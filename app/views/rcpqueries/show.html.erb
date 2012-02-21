@@ -1,0 +1,45 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Session:</b>
+  <%= @rcpquery.session_id %>
+</p>
+
+<p>
+  <b>User:</b>
+  <%= @rcpquery.user_id %>
+</p>
+
+<p>
+  <b>Owner:</b>
+  <%= @rcpquery.owner_id %>
+</p>
+
+<p>
+  <b>Tagstxt:</b>
+  <%= @rcpquery.tagstxt %>
+</p>
+
+<p>
+  <b>Ratingstxt:</b>
+  <%= @rcpquery.ratingstxt %>
+</p>
+
+<p>
+  <b>Fromsitestxt:</b>
+  <%= @rcpquery.fromsitestxt %>
+</p>
+
+<p>
+  <b>Statustxt:</b>
+  <%= @rcpquery.statustxt %>
+</p>
+
+<p>
+  <b>Circlestxt:</b>
+  <%= @rcpquery.circlestxt %>
+</p>
+
+
+<%= link_to 'Edit', edit_rcpquery_path(@rcpquery) %> |
+<%= link_to 'Back', rcpqueries_path %>

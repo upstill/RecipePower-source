@@ -1,0 +1,652 @@
+.container {
+  width: 100%;
+}
+
+body {
+  background: #FDECCF; // DCE8DC;
+  font:12px arial,sans-serif;
+}
+
+header {
+  padding-top: 6px;
+}
+
+header img {
+  padding: 1em;
+  background: #fff;
+}
+
+section {
+  margin-top: 1em;
+  font-size: 120%;
+  padding: 20px;
+  background: #fff;
+}
+
+section h1 {
+padding-top:15px;
+  font-size: 200%;
+}
+
+h2 {
+padding-top:15px;
+  font-size: 200%;
+}
+
+h3 {
+padding-top:15px;
+  font-size: 150%;
+  margin:0px;
+  padding:0px;
+  padding-top:15px;
+}
+
+/* Links */
+
+a {
+  color: #09c;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #069;
+  text-decoration: underline;
+}
+
+a:visited {
+  color: #069;
+}
+
+/* Navigation */
+
+nav {
+  float: right;
+}
+
+nav {
+  background-color: white;
+  padding: 0 0.7em;
+  white-space: nowrap;
+}
+
+nav ul {
+  margin: 0;
+  padding: 0;
+}
+
+nav ul li {
+  list-style-type: none;
+  display: inline-block;
+  padding: 0.2em 0;
+}
+
+nav ul li a {
+  padding: 0 5px;
+  font-weight: bold;
+}
+
+nav ul li a:visited {
+  color: #09c;
+}
+
+nav ul li a:hover {
+  text-decoration: underline;
+}
+
+/*
+  input[type="submit"] {
+	display:block;
+	margin-left: auto;
+	margin-right: auto;
+	display: block;
+	text-align: center;
+	width: 400px;
+	color: #fff;
+	background: #006400;
+	font-size: 150%;
+	font-weight: bold;
+	padding: 15px; 
+	/* Round corners * /
+	border-radius: 10px;
+        letter-spacing:-1px;
+  }
+*/
+
+/* Sign up button */
+a.signup_button {
+  margin-top: 30px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  text-align: center;
+  width: 290px;
+  color: #fff;
+  background: #006400;
+  font-size: 150%;
+  font-weight: bold;
+  padding: 20px;
+}
+
+.round {
+  -moz-border-radius:    10px;
+  -webkit-border-radius: 10px;
+  border-radius:         10px;
+  margin-top:0px;
+  margin-left:10px;
+  margin-right:10px;
+  padding-top:0px;
+  padding-left:20px;
+  padding-right:20px;
+  /* width:750px; */
+  width:95%;
+}
+
+footer {
+  text-align: center;
+  margin-top: 10px;
+  width: 710px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+footer nav {
+  float: none;
+}
+
+.respond_question {
+  width: 400px;
+  height: 40px;
+}
+
+.field_with_errors {
+  /* margin-top: 10px; */
+  padding: 3px 5px 3px 5px;
+  width: 90%;
+  background-color: red;
+  display: table;
+}
+
+.field_with_errors label {
+  color: #fff;
+}
+
+.field {
+ margin-top:10px;
+}
+
+.nukeable_key {
+  background-color:#e0e0e0;
+  margin-right:6px;
+  padding:6px;
+  # border:2px solid black;
+}
+
+.nukeable_X {
+  background-color:#f0f0f0;
+  vertical-align: super;
+}
+
+.lesson {
+   width: 90%;
+   padding: 10px;
+   margin-top:10px;
+   # border: 3px solid gray;
+}
+
+#error_explanation {
+  width: 500px;
+  # border: 2px solid red;
+  padding: 7px;
+  margin-bottom: 20px;
+  background-color: #f0f0f0;
+}
+
+#error_explanation h3 {
+  text-align: left;
+  font-weight: bold;
+  padding: 5px 5px 5px 15px;
+  /* font-size: 12px; */
+  margin: -7px;
+  background-color: #c00;
+  color: #fff;
+}
+
+#error_explanation p {
+  color: #333;
+  margin-bottom: 0;
+  padding: 5px;
+}
+
+#error_explanation ul li {
+  font-size: 12px;
+  list-style: square;
+}
+
+#sidebar {
+width: 250px;
+float: right;
+margin:15px;
+border:3px solid black;
+padding:10px;
+}
+
+.page_label {
+  font:13px arial,sans-serif,bold;
+  text-align:center;
+}
+
+.pic_box {
+    width:350px;
+    height:220px;
+    /* border:3px solid red; */
+    float: right;
+}
+
+.recipe_pic_div {
+    width:360px;
+    height: 300px;
+    // border:3px solid black;
+    // outline:#999 solid 1px;
+    float: right;
+}
+
+.greeting {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+}
+
+.rcpquery_owner_div {
+    // width:360px;
+    // height: 300px;
+    /* border:3px solid black; */
+    float: right;
+    padding-top:10px;
+}
+
+.querylist_title {
+  font:24px arial,sans-serif,bold;
+  width:100%;
+  padding-top:20px;
+  text-align:center;
+}
+
+#querylist_header {
+margin-bottom:10px;
+}
+
+.rcpquery_listmode_div {
+    // width:360px;
+    // height: 300px;
+    /* border:3px solid black; */
+    float: right;
+    font-size:10px;
+}
+
+#rcpquery_owner_return {
+  font:12px arial,sans-serif,bold;
+}
+
+#recipe_pic_label {
+  font:14px arial,sans-serif;
+  font-weight:bold;
+  width:100%;
+}
+
+#recipe_picurl {
+  font:12px arial,sans-serif;
+  width:95%;
+}
+
+.recipe_url_div {
+  margin-top: 15px;
+  margin-bottom: 15px;
+  width:100%;
+  // outline:#999 solid 1px;
+}
+
+#recipe_url_label {
+  font:14px arial,sans-serif;
+  font-weight:bold;
+  width:80%;
+  // outline:#999 solid 1px;
+}
+
+#recipe_url {
+  width:100%;
+  font:12px arial,sans-serif;
+  // outline:#999 solid 1px;
+}
+
+.recipe_title_div {
+  margin-top: 0px;
+  width:100%;
+}
+
+.recipe_status_div {
+  margin-top: 0px;
+  margin-bottom: 10px;
+}
+
+#recipe_status_label {
+  font:14px arial,sans-serif;
+  font-weight:bold;
+  width:100%;
+}
+
+#recipe_privacy_label {
+  font:14px arial,sans-serif;
+  font-weight:bold;
+  width:100%;
+}
+
+#recipe_title_label {
+  font:14px arial,sans-serif;
+  font-weight:bold;
+  width:100%;
+}
+
+#recipe_title {
+  font:12px arial,sans-serif;
+  width:70%;
+}
+
+.recipe_fields_div {
+  width:50%;
+  float: left;
+  // outline:#999 solid 1px;
+}
+
+.recipe_tags_div {
+  margin-top: 20px;
+  width:100%;
+  // outline:#999 solid 1px;
+}
+
+.rcpquery_tags_div {
+  margin-top: 0px;
+  width:60%;
+    // outline:#999 solid 1px;
+}
+
+#recipe_tags_label {
+  font:14px arial,sans-serif;
+  font-weight:bold;
+  width:100%;
+    // outline:#999 solid 1px;
+}
+
+#recipe_tag_tokens {
+  font:12px arial,sans-serif;
+  width:100%;
+    // outline:#999 solid 1px;
+}
+
+.recipe_ratings_div {
+  margin-bottom: 15px;
+  margin-top: 30px;
+  margin-bottom: 10px;
+  width:100%;
+    // outline:#999 solid 1px;
+}
+
+#recipe_ratings_label {
+  font:14px arial,sans-serif;
+  font-weight:bold;
+  width:80%;
+    // outline:#999 solid 1px;
+}
+
+.recipe_comment_div {
+  margin-top: 0px;
+  margin-bottom:10px;
+  width:100%;
+    // outline:#999 solid 1px;
+}
+
+#recipe_comment_label {
+  font:14px arial,sans-serif;
+  font-weight:bold;
+  width:100%;
+    // outline:#999 solid 1px;
+}
+
+#recipe_comment {
+  font:12px arial,sans-serif;
+  width:100%;
+    // outline:#999 solid 1px;
+}
+
+.recipe_title_div {
+  margin-top: 0px;
+  margin-bottom:10px;
+  width:100%;
+    // outline:#999 solid 1px;
+}
+
+#recipe_title_label {
+  font:14px arial,sans-serif;
+  font-weight:bold;
+  width:100%;
+    // outline:#999 solid 1px;
+}
+
+#recipe_title {
+  font:12px arial,sans-serif;
+  width:100%;
+    // outline:#999 solid 1px;
+}
+
+.fields {
+   margin-top:10px;
+   margin-bottom:0px;
+}
+
+.rating_name {
+  font:12px arial,sans-serif;
+  font-weight:bold;
+  padding-left:15px;
+  padding-right:10px;
+}
+
+.rating_left {
+  text-align:right;
+  font:12px arial,sans-serif;
+}
+
+.rating_right {
+  font:12px arial,sans-serif;
+  font-weight:normal;
+}
+
+.rating_del {
+  padding-left:20px;
+}
+
+.display_title {
+  font:15px arial,sans-serif,bold;
+  text-align:center;
+}
+
+.display_url {
+  font:12px arial,sans-serif;
+  text-align:center;
+  padding-bottom:10px;
+}
+
+.tag_summary {
+  font:12px arial,sans-serif;
+}
+
+.rheader {
+  # border:3px solid blue;
+   width:100%;
+}
+
+.rfooter {
+   width:100%;
+}
+
+#viewframe {
+  width:100%;
+  height:600px;
+}
+
+.sig_box {
+  width:300px;
+  height:50px;
+  # border:3px solid red;
+  padding-bottom:0px;
+  float:left;
+}
+
+#atop {
+  # border:3px solid red;
+  padding:0px;
+  margin:0px;
+}
+
+.tiny_logo {
+  width:288px;
+  height:40px;
+  # border:3px solid black;
+  padding:0px;
+  margin:0px;
+  margin-top:10px;
+  margin-bottom:10px;
+  margin-left:15px;
+  background-color:#FDECCF; // DCE8DC;
+}
+
+.nav_links {
+  font:14px arial,sans-serif, bold;
+  text-align:right;
+  # border:3px solid green;
+  padding-right:15px;
+  padding-top:40px;
+  padding-bottom:5px;
+  float:right;
+}
+
+.collection_item_title {
+  color:red;
+}
+
+.collection_item_URL {
+  padding-left:10px;
+}
+
+.welcome_user {
+font:12px arial, sans-serif;
+}
+
+.error, .alert, .notice, .success, .info {padding:0.8em;margin-bottom:1em;border:2px solid #ddd; width:70%;}
+.error, .alert {background:#fbe3e4;color:#8a1f11;border-color:#fbc2c4;}
+
+.rcplist_body {
+    width:95%;
+}
+
+.rcp_list_element {
+    height:219px;
+    width:100%;
+    position:relative;
+    // We're relative to allow absolute positioning of the bottom element
+    // outline:#999 solid 1px;
+}
+
+.rcp_list_pic_box {
+    width:340px;
+    height:215px;
+    float:left;
+    vertical-align: center;
+    // outline:#999 solid 1px;
+}
+
+.rcp_list_text {
+    height:auto;
+    width:50%; // width:500px;
+    margin-left:15px;
+    float:left;
+    // outline:#999 solid 1px;
+}
+
+.rcp_list_element_bottom {
+  position: absolute;
+  bottom: 1px;
+  left: 355px;
+  float:left;
+  width:auto; // 50%;
+  height:auto;
+    // outline:#999 solid 1px;
+}
+
+.rcp_list_element_title {
+  padding-top:18px;
+  font:18px arial,sans-serif, bold;
+}
+
+.rcp_list_element_source {
+  font:14px arial,sans-serif;
+  margin-top:4px;
+  margin-left:20px;
+}
+
+.rcp_list_element_summary {
+  margin-top:10px;
+  font:12px arial,sans-serif;
+}
+
+.rcp_list_element_twocents {
+  margin-top:10px;
+  font:14px arial,sans-serif;
+  font-style: italic;
+}
+
+.rcp_list_element_gotag {
+  margin-top:10px;
+  font:10px arial,sans-serif;
+}
+
+.rcp_list_element_stats {
+  font:15px arial,sans-serif;
+  color: solid red;
+}
+
+.clear { clear:both; }
+
+.fitPic { visibility:hidden; }
+
+.tagspec {
+    width:350px;
+    height:auto;
+    float:left;
+    vertical-align: center;
+    // outline:#999 solid 1px;
+}
+
+.taglist {
+    // overflow:scroll;
+    width:345px;
+    height:auto;
+	font:15px arial, sans-serif;
+    // background:black;
+}
+
+.orphantag {
+    width:350px;
+    // background:yellow;
+}
+
+.referentspec {
+    height:auto;
+    width:400px;
+    margin-left:15px;
+    float:left;
+    // outline:#999 solid 1px;
+}
+
+.dropGlow {
+    outline:#999 solid 3px;
+	background:yellow;
+}

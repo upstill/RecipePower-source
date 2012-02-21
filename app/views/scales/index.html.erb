@@ -1,0 +1,27 @@
+<h1>Listing scales</h1>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Minlabel</th>
+    <th>Maxlabel</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @scales.each do |scale| %>
+  <tr>
+    <td><%= scale.name.nil? ? "<no name>" : scale.name %></td>
+    <td><%= scale.minlabel %></td>
+    <td><%= scale.maxlabel %></td>
+    <td><%= link_to 'Show', scale %></td>
+    <td><%= link_to 'Edit', edit_scale_path(scale) %></td>
+    <td><%= link_to 'Destroy', scale, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Scale', new_scale_path %>

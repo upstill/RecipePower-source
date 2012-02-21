@@ -1,0 +1,11 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  The tag '<b><%= @tag.name %></b>' is for
+  a<%= "n" if @tag.typename=~/^[aeiou]/i %>
+  '<b><%= @tag.typename %>'</b>
+</p>
+
+
+<%= link_to 'Edit', edit_tag_path(@tag) %> |
+<%= link_to 'Back', tags_path %>

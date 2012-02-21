@@ -1,0 +1,49 @@
+<%= form_for(@rcpquery) do |f| %>
+  <% if @rcpquery.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@rcpquery.errors.count, "error") %> prohibited this rcpquery from being saved:</h2>
+
+      <ul>
+      <% @rcpquery.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :session_id %><br />
+    <%= f.text_field :session_id %>
+  </div>
+  <div class="field">
+    <%= f.label :user_id %><br />
+    <%= f.text_field :user_id %>
+  </div>
+  <div class="field">
+    <%= f.label :owner_id %><br />
+    <%= f.text_field :owner_id %>
+  </div>
+  <div class="field">
+    <%= f.label :tagstxt %><br />
+    <%= f.text_area :tagstxt %>
+  </div>
+  <div class="field">
+    <%= f.label :ratingstxt %><br />
+    <%= f.text_area :ratingstxt %>
+  </div>
+  <div class="field">
+    <%= f.label :fromsitestxt %><br />
+    <%= f.text_area :fromsitestxt %>
+  </div>
+  <div class="field">
+    <%= f.label :statustxt %><br />
+    <%= f.text_field :statustxt %>
+  </div>
+  <div class="field">
+    <%= f.label :circlestxt %><br />
+    <%= f.text_area :circlestxt %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

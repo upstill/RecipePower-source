@@ -1,0 +1,258 @@
+/*
+Property	Description
+name (fn)	The name of the dish.
+recipeType (tag)The type of dish: for example, appetizer, entree, dessert ...
+photo		Image of the dish being prepared.
+published	The date the recipe was published, in ISO date format.
+summary		A short summary describing the dish.
+review		A review of the dish. Can include nested review information.
+prepTime	The length of time it takes to prepare the recipe for dish,
+		in ISO 8601 duration format. Can use 
+       min, max as child elements to specify a range of time.
+cookTime	The time it takes to actually cook the dish, in ISO 8601 
+		duration format. Can use 
+       min, max as child elements to specify a range of time.
+totalTime (duration) The total time it takes to prepare the cook the dish,
+		in ISO 8601 duration format. Can use 
+	min, max as child elements to specify a range of time.
+nutrition	Nutrition information about the recipe. 
+		Can contain the following child elements:
+	servingSize,
+	calories,
+	fat,
+	saturatedFat,
+	unsaturatedFat,
+	carbohydrates,
+	sugar,
+	fiber,
+	protein,
+	cholesterol. These elements are not explicitly part of the 
+		hRecipe microformat, but Google will recognize them.
+instructions	The steps to make the dish. Can contain the child element 
+	instruction, which can be used to annotate each step.
+yield		The quantity produced by the recipe (for example,
+		number of people served, number of servings, etc).
+ingredient	An ingredient used in the recipe. Can contain child items
+	name (name of the ingredient)
+	amount. Use this to identify individual ingredients.
+author		Creator of the recipe. Can include nested Person information.
+*/
+
+.hrecipe {
+}
+
+.item {
+}
+
+.fn {
+}
+
+.photo {
+}
+
+.author {
+}
+
+.value-title {
+}
+
+.summary {
+}
+
+.rating {
+}
+
+.average {
+}
+
+.count {
+}
+
+.published .value-title {
+}
+
+.published .value-title {
+}
+
+.published .value-title {
+}
+
+.yield {
+}
+
+.nutrition {
+}
+
+.nutrition .servingsize {
+}
+
+.nutrition .calories {
+}
+
+.nutrition .fat {
+}
+
+.ingredient {
+text-decoration:underline;
+outline:#999 solid 1px;
+}
+
+.name { // The material
+  font:20px arial,sans-serif;
+  font-weight:bold;
+  color:#BE2E64;
+}
+
+.amount { // quantity followed by unit
+}
+
+.quantity { // A number
+  font:20px arial,sans-serif;
+  font-weight:bold;
+  color:#FFBF00;
+}
+
+.unit { // Standard measurement units, plus, e.g., "large", "medium-sized"
+  font:20px arial,sans-serif;
+  font-weight:bold;
+  color:#FFFF00;
+}
+
+.condition { // An individual before-measuring condition for the ingredient
+  font:20px arial,sans-serif;
+  font-weight:bold;
+color:#41698B;
+}
+
+.step { // Post-processing the material
+  font:20px arial,sans-serif;
+  font-weight:bold;
+color:#A579A2;
+}
+
+.tagpane {
+width:60%;
+background:#E8E8E8;
+border:2px solid gray;
+float: left;
+text-align:left;
+font:14px arial,sans-serif;
+}
+
+.explain {
+width:35%;
+background:#E8E8E8;;
+border:2px solid gray;
+float: right;
+text-align:left;
+padding:10px;
+}
+
+.tagpane_buttons {
+width:60%;
+float: left;
+margin-top:10px;
+outline:#999 solid 1px;
+}
+
+#tagpane_ingredient {
+  width:90%;
+  outline:#999 solid 1px;
+  border:1px solid gray;
+  text-decoration:underline;
+  font-size: 12px;
+}
+
+#tagpane_material {
+  width:60px;
+  margin:3px;
+  border:1px solid gray;
+  background:#AAAAAA;
+}
+
+#tagpane_quantity {
+width:70px;
+margin:3px;
+  border:1px solid gray;
+// background:#E8E8E8;
+}
+
+#tagpane_unit {
+width:30px;
+margin:3px;
+  border:1px solid gray;
+// background:#E8E8E8;
+}
+
+#tagpane_condition {
+width:80px;
+margin:3px;
+  border:1px solid gray;
+// background:#E8E8E8;
+}
+
+.amount {
+  font-style: italic;
+  font-size: 12px;
+  border:1px solid gray;
+}
+
+.conditions { // List of before-measuring conditions for the ingredient
+  font-size: 12px;
+  border:1px solid gray;
+  font-style: italic;
+}
+
+#tagpane_amount {
+width:120px;
+margin:5px;
+margin-left:10px;
+}
+
+#tagpane_material {
+width:100px;
+margin:5px;
+  border:1px solid gray;
+  background:#C0C0C0;
+}
+
+#tagpane_conditions {
+width:100px;
+margin:5px;
+}
+
+#tagpane_step {
+width:60px;
+margin:5px;
+margin-left:22px;
+align:left;
+  border:1px solid gray;
+}
+
+.amount_div {
+float:left;
+margin-left:15px;
+}
+
+.ingredient_div {
+float:center;
+width:100%;
+}
+
+.material_div {
+float:left;
+}
+
+.step_div {
+float:left;
+}
+
+.condition_div {
+float:left;
+margin-left:15px;
+margin-right:15px;
+}
+
+.instructions {
+color:white;
+}

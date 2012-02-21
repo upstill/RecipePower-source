@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title "" %></title>
+    <%# stylesheet_link_tag "token-input-facebook" %>
+    <%# javascript_include_tag :defaults, "jquery.tokeninput", "rails" %>
+    <%= stylesheet_link_tag "application" %>
+    <%= javascript_include_tag "application" %>
+    <%= csrf_meta_tag %>
+    <%= render 'layouts/recipestylesheets' %>
+  </head>
+  <body>
+    <div class="container">
+      <%= render 'layouts/rheader' %>
+      <style>
+        section { padding-top:20px; }
+      </style>
+      <section class="round">
+        <%= yield %>
+      </section>
+      <%= render 'layouts/footer' %>
+      <%= debug(params) if Rails.env.development? %>
+    </div>
+  </body>
+</html>

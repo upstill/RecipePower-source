@@ -1,0 +1,50 @@
+<% title @Title %>
+  <% if flash[:notice] %>
+      <div class="notice"><%= flash[:notice] %></div>
+  <% elsif flash[:alert] %>
+      <div class="alert"><%= flash[:alert] %></div>
+  <% else %>
+      <br class="clear">
+  <% end %>
+<% for recipe in @recipes %>
+  <div class="rcp_list_element" >
+    <div class="rcp_list_pic_box">
+	<%= rcp_fitPic recipe %>
+    </div>
+    <div class="rcp_list_text">
+      <div class="rcp_list_element_title">
+	  <%= link_to recipe.title, edit_recipe_path(recipe) %>
+      </div>
+      <div class="rcp_list_element_source">
+	  from
+          <%= link_to display_url(recipe), recipe.url %>
+      </div>
+      <div class="rcp_list_element_summary">
+	  <%= summarize_alltags recipe %>
+      </div>
+      <div class="rcp_list_element_twocents">
+	  <%= recipe.comment_of_user(@listowner) || "" %>
+      </div>
+    </div>
+    <div class="rcp_list_element_bottom">
+       <div class="rcp_list_element_stats">
+          <%= cookmark_count recipe -%> 
+       </div>
+    </div>
+  </div>
+  <br class="clear">
+<% end %>
+<table>
+  <tr>
+    <th>Recipe</th>
+    <th>Site</th>
+    <th>Collected by</th>
+  </tr>
+  <% for recipe in @recipes %>
+    <tr>
+      <td class="collection_item_title"><%= link_to recipe.title, recipe %></td>
+      <td class="collection_item_URL"><%= link_to display_url(recipe), recipe.url %></td>
+      <td class="collection_item_collect"><%= ownership_status recipe %></td>
+    </tr>
+  <% end %>
+</table>

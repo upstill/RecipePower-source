@@ -1,0 +1,23 @@
+<%# Just a plain-text listing of recipes resulting from a query %>
+<table>
+  <tr>
+    <th width="35%">Recipe</th>
+    <th width="15%">From</th>
+    <% if @rcpquery.owner_id == User.guest_id || @rcpquery.owner_id == User.super_id %>
+       <th>Collected by</th>
+    <% end %>
+    <th width="20%">My Two Cents</th>
+    <th width="30%">Tags</th>
+  </tr>
+  <% for recipe in @rcpquery.results %>
+    <tr>
+      <td class="collection_item_title" width="35%"><%= link_to recipe.title, edit_recipe_path(recipe) %></td>
+      <td class="collection_item_URL" width="15%"><%= link_to display_url(recipe), recipe.url %></td>
+      <% if @rcpquery.owner_id == User.guest_id || @rcpquery.owner_id == User.super_id %>
+         <td class="collection_item_collect"><%= ownership_status recipe %></td>
+      <% end %>
+      <td class="collection_item_comment" width="20%"><%= recipe.comment_of_user @rcpquery.owner_id %></td>
+      <td class="collection_item_tags" width="30%"><%= summarize_alltags recipe %></td>
+    </tr>
+  <% end %>
+</table>

@@ -1,0 +1,14 @@
+<div class="fields">
+   <span class="rating_name"><%= f.object.rating_name.capitalize %></span>
+   <span class="rating_left"><%= f.object.rating_minlabel %></span>
+   <span width="20"><%= f.radio_button(:scale_val, -3) %></span>
+   <span width="20"><%= f.radio_button(:scale_val, -2) %></span>
+   <span width="20"><%= f.radio_button(:scale_val, -1) %></span>
+   <span width="20"><%= f.radio_button(:scale_val, 0) %></span>
+   <span width="20"><%= f.radio_button(:scale_val, 1) %></span>
+   <span width="20"><%= f.radio_button(:scale_val, 2) %></span>
+   <span width="20"><%= f.radio_button(:scale_val, 3) %></span>
+   <span class="rating_right"><%= f.object.rating_maxlabel %></span>
+   <%= f.hidden_field(:scale_id, :value=>f.object.rating_scale_id ) %>
+   <span class="rating_del"><%= link_to_remove_fields("remove", f) %></span>
+</div>

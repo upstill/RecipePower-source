@@ -1,0 +1,15 @@
+<div class="tagspec">
+	<input class="tag_entry" id="tag_entry<%= @tabindex.to_s %>" type="text"></input>
+	<br>
+	<div class="taglist" id="taglist<%= @tabindex.to_s %>">
+	</div>
+	<%# render :partial=>"tags/taglist" %>
+</div>
+<div class="referentspec">
+	<div class="referenttree" id="referenttree<%= @tabindex.to_s %>">
+		referenttree goes here
+	</div>
+	<%# if(@tabindex == 0)  %>
+		<%# render :partial=>"foods/foodtree" %>
+	<%# end %>
+</div>

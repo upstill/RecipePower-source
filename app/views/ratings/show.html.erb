@@ -1,0 +1,20 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Recipe:</b>
+  <%= @rating.recipe_id %>
+</p>
+
+<p>
+  <b>Scale:</b>
+  <%= @rating.scale_id %>
+</p>
+
+<p>
+  <b>Scale val:</b>
+  <%= @rating.scale_val %>
+</p>
+
+
+<%= link_to 'Edit', edit_rating_path(@rating) %> |
+<%= link_to 'Back', ratings_path %>

@@ -1,0 +1,23 @@
+<%= form_for @rcpquery do |f| %>
+  <%= show_errors @rcpquery.errors %>
+  <%= render 'form_rcplist_header' %>
+  <div class="rcpquery_tags_div" >
+     <%= label :rcpquery, :tag_tokens, "Tags: ", :id=>"recipe_tags_label" -%>
+     <%= text_field :rcpquery, :tag_tokens, "data-pre" => @rcpquery.tags.map(&:attributes).to_json %>
+  </div>
+  <div class="recipe_ratings_div" >
+     <%# f.label :ratings, "Ratings:", :id=>"recipe_ratings_label" -%>
+     <%= select_to_add_rating "Add Rating", f, :ratings, @rcpquery.ratings, :inclusive %>
+     <%= f.fields_for :ratings do | rating_builder | %>
+       <%= render 'shared/rating_inclusive', :f=>rating_builder %>
+     <% end %>
+  </div>
+  <div class="recipe_comment_div" >
+     <%= label :rcpquery, :querytext, "Search Titles and Comments:", :id=>"recipe_comment_label" -%>
+     <br><%= text_field :rcpquery, :querytext %>
+  </div>
+  <%# <div class="rcpquery_querymode_div"> %>
+     <%# label :rcpquery, :querymode_str,"Sifting Results: ",:id=>"rcpquery_querymode_label" -%>
+     <%# select :rcpquery, :querymode_str, Rcpquery.querymode_select %>
+  <%# </div> %>
+<% end %>

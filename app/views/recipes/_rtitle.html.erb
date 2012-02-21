@@ -1,0 +1,10 @@
+   <div class="display_title">
+        <%= @Title || 
+	    ((@recipe.url.nil? ? 
+	       @recipe.title :
+	       link_to(@recipe.title, @recipe.url)) if @recipe) ||
+	    "No Title to Speak Of" %>
+   </div>
+   <div class="display_url">
+	<%= "as seen on #{display_url(@recipe)}." if @Title.nil? && @recipe %>
+   </div>

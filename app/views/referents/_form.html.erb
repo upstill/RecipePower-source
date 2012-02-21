@@ -1,0 +1,21 @@
+<%= form_for(@referent) do |f| %>
+  <% if @referent.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@referent.errors.count, "error") %> prohibited this referent from being saved:</h2>
+
+      <ul>
+      <% @referent.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :term %><br />
+    <%= f.number_field :term %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

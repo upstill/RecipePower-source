@@ -1,0 +1,13 @@
+<table class="profile" summary="Profile information">
+  <tr>
+    <td class="main">
+      <h1>
+        <%= @visitor.email %>
+      </h1>
+    </td>
+    <td class="sidebar round">
+      <strong>Name</strong> <%= @visitor.email %><br />
+      <strong>URL</strong>  <%= link_to visitor_path(@visitor), @visitor %>
+    </td>
+  </tr>
+</table>

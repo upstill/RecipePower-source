@@ -1,0 +1,33 @@
+<%# Render the results of a recipe query in small_pic mode %>
+<%# NB: Should be rendered within a rcp_list container %>
+<% for recipe in @rcpquery.results %>
+  <div class="rcp_list_element" >
+    <div class="rcp_list_pic_box">
+	<%= rcp_fitPic recipe %>
+    </div>
+    <div class="rcp_list_text">
+      <div class="rcp_list_element_title">
+	  <%= link_to recipe.title, recipe.url %>
+      </div>
+      <div class="rcp_list_element_source">
+	  from <%= link_to recipe.sourcename, recipe.sourcehome %>
+      </div>
+      <div class="rcp_list_element_summary">
+	  <%= summarize_alltags recipe %>
+      </div>
+      <div class="rcp_list_element_twocents">
+	  <%= recipe.comment_of_user(@listowner) || "" %>
+      </div>
+      <div class="rcp_list_element_gotag">
+	  <%= link_to "Tag This Cookmark!", "/recipes/#{recipe.id}/edit" %>
+      </div>
+    </div>
+    <div class="rcp_list_element_bottom">
+       <div class="rcp_list_element_stats">
+	  <%= cookmark_count recipe -%> 
+       </div>
+    </div>
+  </div>
+  <br class="clear">
+  <hr>
+<% end %>

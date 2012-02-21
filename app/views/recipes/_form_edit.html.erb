@@ -1,0 +1,46 @@
+<h3>Tag That Recipe!</h3>
+<%= form_for @recipe do |f| %>
+  <%= show_errors @recipe.errors %>
+    <div class="recipe_pic_div" >
+       <%= f.label :picurl, "URL of image", :id=>"recipe_pic_label" -%>
+       <br><%= f.text_field :picurl %>
+       <div class="pic_box" >
+         <%# "fitPic" class gets fit inside pic_box with Javascript and jQuery %>
+    	 <%= rcp_fitPic @recipe %>
+        </div>
+    </div>
+  <div class="recipe_fields_div">
+    <div class="recipe_tags_div" >
+       <%= f.label :tag_tokens, "Tags: ", :id=>"recipe_tags_label" -%>
+       <%= f.text_field :tag_tokens, "data-pre" => @recipe.tags.map(&:attributes).to_json %>
+    </div>
+    <div class="recipe_ratings_div" >
+       <%= f.label :ratings, "Ratings:", :id=>"recipe_ratings_label" -%>
+       <%= select_to_add_rating "Add Rating", f, :ratings, @recipe.ratings, :exclusive %>
+       <%= f.fields_for :ratings do | rating_builder | %>
+         <%= render '/shared/rating_exclusive', :f=>rating_builder %>
+       <% end %>
+    </div>
+    <div class="recipe_comment_div" >
+       <%= f.label :comment, "My Two Cents:", :id=>"recipe_comment_label" -%>
+       <br><%= f.text_field :comment %>
+    </div>
+    <div class="recipe_url_div" >
+       <%= f.label :url, "URL:", :id=>"recipe_url_label" -%>
+       <br><%= f.text_field :url %>
+    </div>
+    <div class="recipe_title_div" >
+       <%= f.label :title, "Title", :id=>"recipe_title_label" -%>
+       <br><%= f.text_field :title %>
+    </div>
+    <div class="recipe_status_div">
+       <%= f.label :status,  "Status: ",:id=>"recipe_status_label" -%>
+       <%= f.select :status,  Recipe.status_select %>
+       <%= f.label :privacy, "Privacy: ",:id=>"recipe_privacy_label" -%>
+       <%= f.select :privacy, Recipe.privacy_select %>
+    </div>
+    <%= f.submit "Set Tags" %>
+    <%= link_to "Never Mind", "/rcpqueries" %> 
+  </div>
+  <br class="clear">
+<% end %>

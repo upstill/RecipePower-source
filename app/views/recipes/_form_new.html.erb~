@@ -1,0 +1,35 @@
+<h3>Add a Cookmark</h3>
+<%= form_for @recipe do |f| %>
+    <%= f.error_messages %>
+    <div class="recipe_url_div">
+        <%= f.label :url, "Paste URL here and click the button:**", :id=>"recipe_url_label" %>
+        <%= f.text_field :url %><br>
+    </div>
+    <div class="recipe_title_div">
+        <%= f.label :title, "Title:", :id=>"recipe_title_label" %>
+        <br><%= f.text_field :title %>
+    </div>
+    <br><%= f.submit :value=>"Add Cookmark" %>
+<% end %>
+<div class="lesson">
+  **To "cookmark" a recipe for your RecipePower collection:
+  <ul>
+      <li>Open it up anywhere on the Web.</li>
+      <li>Copy its address from the source site. (Viewing the recipe page, select the contents of the browser's address bar and do Edit:Copy.)</li>
+      <li>Paste it into the box above.</li>
+      <li>Click the Add Cookmark button.</li>
+  </ul>
+<strong>OR</strong>!! You don't <strong>have</strong> 
+to copy and paste URLs to capture recipes.
+Instead, click and drag this handy widget into your browser's
+address bar:
+
+<a class="bookmarklet" title="Send to RecipePower" href="javascript:(function(){location.href='http://www.recipepower.com/recipes/new?url='+encodeURIComponent(window.location.href)+'&title='+encodeURIComponent(document.title)+'&notes='+encodeURIComponent(''+(window.getSelection?window.getSelection():document.getSelection?document.getSelection():document.selection.createRange().text))+'&v=6&jump=yes'})()"><img src="/images/Small_Icon.png" width="32px" height="24px" alt="Cookmark"></a>
+
+<p>
+Then, whenever you see a recipe you like on 
+the Web, just click the "Cookmark" button and that page will be 
+whisked off to your collection. (You need Javascript enabled to use this feature.)
+<p>
+No no, no need to thank us. Just doing our job here.
+</div>

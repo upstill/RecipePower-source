@@ -1,0 +1,14 @@
+<section id="rcplist_body">
+  <div class="rcpquery_listmode_div">
+     <%= label :rcpquery, :listmode_str,"Listing Style: ",:id=>"rcpquery_listmode_label" -%>
+     <%= select :rcpquery, :listmode_str, Rcpquery.listmode_select %>
+  </div>
+  <br class="clear">
+<% if @rcpquery.listmode_str == :rcplist_text -%>
+   <%= render 'shared/rcplist_text' %>
+<% elsif @rcpquery.listmode_str == :rcplist_smallpic -%>
+   <%= render 'shared/rcplist_smallpic' %>
+<% elsif @rcpquery.listmode_str == :rcplist_bigpic -%>
+   <%= render 'shared/rcplist_bigpic' %>
+<% end -%>
+</section>

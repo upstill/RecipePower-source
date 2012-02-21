@@ -1,0 +1,27 @@
+<h1>Welcome to RecipePower (under construction)!</h1> 
+<br>
+RecipePower is "delicious for Recipes": <strong>one place</strong> to store, 
+organize and sort through all your food-related "cookmarks" from the Web.
+<p>
+<br>
+RecipePower is coming soon to a browser near you. Meanwhile, we'd love to hear
+your opinions about finding recipes on the Web. 
+<br>
+To take our survey, (short and sweet: ten questions, six minutes, done),
+click below. Thanks again!
+<br>
+<%= link_to "Take the Survey (Please)!", new_visitor_path, :class => "signup_button round" %>
+<p>
+...or, if you'd just like to hear when RecipePower is ready for prime time,
+<br>leave us an email address where we can reach you:
+
+<%= form_for(Visitor.new) do |f| %>
+
+  <div class="field">
+    <%= f.label "Email:" %><br />
+    <%= f.text_field :baremail %>
+  </div>
+  <div class="actions">
+    <%= f.submit :value => "Submit email" %>
+  </div>
+<% end %>

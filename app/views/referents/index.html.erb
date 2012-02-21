@@ -1,0 +1,23 @@
+<h1>Listing referents</h1>
+
+<table>
+  <tr>
+    <th>Term</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @referents.each do |referent| %>
+  <tr>
+    <td><%= referent.name %></td>
+    <td><%= link_to 'Show', referent %></td>
+    <td><%= link_to 'Edit', edit_referent_path(referent) %></td>
+    <td><%= link_to 'Destroy', referent, confirm: 'Are you sure?', method: :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Referent', new_referent_path %>
