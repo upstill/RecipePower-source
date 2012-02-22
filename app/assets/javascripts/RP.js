@@ -221,53 +221,68 @@ function getWdwData() {
 	}
 }
 
-// GUARANTEED NECESSARY
-// Callback to respond to value changes on form elements,
-//  triggering immediate response
-function queryChange() {
-    // queryformHit(this.form);
-    queryformHit($("form")[0]);
+// Respond to typing into the search box: hit the server for a list of matching keys
+//  tabindex: index of this tab on the tags page
+//  typing: the string typed thus far
+//	makeormatch: used to force existence of this exact key
+//  url: http string used to hit the server
+function tagTabsTakeTyping(event, info) {
+    // Send current string to server
+    // Get back replacement list of keys
+    var id = event.srcElement.id;
+    // var tabindex = id.match(/(\D*)(\d*)$/)[2];
+    // Tab's index ends the id string
+    // var taglistSelector = "#taglist" + tabindex;
+    var typing = event.srcElement.value;
+    var makeormatch = (event.type == "change") && ($(this).attr("lastCharTyped") == 13);
+	// For keypress events, just record the last character typed, for future reference
+	if(event.type == "keypress") {
+		$(this).attr("lastCharTyped", event.keyCode);
+		return;
+	}
+	// if(makeormatch) { 
+		// debugger; 
+	// }
+	var wdwData = getWdwData(); // Get structure containing tabindex, listid and treeid names
+	// Reload the dynatree to reflect the typed string
+	$(wdwData.tagListSelector).dynatree("option", 
+		"initAjax", {
+			   url: "/tags/match",
+               data: {
+					tabindex: wdwData.tabindex,
+					unbound_only: true,
+					response_format: "dynatree",
+					term: typing,
+					makeormatch: makeormatch
+               }
+    });
+	var tree = $(wdwData.tagListSelector).dynatree("getTree");
+	tree.reload();
+	/*
+	var resp = jQuery.get(
+		"/tags/match",
+	    {
+	        tabindex: tabindex,
+	        term: typing,
+	        makeormatch: makeormatch
+	    },
+	    function(body, status, instance) { 
+			$(taglistSelector).replaceWith(body); 
+			treatOrphanTags();
+		},
+	    "html"
+	    );
+	*/
 }
 
-// Callback to respond to select on list owner,
-//  triggering immediate response
-function queryownerChange() {
-    queryheaderHit(this.form);
-    queryformHit(this.form);
-}
-
-function queryListmodeChange() {
-    var form = $("form")[0];
-    var formstr = $(form).serialize();
-    // Add the popup to the rcpquery params in the form
-    var div = $('select#rcpquery_listmode_str')[0];
-    var divstr = $(div).serialize();
-    var datastr = "element=tabnum&" + formstr + "&" + divstr;
-    //...and proceed with the form hit as usual
-    var resp =
-    jQuery.ajax({
-        type: "POST",
-        url: form.action,
-        data: datastr,
-        // Submit the data from the form
-        dataType: "html",
-        success: queryresultsUpdate
-    }
-    );
-}
-
-// Handle a hit on one of the query fields by POSTing the whole form, then
-// (via callback) updating the results list
-function queryformHit(form) {
-    var resp =
-    jQuery.ajax({
-        type: "POST",
-        url: form.action,
-        data: "element=tabnum&" + $(form).serialize(),
-        // Submit the data from the form
-        dataType: "html",
-        success: queryresultsUpdate
-    }
-    );
-}
+// Here's how to setup a wrapper method:
+/*
+(function($){
+  $.fn.mycheck = function() {
+	var val = $("#tags_tabset").tabs('option', 'selected');
+	// debugger;
+    return 1;
+  };
+})(jQuery);
+*/
 
