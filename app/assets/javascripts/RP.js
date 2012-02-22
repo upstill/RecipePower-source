@@ -286,3 +286,139 @@ function tagTabsTakeTyping(event, info) {
 })(jQuery);
 */
 
+function setupDynatree() {
+	// $(".taglist").mycheck();
+	
+	var wdwData = getWdwData(); // Get structure containing tabindex, listid and treeid names
+	$(wdwData.tagListSelector).dynatree({
+	    initAjax: {url: "/tags/match",
+	               data: {
+						  tabindex: wdwData.tabindex,
+						  unbound_only: true,
+						  response_format: "dynatree"
+	                      }
+	               },
+		autoFocus: false, // So's not to lose focus upon text input
+	    dnd: {
+	      onDragStart: function(node) {
+	        /** This function MUST be defined to enable dragging for the tree.
+	         *  Return false to cancel dragging of node.
+	         */
+	        logMsg("tree.onDragStart(%o)", node);
+	        if(node.data.isFolder)
+	          return false;
+	        return true;
+	      },
+	      onDragStop: function(node) {
+	        logMsg("tree.onDragStop(%o)", node);
+	      }
+	    }		
+	});
+    $(wdwData.referentTreeSelector).dynatree({	// XXX Currently only the 0 tab has a referent tree
+	    initAjax: {url: "/referents",
+	               data: {key: 0, // Optional arguments to append to the url
+	                      mode: "all"
+	                      }
+	               },
+        onActivate: function(node) {
+            // A DynaTreeNode object is passed to the activation handler
+            // Note: we also get this event, if persistence is on, and the page is reloaded.
+            alert("You activated " + node.data.title);
+        },
+	    onLazyRead: function(node){
+	        node.appendAjax({url: "/referents",
+	                           data: {"key": node.data.key, // Optional url arguments
+	                                  "mode": "all"
+	                                  }
+	                          });
+	    },
+        dnd: {
+            onDragStart: function(node) {
+                /** This function MUST be defined to enable dragging for the tree.
+                 *  Return false to cancel dragging of node.
+                 */
+                logMsg("tree.onDragStart(%o)", node);
+                return true;
+            },
+	        autoExpandMS: 300, // Expand nodes after n milliseconds of hovering.
+	        preventVoidMoves: true, // Prevent dropping nodes 'before self', etc.
+			onDragEnter: function(targetNode, sourceNode) {
+				logMsg("tree.onDragEnter(%o)", sourceNode);
+				return true;
+			},
+            onDrop: function(node, sourceNode, hitMode, ui, draggable) {
+                /** This function MUST be defined to enable dropping of items on
+                 * the tree.
+                 */
+				/* We're dropping a node from either the tag list or the tree itself.
+				   If the source is the tag list, we send JSON to create a new referent
+					to drop into place.
+				   If the source is the tree itself, we send JSON to relocate the referent
+					in the hierarchy.
+				*/
+                logMsg("tree.onDrop(%o, %o, %s)", node, sourceNode, hitMode);
+				var sourceTreeName = sourceNode.parent.tree.divTree.className;
+				var nodeTreeName = node.parent.tree.divTree.className;
+				if(sourceTreeName == nodeTreeName) {
+					// Notify the server of the change in hierarchy
+					function catchReferent( xhr, status ) {
+						// debugger;
+						if(status == "success") {
+							sourceNode.move(node, hitMode);
+						}
+					}
+				  	$.ajax({
+							type:"POST",
+							url:"/referents/"+sourceNode.data.key,
+							data: {_method:'PUT', referent: {parent_id: node.data.key, mode:hitMode }},
+							dataType: 'json',
+							complete: catchReferent
+						});
+				} else {
+					/* In moving a tag into the referent tree, we're either dropping the tag ONTO a referent
+					    (making it an expression for the ref), or dropping it somewhere in the tree. The former
+					    is denoted by a hitMode of "over".
+					 need to go back to the
+						server to 1) notify it of the new referent, and 2) get the referent
+						key for inserting into the tree.
+					  # POST /referents.json??tagid=1&mode={over,before,after}&target=referentid
+					*/
+					function catchReferent(response, status, xhr) {
+						if(status == "success") {
+							if(response[0].key > 0) { // 0 key means no new node
+								var copynode = sourceNode.toDict(true, function(dict){
+								  // dict.title = "Copy of " + dict.title;
+								  // delete dict.key; // Remove key, so a new one will be created
+								});
+								copynode.key = response[0].key;
+						        if(hitMode == "over"){
+						          // Append as child node
+						          node.addChild(copynode);
+						          // expand the drop target
+						          node.expand(true);
+						        }else if(hitMode == "before"){
+						          // Add before this, i.e. as child of current parent
+						          node.parent.addChild(copynode, node);
+						        }else if(hitMode == "after"){
+						          // Add after this, i.e. as child of current parent
+						          node.parent.addChild(copynode, node.getNextSibling());
+						        }
+							} else {
+								// Didn't create new node b/c we just dropped term onto it
+								// Redraw the target node to reflect changes
+								node.setTitle(response[0].title);
+							}
+			                sourceNode.remove();
+				        }
+					}
+				  	$.post("/referents",
+						{tagid:sourceNode.data.key, mode:hitMode, target:node.data.key },
+						catchReferent,
+						"json");
+				}
+            }
+        },
+        persist: true
+    });
+}
+
