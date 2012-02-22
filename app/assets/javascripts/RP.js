@@ -495,3 +495,63 @@ function alertIframeSelection() {
     alert(getIframeSelectionText(iframe));
 };
 
+
+function alertSelectionText() {
+    var editor_body = self.window.document;
+    var range;
+
+    if (editor_body.getSelection()) {
+        range = editor_body.getSelection();
+        alert(range.toString());
+    } else if (editor_body.selection.createRange()) {
+        range = editor_body.selection.createRange();
+        alert(range.text);
+    } else return;
+}
+
+function makeIframeSelectionRed() {
+    var editor_body = self.window.document;
+    var range;
+
+    if (editor_body.getSelection()) {
+        range = editor_body.getSelection();
+    } else if (editor_body.selection.createRange()) {
+        range = editor_body.selection.createRange();
+    } else return;
+    range.pasteHTML("<span style='color: red'>" + range.htmlText + "</span>");
+
+    // var range = document.getElementById("myid").contentWindow.document.selection.createRange();
+    // range.pasteHTML("<span style='color: red'>" + range.htmlText + "</span>");
+}
+
+function remove_fields(link) {
+    $(link).prev("input[type=hidden]").val("1");
+    $(link).closest(".fields").hide();
+    queryformHit($("form")[0]);
+}
+
+function add_fields(link, association, content) {
+    var new_id = new Date().getTime();
+    var regexp = new RegExp("new_" + association, "g")
+    $(link).parent().before(content.replace(regexp, new_id));
+}
+
+$(function() {
+    $("#recipe_tag_tokens").tokenInput("/tags/match.json", {
+        crossDomain: false,
+        hintText: "Type your own tag(s) for the recipe",
+        prePopulate: $("#recipe_tag_tokens").data("pre"),
+        theme: "facebook",
+        allowCustomEntry: true
+    });
+    $("#rcpquery_tag_tokens").tokenInput("/tags/match.json", {
+        crossDomain: false,
+        hintText: "Type tags to look for",
+        prePopulate: $("#rcpquery_tag_tokens").data("pre"),
+        theme: "facebook",
+        onAdd: tokenChangeCallback,
+        onDelete: tokenChangeCallback,
+        allowCustomEntry: true
+    });
+});
+
