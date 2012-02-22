@@ -495,7 +495,6 @@ function alertIframeSelection() {
     alert(getIframeSelectionText(iframe));
 };
 
-
 function alertSelectionText() {
     var editor_body = self.window.document;
     var range;
@@ -554,4 +553,46 @@ $(function() {
         allowCustomEntry: true
     });
 });
+
+function add_rating(link, association, content) {
+    // Get the selected option
+    var opts = link.options;
+    var selection_ix;
+    for (var i = 0; i < opts.length; i++) {
+        if (opts[i].selected) {
+            selection_ix = i;
+        }
+    }
+    // We expect to get the scale's ID to initialize the fields
+    var scale_id_sub = new RegExp("rating_scale_id", "g")
+
+    var rating_id_sub = new RegExp("new_" + association, "g")
+    var rating_id = new Date().getTime();
+
+    var name_sub = new RegExp("rating_rname", "g")
+    var minlabel_sub = new RegExp("rating_minlabel", "g")
+    var maxlabel_sub = new RegExp("rating_maxlabel", "g")
+
+    var labels = opts[selection_ix].title.split(" to ");
+    var scalename = opts[selection_ix].text;
+    var scale_minlabel = labels[0];
+    var scale_maxlabel = labels[1];
+    // Substitute labels for the rating, then deploy the scale
+    $(link).after(content.
+    replace(rating_id_sub, rating_id).
+    replace(name_sub, scalename).
+    replace(minlabel_sub, scale_minlabel).
+    replace(maxlabel_sub, scale_maxlabel).
+    replace(scale_id_sub, opts[selection_ix].value));
+    // The chosen value
+    opts[selection_ix] = null;
+    var radbtns = $('input[id^=\'rcpquery_ratings_attributes\']');
+    $('input[id^=\'rcpquery_ratings_attributes\']').change(queryChange);
+    // if(link.options.length < 2) {
+    // Once the last rating is selected and deployed,
+    // change the prompt and deactivate the control
+    // opts[0].prompt = "No more scales to add";
+    // debugger;
+    // }
+}
 
