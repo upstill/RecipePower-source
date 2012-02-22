@@ -12,6 +12,7 @@ gem 'pg'
 
 gem 'closure_tree'
 gem 'htmlentities'
+gem 'nokogiri'
 
 group :development do
   gem 'rspec-rails', '2.6.1'
