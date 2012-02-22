@@ -422,3 +422,76 @@ function setupDynatree() {
     });
 }
 
+
+// Check that the images in a window have been loaded, fitting them into
+// their frames when the size is available.
+function wdwFitImages() {
+    var TO = window.setInterval(function() {
+        var allDone = true;
+        $("img.fitPic").each(function() {
+            allDone = fitImage(this) && allDone;
+        });
+        if (allDone) {
+            window.clearInterval(TO);
+        }
+    },
+    100);
+}
+
+function fitImage(img) {
+
+    if (!img.complete) {
+        return false;
+    }
+
+    var width = img.parentElement.clientWidth;
+    var height = img.parentElement.clientHeight;
+
+    var aspect = img.width / img.height;
+    // 'shrinkage' is the scale factor, offsets are for centering the result
+    var shrinkage,
+    offsetX = 0,
+    offsetY = 0;
+    if (aspect > width / height) {
+        // If the image is wider than the frame
+        // Shrink to just fit in width
+        shrinkage = width / img.width;
+        offsetY = (height - img.height * shrinkage) / 2;
+    } else {
+        // Shrink to just fit in height
+        shrinkage = height / img.height;
+        offsetX = (width - img.width * shrinkage) / 2;
+    }
+    // Scale the image dimensions to fit its parent's box
+    // img.width *= shrinkage;
+    $(img).css("width", img.width * shrinkage);
+    img.style.position = "relative";
+    $(img).css("top", offsetY);
+    $(img).css("left", offsetX);
+    $(img).css("visibility", "visible");
+    return true;
+}
+
+// Callback when token set changes
+function tokenChangeCallback(hi, li) {
+    var x = 2;
+    queryformHit(this[0].form);
+}
+
+// NOT YET GUARANTEED
+// Responder for link to return to the user's list
+function backToMe(uid) {
+    // debugger;
+    var x = 2;
+}
+
+// Callback when query text changes
+// function textChangeCallback( ) {
+// var x = 2;
+// queryformHit(this[0].form);
+// }
+function alertIframeSelection() {
+    var iframe = document.getElementById("viewframe");
+    alert(getIframeSelectionText(iframe));
+};
+
