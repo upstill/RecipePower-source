@@ -1,7 +1,7 @@
 require 'open-uri'
 require './lib/Domain.rb'
 require './lib/RPDOM.rb'
-require 'Nokogiri'
+require 'nokogiri'
 require 'htmlentities'
 
 class GettableURLValidator < ActiveModel::EachValidator
