@@ -13,9 +13,6 @@ gem 'pg'
 gem 'closure_tree'
 gem 'htmlentities'
 gem 'nokogiri'
-gem 'open-uri'
-gem 'uri'
-gem 'yaml'
 
 group :development do
   gem 'rspec-rails', '2.6.1'
