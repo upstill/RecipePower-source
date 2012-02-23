@@ -42,7 +42,7 @@ class TagsController < ApplicationController
       session[:tabindex] = @tabindex
       @orphantags = Tag.strmatch(params[:q] || params[:term] || "", 
                                session[:user_id],
-                               tagtype.to_i,
+                               tagtype,
                                params[:makeormatch] == "true")
       @orphantags.delete_if { |t| !t.referents.empty? } if params[:unbound_only] == "true"
       respond_to do |format|
@@ -54,7 +54,7 @@ class TagsController < ApplicationController
                 when "strings"
                     # Just a list of strings...
                     @orphantags.map(&:attributes).map { |match| match["name"] }
-                when "tokenInput" 
+                else # assuming "tokenInput" because that js won't send a parameter
                     # for tokenInput: an array of hashes, each with "id" and "name" values
                     @orphantags.map(&:attributes).map { |match| {:id=>match["id"], :name=>match["name"]} } 
                 end
@@ -108,7 +108,7 @@ class TagsController < ApplicationController
   def typify
       # Return array of ids of tags successfully converted
       puts "Typify"+params["tagids"].inspect
-      idsChanged = Tag.convertTypesByIndex(params["tagids"].map{|p| p.delete("orphantag_").to_i}, params["fromtabindex"].to_i, params["totabindex"].to_i)
+      idsChanged = Tag.convertTypesByIndex(params["tagids"].map{|p| p.delete("orphantag_").to_i}, params["fromtabindex"].to_i, params["totabindex"].to_i, true)
       # Go back to the client with a list of ids that were changed
       puts "Success on "+idsChanged.inspect
       render :json=>idsChanged.map { |id| orphantagid(id) }

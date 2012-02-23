@@ -8,7 +8,5 @@ class CreateExpressions < ActiveRecord::Migration
 
       t.timestamps
     end
-    LinkRef.import_file "db/data/FoodLover"
-    # Referent.express "dairy", :Food
   end
 end

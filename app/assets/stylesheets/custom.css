@@ -1,4 +1,5 @@
 .container {
+  background: #FDECCF; // DCE8DC;
   width: 100%;
 }
 
@@ -119,9 +120,9 @@ a.signup_button {
   margin-right: auto;
   display: block;
   text-align: center;
-  width: 290px;
+  width: 190px;
   color: #fff;
-  background: #006400;
+  background: #000064;
   font-size: 150%;
   font-weight: bold;
   padding: 20px;
@@ -131,6 +132,7 @@ a.signup_button {
   -moz-border-radius:    10px;
   -webkit-border-radius: 10px;
   border-radius:         10px;
+  // background: #640000;
   margin-top:0px;
   margin-left:10px;
   margin-right:10px;

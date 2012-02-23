@@ -36,8 +36,8 @@ class Tag < ActiveRecord::Base
 
     attr_reader :typename
 
-   @@TypesToNames = ["free tag".to_sym, :Genre, :Course, :Process, :Food, :Unit, :Publication, :Author, :Occasion, "Pantry Section".to_sym, "Store Section".to_sym, :Circle, :Tool ]
-   @@NamesToTypes = {:Genre=>1, :Course=>2, :Process=>3, :Food=>4, :Unit=>5, :Publication=>6, :Author=>7, :Occasion=>8 , "free tag".to_sym=>0, "Pantry Section".to_sym=>9, "Store Section".to_sym=>10, :Circle=>11, :Tool=>12}
+   @@TypesToNames = ["free tag".to_sym, :Genre, :Role, :Process, :Food, :Unit, :Source, :Author, :Occasion, "Pantry Section".to_sym, "Store Section".to_sym, :Circle, :Tool ]
+   @@NamesToTypes = {:Genre=>1, :Role=>2, :Process=>3, :Food=>4, :Unit=>5, :Source=>6, :Author=>7, :Occasion=>8 , "free tag".to_sym=>0, "Pantry Section".to_sym=>9, "Store Section".to_sym=>10, :Circle=>11, :Tool=>12}
 
    public 
    
@@ -143,7 +143,7 @@ class Tag < ActiveRecord::Base
    end
    
    # Respond to a directive to move tags from one category to another
-   def self.convertTypesByIndex(tagids, fromindex, toindex)
+   def self.convertTypesByIndex(tagids, fromindex, toindex, globalize)
        # Iterate through the tags, keeping those we successfully change.
        # XXX We're assuming that these tags have no semantic information, 
        # i.e., they're orphans.
@@ -152,6 +152,7 @@ class Tag < ActiveRecord::Base
        tagids.keep_if do |id|
             if tag = self.find(id)
                 tag.tagtype = toType;
+                tag.isGlobal = true if globalize
                 tag.save
             end
        end

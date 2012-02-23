@@ -698,3 +698,6 @@ sitekeys.keys.each { |handle|
         end
     end
 }
+
+LinkRef.import_file "db/data/FoodLover"
+# Referent.express "dairy", :Food

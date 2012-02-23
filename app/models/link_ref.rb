@@ -53,11 +53,13 @@ class LinkRef < ActiveRecord::Base
     def self.import_file(fname)
         superid = User.super_id
         File.open(fname).each do |line|
-            firstlast = line.chomp.split "\t"
-            uri = firstlast[1]
-            tagtype = firstlast[2]
-            firstlast.first.split('; ').each do |tag|
-                puts self.associate :tag=>tag, :resource_type=>:glossary, :uri=>uri, :tagtype=>tagtype, :userid=>superid
+            fields = line.chomp.split "\t"
+            uri = fields[1]
+            tagtype = fields[2]
+            fields.first.split('; ').each do |tag|
+                tagtype.split('; ').each do |type|
+                    puts self.associate :tag=>tag, :resource_type=>:glossary, :uri=>uri, :tagtype=>type, :userid=>superid
+                end
             end
         end
     end
