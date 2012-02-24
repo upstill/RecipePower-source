@@ -53,19 +53,20 @@ module ApplicationHelper
     logo = image_tag("RPlogo.png", :alt => "Logo Goes Here" )
     link_to logo, recipes_path
   end
+  
 
   def user_greeting
     # Ensure a user id
-    case uid = session[:user_id]
-    when nil
-       "No User! GAAHH!!!".html_safe
+    debugger
+    user = User.current session[:user_id]
+    case user.id
     when User.guest_id
        link_to "Sign In", "/login"
     when User.super_id
        link_to "Super logout", "/logout"
     else
-       uname = User.find(uid).username
-       ulink = link_to uname, "/users/#{uid.to_s}/edit"
+       uname = user.username
+       ulink = link_to uname, "/users/#{user.id.to_s}/edit"
        ulogout = link_to "Sign Out", "/logout"
        "<strong>#{ulink}</strong><span class=\"welcome_user\">&nbsp|&nbsp;#{ulogout}</span>".html_safe
      end

@@ -4,18 +4,69 @@ class User < ActiveRecord::Base
     has_many :tag_owners
     has_many :tags, :through=>:tag_owners
 
+    has_many :rcprefs
+    has_many :recipes, :through=>:rcprefs, :autosave=>true
+
+    # new columns need to be added here to be writable through mass assignment
+    attr_accessible :id, :username, :email, :password, :password_confirmation, :recipes, :password_hash, :password_salt
+
+    attr_accessor :password
+    before_save :prepare_password
+
+    validates_presence_of :username
+    validates_uniqueness_of :username, :email, :allow_blank => true
+    validates_format_of :username, :with => /^[-\w\._@]+$/i, :allow_blank => true, :message => "should only contain letters, numbers, or .-_@"
+    validates_format_of :email, :with => /^[-a-z0-9_+\.]+\@([-a-z0-9]+\.)+[a-z0-9]{2,4}$/i
+    validates_presence_of :password, :on => :create
+    validates_confirmation_of :password
+    validates_length_of :password, :minimum => 4, :allow_blank => true
+    
+    def self.seed
+        debugger
+        u = self.new :username => "maxgarrone@gmail.com", :email=>"maxgarrone@gmail.com", :password_hash=>"$2a$10$jDwmhYV1GCWTlh2PfogRFu1b9ztDD04ngi/WUnYvxSBJ1ohML/S8G", :password_salt=>"$2a$10$jDwmhYV1GCWTlh2PfogRFu"
+        u.save :validate=>false
+        u = self.new :username => "aaron", :email=>"sweetaz@gmail.com", :password_hash=>"$2a$10$2QSRHaYD8EB89FT42HF8X.3hSLB/xuAB.ryH2ucMikUGbldDgqr46"
+        u.save :validate=>false
+        u = self.new :username => "upstill", :email=>"steve@upstill.net", :password_hash=>"$2a$10$SlXpc.5frJuxeUA0O/t46eRgrWbBqb9D4cKIoOHM44QJnA2bVthFW", :password_salt=>"$2a$10$SlXpc.5frJuxeUA0O/t46e"
+        u.save :validate=>false
+   		@@Super_user = self.new :username => :super, :email=>"webmaster@recipepower.com"
+   		@@Super_user.password = "Sk4pcL2u"
+   		@@Super_user.save
+        @@Guest_user = self.new :username => :guest
+    	@@Guest_user.save :validate=>false
+    end
+    
+    private
+    # Make sure we have this particular user (who had better be in the seed list)
+    def self.ensure_user (name)
+        begin
+            self.where("username = ?", name.to_s).first
+        rescue Exception => e
+            debugger
+            nil
+        end
+    end
+public
+
+# Robustly get the record for the current user
+  def self.current (uid)
+      debugger
+      begin
+          self.find (uid || self.guest_id)
+      rescue ActiveRecord::RecordNotFound => e
+      end
+  end
+
   # Class variable @@Super_user saves the super user_id
   @@Super_user = nil
-
   def self.super_id
-     unless @@Super_user
-        @@Super_user =  self.where("username = ?", :super).first ||
-           		self.new(:username => :super, 
-				 :password=>"Sk4pcL2u",
-				 :email=>"webmaster@recipepower.com")
-	    @@Super_user.save
-     end
-     @@Super_user.id
+     (@@Super_user || (@@Super_user = self.ensure_user(:super))).id
+  end
+  
+  # Class variable @@Guest_user saves the guest user_id
+  @@Guest_user = nil
+  def self.guest_id
+      (@@Guest_user || (@@Guest_user = self.ensure_user(:guest))).id
   end
 
   # Return a list of username/id pairs suitable for popup selection
@@ -36,35 +87,6 @@ class User < ActiveRecord::Base
 	# Add back in the owner, under "Pick Another List"
 	arr.unshift ["Pick Another List", owner_id]
   end
-
-  # Class variable @@Guest_user saves the guest user_id
-  @@Guest_user = nil
-
-  def self.guest_id
-     unless @@Guest_user
-        @@Guest_user =  self.where("username = ?", :guest).first ||
-           		self.new(:username => :guest)
-	@@Guest_user.save(:validate=>false)
-     end
-     @@Guest_user.id
-  end
-
-  has_many :rcprefs
-  has_many :recipes, :through=>:rcprefs, :autosave=>true
-
-  # new columns need to be added here to be writable through mass assignment
-  attr_accessible :username, :email, :password, :password_confirmation, :recipes
-
-  attr_accessor :password
-  before_save :prepare_password
-
-  validates_presence_of :username
-  validates_uniqueness_of :username, :email, :allow_blank => true
-  validates_format_of :username, :with => /^[-\w\._@]+$/i, :allow_blank => true, :message => "should only contain letters, numbers, or .-_@"
-  validates_format_of :email, :with => /^[-a-z0-9_+\.]+\@([-a-z0-9]+\.)+[a-z0-9]{2,4}$/i
-  validates_presence_of :password, :on => :create
-  validates_confirmation_of :password
-  validates_length_of :password, :minimum => 4, :allow_blank => true
 
   # login can be either username or email address
   def self.authenticate(login, pass)

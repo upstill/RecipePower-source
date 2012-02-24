@@ -608,8 +608,7 @@ sitekeys = {
             { label: :Image, path: "meta[property='og:image']", attribute: :content },
             { label: :Author, path: "span[itemprop='author']" }
             ],
-            sample: "http://www.foodandwine.com/chefs",
-            sample: "http://www.foodandwine.com/recipes/chicken-with-piquillos"
+            sample: "http://www.foodandwine.com/chefs"
     },
     "foodandwine-gloss".to_sym => { 
         site: "www.foodandwine.com",
@@ -675,7 +674,6 @@ sitekeys.keys.each { |handle|
         sampleuri = rcd[:sample]
         # The sample may just be a path, without the site
         sampleuri = siteuri+sampleuri if sampleuri =~ /^\//
-        
         if site = Site.by_link(sampleuri) 
             subsite = rcd[:subsite]
             if (subsite && (site.subsite.nil? || (subsite != site.subsite)))
@@ -699,5 +697,6 @@ sitekeys.keys.each { |handle|
     end
 }
 
-LinkRef.import_file "db/data/FoodLover"
+User.seed
+# LinkRef.import_file "db/data/FoodLover"
 # Referent.express "dairy", :Food
