@@ -1,6 +1,31 @@
 class RcpqueriesController < ApplicationController
   layout "recipes"
+  
+private
+  # Get the current query for the current user and a stipulated owner, 
+  # making a new one as necessary
+    def current_query(owner)
+        uid = session[:user_id]
+        # Either we're dealing with an existing query, or not
+        session[:rcpquery] = nil if session[:rcpquery].class != Fixnum
+        @rcpquery = nil
+        begin
+            @rcpquery = session[:rcpquery] && Rcpquery.find(session[:rcpquery])
+        rescue ActiveRecord::RecordNotFound => e
+            # No need to take action; we'll create a new query below
+        end
+        unless @rcpquery && (@rcpquery.user_id == uid)
+            @rcpquery = Rcpquery.create :user_id=>uid, :owner_id=>uid 
+        end
+        if owner && User.exists?(owner.to_i) && (@rcpquery.owner_id != owner.to_i) # Check against bogus uids
+            @rcpquery.owner_id = owner.to_i
+            @rcpquery.save
+        end
+        session[:rcpquery] = @rcpquery.id
+        @rcpquery
+    end
 
+public
   # GET /rcpqueries
   # GET /rcpqueries.xml
   def index
@@ -12,23 +37,7 @@ class RcpqueriesController < ApplicationController
     # Listing recipes doesn't require login, but we do need a user_id
     need_login false # ...doesn't require session: sets user_id to guest id if none
 
-    uid = session[:user_id]
-    # Either we're dealing with an existing query, or not
-    session[:rcpquery] = nil if session[:rcpquery].class != Fixnum
-    unless (qid = session[:rcpquery]) && 
-	   (@rcpquery = Rcpquery.find(qid)) && 
-	   (@rcpquery.user_id == uid) 
-       @rcpquery = Rcpquery.new :user_id=>uid, :owner_id=>uid 
-       @rcpquery.save
-       session[:rcpquery] = @rcpquery.id
-    end
-    if params[:owner] && User.find(params[:owner].to_i) # Check against bogus uids
-       oid = @rcpquery.owner_id = params[:owner].to_i
-       @rcpquery.save
-    else
-       oid = @rcpquery.owner_id
-    end
-
+    @rcpquery = current_query params[:owner]
     # Blind index: show list of either the current user or a given user
     # NB: the list of special user 'guest' sees all public recipes
     # Ensure the quality of the query
@@ -57,7 +66,6 @@ class RcpqueriesController < ApplicationController
   # GET /rcpqueries/new
   # GET /rcpqueries/new.xml
   def new
-    debugger()
     @rcpquery = Rcpquery.new 
     @rcpquery.user_id = @rcpquery.owner_id = session[:user_id]
     @rcpquery.save
@@ -75,16 +83,10 @@ class RcpqueriesController < ApplicationController
   # POST /rcpqueries.xml
   # Take parameters revising the current query
   def create
-    if  (qid = session[:rcpquery]) &&
-	(@rcpquery = Rcpquery.find(qid)) &&
-        (@rcpquery.user_id == session[:user_id]) &&
-	(@rcpquery.owner_id == session[:user_id])
+    
+    @rcpquery = current_query session[:user_id]
 	@rcpquery.update_attributes(params[:rcpquery])
-    else
-	@rcpquery = Rcpquery.new params[:rcpquery]
-    end
     @rcpquery.save
-    session[:rcpquery] = @rcpquery.id
     @Title = "Query from Create"
     redirect_to rcpqueries_url
 
