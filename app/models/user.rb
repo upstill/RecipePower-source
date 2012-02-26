@@ -20,37 +20,18 @@ class User < ActiveRecord::Base
     validates_presence_of :password, :on => :create
     validates_confirmation_of :password
     validates_length_of :password, :minimum => 4, :allow_blank => true
-    
-    def self.seed
-        debugger
-        u = self.new :username => "maxgarrone@gmail.com", :email=>"maxgarrone@gmail.com", :password_hash=>"$2a$10$jDwmhYV1GCWTlh2PfogRFu1b9ztDD04ngi/WUnYvxSBJ1ohML/S8G", :password_salt=>"$2a$10$jDwmhYV1GCWTlh2PfogRFu"
-        u.save :validate=>false
-        u = self.new :username => "aaron", :email=>"sweetaz@gmail.com", :password_hash=>"$2a$10$2QSRHaYD8EB89FT42HF8X.3hSLB/xuAB.ryH2ucMikUGbldDgqr46"
-        u.save :validate=>false
-        u = self.new :username => "upstill", :email=>"steve@upstill.net", :password_hash=>"$2a$10$SlXpc.5frJuxeUA0O/t46eRgrWbBqb9D4cKIoOHM44QJnA2bVthFW", :password_salt=>"$2a$10$SlXpc.5frJuxeUA0O/t46e"
-        u.save :validate=>false
-   		@@Super_user = self.new :username => :super, :email=>"webmaster@recipepower.com"
-   		@@Super_user.password = "Sk4pcL2u"
-   		@@Super_user.save
-        @@Guest_user = self.new :username => :guest
-    	@@Guest_user.save :validate=>false
-    end
-    
-    private
+
     # Make sure we have this particular user (who had better be in the seed list)
-    def self.ensure_user (name)
+    def self.by_name (name)
         begin
             self.where("username = ?", name.to_s).first
         rescue Exception => e
-            debugger
             nil
         end
     end
-public
 
-# Robustly get the record for the current user
+# Robustly get the record for the current user, or guest if not logged in
   def self.current (uid)
-      debugger
       begin
           self.find (uid || self.guest_id)
       rescue ActiveRecord::RecordNotFound => e
@@ -60,13 +41,13 @@ public
   # Class variable @@Super_user saves the super user_id
   @@Super_user = nil
   def self.super_id
-     (@@Super_user || (@@Super_user = self.ensure_user(:super))).id
+     (@@Super_user || (@@Super_user = self.by_name(:super))).id
   end
   
   # Class variable @@Guest_user saves the guest user_id
   @@Guest_user = nil
   def self.guest_id
-      (@@Guest_user || (@@Guest_user = self.ensure_user(:guest))).id
+      (@@Guest_user || (@@Guest_user = self.by_name(:guest))).id
   end
 
   # Return a list of username/id pairs suitable for popup selection

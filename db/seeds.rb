@@ -697,6 +697,101 @@ sitekeys.keys.each { |handle|
     end
 }
 
-User.seed
+# Seed logins--unless they're already there
+unless User.by_name :guest
+    User.new( username: "maxgarrone@gmail.com", 
+            email: "maxgarrone@gmail.com", 
+            password_hash: "$2a$10$jDwmhYV1GCWTlh2PfogRFu1b9ztDD04ngi/WUnYvxSBJ1ohML/S8G", 
+            password_salt: "$2a$10$jDwmhYV1GCWTlh2PfogRFu").save validate: false
+    User.new(username: "aaron", 
+            email: "sweetaz@gmail.com",
+            password_hash: "$2a$10$2QSRHaYD8EB89FT42HF8X.3hSLB/xuAB.ryH2ucMikUGbldDgqr46",
+            password_salt: "$2a$10$2QSRHaYD8EB89FT42HF8X.").save validate: false
+    User.new(username: "upstill", 
+            email: "steve@upstill.net", 
+            password_hash: "$2a$10$SlXpc.5frJuxeUA0O/t46eRgrWbBqb9D4cKIoOHM44QJnA2bVthFW", 
+            password_salt: "$2a$10$SlXpc.5frJuxeUA0O/t46e").save validate: false
+	User.new(username: :super, 
+	        email: "webmaster@recipepower.com",
+            password_hash: "$2a$10$KiEDQDXW52BXJJsDAPEV7eJtk54EDHQSAlqmDa/qkzkeJXCPv0FMS", 
+            password_salt: "$2a$10$KiEDQDXW52BXJJsDAPEV7e").save validate: false
+    User.new(username: :guest).save validate: false
+end
+
 # LinkRef.import_file "db/data/FoodLover"
-# Referent.express "dairy", :Food
+Referent.express "Dairy", :Food
+Referent.express "Meat", :Food
+Referent.express "Pork", :Food
+Referent.express "Beef", :Food
+Referent.express "Lamb", :Food
+Referent.express "Fish", :Food
+Referent.express "Vegetable", :Food
+Referent.express "Grain", :Food
+Referent.express "Fats & Oils", :Food
+Referent.express "Seasonings", :Food
+
+Referent.express "Holidays", :Occasion
+Referent.express "Events", :Occasion
+Referent.express "Super Bowl", :Occasion
+Referent.express "Barbecue", :Occasion
+
+Referent.express "Asian", :Genre
+Referent.express "Latin American", :Genre
+Referent.express "South American", :Genre
+Referent.express "Caribbean", :Genre
+Referent.express "European", :Genre
+Referent.express "African", :Genre
+Referent.express "Pacific", :Genre
+Referent.express "US", :Genre
+Referent.express "Canadian", :Genre
+Referent.express "Middle Eastern", :Genre
+
+Referent.express "Beverage", :Role
+Referent.express "Soup", :Role
+Referent.express "First Course", :Role
+Referent.express "Entree", :Role
+Referent.express "Dessert", :Role
+
+Referent.express "Blogger", :Author
+Referent.express "Chef", :Author
+
+Referent.express "Book", :Source
+Referent.express "Magazine", :Source
+Referent.express "Online", :Source
+
+Referent.express "Cutting", :Process
+Referent.express "Baking", :Process
+Referent.express "Mixing", :Process
+Referent.express "Stovetop", :Process
+
+Referent.express "Volume--English", :Unit
+Referent.express "Volume--Metric", :Unit
+Referent.express "Weight--English", :Unit
+Referent.express "Weight--Metric", :Unit
+Referent.express "Temperature", :Unit
+Referent.express "Time", :Unit
+
+Referent.express "Dairy", "Store Section".to_sym
+Referent.express "Produce", "Store Section".to_sym
+Referent.express "Meat", "Store Section".to_sym
+Referent.express "Frozen Foods", "Store Section".to_sym
+Referent.express "Juices", "Store Section".to_sym
+Referent.express "Beer & Wine", "Store Section".to_sym
+Referent.express "Baking Supplies", "Store Section".to_sym
+Referent.express "Canned Vegetables", "Store Section".to_sym
+Referent.express "Canned Fruit", "Store Section".to_sym
+
+Referent.express "Closet", "Pantry Section".to_sym
+Referent.express "Drawers", "Pantry Section".to_sym
+Referent.express "Spices", "Pantry Section".to_sym
+Referent.express "Fridge", "Pantry Section".to_sym
+Referent.express "Freezer", "Pantry Section".to_sym
+
+Referent.express "Cutting", :Tool
+Referent.express "Mixing", :Tool
+Referent.express "Stovetop", :Tool
+Referent.express "Baking", :Tool
+Referent.express "Other Tools", :Tool
+
+Referent.express "Diets", :Interest
+Referent.express "Genres", :Interest

@@ -57,7 +57,6 @@ module ApplicationHelper
 
   def user_greeting
     # Ensure a user id
-    debugger
     user = User.current session[:user_id]
     case user.id
     when User.guest_id

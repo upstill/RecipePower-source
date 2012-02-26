@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120215213040) do
+ActiveRecord::Schema.define(:version => 20120126013319) do
 
   create_table "expressions", :force => true do |t|
     t.integer  "tag_id"
