@@ -1,9 +1,9 @@
 class ReferentsController < ApplicationController
     # Here's where we defer to different handlers for different types of referent
-    @@HandlersByIndex = [ Referent, GenreReferent, CourseReferent, 
+    @@HandlersByIndex = [ Referent, GenreReferent, RoleReferent, 
             ProcessReferent, FoodReferent, UnitReferent, 
-            PublicationReferent, AuthorReferent, OccasionReferent, 
-            PantrySectionReferent, StoreSectionReferent, CircleReferent, ToolReferent ]
+            SourceReferent, AuthorReferent, OccasionReferent, 
+            PantrySectionReferent, StoreSectionReferent, InterestReferent, ToolReferent ]
     @@HandlerClass = Referent
   # GET /referents
   # GET /referents.json
@@ -81,8 +81,9 @@ class ReferentsController < ApplicationController
         @referent = handlerclass.find params[:target].to_i
         @referent.express tagid
     else
-        targetid = params[:target] ? params[:target].to_i : 0
-        parentid = (targetid > 0) ? handlerclass.find(targetid).parent_id : 0
+        # targetid = params[:target] ? params[:target].to_i : 0
+        # parentid = (targetid > 0) ? handlerclass.find(targetid).parent_id : 0
+        parentid = params[:target] ? params[:target].to_i : 0
         @referent = handlerclass.create :parent_id=>parentid 
         @referent.express tagid, :canonical
         keyback = @referent.id

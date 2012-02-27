@@ -1,3 +1,12 @@
+=begin
+An Expression links a Referent to a Tag. It declares that a semantic entity
+(a Referent) can be referred to by a particular lexical entity (a Tag).
+Fields:
+    -- tag_id, referent_id: the items being linked
+    -- form: perhaps a tag for a specific grammatical variant (e.g. plural, feminine)
+        for a given locale
+    -- locale: the language in which this expression is valid
+=end
 class ExpressionsController < ApplicationController
   # GET /expressions
   # GET /expressions.json

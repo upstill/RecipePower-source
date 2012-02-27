@@ -18,7 +18,6 @@ class Referent < ActiveRecord::Base
     end
     
     def referent_type
-        debugger()
         Tag.tagtype_inDB self.class.name.sub /Referent/, ''
     end
         
@@ -92,20 +91,23 @@ public
     # Class method to create a referent under the given tag.
     # WARNING: while some effort is made to find an existing referent and use that,
     #  this procedure lends itself to redundancy in the dictionary
-    def self.express (tag, *params)
-        unless tagtype = params.first
-            tagtype = Tag.tagtype_inDB self.name.sub(/Referent/,'')
-        end
-        debugger()
-        tagid = Tag.ensure_tag tag, tagtype, true
+    def self.express (tagstring, tagtype, *params)
+        # unless tagtype = params.first
+            # tagtype = Tag.tagtype_inDB self.name.sub(/Referent/,'')
+        # end
+        tagid = Tag.ensure_tag tagstring, tagtype, true
         canonicalform = Expression.type_inDB :canonical
         tag = Tag.find tagid
+        # if there's already a referent referring to this tag, return it
         if exp = tag.expressions.where(:form=>canonicalform, :locale=>:en).first
             return self.find exp.referent_id
         end
         # Didn't find an existing referent, so need to make one
-        result = self.create :tag_id=>tagid, :tag=>tagid, :type=>tagtype.to_s+"Referent"
-        result.expressions.create :tag_id=>tagid, :form=>canonicalform, :locale=>:en
+        result = self.create :tag=>tagid, :type=>tagtype.to_s+"Referent"
+        result.express tagstring, :canonical, :en
+        # unless self.expressions.where(:tag_id=>tagid, :form=>canonicalform, :locale=>:en).first
+            # result.expressions.create :tag_id=>tagid, :form=>canonicalform, :locale=>:en
+        # end
         result
     end
     
@@ -114,10 +116,13 @@ public
         tagid = Tag.ensure_tag tag, self.referent_type, true
         form = Expression.type_inDB (params[0] || :corruption)
         locale = params[1] || :en
-        unless self.expressions.any? { |exp| exp.tag_id==tagid && exp.form==form && exp.locale == locale }
-            self.expressions.create :tag_id=>tagid, :form=>form, :locale=>locale
-            self.tag = tagid if params[0] == :canonical
-            self.save
+        # unless self.expressions.any? { |exp| exp.tag_id==tagid && exp.form==form && exp.locale == locale }
+        unless self.expressions.where(tag_id: tagid, form: form, locale: locale ).first
+            self.expressions.create tag_id: tagid, form: form, locale: locale
+            if params[0] == :canonical
+                self.tag = tagid 
+                self.save
+            end
         end
         tagid
     end
@@ -137,9 +142,11 @@ public
     end
 end
 
+# Subclases for different types of referents
+
 class GenreReferent < Referent ; end  
 
-class CourseReferent < Referent ; end  
+class RoleReferent < Referent ; end  
 
 class ProcessReferent < Referent ; end 
 
@@ -147,7 +154,7 @@ class FoodReferent < Referent ; end
 
 class UnitReferent < Referent ; end  
 
-class PublicationReferent < Referent ; end  
+class SourceReferent < Referent ; end  
 
 class AuthorReferent < Referent ; end  
 
@@ -157,7 +164,7 @@ class PantrySectionReferent < Referent ; end
 
 class StoreSectionReferent < Referent ; end  
 
-class CircleReferent < Referent ; end  
+class InterestReferent < Referent ; end  
 
 class ToolReferent < Referent ; end  
 

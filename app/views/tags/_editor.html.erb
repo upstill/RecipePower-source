@@ -6,10 +6,9 @@
 	<%# render :partial=>"tags/taglist" %>
 </div>
 <div class="referentspec">
-	<div class="referenttree" id="referenttree<%= @tabindex.to_s %>">
-		referenttree goes here
-	</div>
-	<%# if(@tabindex == 0)  %>
-		<%# render :partial=>"foods/foodtree" %>
-	<%# end %>
+	<% if(@tabindex > 0)  %>
+		<div class="referenttree" id="referenttree<%= @tabindex.to_s %>">
+			referenttree goes here
+		</div>
+	<% end %>
 </div>

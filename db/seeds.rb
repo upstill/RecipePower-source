@@ -724,6 +724,8 @@ Referent.express "Meat", :Food
 Referent.express "Pork", :Food
 Referent.express "Beef", :Food
 Referent.express "Lamb", :Food
+Referent.express "Poultry", :Food
+Referent.express "Game", :Food
 Referent.express "Fish", :Food
 Referent.express "Vegetable", :Food
 Referent.express "Grain", :Food
