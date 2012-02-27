@@ -9,12 +9,62 @@ body {
 }
 
 header {
-  padding-top: 6px;
+  # border:3px solid blue;
+  # outline:3px solid green;
+  # padding-top: 6px;
+  height: 63px;
+  width:100%;
 }
 
-header img {
-  padding: 1em;
-  background: #fff;
+#atop {
+  # border:3px solid red;
+  padding:0px;
+  margin:0px;
+}
+
+#logo_div {
+  # border:1px solid green;
+  width: 300px;
+  height: 45px;
+  margin-top: 10px;
+  margin-left: 15px;
+  padding-top:15px;
+}
+
+#logo_img {
+  width:288px;
+  height:40px;
+  # border:1px solid red;
+  background-color:#FDECCF; // DCE8DC;
+}
+
+#nav_links {
+  font:14px arial,sans-serif, bold;
+  text-align:right;
+  # border:3px solid green;
+  padding-right:15px;
+  padding-top:40px;
+  padding-bottom:5px;
+  float:right;
+}
+
+#user_status {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+}
+
+footer {
+  width:100%;
+  text-align: center;
+  margin-top: 10px;
+  width: 710px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+footer nav {
+  float: none;
 }
 
 section {
@@ -143,18 +193,6 @@ a.signup_button {
   width:95%;
 }
 
-footer {
-  text-align: center;
-  margin-top: 10px;
-  width: 710px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-footer nav {
-  float: none;
-}
-
 .respond_question {
   width: 400px;
   height: 40px;
@@ -250,12 +288,6 @@ padding:10px;
     // border:3px solid black;
     // outline:#999 solid 1px;
     float: right;
-}
-
-.greeting {
-  position: absolute;
-  top: 10px;
-  right: 20px;
 }
 
 .rcpquery_owner_div {
@@ -480,15 +512,6 @@ margin-bottom:10px;
   font:12px arial,sans-serif;
 }
 
-.rheader {
-  # border:3px solid blue;
-   width:100%;
-}
-
-.rfooter {
-   width:100%;
-}
-
 #viewframe {
   width:100%;
   height:600px;
@@ -500,34 +523,6 @@ margin-bottom:10px;
   # border:3px solid red;
   padding-bottom:0px;
   float:left;
-}
-
-#atop {
-  # border:3px solid red;
-  padding:0px;
-  margin:0px;
-}
-
-.tiny_logo {
-  width:288px;
-  height:40px;
-  # border:3px solid black;
-  padding:0px;
-  margin:0px;
-  margin-top:10px;
-  margin-bottom:10px;
-  margin-left:15px;
-  background-color:#FDECCF; // DCE8DC;
-}
-
-.nav_links {
-  font:14px arial,sans-serif, bold;
-  text-align:right;
-  # border:3px solid green;
-  padding-right:15px;
-  padding-top:40px;
-  padding-bottom:5px;
-  float:right;
 }
 
 .collection_item_title {

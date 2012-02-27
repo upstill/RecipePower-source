@@ -95,11 +95,11 @@ ActiveRecord::Schema.define(:version => 20120126013319) do
   add_index "referent_hierarchies", ["descendant_id"], :name => "index_referent_hierarchies_on_descendant_id"
 
   create_table "referents", :force => true do |t|
+    t.integer  "tag"
     t.integer  "parent_id"
+    t.string   "type"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "tag"
-    t.string   "type"
   end
 
   create_table "scales", :force => true do |t|

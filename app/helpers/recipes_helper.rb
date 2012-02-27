@@ -72,25 +72,6 @@ module RecipesHelper
        "<p><strong>#{label}: </strong> #{content} </p>".html_safe unless content.empty?
    end
 
-  def tiny_logo
-    logo = image_tag("RPlogo.png", :alt=>"RecipePower", :class=>"tiny_logo")
-    link_to logo, root_path
-  end
-
-  # Make a recipe's url nice for display
-=begin
-  def display_url(rcp)
-      if(url = rcp.url)
-         mappings = {"nytimes.com"=>"The New York Times", 
-      	   "smittenkitchen.com"=>"Smitten Kitchen"}
-         domain = domain_from_url(url)
-         mappings[domain] || domain
-      else
-         ""
-      end
-  end
-=end
-
   # Provide the cookmark-count line
   def cookmark_count(rcp)
      count = rcp.num_cookmarks

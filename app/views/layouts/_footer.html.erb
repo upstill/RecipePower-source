@@ -1,2 +1,46 @@
 <footer>
+  <div class="viewframe"> 
+    <% if true %>
+      <iframe src="<%= @recipe.url %>" id="viewframe" allowfullscreen></iframe>
+    <% end %>
+  </div> 
+  <br>
+  <div class="tagpane">Select me and paste info from the recipe to work on itself</div>
+<div class="explain">
+    Tag the recipe with ingredients, etc. by 1) selecting text with the mouse,
+    and 2) clicking the appropriate tag below. But observe:
+    <ul>
+    <li>These are hierarchical entities, as noted below. Selecting the enclosing entity <i>may</i> help resolve the more fine-grained levels.
+    <li>An "Ingredient" is a single instance of amount, condition(s), material and step.
+    <li>The "Amount" consists of a quantity and a unit, which may be selected separately.
+    <li>"Conditions" are what needs to be done to the ingredient before measuring, e.g. "1 tsp. finely chopped parsley". There may be several, which should be tagged separately.
+    <li>The "Step" is whatever instructions happen to appear for what to do after measuring.
+    </ul>
+</div>
+<div class="tagpane_buttons">
+  <div class="ingredient_div">
+     <input type="button" value="Ingredient List" id="tagpane_ingredient_list" class="ingredients">
+  </div>
+  <div class="ingredient_div">
+     <input type="button" value="Ingredient" id="tagpane_ingredient" class="ingredient">
+  </div>
+  <div class="amount_div">
+     <input type="button" value="Amount" id="tagpane_amount" class="amount">
+    <br><input type="button" value="Quantity" id="tagpane_quantity" class="quantity">
+     <input type="button" value="Unit" id="tagpane_unit" class="unit">
+  </div>
+  <div class="condition_div">
+     <input type="button" value="Conditions" id="tagpane_conditions" class="conditions">
+     <br><input type="button" value="Condition" id="tagpane_condition" class="condition">
+  </div>
+  <div class="material_div">
+     <input type="button" value="Material" id="tagpane_material" class="name">
+  </div>
+  <div class="step_div">
+     <input type="button" value="Step" id="tagpane_step" class="step">
+  </div>
+  <input type="button" value="Submit tags" id="tagpane_submit">
+</div>
 </footer>
+
+<br class="clear">

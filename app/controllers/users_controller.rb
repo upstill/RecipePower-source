@@ -1,5 +1,4 @@
 class UsersController < ApplicationController
-  layout "recipes"
   before_filter :login_required, :except => [:new, :create]
 
   def new

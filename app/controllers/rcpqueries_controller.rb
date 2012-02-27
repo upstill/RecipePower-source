@@ -1,5 +1,4 @@
 class RcpqueriesController < ApplicationController
-  layout "recipes"
   
 private
   # Get the current query for the current user and a stipulated owner, 

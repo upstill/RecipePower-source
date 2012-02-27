@@ -16,11 +16,11 @@ BLOCK_END
      s = <<BLOCK_END
 	<div id="rcpquery_tabset" value="#{@rcpquery.status_tab}"> 
 	    <ul>
-		<li><a href="rcpqueries/relist?status=1" title="rotation_tab">Rotation</a></li> 
-		<li><a href="rcpqueries/relist?status=2" title="favorites_tab">Favorites</a></li> 
-		<li><a href="rcpqueries/relist?status=4" title="interesting_tab">Interesting</a></li>
-		<li><a href="rcpqueries/relist?status=8" title="all_tab">All Cookmarks</a></li>
-		<li><a href="rcpqueries/relist?status=16" title="recent_tab">Recent</a></li>
+		<li><a href="rcpqueries/relist?status=1" title="Show recipes that are in your active rotation">Rotation</a></li> 
+		<li><a href="rcpqueries/relist?status=2" title="Show favorite recipes">Favorites</a></li> 
+		<li><a href="rcpqueries/relist?status=4" title="Show recipes that you've earmarked as 'interesting''">Interesting</a></li>
+		<li><a href="rcpqueries/relist?status=8" title="Show all your cookmarks">All Cookmarks</a></li>
+		<li><a href="rcpqueries/relist?status=16" title="Show recent cookmarks">Recent</a></li>
 	    </ul> 
 	</div>
 BLOCK_END

@@ -1,8 +1,8 @@
 class TagsController < ApplicationController
-  layout "recipes"
   # GET /tags
   # GET /tags.xml
   def index
+      @Title = "Tags"
       if params[:tabindex]
           @tabindex = params[:tabindex].to_i
           tagtype = Tag.index_to_type @tabindex 
@@ -32,6 +32,7 @@ class TagsController < ApplicationController
   #    :makeormatch - Boolean indicating that this tag should be created if 
   #           it can't be found EXACTLY
   def match
+      @Title = "Tags"
       if params[:tabindex]
           @tabindex = params[:tabindex].to_i
           tagtype = Tag.index_to_type @tabindex 
@@ -67,6 +68,7 @@ class TagsController < ApplicationController
   # GET /tags/1
   # GET /tags/1.xml
   def show
+      @Title = "Tags"
     @tag = Tag.find(params[:id])
     session[:tabindex] = @tabindex
 
@@ -79,6 +81,7 @@ class TagsController < ApplicationController
   # GET /tags/new
   # GET /tags/new.xml
   def new
+      @Title = "Tags"
     @tag = Tag.new
 
     respond_to do |format|
@@ -89,6 +92,7 @@ class TagsController < ApplicationController
 
   # GET /tags/1/edit
   def edit
+      @Title = "Tags"
     @tag = Tag.find(params[:id])
   end
   
@@ -96,6 +100,7 @@ class TagsController < ApplicationController
   # Return HTML for the editor for classifying tags
   def editor
     return if need_login true
+    @Title = "Tags"
     @tabindex = (params[:tabindex] || 0).to_i # type numbers for Ingredient, Genre, Free Tag, etc.
     # The list of orphan tags gets all tags of this type which aren't linked to a table
     @orphantags = Tag.strmatch("", session[:user_id], Tag.index_to_type(@tabindex), false)
@@ -117,6 +122,7 @@ class TagsController < ApplicationController
   # POST /tags
   # POST /tags.xml
   def create
+      @Title = "Tags"
     @tag = Tag.new(params[:tag])
 
     respond_to do |format|
@@ -133,6 +139,7 @@ class TagsController < ApplicationController
   # PUT /tags/1
   # PUT /tags/1.xml
   def update
+      @Title = "Tags"
     @tag = Tag.find(params[:id])
 
     respond_to do |format|
@@ -153,6 +160,7 @@ puts "...to "+params[:tag][:tagtype].to_s
   # DELETE /tags/1
   # DELETE /tags/1.xml
   def destroy
+      @Title = "Tags"
     @tag = Tag.find(params[:id])
     @tag.destroy
 

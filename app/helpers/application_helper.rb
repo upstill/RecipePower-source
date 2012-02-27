@@ -38,24 +38,21 @@ module ApplicationHelper
     link_to_function(name, h("add_fields(this, '#{association}', '#{escape_javascript(fields)}')"))
   end
 
-  def title (ext)
-    base_title = "RecipePower"
-    if @title.nil?
-      base_title
-    elsif ext.empty?
-      "#{base_title} | #{@title}"
-    else
-      "#{base_title} | #{ext}"
-    end
+  def title 
+    ext = (@Title || (@recipe.title if @recipe))
+    "RecipePower"+(ext.blank? ? " Home" : " | #{ext}")
   end
 
-  def logo
-    logo = image_tag("RPlogo.png", :alt => "Logo Goes Here" )
-    link_to logo, recipes_path
-  end
+  # def logo
+    # logo = image_tag("RPlogo.png", :alt => "Logo Goes Here" )
+    # link_to logo, recipes_path
+  # end
   
+  def logo
+    link_to image_tag("RPlogo.png", :alt=>"RecipePower", :id=>"logo_img", :href=>"/" ), root_path
+  end
 
-  def user_greeting
+  def user_status
     # Ensure a user id
     user = User.current session[:user_id]
     case user.id
