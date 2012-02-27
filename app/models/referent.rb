@@ -11,14 +11,16 @@ class Referent < ActiveRecord::Base
     # Before saving a referent, we make sure its preferred tag is listed as an expression of type 1
     def ensure_expression
         # Look for an expression on this tag of type 1. If found, demote to a corruption (type 0)
-        unless self.expressions.any? { |exp| exp.tag_id == self.tag }
-            # No expression found => make a new one and add it to the set
-            self.expressions << Expression.create(:tag_id=>self.tag, :referent_id=>self.id, :form=>1, :locale=>:en)
+        if self.tag && (self.tag > 0)
+            unless self.expressions.any? { |exp| exp.tag_id == self.tag }
+                # No expression found => make a new one and add it to the set
+                self.expressions << Expression.create(:tag_id=>self.tag, :referent_id=>self.id, :form=>1, :locale=>:en)
+            end
         end
     end
     
     def referent_type
-        Tag.tagtype_inDB self.class.name.sub /Referent/, ''
+        Tag.tagtype_inDB self.class.name.sub( /Referent/, '').sub(/Section/, " Section")
     end
         
 public
@@ -125,6 +127,12 @@ public
             end
         end
         tagid
+    end
+    
+    # Return the name of the referent [XXX for the current locale]
+    def normalized_name
+        tag = Tag.find self.tag
+        tag.normalized_name
     end
     
     # Return the name of the referent [XXX for the current locale]

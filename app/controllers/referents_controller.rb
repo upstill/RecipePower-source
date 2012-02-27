@@ -21,11 +21,11 @@ class ReferentsController < ApplicationController
             @referents = handlerclass.roots
         end
         # Convert the referents to a JSON response
-        @referents.sort! { |r1, r2| r1.name <=> r2.name }
+        @referents.sort! { |r1, r2| r1.normalized_name <=> r2.normalized_name }
         @nodes = @referents.map { |r| { :title=>r.longname, :isLazy=>true, :key=>r.id, :isFolder=>!r.leaf? }}
     else
         @referents = handlerclass.all
-        @referents.sort! { |r1, r2| r1.name <=> r2.name }
+        @referents.sort! { |r1, r2| r1.normalized_name <=> r2.normalized_name }
     end
 
     respond_to do |format|
@@ -72,21 +72,37 @@ class ReferentsController < ApplicationController
   # POST /referents?tagid=1&mode={over,before,after}&target=referentid
   # POST /referents.json?tagid=1&mode={over,before,after}&target=referentid
   def create
-    @tabindex = session[:tabindex] || params[:tabindex] || 0
+    @tabindex = params[:tabindex].to_i || 0
     handlerclass = @@HandlersByIndex[@tabindex]
     tagid = params[:tagid].to_i
+    targetid = params[:target] ? params[:target].to_i : 0
     keyback = 0
-    if params[:mode] == "over"
+    case params[:mode]
+    when "before"
+        @referent = handlerclass.create
+        @referent.express tagid, :canonical # Ensure it has a tag
+        # Make a child of this node's parent, if any
+        parentid = ((targetid > 0) && handlerclass.find(targetid).parent_id) || 0
+        if parentid > 0
+            parent = handlerclass.find parentid
+            parent.add_child @referent
+            parent.save
+        end
+        keyback = @referent.id
+    when "after"
+        # Make a child of this node
+        @referent = handlerclass.create
+        @referent.express tagid, :canonical
+        parent = handlerclass.find targetid
+        parent.add_child @referent
+        parent.save
+        keyback = @referent.id
+    when "child"
+        debugger
+    when "over"
         # "over" indicates to add the tag to the referent's expressions
         @referent = handlerclass.find params[:target].to_i
         @referent.express tagid
-    else
-        # targetid = params[:target] ? params[:target].to_i : 0
-        # parentid = (targetid > 0) ? handlerclass.find(targetid).parent_id : 0
-        parentid = params[:target] ? params[:target].to_i : 0
-        @referent = handlerclass.create :parent_id=>parentid 
-        @referent.express tagid, :canonical
-        keyback = @referent.id
     end
 
     respond_to do |format|

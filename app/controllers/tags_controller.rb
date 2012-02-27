@@ -7,7 +7,7 @@ class TagsController < ApplicationController
           @tabindex = params[:tabindex].to_i
           tagtype = Tag.index_to_type @tabindex 
       else
-          @tabindex = 0
+          @tabindex = session[:tabindex] || 0
           tagtype = params[:tagtype] || :any
       end
       session[:tabindex] = @tabindex
@@ -36,7 +36,7 @@ class TagsController < ApplicationController
           @tabindex = params[:tabindex].to_i
           tagtype = Tag.index_to_type @tabindex 
       else
-          @tabindex = 0
+          @tabindex = session[:tabindex] || 0
           tagtype = params[:tagtype] || :any
       end
       session[:tabindex] = @tabindex

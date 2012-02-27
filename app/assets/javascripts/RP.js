@@ -243,7 +243,8 @@ function tagTabsTakeTyping(event, info) {
 	// if(makeormatch) { 
 		// debugger; 
 	// }
-	var wdwData = getWdwData(); // Get structure containing tabindex, listid and treeid names
+	var wdwData = getWdwData(); 
+	// Get structure containing tabindex, listid and treeid names
 	// Reload the dynatree to reflect the typed string
 	$(wdwData.tagListSelector).dynatree("option", 
 		"initAjax", {
@@ -359,10 +360,10 @@ function setupDynatree() {
                 logMsg("tree.onDrop(%o, %o, %s)", node, sourceNode, hitMode);
 				var sourceTreeName = sourceNode.parent.tree.divTree.className;
 				var nodeTreeName = node.parent.tree.divTree.className;
+				var wdwData = getWdwData(); 
 				if(sourceTreeName == nodeTreeName) {
 					// Notify the server of the change in hierarchy
 					function catchReferent( xhr, status ) {
-						// debugger;
 						if(status == "success") {
 							sourceNode.move(node, hitMode);
 						}
@@ -370,7 +371,7 @@ function setupDynatree() {
 				  	$.ajax({
 							type:"POST",
 							url:"/referents/"+sourceNode.data.key,
-							data: {_method:'PUT', referent: {parent_id: node.data.key, mode:hitMode }},
+							data: {_method:'PUT', referent: {parent_id: node.data.key, mode:hitMode, tabindex:wdwData.tabindex }},
 							dataType: 'json',
 							complete: catchReferent
 						});
@@ -391,7 +392,7 @@ function setupDynatree() {
 								  // delete dict.key; // Remove key, so a new one will be created
 								});
 								copynode.key = response[0].key;
-						        if(hitMode == "over"){
+						        if(hitMode == "after"){
 						          // Append as child node
 						          node.addChild(copynode);
 						          // expand the drop target
@@ -399,9 +400,7 @@ function setupDynatree() {
 						        }else if(hitMode == "before"){
 						          // Add before this, i.e. as child of current parent
 						          node.parent.addChild(copynode, node);
-						        }else if(hitMode == "after"){
-						          // Add after this, i.e. as child of current parent
-						          node.parent.addChild(copynode, node.getNextSibling());
+								  node.parent.reloadChildren()
 						        }
 							} else {
 								// Didn't create new node b/c we just dropped term onto it
@@ -412,7 +411,7 @@ function setupDynatree() {
 				        }
 					}
 				  	$.post("/referents",
-						{tagid:sourceNode.data.key, mode:hitMode, target:node.data.key },
+						{tagid:sourceNode.data.key, mode:hitMode, target:node.data.key, tabindex:wdwData.tabindex },
 						catchReferent,
 						"json");
 				}

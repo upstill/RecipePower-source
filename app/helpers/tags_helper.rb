@@ -21,6 +21,7 @@ module TagsHelper
     # Build a set of tabs for use by jQuery UI
     def tags_tabset
    	    tabstrs = ""
+   	    tabindex = @tabindex.to_s
    	    tabset = Tag.typenames
    	    tabset.each_index do |ix|
    	      label = tabset[ix].to_s.pluralize
@@ -29,7 +30,7 @@ module TagsHelper
 BLOCK_END
         end
         s = <<BLOCK_END
-<div id="tags_tabset"> 
+<div id="tags_tabset" value=#{tabindex} > 
   <ul>
     #{tabstrs}
   </ul> 
