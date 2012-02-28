@@ -49,7 +49,7 @@ module ApplicationHelper
   # end
   
   def logo
-    link_to image_tag("RPlogo.png", :alt=>"RecipePower", :id=>"logo_img", :href=>"/" ), root_path
+    link_to image_tag("RPlogo.png", :alt=>"RecipePower", :id=>"logo_img" ), root_path
   end
 
   def user_status
@@ -67,7 +67,13 @@ module ApplicationHelper
        "<strong>#{ulink}</strong><span class=\"welcome_user\">&nbsp|&nbsp;#{ulogout}</span>".html_safe
      end
   end
-
+  
+  def bookmarklet
+      imgtag = image_tag("Small_Icon.png", :alt=>"Cookmark", :class=>"logo_icon", width: "32px", height: "24px")
+      bmtag = %q{<a class="bookmarklet" title="Send to RecipePower" href="javascript:(function(){location.href='http://www.recipepower.com/recipes/new?url='+encodeURIComponent(window.location.href)+'&title='+encodeURIComponent(document.title)+'&notes='+encodeURIComponent(''+(window.getSelection?window.getSelection():document.getSelection?document.getSelection():document.selection.createRange().text))+'&v=6&jump=yes'})()">}
+      "#{bmtag}#{imgtag}</a>".html_safe
+  end
+      
   # Turn the last comma in a comma-separated list into ' and'
   def englishize_list(list)
      set = list.split ', '
@@ -79,13 +85,14 @@ module ApplicationHelper
   end
 
     # Return the set of navigation links for the header
-    def show_navlinks(omit)
-	navlinks = []
-	navlinks.push(link_to "Cookmarks", "/rcpqueries") unless omit && omit==:cookmarks
-	navlinks.push(link_to "Add a Cookmark", "/recipes/new") unless omit && omit==:addcookmark
-	navlinks.push(link_to "About", "/about") 
-	navlinks.push(link_to "Contact", "/contact") 
-	navlinks.join('  |  ').html_safe
+    def show_navlinks(current)
+    	navlinks = []
+    	navlinks.push(link_to "Cookmarks", "/rcpqueries", class: (current==:cookmarks) ? "nav_link_strong" : "nav_link") 
+    	navlinks.push(link_to "Add a Cookmark", "/recipes/new", class: (current==:addcookmark) ? "nav_link_strong" : "nav_link") 
+    	navlinks.push(link_to "About", "/about", class: (current==:about) ? "nav_link_strong" : "nav_link") 
+    	navlinks.push(link_to "Contact", "/contact", class: (current==:contact) ? "nav_link_strong" : "nav_link") 
+    	navlinks.push(link_to "Home", "/", class: (current==:home) ? "nav_link_strong" : "nav_link") 
+    	navlinks.join('  |  ').html_safe
     end
 
     def show_errors(errors)

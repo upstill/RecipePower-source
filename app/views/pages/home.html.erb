@@ -1,13 +1,17 @@
 <h2>RecipePower is Here!</h2> 
+<div class="text_block">
 <h3>Sharpening the Web for Cooks</h3>
-<p>
-Don't you wish you had a scratchpad for all the recipes you find on the Web? One that let you tag them so you can get back to them easily? If so, welcome home. Welcome to RecipePower.
-</p><p>
+<p class="airy">
+Have you ever glommed onto a great recipe on the Web, only to have to have it disappear back into the Morass? <br>
+Wouldn't you like to be able to collect <strong>all</strong> the recipes that seem to be written just for you--no matter where they come from?<br>
+Don't you wish you just had a scratchpad where you could jot down and get back to anything and everything that seems appealing? One that let you tag them so you can get back to them easily?
+</p><p class="airy">If so, welcome home. Welcome to RecipePower.
+</p><p class="airy">
 RecipePower is the <strong>one place</strong> to store, 
 organize and sort through all your food-related "cookmarks" from the Web. It's the perfect 
 complement to Google, Bing, and every food site you know and love. It's not about more content. 
 It's about getting a handle on the vast library that's out there already.
-</p><p>
+</p><p class="airy">
 RecipePower is coming soon to a browser near you. Meanwhile, we'd love to hear
 your opinions about finding recipes on the Web. 
 <br>
@@ -15,10 +19,10 @@ To take our survey, (short and sweet: ten questions, six minutes, done),
 click below. Thanks again!
 <br>
 <%= link_to "Take the Survey (Please)!", new_visitor_path, :class => "signup_button" %>
-<p>
+<p class="airy">
 ...or, if you'd just like to hear when RecipePower is ready for prime time,
 <br>leave us an email address where we can reach you:
-
+</p>
 <%= form_for(Visitor.new) do |f| %>
 
   <div class="field">
@@ -29,3 +33,4 @@ click below. Thanks again!
     <%= f.submit :value => "Submit email" %>
   </div>
 <% end %>
+</div>

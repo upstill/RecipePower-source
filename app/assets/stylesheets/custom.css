@@ -72,6 +72,14 @@ header {
   right: 20px;
 }
 
+.nav_link {
+	
+}
+
+.nav_link_strong {
+	font-weight:bold;
+}
+
 #user_status {
   position: absolute;
   top: 8px;
@@ -108,12 +116,28 @@ padding-top:0px;
   font-size: 200%;
 }
 
+h2.med {
+padding-top:0px;
+  font-size: 170%;
+}
+
 h3 {
 padding-top:15px;
   font-size: 150%;
   margin:0px;
   padding:0px;
   padding-top:15px;
+}
+
+p.airy {
+	line-height:150%;
+	font-size:105%;
+	# letter-spacing:1px;
+}
+
+.text_block {
+	margin-top:40px;
+	margin-left:15px;
 }
 
 /* Links */
@@ -186,6 +210,12 @@ nav ul li a:hover {
         letter-spacing:-1px;
   }
 */
+
+.logo_icon {
+	width: 48px;
+	height: 36px;
+	border: 1px solid gray;
+}
 
 /* Sign up button */
 a.signup_button {
@@ -277,7 +307,7 @@ a.signup_button {
 #sidebar {
 width: 250px;
 float: right;
-margin:15px;
+margin:15px 5px 15px 30px;
 border:3px solid black;
 padding:10px;
 }
