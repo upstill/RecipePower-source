@@ -3,32 +3,57 @@
   width: 100%;
 }
 
+.round {
+  -moz-border-radius:    10px;
+  -webkit-border-radius: 10px;
+  border-radius:         10px;
+  // background: #640000;
+position: relative;
+top: 65px;
+left: 10px;
+  margin-top:0px;
+  padding-top:10px;
+  // margin-left:10px;
+  // margin-right:10px;
+  // padding-top:1px;
+  // padding-left:20px;
+  // padding-right:20px;
+  /* width:750px; */
+  width:95%;
+}
+
 body {
   background: #FDECCF; // DCE8DC;
+  width: 100%;
+  margin: 0px;
   font:12px arial,sans-serif;
+  # border:1px solid blue;
+  # outline:1px solid green;
 }
 
 header {
   # border:3px solid blue;
   # outline:3px solid green;
   # padding-top: 6px;
-  height: 63px;
-  width:100%;
 }
 
 #atop {
-  # border:3px solid red;
-  padding:0px;
-  margin:0px;
+  height: 63px;
+  width:100%;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  # outline: 1px solid blue;
+  background-color:#FDECCF; // DCE8DC;
 }
 
 #logo_div {
-  # border:1px solid green;
-  width: 300px;
-  height: 45px;
-  margin-top: 10px;
-  margin-left: 15px;
-  padding-top:15px;
+  position: absolute;
+  left: 15px;
+  bottom: 5px;
+  # outline:1px solid green;
+  width: 288px;
+  height: 40px;
 }
 
 #logo_img {
@@ -42,15 +67,14 @@ header {
   font:14px arial,sans-serif, bold;
   text-align:right;
   # border:3px solid green;
-  padding-right:15px;
-  padding-top:40px;
-  padding-bottom:5px;
-  float:right;
+  position: absolute;
+  bottom: 5px;
+  right: 20px;
 }
 
 #user_status {
   position: absolute;
-  top: 15px;
+  top: 8px;
   right: 20px;
 }
 
@@ -80,7 +104,7 @@ padding-top:15px;
 }
 
 h2 {
-padding-top:15px;
+padding-top:0px;
   font-size: 200%;
 }
 
@@ -165,32 +189,20 @@ nav ul li a:hover {
 
 /* Sign up button */
 a.signup_button {
-  margin-top: 30px;
+  -moz-border-radius:    10px;
+  -webkit-border-radius: 10px;
+  border-radius:         10px;
+  margin-top: 10px;
   margin-left: auto;
   margin-right: auto;
   display: block;
   text-align: center;
   width: 190px;
-  color: #fff;
-  background: #000064;
+  color: #ffffff;
+  background: #80A480;
   font-size: 150%;
   font-weight: bold;
   padding: 20px;
-}
-
-.round {
-  -moz-border-radius:    10px;
-  -webkit-border-radius: 10px;
-  border-radius:         10px;
-  // background: #640000;
-  margin-top:0px;
-  margin-left:10px;
-  margin-right:10px;
-  padding-top:0px;
-  padding-left:20px;
-  padding-right:20px;
-  /* width:750px; */
-  width:95%;
 }
 
 .respond_question {
