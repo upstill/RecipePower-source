@@ -13,6 +13,7 @@ gem 'pg'
 gem 'closure_tree'
 gem 'htmlentities'
 gem 'nokogiri'
+# gem 'will_paginate', '~> 3.0'
 
 group :development do
   gem 'rspec-rails', '2.6.1'

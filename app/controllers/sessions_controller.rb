@@ -1,11 +1,11 @@
 class SessionsController < ApplicationController
 
   def new
-    @Title = "RecipePower Login"
+    @Title = "Login"
   end
 
   def create
-    @Title = "RecipePower Login"
+    @Title = "Login"
     user = User.authenticate(params[:login], params[:password])
     if user
       session[:user_id] = user.id

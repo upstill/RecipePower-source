@@ -5,18 +5,19 @@ require 'nokogiri'
 require 'htmlentities'
 
 class GettableURLValidator < ActiveModel::EachValidator
-  def validate_each(record, attribute, value)
-    if(attribute == :url) 
-      begin
-        # ou = open(value)
-	# ou.close
-	true
-      rescue
-	record.errors[:url] << "\'#{value}\' doesn't seem to be a working URL"
-	nil
-      end
+    def validate_each(record, attribute, value)
+        if(attribute == :url) 
+            begin
+                ou = open(value)
+                ou.close
+                true
+            rescue => e
+                debugger
+                record.errors[:url] << "\'#{value}\' doesn't seem to be a working URL"
+                nil
+            end
+        end
     end
-  end
 end
 
 class Recipe < ActiveRecord::Base
@@ -25,8 +26,7 @@ class Recipe < ActiveRecord::Base
   after_save :save_ref
 
   validates :title,:presence=>true 
-  validates :url,  :presence=>true, 
-		   :gettableURL => true
+  validates :url,  :presence=>true, :gettableURL => true
 
   has_many :tagrefs
   has_many :tags, :through=>:tagrefs, :autosave=>true
@@ -219,24 +219,26 @@ class Recipe < ActiveRecord::Base
   def crackURL
      # Find the site for this url
      # Get the site to crack the page for this recipe
-     @site = @site || Site.by_link(url)
-     findings = @site.crack_page url, :Recipe
-     # Pull title, picture and canonical URL from the result
-     debugger
-     if (self.title = findings.result :Title)
-         titledata = self.title.split('\t')
-         self.title = titledata.first
-         self.url = self.url || titledata.last
-     end
-     if (self.picurl = findings.result :Image)
-         # Make picture path absolute if it's not already
-         self.picurl = @site.site+self.picurl unless self.picurl =~ /^\w*:/
-     else
-         self.picurl = ""
-     end
+     if @site = @site || Site.by_link(url)
+         findings = @site.crack_page url, :Recipe
+         # Pull title, picture and canonical URL from the result
+         if (self.title = findings.result :Title)
+             titledata = self.title.split('\t')
+             self.title = titledata.first
+             self.url = self.url || titledata.last
+         end
+         if (self.picurl = findings.result :Image)
+             # Make picture path absolute if it's not already
+             self.picurl = @site.site+self.picurl unless self.picurl =~ /^\w*:/
+         else
+             self.picurl = ""
+         end
      
-     if (betterURI = findings.result :URI)
-         self.url = betterURI # Replace w. canonical link if such found
+         if (betterURI = findings.result :URI)
+             self.url = betterURI # Replace w. canonical link if such found
+         end
+     else
+         self.errors.add :url, "doesn't make sense or can't be found"
      end
      self.errors.empty?
 end

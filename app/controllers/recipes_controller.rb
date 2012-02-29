@@ -47,7 +47,7 @@ class RecipesController < ApplicationController
     @Title = @listownership+" Cookmarks"
     @Title << " in the Whole Wide World" if !@listowner
     @navlinks = navlinks(nil, :index) 
-    navomit = nil
+    nav_current = nil
   end
 
   def show
@@ -56,7 +56,7 @@ class RecipesController < ApplicationController
     @recipe.current_user = session[:user_id]
     @Title = ""
     @navlinks = navlinks(@recipe, :show)
-    navomit = nil
+    nav_current = nil
   end
 
   def new # Collect URL, then redirect to edit
@@ -90,7 +90,7 @@ class RecipesController < ApplicationController
     else
 	@Title = "Cookmark a Recipe"
 	@navlinks = navlinks(@recipe, :new)
-        @navomit = :addcookmark
+        @nav_current = :addcookmark
 	@recipe.current_user = session[:user_id]
     end
   end
@@ -108,13 +108,13 @@ class RecipesController < ApplicationController
     # Make sure the recipe is on the user's list (and save)
     @recipe.ensureUser( @recipe.current_user = session[:user_id] ) if @recipe.errors.empty?
 
-    if @recipe.id && @recipe.title && !@recipe.title.empty? # Success (valid recipe, either created or fetched)
-	redirect_to edit_recipe_url(@recipe), :notice  => "Successfully cookmarked recipe."
+    if @recipe.id && !@recipe.title.blank? # Success (valid recipe, either created or fetched)
+	    redirect_to edit_recipe_url(@recipe), :notice  => "Recipe Cookmarked!"
     else # failure (not a valid recipe) => return to new
        # No recipe id => try again
        @Title = "Cookmark a Recipe"
        @navlinks = navlinks @recipe, :new
-       @navomit = :addcookmark
+       @nav_current = :addcookmark
        @recipe.current_user = session[:user_id]
        render :action => 'new'
     end
@@ -129,7 +129,7 @@ class RecipesController < ApplicationController
 
     @Title = "" # Get title from the recipe
     @navlinks = navlinks(@recipe, :edit)
-    @navomit = :addcookmark
+    @nav_current = :addcookmark
     # Now go forth and edit
   end
 
@@ -142,7 +142,7 @@ class RecipesController < ApplicationController
     else
       @Title = ""
       @navlinks = navlinks(@recipe, :edit)
-      @navomit = nil
+      @nav_current = nil
       render :action => 'edit'
     end
   end

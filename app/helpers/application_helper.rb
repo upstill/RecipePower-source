@@ -70,7 +70,7 @@ module ApplicationHelper
   
   def bookmarklet
       imgtag = image_tag("Small_Icon.png", :alt=>"Cookmark", :class=>"logo_icon", width: "32px", height: "24px")
-      bmtag = %q{<a class="bookmarklet" title="Send to RecipePower" href="javascript:(function(){location.href='http://www.recipepower.com/recipes/new?url='+encodeURIComponent(window.location.href)+'&title='+encodeURIComponent(document.title)+'&notes='+encodeURIComponent(''+(window.getSelection?window.getSelection():document.getSelection?document.getSelection():document.selection.createRange().text))+'&v=6&jump=yes'})()">}
+      bmtag = %q{<a class="bookmarklet" title="Cookmark" href="javascript:(function(){location.href='http://www.recipepower.com/recipes/new?url='+encodeURIComponent(window.location.href)+'&title='+encodeURIComponent(document.title)+'&notes='+encodeURIComponent(''+(window.getSelection?window.getSelection():document.getSelection?document.getSelection():document.selection.createRange().text))+'&v=6&jump=yes'})()">}
       "#{bmtag}#{imgtag}</a>".html_safe
   end
       
@@ -85,13 +85,18 @@ module ApplicationHelper
   end
 
     # Return the set of navigation links for the header
-    def show_navlinks(current)
+    def header_navlinks(current)
     	navlinks = []
     	navlinks.push(link_to "Cookmarks", "/rcpqueries", class: (current==:cookmarks) ? "nav_link_strong" : "nav_link") 
     	navlinks.push(link_to "Add a Cookmark", "/recipes/new", class: (current==:addcookmark) ? "nav_link_strong" : "nav_link") 
-    	navlinks.push(link_to "About", "/about", class: (current==:about) ? "nav_link_strong" : "nav_link") 
-    	navlinks.push(link_to "Contact", "/contact", class: (current==:contact) ? "nav_link_strong" : "nav_link") 
-    	navlinks.push(link_to "Home", "/", class: (current==:home) ? "nav_link_strong" : "nav_link") 
+    	navlinks.join('  |  ').html_safe
+    end
+    
+    def footer_navlinks(current)
+    	navlinks = []
+    	navlinks << link_to("About", "/about", class: (current==:about) ? "nav_link_strong" : "nav_link") 
+    	navlinks << link_to("Contact", "/contact", class: (current==:contact) ? "nav_link_strong" : "nav_link") 
+    	navlinks << link_to("Home", "/", class: (current==:home) ? "nav_link_strong" : "nav_link") 
     	navlinks.join('  |  ').html_safe
     end
 
@@ -99,7 +104,7 @@ module ApplicationHelper
         result = ""
         if errors.any?
           result << "<div id=\"error_explanation\"><h2>\n"
-          result << pluralize(errors.count, "error")+" prohibited this post from being saved:</h2>\n"
+          result << "Sorry, there are "+pluralize(errors.count, "error")+" keeping that from happening:</h2>\n"
           result << "<ul>"
           errors.full_messages.each do |msg|
               result << "<li>#{msg}</li>\n"
@@ -108,4 +113,8 @@ module ApplicationHelper
         end
         result.html_safe
     end
+    
+    def debug_dump(params)
+        "<div id=\"debug\">#{debug(params)}</div>".html_safe
+	end
 end

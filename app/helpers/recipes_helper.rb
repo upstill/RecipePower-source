@@ -3,47 +3,47 @@ require './lib/Domain.rb'
 
 module RecipesHelper
 
-    def rcp_fitPic(rcp)
+def rcp_fitPic(rcp)
         # "fitPic" class gets fit inside pic_box with Javascript and jQuery
 	if rcp.picurl
             "<img src=\"#{rcp.picurl}\" class=\"fitPic\" >".html_safe
 	else
 	    "Pic goes Here.".html_safe
 	end
-    end
+end
 
-    # If the recipe doesn't belong to the current user's collection,
-    #   provide a link to add it
-    def ownership_status(rcp)
+# If the recipe doesn't belong to the current user's collection,
+#   provide a link to add it
+def ownership_status(rcp)
 	# Summarize ownership as a list of owners, each linked to their collection
 	(rcp.users.map { |u| link_to u.username, rcpqueries_path( :owner=>u.id.to_s) }.join(', ') || "").html_safe
-    end
+end
 
-    def summarize_techniques(courses)
+def summarize_techniques(courses)
 	englishize_list courses.collect{|e| "<strong>#{e.name}</strong>" }.join(', ')
-    end
+end
 
-    def summarize_othertags(tags)
+def summarize_othertags(tags)
 	tags.collect{|e| "<strong>#{e.name}</strong>" }.join(', ')
-    end
+end
 
-    def summarize_ratings(ratings)
+def summarize_ratings(ratings)
 	englishize_list(ratings.collect { |r| "<strong>#{r.value_as_text}</strong>" }.join ', ')
-    end
+end
 
-    def summarize_mainings(ings)
+def summarize_mainings(ings)
 	englishize_list ings.collect{|e| "<strong>#{e.name}</strong>" }.join(', ')
-    end
+end
 
-    def summarize_genres(genres)
+def summarize_genres(genres)
 	genres.collect{|e| "<strong>#{e.name}</strong>" }.join '/' 
-    end
+end
 
-    def summarize_courses(courses)
+def summarize_courses(courses)
 	courses.length > 0 ? courses.collect{|e| "<strong>#{e.name}</strong>" }.join('/') : "dish"
-    end
+end
 
-  def summarize_alltags(rcp)
+def summarize_alltags(rcp)
   	othertags = rcp.tags.select { |t| t.tagtype.nil? || t.tagtype==0 }
   	genres = rcp.tags.select { |t| t.tagtype==1 }
   	courses = rcp.tags.select { |t| t.tagtype==2 }
@@ -60,20 +60,22 @@ module RecipesHelper
 	summ += " using #{summarize_mainings mainings}," if mainings.length > 0
 	summ += " that has been otherwise tagged \'#{summarize_othertags othertags}\'" if othertags.length > 0
 	summ.length>9 ? (summ+".").html_safe : nil
-  end
+end
 
-   def add_genre_link(name)
-	link_to_function name do |page|
-     	   page.insert_html :bottom, :genres, :partial => 'genre', :object=>Genre.new
-      end
-   end
+# XXX No known use for this.
+# def add_genre_link(name)
+# 	link_to_function name do |page|
+#        page.insert_html :bottom, :genres, :partial => 'genre', :object=>Genre.new
+#     end
+# end
 
-   def show_field(label, content)
-       "<p><strong>#{label}: </strong> #{content} </p>".html_safe unless content.empty?
-   end
+# XXX No known use for this.
+# def show_field(label, content)
+#       "<p><strong>#{label}: </strong> #{content} </p>".html_safe unless content.blank?
+# end
 
-  # Provide the cookmark-count line
-  def cookmark_count(rcp)
+# Provide the cookmark-count line
+def cookmark_count(rcp)
      count = rcp.num_cookmarks
      result = count.to_s+" Cookmark"
      result << "s" if count>1
@@ -86,6 +88,6 @@ module RecipesHelper
 				 :update => "response5")
      end
      "<span class=\"cmcount\" id=\"cmcount#{rcp.id}\">#{result}</span>".html_safe
-  end
+end
 
 end

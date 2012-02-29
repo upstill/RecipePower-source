@@ -1,6 +1,6 @@
 class VisitorsController < ApplicationController
   def new
-	@title = "Sign up"
+	@Title = "Sign up"
 	@visitor = Visitor.new
   end
   def show
@@ -17,7 +17,7 @@ class VisitorsController < ApplicationController
       # flash[:success] = "Welcome to RecipePower!"
       # redirect_to (visitor_path (@visitor))
     else
-      @title = "Sign up"
+      @Title = "Sign up"
       render 'new'
     end
   end

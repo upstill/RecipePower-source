@@ -1,21 +1,21 @@
 class PagesController < ApplicationController
   def home
-	@title = "Home"
-	@navomit = :home
+	@Title = "Home"
+	@nav_current = :home
   end
 
   def contact
-	@title = "Contact"
-	@navomit = :contact
+	@Title = "Contact"
+	@nav_current = :contact
   end
 
   def about
-	@title = "About"
-	@navomit = :about
+	@Title = "About"
+	@nav_current = :about
   end
 
   def kale
-	@title = "Kale Recipes"
+	@Title = "Kale Recipes"
   end
 
 end

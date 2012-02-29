@@ -1,8 +1,3 @@
-  <% if flash[:notice] %>
-      <div class="notice"><%= flash[:notice] %></div>
-  <% elsif flash[:alert] %>
-      <div class="alert"><%= flash[:alert] %></div>
-  <% end %>
 <% if @visitor.errors.any? %>
     <div id="error_explanation">
       <% if @visitor.question.nil? || @visitor.question.empty? %>

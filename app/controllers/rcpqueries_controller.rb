@@ -43,7 +43,7 @@ public
 
     @Title = @rcpquery.title
     @navlinks = []
-    @navomit = :cookmarks
+    @nav_current = :cookmarks
     # respond_to do |format|
       # format.html index.html.erb
       # format.xml  { render :xml => @rcpqueries }

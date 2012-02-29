@@ -1,9 +1,3 @@
-<% title "Log in" %>
-  <% if flash[:notice] %>
-      <div class="notice"><%= flash[:notice] %></div>
-  <% elsif flash[:alert] %>
-      <div class="alert"><%= flash[:alert] %></div>
-  <% end %>
 <h3>Login</h3>
 <p>Don't have an account? <%= link_to "Sign up!", signup_path %></p>
 

@@ -162,26 +162,29 @@ class Site < ActiveRecord::Base
     def post_init
         unless self.site
             # We need to initialize the fields of the record, starting with site, based on sample
-            if link = self.sample
-                uri = URI(link)
-                puts "Creating host matching #{uri.host} for #{link} with subsite \'#{self.subsite||""}\'"
+            if (link = self.sample) && (uri = URI(link))
+                if uri.host.blank?
+                    self.errors << "Can't make sense of URI"
+                else
+                    puts "Creating host matching #{uri.host} for #{link} with subsite \'#{self.subsite||""}\'"
         
-                # Reconstruct the sample from the link's path, query and fragment
-                self.sample = uri.path
-                self.sample << "?"+uri.query unless uri.query.blank?
-                self.sample << "#"+uri.fragment unless uri.fragment.blank?
+                    # Reconstruct the sample from the link's path, query and fragment
+                    self.sample = uri.path
+                    self.sample << "?"+uri.query unless uri.query.blank?
+                    self.sample << "#"+uri.fragment unless uri.fragment.blank?
         
-                # Define the site as the link minus the sample (sub)path
-                self.site = link.sub self.sample, ''
-                self.home = self.site # ...seems like a reasonable default...
+                    # Define the site as the link minus the sample (sub)path
+                    self.site = link.sub self.sample, ''
+                    self.home = self.site # ...seems like a reasonable default...
         
-                # Save scheme, host and port information from the link parse
-                self.scheme = uri.scheme
-                self.host = uri.host
-                self.port = uri.port
+                    # Save scheme, host and port information from the link parse
+                    self.scheme = uri.scheme
+                    self.host = uri.host
+                    self.port = uri.port
         
-                # Give the site a provisional name, the host name minus 'www.', if any
-                self.name = uri.host.sub(/www\./, '') unless self.name
+                    # Give the site a provisional name, the host name minus 'www.', if any
+                    self.name = uri.host.sub(/www\./, '') unless self.name
+                end
             else
                 # "Empty" site (probably defaults)
                 self.site = ""
@@ -214,7 +217,7 @@ class Site < ActiveRecord::Base
     # Find and return the site wherein the named link is stored
     def self.by_link (link, *params)
         
-        if uri = URI(link)
+        if (uri = URI(link)) && !uri.host.blank?
             # Find all sites assoc'd with the given domain
             sites = Site.where "host = ?", uri.host
             # It's possible that multiple sites may proceed from the same domain, 
@@ -237,12 +240,17 @@ class Site < ActiveRecord::Base
     def crack_page (link, *params)
         page_type = params.first || :Recipe 
         # Open the Nokogiri doc for the site
-        ou = open link
-        doc = Nokogiri::HTML(ou)
-        pt = PageTags.new doc, self.site
-        pt.glean (self.tags.empty? ? Site.find(1).tags : self.tags)
-        pt.hrecipe 
-        ou.close 
+        pt = nil
+        begin
+            if (ou = open link) && (doc = Nokogiri::HTML(ou))
+                pt = PageTags.new doc, self.site
+                pt.glean (self.tags.empty? ? Site.find(1).tags : self.tags)
+                pt.hrecipe 
+                ou.close 
+            end
+        rescue => e
+            debugger
+        end
         pt    
     end
     
