@@ -1,10 +1,10 @@
-require 'will_paginate'
+# require 'will_paginate'
 
 class SitesController < ApplicationController
   # GET /sites
   # GET /sites.json
   def index
-    @sites = Site.paginate(:per_page => 5, :page => params[:page])
+    @sites = Site.all # paginate(:per_page => 5, :page => params[:page])
 
     respond_to do |format|
       format.html # index.html.erb

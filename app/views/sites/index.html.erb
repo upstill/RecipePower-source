@@ -5,8 +5,7 @@
     <th>Info</th>
     <th>Links</th>
   </tr>
-<% pg = will_paginate @sites %>
-<% debugger %>
+<%# will_paginate @sites %>
 <% @sites.each do |site| %>
   <tr>
 	<td><b><%= site.name || "Defaults" %></b><br>
