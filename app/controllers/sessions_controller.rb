@@ -10,6 +10,7 @@ class SessionsController < ApplicationController
     if user
       session[:user_id] = user.id
       redirect_back rcpqueries_path, :notice =>"Welcome back! (Logged in successfully.)"
+      # redirect_to rcpqueries_url, :notice =>"Welcome back! (Logged in successfully.)"
       # redirect_to_target_or_default recipes_path, :notice => "Welcome back! (Logged in successfully.)"
     else
       flash.now[:alert] = "Invalid login or password."
@@ -18,6 +19,7 @@ class SessionsController < ApplicationController
   end
 
   def destroy
+    @Title = "Logout"
     session[:user_id] = nil
     redirect_to login_path, :notice => "Farewell, till we meet again! (You have been logged out.)"
   end

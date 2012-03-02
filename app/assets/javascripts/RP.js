@@ -1,93 +1,4 @@
 // GUARANTEED NECESSARY
-// Callback to respond to value changes on form elements,
-//  triggering immediate response
-function queryChange() {
-    // queryformHit(this.form);
-    queryformHit($("form")[0]);
-}
-
-// Callback to respond to select on list owner,
-//  triggering immediate response
-function queryownerChange() {
-    queryheaderHit(this.form);
-    queryformHit(this.form);
-}
-
-function queryListmodeChange() {
-    var form = $("form")[0];
-    var formstr = $(form).serialize();
-    // Add the popup to the rcpquery params in the form
-    var div = $('select#rcpquery_listmode_str')[0];
-    var divstr = $(div).serialize();
-    var datastr = "element=tabnum&" + formstr + "&" + divstr;
-    //...and proceed with the form hit as usual
-    var resp =
-    jQuery.ajax({
-        type: "POST",
-        url: form.action,
-        data: datastr,
-        // Submit the data from the form
-        dataType: "html",
-        success: queryresultsUpdate
-    }
-    );
-}
-
-// Handle a hit on one of the query fields by POSTing the whole form, then
-// (via callback) updating the results list
-function queryformHit(form) {
-    var resp =
-    jQuery.ajax({
-        type: "POST",
-        url: form.action,
-        data: "element=tabnum&" + $(form).serialize(),
-        // Submit the data from the form
-        dataType: "html",
-        success: queryresultsUpdate
-    }
-    );
-}
-
-// Callback after an update to hit the appropriate recipe tab
-function queryresultsUpdate(resp, succ, xhr) {
-    // The response is just the index of the tab to hit
-    $("#rcpquery_tabset").tabs('load', Number(resp));
-    $("select#rcpquery_listmode_str").change(queryListmodeChange);
-}
-
-// Handle a hit on the header (backtome link or list selector) by firing off a query-update request
-function queryheaderHit(form) {
-    var resp = jQuery.ajax({
-        type: "POST",
-        url: form.action,
-        data: "element=querylist_header&" + $(form).serialize(),
-        // Submit the data from the form
-        dataType: "html",
-        success: queryheaderUpdate
-    });
-}
-
-// Callback for replacing the recipe list header when the update returns
-function queryheaderUpdate(resp, succ, xhr) {
-    // Just slam the HTML--if any--in there. (Nil response => leave unchanged.)
-    if (resp != "") {
-        $('#querylist_header').replaceWith(resp);
-        // Replace the hit-handler
-        $("select#rcpquery_owner_id").change(queryownerChange);
-    }
-}
-
-// Called when a tab loads => fit any pics in their frames
-function queryTabOnLoad() {
-    wdwFitImages();
-    $("select#rcpquery_listmode_str").change(queryListmodeChange);
-}
-
-// Called when a tab is selected
-function queryTabOnSelect() {
-    var x = 2;
-}
-
 
 // Make orphan tags draggable (not applicable for dynatree)
 /*
@@ -240,9 +151,6 @@ function tagTabsTakeTyping(event, info) {
 		$(this).attr("lastCharTyped", event.keyCode);
 		return;
 	}
-	// if(makeormatch) { 
-		// debugger; 
-	// }
 	var wdwData = getWdwData(); 
 	// Get structure containing tabindex, listid and treeid names
 	// Reload the dynatree to reflect the typed string
@@ -474,7 +382,7 @@ function fitImage(img) {
 // Callback when token set changes
 function tokenChangeCallback(hi, li) {
     var x = 2;
-    queryformHit(this[0].form);
+    queryformHit(this[0].form, {});
 }
 
 // NOT YET GUARANTEED
@@ -487,7 +395,7 @@ function backToMe(uid) {
 // Callback when query text changes
 // function textChangeCallback( ) {
 // var x = 2;
-// queryformHit(this[0].form);
+// queryformHit(this[0].form, {});
 // }
 function alertIframeSelection() {
     var iframe = document.getElementById("viewframe");
@@ -525,7 +433,7 @@ function makeIframeSelectionRed() {
 function remove_fields(link) {
     $(link).prev("input[type=hidden]").val("1");
     $(link).closest(".fields").hide();
-    queryformHit($("form")[0]);
+    queryformHit($("form")[0], {});
 }
 
 function add_fields(link, association, content) {

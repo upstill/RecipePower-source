@@ -104,7 +104,9 @@ module ApplicationHelper
         result = ""
         if errors.any?
           result << "<div id=\"error_explanation\"><h2>\n"
-          result << "Sorry, there are "+pluralize(errors.count, "error")+" keeping that from happening:</h2>\n"
+          result << "Sorry, there "
+          result << (errors.count > 0 ? "are #{errors.count.to_s} errors" : "is an error")
+          result << " keeping that from happening:</h2>\n"
           result << "<ul>"
           errors.full_messages.each do |msg|
               result << "<li>#{msg}</li>\n"

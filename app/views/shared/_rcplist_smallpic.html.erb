@@ -1,6 +1,6 @@
 <%# Render the results of a recipe query in small_pic mode %>
 <%# NB: Should be rendered within a rcp_list container %>
-<% for recipe in @rcpquery.results %>
+<% for recipe in @rcpquery.results_paged  %>
   <div class="rcp_list_element" >
     <div class="rcp_list_pic_box">
 	<%= rcp_fitPic recipe %>

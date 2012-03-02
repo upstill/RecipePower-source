@@ -9,3 +9,4 @@
 
 //= require jquery-1.7.1
 //= require_directory .
+// require RPquery

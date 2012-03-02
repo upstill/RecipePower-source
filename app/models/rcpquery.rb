@@ -67,16 +67,45 @@ class Candihash < Hash
 end
 
 class Rcpquery < ActiveRecord::Base
-    attr_accessible :status, :tag_tokens, :tags, :ratings_attributes, 
+    attr_accessible :status, :tag_tokens, :tags, :ratings_attributes, :page_length, :cur_page,
     	:session_id, :user_id, :owner_id, :listmode_str, :querymode_str, :querytext # From database
     attr_reader :ratings
     attr_reader :tags
     attr_reader :tag_tokens
     attr_reader :listmode_str
     attr_reader :querymode_str
+    attr_accessor :page_length, :cur_page
 
     after_initialize :my_init
     after_find :my_reinit
+    
+    def page_length()
+        25
+    end
+    
+    def page_length=(length)
+    end
+    
+    def cur_page()
+        @cur_page || 1
+    end
+    
+    def cur_page=(p)
+        @cur_page = p.to_i if p
+    end
+    
+    def npages
+        (results.count+(page_length-1))/page_length
+    end
+    
+    # Return a list of results based on the paging parameters
+    def results_paged
+        first = (cur_page-1)*page_length
+        last = first+page_length-1
+        maxlast = results.count-1 
+        last = maxlast if last > maxlast
+        results[first..last]
+    end
 
     # Selectors for setting the list's display mode
     @@listmodes = [["Just Text", :rcplist_text],

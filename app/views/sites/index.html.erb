@@ -2,20 +2,20 @@
 
 <table>
   <tr>
-    <th>Basics</th>
-    <th>Tags</th>
+    <th>Info</th>
     <th>Links</th>
   </tr>
-
+<% pg = will_paginate @sites %>
+<% debugger %>
 <% @sites.each do |site| %>
   <tr>
 	<td><b><%= site.name || "Defaults" %></b><br>
 		<b>Site</b>: <%= site.site %><br>
 		<b>Home</b>: <%= site.home %><br>
+		<b>Name</b>: <%= site.name %><br>
 		<b>Sample</b>: <%= site.sample %><br>
 		<b>Logo</b>: <%= site.logo %><br>
 	</td>
-    <td><%= site.tags %></td>
 	<td><%= link_to 'Show', site %><br>
 		<%= link_to 'Edit', edit_site_path(site) %><br>
 		<%= link_to 'Destroy', site, confirm: 'Are you sure?', method: :delete %><br>

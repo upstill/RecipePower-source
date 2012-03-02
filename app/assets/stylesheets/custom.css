@@ -334,23 +334,23 @@ padding:10px;
     padding-top:10px;
 }
 
-.querylist_title {
-  font:24px arial,sans-serif,bold;
-  width:100%;
-  padding-top:20px;
-  text-align:center;
+#querylist_header {
+	margin-bottom:10px;
 }
 
-#querylist_header {
-margin-bottom:10px;
+.paginate_links {
+	float:left;
+	width:200px;
+	height:30px;
+    font-size:12px;
 }
 
 .rcpquery_listmode_div {
-    // width:360px;
-    // height: 300px;
     /* border:3px solid black; */
     float: right;
-    font-size:10px;
+	width:160px;
+	height:30px;
+    font-size:11px;
 }
 
 #rcpquery_owner_return {
@@ -562,10 +562,12 @@ margin-bottom:10px;
 }
 
 .collection_item_title {
+  font:15px arial, sans-serif;
   color:red;
 }
 
 .collection_item_URL {
+  font:15px arial, sans-serif;
   padding-left:10px;
 }
 

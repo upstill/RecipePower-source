@@ -35,12 +35,12 @@ public
 
     # Listing recipes doesn't require login, but we do need a user_id
     need_login false # ...doesn't require session: sets user_id to guest id if none
-
     @rcpquery = current_query params[:owner]
     # Blind index: show list of either the current user or a given user
     # NB: the list of special user 'guest' sees all public recipes
     # Ensure the quality of the query
 
+    session[:querypage] = @rcpquery.cur_page = params[:page] || session[:querypage]
     @Title = @rcpquery.title
     @navlinks = []
     @nav_current = :cookmarks
@@ -54,6 +54,7 @@ public
   # GET /rcpqueries/1.xml
   def show
     session[:rcpquery] = params[:id].to_i
+    session[:querypage] = @rcpquery.cur_page = params[:page] || session[:querypage]
     redirect_to rcpqueries_url
 
     # respond_to do |format|
@@ -86,6 +87,7 @@ public
     @rcpquery = current_query session[:user_id]
 	@rcpquery.update_attributes(params[:rcpquery])
     @rcpquery.save
+    session[:querypage] = @rcpquery.cur_page = params[:page] || session[:querypage]
     @Title = "Query from Create"
     redirect_to rcpqueries_url
 
@@ -100,12 +102,13 @@ public
     # end
   end
 
-  # /rcpqueries/relist: fire back the recipe list based on a change in status, mode or style
+  # /rcpqueries/relist: fire back the recipe list based on a change in status, mode, style or page number
   # (without such a parameter, it just refreshes the list from the current query)
   def relist
       # Presumably the params include :status, :querymode and/or :listmode specs
       @rcpquery = Rcpquery.fetch_revision(session[:rcpquery], session[:user_id], params)
       session[:rcpquery] = @rcpquery.id # In case the model decided on a new query
+      session[:querypage] = @rcpquery.cur_page = params[:page] || session[:querypage]
       render '_form_rcplist.html.erb', :layout=>false
   end
 
@@ -118,6 +121,7 @@ public
     @rcpquery = Rcpquery.fetch_revision(params[:id].to_i, session[:user_id], params[:rcpquery])
     session[:rcpquery] = @rcpquery.id
 
+    session[:querypage] = @rcpquery.cur_page = params[:page] || session[:querypage]
     @Title = "Query from Update"
     element = params[:element].to_sym
     case element
@@ -130,15 +134,6 @@ public
        render '_form_rcplist.html.erb', :layout=>false
     end
 
-    # if false # XXX This is a PUT request
-        # redirect_to rcpqueries_url
-    # else # POST
-	# respond_to do |format|
-	   # format.html { render '_form_rcplist.html.erb', :layout=>false }
-	   # # format.html { redirect_to(@rcpquery, :notice => 'Rcpquery was successfully updated.') }
-	   # format.xml  { head :ok }
-	# end
-    # end
   end
 
   # DELETE /rcpqueries/1
@@ -146,7 +141,7 @@ public
   def destroy
     @rcpquery = Rcpquery.find(params[:id])
     @rcpquery.destroy
-    session[:rcpquery] = nil
+    session[:rcpquery] = session[:querypage] = nil
     redirect_to rcpqueries_url
 
     # respond_to do |format|
