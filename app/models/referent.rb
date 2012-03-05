@@ -93,11 +93,8 @@ public
     # Class method to create a referent under the given tag.
     # WARNING: while some effort is made to find an existing referent and use that,
     #  this procedure lends itself to redundancy in the dictionary
-    def self.express (tagstring, tagtype, *params)
-        # unless tagtype = params.first
-            # tagtype = Tag.tagtype_inDB self.name.sub(/Referent/,'')
-        # end
-        tagid = Tag.ensure_tag tagstring, tagtype, true
+    def self.express (tagstring, tagtype, isGlobal = false)
+        tagid = Tag.ensure_tag tagstring, tagtype, 0 # 0 userid means make it global
         canonicalform = Expression.type_inDB :canonical
         tag = Tag.find tagid
         # if there's already a referent referring to this tag, return it
@@ -115,7 +112,7 @@ public
     
     # Add a tag to the expressions of this referent, returning the tag id
     def express(tag, *params)
-        tagid = Tag.ensure_tag tag, self.referent_type, true
+        tagid = Tag.ensure_tag tag, self.referent_type, 0 # 0 userid means make it global
         form = Expression.type_inDB (params[0] || :corruption)
         locale = params[1] || :en
         # unless self.expressions.any? { |exp| exp.tag_id==tagid && exp.form==form && exp.locale == locale }

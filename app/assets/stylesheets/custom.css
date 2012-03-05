@@ -35,6 +35,30 @@ header {
   width: 288px;
   height: 40px;
   margin:15px;
+  background-color:#FDECCF; // DCE8DC;
+}
+
+#logo_div a:hover {
+  background-color:#FDECCF; // DCE8DC;
+}
+
+#logo_img {
+  width:288px;
+  height:40px;
+  # border:1px solid red;
+}
+
+#logo_img:hover {
+	outline: #DCE8DC solid thick;
+	background-color:#FEFCDF;
+}
+
+.logo_icon {
+	width: 48px;
+	height: 36px;
+	border: 1px solid gray;
+	float:right;
+	margin-top:20px;
 }
 
 #user_status {
@@ -50,13 +74,6 @@ header {
 
   font:14px arial,sans-serif, bold;
   # border:3px solid green;
-}
-
-#logo_img {
-  width:288px;
-  height:40px;
-  # border:1px solid red;
-  background-color:#FDECCF; // DCE8DC;
 }
 
 #footer_nav_links {
@@ -202,14 +219,6 @@ nav ul li a:hover {
         letter-spacing:-1px;
   }
 */
-
-.logo_icon {
-	width: 48px;
-	height: 36px;
-	border: 1px solid gray;
-	float:right;
-	margin-top:20px;
-}
 
 /* Sign up button */
 a.signup_button {

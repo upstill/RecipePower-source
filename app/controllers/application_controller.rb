@@ -12,26 +12,33 @@ class ApplicationController < ActionController::Base
   include ControllerAuthentication
   protect_from_forgery
 
-  # Gateway to (most) controllers: check that there's a current user
-  # and don't do anything until there is one. If login isn't required,
-  # set the session user id to guest
-  def need_login(required)
-    if(required)
-       if !session[:user_id] || session[:user_id] == User.guest_id
-         @Title = "Login"
-         redirect_away login_url, :notice=>"Let's get you logged in"
-         return true
-       else
-         return false
-       end
+# Gateway to (most) controllers: check that there's a current user
+# and don't do anything until there is one. If login isn't required,
+# set the session user id to guest
+def need_login(login_required, super_required = false)
+    if(login_required)
+        if super_required
+            if session[:user_id] != User.super_id
+                @Title = "Login"
+                redirect_away login_url, :notice=>"You must be logged in as super to go there."
+                return true
+            else
+                return false
+            end
+        elsif !session[:user_id] || session[:user_id] == User.guest_id
+            @Title = "Login"
+            redirect_away login_url, :notice=>"Let's get you logged in"
+            return true
+        else
+            return false
+        end
     else
-       session[:user_id] = User.guest_id unless session[:user_id]
+       session[:user_id] = session[:user_id] || User.guest_id 
     end
-  end
+end
 
   # redirect somewhere that will eventually return back to here
   def redirect_away(*params)
-    debugger()
     session[:original_uri] = request.url
     redirect_to(*params)
   end

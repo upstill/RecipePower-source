@@ -5,6 +5,7 @@ module TagsHelper
     
     # Return HTML for each tag of the given type
     def taglist(taglist)
+        debugger
         taglist.map { |tag| grabtag tag }.join('').html_safe
     end
     

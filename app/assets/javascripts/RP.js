@@ -151,8 +151,8 @@ function tagTabsTakeTyping(event, info) {
 		$(this).attr("lastCharTyped", event.keyCode);
 		return;
 	}
-	var wdwData = getWdwData(); 
 	// Get structure containing tabindex, listid and treeid names
+	var wdwData = getWdwData(); 
 	// Reload the dynatree to reflect the typed string
 	$(wdwData.tagListSelector).dynatree("option", 
 		"initAjax", {
@@ -223,7 +223,7 @@ function setupDynatree() {
 	      }
 	    }		
 	});
-    $(wdwData.referentTreeSelector).dynatree({	// XXX Currently only the 0 tab has a referent tree
+    $(wdwData.referentTreeSelector).dynatree({	
 	    initAjax: {url: "/referents",
 	               data: {key: 0, // Optional arguments to append to the url
 	                      mode: "all"
@@ -445,9 +445,11 @@ function add_fields(link, association, content) {
 $(function() {
     $("#recipe_tag_tokens").tokenInput("/tags/match.json", {
         crossDomain: false,
+		noResultsText: "No matching tag found; hit Enter to make it a tag",
         hintText: "Type your own tag(s) for the recipe",
         prePopulate: $("#recipe_tag_tokens").data("pre"),
         theme: "facebook",
+		preventDuplicates: true,
         allowCustomEntry: true
     });
     $("#rcpquery_tag_tokens").tokenInput("/tags/match.json", {

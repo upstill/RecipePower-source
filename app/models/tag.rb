@@ -72,17 +72,19 @@ class Tag < ActiveRecord::Base
    
    # Using either a string or an id, make sure there's a corresponding tag
    #  and make it global if necessary
-   def self.ensure_tag(t, type, global)
+   def self.ensure_tag(t, type, userid = 0 )
        if(t)
            if(t.class == Fixnum)
-               # Check for existence of the tag
+               # Fetch an existing tag
                tag = Tag.find t
-               if global && !tag.isGlobal
+               if (userid > 0) # Make the user an owner
+                   tag.users << User.find(userid)
+               elsif !tag.isGlobal
                    tag.isGlobal = true
                    tag.save
                end
            else
-               tag = Tag.strmatch(t, nil, type, global).first
+               tag = Tag.strmatch(t, nil, type, (userid == 0)).first
                t = tag.id                
            end
        end
@@ -96,9 +98,9 @@ class Tag < ActiveRecord::Base
    # type: either a single value or an array, specifying key type(s) to search
    # assert: return a key of the given type matching the name, even if it has to be created anew
    def self.strmatch(name, uid, type, assert)
+    name = name || ""  # nil matches anything
     unrestricted = uid.nil? || uid==User.super_id # Let the super-user see all tags
     type = type || :any # nil type implies any type
-    name = name || ""  # nil matches anything
     # type can be an array
     if(type.class==Array)
         type.map! { |t| self.tagtype_inDB t } # Convert type specifier to internal format
@@ -124,7 +126,8 @@ class Tag < ActiveRecord::Base
     	    if unrestricted # Super-user asserts it => Make it global
     	        tag.isGlobal = true
 	        else
-    	        tag.user_ids = tag.user_ids + [uid]
+	            user = User.find(uid)
+    	        tag.users << user
 	        end
     	    tag.save
 	    end
