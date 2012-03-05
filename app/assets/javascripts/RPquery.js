@@ -45,7 +45,6 @@ function queryformHit(form, options) {
 	var query = "";
 	if(options.page) {
 		query = "page="+page+"&"
-		debugger;
 	}
 	query = query+"element=tabnum&" + $(form).serialize()
     var resp =

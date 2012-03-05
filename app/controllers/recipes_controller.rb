@@ -135,7 +135,6 @@ class RecipesController < ApplicationController
 
   def update
     return if need_login true
-    debugger
     @recipe = Recipe.find(params[:id])
     @recipe.current_user = session[:user_id]
     if @recipe.update_attributes(params[:recipe])
@@ -164,7 +163,6 @@ class RecipesController < ApplicationController
   def revise # modify current recipe to reflect a client-side change
     @recipe = Recipe.find(params[:id])
     @recipe.current_user = session[:user_id]
-    debugger
 	# Modification instructions are in query strings:
 	# :do => 'add', 'remove'
 	# :what => "Genre", "Technique", "Course"

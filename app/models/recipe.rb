@@ -136,7 +136,7 @@ class Recipe < ActiveRecord::Base
   # update the real attribute tag_ids
   def tag_tokens=(ids)
 	# The list may contain new terms, passed in single quotes
-	debugger
+	
     arr = ids.split(",").map { |e| 
         if(e=~/^\d*$/) # numbers (sans quotes) represent existing tags
             tag = Tag.find e.to_i

@@ -22,7 +22,6 @@ XXX Eventually, hopefully, we'll be able to replicate said site locally
 function tagpane_load() {
     var iframe = document.getElementById("viewframe");
     var sel = rangy.getIframeSelection(iframe);
-debugger;
     var str = sel.toHtml();
     $(".tagpane").replaceWith("<div class=\"tagpane\"><pre>"+str+"</pre></div>");
 var x = 2;
@@ -43,7 +42,6 @@ function tagpane_paste(html) {
 // Read the state of the tagpane, serialize, and send to server
 function tagpane_submit() {
    var datastr = "element=tabnum&"+$('form').serialize(); // Submit the data from the form
-debugger;
    datastr = $('.tagpane')[0].innerHTML;
    var action = $('form')[0].action;
    var data = { recipe: {tagpane: datastr }};
