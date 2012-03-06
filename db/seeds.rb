@@ -1164,12 +1164,15 @@ sites.each_index { |i|
     ttlrepl = ttlrepls[i] || ""
     
     puts "#{sitename} gets named \'#{name}' replacing \'#{ttlcut}' with \'#{ttlrepl}'"
-    site = Site.find_by_home sitename
-    puts "...has name \'#{site.name}' and replaces \'#{site.ttlcut}' with \'#{site.ttlrepl}'"
-    site.name = name
-    site.ttlcut = ttlcut
-    site.ttlrepl = ttlrepl
-    site.save
+    if site = Site.find_by_home(sitename)
+        puts "...has name \'#{site.name}' and replaces \'#{site.ttlcut}' with \'#{site.ttlrepl}'"
+        site.name = name
+        site.ttlcut = ttlcut
+        site.ttlrepl = ttlrepl
+        site.save
+    else
+        puts "...but it has no record!"
+    end
 }
 
 # Seed logins--unless they're already there
