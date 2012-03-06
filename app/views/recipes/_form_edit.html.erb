@@ -31,6 +31,7 @@
     </div>
     <div class="recipe_title_div" >
        <%= f.label :title, "Title", :id=>"recipe_title_label" -%>
+		<% @recipe.check_title %>
        <br><%= f.text_field :title %>
     </div>
     <div class="recipe_status_div">

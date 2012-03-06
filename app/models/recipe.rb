@@ -22,6 +22,7 @@ end
 class Recipe < ActiveRecord::Base
   attr_accessible :tag_tokens, :title, :url, :alias, :ratings_attributes, :comment, :current_user, :status, :privacy, :picurl, :tagpane
   # before_validation :crackURL
+  after_find :fix_title
   after_save :save_ref
 
   validates :title,:presence=>true 
@@ -45,7 +46,26 @@ class Recipe < ActiveRecord::Base
   attr_reader :comment
   attr_reader :privacy
   attr_reader :status
-
+  
+  # Before saving, pass the title by the editor
+  def fix_title
+      self.title = self.title || ""
+      if st = self.url && Site.by_link(self.url)
+          self.title = st.fix_title self.title
+      end
+      true
+  end
+  
+  # Before editing, try and fill in a blank title
+  def check_title
+      if self.title.blank? && st = (self.url && Site.by_link(self.url))
+          findings = st.crack_page url, :Recipe
+          # Pull title, picture and canonical URL from the result
+          self.title = findings.result(:Title)
+          self.fix_title
+      end
+  end
+  
   # Get the cached rcpref for the recipe and its current user
   def current_ref
       if(@current_user.nil?) # No user => no ref
@@ -56,7 +76,7 @@ class Recipe < ActiveRecord::Base
       end
       @current_ref
   end
-
+  
   # The comment for a recipe comes from its rcprefs for a 
   # given user_id 
   # Get THIS USER's comment on a recipe
@@ -148,43 +168,6 @@ class Recipe < ActiveRecord::Base
     }
   end
 
-  # Make a recipe title nice for display:
-  #   -- remove the internal site reference
-  #   -- capitalize as necessary
-  #   -- remove leading and trailing punctuation and whitespace
-  #   -- remove trailing "Recipe"
-  def cleanup_title
-    ttl = self.title
-    url = self.url
-
-    if ttl.nil? || ttl.empty?
-    	ttl = "<no title>" 
-    else
-        ttl = @@coder.decode ttl
-        # The mappings remember how each site inserts its name into the recipe
-        mappings = {"nytimes.com"=>"The New York Times", 
-        	"smittenkitchen.com"=>'smitten kitchen',
-        	"chow.com"=>'Chow'}
-        subout = mappings[domain_from_url(url)] unless url.nil?
-        ttl.sub!(/#{subout}/i, '') unless subout.nil?
-
-        # Capitalize
-        nocaps = {"and"=>1, "the"=>1, "in"=>1, "of"=>1, "with"=>1}
-        ttl = ttl.split(' ').each {|w| w.capitalize! if(!nocaps[w])}.join(' ')
-
-        # Remove leading punctuation and whitespace
-        ttl.sub!(/^[-|,:\s]*/,'')
-
-        # Remove trailing punctuation and whitespace
-        ttl.sub!(/[-|,:\s]*$/,'')
-
-        # Remove terminating "Recipe"
-        ttl.sub!(/\srecipe\s*$/i,'')
-    end
-
-    self.title = ttl
-  end
-
   public
 
   def current_user
@@ -217,8 +200,8 @@ class Recipe < ActiveRecord::Base
          # Pull title, picture and canonical URL from the result
          if (self.title = findings.result :Title)
              titledata = self.title.split('\t')
-             self.title = titledata.first
              self.url = self.url || titledata.last
+             self.title = @site.fix_title titledata.first
          end
          if (self.picurl = findings.result :Image)
              # Make picture path absolute if it's not already

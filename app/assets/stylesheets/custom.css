@@ -49,8 +49,8 @@ header {
 }
 
 #logo_img:hover {
-	outline: #DCE8DC solid thick;
-	background-color:#FEFCDF;
+	outline: #EDDCBF solid thick;
+	# background-color:#FEFCDF;
 }
 
 .logo_icon {

@@ -85,13 +85,13 @@ class RecipesController < ApplicationController
 	end
     end
     if @recipe.id && @recipe.title && !@recipe.title.empty? # Mark of a fetched/successfully saved recipe
-	# redirect to edit
-	redirect_to edit_recipe_url(@recipe), :notice  => "Successfully cookmarked recipe."
+    	# redirect to edit
+    	redirect_to edit_recipe_url(@recipe), :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you. You might want to confirm the title and picture, and/or tag it?"
     else
-	@Title = "Cookmark a Recipe"
-	@navlinks = navlinks(@recipe, :new)
-        @nav_current = :addcookmark
-	@recipe.current_user = session[:user_id]
+    	@Title = "Cookmark a Recipe"
+    	@navlinks = navlinks(@recipe, :new)
+            @nav_current = :addcookmark
+    	@recipe.current_user = session[:user_id]
     end
   end
 
@@ -138,7 +138,7 @@ class RecipesController < ApplicationController
     @recipe = Recipe.find(params[:id])
     @recipe.current_user = session[:user_id]
     if @recipe.update_attributes(params[:recipe])
-      redirect_to rcpqueries_url :notice  => "Successfully updated recipe."
+      redirect_to rcpqueries_url :notice  => "Successfully updated #{@recipe.title || 'recipe'}."
     else
       @Title = ""
       @navlinks = navlinks(@recipe, :edit)

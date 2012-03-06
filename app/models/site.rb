@@ -17,9 +17,11 @@ end
 # PageTags accumulates the tags for a page
 class PageTags 
     
-    def initialize (nkdoc, site)
+    def initialize (nkdoc, site, ttlcut, ttlrepl)
         @nkdoc = nkdoc
         @site = site
+        @ttlcut = ttlcut
+        @ttlrepl = ttlrepl || ""
         @results = {}
     end
     
@@ -38,8 +40,8 @@ class PageTags
     end
     
     # Return the array of results under the given label
-    def results (*params)
-        if label = params.first
+    def results (label = nil)
+        if label
             (results = @results[label]) && # There are results for this tag
             (results = results.first) &&  # First hash in the list of results
             results[:out] # Output result for this first hash
@@ -52,13 +54,13 @@ class PageTags
     
 protected
     # Extract the data from a node under the given label
-    def tag (label, str, *params)
+    def tag (label, str, uri=nil)
         str = str.cleanup.remove_non_ascii
-        unless str.nil? ||  str.empty?
-            str << '\t'+params.first if params.first
+        unless str.blank?
+            # Add to result
+            str << '\t'+uri unless uri.blank?
             puts "  #{label}:  "+str 
-            @results[label].last[:out] = [] unless @results[label].last[:out]
-            @results[label].last[:out] << str
+            @result[:out] << str # Add to the list of results
         end
     end
 
@@ -69,7 +71,6 @@ protected
             uri = @site+uri if uri =~ /^\// # Prepend domain/site to path as nec.
             outstr = atag.content
             outstr.gsub! /#{cutstr}/, '' if cutstr
-            # emit label, outstr, uri if uri =~ /#{matchstr}/ # Apply subsite constraint
             self.tag label, outstr, uri if uri =~ /#{matchstr}/ # Apply subsite constraint
         end
     end
@@ -92,12 +93,7 @@ public
             tomatch = tagspec[:linkpath]
             pattern = tagspec[:pattern]
             tocut = tagspec[:cut]
-            # fullspec = showspec tagspec
-            unless matches.empty?
-                # puts "--- #{fullspec} ---" 
-                @results[label] = [] unless @results[label]
-                @results[label] << { in: tagspec }
-            end
+            @result = { out: [] } # For accumulating results
             matches.each do |ou|
                 children = (ou.name == "ul") ? ou.css('li') : [ou]
                 children.each { |child|
@@ -123,6 +119,12 @@ public
                         # emit_to_data result, label, outstr
                     end
                 }
+            end
+            unless @result[:out].join('').blank?
+                # If we got results, report them
+                @result[:in] = tagspec
+                @results[label] = @results[label] || []
+                @results[label] << @result 
             end
         end        
     end
@@ -159,6 +161,15 @@ class Site < ActiveRecord::Base
     
     after_initialize :post_init
     
+    @@TitleTags = [    # Used as last-ditch stab at getting a title
+        { label: :Title, path: "#recipe_title" }, 
+        { label: :Title, path: "#title" },
+        { label: :Title, path: ".recipe .title" },
+        { label: :Title, path: ".title a" },
+        { label: :Title, path: ".fn" },
+        { label: :Title, path: "title" } 
+    ]
+    
     def post_init
         unless self.site
             # We need to initialize the fields of the record, starting with site, based on sample
@@ -174,7 +185,7 @@ class Site < ActiveRecord::Base
                     self.sample << "#"+uri.fragment unless uri.fragment.blank?
         
                     # Define the site as the link minus the sample (sub)path
-                    self.site = link.sub self.sample, ''
+                    self.site = link[0,link.rindex(/#{self.sample}/) || link.length]
                     self.home = self.site # ...seems like a reasonable default...
         
                     # Save scheme, host and port information from the link parse
@@ -216,7 +227,6 @@ class Site < ActiveRecord::Base
     
     # Find and return the site wherein the named link is stored
     def self.by_link (link, *params)
-        
         if (uri = URI(link)) && !uri.host.blank?
             # Find all sites assoc'd with the given domain
             sites = Site.where "host = ?", uri.host
@@ -235,16 +245,15 @@ class Site < ActiveRecord::Base
         end
     end
     
-    # Extract the key data from a page. *params may specify what kind of page
+    # Extract the key data from a page. page_type may specify what kind of page
     # (recipe, video, etc.) it's meant to be
-    def crack_page (link, *params)
-        page_type = params.first || :Recipe 
+    def crack_page (link, page_type = :Recipe)
         # Open the Nokogiri doc for the site
         pt = nil
         begin
             if (ou = open link) && (doc = Nokogiri::HTML(ou))
-                pt = PageTags.new doc, self.site
-                pt.glean (self.tags.empty? ? Site.find(1).tags : self.tags)
+                pt = PageTags.new doc, self.site, self.ttlcut, self.ttlrepl
+                pt.glean (self.tags.empty? ? Site.find(1).tags : self.tags)+@@TitleTags
                 pt.hrecipe 
                 ou.close 
             end
@@ -254,4 +263,10 @@ class Site < ActiveRecord::Base
         pt    
     end
     
+    def fix_title(ttl)
+        if self.ttlcut
+            ttl.gsub! /#{self.ttlcut}/, (self.ttlrepl || '')
+        end
+        ttl.strip
+    end
 end

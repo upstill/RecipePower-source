@@ -36,7 +36,7 @@ class SitesController < ApplicationController
 
   # GET /sites/1/edit
   def edit
-    @site = Site.find(params[:id])
+    @site = Site.find(params[:id].to_i)
   end
 
   # POST /sites
