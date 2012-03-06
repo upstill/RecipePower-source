@@ -1165,7 +1165,11 @@ sites.each_index { |i|
     
     puts "#{sitename} gets named \'#{name}' replacing \'#{ttlcut}' with \'#{ttlrepl}'"
     site = Site.find_by_home sitename
-    puts "...has name \'#{site.name}\'"
+    puts "...has name \'#{site.name}' and replaces \'#{site.ttlcut}' with \'#{site.ttlrepl}'"
+    site.name = name
+    site.ttlcut = ttlcut
+    site.ttlrepl = ttlrepl
+    site.save
 }
 
 # Seed logins--unless they're already there
