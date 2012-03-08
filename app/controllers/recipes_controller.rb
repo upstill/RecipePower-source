@@ -95,8 +95,8 @@ class RecipesController < ApplicationController
     end
   end
 
-  # Action for creating a recipe in response to the the 'new' dialog:
-  def create # Take a URL and title, then either lookup or create the recipe
+  # Action for creating a recipe in response to the the 'new' page:
+  def create # Take a URL, then either lookup or create the recipe
     return if need_login true
     url = params[:recipe][:url]
     if  Recipe.exists? :url => url

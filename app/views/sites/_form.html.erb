@@ -24,16 +24,20 @@
     <%= f.text_field :home %>
   </div>
   <div class="field">
-    <%= f.label :sample %><br />
-    <%= f.text_field :sample %>
-  </div>
-  <div class="field">
     <%= f.label :subsite %><br />
     <%= f.text_field :subsite %>
   </div>
   <div class="field">
     <%= f.label :logo %><br />
     <%= f.text_field :logo %>
+  </div>
+  <div class="field">
+    <%= f.label :sample %><br />
+    <%= f.text_field :sample %>
+  </div>
+  <div>
+	Sample Title (raw): <strong><%= crack_sample %></strong><br> 
+	Sample Title (editted): <strong><%= trimmed_sample %></strong><br>
   </div>
   <div class="field">
     <%= f.label "RegExp to cut out of title" %><br />

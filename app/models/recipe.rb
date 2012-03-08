@@ -22,7 +22,7 @@ end
 class Recipe < ActiveRecord::Base
   attr_accessible :tag_tokens, :title, :url, :alias, :ratings_attributes, :comment, :current_user, :status, :privacy, :picurl, :tagpane
   # before_validation :crackURL
-  after_find :trim_title
+  # after_find :trim_title
   after_save :save_ref
 
   validates :title,:presence=>true 
@@ -47,12 +47,7 @@ class Recipe < ActiveRecord::Base
   attr_reader :privacy
   attr_reader :status
   
-  # Before saving, pass the title by the editor
-  def trim_title
-      self.title = self.trimmed_title
-      true
-  end
-  
+  # Make the recipe title nice for display
   def trimmed_title
       ttl = self.title || ""
       if st = self.url && Site.by_link(self.url)
@@ -62,11 +57,11 @@ class Recipe < ActiveRecord::Base
       HTMLEntities.new.decode ttl
   end
   
-  # Before editing, try and fill in a blank title
+  # Before editing, try and fill in a blank title by cracking the url
   def check_title
       if self.title.blank? && st = (url && Site.by_link(self.url))
           self.title = (st.yield :Title)[:Title] || ""
-          self.trim_title
+          self.title = self.trimmed_title
       else
           self.title
       end
@@ -208,7 +203,7 @@ class Recipe < ActiveRecord::Base
          
          found = @site.yield :Title
          self.url = found[:URI] || self.url
-         self.title = found[:Title] || self.title
+         self.title = self.title || found[:Title] 
          
      else
          self.errors.add :url, "doesn't make sense or can't be found"
