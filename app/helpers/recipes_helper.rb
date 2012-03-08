@@ -62,18 +62,6 @@ def summarize_alltags(rcp)
 	summ.length>9 ? (summ+".").html_safe : nil
 end
 
-# XXX No known use for this.
-# def add_genre_link(name)
-# 	link_to_function name do |page|
-#        page.insert_html :bottom, :genres, :partial => 'genre', :object=>Genre.new
-#     end
-# end
-
-# XXX No known use for this.
-# def show_field(label, content)
-#       "<p><strong>#{label}: </strong> #{content} </p>".html_safe unless content.blank?
-# end
-
 # Provide the cookmark-count line
 def cookmark_count(rcp)
      count = rcp.num_cookmarks

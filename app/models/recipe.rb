@@ -49,13 +49,17 @@ class Recipe < ActiveRecord::Base
   
   # Before saving, pass the title by the editor
   def trim_title
-      self.title = self.title || ""
+      self.title = self.trimmed_title
+      true
+  end
+  
+  def trimmed_title
+      ttl = self.title || ""
       if st = self.url && Site.by_link(self.url)
-          self.title = st.trim_title self.title
+          ttl = st.trim_title ttl
       end
       # Convert HTML entities
-      self.title = HTMLEntities.new.decode self.title
-      true
+      HTMLEntities.new.decode ttl
   end
   
   # Before editing, try and fill in a blank title
@@ -63,6 +67,8 @@ class Recipe < ActiveRecord::Base
       if self.title.blank? && st = (url && Site.by_link(self.url))
           self.title = (st.yield :Title)[:Title] || ""
           self.trim_title
+      else
+          self.title
       end
   end
   

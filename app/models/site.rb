@@ -242,7 +242,8 @@ class Site < ActiveRecord::Base
     end
     
     def trim_title(ttl)
-        if self.ttlcut
+        unless self.ttlcut.blank?
+            debugger
             ttl.gsub! /#{self.ttlcut}/, (self.ttlrepl || '')
         end
         ttl.strip
