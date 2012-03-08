@@ -28,14 +28,26 @@
     <%= f.text_field :sample %>
   </div>
   <div class="field">
+    <%= f.label :subsite %><br />
+    <%= f.text_field :subsite %>
+  </div>
+  <div class="field">
     <%= f.label :logo %><br />
     <%= f.text_field :logo %>
   </div>
   <div class="field">
-    <%= f.label :tags %><br />
-    <%= f.text_area :tags %>
+    <%= f.label "RegExp to cut out of title" %><br />
+    <%= f.text_field :ttlcut %>
+  </div>
+  <div class="field">
+    <%= f.label "RegExp of replacement" %><br />
+    <%= f.text_field :ttlrepl %>
   </div>
   <div class="actions">
     <%= f.submit %>
+  </div>
+  <div class="field">
+    <%= f.label :tags %><br />
+    <%= f.text_area :tags_serialized, :rows=>"20" %>
   </div>
 <% end %>

@@ -67,31 +67,31 @@ class RecipesController < ApplicationController
     url = params[:url]
     if url && Recipe.exists?(:url => url)  # Previously captured 
         @recipe = Recipe.where("url = ?", url).first
-	@recipe.ensureUser session[:user_id] 
+        @recipe.ensureUser session[:user_id] 
     else
         @recipe = Recipe.new params
-	# If it has title and a legitimate URL, get stuff from URL and attach to user
-	if @recipe.url
-	    # Do QA, trying to save based on the info we have
-	    if @recipe.crackURL # Get the picture and title from the foreign site
-	        # We may have re-interpreted the URL from the page, so
-	        # need to re-check that the recipe doesn't already exist
-	        if Recipe.exists? :url=>@recipe.url  # Previously captured 
-		    @recipe = Recipe.where("url = ?", @recipe.url).first
-	        end
-		# All seems well as is, so try to add to user's list
-	        @recipe.ensureUser session[:user_id] 
-	    end
-	end
+    	# If it has title and a legitimate URL, get stuff from URL and attach to user
+    	if @recipe.url
+    	    # Do QA, trying to save based on the info we have
+    	    if @recipe.crackURL # Get the picture and title from the foreign site
+    	        # We may have re-interpreted the URL from the page, so
+    	        # need to re-check that the recipe doesn't already exist
+    	        if Recipe.exists? :url=>@recipe.url  # Previously captured 
+    		        @recipe = Recipe.where("url = ?", @recipe.url).first
+    	        end
+    		    # All seems well as is, so try to add to user's list
+    	        @recipe.ensureUser session[:user_id] 
+    	    end
+    	end
     end
-    if @recipe.id && @recipe.title && !@recipe.title.empty? # Mark of a fetched/successfully saved recipe
+    if @recipe.id # Mark of a fetched/successfully saved recipe
     	# redirect to edit
     	redirect_to edit_recipe_url(@recipe), :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you. You might want to confirm the title and picture, and/or tag it?"
     else
-    	@Title = "Cookmark a Recipe"
-    	@navlinks = navlinks(@recipe, :new)
-            @nav_current = :addcookmark
-    	@recipe.current_user = session[:user_id]
+        @Title = "Cookmark a Recipe"
+        @navlinks = navlinks(@recipe, :new)
+        @nav_current = :addcookmark
+        @recipe.current_user = session[:user_id]
     end
   end
 
@@ -107,9 +107,8 @@ class RecipesController < ApplicationController
     end
     # Make sure the recipe is on the user's list (and save)
     @recipe.ensureUser( @recipe.current_user = session[:user_id] ) if @recipe.errors.empty?
-
     if @recipe.id && !@recipe.title.blank? # Success (valid recipe, either created or fetched)
-	    redirect_to edit_recipe_url(@recipe), :notice  => "Recipe Cookmarked!"
+	    redirect_to edit_recipe_url(@recipe), :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you. You might want to confirm the title and picture, and/or tag it?"
     else # failure (not a valid recipe) => return to new
        # No recipe id => try again
        @Title = "Cookmark a Recipe"
@@ -127,7 +126,7 @@ class RecipesController < ApplicationController
     # Forge the connection with the user, if none already
     @recipe.ensureUser( @recipe.current_user = session[:user_id] )
 
-    @Title = "" # Get title from the recipe
+    @Title = @recipe.title # Get title from the recipe
     @navlinks = navlinks(@recipe, :edit)
     @nav_current = :addcookmark
     # Now go forth and edit

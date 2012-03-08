@@ -1,9 +1,14 @@
 module SitesHelper
-    def show_sample(site)
-        url = site.site+(site.sample||"")
-        debugger unless findings = site.crack_page(url, :Recipe)
-        title = findings && findings.result(:Title) 
-        title = title ? site.fix_title(title) : url
+    def crack_sample
+        ttlurl = @site.yield :Title
+        title = ttlurl[:Title]
+        unless url = ttlurl[:URI]
+            url = (@site.yield :URI)[:URI] || ""
+        end
         link_to title, url
+    end
+    def show_sample(site)
+        url = site.sampleURL
+        link_to url, url
     end
 end

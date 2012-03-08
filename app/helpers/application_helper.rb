@@ -39,7 +39,8 @@ module ApplicationHelper
   end
 
   def title 
-    ext = (@Title || (@recipe.title if @recipe))
+    # Any controller can override the default title of controller name
+    ext = (@Title || (@recipe && @recipe.title) || params[:controller].capitalize)
     "RecipePower"+(ext.blank? ? " Home" : " | #{ext}")
   end
 

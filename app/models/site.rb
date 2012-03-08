@@ -1,6 +1,7 @@
 require 'yaml'
+# require 'uri'
+require 'open-uri'
 require 'nokogiri'
-require 'uri'
 
 class String
     def remove_non_ascii
@@ -17,11 +18,9 @@ end
 # PageTags accumulates the tags for a page
 class PageTags 
     
-    def initialize (nkdoc, site, ttlcut, ttlrepl)
+    def initialize (nkdoc, site)
         @nkdoc = nkdoc
         @site = site
-        @ttlcut = ttlcut
-        @ttlrepl = ttlrepl || ""
         @results = {}
     end
     
@@ -89,6 +88,7 @@ public
             xpath = tagspec[:xpath]
             debugger if xpath
             next unless matches = (path && @nkdoc.css(path)) || (xpath && @nkdoc.xpath(xpath)) 
+            next if matches.count < 1
             label = tagspec[:label]
             tomatch = tagspec[:linkpath]
             pattern = tagspec[:pattern]
@@ -152,7 +152,7 @@ public
 end
 
 class Site < ActiveRecord::Base
-    attr_accessible :site, :home, :scheme, :subsite, :sample, :host, :port, :name, :logo, :tags_serialized
+    attr_accessible :site, :home, :scheme, :subsite, :sample, :host, :port, :name, :logo, :tags_serialized, :ttlcut, :ttlrepl
     
     # Virtual attribute tags is an array of specifications for finding a tag
     attr_accessor :tags
@@ -163,10 +163,10 @@ class Site < ActiveRecord::Base
     
     @@TitleTags = [    # Used as last-ditch stab at getting a title
         { label: :Title, path: "#recipe_title" }, 
-        { label: :Title, path: "#title" },
+        # { label: :Title, path: "#title" },
         { label: :Title, path: ".recipe .title" },
-        { label: :Title, path: ".title a" },
-        { label: :Title, path: ".fn" },
+        # { label: :Title, path: ".title a" },
+        # { label: :Title, path: ".fn" },
         { label: :Title, path: "title" } 
     ]
     
@@ -207,8 +207,7 @@ class Site < ActiveRecord::Base
     end
     
     def tags
-        unpack_tags if !@tags
-        @tags
+        @tags = @tags || self.tags_serialized ? YAML::load(self.tags_serialized) : []
     end
     
     def tags= (t)
@@ -216,13 +215,10 @@ class Site < ActiveRecord::Base
     end
 
     def pack_tags
-        @tags = [ ] if !@tags
-        self.tags_serialized = YAML::dump @tags
-    end
-    
-    def unpack_tags
-        pack_tags if !self.tags_serialized
-        @tags = YAML::load self.tags_serialized
+        @tags = [] unless @tags || self.tags_serialized
+        if @tags # @tags is nil iff tags never got unpacked
+            self.tags_serialized = YAML::dump @tags
+        end
     end
     
     # Find and return the site wherein the named link is stored
@@ -245,28 +241,50 @@ class Site < ActiveRecord::Base
         end
     end
     
-    # Extract the key data from a page. page_type may specify what kind of page
-    # (recipe, video, etc.) it's meant to be
-    def crack_page (link, page_type = :Recipe)
-        # Open the Nokogiri doc for the site
-        pt = nil
-        begin
-            if (ou = open link) && (doc = Nokogiri::HTML(ou))
-                pt = PageTags.new doc, self.site, self.ttlcut, self.ttlrepl
-                pt.glean (self.tags.empty? ? Site.find(1).tags : self.tags)+@@TitleTags
-                pt.hrecipe 
-                ou.close 
-            end
-        rescue => e
-            debugger
-        end
-        pt    
-    end
-    
-    def fix_title(ttl)
+    def trim_title(ttl)
         if self.ttlcut
             ttl.gsub! /#{self.ttlcut}/, (self.ttlrepl || '')
         end
         ttl.strip
     end
+    
+    def sampleURL
+        self.site+(self.sample||"")
+    end
+    
+    def yield (name, url = nil)
+        url = @crackedURL || self.sampleURL if url.blank?
+        unless @pagetags && (url == @crackedURL) # Rebuild the found tags
+            # Extract the key data from a page. page_type may specify what kind of page
+            # (recipe, video, etc.) it's meant to be
+            # Open the Nokogiri doc for the site
+            @crackedURL = url
+            @pagetags = nil
+            begin
+                if (ou = open url) && (doc = Nokogiri::HTML(ou))
+                    @pagetags = PageTags.new doc, self.site
+                    @pagetags.glean (self.tags.empty? ? Site.find(1).tags : self.tags)+@@TitleTags
+                    @pagetags.hrecipe 
+                    ou.close 
+                end
+            rescue => e
+                debugger
+            end
+        end
+        result = {}
+        if (@pagetags && foundstr = @pagetags.result(name))
+            # Assuming the tag was fulfilled, there may be post-processing to do
+            case name
+            when :Title
+                titledata = foundstr.split('\t')
+                result[:URI] = titledata[1]
+                foundstr = self.trim_title titledata.first
+            when :Image
+                # Make picture path absolute if it's not already
+                foundstr = self.site+foundstr unless foundstr =~ /^\w*:/
+            end
+            result[name] = foundstr
+        end
+        result
+    end     
 end

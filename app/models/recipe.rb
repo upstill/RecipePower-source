@@ -1,6 +1,6 @@
-require 'open-uri'
 require './lib/Domain.rb'
 require './lib/RPDOM.rb'
+require 'open-uri'
 require 'nokogiri'
 require 'htmlentities'
 
@@ -22,7 +22,7 @@ end
 class Recipe < ActiveRecord::Base
   attr_accessible :tag_tokens, :title, :url, :alias, :ratings_attributes, :comment, :current_user, :status, :privacy, :picurl, :tagpane
   # before_validation :crackURL
-  after_find :fix_title
+  after_find :trim_title
   after_save :save_ref
 
   validates :title,:presence=>true 
@@ -48,21 +48,21 @@ class Recipe < ActiveRecord::Base
   attr_reader :status
   
   # Before saving, pass the title by the editor
-  def fix_title
+  def trim_title
       self.title = self.title || ""
       if st = self.url && Site.by_link(self.url)
-          self.title = st.fix_title self.title
+          self.title = st.trim_title self.title
       end
+      # Convert HTML entities
+      self.title = HTMLEntities.new.decode self.title
       true
   end
   
   # Before editing, try and fill in a blank title
   def check_title
-      if self.title.blank? && st = (self.url && Site.by_link(self.url))
-          findings = st.crack_page url, :Recipe
-          # Pull title, picture and canonical URL from the result
-          self.title = findings.result(:Title)
-          self.fix_title
+      if self.title.blank? && st = (url && Site.by_link(self.url))
+          self.title = (st.yield :Title)[:Title] || ""
+          self.trim_title
       end
   end
   
@@ -196,23 +196,14 @@ class Recipe < ActiveRecord::Base
      # Find the site for this url
      # Get the site to crack the page for this recipe
      if @site = @site || Site.by_link(url)
-         findings = @site.crack_page url, :Recipe
          # Pull title, picture and canonical URL from the result
-         if (self.title = findings.result :Title)
-             titledata = self.title.split('\t')
-             self.url = self.url || titledata.last
-             self.title = @site.fix_title titledata.first
-         end
-         if (self.picurl = findings.result :Image)
-             # Make picture path absolute if it's not already
-             self.picurl = @site.site+self.picurl unless self.picurl =~ /^\w*:/
-         else
-             self.picurl = ""
-         end
-     
-         if (betterURI = findings.result :URI)
-             self.url = betterURI # Replace w. canonical link if such found
-         end
+         self.url = (@site.yield :URI)[:URI] || self.url
+         self.picurl = (@site.yield :Image)[:Image] || ""
+         
+         found = @site.yield :Title
+         self.url = found[:URI] || self.url
+         self.title = found[:Title] || self.title
+         
      else
          self.errors.add :url, "doesn't make sense or can't be found"
      end
