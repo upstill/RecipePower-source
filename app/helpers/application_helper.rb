@@ -79,25 +79,38 @@ module ApplicationHelper
   def englishize_list(list)
      set = list.split ', '
      if(set.length > 1)
-	ending = " and " + set.pop
-	list = set.join(', ') + ending
+        ending = " and " + set.pop
+        list = set.join(', ') + ending
      end
      list
   end
 
+    def navlink(label, link, is_current)
+        if is_current
+            "<span class='nav_link_strong'><i>#{label}</i></span>"
+        else
+            link_to label, link, class: "nav_link"
+        end
+    end
+    
     # Return the set of navigation links for the header
-    def header_navlinks(current)
+    def header_navlinks
     	navlinks = []
-    	navlinks.push(link_to "Cookmarks", "/rcpqueries", class: (current==:cookmarks) ? "nav_link_strong" : "nav_link") 
-    	navlinks.push(link_to "Add a Cookmark", "/recipes/new", class: (current==:addcookmark) ? "nav_link_strong" : "nav_link") 
+    	navlinks.push(navlink "Cookmarks", "/rcpqueries", (@nav_current==:cookmarks)) 
+    	navlinks.push(navlink "Add a Cookmark", "/recipes/new", (@nav_current==:addcookmark)) 
     	navlinks.join('  |  ').html_safe
     end
     
-    def footer_navlinks(current)
+    def footer_navlinks
     	navlinks = []
-    	navlinks << link_to("About", "/about", class: (current==:about) ? "nav_link_strong" : "nav_link") 
-    	navlinks << link_to("Contact", "/contact", class: (current==:contact) ? "nav_link_strong" : "nav_link") 
-    	navlinks << link_to("Home", "/", class: (current==:home) ? "nav_link_strong" : "nav_link") 
+    	navlinks << navlink("About", "/about", (@nav_current==:about)) 
+    	navlinks << navlink("Contact", "/contact", (@nav_current==:contact)) 
+    	navlinks << navlink("Home", "/", (@nav_current==:home)) 
+    	navlinks << navlink("FAQ", "/FAQ", (@nav_current==:FAQ)) 
+    	# We save the current link in the feedback link so we can return here after feedback,
+    	# and so the feedback can include the source
+    	path = request.url.sub /[^:]*:\/\/[^\/]*/, '' # Strip off the protocol and host
+    	navlinks << navlink("Feedback", "/feedbacks/new?backto=#{path}", (@nav_current==:feedback)) 
     	navlinks.join('  |  ').html_safe
     end
 

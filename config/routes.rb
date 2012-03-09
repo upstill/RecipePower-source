@@ -1,5 +1,7 @@
 RP::Application.routes.draw do
 
+  resources :feedbacks
+
   resources :sites
 
   resources :expressions
@@ -51,6 +53,7 @@ RP::Application.routes.draw do
   match '/about', :to => 'pages#about'
   match '/kale', :to => 'pages#kale'
   match '/signup', :to => 'visitors#new'
+  match '/FAQ', :to=>"pages#FAQ"
   root :to => 'pages#home'
 
   # The priority is based upon order of creation:

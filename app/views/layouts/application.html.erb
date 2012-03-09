@@ -51,10 +51,11 @@ whenReady( function() {
 		<%= render 'layouts/header' %>
 		<section id="workpane">
 			<% if flash[:notice] %>
-				<div class="notice"><%= flash[:notice] %></div>
+				<div id="notice" class="notice"><%= flash[:notice] %></div>
 			<% elsif flash[:alert] %>
 				<div class="alert"><%= flash[:alert] %></div>
 			<% end %>
+			<p id="notice"><%# notice %></p>
 			<%= yield %>
 		</section>
 		<%= render 'layouts/footer' %>

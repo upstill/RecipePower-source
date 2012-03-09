@@ -11,13 +11,23 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120305231253) do
+ActiveRecord::Schema.define(:version => 20120308224427) do
 
   create_table "expressions", :force => true do |t|
     t.integer  "tag_id"
     t.integer  "referent_id"
     t.integer  "form"
     t.string   "locale"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "feedbacks", :force => true do |t|
+    t.integer  "user_id"
+    t.string   "email"
+    t.string   "wherefrom"
+    t.string   "doing"
+    t.text     "what"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

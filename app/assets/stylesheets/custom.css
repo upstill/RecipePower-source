@@ -694,3 +694,14 @@ font:12px arial, sans-serif;
     outline:#999 solid 3px;
 	background:yellow;
 }
+
+#feedback_what {
+	width:60%;
+	height:100px;
+}
+
+.text_field {
+	width: 60%;
+	margin-top:5px;
+	margin-bottom:10px;
+}

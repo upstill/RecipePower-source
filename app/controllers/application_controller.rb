@@ -43,15 +43,20 @@ end
     session[:original_uri] = request.url
     redirect_to(*params)
   end
+  
+  # save the given url in the expectation of coming back to it
+  def push_page(url)
+      session[:original_uri] = url
+  end
 
   # returns the person to either the original url from a redirect_away or to a default url
   def redirect_back(*params)
     uri = session[:original_uri]
     session[:original_uri] = nil
     if uri
-      redirect_to uri
+      redirect_to uri, *params
     else
-      redirect_to(*params)
+      redirect_to(*params) unless params.empty?
     end
   end
 end

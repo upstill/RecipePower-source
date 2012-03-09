@@ -1,0 +1,8 @@
+<h3>Feedback Please (and Thank You)!</h3>
+<p class="airy">To wing your thoughts to RecipePower, you can simply fill out the form below, or <%= mail_to "feedback@recipepower.com", "click here to send us mail"  %>.<br>But the most prized and appreciated way is to spend five minutes answering the questions in our Survey.
+</p><p class="airy">
+Either way, thanks for caring.</p>
+<hr><br>
+<%= render 'form' %>
+
+<%= link_to 'Back', @backto_path || feedbacks_path %>

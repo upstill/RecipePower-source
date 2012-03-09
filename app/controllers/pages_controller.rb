@@ -1,8 +1,8 @@
 class PagesController < ApplicationController
-  def home
-	@Title = "Home"
-	@nav_current = :home
-  end
+    def home
+  	@Title = "Home"
+  	@nav_current = :home
+    end
 
   def contact
 	@Title = "Contact"
@@ -16,6 +16,11 @@ class PagesController < ApplicationController
 
   def kale
 	@Title = "Kale Recipes"
+  end
+
+  def faq
+	@Title = "FAQ"
+	@nav_current = :FAQ
   end
 
 end

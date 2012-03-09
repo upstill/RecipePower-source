@@ -47,7 +47,7 @@ class RecipesController < ApplicationController
     @Title = @listownership+" Cookmarks"
     @Title << " in the Whole Wide World" if !@listowner
     @navlinks = navlinks(nil, :index) 
-    nav_current = nil
+    @nav_current = nil
   end
 
   def show
@@ -56,7 +56,7 @@ class RecipesController < ApplicationController
     @recipe.current_user = session[:user_id]
     @Title = ""
     @navlinks = navlinks(@recipe, :show)
-    nav_current = nil
+    @nav_current = nil
   end
 
   def new # Collect URL, then redirect to edit
