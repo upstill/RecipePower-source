@@ -31,8 +31,12 @@ class RecipesController < ApplicationController
     return if need_login true
     # Here is where we take a hit on the "Add to RecipePower" widget,
     # and also invoke the 'new cookmark' dialog. The difference is whether
-    # parameters are supplied for url, title and note.
-    @recipe = Recipe.ensure session[:user_id], params
+    # parameters are supplied for url, title and note (though only URI is required).
+    if params[:url]
+        @recipe = Recipe.ensure session[:user_id], params
+    else
+        @recipe = Recipe.new
+    end
     if @recipe.id # Mark of a fetched/successfully saved recipe: it has an id
     	# redirect to edit
     	redirect_to edit_recipe_url(@recipe), :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br>You might want to confirm the title and picture, and/or tag it?".html_safe
