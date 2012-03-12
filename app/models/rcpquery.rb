@@ -29,7 +29,6 @@ class Candihash < Hash
     # 'rankings' is an array of rid/ranking pairs, denoting the place of 
     # each recipe in some prior ordering. Use that ranking to constrain the output
     def results (rankings)
-	
 	# Extract the keys and sort them by success in matching
 	if @mode == :rcpquery_loose
 	    buffer1 = self.keys.select { |k| self[k] > 0 } # (In random order)
@@ -74,6 +73,7 @@ class Rcpquery < ActiveRecord::Base
     attr_reader :tag_tokens
     attr_reader :listmode_str
     attr_reader :querymode_str
+    attr_reader :results
     attr_accessor :page_length, :cur_page
 
     after_initialize :my_init
@@ -95,22 +95,24 @@ class Rcpquery < ActiveRecord::Base
     end
     
     def npages
-        (results.count+(page_length-1))/page_length
+        (self.results.count+(page_length-1))/page_length
     end
     
     # Return a list of results based on the paging parameters
     def results_paged
-        first = (cur_page-1)*page_length
+        @cur_page = self.npages if @cur_page > self.npages
+        first = (@cur_page-1)*page_length
         last = first+page_length-1
-        maxlast = results.count-1 
+        maxlast = self.results.count-1 
         last = maxlast if last > maxlast
-        results[first..last]
+        self.results[first..last]
     end
 
     # Selectors for setting the list's display mode
     @@listmodes = [["Just Text", :rcplist_text],
   		   ["Small Pics", :rcplist_smallpic],
   		   ["Big Pics", :rcplist_bigpic]]
+  		   
     def self.listmode_select
        @@listmodes
     end
@@ -148,36 +150,37 @@ class Rcpquery < ActiveRecord::Base
     def my_init
 
     	self.tagstxt = ""  unless self.tagstxt
-	self.tag_tokens = self.tagstxt
+    	self.tag_tokens = self.tagstxt
 
-	self.ratingstxt = "" unless self.ratingstxt
-	@ratings = self.ratingstxt.split(',').map do  |r| 
-	    idval = r.split(':')
-	    Rating.new :scale_id=>idval.first.to_i, :scale_val=>idval.last.to_i
-	end
+    	self.ratingstxt = "" unless self.ratingstxt
+    	@ratings = self.ratingstxt.split(',').map do  |r| 
+    	    idval = r.split(':')
+    	    Rating.new :scale_id=>idval.first.to_i, :scale_val=>idval.last.to_i
+    	end
 
-	self.fromsitestxt = "" unless self.fromsitestxt
-	self.circlestxt = "" unless self.circlestxt
-	self.querytext = "" unless self.querytext
+    	self.fromsitestxt = "" unless self.fromsitestxt
+    	self.circlestxt = "" unless self.circlestxt
+    	self.querytext = "" unless self.querytext
 
-	self.user_id = User.guest_id unless self.user_id
-	self.owner_id = User.guest_id unless self.owner_id
+    	self.user_id = User.guest_id unless self.user_id
+    	self.owner_id = User.guest_id unless self.owner_id
 
-	self.status = MyConstants::Rcpstatus_misc unless self.status
+    	self.status = MyConstants::Rcpstatus_misc unless self.status
 
-	self.listmode = :rcplist_smallpic.to_s unless self.listmode
-	   # (vs. :rcplist_text or :rcplist_bigpic)  Default to small-pic listing
-	@listmode = self.listmode.to_sym 
+    	self.listmode = :rcplist_smallpic.to_s unless self.listmode
+    	   # (vs. :rcplist_text or :rcplist_bigpic)  Default to small-pic listing
+    	@listmode = self.listmode.to_sym 
 
-	self.querymode = :rcpquery_loose.to_s unless self.querymode # vs. :rcpquery_strict
-	@querymode = self.querymode.to_sym
+    	self.querymode = :rcpquery_loose.to_s unless self.querymode # vs. :rcpquery_strict
+    	@querymode = self.querymode.to_sym
 
-	@fromsites = [] # An array of site ids
-	@circles = []   # An array of user ids of type 'circle'
-	@rankings = {}	# For each ranked recipe, a recipe_id/ranking pair
+    	@fromsites = [] # An array of site ids
+    	@circles = []   # An array of user ids of type 'circle'
+    	@rankings = {}	# For each ranked recipe, a recipe_id/ranking pair
 
-	@results_pp = 10
-	@results_offset = 0
+    	@results_pp = 10
+    	@results_offset = 0
+    	@results = nil
     end
 
     def my_reinit
@@ -219,56 +222,58 @@ class Rcpquery < ActiveRecord::Base
 
     # Get the results of the current query.
     def results
+    	return @results if @results # Keeping a cache of results
         # Try to match prior query for this user and fetch rankings array
-	# "match" has fewest num. of differing elements
+        # "match" has fewest num. of differing elements
 
-	# Get the initial working list from Rcpref model
-	# Rcpref.recipe_ids can take:
-	# :comment is text to match against the comment field
-	# :status is the set of status flags to match 
-	matchText = (self.querymode.to_sym == :rcpquery_strict && !self.querytext.empty?) ?
-		self.querytext : nil
-	candidates = Rcpref.recipe_ids( 
-			self.owner_id, self.user_id,
-			:status=>self.status,
-			:title=>matchText,
-			:comment=>matchText)
+        # Get the initial working list from Rcpref model
+        # Rcpref.recipe_ids can take:
+        # :comment is text to match against the comment field
+        # :status is the set of status flags to match 
+        matchText = (self.querymode.to_sym == :rcpquery_strict && !self.querytext.empty?) ?
+        self.querytext : nil
+        candidates = Rcpref.recipe_ids( 
+                            self.owner_id, 
+                            self.user_id,
+                            :status=>self.status,
+                            :title=>matchText,
+                            :comment=>matchText)
 
-	# XXX Merge in the lists for each circle
-	# @circles.each { |circle_id| candidates = candidates | Rcpref.recipe_ids(circle_id, self.user_id) }
+        # XXX Merge in the lists for each circle
+        # @circles.each { |circle_id| candidates = candidates | Rcpref.recipe_ids(circle_id, self.user_id) }
 
-	matchText = (self.querymode.to_sym == :rcpquery_loose && !self.querytext.empty?) ?
-		self.querytext : nil
-	if !ratings.empty? || !@tags.empty? || matchText # We purge/massage the list ONLY if there is a query here
-	   # Convert candidate array to a hash recipe_id=>#hits
+        matchText = (self.querymode.to_sym == :rcpquery_loose && !self.querytext.empty?) ?
+                                                self.querytext : nil
+        if !ratings.empty? || !@tags.empty? || matchText # We purge/massage the list ONLY if there is a query here
+            # Convert candidate array to a hash recipe_id=>#hits
 
-	   candihash = Candihash.new candidates, @querymode
+            candihash = Candihash.new candidates, @querymode
 
-	   # XXX Filter for sites
+            # XXX Filter for sites
 
-	   # Rank/purge for ratings
-	   @ratings.each { |rating| candihash.apply rating.recipes }
+            # Rank/purge for ratings
+            @ratings.each { |rating| candihash.apply rating.recipes }
 
-	   # Rank/purge for tag matches
-	   @tags.each { |tag| candihash.apply tag.recipe_ids }
+            # Rank/purge for tag matches
+            @tags.each { |tag| candihash.apply tag.recipe_ids }
+
+            # Rank/purge for text matches in comment
+            if matchText
+                # Get candidates that match in the comments field
+                candihash.apply Rcpref.recipe_ids(self.owner_id, self.user_id,
+                                                :status=>self.status,
+                                                :comment=>matchText) 
+                # Get candidates that match in the title
+                candihash.apply Rcpref.recipe_ids(self.owner_id, self.user_id,
+                                                :status=>self.status,
+                                                :title=>matchText) 
+            end
+            candidates = candihash.results(@rankings).reverse
+    	end
 	
-	   # Rank/purge for text matches in comment
-	   if matchText
-	      # Get candidates that match in the comments field
-	      candihash.apply Rcpref.recipe_ids(self.owner_id, self.user_id,
-						:status=>self.status,
-						:comment=>matchText) 
-	      # Get candidates that match in the title
-	      candihash.apply Rcpref.recipe_ids(self.owner_id, self.user_id,
-						:status=>self.status,
-						:title=>matchText) 
-	   end
-	   candidates = candihash.results(@rankings).reverse
-	end
-	
-	# Derive the final ordering for the candidates based on prior rankings
-	# and convert from rids back into recipes
-	candidates.map { |rid| Recipe.find(rid) } 
+    	# Derive the final ordering for the candidates based on prior rankings
+    	# and convert from rids back into recipes
+    	@results = candidates.map { |rid| Recipe.find(rid) } 
     end
 
   # Virtual attribute tag_tokens accepts the tags for the query

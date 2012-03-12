@@ -107,7 +107,7 @@ module ApplicationHelper
     	navlinks << navlink("Contact", "/contact", (@nav_current==:contact)) 
     	navlinks << navlink("Home", "/", (@nav_current==:home)) 
     	navlinks << navlink("FAQ", "/FAQ", (@nav_current==:FAQ)) 
-    	# We save the current link in the feedback link so we can return here after feedback,
+    	# We save the current URI in the feedback link so we can return here after feedback,
     	# and so the feedback can include the source
     	path = request.url.sub /[^:]*:\/\/[^\/]*/, '' # Strip off the protocol and host
     	navlinks << navlink("Feedback", "/feedbacks/new?backto=#{path}", (@nav_current==:feedback)) 

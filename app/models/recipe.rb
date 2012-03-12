@@ -7,12 +7,10 @@ require 'htmlentities'
 class GettableURLValidator < ActiveModel::EachValidator
     def validate_each(record, attribute, value)
         if(attribute == :url) 
-            begin
-                ou = open(value)
-                ou.close
+            if Site.by_link(value)
                 true
-            rescue => e
-                record.errors[:url] << "\'#{value}\' doesn't seem to be a working URL"
+            else
+                record.errors.add :url, "\'#{value}\' doesn't seem to be a working URL"
                 nil
             end
         end
@@ -21,8 +19,6 @@ end
 
 class Recipe < ActiveRecord::Base
   attr_accessible :tag_tokens, :title, :url, :alias, :ratings_attributes, :comment, :current_user, :status, :privacy, :picurl, :tagpane
-  # before_validation :crackURL
-  # after_find :trim_title
   after_save :save_ref
 
   validates :title,:presence=>true 
@@ -188,28 +184,51 @@ class Recipe < ActiveRecord::Base
   def marked?(uid)
       self.rcprefs.where("user_id = ?", uid).exists?
   end
-
-  # For a new recipe, go out to the Web and get its title and picture
-  # epicurious: for photo, get page from "a#photo_tab", then "div#recipe_full_photo".img
-  #     ...title is <title> minus "at Epicurious.com"
-  # allrecipes: photo, who knows? Title: <title> - "Recipe - Allrecipes.com"
-  def crackURL
-     # Find the site for this url
-     # Get the site to crack the page for this recipe
-     if @site = @site || Site.by_link(url)
-         # Pull title, picture and canonical URL from the result
-         self.url = (@site.yield :URI)[:URI] || self.url
-         self.picurl = (@site.yield :Image)[:Image] || ""
-         
-         found = @site.yield :Title
-         self.url = found[:URI] || self.url
-         self.title = self.title || found[:Title] 
-         
-     else
-         self.errors.add :url, "doesn't make sense or can't be found"
-     end
-     self.errors.empty?
-end
+  
+  # Either fetch an exising recipe record or make a new one, based on the
+  # params. If the params have an :id, we find on that, otherwise we look
+  # for a record matching the :url. 
+  # If a new recipe record needs to be created, we also do QA on the provided URL
+  # Either way, we also make sure that the recipe is associated with the given user
+    def self.ensure( userid, params)
+        if id = params[:id]
+            begin
+                rcp = Recipe.find id.to_i
+            rescue => e
+                rcp = self.new
+                rcp.errors.add :id, "There is no recipe number #{id}"
+            end
+        else
+            url = params[:url]
+            if url && Recipe.exists?(:url => url)  # Previously captured => just look it up
+                rcp = Recipe.where("url = ?", url).first
+            else
+                rcp = Recipe.new params
+                if rcp.url && site = Site.by_link(rcp.url)
+                    # Find the site for this url
+                    # Get the site to crack the page for this recipe
+                    # Pull title, picture and canonical URL from the result
+                    rcp.url = (site.yield :URI, rcp.url)[:URI] || rcp.url
+                    found = site.yield :Title
+                    rcp.url = found[:URI] || rcp.url
+                    # We may have re-interpreted the URL from the page, so
+                    # need to re-check that the recipe doesn't already exist
+                    if Recipe.exists? url: rcp.url  # Previously captured 
+                        Recipe.where("url = ?", rcp.url).first
+                    else
+                        rcp.picurl = (site.yield :Image)[:Image] || ""
+                        rcp.title = rcp.title || found[:Title] 
+                        rcp.save
+                    end
+                else
+                    rcp.errors.add :url, "doesn't make sense or can't be found"
+                end
+            end
+        end
+        # If all is well, make sure it's on the user's list
+        rcp.ensureUser( userid ) if rcp.id && rcp.errors.empty?
+        rcp
+    end
 
 # Return the human-readable name for the recipe's source
 def sourcename
