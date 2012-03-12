@@ -221,7 +221,7 @@ class Recipe < ActiveRecord::Base
                         rcp.save
                     end
                 else
-                    rcp.errors.add :url, "doesn't make sense or can't be found"
+                    rcp.errors.add :url, rcp.url.blank? ? "must be supplied" : "doesn't make sense or can't be found"
                 end
             end
         end
@@ -243,20 +243,26 @@ def sourcehome
 end
 
    # Make sure this recipe is in the collection of the current user
-def ensureUser(uid)
-    unless self.users.exists?(uid)
-        user = User.find(uid)
-        self.users << user
-        if self.save
-            # Provide defaults for status and privacy
-            @current_user = uid
-            ref = self.current_ref
-            ref.status = MyConstants::Rcpstatus_misc
-            ref.privacy = MyConstants::Rcppermission_friends
-            ref.save
+    def ensureUser(uid)
+        unless self.users.exists?(uid)
+            user = User.find(uid)
+            self.users << user
+            if self.save
+                # Provide defaults for status and privacy
+                @current_user = uid
+                ref = self.current_ref
+                ref.status = MyConstants::Rcpstatus_misc
+                ref.privacy = MyConstants::Rcppermission_friends
+                ref.save
+            end
         end
     end
-end
+    
+    # Set the mod time of the recipe to now (so it sorts properly in Recent lists)
+    def touch
+        self.updated_at = Time.now
+        self.save
+    end
 
    # This stores the edited tagpane for the recipe--or maybe not. The main
    # purpose is to parse the HTML to extract any tags embedded therein, 

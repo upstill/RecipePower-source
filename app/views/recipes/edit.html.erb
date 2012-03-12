@@ -1,2 +1,8 @@
 <%= render 'form_edit' %>
-<%= render 'form_tagger' %>
+<div class="viewframe"> 
+  <% if true %>
+    <iframe src="<%= @recipe.url %>" id="viewframe" allowfullscreen></iframe>
+  <% end %>
+</div> 
+<br>
+<%# render 'form_tagger' %>

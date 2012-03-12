@@ -1,5 +1,6 @@
 require "my_constants.rb"
 
+# Class for a hash of recipe keys, for sorting as integers
 class Candihash < Hash
     # Initialize the candihash to a set of keys
     def initialize(startset, mode)
@@ -17,50 +18,50 @@ class Candihash < Hash
     # or by intersecting the sets (:rcpquery_strict)
     def apply(newset)
         case @mode 
-	when :rcpquery_strict
-	    newset.select { |id| self[id.to_s] }
-	    self.reset newset
-	when :rcpquery_loose 
-	    newset.each { |id| self[id.to_s] += 1 if self[id.to_s] }
-	end
+    	when :rcpquery_strict
+    	    newset.select { |id| self[id.to_s] }
+    	    self.reset newset
+    	when :rcpquery_loose 
+    	    newset.each { |id| self[id.to_s] += 1 if self[id.to_s] }
+    	end
     end
 
     # Return the keys as an integer array, sorted by number of hits
     # 'rankings' is an array of rid/ranking pairs, denoting the place of 
     # each recipe in some prior ordering. Use that ranking to constrain the output
     def results (rankings)
-	# Extract the keys and sort them by success in matching
-	if @mode == :rcpquery_loose
-	    buffer1 = self.keys.select { |k| self[k] > 0 } # (In random order)
-            buffer1.sort! { |k1, k2| self[k1] <=> self[k2] } 
-	else
-	    buffer1 = self.keys # Random order
-	end
+    	# Extract the keys and sort them by success in matching
+    	if @mode == :rcpquery_loose
+    	    buffer1 = self.keys.select { |k| self[k] > 0 } # (In random order)
+                buffer1.sort! { |k1, k2| self[k1] <=> self[k2] } 
+    	else
+    	    buffer1 = self.keys # Random order
+    	end
 
-	return buffer1 if rankings.blank?
-	# See if the prior rankings have anything to say about matters
-	buffer2 = rankings.keys.keep_if { |k| self[k] } # Only keep found keys
-	return buffer1.map { |k| k.to_i } if buffer2.empty?
+    	return buffer1 if rankings.blank?
+    	# See if the prior rankings have anything to say about matters
+    	buffer2 = rankings.keys.keep_if { |k| self[k] } # Only keep found keys
+    	return buffer1.map { |k| k.to_i } if buffer2.empty?
 
-	# Apply rankings from prior queries
-	buffer2 = rankings.keys.sort { |k1, k2| self[k1] < 0 ? -1 : (self[k2] < 0 ? 1 : (self[k1] <=> self[k2])) }
+    	# Apply rankings from prior queries
+    	buffer2 = rankings.keys.sort { |k1, k2| self[k1] < 0 ? -1 : (self[k2] < 0 ? 1 : (self[k1] <=> self[k2])) }
 
-	# Now we have two buffers of key strings, ordered by desired output.
-	# We also have 'rankings', that states the desired slot for each key
-	# Keys in buffer2 go into their stated slot (or at the end)
-	result = []
-	# Process keys in order
-	until buffer1.empty? || buffer2.empty?
-	    if(rankings[buffer2.first] == result.size)
-	        result.push buffer2.shift
-	    else # Slot not occupied from rankings
-		id = buffer1.shift
-	        result.push id unless rankings[id] # ...but this id may have a later slot
-	    end
-	end
-	result << buffer1 unless buffer1.empty?
-	result << buffer2 unless buffer2.empty?
-	result.map { |r| r.to_i }
+    	# Now we have two buffers of key strings, ordered by desired output.
+    	# We also have 'rankings', that states the desired slot for each key
+    	# Keys in buffer2 go into their stated slot (or at the end)
+    	result = []
+    	# Process keys in order
+    	until buffer1.empty? || buffer2.empty?
+    	    if(rankings[buffer2.first] == result.size)
+    	        result.push buffer2.shift
+    	    else # Slot not occupied from rankings
+    		id = buffer1.shift
+    	        result.push id unless rankings[id] # ...but this id may have a later slot
+    	    end
+    	end
+    	result << buffer1 unless buffer1.empty?
+    	result << buffer2 unless buffer2.empty?
+    	result.map { |r| r.to_i }
     end
 
 end
@@ -242,9 +243,10 @@ class Rcpquery < ActiveRecord::Base
         # XXX Merge in the lists for each circle
         # @circles.each { |circle_id| candidates = candidates | Rcpref.recipe_ids(circle_id, self.user_id) }
 
-        matchText = (self.querymode.to_sym == :rcpquery_loose && !self.querytext.empty?) ?
-                                                self.querytext : nil
-        if !ratings.empty? || !@tags.empty? || matchText # We purge/massage the list ONLY if there is a query here
+        matchText = (self.querymode.to_sym == :rcpquery_loose && !self.querytext.empty?) ? self.querytext : nil
+        unless ratings.empty? && @tags.empty? && matchText.blank? 
+            # We purge/massage the list ONLY if there is a query here
+            # Otherwise, we simply sort the list by mod date
             # Convert candidate array to a hash recipe_id=>#hits
 
             candihash = Candihash.new candidates, @querymode
@@ -270,27 +272,33 @@ class Rcpquery < ActiveRecord::Base
             end
             candidates = candihash.results(@rankings).reverse
     	end
-	
     	# Derive the final ordering for the candidates based on prior rankings
     	# and convert from rids back into recipes
     	@results = candidates.map { |rid| Recipe.find(rid) } 
+    	
+    	# If we're on the Recent tab, that ordering takes priority
+    	if self.status == MyConstants::Rcpstatus_recent
+    	    # Sort results by last touch
+    	    @results.sort! { |r1, r2| r2.updated_at <=> r1.updated_at }
+    	end
+	    @results
     end
 
-  # Virtual attribute tag_tokens accepts the tags for the query
-  # ids is the parameter string for the tokens
-  def tag_tokens=(paramstr)
-	# Keep the saveable query up to date
-	self.tagstxt = paramstr
-	@tags = paramstr.split(",").map { |e| 
-	  if(e=~/^\d*$/) # numbers (sans quotes) represent existing tags
-	     Tag.find e.to_i
-	  else
-	     e.gsub!('\'','') # Strip out enclosing quotes
-	     # Convert the tag to an id if poss.
-    	     (thetags = Tag.where "name like ?", e) ? thetags[0] : Tag.new(:name=>e)
-	  end
-	}
-  end
+    # Virtual attribute tag_tokens accepts the tags for the query
+    # ids is the parameter string for the tokens
+    def tag_tokens=(paramstr)
+        # Keep the saveable query up to date
+        self.tagstxt = paramstr
+        @tags = paramstr.split(",").map { |e| 
+            if(e=~/^\d*$/) # numbers (sans quotes) represent existing tags
+                Tag.find e.to_i
+            else
+                e.gsub!('\'','') # Strip out enclosing quotes
+                # Convert the tag to an id if poss.
+                (thetags = Tag.where "name like ?", e) ? thetags[0] : Tag.new(:name=>e)
+            end
+        }
+    end
 
   def tag_tokens
      self.tagstxt
@@ -313,9 +321,9 @@ class Rcpquery < ActiveRecord::Base
     # Fetch and use parameters to revise a query record before returning
     def self.fetch_revision(id, uid, *params)
         result = self.find(id)
-	result.session_id = uid
-	result.update_attributes(params[0])
-    	result.save
-	result
+        result.session_id = uid
+        result.update_attributes(params[0])
+        result.save
+        result
     end
 end

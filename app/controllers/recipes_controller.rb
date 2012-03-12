@@ -67,6 +67,7 @@ class RecipesController < ApplicationController
     @recipe = Recipe.ensure session[:user_id], params
     if @recipe.errors.empty? # Success (recipe found)
         @recipe.current_user = session[:user_id]
+        @recipe.touch # We're looking at it, so make it recent
         @Title = @recipe.title # Get title from the recipe
         @nav_current = nil
         # Now go forth and edit
@@ -81,12 +82,18 @@ class RecipesController < ApplicationController
     return if need_login true
     @recipe = Recipe.find(params[:id])
     @recipe.current_user = session[:user_id]
-    if @recipe.update_attributes(params[:recipe])
-      redirect_to rcpqueries_url :notice  => "Successfully updated #{@recipe.title || 'recipe'}."
+    begin
+        saved_okay = @recipe.update_attributes(params[:recipe])
+    rescue => e
+        saved_okay = false
+        @recipe.errors.add "Couldn't save recipe"
+    end
+    if saved_okay
+        redirect_to rcpqueries_url :notice  => "Successfully updated #{@recipe.title || 'recipe'}."
     else
-      @Title = ""
-      @nav_current = nil
-      render :action => 'edit'
+        @Title = ""
+        @nav_current = nil
+        render :action => 'edit'
     end
   end
 
