@@ -8,7 +8,7 @@ module SitesHelper
         link_to title, url
     end
     def trimmed_sample
-        @site.trim_title (@site.yield :Title)[:Title]
+        @site.trim_title (@site.yield :Title)[:Title] || ""
     end
     def show_sample(site)
         url = site.sampleURL

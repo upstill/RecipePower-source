@@ -40,19 +40,21 @@ end
 
   # redirect somewhere that will eventually return back to here
   def redirect_away(*params)
-    session[:original_uri] = request.url
+    session[:original_uri] = request.url.sub /\w*:\/\/[^\/]*/, ''
     redirect_to(*params)
   end
   
   # save the given url in the expectation of coming back to it
   def push_page(url)
+      debugger
       session[:original_uri] = url
   end
 
-  # returns the person to either the original url from a redirect_away or to a default url
+  # returns the person to either the original url from a redirect_away or to a provided, default url
   def redirect_back(*params)
-    uri = session[:original_uri]
+    uri = session[:original_uri] || params.first[:url]
     session[:original_uri] = nil
+    debugger
     if uri
       redirect_to uri, *params
     else

@@ -208,9 +208,9 @@ class Recipe < ActiveRecord::Base
                     # Find the site for this url
                     # Get the site to crack the page for this recipe
                     # Pull title, picture and canonical URL from the result
-                    rcp.url = (site.yield :URI, rcp.url)[:URI] || rcp.url
+                    # rcp.url = rcp.url || (site.yield :URI, rcp.url)[:URI]
                     found = site.yield :Title
-                    rcp.url = found[:URI] || rcp.url
+                    # rcp.url = rcp.url || found[:URI]
                     # We may have re-interpreted the URL from the page, so
                     # need to re-check that the recipe doesn't already exist
                     if Recipe.exists? url: rcp.url  # Previously captured 

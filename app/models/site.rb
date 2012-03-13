@@ -58,7 +58,6 @@ protected
         unless str.blank?
             # Add to result
             str << '\t'+uri unless uri.blank?
-            puts "  #{label}:  "+str 
             @result[:out] << str # Add to the list of results
         end
     end
@@ -123,6 +122,8 @@ public
             unless @result[:out].join('').blank?
                 # If we got results, report them
                 @result[:in] = tagspec
+                puts "...results due to #{tagspec}:"
+                @result[:out].each { |str| puts "  #{label}:  "+str }
                 @results[label] = @results[label] || []
                 @results[label] << @result 
             end
@@ -242,10 +243,12 @@ class Site < ActiveRecord::Base
     end
     
     def trim_title(ttl)
-        unless self.ttlcut.blank?
-            ttl.gsub! /#{self.ttlcut}/i, (self.ttlrepl || '')
+        if ttl
+            unless self.ttlcut.blank?
+                ttl.gsub! /#{self.ttlcut}/i, (self.ttlrepl || '')
+            end
+            ttl.strip
         end
-        ttl.strip
     end
     
     def sampleURL

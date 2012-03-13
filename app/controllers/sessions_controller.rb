@@ -9,7 +9,7 @@ class SessionsController < ApplicationController
     user = User.authenticate(params[:login], params[:password])
     if user
       session[:user_id] = user.id
-      redirect_back rcpqueries_path, :notice =>"Welcome back! (Logged in successfully.)"
+      redirect_back :url=>rcpqueries_path, :notice =>"Welcome back! (Logged in successfully.)"
       # redirect_to rcpqueries_url, :notice =>"Welcome back! (Logged in successfully.)"
       # redirect_to_target_or_default recipes_path, :notice => "Welcome back! (Logged in successfully.)"
     else

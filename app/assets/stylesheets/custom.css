@@ -117,7 +117,7 @@ section {
 }
 
 section h1 {
-padding-top:15px;
+  padding-top:15px;
   font-size: 200%;
 }
 
@@ -140,8 +140,9 @@ h3 {
 }
 
 p.airy {
+  	font:15px arial;
 	line-height:150%;
-	font-size:105%;
+	// font-size:105%;
 	# letter-spacing:1px;
 }
 
@@ -616,6 +617,30 @@ font:12px arial, sans-serif;
     // outline:#999 solid 1px;
 }
 
+.rcp_list_bigelement {
+    // height:219px;
+    width:100%;
+    // position:relative;
+    // We're relative to allow absolute positioning of the bottom element
+    // outline:#999 solid 1px;
+}
+
+.rcp_list_bigpic_box {
+    width:744px; // 680px;
+    height:473px; // 430px;
+    // float:left;
+    vertical-align: center;
+    // outline:#999 solid 1px;
+}
+
+.rcp_list_bigtext {
+    // height:auto;
+    width:90%; // width:500px;
+    margin-left:15px;
+    // float:center;
+    // outline:#999 solid 1px;
+}
+
 .rcp_list_element_bottom {
   position: absolute;
   bottom: 1px;
@@ -650,7 +675,7 @@ font:12px arial, sans-serif;
 
 .rcp_list_element_gotag {
   margin-top:10px;
-  font:10px arial,sans-serif;
+  font:15px arial,sans-serif;
 }
 
 .rcp_list_element_stats {

@@ -4,9 +4,9 @@ require './lib/Domain.rb'
 module RecipesHelper
 
 def rcp_fitPic(rcp)
-        # "fitPic" class gets fit inside pic_box with Javascript and jQuery
+    # "fitPic" class gets fit inside pic_box with Javascript and jQuery
 	if rcp.picurl
-            "<img src=\"#{rcp.picurl}\" class=\"fitPic\" >".html_safe
+        "<img src=\"#{rcp.picurl}\" class=\"fitPic\" >".html_safe
 	else
 	    "Pic goes Here.".html_safe
 	end
