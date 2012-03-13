@@ -32,6 +32,7 @@ class RecipesController < ApplicationController
     # Here is where we take a hit on the "Add to RecipePower" widget,
     # and also invoke the 'new cookmark' dialog. The difference is whether
     # parameters are supplied for url, title and note (though only URI is required).
+    
     if params[:url]
         @recipe = Recipe.ensure session[:user_id], params
     else
