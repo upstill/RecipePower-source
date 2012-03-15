@@ -1,5 +1,7 @@
 RP::Application.routes.draw do
 
+  devise_for :users
+
   resources :feedbacks
 
   resources :sites
