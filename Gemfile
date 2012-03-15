@@ -14,6 +14,8 @@ gem 'closure_tree'
 gem 'htmlentities'
 gem 'nokogiri'
 gem 'will_paginate', '~> 3.0'
+gem 'devise'                        # auth, rails generate devise:install, rails generate devise MODEL
+gem 'declarative_authorization'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
 
 group :development do
   gem 'rspec-rails', '2.6.1'
@@ -50,3 +52,4 @@ group :test do
   gem 'rspec-rails', '2.6.1'
   gem 'webrat', '0.7.1'
 end
+
