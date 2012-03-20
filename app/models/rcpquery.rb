@@ -101,8 +101,16 @@ class Rcpquery < ActiveRecord::Base
     
     # Return a list of results based on the paging parameters
     def results_paged
-        self.cur_page = self.npages if self.cur_page > self.npages
-        first = (self.cur_page-1)*page_length
+        # No paging for 0 or 1 page
+        npg = self.npages
+        return self.results if npg <= 1
+        
+        # Clamp current page to last page
+        cpg = self.cur_page
+        cpg = self.cur_page = npg if cpg > npg
+        
+        # Now get indices of first and last records on the page
+        first = (cpg-1)*page_length
         last = first+page_length-1
         maxlast = self.results.count-1 
         last = maxlast if last > maxlast

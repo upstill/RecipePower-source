@@ -39,26 +39,20 @@ def need_login(login_required, super_required = false)
 end
 
   # redirect somewhere that will eventually return back to here
-  def redirect_away(*params)
-    session[:original_uri] = request.url.sub /\w*:\/\/[^\/]*/, ''
-    redirect_to(*params)
+  def redirect_away(url, options = {})
+    session[:original_uri] = request.url # url.sub /\w*:\/\/[^\/]*/, ''
+    redirect_to url, options
   end
   
   # save the given url in the expectation of coming back to it
   def push_page(url)
-      debugger
       session[:original_uri] = url
   end
 
   # returns the person to either the original url from a redirect_away or to a provided, default url
-  def redirect_back(*params)
-    uri = session[:original_uri] || params.first[:url]
+  def redirect_back(options = {})
+    uri = session[:original_uri] || rcpqueries_path
     session[:original_uri] = nil
-    debugger
-    if uri
-      redirect_to uri, *params
-    else
-      redirect_to(*params) unless params.empty?
-    end
+    redirect_to uri, options
   end
 end
