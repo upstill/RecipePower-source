@@ -723,7 +723,6 @@ end
 max = User.find(1)
 Tag.all.each { |t| t.users << max unless t.users.exists?(:id=>1)}
 
-# LinkRef.import_file "db/data/FoodLover"
 Referent.express "Dairy", :Food, true
 Referent.express "Meat", :Food, true
 Referent.express "Pork", :Food, true
@@ -802,3 +801,6 @@ Referent.express "Other Tools", :Tool, true
 
 Referent.express "Diets", :Interest, true
 Referent.express "Genres", :Interest, true
+
+# LinkRef.import_file "db/data/FoodLover"
+LinkRef.import_CSVfile "db/data/Full Dictionary Revised.csv"

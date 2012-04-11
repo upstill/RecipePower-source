@@ -22,6 +22,15 @@ class Referent < ActiveRecord::Base
     def referent_type
         Tag.tagtype_inDB self.class.name.sub( /Referent/, '').sub(/Section/, " Section")
     end
+    
+    def self.referent_class_for_tagtype(tagtype)
+        if tagtype.class == Fixnum
+            typename = (tagtype > 0) ? Tag.typename(tagtype) : ""
+        else
+            typename = tagtype
+        end
+        typename.to_s+"Referent"
+    end
         
 public
     
@@ -90,20 +99,19 @@ public
         end
     end
     
-    # Class method to create a referent under the given tag.
+    # Class method to create a referent of a given type under the given tag.
     # WARNING: while some effort is made to find an existing referent and use that,
     #  this procedure lends itself to redundancy in the dictionary
-    def self.express (tagstring, tagtype, isGlobal = false)
-        tagid = Tag.ensure_tag tagstring, tagtype, 0 # 0 userid means make it global
-        canonicalform = Expression.type_inDB :canonical
-        tag = Tag.find tagid
+    def self.express (tag, tagtype, isGlobal = false)
+        tag = Tag.assert_tag tag, tagtype: tagtype 
+        form = Expression.type_inDB :canonical
         # if there's already a referent referring to this tag, return it
-        if exp = tag.expressions.where(:form=>canonicalform, :locale=>:en).first
+        if exp = tag.expressions.where(:form=>form, :locale=>:en).first
             return self.find exp.referent_id
         end
         # Didn't find an existing referent, so need to make one
-        result = self.create :tag=>tagid, :type=>tagtype.to_s+"Referent"
-        result.express tagstring, :canonical, :en
+        result = self.create :tag=>tag.id, :type=>Referent.referent_class_for_tagtype(tagtype)
+        result.express tag, form: :canonical, locale: :en
         # unless self.expressions.where(:tag_id=>tagid, :form=>canonicalform, :locale=>:en).first
             # result.expressions.create :tag_id=>tagid, :form=>canonicalform, :locale=>:en
         # end
@@ -111,15 +119,17 @@ public
     end
     
     # Add a tag to the expressions of this referent, returning the tag id
-    def express(tag, *params)
-        tagid = Tag.ensure_tag tag, self.referent_type, 0 # 0 userid means make it global
-        form = Expression.type_inDB (params[0] || :corruption)
-        locale = params[1] || :en
+    def express(tag, args)
+        # We assert the tag in case 1) it's specified by string or id, or 2) it's not global
+        tag = Tag.assert_tag tag, tagtype: self.referent_type 
+        form = Expression.type_inDB (args[:form] || :corruption)
+        locale = args[:locale] || :en
         # unless self.expressions.any? { |exp| exp.tag_id==tagid && exp.form==form && exp.locale == locale }
-        unless self.expressions.where(tag_id: tagid, form: form, locale: locale ).first
-            self.expressions.create tag_id: tagid, form: form, locale: locale
-            if params[0] == :canonical
-                self.tag = tagid 
+        unless self.expressions.where(tag_id: tag.id, form: form, locale: locale ).first
+            self.expressions.create tag_id: tag.id, form: form, locale: locale
+            if args[:form] == :canonical
+                self.tag = tag.id
+                tag.
                 self.save
             end
         end

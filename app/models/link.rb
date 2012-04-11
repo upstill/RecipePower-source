@@ -5,6 +5,14 @@ class Link < ActiveRecord::Base
     
     @@TypeToSym = [nil, :vendor, :store, :book, :blog, :rcpsite, :cookingsite, :othersite, :video, :glossary]
     @@TypeToString = ["Untyped Link", "Supplier", "Store Location", "Book", "Blog", "Recipe Site", "Cooking Site", "Other Site", "Video", "Glossary"]
+
+    before_save :decode_link
+    
+    @@coder = HTMLEntities.new
+    # Decode any HTML entities or escaped characters in the URI
+    def decode_link
+        self.uri = @@coder.decode self.uri
+    end
     
     # Return the integer type key for the given symbol
     def self.sym_inDB(sym)

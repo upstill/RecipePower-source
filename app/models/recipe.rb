@@ -28,8 +28,6 @@ class Recipe < ActiveRecord::Base
   has_many :tags, :through=>:tagrefs, :autosave=>true
   attr_reader :tag_tokens
   
-  @@coder = HTMLEntities.new
-
   has_many :ratings
   has_many :scales, :through=>:ratings, :autosave=>true, :dependent=>:destroy
   # attr_reader :ratings_attributes
@@ -43,6 +41,8 @@ class Recipe < ActiveRecord::Base
   attr_reader :privacy
   attr_reader :status
   
+  @@coder = HTMLEntities.new
+  
   # Make the recipe title nice for display
   def trimmed_title
       ttl = self.title || ""
@@ -50,7 +50,7 @@ class Recipe < ActiveRecord::Base
           ttl = st.trim_title ttl
       end
       # Convert HTML entities
-      HTMLEntities.new.decode ttl
+      @@coder.decode ttl
   end
   
   # Before editing, try and fill in a blank title by cracking the url
@@ -159,7 +159,7 @@ class Recipe < ActiveRecord::Base
             tag = Tag.find e.to_i
         else
             e.sub!(/^\'(.*)\'$/, '\1') # Strip out enclosing quotes
-            tag = Tag.strmatch(e, self.current_user, :any, true)[0]
+            tag = Tag.strmatch(e, userid: self.current_user, force: true)[0]
         end
         self.tags << tag unless self.tags.exists?(id: tag.id)
     }

@@ -9,10 +9,9 @@ class TagsController < ApplicationController
           tagtype = Tag.index_to_type @tabindex 
       else
           @tabindex = session[:tabindex] || 0
-          tagtype = params[:tagtype] || :any
       end
       session[:tabindex] = @tabindex
-      @tags = (tagtype == :any) ? Tag.all : Tag.where("tagtype = ?", tagtype)
+      @tags = params[:tagtype] ? Tag.where("tagtype = ?", params[:tagtype]) : Tag.all
       # The :unbound_only parameter limits the set to tags with no associated form (and, thus, referent)
       @tags.delete_if { |t| !t.referents.empty? } if params[:unbound_only] == "true"
     respond_to do |format|
@@ -25,7 +24,7 @@ class TagsController < ApplicationController
   # GET /tags/match
   # The match action provides a list of tags that match a given string. 
   # Query parameters:
-  #    :tagtype - type of tag to look for
+  #    :tagtype - type of tag to look for (if any; otherwise, unconstrained)
   #    :tabindex - index of tabs in the tags editor; convertible to tag type
   #    :unbound_only - if true, we're compiling a list of unbound tags, so 
   #                     eliminate all tags that already have a referent
@@ -39,13 +38,12 @@ class TagsController < ApplicationController
           tagtype = Tag.index_to_type @tabindex 
       else
           @tabindex = session[:tabindex] || 0
-          tagtype = params[:tagtype] || :any
       end
       session[:tabindex] = @tabindex
       @orphantags = Tag.strmatch(params[:q] || params[:term] || "", 
-                               session[:user_id],
-                               tagtype,
-                               params[:makeormatch] == "true")
+                               userid:  session[:user_id],
+                               tagtype: params[:tagtype], # nil for any type
+                               force:   (params[:makeormatch] == "true"))
       @orphantags.delete_if { |t| !t.referents.empty? } if params[:unbound_only] == "true"
       respond_to do |format|
         format.json { render :json => 
@@ -105,7 +103,7 @@ class TagsController < ApplicationController
     @Title = "Tags"
     @tabindex = (params[:tabindex] || 0).to_i # type numbers for Ingredient, Genre, Free Tag, etc.
     # The list of orphan tags gets all tags of this type which aren't linked to a table
-    @orphantags = Tag.strmatch("", session[:user_id], Tag.index_to_type(@tabindex), false)
+    @orphantags = Tag.strmatch("", userid: session[:user_id], tagtype: Tag.index_to_type(@tabindex) )
     session[:tabindex] = @tabindex
     render :partial=>"editor"
   end

@@ -1,5 +1,16 @@
 module ApplicationHelper
-
+    
+    # The coder is for stripping HTML entities from URIs, recipe titles, etc.
+    @@coder = HTMLEntities.new
+    
+  def decodeHTML(str)
+      @@coder.decode str
+  end
+  
+  def encodeHTML(str)
+      @@coder.encode str
+  end
+  
   def link_to_remove_fields(name, f)
     f.hidden_field(:_destroy) + link_to_function(name, "remove_fields(this)")
   end
