@@ -1,0 +1,11 @@
+thing1:
+    username: thing1
+    
+thing2:
+    username: thing2
+
+super:
+    username: super
+
+guest:
+    username: guest
