@@ -1,0 +1,9 @@
+jal:
+    name: jalapeño peppers
+    tagtype: 4
+    isGlobal: true
+    
+jal2:
+    name: Chipotle  -chiles
+    tagtype: 4
+    isGlobal: false

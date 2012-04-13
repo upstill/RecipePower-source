@@ -65,6 +65,7 @@ GEM
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
     mime-types (1.17.2)
+    minitest (2.12.1)
     multi_json (1.0.4)
     nifty-generators (0.4.6)
     nokogiri (1.5.0)
@@ -157,6 +158,7 @@ DEPENDENCIES
   htmlentities
   jquery-rails
   log_buddy
+  minitest
   nifty-generators
   nokogiri
   pg

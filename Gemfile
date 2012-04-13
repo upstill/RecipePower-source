@@ -14,6 +14,7 @@ gem 'closure_tree'
 gem 'htmlentities'
 gem 'nokogiri'
 gem 'will_paginate', '~> 3.0'
+gem 'minitest'
 
 group :development do
   gem 'rspec-rails', '2.6.1'
