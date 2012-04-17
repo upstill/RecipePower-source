@@ -1,0 +1,6 @@
+jal:
+    uri: http://www.cookthink.com/reference/show_articles/606/jalape%C3%B1o
+    resource_type: 9
+    
+jal2:
+    uri: http://www.cookthink.com/reference2/show_articles/606/jalape%C3%B1o

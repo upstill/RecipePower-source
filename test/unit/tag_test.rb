@@ -110,5 +110,13 @@ class TagTest < ActiveSupport::TestCase
         assert_not_equal t, Tag.strmatch("tagtypecheck", tagtype: [4,5,6], matchall: true).first
     end
     
-    
+    test "tagtype_inDB functions correctly" do
+        assert_equal 1, Tag.tagtype_inDB("genre"), "Lower-case string not parsed correctly"
+        assert_equal 2, Tag.tagtype_inDB(:role), "Lower-case symbol not parsed correctly"
+        assert_equal 3, Tag.tagtype_inDB("PROCESS"), "all-caps string not parsed correctly"
+        assert_nil Tag.tagtype_inDB("free tag"), "lower-case 'free tag' not parsed correctly"
+        assert_nil Tag.tagtype_inDB(nil), "nil doesn't return nil"
+        assert_equal 4, Tag.tagtype_inDB(4), "Integer type not returned"
+        assert_equal [5,6,7,8], Tag.tagtype_inDB([:Unit, :source, "aUTHOR", "occasion"]), "Array of types not parsed correctly"
+    end
 end

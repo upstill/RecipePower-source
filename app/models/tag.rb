@@ -22,16 +22,65 @@ class Tag < ActiveRecord::Base
     
     validates_presence_of :name
     before_validation :tagqa
+
+    # 'typename' is a virtual attribute for the string associated with the tag's type (tagtype attribute)
+
+    attr_reader :typename
+    def typename()
+        self.tagtype.nil? ? "free tag" : @@TypesToNames[self.tagtype]
+    end
+
+    # Set the type of the tag, given in text
+    def typename=(name)
+        self.tagtype = self.tagtype_inDB(name) || 0
+    end
+   
+   # This class method gives access to type names independent of any tag instances
+   def self.typename(type)
+       @@TypesToNames[type] || "free tag"
+   end
     
+    # When a tag is asserted into the database, we do have minimal sanitary standards:
+    #  no leading or trailing whitespace
+    #  all internal whitespace is replaced by a single space character
     def self.tidyName(str)
         str.strip.gsub(/\s+/, ' ')
     end
     
+    @@wordmap = {
+        "chili" => "chile",
+        "chilli" => "chile",
+        "chille" => "chile",
+        "chilly" => "chile",
+        "chilie" => "chile",
+        "chillie" => "chile",
+        "chilis" => "chiles",
+        "chillis" => "chiles",
+        "chiles" => "chiles",
+        "chilles" => "chiles",
+        "chillys" => "chiles",
+        "chilies" => "chiles",
+        "chillies" => "chiles",
+    }
+    
+    @@tagmap = {
+        "chile-bean-paste" => "chili-bean-paste",
+        "chile-bean" => "chili-bean",
+        "chile-powder" => "chili-powder",
+        "chile-con-carne" => "chili-con-carne",
+        "chile-flakes" => "chili-flakes",
+        "chile-oil" => "chili-oil",
+        "chile-paste" => "chili-paste"
+        }
+        
+    
     # Remove gratuitous characters, diacriticals, punctuation and capitalization for search purposes
     def self.normalizeName(str)
-        str.strip.gsub(/[.,'‘’“”'"]+/, '').parameterize
+        str.strip.gsub(/[.,'‘’“”'"]+/, '').parameterize.split('-').collect{ |word| @@wordmap[word] || word }.join('-')
     end
     
+    # Callback for tidying up the name and setting the normalized_name field and ensuring the tagtype
+    # has a value
     def tagqa
         # Clean up the name by removing/collapsing whitespace
         self.name = Tag.tidyName self.name
@@ -41,12 +90,17 @@ class Tag < ActiveRecord::Base
         true
     end
 
-    attr_reader :typename
-
+   # These class variables keep the mapping among tag types, type indices, and descriptive strings for the types
    @@TypesToNames = ["free tag".to_sym, :Genre, :Role, :Process, :Food, :Unit, :Source, :Author, :Occasion, "Pantry Section".to_sym, "Store Section".to_sym, :Interest, :Tool ]
    @@NamesToTypes = {:Genre=>1, :Role=>2, :Process=>3, :Food=>4, :Unit=>5, :Source=>6, :Author=>7, :Occasion=>8 , "free tag".to_sym=>0, "Pantry Section".to_sym=>9, "Store Section".to_sym=>10, :Interest=>11, :Tool=>12}
 
    public 
+   
+   # Taking an index into the table of tag types, return the symbol for that type
+   # (used to build a set of tabs, one for each tag type)
+   def self.index_to_type(index)
+       @@NamesToTypes[@@TypesToNames[index]]
+   end
    
    # Convert the tag type to external storage format, e.g. integer
    # We allow the type to be a string, a symbol, an integer index or an array of those types
@@ -59,47 +113,20 @@ class Tag < ActiveRecord::Base
        end
    end
    
-   def self.typename(type)
-       @@TypesToNames[type] || "free tag"
-   end
-   
-   # Is my tagtype the same as the given type(s) (given as string, symbol, integer or array)
-   def tagtype_is(tt)
+   # Is my tagtype the same as the given type(s) (given as string, symbol or integer)
+   def tagtype_matches(tt)
+       return true if tt.nil? # nil type matches any tag type
        if tt.kind_of?(Array)
-           tt.any? { |type| self.tagtype_is type }
+           tt.any? { |type| self.tagtype_matches type }
        else
            Tag.tagtype_inDB(tt) == self.tagtype
        end
-   end
-
-   # Is my tagtype the same as the given type(s) (given as string, symbol or integer)
-   def tagtype_matches(tt)
-       tt.nil? || self.tagtype_is(tt) || (tt.kind_of?(Array) && (tt.empty? || tt.includes?(nil)))
-   end
-
-   def typename()
-       self.tagtype.nil? ? "free tag" : @@TypesToNames[self.tagtype]
-   end
-
-   # Set the type of the tag, given in text
-   def typename=(name)
-       self.tagtype = self.tagtype_inDB(name) || 0
-   end
-   
-   # Return an array listing the available types, where the index associates the type with the type name
-   def self.typenames()
-   	@@TypesToNames
-   end
-   
-   def self.index_to_type(index)
-       @@NamesToTypes[@@TypesToNames[index]]
    end
    
    # Taking either a tag, a string or an id, make sure there's a corresponding tag
    #  of the given type that's available to the named user. NB: 't' may be a Tag, but
    #  not necessarily of the given type, or one available to the user.
-   def self.assert_tag(t, opts = {})
-       debugger
+   def self.assert_tag(t, opts = {} )
        # Convert tag type, if any, into internal form
        opts[:tagtype] = self.tagtype_inDB(opts[:tagtype]) if opts[:tagtype]
        if t.class == Fixnum
@@ -112,13 +139,13 @@ class Tag < ActiveRecord::Base
        elsif t.class == Tag
            tag = t 
        else
-           opts[:force] = true
+           opts[:assert] = true
            opts[:matchall] = true
            tag = Tag.strmatch(t, opts).first # strmatch will create a tag if none exists
            return nil if tag.nil?
        end
        # Now we've found/created a tag, we need to ensure it's the right type (if we care)
-       puts "Found tag "+tag.name+" on key "+tag.id.to_s+" using key "+t.to_s
+       puts "Found tag #{tag.name} (type #{tag.tagtype.to_s}) on key #{tag.id.to_s} using key #{t.to_s} and type #{opts[:tagtype].to_s}"
        unless tag.tagtype_matches opts[:tagtype]
            # Clone the tag for another type, but if it's a free tag, just change types
            tag = tag.dup if tag.tagtype != 0 # If free tag, just change type
@@ -132,12 +159,12 @@ class Tag < ActiveRecord::Base
        tag
    end
    
-   # Expose this tag to the given user; if user is nil, make the tag global
+   # Expose this tag to the given user; if user is nil or super, make the tag global
    def admit_user(uid = nil)
        unless self.isGlobal
            if (uid.nil? || (uid == User.super_id))
                self.isGlobal = true
-           elsif !self.users.exists?(uid)
+           elsif !self.users.exists?(uid) # Reality check on the user id
                begin
                    user = User.find(uid)
                    self.users << user 
@@ -157,15 +184,14 @@ class Tag < ActiveRecord::Base
    # assert: return a key of the given type matching the name, even if it has to be created anew
    # matchall: search only succeeds if it matches the whole string
    
-   # If the :force option is asserted, strmatch WILL return a tag on the given name, of the
+   # If the :assert option is true, strmatch WILL return a tag on the given name, of the
    # given type, visible to the given user. This may not require making a new tag, but only opening 
    # an existing tag to the given user
   def self.strmatch(name, opts = {} )
-    debugger
     uid = opts[:userid]
     # Convert to internal form
     type = opts[:tagtype] && self.tagtype_inDB(opts[:tagtype])
-    assert = opts[:force]
+    assert = opts[:assert]
     name = name || ""  # nil matches anything
 	# Case-insensitive lookup
 	fuzzyname = Tag.normalizeName name
@@ -252,5 +278,9 @@ class Tag < ActiveRecord::Base
        end
    end
 
+    # Return a list of tags that are expressions of this tag's referent(s)
+    def synonyms( opts = {} )
+        self.referents.uniq.collect { |ref| ref.tags }.flatten.uniq 
+    end
 end
 

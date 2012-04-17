@@ -64,16 +64,13 @@ class TagOwnershipTest < ActiveSupport::TestCase
         # Check that thing2 can't see it
         thing2id = users(:thing2).id
         assert_nil Tag.strmatch(tagstr, userid: thing2id).first, "New local tag should be invisible to other user"
+        # Admit user directly, rather than by assert_tag
         t.admit_user thing2id
         # Make sure thing2 appears among tag owners
         assert t.user_ids.include?(thing2id), "New user for local tag doesn't appear"
         # Make sure thing2 can now see it
         assert Tag.strmatch(tagstr, userid: thing2id).first, "Can't find co-owned local tag on new user"
     end
-    
-    # Folded assertion by user to non-global tag makes it visible to user
-    
-    # User added to tag's list when user asserts an existing key
     
     # Tag made global when asserted by super
     test "super-user makes global tags" do
@@ -94,7 +91,45 @@ class TagOwnershipTest < ActiveSupport::TestCase
         assert Tag.strmatch("thing1 tag").first
     end
     
-    # Admitting super-user for non-global tag makes it global
+    test "Admitting super-user for non-global tag makes it global" do
+        thing1id = users(:thing1).id
+        tagstr = "soon-to-be-global tag"
+        assert_nil Tag.strmatch(tagstr, userid: thing1id).first, tagstr+" shouldn't match before asserting"
+        # Asserting local tag, owned by thing1
+        t = Tag.assert_tag(tagstr, userid: thing1id)
+        # Check that it's indeed local
+        assert_nil t.isGlobal, tagstr+" for specific user turned up global"
+        # Check that thing1 can see it
+        t = Tag.strmatch(tagstr, userid: thing1id).first
+        assert t, "Can't find #{tagstr} on creator"
+        
+        superid = users(:super).id
+        t = Tag.strmatch(tagstr, userid: superid).first
+        assert t, "Can't find #{tagstr} on super"
+        assert_nil t.isGlobal, "Super reading #{tagstr} turned it global"
+        t.admit_user superid
+        assert_equal t, Tag.strmatch(tagstr, userid: superid).first, "Admitting super as user changed tag"
+        assert t.isGlobal, "Admitting super for local tag didn't make it global"
+    end
     
-    # Admitting nil user for non-global tag makes it global
+    test "Admitting nil user for non-global tag makes it global" do
+        thing1id = users(:thing1).id
+        tagstr = "soon-to-be-global-by-nil tag"
+        assert_nil Tag.strmatch(tagstr, userid: thing1id).first, tagstr+" shouldn't match before asserting"
+        # Asserting local tag, owned by thing1
+        t = Tag.assert_tag(tagstr, userid: thing1id)
+        # Check that it's indeed local
+        assert_nil t.isGlobal, tagstr+" for specific user turned up global"
+        # Check that thing1 can see it
+        t = Tag.strmatch(tagstr, userid: thing1id).first
+        assert t, "Can't find #{tagstr} on creator"
+        
+        superid = users(:super).id
+        t = Tag.strmatch(tagstr, userid: superid).first
+        assert t, "Can't find #{tagstr} on super"
+        assert_nil t.isGlobal, "Super reading #{tagstr} turned it global"
+        t.admit_user
+        assert_equal t, Tag.strmatch(tagstr, userid: superid).first, "Admitting nil as user changed tag"
+        assert t.isGlobal, "Admitting nil for local tag didn't make it global"
+    end
 end

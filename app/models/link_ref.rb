@@ -1,4 +1,3 @@
-require './lib/Domain.rb'
 require 'CGI'
 require 'uri'
 
@@ -11,43 +10,35 @@ class LinkRef < ActiveRecord::Base
     # puts "Ensuring uniqueness of user #{self.user_id.to_s} to recipe #{self.recipe_id.to_s}"
     # end
     
-    # The coder is used to encode/decode HTML
-    @@coder = HTMLEntities.new
-    
     # Associate a link with a tag in the database. Parameters:
-    #  :uri
-    #  :type => :vendor, :store, :book, :blog, :rcpsite, :cookingsite, :othersite, :video, :glossary
+    #  :uristr
     #  :tag => if Tag class, taken as is
-    #          if string, the tag's string (typed acc'ng to :keytype)
+    #          if string, the tag's string (typed acc'ng to :tagtype)
     #          if integer, the tag's integer key
-    #   :tagtype => integer or symbol for the tag's type (iff :tag is string)
+    #  resource_type :vendor, :store, :book, :blog, :rcpsite, :cookingsite, :othersite, :video, :glossary, :recipe
+    #   :tagtype => integer or symbol for the tag's type (to assert new type on existing tag)
     # NB: URI and :key are both required    
-    def self.associate (uri, tag, type = :glossary )
-        # Find or create a matching link entry
-        uri = @@coder.decode uri # Links are decoded in the database
-        if type
-            # Should be throwing an error if resource_type doesn't make sense
-            resource_type = Link.resource_type_inDB type
-            # Asserted type => type existing record if nil
-            unless link = Link.find_by_uri_and_resource_type(uri, resource_type)
-                link = Link.find_or_create_by_uri_and_resource_type(uri, nil)
-                link.resource_type = resource_type
-                link.save
-            end
-        else
-            # No asserted type => Use existing record, if any
-            link = Link.find_or_create_by_uri(uri)
+    def self.associate (uristr, tag, opts = {} )
+        puts "LinkRef.associate asserting #{tag} of type #{opts[:tagtype].to_s} for user #{opts[:userid].to_s}"
+        resource_type = opts[:resource_type] || :glossary
+        tag = Tag.assert_tag tag, tagtype: opts[:tagtype], userid: opts[:userid]
+        puts "Associating tag #{tag.id.to_s} carrying links #{tag.link_ids.to_s}"
+        link = Link.assert_link uristr, resource_type
+        puts "...with link #{link.id.to_s} carrying tags #{link.tag_ids.to_s}"
+        unless tag.link_ids.include? link.id
+            puts "Adding link #{link.id} to tag #{tag.id}"
+            tag.links << link
+            tag.save
+            puts "...tag now has links #{tag.link_ids.to_s}"
+            puts "...and link now has #{link.tag_ids.to_s}"
+            link.save
         end
-        # Get domain and path from url if not already there
-        link.save if link.domain.nil? && (link.domain = domain_from_url(uri))
-        
-        # We have a link and a tag. Join the link to all tags which
-        # match the tag name, modulo parametrization
-        LinkRef.find_or_create_by_link_id_and_tag_id(link.id, tag.id) 
+        link
     end
-    
+        
 require 'csv'
     def self.import_CSVfile(fname)
+        rownum = 1
         CSV.foreach(fname, :encoding=>"UTF-8") do |row|
             return unless tagstrs = row[0]
             typestrs = row[1]
@@ -61,10 +52,11 @@ require 'csv'
                 typestrs.split('; ').each do |typestr|
                     # puts self.associate :tag=>tag, :resource_type=>:glossary, :uri=>uri, :tagtype=>type, :userid=>superid
                     # Convert typestr to canonical form
-                    typeid = Tag.tagtype_inDB typestr.capitalize
-                    if typeid
-                        tag = Tag.strmatch( tagstr, tagtype: typeid, force: true).first
-                        LinkRef.associate uri, tag, :glossary
+                    if typeid = Tag.tagtype_inDB(typestr)
+                        # Tags will be asserted if they don't exist, assigned to the given type and made global
+                        tag = Tag.assert_tag( tagstr, tagtype: typeid)
+                        debugger
+                        LinkRef.associate uri, tag
                         tags << tag
                         # The idea is to glean a common referent for all the tags of a given type. If none
                         #  exists among the incoming tags, then we'll make one later
@@ -80,7 +72,7 @@ require 'csv'
                             end
                         end
                     else
-                        puts "Error: typeid '#{typestr}' isn't sensible"
+                        puts "Error on line ##{rownum.to_s}(#{row.to_s}): typeid '#{typestr}' isn't sensible"
                     end
                 end
             end
@@ -90,11 +82,12 @@ require 'csv'
                 # Create a referent for this tag, if necessary
                 if referent = referents[tag.tagtype]
                     # There is a target referent; assert it to the tag unless it's already there
-                    referent.express(tag) unless tag.referent_ids.include?(referent.id)
+                    referent.express(tag) # unless tag.referent_ids.include?(referent.id)
                 else
-                    referents[tag.tagtype] = Referent.express(tag.name, tag.tagtype, true)
+                    referents[tag.tagtype] = Referent.express tag, tag.tagtype
                 end
             end
+            rownum = rownum + 1
         end
     end
     def self.preview_CSVfile(fname)

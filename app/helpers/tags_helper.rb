@@ -22,12 +22,13 @@ module TagsHelper
     def tags_tabset
    	    tabstrs = ""
    	    tabindex = @tabindex.to_s
-   	    tabset = Tag.typenames
-   	    tabset.each_index do |ix|
-   	      label = tabset[ix].to_s.pluralize
-   	      tabstrs += <<BLOCK_END
-       		<li class="tag_tab"><a href="tags/editor?tabindex=#{ix.to_s}" title="#{label}">#{label}</a></li> 
+   	    ix = 0
+   	    while type = Tag.index_to_type(ix) # we get nil when we've run off the end of the table
+   	        label = type.to_s.pluralize
+   	        tabstrs += <<BLOCK_END
+       		    <li class="tag_tab"><a href="tags/editor?tabindex=#{ix.to_s}" title="#{label}">#{label}</a></li> 
 BLOCK_END
+   	        ix += 1
         end
         s = <<BLOCK_END
 <div id="tags_tabset" value=#{tabindex} > 
