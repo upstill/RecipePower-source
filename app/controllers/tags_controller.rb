@@ -26,6 +26,7 @@ class TagsController < ApplicationController
   # Query parameters:
   #    :tagtype - type of tag to look for (if any; otherwise, unconstrained)
   #    :tabindex - index of tabs in the tags editor; convertible to tag type
+  #             NB: tabindex may be omitted for other contexts; all types will be searched
   #    :unbound_only - if true, we're compiling a list of unbound tags, so 
   #                     eliminate all tags that already have a referent
   #    :q, :term - string to match within a tag
@@ -42,7 +43,7 @@ class TagsController < ApplicationController
       session[:tabindex] = @tabindex
       @orphantags = Tag.strmatch(params[:q] || params[:term] || "", 
                                userid:  session[:user_id],
-                               tagtype: params[:tagtype], # nil for any type
+                               tagtype: (params[:tabindex] ? Tag.index_to_type(@tabindex) : nil), # Search across types if no tab
                                force:   (params[:makeormatch] == "true"))
       @orphantags.delete_if { |t| !t.referents.empty? } if params[:unbound_only] == "true"
       respond_to do |format|

@@ -36,6 +36,10 @@ class TagTest < ActiveSupport::TestCase
     test "normalized name must elide gratuity" do
         assert_equal "cafe", Tag.assert_tag("CAfé").normalized_name
         assert_equal "joes-bar-grille-and-restaurant", Tag.assert_tag(" Joe's Bar, Grille and   - -Restaurant  ").normalized_name
+        tag = tags(:chilibean).find
+        assert_nil tag.normalized_name, "Normalized_name should be nil for unsaved record"
+        tag.save
+        assert_equal "chile-bean", "'chili bean' should normalize to 'chile-bean'"
     end
     
     # String matching is immune to differences of diacriticals, capitals and punctuation

@@ -24,7 +24,7 @@ module TagsHelper
    	    tabindex = @tabindex.to_s
    	    ix = 0
    	    while type = Tag.index_to_type(ix) # we get nil when we've run off the end of the table
-   	        label = type.to_s.pluralize
+   	        label = Tag.typename(type).to_s.pluralize
    	        tabstrs += <<BLOCK_END
        		    <li class="tag_tab"><a href="tags/editor?tabindex=#{ix.to_s}" title="#{label}">#{label}</a></li> 
 BLOCK_END

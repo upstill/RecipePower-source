@@ -63,17 +63,6 @@ class Tag < ActiveRecord::Base
         "chillies" => "chiles",
     }
     
-    @@tagmap = {
-        "chile-bean-paste" => "chili-bean-paste",
-        "chile-bean" => "chili-bean",
-        "chile-powder" => "chili-powder",
-        "chile-con-carne" => "chili-con-carne",
-        "chile-flakes" => "chili-flakes",
-        "chile-oil" => "chili-oil",
-        "chile-paste" => "chili-paste"
-        }
-        
-    
     # Remove gratuitous characters, diacriticals, punctuation and capitalization for search purposes
     def self.normalizeName(str)
         str.strip.gsub(/[.,'‘’“”'"]+/, '').parameterize.split('-').collect{ |word| @@wordmap[word] || word }.join('-')

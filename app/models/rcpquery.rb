@@ -240,7 +240,7 @@ class Rcpquery < ActiveRecord::Base
         # :comment is text to match against the comment field
         # :status is the set of status flags to match 
         matchText = (self.querymode.to_sym == :rcpquery_strict && !self.querytext.empty?) ?
-        self.querytext : nil
+                    self.querytext : nil
         candidates = Rcpref.recipe_ids( 
                             self.owner_id, 
                             self.user_id,
@@ -327,10 +327,10 @@ class Rcpquery < ActiveRecord::Base
     end
 
     # Fetch and use parameters to revise a query record before returning
-    def self.fetch_revision(id, uid, *params)
+    def self.fetch_revision(id, uid, params)
         result = self.find(id)
         result.session_id = uid
-        result.update_attributes(params[0])
+        result.update_attributes(params)
         result.save
         result
     end

@@ -7,3 +7,8 @@ jal2:
     name: Chipotle  -chiles
     tagtype: 4
     isGlobal: false
+    
+chilibean:
+    name: chili bean
+    tagtype: 4
+    isGlobal: true

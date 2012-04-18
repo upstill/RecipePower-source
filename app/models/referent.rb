@@ -1,5 +1,5 @@
 class Referent < ActiveRecord::Base
-    acts_as_tree
+    # acts_as_tree
     
     has_many :expressions
     has_many :tags, :through=>:expressions
@@ -140,14 +140,12 @@ public
     
     # Return the name of the referent [XXX for the current locale]
     def normalized_name
-        tag = Tag.find self.tag
-        tag.normalized_name
+        self.tag ? Tag.find(self.tag).normalized_name : "**no tag**"
     end
     
     # Return the name of the referent [XXX for the current locale]
     def name
-        tag = Tag.find self.tag
-        tag.name
+        self.tag ? Tag.find(self.tag).name : "**no tag**"
     end
     
     # Return the name, appended with all associated forms
