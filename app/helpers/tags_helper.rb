@@ -18,10 +18,9 @@ module TagsHelper
         ("<div class=\"orphantag\" id=\"#{orphantagid(tag.id)}\">"+name+"</div>").html_safe
     end
     
-    # Build a set of tabs for use by jQuery UI
-    def tags_tabset
+    # Build a set of tabs for use by jQuery UI, with the current tab given as a parameter
+    def tags_tabset(tabindex)
    	    tabstrs = ""
-   	    tabindex = @tabindex.to_s
    	    ix = 0
    	    while type = Tag.index_to_type(ix) # we get nil when we've run off the end of the table
    	        label = Tag.typename(type).to_s.pluralize
@@ -31,7 +30,7 @@ BLOCK_END
    	        ix += 1
         end
         s = <<BLOCK_END
-<div id="tags_tabset" value=#{tabindex} > 
+<div id="tags_tabset" value=#{tabindex.to_s} > 
   <ul>
     #{tabstrs}
   </ul> 

@@ -126,7 +126,7 @@ puts "Ensuring uniqueness of user #{self.user_id.to_s} to recipe #{self.recipe_i
 	end
 
 	# Return everything now for super
-	return allrefs.map {|rr| rr.recipe_id} if owner_id == User.super_id
+	return allrefs.map {|rr| rr.recipe_id}.uniq if owner_id == User.super_id
 
 	# XXX Should be moved to a migration
 	allrefs.each do |rr| 

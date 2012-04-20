@@ -3,9 +3,9 @@ require "my_constants.rb"
 # Class for a hash of recipe keys, for sorting as integers
 class Candihash < Hash
     # Initialize the candihash to a set of keys
-    def initialize(startset, mode)
+    def initialize(startset) # , mode)
        startset.each { |rid| self[rid.to_s] = 0 }
-       @mode = mode
+       # @mode = mode
     end
 
     def reset keys
@@ -17,13 +17,13 @@ class Candihash < Hash
     # by bumping the presence counts (:rcpquery_loose)
     # or by intersecting the sets (:rcpquery_strict)
     def apply(newset)
-        case @mode 
-    	when :rcpquery_strict
-    	    newset.select { |id| self[id.to_s] }
-    	    self.reset newset
-    	when :rcpquery_loose 
+        # case @mode 
+    	# when :rcpquery_strict
+    	    # newset.select { |id| self[id.to_s] }
+    	    # self.reset newset
+    	# when :rcpquery_loose 
     	    newset.each { |id| self[id.to_s] += 1 if self[id.to_s] }
-    	end
+    	# end
     end
 
     # Return the keys as an integer array, sorted by number of hits
@@ -31,12 +31,11 @@ class Candihash < Hash
     # each recipe in some prior ordering. Use that ranking to constrain the output
     def results (rankings)
     	# Extract the keys and sort them by success in matching
-    	if @mode == :rcpquery_loose
-    	    buffer1 = self.keys.select { |k| self[k] > 0 } # (In random order)
-                buffer1.sort! { |k1, k2| self[k1] <=> self[k2] } 
-    	else
-    	    buffer1 = self.keys # Random order
-    	end
+    	# if @mode == :rcpquery_loose
+    	    buffer1 = self.keys.select { |k| self[k] > 0 }.sort! { |k1, k2| self[k1] <=> self[k2] } 
+    	# else
+    	    # buffer1 = self.keys # Random order
+    	# end
 
     	return buffer1 if rankings.blank?
     	# See if the prior rankings have anything to say about matters
@@ -67,19 +66,21 @@ class Candihash < Hash
 end
 
 class Rcpquery < ActiveRecord::Base
-    attr_accessible :status, :tag_tokens, :tags, :ratings_attributes, :page_length, :cur_page,
-    	:session_id, :user_id, :owner_id, :listmode_str, :querymode_str, :querytext # From database
-    attr_reader :ratings
+    serialize :specialtags
+    
+    attr_accessible :status, :session_id, :user_id, :owner_id, :tag_tokens, :tags, :page_length, :cur_page
     attr_reader :tags
     attr_reader :tag_tokens
-    attr_reader :listmode_str
-    attr_reader :querymode_str
     attr_reader :results
-    attr_accessor :page_length, :cur_page
-
+    attr_accessor :page_length, :cur_page, :specialtags
+    
     after_initialize :my_init
     after_find :my_reinit
-    
+
+    def my_reinit
+	    tag_tokens = self.tagstxt
+    end
+        
     def page_length()
         25
     end
@@ -135,7 +136,8 @@ class Rcpquery < ActiveRecord::Base
         @listmode
     end
 
-    # Selectors for setting the list's searching mode
+=begin
+    # Selectors for setting the list's searching mode (obsolete)
     @@querymodes = [["Strict Searching", :rcpquery_strict],
   		    ["Loose Searching", :rcpquery_loose]]
 
@@ -151,37 +153,29 @@ class Rcpquery < ActiveRecord::Base
     def querymode_str
         self.querymode
     end
+=end
 
     def selectionlist
     	User.selectionlist :owner_id=>self.owner_id, :user_id=>self.user_id
     end
-
     def my_init
 
     	self.tagstxt = ""  unless self.tagstxt
     	self.tag_tokens = self.tagstxt
 
-    	self.ratingstxt = "" unless self.ratingstxt
-    	@ratings = self.ratingstxt.split(',').map do  |r| 
-    	    idval = r.split(':')
-    	    Rating.new :scale_id=>idval.first.to_i, :scale_val=>idval.last.to_i
-    	end
-
-    	self.fromsitestxt = "" unless self.fromsitestxt
-    	self.circlestxt = "" unless self.circlestxt
-    	self.querytext = "" unless self.querytext
-
     	self.user_id = User.guest_id unless self.user_id
     	self.owner_id = User.guest_id unless self.owner_id
 
     	self.status = MyConstants::Rcpstatus_misc unless self.status
+    	
+    	self.specialtags = {} if self.specialtags.nil?
 
     	self.listmode = :rcplist_smallpic.to_s unless self.listmode
     	   # (vs. :rcplist_text or :rcplist_bigpic)  Default to small-pic listing
     	@listmode = self.listmode.to_sym 
 
-    	self.querymode = :rcpquery_loose.to_s unless self.querymode # vs. :rcpquery_strict
-    	@querymode = self.querymode.to_sym
+    	# self.querymode = :rcpquery_loose.to_s unless self.querymode # vs. :rcpquery_strict
+    	# @querymode = self.querymode.to_sym
 
     	@fromsites = [] # An array of site ids
     	@circles = []   # An array of user ids of type 'circle'
@@ -192,41 +186,9 @@ class Rcpquery < ActiveRecord::Base
     	@results = nil
     end
 
-    def my_reinit
-    	# When a query is (re)loaded from the database, convert holder fields
-	tag_tokens = self.tagstxt
-    end
-
-    # updater for ratings attributes, i.e., translate betw params and ratings
-    def ratings_attributes=(ra)
-	rlist = []
-	rlist = ra.values.map { |rv|
-	    Rating.new( :scale_id => rv["scale_id"],
-	    		:scale_val => rv["scale_val"] ) if rv["scale_val"] && (rv["_destroy"] != "1")
-	}.compact
-	self.ratings = rlist
-    end
-
-    # def status_txt=(str)
-        # self.status = str.to_i
-    # end
-
-    # def status_txt(str)
-        # self.status
-    # end
-
     # Return the 0-based index of the tab representing the current status
     def status_tab
         {"1"=>0, "2"=>1, "4"=>2, "8"=>3, "16"=>4}[self.status.to_s]
-    end
-
-    def ratings=(rlist)
-	self.ratingstxt = rlist.map { |r| r.scale_id.to_s+":"+r.scale_val.to_s }.join ','
-    	@ratings = rlist
-    end
-
-    def ratings
-        @ratings
     end
 
     # Get the results of the current query.
@@ -235,48 +197,42 @@ class Rcpquery < ActiveRecord::Base
         # Try to match prior query for this user and fetch rankings array
         # "match" has fewest num. of differing elements
 
-        # Get the initial working list from Rcpref model
-        # Rcpref.recipe_ids can take:
-        # :comment is text to match against the comment field
-        # :status is the set of status flags to match 
-        matchText = (self.querymode.to_sym == :rcpquery_strict && !self.querytext.empty?) ?
-                    self.querytext : nil
+        # First, get a set of candidates, determined by:
+        # -- who the owner of the list is 
+        # -- who the viewer is
+        # -- targetted status of the recipe (Rotation, etc.)
+        # -- text to match against titles and comments
         candidates = Rcpref.recipe_ids( 
                             self.owner_id, 
                             self.user_id,
-                            :status=>self.status,
-                            :title=>matchText,
-                            :comment=>matchText)
+                            status: self.status)
 
         # XXX Merge in the lists for each circle
         # @circles.each { |circle_id| candidates = candidates | Rcpref.recipe_ids(circle_id, self.user_id) }
-
-        matchText = (self.querymode.to_sym == :rcpquery_loose && !self.querytext.empty?) ? self.querytext : nil
-        unless ratings.empty? && @tags.empty? && matchText.blank? 
+        unless @tags.empty? && specialtags.blank? 
             # We purge/massage the list ONLY if there is a query here
             # Otherwise, we simply sort the list by mod date
             # Convert candidate array to a hash recipe_id=>#hits
 
-            candihash = Candihash.new candidates, @querymode
+            candihash = Candihash.new candidates #, @querymode
 
             # XXX Filter for sites
-
-            # Rank/purge for ratings
-            @ratings.each { |rating| candihash.apply rating.recipes }
 
             # Rank/purge for tag matches
             @tags.each { |tag| candihash.apply tag.recipe_ids }
 
             # Rank/purge for text matches in comment
-            if matchText
-                # Get candidates that match in the comments field
+            specialtags.keys.each do |key| 
+                matchStr = specialtags[key]
+                # Get candidates that match the free strings in the query
+                matchStr.gsub! /\'/, ""
                 candihash.apply Rcpref.recipe_ids(self.owner_id, self.user_id,
                                                 :status=>self.status,
-                                                :comment=>matchText) 
+                                                :comment=>matchStr) 
                 # Get candidates that match in the title
                 candihash.apply Rcpref.recipe_ids(self.owner_id, self.user_id,
                                                 :status=>self.status,
-                                                :title=>matchText) 
+                                                :title=>matchStr) 
             end
             candidates = candihash.results(@rankings).reverse
     	end
@@ -292,20 +248,49 @@ class Rcpquery < ActiveRecord::Base
 	    @results
     end
 
-    # Virtual attribute tag_tokens accepts the tags for the query
+    # Virtual attribute tag_tokens accepts the tag string for the query and generates the 
+    # current tag set, along with the necessary specialtags
     # ids is the parameter string for the tokens
+    # NB: The rcpquery takes both tag ids and unaffiliated strings for full-text searching.
+    # The latter are converted to special tags stored with the query, and given a negative
+    # id.
     def tag_tokens=(paramstr)
-        # Keep the saveable query up to date
+        # We either use the current tagstxt or the parameter, updating the tagstxt as needed
         self.tagstxt = paramstr
-        @tags = paramstr.split(",").map { |e| 
-            if(e=~/^\d*$/) # numbers (sans quotes) represent existing tags
-                Tag.find e.to_i
+        @tags = nil
+        self.tags
+    end
+  
+    # Get the current set of tags based on the current tagstxt, including special tags
+    def tags
+        return @tags if @tags # Use cache, if any
+        newspecial = {}
+        oldspecial = self.specialtags
+        # Accumulate resulting tags here:
+        @tags = []
+        self.tagstxt.split(",").each do |e| 
+            e.strip!
+            if(e=~/^\d*$/) # numbers (sans quotes) represent existing tags that the user selected
+                @tags << Tag.find(e.to_i)
+            elsif e=~/^-\d*$/  # negative numbers (sans quotes) represent special tags from before
+                # Re-save this one
+                tag = Tag.new(name: (newspecial[e] = oldspecial[e]))
+                tag.id = e.to_i
+                @tags << tag
             else
-                e.gsub!('\'','') # Strip out enclosing quotes
-                # Convert the tag to an id if poss.
-                (thetags = Tag.where "name like ?", e) ? thetags[0] : Tag.new(:name=>e)
+                # This is a new special tag. Convert to an internal tag and add it to the cache
+                tag = Tag.new(name: e.gsub(/\'/, '').strip )
+                tag.id = -1
+                # Search for an unused id
+                while(newspecial[tag.id.to_s] || oldspecial[tag.id.to_s]) do
+                    tag.id = tag.id - 1 
+                end
+                newspecial[tag.id.to_s] = tag.name
+                @tags << tag
             end
-        }
+        end
+        self.specialtags = newspecial
+        @tags
     end
 
   def tag_tokens
@@ -328,6 +313,9 @@ class Rcpquery < ActiveRecord::Base
 
     # Fetch and use parameters to revise a query record before returning
     def self.fetch_revision(id, uid, params)
+        # This is all very straightforward, EXCEPT that we allow the 'tagstxt' query string
+        # to include both tagids (for searching on tags) and plain text. The latter we split
+        # out into the text for searching titles and comments
         result = self.find(id)
         result.session_id = uid
         result.update_attributes(params)

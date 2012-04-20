@@ -4,12 +4,7 @@ class TagsController < ApplicationController
   def index
       return if need_login true, true
       @Title = "Tags"
-      if params[:tabindex]
-          @tabindex = params[:tabindex].to_i
-          tagtype = Tag.index_to_type @tabindex 
-      else
-          @tabindex = session[:tabindex] || 0
-      end
+      @tabindex = params[:tabindex] ? params[:tabindex].to_i : (session[:tabindex] || 0)
       session[:tabindex] = @tabindex
       @tags = params[:tagtype] ? Tag.where("tagtype = ?", params[:tagtype]) : Tag.all
       # The :unbound_only parameter limits the set to tags with no associated form (and, thus, referent)
@@ -22,46 +17,55 @@ class TagsController < ApplicationController
   end
   
   # GET /tags/match
+  # This action is for remotely querying the tags that match a given string. It gets used in:
+  #  -- the tag editor, for filtering for unbound tags
+  #  -- the recipe tagger, for applying tags to recipes
+  #  -- recipe searching, for picking tags to search on
+  # Expected returns are:
+  #  -- JSON, for the client to create dynatree lists of tags for the tag editor
+  #  -- html, for the resulting list of tags
   # The match action provides a list of tags that match a given string. 
   # Query parameters:
   #    :tagtype - type of tag to look for (if any; otherwise, unconstrained)
   #    :tabindex - index of tabs in the tags editor; convertible to tag type
   #             NB: tabindex may be omitted for other contexts; all types will be searched
-  #    :unbound_only - if true, we're compiling a list of unbound tags, so 
+  #    :unbound_only - if true, we're addressing a list of unbound tags, so 
   #                     eliminate all tags that already have a referent
   #    :q, :term - string to match within a tag
   #    :makeormatch - Boolean indicating that this tag should be created if 
-  #           it can't be found EXACTLY
+  #           it can't be found, modulo normalization
   def match
       @Title = "Tags"
-      if params[:tabindex]
-          @tabindex = params[:tabindex].to_i
-          tagtype = Tag.index_to_type @tabindex 
-      else
-          @tabindex = session[:tabindex] || 0
-      end
-      session[:tabindex] = @tabindex
-      @orphantags = Tag.strmatch(params[:q] || params[:term] || "", 
-                               userid:  session[:user_id],
-                               tagtype: (params[:tabindex] ? Tag.index_to_type(@tabindex) : nil), # Search across types if no tab
-                               force:   (params[:makeormatch] == "true"))
-      @orphantags.delete_if { |t| !t.referents.empty? } if params[:unbound_only] == "true"
+      @tabindex = params[:tabindex].to_i # params[:tabindex] ? params[:tabindex].to_i : (session[:tabindex] || 0)
+      # session[:tabindex] = @tabindex
+      # Get tagtype directly from tagtype parameter, or indirectly from tabindex (or leave it nil)
+      tagtype = (params[:tagtype] && params[:tagtype].to_i) || 
+                (params[:tabindex] && @tabindex)
+      matchstr = params[:q] || params[:term] || ""
+      matchopts = {
+          userid: session[:user_id],
+          tagtype: tagtype,
+          force: (params[:makeormatch] == "true"),
+          partition: true
+      }
+      @taglist = Tag.strmatch(matchstr, matchopts).uniq
+      @taglist.delete_if { |t| !t.referents.empty? } if params[:unbound_only] == "true"
       respond_to do |format|
         format.json { render :json => 
-                case params[:response_format]
-                when "dynatree"
-                    # for a dynatree list: an array of hashes with title, isLazy, key and isFolder fields
-                    @orphantags.map { |tag| { :title=>tag.name, :isLazy=>false, :key=>tag.id, :isFolder=>false } }
-                when "strings"
-                    # Just a list of strings...
-                    @orphantags.map(&:attributes).map { |match| match["name"] }
-                else # assuming "tokenInput" because that js won't send a parameter
-                    # for tokenInput: an array of hashes, each with "id" and "name" values
-                    @orphantags.map(&:attributes).map { |match| {:id=>match["id"], :name=>match["name"]} } 
-                end
+            case params[:response_format]
+            when "dynatree"
+                # for a dynatree list: an array of hashes with title, isLazy, key and isFolder fields
+                @taglist.map { |tag| { :title=>tag.name, :isLazy=>false, :key=>tag.id, :isFolder=>false } }
+            when "strings"
+                # Just a list of strings...
+                @taglist.map(&:attributes).map { |match| match["name"] }
+            else # assuming "tokenInput" because that js won't send a parameter
+                # for tokenInput: an array of hashes, each with "id" and "name" values
+                @taglist.map(&:attributes).map { |match| {:id=>match["id"], :name=>match["name"]} } 
+            end
         }
-        format.html { render :partial=>"tags/taglist"}
-        format.xml  { render :xml => @orphantags }
+        format.html { render :partial=>"tags/taglist" }
+        format.xml  { render :xml => @taglist }
       end
   end
 
@@ -102,9 +106,9 @@ class TagsController < ApplicationController
   def editor
     return if need_login true, true
     @Title = "Tags"
-    @tabindex = (params[:tabindex] || 0).to_i # type numbers for Ingredient, Genre, Free Tag, etc.
+    @tabindex = params[:tabindex] ? params[:tabindex].to_i : (session[:tabindex] || 0)
     # The list of orphan tags gets all tags of this type which aren't linked to a table
-    @orphantags = Tag.strmatch("", userid: session[:user_id], tagtype: Tag.index_to_type(@tabindex) )
+    @taglist = Tag.strmatch("", userid: session[:user_id], tagtype: Tag.index_to_type(@tabindex) )
     session[:tabindex] = @tabindex
     render :partial=>"editor"
   end

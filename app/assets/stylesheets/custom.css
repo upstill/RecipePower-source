@@ -424,9 +424,36 @@ padding:10px;
 }
 
 .rcpquery_tags_div {
-  margin-top: 0px;
+  margin-top: 20px;
+  margin-bottom: 20px;
   width:100%;
   // outline:#999 solid 1px;
+}
+
+#rcpquery_tags_label {
+  font:14px arial,sans-serif;
+// float: left;
+// display: block;
+  font-weight:bold;
+  width:30%;
+  outline:#999 solid 1px;
+}
+
+#rcpquery_querytext {
+  font:14px arial,sans-serif;
+  height:20px;
+// float: right;
+// display: block;
+  width:70%;
+  outline:#999 solid 1px;
+}
+
+#rcpquery_tag_tokens {
+  font:12px arial,sans-serif;
+// float: right;
+// display: block;
+  width:300px; // 70%;
+  outline:#999 solid 3px;
 }
 
 .recipe_fields_div {
@@ -450,7 +477,9 @@ padding:10px;
 
 #recipe_tag_tokens {
   font:12px arial,sans-serif;
-  width:100%;
+float: right;
+display: block;
+  width:70%;
   // outline:#999 solid 1px;
 }
 

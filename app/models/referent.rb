@@ -29,7 +29,8 @@ class Referent < ActiveRecord::Base
         else
             typename = tagtype
         end
-        typename.to_s+"Referent"
+        # Remove whitespace to get the class name
+        typename.to_s.gsub(/\s/, '')+"Referent"
     end
         
 public

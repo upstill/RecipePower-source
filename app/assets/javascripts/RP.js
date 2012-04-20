@@ -454,7 +454,8 @@ $(function() {
     });
     $("#rcpquery_tag_tokens").tokenInput("/tags/match.json", {
         crossDomain: false,
-        hintText: "Type tags to look for",
+        hintText: "",
+		noResultsText: "No matching tag found; hit Enter to search with text",
         prePopulate: $("#rcpquery_tag_tokens").data("pre"),
         theme: "facebook",
         onAdd: tokenChangeCallback,

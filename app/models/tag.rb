@@ -80,25 +80,30 @@ class Tag < ActiveRecord::Base
     end
 
    # These class variables keep the mapping among tag types, type indices, and descriptive strings for the types
-   @@TypesToNames = ["free tag".to_sym, :Genre, :Role, :Process, :Food, :Unit, :Source, :Author, :Occasion, "Pantry Section".to_sym, "Store Section".to_sym, :Interest, :Tool ]
-   @@NamesToTypes = {:Genre=>1, :Role=>2, :Process=>3, :Food=>4, :Unit=>5, :Source=>6, :Author=>7, :Occasion=>8 , "free tag".to_sym=>0, "Pantry Section".to_sym=>9, "Store Section".to_sym=>10, :Interest=>11, :Tool=>12}
+   @@TypesToNames = ["free tag".to_sym, :Genre, :Role, :Process, :Food, :Unit, :Source, :Author, :Occasion, :PantrySection, :StoreSection, :Interest, :Tool ]
+   @@NamesToTypes = {:Genre=>1, :Role=>2, :Process=>3, :Food=>4, :Unit=>5, :Source=>6, :Author=>7, :Occasion=>8 , "free tag".to_sym=>0, :PantrySection=>9, :StoreSection=>10, :Interest=>11, :Tool=>12}
 
    public 
    
    # Taking an index into the table of tag types, return the symbol for that type
    # (used to build a set of tabs, one for each tag type)
+   # NB: returns nil for nil index
    def self.index_to_type(index)
-       @@NamesToTypes[@@TypesToNames[index]]
+       index && @@NamesToTypes[@@TypesToNames[index]]
    end
    
    # Convert the tag type to external storage format, e.g. integer
    # We allow the type to be a string, a symbol, an integer index or an array of those types
    # A nil 'tt' is preserved on output (and an empty array returns nil) 
    def self.tagtype_inDB (tt)
-       if tt.kind_of?(Array)
+       if tt.kind_of? Fixnum 
+           tt 
+       elsif tt.kind_of? Symbol 
+           @@NamesToTypes[tt]
+       elsif tt.kind_of? String
+           @@NamesToTypes[tt.capitalize.to_sym]
+       elsif tt.kind_of? Array
            tt.first && tt.collect { |type| self.tagtype_inDB type }
-       else
-           ((tt.kind_of? Fixnum) ? tt : @@NamesToTypes[tt.capitalize.to_sym]) if tt
        end
    end
    
@@ -117,6 +122,7 @@ class Tag < ActiveRecord::Base
    #  not necessarily of the given type, or one available to the user.
    def self.assert_tag(t, opts = {} )
        # Convert tag type, if any, into internal form
+       debugger
        opts[:tagtype] = self.tagtype_inDB(opts[:tagtype]) if opts[:tagtype]
        if t.class == Fixnum
            # Fetch an existing tag
@@ -204,42 +210,55 @@ class Tag < ActiveRecord::Base
     end
     # We now have a list of tags which match the input, perhaps fuzzily.
     # If we don't need to assert the full string, we're done
-    if !assert
-        # Restrict the found set to any asserted user
-    	tags.keep_if { |tag| tag.isGlobal || tag.users.exists?(uid) } if uid && (uid != User.super_id)
-    	return tags
-    end
-    # The tag set will be those which totally match the input. If there are none such, we need to create one
-    unless tags.empty?
-        # Since these match, we only need to make them visible to the user, if necessary
-        tags.each { |tag| tag.admit_user uid } if uid && (uid != User.super_id)
-    else
-        # We are to create a tag on the given string (after cleanup), and make it visible to the given user
-        name = Tag.tidyName name # Strip/collapse whitespace
-        return [] if name.blank?
-        tag = nil
-        if type.nil? # No type specified
-            tag = Tag.find_or_create_by_name name # It'll be a free tag, but if you don't care enough to specify...
+    if assert
+        # The tag set will be those which totally match the input. If there are none such, we need to create one
+        unless tags.empty?
+            # Since these match, we only need to make them visible to the user, if necessary
+            tags.each { |tag| tag.admit_user uid } if uid && (uid != User.super_id)
         else
-            if type.kind_of?(Array) # Look for the tag among the given types
-                type.find { |t| tag ||= Tag.find_by_name_and_tagtype(name, t) }
-                puts "Found tag #{tag.id} from array of types"
+            # We are to create a tag on the given string (after cleanup), and make it visible to the given user
+            name = Tag.tidyName name # Strip/collapse whitespace
+            return [] if name.blank?
+            tag = nil
+            if type.nil? # No type specified
+                tag = Tag.find_or_create_by_name name # It'll be a free tag, but if you don't care enough to specify...
             else
-                tag = Tag.find_by_name_and_tagtype(name, type)
-            end
-            if tag.nil?
-                type = type.first if type.kind_of?(Array)
-                if tag = Tag.find_by_name_and_tagtype( name, 0 ) # Convert a free tag to the type, if avail.
-                    tag.tagtype = type
-                    tag.save
+                if type.kind_of?(Array) # Look for the tag among the given types
+                    type.find { |t| tag ||= Tag.find_by_name_and_tagtype(name, t) }
+                    puts "Found tag #{tag.id} from array of types"
                 else
-                    tag = Tag.create :name=>name, :tagtype=>type
+                    tag = Tag.find_by_name_and_tagtype(name, type)
+                end
+                if tag.nil?
+                    type = type.first if type.kind_of?(Array)
+                    if tag = Tag.find_by_name_and_tagtype( name, 0 ) # Convert a free tag to the type, if avail.
+                        tag.tagtype = type
+                        tag.save
+                    else
+                        tag = Tag.create :name=>name, :tagtype=>type
+                    end
                 end
             end
+            # If it's private, make it visible to this user
+            tag.admit_user uid
+            tags = [tag]
         end
-        # If it's private, make it visible to this user
-        tag.admit_user uid
-        tags = [tag]
+    else
+        # Restrict the found set to any asserted user
+    	tags.keep_if { |tag| tag.isGlobal || tag.users.exists?(uid) } if uid && (uid != User.super_id)
+    end
+    # Prioritize the list for initial substring matches
+    if (!fuzzyname.blank?) && opts[:partition] && (tags.count > 1)
+        firsttags = []
+        lasttags = []
+        tags.each { |tag| 
+            if tag.normalized_name =~ /^#{fuzzyname}/
+                firsttags << tag
+            else
+                lasttags << tag
+            end
+        }
+        tags = firsttags + lasttags
     end
     tags
   end
