@@ -1,16 +1,14 @@
 <%= form_for @rcpquery do |f| %>
   <%= show_errors @rcpquery.errors %>
-  <%= render 'form_rcplist_header' %>
-  <div class="rcpquery_tags_div" >
-	<ul><li>
-     <%= f.label :tag_tokens, "Seek and Ye shall Find: ", :id=>"rcpquery_tags_label" -%>
-	 <%= f.text_field :tag_tokens, "data-pre" => @rcpquery.tags.map(&:attributes).to_json %>
-</li></ul>
-</div>
-  <div class="recipe_comment_div" >
-	<ul><li>
-     <%= f.label :querytext, "Search Titles and Comments:", :id=>"rcpquery_tags_label" -%>
-     <%= f.text_field :querytext %>
-</li></ul>
-  </div>
+  <%# render 'form_rcplist_header' %>
+	<div id="querylist_header">
+		<div class="rcpquery_owner_div" >
+			<%= select :rcpquery, :owner_id, @rcpquery.selectionlist %>
+		</div>
+		<h3><%= @rcpquery.title %><%= backtome %></h3>
+	</div>
+	 <div class="rcpquery_tags_div" >
+		<%= f.label :tag_tokens, "Seek and Ye shall Find: ", :id=>"rcpquery_tags_label" -%>
+		<%= f.text_field :tag_tokens, "data-pre" => @rcpquery.tags.map(&:attributes).to_json %>
+	 </div>
 <% end %>

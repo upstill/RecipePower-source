@@ -1,6 +1,6 @@
 require "my_constants.rb"
 
-# Class for a hash of recipe keys, for sorting as integers
+# Class for a hash of recipe keys, for sorting as integers and applying search results
 class Candihash < Hash
     # Initialize the candihash to a set of keys
     def initialize(startset) # , mode)
@@ -80,43 +80,6 @@ class Rcpquery < ActiveRecord::Base
     def my_reinit
 	    tag_tokens = self.tagstxt
     end
-        
-    def page_length()
-        25
-    end
-    
-    def page_length=(length)
-    end
-    
-    def cur_page()
-        @cur_page || 1
-    end
-    
-    def cur_page=(p)
-        @cur_page = p.to_i if p
-    end
-    
-    def npages
-        (self.results.count+(page_length-1))/page_length
-    end
-    
-    # Return a list of results based on the paging parameters
-    def results_paged
-        # No paging for 0 or 1 page
-        npg = self.npages
-        return self.results if npg <= 1
-        
-        # Clamp current page to last page
-        cpg = self.cur_page
-        cpg = self.cur_page = npg if cpg > npg
-        
-        # Now get indices of first and last records on the page
-        first = (cpg-1)*page_length
-        last = first+page_length-1
-        maxlast = self.results.count-1 
-        last = maxlast if last > maxlast
-        self.results[first..last]
-    end
 
     # Selectors for setting the list's display mode
     @@listmodes = [["Just Text", :rcplist_text],
@@ -129,31 +92,12 @@ class Rcpquery < ActiveRecord::Base
 
     def listmode_str=(str)
         @listmode = str.to_sym
-	self.listmode = str
+	    self.listmode = str
     end
 
     def listmode_str
         @listmode
     end
-
-=begin
-    # Selectors for setting the list's searching mode (obsolete)
-    @@querymodes = [["Strict Searching", :rcpquery_strict],
-  		    ["Loose Searching", :rcpquery_loose]]
-
-    def self.querymode_select
-        @@querymodes
-    end
-
-    def querymode_str=(str)
-        @querymode = str.to_sym
-	self.querymode = str
-    end
-
-    def querymode_str
-        self.querymode
-    end
-=end
 
     def selectionlist
     	User.selectionlist :owner_id=>self.owner_id, :user_id=>self.user_id
@@ -209,31 +153,26 @@ class Rcpquery < ActiveRecord::Base
 
         # XXX Merge in the lists for each circle
         # @circles.each { |circle_id| candidates = candidates | Rcpref.recipe_ids(circle_id, self.user_id) }
-        unless @tags.empty? && specialtags.blank? 
+        
+        unless self.tags.empty?
             # We purge/massage the list ONLY if there is a query here
             # Otherwise, we simply sort the list by mod date
             # Convert candidate array to a hash recipe_id=>#hits
-
-            candihash = Candihash.new candidates #, @querymode
-
-            # XXX Filter for sites
-
+            candihash = Candihash.new candidates
+            
             # Rank/purge for tag matches
-            @tags.each { |tag| candihash.apply tag.recipe_ids }
-
-            # Rank/purge for text matches in comment
-            specialtags.keys.each do |key| 
-                matchStr = specialtags[key]
-                # Get candidates that match the free strings in the query
-                matchStr.gsub! /\'/, ""
+            @tags.each { |tag| 
+                candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
+                # Get candidates by matching the tag's name against recipe titles and comments
                 candihash.apply Rcpref.recipe_ids(self.owner_id, self.user_id,
                                                 :status=>self.status,
-                                                :comment=>matchStr) 
-                # Get candidates that match in the title
+                                                :comment=>tag.name) 
+                # Get candidates that match specialtags in the title
                 candihash.apply Rcpref.recipe_ids(self.owner_id, self.user_id,
                                                 :status=>self.status,
-                                                :title=>matchStr) 
-            end
+                                                :title=>tag.name) 
+            }
+            # Convert back to a list of candidate ids
             candidates = candihash.results(@rankings).reverse
     	end
     	# Derive the final ordering for the candidates based on prior rankings
@@ -265,7 +204,7 @@ class Rcpquery < ActiveRecord::Base
     def tags
         return @tags if @tags # Use cache, if any
         newspecial = {}
-        oldspecial = self.specialtags
+        oldspecial = self.specialtags || {}
         # Accumulate resulting tags here:
         @tags = []
         self.tagstxt.split(",").each do |e| 
@@ -313,13 +252,55 @@ class Rcpquery < ActiveRecord::Base
 
     # Fetch and use parameters to revise a query record before returning
     def self.fetch_revision(id, uid, params)
-        # This is all very straightforward, EXCEPT that we allow the 'tagstxt' query string
-        # to include both tagids (for searching on tags) and plain text. The latter we split
-        # out into the text for searching titles and comments
+        # This is all very straightforward, EXCEPT that we allow the 'tag_tokens' query string
+        # to include both tagids (for searching on tags) and plain text strings. The latter we 
+        # turn into 'specialtags' for searching titles and comments; they appear in the tags array
+        # as tags with negative ids
         result = self.find(id)
         result.session_id = uid
         result.update_attributes(params)
-        result.save
         result
+    end
+
+    # ------------------ Methods in support of paging results ---------------
+    
+    # Current # of results per page
+    def page_length()
+        25
+    end
+
+    def page_length=(length)
+    end
+
+    # Page we're now on
+    def cur_page()
+        @cur_page || 1
+    end
+
+    def cur_page=(p)
+        @cur_page = p.to_i if p
+    end
+
+    # How many pages in the current result set?
+    def npages
+        (self.results.count+(page_length-1))/page_length
+    end
+
+    # Return a list of results based on the paging parameters
+    def results_paged
+        # No paging for 0 or 1 page
+        npg = self.npages
+        return self.results if npg <= 1
+        
+        # Clamp current page to last page
+        cpg = self.cur_page
+        cpg = self.cur_page = npg if cpg > npg
+        
+        # Now get indices of first and last records on the page
+        first = (cpg-1)*page_length
+        last = first+page_length-1
+        maxlast = self.results.count-1 
+        last = maxlast if last > maxlast
+        self.results[first..last]
     end
 end
