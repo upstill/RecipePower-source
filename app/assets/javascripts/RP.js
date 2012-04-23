@@ -452,16 +452,6 @@ $(function() {
 		preventDuplicates: true,
         allowCustomEntry: true
     });
-    $("#rcpquery_tag_tokens").tokenInput("/tags/match.json", {
-        crossDomain: false,
-        hintText: "",
-		noResultsText: "No matching tag found; hit Enter to search with text",
-        prePopulate: $("#rcpquery_tag_tokens").data("pre"),
-        theme: "facebook",
-        onAdd: tokenChangeCallback,
-        onDelete: tokenChangeCallback,
-        allowCustomEntry: true
-    });
 });
 
 function add_rating(link, association, content) {

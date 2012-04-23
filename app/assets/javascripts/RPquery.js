@@ -87,6 +87,18 @@ function queryTabOnLoad() {
     wdwFitImages();
     $("select#rcpquery_listmode_str").change(queryListmodeChange);
 	$(".pageclickr").click(queryTabOnPaginate);
+	// Activate the tag tokeninput field
+    $("#rcpquery_tag_tokens").tokenInput("/tags/match.json", {
+        crossDomain: false,
+        hintText: "Type tags and strings to look for",
+		noResultsText: "No matching tag found; hit Enter to search with text",
+        prePopulate: $("#rcpquery_tag_tokens").data("pre"),
+        theme: "facebook",
+        onAdd: tokenChangeCallback,
+        onDelete: tokenChangeCallback,
+        allowCustomEntry: true
+    });
+	$("#rcpquery_tag_tokens").focus();
 }
 
 // Called when a tab is selected
