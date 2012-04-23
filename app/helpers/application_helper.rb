@@ -55,11 +55,6 @@ module ApplicationHelper
     "RecipePower"+(ext.blank? ? " Home" : " | #{ext}")
   end
 
-  # def logo
-    # logo = image_tag("RPlogo.png", :alt => "Logo Goes Here" )
-    # link_to logo, recipes_path
-  # end
-  
   def logo
     link_to image_tag("RPlogo.png", :alt=>"RecipePower", :id=>"logo_img" ), root_path
   end

@@ -90,7 +90,7 @@ function queryTabOnLoad() {
 	// Activate the tag tokeninput field
     $("#rcpquery_tag_tokens").tokenInput("/tags/match.json", {
         crossDomain: false,
-        hintText: "Type tags and strings to look for",
+        hintText: "", // "Type tags and strings to look for",
 		noResultsText: "No matching tag found; hit Enter to search with text",
         prePopulate: $("#rcpquery_tag_tokens").data("pre"),
         theme: "facebook",
