@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120308224427) do
+ActiveRecord::Schema.define(:version => 20120419232642) do
 
   create_table "expressions", :force => true do |t|
     t.integer  "tag_id"
@@ -63,16 +63,11 @@ ActiveRecord::Schema.define(:version => 20120308224427) do
     t.integer  "user_id"
     t.integer  "owner_id"
     t.text     "tagstxt"
-    t.text     "ratingstxt"
-    t.text     "fromsitestxt"
-    t.string   "statustxt"
-    t.text     "circlestxt"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.text     "querytext"
     t.string   "listmode"
-    t.string   "querymode"
     t.integer  "status"
+    t.text     "specialtags"
   end
 
   create_table "rcprefs", :force => true do |t|

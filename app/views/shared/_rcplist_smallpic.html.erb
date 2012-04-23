@@ -16,7 +16,7 @@
 	  <%= summarize_alltags recipe %>
       </div>
       <div class="rcp_list_element_twocents">
-	  <%= recipe.comment_of_user(@listowner) || "" %>
+	  <%= present_comments recipe, @rcpquery.owner_id  %>
       </div>
       <div class="rcp_list_element_gotag">
 	  <%= link_to "Tag This Cookmark!", "/recipes/#{recipe.id}/edit" %>

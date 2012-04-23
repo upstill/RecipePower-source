@@ -36,10 +36,11 @@ class TagTest < ActiveSupport::TestCase
     test "normalized name must elide gratuity" do
         assert_equal "cafe", Tag.assert_tag("CAfé").normalized_name
         assert_equal "joes-bar-grille-and-restaurant", Tag.assert_tag(" Joe's Bar, Grille and   - -Restaurant  ").normalized_name
-        tag = tags(:chilibean).find
+        tag = Tag.find_by_name tags(:chilibean).name
+        assert_equal tags(:chilibean).name, tag.name, "'chili bean' not found by name"
         assert_nil tag.normalized_name, "Normalized_name should be nil for unsaved record"
         tag.save
-        assert_equal "chile-bean", "'chili bean' should normalize to 'chile-bean'"
+        assert_equal "chile-bean", tag.normalized_name, "'chili bean' should normalize to 'chile-bean'"
     end
     
     # String matching is immune to differences of diacriticals, capitals and punctuation
@@ -116,11 +117,10 @@ class TagTest < ActiveSupport::TestCase
     
     test "tagtype_inDB functions correctly" do
         assert_equal 1, Tag.tagtype_inDB("genre"), "Lower-case string not parsed correctly"
-        assert_equal 2, Tag.tagtype_inDB(:role), "Lower-case symbol not parsed correctly"
         assert_equal 3, Tag.tagtype_inDB("PROCESS"), "all-caps string not parsed correctly"
         assert_nil Tag.tagtype_inDB("free tag"), "lower-case 'free tag' not parsed correctly"
         assert_nil Tag.tagtype_inDB(nil), "nil doesn't return nil"
         assert_equal 4, Tag.tagtype_inDB(4), "Integer type not returned"
-        assert_equal [5,6,7,8], Tag.tagtype_inDB([:Unit, :source, "aUTHOR", "occasion"]), "Array of types not parsed correctly"
+        assert_equal [5,7,8], Tag.tagtype_inDB([:Unit, "aUTHOR", "occasion"]), "Array of types not parsed correctly"
     end
 end

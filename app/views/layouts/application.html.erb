@@ -31,7 +31,6 @@ whenReady( function() {
 	$("select#rcpquery_listmode_str").change(queryListmodeChange);
 	$("select#rcpquery_status").change(queryChange);
 	$("select#rcpquery_owner_id").change(queryownerChange);
-	$('input[id^=\'rcpquery_querytext\']').change(queryChange);
 	$('input[id^=\'rcpquery_ratings_attributes\']').change(queryChange);
 	// Set up tabs for rcpquery page
 	var val = Number($("#rcpquery_tabset").attr('value'));

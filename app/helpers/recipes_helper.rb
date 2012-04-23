@@ -62,6 +62,18 @@ def summarize_alltags(rcp)
 	summ.length>9 ? (summ+".").html_safe : nil
 end
 
+# Present the comments to this user. Now, all comments starting with his/hers, but ultimately those of his friends
+def present_comments (recipe, user_id)
+    out = (recipe.comment_of_user user_id) || ""
+    out = "My two cents: '#{out}'<br>" unless out.empty?
+    recipe.users.each { |user| 
+        if (user.id != user_id) && (cmt=recipe.comment_of_user(user.id))
+            out << "#{user.username} sez: '#{cmt}'<br>"  unless cmt.blank?
+        end
+    }
+    out.html_safe
+end
+
 # Provide the cookmark-count line
 def cookmark_count(rcp)
      count = rcp.num_cookmarks

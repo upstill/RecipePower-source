@@ -102,7 +102,7 @@ public
     # end
   end
 
-  # /rcpqueries/relist: fire back the recipe list based on a change in status, mode, style or page number
+  # /rcpqueries/relist: fire back the recipe list based on a change in status or page number
   # (without such a parameter, it just refreshes the list from the current query)
   def relist
       # Presumably the params include :status, :querymode and/or :listmode specs

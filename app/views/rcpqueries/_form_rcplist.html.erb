@@ -1,11 +1,26 @@
 <%# Renders a recipe list (from a query) for display under a tab %>
 <section id="rcplist_body">
-	<div class="rcpquery_listmode_div">
-		<%= label :rcpquery, :listmode_str,"Listing Style: ",:id=>"rcpquery_listmode_label" -%>
-		<%= select :rcpquery, :listmode_str, Rcpquery.listmode_select %>
-	</div>
-	<br class="clear">
-	<% if @rcpquery.listmode_str == :rcplist_text -%>
+	<%= form_for @rcpquery do |f| %>
+		<div id="rcpquery_tags_label_div">
+			<%= f.label :tag_tokens, "Seek and Ye Shall Find:", :id=>"rcpquery_tags_label" -%>
+		</div>
+		<div id="rcpquery_tag_tokens_div">
+			<%= f.text_field :tag_tokens, "data-pre" => @rcpquery.tags.map(&:attributes).to_json %>
+		</div>
+		<div class="rcpquery_listmode_div">
+			<%= f.label :listmode_str,"Listing Style: ",:id=>"rcpquery_listmode_label" -%>
+			<%= f.select :listmode_str, Rcpquery.listmode_select %>
+		</div>
+	<% end %>
+	<br class="clear"><hr>
+	<% if @rcpquery.results.empty? %>
+	    <br>
+		<%= image_tag "sad-icon.png", :alt=>"RecipePower", :id=>"sad_img"  %>
+		<p class="airy">
+	    	Sorry, this list doesn't have any recipes that match what you're looking for. Try searching on fewer tags, 
+			or pick another list. <br>Or go out to the Web and bring something back!
+		</p>
+	<% elsif @rcpquery.listmode_str == :rcplist_text -%>
 		<%= render 'shared/rcplist_text' %>
 	<% elsif @rcpquery.listmode_str == :rcplist_smallpic -%>
 		<%= render 'shared/rcplist_smallpic' %>

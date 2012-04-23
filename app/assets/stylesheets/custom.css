@@ -136,7 +136,7 @@ h3 {
   font-size: 150%;
   margin:0px;
   padding:0px;
-  padding-top:5px;
+  // padding-top:5px;
 }
 
 p.airy {
@@ -328,14 +328,6 @@ padding:10px;
     float: right;
 }
 
-.rcpquery_owner_div {
-    // width:360px;
-    // height: 300px;
-    /* border:3px solid black; */
-    float: right;
-    padding-top:10px;
-}
-
 #querylist_header {
 	margin-bottom:10px;
 }
@@ -345,14 +337,6 @@ padding:10px;
 	width:200px;
 	height:30px;
     font-size:12px;
-}
-
-.rcpquery_listmode_div {
-    /* border:3px solid black; */
-    float: right;
-	width:160px;
-	height:30px;
-    font-size:11px;
 }
 
 #rcpquery_owner_return {
@@ -423,10 +407,74 @@ padding:10px;
   width:70%;
 }
 
+.rcpquery_owner_div {
+    // width:360px;
+    // height: 300px;
+    /* border:3px solid black; */
+    float: right;
+    // padding-top:10px;
+}
+
+#rcpquery_tabset {
+	margin-top:15px;
+}
+
 .rcpquery_tags_div {
-  margin-top: 0px;
-  width:100%;
+  // margin-top: 20px;
+  // margin-bottom: 20px;
+  width:610px;
+  float: left;
   // outline:#999 solid 1px;
+}
+
+#rcpquery_tags_label_div {
+	margin:3px;
+	padding:3px;
+	width:180px;
+	height: 27px;
+	float: left;
+    // outline:#999 solid red 3px;
+  	// background:#2be4e3;
+}
+
+#rcpquery_tag_tokens_div {
+	margin:3px;
+	padding:3px;
+	width: 50%; // 400px;
+	height: 27px;
+	float: left;
+  // outline:#999 solid blue 3px;
+  // background:#fbe3e4;
+}
+
+#rcpquery_tags_label {
+  font:16px arial,sans-serif;
+// float: left;
+// display: block;
+  font-weight:bold;
+  width:30%;
+}
+
+.rcpquery_listmode_div {
+    /* border:3px solid black; */
+    float: right;
+	width:200px;
+	height:30px;
+    font:16px arial,sans-serif;
+    // outline:#999 solid 3px;
+}
+
+#rcpquery_tag_tokens {
+	// Beside the point: tokenInput takes over styling of this element as ul.token-input-list-facebook
+}
+
+#sad_img {
+	float: left;
+	margin: 20px;
+}
+
+.no_results_message {
+    font:16px arial,sans-serif;
 }
 
 .recipe_fields_div {
@@ -450,7 +498,9 @@ padding:10px;
 
 #recipe_tag_tokens {
   font:12px arial,sans-serif;
-  width:100%;
+float: right;
+display: block;
+  width:70%;
   // outline:#999 solid 1px;
 }
 
@@ -591,6 +641,7 @@ font:12px arial, sans-serif;
 
 .rcplist_body {
     width:95%;
+    margin-top:0px;
 }
 
 .rcp_list_element {
