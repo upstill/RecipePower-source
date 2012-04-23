@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120419232642) do
+ActiveRecord::Schema.define(:version => 20120423052109) do
 
   create_table "expressions", :force => true do |t|
     t.integer  "tag_id"
@@ -89,15 +89,6 @@ ActiveRecord::Schema.define(:version => 20120419232642) do
     t.text     "picurl"
     t.text     "tagpane"
   end
-
-  create_table "referent_hierarchies", :id => false, :force => true do |t|
-    t.integer "ancestor_id",   :null => false
-    t.integer "descendant_id", :null => false
-    t.integer "generations",   :null => false
-  end
-
-  add_index "referent_hierarchies", ["ancestor_id", "descendant_id"], :name => "index_referent_hierarchies_on_ancestor_id_and_descendant_id", :unique => true
-  add_index "referent_hierarchies", ["descendant_id"], :name => "index_referent_hierarchies_on_descendant_id"
 
   create_table "referents", :force => true do |t|
     t.integer  "tag"
