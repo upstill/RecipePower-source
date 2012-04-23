@@ -1,5 +1,5 @@
-require 'CGI'
 require 'uri'
+# require 'CGI'
 
 class LinkRef < ActiveRecord::Base
     belongs_to :link
