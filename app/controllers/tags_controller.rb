@@ -45,7 +45,7 @@ class TagsController < ApplicationController
       matchopts = {
           userid: session[:user_id],
           tagtype: tagtype,
-          force: (params[:makeormatch] == "true"),
+          assert: (params[:makeormatch] == "true"),
           partition: true
       }
       @taglist = Tag.strmatch(matchstr, matchopts).uniq
