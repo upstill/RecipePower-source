@@ -41,6 +41,9 @@ whenReady( function() {
 	var val = Number($("#tags_tabset").attr('value'));
 	var options = {load:tagTabsOnLoad, selected:val};
 	$("#tags_tabset").tabs(options);
+	if(popupItem = $('.popup')[0]) {
+		popupItem.onclick = servePopup;
+	}
 	
 	// $("a#rcpquery_owner_return").click(backToMe);
 	// Bring text focus to the tag input field

@@ -520,7 +520,7 @@ display: block;
 }
 
 .recipe_comment_div {
-  margin-top: 0px;
+  margin-top: 20px;
   margin-bottom:10px;
   width:100%;
     // outline:#999 solid 1px;
@@ -534,10 +534,16 @@ display: block;
 }
 
 #recipe_comment {
-  font:12px arial,sans-serif;
-height:70px;
+  font:14px arial,sans-serif;
+  // height:70px;
   width:100%;
+  height: 4em;
     // outline:#999 solid 1px;
+}
+
+.watermarkOn {
+    color: #CCCCCC;
+    font-style: italic;
 }
 
 .recipe_title_div {
@@ -781,4 +787,19 @@ font:12px arial, sans-serif;
 	width: 60%;
 	margin-top:5px;
 	margin-bottom:10px;
+}
+
+.preview_button {
+	width:25px;
+	height:25px;
+}
+
+.preview_button:hover {
+	outline: #c0c0c0 solid 3px;
+	background-color:#f8f8f8;
+}
+
+.popup:hover {
+	// outline: #EDDCBF solid thick;
+	background-color:#FFFFFF;
 }

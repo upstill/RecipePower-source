@@ -496,3 +496,9 @@ function add_rating(link, association, content) {
     // }
 }
 
+function servePopup() {
+	linkURL = this.getAttribute('href');
+	window.open(linkURL,'popup','width=500,height=300');
+	return false;
+}
+
