@@ -4,7 +4,6 @@ private
   # Get the current query for the current user and a stipulated owner, 
   # making a new one as necessary
     def current_query(owner)
-        debugger
         uid = session[:user_id]
         # Either we're dealing with an existing query, or not
         session[:rcpquery] = nil if session[:rcpquery].class != Fixnum
@@ -103,7 +102,6 @@ public
   # (without such a parameter, it just refreshes the list from the current query)
   def relist
       # Presumably the params include :status, :querymode and/or :listmode specs
-      debugger
       @rcpquery = Rcpquery.fetch_revision(session[:rcpquery], session[:user_id], params)
       session[:rcpquery] = @rcpquery.id # In case the model decided on a new query
       render '_form_rcplist.html.erb', :layout=>false
@@ -115,7 +113,6 @@ public
   # POST /rcpqueries/1.xml
   def update
     # Respond to a form submission (query params are in params[:rcpquery])
-    debugger
     @rcpquery = Rcpquery.fetch_revision(params[:id].to_i, session[:user_id], params[:rcpquery])
     session[:rcpquery] = @rcpquery.id
 

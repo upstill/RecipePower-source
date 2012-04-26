@@ -259,6 +259,7 @@ class Rcpquery < ActiveRecord::Base
         result = self.find(id)
         result.session_id = uid
         result.update_attributes(params)
+        result.save
         result
     end
 

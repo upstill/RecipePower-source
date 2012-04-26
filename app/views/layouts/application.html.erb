@@ -27,15 +27,7 @@
   <body>
 	<script>
 whenReady( function() {
-	$("select#rcpquery_querymode_str").change(queryChange);
-	$("select#rcpquery_listmode_str").change(queryListmodeChange);
-	$("select#rcpquery_status").change(queryChange);
-	$("select#rcpquery_owner_id").change(queryownerChange);
-	$('input[id^=\'rcpquery_ratings_attributes\']').change(queryChange);
-	// Set up tabs for rcpquery page
-	var val = Number($("#rcpquery_tabset").attr('value'));
-	var options = {load:queryTabOnLoad, select:queryTabOnSelect, selected:val};
-	$("#rcpquery_tabset").tabs(options);
+	RPQueryOnLoad();
 
 	// Set up tabs for tags editing page
 	var val = Number($("#tags_tabset").attr('value'));
@@ -44,13 +36,6 @@ whenReady( function() {
 	if(popupItem = $('.popup')[0]) {
 		popupItem.onclick = servePopup;
 	}
-	
-	// $("a#rcpquery_owner_return").click(backToMe);
-	// Bring text focus to the tag input field
-        $("input#rcpquery_tag_tokens").focus();
-	// wdwFitImage() checks to ensure that all images of class 'fitPic' 
-	// are loaded and resized to their parents.
-        wdwFitImages();
 
   $("#tagpane_submit").click(tagpane_submit);
   rangy.init();

@@ -379,12 +379,6 @@ function fitImage(img) {
     return true;
 }
 
-// Callback when token set changes
-function tokenChangeCallback(hi, li) {
-    var x = 2;
-    queryformHit(this[0].form, {});
-}
-
 // NOT YET GUARANTEED
 // Responder for link to return to the user's list
 function backToMe(uid) {
@@ -392,11 +386,6 @@ function backToMe(uid) {
     var x = 2;
 }
 
-// Callback when query text changes
-// function textChangeCallback( ) {
-// var x = 2;
-// queryformHit(this[0].form, {});
-// }
 function alertIframeSelection() {
     var iframe = document.getElementById("viewframe");
     alert(getIframeSelectionText(iframe));
@@ -496,6 +485,7 @@ function add_rating(link, association, content) {
     // }
 }
 
+// Respond to the preview-recipe button by opening a popup loaded with its URL
 function servePopup() {
 	linkURL = this.getAttribute('href');
 	window.open(linkURL,'popup','width=500,height=300');
