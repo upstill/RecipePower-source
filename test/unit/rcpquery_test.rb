@@ -144,10 +144,18 @@ class RcpqueryTest < ActiveSupport::TestCase
         tagstr2 = "#{specialtag.id.to_s}, 'sproots'"
         taghash = {"tag_tokens" => tagstr2 }
         rq.update_attributes taghash
+        rq.save
         assert_equal 2, rq.tags.count, "Should have two tags as a result"
         special1 = rq.tags.first
         special2 = rq.tags.last
         assert (special1.name == "sproutts" || special2.name == "sproutts"), "'sproutts' not among #{special1.name} and #{special2.name}"
         assert (special1.name == "sproots" || special2.name == "sproots"), "'sproots' not among #{special1.name} and #{special2.name}"
+        
+        rq = Rcpquery.find rq.id
+        assert_equal 2, rq.tags.count, "Should have two tags after fetch"
+        special1 = rq.tags.first
+        special2 = rq.tags.last
+        assert (special1.name == "sproutts" || special2.name == "sproutts"), "'sproutts' not fetched in #{special1.name} and #{special2.name}"
+        assert (special1.name == "sproots" || special2.name == "sproots"), "'sproots' not fetched #{special1.name} and #{special2.name}"
     end
 end

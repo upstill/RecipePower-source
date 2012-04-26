@@ -66,13 +66,13 @@ class Candihash < Hash
 end
 
 class Rcpquery < ActiveRecord::Base
-    serialize :specialtags
+    serialize :specialtags, Hash
     
     attr_accessible :status, :session_id, :user_id, :owner_id, :tag_tokens, :tags, :page_length, :cur_page, :listmode_str
     attr_reader :tags
     attr_reader :tag_tokens
     attr_reader :results
-    attr_accessor :page_length, :specialtags
+    attr_accessor :page_length
     
     after_initialize :my_init
     after_find :my_reinit
@@ -105,7 +105,7 @@ class Rcpquery < ActiveRecord::Base
     def my_init
 
     	self.tagstxt = ""  unless self.tagstxt
-    	self.tag_tokens = self.tagstxt
+        self.tag_tokens = self.tagstxt
 
     	self.user_id = User.guest_id unless self.user_id
     	self.owner_id = User.guest_id unless self.owner_id
@@ -228,6 +228,9 @@ class Rcpquery < ActiveRecord::Base
                 @tags << tag
             end
         end
+        # Have to revise tagstxt to reflect special tags because otherwise, IDs will get 
+        # revised on the next read from DB
+        self.tagstxt = @tags.collect { |t| t.id.to_s }.join ','
         self.specialtags = newspecial
         @tags
     end
