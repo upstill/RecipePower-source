@@ -68,7 +68,7 @@ end
 class Rcpquery < ActiveRecord::Base
     serialize :specialtags
     
-    attr_accessible :status, :session_id, :user_id, :owner_id, :tag_tokens, :tags, :page_length, :cur_page
+    attr_accessible :status, :session_id, :user_id, :owner_id, :tag_tokens, :tags, :page_length, :cur_page, :listmode_str
     attr_reader :tags
     attr_reader :tag_tokens
     attr_reader :results
