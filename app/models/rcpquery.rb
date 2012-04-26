@@ -72,7 +72,7 @@ class Rcpquery < ActiveRecord::Base
     attr_reader :tags
     attr_reader :tag_tokens
     attr_reader :results
-    attr_accessor :page_length, :cur_page, :specialtags
+    attr_accessor :page_length, :specialtags
     
     after_initialize :my_init
     after_find :my_reinit
@@ -266,12 +266,12 @@ class Rcpquery < ActiveRecord::Base
     
     # Current # of results per page
     def page_length()
-        25
+        10
     end
 
     def page_length=(length)
     end
-
+=begin
     # Page we're now on
     def cur_page()
         @cur_page || 1
@@ -280,6 +280,7 @@ class Rcpquery < ActiveRecord::Base
     def cur_page=(p)
         @cur_page = p.to_i if p
     end
+=end
 
     # How many pages in the current result set?
     def npages
@@ -293,7 +294,7 @@ class Rcpquery < ActiveRecord::Base
         return self.results if npg <= 1
         
         # Clamp current page to last page
-        cpg = self.cur_page
+        cpg = self.cur_page || 1
         cpg = self.cur_page = npg if cpg > npg
         
         # Now get indices of first and last records on the page

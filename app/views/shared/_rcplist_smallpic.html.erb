@@ -7,7 +7,7 @@
     </div>
     <div class="rcp_list_text">
       <div class="rcp_list_element_title">
-	  <%= link_to recipe.trimmed_title, recipe.url %>
+	  <%= link_to recipe.trimmed_title, recipe.url %><%= recipe_popup recipe %>
       </div>
       <div class="rcp_list_element_source">
 	  from <%= link_to recipe.sourcename, recipe.sourcehome %>

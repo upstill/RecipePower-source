@@ -15,6 +15,10 @@ module ApplicationHelper
     f.hidden_field(:_destroy) + link_to_function(name, "remove_fields(this)")
   end
   
+  def recipe_popup( rcp )
+      link_to image_tag("preview.png", title:"Show the Recipe", class: "preview_button"), rcp.url, target: "_blank", class: "popup"        
+  end
+  
   # Create a popup selection list for adding a rating to the tags
   def select_to_add_rating(name, f, association, ratings, inex)
     # Derive 'fields', the information needed by the 'add_rating' javascript

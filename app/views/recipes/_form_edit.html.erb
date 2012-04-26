@@ -1,4 +1,5 @@
-<h3>Tag That Recipe! <a href="<%= @recipe.url %>" target="_blank" class="popup"><%= image_tag "preview.png", title:"Show the Recipe", class: "preview_button" %></a></h3>
+<h3>Tag That Recipe!<%= recipe_popup @recipe %></h3>
+
 <%= form_for @recipe do |f| %>
   <%= show_errors @recipe.errors %>
     <div class="recipe_pic_div" >

@@ -33,6 +33,7 @@ BLOCK_END
    end
    
     def pagination_links
+        debugger
         per_page = @rcpquery.page_length
         npages = @rcpquery.npages 
         cur_page = @rcpquery.cur_page        

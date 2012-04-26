@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120423052109) do
+ActiveRecord::Schema.define(:version => 20120426001425) do
 
   create_table "expressions", :force => true do |t|
     t.integer  "tag_id"
@@ -68,6 +68,7 @@ ActiveRecord::Schema.define(:version => 20120423052109) do
     t.string   "listmode"
     t.integer  "status"
     t.text     "specialtags"
+    t.integer  "cur_page",    :default => 1
   end
 
   create_table "rcprefs", :force => true do |t|
@@ -107,6 +108,22 @@ ActiveRecord::Schema.define(:version => 20120423052109) do
     t.datetime "updated_at"
     t.string   "name"
     t.integer  "user_id"
+  end
+
+  create_table "site_referents", :force => true do |t|
+    t.string   "site"
+    t.string   "sample"
+    t.string   "home"
+    t.string   "subsite"
+    t.string   "scheme"
+    t.string   "host"
+    t.string   "port"
+    t.string   "logo"
+    t.text     "tags_serialized"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "ttlcut"
+    t.string   "ttlrepl"
   end
 
   create_table "sites", :force => true do |t|
