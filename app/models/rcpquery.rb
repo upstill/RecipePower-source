@@ -105,14 +105,12 @@ class Rcpquery < ActiveRecord::Base
     def my_init
 
     	self.tagstxt = ""  unless self.tagstxt
-        self.tag_tokens = self.tagstxt
 
     	self.user_id = User.guest_id unless self.user_id
     	self.owner_id = User.guest_id unless self.owner_id
 
     	self.status = MyConstants::Rcpstatus_misc unless self.status
-    	
-    	self.specialtags = {} if self.specialtags.nil?
+    	self.specialtags = self.specialtags || {}
 
     	self.listmode = :rcplist_smallpic.to_s unless self.listmode
     	   # (vs. :rcplist_text or :rcplist_bigpic)  Default to small-pic listing
@@ -218,13 +216,16 @@ class Rcpquery < ActiveRecord::Base
                 @tags << tag
             else
                 # This is a new special tag. Convert to an internal tag and add it to the cache
-                tag = Tag.new(name: e.gsub(/\'/, '').strip )
-                tag.id = -1
-                # Search for an unused id
-                while(newspecial[tag.id.to_s] || oldspecial[tag.id.to_s]) do
-                    tag.id = tag.id - 1 
+                name = e.gsub(/\'/, '').strip
+                unless tag = Tag.strmatch( name, { matchall: true, uid: self.user_id }).first
+                    tag = Tag.new(name: name )
+                    tag.id = -1
+                    # Search for an unused id
+                    while(newspecial[tag.id.to_s] || oldspecial[tag.id.to_s]) do
+                        tag.id = tag.id - 1 
+                    end
+                    newspecial[tag.id.to_s] = tag.name
                 end
-                newspecial[tag.id.to_s] = tag.name
                 @tags << tag
             end
         end

@@ -174,8 +174,8 @@ class Tag < ActiveRecord::Base
    # Look up a tag by name, userid and type, creating a new one if needed
    # RETURNS: an array of matching tags (possibly empty if assert is not true)
    # name: string to find
-   # uid: user whose tags may be searched along with the global tags
-   # type: either a single value or an array, specifying key type(s) to search
+   # userid: user whose tags may be searched along with the global tags
+   # tagtype: either a single value or an array, specifying key type(s) to search
    # assert: return a key of the given type matching the name, even if it has to be created anew
    # matchall: search only succeeds if it matches the whole string
    
