@@ -180,14 +180,16 @@ class Site < ActiveRecord::Base
                 else
                     puts "Creating host matching #{uri.host} for #{link} with subsite \'#{self.subsite||""}\'"
         
+                    puts "Link is '#{link}'; path is '#{uri.path}'"
+                    # Define the site as the link minus the sample (sub)path
+                    self.site = link[0,(link =~ /#{uri.path}/) || link.length]
+                    puts "...from which extracted site '#{self.site}'"
+                    self.home = self.site # ...seems like a reasonable default...
+        
                     # Reconstruct the sample from the link's path, query and fragment
                     self.sample = uri.path
                     self.sample << "?"+uri.query unless uri.query.blank?
                     self.sample << "#"+uri.fragment unless uri.fragment.blank?
-        
-                    # Define the site as the link minus the sample (sub)path
-                    self.site = link[0,link.rindex(/#{self.sample}/) || link.length]
-                    self.home = self.site # ...seems like a reasonable default...
         
                     # Save scheme, host and port information from the link parse
                     self.scheme = uri.scheme
@@ -237,7 +239,7 @@ class Site < ActiveRecord::Base
             end
             matching_subsite || matching_site || Site.create(:sample=>link)
         else
-            puts "Ill-formed link: "+link
+            puts "Ill-formed link: '#{link}'"
             nil
         end
     end

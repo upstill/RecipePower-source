@@ -122,7 +122,6 @@ class Tag < ActiveRecord::Base
    #  not necessarily of the given type, or one available to the user.
    def self.assert_tag(t, opts = {} )
        # Convert tag type, if any, into internal form
-       debugger
        opts[:tagtype] = self.tagtype_inDB(opts[:tagtype]) if opts[:tagtype]
        if t.class == Fixnum
            # Fetch an existing tag

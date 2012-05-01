@@ -190,12 +190,12 @@ class Recipe < ActiveRecord::Base
   # If a new recipe record needs to be created, we also do QA on the provided URL
   # Either way, we also make sure that the recipe is associated with the given user
     def self.ensure( userid, params)
-        if id = params[:id]
+        if (id = params[:id].to_i) && (id > 0) # id of 0 means create a new recipe
             begin
-                rcp = Recipe.find id.to_i
+                rcp = Recipe.find id
             rescue => e
                 rcp = self.new
-                rcp.errors.add :id, "There is no recipe number #{id}"
+                rcp.errors.add :id, "There is no recipe number #{id.to_s}"
             end
         else
             url = params[:url]

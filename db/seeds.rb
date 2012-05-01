@@ -9,6 +9,8 @@
 # We are gathered here today to seed the database with site descriptions, specifying how to 
 # parse recipe pages. We will create one Site record for each site we've sussed out, but first
 # we will create a default which is used for sites that don't appear in the site list.
+
+Site.all.each { |site| site.destroy }
 site = Site.first || Site.new
 site.tags = [
     { label: :Author, path: ".hrecipe span.author" },
@@ -803,4 +805,4 @@ Referent.express "Diets", :Interest, true
 Referent.express "Genres", :Interest, true
 
 # LinkRef.import_file "db/data/FoodLover"
-LinkRef.import_CSVfile "db/data/Full Dictionary Revised.csv"
+# LinkRef.import_CSVfile "db/data/Full Dictionary Revised.csv"
