@@ -1,9 +1,9 @@
 class Referent < ActiveRecord::Base
     # acts_as_tree
     has_many :referent_relations
-    has_many :parents, :through => :referent_relations, :source => :reference
-    has_many :references, :foreign_key => "reference_id", :class_name => "ReferentRelation"
-    has_many :children, :through => :references, :source => :referent
+    has_many :children, :through => :referent_relations, :source => :child # :reference
+    has_many :references, :foreign_key => "child_id", :class_name => "ReferentRelation"
+    has_many :parents, :through => :references, :source => :referent
 
     has_many :expressions
     has_many :tags, :through=>:expressions

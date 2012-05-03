@@ -93,7 +93,7 @@ ActiveRecord::Schema.define(:version => 20120503022122) do
 
   create_table "referent_relations", :force => true do |t|
     t.integer  "referent_id"
-    t.integer  "reference_id"
+    t.integer  "child_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
