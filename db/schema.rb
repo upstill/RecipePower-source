@@ -92,7 +92,7 @@ ActiveRecord::Schema.define(:version => 20120503022122) do
   end
 
   create_table "referent_relations", :force => true do |t|
-    t.integer  "referent_id"
+    t.integer  "parent_id"
     t.integer  "child_id"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -114,6 +114,22 @@ ActiveRecord::Schema.define(:version => 20120503022122) do
     t.datetime "updated_at"
     t.string   "name"
     t.integer  "user_id"
+  end
+
+  create_table "site_referents", :force => true do |t|
+    t.string   "site"
+    t.string   "sample"
+    t.string   "home"
+    t.string   "subsite"
+    t.string   "scheme"
+    t.string   "host"
+    t.string   "port"
+    t.string   "logo"
+    t.text     "tags_serialized"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "ttlcut"
+    t.string   "ttlrepl"
   end
 
   create_table "sites", :force => true do |t|
