@@ -1,8 +1,8 @@
-<h1>Listing referents</h1>
-
+<h3>Listing Referents</h3>
+<br>
 <table>
   <tr>
-    <th>Term</th>
+    <th>Referent</th>
     <th></th>
     <th></th>
     <th></th>
@@ -10,10 +10,17 @@
 
 <% @referents.each do |referent| %>
   <tr>
-    <td><%= referent.name %></td>
-    <td><%= link_to 'Show', referent %></td>
-    <td><%= link_to 'Edit', edit_referent_path(referent) %></td>
-    <td><%= link_to 'Destroy', referent, confirm: 'Are you sure?', method: :delete %></td>
+    <td><%= summarize_referent referent %>
+	    <br><%= link_to 'Show', referent.becomes(Referent) %>
+	    <%= link_to 'Edit', edit_referent_path(referent.becomes(Referent)) %>
+	    <%# link_to 'Destroy', referent.becomes(Referent), confirm: 'Are you sure?', method: :delete %>
+	</td>
+	<td><%= referent.isCountable ? "C" : "NC" %><td>
+	<td>
+		<%= list_expressions referent %><br>
+		<%= list_parents referent %><br>
+		<%= list_children referent %>
+	</td>
   </tr>
 <% end %>
 </table>

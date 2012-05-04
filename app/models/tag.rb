@@ -2,7 +2,7 @@
 class Tag < ActiveRecord::Base
     # require 'iconv'
 
-    attr_accessible :name, :id, :tagtype, :typename, :isGlobal
+    attr_accessible :name, :id, :tagtype, :typename, :isGlobal, :meaning
     
     # tagrefs associate tags with recipes
     has_many :tagrefs
@@ -101,7 +101,7 @@ class Tag < ActiveRecord::Base
        elsif tt.kind_of? Symbol 
            @@NamesToTypes[tt]
        elsif tt.kind_of? String
-           @@NamesToTypes[tt.capitalize.to_sym]
+           @@NamesToTypes[tt.split("\s").downcase.capitalize.join('').to_sym]
        elsif tt.kind_of? Array
            tt.first && tt.collect { |type| self.tagtype_inDB type }
        end

@@ -25,8 +25,12 @@ class Referent < ActiveRecord::Base
         end
     end
     
+    def referent_typename
+        self.class.name.sub( /Referent/, '').sub(/Section/, " Section")
+    end
+    
     def referent_type
-        Tag.tagtype_inDB self.class.name.sub( /Referent/, '').sub(/Section/, " Section")
+        Tag.tagtype_inDB self.referent_typename
     end
     
     def self.referent_class_for_tagtype(tagtype)
