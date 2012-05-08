@@ -60,9 +60,13 @@ class ReferentsController < ApplicationController
 
   # GET /referents/1/edit
   def edit
+=begin
       @tabindex = session[:tabindex] || params[:tabindex] || 0
       handlerclass = @@HandlersByIndex[@tabindex]
-    @referent = handlerclass.find(params[:id])
+      @referent = handlerclass.find(params[:id])
+=end
+      @referent = Referent.find(params[:id]) # .becomes(Referent)
+      @expressions = @referent.expressions
   end
 
   # POST /referents?tagid=1&mode={over,before,after}&target=referentid

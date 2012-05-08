@@ -16,10 +16,10 @@ class ApplicationController < ActionController::Base
 # and don't do anything until there is one. If login isn't required,
 # set the session user id to guest
 def need_login(login_required, super_required = false)
-    if(login_required)
+    if login_required
         if super_required
             # XXX Currently ad-hoc-ly treating Max, Aaron and Steve as super
-            if session[:user_id] > 5 || session[:user_id] == User.guest_id
+            if session[:user_id].nil? || session[:user_id] > 5 || (session[:user_id] == User.guest_id)
                 @Title = "Login"
                 redirect_away login_url, :notice=>"You must be logged in as super to go there."
                 return true

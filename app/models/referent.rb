@@ -9,10 +9,22 @@ class Referent < ActiveRecord::Base
 
     has_many :expressions
     has_many :tags, :through=>:expressions
+    accepts_nested_attributes_for :expressions, allow_destroy: true
     
-    attr_accessible :tag, :type
+    attr_accessible :tag, :type, :description, :isCountable, :expressions_attributes
     
     before_save :ensure_expression
+    
+    @@Locales = [["English",:en], ["Italian",:it], ["Spanish",:es]]
+    @@Forms = [["Generic", 1], ["Singular", 2], ["Plural", 3]]
+    
+    def self.locales
+       @@Locales
+    end
+    
+    def self.forms
+       @@Forms
+    end
     
     # Before saving a referent, we make sure its preferred tag is listed as an expression of type 1
     def ensure_expression
@@ -25,8 +37,23 @@ class Referent < ActiveRecord::Base
         end
     end
     
+    # Return a list of all tags that are related to the one provided. This means:
+    # ...all the synonyms (if required) and
+    # ...all the parents (if required) of
+    # ...all the children (if required) of
+    # ...all the referents of this tag
+    def self.related tagid, doSynonyms = false, doParents = false, doChildren = false
+        [Tag.find(tagid)].collect { |tag| 
+            tag.referents.collect { |ref|
+                (doSynonyms ? ref.tag_ids : []) +
+                (doParents ? ref.parents.collect{ |parent| parent.tag_ids } : []) +
+                (doChildren ? ref.children.collect{ |child| child.tag_ids } : [])
+            }
+        }.flatten.uniq.delete_if{ |id| id == tagid }.collect{ |id| Tag.find id }
+    end
+    
     def referent_typename
-        self.class.name.sub( /Referent/, '').sub(/Section/, " Section")
+        self.type.sub( /Referent/, '').sub(/Section/, " Section")
     end
     
     def referent_type

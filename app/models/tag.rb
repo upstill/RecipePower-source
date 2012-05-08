@@ -2,7 +2,7 @@
 class Tag < ActiveRecord::Base
     # require 'iconv'
 
-    attr_accessible :name, :id, :tagtype, :typename, :isGlobal, :meaning
+    attr_accessible :name, :id, :tagtype, :typename, :isGlobal, :meaning, :links, :recipes, :referents, :users
     
     # tagrefs associate tags with recipes
     has_many :tagrefs

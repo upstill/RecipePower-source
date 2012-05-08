@@ -29,6 +29,7 @@ RP::Application.routes.draw do
   resources :users
 
   match 'tags/editor', :controller=>'tags', :action=>'editor', :via => :get
+  match 'tags/list', :controller=>'tags', :action=>'list', :via => :get
   match 'tags/typify', :controller=>'tags', :action=>'typify'
   match 'tags/match', :controller=>'tags', :action=>'match'
   resources :tags

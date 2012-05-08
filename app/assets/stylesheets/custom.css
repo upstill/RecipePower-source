@@ -407,6 +407,10 @@ padding:10px;
   width:70%;
 }
 
+.list_header {
+   font:15px arial,sans-serif;
+}
+
 .rcpquery_owner_div {
     // width:360px;
     // height: 300px;

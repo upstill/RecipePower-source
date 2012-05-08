@@ -441,6 +441,24 @@ $(function() {
 		preventDuplicates: true,
         allowCustomEntry: true
     });
+    $("#referent_children").tokenInput("/tags/match.json", {
+        crossDomain: false,
+		noResultsText: "No existing tag found; hit Enter to make a new tag",
+        hintText: "Tags for things that come under this category",
+        prePopulate: $("#referent_children").data("pre"),
+        theme: "facebook",
+		preventDuplicates: true,
+        allowCustomEntry: true
+    });
+    $("#referent_parents").tokenInput("/tags/match.json", {
+        crossDomain: false,
+		noResultsText: "No existing tag found; hit Enter to make a new tag",
+        hintText: "Categories that include this",
+        prePopulate: $("#referent_parents").data("pre"),
+        theme: "facebook",
+		preventDuplicates: true,
+        allowCustomEntry: true
+    });
 });
 
 function add_rating(link, association, content) {

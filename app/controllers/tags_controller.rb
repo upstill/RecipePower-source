@@ -113,6 +113,18 @@ class TagsController < ApplicationController
     render :partial=>"editor"
   end
   
+  # GET /tags/list?tabindex=index
+  # Return HTML for the list of tags (presumably called by the tags tablist)
+  def list
+    return if need_login true, true
+    @Title = "Tags"
+    @tabindex = params[:tabindex] ? params[:tabindex].to_i : (session[:tabindex] || 0)
+    # The list of orphan tags gets all tags of this type which aren't linked to a table
+    @taglist = Tag.strmatch("", userid: session[:user_id], tagtype: Tag.index_to_type(@tabindex) )
+    session[:tabindex] = @tabindex
+    render :partial=>"alltags"
+  end
+  
   # GET /typify
   # move the listed keys from one type to another
   def typify

@@ -1,6 +1,6 @@
-<h1>Editing referent</h1>
+<h3>Editing <%= summarize_referent @referent %></h3>
 
 <%= render 'form' %>
 
-<%= link_to 'Show', @referent %> |
+<%= link_to 'Show', @referent.becomes(Referent) %> |
 <%= link_to 'Back', referents_path %>

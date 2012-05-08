@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120503054032) do
+ActiveRecord::Schema.define(:version => 20120507072756) do
 
   create_table "expressions", :force => true do |t|
     t.integer  "tag_id"
@@ -104,6 +104,7 @@ ActiveRecord::Schema.define(:version => 20120503054032) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.boolean  "isCountable"
+    t.string   "description"
   end
 
   create_table "scales", :force => true do |t|

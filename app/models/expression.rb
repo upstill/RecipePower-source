@@ -2,7 +2,7 @@ class Expression < ActiveRecord::Base
     belongs_to :tag
     belongs_to :referent
     
-    attr_accessible :tag_id, :referent_id, :locale, :form
+    attr_accessible :tag_id, :referent_id, :locale, :form, :tagname
     
     after_find :symbolize
     
@@ -16,5 +16,10 @@ class Expression < ActiveRecord::Base
     
     def symbolize
         self.locale = self.locale.to_sym
+    end
+    
+    def tagname
+        return "WTF?!?" unless self && self.tag
+        self.tag.name
     end
 end

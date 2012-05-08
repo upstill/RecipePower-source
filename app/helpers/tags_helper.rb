@@ -1,6 +1,32 @@
 module TagsHelper
+    
+    def count_recipes tag
+        ct = tag.recipe_ids.size
+        (ct > 0) ? pluralize(ct, "Recipe") : ""
+    end
+        
+    def count_owners tag
+        ct = tag.user_ids.size
+        (ct > 0) ? pluralize(ct, "Owner") : ""
+    end
+        
+    def count_links tag
+        ct = tag.link_ids.size
+        (ct > 0) ? pluralize(ct, "Link") : ""
+    end
+        
+    def summarize_synonyms tag
+        # The synonyms are the other expressions of this tag's referents
+        ids = tag.referents.collect { |ref| ref.tag_ids }.flatten.uniq.delete_if { |id| id == tag.id }
+        ids.empty? ? "" : ids.collect { |id| Tag.find(id).name+"(#{id.to_s})" }.join(', ').html_safe
+    end
+    
+    def summarize_tag tag
+        "<strong>#{tag.name}</strong>".html_safe
+    end
+    
     def summarize_tags(tags)
-	tags.collect{|e| "<strong>#{e.name}</strong>" }.join(', ')
+    	tags.collect{|tag| summarize_tag tag }.join(', ')
     end
     
     # Return HTML for each tag of the given type
@@ -25,7 +51,7 @@ module TagsHelper
    	    while type = Tag.index_to_type(ix) # we get nil when we've run off the end of the table
    	        label = Tag.typename(type).to_s.pluralize
    	        tabstrs += <<BLOCK_END
-       		    <li class="tag_tab"><a href="tags/editor?tabindex=#{ix.to_s}" title="#{label}">#{label}</a></li> 
+       		    <li class="tag_tab"><a href="tags/list?tabindex=#{ix.to_s}" title="#{label}">#{label}</a></li> 
 BLOCK_END
    	        ix += 1
         end

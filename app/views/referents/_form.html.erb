@@ -1,4 +1,3 @@
-<%= form_for(@referent) do |f| %>
   <% if @referent.errors.any? %>
     <div id="error_explanation">
       <h2><%= pluralize(@referent.errors.count, "error") %> prohibited this referent from being saved:</h2>
@@ -10,11 +9,48 @@
       </ul>
     </div>
   <% end %>
-
+<%= form_for(@referent.becomes(Referent)) do |f| %>
   <div class="field">
-    <%= f.label :term %><br />
-    <%= f.number_field :term %>
-  </div>
+    <%= f.label :description %>
+    <%= f.text_field :description %>
+</div>
+<div class="referent_parents_div" >
+   <%= f.label :parents, "Parents", :id=>"referent_parents_label" -%>
+   <%= f.text_field :parents, "data-pre" => @referent.parents.map(&:attributes).to_json %>
+</div>
+<div class="referent_children_div" >
+   <%= f.label :children, "Children", :id=>"referent_children_label" -%>
+   <%= f.text_field :children, "data-pre" => @referent.children.map(&:attributes).to_json %>
+</div>
+<div class="field">
+	<%= f.label :expressions %>
+	<table>
+	  <tr>
+		<th>Handle?</th>
+		<th>Tag</th>
+		<th>Language</th>
+		<th>Form</th>
+	  </tr>
+	<%= f.fields_for :expressions do |builder| %>
+	  <tr>
+		<fieldset>
+		  <td><%= f.radio_button :tag, builder.object.tag_id %></td>
+		  <td><%= builder.label :tagname, builder.object.tagname %></td>
+		  <%= builder.hidden_field :tag_id, value: builder.object.tag_id.to_s %>
+		  <td><%= builder.select :locale, Referent.locales %></td>
+		  <td><%= builder.select :form, Referent.forms %></td>
+		  <td><%= builder.check_box :_destroy %><%= builder.label :_destroy, "Remove Expression" %></td>
+		</fieldset>
+	  </tr>
+	  <%# render 'expression_fields', f: builder %>
+	<% end %>
+	</table>
+	<%# link_to_add_fields "Add Question", f, :questions %>	<%= link_to_add_fields "Another Expression", f, :expressions %>
+</div>
+<div class="field">
+	<%= f.check_box(:isCountable) %>
+	<%= f.label(:isCountable, "Is countable") %>
+</div>
   <div class="actions">
     <%= f.submit %>
   </div>
