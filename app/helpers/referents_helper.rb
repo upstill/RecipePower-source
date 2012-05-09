@@ -29,4 +29,5 @@ module ReferentsHelper
 	    "(<i>#{referent.referent_typename}</i>) "
 	    ).html_safe
 	end
+	
 end

@@ -26,26 +26,21 @@
 	<%= f.label :expressions %>
 	<table>
 	  <tr>
-		<th>Handle?</th>
 		<th>Tag</th>
 		<th>Language</th>
 		<th>Form</th>
 	  </tr>
-	<%= f.fields_for :expressions do |builder| %>
-	  <tr>
-		<fieldset>
-		  <td><%= f.radio_button :tag, builder.object.tag_id %></td>
-		  <td><%= builder.label :tagname, builder.object.tagname %></td>
-		  <%= builder.hidden_field :tag_id, value: builder.object.tag_id.to_s %>
-		  <td><%= builder.select :locale, Referent.locales %></td>
-		  <td><%= builder.select :form, Referent.forms %></td>
-		  <td><%= builder.check_box :_destroy %><%= builder.label :_destroy, "Remove Expression" %></td>
-		</fieldset>
-	  </tr>
-	  <%# render 'expression_fields', f: builder %>
-	<% end %>
+	<hr>
 	</table>
-	<%# link_to_add_fields "Add Question", f, :questions %>	<%= link_to_add_fields "Another Expression", f, :expressions %>
+	<%= f.fields_for :expressions do |builder| %>
+		<%= render 'expression_fields', f: builder %>
+	<% end %>
+    <%= link_to_add_fields "Add Expression", f, :expressions, referent_id: @referent.id %>
+	<%# link_to_add_expr "Another Expression", f, :expressions %>
+</div>
+<div class="referent_add_expression_div" >
+   <%= f.label :Add, "Add Expression", :id=>"referent_add_expression_label" -%>
+   <%= text_field :referent, :add_expression %>
 </div>
 <div class="field">
 	<%= f.check_box(:isCountable) %>

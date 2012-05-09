@@ -132,7 +132,8 @@ class ReferentsController < ApplicationController
   def update
       @tabindex = session[:tabindex] || params[:tabindex] || 0
       handlerclass = @@HandlersByIndex[@tabindex]
-    @referent = handlerclass.find(params[:id])
+    @referent = Referent.find(params[:id]).becomes(Referent)
+    debugger
     respond_to do |format|
       if @referent.update_attributes(params[:referent])
         format.html { redirect_to @referent, notice: 'Referent was successfully updated.' }

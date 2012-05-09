@@ -11,7 +11,7 @@ class Referent < ActiveRecord::Base
     has_many :tags, :through=>:expressions
     accepts_nested_attributes_for :expressions, allow_destroy: true
     
-    attr_accessible :tag, :type, :description, :isCountable, :expressions_attributes
+    attr_accessible :tag, :type, :description, :isCountable, :expressions_attributes, :add_expression
     
     before_save :ensure_expression
     
@@ -24,6 +24,14 @@ class Referent < ActiveRecord::Base
     
     def self.forms
        @@Forms
+    end
+    
+    def add_expression
+        debugger
+    end
+    
+    def add_expression=(tag)
+        debugger
     end
     
     # Before saving a referent, we make sure its preferred tag is listed as an expression of type 1

@@ -807,3 +807,10 @@ font:12px arial, sans-serif;
 	// outline: #EDDCBF solid thick;
 	background-color:#FFFFFF;
 }
+
+.expr_tag {
+  font:18px arial,sans-serif;
+  // font-weight:bold;
+  margin-left:20px;
+  margin-right:20px;
+}

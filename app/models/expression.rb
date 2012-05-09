@@ -19,7 +19,7 @@ class Expression < ActiveRecord::Base
     end
     
     def tagname
-        return "WTF?!?" unless self && self.tag
+        return "**no tag**" unless self && self.tag
         self.tag.name
     end
 end

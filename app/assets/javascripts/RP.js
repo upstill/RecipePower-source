@@ -441,24 +441,18 @@ $(function() {
 		preventDuplicates: true,
         allowCustomEntry: true
     });
-    $("#referent_children").tokenInput("/tags/match.json", {
-        crossDomain: false,
-		noResultsText: "No existing tag found; hit Enter to make a new tag",
-        hintText: "Tags for things that come under this category",
-        prePopulate: $("#referent_children").data("pre"),
-        theme: "facebook",
-		preventDuplicates: true,
-        allowCustomEntry: true
-    });
-    $("#referent_parents").tokenInput("/tags/match.json", {
-        crossDomain: false,
-		noResultsText: "No existing tag found; hit Enter to make a new tag",
-        hintText: "Categories that include this",
-        prePopulate: $("#referent_parents").data("pre"),
-        theme: "facebook",
-		preventDuplicates: true,
-        allowCustomEntry: true
-    });
+	$('.remove_fields').click(function(event) {
+	    $(this).prev('input[type=hidden]').val('1')
+	    $(this).closest('tr').hide()
+	    event.preventDefault()
+	});
+	/*
+	$('form').on 'click', '.add_fields', (event) ->
+	    time = new Date().getTime()
+	    regexp = new RegExp($(this).data('id'), 'g')
+	    $(this).before($(this).data('fields').replace(regexp, time))
+	    event.preventDefault()
+	*/
 });
 
 function add_rating(link, association, content) {
