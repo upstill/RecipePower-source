@@ -136,15 +136,18 @@ class Tag < ActiveRecord::Base
    
    # For building into selection boxes, return a list of name/value pairs of all the tag types
    def self.tag_selections
-       i = 0
-       @@TypesToNames.collect { |name| [ name, i++ ]}
+       i = -1
+       @@TypesToNames.collect do |name| 
+           i = i + 1
+           [ name, i ] 
+       end
    end
    
    # Taking an index into the table of tag types, return the symbol for that type
    # (used to build a set of tabs, one for each tag type)
    # NB: returns nil for nil index
    def self.index_to_type(index)
-       index && @@NamesToTypes[@@TypesToNames[index]]
+       index && @@NamesToTypes[@@TypesToSyms[index]]
    end
    
    # Convert the tag type to external storage format, e.g. integer

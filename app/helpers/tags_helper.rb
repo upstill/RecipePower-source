@@ -67,6 +67,8 @@ BLOCK_END
        
        # Helper to define a select menu for tag type
        def tag_selections tag
-           options_for_select Tag.tag_selections
+           sels = Tag.tag_selections
+           debugger
+           options_for_select sels
        end
 end
