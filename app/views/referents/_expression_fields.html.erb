@@ -1,9 +1,9 @@
-<fieldset>
-  <%= f.hidden_field :tag_id %>
+<tr>
+  <td><%= f.hidden_field :tag_token %>
   <%= f.hidden_field :referent_id %>
-  <%= f.label :tagname, f.object.tagname, class: "expr_tag" %>
-  <%= f.select :locale, Referent.locales %>
-  <%= f.select :form, Referent.forms %>
-  <%= f.hidden_field :_destroy %>
-  <%= link_to "remove", '#', class: "remove_fields" %>
-</fieldset>
+  <%= f.label :tagname, f.object.tagname, class: "expr_tag" %></td>
+  <td><%= f.select :locale, Referent.locales %></td>
+  <td><%= f.select :form, Referent.forms %></td>
+  <td><%= f.hidden_field :_destroy %>
+  <%= link_to "remove", '#', class: "remove_fields" %></td>
+</tr>

@@ -1,5 +1,4 @@
 <h3>Everything There Is To Know About "<%= @tag.name %>"</h3>
-<p id="notice"><%= notice %></p>
 
 <% @tag.referents.each do |ref| %>
 	<br>Meaning "<%= link_to ref.name, edit_referent_path(ref) %>"

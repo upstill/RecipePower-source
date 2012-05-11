@@ -64,4 +64,9 @@ BLOCK_END
 BLOCK_END
          s.html_safe
        end
+       
+       # Helper to define a select menu for tag type
+       def tag_selections tag
+           options_for_select Tag.tag_selections
+       end
 end

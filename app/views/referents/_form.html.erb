@@ -10,38 +10,56 @@
     </div>
   <% end %>
 <%= form_for(@referent.becomes(Referent)) do |f| %>
-  <div class="field">
-    <%= f.label :description %>
-    <%= f.text_field :description %>
+<div class="referent_tags_div">
+	<div class="referent_tags_label_div">
+	    <%= f.label :description, "Description:" %>
+	</div>
+	<div class="referent_tags_tokens_div">
+		<%= f.text_field :description, id: "referent_description" %>
+	</div>
 </div>
-<div class="referent_parents_div" >
-   <%= f.label :parents, "Parents", :id=>"referent_parents_label" -%>
-   <%= f.text_field :parents, "data-pre" => @referent.parents.map(&:attributes).to_json %>
+<br class="clear">
+<div class="referent_tags_div" >
+	<div class="referent_tags_label_div">
+	   <%= f.label :parents, "Parents:", :id=>"referent_parents_label" -%>
+	</div>
+	<div class="referent_tags_tokens_div">
+	   <%= f.text_field :parents, "data-pre" => @referent.parents.map(&:attributes).to_json %>
+	</div>
 </div>
-<div class="referent_children_div" >
-   <%= f.label :children, "Children", :id=>"referent_children_label" -%>
-   <%= f.text_field :children, "data-pre" => @referent.children.map(&:attributes).to_json %>
+<br class="clear">
+<div class="referent_tags_div" >
+	<div class="referent_tags_label_div">
+	   <%= f.label :children, "Children:", :id=>"referent_children_label" -%>
+	</div>
+	<div class="referent_tags_tokens_div">
+	   <%= f.text_field :children, "data-type" => @referent_type.to_s, "data-pre" => @referent.children.map(&:attributes).to_json %>
+	</div>
 </div>
+<br class="clear">
 <div class="field">
-	<%= f.label :expressions %>
-	<table>
+	<%= f.label :expressions, "<strong>Names:</strong> (Tags that name this thing)".html_safe %>
+	<table id="expression_table">
 	  <tr>
 		<th>Tag</th>
 		<th>Language</th>
 		<th>Form</th>
 	  </tr>
-	<hr>
-	</table>
 	<%= f.fields_for :expressions do |builder| %>
 		<%= render 'expression_fields', f: builder %>
 	<% end %>
-    <%= link_to_add_fields "Add Expression", f, :expressions, referent_id: @referent.id %>
-	<%# link_to_add_expr "Another Expression", f, :expressions %>
+	</table>
+    <%= link_to_add_fields "Add Name:", f, :expressions, referent_id: @referent.id %>
 </div>
-<div class="referent_add_expression_div" >
-   <%= f.label :Add, "Add Expression", :id=>"referent_add_expression_label" -%>
-   <%= text_field :referent, :add_expression %>
+<div id="referent_add_div" >
+	<div id="referent_add_label_div">
+	   <%= f.label :Add, "Add Name", :id=>"referent_add_expression_label" -%>
+	</div>
+	<div id="referent_add_tokens_div">
+	   <%= text_field :referent, :add_expression %>
+	</div>
 </div>
+<br class="clear">
 <div class="field">
 	<%= f.check_box(:isCountable) %>
 	<%= f.label(:isCountable, "Is countable") %>

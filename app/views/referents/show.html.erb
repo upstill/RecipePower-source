@@ -1,8 +1,12 @@
 <p>
-  <b>Term:</b>
-  <%= @referent.name %>
+  <%= summarize_referent @referent, true %>
+</p><p>
+  <%= list_expressions @referent %>
+</p><p>
+  <%= list_parents @referent %>
+</p><p>
+  <%= list_children @referent %>
 </p>
-
 
 <%= link_to 'Edit', edit_referent_path(@referent) %> |
 <%= link_to 'Back', referents_path %>

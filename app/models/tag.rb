@@ -80,10 +80,65 @@ class Tag < ActiveRecord::Base
     end
 
    # These class variables keep the mapping among tag types, type indices, and descriptive strings for the types
-   @@TypesToNames = ["free tag".to_sym, :Genre, :Role, :Process, :Food, :Unit, :Source, :Author, :Occasion, :PantrySection, :StoreSection, :Interest, :Tool ]
-   @@NamesToTypes = {:Genre=>1, :Role=>2, :Process=>3, :Food=>4, :Unit=>5, :Source=>6, :Author=>7, :Occasion=>8 , "free tag".to_sym=>0, :PantrySection=>9, :StoreSection=>10, :Interest=>11, :Tool=>12}
+   @@TypesToSyms = [
+       "free tag".to_sym, 
+       :Genre, 
+       :Role, 
+       :Process, 
+       :Food, 
+       :Unit, 
+       :Source, 
+       :Author, 
+       :Occasion, 
+       :PantrySection, 
+       :StoreSection, 
+       :Interest, 
+       :Tool, 
+       :Nutrient, 
+       :CulinaryTerm ]
+       
+# Translation from tag type to human-readable form
+   @@TypesToNames = [
+       "free tag", 
+       "Genre", 
+       "Role", 
+       "Process", 
+       "Food", 
+       "Unit", 
+       "Source", 
+       "Author", 
+       "Occasion", 
+       "Pantry Section", 
+       "Store Section", 
+       "Interest", 
+       "Tool", 
+       "Nutrient", 
+       "Culinary Term" ]
+
+   @@NamesToTypes = {
+       :Genre=>1, 
+       :Role=>2, 
+       :Process=>3, 
+       :Food=>4, 
+       :Unit=>5, 
+       :Source=>6, 
+       :Author=>7, 
+       :Occasion=>8 , 
+       "free tag".to_sym=>0, 
+       :PantrySection=>9, 
+       :StoreSection=>10, 
+       :Interest=>11, 
+       :Tool=>12,
+       :Nutrient=>13,
+       :Term=>14 }
 
    public 
+   
+   # For building into selection boxes, return a list of name/value pairs of all the tag types
+   def self.tag_selections
+       i = 0
+       @@TypesToNames.collect { |name| [ name, i++ ]}
+   end
    
    # Taking an index into the table of tag types, return the symbol for that type
    # (used to build a set of tabs, one for each tag type)
@@ -101,7 +156,7 @@ class Tag < ActiveRecord::Base
        elsif tt.kind_of? Symbol 
            @@NamesToTypes[tt]
        elsif tt.kind_of? String
-           @@NamesToTypes[tt.split("\s").downcase.capitalize.join('').to_sym]
+           @@NamesToTypes[tt.split("\s").collect { |word| word.downcase.capitalize }.join('').to_sym]
        elsif tt.kind_of? Array
            tt.first && tt.collect { |type| self.tagtype_inDB type }
        end
@@ -177,6 +232,7 @@ class Tag < ActiveRecord::Base
    # tagtype: either a single value or an array, specifying key type(s) to search
    # assert: return a key of the given type matching the name, even if it has to be created anew
    # matchall: search only succeeds if it matches the whole string
+   # untypedOK: add type 0 to search to look for untyped tags
    
    # If the :assert option is true, strmatch WILL return a tag on the given name, of the
    # given type, visible to the given user. This may not require making a new tag, but only opening 

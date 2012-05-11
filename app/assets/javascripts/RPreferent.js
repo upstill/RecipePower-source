@@ -1,6 +1,8 @@
 // Bind tokenInput to the text fields
 $(function() {
-	$("#referent_children").tokenInput("/tags/match.json", {
+	var tagtype = $('#referent_children').data("type");
+	var querystr = "/tags/match.json?tagtype="+tagtype
+	$("#referent_children").tokenInput(querystr, {
 	    crossDomain: false,
 		noResultsText: "No existing tag found; hit Enter to make a new tag",
 	    hintText: "Tags for things that come under this category",
@@ -9,7 +11,7 @@ $(function() {
 		preventDuplicates: true,
 	    allowCustomEntry: true
 	});
-	$("#referent_parents").tokenInput("/tags/match.json", {
+	$("#referent_parents").tokenInput(querystr, {
 	    crossDomain: false,
 		noResultsText: "No existing tag found; hit Enter to make a new tag",
 	    hintText: "Categories that include this",
@@ -18,13 +20,13 @@ $(function() {
 		preventDuplicates: true,
 	    allowCustomEntry: true
 	});
-	$("#referent_add_expression").tokenInput("/tags/match.json", {
+	$("#referent_add_expression").tokenInput(querystr+"&untypedOK=1", {
 	    crossDomain: false,
 		noResultsText: "No existing tag found; hit Enter to make a new tag",
 	    hintText: "Type/select another tag to express this thing",
 	    theme: "facebook",
 		tokenLimit: 1,
-	    onAdd: add_expression, // Respond to tag selection by adding expression
+	    onAdd: add_expression, // Respond to tag selection by adding expression and deleting tag
 		preventDuplicates: true,
 	    allowCustomEntry: true
 	});
@@ -33,15 +35,25 @@ $(function() {
 /* Callback for the selection of a new tag for an expression */
 function add_expression(hi, li) {
 	// hi.id is the tag id; hi.data is the string
-	var that = $('.add_fields')
+	var that = $('.add_fields') // The add-fields element carries the data for the new stuff
     time = new Date().getTime()
+    // Replace the 'id' with a random timestamp
     regexp = new RegExp($(that).data('id'), 'g')
     newfields = $(that).data('fields').replace(regexp, time);
+
+    // Insert the tag
 	regexp = new RegExp("\\*\\*no tag\\*\\*", 'g')
 	newfields = newfields.replace(regexp, hi.name)
+	
+	// Insert the tag id
 	regexp = new RegExp("type=.hidden.")
-	var valstr = "type=\"hidden\" value=\""+hi.id+"\""
+	var tagid = hi.id || "\'"+hi.name+"\'"
+	var valstr = "type=\"hidden\" value=\""+tagid+"\""
 	newfields = newfields.replace(regexp, valstr)
-    debugger;
-    $(that).before(newfields)
+	
+    var other = $('tr')
+    $(other).last().after(newfields)
+
+    // Finally, clear the tag from the "Add Expression" box
+    $('#referent_add_expression').tokenInput("remove", {id: hi.id});
 }

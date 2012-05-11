@@ -5,7 +5,6 @@
 			<%= f.label :tag_tokens, "Seek and Ye Shall Find:", :id=>"rcpquery_tags_label" -%>
 		</div>
 		<div id="rcpquery_tag_tokens_div">
-			<%# f.text_field :tag_tokens, "data-pre" => [].to_json %>
 			<%= f.text_field :tag_tokens, "data-pre" => @rcpquery.tags.map(&:attributes).to_json %>
 		</div>
 		<div class="rcpquery_listmode_div">

@@ -66,7 +66,8 @@ class ReferentsController < ApplicationController
       @referent = handlerclass.find(params[:id])
 =end
       @referent = Referent.find(params[:id]) # .becomes(Referent)
-      @expressions = @referent.expressions
+      # @expressions = @referent.expressions
+      @referent_type = @referent.referent_type
   end
 
   # POST /referents?tagid=1&mode={over,before,after}&target=referentid
@@ -126,19 +127,31 @@ class ReferentsController < ApplicationController
       end
     end
   end
+  
+  def fix_expression_tokens tokens, tagtype
+      return if !tokens
+      tokens.keys.each do |key|
+          attrlist = tokens[key]
+          attrlist[:tag_token].sub! /^\'/, "\'#{tagtype.to_s}::"
+      end
+  end
 
   # PUT /referents/1
   # PUT /referents/1.json
   def update
-      @tabindex = session[:tabindex] || params[:tabindex] || 0
-      handlerclass = @@HandlersByIndex[@tabindex]
-    @referent = Referent.find(params[:id]).becomes(Referent)
-    debugger
+    # @tabindex = session[:tabindex] || params[:tabindex] || 0
+    # handlerclass = @@HandlersByIndex[@tabindex]
+    @referent = Referent.find(params[:id]) # .becomes(Referent)
+    # Any free tags specified as tag tokens will need a type associated with them.
+    # This is prepended to the string
+    fix_expression_tokens params[:referent][:expressions_attributes], @referent.referent_type
     respond_to do |format|
       if @referent.update_attributes(params[:referent])
-        format.html { redirect_to @referent, notice: 'Referent was successfully updated.' }
+        format.html { redirect_to @referent.becomes(Referent), notice: 'Referent was successfully updated.' }
         format.json { render json: [], status: :success }
       else
+        @referent.becomes(Referent)
+        @referent_type = @referent.referent_type
         format.html { render action: "edit" }
         format.json { render json: @referent.errors, status: :unprocessable_entity }
       end

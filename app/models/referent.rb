@@ -1,3 +1,10 @@
+class ReferentValidator < ActiveModel::Validator
+    def validate(record)
+        debugger
+        count = record.tags.size
+    end
+end
+
 class Referent < ActiveRecord::Base
     # Referents don't have a strict tree structure, just categories defined by an isa relationship.
     # This relationship is implemented by the ReferentRelation table, with parent_id and child_id keys
@@ -13,7 +20,10 @@ class Referent < ActiveRecord::Base
     
     attr_accessible :tag, :type, :description, :isCountable, :expressions_attributes, :add_expression
     
+    validates_with ReferentValidator
+    
     before_save :ensure_expression
+    after_save :ensure_tagtypes
     
     @@Locales = [["English",:en], ["Italian",:it], ["Spanish",:es]]
     @@Forms = [["Generic", 1], ["Singular", 2], ["Plural", 3]]
@@ -37,10 +47,30 @@ class Referent < ActiveRecord::Base
     # Before saving a referent, we make sure its preferred tag is listed as an expression of type 1
     def ensure_expression
         # Look for an expression on this tag of type 1. If found, demote to a corruption (type 0)
+        debugger
         if self.tag && (self.tag > 0)
             unless self.expressions.any? { |exp| exp.tag_id == self.tag }
                 # No expression found => make a new one and add it to the set
                 self.expressions << Expression.create(:tag_id=>self.tag, :referent_id=>self.id, :form=>1, :locale=>:en)
+            end
+        end
+    end
+    
+    # After saving, check that all tags are of our type
+    def ensure_tagtypes
+        mytype = self.referent_type
+        debugger
+        self.tags.each do |tag|
+            # Ensure that all associated tags have the right type, are global, and have a meaning
+            unless tag.tagtype == mytype && tag.isGlobal && tag.meaning
+                if tag.tagtype != mytype && (tag.tagtype > 0) # ERROR!! Can't convert tag from another type
+                    errors.add(:tags, "#{tag.name} is a '#{tag.typename}', not '#{Tag.typename(mytype)}'")
+                else
+                    tag.tagtype = mytype
+                    tag.meaning = self.id unless tag.meaning # Give tag this meaning if there's no other
+                    tag.isGlobal = true
+                    tag.save
+                end
             end
         end
     end
