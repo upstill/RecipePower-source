@@ -1,36 +1,16 @@
-<h3>Everything There Is To Know About "<%= @tag.name %>"</h3>
+<h3>Everything There Is To Know About <%= summarize_tag @tag, true %></h3>
 
-<% @tag.referents.each do |ref| %>
-	<br>Meaning "<%= link_to ref.name, edit_referent_path(ref) %>"
-	<% if ref.parents.size == 0 %>
-	    <br>...is not a kind of anything
-	<% else %>
-		<br>...is a kind of: 
-		<% ref.parents.each do |parent| %>
-			<%= parent.name %><%= ", " unless (parent.id == ref.parents.last.id) %>
-		<% end %>
-	<% end %>
-	<% if ref.children.size == 0 %>
-	    <br>...has no examples
-	<% else %>
-		<br>...and includes: 
-		<% ref.children.each do |child| %>
-			<%= child.name %><%= ", " unless (child.id == ref.children.last.id) %>
-		<% end %>
-	<% end %>
+<%= summarize_tag_owners @tag %>
+<%= summarize_tag_similars @tag %>
+<% if @tag.meaning && (ref = Referent.where(:id=>@tag.meaning).first)%>
+	<%= summarize_ref_parents ref %>
+	<%= summarize_ref_children ref %>
 <% end %>
-<hr>
-<% if @tag.link_ids.size > 0 %>
-	<hr><br>See: <%= @tag.name %> on: 
-	<%= @tag.links.each { |link| present_link link } %>
+<% @tag.referents.collect{ |ref| ref unless ref.id == @tag.meaning }.compact.each do |ref| %>
+	<%= summarize_referent ref, "Other Meaning" %>
 <% end %>
-<%# Get links for the parents and children of all the referents of this tag %>
-<% if (related = Referent.related(@tag, true, true)).count > 0 %>
-    <hr><br>See Also:
-	<% related.each do |tag| %>
-		<hr><br><%= tag.name %> on: 
-		<%= tag.links.each { |link| present_link link } %>
-	<% end %>
-<% end %>
+<%= summarize_tag_links @tag %>
+<%= summarize_tag_relations @tag %>
+<br>
 <%= link_to 'Edit', edit_tag_path(@tag) %> |
 <%= link_to 'Back', tags_path %>

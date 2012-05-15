@@ -1,5 +1,14 @@
 module TagsHelper
     
+    def taglink(id)
+        if id
+            tag = Tag.find id
+            link_to(tag.name, tag)
+        else
+            "**no tag**"
+        end
+    end
+    
     def count_recipes tag
         ct = tag.recipe_ids.size
         (ct > 0) ? pluralize(ct, "Recipe") : ""
@@ -21,8 +30,9 @@ module TagsHelper
         ids.empty? ? "" : ids.collect { |id| Tag.find(id).name+"(#{id.to_s})" }.join(', ').html_safe
     end
     
-    def summarize_tag tag
-        "<strong>#{tag.name}</strong>".html_safe
+    def summarize_tag tag, withtype = false
+	    ((withtype ? "<i>#{tag.typename}</i> " : "" )+
+        "'<strong>#{tag.name}</strong>'").html_safe
     end
     
     def summarize_tags(tags)
@@ -48,12 +58,13 @@ module TagsHelper
     def tags_tabset(tabindex)
    	    tabstrs = ""
    	    ix = 0
-   	    while type = Tag.index_to_type(ix) # we get nil when we've run off the end of the table
+   	    type = 0 # Index 0 yields type nil
+   	    while type
    	        label = Tag.typename(type).to_s.pluralize
    	        tabstrs += <<BLOCK_END
        		    <li class="tag_tab"><a href="tags/list?tabindex=#{ix.to_s}" title="#{label}">#{label}</a></li> 
 BLOCK_END
-   	        ix += 1
+   	        type = Tag.index_to_type(ix+=1) # we get nil when we've run off the end of the table
         end
         s = <<BLOCK_END
 <div id="tags_tabset" value=#{tabindex.to_s} > 
@@ -65,10 +76,40 @@ BLOCK_END
          s.html_safe
        end
        
-       # Helper to define a select menu for tag type
-       def tag_selections tag
-           sels = Tag.tag_selections
-           debugger
-           options_for_select sels
-       end
+   # Helper to define a selection menu for tag type
+   def type_selections tag
+       options_for_select(Tag.type_selections, tag.typenum )
+   end
+       
+  # Return HTML for the links associated with this tag
+   def summarize_tag_links tag, label = "See: "
+     if tag.link_ids.size > 0
+       ("<hr><br>#{label}#{tag.name} %> on:"+
+       tag.links.collect{ |link| present_link link }.join(', ')).html_safe
+     end
+   end
+       
+  # Return HTML for the links related to a given tag (i.e., the links for 
+  # all tags related to this one)
+  def summarize_tag_relations tag
+    links = Referent.related(tag, true, true).collect { |rel| summarize_tag_links rel, "" }.keep_if{|s| s}
+    ("<hr><br>See Also: "+links.join('<br')).html_safe unless links.empty?
+  end
+  
+  def summarize_tag_owners tag
+      ("<br>Is owned by "+
+        (tag.isGlobal ? 
+        "everyone" :
+        ("<br>&nbsp;"+tag.users.collect { |user| user.username }.join(',<br>&nbsp;')))).html_safe
+  end
+  
+  # Helper for showing the tags which are potentially redundant wrt. this tag:
+  # They match in the normalized_name field
+  def summarize_tag_similars tag, label=" Similar tags: "
+      others = Tag.where(normalized_name: tag.normalized_name).delete_if{ |other| other.id == tag.id }
+      unless others.empty? 
+          ("<br>"+
+          others.collect { |other| link_to( other.name, other)+"(#{other.typename} #{other.id.to_s})" }.join(', ')).html_safe
+      end
+  end
 end

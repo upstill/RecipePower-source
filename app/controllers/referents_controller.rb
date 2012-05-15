@@ -67,7 +67,7 @@ class ReferentsController < ApplicationController
 =end
       @referent = Referent.find(params[:id]) # .becomes(Referent)
       # @expressions = @referent.expressions
-      @referent_type = @referent.referent_type
+      @referent_type = @referent.typenum
   end
 
   # POST /referents?tagid=1&mode={over,before,after}&target=referentid
@@ -144,14 +144,14 @@ class ReferentsController < ApplicationController
     @referent = Referent.find(params[:id]) # .becomes(Referent)
     # Any free tags specified as tag tokens will need a type associated with them.
     # This is prepended to the string
-    fix_expression_tokens params[:referent][:expressions_attributes], @referent.referent_type
+    fix_expression_tokens params[:referent][:expressions_attributes], @referent.typenum
     respond_to do |format|
       if @referent.update_attributes(params[:referent])
         format.html { redirect_to @referent.becomes(Referent), notice: 'Referent was successfully updated.' }
         format.json { render json: [], status: :success }
       else
         @referent.becomes(Referent)
-        @referent_type = @referent.referent_type
+        @referent_type = @referent.typenum
         format.html { render action: "edit" }
         format.json { render json: @referent.errors, status: :unprocessable_entity }
       end

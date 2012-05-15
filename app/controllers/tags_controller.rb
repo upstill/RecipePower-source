@@ -4,15 +4,15 @@ class TagsController < ApplicationController
   def index
       return if need_login true, true
       @Title = "Tags"
-      @tabindex = params[:tabindex] ? params[:tabindex].to_i : (session[:tabindex] || 0)
+      @tabindex = (params[:tabindex] && params[:tabindex].to_i) || session[:tabindex] || 0
       session[:tabindex] = @tabindex
-      @tags = params[:tagtype] ? Tag.where("tagtype = ?", params[:tagtype]) : Tag.all
+      @taglist = params[:tagtype] ? Tag.where("tagtype = ?", params[:tagtype]) : Tag.all
       # The :unbound_only parameter limits the set to tags with no associated form (and, thus, referent)
-      @tags.delete_if { |t| !t.referents.empty? } if params[:unbound_only] == "true"
+      @taglist.delete_if { |t| !t.referents.empty? } if params[:unbound_only] == "true"
     respond_to do |format|
-      format.json { render :json => @tags.map { |tag| { :title=>tag.name+tag.id.to_s, :isLazy=>false, :key=>tag.id, :isFolder=>false } } }
+      format.json { render :json => @taglist.map { |tag| { :title=>tag.name+tag.id.to_s, :isLazy=>false, :key=>tag.id, :isFolder=>false } } }
       format.html # index.html.erb
-      format.xml  { render :xml => @tags }
+      format.xml  { render :xml => @taglist }
     end
   end
   
@@ -122,7 +122,8 @@ class TagsController < ApplicationController
     @Title = "Tags"
     @tabindex = params[:tabindex] ? params[:tabindex].to_i : (session[:tabindex] || 0)
     # The list of orphan tags gets all tags of this type which aren't linked to a table
-    @taglist = Tag.strmatch("", userid: session[:user_id], tagtype: Tag.index_to_type(@tabindex) )
+    tagtype = @tabindex > 0 ? Tag.index_to_type(@tabindex) : 0
+    @taglist = Tag.strmatch("", userid: session[:user_id], tagtype: tagtype)
     session[:tabindex] = @tabindex
     render :partial=>"alltags"
   end
@@ -131,10 +132,18 @@ class TagsController < ApplicationController
   # move the listed keys from one type to another
   def typify
       # Return array of ids of tags successfully converted
-      puts "Typify"+params["tagids"].inspect
-      idsChanged = Tag.convertTypesByIndex(params["tagids"].map{|p| p.delete("orphantag_").to_i}, params["fromtabindex"].to_i, params["totabindex"].to_i, true)
-      # Go back to the client with a list of ids that were changed
-      puts "Success on "+idsChanged.inspect
+      # We can take an array of tagids or a single tagid together with a new type spec
+      if params["tagids"] 
+          puts "Typify"+params["tagids"].inspect
+          idsChanged = Tag.convertTypesByIndex(params["tagids"].map{|p| p.delete("orphantag_").to_i}, params["fromtabindex"].to_i, params["totabindex"].to_i, true)
+          # Go back to the client with a list of ids that were changed
+          puts "Success on "+idsChanged.inspect
+      elsif params["tagid"] && params["newtype"]
+          # Change the type of a single tag
+          tag = Tag.find params["tagid"].to_i
+          tag.tagtype = params["newtype"].to_i
+          idsChanged = tag.save ? [tag.id] : []
+      end
       render :json=>idsChanged.map { |id| orphantagid(id) }
   end
 

@@ -21,19 +21,19 @@
 <br class="clear">
 <div class="referent_tags_div" >
 	<div class="referent_tags_label_div">
-	   <%= f.label :parents, "Parents:", :id=>"referent_parents_label" -%>
+	   <%= f.label :parent_tokens, "Parents:", :id=>"referent_parents_label" -%>
 	</div>
 	<div class="referent_tags_tokens_div">
-	   <%= f.text_field :parents, "data-pre" => @referent.parents.map(&:attributes).to_json %>
+	   <%= f.text_field :parent_tokens, "data-type" => @referent_type.to_s, "data-pre" => @referent.parent_tokens %>
 	</div>
 </div>
 <br class="clear">
 <div class="referent_tags_div" >
 	<div class="referent_tags_label_div">
-	   <%= f.label :children, "Children:", :id=>"referent_children_label" -%>
+	   <%= f.label :child_tokens, "Children:", :id=>"referent_children_label" -%>
 	</div>
 	<div class="referent_tags_tokens_div">
-	   <%= f.text_field :children, "data-type" => @referent_type.to_s, "data-pre" => @referent.children.map(&:attributes).to_json %>
+	   <%= f.text_field :child_tokens, "data-type" => @referent_type.to_s, "data-pre" => @referent.child_tokens %>
 	</div>
 </div>
 <br class="clear">

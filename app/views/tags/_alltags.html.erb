@@ -3,6 +3,7 @@
 	  <tr class="list_header">
 	    <th class="list_header">ID</th>
 	    <th>Name</th>
+	    <th>Type</th>
 		<th></th>
 		<th>Public?</th>
 		<th>Similar</th>
@@ -13,16 +14,15 @@
 	    <th></th>
 	  </tr>
 
-	<% @taglist.each do |tag| %><tr>
-		<td><%= tag.id.to_s %></td>
+	<% @taglist.each do |tag| %><tr value="<%= tag.id.to_s %>">
+		<td class="tag_type"><%= tag.id.to_s %></td>
 		<td><%= summarize_tag tag %></td>
+		<td><%= select_tag :tagtype, type_selections(tag), class: "tag_type_selector" %></td>
 		<td><%= count_recipes tag %>
 		   <br><%= count_owners tag %>
 		   <br><%= count_links tag %></td>
 		<td><%= tag.isGlobal ? "Y" : "N" %>
-		<td><% Tag.strmatch(tag.name, { tagtype: tag.tagtype, matchall: true } ).delete_if{ |t2| t2.id == tag.id }.each do |t2| %>
-		      <%= link_to t2.name, edit_tag_path(t2) %>, 
-		<% end %></td>
+		<td><%= summarize_tag_similars tag, "" %></td>
 		<td><%= summarize_synonyms tag %></td>
 		<td><% tag.referents.each do |ref| %>
 		      <%= link_to ref.name, edit_referent_path(ref) %><%= ", " unless ref == tag.referents.last %>
@@ -30,7 +30,7 @@
 	    <td><%= link_to 'Show', tag %></td>
 	    <td><%= link_to 'Edit', edit_tag_path(tag) %></td>
 	    <td><%= link_to 'Destroy', tag, confirm: 'Are you sure?', method: :delete %></td>
-	</tr><% end %>
+	</tr><tr><td colspan="11"><hr></td></tr><% end %>
 	</table>
 	<%= link_to 'New Tag', new_tag_path %>
 </div>

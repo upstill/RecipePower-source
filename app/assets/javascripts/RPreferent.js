@@ -1,8 +1,8 @@
 // Bind tokenInput to the text fields
 $(function() {
-	var tagtype = $('#referent_children').data("type");
+	var tagtype = $('#referent_parent_tokens').data("type");
 	var querystr = "/tags/match.json?tagtype="+tagtype
-	$("#referent_children").tokenInput(querystr, {
+	$("#referent_parent_tokens").tokenInput(querystr, {
 	    crossDomain: false,
 		noResultsText: "No existing tag found; hit Enter to make a new tag",
 	    hintText: "Tags for things that come under this category",
@@ -11,7 +11,7 @@ $(function() {
 		preventDuplicates: true,
 	    allowCustomEntry: true
 	});
-	$("#referent_parents").tokenInput(querystr, {
+	$("#referent_child_tokens").tokenInput(querystr, {
 	    crossDomain: false,
 		noResultsText: "No existing tag found; hit Enter to make a new tag",
 	    hintText: "Categories that include this",

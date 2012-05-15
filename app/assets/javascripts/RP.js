@@ -19,6 +19,34 @@ function tagTabsOnLoad(event, info) {
     // Set up handler for tag typing
     // Since apparently the entry panel isn't set up when the tabs have loaded,
     // we need to set a timer to periodically look for them.
+	$('.tag_type_selector').change(function(event) {
+		// $(this).parent().parent().delete()
+		var element = $(this).parent().parent()
+		var el = element[0]
+		var nextel = element.next()[0]	// The hr element too
+		var tagid = element.attr('value')
+		var value = $(this)[0].value
+	    // Fire off an Ajax call notifying the server of the (re)classification
+	    jQuery.get("/tags/typify",
+	    {
+	        // fromtabindex: fromIndex,
+	        // totabindex: toIndex,
+	        tagid: tagid,
+			newtype: value
+	    },
+	    function(body, status, instance) {
+	        // Use the returned IDs to remove the entries from the list
+	        // First, generate a query string for jQuery from the returned ids
+	        // var refstr = body.map(function(elmt, ix, arr) { return "#" + elmt; }).join(',');
+	        // $(refstr).remove();
+	        // Could be adding the strings to the target tab, if it's loaded
+			if(status == "success") {
+				nextel.parentNode.removeChild(nextel);
+				el.parentNode.removeChild(el);
+			}
+	    },
+	    "json");
+	})
     var TO = window.setInterval(function() {
         var idselector = "#tag_entry" + info.index;
         // var source = '/tags/match?morph=strings&tabindex=' + info.index;

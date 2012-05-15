@@ -14,7 +14,7 @@
   <div class="field">
     <%= f.label :name %><br />
     <%= f.text_field :name %>
-    <%= f.select :tagtype, tag_selections(@tag) %>
+    <%= f.select :tagtype, type_selections(@tag) %>
   </div>
   <div class="actions">
     <%= f.submit %>

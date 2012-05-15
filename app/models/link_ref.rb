@@ -52,7 +52,7 @@ require 'csv'
                 typestrs.split('; ').each do |typestr|
                     # puts self.associate :tag=>tag, :resource_type=>:glossary, :uri=>uri, :tagtype=>type, :userid=>superid
                     # Convert typestr to canonical form
-                    if typeid = Tag.tagtype_inDB(typestr)
+                    if typeid = Tag.typenum(typestr)
                         # Tags will be asserted if they don't exist, assigned to the given type and made global
                         tag = Tag.assert_tag( tagstr, tagtype: typeid)
                         debugger

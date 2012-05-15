@@ -9,14 +9,17 @@
   </tr>
 
 <% @referents.each do |referent| %>
-  <tr>
-    <td><%= summarize_referent referent %>
+  <tr frame="below">
+    <td valign="top">
+	    <hr>
+		<%= summarize_ref_name referent %>
 	    <br><%= link_to 'Show', referent.becomes(Referent) %>
 	    <%= link_to 'Edit', edit_referent_path(referent.becomes(Referent)) %>
 	    <%# link_to 'Destroy', referent.becomes(Referent), confirm: 'Are you sure?', method: :delete %>
 	</td>
 	<td><%= referent.isCountable ? "C" : "NC" %><td>
 	<td>
+	    <hr>
 		<%= list_expressions referent %><br>
 		<%= list_parents referent %><br>
 		<%= list_children referent %>

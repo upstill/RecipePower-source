@@ -22,23 +22,69 @@ class Tag < ActiveRecord::Base
     
     validates_presence_of :name
     before_validation :tagqa
-
+    
+    # Eliminate the tag of the given id, replacing it with this one
+    def absorb oldid
+        newid = self.id
+        t2 = Tag.find oldid
+        # Only consider absorbing tags of non-clashing type
+        ownerids = self.user_ids
+        if t2.normalized_name != self.normalized_name && (t2.typesym.nil? || t2.typesym == self.typesym)
+            
+            # Absorb recipe taggings (Tagrefs) by replacing references to t2 with this id, avoiding duplication
+=begin
+            rids = self.recipe_ids
+            t2.tagrefs.each do |tr| 
+                # Do nothing if this recipe is already listed under the new tag
+                unless rids.include? tr.recipe_id 
+                    tr.tag_id = newid
+                    tr.save
+                end
+                # Make sure the owner of the link can see the replaced link
+                admit_user tr.user_id
+            end
+=end
+            self.recipes = (self.recipes + t2.recipes).uniq
+            
+            # Merge owners by taking on all owners of the absorbee
+            # t2.user_ids.each { |uid| admit_user uid }
+            self.users = self.users + t2.users
+            
+            # Replace referents' DIRECT use of the tag
+            Referent.where(tag: oldid).each do |ref| 
+                ref.tag = newid # Now it's all about ME ME ME
+                ref.save
+            end
+            
+            # Replace the use of the tag in expressions
+=begin
+            myrefids = self.referent_ids
+            Expressions.where(tag_id: oldid).each do |expr|
+                # If we're not already linked to the referent, do so now
+                unless myrefids.include?(expr.referent_id) 
+                    expr.tag_id = newid
+                    expr.save
+                end
+            end
+=end
+            self.referents = (self.referents + t2.referents).uniq
+            
+            self.links = (self.links + t2.links).uniq
+            
+            # Correct any query that uses t2
+            Rcpquery.each do |rq| 
+                do_save = false
+                rq.tags = rq.tags.each { |tag| ((do_save = true) && (tag.id = newid)) if tag.id == oldid }
+                rq.save if do_save
+            end
+            
+            t2.destroy
+        end
+    end
+    
     # 'typename' is a virtual attribute for the string associated with the tag's type (tagtype attribute)
 
     attr_reader :typename
-    def typename()
-        self.tagtype.nil? ? "free tag" : @@TypesToNames[self.tagtype]
-    end
-
-    # Set the type of the tag, given in text
-    def typename=(name)
-        self.tagtype = self.tagtype_inDB(name) || 0
-    end
-   
-   # This class method gives access to type names independent of any tag instances
-   def self.typename(type)
-       @@TypesToNames[type] || "free tag"
-   end
     
     # When a tag is asserted into the database, we do have minimal sanitary standards:
     #  no leading or trailing whitespace
@@ -115,27 +161,51 @@ class Tag < ActiveRecord::Base
        "Nutrient", 
        "Culinary Term" ]
 
-   @@NamesToTypes = {
-       :Genre=>1, 
-       :Role=>2, 
-       :Process=>3, 
-       :Food=>4, 
-       :Unit=>5, 
-       :Source=>6, 
-       :Author=>7, 
-       :Occasion=>8 , 
-       "free tag".to_sym=>0, 
-       :PantrySection=>9, 
-       :StoreSection=>10, 
-       :Interest=>11, 
-       :Tool=>12,
-       :Nutrient=>13,
-       :Term=>14 }
+   @@TypeNums = {  }
+   
+   # Compile tag types by strings and symbols into a hash
+   ix = 0
+   @@TypesToSyms.each do |sym|
+       @@TypeNums[sym] = ix
+       ix = ix+1
+   end
+   
+   ix = 0
+   @@TypesToNames.each do |name|
+       @@TypeNums[name] = ix
+       ix = ix+1
+   end
+   @@TypeNums["free tag"] = @@TypeNums["free tag".to_sym] = nil
 
    public 
    
+   # Convert a tag type to external storage format, e.g. integer
+   # We allow the type to be a string, a symbol, an integer index or an array of those types
+   # A nil 'tt' is preserved on output (and an empty array returns nil) 
+   def self.typenum (tt)
+       if tt.kind_of? Fixnum 
+           tt 
+       elsif (tt.kind_of? Symbol) || (tt.kind_of? String)
+           @@TypeNums[tt]
+       elsif tt.kind_of? Array
+           tt.first && tt.collect { |type| Tag.typenum type }
+       elsif !tt
+           0
+       end
+   end
+ 
+   # Class method to go from a type to a name
+   def self.typename(t)
+      @@TypesToNames[Tag.typenum(t)]
+   end
+   
+   # Class method to go from a type to a symbol
+   def self.typesym(t)
+       @@TypesToSyms[Tag.typenum(t)]
+   end
+   
    # For building into selection boxes, return a list of name/value pairs of all the tag types
-   def self.tag_selections
+   def self.type_selections
        i = -1
        @@TypesToNames.collect do |name| 
            i = i + 1
@@ -143,35 +213,49 @@ class Tag < ActiveRecord::Base
        end
    end
    
+   # Virtual attribute that accepts a type in any form
+   def typenum
+       self.tagtype
+   end
+   
+   def typenum=(tt)
+       self.tagtype = Tag.typenum tt
+   end
+   
+   # Virtual attribute that accepts a type as a name
+   def typename()
+       Tag.typename self.tagtype
+   end
+
+   # Set the type of the tag, given in text
+   def typename=(name)
+       self.tagtype = Tag.typenum(name) || 0
+   end
+   
+   # Virtual attribute that accepts a type as a symbol
+   def typesym()
+       Tag.typesym self.tagtype
+   end
+  
+   def typesym=(sym)
+       self.tagtype = Tag.typenum(sym) || 0
+   end
+   
    # Taking an index into the table of tag types, return the symbol for that type
    # (used to build a set of tabs, one for each tag type)
-   # NB: returns nil for nil index
+   # NB: returns nil for nil index and for index beyond the last type. This is useful
+   # for generating a table that covers all types
    def self.index_to_type(index)
-       index && @@NamesToTypes[@@TypesToSyms[index]]
+       index && @@TypeNums[@@TypesToSyms[index]]
    end
    
-   # Convert the tag type to external storage format, e.g. integer
-   # We allow the type to be a string, a symbol, an integer index or an array of those types
-   # A nil 'tt' is preserved on output (and an empty array returns nil) 
-   def self.tagtype_inDB (tt)
-       if tt.kind_of? Fixnum 
-           tt 
-       elsif tt.kind_of? Symbol 
-           @@NamesToTypes[tt]
-       elsif tt.kind_of? String
-           @@NamesToTypes[tt.split("\s").collect { |word| word.downcase.capitalize }.join('').to_sym]
-       elsif tt.kind_of? Array
-           tt.first && tt.collect { |type| self.tagtype_inDB type }
-       end
-   end
-   
-   # Is my tagtype the same as the given type(s) (given as string, symbol or integer)
-   def tagtype_matches(tt)
+   # Is my tagtype the same as the given type(s) (given as string, symbol, integer or array)
+   def typematch(tt)
        return true if tt.nil? # nil type matches any tag type
        if tt.kind_of?(Array)
-           tt.any? { |type| self.tagtype_matches type }
+           tt.any? { |type| self.typematch type }
        else
-           Tag.tagtype_inDB(tt) == self.tagtype
+           Tag.typenum(tt) == self.tagtype
        end
    end
    
@@ -180,7 +264,7 @@ class Tag < ActiveRecord::Base
    #  not necessarily of the given type, or one available to the user.
    def self.assert_tag(t, opts = {} )
        # Convert tag type, if any, into internal form
-       opts[:tagtype] = self.tagtype_inDB(opts[:tagtype]) if opts[:tagtype]
+       opts[:tagtype] = Tag.typenum(opts[:tagtype]) if opts[:tagtype]
        if t.class == Fixnum
            # Fetch an existing tag
            begin
@@ -198,7 +282,7 @@ class Tag < ActiveRecord::Base
        end
        # Now we've found/created a tag, we need to ensure it's the right type (if we care)
        puts "Found tag #{tag.name} (type #{tag.tagtype.to_s}) on key #{tag.id.to_s} using key #{t.to_s} and type #{opts[:tagtype].to_s}"
-       unless tag.tagtype_matches opts[:tagtype]
+       unless tag.typematch opts[:tagtype]
            # Clone the tag for another type, but if it's a free tag, just change types
            tag = tag.dup if tag.tagtype != 0 # If free tag, just change type
            tag.tagtype = opts[:tagtype].kind_of?(Array) ? opts[:tagtype].first : opts[:tagtype]
@@ -243,7 +327,7 @@ class Tag < ActiveRecord::Base
   def self.strmatch(name, opts = {} )
     uid = opts[:userid]
     # Convert to internal form
-    type = opts[:tagtype] && self.tagtype_inDB(opts[:tagtype])
+    type = opts[:tagtype] && Tag.typenum(opts[:tagtype])
     assert = opts[:assert]
     name = name || ""  # nil matches anything
 	# Case-insensitive lookup
@@ -319,13 +403,6 @@ class Tag < ActiveRecord::Base
         tags = firsttags + lasttags
     end
     tags
-  end
-  
-  # Merge a tag into another tag, to preserve uniqueness of tags within types
-  def merge_into(id) 
-      # Add any links associated with this tag to the target
-      # If not global, add this tag's owners to target
-      # Remove this tag from any referents that use it
   end
    
    # Respond to a directive to move tags from one category to another

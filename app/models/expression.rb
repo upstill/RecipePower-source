@@ -4,8 +4,8 @@ class ExpressionValidator < ActiveModel::Validator
         if(record.tag_id && record.referent_id)
             tag = Tag.find record.tag_id
             ref = Referent.find record.referent_id
-            if tag.tagtype != ref.referent_type && (tag.tagtype > 0)
-                record.errors[:tag_id] << "#{tag.name} is a '#{tag.typename}', not '#{Tag.typename(ref.referent_type)}'"
+            if tag.tagtype != ref.typenum && (tag.tagtype > 0)
+                record.errors[:tag_id] << "#{tag.name} is a '#{tag.typename}', not '#{ref.typename}'"
             end
         else
             record.errors[record.tag_id ? :referent_id : :tag_id] << "Must have both tag and referent ids."
@@ -54,7 +54,7 @@ class Expression < ActiveRecord::Base
             self.tag_id = id
         else
             t.sub!(/^\'(.*)\'$/, '\1') # Strip out the single quotes
-            params = t.split('::')
+            params = t.split(/::/)
             tagtype = params.first.to_i
             tagname = params.last
             # Try to match all within the type

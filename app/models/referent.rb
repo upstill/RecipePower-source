@@ -1,7 +1,11 @@
 class ReferentValidator < ActiveModel::Validator
     def validate(record)
-        debugger
-        count = record.tags.size
+        # Test that record has non-generic type
+        unless record.type && record.type != "Referent"
+            record.errors[:base] << "Referent can't have generic type"
+            return false;
+        end
+        true
     end
 end
 
@@ -18,36 +22,18 @@ class Referent < ActiveRecord::Base
     has_many :tags, :through=>:expressions
     accepts_nested_attributes_for :expressions, allow_destroy: true
     
-    attr_accessible :tag, :type, :description, :isCountable, :expressions_attributes, :add_expression
+    attr_accessible :tag, :type, :description, :isCountable, :expressions_attributes, :add_expression, :parent_tokens, :child_tokens
     
+    validates_associated :parents
+    validates_associated :children
     validates_with ReferentValidator
     
     before_save :ensure_expression
     after_save :ensure_tagtypes
     
-    @@Locales = [["English",:en], ["Italian",:it], ["Spanish",:es]]
-    @@Forms = [["Generic", 1], ["Singular", 2], ["Plural", 3]]
-    
-    def self.locales
-       @@Locales
-    end
-    
-    def self.forms
-       @@Forms
-    end
-    
-    def add_expression
-        debugger
-    end
-    
-    def add_expression=(tag)
-        debugger
-    end
-    
     # Before saving a referent, we make sure its preferred tag is listed as an expression of type 1
     def ensure_expression
         # Look for an expression on this tag of type 1. If found, demote to a corruption (type 0)
-        debugger
         if self.tag && (self.tag > 0)
             unless self.expressions.any? { |exp| exp.tag_id == self.tag }
                 # No expression found => make a new one and add it to the set
@@ -58,8 +44,7 @@ class Referent < ActiveRecord::Base
     
     # After saving, check that all tags are of our type
     def ensure_tagtypes
-        mytype = self.referent_type
-        debugger
+        mytype = self.typenum
         self.tags.each do |tag|
             # Ensure that all associated tags have the right type, are global, and have a meaning
             unless tag.tagtype == mytype && tag.isGlobal && tag.meaning
@@ -73,6 +58,122 @@ class Referent < ActiveRecord::Base
                 end
             end
         end
+    end
+    
+    @@Locales = [["English",:en], ["Italian",:it], ["Spanish",:es], ["French",:fr]]
+    @@Forms = [["Generic", 1], ["Singular", 2], ["Plural", 3]]
+    
+    def self.locales
+       @@Locales
+    end
+    
+    def self.forms
+       @@Forms
+    end
+    
+    # This is a virtual attribute for the benefit of the referent editor, which has
+    # a tokenInput field for adding expressions. In reality, there should never be any text
+    # in this field when the form is submitted. If there is, we just ignore it
+    def add_expression
+    end
+    
+    def add_expression=(tag)
+    end
+    
+    # Virtual attributes for parent and child referents. These are represented by tags, 
+    # so getting and setting involves token lookup. Since parents and children are both
+    # just sets of referents, these v.a.s go through a single pair of methods
+    def parent_tokens
+        parent_tags.map(&:attributes).to_json
+    end
+    
+    def parent_tags
+        tags_from_referents self.parents
+    end
+    
+    def parent_tokens=(tokenlist)
+        # After collecting tags, scan list to eliminate references to self
+        tokenlist = tokenlist.split(',')
+        self.parents = tag_tokens_to_referents(tokenlist).delete_if { |rel| (rel.id == self.id) && errors.add(:parents, "Can't be its own parent.") }
+    end
+    
+    def child_tokens
+        child_tags.map(&:attributes).to_json
+    end
+    
+    def child_tags
+        tags_from_referents self.children
+    end
+    
+    def child_tokens=(tokenlist)
+        # After collecting tags, scan list to eliminate references to self
+        tokenlist = tokenlist.split(',')
+        self.children = tag_tokens_to_referents(tokenlist).delete_if { |rel| (rel.id == self.id)  && errors.add(:children, "Can't be its own child.") }
+    end
+    
+    # Convert a list of referents into the tags that reference them.
+    def tags_from_referents(referents)
+        referents.collect { |ref| Tag.find ref.tag }
+    end
+    
+    # Convert a list of tag tokens into the referents to which they refer
+    def tag_tokens_to_referents(tokens, use_existing=true)
+        tokens.collect do |token|
+            token = token.to_i unless token.sub!(/^\'(.*)\'/, '\1')
+            # We either match the referent to token or create a new one
+            Referent.express token, self.typenum
+        end
+    end
+    
+    # Class method to create a referent of a given type under the given tag.
+    # WARNING: while some effort is made to find an existing referent and use that,
+    #  this procedure lends itself to redundancy in the dictionary
+    def self.express (tag, tagtype, args = {} )
+        tag = Tag.assert_tag tag, tagtype: tagtype # Creating it if need be, and/or making it global 
+        form = Expression.type_inDB :canonical
+        # if there's already a referent referring to this tag, return it
+=begin
+        if exp = tag.expressions.where(:form=>form, :locale=>:en).first
+            return self.find exp.referent_id
+        end
+=end
+        if tag.meaning && tag.meaning > 0
+            result = Referent.find tag.meaning
+        else
+            # Didn't find an existing referent, so need to make one
+            result = self.create :tag=>tag.id, :type=>Referent.referent_class_for_tagtype(tagtype)
+            result.express tag, form: :canonical, locale: :en
+            # unless self.expressions.where(:tag_id=>tagid, :form=>canonicalform, :locale=>:en).first
+                # result.expressions.create :tag_id=>tagid, :form=>canonicalform, :locale=>:en
+            # end
+        end
+        result
+    end
+    
+    # Add a tag to the expressions of this referent, returning the tag id
+    def express(tag, args = {})
+        # We assert the tag in case it's
+        # 1) specified by string or id, 
+        # 2) of a different type, or 
+        # 3) not already global
+        tag = Tag.assert_tag tag, tagtype: self.typenum 
+        form = Expression.type_inDB (args[:form] || :corruption)
+        locale = args[:locale] || :en
+        # unless self.expressions.any? { |exp| exp.tag_id==tagid && exp.form==form && exp.locale == locale }
+        unless self.expressions.where(tag_id: tag.id, form: form, locale: locale ).first
+            self.expressions.create tag_id: tag.id, form: form, locale: locale
+            if args[:form] == :canonical
+                self.tag = tag.id
+                self.save
+            end
+        end
+        tag.id
+    end
+    
+    # Return the tag expressing this referent, if any
+    def expression(form = :canonical, locale = :en)
+        return Tag.find(self.tag) if self.tag && (form == :canonical) && (locale == :en)
+        # Otherwise, we need to lookup/makeup the appropriate expression
     end
     
     # Return a list of all tags that are related to the one provided. This means:
@@ -89,33 +190,31 @@ class Referent < ActiveRecord::Base
             }
         }.flatten.uniq.delete_if{ |id| id == tagid }.collect{ |id| Tag.find id }
     end
-    
-    def referent_typename
-        self.type.sub( /Referent/, '').sub(/Section/, " Section")
+
+    def typesym
+        self.type && self.type.sub( /Referent/, '').to_sym
     end
     
-    def referent_type
-        Tag.tagtype_inDB self.referent_typename
+    def typename
+        Tag.typename self.typesym
+    end
+    
+    def typenum
+        Tag.typenum self.typesym
     end
     
     def self.referent_class_for_tagtype(tagtype)
-        if tagtype.class == Fixnum
-            typename = (tagtype > 0) ? Tag.typename(tagtype) : ""
+        if(Tag.typenum(tagtype) > 0)
+            Tag.typesym(tagtype).to_s+"Referent"
         else
-            typename = tagtype
+            "Referent"
         end
-        # Remove whitespace to get the class name
-        typename.to_s.gsub(/\s/, '')+"Referent"
     end
-        
-public
     
-    def self.show_tree(*params)
+    def self.show_tree(key = nil, level = 0)
         children = []
-        level = 0
-        if key = params.first
-            level = params[1] || 0
-            ref = Referent.find(key)
+        if key
+            ref = Referent.find key
             puts ("    "*level)+"#{ref.id.to_s}: #{ref.name} (#{ref.tag})"
             children = ref.children
             level = level+1
@@ -175,43 +274,15 @@ public
         end
     end
     
-    # Class method to create a referent of a given type under the given tag.
-    # WARNING: while some effort is made to find an existing referent and use that,
-    #  this procedure lends itself to redundancy in the dictionary
-    def self.express (tag, tagtype, args = {} )
-        tag = Tag.assert_tag tag, tagtype: tagtype # Creating it if need be, and/or making it global 
-        form = Expression.type_inDB :canonical
-        # if there's already a referent referring to this tag, return it
-        if exp = tag.expressions.where(:form=>form, :locale=>:en).first
-            return self.find exp.referent_id
-        end
-        # Didn't find an existing referent, so need to make one
-        result = self.create :tag=>tag.id, :type=>Referent.referent_class_for_tagtype(tagtype)
-        result.express tag, form: :canonical, locale: :en
-        # unless self.expressions.where(:tag_id=>tagid, :form=>canonicalform, :locale=>:en).first
-            # result.expressions.create :tag_id=>tagid, :form=>canonicalform, :locale=>:en
-        # end
-        result
-    end
-    
-    # Add a tag to the expressions of this referent, returning the tag id
-    def express(tag, args = {})
-        # We assert the tag in case it's
-        # 1) specified by string or id, 
-        # 2) of a different type, or 
-        # 3) not already global
-        tag = Tag.assert_tag tag, tagtype: self.referent_type 
-        form = Expression.type_inDB (args[:form] || :corruption)
-        locale = args[:locale] || :en
-        # unless self.expressions.any? { |exp| exp.tag_id==tagid && exp.form==form && exp.locale == locale }
-        unless self.expressions.where(tag_id: tag.id, form: form, locale: locale ).first
-            self.expressions.create tag_id: tag.id, form: form, locale: locale
-            if args[:form] == :canonical
-                self.tag = tag.id
-                self.save
-            end
-        end
-        tag.id
+    # Find a referent from a tag string of a given type. This is a search
+    # for ANY tag that refers to the the referent, not just the canonical one
+    def self.find_by_tag tag, tagtype
+        # Find or create the tag
+        
+        # We now have a list of qualifying tags. Choose the one which has 
+        # an existing referent, if any
+        
+        # Find or create an appropriate referent for the tag
     end
     
     # Return the name of the referent [XXX for the current locale]

@@ -1,42 +1,60 @@
 module ReferentsHelper
     
     def list_expressions referent, do_tag=true
-        ("Expressions: <ul>"+(referent.expressions.collect { |expr| 
+        ("Expressions: "+(referent.expressions.collect { |expr| 
             tag = Tag.find(expr.tag_id)
             locale = expr.locale || "(nil)"
             form = expr.form || "(nil)"
-            "<li>'"+
+            "<br>&nbsp;&nbsp;'"+
             (do_tag ? link_to(tag.name, tag) : tag.name)+
-            "'(id #{tag.id.to_s}, form #{form}, locale #{locale})</li>"
-        }.join(', ')+"</ul>" || "none")).html_safe
+            "'(id #{tag.id.to_s}, form #{form}, locale #{locale})"
+        }.join(', ') || "none")).html_safe
     end
     
 	def list_parents referent, do_tag=true
-	    "Parents: "+(referent.parents.collect { |parent| 
-            tag = Tag.find(parent.tag_id)
-            "'"+
-            (do_tag ? link_to(tag, tag.name) : tag.name)+
-            "'"+
+	    ("Parents: "+(referent.parent_tags.collect { |tag| 
+            (do_tag ? link_to(tag.name, tag) : tag.name)+
             "(id #{tag.id.to_s})"
-        }.join(', ') || "none").html_safe
+        }.join(', ') || "none")).html_safe
     end
     
 	def list_children referent, do_tag=true
-	    "Children: "+(referent.children.collect { |child| 
-            tag = Tag.find(child.tag_id)
-            "'"+
-            (do_tag ? link_to(tag, tag.name) : tag.name)+
-            "'"+
+	    ("Children: "+
+	    (referent.child_tags.collect { |tag| 
+            (do_tag ? link_to(tag.name, tag) : tag.name)+
             "(id #{tag.id.to_s})"
-        }.join(', ') || "none").html_safe
+        }.join(', ') || "none")).html_safe
     end
 	
-	def summarize_referent referent, long=false
+	def summarize_ref_name referent, long=false
 	    ("#{referent.id.to_s}: "+
-	    "<i>#{referent.referent_typename}</i> "+
+	    "<i>#{referent.typename}</i> "+
 	    "<strong>\"#{referent.name}\"</strong> "+
 	    (long ? "" : "")
 	    ).html_safe
 	end
 	
+	def summarize_referent ref, label="Meaning"
+      ("<br>#{label} ''#{link_to ref.name, referent_path(ref)}':"+
+       summarize_ref_parents(ref)+
+       summarize_ref_children(ref)).html_safe
+    end
+    
+	def summarize_ref_parents ref
+        if ref.parents.size > 0
+    		("<br>...categorized under: "+
+	        (ref.parents.collect { |parent| link_to parent.name, parent.becomes(Referent) }.join ', ')).html_safe
+	    else
+	        ""
+        end
+	end
+	
+	def summarize_ref_children ref
+        if ref.children.size > 0
+    		("<br>...examples: "+
+	        (ref.children.collect { |child| link_to child.name, child.becomes(Referent) }.join ', ')).html_safe
+	    else
+	        ""
+        end
+	end
 end

@@ -31,6 +31,16 @@ class TagTest < ActiveSupport::TestCase
         assert_equal Tag.assert_tag(valid_id).id, valid_id
     end
     
+    test "accessing tag types by any means" do
+        assert_equal :Genre, Tag.typesym("Genre"), "Name didn't turn into symbol"
+        assert_equal :Genre, Tag.typesym(1), "Number didn't turn into symbol"
+        assert_equal :Genre, Tag.typesym(:Genre), "Symbol didn't turn into symbol"
+        tag = Tag.new :tagtype => 1
+        assert_equal :Genre, tag.typesym(), "Symbol didn't read correctly"
+        assert_equal 1, tag.typenum(), "Number didn't read correctly"
+        assert_equal "Genre", tag.typename(), "Name didn't read correctly"
+    end
+    
     # ------------- Matching strings --------------------
     # Normalized_name correctly removes diacriticals, capitalization, punctuation
     test "normalized name must elide gratuity" do
@@ -115,12 +125,12 @@ class TagTest < ActiveSupport::TestCase
         assert_not_equal t, Tag.strmatch("tagtypecheck", tagtype: [4,5,6], matchall: true).first
     end
     
-    test "tagtype_inDB functions correctly" do
-        assert_equal 1, Tag.tagtype_inDB("genre"), "Lower-case string not parsed correctly"
-        assert_equal 3, Tag.tagtype_inDB("PROCESS"), "all-caps string not parsed correctly"
-        assert_nil Tag.tagtype_inDB("free tag"), "lower-case 'free tag' not parsed correctly"
-        assert_nil Tag.tagtype_inDB(nil), "nil doesn't return nil"
-        assert_equal 4, Tag.tagtype_inDB(4), "Integer type not returned"
-        assert_equal [5,7,8], Tag.tagtype_inDB([:Unit, "aUTHOR", "occasion"]), "Array of types not parsed correctly"
+    test "typenum functions correctly" do
+        # assert_equal 1, Tag.typenum("genre"), "Lower-case string not parsed correctly"
+        # assert_equal 3, Tag.typenum("PROCESS"), "all-caps string not parsed correctly"
+        assert_nil Tag.typenum("free tag"), "lower-case 'free tag' not parsed correctly"
+        assert_nil Tag.typenum(nil), "nil doesn't return nil"
+        assert_equal 4, Tag.typenum(4), "Integer type not returned"
+        assert_equal [5,7,8], Tag.typenum([:Unit, 7, "Occasion"]), "Array of types not parsed correctly"
     end
 end

@@ -197,6 +197,12 @@ class Rcpquery < ActiveRecord::Base
         @tags = nil
         self.tags
     end
+    
+    # We set the tags to an array of tag keys
+    def tags=(tagset)
+        @tags = tagset
+        self.tagstxt = @tags.collect { |t| t.id.to_s }.join ','
+    end
   
     # Get the current set of tags based on the current tagstxt, including special tags
     def tags
