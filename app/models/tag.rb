@@ -172,12 +172,14 @@ class Tag < ActiveRecord::Base
    ix = 0
    @@TypesToSyms.each do |sym|
        @@TypeNums[sym] = ix
+       @@TypeNums[ix.to_s.to_sym] = ix # For translating numbers in the form of strings
        ix = ix+1
    end
    
    ix = 0
    @@TypesToNames.each do |name|
        @@TypeNums[name] = ix
+       @@TypeNums[ix.to_s] = ix # For translating numbers in the form of strings
        ix = ix+1
    end
    @@TypeNums["free tag"] = @@TypeNums["free tag".to_sym] = nil
@@ -223,7 +225,19 @@ class Tag < ActiveRecord::Base
        self.tagtype
    end
    
-   def typenum=(tt)
+   # Move the tag to a new type, possibly merging it with another tag of identical spelling
+   def project(tt)
+       newtypenum = Tag.typenum tt
+       return self if self.tagtype == newtypenum # We're already in the target type!
+       replacement = Tag.where(name: self.name, tagtype: newtypenum).first
+       return nil unless (self.typenum = newtypenum)
+       (replacement && replacement.absorb(self)) ? replacement : self
+   end
+   
+   def typenum=(tt, do_merge = false )
+       # Need to be careful: the tag needs to agree in type with any expressions that include
+       # it
+       return nil unless self.referents.all? { |ref| ref.drop tag }
        self.tagtype = Tag.typenum tt
    end
    

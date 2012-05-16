@@ -285,6 +285,18 @@ class Referent < ActiveRecord::Base
         # Find or create an appropriate referent for the tag
     end
     
+    # Remove uses of this tag by this referent
+    def drop tag
+        debugger
+        if self.tag == tag.id
+            # Need to find another tag to use for canonical string
+            return nil unless replacement_tag = self.tags.detect { |candidate| candidate.id != tag.id }
+            self.tag = replacement_tag.id
+        end
+        self.tags.delete tag
+        self.save
+    end
+    
     # Return the name of the referent [XXX for the current locale]
     def normalized_name
         self.tag ? Tag.find(self.tag).normalized_name : "**no tag**"

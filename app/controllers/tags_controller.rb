@@ -133,9 +133,9 @@ class TagsController < ApplicationController
   def absorb
       tagid = params[:id]
       tag = Tag.find tagid.to_i
-      victimid = params[:victim].to_i
-      if tag.absorb(victimid)
-          render :json=>{to_nuke: [".absorb_#{victimid}"]}
+      victimidstr = params[:victim]
+      if tag.absorb(victimidstr.to_i)
+          render :json=>{to_nuke: ["#tagrow_#{victimidstr}", "#tagrow_#{victimidstr}HR", ".absorb_#{victimidstr}"]}
       else
           render :json=>{errors: tag.errors }
       end
@@ -153,11 +153,14 @@ class TagsController < ApplicationController
           puts "Success on "+idsChanged.inspect
       elsif params["tagid"] && params["newtype"]
           # Change the type of a single tag
-          tag = Tag.find params["tagid"].to_i
-          tag.tagtype = params["newtype"].to_i
+          tagidstr = params["tagid"]
+          tag = Tag.find tagidstr.to_i
+          # We ask and allow for the possibility that the tag will be absorbed into another 
+          # tag of the target type
+          tag = tag.project params["newtype"]
           idsChanged = tag.save ? [tag.id] : []
       end
-      render :json=>{ to_nuke: idsChanged.map{ |id| ["#tagrow_#{id.to_s}", "#tagrow_#{id.to_s}HR"] }.flatten } # orphantag(id) }
+      render :json=>{ to_nuke: idsChanged.map{ |id| ["#tagrow_#{tagidstr}", "#tagrow_#{tagidstr}HR", ".absorb_#{tagidstr}"] }.flatten } # orphantag(id) }
   end
 
   # POST /tags
