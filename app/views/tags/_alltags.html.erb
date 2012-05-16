@@ -14,7 +14,7 @@
 	    <th></th>
 	  </tr>
 
-	<% @taglist.each do |tag| %><tr value="<%= tag.id.to_s %>">
+	<% @taglist.each do |tag| %><tr id="tagrow_<%= tag.id.to_s %>">
 		<td class="tag_type"><%= tag.id.to_s %></td>
 		<td><%= summarize_tag tag %></td>
 		<td><%= select_tag :tagtype, type_selections(tag), class: "tag_type_selector" %></td>
@@ -22,7 +22,7 @@
 		   <br><%= count_owners tag %>
 		   <br><%= count_links tag %></td>
 		<td><%= tag.isGlobal ? "Y" : "N" %>
-		<td><%= summarize_tag_similars tag, "" %></td>
+		<td><%= summarize_tag_similars tag, label: "", absorb_btn: true, joiner: "<br>" %></td>
 		<td><%= summarize_synonyms tag %></td>
 		<td><% tag.referents.each do |ref| %>
 		      <%= link_to ref.name, edit_referent_path(ref) %><%= ", " unless ref == tag.referents.last %>
@@ -30,7 +30,7 @@
 	    <td><%= link_to 'Show', tag %></td>
 	    <td><%= link_to 'Edit', edit_tag_path(tag) %></td>
 	    <td><%= link_to 'Destroy', tag, confirm: 'Are you sure?', method: :delete %></td>
-	</tr><tr><td colspan="11"><hr></td></tr><% end %>
+	</tr><tr id="tagrow_<%= tag.id.to_s %>HR"><td colspan="11"><hr></td></tr><% end %>
 	</table>
 	<%= link_to 'New Tag', new_tag_path %>
 </div>

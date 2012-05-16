@@ -128,6 +128,19 @@ class TagsController < ApplicationController
     render :partial=>"alltags"
   end
   
+  # GET /id/absorb
+  # Merge two tags together, returning a list of DOM elements to nuke as a result
+  def absorb
+      tagid = params[:id]
+      tag = Tag.find tagid.to_i
+      victimid = params[:victim].to_i
+      if tag.absorb(victimid)
+          render :json=>{to_nuke: [".absorb_#{victimid}"]}
+      else
+          render :json=>{errors: tag.errors }
+      end
+  end
+  
   # GET /typify
   # move the listed keys from one type to another
   def typify
@@ -144,7 +157,7 @@ class TagsController < ApplicationController
           tag.tagtype = params["newtype"].to_i
           idsChanged = tag.save ? [tag.id] : []
       end
-      render :json=>idsChanged.map { |id| orphantagid(id) }
+      render :json=>{ to_nuke: idsChanged.map{ |id| ["#tagrow_#{id.to_s}", "#tagrow_#{id.to_s}HR"] }.flatten } # orphantag(id) }
   end
 
   # POST /tags

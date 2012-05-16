@@ -23,63 +23,68 @@ class Tag < ActiveRecord::Base
     validates_presence_of :name
     before_validation :tagqa
     
+    # Pre-check to determine whether a tag can absorb another tag
+    def can_absorb other
+        other.normalized_name == self.normalized_name && ((other.tagtype==0) || (other.tagtype == self.tagtype))    
+    end
+    
     # Eliminate the tag of the given id, replacing it with this one
     def absorb oldid
-        newid = self.id
         t2 = Tag.find oldid
+        return false unless can_absorb t2
+        newid = self.id
         # Only consider absorbing tags of non-clashing type
         ownerids = self.user_ids
-        if t2.normalized_name != self.normalized_name && (t2.typesym.nil? || t2.typesym == self.typesym)
             
-            # Absorb recipe taggings (Tagrefs) by replacing references to t2 with this id, avoiding duplication
+        # Absorb recipe taggings (Tagrefs) by replacing references to t2 with this id, avoiding duplication
 =begin
-            rids = self.recipe_ids
-            t2.tagrefs.each do |tr| 
-                # Do nothing if this recipe is already listed under the new tag
-                unless rids.include? tr.recipe_id 
-                    tr.tag_id = newid
-                    tr.save
-                end
-                # Make sure the owner of the link can see the replaced link
-                admit_user tr.user_id
+        rids = self.recipe_ids
+        t2.tagrefs.each do |tr| 
+            # Do nothing if this recipe is already listed under the new tag
+            unless rids.include? tr.recipe_id 
+                tr.tag_id = newid
+                tr.save
             end
-=end
-            self.recipes = (self.recipes + t2.recipes).uniq
-            
-            # Merge owners by taking on all owners of the absorbee
-            # t2.user_ids.each { |uid| admit_user uid }
-            self.users = self.users + t2.users
-            
-            # Replace referents' DIRECT use of the tag
-            Referent.where(tag: oldid).each do |ref| 
-                ref.tag = newid # Now it's all about ME ME ME
-                ref.save
-            end
-            
-            # Replace the use of the tag in expressions
-=begin
-            myrefids = self.referent_ids
-            Expressions.where(tag_id: oldid).each do |expr|
-                # If we're not already linked to the referent, do so now
-                unless myrefids.include?(expr.referent_id) 
-                    expr.tag_id = newid
-                    expr.save
-                end
-            end
-=end
-            self.referents = (self.referents + t2.referents).uniq
-            
-            self.links = (self.links + t2.links).uniq
-            
-            # Correct any query that uses t2
-            Rcpquery.each do |rq| 
-                do_save = false
-                rq.tags = rq.tags.each { |tag| ((do_save = true) && (tag.id = newid)) if tag.id == oldid }
-                rq.save if do_save
-            end
-            
-            t2.destroy
+            # Make sure the owner of the link can see the replaced link
+            admit_user tr.user_id
         end
+=end
+        self.recipes = (self.recipes + t2.recipes).uniq
+        
+        # Merge owners by taking on all owners of the absorbee
+        # t2.user_ids.each { |uid| admit_user uid }
+        self.users = self.users + t2.users
+        
+        # Replace referents' DIRECT use of the tag
+        Referent.where(tag: oldid).each do |ref| 
+            ref.tag = newid # Now it's all about ME ME ME
+            ref.save
+        end
+        
+        # Replace the use of the tag in expressions
+=begin
+        myrefids = self.referent_ids
+        Expressions.where(tag_id: oldid).each do |expr|
+            # If we're not already linked to the referent, do so now
+            unless myrefids.include?(expr.referent_id) 
+                expr.tag_id = newid
+                expr.save
+            end
+        end
+=end
+        self.referents = (self.referents + t2.referents).uniq
+        
+        self.links = (self.links + t2.links).uniq
+        
+        # Correct any query that uses t2
+        Rcpquery.all.each do |rq| 
+            do_save = false
+            rq.tags = rq.tags.each { |tag| ((do_save = true) && (tag.id = newid)) if tag.id == oldid }
+            rq.save if do_save
+        end
+        
+        t2.destroy
+        return self.errors.keys.count == 0
     end
     
     # 'typename' is a virtual attribute for the string associated with the tag's type (tagtype attribute)

@@ -11,17 +11,17 @@ module TagsHelper
     
     def count_recipes tag
         ct = tag.recipe_ids.size
-        (ct > 0) ? pluralize(ct, "Recipe") : ""
+        (ct > 0) ? pluralize(ct, "Recipe").sub(/\s/, "&nbsp;").html_safe : ""
     end
         
     def count_owners tag
         ct = tag.user_ids.size
-        (ct > 0) ? pluralize(ct, "Owner") : ""
+        (ct > 0) ? pluralize(ct, "Owner").sub(/\s/, "&nbsp;").html_safe : ""
     end
         
     def count_links tag
         ct = tag.link_ids.size
-        (ct > 0) ? pluralize(ct, "Link") : ""
+        (ct > 0) ? pluralize(ct, "Link").sub(/\s/, "&nbsp;").html_safe : ""
     end
         
     def summarize_synonyms tag
@@ -103,13 +103,25 @@ BLOCK_END
         ("<br>&nbsp;"+tag.users.collect { |user| user.username }.join(',<br>&nbsp;')))).html_safe
   end
   
+  def summarize_tag_similar tag, absorb_btn = false
+      tagidstr = tag.id.to_s
+      "<span class=\"absorb_#{tagidstr}\">"+
+      link_to( tag.name, tag)+
+      "(#{tag.typename} #{tagidstr})"+
+      (absorb_btn ? button_to_function("Absorb", "merge_tags();", class: "absorb_button", id: "absorb_tag_#{tagidstr}") : "")+
+      "</span>" 
+  end
+  
   # Helper for showing the tags which are potentially redundant wrt. this tag:
   # They match in the normalized_name field
-  def summarize_tag_similars tag, label=" Similar tags: "
+  def summarize_tag_similars tag, args={} 
+      label= args[:label] || " Similar tags: "
+      joiner = args[:joiner] || "" #  ", "
       others = Tag.where(normalized_name: tag.normalized_name).delete_if{ |other| other.id == tag.id }
       unless others.empty? 
-          ("<br>"+
-          others.collect { |other| link_to( other.name, other)+"(#{other.typename} #{other.id.to_s})" }.join(', ')).html_safe
+          others.collect { |other| 
+              summarize_tag_similar other, (args[:absorb_btn] && tag.can_absorb(other))
+          }.join(joiner).html_safe
       end
   end
 end

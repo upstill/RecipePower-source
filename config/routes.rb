@@ -32,6 +32,7 @@ RP::Application.routes.draw do
   match 'tags/list', :controller=>'tags', :action=>'list', :via => :get
   match 'tags/typify', :controller=>'tags', :action=>'typify'
   match 'tags/match', :controller=>'tags', :action=>'match'
+  match 'tags/:id/absorb', :controller=>'tags', :action=>'absorb'
   resources :tags
 
   resources :ratings
