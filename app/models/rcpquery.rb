@@ -68,7 +68,7 @@ end
 class Rcpquery < ActiveRecord::Base
     serialize :specialtags, Hash
     
-    attr_accessible :status, :session_id, :user_id, :owner_id, :tag_tokens, :tags, :page_length, :cur_page, :listmode_str
+    attr_accessible :status, :session_id, :user_id, :owner_id, :tag_tokens, :tag_ids, :tags, :page_length, :cur_page, :listmode_str
     attr_reader :tags
     attr_reader :tag_tokens
     attr_reader :results
@@ -187,7 +187,7 @@ class Rcpquery < ActiveRecord::Base
 
     # Virtual attribute tag_tokens accepts the tag string for the query and generates the 
     # current tag set, along with the necessary specialtags
-    # ids is the parameter string for the tokens
+    # paramstr is the parameter string for the tokens
     # NB: The rcpquery takes both tag ids and unaffiliated strings for full-text searching.
     # The latter are converted to special tags stored with the query, and given a negative
     # id.
@@ -198,7 +198,12 @@ class Rcpquery < ActiveRecord::Base
         self.tags
     end
     
-    # We set the tags to an array of tag keys
+    def tag_ids=(ids)
+        self.tagstxt = ids.collect { |id| id.to_s }.join ','
+        @tags = nil
+    end
+    
+    # We set the tags to an array of tags
     def tags=(tagset)
         @tags = tagset
         self.tagstxt = @tags.collect { |t| t.id.to_s }.join ','

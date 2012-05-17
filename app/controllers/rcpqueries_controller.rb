@@ -63,8 +63,12 @@ public
   # GET /rcpqueries/new
   # GET /rcpqueries/new.xml
   def new
-    @rcpquery = Rcpquery.new 
-    @rcpquery.user_id = @rcpquery.owner_id = session[:user_id]
+    # We handle optional parameters:
+    #   owner: id of list owner
+    #   tag: number of tag to initialize query with
+    @rcpquery = Rcpquery.new(user_id: session[:user_id],
+                             owner_id: (params[:owner] || session[:user_id]).to_i)
+    @rcpquery.tag_ids = [params[:tag].to_i] if params[:tag]
     @rcpquery.save
     session[:rcpquery] = @rcpquery.id
     redirect_to rcpqueries_url

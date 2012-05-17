@@ -10,8 +10,10 @@ module TagsHelper
     end
     
     def count_recipes tag
-        ct = tag.recipe_ids.size
-        (ct > 0) ? pluralize(ct, "Recipe").sub(/\s/, "&nbsp;").html_safe : ""
+        count = tag.recipe_ids.size
+        return "" if count == 0
+        txt = pluralize(count, "Recipe").sub(/\s/, " ")
+        link_to(txt, new_rcpquery_path(tag: tag.id.to_s))
     end
         
     def count_owners tag

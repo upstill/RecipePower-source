@@ -59,9 +59,12 @@ puts "Ensuring uniqueness of user #{self.user_id.to_s} to recipe #{self.recipe_i
 	# NB: If both are given, recipes are returned which match in either
 	# :status is the set of status flags to match
 
+    commentstr = params.first[:comment]
+    titlestr = params.first[:title]
 	# We accumulate a list of constraints and their parameters for passing to self.where
 	constraints = []
 	parameters = []
+	
 	case requestor_id 
 	   when User.guest_id
 	      # Guest gets only public recipes
@@ -98,19 +101,33 @@ puts "Ensuring uniqueness of user #{self.user_id.to_s} to recipe #{self.recipe_i
 
 	# If there is a :comment parameter, use that in the query
 	# THIS MUST BE THE TOP OF THE STACK
-	if params.first[:comment]
+	if commentstr
 	   constraints << "comment LIKE ?"
-	   parameters << "%"+params.first[:comment]+"%" # Match within
+	   parameters << "%"+commentstr+"%" # Match within
 	end
 
-	allrefs = constraints.empty? ? self.find(:all) : self.where(constraints.join(' AND '), *parameters)
+    if constraints.empty? 
+        if owner_id == User.super_id
+            # We return all recipe ids, possibly filtering for title
+            if titlestr
+                rcpids = Recipe.where( 'title LIKE ?', "%#{titlestr}%").map { |r| r.id }
+            else
+                rcpids = Recipe.select(:id).map { |r| r.id }
+            end
+            return rcpids
+        else
+        	allrefs = self.find :all 
+        end
+    else
+    	allrefs = self.where(constraints.join(' AND '), *parameters)
+    end
 
 	# Handle the case(s) where there is a title constraint
 	#  If there is a comment constraint, find without that constraint, then filter
 	#  otherwise, filter the prior list
-	if params.first[:title]
-	   regexp = /#{params.first[:title]}/i
-	   if params.first[:comment] 
+	if titlestr
+	   regexp = /#{titlestr}/i
+	   if commentstr 
 	       constraints.pop
 	       parameters.pop
 	       more = constraints.empty? ?
@@ -125,22 +142,21 @@ puts "Ensuring uniqueness of user #{self.user_id.to_s} to recipe #{self.recipe_i
 	   end
 	end
 
-	# Return everything now for super
-	return allrefs.map {|rr| rr.recipe_id}.uniq if owner_id == User.super_id
-
-	# XXX Should be moved to a migration
-	allrefs.each do |rr| 
-	   unless rr.privacy && rr.status && rr.comment
-	      rr.privacy = PermissionAll unless rr.privacy
-	      rr.status = StatusMiscMask unless rr.status
-	      rr.comment = "" unless rr.comment
-	      rr.save
-	   end
-	end
-	# Reduce the results to a set of recipe keys
-	if params.first[:status] & StatusRecentMask 
-	    # sort by creation date
-	    allrefs.sort! { |a, b| b.updated_at <=> a.updated_at }
+	if owner_id != User.super_id
+    	# XXX Should be moved to a migration
+    	allrefs.each do |rr| 
+    	   unless rr.privacy && rr.status && rr.comment
+    	      rr.privacy = PermissionAll unless rr.privacy
+    	      rr.status = StatusMiscMask unless rr.status
+    	      rr.comment = "" unless rr.comment
+    	      rr.save
+    	   end
+    	end
+    	# Reduce the results to a set of recipe keys
+    	if params.first[:status] & StatusRecentMask 
+    	    # sort by creation date
+    	    allrefs.sort! { |a, b| b.updated_at <=> a.updated_at }
+    	end
 	end
 	allrefs.map { |rr| rr.recipe_id }.uniq
 end
