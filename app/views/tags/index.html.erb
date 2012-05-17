@@ -1,4 +1,5 @@
-<h3>Show Those Tags!<h3>
-<%= tags_tabset @tabindex %>
-<%# render 'alltags' %>
+<h3>Tags for Type:&nbsp;<%= select_tag :tagtype, type_selections(), id: "taglist_type_selector" %><h3>
+<%# tags_tabset @tabindex %>
+<br><%= render 'alltags' %>
+<br><%= will_paginate @taglist, previous_label: h("<"), next_label: h(">") %>
 

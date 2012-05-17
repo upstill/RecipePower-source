@@ -4,11 +4,20 @@ class TagsController < ApplicationController
   def index
       return if need_login true, true
       @Title = "Tags"
-      @tabindex = (params[:tabindex] && params[:tabindex].to_i) || session[:tabindex] || 0
-      session[:tabindex] = @tabindex
-      @taglist = params[:tagtype] ? Tag.where("tagtype = ?", params[:tagtype]) : Tag.all
-      # The :unbound_only parameter limits the set to tags with no associated form (and, thus, referent)
-      @taglist.delete_if { |t| !t.referents.empty? } if params[:unbound_only] == "true"
+      if params[:tagtype]
+          tagtype = params[:tagtype].to_i
+      else
+          @tabindex = (params[:tabindex] && params[:tabindex].to_i) || session[:tabindex] || 0
+          session[:tabindex] = @tabindex
+          tagtype = @tabindex > 0 ? Tag.index_to_type(@tabindex) : 0
+      end
+      if true
+          @taglist = Tag.where(tagtype: tagtype).order("id").page(params[:page]).per_page(50)
+      else
+          @taglist = params[:tagtype] ? Tag.where("tagtype = ?", params[:tagtype]) : Tag.all
+          # The :unbound_only parameter limits the set to tags with no associated form (and, thus, referent)
+          @taglist.delete_if { |t| !t.referents.empty? } if params[:unbound_only] == "true"
+      end
     respond_to do |format|
       format.json { render :json => @taglist.map { |tag| { :title=>tag.name+tag.id.to_s, :isLazy=>false, :key=>tag.id, :isFolder=>false } } }
       format.html # index.html.erb
@@ -16,6 +25,30 @@ class TagsController < ApplicationController
     end
   end
   
+=begin
+# Shouldn't be using this anymore
+# GET /tags/list?tabindex=index
+# Return HTML for the list of tags (presumably called by the tags tablist)
+  def list
+    return if need_login true, true
+    @Title = "Tags"
+    if params[:tagtype]
+        tagtype = params[:tagtype].to_i
+    else
+        @tabindex = params[:tabindex] ? params[:tabindex].to_i : (session[:tabindex] || 0)
+        # The list of orphan tags gets all tags of this type which aren't linked to a table
+        tagtype = @tabindex > 0 ? Tag.index_to_type(@tabindex) : 0
+        session[:tabindex] = @tabindex
+    end
+    if true
+        @taglist = Tag.where(tagtype: tagtype).order("id").page(params[:page]).per_page(5)
+    else
+        @taglist = Tag.strmatch("", userid: session[:user_id], tagtype: tagtype)
+    end
+    render :partial=>"alltags"
+  end
+=end
+
   # GET /tags/match
   # This action is for remotely querying the tags that match a given string. It gets used in:
   #  -- the tag editor, for filtering for unbound tags
@@ -113,19 +146,6 @@ class TagsController < ApplicationController
     @taglist = Tag.strmatch("", userid: session[:user_id], tagtype: Tag.index_to_type(@tabindex) )
     session[:tabindex] = @tabindex
     render :partial=>"editor"
-  end
-  
-  # GET /tags/list?tabindex=index
-  # Return HTML for the list of tags (presumably called by the tags tablist)
-  def list
-    return if need_login true, true
-    @Title = "Tags"
-    @tabindex = params[:tabindex] ? params[:tabindex].to_i : (session[:tabindex] || 0)
-    # The list of orphan tags gets all tags of this type which aren't linked to a table
-    tagtype = @tabindex > 0 ? Tag.index_to_type(@tabindex) : 0
-    @taglist = Tag.strmatch("", userid: session[:user_id], tagtype: tagtype)
-    session[:tabindex] = @tabindex
-    render :partial=>"alltags"
   end
   
   # GET /id/absorb

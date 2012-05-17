@@ -84,7 +84,7 @@ class Tag < ActiveRecord::Base
         end
         
         t2.destroy
-        return self.errors.keys.count == 0
+        return !self.errors.any?
     end
     
     # 'typename' is a virtual attribute for the string associated with the tag's type (tagtype attribute)

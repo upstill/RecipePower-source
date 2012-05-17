@@ -1,18 +1,72 @@
-// GUARANTEED NECESSARY
 
-// Make orphan tags draggable (not applicable for dynatree)
-/*
-function treatOrphanTags() {	
-    $(".orphantag").multidraggable(
-	{
-        // containment: "#workpane",
-        opacity: 0.7,
-        zIndex: 1,
-        revert: "invalid"
-    }
-	);
-}
-*/
+/* Master function for assigning actions to interface items */
+$(function() {
+	/* Respond to a click on the "Absorb" button accompanying a redundant tag.
+	  The response is to fire off a merge request from the server, which 
+	  sends back a list of DOM elements to delete, which we handle with the 
+	  function nuke_DOM_elements_by_id.
+	*/
+	$('.absorb_button').click( function(event) {
+		var source_id = get_id_from_element($(this))
+		var target = $(this).closest('tr')
+		var target_id = get_id_from_element(target)
+		jQuery.get("tags/"+target_id+"/absorb",
+					{ victim: source_id },     
+					nuke_DOM_elements_by_id,
+					"json");		
+		
+	})
+	/* Respond to the selection of a different tag type by getting a new
+	 * page based on the new type.
+	 */
+	$('#taglist_type_selector').change( function(event) {
+		var newtype = $(this)[0].value
+		jQuery.get("tags", 
+			{ tagtype: newtype }, 
+			function(body, status, instance) { if(status=="success") { $("body").html(body) } }, 
+			"html"
+		)
+	})
+	$('.tag_type_selector').change(function(event) {
+		// We're operating on the nearest table row element
+		var element = $(this).closest('tr')
+		//...which has the id of the tag to change
+		var tagid = get_id_from_element(element)
+		var node = element[0]
+		var nextel = element.next()[0]	// The hr element too
+		// Our good old popup here has the new type of the tag
+		var value = $(this)[0].value
+	    // Fire off an Ajax call notifying the server of the (re)classification
+	    jQuery.get("/tags/typify",
+				    {
+				        tagid: tagid,
+						newtype: value
+				    },
+					nuke_DOM_elements_by_id,
+				    "json");
+	})
+    $("#recipe_tag_tokens").tokenInput("/tags/match.json", {
+        crossDomain: false,
+		noResultsText: "No matching tag found; hit Enter to make it a tag",
+        hintText: "Type your own tag(s) for the recipe",
+        prePopulate: $("#recipe_tag_tokens").data("pre"),
+        theme: "facebook",
+		preventDuplicates: true,
+        allowCustomEntry: true
+    });
+	$('.remove_fields').click(function(event) {
+	    $(this).prev('input[type=hidden]').val('1')
+	    $(this).closest('tr').hide()
+	    event.preventDefault()
+	});
+	/*
+	$('form').on 'click', '.add_fields', (event) ->
+	    time = new Date().getTime()
+	    regexp = new RegExp($(this).data('id'), 'g')
+	    $(this).before($(this).data('fields').replace(regexp, time))
+	    event.preventDefault()
+	*/
+});
 
 /* Utility function to extract an integer key which terminates the
    id of some ancestor of 'start', given by 'spec'
@@ -45,39 +99,6 @@ function merge_tags(event) {
 
 // Called when the tag tabs load to set up dynatree, etc.
 function tagTabsOnLoad(event, info) {
-	/* Respond to a click on the "Absorb" button accompanying a redundant tag.
-	  The response is to fire off a merge request from the server, which 
-	  sends back a list of DOM elements to delete, which we handle with the 
-	  function nuke_DOM_elements_by_id.
-	*/
-	$('.absorb_button').click( function(event) {
-		var source_id = get_id_from_element($(this))
-		var target = $(this).closest('tr')
-		var target_id = get_id_from_element(target)
-		jQuery.get("tags/"+target_id+"/absorb",
-					{ victim: source_id },     
-					nuke_DOM_elements_by_id,
-					"json");		
-		
-	})
-	$('.tag_type_selector').change(function(event) {
-		// We're operating on the nearest table row element
-		var element = $(this).closest('tr')
-		//...which has the id of the tag to change
-		var tagid = get_id_from_element(element)
-		var node = element[0]
-		var nextel = element.next()[0]	// The hr element too
-		// Our good old popup here has the new type of the tag
-		var value = $(this)[0].value
-	    // Fire off an Ajax call notifying the server of the (re)classification
-	    jQuery.get("/tags/typify",
-				    {
-				        tagid: tagid,
-						newtype: value
-				    },
-					nuke_DOM_elements_by_id,
-				    "json");
-	})
     var TO = window.setInterval(function() {
         var idselector = "#tag_entry" + info.index;
         // var source = '/tags/match?morph=strings&tabindex=' + info.index;
@@ -489,30 +510,6 @@ function add_fields(link, association, content) {
     var regexp = new RegExp("new_" + association, "g")
     $(link).parent().before(content.replace(regexp, new_id));
 }
-
-$(function() {
-    $("#recipe_tag_tokens").tokenInput("/tags/match.json", {
-        crossDomain: false,
-		noResultsText: "No matching tag found; hit Enter to make it a tag",
-        hintText: "Type your own tag(s) for the recipe",
-        prePopulate: $("#recipe_tag_tokens").data("pre"),
-        theme: "facebook",
-		preventDuplicates: true,
-        allowCustomEntry: true
-    });
-	$('.remove_fields').click(function(event) {
-	    $(this).prev('input[type=hidden]').val('1')
-	    $(this).closest('tr').hide()
-	    event.preventDefault()
-	});
-	/*
-	$('form').on 'click', '.add_fields', (event) ->
-	    time = new Date().getTime()
-	    regexp = new RegExp($(this).data('id'), 'g')
-	    $(this).before($(this).data('fields').replace(regexp, time))
-	    event.preventDefault()
-	*/
-});
 
 function add_rating(link, association, content) {
     // Get the selected option

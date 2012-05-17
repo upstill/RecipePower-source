@@ -77,8 +77,12 @@ BLOCK_END
        end
        
    # Helper to define a selection menu for tag type
-   def type_selections tag
-       options_for_select(Tag.type_selections, tag.typenum )
+   def type_selections tag=nil
+       if tag
+           options_for_select(Tag.type_selections, tag.typenum )
+       else
+           options_for_select(Tag.type_selections )
+       end
    end
        
   # Return HTML for the links associated with this tag
