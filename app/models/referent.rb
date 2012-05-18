@@ -21,6 +21,8 @@ class Referent < ActiveRecord::Base
     has_many :expressions
     has_many :tags, :through=>:expressions
     accepts_nested_attributes_for :expressions, allow_destroy: true
+
+    belongs_to :canonical_expression, :class_name => "Tag", :foreign_key => "tag_id"
     
     attr_accessible :tag, :type, :description, :isCountable, :expressions_attributes, :add_expression, :parent_tokens, :child_tokens
     
@@ -34,10 +36,10 @@ class Referent < ActiveRecord::Base
     # Before saving a referent, we make sure its preferred tag is listed as an expression of type 1
     def ensure_expression
         # Look for an expression on this tag of type 1. If found, demote to a corruption (type 0)
-        if self.tag && (self.tag > 0)
-            unless self.expressions.any? { |exp| exp.tag_id == self.tag }
+        if self.canonical_expression
+            unless self.expressions.any? { |exp| exp.tag_id == self.tag_id }
                 # No expression found => make a new one and add it to the set
-                self.expressions << Expression.create(:tag_id=>self.tag, :referent_id=>self.id, :form=>1, :locale=>:en)
+                self.expressions << Expression.create(:tag_id=>self.tag_id, :referent_id=>self.id, :form=>1, :locale=>:en)
             end
         end
     end
@@ -47,12 +49,12 @@ class Referent < ActiveRecord::Base
         mytype = self.typenum
         self.tags.each do |tag|
             # Ensure that all associated tags have the right type, are global, and have a meaning
-            unless tag.tagtype == mytype && tag.isGlobal && tag.meaning
+            unless tag.tagtype == mytype && tag.isGlobal
                 if tag.tagtype != mytype && (tag.tagtype > 0) # ERROR!! Can't convert tag from another type
                     errors.add(:tags, "#{tag.name} is a '#{tag.typename}', not '#{Tag.typename(mytype)}'")
                 else
                     tag.tagtype = mytype
-                    tag.meaning = self.id unless tag.meaning # Give tag this meaning if there's no other
+                    tag.primary_meaning = self unless tag.primary_meaning # Give tag this meaning if there's no other
                     tag.isGlobal = true
                     tag.save
                 end
@@ -113,16 +115,19 @@ class Referent < ActiveRecord::Base
     
     # Convert a list of referents into the tags that reference them.
     def tags_from_referents(referents)
-        referents.collect { |ref| Tag.find ref.tag }
+        referents.collect { |ref| ref.canonical_expression }
     end
     
     # Convert a list of tag tokens into the referents to which they refer
     def tag_tokens_to_referents(tokens, use_existing=true)
-        tokens.collect do |token|
-            token = token.to_i unless token.sub!(/^\'(.*)\'/, '\1')
+        refs = tokens.collect do |token|
             # We either match the referent to token or create a new one
+            token.strip!
+            token = token.to_i unless token.sub!(/^\'(.*)\'$/, '\1')
             Referent.express token, self.typenum
         end
+        puts "Tokens converted to referents: "+refs.inspect
+        refs
     end
     
     # Class method to create a referent of a given type under the given tag.
@@ -132,18 +137,13 @@ class Referent < ActiveRecord::Base
         tag = Tag.assert_tag tag, tagtype: tagtype # Creating it if need be, and/or making it global 
         form = Expression.type_inDB :canonical
         # if there's already a referent referring to this tag, return it
-=begin
         if exp = tag.expressions.where(:form=>form, :locale=>:en).first
-            return self.find exp.referent_id
+            return exp.referent
         end
-=end
-        if tag.meaning && tag.meaning > 0
-            result = Referent.find tag.meaning
-        else
+        unless result = tag.primary_meaning
             # Didn't find an existing referent, so need to make one
-            result = self.create :tag=>tag.id, :type=>Referent.referent_class_for_tagtype(tagtype)
+            result = tag.create_primary_meaning :type=>Referent.referent_class_for_tagtype(tagtype)
             result.express tag, form: :canonical, locale: :en
-            # unless self.expressions.where(:tag_id=>tagid, :form=>canonicalform, :locale=>:en).first
                 # result.expressions.create :tag_id=>tagid, :form=>canonicalform, :locale=>:en
             # end
         end
@@ -160,19 +160,19 @@ class Referent < ActiveRecord::Base
         form = Expression.type_inDB (args[:form] || :corruption)
         locale = args[:locale] || :en
         # unless self.expressions.any? { |exp| exp.tag_id==tagid && exp.form==form && exp.locale == locale }
-        unless self.expressions.where(tag_id: tag.id, form: form, locale: locale ).first
+        if self.expressions.where(tag_id: tag.id, form: form, locale: locale ).empty?
             self.expressions.create tag_id: tag.id, form: form, locale: locale
-            if args[:form] == :canonical
-                self.tag = tag.id
-                self.save
-            end
+        end
+        if (args[:form] == :canonical) || !self.canonical_expression
+            self.canonical_expression = tag
+            self.save
         end
         tag.id
     end
     
     # Return the tag expressing this referent, if any
     def expression(form = :canonical, locale = :en)
-        return Tag.find(self.tag) if self.tag && (form == :canonical) && (locale == :en)
+        return self.canonical_expression if (form == :canonical) && (locale == :en)
         # Otherwise, we need to lookup/makeup the appropriate expression
     end
     
@@ -215,7 +215,7 @@ class Referent < ActiveRecord::Base
         children = []
         if key
             ref = Referent.find key
-            puts ("    "*level)+"#{ref.id.to_s}: #{ref.name} (#{ref.tag})"
+            puts ("    "*level)+"#{ref.id.to_s}: #{ref.name} (#{ref.tag_id})"
             children = ref.children
             level = level+1
         else
@@ -287,11 +287,10 @@ class Referent < ActiveRecord::Base
     
     # Remove uses of this tag by this referent
     def drop tag
-        debugger
-        if self.tag == tag.id
+        if self.tag_id == tag.id
             # Need to find another tag to use for canonical string
             return nil unless replacement_tag = self.tags.detect { |candidate| candidate.id != tag.id }
-            self.tag = replacement_tag.id
+            self.canonical_expression = replacement_tag
         end
         self.tags.delete tag
         self.save
@@ -299,18 +298,18 @@ class Referent < ActiveRecord::Base
     
     # Return the name of the referent [XXX for the current locale]
     def normalized_name
-        self.tag ? Tag.find(self.tag).normalized_name : "**no tag**"
+        self.canonical_expression ? self.canonical_expression.normalized_name : "**no tag**"
     end
     
     # Return the name of the referent [XXX for the current locale]
     def name
-        self.tag ? Tag.find(self.tag).name : "**no tag**"
+        self.canonical_expression ? self.canonical_expression.name : "**no tag**"
     end
     
     # Return the name, appended with all associated forms
     def longname
         result = self.name
-        aliases = self.tags.uniq.select {|tag| tag.id != self.tag }.map { |tag| tag.name }.join(", ")
+        aliases = self.tags.uniq.select {|tag| tag.id != self.tag_id }.map { |tag| tag.name }.join(", ")
         result << "(#{aliases})" unless aliases.blank?
         result
     end

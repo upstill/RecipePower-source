@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120507072756) do
+ActiveRecord::Schema.define(:version => 20120518030353) do
 
   create_table "expressions", :force => true do |t|
     t.integer  "tag_id"
@@ -99,12 +99,12 @@ ActiveRecord::Schema.define(:version => 20120507072756) do
   end
 
   create_table "referents", :force => true do |t|
-    t.integer  "tag"
     t.string   "type"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.boolean  "isCountable"
     t.string   "description"
+    t.integer  "tag_id"
   end
 
   create_table "scales", :force => true do |t|
@@ -173,7 +173,7 @@ ActiveRecord::Schema.define(:version => 20120507072756) do
     t.integer  "tagtype"
     t.string   "normalized_name"
     t.boolean  "isGlobal"
-    t.integer  "meaning"
+    t.integer  "referent_id"
   end
 
   create_table "users", :force => true do |t|

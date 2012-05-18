@@ -2,7 +2,7 @@
 class Tag < ActiveRecord::Base
     # require 'iconv'
 
-    attr_accessible :name, :id, :tagtype, :typename, :isGlobal, :meaning, :links, :recipes, :referents, :users
+    attr_accessible :name, :id, :tagtype, :typename, :isGlobal, :links, :recipes, :referents, :users
     
     # tagrefs associate tags with recipes
     has_many :tagrefs
@@ -19,6 +19,8 @@ class Tag < ActiveRecord::Base
     # ownership of tags restrict visible tags
     has_many :tag_owners
     has_many :users, :through=>:tag_owners
+    
+    belongs_to :primary_meaning, :class_name => "Referent", :foreign_key => "referent_id"
     
     validates_presence_of :name
     before_validation :tagqa

@@ -2,11 +2,11 @@
 
 <%= summarize_tag_owners @tag %>
 <%= summarize_tag_similars @tag %>
-<% if @tag.meaning && (ref = Referent.where(:id=>@tag.meaning).first)%>
+<% if ref = @tag.meaning %>
 	<%= summarize_ref_parents ref %>
 	<%= summarize_ref_children ref %>
 <% end %>
-<% @tag.referents.collect{ |ref| ref unless ref.id == @tag.meaning }.compact.each do |ref| %>
+<% @tag.referents.collect{ |ref| ref unless ref.id == @tag.meaning.id }.compact.each do |ref| %>
 	<%= summarize_referent ref, "Other Meaning" %>
 <% end %>
 <%= summarize_tag_links @tag %>

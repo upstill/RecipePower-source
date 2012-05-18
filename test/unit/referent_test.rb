@@ -17,8 +17,8 @@ class ReferentTest < ActiveSupport::TestCase
         assert tags(:jal).save, "Couldn't save tag"
         tag = Tag.find tagid
         assert_not_nil tag, "Couldn't fetch tag"
-        assert_nil tag.meaning, "Couldn't get tag meaning"
-        ref.parent_tokens= ["#{tagid}"]
+        assert_nil tag.primary_meaning, "Couldn't get tag meaning"
+        ref.parent_tokens= "#{tagid}"
         assert_equal 1, ref.parents.size, "Didn't create exactly one parent"
         assert_equal tags(:jal).name, ref.parents.first.name, "Parent's name is wrong"
     end
@@ -27,7 +27,7 @@ class ReferentTest < ActiveSupport::TestCase
         ref = FoodReferent.create
         tagid = tags(:jal).id
         tagname = tags(:jal).name
-        ref.parent_tokens= ["'#{tagname}'"]
+        ref.parent_tokens= "'#{tagname}'"
         assert_equal 1, ref.parents.size, "Didn't create exactly one parent"
         assert_equal tagname, ref.parents.first.name, "Parent's name is wrong"
     end
@@ -35,7 +35,7 @@ class ReferentTest < ActiveSupport::TestCase
     test "Make token list into a parent by tag name on new tag" do
         ref = FoodReferent.create
         tagname = "New Tag"
-        ref.parent_tokens= ["'#{tagname}'"]
+        ref.parent_tokens= "'#{tagname}'"
         assert_equal 1, ref.parents.size, "Didn't create exactly one parent"
         assert_equal tagname, ref.parents.first.name, "Parent's name is wrong"
     end
@@ -43,10 +43,15 @@ class ReferentTest < ActiveSupport::TestCase
     test "Create parent tokens and token list" do
         ref = FoodReferent.create
         parent = Referent.express tags(:chilibean).name, ref.typenum
+        puts "Got expression for '#{tags(:chilibean).name}'"
+        puts "Before adding parent #{parent.name}, parents are: "
+            ref.parents.each { |par| puts "\t#{par.name}(#{par.canonical_expression.id})" }
         ref.parents << parent
+        puts "After adding, parents are: "
+            ref.parents.each { |par| puts "\t#{par.name}(#{par.canonical_expression.id})" }
         pt = ref.parent_tags
         assert_equal 1, pt.count, "Should have a single parent token"
-        assert_equal tags(:chilibean).id, pt.first["id"], "Parent should be tag of chilibean"
+        assert_equal tags(:chilibean).id, pt.first.id, "Parent should be tag of chilibean"
     end
 
     test "Fail to match referent and token of different types" do
@@ -56,40 +61,45 @@ class ReferentTest < ActiveSupport::TestCase
         parent = Referent.express tagname, ref.typenum
         assert_equal parent.typenum, ref.typenum, "Types mismatched"
         assert_not_equal parent.expression.id, tagid, "Ingredient used as parent of "
-        ref.parent_tokens= ["'#{tagname}'"]
+        ref.parent_tokens= "'#{tagname}'"
         assert_equal parent.id, ref.parents.first.id, "Didn't get same referent for parent"
     end
 
     test "Create parents list, convert to tokens and back again" do
         ref = FoodReferent.create
         parent1 = Referent.express tags(:jal).name, ref.typenum
+        assert_equal tags(:jal).name, parent1.name, "Expression doesn't pan out"
         parent2 = Referent.express tags(:chilibean).name, ref.typenum
-        assert_equal tags(:chilibean).name, parent2.expression.name, "Expression doesn't pan out"
+        assert_equal tags(:chilibean).name, parent2.name, "Expression doesn't pan out"
         ref.parents = [parent1, parent2]
         pt = ref.parent_tags
         assert_equal 2, pt.count
         assert_equal tags(:jal).id, pt.first["id"], "Didn't keep tag's id: #{pt.first.inspect}"
         assert_equal tags(:chilibean).name, pt.last["name"], "Didn't keep tag's name"
-        ref.parent_tokens= ["#{pt.first["id"]}", "'#{pt.last["name"]}'"]
+        ptstring = "#{pt.first["id"]}, '#{pt.last["name"]}'"
+        ref.parent_tokens= ptstring
+        ref.save
         pt = ref.parent_tags
+        assert_equal 2, pt.count, "Setting parent tokens failed"
+        puts "Back from setting parent_tokens=: "+pt.inspect
         assert pt.find{ |parent| parent["id"] == tags(:jal).id }, "Lost jal id"
         assert pt.find{ |parent| parent["id"] == tags(:chilibean).id }, "Lost chilibean id"
     end
     
     test "Referent doesn't have itself as parent or child" do
         ref = Referent.express tags(:jal).name, 4
-        ref.parent_tokens= ["'#{tags(:jal).name}'"]
+        ref.parent_tokens= "'#{tags(:jal).name}'"
         puts "For ref w. ID #{ref.id}: "+ref.parents.inspect
         assert_equal 0, ref.parents.count, "Shouldn't make referent parent of self"
-        ref.child_tokens= ["'#{tags(:jal).name}'"]
+        ref.child_tokens= "'#{tags(:jal).name}'"
         assert_equal 0, ref.children.count, "Shouldn't make referent child of self"
     end
     
     test "Parents and children are unique" do
         ref = FoodReferent.create
-        ref.parent_tokens= ["#{tags(:jal).id}", "'#{tags(:jal).name}'"]
+        ref.parent_tokens= "#{tags(:jal).id}, '#{tags(:jal).name}'"
         assert_equal 1, ref.parents(true).count, "Two identical parents successfully asserted"
-        ref.child_tokens= ["#{tags(:chilibean).id}", "'#{tags(:chilibean).name}'"]
+        ref.child_tokens= "#{tags(:chilibean).id}, '#{tags(:chilibean).name}'"
         assert_equal 1, ref.children(true).count, "Two identical children successfully asserted"
     end
 
