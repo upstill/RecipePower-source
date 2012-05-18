@@ -1,6 +1,5 @@
 class ExpressionValidator < ActiveModel::Validator
     def validate(record)
-        debugger
         if(record.tag_id && record.referent_id)
             tag = Tag.find record.tag_id
             ref = Referent.find record.referent_id

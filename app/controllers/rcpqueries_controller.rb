@@ -121,15 +121,19 @@ public
     session[:rcpquery] = @rcpquery.id
 
     @Title = "Query from Update"
-    element = params[:element].to_sym
-    case element
-    when :tabnum
-       # Just send back the tab number
-       render :text=>@rcpquery.status_tab.to_s
-    when :querylist_header
-       render '_form_rcpquery_header.html.erb', :layout=>false
-    when :rcplist_body
-       render '_form_rcplist.html.erb', :layout=>false
+    if params[:element] 
+        case params[:element].to_sym
+        when :tabnum
+           # Just send back the tab number
+           render :text=>@rcpquery.status_tab.to_s
+        when :querylist_header
+           render '_form_rcpquery_header.html.erb', :layout=>false
+        when :rcplist_body
+           render '_form_rcplist.html.erb', :layout=>false
+       end
+    else
+       # Without an element named, redirect to the whole page
+       redirect_to rcpqueries_url
     end
 
   end

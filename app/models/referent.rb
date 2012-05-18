@@ -13,10 +13,10 @@ class Referent < ActiveRecord::Base
     # Referents don't have a strict tree structure, just categories defined by an isa relationship.
     # This relationship is implemented by the ReferentRelation table, with parent_id and child_id keys
     has_many :child_relations, :foreign_key=>"parent_id", :dependent=>:destroy, :class_name=>"ReferentRelation"
-    has_many :children, :through => :child_relations, :source => :child 
+    has_many :children, :through => :child_relations, :source => :child, :uniq => true 
     
     has_many :parent_relations, :foreign_key => "child_id", :dependent=>:destroy, :class_name => "ReferentRelation"
-    has_many :parents, :through => :parent_relations, :source => :parent
+    has_many :parents, :through => :parent_relations, :source => :parent, :uniq => true
 
     has_many :expressions
     has_many :tags, :through=>:expressions
@@ -24,8 +24,8 @@ class Referent < ActiveRecord::Base
     
     attr_accessible :tag, :type, :description, :isCountable, :expressions_attributes, :add_expression, :parent_tokens, :child_tokens
     
-    validates_associated :parents
-    validates_associated :children
+    # validates_associated :parents
+    # validates_associated :children
     validates_with ReferentValidator
     
     before_save :ensure_expression

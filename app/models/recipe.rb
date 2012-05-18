@@ -43,6 +43,20 @@ class Recipe < ActiveRecord::Base
   
   @@coder = HTMLEntities.new
   
+  # Go through all the recipes and make Max an owner
+  def self.maxify
+      max = User.find 1
+      self.all.each do |rcp| 
+          users = rcp.user_ids
+          if users.empty?
+              puts "Giving Max #{rcp.title}"
+              debugger
+              rcp.users << max 
+              rcp.save
+          end
+      end
+  end
+  
   # Make the recipe title nice for display
   def trimmed_title
       ttl = self.title || ""

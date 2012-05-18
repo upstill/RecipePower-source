@@ -1,6 +1,5 @@
 class ReferentRelationValidator < ActiveModel::Validator
     def validate(record)
-        debugger
         unless record.parent_id
             record.errors[:parent_id] << "Relation must include parent"
             return false

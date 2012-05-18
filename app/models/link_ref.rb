@@ -41,8 +41,9 @@ require 'csv'
         rownum = 1
         CSV.foreach(fname, :encoding=>"UTF-8") do |row|
             return unless tagstrs = row[0]
-            typestrs = row[1]
-            uri = row[2]
+            refpath = row[1]
+            typestrs = row[2]
+            uri = row[3]
             referents = [] # Clear the array specifying referents per type
             tags = [] # Clear the array of tags (one for each combo of string and type) for the line
             # In this first pass through the join of tags and types, we convert from strings to tags and typeids,
@@ -55,7 +56,6 @@ require 'csv'
                     if typeid = Tag.typenum(typestr)
                         # Tags will be asserted if they don't exist, assigned to the given type and made global
                         tag = Tag.assert_tag( tagstr, tagtype: typeid)
-                        debugger
                         LinkRef.associate uri, tag
                         tags << tag
                         # The idea is to glean a common referent for all the tags of a given type. If none
@@ -71,6 +71,7 @@ require 'csv'
                                 referents[typeid] = Referent.find(referentid)
                             end
                         end
+                        
                     else
                         puts "Error on line ##{rownum.to_s}(#{row.to_s}): typeid '#{typestr}' isn't sensible"
                     end
@@ -85,6 +86,21 @@ require 'csv'
                     referent.express(tag) # unless tag.referent_ids.include?(referent.id)
                 else
                     referents[tag.tagtype] = Referent.express tag, tag.tagtype
+                end
+            end
+            # Finally, we file the resulting referents under the given path
+            referents.each_index do |ix| 
+                if child = referents[ix]
+                    pathlist = refpath.split('/').collect { |atom| Referent.express atom, ix }
+                    # Now we have a series of referents representing the path above 'child'
+                    # We establish the relationships by popping up the path
+                    while parent = pathlist.pop
+                        unless child.parents(true).any? { |otherparent| otherparent.id == parent.id }
+                            child.parents << parent
+                            child.save
+                        end
+                        child = parent
+                    end
                 end
             end
             rownum = rownum + 1
