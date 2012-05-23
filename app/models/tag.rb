@@ -2,15 +2,19 @@
 class Tag < ActiveRecord::Base
     # require 'iconv'
 
-    attr_accessible :name, :id, :tagtype, :typename, :isGlobal, :links, :recipes, :referents, :users
+    attr_accessible :name, :id, :tagtype, :typename, :isGlobal, :links, :recipes, :referents, :users, :primary_meaning
     
     # tagrefs associate tags with recipes
     has_many :tagrefs
     has_many :recipes, :through=>:tagrefs
     
     # expressions associate tags with the foods (roles, processes, etc.) they refer to
+    # These are the "meanings" of a tag
     has_many :expressions
     has_many :referents, :through=>:expressions
+    
+    # The primary meaning is the default meaning of a tag
+    belongs_to :primary_meaning, :class_name => "Referent", :foreign_key => "referent_id"
     
     # linkrefs give access to glossary entries, etc.
     has_many :link_refs
@@ -19,8 +23,6 @@ class Tag < ActiveRecord::Base
     # ownership of tags restrict visible tags
     has_many :tag_owners
     has_many :users, :through=>:tag_owners
-    
-    belongs_to :primary_meaning, :class_name => "Referent", :foreign_key => "referent_id"
     
     validates_presence_of :name
     before_validation :tagqa
@@ -333,6 +335,15 @@ class Tag < ActiveRecord::Base
        end
    end
    
+   # Give this tag a primary meaning if it doesn't already have one or we're
+   # forcing the issue
+   def admit_meaning ref, force=false
+       if !self.primary_meaning || force
+           self.primary_meaning = ref
+           self.save
+       end 
+   end
+   
    # Look up a tag by name, userid and type, creating a new one if needed
    # RETURNS: an array of matching tags (possibly empty if assert is not true)
    # name: string to find
@@ -424,6 +435,17 @@ class Tag < ActiveRecord::Base
         tags = firsttags + lasttags
     end
     tags
+  end
+  
+  # Return a list of tags that "could be" a match for this one, as judged by losing the distinction
+  # between singular and plural
+  def aliases
+      plural = self.name.pluralize
+      singular = self.name.singularize
+      list = []
+      list = list + Tag.strmatch(singular, matchall: true, tagtype: self.tagtype) if singular != self.name
+      list = list + Tag.strmatch(plural, matchall: true, tagtype: self.tagtype) if plural != self.name
+      list
   end
    
    # Respond to a directive to move tags from one category to another

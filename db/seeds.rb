@@ -804,4 +804,4 @@ Referent.express "Diets", :Interest, true
 Referent.express "Genres", :Interest, true
 
 # LinkRef.import_file "db/data/FoodLover"
-# LinkRef.import_CSVfile "db/data/Full Dictionary Revised.csv"
+LinkRef.import_CSVfile "db/data/Full Dictionary Revised.csv"

@@ -11,6 +11,8 @@ class ExpressionValidator < ActiveModel::Validator
         end
     end
 end
+
+require 'type_map.rb'
     
 class Expression < ActiveRecord::Base
     belongs_to :tag
@@ -18,25 +20,145 @@ class Expression < ActiveRecord::Base
     
     attr_accessible :tag_id, :referent_id, :locale, :form, :tagname, :tag_token
     
-    validates_with ExpressionValidator
+    @@Attribs = [:tag_id, :referent_id, :form, :locale]
     
+    @@Locales = TypeMap.new( { 
+        en: ["English", 1],
+        it: ["Italian", 2], 
+        es: ["Spanish", 3],
+        fr: ["French",  4]
+    }, "No Locale")
+    
+    def self.localenum tt
+        @@Locales.num tt
+    end
+    
+    def self.localesym tt
+        @@Locales.sym tt
+    end
+    
+    def self.localename tt
+        @@Locales.name tt
+    end
+    
+    def localesym
+        @@Locales.sym self.locale
+    end
+    
+    def localename
+        @@Locales.name self.locale
+    end
+    
+    def set_locale tt
+        self.locale = @@Locales.num(tt)
+    end
+    
+    def self.locales
+        @@Locales.list
+    end
+    
+    # Access/manipulation of 'form' attribute. Stored in database as an int, 
+    # Read and written by ints, symbols and strings
+    
+    @@Forms = TypeMap.new( {
+        generic: [ "Generic", 1],
+        singular: [ "Singular", 2],
+        plural: [ "Plural", 3]
+    }, "Unknown Form" )
+    
+    # Set the form by reference to any of the accepted datatypes
+    def set_form tt
+        self.form = @@Forms.num(tt)
+    end
+    
+    # Get the type number, taking any of the accepted datatypes
+    def self.formnum tt
+        @@Forms.num tt
+    end
+    
+    # Get the symbol for the type, taking any of the accepted datatypes
+    def self.formsym tt
+        @@Forms.sym tt
+    end
+    
+    # Get the name for the type, taking any of the accepted datatypes
+    def self.formname tt
+        @@Forms.name tt
+    end
+    
+    # Return the symbol for the type of self
+    def formsym
+        @@Forms.sym self.form
+    end
+    
+    # Return the name for the type of self
+    def formname
+        @@Forms.name self.form
+    end
+    
+    # Return a list of name/type pairs, suitable for making a selection list
+    def self.forms
+        @@Forms.list
+    end
+    
+    validates_with ExpressionValidator
+=begin
+    # before_save :desymbolize
     after_find :symbolize
     
     @@FormTypes = { :corruption=>0, :canonical=>1 }
+    
+    @@Forms = [["Generic", 1], ["Singular", 2], ["Plural", 3]]
+    
+    def self.forms
+       @@Forms
+    end
+    
+    def self.typenum (tt)
+        if tt.kind_of? Fixnum 
+            tt 
+        elsif (tt.kind_of? Symbol)
+            @@FormTypes[tt]
+        elsif(tt.kind_of? String)
+            @@FormTypes[tt.to_sym]
+        elsif tt.kind_of? Array
+            tt.first && tt.collect { |type| Tag.typenum type }
+        elsif !tt
+            0
+        end
+    end
     
     # Ensure that the type is a proper integer
     def self.type_inDB(type)
         type = type.to_sym if type.class == String
         type.class == Symbol ? @@FormTypes[type] : type
     end
-    
-    def symbolize
-        self.locale = self.locale.to_sym
+=end
+
+    # Make a new expression according to the arguments, trying first to find a
+    # match. The trick is that when either the locale or the form aren't specified,
+    # we'll match any expression on the referent and id.
+    def self.find_or_create refid, tagid, args = {}
+        # Collect the relevant arguments into the whereargs hash
+        whereargs = {referent_id: refid, tag_id: tagid}
+        args.keys.each do |k| 
+            k = k.to_sym
+            val = args[k]
+            if val && @@Attribs.include?(k.to_sym)
+                case k
+                when :form
+                    val = self.formnum val
+                when :locale
+                    val = self.localenum val
+                end
+                whereargs[k] = val
+            end
+        end
+        self.where(whereargs).first || self.create(whereargs)
     end
-    
+
     def tagname
-        return "**no tag**" unless self && self.tag
-        self.tag.name
+        self.tag ? self.tag.name : "**no tag**"
     end
     
     # Tag_token: a virtual attribute for taking tag specifications from tokenInput.
@@ -45,7 +167,7 @@ class Expression < ActiveRecord::Base
     # Before accepting a tag name as a new tag, we do our due diligence to find the
     # proferred string among 1) tags of the specified type, and 2) free (untyped) tags.
     def tag_token()
-        self.tag_id && self.tag_id.to_s
+        self.tag ? self.tag.id.to_s : ""
     end
     
     def tag_token=(t)

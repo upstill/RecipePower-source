@@ -24,25 +24,36 @@ class Referent < ActiveRecord::Base
 
     belongs_to :canonical_expression, :class_name => "Tag", :foreign_key => "tag_id"
     
-    attr_accessible :tag, :type, :description, :isCountable, :expressions_attributes, :add_expression, :parent_tokens, :child_tokens
+    attr_accessible :tag, :type, :description, :isCountable, 
+        :expressions_attributes, :add_expression, 
+        :parents, :children, :parent_tokens, :child_tokens
     
     # validates_associated :parents
     # validates_associated :children
     validates_with ReferentValidator
     
-    before_save :ensure_expression
-    after_save :ensure_tagtypes
+    # before_save :ensure_expression
+    # after_save :ensure_tagtypes
     
-    # Before saving a referent, we make sure its preferred tag is listed as an expression of type 1
-    def ensure_expression
-        # Look for an expression on this tag of type 1. If found, demote to a corruption (type 0)
-        if self.canonical_expression
-            unless self.expressions.any? { |exp| exp.tag_id == self.tag_id }
-                # No expression found => make a new one and add it to the set
-                self.expressions << Expression.create(:tag_id=>self.tag_id, :referent_id=>self.id, :form=>1, :locale=>:en)
-            end
-        end
+    # Dump the contents of the database to stdout
+    def self.dump tagtype=4
+        Referent.all.collect { |ref| ref.parents.empty? && (ref.typenum==tagtype) && ref }.each { |tl| tl.dump if tl }
     end
+    
+    # Dump a specified referent with the given indent
+    def dump indent = "", path = []
+        if path.include? self.id
+            puts "#{indent}!!Loop back to #{self.id.to_s}: #{self.name}"
+        else
+            puts "#{indent}Referent #{self.id.to_s}: #{self.name}"
+            indent = indent + "    "
+            self.tags.each do |tag|
+                puts "#{indent}Tag #{tag.id.to_s}: #{tag.name}"
+                tag.links.each { |link| puts "#{indent}    Link #{link.id.to_s}: #{link.uri}"}
+            end
+            self.children.each { |child| child.dump(indent, path+[self.id]) }
+        end
+    end    
     
     # After saving, check that all tags are of our type
     def ensure_tagtypes
@@ -60,17 +71,6 @@ class Referent < ActiveRecord::Base
                 end
             end
         end
-    end
-    
-    @@Locales = [["English",:en], ["Italian",:it], ["Spanish",:es], ["French",:fr]]
-    @@Forms = [["Generic", 1], ["Singular", 2], ["Plural", 3]]
-    
-    def self.locales
-       @@Locales
-    end
-    
-    def self.forms
-       @@Forms
     end
     
     # This is a virtual attribute for the benefit of the referent editor, which has
@@ -130,50 +130,46 @@ class Referent < ActiveRecord::Base
         refs
     end
     
-    # Class method to create a referent of a given type under the given tag.
+    # Class method to create a referent of a given type under the given tag, 
+    # or to find an existing one.
     # WARNING: while some effort is made to find an existing referent and use that,
     #  this procedure lends itself to redundancy in the dictionary
     def self.express (tag, tagtype, args = {} )
         tag = Tag.assert_tag tag, tagtype: tagtype # Creating it if need be, and/or making it global 
-        form = Expression.type_inDB :canonical
-        # if there's already a referent referring to this tag, return it
-        if exp = tag.expressions.where(:form=>form, :locale=>:en).first
-            return exp.referent
-        end
-        unless result = tag.primary_meaning
-            # Didn't find an existing referent, so need to make one
-            result = tag.create_primary_meaning :type=>Referent.referent_class_for_tagtype(tagtype)
-            result.express tag, form: :canonical, locale: :en
-                # result.expressions.create :tag_id=>tagid, :form=>canonicalform, :locale=>:en
-            # end
-        end
-        result
+        form = args[:form] || :generic
+        locale = args[:locale]
+        ref = tag.primary_meaning || 
+              tag.referents.first || 
+              # We don't immediately have a referent for this tag
+              #...but there may already be one as a plural or a singular
+              tag.aliases.collect { |tag| tag.primary_meaning || tag.referents.first }.compact.first ||
+              # Tag doesn't have an existing referent, so need to make one
+              Referent.create(:type=>Referent.referent_class_for_tagtype(tagtype))
+        ref.express tag, form: form, locale: locale
+        ref
     end
     
     # Add a tag to the expressions of this referent, returning the tag id
-    def express(tag, args = {})
+    def express(tag, args = {} )
         # We assert the tag in case it's
-        # 1) specified by string or id, 
+        # 1) specified by string or id, rather than a tag object
         # 2) of a different type, or 
         # 3) not already global
         tag = Tag.assert_tag tag, tagtype: self.typenum 
-        form = Expression.type_inDB (args[:form] || :corruption)
-        locale = args[:locale] || :en
-        # unless self.expressions.any? { |exp| exp.tag_id==tagid && exp.form==form && exp.locale == locale }
-        if self.expressions.where(tag_id: tag.id, form: form, locale: locale ).empty?
-            self.expressions.create tag_id: tag.id, form: form, locale: locale
-        end
-        if (args[:form] == :canonical) || !self.canonical_expression
+        
+        # Find or create an expression of this referent on this tag. If locale
+        # or form aren't specified, match any expression
+        Expression.find_or_create self.id, tag.id, args 
+        
+        # Promote the tag to the canonical expression on this referent if needed
+        if (args[:form] == :generic) || !self.canonical_expression
             self.canonical_expression = tag
             self.save
         end
+        
+        # Point the tag back at this referent, if needed
+        tag.admit_meaning(self)
         tag.id
-    end
-    
-    # Return the tag expressing this referent, if any
-    def expression(form = :canonical, locale = :en)
-        return self.canonical_expression if (form == :canonical) && (locale == :en)
-        # Otherwise, we need to lookup/makeup the appropriate expression
     end
     
     # Return a list of all tags that are related to the one provided. This means:
@@ -242,6 +238,18 @@ class Referent < ActiveRecord::Base
         result
     end
     
+    # Return an array of all paths leading to this leaf node
+    def paths_to inText = true, collected = []
+        paths = []
+        (self.parent_ids - collected).each do |parent_id| 
+            parent = Referent.find parent_id
+            paths = paths + parent.paths_to(false,collected + [parent.id])
+        end
+        paths = paths.empty? ? [[self]] : paths.collect { |path| path << self }
+        return paths unless inText
+        paths.collect { |path| path.collect { |node| node.name }.join('/') }
+    end
+    
     def update_attributes(*params)
         actuals = params.first
         # If the parent id is changing, we need to make sure the tree stays sound
@@ -296,14 +304,22 @@ class Referent < ActiveRecord::Base
         self.save
     end
     
-    # Return the name of the referent [XXX for the current locale]
-    def normalized_name
-        self.canonical_expression ? self.canonical_expression.normalized_name : "**no tag**"
+    # Return the tag expressing this referent according to the given form and locale, if any
+    def expression(args = {})
+        if (args.size > 0) && (expr = self.expressions.where(*args).first)
+            return expr.tag
+        end
+        self.canonical_expression
     end
     
-    # Return the name of the referent [XXX for the current locale]
-    def name
-        self.canonical_expression ? self.canonical_expression.name : "**no tag**"
+    # Return the name of the referent
+    def normalized_name(args = {})
+        (tag = self.expression *args) ? tag.normalized_name : "**no tag**"
+    end
+    
+    # Return the name of the referent
+    def name(args = {})
+        (tag = self.expression *args) ? tag.name : "**no tag**"
     end
     
     # Return the name, appended with all associated forms

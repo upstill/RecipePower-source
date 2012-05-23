@@ -41,8 +41,8 @@ require 'csv'
         rownum = 1
         CSV.foreach(fname, :encoding=>"UTF-8") do |row|
             return unless tagstrs = row[0]
-            refpath = row[1]
-            typestrs = row[2]
+            refpaths = row[1] || ""
+            typestrs = row[2] || ""
             uri = row[3]
             referents = [] # Clear the array specifying referents per type
             tags = [] # Clear the array of tags (one for each combo of string and type) for the line
@@ -50,14 +50,18 @@ require 'csv'
             #  meanwhile looking for a referent borne by one of the tags, which we will associate with all the
             #  tags in the second pass.
             tagstrs.split('; ').each do |tagstr|
+                tagstr.strip!
                 typestrs.split('; ').each do |typestr|
                     # puts self.associate :tag=>tag, :resource_type=>:glossary, :uri=>uri, :tagtype=>type, :userid=>superid
                     # Convert typestr to canonical form
                     if typeid = Tag.typenum(typestr)
+                        # tagstr may be prefaced by a locale marker
+                        tagstr = tagstr.strip.sub(/^(\w\w):/, '')
+                        locale = $1
                         # Tags will be asserted if they don't exist, assigned to the given type and made global
                         tag = Tag.assert_tag( tagstr, tagtype: typeid)
-                        LinkRef.associate uri, tag
-                        tags << tag
+                        LinkRef.associate(uri, tag) if uri
+                        tagpairs << [tag, locale]
                         # The idea is to glean a common referent for all the tags of a given type. If none
                         #  exists among the incoming tags, then we'll make one later
                         if referentid = tag.referent_ids.first
@@ -77,29 +81,37 @@ require 'csv'
                     end
                 end
             end
-            # Now we have a collection of tags, each with a given type. We may also have a referent for each type. 
+            # Now we have a collection of tags, each with a given type, paired with a locale. 
+            # We may also have a referent for each type. 
             # In this pass, we associate all the tags of a given type with the common referent.
-            tags.each do |tag|
-                # Create a referent for this tag, if necessary
-                if referent = referents[tag.tagtype]
+            tagpairs.each do |pair|
+                tag = pair.first
+                locale = pair.last
+                # Either create a referent for this set of tags, or use the one that was
+                # asserted/identified earlier
+                if referents[tag.tagtype]
                     # There is a target referent; assert it to the tag unless it's already there
-                    referent.express(tag) # unless tag.referent_ids.include?(referent.id)
+                    referents[tag.tagtype].express tag, locale: locale
                 else
-                    referents[tag.tagtype] = Referent.express tag, tag.tagtype
+                    referents[tag.tagtype] = Referent.express tag, tag.tagtype, locale: locale
                 end
+                tag.admit_meaning referents[tag.tagtype]
             end
             # Finally, we file the resulting referents under the given path
             referents.each_index do |ix| 
-                if child = referents[ix]
-                    pathlist = refpath.split('/').collect { |atom| Referent.express atom, ix }
-                    # Now we have a series of referents representing the path above 'child'
-                    # We establish the relationships by popping up the path
-                    while parent = pathlist.pop
-                        unless child.parents(true).any? { |otherparent| otherparent.id == parent.id }
-                            child.parents << parent
-                            child.save
+                refpaths.split(';').each do |refpath| 
+                    if child = referents[ix]
+                        pathlist = refpath.strip.split('/').collect { |atom| Referent.express atom, ix }
+                        # Now we have a series of referents representing the path above 'child'
+                        # We establish the relationships by popping up the path
+                        while parent = pathlist.pop
+                            unless child.parents(true).any? { |otherparent| otherparent.id == parent.id }
+                                child.parents << parent
+                                child.save
+                                parent.save
+                            end
+                            child = parent
                         end
-                        child = parent
                     end
                 end
             end
