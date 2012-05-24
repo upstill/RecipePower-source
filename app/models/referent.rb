@@ -136,8 +136,6 @@ class Referent < ActiveRecord::Base
     #  this procedure lends itself to redundancy in the dictionary
     def self.express (tag, tagtype, args = {} )
         tag = Tag.assert_tag tag, tagtype: tagtype # Creating it if need be, and/or making it global 
-        form = args[:form] || :generic
-        locale = args[:locale]
         ref = tag.primary_meaning || 
               tag.referents.first || 
               # We don't immediately have a referent for this tag
@@ -145,7 +143,7 @@ class Referent < ActiveRecord::Base
               tag.aliases.collect { |tag| tag.primary_meaning || tag.referents.first }.compact.first ||
               # Tag doesn't have an existing referent, so need to make one
               Referent.create(:type=>Referent.referent_class_for_tagtype(tagtype))
-        ref.express tag, form: form, locale: locale
+        ref.express tag, args
         ref
     end
     
@@ -157,15 +155,16 @@ class Referent < ActiveRecord::Base
         # 3) not already global
         tag = Tag.assert_tag tag, tagtype: self.typenum 
         
-        # Find or create an expression of this referent on this tag. If locale
-        # or form aren't specified, match any expression
-        Expression.find_or_create self.id, tag.id, args 
-        
         # Promote the tag to the canonical expression on this referent if needed
         if (args[:form] == :generic) || !self.canonical_expression
             self.canonical_expression = tag
             self.save
         end
+        
+        # Find or create an expression of this referent on this tag. If locale
+        # or form aren't specified, match any expression
+        args[:form] = :generic unless args[:form]
+        Expression.find_or_create self.id, tag.id, args 
         
         # Point the tag back at this referent, if needed
         tag.admit_meaning(self)
@@ -199,6 +198,7 @@ class Referent < ActiveRecord::Base
         Tag.typenum self.typesym
     end
     
+    # For mapping from tag type to the class of referent that handles it
     def self.referent_class_for_tagtype(tagtype)
         if(Tag.typenum(tagtype) > 0)
             Tag.typesym(tagtype).to_s+"Referent"
@@ -306,7 +306,8 @@ class Referent < ActiveRecord::Base
     
     # Return the tag expressing this referent according to the given form and locale, if any
     def expression(args = {})
-        if (args.size > 0) && (expr = self.expressions.where(*args).first)
+        args = Expression.scrub_args args
+        if (args.size > 0) && (expr = self.expressions.where(args).first)
             return expr.tag
         end
         self.canonical_expression
@@ -314,12 +315,12 @@ class Referent < ActiveRecord::Base
     
     # Return the name of the referent
     def normalized_name(args = {})
-        (tag = self.expression *args) ? tag.normalized_name : "**no tag**"
+        (tag = self.expression args) ? tag.normalized_name : "**no tag**"
     end
     
     # Return the name of the referent
     def name(args = {})
-        (tag = self.expression *args) ? tag.name : "**no tag**"
+        (tag = self.expression args) ? tag.name : "**no tag**"
     end
     
     # Return the name, appended with all associated forms
@@ -357,3 +358,6 @@ class InterestReferent < Referent ; end
 
 class ToolReferent < Referent ; end  
 
+class NutrientReferent < Referent ; end  
+
+class CulinaryTermReferent < Referent ; end  

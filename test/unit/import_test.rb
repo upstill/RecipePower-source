@@ -6,10 +6,8 @@ class ImportTest < ActiveSupport::TestCase
         LinkRef.import_CSVfile "db/data/Test/locales.csv"
       	spice = Referent.express "spice", 4
       	assert_equal 2, spice.tags.size, "'spice' should have two expressions"
-      	debugger
       	assert_equal "spice", spice.name
       	assert_equal "épice", spice.name(locale: :fr)
-      	assert_equal coconut, coconuts, "'coconut' and 'coconuts' should get the same referent"
     end
     
     test "Coconuts" do
@@ -19,7 +17,6 @@ class ImportTest < ActiveSupport::TestCase
       	assert_equal coconut, coconuts, "'coconut' and 'coconuts' should get the same referent"
     end
     
-=begin
     test "Anchovies" do
         LinkRef.import_CSVfile "db/data/Test/anchovies.csv"
       	ref = Referent.express "anchovy", 4
@@ -60,7 +57,7 @@ class ImportTest < ActiveSupport::TestCase
 	
 	assert_equal 5, child2.children.size, "'wheat flour' should have five children"
 	
-	semolina = Referent.express "semolina flour", 4
+	semolina = Referent.express "semolina flour", 4, form: :generic
 	assert_equal "flours/wheat flour/semolina flour", semolina.paths_to[0], "Bad path to 'semolina flour'"
 	
 	# Read the import file again, confirming no change in number of tags or referents
@@ -76,5 +73,4 @@ class ImportTest < ActiveSupport::TestCase
 	assert_equal nlinks_before, Link.count, "More links on second import"
 	assert_equal nlinkrefs_before, LinkRef.count, "More link references on second import"
   end
-=end
 end

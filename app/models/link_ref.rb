@@ -45,7 +45,7 @@ require 'csv'
             typestrs = row[2] || ""
             uri = row[3]
             referents = [] # Clear the array specifying referents per type
-            tags = [] # Clear the array of tags (one for each combo of string and type) for the line
+            tagpairs = [] # Clear the array of tags (one for each combo of string and type) for the line
             # In this first pass through the join of tags and types, we convert from strings to tags and typeids,
             #  meanwhile looking for a referent borne by one of the tags, which we will associate with all the
             #  tags in the second pass.
@@ -89,11 +89,18 @@ require 'csv'
                 locale = pair.last
                 # Either create a referent for this set of tags, or use the one that was
                 # asserted/identified earlier
+                args = { }
+                if locale.blank?
+                    args[:form] = :generic
+                else
+                    args[:locale] = locale
+                    args[:form] = :generic if locale == "en"
+                end
                 if referents[tag.tagtype]
                     # There is a target referent; assert it to the tag unless it's already there
-                    referents[tag.tagtype].express tag, locale: locale
+                    referents[tag.tagtype].express tag, args
                 else
-                    referents[tag.tagtype] = Referent.express tag, tag.tagtype, locale: locale
+                    referents[tag.tagtype] = Referent.express tag, tag.tagtype, args
                 end
                 tag.admit_meaning referents[tag.tagtype]
             end

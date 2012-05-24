@@ -166,4 +166,93 @@ class ReferentTest < ActiveSupport::TestCase
         assert_equal 0, r4.children.size, "Destroyed child #{r3.id}, but parent #{r4.id} still shows child #{r4.child_ids.first}"
         assert_equal 0, ReferentRelation.all.count, "There are still ReferentRelations after destruction"
     end
+    
+    test "Names, Numbers and Symbols for Types" do
+        assert_equal "Referent", Referent.referent_class_for_tagtype(0), "Wrong class for tagtype 0"
+        assert_equal "GenreReferent", Referent.referent_class_for_tagtype(1), "Wrong class for tagtype 1"
+        assert_equal "RoleReferent", Referent.referent_class_for_tagtype(2), "Wrong class for tagtype 2"
+        assert_equal "ProcessReferent", Referent.referent_class_for_tagtype(3), "Wrong class for tagtype 3"
+        assert_equal "FoodReferent", Referent.referent_class_for_tagtype(4), "Wrong class for tagtype 4"
+        assert_equal "UnitReferent", Referent.referent_class_for_tagtype(5), "Wrong class for tagtype 5"
+        assert_equal "SourceReferent", Referent.referent_class_for_tagtype(6), "Wrong class for tagtype 6"
+        assert_equal "AuthorReferent", Referent.referent_class_for_tagtype(7), "Wrong class for tagtype 7"
+        assert_equal "OccasionReferent", Referent.referent_class_for_tagtype(8), "Wrong class for tagtype 8"
+        assert_equal "PantrySectionReferent", Referent.referent_class_for_tagtype(9), "Wrong class for tagtype 9"
+        assert_equal "StoreSectionReferent", Referent.referent_class_for_tagtype(10), "Wrong class for tagtype 10"
+        assert_equal "InterestReferent", Referent.referent_class_for_tagtype(11), "Wrong class for tagtype 11"
+        assert_equal "ToolReferent", Referent.referent_class_for_tagtype(12), "Wrong class for tagtype 12"
+        assert_equal "NutrientReferent", Referent.referent_class_for_tagtype(13), "Wrong class for tagtype 13"
+        assert_equal "CulinaryTermReferent", Referent.referent_class_for_tagtype(14), "Wrong class for tagtype 14"
+        
+        ref = GenreReferent.new
+        assert_equal "Genre", ref.typename, "Bad Type Name"
+        assert_equal :Genre, ref.typesym, "Bad Type Symbol"
+        assert_equal 1, ref.typenum, "Bad Type Number"
+        
+        ref = RoleReferent.new
+        assert_equal "Role", ref.typename, "Bad Type Name"
+        assert_equal :Role, ref.typesym, "Bad Type Symbol"
+        assert_equal 2, ref.typenum, "Bad Type Number"
+        
+        ref = ProcessReferent.new
+        assert_equal "Process", ref.typename, "Bad Type Name"
+        assert_equal :Process, ref.typesym, "Bad Type Symbol"
+        assert_equal 3, ref.typenum, "Bad Type Number"
+        
+        ref = FoodReferent.new
+        assert_equal "Food", ref.typename, "Bad Type Name"
+        assert_equal :Food, ref.typesym, "Bad Type Symbol"
+        assert_equal 4, ref.typenum, "Bad Type Number"
+        
+        ref = UnitReferent.new
+        assert_equal "Unit", ref.typename, "Bad Type Name"
+        assert_equal :Unit, ref.typesym, "Bad Type Symbol"
+        assert_equal 5, ref.typenum, "Bad Type Number"
+        
+        ref = SourceReferent.new
+        assert_equal "Source", ref.typename, "Bad Type Name"
+        assert_equal :Source, ref.typesym, "Bad Type Symbol"
+        assert_equal 6, ref.typenum, "Bad Type Number"
+        
+        ref = AuthorReferent.new
+        assert_equal "Author", ref.typename, "Bad Type Name"
+        assert_equal :Author, ref.typesym, "Bad Type Symbol"
+        assert_equal 7, ref.typenum, "Bad Type Number"
+        
+        ref = OccasionReferent.new
+        assert_equal "Occasion", ref.typename, "Bad Type Name"
+        assert_equal :Occasion, ref.typesym, "Bad Type Symbol"
+        assert_equal 8, ref.typenum, "Bad Type Number"
+        
+        ref = PantrySectionReferent.new
+        assert_equal "Pantry Section", ref.typename, "Bad Type Name"
+        assert_equal :PantrySection, ref.typesym, "Bad Type Symbol"
+        assert_equal 9, ref.typenum, "Bad Type Number"
+        
+        ref = StoreSectionReferent.new
+        assert_equal "Store Section", ref.typename, "Bad Type Name"
+        assert_equal :StoreSection, ref.typesym, "Bad Type Symbol"
+        assert_equal 10, ref.typenum, "Bad Type Number"
+        
+        ref = InterestReferent.new
+        assert_equal "Interest", ref.typename, "Bad Type Name"
+        assert_equal :Interest, ref.typesym, "Bad Type Symbol"
+        assert_equal 11, ref.typenum, "Bad Type Number"
+        
+        ref = ToolReferent.new
+        assert_equal "Tool", ref.typename, "Bad Type Name"
+        assert_equal :Tool, ref.typesym, "Bad Type Symbol"
+        assert_equal 12, ref.typenum, "Bad Type Number"
+        
+        ref = NutrientReferent.new
+        assert_equal "Nutrient", ref.typename, "Bad Type Name"
+        assert_equal :Nutrient, ref.typesym, "Bad Type Symbol"
+        assert_equal 13, ref.typenum, "Bad Type Number"
+        
+        ref = CulinaryTermReferent.new
+        assert_equal "Culinary Term", ref.typename, "Bad Type Name"
+        assert_equal :CulinaryTerm, ref.typesym, "Bad Type Symbol"
+        assert_equal 14, ref.typenum, "Bad Type Number"
+        
+    end
 end

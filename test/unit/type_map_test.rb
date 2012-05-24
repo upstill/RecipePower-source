@@ -9,6 +9,11 @@ class TypeMapTest < ActiveSupport::TestCase
         fr: ["French",  4]
     }
     
+    test "max_index" do
+        tm = TypeMap.new @@TestTbl, "nil entry"
+        assert_equal 4, tm.max_index, "4 should be the last entry in the type map"
+    end
+    
     test "num" do
         tm = TypeMap.new @@TestTbl, "nil entry"
         assert_equal 2, tm.num(2), "Didn't map 2 to 2"
@@ -33,7 +38,6 @@ class TypeMapTest < ActiveSupport::TestCase
     
     test "name" do
         tm = TypeMap.new @@TestTbl, "nil entry"
-        debugger
         assert_equal "North American", tm.name(3), "Didn't map 3 to 'North American'"
         assert_equal "North American", tm.name(:na), "Didn't map 3 to 'North American'"
         assert_equal "North American", tm.name("North American"), "Didn't map 'North American' to 'North American'"

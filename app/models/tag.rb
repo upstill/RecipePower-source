@@ -133,7 +133,84 @@ class Tag < ActiveRecord::Base
         self.tagtype = 0 unless self.tagtype
         true
     end
+    
+    @@TagTypes = TypeMap.new( {
+        Genre: ["Genre", 1], 
+        Role: ["Role", 2], 
+        Process: ["Process", 3], 
+        Food: ["Food", 4], 
+        Unit: ["Unit", 5], 
+        Source: ["Source", 6], 
+        Author: ["Author", 7], 
+        Occasion: ["Occasion", 8], 
+        PantrySection: ["Pantry Section", 9], 
+        StoreSection: ["Store Section", 10], 
+        Interest: ["Interest", 11], 
+        Tool: ["Tool", 12], 
+        Nutrient: ["Nutrient", 13], 
+        CulinaryTerm: ["Culinary Term", 14]
+    }, "free tag")
+    
+    # Get the type number, taking any of the accepted datatypes
+    def self.typenum tt
+        @@TagTypes.num tt
+    end
+    
+    # Get the symbol for the type, taking any of the accepted datatypes
+    def self.typesym tt
+        @@TagTypes.sym tt
+    end
+    
+    # Get the name for the type, taking any of the accepted datatypes
+    def self.typename tt
+        @@TagTypes.name tt
+    end
+    
+    def typenum
+        self.tagtype
+    end
+    
+    def typenum=(tt, do_merge = false )
+        # Need to be careful: the tag needs to agree in type with any expressions that include
+        # it
+        return nil unless self.referents.all? { |ref| ref.drop tag }
+        self.tagtype = Tag.typenum tt
+    end
+    
+    # Return the symbol for the type of self
+    def typesym
+        @@TagTypes.sym self.tagtype
+    end
+    
+    # Return the name for the type of self
+    def typename
+        @@TagTypes.name self.tagtype
+    end
+    
+    # Return a list of name/type pairs, suitable for making a selection list
+    def self.type_selections
+        @@TagTypes.list
+    end
 
+    # Taking an index into the table of tag types, return the symbol for that type
+    # (used to build a set of tabs, one for each tag type)
+    # NB: returns nil for nil index and for index beyond the last type. This is useful
+    # for generating a table that covers all types
+    def self.index_to_type(index)
+        index if index && (index <= @@TagTypes.max_index)
+    end
+
+    # Is my tagtype the same as the given type(s) (given as string, symbol, integer or array)
+    def typematch(tt)
+        return true if tt.nil? # nil type matches any tag type
+        if tt.kind_of?(Array)
+            tt.any? { |type| self.typematch type }
+        else
+            Tag.typenum(tt) == self.tagtype
+        end
+    end
+    
+=begin    
    # These class variables keep the mapping among tag types, type indices, and descriptive strings for the types
    @@TypesToSyms = [
        "free tag".to_sym, 
@@ -187,8 +264,6 @@ class Tag < ActiveRecord::Base
        ix = ix+1
    end
    @@TypeNums["free tag"] = @@TypeNums["free tag".to_sym] = nil
-
-   public 
    
    # Convert a tag type to external storage format, e.g. integer
    # We allow the type to be a string, a symbol, an integer index or an array of those types
@@ -229,15 +304,6 @@ class Tag < ActiveRecord::Base
        self.tagtype
    end
    
-   # Move the tag to a new type, possibly merging it with another tag of identical spelling
-   def project(tt)
-       newtypenum = Tag.typenum tt
-       return self if self.tagtype == newtypenum # We're already in the target type!
-       replacement = Tag.where(name: self.name, tagtype: newtypenum).first
-       return nil unless (self.typenum = newtypenum)
-       (replacement && replacement.absorb(self)) ? replacement : self
-   end
-   
    def typenum=(tt, do_merge = false )
        # Need to be careful: the tag needs to agree in type with any expressions that include
        # it
@@ -263,23 +329,17 @@ class Tag < ActiveRecord::Base
    def typesym=(sym)
        self.tagtype = Tag.typenum(sym) || 0
    end
+=end
+
+   public 
    
-   # Taking an index into the table of tag types, return the symbol for that type
-   # (used to build a set of tabs, one for each tag type)
-   # NB: returns nil for nil index and for index beyond the last type. This is useful
-   # for generating a table that covers all types
-   def self.index_to_type(index)
-       index && @@TypeNums[@@TypesToSyms[index]]
-   end
-   
-   # Is my tagtype the same as the given type(s) (given as string, symbol, integer or array)
-   def typematch(tt)
-       return true if tt.nil? # nil type matches any tag type
-       if tt.kind_of?(Array)
-           tt.any? { |type| self.typematch type }
-       else
-           Tag.typenum(tt) == self.tagtype
-       end
+   # Move the tag to a new type, possibly merging it with another tag of identical spelling
+   def project(tt)
+       newtypenum = Tag.typenum tt
+       return self if self.tagtype == newtypenum # We're already in the target type!
+       replacement = Tag.where(name: self.name, tagtype: newtypenum).first
+       return nil unless (self.typenum = newtypenum)
+       (replacement && replacement.absorb(self)) ? replacement : self
    end
    
    # Taking either a tag, a string or an id, make sure there's a corresponding tag

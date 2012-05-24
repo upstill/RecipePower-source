@@ -102,45 +102,13 @@ class Expression < ActiveRecord::Base
     end
     
     validates_with ExpressionValidator
-=begin
-    # before_save :desymbolize
-    after_find :symbolize
     
-    @@FormTypes = { :corruption=>0, :canonical=>1 }
-    
-    @@Forms = [["Generic", 1], ["Singular", 2], ["Plural", 3]]
-    
-    def self.forms
-       @@Forms
-    end
-    
-    def self.typenum (tt)
-        if tt.kind_of? Fixnum 
-            tt 
-        elsif (tt.kind_of? Symbol)
-            @@FormTypes[tt]
-        elsif(tt.kind_of? String)
-            @@FormTypes[tt.to_sym]
-        elsif tt.kind_of? Array
-            tt.first && tt.collect { |type| Tag.typenum type }
-        elsif !tt
-            0
-        end
-    end
-    
-    # Ensure that the type is a proper integer
-    def self.type_inDB(type)
-        type = type.to_sym if type.class == String
-        type.class == Symbol ? @@FormTypes[type] : type
-    end
-=end
-
-    # Make a new expression according to the arguments, trying first to find a
-    # match. The trick is that when either the locale or the form aren't specified,
-    # we'll match any expression on the referent and id.
-    def self.find_or_create refid, tagid, args = {}
-        # Collect the relevant arguments into the whereargs hash
-        whereargs = {referent_id: refid, tag_id: tagid}
+    # Clean up a hash of arguments for a search by 
+    # 1) removing any with nil values
+    # 2) making any type specifiers conform to the type in the database
+    # 3) ignoring those which aren't Expression attributes
+    def self.scrub_args(args)
+        newargs = {}
         args.keys.each do |k| 
             k = k.to_sym
             val = args[k]
@@ -149,11 +117,22 @@ class Expression < ActiveRecord::Base
                 when :form
                     val = self.formnum val
                 when :locale
-                    val = self.localenum val
+                    val = self.localesym(val).to_s
                 end
-                whereargs[k] = val
+                newargs[k] = val
             end
         end
+        newargs
+    end
+
+    # Make a new expression according to the arguments, trying first to find a
+    # match. The trick is that when either the locale or the form aren't specified,
+    # we'll match any expression on the referent and id.
+    def self.find_or_create refid, tagid, args = {}
+        # Collect the relevant arguments into the whereargs hash
+        whereargs = self.scrub_args args
+        whereargs[:referent_id] = refid
+        whereargs[:tag_id] = tagid
         self.where(whereargs).first || self.create(whereargs)
     end
 

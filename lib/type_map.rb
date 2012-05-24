@@ -6,23 +6,30 @@ class TypeMap < Array
         @SymToType = { nil => 0 }
         @NameToType = { nil => 0, "" => 0 }
         @List = []
+        @MaxIndex = 0
         init_table.each { |entry| 
             sym = entry.first; name = entry.last.first; typenum = entry.last.last
             @TypeToSym[typenum] = sym
             @TypeToName[typenum] = name
+            @MaxIndex = typenum if typenum > @MaxIndex
             @List += entry.last
             @SymToType[sym] = typenum
             @NameToType[name.gsub(/\s/, '')] = typenum
         }
     end
     
+    def max_index
+        @MaxIndex
+    end
+    
     def num(tt)
         if tt.kind_of? Fixnum 
             @TypeToSym[tt] ? tt : 0
         elsif (tt.kind_of? Symbol)
-            @SymToType[tt] || 0
+            @SymToType[tt] || @NameToType[tt.to_s] || 0
         elsif(tt.kind_of? String)
-            @NameToType[tt.gsub(/\s/, '')] || 0
+            tt.gsub!(/\s/, '')
+            @NameToType[tt] || @SymToType[tt.to_sym] || 0
         elsif tt.kind_of? Array
             tt.first && tt.collect { |type| num type }
         elsif !tt

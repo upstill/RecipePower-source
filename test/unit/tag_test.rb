@@ -128,7 +128,7 @@ class TagTest < ActiveSupport::TestCase
     test "typenum functions correctly" do
         # assert_equal 1, Tag.typenum("genre"), "Lower-case string not parsed correctly"
         # assert_equal 3, Tag.typenum("PROCESS"), "all-caps string not parsed correctly"
-        assert_nil Tag.typenum("free tag"), "lower-case 'free tag' not parsed correctly"
+        assert_equal 0, Tag.typenum("free tag"), "lower-case 'free tag' not parsed correctly"
         assert_equal 0, Tag.typenum(nil), "nil doesn't return nil"
         assert_equal 4, Tag.typenum(4), "Integer type not returned"
         assert_equal [5,7,8], Tag.typenum([:Unit, 7, "Occasion"]), "Array of types not parsed correctly"
