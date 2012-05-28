@@ -2,14 +2,11 @@
 
 <%= form_for @recipe do |f| %>
   <%= show_errors @recipe.errors %>
-    <div class="recipe_pic_div" >
-       <%= f.label :picurl, "URL of picture", :id=>"recipe_pic_label" -%>
-       <br><%= f.text_field :picurl %>
-       <div class="pic_box" >
-         <%# "fitPic" class gets fit inside pic_box with Javascript and jQuery %>
-    	 <%= rcp_fitPic @recipe %>
-        </div>
-    </div>
+  <div class="recipe_pic_div" >
+    <br><%= f.text_field :picurl, type: "hidden" %>
+	<input type="text" id="imgpicker" name='image' rel="jpg,png,gif" value="<%= @recipe.picurl %>"/>
+	<%= rcp_choosePic @recipe %>
+  </div>
   <div class="recipe_fields_div">
     <div class="recipe_tags_div" >
        <%= f.label :tag_tokens, "Tags", :id=>"recipe_tags_label" -%>

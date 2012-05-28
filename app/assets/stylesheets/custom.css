@@ -96,6 +96,25 @@ header {
 	
 }
 
+.tag_info_section {
+	margin: 10px;
+	font:16px arial;
+}
+
+.tag_info_section_title {
+	font:18px arial,sans-serif;
+	font-weight: bold;
+}
+
+.tag_info_section_content {
+	font:16px arial,sans-serif, bold;
+}
+
+.tog_info_rcp_title {
+	margin-left:20px;
+	line-height:2em;
+}
+
 footer {
   width:100%;
   text-align: center;
@@ -319,13 +338,6 @@ padding:10px;
 .page_label {
   font:13px arial,sans-serif,bold;
   text-align:center;
-}
-
-.pic_box {
-    width:350px;
-    height:220px;
-    /* border:3px solid red; */
-    float: right;
 }
 
 #querylist_header {
@@ -575,6 +587,13 @@ display: block;
     height: 300px;
     // border:3px solid black;
     // outline:#999 solid 1px;
+    float: right;
+}
+
+.pic_box {
+    width:350px;
+    height:220px;
+    /* border:3px solid red; */
     float: right;
 }
 
@@ -923,4 +942,5 @@ font:12px arial, sans-serif;
       padding: 0.1em 0.25em;
     }
   }
+
 }

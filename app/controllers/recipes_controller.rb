@@ -78,7 +78,17 @@ class RecipesController < ApplicationController
         render :action => 'new'
     end
   end
-
+  
+  # Respond to a request from the recipe editor for a list of pictures
+  def piclist
+      @recipe = Recipe.find(params[:id])
+      @piclist = @recipe.piclist
+      respond_to do |format|
+        format.html # index.html.erb
+        format.json { render json: @piclist }
+      end
+  end
+  
   def update
     return if need_login true
     @recipe = Recipe.find(params[:id])

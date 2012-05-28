@@ -1,6 +1,12 @@
 # encoding: UTF-8
 require 'test_helper'
 class ImportTest < ActiveSupport::TestCase 
+
+    test "Culinary Terms" do
+    	LinkRef.import_CSVfile "db/data/Test/culinary.csv"
+    	assert_equal 4, Tag.where(tagtype: 14).count, "Should have four Culinary Term entries"
+    end
+=begin
     
     test "Locales" do
         LinkRef.import_CSVfile "db/data/Test/locales.csv"
@@ -34,8 +40,6 @@ class ImportTest < ActiveSupport::TestCase
   	assert_equal 2, tag.links.size, "'#{tag.name}' should have two links"
   	
   end
-  
-  
   test "Flours" do
 	LinkRef.import_CSVfile "db/data/Test/flours.csv"
 	
@@ -73,4 +77,5 @@ class ImportTest < ActiveSupport::TestCase
 	assert_equal nlinks_before, Link.count, "More links on second import"
 	assert_equal nlinkrefs_before, LinkRef.count, "More link references on second import"
   end
+=end
 end

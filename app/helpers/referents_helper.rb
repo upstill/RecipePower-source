@@ -34,24 +34,24 @@ module ReferentsHelper
 	    ).html_safe
 	end
 	
-	def summarize_referent ref, label="Meaning"
-      ("<br>#{label} ''#{link_to ref.name, referent_path(ref)}':"+
+	def summarize_referent ref, label="...Meaning"
+      ("<br>#{label}: ''#{link_to ref.name, referent_path(ref)}':"+
        summarize_ref_parents(ref)+
        summarize_ref_children(ref)).html_safe
     end
     
-	def summarize_ref_parents ref
+	def summarize_ref_parents ref, label = "...Categorized under"
         if ref.parents.size > 0
-    		("<br>...categorized under: "+
+    		("<br>#{label}: "+
 	        (ref.parents.collect { |parent| link_to parent.name, parent.becomes(Referent) }.join ', ')).html_safe
 	    else
 	        ""
         end
 	end
 	
-	def summarize_ref_children ref
+	def summarize_ref_children ref, label = "...Examples"
         if ref.children.size > 0
-    		("<br>...examples: "+
+    		("<br>#{label}: "+
 	        (ref.children.collect { |child| link_to child.name, child.becomes(Referent) }.join ', ')).html_safe
 	    else
 	        ""

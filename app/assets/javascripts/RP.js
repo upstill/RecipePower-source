@@ -1,5 +1,20 @@
 
 /* Master function for assigning actions to interface items */
+$(document).ready(function(){ //wait for the dom to load
+        $('#imgpicker').imagepicker( {// set our selector
+            // Data is required and in a json format
+            data: "piclist",
+			galleryUrl: '' 
+        });
+		$('input#imgpicker').change(function() {
+			debugger;
+		})
+		$('input#imgpicker').load(function() {
+			debugger;
+		})
+		wdwFitImages();
+}); 
+
 $(function() {
 	/* Respond to a click on the "Absorb" button accompanying a redundant tag.
 	  The response is to fire off a merge request from the server, which 
@@ -456,6 +471,7 @@ function fitImage(img) {
     $(img).css("top", offsetY);
     $(img).css("left", offsetX);
     $(img).css("visibility", "visible");
+    $(img).show();
     return true;
 }
 

@@ -41,8 +41,8 @@ require 'csv'
         rownum = 1
         CSV.foreach(fname, :encoding=>"UTF-8") do |row|
             return unless tagstrs = row[0]
-            refpaths = row[1] || ""
-            typestrs = row[2] || ""
+            refpaths = (row[1] || "").strip
+            typestrs = (row[2] || "").strip
             uri = row[3]
             referents = [] # Clear the array specifying referents per type
             tagpairs = [] # Clear the array of tags (one for each combo of string and type) for the line
@@ -60,7 +60,7 @@ require 'csv'
                         locale = $1
                         # Tags will be asserted if they don't exist, assigned to the given type and made global
                         tag = Tag.assert_tag( tagstr, tagtype: typeid)
-                        LinkRef.associate(uri, tag) if uri
+                        LinkRef.associate(uri, tag) unless uri.blank? || (uri == "NOURL")
                         tagpairs << [tag, locale]
                         # The idea is to glean a common referent for all the tags of a given type. If none
                         #  exists among the incoming tags, then we'll make one later
@@ -83,7 +83,8 @@ require 'csv'
             end
             # Now we have a collection of tags, each with a given type, paired with a locale. 
             # We may also have a referent for each type. 
-            # In this pass, we associate all the tags of a given type with the common referent.
+            # In this pass, we associate all the tags of a given type with the common referent,
+            # creating a new referent IFF there is more than one tag.
             tagpairs.each do |pair|
                 tag = pair.first
                 locale = pair.last
@@ -99,7 +100,9 @@ require 'csv'
                 if referents[tag.tagtype]
                     # There is a target referent; assert it to the tag unless it's already there
                     referents[tag.tagtype].express tag, args
-                else
+                elsif (tagpairs.count > 1) || !refpaths.empty? 
+                    # IF there's only one tag AND there's no parentage specified,
+                    # we don't create a referent, just leave it as a tag
                     referents[tag.tagtype] = Referent.express tag, tag.tagtype, args
                 end
                 tag.admit_meaning referents[tag.tagtype]

@@ -724,84 +724,94 @@ end
 max = User.find(1)
 Tag.all.each { |t| t.users << max unless t.users.exists?(:id=>1)}
 
-Referent.express "Dairy", :Food, true
-Referent.express "Meat", :Food, true
-Referent.express "Pork", :Food, true
-Referent.express "Beef", :Food, true
-Referent.express "Lamb", :Food, true
-Referent.express "Poultry", :Food, true
-Referent.express "Game", :Food, true
-Referent.express "Fish", :Food, true
-Referent.express "Vegetable", :Food, true
-Referent.express "Grain", :Food, true
-Referent.express "Fats & Oils", :Food, true
-Referent.express "Seasonings", :Food, true
+Expression.all.each { |exp| exp.destroy }
+Tag.all.each { |tag| tag.tagtype = 0 ; tag.save }
+Referent.all.each { |rr| rr.destroy }
+ReferentRelation.all.each { |rr| rr.destroy }
 
-Referent.express "Holidays", :Occasion, true
-Referent.express "Events", :Occasion, true
-Referent.express "Super Bowl", :Occasion, true
-Referent.express "Barbecue", :Occasion, true
+Referent.express "Dairy", :Food
+Referent.express "Meat", :Food
+Referent.express "Pork", :Food
+Referent.express "Beef", :Food
+Referent.express "Lamb", :Food
+Referent.express "Poultry", :Food
+Referent.express "Game", :Food
+Referent.express "Fish", :Food
+Referent.express "Vegetable", :Food
+Referent.express "Grain", :Food
+Referent.express "Fats & Oils", :Food
+Referent.express "Seasonings", :Food
 
-Referent.express "Asian", :Genre, true
-Referent.express "Latin American", :Genre, true
-Referent.express "South American", :Genre, true
-Referent.express "Caribbean", :Genre, true
-Referent.express "European", :Genre, true
-Referent.express "African", :Genre, true
-Referent.express "Pacific", :Genre, true
-Referent.express "US", :Genre, true
-Referent.express "Canadian", :Genre, true
-Referent.express "Middle Eastern", :Genre, true
+Referent.express "Holidays", :Occasion
+Referent.express "Events", :Occasion
+Referent.express "Super Bowl", :Occasion
+Referent.express "Barbecue", :Occasion
 
-Referent.express "Beverage", :Role, true
-Referent.express "Soup", :Role, true
-Referent.express "First Course", :Role, true
-Referent.express "Entree", :Role, true
-Referent.express "Dessert", :Role, true
+Referent.express "Asian", :Genre
+Referent.express "Latin American", :Genre
+Referent.express "South American", :Genre
+Referent.express "Caribbean", :Genre
+Referent.express "European", :Genre
+Referent.express "African", :Genre
+Referent.express "Pacific", :Genre
+Referent.express "US", :Genre
+Referent.express "Canadian", :Genre
+Referent.express "Middle Eastern", :Genre
 
-Referent.express "Blogger", :Author, true
-Referent.express "Chef", :Author, true
+Referent.express "Beverage", :Role
+Referent.express "Soup", :Role
+Referent.express "First Course", :Role
+Referent.express "Entree", :Role
+Referent.express "Dessert", :Role
 
-Referent.express "Book", :Source, true
-Referent.express "Magazine", :Source, true
-Referent.express "Online", :Source, true
+Referent.express "Blogger", :Author
+Referent.express "Chef", :Author
 
-Referent.express "Cutting", :Process, true
-Referent.express "Baking", :Process, true
-Referent.express "Mixing", :Process, true
-Referent.express "Stovetop", :Process, true
+Referent.express "Book", :Source
+Referent.express "Magazine", :Source
+Referent.express "Online", :Source
 
-Referent.express "Volume--English", :Unit, true
-Referent.express "Volume--Metric", :Unit, true
-Referent.express "Weight--English", :Unit, true
-Referent.express "Weight--Metric", :Unit, true
-Referent.express "Temperature", :Unit, true
-Referent.express "Time", :Unit, true
+Referent.express "Cutting", :Process
+Referent.express "Baking", :Process
+Referent.express "Mixing", :Process
+Referent.express "Stovetop", :Process
 
-Referent.express "Dairy", :StoreSection, true
-Referent.express "Produce", :StoreSection, true
-Referent.express "Meat", :StoreSection, true
-Referent.express "Frozen Foods", :StoreSection, true
-Referent.express "Juices", :StoreSection, true
-Referent.express "Beer & Wine", :StoreSection, true
-Referent.express "Baking Supplies", :StoreSection, true
-Referent.express "Canned Vegetables", :StoreSection, true
-Referent.express "Canned Fruit", :StoreSection, true
+Referent.express "Volume--English", :Unit
+Referent.express "Volume--Metric", :Unit
+Referent.express "Weight--English", :Unit
+Referent.express "Weight--Metric", :Unit
+Referent.express "Temperature", :Unit
+Referent.express "Time", :Unit
 
-Referent.express "Closet", :PantrySection, true
-Referent.express "Drawers", :PantrySection, true
-Referent.express "Spices", :PantrySection, true
-Referent.express "Fridge", :PantrySection, true
-Referent.express "Freezer", :PantrySection, true
+Referent.express "Dairy", :StoreSection
+Referent.express "Produce", :StoreSection
+Referent.express "Meat", :StoreSection
+Referent.express "Frozen Foods", :StoreSection
+Referent.express "Juices", :StoreSection
+Referent.express "Beer & Wine", :StoreSection
+Referent.express "Baking Supplies", :StoreSection
+Referent.express "Canned Vegetables", :StoreSection
+Referent.express "Canned Fruit", :StoreSection
 
-Referent.express "Cutting", :Tool, true
-Referent.express "Mixing", :Tool, true
-Referent.express "Stovetop", :Tool, true
-Referent.express "Baking", :Tool, true
-Referent.express "Other Tools", :Tool, true
+Referent.express "Closet", :PantrySection
+Referent.express "Drawers", :PantrySection
+Referent.express "Spices", :PantrySection
+Referent.express "Fridge", :PantrySection
+Referent.express "Freezer", :PantrySection
 
-Referent.express "Diets", :Interest, true
-Referent.express "Genres", :Interest, true
+Referent.express "Cutting", :Tool
+Referent.express "Mixing", :Tool
+Referent.express "Stovetop", :Tool
+Referent.express "Baking", :Tool
+Referent.express "Other Tools", :Tool
+
+Referent.express "Diets", :Interest
+Referent.express "Genres", :Interest
 
 # LinkRef.import_file "db/data/FoodLover"
+Expression.all.each { |exp| exp.destroy }
+Tag.all.each { |tag| tag.tagtype = 0 ; tag.save }
+Referent.all.each { |rr| rr.destroy }
+ReferentRelation.all.each { |rr| rr.destroy }
+
 LinkRef.import_CSVfile "db/data/Full Dictionary Revised.csv"

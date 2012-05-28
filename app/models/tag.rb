@@ -1,4 +1,5 @@
 # encoding: UTF-8
+require "type_map.rb"
 class Tag < ActiveRecord::Base
     # require 'iconv'
 
@@ -60,8 +61,8 @@ class Tag < ActiveRecord::Base
         self.users = self.users + t2.users
         
         # Replace referents' DIRECT use of the tag
-        Referent.where(tag: oldid).each do |ref| 
-            ref.tag = newid # Now it's all about ME ME ME
+        Referent.where(tag_id: oldid).each do |ref| 
+            ref.tag_id = newid # Now it's all about ME ME ME
             ref.save
         end
         
@@ -149,7 +150,7 @@ class Tag < ActiveRecord::Base
         Tool: ["Tool", 12], 
         Nutrient: ["Nutrient", 13], 
         CulinaryTerm: ["Culinary Term", 14]
-    }, "free tag")
+    }, "unclassified")
     
     # Get the type number, taking any of the accepted datatypes
     def self.typenum tt

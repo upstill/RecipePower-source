@@ -38,7 +38,8 @@ RP::Application.routes.draw do
   resources :ratings
 
   resources :scales
-
+  
+  match 'recipes/:id/piclist' => 'recipes#piclist'
   match 'recipes/parse' => 'recipes#parse', :via => :post
   resources :recipes
   match 'recipes/:id' => 'recipes#update', :via => :post

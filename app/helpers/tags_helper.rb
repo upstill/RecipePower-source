@@ -34,7 +34,7 @@ module TagsHelper
     
     def summarize_tag tag, withtype = false
 	    ((withtype ? "<i>#{tag.typename}</i> " : "" )+
-        "'<strong>#{tag.name}</strong>'").html_safe
+        "tag '<strong>#{tag.name}</strong>'").html_safe
     end
     
     def summarize_tags(tags)
@@ -86,27 +86,66 @@ BLOCK_END
            options_for_select(Tag.type_selections )
        end
    end
+  
+  # Present one section of the tag info using a label, a (possibly empty) collection
+  # of descriptive strings, and a classname for a span summarizing the section (presumably
+  # because the individual entries are meant to show on a line). 
+  # If the collection is empty, we return nil; if the contentclass is blank we don't wrap it in a span
+  def tag_info_section label, contentstrs, contentclass = "tag_info_section_content"
+    if contentstrs && !contentstrs.empty?
+        contentstr = contentclass.blank? ? 
+                     contentstrs.join('') : 
+                     ("<span class=\"#{contentclass}\">" + contentstrs.join(', ') + "</span>")
+        ("<div class=\"tag_info_section\"><span class=\"tag_info_section_title\">#{label}</span>: " +
+         contentstr +
+         "</div>"
+        ).html_safe
+    end
+  end
        
   # Return HTML for the links associated with this tag
-   def summarize_tag_links tag, label = "See: "
-     if tag.link_ids.size > 0
-       ("<hr><br>#{label}#{tag.name} %> on:"+
-       tag.links.collect{ |link| present_link link }.join(', ')).html_safe
-     end
+   def summarize_tag_links tag, label = "See "
+     tag_info_section(
+       (label + "'#{tag.name}'" + " on"), 
+       tag.links.collect{ |link| "<div class=\"tog_info_rcp_title\">" + present_link(link) + "</div>" },
+       "")
    end
        
   # Return HTML for the links related to a given tag (i.e., the links for 
   # all tags related to this one)
   def summarize_tag_relations tag
-    links = Referent.related(tag, true, true).collect { |rel| summarize_tag_links rel, "" }.keep_if{|s| s}
-    ("<hr><br>See Also: "+links.join('<br')).html_safe unless links.empty?
+    links = Referent.related(tag, true, true).keep_if{ |rel| rel.id != tag.id }.collect { |rel| 
+            if tl = summarize_tag_links(rel, "") 
+                "<div class=\"tog_info_rcp_title\">"+tl+"</div>"                
+            end
+        }.keep_if{ |s| !s.blank? }
+    tag_info_section "See Also", links, ""
+  end
+  
+  def summarize_tag_recipes tag
+    rcpstrs = tag.recipes.uniq.collect { |rcp| 
+            "<div class=\"tog_info_rcp_title\">
+          	  #{link_to rcp.trimmed_title, rcp.url} #{recipe_popup rcp}
+            </div>"
+        }
+    tag_info_section "Recipes", rcpstrs, ""
+  end
+  
+  def summarize_tag_parents tag, label = "Categorized Under"
+    if ref = tag.primary_meaning
+	  tag_info_section label, ref.parents.collect { |parent| link_to parent.name, parent.canonical_expression }
+    end
+  end
+	
+  def summarize_tag_children tag, label = "Examples"
+    if ref = tag.primary_meaning
+      tag_info_section label, ref.children.collect { |child| link_to child.name, child.canonical_expression }
+    end
   end
   
   def summarize_tag_owners tag
-      ("<br>Is owned by "+
-        (tag.isGlobal ? 
-        "everyone" :
-        ("<br>&nbsp;"+tag.users.collect { |user| user.username }.join(',<br>&nbsp;')))).html_safe
+      ownerstrs = tag.isGlobal ? ["everyone (it's global)"] : tag.users.collect { |user| user.username }
+      tag_info_section "It's owned by", ownerstrs
   end
   
   def summarize_tag_similar tag, absorb_btn = false
@@ -121,13 +160,10 @@ BLOCK_END
   # Helper for showing the tags which are potentially redundant wrt. this tag:
   # They match in the normalized_name field
   def summarize_tag_similars tag, args={} 
-      label= args[:label] || " Similar tags: "
+      label= args[:label] || "Similar tags"
       joiner = args[:joiner] || "" #  ", "
-      others = Tag.where(normalized_name: tag.normalized_name).delete_if{ |other| other.id == tag.id }
-      unless others.empty? 
-          others.collect { |other| 
-              summarize_tag_similar other, (args[:absorb_btn] && tag.can_absorb(other))
-          }.join(joiner).html_safe
-      end
+      others = Tag.where(normalized_name: tag.normalized_name).delete_if { |other| other.id == tag.id }
+      # otherstrs = others.collect { |other| summarize_tag_similar other, (args[:absorb_btn] && tag.can_absorb(other)) }
+      tag_info_section label, others.collect { |other| summarize_tag_similar other, (args[:absorb_btn] && tag.can_absorb(other)) }
   end
 end

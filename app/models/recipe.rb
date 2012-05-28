@@ -299,6 +299,12 @@ end
        super
    end
 
+   # Return a list of image URLs for the page
+  def piclist
+    return [] unless (ou = open url) 
+    return [] unless (doc = Nokogiri::HTML(ou))
+    doc.css("img").map { |img| img.attributes["src"].value }
+  end
 
 @@DoSpans
 
