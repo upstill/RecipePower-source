@@ -688,7 +688,7 @@ font:12px arial, sans-serif;
     vertical-align: center;
     // text-align: center;text-align: center; // vertical-align: center;
     align: center;
-    outline:#999 solid 1px;
+    // outline:#999 solid 1px;
 }
 
 .fitPic { 
@@ -758,9 +758,17 @@ font:12px arial, sans-serif;
   margin-left:20px;
 }
 
-.rcp_list_element_summary {
+.rcp_list_element_tag_summary {
   margin-top:10px;
-  font:12px arial,sans-serif;
+  font:15px arial,sans-serif;
+  font-style: italic;
+}
+
+.rcp_list_element_tag {
+  margin-top:10px;
+  font:15px arial,sans-serif;
+  font-style: normal;
+  font-weight: 600;
 }
 
 .rcp_list_element_twocents {

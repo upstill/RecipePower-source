@@ -32,7 +32,7 @@ function queryTabOnLoad() {
 	// Ensure that we change the list mode upon demand
     $("select#rcpquery_listmode_str").change(queryListmodeChange);
 
-    // Load new page 
+    // Install click handler to load new page 
 	$(".pageclickr").click(queryTabOnPaginate);
 	
 	// Enable recipe-preview popup

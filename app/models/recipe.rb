@@ -301,9 +301,11 @@ end
 
    # Return a list of image URLs for the page
   def piclist
-    return [] unless (ou = open url) 
-    return [] unless (doc = Nokogiri::HTML(ou))
-    doc.css("img").map { |img| img.attributes["src"].value }.uniq.keep_if { |url| url =~ /\.(gif|tif|tiff|png|jpg|jpeg|img)$/i }
+    return [] unless (ou = open url) && (site = Site.by_link url) && (doc = Nokogiri::HTML(ou))
+    home = site.home
+    debugger
+    # Get all the img tags, uniqify them, purge non-compliant ones and insert the domain as required
+    doc.css("img").map { |img| img.attributes["src"].value }.uniq.keep_if { |url| url =~ /\.(gif|tif|tiff|png|jpg|jpeg|img)$/i }.collect{ |path| path.sub /^\//, home+"/" }
   end
 
 @@DoSpans

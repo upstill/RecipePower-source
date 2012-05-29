@@ -3,6 +3,8 @@ require './lib/Domain.rb'
 
 module RecipesHelper
 
+# Declare a recipe's image in an adjustable box. The images are downloaded by
+# the browser under Javascript and their dimensions adjusted.
 def rcp_fitPic(rcp)
     # "fitPic" class gets fit inside pic_box with Javascript and jQuery
 	if rcp.picurl.blank?
@@ -12,11 +14,14 @@ def rcp_fitPic(rcp)
 	end
 end
 
-  # Declare the list of thumbnails for picking a page's image
+  # Declare the list of thumbnails for picking a recipe's image.
+  # It's sourced from the page by hoovering up all the <img tags that have
+  # an appropriate file type.
   def rcp_choosePic rcp
       piclist = rcp.piclist.collect { |url|
   		"<li class=\"pickerImage\"><img src=\"#{url}\" alt=\"#{url}\"/></li>\n"
   	  }
+  	debugger
   	if piclist.count > 0
         %Q{
             <div class="imagepicker">                                   
@@ -44,30 +49,6 @@ def ownership_status(rcp)
 	(rcp.users.map { |u| link_to u.username, rcpqueries_path( :owner=>u.id.to_s) }.join(', ') || "").html_safe
 end
 
-def summarize_techniques(courses)
-	englishize_list courses.collect{|e| "<strong>#{e.name}</strong>" }.join(', ')
-end
-
-def summarize_othertags(tags)
-	tags.collect{|e| "<strong>#{e.name}</strong>" }.join(', ')
-end
-
-def summarize_ratings(ratings)
-	englishize_list(ratings.collect { |r| "<strong>#{r.value_as_text}</strong>" }.join ', ')
-end
-
-def summarize_mainings(ings)
-	englishize_list ings.collect{|e| "<strong>#{e.name}</strong>" }.join(', ')
-end
-
-def summarize_genres(genres)
-	genres.collect{|e| "<strong>#{e.name}</strong>" }.join '/' 
-end
-
-def summarize_courses(courses)
-	courses.length > 0 ? courses.collect{|e| "<strong>#{e.name}</strong>" }.join('/') : "dish"
-end
-
 # Return an enumeration of a series of strings, separated by ',' except for the last two separated by 'and'
 # RETURN BLANK STRING IF STRS ARE EMPTY
 def strjoin strs, before = "", after = "", joiner = ', '
@@ -82,15 +63,16 @@ def strjoin strs, before = "", after = "", joiner = ', '
 end
 
 def tagjoin tags, enquote = false, before = "", after = "", joiner = ','
-    strjoin tags.collect{ |tag| link_to (enquote ? "'#{tag.name}'" : tag.name), tag }, before, after, joiner
+    strjoin tags.collect{ |tag| link_to (enquote ? "'#{tag.name}'" : tag.name), tag, class: "rcp_list_element_tag" }, before, after, joiner
 end
 
+# Provide an English-language summary of the tags for a recipe.
 def summarize_alltags(rcp)
 
     genrestr = tagjoin rcp.tags.where(tagtype: 1), false, "", " "
     rolestr = tagjoin rcp.tags.where(tagtype: 2), false, " for "
 
-    procstr = tagjoin rcp.tags.where(tagtype: 3), false, " using ", " process"
+    procstr = tagjoin rcp.tags.where(tagtype: 3), false, " with ", " process"
     foodstr = tagjoin rcp.tags.where(tagtype: 4), false, " that includes "
     sourcestr = tagjoin rcp.tags.where(tagtype: 6), false, " from "
     authorstr = tagjoin rcp.tags.where(tagtype: 7), false, " by "
@@ -99,34 +81,21 @@ def summarize_alltags(rcp)
     occasionstr = tagjoin rcp.tags.where(tagtype: 8), false, " good for"
     intereststr = tagjoin rcp.tags.where(tagtype: 11), true, " tagged by Interest for "
 
-    otherstr = tagjoin rcp.tags.where(tagtype: [0, 13, 14]), true, " Other tags: ", "."
+    otherstr = tagjoin rcp.tags.where(tagtype: [0, 13, 14]), true, " Miscellaneous tags: ", "."
     
     strlist = [sourcestr, authorstr, foodstr, procstr, toolstr].keep_if{ |str| !str.empty? }
-
-    ("A "+genrestr+" recipe"+(strlist.shift || "")+
-    strjoin(strlist, "", "", "; ")+"."+
+    
+    genrestr = "<span>untagged</span>" if strlist.empty? && genrestr.blank? && occasionstr.blank? && intereststr.blank? && otherstr.blank?
+    if genrestr.blank?
+        article = "A"
+    else
+        article = (genrestr =~ />[aeiouAEIOU]/i) ? "An " : "A "
+    end
+    
+    ((article+genrestr+" recipe"+(strlist.shift || "")+
+      strjoin(strlist, "", "", "; ")+".").sub(/A\s*recipe\./,'')+
     strjoin([occasionstr, intereststr], " ", ".", ",").capitalize+
     otherstr).html_safe
-=begin
-    "A [<genre> ]recipe[ for <role>][, from <source>][, by <author>][, made with <food>][, using <procstr> technique(s)][, with <tool>]
-    [Good for <occasion>][, tagged for Interest(s) <interest>. Other tags: <Nutrient><Culinary Term><free tag>]"
-  	othertags = rcp.tags.select { |t| t.tagtype.nil? || t.tagtype==0 }
-  	genres = rcp.tags.select { |t| t.tagtype==1 }
-  	courses = rcp.tags.select { |t| t.tagtype==2 }
-  	techniques = rcp.tags.select { |t| t.tagtype==3 }
-  	mainings = rcp.tags.select { |t| t.tagtype==4 }
-  	summ = "...a"
-	summ += " #{summarize_genres(genres)}" if genres.length>0
-	summ += " #{summarize_courses(courses)}"
-	summ += "," unless (summ.match 'dish$')
-	summ += " rated #{summarize_ratings(rcp.ratings)}" if rcp.ratings.length>0
-	summ += "," unless (summ.match 'dish$')
-	summ += " made" if (mainings.length>0) || (techniques.length > 0)
-	summ += " by #{summarize_techniques(techniques)}," if techniques.length>0
-	summ += " using #{summarize_mainings mainings}," if mainings.length > 0
-	summ += " that has been otherwise tagged \'#{summarize_othertags othertags}\'" if othertags.length > 0
-	summ.length>9 ? (summ+".").html_safe : nil
-=end
 end
 
 # Present the comments to this user. Now, all comments starting with his/hers, but ultimately those of his friends

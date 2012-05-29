@@ -8,7 +8,7 @@
 			<%= f.text_field :tag_tokens, "data-pre" => @rcpquery.tags.map(&:attributes).to_json %>
 		</div>
 		<div class="rcpquery_listmode_div">
-			<%= f.label :listmode_str,"Listing Style: ",:id=>"rcpquery_listmode_label" -%>
+			<%= f.label :listmode_str,"List As: ",:id=>"rcpquery_listmode_label" -%>
 			<%= f.select :listmode_str, Rcpquery.listmode_select %>
 		</div>
 	<% end %>

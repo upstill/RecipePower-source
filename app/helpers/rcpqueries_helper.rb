@@ -29,7 +29,8 @@ BLOCK_END
    
    def pagination_link (text, pagenum)
         # "<span value='#{p.to_s}' class='pageclickr'>#{p.to_s}</span>"
-        link_to_function text.html_safe, "queryTabOnPaginate(evt);", value: pagenum.to_s
+        # We install the actual pagination handler in RPquery.js::queryTabOnLoad
+        link_to_function text.html_safe, ";", class: "pageclickr", value: pagenum.to_s
    end
    
     def pagination_links
