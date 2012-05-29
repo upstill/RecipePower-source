@@ -5,34 +5,36 @@ module RecipesHelper
 
 def rcp_fitPic(rcp)
     # "fitPic" class gets fit inside pic_box with Javascript and jQuery
-	if rcp.picurl
-        "<img src=\"#{rcp.picurl}\" class=\"fitPic\" >".html_safe
+	if rcp.picurl.blank?
+	    %q{<div class="centerfloat">No Image Available</div>}.html_safe
 	else
-	    "Pic goes Here.".html_safe
+        "<img src=\"#{rcp.picurl}\" class=\"fitPic\" >".html_safe
 	end
 end
 
   # Declare the list of thumbnails for picking a page's image
   def rcp_choosePic rcp
-      str = 
-%Q{
-    <div class="imagepicker">                                   
-      <label for="recipe_picurl" id="recipe_pic_label">Picture of Recipe</label>
-      <div class="preview">                                     
-        <img src="#{rcp.picurl}" alt="Placeholder", class="fitPic">  
-      </div>                                                    
-      <br><button class="title">Pick Image</button>         
-      <div class="content">                                     
-        <div class="wrapper">                                   
-          <ul>}+
-          rcp.piclist.collect { |url|
-    		"<li class=\"pickerImage\"><img src=\"#{url}\" alt=\"#{url}\"/></li>\n"
-    	  }.join('')+
-%q{       </ul>                                             
-        </div>                                                  
-      </div>                                                    
-    </div>}
-    str.html_safe
+      piclist = rcp.piclist.collect { |url|
+  		"<li class=\"pickerImage\"><img src=\"#{url}\" alt=\"#{url}\"/></li>\n"
+  	  }
+  	if piclist.count > 0
+        %Q{
+            <div class="imagepicker">                                   
+              <div class="preview">                                     
+                <img src="#{rcp.picurl}" alt="No Image Available", class="fitPic">  
+              </div>                                                    
+              <br><button class="title">Pick Image</button>
+              <div class="content">                                     
+                <div class="wrapper">                                   
+                  <ul>#{piclist.join('')}</ul>                                             
+                </div>                                                  
+              </div>                                                    
+            </div>}.html_safe
+    else
+            %q{<div class="imagepicker">
+                <label for="recipe_picurl" id="recipe_pic_label">No Picture Available</label>
+            </div>}.html_safe                                   
+    end
   end
 
 # If the recipe doesn't belong to the current user's collection,

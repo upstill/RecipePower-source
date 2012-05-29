@@ -469,7 +469,7 @@ function fitImage(img) {
     $(img).css("width", img.width * shrinkage);
     img.style.position = "relative";
     $(img).css("top", offsetY);
-    $(img).css("left", offsetX);
+    // $(img).css("left", offsetX);
     $(img).css("visibility", "visible");
     $(img).show();
     return true;

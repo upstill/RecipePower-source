@@ -303,7 +303,7 @@ end
   def piclist
     return [] unless (ou = open url) 
     return [] unless (doc = Nokogiri::HTML(ou))
-    doc.css("img").map { |img| img.attributes["src"].value }
+    doc.css("img").map { |img| img.attributes["src"].value }.uniq.keep_if { |url| url =~ /\.(gif|tif|tiff|png|jpg|jpeg|img)$/i }
   end
 
 @@DoSpans
