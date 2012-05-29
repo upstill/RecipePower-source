@@ -112,16 +112,20 @@ module ApplicationHelper
     	navlinks.join('  |  ').html_safe
     end
     
+    def feedback_link label
+    	# We save the current URI in the feedback link so we can return here after feedback,
+    	# and so the feedback can include the source
+    	path = request.url.sub /[^:]*:\/\/[^\/]*/, '' # Strip off the protocol and host
+    	navlink(label, "/feedbacks/new?backto=#{path}", (@nav_current==:feedback)) 
+    end
+    
     def footer_navlinks
     	navlinks = []
     	navlinks << navlink("About", "/about", (@nav_current==:about)) 
     	navlinks << navlink("Contact", "/contact", (@nav_current==:contact)) 
     	navlinks << navlink("Home", "/", (@nav_current==:home)) 
     	navlinks << navlink("FAQ", "/FAQ", (@nav_current==:FAQ)) 
-    	# We save the current URI in the feedback link so we can return here after feedback,
-    	# and so the feedback can include the source
-    	path = request.url.sub /[^:]*:\/\/[^\/]*/, '' # Strip off the protocol and host
-    	navlinks << navlink("Feedback", "/feedbacks/new?backto=#{path}", (@nav_current==:feedback)) 
+    	navlinks << feedback_link("Feedback")
     	navlinks.join('  |  ').html_safe
     end
 
