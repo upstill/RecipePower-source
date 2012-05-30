@@ -153,10 +153,15 @@ public
 end
 
 class Site < ActiveRecord::Base
-    attr_accessible :site, :home, :scheme, :subsite, :sample, :host, :port, :name, :logo, :tags_serialized, :ttlcut, :ttlrepl
+    attr_accessible :site, :home, :scheme, :subsite, :sample, :host, :port, :name, :logo, :tags_serialized, :ttlcut, :ttlrepl, :site_referent
+    
+    belongs_to :referent
     
     # Virtual attribute tags is an array of specifications for finding a tag
     attr_accessor :tags
+    
+    # When creating a site, also create a corresponding site referent
+    before_create :ensure_referent
     
     before_save :pack_tags
     
@@ -170,6 +175,11 @@ class Site < ActiveRecord::Base
         # { label: :Title, path: ".fn" },
         { label: :Title, path: "title" } 
     ]
+    
+    # Use the site's name as a tag for creating a referent
+    def ensure_referent
+        self.referent = Referent.express(self.name, :Source)
+    end
     
     def post_init
         unless self.site

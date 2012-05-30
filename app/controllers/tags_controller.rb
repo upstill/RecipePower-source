@@ -5,14 +5,14 @@ class TagsController < ApplicationController
       return if need_login true, true
       @Title = "Tags"
       if params[:tagtype]
-          tagtype = params[:tagtype].to_i
+          @tagtype = params[:tagtype].to_i
       else
           @tabindex = (params[:tabindex] && params[:tabindex].to_i) || session[:tabindex] || 0
           session[:tabindex] = @tabindex
-          tagtype = @tabindex > 0 ? Tag.index_to_type(@tabindex) : 0
+          @tagtype = @tabindex > 0 ? Tag.index_to_type(@tabindex) : 0
       end
       if true
-          @taglist = Tag.where(tagtype: tagtype).order("id").page(params[:page]).per_page(50)
+          @taglist = Tag.where(tagtype: @tagtype).order("id").page(params[:page]).per_page(50)
       else
           @taglist = params[:tagtype] ? Tag.where("tagtype = ?", params[:tagtype]) : Tag.all
           # The :unbound_only parameter limits the set to tags with no associated form (and, thus, referent)

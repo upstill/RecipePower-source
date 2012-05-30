@@ -344,7 +344,11 @@ class FoodReferent < Referent ; end
 
 class UnitReferent < Referent ; end  
 
-class SourceReferent < Referent ; end  
+class SourceReferent < Referent ; 
+    has_one :site
+    
+    attr_accessible :site
+end  
 
 class AuthorReferent < Referent ; end  
 

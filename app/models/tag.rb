@@ -174,7 +174,7 @@ class Tag < ActiveRecord::Base
     def typenum=(tt, do_merge = false )
         # Need to be careful: the tag needs to agree in type with any expressions that include
         # it
-        return nil unless self.referents.all? { |ref| ref.drop tag }
+        return nil unless self.referents.all? { |ref| ref.drop self }
         self.tagtype = Tag.typenum tt
     end
     

@@ -79,11 +79,13 @@ BLOCK_END
        end
        
    # Helper to define a selection menu for tag type
-   def type_selections tag=nil
-       if tag
-           options_for_select(Tag.type_selections, tag.typenum )
-       else
+   def type_selections val=nil
+       if val.kind_of? Tag
+           options_for_select(Tag.type_selections, val.typenum )
+       elsif val.nil?
            options_for_select(Tag.type_selections )
+       else
+           options_for_select(Tag.type_selections, val )
        end
    end
   
