@@ -15,6 +15,7 @@ gem 'htmlentities'
 gem 'nokogiri'
 gem 'will_paginate', '~> 3.0'
 gem 'minitest'
+gem 'newrelic_rpm'
 
 group :development do
   gem 'rspec-rails', '2.6.1'
