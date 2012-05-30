@@ -21,7 +21,6 @@ end
       piclist = rcp.piclist.collect { |url|
   		"<li class=\"pickerImage\"><img src=\"#{url}\" alt=\"#{url}\"/></li>\n"
   	  }
-  	debugger
   	if piclist.count > 0
         %Q{
             <div class="imagepicker">                                   

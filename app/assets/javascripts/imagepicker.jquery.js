@@ -16,7 +16,8 @@ function imagePickerSelector(id) {
             placeholder: 'http://placehold.it/50x50',  
             data: '',  
             galleryUrl: '/imagepicker/gallery/' ,
-            title: 'Select Image' 
+            title: 'Select Image',
+			outputfieldselector: 'input#recipe_picurl'
           }, 
           params = ''; 
           settings = $.extend({}, defaults, options);  
@@ -63,8 +64,6 @@ function imagePickerSelector(id) {
 						$(params.imgPicker + ' .content').animate({opacity:'toggle'}, 700, function() {
 														    params.parent.data('open',false);// set closed
 									  						});
-						newtext = $('input#imgpicker').val() // Send resulting text to text input
-						$('input#recipe_picurl').val(newtext)
 						}
 				//	}
 						return false;
@@ -85,8 +84,7 @@ function imagePickerSelector(id) {
 					// add selected class
 					$(this).addClass('selected');
 					// set our field value
-					// $('input[imgPickerId=' + params.id + ']').val(sourceimg);
-					$('input#recipe_picurl').val(sourceimg);
+					$(params.outputfieldselector).val(sourceimg) // Send resulting text to text input
 					//set preview image
 					var imgSelector = params.imgPicker +' .preview img'
 					$(imgSelector).css("visibility", "invisible");
@@ -145,6 +143,7 @@ function imagePickerSelector(id) {
 	          				params.imgPicker = $imgPicker;
 	          				params.open = open;
 	          				params.allowed = allowed;
+							params.outputfieldselector = 'input#recipe_picurl'
 	          				
   				return params // return the object		
           }

@@ -167,15 +167,14 @@ class Recipe < ActiveRecord::Base
   # update the real attribute tag_ids
   def tag_tokens=(ids)
 	# The list may contain new terms, passed in single quotes
-    arr = ids.split(",").map { |e| 
+    self.tags = ids.split(",").map { |e| 
         if(e=~/^\d*$/) # numbers (sans quotes) represent existing tags
             tag = Tag.find e.to_i
         else
             e.sub!(/^\'(.*)\'$/, '\1') # Strip out enclosing quotes
             tag = Tag.strmatch(e, userid: self.current_user, assert: true)[0]
         end
-        self.tags << tag unless tag.nil? || self.tags.exists?(id: tag.id)
-    }
+    }.compact
   end
 
   public
