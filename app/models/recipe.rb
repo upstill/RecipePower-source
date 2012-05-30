@@ -174,7 +174,7 @@ class Recipe < ActiveRecord::Base
             e.sub!(/^\'(.*)\'$/, '\1') # Strip out enclosing quotes
             tag = Tag.strmatch(e, userid: self.current_user, assert: true)[0]
         end
-    }.compact
+    }.compact.uniq
   end
 
   public
