@@ -25,6 +25,7 @@ group :development do
   # gem 'ruby-debug'
   gem 'ruby-debug19', :require => 'ruby-debug'
   gem 'log_buddy'
+  gem 'ruby-prof', :git => 'git://github.com/wycats/ruby-prof.git'
 end
 
 # Gems used only for assets and not required

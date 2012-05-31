@@ -106,7 +106,11 @@ public
   # (without such a parameter, it just refreshes the list from the current query)
   def relist
       # Presumably the params include :status, :querymode and/or :listmode specs
-      @rcpquery = Rcpquery.fetch_revision(session[:rcpquery], session[:user_id], params)
+      if params[:id] # Query may be specified by id (currently only for profiling)
+          @rcpquery = Rcpquery.where(:id => params[:id]).first || Rcpquery.create(user_id: User.guest_id, owner_id: User.guest_id)
+      else
+          @rcpquery = Rcpquery.fetch_revision(session[:rcpquery], session[:user_id], params)
+      end
       session[:rcpquery] = @rcpquery.id # In case the model decided on a new query
       render '_form_rcplist.html.erb', :layout=>false
   end

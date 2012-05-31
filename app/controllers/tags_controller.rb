@@ -65,6 +65,7 @@ class TagsController < ApplicationController
   #    :unbound_only - if true, we're addressing a list of unbound tags, so 
   #                     eliminate all tags that already have a referent
   #    :q, :term - string to match within a tag
+  #    :user_id - id of user who is viewing the list
   #    :makeormatch - Boolean indicating that this tag should be created if 
   #           it can't be found, modulo normalization
   def match
@@ -78,7 +79,7 @@ class TagsController < ApplicationController
       tagtype = [0, tagtype] if params[:untypedOK] && tagtype          
       matchstr = params[:q] || params[:term] || ""
       matchopts = {
-          userid: session[:user_id],
+          userid: params[:user_id] || session[:user_id],
           tagtype: tagtype,
           assert: (params[:makeormatch] == "true"),
           partition: true
