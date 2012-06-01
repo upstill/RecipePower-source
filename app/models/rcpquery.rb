@@ -31,11 +31,7 @@ class Candihash < Hash
     # each recipe in some prior ordering. Use that ranking to constrain the output
     def results (rankings)
     	# Extract the keys and sort them by success in matching
-    	# if @mode == :rcpquery_loose
-    	    buffer1 = self.keys.select { |k| self[k] > 0 }.sort! { |k1, k2| self[k1] <=> self[k2] } 
-    	# else
-    	    # buffer1 = self.keys # Random order
-    	# end
+    	buffer1 = self.keys.select { |k| self[k] > 0 }.sort! { |k1, k2| self[k1] <=> self[k2] } 
 
     	return buffer1 if rankings.blank?
     	# See if the prior rankings have anything to say about matters
@@ -133,8 +129,9 @@ class Rcpquery < ActiveRecord::Base
         {"1"=>0, "2"=>1, "4"=>2, "8"=>3, "16"=>4}[self.status.to_s]
     end
 
+protected
     # Get the results of the current query.
-    def results
+    def result_ids
     	return @results if @results # Keeping a cache of results
         # Try to match prior query for this user and fetch rankings array
         # "match" has fewest num. of differing elements
@@ -151,7 +148,7 @@ class Rcpquery < ActiveRecord::Base
 
         # XXX Merge in the lists for each circle
         # @circles.each { |circle_id| candidates = candidates | Rcpref.recipe_ids(circle_id, self.user_id) }
-        
+    	
         unless self.tags.empty?
             # We purge/massage the list ONLY if there is a query here
             # Otherwise, we simply sort the list by mod date
@@ -173,6 +170,7 @@ class Rcpquery < ActiveRecord::Base
             # Convert back to a list of candidate ids
             candidates = candihash.results(@rankings).reverse
     	end
+=begin
     	# Derive the final ordering for the candidates based on prior rankings
     	# and convert from rids back into recipes
     	@results = candidates.map { |rid| Recipe.find(rid) } 
@@ -183,8 +181,10 @@ class Rcpquery < ActiveRecord::Base
     	    @results.sort! { |r1, r2| r2.updated_at <=> r1.updated_at }
     	end
 	    @results
+=end
+        @results = candidates
     end
-
+public
     # Virtual attribute tag_tokens accepts the tag string for the query and generates the 
     # current tag set, along with the necessary specialtags
     # paramstr is the parameter string for the tokens
@@ -300,24 +300,34 @@ class Rcpquery < ActiveRecord::Base
 
     # How many pages in the current result set?
     def npages
-        (self.results.count+(page_length-1))/page_length
+        (self.result_ids.count+(page_length-1))/page_length
+    end
+    
+    # Are there any recipes waiting to come out of the query?
+    def empty?
+        self.result_ids.empty?
     end
 
     # Return a list of results based on the paging parameters
     def results_paged
         # No paging for 0 or 1 page
         npg = self.npages
-        return self.results if npg <= 1
+        results = self.result_ids
+        maxlast = results.count-1 
+        debugger
+        if npg <= 1
+            first = 0
+            last = maxlast
+        else
+            # Clamp current page to last page
+            cpg = self.cur_page || 1
+            cpg = self.cur_page = npg if cpg > npg
         
-        # Clamp current page to last page
-        cpg = self.cur_page || 1
-        cpg = self.cur_page = npg if cpg > npg
-        
-        # Now get indices of first and last records on the page
-        first = (cpg-1)*page_length
-        last = first+page_length-1
-        maxlast = self.results.count-1 
-        last = maxlast if last > maxlast
-        self.results[first..last]
+            # Now get indices of first and last records on the page
+            first = (cpg-1)*page_length
+            last = first+page_length-1
+            last = maxlast if last > maxlast
+        end
+        results[first..last].collect { |rid| Recipe.find rid }
     end
 end

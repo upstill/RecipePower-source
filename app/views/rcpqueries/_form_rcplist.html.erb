@@ -13,7 +13,7 @@
 		</div>
 	<% end %>
 	<br class="clear"><hr>
-	<% if @rcpquery.results.empty? %>
+	<% if @rcpquery.empty? %>
 	    <br>
 		<%= image_tag "sad-icon.png", :alt=>"RecipePower", :id=>"sad_img"  %>
 		<p class="airy">
