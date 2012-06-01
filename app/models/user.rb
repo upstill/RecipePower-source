@@ -38,16 +38,16 @@ class User < ActiveRecord::Base
       end
   end
 
-  # Class variable @@Super_user saves the super user_id
-  @@Super_user = nil
+  # Class variable @@Super_uid saves the super user_id
+  @@Super_uid = nil
   def self.super_id
-     (@@Super_user || (@@Super_user = self.by_name(:super))).id
+     @@Super_uid || (@@Super_uid = self.by_name(:super).id)
   end
   
-  # Class variable @@Guest_user saves the guest user_id
-  @@Guest_user = nil
+  # Class variable @@Guest_uid saves the guest user_id
+  @@Guest_uid = nil
   def self.guest_id
-      (@@Guest_user || (@@Guest_user = self.by_name(:guest))).id
+      @@Guest_uid || (@@Guest_uid = self.by_name(:guest).id)
   end
 
   # Return a list of username/id pairs suitable for popup selection

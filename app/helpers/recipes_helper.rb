@@ -68,19 +68,22 @@ end
 # Provide an English-language summary of the tags for a recipe.
 def summarize_alltags(rcp)
 
-    genrestr = tagjoin rcp.tags.where(tagtype: 1), false, "", " "
-    rolestr = tagjoin rcp.tags.where(tagtype: 2), false, " for "
+    tags = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
+    rcp.tags.each { |tag| tags[tag.tagtype] << tag }
+    
+    genrestr = tagjoin tags[1], false, "", " "
+    rolestr = tagjoin tags[2], false, " for "
 
-    procstr = tagjoin rcp.tags.where(tagtype: 3), false, " with ", " process"
-    foodstr = tagjoin rcp.tags.where(tagtype: 4), false, " that includes "
-    sourcestr = tagjoin rcp.tags.where(tagtype: 6), false, " from "
-    authorstr = tagjoin rcp.tags.where(tagtype: 7), false, " by "
-    toolstr = tagjoin rcp.tags.where(tagtype: 12), false, " with "
+    procstr = tagjoin tags[3], false, " with ", " process"
+    foodstr = tagjoin tags[4], false, " that includes "
+    sourcestr = tagjoin tags[6], false, " from "
+    authorstr = tagjoin tags[7], false, " by "
+    toolstr = tagjoin tags[12], false, " with "
 
-    occasionstr = tagjoin rcp.tags.where(tagtype: 8), false, " good for"
-    intereststr = tagjoin rcp.tags.where(tagtype: 11), true, " tagged by Interest for "
+    occasionstr = tagjoin tags[8], false, " good for"
+    intereststr = tagjoin tags[11], true, " tagged by Interest for "
 
-    otherstr = tagjoin rcp.tags.where(tagtype: [0, 13, 14]), true, " Miscellaneous tags: ", "."
+    otherstr = tagjoin (tags[0]+tags[13]+tags[14]), true, " Miscellaneous tags: ", "."
     
     strlist = [sourcestr, authorstr, foodstr, procstr, toolstr].keep_if{ |str| !str.empty? }
     
@@ -101,11 +104,14 @@ end
 def present_comments (recipe, user_id)
     out = (recipe.comment_of_user user_id) || ""
     out = "My two cents: '#{out}'<br>" unless out.empty?
+=begin
+    # Removed this to cut down on queries
     recipe.users.each { |user| 
         if (user.id != user_id) && (cmt=recipe.comment_of_user(user.id))
             out << "#{user.username} sez: '#{cmt}'<br>"  unless cmt.blank?
         end
     }
+=end
     out.html_safe
 end
 

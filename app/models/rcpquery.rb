@@ -314,7 +314,6 @@ public
         npg = self.npages
         results = self.result_ids
         maxlast = results.count-1 
-        debugger
         if npg <= 1
             first = 0
             last = maxlast
