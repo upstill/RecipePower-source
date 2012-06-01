@@ -15,6 +15,7 @@ class TypeMap < Array
             @List[typenum] = entry.last
             @SymToType[sym] = typenum
             @NameToType[name.gsub(/\s/, '').downcase] = typenum
+            @NameToType[typenum.to_s] = typenum
         }
     end
     

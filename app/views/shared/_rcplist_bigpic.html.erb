@@ -19,7 +19,7 @@
 		  <%= recipe.comment_of_user(@listowner) || "" %>
       </div>
       <div class="rcp_list_element_gotag">
-		  <%= link_to "Tag This Cookmark!", "/recipes/#{recipe.id}/edit" %>
+		  <%= link_to "Tag This Cookmark!", edit_recipe_path(recipe) %>
       </div>
     </div>
   </div>
