@@ -55,6 +55,7 @@ RP::Application.routes.draw do
   # get "pages/about"
   match '/contact', :to => 'pages#contact'
   match '/about', :to => 'pages#about'
+  match '/welcome', :to => 'pages#welcome'
   match '/kale', :to => 'pages#kale'
   match '/signup', :to => 'visitors#new'
   match '/FAQ', :to=>"pages#FAQ"
