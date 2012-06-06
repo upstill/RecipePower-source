@@ -65,8 +65,8 @@ class User < ActiveRecord::Base
 	exclusions = [  user_id, owner_id, self.super_id, self.guest_id ]
 	arr.delete_if { |entry| exclusions.include? entry[1] }
 
-	# Add back in the owner, under "Pick Another List"
-	arr.unshift ["Pick Another List", owner_id]
+	# Add back in the owner, under "Pick Another Collection"
+	arr.unshift ["Pick Another Collection", owner_id]
   end
 
   # login can be either username or email address

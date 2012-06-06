@@ -159,10 +159,17 @@ h3 {
 }
 
 p.airy {
-  	font:15px arial;
+  	font:18px calibri;
 	line-height:150%;
 	// font-size:105%;
-	# letter-spacing:1px;
+	// letter-spacing:1px;
+}
+
+li.airy {
+  	font:18px calibri;
+	line-height:150%;
+	// font-size:105%;
+	// letter-spacing:1px;
 }
 
 .text_block {

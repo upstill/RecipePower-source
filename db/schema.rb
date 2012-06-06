@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120530051514) do
+ActiveRecord::Schema.define(:version => 20120606032027) do
 
   create_table "expressions", :force => true do |t|
     t.integer  "tag_id"
@@ -176,6 +176,8 @@ ActiveRecord::Schema.define(:version => 20120530051514) do
     t.boolean  "isGlobal"
     t.integer  "referent_id"
   end
+
+  add_index "tags", ["tagtype"], :name => "index_tags_on_tagtype"
 
   create_table "users", :force => true do |t|
     t.string   "username"

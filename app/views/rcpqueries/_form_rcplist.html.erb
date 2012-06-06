@@ -14,12 +14,7 @@
 	<% end %>
 	<br class="clear"><hr>
 	<% if @rcpquery.empty? %>
-	    <br>
-		<%= image_tag "sad-icon.png", :alt=>"RecipePower", :id=>"sad_img"  %>
-		<p class="airy">
-	    	Sorry, this list doesn't have any recipes that match what you're looking for. Try searching on fewer tags, 
-			or pick another list. <br>Or go out to the Web and bring something back!
-		</p>
+		<%= explain_empty @rcpquery %>
 	<% elsif @rcpquery.listmode_str == :rcplist_text -%>
 		<%= render 'shared/rcplist_text' %>
 	<% elsif @rcpquery.listmode_str == :rcplist_smallpic -%>

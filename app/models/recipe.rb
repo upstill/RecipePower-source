@@ -24,18 +24,18 @@ class Recipe < ActiveRecord::Base
   validates :title,:presence=>true 
   validates :url,  :presence=>true, :gettableURL => true
 
-  has_many :tagrefs
+  has_many :tagrefs, :dependent=>:destroy
   has_many :tags, :through=>:tagrefs, :autosave=>true
   attr_reader :tag_tokens
   
-  has_many :ratings
-  has_many :scales, :through=>:ratings, :autosave=>true, :dependent=>:destroy
+  has_many :ratings, :dependent=>:destroy
+  has_many :scales, :through=>:ratings, :autosave=>true
   # attr_reader :ratings_attributes
   accepts_nested_attributes_for :ratings, :reject_if => lambda { |a| a[:scale_val].nil? }, :allow_destroy=>true
 
   validates_uniqueness_of :url
 
-  has_many :rcprefs
+  has_many :rcprefs, :dependent=>:destroy
   has_many :users, :through=>:rcprefs, :autosave=>true
   attr_reader :comment
   attr_reader :privacy

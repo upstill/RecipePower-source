@@ -5,11 +5,21 @@ module RcpqueriesHelper
 	if @rcpquery.owner_id != @rcpquery.user_id 
 	    s = <<BLOCK_END
 	        <a href="rcpqueries?owner=#{@rcpquery.user_id}" id="rcpquery_owner_return">
-		   (back to #{(@rcpquery.user_id==User.guest_id) ? "the Big List" : "my list"})
+		   (back to #{(@rcpquery.user_id==User.guest_id) ? "the Big List" : "my collection"})
 		</a>
 BLOCK_END
 	    s.html_safe
 	end
+   end
+   
+   def explain_empty (rq)
+       explan = rq.tags.empty? ? 
+                "Sorry, this collection is empty. Try picking another collection above, or go out to the Web and bring something back!" :
+                "Sorry, this list doesn't have any recipes that match what you're looking for. Try searching on fewer tags, 
+			    or pick another list. <br>Or go out to the Web and bring something back!"
+%Q{	    <br>
+		#{image_tag "sad-icon.png", :alt=>"RecipePower", :id=>"sad_img"}
+		<p class="airy">#{explan}</p>}.html_safe
    end
 
    def query_tabset
