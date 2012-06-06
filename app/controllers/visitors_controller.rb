@@ -1,4 +1,6 @@
 class VisitorsController < ApplicationController
+  filter_access_to :all
+  
   def new
 	@Title = "Sign up"
 	@visitor = Visitor.new

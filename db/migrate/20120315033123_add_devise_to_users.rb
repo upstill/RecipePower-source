@@ -41,6 +41,8 @@ class AddDeviseToUsers < ActiveRecord::Migration
 
       # Uncomment below if timestamps were not included in your original model.
       # t.timestamps
+      
+      t.integer :role_id, :default => 0
     end
 
     add_index :users, :email,                :unique => true
@@ -77,6 +79,7 @@ class AddDeviseToUsers < ActiveRecord::Migration
     remove_column :users, :failed_attempts
     remove_column :users, :unlock_token
     remove_column :users, :locked_at
-    
+
+    remove_column :users, :role_id    
   end
 end

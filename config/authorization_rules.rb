@@ -1,23 +1,23 @@
 authorization do
   role :guest do
-    has_permission_on [:public], :to => [:read]
+    has_permission_on [:pages], :to => [:home, :contact, :about, :kale, :FAQ]
+    has_permission_on [:feedbacks], :to => [:create]
+    has_permission_on [:visitors], :to => [:create]
+    has_permission_on [:rcpqueries], :to => [:create, :read]
   end
   
-  role :administrator do
-    has_permission_on :public, :to => [:read, :create]
-    has_permission_on [:accounts, :categories, :matches, :transactions, :users, :roles], :to => :manage
-  end
-  
-  role :accountant do
+  role :admin do
     includes :guest
+    # :sessions, :users
+    has_permission_on [:expressions, :feedbacks, :links, :pages, :ratings, :rcpqueries, :recipes, :referents, :scales, :sites, :tags, :visitors], :to => :manage
   end
   
   role :user do
-    has_permission_on :public, :to => [:read, :create]
-    has_permission_on [:accounts, :categories, :matches, :transactions], :to => :create
-    has_permission_on [:accounts, :categories, :matches, :transactions], :to => :manage do
-      if_attribute :user => is { user }
-    end
+    includes :guest
+    #has_permission_on [:accounts, :categories, :matches, :transactions], :to => :create
+    #has_permission_on [:accounts, :categories, :matches, :transactions], :to => :manage do
+    #  if_attribute :user => is { user }
+    #end
   end
 end
 
@@ -39,7 +39,5 @@ privileges do
     includes :create, :read, :update, :delete
   end
   
-  privilege :create, :public, :includes => :upload
-  privilege :create, :categories, :includes => :sort
-  privilege :create, :matches, :includes => :guess
+#  privilege :read, :pages, :includes => [:home, :contact, :about, :kale, :FAQ]
 end

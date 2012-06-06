@@ -187,6 +187,7 @@ ActiveRecord::Schema.define(:version => 20120315033123) do
     t.integer  "failed_attempts",        :default => 0
     t.string   "unlock_token"
     t.datetime "locked_at"
+    t.integer  "role_id",                :default => 0
   end
 
   add_index "users", ["confirmation_token"], :name => "index_users_on_confirmation_token", :unique => true

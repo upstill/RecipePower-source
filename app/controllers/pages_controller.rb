@@ -1,4 +1,6 @@
 class PagesController < ApplicationController
+  filter_access_to :all
+
     def home
   	@Title = "Home"
   	@nav_current = :home

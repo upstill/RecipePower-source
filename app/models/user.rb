@@ -6,8 +6,13 @@ class User < ActiveRecord::Base
          :encryptable, :confirmable, :lockable, :timeoutable, :omniauthable
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :email, :password, :password_confirmation, :remember_me
+  attr_accessible :email, :password, :password_confirmation, :remember_me, :role_id
 
+  ROLES = {0 => :guest, 1 => :user, 2 => :admin}
+  
+  def role_symbols
+    [ROLES[role_id]]
+  end
 
   # ownership of tags restrict visible tags
   has_many :tag_owners

@@ -3,8 +3,8 @@ common: &common
   encoding: unicode
   pool: 5
   timeout: 5000
-  username: cookmarks
-  password: cookmarks
+  username: postgres
+  password: postgres
 
 development:
   adapter: postgresql
