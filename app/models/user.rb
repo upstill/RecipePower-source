@@ -1,36 +1,4 @@
 class User < ActiveRecord::Base
-<<<<<<< HEAD
-    
-    # ownership of tags restrict visible tags
-    has_many :tag_owners
-    has_many :tags, :through=>:tag_owners
-
-    has_many :rcprefs
-    has_many :recipes, :through=>:rcprefs, :autosave=>true
-
-    # new columns need to be added here to be writable through mass assignment
-    attr_accessible :id, :username, :email, :password, :password_confirmation, :recipes, :password_hash, :password_salt
-
-    attr_accessor :password
-    before_save :prepare_password
-
-    validates_presence_of :username
-    validates_uniqueness_of :username, :email
-    validates_format_of :username, :with => /^[-\w\s\._@]+$/i, :allow_blank => true, :message => "should only contain letters, spaces, numbers, or .-_@"
-    validates_format_of :email, :with => /^[-a-z0-9_+\.]+\@([-a-z0-9]+\.)+[a-z0-9]{2,4}$/i
-    validates_presence_of :password, :on => :create
-    validates_confirmation_of :password
-    validates_length_of :password, :minimum => 4
-
-    # Make sure we have this particular user (who had better be in the seed list)
-    def self.by_name (name)
-        begin
-            self.where("username = ?", name.to_s).first
-        rescue Exception => e
-            nil
-        end
-    end
-=======
   # Include default devise modules. Others available are:
   # :token_authenticatable, :encryptable, :confirmable, :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :registerable,
@@ -61,7 +29,7 @@ class User < ActiveRecord::Base
 
   validates_presence_of :username
   validates_uniqueness_of :username, :email, :allow_blank => true
-  validates_format_of :username, :with => /^[-\w\._@]+$/i, :allow_blank => true, :message => "should only contain letters, numbers, or .-_@"
+  validates_format_of :username, :with => /^[-\w\s\._@]+$/i, :allow_blank => true, :message => "should only contain letters, spaces, numbers, or .-_@"
   validates_format_of :email, :with => /^[-a-z0-9_+\.]+\@([-a-z0-9]+\.)+[a-z0-9]{2,4}$/i
   validates_presence_of :password, :on => :create
   validates_confirmation_of :password
@@ -75,7 +43,6 @@ class User < ActiveRecord::Base
           nil
       end
   end
->>>>>>> de4ede205242545c100ecd14fb640c744039a636
 
 # Robustly get the record for the current user, or guest if not logged in
   def self.current (uid)
@@ -85,16 +52,16 @@ class User < ActiveRecord::Base
       end
   end
 
-  # Class variable @@Super_uid saves the super user_id
-  @@Super_uid = nil
+  # Class variable @@Super_user saves the super user_id
+  @@Super_user = nil
   def self.super_id
-     @@Super_uid || (@@Super_uid = self.by_name(:super).id)
+      (@@Super_user || (@@Super_user = self.by_name(:super))).id
   end
   
   # Class variable @@Guest_uid saves the guest user_id
-  @@Guest_uid = nil
+  @@Guest_user = nil
   def self.guest_id
-      @@Guest_uid || (@@Guest_uid = self.by_name(:guest).id)
+      (@@Guest_user || (@@Guest_user = self.by_name(:guest))).id
   end
 
   # Return a list of username/id pairs suitable for popup selection
