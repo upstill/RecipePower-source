@@ -1,4 +1,5 @@
 class User < ActiveRecord::Base
+<<<<<<< HEAD
     
     # ownership of tags restrict visible tags
     has_many :tag_owners
@@ -29,6 +30,52 @@ class User < ActiveRecord::Base
             nil
         end
     end
+=======
+  # Include default devise modules. Others available are:
+  # :token_authenticatable, :encryptable, :confirmable, :lockable, :timeoutable and :omniauthable
+  devise :database_authenticatable, :registerable,
+         :recoverable, :rememberable, :trackable, :validatable,
+         :encryptable, :confirmable, :lockable, :timeoutable, :omniauthable
+
+  # Setup accessible (or protected) attributes for your model
+  attr_accessible :email, :password, :password_confirmation, :remember_me, :role_id
+
+  ROLES = {0 => :guest, 1 => :user, 2 => :admin}
+  
+  def role_symbols
+    [ROLES[role_id]]
+  end
+
+  # ownership of tags restrict visible tags
+  has_many :tag_owners
+  has_many :tags, :through=>:tag_owners
+
+  has_many :rcprefs
+  has_many :recipes, :through=>:rcprefs, :autosave=>true
+
+  # new columns need to be added here to be writable through mass assignment
+  attr_accessible :id, :username, :email, :password, :password_confirmation, :recipes, :password_hash, :password_salt
+
+  attr_accessor :password
+  before_save :prepare_password
+
+  validates_presence_of :username
+  validates_uniqueness_of :username, :email, :allow_blank => true
+  validates_format_of :username, :with => /^[-\w\._@]+$/i, :allow_blank => true, :message => "should only contain letters, numbers, or .-_@"
+  validates_format_of :email, :with => /^[-a-z0-9_+\.]+\@([-a-z0-9]+\.)+[a-z0-9]{2,4}$/i
+  validates_presence_of :password, :on => :create
+  validates_confirmation_of :password
+  validates_length_of :password, :minimum => 4, :allow_blank => true
+
+  # Make sure we have this particular user (who had better be in the seed list)
+  def self.by_name (name)
+      begin
+          self.where("username = ?", name.to_s).first
+      rescue Exception => e
+          nil
+      end
+  end
+>>>>>>> de4ede205242545c100ecd14fb640c744039a636
 
 # Robustly get the record for the current user, or guest if not logged in
   def self.current (uid)

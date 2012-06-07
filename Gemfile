@@ -16,6 +16,9 @@ gem 'nokogiri'
 gem 'will_paginate', '~> 3.0'
 gem 'minitest'
 gem 'newrelic_rpm'
+gem 'devise'                        # auth, rails generate devise:install, rails generate devise MODEL
+gem 'omniauth'                      # multi-provider auth
+gem 'declarative_authorization'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
 
 group :development do
   gem 'rspec-rails', '2.6.1'
@@ -54,3 +57,4 @@ group :test do
   gem 'ruby-debug19', :require => 'ruby-debug'
   gem 'webrat', '0.7.1'
 end
+

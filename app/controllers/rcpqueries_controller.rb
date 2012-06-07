@@ -1,4 +1,5 @@
 class RcpqueriesController < ApplicationController
+  filter_access_to :all
   
 private
   # Get the current query for the current user and a stipulated owner, 

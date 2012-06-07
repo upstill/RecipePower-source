@@ -1,5 +1,7 @@
 RP::Application.routes.draw do
 
+  devise_for :users
+
   resources :feedbacks
 
   resources :sites
@@ -17,17 +19,12 @@ RP::Application.routes.draw do
 
   match 'rcpqueries/:id' => 'rcpqueries#update', :via => :post
 
-  match 'user/edit' => 'users#edit', :as => :edit_current_user
-
-  match 'signup' => 'users#new', :as => :signup
-
-  match 'logout' => 'sessions#destroy', :as => :logout
-
-  match 'login' => 'sessions#new', :as => :login
-
-  resources :sessions
-
-  resources :users
+  #match 'user/edit' => 'users#edit', :as => :edit_current_user
+  #match 'signup' => 'users#new', :as => :signup
+  #match 'logout' => 'sessions#destroy', :as => :logout
+  #match 'login' => 'sessions#new', :as => :login
+  #resources :sessions
+  #resources :users
 
   match 'tags/editor', :controller=>'tags', :action=>'editor', :via => :get
   match 'tags/list', :controller=>'tags', :action=>'list', :via => :get

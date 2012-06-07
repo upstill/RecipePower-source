@@ -1,4 +1,6 @@
 class FeedbacksController < ApplicationController
+  filter_access_to :all
+
   # GET /feedbacks
   # GET /feedbacks.json
   def index
