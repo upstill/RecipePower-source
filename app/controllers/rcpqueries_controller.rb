@@ -1,11 +1,11 @@
 class RcpqueriesController < ApplicationController
-  filter_access_to :all
+  # filter_access_to :all
   
 private
   # Get the current query for the current user and a stipulated owner, 
   # making a new one as necessary
     def current_query(owner)
-        uid = session[:user_id]
+        @user_id = current_user_or_guest_id # session[:user_id]
         # Either we're dealing with an existing query, or not
         session[:rcpquery] = nil if session[:rcpquery].class != Fixnum
         @rcpquery = nil
@@ -14,8 +14,8 @@ private
         rescue ActiveRecord::RecordNotFound => e
             # No need to take action; we'll create a new query below
         end
-        unless @rcpquery && (@rcpquery.user_id == uid)
-            @rcpquery = Rcpquery.create :user_id=>uid, :owner_id=>uid 
+        unless @rcpquery && (@rcpquery.user_id == @user_id)
+            @rcpquery = Rcpquery.create :user_id=>@user_id, :owner_id=>@user_id 
         end
         if owner && User.exists?(owner.to_i) && (@rcpquery.owner_id != owner.to_i) # Check against bogus uids
             @rcpquery.owner_id = owner.to_i
@@ -34,7 +34,7 @@ public
     #   owner: id of list owner
 
     # Listing recipes doesn't require login, but we do need a user_id
-    need_login false # ...doesn't require session: sets user_id to guest id if none
+    # need_login false # ...doesn't require session: sets user_id to guest id if none
     @rcpquery = current_query params[:owner]
     # Blind index: show list of either the current user or a given user
     # NB: the list of special user 'guest' sees all public recipes
@@ -67,8 +67,9 @@ public
     # We handle optional parameters:
     #   owner: id of list owner
     #   tag: number of tag to initialize query with
-    @rcpquery = Rcpquery.new(user_id: session[:user_id],
-                             owner_id: (params[:owner] || session[:user_id]).to_i)
+    @user_id = current_user_or_guest_id # session[:user_id]
+    @rcpquery = Rcpquery.new(user_id: @user_id,
+                             owner_id: (params[:owner] || @user_id).to_i)
     @rcpquery.tag_ids = [params[:tag].to_i] if params[:tag]
     @rcpquery.save
     session[:rcpquery] = @rcpquery.id
@@ -85,8 +86,8 @@ public
   # POST /rcpqueries.xml
   # Take parameters revising the current query
   def create
-    
-    @rcpquery = current_query session[:user_id]
+    @user_id = current_user_or_guest_id # session[:user_id]
+    @rcpquery = current_query @user_id
 	@rcpquery.update_attributes(params[:rcpquery])
     @rcpquery.save
     @Title = "Query from Create"
@@ -107,10 +108,11 @@ public
   # (without such a parameter, it just refreshes the list from the current query)
   def relist
       # Presumably the params include :status, :querymode and/or :listmode specs
+      @user_id = current_user_or_guest_id # session[:user_id]
       if params[:id] # Query may be specified by id (currently only for profiling)
           @rcpquery = Rcpquery.where(:id => params[:id]).first || Rcpquery.create(user_id: User.guest_id, owner_id: User.guest_id)
       else
-          @rcpquery = Rcpquery.fetch_revision(session[:rcpquery], session[:user_id], params)
+          @rcpquery = Rcpquery.fetch_revision(session[:rcpquery], @user_id, params)
       end
       session[:rcpquery] = @rcpquery.id # In case the model decided on a new query
       render '_form_rcplist.html.erb', :layout=>false
@@ -122,7 +124,8 @@ public
   # POST /rcpqueries/1.xml
   def update
     # Respond to a form submission (query params are in params[:rcpquery])
-    @rcpquery = Rcpquery.fetch_revision(params[:id].to_i, session[:user_id], params[:rcpquery])
+    @user_id = current_user_or_guest_id # session[:user_id]
+    @rcpquery = Rcpquery.fetch_revision(params[:id].to_i, @user_id, params[:rcpquery])
     session[:rcpquery] = @rcpquery.id
 
     @Title = "Query from Update"

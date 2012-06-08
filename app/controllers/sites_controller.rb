@@ -4,7 +4,7 @@ class SitesController < ApplicationController
   # GET /sites
   # GET /sites.json
   def index
-      return if need_login true, true
+      # return if need_login true, true
     @sites = Site.all # paginate(:per_page => 5, :page => params[:page])
     
     respond_to do |format|
@@ -16,7 +16,7 @@ class SitesController < ApplicationController
   # GET /sites/1
   # GET /sites/1.json
   def show
-      return if need_login true, true
+      # return if need_login true, true
     @site = Site.find(params[:id])
     @Title = @site.name
 
@@ -29,7 +29,7 @@ class SitesController < ApplicationController
   # GET /sites/new
   # GET /sites/new.json
   def new
-      return if need_login true, true
+      # return if need_login true, true
     @site = Site.new
     @Title = "New Site"
 
@@ -41,7 +41,7 @@ class SitesController < ApplicationController
 
   # GET /sites/1/edit
   def edit
-      return if need_login true, true
+      # return if need_login true, true
     @site = Site.find(params[:id].to_i)
     @Title = @site.name
   end
@@ -49,7 +49,7 @@ class SitesController < ApplicationController
   # POST /sites
   # POST /sites.json
   def create
-      return if need_login true, true
+      # return if need_login true, true
     @site = Site.new(params[:site])
 
     respond_to do |format|
@@ -66,7 +66,7 @@ class SitesController < ApplicationController
   # PUT /sites/1
   # PUT /sites/1.json
   def update
-      return if need_login true, true
+      # return if need_login true, true
     @site = Site.find(params[:id])
 
     respond_to do |format|
@@ -83,7 +83,7 @@ class SitesController < ApplicationController
   # DELETE /sites/1
   # DELETE /sites/1.json
   def destroy
-      return if need_login true, true
+      # return if need_login true, true
     @site = Site.find(params[:id])
     @site.destroy
 

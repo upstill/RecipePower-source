@@ -12,6 +12,7 @@ class ApplicationController < ActionController::Base
   include ControllerAuthentication
   protect_from_forgery
 
+=begin
 # Gateway to (most) controllers: check that there's a current user
 # and don't do anything until there is one. If login isn't required,
 # set the session user id to guest
@@ -37,7 +38,7 @@ def need_login(login_required, super_required = false)
        session[:user_id] = session[:user_id] || User.guest_id 
     end
 end
-
+=end
   # redirect somewhere that will eventually return back to here
   def redirect_away(url, options = {})
     session[:original_uri] = request.url # url.sub /\w*:\/\/[^\/]*/, ''

@@ -2,7 +2,7 @@ class TagsController < ApplicationController
   # GET /tags
   # GET /tags.xml
   def index
-      return if need_login true, true
+      # return if need_login true, true
       @Title = "Tags"
       if params[:tagtype]
           @tagtype = params[:tagtype].to_i
@@ -30,7 +30,7 @@ class TagsController < ApplicationController
 # GET /tags/list?tabindex=index
 # Return HTML for the list of tags (presumably called by the tags tablist)
   def list
-    return if need_login true, true
+    # return if need_login true, true
     @Title = "Tags"
     if params[:tagtype]
         tagtype = params[:tagtype].to_i
@@ -108,7 +108,7 @@ class TagsController < ApplicationController
   # GET /tags/1
   # GET /tags/1.xml
   def show
-      return if need_login true, true
+      # return if need_login true, true
       @Title = "Tags"
     @tag = Tag.find(params[:id])
     session[:tabindex] = @tabindex
@@ -140,7 +140,7 @@ class TagsController < ApplicationController
   # GET /tags/editor?tabindex=index
   # Return HTML for the editor for classifying tags
   def editor
-    return if need_login true, true
+    # return if need_login true, true
     @Title = "Tags"
     @tabindex = params[:tabindex] ? params[:tabindex].to_i : (session[:tabindex] || 0)
     # The list of orphan tags gets all tags of this type which aren't linked to a table

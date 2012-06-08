@@ -4,7 +4,7 @@ class FeedbacksController < ApplicationController
   # GET /feedbacks
   # GET /feedbacks.json
   def index
-    return if need_login true, true
+    # return if need_login true, true
     @feedbacks = Feedback.all
 
     respond_to do |format|
@@ -16,7 +16,7 @@ class FeedbacksController < ApplicationController
   # GET /feedbacks/1
   # GET /feedbacks/1.json
   def show
-    return if need_login true, true
+    # return if need_login true, true
     @feedback = Feedback.find(params[:id])
 
     respond_to do |format|

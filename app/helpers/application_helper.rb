@@ -65,17 +65,16 @@ module ApplicationHelper
   end
 
   def user_status
-    # Ensure a user id
-    user = User.current session[:user_id]
-    case user.id
+    case current_user_or_guest_id
     when User.guest_id
-       link_to "Sign In", "/login"
+       link_to("Sign up", new_user_registration_path)+" or "+link_to("Sign In", new_user_session_path)
     when User.super_id
-       link_to "Super logout", "/logout"
+       link_to "Super logout", destroy_user_session_path, :method=>"delete"
     else
+       user = current_user
        uname = user.username
        ulink = link_to uname, "/users/#{user.id.to_s}/edit"
-       ulogout = link_to "Sign Out", "/logout"
+       ulogout = link_to "Sign Out", destroy_user_session_path, :method=>"delete"
        "<strong>#{ulink}</strong><span class=\"welcome_user\">&nbsp|&nbsp;#{ulogout}</span>".html_safe
      end
   end

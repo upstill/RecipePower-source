@@ -2,11 +2,11 @@ class RecipesController < ApplicationController
 
   def index
     redirect_to rcpqueries_url
-    return if need_login true
+    # return if need_login true
     # Get the collected recipes for the user named in query
-    if @listowner = session[:user_id] 
+    if @listowner = current_user_or_guest_id # session[:user_id] 
       user = User.find @listowner
-      @listownership = (@listowner==session[:user_id] ? 
+      @listownership = (@listowner==current_user_or_guest_id ? # session[:user_id] ? 
 			"My" : 
 			user.username+"\'s").html_safe
       @recipes = user.recipes 
@@ -20,21 +20,21 @@ class RecipesController < ApplicationController
   end
 
   def show
-    return if need_login true
+    # return if need_login true
     @recipe = Recipe.find(params[:id])
-    @recipe.current_user = session[:user_id]
+    @recipe.current_user = current_user_or_guest_id # session[:user_id]
     @Title = ""
     @nav_current = nil
   end
 
   def new # Collect URL, then redirect to edit
-    return if need_login true
+    # return if need_login true
     # Here is where we take a hit on the "Add to RecipePower" widget,
     # and also invoke the 'new cookmark' dialog. The difference is whether
     # parameters are supplied for url, title and note (though only URI is required).
     
     if params[:url]
-        @recipe = Recipe.ensure session[:user_id], params
+        @recipe = Recipe.ensure current_user_or_guest_id, params # session[:user_id], params
     else
         @recipe = Recipe.new
     end
@@ -44,15 +44,15 @@ class RecipesController < ApplicationController
     else
         @Title = "Cookmark a Recipe"
         @nav_current = :addcookmark
-        @recipe.current_user = session[:user_id]
+        @recipe.current_user = current_user_or_guest_id # session[:user_id]
     end
   end
 
   # Action for creating a recipe in response to the the 'new' page:
   def create # Take a URL, then either lookup or create the recipe
-    return if need_login true
+    # return if need_login true
     # Find the recipe by URI (possibly correcting same), and bind it to the current user
-    @recipe = Recipe.ensure session[:user_id], params[:recipe]
+    @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params[:recipe]
     if @recipe.errors.empty? # Success (valid recipe, either created or fetched)
 	    redirect_to edit_recipe_url(@recipe), :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br> You might want to confirm the title and picture, and/or tag it?".html_safe
     else # failure (not a valid recipe) => return to new
@@ -63,11 +63,11 @@ class RecipesController < ApplicationController
   end
 
   def edit
-    return if need_login true
+    # return if need_login true
     # Fetch the recipe by id, if possible, and ensure that it's registered with the user
-    @recipe = Recipe.ensure session[:user_id], params
+    @recipe = Recipe.ensure current_user_or_guest_id, params # session[:user_id], params
     if @recipe.errors.empty? # Success (recipe found)
-        @recipe.current_user = session[:user_id]
+        @recipe.current_user = current_user_or_guest_id # session[:user_id]
         @recipe.touch # We're looking at it, so make it recent
         @Title = @recipe.title # Get title from the recipe
         @nav_current = nil
@@ -90,9 +90,9 @@ class RecipesController < ApplicationController
   end
   
   def update
-    return if need_login true
+    # return if need_login true
     @recipe = Recipe.find(params[:id])
-    @recipe.current_user = session[:user_id]
+    @recipe.current_user = current_user_or_guest_id # session[:user_id]
     begin
         saved_okay = @recipe.update_attributes(params[:recipe])
     rescue => e
@@ -110,10 +110,10 @@ class RecipesController < ApplicationController
 
   # Delete the recipe from the user's list
   def delete
-    return if need_login true
+    # return if need_login true
     @recipe = Recipe.find(params[:id])
     # Simply remove this recipe/user pair from the join table
-    user = User.find(session[:user_id])
+    user = current_user # User.find(session[:user_id])
     user.recipes.delete @recipe
     user.save
     @recipes = user.recipes(true)
@@ -123,21 +123,23 @@ class RecipesController < ApplicationController
 
   # Remove the recipe from the system entirely
   def destroy
-    return if need_login true
+    # return if need_login true
+=begin XXX This is where we control access
     unless session[:user_id] == 1 || session[:user_id] == 3 || session[:user_id] == 5
 	    redirect_to edit_recipe_url(@recipe), :notice  => "You need to be Max, Steve or super to destroy a recipe".html_safe
 	else
+=end
         debugger
         @recipe = Recipe.find(params[:id])
         title = @recipe.title
         @recipe.destroy
         redirect_to rcpqueries_url, :notice => "\"#{title}\" is gone for good."
-    end
+    # end
   end
 
   def revise # modify current recipe to reflect a client-side change
     @recipe = Recipe.find(params[:id])
-    @recipe.current_user = session[:user_id]
+    @recipe.current_user = current_user_or_guest_id # session[:user_id]
 	# Modification instructions are in query strings:
 	# :do => 'add', 'remove'
 	# :what => "Genre", "Technique", "Course"

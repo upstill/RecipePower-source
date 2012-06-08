@@ -11,11 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-<<<<<<< HEAD
-ActiveRecord::Schema.define(:version => 20120530051514) do
-=======
-ActiveRecord::Schema.define(:version => 20120315033123) do
->>>>>>> de4ede205242545c100ecd14fb640c744039a636
+ActiveRecord::Schema.define(:version => 20120607031155) do
 
   create_table "expressions", :force => true do |t|
     t.integer  "tag_id"

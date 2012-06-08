@@ -17,15 +17,16 @@
 #   before_filter :login_required, :except => [:index, :show]
 module ControllerAuthentication
   def self.included(controller)
-    controller.send :helper_method, :current_user, :logged_in?, :redirect_to_target_or_default
+      controller.send :helper_method, :current_user_or_guest_id, :logged_in?, :redirect_to_target_or_default
+      # controller.send :helper_method, :current_user, :logged_in?, :redirect_to_target_or_default
   end
-
-  def current_user
-    @current_user ||= User.find(session[:user_id]) if session[:user_id]
+  
+  def current_user_or_guest_id
+    (user = current_user) ? current_user.id : User.guest_id
   end
 
   def logged_in?
-    current_user
+    current_user != nil
   end
 
   def login_required
