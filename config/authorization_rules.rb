@@ -3,21 +3,23 @@ authorization do
     has_permission_on [:pages], :to => [:home, :contact, :about, :kale, :FAQ]
     has_permission_on [:feedbacks], :to => [:create]
     has_permission_on [:visitors], :to => [:create]
-    has_permission_on [:rcpqueries], :to => [:create, :read]
-  end
-  
-  role :admin do
-    includes :guest
-    # :sessions, :users
-    has_permission_on [:expressions, :feedbacks, :links, :pages, :ratings, :rcpqueries, :recipes, :referents, :scales, :sites, :tags, :visitors], :to => :manage
+    has_permission_on [:rcpqueries], :to => [:create, :read, :update]
   end
   
   role :user do
     includes :guest
+    has_permission_on [:recipes], :to => [:read, :create, :update, :delete]
     #has_permission_on [:accounts, :categories, :matches, :transactions], :to => :create
     #has_permission_on [:accounts, :categories, :matches, :transactions], :to => :manage do
     #  if_attribute :user => is { user }
     #end
+  end
+  
+  role :admin do
+    includes :user
+    # :sessions, :users
+    has_permission_on [:recipes], :to => [:destroy]
+    has_permission_on [:expressions, :feedbacks, :links, :pages, :ratings, :rcpqueries, :recipes, :referents, :scales, :sites, :tags, :visitors], :to => :manage
   end
 end
 
@@ -26,13 +28,16 @@ privileges do
     includes :new
   end
   privilege :read do
-    includes :index, :show
+    includes :index, :show, :relist, :piclist
   end
   privilege :update do
     includes :edit
   end
-  privilege :delete do
+  privilege :destroy do
     includes :destroy
+  end
+  privilege :delete do
+    includes :remove
   end
   
   privilege :manage do

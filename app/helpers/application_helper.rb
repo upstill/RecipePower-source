@@ -73,7 +73,7 @@ module ApplicationHelper
     else
        user = current_user
        uname = user.username
-       ulink = link_to uname, "/users/#{user.id.to_s}/edit"
+       ulink = link_to uname, edit_user_registration_path # "/users/#{user.id.to_s}/edit"
        ulogout = link_to "Sign Out", destroy_user_session_path, :method=>"delete"
        "<strong>#{ulink}</strong><span class=\"welcome_user\">&nbsp|&nbsp;#{ulogout}</span>".html_safe
      end

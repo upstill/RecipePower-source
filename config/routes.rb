@@ -19,11 +19,14 @@ RP::Application.routes.draw do
 
   match 'rcpqueries/:id' => 'rcpqueries#update', :via => :post
 
-  #match 'user/edit' => 'users#edit', :as => :edit_current_user
+  # Super-user can edit user info, starting with roles
   #match 'signup' => 'users#new', :as => :signup
   #match 'logout' => 'sessions#destroy', :as => :logout
   #match 'login' => 'sessions#new', :as => :login
   #resources :sessions
+  scope "/admin" do
+      resources :users
+  end
   #resources :users
 
   match 'tags/editor', :controller=>'tags', :action=>'editor', :via => :get
@@ -38,7 +41,7 @@ RP::Application.routes.draw do
   resources :scales
   
   match 'recipes/:id/piclist' => 'recipes#piclist'
-  match 'recipes/:id/delete' => 'recipes#delete'
+  match 'recipes/:id/remove' => 'recipes#remove'
   match 'recipes/:id/destroy' => 'recipes#destroy'
   match 'recipes/parse' => 'recipes#parse', :via => :post
   resources :recipes

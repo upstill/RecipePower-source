@@ -1,4 +1,5 @@
 class RecipesController < ApplicationController
+  filter_access_to :all
 
   def index
     redirect_to rcpqueries_url

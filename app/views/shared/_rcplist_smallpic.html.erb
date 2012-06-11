@@ -19,7 +19,9 @@
 	     <%= present_comments recipe, @rcpquery.owner_id  %>
       </div>
       <div class="rcp_list_element_gotag">
-	     <%= link_to "Tag This Cookmark!", edit_recipe_path(recipe) %>
+		  <% if permitted_to? :update, recipe %>
+	     	<%= link_to (@rcpquery.owner_id == @user_id ? "Edit Tags" : "Grab This Cookmark!"), edit_recipe_path(recipe) %>
+		  <% end %>
       </div>
     </div>
     <div class="rcp_list_element_bottom">

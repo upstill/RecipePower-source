@@ -6,7 +6,7 @@ class User < ActiveRecord::Base
          :confirmable, :lockable, :timeoutable, :omniauthable
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :username, :email, :password, :password_confirmation, :remember_me, :role_id
+  attr_accessible :id, :username, :email, :password, :password_confirmation, :recipes, :remember_me, :role_id
 
   ROLES = {0 => :guest, 1 => :user, 2 => :admin}
   
@@ -21,19 +21,13 @@ class User < ActiveRecord::Base
   has_many :rcprefs
   has_many :recipes, :through=>:rcprefs, :autosave=>true
 
-  # new columns need to be added here to be writable through mass assignment
-  attr_accessible :id, :username, :email, :password, :password_confirmation, :recipes, :password_hash, :password_salt
-
-  attr_accessor :password
-  before_save :prepare_password
-
-  validates_presence_of :username
+  # validates_presence_of :username
   validates_uniqueness_of :username, :email, :allow_blank => true
   validates_format_of :username, :with => /^[-\w\s\._@]+$/i, :allow_blank => true, :message => "should only contain letters, spaces, numbers, or .-_@"
   validates_format_of :email, :with => /^[-a-z0-9_+\.]+\@([-a-z0-9]+\.)+[a-z0-9]{2,4}$/i
-  validates_presence_of :password, :on => :create
-  validates_confirmation_of :password
-  validates_length_of :password, :minimum => 4, :allow_blank => true
+  # validates_presence_of :password, :on => :create
+  # validates_confirmation_of :password
+  # validates_length_of :password, :minimum => 4, :allow_blank => true
 
   # Make sure we have this particular user (who had better be in the seed list)
   def self.by_name (name)
@@ -83,6 +77,7 @@ class User < ActiveRecord::Base
 	arr.unshift ["Pick Another Collection", owner_id]
   end
 
+=begin
   # login can be either username or email address
   def self.authenticate(login, pass)
     user = find_by_username(login) || find_by_email(login)
@@ -92,15 +87,9 @@ class User < ActiveRecord::Base
   def encrypt_password(pass)
     BCrypt::Engine.hash_secret(pass, password_salt)
   end
+=end
 
   private
-
-  def prepare_password
-    unless password.blank?
-      self.password_salt = BCrypt::Engine.generate_salt
-      self.password_hash = encrypt_password(password)
-    end
-  end
 
   # Look up user by id and return the name, protecting against 
   # invalid ids

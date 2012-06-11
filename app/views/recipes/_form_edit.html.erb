@@ -33,6 +33,12 @@
     </div>
     <%= f.submit "Set Tags" %>
     <%= link_to "Never Mind", "/rcpqueries" %> 
+  <% if permitted_to? :remove, @recipe %>
+    <%= link_to "Remove from my collection", @recipe, :method => :remove
+  <% end %>
+  <% if permitted_to? :destroy, @recipe %>
+    <%= link_to "Destroy", @recipe, :method => :destroy, :confirm => "This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" %> |
+  <% end %>
   </div>
   <br class="clear">
 <% end %>
