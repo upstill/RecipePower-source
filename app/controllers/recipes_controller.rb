@@ -110,7 +110,7 @@ class RecipesController < ApplicationController
   end
 
   # Delete the recipe from the user's list
-  def delete
+  def remove
     # return if need_login true
     @recipe = Recipe.find(params[:id])
     # Simply remove this recipe/user pair from the join table
@@ -119,12 +119,11 @@ class RecipesController < ApplicationController
     user.save
     @recipes = user.recipes(true)
 
-    redirect_to rcpqueries_url, :notice => "Fear not. \"#{@recipe.title}\" is gone from your cookmarks collection--though you may see it on others' lists."
+    redirect_to rcpqueries_url, :notice => "Fear not. \"#{@recipe.title}\" is gone from your cookmarks--though you may see it in other collections."
   end
 
   # Remove the recipe from the system entirely
   def destroy
-    # return if need_login true
 =begin XXX This is where we control access
     unless session[:user_id] == 1 || session[:user_id] == 3 || session[:user_id] == 5
 	    redirect_to edit_recipe_url(@recipe), :notice  => "You need to be Max, Steve or super to destroy a recipe".html_safe

@@ -106,8 +106,8 @@ module ApplicationHelper
     # Return the set of navigation links for the header
     def header_navlinks
     	navlinks = []
-    	navlinks.push(navlink "Cookmarks", "/rcpqueries", (@nav_current==:cookmarks)) 
-    	navlinks.push(navlink "Add a Cookmark", "/recipes/new", (@nav_current==:addcookmark)) 
+    	navlinks.push(navlink "Cookmarks", rcpqueries_path, (@nav_current==:cookmarks)) 
+    	navlinks.push(navlink "Add a Cookmark", new_recipe_path, (@nav_current==:addcookmark)) 
     	navlinks.join('  |  ').html_safe
     end
     
