@@ -28,7 +28,7 @@ privileges do
     includes :new
   end
   privilege :read do
-    includes :index, :show, :relist, :piclist
+    includes :index, :show, :relist, :piclist, :touch
   end
   privilege :update do
     includes :edit

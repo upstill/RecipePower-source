@@ -43,24 +43,35 @@ class Rcpref < ActiveRecord::Base
     def status_flags=(flags)
 	self.status = status_flags_to_bits flags
     end
-
+    
+    # Present the time-since-touched in a text format
+    def self.touch_date(rid, uid)
+        if rr = Rcpref.where(recipe_id: rid, user_id: uid).first
+          rr.updated_at
+        end
+    end
+  
     # When saving a "new" use, make sure it's unique
     def ensure_unique
-puts "Ensuring uniqueness of user #{self.user_id.to_s} to recipe #{self.recipe_id.to_s}"
+        puts "Ensuring uniqueness of user #{self.user_id.to_s} to recipe #{self.recipe_id.to_s}"
     end
 
-    # get an array of recipe ids from a user, subject to permissions and status
+    # get an array of recipe ids from a user, subject to permissions and status, with appropriate ordering
     def Rcpref.recipe_ids(owner_id, requestor_id, *params)
 	# owner_id indexes the owner: 'guest' and 'super' are special "owners"
 	#  of all recipes (subject to permission)
-	# requestor_id is the user_id of the user requesting the list
+	# requestor_id is the user_id of the user requesting the list; resulting set will be filtered according
+	#    to the relationship between the two users
 	# :comment is text to match against the comment field
 	# :title is text to match against the recipe's title 
 	# NB: If both are given, recipes are returned which match in either
 	# :status is the set of status flags to match
+	# :sorted gives criterion for sorting (currently only sort by updated_at field)
 
     commentstr = params.first[:comment]
     titlestr = params.first[:title]
+    sortfield = params.first[:sorted]
+	statuses = params.first[:status] || StatusAny
 	# We accumulate a list of constraints and their parameters for passing to self.where
 	constraints = []
 	parameters = []
@@ -75,7 +86,7 @@ puts "Ensuring uniqueness of user #{self.user_id.to_s} to recipe #{self.recipe_i
 	      permissions = PermissionAll
 	   when owner_id
 	      # Owner of list sees all in the list
-              permissions = PermissionAll
+          permissions = PermissionAll
 	   else
 	      # XXX We SHOULD be deriving permission bits from other considerations:
 	      # * If the two users share membership in some group, then set Groups bit
@@ -83,8 +94,6 @@ puts "Ensuring uniqueness of user #{self.user_id.to_s} to recipe #{self.recipe_i
 	      permissions = PermissionAll
 	end
 
-	# Derive the status part of the query from the :status parameter
-	statuses = params.first[:status] || StatusAny
 	# Unless we're going for restricted status, just get 'em all
 	if statuses < StatusMiscMask
 	   constraints << "status <= ?"
@@ -106,20 +115,22 @@ puts "Ensuring uniqueness of user #{self.user_id.to_s} to recipe #{self.recipe_i
 	   parameters << "%"+commentstr+"%" # Match within
 	end
 
+    # Having collected a set of constraints and parameters, pursue appropriate fetch procedures
     if constraints.empty? 
         if owner_id == User.super_id
             # We return all recipe ids, possibly filtering for title
             if titlestr
-                rcpids = Recipe.where( 'title LIKE ?', "%#{titlestr}%").map { |r| r.id }
+                rcps = Recipe.where( 'title LIKE ?', "%#{titlestr}%")
             else
-                rcpids = Recipe.select(:id).map { |r| r.id }
+                rcps = Recipe.select(:id)
             end
-            return rcpids
+            return rcps.map { |r| r.id }
         else
-        	allrefs = self.find :all 
+        	allrefs = sortfield ? self.find(:all).reorder(sortfield) : self.find(:all)
         end
     else
-    	allrefs = self.where(constraints.join(' AND '), *parameters)
+    	allrefs = sortfield ? self.where(constraints.join(' AND '), *parameters).reorder(sortfield) :
+    	                      self.where(constraints.join(' AND '), *parameters)
     end
 
 	# Handle the case(s) where there is a title constraint
@@ -154,7 +165,7 @@ puts "Ensuring uniqueness of user #{self.user_id.to_s} to recipe #{self.recipe_i
     	end
     	# Reduce the results to a set of recipe keys
     	if params.first[:status] & StatusRecentMask 
-    	    # sort by creation date
+    	    # sort by last-touched date
     	    allrefs.sort! { |a, b| b.updated_at <=> a.updated_at }
     	end
 	end

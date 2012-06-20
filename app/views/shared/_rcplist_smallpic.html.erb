@@ -1,6 +1,7 @@
 <%# Render the results of a recipe query in small_pic mode %>
 <%# NB: Should be rendered within a rcp_list container %>
 <% for recipe in @rcpquery.results_paged  %>
+  <% recipe.current_user = @user_id %>
   <div class="rcp_list_element" >
     <div class="rcp_list_pic_box">
 	<%= rcp_fitPic recipe %>
@@ -25,9 +26,8 @@
       </div>
     </div>
     <div class="rcp_list_element_bottom">
-       <div class="rcp_list_element_stats">
+	   <%= rr_touch_date_elmt recipe %>
 	  <%# cookmark_count recipe -%> 
-       </div>
     </div>
   </div>
   <br class="clear">

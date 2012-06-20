@@ -1,5 +1,6 @@
 class RecipesController < ApplicationController
   filter_access_to :all
+  include ApplicationHelper
 
   def index
     redirect_to rcpqueries_url
@@ -26,6 +27,8 @@ class RecipesController < ApplicationController
     @recipe.current_user = current_user_or_guest_id # session[:user_id]
     @Title = ""
     @nav_current = nil
+    debugger
+    redirect_to @recipe.url
   end
 
   def new # Collect URL, then redirect to edit
@@ -62,6 +65,21 @@ class RecipesController < ApplicationController
        render :action => 'new'
     end
   end
+  
+  # Register that the recipe was touched by the current user.
+  # Since that recipe will now be at the head return a new first-recipe in the list.
+  def touch
+      @recipe = Recipe.ensure current_user_or_guest_id, params # session[:user_id], params
+      if @recipe.errors.empty? # Success (recipe found)
+        @recipe.touch
+      end
+      # The client doesn't really care whether we touch successfully or not...
+      selector = "#"+rr_touch_date_id(@recipe)
+      content = rr_touch_date_elmt @recipe
+      respond_to do |format|
+        format.json { render json: {selector: selector, content: content } }
+      end
+  end
 
   def edit
     # return if need_login true
@@ -69,7 +87,7 @@ class RecipesController < ApplicationController
     @recipe = Recipe.ensure current_user_or_guest_id, params # session[:user_id], params
     if @recipe.errors.empty? # Success (recipe found)
         @recipe.current_user = current_user_or_guest_id # session[:user_id]
-        @recipe.touch # We're looking at it, so make it recent
+        @recipe.touch_by @recipe.current_user # We're looking at it, so make it recent
         @Title = @recipe.title # Get title from the recipe
         @nav_current = nil
         # Now go forth and edit

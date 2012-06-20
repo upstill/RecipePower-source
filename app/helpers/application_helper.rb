@@ -1,4 +1,5 @@
 module ApplicationHelper
+    include ActionView::Helpers::DateHelper
     
     # The coder is for stripping HTML entities from URIs, recipe titles, etc.
     @@coder = HTMLEntities.new
@@ -25,9 +26,25 @@ module ApplicationHelper
   end
   
   def recipe_popup( rcp )
-      link_to image_tag("preview.png", title:"Show the Recipe", class: "preview_button"), rcp.url, target: "_blank", class: "popup"        
+      link_to image_tag("preview.png", title:"Show the recipe in a popup window", class: "preview_button"), rcp.url, target: "_blank", class: "popup", id: "popup#{rcp.id.to_s}"        
   end
-  
+    
+    # Return the id of the DOM element giving the time-since-touched for a recipe
+    def rr_touch_date_id recipe
+        "touchtime#{recipe.id.to_s}"
+    end
+
+    # Present the date and time the recipe was last touched by the given user
+    def rr_touch_date_elmt recipe
+        if touched = Rcpref.touch_date(recipe.id, recipe.current_user)
+            result = %Q{
+               <div class="rcp_list_element_stats" id="#{rr_touch_date_id(recipe)}">
+                 Last viewed #{time_ago_in_words(touched)} ago.
+               </div>
+            }.html_safe
+        end
+    end    
+        
   # Create a popup selection list for adding a rating to the tags
   def select_to_add_rating(name, f, association, ratings, inex)
     # Derive 'fields', the information needed by the 'add_rating' javascript

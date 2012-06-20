@@ -40,9 +40,11 @@ RP::Application.routes.draw do
 
   resources :scales
   
+  match 'recipes/:id/touch' => 'recipes#touch'
   match 'recipes/:id/piclist' => 'recipes#piclist'
   match 'recipes/:id/remove' => 'recipes#remove'
   match 'recipes/:id/destroy' => 'recipes#destroy'
+  match 'recipes/:id/show' => 'recipes#show'
   match 'recipes/parse' => 'recipes#parse', :via => :post
   resources :recipes
   match 'recipes/:id' => 'recipes#update', :via => :post

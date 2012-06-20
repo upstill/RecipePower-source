@@ -1,0 +1,3 @@
+module RcprefsHelper
+
+end

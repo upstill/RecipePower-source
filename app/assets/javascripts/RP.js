@@ -569,10 +569,51 @@ function add_rating(link, association, content) {
     // }
 }
 
-// Respond to the preview-recipe button by opening a popup loaded with its URL
-function servePopup() {
-	linkURL = this.getAttribute('href');
-	window.open(linkURL,'popup','width=500,height=300');
-	return false;
+// Take an HTML element from the server and replace it in the DOM
+function replaceElmt(body, status, instance) {
+	if(status == "success") {
+		var selector = body.selector
+		var content = body.content
+		debugger;
+		$(selector).replaceWith(content);
+	}
 }
+
+/* Respond to the preview-recipe button by opening a popup loaded with its URL.
+   If the popup gets blocked, return true so that the recipe is opened in a new
+   window/tab.
+   In either case, notify the server of the opening so it can touch the recipe
+*/
+function servePopup() {
+   var regexp = new RegExp("popup", "g")
+   var rcpid = this.getAttribute('id').replace(regexp, "");
+   debugger;
+   jQuery.get( "recipes/"+rcpid+"/touch", {}, replaceElmt, "json" );		
+
+   // Now for the main event: open the popup window if possible
+   linkURL = this.getAttribute('href');
+   var popUp = window.open(linkURL, 'popup', 'width=600, height=300, scrollbars, resizable');
+   if (!popUp || typeof(popUp) === 'undefined') {
+      return true;
+   } else {
+     popUp.focus();
+     return false;
+   }
+}
+/*
+/* Respond to a click on the recipe-preview button by sending a touch-recipe
+   message to the server * /
+$('.popup').bind('click', function () {
+	debugger;
+	return true;
+   var popUp = window.open($(this).attr('href'), 'googleWindow',
+   'width=600, height=300, scrollbars, resizable');
+   if (!popUp || typeof(popUp) === 'undefined') {
+      return true;
+   } else {
+     popUp.focus();
+     return false;
+   }
+});
+*/
 
