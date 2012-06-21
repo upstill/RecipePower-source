@@ -1,5 +1,7 @@
 RP::Application.routes.draw do
 
+  resources :authentications
+
   devise_for :users
 
   resources :feedbacks
@@ -17,6 +19,8 @@ RP::Application.routes.draw do
 
   resources :rcpqueries
 
+  match '/auth/:provider/callback' => 'authentications#create'
+  
   match 'rcpqueries/:id' => 'rcpqueries#update', :via => :post
 
   # Calling 'profile' action in 'users' controller edits the current user

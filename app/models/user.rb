@@ -27,6 +27,7 @@ class User < ActiveRecord::Base
       self.role_id = @@Roles.num(:user) unless self.role_id && (self.role_id > 0)
   end
   
+  has_many :authentications
   # ownership of tags restrict visible tags
   has_many :tag_owners
   has_many :tags, :through=>:tag_owners
