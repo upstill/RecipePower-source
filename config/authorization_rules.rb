@@ -15,10 +15,19 @@ authorization do
     #end
   end
   
+  role :moderator do
+      includes :user
+  end
+  
+  role :editor do
+      includes :moderator
+  end
+  
   role :admin do
-    includes :user
+    includes :editor
     # :sessions, :users
     has_permission_on [:recipes], :to => [:destroy]
+    has_permission_on [:users], :to => [:manage]
     has_permission_on [:expressions, :feedbacks, :links, :pages, :ratings, :rcpqueries, :recipes, :referents, :scales, :sites, :tags, :visitors], :to => :manage
   end
 end

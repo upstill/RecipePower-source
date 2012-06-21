@@ -1,6 +1,7 @@
 class RecipesController < ApplicationController
   filter_access_to :all
   include ApplicationHelper
+  include ActionView::Helpers::TextHelper
 
   def index
     redirect_to rcpqueries_url
@@ -137,7 +138,8 @@ class RecipesController < ApplicationController
     user.save
     @recipes = user.recipes(true)
 
-    redirect_to rcpqueries_url, :notice => "Fear not. \"#{@recipe.title}\" is gone from your cookmarks--though you may see it in other collections."
+    truncated = truncate(@recipe.title, :length => 40)
+    redirect_to rcpqueries_url, :notice => "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections."
   end
 
   # Remove the recipe from the system entirely

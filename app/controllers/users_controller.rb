@@ -21,12 +21,18 @@ class UsersController < ApplicationController
   end
 
   def edit
-    @user = current_user
+    @user = (params[:id] && User.find(params[:id])) || current_user
     @Title = "Edit Profile"
+  end
+  
+  def profile
+      @user = current_user
+      @Title = "Edit Profile"
+      render :action => 'edit'
   end
 
   def update
-    @user = current_user
+    @user = User.find params[:id]
     if @user.update_attributes(params[:user])
       @Title = "Cookmarks from Update"
       redirect_to recipes_path, :notice => "Your profile has been updated."

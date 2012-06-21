@@ -4,17 +4,12 @@
     <%= f.label :username %><br />
     <%= f.text_field :username %>
   </p>
-  <p>
-    <%= f.label :email, "Email Address" %><br />
-    <%= f.text_field :email %>
-  </p>
-  <p>
-    <%= f.label :password %><br />
-    <%= f.password_field :password %>
-  </p>
-  <p>
-    <%= f.label :password_confirmation, "Confirm Password" %><br />
-    <%= f.password_field :password_confirmation %>
-  </p>
-  <p><%= f.submit (@user.new_record? ? "Sign up" : "Update") %></p>
+Want to change your password? <%= link_to "Click here", edit_user_registration_path %>
+<p>
+  <% if permitted_to? :manage, @user %>
+	<%= f.label :role_id,  "Role: ",:id=>"user_role_label" -%>
+    <%= f.select :role_id,  options_for_select(*(@user.role_select)) %>
+  <% end %>
+</p>
+  <p><%= f.submit "Update" %></p>
 <% end %>

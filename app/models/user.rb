@@ -1,19 +1,32 @@
+require "type_map.rb"
 class User < ActiveRecord::Base
   # Include default devise modules. Others available are:
-  # :token_authenticatable, :encryptable, :confirmable, :lockable, :timeoutable and :omniauthable
+  # :token_authenticatable, :encryptable, :timeoutable
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable,
-         :confirmable, :lockable, :timeoutable, :omniauthable
+         :confirmable, :lockable, :omniauthable
 
   # Setup accessible (or protected) attributes for your model
   attr_accessible :id, :username, :email, :password, :password_confirmation, :recipes, :remember_me, :role_id
 
-  ROLES = {0 => :guest, 1 => :user, 2 => :admin}
-  
-  def role_symbols
-    [ROLES[role_id]]
-  end
+  # Establish the relationship among role_id values, symbols and user-friendly names
+  @@Roles = TypeMap.new( {
+      guest: ["Guest", 1], 
+      user: ["User", 2], 
+      moderator: ["Moderator", 3], 
+      editor: ["Editor", 4], 
+      admin: ["Admin", 5]
+  }, "unclassified")
 
+  def role_symbols
+      [@@Roles.sym(role_id)]
+  end
+  
+  # Ensure each user has a role, defaulting to :user
+  before_save do
+      self.role_id = @@Roles.num(:user) unless self.role_id && (self.role_id > 0)
+  end
+  
   # ownership of tags restrict visible tags
   has_many :tag_owners
   has_many :tags, :through=>:tag_owners
@@ -21,13 +34,10 @@ class User < ActiveRecord::Base
   has_many :rcprefs
   has_many :recipes, :through=>:rcprefs, :autosave=>true
 
-  # validates_presence_of :username
-  validates_uniqueness_of :username, :email, :allow_blank => true
-  validates_format_of :username, :with => /^[-\w\s\._@]+$/i, :allow_blank => true, :message => "should only contain letters, spaces, numbers, or .-_@"
+  validates_presence_of :username
+  validates_uniqueness_of :username, :email
+  validates_format_of :username, :allow_blank => true, :with => /^[-\w\s\.!_@]+$/i, :message => "can't take funny characters (letters, spaces, numbers, or .-!_@ only)"
   validates_format_of :email, :with => /^[-a-z0-9_+\.]+\@([-a-z0-9]+\.)+[a-z0-9]{2,4}$/i
-  # validates_presence_of :password, :on => :create
-  # validates_confirmation_of :password
-  # validates_length_of :password, :minimum => 4, :allow_blank => true
 
   # Make sure we have this particular user (who had better be in the seed list)
   def self.by_name (name)
@@ -36,6 +46,12 @@ class User < ActiveRecord::Base
       rescue Exception => e
           nil
       end
+  end
+  
+  # Return a 2-array of 1) the list of possible roles, and 2) the current role,
+  # suitable for passing to options_for_select
+  def role_select
+      [@@Roles.list, role_id]
   end
 
 # Robustly get the record for the current user, or guest if not logged in
@@ -76,18 +92,6 @@ class User < ActiveRecord::Base
 	# Add back in the owner, under "Pick Another Collection"
 	arr.unshift ["Pick Another Collection", owner_id]
   end
-
-=begin
-  # login can be either username or email address
-  def self.authenticate(login, pass)
-    user = find_by_username(login) || find_by_email(login)
-    return user if user && user.password_hash == user.encrypt_password(pass)
-  end
-
-  def encrypt_password(pass)
-    BCrypt::Engine.hash_secret(pass, password_salt)
-  end
-=end
 
   private
 

@@ -291,7 +291,6 @@ class Recipe < ActiveRecord::Base
   
   # Return the string describing the date last touched
   def touch_date_str
-      debugger
       Rcpref.touch_date_str(self.id, self.current_user)
   end
 

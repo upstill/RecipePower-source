@@ -19,14 +19,16 @@ RP::Application.routes.draw do
 
   match 'rcpqueries/:id' => 'rcpqueries#update', :via => :post
 
+  # Calling 'profile' action in 'users' controller edits the current user
+  match 'users/profile' => 'users#profile'
+  # match 'users/:id/show' => 'users#show'
+  resources :users
+  
   # Super-user can edit user info, starting with roles
   #match 'signup' => 'users#new', :as => :signup
   #match 'logout' => 'sessions#destroy', :as => :logout
   #match 'login' => 'sessions#new', :as => :login
   #resources :sessions
-  scope "/admin" do
-      resources :users
-  end
   #resources :users
 
   match 'tags/editor', :controller=>'tags', :action=>'editor', :via => :get
