@@ -1,0 +1,19 @@
+<% if @authentications && !@authentications.empty? %>
+    <div class="authentications">
+	  <p><strong>You can sign in to this account using:</strong></p>
+      <% for authentication in @authentications %>
+        <div class="authentication">
+          <%= image_tag "#{authentication.provider}_32.png", :size => "32x32" %>
+          <div class="provider"><%= authentication.provider_name %></div>
+          <div class="uid"><%= truncate authentication.uid.to_s, :length => 20 %></div>
+		  <% if @auth_delete %>
+            <%= link_to "X", authentication, :confirm => 'Are you sure you want to remove this authentication option?', :method => :delete, :class => "remove" %>
+		  <% end %>
+        </div>
+      <% end %>
+      <div class="clear"></div>
+	  <% if @auth_delete %>
+	    <p>(Click the 'X' to revoke the authorization)</p>
+	  <% end %>
+    </div>
+<% end %>

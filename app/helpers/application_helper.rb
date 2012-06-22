@@ -81,10 +81,11 @@ module ApplicationHelper
     link_to image_tag("RPlogo.png", :alt=>"RecipePower", :id=>"logo_img" ), root_path
   end
 
+  # Deploy the links for naming the user and/or signing up/signing in
   def user_status
     case current_user_or_guest_id
     when User.guest_id
-       link_to("Sign up", new_user_registration_path)+" or "+link_to("Sign In", new_user_session_path)
+       link_to("Sign In", authentications_path)
     when User.super_id
        link_to "Super logout", destroy_user_session_path, :method=>"delete"
     else

@@ -1,15 +1,27 @@
 <%= form_for @user do |f| %>
   <%= show_errors @user.errors %>
   <p>
-    <%= f.label :username %><br />
+    <%= f.label :username, "Username/Handle" %><br />
     <%= f.text_field :username %>
   </p>
-Want to change your password? <%= link_to "Click here", edit_user_registration_path %>
+  <p>
+    <%= f.label :fullname, "Full Name" %><br />
+    <%= f.text_field :fullname %>
+  </p>
+  <p>
+    <%= f.label :about, "About Me" %><br />
+    <%= f.text_area :about, placeholder: "Who Are You? What Do You Eat?", rows: "4", width: "80%" %>
+  </p>
 <p>
   <% if permitted_to? :manage, @user %>
 	<%= f.label :role_id,  "Role: ",:id=>"user_role_label" -%>
     <%= f.select :role_id,  options_for_select(*(@user.role_select)) %>
   <% end %>
 </p>
-  <p><%= f.submit "Update" %></p>
+  <p><%= f.submit "Update Details" %></p>
 <% end %>
+<hr>
+Want to change your password? <%= link_to "Click here", edit_user_registration_path %>
+<br>
+<%= render partial: 'shared/authentications' %>
+Want to sign in with other accounts? <%= link_to "Click here", authentications_path %>

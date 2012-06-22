@@ -28,6 +28,20 @@ class User < ActiveRecord::Base
   end
   
   has_many :authentications
+  # Pass info from an authentication onto a user as needed
+  def apply_omniauth(omniauth)
+    if ui = omniauth['info']
+      self.email = ui['email'] if email.blank? && !ui['email'].blank?
+      self.image = ui['image'] if image.blank? && !ui['image'].blank?
+      self.username = ui['nickname'] if username.blank? && !ui['nickname'].blank?
+      self.fullname = ui['name'] if fullname.blank? && !ui['name'].blank?
+    end
+  end
+
+  def password_required?
+    (authentications.empty? || !password.blank?) && super
+  end
+  
   # ownership of tags restrict visible tags
   has_many :tag_owners
   has_many :tags, :through=>:tag_owners
@@ -38,7 +52,7 @@ class User < ActiveRecord::Base
   validates_presence_of :username
   validates_uniqueness_of :username, :email
   validates_format_of :username, :allow_blank => true, :with => /^[-\w\s\.!_@]+$/i, :message => "can't take funny characters (letters, spaces, numbers, or .-!_@ only)"
-  validates_format_of :email, :with => /^[-a-z0-9_+\.]+\@([-a-z0-9]+\.)+[a-z0-9]{2,4}$/i
+  validates_format_of :email, :allow_blank => true, :with => /^[-a-z0-9_+\.]+\@([-a-z0-9]+\.)+[a-z0-9]{2,4}$/i
 
   # Make sure we have this particular user (who had better be in the seed list)
   def self.by_name (name)

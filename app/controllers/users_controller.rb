@@ -21,12 +21,17 @@ class UsersController < ApplicationController
   end
 
   def edit
-    @user = (params[:id] && User.find(params[:id])) || current_user
+    debugger
+    if @user = ((params[:id] && User.find(params[:id])) || current_user)
+        @authentications = @user.authentications
+    end
     @Title = "Edit Profile"
   end
   
   def profile
-      @user = current_user
+      if @user = current_user
+          @authentications = @user.authentications
+      end
       @Title = "Edit Profile"
       render :action => 'edit'
   end
