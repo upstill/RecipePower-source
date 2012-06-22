@@ -17,7 +17,9 @@ gem 'will_paginate', '~> 3.0'
 gem 'minitest'
 gem 'newrelic_rpm'
 gem 'devise'                        # auth, rails generate devise:install, rails generate devise MODEL
-gem 'omniauth-twitter'                      # multi-provider auth
+gem 'omniauth-twitter'                      
+gem 'omniauth-facebook'                     
+gem 'omniauth-google-oauth2'                     
 gem 'declarative_authorization'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
 
 group :development do

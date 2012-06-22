@@ -71,9 +71,9 @@ module ApplicationHelper
 	    onchange: h("add_rating(this, '#{association}', '#{escape_javascript(fields)}')"))
   end
 
-  def title 
+  def title ttl=nil
     # Any controller can override the default title of controller name
-    ext = (@Title || (@recipe && @recipe.title) || params[:controller].capitalize)
+    ext = (ttl || @Title || (@recipe && @recipe.title) || params[:controller].capitalize)
     "RecipePower"+(ext.blank? ? " Home" : " | #{ext}")
   end
 

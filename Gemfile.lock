@@ -62,9 +62,12 @@ GEM
     erubis (2.7.0)
     execjs (1.3.0)
       multi_json (~> 1.0)
+    faraday (0.8.1)
+      multipart-post (~> 1.1)
     hashie (1.2.0)
     hike (1.2.1)
     htmlentities (4.3.1)
+    httpauth (0.1)
     i18n (0.6.0)
     jquery-rails (1.0.19)
       railties (~> 3.0)
@@ -81,15 +84,28 @@ GEM
     minitest (2.12.1)
     mocha (0.9.12)
     multi_json (1.0.4)
+    multipart-post (1.1.5)
     newrelic_rpm (3.3.4.1)
     nifty-generators (0.4.6)
     nokogiri (1.5.0)
     oauth (0.4.6)
+    oauth2 (0.6.0)
+      faraday (~> 0.7)
+      httpauth (~> 0.1)
+      multi_json (~> 1.0)
     omniauth (1.1.0)
       hashie (~> 1.2)
       rack
+    omniauth-facebook (1.3.0)
+      omniauth-oauth2 (~> 1.0.2)
+    omniauth-google-oauth2 (0.1.10)
+      omniauth (~> 1.0)
+      omniauth-oauth2
     omniauth-oauth (1.0.1)
       oauth
+      omniauth (~> 1.0)
+    omniauth-oauth2 (1.0.2)
+      oauth2 (~> 0.6.0)
       omniauth (~> 1.0)
     omniauth-twitter (0.0.9)
       omniauth-oauth (~> 1.0)
@@ -192,6 +208,8 @@ DEPENDENCIES
   newrelic_rpm
   nifty-generators
   nokogiri
+  omniauth-facebook
+  omniauth-google-oauth2
   omniauth-twitter
   pg
   rails (= 3.1.0)
