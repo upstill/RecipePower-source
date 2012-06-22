@@ -1,18 +1,58 @@
-<% title "Authentications" %>
+<% title "Sign In Options" %>
 
-<table>
-  <tr>
-    <th>User</th>
-    <th>Provider</th>
-    <th>Uid</th>
-  </tr>
-  <% for authentication in @authentications %>
-    <tr>
-      <td><%= authentication.user_id %></td>
-      <td><%= authentication.provider %></td>
-      <td><%= authentication.uid %></td>
-      <td><%= link_to "Destroy", authentication, :confirm => 'Are you sure?', :method => :delete %></td>
-    </tr>
+<div id="sidebar">
+<h3>A Note On Privacy</h3>
+<p class="airy">
+If you feel it's kind of spooky to sign in with your Facebook (etc.) account, well, we do too. But if you're as sick as we are of creating passwords for every site in sight, it does make signing up and signing in a snap (or a click). 
+</p><p class="airy">
+RecipePower is not interested in your personal data and won't ask for it. But if you later decide to share your joy in RecipePower with your friends, we're happy to help. :-)
+</p>
+</div>
+
+<h3>Sign In Options</h3>
+<div class="auth_content">
+  <% if @authentications && !@authentications.empty? %>
+    <p><strong>You can sign in to this account using:</strong></p>
+    <div class="authentications">
+      <% for authentication in @authentications %>
+        <div class="authentication">
+          <%= image_tag "#{authentication.provider}_32.png", :size => "32x32" %>
+          <div class="provider"><%= authentication.provider.titleize %></div>
+          <div class="uid"><%= truncate authentication.uid.to_s, :length => 20 %></div>
+          <%= link_to "X", authentication, :confirm => 'Are you sure you want to remove this authentication option?', :method => :delete, :class => "remove" %>
+        </div>
+      <% end %>
+      <div class="clear"></div>
+    </div>
+    <p><strong>Add another service to sign in with:</strong></p>
+  <% else %>
+    <p><strong>Sign in through one of these services:</strong></p>
   <% end %>
-</table>
 
+<a href="/auth/facebook" class="auth_provider">
+  <%= image_tag "facebook_64.png", :size => "64x64", :alt => "Facebook" %>
+  Facebook
+</a>
+<a href="/auth/google_oauth2" class="auth_provider">
+  <%= image_tag "google_oauth2_64.png", :size => "64x64", :alt => "Google" %>
+  Google
+</a>
+<a href="/auth/twitter" class="auth_provider">
+  <%= image_tag "twitter_64.png", :size => "64x64", :alt => "Twitter" %>
+  Twitter
+</a>
+<br>
+<a href="/auth/aol" class="auth_provider">
+  <%= image_tag "aol_64.png", :size => "64x64", :alt => "AOL" %>
+  AOL
+</a>
+<a href="/auth/yahoo" class="auth_provider">
+  <%= image_tag "yahoo_64.png", :size => "64x64", :alt => "Yahoo" %>
+  Yahoo
+</a>
+<a href="/auth/open_id" class="auth_provider">
+  <%= image_tag "openid_64.png", :size => "64x64", :alt => "OpenID" %>
+  OpenID
+</a>
+</div>
+<div class="clear"></div>
