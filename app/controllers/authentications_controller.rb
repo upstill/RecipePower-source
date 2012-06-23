@@ -17,10 +17,10 @@ class AuthenticationsController < ApplicationController
       @authentication = current_user.authentications.create!(authparams) # Link to existing user
       redirect_to authentications_url, :notice => "Yay! Successful authentication via #{@authentication.provider_name}."
     elsif (info = omniauth['info']) && (email = info['email']) && (user = User.find_by_email(email))
-        user.apply_omniauth(omniauth)
-        @authentication = user.authentications.create!(authparams) # Link to existing user
-        flash[:notice] = "Yay! Signed in with #{@authentication.provider_name}."
-        sign_in_and_redirect(:user, user)
+      user.apply_omniauth(omniauth)
+      @authentication = user.authentications.create!(authparams) # Link to existing user
+      flash[:notice] = "Yay! Signed in with #{@authentication.provider_name}."
+      sign_in_and_redirect(:user, user)
     else
       # This is a new authentication (not previously linked to a user) and there is 
       # no current user to link it to. So we need to sign up the user to link it to
@@ -32,6 +32,7 @@ class AuthenticationsController < ApplicationController
         sign_in_and_redirect(:user, user)
       else
         session[:omniauth] = omniauth.except('extra')
+        flash[:notice] = "To cement your identity into RecipePower, we need to confirm a username and email JUST THIS ONCE."
         redirect_to new_user_registration_url
       end
     end

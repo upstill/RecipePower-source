@@ -9,13 +9,13 @@ RecipePower is not interested in your personal data and won't ask for it. But if
 </p>
 </div>
 
-<h3><%= current_user ? "Manage Sign-in Accounts" : "Sign In" %></h3>
+<h3><%= current_user ? "Manage Sign-in Services" : "Sign In" %></h3>
 <div class="auth_content">
   <%= render partial: 'shared/authentications' %>
   <% if @authentications && !@authentications.empty? %>
     <p><strong>Add another service to sign in with:</strong></p>
   <% else %>
-    <p class="airy"><strong>You can sign in using one of these services:</strong></p>
+    <p class="airy"><strong>You can sign in by clicking on one of these services:</strong></p>
   <% end %>
   <div class="auth_buttons">
 	<a href="/auth/facebook" class="auth_provider">
