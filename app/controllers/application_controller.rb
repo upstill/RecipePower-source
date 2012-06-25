@@ -8,7 +8,7 @@ class ApplicationController < ActionController::Base
     def orphantagid(tagid)
         "orphantag_"+tagid.to_s
     end
-    
+      
   include ControllerAuthentication
   protect_from_forgery
 
@@ -39,6 +39,21 @@ def need_login(login_required, super_required = false)
     end
 end
 =end
+    
+  def stored_location_for(resource)
+    if current_user 
+        # flash[:notice] = "Congratulations, you're signed up!"
+        if flashback = params[:redirect_to]
+            return flashback
+        elsif current_user.sign_in_count < 2
+            return welcome_path
+        else
+            return rcpqueries_path
+        end
+    end
+    super( resource ) 
+  end    
+
   # redirect somewhere that will eventually return back to here
   def redirect_away(url, options = {})
     session[:original_uri] = request.url # url.sub /\w*:\/\/[^\/]*/, ''

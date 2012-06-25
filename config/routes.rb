@@ -25,6 +25,8 @@ RP::Application.routes.draw do
 
   # Calling 'profile' action in 'users' controller edits the current user
   match 'users/profile' => 'users#profile'
+  # Ask a user to identify him/herself by email address
+  match 'users/identify' => 'users#identify'
   # match 'users/:id/show' => 'users#show'
   resources :users
   

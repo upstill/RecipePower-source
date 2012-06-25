@@ -1,6 +1,6 @@
 authorization do
   role :guest do
-    has_permission_on [:pages], :to => [:home, :contact, :about, :kale, :FAQ]
+    has_permission_on [:pages], :to => [:home, :contact, :about, :welcome, :FAQ]
     has_permission_on [:feedbacks], :to => [:create]
     has_permission_on [:visitors], :to => [:create]
     has_permission_on [:rcpqueries], :to => [:create, :read, :update]
@@ -53,5 +53,5 @@ privileges do
     includes :create, :read, :update, :delete
   end
   
-#  privilege :read, :pages, :includes => [:home, :contact, :about, :kale, :FAQ]
+#   privilege :read, :pages, :includes => [:home, :contact, :about, :FAQ, :welcome]
 end

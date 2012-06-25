@@ -192,6 +192,14 @@ a:visited {
   color: #069;
 }
 
+h4 {
+	margin-top:2em;
+	margin-bottom:0em;
+}
+
+.indent {
+	margin-left:2em;
+}
 /* Navigation */
 
 nav {

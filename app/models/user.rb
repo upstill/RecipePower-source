@@ -7,7 +7,7 @@ class User < ActiveRecord::Base
          :confirmable, :lockable # , :omniauthable
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :id, :username, :email, :password, :password_confirmation, :recipes, :remember_me, :role_id
+  attr_accessible :id, :username, :email, :password, :password_confirmation, :recipes, :remember_me, :role_id, :sign_in_count
 
   # Establish the relationship among role_id values, symbols and user-friendly names
   @@Roles = TypeMap.new( {
