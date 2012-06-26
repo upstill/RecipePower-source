@@ -27,7 +27,7 @@ class User < ActiveRecord::Base
       self.role_id = @@Roles.num(:user) unless self.role_id && (self.role_id > 0)
   end
   
-  has_many :authentications
+  has_many :authentications, :dependent => :destroy
   # Pass info from an authentication onto a user as needed
   def apply_omniauth(omniauth)
     if ui = omniauth['info']
