@@ -17,6 +17,7 @@ gem 'will_paginate', '~> 3.0'
 gem 'minitest'
 gem 'newrelic_rpm'
 gem 'devise'                        # auth, rails generate devise:install, rails generate devise MODEL
+gem 'devise_invitable'
 gem 'omniauth-twitter'                      
 gem 'omniauth-facebook'                     
 gem 'omniauth-google-oauth2'                     

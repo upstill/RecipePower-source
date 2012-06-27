@@ -2,14 +2,14 @@ require "type_map.rb"
 class User < ActiveRecord::Base
   # Include default devise modules. Others available are:
   # :token_authenticatable, :encryptable, :timeoutable
-  devise :database_authenticatable, :registerable,
+  devise :invitable, :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable,
          :confirmable, :lockable # , :omniauthable
 
   # Setup accessible (or protected) attributes for your model
   attr_accessible :id, :username, :fullname, :about,
                 :email, :password, :password_confirmation, 
-                :recipes, :remember_me, :role_id, :sign_in_count
+                :recipes, :remember_me, :role_id, :sign_in_count, :invitation_message
 
   # Establish the relationship among role_id values, symbols and user-friendly names
   @@Roles = TypeMap.new( {

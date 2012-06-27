@@ -1,6 +1,7 @@
 class UsersController < ApplicationController
   before_filter :login_required, :except => [:new, :create, :identify]
-
+  before_filter :authenticate_user!, :except => [:show, :index]
+  
   def new
     @user = User.new
     @Title = "Create RecipePower Account"

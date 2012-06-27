@@ -1,51 +1,9 @@
 <% title "Sign In Options" %>
-
-<div class="auth_sidebar">
-<h3>A Note On Privacy</h3>
-<p class="airy">
-Does it feel kind of spooky to sign in with your Facebook (etc.) account? Yeah, us too--but we're also sick of creating passwords for every site in sight. It does make signup and signin a snap (or a click). 
-</p><p class="airy">
-RecipePower is not interested in your personal data and won't ask for it. But if you later decide to share your joy in RecipePower with your friends, we're happy to help. :-)
-</p>
-</div>
+<%= render partial: 'shared/authentications_sidebar' %>
 
 <h3><%= current_user ? "Manage Sign-in Services" : "Sign In" %></h3>
-<div class="auth_content">
-  <%= render partial: 'shared/authentications' %>
-  <% if @authentications && !@authentications.empty? %>
-    <p><strong>Add another service to sign in with:</strong></p>
-  <% else %>
-    <p class="airy"><strong>You can sign in by clicking on one of these services:</strong></p>
-  <% end %>
-  <div class="auth_buttons">
-	<a href="/auth/facebook" class="auth_provider">
-	  <%= image_tag "facebook_64.png", :size => "64x64", :alt => "Facebook" %>
-	  Facebook
-	</a>
-	<a href="/auth/google_oauth2" class="auth_provider">
-	  <%= image_tag "google_oauth2_64.png", :size => "64x64", :alt => "Google" %>
-	  Google
-	</a>
-	<a href="/auth/twitter" class="auth_provider">
-	  <%= image_tag "twitter_64.png", :size => "64x64", :alt => "Twitter" %>
-	  Twitter
-	</a>
-  </div>
-<br class="clear">
-  <div class="auth_buttons">
-	<a href="/auth/aol" class="auth_provider">
-	  <%= image_tag "aol_64.png", :size => "64x64", :alt => "AOL" %>
-	  Aol
-	</a>
-	<a href="/auth/yahoo" class="auth_provider">
-	  <%= image_tag "yahoo_64.png", :size => "64x64", :alt => "Yahoo" %>
-	  Yahoo
-	</a>
-	<a href="/auth/open_id" class="auth_provider">
-	  <%= image_tag "openid_64.png", :size => "64x64", :alt => "OpenID" %>
-	  OpenID
-	</a>
-  </div>
+<%= render partial: 'shared/authentications_current' %>
+<%= render partial: 'shared/authentications_possible' %>
 <% if !current_user %>
   <div class="auth_signin">
 	<strong>Rather use a RecipePower account? <br><br></strong>
@@ -54,6 +12,4 @@ RecipePower is not interested in your personal data and won't ask for it. But if
 	<%= link_to("Sign In", new_user_session_path) %>
   </div>
 <% end %>
-</div>
-<div class="clear">
-</div>
+<br class="clear">

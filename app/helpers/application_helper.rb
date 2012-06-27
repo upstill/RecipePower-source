@@ -138,11 +138,12 @@ module ApplicationHelper
     
     def footer_navlinks
     	navlinks = []
-    	navlinks << navlink("About", "/about", (@nav_current==:about)) 
-    	navlinks << navlink("Contact", "/contact", (@nav_current==:contact)) 
-    	navlinks << navlink("Home", "/", (@nav_current==:home)) 
+    	navlinks << navlink("About", about_path, (@nav_current==:about)) 
+    	navlinks << navlink("Contact", contact_path, (@nav_current==:contact)) 
+    	navlinks << navlink("Home", root_path, (@nav_current==:home)) 
     	navlinks << navlink("FAQ", "/FAQ", (@nav_current==:FAQ)) 
     	navlinks << feedback_link("Feedback")
+    	navlinks << navlink("Invite", new_user_invitation_path, (@nav_current==:invite))
     	navlinks.join('  |  ').html_safe
     end
 

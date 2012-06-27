@@ -1,4 +1,5 @@
 class RegistrationsController < Devise::RegistrationsController
+    before_filter :authenticate_user!, :except => [:show, :index]
     def create
       # We can be coming from users#identify on the 'existing user' form
       if @user = User.find_by_email(params[:user][:email])

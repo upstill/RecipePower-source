@@ -4,7 +4,7 @@
 }
 
 .auth_sidebar {
-width: 300px;
+width: 30%;
 float: right;
 margin:15px 5px 15px 30px;
 border:3px solid black;
@@ -22,6 +22,7 @@ padding:10px;
 
 .auth_content {
 	float: left;
+	width: 60%;
 }
 
 .authentication {
