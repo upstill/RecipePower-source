@@ -4,7 +4,6 @@ common: &common
   pool: 5
   timeout: 5000
   username: postgres
-  password: postgres
 
 development:
   adapter: postgresql
