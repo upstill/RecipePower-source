@@ -7,6 +7,7 @@ class AuthenticationsController < ApplicationController
 
   # Callback after omniauth authentication
   def create
+      debugger
     # render :text => request.env['omniauth.auth'].to_yaml
     omniauth = request.env['omniauth.auth']
     # render text: omniauth.to_yaml
@@ -31,20 +32,16 @@ class AuthenticationsController < ApplicationController
       user = (token && User.where(:invitation_token => token).first) || User.new
       user.username = session[:invitation_username]
       user.apply_omniauth(omniauth)
-      if success = user.valid?
-          @authentication = user.authentications.build(authparams)
+      @authentication = user.authentications.build(authparams)
+      if user.save
           flash[:notice] = "Signed in via #{@authentication.provider_name}."
           if user.sign_in_count > 1
               flash[:notice] += " Welcome back, #{user.username}!"
           end
           if user.invited?
               user.accept_invitation!
-          else
-              success = user.save
           end
-      end
-      if success
-        sign_in_and_redirect(:user, user)
+          sign_in_and_redirect(:user, user)
       else
         # The email didn't come in the authorization, so we now need to 
         # discriminate between an existing user(and have them log in) 

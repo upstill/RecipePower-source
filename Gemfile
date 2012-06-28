@@ -5,9 +5,6 @@ gem 'rails', '3.1.0'
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
 
-# gem 'sqlite3'
-
-# Gems for the Tutorial sample app
 gem 'pg'
 
 gem 'closure_tree'
@@ -22,6 +19,7 @@ gem 'omniauth-twitter'
 gem 'omniauth-facebook'                     
 gem 'omniauth-google-oauth2'                     
 gem 'declarative_authorization'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
+gem 'thin'
 
 group :development do
   gem 'rspec-rails', '2.6.1'

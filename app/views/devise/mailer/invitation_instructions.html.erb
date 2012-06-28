@@ -4,7 +4,7 @@
 <%= (@resource.invited_by_id && (User.find(@resource.invited_by_id).fullname || User.find(@resource.invited_by_id).email)) || "Someone" %>
 has invited you to join them on 
 <%= link_to "RecipePower.com", root_url %>
-<%= @resource.invitation_message ? ", saying \"#{@resource.invitation_message}\".<br>" : ". " %> 
+<%= @resource.invitation_message ? ", saying \"#{@resource.invitation_message}\".<br>".html_safe : ". " %> 
 You can accept through the link below.</p>
 
 <p><%= link_to 'Accept invitation', accept_invitation_url(@resource, :invitation_token => @resource.invitation_token) %></p>

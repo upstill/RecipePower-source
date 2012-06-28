@@ -1,6 +1,13 @@
 <h3>Welcome to RecipePower!</h3>
+<p class="airy">
+The Web is the most wonderful, vast library for cooks, EVER. But the jewels, the recipes that are perfect <strong>for you</strong> are scattered in all corners of the galaxy. Wouldn't you love to have one concentrated, brilliant collection, the Best of the Web, with your name on it? Well, here you go. RecipePower is where you can collect, 
+organize, share, rediscover and generally splash around in all your food-related "cookmarks" from the Web. It's an online lockbox for your culinary treasures, organized on <strong>your</strong> terms.  
+</p><p class="airy">
+There are thousands of sources out there, from food blogs, to cooking sites, to search engines--but RecipePower is the <strong>one place</strong> to bring them all together. It's also where you'll find like-minded cooks on the same quest. Here, you can meet, share recipes with, learn from, teach and collaborate with others from fellow travellers in your food world.
+</p>
+<hr>
 <%= render partial: 'shared/authentications_sidebar' %>
-<h4>Just give yourself a username and password, and you're all set.</h4>
+<h4>Sound interesting? Just give yourself a username and password, and you're ready to roll.</h4>
 <%= form_for resource, :as => resource_name, :url => invitation_path(resource_name), :html => { :method => :put } do |f| %>
   <%= devise_error_messages! %>
   <%= f.hidden_field :invitation_token %>
