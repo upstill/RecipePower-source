@@ -1,5 +1,7 @@
 RP::Application.routes.draw do
 
+  resources :feedback, :only => [:new, :create]
+
   resources :authentications
 
   devise_for :users, :controllers => {:invitations => 'invitations', :registrations => 'registrations'}

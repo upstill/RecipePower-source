@@ -94,7 +94,7 @@ module ApplicationHelper
        ulink = link_to uname, users_profile_path # users_edit_path 
        ulogout = link_to "Sign Out", destroy_user_session_path, :method=>"delete"
        "<strong>#{ulink}</strong><span class=\"welcome_user\">&nbsp|&nbsp;#{ulogout}</span>".html_safe
-     end
+     end + " | " + navlink("Invite", new_user_invitation_path, (@nav_current==:invite))
   end
   
   def bookmarklet
@@ -128,13 +128,14 @@ module ApplicationHelper
     	navlinks.push(navlink "Add a Cookmark", new_recipe_path, (@nav_current==:addcookmark)) 
     	navlinks.join('  |  ').html_safe
     end
-    
+=begin    
     def feedback_link label
     	# We save the current URI in the feedback link so we can return here after feedback,
     	# and so the feedback can include the source
     	path = request.url.sub /[^:]*:\/\/[^\/]*/, '' # Strip off the protocol and host
     	navlink(label, "/feedbacks/new?backto=#{path}", (@nav_current==:feedback)) 
     end
+=end
     
     def footer_navlinks
     	navlinks = []
@@ -142,8 +143,7 @@ module ApplicationHelper
     	navlinks << navlink("Contact", contact_path, (@nav_current==:contact)) 
     	navlinks << navlink("Home", root_path, (@nav_current==:home)) 
     	navlinks << navlink("FAQ", "/FAQ", (@nav_current==:FAQ)) 
-    	navlinks << feedback_link("Feedback")
-    	navlinks << navlink("Invite", new_user_invitation_path, (@nav_current==:invite))
+    	# navlinks << feedback_link("Feedback")
     	navlinks.join('  |  ').html_safe
     end
 

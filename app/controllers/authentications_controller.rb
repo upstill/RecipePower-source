@@ -7,7 +7,6 @@ class AuthenticationsController < ApplicationController
 
   # Callback after omniauth authentication
   def create
-      debugger
     # render :text => request.env['omniauth.auth'].to_yaml
     omniauth = request.env['omniauth.auth']
     # render text: omniauth.to_yaml

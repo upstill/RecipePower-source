@@ -1,0 +1,9 @@
+Dear site administrator, you've got feedback from your users:
+
+Subject: <%= @feedback.subject %>
+User's email: <%= @feedback.email %>
+Sent at: <%= Time.now %>
+From Page: <%= @feedback.page %>
+
+Comment:
+<%=h @feedback.comment %>
