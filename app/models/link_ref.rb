@@ -1,3 +1,4 @@
+# encoding: UTF-8
 require 'uri'
 # require 'CGI'
 
@@ -41,9 +42,9 @@ require 'csv'
         rownum = 1
         CSV.foreach(fname, :encoding=>"UTF-8") do |row|
             return unless tagstrs = row[0]
-            refpaths = (row[1] || "").strip
-            typestrs = (row[2] || "").strip
-            uri = row[3]
+            refpaths = (row[2] || "").strip
+            typestrs = (row[3] || "").strip
+            uri = row[4]
             referents = [] # Clear the array specifying referents per type
             tagpairs = [] # Clear the array of tags (one for each combo of string and type) for the line
             # In this first pass through the join of tags and types, we convert from strings to tags and typeids,
@@ -52,6 +53,7 @@ require 'csv'
             tagstrs.split('; ').each do |tagstr|
                 tagstr.strip!
                 typestrs.split('; ').each do |typestr|
+                    typestr.strip!
                     # puts self.associate :tag=>tag, :resource_type=>:glossary, :uri=>uri, :tagtype=>type, :userid=>superid
                     # Convert typestr to canonical form
                     if typeid = Tag.typenum(typestr)
@@ -86,8 +88,7 @@ require 'csv'
             # In this pass, we associate all the tags of a given type with the common referent,
             # creating a new referent IFF there is more than one tag.
             tagpairs.each do |pair|
-                tag = pair.first
-                locale = pair.last
+                tag, locale = pair[0..1]
                 # Either create a referent for this set of tags, or use the one that was
                 # asserted/identified earlier
                 args = { }
@@ -111,11 +112,11 @@ require 'csv'
             referents.each_index do |ix| 
                 refpaths.split(';').each do |refpath| 
                     if child = referents[ix]
-                        pathlist = refpath.strip.split('/').collect { |atom| Referent.express atom, ix }
+                        pathlist = refpath.strip.split('/').collect { |atom| Referent.express atom.strip, ix }
                         # Now we have a series of referents representing the path above 'child'
                         # We establish the relationships by popping up the path
                         while parent = pathlist.pop
-                            unless child.parents(true).any? { |otherparent| otherparent.id == parent.id }
+                            unless (child.id == parent.id) || child.parents(true).any? { |otherparent| otherparent.id == parent.id }
                                 child.parents << parent
                                 child.save
                                 parent.save
@@ -128,6 +129,7 @@ require 'csv'
             rownum = rownum + 1
         end
     end
+    
     def self.preview_CSVfile(fname)
         uses = {}
         CSV.foreach(fname, :encoding=>"UTF-8") do |row|
@@ -159,5 +161,43 @@ require 'csv'
                 uses[word].each { |use| f.puts use }
             end
         end        
+    end
+    
+require './lib/linker.rb'
+    def self.CSVtree(fname)
+        rownum = 1
+        linkers = {}
+        CSV.foreach(fname, :encoding=>"UTF-8") do |row|
+            return unless tagstrs = row[0]
+            refpaths = (row[2] || "").strip
+            typestrs = (row[3] || "").strip
+            # In this first pass through the join of tags and types, we convert from strings to tags and typeids,
+            #  meanwhile looking for a referent borne by one of the tags, which we will associate with all the
+            #  tags in the second pass.
+            tagstrs.split(';').each do |tagstr|
+                tagstr = normalize(tagstr)
+                tagstr.sub('..:','')
+                typestrs.split(';').each do |typestr|
+                    typestr = normalize typestr
+                    linker = (linkers[typestr] ||= Linker.new()) 
+                    refpaths.split(';').each do |pathstr|
+                        path = pathstr.split('/').collect { |name| normalize name }
+                        path << tagstr unless (tagstr == path[-1])
+                        linker.pathify path
+                    end
+                end
+            end
+            rownum = rownum + 1
+            # break if rownum > 10
+        end
+        linker = linkers["food"]
+        debugger
+        linker.show
+        return
+        linkers.keys.sort.each do |type|
+            puts type.titleize+":"
+            linker = linkers[type]
+            linker.roots.each { |root| linker.show_node root, "  " }
+        end
     end
 end

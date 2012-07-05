@@ -26,7 +26,9 @@ class Expression < ActiveRecord::Base
         en: ["English", 1],
         it: ["Italian", 2], 
         es: ["Spanish", 3],
-        fr: ["French",  4]
+        fr: ["French",  4],
+        ru: ["Russian", 5],
+        de: ["German",  6]
     }, "No Locale")
     
     def self.localenum tt
