@@ -162,7 +162,7 @@ require 'csv'
             end
         end        
     end
-    
+=begin
 require './lib/linker.rb'
     def self.CSVtree(fname)
         rownum = 1
@@ -200,4 +200,5 @@ require './lib/linker.rb'
             linker.roots.each { |root| linker.show_node root, "  " }
         end
     end
+=end
 end
