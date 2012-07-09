@@ -60,6 +60,16 @@ $(function() {
 					nuke_DOM_elements_by_id,
 				    "json");
 	})
+    $("#Focus_on_tags").tokenInput("/tags/match.json", {
+        crossDomain: false,
+        hintText: "", // "Type tags and strings to look for",
+		noResultsText: "No matching tag found; hit Enter to search with text",
+        prePopulate: "", // $("#rcpquery_tag_tokens").data("pre"),
+        theme: "facebook",
+        onAdd: tokenChangeCallback,
+        onDelete: tokenChangeCallback,
+        allowCustomEntry: true
+    });
     $("#recipe_tag_tokens").tokenInput("/tags/match.json", {
         crossDomain: false,
 		noResultsText: "No matching tag found; hit Enter to make it a tag",

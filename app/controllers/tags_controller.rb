@@ -18,6 +18,7 @@ class TagsController < ApplicationController
           # The :unbound_only parameter limits the set to tags with no associated form (and, thus, referent)
           @taglist.delete_if { |t| !t.referents.empty? } if params[:unbound_only] == "true"
       end
+    # @filtertag = Tag.new
     respond_to do |format|
       format.json { render :json => @taglist.map { |tag| { :title=>tag.name+tag.id.to_s, :isLazy=>false, :key=>tag.id, :isFolder=>false } } }
       format.html # index.html.erb
