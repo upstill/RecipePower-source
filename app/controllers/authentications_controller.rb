@@ -38,7 +38,7 @@ class AuthenticationsController < ApplicationController
       user.username = session[:invitation_username]
       user.apply_omniauth(omniauth)
       @authentication = user.authentications.build(authparams)
-      if user.save
+      if user.save && !user.email.blank?
           flash[:notice] = "Signed in via #{@authentication.provider_name}."
           if user.sign_in_count > 1
               flash[:notice] += " Welcome back, #{user.username}!"
