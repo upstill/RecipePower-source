@@ -2,8 +2,15 @@ require './lib/controller_authentication.rb'
 
 class ApplicationController < ActionController::Base
     helper :all
+    rescue_from Timeout::Error, :with => :timeout_error # self defined exception
+    rescue_from OAuth::Unauthorized, :with => :timeout_error # self defined exception
     
     helper_method :orphantagid
+    
+    def timeout_error
+        debugger
+        redirect_to authentications_path, :notice => "Sorry, access to that page took too long."
+    end
     
     def orphantagid(tagid)
         "orphantag_"+tagid.to_s
