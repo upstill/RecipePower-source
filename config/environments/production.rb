@@ -58,9 +58,9 @@ RP::Application.configure do
 
   # Send deprecation notices to registered listeners
   config.active_support.deprecation = :notify
-end
 
-RP::Application.config.middleware.use ExceptionNotifier,
-  :email_prefix => "[Whatever] ",
-  :sender_address => %{"notifier" <upstill@gmail.com>},
-  :exception_recipients => %w{webmaster@recipepower.com}
+  config.middleware.use ExceptionNotifier,
+    :email_prefix => "[RecipePower] ",
+    :sender_address => %{ "RecipePower" <upstill@gmail.com> },
+    :exception_recipients => %w{ webmaster@recipepower.com }
+end
