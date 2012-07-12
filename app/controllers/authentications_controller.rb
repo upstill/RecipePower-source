@@ -1,15 +1,16 @@
 class AuthenticationsController < ApplicationController
   def index
     @authentications = current_user.authentications if current_user
-    cu = current_user
-    debugger
     @auth_delete = true
     @auth_context = :manage
   end
   
   def failure
-      debugger
       redirect_to authentications_url, :notice => "Sorry, authentication failed."
+  end
+  
+  def handle_unverified_request
+      true
   end
 
   # Callback after omniauth authentication
@@ -18,8 +19,6 @@ class AuthenticationsController < ApplicationController
     omniauth = request.env['omniauth.auth']
     # render text: omniauth.to_yaml
     authparams = omniauth.slice('provider', 'uid')
-    cu = current_user
-    debugger
     if @authentication = Authentication.find_by_provider_and_uid(omniauth['provider'], omniauth['uid'])
       flash[:notice] = "Yay! Signed in with #{@authentication.provider_name}. Welcome back, #{@authentication.user.username}!"
       # sign_in_and_redirect(:user, @authentication.user)
