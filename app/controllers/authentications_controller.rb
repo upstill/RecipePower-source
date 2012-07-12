@@ -50,9 +50,9 @@ class AuthenticationsController < ApplicationController
           end
           sign_in_and_redirect(:user, user)
         end
-      end  # elsif
+      end  
+      # We haven't managed to get the user signed in by other means, but we still have an authorization
       if !current_user
-        debugger
         # The email didn't come in the authorization, so we now need to 
         # discriminate between an existing user(and have them log in) 
         # and a new user (and have them sign up). Time to throw the problem
