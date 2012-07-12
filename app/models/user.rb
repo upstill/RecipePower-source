@@ -1,10 +1,10 @@
 require "type_map.rb"
 class User < ActiveRecord::Base
   # Include default devise modules. Others available are:
-  # :token_authenticatable, :encryptable, :timeoutable
+  # :token_authenticatable, :encryptable, :confirmable, :timeoutable
   devise :invitable, :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable,
-         :confirmable, :lockable # , :omniauthable
+         :lockable # , :omniauthable
 
   # Setup accessible (or protected) attributes for your model
   attr_accessible :id, :username, :fullname, :about,

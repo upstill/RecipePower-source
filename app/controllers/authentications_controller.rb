@@ -1,6 +1,8 @@
 class AuthenticationsController < ApplicationController
   def index
     @authentications = current_user.authentications if current_user
+    cu = current_user
+    debugger
     @auth_delete = true
     @auth_context = :manage
   end
@@ -16,10 +18,12 @@ class AuthenticationsController < ApplicationController
     omniauth = request.env['omniauth.auth']
     # render text: omniauth.to_yaml
     authparams = omniauth.slice('provider', 'uid')
+    cu = current_user
     debugger
     if @authentication = Authentication.find_by_provider_and_uid(omniauth['provider'], omniauth['uid'])
       flash[:notice] = "Yay! Signed in with #{@authentication.provider_name}. Welcome back, #{@authentication.user.username}!"
-      sign_in_and_redirect(:user, @authentication.user)
+      # sign_in_and_redirect(:user, @authentication.user)
+      result = sign_in_and_redirect @authentication.user, :bypass => true
     elsif current_user
       current_user.apply_omniauth(omniauth)
       @authentication = current_user.authentications.create!(authparams) # Link to existing user
@@ -32,13 +36,12 @@ class AuthenticationsController < ApplicationController
       @authentication = user.authentications.create!(authparams) # Link to existing user
       flash[:notice] = "Yay! Signed in with #{@authentication.provider_name}. Nice to see you again, #{user.username}!"
       sign_in_and_redirect(:user, user)
-    else
-      token = session[:invitation_token]
-      user = (token && User.where(:invitation_token => token).first) || User.new
-      user.username = session[:invitation_username]
-      user.apply_omniauth(omniauth)
-      @authentication = user.authentications.build(authparams)
-      if user.save && !user.email.blank?
+    elsif user = (session[:invitation_token] && User.where(:invitation_token => session[:invitation_token]).first)
+        # If we have an invitation out for this user we go ahead and log them in
+        user.username = session[:invitation_username]
+        user.apply_omniauth(omniauth)
+        @authentication = user.authentications.build(authparams)
+        if user.save
           flash[:notice] = "Signed in via #{@authentication.provider_name}."
           if user.sign_in_count > 1
               flash[:notice] += " Welcome back, #{user.username}!"
@@ -47,7 +50,10 @@ class AuthenticationsController < ApplicationController
               user.accept_invitation!
           end
           sign_in_and_redirect(:user, user)
-      else
+        end
+      end  # elsif
+      if !current_user
+        debugger
         # The email didn't come in the authorization, so we now need to 
         # discriminate between an existing user(and have them log in) 
         # and a new user (and have them sign up). Time to throw the problem
@@ -74,7 +80,6 @@ class AuthenticationsController < ApplicationController
 =end
       session[:invitation_token] = nil
       session[:invitation_username] = nil
-    end
   end
 
   def destroy
