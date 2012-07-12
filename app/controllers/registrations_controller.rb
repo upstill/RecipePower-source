@@ -3,13 +3,17 @@ class RegistrationsController < Devise::RegistrationsController
     def create
         debugger
       # We can be coming from users#identify on the 'existing user' form
-      if @user = User.find_by_email(params[:user][:email])
-          if omniauth = session[:omniauth]
-            @user.apply_omniauth(omniauth)
-            @user.authentications.build(omniauth.slice('provider','uid'))
-            @user.valid?
+      if params[:commit] == "Go"
+          if @user = User.find_by_email(params[:user][:email])
+              if omniauth = session[:omniauth]
+                @user.apply_omniauth(omniauth)
+                @user.authentications.build(omniauth.slice('provider','uid'))
+                @user.valid?
+              end
+              sign_in_and_redirect(:user, @user)
+          else # No such user found
+              redirect_to users_identify_url, :notice => "Sorry, we don't have any records of an '#{params[:user][:email]}'."
           end
-          sign_in_and_redirect(:user, @user)
       else
           super
           session[:omniauth] = nil unless @user.new_record?
