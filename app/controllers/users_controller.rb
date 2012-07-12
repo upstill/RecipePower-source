@@ -1,4 +1,5 @@
 class UsersController < ApplicationController
+  rescue_from ActiveRecord::RecordNotFound, :with => :not_found
   before_filter :login_required, :except => [:new, :create, :identify]
   before_filter :authenticate_user!, :except => [:show, :index, :identify]
   
@@ -8,6 +9,15 @@ class UsersController < ApplicationController
     if(!session[:user_id])
        redirect_to new_visitor_url, :notice => "Sorry, but RecipePower is not open for business as yet. Stay tuned, or sign up for our mailing list"
     end
+  end
+  
+  def show
+      @user = User.find params[:id]
+  end
+  
+  def not_found
+      debugger
+      redirect_to users_path, :notice => "User not found"
   end
 
   # With devise handling user creation, the only way we get here is from the 'identify' page.
