@@ -4,8 +4,14 @@ class ApplicationController < ActionController::Base
     helper :all
     rescue_from Timeout::Error, :with => :timeout_error # self defined exception
     rescue_from OAuth::Unauthorized, :with => :timeout_error # self defined exception
+    rescue_from AbstractController::ActionNotFound, :with => :no_action_error
     
     helper_method :orphantagid
+    
+    def no_action_error
+        debugger
+        redirect_to home_path, :notice => "Sorry, action not found"
+    end
     
     def timeout_error
         debugger
@@ -87,6 +93,7 @@ end
   
   protected
     def render_optional_error_file(status_code)
+      logger.info "Logger sez: Error 500"
       render :template => "errors/500", :status => 500, :layout => 'application'
     end
 end

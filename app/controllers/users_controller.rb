@@ -16,7 +16,7 @@ class UsersController < ApplicationController
   end
   
   def not_found
-      debugger
+      logger.debug "Logger sez: User not found"
       redirect_to users_path, :notice => "User not found"
   end
 
