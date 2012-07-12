@@ -12,6 +12,12 @@ class ApplicationController < ActionController::Base
         redirect_to authentications_path, :notice => "Sorry, access to that page took too long."
     end
     
+    def rescue_action_in_public
+        debugger
+        x=2
+    end
+    # alias_method :rescue_action_locally, :rescue_action_in_public    
+    
     def orphantagid(tagid)
         "orphantag_"+tagid.to_s
     end
@@ -78,4 +84,9 @@ end
     session[:original_uri] = nil
     redirect_to uri, options
   end
+  
+  protected
+    def render_optional_error_file(status_code)
+      render :template => "errors/500", :status => 500, :layout => 'application'
+    end
 end

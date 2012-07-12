@@ -23,6 +23,7 @@ gem 'omniauth-openid'
 gem 'declarative_authorization'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
 gem 'thin'
 
+gem 'exception_notification', :require => 'exception_notifier'
 group :development do
   gem 'rspec-rails', '2.6.1'
   gem 'annotate', '2.4.0'

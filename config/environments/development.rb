@@ -28,4 +28,10 @@ RP::Application.configure do
 
   # Expands the lines which load the assets
   config.assets.debug = true
+  
 end
+
+RP::Application.config.middleware.use ExceptionNotifier,
+  :email_prefix => "[Whatever] ",
+  :sender_address => %{"notifier" <upstill@gmail.com>},
+  :exception_recipients => %w{webmaster@recipepower.com}

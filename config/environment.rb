@@ -9,3 +9,4 @@ require 'will_paginate'
 # Get the encryption key files
 # Sentry::AsymmetricSentry.default_public_key_file = "config/publ.key"
 # Sentry::AsymmetricSentry.default_private_key_file = "config/priv.key"
+
