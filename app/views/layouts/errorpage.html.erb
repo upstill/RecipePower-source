@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>RecipePower Error</title>
+	<%= favicon_link_tag "/assets/favicon.ico" %>
+    <%= stylesheet_link_tag "application" %>
+    <%= javascript_include_tag "application" %>
+    <%= csrf_meta_tag %>
+  </head>
+  <body>
+	<div id="container">
+	    <%# render 'layouts/header' %>
+		<header>
+			<div id="logo_div">
+				<%= logo %>
+			</div>
+		</header>
+	    <section id="workpane">
+			<%= yield %>
+			<script type => 'text/javascript'>
+			  var GOOG_FIXURL_LANG = '#{I18n.locale}';
+			  var GOOG_FIXURL_SITE = '#{request.protocol}#{request.host}';
+			</script>
+			<script type='text/javascript' src = 'http://linkhelp.clients.google.com/tbproxy/lh/wm/fixurl.js' >
+			</script>
+	    </section>
+	    <%# render 'layouts/footer' %>
+		<footer>
+			<div id="footer_nav_links">
+				<%= footer_navlinks %>
+			</div>
+		</footer>
+	</div>
+	<% debug_dump(params) if Rails.env.development? %>
+  </body>
+</html>
