@@ -61,6 +61,7 @@ RP::Application.configure do
 
   config.middleware.use ExceptionNotifier,
     :email_prefix => "[RecipePower] ",
-    :sender_address => %{ "RecipePower" <upstill@gmail.com> },
-    :exception_recipients => %w{ webmaster@recipepower.com }
+    :sender_address => "upstill@gmail.com",
+    :exception_recipients => "webmaster@recipepower.com"
+  
 end

@@ -33,6 +33,7 @@ group :development do
   gem 'ruby-debug19', :require => 'ruby-debug'
   gem 'log_buddy'
   gem 'ruby-prof', :git => 'git://github.com/wycats/ruby-prof.git'
+  gem 'letter_opener'
 end
 
 # Gems used only for assets and not required
