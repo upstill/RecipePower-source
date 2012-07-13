@@ -16,8 +16,8 @@ class UsersController < ApplicationController
   end
   
   def not_found
-      logger.debug "Logger sez: User not found"
-      redirect_to users_path, :notice => "User not found"
+      debugger
+      redirect_to root_path, :notice => "User not found"
   end
 
   # With devise handling user creation, the only way we get here is from the 'identify' page.
