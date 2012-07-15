@@ -4,27 +4,51 @@ class TagsController < ApplicationController
   def index
       # return if need_login true, true
       @Title = "Tags"
-      if params[:tagtype]
-          @tagtype = params[:tagtype].to_i
+      @filtertag = Tag.new
+      @filtertag.name = params[:filterstr]
+      debugger
+      @filtertag.tagtype = params[:tagtype].to_i if params[:tagtype]
+      @taglist = 
+      if @filtertag.name
+          # Use matching functionality of Tag model
+          Tag.strmatch(@filtertag.name, tagtype: @filtertag.tagtype)
+      elsif @filtertag.tagtype
+          Tag.where(tagtype: @filtertag.tagtype)
       else
-          @tabindex = (params[:tabindex] && params[:tabindex].to_i) || session[:tabindex] || 0
-          session[:tabindex] = @tabindex
-          @tagtype = @tabindex > 0 ? Tag.index_to_type(@tabindex) : 0
+          Tag.all
       end
-      if true
-          @taglist = Tag.where(tagtype: @tagtype).order("id").page(params[:page]).per_page(50)
-      else
-          @taglist = params[:tagtype] ? Tag.where("tagtype = ?", params[:tagtype]) : Tag.all
-          # The :unbound_only parameter limits the set to tags with no associated form (and, thus, referent)
-          @taglist.delete_if { |t| !t.referents.empty? } if params[:unbound_only] == "true"
-      end
-    # @filtertag = Tag.new
+      @taglist = @taglist.order("id").page(params[:page]).per_page(50)
     respond_to do |format|
       format.json { render :json => @taglist.map { |tag| { :title=>tag.name+tag.id.to_s, :isLazy=>false, :key=>tag.id, :isFolder=>false } } }
       format.html # index.html.erb
       format.xml  { render :xml => @taglist }
     end
   end
+
+# POST /tags
+# POST /tags.xml
+# Since we don't actually create tags using the form, this facility is used by the tags lister
+# to filter the list. Thus, we collect the form data and redirect
+def create
+  debugger
+  if params[:tag]
+      redirect_to controller: "tags", action: "index", filterstr: params[:tag][:name], tagtype: params[:tag][:tagtype]
+  end
+=begin
+  @Title = "Tags"
+  @tag = Tag.new(params[:tag])
+
+  respond_to do |format|
+    if @tag.save
+      format.html { redirect_to(@tag, :notice => 'Tag was successfully created.') }
+      format.xml  { render :xml => @tag, :status => :created, :location => @tag }
+    else
+      format.html { render :action => "new" }
+      format.xml  { render :xml => @tag.errors, :status => :unprocessable_entity }
+    end
+  end
+=end
+end
   
 =begin
 # Shouldn't be using this anymore
@@ -183,23 +207,6 @@ class TagsController < ApplicationController
           idsChanged = tag.save ? [tag.id] : []
       end
       render :json=>{ to_nuke: idsChanged.map{ |id| ["#tagrow_#{tagidstr}", "#tagrow_#{tagidstr}HR", ".absorb_#{tagidstr}"] }.flatten } # orphantag(id) }
-  end
-
-  # POST /tags
-  # POST /tags.xml
-  def create
-      @Title = "Tags"
-    @tag = Tag.new(params[:tag])
-
-    respond_to do |format|
-      if @tag.save
-        format.html { redirect_to(@tag, :notice => 'Tag was successfully created.') }
-        format.xml  { render :xml => @tag, :status => :created, :location => @tag }
-      else
-        format.html { render :action => "new" }
-        format.xml  { render :xml => @tag.errors, :status => :unprocessable_entity }
-      end
-    end
   end
 
   # PUT /tags/1

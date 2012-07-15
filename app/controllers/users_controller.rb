@@ -16,7 +16,6 @@ class UsersController < ApplicationController
   end
   
   def not_found
-      debugger
       redirect_to root_path, :notice => "User not found"
   end
 

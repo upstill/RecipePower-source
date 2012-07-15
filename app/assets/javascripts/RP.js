@@ -66,7 +66,7 @@ $(function() {
 		noResultsText: "No matching tag found; hit Enter to search with text",
         prePopulate: "", // $("#rcpquery_tag_tokens").data("pre"),
         theme: "facebook",
-        onAdd: tokenChangeCallback,
+        onAdd: editAnotherTag,
         onDelete: tokenChangeCallback,
         allowCustomEntry: true
     });

@@ -1,0 +1,6 @@
+<%# Form for the tag filtering the tag list %>
+<%= form_for(@filtertag) do |f| %>
+    Filter by: <%= f.text_field :name %>
+    <%= f.select(:tagtype, type_selections(@filtertag), include_blank: true) %>
+    <%= f.submit "Filter List" %>
+<% end %>

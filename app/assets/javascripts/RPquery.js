@@ -61,6 +61,21 @@ function tokenChangeCallback(hi, li) {
 	// var tokenStr = $("#rcpquery_tag_tokens").tokenInput("get");
 	// updateRecipeQueryResults( { tag_tokens: tokenStr })
 }
+function replaceElmt(body, status, instance) {
+	if(status == "success") {
+		var selector = body.selector
+		var content = body.content
+		debugger;
+		$(selector).replaceWith(content);
+	}
+}
+
+// Callback to select another tag for editing
+function editAnotherTag(hi, li) {
+	if (hi && hi.id) {
+		$('body').load( "/tags/"+hi.id+"/edit" );
+	}
+}
 
 // Handle a hit on one of the query fields by POSTing the whole form, then
 // (via callback) updating the results list

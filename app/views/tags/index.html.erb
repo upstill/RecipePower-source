@@ -1,6 +1,6 @@
-<h3>Tags for Type:&nbsp;
-  <%= select_tag :tagtype, type_selections(@tagtype), id: "taglist_type_selector"  %>
-<h3>
+<h3>Tags<h3>
+<br><%= render 'filtertag' %>
+<hr>
 <br><%= render 'alltags' %>
 <br><%= will_paginate @taglist %>
 

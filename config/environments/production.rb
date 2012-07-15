@@ -63,6 +63,6 @@ RP::Application.configure do
     :email_prefix => "[RecipePower] ",
     :sender_address => "upstill@gmail.com",
     :exception_recipients => "webmaster@recipepower.com",
-    :ignore_exceptions => []
+    :ignore_exceptions => ExceptionNotifier.default_ignore_exceptions # + [RunTimeError]
   
 end

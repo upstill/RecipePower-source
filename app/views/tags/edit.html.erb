@@ -1,7 +1,9 @@
-<h1>Editing tag</h1>
+<h3>Editing tag <%= "#{@tag.id.to_s}: #{@tag.name}" %></h3>
 
 <%= render 'form' %>
 
 <%= link_to 'Show', @tag %> |
 <%= link_to 'Back', tags_path %>
+<hr>
+<h4>Select another tag to edit:</h4>
 <%= text_field_tag "Focus on tags", "Type another tag to edit" %>
