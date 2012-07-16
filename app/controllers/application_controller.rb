@@ -14,10 +14,11 @@ class ApplicationController < ActionController::Base
   end
     
     def permission_denied
-        debugger
       action = case params[:action]
       when "index"
           "see the list of all"
+      when "show"
+          "examine"
       when "new"
           params[:controller] == "recipes" ? "cookmark" : "create new"
       else

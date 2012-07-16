@@ -25,6 +25,7 @@ authorization do
   role :editor do
       includes :moderator
       has_permission_on [:tags], :to => [:manage]
+      has_permission_on [:referents], :to => [:manage]
   end
   
   role :admin do

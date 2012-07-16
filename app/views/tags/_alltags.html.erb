@@ -27,7 +27,7 @@
 		<td><%= summarize_tag_similars tag, label: "", absorb_btn: true, joiner: "<br>" %></td>
 		<td><%= summarize_synonyms tag %></td>
 		<td><% tag.referents.each do |ref| %>
-		      <%= link_to ref.name, edit_referent_path(ref) %><%= ", " unless ref == tag.referents.last %>
+		      <%= link_to ref.name, referent_path(ref) %><%= ", " unless ref == tag.referents.last %>
 		<% end %></td>
 		<% if permitted_to? :edit, tag %>
 	    	<td><%= link_to 'Edit', edit_tag_path(tag) %></td>

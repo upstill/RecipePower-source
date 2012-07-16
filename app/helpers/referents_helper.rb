@@ -2,12 +2,16 @@ module ReferentsHelper
     
     def list_expressions referent, do_tag=true
         ("Expressions: "+(referent.expressions.collect { |expr| 
-            tag = Tag.find(expr.tag_id)
-            locale = expr.locale || "(nil)"
-            form = expr.form || "(nil)"
             "<br>&nbsp;&nbsp;'"+
-            (do_tag ? link_to(tag.name, tag) : tag.name)+
-            "'(id #{tag.id.to_s}, form #{form}, locale #{locale})"
+            begin
+                tag = Tag.find(expr.tag_id)
+                locale = expr.locale || "(nil)"
+                form = expr.form || "(nil)"
+                (do_tag ? link_to(tag.name, tag) : tag.name)+
+                "'(id #{tag.id.to_s}, form #{form}, locale #{locale})"
+            rescue
+                "<Missing tag##{expr.tag_id}>"
+            end
         }.join(', ') || "none")).html_safe
     end
     

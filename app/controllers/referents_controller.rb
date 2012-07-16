@@ -1,4 +1,5 @@
 class ReferentsController < ApplicationController
+    filter_access_to :all
     # Here's where we defer to different handlers for different types of referent
     @@HandlersByIndex = [ Referent, GenreReferent, RoleReferent, 
             ProcessReferent, FoodReferent, UnitReferent, 
@@ -20,9 +21,10 @@ class ReferentsController < ApplicationController
             @referents = handlerclass.all # roots
         end
     else
-        @referents = handlerclass.all
+        @referents = handlerclass.scoped
     end
-    @referents.sort! { |r1, r2| r1.normalized_name <=> r2.normalized_name }
+    @referents = @referents.order("id").page(params[:page] || 1).per_page(50)
+    # @referents.sort! { |r1, r2| r1.normalized_name <=> r2.normalized_name }
 
     respond_to do |format|
       format.html # index.html.erb
