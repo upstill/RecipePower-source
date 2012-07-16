@@ -4,10 +4,8 @@ class TagsController < ApplicationController
   def index
       # return if need_login true, true
       @Title = "Tags"
-      @filtertag = Tag.new
-      @filtertag.name = params[:filterstr]
-      debugger
-      @filtertag.tagtype = params[:tagtype].to_i if params[:tagtype]
+      @filtertag = Tag.new name: params[:filterstr]
+      @filtertag = params[:tagtype].to_i unless params[:tagtype].blank?
       @taglist = 
       if @filtertag.name
           # Use matching functionality of Tag model
@@ -15,8 +13,9 @@ class TagsController < ApplicationController
       elsif @filtertag.tagtype
           Tag.where(tagtype: @filtertag.tagtype)
       else
-          Tag.all
+          Tag.scoped
       end
+      # We should have a Relation for the relevant tags
       @taglist = @taglist.order("id").page(params[:page]).per_page(50)
     respond_to do |format|
       format.json { render :json => @taglist.map { |tag| { :title=>tag.name+tag.id.to_s, :isLazy=>false, :key=>tag.id, :isFolder=>false } } }
@@ -27,10 +26,9 @@ class TagsController < ApplicationController
 
 # POST /tags
 # POST /tags.xml
-# Since we don't actually create tags using the form, this facility is used by the tags lister
-# to filter the list. Thus, we collect the form data and redirect
+# Since we don't actually create tags using the form, this action is used by the tags lister
+# to gather parameters for filtering the list. Thus, we collect the form data and redirect
 def create
-  debugger
   if params[:tag]
       redirect_to controller: "tags", action: "index", filterstr: params[:tag][:name], tagtype: params[:tag][:tagtype]
   end
