@@ -10,9 +10,10 @@
 		<th>Similar</th>
 	    <th>Synonym(s)</th>
 	    <th>Meaning(s)</th>
-	    <th></th>
-	    <th></th>
-	    <th></th>
+		<% if permitted_to? :edit, @taglist.first %>
+	      <th></th>
+	      <th></th>
+		<% end %>
 	  </tr>
 
 	<% @taglist.each do |tag| %><tr id="tagrow_<%= tag.id.to_s %>">
@@ -28,9 +29,10 @@
 		<td><% tag.referents.each do |ref| %>
 		      <%= link_to ref.name, edit_referent_path(ref) %><%= ", " unless ref == tag.referents.last %>
 		<% end %></td>
-	    <td><%= link_to 'Show', tag %></td>
-	    <td><%= link_to 'Edit', edit_tag_path(tag) %></td>
-	    <td><%= link_to 'Destroy', tag, confirm: 'Are you sure?', method: :delete %></td>
+		<% if permitted_to? :edit, tag %>
+	    	<td><%= link_to 'Edit', edit_tag_path(tag) %></td>
+	    	<td><%= link_to 'Destroy', tag, confirm: 'Are you sure?', method: :delete %></td>
+		<% end %>
 	</tr><tr id="tagrow_<%= tag.id.to_s %>HR"><td colspan="11"><hr></td></tr><% end %>
 	</table>
   <% else %>

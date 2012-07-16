@@ -10,6 +10,8 @@ authorization do
   role :user do
     includes :guest
     has_permission_on [:recipes], :to => [:read, :create, :update, :delete]
+    has_permission_on [:tags], :to => [:read]
+    
     #has_permission_on [:accounts, :categories, :matches, :transactions], :to => :create
     #has_permission_on [:accounts, :categories, :matches, :transactions], :to => :manage do
     #  if_attribute :user => is { user }

@@ -11,5 +11,7 @@
 <%= summarize_tag_links @tag %>
 <%= summarize_tag_relations @tag %>
 <br>
-<%= link_to 'Edit', edit_tag_path(@tag) %>
+<% if permitted_to? :edit, @tag %>
+  <%= link_to 'Edit', edit_tag_path(@tag) %>
+<% end %>
 <%# link_to 'All Tags', tags_path # ...with suitable permissions %>

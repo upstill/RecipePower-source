@@ -34,7 +34,7 @@ module TagsHelper
     
     def summarize_tag tag, withtype = false
 	    ((withtype ? "<i>#{tag.typename}</i> " : "" )+
-        "'<strong>#{tag.name}</strong>'").html_safe
+        "'<strong>#{link_to(tag.name, tag)}</strong>'").html_safe
     end
     
     def summarize_tags(tags)
