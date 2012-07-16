@@ -4,6 +4,7 @@ authorization do
     has_permission_on [:feedbacks], :to => [:create]
     has_permission_on [:visitors], :to => [:create]
     has_permission_on [:rcpqueries], :to => [:create, :read, :update]
+    has_permission_on [:tags], :to => [:show]
   end
   
   role :user do
@@ -21,6 +22,7 @@ authorization do
   
   role :editor do
       includes :moderator
+      has_permission_on [:tags], :to => [:manage]
   end
   
   role :admin do
@@ -28,7 +30,7 @@ authorization do
     # :sessions, :users
     has_permission_on [:recipes], :to => [:destroy]
     has_permission_on [:users], :to => [:manage]
-    has_permission_on [:expressions, :feedbacks, :links, :pages, :ratings, :rcpqueries, :recipes, :referents, :scales, :sites, :tags, :visitors], :to => :manage
+    has_permission_on [:expressions, :feedbacks, :links, :pages, :ratings, :rcpqueries, :recipes, :referents, :scales, :sites, :visitors], :to => :manage
   end
 end
 
@@ -47,8 +49,7 @@ privileges do
   end
   privilege :delete do
     includes :remove
-  end
-  
+  end  
   privilege :manage do
     includes :create, :read, :update, :delete
   end

@@ -1,4 +1,6 @@
 class TagsController < ApplicationController
+  filter_access_to :all
+  
   # GET /tags
   # GET /tags.xml
   def index

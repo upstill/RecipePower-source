@@ -7,7 +7,30 @@ class ApplicationController < ActionController::Base
     rescue_from AbstractController::ActionNotFound, :with => :no_action_error
     
     helper_method :orphantagid
+  
+  # Return a string for the status of the current user
+  def current_status
+      current_user ? current_user.role_symbols.first.to_s : "guest"
+  end
     
+    def permission_denied
+        debugger
+      action = case params[:action]
+      when "index"
+          "see the list of all"
+      when "new"
+          params[:controller] == "recipes" ? "cookmark" : "create new"
+      else
+          params[:action]
+      end
+      notice = "Sorry, but as a #{current_status}, you're not allowed to #{action} #{params[:controller]}."
+      respond_to do |format|
+        format.html { redirect_to(:back, notice: notice) rescue redirect_to('/', notice: notice) }
+        format.xml  { head :unauthorized }
+        format.js   { head :unauthorized }
+      end
+    end
+
     def no_action_error
         debugger
         redirect_to home_path, :notice => "Sorry, action not found"

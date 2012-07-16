@@ -19,11 +19,10 @@ class AuthenticationsController < ApplicationController
     omniauth = request.env['omniauth.auth']
     # render text: omniauth.to_yaml
     authparams = omniauth.slice('provider', 'uid')
-    debugger
     if @authentication = Authentication.find_by_provider_and_uid(omniauth['provider'], omniauth['uid'])
       flash[:notice] = "Yay! Signed in with #{@authentication.provider_name}. Welcome back, #{@authentication.user.username}!"
       # sign_in_and_redirect(:user, @authentication.user)
-      result = sign_in_and_redirect @authentication.user, :bypass => true
+      result = sign_in_and_redirect @authentication.user # , :bypass => true
     elsif current_user
       current_user.apply_omniauth(omniauth)
       @authentication = current_user.authentications.create!(authparams) # Link to existing user

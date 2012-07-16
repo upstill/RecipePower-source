@@ -126,9 +126,12 @@ BLOCK_END
   
   def summarize_tag_recipes tag
     rcpstrs = tag.recipes.uniq.collect { |rcp| 
-            %Q{<div class="tog_info_rcp_title">
-          	  #{link_to rcp.trimmed_title, rcp.url} #{recipe_popup rcp} #{link_to "[Tagger]", edit_recipe_path(rcp) }
-            </div>}
+        taglink = (permitted_to? :edit, rcp) ?
+          link_to("[Tagger]", edit_recipe_path(rcp)) :
+          ""
+          %Q{<div class="tog_info_rcp_title">
+          	   #{link_to rcp.trimmed_title, rcp.url} #{recipe_popup rcp} #{taglink}
+             </div>}
         }
     tag_info_section "Recipes", rcpstrs, ""
   end
