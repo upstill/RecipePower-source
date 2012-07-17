@@ -220,7 +220,7 @@ class Recipe < ActiveRecord::Base
                 rcp = Recipe.new params
                 # Find the site for this url
                 if rcp.url && site = Site.by_link(rcp.url)
-                    if site.url == "http://www.recipepower.com"
+                    if site.site == "http://www.recipepower.com"
                         rcp.errors.add :url, "Sorry, can't cookmark pages from RecipePower. (Does that even make sense?)"
                     else
                       # Get the site to crack the page for this recipe
