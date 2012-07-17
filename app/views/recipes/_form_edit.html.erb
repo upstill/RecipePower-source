@@ -37,7 +37,7 @@
     <%= button_to "Remove From My Collection", "/recipes/#{@recipe.id.to_s}/remove" %>
   <% end %>
   <% if permitted_to? :destroy, @recipe %>
-    <%= button_to "Destroy this Recipe", @recipe, :method => :destroy, :confirm => "This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" %>
+    <%= button_to "Destroy this Recipe", "/recipes/#{@recipe.id.to_s}/destroy", :confirm => "This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" %>
   <% end %>
   </div>
   <br class="clear">

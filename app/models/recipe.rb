@@ -50,7 +50,6 @@ class Recipe < ActiveRecord::Base
           users = rcp.user_ids
           if users.empty?
               puts "Giving Max #{rcp.title}"
-              debugger
               rcp.users << max 
               rcp.save
           end
@@ -204,7 +203,6 @@ class Recipe < ActiveRecord::Base
   # and dig around for a title.
   # Either way, we also make sure that the recipe is associated with the given user
     def self.ensure( userid, params)
-        debugger
         if (id = params[:id].to_i) && (id > 0) # id of 0 means create a new recipe
             begin
                 rcp = Recipe.find id

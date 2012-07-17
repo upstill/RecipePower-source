@@ -28,7 +28,6 @@ class RecipesController < ApplicationController
     @recipe.current_user = current_user_or_guest_id # session[:user_id]
     @Title = ""
     @nav_current = nil
-    debugger
     redirect_to @recipe.url
   end
 
@@ -149,7 +148,6 @@ class RecipesController < ApplicationController
 	    redirect_to edit_recipe_url(@recipe), :notice  => "You need to be Max, Steve or super to destroy a recipe".html_safe
 	else
 =end
-        debugger
         @recipe = Recipe.find(params[:id])
         title = @recipe.title
         @recipe.destroy

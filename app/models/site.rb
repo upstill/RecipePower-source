@@ -268,7 +268,6 @@ class Site < ActiveRecord::Base
     end
     
     def yield (name, url = nil)
-        debugger
         url = @crackedURL || self.sampleURL if url.blank?
         unless @pagetags && (url == @crackedURL) # Rebuild the found tags
             # Extract the key data from a page. page_type may specify what kind of page
