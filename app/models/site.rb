@@ -268,6 +268,7 @@ class Site < ActiveRecord::Base
     end
     
     def yield (name, url = nil)
+        debugger
         url = @crackedURL || self.sampleURL if url.blank?
         unless @pagetags && (url == @crackedURL) # Rebuild the found tags
             # Extract the key data from a page. page_type may specify what kind of page
@@ -278,7 +279,7 @@ class Site < ActiveRecord::Base
             begin
                 if (ou = open url) && (doc = Nokogiri::HTML(ou))
                     @pagetags = PageTags.new doc, self.site
-                    @pagetags.glean (self.tags.empty? ? Site.find(1).tags : self.tags)+@@TitleTags
+                    @pagetags.glean (self.tags.empty? ? Site.find_by_site('http://www.recipepower.com').tags : self.tags)+@@TitleTags
                     @pagetags.hrecipe 
                     ou.close 
                 end

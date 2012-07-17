@@ -10,7 +10,7 @@
 # parse recipe pages. We will create one Site record for each site we've sussed out, but first
 # we will create a default which is used for sites that don't appear in the site list.
 
-site = Site.first || Site.new
+site = Site.find_or_create_by_site('http://www.recipepower.com')
 site.tags = [
     { label: :Author, path: ".hrecipe span.author" },
     { label: :Author, path: "meta[name='publisher']", attribute: :content },

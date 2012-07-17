@@ -201,8 +201,10 @@ class Recipe < ActiveRecord::Base
   # params. If the params have an :id, we find on that, otherwise we look
   # for a record matching the :url. 
   # If a new recipe record needs to be created, we also do QA on the provided URL
+  # and dig around for a title.
   # Either way, we also make sure that the recipe is associated with the given user
     def self.ensure( userid, params)
+        debugger
         if (id = params[:id].to_i) && (id > 0) # id of 0 means create a new recipe
             begin
                 rcp = Recipe.find id
@@ -216,21 +218,25 @@ class Recipe < ActiveRecord::Base
                 rcp = Recipe.where("url = ?", url).first
             else
                 rcp = Recipe.new params
+                # Find the site for this url
                 if rcp.url && site = Site.by_link(rcp.url)
-                    # Find the site for this url
-                    # Get the site to crack the page for this recipe
-                    # Pull title, picture and canonical URL from the result
-                    # rcp.url = rcp.url || (site.yield :URI, rcp.url)[:URI]
-                    found = site.yield :Title, rcp.url
-                    # rcp.url = rcp.url || found[:URI]
-                    # We may have re-interpreted the URL from the page, so
-                    # need to re-check that the recipe doesn't already exist
-                    if Recipe.exists? url: rcp.url  # Previously captured 
-                        Recipe.where("url = ?", rcp.url).first
+                    if site.url == "http://www.recipepower.com"
+                        rcp.errors.add :url, "Sorry, can't cookmark pages from RecipePower. (Does that even make sense?)"
                     else
+                      # Get the site to crack the page for this recipe
+                      # Pull title, picture and canonical URL from the result
+                      # rcp.url = rcp.url || (site.yield :URI, rcp.url)[:URI]
+                      found = site.yield :Title, rcp.url
+                      # rcp.url = rcp.url || found[:URI]
+                      # We may have re-interpreted the URL from the page, so
+                      # need to re-check that the recipe doesn't already exist
+                      if Recipe.exists? url: rcp.url  # Previously captured 
+                        Recipe.where("url = ?", rcp.url).first
+                      else
                         rcp.picurl = (site.yield :Image, rcp.url)[:Image] || ""
                         rcp.title = rcp.title || found[:Title] 
                         rcp.save
+                      end
                     end
                 else
                     rcp.errors.add :url, rcp.url.blank? ? "must be supplied" : "doesn't make sense or can't be found"
