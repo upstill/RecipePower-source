@@ -2,7 +2,7 @@
 function RPQueryOnLoad() {
 	// $("select#rcpquery_querymode_str").change(queryChange);
 	// $("select#rcpquery_status").change(queryChange);
-	$("select#rcpquery_owner_id").change(queryownerChange);
+	// $("select#rcpquery_owner_id").change(queryownerChange);
 	// $('input[id^=\'rcpquery_ratings_attributes\']').change(queryChange);
 	
 	// Set up tabs for results list
@@ -12,18 +12,22 @@ function RPQueryOnLoad() {
 						load:queryTabOnLoad, // Once the tab is loaded, go get the content
 						selected:val
 						});
+	// Activate the tag tokeninput field
+    $("#rcpquery_tag_tokens").tokenInput("/tags/match.json", {
+        crossDomain: false,
+        hintText: "", // "Type tags and strings to look for",
+		noResultsText: "No matching tag found; hit Enter to search with text",
+        prePopulate: $("#rcpquery_tag_tokens").data("pre"),
+        theme: "facebook",
+        onAdd: tokenChangeCallback,
+        onDelete: tokenChangeCallback,
+        allowCustomEntry: true
+    });
 	
 	// $("a#rcpquery_owner_return").click(backToMe);
 	// Bring text focus to the tag input field
-    $("input#rcpquery_tag_tokens").focus();
+    $("#rcpquery_tag_tokens").focus();
 }
-
-/*
-// Called when a tab is selected
-function queryTabOnSelect() {
-    var x = 2;
-}
-*/
 
 // Called when a tab loads (after the content has been replaced):
 //  -- Set the appropriate event handlers
@@ -37,51 +41,23 @@ function queryTabOnLoad() {
 	
 	// Enable recipe-preview popup
 	$(".popup").click(servePopup);
-	// Activate the tag tokeninput field
-    $("#rcpquery_tag_tokens").tokenInput("/tags/match.json", {
-        crossDomain: false,
-        hintText: "", // "Type tags and strings to look for",
-		noResultsText: "No matching tag found; hit Enter to search with text",
-        prePopulate: "", // $("#rcpquery_tag_tokens").data("pre"),
-        theme: "facebook",
-        onAdd: tokenChangeCallback,
-        onDelete: tokenChangeCallback,
-        allowCustomEntry: true
-    });
-	// $("#rcpquery_tag_tokens").focus();
     wdwFitImages();
 }
 
-// ----------------- Callbacks for interaction events 
-
-// Callback when token set changes
+// Callback when token set changes: handle as any change to the query form
 function tokenChangeCallback(hi, li) {
     var x = 2;
     queryformHit(this[0].form, {});
 	// var tokenStr = $("#rcpquery_tag_tokens").tokenInput("get");
 	// updateRecipeQueryResults( { tag_tokens: tokenStr })
 }
-function replaceElmt(body, status, instance) {
-	if(status == "success") {
-		var selector = body.selector
-		var content = body.content
-		debugger;
-		$(selector).replaceWith(content);
-	}
-}
-
-// Callback to select another tag for editing
-function editAnotherTag(hi, li) {
-	if (hi && hi.id) {
-		$('body').load( "/tags/"+hi.id+"/edit" );
-	}
-}
 
 // Handle a hit on one of the query fields by POSTing the whole form, then
 // (via callback) updating the results list
 function queryformHit(form, options) {
 	var query = "";
-	query = query+"element=tabnum&" + $(form).serialize()
+	var formdata = $(form).serialize();
+	query = query+"element=tabnum&" + formdata;
     var resp =
     jQuery.ajax({
         type: "POST",
@@ -94,15 +70,13 @@ function queryformHit(form, options) {
     );
 }
 
-// Respond to list selection: replace header and results list
-function queryownerChange() {
-    // queryheaderHit(this.form);
-    // queryformHit(this.form, {});
-	var ownerItem = $('#rcpquery_owner_id')[0];
-	var newOwner = $('#rcpquery_owner_id').attr('value'); // ownerItem.value;
-	updateRecipeQueryHeader(newOwner);
-	updateRecipeQueryResults({});
+// Callback after an update to hit the appropriate recipe tab
+function queryresultsUpdate(resp, succ, xhr) {
+    // The response is just the index of the tab to hit
+    $("#rcpquery_tabset").tabs('load', Number(resp));
 }
+
+// ----------------- Callbacks for interaction events 
 
 // Respond to page selection: replace results list
 function queryTabOnPaginate(evt) {
@@ -119,22 +93,26 @@ function queryListmodeChange() {
 
 // --------------- Functions for updating elements based on events 
 
-// Time to update the header
-function updateRecipeQueryHeader( newowner ) {
-	var query = $.param( {
-		'rcpquery': { owner_id: newowner },
-		'element': 'querylist_header'
+// Update the recipe query list due to a change in state as expressed in
+// the passed-in hash, which gets sent to the server as a query-update request. The
+// returned list gets used to replace the current list.
+function updateRecipeQueryResults( queryparams ) {
+	var query = $.param({
+		'rcpquery': queryparams,
+		'element': "tabnum" 
 	})
-	var queryID = $(".rcpquery_owner_div").attr('value');
+	var queryID = $(".rcpquery_query_div").attr('value');
 	var resp = jQuery.ajax({
 		url: "/rcpqueries/"+queryID,
 		type: "POST",
 		data: query,
 		dataType: "html",
-	    success: queryheaderUpdate
-	});
+		success: queryresultsUpdate
+	})
 }
 
+// ----------------------  Obsolete functions (largely based on forms)
+/*
 // Callback for replacing the recipe list header when the update returns
 function queryheaderUpdate(resp, succ, xhr) {
     // Just slam the HTML--if any--in there. (Nil response => leave unchanged.)
@@ -145,32 +123,6 @@ function queryheaderUpdate(resp, succ, xhr) {
     }
 }
 
-// Update the recipe query list due to a change in state as expressed in
-// the passed-in hash, which gets sent to the server as a query-update request. The
-// returned list gets used to replace the current list.
-function updateRecipeQueryResults( queryparams ) {
-	var query = $.param({
-		'rcpquery': queryparams,
-		'element': "tabnum" 
-	})
-	var queryID = $(".rcpquery_owner_div").attr('value');
-	var resp = jQuery.ajax({
-		url: "/rcpqueries/"+queryID,
-		type: "POST",
-		data: query,
-		dataType: "html",
-		success: queryresultsUpdate
-	})
-}
-
-// Callback after an update to hit the appropriate recipe tab
-function queryresultsUpdate(resp, succ, xhr) {
-    // The response is just the index of the tab to hit
-    $("#rcpquery_tabset").tabs('load', Number(resp));
-}
-
-// ----------------------  Obsolete functions (largely based on forms)
-/*
 // Handle a hit on the header (backtome link or list selector) by firing off a query-update request
 function queryheaderHit(form) {
     var resp = jQuery.ajax({
@@ -208,6 +160,37 @@ function queryListmodeChange() {
         success: queryresultsUpdate
     }
     );
+}
+
+function updateRecipeQueryHeader( newowner ) {
+	var query = $.param( {
+		'rcpquery': { owner_id: newowner },
+		'element': 'querylist_header'
+	})
+	var queryID = $(".rcpquery_query_div").attr('value');
+	var resp = jQuery.ajax({
+		url: "/rcpqueries/"+queryID,
+		type: "POST",
+		data: query,
+		dataType: "html",
+	    success: queryheaderUpdate
+	});
+}
+
+function queryownerChange() {
+    // queryheaderHit(this.form);
+    // queryformHit(this.form, {});
+	var ownerItem = $('#rcpquery_owner_id')[0];
+	var newOwner = $('#rcpquery_owner_id').attr('value'); // ownerItem.value;
+	// updateRecipeQueryHeader(newOwner);
+	updateRecipeQueryResults({});
+}
+
+// Callback to select another tag for editing
+function editAnotherTag(hi, li) {
+	if (hi && hi.id) {
+		$('body').load( "/tags/"+hi.id+"/edit" );
+	}
 }
 
 */

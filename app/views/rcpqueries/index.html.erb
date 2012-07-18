@@ -1,4 +1,18 @@
 <%# Master form for taking a recipe query and returning a list of results %>
-
-<%= render 'form_edit' %>
+<%= show_errors @rcpquery.errors %>
+<div class="rcpquery_query_div" value="<%= @rcpquery.id.to_s %>" >
+  <%= form_for @rcpquery do |f| %>
+	<div id="rcpquery_tags_label_div">
+		<%= f.label :tag_tokens, "Seek and Ye Shall Find:", :id=>"rcpquery_tags_label" -%>
+	</div>
+	<div id="rcpquery_tag_tokens_div">
+		<%= f.text_field :tag_tokens, "data-pre" => @rcpquery.tags.map(&:attributes).to_json %>
+	</div>
+	<div class="rcpquery_listmode_div">
+		<%= f.label :listmode_str,"List As: ",:id=>"rcpquery_listmode_label" -%>
+		<%= f.select :listmode_str, Rcpquery.listmode_select %>
+	</div>
+  <% end %>
+</div>
+<br class="clear" >
 <%= query_tabset %>

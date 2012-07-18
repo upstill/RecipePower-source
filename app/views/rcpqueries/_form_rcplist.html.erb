@@ -1,18 +1,5 @@
 <%# Renders a recipe list (from a query) for display under a tab %>
-<section id="rcplist_body">
-	<%= form_for @rcpquery do |f| %>
-		<div id="rcpquery_tags_label_div">
-			<%= f.label :tag_tokens, "Seek and Ye Shall Find:", :id=>"rcpquery_tags_label" -%>
-		</div>
-		<div id="rcpquery_tag_tokens_div">
-			<%= f.text_field :tag_tokens, "data-pre" => @rcpquery.tags.map(&:attributes).to_json %>
-		</div>
-		<div class="rcpquery_listmode_div">
-			<%= f.label :listmode_str,"List As: ",:id=>"rcpquery_listmode_label" -%>
-			<%= f.select :listmode_str, Rcpquery.listmode_select %>
-		</div>
-	<% end %>
-	<br class="clear"><hr>
+<section class="rcplist_body">
 	<% if @rcpquery.empty? %>
 		<%= explain_empty @rcpquery %>
 	<% elsif @rcpquery.listmode_str == :rcplist_text -%>

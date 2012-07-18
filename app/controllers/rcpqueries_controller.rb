@@ -134,8 +134,6 @@ public
         when :tabnum
            # Just send back the tab number
            render :text=>@rcpquery.status_tab.to_s
-        when :querylist_header
-           render '_form_rcpquery_header.html.erb', :layout=>false
         when :rcplist_body
            render '_form_rcplist.html.erb', :layout=>false
        end

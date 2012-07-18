@@ -4,7 +4,7 @@ authorization do
     has_permission_on [:feedbacks], :to => [:create]
     has_permission_on [:visitors], :to => [:create]
     has_permission_on [:rcpqueries], :to => [:create, :read, :update]
-    has_permission_on [:tags], :to => [:show]
+    has_permission_on [:tags], :to => [:show, :match]
   end
   
   role :user do
@@ -54,7 +54,7 @@ privileges do
     includes :remove
   end  
   privilege :manage do
-    includes :create, :read, :update, :delete
+    includes :create, :read, :update, :delete, :editor, :typify, :absorb
   end
   
 #   privilege :read, :pages, :includes => [:home, :contact, :about, :FAQ, :welcome]

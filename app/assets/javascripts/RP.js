@@ -64,7 +64,7 @@ $(function() {
         crossDomain: false,
         hintText: "", // "Type tags and strings to look for",
 		noResultsText: "No matching tag found; hit Enter to search with text",
-        prePopulate: "", // $("#rcpquery_tag_tokens").data("pre"),
+        prePopulate: "", 
         theme: "facebook",
         onAdd: editAnotherTag,
         onDelete: tokenChangeCallback,
@@ -92,6 +92,13 @@ $(function() {
 	    event.preventDefault()
 	*/
 });
+
+// Callback to select another tag for editing
+function editAnotherTag(hi, li) {
+	if (hi && hi.id) {
+		$('body').load( "/tags/"+hi.id+"/edit" );
+	}
+}
 
 /* Utility function to extract an integer key which terminates the
    id of some ancestor of 'start', given by 'spec'
