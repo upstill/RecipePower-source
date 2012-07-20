@@ -9,7 +9,68 @@ class User < ActiveRecord::Base
   # Setup accessible (or protected) attributes for your model
   attr_accessible :id, :username, :fullname, :about,
                 :email, :password, :password_confirmation, 
-                :recipes, :remember_me, :role_id, :sign_in_count, :invitation_message
+                :recipes, :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens
+=begin
+  has_many :child_relations, :foreign_key=>"parent_id", :dependent=>:destroy, :class_name=>"ReferentRelation"
+  has_many :children, :through => :child_relations, :source => :child, :uniq => true 
+
+  has_many :parent_relations, :foreign_key => "child_id", :dependent=>:destroy, :class_name => "ReferentRelation"
+  has_many :parents, :through => :parent_relations, :source => :parent, :uniq => true
+=end
+  has_many :follower_relations, :foreign_key=>"followee_id", :dependent=>:destroy, :class_name=>"UserRelation"
+  has_many :followers, :through => :follower_relations, :source => :follower, :uniq => true 
+
+  has_many :followee_relations, :foreign_key => "follower_id", :dependent=>:destroy, :class_name => "UserRelation"
+  has_many :followees, :through => :followee_relations, :source => :followee, :uniq => true
+  
+  # Channels are just another kind of user. This field (channel_referent_id, externally) denotes such.
+  belongs_to :channel, :class_name => "ChannelReferent"
+  
+  def follows? (user)
+      if self.class == user.class
+          self.followees.include? user
+      else
+          self.followee_ids.include? user
+      end
+  end
+  
+  # Presents a hash of IDs with a switch value for whether to include that followee
+  def followee_tokens=(flist)
+      newlist = []
+      flist.each_key do |key| 
+          newlist.push key.to_i if (flist[key] == "1")
+      end
+      debugger
+      self.followee_ids = newlist
+  end
+  
+  def followee_tokens
+      debugger
+      x=2
+  end
+  
+  # Virtual attribute for the collection of non-channel followees
+  def ufollowees
+      self.followees.find_all { |user| !user.channel? }
+  end
+  
+  def ufollowees= ulist
+      self.followees = self.cfollowees + ulist
+  end
+  
+  # Is a user a channel, as opposed to a human user?
+  def channel?
+      self.channel_referent_id > 0
+  end
+  
+  # Virtual attribute for the collection of channels the user is following
+  def cfollowees
+      self.followees.find_all { |user| user.channel? }
+  end
+  
+  def cfollowees= clist
+      self.followees = self.ufollowees + clist
+  end
 
   # Establish the relationship among role_id values, symbols and user-friendly names
   @@Roles = TypeMap.new( {
@@ -41,7 +102,12 @@ class User < ActiveRecord::Base
   end
 
   def password_required?
-    (authentications.empty? || !password.blank?) && super
+    (self.channel_referent_id==0) && (authentications.empty? || !password.blank?) && super
+  end
+  
+  # We don't require an email for users representing channels
+  def email_changed?
+      (self.channel_referent_id==0) && super
   end
   
   # ownership of tags restrict visible tags
@@ -52,7 +118,8 @@ class User < ActiveRecord::Base
   has_many :recipes, :through=>:rcprefs, :autosave=>true
 
   validates_presence_of :username
-  validates_uniqueness_of :username, :email
+  validates_uniqueness_of :username
+  validates_uniqueness_of :email, :if => :email_changed?
   validates_format_of :username, :allow_blank => true, :with => /^[-\w\s\.!_@]+$/i, :message => "can't take funny characters (letters, spaces, numbers, or .-!_@ only)"
   validates_format_of :email, :allow_blank => true, :with => /^[-a-z0-9_+\.]+\@([-a-z0-9]+\.)+[a-z0-9]{2,4}$/i
 
@@ -89,6 +156,18 @@ class User < ActiveRecord::Base
   @@Guest_user = nil
   def self.guest_id
       (@@Guest_user || (@@Guest_user = self.by_name(:guest))).id
+  end
+  
+  @@Special_ids = []
+  # Approve a user id for visibility by the public
+  def self.public? (id)
+      @@Special_ids = [self.super_id, self.guest_id] if @@Special_ids.empty?
+      !@@Special_ids.include? id
+  end
+  
+  def self.isPrivate id
+      @@Special_ids = [self.super_id, self.guest_id] if @@Special_ids.empty?
+      @@Special_ids << [id]
   end
 
   # Return a list of username/id pairs suitable for popup selection

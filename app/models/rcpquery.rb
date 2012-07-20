@@ -64,7 +64,10 @@ end
 class Rcpquery < ActiveRecord::Base
     serialize :specialtags, Hash
     
-    attr_accessible :status, :session_id, :user_id, :owner_id, :tag_tokens, :tag_ids, :tags, :page_length, :cur_page, :listmode_str
+    attr_accessible :status, :session_id, :user_id, :owner_id, :tag_tokens, :tag_ids, :tags, :page_length, :cur_page, 
+        :listmode_str, :showmine, :showfriends, :showchannels, :showall
+    belongs_to :friend, :class_name => :user
+    belongs_to :channel, :class_name => :tag
     attr_reader :tags
     attr_reader :tag_tokens
     attr_reader :results
@@ -81,11 +84,20 @@ class Rcpquery < ActiveRecord::Base
     @@listmodes = [["Just Text", :rcplist_text],
   		   ["Small Pics", :rcplist_smallpic],
   		   ["Big Pics", :rcplist_bigpic]]
-  		   
+  	
+  	# Provide a list of display-mode options suitable for a select menu	   
     def self.listmode_select
        @@listmodes
     end
-
+    
+  	# Provide a list of friends suitable for a select menu	   
+    def listfriends_select
+    end
+    
+  	# Provide a list of channels suitable for a select menu	   
+    def listchannels_select
+    end
+    
     def listmode_str=(str)
         @listmode = str.to_sym
 	    self.listmode = str
@@ -98,6 +110,7 @@ class Rcpquery < ActiveRecord::Base
     def selectionlist
     	User.selectionlist :owner_id=>self.owner_id, :user_id=>self.user_id
     end
+    
     def my_init
 
     	self.tagstxt = ""  unless self.tagstxt

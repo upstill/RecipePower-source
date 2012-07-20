@@ -26,14 +26,14 @@ class Referent < ActiveRecord::Base
     
     attr_accessible :tag, :type, :description, :isCountable, 
         :expressions_attributes, :add_expression, 
-        :parents, :children, :parent_tokens, :child_tokens
+        :parents, :children, :parent_tokens, :child_tokens, :typeindex
     
     # validates_associated :parents
     # validates_associated :children
     validates_with ReferentValidator
     
     # before_save :ensure_expression
-    # after_save :ensure_tagtypes
+    after_save :ensure_tagtypes
     
     # Dump the contents of the database to stdout
     def self.dump tagtype=4
@@ -340,7 +340,13 @@ class RoleReferent < Referent ; end
 
 class ProcessReferent < Referent ; end 
 
-class FoodReferent < Referent ; end  
+class IngredientReferent < Referent ; end  
+
+class FoodReferent < Referent ; 
+    def self.fix
+        FoodReferent.all.each { |ref| ref.type = "IngredientReferent"; ref.save }
+    end
+end  
 
 class UnitReferent < Referent ; end  
 
@@ -358,7 +364,33 @@ class PantrySectionReferent < Referent ; end
 
 class StoreSectionReferent < Referent ; end  
 
-class InterestReferent < Referent ; end  
+class ChannelReferent < Referent ; 
+    has_one :user    
+    attr_accessible :user
+    
+    before_save :ensure_user
+    after_save :fix_user
+    
+    # We ensure that every channel has an associated user
+    def ensure_user
+        self.canonical_expression = self.expressions.first.tag unless self.canonical_expression || self.expressions.empty?
+        unless self.user
+            # Each channel gets a corresponding user with the super-user password
+            user = User.find(User.super_id).dup
+            user.username = self.canonical_expression.name
+            user.email = "channels@recipepower.com"
+            user.channel = self
+            self.user = user
+        end
+    end
+    
+    def fix_user
+        if self.user.email == "channels@recipepower.com"
+            self.user.email = "channel#{self.id.to_s}@recipepower.com"
+            self.user.save
+        end
+    end
+end  
 
 class ToolReferent < Referent ; end  
 

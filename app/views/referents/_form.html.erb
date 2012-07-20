@@ -10,6 +10,7 @@
     </div>
   <% end %>
 <%= form_for(@referent.becomes(Referent)) do |f| %>
+<%= f.select :type, Tag.type_selections %>
 <div class="referent_tags_div">
 	<div class="referent_tags_label_div">
 	    <%= f.label :description, "Description:" %>

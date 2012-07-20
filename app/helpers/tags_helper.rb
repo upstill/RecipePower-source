@@ -25,6 +25,12 @@ module TagsHelper
         ct = tag.link_ids.size
         (ct > 0) ? pluralize(ct, "Link").sub(/\s/, "&nbsp;").html_safe : ""
     end
+    
+    def summarize_meaning tag
+        if tag.primary_meaning
+            "<p class=\"airy\"><strong>Described as</strong> '#{tag.primary_meaning.description}'</p>".html_safe
+        end
+    end
         
     def summarize_synonyms tag
         # The synonyms are the other expressions of this tag's referents
@@ -32,9 +38,9 @@ module TagsHelper
         ids.empty? ? "" : ids.collect { |id| Tag.find(id).name+"(#{id.to_s})" }.join(', ').html_safe
     end
     
-    def summarize_tag tag, withtype = false
+    def summarize_tag tag, withtype = false, do_link = true
 	    ((withtype ? "<i>#{tag.typename}</i> " : "" )+
-        "'<strong>#{link_to(tag.name, tag)}</strong>'").html_safe
+        "'<strong>#{do_link ? link_to(tag.name, tag) : tag.name}</strong>'").html_safe
     end
     
     def summarize_tags(tags)

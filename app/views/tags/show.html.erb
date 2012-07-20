@@ -1,10 +1,10 @@
-<h3>Everything There Is To Know About <%= summarize_tag @tag, true %></h3>
-
+<h3>Everything There Is To Know About <%= summarize_tag @tag, true, false %></h3>
+<%= summarize_meaning @tag %>
 <%= summarize_tag_owners @tag %>
 <%= summarize_tag_similars @tag %>
 <%= summarize_tag_parents @tag %>
 <%= summarize_tag_children @tag %>
-<% @tag.referents.collect{ |ref| ref unless ref.id == @tag.primary_meaning.id }.compact.each do |ref| %>
+<% @tag.referents.collect{ |ref| ref unless @tag.primary_meaning && (ref.id == @tag.primary_meaning.id) }.compact.each do |ref| %>
 	<%= summarize_referent ref, "Other Meaning(s)" %>
 <% end %>
 <%= summarize_tag_recipes @tag %>

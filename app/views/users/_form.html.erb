@@ -12,6 +12,14 @@
     <%= f.label :about, "About Me" %><br />
     <%= f.text_area :about, placeholder: "Who Are You? What Do You Eat?", rows: "4", width: "80%" %>
   </p>
+  <p>
+    <h4>People I Follow</h4>
+	<%= followees_list f, @user, false %>
+  </p>
+  <p>
+    <h4>My Channels</h4>
+	<%= followees_list f, @user, true %>
+  </p>
 <p>
   <% if permitted_to? :manage, @user %>
 	<%= f.label :role_id,  "Role: ",:id=>"user_role_label" -%>

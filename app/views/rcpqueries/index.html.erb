@@ -1,7 +1,7 @@
 <%# Master form for taking a recipe query and returning a list of results %>
 <%= show_errors @rcpquery.errors %>
-<div class="rcpquery_query_div" value="<%= @rcpquery.id.to_s %>" >
-  <%= form_for @rcpquery do |f| %>
+<%= form_for @rcpquery do |f| %>
+  <div class="rcpquery_query_div" value="<%= @rcpquery.id.to_s %>" >
 	<div id="rcpquery_tags_label_div">
 		<%= f.label :tag_tokens, "Seek and Ye Shall Find:", :id=>"rcpquery_tags_label" -%>
 	</div>
@@ -12,7 +12,13 @@
 		<%= f.label :listmode_str,"List As: ",:id=>"rcpquery_listmode_label" -%>
 		<%= f.select :listmode_str, Rcpquery.listmode_select %>
 	</div>
-  <% end %>
-</div>
-<br class="clear" >
-<%= query_tabset %>
+  </div>
+  <br class="clear" >
+  <h4 class="rcpquery_list_header" id="rcpquery_mylist">My Cookmarks</h4>
+  <%= query_tabset %>
+  <h4 class="rcpquery_list_header" id="rcpquery_friendslist">My Friends' Cookmarks</h4>
+    <%# f.select :friends, Rcpquery.listfriends_select %>
+  <h4 class="rcpquery_list_header" id="rcpquery_channelslist">My Channels' Cookmarks</h4>
+  	<%# f.select :friends, Rcpquery.listchannels_select %>
+  <h4 class="rcpquery_list_header" id="rcpquery_masterlist">Every Cookmark in the Whole Wide World</h4>
+<% end %>

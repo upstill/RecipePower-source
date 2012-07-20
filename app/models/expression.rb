@@ -1,13 +1,15 @@
 class ExpressionValidator < ActiveModel::Validator
     def validate(record)
-        if(record.tag_id && record.referent_id)
+        if(record.tag_id)
             tag = Tag.find record.tag_id
-            ref = Referent.find record.referent_id
-            if tag.tagtype != ref.typenum && (tag.tagtype > 0)
-                record.errors[:tag_id] << "#{tag.name} is a '#{tag.typename}', not '#{ref.typename}'"
+            if record.referent_id
+                ref = Referent.find record.referent_id
+                if tag.tagtype != ref.typenum && (tag.tagtype > 0)
+                    record.errors[:tag_id] << "#{tag.name} is a '#{tag.typename}', not '#{ref.typename}'"
+                end
             end
         else
-            record.errors[record.tag_id ? :referent_id : :tag_id] << "Must have both tag and referent ids."
+            record.errors[record.tag_id ? :referent_id : :tag_id] << "Must have tag id."
         end
     end
 end
@@ -17,6 +19,15 @@ require 'type_map.rb'
 class Expression < ActiveRecord::Base
     belongs_to :tag
     belongs_to :referent
+    
+    before_save :fix_type
+    
+    def fix_type
+        tg = self.tag
+        ref = self.referent
+        debugger
+        tg.typenum = ref.typenum if (tg.typenum != ref.typenum) && (tg.typenum == 0)
+    end
     
     attr_accessible :tag_id, :referent_id, :locale, :form, :tagname, :tag_token
     

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120628183607) do
+ActiveRecord::Schema.define(:version => 20120718171226) do
 
   create_table "authentications", :force => true do |t|
     t.integer  "user_id"
@@ -78,7 +78,13 @@ ActiveRecord::Schema.define(:version => 20120628183607) do
     t.string   "listmode"
     t.integer  "status"
     t.text     "specialtags"
-    t.integer  "cur_page",    :default => 1
+    t.integer  "cur_page",     :default => 1
+    t.boolean  "showmine",     :default => true
+    t.boolean  "showfriends",  :default => false
+    t.integer  "friend_id",    :default => 0
+    t.boolean  "showchannels", :default => false
+    t.integer  "channel_id",   :default => 0
+    t.boolean  "showall",      :default => false
   end
 
   create_table "rcprefs", :force => true do |t|
@@ -187,6 +193,13 @@ ActiveRecord::Schema.define(:version => 20120628183607) do
     t.integer  "referent_id"
   end
 
+  create_table "user_relations", :force => true do |t|
+    t.integer  "follower_id"
+    t.integer  "followee_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "users", :force => true do |t|
     t.string   "username"
     t.string   "email",                                :default => "", :null => false
@@ -221,6 +234,7 @@ ActiveRecord::Schema.define(:version => 20120628183607) do
     t.integer  "invited_by_id"
     t.string   "invited_by_type"
     t.text     "invitation_message"
+    t.integer  "channel_referent_id",                  :default => 0
   end
 
   add_index "users", ["confirmation_token"], :name => "index_users_on_confirmation_token", :unique => true

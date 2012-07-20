@@ -2,9 +2,9 @@ class ReferentsController < ApplicationController
     filter_access_to :all
     # Here's where we defer to different handlers for different types of referent
     @@HandlersByIndex = [ Referent, GenreReferent, RoleReferent, 
-            ProcessReferent, FoodReferent, UnitReferent, 
+            ProcessReferent, IngredientReferent, UnitReferent, 
             SourceReferent, AuthorReferent, OccasionReferent, 
-            PantrySectionReferent, StoreSectionReferent, InterestReferent, ToolReferent ]
+            PantrySectionReferent, StoreSectionReferent, ChannelReferent, ToolReferent ]
     @@HandlerClass = Referent
   # GET /referents
   # GET /referents.json
@@ -75,12 +75,18 @@ class ReferentsController < ApplicationController
   # POST /referents?tagid=1&mode={over,before,after}&target=referentid
   # POST /referents.json?tagid=1&mode={over,before,after}&target=referentid
   def create
-    @tabindex = params[:tabindex].to_i || 0
-    handlerclass = @@HandlersByIndex[@tabindex]
-    tagid = params[:tagid].to_i
-    targetid = params[:target] ? params[:target].to_i : 0
+    if params[:tabindex]
+        @tabindex = params[:tabindex].to_i || 0
+        handlerclass = @@HandlersByIndex[@tabindex]
+        tagid = params[:tagid].to_i # Id of expression
+        targetid = params[:target] ? params[:target].to_i : 0
+    else
+        @tabindex = params[:referent][:type].to_i || 0
+        handlerclass = @@HandlersByIndex[@tabindex]
+        params[:referent].delete :type
+    end
     keyback = 0
-=begin
+    
     # This code will pertain when we get some kind of hierarchy back
     case params[:mode]
     when "before"
@@ -109,19 +115,22 @@ class ReferentsController < ApplicationController
         @referent = handlerclass.find params[:target].to_i
         @referent.express tagid
     end
-=end
+
     if params[:mode] == "over"
         # "over" indicates to add the tag to the referent's expressions
         @referent = handlerclass.find params[:target].to_i
         @referent.express tagid
-    else
+    elsif params[:mode]
         @referent = handlerclass.create tag: tagid
         keyback = @referent.id
+    else
+        # The standard New Referent return has no mode
+        @referent = handlerclass.new params[:referent]
     end
 
     respond_to do |format|
       if @referent && @referent.save
-        format.html { redirect_to @referent, notice: 'Referent was successfully created/aliased.' }
+        format.html { redirect_to @referent.becomes(Referent), notice: 'Referent was successfully created/aliased.' }
         format.json { render json: [{ :title=>@referent.longname, :isLazy=>true, :key=>keyback, :isFolder=>false }], status: :created }
       else
         format.html { render action: "new" }
