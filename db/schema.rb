@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120718171226) do
+ActiveRecord::Schema.define(:version => 20120721004451) do
 
   create_table "authentications", :force => true do |t|
     t.integer  "user_id"
@@ -78,13 +78,10 @@ ActiveRecord::Schema.define(:version => 20120718171226) do
     t.string   "listmode"
     t.integer  "status"
     t.text     "specialtags"
-    t.integer  "cur_page",     :default => 1
-    t.boolean  "showmine",     :default => true
-    t.boolean  "showfriends",  :default => false
-    t.integer  "friend_id",    :default => 0
-    t.boolean  "showchannels", :default => false
-    t.integer  "channel_id",   :default => 0
-    t.boolean  "showall",      :default => false
+    t.integer  "cur_page",    :default => 1
+    t.integer  "friend_id",   :default => 0
+    t.integer  "channel_id",  :default => 0
+    t.string   "which_list",  :default => "mine"
   end
 
   create_table "rcprefs", :force => true do |t|

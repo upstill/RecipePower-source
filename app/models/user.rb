@@ -40,36 +40,18 @@ class User < ActiveRecord::Base
       flist.each_key do |key| 
           newlist.push key.to_i if (flist[key] == "1")
       end
-      debugger
       self.followee_ids = newlist
-  end
-  
-  def followee_tokens
-      debugger
-      x=2
-  end
-  
-  # Virtual attribute for the collection of non-channel followees
-  def ufollowees
-      self.followees.find_all { |user| !user.channel? }
-  end
-  
-  def ufollowees= ulist
-      self.followees = self.cfollowees + ulist
   end
   
   # Is a user a channel, as opposed to a human user?
   def channel?
       self.channel_referent_id > 0
   end
-  
-  # Virtual attribute for the collection of channels the user is following
-  def cfollowees
-      self.followees.find_all { |user| user.channel? }
-  end
-  
-  def cfollowees= clist
-      self.followees = self.ufollowees + clist
+
+  # Override the followees method to allow for guests and super to see all users, and
+  # to filter for whether to return the channels
+  def follows channel=false
+    self.followees.find_all { |user| (user.channel? == channel) }
   end
 
   # Establish the relationship among role_id values, symbols and user-friendly names
@@ -169,7 +151,7 @@ class User < ActiveRecord::Base
       @@Special_ids = [self.super_id, self.guest_id] if @@Special_ids.empty?
       @@Special_ids << [id]
   end
-
+=begin
   # Return a list of username/id pairs suitable for popup selection
   # owner: the id that should be hidden under "Choose Another"
   # user: the id that should be excluded from the list
@@ -188,6 +170,7 @@ class User < ActiveRecord::Base
 	# Add back in the owner, under "Pick Another Collection"
 	arr.unshift ["Pick Another Collection", owner_id]
   end
+=end
 
   private
 

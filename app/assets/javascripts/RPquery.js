@@ -23,10 +23,54 @@ function RPQueryOnLoad() {
         onDelete: tokenChangeCallback,
         allowCustomEntry: true
     });
+
+	// Respond to hits on the friends selector
+	$("select#rcpquery_friend_id").change(queryFriendsListLoad);
+	// $("select#rcpquery_channel_id").change(queryChannelChange);
+	
+    // Load the 'friends' recipe list
+    queryFriendsListLoad();
+
+    // Load the 'channels' recipe list
+    queryChannelsListLoad();
+
+    // Load the master recipe list
+    queryMasterListLoad();
 	
 	// $("a#rcpquery_owner_return").click(backToMe);
 	// Bring text focus to the tag input field
     $("#rcpquery_tag_tokens").focus();
+}
+
+// Respond to a change in the friend selector
+function queryFriendsListLoad() {
+    // queryformHit(this.form, {});
+    // Get the value of the selection box
+    set = $("select#rcpquery_friend_id");
+	querystr = "rcpqueries/relist?list=friend"
+	if(set.first) {
+		querystr += set.val();
+	}
+    // Fire off a replacement for the list
+	$('#rcpquery_friends_list').load( querystr );
+}
+
+// Respond to a change in the friend selector
+function queryChannelsListLoad() {
+    // queryformHit(this.form, {});
+    // Get the value of the selection box
+    set = $("select#rcpquery_channel_id");
+	querystr = "rcpqueries/relist?list=channel"
+	if(set.first) {
+		querystr += set.val();
+	}
+    // Fire off a replacement for the list
+	$('#rcpquery_channels_list').load( querystr );
+}
+
+// Respond to a change in the friend selector
+function queryMasterListLoad() {
+	$('#rcpquery_master_list').load( "rcpqueries/relist?list=master" );
 }
 
 // Called when a tab loads (after the content has been replaced):
@@ -74,6 +118,12 @@ function queryformHit(form, options) {
 function queryresultsUpdate(resp, succ, xhr) {
     // The response is just the index of the tab to hit
     $("#rcpquery_tabset").tabs('load', Number(resp));
+    // Load the 'friends' recipe list
+    queryFriendsListLoad();
+    // Load the 'channels' recipe list
+    queryChannelsListLoad();
+    // Load the master recipe list
+    queryMasterListLoad();
 }
 
 // ----------------- Callbacks for interaction events 

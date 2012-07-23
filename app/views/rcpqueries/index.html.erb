@@ -14,11 +14,8 @@
 	</div>
   </div>
   <br class="clear" >
-  <h4 class="rcpquery_list_header" id="rcpquery_mylist">My Cookmarks</h4>
   <%= query_tabset %>
-  <h4 class="rcpquery_list_header" id="rcpquery_friendslist">My Friends' Cookmarks</h4>
-    <%# f.select :friends, Rcpquery.listfriends_select %>
-  <h4 class="rcpquery_list_header" id="rcpquery_channelslist">My Channels' Cookmarks</h4>
-  	<%# f.select :friends, Rcpquery.listchannels_select %>
-  <h4 class="rcpquery_list_header" id="rcpquery_masterlist">Every Cookmark in the Whole Wide World</h4>
+  <%= query_friendset f %>
+  <%= query_friendset f, true %>
+  <%= query_masterset %>
 <% end %>

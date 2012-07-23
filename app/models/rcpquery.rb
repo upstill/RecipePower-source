@@ -65,9 +65,10 @@ class Rcpquery < ActiveRecord::Base
     serialize :specialtags, Hash
     
     attr_accessible :status, :session_id, :user_id, :owner_id, :tag_tokens, :tag_ids, :tags, :page_length, :cur_page, 
-        :listmode_str, :showmine, :showfriends, :showchannels, :showall
-    belongs_to :friend, :class_name => :user
-    belongs_to :channel, :class_name => :tag
+        :listmode_str, :owner, :friend, :channel, :which_list
+    belongs_to :owner, :class_name => "User"
+    belongs_to :friend, :class_name => "User"
+    belongs_to :channel, :class_name => "User"
     attr_reader :tags
     attr_reader :tag_tokens
     attr_reader :results
@@ -91,11 +92,9 @@ class Rcpquery < ActiveRecord::Base
     end
     
   	# Provide a list of friends suitable for a select menu	   
-    def listfriends_select
-    end
-    
-  	# Provide a list of channels suitable for a select menu	   
-    def listchannels_select
+    def friend_selection_list channel = false
+        [[channel ? "All Channels" : "All Friends", 0]] + 
+        (self.owner ? self.owner.follows(channel).map { |f| [f.username, f.id]} : [])
     end
     
     def listmode_str=(str)
@@ -106,10 +105,11 @@ class Rcpquery < ActiveRecord::Base
     def listmode_str
         @listmode
     end
-
+=begin
     def selectionlist
     	User.selectionlist :owner_id=>self.owner_id, :user_id=>self.user_id
     end
+=end
     
     def my_init
 
@@ -148,22 +148,27 @@ protected
     	return @results if @results # Keeping a cache of results
         # Try to match prior query for this user and fetch rankings array
         # "match" has fewest num. of differing elements
+        
+        if user = User.where(id: self.owner_id).first
+          if self.which_list == "mine"
+            sources = self.owner_id
+          elsif self.which_list == "friend"
+            sources = (self.friend && self.friend.id) || user.follows(false).map { |followee| followee.id }
+          elsif self.which_list == "channel"
+            sources = (self.channel && self.channel.id) || user.follows(true).map { |followee| followee.id }
+          end
+        end
+        # Now sources is either a user id, an array of ids, or nil (for the master list)
 
         # First, get a set of candidates, determined by:
         # -- who the owner of the list is 
         # -- who the viewer is
         # -- targetted status of the recipe (Rotation, etc.)
         # -- text to match against titles and comments
-        candidates = Rcpref.recipe_ids( 
-                            self.owner_id, 
-                            self.user_id,
-                            status: self.status)
-
-        # XXX Merge in the lists for each circle
-        # @circles.each { |circle_id| candidates = candidates | Rcpref.recipe_ids(circle_id, self.user_id) }
+        candidates = Rcpref.recipe_ids( sources, self.user_id, status: self.status)
     	
         unless self.tags.empty?
-            # We purge/massage the list ONLY if there is a query here
+            # We purge/massage the list ONLY if there is a tags query here
             # Otherwise, we simply sort the list by mod date
             # Convert candidate array to a hash recipe_id=>#hits
             candihash = Candihash.new candidates
@@ -172,11 +177,11 @@ protected
             @tags.each { |tag| 
                 candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
                 # Get candidates by matching the tag's name against recipe titles and comments
-                candihash.apply Rcpref.recipe_ids(self.owner_id, self.user_id,
+                candihash.apply Rcpref.recipe_ids(sources, self.user_id,
                                                 :status=>self.status,
                                                 :comment=>tag.name) 
                 # Get candidates that match specialtags in the title
-                candihash.apply Rcpref.recipe_ids(self.owner_id, self.user_id,
+                candihash.apply Rcpref.recipe_ids(sources, self.user_id,
                                                 :status=>self.status,
                                                 :title=>tag.name) 
             }
@@ -286,6 +291,23 @@ public
         # as tags with negative ids
         result = self.find(id)
         result.session_id = uid
+        if list = params[:list]
+            list =~ /^(\D*)(\d*)$/
+            result.which_list = $1
+            # idspec of 0 denotes "all friends/channels"; 
+            # absent idspec denotes "current friend/channel"
+            # idspec as value denotes specific friend/channel
+            if user = User.where(id: $2).first
+                case result.which_list
+                when "friend"
+                  result.friend = user
+                when "channel"
+                  result.channel = user
+                end
+            end
+        else
+            result.which_list = "mine"
+        end
         result.update_attributes(params)
         result.save
         result
