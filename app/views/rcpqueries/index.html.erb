@@ -14,6 +14,52 @@
 	</div>
   </div>
   <br class="clear" >
+  <div id="accordion">  
+        <!-- <h3><a href="#recent" class="heading">Recent Entries</h3>  -->
+		<h3><span id="rcpquery_mine_label">My Cookmarks</span></h3>  
+        <div id="rcpquery_mine_content">
+	      <ul id="recent">  
+            <li><span class="date">01.19.2009</span> <a href="#">Recent Entry Title</a></li>  
+            <li><span class="date">01.15.2009</span> <a href="#">Recent Entry Title</a></li>  
+            <li><span class="date">01.13.2009</span> <a href="#">Recent Entry Title</a></li>  
+            <li><span class="date">01.11.2009</span> <a href="#">Recent Entry Title</a></li>  
+            <li><span class="date">01.10.2009</span> <a href="#">Recent Entry Title</a></li>  
+          </ul>
+	    </div>
+	    <!-- <h3><a href="#popular" class="heading">Heading 2</a></h3>  -->
+		<h3><span id="rcpquery_friends_label">Friends' Cookmarks</span></h3>  
+        <div id="rcpquery_friends_content">
+	      <ul id="popular">  
+            <li><span class="date">08.16.2008</span> <a href="#">Popular Entry Title</a></li>  
+            <li><span class="date">06.12.2008</span> <a href="#">Popular Entry Title</a></li>  
+            <li><span class="date">04.12.2008</span> <a href="#">Popular Entry Title</a></li>  
+            <li><span class="date">06.12.2007</span> <a href="#">Popular Entry Title</a></li>  
+            <li><span class="date">03.12.2007</span> <a href="#">Popular Entry Title</a></li>  
+          </ul>
+	    </div>
+	    <!-- <h3><a href="#categories" class="heading">Heading 3</a></h3>  -->
+		<h3><span id="rcpquery_channels_label">Channels' Cookmarks</span></h3>  
+        <div id="rcpquery_channels_content">
+	      <ul id="categories">  
+            <li><a href="#">Category Name</a> <span class="count">7</span></li>  
+            <li><a href="#">Category Name</a> <span class="count">4</span></li>  
+            <li><a href="#">Category Name</a> <span class="count">15</span></li>  
+            <li><a href="#">Category Name</a> <span class="count">29</span></li>  
+            <li><a href="#">Category Name</a> <span class="count">8</span></li>  
+          </ul>
+	    </div>
+	    <!-- <h3><a href="#archive" class="heading">Heading 4</a></h3>  -->
+		<h3><span id="rcpquery_master_label">All the Cookmarks in the Whole Wide World (Of RecipePower)</span></h3>  
+        <div id="rcpquery_master_content">
+		  <ul id="archive">  
+            <li><a href="#">January 2009</a> <span class="count">4</span></li>  
+            <li><a href="#">December 2008</a> <span class="count">14</span></li>  
+            <li><a href="#">November 2008</a> <span class="count">12</span></li>  
+            <li><a href="#">October 2008</a> <span class="count">8</span></li>  
+            <li><a href="#">September 2008</a> <span class="count">18</span></li>  
+          </ul>
+		</div>
+  </div>  
   <%= query_tabset %>
   <%= query_friendset f %>
   <%= query_friendset f, true %>

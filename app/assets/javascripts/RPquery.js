@@ -40,6 +40,8 @@ function RPQueryOnLoad() {
 	// $("a#rcpquery_owner_return").click(backToMe);
 	// Bring text focus to the tag input field
     $("#rcpquery_tag_tokens").focus();
+
+    $('#accordion').accordion();  
 }
 
 // Respond to a change in the friend selector
