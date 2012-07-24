@@ -21,6 +21,10 @@ BLOCK_END
 		#{image_tag "sad-icon.png", :alt=>"RecipePower", :id=>"sad_img"}
 		<p class="airy">#{explan}</p>}.html_safe
    end
+   
+   def query_listid
+       "rcpquery_"+@rcpquery.which_list+"_list"
+   end
 
      def query_tabset
        s = <<BLOCK_END

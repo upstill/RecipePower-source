@@ -25,23 +25,47 @@ function RPQueryOnLoad() {
     });
 
 	// Respond to hits on the friends selector
-	$("select#rcpquery_friend_id").change(queryFriendsListLoad);
+	// $("select#rcpquery_friend_id").change(queryFriendsListLoad);
 	// $("select#rcpquery_channel_id").change(queryChannelChange);
 	
     // Load the 'friends' recipe list
-    queryFriendsListLoad();
+    // queryFriendsListLoad();
 
     // Load the 'channels' recipe list
-    queryChannelsListLoad();
+    // queryChannelsListLoad();
 
     // Load the master recipe list
-    queryMasterListLoad();
+    // queryMasterListLoad();
 	
 	// $("a#rcpquery_owner_return").click(backToMe);
 	// Bring text focus to the tag input field
     $("#rcpquery_tag_tokens").focus();
 
-    $('#accordion').accordion();  
+    $('#accordion').accordion({
+		changestart: queryAccordionChange,
+		collapsible: true,
+		active: false, 
+		autoHeight: false
+	});  
+	$('#accordion').accordion( "activate", "h3#rcpquery_friends_header");
+}
+
+// When the accordion changes, we need to load the content of the new section, as needed
+function queryAccordionChange(event, ui) {
+	var contentID = ui.newContent.attr("id"); // Extract this node's ID
+	if(contentID) {
+		// The new-section selector may be nil when closing a section w/o opening another
+	    var pre = new RegExp("rcpquery_");
+	    var post = new RegExp("_content");
+	    var listKind = contentID.replace(pre, "").replace(post, "");
+		var listID = "rcpquery_"+listKind+"_list"; // Substitute "list" for "content" to get ID of list item
+		debugger;
+		var obj = $("#"+listID);
+		if (!obj.hasClass("current")) {
+			obj.load( "rcpqueries/relist", { list: listKind });
+			obj.addClass("current");
+		}
+	}
 }
 
 // Respond to a change in the friend selector
@@ -49,8 +73,8 @@ function queryFriendsListLoad() {
     // queryformHit(this.form, {});
     // Get the value of the selection box
     set = $("select#rcpquery_friend_id");
-	querystr = "rcpqueries/relist?list=friend"
-	if(set.first) {
+	querystr = "rcpqueries/relist?list=friends"
+	if(set.first && set.val()) {
 		querystr += set.val();
 	}
     // Fire off a replacement for the list
@@ -62,8 +86,8 @@ function queryChannelsListLoad() {
     // queryformHit(this.form, {});
     // Get the value of the selection box
     set = $("select#rcpquery_channel_id");
-	querystr = "rcpqueries/relist?list=channel"
-	if(set.first) {
+	querystr = "rcpqueries/relist?list=channels"
+	if(set.first && set.val()) {
 		querystr += set.val();
 	}
     // Fire off a replacement for the list

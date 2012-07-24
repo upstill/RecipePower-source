@@ -299,9 +299,9 @@ public
             # idspec as value denotes specific friend/channel
             if user = User.where(id: $2).first
                 case result.which_list
-                when "friend"
+                when "friends"
                   result.friend = user
-                when "channel"
+                when "channels"
                   result.channel = user
                 end
             end

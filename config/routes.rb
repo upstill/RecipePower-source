@@ -17,7 +17,7 @@ RP::Application.routes.draw do
 
   resources :links
 
-  match 'rcpqueries/relist', :controller=>'rcpqueries', :action=>'relist', :via => :get
+  match 'rcpqueries/relist', :controller=>'rcpqueries', :action=>'relist', :via => :post
   match 'rcpqueries/:id/relist', :controller=>'rcpqueries', :action=>'relist', :via => :get
 
   resources :rcpqueries
