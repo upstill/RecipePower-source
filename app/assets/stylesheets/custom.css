@@ -151,12 +151,14 @@ h2.med {
   	font-size: 170%;
 }
 
+/*
 h3 {
   font-size: 150%;
   margin:0px;
   padding:0px;
   // padding-top:5px;
 }
+*/
 
 p.airy {
   	font:18px calibri;
@@ -1030,4 +1032,5 @@ ul#accordion a.heading { width: 298px; }
 ul#accordion ul li { float: none; width: auto; }  
 ul#accordion li.ui-accordion-selected a.heading { background: #850251; color: #fff; }  
 */
+h3#rcpquery_friends_header { margin-left: 100px; }
 

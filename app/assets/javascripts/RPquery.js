@@ -47,7 +47,7 @@ function RPQueryOnLoad() {
 		active: false, 
 		autoHeight: false
 	});  
-	$('#accordion').accordion( "activate", "h3#rcpquery_friends_header");
+	// $('#accordion').accordion( "activate", "h3#rcpquery_friends_header");
 }
 
 // When the accordion changes, we need to load the content of the new section, as needed
@@ -62,12 +62,17 @@ function queryAccordionChange(event, ui) {
 		debugger;
 		var obj = $("#"+listID);
 		if (!obj.hasClass("current")) {
-			obj.load( "rcpqueries/relist", { list: listKind });
-			obj.addClass("current");
+			obj.load( "rcpqueries/relist", { list: listKind }, function( content, status, xhr) {
+				debugger;
+				if(status == "success") {
+					obj.addClass("current");
+				}
+			});
 		}
 	}
 }
 
+/*
 // Respond to a change in the friend selector
 function queryFriendsListLoad() {
     // queryformHit(this.form, {});
@@ -98,6 +103,7 @@ function queryChannelsListLoad() {
 function queryMasterListLoad() {
 	$('#rcpquery_master_list').load( "rcpqueries/relist?list=master" );
 }
+*/
 
 // Called when a tab loads (after the content has been replaced):
 //  -- Set the appropriate event handlers
@@ -142,14 +148,12 @@ function queryformHit(form, options) {
 
 // Callback after an update to hit the appropriate recipe tab
 function queryresultsUpdate(resp, succ, xhr) {
+	$(".rcplist_body").removeClass("current");
     // The response is just the index of the tab to hit
     $("#rcpquery_tabset").tabs('load', Number(resp));
-    // Load the 'friends' recipe list
-    queryFriendsListLoad();
-    // Load the 'channels' recipe list
-    queryChannelsListLoad();
-    // Load the master recipe list
-    queryMasterListLoad();
+	// Explicitly update the currently-open section
+	var active = $("#accordion").accordion("option", "active");
+	debugger;
 }
 
 // ----------------- Callbacks for interaction events 

@@ -129,6 +129,7 @@ function merge_tags(event) {
 	return true;
 }
 
+/*
 // Called when the tag tabs load to set up dynatree, etc.
 function tagTabsOnLoad(event, info) {
     var TO = window.setInterval(function() {
@@ -233,7 +234,7 @@ function tagTabTakeDropFromDynatree(event, info) {
     },
     "json");
 }
-
+*/
 function getWdwData() {
 	var tabindex = $("#tags_tabset").tabs('option', 'selected');
 	return {
@@ -543,7 +544,7 @@ function add_fields(link, association, content) {
     var regexp = new RegExp("new_" + association, "g")
     $(link).parent().before(content.replace(regexp, new_id));
 }
-
+/*
 function add_rating(link, association, content) {
     // Get the selected option
     var opts = link.options;
@@ -585,6 +586,7 @@ function add_rating(link, association, content) {
     // debugger;
     // }
 }
+*/
 
 // Take an HTML element from the server and replace it in the DOM
 function replaceElmt(body, status, instance) {
