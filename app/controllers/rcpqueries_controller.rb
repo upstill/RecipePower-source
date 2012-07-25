@@ -117,6 +117,14 @@ public
       session[:rcpquery] = @rcpquery.id # In case the model decided on a new query
       render '_form_rcplist.html.erb', :layout=>false
   end
+  
+  # Return the recipe list for a tab in the 'mine' list. 
+  # The only parameter is 'status', denoting the tab involved
+  def tablist
+      @user_id = current_user_or_guest_id
+      @rcpquery = Rcpquery.fetch_revision(session[:rcpquery], @user_id, params)
+      render '_form_placeholder.html.erb', :layout=>false
+  end
 
   # PUT /rcpqueries/1
   # PUT /rcpqueries/1.xml

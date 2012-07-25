@@ -65,7 +65,7 @@ class Rcpquery < ActiveRecord::Base
     serialize :specialtags, Hash
     
     attr_accessible :status, :session_id, :user_id, :owner_id, :tag_tokens, :tag_ids, :tags, :page_length, :cur_page, 
-        :listmode_str, :owner, :friend, :channel, :which_list
+        :listmode_str, :owner_id, :friend_id, :channel_id, :which_list
     belongs_to :owner, :class_name => "User"
     belongs_to :friend, :class_name => "User"
     belongs_to :channel, :class_name => "User"
@@ -148,13 +148,12 @@ protected
     	return @results if @results # Keeping a cache of results
         # Try to match prior query for this user and fetch rankings array
         # "match" has fewest num. of differing elements
-        
         if user = User.where(id: self.owner_id).first
-          if self.which_list == "mine"
+          if self.which_list =~ /mine/
             sources = self.owner_id
-          elsif self.which_list == "friend"
+          elsif self.which_list =~ /friend/
             sources = (self.friend && self.friend.id) || user.follows(false).map { |followee| followee.id }
-          elsif self.which_list == "channel"
+          elsif self.which_list =~ /channel/
             sources = (self.channel && self.channel.id) || user.follows(true).map { |followee| followee.id }
           end
         end
@@ -305,8 +304,8 @@ public
                   result.channel = user
                 end
             end
-        else
-            result.which_list = "mine"
+        # else
+            # result.which_list = "mine"
         end
         result.update_attributes(params)
         result.save

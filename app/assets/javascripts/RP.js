@@ -129,6 +129,159 @@ function merge_tags(event) {
 	return true;
 }
 
+function getWdwData() {
+	var tabindex = $("#tags_tabset").tabs('option', 'selected');
+	return {
+		tabindex: tabindex,
+		tagListSelector: "#taglist"+tabindex,
+		referentTreeSelector: "#referenttree"+tabindex,
+		listTextElement: "#tag_entry"+tabindex
+	}
+}
+
+// Here's how to setup a wrapper method:
+(function($){
+  $.fn.mycheck = function() {
+	var val = $("#tags_tabset").tabs('option', 'selected');
+	// debugger;
+    return 1;
+  };
+})(jQuery);
+
+// Check that the images in a window have been loaded, fitting them into
+// their frames when the size is available.
+function wdwFitImages() {
+    var TO = window.setInterval(function() {
+        var allDone = true;
+        $("img.fitPic").each(function() {
+            allDone = fitImage(this) && allDone;
+        });
+        if (allDone) {
+            window.clearInterval(TO);
+        }
+    },
+    100);
+}
+
+function fitImage(img) {
+
+    if (!img.complete) {
+        return false;
+    }
+
+    var width = img.parentElement.clientWidth;
+    var height = img.parentElement.clientHeight;
+
+    var aspect = img.width / img.height;
+    // 'shrinkage' is the scale factor, offsets are for centering the result
+    var shrinkage,
+    offsetX = 0,
+    offsetY = 0;
+    if (aspect > width / height) {
+        // If the image is wider than the frame
+        // Shrink to just fit in width
+        shrinkage = width / img.width;
+        offsetY = (height - img.height * shrinkage) / 2;
+    } else {
+        // Shrink to just fit in height
+        shrinkage = height / img.height;
+        offsetX = (width - img.width * shrinkage) / 2;
+    }
+    // Scale the image dimensions to fit its parent's box
+    // img.width *= shrinkage;
+    $(img).css("width", img.width * shrinkage);
+    img.style.position = "relative";
+    $(img).css("top", offsetY);
+    // $(img).css("left", offsetX);
+    $(img).css("visibility", "visible");
+    $(img).show();
+    return true;
+}
+
+// NOT YET GUARANTEED
+// Responder for link to return to the user's list
+function backToMe(uid) {
+    // debugger;
+    var x = 2;
+}
+
+function alertIframeSelection() {
+    var iframe = document.getElementById("viewframe");
+    alert(getIframeSelectionText(iframe));
+};
+
+function alertSelectionText() {
+    var editor_body = self.window.document;
+    var range;
+
+    if (editor_body.getSelection()) {
+        range = editor_body.getSelection();
+        alert(range.toString());
+    } else if (editor_body.selection.createRange()) {
+        range = editor_body.selection.createRange();
+        alert(range.text);
+    } else return;
+}
+
+function makeIframeSelectionRed() {
+    var editor_body = self.window.document;
+    var range;
+
+    if (editor_body.getSelection()) {
+        range = editor_body.getSelection();
+    } else if (editor_body.selection.createRange()) {
+        range = editor_body.selection.createRange();
+    } else return;
+    range.pasteHTML("<span style='color: red'>" + range.htmlText + "</span>");
+
+    // var range = document.getElementById("myid").contentWindow.document.selection.createRange();
+    // range.pasteHTML("<span style='color: red'>" + range.htmlText + "</span>");
+}
+
+function remove_fields(link) {
+    $(link).prev("input[type=hidden]").val("1");
+    $(link).closest(".fields").hide();
+    queryformHit($("form")[0], {});
+}
+
+function add_fields(link, association, content) {
+    var new_id = new Date().getTime();
+    var regexp = new RegExp("new_" + association, "g")
+    $(link).parent().before(content.replace(regexp, new_id));
+}
+
+// Take an HTML element from the server and replace it in the DOM
+function replaceElmt(body, status, instance) {
+	if(status == "success") {
+		var selector = body.selector
+		var content = body.content
+		debugger;
+		$(selector).replaceWith(content);
+	}
+}
+
+/* Respond to the preview-recipe button by opening a popup loaded with its URL.
+   If the popup gets blocked, return true so that the recipe is opened in a new
+   window/tab.
+   In either case, notify the server of the opening so it can touch the recipe
+*/
+function servePopup() {
+   var regexp = new RegExp("popup", "g")
+   var rcpid = this.getAttribute('id').replace(regexp, "");
+   debugger;
+   jQuery.get( "recipes/"+rcpid+"/touch", {}, replaceElmt, "json" );		
+
+   // Now for the main event: open the popup window if possible
+   linkURL = this.getAttribute('href');
+   var popUp = window.open(linkURL, 'popup', 'width=600, height=300, scrollbars, resizable');
+   if (!popUp || typeof(popUp) === 'undefined') {
+      return true;
+   } else {
+     popUp.focus();
+     return false;
+   }
+}
+
 /*
 // Called when the tag tabs load to set up dynatree, etc.
 function tagTabsOnLoad(event, info) {
@@ -234,22 +387,13 @@ function tagTabTakeDropFromDynatree(event, info) {
     },
     "json");
 }
-*/
-function getWdwData() {
-	var tabindex = $("#tags_tabset").tabs('option', 'selected');
-	return {
-		tabindex: tabindex,
-		tagListSelector: "#taglist"+tabindex,
-		referentTreeSelector: "#referenttree"+tabindex,
-		listTextElement: "#tag_entry"+tabindex
-	}
-}
 
 // Respond to typing into the search box: hit the server for a list of matching keys
 //  tabindex: index of this tab on the tags page
 //  typing: the string typed thus far
 //	makeormatch: used to force existence of this exact key
 //  url: http string used to hit the server
+
 function tagTabsTakeTyping(event, info) {
     // Send current string to server
     // Get back replacement list of keys
@@ -294,19 +438,8 @@ function tagTabsTakeTyping(event, info) {
 		},
 	    "html"
 	    );
-	*/
+	* /
 }
-
-// Here's how to setup a wrapper method:
-/*
-(function($){
-  $.fn.mycheck = function() {
-	var val = $("#tags_tabset").tabs('option', 'selected');
-	// debugger;
-    return 1;
-  };
-})(jQuery);
-*/
 
 function setupDynatree() {
 	// $(".taglist").mycheck();
@@ -325,7 +458,7 @@ function setupDynatree() {
 	      onDragStart: function(node) {
 	        /** This function MUST be defined to enable dragging for the tree.
 	         *  Return false to cancel dragging of node.
-	         */
+	         * /
 	        logMsg("tree.onDragStart(%o)", node);
 	        if(node.data.isFolder)
 	          return false;
@@ -358,7 +491,7 @@ function setupDynatree() {
             onDragStart: function(node) {
                 /** This function MUST be defined to enable dragging for the tree.
                  *  Return false to cancel dragging of node.
-                 */
+                 * /
                 logMsg("tree.onDragStart(%o)", node);
                 return true;
             },
@@ -371,13 +504,13 @@ function setupDynatree() {
             onDrop: function(node, sourceNode, hitMode, ui, draggable) {
                 /** This function MUST be defined to enable dropping of items on
                  * the tree.
-                 */
+                 * /
 				/* We're dropping a node from either the tag list or the tree itself.
 				   If the source is the tag list, we send JSON to create a new referent
 					to drop into place.
 				   If the source is the tree itself, we send JSON to relocate the referent
 					in the hierarchy.
-				*/
+				* /
                 logMsg("tree.onDrop(%o, %o, %s)", node, sourceNode, hitMode);
 				var sourceTreeName = sourceNode.parent.tree.divTree.className;
 				var nodeTreeName = node.parent.tree.divTree.className;
@@ -404,7 +537,7 @@ function setupDynatree() {
 						server to 1) notify it of the new referent, and 2) get the referent
 						key for inserting into the tree.
 					  # POST /referents.json??tagid=1&mode={over,before,after}&target=referentid
-					*/
+					* /
 					function catchReferent(response, status, xhr) {
 						if(status == "success") {
 							if(response[0].key > 0) { // 0 key means no new node
@@ -442,109 +575,6 @@ function setupDynatree() {
     });
 }
 
-
-// Check that the images in a window have been loaded, fitting them into
-// their frames when the size is available.
-function wdwFitImages() {
-    var TO = window.setInterval(function() {
-        var allDone = true;
-        $("img.fitPic").each(function() {
-            allDone = fitImage(this) && allDone;
-        });
-        if (allDone) {
-            window.clearInterval(TO);
-        }
-    },
-    100);
-}
-
-function fitImage(img) {
-
-    if (!img.complete) {
-        return false;
-    }
-
-    var width = img.parentElement.clientWidth;
-    var height = img.parentElement.clientHeight;
-
-    var aspect = img.width / img.height;
-    // 'shrinkage' is the scale factor, offsets are for centering the result
-    var shrinkage,
-    offsetX = 0,
-    offsetY = 0;
-    if (aspect > width / height) {
-        // If the image is wider than the frame
-        // Shrink to just fit in width
-        shrinkage = width / img.width;
-        offsetY = (height - img.height * shrinkage) / 2;
-    } else {
-        // Shrink to just fit in height
-        shrinkage = height / img.height;
-        offsetX = (width - img.width * shrinkage) / 2;
-    }
-    // Scale the image dimensions to fit its parent's box
-    // img.width *= shrinkage;
-    $(img).css("width", img.width * shrinkage);
-    img.style.position = "relative";
-    $(img).css("top", offsetY);
-    // $(img).css("left", offsetX);
-    $(img).css("visibility", "visible");
-    $(img).show();
-    return true;
-}
-
-// NOT YET GUARANTEED
-// Responder for link to return to the user's list
-function backToMe(uid) {
-    // debugger;
-    var x = 2;
-}
-
-function alertIframeSelection() {
-    var iframe = document.getElementById("viewframe");
-    alert(getIframeSelectionText(iframe));
-};
-
-function alertSelectionText() {
-    var editor_body = self.window.document;
-    var range;
-
-    if (editor_body.getSelection()) {
-        range = editor_body.getSelection();
-        alert(range.toString());
-    } else if (editor_body.selection.createRange()) {
-        range = editor_body.selection.createRange();
-        alert(range.text);
-    } else return;
-}
-
-function makeIframeSelectionRed() {
-    var editor_body = self.window.document;
-    var range;
-
-    if (editor_body.getSelection()) {
-        range = editor_body.getSelection();
-    } else if (editor_body.selection.createRange()) {
-        range = editor_body.selection.createRange();
-    } else return;
-    range.pasteHTML("<span style='color: red'>" + range.htmlText + "</span>");
-
-    // var range = document.getElementById("myid").contentWindow.document.selection.createRange();
-    // range.pasteHTML("<span style='color: red'>" + range.htmlText + "</span>");
-}
-
-function remove_fields(link) {
-    $(link).prev("input[type=hidden]").val("1");
-    $(link).closest(".fields").hide();
-    queryformHit($("form")[0], {});
-}
-
-function add_fields(link, association, content) {
-    var new_id = new Date().getTime();
-    var regexp = new RegExp("new_" + association, "g")
-    $(link).parent().before(content.replace(regexp, new_id));
-}
-/*
 function add_rating(link, association, content) {
     // Get the selected option
     var opts = link.options;
@@ -586,40 +616,7 @@ function add_rating(link, association, content) {
     // debugger;
     // }
 }
-*/
 
-// Take an HTML element from the server and replace it in the DOM
-function replaceElmt(body, status, instance) {
-	if(status == "success") {
-		var selector = body.selector
-		var content = body.content
-		debugger;
-		$(selector).replaceWith(content);
-	}
-}
-
-/* Respond to the preview-recipe button by opening a popup loaded with its URL.
-   If the popup gets blocked, return true so that the recipe is opened in a new
-   window/tab.
-   In either case, notify the server of the opening so it can touch the recipe
-*/
-function servePopup() {
-   var regexp = new RegExp("popup", "g")
-   var rcpid = this.getAttribute('id').replace(regexp, "");
-   debugger;
-   jQuery.get( "recipes/"+rcpid+"/touch", {}, replaceElmt, "json" );		
-
-   // Now for the main event: open the popup window if possible
-   linkURL = this.getAttribute('href');
-   var popUp = window.open(linkURL, 'popup', 'width=600, height=300, scrollbars, resizable');
-   if (!popUp || typeof(popUp) === 'undefined') {
-      return true;
-   } else {
-     popUp.focus();
-     return false;
-   }
-}
-/*
 /* Respond to a click on the recipe-preview button by sending a touch-recipe
    message to the server * /
 $('.popup').bind('click', function () {

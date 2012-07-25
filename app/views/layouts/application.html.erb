@@ -30,13 +30,13 @@ whenReady( function() {
 	RPQueryOnLoad();
 
 	// Set up tabs for tags editing page
-	var val = Number($("#tags_tabset").attr('value'));
+/*	var val = Number($("#tags_tabset").attr('value'));
 	var options = {load:tagTabsOnLoad, selected:val};
 	$("#tags_tabset").tabs(options);
 	if(popupItem = $('.popup')[0]) {
 		popupItem.onclick = servePopup;
 	}
-
+*/
   $("#tagpane_submit").click(tagpane_submit);
   rangy.init();
   $("#tagpane_ingredient_list").click(tagpane_ingredient_list);

@@ -25,45 +25,39 @@ function RPQueryOnLoad() {
     });
 
 	// Respond to hits on the friends selector
-	// $("select#rcpquery_friend_id").change(queryFriendsListLoad);
-	// $("select#rcpquery_channel_id").change(queryChannelChange);
+	$("select#rcpquery_friend_id").change(queryFriendsSelect);
+	$("select#rcpquery_channel_id").change(queryFriendsSelect);
 	
-    // Load the 'friends' recipe list
-    // queryFriendsListLoad();
-
-    // Load the 'channels' recipe list
-    // queryChannelsListLoad();
-
-    // Load the master recipe list
-    // queryMasterListLoad();
-	
-	// $("a#rcpquery_owner_return").click(backToMe);
 	// Bring text focus to the tag input field
     $("#rcpquery_tag_tokens").focus();
 
+	var activelist = $('#accordion').attr("data") || "mine";
     $('#accordion').accordion({
 		changestart: queryAccordionChange,
 		collapsible: true,
 		active: false, 
 		autoHeight: false
 	});  
-	// $('#accordion').accordion( "activate", "h3#rcpquery_friends_header");
+	$('#accordion').accordion( "activate", "h3#rcpquery_"+activelist+"_header");
 }
 
 // When the accordion changes, we need to load the content of the new section, as needed
 function queryAccordionChange(event, ui) {
-	var contentID = ui.newContent.attr("id"); // Extract this node's ID
+	queryAccordionUpdatePanel( ui.newContent);
+}
+
+function queryAccordionUpdatePanel(elmt) {
+	var contentID = elmt.attr("id"); // Extract this node's ID
 	if(contentID) {
 		// The new-section selector may be nil when closing a section w/o opening another
 	    var pre = new RegExp("rcpquery_");
 	    var post = new RegExp("_content");
 	    var listKind = contentID.replace(pre, "").replace(post, "");
-		var listID = "rcpquery_"+listKind+"_list"; // Substitute "list" for "content" to get ID of list item
-		debugger;
+		var listID = "rcpquery_"+listKind+"_list_container"; // Substitute "list" for "content" to get ID of list item
 		var obj = $("#"+listID);
+		debugger;
 		if (!obj.hasClass("current")) {
 			obj.load( "rcpqueries/relist", { list: listKind }, function( content, status, xhr) {
-				debugger;
 				if(status == "success") {
 					obj.addClass("current");
 				}
@@ -72,38 +66,17 @@ function queryAccordionChange(event, ui) {
 	}
 }
 
-/*
 // Respond to a change in the friend selector
-function queryFriendsListLoad() {
+function queryFriendsSelect() {
     // queryformHit(this.form, {});
     // Get the value of the selection box
-    set = $("select#rcpquery_friend_id");
-	querystr = "rcpqueries/relist?list=friends"
-	if(set.first && set.val()) {
-		querystr += set.val();
-	}
-    // Fire off a replacement for the list
-	$('#rcpquery_friends_list').load( querystr );
+    var re = new RegExp("_id$")
+    var id = this.id.replace(re, "s_list_container")
+    $("#"+id).removeClass("current");
+    // Notify the server of the change and trigger an update of the current item
+    queryformHit(this[0].form, { });
 }
 
-// Respond to a change in the friend selector
-function queryChannelsListLoad() {
-    // queryformHit(this.form, {});
-    // Get the value of the selection box
-    set = $("select#rcpquery_channel_id");
-	querystr = "rcpqueries/relist?list=channels"
-	if(set.first && set.val()) {
-		querystr += set.val();
-	}
-    // Fire off a replacement for the list
-	$('#rcpquery_channels_list').load( querystr );
-}
-
-// Respond to a change in the friend selector
-function queryMasterListLoad() {
-	$('#rcpquery_master_list').load( "rcpqueries/relist?list=master" );
-}
-*/
 
 // Called when a tab loads (after the content has been replaced):
 //  -- Set the appropriate event handlers
@@ -122,7 +95,9 @@ function queryTabOnLoad() {
 
 // Callback when token set changes: handle as any change to the query form
 function tokenChangeCallback(hi, li) {
-    var x = 2;
+	// Invalidate all lists
+	$(".rcplist_container").removeClass("current");
+	// Notify the server of the change and update as needed
     queryformHit(this[0].form, {});
 	// var tokenStr = $("#rcpquery_tag_tokens").tokenInput("get");
 	// updateRecipeQueryResults( { tag_tokens: tokenStr })
@@ -142,18 +117,20 @@ function queryformHit(form, options) {
         // Submit the data from the form
         dataType: "html",
         success: queryresultsUpdate
-    }
-    );
+    });
 }
 
-// Callback after an update to hit the appropriate recipe tab
+// Callback after an update to hit the appropriate recipe tab (etc.)
 function queryresultsUpdate(resp, succ, xhr) {
-	$(".rcplist_body").removeClass("current");
-    // The response is just the index of the tab to hit
-    $("#rcpquery_tabset").tabs('load', Number(resp));
 	// Explicitly update the currently-open section
 	var active = $("#accordion").accordion("option", "active");
-	debugger;
+	if (active == 0) {
+	    // The response is just the index of the tab to hit
+	    $("#rcpquery_tabset").tabs('load', Number(resp));
+	} else if (active != null) {
+		// Reload the list for the currently-active panel, if any
+		queryAccordionUpdatePanel($("#accordion").children().slice((2*active)+1));
+	}
 }
 
 // ----------------- Callbacks for interaction events 

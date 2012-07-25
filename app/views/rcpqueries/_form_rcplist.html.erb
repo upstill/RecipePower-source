@@ -1,5 +1,5 @@
 <%# Renders a recipe list (from a query) for display under a tab %>
-<section class="rcplist_body current">
+<section class="rcplist_body">
 	<% if @rcpquery.empty? %>
 		<%= explain_empty @rcpquery %>
 	<% elsif @rcpquery.listmode_str == :rcplist_text -%>

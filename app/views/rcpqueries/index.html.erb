@@ -14,36 +14,32 @@
 	</div>
   </div>
   <br class="clear" >
-  <div id="accordion">  
+  <div id="accordion" data="<%= @rcpquery.which_list %>">  
         <!-- <h3><a href="#recent" class="heading">Recent Entries</h3>  -->
-		<h3 id="rcpquery_mine_header"><span id="rcpquery_mine_label">My Cookmarks</span></h3>  
+		<h3 id="rcpquery_mine_header"><span class="rcpquery_panel_label" id="rcpquery_mine_label">My Cookmarks</span></h3>  
         <div id="rcpquery_mine_content">
-	      <ul id="recent">  
-            <li><span class="date">01.19.2009</span> <a href="#">Recent Entry Title</a></li>  
-            <li><span class="date">01.15.2009</span> <a href="#">Recent Entry Title</a></li>  
-            <li><span class="date">01.13.2009</span> <a href="#">Recent Entry Title</a></li>  
-            <li><span class="date">01.11.2009</span> <a href="#">Recent Entry Title</a></li>  
-            <li><span class="date">01.10.2009</span> <a href="#">Recent Entry Title</a></li>  
-          </ul>
+		  <%= query_tabset %>
 	    </div>
 	    <!-- <h3><a href="#popular" class="heading">Heading 2</a></h3>  -->
-		<h3 id="rcpquery_friends_header"><span id="rcpquery_friends_label">Friends' Cookmarks</span></h3>  
+		<h3 id="rcpquery_friends_header"><span class="rcpquery_panel_label" id="rcpquery_friends_label">Friends' Cookmarks</span></h3>  
         <div id="rcpquery_friends_content">
-	      <section class="rcplist_body" id="rcpquery_friends_list">To Be Loaded Dynamically</section>
+		  <%= query_friendstart f %>
+		  <%= query_container "friends", "Hang on a second..." %>
 	    </div>
 	    <!-- <h3><a href="#categories" class="heading">Heading 3</a></h3>  -->
-		<h3 id="rcpquery_channels_header"><span id="rcpquery_channels_label">Channels' Cookmarks</span></h3>  
+		<h3 id="rcpquery_channels_header"><span class="rcpquery_panel_label" id="rcpquery_channels_label">Channels' Cookmarks</span></h3>  
         <div id="rcpquery_channels_content">
-	      <section class="rcplist_body" id="rcpquery_channels_list">To Be Loaded Dynamically</section>
+		  <%= query_friendstart f, true %>
+		  <%= query_container "channels", "Hang on a second..." %>
 	    </div>
 	    <!-- <h3><a href="#archive" class="heading">Heading 4</a></h3>  -->
-		<h3 id="rcpquery_master_header"><span id="rcpquery_master_label">All the Cookmarks in the Whole Wide World (Of RecipePower)</span></h3>  
+		<h3 id="rcpquery_master_header"><span class="rcpquery_panel_label" id="rcpquery_master_label">All the Cookmarks in the Whole Wide World (Of RecipePower)</span></h3>  
         <div id="rcpquery_master_content">
-	      <div class="rcplist_body" id="rcpquery_master_list">To Be Loaded Dynamically</div>
+		  <%= query_container "master", "Scouring the world..." %>
 		</div>
   </div>  
-  <%= query_tabset %>
-  <%= query_friendset f %>
-  <%= query_friendset f, true %>
+  <%# query_tabset %>
+  <%# query_friendset f %>
+  <%# query_friendset f, true %>
   <%# query_masterset %>
 <% end %>
