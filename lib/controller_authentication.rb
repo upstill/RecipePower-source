@@ -21,8 +21,12 @@ module ControllerAuthentication
       # controller.send :helper_method, :current_user, :logged_in?, :redirect_to_target_or_default
   end
   
+  def current_user_or_guest
+      current_user || User.guest
+  end
+  
   def current_user_or_guest_id
-    (user = current_user) ? current_user.id : User.guest_id
+    (current_user && current_user.id) || User.guest_id
   end
 
   def logged_in?

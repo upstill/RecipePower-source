@@ -83,17 +83,15 @@ module ApplicationHelper
 
   # Deploy the links for naming the user and/or signing up/signing in
   def user_status
-    case current_user_or_guest_id
-    when User.guest_id
-       link_to("Sign In", authentications_path)
-    when User.super_id
-       link_to "Super logout", destroy_user_session_path, :method=>"delete"
-    else
-       user = current_user
+    if current_user_or_guest_id == User.super_id
+        link_to "Super logout", destroy_user_session_path, :method=>"delete"
+    elsif user = current_user
        uname = user.username
        ulink = link_to uname, users_profile_path # users_edit_path 
        ulogout = link_to "Sign Out", destroy_user_session_path, :method=>"delete"
        "<strong>#{ulink}</strong><span class=\"welcome_user\">&nbsp|&nbsp;#{ulogout}</span>".html_safe
+     else
+         link_to("Sign In", authentications_path)
      end + " | " + navlink("Invite", new_user_invitation_path, (@nav_current==:invite))
   end
   

@@ -120,14 +120,6 @@ class User < ActiveRecord::Base
       [@@Roles.list, role_id]
   end
 
-# Robustly get the record for the current user, or guest if not logged in
-  def self.current (uid)
-      begin
-          self.find (uid || self.guest_id)
-      rescue ActiveRecord::RecordNotFound => e
-      end
-  end
-
   # Class variable @@Super_user saves the super user_id
   @@Super_user = nil
   def self.super_id
@@ -135,9 +127,13 @@ class User < ActiveRecord::Base
   end
   
   # Class variable @@Guest_uid saves the guest user_id
-  @@Guest_user = nil
+  @@Guest_user = nil  
+  def self.guest
+      @@Guest_user || (@@Guest_user = self.by_name(:guest))
+  end
+      
   def self.guest_id
-      (@@Guest_user || (@@Guest_user = self.by_name(:guest))).id
+      self.guest.id
   end
   
   @@Special_ids = []
