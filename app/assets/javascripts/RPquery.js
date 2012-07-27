@@ -82,6 +82,8 @@ function queryAccordionUpdatePanel(elmt) {
 					queryOnLoad(obj.find("img.fitPic"));
 				}
 			});
+		} else {
+			queryOnLoad(obj.find("img.fitPic"));	
 		}
 	}
 }

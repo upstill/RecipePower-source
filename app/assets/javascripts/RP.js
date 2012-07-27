@@ -151,6 +151,7 @@ function getWdwData() {
 // Check that the images in a window have been loaded, fitting them into
 // their frames when the size is available. NB: It's best to restrict this set to
 // the visible images, for performance's sake.
+/*
 function wdwFitImages(selection) {
     var TO = window.setInterval(function() {
         var allDone = true;
@@ -172,6 +173,14 @@ function wdwFitImages(selection) {
     },
     10);
 }
+*/
+
+// Onload function for images, to fit themselves (found by id) into the enclosing container.
+function fitImageOnLoad(id) {
+    $("#"+id).each(function() {
+        fitImage(this);
+    });
+}
 
 function fitImage(img) {
 
@@ -179,8 +188,16 @@ function fitImage(img) {
         return false;
     }
 
+    if(!(img.width > 5 && img.height > 5)) {
+		return false;
+	}
+
     var width = img.parentElement.clientWidth;
     var height = img.parentElement.clientHeight;
+
+    if(!(width > 5 && height > 5)) {
+		return false;
+	}
 
     var aspect = img.width / img.height;
     // 'shrinkage' is the scale factor, offsets are for centering the result

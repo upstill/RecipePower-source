@@ -11,7 +11,7 @@ def rcp_fitPic(rcp)
 	if rcp.picurl.blank?
 	    %Q{<div class="centerfloat" id="#{id}">No Image Available</div>}.html_safe
 	else
-        %Q{<img src="#{rcp.picurl}" class="fitPic" id="#{id}" onload="fitImage(#{id});">}.html_safe
+        (%Q{<img src="#{rcp.picurl}" class="fitPic" id="#{id}" onload="fitImageOnLoad('}+id+%q{');">}).html_safe
 	end
 end
 

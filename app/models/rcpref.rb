@@ -94,7 +94,7 @@ class Rcpref < ActiveRecord::Base
 	end
 
     refs = refs.order(sortfield) if sortfield
-    refs = refs.order("updated_at") if sort_by_touched
+    refs = refs.order("updated_at").reverse_order() if sort_by_touched
     
     # We apply the titlestr, if any
     if titlestr

@@ -2,6 +2,7 @@ require 'yaml'
 # require 'uri'
 require 'open-uri'
 require 'nokogiri'
+require "net/http"
 
 class String
     def remove_non_ascii
@@ -232,6 +233,18 @@ class Site < ActiveRecord::Base
         if @tags # @tags is nil iff tags never got unpacked
             self.tags_serialized = YAML::dump @tags
         end
+    end
+    
+    # Confirm that a proposed URL (with an optional subpath) actually has content at the other end
+    def self.test_link(link, resource=nil)
+      begin
+        url = resource ? URI.join(link, resource) : URI.parse(link)
+      rescue Exception => e
+        return false
+      end
+      req = Net::HTTP.new(url.host, url.port)
+      res = req.request_head(url.path)
+      return res.code == "200"
     end
     
     # Find and return the site wherein the named link is stored
