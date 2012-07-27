@@ -7,10 +7,11 @@ module RecipesHelper
 # the browser under Javascript and their dimensions adjusted.
 def rcp_fitPic(rcp)
     # "fitPic" class gets fit inside pic_box with Javascript and jQuery
+    id = "rcpPic"+rcp.id.to_s
 	if rcp.picurl.blank?
-	    %q{<div class="centerfloat">No Image Available</div>}.html_safe
+	    %Q{<div class="centerfloat" id="#{id}">No Image Available</div>}.html_safe
 	else
-        "<img src=\"#{rcp.picurl}\" class=\"fitPic\" >".html_safe
+        %Q{<img src="#{rcp.picurl}" class="fitPic" id="#{id}" onload="fitImage(#{id});">}.html_safe
 	end
 end
 

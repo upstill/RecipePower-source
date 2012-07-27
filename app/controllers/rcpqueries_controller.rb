@@ -32,15 +32,8 @@ public
 
     # We wake up with optional parameters:
     #   owner: id of list owner
-
-    # Listing recipes doesn't require login, but we do need a user_id
-    # need_login false # ...doesn't require session: sets user_id to guest id if none
     @rcpquery = current_query params[:owner]
-    # Blind index: show list of either the current user or a given user
-    # NB: the list of special user 'guest' sees all public recipes
-    # Ensure the quality of the query
-
-    @Title = @rcpquery.title
+    @Title = "Cookmarks"
     @navlinks = []
     @nav_current = :cookmarks
     # respond_to do |format|
@@ -110,11 +103,13 @@ public
       # Presumably the params include :status, :querymode and/or :listmode specs
       @user_id = current_user_or_guest_id # session[:user_id]
       if params[:id] # Query may be specified by id (currently only for profiling)
-          @rcpquery = Rcpquery.where(:id => params[:id]).first || Rcpquery.create(user_id: User.guest_id, owner_id: User.guest_id)
+          @rcpquery = Rcpquery.where(:id => params[:id]).first || 
+	  	      Rcpquery.create(user_id: User.guest_id, owner_id: User.guest_id)
       else
           @rcpquery = Rcpquery.fetch_revision(session[:rcpquery], @user_id, params)
       end
       session[:rcpquery] = @rcpquery.id # In case the model decided on a new query
+      @list_name = @rcpquery.which_list
       render '_form_rcplist.html.erb', :layout=>false
   end
   
@@ -137,6 +132,7 @@ public
     session[:rcpquery] = @rcpquery.id
 
     @Title = "Query from Update"
+    @list_name = @rcpquery.which_list
     if params[:element] 
         case params[:element].to_sym
         when :tabnum

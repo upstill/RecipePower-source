@@ -267,7 +267,7 @@ public
   def tag_tokens
      self.tagstxt
   end
-
+=begin
     # Generate a title for labelling the query results
     def title
         case self.owner_id
@@ -281,7 +281,7 @@ public
             User.find(self.owner_id).username+"\'s Cookmarks"
         end
     end
-
+=end
     # Fetch and use parameters to revise a query record before returning
     def self.fetch_revision(id, uid, params)
         # This is all very straightforward, EXCEPT that we allow the 'tag_tokens' query string

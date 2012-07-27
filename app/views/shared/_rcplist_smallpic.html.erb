@@ -1,35 +1,6 @@
 <%# Render the results of a recipe query in small_pic mode %>
 <%# NB: Should be rendered within a rcp_list container %>
-<% for recipe in @rcpquery.results_paged  %>
-  <% recipe.current_user = @user_id %>
-  <div class="rcp_list_element" >
-    <div class="rcp_list_pic_box">
-	<%= rcp_fitPic recipe %>
-    </div>
-    <div class="rcp_list_text">
-      <div class="rcp_list_element_title">
-	     <%= link_to recipe.trimmed_title, recipe.url %><%= recipe_popup recipe %>
-      </div>
-      <div class="rcp_list_element_source">
-	      from <%= link_to recipe.sourcename, recipe.sourcehome %>
-      </div>
-      <div class="rcp_list_element_tag_summary">
-	     <%= summarize_alltags recipe %>
-      </div>
-      <div class="rcp_list_element_twocents">
-	     <%= present_comments recipe, @rcpquery.owner_id  %>
-      </div>
-      <div class="rcp_list_element_gotag">
-		  <% if permitted_to? :update, recipe %>
-	     	<%= link_to (@rcpquery.owner_id == @user_id ? "Edit Tags" : "Grab This Cookmark!"), edit_recipe_path(recipe) %>
-		  <% end %>
-      </div>
-    </div>
-    <div class="rcp_list_element_bottom">
-	   <%= rr_touch_date_elmt recipe %>
-	  <%# cookmark_count recipe -%> 
-    </div>
-  </div>
-  <br class="clear">
-  <hr>
+<% for @recipe in @rcpquery.results_paged  %>
+  <% @recipe.current_user = @user_id %>
+  <%= render "shared/recipe_smallpic" %>
 <% end %>

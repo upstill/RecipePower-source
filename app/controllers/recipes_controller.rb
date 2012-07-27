@@ -7,18 +7,10 @@ class RecipesController < ApplicationController
     redirect_to rcpqueries_url
     # return if need_login true
     # Get the collected recipes for the user named in query
-    if @listowner = current_user_or_guest_id # session[:user_id] 
-      user = User.find @listowner
-      @listownership = (@listowner==current_user_or_guest_id ? # session[:user_id] ? 
-			"My" : 
-			user.username+"\'s").html_safe
-      @recipes = user.recipes 
-    else
-      @listownership = "All the"
-      @recipes = Recipe.find(:all)
-    end
-    @Title = @listownership+" Cookmarks"
-    @Title << " in the Whole Wide World" if !@listowner
+    user = current_user_or_guest 
+    @listowner = user.id
+    @recipes = user.recipes 
+    @Title = "#{user.username}\'s Cookmarks"
     @nav_current = nil
   end
 
@@ -125,6 +117,27 @@ class RecipesController < ApplicationController
         @nav_current = nil
         render :action => 'edit'
     end
+  end
+  
+  # Add a recipe to the user's collection without going to edit tags
+  # GET recipes/:id/collect
+  def collect
+      @recipe = Recipe.ensure current_user_or_guest_id, params
+      truncated = truncate(@recipe.title, :length => 40)
+      @list_name = "mine"
+      if @recipe.errors.empty?
+          respond_to do |format|
+            format.html { render 'shared/_recipe_smallpic.html.erb', :layout=>false }
+            format.json { render json: { title: truncated } }
+            format.js { render text: @recipe.title }
+          end
+      else
+          respond_to do |format|
+            format.html # index.html.erb
+            format.json { render json: { error: @recipe.errors.inspect } }
+            format.js { render :text => e.message, :status => 403 }
+          end
+      end
   end
 
   # Delete the recipe from the user's list

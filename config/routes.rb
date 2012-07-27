@@ -52,6 +52,7 @@ RP::Application.routes.draw do
 
   resources :scales
   
+  match 'recipes/:id/collect' => 'recipes#collect'
   match 'recipes/:id/touch' => 'recipes#touch'
   match 'recipes/:id/piclist' => 'recipes#piclist'
   match 'recipes/:id/remove' => 'recipes#remove'

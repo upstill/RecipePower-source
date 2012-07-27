@@ -1,17 +1,5 @@
 module RcpqueriesHelper
 
-   # Build a link for getting back to the current user's list
-   def backtome
-	if @rcpquery.owner_id != @rcpquery.user_id 
-	    s = <<BLOCK_END
-	        <a href="rcpqueries?owner=#{@rcpquery.user_id}" id="rcpquery_owner_return">
-		   (back to #{(@rcpquery.user_id==User.guest_id) ? "the Big List" : "my collection"})
-		</a>
-BLOCK_END
-	    s.html_safe
-	end
-   end
-   
    def explain_empty (rq)
        explan = rq.tags.empty? ? 
                 "Sorry, this collection is empty. Try picking another collection above, or go out to the Web and bring something back!" :

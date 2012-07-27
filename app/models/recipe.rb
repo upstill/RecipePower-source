@@ -272,6 +272,7 @@ class Recipe < ActiveRecord::Base
                 ref.save
             end
         end
+        self.touch_by uid
         self.current_user = uid
     end
     

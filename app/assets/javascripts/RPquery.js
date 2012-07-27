@@ -33,7 +33,8 @@ function RPQueryOnLoad() {
 
 	var activelist = $('#accordion').attr("data") || "mine";
     $('#accordion').accordion({
-		changestart: queryAccordionChange,
+		changestart: queryAccordionChangeStart,
+		change: queryAccordionChange,
 		collapsible: true,
 		active: false, 
 		autoHeight: false
@@ -42,8 +43,27 @@ function RPQueryOnLoad() {
 }
 
 // When the accordion changes, we need to load the content of the new section, as needed
+function queryAccordionChangeStart(event, ui) {
+	queryAccordionUpdatePanel( ui.newContent );
+}
+
+// When the accordion changes, we need to load the content of the new section, as needed
 function queryAccordionChange(event, ui) {
-	queryAccordionUpdatePanel( ui.newContent);
+}
+
+// Common function for enabling elements of recipe lists and pics on query page, after load
+function queryOnLoad(imgs) {
+
+    // Install click handler to load new page 
+	$(".pageclickr").click(queryTabOnPaginate);
+	
+	// Enable recipe-preview popup
+	$(".popup").click(servePopup);
+
+    imgs.each(function() {
+        fitImage(this);
+    });
+	
 }
 
 function queryAccordionUpdatePanel(elmt) {
@@ -55,15 +75,29 @@ function queryAccordionUpdatePanel(elmt) {
 	    var listKind = contentID.replace(pre, "").replace(post, "");
 		var listID = "rcpquery_"+listKind+"_list_container"; // Substitute "list" for "content" to get ID of list item
 		var obj = $("#"+listID);
-		debugger;
 		if (!obj.hasClass("current")) {
 			obj.load( "rcpqueries/relist", { list: listKind }, function( content, status, xhr) {
 				if(status == "success") {
 					obj.addClass("current");
+					queryOnLoad(obj.find("img.fitPic"));
 				}
 			});
 		}
 	}
+}
+
+function rcpCollect(id) {
+	// Call server on /recipes/:id/collect
+    jQuery.get( "recipes/"+id+"/collect", {},
+        function(body, status, hr) {
+			// Insert the resulting fragment at the top of the Recent tab, if open
+			var tabid = $("#rcpquery_tabset").tabs("option", "selected");
+			if(tabid==4) {
+				$("#rcplist_mine_body").prepend(body);
+			}
+			$("#rcpPic"+id).dialog({ model: true, title: "Got it! Now appearing at the top of your Recent cookmarks."});
+		}, "html"
+    );
 }
 
 // Respond to a change in the friend selector
@@ -81,16 +115,11 @@ function queryFriendsSelect() {
 // Called when a tab loads (after the content has been replaced):
 //  -- Set the appropriate event handlers
 //	-- fit any pics in their frames and enable clicking on paging buttons
-function queryTabOnLoad() {
+function queryTabOnLoad(event, ui) {
 	// Ensure that we change the list mode upon demand
     $("select#rcpquery_listmode_str").change(queryListmodeChange);
-
-    // Install click handler to load new page 
-	$(".pageclickr").click(queryTabOnPaginate);
-	
-	// Enable recipe-preview popup
-	$(".popup").click(servePopup);
-    wdwFitImages();
+    var imgsel = $("img.fitPic", ui.panel);
+    queryOnLoad(imgsel);
 }
 
 // Callback when token set changes: handle as any change to the query form

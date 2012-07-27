@@ -8,11 +8,6 @@ class ApplicationController < ActionController::Base
     
     helper_method :orphantagid
   
-  # Return a string for the status of the current user
-  def current_status
-      current_user ? current_user.role_symbols.first.to_s : "guest"
-  end
-    
     def permission_denied
       action = case params[:action]
       when "index"
@@ -24,7 +19,7 @@ class ApplicationController < ActionController::Base
       else
           params[:action]
       end
-      notice = "Sorry, but as a #{current_status}, you're not allowed to #{action} #{params[:controller]}."
+      notice = "Sorry, but as a #{current_user_or_guest.role}, you're not allowed to #{action} #{params[:controller]}."
       respond_to do |format|
         format.html { redirect_to(:back, notice: notice) rescue redirect_to('/', notice: notice) }
         format.xml  { head :unauthorized }
@@ -54,34 +49,6 @@ class ApplicationController < ActionController::Base
       
   include ControllerAuthentication
   protect_from_forgery
-
-=begin
-# Gateway to (most) controllers: check that there's a current user
-# and don't do anything until there is one. If login isn't required,
-# set the session user id to guest
-def need_login(login_required, super_required = false)
-    if login_required
-        if super_required
-            # XXX Currently ad-hoc-ly treating Max, Aaron and Steve as super
-            if session[:user_id].nil? || session[:user_id] > 5 || (session[:user_id] == User.guest_id)
-                @Title = "Login"
-                redirect_away login_url, :notice=>"You must be logged in as super to go there."
-                return true
-            else
-                return false
-            end
-        elsif !session[:user_id] || session[:user_id] == User.guest_id
-            @Title = "Login"
-            redirect_away login_url, :notice=>"Let's get you logged in"
-            return true
-        else
-            return false
-        end
-    else
-       session[:user_id] = session[:user_id] || User.guest_id 
-    end
-end
-=end
     
   def stored_location_for(resource)
     if current_user 

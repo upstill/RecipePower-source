@@ -26,7 +26,7 @@ module ControllerAuthentication
   end
   
   def current_user_or_guest_id
-    (current_user && current_user.id) || User.guest_id
+    self.current_user_or_guest.id
   end
 
   def logged_in?

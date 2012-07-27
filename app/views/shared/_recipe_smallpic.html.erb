@@ -1,0 +1,35 @@
+<%# Partial for a single recipe in a "smallpic" recipe list %>
+  <div class="rcp_list_element" >
+    <div class="rcp_list_pic_box">
+	<%= rcp_fitPic @recipe %>
+    </div>
+    <div class="rcp_list_text">
+      <div class="rcp_list_element_title">
+	     <%= link_to @recipe.trimmed_title, @recipe.url %><%= recipe_popup @recipe %>
+      </div>
+      <div class="rcp_list_element_source">
+	      from <%= link_to @recipe.sourcename, @recipe.sourcehome %>
+      </div>
+      <div class="rcp_list_element_tag_summary">
+	     <%= summarize_alltags @recipe %>
+      </div>
+      <div class="rcp_list_element_twocents">
+	     <%= present_comments @recipe, @recipe.current_user  %>
+      </div>
+      <div class="rcp_list_element_gotag">
+		  <% if permitted_to? :update, @recipe %>
+		    <% if @list_name == "mine" %>
+	     	  <%= link_to "Edit Tags", edit_recipe_path(@recipe) %>
+		    <% else %>
+	     	  <%= link_to_function "Grab This Cookmark!", "rcpCollect(#{@recipe.id});" %>
+			<% end %>
+		  <% end %>
+      </div>
+    </div>
+    <div class="rcp_list_element_bottom">
+	   <%= rr_touch_date_elmt @recipe %>
+	  <%# cookmark_count @recipe -%> 
+    </div>
+  </div>
+  <br class="clear">
+  <hr>

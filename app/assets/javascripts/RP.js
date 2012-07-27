@@ -12,7 +12,7 @@ $(document).ready(function(){ //wait for the dom to load
 		$('input#imgpicker').load(function() {
 			debugger;
 		})
-		wdwFitImages();
+		// wdwFitImages();
 }); 
 
 $(function() {
@@ -149,18 +149,28 @@ function getWdwData() {
 })(jQuery);
 
 // Check that the images in a window have been loaded, fitting them into
-// their frames when the size is available.
-function wdwFitImages() {
+// their frames when the size is available. NB: It's best to restrict this set to
+// the visible images, for performance's sake.
+function wdwFitImages(selection) {
     var TO = window.setInterval(function() {
         var allDone = true;
-        $("img.fitPic").each(function() {
+		if(arguments.length == 0) {
+			selection = $("img.fitPic");
+		} else {
+			if (selection.ELEMENT_NODE) {
+				selection = $("img.fitPic", selection);
+			} else {
+				selection = selection.find("img.fitPic");
+			}
+		}
+        selection.each(function() {
             allDone = fitImage(this) && allDone;
         });
         if (allDone) {
             window.clearInterval(TO);
         }
     },
-    100);
+    10);
 }
 
 function fitImage(img) {
@@ -255,7 +265,6 @@ function replaceElmt(body, status, instance) {
 	if(status == "success") {
 		var selector = body.selector
 		var content = body.content
-		debugger;
 		$(selector).replaceWith(content);
 	}
 }
@@ -268,7 +277,6 @@ function replaceElmt(body, status, instance) {
 function servePopup() {
    var regexp = new RegExp("popup", "g")
    var rcpid = this.getAttribute('id').replace(regexp, "");
-   debugger;
    jQuery.get( "recipes/"+rcpid+"/touch", {}, replaceElmt, "json" );		
 
    // Now for the main event: open the popup window if possible

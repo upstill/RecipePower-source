@@ -26,6 +26,10 @@ class User < ActiveRecord::Base
   # Channels are just another kind of user. This field (channel_referent_id, externally) denotes such.
   belongs_to :channel, :class_name => "ChannelReferent"
   
+  def role
+      self.role_symbols.first.to_s
+  end
+  
   def follows? (user)
       if self.class == user.class
           self.followees.include? user
@@ -48,8 +52,8 @@ class User < ActiveRecord::Base
       self.channel_referent_id > 0
   end
 
-  # Override the followees method to allow for guests and super to see all users, and
-  # to filter for whether to return the channels
+  # Who does this user follow? 
+  # Return either friends or channels, depending on 'channel' parameter
   def follows channel=false
     self.followees.find_all { |user| (user.channel? == channel) }
   end
@@ -120,18 +124,19 @@ class User < ActiveRecord::Base
       [@@Roles.list, role_id]
   end
 
-  # Class variable @@Super_user saves the super user_id
+  # Class variable @@Super_user saves the super User
   @@Super_user = nil
   def self.super_id
       (@@Super_user || (@@Super_user = self.by_name(:super))).id
   end
   
-  # Class variable @@Guest_uid saves the guest user_id
+  # Class variable @@Guest_user saves the guest User
   @@Guest_user = nil  
   def self.guest
       @@Guest_user || (@@Guest_user = self.by_name(:guest))
   end
       
+  # Simply return the id of the guest
   def self.guest_id
       self.guest.id
   end
@@ -139,12 +144,12 @@ class User < ActiveRecord::Base
   @@Special_ids = []
   # Approve a user id for visibility by the public
   def self.public? (id)
-      @@Special_ids = [self.super_id, self.guest_id] if @@Special_ids.empty?
+      @@Special_ids = [self.super_id] if @@Special_ids.empty?
       !@@Special_ids.include? id
   end
   
   def self.isPrivate id
-      @@Special_ids = [self.super_id, self.guest_id] if @@Special_ids.empty?
+      @@Special_ids = [self.super_id] if @@Special_ids.empty?
       @@Special_ids << [id]
   end
 =begin
