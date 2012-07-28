@@ -5,6 +5,7 @@ class User < ActiveRecord::Base
   devise :invitable, :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable,
          :lockable # , :omniauthable
+  after_invitation_accepted :initialize_friends
 
   # Setup accessible (or protected) attributes for your model
   attr_accessible :id, :username, :fullname, :about,
@@ -28,6 +29,15 @@ class User < ActiveRecord::Base
   
   def role
       self.role_symbols.first.to_s
+  end
+  
+  # Start an invited user off with two friends: the person who invited them (if any) and 'guest'
+  def initialize_friends
+      # Give him friends
+      f = [User.guest_id]
+      f << self.invited_by_id if self.invited_by_id
+      self.followee_ids = f
+      self.save
   end
   
   def follows? (user)
