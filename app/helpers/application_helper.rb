@@ -28,7 +28,51 @@ module ApplicationHelper
   def recipe_popup( rcp )
       link_to image_tag("preview.png", title:"Show the recipe in a popup window", class: "preview_button"), rcp.url, target: "_blank", class: "popup", id: "popup#{rcp.id.to_s}"        
   end
-    
+
+  # Declare an image withinin an adjustable box. The images are downloaded by
+  # the browser and their dimensions adjusted under Javascript by the fitImageOnLoad() function.
+  def page_fitPic(picurl, id, float_ttl = true)
+    # "fitPic" class gets fit inside pic_box with Javascript and jQuery
+    id = "rcpPic"+id.to_s
+	if picurl.blank? && float_ttl
+	    %Q{<div class="centerfloat" id="#{id}">No Image Available</div>}.html_safe
+	else
+	    image_tag(picurl, class: "fitPic", id: id.to_s, onload: "fitImageOnLoad('#{id.to_s}')", alt: "No Image Available")
+	end
+  end
+  
+  # Get all the img tags from a page and bundle them up as list items suitable for a picker
+  def page_piclist url
+      piclist = Site.piclist(url).collect { |url|
+  		"<li class=\"pickerImage\"><img src=\"#{url}\" alt=\"#{url}\"/></li>\n"
+  	  }
+  end
+
+  # Declare the list of thumbnails for picking a recipe's image.
+  # It's sourced from the page by hoovering up all the <img tags that have
+  # an appropriate file type.
+  def page_choosePic picurl, pageurl, id
+    piclist = page_piclist pageurl
+  	if piclist.count > 0
+        %Q{
+            <div class="imagepicker">                                   
+              <div class="preview">                                     
+                #{page_fitPic picurl, id, false}  
+              </div>                                                    
+              <br><button class="title">Pick Image</button>
+              <div class="content">                                     
+                <div class="wrapper">                                   
+                  <ul>#{piclist.join('')}</ul>                                             
+                </div>                                                  
+              </div>                                                    
+            </div>}.html_safe
+    else
+            %q{<div class="imagepicker">
+                <label for="recipe_picurl" id="recipe_pic_label">No Picture Available</label>
+            </div>}.html_safe                                   
+    end
+  end
+      
     # Return the id of the DOM element giving the time-since-touched for a recipe
     def rr_touch_date_id recipe
         "touchtime#{recipe.id.to_s}"

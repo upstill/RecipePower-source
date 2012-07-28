@@ -1,11 +1,20 @@
 
 /* Master function for assigning actions to interface items */
 $(document).ready(function(){ //wait for the dom to load
-        $('#imgpicker').imagepicker( {// set our selector
-            // Data is required and in a json format
-            data: "piclist",
-			galleryUrl: '' 
-        });
+    $('#imgpicker').imagepicker( {// set our selector
+        // Data is required and in a json format
+        data: "piclist",
+		galleryUrl: '' ,
+		outputfieldselector: 'input#recipe_picurl'
+    });
+/*
+    $('#logopicker').imagepicker( {// set our selector
+        // Data is required and in a json format
+        data: "piclist",
+		outputfieldselector: 'input#site_logo',
+		galleryUrl: '' 
+    });
+*/
 		$('input#imgpicker').change(function() {
 			debugger;
 		})

@@ -1,7 +1,7 @@
 <%# Partial for a single recipe in a "smallpic" recipe list %>
   <div class="rcp_list_element" >
     <div class="rcp_list_pic_box">
-	<%= rcp_fitPic @recipe %>
+	<%= page_fitPic @recipe.picurl, @recipe.id %>
     </div>
     <div class="rcp_list_text">
       <div class="rcp_list_element_title">

@@ -3,45 +3,6 @@ require './lib/Domain.rb'
 
 module RecipesHelper
 
-# Declare a recipe's image in an adjustable box. The images are downloaded by
-# the browser under Javascript and their dimensions adjusted.
-def rcp_fitPic(rcp)
-    # "fitPic" class gets fit inside pic_box with Javascript and jQuery
-    id = "rcpPic"+rcp.id.to_s
-	if rcp.picurl.blank?
-	    %Q{<div class="centerfloat" id="#{id}">No Image Available</div>}.html_safe
-	else
-        (%Q{<img src="#{rcp.picurl}" class="fitPic" id="#{id}" onload="fitImageOnLoad('}+id+%q{');">}).html_safe
-	end
-end
-
-  # Declare the list of thumbnails for picking a recipe's image.
-  # It's sourced from the page by hoovering up all the <img tags that have
-  # an appropriate file type.
-  def rcp_choosePic rcp
-      piclist = rcp.piclist.collect { |url|
-  		"<li class=\"pickerImage\"><img src=\"#{url}\" alt=\"#{url}\"/></li>\n"
-  	  }
-  	if piclist.count > 0
-        %Q{
-            <div class="imagepicker">                                   
-              <div class="preview">                                     
-                <img src="#{rcp.picurl}" alt="No Image Available", class="fitPic">  
-              </div>                                                    
-              <br><button class="title">Pick Image</button>
-              <div class="content">                                     
-                <div class="wrapper">                                   
-                  <ul>#{piclist.join('')}</ul>                                             
-                </div>                                                  
-              </div>                                                    
-            </div>}.html_safe
-    else
-            %q{<div class="imagepicker">
-                <label for="recipe_picurl" id="recipe_pic_label">No Picture Available</label>
-            </div>}.html_safe                                   
-    end
-  end
-
 # If the recipe doesn't belong to the current user's collection,
 #   provide a link to add it
 def ownership_status(rcp)

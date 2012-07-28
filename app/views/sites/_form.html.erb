@@ -11,6 +11,11 @@
     </div>
   <% end %>
 
+  <div class="recipe_pic_div" >
+    <br><%= f.text_field :logo, type: "hidden" %>
+	<input type="text" id="imgpicker" name='image' rel="jpg,png,gif" />
+	<%= page_choosePic @site.sample, @site.home, @site.id %>
+  </div>
   <div class="field">
     <%= f.label :Name %><br />
     <%= f.text_field :name %>
@@ -26,10 +31,6 @@
   <div class="field">
     <%= f.label :subsite %><br />
     <%= f.text_field :subsite %>
-  </div>
-  <div class="field">
-    <%= f.label :logo %><br />
-    <%= f.text_field :logo %>
   </div>
   <div class="field">
     <%= f.label :sample %><br />

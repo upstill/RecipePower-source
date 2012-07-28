@@ -104,11 +104,12 @@ class RecipesController < ApplicationController
     # return if need_login true
     @recipe = Recipe.find(params[:id])
     @recipe.current_user = current_user_or_guest_id # session[:user_id]
+    debugger
     begin
         saved_okay = @recipe.update_attributes(params[:recipe])
     rescue => e
         saved_okay = false
-        @recipe.errors.add "Couldn't save recipe"
+        # @recipe.errors.add "Couldn't save recipe"
     end
     if saved_okay
         redirect_to rcpqueries_url :notice  => "Successfully updated #{@recipe.title || 'recipe'}."

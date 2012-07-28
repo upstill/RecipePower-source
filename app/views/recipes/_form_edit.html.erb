@@ -5,7 +5,7 @@
   <div class="recipe_pic_div" >
     <br><%= f.text_field :picurl, type: "hidden" %>
 	<input type="text" id="imgpicker" name='image' rel="jpg,png,gif" value="<%= @recipe.picurl %>"/>
-	<%= rcp_choosePic @recipe %>
+	<%= page_choosePic @recipe.picurl, @recipe.url, @recipe.id %>
   </div>
   <div class="recipe_fields_div">
     <div class="recipe_tags_div" >

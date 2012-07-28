@@ -6,7 +6,6 @@ require 'htmlentities'
 
 class GettableURLValidator < ActiveModel::EachValidator
     def validate_each(record, attribute, value)
-        debugger
         if(attribute == :url) 
             if Site.test_link(value) # by_link(value)
                 true
@@ -15,7 +14,6 @@ class GettableURLValidator < ActiveModel::EachValidator
                 nil
             end
         elsif attribute == :picurl
-            debugger
             if Site.by_link (value)
                 true
             else
@@ -337,32 +335,10 @@ class Recipe < ActiveRecord::Base
        end
        super
    end
-
-   # Return a list of image URLs for the recipe's page
-  def piclist
-    return [] unless (ou = open url) && (site = Site.by_link url) && (doc = Nokogiri::HTML(ou))
-    # Get all the img tags, uniqify them, purge non-compliant ones and insert the domain as required
-    doc.css("img").map { |img| 
-        img.attributes["src"] # Collect all the "src" attributes from <img tags
-    }.compact.map { |src| # Ignore if nil
-        src.value # Extract value (URL string)
-    }.uniq.keep_if { |url| # Purge duplicates
-        url =~ /\.(gif|tif|tiff|png|jpg|jpeg|img)$/i # Accept only image tags
-    }.map{ |path| 
-        # This could be a path relative to the home url
-        debugger
-        begin
-            uri = URI.link(path)
-        rescue
-            begin
-              uri = URI.join( url, path) 
-            rescue
-              nil
-            end 
-        end
-        uri && uri.to_s # Fix up relative paths to be absolute by prepending site URL
-    }.compact
-  end
+   
+   def piclist
+       Site.piclist self.url
+   end
 
 @@DoSpans
 

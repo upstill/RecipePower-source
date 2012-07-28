@@ -267,6 +267,35 @@ class Site < ActiveRecord::Base
         end
     end
     
+     # Return a list of image URLs for a given page
+    def self.piclist(url)
+      begin 
+        return [] unless (ou = open url) && (site = Site.by_link url) && (doc = Nokogiri::HTML(ou))
+      rescue Exception => e
+        return []
+      end
+      # Get all the img tags, uniqify them, purge non-compliant ones and insert the domain as required
+      doc.css("img").map { |img| 
+          img.attributes["src"] # Collect all the "src" attributes from <img tags
+      }.compact.map { |src| # Ignore if nil
+          src.value # Extract value (URL string)
+      }.uniq.keep_if { |url| # Purge duplicates
+          url =~ /\.(gif|tif|tiff|png|jpg|jpeg|img)$/i # Accept only image tags
+      }.map{ |path| 
+          # This could be a path relative to the home url
+          begin
+              uri = URI.link(path)
+          rescue
+              begin
+                uri = URI.join( url, path) 
+              rescue
+                nil
+              end 
+          end
+          uri && uri.to_s # Fix up relative paths to be absolute by prepending site URL
+      }.compact
+    end
+    
     def trim_title(ttl)
         if ttl
             unless self.ttlcut.blank?

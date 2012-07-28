@@ -16,8 +16,7 @@ function imagePickerSelector(id) {
             placeholder: 'http://placehold.it/50x50',  
             data: '',  
             galleryUrl: '/imagepicker/gallery/' ,
-            title: 'Select Image',
-			outputfieldselector: 'input#recipe_picurl'
+            title: 'Select Image'
           }, 
           params = ''; 
           settings = $.extend({}, defaults, options);  
