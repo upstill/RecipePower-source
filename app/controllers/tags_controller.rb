@@ -4,10 +4,11 @@ class TagsController < ApplicationController
   # GET /tags
   # GET /tags.xml
   def index
-      # return if need_login true, true
+      # 'index' page may be calling itself with filter parameters in the name and tagtype
       @Title = "Tags"
-      @filtertag = Tag.new name: params[:filterstr]
-      @filtertag = params[:tagtype].to_i unless params[:tagtype].blank?
+      debugger
+      @filtertag = Tag.new params[:tag]
+      # @filtertag.tagtype = params[:tag][:tagtype].to_i unless params[:tag][:tagtype].blank?
       @taglist = 
       if @filtertag.name
           # Use matching functionality of Tag model
@@ -31,23 +32,28 @@ class TagsController < ApplicationController
 # Since we don't actually create tags using the form, this action is used by the tags lister
 # to gather parameters for filtering the list. Thus, we collect the form data and redirect
 def create
-  if params[:tag]
-      redirect_to controller: "tags", action: "index", filterstr: params[:tag][:name], tagtype: params[:tag][:tagtype]
+  debugger
+  # We get the create action in two circumstances: 
+  #  1) we actually are creating a new tag;
+  #  2) we get called from the index page with a tag filter
+  if params[:commit] =~ /Filter/
+      redirect_to controller: "tags", action: "index", tag: params[:tag]
+  else
+      @Title = "Tags"
+      @tag = Tag.new(params[:tag])
+      respond_to do |format|
+        if @tag.save
+          format.html { redirect_to controller: "tags", 
+                            action: "index", 
+                            tag: params[:tag],
+                            notice: 'Tag was successfully created.' }
+          format.xml  { render :xml => @tag, :status => :created, :location => @tag }
+        else
+          format.html { render :action => "new" }
+          format.xml  { render :xml => @tag.errors, :status => :unprocessable_entity }
+        end
+      end
   end
-=begin
-  @Title = "Tags"
-  @tag = Tag.new(params[:tag])
-
-  respond_to do |format|
-    if @tag.save
-      format.html { redirect_to(@tag, :notice => 'Tag was successfully created.') }
-      format.xml  { render :xml => @tag, :status => :created, :location => @tag }
-    else
-      format.html { render :action => "new" }
-      format.xml  { render :xml => @tag.errors, :status => :unprocessable_entity }
-    end
-  end
-=end
 end
   
 =begin

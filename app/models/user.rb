@@ -3,7 +3,7 @@ class User < ActiveRecord::Base
   # Include default devise modules. Others available are:
   # :token_authenticatable, :encryptable, :confirmable, :timeoutable
   devise :invitable, :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :trackable, :validatable,
+         :recoverable, :rememberable, :trackable #, :validatable,
          :lockable # , :omniauthable
   after_invitation_accepted :initialize_friends
 
@@ -11,13 +11,7 @@ class User < ActiveRecord::Base
   attr_accessible :id, :username, :fullname, :about,
                 :email, :password, :password_confirmation, 
                 :recipes, :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens
-=begin
-  has_many :child_relations, :foreign_key=>"parent_id", :dependent=>:destroy, :class_name=>"ReferentRelation"
-  has_many :children, :through => :child_relations, :source => :child, :uniq => true 
 
-  has_many :parent_relations, :foreign_key => "child_id", :dependent=>:destroy, :class_name => "ReferentRelation"
-  has_many :parents, :through => :parent_relations, :source => :parent, :uniq => true
-=end
   has_many :follower_relations, :foreign_key=>"followee_id", :dependent=>:destroy, :class_name=>"UserRelation"
   has_many :followers, :through => :follower_relations, :source => :follower, :uniq => true 
 
@@ -81,9 +75,23 @@ class User < ActiveRecord::Base
       [@@Roles.sym(role_id)]
   end
   
+  def check_email
+      debugger
+      if self.email =~ /(.*)<(.*)>\s*$/ 
+          uname = $1
+          em = $2
+          # If it's a valid email, use that for the email field
+          if em =~ /^[-a-z0-9_+\.]+\@([-a-z0-9]+\.)+[a-z0-9]{2,4}$/i
+              self.username = uname if self.username.blank? && User.where(username: uname).empty?
+              self.email = em 
+          end
+      end
+  end
+  
   # Ensure each user has a role, defaulting to :user
   before_save do
       self.role_id = @@Roles.num(:user) unless self.role_id && (self.role_id > 0)
+      # Strip nn field of name and stick that in username if poss.
   end
   
   has_many :authentications, :dependent => :destroy
@@ -112,12 +120,16 @@ class User < ActiveRecord::Base
 
   has_many :rcprefs
   has_many :recipes, :through=>:rcprefs, :autosave=>true
+  
+  validates :email, :presence => true
 
   validates_presence_of :username
   validates_uniqueness_of :username
   validates_uniqueness_of :email, :if => :email_changed?
   validates_format_of :username, :allow_blank => true, :with => /^[-\w\s\.!_@]+$/i, :message => "can't take funny characters (letters, spaces, numbers, or .-!_@ only)"
   validates_format_of :email, :allow_blank => true, :with => /^[-a-z0-9_+\.]+\@([-a-z0-9]+\.)+[a-z0-9]{2,4}$/i
+
+  before_validation :check_email
 
   # Make sure we have this particular user (who had better be in the seed list)
   def self.by_name (name)
