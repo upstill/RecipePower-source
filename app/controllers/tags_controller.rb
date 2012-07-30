@@ -6,7 +6,6 @@ class TagsController < ApplicationController
   def index
       # 'index' page may be calling itself with filter parameters in the name and tagtype
       @Title = "Tags"
-      debugger
       @filtertag = Tag.new params[:tag]
       # @filtertag.tagtype = params[:tag][:tagtype].to_i unless params[:tag][:tagtype].blank?
       @taglist = 
@@ -32,7 +31,6 @@ class TagsController < ApplicationController
 # Since we don't actually create tags using the form, this action is used by the tags lister
 # to gather parameters for filtering the list. Thus, we collect the form data and redirect
 def create
-  debugger
   # We get the create action in two circumstances: 
   #  1) we actually are creating a new tag;
   #  2) we get called from the index page with a tag filter

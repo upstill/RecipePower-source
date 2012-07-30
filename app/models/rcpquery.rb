@@ -94,7 +94,7 @@ class Rcpquery < ActiveRecord::Base
   	# Provide a list of friends suitable for a select menu	   
     def friend_selection_list channel = false
         [[channel ? "All Channels" : "All Friends", 0]] + 
-        (self.owner ? self.owner.follows(channel).map { |f| [f.username, f.id]} : [])
+        (self.owner ? self.owner.follows(channel).map { |f| [f.handle, f.id]} : [])
     end
     
     def listmode_str=(str)
@@ -278,7 +278,7 @@ public
         when self.user_id
             "My Cookmarks"
         else
-            User.find(self.owner_id).username+"\'s Cookmarks"
+            User.find(self.owner_id).handle+"\'s Cookmarks"
         end
     end
 =end

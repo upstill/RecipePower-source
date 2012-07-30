@@ -20,7 +20,7 @@ class AuthenticationsController < ApplicationController
     # render text: omniauth.to_yaml
     authparams = omniauth.slice('provider', 'uid')
     if @authentication = Authentication.find_by_provider_and_uid(omniauth['provider'], omniauth['uid'])
-      flash[:notice] = "Yay! Signed in with #{@authentication.provider_name}. Welcome back, #{@authentication.user.username}!"
+      flash[:notice] = "Yay! Signed in with #{@authentication.provider_name}. Welcome back, #{@authentication.user.handle}!"
       # sign_in_and_redirect(:user, @authentication.user)
       result = sign_in_and_redirect @authentication.user # , :bypass => true
     elsif current_user
@@ -33,7 +33,7 @@ class AuthenticationsController < ApplicationController
     elsif (info = omniauth['info']) && (email = info['email']) && (user = User.find_by_email(email))
       user.apply_omniauth(omniauth)
       @authentication = user.authentications.create!(authparams) # Link to existing user
-      flash[:notice] = "Yay! Signed in with #{@authentication.provider_name}. Nice to see you again, #{user.username}!"
+      flash[:notice] = "Yay! Signed in with #{@authentication.provider_name}. Nice to see you again, #{user.handle}!"
       sign_in_and_redirect(:user, user)
     elsif user = (session[:invitation_token] && User.where(:invitation_token => session[:invitation_token]).first)
         # If we have an invitation out for this user we go ahead and log them in
@@ -43,7 +43,7 @@ class AuthenticationsController < ApplicationController
         if user.save
           flash[:notice] = "Signed in via #{@authentication.provider_name}."
           if user.sign_in_count > 1
-              flash[:notice] += " Welcome back, #{user.username}!"
+              flash[:notice] += " Welcome back, #{user.handle}!"
           end
           if user.invited?
               user.accept_invitation!
@@ -65,7 +65,7 @@ class AuthenticationsController < ApplicationController
 =begin
       @authentication = user.authentications.build(authparams)
       if user.save
-        flash[:notice] = "Signed in via #{@authentication.provider_name}. Welcome back, #{user.username}!"
+        flash[:notice] = "Signed in via #{@authentication.provider_name}. Welcome back, #{user.handle}!"
         sign_in_and_redirect(:user, user)
       else
         # The email didn't come in the authorization, so we now need to 

@@ -75,23 +75,22 @@ class User < ActiveRecord::Base
       [@@Roles.sym(role_id)]
   end
   
-  def check_email
-      debugger
+  def qa
+      # Ensure that everyone gets a role
+      self.role_id = @@Roles.num(:user) unless self.role_id && (self.role_id > 0)
+      # Handle the case where email addresses come in the form 'realworlname <email>' by
+      # stripping out the excess and sticking it in the Full Name field. This is important not 
+      # only to capture that information, but to avoid email collisions in the case where the
+      # email portions are the same and they differ only in the real name.
       if self.email =~ /(.*)<(.*)>\s*$/ 
           uname = $1
           em = $2
           # If it's a valid email, use that for the email field
           if em =~ /^[-a-z0-9_+\.]+\@([-a-z0-9]+\.)+[a-z0-9]{2,4}$/i
-              self.username = uname if self.username.blank? && User.where(username: uname).empty?
               self.email = em 
+              self.fullname = uname.strip.titleize if self.fullname.blank?
           end
       end
-  end
-  
-  # Ensure each user has a role, defaulting to :user
-  before_save do
-      self.role_id = @@Roles.num(:user) unless self.role_id && (self.role_id > 0)
-      # Strip nn field of name and stick that in username if poss.
   end
   
   has_many :authentications, :dependent => :destroy
@@ -106,7 +105,7 @@ class User < ActiveRecord::Base
   end
 
   def password_required?
-    (self.channel_referent_id==0) && (authentications.empty? || !password.blank?) && super
+    (self.channel_referent_id==0) && (authentications.empty? || !password.blank?) # && super
   end
   
   # We don't require an email for users representing channels
@@ -123,13 +122,13 @@ class User < ActiveRecord::Base
   
   validates :email, :presence => true
 
-  validates_presence_of :username
+  # validates_presence_of :username
   validates_uniqueness_of :username
   validates_uniqueness_of :email, :if => :email_changed?
   validates_format_of :username, :allow_blank => true, :with => /^[-\w\s\.!_@]+$/i, :message => "can't take funny characters (letters, spaces, numbers, or .-!_@ only)"
   validates_format_of :email, :allow_blank => true, :with => /^[-a-z0-9_+\.]+\@([-a-z0-9]+\.)+[a-z0-9]{2,4}$/i
 
-  before_validation :check_email
+  before_save :qa
 
   # Make sure we have this particular user (who had better be in the seed list)
   def self.by_name (name)
@@ -174,6 +173,29 @@ class User < ActiveRecord::Base
       @@Special_ids = [self.super_id] if @@Special_ids.empty?
       @@Special_ids << [id]
   end
+  
+  # Return the string by which this user is referred. Preferentially return (in order)
+  # -- username
+  # -- fullname
+  # -- email
+  def handle
+      if username.blank?
+          fullname.blank? ? email : fullname
+      else 
+          username
+      end
+  end
+  
+  # Who is eligible to be
+  def friend_candidates(for_channels)
+    User.all.keep_if { |other| 
+        (for_channels == other.channel?) && # Select for channels or regular users
+         User.public?(other.id) && # Exclude invisible users
+         (!other.invitation_token || other.invitation_accepted_at) && # Excluded unconfirmed invites
+         (other.id != id) # Don't include this user
+    }
+  end
+      
 =begin
   # Return a list of username/id pairs suitable for popup selection
   # owner: the id that should be hidden under "Choose Another"
@@ -185,7 +207,7 @@ class User < ActiveRecord::Base
 	owner_id = args[0][:owner_id]
 	user_id = args[0][:user_id]
 	# XXX Should be more discriminating :-)
-  	arr = self.find(:all).map { |user| [user.username, user.id] }
+  	arr = self.find(:all).map { |user| [user.handle, user.id] }
 	# Remove entries for owner and user
 	exclusions = [  user_id, owner_id, self.super_id, self.guest_id ]
 	arr.delete_if { |entry| exclusions.include? entry[1] }
@@ -196,14 +218,4 @@ class User < ActiveRecord::Base
 =end
 
   private
-
-  # Look up user by id and return the name, protecting against 
-  # invalid ids
-  def self.uname(id)
-      if id && (id > 0) && (user = self.find(id))
-         user.username
-      else
-         "no user"
-      end
-  end
 end

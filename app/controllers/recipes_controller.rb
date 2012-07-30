@@ -10,7 +10,7 @@ class RecipesController < ApplicationController
     user = current_user_or_guest 
     @listowner = user.id
     @recipes = user.recipes 
-    @Title = "#{user.username}\'s Cookmarks"
+    @Title = "#{user.handle}\'s Cookmarks"
     @nav_current = nil
   end
 

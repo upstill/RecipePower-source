@@ -155,7 +155,7 @@ BLOCK_END
   end
   
   def summarize_tag_owners tag
-      ownerstrs = tag.isGlobal ? ["everyone (it's global)"] : tag.users.collect { |user| user.username }
+      ownerstrs = tag.isGlobal ? ["everyone (it's global)"] : tag.users.collect { |user| user.handle }
       tag_info_section "It's owned by", ownerstrs
   end
   

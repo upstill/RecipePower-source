@@ -128,7 +128,7 @@ module ApplicationHelper
   # Deploy the links for naming the user and/or signing up/signing in
   def user_status
     if user = current_user
-       uname = user.username
+       uname = user.handle
        ulink = link_to uname, users_profile_path # users_edit_path 
        ulogout = link_to "Sign Out", destroy_user_session_path, :method=>"delete"
        "<strong>#{ulink}</strong><span class=\"welcome_user\">&nbsp|&nbsp;#{ulogout}</span>".html_safe

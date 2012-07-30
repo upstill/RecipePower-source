@@ -7,7 +7,7 @@ module RecipesHelper
 #   provide a link to add it
 def ownership_status(rcp)
 	# Summarize ownership as a list of owners, each linked to their collection
-	(rcp.users.map { |u| link_to u.username, rcpqueries_path( :owner=>u.id.to_s) }.join(', ') || "").html_safe
+	(rcp.users.map { |u| link_to u.handle, rcpqueries_path( :owner=>u.id.to_s) }.join(', ') || "").html_safe
 end
 
 # Return an enumeration of a series of strings, separated by ',' except for the last two separated by 'and'
@@ -70,7 +70,7 @@ def present_comments (recipe, user_id)
     # Removed this to cut down on queries
     recipe.users.each { |user| 
         if (user.id != user_id) && (cmt=recipe.comment_of_user(user.id))
-            out << "#{user.username} sez: '#{cmt}'<br>"  unless cmt.blank?
+            out << "#{user.handle} sez: '#{cmt}'<br>"  unless cmt.blank?
         end
     }
 =end

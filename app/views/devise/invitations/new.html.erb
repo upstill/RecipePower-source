@@ -9,7 +9,7 @@
   <%= f.text_field :email %></p>
 
   <p><%= f.label :invitation_message, "Invitation Message (optional)" %><br />
-  <%= f.text_area :invitation_message, :rows=>"4" %></p>
+  <%= f.text_area :invitation_message, :rows=>"4", value: "I'd like you to join me on RecipePower, exploring the world of recipes on the Web." %></p>
 
   <p><%= f.submit "Send an invitation" %></p>
 <% end %>
