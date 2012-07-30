@@ -15,6 +15,7 @@ class InvitationsController < Devise::InvitationsController
       self.resource = resource_class.accept_invitation!(params[resource_name])
 
       if resource.errors.empty?
+        RpMailer.invitation_accepted_email(resource).deliver
         session[:invitation_token] = nil
         set_flash_message :notice, :updated
         sign_in(resource_name, resource)

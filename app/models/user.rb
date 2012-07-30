@@ -24,16 +24,33 @@ class User < ActiveRecord::Base
   def role
       self.role_symbols.first.to_s
   end
+
+private
+  @@leasts = {}
+  def self.least_email(str)
+      @@leasts[str] || 
+      (@@leasts[str] = User.where("email like ?", "%#{str}%").collect { |match| match.id }.min)
+  end
   
   # Start an invited user off with two friends: the person who invited them (if any) and 'guest'
   def initialize_friends
       # Give him friends
-      f = [User.guest_id]
+      f = [User.guest_id, User.least_email("upstill"), User.least_email("arrone") ]
       f << self.invited_by_id if self.invited_by_id
       self.followee_ids = f
       self.save
+      
+      # Make the inviter follow the newbie. 
+      if self.invited_by_id
+          begin
+              invited_by = User.find(self.invited_by_id)
+              invited_by.followees << self
+          rescue
+          end
+      end
   end
-  
+public
+
   def follows? (user)
       if self.class == user.class
           self.followees.include? user
@@ -123,7 +140,7 @@ class User < ActiveRecord::Base
   validates :email, :presence => true
 
   # validates_presence_of :username
-  validates_uniqueness_of :username
+  validates_uniqueness_of :username, allow_blank: true
   validates_uniqueness_of :email, :if => :email_changed?
   validates_format_of :username, :allow_blank => true, :with => /^[-\w\s\.!_@]+$/i, :message => "can't take funny characters (letters, spaces, numbers, or .-!_@ only)"
   validates_format_of :email, :allow_blank => true, :with => /^[-a-z0-9_+\.]+\@([-a-z0-9]+\.)+[a-z0-9]{2,4}$/i
@@ -191,7 +208,7 @@ class User < ActiveRecord::Base
     User.all.keep_if { |other| 
         (for_channels == other.channel?) && # Select for channels or regular users
          User.public?(other.id) && # Exclude invisible users
-         (!other.invitation_token || other.invitation_accepted_at) && # Excluded unconfirmed invites
+         (other.channel? || (other.sign_in_count && (other.sign_in_count > 0))) && # Excluded unconfirmed invites
          (other.id != id) # Don't include this user
     }
   end
