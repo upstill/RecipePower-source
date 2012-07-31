@@ -4,32 +4,12 @@ class Rcpref < ActiveRecord::Base
     # before_save :ensure_unique
     attr_accessible :comment, :recipe_id, :user_id
 
-    PermissionPrivateMask = 0x1
-    PermissionFriendsMask = 0x2
-    PermissionCirclesMask = 0x4
-    PermissionPublicMask = 0x8
-    PermissionAll = PermissionPrivateMask | PermissionFriendsMask | PermissionCirclesMask | PermissionPublicMask 
-
     StatusRotationMask = 0x1
     StatusFavoritesMask = 0x2
     StatusInterestingMask = 0x4
     StatusMiscMask = 0x8
     StatusAny = StatusRotationMask | StatusFavoritesMask | StatusInterestingMask | StatusMiscMask 
     StatusRecentMask = 0x10
-
-    # Get the user-assigned permissions for a recipe as a hash of booleans
-    #	:permission_public
-    #	:permission_friends
-    #	:permission_circles
-    #	:permission_private
-    def privacy_flags
-	privacy_bits_to_flags(self.privacy)
-    end
-
-    # Get the user-assigned permissions for a recipe as a hash of booleans
-    def privacy_flags=(flags)
-	self.privacy = privacy_flags_to_bits flags
-    end
 
     # Get the user-assigned status for a recipe as a hash of booleans
     # :status_rotation
@@ -85,9 +65,9 @@ class Rcpref < ActiveRecord::Base
 	  # super sees all
 	  refs = Rcpref.scoped
     else
-	  refs = owner_id.nil? ? Rcpref.scoped : Rcpref.where(user_id: owner_id) 
+	  refs = owner_id.nil? ? Rcpref.scoped : Rcpref.where(user_id: owner_id) # NB: owner_id can be an array of ids
 	
-	  refs = refs.where("privacy <= ?", PermissionPublicMask) unless owner_is_requestor 
+	  refs = refs.where("NOT private") unless owner_is_requestor 
 
 	  # Unless we're going for restricted status, just get 'em all
 	  refs = refs.where("status <= ?", statuses) if statuses < StatusMiscMask
@@ -133,6 +113,28 @@ end
         (flags[:status_misc] ? StatusMiscMask : 0)
     end
 
+=begin
+
+PermissionPrivateMask = 0x1
+PermissionFriendsMask = 0x2
+PermissionCirclesMask = 0x4
+PermissionPublicMask = 0x8
+PermissionAll = PermissionPrivateMask | PermissionFriendsMask | PermissionCirclesMask | PermissionPublicMask 
+
+    # Get the user-assigned permissions for a recipe as a hash of booleans
+    def privacy_flags=(flags)
+      self.privacy = privacy_flags_to_bits flags
+    end
+
+    # Get the user-assigned permissions for a recipe as a hash of booleans
+    #	:permission_public
+    #	:permission_friends
+    #	:permission_circles
+    #	:permission_private
+    def privacy_flags
+    privacy_bits_to_flags(self.privacy)
+    end
+    
     def privacy_bits_to_flags(bits)
 	{:permission_private=>(bits & PermissionPrivateMask),
 	 :permission_friends=>(bits & PermissionFriendsMask),
@@ -146,5 +148,5 @@ end
 	(flags[:permission_circles] ? PermissionCirclesMask : 0) |
 	(flags[:permission_public] ? PermissionPublicMask : 0)
     end
-
+=end
 end

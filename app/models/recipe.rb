@@ -7,10 +7,11 @@ require 'htmlentities'
 class GettableURLValidator < ActiveModel::EachValidator
     def validate_each(record, attribute, value)
         if(attribute == :url) 
-            if Site.test_link(value) # by_link(value)
+            if test_result = Site.test_link(value) # by_link(value)
+                record.url = test_result if test_result.kind_of?(String)
                 true
             else
-                record.errors.add :url, "\'#{value}\' doesn't seem to be a working URL"
+                record.errors.add :url, "\'#{value}\' doesn't seem to be a valid URL (can you use it as an address in your browser?)"
                 nil
             end
         elsif attribute == :picurl
@@ -32,7 +33,7 @@ class GettableURLValidator < ActiveModel::EachValidator
 end
 
 class Recipe < ActiveRecord::Base
-  attr_accessible :tag_tokens, :title, :url, :alias, :ratings_attributes, :comment, :current_user, :status, :privacy, :picurl, :tagpane
+  attr_accessible :tag_tokens, :title, :url, :alias, :ratings_attributes, :comment, :current_user, :status, :private, :picurl, :tagpane
   after_save :save_ref
 
   validates :title,:presence=>true 
@@ -53,7 +54,7 @@ class Recipe < ActiveRecord::Base
   has_many :rcprefs, :dependent=>:destroy
   has_many :users, :through=>:rcprefs, :autosave=>true
   attr_reader :comment
-  attr_reader :privacy
+  attr_accessor :private
   attr_reader :status
   
   @@coder = HTMLEntities.new
@@ -124,12 +125,12 @@ class Recipe < ActiveRecord::Base
   # Casual setting of privacy for the recipe: immediate save for 
   # this recipe/user combo.
   # Presented as an integer related to @@privacies
-  def privacy=(val)
-     @current_ref.privacy = val.to_i if current_ref()
+  def private=(val)
+     @current_ref.private = (val != "0") if current_ref()
   end
 
-  def privacy
-    current_ref() ? @current_ref.privacy : MyConstants::Rcppermission_public
+  def private
+    current_ref() ? @current_ref.private : false
   end
 
   # Casual setting of status for the recipe: immediate save for 
@@ -151,7 +152,7 @@ class Recipe < ActiveRecord::Base
          if(ref = refs.first)
             ref.comment = @current_ref.comment
             ref.status = @current_ref.status
-            ref.privacy = @current_ref.privacy
+            ref.private = @current_ref.private
 	    ref.save
          end
       end
@@ -173,9 +174,9 @@ class Recipe < ActiveRecord::Base
   end
 
   # return an array of status/value pairs for passing to select()
-  def self.privacy_select
-      @@privacies
-  end
+  # def self.privacy_select
+      # @@privacies
+  # end
 
   # Write the virtual attribute tag_tokens (a list of ids) to
   # update the real attribute tag_ids
@@ -283,7 +284,8 @@ class Recipe < ActiveRecord::Base
                 @current_user = uid
                 ref = self.current_ref
                 ref.status = MyConstants::Rcpstatus_misc
-                ref.privacy = MyConstants::Rcppermission_friends
+                # ref.privacy = MyConstants::Rcppermission_friends
+                ref.private = false
                 ref.save
             end
         end

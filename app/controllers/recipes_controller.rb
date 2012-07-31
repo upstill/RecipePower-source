@@ -106,8 +106,8 @@ class RecipesController < ApplicationController
     @recipe.current_user = current_user_or_guest_id # session[:user_id]
     begin
         saved_okay = @recipe.update_attributes(params[:recipe])
-    rescue => e
-        saved_okay = false
+    # rescue => e
+        # saved_okay = false
         # @recipe.errors.add "Couldn't save recipe"
     end
     if saved_okay
@@ -115,7 +115,7 @@ class RecipesController < ApplicationController
     else
         @Title = ""
         @nav_current = nil
-        render :action => 'edit'
+        render :action => 'edit', :notice => "Huhh??!?"
     end
   end
   

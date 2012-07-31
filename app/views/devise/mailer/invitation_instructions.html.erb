@@ -2,7 +2,7 @@
 
 <p>
 <%= (@resource.invited_by_id && (User.find(@resource.invited_by_id).fullname || User.find(@resource.invited_by_id).email)) || "Someone" %>
-has invited you to join them on 
+has invited you to join in at 
 <%= link_to("RecipePower.com", root_url)+(@resource.invitation_message.blank? ? "." : ", saying") %>
 <% unless @resource.invitation_message.blank? %>
   <% if(@resource.invitation_message.length > 20) %>

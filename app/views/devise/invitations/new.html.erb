@@ -9,7 +9,8 @@
   <%= f.text_field :email %></p>
 
   <p><%= f.label :invitation_message, "Invitation Message (optional)" %><br />
-  <%= f.text_area :invitation_message, :rows=>"4", value: "I'd like you to join me on RecipePower, exploring the world of recipes on the Web." %></p>
+	<% steve_msg = "As requested, here is your invitation to the website. At this stage, I'm really looking for two things: 1) Don't be shy about being critical! I can't promise to implement every suggestion, but I CAN promise to take very seriously your experience of the site. I really want to make something people love to use. 2) If you go out to the Web and cookmark 10 or 12 of your favorite recipes, that will not only get you over the hump to using the site, but it'll be a HUGE help for us in getting our content levered up. ...but thanks for whatever you have time to do.".html_safe %>
+  <%= f.text_area :invitation_message, :rows=>"4", value: ((current_user && current_user.email =~ /upstill/) ? steve_msg : "I'd like you to join me on RecipePower, exploring the world of recipes on the Web.") %></p>
 
   <p><%= f.submit "Send an invitation" %></p>
 <% end %>

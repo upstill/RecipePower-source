@@ -235,16 +235,33 @@ class Site < ActiveRecord::Base
         end
     end
     
-    # Confirm that a proposed URL (with an optional subpath) actually has content at the other end
-    def self.test_link(link, resource=nil)
+    def self.result(link, resource=nil)
       begin
         url = resource ? URI.join(link, resource) : URI.parse(link)
+        req = Net::HTTP.new(url.host, url.port)
+        req.request_head(url.path)
       rescue Exception => e
-        return false
+        return nil
       end
-      req = Net::HTTP.new(url.host, url.port)
-      res = req.request_head(url.path)
-      return res.code == "200"
+    end
+    
+    # Confirm that a proposed URL (with an optional subpath) actually has content at the other end
+    # If the link is badly formed (returns a 400 result from the server) then we return false
+    # If the resource has moved (result 301) and the new location works, we return the new link
+    # Otherwise, we just return true. 
+    # Thus: false means fail; string means good but moved; true means everything is copacetic
+    def self.test_link(link, resource=nil)
+      # If the result method can't make sense of the link, then give up
+      return false unless res = self.result(link, resource)
+      if res.code == "301"
+          # If the location has moved permanently (result 301) we try to supplant this link internally
+          if ((new_location = res.header["location"]) &&
+              (res2 = self.result(new_location)) &&
+              (res2.code == "200"))
+            return new_location
+          end
+      end
+      return res.code != "400" # Not very stringent: we only disallow ill-formed requests
     end
     
     # Find and return the site wherein the named link is stored
