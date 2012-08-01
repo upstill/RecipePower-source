@@ -49,20 +49,22 @@ class ApplicationController < ActionController::Base
       
   include ControllerAuthentication
   protect_from_forgery
-    
-  def stored_location_for(resource)
-    if current_user 
+  
+  def after_sign_in_path_for(resource)
+    loc = stored_location_for(resource)
+    debugger
+    loc ||
+      if resource.is_a?(User)
         # flash[:notice] = "Congratulations, you're signed up!"
-        if flashback = params[:redirect_to]
-            return flashback
-        elsif current_user.sign_in_count < 2
-            return welcome_path
+        if resource.sign_in_count < 2
+          return welcome_path
         else
-            return rcpqueries_path
+          return rcpqueries_path
         end
-    end
-    super( resource ) 
-  end    
+      else
+        super(resource)
+      end
+  end
 
   # redirect somewhere that will eventually return back to here
   def redirect_away(url, options = {})

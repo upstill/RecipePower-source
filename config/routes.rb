@@ -70,13 +70,14 @@ RP::Application.routes.draw do
   # get "pages/home"
   # get "pages/contact"
   # get "pages/about"
+  match '/home', :to => 'pages#home'
   match '/contact', :to => 'pages#contact'
   match '/about', :to => 'pages#about'
   match '/welcome', :to => 'pages#welcome'
   match '/kale', :to => 'pages#kale'
   match '/signup', :to => 'visitors#new'
   match '/FAQ', :to=>"pages#FAQ"
-  root :to => 'pages#home'
+  root :to => 'pages#home_or_recipes'
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

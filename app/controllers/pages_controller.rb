@@ -1,10 +1,18 @@
 class PagesController < ApplicationController
-  filter_access_to :all
+  # filter_access_to :all
+  
+  def home_or_recipes
+    if logged_in?
+        redirect_to rcpqueries_path 
+    else
+        redirect_to home_path
+    end
+  end
 
-    def home
+  def home
   	@Title = "Home"
   	@nav_current = :home
-    end
+  end
 
   def contact
 	@Title = "Contact"

@@ -181,7 +181,7 @@ module ApplicationHelper
     	navlinks = []
     	navlinks << navlink("About", about_path, (@nav_current==:about)) 
     	navlinks << navlink("Contact", contact_path, (@nav_current==:contact)) 
-    	navlinks << navlink("Home", root_path, (@nav_current==:home)) 
+    	navlinks << navlink("Home", home_path, (@nav_current==:home)) 
     	navlinks << navlink("FAQ", "/FAQ", (@nav_current==:FAQ)) 
     	# navlinks << feedback_link("Feedback")
     	navlinks.join('  |  ').html_safe

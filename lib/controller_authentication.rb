@@ -33,10 +33,12 @@ module ControllerAuthentication
     current_user != nil
   end
 
-  def login_required
+  # before_filter on controller that needs login to do anything
+  def login_required(alert = "Let's get you logged in so we can do this properly.")
     unless logged_in?
-      store_target_location
-      redirect_to login_url, :alert => "You must first log in or sign up before accessing this page."
+      scope = Devise::Mapping.find_scope!(User)
+      session["#{scope}_return_to"] = request.url 
+      redirect_to authentications_path, alert: alert # login_url, :alert => alert
     end
   end
 

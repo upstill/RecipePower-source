@@ -1,4 +1,5 @@
 class RecipesController < ApplicationController
+  before_filter :login_required, :except => [:index, :show]
   filter_access_to :all
   include ApplicationHelper
   include ActionView::Helpers::TextHelper
