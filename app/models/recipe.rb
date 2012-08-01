@@ -274,7 +274,7 @@ class Recipe < ActiveRecord::Base
     @site.home
   end
 
-   # Make sure this recipe is in the collection of the current user
+   # Make sure this recipe is in the collection of the given user
     def ensureUser(uid)
         unless self.users.exists?(uid)
             user = User.find(uid)

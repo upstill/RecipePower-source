@@ -40,6 +40,12 @@ class Referent < ActiveRecord::Base
         Referent.all.collect { |ref| ref.parents.empty? && (ref.typenum==tagtype) && ref }.each { |tl| tl.dump if tl }
     end
     
+    # Notify this referent of an association with some resource.
+    # Since there's no intrinsic connection between any referents and any resources,
+    # this one is strictly for overriding by subclasses
+    def notice_resource(resource)
+    end
+    
     # Dump a specified referent with the given indent
     def dump indent = "", path = []
         if path.include? self.id
@@ -370,6 +376,11 @@ class ChannelReferent < Referent ;
     
     before_save :ensure_user
     after_save :fix_user
+    
+    # When a recipe is tagged with one of this referent's tags, add it to the list of the channel user
+    def notice_resource(recipe)
+        recipe.kind_of?(Recipe) && user && (recipe.ensureUser(user.id))
+    end
     
     # We ensure that every channel has an associated user
     def ensure_user
