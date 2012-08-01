@@ -50,20 +50,17 @@ class ApplicationController < ActionController::Base
   include ControllerAuthentication
   protect_from_forgery
   
+  # This is an override of the Devise method to determine where to go after login.
+  # If there was a redirect to the login page, we go back to the source of the redirect.
+  # Otherwise, new users go to the welcome page and logged-in-before users to the queries page.
   def after_sign_in_path_for(resource)
-    loc = stored_location_for(resource)
-    debugger
-    loc ||
-      if resource.is_a?(User)
-        # flash[:notice] = "Congratulations, you're signed up!"
-        if resource.sign_in_count < 2
-          return welcome_path
-        else
-          return rcpqueries_path
-        end
-      else
-        super(resource)
-      end
+    stored_location_for(resource) ||
+    if resource.is_a?(User)
+      # flash[:notice] = "Congratulations, you're signed up!"
+      resource.sign_in_count < 2 ? welcome_path : rcpqueries_path
+    else
+      super(resource)
+    end
   end
 
   # redirect somewhere that will eventually return back to here
