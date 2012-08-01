@@ -29,11 +29,11 @@
        <%= f.label :status,  "Status: ",:id=>"recipe_status_label" -%>
        <%= f.select :status,  Recipe.status_select %>
 	   <%= f.check_box :private %>
-	   <%= f.label :private, "Private (for your eyes only)" %>
+	   <%= f.label :private, "Private (for my eyes only)" %>
        <%# f.label :privacy, "Privacy: ",:id=>"recipe_privacy_label" -%>
        <%# f.select :privacy, Recipe.privacy_select %>
     </div>
-    <%= f.submit "Set Tags" %>
+    <%= f.submit "Save" %>
     <br><%= link_to "Back to Cookmarks", rcpqueries_path %> 
   <% if permitted_to? :remove, @recipe %>
     <%= button_to "Remove From My Collection", "/recipes/#{@recipe.id.to_s}/remove" %>

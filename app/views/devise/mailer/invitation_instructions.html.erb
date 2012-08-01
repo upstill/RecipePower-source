@@ -1,7 +1,7 @@
 <p>Calling <%= @resource.email %>!</p>
 
 <p>
-<%= (@resource.invited_by_id && (User.find(@resource.invited_by_id).fullname || User.find(@resource.invited_by_id).email)) || "Someone" %>
+<%= (@resource.invited_by_id && User.find(@resource.invited_by_id).handle) || "Someone" %>
 has invited you to join in at 
 <%= link_to("RecipePower.com", root_url)+(@resource.invitation_message.blank? ? "." : ", saying") %>
 <% unless @resource.invitation_message.blank? %>
