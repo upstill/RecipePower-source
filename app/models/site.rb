@@ -235,13 +235,15 @@ class Site < ActiveRecord::Base
         end
     end
     
+    # Probe a URL with its server, returning the result code for a head request
     def self.result(link, resource=nil)
       begin
         url = resource ? URI.join(link, resource) : URI.parse(link)
         req = Net::HTTP.new(url.host, url.port)
-        req.request_head(url.path)
+        req.request_head(url.path).code
       rescue Exception => e
-        return nil
+        # If the server doesn't want to talk, we assume that the URL is okay, at least
+        return 401 if e.kind_of?(Errno::ECONNRESET)
       end
     end
     
@@ -252,16 +254,15 @@ class Site < ActiveRecord::Base
     # Thus: false means fail; string means good but moved; true means everything is copacetic
     def self.test_link(link, resource=nil)
       # If the result method can't make sense of the link, then give up
-      return false unless res = self.result(link, resource)
-      if res.code == "301"
+      return false unless result_code = self.result(link, resource)
+      if result_code == "301"
           # If the location has moved permanently (result 301) we try to supplant this link internally
           if ((new_location = res.header["location"]) &&
-              (res2 = self.result(new_location)) &&
-              (res2.code == "200"))
+              (self.result(new_location) == "200"))
             return new_location
           end
       end
-      return res.code != "400" # Not very stringent: we only disallow ill-formed requests
+      return result_code != "400" # Not very stringent: we only disallow ill-formed requests
     end
     
     # Find and return the site wherein the named link is stored
