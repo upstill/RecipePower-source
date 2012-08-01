@@ -8,7 +8,7 @@ class User < ActiveRecord::Base
   after_invitation_accepted :initialize_friends
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :id, :username, :fullname, :about,
+  attr_accessible :id, :username, :fullname, :about, :login,
                 :email, :password, :password_confirmation, 
                 :recipes, :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens
 
@@ -20,6 +20,19 @@ class User < ActiveRecord::Base
   
   # Channels are just another kind of user. This field (channel_referent_id, externally) denotes such.
   belongs_to :channel, :class_name => "ChannelReferent"
+  
+  # login is a virtual attribute placeholding for [username or email]
+  attr_accessor :login
+  
+  def self.find_first_by_auth_conditions(warden_conditions)
+    conditions = warden_conditions.dup
+    debugger
+    if login = conditions.delete(:login)
+      where(conditions).where(["lower(username) = :value OR lower(email) = :value", { :value => login.downcase }]).first
+    else
+      where(conditions).first
+    end
+  end
   
   def role
       self.role_symbols.first.to_s

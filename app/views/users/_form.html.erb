@@ -1,8 +1,12 @@
 <%= form_for @user do |f| %>
   <%= show_errors @user.errors %>
   <p>
-    <%= f.label :username, "Username/Handle" %><br />
+    <%= f.label :username, "Username" %><br />
     <%= f.text_field :username %>
+  </p>
+  <p>
+    <%= f.label :email, "Email" %><br />
+    <%= f.text_field :email %>
   </p>
   <p>
     <%= f.label :fullname, "Full Name" %><br />
