@@ -7,7 +7,6 @@ class RpMailer < ActionMailer::Base
     end
     
   def invitation_accepted_email(invitee)
-    debugger
     return unless @user = User.where(id: invitee.invited_by).first
     @invitee = invitee
     @url = "http://www.recipepower.com/users/profile"
