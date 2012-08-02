@@ -9,6 +9,30 @@ class InvitationsController < Devise::InvitationsController
         redirect_to after_sign_out_path_for(resource_name)
       end
     end
+    
+    # POST /resource/invitation
+    def create
+      self.resource = resource_class.invite!(params[resource_name], current_inviter)
+      if resource.errors.empty?
+        set_flash_message :notice, :send_instructions, :email => self.resource.email
+        respond_with resource, :location => after_invite_path_for(resource)
+      elsif resource.errors[:email] && (other = User.where(email: resource.email).first)
+          # HA! request failed because email exists. Forget the invitation, just make us friends.
+          id = other.email 
+          id = other.handle if id.blank?
+          id << " (aka #{other.handle})" if (other.handle != id)
+          if current_inviter.followee_ids.include? other.id
+              notice = "#{id} is already on RecipePower--and a friend of yours."
+          else
+              current_inviter.followees << other
+              current_inviter.save
+              notice = "But #{id} is already on RecipePower! Oh happy day!! <br>(We've gone ahead and made them your friend.)".html_safe
+          end
+          redirect_to rcpqueries_path, :notice => notice
+      else
+        respond_with_navigational(resource) { render :new }
+      end
+    end
 
     # PUT /resource/invitation
     def update
