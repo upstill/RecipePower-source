@@ -72,6 +72,43 @@ module ApplicationHelper
             </div>}.html_safe                                   
     end
   end
+  
+  # Local version of an image picker
+  def site_choosePic f, site
+      piclist = Site.piclist site.home+site.sample
+ 	  if piclist.count > 0
+ 	    pictab = []
+ 	    # divide piclist into rows of four pics apiece
+        picrows = ""
+        thumbNum = 0
+        # Divide the piclist of URLs into rows of four, accumulating HTML for each row
+ 	    until piclist.empty?
+ 	        picrows <<  "<tr><td>"+
+ 	                    piclist.slice(0..3).collect{ |url| 
+ 	                      idstr = "thumbnail"+(thumbNum = thumbNum+1).to_s
+ 	                      "<div class = \"picCell\">"+
+                    	    image_tag(url, class: "fitPic", id: idstr, onclick: "pickImg('input.icon_picker', 'input#site_logo', '#{url}')", onload: "fitImageOnLoad('#{idstr}')", alt: "No Image Available")+
+                    	  "</div>"
+ 	                    }.join('</td><td>')+
+ 	                    "</td></tr>"
+ 	        piclist = piclist.slice(4..-1) || [] # Returns nil when off the end of the array
+        end
+# picrows = ""
+        picID = "rcpPic"+site.id.to_s
+        %Q{
+              <div class="preview">                                     
+                #{page_fitPic site.logo, site.id, false}  
+              </div> 
+              <p class="airy">Pick one of the thumbnails<br>or type/paste the URL below.</p>                                                 
+              <br class="clear">#{f.text_field( :logo, class: "icon_picker", value: site.logo, rel: "jpg,png,gif", 
+                                                onchange: "previewImg('input.icon_picker', 'input#site_logo')" )} <u>Preview</u>
+              <br><table>#{picrows}</table>                                             
+          }.html_safe
+      else
+          %q{<label for="recipe_picurl" id="recipe_pic_label">No Picture Available</label>}.html_safe                                   
+      end
+      
+  end
       
     # Return the id of the DOM element giving the time-since-touched for a recipe
     def rr_touch_date_id recipe

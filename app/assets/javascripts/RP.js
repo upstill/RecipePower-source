@@ -7,14 +7,7 @@ $(document).ready(function(){ //wait for the dom to load
 		galleryUrl: '' ,
 		outputfieldselector: 'input#recipe_picurl'
     });
-/*
-    $('#logopicker').imagepicker( {// set our selector
-        // Data is required and in a json format
-        data: "piclist",
-		outputfieldselector: 'input#site_logo',
-		galleryUrl: '' 
-    });
-*/
+
 		$('input#imgpicker').change(function() {
 			debugger;
 		})
@@ -184,6 +177,41 @@ function wdwFitImages(selection) {
 }
 */
 
+// Handle a click on a thumbnail image by passing the URL on to the 
+// associated input field
+function pickImg(inputsel, formsel, url) {
+	$(inputsel).attr("value", url );
+	previewImg(inputsel, formsel);
+}
+
+// Copy an input URL to both the preview image and the (hidden) form field
+function previewImg(inputsel, formsel) {
+    var url = $(inputsel).attr("value");
+	$(formsel).attr("value", url )
+	var imageset = $("div.preview img")
+	if(imageset.first) {
+	    imageset.hide();
+		imageset.attr("src", url )
+		fitImage(imageset.first)
+	}
+}
+
+// When a new URL is typed, set the (hidden) field box
+function newImageURL(inputsel, formsel, picid) {
+	var url = $(inputsel).attr("value")
+	var thePic = $("#"+picid)
+	var formField = $(formsel)
+	debugger;
+	formField.attr("value", url);
+	thePic.attr("src", url)
+	return false;
+}
+
+function confirmSubmit() {
+	debugger;
+	return false;
+}
+
 // Onload function for images, to fit themselves (found by id) into the enclosing container.
 function fitImageOnLoad(id) {
     $("#"+id).each(function() {
@@ -200,35 +228,36 @@ function fitImage(img) {
     if(!(img.width > 5 && img.height > 5)) {
 		return false;
 	}
+	
+	var picWidth = img.naturalWidth; // width();
+	var picHeight = img.naturalHeight; // height();
 
-    var width = img.parentElement.clientWidth;
-    var height = img.parentElement.clientHeight;
-
-    if(!(width > 5 && height > 5)) {
+    // In case the image hasn't loaded yet
+    if(!(picWidth > 5 && picHeight > 5)) {
 		return false;
 	}
 
-    var aspect = img.width / img.height;
-    // 'shrinkage' is the scale factor, offsets are for centering the result
-    var shrinkage,
-    offsetX = 0,
-    offsetY = 0;
-    if (aspect > width / height) {
-        // If the image is wider than the frame
-        // Shrink to just fit in width
-        shrinkage = width / img.width;
-        offsetY = (height - img.height * shrinkage) / 2;
-    } else {
-        // Shrink to just fit in height
-        shrinkage = height / img.height;
-        offsetX = (width - img.width * shrinkage) / 2;
-    }
-    // Scale the image dimensions to fit its parent's box
-    // img.width *= shrinkage;
-    $(img).css("width", img.width * shrinkage);
+    var frameWidth = $(img.parentElement).width(); // img.parentElement.clientWidth;
+    var frameHeight = $(img.parentElement).height(); // img.parentElement.clientHeight;
+
+    if(!(frameWidth > 5 && frameHeight > 5)) {
+		return false;
+	}
+
+	var frameAR = frameWidth/frameHeight;
+	var imgAR = picWidth/picHeight;
+    if(imgAR > frameAR) { 
+      var newHeight = frameWidth/imgAR;
+	  $(img).css("width", frameWidth);
+	  $(img).css("height", newHeight);
+	  $(img).css("top", (frameHeight-newHeight)/2);
+	} else {
+      var newWidth = frameHeight*imgAR;
+	  $(img).css("width", newWidth);
+	  $(img).css("height", frameHeight);
+	  $(img).css("left", 0); // (frameWidth-newWidth)/2);
+	}
     img.style.position = "relative";
-    $(img).css("top", offsetY);
-    // $(img).css("left", offsetX);
     $(img).css("visibility", "visible");
     $(img).show();
     return true;

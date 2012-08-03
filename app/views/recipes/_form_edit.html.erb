@@ -13,7 +13,7 @@
        <%= f.text_field :tag_tokens, "data-pre" => @recipe.tags.map(&:attributes).to_json %>
     </div>
     <div class="recipe_comment_div" >
-       <%= f.label :comment, "My Two Cents", :id=>"recipe_comment_label" -%>
+       <%= f.label :comment, "Notes", :id=>"recipe_comment_label" -%>
        <br><%= f.text_area :comment, placeholder: "What are your thoughts about this recipe?" %>
     </div>
     <div class="recipe_url_div" >

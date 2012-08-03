@@ -68,7 +68,6 @@ class SitesController < ApplicationController
   def update
       # return if need_login true, true
     @site = Site.find(params[:id])
-    debugger
     respond_to do |format|
       if @site.update_attributes(params[:site])
         format.html { redirect_to @site, notice: 'Site was successfully updated.' }
