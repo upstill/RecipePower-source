@@ -1,4 +1,3 @@
-
 /* Master function for assigning actions to interface items */
 $(document).ready(function(){ //wait for the dom to load
     $('#imgpicker').imagepicker( {// set our selector
@@ -201,14 +200,8 @@ function newImageURL(inputsel, formsel, picid) {
 	var url = $(inputsel).attr("value")
 	var thePic = $("#"+picid)
 	var formField = $(formsel)
-	debugger;
 	formField.attr("value", url);
 	thePic.attr("src", url)
-	return false;
-}
-
-function confirmSubmit() {
-	debugger;
 	return false;
 }
 
