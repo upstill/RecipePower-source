@@ -6,12 +6,18 @@
   <body>
     <h1>Welcome to RecipePower.com, <%= @user.handle %></h1>
     <p>
-      You have successfully signed up to RecipePower.com,
-      your username is: <%= @user.username %>.<br/>
+      You have successfully signed up to RecipePower.com.
+      <br>You can log in at <%= @login_url %>, and your username is: <%= @user.username %>.
     </p>
     <p>
-      To login to the site, just follow this link: <%= @url %>.
+		<%= @inviter.handle %> invited you, so by default you will follow 
+		each other as friends.
     </p>
-    <p>Thanks for joining and have a great day!</p>
+    <p>
+      To change this, or make other changes to your profile, go to: <%= @profile_url %>.
+    </p>
+    <p>Thanks for joining us in making sense of the world of recipes on the Web.</p>
+    <p><br> Best Regards,</p>
+    <p>Steve & Max, aka The RecipePower Boys.</p>
   </body>
 </html>
