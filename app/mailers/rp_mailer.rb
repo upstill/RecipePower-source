@@ -1,5 +1,5 @@
 class RpMailer < ActionMailer::Base
-  default from: "upstill@gmail.com"
+  default from: "webmaster@recipepower.com"
   def welcome_email(user)
       @user = user
       @url  = "http://recipepower.com/login"

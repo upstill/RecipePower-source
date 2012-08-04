@@ -1,8 +1,8 @@
 class FeedbackMailer < ActionMailer::Base
-  default from: "recipepowerfeedback@gmail.com"
+  default from: "upstill@gmail.com"
 
   def feedback(feedback)
-    recipients  = 'upstill@gmail.com'
+    recipients  = 'recipepowerfeedback@gmail.com'
     subject     = "#{feedback.subject} ##{feedback.id}"
 
     @feedback = feedback
