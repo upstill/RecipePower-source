@@ -22,6 +22,10 @@ $(function() {
 	  sends back a list of DOM elements to delete, which we handle with the 
 	  function nuke_DOM_elements_by_id.
 	*/
+	$("#PickLogo").click( function(event) {
+		PicPicker("Pick a Logo");
+		event.preventDefault();
+	})
 	$('.absorb_button').click( function(event) {
 		var source_id = get_id_from_element($(this))
 		var target = $(this).closest('tr')
@@ -176,23 +180,39 @@ function wdwFitImages(selection) {
 }
 */
 
+function PicPicker(ttl) {
+	// Bring up a dialog showing the picture-picking fields of the page
+	$("div.iconpicker").dialog({
+		modal: true,
+		width: 460,
+		title: (ttl || "Pick a Picture"),
+		buttons: { Okay: function (event) {
+			// Transfer the logo URL from the dialog's text input to the page text input
+			previewImg("input.icon_picker", "div.logo img", "input#site_logo");
+			$(this).dialog('close');
+			// Copy the image to the window's thumbnail
+		}}
+	});
+}
+
 // Handle a click on a thumbnail image by passing the URL on to the 
 // associated input field
-function pickImg(inputsel, formsel, url) {
+function pickImg(inputsel, imagesel, url) {
 	$(inputsel).attr("value", url );
-	previewImg(inputsel, formsel);
+	previewImg(inputsel, imagesel, "");
 }
 
 // Copy an input URL to both the preview image and the (hidden) form field
-function previewImg(inputsel, formsel) {
+function previewImg(inputsel, imagesel, formsel) {
+	// Copy the url from the input field to the form field
     var url = $(inputsel).attr("value");
 	$(formsel).attr("value", url )
-	var imageset = $("div.preview img")
-	if(imageset.first) {
-	    imageset.hide();
-		imageset.attr("src", url )
-		fitImage(imageset.first)
-	}
+	
+	// Set the image(s) to the URL and fit them in their frames
+	var imageset = $(imagesel)
+    imageset.hide();
+	imageset.attr("src", url )
+	fitImage(imageset[0])
 }
 
 // When a new URL is typed, set the (hidden) field box
@@ -206,15 +226,15 @@ function newImageURL(inputsel, formsel, picid) {
 }
 
 // Onload function for images, to fit themselves (found by id) into the enclosing container.
-function fitImageOnLoad(id) {
-    $("#"+id).each(function() {
+function fitImageOnLoad(selector) {
+    $(selector).each(function() {
         fitImage(this);
     });
 }
 
 function fitImage(img) {
 
-    if (!img.complete) {
+    if (!(img && img.complete)) {
         return false;
     }
 

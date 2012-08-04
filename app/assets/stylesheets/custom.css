@@ -888,6 +888,15 @@ input.icon_picker {
 	width:85%;
 }
 
+.logo {
+	width: 128px;
+	height: 96px;
+	text-align: center;
+    margin: 10px;
+    padding: 10px;
+	border:#909090 3px solid;
+}
+
 .iconpicker	.preview {
 		float: left;
 	    width:160px;

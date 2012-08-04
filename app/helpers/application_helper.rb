@@ -31,13 +31,14 @@ module ApplicationHelper
 
   # Declare an image withinin an adjustable box. The images are downloaded by
   # the browser and their dimensions adjusted under Javascript by the fitImageOnLoad() function.
-  def page_fitPic(picurl, id, float_ttl = true)
+  def page_fitPic(picurl, id, float_ttl = true, selector=nil)
     # "fitPic" class gets fit inside pic_box with Javascript and jQuery
-    id = "rcpPic"+id.to_s
+    idstr = "rcpPic"+id.to_s
+    selector = selector || "##{idstr}"
 	if picurl.blank? && float_ttl
-	    %Q{<div class="centerfloat" id="#{id}">No Image Available</div>}.html_safe
+	    %Q{<div class="centerfloat" id="#{idstr}">No Image Available</div>}.html_safe
 	else
-	    image_tag(picurl, class: "fitPic", id: id.to_s, onload: "fitImageOnLoad('#{id.to_s}')", alt: "No Image Available")
+	    image_tag(picurl, class: "fitPic", id: idstr, onload: "fitImageOnLoad('#{selector}')", alt: "No Image Available")
 	end
   end
   
@@ -74,7 +75,7 @@ module ApplicationHelper
   end
   
   # Local version of an image picker
-  def site_choosePic f, site
+  def site_choosePic site
       piclist = Site.piclist site.home+site.sample
  	  if piclist.count > 0
  	    pictab = []
@@ -87,7 +88,7 @@ module ApplicationHelper
  	                    piclist.slice(0..3).collect{ |url| 
  	                      idstr = "thumbnail"+(thumbNum = thumbNum+1).to_s
  	                      "<div class = \"picCell\">"+
-                    	    image_tag(url, class: "fitPic", id: idstr, onclick: "pickImg('input.icon_picker', 'input#site_logo', '#{url}')", onload: "fitImageOnLoad('#{idstr}')", alt: "No Image Available")+
+                    	    image_tag(url, class: "fitPic", id: idstr, onclick: "pickImg('input.icon_picker', 'div.preview img', '#{url}')", onload: "fitImageOnLoad('##{idstr}')", alt: "No Image Available")+
                     	  "</div>"
  	                    }.join('</td><td>')+
  	                    "</td></tr>"
@@ -97,11 +98,14 @@ module ApplicationHelper
         picID = "rcpPic"+site.id.to_s
         %Q{
               <div class="preview">                                     
-                #{page_fitPic site.logo, site.id, false}  
+                #{page_fitPic site.logo, site.id, false, "div.preview img"}  
               </div> 
-              <p class="airy">Pick one of the thumbnails<br>or type/paste the URL below.</p>                                                 
-              <br class="clear">#{f.text_field( :logo, class: "icon_picker", value: site.logo, rel: "jpg,png,gif", 
-                                                onchange: "previewImg('input.icon_picker', 'input#site_logo')" )} <u>Preview</u>
+              <p class="airy">Pick one of the thumbnails<br>or type/paste the URL below, then click Okay.</p>                                                 
+              <br class="clear"> <u>Preview</u>
+              <input type="text" class="icon_picker" 
+                        rel="jpg,png,gif" 
+                        value="#{site.logo}" 
+                        onchange="previewImg('input.icon_picker', 'div.preview img', 'input#site_logo')" />
               <br><table>#{picrows}</table>                                             
           }.html_safe
       else

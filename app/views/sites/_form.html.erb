@@ -10,10 +10,13 @@
       </ul>
     </div>
   <% end %>
-
+  <div class="logo">                                     
+    <%= page_fitPic @site.logo, @site.id, false, "div.logo img"  %>
+  </div> 
+  <%= link_to "Pick Logo", "/", :id=>"PickLogo" %>
+  <%= f.text_field :logo, rel: "jpg,png,gif", hidden: true %>
   <div class="iconpicker" >
-	<h3>Site Icon</h3>
-	<%= site_choosePic f, @site %>
+	<%= site_choosePic @site %>
   </div>
   <div class="field">
     <%= f.label :Name %><br />
