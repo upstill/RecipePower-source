@@ -7,8 +7,6 @@ RP::Application.routes.draw do
 
   devise_for :users, :controllers => {:invitations => 'invitations', :registrations => 'registrations'}
 
-  resources :feedbacks
-
   resources :sites
 
   resources :expressions
