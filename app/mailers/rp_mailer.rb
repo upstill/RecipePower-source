@@ -2,6 +2,14 @@ class RpMailer < ActionMailer::Base
   default from: "support@recipepower.com"
   add_template_helper(UsersHelper)
   
+  def feedback(feedback)
+    recipients  = 'recipepowerfeedback@gmail.com'
+    subject     = "#{feedback.subject} ##{feedback.id}"
+
+    @feedback = feedback
+    mail :to => recipients, :subject => subject
+  end
+  
   def welcome_email(user)
       return unless @inviter = User.where(id: user.invited_by).first
       @user = user

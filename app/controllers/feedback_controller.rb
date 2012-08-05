@@ -12,7 +12,7 @@ class FeedbackController < ApplicationController
   def create
     @feedback = Feedback.create(params[:feedback])
     if @feedback.valid?
-      FeedbackMailer.feedback(@feedback).deliver
+      RpMailer.feedback(@feedback).deliver
       render :status => :created, :text => '<h3>Thank you for your feedback!</h3>'
     else
       @error_message = "You can just close the panel if you don't want to describe your #{@feedback.subject.to_s.downcase}."

@@ -10,11 +10,16 @@
       <br>You can log in at the <%= link_to "Login Page", @login_url %>, using <%= login_choices @user %>.
     </p>
     <p>
+    <% if @inviter %>
 		<%= @inviter.handle %> invited you, so by default you will follow 
 		each other as friends.
     </p>
     <p>
-      To change this, or make other changes to your profile, go to the <%= link_to("RecipePower Profile Page", @profile_url) %>.
+      To change this
+    <% else %>
+	  To select friends, open channels
+	<% end %>
+	 or make other changes to your profile, go to the <%= link_to("RecipePower Profile Page", @profile_url) %>.
     </p>
     <p>Thanks for joining us in making sense of the world of recipes on the Web.</p>
     <p><br> Best Regards,</p>
