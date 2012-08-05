@@ -16,4 +16,4 @@ ActionMailer::Base.smtp_settings = {
   :user_name      => ENV['MAILGUN_SMTP_LOGIN'],
   :password       => ENV['MAILGUN_SMTP_PASSWORD'],
 }
-ActionMailer::Base.delivery_method = :smtp
+# ActionMailer::Base.delivery_method = :smtp

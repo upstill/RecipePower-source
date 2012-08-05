@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+    <meta charset="utf-8" http-equiv="Content-Type" content="text/html" />
   </head>
   <body>
-    <h1>Welcome to RecipePower.com, <%= @user.handle %></h1>
+    <h3>Welcome to RecipePower.com, <%= @user.handle %></h3>
     <p>
       You have successfully signed up to RecipePower.com.
-      <br>You can log in at <%= @login_url %>, and your username is: <%= @user.username %>.
+      <br>You can log in at the <%= link_to "Login Page", @login_url %>, using <%= login_choices @user %>.
     </p>
     <p>
 		<%= @inviter.handle %> invited you, so by default you will follow 
 		each other as friends.
     </p>
     <p>
-      To change this, or make other changes to your profile, go to: <%= @profile_url %>.
+      To change this, or make other changes to your profile, go to the <%= link_to("RecipePower Profile Page", @profile_url) %>.
     </p>
     <p>Thanks for joining us in making sense of the world of recipes on the Web.</p>
     <p><br> Best Regards,</p>

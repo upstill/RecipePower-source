@@ -25,7 +25,8 @@ class PagesController < ApplicationController
   end
 
   def kale
-	@Title = "Kale Recipes"
+      @user.focus = 8
+	  @Title = "Kale Recipes"
   end
 
   def faq

@@ -7,4 +7,12 @@ module UsersHelper
    	   }.compact.join('<br>').html_safe
      end
    end
+   
+   def login_choices user
+       both = !(user.username.empty? || user.email.empty?)
+       ((both ? "either " : "")+
+       (user.username ? "your username '#{user.username}'" : "")+
+       (both ? " or " : "")+
+       (user.email ? "your email '#{user.email}'" : "")).html_safe
+   end
 end

@@ -6,6 +6,9 @@ RP::Application.configure do
   # since you don't have to restart the web server when you make code changes.
   config.cache_classes = false
 
+  # See everything in the log (default is :info)
+  config.log_level = :debug
+
   # Log error messages when you accidentally call methods on nil.
   config.whiny_nils = true
 
@@ -14,7 +17,7 @@ RP::Application.configure do
   config.action_controller.perform_caching = false
 
   # Don't care if the mailer can't send
-  config.action_mailer.raise_delivery_errors = false
+  config.action_mailer.raise_delivery_errors = true # false
   config.action_mailer.default_url_options = { :host => 'localhost:5000' }
   
   # Print deprecation notices to the Rails logger
@@ -30,9 +33,9 @@ RP::Application.configure do
   config.assets.debug = true
 
   config.middleware.use ExceptionNotifier,
-    :email_prefix => "[RecipePower] ",
-    :sender_address => "recipepowerfeedback@gmail.com",
-    :exception_recipients => "webmaster@recipepower.com"
-  
+    :email_prefix => "[RecipePower Failure!!] ",
+    :sender_address => %{"notifier" <notifier@recipepower.com>},
+    :exception_recipients => %w{recipepowerfeedback@gmail.com}
+
   config.action_mailer.delivery_method = :letter_opener
 end

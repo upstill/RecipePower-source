@@ -31,7 +31,7 @@ RP::Application.configure do
   # config.force_ssl = true
 
   # See everything in the log (default is :info)
-  # config.log_level = :debug
+  config.log_level = :debug
 
   # Use a different logger for distributed setups
   # config.logger = SyslogLogger.new
@@ -46,7 +46,7 @@ RP::Application.configure do
   # config.assets.precompile += %w( search.js )
 
   # Disable delivery errors, bad email addresses will be ignored
-  # config.action_mailer.raise_delivery_errors = false
+  config.action_mailer.raise_delivery_errors = true
   config.action_mailer.default_url_options = { :host => 'strong-galaxy-5765.herokuapp.com' }
 
   # Enable threaded mode
@@ -60,8 +60,10 @@ RP::Application.configure do
   config.active_support.deprecation = :notify
 
   config.middleware.use ExceptionNotifier,
-    :email_prefix => "[RecipePower] ",
-    :sender_address => "webmaster@recipepower.com",
-    :exception_recipients => "upstill@gmail.com",
+    :email_prefix => "[RecipePower Failure!!] ",
+    :sender_address => "upstill@gmail.com",
+    :exception_recipients => "recipepowerfeedback@gmail.com",
     :ignore_exceptions => ExceptionNotifier.default_ignore_exceptions # + [RunTimeError]
+    
+  ActionMailer::Base.delivery_method = :smtp
 end

@@ -1,11 +1,13 @@
 class RpMailer < ActionMailer::Base
   default from: "support@recipepower.com"
+  add_template_helper(UsersHelper)
+  
   def welcome_email(user)
       return unless @inviter = User.where(id: user.invited_by).first
       @user = user
       @profile_url = "http://www.recipepower.com/users/profile"
       @login_url  = "http://recipepower.com/login"
-      mail(:to => @user.email, :subject => "Welcome to RecipePower")
+      mail :to => @user.email, :subject => "Welcome to RecipePower"
     end
     
   def invitation_accepted_email(invitee)
