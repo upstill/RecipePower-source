@@ -61,9 +61,9 @@ RP::Application.configure do
 
   config.middleware.use ExceptionNotifier,
     :email_prefix => "[RecipePower Failure!!] ",
-    :sender_address => "upstill@gmail.com",
-    :exception_recipients => "recipepowerfeedback@gmail.com",
+    :sender_address => %{"notifier" <upstill@gmail.com>},
+    :exception_recipients => %w{recipepowerfeedback@gmail.com}
     :ignore_exceptions => ExceptionNotifier.default_ignore_exceptions # + [RunTimeError]
-    
+
   ActionMailer::Base.delivery_method = :smtp
 end
