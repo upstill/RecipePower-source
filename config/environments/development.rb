@@ -37,5 +37,5 @@ RP::Application.configure do
     :sender_address => %{"notifier" <notifier@recipepower.com>},
     :exception_recipients => %w{recipepowerfeedback@gmail.com}
 
-  config.action_mailer.delivery_method = :smtp # :letter_opener
+  config.action_mailer.delivery_method = :letter_opener # :smtp
 end
