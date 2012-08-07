@@ -75,6 +75,7 @@ RP::Application.routes.draw do
   match '/kale', :to => 'pages#kale'
   match '/signup', :to => 'visitors#new'
   match '/FAQ', :to=>"pages#FAQ"
+  match '/admin', :to=>"pages#admin"
   root :to => 'pages#home_or_recipes'
 
   # The priority is based upon order of creation:

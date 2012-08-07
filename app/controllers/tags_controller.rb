@@ -20,9 +20,9 @@ class TagsController < ApplicationController
       # We should have a Relation for the relevant tags
       @taglist = @taglist.order("id").page(params[:page]).per_page(50)
     respond_to do |format|
-      format.json { render :json => @taglist.map { |tag| { :title=>tag.name+tag.id.to_s, :isLazy=>false, :key=>tag.id, :isFolder=>false } } }
+      # format.json { render :json => @taglist.map { |tag| { :title=>tag.name+tag.id.to_s, :isLazy=>false, :key=>tag.id, :isFolder=>false } } }
       format.html # index.html.erb
-      format.xml  { render :xml => @taglist }
+      format.xml  { render :xml => @userlist }
     end
   end
 
