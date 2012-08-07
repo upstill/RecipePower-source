@@ -9,25 +9,27 @@
       </ul>
     </div>
   <% end %>
+<% @reftype = @referent.type %>
 <%= form_for(@referent.becomes(Referent)) do |f| %>
-<%= f.select :type, Tag.type_selections %>
-<div class="referent_tags_div">
+  <% f.object.type = @reftype %>
+  <%= f.select :typenum, @typeselections %>
+  <div class="referent_tags_div">
 	<div class="referent_tags_label_div">
 	    <%= f.label :description, "Description:" %>
 	</div>
 	<div class="referent_tags_tokens_div">
 		<%= f.text_field :description, id: "referent_description" %>
 	</div>
-</div>
-<br class="clear">
-<div class="referent_tags_div" >
+  </div>
+  <br class="clear">
+  <div class="referent_tags_div" >
 	<div class="referent_tags_label_div">
 	   <%= f.label :parent_tokens, "Parents:", :id=>"referent_parents_label" -%>
 	</div>
 	<div class="referent_tags_tokens_div">
 	   <%= f.text_field :parent_tokens, "data-type" => @referent_type.to_s, "data-pre" => @referent.parent_tokens %>
 	</div>
-</div>
+  </div>
 <br class="clear">
 <div class="referent_tags_div" >
 	<div class="referent_tags_label_div">
@@ -54,7 +56,7 @@
 </div>
 <div id="referent_add_div" >
 	<div id="referent_add_label_div">
-	   <%= f.label :Add, "Add Name", :id=>"referent_add_expression_label" -%>
+	   <%= f.label :Add, "Add Tag", :id=>"referent_add_expression_label" -%>
 	</div>
 	<div id="referent_add_tokens_div">
 	   <%= text_field :referent, :add_expression %>

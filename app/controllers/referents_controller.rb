@@ -35,7 +35,7 @@ class ReferentsController < ApplicationController
   # GET /referents/1
   # GET /referents/1.json
   def show
-      @tabindex = session[:tabindex] || params[:tabindex] || 0
+      @tabindex = (session[:tabindex] || params[:tabindex] || 0).to_i
       handlerclass = @@HandlersByIndex[@tabindex]
     @referent = handlerclass.find(params[:id])
 
@@ -49,10 +49,13 @@ class ReferentsController < ApplicationController
   # GET /referents/new
   # GET /referents/new.json?tagid=1&mode={over,before,after}&parent=referentid
   def new
-      @tabindex = session[:tabindex] || params[:tabindex] || 0
-      handlerclass = @@HandlersByIndex[@tabindex]
+    @tabindex = (session[:tabindex] || params[:tabindex] || 4).to_i
+    handlerclass = @@HandlersByIndex[@tabindex]
     @referent = handlerclass.new
     @referent.express (params[:tagid]) if params[:tagid]
+    @typeselections = Tag.type_selections
+    @typeselections.shift
+    debugger
 
     respond_to do |format|
       format.html # new.html.erb
@@ -70,20 +73,23 @@ class ReferentsController < ApplicationController
       @referent = Referent.find(params[:id]) # .becomes(Referent)
       # @expressions = @referent.expressions
       @referent_type = @referent.typenum
+      @typeselections = Tag.type_selections
+      @typeselections.shift
   end
 
   # POST /referents?tagid=1&mode={over,before,after}&target=referentid
   # POST /referents.json?tagid=1&mode={over,before,after}&target=referentid
   def create
+      debugger
     if params[:tabindex]
         @tabindex = params[:tabindex].to_i || 0
         handlerclass = @@HandlersByIndex[@tabindex]
         tagid = params[:tagid].to_i # Id of expression
         targetid = params[:target] ? params[:target].to_i : 0
     else
-        @tabindex = params[:referent][:type].to_i || 0
+        @tabindex = params[:referent][:typenum].to_i || 0
         handlerclass = @@HandlersByIndex[@tabindex]
-        params[:referent].delete :type
+        params[:referent].delete :typenum
     end
     keyback = 0
     
@@ -163,6 +169,8 @@ class ReferentsController < ApplicationController
       else
         @referent.becomes(Referent)
         @referent_type = @referent.typenum
+        @typeselections = Tag.type_selections
+        @typeselections.shift
         format.html { render action: "edit" }
         format.json { render json: @referent.errors, status: :unprocessable_entity }
       end
@@ -172,8 +180,8 @@ class ReferentsController < ApplicationController
   # DELETE /referents/1
   # DELETE /referents/1.json
   def destroy
-      @tabindex = session[:tabindex] || params[:tabindex] || 0
-      handlerclass = @@HandlersByIndex[@tabindex]
+    @tabindex = session[:tabindex] || params[:tabindex] || 0
+    handlerclass = @@HandlersByIndex[@tabindex]
     @referent = handlerclass.find(params[:id])
     @referent.destroy
 
@@ -186,7 +194,6 @@ class ReferentsController < ApplicationController
   # /referents/connect?parent=&child=
   def add_child
       @tabindex = session[:tabindex] || params[:tabindex] || 0
-      debugger
       handlerclass = @@HandlersByIndex[@tabindex]
       parent = handlerclass.find params[:parentid].to_i
       child = handlerclass.find params[:childid].to_i

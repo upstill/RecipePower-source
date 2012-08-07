@@ -5,6 +5,11 @@ class ReferentValidator < ActiveModel::Validator
             record.errors[:base] << "Referent can't have generic type"
             return false;
         end
+        if record.tags.empty?
+          debugger
+          record.errors[:base] << "Referents must have at least one tag to express them."
+          return false;
+        end
         true
     end
 end

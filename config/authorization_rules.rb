@@ -30,6 +30,7 @@ authorization do
   role :admin do
     includes :editor
     # :sessions, :users
+    has_permission_on [:pages], :to => [:admin]
     has_permission_on [:recipes], :to => [:destroy]
     has_permission_on [:users], :to => [:manage]
     has_permission_on [:expressions, :links, :pages, :ratings, :rcpqueries, :recipes, :referents, :scales, :sites], :to => :manage
