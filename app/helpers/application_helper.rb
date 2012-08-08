@@ -108,11 +108,12 @@ module ApplicationHelper
             #{page_fitPic picurl, id, false, "div.preview img"}  
           </div> 
           <p class="airy">#{prompt}</p>                                                 
-          <br class="clear"> <u>Preview</u>
+          <br class="clear"> 
           <input type="text" class="icon_picker" 
                     rel="jpg,png,gif" 
                     value="#{picurl}" 
                     onchange="previewImg('input.icon_picker', 'div.preview img', 'input##{input_field}')" />
+          <u>Preview</u>
           #{tblstr}       
         </div>                                      
       }.html_safe      
