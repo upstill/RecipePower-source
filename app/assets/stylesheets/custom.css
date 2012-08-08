@@ -618,6 +618,11 @@ display: block;
     float: right;
 }
 
+.recipe_pic_preview {
+	width: 320px;
+	height: 240px;
+}
+
 .pic_box {
     width:350px;
     height:220px;
@@ -877,7 +882,7 @@ font:12px arial, sans-serif;
 .iconpicker {
     display: block;
     float: right;
-    width:460px; // 100%;
+    width:660px; // 100%;
     margin: 5px;
     padding: 5px;
 	border:#000000 2px solid;

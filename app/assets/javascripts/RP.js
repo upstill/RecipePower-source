@@ -1,19 +1,5 @@
 /* Master function for assigning actions to interface items */
 $(document).ready(function(){ //wait for the dom to load
-    $('#imgpicker').imagepicker( {// set our selector
-        // Data is required and in a json format
-        data: "piclist",
-		galleryUrl: '' ,
-		outputfieldselector: 'input#recipe_picurl'
-    });
-
-		$('input#imgpicker').change(function() {
-			debugger;
-		})
-		$('input#imgpicker').load(function() {
-			debugger;
-		})
-		// wdwFitImages();
 }); 
 
 $(function() {
@@ -22,7 +8,7 @@ $(function() {
 	  sends back a list of DOM elements to delete, which we handle with the 
 	  function nuke_DOM_elements_by_id.
 	*/
-	$("#PickLogo").click( function(event) {
+	$("#PicPicker").click( function(event) {
 		PicPicker("Pick a Logo");
 		event.preventDefault();
 	})
@@ -184,7 +170,7 @@ function PicPicker(ttl) {
 	// Bring up a dialog showing the picture-picking fields of the page
 	$("div.iconpicker").dialog({
 		modal: true,
-		width: 460,
+		width: 700,
 		title: (ttl || "Pick a Picture"),
 		buttons: { Okay: function (event) {
 			// Transfer the logo URL from the dialog's text input to the page text input

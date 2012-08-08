@@ -3,10 +3,14 @@
 <%= form_for @recipe do |f| %>
   <%= show_errors @recipe.errors %>
   <div class="recipe_pic_div" >
-    <br><%= f.text_field :picurl, type: "hidden" %>
-	<input type="text" id="imgpicker" name='image' rel="jpg,png,gif" value="<%= @recipe.picurl %>"/>
-	<%= page_choosePic @recipe.picurl, @recipe.url, @recipe.id %>
+	<%# page_choosePic @recipe.picurl, @recipe.url, @recipe.id %>
+    <div class="recipe_pic_preview">                                     
+      <%= page_fitPic @recipe.picurl, @recipe.id, false %>  
+    </div>                                                    
+    <br><%= link_to "Pick Picture", "/", :id=>"PicPicker" %>
   </div>
+  <%= f.text_field :picurl, rel: "jpg,png,gif", hidden: true %>
+  <%= pic_picker @recipe.picurl, @recipe.url, @recipe.id, "recipe_picurl" %>
   <div class="recipe_fields_div">
     <div class="recipe_tags_div" >
        <%= f.label :tag_tokens, "Tags", :id=>"recipe_tags_label" -%>

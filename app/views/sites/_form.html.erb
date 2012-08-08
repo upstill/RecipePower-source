@@ -13,11 +13,9 @@
   <div class="logo">                                     
     <%= page_fitPic @site.logo, @site.id, false, "div.logo img"  %>
   </div> 
-  <%= link_to "Pick Logo", "/", :id=>"PickLogo" %>
+  <%= link_to "Pick Logo", "/", :id=>"PicPicker" %>
   <%= f.text_field :logo, rel: "jpg,png,gif", hidden: true %>
-  <div class="iconpicker" >
-	<%= site_choosePic @site %>
-  </div>
+  <%= pic_picker @site.logo, @site.home+@site.sample, @site.id, "site_logo" %>
   <div class="field">
     <%= f.label :Name %><br />
     <%= f.text_field :name %>

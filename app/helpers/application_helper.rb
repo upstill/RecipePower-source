@@ -75,44 +75,47 @@ module ApplicationHelper
     end
   end
   
-  # Local version of an image picker
-  def site_choosePic site
-      piclist = Site.piclist site.home+site.sample
- 	  if piclist.count > 0
- 	    pictab = []
- 	    # divide piclist into rows of four pics apiece
-        picrows = ""
-        thumbNum = 0
-        # Divide the piclist of URLs into rows of four, accumulating HTML for each row
- 	    until piclist.empty?
- 	        picrows <<  "<tr><td>"+
- 	                    piclist.slice(0..3).collect{ |url| 
- 	                      idstr = "thumbnail"+(thumbNum = thumbNum+1).to_s
- 	                      "<div class = \"picCell\">"+
-                    	    image_tag(url, class: "fitPic", id: idstr, onclick: "pickImg('input.icon_picker', 'div.preview img', '#{url}')", onload: "fitImageOnLoad('##{idstr}')", alt: "No Image Available")+
-                    	  "</div>"
- 	                    }.join('</td><td>')+
- 	                    "</td></tr>"
- 	        piclist = piclist.slice(4..-1) || [] # Returns nil when off the end of the array
-        end
-# picrows = ""
-        picID = "rcpPic"+site.id.to_s
-        %Q{
-              <div class="preview">                                     
-                #{page_fitPic site.logo, site.id, false, "div.preview img"}  
-              </div> 
-              <p class="airy">Pick one of the thumbnails<br>or type/paste the URL below, then click Okay.</p>                                                 
-              <br class="clear"> <u>Preview</u>
-              <input type="text" class="icon_picker" 
-                        rel="jpg,png,gif" 
-                        value="#{site.logo}" 
-                        onchange="previewImg('input.icon_picker', 'div.preview img', 'input#site_logo')" />
-              <br><table>#{picrows}</table>                                             
-          }.html_safe
-      else
-          %q{<label for="recipe_picurl" id="recipe_pic_label">No Picture Available</label>}.html_safe                                   
-      end
-      
+  # Build a picture-selection dialog with the default url, url for a page containing candidate images, id, and name of input field to set
+  def pic_picker picurl, pageurl, id, input_field
+    piclist = Site.piclist pageurl
+    pictab = []
+    # divide piclist into rows of four pics apiece
+    picrows = ""
+    thumbNum = 0
+    # Divide the piclist of URLs into rows of four, accumulating HTML for each row
+    until piclist.empty?
+        picrows <<  "<tr><td>"+
+                    piclist.slice(0..5).collect{ |url| 
+                      idstr = "thumbnail"+(thumbNum = thumbNum+1).to_s
+                      "<div class = \"picCell\">"+
+            	    image_tag(url, class: "fitPic", id: idstr, onclick: "pickImg('input.icon_picker', 'div.preview img', '#{url}')", onload: "fitImageOnLoad('##{idstr}')", alt: "No Image Available")+
+            	  "</div>"
+                    }.join('</td><td>')+
+                    "</td></tr>"
+        piclist = piclist.slice(6..-1) || [] # Returns nil when off the end of the array
+    end
+    picID = "rcpPic"+id.to_s
+    if picrows.empty?
+        tblstr = ""
+        prompt = "There are no pictures on the page, but you can paste a URL below, then click Okay."
+    else
+        tblstr = "<br><table>#{picrows}</table>"
+        prompt = "Pick one of the thumbnails<br>or type/paste the URL below, then click Okay."
+    end
+    %Q{
+        <div class="iconpicker" style="display:none;" >
+          <div class="preview">                                     
+            #{page_fitPic picurl, id, false, "div.preview img"}  
+          </div> 
+          <p class="airy">#{prompt}</p>                                                 
+          <br class="clear"> <u>Preview</u>
+          <input type="text" class="icon_picker" 
+                    rel="jpg,png,gif" 
+                    value="#{picurl}" 
+                    onchange="previewImg('input.icon_picker', 'div.preview img', 'input##{input_field}')" />
+          #{tblstr}       
+        </div>                                      
+      }.html_safe      
   end
       
     # Return the id of the DOM element giving the time-since-touched for a recipe
