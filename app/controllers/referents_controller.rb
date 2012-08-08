@@ -55,7 +55,6 @@ class ReferentsController < ApplicationController
     @referent.express (params[:tagid]) if params[:tagid]
     @typeselections = Tag.type_selections
     @typeselections.shift
-    debugger
 
     respond_to do |format|
       format.html # new.html.erb
@@ -65,11 +64,6 @@ class ReferentsController < ApplicationController
 
   # GET /referents/1/edit
   def edit
-=begin
-      @tabindex = session[:tabindex] || params[:tabindex] || 0
-      handlerclass = @@HandlersByIndex[@tabindex]
-      @referent = handlerclass.find(params[:id])
-=end
       @referent = Referent.find(params[:id]) # .becomes(Referent)
       # @expressions = @referent.expressions
       @referent_type = @referent.typenum
@@ -80,7 +74,6 @@ class ReferentsController < ApplicationController
   # POST /referents?tagid=1&mode={over,before,after}&target=referentid
   # POST /referents.json?tagid=1&mode={over,before,after}&target=referentid
   def create
-      debugger
     if params[:tabindex]
         @tabindex = params[:tabindex].to_i || 0
         handlerclass = @@HandlersByIndex[@tabindex]

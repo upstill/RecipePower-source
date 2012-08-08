@@ -28,6 +28,8 @@
 	<script>
 whenReady( function() {
 	RPQueryOnLoad();
+	<%= %Q{ $('#{@focus_selector || "#user_login"}').focus(); }.html_safe if @focus_selector %>
+	
 
 	// Set up tabs for tags editing page
 /*	var val = Number($("#tags_tabset").attr('value'));

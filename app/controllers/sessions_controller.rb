@@ -1,4 +1,5 @@
 class SessionsController < ApplicationController
+  before_filter { @focus_selector = "#user_login" }
 
   def new
     @Title = "Login"

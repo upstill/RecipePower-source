@@ -6,8 +6,7 @@ class ReferentValidator < ActiveModel::Validator
             return false;
         end
         if record.tags.empty?
-          debugger
-          record.errors[:base] << "Referents must have at least one tag to express them."
+          record.errors[:base] << "A Referent must have at least one tag to express it."
           return false;
         end
         true

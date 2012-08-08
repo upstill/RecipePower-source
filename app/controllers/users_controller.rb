@@ -2,7 +2,13 @@ class UsersController < ApplicationController
   rescue_from ActiveRecord::RecordNotFound, :with => :not_found
   before_filter :login_required, :except => [:new, :create, :identify]
   before_filter :authenticate_user!, :except => [:show, :index, :identify]
-
+  before_filter :declare_focus
+  
+  def declare_focus
+    debugger
+    @focus_selector = "#user_login"
+  end
+  
   # GET /tags
   # GET /tags.xml
   def index

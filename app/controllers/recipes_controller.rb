@@ -1,5 +1,7 @@
 class RecipesController < ApplicationController
   before_filter :login_required, :except => [:index, :show]
+  before_filter { @focus_selector = "#recipe_url" }
+  
   filter_access_to :all
   include ApplicationHelper
   include ActionView::Helpers::TextHelper
