@@ -15,9 +15,10 @@ class GettableURLValidator < ActiveModel::EachValidator
                 nil
             end
         elsif attribute == :picurl
-            if Site.by_link (value)
+            if Site.test_link (value)
                 true
             else
+                debugger
                 # The picurl may be a relative path. In fact, it may have backup characters
                 begin
                   uri = URI.join( record.url, value) 

@@ -5,12 +5,12 @@
   <div class="recipe_pic_div" >
 	<%# page_choosePic @recipe.picurl, @recipe.url, @recipe.id %>
     <div class="recipe_pic_preview">                                     
-      <%= page_fitPic @recipe.picurl, @recipe.id, false %>  
+      <%= page_fitPic @recipe.picurl, @recipe.id, false, "div.recipe_pic_preview img" %>  
     </div>                                                    
-    <br><%= link_to "Pick Picture", "/", :id=>"PicPicker" %>
+    <br><%= link_to "Pick Picture", "/", :id=>"PicPicker", :data=>"recipe_picurl;div.recipe_pic_preview img" %>
   </div>
   <%= f.text_field :picurl, rel: "jpg,png,gif", hidden: true %>
-  <%= pic_picker @recipe.picurl, @recipe.url, @recipe.id, "recipe_picurl" %>
+  <%= pic_picker @recipe.picurl, @recipe.url, @recipe.id %>
   <div class="recipe_fields_div">
     <div class="recipe_tags_div" >
        <%= f.label :tag_tokens, "Tags", :id=>"recipe_tags_label" -%>

@@ -39,44 +39,11 @@ module ApplicationHelper
 	    %Q{<div class="centerfloat" id="#{idstr}">No Image Available</div>}.html_safe
 	else
 	    %Q{<img src="#{picurl}" class="fitPic" id="#{idstr}" onload="fitImageOnLoad('#{selector}')" alt="No Image Available">}.html_safe
-	    # image_tag(picurl, class: "fitPic", id: idstr, onload: "fitImageOnLoad('#{selector}')", alt: "No Image Available")
 	end
   end
   
-  # Get all the img tags from a page and bundle them up as list items suitable for a picker
-  def page_piclist url
-      piclist = Site.piclist(url).collect { |url|
-  		"<li class=\"pickerImage\"><img src=\"#{url}\" alt=\"#{url}\"/></li>\n"
-  	  }
-  end
-
-  # Declare the list of thumbnails for picking a recipe's image.
-  # It's sourced from the page by hoovering up all the <img tags that have
-  # an appropriate file type.
-  def page_choosePic picurl, pageurl, id
-    piclist = page_piclist pageurl
-  	if piclist.count > 0
-        %Q{
-            <div class="imagepicker">                                   
-              <div class="preview">                                     
-                #{page_fitPic picurl, id, false}  
-              </div>                                                    
-              <br><button class="title">Pick Image</button>
-              <div class="content">                                     
-                <div class="wrapper">                                   
-                  <ul>#{piclist.join('')}</ul>                                             
-                </div>                                                  
-              </div>                                                    
-            </div>}.html_safe
-    else
-            %q{<div class="imagepicker">
-                <label for="recipe_picurl" id="recipe_pic_label">No Picture Available</label>
-            </div>}.html_safe                                   
-    end
-  end
-  
   # Build a picture-selection dialog with the default url, url for a page containing candidate images, id, and name of input field to set
-  def pic_picker picurl, pageurl, id, input_field
+  def pic_picker picurl, pageurl, id
     piclist = Site.piclist pageurl
     pictab = []
     # divide piclist into rows of four pics apiece
@@ -112,7 +79,7 @@ module ApplicationHelper
           <input type="text" class="icon_picker" 
                     rel="jpg,png,gif" 
                     value="#{picurl}" 
-                    onchange="previewImg('input.icon_picker', 'div.preview img', 'input##{input_field}')" />
+                    onchange="previewImg('input.icon_picker', 'div.preview img', '')" />
           <u>Preview</u>
           #{tblstr}       
         </div>                                      

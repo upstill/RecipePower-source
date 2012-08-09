@@ -5,7 +5,7 @@ class ReferentValidator < ActiveModel::Validator
             record.errors[:base] << "Referent can't have generic type"
             return false;
         end
-        if record.tags.empty?
+        if record.tags.empty? && !record.canonical_expression
           record.errors[:base] << "A Referent must have at least one tag to express it."
           return false;
         end
@@ -29,7 +29,7 @@ class Referent < ActiveRecord::Base
     belongs_to :canonical_expression, :class_name => "Tag", :foreign_key => "tag_id"
     
     attr_accessible :tag, :type, :description, :isCountable, 
-        :expressions_attributes, :add_expression, 
+        :expressions_attributes, :add_expression, :tag_id,
         :parents, :children, :parent_tokens, :child_tokens, :typeindex
     
     # validates_associated :parents
@@ -130,12 +130,12 @@ class Referent < ActiveRecord::Base
     
     # Convert a list of tag tokens into the referents to which they refer
     def tag_tokens_to_referents(tokens, use_existing=true)
-        refs = tokens.collect do |token|
+        refs = tokens.collect { |token|
             # We either match the referent to token or create a new one
             token.strip!
             token = token.to_i unless token.sub!(/^\'(.*)\'$/, '\1')
             Referent.express token, self.typenum
-        end
+        }.compact # Blow off failed referents
         puts "Tokens converted to referents: "+refs.inspect
         refs
     end
@@ -146,15 +146,18 @@ class Referent < ActiveRecord::Base
     #  this procedure lends itself to redundancy in the dictionary
     def self.express (tag, tagtype, args = {} )
         tag = Tag.assert_tag tag, tagtype: tagtype # Creating it if need be, and/or making it global 
+        debugger
         ref = tag.primary_meaning || 
               tag.referents.first || 
               # We don't immediately have a referent for this tag
               #...but there may already be one as a plural or a singular
               tag.aliases.collect { |tag| tag.primary_meaning || tag.referents.first }.compact.first ||
               # Tag doesn't have an existing referent, so need to make one
-              Referent.create(:type=>Referent.referent_class_for_tagtype(tagtype))
-        ref.express tag, args
-        ref
+              Referent.create(:type=>Referent.referent_class_for_tagtype(tagtype), tag_id: tag.id )
+        if ref.id # Successfully created
+          ref.express tag, args
+          ref
+        end
     end
     
     # Add a tag to the expressions of this referent, returning the tag id

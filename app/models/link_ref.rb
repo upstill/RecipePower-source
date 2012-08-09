@@ -112,7 +112,7 @@ require 'csv'
             referents.each_index do |ix| 
                 refpaths.split(';').each do |refpath| 
                     if child = referents[ix]
-                        pathlist = refpath.strip.split('/').collect { |atom| Referent.express atom.strip, ix }
+                        pathlist = refpath.strip.split('/').collect { |atom| Referent.express atom.strip, ix }.compact
                         # Now we have a series of referents representing the path above 'child'
                         # We establish the relationships by popping up the path
                         while parent = pathlist.pop
