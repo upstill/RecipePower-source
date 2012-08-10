@@ -12,10 +12,26 @@ class InvitationsController < Devise::InvitationsController
     
     # POST /resource/invitation
     def create
-      self.resource = resource_class.invite!(params[resource_name], current_inviter)
-      if resource.errors.empty?
+      email = params[resource_name][:email]
+      begin
+          self.resource = resource_class.invite!(params[resource_name], current_inviter)
+      rescue Exception => e
+      end
+      if resource && resource.errors.empty? # Success!
         set_flash_message :notice, :send_instructions, :email => self.resource.email
         respond_with resource, :location => after_invite_path_for(resource)
+      elsif !resource
+          if e.class == ActiveRecord::RecordNotUnique
+              notice = "'#{email}' is either invited or signed up already."
+          else
+              notice = "Sorry, can't create invitation. "
+              if e
+                e.to_s.split("\n").each { |line| 
+                  notice << "\n"+line if (line =~ /DETAIL:/)
+                }
+              end
+          end
+          redirect_to rcpqueries_path, :notice => notice
       elsif resource.errors[:email] && (other = User.where(email: resource.email).first)
           # HA! request failed because email exists. Forget the invitation, just make us friends.
           id = other.email 
