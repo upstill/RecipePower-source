@@ -1,4 +1,9 @@
 class InvitationsController < Devise::InvitationsController
+    
+    def after_invite_path_for(resource)
+        rcpqueries_path
+    end
+    
     # GET /resource/invitation/accept?invitation_token=abcdef
     def edit
       if params[:invitation_token] && self.resource = resource_class.to_adapter.find_first( :invitation_token => params[:invitation_token] )

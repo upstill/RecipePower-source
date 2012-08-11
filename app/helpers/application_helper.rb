@@ -87,15 +87,15 @@ module ApplicationHelper
   end
       
     # Return the id of the DOM element giving the time-since-touched for a recipe
-    def rr_touch_date_id recipe
+    def touch_date_id recipe
         "touchtime#{recipe.id.to_s}"
     end
 
-    # Present the date and time the recipe was last touched by the given user
-    def rr_touch_date_elmt recipe
-        if touched = Rcpref.touch_date(recipe.id, recipe.current_user)
+    # Present the date and time the recipe was last touched by its current user
+    def touch_date_elmt recipe
+        if touched = Touch.touch_date(recipe.id, recipe.current_user)
             result = %Q{
-               <div class="rcp_list_element_stats" id="#{rr_touch_date_id(recipe)}">
+               <div class="rcp_list_element_stats" id="#{touch_date_id(recipe)}">
                  Last viewed #{time_ago_in_words(touched)} ago.
                </div>
             }.html_safe
@@ -140,14 +140,16 @@ module ApplicationHelper
 
   # Deploy the links for naming the user and/or signing up/signing in
   def user_status
+    userlinks = []
     if user = current_user
-       uname = user.handle
-       ulink = link_to uname, users_profile_path # users_edit_path 
-       ulogout = link_to "Sign Out", destroy_user_session_path, :method=>"delete"
-       "<strong>#{ulink}</strong><span class=\"welcome_user\">&nbsp|&nbsp;#{ulogout}</span>".html_safe
-     else
-         link_to("Sign In", authentications_path)
-     end + (current_user ? " | " + navlink("Invite", new_user_invitation_path, (@nav_current==:invite)) : "").html_safe
+       userlinks << link_to(user.handle, users_profile_path) # users_edit_path 
+       userlinks << link_to("Sign Out", destroy_user_session_path, :method=>"delete")
+       userlinks << navlink("Invite", new_user_invitation_path, (@nav_current==:invite))
+    else
+       userlinks << link_to("Sign In", authentications_path)
+    end
+ 	userlinks << navlink("Admin", admin_path) if permitted_to?(:admin, :pages)
+ 	userlinks.join('&nbsp|&nbsp').html_safe
   end
   
   def bookmarklet
@@ -166,7 +168,7 @@ module ApplicationHelper
      list
   end
 
-    def navlink(label, link, is_current)
+    def navlink(label, link, is_current=false)
         if is_current
             "<span class='nav_link_strong'><i>#{label}</i></span>"
         else
@@ -179,7 +181,7 @@ module ApplicationHelper
     	navlinks = []
     	navlinks.push(navlink "Cookmarks", rcpqueries_path, (@nav_current==:cookmarks)) 
     	navlinks.push(navlink "Add a Cookmark", new_recipe_path, (@nav_current==:addcookmark)) 
-    	navlinks.join('  |  ').html_safe
+    	navlinks.join('&nbsp|&nbsp').html_safe
     end
 =begin    
     def feedback_link label

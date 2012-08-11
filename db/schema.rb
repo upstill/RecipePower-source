@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120731213001) do
+ActiveRecord::Schema.define(:version => 20120810175755) do
 
   create_table "authentications", :force => true do |t|
     t.integer  "user_id"
@@ -188,6 +188,13 @@ ActiveRecord::Schema.define(:version => 20120731213001) do
     t.string   "normalized_name"
     t.boolean  "isGlobal"
     t.integer  "referent_id"
+  end
+
+  create_table "touches", :force => true do |t|
+    t.integer  "user_id"
+    t.integer  "recipe_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "user_relations", :force => true do |t|

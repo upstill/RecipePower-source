@@ -148,9 +148,16 @@ protected
     	return @results if @results # Keeping a cache of results
         # Try to match prior query for this user and fetch rankings array
         # "match" has fewest num. of differing elements
+        candidates = nil
+        sources = nil
         if user = User.where(id: self.owner_id).first
           if self.which_list =~ /mine/
-            sources = self.owner_id
+            if (self.status == 16) # Recent list: pre-empt to use recently-touched list
+              # The touches are collected in touch order 
+              candidates = user.touches.map { |touch| touch.recipe_id }
+            else
+              sources = self.owner_id
+            end
           elsif self.which_list =~ /friend/
             sources = (self.friend && self.friend.id) || user.follows(false).map { |followee| followee.id }
           elsif self.which_list =~ /channel/
@@ -164,7 +171,7 @@ protected
         # -- who the viewer is
         # -- targetted status of the recipe (Rotation, etc.)
         # -- text to match against titles and comments
-        candidates = Rcpref.recipe_ids( sources, self.user_id, status: self.status)
+        candidates = candidates || Rcpref.recipe_ids( sources, self.user_id, status: self.status)
     	
         unless self.tags.empty?
             # We purge/massage the list ONLY if there is a tags query here
@@ -187,18 +194,6 @@ protected
             # Convert back to a list of candidate ids
             candidates = candihash.results(@rankings).reverse
     	end
-=begin
-    	# Derive the final ordering for the candidates based on prior rankings
-    	# and convert from rids back into recipes
-    	@results = candidates.map { |rid| Recipe.find(rid) } 
-    	
-    	# If we're on the Recent tab, that ordering takes priority
-    	if self.status == MyConstants::Rcpstatus_recent
-    	    # Sort results by last touch
-    	    @results.sort! { |r1, r2| r2.updated_at <=> r1.updated_at }
-    	end
-	    @results
-=end
         @results = candidates
     end
 public

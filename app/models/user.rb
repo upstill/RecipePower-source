@@ -149,6 +149,9 @@ public
   has_many :rcprefs
   has_many :recipes, :through=>:rcprefs, :autosave=>true
   
+  has_many :touches, :order => "updated_at DESC"
+  has_many :touchings, :through=>:touches
+  
   validates :email, :presence => true
 
   # validates_presence_of :username

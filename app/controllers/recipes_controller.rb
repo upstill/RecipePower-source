@@ -61,16 +61,17 @@ class RecipesController < ApplicationController
     end
   end
   
-  # Register that the recipe was touched by the current user.
+  # Register that the recipe was touched by the current user--if they own it.
   # Since that recipe will now be at the head return a new first-recipe in the list.
   def touch
-      @recipe = Recipe.ensure current_user_or_guest_id, params # session[:user_id], params
+      @recipe = Recipe.ensure nil, params # session[:user_id], params
       if @recipe.errors.empty? # Success (recipe found)
-        @recipe.touch
+          @recipe.current_user = current_user_or_guest_id
+          @recipe.touch
       end
       # The client doesn't really care whether we touch successfully or not...
-      selector = "#"+rr_touch_date_id(@recipe)
-      content = rr_touch_date_elmt @recipe
+      selector = "#"+touch_date_id(@recipe)
+      content = touch_date_elmt @recipe
       respond_to do |format|
         format.json { render json: {selector: selector, content: content } }
       end
@@ -82,7 +83,7 @@ class RecipesController < ApplicationController
     @recipe = Recipe.ensure current_user_or_guest_id, params # session[:user_id], params
     if @recipe.errors.empty? # Success (recipe found)
         @recipe.current_user = current_user_or_guest_id # session[:user_id]
-        @recipe.touch_by @recipe.current_user # We're looking at it, so make it recent
+        @recipe.touch # We're looking at it, so make it recent
         @Title = @recipe.title # Get title from the recipe
         @nav_current = nil
         # Now go forth and edit
@@ -146,29 +147,24 @@ class RecipesController < ApplicationController
   # Delete the recipe from the user's list
   def remove
     # return if need_login true
+    debugger
     @recipe = Recipe.find(params[:id])
     # Simply remove this recipe/user pair from the join table
     user = current_user # User.find(session[:user_id])
     user.recipes.delete @recipe
     user.save
     @recipes = user.recipes(true)
-
+    debugger
     truncated = truncate(@recipe.title, :length => 40)
     redirect_to rcpqueries_url, :notice => "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections."
   end
 
   # Remove the recipe from the system entirely
   def destroy
-=begin XXX This is where we control access
-    unless session[:user_id] == 1 || session[:user_id] == 3 || session[:user_id] == 5
-	    redirect_to edit_recipe_url(@recipe), :notice  => "You need to be Max, Steve or super to destroy a recipe".html_safe
-	else
-=end
-        @recipe = Recipe.find(params[:id])
-        title = @recipe.title
-        @recipe.destroy
-        redirect_to rcpqueries_url, :notice => "\"#{title}\" is gone for good."
-    # end
+    @recipe = Recipe.find(params[:id])
+    title = @recipe.title
+    @recipe.destroy
+    redirect_to rcpqueries_url, :notice => "\"#{title}\" is gone for good."
   end
 
   def revise # modify current recipe to reflect a client-side change

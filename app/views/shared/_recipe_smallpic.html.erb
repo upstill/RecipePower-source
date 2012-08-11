@@ -18,7 +18,7 @@
       </div>
       <div class="rcp_list_element_gotag">
 		  <% if permitted_to? :update, @recipe %>
-		    <% if @list_name == "mine" %>
+		    <% if @recipe.users.exists?(@recipe.current_user) %>
 	     	  <%= link_to "Edit Tags", edit_recipe_path(@recipe) %>
 		    <% else %>
 	     	  <%= link_to_function "Grab This Cookmark!", "rcpCollect(#{@recipe.id});" %>
@@ -27,7 +27,7 @@
       </div>
     </div>
     <div class="rcp_list_element_bottom">
-	   <%= rr_touch_date_elmt @recipe %>
+	   <%= touch_date_elmt @recipe %>
 	  <%# cookmark_count @recipe -%> 
     </div>
   </div>

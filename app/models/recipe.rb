@@ -18,7 +18,6 @@ class GettableURLValidator < ActiveModel::EachValidator
             if Site.test_link (value)
                 true
             else
-                debugger
                 # The picurl may be a relative path. In fact, it may have backup characters
                 begin
                   uri = URI.join( record.url, value) 
@@ -259,7 +258,7 @@ class Recipe < ActiveRecord::Base
             end
         end
         # If all is well, make sure it's on the user's list
-        rcp.ensureUser( userid ) if rcp.id && rcp.errors.empty?
+        rcp.ensureUser( userid ) if userid && rcp.id && rcp.errors.empty?
         rcp
     end
 
@@ -290,32 +289,19 @@ class Recipe < ActiveRecord::Base
                 ref.save
             end
         end
-        self.touch_by uid
         self.current_user = uid
+        Touch.touch uid, self.id
     end
     
     # Set the mod time of the recipe to now (so it sorts properly in Recent lists)
     def touch
         if self.current_user
-            self.touch_by self.current_user
+            Touch.touch self.current_user, self.id
         else
-            self.updated_at = Time.now
-            self.save
+            debugger
+            super
         end
     end
-    
-    # The recipe is being touched by a particular user, so touch its Rcpref
-    def touch_by uid
-        if rr = Rcpref.where(recipe_id: self.id, user_id: uid).first
-            rr.updated_at = Time.now
-            rr.save
-        end
-    end
-  
-  # Return the string describing the date last touched
-  def touch_date_str
-      Rcpref.touch_date_str(self.id, self.current_user)
-  end
 
    # This stores the edited tagpane for the recipe--or maybe not. The main
    # purpose is to parse the HTML to extract any tags embedded therein, 
