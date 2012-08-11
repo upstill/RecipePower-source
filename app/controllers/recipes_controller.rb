@@ -137,7 +137,7 @@ class RecipesController < ApplicationController
           end
       else
           respond_to do |format|
-            format.html # index.html.erb
+            format.html { render nothing: true }
             format.json { render json: { error: @recipe.errors.inspect } }
             format.js { render :text => e.message, :status => 403 }
           end

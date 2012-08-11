@@ -15,7 +15,7 @@ class GettableURLValidator < ActiveModel::EachValidator
                 nil
             end
         elsif attribute == :picurl
-            if Site.test_link (value)
+            if !value || value.empty? || Site.test_link(value)
                 true
             else
                 # The picurl may be a relative path. In fact, it may have backup characters
@@ -53,6 +53,7 @@ class Recipe < ActiveRecord::Base
 
   has_many :rcprefs, :dependent=>:destroy
   has_many :users, :through=>:rcprefs, :autosave=>true
+  has_many :touches, :dependent=>:destroy
   attr_reader :comment
   attr_accessor :private
   attr_reader :status
