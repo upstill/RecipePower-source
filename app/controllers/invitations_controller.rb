@@ -18,6 +18,7 @@ class InvitationsController < Devise::InvitationsController
     # POST /resource/invitation
     def create
       email = params[resource_name][:email]
+      params[resource_name][:subject] = "Come on down!"
       begin
           self.resource = resource_class.invite!(params[resource_name], current_inviter)
       rescue Exception => e

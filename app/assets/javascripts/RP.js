@@ -346,6 +346,20 @@ function servePopup() {
    }
 }
 
+function rcpCollect(id) {
+	// Call server on /recipes/:id/collect
+    jQuery.get( "recipes/"+id+"/collect", {},
+        function(body, status, hr) {
+			// Insert the resulting fragment at the top of the Recent tab, if open
+			var tabid = $("#rcpquery_tabset").tabs("option", "selected");
+			if(tabid==4) {
+				$("#rcplist_mine_body").prepend(body);
+			}
+			$("#rcpPic"+id).dialog({ model: true, title: "Got it! Now appearing at the top of your Recent cookmarks."});
+		}, "html"
+    );
+}
+
 /*
 // Called when the tag tabs load to set up dynatree, etc.
 function tagTabsOnLoad(event, info) {

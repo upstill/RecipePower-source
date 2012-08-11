@@ -60,22 +60,6 @@ class RecipesController < ApplicationController
        render :action => 'new'
     end
   end
-  
-  # Register that the recipe was touched by the current user--if they own it.
-  # Since that recipe will now be at the head return a new first-recipe in the list.
-  def touch
-      @recipe = Recipe.ensure nil, params # session[:user_id], params
-      if @recipe.errors.empty? # Success (recipe found)
-          @recipe.current_user = current_user_or_guest_id
-          @recipe.touch
-      end
-      # The client doesn't really care whether we touch successfully or not...
-      selector = "#"+touch_date_id(@recipe)
-      content = touch_date_elmt @recipe
-      respond_to do |format|
-        format.json { render json: {selector: selector, content: content } }
-      end
-  end
 
   def edit
     # return if need_login true
@@ -123,31 +107,46 @@ class RecipesController < ApplicationController
     end
   end
   
+  # Register that the recipe was touched by the current user--if they own it.
+  # Since that recipe will now be at the head return a new first-recipe in the list.
+  def touch
+      @recipe = Recipe.ensure nil, params # session[:user_id], params
+      if @recipe.errors.empty? # Success (recipe found)
+          @recipe.current_user = current_user_or_guest_id
+          @recipe.touch
+      end
+      # The client doesn't really care whether we touch successfully or not...
+      selector = "#"+touch_date_id(@recipe)
+      content = touch_date_elmt @recipe
+      respond_to do |format|
+        format.json { render json: {selector: selector, content: content } }
+      end
+  end
+  
   # Add a recipe to the user's collection without going to edit tags
   # GET recipes/:id/collect
   def collect
-      @recipe = Recipe.ensure current_user_or_guest_id, params
-      truncated = truncate(@recipe.title, :length => 40)
-      @list_name = "mine"
-      if @recipe.errors.empty?
-          respond_to do |format|
-            format.html { render 'shared/_recipe_smallpic.html.erb', :layout=>false }
-            format.json { render json: { title: truncated } }
-            format.js { render text: @recipe.title }
-          end
-      else
-          respond_to do |format|
-            format.html { render nothing: true }
-            format.json { render json: { error: @recipe.errors.inspect } }
-            format.js { render :text => e.message, :status => 403 }
-          end
+    @recipe = Recipe.ensure current_user_or_guest_id, params
+    truncated = truncate(@recipe.title, :length => 40)
+    @list_name = "mine"
+    if @recipe.errors.empty?
+      respond_to do |format|
+        format.html { render 'shared/_recipe_smallpic.html.erb', :layout=>false }
+        format.json { render json: { title: truncated } }
+        format.js { render text: @recipe.title }
       end
+    else
+      respond_to do |format|
+        format.html { render nothing: true }
+        format.json { render json: { error: @recipe.errors.inspect } }
+        format.js { render :text => e.message, :status => 403 }
+      end
+    end
   end
 
   # Delete the recipe from the user's list
   def remove
     # return if need_login true
-    debugger
     @recipe = Recipe.find(params[:id])
     # Simply remove this recipe/user pair from the join table
     user = current_user # User.find(session[:user_id])
