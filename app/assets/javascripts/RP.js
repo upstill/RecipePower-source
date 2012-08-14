@@ -316,15 +316,6 @@ function add_fields(link, association, content) {
     $(link).parent().before(content.replace(regexp, new_id));
 }
 
-// Take an HTML element from the server and replace it in the DOM
-function replaceElmt(body, status, instance) {
-	if(status == "success") {
-		var selector = body.selector
-		var content = body.content
-		$(selector).replaceWith(content);
-	}
-}
-
 /* Respond to the preview-recipe button by opening a popup loaded with its URL.
    If the popup gets blocked, return true so that the recipe is opened in a new
    window/tab.
@@ -333,7 +324,7 @@ function replaceElmt(body, status, instance) {
 function servePopup() {
    var regexp = new RegExp("popup", "g")
    var rcpid = this.getAttribute('id').replace(regexp, "");
-   jQuery.get( "recipes/"+rcpid+"/touch", {}, replaceElmt, "json" );		
+   rcpTouch(rcpid);
 
    // Now for the main event: open the popup window if possible
    linkURL = this.getAttribute('href');
@@ -346,11 +337,48 @@ function servePopup() {
    }
 }
 
+// Take an HTML element from the server and replace it in the DOM
+function replaceElmt(body, status, instance) {
+	if(status == "success") {
+		var selector = body.selector
+		var content = body.content
+		$(selector).replaceWith(content);
+	}
+}
+
+// Report back to the server that a recipe has been touched. In return, get that recipe's 
+// list element in the Recent list and place it at the top (removing any that's already 
+// there).
+function rcpTouch(id) {
+   // First, replace all the "Recipe last viewed at" lines according to the server
+   jQuery.get( "recipes/"+id+"/touch", {}, 
+	  function(body, status, instance) {
+		if(status == "success") {
+		   var spanselector = body.selector
+		   var spancontent = body.content
+		   var list_element_class = body.list_element_class;
+		   $(spanselector).replaceWith(spancontent);
+		   // Go back to the server for the HTML replacing the list element in Recent
+		   jQuery.get( "recipes/"+id+"/touch", {}, 
+				function(body, status, instance) {
+					if(status == "success") {
+						var tabid = $("#rcpquery_tabset").tabs("option", "selected");
+						if(tabid==4) {
+							debugger;
+							$("#rcplist_mine_body ."+list_element_class).remove()
+							$("#rcplist_mine_body").prepend(body);
+						}
+					}
+				}, "html" );	
+		}	
+	  }, "json" )
+}
+
 function rcpCollect(id) {
 	// Call server on /recipes/:id/collect
     jQuery.get( "recipes/"+id+"/collect", {},
         function(body, status, hr) {
-			// Insert the resulting fragment at the top of the Recent tab, if open
+			// Insert the resulting element at the top of the Recent tab, if open
 			var tabid = $("#rcpquery_tabset").tabs("option", "selected");
 			if(tabid==4) {
 				$("#rcplist_mine_body").prepend(body);

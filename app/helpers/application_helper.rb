@@ -85,19 +85,21 @@ module ApplicationHelper
         </div>                                      
       }.html_safe      
   end
+  
+    def recipe_list_element_class recipe
+        "rcpListElmt"+@recipe.id.to_s    
+    end
       
     # Return the id of the DOM element giving the time-since-touched for a recipe
-    def touch_date_id recipe
+    def touch_date_class recipe
         "touchtime#{recipe.id.to_s}"
     end
 
     # Present the date and time the recipe was last touched by its current user
     def touch_date_elmt recipe
         if touched = Touch.touch_date(recipe.id, recipe.current_user)
-            result = %Q{
-               <div class="rcp_list_element_stats" id="#{touch_date_id(recipe)}">
-                 Last viewed #{time_ago_in_words(touched)} ago.
-               </div>
+            %Q{
+              <span class="#{touch_date_class(recipe)}">Last viewed #{time_ago_in_words(touched)} ago.</span>
             }.html_safe
         end
     end    

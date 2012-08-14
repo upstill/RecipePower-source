@@ -116,10 +116,16 @@ class RecipesController < ApplicationController
           @recipe.touch
       end
       # The client doesn't really care whether we touch successfully or not...
-      selector = "#"+touch_date_id(@recipe)
-      content = touch_date_elmt @recipe
       respond_to do |format|
-        format.json { render json: {selector: selector, content: content } }
+        format.json { 
+            selector = "."+touch_date_class(@recipe)
+            content = touch_date_elmt @recipe
+            render json: {selector: selector, content: content, list_element_class: recipe_list_element_class(@recipe) } 
+        }
+        format.html { 
+            @list_name = "mine"
+            render 'shared/_recipe_smallpic.html.erb', :layout=>false 
+        }
       end
   end
   
