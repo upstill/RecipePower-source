@@ -1,4 +1,5 @@
 class RecipesController < ApplicationController
+
   before_filter :login_required, :except => [:index, :show]
   before_filter { @focus_selector = "#recipe_url" }
   
@@ -117,10 +118,13 @@ class RecipesController < ApplicationController
       end
       # The client doesn't really care whether we touch successfully or not...
       respond_to do |format|
+        list_element_body = render_to_string(:partial => "shared/recipe_smallpic") 
         format.json { 
-            selector = "."+touch_date_class(@recipe)
-            content = touch_date_elmt @recipe
-            render json: {selector: selector, content: content, list_element_class: recipe_list_element_class(@recipe) } 
+            render json: { touch_class: touch_date_class(@recipe), 
+                           touch_body: touch_date_elmt(@recipe), 
+                           list_element_class: recipe_list_element_class(@recipe),
+                           list_element_body: list_element_body
+                         } 
         }
         format.html { 
             @list_name = "mine"
@@ -133,12 +137,20 @@ class RecipesController < ApplicationController
   # GET recipes/:id/collect
   def collect
     @recipe = Recipe.ensure current_user_or_guest_id, params
-    truncated = truncate(@recipe.title, :length => 40)
+    truncated = truncate @recipe.title, :length => 140
     @list_name = "mine"
     if @recipe.errors.empty?
+      go_link_body = render_to_string(:partial => "recipes/golink")
+      list_element_body = render_to_string(:partial => "shared/recipe_smallpic") 
       respond_to do |format|
         format.html { render 'shared/_recipe_smallpic.html.erb', :layout=>false }
-        format.json { render json: { title: truncated } }
+        format.json { render json: { title: truncated, 
+                                     go_link_class: recipe_list_element_golink_class(@recipe), 
+                                     go_link_body: go_link_body,
+                                     list_element_class: recipe_list_element_class(@recipe), 
+                                     list_element_body: list_element_body
+                                   } 
+                    }
         format.js { render text: @recipe.title }
       end
     else

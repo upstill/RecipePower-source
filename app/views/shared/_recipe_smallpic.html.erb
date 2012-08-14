@@ -17,15 +17,9 @@
       <div class="rcp_list_element_twocents">
 	     <%= present_comments @recipe, @recipe.current_user  %>
       </div>
-      <div class="rcp_list_element_gotag">
-		  <% if permitted_to? :update, @recipe %>
-		    <% if @recipe.users.exists?(@recipe.current_user) %>
-	     	  <%= link_to "Edit Tags", edit_recipe_path(@recipe) %>
-		    <% else %>
-	     	  <%= link_to_function "Grab This Cookmark!", "rcpCollect(#{@recipe.id});" %>
-			<% end %>
-		  <% end %>
-      </div>
+      <div class="rcp_list_element_golink">
+	    <%= render "recipes/golink" %>
+	  </div>
     </div>
     <div class="rcp_list_element_bottom">
       <div class="rcp_list_element_stats">

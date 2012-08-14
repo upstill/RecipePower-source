@@ -354,38 +354,35 @@ function rcpTouch(id) {
    jQuery.get( "recipes/"+id+"/touch", {}, 
 	  function(body, status, instance) {
 		if(status == "success") {
-		   var spanselector = body.selector
-		   var spancontent = body.content
-		   var list_element_class = body.list_element_class;
-		   $(spanselector).replaceWith(spancontent);
-		   // Go back to the server for the HTML replacing the list element in Recent
-		   jQuery.get( "recipes/"+id+"/touch", {}, 
-				function(body, status, instance) {
-					if(status == "success") {
-						var tabid = $("#rcpquery_tabset").tabs("option", "selected");
-						if(tabid==4) {
-							debugger;
-							$("#rcplist_mine_body ."+list_element_class).remove()
-							$("#rcplist_mine_body").prepend(body);
-						}
-					}
-				}, "html" );	
+		  $("."+body.touch_class).replaceWith(body.touch_body);
+	      boostInTablist(body.list_element_class, body.list_element_body, 4)
 		}	
 	  }, "json" )
 }
 
+function boostInTablist(list_element_class, list_element_body, targettab) {
+    // Insert the resulting element at the top of the All Cookmarks tab, if open
+    var tabid = $("#rcpquery_tabset").tabs("option", "selected");
+    if(tabid==targettab) {
+	  $("#rcplist_mine_body ."+list_element_class).remove()
+	  $("#rcplist_mine_body").prepend(list_element_body);
+    }
+}
+
 function rcpCollect(id) {
-	// Call server on /recipes/:id/collect
-    jQuery.get( "recipes/"+id+"/collect", {},
-        function(body, status, hr) {
-			// Insert the resulting element at the top of the Recent tab, if open
-			var tabid = $("#rcpquery_tabset").tabs("option", "selected");
-			if(tabid==4) {
-				$("#rcplist_mine_body").prepend(body);
-			}
-			$("#rcpPic"+id).dialog({ model: true, title: "Got it! Now appearing at the top of your Recent cookmarks."});
-		}, "html"
-    );
+  // Call server on /recipes/:id/collect
+  jQuery.get( "recipes/"+id+"/collect", {},
+    function(body, status, hr) {
+	  if(status == "success") {
+	    $("."+body.go_link_class).replaceWith(body.go_link_body);
+	    boostInTablist(body.list_element_class, body.list_element_body, 3) // Put it at the top of My Cookmarks
+	    boostInTablist(body.list_element_class, body.list_element_body, 4) // Put it at the top of the Recent tab
+	    $("div.ack_popup").text(body.title);
+	    jNotify( "Got it! Now appearing at the top of My Cookmarks.", 
+			{ HorizontalPosition: 'center', VerticalPosition: 'top'} );
+	    // $("div.ack_popup").dialog({ model: true, title: "Got it! Now appearing at the top of My Cookmarks."});
+	  }
+    }, "json" );
 }
 
 /*

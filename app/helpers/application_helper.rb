@@ -86,6 +86,24 @@ module ApplicationHelper
       }.html_safe      
   end
   
+  def recipe_list_element_golink_class recipe
+    "rcpListGotag"+@recipe.id.to_s    
+  end
+  
+=begin
+  def recipe_list_element_golink recipe
+	if permitted_to? :update, @recipe
+      ("<span class='#{recipe_list_element_golink_class @recipe}'>" + 
+      if @recipe.users.exists?(@recipe.current_user)
+ 	    link_to "Edit Tags", edit_recipe_path(@recipe)
+ 	  else 
+ 	    link_to_function "Grab This Cookmark!", "rcpCollect(#{@recipe.id.to_s})"
+ 	  end + 
+ 	  "</span>").html_safe
+    end
+  end      
+=end
+  
     def recipe_list_element_class recipe
         "rcpListElmt"+@recipe.id.to_s    
     end
