@@ -9,29 +9,29 @@ Make it stupid-simple to capture recipes: drag this handy
 Without the button, you can always manually copy and paste links into RecipePower, (see the <%= link_to "Add a Cookmark", new_recipe_path %> link above). But that's not very convenient, is it?
 </p>
 </div>
-<p class="airy">We're glad you came. Now what? If you can spare a few minutes to get the big picture, read on. You're already signed up, so we'll spare you the sales pitch.</p>
-<h4>RecipePower: The Quick Skinny</h4>
+<p class="airy">We're glad you came. Now that you're here, may we
+introduce ourselves?</p>
+<h4>The Quick Skinny</h4>
 <p class="airy">
-RecipePower is for collecting and using <i>cookmarks</i>, the culinary equivalent of bookmarks. A cookmark is just a link back to a recipe or any other cooking-related page on the Web: if you can see it in your browser, you can cookmark it. Everyone on RecipePower has a collection of cookmarks, found on the <strong>Cookmarks</strong> page (see link above), where you'll find a nice, snappy view of your whole collection, and a simple way to search through it. The Cookmarks page is also where you can see <i>other</i> collections: those of your friends, or the cookmarks pertaining to various cooking interests, which we call <i>channels</i>. Collections of Cookmarks are the heart of RecipePower.
+RecipePower is for collecting <i>cookmarks</i>, the culinary equivalent of bookmarks. A cookmark is just a link back to a recipe or any other cooking-related page on the Web: if you can see it in your browser, you can cookmark it. To see your cookmarks, browse and search through them, go to the <strong><%= link_to "Cookmarks", rcpqueries_path %></strong> page. There, you'll also find the collections of your friends, and special-interest collections which we call <i>channels</i>. Collections of Cookmarks are the heart of RecipePower.
 </p><p class="airy">
-How do recipes get <i>into</i> your Cookmarks collection in the first place? Three ways:
-<ol class="airy">
-	<li class="airy">(<strong>NOT</strong> recommended) When viewing a recipe's page on the Web, you can 
-		<ul><li class="airy">Edit/Copy the URL (contents of the Address Bar in your browser) </li>
-		    <li class="airy">Go to the "Add a Cookmark" page in RecipePower </li>
-			<li class="airy">Edit/Paste the URL into that page.</li>
-		</ul>
-		But really, that's just a fallback for those too shy to Do The Right Thing, <i>viz</i>:</li>
-	<li class="airy">(Way easier) Install our bookmarklet in your browser (see the sidebar). Then any recipe (or other link) on the web can be added to your collection by just clicking the bookmarklet, thereby whisking the current page off to RecipePower.</li>
-	<li class="airy">Easiest of all is to just grab a cookmark from somebody else on RecipePower. When you're in another Cookmarks collection, each recipe will have a <strong>Grab This Cookmark</strong> link. That's all you need to add it to your own collection.
-</ol>
+How do recipes get <i>into</i> your Cookmarks collection in the first place? Simple. Start by dragging our handy bookmarklet (see sidebar at right) into the bookmark bar of your browser. Then when you're browsing the web, you can cookmark any recipe by just clicking the bookmarklet. The page you're on at that time gets whisked over to RecipePower.
 </p><p class="airy">
-When you add a recipe to your Cookmarks, you can slap any number of <i>tags</i> onto it, including tags you invent because they mean something special to you. That way, when you later want to see the recipes you've earmarked for, say, Weeknight Quickies, you just type that tag into the Cookmarks page and Voila! The list shortens to just those recipes. PS When you grab a cookmark< from someone else, you inherit the tags it already has: less work for you! 
+You can also grab a cookmark from somebody else. When browsing another's Cookmarks collection, if you see something you like, click its <strong>Grab This Cookmark</strong> link. It does what it says it does.
+</p><p class="airy">
+Finally, if you're a certain type of person, you might also want to copy and paste addresses straight from your browser bar into RecipePower. You can do that with the <strong><%= link_to "Add a Cookmark", new_recipe_path %></strong> link above.
+</p>
+<h4>Tagging Recipes</h4>
+<p class="airy">
+Once your collection grows to more than a couple of dozen recipes, you'll wish for a way to organize them. RecipePower lets you organize them any way you like by <strong>tagging</strong> them. A tag is nothing but a name for a collection that you define. Tag a recipe for, say, Sunday Night Specials and then, when you later look for Sunday Night Specials, RecipePower will go through your collection and pull up all the recipes with that tag.  
+</p><p class="airy">
+How "should" you tag your recipes? Any way you like! RecipePower has defined many useful tags and you can also tag recipes according to the channels that we've set up. But you're not limited to our vocabulary. If you want to tag a recipe as Uncle Bernie's Favorite, be our guest.
 </p>
 <h4>Now What?</h4>
+<p class="airy">
+Why not head over to the <%= link_to "Cookmarks", rcpqueries_path %> page and have a look? You'll find that you have some friends there already. You can get started by browsing through their recipes and seeing their tags. We've also provided you with a starter set of Channels. If you want to add new friends or select other channels go to the Profile page under your name at the top right of the screen.
 </p><p class="airy">
-Now that you've registered, you have your own collection of Cookmarks--always available behind the Cookmarks link above--but don't go there just yet! Your collection starts out empty: pretty useless, even a little depressing maybe. The smart thing would be to install our bookmarklet and go find some recipes on the Web (see sidebar).
-</p><p class="airy">But why not see what recipes are already available on RecipePower? Since your collection is empty, do we have a friend for you: our scout Max is scouring the Net for Good New Stuff, and his Cookmarks list is <%= link_to "here", "rcpqueries/new?owner=1" %>. 
+But why not go out to the Web, find some of your favorite recipes, and bring them into RecipePower? It's a good feeling to have them under lock and key.
 </p><p class="airy">
-Let us invite you, here at the beginning, to invite your friends to join you on RecipePower. You'll be able to grab cookmarks from one another, and see what others are up to in the kitchen. Why not settle i and make cooking a community experience with RecipePower? Use the Invite link below to introduce people to the site. We'll get them set up and cooking <i>tout suite</i>.
+Oh, one more thing: let us invite you right now to invite your friends to RecipePower. You'll be able to grab cookmarks from one another, and see what others are up to in the kitchen. Why not settle in and make cooking a community experience with RecipePower? Use the Invite link above to introduce people to the site. We'll get them set up and cooking <i>tout suite</i>.
 </p>

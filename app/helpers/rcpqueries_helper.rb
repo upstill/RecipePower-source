@@ -22,10 +22,10 @@ module RcpqueriesHelper
        s = <<BLOCK_END
   	<div id="rcpquery_tabset" value="#{@rcpquery.status_tab}"> 
   	    <ul>
-  		<li><a href="rcpqueries/tablist?status=1" title="Show recipes that are in your active rotation">Rotation</a></li> 
-  		<li><a href="rcpqueries/tablist?status=2" title="Show favorite recipes">Favorites</a></li> 
-  		<li><a href="rcpqueries/tablist?status=4" title="Show recipes that you've earmarked as 'interesting''">Interesting</a></li>
-  		<li><a href="rcpqueries/tablist?status=8" title="Show all your cookmarks">All Cookmarks</a></li>
+  		<li><a href="rcpqueries/tablist?status=1" title="Show recipes that you're actually cooking these days">Now Cooking</a></li> 
+  		<li><a href="rcpqueries/tablist?status=2" title="Show favorite recipes">Keepers</a></li> 
+  		<li><a href="rcpqueries/tablist?status=4" title="Show recipes that you've earmarked to try sometime">To Try</a></li>
+  		<li><a href="rcpqueries/tablist?status=8" title="Show all the cookmarks you've collected">Collected Cookmarks</a></li>
   		<li><a href="rcpqueries/tablist?status=16" title="Show recent cookmarks">Recent</a></li>
   	    </ul> 
   	</div>

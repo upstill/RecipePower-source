@@ -3,7 +3,7 @@
 		accept_invitation_url(@resource, :invitation_token => @resource.invitation_token).sub(/strong-galaxy-5765.herokuapp.com/,"www.recipepower.com")) %>
 		
 <p><%= accept_str.sub(/>accept /, ">Accept ").html_safe %></p>
-<%= inviter_name || "Someone" %> wants you to join them at
+<%= inviter_name || "Someone" %> is inviting you to join
 <%= link_to("RecipePower", root_url)+(@resource.invitation_message.blank? ? "." : ", saying") %>
 <% unless @resource.invitation_message.blank? %>
   <% if(@resource.invitation_message.length > 20) %>

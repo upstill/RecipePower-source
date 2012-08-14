@@ -125,7 +125,6 @@ class Recipe < ActiveRecord::Base
 
   # Casual setting of privacy for the recipe: immediate save for 
   # this recipe/user combo.
-  # Presented as an integer related to @@privacies
   def private=(val)
      @current_ref.private = (val != "0") if current_ref()
   end
@@ -159,25 +158,15 @@ class Recipe < ActiveRecord::Base
       end
   end
 
-  @@statuses = [[:Rotation, MyConstants::Rcpstatus_rotation], 
-  		[:Favorites, MyConstants::Rcpstatus_favorites],
-		[:Interesting, MyConstants::Rcpstatus_interesting],
+  @@statuses = [["Now Cooking", MyConstants::Rcpstatus_rotation], 
+  		[:Keepers, MyConstants::Rcpstatus_favorites],
+		["To Try", MyConstants::Rcpstatus_interesting],
 		[:Misc, MyConstants::Rcpstatus_misc]]
-
-  @@privacies = [[:Private, MyConstants::Rcppermission_private], 
-  		["Friends Only", MyConstants::Rcppermission_friends],
-		[:Circles, MyConstants::Rcppermission_circles],
-		[:Public, MyConstants::Rcppermission_public]]
 
   # return an array of status/value pairs for passing to select()
   def self.status_select
       @@statuses
   end
-
-  # return an array of status/value pairs for passing to select()
-  # def self.privacy_select
-      # @@privacies
-  # end
 
   # Write the virtual attribute tag_tokens (a list of ids) to
   # update the real attribute tag_ids
@@ -395,4 +384,15 @@ class Recipe < ActiveRecord::Base
        # already been so expressed)
        html || ou.to_s
    end
+=begin
+   @@privacies = [[:Private, MyConstants::Rcppermission_private], 
+   		["Friends Only", MyConstants::Rcppermission_friends],
+ 		[:Circles, MyConstants::Rcppermission_circles],
+ 		[:Public, MyConstants::Rcppermission_public]]
+
+   # return an array of status/value pairs for passing to select()
+   def self.privacy_select
+     @@privacies
+   end
+=end
 end
