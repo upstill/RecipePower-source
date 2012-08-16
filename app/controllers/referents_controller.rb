@@ -141,7 +141,6 @@ class ReferentsController < ApplicationController
     end
 
     respond_to do |format|
-      debugger
       if @referent && @referent.save
         format.html { redirect_to @referent.becomes(Referent), notice: 'Referent was successfully created/aliased.' }
         format.json { render json: [{ :title=>@referent.longname, :isLazy=>true, :key=>keyback, :isFolder=>false }], status: :created }

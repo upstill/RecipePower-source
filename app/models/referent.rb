@@ -28,7 +28,7 @@ class Referent < ActiveRecord::Base
 
     belongs_to :canonical_expression, :class_name => "Tag", :foreign_key => "tag_id"
     
-    has_and_belongs_to_many :channels, :class_name => "Referent", :foreign_key => "channel_id", :join_table => "channels_referents"
+    has_and_belongs_to_many :channels, :class_name => "Referent", :foreign_key => "channel_id", :join_table => "channels_referents", :uniq => true
     
     attr_accessible :tag, :type, :description, :isCountable, :dependent,
         :expressions_attributes, :add_expression, :tag_id,
@@ -53,7 +53,6 @@ class Referent < ActiveRecord::Base
     # this one is strictly for overriding by subclasses
     def notice_resource(resource)
         # !!! This is where we pass a resource event to any associated channels !!!
-        debugger
         channels.each { |ch| ch.notice_resource resource }
     end
     
@@ -427,21 +426,16 @@ class ChannelReferent < Referent ;
         # We need to check that type
         return if !(tag = canonical_expression) # All referents must have a tag; this error will get picked up elsewhere
         debugger
-        if @dependent == "1"
-            # The tag needs to be a type OTHER than 'unclassified' or 'Channel'
-            if [0,11].include? tag.typenum
-                errors.add(:tags, "If you want a channel based on another type, you need to give it a name from that type. #{tag.name} is a #{tag.typename}")
-            else
-                # Tag comes from a proper type
-                # Use its referent or make a referent for it
-                ref = Referent.express tag, tag.typenum
-                debugger
-                x=2
-            end
-        else
-            if [0,11].include? tag.typenum
+        if @dependent # We're saving from editing
+            if @dependent == "1"
+                # The tag needs to be a type OTHER than 'unclassified' or 'Channel'
+                if [0,11].include? tag.typenum
+                    errors.add(:tags, "If you want a channel based on another type, you need to give it a name from that type. #{tag.name} is a #{tag.typename}")
+                end
+            elsif [0,11].include? tag.typenum
+                # Since we're not dependent, we ensure we have a tag and make ourself our own channel
                 express tag
-                ref = self;
+                channels << self
             else
                 # Error: channel is not dependent on another type
                 errors.add(:tags, "You're giving this channel a name that already exists for a #{tag.typename}. Either create the channel with a unique name, or make the channel Dependent.")
@@ -465,11 +459,14 @@ class ChannelReferent < Referent ;
     # after_save method to correct the channel's user's email address
     def fix_user
         # Need to make sure the tag is linked to self
-        if self.tags.empty? && (dependent != "1") 
+        tag = self.canonical_expression
+        if dependent == "1"
             debugger
-            # For a channel that's dependent on another referent, we vampire off the other tag
-            tag = self.canonical_expression
-            express tag
+            # We're coming out of editing. Now that we're saved, it's safe to
+            # add ourself to the channels of the (foreign) tag
+            ref = Referent.express tag, tag.typenum
+            ref.channels << self
+            ref.save
         end
         if self.user.email == "channels@recipepower.com"
             self.user.email = "channel#{self.id.to_s}@recipepower.com"
