@@ -49,7 +49,7 @@ class ReferentsController < ApplicationController
   # GET /referents/new
   # GET /referents/new.json?tagid=1&mode={over,before,after}&parent=referentid
   def new
-    @tabindex = (session[:tabindex] || params[:tabindex] || 4).to_i
+    @tabindex = (params[:tabindex] || session[:tabindex] || 4).to_i
     handlerclass = @@HandlersByIndex[@tabindex]
     @referent = handlerclass.new
     @referent.express (params[:tagid]) if params[:tagid]
@@ -57,7 +57,7 @@ class ReferentsController < ApplicationController
     @typeselections.shift
 
     respond_to do |format|
-      format.html # new.html.erb
+      format.html { render (@tabindex==11 ? "new_channel.html.erb" : "new") }
       format.json { render json: [{ :title=>@referent.longname, :isLazy=>true, :key=>@referent.id, :isFolder=>false }] }
     end
   end
@@ -74,16 +74,29 @@ class ReferentsController < ApplicationController
   # POST /referents?tagid=1&mode={over,before,after}&target=referentid
   # POST /referents.json?tagid=1&mode={over,before,after}&target=referentid
   def create
-    if params[:tabindex]
+    if params[:tabindex] # Obsolete: coming from the old tag-organizing page
         @tabindex = params[:tabindex].to_i || 0
         handlerclass = @@HandlersByIndex[@tabindex]
         tagid = params[:tagid].to_i # Id of expression
         targetid = params[:target] ? params[:target].to_i : 0
     else
         @tabindex = params[:referent][:typenum].to_i || 0
+        tagid = params[:referent][:tag_id]
+        if @tabindex == 11
+            # This is a channel. It needs a referent to key off of.
+            if params[:dependent] == 1 
+                # We're not creating a free-standing channel, but piggy-backing
+                # on an existing referent.
+            else
+                # This is a channel that only gets events when its tag gets 
+                # applied to a recipe. In other words, it's a referent that 
+                # sends to itself.
+            end
+        end
         handlerclass = @@HandlersByIndex[@tabindex]
         params[:referent].delete :typenum
     end
+    go = 0
     keyback = 0
     
     # This code will pertain when we get some kind of hierarchy back
@@ -128,11 +141,14 @@ class ReferentsController < ApplicationController
     end
 
     respond_to do |format|
+      debugger
       if @referent && @referent.save
         format.html { redirect_to @referent.becomes(Referent), notice: 'Referent was successfully created/aliased.' }
         format.json { render json: [{ :title=>@referent.longname, :isLazy=>true, :key=>keyback, :isFolder=>false }], status: :created }
       else
-        format.html { render action: "new" }
+        @typeselections = Tag.type_selections
+        @typeselections.shift
+        format.html { render action: (@tabindex==11 ? "new_channel.html.erb" : "new") }
         format.json { render json: @referent.errors, status: :unprocessable_entity }
       end
     end

@@ -1,0 +1,45 @@
+<h3>New Channel</h3>
+
+  <% if @referent.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@referent.errors.count, "error") %> prohibited this referent from being saved:</h2>
+
+      <ul>
+      <% @referent.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+<% @reftype = @referent.type %>
+<%= form_for(@referent.becomes(Referent)) do |f| %>
+  <% f.object = f.object.becomes ChannelReferent %>
+  <% f.object.type = @reftype %>
+  <%= f.hidden_field :typenum %>
+  <%= f.check_box :dependent, onchange: "dependentSwitch()" %>
+  <%= f.label :dependent, "Channel on Existing Tag (vs. building a freestanding channel)" %>
+  <br class="clear">
+  <div class="referent_tags_div" >
+	<div class="referent_tags_label_div">
+	   <%= f.label :tag_token, "Name:", :id=>"referent_channel_tag_label" -%>
+	</div>
+	<div class="referent_tags_tokens_div">
+	   <%= f.text_field :tag_token, :id=>"referent_channel_tag" %>
+	</div>
+  </div>
+  <br class="clear">
+  <div class="referent_tags_div">
+	<div class="referent_tags_label_div">
+	  <%= f.label :description, "Description:" %>
+	</div>
+	<div class="referent_tags_tokens_div">
+	  <%= f.text_field :description, id: "referent_description" %>
+	</div>
+  </div>
+  <br class="clear">
+  <div class="actions">
+    <%= f.submit "Build Channel" %>
+  </div>
+<% end %>
+
+<%= link_to 'Back', referents_path %>

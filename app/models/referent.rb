@@ -28,9 +28,13 @@ class Referent < ActiveRecord::Base
 
     belongs_to :canonical_expression, :class_name => "Tag", :foreign_key => "tag_id"
     
-    attr_accessible :tag, :type, :description, :isCountable, 
+    has_and_belongs_to_many :channels, :class_name => "Referent", :foreign_key => "channel_id", :join_table => "channels_referents"
+    
+    attr_accessible :tag, :type, :description, :isCountable, :dependent,
         :expressions_attributes, :add_expression, :tag_id,
         :parents, :children, :parent_tokens, :child_tokens, :typeindex
+        
+    attr_accessor :dependent
     
     # validates_associated :parents
     # validates_associated :children
@@ -48,6 +52,9 @@ class Referent < ActiveRecord::Base
     # Since there's no intrinsic connection between any referents and any resources,
     # this one is strictly for overriding by subclasses
     def notice_resource(resource)
+        # !!! This is where we pass a resource event to any associated channels !!!
+        debugger
+        channels.each { |ch| ch.notice_resource resource }
     end
     
     # Dump a specified referent with the given indent
@@ -146,7 +153,6 @@ class Referent < ActiveRecord::Base
     #  this procedure lends itself to redundancy in the dictionary
     def self.express (tag, tagtype, args = {} )
         tag = Tag.assert_tag tag, tagtype: tagtype # Creating it if need be, and/or making it global 
-        debugger
         ref = tag.primary_meaning || 
               tag.referents.first || 
               # We don't immediately have a referent for this tag
@@ -177,7 +183,12 @@ class Referent < ActiveRecord::Base
         # Find or create an expression of this referent on this tag. If locale
         # or form aren't specified, match any expression
         args[:form] = :generic unless args[:form]
-        Expression.find_or_create self.id, tag.id, args 
+        if self.id
+          Expression.find_or_create self.id, tag.id, args 
+        elsif self.expressions.empty? # We're not saved, so have no id
+          args[:tag_id] = tag.id
+          self.expressions << Expression.new(args)
+        end
         
         # Point the tag back at this referent, if needed
         tag.admit_meaning(self)
@@ -379,14 +390,63 @@ class StoreSectionReferent < Referent ; end
 
 class ChannelReferent < Referent ; 
     has_one :user    
-    attr_accessible :user
+    attr_accessible :user, :tag_token
     
+    before_validation :check_tag
     before_save :ensure_user
     after_save :fix_user
+    
+    # The tag_token VA is special to channels, since 1) the name of the channel could
+    # refer to a referent of another type (for dependent channels) and 2) a tag may or
+    # may not be appropriate.
+    def tag_token
+        [canonical_expression].compact.map(&:attributes).to_json
+    end
+    
+    def tag_token=(tokenlist)
+      if token = tokenlist.split(',').first
+        token.strip!
+        if token.sub!(/^\'(.*)\'$/, '\1') # A string
+            self.canonical_expression = Tag.assert_tag token, tagtype: self.typenum # Creating it if need be, and/or making it global 
+        else
+            self.canonical_expression = Tag.find token.to_i # Existing tag
+        end
+      end
+    end
     
     # When a recipe is tagged with one of this referent's tags, add it to the list of the channel user
     def notice_resource(recipe)
         recipe.kind_of?(Recipe) && user && (recipe.ensureUser(user.id))
+    end
+    
+    # For a channel based on another class of referent, the tag must have an associated referent, or
+    # at least have a type so that a referent can be created.
+    # For a freestanding channel, the tag CANNOT have an existing type (other than 'unclassified')
+    def check_tag
+        # At this point in the history of a channel, it presumably has a canonical expression.
+        # We need to check that type
+        return if !(tag = canonical_expression) # All referents must have a tag; this error will get picked up elsewhere
+        debugger
+        if @dependent == "1"
+            # The tag needs to be a type OTHER than 'unclassified' or 'Channel'
+            if [0,11].include? tag.typenum
+                errors.add(:tags, "If you want a channel based on another type, you need to give it a name from that type. #{tag.name} is a #{tag.typename}")
+            else
+                # Tag comes from a proper type
+                # Use its referent or make a referent for it
+                ref = Referent.express tag, tag.typenum
+                debugger
+                x=2
+            end
+        else
+            if [0,11].include? tag.typenum
+                express tag
+                ref = self;
+            else
+                # Error: channel is not dependent on another type
+                errors.add(:tags, "You're giving this channel a name that already exists for a #{tag.typename}. Either create the channel with a unique name, or make the channel Dependent.")
+            end
+        end
     end
     
     # We ensure that every channel has an associated user
@@ -402,7 +462,15 @@ class ChannelReferent < Referent ;
         end
     end
     
+    # after_save method to correct the channel's user's email address
     def fix_user
+        # Need to make sure the tag is linked to self
+        if self.tags.empty? && (dependent != "1") 
+            debugger
+            # For a channel that's dependent on another referent, we vampire off the other tag
+            tag = self.canonical_expression
+            express tag
+        end
         if self.user.email == "channels@recipepower.com"
             self.user.email = "channel#{self.id.to_s}@recipepower.com"
             self.user.save

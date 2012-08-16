@@ -123,7 +123,13 @@ var methods = {
     remove: function(item) {
         this.data("tokenInputObject").remove(item);
         return this;
-    }
+    },
+	revise: function(url_or_data_or_function, options) {
+        this.data("tokenInputObject").revise(url_or_data_or_function, options);
+		// Clear the input
+        this.data("tokenInputObject").clear();
+        return this;
+	}
 }
 
 // Expose the .tokenInput function to jQuery as a plugin
@@ -516,7 +522,9 @@ $.TokenList = function (input, url_or_data_or_function, settings) {
         });
     }
 
-
+	this.revise = function(url_or_data_or_string, newsettings) {
+		$.extend(settings, { url: url_or_data_or_string }, newsettings);
+	}
 
     //
     // Private functions

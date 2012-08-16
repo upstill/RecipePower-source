@@ -103,6 +103,7 @@ end
       # session[:tabindex] = @tabindex
       # Get tagtype directly from tagtype parameter, or indirectly from tabindex (or leave it nil)
       tagtype = (params[:tagtype] && params[:tagtype].to_i) || 
+                (params[:tagtypes] && params[:tagtypes].split(',').collect{ |t| t.to_i} ) ||
                 (params[:tabindex] && @tabindex)
       # If a tagtype is asserted AND type 0 is admissable, search on an array of types
       tagtype = [0, tagtype] if params[:untypedOK] && tagtype          
