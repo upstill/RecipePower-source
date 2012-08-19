@@ -1,4 +1,4 @@
-<h2>Send invitation</h2>
+<h3>Send invitation</h3>
 
 <%= form_for resource, :as => resource_name, :url => invitation_path(resource_name), :html => {:method => :post} do |f| %>
   <%= devise_error_messages! %>

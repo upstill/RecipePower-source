@@ -1,30 +1,22 @@
-<div class="text_block">
+<div class="rightblock">
+<!--
+  <div class="auth_signin">
+    <% render partial: 'shared/authentications_possible' %>
+  </div>
+  <br>
+-->
+  <div class="right_signin">
+    <%= render partial: "shared/slug_signin" %>
+  </div>
+</div>
 <h3>RecipePower: The Best Recipes on the Web, According to...You</h3> 
+<div class="text_block">
 <p class="airy">
-The Web is the greatest library for cooks, <strong>ever</strong>--and the search tools are amazing. But once you've found j-u-u-u-s-t the right recipe, then what? How do you find it again without going through the whole process? If that seems like wasted effort, if you've ever wished you could stash them away in your own perfect collection, welcome to RecipePower. At RecipePower, you collect, organize, share, rediscover and generally splash around in all your food-related "cookmarks" from the Web. Here, you'll also find like-minded cooks on the same quest. Share recipes with, learn from, teach and collaborate with fellow travellers in your neighborhood of the food world.</p>
+The Web is the greatest library for cooks, <strong>ever</strong>--and the search tools are amazing. But once you've found j-u-u-u-s-t the right recipe, what if you want it again later? How do you get it back without going through the whole process again? If you've ever wished you could stash those jewels away in your own brilliant collection, welcome to RecipePower. Here, you collect, organize, share, rediscover and generally splash around in all your food-related "cookmarks" from the Web. You'll also find like-minded cooks on the same quest. Share recipes with, learn from, teach and collaborate with fellow travellers in your neighborhood of the food world.</p>
 <h4>What's Different about RecipePower?</h4>
 <p class="airy">
-There are many recipe-clipping and -sharing sites these days. But most of them either support a limited set of cooking sites, or expect you to wrangle with importing recipes, or both. RecipePower doesn't import anything. Instead, our cookmarks simply remember where the recipe lives. The whole process is a breeze: capture, tag and share a recipe in seconds. And there are no limits to where you can collect from. If you see it in a browser window, you can cookmark it.
+There are many recipe-clipping and -sharing sites these days. But most of them support a limited set of cooking sites, or expect you to wrangle with importing recipes, or both. RecipePower doesn't import anything. Instead, our cookmarks simply remember where the recipe lives. The whole process is a breeze: capture, tag and share a recipe in seconds. And there are no limits to where you can collect from. If you see it in a browser window, you can cookmark it.
 </p><p class="airy">
-RecipePower is coming soon to a browser near you. Meanwhile, we'd love to hear
-your opinions about finding recipes on the Web. 
-<br>
-To take our survey, (short and sweet: ten questions, six minutes, done),
-click below. Thanks again!
-<br>
-<%= link_to "Take the Survey (Please)!", new_visitor_path, :class => "signup_button" %>
-<p class="airy">
-...or, if you'd just like to hear when RecipePower is ready for prime time,
-<br>leave us an email address where we can reach you:
-</p>
-<%= form_for(Visitor.new) do |f| %>
+It's early days, and RecipePower is currently open by invitation only. Click the Cookmarks link above to get a feeling for what's happening here. If you'd like an invitation, drop us a line at <a href="mailto:support@recipepower.com">support@recipepower.com</a>.
 
-  <div class="field">
-    <%= f.label "Email:" %><br />
-    <%= f.text_field :baremail %>
-  </div>
-  <div class="actions">
-    <%= f.submit :value => "Submit email" %>
-  </div>
-<% end %>
-</div>
+<br class="clear">

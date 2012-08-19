@@ -425,7 +425,6 @@ class ChannelReferent < Referent ;
         # At this point in the history of a channel, it presumably has a canonical expression.
         # We need to check that type
         return if !(tag = canonical_expression) # All referents must have a tag; this error will get picked up elsewhere
-        debugger
         if @dependent # We're saving from editing
             if @dependent == "1"
                 # The tag needs to be a type OTHER than 'unclassified' or 'Channel'
@@ -460,8 +459,7 @@ class ChannelReferent < Referent ;
     def fix_user
         # Need to make sure the tag is linked to self
         tag = self.canonical_expression
-        if dependent == "1"
-            debugger
+        if @dependent == "1"
             # We're coming out of editing. Now that we're saved, it's safe to
             # add ourself to the channels of the (foreign) tag
             ref = Referent.express tag, tag.typenum

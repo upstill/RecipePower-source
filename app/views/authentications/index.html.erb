@@ -1,15 +1,24 @@
 <% title "Sign In Options" %>
 <%= render partial: 'shared/authentications_sidebar' %>
-
-<h3><%= current_user ? "Manage Sign-in Services" : "Sign In" %></h3>
-<%= render partial: 'shared/authentications_current' %>
-<%= render partial: 'shared/authentications_possible' %>
-<% if !current_user %>
-  <div class="auth_signin">
-	<strong>Rather use a RecipePower account? <br><br></strong>
-	<%= link_to("Sign up", new_user_registration_path) %>
-	or
-	<%= link_to("Sign In", new_user_session_path) %>
-  </div>
+<% if current_user %>
+	<h3>Manage Sign-in Services</h3>
+<% else %>
+	<h3>Sign In</h3>
 <% end %>
+<div class="signin_all">
+  <div class="auth_signin">
+    <%= render partial: 'shared/authentications_current' %>
+    <%= render partial: 'shared/authentications_possible' %>
+  </div>
+  <br class="clear">
+  <% if !current_user %>
+    <div class="sign" >
+	  <strong>Rather use a RecipePower account? <br></strong>
+	  <%= render partial: "shared/slug_signin" %>
+	  <%# link_to("Sign In", new_user_session_path) %>
+	  <%# render partial: "shared/slug_signup" %>
+	  <%# link_to("Sign up", new_user_registration_path) %>
+    </div>
+  <% end %>
+</div>
 <br class="clear">

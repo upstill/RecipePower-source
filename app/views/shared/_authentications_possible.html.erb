@@ -1,11 +1,12 @@
+<div class="auth_poss">
   <% if @auth_context == :manage %>
 	<% if current_user %>
-      <h4>Add another service to sign in with:</h4>
+      <strong>Add another service to sign in with:</strong><br>
     <% else %>
-      <h4>You can sign in by clicking on one of these services:</h4>
+      <strong>You can sign in by clicking on one of these services:</strong><br>
 	<% end %>
   <% else %>
-    <h4>Or, click to sign in using one of these fine services (see sidebar):</h4>
+    <strong>Or, click to sign in using one of these fine services (see sidebar):</strong><br>
   <% end %>
 	<a href="/auth/facebook" class="auth_provider">
 	  <%= image_tag "facebook_64.png", :size => "64x64", :alt => "Facebook" %>
@@ -31,3 +32,4 @@
 	  <%= image_tag "open_id_64.png", :size => "64x64", :alt => "OpenID" %>
 	  OpenID
 	</a>
+</div>

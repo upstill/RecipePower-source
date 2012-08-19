@@ -399,16 +399,28 @@ function rcpCollect(id) {
   // Call server on /recipes/:id/collect
   jQuery.get( "recipes/"+id+"/collect", {},
     function(body, status, hr) {
+	  debugger;
 	  if(status == "success") {
-	    $("."+body.go_link_class).replaceWith(body.go_link_body);
-	    boostInTablist(body.list_element_class, body.list_element_body, 3) // Put it at the top of My Cookmarks
-	    boostInTablist(body.list_element_class, body.list_element_body, 4) // Put it at the top of the Recent tab
-	    $("div.ack_popup").text(body.title);
-	    jNotify( "Got it! Now appearing at the top of My Cookmarks.", 
-			{ HorizontalPosition: 'center', VerticalPosition: 'top'} );
-	    // $("div.ack_popup").dialog({ model: true, title: "Got it! Now appearing at the top of My Cookmarks."});
+		/*
+          if(body.go_link_body) {
+		    $("."+body.go_link_class).replaceWith(body.go_link_body);
+		    boostInTablist(body.list_element_class, body.list_element_body, 3) // Put it at the top of My Cookmarks
+		    boostInTablist(body.list_element_class, body.list_element_body, 4) // Put it at the top of the Recent tab
+		    $("div.ack_popup").text(body.title);
+		    jNotify( "Got it! Now appearing at the top of My Cookmarks.", 
+				{ HorizontalPosition: 'center', VerticalPosition: 'top'} );
+		  } else {
+		*/
+	          top.consoleRef = window.open('', 'login', 'width=550,height=350'
+			   +',menubar=0'
+			   +',toolbar=0'
+			   +',status=0'
+			   +',scrollbars=1'
+			   +',resizable=1');
+			  top.consoleRef.document.writeln(body);
+		  // }
 	  }
-    }, "json" );
+    }, "html" );
 }
 
 /*

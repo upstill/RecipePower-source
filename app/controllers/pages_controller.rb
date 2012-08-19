@@ -12,6 +12,7 @@ class PagesController < ApplicationController
   def home
   	@Title = "Home"
   	@nav_current = :home
+    @auth_context = :manage
   end
 
   def contact

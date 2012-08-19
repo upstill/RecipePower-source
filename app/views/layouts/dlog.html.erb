@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+	<%= favicon_link_tag "/assets/favicon.ico" %>
+    <%= stylesheet_link_tag "application" %>
+    <%= javascript_include_tag "application" %>
+    <%= csrf_meta_tag %>
+    <%# render 'layouts/stylesheets' %>
+	<script type="text/javascript">
+
+	 var _gaq = _gaq || [];
+	 _gaq.push(['_setAccount', 'UA-30180298-1']);
+	 _gaq.push(['_trackPageview']);
+
+	 (function() {
+	   var ga = document.createElement('script'); 
+		ga.type = 'text/javascript'; 
+		ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0];
+		s.parentNode.insertBefore(ga, s);
+	 })();
+
+	</script>
+  </head>
+  <body>
+	<script>
+whenReady( function() {
+	RPQueryOnLoad();
+	<%= %Q{ $($('#{@focus_selector || '#user_email' || "#user_login"}').first()).focus(); }.html_safe if @focus_selector %>
+	
+
+	// Set up tabs for tags editing page
+});
+	</script>
+	<div id="container">
+		<%# render 'layouts/header' %>
+		<section id="workpane">
+			<% if flash[:notice] %>
+				<div id="notice" class="notice"><%= flash[:notice] %></div>
+			<% elsif flash[:alert] %>
+				<div class="alert"><%= flash[:alert] %></div>
+			<% end %>
+			<p id="notice"><%# notice %></p>
+			<%= yield %>
+		</section>
+		<%# render 'layouts/footer' %>
+	</div>
+	<%= debug_dump(params) if Rails.env.development? %>
+	</body>
+</html>

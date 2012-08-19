@@ -136,6 +136,7 @@ class RecipesController < ApplicationController
   # Add a recipe to the user's collection without going to edit tags
   # GET recipes/:id/collect
   def collect
+    debugger
     @recipe = Recipe.ensure current_user_or_guest_id, params
     truncated = truncate @recipe.title, :length => 140
     @list_name = "mine"

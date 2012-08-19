@@ -1,6 +1,18 @@
 module ApplicationHelper
     include ActionView::Helpers::DateHelper
     
+    def resource_name
+      :user
+    end
+
+    def resource
+      @resource ||= User.new
+    end
+
+    def devise_mapping
+      @devise_mapping ||= Devise.mappings[:user]
+    end
+    
     # The coder is for stripping HTML entities from URIs, recipe titles, etc.
     @@coder = HTMLEntities.new
     
@@ -174,7 +186,7 @@ module ApplicationHelper
   
   def bookmarklet
       imgtag = image_tag("Small_Icon.png", :alt=>"Cookmark", :class=>"logo_icon", width: "32px", height: "24px")
-      bmtag = %q{<a class="bookmarklet" title="Cookmark" href="javascript:(function(){location.href='http://www.recipepower.com/recipes/new?url='+encodeURIComponent(window.location.href)+'&title='+encodeURIComponent(document.title)+'&notes='+encodeURIComponent(''+(window.getSelection?window.getSelection():document.getSelection?document.getSelection():document.selection.createRange().text))+'&v=6&jump=yes'})()">}
+      bmtag = %q{<a class="bookmarklet" title="Cookmark" href="javascript:void(window.open('http://localhost:5000/recipes/new?url='+encodeURIComponent(window.location.href)+'&title='+encodeURIComponent(document.title)+'&notes='+encodeURIComponent(''+(window.getSelection?window.getSelection():document.getSelection?document.getSelection():document.selection.createRange().text))+'&v=6&jump=yes',%20'popup',%20'width=600,%20height=300,%20scrollbars,%20resizable'))">}
       "#{bmtag}#{imgtag}</a>".html_safe
   end
       

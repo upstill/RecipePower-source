@@ -3,8 +3,9 @@ class AuthenticationsController < ApplicationController
     @authentications = current_user.authentications if current_user
     @auth_delete = true
     @auth_context = :manage
+    # render :layout => "dlog"
   end
-  
+
   def failure
       redirect_to authentications_url, :notice => "Sorry, authentication failed."
   end
