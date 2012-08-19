@@ -17,27 +17,27 @@ padding:10px;
 
 .auth_sign {
 	width: 600px;
-  border: solid 1px #999;
+  // border: solid 1px #999;
 	float: left;
 }
 
 .sign {
 	width: 520px;
-    border: solid 1px #999;
+    // border: solid 1px #999;
     margin: 20px;
 	float:left;
 }
 
 .signup {
 	width: 250px;
-    border: solid 1px #999;
+    // border: solid 1px #999;
 	margin: 20px;
 	float: left;
 }
 
 .signin {
 	width: 250px;
-    border: solid 1px #999;
+    // border: solid 1px #999;
 	margin: 20px;
 	float: left;
 }
@@ -60,7 +60,7 @@ padding:10px;
 
 .auth_signin {
 	width: 520px;
-  border: solid 1px #999;
+  // border: solid 1px #999;
 	margin-left: 20px;
 	float: left;
 }
