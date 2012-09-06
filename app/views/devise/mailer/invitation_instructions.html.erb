@@ -4,7 +4,7 @@
 		
 <p><%= accept_str.sub(/>accept /, ">Accept ").html_safe %></p>
 <%= inviter_name || "Someone" %> is inviting you to join
-<%= link_to("RecipePower", root_url)+(@resource.invitation_message.blank? ? "." : ", saying") %>
+<%= link_to("RecipePower", root_url.sub(/strong-galaxy-5765.herokuapp.com/,"www.recipepower.com"))+(@resource.invitation_message.blank? ? "." : ", saying") %>
 <% unless @resource.invitation_message.blank? %>
   <% if(@resource.invitation_message.length > 20) %>
 	<blockquote><%= @resource.invitation_message %></blockquote>
@@ -13,7 +13,7 @@
   <% end %>
 <% end %>
 --<br>
-<%= link_to "RecipePower", root_url %> makes sure you never forget a recipe again, lets you find them again quickly, and clues you in to your friends' discoveries too!  Join <%= inviter_name || "us" %> and you'll get cooking like never before. Getting started takes just a few seconds, then you'll be snagging the best recipes from the Web--for good. So <%= accept_str %> today!
+<%= link_to "RecipePower", root_url.sub(/strong-galaxy-5765.herokuapp.com/,"www.recipepower.com") %> makes sure you never forget a recipe again, lets you find them again quickly, and clues you in to your friends' discoveries too!  Join <%= inviter_name || "us" %> and you'll get cooking like never before. Getting started takes just a few seconds, then you'll be snagging the best recipes from the Web--for good. So <%= accept_str %> today!
 <p>
 --<br>
 Max and Steve
