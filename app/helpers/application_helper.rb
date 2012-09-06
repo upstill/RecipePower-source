@@ -178,15 +178,15 @@ module ApplicationHelper
        userlinks << link_to("Sign Out", destroy_user_session_path, :method=>"delete")
        userlinks << navlink("Invite", new_user_invitation_path, (@nav_current==:invite))
     else
-       userlinks << link_to("Sign In", authentications_path)
+       userlinks << link_to_function("Sign In", "getLogin()" ) # link_to("Sign In", authentications_path, :source => "click_to")
     end
  	userlinks << navlink("Admin", admin_path) if permitted_to?(:admin, :pages)
  	userlinks.join('&nbsp|&nbsp').html_safe
   end
-  
+
   def bookmarklet
       imgtag = image_tag("Small_Icon.png", :alt=>"Cookmark", :class=>"logo_icon", width: "32px", height: "24px")
-      bmtag = %q{<a class="bookmarklet" title="Cookmark" href="javascript:void(window.open('http://localhost:5000/recipes/new?url='+encodeURIComponent(window.location.href)+'&title='+encodeURIComponent(document.title)+'&notes='+encodeURIComponent(''+(window.getSelection?window.getSelection():document.getSelection?document.getSelection():document.selection.createRange().text))+'&v=6&jump=yes',%20'popup',%20'width=600,%20height=300,%20scrollbars,%20resizable'))">}
+      bmtag = %q{<a class="bookmarklet" title="Cookmark" href="javascript:void(window.open('http://www.recipepower.com/recipes/new?url='+encodeURIComponent(window.location.href)+'&title='+encodeURIComponent(document.title)+'&notes='+encodeURIComponent(''+(window.getSelection?window.getSelection():document.getSelection?document.getSelection():document.selection.createRange().text))+'&v=6&jump=yes',%20'popup',%20'width=600,%20height=300,%20scrollbars,%20resizable'))">}
       "#{bmtag}#{imgtag}</a>".html_safe
   end
       

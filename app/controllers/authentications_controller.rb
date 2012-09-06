@@ -3,7 +3,12 @@ class AuthenticationsController < ApplicationController
     @authentications = current_user.authentications if current_user
     @auth_delete = true
     @auth_context = :manage
-    # render :layout => "dlog"
+    @dlog = params[:source] != "click_to" # As opposed to automagically triggering login
+    if !@dlog && false
+        render "index"
+    else
+        render "index", :layout => false # :layout => "dlog"
+    end
   end
 
   def failure

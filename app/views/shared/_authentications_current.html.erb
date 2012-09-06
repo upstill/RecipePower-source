@@ -1,7 +1,7 @@
-<div class="auth_current">
 <% if @authentications && !@authentications.empty? %>
+<div class="auth_current<%= "_dlog" if @dlog %>">
     <div class="authentications">
-	  <h4><strong>You can sign in to this account using:</strong></h4>
+	  <strong>You can sign in to this account using:</strong><br>
       <% for authentication in @authentications %>
         <div class="authentication">
           <%= image_tag "#{authentication.provider}_32.png", :size => "32x32" %>
@@ -16,5 +16,5 @@
 	  <% if @auth_delete %>
 	    (Click the 'X' to revoke the authorization)
 	  <% end %>
-<% end %>
 </div>
+<% end %>

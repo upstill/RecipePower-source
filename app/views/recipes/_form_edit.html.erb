@@ -1,3 +1,4 @@
+<div class="editRecipe">
 <h3>Tag That Recipe!<%= recipe_popup @recipe %></h3>
 
 <%= form_for @recipe do |f| %>
@@ -37,14 +38,15 @@
        <%# f.label :privacy, "Privacy: ",:id=>"recipe_privacy_label" -%>
        <%# f.select :privacy, Recipe.privacy_select %>
     </div>
-    <%= f.submit "Save" %>
-    <br><%= link_to "Back to Cookmarks", rcpqueries_path %> 
+    <%= f.submit "Save", class: "save-tags-button" %>
+    <%= f.submit "Cancel", class: "save-tags-button" %>
   </div>
 <% end %>
 <br class="clear">
 <% if permitted_to? :remove, @recipe %>
-  <%= button_to "Remove From My Collection", "/recipes/#{@recipe.id.to_s}/remove" %>
+  <%= button_to "Remove From My Collection", "/recipes/#{@recipe.id.to_s}/remove", class: "save-tags-button" %>
 <% end %>
 <% if permitted_to? :destroy, @recipe %>
-  <%= button_to "Destroy this Recipe", "/recipes/#{@recipe.id.to_s}/destroy", :confirm => "This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" %>
+  <%= button_to "Destroy this Recipe", "/recipes/#{@recipe.id.to_s}/destroy", class: "save-tags-button", :confirm => "This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" %>
 <% end %>
+</div>

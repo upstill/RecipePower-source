@@ -28,17 +28,37 @@ padding:10px;
 	float:left;
 }
 
-.signup {
-	width: 250px;
+.sign_dlog {
+	width: 550px;
     // border: solid 1px #999;
-	margin: 20px;
+	float: left;
+}
+
+.auth_signin_dlog {
+	width: 280px;
+    border-right: solid 1px #999;
+	margin: 0px 20px;
+	float: left;
+}
+
+.signup {
+	width: 200px;
+    // border: solid 1px #999;
+	margin: 10px;
+	float: left;
+}
+
+.or {
+	margin-top: 100px;
+	margin-right: 10px;
+    // border: solid 1px #999;
 	float: left;
 }
 
 .signin {
 	width: 250px;
     // border: solid 1px #999;
-	margin: 20px;
+	margin: 10px;
 	float: left;
 }
 
@@ -67,6 +87,12 @@ padding:10px;
 
 .signin_all {
 	width: 530px;
+	float: left;
+}
+
+.signin_all_dlog {
+	width: 930px;
+	margin-top: 2em;
 	float: left;
 }
 

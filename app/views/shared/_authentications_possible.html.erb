@@ -1,9 +1,9 @@
-<div class="auth_poss">
+<div class="auth_poss<%= "_dlog" if @dlog %>">
   <% if @auth_context == :manage %>
 	<% if current_user %>
       <strong>Add another service to sign in with:</strong><br>
     <% else %>
-      <strong>You can sign in by clicking on one of these services:</strong><br>
+      <strong>You can sign in by clicking on one of these services:</strong><br><br>
 	<% end %>
   <% else %>
     <strong>Or, click to sign in using one of these fine services (see sidebar):</strong><br>

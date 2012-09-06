@@ -1,0 +1,41 @@
+<div class="editRecipe">
+<%= form_for @recipe do |f| %>
+  <%= show_errors @recipe.errors %>
+  <div class="recipe_pic_div_dlog" >
+    <div class="recipe_pic_preview_dlog">                                     
+      <%= page_fitPic @recipe.picurl, @recipe.id, false, "div.recipe_pic_preview_dlog img" %>  
+    </div>                                                    
+    <br><%= link_to "Pick Picture", "/", :id=>"PicPicker", :data=>"recipe_picurl;div.recipe_pic_preview img" %>
+  </div>
+  <%= f.text_field :picurl, rel: "jpg,png,gif", hidden: true %>
+  <%# pic_picker @recipe.picurl, @recipe.url, @recipe.id %>
+  <br class="clear">
+  <div class="recipe_field_div_dlog" >
+     <%= f.label :title, "Title", :id=>"recipe_title_label" -%>
+	 <% @recipe.check_title %>
+     <br><%= f.text_area :title, class: "recipe_text_field_dlog", rows: "3" %>
+  </div>
+  <div class="recipe_field_div_dlog" >
+     <%= f.label :tag_tokens, "Tags", :id=>"recipe_tags_label" -%>
+     <br class="clear"><%= f.text_field :tag_tokens, "data-pre" => @recipe.tags.map(&:attributes).to_json, class: "recipe_text_field_dlog" %>
+  </div>
+  <div class="recipe_field_div_dlog" >
+     <%= f.label :comment, "Notes", :id=>"recipe_comment_label" -%>
+     <br><%= f.text_area :comment, placeholder: "What are your thoughts about this recipe?", class: "recipe_text_field_dlog", rows: "3" %>
+  </div>
+  <div class="recipe_status_div_dlog">
+     <%= f.label :status,  "Status: ",:id=>"recipe_status_label" -%>
+     <%= f.select :status,  Recipe.status_select %>
+     <%= f.check_box :private %>
+     <%= f.label :private, "Private (for my eyes only)" %>
+  </div>
+  <%= f.submit "Save", class: "save-tags-button" %>
+  <%= f.submit "Cancel", class: "save-tags-button cancel" %>
+<% end %>
+<% if permitted_to? :remove, @recipe %>
+  <%= button_to "Remove From Collection", "/recipes/#{@recipe.id.to_s}/remove", class: "save-tags-button" %>
+<% end %>
+<% if permitted_to? :destroy, @recipe %>
+  <%= button_to "Destroy this Recipe", "/recipes/#{@recipe.id.to_s}/destroy", class: "save-tags-button", :confirm => "This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" %>
+<% end %>
+</div>

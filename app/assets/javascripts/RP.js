@@ -395,6 +395,75 @@ function boostInTablist(list_element_class, list_element_body, targettab) {
     }
 }
 
+// Function that blocks an action before the user logs in
+function getLogin() {
+  jQuery.get( "authentications", {},
+    function(body, status, hr) {
+	  debugger;
+	  if(status == "success") {
+		/*
+          if(body.go_link_body) {
+		    $("."+body.go_link_class).replaceWith(body.go_link_body);
+		    boostInTablist(body.list_element_class, body.list_element_body, 3) // Put it at the top of My Cookmarks
+		    boostInTablist(body.list_element_class, body.list_element_body, 4) // Put it at the top of the Recent tab
+		    $("div.ack_popup").text(body.title);
+		    jNotify( "Got it! Now appearing at the top of My Cookmarks.", 
+				{ HorizontalPosition: 'center', VerticalPosition: 'top'} );
+		  } else {
+		*/
+		$("#container").append(body);
+		$("div.signin_all_dlog").dialog({
+			modal: true,
+			width: 900,
+			title: "Sign In Please"
+		});
+		/*
+	          top.consoleRef = window.open('', 'login', 'width=550,height=350'
+			   +',menubar=0'
+			   +',toolbar=0'
+			   +',status=0'
+			   +',scrollbars=1'
+			   +',resizable=1');
+			  top.consoleRef.document.writeln(body);
+		*/
+		  // }
+	  }
+    }, "html" );
+}
+
+function cancelRecipeEdit(event) {
+	$("div.editRecipe").dialog("close");
+	$("div.editRecipe").remove();
+	event.preventDefault();
+}
+
+function rcpEdit(id) {
+  jQuery.get( "recipes/"+id+"/edit", {},
+    function(body, status, hr) {
+	  if(status == "success") {
+		$("#container").append(body);
+		$("input.cancel").click( cancelRecipeEdit );
+	    $("#recipe_tag_tokens").tokenInput("/tags/match.json", {
+	        crossDomain: false,
+			noResultsText: "No matching tag found; hit Enter to make it a tag",
+	        hintText: "Type your own tag(s) for the recipe",
+	        prePopulate: $("#recipe_tag_tokens").data("pre"),
+	        theme: "facebook",
+			preventDuplicates: true,
+	        allowCustomEntry: true
+	    });
+		debugger;
+		fitImageOnLoad("div.editRecipe img");
+		$("div.editRecipe").dialog({
+			modal: true,
+			width: 250,
+			position: "left",
+			title: "Tag that Recipe!"
+		});
+	  }
+    }, "html" );
+}
+
 function rcpCollect(id) {
   // Call server on /recipes/:id/collect
   jQuery.get( "recipes/"+id+"/collect", {},
@@ -411,6 +480,31 @@ function rcpCollect(id) {
 				{ HorizontalPosition: 'center', VerticalPosition: 'top'} );
 		  } else {
 		*/
+		$("#container").append(body);
+		$("div.signin_all_dlog").dialog({
+			modal: true,
+			width: 900,
+			title: "Let's get you signed in so we can do this properly",
+			buttons: { 
+
+			  "Sign In": function (event) {
+				debugger;
+				$(this).dialog('close');
+			  },
+/*
+			  "Sign Up": function (event) {
+				debugger;
+				$(this).dialog('close');
+			  },
+
+			  "Sign In": function (event) {
+				debugger;
+				$(this).dialog('close');
+			  }
+*/
+			}
+		});
+		/*
 	          top.consoleRef = window.open('', 'login', 'width=550,height=350'
 			   +',menubar=0'
 			   +',toolbar=0'
@@ -418,6 +512,7 @@ function rcpCollect(id) {
 			   +',scrollbars=1'
 			   +',resizable=1');
 			  top.consoleRef.document.writeln(body);
+		*/
 		  // }
 	  }
     }, "html" );
