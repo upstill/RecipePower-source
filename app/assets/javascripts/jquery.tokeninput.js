@@ -414,13 +414,8 @@ $.TokenList = function (input, url_or_data, settings) {
         .insertAfter(token_list)
         .css({position: 'relative'});
     var dropdown = $("<div>")
-<<<<<<< HEAD
         .addClass($(input).data("settings").classes.dropdown)
-        .appendTo("body")
-=======
-        .addClass(settings.classes.dropdown)
         .appendTo(dropdown_parent)
->>>>>>> cburger-jquery-tokeninput/master
         .hide();
 
     // Magic element to help us resize the text input
@@ -761,7 +756,7 @@ $.TokenList = function (input, url_or_data, settings) {
     }
 
     function show_dropdown() {
-<<<<<<< HEAD
+/* loopj
         dropdown
             .css({
                 position: "absolute",
@@ -771,7 +766,7 @@ $.TokenList = function (input, url_or_data, settings) {
                 'z-index': $(input).data("settings").zindex
             })
             .show();
-=======
+*/ // cburgmer:
         var dropdown_height = $("ul", dropdown).height(),
             bottom_height_left = $(document).height() - $(token_list).offset().top - $(token_list).outerHeight(),
             top_height_left = $(token_list).offset().top;
@@ -802,7 +797,7 @@ $.TokenList = function (input, url_or_data, settings) {
                 .addClass('token-input-dropdown-bottom-facebook')
                 .show();
         }
->>>>>>> cburger-jquery-tokeninput/master
+// end of new
     }
 
     function show_dropdown_searching () {

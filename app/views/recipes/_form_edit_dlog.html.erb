@@ -1,34 +1,42 @@
 <div class="editRecipe">
 <%= form_for @recipe do |f| %>
   <%= show_errors @recipe.errors %>
-  <div class="recipe_pic_div_dlog" >
-    <div class="recipe_pic_preview_dlog">                                     
-      <%= page_fitPic @recipe.picurl, @recipe.id, false, "div.recipe_pic_preview_dlog img" %>  
+  <div class="recipe_pic_div_dlog recipe_field_label" >
+    <div class="recipe_pic_preview">                                     
+      <%= page_fitPic @recipe.picurl, @recipe.id, false, "div.recipe_pic_preview img" %>  
     </div>                                                    
-    <br><%= link_to "Pick Picture", "/", :id=>"PicPicker", :data=>"recipe_picurl;div.recipe_pic_preview img" %>
+	  <%= link_to "Pick Picture", "/", :id=>"PicPicker", :data=>"recipe_picurl;div.recipe_pic_preview img" %>
   </div>
   <%= f.text_field :picurl, rel: "jpg,png,gif", hidden: true %>
-  <%# pic_picker @recipe.picurl, @recipe.url, @recipe.id %>
+  <%= pic_picker @recipe.picurl, @recipe.url, @recipe.id %>
   <br class="clear">
+
+  <div class="recipe_tags_div_dlog" >
+     <%= f.label :tag_tokens, "Tags", :class=>"recipe_field_label" -%>
+     <br><%= f.text_field :tag_tokens, rows: "2", "data-pre" => @recipe.tags.map(&:attributes).to_json -%>
+  </div>
+
   <div class="recipe_field_div_dlog" >
-     <%= f.label :title, "Title", :id=>"recipe_title_label" -%>
+     <%= f.label :comment, "Notes", :class=>"recipe_field_label" -%>
+     <br><%= f.text_area :comment, placeholder: "What are your thoughts about this recipe?", rows: "3" -%>
+  </div>
+
+  <div class="recipe_field_div_dlog" >
+     <%= f.label :title, "Title", :class=>"recipe_field_label" -%>
 	 <% @recipe.check_title %>
-     <br><%= f.text_area :title, class: "recipe_text_field_dlog", rows: "3" %>
+     <br><%= f.text_area :title, rows: "3" -%>
   </div>
-  <div class="recipe_field_div_dlog" >
-     <%= f.label :tag_tokens, "Tags", :id=>"recipe_tags_label" -%>
-     <br class="clear"><%= f.text_field :tag_tokens, "data-pre" => @recipe.tags.map(&:attributes).to_json, class: "recipe_text_field_dlog" %>
-  </div>
-  <div class="recipe_field_div_dlog" >
-     <%= f.label :comment, "Notes", :id=>"recipe_comment_label" -%>
-     <br><%= f.text_area :comment, placeholder: "What are your thoughts about this recipe?", class: "recipe_text_field_dlog", rows: "3" %>
-  </div>
-  <div class="recipe_status_div_dlog">
-     <%= f.label :status,  "Status: ",:id=>"recipe_status_label" -%>
+
+  <div class="recipe_field_div_dlog">
+     <%= f.label :status,  "Status: ",:class=>"recipe_field_label" -%>
      <%= f.select :status,  Recipe.status_select %>
+ </div>
+
+ <div class="recipe_field_div_dlog">
      <%= f.check_box :private %>
-     <%= f.label :private, "Private (for my eyes only)" %>
+     <%= f.label :private, "Private (for my eyes only)", :class=>"recipe_field_label" %>
   </div>
+
   <%= f.submit "Save", class: "save-tags-button" %>
   <%= f.submit "Cancel", class: "save-tags-button cancel" %>
 <% end %>

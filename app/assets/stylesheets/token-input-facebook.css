@@ -7,7 +7,7 @@ ul.token-input-list-facebook {
     border: 1px solid #8496ba;
     cursor: text;
     font-size: 12px;
-    font-family: Verdana, sans-serif;
+    font-family: Verdana;
     min-height: 1px;
     margin: 0;
     padding: 0;
@@ -76,10 +76,6 @@ div.token-input-dropdown-facebook {
     border: 1px solid #ccc;
     cursor: default;
     font-size: 11px;
-<<<<<<< HEAD
-    font-family: Verdana, sans-serif;
-    z-index: 1;
-=======
     font-family: Verdana;
     z-index: 1005;
 }
@@ -88,7 +84,6 @@ div.token-input-dropdown-bottom-facebook {
 }
 div.token-input-dropdown-top-facebook {
     border-bottom: none;
->>>>>>> cburger-jquery-tokeninput/master
 }
 
 div.token-input-dropdown-facebook p {

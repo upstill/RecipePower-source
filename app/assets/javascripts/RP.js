@@ -1,5 +1,9 @@
 /* Master function for assigning actions to interface items */
-$(document).ready(function(){ //wait for the dom to load
+$(document).ready(function() { //wait for the dom to load
+  $("#ToggleHorn").click( function(event) {
+	toggleHorn();
+	event.preventDefault();
+  })
 }); 
 
 $(function() {
@@ -8,6 +12,7 @@ $(function() {
 	  sends back a list of DOM elements to delete, which we handle with the 
 	  function nuke_DOM_elements_by_id.
 	*/
+
 	$("#PicPicker").click( function(event) {
 		PicPicker("Pick a Logo");
 		event.preventDefault();
@@ -194,7 +199,7 @@ function wdwFitImages(selection) {
 
 function PicPicker(ttl) {
 	// Bring up a dialog showing the picture-picking fields of the page
-	$("div.iconpicker").dialog({
+	$("div.recipe_pic_preview").dialog({ // nee: iconpicker
 		modal: true,
 		width: 700,
 		title: (ttl || "Pick a Picture"),
@@ -431,9 +436,8 @@ function getLogin() {
     }, "html" );
 }
 
-function cancelRecipeEdit(event) {
+function rcpEditCancel(event) {
 	$("div.editRecipe").dialog("close");
-	$("div.editRecipe").remove();
 	event.preventDefault();
 }
 
@@ -442,7 +446,7 @@ function rcpEdit(id) {
     function(body, status, hr) {
 	  if(status == "success") {
 		$("#container").append(body);
-		$("input.cancel").click( cancelRecipeEdit );
+		$("input.cancel").click( rcpEditCancel );
 	    $("#recipe_tag_tokens").tokenInput("/tags/match.json", {
 	        crossDomain: false,
 			noResultsText: "No matching tag found; hit Enter to make it a tag",
@@ -452,16 +456,54 @@ function rcpEdit(id) {
 			preventDuplicates: true,
 	        allowCustomEntry: true
 	    });
-		debugger;
+		$("#PicPicker").click( function(event) {
+			debugger;
+			PicPicker("Pick a Picture for the Recipe");
+			event.preventDefault();
+		})
 		fitImageOnLoad("div.editRecipe img");
 		$("div.editRecipe").dialog({
 			modal: true,
 			width: 250,
+			close: function (event, obj) {
+				debugger;
+				$("div.editRecipe").remove();
+			},
 			position: "left",
 			title: "Tag that Recipe!"
 		});
 	  }
     }, "html" );
+}
+
+function toggleHorn() {
+	if($("div.hornNew").length == 0) {
+		/* No "hornNew" div => do hornIn */
+		hornIn();
+	} else {
+		hornOut();
+	}
+}
+
+/* Put a div at the top of the window, moving all other content down */
+function hornIn() {
+	// Select all children of <body
+	debugger;
+	var myDiv = $("<div class='hornOrig'></div>");
+	$("body").children()
+	// Put them into their own div
+		.wrapAll(myDiv);
+	$("body").prepend($("<div class='hornNew'></div>"));
+	// $("body").append(myDiv);
+}
+
+/* Restore the window to its un-horned state */
+function hornOut() {
+	/* Remove the 'hornNew' div */
+	debugger;
+	$("div.hornNew").remove();
+	/* Unwrap the page contents from "hornOrig" */
+	$("div.hornOrig").children().unwrap();
 }
 
 function rcpCollect(id) {

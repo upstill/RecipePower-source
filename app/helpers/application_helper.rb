@@ -41,7 +41,7 @@ module ApplicationHelper
       link_to image_tag("preview.png", title:"Show the recipe in a popup window", class: "preview_button"), rcp.url, target: "_blank", class: "popup", id: "popup#{rcp.id.to_s}"        
   end
 
-  # Declare an image withinin an adjustable box. The images are downloaded by
+  # Declare an image within an adjustable box. The images are downloaded by
   # the browser and their dimensions adjusted under Javascript by the fitImageOnLoad() function.
   def page_fitPic(picurl, id, float_ttl = true, selector=nil)
     # "fitPic" class gets fit inside pic_box with Javascript and jQuery

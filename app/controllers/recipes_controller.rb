@@ -101,7 +101,6 @@ class RecipesController < ApplicationController
     else
       @recipe = Recipe.find(params[:id])
       @recipe.current_user = current_user_or_guest_id # session[:user_id]
-      debugger
       begin
         saved_okay = @recipe.update_attributes(params[:recipe])
         # rescue => e
