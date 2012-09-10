@@ -35,4 +35,17 @@ class PagesController < ApplicationController
 	@nav_current = :FAQ
   end
 
+  # 'spacetaker' produces an empty div--for dialog-testing purposes
+  def spacetaker
+	@Title = "Spacetaker"
+	@nav_current = :Spacetaker
+	# The 'partial' parameter indicates to deliver a partial, not the whole page
+	if @partial = params[:partial]
+	    # Render only the partial associated with the page, embedded in the Injector
+        render :layout => "injector"
+    else
+        render action: 'spacetaker'
+    end
+  end
+
 end

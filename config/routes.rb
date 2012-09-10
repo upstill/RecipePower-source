@@ -76,6 +76,7 @@ RP::Application.routes.draw do
   match '/signup', :to => 'visitors#new'
   match '/FAQ', :to=>"pages#FAQ"
   match '/admin', :to=>"pages#admin"
+  match '/spacetaker', :to=>"pages#spacetaker"
   root :to => 'pages#home_or_recipes'
 
   # The priority is based upon order of creation:
