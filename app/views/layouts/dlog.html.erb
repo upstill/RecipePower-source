@@ -37,11 +37,7 @@ whenReady( function() {
 	<div id="container">
 		<%# render 'layouts/header' %>
 		<section id="workpane">
-			<% if flash[:notice] %>
-				<div id="notice" class="notice"><%= flash[:notice] %></div>
-			<% elsif flash[:alert] %>
-				<div class="alert"><%= flash[:alert] %></div>
-			<% end %>
+			<%= flash_helper %>
 			<p id="notice"><%# notice %></p>
 			<%= yield %>
 		</section>

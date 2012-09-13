@@ -169,6 +169,18 @@ module ApplicationHelper
   def logo
     link_to image_tag("RPlogo.png", :alt=>"RecipePower", :id=>"logo_img" ), root_path
   end
+  
+  def flash_helper
+      f_names = [:notice, :warning, :message]
+      fl = ''
+      for name in f_names
+        if flash[name]
+          fl = fl + "<div class=\"notice\">#{flash[name]}</div>"
+        end
+      flash[name] = nil;
+    end
+    return fl.html_safe
+  end
 
   # Deploy the links for naming the user and/or signing up/signing in
   def user_status
@@ -178,7 +190,7 @@ module ApplicationHelper
        userlinks << link_to("Sign Out", destroy_user_session_path, :method=>"delete")
        userlinks << navlink("Invite", new_user_invitation_path, (@nav_current==:invite))
     else
-       userlinks << link_to_function("Sign In", "getLogin()" ) # link_to("Sign In", authentications_path, :source => "click_to")
+       userlinks << link_to_function("Sign In", "runModal('authentications/new', 'Sign In or Sign Up' )" )
     end
  	userlinks << navlink("Admin", admin_path) if permitted_to?(:admin, :pages)
  	userlinks.join('&nbsp|&nbsp').html_safe
@@ -212,7 +224,7 @@ module ApplicationHelper
     def header_navlinks
     	navlinks = []
     	navlinks.push(navlink "Cookmarks", rcpqueries_path, (@nav_current==:cookmarks)) 
-    	navlinks.push(navlink "Add a Cookmark", new_recipe_path, (@nav_current==:addcookmark)) 
+    	navlinks.push(link_to_function("Add a Cookmark", "rcpAdd()" )) # navlink "Add a Cookmark", new_recipe_path, (@nav_current==:addcookmark)) 
     	navlinks.join('&nbsp|&nbsp').html_safe
     end
 =begin    

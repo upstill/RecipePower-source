@@ -1,5 +1,10 @@
 <h3>Welcome<%= current_user ? ", "+current_user.handle : "" %>!</h3> 
 <%= link_to "Toggle Horn", "/", :id=>"ToggleHorn" %>
+<button type="button" onclick="fireSpaceTaker()">Fire SpaceTaker</button>
+<button type="button" onclick="fireLogin()">Login</button>
+<button type="button" onclick="fireAddCoomkark()">Add Cookmark via Paste</button>
+<button type="button" onclick="fireNewCookmark()">New Cookmark</button>
+<button type="button" onclick="fireEditCookmark()">Edit Cookmark</button>
 <div id="sidebar">
 <h3>Getting Started</h3>
 <p><%= bookmarklet %>
@@ -13,7 +18,7 @@ Without the button, you can always manually copy and paste links into RecipePowe
 <p class="airy">Thank you for coming. May we introduce ourselves?</p>
 <h4>The Quick Skinny</h4>
 <p class="airy">
-RecipePower is for collecting <i>cookmarks</i>, the culinary equivalent of bookmarks. A cookmark is just a link back to a recipe or any other cooking-related page on the Web: if you can see it in your browser, you can cookmark it. To see your cookmarks, browse and search through them, go to the <strong><%= link_to "Cookmarks", rcpqueries_path %></strong> page. There, you'll also find the collections of your friends, and special-interest collections which we call <i>channels</i>. Collections of Cookmarks are the heart of RecipePower.
+RecipePower is for collecting <i>cookmarks</i>. A cookmark is just a link back to a recipe or any other cooking-related page on the Web: just like a bookmark, but kept in RecipePower. Collections of Cookmarks are the heart of RecipePower: you have one, your friends each have one, and there are even special-interest collections called <i>channels</i>. In RecipePower, the <strong><%= link_to "Cookmarks", rcpqueries_path %></strong> page is "cookmark central", where you view and sort through collections of all kinds. 
 </p><p class="airy">
 How do recipes get <i>into</i> your Cookmarks collection in the first place? Simple. Start by dragging our handy bookmarklet (see sidebar at right) into the bookmark bar of your browser. Then when you're browsing the web, you can cookmark any recipe by just clicking the bookmarklet. The page you're on at that time gets whisked over to RecipePower.
 </p><p class="airy">

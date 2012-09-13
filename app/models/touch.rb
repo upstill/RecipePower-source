@@ -6,6 +6,7 @@ class Touch < ActiveRecord::Base
   def self.touch user, recipe
     user = user.id if user.kind_of? User
     recipe = recipe.id if recipe.kind_of? User
+    debugger
     if rcd = self.find_or_create_by_user_id_and_recipe_id( user, recipe )
       rcd.touch 
     end

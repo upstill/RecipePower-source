@@ -4,9 +4,7 @@
  	    <%= link_to_function "Edit Cookmark", "rcpEdit(#{@recipe.id.to_s})" %> 
 		<%# link_to "Edit Tags", edit_recipe_path(@recipe, :source => "click_to") %>
  	<% else %> 
- 	    <%= link_to_function "Grab This Cookmark!", (@recipe.current_user == User.guest_id) ? 
-													"getLogin()" : 
-													"rcpCollect(#{@recipe.id.to_s})" %>
+ 	    <%= link_to_function "Grab This Cookmark!", "rcpCollect(#{@recipe.id.to_s})" %>
  	<% end %>
   </span>
 <%# end %>

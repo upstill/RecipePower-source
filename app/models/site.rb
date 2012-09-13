@@ -267,7 +267,12 @@ class Site < ActiveRecord::Base
     
     # Find and return the site wherein the named link is stored
     def self.by_link (link)
-        if (uri = URI(link)) && !uri.host.blank?
+        begin
+            uri = URI(link)
+        rescue
+            uri = nil
+        end
+        if uri && !uri.host.blank?
             # Find all sites assoc'd with the given domain
             sites = Site.where "host = ?", uri.host
             # It's possible that multiple sites may proceed from the same domain, 

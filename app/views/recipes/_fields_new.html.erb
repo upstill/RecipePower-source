@@ -1,0 +1,10 @@
+<div class="dialog" id="rcpNewDialog" data="Add a Cookmark">
+<%= show_errors @recipe.errors %>
+<%= form_for @recipe do |f| %>
+    <div class="recipe_url_div">
+        <%= f.label :url, "Paste URL here and click 'Add Cookmark' or hit Enter/Return", :class=>"recipe_field_label" %>
+        <%= f.text_field :url %><br>
+    </div>
+    <%= f.submit :value=>"Add Cookmark" %>
+<% end %>
+</div>

@@ -3,6 +3,7 @@ RP::Application.routes.draw do
   resources :feedback, :only => [:new, :create]
 
   match '/auth/failure' => 'authentications#failure'
+  match '/authentications/new' => 'authentications#new'
   resources :authentications
 
   devise_for :users, :controllers => {:invitations => 'invitations', :registrations => 'registrations'}

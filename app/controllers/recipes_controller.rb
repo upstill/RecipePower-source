@@ -1,3 +1,5 @@
+require './lib/controller_utils.rb'
+
 class RecipesController < ApplicationController
 
   before_filter :login_required, :except => [:index, :show]
@@ -45,6 +47,16 @@ class RecipesController < ApplicationController
         @Title = "Cookmark a Recipe"
         @nav_current = :addcookmark
         @recipe.current_user = current_user_or_guest_id # session[:user_id]
+        respond_to do |format|
+          format.html # new.html.erb
+          format.json { 
+              div = with_format("html") do render_to_string partial: "recipes/fields_new" end
+              render json: {
+                  type: "dialog",
+                  body: div
+                  } 
+          }
+        end
     end
   end
 
@@ -142,25 +154,35 @@ class RecipesController < ApplicationController
       end
   end
   
-  # Add a recipe to the user's collection without going to edit tags
+  # Add a recipe to the user's collection without going to edit tags. Full-page render is just rcpqueries page
   # GET recipes/:id/collect
   def collect
     debugger
     @recipe = Recipe.ensure current_user_or_guest_id, params
-    truncated = truncate @recipe.title, :length => 140
     @list_name = "mine"
+    @partial = params[:partial]
     if @recipe.errors.empty?
-      go_link_body = render_to_string(:partial => "recipes/golink")
-      list_element_body = render_to_string(:partial => "shared/recipe_smallpic") 
       respond_to do |format|
-        format.html { render 'shared/_recipe_smallpic.html.erb', :layout=>false }
-        format.json { render json: { title: truncated, 
-                                     go_link_class: recipe_list_element_golink_class(@recipe), 
-                                     go_link_body: go_link_body,
-                                     list_element_class: recipe_list_element_class(@recipe), 
-                                     list_element_body: list_element_body
-                                   } 
-                    }
+        format.html { 
+            if @partial 
+                render :partial => "shared/recipe_smallpic", :layout=>false 
+            else
+                redirect_to rcpqueries_path
+            end
+        }
+        format.json { 
+            truncated = truncate @recipe.title, :length => 140
+            go_link_body = with_format("html") do render_to_string :partial => "recipes/golink" end
+            list_element_body = with_format("html") do render_to_string :partial => "shared/recipe_smallpic" end
+            render json: { 
+                           type: :element,
+                           title: truncated, 
+                           go_link_class: recipe_list_element_golink_class(@recipe), 
+                           go_link_body: go_link_body,
+                           list_element_class: recipe_list_element_class(@recipe), 
+                           list_element_body: list_element_body
+                         } 
+        }
         format.js { render text: @recipe.title }
       end
     else
