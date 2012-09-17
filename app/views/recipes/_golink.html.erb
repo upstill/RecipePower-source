@@ -1,10 +1,9 @@
 <%# if permitted_to? :update, @recipe %>
   <span class="<%= recipe_list_element_golink_class @recipe %>"> 
     <% if (@recipe.current_user != User.guest_id) && @recipe.users.exists?(@recipe.current_user) %>
- 	    <%= link_to_function "Edit Cookmark", "rcpEdit(#{@recipe.id.to_s})" %> 
-		<%# link_to "Edit Tags", edit_recipe_path(@recipe, :source => "click_to") %>
+	  <%= link_to_dialog "Edit Cookmark", edit_recipe_path(@recipe, :partial => "at_left") %>
  	<% else %> 
- 	    <%= link_to_function "Grab This Cookmark!", "rcpCollect(#{@recipe.id.to_s})" %>
+ 	  <%= link_to_function "Grab This Cookmark!", "rcpCollect(#{@recipe.id.to_s})" %>
  	<% end %>
   </span>
 <%# end %>

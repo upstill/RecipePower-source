@@ -10,7 +10,6 @@ puts "Ensuring uniqueness of tag #{self.tag_id.to_s} to recipe #{self.recipe_id.
     end
     
     def notify_referents
-        debugger
         self.tag.referents.each { |ref| ref.notice_resource self.recipe }
     end
         

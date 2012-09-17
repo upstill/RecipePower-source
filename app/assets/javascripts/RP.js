@@ -396,69 +396,22 @@ function boostInTablist(list_element_class, list_element_body, targettab) {
     }
 }
 
-function rcpEditCancel(event) {
-	$("div.editRecipe").dialog("close");
-	event.preventDefault();
-}
-
-function rcpEdit(id) {
-  jQuery.get( "recipes/"+id+"/edit", {},
-    function(body, status, hr) {
-	  if(status == "success") {
-		$("#container").append(body);
-		$("input.cancel").click( rcpEditCancel );
-	    $("#recipe_tag_tokens").tokenInput("/tags/match.json", {
-	        crossDomain: false,
-			noResultsText: "No matching tag found; hit Enter to make it a tag",
-	        hintText: "Type your own tag(s) for the recipe",
-	        prePopulate: $("#recipe_tag_tokens").data("pre"),
-	        theme: "facebook",
-			preventDuplicates: true,
-	        allowCustomEntry: true
-	    });
-		$("#PicPicker").click( function(event) {
-			debugger;
-			PicPicker("Pick a Picture for the Recipe");
-			event.preventDefault();
-		})
-		fitImageOnLoad("div.editRecipe img");
-		$("div.editRecipe").dialog({
-			modal: true,
-			width: 250,
-			close: function (event, obj) {
-				debugger;
-				$("div.editRecipe").remove();
-			},
-			position: "left",
-			title: "Tag that Recipe!"
-		});
-	  }
-    }, "html" );
-}
-
 // Request the server to add a recipe to a user's collection, allowing for an 
 function rcpCollect(id) {
   // Call server on /recipes/:id/collect
   jQuery.get( "recipes/"+id+"/collect", {},
     function(data, status, hr) {
+	  debugger;
 	  if(status == "success") {
 		if(data.type == "dialog") {
 			$("#container").append(data.body);
 			$('form').submit( function(eventdata) { // Supports multiple forms in dialog
-			    $.ajax({
+				$.ajax({
 			        url: eventdata.srcElement.action,
 			        type: 'post',
 			        dataType: 'json',
 			        data: $(eventdata.srcElement).serialize()
 			    });
-			    /*
-			    $.post( eventdata.srcElement.action, $('form.user_new').serialize(), function(data) {
-			         debugger;
-					 var x = 2;
-			       },
-			       'json' // I expect a JSON response
-			    );
-			    */
 			})
 			$("div.signin_all_dlog").dialog({
 				modal: true,
@@ -472,48 +425,21 @@ function rcpCollect(id) {
 		    $("div.ack_popup").text(data.title);
 		    jNotify( "Got it! Now appearing at the top of My Cookmarks.", 
 				{ HorizontalPosition: 'center', VerticalPosition: 'top'} );
+		} else if(data.type == "error" ) {
+		    jNotify( "Sorry, couldn't grab cookmark: "+data.error, 
+				{ HorizontalPosition: 'center', VerticalPosition: 'top'} );
+			
 		}
 	  }
     }, "json" );
 }
 
-/* Take an HTML stream and run a dialog from it. Assumptions:
-  1) The body is a div element of class 'dialog'. (It will work if the 'div.dialog'
-	is embedded within the HTML, but it won't clean up properly.
-  2) There is styling on the element that will determine the width of the dialog
-  3) [optional] The 'div.dialog' has a data attribute containing a title string
-  3) The submit action returns a json structure that the digestion function understands
-*/
-
-function runDialog(body, fcn) {
-	debugger;
-	$("#container").append(body);
-	$('form').submit( function(eventdata) { // Supports multiple forms in dialog
-	    $.ajax({
-	        url: eventdata.srcElement.action,
-	        type: 'post',
-	        dataType: 'json',
-	        data: $(eventdata.srcElement).serialize()
-	    });
-	})
-	var ttl = $('div.dialog').attr("data") || "";
-	$("div.dialog").dialog({
-		modal: true,
-		width: 'auto',
-		title: ttl,
-		close: function() {
-			$('div.dialog').remove();
-		}
-	});				
-}
-
 function rcpAdd() { // Add a recipe to the cookmarks by pasting in a URL
-  jQuery.get( "recipes/new", {},
+  jQuery.get( "/recipes/new", {},
     function(data, status, hr) {
 	  if(status == "success") {
-		debugger;
-		if(data.type == "dialog") {
-			runDialog(data.body);
+		if(data.dialog != null) {
+			runDialog(data.dialog );
 		} else if(data.type == "element") { // Successful (non-redirected) response from server
 		    // $("."+data.go_link_class).replaceWith(data.go_link_body);
 		    boostInTablist(data.list_element_class, data.list_element_body, 3) // Put it at the top of My Cookmarks

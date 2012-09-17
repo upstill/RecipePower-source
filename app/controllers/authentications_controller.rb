@@ -23,11 +23,14 @@ class AuthenticationsController < ApplicationController
               end
            }
            format.json { # If asked for json, it's from javascript seeking a dialog
-               @partial = "dialog"
-               hresult = with_format("html") do
-                   render_to_string "new", :layout => false # :layout => "dlog"
-               end
-             render json: { type: "dialog", body: hresult }
+             @partial = "dialog"
+             hresult = with_format("html") do
+               render_to_string "new", :layout => false # :layout => "dlog"
+             end
+             render json: { 
+                 dialog: hresult, 
+                 title: "Let's get you logged in so we can do this properly" 
+             }
            }
       end
       # render "index", :layout => false # :layout => "dlog"
@@ -40,7 +43,6 @@ class AuthenticationsController < ApplicationController
       @auth_context = :manage
       @dlog = params[:source] != "click_to" # As opposed to automagically triggering login
       flash[:notice] = params[:notice]
-      debugger
       respond_to do |format|
           format.html {      
               case @partial = params[:partial]
@@ -53,17 +55,12 @@ class AuthenticationsController < ApplicationController
               end
            }
            format.json {
-             { type: "dialog", 
-               body: 
-                 case @partial = params[:partial]
-                 when "modal"
-                   render_string "new", :layout => false # :layout => "dlog"
-                 when nil # Not partial at all => whole page
-                   render_string "new"
-                 else
-                   render_string "new", :layout => "injector" # :layout => "dlog"
-                 end
-             }
+             @partial = "modal"
+             hresult = with_format("html") do
+               # Blithely assuming that we want a modal-dialog element if we're getting JSON
+               render_to_string "new", :layout => false # :layout => "dlog"
+             end
+             render json: { dialog: hresult }
            }
       end
   end

@@ -54,6 +54,7 @@ class ApplicationController < ActionController::Base
   # If there was a redirect to the login page, we go back to the source of the redirect.
   # Otherwise, new users go to the welcome page and logged-in-before users to the queries page.
   def after_sign_in_path_for(resource)
+    logger.debug "AFTER SIGNIN, STORED LOCATION IS "+(stored_location_for(resource)||"nil")
     stored_location_for(resource) ||
     if resource.is_a?(User)
       # flash[:notice] = "Congratulations, you're signed up!"
@@ -65,17 +66,20 @@ class ApplicationController < ActionController::Base
 
   # redirect somewhere that will eventually return back to here
   def redirect_away(url, options = {})
+    logger.debug "REDIRECTING AWAY FROM "+request.url+" TO "+url
     session[:original_uri] = request.url # url.sub /\w*:\/\/[^\/]*/, ''
     redirect_to url, options
   end
   
   # save the given url in the expectation of coming back to it
   def push_page(url)
+      logger.debug "PUSHING PAGE TO "+url
       session[:original_uri] = url
   end
 
   # returns the person to either the original url from a redirect_away or to a provided, default url
   def redirect_back(options = {})
+    logger.debug "REDIRECTING BACK TO "+(session[:original_uri] || "rcpqueries_path")
     uri = session[:original_uri] || rcpqueries_path
     session[:original_uri] = nil
     redirect_to uri, options

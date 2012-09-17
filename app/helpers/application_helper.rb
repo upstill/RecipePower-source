@@ -190,7 +190,7 @@ module ApplicationHelper
        userlinks << link_to("Sign Out", destroy_user_session_path, :method=>"delete")
        userlinks << navlink("Invite", new_user_invitation_path, (@nav_current==:invite))
     else
-       userlinks << link_to_function("Sign In", "runModal('authentications/new', 'Sign In or Sign Up' )" )
+       userlinks << link_to_function("Sign In", "applyForInteraction('authentications/new')" )
     end
  	userlinks << navlink("Admin", admin_path) if permitted_to?(:admin, :pages)
  	userlinks.join('&nbsp|&nbsp').html_safe
@@ -265,4 +265,25 @@ module ApplicationHelper
     def debug_dump(params)
         "<div id=\"debug\">#{debug(params)}</div>".html_safe
 	end
+	
+	# Embed a link to javascript for running a dialog by reference to a URL
+	def link_to_dialog(label, url)
+    	link_to_function label, "applyForInteraction('#{url}');"
+    end
+	
+	# Place the header for a dialog, including a call to its Onload function
+	def declareDialog( which, ttl)
+	    classname = which.to_s
+	    elmtDecl = %Q{
+	      <div class='#{classname} dialog #{@partial}' title="#{ttl}">
+	    }
+        selector = 'div.'+classname
+        onloadFcn = classname+"Onload"
+	    onloadDecl = %Q{
+	        <script type="text/javascript">
+            $('#{selector}').ready(#{onloadFcn});
+            </script>
+        }
+        (elmtDecl + onloadDecl).html_safe
+    end
 end

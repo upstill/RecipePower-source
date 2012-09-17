@@ -1,19 +1,11 @@
 /* Javascript supporting injected dialogs in arbitrary pages */
 
-function runModal(request, ttl) {
-	$('<div>').dialog({
-	  open: function(){ $(this).load( request+"?partial=modal" ); },
-		width: 900,
-		title: ttl
-	});
-}
-
 // Send a request for HTML to run a dialog, making no assumptions about the environment
 function recipePowerGetAndRun(request, mode) {
   if(mode === "modal") {
-	runModal(request);
+	applyForInteraction(request);
   } else {
-	mode = mode || "top";
+	mode = mode || "at_top";
 	var xmlhttp;
 	// Send the request using minimal Javascript
 	if (window.XMLHttpRequest) { xmlhttp=new XMLHttpRequest(); }

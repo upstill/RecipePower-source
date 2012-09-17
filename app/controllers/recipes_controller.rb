@@ -51,10 +51,7 @@ class RecipesController < ApplicationController
           format.html # new.html.erb
           format.json { 
               div = with_format("html") do render_to_string partial: "recipes/fields_new" end
-              render json: {
-                  type: "dialog",
-                  body: div
-                  } 
+              render json: { dialog: div } 
           }
         end
     end
@@ -85,10 +82,25 @@ class RecipesController < ApplicationController
         @Title = @recipe.title # Get title from the recipe
         @nav_current = nil
         # Now go forth and edit
-        if @dlog
-          render :layout => false
-        else
-          render :action => 'edit'
+        respond_to do |format|
+          format.html {
+              if @dlog
+                render :layout => false
+              else
+                render :action => 'edit'
+              end
+          }
+          format.json { 
+            body = with_format("html") do
+              @partial = "at_left"               
+              if @dlog
+                render_to_string :layout => false
+              else
+                render_to_string :action => 'edit'
+              end
+            end
+            render :json => { dialog: body }
+          }
         end
     else
         @Title = "Cookmark a Recipe"
@@ -188,7 +200,7 @@ class RecipesController < ApplicationController
     else
       respond_to do |format|
         format.html { render nothing: true }
-        format.json { render json: { error: @recipe.errors.inspect } }
+        format.json { render json: { type: :error, error: @recipe.errors.first } }
         format.js { render :text => e.message, :status => 403 }
       end
     end
