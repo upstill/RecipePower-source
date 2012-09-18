@@ -75,16 +75,17 @@ class RecipesController < ApplicationController
     # return if need_login true
     # Fetch the recipe by id, if possible, and ensure that it's registered with the user
     @recipe = Recipe.ensure current_user_or_guest_id, params # session[:user_id], params
-    @dlog = params[:source] != "click_to" # As opposed to following a link here
     if @recipe.errors.empty? # Success (recipe found)
         @recipe.current_user = current_user_or_guest_id # session[:user_id]
         @recipe.touch # We're looking at it, so make it recent
         @Title = @recipe.title # Get title from the recipe
         @nav_current = nil
+        @partial = params[:partial]
+        debugger
         # Now go forth and edit
         respond_to do |format|
           format.html {
-              if @dlog
+              if @partial
                 render :layout => false
               else
                 render :action => 'edit'
@@ -93,11 +94,7 @@ class RecipesController < ApplicationController
           format.json { 
             body = with_format("html") do
               @partial = "at_left"               
-              if @dlog
-                render_to_string :layout => false
-              else
-                render_to_string :action => 'edit'
-              end
+              render_to_string :layout => false
             end
             render :json => { dialog: body }
           }
@@ -126,6 +123,7 @@ class RecipesController < ApplicationController
       @recipe = Recipe.find(params[:id])
       @recipe.current_user = current_user_or_guest_id # session[:user_id]
       begin
+        debugger
         saved_okay = @recipe.update_attributes(params[:recipe])
         # rescue => e
             # saved_okay = false
@@ -200,7 +198,7 @@ class RecipesController < ApplicationController
     else
       respond_to do |format|
         format.html { render nothing: true }
-        format.json { render json: { type: :error, error: @recipe.errors.first } }
+        format.json { render json: { type: :error, error: @recipe.errors.messages.first.last.last } }
         format.js { render :text => e.message, :status => 403 }
       end
     end

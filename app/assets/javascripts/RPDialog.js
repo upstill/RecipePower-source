@@ -11,6 +11,23 @@
 	dialog to set up various response functions.
 */
 
+/* Utility for setting the function called when closing the dialog */
+function dialogCallback( fcn ) {
+  if(fcn == undefined) {
+	return $('div.dialog').data("callback");
+  } else {
+	$('div.dialog').data("callback", fcn);
+  }
+}
+
+function dialogResult( obj ) {
+  if(obj == undefined) {
+	return $('div.dialog').data("dialog_result");
+  } else {
+	$('div.dialog').data("dialog_result", obj);
+  }
+}
+
 // Javascript to replace the current page with the error (or any other full) page
 function doError() {
 	return $('#container').data("error_page");
@@ -29,9 +46,9 @@ function processErrorResult(html) {
 	*/
 	debugger;
 	if(html.match(/<!DOCTYPE/)) { // A whole page
-		$('div.dialog').data("dialog_result", { page: html } );
+		dialogResult( { page: html } );
 	} else if(html.match(re)) { // or a dialog
-		$('div.dialog').data("dialog_result", { dialog: html } );
+		dialogResult( { dialog: html } );
 	}	
 }
 
@@ -43,7 +60,7 @@ function processSuccess(responseData) {
 	// XXX If it's a full page, check for the presence of a dialog ('div.dialog'); if 
 	// present, extract and run it. if not, just do normal forms processing after return
 	// Instead of falling to default form handling, record the data in 'div.dialog'
-	$('div.dialog').data("dialog_result", responseData );
+	dialogResult( responseData );
     return false;
   }
   return true;
@@ -80,6 +97,7 @@ function runDialog(body) {
 	$('form').submit( function(eventdata) { // Supports multiple forms in dialog
 		var context = this;
 		var process_result_normally = true;
+		debugger;
 		/* To sort out errors from subsequent dialogs, we submit the form asynchronously
 		   and use the result to determine whether to do normal forms processing. */
 		$(context).ajaxSubmit( {
@@ -104,14 +122,19 @@ function runDialog(body) {
 		position: ['left', 'top'],
 		close: function() {
 			// It is expected that any dialogs have placed the response data object into the 'div.dialog'
-			var returned_data = $('div.dialog').data("dialog_result");
+			var returned_data = dialogResult();
+			debugger;
+			var callback = dialogCallback();
+			if(callback) {
+				callback(returned_data);
+			}
 			$('div.dialog').dialog("destroy");
 			$('div.dialog').remove();
 			// It is expected that any dialogs have placed the response data object into the 'div.dialog'
 			processResponse(returned_data);
 		}
 	}
-	debugger;
+	// XXX These should be in CSS
 	if(isTop) {
 		options.width = '100%';
 		options.height = '150px';
@@ -122,7 +145,7 @@ function runDialog(body) {
 		options.modal = true;
 		options.width = 'auto';
 		options.height = 'auto';
-		position: "center";
+		options.position = "center";
 	}
 	$("div.dialog").dialog( options );				
 }
@@ -141,11 +164,9 @@ function runDialog(body) {
    -- any "dialog" attribute is run on this page. The div containing the dialog may have classes
 			'at_left' or 'at_top', in which case they are run non-modally inside an iframe. 
 			Otherwise, run the dialog modally.
-   -- any "replacements" attributes are assumed to be a series of selector-value pairs, where the 
+   -- any "replacements" attribute is assumed to be a series of selector-value pairs, where the 
 		selectors stipulate elements to be replaced with the corresponding value
    -- any "notification" attribute is used as the text for a notifier of success
-   -- any "onSuccess" attribute is a function that gets called on the JSON object to perform any
-		other machinations with the JSON object.
 */
 
 // This function can be tied to a link with only a URL to a controller for generating a dialog.

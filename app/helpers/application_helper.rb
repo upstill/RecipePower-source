@@ -224,7 +224,8 @@ module ApplicationHelper
     def header_navlinks
     	navlinks = []
     	navlinks.push(navlink "Cookmarks", rcpqueries_path, (@nav_current==:cookmarks)) 
-    	navlinks.push(link_to_function("Add a Cookmark", "rcpAdd()" )) # navlink "Add a Cookmark", new_recipe_path, (@nav_current==:addcookmark)) 
+    	navlinks.push(link_to_dialog "Add a Cookmark", new_recipe_path )
+    	# navlinks.push(link_to_function("Add a Cookmark", "rcpAdd()" )) # navlink "Add a Cookmark", new_recipe_path, (@nav_current==:addcookmark)) 
     	navlinks.join('&nbsp|&nbsp').html_safe
     end
 =begin    
@@ -271,7 +272,10 @@ module ApplicationHelper
     	link_to_function label, "applyForInteraction('#{url}');"
     end
 	
-	# Place the header for a dialog, including a call to its Onload function
+	# Place the header for a dialog, including a call to its Onload function.
+	# Currently handled this way (e.g., symbols that have been supported)
+	#   :editRecipe
+	#   :newRecipe
 	def declareDialog( which, ttl)
 	    classname = which.to_s
 	    elmtDecl = %Q{

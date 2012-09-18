@@ -1,4 +1,5 @@
-<div class="dialog" id="rcpNewDialog" data="Add a Cookmark">
+<%= declareDialog :newRecipe, "Add a Cookmark" %>
+<%# <div class="newRecipe dialog" id="rcpNewDialog" data="Add a Cookmark"> %>
 <%= show_errors @recipe.errors %>
 <%= form_for @recipe do |f| %>
     <div class="recipe_url_div">

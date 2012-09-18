@@ -243,7 +243,7 @@ class Site < ActiveRecord::Base
         req.request_head(url.path).code
       rescue Exception => e
         # If the server doesn't want to talk, we assume that the URL is okay, at least
-        return 401 if e.kind_of?(Errno::ECONNRESET)
+        return 401 if e.kind_of?(Errno::ECONNRESET) || url
       end
     end
     

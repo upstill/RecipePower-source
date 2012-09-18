@@ -1,3 +1,6 @@
+function editRecipeCallback( responseData ) {
+	debugger;
+}
 
 // Ensure that functionality is available for the editRecipe dialog
 function editRecipeOnload() {
@@ -16,4 +19,14 @@ function editRecipeOnload() {
 		event.preventDefault();
 	})
 	fitImageOnLoad("div.editRecipe img");
+	dialogCallback( editRecipeCallback );
+}
+
+// Called upon successful completion of the dialog
+function newRecipeCallback( responseData ) {
+	debugger;
+}
+
+function newRecipeOnload() {
+	dialogCallback( newRecipeCallback )
 }
