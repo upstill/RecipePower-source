@@ -1,10 +1,37 @@
 <h3>Welcome<%= current_user ? ", "+current_user.handle : "" %>!</h3> 
-<%= link_to "Toggle Horn", "/", :id=>"ToggleHorn" %>
-<button type="button" onclick="fireSpaceTaker()">Fire SpaceTaker</button>
-<button type="button" onclick="fireLogin()">Login</button>
-<button type="button" onclick="fireAddCoomkark()">Add Cookmark via Paste</button>
-<button type="button" onclick="fireNewCookmark()">New Cookmark</button>
-<button type="button" onclick="fireEditCookmark()">Edit Cookmark</button>
+<table>
+  <tr>
+	<td>Login:</td>
+	<td><button type="button" onclick="recipePowerGetAndRunHTML('authentications/new')">Full Page HTML</button></td>
+	<td><button type="button" onclick="recipePowerGetAndRunJSON('authentications/new')">Full Page JSON</button></td>
+	<td><button type="button" onclick="recipePowerGetAndRunHTML('authentications/new', 'modal')">Modal HTML</button></td>
+	<td><button type="button" onclick="recipePowerGetAndRunJSON('authentications/new', 'modal')">Modal JSON</button></td>
+	<td><button type="button" onclick="recipePowerGetAndRunHTML('authentications/new', 'at_left')">Left HTML</button></td>
+	<td><button type="button" onclick="recipePowerGetAndRunJSON('authentications/new', 'at_left')">Left JSON</button></td>
+	<td><button type="button" onclick="recipePowerGetAndRunHTML('authentications/new', 'at_top')">Top HTML</button></td>
+	<td><button type="button" onclick="recipePowerGetAndRunJSON('authentications/new', 'at_top')">Top JSON</button></td>
+  </tr>
+  <tr>
+	<td>Add Cookmark:</td>
+	<td><button type="button" onclick="recipePowerGetAndRunHTML('recipes/new')">Full Page HTML</button></td>
+	<td><button type="button" onclick="recipePowerGetAndRunJSON('recipes/new')">Full Page JSON</button></td>
+	<td><button type="button" onclick="recipePowerGetAndRunHTML('recipes/new', 'modal')">Modal HTML</button></td>
+	<td><button type="button" onclick="recipePowerGetAndRunJSON('recipes/new', 'modal')">Modal JSON</button></td>
+	<td><button type="button" onclick="recipePowerGetAndRunHTML('recipes/new', 'at_left')">Left HTML</button></td>
+	<td><button type="button" onclick="recipePowerGetAndRunJSON('recipes/new', 'at_left')">Left JSON</button></td>
+	<td><button type="button" onclick="recipePowerGetAndRunHTML('recipes/new', 'at_top')">Top HTML</button></td>
+	<td><button type="button" onclick="recipePowerGetAndRunJSON('recipes/new', 'at_top')">Top JSON</button></td>
+  </tr>
+  <tr>
+	<td>New Cookmark:</td>
+  </tr>
+  <tr>
+	<td>Edit Cookmark:</td>
+  </tr>
+</table>
+<button type="button" onclick="toggleResults()">Toggle Results Display</button></td>
+<div class="results">
+</div>
 <div id="sidebar">
 <h3>Getting Started</h3>
 <p><%= bookmarklet %>

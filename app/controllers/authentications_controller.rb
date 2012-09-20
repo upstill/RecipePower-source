@@ -5,35 +5,9 @@ class AuthenticationsController < ApplicationController
       @authentications = current_user.authentications if current_user
       @auth_delete = true
       @auth_context = :manage
-      @dlog = params[:source] != "click_to" # As opposed to automagically triggering login
       @partial = params[:partial]
       flash[:notice] = params[:notice]
-#<ActionView::MissingTemplate: Missing template authentications/new, application/new with 
-# {:handlers=>[:erb, :builder, :coffee], :formats=>[:json], :locale=>[:en, :en]}      
-    respond_to do |format|
-          format.html {      
-              debugger
-              case @partial = params[:partial]
-              when "modal"
-                  render "new", :layout => false # :layout => "dlog"
-              when nil # Not partial at all => whole page
-                  render "new"
-              else
-                  render "new", :layout => "injector" # :layout => "dlog"
-              end
-           }
-           format.json { # If asked for json, it's from javascript seeking a dialog
-             @partial = "dialog"
-             hresult = with_format("html") do
-               render_to_string "new", :layout => false # :layout => "dlog"
-             end
-             render json: { 
-                 dialog: hresult, 
-                 title: "Let's get you logged in so we can do this properly" 
-             }
-           }
-      end
-      # render "index", :layout => false # :layout => "dlog"
+      dialog_boilerplate "new"
     end
 
   # Get a new authentication (==login)
@@ -41,28 +15,9 @@ class AuthenticationsController < ApplicationController
       @authentications = current_user.authentications if current_user
       @auth_delete = true
       @auth_context = :manage
-      @dlog = params[:source] != "click_to" # As opposed to automagically triggering login
       flash[:notice] = params[:notice]
-      respond_to do |format|
-          format.html {      
-              case @partial = params[:partial]
-              when "modal"
-                  render "new", :layout => false # :layout => "dlog"
-              when nil # Not partial at all => whole page
-                  render "new"
-              else
-                  render "new", :layout => "injector" # :layout => "dlog"
-              end
-           }
-           format.json {
-             @partial = "modal"
-             hresult = with_format("html") do
-               # Blithely assuming that we want a modal-dialog element if we're getting JSON
-               render_to_string "new", :layout => false # :layout => "dlog"
-             end
-             render json: { dialog: hresult }
-           }
-      end
+      @partial = params[:partial]
+      dialog_boilerplate "new"
   end
 
   def failure

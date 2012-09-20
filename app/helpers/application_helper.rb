@@ -190,7 +190,7 @@ module ApplicationHelper
        userlinks << link_to("Sign Out", destroy_user_session_path, :method=>"delete")
        userlinks << navlink("Invite", new_user_invitation_path, (@nav_current==:invite))
     else
-       userlinks << link_to_function("Sign In", "applyForInteraction('authentications/new')" )
+       userlinks << link_to_function("Sign In", "recipePowerGetAndRunJSON('authentications/new', 'modal')" )
     end
  	userlinks << navlink("Admin", admin_path) if permitted_to?(:admin, :pages)
  	userlinks.join('&nbsp|&nbsp').html_safe
@@ -224,7 +224,7 @@ module ApplicationHelper
     def header_navlinks
     	navlinks = []
     	navlinks.push(navlink "Cookmarks", rcpqueries_path, (@nav_current==:cookmarks)) 
-    	navlinks.push(link_to_dialog "Add a Cookmark", new_recipe_path )
+    	navlinks.push(link_to_dialog "Add a Cookmark", new_recipe_path, "modal" )
     	# navlinks.push(link_to_function("Add a Cookmark", "rcpAdd()" )) # navlink "Add a Cookmark", new_recipe_path, (@nav_current==:addcookmark)) 
     	navlinks.join('&nbsp|&nbsp').html_safe
     end
@@ -268,8 +268,8 @@ module ApplicationHelper
 	end
 	
 	# Embed a link to javascript for running a dialog by reference to a URL
-	def link_to_dialog(label, url)
-    	link_to_function label, "applyForInteraction('#{url}');"
+	def link_to_dialog(label, path, where)
+    	link_to_function label, "recipePowerGetAndRunJSON('#{path}', where);"
     end
 	
 	# Place the header for a dialog, including a call to its Onload function.

@@ -11,6 +11,89 @@
 	dialog to set up various response functions.
 */
 
+function recipePowerGetAndRunHTML(request, where) {
+	if(where) {
+		request += "?partial="+where
+	}
+	$('span.query').text(request);
+	var xmlhttp;
+	// Send the request using minimal Javascript
+	if (window.XMLHttpRequest) { xmlhttp=new XMLHttpRequest(); }
+	else {
+	  try { xmlhttp = new ActiveXObject("Msxml2.XMLHTTP"); }
+	  catch (e) {
+		try { xmlhttp = new ActiveXObject("Microsoft.XMLHTTP"); }
+		catch (e) { xmlhttp = null; }
+	  }
+	}
+	if(xmlhttp != null) {
+	  xmlhttp.onreadystatechange=function() {
+	    if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+		  // Now we have code, possibly required for jQuery and certainly 
+		  // required for any of our javascript. Ensure the code is loaded.
+		  if(xmlhttp.responseText) {
+			if($('span.source').length > 0) {
+			  $('span.source').html("");
+			  appendSource(where||"page", xmlhttp.responseText)
+			} else {
+			  if(where) {
+			    runDialog(xmlhttp.responseText, where);
+			  } else {
+				// If not presented with a :partial specification, controller should return whole page
+			    runPage(xmlhttp.responseText);
+			  }
+		    }
+		  }
+	    }
+	  }
+	  xmlhttp.open("GET", request, true);
+	  xmlhttp.setRequestHeader("Accept", "text/html" );
+	  xmlhttp.send();		
+	}
+}
+
+// Debugging aid: if there is a 'div.results' element we maintain a span of class 'query' for recording the query. Maybe.
+// This function toggles that.
+function toggleResults() {
+  if($('span.query').length > 0) {
+	$('div.results').html("");
+  } else {
+    $('div.results').html("<hr><h3>Query</h3><span class='query'></span><br><hr><h3>Result</h3><span class='source'></span><br><hr>");
+  }
+}
+
+// This function can be tied to a link with only a URL to a controller for generating a dialog.
+// We will get the div and run the associated dialog.
+function recipePowerGetAndRunJSON(request, where) {
+	if(where) {
+		request += "?partial="+where
+	}
+	$('span.query').text(request);
+	$.ajax( {
+		type: "GET",
+		dataType: "json",
+		url: request,
+		error: function(jqXHR, textStatus, errorThrown) {
+			$('span.source').text(jqXHR.responseText);
+			debugger;
+			postErrorResult(jqXHR.responseText);
+		},
+		success: function (responseData, statusText, xhr) {
+			if($('span.source').length > 0) {
+				$('span.source').html("");
+				$('span.source').text("where: "+(responseData.where || "not declared")).append('<br>');
+				appendSource("page", responseData.page)
+				appendSource("dialog", responseData.dialog)
+				appendSource("modal", responseData.modal)
+				appendSource("at_left", responseData.at_left)
+				appendSource("at_top", responseData.at_top)
+			} else {
+				processResponse(responseData);
+			}
+		}
+	});
+}
+
 /* Utility for setting the function called when closing the dialog */
 function dialogCallback( fcn ) {
   if(fcn == undefined) {
@@ -30,11 +113,11 @@ function dialogResult( obj ) {
 
 // Javascript to replace the current page with the error (or any other full) page
 function doError() {
-	return $('#container').data("error_page");
+	return $('#container').data("pending_page");
 }
 
 /* Handle the error result from either a forms submission or a request of the server */
-function processErrorResult(html) {
+function postErrorResult(html) {
 	// Hopefully the responseText is HTML...
 	var re = new RegExp(/^<div.*\bclass\b\s*=\s*\".*\bdialog\b/);
 	/* Testers for the re
@@ -53,14 +136,14 @@ function processErrorResult(html) {
 }
 
 /* Handle successful return of the JSON request */
-function processSuccess(responseData) {
+function postSuccess(jsonResponse) {
   debugger;
-  if(responseData.page || responseData.dialog) {
+  if(jsonResponse.page || jsonResponse.dialog) {
 	// We got a result we can handle; stash it in the dialog result and return false
 	// XXX If it's a full page, check for the presence of a dialog ('div.dialog'); if 
 	// present, extract and run it. if not, just do normal forms processing after return
 	// Instead of falling to default form handling, record the data in 'div.dialog'
-	dialogResult( responseData );
+	dialogResult( jsonResponse );
     return false;
   }
   return true;
@@ -76,21 +159,51 @@ function processResponse(data) {
 	if(data != null) {
 		// Process the data as returned
 		if(data.page) { // Full page: open it
-			$('#container').data("error_page", data.page );
-			location.replace('javascript:doError()');
+			runPage(data.page);
 		} else if(data.dialog) {
-			runDialog(data.dialog);					
+			runDialog(data.dialog, "modal"); // runModalDialog(data.dialog);					
+		} else if(data.at_top) {
+			runDialog(data.dialog, "at_top"); // runModelessDialog(data.at_top, "at_top");
+		} else if(data.at_left) {
+			runDialog(data.dialog, "at_left"); // runModelessDialog(data.at_left, "at_left");
 		}
 	}	
 }
 
+function runPage(html) {
+	if(html) {
+		$('#container').data("pending_page", html );
+		location.replace('javascript:doError()');		
+	}
+}
+
+function runDialog(html, mode) {
+	if(mode == "modal" || mode == "dialog") {
+		runModalDialog(html);					
+	} else { // at_top and at_left run modelessly
+		assertDialog(html, mode);
+	}
+}
+
+/* Run a modeless dialog by injecting a div at the top of the page, AFTER wrapping all
+    existing content in a special div */
+function runModelessDialog(body, mode) {
+	debugger;
+	withdrawDialog();
+}
+
 // Run a dialog from a body of HTML, which should be a div with 'dialog' class as outlined above.
-function runDialog(body) {
-	$("#container").append(body);
+function runModalDialog(body) {
+	// $("#container").append(body);
+	debugger;
+	// Parse HTML, extract 'div.dialog' element (as nec.), then append to container
+	var dlog = $('div.dialog', $('<html></html>').html(body));
+	$('#container').append(dlog);
+	
 	$("input.cancel").click( function(event) {
 		$('div.dialog').dialog("close");
 		event.preventDefault();
-	} );
+	});
 	// Any forms get submitted and their results handled appropriately. NB: the submission
 	// must be synchronous because we have to decide AFTER the results return whether to handle
 	// the form result normally.
@@ -104,12 +217,12 @@ function runDialog(body) {
 			async: false,
 			dataType: "json",
 			error: function(jqXHR, textStatus, errorThrown) {
-				processErrorResult(jqXHR.responseText);
+				postErrorResult(jqXHR.responseText);
 			    $('div.dialog').dialog("close");
 			    process_result_normally = false;
 			},
 			success: function (responseData, statusText, xhr, form) {
-				process_result_normally = processSuccess(responseData);
+				process_result_normally = postSuccess(responseData);
 				$('div.dialog').dialog("close");
 			}
 		});
@@ -129,8 +242,8 @@ function runDialog(body) {
 				callback(returned_data);
 			}
 			$('div.dialog').dialog("destroy");
+			// Remove the first child of 'body', which is our dialog (if any)
 			$('div.dialog').remove();
-			// It is expected that any dialogs have placed the response data object into the 'div.dialog'
 			processResponse(returned_data);
 		}
 	}
@@ -150,6 +263,37 @@ function runDialog(body) {
 	$("div.dialog").dialog( options );				
 }
 
+// Inject the dialog on the current document, using the given HTML
+function assertDialog(code) {
+	debugger;
+	if($('#RecipePowerInjectedEncapsulation').length == 0) { // XXX depends on jQuery
+	  // Need to encapsulate existing body
+	  var theFrame = $("<div id='RecipePowerInjectedEncapsulation'></div>");
+	  $("body").children()
+	    // Put them into their own div
+		.wrapAll(theFrame);
+	} 
+	if($('#RecipePowerInjectedEncapsulation').prev().length > 0) {
+	  // Page has existing dialog => Remove it
+	  // Clean up javascript namespace
+	  $('#RecipePowerInjectedEncapsulation').prev().remove();
+	}
+	// Now the page is ready to receive the code, prepended to the page
+	// We extract the dialog div from what may be a whole page
+	$("body").prepend($('div.dialog', $(code)));
+	// Ensure that all scripts are loaded
+	// Run after-load functions
+}
+
+// Remove the dialog and injected code
+function withdrawDialog() {
+	$('#RecipePowerInjectedEncapsulation').prev().dialog("destroy");
+	// Remove the first child of 'body', which is our dialog (if any)
+	$('#RecipePowerInjectedEncapsulation').prev().remove();
+	/* Unwrap the page contents from their encapsulation */
+	$('#RecipePowerInjectedEncapsulation').children().unwrap();
+}
+
 /* Submit a request to the server for interactive HTML. It's meant to be JSON specifying how 
    to handle it, but if the controller doesn't produce JSON (or if the request gets redirected
    to a controller which doesn't), the request may produce generic HTML, failing with an error 
@@ -162,25 +306,19 @@ function runDialog(body) {
    If the request DOES return JSON, there are several possibilities:
    -- any "page" attribute is treated as HTML, exactly as above
    -- any "dialog" attribute is run on this page. The div containing the dialog may have classes
-			'at_left' or 'at_top', in which case they are run non-modally inside an iframe. 
+			'at_left' or 'at_top', in which case they are run non-modally inside a div
 			Otherwise, run the dialog modally.
    -- any "replacements" attribute is assumed to be a series of selector-value pairs, where the 
 		selectors stipulate elements to be replaced with the corresponding value
    -- any "notification" attribute is used as the text for a notifier of success
 */
 
-// This function can be tied to a link with only a URL to a controller for generating a dialog.
-// We will get the div and run the associated dialog.
-function applyForInteraction(querystr) {
-	$.ajax( {
-		type: "GET",
-		dataType: "json",
-		url: querystr,
-		error: function(jqXHR, textStatus, errorThrown) {
-			processErrorResult(jqXHR.responseText);
-		},
-		success: function (responseData, statusText, xhr) {
-			processResponse(responseData);
-		}
-	});
+function appendSource(label, src) {
+	if(src) {
+		$('span.source').append(
+			$('<strong>').text(label+":")
+		).append(
+			$('<pre>').text(src)
+		)
+	}
 }

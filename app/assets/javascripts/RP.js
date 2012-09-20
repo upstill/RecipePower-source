@@ -439,7 +439,7 @@ function rcpAdd() { // Add a recipe to the cookmarks by pasting in a URL
     function(data, status, hr) {
 	  if(status == "success") {
 		if(data.dialog != null) {
-			runDialog(data.dialog );
+			runModalDialog(data.dialog );
 		} else if(data.type == "element") { // Successful (non-redirected) response from server
 		    // $("."+data.go_link_class).replaceWith(data.go_link_body);
 		    boostInTablist(data.list_element_class, data.list_element_body, 3) // Put it at the top of My Cookmarks

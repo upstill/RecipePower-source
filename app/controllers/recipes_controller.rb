@@ -81,7 +81,6 @@ class RecipesController < ApplicationController
         @Title = @recipe.title # Get title from the recipe
         @nav_current = nil
         @partial = params[:partial]
-        debugger
         # Now go forth and edit
         respond_to do |format|
           format.html {

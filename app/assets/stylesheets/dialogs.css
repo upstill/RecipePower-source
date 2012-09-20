@@ -1,0 +1,15 @@
+div.at_left {
+  width:10.2em;
+  position:absolute;
+  top:0;
+  font-size:80%;
+  padding-left:1%;
+  padding-right:1%;
+  margin-left:0;
+  margin-right:0;
+}
+
+div.content_at_left {
+	margin-left:10.2em;
+    padding-left:1em;
+}
