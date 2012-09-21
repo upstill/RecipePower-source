@@ -47,13 +47,18 @@ class RecipesController < ApplicationController
         @Title = "Cookmark a Recipe"
         @nav_current = :addcookmark
         @recipe.current_user = current_user_or_guest_id # session[:user_id]
+        @partial = params[:partial]
+        dialog_boilerplate 'new', 'modal'
+=begin
         respond_to do |format|
           format.html # new.html.erb
           format.json { 
+              @partial = 'model' unless @partial
               div = with_format("html") do render_to_string partial: "recipes/fields_new" end
-              render json: { dialog: div } 
+              render json: { dialog: div, where: @partial } 
           }
         end
+=end
     end
   end
 
@@ -82,22 +87,7 @@ class RecipesController < ApplicationController
         @nav_current = nil
         @partial = params[:partial]
         # Now go forth and edit
-        respond_to do |format|
-          format.html {
-              if @partial
-                render :layout => false
-              else
-                render :action => 'edit'
-              end
-          }
-          format.json { 
-            body = with_format("html") do
-              @partial = "at_left"               
-              render_to_string :layout => false
-            end
-            render :json => { dialog: body }
-          }
-        end
+        dialog_boilerplate('edit', 'at_left')
     else
         @Title = "Cookmark a Recipe"
         @nav_current = :addcookmark

@@ -28,13 +28,13 @@ padding:10px;
 	float:left;
 }
 
-.sign_dlog {
+.sign.modal {
 	width: 550px;
     // border: solid 1px #999;
 	float: left;
 }
 
-.auth_signin_dlog {
+.auth_signin.modal {
 	width: 280px;
     border-right: solid 1px #999;
 	margin: 0px 20px;
@@ -90,7 +90,7 @@ padding:10px;
 	float: left;
 }
 
-.signin_all_dlog {
+.signin_all.modal {
 	width: 930px;
 	margin-top: 2em;
 	float: left;

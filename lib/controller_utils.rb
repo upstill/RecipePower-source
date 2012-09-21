@@ -9,7 +9,7 @@ def with_format(format, &block)
     result
 end
 
-def dialog_boilerplate(action)
+def dialog_boilerplate(action, default_partial = null)
     respond_to do |format|
         format.html {      
             if @partial
@@ -19,10 +19,10 @@ def dialog_boilerplate(action)
             end
          }
          format.json { 
-           @partial = "modal" unless @partial
+           @partial = default_partial unless @partial
            hresult = with_format("html") do
              # Blithely assuming that we want a modal-dialog element if we're getting JSON
-             render_to_string "new", :layout => false # :layout => "dlog"
+             render_to_string action, :layout => false # :layout => "dlog"
            end
            render json: { dialog: hresult, where: @partial }
          }

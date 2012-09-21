@@ -1,4 +1,4 @@
-<div class="auth_poss<%= "_dlog" if @partial %>">
+<div class="auth_poss <%= @partial %>">
   <% if @auth_context == :manage %>
 	<% if current_user %>
       <strong>Add another service to sign in with:</strong><br>

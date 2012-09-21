@@ -1,4 +1,15 @@
 
+function recipePowerGetAndRun(request, format, where) {
+	if(where) {
+		if(where != "wherever") {
+			request += "?partial="+where
+		}
+	} else if(format=="html") {
+		window.location = request;
+		return;
+	}
+}
+
 /* Take an HTML stream and run a dialog from it. Assumptions:
   1) The body is a div element of class 'dialog'. (It will work if the 'div.dialog'
 	is embedded within the HTML, but it won't clean up properly.)
@@ -88,13 +99,13 @@ function recipePowerGetAndRunJSON(request, where) {
 				appendSource("at_left", responseData.at_left)
 				appendSource("at_top", responseData.at_top)
 			} else {
-				processResponse(responseData);
+				processJSON(responseData);
 			}
 		}
 	});
 }
 
-/* Utility for setting the function called when closing the dialog */
+/* Utility for setting and getting the function called when closing the dialog */
 function dialogCallback( fcn ) {
   if(fcn == undefined) {
 	return $('div.dialog').data("callback");
@@ -116,8 +127,7 @@ function doError() {
 	return $('#container').data("pending_page");
 }
 
-/* Handle the error result from either a forms submission or a request of the server */
-function postErrorResult(html) {
+function HTMLtoJSON(html) {
 	// Hopefully the responseText is HTML...
 	var re = new RegExp(/^<div.*\bclass\b\s*=\s*\".*\bdialog\b/);
 	/* Testers for the re
@@ -129,10 +139,18 @@ function postErrorResult(html) {
 	*/
 	debugger;
 	if(html.match(/<!DOCTYPE/)) { // A whole page
-		dialogResult( { page: html } );
+		return { page: html };
 	} else if(html.match(re)) { // or a dialog
-		dialogResult( { dialog: html } );
+		return { dialog: html };
 	}	
+}
+
+/* Handle the error result from either a forms submission or a request of the server */
+function postErrorResult(html) {
+	var json = HTMLtoJSON(html);
+	if(json) {
+		dialogResult(json);
+	}
 }
 
 /* Handle successful return of the JSON request */
@@ -154,18 +172,17 @@ function postSuccess(jsonResponse) {
   'data' is an object, either coming directly from a JSON request or indirectly by catching
    HTML that came in on failure of a JSON request (in which case the object has a 'page' or
    a 'dialog' attribute, depending on whether the HTML was a full page or a dialog fragment). */
-function processResponse(data) {
+function processJSON(data) {
 	debugger;
 	if(data != null) {
 		// Process the data as returned
 		if(data.page) { // Full page: open it
 			runPage(data.page);
 		} else if(data.dialog) {
-			runDialog(data.dialog, "modal"); // runModalDialog(data.dialog);					
-		} else if(data.at_top) {
-			runDialog(data.dialog, "at_top"); // runModelessDialog(data.at_top, "at_top");
-		} else if(data.at_left) {
-			runDialog(data.dialog, "at_left"); // runModelessDialog(data.at_left, "at_left");
+			if(data.where)
+			  runDialog(data.dialog, data.where); // runModalDialog(data.dialog);	
+			else
+			  runDialog(data.dialog)				
 		}
 	}	
 }
@@ -177,7 +194,20 @@ function runPage(html) {
 	}
 }
 
+// Run html for a dialog, either in the mode given, or based on the 
+// class set of the dialog itself
 function runDialog(html, mode) {
+	debugger;
+	if (!mode) {
+	   var parsed = $('div.dialog', $('<html></html>').html(html));
+	   if($(parsed).hasClass('at_left')) {
+		 mode = 'at_left'
+	   } else if($(parsed).hasClass('at_top')) {
+		 mode = 'at_top'
+	   } else {
+		 mode = 'modal'
+	   }
+	}
 	if(mode == "modal" || mode == "dialog") {
 		runModalDialog(html);					
 	} else { // at_top and at_left run modelessly
@@ -194,12 +224,8 @@ function runModelessDialog(body, mode) {
 
 // Run a dialog from a body of HTML, which should be a div with 'dialog' class as outlined above.
 function runModalDialog(body) {
-	// $("#container").append(body);
-	debugger;
 	// Parse HTML, extract 'div.dialog' element (as nec.), then append to container
-	var dlog = $('div.dialog', $('<html></html>').html(body));
-	$('#container').append(dlog);
-	
+	var dlog = assertDialog(body); // $('#container').append($('div.dialog', $('<html></html>').html(body)));
 	$("input.cancel").click( function(event) {
 		$('div.dialog').dialog("close");
 		event.preventDefault();
@@ -217,11 +243,13 @@ function runModalDialog(body) {
 			async: false,
 			dataType: "json",
 			error: function(jqXHR, textStatus, errorThrown) {
+				debugger;
 				postErrorResult(jqXHR.responseText);
 			    $('div.dialog').dialog("close");
 			    process_result_normally = false;
 			},
 			success: function (responseData, statusText, xhr, form) {
+				debugger;
 				process_result_normally = postSuccess(responseData);
 				$('div.dialog').dialog("close");
 			}
@@ -243,21 +271,20 @@ function runModalDialog(body) {
 			}
 			$('div.dialog').dialog("destroy");
 			// Remove the first child of 'body', which is our dialog (if any)
-			$('div.dialog').remove();
-			processResponse(returned_data);
+			withdrawDialog(); // $('div.dialog').remove();
+			processJSON(returned_data);
 		}
 	}
-	// XXX These should be in CSS
 	if(isTop) {
 		options.width = '100%';
-		options.height = '150px';
+		options.height = $(dlog).css("height");
 	} else if (isLeft) {
 		options.height = 'auto';
-		options.width = '250px';
+		options.width = $(dlog).css("width");
 	} else {
 		options.modal = true;
-		options.width = 'auto';
-		options.height = 'auto';
+		options.width = $(dlog).css("width");
+		options.height = $(dlog).css("height");
 		options.position = "center";
 	}
 	$("div.dialog").dialog( options );				
@@ -265,7 +292,7 @@ function runModalDialog(body) {
 
 // Inject the dialog on the current document, using the given HTML
 function assertDialog(code) {
-	debugger;
+	var dlog = $('div.dialog', $('<html></html>').html(code));
 	if($('#RecipePowerInjectedEncapsulation').length == 0) { // XXX depends on jQuery
 	  // Need to encapsulate existing body
 	  var theFrame = $("<div id='RecipePowerInjectedEncapsulation'></div>");
@@ -273,23 +300,33 @@ function assertDialog(code) {
 	    // Put them into their own div
 		.wrapAll(theFrame);
 	} 
-	if($('#RecipePowerInjectedEncapsulation').prev().length > 0) {
-	  // Page has existing dialog => Remove it
+	var odlog = $('#RecipePowerInjectedEncapsulation').prev().add(
+				$('#RecipePowerInjectedEncapsulation').next());
+	if($(odlog).length > 0) {
+	  // Page has existing dialog, either before or after injection => Remove it
 	  // Clean up javascript namespace
-	  $('#RecipePowerInjectedEncapsulation').prev().remove();
+	  $(odlog).remove();
 	}
 	// Now the page is ready to receive the code, prepended to the page
 	// We extract the dialog div from what may be a whole page
-	$("body").prepend($('div.dialog', $(code)));
+	$("body").prepend($(dlog));
 	// Ensure that all scripts are loaded
 	// Run after-load functions
+	debugger;
+	dlog = $('div.dialog');
+	if($(dlog).hasClass("at_left")) {
+	    $('#RecipePowerInjectedEncapsulation').css("marginLeft", $(dlog).css("width"))
+	}
+	return dlog;
 }
 
 // Remove the dialog and injected code
 function withdrawDialog() {
-	$('#RecipePowerInjectedEncapsulation').prev().dialog("destroy");
+	var odlog = $('#RecipePowerInjectedEncapsulation').prev().add(
+				$('#RecipePowerInjectedEncapsulation').next());
+	$(odlog).dialog("destroy");
 	// Remove the first child of 'body', which is our dialog (if any)
-	$('#RecipePowerInjectedEncapsulation').prev().remove();
+	$(odlog).remove();
 	/* Unwrap the page contents from their encapsulation */
 	$('#RecipePowerInjectedEncapsulation').children().unwrap();
 }
