@@ -279,7 +279,7 @@ module ApplicationHelper
 	def declareDialog( which, ttl)
 	    classname = which.to_s
 	    elmtDecl = %Q{
-	      <div class='#{classname} dialog #{@partial}' title="#{ttl}">
+	      <div class='#{classname} dialog #{@area}' title="#{ttl}">
 	    }
         selector = 'div.'+classname
         onloadFcn = classname+"Onload"

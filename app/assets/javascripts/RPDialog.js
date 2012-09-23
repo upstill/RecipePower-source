@@ -1,15 +1,4 @@
 
-function recipePowerGetAndRun(request, format, where) {
-	if(where) {
-		if(where != "wherever") {
-			request += "?partial="+where
-		}
-	} else if(format=="html") {
-		window.location = request;
-		return;
-	}
-}
-
 /* Take an HTML stream and run a dialog from it. Assumptions:
   1) The body is a div element of class 'dialog'. (It will work if the 'div.dialog'
 	is embedded within the HTML, but it won't clean up properly.)
@@ -22,9 +11,9 @@ function recipePowerGetAndRun(request, format, where) {
 	dialog to set up various response functions.
 */
 
-function recipePowerGetAndRunHTML(request, where) {
-	if(where) {
-		request += "?partial="+where
+function recipePowerGetAndRunHTML(request, how, area) {
+	if(area) { // No area specified => up to the controller (usually defaults to 'page')
+		request += "?area="+area
 	}
 	$('span.query').text(request);
 	var xmlhttp;
@@ -43,17 +32,8 @@ function recipePowerGetAndRunHTML(request, where) {
 		  // Now we have code, possibly required for jQuery and certainly 
 		  // required for any of our javascript. Ensure the code is loaded.
 		  if(xmlhttp.responseText) {
-			if($('span.source').length > 0) {
-			  $('span.source').html("");
-			  appendSource(where||"page", xmlhttp.responseText)
-			} else {
-			  if(where) {
-			    runDialog(xmlhttp.responseText, where);
-			  } else {
-				// If not presented with a :partial specification, controller should return whole page
-			    runPage(xmlhttp.responseText);
-			  }
-		    }
+			  (typeof presentResponse === 'function' && presentResponse({code: xmlhttp.responseText})) || 
+			  runAppropriately(xmlhttp.responseText, how, area)
 		  }
 	    }
 	  }
@@ -63,23 +43,33 @@ function recipePowerGetAndRunHTML(request, where) {
 	}
 }
 
-// Debugging aid: if there is a 'div.results' element we maintain a span of class 'query' for recording the query. Maybe.
-// This function toggles that.
-function toggleResults() {
-  if($('span.query').length > 0) {
-	$('div.results').html("");
-  } else {
-    $('div.results').html("<hr><h3>Query</h3><span class='query'></span><br><hr><h3>Result</h3><span class='source'></span><br><hr>");
-  }
-}
+/* Submit a request to the server for interactive HTML. It's meant to be JSON specifying how 
+   to handle it, but if the controller doesn't produce JSON (or if the request gets redirected
+   to a controller which doesn't), the request may produce generic HTML, failing with an error 
+   but still providing the HTML. The HTML may be
+   either a dialog (in the form of a div with class 'dialog') or a full page. In turn, the full
+   page may have a dialog embedded in it (again, as a div.dialog). If a dialog, embedded or not,
+   we run it on the current page. If a full page without a dialog, we throw up our 
+   hands and just load the page.
+
+   If the request DOES return JSON, there are several possibilities:
+   -- any "page" attribute is treated as HTML, exactly as above
+   -- any "dialog" attribute is run on this page. The div containing the dialog may have classes
+			'at_left' or 'at_top', in which case they are run non-modally inside a div
+			Otherwise, run the dialog modally.
+   -- any "replacements" attribute is assumed to be a series of selector-value pairs, where the 
+		selectors stipulate elements to be replaced with the corresponding value
+   -- any "notification" attribute is used as the text for a notifier of success
+*/
 
 // This function can be tied to a link with only a URL to a controller for generating a dialog.
 // We will get the div and run the associated dialog.
-function recipePowerGetAndRunJSON(request, where) {
-	if(where) {
-		request += "?partial="+where
+function recipePowerGetAndRunJSON(request, how, area) {
+	if(area) {
+		request += "?area="+area
 	}
 	$('span.query').text(request);
+	debugger;
 	$.ajax( {
 		type: "GET",
 		dataType: "json",
@@ -90,19 +80,31 @@ function recipePowerGetAndRunJSON(request, where) {
 			postErrorResult(jqXHR.responseText);
 		},
 		success: function (responseData, statusText, xhr) {
-			if($('span.source').length > 0) {
-				$('span.source').html("");
-				$('span.source').text("where: "+(responseData.where || "not declared")).append('<br>');
-				appendSource("page", responseData.page)
-				appendSource("dialog", responseData.dialog)
-				appendSource("modal", responseData.modal)
-				appendSource("at_left", responseData.at_left)
-				appendSource("at_top", responseData.at_top)
-			} else {
-				processJSON(responseData);
-			}
+			debugger;
+			(typeof presentResponse === 'function' && presentResponse(responseData)) || 
+			runAppropriately(responseData.code, how, responseData.area);
 		}
 	});
+}
+
+function runAppropriately(code, how, area) {
+  if(how == "page") {
+    runPage(code);
+  } else if(how == "modeless") {
+	injectDialog(code, area);
+  } else { // at_top and at_left run modelessly
+	runModalDialog(code, area);					
+  }
+}
+
+// Debugging aid: if there is a 'div.results' element we maintain a span of class 'query' for recording the query. Maybe.
+// This function toggles that.
+function toggleResults() {
+  if($('span.query').length > 0) {
+	$('div.results').html("");
+  } else {
+    $('div.results').html("<hr><h3>Query</h3><span class='query'></span><br><hr><h3>Result</h3><span class='source'></span><br><hr>");
+  }
 }
 
 /* Utility for setting and getting the function called when closing the dialog */
@@ -127,24 +129,6 @@ function doError() {
 	return $('#container').data("pending_page");
 }
 
-function HTMLtoJSON(html) {
-	// Hopefully the responseText is HTML...
-	var re = new RegExp(/^<div.*\bclass\b\s*=\s*\".*\bdialog\b/);
-	/* Testers for the re
-	var match1 = "<div class=\"dialog\"".match(re);
-	var match2 = "<div class =\"dialog\"".match(re);
-	var match3 = "<div class= \"dialog\"".match(re);
-	var match4 = "<div class=\"rcpEdit dialog\"".match(re);
-	var match5 = "<div class=\"rcpEditdialog\"".match(re);
-	*/
-	debugger;
-	if(html.match(/<!DOCTYPE/)) { // A whole page
-		return { page: html };
-	} else if(html.match(re)) { // or a dialog
-		return { dialog: html };
-	}	
-}
-
 /* Handle the error result from either a forms submission or a request of the server */
 function postErrorResult(html) {
 	var json = HTMLtoJSON(html);
@@ -167,26 +151,6 @@ function postSuccess(jsonResponse) {
   return true;
 }
 
-/* Process the result of hitting the server with a general request, whether from a forms
-  submission or a free-standing request. 
-  'data' is an object, either coming directly from a JSON request or indirectly by catching
-   HTML that came in on failure of a JSON request (in which case the object has a 'page' or
-   a 'dialog' attribute, depending on whether the HTML was a full page or a dialog fragment). */
-function processJSON(data) {
-	debugger;
-	if(data != null) {
-		// Process the data as returned
-		if(data.page) { // Full page: open it
-			runPage(data.page);
-		} else if(data.dialog) {
-			if(data.where)
-			  runDialog(data.dialog, data.where); // runModalDialog(data.dialog);	
-			else
-			  runDialog(data.dialog)				
-		}
-	}	
-}
-
 function runPage(html) {
 	if(html) {
 		$('#container').data("pending_page", html );
@@ -194,38 +158,10 @@ function runPage(html) {
 	}
 }
 
-// Run html for a dialog, either in the mode given, or based on the 
-// class set of the dialog itself
-function runDialog(html, mode) {
-	debugger;
-	if (!mode) {
-	   var parsed = $('div.dialog', $('<html></html>').html(html));
-	   if($(parsed).hasClass('at_left')) {
-		 mode = 'at_left'
-	   } else if($(parsed).hasClass('at_top')) {
-		 mode = 'at_top'
-	   } else {
-		 mode = 'modal'
-	   }
-	}
-	if(mode == "modal" || mode == "dialog") {
-		runModalDialog(html);					
-	} else { // at_top and at_left run modelessly
-		assertDialog(html, mode);
-	}
-}
-
-/* Run a modeless dialog by injecting a div at the top of the page, AFTER wrapping all
-    existing content in a special div */
-function runModelessDialog(body, mode) {
-	debugger;
-	withdrawDialog();
-}
-
 // Run a dialog from a body of HTML, which should be a div with 'dialog' class as outlined above.
-function runModalDialog(body) {
+function runModalDialog(body, area) {
 	// Parse HTML, extract 'div.dialog' element (as nec.), then append to container
-	var dlog = assertDialog(body); // $('#container').append($('div.dialog', $('<html></html>').html(body)));
+	var dlog = injectDialog(body, area); 
 	$("input.cancel").click( function(event) {
 		$('div.dialog').dialog("close");
 		event.preventDefault();
@@ -257,42 +193,47 @@ function runModalDialog(body) {
 		return process_result_normally;
 	})
 	// Dialogs are modal by default, unless the classes 'at_top' or 'at_left' are asserted
-	var isTop = $('div.dialog').hasClass("at_top");
-	var isLeft = $('div.dialog').hasClass("at_left");
 	var options = {
+		modal: true,
+		width: 'auto',
 		position: ['left', 'top'],
 		close: function() {
 			// It is expected that any dialogs have placed the response data object into the 'div.dialog'
-			var returned_data = dialogResult();
+			var returnedData = dialogResult();
 			debugger;
 			var callback = dialogCallback();
 			if(callback) {
-				callback(returned_data);
+				callback(returnedData);
 			}
 			$('div.dialog').dialog("destroy");
 			// Remove the first child of 'body', which is our dialog (if any)
 			withdrawDialog(); // $('div.dialog').remove();
-			processJSON(returned_data);
+			if(returnedData) {
+				runAppropriately(returnedData.code, "modal", returnedData.area)
+			}
 		}
 	}
-	if(isTop) {
-		options.width = '100%';
-		options.height = $(dlog).css("height");
-	} else if (isLeft) {
-		options.height = 'auto';
-		options.width = $(dlog).css("width");
-	} else {
-		options.modal = true;
-		options.width = $(dlog).css("width");
-		options.height = $(dlog).css("height");
+	if((area == "floating") || (area == "page")) {
 		options.position = "center";
 	}
 	$("div.dialog").dialog( options );				
 }
 
 // Inject the dialog on the current document, using the given HTML
-function assertDialog(code) {
+function injectDialog(code, area) {
+	// Parse the code, creating an html element outside the DOM, then pulling the
+	// 'div.dialog' element from that.
 	var dlog = $('div.dialog', $('<html></html>').html(code));
+	if(!(area && $(dlog).hasClass(area)) ) {
+		// If the area isn't specified anywhere, 'floating' is the default
+		area = "floating"
+		// For one reason or another, the dialog is laid out for an area different from that requested
+		["at_left", "at_top", "floating", "page"].forEach( function(str) {
+			if($(dlog).hasClass(str)) {
+				area = str;
+			}
+		})
+	}
 	if($('#RecipePowerInjectedEncapsulation').length == 0) { // XXX depends on jQuery
 	  // Need to encapsulate existing body
 	  var theFrame = $("<div id='RecipePowerInjectedEncapsulation'></div>");
@@ -300,6 +241,7 @@ function assertDialog(code) {
 	    // Put them into their own div
 		.wrapAll(theFrame);
 	} 
+	// Any old dialog will be either a predecessor or successor of the encapsulation
 	var odlog = $('#RecipePowerInjectedEncapsulation').prev().add(
 				$('#RecipePowerInjectedEncapsulation').next());
 	if($(odlog).length > 0) {
@@ -309,12 +251,16 @@ function assertDialog(code) {
 	}
 	// Now the page is ready to receive the code, prepended to the page
 	// We extract the dialog div from what may be a whole page
-	$("body").prepend($(dlog));
 	// Ensure that all scripts are loaded
 	// Run after-load functions
+	if((area == "at_left") || (area == "at_top")) {
+		$("body").prepend($(dlog)); 
+	} else {
+		$("body").append($(dlog)); 
+	}
+	dlog = $('div.dialog'); // Now the dialog is in the DOM
 	debugger;
-	dlog = $('div.dialog');
-	if($(dlog).hasClass("at_left")) {
+	if(area == "at_left") {
 	    $('#RecipePowerInjectedEncapsulation').css("marginLeft", $(dlog).css("width"))
 	}
 	return dlog;
@@ -329,33 +275,4 @@ function withdrawDialog() {
 	$(odlog).remove();
 	/* Unwrap the page contents from their encapsulation */
 	$('#RecipePowerInjectedEncapsulation').children().unwrap();
-}
-
-/* Submit a request to the server for interactive HTML. It's meant to be JSON specifying how 
-   to handle it, but if the controller doesn't produce JSON (or if the request gets redirected
-   to a controller which doesn't), the request may produce generic HTML, failing with an error 
-   but still providing the HTML. The HTML may be
-   either a dialog (in the form of a div with class 'dialog') or a full page. In turn, the full
-   page may have a dialog embedded in it (again, as a div.dialog). If a dialog, embedded or not,
-   we run it on the current page. If a full page without a dialog, we throw up our 
-   hands and just load the page.
-
-   If the request DOES return JSON, there are several possibilities:
-   -- any "page" attribute is treated as HTML, exactly as above
-   -- any "dialog" attribute is run on this page. The div containing the dialog may have classes
-			'at_left' or 'at_top', in which case they are run non-modally inside a div
-			Otherwise, run the dialog modally.
-   -- any "replacements" attribute is assumed to be a series of selector-value pairs, where the 
-		selectors stipulate elements to be replaced with the corresponding value
-   -- any "notification" attribute is used as the text for a notifier of success
-*/
-
-function appendSource(label, src) {
-	if(src) {
-		$('span.source').append(
-			$('<strong>').text(label+":")
-		).append(
-			$('<pre>').text(src)
-		)
-	}
 }

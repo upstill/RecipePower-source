@@ -1,3 +1,1 @@
-<%# Only 'modal' and 'at_top' are supported %>
-<% @partial = 'modal' if (@partial && (@partial == 'at_left')) %>
 <%= render (@partial ? 'recipes/fields_new' : 'form_new') %>

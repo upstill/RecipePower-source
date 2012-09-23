@@ -1,7 +1,7 @@
 <%= declareDialog :editRecipe, "Tag That Recipe!" %>
 <%= form_for @recipe do |f| %>
   <%= show_errors @recipe.errors %>
-  <div class="recipe_pic_div <%= @partial %> recipe_field_label" >
+  <div class="recipe_pic_div <%= @area %> recipe_field_label" >
     <div class="recipe_pic_preview">                                     
       <%= page_fitPic @recipe.picurl, @recipe.id, false, "div.recipe_pic_preview img" %>  
     </div>                                                    
@@ -11,28 +11,28 @@
   <%= pic_picker @recipe.picurl, @recipe.url, @recipe.id %>
   <br class="clear">
 
-  <div class="recipe_tags_div <%= @partial %>" >
+  <div class="recipe_tags_div <%= @area %>" >
      <%= f.label :tag_tokens, "Tags", :class=>"recipe_field_label" -%>
      <br><%= f.text_field :tag_tokens, rows: "2", "data-pre" => @recipe.tags.map(&:attributes).to_json -%>
   </div>
 
-  <div class="recipe_field_div <%= @partial %>" >
+  <div class="recipe_field_div <%= @area %>" >
      <%= f.label :comment, "Notes", :class=>"recipe_field_label" -%>
      <br><%= f.text_area :comment, placeholder: "What are your thoughts about this recipe?", rows: "3" -%>
   </div>
 
-  <div class="recipe_field_div <%= @partial %>" >
+  <div class="recipe_field_div <%= @area %>" >
      <%= f.label :title, "Title", :class=>"recipe_field_label" -%>
 	 <% @recipe.check_title %>
      <br><%= f.text_area :title, rows: "3" -%>
   </div>
 
-  <div class="recipe_field_div <%= @partial %>">
+  <div class="recipe_field_div <%= @area %>">
      <%= f.label :status,  "Status: ",:class=>"recipe_field_label" -%>
      <%= f.select :status,  Recipe.status_select %>
  </div>
 
- <div class="recipe_field_div <%= @partial %>">
+ <div class="recipe_field_div <%= @area %>">
      <%= f.check_box :private %>
      <%= f.label :private, "Private (for my eyes only)", :class=>"recipe_field_label" %>
   </div>

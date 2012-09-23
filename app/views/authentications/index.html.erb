@@ -5,8 +5,8 @@
 <% if current_user %>
 	<h3>Manage Sign-in Services</h3>
 <% end %>
-<div class="signin_all dialog <%= @partial %>" >
-  <div class="auth_signin <%= @partial %>" >
+<div class="signin_all dialog <%= @area %>" title="Sign In Please" >
+  <div class="auth_signin <%= @area %>" >
     <%= render partial: 'shared/authentications_current' %>
     <%= render partial: 'shared/authentications_possible' %>
   </div>
@@ -14,7 +14,7 @@
     <br class="clear">
   <% end %>
   <% if !current_user %>
-    <div class="sign <%= @partial %>" />
+    <div class="sign <%= @area %>" />
 	  <strong>Rather use a RecipePower account? <br></strong><hr>
 	  <%= render partial: "shared/slug_signin" %>
 	<div class="or" ><strong>OR</strong></div>

@@ -1,3 +1,4 @@
+// Default styling for dialogs at the left of the window
 div.at_left {
   width:10.2em;
   position:absolute;
@@ -9,7 +10,12 @@ div.at_left {
   margin-right:0;
 }
 
-div.content_at_left {
-	margin-left:10.2em;
-    padding-left:1em;
+/* newRecipe */
+
+div.newRecipe {
+	width: 550px;
+	height: 150px;
 }
+
+/* authentications */
+

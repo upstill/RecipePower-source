@@ -5,7 +5,7 @@ class AuthenticationsController < ApplicationController
       @authentications = current_user.authentications if current_user
       @auth_delete = true
       @auth_context = :manage
-      @partial = params[:partial]
+      @area = params[:area]
       flash[:notice] = params[:notice]
       dialog_boilerplate "new"
     end
@@ -16,7 +16,7 @@ class AuthenticationsController < ApplicationController
       @auth_delete = true
       @auth_context = :manage
       flash[:notice] = params[:notice]
-      @partial = params[:partial]
+      @area = params[:area]
       dialog_boilerplate "new"
   end
 

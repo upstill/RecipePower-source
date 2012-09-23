@@ -47,18 +47,8 @@ class RecipesController < ApplicationController
         @Title = "Cookmark a Recipe"
         @nav_current = :addcookmark
         @recipe.current_user = current_user_or_guest_id # session[:user_id]
-        @partial = params[:partial]
+        @area = params[:area]
         dialog_boilerplate 'new', 'modal'
-=begin
-        respond_to do |format|
-          format.html # new.html.erb
-          format.json { 
-              @partial = 'model' unless @partial
-              div = with_format("html") do render_to_string partial: "recipes/fields_new" end
-              render json: { dialog: div, where: @partial } 
-          }
-        end
-=end
     end
   end
 
@@ -85,7 +75,7 @@ class RecipesController < ApplicationController
         @recipe.touch # We're looking at it, so make it recent
         @Title = @recipe.title # Get title from the recipe
         @nav_current = nil
-        @partial = params[:partial]
+        @area = params[:area]
         # Now go forth and edit
         dialog_boilerplate('edit', 'at_left')
     else
@@ -159,15 +149,18 @@ class RecipesController < ApplicationController
     debugger
     @recipe = Recipe.ensure current_user_or_guest_id, params
     @list_name = "mine"
-    @partial = params[:partial]
+    @area = params[:area]
     if @recipe.errors.empty?
       respond_to do |format|
         format.html { 
+            redirect_to rcpqueries_path
+=begin
             if @partial 
                 render :partial => "shared/recipe_smallpic", :layout=>false 
             else
                 redirect_to rcpqueries_path
             end
+=end
         }
         format.json { 
             truncated = truncate @recipe.title, :length => 140

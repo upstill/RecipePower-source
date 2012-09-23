@@ -172,8 +172,10 @@ p.airy.bld {
 }
 
 label {
-	font:18px calibri;
-	line-height:150%;
+  font:14px arial,sans-serif;
+  font-weight:bold;
+//	font:18px calibri;
+//	line-height:150%;
 }
 
 li.airy {
@@ -410,6 +412,12 @@ padding:10px;
 }
 
 .recipe_field_label, recipe_field_label_centered {
+  font:14px arial,sans-serif;
+  font-weight:bold;
+  width:100%;	
+}
+
+.standard_field_label {
   font:14px arial,sans-serif;
   font-weight:bold;
   width:100%;	

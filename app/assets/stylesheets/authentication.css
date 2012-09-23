@@ -28,23 +28,26 @@ padding:10px;
 	float:left;
 }
 
-.sign.modal {
+.sign.floating {
 	width: 550px;
     // border: solid 1px #999;
 	float: left;
 }
 
-.auth_signin.modal {
+.auth_signin.floating {
 	width: 280px;
-    border-right: solid 1px #999;
+	border-right: solid 1px #999;
+	//    border: solid 3px #009;
 	margin: 0px 20px;
 	float: left;
 }
 
 .signup {
 	width: 200px;
+	border-left: solid 1px #999;
     // border: solid 1px #999;
-	margin: 10px;
+	margin: 0px;
+	padding-left: 20px;
 	float: left;
 }
 
@@ -57,8 +60,10 @@ padding:10px;
 
 .signin {
 	width: 250px;
+	border-right: solid 1px #999;
     // border: solid 1px #999;
-	margin: 10px;
+	margin-right: 10px;
+	padding-right: 10px;
 	float: left;
 }
 
@@ -90,7 +95,7 @@ padding:10px;
 	float: left;
 }
 
-.signin_all.modal {
+.signin_all.floating {
 	width: 930px;
 	margin-top: 2em;
 	float: left;
