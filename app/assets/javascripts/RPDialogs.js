@@ -4,6 +4,7 @@ function editRecipeCallback( responseData ) {
 
 // Ensure that functionality is available for the editRecipe dialog
 function editRecipeOnload() {
+	debugger;
     $("#recipe_tag_tokens").tokenInput("/tags/match.json", {
         crossDomain: false,
 		noResultsText: "No matching tag found; hit Enter to make it a tag",

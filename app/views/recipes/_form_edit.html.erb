@@ -1,4 +1,3 @@
-<div class="editRecipe dialog">
 <h3>Tag That Recipe!<%= recipe_popup @recipe %></h3>
 
 <%= form_for @recipe do |f| %>
@@ -48,4 +47,3 @@
 <% if permitted_to? :destroy, @recipe %>
   <%= button_to "Destroy this Recipe", "/recipes/#{@recipe.id.to_s}/destroy", class: "save-tags-button", :confirm => "This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" %>
 <% end %>
-</div>

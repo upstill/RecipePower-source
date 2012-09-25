@@ -11,7 +11,7 @@ end
 
 def dialog_boilerplate(action, default_area=nil)
     respond_to do |format|
-        format.html {    
+        format.html {
             @area ||= "page"  
             if @area == "page" # Not partial at all => whole page
                 render action

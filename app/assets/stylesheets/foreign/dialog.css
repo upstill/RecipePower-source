@@ -1,0 +1,17 @@
+div.dialog.at_left {
+	width:auto;
+	outline:#009 solid 3px;
+	position:absolute;
+	top:0;
+	left:0;
+	} 
+
+div.dialog.at_top {
+	width:100%;
+	height:auto;
+	outline:#090 solid 3px;
+	top:0;
+	left:0;
+	margin:3px;
+	padding:1em;
+}

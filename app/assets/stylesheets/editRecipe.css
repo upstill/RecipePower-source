@@ -1,14 +1,17 @@
+span.editRecipe {
+  font:24px arial,sans-serif;
+  font-weight:bold;
+}
 
-.editRecipe {
-	width: 200px;
-  // width: 100%;
-  // float: left;
-  margin: 0px;
-  outline:#900 solid 1px;
+div.editRecipe {
+  width: 95%;
+  margin: 1em;
+  padding: 1em;
+  outline:#090 solid 1px;
 }
 
 div.editRecipe.at_left {
-	width: 200px;
+	width:200px;
 }
 
 .recipe_pic_div {
@@ -34,7 +37,7 @@ div.editRecipe.at_left {
 .recipe_tags_div.at_left {
   margin-top: 5px;
   width: 100%;
-  // outline:#999 solid 1px;
+  outline:#999 solid 1px;
 }
 
 .recipe_tags_div {

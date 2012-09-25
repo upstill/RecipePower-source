@@ -272,22 +272,20 @@ module ApplicationHelper
     	link_to_function label, "recipePowerGetAndRunJSON('#{path}', where);"
     end
 	
-	# Place the header for a dialog, including a call to its Onload function.
+	# Place the header for a dialog, including setting its Onload function.
 	# Currently handled this way (e.g., symbols that have been supported)
 	#   :editRecipe
 	#   :newRecipe
-	def declareDialog( which, ttl)
+	def dialogHeader( which, ttl)
 	    classname = which.to_s
-	    elmtDecl = %Q{
-	      <div class='#{classname} dialog #{@area}' title="#{ttl}">
-	    }
-        selector = 'div.'+classname
         onloadFcn = classname+"Onload"
-	    onloadDecl = %Q{
-	        <script type="text/javascript">
-            $('#{selector}').ready(#{onloadFcn});
-            </script>
-        }
-        (elmtDecl + onloadDecl).html_safe
+	    %Q{
+	      <div class='dialog #{@area}' title="#{ttl}" onload="#{onloadFcn}">
+	      <div class='#{classname} #{@area}'>
+	    }.html_safe
+    end
+
+    def dialogFooter()
+        "</div></div>".html_safe
     end
 end

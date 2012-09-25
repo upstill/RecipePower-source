@@ -69,18 +69,15 @@ function recipePowerGetAndRunJSON(request, how, area) {
 		request += "?area="+area
 	}
 	$('span.query').text(request);
-	debugger;
 	$.ajax( {
 		type: "GET",
 		dataType: "json",
 		url: request,
 		error: function(jqXHR, textStatus, errorThrown) {
 			$('span.source').text(jqXHR.responseText);
-			debugger;
 			postErrorResult(jqXHR.responseText);
 		},
 		success: function (responseData, statusText, xhr) {
-			debugger;
 			(typeof presentResponse === 'function' && presentResponse(responseData)) || 
 			runAppropriately(responseData.code, how, responseData.area);
 		}
@@ -130,16 +127,12 @@ function doError() {
 }
 
 /* Handle the error result from either a forms submission or a request of the server */
-function postErrorResult(html) {
-	var json = HTMLtoJSON(html);
-	if(json) {
-		dialogResult(json);
-	}
+function postErrorResult( html ) {
+	dialogResult( html ? { code: html } : null );
 }
 
 /* Handle successful return of the JSON request */
 function postSuccess(jsonResponse) {
-  debugger;
   if(jsonResponse.page || jsonResponse.dialog) {
 	// We got a result we can handle; stash it in the dialog result and return false
 	// XXX If it's a full page, check for the presence of a dialog ('div.dialog'); if 
@@ -172,20 +165,17 @@ function runModalDialog(body, area) {
 	$('form').submit( function(eventdata) { // Supports multiple forms in dialog
 		var context = this;
 		var process_result_normally = true;
-		debugger;
 		/* To sort out errors from subsequent dialogs, we submit the form asynchronously
 		   and use the result to determine whether to do normal forms processing. */
 		$(context).ajaxSubmit( {
 			async: false,
 			dataType: "json",
 			error: function(jqXHR, textStatus, errorThrown) {
-				debugger;
 				postErrorResult(jqXHR.responseText);
 			    $('div.dialog').dialog("close");
 			    process_result_normally = false;
 			},
 			success: function (responseData, statusText, xhr, form) {
-				debugger;
 				process_result_normally = postSuccess(responseData);
 				$('div.dialog').dialog("close");
 			}
@@ -200,7 +190,6 @@ function runModalDialog(body, area) {
 		close: function() {
 			// It is expected that any dialogs have placed the response data object into the 'div.dialog'
 			var returnedData = dialogResult();
-			debugger;
 			var callback = dialogCallback();
 			if(callback) {
 				callback(returnedData);
@@ -221,18 +210,24 @@ function runModalDialog(body, area) {
 
 // Inject the dialog on the current document, using the given HTML
 function injectDialog(code, area) {
+	// First, remove any lingering style or script elements on the page
+	$('link.RecipePowerInjectedStyle').remove();
+	// Inject our styles
+	$('<link href="/assets/foreign/dialog.css?body=1" media="screen" rel="stylesheet" type="text/css" id="RecipePowerInjectedStyle"/>').appendTo('head');
 	// Parse the code, creating an html element outside the DOM, then pulling the
 	// 'div.dialog' element from that.
 	var dlog = $('div.dialog', $('<html></html>').html(code));
+	debugger;
 	if(!(area && $(dlog).hasClass(area)) ) {
 		// If the area isn't specified anywhere, 'floating' is the default
 		area = "floating"
 		// For one reason or another, the dialog is laid out for an area different from that requested
-		["at_left", "at_top", "floating", "page"].forEach( function(str) {
-			if($(dlog).hasClass(str)) {
-				area = str;
+		var positions = ["at_left", "at_top", "floating", "page"];
+	    for(var i = 0, len = positions.length; i < len; ++i) {
+			if($(dlog).hasClass(positions[i])) {
+				area = positions[i];
 			}
-		})
+	    }
 	}
 	if($('#RecipePowerInjectedEncapsulation').length == 0) { // XXX depends on jQuery
 	  // Need to encapsulate existing body
@@ -259,7 +254,12 @@ function injectDialog(code, area) {
 		$("body").append($(dlog)); 
 	}
 	dlog = $('div.dialog'); // Now the dialog is in the DOM
+	// We get and execute the onload function for the dialog
+	var onload = $('div.dialog').attr("onload");
 	debugger;
+	if (onload && (typeof window[onload] === 'function')) {
+		window[onload]();
+	}
 	if(area == "at_left") {
 	    $('#RecipePowerInjectedEncapsulation').css("marginLeft", $(dlog).css("width"))
 	}
@@ -275,4 +275,6 @@ function withdrawDialog() {
 	$(odlog).remove();
 	/* Unwrap the page contents from their encapsulation */
 	$('#RecipePowerInjectedEncapsulation').children().unwrap();
+	/* Remove any injected styles from the head */
+	$('link.RecipePowerInjectedStyle').remove();
 }

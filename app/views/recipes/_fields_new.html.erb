@@ -1,4 +1,4 @@
-<%= declareDialog :newRecipe, "Add a Cookmark" %>
+<%= dialogHeader :newRecipe, "Add a Cookmark" %>
 <%# <div class="newRecipe dialog" id="rcpNewDialog" data="Add a Cookmark"> %>
 <%= show_errors @recipe.errors %>
 <%= form_for @recipe do |f| %>
@@ -8,4 +8,5 @@
     </div>
     <%= f.submit :value=>"Add Cookmark" %>
 <% end %>
-</div>
+<%= dialogFooter %>
+
