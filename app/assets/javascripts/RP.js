@@ -195,7 +195,7 @@ function wdwFitImages(selection) {
 
 function PicPicker(ttl) {
 	// Bring up a dialog showing the picture-picking fields of the page
-	$("div.recipe_pic_preview").dialog({ // nee: iconpicker
+	$("div.iconpicker").dialog({ // nee: iconpicker
 		modal: true,
 		width: 700,
 		title: (ttl || "Pick a Picture"),
