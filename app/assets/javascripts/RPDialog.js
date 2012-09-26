@@ -126,6 +126,15 @@ function doError() {
 	return $('#container').data("pending_page");
 }
 
+// Cancel a modeless dialog by closing it and issuing a notification, if any
+function doCancel(event) {
+	debugger;
+	withdrawDialog();
+	event.preventDefault();
+	jNotify( "Recipe secure and unharmed.", 
+		{ HorizontalPosition: 'center', VerticalPosition: 'top'} );
+}
+
 /* Handle the error result from either a forms submission or a request of the server */
 function postErrorResult( html ) {
 	dialogResult( html ? { code: html } : null );
@@ -255,11 +264,12 @@ function injectDialog(code, area) {
 	}
 	dlog = $('div.dialog'); // Now the dialog is in the DOM
 	// We get and execute the onload function for the dialog
-	var onload = $('div.dialog').attr("onload");
-	debugger;
+	var onload = $(dlog).attr("onload");
 	if (onload && (typeof window[onload] === 'function')) {
 		window[onload]();
 	}
+	// Cancel will remove the dialog and confirm null effect to user
+	$('input.cancel', dlog).click(doCancel);
 	if(area == "at_left") {
 	    $('#RecipePowerInjectedEncapsulation').css("marginLeft", $(dlog).css("width"))
 	}

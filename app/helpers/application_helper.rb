@@ -56,7 +56,6 @@ module ApplicationHelper
   
   # Build a picture-selection dialog with the default url, url for a page containing candidate images, id, and name of input field to set
   def pic_picker picurl, pageurl, id
-      debugger;
     piclist = Site.piclist pageurl
     pictab = []
     # divide piclist into rows of four pics apiece

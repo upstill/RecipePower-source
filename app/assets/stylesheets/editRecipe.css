@@ -16,7 +16,7 @@ div.editRecipe.at_left {
 
 .recipe_pic_div {
     width:35%; // 360px;
-    height: 300px;
+    height: auto;
     // border:3px solid black;
     // outline:#999 solid 1px;
     float: right;
