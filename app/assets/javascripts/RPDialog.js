@@ -75,11 +75,18 @@ function recipePowerGetAndRunJSON(request, how, area) {
 		url: request,
 		error: function(jqXHR, textStatus, errorThrown) {
 			$('span.source').text(jqXHR.responseText);
+			debugger;
 			postErrorResult(jqXHR.responseText);
 		},
 		success: function (responseData, statusText, xhr) {
-			(typeof presentResponse === 'function' && presentResponse(responseData)) || 
-			runAppropriately(responseData.code, how, responseData.area);
+			if(!(typeof presentResponse === 'function' && presentResponse(responseData))) {
+				if(responseData.processorFcn && (typeof window[responseData.processorFcn] === 'function')) {
+				    window[responseData.processorFcn](responseData);
+				} 
+				if(responseData.code) {
+					runAppropriately(responseData.code, responseData.how || how, responseData.area);
+				}
+			} 
 		}
 	});
 }
@@ -88,7 +95,7 @@ function runAppropriately(code, how, area) {
   if(how == "page") {
     runPage(code);
   } else if(how == "modeless") {
-	injectDialog(code, area);
+	injectDialog(code, area, true);
   } else { // at_top and at_left run modelessly
 	runModalDialog(code, area);					
   }
@@ -105,11 +112,11 @@ function toggleResults() {
 }
 
 /* Utility for setting and getting the function called when closing the dialog */
-function dialogCallback( fcn ) {
+function dialogOnClose( dlog, fcn ) {
   if(fcn == undefined) {
-	return $('div.dialog').data("callback");
+	return $(dlog).data("onclosecallback");
   } else {
-	$('div.dialog').data("callback", fcn);
+	$(dlog).data("onclosecallback", fcn);
   }
 }
 
@@ -124,15 +131,6 @@ function dialogResult( obj ) {
 // Javascript to replace the current page with the error (or any other full) page
 function doError() {
 	return $('#container').data("pending_page");
-}
-
-// Cancel a modeless dialog by closing it and issuing a notification, if any
-function doCancel(event) {
-	debugger;
-	withdrawDialog();
-	event.preventDefault();
-	jNotify( "Recipe secure and unharmed.", 
-		{ HorizontalPosition: 'center', VerticalPosition: 'top'} );
 }
 
 /* Handle the error result from either a forms submission or a request of the server */
@@ -160,37 +158,53 @@ function runPage(html) {
 	}
 }
 
+// Cancel a modal dialog by issuing the close event
+function cancelModalDialog(event) {
+	debugger;
+	$('div.dialog').dialog("close");
+	event.preventDefault();
+}
+
+// Cancel a modeless dialog by closing it and issuing a notification, if any
+function cancelModelessDialog(event) {
+	debugger;
+	withdrawDialog();
+	event.preventDefault();
+	jNotify( "Cookmark secure and unharmed.", 
+		{ HorizontalPosition: 'center', VerticalPosition: 'top'} );
+}
+
+// A submit handler for a modal dialog form. Submits the data with a JSON
+// request and stores the response so it can be used when the dialog is closed.
+function submitDialogForm(eventdata) { // Supports multiple forms in dialog
+	var context = this;
+	var process_result_normally = true;
+	/* To sort out errors from subsequent dialogs, we submit the form asynchronously
+	   and use the result to determine whether to do normal forms processing. */
+	$(context).ajaxSubmit( {
+		async: false,
+		dataType: "json",
+		error: function(jqXHR, textStatus, errorThrown) {
+			postErrorResult(jqXHR.responseText);
+		    $('div.dialog').dialog("close");
+		    process_result_normally = false;
+		},
+		success: function (responseData, statusText, xhr, form) {
+			process_result_normally = postSuccess(responseData);
+			$('div.dialog').dialog("close");
+		}
+	});
+	return process_result_normally;
+}
+
 // Run a dialog from a body of HTML, which should be a div with 'dialog' class as outlined above.
 function runModalDialog(body, area) {
 	// Parse HTML, extract 'div.dialog' element (as nec.), then append to container
-	var dlog = injectDialog(body, area); 
-	$("input.cancel").click( function(event) {
-		$('div.dialog').dialog("close");
-		event.preventDefault();
-	});
+	var dlog = injectDialog(body, area, false); 
 	// Any forms get submitted and their results handled appropriately. NB: the submission
 	// must be synchronous because we have to decide AFTER the results return whether to handle
 	// the form result normally.
-	$('form').submit( function(eventdata) { // Supports multiple forms in dialog
-		var context = this;
-		var process_result_normally = true;
-		/* To sort out errors from subsequent dialogs, we submit the form asynchronously
-		   and use the result to determine whether to do normal forms processing. */
-		$(context).ajaxSubmit( {
-			async: false,
-			dataType: "json",
-			error: function(jqXHR, textStatus, errorThrown) {
-				postErrorResult(jqXHR.responseText);
-			    $('div.dialog').dialog("close");
-			    process_result_normally = false;
-			},
-			success: function (responseData, statusText, xhr, form) {
-				process_result_normally = postSuccess(responseData);
-				$('div.dialog').dialog("close");
-			}
-		});
-		return process_result_normally;
-	})
+	$('form', dlog).submit( submitDialogForm );
 	// Dialogs are modal by default, unless the classes 'at_top' or 'at_left' are asserted
 	var options = {
 		modal: true,
@@ -199,13 +213,13 @@ function runModalDialog(body, area) {
 		close: function() {
 			// It is expected that any dialogs have placed the response data object into the 'div.dialog'
 			var returnedData = dialogResult();
-			var callback = dialogCallback();
-			if(callback) {
-				callback(returnedData);
+			var onclosecallback = dialogOnClose(dlog);
+			if(onclosecallback && (returnedData != undefined)) {
+				onclosecallback(returnedData);
 			}
 			$('div.dialog').dialog("destroy");
 			// Remove the first child of 'body', which is our dialog (if any)
-			withdrawDialog(); // $('div.dialog').remove();
+			withdrawDialog(); 
 			if(returnedData) {
 				runAppropriately(returnedData.code, "modal", returnedData.area)
 			}
@@ -214,11 +228,11 @@ function runModalDialog(body, area) {
 	if((area == "floating") || (area == "page")) {
 		options.position = "center";
 	}
-	$("div.dialog").dialog( options );				
+	$(dlog).dialog( options );				
 }
 
 // Inject the dialog on the current document, using the given HTML
-function injectDialog(code, area) {
+function injectDialog(code, area, modeless) {
 	// First, remove any lingering style or script elements on the page
 	$('link.RecipePowerInjectedStyle').remove();
 	// Inject our styles
@@ -266,10 +280,11 @@ function injectDialog(code, area) {
 	// We get and execute the onload function for the dialog
 	var onload = $(dlog).attr("onload");
 	if (onload && (typeof window[onload] === 'function')) {
-		window[onload]();
+		window[onload](dlog);
 	}
 	// Cancel will remove the dialog and confirm null effect to user
-	$('input.cancel', dlog).click(doCancel);
+	$('input.cancel', dlog).click( modeless ? cancelModelessDialog : cancelModalDialog );
+	$('form', dlog).submit( submitDialogForm );
 	if(area == "at_left") {
 	    $('#RecipePowerInjectedEncapsulation').css("marginLeft", $(dlog).css("width"))
 	}

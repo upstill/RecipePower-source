@@ -102,7 +102,6 @@ class RecipesController < ApplicationController
       @recipe = Recipe.find(params[:id])
       @recipe.current_user = current_user_or_guest_id # session[:user_id]
       begin
-        debugger
         saved_okay = @recipe.update_attributes(params[:recipe])
         # rescue => e
             # saved_okay = false
@@ -146,7 +145,6 @@ class RecipesController < ApplicationController
   # Add a recipe to the user's collection without going to edit tags. Full-page render is just rcpqueries page
   # GET recipes/:id/collect
   def collect
-    debugger
     @recipe = Recipe.ensure current_user_or_guest_id, params
     @list_name = "mine"
     @area = params[:area]
@@ -172,7 +170,8 @@ class RecipesController < ApplicationController
                            go_link_class: recipe_list_element_golink_class(@recipe), 
                            go_link_body: go_link_body,
                            list_element_class: recipe_list_element_class(@recipe), 
-                           list_element_body: list_element_body
+                           list_element_body: list_element_body,
+                           processorFcn: "collectRecipeCallback"
                          } 
         }
         format.js { render text: @recipe.title }
