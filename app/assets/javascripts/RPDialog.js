@@ -137,7 +137,6 @@ function dialogResult( dlog, obj ) {
 // Javascript to replace the current page with the error (or any other full) page
 function doError() {
 	var page = $('#container').data("pending_page");
-	debugger;
 	return page;
 }
 

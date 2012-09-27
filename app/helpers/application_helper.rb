@@ -102,20 +102,6 @@ module ApplicationHelper
     "rcpListGotag"+@recipe.id.to_s    
   end
   
-=begin
-  def recipe_list_element_golink recipe
-	if permitted_to? :update, @recipe
-      ("<span class='#{recipe_list_element_golink_class @recipe}'>" + 
-      if @recipe.users.exists?(@recipe.current_user)
- 	    link_to "Edit Tags", edit_recipe_path(@recipe)
- 	  else 
- 	    link_to_function "Grab This Cookmark!", "rcpCollect(#{@recipe.id.to_s})"
- 	  end + 
- 	  "</span>").html_safe
-    end
-  end      
-=end
-  
     def recipe_list_element_class recipe
         "rcpListElmt"+@recipe.id.to_s    
     end
@@ -224,7 +210,7 @@ module ApplicationHelper
     def header_navlinks
     	navlinks = []
     	navlinks.push(navlink "Cookmarks", rcpqueries_path, (@nav_current==:cookmarks)) 
-    	navlinks.push(link_to_dialog "Add a Cookmark", new_recipe_path, "modal" )
+    	navlinks.push(link_to_dialog "Add a Cookmark", new_recipe_path, "modal", "floating" )
     	# navlinks.push(link_to_function("Add a Cookmark", "rcpAdd()" )) # navlink "Add a Cookmark", new_recipe_path, (@nav_current==:addcookmark)) 
     	navlinks.join('&nbsp|&nbsp').html_safe
     end
@@ -268,8 +254,8 @@ module ApplicationHelper
 	end
 	
 	# Embed a link to javascript for running a dialog by reference to a URL
-	def link_to_dialog(label, path, where)
-    	link_to_function label, "recipePowerGetAndRunJSON('#{path}', where);"
+	def link_to_dialog(label, path, how, where)
+    	link_to_function label, "recipePowerGetAndRunJSON('#{path}', '#{how}', '#{where}');"
     end
 	
 	# Place the header for a dialog, including setting its Onload function.

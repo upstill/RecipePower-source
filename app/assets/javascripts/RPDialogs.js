@@ -1,10 +1,17 @@
 function editRecipeCallback( responseData ) {
-	debugger;
 }
 
 // Ensure that functionality is available for the editRecipe dialog
-function editRecipeOnload(dlog) {
+function newRecipeOnload(dlog) {
+	dialogOnClose( dlog, newRecipeCallback );
+}
+
+function newRecipeCallback(data) {
 	debugger;
+	var x=2;
+}	
+
+function editRecipeOnload(dlog) {
     $("#recipe_tag_tokens").tokenInput("/tags/match.json", {
         crossDomain: false,
 		noResultsText: "No matching tag found; hit Enter to make it a tag",
@@ -15,7 +22,6 @@ function editRecipeOnload(dlog) {
         allowCustomEntry: true
     });
 	$("#PicPicker").click( function(event) {
-		debugger;
 		PicPicker("Pick a Picture for the Recipe");
 		event.preventDefault();
 	})
