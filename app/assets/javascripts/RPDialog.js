@@ -64,6 +64,10 @@ function recipePowerGetAndRunHTML(request, how, area) {
    -- any "notification" attribute is used as the text for a notifier of success
 */
 
+function testCase() {
+	recipePowerGetAndRunJSON("/recipes/new", "modal", "floating");
+}
+
 // This function can be tied to a link with only a URL to a controller for generating a dialog.
 // We will get the div and run the associated dialog.
 function recipePowerGetAndRunJSON(request, how, area) {
@@ -77,7 +81,7 @@ function recipePowerGetAndRunJSON(request, how, area) {
 		url: request,
 		error: function(jqXHR, textStatus, errorThrown) {
 			$('span.source').text(jqXHR.responseText);
-			var responseData = postResult(jqXHR);
+			var responseData = postError(jqXHR);
 			runResponse(responseData);
 		},
 		success: function (responseData, statusText, xhr) {
@@ -279,11 +283,9 @@ function injectDialog(code, area, modeless) {
 	    }
 	}
 	if($('#RecipePowerInjectedEncapsulation').length == 0) { // XXX depends on jQuery
+	  wrapWithoutCloning();
 	  // Need to encapsulate existing body
-	  var theFrame = $("<div id='RecipePowerInjectedEncapsulation'></div>");
-	  $("body").children()
-	    // Put them into their own div
-		.wrapAll(theFrame);
+	  // var theFrame = $("<div id='RecipePowerInjectedEncapsulation'></div>");
 	} 
 	// Any old dialog will be either a predecessor or successor of the encapsulation
 	var odlog = $('#RecipePowerInjectedEncapsulation').prev().add(
@@ -328,7 +330,32 @@ function withdrawDialog() {
 	// Remove the first child of 'body', which is our dialog (if any)
 	$(odlog).remove();
 	/* Unwrap the page contents from their encapsulation */
-	$('#RecipePowerInjectedEncapsulation').children().unwrap();
+	unwrapWithoutCloning(); // $('#RecipePowerInjectedEncapsulation').children().unwrap();
 	/* Remove any injected styles from the head */
 	$('link.RecipePowerInjectedStyle').remove();
+}
+
+/* Encapsulate the body content of the page with a div wrapper */
+function wrapWithoutCloning() {
+	var wrapper = document.createElement('div'); 
+	wrapper.id = "RecipePowerInjectedEncapsulation";
+	var body = document.getElementsByTagName('body')[0];
+	body.insertBefore(wrapper, body.firstChild );
+	var child;
+	while (child = body.childNodes[1]) {
+		body.removeChild(child);
+		wrapper.appendChild(child);
+	}
+}
+
+/* Remove the previously-injected wrapper */
+function unwrapWithoutCloning() {
+	var body = document.getElementsByTagName('body')[0];
+	var wrapper = document.getElementsByID('RecipePowerInjectedEncapsulation');
+	var child;
+	while(child = wrapper.childNodes[0]) {
+		wrapper.removeChild(child);
+		body.insertBefore(child, wrapper);
+	}
+	body.removeChild(wrapper);
 }
