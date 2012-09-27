@@ -351,7 +351,7 @@ function wrapWithoutCloning() {
 /* Remove the previously-injected wrapper */
 function unwrapWithoutCloning() {
 	var body = document.getElementsByTagName('body')[0];
-	var wrapper = document.getElementsByID('RecipePowerInjectedEncapsulation');
+	var wrapper = document.getElementById('RecipePowerInjectedEncapsulation');
 	var child;
 	while(child = wrapper.childNodes[0]) {
 		wrapper.removeChild(child);
