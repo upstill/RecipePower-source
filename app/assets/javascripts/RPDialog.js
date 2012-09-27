@@ -31,10 +31,12 @@ function recipePowerGetAndRunHTML(request, how, area) {
 	    if (xmlhttp.readyState==4 && xmlhttp.status==200) {
 		  // Now we have code, possibly required for jQuery and certainly 
 		  // required for any of our javascript. Ensure the code is loaded.
-		  if(xmlhttp.responseText) {
-			  (typeof presentResponse === 'function' && presentResponse({code: xmlhttp.responseText})) || 
-			  runAppropriately(xmlhttp.responseText, how, area)
-		  }
+		
+		  var result = { code: xmlhttp.responseText };
+		  postSuccess( result );
+		  result.how = how;
+		  result.area = area;
+		  runResponse(result);
 	    }
 	  }
 	  xmlhttp.open("GET", request, true);
@@ -75,8 +77,7 @@ function recipePowerGetAndRunJSON(request, how, area) {
 		url: request,
 		error: function(jqXHR, textStatus, errorThrown) {
 			$('span.source').text(jqXHR.responseText);
-			
-			var responseData = postErrorResult(jqXHR);
+			var responseData = postResult(jqXHR);
 			runResponse(responseData);
 		},
 		success: function (responseData, statusText, xhr) {
@@ -92,35 +93,23 @@ function recipePowerGetAndRunJSON(request, how, area) {
 // to present it. The data may also consist of only 'code' if it results from an HTML request
 function runResponse(responseData) {
 	// Wrapped in 'presentResponse', in the case where we're only presenting the results of the request
-	if(!(typeof presentResponse === 'function' && presentResponse(responseData))) {
-		// The response may include a 'processorFcn' to use any other data produced
-		if(responseData.code) {
-			runAppropriately(responseData.code, responseData.how, responseData.area);
+	if(responseData && !(typeof presentResponse === 'function' && presentResponse(responseData))) {
+		if(code = responseData.code) {
+		  var placed = false;
+		  if(responseData.how == "modeless") {
+			placed = injectDialog(code, responseData.area, true);
+		  } else if(responseData.how == "modal") { // at_top and at_left run modelessly
+			placed = runModalDialog(code, responseData.area);					
+		  }
+		  if (!placed) { // Force the page to be displayed. XXX Does nothing to the address bar
+		    $('#container').data("pending_page", code ); // Stash for doError function
+		    // window.location.replace('javascript:doError()');	
+		    document.open();
+			document.write(code);
+			document.close;
+		  }
 		}
 	} 
-}
-
-function runAppropriately(code, how, area) {
-  if(how == "page") {
-	if(code) {
-		$('#container').data("pending_page", code );
-		location.replace('javascript:doError()');		
-	}
-  } else if(how == "modeless") {
-	injectDialog(code, area, true);
-  } else { // at_top and at_left run modelessly
-	runModalDialog(code, area);					
-  }
-}
-
-// Debugging aid: if there is a 'div.results' element we maintain a span of class 'query' for recording the query. Maybe.
-// This function toggles that.
-function toggleResults() {
-  if($('span.query').length > 0) {
-	$('div.results').html("");
-  } else {
-    $('div.results').html("<hr><h3>Query</h3><span class='query'></span><br><hr><h3>Result</h3><span class='source'></span><br><hr>");
-  }
 }
 
 /* Utility for setting and getting the function called when closing the dialog */
@@ -147,21 +136,26 @@ function dialogResult( dlog, obj ) {
 
 // Javascript to replace the current page with the error (or any other full) page
 function doError() {
-	return $('#container').data("pending_page");
+	var page = $('#container').data("pending_page");
+	debugger;
+	return page;
 }
 
 /* Handle the error result from either a forms submission or a request of the server
   by treating the html as code to be rendered and sticking it in an object attached
   to the dialog, if any. */
-function postErrorResult( jqXHR, dlog ) {
+function postError( jqXHR, dlog ) {
 	result = jqXHR.responseText ? { code: jqXHR.responseText } : null;
+	// Stash the result in the dialog, if any
 	if(dlog != 'undefined') {
 		dialogResult( dlog, result );
 	}
 	return result;
 }
 
-/* Handle successful return of a JSON request */
+/* Handle successful return of a JSON request by running whatever success function
+   obtains, and stashing any resulting code away for invocation after closing the
+   dialog, if any. */
 function postSuccess(jsonResponse, dlog) {
   // Call either the named response function or the one associated with the dialog
   if(closer = jsonResponse.processorFcn || (dlog && dialogOnClose(dlog))) {
@@ -171,7 +165,8 @@ function postSuccess(jsonResponse, dlog) {
 		window[closer](jsonResponse);
 	  }
   }
-  if(jsonResponse.code) {
+  // Simplistic response: we'll prevent normal form handling IFF there's code to run.
+  if(jsonResponse.code) { 
 	// We got a result we can handle; stash it in the dialog result and return false
 	if(dlog != undefined) {
 		dialogResult( dlog, jsonResponse );
@@ -183,14 +178,12 @@ function postSuccess(jsonResponse, dlog) {
 
 // Cancel a modal dialog by issuing the close event
 function cancelModalDialog(event) {
-	
 	$('div.dialog').dialog("close");
 	event.preventDefault();
 }
 
 // Cancel a modeless dialog by closing it and issuing a notification, if any
 function cancelModelessDialog(event) {
-	
 	withdrawDialog();
 	event.preventDefault();
 	jNotify( "Cookmark secure and unharmed.", 
@@ -209,59 +202,72 @@ function submitDialogForm(eventdata) { // Supports multiple forms in dialog
 		async: false,
 		dataType: "json",
 		error: function(jqXHR, textStatus, errorThrown) {
-			postErrorResult(jqXHR, dlog);
-		    $(dlog).dialog("close");
+			postError(jqXHR, dlog);
+			closeDialog(dlog);
 		    process_result_normally = false;
 		},
 		success: function (responseData, statusText, xhr, form) {
 			process_result_normally = postSuccess(responseData, dlog);
-			$(dlog).dialog("close");
+			closeDialog(dlog);
 		}
 	});
 	return process_result_normally;
 }
 
+// Handle forms submission on a dialog (both successful and unsuccessful) by closing
+// the dialog either directly (by closing the div, if it's modeless) or indirectly
+// (calling the dialog's close method, if it's modal)
+function closeDialog(dlog) {
+	var returnedData = dialogResult(dlog);
+	if($(dlog).hasClass('ui-dialog-content')) {
+	  // Modal dialog
+      $(dlog).dialog("close");
+	} else {
+	  withdrawDialog(); 
+	  runResponse(returnedData);
+	}
+}
+
 // Run a dialog from a body of HTML, which should be a div with 'dialog' class as outlined above.
 function runModalDialog(body, area) {
-	// Parse HTML, extract 'div.dialog' element (as nec.), then append to container
-	var dlog = injectDialog(body, area, false); 
-	// Any forms get submitted and their results handled appropriately. NB: the submission
-	// must be synchronous because we have to decide AFTER the results return whether to handle
-	// the form result normally.
-	$('form', dlog).submit( dlog, submitDialogForm );
+  var dlog = injectDialog(body, area, false); 
+  // Any forms get submitted and their results handled appropriately. NB: the submission
+  // must be synchronous because we have to decide AFTER the results return whether to handle
+  // the form result normally.
+  if(dlog) {
 	// Dialogs are modal by default, unless the classes 'at_top' or 'at_left' are asserted
 	var options = {
 		modal: true,
 		width: 'auto',
 		position: ['left', 'top'],
 		close: function() {
-			// It is expected that any dialogs have placed the response data object into the 'div.dialog'
-			
+			// It is expected that any dialogs have placed the response data object into the dlog object
 			var returnedData = dialogResult(dlog);
-			$('div.dialog').dialog("destroy");
+			$(dlog).dialog("destroy");
 			// Remove the first child of 'body', which is our dialog (if any)
 			withdrawDialog(); 
-			if(returnedData) {
-				runAppropriately(returnedData.code, "modal", returnedData.area)
-			}
+			runResponse(returnedData);
 		}
 	}
 	if((area == "floating") || (area == "page")) {
 		options.position = "center";
 	}
-	$(dlog).dialog( options );				
+	$(dlog).dialog( options );	
+  }
+  return dlog;			
 }
 
 // Inject the dialog on the current document, using the given HTML
 function injectDialog(code, area, modeless) {
-	// First, remove any lingering style or script elements on the page
-	$('link.RecipePowerInjectedStyle').remove();
-	// Inject our styles
-	$('<link href="/assets/foreign/dialog.css?body=1" media="screen" rel="stylesheet" type="text/css" id="RecipePowerInjectedStyle"/>').appendTo('head');
-	// Parse the code, creating an html element outside the DOM, then pulling the
-	// 'div.dialog' element from that.
-	var dlog = $('div.dialog', $('<html></html>').html(code));
-	
+  // First, remove any lingering style or script elements on the page
+  $('link.RecipePowerInjectedStyle').remove();
+  // Inject our styles
+  $('<link href="/assets/foreign/dialog.css?body=1" media="screen" rel="stylesheet" type="text/css" id="RecipePowerInjectedStyle"/>').appendTo('head');
+  // Parse the code, creating an html element outside the DOM, then pulling the
+  // 'div.dialog' element from that.
+  var dlog = $('div.dialog', $('<html></html>').html(code));
+
+  if(dlog) {	
 	if(!(area && $(dlog).hasClass(area)) ) {
 		// If the area isn't specified anywhere, 'floating' is the default
 		area = "floating"
@@ -292,12 +298,14 @@ function injectDialog(code, area, modeless) {
 	// We extract the dialog div from what may be a whole page
 	// Ensure that all scripts are loaded
 	// Run after-load functions
+	var dlog;
 	if((area == "at_left") || (area == "at_top")) {
 		$("body").prepend($(dlog)); 
+		dlog = $('#RecipePowerInjectedEncapsulation').prev();
 	} else {
 		$("body").append($(dlog)); 
+		dlog = $('#RecipePowerInjectedEncapsulation').next();
 	}
-	dlog = $('div.dialog'); // Now the dialog is in the DOM
 	// We get and execute the onload function for the dialog
 	var onload = $(dlog).attr("onload");
 	if (onload && (typeof window[onload] === 'function')) {
@@ -309,7 +317,8 @@ function injectDialog(code, area, modeless) {
 	if(area == "at_left") {
 	    $('#RecipePowerInjectedEncapsulation').css("marginLeft", $(dlog).css("width"))
 	}
-	return dlog;
+  }
+  return dlog;
 }
 
 // Remove the dialog and injected code

@@ -87,3 +87,13 @@ function showRequest(formData, jqForm, options) {
     // returning anything other than false will allow the form submit to continue 
     return false; 
 } 
+
+// Debugging aid: if there is a 'div.results' element we maintain a span of class 'query' for recording the query. Maybe.
+// This function toggles that, so it's very useful to attach it to a "Toggle Results Display" button.
+function toggleResults() {
+  if($('span.query').length > 0) {
+	$('div.results').html("");
+  } else {
+    $('div.results').html("<hr><h3>Query</h3><span class='query'></span><br><hr><h3>Result</h3><span class='source'></span><br><hr>");
+  }
+}

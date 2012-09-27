@@ -39,7 +39,6 @@ function collectRecipeCallback( data ) {
 
 // Called upon successful completion of the dialog
 function newRecipeCallback( data ) {
-	debugger;
     $("."+data.go_link_class).replaceWith(data.go_link_body);
     boostInTablist(data.list_element_class, data.list_element_body, 3) // Put it at the top of My Cookmarks
     boostInTablist(data.list_element_class, data.list_element_body, 4) // Put it at the top of the Recent tab
