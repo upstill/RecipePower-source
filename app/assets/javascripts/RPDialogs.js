@@ -1,22 +1,3 @@
-function editRecipeCallback( responseData ) {
-}
-
-// Ensure that functionality is available for the editRecipe dialog
-function newRecipeOnload(dlog) {
-	dialogOnClose( dlog, newRecipeCallback );
-}
-
-function newRecipeCallback(data) {
-	debugger;
-	var x=2;
-    $("."+data.go_link_class).replaceWith(data.go_link_body);
-    boostInTablist(data.list_element_class, data.list_element_body, 3) // Put it at the top of My Cookmarks
-    boostInTablist(data.list_element_class, data.list_element_body, 4) // Put it at the top of the Recent tab
-    $("div.ack_popup").text(data.title);
-    jNotify( "Got it! Added to collection and now appearing at the top of My Cookmarks.", 
-		{ HorizontalPosition: 'center', VerticalPosition: 'top'} );
-}	
-
 function editRecipeOnload(dlog) {
     $("#recipe_tag_tokens").tokenInput("/tags/match.json", {
         crossDomain: false,
@@ -32,35 +13,30 @@ function editRecipeOnload(dlog) {
 		event.preventDefault();
 	})
 	fitImageOnLoad("div.editRecipe img");
-	dialogOnClose( dlog, editRecipeCallback );
-}
-
-function collectRecipeCallback( data ) {
-  debugger;
-  if(data.error) {
-    jNotify( "Sorry, couldn't grab cookmark: "+data.error, 
-		{ HorizontalPosition: 'center', VerticalPosition: 'top'} );
-  } else {
-    $("."+data.go_link_class).replaceWith(data.go_link_body);
-    boostInTablist(data.list_element_class, data.list_element_body, 3) // Put it at the top of My Cookmarks
-    boostInTablist(data.list_element_class, data.list_element_body, 4) // Put it at the top of the Recent tab
-    $("div.ack_popup").text(data.title);
-    jNotify( "Got it! Now appearing at the top of My Cookmarks.", 
-		{ HorizontalPosition: 'center', VerticalPosition: 'top'} );
-  }
-}
-
-// Called upon successful completion of the dialog
-function newRecipeCallback( data ) {
-	debugger;
-    $("."+data.go_link_class).replaceWith(data.go_link_body);
-    boostInTablist(data.list_element_class, data.list_element_body, 3) // Put it at the top of My Cookmarks
-    boostInTablist(data.list_element_class, data.list_element_body, 4) // Put it at the top of the Recent tab
-    $("div.ack_popup").text(data.title);
-    jNotify( "Got it! Now appearing at the top of My Cookmarks.", 
-		{ HorizontalPosition: 'center', VerticalPosition: 'top'} );
+	dialogOnClose( dlog, recipeCallback )
 }
 
 function newRecipeOnload(dlog) {
-	dialogOnClose( dlog, newRecipeCallback )
+	dialogOnClose( dlog, recipeCallback )
+}
+
+function genericHandling(data, preface) {
+  if(data.error) {
+    postError( preface+data.error );
+  } else if(data.notice) {
+	postNotice( data.notice );
+  }
+}
+
+// General handling for recipe controller responses
+function recipeCallback( data ) {
+	if(data.go_link_class) {
+	    $("."+data.go_link_class).replaceWith(data.go_link_body);
+	}
+	if(data.list_element_class) {
+		$('.'+data.list_element_class).replaceWith(data.list_element_body);
+	    boostInTablist(data.list_element_class, data.list_element_body, 3) // Put it at the top of My Cookmarks
+	    boostInTablist(data.list_element_class, data.list_element_body, 4) // Put it at the top of the Recent tab
+	}
+	genericHandling(data); // Post errors and notices
 }

@@ -8,6 +8,30 @@ class RecipesController < ApplicationController
   filter_access_to :all
   include ApplicationHelper
   include ActionView::Helpers::TextHelper
+  
+  # Render to html, json or js the results of a recipe manipulation
+  def reportRecipe( url, notice, formats)
+      truncated = truncate @recipe.title, :length => 140
+      respond_to do |format|
+        format.html { 
+          redirect_to url, :notice  => notice
+        }
+        format.json { 
+          go_link_body = with_format("html") do render_to_string :partial => "recipes/golink" end
+          list_element_body = with_format("html") do render_to_string :partial => "shared/recipe_smallpic" end
+          render json:     { 
+                             notice: notice,
+                             title: truncated, 
+                             go_link_class: recipe_list_element_golink_class(@recipe), 
+                             go_link_body: go_link_body,
+                             list_element_class: recipe_list_element_class(@recipe), 
+                             list_element_body: list_element_body,
+                             processorFcn: "recipeCallback"
+                           } 
+        }
+        format.js { render text: @recipe.title }
+      end
+  end
 
   def index
     redirect_to rcpqueries_url
@@ -58,7 +82,10 @@ class RecipesController < ApplicationController
     # Find the recipe by URI (possibly correcting same), and bind it to the current user
     @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params[:recipe]
     if @recipe.errors.empty? # Success (valid recipe, either created or fetched)
-	    redirect_to edit_recipe_url(@recipe), :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br> You might want to confirm the title and picture, and/or tag it?".html_safe
+        reportRecipe(  
+                edit_recipe_url(@recipe), 
+                "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br> You might want to confirm the title and picture, and/or tag it?".html_safe,
+                formats )
     else # failure (not a valid recipe) => return to new
        @Title = "Cookmark a Recipe"
        @nav_current = :addcookmark
@@ -108,7 +135,7 @@ class RecipesController < ApplicationController
             # @recipe.errors.add "Couldn't save recipe"
       end
       if saved_okay
-        redirect_to rcpqueries_url :notice  => "Successfully updated #{@recipe.title || 'recipe'}."
+        reportRecipe( rcpqueries_url, "Successfully updated #{@recipe.title || 'recipe'}.", formats )
       else
         @Title = ""
         @nav_current = nil
@@ -149,33 +176,7 @@ class RecipesController < ApplicationController
     @list_name = "mine"
     @area = params[:area]
     if @recipe.errors.empty?
-      respond_to do |format|
-        format.html { 
-            redirect_to rcpqueries_path
-=begin
-            if @partial 
-                render :partial => "shared/recipe_smallpic", :layout=>false 
-            else
-                redirect_to rcpqueries_path
-            end
-=end
-        }
-        format.json { 
-            truncated = truncate @recipe.title, :length => 140
-            go_link_body = with_format("html") do render_to_string :partial => "recipes/golink" end
-            list_element_body = with_format("html") do render_to_string :partial => "shared/recipe_smallpic" end
-            render json: { 
-                           type: :element,
-                           title: truncated, 
-                           go_link_class: recipe_list_element_golink_class(@recipe), 
-                           go_link_body: go_link_body,
-                           list_element_class: recipe_list_element_class(@recipe), 
-                           list_element_body: list_element_body,
-                           processorFcn: "collectRecipeCallback"
-                         } 
-        }
-        format.js { render text: @recipe.title }
-      end
+      reportRecipe( rcpqueries_path, truncate( @recipe.title, :length => 100)+" now appearing in your collection.", formats)
     else
       respond_to do |format|
         format.html { render nothing: true }

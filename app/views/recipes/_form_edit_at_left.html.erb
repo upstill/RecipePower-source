@@ -1,4 +1,4 @@
-<%= form_for @recipe do |f| %>
+<%= form_for @recipe, :html => { class: 'edit_recipe json'} do |f| %>
   <%= show_errors @recipe.errors %>
   <div class="recipe_pic_div <%= @area %> recipe_field_label" >
     <div class="recipe_pic_preview">                                     

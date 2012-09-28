@@ -64,10 +64,6 @@ function recipePowerGetAndRunHTML(request, how, area) {
    -- any "notification" attribute is used as the text for a notifier of success
 */
 
-function testCase() {
-	recipePowerGetAndRunJSON("/recipes/new", "modal", "floating");
-}
-
 // This function can be tied to a link with only a URL to a controller for generating a dialog.
 // We will get the div and run the associated dialog.
 function recipePowerGetAndRunJSON(request, how, area) {
@@ -121,6 +117,7 @@ function runResponse(responseData) {
 		  }
 		}
 	} 
+	recipePowerNotify();
 }
 
 /* Utility for setting and getting the function called when closing the dialog */
@@ -177,14 +174,10 @@ function postSuccess(jsonResponse, dlog) {
 	  }
   }
   // Simplistic response: we'll prevent normal form handling IFF there's code to run.
-  if(jsonResponse.code) { 
-	// We got a result we can handle; stash it in the dialog result and return false
-	if(dlog != undefined) {
-		dialogResult( dlog, jsonResponse );
-	}
-    return false;
+  if(dlog != undefined) {
+	dialogResult( dlog, jsonResponse );
   }
-  return true;
+  return false;
 }
 
 // Cancel a modal dialog by issuing the close event
@@ -203,15 +196,16 @@ function cancelModelessDialog(event) {
 
 // A submit handler for a modal dialog form. Submits the data with a JSON
 // request and stores the response so it can be used when the dialog is closed.
-function submitDialogForm(eventdata) { // Supports multiple forms in dialog
+function submitDialogForJSON(eventdata) { // Supports multiple forms in dialog
 	var context = this;
 	var dlog = eventdata.data; // As stored when the dialog was set up
 	var process_result_normally = true;
+	eventdata.preventDefault();
 	/* To sort out errors from subsequent dialogs, we submit the form asynchronously
 	   and use the result to determine whether to do normal forms processing. */
 	$(context).ajaxSubmit( {
 		async: false,
-		dataType: "json",
+		dataType: 'json',
 		error: function(jqXHR, textStatus, errorThrown) {
 			postError(jqXHR, dlog);
 			closeDialog(dlog);
@@ -322,12 +316,39 @@ function injectDialog(code, area, modeless) {
 	}
 	// Cancel will remove the dialog and confirm null effect to user
 	$('input.cancel', dlog).click( modeless ? cancelModelessDialog : cancelModalDialog );
-	$('form', dlog).submit( dlog, submitDialogForm );
+	// Forms submissions that expect JSON structured data will be handled here:
+	$('form.json', dlog).submit( dlog, submitDialogForJSON );
 	if(area == "at_left") {
 	    $('#RecipePowerInjectedEncapsulation').css("marginLeft", $(dlog).css("width"))
 	}
   }
   return dlog;
+}
+
+function postError(str) {
+  if(str && (str.length > 0)) {
+	$('#container').data("errorPost", str);
+  }
+}
+
+function postNotice(str) {
+  if(str && (str.length > 0)) {
+	$('#container').data("noticePost", str);
+  }
+}
+
+function recipePowerNotify() {
+	var str = $('#container').data("errorPost");
+	if(str && str.length > 0) {
+		jNotify(str, { HorizontalPosition: 'center', VerticalPosition: 'top', TimeShown: 2000 } );
+		$('#container').data("errorPost", "");	
+	} else {
+		str = $('#container').data("noticePost");
+		if(str && str.length > 0) {
+			jNotify(str, { HorizontalPosition: 'center', VerticalPosition: 'top', TimeShown: 2000 } );
+		}
+	}
+	$('#container').data("noticePost", "");	
 }
 
 // Remove the dialog and injected code
