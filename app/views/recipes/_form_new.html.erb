@@ -1,14 +1,7 @@
-<%= show_errors @recipe.errors %>
 <h3>Add a Cookmark</h3>
-<%= form_for @recipe do |f| %>
-    <div class="recipe_url_div">
-        <%= f.label :url, "Paste URL here and click 'Add Cookmark'", :id=>"recipe_url_label" %>
-        <%= f.text_field :url %><br>
-    </div>
-    <br><%= f.submit :value=>"Add Cookmark" %>
-<% end %>
+<%= render "recipes/fields_new" %>
 <div class="lesson">
-<p class="airy">  To "cookmark" a recipe for your RecipePower collection:</p>
+<p class="airy">To "cookmark" a recipe for your RecipePower collection:</p>
   <ul>
       <li>Open it up anywhere on the Web.</li>
       <li>Copy its address from the source site. (Viewing the recipe page, select the contents of the browser's address bar and do Edit:Copy.)</li>

@@ -41,7 +41,7 @@ module ApplicationHelper
       link_to image_tag("preview.png", title:"Show the recipe in a popup window", class: "preview_button"), rcp.url, target: "_blank", class: "popup", id: "popup#{rcp.id.to_s}"        
   end
 
-  # Declare an image withinin an adjustable box. The images are downloaded by
+  # Declare an image within an adjustable box. The images are downloaded by
   # the browser and their dimensions adjusted under Javascript by the fitImageOnLoad() function.
   def page_fitPic(picurl, id, float_ttl = true, selector=nil)
     # "fitPic" class gets fit inside pic_box with Javascript and jQuery
@@ -102,20 +102,6 @@ module ApplicationHelper
     "rcpListGotag"+@recipe.id.to_s    
   end
   
-=begin
-  def recipe_list_element_golink recipe
-	if permitted_to? :update, @recipe
-      ("<span class='#{recipe_list_element_golink_class @recipe}'>" + 
-      if @recipe.users.exists?(@recipe.current_user)
- 	    link_to "Edit Tags", edit_recipe_path(@recipe)
- 	  else 
- 	    link_to_function "Grab This Cookmark!", "rcpCollect(#{@recipe.id.to_s})"
- 	  end + 
- 	  "</span>").html_safe
-    end
-  end      
-=end
-  
     def recipe_list_element_class recipe
         "rcpListElmt"+@recipe.id.to_s    
     end
@@ -169,6 +155,18 @@ module ApplicationHelper
   def logo
     link_to image_tag("RPlogo.png", :alt=>"RecipePower", :id=>"logo_img" ), root_path
   end
+  
+  def flash_helper
+      f_names = [:notice, :warning, :message]
+      fl = ''
+      for name in f_names
+        if flash[name]
+          fl = fl + "<div class=\"notice\">#{flash[name]}</div>"
+        end
+      flash[name] = nil;
+    end
+    return fl.html_safe
+  end
 
   # Deploy the links for naming the user and/or signing up/signing in
   def user_status
@@ -178,12 +176,12 @@ module ApplicationHelper
        userlinks << link_to("Sign Out", destroy_user_session_path, :method=>"delete")
        userlinks << navlink("Invite", new_user_invitation_path, (@nav_current==:invite))
     else
-       userlinks << link_to("Sign In", authentications_path)
+       userlinks << link_to_function("Sign In", "recipePowerGetAndRunJSON('authentications/new', 'modal')" )
     end
  	userlinks << navlink("Admin", admin_path) if permitted_to?(:admin, :pages)
  	userlinks.join('&nbsp|&nbsp').html_safe
   end
-  
+
   def bookmarklet
       imgtag = image_tag("Small_Icon.png", :alt=>"Cookmark", :class=>"logo_icon", width: "32px", height: "24px")
       bmtag = %q{<a class="bookmarklet" title="Cookmark" href="javascript:void(window.open('http://www.recipepower.com/recipes/new?url='+encodeURIComponent(window.location.href)+'&title='+encodeURIComponent(document.title)+'&notes='+encodeURIComponent(''+(window.getSelection?window.getSelection():document.getSelection?document.getSelection():document.selection.createRange().text))+'&v=6&jump=yes',%20'popup',%20'width=600,%20height=300,%20scrollbars,%20resizable'))">}
@@ -212,7 +210,8 @@ module ApplicationHelper
     def header_navlinks
     	navlinks = []
     	navlinks.push(navlink "Cookmarks", rcpqueries_path, (@nav_current==:cookmarks)) 
-    	navlinks.push(navlink "Add a Cookmark", new_recipe_path, (@nav_current==:addcookmark)) 
+    	navlinks.push(link_to_dialog "Add a Cookmark", new_recipe_path, "modal", "floating" )
+    	# navlinks.push(link_to_function("Add a Cookmark", "rcpAdd()" )) # navlink "Add a Cookmark", new_recipe_path, (@nav_current==:addcookmark)) 
     	navlinks.join('&nbsp|&nbsp').html_safe
     end
 =begin    
@@ -253,4 +252,26 @@ module ApplicationHelper
     def debug_dump(params)
         "<div id=\"debug\">#{debug(params)}</div>".html_safe
 	end
+	
+	# Embed a link to javascript for running a dialog by reference to a URL
+	def link_to_dialog(label, path, how, where)
+    	link_to_function label, "recipePowerGetAndRunJSON('#{path}', '#{how}', '#{where}');"
+    end
+	
+	# Place the header for a dialog, including setting its Onload function.
+	# Currently handled this way (e.g., symbols that have been supported)
+	#   :editRecipe
+	#   :newRecipe
+	def dialogHeader( which, ttl)
+	    classname = which.to_s
+        onloadFcn = classname+"Onload"
+	    %Q{
+	      <div class='dialog #{@area}' title="#{ttl}" onload="#{onloadFcn}">
+	      <div class='#{classname} #{@area}'>
+	    }.html_safe
+    end
+
+    def dialogFooter()
+        "</div></div>".html_safe
+    end
 end

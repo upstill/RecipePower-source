@@ -1,5 +1,5 @@
 /* Master function for assigning actions to interface items */
-$(document).ready(function(){ //wait for the dom to load
+$(document).ready(function() { //wait for the dom to load
 }); 
 
 $(function() {
@@ -8,6 +8,7 @@ $(function() {
 	  sends back a list of DOM elements to delete, which we handle with the 
 	  function nuke_DOM_elements_by_id.
 	*/
+
 	$("#PicPicker").click( function(event) {
 		PicPicker("Pick a Logo");
 		event.preventDefault();
@@ -194,7 +195,7 @@ function wdwFitImages(selection) {
 
 function PicPicker(ttl) {
 	// Bring up a dialog showing the picture-picking fields of the page
-	$("div.iconpicker").dialog({
+	$("div.iconpicker").dialog({ // nee: iconpicker
 		modal: true,
 		width: 700,
 		title: (ttl || "Pick a Picture"),
@@ -395,32 +396,60 @@ function boostInTablist(list_element_class, list_element_body, targettab) {
     }
 }
 
+// Request the server to add a recipe to a user's collection, allowing for an 
 function rcpCollect(id) {
   // Call server on /recipes/:id/collect
   jQuery.get( "recipes/"+id+"/collect", {},
-    function(body, status, hr) {
+    function(data, status, hr) {
 	  debugger;
 	  if(status == "success") {
-		/*
-          if(body.go_link_body) {
-		    $("."+body.go_link_class).replaceWith(body.go_link_body);
-		    boostInTablist(body.list_element_class, body.list_element_body, 3) // Put it at the top of My Cookmarks
-		    boostInTablist(body.list_element_class, body.list_element_body, 4) // Put it at the top of the Recent tab
-		    $("div.ack_popup").text(body.title);
+		if(data.type == "dialog") {
+			$("#container").append(data.body);
+			$('form').submit( function(eventdata) { // Supports multiple forms in dialog
+				$.ajax({
+			        url: eventdata.srcElement.action,
+			        type: 'post',
+			        dataType: 'json',
+			        data: $(eventdata.srcElement).serialize()
+			    });
+			})
+			$("div.signin_all_dlog").dialog({
+				modal: true,
+				width: 900,
+				title: "Let's get you signed in so we can do this properly",
+			});			
+		} else if(data.type == "element") { // Successful (non-redirected) response from server
+		    $("."+data.go_link_class).replaceWith(data.go_link_body);
+		    boostInTablist(data.list_element_class, data.list_element_body, 3) // Put it at the top of My Cookmarks
+		    boostInTablist(data.list_element_class, data.list_element_body, 4) // Put it at the top of the Recent tab
+		    $("div.ack_popup").text(data.title);
 		    jNotify( "Got it! Now appearing at the top of My Cookmarks.", 
 				{ HorizontalPosition: 'center', VerticalPosition: 'top'} );
-		  } else {
-		*/
-	          top.consoleRef = window.open('', 'login', 'width=550,height=350'
-			   +',menubar=0'
-			   +',toolbar=0'
-			   +',status=0'
-			   +',scrollbars=1'
-			   +',resizable=1');
-			  top.consoleRef.document.writeln(body);
-		  // }
+		} else if(data.type == "error" ) {
+		    jNotify( "Sorry, couldn't grab cookmark: "+data.error, 
+				{ HorizontalPosition: 'center', VerticalPosition: 'top'} );
+			
+		}
 	  }
-    }, "html" );
+    }, "json" );
+}
+
+function rcpAdd() { // Add a recipe to the cookmarks by pasting in a URL
+  jQuery.get( "/recipes/new", {},
+    function(data, status, hr) {
+	  if(status == "success") {
+		if(data.dialog != null) {
+			runModalDialog(data.dialog );
+		} else if(data.type == "element") { // Successful (non-redirected) response from server
+		    $("."+data.go_link_class).replaceWith(data.go_link_body);
+		    boostInTablist(data.list_element_class, data.list_element_body, 3) // Put it at the top of My Cookmarks
+		    boostInTablist(data.list_element_class, data.list_element_body, 4) // Put it at the top of the Recent tab
+		    $("div.ack_popup").text(data.title);
+		    jNotify( "Got it! Added to collection and now appearing at the top of My Cookmarks.", 
+				{ HorizontalPosition: 'center', VerticalPosition: 'top'} );
+		}
+	  }
+  }, "json" );
 }
 
 /*

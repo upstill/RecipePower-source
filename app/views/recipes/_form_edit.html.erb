@@ -3,48 +3,47 @@
 <%= form_for @recipe do |f| %>
   <%= show_errors @recipe.errors %>
   <div class="recipe_pic_div" >
-	<%# page_choosePic @recipe.picurl, @recipe.url, @recipe.id %>
     <div class="recipe_pic_preview">                                     
       <%= page_fitPic @recipe.picurl, @recipe.id, false, "div.recipe_pic_preview img" %>  
     </div>                                                    
-    <br><%= link_to "Pick Picture", "/", :id=>"PicPicker", :data=>"recipe_picurl;div.recipe_pic_preview img" %>
+    <p style="text-align:center;"><%= link_to "Pick Picture", "/", :id=>"PicPicker", :data=>"recipe_picurl;div.recipe_pic_preview img" %></p>
   </div>
   <%= f.text_field :picurl, rel: "jpg,png,gif", hidden: true %>
   <%= pic_picker @recipe.picurl, @recipe.url, @recipe.id %>
   <div class="recipe_fields_div">
     <div class="recipe_tags_div" >
-       <%= f.label :tag_tokens, "Tags", :id=>"recipe_tags_label" -%>
+       <%= f.label :tag_tokens, "Tags", :class=>"recipe_field_label" -%>
        <%= f.text_field :tag_tokens, "data-pre" => @recipe.tags.map(&:attributes).to_json %>
     </div>
     <div class="recipe_comment_div" >
-       <%= f.label :comment, "Notes", :id=>"recipe_comment_label" -%>
+       <%= f.label :comment, "Notes", :class=>"recipe_field_label" -%>
        <br><%= f.text_area :comment, placeholder: "What are your thoughts about this recipe?" %>
     </div>
     <div class="recipe_url_div" >
-       <%= f.label :url, "URL", :id=>"recipe_url_label" -%>
+       <%= f.label :url, "URL", :class=>"recipe_field_label" -%>
        <br><%= f.text_field :url %>
     </div>
     <div class="recipe_title_div" >
-       <%= f.label :title, "Title", :id=>"recipe_title_label" -%>
+       <%= f.label :title, "Title", :class=>"recipe_field_label" -%>
 		<% @recipe.check_title %>
        <br><%= f.text_field :title %>
     </div>
     <div class="recipe_status_div">
-       <%= f.label :status,  "Status: ",:id=>"recipe_status_label" -%>
+       <%= f.label :status,  "Status: ",:class=>"recipe_field_label" -%>
        <%= f.select :status,  Recipe.status_select %>
 	   <%= f.check_box :private %>
 	   <%= f.label :private, "Private (for my eyes only)" %>
-       <%# f.label :privacy, "Privacy: ",:id=>"recipe_privacy_label" -%>
+       <%# f.label :privacy, "Privacy: ",:class=>"recipe_field_label" -%>
        <%# f.select :privacy, Recipe.privacy_select %>
     </div>
-    <%= f.submit "Save" %>
-    <br><%= link_to "Back to Cookmarks", rcpqueries_path %> 
+    <%= f.submit "Save", class: "save-tags-button" %>
+    <%= f.submit "Cancel", class: "save-tags-button cancel" %>
   </div>
 <% end %>
 <br class="clear">
 <% if permitted_to? :remove, @recipe %>
-  <%= button_to "Remove From My Collection", "/recipes/#{@recipe.id.to_s}/remove" %>
+  <%= button_to "Remove From My Collection", "/recipes/#{@recipe.id.to_s}/remove", class: "save-tags-button" %>
 <% end %>
 <% if permitted_to? :destroy, @recipe %>
-  <%= button_to "Destroy this Recipe", "/recipes/#{@recipe.id.to_s}/destroy", :confirm => "This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" %>
+  <%= button_to "Destroy this Recipe", "/recipes/#{@recipe.id.to_s}/destroy", class: "save-tags-button", :confirm => "This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" %>
 <% end %>

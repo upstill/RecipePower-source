@@ -1,0 +1,25 @@
+// Default styling for dialogs at the left of the window
+div.dialog {
+  width:10.2em;
+  position:absolute;
+  top:0;
+left: 50px;
+  font-size:80%;
+  padding-left:1%;
+  padding-right:1%;
+  margin-left:0;
+  margin-right:0;
+  outline:#090 solid 1px;
+}
+
+// editRecipe
+
+/* newRecipe */
+
+div.newRecipe {
+	width: 550px;
+	height: 150px;
+}
+
+/* authentications */
+

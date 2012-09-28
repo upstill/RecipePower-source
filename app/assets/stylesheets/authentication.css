@@ -4,7 +4,7 @@
 }
 
 .auth_sidebar {
-width: 30%;
+width: 300px;
 float: right;
 margin:15px 5px 15px 30px;
 border:3px solid black;
@@ -28,17 +28,42 @@ padding:10px;
 	float:left;
 }
 
-.signup {
-	width: 250px;
+.sign.floating {
+	width: 550px;
     // border: solid 1px #999;
-	margin: 20px;
+	float: left;
+}
+
+.auth_signin.floating {
+	width: 280px;
+	border-right: solid 1px #999;
+	//    border: solid 3px #009;
+	margin: 0px 20px;
+	float: left;
+}
+
+.signup {
+	width: 200px;
+	border-left: solid 1px #999;
+    // border: solid 1px #999;
+	margin: 0px;
+	padding-left: 20px;
+	float: left;
+}
+
+.or {
+	margin-top: 100px;
+	margin-right: 10px;
+    // border: solid 1px #999;
 	float: left;
 }
 
 .signin {
 	width: 250px;
+	border-right: solid 1px #999;
     // border: solid 1px #999;
-	margin: 20px;
+	margin-right: 10px;
+	padding-right: 10px;
 	float: left;
 }
 
@@ -67,6 +92,12 @@ padding:10px;
 
 .signin_all {
 	width: 530px;
+	float: left;
+}
+
+.signin_all.floating {
+	width: 930px;
+	margin-top: 2em;
 	float: left;
 }
 

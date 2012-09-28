@@ -1,5 +1,5 @@
 <div class="signin">
-<strong>Sign In</strong><br>
+<h3>Sign In</h3>
 <%= form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f| %>
   <p><%= f.label :login, "Username or Email (your choice)" %><br />
   <%= f.text_field :login %></p>
@@ -8,9 +8,9 @@
   <%= f.password_field :password %></p>
 
   <% if devise_mapping.rememberable? -%>
-    <p><%= f.check_box :remember_me %> <%= f.label :remember_me %></p>
+    <p><%= f.check_box :remember_me, :checked => true %> <%= f.label :remember_me %></p>
   <% end -%>
 
-  <div class="gobutton"><%= f.submit "Sign in" %></div>
+  <div class="gobutton"><%= f.submit "Sign in", class: "submit_button" %></div>
 <% end %>
 </div>

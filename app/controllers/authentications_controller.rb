@@ -1,9 +1,23 @@
+require './lib/controller_utils.rb'
+  
 class AuthenticationsController < ApplicationController
-  def index
-    @authentications = current_user.authentications if current_user
-    @auth_delete = true
-    @auth_context = :manage
-    # render :layout => "dlog"
+    def index
+      @authentications = current_user.authentications if current_user
+      @auth_delete = true
+      @auth_context = :manage
+      @area = params[:area]
+      flash[:notice] = params[:notice]
+      dialog_boilerplate "new"
+    end
+
+  # Get a new authentication (==login)
+  def new
+      @authentications = current_user.authentications if current_user
+      @auth_delete = true
+      @auth_context = :manage
+      flash[:notice] = params[:notice]
+      @area = params[:area]
+      dialog_boilerplate "new"
   end
 
   def failure

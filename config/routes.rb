@@ -3,6 +3,7 @@ RP::Application.routes.draw do
   resources :feedback, :only => [:new, :create]
 
   match '/auth/failure' => 'authentications#failure'
+  match '/authentications/new' => 'authentications#new'
   resources :authentications
 
   devise_for :users, :controllers => {:invitations => 'invitations', :registrations => 'registrations'}
@@ -76,6 +77,7 @@ RP::Application.routes.draw do
   match '/signup', :to => 'visitors#new'
   match '/FAQ', :to=>"pages#FAQ"
   match '/admin', :to=>"pages#admin"
+  match '/spacetaker', :to=>"pages#spacetaker"
   root :to => 'pages#home_or_recipes'
 
   # The priority is based upon order of creation:

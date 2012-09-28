@@ -1,3 +1,5 @@
+require './lib/controller_utils.rb'
+
 class RecipesController < ApplicationController
 
   before_filter :login_required, :except => [:index, :show]
@@ -6,6 +8,30 @@ class RecipesController < ApplicationController
   filter_access_to :all
   include ApplicationHelper
   include ActionView::Helpers::TextHelper
+  
+  # Render to html, json or js the results of a recipe manipulation
+  def reportRecipe( url, notice, formats)
+      truncated = truncate @recipe.title, :length => 140
+      respond_to do |format|
+        format.html { 
+          redirect_to url, :notice  => notice
+        }
+        format.json { 
+          go_link_body = with_format("html") do render_to_string :partial => "recipes/golink" end
+          list_element_body = with_format("html") do render_to_string :partial => "shared/recipe_smallpic" end
+          render json:     { 
+                             notice: notice,
+                             title: truncated, 
+                             go_link_class: recipe_list_element_golink_class(@recipe), 
+                             go_link_body: go_link_body,
+                             list_element_class: recipe_list_element_class(@recipe), 
+                             list_element_body: list_element_body,
+                             processorFcn: "recipeCallback"
+                           } 
+        }
+        format.js { render text: @recipe.title }
+      end
+  end
 
   def index
     redirect_to rcpqueries_url
@@ -45,6 +71,8 @@ class RecipesController < ApplicationController
         @Title = "Cookmark a Recipe"
         @nav_current = :addcookmark
         @recipe.current_user = current_user_or_guest_id # session[:user_id]
+        @area = params[:area]
+        dialog_boilerplate 'new', 'modal'
     end
   end
 
@@ -54,7 +82,10 @@ class RecipesController < ApplicationController
     # Find the recipe by URI (possibly correcting same), and bind it to the current user
     @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params[:recipe]
     if @recipe.errors.empty? # Success (valid recipe, either created or fetched)
-	    redirect_to edit_recipe_url(@recipe), :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br> You might want to confirm the title and picture, and/or tag it?".html_safe
+        reportRecipe(  
+                edit_recipe_url(@recipe), 
+                "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br> You might want to confirm the title and picture, and/or tag it?".html_safe,
+                formats )
     else # failure (not a valid recipe) => return to new
        @Title = "Cookmark a Recipe"
        @nav_current = :addcookmark
@@ -71,11 +102,12 @@ class RecipesController < ApplicationController
         @recipe.touch # We're looking at it, so make it recent
         @Title = @recipe.title # Get title from the recipe
         @nav_current = nil
+        @area = params[:area]
         # Now go forth and edit
+        dialog_boilerplate('edit', 'at_left')
     else
         @Title = "Cookmark a Recipe"
         @nav_current = :addcookmark
-        render :action => 'new'
     end
   end
   
@@ -91,20 +123,24 @@ class RecipesController < ApplicationController
   
   def update
     # return if need_login true
-    @recipe = Recipe.find(params[:id])
-    @recipe.current_user = current_user_or_guest_id # session[:user_id]
-    begin
-        saved_okay = @recipe.update_attributes(params[:recipe])
-    # rescue => e
-        # saved_okay = false
-        # @recipe.errors.add "Couldn't save recipe"
-    end
-    if saved_okay
-        redirect_to rcpqueries_url :notice  => "Successfully updated #{@recipe.title || 'recipe'}."
+    if params[:commit] == "Cancel"
+      redirect_to rcpqueries_url :notice  => "Recipe secure and unchanged."
     else
+      @recipe = Recipe.find(params[:id])
+      @recipe.current_user = current_user_or_guest_id # session[:user_id]
+      begin
+        saved_okay = @recipe.update_attributes(params[:recipe])
+        # rescue => e
+            # saved_okay = false
+            # @recipe.errors.add "Couldn't save recipe"
+      end
+      if saved_okay
+        reportRecipe( rcpqueries_url, "Successfully updated #{@recipe.title || 'recipe'}.", formats )
+      else
         @Title = ""
         @nav_current = nil
         render :action => 'edit', :notice => "Huhh??!?"
+      end
     end
   end
   
@@ -133,31 +169,18 @@ class RecipesController < ApplicationController
       end
   end
   
-  # Add a recipe to the user's collection without going to edit tags
+  # Add a recipe to the user's collection without going to edit tags. Full-page render is just rcpqueries page
   # GET recipes/:id/collect
   def collect
-    debugger
     @recipe = Recipe.ensure current_user_or_guest_id, params
-    truncated = truncate @recipe.title, :length => 140
     @list_name = "mine"
+    @area = params[:area]
     if @recipe.errors.empty?
-      go_link_body = render_to_string(:partial => "recipes/golink")
-      list_element_body = render_to_string(:partial => "shared/recipe_smallpic") 
-      respond_to do |format|
-        format.html { render 'shared/_recipe_smallpic.html.erb', :layout=>false }
-        format.json { render json: { title: truncated, 
-                                     go_link_class: recipe_list_element_golink_class(@recipe), 
-                                     go_link_body: go_link_body,
-                                     list_element_class: recipe_list_element_class(@recipe), 
-                                     list_element_body: list_element_body
-                                   } 
-                    }
-        format.js { render text: @recipe.title }
-      end
+      reportRecipe( rcpqueries_path, truncate( @recipe.title, :length => 100)+" now appearing in your collection.", formats)
     else
       respond_to do |format|
         format.html { render nothing: true }
-        format.json { render json: { error: @recipe.errors.inspect } }
+        format.json { render json: { type: :error, error: @recipe.errors.messages.first.last.last } }
         format.js { render :text => e.message, :status => 403 }
       end
     end

@@ -243,7 +243,7 @@ class Site < ActiveRecord::Base
         req.request_head(url.path).code
       rescue Exception => e
         # If the server doesn't want to talk, we assume that the URL is okay, at least
-        return 401 if e.kind_of?(Errno::ECONNRESET)
+        return 401 if e.kind_of?(Errno::ECONNRESET) || url
       end
     end
     
@@ -267,7 +267,12 @@ class Site < ActiveRecord::Base
     
     # Find and return the site wherein the named link is stored
     def self.by_link (link)
-        if (uri = URI(link)) && !uri.host.blank?
+        begin
+            uri = URI(link)
+        rescue
+            uri = nil
+        end
+        if uri && !uri.host.blank?
             # Find all sites assoc'd with the given domain
             sites = Site.where "host = ?", uri.host
             # It's possible that multiple sites may proceed from the same domain, 
