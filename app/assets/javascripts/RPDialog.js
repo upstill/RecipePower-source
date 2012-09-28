@@ -319,7 +319,11 @@ function injectDialog(code, area, modeless) {
 	// Forms submissions that expect JSON structured data will be handled here:
 	$('form.json', dlog).submit( dlog, submitDialogForJSON );
 	if(area == "at_left") {
-	    $('#RecipePowerInjectedEncapsulation').css("marginLeft", $(dlog).css("width"))
+		// Right-shift the injector to accommodate the editor
+		var dlgwidth = $(dlog).width();
+		var injectorwidth = $('#RecipePowerInjectedEncapsulation').width();
+		$('#RecipePowerInjectedEncapsulation').width(dlgwidth+injectorwidth)
+	    $('#RecipePowerInjectedEncapsulation').css("marginLeft", dlgwidth)
 	}
   }
   return dlog;
