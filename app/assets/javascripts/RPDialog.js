@@ -100,13 +100,20 @@ function runResponse(responseData) {
 	if(responseData && !(typeof presentResponse === 'function' && presentResponse(responseData))) {
 		if(code = responseData.code) {
 		  var placed = false;
+		  if(!responseData.how) {
+			if(responseData.area == "floating") {
+				responseData.how = "modal"
+			} else if ((responseData.area == "at_left") || (responseData.area == "at_top")) {
+				responseData.how = "modeless"
+			}
+		  }
 		  if(responseData.how == "modeless") {
 			placed = injectDialog(code, responseData.area, true);
 		  } else if(responseData.how == "modal") { // at_top and at_left run modelessly
 			placed = runModalDialog(code, responseData.area);					
 		  }
 		  if (!placed) { // Force the page to be displayed. XXX Does nothing to the address bar
-		    $('#container').data("pending_page", code ); // Stash for doError function
+		    // $('#container').data("pending_page", code ); // Stash for doError function
 		    // window.location.replace('javascript:doError()');	
 		    document.open();
 			document.write(code);
@@ -148,7 +155,8 @@ function doError() {
   by treating the html as code to be rendered and sticking it in an object attached
   to the dialog, if any. */
 function postError( jqXHR, dlog ) {
-	result = jqXHR.responseText ? { code: jqXHR.responseText } : null;
+	// Any error page we get we will <try> to present modally
+	result = jqXHR.responseText ? { code: jqXHR.responseText, area: "floating", how: "modal" } : null;
 	// Stash the result in the dialog, if any
 	if(dlog != 'undefined') {
 		dialogResult( dlog, result );

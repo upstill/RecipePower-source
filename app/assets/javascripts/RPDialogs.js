@@ -9,6 +9,12 @@ function newRecipeOnload(dlog) {
 function newRecipeCallback(data) {
 	debugger;
 	var x=2;
+    $("."+data.go_link_class).replaceWith(data.go_link_body);
+    boostInTablist(data.list_element_class, data.list_element_body, 3) // Put it at the top of My Cookmarks
+    boostInTablist(data.list_element_class, data.list_element_body, 4) // Put it at the top of the Recent tab
+    $("div.ack_popup").text(data.title);
+    jNotify( "Got it! Added to collection and now appearing at the top of My Cookmarks.", 
+		{ HorizontalPosition: 'center', VerticalPosition: 'top'} );
 }	
 
 function editRecipeOnload(dlog) {
@@ -30,6 +36,7 @@ function editRecipeOnload(dlog) {
 }
 
 function collectRecipeCallback( data ) {
+  debugger;
   if(data.error) {
     jNotify( "Sorry, couldn't grab cookmark: "+data.error, 
 		{ HorizontalPosition: 'center', VerticalPosition: 'top'} );
@@ -45,6 +52,7 @@ function collectRecipeCallback( data ) {
 
 // Called upon successful completion of the dialog
 function newRecipeCallback( data ) {
+	debugger;
     $("."+data.go_link_class).replaceWith(data.go_link_body);
     boostInTablist(data.list_element_class, data.list_element_body, 3) // Put it at the top of My Cookmarks
     boostInTablist(data.list_element_class, data.list_element_body, 4) // Put it at the top of the Recent tab

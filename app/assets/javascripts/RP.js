@@ -441,7 +441,7 @@ function rcpAdd() { // Add a recipe to the cookmarks by pasting in a URL
 		if(data.dialog != null) {
 			runModalDialog(data.dialog );
 		} else if(data.type == "element") { // Successful (non-redirected) response from server
-		    // $("."+data.go_link_class).replaceWith(data.go_link_body);
+		    $("."+data.go_link_class).replaceWith(data.go_link_body);
 		    boostInTablist(data.list_element_class, data.list_element_body, 3) // Put it at the top of My Cookmarks
 		    boostInTablist(data.list_element_class, data.list_element_body, 4) // Put it at the top of the Recent tab
 		    $("div.ack_popup").text(data.title);
