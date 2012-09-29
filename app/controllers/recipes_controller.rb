@@ -58,7 +58,6 @@ class RecipesController < ApplicationController
     # Here is where we take a hit on the "Add to RecipePower" widget,
     # and also invoke the 'new cookmark' dialog. The difference is whether
     # parameters are supplied for url, title and note (though only URI is required).
-    debugger
     if params[:url]
         @recipe = Recipe.ensure current_user_or_guest_id, params # session[:user_id], params
     else
@@ -102,7 +101,6 @@ class RecipesController < ApplicationController
         @recipe.touch # We're looking at it, so make it recent
         @Title = @recipe.title # Get title from the recipe
         @nav_current = nil
-        debugger
         @area = params[:area]
         # Now go forth and edit
         dialog_boilerplate('edit', 'at_left')
@@ -196,7 +194,6 @@ class RecipesController < ApplicationController
     user.recipes.delete @recipe
     user.save
     @recipes = user.recipes(true)
-    debugger
     truncated = truncate(@recipe.title, :length => 40)
     redirect_to rcpqueries_url, :notice => "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections."
   end
