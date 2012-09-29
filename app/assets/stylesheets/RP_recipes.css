@@ -133,7 +133,7 @@ color:#A579A2;
 .tagpane {
 width:60%;
 background:#E8E8E8;
-border:2px solid gray;
+// border:2px solid gray;
 float: left;
 text-align:left;
 font:14px arial,sans-serif;
@@ -226,7 +226,7 @@ width:60px;
 margin:5px;
 margin-left:22px;
 align:left;
-  border:1px solid gray;
+//  border:1px solid gray;
 }
 
 .amount_div {

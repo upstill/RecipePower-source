@@ -7,7 +7,7 @@ div.editRecipe {
   width: 95%;
   margin: 1em;
   padding: 1em;
-  outline:#090 solid 1px;
+//  outline:#090 solid 1px;
 }
 
 div.editRecipe.at_left {
@@ -27,7 +27,7 @@ div.editRecipe.at_left {
   height: 120px;
   margin-left: auto;
   margin-right: auto;
-  outline:#099 solid 1px;
+//  outline:#099 solid 1px;
 }
 
 .recipe_text_field.at_left {
@@ -37,7 +37,7 @@ div.editRecipe.at_left {
 .recipe_tags_div.at_left {
   margin-top: 5px;
   width: 100%;
-  outline:#999 solid 1px;
+//  outline:#999 solid 1px;
 }
 
 .recipe_tags_div {
