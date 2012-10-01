@@ -9,7 +9,7 @@ $(function() {
 	    prePopulate: $("#referent_children").data("pre"),
 	    theme: "facebook",
 		preventDuplicates: true,
-	    allowCustomEntry: true
+	    allowFreeTagging: true // allowCustomEntry: true
 	});
 	$("#referent_child_tokens").tokenInput(querystr, {
 	    crossDomain: false,
@@ -18,7 +18,7 @@ $(function() {
 	    prePopulate: $("#referent_parents").data("pre"),
 	    theme: "facebook",
 		preventDuplicates: true,
-	    allowCustomEntry: true
+	    allowFreeTagging: true // allowCustomEntry: true
 	});
 	$("#referent_add_expression").tokenInput(querystr+"&untypedOK=1", {
 	    crossDomain: false,
@@ -28,7 +28,7 @@ $(function() {
 		tokenLimit: 1,
 	    onAdd: add_expression, // Respond to tag selection by adding expression and deleting tag
 		preventDuplicates: true,
-	    allowCustomEntry: true
+	    allowFreeTagging: true // allowCustomEntry: true
 	});
 });
 

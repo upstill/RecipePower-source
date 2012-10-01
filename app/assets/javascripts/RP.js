@@ -60,7 +60,7 @@ $(function() {
         theme: "facebook",
         onAdd: editAnotherTag,
         onDelete: tokenChangeCallback,
-        allowCustomEntry: true
+        allowFreeTagging: true // allowCustomEntry: true
     });
     $("#recipe_tag_tokens").tokenInput("/tags/match.json", {
         crossDomain: false,
@@ -69,7 +69,7 @@ $(function() {
         prePopulate: $("#recipe_tag_tokens").data("pre"),
         theme: "facebook",
 		preventDuplicates: true,
-        allowCustomEntry: true
+        allowFreeTagging: true // allowCustomEntry: true
     });
     $("#referent_channel_tag").tokenInput("/tags/match.json?tagtype=0", {
         crossDomain: false,
@@ -79,7 +79,7 @@ $(function() {
         theme: "facebook",
 		preventDuplicates: true,
 		tokenLimit: 1,
-        allowCustomEntry: true
+        allowFreeTagging: true // allowCustomEntry: true
     });
 	$('.remove_fields').click(function(event) {
 	    $(this).prev('input[type=hidden]').val('1')
@@ -100,13 +100,13 @@ function dependentSwitch() {
       $("#referent_channel_tag").tokenInput("revise", "/tags/match.json?tagtypes=1,2,3,4,6,7,8,12,14", {
 		noResultsText: "No existing tag found to use as channel",
         hintText: "Type an existing tag for the channel to track",
-        allowCustomEntry: false
+        allowFreeTagging: false // allowCustomEntry: false
       });
     } else {
       $("#referent_channel_tag").tokenInput("revise", "/tags/match.json?tagtype=0", {
 		noResultsText: "No matching tag found; hit Enter to make a new tag",
         hintText: "Type a tag naming the channel",
-        allowCustomEntry: true
+        allowFreeTagging: false // allowCustomEntry: true
       });
 	}
 }

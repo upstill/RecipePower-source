@@ -6,7 +6,7 @@ function editRecipeOnload(dlog) {
         prePopulate: $("#recipe_tag_tokens").data("pre"),
         theme: "facebook",
 		preventDuplicates: true,
-        allowCustomEntry: true
+        allowFreeTagging: true // allowCustomEntry: true
     });
 	$("#PicPicker").click( function(event) {
 		PicPicker("Pick a Picture for the Recipe");

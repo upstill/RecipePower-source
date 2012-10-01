@@ -21,7 +21,7 @@ function RPQueryOnLoad() {
         theme: "facebook",
         onAdd: tokenChangeCallback,
         onDelete: tokenChangeCallback,
-        allowCustomEntry: true
+        allowFreeTagging: true // allowCustomEntry: true
     });
 
 	// Respond to hits on the friends selector
