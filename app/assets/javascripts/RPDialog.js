@@ -117,7 +117,7 @@ function runResponse(responseData) {
 		  }
 		}
 	} 
-	recipePowerNotify();
+	recipePowerNotify(); // Put up any notifications provided by the response
 }
 
 /* Utility for setting and getting the function called when closing the dialog */
@@ -325,6 +325,9 @@ function injectDialog(code, area, modeless) {
 		var injectorwidth = $('#RecipePowerInjectedEncapsulation').width();
 		$('#RecipePowerInjectedEncapsulation').width(dlgwidth+injectorwidth)
 	    $('#RecipePowerInjectedEncapsulation').css("marginLeft", dlgwidth)
+	} else if (area == 'at_top') {
+		var dlgheight = $(dlog).outerHeight();
+		$('#RecipePowerInjectedEncapsulation').css("marginTop", dlgheight)
 	}
   }
   return dlog;
@@ -392,4 +395,57 @@ function unwrapWithoutCloning() {
 		body.insertBefore(child, wrapper);
 	}
 	body.removeChild(wrapper);
+}
+
+function serialize(obj) {
+  var str = [];
+  for(var p in obj)
+     str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+  return str.join("&");
+}
+
+
+function capture() {
+	// location.href='http://localhost:5000/recipes/capture?url='+encodeURIComponent(window.location.href)+'&title='+encodeURIComponent(document.title)+'&notes='+encodeURIComponent(''+(window.getSelection?window.getSelection():document.getSelection?document.getSelection():document.selection.createRange().text))+'&v=6&jump=yes'
+    var resource = "http://localhost:5000/recipes/capture";
+    var obj = 
+	  { url: window.location.href,
+	 	title: document.title,
+		area: "at_top",
+		how: "modeless" }
+
+	var str = [];
+	for(var p in obj)
+	  str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+	var request = resource + "?" + str.join("&");
+	$('span.query').text(request);
+	
+	var xmlhttp;
+	// Send the request using minimal Javascript
+	if (window.XMLHttpRequest) { xmlhttp=new XMLHttpRequest(); }
+	else {
+	  try { xmlhttp = new ActiveXObject("Msxml2.XMLHTTP"); }
+	  catch (e) {
+		try { xmlhttp = new ActiveXObject("Microsoft.XMLHTTP"); }
+		catch (e) { xmlhttp = null; }
+	  }
+	}
+	if(xmlhttp != null) {
+	  xmlhttp.onreadystatechange=function() {
+	    if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+		  // Now we have code, possibly required for jQuery and certainly 
+		  // required for any of our javascript. Ensure the code is loaded.
+
+		  var result = { code: xmlhttp.responseText };
+		  // Not really necessary if we're not responding to a dialog: postSuccess( result );
+		  result.how = "modeless";
+		  result.area = "at_top";
+		  runResponse(result);
+	    }
+	  }
+	  xmlhttp.open("GET", request, true);
+	  xmlhttp.setRequestHeader("Accept", "text/html" );
+	  xmlhttp.send();		
+	}
+	return false;
 }

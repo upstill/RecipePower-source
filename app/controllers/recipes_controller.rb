@@ -75,6 +75,30 @@ class RecipesController < ApplicationController
     end
   end
 
+  def capture # Collect URL from foreign site, asking whether to redirect to edit
+    # return if need_login true
+    # Here is where we take a hit on the "Add to RecipePower" widget,
+    # and also invoke the 'new cookmark' dialog. The difference is whether
+    # parameters are supplied for url, title and note (though only URI is required).
+    if params[:url]
+        @recipe = Recipe.ensure current_user_or_guest_id, params # session[:user_id], params
+    else
+        @recipe = Recipe.new
+    end
+    @area = params[:area] || "at_top"
+    if @recipe.id # Mark of a fetched/successfully saved recipe: it has an id
+    	# redirect to edit
+    	dialog_only = params[:how] == "modal" || params[:how] == "modeless"
+    	render :action => "capture", :layout => !dialog_only, :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br>You might want to confirm the title and picture, and/or tag it?".html_safe
+    else
+        @Title = "Cookmark a Recipe"
+        @nav_current = :addcookmark
+        @recipe.current_user = current_user_or_guest_id # session[:user_id]
+        @area = params[:area]
+        dialog_boilerplate 'new', params[:how] || 'modal'
+    end
+  end
+
   # Action for creating a recipe in response to the the 'new' page:
   def create # Take a URL, then either lookup or create the recipe
     # return if need_login true

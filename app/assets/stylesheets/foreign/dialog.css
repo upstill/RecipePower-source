@@ -23,7 +23,7 @@ div.dialog.at_left {
 
 div.dialog.at_top {
 	height:auto;
-	position:absolute;
+	position:fixed;
 //	outline:#090 solid 3px;
 	top:0;
 	left:0;
