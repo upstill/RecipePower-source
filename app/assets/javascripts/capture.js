@@ -8,5 +8,15 @@
 // This file is automatically included by javascript_include_tag :defaults
 
 // require jquery-1.7.1
-//= require_directory .
+//= require capture-bootstrap
+//= require RPDialog
+//= require RPDialogs
 // require RPquery
+
+/* 
+(function () {  
+var s = document.createElement('script');
+s.setAttribute('language','javascript');
+s.setAttribute('src','http://example.com/js/bookmarklet.js');
+document.body.appendChild(s);}())
+*/

@@ -95,6 +95,7 @@ class RecipesController < ApplicationController
         @nav_current = :addcookmark
         @recipe.current_user = current_user_or_guest_id # session[:user_id]
         @area = params[:area]
+        debugger
         dialog_boilerplate 'new', params[:how] || 'modal'
     end
   end

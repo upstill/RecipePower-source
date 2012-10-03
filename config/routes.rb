@@ -1,5 +1,7 @@
 RP::Application.routes.draw do
 
+  get "bm/bookmarklet(.:format)" => "bm#bookmarklet", :as => :bookmarklet
+
   resources :feedback, :only => [:new, :create]
 
   match '/auth/failure' => 'authentications#failure'

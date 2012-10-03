@@ -1,0 +1,2 @@
+module BmHelper
+end

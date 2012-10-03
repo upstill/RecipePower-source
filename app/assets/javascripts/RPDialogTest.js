@@ -73,7 +73,7 @@ function showRequest(formData, jqForm, options) {
 		alert("Can't get full pages with JSON")
 	} else {
       if(fields.format == "HTML") {
-	    recipePowerGetAndRunHTML(fields.url, fields.mode, fields.area);
+	    recipePowerGetAndRunHTML(fields.url, { how: fields.mode, area: fields.area } );
 	  } else {
 		recipePowerGetAndRunJSON(fields.url, fields.mode, fields.area);
 	  }

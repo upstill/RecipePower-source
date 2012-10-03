@@ -1,49 +1,36 @@
 
-/* Take an HTML stream and run a dialog from it. Assumptions:
-  1) The body is a div element of class 'dialog'. (It will work if the 'div.dialog'
-	is embedded within the HTML, but it won't clean up properly.)
-  2) There is styling on the element that will determine the width of the dialog
-  3) [optional] The 'div.dialog' has a 'title' attribute containing the title string
-  4) The submit action returns a json structure that the digestion function understands
-  5) The dialog will be run modally unless there is a 'at_top' class or 'at_left' class
-	on the 'div.dialog' element.
-  6) While not required, it is conventional that an 'Onload' function be defined for the 
-	dialog to set up various response functions.
-*/
-
-function recipePowerGetAndRunHTML(request, how, area) {
-	if(area) { // No area specified => up to the controller (usually defaults to 'page')
-		request += "?area="+area
-	}
-	$('span.query').text(request);
-	var xmlhttp;
-	// Send the request using minimal Javascript
-	if (window.XMLHttpRequest) { xmlhttp=new XMLHttpRequest(); }
-	else {
-	  try { xmlhttp = new ActiveXObject("Msxml2.XMLHTTP"); }
-	  catch (e) {
-		try { xmlhttp = new ActiveXObject("Microsoft.XMLHTTP"); }
-		catch (e) { xmlhttp = null; }
-	  }
-	}
-	if(xmlhttp != null) {
-	  xmlhttp.onreadystatechange=function() {
-	    if (xmlhttp.readyState==4 && xmlhttp.status==200) {
-		  // Now we have code, possibly required for jQuery and certainly 
-		  // required for any of our javascript. Ensure the code is loaded.
-		
-		  var result = { code: xmlhttp.responseText };
-		  postSuccess( result );
-		  result.how = how;
-		  result.area = area;
-		  runResponse(result);
-	    }
-	  }
-	  xmlhttp.open("GET", request, true);
-	  xmlhttp.setRequestHeader("Accept", "text/html" );
-	  xmlhttp.send();		
-	}
+// Process response from a request. This will be an object supplied by a JSON request,
+// which may include code to be presented along with fields (how and area) telling how
+// to present it. The data may also consist of only 'code' if it results from an HTML request
+function runResponse(responseData) {
+	// Wrapped in 'presentResponse', in the case where we're only presenting the results of the request
+	if(responseData && !(typeof presentResponse === 'function' && presentResponse(responseData))) {
+		if(code = responseData.code) {
+		  var placed = false;
+		  if(!responseData.how) {
+			if(responseData.area == "floating") {
+				responseData.how = "modal"
+			} else if ((responseData.area == "at_left") || (responseData.area == "at_top")) {
+				responseData.how = "modeless"
+			}
+		  }
+		  if(responseData.how == "modeless") {
+			placed = injectDialog(code, responseData.area, true);
+		  } else if(responseData.how == "modal") { // at_top and at_left run modelessly
+			placed = runModalDialog(code, responseData.area);					
+		  }
+		  if (!placed) { // Force the page to be displayed. XXX Does nothing to the address bar
+		    // $('#container').data("pending_page", code ); // Stash for doError function
+		    // window.location.replace('javascript:doError()');	
+		    document.open();
+			document.write(code);
+			document.close;
+		  }
+		}
+	} 
+	recipePowerNotify(); // Put up any notifications provided by the response
 }
+
 
 /* Submit a request to the server for interactive HTML. It's meant to be JSON specifying how 
    to handle it, but if the controller doesn't produce JSON (or if the request gets redirected
@@ -86,38 +73,6 @@ function recipePowerGetAndRunJSON(request, how, area) {
 			runResponse(responseData);
 		}
 	});
-}
-
-// Process response from a request. This will be an object supplied by a JSON request,
-// which may include code to be presented along with fields (how and area) telling how
-// to present it. The data may also consist of only 'code' if it results from an HTML request
-function runResponse(responseData) {
-	// Wrapped in 'presentResponse', in the case where we're only presenting the results of the request
-	if(responseData && !(typeof presentResponse === 'function' && presentResponse(responseData))) {
-		if(code = responseData.code) {
-		  var placed = false;
-		  if(!responseData.how) {
-			if(responseData.area == "floating") {
-				responseData.how = "modal"
-			} else if ((responseData.area == "at_left") || (responseData.area == "at_top")) {
-				responseData.how = "modeless"
-			}
-		  }
-		  if(responseData.how == "modeless") {
-			placed = injectDialog(code, responseData.area, true);
-		  } else if(responseData.how == "modal") { // at_top and at_left run modelessly
-			placed = runModalDialog(code, responseData.area);					
-		  }
-		  if (!placed) { // Force the page to be displayed. XXX Does nothing to the address bar
-		    // $('#container').data("pending_page", code ); // Stash for doError function
-		    // window.location.replace('javascript:doError()');	
-		    document.open();
-			document.write(code);
-			document.close;
-		  }
-		}
-	} 
-	recipePowerNotify(); // Put up any notifications provided by the response
 }
 
 /* Utility for setting and getting the function called when closing the dialog */
@@ -397,55 +352,3 @@ function unwrapWithoutCloning() {
 	body.removeChild(wrapper);
 }
 
-function serialize(obj) {
-  var str = [];
-  for(var p in obj)
-     str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
-  return str.join("&");
-}
-
-
-function capture() {
-	// location.href='http://localhost:5000/recipes/capture?url='+encodeURIComponent(window.location.href)+'&title='+encodeURIComponent(document.title)+'&notes='+encodeURIComponent(''+(window.getSelection?window.getSelection():document.getSelection?document.getSelection():document.selection.createRange().text))+'&v=6&jump=yes'
-    var resource = "http://localhost:5000/recipes/capture";
-    var obj = 
-	  { url: window.location.href,
-	 	title: document.title,
-		area: "at_top",
-		how: "modeless" }
-
-	var str = [];
-	for(var p in obj)
-	  str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
-	var request = resource + "?" + str.join("&");
-	$('span.query').text(request);
-	
-	var xmlhttp;
-	// Send the request using minimal Javascript
-	if (window.XMLHttpRequest) { xmlhttp=new XMLHttpRequest(); }
-	else {
-	  try { xmlhttp = new ActiveXObject("Msxml2.XMLHTTP"); }
-	  catch (e) {
-		try { xmlhttp = new ActiveXObject("Microsoft.XMLHTTP"); }
-		catch (e) { xmlhttp = null; }
-	  }
-	}
-	if(xmlhttp != null) {
-	  xmlhttp.onreadystatechange=function() {
-	    if (xmlhttp.readyState==4 && xmlhttp.status==200) {
-		  // Now we have code, possibly required for jQuery and certainly 
-		  // required for any of our javascript. Ensure the code is loaded.
-
-		  var result = { code: xmlhttp.responseText };
-		  // Not really necessary if we're not responding to a dialog: postSuccess( result );
-		  result.how = "modeless";
-		  result.area = "at_top";
-		  runResponse(result);
-	    }
-	  }
-	  xmlhttp.open("GET", request, true);
-	  xmlhttp.setRequestHeader("Accept", "text/html" );
-	  xmlhttp.send();		
-	}
-	return false;
-}
