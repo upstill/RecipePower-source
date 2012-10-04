@@ -39,8 +39,7 @@
 
   save_style("http://localhost:5000/assets/foreign/dialog.css?body=1");
   create_container("recipePower-container");
-  // save_link();
-  save_link_complete("Okay! DONE!!");
+  save_link();
 })();
 
 /* This callback will be invoked by the javascript returned by the server, above */
@@ -56,7 +55,7 @@ function save_link_complete(data) {
 }
 
 function set_status(content) {
-  jNotify(content); // document.getElementById("recipepower-status").innerHTML = content;
+  alert(content); // jNotify(content); // document.getElementById("recipepower-status").innerHTML = content;
 }
 
 function close_container(id) {

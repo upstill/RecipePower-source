@@ -12,6 +12,6 @@ class BmController < ApplicationController
       @area = "at_top"
       @how = "modeless"
       dialog_only = true
-      render action: "bookmarklet"
+      debugger
     end
 end

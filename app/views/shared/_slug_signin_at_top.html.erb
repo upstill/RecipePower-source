@@ -1,0 +1,19 @@
+<div class="signin at_top">
+<strong>Signin with password:</strong><br>
+<%= form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f| %>
+<div class="signin_field at_top">
+  <p><%= f.label :login, "Username or Email<br>(your choice)".html_safe %><br />
+  <%= f.text_field :login %></p>
+</div>
+<div class="signin_field at_top">
+  <p>&nbsp;<br><%= f.label :password %><br />
+  <%= f.password_field :password %></p>
+</div>
+<div class="signin_field at_top">
+  <% if devise_mapping.rememberable? -%>
+    <%= f.check_box :remember_me, :checked => true %> <%= f.label :remember_me %>
+  <% end -%>
+  <br><div class="gobutton at_top"><%= f.submit "Sign in", class: "submit_button" %></div>
+</div>
+<% end %>
+</div>
