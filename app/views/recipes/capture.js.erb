@@ -1,0 +1,8 @@
+(function() {
+  function return_report(cb) {
+	if(typeof window[cb] == 'function') {
+		window[cb]("successfully called capture!")
+	}
+  }
+  return_report("save_link_complete");
+})();

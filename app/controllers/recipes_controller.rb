@@ -2,7 +2,7 @@ require './lib/controller_utils.rb'
 
 class RecipesController < ApplicationController
 
-  before_filter :login_required, :except => [:index, :show]
+  before_filter :login_required, :except => [:index, :show, :capture ]
   before_filter { @focus_selector = "#recipe_url" }
   
   filter_access_to :all
@@ -80,8 +80,9 @@ class RecipesController < ApplicationController
     # Here is where we take a hit on the "Add to RecipePower" widget,
     # and also invoke the 'new cookmark' dialog. The difference is whether
     # parameters are supplied for url, title and note (though only URI is required).
-    if params[:url]
-        @recipe = Recipe.ensure current_user_or_guest_id, params # session[:user_id], params
+    debugger
+    if params[:recipe]
+        @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params
     else
         @recipe = Recipe.new
     end
@@ -95,8 +96,12 @@ class RecipesController < ApplicationController
         @nav_current = :addcookmark
         @recipe.current_user = current_user_or_guest_id # session[:user_id]
         @area = params[:area]
-        debugger
-        dialog_boilerplate 'new', params[:how] || 'modal'
+        respond_to do |format|
+            format.html 
+            format.json 
+            format.js { render action: "capture" }
+        end
+        # dialog_boilerplate 'new', params[:how] || 'modal'
     end
   end
 

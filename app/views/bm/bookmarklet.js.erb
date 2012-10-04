@@ -1,5 +1,138 @@
 /* This file is loaded by the RecipePower bookmarklet. */
+//bookmarklet.js.erb
+(function() {
+  function create_container(id) {
+    var container = document.createElement("div");
+    container.id = id;
+    container.innerHTML = "<%= escape_javascript(render( :partial => "recipes/fields_new", :locals => {:api_key => params[:k]}))%>";
+    inject_container(container, "at_top", false); // document.body.appendChild(container);
+  };
 
+  function save_link(scriptsrc) {
+	var scriptblock = document.getElementById('recipepower-dynoscripts');
+	if(!scriptblock) {
+		scriptblock = document.createElement('div');
+		scriptblock.id = 'recipepower-dynoscripts';
+		document.body.appendChild(scriptblock);
+	}
+	
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = "http://localhost:5000/recipes/capture.js?callback=save_link_complete&api_key=<%= params["api_key"] %>&recipe[url]=" + encodeURI(window.location.href);
+    script.id = "recipepower-loadJSONP";
+    document.body.appendChild(script);
+  }
+
+  function save_style(stylesrc) {
+	var styleblock = document.getElementById('recipepower-dynostyles');
+	if(!styleblock) {
+		styleblock = document.createElement('div');
+		styleblock.id = 'recipepower-dynostyles';
+		document.body.appendChild(styleblock);
+	}
+	var style = document.createElement("style");
+	style.type = "text/css";
+	style.src = stylesrc;
+	// style.id = "RecipePowerInjectedStyle";
+	styleblock.appendChild(style);
+  }
+
+  save_style("http://localhost:5000/assets/foreign/dialog.css?body=1");
+  create_container("recipePower-container");
+  // save_link();
+  save_link_complete("Okay! DONE!!");
+})();
+
+/* This callback will be invoked by the javascript returned by the server, above */
+function save_link_complete(data) {
+  if(data.status == "success") {
+    set_status("<h3>Yay!! Success</h3>"); // "<%# escape_javascript(render("shared/saved")) %>");
+  } else {
+    set_status("<h3>Boo! Failure</h3>"); // "<%# escape_javascript(render("shared/error")) %>");
+  }
+
+  close_container("recipepower-dynostyles");
+  close_container("recipepower-dynoscripts");
+}
+
+function set_status(content) {
+  jNotify(content); // document.getElementById("recipepower-status").innerHTML = content;
+}
+
+function close_container(id) {
+  var container = document.getElementById(id);
+  if(container) {
+	container.style.display = 'none';
+	container.parentNode.removeChild(container);
+  }
+}
+
+// Inject the container into the current document
+function inject_container(container, area, modeless) {
+  // First, remove any lingering style or script elements on the page
+  // $('link.RecipePowerInjectedStyle').remove();
+  // Inject our styles
+  // $('<link href="http://localhost:5000/assets/foreign/dialog.css?body=1" media="screen" rel="stylesheet" type="text/css" id="RecipePowerInjectedStyle"/>').appendTo('head');
+  // Parse the code, creating an html element outside the DOM, then pulling the
+  // 'div.dialog' element from that.
+	// Find the dialog within the container (first and only node of type element)
+	var dlog = container.firstChild;
+	while(dlog && dlog.nodeType != 1) {
+		dlog = dlog.nextSibling;
+	}
+	var capsule = document.getElementById("RecipePowerInjectedEncapsulation");
+	if(!capsule) { 
+	  capsule = wrapWithoutCloning();
+	} 
+	// Any old dialog will be either a predecessor or successor of the encapsulation
+	close_container("recipePower-container");
+	// Now the page is ready to receive the code, prepended to the page
+	// We extract the dialog div from what may be a whole page
+	// Ensure that all scripts are loaded
+	// Run after-load functions
+	document.body.insertBefore(container, capsule);
+	var mgn = dlog.offsetHeight+"px 0px 0px 0px";
+	container.style.margin=mgn;
+	// We get and execute the onload function for the dialog
+	var onload = dlog.attributes["onload"];
+	if (onload && (typeof window[onload] === 'function')) {
+		window[onload](dlog);
+	}
+	// Cancel will remove the dialog and confirm null effect to user
+	// $('input.cancel', dlog).click( modeless ? cancelModelessDialog : cancelModalDialog );
+	// Forms submissions that expect JSON structured data will be handled here:
+	// $('form.json', dlog).submit( dlog, submitDialogForJSON );
+	// var dlgheight = $(dlog).outerHeight();
+	// $('#RecipePowerInjectedEncapsulation').css("marginTop", dlgheight)
+}
+
+/* Encapsulate the body content of the page with a div wrapper */
+function wrapWithoutCloning() {
+	var wrapper = document.createElement('div'); 
+	wrapper.id = "RecipePowerInjectedEncapsulation";
+	var body = document.getElementsByTagName('body')[0];
+	body.insertBefore(wrapper, body.firstChild );
+	var child;
+	while (child = body.childNodes[1]) {
+		body.removeChild(child);
+		wrapper.appendChild(child);
+	}
+	return wrapper;
+}
+
+/* Remove the previously-injected wrapper */
+function unwrapWithoutCloning() {
+	var body = document.getElementsByTagName('body')[0];
+	var wrapper = document.getElementById('RecipePowerInjectedEncapsulation');
+	var child;
+	while(child = wrapper.childNodes[0]) {
+		wrapper.removeChild(child);
+		body.insertBefore(child, wrapper);
+	}
+	body.removeChild(wrapper);
+}
+
+/*
 if (!($ = window.jQuery)) { // typeof jQuery=='undefined' works too  
     script = document.createElement( 'script' );  
     script.src = 'http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js';  
@@ -19,61 +152,7 @@ function recipePowerCapture() {
 		area: "at_top",
 		how: "modeless" }
 		
-	recipePowerGetAndRunHTML(resource, obj)
+		// recipePowerGetAndRunHTML(resource, obj)
+		recipePowerGetAndRunHTML("http://localhost:5000/home", {})
 }
-
-/* Take an HTML stream and run a dialog from it. Assumptions:
-  1) The body is a div element of class 'dialog'. (It will work if the 'div.dialog'
-	is embedded within the HTML, but it won't clean up properly.)
-  2) There is styling on the element that will determine the width of the dialog
-  3) [optional] The 'div.dialog' has a 'title' attribute containing the title string
-  4) The submit action returns a json structure that the digestion function understands
-  5) The dialog will be run modally unless there is a 'at_top' class or 'at_left' class
-	on the 'div.dialog' element.
-  6) While not required, it is conventional that an 'Onload' function be defined for the 
-	dialog to set up various response functions.
 */
-
-function recipePowerGetAndRunHTML(request, params ) {
-	// Serialize the request
-  debugger;
-  if(typeof params === 'object') {
-	var str = [];
-	for(var p in params)
-	  str.push(encodeURIComponent(p) + "=" + encodeURIComponent(params[p]));
-	request += "?" + str.join("&");
-  }
-	
-	$('span.query').text(request);
-	var xmlhttp;
-	// Send the request using minimal Javascript
-	if (window.XMLHttpRequest) { xmlhttp=new XMLHttpRequest(); }
-	else {
-	  try { xmlhttp = new ActiveXObject("Msxml2.XMLHTTP"); }
-	  catch (e) {
-		try { xmlhttp = new ActiveXObject("Microsoft.XMLHTTP"); }
-		catch (e) { xmlhttp = null; }
-	  }
-	}
-	if(xmlhttp != null) {
-	  xmlhttp.onreadystatechange=function() {
-	    if (xmlhttp.readyState==4 && xmlhttp.status==200) {
-		  // Now we have code, possibly required for jQuery and certainly 
-		  // required for any of our javascript. Ensure the code is loaded.
-		  debugger;
-		  var result = { code: xmlhttp.responseText };
-		  if(typeof postSuccess === 'function') {
-			  postSuccess( result );
-		  }
-		  result.how = how;
-		  result.area = area;
-		  if(typeof runResponse === 'function') {
-			  runResponse( result );
-		  }
-	    }
-	  }
-	  xmlhttp.open("GET", request, true);
-	  xmlhttp.setRequestHeader("Accept", "text/html" );
-	  xmlhttp.send();		
-	}
-}
