@@ -231,19 +231,19 @@ div.signin_or {
     // height: 50px;
 	// border-right: solid 1px #999;
 	border-left: 1px solid black;
-	margin: .1em;
-	padding: 0.2em;
+	margin: 0em;
+	padding: 0em 0.7em;
 	float: left;
 }
 
 .signin_field.at_top {
 	float:left;
-	margin: 0em 1em;
+	margin: 0.5em 1em 0.3em 1em;
 	width:auto;
 }
 
 div.gobutton.at_top input {
-  margin: 1em;
+  margin: 0em;
   display: inline-block;
   text-align: center;
   border-width: 1px;
