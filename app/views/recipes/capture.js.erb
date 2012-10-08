@@ -3,6 +3,9 @@
 (function() {
   function create_container(id) {
     var container = document.createElement("div");
+    // container.style.margin="1em";
+    container.style.width=document.body.clientWidth; // "100%";
+    container.style['z-index'] = 100;
     container.id = id;
     container.innerHTML = "<%= escape_javascript(render @partial, :locals => {:api_key => params[:k]} )%>";
     inject_container(container, "at_top", false); // document.body.appendChild(container);
@@ -37,8 +40,8 @@
 	styleblock.appendChild(style);
   }
 
-  save_style("http://localhost:5000/assets/foreign/dialog.css?body=1");
-  save_style("http://localhost:5000/assets/authentication.css?body=1");
+  // save_style("http://localhost:5000/assets/foreign/dialog.css");
+  // save_style("http://localhost:5000/assets/authentication.css");
   create_container("recipePower-container");
   // save_link();
 })();
@@ -73,8 +76,6 @@ function inject_container(container, area, modeless) {
   // $('link.RecipePowerInjectedStyle').remove();
   // Inject our styles
   // $('<link href="http://localhost:5000/assets/foreign/dialog.css?body=1" media="screen" rel="stylesheet" type="text/css" id="RecipePowerInjectedStyle"/>').appendTo('head');
-  // Parse the code, creating an html element outside the DOM, then pulling the
-  // 'div.dialog' element from that.
 	// Find the dialog within the container (first and only node of type element)
 	var dlog = container.firstChild;
 	while(dlog && dlog.nodeType != 1) {
@@ -84,33 +85,41 @@ function inject_container(container, area, modeless) {
 	if(!capsule) { 
 	  capsule = wrapWithoutCloning();
 	} 
-	// Any old dialog will be either a predecessor or successor of the encapsulation
-	close_container("recipePower-container");
-	// Now the page is ready to receive the code, prepended to the page
-	// We extract the dialog div from what may be a whole page
-	// Ensure that all scripts are loaded
-	// Run after-load functions
-	document.body.insertBefore(container, capsule);
-	var mgn = dlog.offsetHeight+"px 0px 0px 0px";
-	container.style.margin=mgn;
-	// We get and execute the onload function for the dialog
+	dlog.style.width = capsule.clientWidth;
+	/// close_container("recipePower-container");
+	/// Now the page is ready to receive the code, prepended to the page
+	/// We extract the dialog div from what may be a whole page
+	/// Ensure that all scripts are loaded
+	/// Run after-load functions
+	container.style.display = 'none';
+ 	document.body.insertBefore(container, capsule);
+	container.style.display = 'block';
+	/// We get and execute the onload function for the dialog
 	var onload = dlog.attributes["onload"];
 	if (onload && (typeof window[onload] === 'function')) {
 		window[onload](dlog);
 	}
-	// Cancel will remove the dialog and confirm null effect to user
-	// $('input.cancel', dlog).click( modeless ? cancelModelessDialog : cancelModalDialog );
-	// Forms submissions that expect JSON structured data will be handled here:
-	// $('form.json', dlog).submit( dlog, submitDialogForJSON );
-	// var dlgheight = $(dlog).outerHeight();
-	// $('#RecipePowerInjectedEncapsulation').css("marginTop", dlgheight)
+	var mgn = 130; // XXX Should be getting something like dlog.offsetHeight;
+	mgn = mgn+"px 0px 0px 0px";
+	capsule.style.margin=mgn;
+	
+	/// Cancel will remove the dialog and confirm null effect to user
+	/// $('input.cancel', dlog).click( modeless ? cancelModelessDialog : cancelModalDialog );
+	/// Forms submissions that expect JSON structured data will be handled here:
+	/// $('form.json', dlog).submit( dlog, submitDialogForJSON );
+	/// var dlgheight = $(dlog).outerHeight();
+	/// $('#RecipePowerInjectedEncapsulation').css("marginTop", dlgheight)
 }
 
 /* Encapsulate the body content of the page with a div wrapper */
 function wrapWithoutCloning() {
+	var body = document.getElementsByTagName('body')[0];
 	var wrapper = document.createElement('div'); 
 	wrapper.id = "RecipePowerInjectedEncapsulation";
-	var body = document.getElementsByTagName('body')[0];
+	// wrapper.style = body.style;
+    wrapper.style.position = "absolute";
+    wrapper.style.width = "auto";
+    wrapper.style.height = "auto";
 	body.insertBefore(wrapper, body.firstChild );
 	var child;
 	while (child = body.childNodes[1]) {

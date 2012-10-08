@@ -209,13 +209,6 @@ padding:10px;
   border:1px solid black;
 }
 
-div.signin_or {
-	margin-top:1.5em;
-    font:16px arial,sans-serif;
-    font-weight:bold;
-	float:left;
-}
-
 .auth_poss.at_top {
     font:16px arial,sans-serif;
     // height: 50px;
@@ -273,3 +266,12 @@ div.gobutton.at_top input {
   border-radius: 15px;
   padding: 4.800000000000001px 12px 4.800000000000001px 12px;
 }
+
+/*
+label.recipePower {
+  font:14px arial,sans-serif;
+  font-weight:bold;
+//	font:18px calibri;
+//	line-height:150%;
+}
+*/

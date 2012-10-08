@@ -1,11 +1,14 @@
 <div class="signin_all <%= @area %> dialog" >
+  <link href="http://localhost:5000/assets/foreign/login.css?body=1" media="screen" rel="stylesheet" type="text/css">
   <div class="signin_hdr">
-	<%= image_tag "http://www.recipepower.com/assets/RPlogo.png", :size => "174x26", :alt => "RecipePower" %> needs you to sign in to collect this cookmark.
+	<div style="float:left"><%= image_tag "http://www.recipepower.com/assets/RPlogo.png", class: "small_logo", :alt => "RecipePower" %></div>
+	<div class="hdrdiv">&nbsp;needs you to sign in to collect this cookmark. Not a member? <u><%= link_to "Sign up!", "http://www.recipepower.com/users/sign_up" %></u></div>
   </div>
+  <div class="signin_cancel">X</div>
   <br class="clear">
   <%= render partial: 'shared/authentications_possible_at_top' %>
   <div class="signin_or">
-&nbsp;&nbsp;OR&nbsp;&nbsp;
+&nbsp;OR&nbsp;
   </div>
   <%= render partial: "shared/slug_signin_at_top" %>
 </div>
