@@ -28,5 +28,9 @@ def dialog_boilerplate(action, default_area=nil)
            end
            render json: { code: hresult, area: @area }
          }
+         format.js {
+             # Must have set @partial in preparation
+             render action: "capture"
+         }
     end
 end

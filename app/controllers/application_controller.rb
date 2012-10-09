@@ -54,6 +54,7 @@ class ApplicationController < ActionController::Base
   # If there was a redirect to the login page, we go back to the source of the redirect.
   # Otherwise, new users go to the welcome page and logged-in-before users to the queries page.
   def after_sign_in_path_for(resource)
+    debugger
     redirect = stored_location_for(resource)
     logger.debug "AFTER SIGNIN, STORED LOCATION IS "+(redirect||"empty")
     redirect ||

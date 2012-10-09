@@ -4,10 +4,11 @@
   function create_container(id) {
     var container = document.createElement("div");
     // container.style.margin="1em";
-    container.style.width=document.body.clientWidth; // "100%";
+    container.style.width=document.body.clientWidth+"px"; // "100%";
     container.style['z-index'] = 100;
     container.id = id;
     container.innerHTML = "<%= escape_javascript(render @partial, :locals => {:api_key => params[:k]} )%>";
+    debugger;
     inject_container(container, "at_top", false); // document.body.appendChild(container);
   };
 

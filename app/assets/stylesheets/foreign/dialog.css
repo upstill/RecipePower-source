@@ -4,6 +4,8 @@
   font-weight:bold;
   position: fixed;
   top: 0px;
+  padding: 0;
+  margin:0;
 }
 
 #recipePower-container .hdrdiv {
@@ -11,6 +13,7 @@
 	padding: 0em;
 	padding-top:1.05em;
 	height:15px;
+	width: 600px;
 }
 
 #recipePower-container .signin_all {
@@ -21,6 +24,23 @@
 	padding-bottom: 0;
 	float: left;
   background-color: #EEE;
+}
+
+#recipePower-container .rcpEdit {
+	// width: 100%; // Fits the inside of its container
+	margin: 0.3em;
+	border: solid 3px #900;
+	padding: 0.5em;
+	padding-bottom: 0;
+	float: left;
+  	background-color: #EEE;
+}
+
+div.rcpEdit_hdr {
+  height: 24px;
+  width: 500px;
+  margin: 0.1em;
+  // border:1px solid black;
 }
 
 div.signin_hdr {
@@ -38,6 +58,14 @@ div.signin_hdr {
 }
 
 .signin.at_top {
+	width: auto; // 430px;
+    height: auto;
+	margin: 0em;
+	padding: 0em 0.7em;
+	float: left;
+}
+
+.rcpEdit.at_top {
 	width: auto; // 430px;
     height: auto;
 	margin: 0em;
@@ -127,6 +155,16 @@ div.gobutton.at_top input {
 }
 
 div.signin_cancel {
+	float: right;
+	width: auto;
+	height: auto;
+  color: #5E4A18;
+  font-size: 10px;
+  background-color: #E6DAA1;
+  border-radius: 8px;
+}
+
+div.rcpEdit_cancel {
 	float: right;
 	width: auto;
 	height: auto;

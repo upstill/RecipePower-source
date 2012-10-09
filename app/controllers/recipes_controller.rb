@@ -101,8 +101,9 @@ class RecipesController < ApplicationController
             }
             format.js { # Produce javascript in response to the bookmarklet
                 if(current_user)
-                    @partial = "recipes/edit"
+                    @partial = "recipes/form_edit_at_top"
                 else
+                    session["user_return_to"] = "/recipes/#{@recipe.id.to_s}/edit.js"
                     @partial = 'shared/authentications_signin_at_top'
                 end
                 render
