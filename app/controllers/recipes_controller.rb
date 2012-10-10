@@ -107,7 +107,7 @@ class RecipesController < ApplicationController
                 else
                     session["user_return_to"] = "/recipes/#{@recipe.id.to_s}/edit?area=at_top&layout=injector"
                     # @partial = 'shared/authentications_signin_at_top'
-                    @url = "http://localhost:5000/authentications/signin?area=at_top&layout=injector"
+                    @url = "http://localhost:5000/authentications/new?area=at_top&layout=injector"
                 end
                 render
             }

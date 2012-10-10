@@ -5,8 +5,9 @@ class AuthenticationsController < ApplicationController
       @authentications = current_user.authentications if current_user
       @auth_delete = true
       @auth_context = :manage
-      @area = params[:area]
       flash[:notice] = params[:notice]
+      @area = params[:area]
+      @layout = params[:layout]
       dialog_boilerplate "new"
     end
 

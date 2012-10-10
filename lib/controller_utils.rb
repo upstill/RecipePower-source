@@ -10,6 +10,9 @@ def with_format(format, &block)
 end
 
 def dialog_boilerplate(action, default_area=nil)
+    flash[:notice] = params[:notice]
+    @area = params[:area]
+    @layout = params[:layout]
     respond_to do |format|
         format.html {
             @area ||= "page"  

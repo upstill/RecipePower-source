@@ -1,29 +1,29 @@
 
-#recipePower-container {
+div.dialog {
   font:12px arial,sans-serif;
   font-weight:bold;
-  position: fixed;
-  top: 0px;
-  padding: 0;
-  margin:0;
+  // position: fixed;
+  // top: 0px;
+  // padding: 0;
+  // margin:0;
 }
 
 .hdrdiv {
 	float:left;
 	padding: 0em;
-	padding-top:1.05em;
+	padding-top:11px;
 	height:15px;
-	width: 600px;
+	width: auto;
 }
 
 .signin_all {
-	// width: 100%;
-	margin: 0.3em;
+	width: auto;
+	margin: 0.2em;
 	border: solid 3px #900;
-	padding: 0.5em;
+	padding: 0; // 0.5em;
 	padding-bottom: 0;
 	float: left;
-  background-color: #EEE;
+    background-color: #EEE;
 }
 
 .rcpEdit {
@@ -45,16 +45,19 @@ div.rcpEdit_hdr {
 
 div.signin_hdr {
   height: 24px;
-  width: 90%;
-  margin: 0.1em;
+  width: auto;
+  margin: 0;
+  margin: 0.5em;
+  padding: 0;
   // border:1px solid black;
 }
 
 .auth_poss.at_top {
     // height: 50px;
-    width: 275px;
+    width: auto;
 	float: left;
 	margin: .1em;
+	margin-left: 0.5em;
 }
 
 .signin.at_top {
@@ -154,22 +157,16 @@ div.gobutton.at_top input {
   padding: 3px 6px 3px 6px;
 }
 
-div.signin_cancel {
+div.cancel_btn {
 	float: right;
 	width: auto;
 	height: auto;
   color: #5E4A18;
-  font-size: 10px;
+  font-size: 14px;
+  padding: 2px;
   background-color: #E6DAA1;
-  border-radius: 8px;
-}
-
-div.rcpEdit_cancel {
-	float: right;
-	width: auto;
-	height: auto;
-  color: #5E4A18;
-  font-size: 10px;
-  background-color: #E6DAA1;
-  border-radius: 8px;
+  border-radius: 2px;
+  border-color: hsl(0, 0%, 55%);
+  border-width: 2px;
+  border-style: solid;
 }
