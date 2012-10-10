@@ -1,57 +1,21 @@
 /* This file is invoked by the RecipePower bookmarklet. */
 // capture.js.erb
 (function() {
-  function create_container(id) {
-    var container = document.createElement("iframe");
-    // container.style.margin="1em";
-    container.style.width=document.body.clientWidth+"px"; // "100%";
-    container.style.height = "auto";
-    container.style['z-index'] = 100;
-    container.style.position = "fixed";
-	container.style.top = "0";
-	container.style.padding = "0";
-	container.style.margin = "0";
-    container.id = id;
-    container.src = "<%= @url %>";
-    container.onload = function() {
-	   inject_container(container, "at_top", false); // document.body.appendChild(container);
+    var ifr = document.createElement("iframe");
+    // ifr.style.margin="1em";
+    ifr.style.width=document.body.clientWidth+"px"; // "100%";
+    ifr.style.height = "auto";
+    ifr.style['z-index'] = 100;
+    ifr.style.position = "fixed";
+	ifr.style.top = "0";
+	ifr.style.padding = "0";
+	ifr.style.margin = "0";
+    ifr.id = "recipePower-container";
+    ifr.src = "<%= @url %>";
+    ifr.onload = function() {
+	   inject_iframe(ifr, "at_top", false); // document.body.appendChild(ifr);
 	}
-    document.body.appendChild(container);
-  };
-
-  function save_link(scriptsrc) {
-	var scriptblock = document.getElementById('recipepower-dynoscripts');
-	if(!scriptblock) {
-		scriptblock = document.createElement('div');
-		scriptblock.id = 'recipepower-dynoscripts';
-		document.body.appendChild(scriptblock);
-	}
-	
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src = "http://localhost:5000/recipes/capture.js?callback=save_link_complete&api_key=<%= params["api_key"] %>&recipe[url]=" + encodeURI(window.location.href);
-    script.id = "recipepower-loadJSONP";
-    document.body.appendChild(script);
-  }
-
-  function save_style(stylesrc) {
-	var styleblock = document.getElementById('recipepower-dynostyles');
-	if(!styleblock) {
-		styleblock = document.createElement('div');
-		styleblock.id = 'recipepower-dynostyles';
-		document.body.appendChild(styleblock);
-	}
-	var style = document.createElement("style");
-	style.type = "text/css";
-	style.src = stylesrc;
-	// style.id = "RecipePowerInjectedStyle";
-	styleblock.appendChild(style);
-  }
-
-  // save_style("http://localhost:5000/assets/foreign/dialog.css");
-  // save_style("http://localhost:5000/assets/authentication.css");
-  create_container("recipePower-container");
-  // save_link();
+    document.body.appendChild(ifr);
 })();
 
 /* This callback will be invoked by the javascript returned by the server, above */
@@ -79,29 +43,29 @@ function close_container(id) {
 }
 
 // Inject the container into the current document
-function inject_container(container, area, modeless) {
+function inject_iframe(ifr, area, modeless) {
   // First, remove any lingering style or script elements on the page
   // $('link.RecipePowerInjectedStyle').remove();
   // Inject our styles
   // $('<link href="http://localhost:5000/assets/foreign/dialog.css?body=1" media="screen" rel="stylesheet" type="text/css" id="RecipePowerInjectedStyle"/>').appendTo('head');
-	// Find the dialog within the container (first and only node of type element)
-	var dlog = container.contentDocument.body.childNodes[0];
+	// Find the dialog within the iframe (first and only node of type element)
+	var dlog = ifr.contentDocument.body.childNodes[0];
 	while(dlog && dlog.nodeType != 1) {
 			dlog = dlog.nextSibling;
 		}
 	var capsule = document.getElementById("RecipePowerInjectedEncapsulation");
 	if(!capsule) { 
-	  capsule = wrapWithoutCloning(container);
+	  capsule = wrapWithoutCloning(ifr);
 	} 
 	dlog.style.width = capsule.clientWidth;
-	/// close_container("recipePower-container");
+	/// close_iframe("recipePower-container");
 	/// Now the page is ready to receive the code, prepended to the page
 	/// We extract the dialog div from what may be a whole page
 	/// Ensure that all scripts are loaded
 	/// Run after-load functions
-//	container.style.display = 'none';
-// 	document.body.insertBefore(container, capsule);
-//	container.style.display = 'block';
+//	ifr.style.display = 'none';
+// 	document.body.insertBefore(ifr, capsule);
+//	ifr.style.display = 'block';
 	/// We get and execute the onload function for the dialog
 	var onload = dlog.attributes["onload"];
 	if (onload && (typeof window[onload] === 'function')) {
