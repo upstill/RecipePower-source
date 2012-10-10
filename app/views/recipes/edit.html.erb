@@ -1,6 +1,7 @@
 <% if true %>
 <%= dialogHeader :editRecipe, "Tag That Recipe!" %>
-<%= render ((@area == "at_left") ? 'form_edit_at_left' : 'form_edit') %>
+<% partial = "form_edit"+(@area ? "_"+@area : "") %>
+<%= render partial %>
 <%= dialogFooter %>
 <% else %>
 <div class="editRecipe">

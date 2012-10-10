@@ -8,7 +8,7 @@
   margin:0;
 }
 
-#recipePower-container .hdrdiv {
+.hdrdiv {
 	float:left;
 	padding: 0em;
 	padding-top:1.05em;
@@ -16,7 +16,7 @@
 	width: 600px;
 }
 
-#recipePower-container .signin_all {
+.signin_all {
 	// width: 100%;
 	margin: 0.3em;
 	border: solid 3px #900;
@@ -26,7 +26,7 @@
   background-color: #EEE;
 }
 
-#recipePower-container .rcpEdit {
+.rcpEdit {
 	// width: 100%; // Fits the inside of its container
 	margin: 0.3em;
 	border: solid 3px #900;
@@ -79,7 +79,7 @@ div.signin_hdr {
 	width:auto; // 130px;
 }
 
-#recipePower-container .auth_provider.small {
+.auth_provider.small {
   float: left;
 width: auto; // 42px;
 height: 50px;

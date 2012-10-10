@@ -266,7 +266,7 @@ module ApplicationHelper
 	    classname = which.to_s
         onloadFcn = classname+"Onload"
 	    %Q{
-	      <div class='dialog #{@area}' title="#{ttl}" onload="#{onloadFcn}">
+	      <div class='dialog #{@area}' title="#{ttl}" onload="#{onloadFcn} id="recipePowerDialog" >
 	      <div class='#{classname} #{@area}'>
 	    }.html_safe
     end

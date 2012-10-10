@@ -2,14 +2,21 @@
 // capture.js.erb
 (function() {
   function create_container(id) {
-    var container = document.createElement("div");
+    var container = document.createElement("iframe");
     // container.style.margin="1em";
     container.style.width=document.body.clientWidth+"px"; // "100%";
+    container.style.height = "auto";
     container.style['z-index'] = 100;
+    container.style.position = "fixed";
+	container.style.top = "0";
+	container.style.padding = "0";
+	container.style.margin = "0";
     container.id = id;
-    container.innerHTML = "<%= escape_javascript(render @partial, :locals => {:api_key => params[:k]} )%>";
-    debugger;
-    inject_container(container, "at_top", false); // document.body.appendChild(container);
+    container.src = "<%= @url %>";
+    container.onload = function() {
+	   inject_container(container, "at_top", false); // document.body.appendChild(container);
+	}
+    document.body.appendChild(container);
   };
 
   function save_link(scriptsrc) {
@@ -78,13 +85,13 @@ function inject_container(container, area, modeless) {
   // Inject our styles
   // $('<link href="http://localhost:5000/assets/foreign/dialog.css?body=1" media="screen" rel="stylesheet" type="text/css" id="RecipePowerInjectedStyle"/>').appendTo('head');
 	// Find the dialog within the container (first and only node of type element)
-	var dlog = container.firstChild;
+	var dlog = container.contentDocument.body.childNodes[0];
 	while(dlog && dlog.nodeType != 1) {
-		dlog = dlog.nextSibling;
-	}
+			dlog = dlog.nextSibling;
+		}
 	var capsule = document.getElementById("RecipePowerInjectedEncapsulation");
 	if(!capsule) { 
-	  capsule = wrapWithoutCloning();
+	  capsule = wrapWithoutCloning(container);
 	} 
 	dlog.style.width = capsule.clientWidth;
 	/// close_container("recipePower-container");
@@ -92,9 +99,9 @@ function inject_container(container, area, modeless) {
 	/// We extract the dialog div from what may be a whole page
 	/// Ensure that all scripts are loaded
 	/// Run after-load functions
-	container.style.display = 'none';
- 	document.body.insertBefore(container, capsule);
-	container.style.display = 'block';
+//	container.style.display = 'none';
+// 	document.body.insertBefore(container, capsule);
+//	container.style.display = 'block';
 	/// We get and execute the onload function for the dialog
 	var onload = dlog.attributes["onload"];
 	if (onload && (typeof window[onload] === 'function')) {
@@ -113,7 +120,7 @@ function inject_container(container, area, modeless) {
 }
 
 /* Encapsulate the body content of the page with a div wrapper */
-function wrapWithoutCloning() {
+function wrapWithoutCloning(omitted) {
 	var body = document.getElementsByTagName('body')[0];
 	var wrapper = document.createElement('div'); 
 	wrapper.id = "RecipePowerInjectedEncapsulation";
@@ -123,7 +130,7 @@ function wrapWithoutCloning() {
     wrapper.style.height = "auto";
 	body.insertBefore(wrapper, body.firstChild );
 	var child;
-	while (child = body.childNodes[1]) {
+	while ((child = body.childNodes[1]) && (child != omitted)) {
 		body.removeChild(child);
 		wrapper.appendChild(child);
 	}

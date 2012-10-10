@@ -94,6 +94,7 @@ class RecipesController < ApplicationController
     	dialog_only = params[:how] == "modal" || params[:how] == "modeless"
         respond_to do |format|
             format.html {
+                # The javascript includes an iframe for specific content
             	render :action => "capture", :layout => !dialog_only, :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br>You might want to confirm the title and picture, and/or tag it?".html_safe
             }
             format.json {
@@ -102,9 +103,11 @@ class RecipesController < ApplicationController
             format.js { # Produce javascript in response to the bookmarklet
                 if(current_user)
                     @partial = "recipes/form_edit_at_top"
+                    @url = "http://localhost:5000/recipes/#{@recipe.id.to_s}/edit?area=at_top&layout=injector"
                 else
-                    session["user_return_to"] = "/recipes/#{@recipe.id.to_s}/edit.js"
-                    @partial = 'shared/authentications_signin_at_top'
+                    session["user_return_to"] = "/recipes/#{@recipe.id.to_s}/edit?area=at_top&layout=injector"
+                    # @partial = 'shared/authentications_signin_at_top'
+                    @url = "http://localhost:5000/authentications/signin?area=at_top&layout=injector"
                 end
                 render
             }
@@ -146,6 +149,7 @@ class RecipesController < ApplicationController
         @nav_current = nil
         @area = params[:area]
         # Now go forth and edit
+        @layout = params[:layout]
         dialog_boilerplate('edit', 'at_left')
     else
         @Title = "Cookmark a Recipe"
