@@ -362,7 +362,7 @@ function rcpCollect(id) {
 			        data: $(eventdata.srcElement).serialize()
 			    });
 			})
-			$("div.signin_all_dlog").dialog({
+			$("div.signIn").dialog({
 				modal: true,
 				width: 900,
 				title: "Let's get you signed in so we can do this properly",

@@ -16,7 +16,7 @@ div.dialog {
 	width: auto;
 }
 
-.signin_all {
+.signIn {
 	width: auto;
 	margin: 0.2em;
 	border: solid 3px #900;
@@ -26,27 +26,27 @@ div.dialog {
     background-color: #EEE;
 }
 
-.rcpEdit {
-	// width: 100%; // Fits the inside of its container
-	margin: 0.3em;
+.editRecipe {
+	width: auto;
+	margin: 0.2em;
 	border: solid 3px #900;
-	padding: 0.5em;
+	padding: 0; // 0.5em;
 	padding-bottom: 0;
 	float: left;
-  	background-color: #EEE;
+    background-color: #EEE;
 }
 
-div.rcpEdit_hdr {
+div.editRecipe_hdr {
   height: 24px;
-  width: 500px;
-  margin: 0.1em;
+  width: auto;
+  margin: 0.5em;
+  padding: 0;
   // border:1px solid black;
 }
 
 div.signin_hdr {
   height: 24px;
   width: auto;
-  margin: 0;
   margin: 0.5em;
   padding: 0;
   // border:1px solid black;
@@ -64,15 +64,15 @@ div.signin_hdr {
 	width: auto; // 430px;
     height: auto;
 	margin: 0em;
-	padding: 0em 0.7em;
+	padding: 0em;
 	float: left;
 }
 
-.rcpEdit.at_top {
+.editRecipe.at_top {
 	width: auto; // 430px;
     height: auto;
 	margin: 0em;
-	padding: 0em 0.7em;
+	padding: 0em;
 	float: left;
 }
 
@@ -80,6 +80,12 @@ div.signin_hdr {
 	float:left;
 	margin: 0.5em;
 	width:auto; // 130px;
+}
+
+.editRecipe_field.at_top {
+	float:left;
+	margin: 0.5em;
+	width:auto; 
 }
 
 .auth_provider.small {
@@ -125,6 +131,22 @@ input#user_password {
 	margin: 0.2em;
 }
 
+div.recipe_pic_preview {
+  width: 160px;
+  height: 120px;
+  margin-left: auto;
+  margin-right: auto;
+//  outline:#099 solid 1px;
+}
+
+div.recipe_pic_preview.at_top {
+  width: 120px;
+  height: 90px;
+  margin-left: auto;
+  margin-right: auto;
+  outline:#099 solid 1px;
+}
+
 div.gobutton.at_top input {
   margin: 0.5em;
   display: inline-block;
@@ -157,10 +179,11 @@ div.gobutton.at_top input {
   padding: 3px 6px 3px 6px;
 }
 
-div.cancel_btn {
+div#recipePowerCancelDiv {
 	float: right;
 	width: auto;
 	height: auto;
+  text-decoration: none;
   color: #5E4A18;
   font-size: 14px;
   padding: 2px;

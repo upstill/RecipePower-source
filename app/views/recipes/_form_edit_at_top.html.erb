@@ -1,10 +1,44 @@
-<div class="rcpEdit <%= @area %> dialog" style="width:100%" >
-  <div class="cancel_btn">X</div>
-  <div class="rcpEdit_hdr" style="padding:0;" >
-	<div style="float:left">
-	    <%= image_tag "http://www.recipepower.com/assets/RPlogo.png", class: "small_logo", :alt => "RecipePower" %>
-	    &nbsp;Cookmarked! You can tag it here if you like. (Or not.)
-	</div>
+  <div class="editRecipe_hdr" style="padding:0;" >
+	 <%= image_tag "http://www.recipepower.com/assets/RPlogo.png", class: "small_logo", :alt => "RecipePower" %>
+	 &nbsp;Cookmarked for your collection! Tag it here if you like. (Or not.)
   </div>
-  <div class="rcpEdit_cancel">X</div>
-</div>
+<%= form_for @recipe, :html => { class: 'editRecipe at_top'} do |f| %>
+  <%= show_errors @recipe.errors %>
+  <br class="clear">
+	<div class="editRecipe_field <%= @area %> ">
+	  <div class="recipe_pic_div <%= @area %>" >
+	    <div class="recipe_pic_preview <%= @area %>">
+	      <%= page_fitPic @recipe.picurl, @recipe.id, false, "div.recipe_pic_preview img" %>  
+	    </div>                                                    
+		  <%= link_to "Pick Picture", "/", :id=>"PicPicker", :data=>"recipe_picurl;div.recipe_pic_preview img" %>
+	  </div>
+	  <%= f.text_field :picurl, rel: "jpg,png,gif", hidden: true %>
+	  <%= pic_picker @recipe.picurl, @recipe.url, @recipe.id %>
+	</div>
+
+  <div class="editRecipe_field <%= @area %>" >
+     <%= f.label :tag_tokens, "Tags" -%>
+     <br><%= f.text_field :tag_tokens, rows: "2", "data-pre" => @recipe.tags.map(&:attributes).to_json -%>
+  </div>
+
+  <div class="editRecipe_field <%= @area %>" >
+     <%= f.label :comment, "Notes" -%>
+     <br><%= f.text_area :comment, placeholder: "What are your thoughts about this recipe?", rows: "3" -%>
+  </div>
+
+  <div class="editRecipe_field <%= @area %>" >
+     <%= f.label :title, "Title" -%>
+	 <% @recipe.check_title %>
+     <br><%= f.text_area :title, rows: "3" -%>
+  </div>
+
+  <div class="editRecipe_field <%= @area %>">
+     <%= f.check_box :private %>
+     <%= f.label :private, "Private" %>
+  </div>
+
+  <div class="editRecipe_field <%= @area %>">
+    <%= f.submit "Save", class: "gobutton" %>
+	<%= button_to "Forget It", "/recipes/#{@recipe.id.to_s}/remove", class: "gobutton" %>
+  </div>
+<% end %>

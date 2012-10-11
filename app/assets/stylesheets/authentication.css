@@ -92,12 +92,12 @@ padding:10px;
 	float: left;
 }
 
-.signin_all {
+.signIn {
 	width: 630px;
 	float: left;
 }
 
-.signin_all.floating {
+.signIn.floating {
 	width: 930px;
 	margin-top: 2em;
 	float: left;
@@ -193,7 +193,7 @@ padding:10px;
 }
 */
 
-.signin_all.at_top {
+.signIn.at_top {
 	width: 100%;
 	height:auto;
 	margin: 0.2em;

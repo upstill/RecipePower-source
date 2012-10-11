@@ -13,10 +13,18 @@
     ifr.id = "recipePower-container";
     ifr.src = "<%= @url %>";
     ifr.onload = function() {
-	   inject_iframe(ifr, "at_top", false); // document.body.appendChild(ifr);
+	   inject_iframe(ifr, "at_top", false); 
 	}
     document.body.appendChild(ifr);
 })();
+
+/* Called when the X to cancel the dialog is clicked */
+function retire_iframe() {
+	var iframe = document.getElementById("recipePower-container")
+	iframe.style.display = 'none';
+	iframe.parentNode.removeChild(iframe);
+	unwrapWithoutCloning();
+}
 
 /* This callback will be invoked by the javascript returned by the server, above */
 function save_link_complete(data) {
@@ -25,21 +33,11 @@ function save_link_complete(data) {
   } else {
     set_status("<h3>Boo! Failure</h3>"); // "<%# escape_javascript(render("shared/error")) %>");
   }
-
-  close_container("recipepower-dynostyles");
-  close_container("recipepower-dynoscripts");
+  retire_iframe();
 }
 
 function set_status(content) {
   alert(content); // jNotify(content); // document.getElementById("recipepower-status").innerHTML = content;
-}
-
-function close_container(id) {
-  var container = document.getElementById(id);
-  if(container) {
-	container.style.display = 'none';
-	container.parentNode.removeChild(container);
-  }
 }
 
 // Inject the container into the current document
@@ -76,6 +74,10 @@ function inject_iframe(ifr, area, modeless) {
 	capsule.style.margin=mgn;
 	
 	/// Cancel will remove the dialog and confirm null effect to user
+	var cancelBtn = ifr.contentDocument.getElementById("recipePowerCancelBtn");
+	if(cancelBtn) {
+		cancelBtn.onclick = retire_iframe;
+	}
 	/// $('input.cancel', dlog).click( modeless ? cancelModelessDialog : cancelModalDialog );
 	/// Forms submissions that expect JSON structured data will be handled here:
 	/// $('form.json', dlog).submit( dlog, submitDialogForJSON );
@@ -85,7 +87,7 @@ function inject_iframe(ifr, area, modeless) {
 
 /* Encapsulate the body content of the page with a div wrapper */
 function wrapWithoutCloning(omitted) {
-	var body = document.getElementsByTagName('body')[0];
+	var body = document.body;
 	var wrapper = document.createElement('div'); 
 	wrapper.id = "RecipePowerInjectedEncapsulation";
 	// wrapper.style = body.style;
@@ -103,7 +105,7 @@ function wrapWithoutCloning(omitted) {
 
 /* Remove the previously-injected wrapper */
 function unwrapWithoutCloning() {
-	var body = document.getElementsByTagName('body')[0];
+	var body = document.body;
 	var wrapper = document.getElementById('RecipePowerInjectedEncapsulation');
 	var child;
 	while(child = wrapper.childNodes[0]) {
@@ -112,37 +114,3 @@ function unwrapWithoutCloning() {
 	}
 	body.removeChild(wrapper);
 }
-
-/*
-if (!($ = window.jQuery)) { // typeof jQuery=='undefined' works too  
-    script = document.createElement( 'script' );  
-    script.src = 'http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js';  
-    script.onload=recipePowerCapture;  
-    document.body.appendChild(script);  
-}  
-else {  
-    recipePowerCapture();  
-}  
-
-function recipePowerCapture() {
-    var resource = "http://localhost:5000/recipes/capture";
-    alert( "Got recipePowerCapture!");
-    var obj = 
-	  { url: window.location.href,
-	 	title: document.title,
-		area: "at_top",
-		how: "modeless" }
-		
-		// recipePowerGetAndRunHTML(resource, obj)
-		recipePowerGetAndRunHTML("http://localhost:5000/home", {})
-}
-*//* 
-(function() {
-  function return_report(cb) {
-	if(typeof window[cb] == 'function') {
-		window[cb]("successfully called capture!")
-	}
-  }
-  return_report("save_link_complete");
-})();
-*/
