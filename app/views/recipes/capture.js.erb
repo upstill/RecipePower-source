@@ -21,21 +21,12 @@
 	    ifr.onload = ifrOnload;
 	}
     document.body.appendChild(ifr);
-	window.addEventListener("ifrdone", receiveMessage, false);
 })();
-
-function receiveMessage(event)
-{
-  debugger;
-  if (event.origin !== "http://example.org:8080")
-    return;
-
-  // ...
-}
 
 function ifrOnload() {
 	var ifr = this;
-/*
+/* We would love to encapsulate the window content so we can move the top out of the way
+   of the injected content, but it doesn't seem to work, at least on htmldog.com
 	var capsule = document.getElementById("RecipePowerInjectedEncapsulation");
 	if(!capsule) { 
 	  capsule = wrapWithoutCloning(ifr);
@@ -152,3 +143,89 @@ function unwrapWithoutCloning() {
 	}
 	body.removeChild(wrapper);
 }
+
+// Define receive-message handler from ba-postmessage.js
+(function($){
+  // '$:nomunge'; // Used by YUI compressor.
+  
+  // A few vars used in non-awesome browsers.
+  var interval_id,
+    last_hash,
+    cache_bust = 1,
+    
+    // A var used in awesome browsers.
+    rm_callback,
+    
+    // A few convenient shortcuts.
+    window = this,
+    FALSE = !1,
+    
+    // Reused internal strings.
+    postMessage = 'postMessage',
+    addEventListener = 'addEventListener',
+    
+    p_receiveMessage,
+    
+    // I couldn't get window.postMessage to actually work in Opera 9.64!
+    has_postMessage = window[postMessage] // XXX && !$.browser.opera;
+
+  
+  $.receiveMessage = p_receiveMessage = function( callback, source_origin, delay ) {
+    if ( has_postMessage ) {
+      // Since the browser supports window.postMessage, the callback will be
+      // bound to the actual event associated with window.postMessage.
+      
+      if ( callback ) {
+        // Unbind an existing callback if it exists.
+        rm_callback && p_receiveMessage();
+        
+        // Bind the callback. A reference to the callback is stored for ease of
+        // unbinding.
+        rm_callback = function(e) {
+	debugger;
+          if ( ( typeof source_origin === 'string' && e.origin !== source_origin )
+             || ( (typeof source_origin === 'function') && source_origin( e.origin ) === FALSE ) ) {
+            return FALSE;
+          }
+          callback( e );
+        };
+      }
+      
+      if ( window[addEventListener] ) {
+        window[ callback ? addEventListener : 'removeEventListener' ]( 'message', rm_callback, FALSE );
+      } else {
+        window[ callback ? 'attachEvent' : 'detachEvent' ]( 'onmessage', rm_callback );
+      }
+      
+    } else {
+      // Since the browser sucks, a polling loop will be started, and the
+      // callback will be called whenever the location.hash changes.
+      
+      interval_id && clearInterval( interval_id );
+      interval_id = null;
+      
+      if ( callback ) {
+        delay = typeof source_origin === 'number'
+          ? source_origin
+          : typeof delay === 'number'
+            ? delay
+            : 100;
+        
+        interval_id = setInterval(function(){
+          var hash = document.location.hash,
+            re = /^#?\d+&/;
+          if ( hash !== last_hash && re.test( hash ) ) {
+            last_hash = hash;
+            callback({ data: hash.replace( re, '' ) });
+          }
+        }, delay );
+      }
+    }
+  };
+
+})(window);
+
+window.receiveMessage( function(evt) {
+	var data = evt.data;
+	debugger;
+}, "http://<%= Rails.env.development? ? "localhost:5000" : "www.recipepower.com" %>" );

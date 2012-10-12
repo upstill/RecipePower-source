@@ -43,8 +43,7 @@
 		}
 		setTimeout(function(){
 			debugger;
-			// Event.postMessage(window.parent, _228d, "done");
-			window.parent.postMessage("ifrdone", "*");
+			$.postMessage( "ifrdone", "http://www.htmldog.com/" );
 		}, 5000);
         
 		/// Cancel will remove the dialog and confirm null effect to user
