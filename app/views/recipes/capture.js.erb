@@ -4,26 +4,71 @@
     var ifr = document.createElement("iframe");
     // ifr.style.margin="1em";
     ifr.style.width=document.body.clientWidth+"px"; // "100%";
-    ifr.style.height = "auto";
+    // ifr.style.height = "auto";
     ifr.style['z-index'] = 100;
     ifr.style.position = "fixed";
 	ifr.style.top = "0";
 	ifr.style.padding = "0";
 	ifr.style.margin = "0";
-    ifr.id = "recipePower-container";
+	ifr.style.display = 'none';
+    ifr.id = "recipePower-iframe";
     ifr.src = "<%= @url %>";
-    ifr.onload = function() {
-	   inject_iframe(ifr, "at_top", false); 
+	// set the width of the frame to that of the enclosing document
+	ifr.style.width = window.outerWidth;
+	if (ifr.attachEvent){
+	    ifr.attachEvent("onload", ifrOnload);
+	} else {
+	    ifr.onload = ifrOnload;
 	}
     document.body.appendChild(ifr);
+	window.addEventListener("ifrdone", receiveMessage, false);
 })();
 
-/* Called when the X to cancel the dialog is clicked */
-function retire_iframe() {
-	var iframe = document.getElementById("recipePower-container")
-	iframe.style.display = 'none';
-	iframe.parentNode.removeChild(iframe);
-	unwrapWithoutCloning();
+function receiveMessage(event)
+{
+  debugger;
+  if (event.origin !== "http://example.org:8080")
+    return;
+
+  // ...
+}
+
+function ifrOnload() {
+	var ifr = this;
+/*
+	var capsule = document.getElementById("RecipePowerInjectedEncapsulation");
+	if(!capsule) { 
+	  capsule = wrapWithoutCloning(ifr);
+	} 
+*/
+	/* We go back to the server for the dimensions of the iframe content, running
+		returned Javascript to set the size appropriately */
+	get_resize(ifr.attributes["src"].nodeValue);
+}
+
+function get_resize(uri) {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = "http://localhost:5000/iframe/create.js?callback=execute_resize&url="+encodeURI(uri);
+    script.id = "recipePower-loadJSONP";
+    document.body.appendChild(script);
+  }
+
+function execute_resize(dims) {
+	
+	var height = dims.height;
+	/*
+	var capsule = document.getElementById("RecipePowerInjectedEncapsulation");
+	var mgn = height+"px 0px 0px 0px";
+	capsule.style.margin=mgn;
+	*/
+	
+	var ifr = document.getElementById("recipePower-iframe");
+	ifr.height=height;
+	ifr.style.display = 'block';
+	
+	var s = document.getElementById("recipePower-loadJSONP");
+	s.parentNode.removeChild(s);
 }
 
 /* This callback will be invoked by the javascript returned by the server, above */
@@ -47,37 +92,29 @@ function inject_iframe(ifr, area, modeless) {
   // Inject our styles
   // $('<link href="http://localhost:5000/assets/foreign/dialog.css?body=1" media="screen" rel="stylesheet" type="text/css" id="RecipePowerInjectedStyle"/>').appendTo('head');
 	// Find the dialog within the iframe (first and only node of type element)
-	var dlog = ifr.contentDocument.body.childNodes[0];
+	// var dlog = ifr.contentDocument.body.childNodes[0];
+	var dlog = document.body.childNodes[0];
 	while(dlog && dlog.nodeType != 1) {
 			dlog = dlog.nextSibling;
 		}
-	var capsule = document.getElementById("RecipePowerInjectedEncapsulation");
-	if(!capsule) { 
-	  capsule = wrapWithoutCloning(ifr);
-	} 
 	dlog.style.width = capsule.clientWidth;
-	/// close_iframe("recipePower-container");
+	/// close_iframe("recipePower-iframe");
 	/// Now the page is ready to receive the code, prepended to the page
 	/// We extract the dialog div from what may be a whole page
 	/// Ensure that all scripts are loaded
 	/// Run after-load functions
-//	ifr.style.display = 'none';
-// 	document.body.insertBefore(ifr, capsule);
-//	ifr.style.display = 'block';
 	/// We get and execute the onload function for the dialog
 	var onload = dlog.attributes["onload"];
 	if (onload && (typeof window[onload] === 'function')) {
 		window[onload](dlog);
 	}
-	var mgn = 130; // XXX Should be getting something like dlog.offsetHeight;
-	mgn = mgn+"px 0px 0px 0px";
-	capsule.style.margin=mgn;
 	
 	/// Cancel will remove the dialog and confirm null effect to user
-	var cancelBtn = ifr.contentDocument.getElementById("recipePowerCancelBtn");
+	var cancelBtn = document.getElementById("recipePowerCancelBtn");
 	if(cancelBtn) {
 		cancelBtn.onclick = retire_iframe;
 	}
+	return dlog.offsetHeight;
 	/// $('input.cancel', dlog).click( modeless ? cancelModelessDialog : cancelModalDialog );
 	/// Forms submissions that expect JSON structured data will be handled here:
 	/// $('form.json', dlog).submit( dlog, submitDialogForJSON );
@@ -92,7 +129,8 @@ function wrapWithoutCloning(omitted) {
 	wrapper.id = "RecipePowerInjectedEncapsulation";
 	// wrapper.style = body.style;
     wrapper.style.position = "absolute";
-    wrapper.style.width = "auto";
+	debugger;
+    wrapper.style.width = document.body.clientWidth; // "auto";
     wrapper.style.height = "auto";
 	body.insertBefore(wrapper, body.firstChild );
 	var child;

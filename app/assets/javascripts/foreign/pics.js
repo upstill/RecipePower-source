@@ -1,4 +1,13 @@
 
+/* Called when the X to cancel the dialog is clicked */
+function retire_iframe() {
+	var iframe = document.getElementById("recipePower-container")
+	debugger;
+	iframe.style.display = 'none';
+	iframe.parentNode.removeChild(iframe);
+	unwrapWithoutCloning();
+}
+
 // Onload function for images, to fit themselves (found by id) into the enclosing container.
 function fitImageOnLoad(selector) {
     $(selector).each(function() {

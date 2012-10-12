@@ -26,6 +26,10 @@ div.dialog {
     background-color: #EEE;
 }
 
+div.editRecipe.dialog.at_top {
+	width:800px;
+}
+
 .editRecipe {
 	width: auto;
 	margin: 0.2em;
@@ -42,6 +46,11 @@ div.editRecipe_hdr {
   margin: 0.5em;
   padding: 0;
   // border:1px solid black;
+}
+
+.editRecipe_element {
+	height: 40px;
+	padding-bottom: 0.2em;
 }
 
 div.signin_hdr {

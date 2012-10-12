@@ -1,10 +1,9 @@
   <div class="editRecipe_hdr" style="padding:0;" >
 	 <%= image_tag "http://www.recipepower.com/assets/RPlogo.png", class: "small_logo", :alt => "RecipePower" %>
-	 &nbsp;Cookmarked for your collection! Tag it here if you like. (Or not.)
+	 &nbsp;clipped this for your collection! Tag it here if you like. (Or <%= link_to_function "not", "retire_iframe();" %>.)
   </div>
-<%= form_for @recipe, :html => { class: 'editRecipe at_top'} do |f| %>
+<%= form_for @recipe, :html => { style: 'width:auto;height:auto'} do |f| %>
   <%= show_errors @recipe.errors %>
-  <br class="clear">
 	<div class="editRecipe_field <%= @area %> ">
 	  <div class="recipe_pic_div <%= @area %>" >
 	    <div class="recipe_pic_preview <%= @area %>">
@@ -16,29 +15,29 @@
 	  <%= pic_picker @recipe.picurl, @recipe.url, @recipe.id %>
 	</div>
 
-  <div class="editRecipe_field <%= @area %>" >
-     <%= f.label :tag_tokens, "Tags" -%>
-     <br><%= f.text_field :tag_tokens, rows: "2", "data-pre" => @recipe.tags.map(&:attributes).to_json -%>
+  <div class="editRecipe_field <%= @area %>", style="margin-right:0.1em;margin-left:0.5em" >
+     <div class="editRecipe_element"><%= f.label :title, "Title" -%></div>
+     <div class="editRecipe_element"><%= f.label :tag_tokens, "Tags" -%></div>
+     <div class="editRecipe_element"><%= f.label :comment, "Notes" -%></div>
   </div>
 
-  <div class="editRecipe_field <%= @area %>" >
-     <%= f.label :comment, "Notes" -%>
-     <br><%= f.text_area :comment, placeholder: "What are your thoughts about this recipe?", rows: "3" -%>
-  </div>
-
-  <div class="editRecipe_field <%= @area %>" >
-     <%= f.label :title, "Title" -%>
+  <div class="editRecipe_field <%= @area %>", style="margin-left:0.2em" >
 	 <% @recipe.check_title %>
-     <br><%= f.text_area :title, rows: "3" -%>
+     <div class="editRecipe_element">
+		<%= f.text_area :title, style: "width:500px", rows: "2" -%>
+	 </div>
+     <div class="editRecipe_element">
+	    <%= f.text_field :tag_tokens, "data-pre" => @recipe.tags.map(&:attributes).to_json, style: "width:500px", rows: "2" -%>
+	 </div>
+     <div class="editRecipe_element">
+		<%= f.text_area :comment, placeholder: "What are your thoughts about this recipe?", style: "width:500px", rows: "2" -%>
+	 </div>
   </div>
 
   <div class="editRecipe_field <%= @area %>">
      <%= f.check_box :private %>
      <%= f.label :private, "Private" %>
-  </div>
-
-  <div class="editRecipe_field <%= @area %>">
-    <%= f.submit "Save", class: "gobutton" %>
+    <br><%= f.submit "Save", class: "gobutton" %>
 	<%= button_to "Forget It", "/recipes/#{@recipe.id.to_s}/remove", class: "gobutton" %>
   </div>
 <% end %>

@@ -1,0 +1,8 @@
+// Javascript for asserting the derived iframe dimensions
+(function () {
+	<%= params[:callback] %>(
+<% if @dims %>
+	{ height: <%= @dims[:height] %>, width: <%= @dims[:width] %> }
+<% end %>
+    );
+})();

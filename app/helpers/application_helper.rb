@@ -276,7 +276,7 @@ module ApplicationHelper
         ttlspec = ttl ? (" title=\"#{ttl}+\"") : ""
 	    result = %Q{ 
 	      #{flash_helper}
-	      <div class='#{classname} dialog #{@area}' #{ttlspec} onload="#{onloadFcn} id="recipePowerDialog" >
+	      <div class='#{classname} dialog #{@area}' #{ttlspec} onload="#{onloadFcn}" id="recipePowerDialog" >
 	    }
 	    if(@layout && @layout=="injector") 
 	      result += %Q{
