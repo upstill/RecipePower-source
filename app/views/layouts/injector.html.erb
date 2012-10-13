@@ -41,17 +41,19 @@
 				window[onloadFcn](dlog);
 			}
 		}
-		setTimeout(function(){
-			debugger;
-			$.postMessage( "ifrdone", "http://www.htmldog.com/" );
-		}, 5000);
         
 		/// Cancel will remove the dialog and confirm null effect to user
 		var cancelBtn = document.getElementById("recipePowerCancelBtn");
 		if(cancelBtn) {
-			cancelBtn.onclick = retire_iframe;
+			cancelBtn.onclick = function(){
+				$.postMessage( { call: "retire_iframe" }, "http://www.htmldog.com/" );
+			};
 		}
-		// Finally, report the window dimensions to the server
+		// Finally, report the window dimensions to the enclosing window
+		var msg = { call: "execute_resize", width: dlog.width, height: document.height };
+		$.postMessage( msg, "http://www.htmldog.com/" );
+		
+		/*
 		var request = "http://localhost:5000/iframe/create.json?url="+encodeURI(window.location.href)+
 			"&amp;ifr[width]="+dlog.width+
 			"&amp;ifr[height]="+document.height;
@@ -71,6 +73,7 @@
 		  xmlhttp.setRequestHeader("Accept", "text/html" );
 		  xmlhttp.send();		
 		}
+		*/
 	 });
 
 	</script>

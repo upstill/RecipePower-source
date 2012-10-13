@@ -15,14 +15,17 @@
     ifr.src = "<%= @url %>";
 	// set the width of the frame to that of the enclosing document
 	ifr.style.width = window.outerWidth;
+	/*
 	if (ifr.attachEvent){
 	    ifr.attachEvent("onload", ifrOnload);
 	} else {
 	    ifr.onload = ifrOnload;
 	}
+	*/
     document.body.appendChild(ifr);
 })();
 
+/*
 function ifrOnload() {
 	var ifr = this;
 /* We would love to encapsulate the window content so we can move the top out of the way
@@ -31,24 +34,27 @@ function ifrOnload() {
 	if(!capsule) { 
 	  capsule = wrapWithoutCloning(ifr);
 	} 
-*/
+* /
 	/* We go back to the server for the dimensions of the iframe content, running
-		returned Javascript to set the size appropriately */
+		returned Javascript to set the size appropriately * /
 	get_resize(ifr.attributes["src"].nodeValue);
 }
+*/
 
+/*
 function get_resize(uri) {
     var script = document.createElement("script");
     script.type = "text/javascript";
     script.src = "http://localhost:5000/iframe/create.js?callback=execute_resize&url="+encodeURI(uri);
     script.id = "recipePower-loadJSONP";
     document.body.appendChild(script);
-  }
+}
+*/
 
 function execute_resize(dims) {
 	
 	var height = dims.height;
-	/*
+	/* Set the top margin of the encapsulation to clear the iframe
 	var capsule = document.getElementById("RecipePowerInjectedEncapsulation");
 	var mgn = height+"px 0px 0px 0px";
 	capsule.style.margin=mgn;
@@ -58,8 +64,10 @@ function execute_resize(dims) {
 	ifr.height=height;
 	ifr.style.display = 'block';
 	
+	/* Remove the script fragment that called us
 	var s = document.getElementById("recipePower-loadJSONP");
 	s.parentNode.removeChild(s);
+	*/
 }
 
 /* This callback will be invoked by the javascript returned by the server, above */
@@ -70,6 +78,20 @@ function save_link_complete(data) {
     set_status("<h3>Boo! Failure</h3>"); // "<%# escape_javascript(render("shared/error")) %>");
   }
   retire_iframe();
+}
+
+/* Called when the X to cancel the dialog is clicked */
+function retire_iframe() {
+	var iframe = document.getElementById("recipePower-iframe");
+	if(iframe) {
+		iframe.style.display = 'none';
+		iframe.parentNode.removeChild(iframe);		
+	}
+	// Sadly obsolete: unwrapWithoutCloning();
+	var script = document.getElementById("recipePower-injector");
+	if(script) {
+		script.parentNode.removeChild(script);
+	}
 }
 
 function set_status(content) {
@@ -99,12 +121,6 @@ function inject_iframe(ifr, area, modeless) {
 	if (onload && (typeof window[onload] === 'function')) {
 		window[onload](dlog);
 	}
-	
-	/// Cancel will remove the dialog and confirm null effect to user
-	var cancelBtn = document.getElementById("recipePowerCancelBtn");
-	if(cancelBtn) {
-		cancelBtn.onclick = retire_iframe;
-	}
 	return dlog.offsetHeight;
 	/// $('input.cancel', dlog).click( modeless ? cancelModelessDialog : cancelModalDialog );
 	/// Forms submissions that expect JSON structured data will be handled here:
@@ -113,14 +129,15 @@ function inject_iframe(ifr, area, modeless) {
 	/// $('#RecipePowerInjectedEncapsulation').css("marginTop", dlgheight)
 }
 
-/* Encapsulate the body content of the page with a div wrapper */
+/* Encapsulate the body content of the page with a div wrapper.
+  NB: doesn't pertain until we figure out how to do this correctly (doesn't
+	work for htmldog.com) 
 function wrapWithoutCloning(omitted) {
 	var body = document.body;
 	var wrapper = document.createElement('div'); 
 	wrapper.id = "RecipePowerInjectedEncapsulation";
 	// wrapper.style = body.style;
     wrapper.style.position = "absolute";
-	debugger;
     wrapper.style.width = document.body.clientWidth; // "auto";
     wrapper.style.height = "auto";
 	body.insertBefore(wrapper, body.firstChild );
@@ -132,7 +149,7 @@ function wrapWithoutCloning(omitted) {
 	return wrapper;
 }
 
-/* Remove the previously-injected wrapper */
+/* Remove the previously-injected wrapper * /
 function unwrapWithoutCloning() {
 	var body = document.body;
 	var wrapper = document.getElementById('RecipePowerInjectedEncapsulation');
@@ -143,6 +160,7 @@ function unwrapWithoutCloning() {
 	}
 	body.removeChild(wrapper);
 }
+*/
 
 // Define receive-message handler from ba-postmessage.js
 (function($){
@@ -182,7 +200,6 @@ function unwrapWithoutCloning() {
         // Bind the callback. A reference to the callback is stored for ease of
         // unbinding.
         rm_callback = function(e) {
-	debugger;
           if ( ( typeof source_origin === 'string' && e.origin !== source_origin )
              || ( (typeof source_origin === 'function') && source_origin( e.origin ) === FALSE ) ) {
             return FALSE;
@@ -226,6 +243,20 @@ function unwrapWithoutCloning() {
 })(window);
 
 window.receiveMessage( function(evt) {
-	var data = evt.data;
-	debugger;
+	var params = evt.data.split('&');
+	var data = {}, call = "";
+	var re = /([^=]*)=(.*)$/;
+	for(var i = 0, len = params.length; i < len; ++i) {
+	    var param = params[i];
+	    var parts = re.exec(param);
+	    if(parts[1] == "call") {
+		   call = parts[2];
+	    } else {
+			data[parts[1]] = parts[2];
+		}
+	}
+	// Now we have a data array and a function to call
+	if(typeof window[call] === 'function') {
+		window[call](data);
+	}
 }, "http://<%= Rails.env.development? ? "localhost:5000" : "www.recipepower.com" %>" );
