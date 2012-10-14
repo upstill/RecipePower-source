@@ -46,12 +46,11 @@
 		var cancelBtn = document.getElementById("recipePowerCancelBtn");
 		if(cancelBtn) {
 			cancelBtn.onclick = function(){
-				$.postMessage( { call: "retire_iframe" }, "http://www.htmldog.com/" );
+				$.postMessage( { call: "retire_iframe" }, "<%= params[:sourcehome] %>" );
 			};
 		}
 		// Finally, report the window dimensions to the enclosing window
-		var msg = { call: "execute_resize", width: dlog.width, height: document.height };
-		$.postMessage( msg, "http://www.htmldog.com/" );
+		$.postMessage( { call: "execute_resize", width: dlog.width, height: document.height }, "<%= params[:sourcehome] %>" );
 		
 		/*
 		var request = "http://localhost:5000/iframe/create.json?url="+encodeURI(window.location.href)+

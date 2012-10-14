@@ -80,14 +80,11 @@ class RecipesController < ApplicationController
     # Here is where we take a hit on the "Add to RecipePower" widget,
     # and also invoke the 'new cookmark' dialog. The difference is whether
     # parameters are supplied for url, title and note (though only URI is required).
-@recipe = Recipe.find(800)
-=begin
     if params[:recipe]
         @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params
     else
         @recipe = Recipe.new
     end
-=end
     @area = params[:area] || "at_top"
     if @recipe.id # Mark of a fetched/successfully saved recipe: it has an id
     	# redirect to edit
@@ -100,14 +97,15 @@ class RecipesController < ApplicationController
             format.json {
             	render :action => "capture", :layout => !dialog_only, :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br>You might want to confirm the title and picture, and/or tag it?".html_safe
             }
-            format.js { # Produce javascript in response to the bookmarklet
+            format.js { 
+                # Produce javascript in response to the bookmarklet, to render into an iframe, 
+                # either the recipe editor or a login screen.
                 if(current_user)
                     @partial = "recipes/form_edit_at_top"
-                    @url = "http://localhost:5000/recipes/#{@recipe.id.to_s}/edit?area=at_top&layout=injector"
+                    @url = edit_recipe_url(@recipe, area: "at_top", layout: "injector", sourcehome: @recipe.sourcehome )
                 else
                     session["user_return_to"] = "/recipes/#{@recipe.id.to_s}/edit?area=at_top&layout=injector"
-                    # @partial = 'shared/authentications_signin_at_top'
-                    @url = "http://localhost:5000/authentications/new?area=at_top&layout=injector"
+                    @url = new_authentication_url( area: "at_top", layout: "injector", sourcehome: @recipe.sourcehome )
                 end
                 render
             }
