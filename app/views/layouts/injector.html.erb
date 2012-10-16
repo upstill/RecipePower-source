@@ -55,7 +55,6 @@
 			};
 		}
 		// Finally, report the window dimensions to the enclosing window
-		debugger;
 		$.postMessage( { call: "execute_resize", width: dlog.offsetWidth, height: dlog.offsetHeight }, "<%= params[:sourcehome] %>" );
 		
 		// Set up jquery tokeninput for the tags
@@ -73,10 +72,31 @@
 			PicPicker("Pick a Logo");
 			event.preventDefault();
 		})
+
+	  // Function for cracking param string
+		window.ptq = function(q) {
+			/* parse the message */
+			/* semicolons are nonstandard but we accept them */
+			var x = q.replace(/;/g, '&').split('&'), i, name, t;
+			/* q changes from string version of query to object */
+			for (q={}, i=0; i<x.length; i++) {
+				t = x[i].split('=', 2);
+				name = unescape(t[0]);
+				if (!q[name])
+					q[name] = [];
+				if (t.length > 1) {
+					q[name][q[name].length] = unescape(t[1]);
+				} else
+				/* next two lines are nonstandard */
+					q[name][q[name].length] = true;
+			}
+			return q;
+		}
 	    
 		$.receiveMessage( function(evt) {
 			debugger;
-			var data = evt.data;
+			var str = evt.data;
+			var data = window.ptq(str);
 		})
 	 });
 

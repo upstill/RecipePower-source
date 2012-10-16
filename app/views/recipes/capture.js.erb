@@ -172,11 +172,14 @@ function unwrapWithoutCloning() {
 
   function imgclick(event) { // Handle a click on an image by sending its url to the iframe
 		var img;
+		debugger;
 		if(img = event.target) {
-			debugger;
 			var src = img.src;
 			var iframe = document.getElementById('recipePower-iframe')
-			window.postMessage(img.src, "http://<%= Rails.env.development? ? "localhost:5000" : "www.recipepower.com" %>", iframe.contentWindow);
+			window.postMessage(
+				{ url: img.src,
+					call: "replaceImg"
+				}, "http://<%= Rails.env.development? ? "localhost:5000" : "www.recipepower.com" %>", iframe.contentWindow);
       event.preventDefault();
       event.stopPropagation();
 		}
@@ -208,13 +211,26 @@ function unwrapWithoutCloning() {
     // I couldn't get window.postMessage to actually work in Opera 9.64!
     has_postMessage = window[postMessage] // XXX && !$.browser.opera;
   
+  $.buildParam = function(parameters){
+	  var qs = "";
+	  for(var key in parameters) {
+	    var value = parameters[key];
+	    qs += encodeURIComponent(key) + "=" + encodeURIComponent(value) + "&";
+	  }
+	  if (qs.length > 0) {
+	    qs = qs.substring(0, qs.length-1); //chop off last "&"
+	  }
+	  return qs;
+	}
+	
   $.postMessage = function( message, target_url, target ) {
     if ( !target_url ) { return; }
     
     // Serialize the message if not a string. Note that this is the only real
     // jQuery dependency for this script. If removed, this script could be
     // written as very basic JavaScript.
-    message = typeof message === 'string' ? message : $.param( message );
+debugger;
+    message = typeof message === 'string' ? message : $.buildParam( message );
     
     // Default to parent if unspecified.
     target = target || parent;
@@ -232,6 +248,26 @@ function unwrapWithoutCloning() {
       target.location = target_url.replace( /#.*$/, '' ) + '#' + (+new Date) + (cache_bust++) + '&' + message;
     }
   };
+
+  // Function for cracking param string
+	$.ptq = function(q) {
+		/* parse the message */
+		/* semicolons are nonstandard but we accept them */
+		var x = q.replace(/;/g, '&').split('&'), i, name, t;
+		/* q changes from string version of query to object */
+		for (q={}, i=0; i<x.length; i++) {
+			t = x[i].split('=', 2);
+			name = unescape(t[0]);
+			if (!q[name])
+				q[name] = [];
+			if (t.length > 1) {
+				q[name][q[name].length] = unescape(t[1]);
+			} else
+			/* next two lines are nonstandard */
+				q[name][q[name].length] = true;
+		}
+		return q;
+	}
   
   $.receiveMessage = p_receiveMessage = function( callback, source_origin, delay ) {
     if ( has_postMessage ) {
@@ -292,22 +328,12 @@ window.receiveMessage( function(evt) {
 	// By convention, messages arrive as a query string which gets turned
 	// into an object whose 'call' parameter denotes a function to call, 
 	// passing in the object carrying the rest of the parameters.
-	
 	// Parse the data string as a conventional set of queryparams
-	var params = evt.data.split('&');
-	var data = {}, call = "";
-	var re = /([^=]*)=(.*)$/;
-	for(var i = 0, len = params.length; i < len; ++i) {
-	    var param = params[i];
-	    var parts = re.exec(param);
-	    if(parts[1] == "call") {
-		   call = parts[2];
-	    } else {
-			data[parts[1]] = parts[2];
-		}
-	}
+	var data = window.ptq(evt.data);
 	// Now we have a data array and a function to call
-	if(typeof window[call] === 'function') {
+	var call = data.call;
+	debugger;
+	if(call && (typeof window[call] === 'function')) {
 		window[call](data);
 	}
 }, "http://<%= Rails.env.development? ? "localhost:5000" : "www.recipepower.com" %>" );
