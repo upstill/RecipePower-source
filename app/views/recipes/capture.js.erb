@@ -4,18 +4,18 @@
    (e.g., to resize, or to close) it
    sends a message back up here via a message-passing scheme from ba-postmessage. */
 (function() {
-    var ifr = document.createElement("iframe");
-    // ifr.style.margin="1em";
-    ifr.style.width=document.body.clientWidth+"px"; // "100%";
-    // ifr.style.height = "auto";
-    ifr.style['z-index'] = 100;
-    ifr.style.position = "fixed";
+	var ifr = document.createElement("iframe");
+	// ifr.style.margin="1em";
+	ifr.style.width = document.body.clientWidth + "px"; // "100%";
+	// ifr.style.height = "auto";
+	ifr.style['z-index'] = 100;
+	ifr.style.position = "fixed";
 	ifr.style.top = "0";
 	ifr.style.padding = "0";
 	ifr.style.margin = "0";
 	ifr.style.display = 'none';
-    ifr.id = "recipePower-iframe";
-    ifr.src = "<%= @url %>";
+	ifr.id = "recipePower-iframe";
+	ifr.src = "<%= @url %>";
 	// set the width of the frame to that of the enclosing document
 	ifr.style.width = window.outerWidth;
 	/*
@@ -26,7 +26,34 @@
 	}
 	*/
     document.body.appendChild(ifr);
+    
+	/* Define the style for highlighting images for picking */
+	var css = 'img.recipePower-highlight { border:#ffaa66 8px solid; }',
+	    head = document.getElementsByTagName('head')[0],
+	    style = document.createElement('style');
+
+	style.type = 'text/css';
+	if(style.styleSheet){
+	    style.styleSheet.cssText = css;
+	}else{
+	    style.appendChild(document.createTextNode(css));
+	}
+	head.appendChild(style);
 })();
+
+/* Called when the X to cancel the dialog is clicked */
+function retire_iframe() {
+	var iframe = document.getElementById("recipePower-iframe");
+	if(iframe) {
+		iframe.style.display = 'none';
+		iframe.parentNode.removeChild(iframe);		
+	}
+	// Sadly obsolete: unwrapWithoutCloning();
+	var script = document.getElementById("recipePower-injector");
+	if(script) {
+		script.parentNode.removeChild(script);
+	}
+}
 
 /*
 function ifrOnload() {
@@ -56,20 +83,6 @@ function execute_resize(dims) {
 	var ifr = document.getElementById("recipePower-iframe");
 	ifr.height=height;
 	ifr.style.display = 'block';
-}
-
-/* Called when the X to cancel the dialog is clicked */
-function retire_iframe() {
-	var iframe = document.getElementById("recipePower-iframe");
-	if(iframe) {
-		iframe.style.display = 'none';
-		iframe.parentNode.removeChild(iframe);		
-	}
-	// Sadly obsolete: unwrapWithoutCloning();
-	var script = document.getElementById("recipePower-injector");
-	if(script) {
-		script.parentNode.removeChild(script);
-	}
 }
 
 /* Encapsulate the body content of the page with a div wrapper.
@@ -105,6 +118,71 @@ function unwrapWithoutCloning() {
 }
 */
 
+// Define mouse-hover highlighting for images
+(function() {
+  var prev;
+
+  function attch(img) {
+		if (img.addEventListener) {
+			img.addEventListener('mouseover', mouseon, false);
+			img.addEventListener('mouseout', mouseoff, false);
+			img.addEventListener('click', imgclick, false);
+		} else if (img.attachEvent) {
+			img.attachEvent('onmouseover', function(e) {
+				return mouseon(e || window.event);
+			});
+			img.attachEvent('onmouseout', function(e) {
+				return mouseoff(e || window.event);
+			});
+			img.attachEvent('onclick', function(e) {
+				return imgclick(e || window.event);
+			});
+		} else {
+			img.onmouseover = mouseon;
+			img.onmouseout = mouseoff;
+			img.onclick = imgclick;
+		}	
+	}
+
+  var ix, img, imgs = document.getElementsByTagName('img');
+	for (ix = 0; img = imgs[ix]; ix++) {
+		attch(img);
+	}
+
+  function mouseon(event) {
+    if (event.target === document.body ||
+        (prev && prev === event.target)) {
+      return;
+    }
+    if (prev) {
+      prev.className = prev.className.replace(/\brecipePower-highlight\b/, '');
+      prev = undefined;
+    }
+    if (event.target) {
+      prev = event.target;
+      prev.className += " recipePower-highlight";
+    }
+  }
+
+  function mouseoff(event) {
+    if (event.target) {
+      event.target.className = event.target.className.replace(/\brecipePower-highlight\b/, '');
+    }
+  }
+
+  function imgclick(event) { // Handle a click on an image by sending its url to the iframe
+		var img;
+		if(img = event.target) {
+			debugger;
+			var src = img.src;
+			var iframe = document.getElementById('recipePower-iframe')
+			window.postMessage(img.src, "http://<%= Rails.env.development? ? "localhost:5000" : "www.recipepower.com" %>", iframe.contentWindow);
+      event.preventDefault();
+      event.stopPropagation();
+		}
+	}
+})();
+
 // Define receive-message handler from ba-postmessage.js
 (function($){
   // '$:nomunge'; // Used by YUI compressor.
@@ -129,7 +207,31 @@ function unwrapWithoutCloning() {
     
     // I couldn't get window.postMessage to actually work in Opera 9.64!
     has_postMessage = window[postMessage] // XXX && !$.browser.opera;
-
+  
+  $.postMessage = function( message, target_url, target ) {
+    if ( !target_url ) { return; }
+    
+    // Serialize the message if not a string. Note that this is the only real
+    // jQuery dependency for this script. If removed, this script could be
+    // written as very basic JavaScript.
+    message = typeof message === 'string' ? message : $.param( message );
+    
+    // Default to parent if unspecified.
+    target = target || parent;
+    
+    if ( has_postMessage ) {
+      // The browser supports window.postMessage, so call it with a targetOrigin
+      // set appropriately, based on the target_url parameter.
+      target[postMessage]( message, target_url.replace( /([^:]+:\/\/[^\/]+).*/, '$1' ) );
+      
+    } else if ( target_url ) {
+      // The browser does not support window.postMessage, so set the location
+      // of the target to target_url#message. A bit ugly, but it works! A cache
+      // bust parameter is added to ensure that repeat messages trigger the
+      // callback.
+      target.location = target_url.replace( /#.*$/, '' ) + '#' + (+new Date) + (cache_bust++) + '&' + message;
+    }
+  };
   
   $.receiveMessage = p_receiveMessage = function( callback, source_origin, delay ) {
     if ( has_postMessage ) {
@@ -190,6 +292,8 @@ window.receiveMessage( function(evt) {
 	// By convention, messages arrive as a query string which gets turned
 	// into an object whose 'call' parameter denotes a function to call, 
 	// passing in the object carrying the rest of the parameters.
+	
+	// Parse the data string as a conventional set of queryparams
 	var params = evt.data.split('&');
 	var data = {}, call = "";
 	var re = /([^=]*)=(.*)$/;
