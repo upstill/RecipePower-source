@@ -1,6 +1,6 @@
   <div class="editRecipe_hdr" style="padding:0;" >
 	 <%= image_tag "http://www.recipepower.com/assets/RPlogo.png", class: "small_logo", :alt => "RecipePower" %>
-	 &nbsp;clipped this for your collection! Tag it here if you like. (Or <%= link_to_function "not", "retire_iframe();" %>.)
+	 <span>clipped this for your collection! Tag it here if you like. (Or <%= link_to_function "not", "retire_iframe();" %>.)</span>
   </div>
 <%= form_for @recipe, :html => { style: 'width:auto;height:auto'} do |f| %>
   <%= show_errors @recipe.errors %>
@@ -9,7 +9,7 @@
 	    <div class="recipe_pic_preview <%= @area %>">
 	      <%= page_fitPic @recipe.picurl, @recipe.id, false, "div.recipe_pic_preview img" %>  
 	    </div>  
-	      Prefer another picture?<br />Click one!
+	      <br />Prefer another picture?<br />Click one!
 		  <%# link_to "Pick Picture", "/", :id=>"PicPicker", :data=>"recipe_picurl;div.recipe_pic_preview img" %>
 	  </div>
 	  <%= f.text_field :picurl, rel: "jpg,png,gif", hidden: true %>
@@ -38,7 +38,7 @@
   <div class="editRecipe_field <%= @area %>">
      <%= f.check_box :private %>
      <%= f.label :private, "Private" %>
-    <br><%= f.submit "Save", class: "gobutton" %>
-	<%= button_to "Forget It", "/recipes/#{@recipe.id.to_s}/remove", class: "gobutton" %>
+    <br><%= f.submit "Save", class: "gobutton #{@area}" %>
+	<%= button_to "Forget It", "/recipes/#{@recipe.id.to_s}/remove", class: "gobutton #{@area}" %>
   </div>
 <% end %>

@@ -27,7 +27,7 @@ div.dialog {
 }
 
 div.editRecipe.dialog.at_top {
-	width:800px;
+	width:794px;
 }
 
 .editRecipe {
@@ -41,10 +41,16 @@ div.editRecipe.dialog.at_top {
 }
 
 div.editRecipe_hdr {
-  height: 24px;
+  height: 30px;
   width: auto;
   margin: 0.5em;
   padding: 0;
+  // border:1px solid black;
+}
+
+div.editRecipe_hdr span {
+	position:relative;
+	top:-.18em;
   // border:1px solid black;
 }
 
@@ -154,10 +160,11 @@ div.recipe_pic_preview.at_top {
   height: 90px;
   margin-left: auto;
   margin-right: auto;
-  outline:#099 solid 1px;
+  margin-bottm: 1em;
+  // outline:#099 solid 1px;
 }
 
-div.gobutton.at_top input {
+input.gobutton.at_top {
   margin: 0.5em;
   display: inline-block;
   text-align: center;

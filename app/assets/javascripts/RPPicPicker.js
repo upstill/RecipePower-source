@@ -1,7 +1,6 @@
 
 // Called to replace the form's image with the given URL
 function replaceImg(data) {
-	debugger;
 	if(data.url && data.url[0])
     pickImg('input#recipe_picurl', 'img.fitPic', data.url[0]);
     // pickImg('input.icon_picker', 'div.preview img', data.url[0]);
