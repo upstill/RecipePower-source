@@ -1,4 +1,12 @@
 
+// Called to replace the form's image with the given URL
+function replaceImg(data) {
+	debugger;
+	if(data.url && data.url[0])
+    pickImg('input#recipe_picurl', 'img.fitPic', data.url[0]);
+    // pickImg('input.icon_picker', 'div.preview img', data.url[0]);
+}
+
 function PicPicker(ttl) {
 	// Bring up a dialog showing the picture-picking fields of the page
 	$("div.iconpicker").dialog({ // nee: iconpicker
@@ -27,7 +35,7 @@ function pickImg(inputsel, imagesel, url) {
 // Copy an input URL to both the preview image and the (hidden) form field
 function previewImg(inputsel, imagesel, formsel) {
 	// Copy the url from the input field to the form field
-    var url = $(inputsel).attr("value");
+  var url = $(inputsel).attr("value");
 	$(formsel).attr("value", url )
 	
 	// Set the image(s) to the URL and fit them in their frames

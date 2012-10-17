@@ -5,6 +5,7 @@
     <%= stylesheet_link_tag "foreign/dialog" %>
     <%= stylesheet_link_tag "foreign/RPPicPicker" %>
     <%= stylesheet_link_tag "token-input-facebook" %>
+    <%= stylesheet_link_tag "jquery-ui-1.8.17.custom" %>
 	<% if true %>
        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
 	<% end %>
@@ -30,6 +31,10 @@
 		s.parentNode.insertBefore(ga, s);
 	 })();
 	
+	function retire_iframe() {
+		$.postMessage( { call: "retire_iframe" }, "<%= params[:sourcehome] %>" );
+	}
+	
 	 // Followup for the iframe injection
 	$(document).ready(function() {
 		// var capsule = window.
@@ -48,12 +53,10 @@
 		}
         
 		/// Cancel will remove the dialog and confirm null effect to user
+		
 		var cancelBtn = document.getElementById("recipePowerCancelBtn");
-		if(cancelBtn) {
-			cancelBtn.onclick = function(){
-				$.postMessage( { call: "retire_iframe" }, "<%= params[:sourcehome] %>" );
-			};
-		}
+		if(cancelBtn) cancelBtn.onclick = retire_iframe;
+			
 		// Finally, report the window dimensions to the enclosing window
 		$.postMessage( { call: "execute_resize", width: dlog.offsetWidth, height: dlog.offsetHeight }, "<%= params[:sourcehome] %>" );
 		
@@ -67,12 +70,12 @@
 			preventDuplicates: true,
 	        allowFreeTagging: true // allowCustomEntry: true
 	    });
-
+/*
 		$("#PicPicker").click( function(event) {
 			PicPicker("Pick a Logo");
 			event.preventDefault();
 		})
-
+*/
 	  // Function for cracking param string
 		window.ptq = function(q) {
 			/* parse the message */
@@ -94,9 +97,11 @@
 		}
 	    
 		$.receiveMessage( function(evt) {
-			debugger;
-			var str = evt.data;
-			var data = window.ptq(str);
+			var data = window.ptq(evt.data);
+			var call = data.call;
+			if(call && (typeof window[call] === 'function')) {
+				window[call](data);
+			}
 		})
 	 });
 

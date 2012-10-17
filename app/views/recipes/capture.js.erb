@@ -28,7 +28,7 @@
     document.body.appendChild(ifr);
     
 	/* Define the style for highlighting images for picking */
-	var css = 'img.recipePower-highlight { border:#ffaa66 8px solid; }',
+	var css = 'img.recipePower-highlight { outline:#ffaa66 8px solid; }',
 	    head = document.getElementsByTagName('head')[0],
 	    style = document.createElement('style');
 
@@ -172,7 +172,6 @@ function unwrapWithoutCloning() {
 
   function imgclick(event) { // Handle a click on an image by sending its url to the iframe
 		var img;
-		debugger;
 		if(img = event.target) {
 			var src = img.src;
 			var iframe = document.getElementById('recipePower-iframe')
@@ -229,7 +228,6 @@ function unwrapWithoutCloning() {
     // Serialize the message if not a string. Note that this is the only real
     // jQuery dependency for this script. If removed, this script could be
     // written as very basic JavaScript.
-debugger;
     message = typeof message === 'string' ? message : $.buildParam( message );
     
     // Default to parent if unspecified.
@@ -332,7 +330,6 @@ window.receiveMessage( function(evt) {
 	var data = window.ptq(evt.data);
 	// Now we have a data array and a function to call
 	var call = data.call;
-	debugger;
 	if(call && (typeof window[call] === 'function')) {
 		window[call](data);
 	}
