@@ -61,6 +61,8 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		head.appendChild(style);
 
 	  var ix, img, imgs = document.getElementsByTagName('img');
+	  debugger;
+		imgs = window.recipePower_namespace.imgs;
 		for (ix = 0; img = imgs[ix]; ix++) {
 			window.recipePower_namespace.attch(img);
 		}
@@ -74,60 +76,51 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	// Define mouse-hover highlighting for images
   attch: function (img) {
 		if (img.addEventListener) {
-			img.addEventListener('mouseover', window.recipePower_namespace.mouseon, false);
-			img.addEventListener('mouseout', window.recipePower_namespace.mouseoff, false);
-			img.addEventListener('click', window.recipePower_namespace.imgclick, false);
+			img.addEventListener('mouseover', this.mouseon, false);
+			img.addEventListener('mouseout', this.mouseoff, false);
+			img.addEventListener('click', this.imgclick, false);
 		} else if (img.attachEvent) {
 			img.attachEvent('onmouseover', function(e) {
-				return window.recipePower_namespace.mouseon(e || window.event);
+				return this.mouseon(e || window.event);
 			});
 			img.attachEvent('onmouseout', function(e) {
-				return window.recipePower_namespace.mouseoff(e || window.event);
+				return this.mouseoff(e || window.event);
 			});
 			img.attachEvent('onclick', function(e) {
-				return window.recipePower_namespace.imgclick(e || window.event);
+				return this.imgclick(e || window.event);
 			});
 		} else {
-			img.onmouseover = window.recipePower_namespace.mouseon;
-			img.onmouseout = window.recipePower_namespace.mouseoff;
-			img.onclick = window.recipePower_namespace.imgclick;
+			img.onmouseover = this.mouseon;
+			img.onmouseout = this.mouseoff;
+			img.onclick = this.imgclick;
 		}	
 	},
 
   mouseon: function (event) {
-    if (event.target === document.body ||
-        (this.prev && this.prev === event.target)) {
-      return;
-    }
-    if (this.prev) {
-      this.prev.className = this.prev.className.replace(/\brecipePower-highlight\b/, '');
-      this.prev = undefined;
-    }
-    if (event.target) {
-      this.prev = event.target;
-      this.prev.className += " recipePower-highlight";
-    }
-  },
+		var ns = window.recipePower_namespace;
+    if (this != ns.prev) {
+			if (ns.prev) {
+				ns.prev.className = ns.prev.className.replace(/\brecipePower-highlight\b/, '');
+				ns.prev = undefined;
+			}
+			(ns.prev = this).className += " recipePower-highlight";
+		}
+	},
 
   mouseoff: function (event) {
-    if (event.target) {
-      event.target.className = event.target.className.replace(/\brecipePower-highlight\b/, '');
-			this.prev = undefined;
-    }
+		this.className = this.className.replace(/\brecipePower-highlight\b/, '');
+		window.recipePower_namespace.prev = undefined;
   },
 
   imgclick: function (event) { // Handle a click on an image by sending its url to the iframe
-		var img;
-		if(img = event.target) {
-			var src = img.src;
-			var iframe = document.getElementById('recipePower-iframe')
-			window.recipePower_namespace.postMessage(
-				{ url: img.src,
-					call: "replaceImg"
-				}, "http://<%= Rails.env.development? ? "localhost:5000" : "www.recipepower.com" %>", iframe.contentWindow);
-      event.preventDefault();
-      event.stopPropagation();
-		}
+		var ns = window.recipePower_namespace;
+		var iframe = ns.iframe; // document.getElementById('recipePower-iframe')
+		ns.postMessage(
+			{ url: this.src,
+				call: "replaceImg"
+			}, "http://<%= Rails.env.development? ? "localhost:5000" : "www.recipepower.com" %>", iframe.contentWindow);
+		event.preventDefault();
+		event.stopPropagation();
 	},
 
   // Function for cracking param string
