@@ -7,20 +7,42 @@
 // Create the namespace and define our functions in it.
 window.recipePower_namespace = window.recipePower_namespace || {
 	
+	imgs: document.getElementsByTagName('img'),
+	imghandlers: [],
+	iframe: undefined, // Will store the associated iframe DOM element
+	
 	/* Called when the X to cancel the dialog is clicked */
 	retire_iframe: function () {
-		debugger;
-		var iframe = document.getElementById("recipePower-iframe");
-		if(iframe) {
-			iframe.style.display = 'none';
-			iframe.parentNode.removeChild(iframe);		
+		if(this.iframe) {
+			this.iframe.style.display = 'none';
+			this.iframe.parentNode.removeChild(this.iframe);		
 		}
 		// Sadly obsolete: unwrapWithoutCloning();
 		var script = document.getElementById("recipePower-injector");
-		if(script) {
-			script.parentNode.removeChild(script);
+		if(script) script.parentNode.removeChild(script);
+		
+		// Remove mouse-hover highlighting and click handler for images
+		for(var i=0; i<this.imgs.length; i++) {
+			var img = this.imgs[i];
+			if (img.removeEventListener) {
+				img.removeEventListener('mouseover', this.mouseon, false);
+				img.removeEventListener('mouseout', this.mouseoff, false);
+				img.removeEventListener('click', this.imgclick, false);
+			} else if (img.detachEvent) {
+				img.detachEvent('onmouseover', this.mouseon );
+				img.detachEvent('onmouseout', this.mouseoff );
+				img.detachEvent('onclick', this.imgclick );
+			} else {
+				img.onmouseover = this.imghandlers[i].mouseon;
+				img.onmouseout = this.imghandlers[i].mouseoff;
+				img.onclick = this.imghandlers[i].imgclick;
+			}	
 		}
 		delete this.mouseon;
+		delete this.mouseoff;
+		delete this.imgclick;
+		
+		// Finally, remove all trace that we were ever here.
 		window.recipePower_namespace = undefined;
 	},
 
@@ -40,6 +62,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	
 	ifrOnload: function () {
 		var ifr = this;
+	  var ns = window.recipePower_namespace;
 	/* We would love to encapsulate the window content so we can move the top out of the way
 	   of the injected content, but it doesn't seem to work, at least on htmldog.com
 		var capsule = document.getElementById("RecipePowerInjectedEncapsulation");
@@ -60,43 +83,36 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		}
 		head.appendChild(style);
 
-	  var ix, img, imgs = document.getElementsByTagName('img');
-	  debugger;
-		imgs = window.recipePower_namespace.imgs;
-		for (ix = 0; img = imgs[ix]; ix++) {
-			window.recipePower_namespace.attch(img);
+		// Define mouse-hover highlighting for images
+		for(var i=0; i<ns.imgs.length; i++) {
+			var img = ns.imgs[i];
+			if (img.addEventListener) {
+				img.addEventListener('mouseover', ns.mouseon, false);
+				img.addEventListener('mouseout', ns.mouseoff, false);
+				img.addEventListener('click', ns.imgclick, false);
+			} else if (img.attachEvent) {
+				img.attachEvent('onmouseover', ns.mouseon );
+				img.attachEvent('onmouseout', ns.mouseoff );
+				img.attachEvent('onclick', ns.imgclick );
+			} else {
+				// We save the existing event handlers for restoral when closing out
+				ns.imghandlers[i] = {
+					mouseover: img.onmouseover,
+					onmouseout: img.onmouseout,
+					onclick: img.onclick
+				}
+				img.onmouseover = ns.mouseon;
+				img.onmouseout = ns.mouseoff;
+				img.onclick = ns.imgclick;
+			}	
 		}
-		window.recipePower_namespace.imgs = imgs;
 	},
 	
-	imgs: document.getElementsByTagName('img'),
-
+	// For the benefit of mouse tracking functions below
   prev: undefined,
 
-	// Define mouse-hover highlighting for images
-  attch: function (img) {
-		if (img.addEventListener) {
-			img.addEventListener('mouseover', this.mouseon, false);
-			img.addEventListener('mouseout', this.mouseoff, false);
-			img.addEventListener('click', this.imgclick, false);
-		} else if (img.attachEvent) {
-			img.attachEvent('onmouseover', function(e) {
-				return this.mouseon(e || window.event);
-			});
-			img.attachEvent('onmouseout', function(e) {
-				return this.mouseoff(e || window.event);
-			});
-			img.attachEvent('onclick', function(e) {
-				return this.imgclick(e || window.event);
-			});
-		} else {
-			img.onmouseover = this.mouseon;
-			img.onmouseout = this.mouseoff;
-			img.onclick = this.imgclick;
-		}	
-	},
-
   mouseon: function (event) {
+	  event = event || window.event;
 		var ns = window.recipePower_namespace;
     if (this != ns.prev) {
 			if (ns.prev) {
@@ -108,11 +124,13 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	},
 
   mouseoff: function (event) {
+	  event = event || window.event;
 		this.className = this.className.replace(/\brecipePower-highlight\b/, '');
 		window.recipePower_namespace.prev = undefined;
   },
 
   imgclick: function (event) { // Handle a click on an image by sending its url to the iframe
+	  event = event || window.event;
 		var ns = window.recipePower_namespace;
 		var iframe = ns.iframe; // document.getElementById('recipePower-iframe')
 		ns.postMessage(
