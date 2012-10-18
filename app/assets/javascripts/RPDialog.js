@@ -135,24 +135,24 @@ function recipePowerGetAndRunJSON(request, how, area) {
 
 /* Utility for setting and getting the function called when closing the dialog */
 function dialogOnClose( dlog, fcn ) {
-  if(fcn == undefined) {
-	return $(dlog).data("onclosecallback");
-  } else {
-	$(dlog).data("onclosecallback", fcn);
-  }
+	if(fcn == undefined) {
+		return $(dlog).data("onclosecallback");
+	} else {
+		$(dlog).data("onclosecallback", fcn);
+	}
 }
 
 // Store the response to a query (including forms submissions)
 // in the dialog--if any--for later processing. 
 // OR--if obj is undefined--return the stored struct
 function dialogResult( dlog, obj ) {
-  if(dlog) {
-	  if(obj == undefined) {
-		return $(dlog).data("dialog_result");
-	  } else {
-		$(dlog).data("dialog_result", obj);
-	  }
-  }
+	if(dlog) {
+		if(obj == undefined) {
+			return $(dlog).data("dialog_result");
+		} else {
+			$(dlog).data("dialog_result", obj);
+		}
+	}
 }
 
 // Javascript to replace the current page with the error (or any other full) page
@@ -248,31 +248,30 @@ function closeDialog(dlog) {
 
 // Run a dialog from a body of HTML, which should be a div with 'dialog' class as outlined above.
 function runModalDialog(body, area) {
-  var dlog = injectDialog(body, area, false); 
-  // Any forms get submitted and their results handled appropriately. NB: the submission
-  // must be synchronous because we have to decide AFTER the results return whether to handle
-  // the form result normally.
-  if(dlog) {
-	// Dialogs are modal by default, unless the classes 'at_top' or 'at_left' are asserted
-	var options = {
-		modal: true,
-		width: 'auto',
-		position: ['left', 'top'],
-		close: function() {
-			// It is expected that any dialogs have placed the response data object into the dlog object
-			var returnedData = dialogResult(dlog);
-			$(dlog).dialog("destroy");
-			// Remove the first child of 'body', which is our dialog (if any)
-			withdrawDialog(); 
-			runResponse(returnedData);
+	var dlog = injectDialog(body, area, false); 
+	// Any forms get submitted and their results handled appropriately. NB: the submission
+	// must be synchronous because we have to decide AFTER the results return whether to handle
+	// the form result normally.
+	if(dlog) {
+		// Dialogs are modal by default, unless the classes 'at_top' or 'at_left' are asserted
+		var options = {
+			modal: true,
+			width: 'auto',
+			position: ['left', 'top'],
+			close: function() {
+				// It is expected that any dialogs have placed the response data object into the dlog object
+				var returnedData = dialogResult(dlog);
+				$(dlog).dialog("destroy");
+				// Remove the first child of 'body', which is our dialog (if any)
+				withdrawDialog(); 
+				runResponse(returnedData);
+			}
 		}
+		if((area == "floating") || (area == "page"))
+			options.position = "center";
+		$(dlog).dialog( options );	
 	}
-	if((area == "floating") || (area == "page")) {
-		options.position = "center";
-	}
-	$(dlog).dialog( options );	
-  }
-  return dlog;			
+	return dlog;			
 }
 
 // Inject the dialog on the current document, using the given HTML

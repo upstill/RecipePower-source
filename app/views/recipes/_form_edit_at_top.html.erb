@@ -25,13 +25,13 @@
   <div class="editRecipe_field <%= @area %>", style="margin-left:0.2em" >
 	 <% @recipe.check_title %>
      <div class="editRecipe_element">
-		<%= f.text_area :title, style: "width:500px", rows: "2" -%>
+		<%= f.text_area :title, style: "width:490px", rows: "2" -%>
 	 </div>
      <div class="editRecipe_element">
-	    <%= f.text_field :tag_tokens, "data-pre" => @recipe.tags.map(&:attributes).to_json, style: "width:500px", rows: "2" -%>
+	    <%= f.text_field :tag_tokens, "data-pre" => @recipe.tags.map(&:attributes).to_json, style: "width:490px", rows: "2" -%>
 	 </div>
      <div class="editRecipe_element">
-		<%= f.text_area :comment, placeholder: "What are your thoughts about this recipe?", style: "width:500px", rows: "2" -%>
+		<%= f.text_area :comment, placeholder: "What are your thoughts about this recipe?", style: "width:490px", rows: "2" -%>
 	 </div>
   </div>
 
@@ -39,6 +39,6 @@
      <%= f.check_box :private %>
      <%= f.label :private, "Private" %>
     <br><%= f.submit "Save", class: "gobutton #{@area}" %>
-	<%= button_to "Forget It", "/recipes/#{@recipe.id.to_s}/remove", class: "gobutton #{@area}" %>
+	<%# button_to "Forget It", "/recipes/#{@recipe.id.to_s}/remove", class: "gobutton #{@area}" %>
   </div>
 <% end %>
