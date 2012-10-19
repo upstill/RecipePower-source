@@ -36,20 +36,20 @@ function recipePowerGetAndRunHTML(request, params ) {
 	if(xmlhttp != null) {
 	  xmlhttp.onreadystatechange=function() {
 	    if (xmlhttp.readyState==4) {
-		debugger;
-		if(xmlhttp.status==200) {
-		  // Now we have code, possibly required for jQuery and certainly 
-		  // required for any of our javascript. Ensure the code is loaded.
-		  var result = { code: xmlhttp.responseText };
-		  if(typeof postSuccess === 'function') {
-			  postSuccess( result );
-		  }
-		  result.how = how;
-		  result.area = area;
-		  if(typeof runResponse === 'function') {
-			  runResponse( result );
-		  }
-	    }}
+				if(xmlhttp.status==200) {
+				  // Now we have code, possibly required for jQuery and certainly 
+				  // required for any of our javascript. Ensure the code is loaded.
+				  var result = { code: xmlhttp.responseText };
+				  if(typeof postSuccess === 'function') {
+					  postSuccess( result );
+				  }
+				  result.how = how;
+				  result.area = area;
+				  if(typeof runResponse === 'function') {
+					  runResponse( result );
+				  }
+		    }
+			}
 	  }
 	  xmlhttp.open("GET", request, true);
 	  xmlhttp.setRequestHeader("Accept", "text/html" );

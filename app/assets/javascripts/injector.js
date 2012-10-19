@@ -27,21 +27,19 @@ function submitDialog(eventdata) { // Supports multiple forms in dialog
 		dataType: 'html',
 		error: function(jqXHR, textStatus, errorThrown) {
 			// postError(jqXHR, dlog);
-			debugger;
 			retire_iframe(); // closeDialog(dlog);
 			process_result_normally = false;
 		},
 		success: function (responseData, statusText, xhr, form) {
 			process_result_normally = false; // postSuccess(responseData, dlog);
-			debugger;
 			if(responseData.match(/.*<!.*DOCTYPE\b.*\bhtml\b.*>/i)) {
 				// Replace the current document's content with the response
 				document.open();
 				document.write(responseData);
 				document.close();
 			} else {
-				var child, childnodes = document.body.childNodes;
-				while(child = childnodes[0]) {
+			  var child;
+				while(child = document.body.childNodes[0]) {
 					if(child.style)
 						child.style.visibility = 'hidden';
 					document.body.removeChild(child);
@@ -59,13 +57,6 @@ function submitDialog(eventdata) { // Supports multiple forms in dialog
 		}
 	});
 	return process_result_normally;
-}
-	
-function retire_iframe(notice) {
-	var msg = { call: "retire_iframe" };
-	if(notice)
-		msg.notice = notice;
-	$.postMessage( msg, document.sourcehome );
 }
 
 // Function for cracking param string
@@ -89,11 +80,10 @@ function ptq(q) {
 }
 
 function armDialog(sourcehome) {
-	// var capsule = window.
 	// Set the dialog width to that of the accompanying encapsulation
 	if(sourcehome && sourcehome.length > 0) document.sourcehome = sourcehome;
+
 	var dlog = document.getElementById("recipePowerDialog"); // document.body.childNodes[0];
-	debugger;
 	var onloadNode = dlog.attributes["onload"];
 	if(onloadNode) {
 		onloadFcn = onloadNode.nodeValue;
@@ -119,12 +109,6 @@ function armDialog(sourcehome) {
 		preventDuplicates: true,
 		allowFreeTagging: true // allowCustomEntry: true
 	});
-/*
-	$("#PicPicker").click( function(event) {
-		PicPicker("Pick a Logo");
-		event.preventDefault();
-	})
-*/
     
 	$.receiveMessage( function(evt) {
 		var data = ptq(evt.data);
@@ -133,4 +117,11 @@ function armDialog(sourcehome) {
 			window[call](data);
 		}
 	})
+}
+	
+function retire_iframe(notice) {
+	var msg = { call: "retire_iframe" };
+	if(notice)
+		msg.notice = notice;
+	$.postMessage( msg, document.sourcehome );
 }
