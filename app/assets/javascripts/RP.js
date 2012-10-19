@@ -303,7 +303,6 @@ function rcpCollect(id) {
   // Call server on /recipes/:id/collect
   jQuery.get( "recipes/"+id+"/collect", {},
     function(data, status, hr) {
-	  debugger;
 	  if(status == "success") {
 		if(data.type == "dialog") {
 			$("#container").append(data.body);
@@ -692,7 +691,6 @@ function add_rating(link, association, content) {
 /* Respond to a click on the recipe-preview button by sending a touch-recipe
    message to the server * /
 $('.popup').bind('click', function () {
-	debugger;
 	return true;
    var popUp = window.open($(this).attr('href'), 'googleWindow',
    'width=600, height=300, scrollbars, resizable');
