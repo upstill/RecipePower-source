@@ -7,6 +7,7 @@
 // Place your application-specific JavaScript functions and classes here
 
 //= require pics
+//= require jquery-1.7.1
 //= require jquery.tokeninput
 //= require jquery.form
 //= require jquery.ba-postmessage
