@@ -9,7 +9,6 @@
 		<% end %>
 		<%= javascript_include_tag "application" %>
 		<%= csrf_meta_tag %>
-		<%# render 'layouts/stylesheets' %>
 		<script type="text/javascript">
 			var _gaq = _gaq || [];
 			_gaq.push(['_setAccount', 'UA-30180298-1']);
@@ -27,34 +26,34 @@
   </head>
   <body>
 	<script>
-whenReady( function() {
-	RPQueryOnLoad();
-	<%= %Q{ $($('#{@focus_selector || '#user_email' || "#user_login"}').first()).focus(); }.html_safe if @focus_selector %>
+		$(document).ready(function() {
+			RPQueryOnLoad();
+			$("<%= @focus_selector || '#user_email' || '#user_login' %>").first().focus(); 
 	
 
-	// Set up tabs for tags editing page
-/*	var val = Number($("#tags_tabset").attr('value'));
-	var options = {load:tagTabsOnLoad, selected:val};
-	$("#tags_tabset").tabs(options);
-	if(popupItem = $('.popup')[0]) {
-		popupItem.onclick = servePopup;
-	}
+			// Set up tabs for tags editing page
+/*			var val = Number($("#tags_tabset").attr('value'));
+			var options = {load:tagTabsOnLoad, selected:val};
+			$("#tags_tabset").tabs(options);
+			if(popupItem = $('.popup')[0]) {
+				popupItem.onclick = servePopup;
+			}
 */
 /*
-  $("#tagpane_submit").click(tagpane_submit);
-  rangy.init();
-  $("#tagpane_ingredient_list").click(tagpane_ingredient_list);
-  $("#tagpane_ingredient").click(tagpane_ingredient);
-  $("#tagpane_amount").click(tagpane_amount);
-  $("#tagpane_quantity").click(tagpane_quantity);
-  $("#tagpane_unit").click(tagpane_unit);
-  $("#tagpane_conditions").click(tagpane_conditions);
-  $("#tagpane_condition").click(tagpane_condition);
-  $("#tagpane_material").click(tagpane_material);
-  $("#tagpane_step").click(tagpane_step);
-  $(".tagpane").bind('paste', takePaste);
+		  $("#tagpane_submit").click(tagpane_submit);
+		  rangy.init();
+		  $("#tagpane_ingredient_list").click(tagpane_ingredient_list);
+		  $("#tagpane_ingredient").click(tagpane_ingredient);
+		  $("#tagpane_amount").click(tagpane_amount);
+		  $("#tagpane_quantity").click(tagpane_quantity);
+		  $("#tagpane_unit").click(tagpane_unit);
+		  $("#tagpane_conditions").click(tagpane_conditions);
+		  $("#tagpane_condition").click(tagpane_condition);
+		  $("#tagpane_material").click(tagpane_material);
+		  $("#tagpane_step").click(tagpane_step);
+		  $(".tagpane").bind('paste', takePaste);
 */
-});
+		});
 	</script>
 	<div id="container">
 		<%= render 'layouts/header' %>
