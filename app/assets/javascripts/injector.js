@@ -122,7 +122,6 @@ function armDialog(sourcehome) {
 	
 function retire_iframe(notice) {
 	var msg = { call: "retire_iframe" };
-	debugger;
 	if(notice && (typeof notice === 'string'))
 		msg.notice = notice;
 	$.postMessage( msg, document.sourcehome );
