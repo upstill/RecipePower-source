@@ -7,6 +7,6 @@
 // Place your application-specific JavaScript functions and classes here
 // This file is automatically included by javascript_include_tag :defaults
 
-//= require jquery-1.7.1
+// require jquery-1.7.1
 //= require_directory .
 // require RPquery

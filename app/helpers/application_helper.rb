@@ -258,20 +258,35 @@ module ApplicationHelper
     	link_to_function label, "recipePowerGetAndRunJSON('#{path}', '#{how}', '#{where}');"
     end
 	
+	def globstring(hsh)
+	    hsh.keys.each.collect { |key| 
+	      key.to_s+": ["+(hsh[key] ? hsh[key].to_s : "nil")+"]"
+	    }.join(' ')
+    end
 	# Place the header for a dialog, including setting its Onload function.
 	# Currently handled this way (e.g., symbols that have been supported)
 	#   :editRecipe
+	#   :captureRecipe
 	#   :newRecipe
-	def dialogHeader( which, ttl)
+	#   :signIn
+	def dialogHeader( which, ttl=nil)
+	    logger.debug "dialogHeader for "+globstring({dialog: which, area: @area, layout: @layout, ttl: ttl})
 	    classname = which.to_s
         onloadFcn = classname+"Onload"
-	    %Q{
-	      <div class='dialog #{@area}' title="#{ttl}" onload="#{onloadFcn}">
-	      <div class='#{classname} #{@area}'>
-	    }.html_safe
+        ttlspec = ttl ? (" title=\"#{ttl}+\"") : ""
+	    result = %Q{ 
+	      #{flash_helper}
+	      <div class='#{classname} dialog #{@area}' #{ttlspec} onload="#{onloadFcn}" id="recipePowerDialog" >
+	    }
+	    if(@layout && @layout=="injector") 
+	      result += %Q{
+            <div id="recipePowerCancelDiv">#{link_to_function "X", "cancelDialog", style:"text-decoration: none;", id: "recipePowerCancelBtn"}</div>	            
+	      }
+	    end
+	    result.html_safe
     end
 
     def dialogFooter()
-        "</div></div>".html_safe
+        "</div><br class='clear'>".html_safe
     end
 end

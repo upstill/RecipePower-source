@@ -1,5 +1,5 @@
 <h3>Welcome<%= current_user ? ", "+current_user.handle : "" %>!</h3> 
-<% if false %>
+<% if Rails.env.development? %>
 <%= form_tag("/search", :method => "get", id: "TestDialog") do %>
 <table>
   <tr>

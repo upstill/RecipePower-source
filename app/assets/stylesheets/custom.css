@@ -1,3 +1,4 @@
+
 #container {
   margin:0px;
   background: #FDECCF; // DCE8DC;
@@ -10,23 +11,6 @@
   border-radius:         10px;
   margin:15px;
   // outline:2px solid red;
-}
-
-body {
-  background: #FDECCF; // DCE8DC;
-  width: 100%;
-  margin: 0px;
-  font:12px arial,sans-serif;
-  # border:1px solid blue;
-  outline:1px solid green;
-}
-
-header {
-  margin:0px;
-  height: 55px;
-  width:100%;
-  # outline: 1px solid blue;
-  background-color:#FDECCF; // DCE8DC;
 }
 
 #logo_div {
@@ -128,23 +112,6 @@ footer nav {
   float: none;
 }
 
-section {
-  margin-top: 1em;
-  font-size: 120%;
-  padding: 20px;
-  background: #fff;
-}
-
-section h1 {
-  padding-top:15px;
-  font-size: 200%;
-}
-
-h2 {
-	padding-top:0px;
-  	font-size: 200%;
-}
-
 h2.med {
 	line-height:150%;
 	padding-top:0px;
@@ -162,13 +129,6 @@ p.airy.bld {
   font-size:14px;
 }
 
-label {
-  font:14px arial,sans-serif;
-  font-weight:bold;
-//	font:18px calibri;
-//	line-height:150%;
-}
-
 li.airy {
   	font:18px calibri;
 	line-height:150%;
@@ -184,71 +144,11 @@ p.sidebar {
 }
 
 .text_block {
-	margin:0px;
-}
-
-/* Links */
-
-a {
-  color: #09c;
-  text-decoration: underline;
-}
-
-a:hover {
-  color: #069;
-  text-decoration: underline;
-}
-
-a:visited {
-  color: #069;
-}
-
-h4 {
-	margin-top:2em;
-	margin-bottom:1em;
-}
-
-h4.first {
-	margin-top:0.5em;
+	margin-left:2em;
 }
 
 .indent {
 	margin-left:2em;
-}
-/* Navigation */
-
-nav {
-  float: right;
-}
-
-nav {
-  background-color: white;
-  padding: 0 0.7em;
-  white-space: nowrap;
-}
-
-nav ul {
-  margin: 0;
-  padding: 0;
-}
-
-nav ul li {
-  list-style-type: none;
-  display: inline-block;
-  padding: 0.2em 0;
-}
-
-nav ul li a {
-  padding: 0 5px;
-  font-weight: bold;
-}
-
-nav ul li a:visited {
-  color: #09c;
-}
-
-nav ul li a:hover {
-  text-decoration: underline;
 }
 
 /*
@@ -643,9 +543,6 @@ padding:10px;
 font:12px arial, sans-serif;
 }
 
-.error, .alert, .notice, .success, .info {padding:0.8em;margin-bottom:1em;border:2px solid #ddd; width:70%;}
-.error, .alert {background:#fbe3e4;color:#8a1f11;border-color:#fbc2c4;}
-
 .rcplist_body {
     width:95%;
     margin-top:0px;
@@ -761,8 +658,6 @@ font:12px arial, sans-serif;
 }
 
 .clear { clear:both; }
-
-.fitPic { visibility:hidden; }
 
 .tagspec {
     width:350px;

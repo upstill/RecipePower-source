@@ -11,10 +11,17 @@
 	dialog to set up various response functions.
 */
 
-function recipePowerGetAndRunHTML(request, how, area) {
-	if(area) { // No area specified => up to the controller (usually defaults to 'page')
-		request += "?area="+area
-	}
+function recipePowerGetAndRunHTML(request, params ) {
+	// Serialize the request
+  var how = "modeless"
+  var area = "at_top"
+  if(typeof params === 'object') {
+	var str = [];
+	for(var p in params)
+	  str.push(encodeURIComponent(p) + "=" + encodeURIComponent(params[p]));
+	request += "?" + str.join("&");
+  }
+	
 	$('span.query').text(request);
 	var xmlhttp;
 	// Send the request using minimal Javascript
@@ -28,22 +35,60 @@ function recipePowerGetAndRunHTML(request, how, area) {
 	}
 	if(xmlhttp != null) {
 	  xmlhttp.onreadystatechange=function() {
-	    if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+	    if (xmlhttp.readyState==4) {
+		debugger;
+		if(xmlhttp.status==200) {
 		  // Now we have code, possibly required for jQuery and certainly 
 		  // required for any of our javascript. Ensure the code is loaded.
-		
 		  var result = { code: xmlhttp.responseText };
-		  postSuccess( result );
+		  if(typeof postSuccess === 'function') {
+			  postSuccess( result );
+		  }
 		  result.how = how;
 		  result.area = area;
-		  runResponse(result);
-	    }
+		  if(typeof runResponse === 'function') {
+			  runResponse( result );
+		  }
+	    }}
 	  }
 	  xmlhttp.open("GET", request, true);
 	  xmlhttp.setRequestHeader("Accept", "text/html" );
 	  xmlhttp.send();		
 	}
 }
+
+// Process response from a request. This will be an object supplied by a JSON request,
+// which may include code to be presented along with fields (how and area) telling how
+// to present it. The data may also consist of only 'code' if it results from an HTML request
+function runResponse(responseData) {
+	// Wrapped in 'presentResponse', in the case where we're only presenting the results of the request
+	if(responseData && !(typeof presentResponse === 'function' && presentResponse(responseData))) {
+		if(code = responseData.code) {
+			var placed = false;
+			if(!responseData.how) {
+				if(responseData.area == "floating") {
+					responseData.how = "modal"
+				} else if ((responseData.area == "at_left") || (responseData.area == "at_top")) {
+					responseData.how = "modeless"
+				}
+			}
+			if(responseData.how == "modeless") {
+				placed = injectDialog(code, responseData.area, true);
+			} else if(responseData.how == "modal") { // at_top and at_left run modelessly
+				placed = runModalDialog(code, responseData.area);					
+			}
+			if (!placed) { // Force the page to be displayed. XXX Does nothing to the address bar
+				// $('#container').data("pending_page", code ); // Stash for doError function
+				// window.location.replace('javascript:doError()');	
+				document.open();
+				document.write(code);
+				document.close;
+			}
+		}
+	} 
+	recipePowerNotify(); // Put up any notifications provided by the response
+}
+
 
 /* Submit a request to the server for interactive HTML. It's meant to be JSON specifying how 
    to handle it, but if the controller doesn't produce JSON (or if the request gets redirected
@@ -88,58 +133,26 @@ function recipePowerGetAndRunJSON(request, how, area) {
 	});
 }
 
-// Process response from a request. This will be an object supplied by a JSON request,
-// which may include code to be presented along with fields (how and area) telling how
-// to present it. The data may also consist of only 'code' if it results from an HTML request
-function runResponse(responseData) {
-	// Wrapped in 'presentResponse', in the case where we're only presenting the results of the request
-	if(responseData && !(typeof presentResponse === 'function' && presentResponse(responseData))) {
-		if(code = responseData.code) {
-		  var placed = false;
-		  if(!responseData.how) {
-			if(responseData.area == "floating") {
-				responseData.how = "modal"
-			} else if ((responseData.area == "at_left") || (responseData.area == "at_top")) {
-				responseData.how = "modeless"
-			}
-		  }
-		  if(responseData.how == "modeless") {
-			placed = injectDialog(code, responseData.area, true);
-		  } else if(responseData.how == "modal") { // at_top and at_left run modelessly
-			placed = runModalDialog(code, responseData.area);					
-		  }
-		  if (!placed) { // Force the page to be displayed. XXX Does nothing to the address bar
-		    // $('#container').data("pending_page", code ); // Stash for doError function
-		    // window.location.replace('javascript:doError()');	
-		    document.open();
-			document.write(code);
-			document.close;
-		  }
-		}
-	} 
-	recipePowerNotify();
-}
-
 /* Utility for setting and getting the function called when closing the dialog */
 function dialogOnClose( dlog, fcn ) {
-  if(fcn == undefined) {
-	return $(dlog).data("onclosecallback");
-  } else {
-	$(dlog).data("onclosecallback", fcn);
-  }
+	if(fcn == undefined) {
+		return $(dlog).data("onclosecallback");
+	} else {
+		$(dlog).data("onclosecallback", fcn);
+	}
 }
 
 // Store the response to a query (including forms submissions)
 // in the dialog--if any--for later processing. 
 // OR--if obj is undefined--return the stored struct
 function dialogResult( dlog, obj ) {
-  if(dlog) {
-	  if(obj == undefined) {
-		return $(dlog).data("dialog_result");
-	  } else {
-		$(dlog).data("dialog_result", obj);
-	  }
-  }
+	if(dlog) {
+		if(obj == undefined) {
+			return $(dlog).data("dialog_result");
+		} else {
+			$(dlog).data("dialog_result", obj);
+		}
+	}
 }
 
 // Javascript to replace the current page with the error (or any other full) page
@@ -168,14 +181,14 @@ function postSuccess(jsonResponse, dlog) {
   // Call either the named response function or the one associated with the dialog
   if(closer = jsonResponse.processorFcn || (dlog && dialogOnClose(dlog))) {
 	  if(typeof closer === 'function') {
-		closer(jsonResponse);
+			closer(jsonResponse);
 	  } else if(typeof window[closer] === 'function') {
-		window[closer](jsonResponse);
+			window[closer](jsonResponse);
 	  }
   }
   // Simplistic response: we'll prevent normal form handling IFF there's code to run.
   if(dlog != undefined) {
-	dialogResult( dlog, jsonResponse );
+		dialogResult( dlog, jsonResponse );
   }
   return false;
 }
@@ -209,7 +222,7 @@ function submitDialogForJSON(eventdata) { // Supports multiple forms in dialog
 		error: function(jqXHR, textStatus, errorThrown) {
 			postError(jqXHR, dlog);
 			closeDialog(dlog);
-		    process_result_normally = false;
+			process_result_normally = false;
 		},
 		success: function (responseData, statusText, xhr, form) {
 			process_result_normally = postSuccess(responseData, dlog);
@@ -235,31 +248,30 @@ function closeDialog(dlog) {
 
 // Run a dialog from a body of HTML, which should be a div with 'dialog' class as outlined above.
 function runModalDialog(body, area) {
-  var dlog = injectDialog(body, area, false); 
-  // Any forms get submitted and their results handled appropriately. NB: the submission
-  // must be synchronous because we have to decide AFTER the results return whether to handle
-  // the form result normally.
-  if(dlog) {
-	// Dialogs are modal by default, unless the classes 'at_top' or 'at_left' are asserted
-	var options = {
-		modal: true,
-		width: 'auto',
-		position: ['left', 'top'],
-		close: function() {
-			// It is expected that any dialogs have placed the response data object into the dlog object
-			var returnedData = dialogResult(dlog);
-			$(dlog).dialog("destroy");
-			// Remove the first child of 'body', which is our dialog (if any)
-			withdrawDialog(); 
-			runResponse(returnedData);
+	var dlog = injectDialog(body, area, false); 
+	// Any forms get submitted and their results handled appropriately. NB: the submission
+	// must be synchronous because we have to decide AFTER the results return whether to handle
+	// the form result normally.
+	if(dlog) {
+		// Dialogs are modal by default, unless the classes 'at_top' or 'at_left' are asserted
+		var options = {
+			modal: true,
+			width: 'auto',
+			position: ['left', 'top'],
+			close: function() {
+				// It is expected that any dialogs have placed the response data object into the dlog object
+				var returnedData = dialogResult(dlog);
+				$(dlog).dialog("destroy");
+				// Remove the first child of 'body', which is our dialog (if any)
+				withdrawDialog(); 
+				runResponse(returnedData);
+			}
 		}
+		if((area == "floating") || (area == "page"))
+			options.position = "center";
+		$(dlog).dialog( options );	
 	}
-	if((area == "floating") || (area == "page")) {
-		options.position = "center";
-	}
-	$(dlog).dialog( options );	
-  }
-  return dlog;			
+	return dlog;			
 }
 
 // Inject the dialog on the current document, using the given HTML
@@ -325,6 +337,9 @@ function injectDialog(code, area, modeless) {
 		var injectorwidth = $('#RecipePowerInjectedEncapsulation').width();
 		$('#RecipePowerInjectedEncapsulation').width(dlgwidth+injectorwidth)
 	    $('#RecipePowerInjectedEncapsulation').css("marginLeft", dlgwidth)
+	} else if (area == 'at_top') {
+		var dlgheight = $(dlog).outerHeight();
+		$('#RecipePowerInjectedEncapsulation').css("marginTop", dlgheight)
 	}
   }
   return dlog;
@@ -393,3 +408,4 @@ function unwrapWithoutCloning() {
 	}
 	body.removeChild(wrapper);
 }
+

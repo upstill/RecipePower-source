@@ -10,13 +10,16 @@ def with_format(format, &block)
 end
 
 def dialog_boilerplate(action, default_area=nil)
+    flash[:notice] = params[:notice]
+    @area = params[:area]
+    @layout = params[:layout]
     respond_to do |format|
         format.html {
             @area ||= "page"  
             if @area == "page" # Not partial at all => whole page
                 render action
             else
-                render action, :layout => false
+                render action, :layout => (@layout || false) # May have special iframe layout
             end
          }
          format.json { 
@@ -24,9 +27,13 @@ def dialog_boilerplate(action, default_area=nil)
            @area = @area || default_area || "floating"
            hresult = with_format("html") do
              # Blithely assuming that we want a modal-dialog element if we're getting JSON
-             render_to_string action, :layout => false
+             render_to_string action, :layout => (@layout || false) # May have special iframe layout
            end
            render json: { code: hresult, area: @area }
+         }
+         format.js {
+             # Must have set @partial in preparation
+             render action: "capture"
          }
     end
 end

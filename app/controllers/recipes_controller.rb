@@ -2,7 +2,7 @@ require './lib/controller_utils.rb'
 
 class RecipesController < ApplicationController
 
-  before_filter :login_required, :except => [:index, :show]
+  before_filter :login_required, :except => [:index, :show, :capture ]
   before_filter { @focus_selector = "#recipe_url" }
   
   filter_access_to :all
@@ -11,26 +11,30 @@ class RecipesController < ApplicationController
   
   # Render to html, json or js the results of a recipe manipulation
   def reportRecipe( url, notice, formats)
-      truncated = truncate @recipe.title, :length => 140
-      respond_to do |format|
-        format.html { 
+    truncated = truncate @recipe.title, :length => 140
+    respond_to do |format|
+      format.html { 
+        if (params[:layout] && params[:layout] == "injector")
+          render text: notice
+        else
           redirect_to url, :notice  => notice
-        }
-        format.json { 
-          go_link_body = with_format("html") do render_to_string :partial => "recipes/golink" end
-          list_element_body = with_format("html") do render_to_string :partial => "shared/recipe_smallpic" end
-          render json:     { 
-                             notice: notice,
-                             title: truncated, 
-                             go_link_class: recipe_list_element_golink_class(@recipe), 
-                             go_link_body: go_link_body,
-                             list_element_class: recipe_list_element_class(@recipe), 
-                             list_element_body: list_element_body,
-                             processorFcn: "recipeCallback"
-                           } 
-        }
-        format.js { render text: @recipe.title }
-      end
+        end
+      }
+      format.json { 
+        go_link_body = with_format("html") do render_to_string :partial => "recipes/golink" end
+        list_element_body = with_format("html") do render_to_string :partial => "shared/recipe_smallpic" end
+        render json:     { 
+                         notice: notice,
+                         title: truncated, 
+                         go_link_class: recipe_list_element_golink_class(@recipe), 
+                         go_link_body: go_link_body,
+                         list_element_class: recipe_list_element_class(@recipe), 
+                         list_element_body: list_element_body,
+                         processorFcn: "recipeCallback"
+                       } 
+      }
+      format.js { render text: @recipe.title }
+    end
   end
 
   def index
@@ -75,6 +79,50 @@ class RecipesController < ApplicationController
     end
   end
 
+  def capture # Collect URL from foreign site, asking whether to redirect to edit
+    # return if need_login true
+    # Here is where we take a hit on the "Add to RecipePower" widget,
+    # and also invoke the 'new cookmark' dialog. The difference is whether
+    # parameters are supplied for url, title and note (though only URI is required).
+    if params[:recipe]
+        @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params
+    else
+        @recipe = Recipe.new
+    end
+    @area = params[:area] || "at_top"
+    if @recipe.id # Mark of a fetched/successfully saved recipe: it has an id
+    	# redirect to edit
+    	dialog_only = params[:how] == "modal" || params[:how] == "modeless"
+        respond_to do |format|
+            format.html {
+                # The javascript includes an iframe for specific content
+            	render :action => "capture", :layout => !dialog_only, :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br>You might want to confirm the title and picture, and/or tag it?".html_safe
+            }
+            format.json {
+            	render :action => "capture", :layout => !dialog_only, :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br>You might want to confirm the title and picture, and/or tag it?".html_safe
+            }
+            format.js { 
+                # Produce javascript in response to the bookmarklet, to render into an iframe, 
+                # either the recipe editor or a login screen.
+                @url = edit_recipe_url(@recipe, area: "at_top", layout: "injector", sourcehome: @recipe.sourcehome )
+                if(current_user)
+                    @partial = "recipes/form_edit_at_top"
+                else
+                    session["user_return_to"] = @url
+                    @url = new_authentication_url( area: "at_top", layout: "injector", sourcehome: @recipe.sourcehome )
+                end
+                render
+            }
+        end
+    else
+        @Title = "Cookmark a Recipe"
+        @nav_current = :addcookmark
+        @recipe.current_user = current_user_or_guest_id # session[:user_id]
+        @area = params[:area] || "at_top"
+        dialog_boilerplate 'new', params[:how] || 'modal'
+    end
+  end
+
   # Action for creating a recipe in response to the the 'new' page:
   def create # Take a URL, then either lookup or create the recipe
     # return if need_login true
@@ -103,6 +151,7 @@ class RecipesController < ApplicationController
         @nav_current = nil
         @area = params[:area]
         # Now go forth and edit
+        @layout = params[:layout]
         dialog_boilerplate('edit', 'at_left')
     else
         @Title = "Cookmark a Recipe"
@@ -123,7 +172,7 @@ class RecipesController < ApplicationController
   def update
     # return if need_login true
     if params[:commit] == "Cancel"
-      redirect_to rcpqueries_url :notice  => "Recipe secure and unchanged."
+      reportRecipe rcpqueries_url, "Recipe secure and unchanged.", formats
     else
       @recipe = Recipe.find(params[:id])
       @recipe.current_user = current_user_or_guest_id # session[:user_id]

@@ -193,104 +193,6 @@ function wdwFitImages(selection) {
 }
 */
 
-function PicPicker(ttl) {
-	// Bring up a dialog showing the picture-picking fields of the page
-	$("div.iconpicker").dialog({ // nee: iconpicker
-		modal: true,
-		width: 700,
-		title: (ttl || "Pick a Picture"),
-		buttons: { Okay: function (event) {
-			// Transfer the logo URL from the dialog's text input to the page text input
-			// THE PICPICKER MUST BE ARMED WITH NAMES IN ITS DATA
-			var datavals = $("#PicPicker").attr("data").split(';');
-			previewImg("input.icon_picker", datavals[1], "input#"+datavals[0]);
-			$(this).dialog('close');
-			// Copy the image to the window's thumbnail
-		}}
-	});
-}
-
-// Handle a click on a thumbnail image by passing the URL on to the 
-// associated input field
-function pickImg(inputsel, imagesel, url) {
-	$(inputsel).attr("value", url );
-	previewImg(inputsel, imagesel, "");
-}
-
-// Copy an input URL to both the preview image and the (hidden) form field
-function previewImg(inputsel, imagesel, formsel) {
-	// Copy the url from the input field to the form field
-    var url = $(inputsel).attr("value");
-	$(formsel).attr("value", url )
-	
-	// Set the image(s) to the URL and fit them in their frames
-	var imageset = $(imagesel)
-    imageset.hide();
-	imageset.attr("src", url )
-	fitImage(imageset[0])
-}
-
-// When a new URL is typed, set the (hidden) field box
-function newImageURL(inputsel, formsel, picid) {
-	var url = $(inputsel).attr("value")
-	var thePic = $("#"+picid)
-	var formField = $(formsel)
-	formField.attr("value", url);
-	thePic.attr("src", url)
-	return false;
-}
-
-// Onload function for images, to fit themselves (found by id) into the enclosing container.
-function fitImageOnLoad(selector) {
-    $(selector).each(function() {
-        fitImage(this);
-    });
-}
-
-function fitImage(img) {
-
-    if (!(img && img.complete)) {
-        return false;
-    }
-
-    if(!(img.width > 5 && img.height > 5)) {
-		return false;
-	}
-	
-	var picWidth = img.naturalWidth; // width();
-	var picHeight = img.naturalHeight; // height();
-
-    // In case the image hasn't loaded yet
-    if(!(picWidth > 5 && picHeight > 5)) {
-		return false;
-	}
-
-    var frameWidth = $(img.parentElement).width(); // img.parentElement.clientWidth;
-    var frameHeight = $(img.parentElement).height(); // img.parentElement.clientHeight;
-
-    if(!(frameWidth > 5 && frameHeight > 5)) {
-		return false;
-	}
-
-	var frameAR = frameWidth/frameHeight;
-	var imgAR = picWidth/picHeight;
-    if(imgAR > frameAR) { 
-      var newHeight = frameWidth/imgAR;
-	  $(img).css("width", frameWidth);
-	  $(img).css("height", newHeight);
-	  $(img).css("top", (frameHeight-newHeight)/2);
-	} else {
-      var newWidth = frameHeight*imgAR;
-	  $(img).css("width", newWidth);
-	  $(img).css("height", frameHeight);
-	  $(img).css("left", 0); // (frameWidth-newWidth)/2);
-	}
-    img.style.position = "relative";
-    $(img).css("visibility", "visible");
-    $(img).show();
-    return true;
-}
-
 // NOT YET GUARANTEED
 // Responder for link to return to the user's list
 function backToMe(uid) {
@@ -413,7 +315,7 @@ function rcpCollect(id) {
 			        data: $(eventdata.srcElement).serialize()
 			    });
 			})
-			$("div.signin_all_dlog").dialog({
+			$("div.signIn").dialog({
 				modal: true,
 				width: 900,
 				title: "Let's get you signed in so we can do this properly",

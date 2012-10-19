@@ -1,0 +1,12 @@
+<%= dialogHeader :captureRecipe, "Cookmark Captured" %>
+<%= show_errors @recipe.errors %>
+<%= form_for @recipe, html: { class: "capture_recipe json" } do |f| %>
+	<div class="recipe_comment_div" >
+	   <%= f.label :comment, "Notes", :class=>"recipe_field_label" -%>
+	   <br><%= f.text_area :comment, placeholder: "What are your thoughts about this recipe?" %>
+	</div>
+    <%= f.submit "Save", class: "save-tags-button" %>
+    <%= f.submit "Cancel", class: "save-tags-button cancel" %>
+<% end %>
+<%= dialogFooter %>
+
