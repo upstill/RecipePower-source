@@ -5,5 +5,5 @@
  *= require dialog
  *= require RPGlobal
  *= require token-input-facebook
- 
+ *= require jNotify.jquery
 */

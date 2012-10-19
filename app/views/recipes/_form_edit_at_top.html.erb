@@ -38,6 +38,7 @@
   <div class="editRecipe_field <%= @area %>">
      <%= f.check_box :private %>
      <%= f.label :private, "Private" %>
+		 <%= hidden_field_tag 'layout', 'injector' %>
     <br><%= f.submit "Save", class: "gobutton #{@area}" %>
 	<%# button_to "Forget It", "/recipes/#{@recipe.id.to_s}/remove", class: "gobutton #{@area}" %>
   </div>

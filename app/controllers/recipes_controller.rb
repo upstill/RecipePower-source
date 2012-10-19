@@ -11,26 +11,30 @@ class RecipesController < ApplicationController
   
   # Render to html, json or js the results of a recipe manipulation
   def reportRecipe( url, notice, formats)
-      truncated = truncate @recipe.title, :length => 140
-      respond_to do |format|
-        format.html { 
+    truncated = truncate @recipe.title, :length => 140
+    respond_to do |format|
+      format.html { 
+        if (params[:layout] && params[:layout] == "injector")
+          render text: notice
+        else
           redirect_to url, :notice  => notice
-        }
-        format.json { 
-          go_link_body = with_format("html") do render_to_string :partial => "recipes/golink" end
-          list_element_body = with_format("html") do render_to_string :partial => "shared/recipe_smallpic" end
-          render json:     { 
-                             notice: notice,
-                             title: truncated, 
-                             go_link_class: recipe_list_element_golink_class(@recipe), 
-                             go_link_body: go_link_body,
-                             list_element_class: recipe_list_element_class(@recipe), 
-                             list_element_body: list_element_body,
-                             processorFcn: "recipeCallback"
-                           } 
-        }
-        format.js { render text: @recipe.title }
-      end
+        end
+      }
+      format.json { 
+        go_link_body = with_format("html") do render_to_string :partial => "recipes/golink" end
+        list_element_body = with_format("html") do render_to_string :partial => "shared/recipe_smallpic" end
+        render json:     { 
+                         notice: notice,
+                         title: truncated, 
+                         go_link_class: recipe_list_element_golink_class(@recipe), 
+                         go_link_body: go_link_body,
+                         list_element_class: recipe_list_element_class(@recipe), 
+                         list_element_body: list_element_body,
+                         processorFcn: "recipeCallback"
+                       } 
+      }
+      format.js { render text: @recipe.title }
+    end
   end
 
   def index
@@ -100,11 +104,11 @@ class RecipesController < ApplicationController
             format.js { 
                 # Produce javascript in response to the bookmarklet, to render into an iframe, 
                 # either the recipe editor or a login screen.
+                @url = edit_recipe_url(@recipe, area: "at_top", layout: "injector", sourcehome: @recipe.sourcehome )
                 if(current_user)
                     @partial = "recipes/form_edit_at_top"
-                    @url = edit_recipe_url(@recipe, area: "at_top", layout: "injector", sourcehome: @recipe.sourcehome )
                 else
-                    session["user_return_to"] = "/recipes/#{@recipe.id.to_s}/edit?area=at_top&layout=injector"
+                    session["user_return_to"] = @url
                     @url = new_authentication_url( area: "at_top", layout: "injector", sourcehome: @recipe.sourcehome )
                 end
                 render
@@ -168,7 +172,7 @@ class RecipesController < ApplicationController
   def update
     # return if need_login true
     if params[:commit] == "Cancel"
-      redirect_to rcpqueries_url :notice  => "Recipe secure and unchanged."
+      reportRecipe rcpqueries_url, "Recipe secure and unchanged.", formats
     else
       @recipe = Recipe.find(params[:id])
       @recipe.current_user = current_user_or_guest_id # session[:user_id]

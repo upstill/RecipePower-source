@@ -40,7 +40,6 @@ div.dialog.at_top {
   font-weight:bold;
 	height:auto;
 	position:fixed;
-	outline:#090 solid 3px;
 	top:0;
 	left:0;
 	// margin:3px;
@@ -58,12 +57,9 @@ div.dialog.at_top {
 
 .signIn {
 	width: auto;
-	margin: 0.2em;
 	border: solid 3px #900;
-	padding: 0; // 0.5em;
-	padding-bottom: 0;
 	float: left;
-    background-color: #EEE;
+	background-color: #EEE;
 }
 
 div.editRecipe.dialog.at_top {

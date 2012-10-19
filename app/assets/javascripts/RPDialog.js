@@ -64,26 +64,26 @@ function runResponse(responseData) {
 	// Wrapped in 'presentResponse', in the case where we're only presenting the results of the request
 	if(responseData && !(typeof presentResponse === 'function' && presentResponse(responseData))) {
 		if(code = responseData.code) {
-		  var placed = false;
-		  if(!responseData.how) {
-			if(responseData.area == "floating") {
-				responseData.how = "modal"
-			} else if ((responseData.area == "at_left") || (responseData.area == "at_top")) {
-				responseData.how = "modeless"
+			var placed = false;
+			if(!responseData.how) {
+				if(responseData.area == "floating") {
+					responseData.how = "modal"
+				} else if ((responseData.area == "at_left") || (responseData.area == "at_top")) {
+					responseData.how = "modeless"
+				}
 			}
-		  }
-		  if(responseData.how == "modeless") {
-			placed = injectDialog(code, responseData.area, true);
-		  } else if(responseData.how == "modal") { // at_top and at_left run modelessly
-			placed = runModalDialog(code, responseData.area);					
-		  }
-		  if (!placed) { // Force the page to be displayed. XXX Does nothing to the address bar
-		    // $('#container').data("pending_page", code ); // Stash for doError function
-		    // window.location.replace('javascript:doError()');	
-		    document.open();
-			document.write(code);
-			document.close;
-		  }
+			if(responseData.how == "modeless") {
+				placed = injectDialog(code, responseData.area, true);
+			} else if(responseData.how == "modal") { // at_top and at_left run modelessly
+				placed = runModalDialog(code, responseData.area);					
+			}
+			if (!placed) { // Force the page to be displayed. XXX Does nothing to the address bar
+				// $('#container').data("pending_page", code ); // Stash for doError function
+				// window.location.replace('javascript:doError()');	
+				document.open();
+				document.write(code);
+				document.close;
+			}
 		}
 	} 
 	recipePowerNotify(); // Put up any notifications provided by the response
@@ -181,14 +181,14 @@ function postSuccess(jsonResponse, dlog) {
   // Call either the named response function or the one associated with the dialog
   if(closer = jsonResponse.processorFcn || (dlog && dialogOnClose(dlog))) {
 	  if(typeof closer === 'function') {
-		closer(jsonResponse);
+			closer(jsonResponse);
 	  } else if(typeof window[closer] === 'function') {
-		window[closer](jsonResponse);
+			window[closer](jsonResponse);
 	  }
   }
   // Simplistic response: we'll prevent normal form handling IFF there's code to run.
   if(dlog != undefined) {
-	dialogResult( dlog, jsonResponse );
+		dialogResult( dlog, jsonResponse );
   }
   return false;
 }
@@ -222,7 +222,7 @@ function submitDialogForJSON(eventdata) { // Supports multiple forms in dialog
 		error: function(jqXHR, textStatus, errorThrown) {
 			postError(jqXHR, dlog);
 			closeDialog(dlog);
-		    process_result_normally = false;
+			process_result_normally = false;
 		},
 		success: function (responseData, statusText, xhr, form) {
 			process_result_normally = postSuccess(responseData, dlog);
