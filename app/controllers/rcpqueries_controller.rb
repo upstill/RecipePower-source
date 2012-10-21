@@ -102,14 +102,12 @@ public
   # (without such a parameter, it just refreshes the list from the current query)
   def relist
       # Presumably the params include :status, :querymode and/or :listmode specs
+      
       @user_id = current_user_or_guest_id # session[:user_id]
-      if params[:id] # Query may be specified by id (currently only for profiling)
-          @rcpquery = Rcpquery.where(:id => params[:id]).first || 
-	  	      Rcpquery.create(user_id: User.guest_id, owner_id: User.guest_id)
-      else
-          @rcpquery = Rcpquery.fetch_revision(session[:rcpquery], @user_id, params)
-      end
+      # Query may be specified directly by id (currently only for profiling)
+      @rcpquery = Rcpquery.fetch_revision(params[:id] || session[:rcpquery], @user_id, params)
       session[:rcpquery] = @rcpquery.id # In case the model decided on a new query
+      
       @list_name = @rcpquery.which_list
       render '_form_rcplist.html.erb', :layout=>false
   end
@@ -117,8 +115,11 @@ public
   # Return the recipe list for a tab in the 'mine' list. 
   # The only parameter is 'status', denoting the tab involved
   def tablist
+    
       @user_id = current_user_or_guest_id
       @rcpquery = Rcpquery.fetch_revision(session[:rcpquery], @user_id, params)
+      session[:rcpquery] = @rcpquery.id # In case the model decided on a new query
+      
       render '_form_placeholder.html.erb', :layout=>false
   end
 
@@ -130,7 +131,7 @@ public
     # Respond to a form submission (query params are in params[:rcpquery])
     @user_id = current_user_or_guest_id # session[:user_id]
     @rcpquery = Rcpquery.fetch_revision(params[:id].to_i, @user_id, params[:rcpquery])
-    session[:rcpquery] = @rcpquery.id
+    session[:rcpquery] = @rcpquery.id # In case the model decided on a new query
 
     @Title = "Query from Update"
     @list_name = @rcpquery.which_list

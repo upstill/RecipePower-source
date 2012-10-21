@@ -277,35 +277,35 @@ public
         end
     end
 =end
-    # Fetch and use parameters to revise a query record before returning
-    def self.fetch_revision(id, uid, params)
-        # This is all very straightforward, EXCEPT that we allow the 'tag_tokens' query string
-        # to include both tagids (for searching on tags) and plain text strings. The latter we 
-        # turn into 'specialtags' for searching titles and comments; they appear in the tags array
-        # as tags with negative ids
-        result = self.find(id)
-        result.session_id = uid
-        if list = params[:list]
-            list =~ /^(\D*)(\d*)$/
-            result.which_list = $1
-            # idspec of 0 denotes "all friends/channels"; 
-            # absent idspec denotes "current friend/channel"
-            # idspec as value denotes specific friend/channel
-            if user = User.where(id: $2).first
-                case result.which_list
-                when "friends"
-                  result.friend = user
-                when "channels"
-                  result.channel = user
-                end
-            end
-        # else
-            # result.which_list = "mine"
-        end
-        result.update_attributes(params)
-        result.save
-        result
+  # Fetch and use parameters to revise a query record before returning
+  def self.fetch_revision(id, uid, params)
+    # This is all very straightforward, EXCEPT that we allow the 'tag_tokens' query string
+    # to include both tagids (for searching on tags) and plain text strings. The latter we 
+    # turn into 'specialtags' for searching titles and comments; they appear in the tags array
+    # as tags with negative ids
+    result = Rcpquery.where(:id => id).first || Rcpquery.create(user_id: uid, owner_id: uid)
+    result.session_id = uid
+    if list = params[:list]
+      list =~ /^(\D*)(\d*)$/
+      result.which_list = $1
+      # idspec of 0 denotes "all friends/channels"; 
+      # absent idspec denotes "current friend/channel"
+      # idspec as value denotes specific friend/channel
+      if user = User.where(id: $2).first
+          case result.which_list
+          when "friends"
+            result.friend = user
+          when "channels"
+            result.channel = user
+          end
+      end
+     # else
+        # result.which_list = "mine"
     end
+    result.update_attributes(params)
+    result.save
+    result
+  end
 
     # ------------------ Methods in support of paging results ---------------
     
@@ -356,6 +356,6 @@ public
             last = first+page_length-1
             last = maxlast if last > maxlast
         end
-        results[first..last].collect { |rid| Recipe.find rid }
+        results[first..last].collect { |rid| Recipe.where( id: rid ).first }.compact
     end
 end
