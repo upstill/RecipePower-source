@@ -256,7 +256,7 @@ function runModalDialog(body, area) {
 		// Dialogs are modal by default, unless the classes 'at_top' or 'at_left' are asserted
 		var options = {
 			modal: true,
-			width: 'auto',
+			width: dlog.width(), // Barely enclose the dialog with our window
 			position: ['left', 'top'],
 			close: function() {
 				// It is expected that any dialogs have placed the response data object into the dlog object
@@ -279,7 +279,7 @@ function injectDialog(code, area, modeless) {
   // First, remove any lingering style or script elements on the page
   $('link.RecipePowerInjectedStyle').remove();
   // Inject our styles
-  $('<link href="/assets/foreign/dialog.css?body=1" media="screen" rel="stylesheet" type="text/css" id="RecipePowerInjectedStyle"/>').appendTo('head');
+  $('<link href="/assets/dialog.css?body=1" media="screen" rel="stylesheet" type="text/css" id="RecipePowerInjectedStyle"/>').appendTo('head');
   // Parse the code, creating an html element outside the DOM, then pulling the
   // 'div.dialog' element from that.
   var dlog = $('div.dialog', $('<html></html>').html(code));

@@ -12,7 +12,7 @@ div#recipePowerDialog.at_top {
 div.dialog.floating {
   font:12px arial,sans-serif;
   font-weight:bold;
-	width: auto;
+  // width: auto;
   font-size:80%;
   padding-left:1%;
   padding-right:1%;

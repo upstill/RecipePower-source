@@ -21,7 +21,8 @@ gem 'omniauth-facebook'
 gem 'omniauth-google-oauth2'                     
 gem 'omniauth-openid'                     
 gem 'declarative_authorization'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
-gem 'thin'  
+gem 'thin'
+gem 'eventmachine', '1.0.0.rc.4'
 
 gem 'exception_notification', :require => 'exception_notifier'
 group :development do

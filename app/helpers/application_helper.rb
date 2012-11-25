@@ -168,6 +168,10 @@ module ApplicationHelper
     return fl.html_safe
   end
 
+  def current_domain
+    Rails.env.development? ? "localhost:3000" : "www.recipepower.com"
+  end
+
   # Deploy the links for naming the user and/or signing up/signing in
   def user_status
     userlinks = []
@@ -183,9 +187,19 @@ module ApplicationHelper
   end
 
   def bookmarklet
-      imgtag = image_tag("Small_Icon.png", :alt=>"Cookmark", :class=>"logo_icon", width: "32px", height: "24px")
-      bmtag = %q{<a class="bookmarklet" title="Cookmark" href="javascript:void(window.open('http://www.recipepower.com/recipes/new?url='+encodeURIComponent(window.location.href)+'&title='+encodeURIComponent(document.title)+'&notes='+encodeURIComponent(''+(window.getSelection?window.getSelection():document.getSelection?document.getSelection():document.selection.createRange().text))+'&v=6&jump=yes',%20'popup',%20'width=600,%20height=300,%20scrollbars,%20resizable'))">}
-      "#{bmtag}#{imgtag}</a>".html_safe
+    imgtag = image_tag( "Small_Icon.png", 
+			:alt=>"Cookmark",
+			:class=>"logo_icon",
+			width: "32px",
+			height: "24px")
+    if Rails.env.development?
+      # New bookmarklet
+      bmtag = %Q{<a class="bookmarklet" title="Cookmark" href="javascript:(function%20()%20{var%20s%20=%20document.createElement(%27script%27);s.setAttribute(%27language%27,%27javascript%27);s.setAttribute(%27id%27,%20%27recipePower-injector%27);s.setAttribute(%27src%27,%27http://#{current_domain}/recipes/capture.js?recipe[url]=%27+encodeURIComponent(window.location.href)+%27&recipe[title]=%27+encodeURIComponent(document.title)+%27&recipe[rcpref][comment]=%27+encodeURIComponent(%27%27+(window.getSelection?window.getSelection():document.getSelection?document.getSelection():document.selection.createRange().text))+%27&v=6&jump=yes%27);document.body.appendChild(s);}())">}
+    else
+      # Old bookmarklet
+      bmtag = %Q{<a class="bookmarklet" title="Cookmark" href="javascript:void(window.open('http://#{current_domain}/recipes/new?url='+encodeURIComponent(window.location.href)+'&title='+encodeURIComponent(document.title)+'&notes='+encodeURIComponent(''+(window.getSelection?window.getSelection():document.getSelection?document.getSelection():document.selection.createRange().text))+'&v=6&jump=yes',%20'popup',%20'width=600,%20height=300,%20scrollbars,%20resizable'))">}
+    end
+    "#{bmtag}#{imgtag}</a>".html_safe
   end
       
   # Turn the last comma in a comma-separated list into ' and'
@@ -273,7 +287,7 @@ module ApplicationHelper
 	    logger.debug "dialogHeader for "+globstring({dialog: which, area: @area, layout: @layout, ttl: ttl})
 	    classname = which.to_s
         onloadFcn = classname+"Onload"
-        ttlspec = ttl ? (" title=\"#{ttl}+\"") : ""
+        ttlspec = ttl ? (" title=\"#{ttl}\"") : ""
 	    result = %Q{ 
 	      #{flash_helper}
 	      <div class='#{classname} dialog #{@area}' #{ttlspec} onload="#{onloadFcn}" id="recipePowerDialog" >

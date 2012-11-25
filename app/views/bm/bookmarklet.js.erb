@@ -18,7 +18,7 @@
 	
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src = "http://localhost:5000/recipes/capture.js?callback=save_link_complete&api_key=<%= params["api_key"] %>&recipe[url]=" + encodeURI(window.location.href);
+    script.src = "http://#{current_domain}/recipes/capture.js?callback=save_link_complete&api_key=<%= params["api_key"] %>&recipe[url]=" + encodeURI(window.location.href);
     script.id = "recipepower-loadJSONP";
     document.body.appendChild(script);
   }
@@ -37,7 +37,7 @@
 	styleblock.appendChild(style);
   }
 
-  save_style("http://localhost:5000/assets/foreign/dialog.css?body=1");
+  save_style("http://#{current_domain()}/assets/dialog.css?body=1");
   create_container("recipePower-container");
   save_link();
 })();
@@ -71,7 +71,7 @@ function inject_container(container, area, modeless) {
   // First, remove any lingering style or script elements on the page
   // $('link.RecipePowerInjectedStyle').remove();
   // Inject our styles
-  // $('<link href="http://localhost:5000/assets/foreign/dialog.css?body=1" media="screen" rel="stylesheet" type="text/css" id="RecipePowerInjectedStyle"/>').appendTo('head');
+  // $('<link href="http://#{current_domain}/assets/dialog.css?body=1" media="screen" rel="stylesheet" type="text/css" id="RecipePowerInjectedStyle"/>').appendTo('head');
   // Parse the code, creating an html element outside the DOM, then pulling the
   // 'div.dialog' element from that.
 	// Find the dialog within the container (first and only node of type element)
@@ -143,7 +143,7 @@ else {
 }  
 
 function recipePowerCapture() {
-    var resource = "http://localhost:5000/recipes/capture";
+    var resource = "http://#{current_domain}/recipes/capture";
     alert( "Got recipePowerCapture!");
     var obj = 
 	  { url: window.location.href,
@@ -152,6 +152,6 @@ function recipePowerCapture() {
 		how: "modeless" }
 		
 		// recipePowerGetAndRunHTML(resource, obj)
-		recipePowerGetAndRunHTML("http://localhost:5000/home", {})
+		recipePowerGetAndRunHTML("http://#{current_domain}/home", {})
 }
 */

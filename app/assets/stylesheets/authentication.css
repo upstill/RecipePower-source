@@ -35,9 +35,7 @@ padding:10px;
 }
 
 .auth_signin.floating {
-	width: 280px;
-	border-right: solid 1px #999;
-	//    border: solid 3px #009;
+	// width: 500px;
 	margin: 0px 20px;
 	float: left;
 }
@@ -98,7 +96,7 @@ padding:10px;
 }
 
 .signIn.floating {
-	width: 930px;
+	width: 600px;
 	margin-top: 2em;
 	float: left;
 }

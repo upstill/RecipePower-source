@@ -1,0 +1,105 @@
+C:/RailsInstaller/Ruby1.9.3/bin/ruby.exe extconf.rb 
+checking for rb_trap_immediate in ruby.h,rubysig.h... no
+checking for rb_thread_blocking_region()... yes
+checking for inotify_init() in sys/inotify.h... no
+checking for __NR_inotify_init in sys/syscall.h... no
+checking for writev() in sys/uio.h... no
+checking for rb_thread_check_ints()... yes
+checking for rb_time_new()... yes
+checking for windows.h... yes
+checking for winsock.h... yes
+checking for main() in -lkernel32... yes
+checking for main() in -lrpcrt4... yes
+checking for main() in -lgdi32... yes
+checking for main() in -lssl... no
+creating Makefile
+
+make
+generating rubyeventmachine-i386-mingw32.def
+compiling binder.cpp
+cc1plus.exe: warning: command line option "-Wdeclaration-after-statement" is valid for C/ObjC but not for C++
+cc1plus.exe: warning: command line option "-Wimplicit-function-declaration" is valid for C/ObjC but not for C++
+In file included from project.h:137:0,
+                 from binder.cpp:20:
+binder.h:35:34: warning: type qualifiers ignored on function return type
+In file included from project.h:138:0,
+                 from binder.cpp:20:
+em.h:91:47: warning: type qualifiers ignored on function return type
+em.h:92:76: warning: type qualifiers ignored on function return type
+em.h:93:56: warning: type qualifiers ignored on function return type
+em.h:95:57: warning: type qualifiers ignored on function return type
+em.h:96:60: warning: type qualifiers ignored on function return type
+em.h:97:58: warning: type qualifiers ignored on function return type
+em.h:98:55: warning: type qualifiers ignored on function return type
+em.h:99:36: warning: type qualifiers ignored on function return type
+em.h:101:47: warning: type qualifiers ignored on function return type
+em.h:106:42: warning: type qualifiers ignored on function return type
+em.h:123:45: warning: type qualifiers ignored on function return type
+em.h:132:36: warning: type qualifiers ignored on function return type
+In file included from project.h:145:0,
+                 from binder.cpp:20:
+eventmachine.h:45:61: warning: type qualifiers ignored on function return type
+eventmachine.h:46:112: warning: type qualifiers ignored on function return type
+eventmachine.h:47:69: warning: type qualifiers ignored on function return type
+eventmachine.h:49:73: warning: type qualifiers ignored on function return type
+eventmachine.h:62:75: warning: type qualifiers ignored on function return type
+eventmachine.h:63:74: warning: type qualifiers ignored on function return type
+eventmachine.h:64:77: warning: type qualifiers ignored on function return type
+eventmachine.h:65:41: warning: type qualifiers ignored on function return type
+In file included from project.h:145:0,
+                 from binder.cpp:20:
+eventmachine.h:99:60: warning: type qualifiers ignored on function return type
+eventmachine.h:100:58: warning: type qualifiers ignored on function return type
+eventmachine.h:102:60: warning: type qualifiers ignored on function return type
+eventmachine.h:105:41: warning: type qualifiers ignored on function return type
+compiling cmain.cpp
+cc1plus.exe: warning: command line option "-Wdeclaration-after-statement" is valid for C/ObjC but not for C++
+cc1plus.exe: warning: command line option "-Wimplicit-function-declaration" is valid for C/ObjC but not for C++
+In file included from project.h:137:0,
+                 from cmain.cpp:20:
+binder.h:35:34: warning: type qualifiers ignored on function return type
+In file included from project.h:138:0,
+                 from cmain.cpp:20:
+em.h:91:47: warning: type qualifiers ignored on function return type
+em.h:92:76: warning: type qualifiers ignored on function return type
+em.h:93:56: warning: type qualifiers ignored on function return type
+em.h:95:57: warning: type qualifiers ignored on function return type
+em.h:96:60: warning: type qualifiers ignored on function return type
+em.h:97:58: warning: type qualifiers ignored on function return type
+em.h:98:55: warning: type qualifiers ignored on function return type
+em.h:99:36: warning: type qualifiers ignored on function return type
+em.h:101:47: warning: type qualifiers ignored on function return type
+em.h:106:42: warning: type qualifiers ignored on function return type
+em.h:123:45: warning: type qualifiers ignored on function return type
+em.h:132:36: warning: type qualifiers ignored on function return type
+In file included from project.h:145:0,
+                 from cmain.cpp:20:
+eventmachine.h:45:61: warning: type qualifiers ignored on function return type
+eventmachine.h:46:112: warning: type qualifiers ignored on function return type
+eventmachine.h:47:69: warning: type qualifiers ignored on function return type
+eventmachine.h:49:73: warning: type qualifiers ignored on function return type
+eventmachine.h:62:75: warning: type qualifiers ignored on function return type
+eventmachine.h:63:74: warning: type qualifiers ignored on function return type
+eventmachine.h:64:77: warning: type qualifiers ignored on function return type
+eventmachine.h:65:41: warning: type qualifiers ignored on function return type
+In file included from project.h:145:0,
+                 from cmain.cpp:20:
+eventmachine.h:99:60: warning: type qualifiers ignored on function return type
+eventmachine.h:100:58: warning: type qualifiers ignored on function return type
+eventmachine.h:102:60: warning: type qualifiers ignored on function return type
+eventmachine.h:105:41: warning: type qualifiers ignored on function return type
+cmain.cpp:98:71: warning: type qualifiers ignored on function return type
+cmain.cpp:109:122: warning: type qualifiers ignored on function return type
+cmain.cpp:119:79: warning: type qualifiers ignored on function return type
+cmain.cpp:129:83: warning: type qualifiers ignored on function return type
+cmain.cpp:260:85: warning: type qualifiers ignored on function return type
+cmain.cpp:270:84: warning: type qualifiers ignored on function return type
+cmain.cpp:280:88: warning: type qualifiers ignored on function return type
+cmain.cpp:290:51: warning: type qualifiers ignored on function return type
+cmain.cpp:300:70: warning: type qualifiers ignored on function return type
+cmain.cpp:320:55: warning: type qualifiers ignored on function return type
+cmain.cpp:546:70: warning: type qualifiers ignored on function return type
+cmain.cpp:669:68: warning: type qualifiers ignored on function return type
+cmain.cpp: In function 'int evma_send_file_data_to_connection(long unsigned int, const char*)':
+cmain.cpp:752:6: error: cannot convert 'stat*' to '_stati64*' for argument '2' to 'int _fstati64(int, _stati64*)'
+make: *** [cmain.o] Error 1

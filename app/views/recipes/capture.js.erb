@@ -69,6 +69,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		if(!capsule) { 
 		  capsule = wrapWithoutCloning(ifr);
 		} 
+		ifr.style.display = 'box';
 	*/
 		/* Define the style for highlighting images for picking */
 		var css = 'img.recipePower-highlight { outline:#ffaa66 8px solid; }',
@@ -136,7 +137,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		ns.postMessage(
 			{ url: this.src,
 				call: "replaceImg"
-			}, "http://<%= Rails.env.development? ? "localhost:5000" : "www.recipepower.com" %>", iframe.contentWindow);
+			}, "http://<%= current_domain %>", iframe.contentWindow);
 		event.preventDefault();
 		event.stopPropagation();
 	},
@@ -174,7 +175,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	ifr.style.top = "0";
 	ifr.style.padding = "0";
 	ifr.style.margin = "0";
-	ifr.style.display = 'none';
+	ifr.style.display = 'none'; // 'block';
 	ifr.id = "recipePower-iframe";
 	ifr.src = "<%= @url %>";
 	// set the width of the frame to that of the enclosing document
@@ -185,6 +186,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	    ifr.onload = window.recipePower_namespace.ifrOnload;
 	}
   document.body.appendChild(ifr);
+	ifr.style.display = 'block';
   window.recipePower_namespace.iframe = ifr;
 })();
 
@@ -349,4 +351,4 @@ window.recipePower_namespace.receiveMessage( function(evt) {
 	if(call && (typeof window.recipePower_namespace[call] === 'function')) {
 		window.recipePower_namespace[call](data);
 	}
-}, "http://<%= Rails.env.development? ? "localhost:5000" : "www.recipepower.com" %>" );
+}, "http://<%= current_domain %>" );

@@ -1,7 +1,7 @@
 <% if current_user && false %>
 	<h3>Manage Sign-in Services</h3>
 <% end %>
-<%= dialogHeader :signIn %>
+<%# dialogHeader :signIn %>
   <div class="auth_signin <%= @area %>" >
     <%= render partial: 'shared/authentications_current' %>
     <%= render partial: 'shared/authentications_possible' %>
@@ -14,4 +14,4 @@
 	  <%= render partial: "shared/slug_signup" %>
 	</div>
   <% end %>
-<%= dialogFooter %>
+<%# dialogFooter %>

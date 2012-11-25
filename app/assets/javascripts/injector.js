@@ -96,7 +96,6 @@ function armDialog(sourcehome) {
 	var cancelBtn = document.getElementById("recipePowerCancelBtn");
 	if(cancelBtn) cancelBtn.onclick = retire_iframe;
 	$('form', dlog).submit( dlog, submitDialog );
-		
 	// Finally, report the window dimensions to the enclosing window
 	$.postMessage( { call: "execute_resize", width: dlog.offsetWidth, height: dlog.offsetHeight }, document.sourcehome );
 	
