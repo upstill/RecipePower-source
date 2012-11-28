@@ -35,38 +35,49 @@
 <div class="results">
 </div>
 <% end %>
-<div id="sidebar">
-<h3>Getting Started</h3>
-<p><%= bookmarklet %>
-Make it stupid-simple to capture recipes: drag this handy
-	button to your browser's Bookmarks bar. After that, life is sweet: when you find a recipe to remember,
-	click the Cookmark link to stow it in RecipePower. 
-</p><p>
-Without the button, you can always manually copy and paste links into RecipePower, (see the <%= link_to "Add a Cookmark", new_recipe_path %> link above). But that's not very convenient, is it?
-</p>
+<div class="welcome_sidebar">
+  <p><span class="large">Getting Started</span></p>
+    <div class="instructions_button">
+      <%= page_fitPic "cookmark_button.png", "_step1" %>
+	</div>
+	<p>This is the <em>Cookmark</em> button, where the magic happens.</p>
+    <div class="instructions_step">
+	  <%= page_fitPic "drag_pic.png", "_step2" %>
+	</div>
+	<p>Drag the Cookmark button onto your browser's bookmarks bar.
+	<br><span class="small">(If the bookmarks bar isn't visible, you can find it under "View" in the top menus)</p>
+    <div class="instructions_step">
+      <%= page_fitPic "click_cookmark.png", "_step3" %>
+	</div>
+	<p>With any recipe showing in your browser, click on the Cookmark button to remember it in
+    your RecipePower collection.</p>
 </div>
 <p class="airy">Thank you for coming. May we introduce ourselves?</p>
 <h4>The Quick Skinny</h4>
 <p class="airy">
-RecipePower is for collecting <i>cookmarks</i>. A cookmark is just a link back to a recipe or any other cooking-related page on the Web: just like a bookmark, but kept in RecipePower. Collections of Cookmarks are the heart of RecipePower: you have one, your friends each have one, and there are even special-interest collections called <i>channels</i>. In RecipePower, the <strong><%= link_to "Cookmarks", rcpqueries_path %></strong> page is "cookmark central", where you view and sort through collections of all kinds. 
+RecipePower is for collecting <i>cookmarks</i>. A cookmark is just breadcrumbs back to any recipe on the Web: just like a bookmark, but better, in RecipePower. Collections of Cookmarks are what it's about: everyone has a collection--you, your friends--and there are also special-interest collections called <i>channels</i>. It's all there on the <strong><%= link_to "Cookmarks", rcpqueries_path %></strong> page. 
 </p><p class="airy">
-How do recipes get <i>into</i> your Cookmarks collection in the first place? Simple. Start by dragging our handy bookmarklet (see sidebar at right) into the bookmark bar of your browser. Then when you're browsing the web, you can cookmark any recipe by just clicking the bookmarklet. The page you're on at that time gets whisked over to RecipePower.
+How do cookmarks get collected in the first place? With our handy bookmarklet! (See sidebar at right.) You can cookmark any recipe by just clicking the bookmarklet in your browser's bookmarks bar. The page containing the recipe (or rather, its cookmark) gets whisked over to RecipePower.
 </p><p class="airy">
-You can also grab a cookmark from somebody else. When browsing another's Cookmarks collection, if you see something you like, click its <strong>Grab This Cookmark</strong> link. It does what it says it does.
+You can also grab a cookmark from anyone else on RecipePower. When browsing through various collections, if you see something you like, click its <strong>Grab This Cookmark</strong> link and Poof! It's added to yours.
 </p><p class="airy">
-Finally, if you're a certain type of person, you might also want to copy and paste addresses straight from your browser bar into RecipePower. You can do that with the <strong><%= link_to "Add a Cookmark", new_recipe_path %></strong> link above.
+Finally, some people like copy-and-paste. If you've copied the URL for a recipe, click on the <strong><%= link_to "Add a Cookmark", new_recipe_path %></strong> link above.
 </p>
 <h4>Tagging Recipes</h4>
 <p class="airy">
-Once your collection grows to more than a couple of dozen recipes, you'll want a way to organize them. RecipePower lets you organize cookmarks any way you like with <strong>tags</strong>. A tag is just a name for a collection. Tag a recipe for, say, Sunday Night Specials and then, when you later look for Sunday Night Specials, RecipePower will go through your collection and pull up all the recipes with that tag. You create new tags just by pretending they exist. Type a tag into the tag box and, if it doesn't already exist, the collection springs into existence, just like magic.
+Once you collect more than a few recipes, you'll want to get them organized, and that's where <strong>tags</strong> come in. A tag is just a label that you might use to recall a recipe. Tag a recipe for, say, Sunday Night Specials and then, when you later ask for Sunday Night Specials, RecipePower will present all the recipes with that tag. They're kind of like sections in a binder, except that any recipe can have any number of tags.
 </p><p class="airy">
-How "should" you tag your recipes? Any way you like! RecipePower has defined many useful tags and you can also tag recipes according to the channels that we've set up. But you're not limited to our vocabulary. If you want to tag a recipe as Uncle Bernie's Favorite, be our guest.
+So where do tags come from? We've set up a rich dictionary of tags, but of course you're free to make up tags that make sense to you. Create a new tag just by pretending it exists: type a tag into the tag box, hit Return, and it gets created, just like magic.
+</p><p class="airy">
+How "should" you tag your recipes? Any way you like! If you want to tag a recipe as Uncle Bernie's Favorite, be our guest.
 </p>
 <h4>What are Channels?</h4>
-A channel is a collection of special-interest recipes like "Cocktails" or "Simple but Swanky". If that sounds a little like tags, fair enough: a recipe gets put into a channel in exactly the same way it gets tagged, and you can look recipes up by channel, too, same as tags. But where tags are about things like the genre of a recipe or what course it serves, Channels can be about <strong>any</strong> topic. But more important, when you sign up for a channel, you not only get a look at all the recipes that have been posted to that channel, you also hear about <i>new</i> recipes as they're added to the channel. They pop up in your news feed.
+<p class="airy">
+As a cook, you probably have some special interests: maybe one-dish meals, or Atkins recipes, or barbecue. The possibilities are endless. You have interests, we have channels.
+A channel serves up recipes for special interests like "Cocktails" or "Simple but Swanky". If that sounds a little like tags, fair enough: a recipe gets put into a channel in exactly the same way it gets tagged, and you can look recipes up by channel, too, same as tags. But when you sign up for a channel, you not only get a look at all the recipes that have been posted there, you also hear about <i>new</i> recipes as they're added to the channel. They pop up in your news feed.
 <h4>Now What?</h4>
 <p class="airy">
-Why not head over to the <%= link_to "Cookmarks", rcpqueries_path %> page and have a look? You'll find that you have some friends there already. You can get started by browsing through their recipes and seeing their tags. We've also provided you with a starter set of Channels. If you want to add new friends or select other channels go to the Profile page under your name at the top right of the screen.
+After you install the bookmarklet, why not head over to the <%= link_to "Cookmarks", rcpqueries_path %> page and have a look? You'll find that you have some friends there already. You might get started by browsing through their recipes and seeing their tags. We've also provided you with a starter set of Channels. If you want to add new friends or select other channels go to the Profile page under your name at the top right of the screen.
 </p><p class="airy">
 But why not go out to the Web, find some of your favorite recipes, and bring them into RecipePower? It's a good feeling to know that your magic recipes are waiting for you any time you like.
 </p><p class="airy">

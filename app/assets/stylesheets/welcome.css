@@ -1,0 +1,44 @@
+// Styles for the welcome page
+
+
+div.bookmarklet_icon {
+  position:absolute;
+  left:120px;
+  top:140px;
+  width: 139px;
+  height: 117px;
+  border:2px solid blue;
+  z-index: 1000;
+}
+
+div.welcome_sidebar {
+  font:20pt calibri;
+  line-height:130%;
+  color: #FFFFFF;
+  float:right;
+  width: 200px;
+  background-color: #800040;
+  margin: 25px;
+  padding: 20px;
+  padding-top: 10px;
+}
+
+span.small {
+  font-size: 80%;
+}
+
+span.large {
+  font-size: 150%;
+}
+
+div.instructions_button {
+   height: 60px;
+   margin: 5px;
+}
+
+div.instructions_step {
+	height: 200px;
+   margin: 5px;
+}
+
+

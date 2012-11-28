@@ -1,6 +1,7 @@
 
 // Onload function for images, to fit themselves (found by id) into the enclosing container.
 function fitImageOnLoad(selector) {
+debugger;
     $(selector).each(function() {
         fitImage(this);
     });

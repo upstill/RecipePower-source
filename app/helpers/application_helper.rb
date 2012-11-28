@@ -43,14 +43,22 @@ module ApplicationHelper
 
   # Declare an image within an adjustable box. The images are downloaded by
   # the browser and their dimensions adjusted under Javascript by the fitImageOnLoad() function.
-  def page_fitPic(picurl, id, float_ttl = true, selector=nil)
+  # id -- used to define an id attribute for this picture (all fitpics will have class 'fitPic')
+  # float_ttl -- indicates how to handle an empty URL
+  # selector -- specifies an alternative selector for finding the picture for resizing
+  def page_fitPic(picurl, id = "", float_ttl = true, selector=nil)
     # "fitPic" class gets fit inside pic_box with Javascript and jQuery
     idstr = "rcpPic"+id.to_s
     selector = selector || "##{idstr}"
 	if picurl.blank? && float_ttl
 	    %Q{<div class="centerfloat" id="#{idstr}">No Image Available</div>}.html_safe
 	else
-	    %Q{<img src="#{picurl}" class="fitPic" id="#{idstr}" onload="fitImageOnLoad('#{selector}')" alt="No Image Available">}.html_safe
+	  image_tag(picurl, 
+		class: "fitPic",
+		id: idstr,
+		onload: "fitImageOnLoad('#{selector}')",
+		alt: "No Image Available")
+	    # %Q{<img src="#{picurl}" class="fitPic" id="#{idstr}" onload="fitImageOnLoad('#{selector}')" alt="No Image Available">}.html_safe
 	end
   end
   
@@ -187,11 +195,7 @@ module ApplicationHelper
   end
 
   def bookmarklet
-    imgtag = image_tag( "Small_Icon.png", 
-			:alt=>"Cookmark",
-			:class=>"logo_icon",
-			width: "32px",
-			height: "24px")
+    imgtag = page_fitPic "cookmark_button.png", "cookmark_button", true, ".logo_icon"
     if Rails.env.development?
       # New bookmarklet
       bmtag = %Q{<a class="bookmarklet" title="Cookmark" href="javascript:(function%20()%20{var%20s%20=%20document.createElement(%27script%27);s.setAttribute(%27language%27,%27javascript%27);s.setAttribute(%27id%27,%20%27recipePower-injector%27);s.setAttribute(%27src%27,%27http://#{current_domain}/recipes/capture.js?recipe[url]=%27+encodeURIComponent(window.location.href)+%27&recipe[title]=%27+encodeURIComponent(document.title)+%27&recipe[rcpref][comment]=%27+encodeURIComponent(%27%27+(window.getSelection?window.getSelection():document.getSelection?document.getSelection():document.selection.createRange().text))+%27&v=6&jump=yes%27);document.body.appendChild(s);}())">}
@@ -199,7 +203,8 @@ module ApplicationHelper
       # Old bookmarklet
       bmtag = %Q{<a class="bookmarklet" title="Cookmark" href="javascript:void(window.open('http://#{current_domain}/recipes/new?url='+encodeURIComponent(window.location.href)+'&title='+encodeURIComponent(document.title)+'&notes='+encodeURIComponent(''+(window.getSelection?window.getSelection():document.getSelection?document.getSelection():document.selection.createRange().text))+'&v=6&jump=yes',%20'popup',%20'width=600,%20height=300,%20scrollbars,%20resizable'))">}
     end
-    "#{bmtag}#{imgtag}</a>".html_safe
+    # "<div class='logo_icon'>#{bmtag}#{imgtag}</a></div>".html_safe
+    "<div class='bookmarklet_icon'></div>".html_safe
   end
       
   # Turn the last comma in a comma-separated list into ' and'

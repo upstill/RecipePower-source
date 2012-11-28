@@ -136,13 +136,6 @@ li.airy {
 	// letter-spacing:1px;
 }
 
-p.sidebar {
-  	font:16px calibri;
-	line-height:130%;
-	// font-size:105%;
-	// letter-spacing:1px;
-}
-
 .text_block {
 	margin-left:2em;
 }
@@ -255,14 +248,6 @@ a.signup_button {
 #error_explanation ul li {
   font-size: 12px;
   list-style: square;
-}
-
-#sidebar {
-width: 250px;
-float: right;
-margin:15px 5px 15px 30px;
-border:3px solid black;
-padding:10px;
 }
 
 .page_label {
