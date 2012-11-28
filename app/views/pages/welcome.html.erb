@@ -37,19 +37,19 @@
 <% end %>
 <div class="welcome_sidebar">
   <p><span class="large">Getting Started</span></p>
-    <div class="instructions_button">
-      <%= page_fitPic "cookmark_button.png", "_step1" %>
-	</div>
-	<p>This is the <em>Cookmark</em> button, where the magic happens.</p>
-    <div class="instructions_step">
-	  <%= page_fitPic "drag_pic.png", "_step2" %>
-	</div>
-	<p>Drag the Cookmark button onto your browser's bookmarks bar.
-	<br><span class="small">(If the bookmarks bar isn't visible, you can find it under "View" in the top menus)</p>
-    <div class="instructions_step">
-      <%= page_fitPic "click_cookmark.png", "_step3" %>
-	</div>
-	<p>With any recipe showing in your browser, click on the Cookmark button to remember it in
+  <div class="bookmarklet">
+    <%= bookmarklet %>
+  </div>
+  <p>This is the <em>Cookmark</em> button, where the magic happens.</p>
+  <div class="instructions_step">
+	<%= page_fitPic "drag_pic.png", "_step2" %>
+  </div>
+  <p>Drag the Cookmark button onto your browser's bookmarks bar.
+  <br><span class="small">(If the bookmarks bar isn't visible, you can find it under "View" in the top menus)</p>
+  <div class="instructions_step">
+    <%= page_fitPic "click_cookmark.png", "_step3" %>
+  </div>
+  <p>With any recipe showing in your browser, click on the Cookmark button to remember it in
     your RecipePower collection.</p>
 </div>
 <p class="airy">Thank you for coming. May we introduce ourselves?</p>

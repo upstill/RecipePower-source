@@ -57,7 +57,7 @@ module ApplicationHelper
 		class: "fitPic",
 		id: idstr,
 		onload: "fitImageOnLoad('#{selector}')",
-		alt: "No Image Available")
+		alt: "Some Image Available")
 	    # %Q{<img src="#{picurl}" class="fitPic" id="#{idstr}" onload="fitImageOnLoad('#{selector}')" alt="No Image Available">}.html_safe
 	end
   end
@@ -195,16 +195,15 @@ module ApplicationHelper
   end
 
   def bookmarklet
-    imgtag = page_fitPic "cookmark_button.png", "cookmark_button", true, ".logo_icon"
-    if Rails.env.development?
+    imgtag = image_tag("cookmark_button.png", class:"bookmarklet", alt:"Cookmark") # page_fitPic "cookmark_button.png", "_step1"
+    if Rails.env.development? || true
       # New bookmarklet
       bmtag = %Q{<a class="bookmarklet" title="Cookmark" href="javascript:(function%20()%20{var%20s%20=%20document.createElement(%27script%27);s.setAttribute(%27language%27,%27javascript%27);s.setAttribute(%27id%27,%20%27recipePower-injector%27);s.setAttribute(%27src%27,%27http://#{current_domain}/recipes/capture.js?recipe[url]=%27+encodeURIComponent(window.location.href)+%27&recipe[title]=%27+encodeURIComponent(document.title)+%27&recipe[rcpref][comment]=%27+encodeURIComponent(%27%27+(window.getSelection?window.getSelection():document.getSelection?document.getSelection():document.selection.createRange().text))+%27&v=6&jump=yes%27);document.body.appendChild(s);}())">}
     else
       # Old bookmarklet
       bmtag = %Q{<a class="bookmarklet" title="Cookmark" href="javascript:void(window.open('http://#{current_domain}/recipes/new?url='+encodeURIComponent(window.location.href)+'&title='+encodeURIComponent(document.title)+'&notes='+encodeURIComponent(''+(window.getSelection?window.getSelection():document.getSelection?document.getSelection():document.selection.createRange().text))+'&v=6&jump=yes',%20'popup',%20'width=600,%20height=300,%20scrollbars,%20resizable'))">}
     end
-    # "<div class='logo_icon'>#{bmtag}#{imgtag}</a></div>".html_safe
-    "<div class='bookmarklet_icon'></div>".html_safe
+    (bmtag+imgtag+"</a>").html_safe
   end
       
   # Turn the last comma in a comma-separated list into ' and'

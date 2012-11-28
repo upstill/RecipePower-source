@@ -31,9 +31,17 @@ span.large {
   font-size: 150%;
 }
 
-div.instructions_button {
-   height: 60px;
-   margin: 5px;
+.bookmarklet {
+   height: 59px;
+   width: 70px;
+   margin:0;
+   line-height: 59px;
+   highlight-color: #FFFFFF;
+   display: block;
+}
+
+div.bookmarklet {
+   margin: 0px 65px 0px 65px;
 }
 
 div.instructions_step {
