@@ -17,7 +17,10 @@ div.welcome_sidebar {
   color: #FFFFFF;
   float:right;
   width: 200px;
-  background-color: #800040;
+  background: #880000;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#880000', endColorstr='#6c0000');
+  background: -webkit-gradient(linear, left top, left bottom, from(#880000), to(#6c0000));
+  background: -moz-linear-gradient(top,  #880000,  #6c0000);
   margin: 25px;
   padding: 20px;
   padding-top: 10px;
