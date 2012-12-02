@@ -27,11 +27,16 @@ RP::Application.configure do
   config.action_dispatch.best_standards_support = :builtin
 
   # Do not compress assets
-  config.assets.compress = false
+  # config.assets.compress = false
 
   # Expands the lines which load the assets
   config.assets.debug = true
-
+  
+  # Don't fallback to assets pipeline if a precompiled asset is missed
+  config.assets.compile = true
+  config.assets.digest = true
+  config.assets.initialize_on_precompile = false
+  
   config.middleware.use ExceptionNotifier,
     :email_prefix => "[RecipePower Failure!!] ",
     :sender_address => %{"notifier" <notifier@recipepower.com>},
@@ -39,4 +44,11 @@ RP::Application.configure do
 
   config.action_mailer.delivery_method = :letter_opener # :smtp
   
+  # Raise exception on mass assignment protection for Active Record models
+  config.active_record.mass_assignment_sanitizer = :strict
+
+  # Log the query plan for queries taking more than this (works
+  # with SQLite, MySQL, and PostgreSQL)
+  config.active_record.auto_explain_threshold_in_seconds = 0.5
+
 end

@@ -285,7 +285,8 @@ public
     # as tags with negative ids
     result = Rcpquery.where(:id => id).first || Rcpquery.create(user_id: uid, owner_id: uid)
     result.session_id = uid
-    if list = params[:list]
+    # Remove the 'list' parameter, which isn't a real field
+    if list = params.delete(:list)
       list =~ /^(\D*)(\d*)$/
       result.which_list = $1
       # idspec of 0 denotes "all friends/channels"; 
@@ -302,7 +303,7 @@ public
      # else
         # result.which_list = "mine"
     end
-    result.update_attributes(params)
+    result.update_attributes(params) if params.size > 0
     result.save
     result
   end
