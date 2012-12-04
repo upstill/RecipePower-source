@@ -50,17 +50,20 @@ module ApplicationHelper
     # "fitPic" class gets fit inside pic_box with Javascript and jQuery
     idstr = "rcpPic"+id.to_s
     selector = selector || "##{idstr}"
-	if picurl.blank? # && float_ttl
-	    %Q{<div class="centerfloat" id="#{idstr}">No Image Available</div>}.html_safe
-	else
-	  logger.debug "page_fitPic loading picture '"+picurl+"'"
-	  image_tag(picurl, 
-      class: "fitPic",
-      id: idstr,
-      onload: "fitImageOnLoad('#{selector}')",
-      alt: "Some Image Available")
-    # %Q{<img src="#{picurl}" class="fitPic" id="#{idstr}" onload="fitImageOnLoad('#{selector}')" alt="No Image Available">}.html_safe
-	end
+    picurl = picurl || ""
+  	if picurl.blank? 
+  	  if float_ttl
+  	    %Q{<div class="centerfloat" id="#{idstr}">No Image Available</div>}.html_safe
+    	else
+        %Q{<img src="#{picurl}" class="fitPic" id="#{idstr}" onload="fitImageOnLoad('#{selector}')" alt="No Image On File">}.html_safe
+      end
+  	else 
+  	  image_tag(picurl, 
+        class: "fitPic",
+        id: idstr,
+        onload: "fitImageOnLoad('#{selector}')",
+        alt: "Some Image Available")
+  	end
   end
   
   # Build a picture-selection dialog with the default url, url for a page containing candidate images, id, and name of input field to set
