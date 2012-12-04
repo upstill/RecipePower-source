@@ -24,7 +24,8 @@ gem 'declarative_authorization'     # simple auth rules/roles, create config/aut
 gem 'thin'
 gem 'eventmachine', '1.0.0.rc.4'
 
-gem 'exception_notification', :require => 'exception_notifier'
+# gem 'exception_notification', :require => 'exception_notifier'
+gem 'exception_notification', :require => 'exception_notifier', git: 'git://github.com/alanjds/exception_notification.git' 
 group :development do
   gem 'rspec-rails', '2.6.1'
   gem 'annotate', '2.4.0'
