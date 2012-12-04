@@ -50,7 +50,7 @@ module ApplicationHelper
     # "fitPic" class gets fit inside pic_box with Javascript and jQuery
     idstr = "rcpPic"+id.to_s
     selector = selector || "##{idstr}"
-	if picurl.blank? && float_ttl
+	if picurl.blank? # && float_ttl
 	    %Q{<div class="centerfloat" id="#{idstr}">No Image Available</div>}.html_safe
 	else
 	  logger.debug "page_fitPic loading picture '"+picurl+"'"
