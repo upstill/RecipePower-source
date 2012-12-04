@@ -1,5 +1,31 @@
 RP::Application.routes.draw do
 
+  match 'collection', :controller=>'collection', :action=>'index'
+  
+  get 'collection/query'
+
+  get "collection/show"
+
+  get "collection/new"
+
+  get "collection/edit"
+
+  get "collection/create"
+
+  get "collection/relist"
+
+  get "collection/update"
+
+  get "show/new"
+
+  get "show/edit"
+
+  get "show/create"
+
+  get "show/relist"
+
+  get "show/update"
+
   get "iframe/create"
 
   get "bm/bookmarklet(.:format)" => "bm#bookmarklet", :as => :bookmarklet

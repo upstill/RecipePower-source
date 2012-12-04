@@ -1,0 +1,102 @@
+// Place all the styles related to the collection controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+div.collection_sider {
+	float: left;
+	width: 300px;
+	// border:3px solid black;
+}
+
+.collection_query_div {
+    width:95%;
+    // height: 300px;
+    /* border:3px solid black; */
+    float: left;
+    // padding-top:10px;
+}
+
+div.collection_nav {
+	float: left;
+	width: 300px;
+	// border:3px solid black;
+}
+
+#collection_query_label {
+	margin:3px;
+	padding:3px;
+	// width:180px;
+	height: 27px;
+	float: left;
+    // outline:#999 solid red 3px;
+  	// background:#2be4e3;
+}
+
+#collection_query_tokens {
+	margin:3px;
+	padding:3px;
+	width: 50%; // 400px;
+	height: 27px;
+	float: left;
+  // outline:#999 solid blue 3px;
+  // background:#fbe3e4;
+}
+
+#collection_tags_label {
+  font:16px arial,sans-serif;
+// float: left;
+// display: block;
+  font-weight:bold;
+//  width:50%;
+}
+
+div.collection {
+	display: table;
+	width: 100%;
+	// border:3px solid red;
+}
+
+div.collection_nav {
+  padding: 15px 0;
+  display:table-cell;
+	width: auto;
+	background: #CCCCCC;
+	// border: 3px solid black;
+}
+
+div.collection_list {
+  vertical-align: top;
+  display:table-cell;
+	width: auto;
+	border:2px solid black;
+}
+
+div.RcpBrowser {
+	font-weight:bold;
+	position: relative;
+	left: 2px;
+	padding: 3px 15px;
+}
+
+div.RcpBrowser.Level1 {
+padding-left: 15px;
+font:24px arial,sans-serif;
+}
+
+div.RcpBrowser.Level2 {
+padding-left: 30px;
+font:16px arial,sans-serif;
+}
+
+div.RcpBrowser.Level3 {
+padding-left: 40px;
+font:14px arial,sans-serif;
+}
+
+div.RcpBrowser.selected {
+	background: #FFFFFF;
+	border-left: 2px solid black;
+	border-top: 2px solid black;
+	border-bottom: 2px solid black;
+}
+

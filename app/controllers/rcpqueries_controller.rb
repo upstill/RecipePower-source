@@ -129,6 +129,7 @@ public
   # POST /rcpqueries/1.xml
   def update
     # Respond to a form submission (query params are in params[:rcpquery])
+    debugger
     @user_id = current_user_or_guest_id # session[:user_id]
     @rcpquery = Rcpquery.fetch_revision(params[:id].to_i, @user_id, params[:rcpquery])
     session[:rcpquery] = @rcpquery.id # In case the model decided on a new query

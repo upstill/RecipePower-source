@@ -262,21 +262,7 @@ public
   def tag_tokens
      self.tagstxt
   end
-=begin
-    # Generate a title for labelling the query results
-    def title
-        case self.owner_id
-        when User.guest_id
-            "Cookmarks in RecipePower"
-        when User.super_id
-            "All the Cookmarks in the Whole Wide World"
-        when self.user_id
-            "My Cookmarks"
-        else
-            User.find(self.owner_id).handle+"\'s Cookmarks"
-        end
-    end
-=end
+
   # Fetch and use parameters to revise a query record before returning
   def self.fetch_revision(id, uid, params)
     # This is all very straightforward, EXCEPT that we allow the 'tag_tokens' query string

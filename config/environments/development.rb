@@ -33,9 +33,9 @@ RP::Application.configure do
   config.assets.debug = true
   
   # Don't fallback to assets pipeline if a precompiled asset is missed
-  config.assets.compile = true
-  config.assets.digest = true
-  config.assets.initialize_on_precompile = false
+  # config.assets.compile = true
+  # config.assets.digest = true
+  # config.assets.initialize_on_precompile = false
   
   config.middleware.use ExceptionNotifier,
     :email_prefix => "[RecipePower Failure!!] ",

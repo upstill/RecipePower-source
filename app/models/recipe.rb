@@ -209,6 +209,7 @@ class Recipe < ActiveRecord::Base
   # and dig around for a title.
   # Either way, we also make sure that the recipe is associated with the given user
     def self.ensure( userid, params)
+      debugger
         if (id = params[:id].to_i) && (id > 0) # id of 0 means create a new recipe
             begin
                 rcp = Recipe.find id
@@ -221,6 +222,7 @@ class Recipe < ActiveRecord::Base
             if url && Recipe.exists?(:url => url)  # Previously captured => just look it up
                 rcp = Recipe.where("url = ?", url).first
             else
+                params.delete(:rcpref)
                 rcp = Recipe.new params
                 # Find the site for this url
                 if rcp.url && site = Site.by_link(rcp.url)

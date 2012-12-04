@@ -1,4 +1,5 @@
 require "type_map.rb"
+require "rcp_browser.rb"
 class User < ActiveRecord::Base
   # Include default devise modules. Others available are:
   # :token_authenticatable, :encryptable, :confirmable, :timeoutable
@@ -6,11 +7,13 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable #, :validatable,
          :lockable # , :omniauthable
   after_invitation_accepted :initialize_friends
+  before_save :serialize_browser
 
   # Setup accessible (or protected) attributes for your model
   attr_accessible :id, :username, :fullname, :about, :login,
                 :email, :password, :password_confirmation, 
                 :recipes, :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens
+  attr_writer :browser
 
   has_many :follower_relations, :foreign_key=>"followee_id", :dependent=>:destroy, :class_name=>"UserRelation"
   has_many :followers, :through => :follower_relations, :source => :follower, :uniq => true 
@@ -23,6 +26,14 @@ class User < ActiveRecord::Base
   
   # login is a virtual attribute placeholding for [username or email]
   attr_accessor :login
+  
+  def browser
+    @browser = @browser || (browser_serialized ? RcpBrowser.load(browser_serialized) : RcpBrowser.new(id))
+  end
+  
+  def serialize_browser
+    self.browser_serialized = @browser.dump if @browser
+  end
   
   def self.find_first_by_auth_conditions(warden_conditions)
     conditions = warden_conditions.dup
