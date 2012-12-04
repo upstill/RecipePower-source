@@ -53,12 +53,13 @@ module ApplicationHelper
 	if picurl.blank? && float_ttl
 	    %Q{<div class="centerfloat" id="#{idstr}">No Image Available</div>}.html_safe
 	else
+	  logger.debug "page_fitPic loading picture '"+picurl+"'"
 	  image_tag(picurl, 
-		class: "fitPic",
-		id: idstr,
-		onload: "fitImageOnLoad('#{selector}')",
-		alt: "Some Image Available")
-	    # %Q{<img src="#{picurl}" class="fitPic" id="#{idstr}" onload="fitImageOnLoad('#{selector}')" alt="No Image Available">}.html_safe
+      class: "fitPic",
+      id: idstr,
+      onload: "fitImageOnLoad('#{selector}')",
+      alt: "Some Image Available")
+    # %Q{<img src="#{picurl}" class="fitPic" id="#{idstr}" onload="fitImageOnLoad('#{selector}')" alt="No Image Available">}.html_safe
 	end
   end
   
