@@ -1,0 +1,22 @@
+<%# Master form for taking a recipe query and returning a list of results %>
+<%# show_errors @collection.errors %>
+<%= form_tag("/collection/query", :method => "get", :class => "query_form") do %>
+  <div class="collection_query_div" >
+		<div id="collection_query_label">
+			<%= label_tag(:tagstxt, "Seek and Ye Shall Find:", :id=>"collection_tags_label") -%>
+		</div>
+		<div id="collection_query_tokens">
+		  <%= text_field_tag(:tagstxt, "data-pre" => @collection.tags.map(&:attributes).to_json) %>
+		</div>
+  </div>
+<% end %>
+<br class="clear">
+<div class="collection">
+	<div class="collection_nav">
+		<%= @collection.html().html_safe %>
+	</div>
+	<div class="collection_list">
+Basically you need to make the two divs act like table cells. So instead of usign float:left, you'll have to use display:table-cell on both divs, and for the dynamic width div you need to set width:auto; also. The both divs should be placed into a 100% width container with the display:table property.
+	</div>
+</div>
+<br class="clear">

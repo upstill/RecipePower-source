@@ -2,16 +2,16 @@
 <%= show_errors @rcpquery.errors %>
 <%= form_for @rcpquery do |f| %>
   <div class="rcpquery_query_div" value="<%= @rcpquery.id.to_s %>" >
-	<div id="rcpquery_tags_label_div">
-		<%= f.label :tag_tokens, "Seek and Ye Shall Find:", :id=>"rcpquery_tags_label" -%>
-	</div>
-	<div id="rcpquery_tag_tokens_div">
-		<%= f.text_field :tag_tokens, "data-pre" => @rcpquery.tags.map(&:attributes).to_json %>
-	</div>
-	<div class="rcpquery_listmode_div">
-		<%= f.label :listmode_str,"List As: ",:id=>"rcpquery_listmode_label" -%>
-		<%= f.select :listmode_str, Rcpquery.listmode_select %>
-	</div>
+		<div id="rcpquery_tags_label_div">
+			<%= f.label :tag_tokens, "Seek and Ye Shall Find:", :id=>"rcpquery_tags_label" -%>
+		</div>
+		<div id="rcpquery_tag_tokens_div">
+			<%= f.text_field :tag_tokens, "data-pre" => @rcpquery.tags.map(&:attributes).to_json %>
+		</div>
+		<div class="rcpquery_listmode_div">
+			<%= f.label :listmode_str,"List As: ",:id=>"rcpquery_listmode_label" -%>
+			<%= f.select :listmode_str, Rcpquery.listmode_select %>
+		</div>
   </div>
   <br class="clear" >
   <div id="accordion" data="<%= @rcpquery.which_list %>">  

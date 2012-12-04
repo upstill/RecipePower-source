@@ -32,4 +32,14 @@ class RcpBrowserTest < ActiveSupport::TestCase
      puts "Dump of Copy: "+dump2
      assert_equal dump1, dump2, "Restored version not same as first"
   end
+  
+  test "browser with tag tokens dumped and loaded" do
+     rb = RcpBrowser.new({ :userid=>3, :tag_tokens=>[125, "something weird"] })
+     dump1 = rb.dump
+     puts "Dump of Original: "+dump1
+     rb2 = RcpBrowser.load dump1
+     dump2 = rb2.dump
+     puts "Dump of Copy: "+dump2
+     assert_equal dump1, dump2, "Restored version not same as first"
+  end
 end
