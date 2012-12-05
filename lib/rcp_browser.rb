@@ -2,7 +2,7 @@
 require 'my_constants.rb'
 
 class RcpBrowserElement
-  attr_accessor :npages, :cur_page
+  attr_accessor :npages, :cur_page, :nodeid
   attr_reader :handle, :level
   @@nextid = 1  
   # Persisters for all browser-element nodes; these may be augmented by a subclass by
@@ -31,7 +31,7 @@ class RcpBrowserElement
   end
   
   def css_class
-    "RcpBrowserLevel"+@level.to_s+(@selected ? " selected" : "")
+    "RcpBrowser Level"+@level.to_s+(@selected ? " selected" : "")
   end
   
   # ID for uniquely selecting the element
@@ -46,7 +46,9 @@ class RcpBrowserElement
   
   # HTML for interpolating into the display
   def html
-    %Q{<div class="#{css_class}" id="#{css_id}">#{'&nbsp'*@level}#{handle}</div>}.html_safe
+    %Q{<div class="#{css_class}" id="#{css_id}">
+        #{'&nbsp'*@level}<a href="javascript:void(0)" >#{handle}</a>
+      </div>}.html_safe
   end
   
   def select
@@ -55,6 +57,14 @@ class RcpBrowserElement
   
   def deselect
     @selected = false
+  end
+  
+  def select_by_id(id)
+    @selected = (@nodeid == id)
+  end
+  
+  def selected
+    @selected && self
   end
   
 end
@@ -72,8 +82,12 @@ class RcpBrowserComposite < RcpBrowserElement
     
   # The HTML for the composite is just the HTML for the elements, joined with newlines
   def html
-    list = [super] + @children.map { |child| child.html }
-    list.join("\n")
+    list = super
+    if @selected 
+      ([list] + @children.map { |child| child.html }).join("\n")
+    else
+      list
+    end
   end
   
   # Save instance variables plus chidren
@@ -92,6 +106,21 @@ class RcpBrowserComposite < RcpBrowserElement
       end
       : []
   end
+  
+  def select_by_id(id)
+    super
+    @children.each { |child| child.select_by_id(id) }
+  end
+  
+  def selected
+    result = 
+    super || @children.each { |child| 
+      if selection = child.selected
+        return selection
+      end
+    }
+  end
+  
 end
 
 # Top-level recipe browser, comprising the standard lists, and adding a tag list
@@ -109,12 +138,20 @@ class RcpBrowser < RcpBrowserComposite
         RcpBrowserCompositeUser.new(1, userarg),
         RcpBrowserCompositeFriends.new(1, userarg),
         RcpBrowserCompositeChannels.new(1, userarg),
+        RcpBrowserElementAllRecipes.new(1, userarg),
         RcpBrowserElementRecent.new(1, userarg),
-        RcpBrowserElementNews.new(1, userarg),
-        RcpBrowserElementAllRecipes.new(1, userarg)
+        RcpBrowserElementNews.new(1, userarg)
         ] 
       @children[0].select
     end
+  end
+  
+  def results_paged
+    [Recipe.find(800)]
+  end
+  
+  def npages
+    1
   end
   
   # Accept new tags text, bust the cache, and return the new set of tags
@@ -237,7 +274,7 @@ class RcpBrowserCompositeChannels < RcpBrowserComposite
   
   def initialize(level, args)
     super
-    @handle = "Channels"
+    @handle = "Channel Collections"
   end
   
   def results(rcpquery)
