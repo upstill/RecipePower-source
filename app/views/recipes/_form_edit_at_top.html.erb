@@ -7,11 +7,9 @@
 	<div class="editRecipe_field <%= @area %> ">
 	  <div class="recipe_pic_div <%= @area %>" >
 	    <div class="recipe_pic_preview <%= @area %>">
-	      <%= page_fitPic @recipe.picurl, @recipe.id, false, "div.recipe_pic_preview img" %>  
+	      <%= page_fitPic @recipe.picurl, @recipe.id, "PickPicture.png", "div.recipe_pic_preview img" %>  
 	    </div>  
-			<% if @recipe.picurl.blank? %>
-     		<br />Click on a picture <br />for the recipe.
-			<% else %>
+			<% unless @recipe.picurl.blank? %>
    			<br />Prefer another picture?<br />Click one!
 			<% end %>
 	    <%# link_to "Pick Picture", "/", :id=>"PicPicker", :data=>"recipe_picurl;div.recipe_pic_preview img" %>

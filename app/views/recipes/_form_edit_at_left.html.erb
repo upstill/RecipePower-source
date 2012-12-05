@@ -2,7 +2,7 @@
   <%= show_errors @recipe.errors %>
   <div class="recipe_pic_div <%= @area %> recipe_field_label" >
     <div class="recipe_pic_preview">                                     
-      <%= page_fitPic @recipe.picurl, @recipe.id, false, "div.recipe_pic_preview img" %>  
+      <%= page_fitPic @recipe.picurl, @recipe.id, "MissingPicture.png", "div.recipe_pic_preview img" %>  
     </div>                                                    
 	  <%= link_to "Pick Picture", "/", :id=>"PicPicker", :data=>"recipe_picurl;div.recipe_pic_preview img" %>
   </div>

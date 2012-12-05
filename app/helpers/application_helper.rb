@@ -46,24 +46,15 @@ module ApplicationHelper
   # id -- used to define an id attribute for this picture (all fitpics will have class 'fitPic')
   # float_ttl -- indicates how to handle an empty URL
   # selector -- specifies an alternative selector for finding the picture for resizing
-  def page_fitPic(picurl, id = "", float_ttl = true, selector=nil)
+  def page_fitPic(picurl, id = "", placeholder_image = "MissingPicture.png", selector=nil)
     # "fitPic" class gets fit inside pic_box with Javascript and jQuery
     idstr = "rcpPic"+id.to_s
     selector = selector || "##{idstr}"
-    picurl = picurl || ""
-  	if picurl.blank? 
-  	  if float_ttl
-  	    %Q{<div class="centerfloat" id="#{idstr}">No Image Available</div>}.html_safe
-    	else
-        %Q{<img src="#{picurl}" class="fitPic" id="#{idstr}" onload="fitImageOnLoad('#{selector}')" alt="No Image On File">}.html_safe
-      end
-  	else 
-  	  image_tag(picurl, 
-        class: "fitPic",
-        id: idstr,
-        onload: "fitImageOnLoad('#{selector}')",
-        alt: "Some Image Available")
-  	end
+	  image_tag(picurl.blank? ? placeholder_image : picurl, 
+      class: "fitPic",
+      id: idstr,
+      onload: "fitImageOnLoad('#{selector}')",
+      alt: "Some Image Available")
   end
   
   # Build a picture-selection dialog with the default url, url for a page containing candidate images, id, and name of input field to set
@@ -96,7 +87,7 @@ module ApplicationHelper
     %Q{
         <div class="iconpicker" style="display:none;" >
           <div class="preview">                                     
-            #{page_fitPic picurl, id, false, "div.preview img"}  
+            #{page_fitPic picurl, id, "MissingPicture.png", "div.preview img"}  
           </div> 
           <p class="airy">#{prompt}</p>                                                 
           <br class="clear"> 
@@ -199,7 +190,7 @@ module ApplicationHelper
   end
 
   def bookmarklet
-    imgtag = image_tag("cookmark_button.png", class:"bookmarklet", alt:"Cookmark") # page_fitPic "cookmark_button.png", "_step1"
+    imgtag = image_tag("cookmark_button.png", class:"bookmarklet", alt:"Cookmark") 
     if Rails.env.development? || true
       # New bookmarklet
       bmtag = %Q{<a class="bookmarklet" title="Cookmark" href="javascript:(function%20()%20{var%20s%20=%20document.createElement(%27script%27);s.setAttribute(%27language%27,%27javascript%27);s.setAttribute(%27id%27,%20%27recipePower-injector%27);s.setAttribute(%27src%27,%27http://#{current_domain}/recipes/capture.js?recipe[url]=%27+encodeURIComponent(window.location.href)+%27&recipe[title]=%27+encodeURIComponent(document.title)+%27&recipe[rcpref][comment]=%27+encodeURIComponent(%27%27+(window.getSelection?window.getSelection():document.getSelection?document.getSelection():document.selection.createRange().text))+%27&v=6&jump=yes%27);document.body.appendChild(s);}())">}

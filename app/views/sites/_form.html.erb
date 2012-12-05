@@ -11,7 +11,7 @@
     </div>
   <% end %>
   <div class="logo">                                     
-    <%= page_fitPic @site.logo, @site.id, false, "div.logo img"  %>
+    <%= page_fitPic @site.logo, @site.id, "MissingLogo.png", "div.logo img"  %>
   </div> 
   <%= link_to "Pick Logo", "/", :id=>"PicPicker", :data=>"site_logo;div.logo img" %>
   <%= f.text_field :logo, rel: "jpg,png,gif", hidden: true %>
