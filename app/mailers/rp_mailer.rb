@@ -3,7 +3,7 @@ class RpMailer < ActionMailer::Base
   add_template_helper(UsersHelper)
   
   def feedback(feedback)
-    recipients  = 'upstill@gmail.com' # 'recipepowerfeedback@gmail.com'
+    recipients  = 'recipepowerfeedback@gmail.com'
     subject     = "#{feedback.subject} ##{feedback.id}"
 
     @feedback = feedback
@@ -11,12 +11,12 @@ class RpMailer < ActionMailer::Base
   end
   
   def welcome_email(user)
-      return unless @inviter = User.where(id: user.invited_by).first
-      @user = user
-      @profile_url = "http://www.recipepower.com/users/profile"
-      @login_url  = "http://recipepower.com/login"
-      mail :to => @user.email, :subject => "Welcome to RecipePower"
-    end
+    return unless @inviter = User.where(id: user.invited_by).first
+    @user = user
+    @profile_url = "http://www.recipepower.com/users/profile"
+    @login_url  = "http://recipepower.com/login"
+    mail :to => @user.email, :subject => "Welcome to RecipePower"
+  end
     
   def invitation_accepted_email(invitee)
     return unless @user = User.where(id: invitee.invited_by).first
