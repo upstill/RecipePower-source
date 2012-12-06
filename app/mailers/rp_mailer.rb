@@ -3,7 +3,7 @@ class RpMailer < ActionMailer::Base
   add_template_helper(UsersHelper)
   
   def feedback(feedback)
-    recipients  = 'recipepowerfeedback@gmail.com'
+    recipients  = 'upstill@gmail.com' # 'recipepowerfeedback@gmail.com'
     subject     = "#{feedback.subject} ##{feedback.id}"
 
     @feedback = feedback
