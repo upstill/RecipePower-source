@@ -44,13 +44,6 @@ class RcpBrowserElement
     []
   end
   
-  # HTML for interpolating into the display
-  def html
-    %Q{<div class="#{css_class}" id="#{css_id}">
-        #{'&nbsp'*@level}<a href="javascript:void(0)" >#{handle}</a>
-      </div>}.html_safe
-  end
-  
   def select
     @selected = true
   end
@@ -67,6 +60,18 @@ class RcpBrowserElement
     @selected && self
   end
   
+  def selection_at_or_below
+    @selected
+  end
+  
+  # HTML for interpolating into the display
+  def html(do_show)
+    displaystyle = "display: "+(do_show ? "block" : "none" )+";"
+    %Q{<div class="#{css_class}" id="#{css_id}" style="#{displaystyle}">
+         #{'&nbsp'*@level}<a href="javascript:void(0)" >#{handle}</a>
+       </div>}.html_safe
+  end
+  
 end
 
 # Class of composites, collections of browser elements
@@ -78,16 +83,7 @@ class RcpBrowserComposite < RcpBrowserElement
     @children.each do |child|
       out = out + child.results(rcpquery)
     end
-  end
-    
-  # The HTML for the composite is just the HTML for the elements, joined with newlines
-  def html
-    list = super
-    if @selected 
-      ([list] + @children.map { |child| child.html }).join("\n")
-    else
-      list
-    end
+    out.uniq
   end
   
   # Save instance variables plus chidren
@@ -119,6 +115,16 @@ class RcpBrowserComposite < RcpBrowserElement
         return selection
       end
     }
+  end
+  
+  # An element is visible if it's at level 1 OR some descendant is visible OR its parent is selected
+  def selection_at_or_below
+    @selected || (@children.any { |child| child.selection_at_or_below })
+  end
+
+  # The HTML for the composite is just the HTML for the elements, joined with newlines
+  def html(do_show)
+    ([super(do_show || self.selection_at_or_below)] + @children.map { |child| child.html(@selected) }).join("\n")
   end
   
 end
@@ -217,17 +223,18 @@ class RcpBrowser < RcpBrowserComposite
   end
   
   def html
-    @children.map { |child| child.html }.join("\n").html_safe
+    @children.map { |child| child.html(true) }.join("\n").html_safe
   end
   
 end
 
-# Element for all the recipes for a user
-class RcpBrowserElementUser < RcpBrowserElement
+# Element for all the recipes for a user (no children)
+class RcpBrowserElementFriend < RcpBrowserElement
   
   def initialize(level, args)
     super
-    @handle = User.find(userid).name
+    @friendid = args[:friendid]
+    @handle = User.find(@friendid).username
   end
   
   def results(rcpquery)
@@ -241,14 +248,14 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
   def initialize(level, args)
     super
     @handle = "My Recipes"
-    @children =
-    [ MyConstants::Rcpstatus_rotation, 
-      MyConstants::Rcpstatus_favorites, 
-      MyConstants::Rcpstatus_interesting, 
-      MyConstants::Rcpstatus_misc].map do |status| 
-      args[:status] = status
-      RcpBrowserElementStatus.new(level+1, args)
-    end if @children.empty?
+    if @children.empty?
+      @children = [ MyConstants::Rcpstatus_rotation, 
+        MyConstants::Rcpstatus_favorites, 
+        MyConstants::Rcpstatus_interesting].map do |status| 
+        args[:status] = status
+        RcpBrowserElementStatus.new(level+1, args)
+      end
+    end
   end
   
   def results(rcpquery)
@@ -257,11 +264,26 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
 end
 
 # Composite for all the recipes for the user's friends, with subheads for each friend
-class RcpBrowserCompositeFriends < RcpBrowserComposite
+class RcpBrowserChannelsAndFriends < RcpBrowserComposite
   
   def initialize(level, args)
     super
-    @handle = "Friends' Collections"
+    # Add a child node for each user being followed
+    klass = Module.const_get("User")
+    if klass.is_a?(Class) # If User class is available (i.e., in Rails, as opposed to testing)
+      @followees = User.find(@userid).follows @isChannel
+      @children = @followees.map do |followee| 
+        args[:friendid] = followee.id
+        RcpBrowserElementFriend.new level+1, args
+      end
+    end
+  end
+  
+  def save
+    saved = super
+    # Don't save the children; they will be reconstructed from the database
+    saved.delete(:children)
+    saved
   end
   
   def results(rcpquery)
@@ -269,17 +291,25 @@ class RcpBrowserCompositeFriends < RcpBrowserComposite
   end
 end
 
-# Element for all the recipes in a user's channels, with subheads for each channel
-class RcpBrowserCompositeChannels < RcpBrowserComposite
+class RcpBrowserCompositeFriends < RcpBrowserChannelsAndFriends
   
   def initialize(level, args)
+    @isChannel = false
+    super
+    @handle = "Friends' Collections"
+  end
+  
+end
+
+# Element for all the recipes in a user's channels, with subheads for each channel
+class RcpBrowserCompositeChannels < RcpBrowserChannelsAndFriends
+  
+  def initialize(level, args)
+    @isChannel = true
     super
     @handle = "Channel Collections"
   end
   
-  def results(rcpquery)
-    []
-  end
 end
 
 # Element for recent recipes 
@@ -293,6 +323,7 @@ class RcpBrowserElementRecent < RcpBrowserElement
   def results(rcpquery)
     []
   end
+  
 end
 
 # Element for a news feed for a particular user
@@ -314,7 +345,7 @@ class RcpBrowserElementStatus < RcpBrowserElement
   def initialize(level, args)
     @persisters = (@persisters || []) << :status
     super
-    @handle = "Status #{@status.to_s}"
+    @handle = MyConstants::Rcpstatus_names[@status]
   end
   
   def results(rcpquery)

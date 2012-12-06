@@ -75,11 +75,11 @@ private
 public
 
   def follows? (user)
-      if self.class == user.class
-          self.followees.include? user
-      else
-          self.followee_ids.include? user
-      end
+    if self.class == user.class
+      self.followees.include? user
+    else
+      self.followee_ids.include? user
+    end
   end
   
   # Presents a hash of IDs with a switch value for whether to include that followee

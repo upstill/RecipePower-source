@@ -14,7 +14,7 @@ jQuery ->
 	)
 	
 	$('.RcpBrowser').click ->
-		if(!$(this).hasClass("selected"))
+		if !$(this).hasClass("selected")
 			# Hide all children of currently-selected collection
 			selected = $('.RcpBrowser.selected')[0]
 			toClose = selected
@@ -22,25 +22,24 @@ jQuery ->
 				toggleChildren toClose
 				toClose = parentOf toClose
 			# Deselect current selection
-			$(selected).removeClass("selected")
+			$(selected).removeClass "selected"
 			
-			$(this).addClass("selected")
+			$(this).addClass "selected"
 			toggleChildren this # Make all children visible
-			data = $(this).data('html')
+			data = $(this).data 'html'
 			if(data)
 				$('div.collection_list')[0].innerHTML = data
-			$(this).data('html', this.className )
+			$(this).data('html', @className )
 			# Now that the selection is settled, we can fetch the recipe list
-			jQuery.ajax(
+			jQuery.ajax
 				type: "POST",
 				url: "collection/update",
-				data: { selected: this.id },
+				data: { selected: @id },
 				dataType: "html",
 				success: (resp, succ, xhr) ->
 					# Explicitly update the currently-open section
 					$('div.collection_list')[0].innerHTML	= resp	
-			);
-			
+
 
 # The parent of an element is the first element with a level lower than the element
 parentOf = (elmt) ->
@@ -58,22 +57,22 @@ isAncestor = (ancestor, descendant) ->
 	targetLevel = elementLevel ancestor
 	while(elementLevel(prior) > targetLevel)
 		prior = $(prior).prev()[0]
-		if(!prior)
+		if !prior
 			return false
 	prior == ancestor
 
 elementLevel = (elmt) ->
 	cn = elmt.className
-	ix = cn.indexOf('Level')
-	if(ix > 0)
-		cn.charAt(ix+5)
+	ix = cn.indexOf 'Level'
+	if ix > 0
+		cn.charAt ix+5
 	else
 		"0"
 
 toggleChildren = (me) ->
 	myLevel = elementLevel me
 	while((me = $(me).next()[0]) && (elementLevel(me) > myLevel))
-		$(me).toggle();
+		$(me).toggle 200
 
 # Callback when the query tag set changes
 queryChange = (hi, li) ->
@@ -81,13 +80,11 @@ queryChange = (hi, li) ->
 	# $(".rcplist_container").removeClass("current"); # Bust any cached collections
 	# Notify the server of the change and update as needed
 	form = $('form.query_form')[0]
-	jQuery.ajax(
+	jQuery.ajax
 		type: "POST",
 		url: form.action,
-		data: $(form).serialize(),
+		data: $(form).serialize,
 		dataType: "html",
 		success: (resp, succ, xhr) ->
 			# Explicitly update the currently-open section
 			$('div.collection_list')[0].innerHTML	= resp	
-	);
-
