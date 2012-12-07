@@ -49,13 +49,13 @@ class Rcpref < ActiveRecord::Base
 	# NB: If both are given, recipes are returned which match in either
 	# :status is the set of status flags to match
 	# :sorted gives criterion for sorting (currently only sort by updated_at field)
+  args = params.first || {}
+  commentstr = args[:comment]
+  titlestr = args[:title]
+  sortfield = args[:sorted]
+	statuses = args[:status] || StatusAny
 
-    commentstr = params.first[:comment]
-    titlestr = params.first[:title]
-    sortfield = params.first[:sorted]
-	statuses = params.first[:status] || StatusAny
-
-	sort_by_touched = params.first[:status] & StatusRecentMask 
+	sort_by_touched = args[:status] & StatusRecentMask 
 	if owner_id.kind_of? Fixnum
 	    owner_is_super = (owner_id == User.super_id)
 	    owner_is_requestor = (owner_id == requestor_id)

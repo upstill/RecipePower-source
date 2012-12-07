@@ -2,7 +2,9 @@ RP::Application.routes.draw do
 
   match 'collection', :controller=>'collection', :action=>'index'
   
-  get 'collection/query'
+  match 'collection/query', :controller=>'collection', :action=>'query', :via => :post
+
+  match "collection/update", :controller=>'collection', :action=>'update', :via => :post
 
   get "collection/show"
 
@@ -13,8 +15,6 @@ RP::Application.routes.draw do
   get "collection/create"
 
   get "collection/relist"
-
-  get "collection/update"
 
   get "show/new"
 

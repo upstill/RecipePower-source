@@ -7,6 +7,12 @@ module MyConstants
   Rcpstatus_interesting = 4
   Rcpstatus_misc = 8
   Rcpstatus_recent = 16 # For querying recently-touched recipes
+  
+  Rcpstatus_names = []
+  Rcpstatus_names[Rcpstatus_rotation] = "Now Cooking"
+  Rcpstatus_names[Rcpstatus_favorites] = "Keepers"
+  Rcpstatus_names[Rcpstatus_interesting] = "To Try"
+  Rcpstatus_names[Rcpstatus_misc] = "All My Cookmarks"
 
   Rcppermission_private = 1
   Rcppermission_friends = 2
