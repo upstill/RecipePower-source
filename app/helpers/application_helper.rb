@@ -47,6 +47,7 @@ module ApplicationHelper
   # float_ttl -- indicates how to handle an empty URL
   # selector -- specifies an alternative selector for finding the picture for resizing
   def page_fitPic(picurl, id = "", placeholder_image = "MissingPicture.png", selector=nil)
+    logger.debug "page_fitPic placing #{picurl.blank? ? placeholder_image : picurl}"
     # "fitPic" class gets fit inside pic_box with Javascript and jQuery
     idstr = "rcpPic"+id.to_s
     selector = selector || "##{idstr}"
