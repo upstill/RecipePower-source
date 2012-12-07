@@ -211,7 +211,7 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
   
   def initialize(level, args)
     super
-    @handle = "My Recipes"
+    @handle = "My Collection"
     if @children.empty?
       @children = [ MyConstants::Rcpstatus_rotation, 
         MyConstants::Rcpstatus_favorites, 
@@ -263,7 +263,7 @@ class RcpBrowserCompositeFriends < RcpBrowserChannelsAndFriends
   def initialize(level, args)
     @isChannel = false
     super
-    @handle = "Friends' Collections"
+    @handle = "My Friends"
   end
   
 end
@@ -274,7 +274,7 @@ class RcpBrowserCompositeChannels < RcpBrowserChannelsAndFriends
   def initialize(level, args)
     @isChannel = true
     super
-    @handle = "Channel Collections"
+    @handle = "My Channels"
   end
   
 end
@@ -284,7 +284,7 @@ class RcpBrowserCompositeBlogs < RcpBrowserComposite
   
   def initialize(level, args)
     super
-    @handle = "Blogs I Follow"
+    @handle = "My Blogs"
   end
   
 end
@@ -370,8 +370,8 @@ class RcpBrowser < RcpBrowserComposite
         RcpBrowserCompositeUser.new(1, userarg),
         RcpBrowserCompositeFriends.new(1, userarg),
         RcpBrowserCompositeChannels.new(1, userarg),
-        RcpBrowserElementAllRecipes.new(1, userarg),
         RcpBrowserCompositeBlogs.new(1, userarg),
+        RcpBrowserElementAllRecipes.new(1, userarg),
         RcpBrowserElementRecent.new(1, userarg),
         RcpBrowserElementNews.new(1, userarg)
         ] 
