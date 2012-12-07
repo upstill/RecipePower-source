@@ -1,6 +1,6 @@
 <%# Master form for taking a recipe query and returning a list of results %>
 <%# show_errors @collection.errors %>
-<%= form_tag("/collection/query", :method => "get", :class => "query_form") do %>
+<%= form_tag("/collection/update", :method => "get", :class => "query_form") do %>
   <div class="collection_query_div" >
 		<div id="collection_query_label">
 			<%= label_tag(:tagstxt, "Seek and Ye Shall Find:", :id=>"collection_tags_label") -%>
@@ -13,7 +13,7 @@
 <br class="clear">
 <div class="collection">
 	<div class="collection_nav">
-		<%= @collection.html().html_safe %>
+		<%= @collection.html %>
 	</div>
 	<div class="collection_list">
 		<%= render "relist" %>

@@ -13,6 +13,8 @@ jQuery ->
 		allowFreeTagging: true
 	)
 	
+	$(".pageclickr").click collection_pager
+	
 	$('.RcpBrowser').click ->
 		if !$(this).hasClass("selected")
 			# Hide all children of currently-selected collection
@@ -29,17 +31,24 @@ jQuery ->
 			data = $(this).data 'html'
 			if(data)
 				$('div.collection_list')[0].innerHTML = data
-			$(this).data('html', @className )
 			# Now that the selection is settled, we can fetch the recipe list
-			jQuery.ajax
-				type: "POST",
-				url: "collection/update",
-				data: { selected: @id },
-				dataType: "html",
-				success: (resp, succ, xhr) ->
-					# Explicitly update the currently-open section
-					$('div.collection_list')[0].innerHTML	= resp	
+			collection_update { selected: @id }
 
+collection_update = (params, url) ->
+	jQuery.ajax
+		type: "POST",
+		url: (url || "collection/update"),
+		data: params,
+		dataType: "html",
+		success: (resp, succ, xhr) ->
+		# Explicitly update the collection list
+			$('div.collection_list')[0].innerHTML	= resp	
+			$(".pageclickr").click(collection_pager)
+	
+collection_pager = (evt) ->
+	# Respond to page selection: replace results list
+	# Pagination spans have an associated value with the page number
+	collection_update { cur_page: this.getAttribute("value") }
 
 # The parent of an element is the first element with a level lower than the element
 parentOf = (elmt) ->
@@ -80,11 +89,4 @@ queryChange = (hi, li) ->
 	# $(".rcplist_container").removeClass("current"); # Bust any cached collections
 	# Notify the server of the change and update as needed
 	form = $('form.query_form')[0]
-	jQuery.ajax
-		type: "POST",
-		url: form.action,
-		data: $(form).serialize,
-		dataType: "html",
-		success: (resp, succ, xhr) ->
-			# Explicitly update the currently-open section
-			$('div.collection_list')[0].innerHTML	= resp	
+	collection_update $(form).serialize(), form.action

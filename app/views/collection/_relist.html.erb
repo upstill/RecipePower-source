@@ -1,8 +1,7 @@
-<%# Render the current collection in small_pic mode %>
-	<% for @recipe in @collection.results_paged  %>
-	  <% @recipe.current_user = @user_id %>
-	  <%= render "shared/recipe_smallpic" %>
-	<% end %>
-	<div class="digg_pagination">
-		<%= pagination_links if @collection.npages > 1 %>
-	</div>
+<% for @recipe in @collection.results_paged  %>
+  <% @recipe.current_user = @user_id %>
+  <%= render "shared/recipe_smallpic" %>
+<% end %>
+<div class="digg_pagination">
+	<%= pagination_links @collection.npages, @collection.cur_page %>
+</div>

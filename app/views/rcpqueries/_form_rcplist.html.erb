@@ -10,6 +10,6 @@
 		<%= render 'shared/rcplist_bigpic' %>
 	<% end -%>
 	<div class="digg_pagination">
-		<%= pagination_links if @rcpquery.npages > 1 %>
+		<%= pagination_links @rcpquery.npages, @rcpquery.cur_page %>
 	</div>
 </section>

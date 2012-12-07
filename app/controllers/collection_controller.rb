@@ -40,7 +40,15 @@ class CollectionController < ApplicationController
   # Update takes either a query string or a specification of a collection now selected
   # We return a recipe list IFF the :cached parameter is not set
   def update
-    @collection.select_by_id(params[:selected].delete("RcpBrowserElement").to_i)
+    if tagstxt = params[:tagstxt]
+      @collection.tagstxt = tagstxt
+    end
+    if id = params[:selected]
+      @collection.select_by_id(params[:selected].delete("RcpBrowserElement").to_i)
+    end
+    if page = params[:cur_page]
+      @collection.cur_page = page.to_i
+    end
     render '_relist', :layout=>false
   end
 end
