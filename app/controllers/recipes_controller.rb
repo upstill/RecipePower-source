@@ -93,27 +93,34 @@ class RecipesController < ApplicationController
     if @recipe.id # Mark of a fetched/successfully saved recipe: it has an id
     	# redirect to edit
     	dialog_only = params[:how] == "modal" || params[:how] == "modeless"
-        respond_to do |format|
-            format.html {
-                # The javascript includes an iframe for specific content
-            	render :action => "capture", :layout => !dialog_only, :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br>You might want to confirm the title and picture, and/or tag it?".html_safe
-            }
-            format.json {
-            	render :action => "capture", :layout => !dialog_only, :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br>You might want to confirm the title and picture, and/or tag it?".html_safe
-            }
-            format.js { 
-                # Produce javascript in response to the bookmarklet, to render into an iframe, 
-                # either the recipe editor or a login screen.
-                @url = edit_recipe_url(@recipe, area: "at_top", layout: "injector", sourcehome: @recipe.sourcehome )
-                if(current_user)
-                    @partial = "recipes/form_edit_at_top"
-                else
-                    session["user_return_to"] = @url
-                    @url = new_authentication_url( area: "at_top", layout: "injector", sourcehome: @recipe.sourcehome )
-                end
-                render
-            }
-        end
+      respond_to do |format|
+        format.html {
+          # The javascript includes an iframe for specific content
+          render :action => "capture", :layout => !dialog_only, :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br>You might want to confirm the title and picture, and/or tag it?".html_safe
+        }
+        format.json {
+          render :action => "capture", :layout => !dialog_only, :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br>You might want to confirm the title and picture, and/or tag it?".html_safe
+        }
+        format.js { 
+          # Produce javascript in response to the bookmarklet, to render into an iframe, 
+          # either the recipe editor or a login screen.
+          @url = edit_recipe_url(@recipe, area: "at_top", layout: "injector", sourcehome: @recipe.sourcehome )
+          if(current_user)
+            @partial = "recipes/form_edit_at_top"
+          else
+            session["user_return_to"] = @url
+            @url = new_authentication_url( area: "at_top", layout: "injector", sourcehome: @recipe.sourcehome )
+          end
+          # Before rendering the javascript, we render the dialog into a string to include in the response
+          # http://www.recipepower.com/recipes/1/edit?area=at_top&amp;layout=injector&amp;sourcehome=http%3A%2F%2Fsmittenkitchen.com
+          @recipe.touch # We're looking at it, so make it recent
+          @area = 'at_top'
+          # Now go forth and edit
+          @layout = 'injector'
+          @dialog = render_to_string :edit, :layout => @layout
+          render
+        }
+      end
     else
         @Title = "Cookmark a Recipe"
         @nav_current = :addcookmark
@@ -129,10 +136,10 @@ class RecipesController < ApplicationController
     # Find the recipe by URI (possibly correcting same), and bind it to the current user
     @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params[:recipe]
     if @recipe.errors.empty? # Success (valid recipe, either created or fetched)
-        reportRecipe(  
-                edit_recipe_url(@recipe), 
-                "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br> You might want to confirm the title and picture, and/or tag it?".html_safe,
-                formats )
+      reportRecipe(  
+              edit_recipe_url(@recipe), 
+              "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br> You might want to confirm the title and picture, and/or tag it?".html_safe,
+              formats )
     else # failure (not a valid recipe) => return to new
        @Title = "Cookmark a Recipe"
        @nav_current = :addcookmark
@@ -145,17 +152,17 @@ class RecipesController < ApplicationController
     # Fetch the recipe by id, if possible, and ensure that it's registered with the user
     @recipe = Recipe.ensure current_user_or_guest_id, params # session[:user_id], params
     if @recipe.errors.empty? # Success (recipe found)
-        @recipe.current_user = current_user_or_guest_id # session[:user_id]
-        @recipe.touch # We're looking at it, so make it recent
-        @Title = @recipe.title # Get title from the recipe
-        @nav_current = nil
-        @area = params[:area]
-        # Now go forth and edit
-        @layout = params[:layout]
-        dialog_boilerplate('edit', 'at_left')
+      @recipe.current_user = current_user_or_guest_id # session[:user_id]
+      @recipe.touch # We're looking at it, so make it recent
+      @Title = @recipe.title # Get title from the recipe
+      @nav_current = nil
+      @area = params[:area]
+      # Now go forth and edit
+      @layout = params[:layout]
+      dialog_boilerplate('edit', 'at_left')
     else
-        @Title = "Cookmark a Recipe"
-        @nav_current = :addcookmark
+      @Title = "Cookmark a Recipe"
+      @nav_current = :addcookmark
     end
   end
   

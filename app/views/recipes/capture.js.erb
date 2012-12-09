@@ -181,9 +181,9 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	// set the width of the frame to that of the enclosing document
 	ifr.style.width = window.outerWidth;
 	if (ifr.attachEvent){
-	    ifr.attachEvent("onload", window.recipePower_namespace.ifrOnload);
+    ifr.attachEvent("onload", window.recipePower_namespace.ifrOnload);
 	} else {
-	    ifr.onload = window.recipePower_namespace.ifrOnload;
+    ifr.onload = window.recipePower_namespace.ifrOnload;
 	}
   document.body.appendChild(ifr);
 	ifr.style.display = 'block';

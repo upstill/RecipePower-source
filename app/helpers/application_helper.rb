@@ -51,11 +51,19 @@ module ApplicationHelper
     # "fitPic" class gets fit inside pic_box with Javascript and jQuery
     idstr = "rcpPic"+id.to_s
     selector = selector || "##{idstr}"
-	  image_tag(picurl.blank? ? placeholder_image : picurl, 
-      class: "fitPic",
-      id: idstr,
-      onload: "fitImageOnLoad('#{selector}')",
-      alt: "Some Image Available")
+    begin
+  	  image_tag(picurl.blank? ? placeholder_image : picurl, 
+        class: "fitPic",
+        id: idstr,
+        onload: "fitImageOnLoad('#{selector}')",
+        alt: "Some Image Available")
+    rescue
+  	  image_tag(placeholder_image, 
+        class: "fitPic",
+        id: idstr,
+        onload: "fitImageOnLoad('#{selector}')",
+        alt: "Some Image Available")
+    end
   end
   
   # Build a picture-selection dialog with the default url, url for a page containing candidate images, id, and name of input field to set
@@ -67,62 +75,62 @@ module ApplicationHelper
     thumbNum = 0
     # Divide the piclist of URLs into rows of four, accumulating HTML for each row
     until piclist.empty?
-        picrows <<  "<tr><td>"+
-                    piclist.slice(0..5).collect{ |url| 
-                      idstr = "thumbnail"+(thumbNum = thumbNum+1).to_s
-                      "<div class = \"picCell\">"+
-            	    image_tag(url, class: "fitPic", id: idstr, onclick: "pickImg('input.icon_picker', 'div.preview img', '#{url}')", onload: "fitImageOnLoad('##{idstr}')", alt: "No Image Available")+
-            	  "</div>"
-                    }.join('</td><td>')+
-                    "</td></tr>"
-        piclist = piclist.slice(6..-1) || [] # Returns nil when off the end of the array
+      picrows << "<tr><td>"+
+      piclist.slice(0..5).collect{ |url| 
+        idstr = "thumbnail"+(thumbNum = thumbNum+1).to_s
+        "<div class = \"picCell\">"+
+        image_tag(url, class: "fitPic", id: idstr, onclick: "pickImg('input.icon_picker', 'div.preview img', '#{url}')", onload: "fitImageOnLoad('##{idstr}')", alt: "No Image Available")+
+        "</div>"
+      }.join('</td><td>')+
+      "</td></tr>"
+      piclist = piclist.slice(6..-1) || [] # Returns nil when off the end of the array
     end
     picID = "rcpPic"+id.to_s
     if picrows.empty?
-        tblstr = ""
-        prompt = "There are no pictures on the page, but you can paste a URL below, then click Okay."
+      tblstr = ""
+      prompt = "There are no pictures on the page, but you can paste a URL below, then click Okay."
     else
-        tblstr = "<br><table>#{picrows}</table>"
-        prompt = "Pick one of the thumbnails<br>or type/paste the URL below, then click Okay."
+      tblstr = "<br><table>#{picrows}</table>"
+      prompt = "Pick one of the thumbnails<br>or type/paste the URL below, then click Okay."
     end
     %Q{
-        <div class="iconpicker" style="display:none;" >
-          <div class="preview">                                     
-            #{page_fitPic picurl, id, "MissingPicture.png", "div.preview img"}  
-          </div> 
-          <p class="airy">#{prompt}</p>                                                 
-          <br class="clear"> 
-          <input type="text" class="icon_picker" 
-                    rel="jpg,png,gif" 
-                    value="#{picurl}" 
-                    onchange="previewImg('input.icon_picker', 'div.preview img', '')" />
-          <u>Preview</u>
-          #{tblstr}       
-        </div>                                      
-      }.html_safe      
+      <div class="iconpicker" style="display:none;" >
+        <div class="preview">                                     
+          #{page_fitPic picurl, id, "MissingPicture.png", "div.preview img"}  
+        </div> 
+        <p class="airy">#{prompt}</p>                                                 
+        <br class="clear"> 
+        <input type="text" class="icon_picker" 
+          rel="jpg,png,gif" 
+          value="#{picurl}" 
+          onchange="previewImg('input.icon_picker', 'div.preview img', '')" />
+        <u>Preview</u>
+        #{tblstr}       
+      </div>                                      
+    }.html_safe      
   end
   
   def recipe_list_element_golink_class recipe
     "rcpListGotag"+@recipe.id.to_s    
   end
   
-    def recipe_list_element_class recipe
-        "rcpListElmt"+@recipe.id.to_s    
-    end
-      
-    # Return the id of the DOM element giving the time-since-touched for a recipe
-    def touch_date_class recipe
-        "touchtime#{recipe.id.to_s}"
-    end
+  def recipe_list_element_class recipe
+    "rcpListElmt"+@recipe.id.to_s    
+  end
 
-    # Present the date and time the recipe was last touched by its current user
-    def touch_date_elmt recipe
-        if touched = Touch.touch_date(recipe.id, recipe.current_user)
-            %Q{
-              <span class="#{touch_date_class(recipe)}">Last viewed #{time_ago_in_words(touched)} ago.</span>
-            }.html_safe
-        end
-    end    
+  # Return the id of the DOM element giving the time-since-touched for a recipe
+  def touch_date_class recipe
+    "touchtime#{recipe.id.to_s}"
+  end
+
+  # Present the date and time the recipe was last touched by its current user
+  def touch_date_elmt recipe
+    if touched = Touch.touch_date(recipe.id, recipe.current_user)
+      %Q{
+        <span class="#{touch_date_class(recipe)}">Last viewed #{time_ago_in_words(touched)} ago.</span>
+      }.html_safe
+    end
+  end    
         
   # Create a popup selection list for adding a rating to the tags
   def select_to_add_rating(name, f, association, ratings, inex)
@@ -204,103 +212,95 @@ module ApplicationHelper
       
   # Turn the last comma in a comma-separated list into ' and'
   def englishize_list(list)
-     set = list.split ', '
-     if(set.length > 1)
-        ending = " and " + set.pop
-        list = set.join(', ') + ending
-     end
-     list
+    set = list.split ', '
+    if(set.length > 1)
+      ending = " and " + set.pop
+      list = set.join(', ') + ending
+    end
+    list
   end
 
-    def navlink(label, link, is_current=false)
-        if is_current
-            "<span class='nav_link_strong'><i>#{label}</i></span>"
-        else
-            link_to label, link, class: "nav_link"
-        end
+  def navlink(label, link, is_current=false)
+    if is_current
+      "<span class='nav_link_strong'><i>#{label}</i></span>"
+    else
+      link_to label, link, class: "nav_link"
     end
-    
-    # Return the set of navigation links for the header
-    def header_navlinks
-    	navlinks = []
-    	navlinks.push(navlink "Cookmarks", rcpqueries_path, (@nav_current==:cookmarks)) 
-    	navlinks.push(link_to_dialog "Add a Cookmark", new_recipe_path, "modal", "floating" )
-    	# navlinks.push(link_to_function("Add a Cookmark", "rcpAdd()" )) # navlink "Add a Cookmark", new_recipe_path, (@nav_current==:addcookmark)) 
-    	navlinks.join('&nbsp|&nbsp').html_safe
-    end
-=begin    
-    def feedback_link label
-    	# We save the current URI in the feedback link so we can return here after feedback,
-    	# and so the feedback can include the source
-    	path = request.url.sub /[^:]*:\/\/[^\/]*/, '' # Strip off the protocol and host
-    	navlink(label, "/feedbacks/new?backto=#{path}", (@nav_current==:feedback)) 
-    end
-=end
-    
-    def footer_navlinks
-    	navlinks = []
-    	navlinks << navlink("About", about_path, (@nav_current==:about)) 
-    	navlinks << navlink("Contact", contact_path, (@nav_current==:contact)) 
-    	navlinks << navlink("Home", home_path, (@nav_current==:home)) 
-    	navlinks << navlink("FAQ", "/FAQ", (@nav_current==:FAQ)) 
-    	# navlinks << feedback_link("Feedback")
-    	navlinks.join('  |  ').html_safe
-    end
+  end
 
-    def show_errors(errors)
-        result = ""
-        if errors.any?
-          result << "<div id=\"error_explanation\"><h2>\n"
-          result << "Sorry, but "
-          result << (errors.count > 1 ? "#{errors.count.to_s} errors are" : "an error is")
-          result << " keeping that from happening:</h2>\n"
-          result << "<ul>"
-          errors.full_messages.each do |msg|
-              result << "<li>#{msg}</li>\n"
-          end
-          result << "</ul>\n</div>"
-        end
-        result.html_safe
-    end
+  # Return the set of navigation links for the header
+  def header_navlinks
+    navlinks = []
+    navlinks.push(navlink "Cookmarks", rcpqueries_path, (@nav_current==:cookmarks)) 
+    navlinks.push(link_to_dialog "Add a Cookmark", new_recipe_path, "modal", "floating" )
+    # navlinks.push(link_to_function("Add a Cookmark", "rcpAdd()" )) # navlink "Add a Cookmark", new_recipe_path, (@nav_current==:addcookmark)) 
+    navlinks.join('&nbsp|&nbsp').html_safe
+  end
     
-    def debug_dump(params)
-        "<div id=\"debug\">#{debug(params)}</div>".html_safe
+  def footer_navlinks
+  	navlinks = []
+  	navlinks << navlink("About", about_path, (@nav_current==:about)) 
+  	navlinks << navlink("Contact", contact_path, (@nav_current==:contact)) 
+  	navlinks << navlink("Home", home_path, (@nav_current==:home)) 
+  	navlinks << navlink("FAQ", "/FAQ", (@nav_current==:FAQ)) 
+  	# navlinks << feedback_link("Feedback")
+  	navlinks.join('  |  ').html_safe
+  end
+
+  def show_errors(errors)
+    result = ""
+    if errors.any?
+      result << "<div id=\"error_explanation\"><h2>\n"
+      result << "Sorry, but "
+      result << (errors.count > 1 ? "#{errors.count.to_s} errors are" : "an error is")
+      result << " keeping that from happening:</h2>\n"
+      result << "<ul>"
+      errors.full_messages.each do |msg|
+          result << "<li>#{msg}</li>\n"
+      end
+      result << "</ul>\n</div>"
+    end
+    result.html_safe
+  end
+  
+  def debug_dump(params)
+      "<div id=\"debug\">#{debug(params)}</div>".html_safe
 	end
 	
 	# Embed a link to javascript for running a dialog by reference to a URL
 	def link_to_dialog(label, path, how, where)
-    	link_to_function label, "recipePowerGetAndRunJSON('#{path}', '#{how}', '#{where}');"
-    end
+  	link_to_function label, "recipePowerGetAndRunJSON('#{path}', '#{how}', '#{where}');"
+  end
 	
 	def globstring(hsh)
-	    hsh.keys.each.collect { |key| 
-	      key.to_s+": ["+(hsh[key] ? hsh[key].to_s : "nil")+"]"
-	    }.join(' ')
+    hsh.keys.each.collect { |key| 
+      key.to_s+": ["+(hsh[key] ? hsh[key].to_s : "nil")+"]"
+    }.join(' ')
+  end
+  # Place the header for a dialog, including setting its Onload function.
+  # Currently handled this way (e.g., symbols that have been supported)
+  #   :editRecipe
+  #   :captureRecipe
+  #   :newRecipe
+  #   :signIn
+  def dialogHeader( which, ttl=nil)
+    logger.debug "dialogHeader for "+globstring({dialog: which, area: @area, layout: @layout, ttl: ttl})
+    classname = which.to_s
+    onloadFcn = classname+"Onload"
+    ttlspec = ttl ? (" title=\"#{ttl}\"") : ""
+    result = %Q{ 
+      #{flash_helper}
+      <div class='#{classname} dialog #{@area}' #{ttlspec} onload="#{onloadFcn}" id="recipePowerDialog" >
+      }
+    if(@layout && @layout=="injector") 
+      result += %Q{
+        <div id="recipePowerCancelDiv">#{link_to_function "X", "cancelDialog", style:"text-decoration: none;", id: "recipePowerCancelBtn"}</div>	            
+      }
     end
-	# Place the header for a dialog, including setting its Onload function.
-	# Currently handled this way (e.g., symbols that have been supported)
-	#   :editRecipe
-	#   :captureRecipe
-	#   :newRecipe
-	#   :signIn
-	def dialogHeader( which, ttl=nil)
-	    logger.debug "dialogHeader for "+globstring({dialog: which, area: @area, layout: @layout, ttl: ttl})
-	    classname = which.to_s
-        onloadFcn = classname+"Onload"
-        ttlspec = ttl ? (" title=\"#{ttl}\"") : ""
-	    result = %Q{ 
-	      #{flash_helper}
-	      <div class='#{classname} dialog #{@area}' #{ttlspec} onload="#{onloadFcn}" id="recipePowerDialog" >
-	    }
-	    if(@layout && @layout=="injector") 
-	      result += %Q{
-            <div id="recipePowerCancelDiv">#{link_to_function "X", "cancelDialog", style:"text-decoration: none;", id: "recipePowerCancelBtn"}</div>	            
-	      }
-	    end
-	    result.html_safe
-    end
+    result.html_safe
+  end
 
-    def dialogFooter()
-        "</div><br class='clear'>".html_safe
-    end
+  def dialogFooter()
+    "</div><br class='clear'>".html_safe
+  end
 end

@@ -15,7 +15,7 @@
 	    <%# link_to "Pick Picture", "/", :id=>"PicPicker", :data=>"recipe_picurl;div.recipe_pic_preview img" %>
 	  </div>
 	  <%= f.text_field :picurl, rel: "jpg,png,gif", hidden: true %>
-	  <%= pic_picker @recipe.picurl, @recipe.url, @recipe.id %>
+	  <%= pic_picker(@recipe.picurl, @recipe.url, @recipe.id) unless (@area == "at_top") %>
 	</div>
 
   <div class="editRecipe_field <%= @area %>", style="margin-right:0.1em;margin-left:0.5em" >
