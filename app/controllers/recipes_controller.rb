@@ -98,9 +98,6 @@ class RecipesController < ApplicationController
           # The javascript includes an iframe for specific content
           render :action => "capture", :layout => !dialog_only, :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br>You might want to confirm the title and picture, and/or tag it?".html_safe
         }
-        format.json {
-          render :action => "capture", :layout => !dialog_only, :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br>You might want to confirm the title and picture, and/or tag it?".html_safe
-        }
         format.js { 
           # Produce javascript in response to the bookmarklet, to render into an iframe, 
           # either the recipe editor or a login screen.
@@ -117,7 +114,7 @@ class RecipesController < ApplicationController
           @area = 'at_top'
           # Now go forth and edit
           @layout = 'injector'
-          @dialog = render_to_string :edit, :layout => @layout
+          # @dialog = render_to_string :edit, :layout => @layout
           render
         }
       end

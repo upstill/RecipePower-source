@@ -42,8 +42,8 @@
 <% end %>
 <br class="clear">
 <% if permitted_to? :remove, @recipe %>
-  <%= button_to "Remove From My Collection", "/recipes/#{@recipe.id.to_s}/remove", class: "save-tags-button" %>
+  <%= button_to "Remove From My Collection", remove_recipe_path(@recipe), class: "save-tags-button" %>
 <% end %>
 <% if permitted_to? :destroy, @recipe %>
-  <%= button_to "Destroy this Recipe", "/recipes/#{@recipe.id.to_s}/destroy", class: "save-tags-button", :confirm => "This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" %>
+  <%= button_to "Destroy this Recipe", recipe_path(@recipe), :method => :delete, class: "save-tags-button", :confirm => "This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" %>
 <% end %>

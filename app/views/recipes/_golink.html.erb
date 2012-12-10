@@ -3,7 +3,7 @@
     <% if (@recipe.current_user != User.guest_id) && @recipe.users.exists?(@recipe.current_user) %>
 	  <%= link_to_dialog "Edit Cookmark", edit_recipe_path(@recipe), "modeless", "at_left" %>
  	<% else %> 
- 	  <%= link_to_dialog "Grab This Cookmark!", "/recipes/#{@recipe.id}/collect", "modal", "floating" %>
+ 	  <%= link_to_dialog "Grab This Cookmark!", collect_recipe_path(@recipe), "modal", "floating" %>
  	<% end %>
   </span>
 <%# end %>

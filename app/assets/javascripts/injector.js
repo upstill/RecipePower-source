@@ -11,7 +11,7 @@
 //= require jquery.tokeninput
 //= require jquery.form
 //= require jquery.ba-postmessage
-//= require RPPicPicker
+// require RPPicPicker
 //= require jNotify.jquery
 
 // A submit handler for a modal dialog form. Submits the data 

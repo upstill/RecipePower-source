@@ -42,6 +42,6 @@
      <%= f.label :private, "Private" %>
 		 <%= hidden_field_tag 'layout', 'injector' %>
     <br><%= f.submit "Save", class: "gobutton #{@area}" %>
-	<%# button_to "Forget It", "/recipes/#{@recipe.id.to_s}/remove", class: "gobutton #{@area}" %>
+	<%# button_to "Forget It", remove_recipe_path(@recipe), class: "gobutton #{@area}" %>
   </div>
 <% end %>

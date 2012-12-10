@@ -1,4 +1,6 @@
 <%= dialogHeader :captureRecipe, "Cookmark Captured" %>
+Sorry, HTML format not supported for recipe capture.
+<!--
 <%= show_errors @recipe.errors %>
 <%= form_for @recipe, html: { class: "capture_recipe json" } do |f| %>
 	<div class="recipe_comment_div" >
@@ -8,5 +10,6 @@
     <%= f.submit "Save", class: "save-tags-button" %>
     <%= f.submit "Cancel", class: "save-tags-button cancel" %>
 <% end %>
+-->
 <%= dialogFooter %>
 

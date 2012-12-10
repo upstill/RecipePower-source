@@ -81,16 +81,27 @@ RP::Application.routes.draw do
 
   resources :scales
   
-  match 'recipes/capture' => 'recipes#capture'
-  match 'recipes/:id/collect' => 'recipes#collect'
-  match 'recipes/:id/touch' => 'recipes#touch'
-  match 'recipes/:id/piclist' => 'recipes#piclist'
-  match 'recipes/:id/remove' => 'recipes#remove'
-  match 'recipes/:id/destroy' => 'recipes#destroy'
-  match 'recipes/:id/show' => 'recipes#show'
-  match 'recipes/parse' => 'recipes#parse', :via => :post
-  resources :recipes
-  match 'recipes/:id' => 'recipes#update', :via => :post
+  # match 'recipes/capture' => 'recipes#capture'
+  # match 'recipes/:id/collect' => 'recipes#collect'
+  # match 'recipes/:id/touch' => 'recipes#touch'
+  # match 'recipes/:id/piclist' => 'recipes#piclist'
+  # match 'recipes/:id/remove' => 'recipes#remove'
+  # match 'recipes/:id/destroy' => 'recipes#destroy'
+  # match 'recipes/:id/show' => 'recipes#show'
+  # match 'recipes/parse' => 'recipes#parse', :via => :post
+  # match 'recipes/:id' => 'recipes#update', :via => :post
+  resources :recipes do
+    member do 
+      get 'collect'
+      get 'touch'
+      get 'piclist'
+      post 'remove'
+    end
+    collection do
+      get 'capture'
+      post 'parse'
+    end
+  end
 
   match '/revise', :to => 'recipes#revise'
 
