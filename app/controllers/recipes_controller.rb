@@ -96,16 +96,20 @@ class RecipesController < ApplicationController
         @recipe.current_user = current_user_or_guest_id # session[:user_id]
         @recipe.touch # We're looking at it, so make it recent
         # The javascript includes an iframe for specific content
+        @layout = "injector"
         render :edit, :layout => (params[:layout] || dialog_only)
       }
       format.js { 
         # Produce javascript in response to the bookmarklet, to render into an iframe, 
         # either the recipe editor or a login screen.
-        @url = capture_recipes_url area: "at_top", layout: "injector", recipe: params[:recipe]
+        # We need a domain to pass as sourcehome, so the injected iframe can communicate with the browser
+        uri = URI(params[:recipe][:url])
+        domain = uri.scheme+"://"+uri.host
+        @url = capture_recipes_url area: "at_top", layout: "injector", recipe: params[:recipe], sourcehome: domain
         if !current_user
           # Push the editing URL so authentication happens first
           session["user_return_to"] = @url
-          @url = new_authentication_url( area: "at_top", layout: "injector" )
+          @url = new_authentication_url( area: "at_top", layout: "injector", sourcehome: domain )
         end
         render
       }

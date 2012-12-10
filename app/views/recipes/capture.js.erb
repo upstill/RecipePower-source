@@ -302,7 +302,6 @@ function unwrapWithoutCloning() {
   };
   
   $.receiveMessage = p_receiveMessage = function( callback, source_origin, delay ) {
-		debugger;
     if ( has_postMessage ) {
       // Since the browser supports window.postMessage, the callback will be
       // bound to the actual event associated with window.postMessage.
@@ -314,7 +313,6 @@ function unwrapWithoutCloning() {
         // Bind the callback. A reference to the callback is stored for ease of
         // unbinding.
         rm_callback = function(e) {
-					debugger;
           if ( ( typeof source_origin === 'string' && e.origin !== source_origin )
              || ( (typeof source_origin === 'function') && source_origin( e.origin ) === FALSE ) ) {
             return FALSE;
@@ -366,7 +364,6 @@ window.recipePower_namespace.receiveMessage( function(evt) {
 	var data = window.recipePower_namespace.ptq(evt.data);
 	// Now we have a data array and a function to call
 	var call = data.call;
-	debugger;
 	if(call && (typeof window.recipePower_namespace[call] === 'function')) {
 		window.recipePower_namespace[call](data);
 	}
