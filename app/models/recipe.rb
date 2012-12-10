@@ -189,7 +189,7 @@ class Recipe < ActiveRecord::Base
   end
 
   def current_user=(id)
-      @current_user = id
+    @current_user = id
   end
 
   # Return the number of times a recipe's been marked
@@ -265,24 +265,24 @@ class Recipe < ActiveRecord::Base
     @site.home
   end
 
-   # Make sure this recipe is in the collection of the given user
-    def ensureUser(uid)
-        unless self.users.exists?(uid)
-            user = User.find(uid)
-            self.users << user
-            if self.save
-                # Provide defaults for status and privacy
-                @current_user = uid
-                ref = self.current_ref
-                ref.status = MyConstants::Rcpstatus_misc
-                # ref.privacy = MyConstants::Rcppermission_friends
-                ref.private = false
-                ref.save
-            end
-        end
-        self.current_user = uid
-        Touch.touch uid, self.id
+  # Make sure this recipe is in the collection of the given user
+  def ensureUser(uid)
+    unless self.users.exists?(uid)
+      user = User.find(uid)
+      self.users << user
+      if self.save
+        # Provide defaults for status and privacy
+        @current_user = uid
+        ref = self.current_ref
+        ref.status = MyConstants::Rcpstatus_misc
+        # ref.privacy = MyConstants::Rcppermission_friends
+        ref.private = false
+        ref.save
+      end
     end
+    self.current_user = uid
+    Touch.touch uid, self.id
+  end
     
     # Set the mod time of the recipe to now (so it sorts properly in Recent lists)
     def touch

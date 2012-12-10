@@ -106,10 +106,10 @@ class RecipesController < ApplicationController
         uri = URI(params[:recipe][:url])
         domain = uri.scheme+"://"+uri.host
         @url = capture_recipes_url area: "at_top", layout: "injector", recipe: params[:recipe], sourcehome: domain
-        if !current_user
+        if !current_user # Apparently there's no way to check up on a user without hitting the database
           # Push the editing URL so authentication happens first
           session["user_return_to"] = @url
-          @url = new_authentication_url( area: "at_top", layout: "injector", sourcehome: domain )
+          @url = new_authentication_url area: "at_top", layout: "injector", sourcehome: domain 
         end
         render
       }

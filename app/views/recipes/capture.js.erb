@@ -63,10 +63,14 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	ifrOnload: function () {
 		// First, dispose of the placeholder image
 		var img = document.getElementById("recipePower-placeholder");
+		var ifr = this;
+		// Move the iframe onscreen
+		ifr.style.left = img.style.left;
+		
+		// Delete the image from behind it
 		img.style.display = "none";
 		img.parentNode.removeChild(img);
 		
-		var ifr = this;
 	  var ns = window.recipePower_namespace;
 	/* We would love to encapsulate the window content so we can move the top out of the way
 	   of the injected content, but it doesn't seem to work, at least on htmldog.com
@@ -77,7 +81,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		ifr.style.display = 'box';
 	*/
 		/* Define the style for highlighting images for picking */
-		var css = 'img.recipePower-highlight { outline:#ffaa66 8px solid; }',
+		var css = 'img.recipePower-highlight { border:#ffaa66 3px solid; outline:#ffaa66 3px solid; }',
 		    head = document.getElementsByTagName('head')[0],
 		    style = document.createElement('style');
 
@@ -122,7 +126,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		var ns = window.recipePower_namespace;
     if (this != ns.prev) {
 			if (ns.prev) {
-				ns.prev.className = ns.prev.className.replace(/\brecipePower-highlight\b/, '');
+				ns.prev.className = ns.prev.className.replace(/\brecipePower-highlight/, '');
 				ns.prev = undefined;
 			}
 			(ns.prev = this).className += " recipePower-highlight";
@@ -177,10 +181,12 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	img.style.display = 'block';
   img.style.position = 'fixed';
 	img.style.top = '0';
-	img.style.left = ((window.outerWidth-img.naturalWidth)/2).toString() + "px";
+	img.style.left = "5000px";
 	img.style['z-index'] = 99;
 	img.id = "recipePower-placeholder";
 	document.body.appendChild(img);
+	// Move the image onscreen, centered
+	img.style.left = ((window.outerWidth-800)/2).toString() + "px";
 
 	var ifr = document.createElement("iframe");
 	// ifr.style.margin="1em";
@@ -190,7 +196,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	ifr.style['z-index'] = 100;
 	ifr.style.position = "fixed";
 	ifr.style.top = "0";
-	ifr.style.left = img.style.left;
+	ifr.style.left = "5000px"; // initially offscreen
 	ifr.style.padding = "0";
 	ifr.style.margin = "0";
 	ifr.style.display = 'none'; // 'block';
