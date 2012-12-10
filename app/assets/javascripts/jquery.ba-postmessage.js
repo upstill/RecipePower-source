@@ -96,6 +96,7 @@
   //  Nothing.
   
   $[postMessage] = function( message, target_url, target ) {
+	debugger;
     if ( !target_url ) { return; }
     
     // Serialize the message if not a string. Note that this is the only real

@@ -84,63 +84,31 @@ class RecipesController < ApplicationController
     # Here is where we take a hit on the "Add to RecipePower" widget,
     # and also invoke the 'new cookmark' dialog. The difference is whether
     # parameters are supplied for url, title and note (though only URI is required).
-    if params[:recipe]
-        @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params
-    else
-        @recipe = Recipe.new
-    end
     @area = params[:area] || "at_top"
-    if @recipe.id # Mark of a fetched/successfully saved recipe: it has an id
-    	# redirect to edit
-    	dialog_only = params[:how] == "modal" || params[:how] == "modeless"
-      respond_to do |format|
-        format.html {
-          # The javascript includes an iframe for specific content
-          render :action => "capture", :layout => !dialog_only, :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br>You might want to confirm the title and picture, and/or tag it?".html_safe
-        }
-        format.js { 
-          # Produce javascript in response to the bookmarklet, to render into an iframe, 
-          # either the recipe editor or a login screen.
-          @url = edit_recipe_url(@recipe, area: "at_top", layout: "injector", sourcehome: @recipe.sourcehome )
-          if(current_user)
-            @partial = "recipes/form_edit_at_top"
-          else
-            session["user_return_to"] = @url
-            @url = new_authentication_url( area: "at_top", layout: "injector", sourcehome: @recipe.sourcehome )
-          end
-          # Before rendering the javascript, we render the dialog into a string to include in the response
-          # http://www.recipepower.com/recipes/1/edit?area=at_top&amp;layout=injector&amp;sourcehome=http%3A%2F%2Fsmittenkitchen.com
-          @recipe.touch # We're looking at it, so make it recent
-          @area = 'at_top'
-          # Now go forth and edit
-          @layout = 'injector'
-          # @dialog = render_to_string :edit, :layout => @layout
-          render
-        }
-      end
-    else
-        @Title = "Cookmark a Recipe"
-        @nav_current = :addcookmark
+  	dialog_only = params[:how] == "modal" || params[:how] == "modeless"
+    respond_to do |format|
+      format.html { # This is for capturing a new recipe. The injector (capture.js) calls for this
+        if params[:recipe]
+          @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params
+        else
+          @recipe = Recipe.new
+        end
         @recipe.current_user = current_user_or_guest_id # session[:user_id]
-        @area = params[:area] || "at_top"
-        dialog_boilerplate 'new', params[:how] || 'modal'
-    end
-  end
-
-  # Action for creating a recipe in response to the the 'new' page:
-  def create # Take a URL, then either lookup or create the recipe
-    # return if need_login true
-    # Find the recipe by URI (possibly correcting same), and bind it to the current user
-    @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params[:recipe]
-    if @recipe.errors.empty? # Success (valid recipe, either created or fetched)
-      reportRecipe(  
-              edit_recipe_url(@recipe), 
-              "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br> You might want to confirm the title and picture, and/or tag it?".html_safe,
-              formats )
-    else # failure (not a valid recipe) => return to new
-       @Title = "Cookmark a Recipe"
-       @nav_current = :addcookmark
-       render :action => 'new'
+        @recipe.touch # We're looking at it, so make it recent
+        # The javascript includes an iframe for specific content
+        render :edit, :layout => (params[:layout] || dialog_only)
+      }
+      format.js { 
+        # Produce javascript in response to the bookmarklet, to render into an iframe, 
+        # either the recipe editor or a login screen.
+        @url = capture_recipes_url area: "at_top", layout: "injector", recipe: params[:recipe]
+        if !current_user
+          # Push the editing URL so authentication happens first
+          session["user_return_to"] = @url
+          @url = new_authentication_url( area: "at_top", layout: "injector" )
+        end
+        render
+      }
     end
   end
 
@@ -160,6 +128,23 @@ class RecipesController < ApplicationController
     else
       @Title = "Cookmark a Recipe"
       @nav_current = :addcookmark
+    end
+  end
+
+  # Action for creating a recipe in response to the the 'new' page:
+  def create # Take a URL, then either lookup or create the recipe
+    # return if need_login true
+    # Find the recipe by URI (possibly correcting same), and bind it to the current user
+    @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params[:recipe]
+    if @recipe.errors.empty? # Success (valid recipe, either created or fetched)
+      reportRecipe(  
+              edit_recipe_url(@recipe), 
+              "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br> You might want to confirm the title and picture, and/or tag it?".html_safe,
+              formats )
+    else # failure (not a valid recipe) => return to new
+       @Title = "Cookmark a Recipe"
+       @nav_current = :addcookmark
+       render :action => 'new'
     end
   end
   
