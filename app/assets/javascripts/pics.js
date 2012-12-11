@@ -52,3 +52,23 @@ function fitImage(img) {
     $(img).show();
     return true;
 }
+
+// Handle a click on a thumbnail image by passing the URL on to the 
+// associated input field
+function pickImg(inputsel, imagesel, url) {
+	$(inputsel).attr("value", url );
+	previewImg(inputsel, imagesel, "");
+}
+
+// Copy an input URL to both the preview image and the (hidden) form field
+function previewImg(inputsel, imagesel, formsel) {
+	// Copy the url from the input field to the form field
+  var url = $(inputsel).attr("value");
+	$(formsel).attr("value", url )
+	
+	// Set the image(s) to the URL and fit them in their frames
+	var imageset = $(imagesel)
+    imageset.hide();
+	imageset.attr("src", url )
+	fitImage(imageset[0])
+}

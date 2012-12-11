@@ -14,6 +14,12 @@
 // require RPPicPicker
 //= require jNotify.jquery
 
+// Called to replace the form's image with the given URL in response to a message from the owning window
+function replaceImg(data) {
+	if(data.url && data.url[0])
+    pickImg('input#recipe_picurl', 'img.fitPic', data.url[0]);
+}
+
 // A submit handler for a modal dialog form. Submits the data 
 // request and stores the response so it can be used when the dialog is closed.
 function submitDialog(eventdata) { // Supports multiple forms in dialog
