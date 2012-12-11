@@ -47,7 +47,8 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	},
 
 	execute_resize: function (dims) {
-		var height = dims.height;
+		var width = dims.width[0];
+		var height = dims.height[0];
 
 		/* Set the top margin of the encapsulation to clear the iframe
 		var capsule = document.getElementById("RecipePowerInjectedEncapsulation");
@@ -56,7 +57,10 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		*/
 
 		var ifr = document.getElementById("recipePower-iframe");
-		ifr.height=height;
+		ifr.style.width = width.toString() + "px";
+		ifr.style.height = height.toString() + "px";
+		ifr.style.top = "0";
+		ifr.style.left = ((window.outerWidth-width)/2).toString() + "px";
 		ifr.style.display = 'block';
 	}, 
 	
@@ -182,7 +186,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
   img.style.position = 'fixed';
 	img.style.top = '0';
 	img.style.left = "5000px";
-	img.style['z-index'] = 99;
+	img.style['z-index'] = 999;
 	img.id = "recipePower-placeholder";
 	document.body.appendChild(img);
 	// Move the image onscreen, centered
@@ -191,15 +195,12 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	var ifr = document.createElement("iframe");
 	// ifr.style.margin="1em";
 	// Set the size of the frame to that of the placeholder image
-	ifr.style.width = img.naturalWidth.toString() + "px";
-	ifr.style.height = img.naturalHeight.toString() + "px";
-	ifr.style['z-index'] = 100;
+	ifr.style['z-index'] = 1000;
 	ifr.style.position = "fixed";
-	ifr.style.top = "0";
 	ifr.style.left = "5000px"; // initially offscreen
 	ifr.style.padding = "0";
 	ifr.style.margin = "0";
-	ifr.style.display = 'none'; // 'block';
+	ifr.style.display = 'block';
 	ifr.id = "recipePower-iframe";
 	ifr.src = "<%= @url %>";
 	if (ifr.attachEvent){
@@ -362,15 +363,17 @@ function unwrapWithoutCloning() {
 })(window.recipePower_namespace);
 
 window.recipePower_namespace.receiveMessage( function(evt) {
-	
-	// By convention, messages arrive as a query string which gets turned
-	// into an object whose 'call' parameter denotes a function to call, 
-	// passing in the object carrying the rest of the parameters.
-	// Parse the data string as a conventional set of queryparams
-	var data = window.recipePower_namespace.ptq(evt.data);
-	// Now we have a data array and a function to call
-	var call = data.call;
-	if(call && (typeof window.recipePower_namespace[call] === 'function')) {
-		window.recipePower_namespace[call](data);
+	var namespace = window.recipePower_namespace;
+	if(namespace) {
+		// By convention, messages arrive as a query string which gets turned
+		// into an object whose 'call' parameter denotes a function to call, 
+		// passing in the object carrying the rest of the parameters.
+		// Parse the data string as a conventional set of queryparams
+		var data = namespace.ptq(evt.data);
+		// Now we have a data array and a function to call
+		var calls = data.call, call;
+		if(calls && (call = calls[0]) && (typeof namespace[call] === 'function')) {
+			namespace[call](data);
+		}
 	}
 }, "http://<%= current_domain %>" );
