@@ -186,7 +186,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
   img.style.position = 'fixed';
 	img.style.top = '0';
 	img.style.left = "5000px";
-	img.style['z-index'] = 999;
+	img.style['z-index'] = 900001;
 	img.id = "recipePower-placeholder";
 	document.body.appendChild(img);
 	// Move the image onscreen, centered
@@ -195,7 +195,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	var ifr = document.createElement("iframe");
 	// ifr.style.margin="1em";
 	// Set the size of the frame to that of the placeholder image
-	ifr.style['z-index'] = 1000;
+	ifr.style['z-index'] = 900002;
 	ifr.style.position = "fixed";
 	ifr.style.left = "5000px"; // initially offscreen
 	ifr.style.padding = "0";
