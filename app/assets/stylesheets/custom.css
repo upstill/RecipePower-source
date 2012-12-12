@@ -1,83 +1,10 @@
 
-#container {
-  margin:0px;
-  background: #FDECCF; // DCE8DC;
-  width: 100%;
-}
-
-#workpane {
-  -moz-border-radius:    10px;
-  -webkit-border-radius: 10px;
-  border-radius:         10px;
-  margin:15px;
-  // outline:2px solid red;
-}
-
-#logo_div {
-  float:left;
-  # outline:1px solid green;
-  width: 288px;
-  height: 40px;
-  margin:15px;
-  background-color:#FDECCF; // DCE8DC;
-}
-
-#logo_div a:hover {
-  background-color:#FDECCF; // DCE8DC;
-}
-
-#logo_img {
-  width:288px;
-  height:40px;
-  # border:1px solid red;
-}
-
-#logo_img:hover {
-	outline: #EDDCBF solid thick;
-	# background-color:#FEFCDF;
-}
-
 .logo_icon {
 	width: 48px;
 	height: 36px;
 	border: 1px solid gray;
 	float:right;
 	margin-top:20px;
-}
-
-#user_status {
-  text-align:right;
-  padding-top:5px;
-  margin-right:15px;
-}
-
-#header_nav_links {
-  text-align:right;
-  margin-top:20px;
-  margin-right:15px;
-
-  font:14px arial,sans-serif, bold;
-  # border:3px solid green;
-}
-
-#footer_nav_links {
-  font:14px arial,sans-serif, bold;
-  text-align:center;
-  // border:3px solid green;
-  margin:20px;
-  padding-bottom:10px;
-}
-
-.nav_link {
-	
-}
-
-.nav_link_strong {
-	font-weight:bold;
-}
-
-#debug {
-	
 }
 
 .tag_info_section {
@@ -97,43 +24,6 @@
 .tog_info_rcp_title {
 	margin-left:20px;
 	line-height:2em;
-}
-
-footer {
-  width:100%;
-  text-align: center;
-  margin-top: 10px;
-  width: 710px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-footer nav {
-  float: none;
-}
-
-h2.med {
-	line-height:150%;
-	padding-top:0px;
-  	font-size: 170%;
-}
-
-p.airy {
-  	font:18px calibri;
-	line-height:150%;
-	// font-size:105%;
-	// letter-spacing:1px;
-}
-
-p.airy.bld {
-  font-size:14px;
-}
-
-li.airy {
-  	font:18px calibri;
-	line-height:150%;
-	// font-size:105%;
-	// letter-spacing:1px;
 }
 
 .text_block {
@@ -533,38 +423,12 @@ font:12px arial, sans-serif;
     margin-top:0px;
 }
 
-.rcp_list_element {
-    height:219px;
-    width:100%;
-    position:relative;
-    // We're relative to allow absolute positioning of the bottom element
-    // outline:#999 solid 1px;
-}
-
-.rcp_list_pic_box {
-    width:340px;
-    height:215px;
-    float:left;
-    vertical-align: center;
-    // text-align: center;text-align: center; // vertical-align: center;
-    align: center;
-    // outline:#999 solid 1px;
-}
-
 .centerfloat {
   position:relative;
   width:100%;
   height:2em;
   top:50%;
   margin-top:-1em;
-    // outline:#999 solid 1px;
-}
-
-.rcp_list_text {
-    height:auto;
-    width:50%; // width:500px;
-    margin-left:15px;
-    float:left;
     // outline:#999 solid 1px;
 }
 
@@ -591,58 +455,6 @@ font:12px arial, sans-serif;
     // float:center;
     // outline:#999 solid 1px;
 }
-
-.rcp_list_element_bottom {
-  position: absolute;
-  bottom: 1px;
-  left: 355px;
-  float:left;
-  width:auto; // 50%;
-  height:auto;
-    // outline:#999 solid 1px;
-}
-
-.rcp_list_element_title {
-  padding-top:18px;
-  font:18px arial,sans-serif, bold;
-}
-
-.rcp_list_element_source {
-  font:14px arial,sans-serif;
-  margin-top:4px;
-  margin-left:20px;
-}
-
-.rcp_list_element_tag_summary {
-  margin-top:10px;
-  font:15px arial,sans-serif;
-  font-style: italic;
-}
-
-.rcp_list_element_tag {
-  margin-top:10px;
-  font:15px arial,sans-serif;
-  font-style: normal;
-  font-weight: 600;
-}
-
-.rcp_list_element_twocents {
-  margin-top:10px;
-  font:14px arial,sans-serif;
-  font-style: italic;
-}
-
-.rcp_list_element_golink {
-  margin-top:10px;
-  font:15px arial,sans-serif;
-}
-
-.rcp_list_element_stats {
-  font:15px arial,sans-serif;
-  color: solid red;
-}
-
-.clear { clear:both; }
 
 .tagspec {
     width:350px;
@@ -689,16 +501,6 @@ font:12px arial, sans-serif;
 	margin-bottom:10px;
 }
 
-.preview_button {
-	width:25px;
-	height:25px;
-}
-
-.preview_button:hover {
-	outline: #c0c0c0 solid 3px;
-	background-color:#f8f8f8;
-}
-
 .logo {
 	width: 128px;
 	height: 96px;
@@ -706,11 +508,6 @@ font:12px arial, sans-serif;
     margin: 10px;
     padding: 10px;
 	border:#909090 3px solid;
-}
-
-.popup:hover {
-	// outline: #EDDCBF solid thick;
-	background-color:#FFFFFF;
 }
 
 .expr_tag {
@@ -867,12 +664,6 @@ ul#accordion ul li { float: none; width: auto; }
 ul#accordion li.ui-accordion-selected a.heading { background: #850251; color: #fff; }  
 */
 span.rcpquery_panel_label { margin-left: 30px; }
-
-// Space for a recipe picture to be fit into
-.fitPic { 
-	align: center;
-	visibility:hidden; 
-}
 
 .iconpicker {
     display: block;

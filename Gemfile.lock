@@ -48,9 +48,14 @@ GEM
     arel (3.0.2)
     bcrypt-ruby (3.0.1)
     bcrypt-ruby (3.0.1-x86-mingw32)
+    better_errors (0.2.0)
+      coderay (>= 1.0.0)
+      erubis (>= 2.7.0)
+    binding_of_caller (0.6.8)
     builder (3.0.4)
     closure_tree (3.6.5)
       activerecord (>= 3.0.0)
+    coderay (1.0.8)
     coffee-rails (3.2.2)
       coffee-script (>= 2.2.0)
       railties (~> 3.2.0)
@@ -247,6 +252,8 @@ PLATFORMS
 
 DEPENDENCIES
   annotate (= 2.4.0)
+  better_errors
+  binding_of_caller
   closure_tree
   coffee-rails (~> 3.2.1)
   debugger

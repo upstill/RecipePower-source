@@ -1,0 +1,12 @@
+<div class="frame_left">
+	<div class="collection_nav">
+		<%= @collection.html %>
+	</div>
+	<br class="clear">
+	<hr>
+	<div id="footer_nav_links">
+		<%= footer_navlinks %>
+	</div>
+	<%= debug_dump(params) if Rails.env.development? %>
+</div>
+<%= feedback_tab(:position => 'left') %>

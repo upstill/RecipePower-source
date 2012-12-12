@@ -1,4 +1,5 @@
 class CollectionController < ApplicationController
+  layout "collection"
   before_filter :fetch_browser
   after_filter :save_browser
   

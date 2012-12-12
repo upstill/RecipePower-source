@@ -33,6 +33,12 @@ h2 {
   	font-size: 200%;
 }
 
+h2.med {
+	line-height:150%;
+	padding-top:0px;
+  	font-size: 170%;
+}
+
 label {
   font:14px arial,sans-serif;
   font-weight:bold;
@@ -40,7 +46,25 @@ label {
 //	line-height:150%;
 }
 
-/* Links */
+p.airy {
+  font:18px calibri;
+	line-height:150%;
+	// font-size:105%;
+	// letter-spacing:1px;
+}
+
+p.airy.bld {
+  font-size:14px;
+}
+
+li.airy {
+  	font:18px calibri;
+	line-height:150%;
+	// font-size:105%;
+	// letter-spacing:1px;
+}
+
+/* Links
 
 a {
   color: #09c;
@@ -56,6 +80,8 @@ a:visited {
   color: #069;
 }
 
+*/
+
 h4 {
 	margin-top:2em;
 	margin-bottom:1em;
@@ -64,13 +90,10 @@ h4 {
 h4.first {
 	margin-top:0.5em;
 }
-/* Navigation */
 
+/* Navigation */
 nav {
   float: right;
-}
-
-nav {
   background-color: white;
   padding: 0 0.7em;
   white-space: nowrap;
@@ -100,6 +123,21 @@ nav ul li a:hover {
   text-decoration: underline;
 }
 
+footer {
+  width:100%;
+  text-align: center;
+  margin-top: 10px;
+  width: 710px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+footer nav {
+  float: none;
+}
+
+.clear { clear:both; }
+
 .error, .alert, .notice, .success, .info {padding:0.8em;margin-bottom:1em;border:2px solid #ddd; width:70%;}
 .error, .alert {background:#fbe3e4;color:#8a1f11;border-color:#fbc2c4;}
 
@@ -112,4 +150,80 @@ div.notice-div {
 	left: "200";
 	padding: "1em";
 	margin: "auto";
+}
+
+// Space for a recipe picture to be fit into
+.fitPic { 
+	align: center;
+	visibility: hidden; 
+	display: none;
+}
+
+#logo_div {
+  float:left;
+  # outline:1px solid green;
+  width: 288px;
+  height: 40px;
+  margin:10px;
+  // background-color:#FDECCF; // DCE8DC;
+}
+
+#container {
+  margin:0px;
+  background: #FDECCF; // DCE8DC;
+  width: 100%;
+}
+
+#workpane {
+  -moz-border-radius:    10px;
+  -webkit-border-radius: 10px;
+  border-radius:         10px;
+  margin:15px;
+  // outline:2px solid red;
+}
+
+#debug {
+	
+}
+
+#logo_img {
+  width:288px;
+  height:40px;
+  # border:1px solid red;
+}
+
+#logo_img:hover {
+	outline: #EDDCBF solid thick;
+	// background-color:#DDDDDD;
+}
+
+#user_status {
+  text-align:right;
+  padding-top:5px;
+  margin-right:15px;
+}
+
+#header_nav_links {
+  text-align:right;
+  margin-top:20px;
+  margin-right:15px;
+
+  font:14px arial,sans-serif, bold;
+  # border:3px solid green;
+}
+
+#footer_nav_links {
+  font:14px arial,sans-serif, bold;
+  text-align:center;
+  // border:3px solid green;
+  margin:20px;
+  padding-bottom:10px;
+}
+
+.nav_link {
+	
+}
+
+.nav_link_strong {
+	font-weight:bold;
 }

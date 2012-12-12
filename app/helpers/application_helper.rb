@@ -164,8 +164,8 @@ module ApplicationHelper
     "RecipePower"+(ext.blank? ? " Home" : " | #{ext}")
   end
 
-  def logo
-    link_to image_tag("RPlogo.png", :alt=>"RecipePower", :id=>"logo_img" ), root_path
+  def logo(small=false)
+    link_to image_tag("RPlogo.png", :alt=>"RecipePower", :id=>"logo_img"+(small ? "_small" : "") ), root_path
   end
   
   def flash_helper

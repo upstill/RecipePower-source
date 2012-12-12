@@ -3,7 +3,32 @@
  * and any sub-directories. You're free to add application-wide styles to this file and they'll appear at
  * the top of the compiled file, but it's generally better to create a new file per style scope.
  *= require_self
- *= require_directory .
  
+ *= require RPGlobal
+ *= require RPPicPicker
+ *= require RP_recipes
+ *  require application
+ *= require authentication
+ *= require bm
+ *= require buttons
+ *  require collection
+ *= require custom
+ *= require dialog
+ *= require dialogs
+ *= require editRecipe
+ *= require errors
+ *= require expressions
+ *= require feedback
+ *= require iframe
+ *  require injector
+ *= require invitations
+ *= require paginate
+ *= require referents
+ *= require registrations
+ *= require scaffolds
+ *= require sites
+ *= require welcome
+ *= require rcp_list
+
 */
 

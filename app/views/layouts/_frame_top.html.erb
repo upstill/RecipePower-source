@@ -1,0 +1,18 @@
+<div class="frame_top">
+  <div class="collection_query_div" >
+		<%= form_tag("/collection/update", :method => "get", :class => "query_form") do %>
+			<div id="collection_query_label">
+				<%= label_tag(:tagstxt, "Seek and Ye Shall Find:", :id=>"collection_tags_label") -%>
+			</div>
+			<div id="collection_query_tokens">
+			  <%= text_field_tag(:tagstxt, "data-pre" => @collection.tags.map(&:attributes).to_json) %>
+			</div>
+		<% end %>
+	</div>
+	<div id="header_nav" class="top">
+			<%= user_status().html_safe %>
+	</div>
+	<div id="header_nav" class="bottom">
+			<%= header_navlinks  %>
+	</div>
+</div>

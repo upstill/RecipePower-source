@@ -1,41 +1,142 @@
+/*
+ * This is a manifest file that'll automatically include all the stylesheets available in this directory
+ * and any sub-directories. You're free to add application-wide styles to this file and they'll appear at
+ * the top of the compiled file, but it's generally better to create a new file per style scope.
+
 // Place all the styles related to the collection controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
-div.collection_sider {
-	float: left;
-	width: 300px;
-	// border:3px solid black;
+ *= require_self
+ *  require_tree blueprint
+ *= require scaffolds
+ *= require RPGlobal
+ *= require rcp_list
+ *= require dialogs
+ *= require_tree ../../../vendor/assets/stylesheets/jquery
+
+*/
+
+div.frame_corner {
+  position: fixed;
+  height: 70px;
+  width: 260px;
+  top: 0px;
+  left: 0px;
+  z-index:1001;
+  background: #DDDDDD;
 }
 
-.collection_query_div {
-    width:95%;
-    // height: 300px;
-    /* border:3px solid black; */
-    float: left;
-    // padding-top:10px;
+div.frame_top {
+  position:fixed;
+  height: 66px;
+  width: 100%;
+  min-width: 1000px;
+  top: 0px;
+  left: 260px;
+  z-index:1000;
+  background: #DDDDDD;
+  border-bottom: 2px solid black;
+}
+
+div.frame_left {
+  position:fixed;
+  top: 66px;
+  left: 0px;
+  width: 260px;
+  z-index:1000;
+  background: #DDDDDD;
+  border-right: 2px solid black;
+}
+
+#logo_div_small {
+  float:left;
+  # outline:1px solid green;
+  width: 252px;
+  height: 35px;
+  margin: 10px;
+  // background-color:#FDECCF; // DCE8DC;
+}
+
+#logo_div_small a:hover {
+  background:#BBBBBB; // DCE8DC;
+}
+
+#logo_img_small {
+  width: 252px;
+  height: 35px;
+  display: block;
+  # border:1px solid red;
+}
+
+#logo_img_small:hover {
+	// border-bottom:2px solid #888888;
+	// border-top:2px solid #888888;
+	outline: #BBBBBB solid thick;
+	// background:#DDDDDD;
+}
+
+div#header_nav {
+  position: absolute;
+  right: 265px;
+  width: auto;
+  height: 20px;
+  font:14px arial,sans-serif, bold;
+  text-align:right;
+}
+
+div#header_nav.top {
+   top: 3px;
+}
+
+div#header_nav.bottom {
+   bottom: 0px;
+}
+
+div.content {
+  z-index:0;
+  border-left: 2px solid black;
+  margin-top: 66px;
+	margin-left: 252px;
+}
+
+div.collection {
+	width: 100%;
 }
 
 div.collection_nav {
-	float: left;
-	width: 300px;
-	// border:3px solid black;
+  padding: 15px 0;
+	background: #DDDDDD;
+	width: 260px;
+}
+
+div.collection_list {
+  vertical-align: top;
+	min-width: 800px;
+}
+
+.collection_query_div {
+    width:600px;
+    margin: 15px;
+    // border:3px solid black;
+    float: left;
 }
 
 #collection_query_label {
 	margin:3px;
+	margin-top: 10px;
 	padding:3px;
-	// width:180px;
-	height: 27px;
+	width: auto;
+	height: 23px;
 	float: left;
     // outline:#999 solid red 3px;
   	// background:#2be4e3;
 }
 
 #collection_query_tokens {
-	margin:3px;
+	margin:0;
 	padding:3px;
-	width: 50%; // 400px;
+	width: 380px;
 	height: 27px;
 	float: left;
   // outline:#999 solid blue 3px;
@@ -50,28 +151,6 @@ div.collection_nav {
 //  width:50%;
 }
 
-div.collection {
-	display: table;
-	width: 100%;
-	// border:3px solid red;
-}
-
-div.collection_nav {
-  padding: 15px 0;
-  display:table-cell;
-	width: auto;
-	background: #CCCCCC;
-	// border: 3px solid black;
-}
-
-div.collection_list {
-  vertical-align: top;
-  display:table-cell;
-	width: auto;
-	min-width: 400px;
-	border:2px solid black;
-}
-
 div.RcpBrowser {
 	font-weight:bold;
 	position: relative;
@@ -81,7 +160,7 @@ div.RcpBrowser {
 
 div.RcpBrowser.Level1 {
 padding-left: 15px;
-font:24px arial,sans-serif;
+font:20px arial,sans-serif;
 }
 
 div.RcpBrowser.Level2 {

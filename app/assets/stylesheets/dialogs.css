@@ -1,12 +1,139 @@
+/* Styling for specific dialogs */
 
-// editRecipe
+/* ------------- editRecipe ---------------*/
 
-/* newRecipe */
-
+/* ------------- newRecipe  ---------------*/
 div.newRecipe {
 	width: 550px;
 	height: 150px;
 }
 
-/* authentications */
+/* ------------- captureRecipe ---------------*/
 
+/* ------------- signIn ---------------*/
+
+.signIn {
+	width: 630px;
+	float: left;
+}
+
+.signIn.floating {
+	width: 600px;
+	margin-top: 2em;
+	float: left;
+}
+
+.signIn.at_top {
+	width: 100%;
+	height:auto;
+	margin: 0.2em;
+	// border: solid 3px #900;
+}
+
+.sign {
+	width: 620px;
+    // border: solid 1px #999;
+    margin: 20px;
+	float:left;
+}
+
+.sign.floating {
+	width: 550px;
+    // border: solid 1px #999;
+	float: left;
+}
+
+.signup {
+	width: 200px;
+	border-left: solid 1px #999;
+    // border: solid 1px #999;
+	margin: 0px;
+	padding-left: 20px;
+	float: left;
+}
+
+.or {
+	margin-top: 100px;
+	margin-right: 10px;
+    // border: solid 1px #999;
+	float: left;
+}
+
+.signin {
+	width: 250px;
+	border-right: solid 1px #999;
+    // border: solid 1px #999;
+	margin-right: 10px;
+	padding-right: 10px;
+	float: left;
+}
+
+.signin.at_top {
+    font:16px arial,sans-serif;
+	width: 600px;
+    // height: 50px;
+	// border-right: solid 1px #999;
+	border-left: 1px solid black;
+	margin: 0em;
+	padding: 0em 0.7em;
+	float: left;
+}
+
+/* ------------- authentications ---------------*/
+
+.auth_signin {
+	width: 520px;
+  // border: solid 1px #999;
+	margin-left: 20px;
+	float: left;
+}
+
+.auth_signin.floating {
+	// width: 500px;
+	margin: 0px 20px;
+	float: left;
+}
+
+.auth_signin.at_top {
+	width: 400px;
+	border: solid 1px #090;
+	margin: 0.3em;
+	float: left;
+}
+
+.auth_poss.at_top {
+  font:16px arial,sans-serif;
+  width: 320px;
+	float: left;
+	margin: .1em;
+	border-right: 1px solid black;
+}
+
+.auth_poss.at_top {
+  width: auto;
+	float: left;
+	margin: .1em;
+	margin-left: 0.5em;
+}
+
+.auth_provider img {
+  display: block;
+}
+
+.auth_provider {
+  float: left;
+  text-decoration: none;
+  margin-right: 20px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.auth_provider.small {
+  float: left;
+  text-decoration: none;
+  // margin-right: 1em;
+  text-align: center;
+  margin: 0.1em;
+  // margin-bottom: 1em;
+  font-size: 11px;
+}

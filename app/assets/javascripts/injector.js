@@ -7,12 +7,11 @@
 // Place your application-specific JavaScript functions and classes here
 
 //= require pics
-//= require jquery-1.7.1
-//= require jquery.tokeninput
-//= require jquery.form
-//= require jquery.ba-postmessage
+//= require jquery/jquery.form
+//= require jquery/jquery.ba-postmessage
+//= require jquery/jNotify.jquery
 // require RPPicPicker
-//= require jNotify.jquery
+//= require jquery/jquery.tokeninput
 
 // Called to replace the form's image with the given URL in response to a message from the owning window
 function replaceImg(data) {

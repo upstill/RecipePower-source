@@ -37,6 +37,8 @@ group :development do
   gem 'log_buddy'
   gem 'ruby-prof', :git => 'git://github.com/wycats/ruby-prof.git'
   gem 'letter_opener'
+  gem "better_errors"
+  gem "binding_of_caller"
 end
 
 # Gems used only for assets and not required

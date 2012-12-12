@@ -1,22 +1,7 @@
 <%# Master form for taking a recipe query and returning a list of results %>
 <%# show_errors @collection.errors %>
-<%= form_tag("/collection/update", :method => "get", :class => "query_form") do %>
-  <div class="collection_query_div" >
-		<div id="collection_query_label">
-			<%= label_tag(:tagstxt, "Seek and Ye Shall Find:", :id=>"collection_tags_label") -%>
-		</div>
-		<div id="collection_query_tokens">
-		  <%= text_field_tag(:tagstxt, "data-pre" => @collection.tags.map(&:attributes).to_json) %>
-		</div>
-  </div>
-<% end %>
-<br class="clear">
 <div class="collection">
-	<div class="collection_nav">
-		<%= @collection.html %>
-	</div>
 	<div class="collection_list">
 		<%= render "relist" %>
 	</div>
 </div>
-<br class="clear">

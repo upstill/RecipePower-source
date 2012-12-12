@@ -21,50 +21,6 @@ padding:10px;
 	float: left;
 }
 
-.sign {
-	width: 620px;
-    // border: solid 1px #999;
-    margin: 20px;
-	float:left;
-}
-
-.sign.floating {
-	width: 550px;
-    // border: solid 1px #999;
-	float: left;
-}
-
-.auth_signin.floating {
-	// width: 500px;
-	margin: 0px 20px;
-	float: left;
-}
-
-.signup {
-	width: 200px;
-	border-left: solid 1px #999;
-    // border: solid 1px #999;
-	margin: 0px;
-	padding-left: 20px;
-	float: left;
-}
-
-.or {
-	margin-top: 100px;
-	margin-right: 10px;
-    // border: solid 1px #999;
-	float: left;
-}
-
-.signin {
-	width: 250px;
-	border-right: solid 1px #999;
-    // border: solid 1px #999;
-	margin-right: 10px;
-	padding-right: 10px;
-	float: left;
-}
-
 .rightblock {
 	width: 350px;
 	margin-left: 2em;
@@ -81,24 +37,6 @@ padding:10px;
 .right_signin {
 	width: 300px;
 	float: right;
-}
-
-.auth_signin {
-	width: 520px;
-  // border: solid 1px #999;
-	margin-left: 20px;
-	float: left;
-}
-
-.signIn {
-	width: 630px;
-	float: left;
-}
-
-.signIn.floating {
-	width: 600px;
-	margin-top: 2em;
-	float: left;
 }
 
 .auth_content {
@@ -149,37 +87,8 @@ padding:10px;
   font-size: 11px;
 }
 
-.auth_provider img {
-  display: block;
-}
-
-.auth_provider {
-  float: left;
-  text-decoration: none;
-  margin-right: 20px;
-  text-align: center;
-  margin-bottom: 10px;
-}
-
-.auth_provider.small {
-  float: left;
-  text-decoration: none;
-  // margin-right: 1em;
-  text-align: center;
-  margin: 0.1em;
-  // margin-bottom: 1em;
-  font-size: 11px;
-}
-
 .signin_left {
 	width: 600px;
-	float: left;
-}
-
-.auth_signin.at_top {
-	width: 400px;
-	border: solid 1px #090;
-	margin: 0.3em;
 	float: left;
 }
 
@@ -191,13 +100,6 @@ padding:10px;
 }
 */
 
-.signIn.at_top {
-	width: 100%;
-	height:auto;
-	margin: 0.2em;
-	// border: solid 3px #900;
-}
-
 .signin_hdr {
   font:18px arial,sans-serif;
   font-weight:bold;
@@ -205,26 +107,6 @@ padding:10px;
   width: 100%;
   margin: 0.1em;
   border:1px solid black;
-}
-
-.auth_poss.at_top {
-    font:16px arial,sans-serif;
-    // height: 50px;
-    width: 320px;
-	float: left;
-	margin: .1em;
-	border-right: 1px solid black;
-}
-
-.signin.at_top {
-    font:16px arial,sans-serif;
-	width: 600px;
-    // height: 50px;
-	// border-right: solid 1px #999;
-	border-left: 1px solid black;
-	margin: 0em;
-	padding: 0em 0.7em;
-	float: left;
 }
 
 .signin_field.at_top {

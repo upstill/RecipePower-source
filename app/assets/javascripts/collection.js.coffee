@@ -1,6 +1,42 @@
-# Place all the behaviors and hooks related to the matching controller here.
-# All this logic will automatically be available in application.js.
-# You can use CoffeeScript in this file: http:#jashkenas.github.com/coffee-script/
+# This is a manifest file that'll be compiled into including all the files listed below.
+# Add new JavaScript/Coffee code in separate files in this directory and they'll automatically
+# be included in the compiled file accessible from http://example.com/assets/application.js
+# It's not advisable to add code directly here, but if you do, it'll appear at the bottom of the
+# the compiled file.
+#
+# Place your application-specific JavaScript functions and classes here
+# This file is automatically included by javascript_include_tag :defaults
+
+#= require_directory ../../../vendor/assets/javascripts/jquery
+
+# require injector
+#= require RPDialog
+
+# require RPquery
+# require RP
+# require RPDialogTest
+# require RPDialogs
+# require RPImages
+
+# require RPPicPicker
+# require RPfields
+# require RPquery
+# require RPreferent
+# require application
+# require bm
+# require errors
+# require expressions
+# require iframe
+
+# require invitations
+# require microformat
+#= require pics
+# require rails
+# require referents
+# require registrations
+# require sites
+# require whenReady
+
 jQuery ->
 	$("#tagstxt").tokenInput("/tags/match.json", 
 		crossDomain: false,
@@ -44,6 +80,8 @@ collection_update = (params, url) ->
 		# Explicitly update the collection list
 			$('div.collection_list')[0].innerHTML	= resp	
 			$(".pageclickr").click(collection_pager)
+		beforeSend: (xhr) ->
+			xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))
 	
 collection_pager = (evt) ->
 	# Respond to page selection: replace results list
