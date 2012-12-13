@@ -7,11 +7,9 @@
  *= require RPGlobal
  *= require RPPicPicker
  *= require RP_recipes
- *  require application
  *= require authentication
  *= require bm
  *= require buttons
- *  require collection
  *= require custom
  *= require dialog
  *= require dialogs
@@ -29,6 +27,7 @@
  *= require sites
  *= require welcome
  *= require rcp_list
+ *= require_directory ../../../vendor/assets/stylesheets/jquery
 
 */
 
