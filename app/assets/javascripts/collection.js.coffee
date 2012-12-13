@@ -38,17 +38,18 @@
 # require whenReady
 
 jQuery ->
-	$("#tagstxt").tokenInput("/tags/match.json", 
+	$("#tagstxt").tokenInput("/tags/match.json",
 		crossDomain: false,
 		hintText: "Type tags and strings to look for",
 		noResultsText: "No matching tag found; hit Enter to search with text",
-		prePopulate: $("#collection_query_tokens").data("pre"),
+		prePopulate: $("#tagstxt").data("pre"),
 		theme: "facebook",
-		onAdd: queryChange,
-		onDelete: queryChange,
+		onAdd: collection_tagchange,
+		onDelete: collection_tagchange,
 		allowFreeTagging: true
 	)
 	
+	$("#tagstxt").first().focus()	
 	$(".pageclickr").click collection_pager
 	
 	$('.RcpBrowser').click ->
@@ -70,18 +71,22 @@ jQuery ->
 			# Now that the selection is settled, we can fetch the recipe list
 			collection_update { selected: @id }
 
+collection_tagchange = (params, url) ->
+	collection_update $('form.query_form').serialize()
+	
 collection_update = (params, url) ->
+	debugger;
 	jQuery.ajax
-		type: "POST",
-		url: (url || "collection/update"),
-		data: params,
-		dataType: "html",
+		type: "POST"
+		url: (url || "collection/update")
+		data: params
+		dataType: "html"
+		beforeSend: (xhr) ->
+			xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))
 		success: (resp, succ, xhr) ->
 		# Explicitly update the collection list
 			$('div.collection_list')[0].innerHTML	= resp	
 			$(".pageclickr").click(collection_pager)
-		beforeSend: (xhr) ->
-			xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))
 	
 collection_pager = (evt) ->
 	# Respond to page selection: replace results list

@@ -44,6 +44,10 @@ class CollectionController < ApplicationController
     if tagstxt = params[:tagstxt]
       @collection.tagstxt = tagstxt
     end
+    if tags = params[:tags]
+      debugger
+      x=2
+    end
     if id = params[:selected]
       @collection.select_by_id(params[:selected].delete("RcpBrowserElement").to_i)
     end

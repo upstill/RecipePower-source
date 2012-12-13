@@ -13,6 +13,7 @@
  *= require RPGlobal
  *= require rcp_list
  *= require dialogs
+ *= require paginate
  *= require_tree ../../../vendor/assets/stylesheets/jquery
 
 */
@@ -47,6 +48,7 @@ div.frame_left {
   z-index:1000;
   background: #DDDDDD;
   border-right: 2px solid black;
+  border-bottom: 2px solid black;
 }
 
 #logo_div_small {
@@ -96,7 +98,7 @@ div#header_nav.bottom {
 div.content {
   z-index:0;
   border-left: 2px solid black;
-  margin-top: 66px;
+  margin-top: 72px;
 	margin-left: 252px;
 }
 

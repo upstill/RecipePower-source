@@ -51,18 +51,28 @@ module ApplicationHelper
     # "fitPic" class gets fit inside pic_box with Javascript and jQuery
     idstr = "rcpPic"+id.to_s
     selector = selector || "##{idstr}"
-    begin
-  	  image_tag(picurl.blank? ? placeholder_image : picurl, 
-        class: "fitPic",
-        id: idstr,
-        onload: "fitImageOnLoad('#{selector}')",
-        alt: "Some Image Available")
-    rescue
-  	  image_tag(placeholder_image, 
-        class: "fitPic",
-        id: idstr,
-        onload: "fitImageOnLoad('#{selector}')",
-        alt: "Some Image Available")
+    if picurl.blank?
+      picurl = placeholder_image
+    end
+    # Allowing for the possibility of a data URI
+    if picurl.match(/^data:image/)
+      %Q{<img alt="Some Image Available" class="fitPic" id="#{idstr}" onload="fitImageOnLoad('#{selector}')" src="#{picurl}" style="visibility: none;">}.html_safe
+    else
+      begin
+    	  image_tag(picurl.blank? ? placeholder_image : picurl, 
+          class: "fitPic",
+          id: idstr,
+          style: "visibility: none;",
+          onload: "fitImageOnLoad('#{selector}')",
+          alt: "Some Image Available")
+      rescue
+    	  image_tag(placeholder_image, 
+          class: "fitPic",
+          id: idstr,
+          style: "visibility: none;",
+          onload: "fitImageOnLoad('#{selector}')",
+          alt: "Some Image Available")
+      end
     end
   end
   

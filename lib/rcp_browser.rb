@@ -379,6 +379,10 @@ class RcpBrowser < RcpBrowserComposite
     @children[0].select unless selected # Ensure there's a selection
   end
   
+  def tagstxt()
+    @tagstxt
+  end
+  
   # Accept new tags text, bust the cache, and return the new set of tags
   def tagstxt=(txt)
       # We either use the current tagstxt or the parameter, updating the tagstxt as needed
@@ -410,7 +414,7 @@ class RcpBrowser < RcpBrowserComposite
       else
         # This is a new special tag. Convert to an internal tag and add it to the cache
         name = e.gsub(/\'/, '').strip
-        unless tag = Tag.strmatch( name, { matchall: true, uid: self.user_id }).first
+        unless tag = Tag.strmatch( name, { matchall: true, uid: @userid }).first
             tag = Tag.new( name: name )
             tag.id = -1
             # Search for an unused id
