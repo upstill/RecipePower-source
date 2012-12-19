@@ -16,9 +16,10 @@
 //= require RP
 //= require RPDialogTest
 //= require RPDialogs
+//= require edit_recipe
 //= require RPImages
 
-//= require RPPicPicker
+//= require pic_picker
 //= require RPfields
 //= require RPquery
 //= require RPreferent
@@ -35,4 +36,5 @@
 //= require referents
 //= require registrations
 //= require sites
-//= require whenReady
+// require whenReady
+//= require bootstrap

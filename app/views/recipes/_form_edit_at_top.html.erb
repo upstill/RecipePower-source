@@ -1,47 +1,42 @@
-  <div class="editRecipe_hdr" style="padding:0;" >
+  <div class="edit_recipe_hdr">
 	 <%= image_tag "http://www.recipepower.com/assets/RPlogo.png", class: "small_logo", :alt => "RecipePower" %>
-	 <span>clipped this for your collection! Tag it here if you like. (Or <%= link_to_function "not", "retire_iframe();" %>.)</span>
+	 <span>has added this to your collection. Tag it here if you like. (Or <%= link_to_function "not", "retire_iframe();" %>.)</span>
   </div>
 <%= form_for @recipe, :html => { style: 'width:auto;height:auto'} do |f| %>
   <%= show_errors @recipe.errors %>
-	<div class="editRecipe_field <%= @area %> ">
-	  <div class="recipe_pic_div <%= @area %>" >
-	    <div class="recipe_pic_preview <%= @area %>">
-	      <%= page_fitPic @recipe.picurl, @recipe.id, "PickPicture.png", "div.recipe_pic_preview img" %>  
-	    </div>  
-			<% unless @recipe.picurl.blank? %>
-   			<br />Prefer another picture?<br />Click one!
-			<% end %>
-	    <%# link_to "Pick Picture", "/", :id=>"PicPicker", :data=>"recipe_picurl;div.recipe_pic_preview img" %>
-	  </div>
-	  <%= f.text_field :picurl, rel: "jpg,png,gif", hidden: true %>
-	  <%= pic_picker(@recipe.picurl, @recipe.url, @recipe.id) unless (@area == "at_top") %>
+
+	<div class="left">
+		<%= recipe_pic_field @recipe, f, false %>
+		<% unless @recipe.picurl.blank? %>
+				<p>Prefer another picture?<br />Click one!</p>
+		<% end %>
 	</div>
+	
+	<div class="middle">
+	  <div class="edit_recipe_field" >
+			<%= f.label :title, "Title" -%>
+			<% @recipe.check_title %>
+			<%= f.text_area :title, rows: "2" -%>
+	  </div>
 
-  <div class="editRecipe_field <%= @area %>", style="margin-right:0.1em;margin-left:0.5em" >
-     <div class="editRecipe_element"><%= f.label :title, "Title" -%></div>
-     <div class="editRecipe_element"><%= f.label :tag_tokens, "Tags" -%></div>
-     <div class="editRecipe_element"><%= f.label :comment, "Notes" -%></div>
+	  <div class="edit_recipe_field tags" >
+			<%= f.label :tag_tokens, "Tags" -%>
+			<%= f.text_field :tag_tokens, rows: "1", "data-pre" => @recipe.tags.map(&:attributes).to_json -%>
+	  </div>
+
+	  <div class="edit_recipe_field" >
+			<%= f.label :comment, "Notes" -%>
+			<%= f.text_area :comment, placeholder: "What are your thoughts about this recipe?", rows: "2" -%>
+	  </div>
   </div>
 
-  <div class="editRecipe_field <%= @area %>", style="margin-left:0.2em" >
-	 <% @recipe.check_title %>
-     <div class="editRecipe_element">
-		<%= f.text_area :title, style: "width:490px", rows: "2" -%>
-	 </div>
-     <div class="editRecipe_element">
-	    <%= f.text_field :tag_tokens, "data-pre" => @recipe.tags.map(&:attributes).to_json, style: "width:490px", rows: "2" -%>
-	 </div>
-     <div class="editRecipe_element">
-		<%= f.text_area :comment, placeholder: "What are your thoughts about this recipe?", style: "width:490px", rows: "2" -%>
-	 </div>
-  </div>
-
-  <div class="editRecipe_field <%= @area %>">
-     <%= f.check_box :private %>
-     <%= f.label :private, "Private" %>
-		 <%= hidden_field_tag 'layout', 'injector' %>
-    <br><%= f.submit "Save", class: "gobutton #{@area}" %>
-	<%# button_to "Forget It", remove_recipe_path(@recipe), class: "gobutton #{@area}" %>
+	<div class="right">
+	  <div class="edit_recipe_field ">
+	     <%= f.check_box :private %>
+	     <%= f.label :private, "Private" %>
+	  </div>
+		<%= f.submit "Save", class: "gobutton at_top" %>
+		<%# button_to "Forget It", remove_recipe_path(@recipe), class: "gobutton #{@area}" %>
+		<%= hidden_field_tag 'layout', 'injector' %>
   </div>
 <% end %>

@@ -331,12 +331,14 @@ function injectDialog(code, area, modeless) {
 	// Forms submissions that expect JSON structured data will be handled here:
 	$('form.json', dlog).submit( dlog, submitDialogForJSON );
 	if(area == "at_left") {
-		$(dlog).css( "top", window.pageYOffset );
+		$(dlog).css( "position", "fixed" );
+		$(dlog).css( "top", "70px" );
+		// $(dlog).css( "top", window.pageYOffset );
 		// Right-shift the injector to accommodate the editor
-		var dlgwidth = $(dlog).width();
-		var injectorwidth = $('#RecipePowerInjectedEncapsulation').width();
-		$('#RecipePowerInjectedEncapsulation').width(dlgwidth+injectorwidth)
-	    $('#RecipePowerInjectedEncapsulation').css("marginLeft", dlgwidth)
+		// var dlgwidth = $(dlog).width();
+		// var injectorwidth = $('#RecipePowerInjectedEncapsulation').width();
+		// $('#RecipePowerInjectedEncapsulation').width(dlgwidth+injectorwidth)
+		// $('#RecipePowerInjectedEncapsulation').css("marginLeft", dlgwidth)
 	} else if (area == 'at_top') {
 		var dlgheight = $(dlog).outerHeight();
 		$('#RecipePowerInjectedEncapsulation').css("marginTop", dlgheight)

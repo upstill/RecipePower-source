@@ -8,6 +8,10 @@
 # This file is automatically included by javascript_include_tag :defaults
 
 #= require_directory ../../../vendor/assets/javascripts/jquery
+#= require jquery_ujs
+#= require bootstrap
+
+#= require edit_recipe
 
 # require injector
 #= require RPDialog
@@ -16,9 +20,10 @@
 # require RP
 # require RPDialogTest
 # require RPDialogs
+#= require edit_recipe
 # require RPImages
 
-# require RPPicPicker
+#= require pic_picker
 # require RPfields
 # require RPquery
 # require RPreferent
@@ -40,7 +45,7 @@
 jQuery ->
 	$("#tagstxt").tokenInput("/tags/match.json",
 		crossDomain: false,
-		hintText: "Type tags and strings to look for",
+		hintText: "",
 		noResultsText: "No matching tag found; hit Enter to search with text",
 		prePopulate: $("#tagstxt").data("pre"),
 		theme: "facebook",

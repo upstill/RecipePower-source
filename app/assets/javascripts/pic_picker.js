@@ -1,7 +1,10 @@
 
+// Respond to a link by bringing up a dialog for picking among the image fields of a page
+// -- the pic_picker div is ready to be a diaog
+// -- the data of the link must contain urls for each image, separated by ';'
 function PicPicker(ttl) {
-	// Bring up a dialog showing the picture-picking fields of the page
-	$("div.iconpicker").dialog({ // nee: iconpicker
+	debugger;
+	$("div.pic_picker").dialog({ // nee: iconpicker
 		modal: true,
 		width: 700,
 		zIndex: 1200,
@@ -9,7 +12,7 @@ function PicPicker(ttl) {
 		buttons: { Okay: function (event) {
 			// Transfer the logo URL from the dialog's text input to the page text input
 			// THE PICPICKER MUST BE ARMED WITH NAMES IN ITS DATA
-			var datavals = $("#PicPicker").attr("data").split(';');
+			var datavals = $("a.pic_picker").attr("data").split(';');
 			previewImg("input.icon_picker", datavals[1], "input#"+datavals[0]);
 			$(this).dialog('close');
 			// Copy the image to the window's thumbnail

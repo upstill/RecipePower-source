@@ -1,5 +1,5 @@
 <div class="signin">
-<h3>Sign In</h3>
+<div class="prompt">Sign In</div>
 <%= form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f| %>
   <p><%= f.label :login, "Username or Email (your choice)" %><br />
   <%= f.text_field :login %></p>

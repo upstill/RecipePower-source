@@ -2,14 +2,7 @@
 
 <%= form_for @recipe do |f| %>
   <%= show_errors @recipe.errors %>
-  <div class="recipe_pic_div" >
-    <div class="recipe_pic_preview">                                     
-      <%= page_fitPic @recipe.picurl, @recipe.id, "MissingPicture.png", "div.recipe_pic_preview img" %>  
-    </div>                                                    
-    <p style="text-align:center;"><%= link_to "Pick Picture", "/", :id=>"PicPicker", :data=>"recipe_picurl;div.recipe_pic_preview img" %></p>
-  </div>
-  <%= f.text_field :picurl, rel: "jpg,png,gif", hidden: true %>
-  <%= pic_picker @recipe.picurl, @recipe.url, @recipe.id %>
+  <%= recipe_pic_field @recipe, f, true %>
   <div class="recipe_fields_div">
     <div class="recipe_tags_div" >
        <%= f.label :tag_tokens, "Tags", :class=>"recipe_field_label" -%>

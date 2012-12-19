@@ -56,20 +56,20 @@ module ApplicationHelper
     end
     # Allowing for the possibility of a data URI
     if picurl.match(/^data:image/)
-      %Q{<img alt="Some Image Available" class="fitPic" id="#{idstr}" onload="fitImageOnLoad('#{selector}')" src="#{picurl}" style="visibility: none;">}.html_safe
+      %Q{<img alt="Some Image Available" class="fitPic" id="#{idstr}" onload="fitImageOnLoad('#{selector}')" src="#{picurl}" style="visibility:hidden;">}.html_safe
     else
       begin
     	  image_tag(picurl.blank? ? placeholder_image : picurl, 
           class: "fitPic",
           id: idstr,
-          style: "visibility: none;",
+          style: "visibility:hidden;",
           onload: "fitImageOnLoad('#{selector}')",
           alt: "Some Image Available")
       rescue
     	  image_tag(placeholder_image, 
           class: "fitPic",
           id: idstr,
-          style: "visibility: none;",
+          style: "visibility:hidden;",
           onload: "fitImageOnLoad('#{selector}')",
           alt: "Some Image Available")
       end
@@ -104,7 +104,7 @@ module ApplicationHelper
       prompt = "Pick one of the thumbnails<br>or type/paste the URL below, then click Okay."
     end
     %Q{
-      <div class="iconpicker" style="display:none;" >
+      <div class="pic_picker" style="display:none;" >
         <div class="preview">                                     
           #{page_fitPic picurl, id, "MissingPicture.png", "div.preview img"}  
         </div> 
@@ -289,18 +289,18 @@ module ApplicationHelper
   end
   # Place the header for a dialog, including setting its Onload function.
   # Currently handled this way (e.g., symbols that have been supported)
-  #   :editRecipe
+  #   :edit_recipe
   #   :captureRecipe
   #   :newRecipe
-  #   :signIn
-  def dialogHeader( which, ttl=nil)
-    logger.debug "dialogHeader for "+globstring({dialog: which, area: @area, layout: @layout, ttl: ttl})
+  #   :sign_in
+  def dialogHeader( which, ttl=nil, area="floating")
+    logger.debug "dialogHeader for "+globstring({dialog: which, area: area, layout: @layout, ttl: ttl})
     classname = which.to_s
     onloadFcn = classname+"Onload"
     ttlspec = ttl ? (" title=\"#{ttl}\"") : ""
     result = %Q{ 
       #{flash_helper}
-      <div class='#{classname} dialog #{@area}' #{ttlspec} onload="#{onloadFcn}" id="recipePowerDialog" >
+      <div class='#{classname} dialog #{area}' #{ttlspec} onload="#{onloadFcn}" id="recipePowerDialog" >
       }
     if(@layout && @layout=="injector") 
       result += %Q{

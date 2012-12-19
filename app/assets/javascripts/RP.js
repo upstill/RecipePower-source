@@ -8,11 +8,6 @@ $(function() {
 	  sends back a list of DOM elements to delete, which we handle with the 
 	  function nuke_DOM_elements_by_id.
 	*/
-
-	$("#PicPicker").click( function(event) {
-		PicPicker("Pick a Logo");
-		event.preventDefault();
-	})
 	$('.absorb_button').click( function(event) {
 		var source_id = get_id_from_element($(this))
 		var target = $(this).closest('tr')
@@ -314,7 +309,7 @@ function rcpCollect(id) {
 			        data: $(eventdata.srcElement).serialize()
 			    });
 			})
-			$("div.signIn").dialog({
+			$("div.sign_in").dialog({
 				modal: true,
 				width: 900,
 				title: "Let's get you signed in so we can do this properly",

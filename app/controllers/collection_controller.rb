@@ -14,6 +14,7 @@ class CollectionController < ApplicationController
   end
   
   def index
+	  # logger.debug render_to_string 
   end
   
   def show
@@ -43,10 +44,6 @@ class CollectionController < ApplicationController
   def update
     if tagstxt = params[:tagstxt]
       @collection.tagstxt = tagstxt
-    end
-    if tags = params[:tags]
-      debugger
-      x=2
     end
     if id = params[:selected]
       @collection.select_by_id(params[:selected].delete("RcpBrowserElement").to_i)

@@ -6,15 +6,31 @@
 // Place all the styles related to the collection controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+ >>>>>>> collection
+ >>>>>>> RPGlobal.css
+ >>>>> scaffolds.css 
+ >>>>>>>> dialogs
+ >>>>>>>>>>>> rcp_list
+ >>>>>>>>>> edit_recipe 
+ >>>>>>>>>> buttons
+ >>>>>>>>> paginate (vendor)
+ >>>>>>>>>>> jquery/jNotify.jquery.css
+ >>>>>>>>>>>>>> jquery/jquery-ui-1.8.17.custom.css
+ >>>>>>>>>>>>>> jquery/token-input-facebook.css
+ >>>>>>>>>>>>>> feedback (vendor)
 
  *= require_self
  *  require_tree blueprint
- *= require RPGlobal
- *= require scaffolds
- *= require rcp_list
- *= require dialogs
+ *= require common/RPGlobal
+ *= require common/scaffolds
+ *= require common/dialogs
+ *= require views/rcp_list
+ *= require views/edit_recipe
+ *= require views/sign_in
+ *= require common/buttons
  *= require paginate
  *= require_tree ../../../vendor/assets/stylesheets/jquery
+ *= require feedback
 
 */
 

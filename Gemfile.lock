@@ -52,7 +52,9 @@ GEM
       coderay (>= 1.0.0)
       erubis (>= 2.7.0)
     binding_of_caller (0.6.8)
+    bootstrap-sass (2.1.0.0)
     builder (3.0.4)
+    chunky_png (1.2.6)
     closure_tree (3.6.5)
       activerecord (>= 3.0.0)
     coderay (1.0.8)
@@ -64,6 +66,12 @@ GEM
       execjs
     coffee-script-source (1.4.0)
     columnize (0.3.6)
+    compass (0.12.2)
+      chunky_png (~> 1.2)
+      fssm (>= 0.2.7)
+      sass (~> 3.1)
+    compass-rails (1.0.3)
+      compass (>= 0.12.2, < 0.14)
     daemons (1.1.9)
     debugger (1.2.2)
       columnize (>= 0.3.1)
@@ -92,6 +100,7 @@ GEM
       multipart-post (~> 1.1)
     faraday_middleware (0.9.0)
       faraday (>= 0.7.4, < 0.9)
+    fssm (0.2.9)
     hashie (1.2.0)
     hike (1.2.1)
     htmlentities (4.3.1)
@@ -254,8 +263,10 @@ DEPENDENCIES
   annotate (= 2.4.0)
   better_errors
   binding_of_caller
+  bootstrap-sass (= 2.1)
   closure_tree
   coffee-rails (~> 3.2.1)
+  compass-rails
   debugger
   declarative_authorization
   devise

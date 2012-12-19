@@ -1,4 +1,8 @@
 <div class="frame_left">
+	<%= dialogHeader :edit_recipe, "Tag That Recipe!", "at_left" %>
+		<% logger.debug render("recipes/form_edit_at_left") %>
+		<%= render "recipes/form_edit_at_left" %>
+	<%= dialogFooter %>
 	<div class="collection_nav">
 		<%= @collection.html %>
 	</div>
@@ -10,3 +14,5 @@
 	<%= debug_dump(params) if Rails.env.development? %>
 </div>
 <%= feedback_tab(:position => 'left') %>
+<% @recipe = Recipe.find 800 %>
+<% @area = "at_left" %>

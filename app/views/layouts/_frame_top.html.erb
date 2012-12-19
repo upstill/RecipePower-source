@@ -9,9 +9,36 @@
 			</div>
 		<% end %>
 	</div>
-	<div id="header_nav" class="top">
-			<%= user_status().html_safe %>
-	</div>
+	<%# <header class="navbar navbar-fixed-top navbar-inverse"> %>
+	  <%# <div class="navbar-inner"> %>
+	    <%# <div class="container"> %>
+	      <%# link_to "PMgmt",           root_path, id: "logo" %>
+	      <nav>
+	        <ul class="nav pull-right">
+	          <% if user_signed_in? %>
+	            <li id="fat-menu" class="dropdown">
+	              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+	                <%= current_user.handle %> <b class="caret"></b>
+	              </a>
+	              <ul class="dropdown-menu">
+	                <li><%= link_to "Settings", users_profile_path %></li>
+	                <li><%= link_to "Invite", new_user_invitation_path %></li>
+									<% if permitted_to? :admin, :pages %>
+	                	<li><%= link_to "Admin", admin_path %></li>
+									<% end %>
+	                <li>
+	                  <%= link_to "Sign Out", destroy_user_session_path, :method => "delete" %>
+	                </li>
+	              </ul>
+	            </li>
+	          <% else %>
+	            <li><%= link_to_function "Sign In", %q{recipePowerGetAndRunJSON('authentications/new', 'modal')} %></li>
+	          <% end %>
+	        </ul>
+	      </nav>
+	    <%# </div> %>
+	  <%# </div> %>
+	<%# </header>	 %>
 	<div id="header_nav" class="bottom">
 			<%= header_navlinks  %>
 	</div>

@@ -38,7 +38,7 @@ RP::Application.configure do
   # config.assets.initialize_on_precompile = false
 
   # Precompile additional assets (application.js, application.css, and all non-JS/CSS are already added)
-  config.assets.precompile += %w( injector.css injector.js )
+  config.assets.precompile += %w( collection.css collection.js injector.css injector.js )
   
   config.middleware.use ExceptionNotifier,
     :email_prefix => "[RecipePower Failure!!] ",
