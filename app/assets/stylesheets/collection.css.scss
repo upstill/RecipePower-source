@@ -9,10 +9,10 @@
  >>>>>>> collection
  >>>>>>> RPGlobal.css
  >>>>> scaffolds.css 
- >>>>>>>> dialogs
- >>>>>>>>>>>> rcp_list
- >>>>>>>>>> edit_recipe 
- >>>>>>>>>> buttons
+ >>>>>>>> common/dialogs
+ >>>>>>>>>>>> views/rcp_list
+ >>>>>>>>>> views/edit_recipe 
+ >>>>>>>>>> common/buttons
  >>>>>>>>> paginate (vendor)
  >>>>>>>>>>> jquery/jNotify.jquery.css
  >>>>>>>>>>>>>> jquery/jquery-ui-1.8.17.custom.css
@@ -33,6 +33,7 @@
  *= require feedback
 
 */
+@import "bootstrap";
 
 div.frame_corner {
   position: fixed;
@@ -45,12 +46,14 @@ div.frame_corner {
 }
 
 div.frame_top {
+	display:block;
   position:fixed;
-  height: 66px;
-  width: 100%;
-  min-width: 1000px;
   top: 0px;
-  left: 260px;
+	left:0;
+	right:0;
+	margin-left:260px;
+	height:66px;
+	min-width:800px;
   z-index:1000;
   background: #DDDDDD;
   border-bottom: 2px solid black;
@@ -96,7 +99,7 @@ div.frame_left {
 
 div#header_nav {
   position: absolute;
-  right: 265px;
+	right:8px;
   width: auto;
   height: 20px;
   font:14px arial,sans-serif, bold;
@@ -197,5 +200,21 @@ div.RcpBrowser.selected {
 	border-top: 2px solid black;
 	border-bottom: 2px solid black;
   border-radius:5px;
+}
+ul.nav.pull-right {
+	position:absolute;
+	right:0px
+}
+.dropdown-menu {
+	left:auto;
+	position:fixed;
+	top:0;
+	right:0
+}
+.nav {
+	margin:5px 10px 0 0
+}
+hr {
+	margin:5px
 }
 

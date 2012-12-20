@@ -1,47 +1,189 @@
-span.editRecipe {
-  font:24px arial,sans-serif;
-  font-weight:bold;
+.edit_recipe.dialog {
+	width:95%;
+	margin:5px;
+	padding:5px;
+	padding-bottom:0;
+	background-color:#EEE
 }
 
-div.editRecipe {
-  width: 95%;
-  margin: 1em;
-  padding: 1em;
-//  outline:#090 solid 1px;
+.edit_recipe.dialog.at_left {
+	width:235px;
+	margin:3px;
+	padding:8px;
+	border:2px solid black
 }
 
-div.editRecipe.at_left {
+.edit_recipe.dialog.at_left form {
+	margin:0
+}
+
+.edit_recipe.dialog.at_left div.edit_recipe_field {
+	margin-top:5px;
+	width:100%;
+	height:auto
+}
+
+.edit_recipe.dialog.at_left div.edit_recipe_field.pic {
 	width:200px;
+	height:180px;
+	margin-left:auto;
+	margin-right:auto
 }
 
-.recipe_pic_div {
-    width:35%; // 360px;
-    height: auto;
-    // border:3px solid black;
-    // outline:#999 solid 1px;
-    float: right;
+.edit_recipe.dialog.at_left div.edit_recipe_field.pic div.recipe_pic_preview {
+	width:200px;
+	height:150px;
+	margin-left:auto;
+	margin-right:auto
 }
 
-.recipe_pic_preview {
-  width: 160px;
-  height: 120px;
-  margin-left: auto;
-  margin-right: auto;
-//  outline:#099 solid 1px;
+.edit_recipe.dialog.at_left div.edit_recipe_field.pic div.recipe_pic_preview input {
+	display:none
 }
 
-.recipe_text_field.at_left {
-	width: 80%;
+.edit_recipe.dialog.at_left div.edit_recipe_field.pic div.recipe_pic_preview p {
+	font:14px arial,sans-serif;
+	font-weight:bold;
+	text-align:center;
+	margin-bottom:0px;
+	margin-top:5px
 }
 
-.recipe_tags_div.at_left {
-  margin-top: 5px;
-  width: 100%;
-//  outline:#999 solid 1px;
+.edit_recipe.dialog.at_left div.edit_recipe_field.tags {
+	margin-bottom:10px
 }
 
-.recipe_tags_div {
-  margin-top: 20px;
-  width: 100%;
-  // outline: #999 solid 1px;
+.edit_recipe.dialog.at_left div.edit_recipe_field label {
+	font:14px arial,sans-serif;
+	font-weight:bold;
+	float:left
+}
+
+.edit_recipe.dialog.at_left div.edit_recipe_field input {
+	float:left;
+	margin:2px;
+	margin-right:6px
+}
+
+.edit_recipe.dialog.at_left div.edit_recipe_field textarea {
+	width:222px
+}
+
+.edit_recipe.dialog.at_top {
+	font:12px arial,sans-serif;
+	font-weight:bold;
+	width:auto;
+	height:auto;
+	margin:0em;
+	padding:0em;
+	border:solid 3px #900
+}
+
+.edit_recipe.dialog.at_top div.edit_recipe_hdr {
+	height:30px;
+	width:auto;
+	margin:0.8em;
+	margin-top:0.4em;
+	margin-bottom:0.2em;
+	padding:0
+}
+
+.edit_recipe.dialog.at_top div.edit_recipe_hdr span {
+	display:inline-block;
+	vertical-align:top;
+	margin-top:12px
+}
+
+.edit_recipe.dialog.at_top div.edit_recipe_hdr img {
+	display:inline-block
+}
+
+.edit_recipe.dialog.at_top div.left {
+	float:left;
+	width:150px;
+	height:auto;
+	border:1px solid red
+}
+
+.edit_recipe.dialog.at_top div.left p {
+	display:block;
+	font:12px arial,sans-serif;
+	font-weight:bold;
+	text-align:center;
+	margin:3px
+}
+
+.edit_recipe.dialog.at_top div.middle {
+	float:left;
+	width:530px;
+	height:auto;
+	border:1px solid green
+}
+
+.edit_recipe.dialog.at_top div.right {
+	float:left;
+	width:100px;
+	height:auto;
+	border:1px solid blue
+}
+
+.edit_recipe.dialog.at_top div.edit_recipe_element {
+	height:40px;
+	padding-bottom:0.2em
+}
+
+.edit_recipe.dialog.at_top div.edit_recipe_field {
+	margin:0.5em;
+	width:100%
+}
+
+.edit_recipe.dialog.at_top div.edit_recipe_field label {
+	display:inline-block;
+	vertical-align:top;
+	width:50px;
+	margin-top:5px
+}
+
+.edit_recipe.dialog.at_top div.edit_recipe_field textarea {
+	display:inline-block;
+	vertical-align:top;
+	width:460px
+}
+
+.edit_recipe.dialog.at_top div.edit_recipe_field ul {
+	display:inline-block;
+	vertical-align:top;
+	width:463px;
+	clear:none
+}
+
+.edit_recipe.dialog.at_top div.edit_recipe_field input {
+	display:inline-block;
+	margin:5px
+}
+
+.edit_recipe.dialog.at_top div.edit_recipe_field.pic {
+	width:120px;
+	height:90px;
+	margin-left:auto;
+	margin-right:auto;
+	outline:#999 solid 1px
+}
+
+.edit_recipe.dialog.at_top div.edit_recipe_field.pic div.recipe_pic_preview {
+	width:120px;
+	height:90px;
+	margin-left:auto;
+	margin-right:auto
+}
+
+.edit_recipe.dialog.at_top div.edit_recipe_field.pic div.recipe_pic_preview input {
+	display:none
+}
+
+.edit_recipe.dialog.at_top div.edit_recipe_field.pic div.recipe_pic_preview p {
+	font:12px arial,sans-serif;
+	font-weight:bold;
+	text-align:center;
+	margin:3px
 }

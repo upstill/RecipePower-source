@@ -1,108 +1,101 @@
 // Default styling for dialogs
 div.dialog {
-  font:12px arial,sans-serif;
-  font-weight:bold;
-//  outline:#090 solid 1px;
+	font:12px arial,sans-serif;
+	font-weight:bold
 }
-
 div#recipePowerDialog.at_top {
-	width: 789px;
+	width:789px
 }
-
 div.dialog.floating {
-  font:12px arial,sans-serif;
-  font-weight:bold;
-  // width: auto;
-  font-size:80%;
-  padding-left:1%;
-  padding-right:1%;
-  margin-left:0;
-  margin-right:0;
+	font:12px arial,sans-serif;
+	font-weight:bold;
+	// width:auto;
+	font-size:80%;
+	padding-left:1%;
+	padding-right:1%;
+	margin-left:0;
+	margin-right:0
 }
-
 div.dialog.at_left {
-  font:12px arial,sans-serif;
-  font-weight:bold;
+	font:12px arial,sans-serif;
+	font-weight:bold;
 	width:auto;
 	position:absolute;
-  font-size:80%;
-  padding-left:1%;
-  padding-right:1%;
-  margin-left:0;
-  margin-right:0;
-//	outline:#009 solid 3px;
+	font-size:80%;
+	padding-left:1%;
+	padding-right:1%;
+	margin-left:0;
+	margin-right:0;
+	z-index:2000;
 	top:0;
-	left:0;
-	} 
-
+	left:0
+}
 div.dialog.at_top {
-  font:12px arial,sans-serif;
-  font-weight:bold;
+	font:12px arial,sans-serif;
+	font-weight:bold;
 	height:auto;
 	position:fixed;
 	top:0;
 	left:0;
 	// margin:3px;
 	padding-left:5px;
-	padding-bottom:5px;
+	padding-bottom:5px
 }
-
 .hdrdiv {
 	float:left;
-	padding: 0em;
+	padding:0em;
 	padding-top:11px;
 	height:15px;
-	width: auto;
+	width:auto
 }
-
 img.small_logo {
-	width: 144px;
-	height: 24px;
+	width:144px;
+	height:24px
 }
-
 input.gobutton.at_top {
-  margin: 0.5em;
-  display: inline-block;
-  text-align: center;
-  border-width: 1px;
-  border-style: solid;
-  text-transform: uppercase;
-  text-decoration: none;
-  line-height: 1.1;
-  font-weight: normal;
-  font-family: sans-serif;
-  color: #5E4A18;
-  font-size: 10px;
-  background-color: #E6DAA1;
-  background-image: -webkit-linear-gradient(top, #e7dca5 0%, #e7e2c9 48%, #E6DAA1 49%, #E6DAA1 82%, #ece3b7 100%);
-  background-image: -moz-linear-gradient(top, #e7dca5 0%, #e7e2c9 48%, #E6DAA1 49%, #E6DAA1 82%, #ece3b7 100%);
-  background-image: -o-linear-gradient(top, #e7dca5 0%, #e7e2c9 48%, #E6DAA1 49%, #E6DAA1 82%, #ece3b7 100%);
-  background-image: linear-gradient(top, #e7dca5 0%, #e7e2c9 48%, #E6DAA1 49%, #E6DAA1 82%, #ece3b7 100%);
-  border-color: hsl(0, 0%, 55%);
-  -webkit-box-shadow: inset 0 0 1px 1px #fcfbf6, 0 0 1px 3px rgba(0, 0, 0, 0.15);
-  -moz-box-shadow: inset 0 0 1px 1px #fcfbf6, 0 0 1px 3px rgba(0, 0, 0, 0.15);
-  box-shadow: inset 0 0 1px 1px #fcfbf6, 0 0 1px 3px rgba(0, 0, 0, 0.15);
-  -webkit-text-shadow: 1px 1px 1px #d1ba50;
-  -moz-text-shadow: 1px 1px 1px #d1ba50;
-  -o-text-shadow: 1px 1px 1px #d1ba50;
-  text-shadow: 1px 1px 1px #d1ba50;
-  -webkit-border-radius: 12px;
-  -moz-border-radius: 12px;
-  border-radius: 8px;
-  padding: 3px 6px 3px 6px;
+	margin-top:2em;
+	margin-left:auto;
+	margin-right:auto;
+	display:block;
+	text-align:center;
+	border-width:2px;
+	border-style:solid;
+	text-transform:uppercase;
+	text-decoration:none;
+	line-height:1.3;
+	font-weight:normal;
+	font-family:sans-serif;
+	color:#5E4A18;
+	font-size:14px;
+	background-color:#E6DAA1;
+	background-image:-webkit-linear-gradient(top,#e7dca5 0%,#e7e2c9 48%,#E6DAA1 49%,#E6DAA1 82%,#ece3b7 100%);
+	background-image:-moz-linear-gradient(top,#e7dca5 0%,#e7e2c9 48%,#E6DAA1 49%,#E6DAA1 82%,#ece3b7 100%);
+	background-image:-o-linear-gradient(top,#e7dca5 0%,#e7e2c9 48%,#E6DAA1 49%,#E6DAA1 82%,#ece3b7 100%);
+	background-image:linear-gradient(top,#e7dca5 0%,#e7e2c9 48%,#E6DAA1 49%,#E6DAA1 82%,#ece3b7 100%);
+	border-color:hsl(0,0%,55%);
+	-webkit-box-shadow:inset 0 0 1px 1px #fcfbf6,0 0 1px 3px rgba(0,0,0,0.15);
+	-moz-box-shadow:inset 0 0 1px 1px #fcfbf6,0 0 1px 3px rgba(0,0,0,0.15);
+	box-shadow:inset 0 0 1px 1px #fcfbf6,0 0 1px 3px rgba(0,0,0,0.15);
+	-webkit-text-shadow:1px 1px 1px #d1ba50;
+	-moz-text-shadow:1px 1px 1px #d1ba50;
+	-o-text-shadow:1px 1px 1px #d1ba50;
+	text-shadow:1px 1px 1px #d1ba50;
+	-webkit-border-radius:12px;
+	-moz-border-radius:12px;
+	border-radius:8px;
+	padding:3px 6px 3px 6px
 }
-
 div#recipePowerCancelDiv {
-	float: right;
-	width: auto;
-	height: auto;
-  text-decoration: none;
-  color: #5E4A18;
-  font-size: 14px;
-  padding: 2px;
-  background-color: #E6DAA1;
-  border-radius: 2px;
-  border-color: hsl(0, 0%, 55%);
-  border-width: 2px;
-  border-style: solid;
+	float:right;
+	width:auto;
+	height:auto;
+	text-decoration:none;
+	color:#5E4A18;
+	font-size:14px;
+	padding:2px;
+	background-color:#E6DAA1;
+	border-radius:2px;
+	border-color:hsl(0,0%,55%);
+	border-width:2px;
+	border-style: solid
 }

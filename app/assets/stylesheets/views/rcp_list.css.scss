@@ -4,7 +4,7 @@
     width:100%;
     position:relative;
     // We're relative to allow absolute positioning of the bottom element
-    // outline:#999 solid 1px;
+    // outline:#999 solid 1px
 }
 
 .rcp_list_pic_box {
@@ -14,7 +14,7 @@
     vertical-align: center;
     // text-align: center;text-align: center; // vertical-align: center;
     align: center;
-    // outline:#999 solid 1px;
+    // outline:#999 solid 1px
 }
 
 .rcp_list_text {
@@ -22,7 +22,7 @@
     width:50%; // width:500px;
     margin-left:15px;
     float:left;
-    // outline:#999 solid 1px;
+    // outline:#999 solid 1px
 }
 
 .rcp_list_element_bottom {
@@ -32,60 +32,60 @@
   float:left;
   width:auto; // 50%;
   height:auto;
-    // outline:#999 solid 1px;
+    // outline:#999 solid 1px
 }
 
 .rcp_list_element_title {
   padding-top:18px;
-  font:18px arial,sans-serif, bold;
+  font:18px arial,sans-serif, bold
 }
 
 .rcp_list_element_source {
   font:14px arial,sans-serif;
   margin-top:4px;
-  margin-left:20px;
+  margin-left:20px
 }
 
 .rcp_list_element_tag_summary {
   margin-top:10px;
   font:15px arial,sans-serif;
-  font-style: italic;
+  font-style: italic
 }
 
 .rcp_list_element_tag {
   margin-top:10px;
   font:15px arial,sans-serif;
   font-style: normal;
-  font-weight: 600;
+  font-weight: 600
 }
 
 .rcp_list_element_twocents {
   margin-top:10px;
   font:14px arial,sans-serif;
-  font-style: italic;
+  font-style: italic
 }
 
 .rcp_list_element_golink {
   margin-top:10px;
-  font:15px arial,sans-serif;
+  font:15px arial,sans-serif
 }
 
 .rcp_list_element_stats {
   font:15px arial,sans-serif;
-  color: solid red;
+  color: solid red
 }
 
 .preview_button {
 	width:25px;
-	height:25px;
+	height:25px
 }
 
 .preview_button:hover {
 	outline: #c0c0c0 solid 3px;
-	background-color:#f8f8f8;
+	background-color:#f8f8f8
 }
 
 .popup:hover {
 	// outline: #EDDCBF solid thick;
-	background-color:#FFFFFF;
+	background-color:#FFFFFF
 }
