@@ -39,7 +39,9 @@ div.dialog.at_top {
 	left:0;
 	// margin:3px;
 	padding-left:5px;
-	padding-bottom:5px
+	padding-bottom:5px;
+	background-color:#EEE;
+	border:solid 3px #900
 }
 .hdrdiv {
 	float:left;

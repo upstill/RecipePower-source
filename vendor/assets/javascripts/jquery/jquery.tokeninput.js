@@ -138,7 +138,6 @@ function _escapeHTML(text) {
 var methods = {
     init: function(url_or_data_or_function, options) {
         var settings = $.extend({}, DEFAULT_SETTINGS, options || {});
-
         return this.each(function () {
             $(this).data("settings", settings);
             $(this).data("tokenInputObject", new $.TokenList(this, url_or_data_or_function, settings));

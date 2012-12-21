@@ -103,17 +103,6 @@ function armDialog(sourcehome) {
 	// Finally, report the window dimensions to the enclosing window
 	$.postMessage( { call: "execute_resize", width: dlog.offsetWidth, height: dlog.offsetHeight }, document.sourcehome );
 	
-	// Set up jquery tokeninput for the tags
-	$("#recipe_tag_tokens").tokenInput("/tags/match.json", {
-		crossDomain: false,
-		noResultsText: "No matching tag found; hit Enter to make it a tag",
-		hintText: "Type your own tag(s) for the recipe",
-		prePopulate: $("#recipe_tag_tokens").data("pre"),
-		theme: "facebook",
-		preventDuplicates: true,
-		allowFreeTagging: true // allowCustomEntry: true
-	});
-    
 	$.receiveMessage( function(evt) {
 		var data = ptq(evt.data);
 		var call = data.call;

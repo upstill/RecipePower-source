@@ -57,15 +57,6 @@ $(function() {
         onDelete: tokenChangeCallback,
         allowFreeTagging: true // allowCustomEntry: true
     });
-    $("#recipe_tag_tokens").tokenInput("/tags/match.json", {
-        crossDomain: false,
-		noResultsText: "No matching tag found; hit Enter to make it a tag",
-        hintText: "Type your own tag(s) for the recipe",
-        prePopulate: $("#recipe_tag_tokens").data("pre"),
-        theme: "facebook",
-		preventDuplicates: true,
-        allowFreeTagging: true // allowCustomEntry: true
-    });
     $("#referent_channel_tag").tokenInput("/tags/match.json?tagtype=0", {
         crossDomain: false,
 		noResultsText: "No matching tag found; hit Enter to make it a tag",

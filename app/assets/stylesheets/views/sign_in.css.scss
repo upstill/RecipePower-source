@@ -1,122 +1,129 @@
 
 .sign_in.dialog {
-	background-color:#EEE;
-	width:630px;
-	height:200px
-}
-
-.sign_in.dialog.at_top {
-	font:12px arial,sans-serif;
-	font-weight:bold;
-	width:630px;
-	height:auto;
-	margin:0.5em;
-	padding:0.5em;
-	border:solid 3px #900
-}
-
-.sign_in.dialog.floating {
-	width:600px;
-	margin-top:2em;
-	float:left
-}
-
-.sign_in.dialog div.signin_hdr {
-	height:24px;
-	width:auto;
-	margin:0.5em;
-	padding:0
-}
-
-.sign_in.dialog .sign {
-	width:620px;
-	margin:5px 20px;
-	float:left
-}
-
-.sign_in.dialog .sign.floating {
-	width:550px;
-	float:left
-}
-
-.sign_in.dialog .signup {
-	width:200px;
-	border-left:solid 1px #999;
-	margin:0px;
-	padding-left:20px;
-	float:left
-}
-
-.sign_in.dialog .prompt {
-	margin:15px 0px;
-	font:20px arial,sans-serif;
-	font-weight:bold
-}
-
-.sign_in.dialog .or {
-	font:24px arial,sans-serif;
-	margin-top:100px;
-	margin-right:10px;
-	float:left
-}
-
-.sign_in.dialog div.signin_or {
-	padding-top:1.5em;
-	font-size:14px;
-	float:left;
-	height:40px;
-	border-right:1px solid black;
-	border-left:1px solid black
+	&.at_top {
+		font:12px arial,sans-serif;
+		font-weight:bold;
+		width:1000px;
+		height:auto;
+		.auth_poss {
+			display: inline-block;
+			font:16px arial,sans-serif;
+			width:auto;
+			margin:0.5em .1em ;			
+			border-right:1px solid black;
+			.auth_provider {
+				display: inline-block;
+				text-decoration:none;
+				text-align:center;
+				margin-bottom:10px;
+				width:55px;
+				height:auto;
+				margin:0;
+				font-size:12px;
+				img {
+					width:48px;
+					height:48px;
+					margin-left:auto;
+					margin-right:auto;
+					display:block
+				}
+			}
+		}
+		.signin {
+			margin:0px 5px;
+			padding:7px;
+			display: inline-block;
+			font:16px arial,sans-serif;
+			width:auto;
+			border-left:1px solid black;
+			vertical-align: top;
+			.signin_credentials {
+				width: 210px;
+				display: inline-block;
+				vertical-align: top;
+				// margin:0.5em;
+				.signin_element {
+					width: 95%;
+				}
+			}
+			.signin_go {
+				width: 120px;
+				margin: 10px;
+				display: inline-block;
+				vertical-align: top;
+			}
+		}
+	}
+	&.floating {
+		width:600px;
+		margin-top:2em;
+		float:left
+	}
+	div.signin_hdr {
+		height:24px;
+		width:auto;
+		margin:0.5em;
+		padding:0
+	}
+	.sign {
+		width:620px;
+		margin:5px 20px;
+		float:left;
+		&.floating {
+			width:550px;
+			float:left
+		}
+	}
+	.signup {
+		width:200px;
+		border-left:solid 1px #999;
+		margin:0px;
+		padding-left:20px;
+		float:left
+	}
+	.prompt {
+		margin:15px 0px;
+		font:20px arial,sans-serif;
+		font-weight:bold
+	}
+	.or {
+		font:24px arial,sans-serif;
+		margin-top:100px;
+		margin-right:10px;
+		float:left
+	}
+	div.signin_or {
+		display: inline-block;
+		padding-top:1.5em;
+		font-size:14px;
+		height:40px;
+		// border-right:1px solid black;
+		// border-left:1px solid black
+	}
 }
 
 .signin {
 	width:250px;
-	border-right:solid 1px #999;
+	// border-right:solid 1px #999;
 	margin-right:10px;
 	padding-right:10px;
-	float:left
-}
-
-.signin.at_top {
-	font:16px arial,sans-serif;
-	width:600px;
-	border-left:1px solid black;
-	margin:0em;
-	padding:0em 0.7em;
-	float:left
-}
-
-.signin.at_top .signin_field {
-	float:left;
-	margin:0.5em;
-	width:auto
+	display: inline-block;
 }
 
 .auth_signin {
 	width:520px;
 	margin-left:20px;
-	float:left
-}
-
-.auth_signin.floating {
-	margin:0px 20px;
-	float:left
-}
-
-.auth_signin.at_top {
-	width:400px;
-	border:solid 1px #090;
-	margin:0.3em;
-	float:left
-}
-
-.auth_poss.at_top {
-	font:16px arial,sans-serif;
-	width:320px;
 	float:left;
-	margin:.1em;
-	border-right:1px solid black;
-	margin-left:0.5em
+	&.floating {
+		margin:0px 20px;
+		float:left
+	}
+	&.at_top {
+		width:400px;
+		border:solid 1px #090;
+		margin:0.3em;
+		float:left
+	}
 }
 
 .auth_provider {
@@ -124,26 +131,23 @@
 	text-decoration:none;
 	margin-right:20px;
 	text-align:center;
-	margin-bottom:10px
-}
-
-.auth_provider.small {
-	float:left;
-	width:auto;
-	height:50px;
-	text-decoration:none;
-	text-align:center;
-	margin:0;
-	padding:0;
-	padding-right:0.5em;
-	font-size:9px
-}
-
-.auth_provider.small img {
-	width:32px;
-	height:32px
-}
-
-.auth_provider img {
-	display:block
+	margin-bottom:10px;
+	&.small {
+		float:left;
+		width:auto;
+		height:50px;
+		text-decoration:none;
+		text-align:center;
+		margin:0;
+		padding:0;
+		padding-right:0.5em;
+		font-size:9px;
+		img {
+			width:40px;
+			height:40px
+		}
+	}
+	img {
+		display:block
+	}
 }
