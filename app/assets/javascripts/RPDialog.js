@@ -279,7 +279,7 @@ function injectDialog(code, area, modeless) {
   // First, remove any lingering style or script elements on the page
   $('link.RecipePowerInjectedStyle').remove();
   // Inject our styles
-  $('<link href="/assets/dialog.css?body=1" media="screen" rel="stylesheet" type="text/css" id="RecipePowerInjectedStyle"/>').appendTo('head');
+  // $('<link href="/assets/dialog.css?body=1" media="screen" rel="stylesheet" type="text/css" id="RecipePowerInjectedStyle"/>').appendTo('head');
   // Parse the code, creating an html element outside the DOM, then pulling the
   // 'div.dialog' element from that.
   var dlog = $('div.dialog', $('<html></html>').html(code));
@@ -323,8 +323,11 @@ function injectDialog(code, area, modeless) {
 	}
 	// We get and execute the onload function for the dialog
 	var onload = $(dlog).attr("onload");
-	if (onload && (typeof window[onload] === 'function')) {
-		window[onload](dlog);
+	if (onload) {
+		if (typeof window[onload] === 'function') 
+			window[onload](dlog);
+		else if (RP && (typeof RP[onload] === 'function')) 
+			RP[onload](dlog);
 	}
 	// Cancel will remove the dialog and confirm null effect to user
 	$('input.cancel', dlog).click( modeless ? cancelModelessDialog : cancelModalDialog );

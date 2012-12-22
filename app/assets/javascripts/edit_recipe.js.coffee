@@ -1,6 +1,6 @@
 # Support for editing recipe tags
 
-jQuery ->
+RP.edit_recipeOnload = (dlog) ->
 	$("#recipe_tag_tokens").tokenInput("/tags/match.json", 
 		crossDomain: false,
 		noResultsText: "No matching tag found; hit Enter to make it a tag",
@@ -10,8 +10,16 @@ jQuery ->
 		preventDuplicates: true,
 		allowFreeTagging: true
 	)
-	$("a.pic_picker").click ->
+	$("a.pic_picker_golink").click ->
 		PicPicker "Pick a Picture for the Recipe"
 		event.preventDefault()
 	fitImageOnLoad "div.edit_recipe img"
 	# dialogOnClose dlog, recipeCallback 
+	
+RP.edit_recipeGo = (path, how, where) ->
+	recipePowerGetAndRunJSON path, how, where
+
+jQuery ->
+	if dlog = $('div.edit_recipe.dialog')[0]
+		RP.edit_recipeOnload(dlog)
+

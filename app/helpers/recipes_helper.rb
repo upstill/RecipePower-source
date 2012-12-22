@@ -2,14 +2,19 @@ require 'open-uri'
 require './lib/Domain.rb'
 
 module RecipesHelper
+  
+def edit_recipe_link( label, path, how="modeless", where="at_left")
+  # link_to_function label, "recipePowerGetAndRunJSON('#{path}', '#{how}', '#{where}');"
+  link_to_function label, "RP.edit_recipeGo('#{path}', '#{how}', '#{where}');"
+end
 
-# Show a thumbnail of a recipe's image, possibly with a link to an editing dialo
+# Show a thumbnail of a recipe's image, possibly with a link to an editing dialog
 def recipe_pic_field(rcp, form, editable = true)
   fields =  page_fitPic(@recipe.picurl, @recipe.id, "PickPicture.png", "div.recipe_pic_preview img")+
           form.text_field(:picurl, rel: "jpg,png,gif", hidden: true)
   if editable
     fields += content_tag(:p,
-          link_to( "Pick Picture", "/", :class=>"pic_picker", :data=>"recipe_picurl;div.recipe_pic_preview img"))+
+          link_to( "Pick Picture", "/", :class=>"pic_picker_golink", :data=>"recipe_picurl;div.recipe_pic_preview img"))+
       pic_picker(@recipe.picurl, @recipe.url, @recipe.id) # Declare the picture-picking dialog
   end
   content_tag(
