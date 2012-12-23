@@ -18,6 +18,7 @@
 //= require RP
 //= require RPDialogTest
 //= require RPDialogs
+//= require dialog
 //= require edit_recipe
 //= require RPImages
 

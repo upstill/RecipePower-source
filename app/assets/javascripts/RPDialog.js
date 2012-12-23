@@ -112,9 +112,9 @@ function runResponse(responseData) {
 // This function can be tied to a link with only a URL to a controller for generating a dialog.
 // We will get the div and run the associated dialog.
 function recipePowerGetAndRunJSON(request, how, area) {
-	if(area) {
+	if(area)
 		request += "?area="+area
-	}
+	
 	$('span.query').text(request);
 	$.ajax( {
 		type: "GET",
@@ -195,7 +195,9 @@ function postSuccess(jsonResponse, dlog) {
 
 // Cancel a modal dialog by issuing the close event
 function cancelModalDialog(event) {
-	$('div.dialog').dialog("close");
+	var dlog = $('div.dialog');
+	$(dlog).dialog("close");
+	RP.dialog.apply('onclose', dlog);
 	event.preventDefault();
 }
 
@@ -322,13 +324,8 @@ function injectDialog(code, area, modeless) {
 		dlog = $('#RecipePowerInjectedEncapsulation').next();
 	}
 	// We get and execute the onload function for the dialog
-	var onload = $(dlog).attr("onload");
-	if (onload) {
-		if (typeof window[onload] === 'function') 
-			window[onload](dlog);
-		else if (RP && (typeof RP[onload] === 'function')) 
-			RP[onload](dlog);
-	}
+	if($(dlog).hasClass('dialog') && RP && RP.dialog)
+		RP.dialog.apply('onload', dlog);
 	// Cancel will remove the dialog and confirm null effect to user
 	$('input.cancel', dlog).click( modeless ? cancelModelessDialog : cancelModalDialog );
 	// Forms submissions that expect JSON structured data will be handled here:
@@ -358,7 +355,7 @@ function postError(str) {
 
 function postNotice(str) {
   if(str && (str.length > 0)) {
-	$('#container').data("noticePost", str);
+		$('#container').data("noticePost", str);
   }
 }
 
@@ -380,13 +377,22 @@ function recipePowerNotify() {
 function withdrawDialog() {
 	var odlog = $('#RecipePowerInjectedEncapsulation').prev().add(
 				$('#RecipePowerInjectedEncapsulation').next());
-	$(odlog).dialog("destroy");
-	// Remove the first child of 'body', which is our dialog (if any)
-	$(odlog).remove();
+	removeDialog(odlog);
 	/* Unwrap the page contents from their encapsulation */
 	unwrapWithoutCloning(); // $('#RecipePowerInjectedEncapsulation').children().unwrap();
 	/* Remove any injected styles from the head */
 	$('link.RecipePowerInjectedStyle').remove();
+}
+
+// Clean up an active dialog by destroying its jQuery dialog, calling its onclose function
+// and removing it from the DOM
+function removeDialog(dlog) {
+	$(dlog).dialog("destroy");
+	// If the dialog has an associated manager, call its onclose function
+	if(RP && RP.dialog)
+		RP.dialog.apply('onclose', dlog)
+	// Remove the first child of 'body', which is our dialog (if any)
+	$(dlog).remove();	
 }
 
 /* Encapsulate the body content of the page with a div wrapper */

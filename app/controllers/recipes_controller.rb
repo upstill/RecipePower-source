@@ -164,10 +164,10 @@ class RecipesController < ApplicationController
   
   def update
     # return if need_login true
+    @recipe = Recipe.find(params[:id])
     if params[:commit] == "Cancel"
       reportRecipe rcpqueries_url, "Recipe secure and unchanged.", formats
     else
-      @recipe = Recipe.find(params[:id])
       @recipe.current_user = current_user_or_guest_id # session[:user_id]
       begin
         saved_okay = @recipe.update_attributes(params[:recipe])
