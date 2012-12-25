@@ -59,7 +59,7 @@ module ApplicationHelper
       %Q{<img alt="Some Image Available" class="fitPic" id="#{idstr}" onload="fitImageOnLoad('#{selector}')" src="#{picurl}" style="visibility:hidden;">}.html_safe
     else
       begin
-    	  image_tag(picurl.blank? ? placeholder_image : picurl, 
+    	  image_tag(picurl, 
           class: "fitPic",
           id: idstr,
           style: "visibility:hidden;",

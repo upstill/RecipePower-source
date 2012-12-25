@@ -49,5 +49,5 @@ RP.edit_recipeGo = (path, how, where) ->
 
 jQuery ->
 	if dlog = $('div.edit_recipe.dialog')[0]
-		RP.edit_recipeOnload(dlog)
+ 		RP.edit_recipeOnload(dlog)
 

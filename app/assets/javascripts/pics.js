@@ -48,7 +48,8 @@ function fitImage(img) {
 	  $(img).css("left", (frameWidth-newWidth)/2);
 	}
 	img.style.position = "relative";
-    $(img).css("visibility", "visible");
+  $(img).css("visibility", "visible");
+  $(parent).css("display", "block");
     $(img).show();
     return true;
 }

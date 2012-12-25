@@ -10,22 +10,21 @@ end
 
 # Show a thumbnail of a recipe's image, possibly with a link to an editing dialog
 def recipe_pic_field(rcp, form, editable = true)
-  fields =  page_fitPic(@recipe.picurl, @recipe.id, "PickPicture.png", "div.recipe_pic_preview img")+
-          form.text_field(:picurl, rel: "jpg,png,gif", hidden: true)
-  if editable
-    fields += content_tag(:p,
-          link_to( "Pick Picture", "/", :class=>"pic_picker_golink", :data=>"recipe_picurl;div.recipe_pic_preview img"))+
-      pic_picker(@recipe.picurl, @recipe.url, @recipe.id) # Declare the picture-picking dialog
-  end
-  content_tag(
+  picurl = @recipe.picurl
+  preview = content_tag(
     :div, 
-    content_tag(
-      :div, 
-      fields, 
-      class: "recipe_pic_preview"
-    ),
-    class: "edit_recipe_field pic"
+    page_fitPic(@recipe.picurl, @recipe.id, "PickPicture.png", "div.recipe_pic_preview img")+
+              form.text_field(:picurl, rel: "jpg,png,gif", hidden: true),
+    class: "recipe_pic_preview"
   )
+  picker = editable ?
+    content_tag(:div,
+          link_to( "Pick Picture", "/", :data=>"recipe_picurl;div.recipe_pic_preview img", :class => "pic_picker_golink")+
+          pic_picker(@recipe.picurl, @recipe.url, @recipe.id), 
+          :class=>"recipe_pic_picker"
+          ) # Declare the picture-picking dialog
+  : ""
+  content_tag :div, preview + picker, class: "edit_recipe_field pic"
 end
 
 # If the recipe doesn't belong to the current user's collection,

@@ -6,11 +6,16 @@
 //
 // Place your application-specific JavaScript functions and classes here
 
+//= require_self
 //= require pics
+//= require dialog
+//= require edit_recipe
 //= require jquery/jquery.form
 //= require jquery/jquery.ba-postmessage
 //= require jquery/jNotify.jquery
 //= require jquery/jquery.tokeninput
+
+window.RP = window.RP || {}
 
 // Called to replace the form's image with the given URL in response to a message from the owning window
 function replaceImg(data) {
@@ -90,12 +95,15 @@ function armDialog(sourcehome) {
 
 	var dlog = document.getElementById("recipePowerDialog"); // document.body.childNodes[0];
 	var onloadNode = dlog.attributes["onload"];
+	debugger;
 	if(onloadNode) {
 		onloadFcn = onloadNode.nodeValue;
 		if (onloadFcn && (typeof window[onloadFcn] === 'function'))
 			window[onloadFcn](dlog);
 	}
        
+  // if((typeof (RP) != 'undefined') && (typeof RP.dialog != 'undefined'))
+		// RP.dialog.apply('onload', dlog);
 	/// Cancel will remove the dialog and confirm null effect to user
 	var cancelBtn = document.getElementById("recipePowerCancelBtn");
 	if(cancelBtn) cancelBtn.onclick = retire_iframe;

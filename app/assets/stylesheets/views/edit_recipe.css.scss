@@ -3,70 +3,64 @@
 	margin:5px;
 	padding:5px;
 	padding-bottom:0;
-	background-color:#EEE
-}
-
-.edit_recipe.dialog.at_left {
-	width:235px;
-	margin:3px;
-	padding:8px;
-	border:2px solid black
-}
-
-.edit_recipe.dialog.at_left form {
-	margin:0
-}
-
-.edit_recipe.dialog.at_left div.edit_recipe_field {
-	margin-top:5px;
-	width:100%;
-	height:auto
-}
-
-.edit_recipe.dialog.at_left div.edit_recipe_field.pic {
-	width:200px;
-	height:180px;
-	margin-left:auto;
-	margin-right:auto
-}
-
-.edit_recipe.dialog.at_left div.edit_recipe_field.pic div.recipe_pic_preview {
-	width:200px;
-	height:150px;
-	margin-left:auto;
-	margin-right:auto
-}
-
-.edit_recipe.dialog.at_left div.edit_recipe_field.pic div.recipe_pic_preview input {
-	display:none
-}
-
-.edit_recipe.dialog.at_left div.edit_recipe_field.pic div.recipe_pic_preview p {
-	font:14px arial,sans-serif;
-	font-weight:bold;
-	text-align:center;
-	margin-bottom:0px;
-	margin-top:5px
-}
-
-.edit_recipe.dialog.at_left div.edit_recipe_field.tags {
-	margin-bottom:10px
-}
-
-.edit_recipe.dialog.at_left div.edit_recipe_field label {
-	font:14px arial,sans-serif;
-	font-weight:bold;
-	float:left
-}
-
-.edit_recipe.dialog.at_left div.edit_recipe_field input {
-	float:left;
-	margin:2px;
-	margin-right:6px
-}
-
-.edit_recipe.dialog.at_left div.edit_recipe_field textarea {
-	width:222px
+	background-color:#EEE;
+	&.at_left {
+		width:235px;
+		margin:3px;
+		padding:8px;
+		border:2px solid black;
+		form {
+			margin:0
+		}
+		div.edit_recipe_field {
+			margin-top:5px;
+			width:100%;
+			height:auto;
+			&.pic {
+				width:200px;
+				height:auto;
+				margin-left:auto;
+				margin-right:auto;
+				div.recipe_pic_preview {
+					width:200px;
+					height:150px;
+					display: none;
+					margin-left:auto;
+					margin-right:auto;
+					input {
+						display:none;
+					}
+					img {
+						display: none;
+					}
+				}
+				div.recipe_pic_picker {
+					font:14px arial,sans-serif;
+					font-weight:bold;
+					text-align:center;
+					margin-bottom:0px;
+					margin-top:5px
+				}
+			}
+			&.tags {
+				margin-bottom:10px
+			}
+			label {
+				font:14px arial,sans-serif;
+				font-weight:bold;
+				float:left
+			}
+			input {
+				float:left;
+				margin:2px;
+				margin-right:6px
+			}
+			textarea {
+				width:222px
+			}
+		}
+	}
+	
 }
 
 .edit_recipe.dialog.at_top {

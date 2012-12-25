@@ -296,7 +296,7 @@ function injectDialog(code, area, modeless) {
 			if($(dlog).hasClass(positions[i])) {
 				area = positions[i];
 			}
-	    }
+	  }
 	}
 	if($('#RecipePowerInjectedEncapsulation').length == 0) { // XXX depends on jQuery
 	  wrapWithoutCloning();
