@@ -16,11 +16,12 @@
 #= require RPDialog
 
 # require RPquery
-# require RP
+#= require RP
 # require RPDialogTest
 # require RPDialogs
 #= require dialog
 #= require edit_recipe
+#= require rcp_list
 # require RPImages
 
 #= require pic_picker
@@ -82,7 +83,6 @@ collection_tagchange = (params, url) ->
 	collection_update $('form.query_form').serialize()
 	
 collection_update = (params, url) ->
-	debugger;
 	jQuery.ajax
 		type: "POST"
 		url: (url || "collection/update")

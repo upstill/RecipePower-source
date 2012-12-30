@@ -95,7 +95,6 @@ function armDialog(sourcehome) {
 
 	var dlog = document.getElementById("recipePowerDialog"); // document.body.childNodes[0];
 	var onloadNode = dlog.attributes["onload"];
-	debugger;
 	if(onloadNode) {
 		onloadFcn = onloadNode.nodeValue;
 		if (onloadFcn && (typeof window[onloadFcn] === 'function'))

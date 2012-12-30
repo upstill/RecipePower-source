@@ -10,6 +10,7 @@
 //= require_self
 // require_directory .
 //= require_directory ../../../vendor/assets/javascripts/jquery
+//= require jquery_ujs
 
 //= require injector
 //= require RPDialog
@@ -20,6 +21,7 @@
 //= require RPDialogs
 //= require dialog
 //= require edit_recipe
+//= require rcp_list
 //= require RPImages
 
 //= require pic_picker

@@ -2,10 +2,10 @@
 <div class="prompt">Sign In</div>
 <%= form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f| %>
   <p><%= f.label :login, "Username or Email (your choice)" %>
-  <%= f.text_field :login %></p>
+  <%= f.text_field :login, size: 40 %></p>
 
   <p><%= f.label :password %>
-  <%= f.password_field :password %></p>
+  <%= f.password_field :password, size: 40 %></p>
 
   <% if devise_mapping.rememberable? -%>
     <p>

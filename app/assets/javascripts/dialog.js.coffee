@@ -1,9 +1,10 @@
 manager_of = (dlog) ->
 	# Look for a manager using the dialog's class name
-	classList = $(dlog).attr('class').split /\s+/ 
-	for mgr_name in classList
-		if RP[mgr_name] 
-			return RP[mgr_name]
+	if dlog && (classname = $(dlog).attr('class'))
+		classList = classname.split /\s+/ 
+		for mgr_name in classList
+			if RP[mgr_name] 
+				return RP[mgr_name]
 	return null	
 
 RP.dialog = RP.dialog || {}

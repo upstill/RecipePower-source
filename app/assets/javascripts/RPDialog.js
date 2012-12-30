@@ -174,22 +174,32 @@ function postError( jqXHR, dlog ) {
 	return result;
 }
 
+function string_to_function(str) {
+	if(str) {
+		var obj = window;
+		var strs = str.split('.');
+		for (var i = 0; i < strs.length; i++) {
+			obj = obj[strs[i]]
+			if((typeof obj === 'undefined') || !obj)
+				break;
+		}
+		if(typeof obj === 'function')
+			return obj;
+	}
+	return null;
+}
+
 /* Handle successful return of a JSON request by running whatever success function
    obtains, and stashing any resulting code away for invocation after closing the
    dialog, if any. */
 function postSuccess(jsonResponse, dlog) {
   // Call either the named response function or the one associated with the dialog
-  if(closer = jsonResponse.processorFcn || (dlog && dialogOnClose(dlog))) {
-	  if(typeof closer === 'function') {
-			closer(jsonResponse);
-	  } else if(typeof window[closer] === 'function') {
-			window[closer](jsonResponse);
-	  }
-  }
+  var closer;
+  if(closer = string_to_function(jsonResponse.processorFcn) || (dlog && dialogOnClose(dlog)))
+		closer(jsonResponse);
   // Simplistic response: we'll prevent normal form handling IFF there's code to run.
-  if(dlog != undefined) {
+  if(dlog != undefined)
 		dialogResult( dlog, jsonResponse );
-  }
   return false;
 }
 
@@ -203,6 +213,7 @@ function cancelModalDialog(event) {
 
 // Cancel a modeless dialog by closing it and issuing a notification, if any
 function cancelModelessDialog(event) {
+	debugger;
 	withdrawDialog();
 	event.preventDefault();
 	jNotify( "Cookmark secure and unharmed.", 
@@ -215,6 +226,7 @@ function submitDialogForJSON(eventdata) { // Supports multiple forms in dialog
 	var context = this;
 	var dlog = eventdata.data; // As stored when the dialog was set up
 	var process_result_normally = true;
+	debugger;
 	eventdata.preventDefault();
 	/* To sort out errors from subsequent dialogs, we submit the form asynchronously
 	   and use the result to determine whether to do normal forms processing. */
@@ -287,42 +299,50 @@ function injectDialog(code, area, modeless) {
   var dlog = $('div.dialog', $('<html></html>').html(code));
 
   if(dlog) {	
-	if(!(area && $(dlog).hasClass(area)) ) {
-		// If the area isn't specified anywhere, 'floating' is the default
-		area = "floating"
-		// For one reason or another, the dialog is laid out for an area different from that requested
-		var positions = ["at_left", "at_top", "floating", "page"];
-	    for(var i = 0, len = positions.length; i < len; ++i) {
-			if($(dlog).hasClass(positions[i])) {
-				area = positions[i];
-			}
-	  }
+		if(!(area && $(dlog).hasClass(area)) ) {
+			// If the area isn't specified anywhere, 'floating' is the default
+			area = "floating"
+			// For one reason or another, the dialog is laid out for an area different from that requested
+			var positions = ["at_left", "at_top", "floating", "page"];
+		    for(var i = 0, len = positions.length; i < len; ++i) {
+				if($(dlog).hasClass(positions[i])) {
+					area = positions[i];
+				}
+		  }
+		}
+		if($('#RecipePowerInjectedEncapsulation').length == 0) { // XXX depends on jQuery
+		  wrapWithoutCloning();
+		  // Need to encapsulate existing body
+		  // var theFrame = $("<div id='RecipePowerInjectedEncapsulation'></div>");
+		} 
+		// Any old dialog will be either a predecessor or successor of the encapsulation
+		var odlog = $('#RecipePowerInjectedEncapsulation').prev().add(
+					$('#RecipePowerInjectedEncapsulation').next());
+		if($(odlog).length > 0) {
+		  // Page has existing dialog, either before or after injection => Remove it
+		  // Clean up javascript namespace
+		  $(odlog).remove();
+		}
+		// Now the page is ready to receive the code, prepended to the page
+		// We extract the dialog div from what may be a whole page
+		// Ensure that all scripts are loaded
+		// Run after-load functions
+		var dlog;
+		if((area == "at_left") || (area == "at_top")) {
+			$("body").prepend($(dlog)); 
+			dlog = $('#RecipePowerInjectedEncapsulation').prev();
+		} else {
+			$("body").append($(dlog)); 
+			dlog = $('#RecipePowerInjectedEncapsulation').next();
+		}
+		launchDialog(dlog, area, modeless);
 	}
-	if($('#RecipePowerInjectedEncapsulation').length == 0) { // XXX depends on jQuery
-	  wrapWithoutCloning();
-	  // Need to encapsulate existing body
-	  // var theFrame = $("<div id='RecipePowerInjectedEncapsulation'></div>");
-	} 
-	// Any old dialog will be either a predecessor or successor of the encapsulation
-	var odlog = $('#RecipePowerInjectedEncapsulation').prev().add(
-				$('#RecipePowerInjectedEncapsulation').next());
-	if($(odlog).length > 0) {
-	  // Page has existing dialog, either before or after injection => Remove it
-	  // Clean up javascript namespace
-	  $(odlog).remove();
-	}
-	// Now the page is ready to receive the code, prepended to the page
-	// We extract the dialog div from what may be a whole page
-	// Ensure that all scripts are loaded
-	// Run after-load functions
-	var dlog;
-	if((area == "at_left") || (area == "at_top")) {
-		$("body").prepend($(dlog)); 
-		dlog = $('#RecipePowerInjectedEncapsulation').prev();
-	} else {
-		$("body").append($(dlog)); 
-		dlog = $('#RecipePowerInjectedEncapsulation').next();
-	}
+	return dlog;
+}
+
+// Set the dialog up to run
+function launchDialog(dlog, area, modeless)
+{
 	// We get and execute the onload function for the dialog
 	if($(dlog).hasClass('dialog') && RP && RP.dialog)
 		RP.dialog.apply('onload', dlog);
@@ -343,8 +363,6 @@ function injectDialog(code, area, modeless) {
 		var dlgheight = $(dlog).outerHeight();
 		$('#RecipePowerInjectedEncapsulation').css("marginTop", dlgheight)
 	}
-  }
-  return dlog;
 }
 
 function postError(str) {

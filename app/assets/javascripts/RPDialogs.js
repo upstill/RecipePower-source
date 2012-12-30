@@ -1,6 +1,6 @@
 
 function newRecipeOnload(dlog) {
-	dialogOnClose( dlog, recipeCallback )
+	dialogOnClose( dlog, RP.rcp_list.update )
 }
 
 function genericHandling(data, preface) {

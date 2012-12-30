@@ -287,6 +287,22 @@ module ApplicationHelper
       key.to_s+": ["+(hsh[key] ? hsh[key].to_s : "nil")+"]"
     }.join(' ')
   end
+  
+  # Declare a dialog div with content to be supplied later using the template
+  def dialogDiv( which, ttl=nil, area="floating", template="")
+    logger.debug "dialogHeader for "+globstring({dialog: which, area: area, layout: @layout, ttl: ttl})
+    classname = which.to_s
+    onloadFcn = classname+"Onload"
+    ttlspec = ttl ? (" title=\"#{ttl}\"") : ""
+    flash_helper() +
+    content_tag(:div, 
+        "",
+        class: classname+" dialog "+area, 
+        onload: onloadFcn, 
+        id: "recipePowerDialog", 
+        template: template)
+  end
+  
   # Place the header for a dialog, including setting its Onload function.
   # Currently handled this way (e.g., symbols that have been supported)
   #   :edit_recipe
@@ -296,18 +312,15 @@ module ApplicationHelper
   def dialogHeader( which, ttl=nil, area="floating")
     logger.debug "dialogHeader for "+globstring({dialog: which, area: area, layout: @layout, ttl: ttl})
     classname = which.to_s
-    onloadFcn = classname+"Onload"
+    onloadFcn = (classname+"Onload")
     ttlspec = ttl ? (" title=\"#{ttl}\"") : ""
-    result = %Q{ 
-      #{flash_helper}
-      <div class='#{classname} dialog #{area}' #{ttlspec} onload="#{onloadFcn}" id="recipePowerDialog" >
-      }
-    if(@layout && @layout=="injector") 
-      result += %Q{
-        <div id="recipePowerCancelDiv">#{link_to_function "X", "cancelDialog", style:"text-decoration: none;", id: "recipePowerCancelBtn"}</div>	            
-      }
-    end
-    result.html_safe
+    flash_helper() +
+    %Q{<div id="recipePowerDialog" onload="#{onloadFcn}" class="#{classname} dialog #{area}" #{ttlspec}>}.html_safe +
+    ((@layout && @layout=="injector") ? 
+      content_tag(:div, 
+        link_to_function("X", "cancelDialog", style:"text-decoration: none;", id: "recipePowerCancelBtn"),
+        id: "recipePowerCancelDiv")
+    : "")
   end
 
   def dialogFooter()

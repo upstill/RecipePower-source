@@ -30,7 +30,7 @@ class RecipesController < ApplicationController
                          go_link_body: go_link_body,
                          list_element_class: recipe_list_element_class(@recipe), 
                          list_element_body: list_element_body,
-                         processorFcn: "recipeCallback"
+                         processorFcn: "RP.rcp_list.update"
                        } 
       }
       format.js { render text: @recipe.title }
