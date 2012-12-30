@@ -62,14 +62,14 @@ module ApplicationHelper
     	  image_tag(picurl, 
           class: "fitPic",
           id: idstr,
-          style: "visibility:hidden;",
+          # style: "visibility:hidden;",
           onload: "fitImageOnLoad('#{selector}')",
           alt: "Some Image Available")
       rescue
     	  image_tag(placeholder_image, 
           class: "fitPic",
           id: idstr,
-          style: "visibility:hidden;",
+          # style: "visibility:hidden;",
           onload: "fitImageOnLoad('#{selector}')",
           alt: "Some Image Available")
       end
