@@ -11,10 +11,7 @@ RP.edit_recipe.go = (rcpdata) ->
 		
 	# Parse the data for the recipe and insert into the dialog's template.
 	# The dialog has placeholders of the form %%rcp<fieldname>%% for each part of the recipe
-	dlgdata = $(dlog).attr "template" # XXX should be stored in 'data-template' per HTML5
-	obj = jQuery.parseJSON dlgdata
-	dlgsource = unescape obj.string
-	dlgsource = dlgsource.
+	dlgsource = $(dlog).data("template").string.
 	replace(/%%rcpID%%/g, rcpdata.rcpID).
 	replace(/%%rcpTitle%%/g, rcpdata.rcpTitle).
 	replace(/%%rcpPicURL%%/g, rcpdata.rcpPicURL).
@@ -56,14 +53,20 @@ RP.edit_recipe.onclose = (dlog) ->
 		RP.dialog.apply('onclose', picker_dlog)
 	$(picker_dlog).dialog("destroy");
 	$(picker_dlog).remove();
+	
+# Extract a name from a reference of the form "recipe[<name>]"
+recipedata = (arr) ->
+	result = new Object()
+	$.each arr, ->
+		if this.name.match(/recipe\[.*\]$/) 
+			index = this.name.replace /^recipe\[(.*)\]/, "$1"
+			result[index] = this.value
+	result
 
 # When dialog is loaded, activate its functionality
 RP.edit_recipe.onload = (dlog) ->
 	# Only proceed if the dialog has children
 	if $('.edit_recipe > *').length > 0
-		$('form.edit_recipe').on 'ajax:success', (event, data, status, xhr) ->
-			postSuccess data, dlog
-			RP.edit_recipe.stop dlog
 		# Setup tokenInput on the tags field
 		$("#recipe_tag_tokens", dlog).tokenInput("/tags/match.json", 
 			crossDomain: false,
@@ -81,6 +84,23 @@ RP.edit_recipe.onload = (dlog) ->
 		# Fit the recipe's image into its place
 		fitImageOnLoad "div.recipe_pic_preview img"
 		$(dlog).show 500
+		
+		# When submitting the form, we abort if there's no change
+		# Stash the serialized form data for later comparison
+		$('form.edit_recipe').data "before", recipedata($('form.edit_recipe').serializeArray())
+		$('form.edit_recipe').on 'ajax:beforeSend', (xhr) ->
+			# If the before and after states don't differ, we just close the dialog without submitting
+			dataBefore = $('form.edit_recipe').data "before"
+			dataAfter = recipedata $('form.edit_recipe').serializeArray()
+			for own attr, value of dataAfter
+				if dataBefore[attr] != value # Something's changed => do normal forms processing
+					return true
+			# Nothing's changed => we can just silently close the dialog
+			RP.edit_recipe.stop()
+			false
+		$('form.edit_recipe').on 'ajax:success', (event, data, status, xhr) ->
+			postSuccess data, dlog
+			RP.edit_recipe.stop dlog
 
 jQuery ->
 	if dlog = $('div.edit_recipe.dialog')[0]

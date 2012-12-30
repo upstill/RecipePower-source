@@ -213,7 +213,6 @@ function cancelModalDialog(event) {
 
 // Cancel a modeless dialog by closing it and issuing a notification, if any
 function cancelModelessDialog(event) {
-	debugger;
 	withdrawDialog();
 	event.preventDefault();
 	jNotify( "Cookmark secure and unharmed.", 
@@ -226,7 +225,6 @@ function submitDialogForJSON(eventdata) { // Supports multiple forms in dialog
 	var context = this;
 	var dlog = eventdata.data; // As stored when the dialog was set up
 	var process_result_normally = true;
-	debugger;
 	eventdata.preventDefault();
 	/* To sort out errors from subsequent dialogs, we submit the form asynchronously
 	   and use the result to determine whether to do normal forms processing. */

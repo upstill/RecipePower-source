@@ -7,9 +7,7 @@ RP.rcp_list.update = ( data ) ->
 	if data.list_element_class
 		$('.'+data.list_element_class).replaceWith data.list_element_body
 		img = $('.'+data.list_element_class+' '+'img.fitPic')
-		debugger
 		$(img).load -> 
-			debugger
 			fitImage img[0]
 			x=2
 		fitImage img[0]

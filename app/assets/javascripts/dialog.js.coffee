@@ -1,3 +1,6 @@
+# Generic dialog management
+RP.dialog = RP.dialog || {}
+
 manager_of = (dlog) ->
 	# Look for a manager using the dialog's class name
 	if dlog && (classname = $(dlog).attr('class'))
@@ -6,8 +9,6 @@ manager_of = (dlog) ->
 			if RP[mgr_name] 
 				return RP[mgr_name]
 	return null	
-
-RP.dialog = RP.dialog || {}
 
 RP.dialog.go = (path, how, where) ->
 	recipePowerGetAndRunJSON path, how, where
