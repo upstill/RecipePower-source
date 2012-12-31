@@ -25,7 +25,6 @@ class Expression < ActiveRecord::Base
     def fix_type
         tg = self.tag
         ref = self.referent
-        debugger
         tg.typenum = ref.typenum if (tg.typenum != ref.typenum) && (tg.typenum == 0)
     end
     

@@ -12,6 +12,5 @@ class BmController < ApplicationController
       @area = "at_top"
       @how = "modeless"
       dialog_only = true
-      debugger
     end
 end

@@ -8,7 +8,6 @@ function fitImageOnLoad(selector) {
 
 function ensureOnload(selector, context) {
 		$(selector, context).load( function(evt) {
-			debugger;
 			fitImage(evt.currentTarget);
 			x=2;
 		});

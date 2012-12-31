@@ -348,7 +348,6 @@ class Site < ActiveRecord::Base
                     ou.close 
                 end
             rescue => e
-                debugger
                 x=2
             end
         end

@@ -28,17 +28,14 @@ class ApplicationController < ActionController::Base
     end
 
     def no_action_error
-        debugger
         redirect_to home_path, :notice => "Sorry, action not found"
     end
     
     def timeout_error
-        debugger
         redirect_to authentications_path, :notice => "Sorry, access to that page took too long."
     end
     
     def rescue_action_in_public
-        debugger
         x=2
     end
     # alias_method :rescue_action_locally, :rescue_action_in_public    

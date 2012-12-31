@@ -5,7 +5,6 @@ class UsersController < ApplicationController
   # before_filter :declare_focus
   
   def declare_focus
-    debugger
     @focus_selector = "#user_login"
   end
   

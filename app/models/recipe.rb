@@ -289,7 +289,6 @@ class Recipe < ActiveRecord::Base
         if self.current_user
             Touch.touch self.current_user, self.id
         else
-            debugger
             super
         end
     end

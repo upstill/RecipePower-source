@@ -191,7 +191,6 @@ require './lib/linker.rb'
             # break if rownum > 10
         end
         linker = linkers["food"]
-        debugger
         linker.show
         return
         linkers.keys.sort.each do |type|

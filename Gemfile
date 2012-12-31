@@ -25,6 +25,7 @@ gem 'thin'
 gem 'eventmachine', '1.0.0.rc.4'
 gem 'sass-rails', " ~> 3.2.3"
 gem 'bootstrap-sass', '2.1'
+gem 'ruby_parser'
 
 # gem 'exception_notification', :require => 'exception_notifier'
 gem 'exception_notification', :require => 'exception_notifier', git: 'git://github.com/alanjds/exception_notification.git' 
