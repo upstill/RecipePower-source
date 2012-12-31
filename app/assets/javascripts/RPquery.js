@@ -58,11 +58,11 @@ function queryOnLoad(imgs) {
 	$(".pageclickr").click(queryTabOnPaginate);
 	
 	// Enable recipe-preview popup
-	$(".popup").click(servePopup);
+	$(".popup").click(RP.servePopup);
 
-    imgs.each(function() {
-        fitImage(this);
-    });
+  imgs.each(function() {
+      fitImage(this);
+  });
 	
 }
 

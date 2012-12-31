@@ -27,7 +27,7 @@
  *= require common/dialog
  *= require common/dialogs
  *= require views/edit_recipe
- *= require views/RPPicPicker
+ *= require views/pic_picker
 
  *= require views/rcp_list
  *= require views/sign_in

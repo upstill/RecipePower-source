@@ -2,39 +2,49 @@
 
 RP.edit_recipe = RP.edit_recipe || {}
 
+me = () ->
+	$('div.edit_recipe.dialog')
+
 # Open the edit-recipe dialog on the recipe represented by 'rcpdata'
 RP.edit_recipe.go = (rcpdata) ->
-	dlog = $('div.edit_recipe.dialog')
+	dlog = me()
 	# If it has children it's active, and should be put away, starting with hiding it.
 	if $('.edit_recipe > *').length > 0
 		$(dlog).hide()
 		
 	# Parse the data for the recipe and insert into the dialog's template.
 	# The dialog has placeholders of the form %%rcp<fieldname>%% for each part of the recipe
+	# The status must be set by activating one of the options
+	statustarget = '<option value="'+rcpdata.rcpStatus+'"'
+	statusrepl = statustarget + ' selected="selected"'
 	dlgsource = $(dlog).data("template").string.
 	replace(/%%rcpID%%/g, rcpdata.rcpID).
 	replace(/%%rcpTitle%%/g, rcpdata.rcpTitle).
 	replace(/%%rcpPicURL%%/g, rcpdata.rcpPicURL).
 	replace(/%%rcpPrivate%%/g, rcpdata.rcpPrivate).
 	replace(/%%rcpComment%%/g, rcpdata.rcpComment).
-	replace(/%%rcpStatus%%/g, rcpdata.rcpStatus)
+	replace(/%%authToken%%/g, rcpdata.authToken).
+	replace(statustarget, statusrepl).
+	replace(/%%rcpPicPicker%%/, rcpdata.rcpPicPicker)
+	
 	$(dlog).html dlgsource # This nukes any lingering children as well as initializing the dialog
 	# The tag data is parsed and added to the tags field directly
-	tagdata = jQuery.parseJSON rcpdata.rcpTagData
-	$("#recipe_tag_tokens").data "pre", tagdata
+	$("#recipe_tag_tokens").data "pre", jQuery.parseJSON(rcpdata.rcpTagData)
 	
 	# Invoke any onload functionality
 	RP.edit_recipe.onload dlog # launchDialog dlog, "at_left", true # 
 	# $('input.save-tags-button.save', dlog).click RP.edit_recipe.submit 
 	# Arm the cancel button to close the dialog
 	$('input.save-tags-button.cancel', dlog).click RP.edit_recipe.cancel 
+	
+	RP.rcp_list.touch_recipe rcpdata.rcpID
 
 RP.edit_recipe.getandgo = (path, how, where) ->
 	recipePowerGetAndRunJSON path, how, where
 
 # Done with dialog: hide it and nuke its children
 RP.edit_recipe.stop = (dlog) ->
-	dlog = $('div.edit_recipe.dialog')
+	dlog = me()
 	$(dlog).hide()
 	RP.edit_recipe.onclose dlog
 	$(dlog).empty()
@@ -63,6 +73,26 @@ recipedata = (arr) ->
 			result[index] = this.value
 	result
 
+# Don't submit if nothing has changed
+before_send = (xhr) ->
+	# If the before and after states don't differ, we just close the dialog without submitting
+	dataBefore = $('form.edit_recipe').data "before"
+	dataAfter = recipedata $('form.edit_recipe').serializeArray()
+	me().hide()
+	for own attr, value of dataAfter
+		if dataBefore[attr] != value # Something's changed => do normal forms processing
+			return true
+	# Nothing's changed => we can just silently close the dialog
+	RP.edit_recipe.stop()
+	false
+
+# Handle successful form submission: post the data and stop the dialog
+success = (event, data, status, xhr) ->
+	dlog = me()
+	postSuccess data, dlog
+	RP.edit_recipe.stop dlog
+	true
+
 # When dialog is loaded, activate its functionality
 RP.edit_recipe.onload = (dlog) ->
 	# Only proceed if the dialog has children
@@ -88,21 +118,10 @@ RP.edit_recipe.onload = (dlog) ->
 		# When submitting the form, we abort if there's no change
 		# Stash the serialized form data for later comparison
 		$('form.edit_recipe').data "before", recipedata($('form.edit_recipe').serializeArray())
-		$('form.edit_recipe').on 'ajax:beforeSend', (xhr) ->
-			# If the before and after states don't differ, we just close the dialog without submitting
-			dataBefore = $('form.edit_recipe').data "before"
-			dataAfter = recipedata $('form.edit_recipe').serializeArray()
-			for own attr, value of dataAfter
-				if dataBefore[attr] != value # Something's changed => do normal forms processing
-					return true
-			# Nothing's changed => we can just silently close the dialog
-			RP.edit_recipe.stop()
-			false
-		$('form.edit_recipe').on 'ajax:success', (event, data, status, xhr) ->
-			postSuccess data, dlog
-			RP.edit_recipe.stop dlog
+		$('form.edit_recipe').on 'ajax:beforeSend', before_send
+		$('form.edit_recipe').on 'ajax:success', success
 
 jQuery ->
-	if dlog = $('div.edit_recipe.dialog')[0]
+	if dlog = me()[0]
  		RP.edit_recipe.onload(dlog)
 

@@ -3,7 +3,8 @@
 // -- the pic_picker div is ready to be a diaog
 // -- the data of the link must contain urls for each image, separated by ';'
 function PicPicker(ttl) {
-	$("div.pic_picker").dialog({ // nee: iconpicker
+	var dlog = $('div.pic_picker');
+	$(dlog).dialog({ // nee: iconpicker
 		modal: true,
 		width: 700,
 		zIndex: 1200,

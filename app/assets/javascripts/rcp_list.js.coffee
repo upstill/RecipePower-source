@@ -21,3 +21,14 @@ RP.rcp_list.boostInRecent = (list_element_class, list_element_body, targettab) -
 	if tabid==targettab 
 		$("#rcplist_mine_body ."+list_element_class).remove()
 		$("#rcplist_mine_body").prepend(list_element_body);
+
+# Report back to the server that a recipe has been touched. In return, get that recipe's 
+# list element in the Recent list and place it at the top (removing any that's already 
+# there).
+RP.rcp_list.touch_recipe = (id) ->		# Formerly rcpTouch from oldRP.js
+	# First, replace all the "Recipe last viewed at" lines according to the server
+	jQuery.get( "recipes/"+id+"/touch", {}, (body, status, instance) ->
+			if status == "success"
+				$("."+body.touch_class).replaceWith(body.touch_body);
+				# boostInTablist(body.list_element_class, body.list_element_body, 4)
+		, "json" )

@@ -6,7 +6,7 @@ manager_of = (dlog) ->
 	if dlog && (classname = $(dlog).attr('class'))
 		classList = classname.split /\s+/ 
 		for mgr_name in classList
-			if RP[mgr_name] 
+			if mgr_name != "dialog" && RP[mgr_name] 
 				return RP[mgr_name]
 	return null	
 

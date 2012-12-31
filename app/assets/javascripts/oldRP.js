@@ -231,27 +231,6 @@ function add_fields(link, association, content) {
     $(link).parent().before(content.replace(regexp, new_id));
 }
 
-/* Respond to the preview-recipe button by opening a popup loaded with its URL.
-   If the popup gets blocked, return true so that the recipe is opened in a new
-   window/tab.
-   In either case, notify the server of the opening so it can touch the recipe
-*/
-function servePopup() {
-   var regexp = new RegExp("popup", "g")
-   var rcpid = this.getAttribute('id').replace(regexp, "");
-   rcpTouch(rcpid);
-
-   // Now for the main event: open the popup window if possible
-   linkURL = this.getAttribute('href');
-   var popUp = window.open(linkURL, 'popup', 'width=600, height=300, scrollbars, resizable');
-   if (!popUp || typeof(popUp) === 'undefined') {
-      return true;
-   } else {
-     popUp.focus();
-     return false;
-   }
-}
-
 // Take an HTML element from the server and replace it in the DOM
 function replaceElmt(body, status, instance) {
 	if(status == "success") {
@@ -259,20 +238,6 @@ function replaceElmt(body, status, instance) {
 		var content = body.content
 		$(selector).replaceWith(content);
 	}
-}
-
-// Report back to the server that a recipe has been touched. In return, get that recipe's 
-// list element in the Recent list and place it at the top (removing any that's already 
-// there).
-function rcpTouch(id) {
-   // First, replace all the "Recipe last viewed at" lines according to the server
-   jQuery.get( "recipes/"+id+"/touch", {}, 
-	  function(body, status, instance) {
-		if(status == "success") {
-		  $("."+body.touch_class).replaceWith(body.touch_body);
-	      boostInTablist(body.list_element_class, body.list_element_body, 4)
-		}	
-	  }, "json" )
 }
 
 function boostInTablist(list_element_class, list_element_body, targettab) {
