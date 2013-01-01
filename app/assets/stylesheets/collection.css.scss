@@ -32,6 +32,7 @@
  *= require paginate
  *= require_tree ../../../vendor/assets/stylesheets/jquery
  *= require feedback
+ *= require common/ajax_loader
 
 */
 @import "bootstrap";
@@ -69,6 +70,21 @@ div.frame_left {
   background: #DDDDDD;
   border-right: 2px solid black;
   border-bottom: 2px solid black;
+}
+
+div.loader {
+    display:    none;
+    position:   fixed;
+    z-index:    999;
+    height:     100%;
+    width:      100%;
+    background: rgba( 255, 255, 255, .8 ) 
+                url('/assets/ajax-loader.gif') 
+                50% 50% 
+                no-repeat;
+		&.loading {
+			display: block
+		}
 }
 
 #logo_div_small {
@@ -218,4 +234,3 @@ ul.nav.pull-right {
 hr {
 	margin:5px
 }
-

@@ -11,37 +11,39 @@
 // require_directory .
 //= require_directory ../../../vendor/assets/javascripts/jquery
 //= require jquery_ujs
+//= require_directory ./common
+//= require_directory ./views
+//= require_directory ./controllers
 
 //= require injector
-//= require RPDialog
-
-//= require RPquery
-//= require RP
+//= require microformat
+//= require rails
 //= require RPDialogTest
-//= require RPDialogs
-//= require dialog
-//= require edit_recipe
-//= require rcp_list
-//= require RPImages
-
-//= require pic_picker
 //= require RPfields
 //= require RPquery
 //= require RPreferent
-//= require application
-//= require bm
-//= require errors
-//= require expressions
-//= require iframe
+//  require RPDialog
 
-//= require invitations
-//= require microformat
-//= require pics
-//= require rails
-//= require referents
-//= require registrations
-//= require sites
-// require whenReady
 //= require bootstrap
+
+//  require RP
+//  require RPDialogs
+//  require dialog
+//  require edit_recipe
+//  require rcp_list
+//  require RPImages
+
+//  require pic_picker
+//  require application
+//  require bm
+//  require errors
+//  require expressions
+
+//  require invitations
+//  require pics
+//  require referents
+//  require registrations
+//  require sites
+// require whenReady
 
 var RP = RP || {};

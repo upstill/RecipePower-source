@@ -1,5 +1,5 @@
 // Cribbed from http://h3manth.com/content/download-images-nodejs
-
+// Gather the images from a page
 function getImages(uri) {
     var request = require('request');
     var url = require('url');
@@ -13,7 +13,7 @@ function getImages(uri) {
             imgs = $('img').toArray()
             console.log("Downloading...")
             imgs.forEach(function (img) {
-                //console.log(img.attribs.src)
+                console.log(img.attribs.src)
                 process.stdout.write(".");
                 img_url = img.attribs.src
                 if (/^https?:\/\//.test(img_url)) {

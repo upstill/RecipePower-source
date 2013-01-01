@@ -7,9 +7,9 @@
 // Place your application-specific JavaScript functions and classes here
 
 //= require_self
-//= require pics
-//= require dialog
-//= require edit_recipe
+//= require common/pics
+//= require common/dialog
+//= require views/edit_recipe
 //= require jquery/jquery.form
 //= require jquery/jquery.ba-postmessage
 //= require jquery/jNotify.jquery
