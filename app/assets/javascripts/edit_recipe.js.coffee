@@ -108,17 +108,17 @@ RP.edit_recipe.onload = (dlog) ->
 			allowFreeTagging: true
 		)
 		
-		# $('a.pic_picker_golink', dlog).css('color', 'gray');
-		$('a.pic_picker_golink', dlog).css('visibility', 'hidden');
-		# Get the picture picker in background
-		RP.pic_picker.load ->
-			# $('a.pic_picker_golink', dlog).css('color', 'black');
-			$('a.pic_picker_golink', dlog).css('visibility', 'visible');
+		if $('a.pic_picker_golink', dlog).length > 0
+			$('a.pic_picker_golink', dlog).css('visibility', 'hidden');
+			# Get the picture picker in background
+			RP.pic_picker.load ->
+				# $('a.pic_picker_golink', dlog).css('color', 'black');
+				$('a.pic_picker_golink', dlog).css('visibility', 'visible');
 		
-		# Arm the pic picker to open when clicked
-		$("a.pic_picker_golink", dlog).click ->
-			event.preventDefault()
-			return RP.pic_picker.open "Pick a Picture for the Recipe"
+			# Arm the pic picker to open when clicked
+			$("a.pic_picker_golink", dlog).click ->
+				event.preventDefault()
+				return RP.pic_picker.open "Pick a Picture for the Recipe"
 		
 		# Fit the recipe's image into its place
 		fitImageOnLoad "div.recipe_pic_preview img"
