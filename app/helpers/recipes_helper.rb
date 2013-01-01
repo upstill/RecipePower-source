@@ -17,7 +17,6 @@ def edit_recipe_link( label, recipe)
       rcpPrivate: recipe.private,
       rcpComment: recipe.comment,
       rcpStatus: recipe.status,
-      rcpPicPicker: pic_picker(recipe.picurl, recipe.url, recipe.id),
       authToken: form_authenticity_token
     }
     link_to_function label, "RP.edit_recipe.go(#{rcp_params.to_json});"
@@ -38,7 +37,7 @@ def recipe_pic_field(rcp, form, editable = true)
   picker = editable ?
     content_tag(:div,
           link_to( "Pick Picture", "/", :data=>"recipe_picurl;div.recipe_pic_preview img", :class => "pic_picker_golink")+
-          pic_picker(@recipe.picurl, @recipe.url, @recipe.id), 
+          pic_picker_shell(), # pic_picker(@recipe.picurl, @recipe.url, @recipe.id), 
           :class=>"recipe_pic_picker"
           ) # Declare the picture-picking dialog
   : ""
@@ -144,7 +143,7 @@ def recipe_editor
       <div class="edit_recipe_field pic"><div class="recipe_pic_preview"><img alt="Some Image Available" class="fitPic" id="rcpPic%%rcpID%%" onload="fitImageOnLoad('div.recipe_pic_preview img')" src="%%rcpPicURL%%" style="visibility:hidden;" /><input hidden="hidden" id="recipe_picurl" name="recipe[picurl]" rel="jpg,png,gif" size="30" type="text" value="%%rcpPicURL%%" /></div>
         <div class="recipe_pic_picker">
          <a href="/" class="pic_picker_golink" data="recipe_picurl;div.recipe_pic_preview img">Pick Picture</a>
-         %%rcpPicPicker%%
+         <div class="pic_picker" data-url="recipes/%%rcpID%%/edit?pic_picker=true" style="display:none;"></div>
         </div>
       </div>
          <div class="edit_recipe_field tags" >

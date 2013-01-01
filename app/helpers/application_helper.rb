@@ -76,8 +76,21 @@ module ApplicationHelper
     end
   end
   
+#  def pic_picker picurl, pageurl, id
+#    pic_picker_shell (pic_picker_contents picurl, pageurl, id)
+#  end
+  
+  # Declare the (empty) contents of the pic_picker dialog, embedding a url for later requesting the actual dialog data
+  def pic_picker_shell contents=""
+    content_tag :div, 
+      contents, 
+      class: "pic_picker",
+      style: "display:none;",
+      "data-url" => @recipe ? "recipes/#{@recipe.id}/edit?pic_picker=true" : ""
+  end
+  
   # Build a picture-selection dialog with the default url, url for a page containing candidate images, id, and name of input field to set
-  def pic_picker picurl, pageurl, id
+  def pic_picker_contents picurl, pageurl, id
     piclist = Site.piclist pageurl
     pictab = []
     # divide piclist into rows of four pics apiece
@@ -103,12 +116,11 @@ module ApplicationHelper
       tblstr = "<br><table>#{picrows}</table>"
       prompt = "Pick one of the thumbnails<br>or type/paste the URL below, then click Okay."
     end
+    content_tag( :div, 
+      page_fitPic( picurl, id, "MissingPicture.png", "div.preview img" ),
+      class: "preview" )+
+    content_tag( :p, prompt, class: "airy" )+
     %Q{
-      <div class="pic_picker" style="display:none;" >
-        <div class="preview">                                     
-          #{page_fitPic picurl, id, "MissingPicture.png", "div.preview img"}  
-        </div> 
-        <p class="airy">#{prompt}</p>                                                 
         <br class="clear"> 
         <input type="text" class="icon_picker" 
           rel="jpg,png,gif" 
@@ -116,7 +128,6 @@ module ApplicationHelper
           onchange="previewImg('input.icon_picker', 'div.preview img', '')" />
         <u>Preview</u>
         #{tblstr}       
-      </div>                                      
     }.html_safe      
   end
   

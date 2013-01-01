@@ -72,11 +72,14 @@ function pickImg(inputsel, imagesel, url) {
 function previewImg(inputsel, imagesel, formsel) {
 	// Copy the url from the input field to the form field
   var url = $(inputsel).attr("value");
-	$(formsel).attr("value", url )
+  if (url != $(formsel).attr("value"))
+		$(formsel).attr("value", url )
 	
 	// Set the image(s) to the URL and fit them in their frames
 	var imageset = $(imagesel)
-    imageset.hide();
-	imageset.attr("src", url )
-	fitImage(imageset[0])
+	if(imageset.attr("src") != url) {
+		imageset.hide();
+		imageset.attr("src", url )
+		fitImage(imageset[0])
+	}
 }

@@ -24,8 +24,7 @@ RP.edit_recipe.go = (rcpdata) ->
 	replace(/%%rcpPrivate%%/g, rcpdata.rcpPrivate).
 	replace(/%%rcpComment%%/g, rcpdata.rcpComment).
 	replace(/%%authToken%%/g, rcpdata.authToken).
-	replace(statustarget, statusrepl).
-	replace(/%%rcpPicPicker%%/, rcpdata.rcpPicPicker)
+	replace(statustarget, statusrepl)
 	
 	$(dlog).html dlgsource # This nukes any lingering children as well as initializing the dialog
 	# The tag data is parsed and added to the tags field directly
@@ -97,6 +96,8 @@ success = (event, data, status, xhr) ->
 RP.edit_recipe.onload = (dlog) ->
 	# Only proceed if the dialog has children
 	if $('.edit_recipe > *').length > 0
+		$(dlog).show 500
+
 		# Setup tokenInput on the tags field
 		$("#recipe_tag_tokens", dlog).tokenInput("/tags/match.json", 
 			crossDomain: false,
@@ -107,13 +108,17 @@ RP.edit_recipe.onload = (dlog) ->
 			preventDuplicates: true,
 			allowFreeTagging: true
 		)
+		
+		# Get the picture picker in background
+		RP.pic_picker.load()
+		
 		# Arm the pic picker to open when clicked
 		$("a.pic_picker_golink", dlog).click ->
-			PicPicker "Pick a Picture for the Recipe"
+			RP.pic_picker.open "Pick a Picture for the Recipe"
 			event.preventDefault()
+		
 		# Fit the recipe's image into its place
 		fitImageOnLoad "div.recipe_pic_preview img"
-		$(dlog).show 500
 		
 		# When submitting the form, we abort if there's no change
 		# Stash the serialized form data for later comparison

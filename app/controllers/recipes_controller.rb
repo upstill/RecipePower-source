@@ -124,11 +124,16 @@ class RecipesController < ApplicationController
       @recipe.current_user = current_user_or_guest_id # session[:user_id]
       @recipe.touch # We're looking at it, so make it recent
       @Title = @recipe.title # Get title from the recipe
-      @nav_current = nil
-      @area = params[:area]
-      # Now go forth and edit
-      @layout = params[:layout]
-      dialog_boilerplate('edit', 'at_left')
+      if params[:pic_picker]
+        # Setting the pic_picker param requests a picture-editing dialog
+        render :partial=> "pic_picker"
+      else
+        @nav_current = nil
+        @area = params[:area]
+        # Now go forth and edit
+        @layout = params[:layout]
+        dialog_boilerplate('edit', 'at_left')
+      end
     else
       @Title = "Cookmark a Recipe"
       @nav_current = :addcookmark
