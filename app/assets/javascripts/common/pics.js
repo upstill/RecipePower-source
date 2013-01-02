@@ -54,7 +54,6 @@ function fitImage(img) {
 	  $(img).css("top", 0);
 	  $(img).css("left", (frameWidth-newWidth)/2);
 	}
-  // $(parent).css("display", "block");
   $(img).addClass("loaded")
   return true;
 }
