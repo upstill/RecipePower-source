@@ -140,8 +140,12 @@ div.notice-div {
 .fitPic {
 	align:center;
 	visibility:hidden;
-	display:none
+	&.loaded {
+		visibility: visible;
+		position: relative;
+	}
 }
+
 #logo_div {
 	float:left;
 	# outline:1px solid green;

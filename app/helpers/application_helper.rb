@@ -56,20 +56,18 @@ module ApplicationHelper
     end
     # Allowing for the possibility of a data URI
     if picurl.match(/^data:image/)
-      %Q{<img alt="Some Image Available" class="fitPic" id="#{idstr}" onload="fitImageOnLoad('#{selector}')" src="#{picurl}" style="visibility:hidden;">}.html_safe
+      %Q{<img alt="Some Image Available" class="fitPic" id="#{idstr}" onload="fitImageOnLoad('#{selector}')" src="#{picurl}">}.html_safe
     else
       begin
     	  image_tag(picurl, 
           class: "fitPic",
           id: idstr,
-          style: "visibility:hidden;",
           onload: "fitImageOnLoad('#{selector}')",
           alt: "Some Image Available")
       rescue
     	  image_tag(placeholder_image, 
           class: "fitPic",
           id: idstr,
-          style: "visibility:hidden;",
           onload: "fitImageOnLoad('#{selector}')",
           alt: "Some Image Available")
       end
@@ -101,9 +99,14 @@ module ApplicationHelper
       picrows << "<tr><td>"+
       piclist.slice(0..5).collect{ |url| 
         idstr = "thumbnail"+(thumbNum = thumbNum+1).to_s
-        "<div class = \"picCell\">"+
-        image_tag(url, class: "fitPic", id: idstr, onclick: "pickImg('input.icon_picker', 'div.preview img', '#{url}')", onload: "fitImageOnLoad('##{idstr}')", alt: "No Image Available")+
-        "</div>"
+        content_tag( :div,
+          image_tag(url, 
+            class: "fitPic", 
+            id: idstr, 
+            onclick: "pickImg('input.icon_picker', 'div.preview img', '#{url}')", 
+            onload: "fitImageOnLoad('##{idstr}')", 
+            alt: "No Image Available"),
+          class: "picCell")
       }.join('</td><td>')+
       "</td></tr>"
       piclist = piclist.slice(6..-1) || [] # Returns nil when off the end of the array
@@ -114,12 +117,12 @@ module ApplicationHelper
       prompt = "There are no pictures on the page, but you can paste a URL below, then click Okay."
     else
       tblstr = "<br><table>#{picrows}</table>"
-      prompt = "Pick one of the thumbnails<br>or type/paste the URL below, then click Okay."
+      prompt = "Pick one of the thumbnails<br>or type/paste the URL below, then click Okay.".html_safe
     end
     content_tag( :div, 
       page_fitPic( picurl, id, "MissingPicture.png", "div.preview img" ),
       class: "preview" )+
-    content_tag( :p, prompt, class: "airy" )+
+    content_tag( :div, prompt, class: "prompt" )+
     %Q{
         <br class="clear"> 
         <input type="text" class="icon_picker" 

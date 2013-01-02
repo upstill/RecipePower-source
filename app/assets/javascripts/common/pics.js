@@ -54,11 +54,9 @@ function fitImage(img) {
 	  $(img).css("top", 0);
 	  $(img).css("left", (frameWidth-newWidth)/2);
 	}
-	img.style.position = "relative";
-  $(img).css("visibility", "visible");
-  $(parent).css("display", "block");
-    $(img).show();
-    return true;
+  // $(parent).css("display", "block");
+  $(img).addClass("loaded")
+  return true;
 }
 
 // Handle a click on a thumbnail image by passing the URL on to the 
@@ -78,7 +76,7 @@ function previewImg(inputsel, imagesel, formsel) {
 	// Set the image(s) to the URL and fit them in their frames
 	var imageset = $(imagesel)
 	if(imageset.attr("src") != url) {
-		imageset.hide();
+		imageset.removeClass("loaded");
 		imageset.attr("src", url )
 		fitImage(imageset[0])
 	}

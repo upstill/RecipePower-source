@@ -1,20 +1,23 @@
 div.pic_picker {
-	display:block;
+	display:inline-block;
 	width:700px;
 	margin:5px;
 	padding:5px;
 	border:#000000 2px solid;
 	.preview {
-		float:left;
-		width:160px;
-		height:120px;
-		text-align:center;
-		margin:10px;
-		padding:10px;
-		border:#909090 3px solid;
-		img {
-			border:#000 5px solid
-		}
+		width:200px;
+		height:150px;
+		float: left;
+		margin-bottom: 10px;
+		border:#909090 2px solid;
+	}
+	.prompt {
+		display: block;
+		float: left;
+		width: 280px;
+		margin:30px;
+		font:20px arial,sans-serif;
+		font-weight:bold
 	}
 	.picCell {
 		width:96px;
