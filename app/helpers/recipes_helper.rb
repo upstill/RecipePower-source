@@ -14,7 +14,7 @@ def edit_recipe_link( label, recipe)
       rcpTitle: recipe.title,
       rcpTagData: recipe.tags.map(&:attributes).to_json,
       rcpPicURL: recipe.picurl,
-      rcpPrivate: recipe.private,
+      rcpPrivate: recipe.private ? %q{checked="checked"} : "",
       rcpComment: recipe.comment,
       rcpStatus: recipe.status,
       authToken: form_authenticity_token
@@ -140,7 +140,7 @@ def recipe_editor
   editor = { :string =>
       %q{
 <form accept-charset="UTF-8" action="/recipes/%%rcpID%%" class="edit_recipe" data-remote="true" data-type="json" id="edit_recipe_%%rcpID%%" method="post"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="&#x2713;" /><input name="_method" type="hidden" value="put" /><input name="authenticity_token" type="hidden" value="%%authToken%%" /></div>
-      <div class="edit_recipe_field pic"><div class="recipe_pic_preview"><img alt="Some Image Available" class="fitPic" id="rcpPic%%rcpID%%" onload="fitImageOnLoad('div.recipe_pic_preview img')" src="%%rcpPicURL%%" style="visibility:hidden;" /><input hidden="hidden" id="recipe_picurl" name="recipe[picurl]" rel="jpg,png,gif" size="30" type="text" value="%%rcpPicURL%%" /></div>
+      <div class="edit_recipe_field pic"><div class="recipe_pic_preview"><img alt="Some Image Available" class="fitPic" id="rcpPic%%rcpID%%" onload="fitImageOnLoad('div.recipe_pic_preview img')" src="%%rcpPicURL%%" /><input hidden="hidden" id="recipe_picurl" name="recipe[picurl]" rel="jpg,png,gif" size="30" type="text" value="%%rcpPicURL%%" /></div>
         <div class="recipe_pic_picker">
          <a href="/" class="pic_picker_golink" data="recipe_picurl;div.recipe_pic_preview img">Pick Picture</a>
          <div class="pic_picker" data-url="recipes/%%rcpID%%/edit?pic_picker=true" style="display:none;"></div>
@@ -160,7 +160,7 @@ def recipe_editor
             <option value="8">Misc</option></select>
         </div>
         <div class="edit_recipe_field">
-       		<input name="recipe[private]" type="hidden" value="%%rcpPrivate%%" /><input id="recipe_private" name="recipe[private]" type="checkbox" value="%%rcpPrivate%%" />
+       		<input name="recipe[private]" type="hidden" value="0" /><input %%rcpPrivate%% id="recipe_private" name="recipe[private]" type="checkbox" value="1" />
        		<label for="recipe_private">Private (for my eyes only)</label>
          </div>
          <input class="save-tags-button submit" name="commit" type="submit" value="Save" />
