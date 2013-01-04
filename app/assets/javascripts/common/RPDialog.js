@@ -65,17 +65,17 @@ function runResponse(responseData) {
 		if(code = responseData.code) {
 			var placed = false;
 			if(!responseData.how) {
-				if(responseData.area == "floating") {
+				if(responseData.area == "floating") 
 					responseData.how = "modal"
-				} else if ((responseData.area == "at_left") || (responseData.area == "at_top")) {
+				else if ((responseData.area == "at_left") || (responseData.area == "at_top"))
 					responseData.how = "modeless"
-				}
 			}
-			if(responseData.how == "modeless") {
+			
+			if(responseData.how == "modeless")
 				placed = injectDialog(code, responseData.area, true);
-			} else if(responseData.how == "modal") { // at_top and at_left run modelessly
+			else if(responseData.how == "modal") // at_top and at_left run modelessly
 				placed = runModalDialog(code, responseData.area);					
-			}
+
 			if (!placed) { // Force the page to be displayed. XXX Does nothing to the address bar
 				// $('#container').data("pending_page", code ); // Stash for doError function
 				// window.location.replace('javascript:doError()');	
@@ -85,7 +85,8 @@ function runResponse(responseData) {
 			}
 		}
 	} 
-	// recipePowerNotify(); // Put up any notifications provided by the response
+	if(responseData.notice)
+		jNotify( responseData.notice, { HorizontalPosition: 'center', VerticalPosition: 'top', TimeShown: 1200 } );
 }
 
 /* Submit a request to the server for interactive HTML. It's meant to be JSON specifying how 
@@ -114,7 +115,6 @@ function recipePowerGetAndRunJSON(request, how, area) {
 		request += "?area="+area
 	
 	$('span.query').text(request);
-	debugger
 	$.ajax( {
 		type: "GET",
 		dataType: "json",
@@ -280,9 +280,8 @@ function injectDialog(code, area, modeless) {
 		// Ensure that all scripts are loaded
 		// Run after-load functions
 		
-		$("body").prepend($(dlog)); 
-		var dlog = $("body").children[0]; 
-		debugger
+		$("body").append($(dlog)); 
+		var dlog = $("body").children().last(); 
 		launchDialog(dlog, area, modeless);
 	}
 	return dlog;

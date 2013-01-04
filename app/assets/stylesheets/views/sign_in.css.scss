@@ -79,7 +79,7 @@
 		border-left:solid 1px #999;
 		margin:0px;
 		padding-left:20px;
-		float:left
+		display: inline-block;
 	}
 	.prompt {
 		margin:15px 0px;
@@ -90,7 +90,7 @@
 		font:24px arial,sans-serif;
 		margin-top:100px;
 		margin-right:10px;
-		float:left
+		display: inline-block;
 	}
 	div.signin_or {
 		display: inline-block;
