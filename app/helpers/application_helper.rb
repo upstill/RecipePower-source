@@ -306,13 +306,11 @@ module ApplicationHelper
   def dialogDiv( which, ttl=nil, area="floating", template="")
     logger.debug "dialogHeader for "+globstring({dialog: which, area: area, layout: @layout, ttl: ttl})
     classname = which.to_s
-    onloadFcn = classname+"Onload"
     ttlspec = ttl ? (" title=\"#{ttl}\"") : ""
     flash_helper() +
     content_tag(:div, 
         "",
         class: classname+" dialog "+area, 
-        onload: onloadFcn, 
         id: "recipePowerDialog", 
         "data-template" => template)
   end
@@ -321,15 +319,14 @@ module ApplicationHelper
   # Currently handled this way (e.g., symbols that have been supported)
   #   :edit_recipe
   #   :captureRecipe
-  #   :newRecipe
+  #   :new_recipe (nee newRecipe)
   #   :sign_in
   def dialogHeader( which, ttl=nil, area="floating")
     logger.debug "dialogHeader for "+globstring({dialog: which, area: area, layout: @layout, ttl: ttl})
     classname = which.to_s
-    onloadFcn = (classname+"Onload")
     ttlspec = ttl ? (" title=\"#{ttl}\"") : ""
     flash_helper() +
-    %Q{<div id="recipePowerDialog" onload="#{onloadFcn}" class="#{classname} dialog #{area}" #{ttlspec}>}.html_safe +
+    %Q{<div id="recipePowerDialog" class="#{classname} dialog #{area}" #{ttlspec}>}.html_safe +
     ((@layout && @layout=="injector") ? 
       content_tag(:div, 
         link_to_function("X", "cancelDialog", style:"text-decoration: none;", id: "recipePowerCancelBtn"),

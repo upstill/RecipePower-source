@@ -25,7 +25,6 @@
  *= require RP_recipes
  *= require views/authentication
  *= require common/dialog
- *= require common/dialogs
  *= require views/edit_recipe
  *= require views/pic_picker
 

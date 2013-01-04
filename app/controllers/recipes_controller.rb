@@ -12,28 +12,33 @@ class RecipesController < ApplicationController
   # Render to html, json or js the results of a recipe manipulation
   def reportRecipe( url, notice, formats)
     truncated = truncate @recipe.title, :length => 140
-    respond_to do |format|
-      format.html { 
+    respond_to do |fmt|
+      fmt.html { 
         if (params[:layout] && params[:layout] == "injector")
           render text: notice
         else
           redirect_to url, :notice  => notice
         end
       }
-      format.json { 
-        go_link_body = with_format("html") do render_to_string :partial => "recipes/golink" end
-        list_element_body = with_format("html") do render_to_string :partial => "shared/recipe_smallpic" end
+      fmt.json { 
+        if params[:action] != "destroy"
+          go_link_body = with_format("html") do render_to_string :partial => "recipes/golink" end
+          list_element_body = with_format("html") do render_to_string :partial => "shared/recipe_smallpic" end
+        end
         render json:     { 
                          notice: notice,
                          title: truncated, 
                          go_link_class: recipe_list_element_golink_class(@recipe), 
-                         go_link_body: go_link_body,
+                         go_link_body: go_link_body || "",
                          list_element_class: recipe_list_element_class(@recipe), 
-                         list_element_body: list_element_body,
+                         list_element_body: list_element_body || "",
+                         action: params[:action],
                          processorFcn: "RP.rcp_list.update"
                        } 
       }
-      format.js { render text: @recipe.title }
+      fmt.js { 
+        render text: @recipe.title 
+      }
     end
   end
 
@@ -242,7 +247,8 @@ class RecipesController < ApplicationController
     user.save
     @recipes = user.recipes(true)
     truncated = truncate(@recipe.title, :length => 40)
-    redirect_to rcpqueries_url, :notice => "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections."
+    reportRecipe rcpqueries_url, "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections.", formats
+    # redirect_to rcpqueries_url, :notice => "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections."
   end
 
   # Remove the recipe from the system entirely
@@ -250,7 +256,8 @@ class RecipesController < ApplicationController
     @recipe = Recipe.find(params[:id])
     title = @recipe.title
     @recipe.destroy
-    redirect_to rcpqueries_url, :notice => "\"#{title}\" is gone for good."
+    reportRecipe rcpqueries_url, "\"#{title}\" is gone for good.", formats
+    # redirect_to rcpqueries_url, :notice => "\"#{title}\" is gone for good."
   end
 
   def revise # modify current recipe to reflect a client-side change

@@ -20,7 +20,7 @@ RP.edit_recipe.go = (rcpdata) ->
 	dlgsource = $(dlog).data("template").string.
 	replace(/%%rcpID%%/g, rcpdata.rcpID).
 	replace(/%%rcpTitle%%/g, rcpdata.rcpTitle).
-	replace(/%%rcpPicURL%%/g, rcpdata.rcpPicURL).
+	replace(/%%rcpPicURL%%/g, rcpdata.rcpPicURL || "assets/MissingPicture.png" ).
 	replace(/%%rcpPrivate%%/g, rcpdata.rcpPrivate).
 	replace(/%%rcpComment%%/g, rcpdata.rcpComment).
 	replace(/%%authToken%%/g, rcpdata.authToken).
@@ -30,38 +30,16 @@ RP.edit_recipe.go = (rcpdata) ->
 	# The tag data is parsed and added to the tags field directly
 	$("#recipe_tag_tokens").data "pre", jQuery.parseJSON(rcpdata.rcpTagData)
 	
-	# Invoke any onload functionality
-	RP.edit_recipe.onload dlog # launchDialog dlog, "at_left", true # 
-	# $('input.save-tags-button.save', dlog).click RP.edit_recipe.submit 
-	# Arm the cancel button to close the dialog
-	$('input.save-tags-button.cancel', dlog).click RP.edit_recipe.cancel 
-	
-	RP.rcp_list.touch_recipe rcpdata.rcpID
+	# Hand it off to the dialog handler
+	launchDialog dlog, "at_left", true
 
-RP.edit_recipe.getandgo = (path, how, where) ->
-	recipePowerGetAndRunJSON path, how, where
-
-# Done with dialog: hide it and nuke its children
-RP.edit_recipe.stop = (dlog) ->
-	dlog = me()
-	$(dlog).hide()
-	RP.edit_recipe.onclose dlog
-	$(dlog).empty()
-
-RP.edit_recipe.cancel = (eventdata) ->
-	RP.edit_recipe.stop()
-	jNotify( "Cookmark secure and unharmed.", 
-		{ HorizontalPosition: 'center', VerticalPosition: 'top'} );
-	eventdata.preventDefault()
-
-# When the dialog is closed, also close its pic picker
+# Handle a close event: when the dialog is closed, also close its pic picker
 RP.edit_recipe.onclose = (dlog) ->
+	$(dlog).hide()
 	picker_dlog = $("div.pic_picker")
-	# If the dialog has an associated manager, call its onclose function
-	if(RP && RP.dialog)
-		RP.dialog.apply('onclose', picker_dlog)
-	$(picker_dlog).dialog("destroy");
-	$(picker_dlog).remove();
+	closeModal(picker_dlog)
+	$(dlog).empty()
+	return true # Prevent normal close action
 	
 # Extract a name from a reference of the form "recipe[<name>]"
 recipedata = (arr) ->
@@ -73,27 +51,21 @@ recipedata = (arr) ->
 	result
 
 # Don't submit if nothing has changed
-before_send = (xhr) ->
+RP.edit_recipe.submission_redundant = (dlog) ->
 	# If the before and after states don't differ, we just close the dialog without submitting
-	dataBefore = $('form.edit_recipe').data "before"
-	dataAfter = recipedata $('form.edit_recipe').serializeArray()
-	me().hide()
+	debugger
+	hooks = $('form.edit_recipe', dlog).data "hooks"
+	dataBefore = hooks.dataBefore
+	dataAfter = recipedata $('form.edit_recipe', dlog).serializeArray()
 	for own attr, value of dataAfter
 		if dataBefore[attr] != value # Something's changed => do normal forms processing
-			return true
+			return false
 	# Nothing's changed => we can just silently close the dialog
-	RP.edit_recipe.stop()
-	false
-
-# Handle successful form submission: post the data and stop the dialog
-success = (event, data, status, xhr) ->
-	dlog = me()
-	postSuccess data, dlog
-	RP.edit_recipe.stop dlog
 	true
 
 # When dialog is loaded, activate its functionality
 RP.edit_recipe.onload = (dlog) ->
+	dlog = me()
 	# Only proceed if the dialog has children
 	if $('.edit_recipe > *').length > 0
 		$(dlog).show 500
@@ -125,9 +97,29 @@ RP.edit_recipe.onload = (dlog) ->
 		
 		# When submitting the form, we abort if there's no change
 		# Stash the serialized form data for later comparison
-		$('form.edit_recipe').data "before", recipedata($('form.edit_recipe').serializeArray())
-		$('form.edit_recipe').on 'ajax:beforeSend', before_send
-		$('form.edit_recipe').on 'ajax:success', success
+		# $('form.edit_recipe').data "before", recipedata $('form.edit_recipe').serializeArray()
+		dataBefore = recipedata $('form.edit_recipe', dlog).serializeArray()
+		$('form.edit_recipe').data "hooks", {
+			dataBefore: recipedata($('form.edit_recipe', dlog).serializeArray()),
+			saveMsg: "Cookmark successfully saved.",
+			beforesaveFcn: "RP.edit_recipe.submission_redundant"
+		}
+		
+		$('input.save-tags-button.cancel', dlog).data "hooks",
+		 	successMsg: "Cookmark secure and unharmed."
+		$('form#remove').data "hooks",
+		 	successMsg: "Cookmark removed from collection."
+		$('form#destroy').data "hooks",
+	 		successMsg: "Cookmark destroyed for now and evermore."
+
+#		$('input.save-tags-button.cancel', dlog).click RP.edit_recipe.oncancel 
+#		$('form.edit_recipe').on 'ajax:beforeSend', submission_redundant
+#		$('form.edit_recipe').on 'ajax:success', submission_success
+#		$('form#remove').on 'ajax:success', submission_success
+#		$('form#destroy').on 'ajax:success', submission_success
+		
+		rcpid = $('form.edit_recipe', dlog).attr("id").replace /\D*/g, ''
+		# RP.rcp_list.touch_recipe rcpid
 
 jQuery ->
 	if dlog = me()[0]

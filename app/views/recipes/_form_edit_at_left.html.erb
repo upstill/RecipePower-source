@@ -32,8 +32,8 @@
   <%= f.submit "Cancel", class: "save-tags-button cancel" %>
 <% end %>
 <% if permitted_to? :remove, @recipe %>
-  <%= button_to "Remove From Collection", remove_recipe_path(@recipe), class: "save-tags-button remove", :remote => true, :form => { "data-type" => "json" } %>
+  <%= button_to "Remove From Collection", remove_recipe_path(@recipe), class: "save-tags-button", :remote => true, :form => { "data-type" => "json", id: "remove" } %>
 <% end %>
 <% if permitted_to? :destroy, @recipe %>
-  <%= button_to "Destroy this Recipe", recipe_path(@recipe), :remote => true, :form => { "data-type" => "json" }, :method => :delete, class: "save-tags-button destroy", :confirm => "This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" %>
+  <%= button_to "Destroy this Recipe", recipe_path(@recipe), :remote => true, :form => { "data-type" => "json", id: "destroy" }, :method => :delete, class: "save-tags-button", :confirm => "This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" %>
 <% end %>

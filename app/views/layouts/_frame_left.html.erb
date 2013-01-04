@@ -8,10 +8,9 @@
 		<%= @collection.html %>
 	</div>
 	<br class="clear">
+	<%= content_tag :div, (link_to_dialog "Add a Cookmark", new_recipe_path, "modal", "floating"), class: "footer_nav_links" %>
 	<hr>
-	<div id="footer_nav_links">
-		<%= footer_navlinks %>
-	</div>
+	<%= content_tag :div, footer_navlinks, class: "footer_nav_links" %>
 	<%= debug_dump(params) if Rails.env.development? %>
 </div>
 <%= feedback_tab(:position => 'left') %>

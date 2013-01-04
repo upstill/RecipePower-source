@@ -23,9 +23,9 @@
  *  require_tree blueprint
  *= require common/RPGlobal
  *= require common/scaffolds
- *= require common/dialogs
  *= require views/rcp_list
  *= require views/edit_recipe
+ *= require views/new_recipe
  *= require views/sign_in
  *= require views/pic_picker
  *= require common/buttons
@@ -154,7 +154,7 @@ div.collection_list {
 }
 
 .collection_query_div {
-    width:600px;
+    width:670px;
     margin: 15px;
     // border:3px solid black;
     float: left;
@@ -174,7 +174,7 @@ div.collection_list {
 #collection_query_tokens {
 	margin:0;
 	padding:3px;
-	width: 380px;
+	width: 450px;
 	height: 27px;
 	float: left;
   // outline:#999 solid blue 3px;

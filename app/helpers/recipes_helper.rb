@@ -165,8 +165,8 @@ def recipe_editor
          </div>
          <input class="save-tags-button submit" name="commit" type="submit" value="Save" />
          <input class="save-tags-button cancel" name="commit" type="submit" value="Cancel" />
-         </form>  <form action="/recipes/%%rcpID%%/remove" class="button_to" data-remote="true" data-type="json" method="post"><div><input class="save-tags-button remove" type="submit" value="Remove From Collection" /><input name="authenticity_token" type="hidden" value="%%authToken%%" /></div></form>
-         <form action="/recipes/%%rcpID%%" class="button_to" data-remote="true" data-type="json" method="post"><div><input name="_method" type="hidden" value="delete" /><input class="save-tags-button destroy" data-confirm="This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" type="submit" value="Destroy this Recipe" /><input name="authenticity_token" type="hidden" value="%%authToken%%" /></div></form>
+         </form>  <form action="/recipes/%%rcpID%%/remove" class="button_to remove" data-remote="true" data-type="json" method="post"><div><input class="save-tags-button remove" type="submit" value="Remove From Collection" /><input name="authenticity_token" type="hidden" value="%%authToken%%" /></div></form>
+         <form action="/recipes/%%rcpID%%" class="button_to destroy" data-remote="true" data-type="json" method="post"><div><input name="_method" type="hidden" value="delete" /><input class="save-tags-button destroy" data-confirm="This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" type="submit" value="Destroy this Recipe" /><input name="authenticity_token" type="hidden" value="%%authToken%%" /></div></form>
       }+
     dialogFooter()
   }.to_json()

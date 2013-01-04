@@ -1,8 +1,4 @@
 
-function newRecipeOnload(dlog) {
-	dialogOnClose( dlog, RP.rcp_list.update )
-}
-
 function genericHandling(data, preface) {
   if(data.error) {
     postError( preface+data.error );
