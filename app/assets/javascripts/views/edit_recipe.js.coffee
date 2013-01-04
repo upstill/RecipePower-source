@@ -33,6 +33,62 @@ RP.edit_recipe.go = (rcpdata) ->
 	# Hand it off to the dialog handler
 	launchDialog dlog, "at_left", true
 
+# When dialog is loaded, activate its functionality
+RP.edit_recipe.onload = (dlog) ->
+	dlog = me()
+	# Only proceed if the dialog has children
+	if $('.edit_recipe > *').length > 0
+		$(dlog).show 500
+		# Setup tokenInput on the tags field
+		$("#recipe_tag_tokens", dlog).tokenInput("/tags/match.json", 
+			crossDomain: false,
+			noResultsText: "No matching tag found; hit Enter to make it a tag",
+			hintText: "Type your own tag(s) for the recipe",
+			prePopulate: $("#recipe_tag_tokens").data("pre"),
+			theme: "facebook",
+			preventDuplicates: true,
+			allowFreeTagging: true
+		)
+		
+		if $('a.pic_picker_golink', dlog).length > 0
+			# Get the picture picker in background
+			RP.pic_picker.load (picdlg) ->
+				$('a.pic_picker_golink', dlog).addClass('loaded');
+			
+			# Arm the pic picker to open when clicked
+			$("a.pic_picker_golink", dlog).click ->
+				event.preventDefault()
+				return RP.pic_picker.open "Pick a Picture for the Recipe"
+		
+		# Fit the recipe's image into its place
+		fitImageOnLoad "div.recipe_pic_preview img"
+		
+		# When submitting the form, we abort if there's no change
+		# Stash the serialized form data for later comparison
+		# $('form.edit_recipe').data "before", recipedata $('form.edit_recipe').serializeArray()
+		dataBefore = recipedata $('form.edit_recipe', dlog).serializeArray()
+		$('form.edit_recipe', dlog).data "hooks", {
+			dataBefore: recipedata($('form.edit_recipe', dlog).serializeArray()),
+			saveMsg: "Cookmark successfully saved.",
+			beforesaveFcn: "RP.edit_recipe.submission_redundant"
+		}
+		
+		$('input.save-tags-button.cancel', dlog).data "hooks",
+		 	successMsg: "Cookmark secure and unharmed."
+		$('form.remove', dlog).data "hooks",
+		 	saveMsg: "Cookmark removed from collection."
+		$('form.destroy', dlog).data "hooks",
+	 		saveMsg: "Cookmark destroyed for now and evermore."
+
+#		$('input.save-tags-button.cancel', dlog).click RP.edit_recipe.oncancel 
+#		$('form.edit_recipe').on 'ajax:beforeSend', submission_redundant
+#		$('form.edit_recipe').on 'ajax:success', submission_success
+#		$('form#remove').on 'ajax:success', submission_success
+#		$('form#destroy').on 'ajax:success', submission_success
+		
+		rcpid = $('form.edit_recipe', dlog).attr("id").replace /\D*/g, ''
+		# RP.rcp_list.touch_recipe rcpid
+
 # Handle a close event: when the dialog is closed, also close its pic picker
 RP.edit_recipe.onclose = (dlog) ->
 	$(dlog).hide()
@@ -53,7 +109,6 @@ recipedata = (arr) ->
 # Don't submit if nothing has changed
 RP.edit_recipe.submission_redundant = (dlog) ->
 	# If the before and after states don't differ, we just close the dialog without submitting
-	debugger
 	hooks = $('form.edit_recipe', dlog).data "hooks"
 	dataBefore = hooks.dataBefore
 	dataAfter = recipedata $('form.edit_recipe', dlog).serializeArray()
@@ -62,64 +117,6 @@ RP.edit_recipe.submission_redundant = (dlog) ->
 			return false
 	# Nothing's changed => we can just silently close the dialog
 	true
-
-# When dialog is loaded, activate its functionality
-RP.edit_recipe.onload = (dlog) ->
-	dlog = me()
-	# Only proceed if the dialog has children
-	if $('.edit_recipe > *').length > 0
-		$(dlog).show 500
-		# Setup tokenInput on the tags field
-		$("#recipe_tag_tokens", dlog).tokenInput("/tags/match.json", 
-			crossDomain: false,
-			noResultsText: "No matching tag found; hit Enter to make it a tag",
-			hintText: "Type your own tag(s) for the recipe",
-			prePopulate: $("#recipe_tag_tokens").data("pre"),
-			theme: "facebook",
-			preventDuplicates: true,
-			allowFreeTagging: true
-		)
-		
-		if $('a.pic_picker_golink', dlog).length > 0
-			$('a.pic_picker_golink', dlog).css('visibility', 'hidden');
-			# Get the picture picker in background
-			RP.pic_picker.load ->
-				# $('a.pic_picker_golink', dlog).css('color', 'black');
-				$('a.pic_picker_golink', dlog).css('visibility', 'visible');
-		
-			# Arm the pic picker to open when clicked
-			$("a.pic_picker_golink", dlog).click ->
-				event.preventDefault()
-				return RP.pic_picker.open "Pick a Picture for the Recipe"
-		
-		# Fit the recipe's image into its place
-		fitImageOnLoad "div.recipe_pic_preview img"
-		
-		# When submitting the form, we abort if there's no change
-		# Stash the serialized form data for later comparison
-		# $('form.edit_recipe').data "before", recipedata $('form.edit_recipe').serializeArray()
-		dataBefore = recipedata $('form.edit_recipe', dlog).serializeArray()
-		$('form.edit_recipe').data "hooks", {
-			dataBefore: recipedata($('form.edit_recipe', dlog).serializeArray()),
-			saveMsg: "Cookmark successfully saved.",
-			beforesaveFcn: "RP.edit_recipe.submission_redundant"
-		}
-		
-		$('input.save-tags-button.cancel', dlog).data "hooks",
-		 	successMsg: "Cookmark secure and unharmed."
-		$('form#remove').data "hooks",
-		 	successMsg: "Cookmark removed from collection."
-		$('form#destroy').data "hooks",
-	 		successMsg: "Cookmark destroyed for now and evermore."
-
-#		$('input.save-tags-button.cancel', dlog).click RP.edit_recipe.oncancel 
-#		$('form.edit_recipe').on 'ajax:beforeSend', submission_redundant
-#		$('form.edit_recipe').on 'ajax:success', submission_success
-#		$('form#remove').on 'ajax:success', submission_success
-#		$('form#destroy').on 'ajax:success', submission_success
-		
-		rcpid = $('form.edit_recipe', dlog).attr("id").replace /\D*/g, ''
-		# RP.rcp_list.touch_recipe rcpid
 
 jQuery ->
 	if dlog = me()[0]

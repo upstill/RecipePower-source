@@ -209,7 +209,6 @@ function postSuccess(jsonResponse, dlog, entity) {
 		closer(jsonResponse);
 		
 	// Call the dialog's response function
-	debugger;
 	if((dlog != undefined) || (entity != undefined))
 		dialogOnEvent("save", dlog, entity);
 		
@@ -261,16 +260,9 @@ function runModalDialog(body, area) {
 	return dlog;			
 }
 
-// Inject the dialog on the current document, using the given HTML
+// Inject the dialog on the current document, using the given HTML code
 function injectDialog(code, area, modeless) {
-  // First, remove any lingering style or script elements on the page
-  $('link.RecipePowerInjectedStyle').remove();
-  // Inject our styles
-  // $('<link href="/assets/dialog.css?body=1" media="screen" rel="stylesheet" type="text/css" id="RecipePowerInjectedStyle"/>').appendTo('head');
-  // Parse the code, creating an html element outside the DOM, then pulling the
-  // 'div.dialog' element from that.
   var dlog = $('div.dialog', $('<html></html>').html(code));
-
   if(dlog) {	
 		if(!(area && $(dlog).hasClass(area)) ) {
 			// If the area isn't specified anywhere, 'floating' is the default
@@ -283,31 +275,14 @@ function injectDialog(code, area, modeless) {
 				}
 		  }
 		}
-		if($('#RecipePowerInjectedEncapsulation').length == 0) { // XXX depends on jQuery
-		  wrapWithoutCloning();
-		  // Need to encapsulate existing body
-		  // var theFrame = $("<div id='RecipePowerInjectedEncapsulation'></div>");
-		} 
-		// Any old dialog will be either a predecessor or successor of the encapsulation
-		var odlog = $('#RecipePowerInjectedEncapsulation').prev().add(
-					$('#RecipePowerInjectedEncapsulation').next());
-		if($(odlog).length > 0) {
-		  // Page has existing dialog, either before or after injection => Remove it
-		  // Clean up javascript namespace
-		  $(odlog).remove();
-		}
 		// Now the page is ready to receive the code, prepended to the page
 		// We extract the dialog div from what may be a whole page
 		// Ensure that all scripts are loaded
 		// Run after-load functions
-		var dlog;
-		if((area == "at_left") || (area == "at_top")) {
-			$("body").prepend($(dlog)); 
-			dlog = $('#RecipePowerInjectedEncapsulation').prev();
-		} else {
-			$("body").append($(dlog)); 
-			dlog = $('#RecipePowerInjectedEncapsulation').next();
-		}
+		
+		$("body").prepend($(dlog)); 
+		var dlog = $("body").children[0]; 
+		debugger
 		launchDialog(dlog, area, modeless);
 	}
 	return dlog;
@@ -335,8 +310,7 @@ function launchDialog(dlog, area, modeless)
 		var context = this;
 		var dlog = eventdata.data; // As stored when the dialog was set up
 		eventdata.preventDefault();
-		var process_result_normally;
-		debugger;
+		var process_result_normally;;
 		if(process_result_normally = !dialogOnEvent("beforesave", dlog, eventdata.currentTarget)) {
 			// Okay to submit
 			/* To sort out errors from subsequent dialogs, we submit the form synchronously
@@ -363,52 +337,22 @@ function launchDialog(dlog, area, modeless)
 	if(area == "at_left") {
 		$(dlog).css( "position", "fixed" );
 		$(dlog).css( "top", "70px" );
-	} else if (area == 'at_top') {
-		var dlgheight = $(dlog).outerHeight();
-		$('#RecipePowerInjectedEncapsulation').css("marginTop", dlgheight)
 	}
 }
 
 // Remove the dialog and injected code
 function closeModal(dlog) {
-	debugger
 	$(dlog).dialog("destroy"); // If running a jquery dialog 
 	// If the dialog has an associated manager, call its onclose function
 	if(!dialogOnEvent("close", dlog))
 		// Remove the first child of 'body', which is our dialog (if any)
 		$(dlog).remove();	
-	/* Unwrap the page contents from their encapsulation */
-	unwrapWithoutCloning(); // $('#RecipePowerInjectedEncapsulation').children().unwrap();
-	/* Remove any injected styles from the head */
-	$('link.RecipePowerInjectedStyle').remove();
 }
 
 function closeModeless(dlog) {
   $(dlog).dialog("close");
-}
-
-/* Encapsulate the body content of the page with a div wrapper */
-function wrapWithoutCloning() {
-	var wrapper = document.createElement('div'); 
-	wrapper.id = "RecipePowerInjectedEncapsulation";
-	var body = document.getElementsByTagName('body')[0];
-	body.insertBefore(wrapper, body.firstChild );
-	var child;
-	while (child = body.childNodes[1]) {
-		body.removeChild(child);
-		wrapper.appendChild(child);
-	}
-}
-
-/* Remove the previously-injected wrapper */
-function unwrapWithoutCloning() {
-	var body = document.getElementsByTagName('body')[0];
-	var wrapper = document.getElementById('RecipePowerInjectedEncapsulation');
-	var child;
-	while(child = wrapper.childNodes[0]) {
-		wrapper.removeChild(child);
-		body.insertBefore(child, wrapper);
-	}
-	body.removeChild(wrapper);
+	if(!dialogOnEvent("close", dlog))
+		// Remove the first child of 'body', which is our dialog (if any)
+		$(dlog).remove();	
 }
 
