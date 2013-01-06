@@ -23,6 +23,10 @@ module ApplicationHelper
   def encodeHTML(str)
       @@coder.encode str
   end
+  
+  def forgot_password_link
+    link_to_function "Forgot Password", %Q{recipePowerGetAndRunJSON('#{new_user_password_path}', 'modal')}
+  end
     
   def link_to_add_fields(name, f, association, *initializers)
     new_object = f.object.send(association).klass.new *initializers

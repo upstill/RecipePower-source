@@ -1,5 +1,29 @@
 
 .sign_in.dialog {
+	.sign {
+		width:620px;
+		margin:5px 20px;
+		float:left;
+		&.floating {
+			width:600px;
+			margin:5px 12px;
+			float:left
+		}
+	}
+	.signup {
+		width:250px;
+		border-left:solid 1px #999;
+		margin:0px;
+		padding-left:20px;
+		display: inline-block;
+	}
+	.or {
+		font:24px arial,sans-serif;
+		margin-top:100px;
+		margin-right:10px;
+		display: inline-block;
+		vertical-align: top;
+	}
 	&.at_top {
 		font:12px arial,sans-serif;
 		font-weight:bold;
@@ -41,7 +65,7 @@
 				width: 210px;
 				display: inline-block;
 				vertical-align: top;
-				// margin:0.5em;
+				margin-top: 0.2em;
 				.signin_element {
 					width: 95%;
 				}
@@ -57,7 +81,25 @@
 	&.floating {
 		width:600px;
 		margin-top:2em;
-		float:left
+		float:left;
+		input {
+			width: 95%;
+		}
+		.signup {
+			width:230px;
+		}
+		.signin {
+			width:230px;
+			border-right:solid 1px #999;
+			padding-right:10px;
+			margin-right:10px;
+			padding-right:10px;
+			display: inline-block;
+			vertical-align: top;
+			.field {
+				margin-top: 5px;
+			}
+		}
 	}
 	div.signin_hdr {
 		height:24px;
@@ -65,32 +107,10 @@
 		margin:0.5em;
 		padding:0
 	}
-	.sign {
-		width:620px;
-		margin:5px 20px;
-		float:left;
-		&.floating {
-			width:550px;
-			float:left
-		}
-	}
-	.signup {
-		width:200px;
-		border-left:solid 1px #999;
-		margin:0px;
-		padding-left:20px;
-		display: inline-block;
-	}
 	.prompt {
 		margin:15px 0px;
 		font:20px arial,sans-serif;
 		font-weight:bold
-	}
-	.or {
-		font:24px arial,sans-serif;
-		margin-top:100px;
-		margin-right:10px;
-		display: inline-block;
 	}
 	div.signin_or {
 		display: inline-block;
@@ -108,6 +128,7 @@
 	margin-right:10px;
 	padding-right:10px;
 	display: inline-block;
+	vertical-align: top;
 }
 
 .auth_signin {

@@ -281,17 +281,24 @@ class Recipe < ActiveRecord::Base
       end
     end
     self.current_user = uid
-    Touch.touch uid, self.id
+    touch
   end
-    
-    # Set the mod time of the recipe to now (so it sorts properly in Recent lists)
-    def touch
-        if self.current_user
-            Touch.touch self.current_user, self.id
-        else
-            super
-        end
+  
+  # Set the mod time of the recipe to now (so it sorts properly in Recent lists)
+  # If a uid is provided, touch the associated rcpref instead
+  def touch uid=nil
+    if uid
+      refs = RcpRef.where( user_id: uid, recipe_id: id)
+      if refs[0]
+        refs[0].touch
+      else # No rcpref extant => create one
+      end
+    else
+      super
     end
+    # if self.current_user
+      # Touch.touch self.current_user, self.id
+  end
 
    # This stores the edited tagpane for the recipe--or maybe not. The main
    # purpose is to parse the HTML to extract any tags embedded therein, 
