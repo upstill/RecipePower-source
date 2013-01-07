@@ -11,6 +11,14 @@ class Touch < ActiveRecord::Base
     end
   end
   
+  # Move all touchings to the corresponding rcpref
+  def self.fix
+    self.all.each { |rcd| 
+      rcp = rcd.touching
+      rcp.uptouch rcd.user_id, rcd.updated_at 
+    }
+  end
+  
   # Present the time-since-touched in a text format
   def self.touch_date(rid, uid)
     if rr = self.where(recipe_id: rid, user_id: uid).first

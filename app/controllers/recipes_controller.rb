@@ -67,11 +67,8 @@ class RecipesController < ApplicationController
     # Here is where we take a hit on the "Add to RecipePower" widget,
     # and also invoke the 'new cookmark' dialog. The difference is whether
     # parameters are supplied for url, title and note (though only URI is required).
-    if params[:url]
-        @recipe = Recipe.ensure current_user_or_guest_id, params # session[:user_id], params
-    else
-        @recipe = Recipe.new
-    end
+    debugger
+    @recipe = Recipe.ensure current_user_or_guest_id, params.slice(:url) # session[:user_id], params
     if @recipe.id # Mark of a fetched/successfully saved recipe: it has an id
     	# redirect to edit
     	redirect_to edit_recipe_url(@recipe), :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br>You might want to confirm the title and picture, and/or tag it?".html_safe
@@ -93,13 +90,8 @@ class RecipesController < ApplicationController
   	dialog_only = params[:how] == "modal" || params[:how] == "modeless"
     respond_to do |format|
       format.html { # This is for capturing a new recipe. The injector (capture.js) calls for this
-        if params[:recipe]
-          @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params
-        else
-          @recipe = Recipe.new
-        end
-        @recipe.current_user = current_user_or_guest_id # session[:user_id]
-        @recipe.touch # We're looking at it, so make it recent
+        debugger
+        @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params
         # The javascript includes an iframe for specific content
         @layout = "injector"
         render :edit, :layout => (params[:layout] || dialog_only)
@@ -124,10 +116,8 @@ class RecipesController < ApplicationController
   def edit
     # return if need_login true
     # Fetch the recipe by id, if possible, and ensure that it's registered with the user
-    @recipe = Recipe.ensure current_user_or_guest_id, params # session[:user_id], params
-    if @recipe.errors.empty? # Success (recipe found)
-      @recipe.current_user = current_user_or_guest_id # session[:user_id]
-      @recipe.touch # We're looking at it, so make it recent
+    @recipe = Recipe.ensure current_user_or_guest_id, params.slice(:id) # session[:user_id], params
+    if @recipe && @recipe.errors.empty? # Success (recipe found)
       @Title = @recipe.title # Get title from the recipe
       if params[:pic_picker]
         # Setting the pic_picker param requests a picture-editing dialog
@@ -149,6 +139,7 @@ class RecipesController < ApplicationController
   def create # Take a URL, then either lookup or create the recipe
     # return if need_login true
     # Find the recipe by URI (possibly correcting same), and bind it to the current user
+    debugger
     @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params[:recipe]
     if @recipe.errors.empty? # Success (valid recipe, either created or fetched)
       reportRecipe(  
@@ -198,26 +189,21 @@ class RecipesController < ApplicationController
   # Register that the recipe was touched by the current user--if they own it.
   # Since that recipe will now be at the head return a new first-recipe in the list.
   def touch
-      @recipe = Recipe.ensure nil, params # session[:user_id], params
-      if @recipe.errors.empty? # Success (recipe found)
-          @recipe.current_user = current_user_or_guest_id
-          @recipe.touch
-      end
-      # The client doesn't really care whether we touch successfully or not...
-      respond_to do |format|
-        list_element_body = render_to_string(:partial => "shared/recipe_smallpic") 
-        format.json { 
-            render json: { touch_class: touch_date_class(@recipe), 
-                           touch_body: touch_date_elmt(@recipe), 
-                           list_element_class: recipe_list_element_class(@recipe),
-                           list_element_body: list_element_body
-                         } 
-        }
-        format.html { 
-            @list_name = "mine"
-            render 'shared/_recipe_smallpic.html.erb', :layout=>false 
-        }
-      end
+    @recipe = Recipe.ensure current_user_or_guest_id, params.slice(:id, :url), false # session[:user_id], params
+    respond_to do |format|
+      list_element_body = render_to_string(:partial => "shared/recipe_smallpic") 
+      format.json { 
+          render json: { touch_class: touch_date_class(@recipe), 
+                         touch_body: touch_date_elmt(@recipe), 
+                         list_element_class: recipe_list_element_class(@recipe),
+                         list_element_body: list_element_body
+                       } 
+      }
+      format.html { 
+          @list_name = "mine"
+          render 'shared/_recipe_smallpic.html.erb', :layout=>false 
+      }
+    end
   end
   
   # Add a recipe to the user's collection without going to edit tags. Full-page render is just rcpqueries page
@@ -240,12 +226,8 @@ class RecipesController < ApplicationController
   # Delete the recipe from the user's list
   def remove
     # return if need_login true
-    @recipe = Recipe.find(params[:id])
-    # Simply remove this recipe/user pair from the join table
-    user = current_user # User.find(session[:user_id])
-    user.recipes.delete @recipe
-    user.save
-    @recipes = user.recipes(true)
+    @recipe = Recipe.ensure current_user_or_guest_id, params.slice(:id), false
+    @recipe.remove_from_collection current_user_or_guest_id
     truncated = truncate(@recipe.title, :length => 40)
     reportRecipe rcpqueries_url, "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections.", formats
     # redirect_to rcpqueries_url, :notice => "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections."
@@ -253,7 +235,7 @@ class RecipesController < ApplicationController
 
   # Remove the recipe from the system entirely
   def destroy
-    @recipe = Recipe.find(params[:id])
+    @recipe = Recipe.find params[:id] 
     title = @recipe.title
     @recipe.destroy
     reportRecipe rcpqueries_url, "\"#{title}\" is gone for good.", formats

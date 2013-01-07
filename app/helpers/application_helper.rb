@@ -153,7 +153,7 @@ module ApplicationHelper
 
   # Present the date and time the recipe was last touched by its current user
   def touch_date_elmt recipe
-    if touched = Touch.touch_date(recipe.id, recipe.current_user)
+    if touched = recipe.touch_date
       %Q{
         <span class="#{touch_date_class(recipe)}">Last viewed #{time_ago_in_words(touched)} ago.</span>
       }.html_safe

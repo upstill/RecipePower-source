@@ -55,7 +55,7 @@ class Recipe < ActiveRecord::Base
   has_many :users, :through=>:rcprefs, :autosave=>true
   has_many :touches, :dependent=>:destroy
   attr_reader :comment
-  attr_accessor :private
+  attr_accessor :private, :current_user
   attr_reader :status
   
   @@coder = HTMLEntities.new
@@ -85,23 +85,17 @@ class Recipe < ActiveRecord::Base
   
   # Before editing, try and fill in a blank title by cracking the url
   def check_title
-      if self.title.blank? && st = (url && Site.by_link(self.url))
-          self.title = (st.yield :Title)[:Title] || ""
-          self.title = self.trimmed_title
-      else
-          self.title
-      end
+    if self.title.blank? && st = (url && Site.by_link(self.url))
+      self.title = (st.yield :Title)[:Title] || ""
+      self.title = self.trimmed_title
+    else
+      self.title
+    end
   end
   
-  # Get the cached rcpref for the recipe and its current user
-  def current_ref
-      if(@current_user.nil?) # No user => no ref
-         @current_ref = nil 
-      elsif(@current_ref.nil? || 
-      	    @current_ref.user_id != @current_user)
-	 @current_ref = self.rcprefs.where("user_id = ?", @current_user)[0]
-      end
-      @current_ref
+  # Present the time-since-touched in a text format
+  def touch_date uid=nil
+    ref_for(uid).updated_at
   end
   
   # The comment for a recipe comes from its rcprefs for a 
@@ -113,7 +107,7 @@ class Recipe < ActiveRecord::Base
 
   # Get another user's comment on a recipe
   def comment_of_user(uid)
-    unless (refs = self.rcprefs.where(:user_id=>uid)).empty? 
+    unless (refs = rcprefs.where(:user_id=>uid)).empty? 
     	refs.first.comment 
     end
   end
@@ -147,15 +141,15 @@ class Recipe < ActiveRecord::Base
   # An after_save method for a recipe which saves the 
   # recipe/user info cache for the current user
   def save_ref
-      if(@current_ref && (@current_ref.user_id == @current_user))
-          refs = self.rcprefs.where(:user_id=>@current_user)
-         if(ref = refs.first)
-            ref.comment = @current_ref.comment
-            ref.status = @current_ref.status
-            ref.private = @current_ref.private
-	    ref.save
-         end
+    if(@current_ref && (@current_ref.user_id == @current_user))
+      refs = self.rcprefs.where(:user_id=>@current_user)
+      if(ref = refs.first)
+        ref.comment = @current_ref.comment
+        ref.status = @current_ref.status
+        ref.private = @current_ref.private
+        ref.save
       end
+    end
   end
 
   @@statuses = [["Now Cooking", MyConstants::Rcpstatus_rotation], 
@@ -184,39 +178,64 @@ class Recipe < ActiveRecord::Base
 
   public
 
-  def current_user
-      @current_user
-  end
-
-  def current_user=(id)
-    @current_user = id
-  end
-
   # Return the number of times a recipe's been marked
   def num_cookmarks
-     Rcpref.where(["recipe_id = ?", self.id]).count
+     Rcpref.where(["recipe_id = ? AND in_collection = ?", self.id, true]).count
   end
 
   # Is the recipe cookmarked by the given user?
   def marked?(uid)
-      self.rcprefs.where("user_id = ?", uid).exists?
+    (ref = self.rcprefs.where("user_id = ?", uid)[0]) && ref.in_collection
+  end
+
+  # Set the mod time of the recipe to now (so it sorts properly in Recent lists)
+  # If a uid is provided, touch the associated rcpref instead
+  def touch uid, add_to_collection = true
+    rcpref = ref_for uid
+    rcpref.in_collection = true if add_to_collection
+    rcpref.save
+    rcpref
+  end
+  
+  # Set the updated_at field for the rcpref for this user and this recipe
+  def uptouch(uid, time)
+    debugger
+    ref = ref_for uid
+    ref.updated_at = time if time > ref.updated_at
+    ref.save
+  end
+  
+  def remove_from_collection uid
+    rcpref = ref_for uid
+    if rcpref.in_collection
+      rcpref.in_collection = false
+      rcpref.save
+    end
+  end
+  
+  # Get the cached rcpref for the recipe and its current user.
+  # 'uid' may be set to assert a new current user
+  def current_ref uid=nil
+    @current_ref = ref_for(@current_user = (uid || @current_user))
   end
   
   # Either fetch an exising recipe record or make a new one, based on the
   # params. If the params have an :id, we find on that, otherwise we look
-  # for a record matching the :url. 
+  # for a record matching the :url. If there are no params, just return a new recipe
   # If a new recipe record needs to be created, we also do QA on the provided URL
   # and dig around for a title.
   # Either way, we also make sure that the recipe is associated with the given user
-  def self.ensure( userid, params)
-    if (id = params[:id].to_i) && (id > 0) # id of 0 means create a new recipe
+  def self.ensure( userid, params, add_to_collection = true)
+    if params.blank?
+      rcp = self.new      
+    elsif (id = params[:id].to_i) && (id > 0) # id of 0 means create a new recipe
       begin
         rcp = Recipe.find id
       rescue => e
         rcp = self.new
         rcp.errors.add :id, "There is no recipe number #{id.to_s}"
       end
-    else
+    else # No id: create based on url
       url = params[:url]
       if url && Recipe.exists?(:url => url)  # Previously captured => just look it up
         rcp = Recipe.where("url = ?", url).first
@@ -249,7 +268,9 @@ class Recipe < ActiveRecord::Base
       end
     end
     # If all is well, make sure it's on the user's list
-    rcp.ensureUser( userid ) if userid && rcp.id && rcp.errors.empty?
+    if userid && rcp.id && rcp.errors.empty?
+      rcp.touch(rcp.current_user = userid, add_to_collection)
+    end
     rcp
   end
 
@@ -263,41 +284,6 @@ class Recipe < ActiveRecord::Base
   def sourcehome
     @site = @site || Site.by_link(self.url)
     @site.home
-  end
-
-  # Make sure this recipe is in the collection of the given user
-  def ensureUser(uid)
-    unless self.users.exists?(uid)
-      user = User.find(uid)
-      self.users << user
-      if self.save
-        # Provide defaults for status and privacy
-        @current_user = uid
-        ref = self.current_ref
-        ref.status = MyConstants::Rcpstatus_misc
-        # ref.privacy = MyConstants::Rcppermission_friends
-        ref.private = false
-        ref.save
-      end
-    end
-    self.current_user = uid
-    touch
-  end
-  
-  # Set the mod time of the recipe to now (so it sorts properly in Recent lists)
-  # If a uid is provided, touch the associated rcpref instead
-  def touch uid=nil
-    if uid
-      refs = RcpRef.where( user_id: uid, recipe_id: id)
-      if refs[0]
-        refs[0].touch
-      else # No rcpref extant => create one
-      end
-    else
-      super
-    end
-    # if self.current_user
-      # Touch.touch self.current_user, self.id
   end
 
    # This stores the edited tagpane for the recipe--or maybe not. The main
@@ -391,15 +377,22 @@ class Recipe < ActiveRecord::Base
        # already been so expressed)
        html || ou.to_s
    end
-=begin
-   @@privacies = [[:Private, MyConstants::Rcppermission_private], 
-   		["Friends Only", MyConstants::Rcppermission_friends],
- 		[:Circles, MyConstants::Rcppermission_circles],
- 		[:Public, MyConstants::Rcppermission_public]]
 
-   # return an array of status/value pairs for passing to select()
-   def self.privacy_select
-     @@privacies
-   end
-=end
+protected
+  
+  # Return the reference for the given user and this recipe, creating a new one as necessary
+  # If the 'collect' flag is off, the reference should not add the recipe to the user's collection
+  def ref_for uid
+    if uid.nil? # No user => no ref
+      Rcpref.new comment: ""  
+    elsif @current_ref && @current_ref.user_id && @current_ref.user_id == uid # Consult the cache
+      @current_ref
+    else
+      if !users.exists? uid 
+        # Create a new rcpref between the user and the recipe
+        users << User.find(uid)
+      end
+      self.rcprefs.where("user_id = ?", uid)[0]
+    end
+  end
 end
