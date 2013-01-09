@@ -12,10 +12,29 @@ class Touch < ActiveRecord::Base
   end
   
   # Move all touchings to the corresponding rcpref
-  def self.fix
+  def self.fix n=-1
     self.all.each { |rcd| 
       rcp = rcd.touching
-      rcp.uptouch rcd.user_id, rcd.updated_at 
+      if rcp.users.exists? rcd.user_id
+        before = rcp.touch_date(rcd.user_id)
+        task = rcp.uptouch(rcd.user_id, rcd.updated_at) ? "Uptouched" : nil
+      else
+        before = "n/a"
+        Rcpref.record_timestamps=false
+        attrs = rcd.attributes.slice(*%w{ recipe_id user_id created_at updated_at })
+        attrs["in_collection"] = false
+        Rcpref.create attrs
+        Rcpref.record_timestamps=true
+        task = "Created new ref for"
+      end
+      after = rcp.touch_date(rcd.user_id)
+      if task
+        logger.debug "#{task} recipe ##{rcd.recipe_id.to_s} for touch on time #{rcd.updated_at}"
+        logger.debug "...before, time was #{before}"
+        logger.debug "...after, time is #{after}"
+        n = n-1
+      end
+      return if n==0
     }
   end
   

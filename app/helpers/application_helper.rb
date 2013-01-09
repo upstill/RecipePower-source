@@ -153,11 +153,12 @@ module ApplicationHelper
 
   # Present the date and time the recipe was last touched by its current user
   def touch_date_elmt recipe
-    if touched = recipe.touch_date
-      %Q{
-        <span class="#{touch_date_class(recipe)}">Last viewed #{time_ago_in_words(touched)} ago.</span>
-      }.html_safe
+    if params[:controller] == "collection"
+      stmt = @collection.timestamp recipe
+    else
+      stmt = "Last viewed #{time_ago_in_words recipe.touch_date} ago."
     end
+    content_tag :span, stmt, class: touch_date_class(recipe)
   end    
         
   # Create a popup selection list for adding a rating to the tags

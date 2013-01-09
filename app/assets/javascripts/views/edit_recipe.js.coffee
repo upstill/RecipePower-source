@@ -33,6 +33,10 @@ RP.edit_recipe.go = (rcpdata) ->
 	# Hand it off to the dialog handler
 	launchDialog dlog, "at_left", true
 
+RP.edit_recipe.stop = ->
+	# Close the recipe editor, if it's open
+	closeModeless me()
+
 # When dialog is loaded, activate its functionality
 RP.edit_recipe.onload = (dlog) ->
 	dlog = me()
@@ -87,7 +91,7 @@ RP.edit_recipe.onload = (dlog) ->
 #		$('form#destroy').on 'ajax:success', submission_success
 		
 		rcpid = $('form.edit_recipe', dlog).attr("id").replace /\D*/g, ''
-		# RP.rcp_list.touch_recipe rcpid
+		RP.rcp_list.touch_recipe rcpid
 
 # Handle a close event: when the dialog is closed, also close its pic picker
 RP.edit_recipe.onclose = (dlog) ->

@@ -1,6 +1,7 @@
 # Class for a single selectable collection of recipes, whether physical or virtual
 require 'my_constants.rb'
 require "candihash.rb"
+include ActionView::Helpers::DateHelper
 
 class RcpBrowserElement
   attr_accessor :npages, :cur_page, :nodeid
@@ -23,6 +24,10 @@ class RcpBrowserElement
       @nodeid = @@nextid
       @@nextid = @@nextid + 1
     end
+  end
+  
+  def timestamp recipe
+    (cd = recipe.collection_date @userid) && "Cookmarked #{time_ago_in_words cd} ago."
   end
   
   def user
@@ -93,7 +98,7 @@ class RcpBrowserElement
   
   # How many pages in the current result set?
   def npages(tagset)
-      (self.result_ids(tagset).count+(@@page_length-1))/@@page_length
+    (self.result_ids(tagset).count+(@@page_length-1))/@@page_length
   end
   
   # Are there any recipes waiting to come out of the query?
@@ -204,6 +209,10 @@ class RcpBrowserElementFriend < RcpBrowserElement
     @friendid
   end
   
+  def candidates
+    @candidates = @candidates || User.find(@friendid).recipes(public: true, sort_by: :collected)
+  end
+  
 end
 
 # Element for all the recipes for the owner, with subheads for status and favored keys
@@ -220,6 +229,10 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
         RcpBrowserElementStatus.new(level+1, args)
       end
     end
+  end
+  
+  def candidates
+    @candidates = @candidates || user.recipes(status: MyConstants::Rcpstatus_misc, sort_by: :collected)
   end
 
 end
@@ -299,7 +312,11 @@ class RcpBrowserElementRecent < RcpBrowserElement
   
   # Candidates for the Recent list are all recipes touched by the user
   def candidates
-    user.touches.map { |touch| touch.recipe_id }
+    user.recipes all: true
+  end
+  
+  def timestamp recipe
+    (td = recipe.touch_date @userid) && "Last viewed #{time_ago_in_words td } ago."
   end
   
 end
@@ -324,7 +341,7 @@ class RcpBrowserElementStatus < RcpBrowserElement
   end
   
   def candidates
-    @candidates = @candidates || Rcpref.recipe_ids( sources, @userid, status: @status)
+    @candidates = @candidates || user.recipes(status: @status, sort_by: :collected)
   end
   
 end
@@ -452,6 +469,10 @@ class RcpBrowser < RcpBrowserComposite
   # Get the results of the current query.
   def result_ids
     selected.result_ids tags
+  end
+  
+  def timestamp recipe
+    selected.timestamp recipe
   end
   
   # How many pages in the current result set?

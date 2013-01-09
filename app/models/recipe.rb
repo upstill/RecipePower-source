@@ -95,47 +95,51 @@ class Recipe < ActiveRecord::Base
   
   # Present the time-since-touched in a text format
   def touch_date uid=nil
-    ref_for(uid).updated_at
+    (ref = uid.nil? ? current_ref : ref_for(uid, false)) && ref.updated_at
+  end
+  
+  # Present the time since collection in a text format
+  def collection_date uid=nil
+    debugger
+    (ref = uid.nil? ? current_ref : ref_for(uid, false)) && ref.created_at
   end
   
   # The comment for a recipe comes from its rcprefs for a 
   # given user_id 
   # Get THIS USER's comment on a recipe
   def comment
-    current_ref() ? @current_ref.comment : ""
+    current_ref.comment || ""
   end
 
   # Get another user's comment on a recipe
   def comment_of_user(uid)
-    unless (refs = rcprefs.where(:user_id=>uid)).empty? 
-    	refs.first.comment 
-    end
+    ((ref = ref_for(uid,false)) && ref.comment) || ""
   end
 
   # Record THIS USER's comment in the reciperefs join table
   def comment=(str)
-    @current_ref.comment = str if current_ref()
+    current_ref.comment = str
   end
 
   # Casual setting of privacy for the recipe: immediate save for 
   # this recipe/user combo.
   def private=(val)
-     @current_ref.private = (val != "0") if current_ref()
+     current_ref.private = (val != "0")
   end
 
   def private
-    current_ref() ? @current_ref.private : false
+    current_ref.private
   end
 
   # Casual setting of status for the recipe: immediate save for 
   # this recipe/user combo.
   # Presented as an integer related to @@statuses
   def status=(val)
-     @current_ref.status = val.to_i if current_ref()
+     current_ref.status = val.to_i
   end
 
   def status
-    current_ref() ? @current_ref.status : MyConstants::Rcpstatus_misc
+    current_ref.status
   end
 
   # An after_save method for a recipe which saves the 
@@ -184,25 +188,34 @@ class Recipe < ActiveRecord::Base
   end
 
   # Is the recipe cookmarked by the given user?
-  def marked?(uid)
-    (ref = self.rcprefs.where("user_id = ?", uid)[0]) && ref.in_collection
+  def marked? uid=nil
+    (uid.nil? ? current_ref : ref_for(uid, false)).in_collection
   end
 
   # Set the mod time of the recipe to now (so it sorts properly in Recent lists)
   # If a uid is provided, touch the associated rcpref instead
   def touch uid, add_to_collection = true
     rcpref = ref_for uid
-    rcpref.in_collection = true if add_to_collection
-    rcpref.save
+    if add_to_collection && !rcpref.in_collection
+      rcpref.in_collection = true
+      rcpref.save
+    else
+      rcpref.touch
+    end
     rcpref
   end
   
   # Set the updated_at field for the rcpref for this user and this recipe
   def uptouch(uid, time)
-    debugger
     ref = ref_for uid
-    ref.updated_at = time if time > ref.updated_at
-    ref.save
+    if time > ref.updated_at
+      Rcpref.record_timestamps=false
+      ref.updated_at = time 
+      ref.save
+      Rcpref.record_timestamps=true
+    else
+      false
+    end
   end
   
   def remove_from_collection uid
@@ -382,17 +395,20 @@ protected
   
   # Return the reference for the given user and this recipe, creating a new one as necessary
   # If the 'collect' flag is off, the reference should not add the recipe to the user's collection
-  def ref_for uid
+  def ref_for uid, force=true
     if uid.nil? # No user => no ref
-      Rcpref.new comment: ""  
+      Rcpref.new(comment: "")  
     elsif @current_ref && @current_ref.user_id && @current_ref.user_id == uid # Consult the cache
       @current_ref
-    else
+    elsif force
       if !users.exists? uid 
         # Create a new rcpref between the user and the recipe
         users << User.find(uid)
       end
       self.rcprefs.where("user_id = ?", uid)[0]
+    else
+      nil
     end
   end
+  
 end

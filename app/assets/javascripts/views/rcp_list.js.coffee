@@ -1,5 +1,8 @@
 RP.rcp_list = RP.rcp_list || {}
 
+RP.rcp_list.onload = ->
+	$(".popup").click(RP.servePopup);
+
 # Callback to update content in a recipe list due to JSON feedback
 RP.rcp_list.update = ( data ) ->
 	if data.action == "remove" || data.action == "destroy"
@@ -35,3 +38,7 @@ RP.rcp_list.touch_recipe = (id) ->		# Formerly rcpTouch from oldRP.js
 				$("."+body.touch_class).replaceWith(body.touch_body);
 				# boostInTablist(body.list_element_class, body.list_element_body, 4)
 		, "json" )
+
+jQuery ->
+	# Enable recipe-preview popup
+	RP.rcp_list.onload()
