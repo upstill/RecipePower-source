@@ -59,7 +59,7 @@ class Recipe < ActiveRecord::Base
   attr_reader :status
   
   @@coder = HTMLEntities.new
-  
+    
   # Either fetch an exising recipe record or make a new one, based on the
   # params. If the params have an :id, we find on that, otherwise we look
   # for a record matching the :url. If there are no params, just return a new recipe

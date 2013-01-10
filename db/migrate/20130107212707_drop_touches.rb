@@ -1,8 +1,15 @@
 class DropTouches < ActiveRecord::Migration
   def up
-	Touch.fix
-	drop_table :touches
-	change_column :rcprefs, :in_collection, :boolean, :default => false
+      Touch.fix
+      drop_table :touches
+      change_column :rcprefs, :in_collection, :boolean, :default => false
+
+      Rcpref.record_timestamps=false
+      Rcpref.where(user_id: [1,3], private: true).each { |rcd| 
+        rcd.private = false 
+        rcd.save
+      }
+      Rcpref.record_timestamps=true
 
   end
 
