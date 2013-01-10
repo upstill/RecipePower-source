@@ -47,6 +47,20 @@ class User < ActiveRecord::Base
   def role
       self.role_symbols.first.to_s
   end
+  
+  # Return the list of recipes owned by the user, optionally including every recipe they've touched. Options:
+  # :all => include touched recipes, not just those that have been collected
+  # :sort_by = :collected => order recipes by when they were collected (as opposed to recently touched)
+  # :status => Select for recipes with this status or lower
+  # :public => Only public recipes
+  def recipes options={} 
+    constraints = { :user_id => id }
+    constraints[:in_collection] = true unless options[:all]
+    constraints[:status] = 1..options[:status] if options[:status]
+    constraints[:private] = false if options[:public]
+    ordering = (options[:sort_by] == :collected) ? "created_at" : "updated_at"
+    Rcpref.where(constraints).order(ordering+" DESC").select("recipe_id").map(&:recipe_id)
+  end
 
 private
   @@leasts = {}

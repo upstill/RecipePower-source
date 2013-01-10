@@ -415,7 +415,7 @@ class ChannelReferent < Referent ;
     
     # When a recipe is tagged with one of this referent's tags, add it to the list of the channel user
     def notice_resource(recipe)
-        recipe.kind_of?(Recipe) && user && (recipe.ensureUser(user.id))
+        recipe.kind_of?(Recipe) && user && (recipe.touch(user.id))
     end
     
     # For a channel based on another class of referent, the tag must have an associated referent, or

@@ -18,6 +18,9 @@ RP.postError = (str) ->
 RP.postNotice = (str) ->
 	if str && (str.length > 0)
 		$('#container').data "noticePost", str
+#		jNotify str, 
+#			HorizontalPosition: 'center', 
+#			VerticalPosition: 'top'
 
 # Respond to the preview-recipe button by opening a popup loaded with its URL.
 #   If the popup gets blocked, return true so that the recipe is opened in a new

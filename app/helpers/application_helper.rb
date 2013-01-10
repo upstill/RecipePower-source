@@ -23,6 +23,10 @@ module ApplicationHelper
   def encodeHTML(str)
       @@coder.encode str
   end
+  
+  def forgot_password_link
+    link_to_function "Forgot Password", %Q{recipePowerGetAndRunJSON('#{new_user_password_path}', 'modal')}
+  end
     
   def link_to_add_fields(name, f, association, *initializers)
     new_object = f.object.send(association).klass.new *initializers
@@ -149,11 +153,12 @@ module ApplicationHelper
 
   # Present the date and time the recipe was last touched by its current user
   def touch_date_elmt recipe
-    if touched = Touch.touch_date(recipe.id, recipe.current_user)
-      %Q{
-        <span class="#{touch_date_class(recipe)}">Last viewed #{time_ago_in_words(touched)} ago.</span>
-      }.html_safe
+    if params[:controller] == "collection"
+      stmt = @collection.timestamp recipe
+    else
+      stmt = "Last viewed #{time_ago_in_words recipe.touch_date} ago."
     end
+    content_tag :span, stmt, class: touch_date_class(recipe)
   end    
         
   # Create a popup selection list for adding a rating to the tags
@@ -306,13 +311,11 @@ module ApplicationHelper
   def dialogDiv( which, ttl=nil, area="floating", template="")
     logger.debug "dialogHeader for "+globstring({dialog: which, area: area, layout: @layout, ttl: ttl})
     classname = which.to_s
-    onloadFcn = classname+"Onload"
     ttlspec = ttl ? (" title=\"#{ttl}\"") : ""
     flash_helper() +
     content_tag(:div, 
         "",
         class: classname+" dialog "+area, 
-        onload: onloadFcn, 
         id: "recipePowerDialog", 
         "data-template" => template)
   end
@@ -321,15 +324,14 @@ module ApplicationHelper
   # Currently handled this way (e.g., symbols that have been supported)
   #   :edit_recipe
   #   :captureRecipe
-  #   :newRecipe
+  #   :new_recipe (nee newRecipe)
   #   :sign_in
   def dialogHeader( which, ttl=nil, area="floating")
     logger.debug "dialogHeader for "+globstring({dialog: which, area: area, layout: @layout, ttl: ttl})
     classname = which.to_s
-    onloadFcn = (classname+"Onload")
     ttlspec = ttl ? (" title=\"#{ttl}\"") : ""
     flash_helper() +
-    %Q{<div id="recipePowerDialog" onload="#{onloadFcn}" class="#{classname} dialog #{area}" #{ttlspec}>}.html_safe +
+    %Q{<div id="recipePowerDialog" class="#{classname} dialog #{area}" #{ttlspec}>}.html_safe +
     ((@layout && @layout=="injector") ? 
       content_tag(:div, 
         link_to_function("X", "cancelDialog", style:"text-decoration: none;", id: "recipePowerCancelBtn"),

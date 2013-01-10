@@ -1,18 +1,24 @@
 RP.rcp_list = RP.rcp_list || {}
 
+RP.rcp_list.onload = ->
+	$(".popup").click(RP.servePopup);
+
 # Callback to update content in a recipe list due to JSON feedback
 RP.rcp_list.update = ( data ) ->
-	if data.go_link_class 
-		$("."+data.go_link_class).replaceWith data.go_link_body
-	if data.list_element_class
-		$('.'+data.list_element_class).replaceWith data.list_element_body
-		img = $('.'+data.list_element_class+' '+'img.fitPic')
-		$(img).load -> 
+	if data.action == "remove" || data.action == "destroy"
+		$('.'+data.list_element_class).remove()
+	else
+		if data.go_link_class 
+			$("."+data.go_link_class).replaceWith data.go_link_body
+		if data.list_element_class
+			$('.'+data.list_element_class).replaceWith data.list_element_body
+			img = $('.'+data.list_element_class+' '+'img.fitPic')
+			$(img).load -> 
+				fitImage img[0]
+				x=2
 			fitImage img[0]
-			x=2
-		fitImage img[0]
-		# RP.rcp_list.boostInRecent data.list_element_class, data.list_element_body, 3 # Put it at the top of My Cookmarks
-		# RP.rcp_list.boostInRecent data.list_element_class, data.list_element_body, 4 # Put it at the top of the Recent tab
+			# RP.rcp_list.boostInRecent data.list_element_class, data.list_element_body, 3 # Put it at the top of My Cookmarks
+			# RP.rcp_list.boostInRecent data.list_element_class, data.list_element_body, 4 # Put it at the top of the Recent tab
 	RP.notify data # Post errors and notices
 
 RP.rcp_list.boostInRecent = (list_element_class, list_element_body, targettab) ->
@@ -32,3 +38,7 @@ RP.rcp_list.touch_recipe = (id) ->		# Formerly rcpTouch from oldRP.js
 				$("."+body.touch_class).replaceWith(body.touch_body);
 				# boostInTablist(body.list_element_class, body.list_element_body, 4)
 		, "json" )
+
+jQuery ->
+	# Enable recipe-preview popup
+	RP.rcp_list.onload()

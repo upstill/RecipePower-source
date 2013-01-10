@@ -1,6 +1,6 @@
 div.pic_picker {
 	display:inline-block;
-	width:700px;
+	width:750px;
 	margin:5px;
 	padding:5px;
 	border:#000000 2px solid;
@@ -16,8 +16,11 @@ div.pic_picker {
 		float: left;
 		width: 280px;
 		margin:30px;
-		font:20px arial,sans-serif;
-		font-weight:bold
+		font:18px arial,sans-serif;
+		font-weight:bold;
+	}
+	input {
+		width: 580px;
 	}
 	.picCell {
 		width:96px;

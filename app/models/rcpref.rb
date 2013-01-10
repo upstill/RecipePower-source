@@ -2,7 +2,7 @@ class Rcpref < ActiveRecord::Base
     belongs_to :recipe
     belongs_to :user
     # before_save :ensure_unique
-    attr_accessible :comment, :recipe_id, :user_id
+    attr_accessible :comment, :recipe_id, :user_id, :in_collection, :updated_at, :created_at
 
     StatusRotationMask = 0x1
     StatusFavoritesMask = 0x2

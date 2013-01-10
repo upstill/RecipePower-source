@@ -85,7 +85,8 @@ collection_tagchange = (params, url) ->
 	collection_update $('form.query_form').serialize()
 	
 collection_update = (params, url) ->
-	$('div.loader').addClass "loading" 
+	$('div.loader').addClass "loading" # show progress indicator
+	RP.edit_recipe.stop() # Close the recipe editor if it's open
 	jQuery.ajax
 		type: "POST"
 		url: (url || "collection/update")
@@ -95,9 +96,11 @@ collection_update = (params, url) ->
 			xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))
 		success: (resp, succ, xhr) ->
 			# Explicitly update the collection list
-			$('div.loader').removeClass "loading" 
+			$('div.loader').removeClass "loading" # Remove progress indicator
 			$('div.collection_list')[0].innerHTML	= resp	
 			$(".pageclickr").click(collection_pager)
+			RP.rcp_list.onload()
+			window.scrollTo(0,0)
 	
 collection_pager = (evt) ->
 	# Respond to page selection: replace results list

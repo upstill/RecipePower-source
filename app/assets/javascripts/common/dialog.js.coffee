@@ -17,7 +17,7 @@ RP.dialog.apply = (method, dlog) ->
 	mgr = manager_of dlog
 	if mgr && mgr[method]
 		mgr[method](dlog)
-
+			
 RP.dialog.onclose = (dlog) ->
 	RP.dialog.apply 'onclose', dlog
 

@@ -23,7 +23,7 @@
 	  <%= summarize_alltags recipe %>
       </div>
       <div class="rcp_list_element_twocents">
-	  <%= recipe.comment_of_user(@listowner) || "" %>
+	  <%= recipe.comment(@listowner) || "" %>
       </div>
     </div>
     <div class="rcp_list_element_bottom">

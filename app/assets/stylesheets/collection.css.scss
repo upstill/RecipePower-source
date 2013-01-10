@@ -23,9 +23,9 @@
  *  require_tree blueprint
  * require common/RPGlobal
  * require common/scaffolds
- *= require common/dialogs
  *= require views/rcp_list
  *= require views/edit_recipe
+ *= require views/new_recipe
  *= require views/sign_in
  *= require views/pic_picker
  *= require common/buttons
