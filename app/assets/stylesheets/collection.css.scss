@@ -21,8 +21,8 @@
 
  *= require_self
  *  require_tree blueprint
- *= require common/RPGlobal
- *= require common/scaffolds
+ * require common/RPGlobal
+ * require common/scaffolds
  *= require common/dialogs
  *= require views/rcp_list
  *= require views/edit_recipe
@@ -36,201 +36,27 @@
 
 */
 @import "bootstrap";
-
-div.frame_corner {
-  position: fixed;
-  height: 70px;
-  width: 260px;
-  top: 0px;
-  left: 0px;
-  z-index:1001;
-  background: #DDDDDD;
-}
-
-div.frame_top {
-	display:block;
-  position:fixed;
-  top: 0px;
-	left:0;
-	right:0;
-	margin-left:260px;
-	height:66px;
-	min-width:800px;
-  z-index:1000;
-  background: #DDDDDD;
-  border-bottom: 2px solid black;
-}
-
-div.frame_left {
-  position:fixed;
-  top: 66px;
-  left: 0px;
-  width: 260px;
-  z-index:1000;
-  background: #DDDDDD;
-  border-right: 2px solid black;
-  border-bottom: 2px solid black;
-}
-
-div.loader {
-    display:    none;
-    position:   fixed;
-    z-index:    999;
-    height:     100%;
-    width:      100%;
-    background: rgba( 255, 255, 255, .8 ) 
-                url('/assets/ajax-loader.gif') 
-                50% 50% 
-                no-repeat;
-		&.loading {
-			display: block
-		}
-}
-
-#logo_div_small {
-  float:left;
-  # outline:1px solid green;
-  width: 252px;
-  height: 35px;
-  margin: 10px;
-  // background-color:#FDECCF; // DCE8DC;
-}
-
-#logo_div_small a:hover {
-  background:#BBBBBB; // DCE8DC;
-}
+body { padding-top: 60px; }
+@import "bootstrap-responsive";
 
 #logo_img_small {
-  width: 252px;
-  height: 35px;
-  display: block;
-  # border:1px solid red;
+	width: 250px;
 }
 
-#logo_img_small:hover {
-	// border-bottom:2px solid #888888;
-	// border-top:2px solid #888888;
-	outline: #BBBBBB solid thick;
-	// background:#DDDDDD;
+.query_form {
+	margin-bottom: 0px
 }
 
-div#header_nav {
-  position: absolute;
-	right:8px;
-  width: auto;
-  height: 20px;
-  font:14px arial,sans-serif, bold;
-  text-align:right;
+.RcpBrowser.active {
+	
 }
 
-div#header_nav.top {
-   top: 3px;
+.nav-tabs > .active > a, .nav-tabs > .active > a:hover {
+	color: #ffffff;
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2);
+	background-color: #0088cc;
 }
 
-div#header_nav.bottom {
-   bottom: 0px;
-}
-
-div.content {
-  z-index:0;
-  border-left: 2px solid black;
-  margin-top: 72px;
-	margin-left: 260px;
-}
-
-div.collection {
-	width: 100%;
-}
-
-div.collection_nav {
-  padding: 15px 0;
-	background: #DDDDDD;
-	width: 260px;
-}
-
-div.collection_list {
-  vertical-align: top;
-	min-width: 800px;
-}
-
-.collection_query_div {
-    width:600px;
-    margin: 15px;
-    // border:3px solid black;
-    float: left;
-}
-
-#collection_query_label {
-	margin:3px;
-	margin-top: 10px;
-	padding:3px;
-	width: auto;
-	height: 23px;
-	float: left;
-    // outline:#999 solid red 3px;
-  	// background:#2be4e3;
-}
-
-#collection_query_tokens {
-	margin:0;
-	padding:3px;
-	width: 380px;
-	height: 27px;
-	float: left;
-  // outline:#999 solid blue 3px;
-  // background:#fbe3e4;
-}
-
-#collection_tags_label {
-  font:16px arial,sans-serif;
-// float: left;
-// display: block;
-  font-weight:bold;
-//  width:50%;
-}
-
-div.RcpBrowser {
-	font-weight:bold;
-	position: relative;
-	left: 2px;
-	padding: 3px 15px;
-}
-
-div.RcpBrowser.Level1 {
-padding-left: 15px;
-font:20px arial,sans-serif;
-}
-
-div.RcpBrowser.Level2 {
-padding-left: 30px;
-font:16px arial,sans-serif;
-}
-
-div.RcpBrowser.Level3 {
-padding-left: 40px;
-font:14px arial,sans-serif;
-}
-
-div.RcpBrowser.selected {
-	background: #FFFFFF;
-	border-left: 2px solid black;
-	border-top: 2px solid black;
-	border-bottom: 2px solid black;
-  border-radius:5px;
-}
-ul.nav.pull-right {
-	position:absolute;
-	right:0px
-}
-.dropdown-menu {
-	left:auto;
-	position:fixed;
-	top:0;
-	right:0
-}
-.nav {
-	margin:5px 10px 0 0
-}
-hr {
-	margin:5px
+.RcpBrowser.Level2 {
+	margin-left: 30px;
 }

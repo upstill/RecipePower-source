@@ -52,7 +52,8 @@ GEM
       coderay (>= 1.0.0)
       erubis (>= 2.7.0)
     binding_of_caller (0.6.8)
-    bootstrap-sass (2.1.0.0)
+    bootstrap-sass (2.2.2.0)
+      sass (~> 3.2)
     builder (3.0.4)
     chunky_png (1.2.6)
     closure_tree (3.6.5)
@@ -266,7 +267,7 @@ DEPENDENCIES
   annotate (= 2.4.0)
   better_errors
   binding_of_caller
-  bootstrap-sass (= 2.1)
+  bootstrap-sass (= 2.2.2)
   closure_tree
   coffee-rails (~> 3.2.1)
   compass-rails

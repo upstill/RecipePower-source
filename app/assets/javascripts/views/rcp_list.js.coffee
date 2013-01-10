@@ -17,7 +17,7 @@ RP.rcp_list.update = ( data ) ->
 
 RP.rcp_list.boostInRecent = (list_element_class, list_element_body, targettab) ->
 	# Insert the resulting element at the top of the All Cookmarks tab, if open
-	tabid = $("#rcpquery_tabset").tabs("option", "selected");
+	tabid = $("#rcpquery_tabset").tabs("option", "active");
 	if tabid==targettab 
 		$("#rcplist_mine_body ."+list_element_class).remove()
 		$("#rcplist_mine_body").prepend(list_element_body);

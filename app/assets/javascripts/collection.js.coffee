@@ -63,17 +63,17 @@ jQuery ->
 	$(".pageclickr").click collection_pager
 	
 	$('.RcpBrowser').click ->
-		if !$(this).hasClass("selected")
+		if !$(this).hasClass("active")
 			# Hide all children of currently-selected collection
-			selected = $('.RcpBrowser.selected')[0]
+			selected = $('.RcpBrowser.active')[0]
 			toClose = selected
 			while(toClose && elementLevel(toClose) >= elementLevel(this))
 				toggleChildren toClose
 				toClose = parentOf toClose
 			# Deselect current selection
-			$(selected).removeClass "selected"
+			$(selected).removeClass "active"
 			
-			$(this).addClass "selected"
+			$(this).addClass "active"
 			toggleChildren this # Make all children visible
 			data = $(this).data 'html'
 			if(data)

@@ -37,7 +37,7 @@ class RcpBrowserElement
   end
   
   def css_class
-    "RcpBrowser Level"+@level.to_s+(@selected ? " selected" : "")
+    "RcpBrowser Level"+@level.to_s+(@selected ? " active" : "")
   end
   
   # ID for uniquely selecting the element
@@ -142,9 +142,9 @@ class RcpBrowserElement
   # HTML for interpolating into the display
   def html(do_show)
     displaystyle = "display: "+(do_show ? "block" : "none" )+";"
-    %Q{<div class="#{css_class}" id="#{css_id}" style="#{displaystyle}">
-         #{'&nbsp'*@level}<a href="javascript:void(0)" >#{handle}</a>
-       </div>}.html_safe
+    %Q{<li class="#{css_class}" id="#{css_id}" style="#{displaystyle}">
+         <a href="#">#{handle}</a>
+       </li>}.html_safe
   end
   
 end
