@@ -16,7 +16,7 @@
       <% if @rcpquery.owner_id == User.guest_id || @rcpquery.owner_id == User.super_id %>
          <td class="collection_item_collect"><%= ownership_status recipe %></td>
       <% end %>
-      <td class="collection_item_comment" width="20%"><%= recipe.comment_of_user @rcpquery.owner_id %></td>
+      <td class="collection_item_comment" width="20%"><%= recipe.comment @rcpquery.owner_id %></td>
       <td class="collection_item_tags" width="30%">
 		<%= summarize_alltags recipe %><%= link_to "(Tag it)", edit_recipe_path(recipe) %>
 	  </td>

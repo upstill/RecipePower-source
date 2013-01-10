@@ -209,6 +209,10 @@ class RcpBrowserElementFriend < RcpBrowserElement
     @friendid
   end
   
+  def timestamp recipe
+    (cd = recipe.collection_date @friendid) && "Cookmarked #{time_ago_in_words cd} ago."
+  end
+  
   def candidates
     @candidates = @candidates || User.find(@friendid).recipes(public: true, sort_by: :collected)
   end

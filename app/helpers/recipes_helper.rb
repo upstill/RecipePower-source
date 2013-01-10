@@ -105,12 +105,12 @@ end
 
 # Present the comments to this user. Now, all comments starting with his/hers, but ultimately those of his friends
 def present_comments (recipe, user_id)
-    out = (recipe.comment_of_user user_id) || ""
+    out = (recipe.comment user_id) || ""
     out = "My two cents: '#{out}'<br>" unless out.empty?
 =begin
     # Removed this to cut down on queries
     recipe.users.each { |user| 
-        if (user.id != user_id) && (cmt=recipe.comment_of_user(user.id))
+        if (user.id != user_id) && (cmt=recipe.comment(user.id))
             out << "#{user.handle} sez: '#{cmt}'<br>"  unless cmt.blank?
         end
     }
@@ -121,9 +121,8 @@ end
 # Provide the cookmark-count line
 def cookmark_count(rcp)
      count = rcp.num_cookmarks
-     result = count.to_s+" Cookmark"
-     result << "s" if count>1
-     if rcp.marked? session[:user_id]
+     result = count.to_s+" Cookmark"+((count>1)?"s":"")
+     if rcp.cookmarked session[:user_id]
         result << " (including mine)"
      else
         result << ": " + 
