@@ -38,3 +38,19 @@ RP.servePopup = () ->
 	else
 		popUp.focus()
 		return false
+
+
+# get the function associated with a given string, even if the string refers to elements of nested structures.
+RP.named_function = (str) ->
+	if(str) 
+		obj = window;
+		strs = str.split '.'
+		i = 0; 
+		while i < strs.length
+			obj = obj[strs[i]]
+			if((typeof obj == 'undefined') || !obj)
+				break
+			i = i + 1
+		if(typeof obj == 'function')
+			return obj
+	return null;

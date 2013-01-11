@@ -149,7 +149,7 @@ function dialogOnEvent(what_event, dlog, entity) {
 		if(hooks.hasOwnProperty(msg_name))
 			jNotify( hooks[msg_name], { HorizontalPosition: 'center', VerticalPosition: 'top', TimeShown: 1200 } );
 		if(hooks.hasOwnProperty(fcn_name)) {
-			var fcn = named_function(hooks[fcn_name]);
+			var fcn = RP.named_function(hooks[fcn_name]);
 			return fcn(dlog);
 		}
 	} else if(RP && RP.dialog)
@@ -168,22 +168,6 @@ function dialogResult( dlog, obj ) {
 			$(dlog).data("dialog_result", obj);
 		}
 	}
-}
-
-// get the function associated with a given string, even if the string refers to elements of nested structures.
-function named_function(str) {
-	if(str) {
-		var obj = window;
-		var strs = str.split('.');
-		for (var i = 0; i < strs.length; i++) {
-			obj = obj[strs[i]]
-			if((typeof obj === 'undefined') || !obj)
-				break;
-		}
-		if(typeof obj === 'function')
-			return obj;
-	}
-	return null;
 }
 
 /* Handle the error result from either a forms submission or a request of the server
@@ -205,7 +189,7 @@ function postSuccess(jsonResponse, dlog, entity) {
 
   // Call processor function named in the response
   var closer;
-  if(closer = named_function(jsonResponse.processorFcn) )
+  if(closer = RP.named_function(jsonResponse.processorFcn) )
 		closer(jsonResponse);
 		
 	// Call the dialog's response function

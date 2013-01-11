@@ -4,7 +4,7 @@
 	padding:5px;
 	padding-bottom:0;
 	background-color:#EEE;
-	z-index: 1001;
+	z-index: 9000001;
 	&.at_left {
 		width:235px;
 		margin:3px;
@@ -99,7 +99,8 @@
 }
 
 .edit_recipe.dialog.at_top div.edit_recipe_hdr img {
-	display:inline-block
+	display:inline-block;
+	z-index: 900001;
 }
 
 .edit_recipe.dialog.at_top div.left {

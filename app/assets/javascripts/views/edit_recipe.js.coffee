@@ -91,7 +91,8 @@ RP.edit_recipe.onload = (dlog) ->
 #		$('form#destroy').on 'ajax:success', submission_success
 		
 		rcpid = $('form.edit_recipe', dlog).attr("id").replace /\D*/g, ''
-		RP.rcp_list.touch_recipe rcpid
+		if touch_recipe = RP.named_function "RP.rcp_list.touch_recipe"
+			touch_recipe rcpid
 
 # Handle a close event: when the dialog is closed, also close its pic picker
 RP.edit_recipe.onclose = (dlog) ->

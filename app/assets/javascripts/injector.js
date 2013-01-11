@@ -8,6 +8,7 @@
 
 //= require_self
 //= require common/pics
+//= require common/RP
 //= require common/dialog
 //= require views/edit_recipe
 //= require jquery/jquery.form
