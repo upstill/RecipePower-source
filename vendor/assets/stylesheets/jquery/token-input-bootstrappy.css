@@ -3,21 +3,26 @@ ul.token-input-list-facebook {
     overflow: hidden; 
     height: auto !important; 
     height: 1%;
-    width: 400px;
-    border: 1px solid #BBB;
+    min-width: 206px;
+    max-width: 700px;
+/*     width:auto; */
+    border: 1px solid #CCC;
     cursor: text;
     font-size: 12px;
     font-family: Verdana, sans-serif;
     min-height: 1px;
     z-index: 999;
-    margin: 0;
-    padding: 0;
+    margin: 5px 0px 0px;
+    padding: 0px 14px;
     background-color: #fff;
     list-style-type: none;
     clear: left;
     -webkit-border-radius: 15px;
-		-moz-border-radius: 15px;
-		border-radius: 15px;
+	-moz-border-radius: 15px;
+	border-radius: 15px;
+	-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+	-moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+	box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
 }
 
 ul.token-input-list-facebook.token-input-focused-facebook {
@@ -31,29 +36,36 @@ ul.token-input-list-facebook.token-input-focused-facebook {
 
 ul.token-input-list-facebook li input {
     border: 0;
-    width: 100px;
-    padding: 3px 8px;
+    outline: blue;
     background-color: white;
-    margin: 2px 0;
     -webkit-appearance: caret;
+    padding: 0px;
+    margin: 4px 0px;
+    overflow: visible;
 }
 
 li.token-input-token-facebook {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     overflow: hidden; 
     height: auto !important; 
     height: 15px;
-    margin: 3px;
-    padding: 1px 3px;
+    margin: 2px;
+    margin-left: 0px;
+    padding: 1px 8px 1px 12px;
     background-color: #F5F5F5;
     color: #555;
     cursor: default;
     border: 1px solid #BBB;
-    font-size: 11px;
-    border-radius: 5px;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
+    font-size: 14px;
+    border-radius: 11px;
+    -moz-border-radius: 11px;
+    -webkit-border-radius: 11px;
     float: left;
     white-space: nowrap;
+}
+
+li.token-input-token-facebook:first-child {
+	margin-left: -12px;
 }
 
 li.token-input-token-facebook p {
@@ -80,27 +92,28 @@ li.token-input-input-token-facebook {
     margin: 0;
     padding: 0;
     list-style-type: none;
+    overflow: visible;
 }
 
 div.token-input-dropdown-facebook {
     position: absolute;
     width: 400px;
-    background-color: #F5F5F5;
+    background-color: #FFF;
     overflow: hidden;
-    border-left: 1px solid #ccc;
-    border-right: 1px solid #ccc;
-    border-bottom: 1px solid #ccc;
+    border: 1px solid rgba(0, 0, 0, 0.2);
     cursor: default;
-    font-size: 12px;
-    font-family: Verdana, sans-serif;
-    z-index: 1;
+    -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    padding: 5px 0px;
+    margin: 2px 0 0;
 }
 
 div.token-input-dropdown-facebook p {
     margin: 0;
-    padding: 5px;
-    font-weight: bold;
-    color: #555;
+    padding: 3px 20px;
+    color: #333;
 }
 
 div.token-input-dropdown-facebook ul {
@@ -109,18 +122,18 @@ div.token-input-dropdown-facebook ul {
 }
 
 div.token-input-dropdown-facebook ul li {
-    background-color: #f5f5f5;
-    padding: 3px;
+    /* background-color: #f5f5f5; */
+    padding: 3px 20px;
     margin: 0;
     list-style-type: none;
 }
 
 div.token-input-dropdown-facebook ul li.token-input-dropdown-item-facebook {
-    background-color: #f5f5f5;
+    /* background-color: #f5f5f5; */
 }
 
 div.token-input-dropdown-facebook ul li.token-input-dropdown-item2-facebook {
-    background-color: #f5f5f5;
+    /* background-color: #f5f5f5; */
 }
 
 div.token-input-dropdown-facebook ul li em {
@@ -129,6 +142,9 @@ div.token-input-dropdown-facebook ul li em {
 }
 
 div.token-input-dropdown-facebook ul li.token-input-selected-dropdown-item-facebook {
-    background-color: #08C;
-    color: #f5f5f5;
+    background-color: #0081c2;
+    color: #FFF;
+    background-image: -webkit-linear-gradient(top, #0088cc, #0077b3);
+    background-image: -moz-linear-gradient(top, #0088cc, #0077b3);
+    background-image: linear-gradient(to bottom, #0088cc, #0077b3);
 }
