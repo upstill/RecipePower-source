@@ -3,15 +3,6 @@
   	<div class="container">
 	  	<a class="brand" href="/collection">RecipePower</a>
 	  	<ul class="nav pull-right">
-<!--
-		  	<li>
-				<%= form_tag("/collection/update", :method => "get", :class => "navbar-form form-search query_form") do %>
-					<div id="collection_query_tokens">
-					<%= text_field_tag :tagstxt, "#{@collection.tagstxt}", "data-pre" => @collection.tags.map(&:attributes).to_json, :placeholder => "Seek and ye shall find...", :class => "search-query" %>
-					</div>
-				<% end %>
-			</li>
--->
 		<% if user_signed_in? %>
 			<li><%= link_to_dialog "Add a Cookmark", new_recipe_path, "modal", "floating"  %></li>
 			<li class="dropdown">
@@ -32,8 +23,6 @@
 				<%= form_tag("/collection/update", :method => "get", :class => "navbar-form form-search query_form") do %>
 					<div id="collection_query_tokens">
 						<%= text_field_tag :tagstxt, "#{@collection.tagstxt}", "data-pre" => @collection.tags.map(&:attributes).to_json, :placeholder => "Seek and ye shall find...", :class => "search-query" %>
-<!--						<%= text_field_tag :notags, "#{@collection.tagstxt}", "data-pre" => @collection.tags.map(&:attributes).to_json, :placeholder => "Seek and ye shall find...", :class => "search-query" %>
--->
 					</div>
 				<% end %>
 			</li>

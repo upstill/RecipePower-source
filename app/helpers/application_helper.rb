@@ -189,8 +189,9 @@ module ApplicationHelper
 
   def title ttl=nil
     # Any controller can override the default title of controller name
-    ext = (ttl || @Title || (@recipe && @recipe.title) || params[:controller].capitalize)
-    "RecipePower"+(ext.blank? ? " Home" : " | #{ext}")
+    # ext = (ttl || @Title || (@recipe && @recipe.title) || params[:controller].capitalize)
+    #"RecipePower"+(ext.blank? ? " Home" : " | #{ext}")
+    "RecipePower"
   end
 
   def logo(small=false)
