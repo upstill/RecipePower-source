@@ -1,6 +1,6 @@
 /*
  * jQuery Plugin: Tokenizing Autocomplete Text Entry
- * Version 1.6.0
+ * Version 1.6.1
  *
  * Copyright (c) 2009 James Smith (http://loopj.com)
  * Licensed jointly under the GPL and MIT licenses,
@@ -30,6 +30,7 @@ var DEFAULT_SETTINGS = {
     searchingText: "Searching...",
     deleteText: "&times;",
     animateDropdown: true,
+    placeholder: null,
     theme: null,
     zindex: 999,
     resultsLimit: null,
@@ -54,6 +55,7 @@ var DEFAULT_SETTINGS = {
 
     // Behavioral settings
     allowFreeTagging: false,
+    allowTabOut: false,
 
     // Callbacks
     onResult: null,
@@ -138,6 +140,7 @@ function _escapeHTML(text) {
 var methods = {
     init: function(url_or_data_or_function, options) {
         var settings = $.extend({}, DEFAULT_SETTINGS, options || {});
+
         return this.each(function () {
             $(this).data("settings", settings);
             $(this).data("tokenInputObject", new $.TokenList(this, url_or_data_or_function, settings));
@@ -166,7 +169,7 @@ var methods = {
         $(this).data("settings", $.extend({}, $(this).data("settings"), options || {}));
         return this;
     }
-}
+};
 
 // Expose the .tokenInput function to jQuery as a plugin
 $.fn.tokenInput = function (method) {
@@ -250,14 +253,12 @@ $.TokenList = function (input, url_or_data, settings) {
         })
         .blur(function () {
             hide_dropdown();
-            $(this).val("");
-            token_list.removeClass($(input).data("settings").classes.focused);
-
+            
             if ($(input).data("settings").allowFreeTagging) {
               add_freetagging_tokens();
-            } else {
-              $(this).val("");
             }
+            
+            $(this).val("");
             token_list.removeClass($(input).data("settings").classes.focused);
         })
         .bind("keyup keydown blur update", resize_input)
@@ -333,9 +334,16 @@ $.TokenList = function (input, url_or_data, settings) {
                     hidden_input.change();
                   } else {
                     if ($(input).data("settings").allowFreeTagging) {
-                      add_freetagging_tokens();
+                      if($(input).data("settings").allowTabOut && $(this).val() === "") {
+                        return true;
+                      } else {
+                        add_freetagging_tokens();
+                      }
                     } else {
                       $(this).val("");
+                      if($(input).data("settings").allowTabOut) {
+                        return true;
+                      }
                     }
                     event.stopPropagation();
                     event.preventDefault();
@@ -354,6 +362,10 @@ $.TokenList = function (input, url_or_data, settings) {
                     break;
             }
         });
+
+    // Keep reference for placeholder
+    if (settings.placeholder)
+        input_box.attr("placeholder", settings.placeholder)
 
     // Keep a reference to the original input box
     var hidden_input = $(input)
@@ -409,12 +421,9 @@ $.TokenList = function (input, url_or_data, settings) {
         .append(input_box);
 
     // The list to store the dropdown items in
-    var dropdown_parent = $("<div>")
-        .insertAfter(token_list)
-        .css({position: 'relative'});
     var dropdown = $("<div>")
         .addClass($(input).data("settings").classes.dropdown)
-        .appendTo(dropdown_parent)
+        .appendTo("body")
         .hide();
 
     // Magic element to help us resize the text input
@@ -442,6 +451,7 @@ $.TokenList = function (input, url_or_data, settings) {
         $.each(li_data, function (index, value) {
             insert_token(value);
             checkTokenLimit();
+            input_box.attr("placeholder", null)
         });
     }
 
@@ -465,11 +475,11 @@ $.TokenList = function (input, url_or_data, settings) {
                 delete_token($(this));
             }
         });
-    }
+    };
 
     this.add = function(item) {
         add_token(item);
-    }
+    };
 
     this.remove = function(item) {
         token_list.children("li").each(function() {
@@ -487,15 +497,18 @@ $.TokenList = function (input, url_or_data, settings) {
                 }
             }
         });
-    }
+    };
 
     this.getTokens = function() {
         return saved_tokens;
-    }
+    };
 
     this.toggleDisabled = function(disable) {
         toggleDisabled(disable);
-    }
+    };
+
+    // Resize input to maximum width so the placeholder can be seen
+    resize_input();
 
     //
     // Private functions
@@ -533,9 +546,13 @@ $.TokenList = function (input, url_or_data, settings) {
     function resize_input() {
         if(input_val === (input_val = input_box.val())) {return;}
 
+        // Get width left on the current line
+        var width_left = token_list.width() - input_box.offset().left - token_list.offset().left;
         // Enter new content into resizer and resize input accordingly
         input_resizer.html(_escapeHTML(input_val));
-        input_box.width(input_resizer.width() + 30);
+        // Get maximum width, minimum the size of input and maximum the widget's width
+        input_box.width(Math.min(token_list.width(),
+                                 Math.max(width_left, input_resizer.width() + 30)));
     }
 
     function is_printable_character(keycode) {
@@ -617,7 +634,7 @@ $.TokenList = function (input, url_or_data, settings) {
             token_list.children().each(function () {
                 var existing_token = $(this);
                 var existing_data = $.data(existing_token.get(0), "tokeninput");
-                if(existing_data && existing_data.id === item.id) {
+                if(existing_data && existing_data[settings.tokenValue] === item[settings.tokenValue]) {
                     found_existing_token = existing_token;
                     return false;
                 }
@@ -631,9 +648,14 @@ $.TokenList = function (input, url_or_data, settings) {
             }
         }
 
+        // Squeeze input_box so we force no unnecessary line break
+        input_box.width(0);
+
         // Insert the new tokens
         if($(input).data("settings").tokenLimit == null || token_count < $(input).data("settings").tokenLimit) {
             insert_token(item);
+            // Remove the placeholder so it's not seen after you've added a token
+            input_box.attr("placeholder", null)
             checkTokenLimit();
         }
 
@@ -716,6 +738,9 @@ $.TokenList = function (input, url_or_data, settings) {
 
         // Remove this token from the saved list
         saved_tokens = saved_tokens.slice(0,index).concat(saved_tokens.slice(index+1));
+        if (saved_tokens.length == 0) {
+            input_box.attr("placeholder", settings.placeholder)
+        }
         if(index < selected_token_index) selected_token_index--;
 
         // Update the hidden input
@@ -755,48 +780,15 @@ $.TokenList = function (input, url_or_data, settings) {
     }
 
     function show_dropdown() {
-/* loopj
         dropdown
             .css({
                 position: "absolute",
-                top: $(token_list).offset().top + $(token_list).outerHeight(),
+                top: $(token_list).offset().top + $(token_list).height(),
                 left: $(token_list).offset().left,
-                width: $(token_list).outerWidth(),
+                width: $(token_list).width(),
                 'z-index': $(input).data("settings").zindex
             })
             .show();
-*/ // cburgmer:
-        var dropdown_height = $("ul", dropdown).height(),
-            bottom_height_left = $(document).height() - $(token_list).offset().top - $(token_list).outerHeight(),
-            top_height_left = $(token_list).offset().top;
-
-        if (dropdown_height > bottom_height_left && dropdown_height < top_height_left) {
-            // Show dropdown to the top, ergo 'dropup'
-            dropdown
-                .css({
-                    position: "absolute",
-                    bottom: $(token_list).outerHeight(),
-                    top: '',
-                    left: 0,
-                    width: token_list.width()
-                })
-                .addClass('token-input-dropdown-top-facebook')
-                .removeClass('token-input-dropdown-bottom-facebook')
-                .show();
-        } else {
-            dropdown
-                .css({
-                    position: "absolute",
-                    top: 0,
-                    bottom: '',
-                    left: 0,
-                    width: token_list.width()
-                })
-                .removeClass('token-input-dropdown-top-facebook')
-                .addClass('token-input-dropdown-bottom-facebook')
-                .show();
-        }
-// end of new
     }
 
     function show_dropdown_searching () {
@@ -1048,3 +1040,4 @@ $.TokenList.Cache = function (options) {
     };
 };
 }(jQuery));
+

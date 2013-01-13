@@ -56,10 +56,12 @@ jQuery ->
 		theme: "facebook",
 		onAdd: collection_tagchange,
 		onDelete: collection_tagchange,
-		allowFreeTagging: true
+		allowFreeTagging: true,
+		placeholder: "Seek and ye shall find...",
+		zindex: 1500
 	)
 	
-	$("#tagstxt").first().focus()	
+	$("#tagstxt").first().focus()
 	$(".pageclickr").click collection_pager
 	
 	$('.RcpBrowser').click ->
