@@ -547,11 +547,11 @@ $.TokenList = function (input, url_or_data, settings) {
         }
     }
 
-    function resize_input() {
-        if(input_val === (input_val = input_box.val())) {return;}
+    function resize_input(force) {
+        if((input_val === (input_val = input_box.val())) && (!force)) {return;}
 
         // Get width left on the current line
-        var width_left = token_list.width() - input_box.offset().left - token_list.offset().left;
+        var width_left = token_list.width() - (input_box.offset().left - token_list.offset().left);
         // Enter new content into resizer and resize input accordingly
         input_resizer.html(_escapeHTML(input_val));
         // Get maximum width, minimum the size of input and maximum the widget's width
@@ -763,6 +763,8 @@ $.TokenList = function (input, url_or_data, settings) {
         if($.isFunction(callback)) {
             callback.call(hidden_input,token_data);
         }
+
+				resize_input(true);
     }
 
     // Update the hidden input box value
