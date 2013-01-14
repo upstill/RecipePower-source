@@ -70,125 +70,115 @@
 			}
 		}
 	}
-	
-}
-
-.edit_recipe.dialog.at_top {
-	font:12px arial,sans-serif;
-	font-weight:bold;
-	width:auto;
-	height:auto;
-	margin:0em;
-	padding:0em;
-	border:solid 3px #900
-}
-
-.edit_recipe.dialog.at_top div.edit_recipe_hdr {
-	height:30px;
-	width:auto;
-	margin:0.8em;
-	margin-top:0.4em;
-	margin-bottom:0.2em;
-	padding:0
-}
-
-.edit_recipe.dialog.at_top div.edit_recipe_hdr span {
-	display:inline-block;
-	vertical-align:top;
-	margin-top:12px
-}
-
-.edit_recipe.dialog.at_top div.edit_recipe_hdr img {
-	display:inline-block;
-	z-index: 900001;
-}
-
-.edit_recipe.dialog.at_top div.left {
-	float:left;
-	width:150px;
-	height:auto;
-	// border:1px solid red
-}
-
-.edit_recipe.dialog.at_top div.left p {
-	display:block;
-	font:12px arial,sans-serif;
-	font-weight:bold;
-	text-align:center;
-	margin:3px
-}
-
-.edit_recipe.dialog.at_top div.middle {
-	float:left;
-	width:530px;
-	height:auto;
-	// border:1px solid green
-}
-
-.edit_recipe.dialog.at_top div.right {
-	float:left;
-	width:100px;
-	height:auto;
-	// border:1px solid blue
-}
-
-.edit_recipe.dialog.at_top div.edit_recipe_element {
-	height:40px;
-	padding-bottom:0.2em
-}
-
-.edit_recipe.dialog.at_top div.edit_recipe_field {
-	margin:0.5em;
-	width:100%
-}
-
-.edit_recipe.dialog.at_top div.edit_recipe_field label {
-	display:inline-block;
-	vertical-align:top;
-	width:50px;
-	margin-top:5px
-}
-
-.edit_recipe.dialog.at_top div.edit_recipe_field textarea {
-	display:inline-block;
-	vertical-align:top;
-	width:460px
-}
-
-.edit_recipe.dialog.at_top div.edit_recipe_field ul {
-	display:inline-block;
-	vertical-align:top;
-	width:463px;
-	clear:none
-}
-
-.edit_recipe.dialog.at_top div.edit_recipe_field input {
-	display:inline-block;
-	margin:5px
-}
-
-.edit_recipe.dialog.at_top div.edit_recipe_field.pic {
-	width:120px;
-	height:90px;
-	margin-left:auto;
-	margin-right:auto;
-	outline:#999 solid 1px
-}
-
-.edit_recipe.dialog.at_top div.edit_recipe_field.pic div.recipe_pic_preview {
-	width:120px;
-	height:90px;
-	margin-left:auto;
-	margin-right:auto
-}
-
-.edit_recipe.dialog.at_top div.edit_recipe_field.pic div.recipe_pic_preview input {
-	display:none
-}
-
-.edit_recipe.dialog.at_top div.edit_recipe_field.pic div.recipe_pic_preview p {
-	font:12px arial,sans-serif;
-	font-weight:bold;
-	text-align:center;
-	margin:3px
+	&.at_top {
+		font:12px arial,sans-serif;
+		font-weight:bold;
+		width:auto;
+		height:auto;
+		margin:0em;
+		padding:0em;
+		border:solid 3px #900;
+		div.edit_recipe_hdr {
+			height:30px;
+			width:auto;
+			margin:0.8em;
+			margin-top:0.4em;
+			margin-bottom:0.2em;
+			padding:0;
+			span {
+				display:inline-block;
+				vertical-align:top;
+				margin-top:12px
+			}
+			img {
+				display:inline-block;
+				z-index: 900001;
+			}
+		}
+		div.left {
+			float:left;
+			width:150px;
+			height:auto;
+			// border:1px solid red
+			p {
+				display:block;
+				font:12px arial,sans-serif;
+				font-weight:bold;
+				text-align:center;
+				margin:3px
+			}
+		}
+		div.middle {
+			float:left;
+			width:530px;
+			height:auto;
+			// border:1px solid green
+		}
+		div.right {
+			float:left;
+			width:100px;
+			height:auto;
+			// border:1px solid blue
+		}
+		div.edit_recipe_element {
+			height:40px;
+			padding-bottom:0.2em
+		}
+		div.edit_recipe_field {
+			margin:0.5em;
+			width:100%;
+			label {
+				display:inline-block;
+				vertical-align:top;
+				width:50px;
+				margin-top:5px
+			}
+			textarea {
+				display:inline-block;
+				vertical-align:top;
+				resize: none;
+				width:460px
+			}
+			ul {
+				display:inline-block;
+				vertical-align:top;
+				width:463px;
+				clear:none
+			}
+			input {
+				display:inline-block;
+				margin:5px
+			}
+			&.tags {
+				textarea {
+					width: 430px;
+				}
+				ul {
+					width: 430px;
+				}
+			}
+			&.pic {
+				width:120px;
+				height:90px;
+				margin-left:auto;
+				margin-right:auto;
+				outline:#999 solid 1px;
+				div.recipe_pic_preview {
+					width:120px;
+					height:90px;
+					margin-left:auto;
+					margin-right:auto;
+					input {
+						display:none
+					}
+					p {
+						font:12px arial,sans-serif;
+						font-weight:bold;
+						text-align:center;
+						margin:3px
+					}
+				}
+			}
+		}
+	}
 }

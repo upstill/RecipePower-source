@@ -47,6 +47,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	},
 
 	execute_resize: function (dims) {
+
 		var width = dims.width[0];
 		var height = dims.height[0];
 
@@ -217,6 +218,8 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	ifr.style.padding = "0";
 	ifr.style.margin = "0";
 	ifr.style.display = 'block';
+	ifr.style.overflow = 'visible';
+	ifr.style.border = "0px";
 	ifr.id = "recipePower-iframe";
 	ifr.src = "<%= @url %>";
 	if (ifr.attachEvent){

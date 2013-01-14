@@ -5,9 +5,7 @@ module FeedbackHelper
     }.merge(options.stringify_keys)
 
     options['position'] = "'#{options['position']}'" unless options['position'].blank? || options['position'] == 'null'
-    content_tag 'script', :type => "text/javascript" do
-      "$(document).ready(function() { $('.feedback_link').feedback({tabPosition: #{options["position"]}}); });"
-    end
+    javascript_tag "$(document).ready(function() { $('.feedback_link').feedback({tabPosition: #{options["position"]}}); });"
 
   end
 

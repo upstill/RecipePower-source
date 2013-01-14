@@ -15,6 +15,7 @@
 //= require jquery/jquery.ba-postmessage
 //= require jquery/jNotify.jquery
 //= require jquery/jquery.tokeninput
+//= require jquery/jquery.ba-resize
 
 window.RP = window.RP || {}
 
@@ -108,6 +109,23 @@ function armDialog(sourcehome) {
 	var cancelBtn = document.getElementById("recipePowerCancelBtn");
 	if(cancelBtn) cancelBtn.onclick = retire_iframe;
 	$('form', dlog).submit( dlog, submitDialog );
+	// Set the dialog's resize function to adjust size of the iframe
+	$(dlog).resize( function (evt) {
+		var dropdown = $('div.token-input-dropdown-facebook')[0]
+		var h = 0;
+		if(dropdown.style.display == "none") {
+			h = 0;
+		} else {
+			h = dropdown.offsetHeight;
+		}
+		$.postMessage( { call: "execute_resize", width: dlog.offsetWidth, height: dlog.offsetHeight+h }, document.sourcehome );
+	});
+	
+	$('div.token-input-dropdown-facebook').resize( function (evt) {
+		// Strangely, this do-nothing resize monitor is required to trigger resize of the dialog
+		var dropdown = $('div.token-input-dropdown-facebook')[0]
+	});
+	
 	// Finally, report the window dimensions to the enclosing window
 	$.postMessage( { call: "execute_resize", width: dlog.offsetWidth, height: dlog.offsetHeight }, document.sourcehome );
 	

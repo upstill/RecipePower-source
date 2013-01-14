@@ -42,6 +42,7 @@ RP.edit_recipe.onload = (dlog) ->
 	dlog = me()
 	# Only proceed if the dialog has children
 	if $('.edit_recipe > *').length > 0
+		
 		$(dlog).show 500
 		# Setup tokenInput on the tags field
 		$("#recipe_tag_tokens", dlog).tokenInput("/tags/match.json", 

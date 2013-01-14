@@ -23,7 +23,6 @@
 				<%= form_tag("/collection/update", :method => "get", :class => "navbar-form form-search query_form") do %>
 					<div id="collection_query_tokens">
 						<%= text_field_tag :tagstxt, "#{@collection.tagstxt}", "data-pre" => @collection.tags.map(&:attributes).to_json, :placeholder => "Seek and ye shall find...", :class => "search-query" %>
-<!-- 						<%= text_field_tag :notags, "#{@collection.tagstxt}", "data-pre" => @collection.tags.map(&:attributes).to_json, :placeholder => "Seek and ye shall find...", :class => "search-query" %> -->
 					</div>
 				<% end %>
 			</li>
