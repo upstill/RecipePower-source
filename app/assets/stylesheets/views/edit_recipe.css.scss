@@ -5,6 +5,7 @@
 	padding-bottom:0;
 	background-color:#EEE;
 	z-index: 9000001;
+	// Cribbed from http://www.alistapart.com/articles/expanding-text-areas-made-elegant/
 	textarea, 
 	pre {
 	  margin: 0;
@@ -21,7 +22,7 @@
 	.expandingArea > pre {
 	  padding: 5px;
 	  background: transparent;
-	  font: 400 13px/16px helvetica, arial, sans-serif;
+	  font: 400 13px/16px arial, sans-serif;
 	  /* Make the text soft-wrap */
 	  white-space: pre-wrap;
 	  word-wrap: break-word;

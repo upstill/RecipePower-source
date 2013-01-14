@@ -31,7 +31,12 @@
 
 	  <div class="edit_recipe_field" >
 			<%= f.label :comment, "Notes" -%>
-			<%= f.text_area :comment, placeholder: "What are your thoughts about this recipe?", rows: "2" -%>
+			<div class="edit_recipe_field_textarea">
+				<div class="expandingArea">
+				  <pre><span></span><br></pre>
+				  <%= f.text_area :comment, placeholder: "What are your thoughts about this recipe?" -%>
+				</div>			
+			</div>			
 	  </div>
   </div>
 
