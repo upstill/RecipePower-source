@@ -84,7 +84,8 @@ RP.edit_recipe.onload = (dlog) ->
 		 	saveMsg: "Cookmark removed from collection."
 		$('form.destroy', dlog).data "hooks",
 	 		saveMsg: "Cookmark destroyed for now and evermore."
-
+		RP.makeExpandingArea $('div.expandingArea', dlog)
+		
 #		$('input.save-tags-button.cancel', dlog).click RP.edit_recipe.oncancel 
 #		$('form.edit_recipe').on 'ajax:beforeSend', submission_redundant
 #		$('form.edit_recipe').on 'ajax:success', submission_success
@@ -126,5 +127,4 @@ RP.edit_recipe.submission_redundant = (dlog) ->
 
 jQuery ->
 	if dlog = me()[0]
- 		RP.edit_recipe.onload(dlog)
-
+ 		RP.edit_recipe.onload dlog

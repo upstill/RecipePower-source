@@ -39,6 +39,21 @@ RP.servePopup = () ->
 		popUp.focus()
 		return false
 
+RP.makeExpandingArea = (container) ->
+	area = $('textarea', container)[0]
+	span = $('span', container)[0]
+	if area.addEventListener 
+		area.addEventListener 'input', () ->
+			span.textContent = area.value
+		, false
+		span.textContent = area.value;
+	else if area.attachEvent 
+		# IE8 compatibility
+		area.attachEvent 'onpropertychange', () ->
+			span.innerText = area.value;
+		span.innerText = area.value;
+	# Enable extra CSS
+	container.addClass 'active'
 
 # get the function associated with a given string, even if the string refers to elements of nested structures.
 RP.named_function = (str) ->

@@ -16,7 +16,12 @@
 	  <div class="edit_recipe_field" >
 			<%= f.label :title, "Title" -%>
 			<% @recipe.check_title %>
-			<%= f.text_area :title, rows: "2" -%>
+			<div class="edit_recipe_field_textarea">
+				<div class="expandingArea">
+				  <pre><span></span><br></pre>
+				  <%= f.text_area :title, rows: "2" -%>
+				</div>			
+			</div>			
 	  </div>
 
 	  <div class="edit_recipe_field tags" >
