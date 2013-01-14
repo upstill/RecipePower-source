@@ -149,6 +149,14 @@
 				display:inline-block;
 				margin:5px
 			}
+			&.tags {
+				textarea {
+					width: 430px;
+				}
+				ul {
+					width: 430px;
+				}
+			}
 			&.pic {
 				width:120px;
 				height:90px;
