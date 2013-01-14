@@ -7,7 +7,7 @@ module RecipesHelper
 def grab_recipe_link label, recipe
 end
 
-def edit_recipe_link( label, recipe)
+def edit_recipe_link( label, recipe, *options)
   if params[:controller] != 'rcpqueries'
     rcp_params = {
       rcpID: recipe.id,
@@ -19,7 +19,7 @@ def edit_recipe_link( label, recipe)
       rcpStatus: recipe.status,
       authToken: form_authenticity_token
     }
-    link_to_function label, "RP.edit_recipe.go(#{rcp_params.to_json});"
+    link_to_function label, "RP.edit_recipe.go(#{rcp_params.to_json});", *options
   else
     link_to_function label, "recipePowerGetAndRunJSON( '#{edit_recipe_path(recipe)}', 'modeless', 'at_left');"
   end
