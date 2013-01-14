@@ -60,3 +60,78 @@ body { padding-top: 60px; }
 .RcpBrowser.Level2 {
 	margin-left: 30px;
 }
+
+.rcp_grid_pic_box {
+	width: 260px;
+	height: 260px;
+	display: -webkit-box;
+	display: -moz-box;
+	display: box;
+
+	-webkit-box-orient: vertical;
+	-moz-box-orient: vertical;
+	box-orient: vertical;
+
+	-webkit-box-align: center;
+	-moz-box-align: center;
+	box-align: center;
+
+	-webkit-box-pack: center;
+	-moz-box-pack: center;
+	box-pack: center;
+}
+
+.rcp_grid_datablock {
+	padding: 0px 8px;
+	height: 4.6em;
+}
+
+.rcp_grid_element_title {
+	margin-bottom: 0px;
+}
+
+.rcp_grid_element_title > a {
+	display: block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.rcp_grid_element_source {
+	font-size: 0.9em;
+	color: #999;
+}
+
+.rcp_grid_element_footer {
+	display: -webkit-box;
+	display: -moz-box;
+	display: box;
+
+	-webkit-box-align: center;
+	-moz-box-align: center;
+	box-align: center;
+
+	-webkit-box-pack: center;
+	-moz-box-pack: center;
+	box-pack: center;
+	
+	padding: 4px 4px 4px 12px;
+	margin: 2px -4px -4px;
+	border-top: 1px solid #ddd;
+	border-radius: 0 0 4px 4px;
+	background-color: #fafafa;
+	background-image: -webkit-linear-gradient(top, #ffffff, #f2f2f2);
+	background-image: -moz-linear-gradient(top, #ffffff, #f2f2f2);
+	background-image: linear-gradient(to bottom, #ffffff, #f2f2f2);
+}
+
+.rcp_grid_element_stats {
+	font-size: 0.8em;
+	color: #999;
+}
+
+.rcp_grid_element_spacer {
+	-webkit-box-flex: 1;
+	-moz-box-flex: 1;
+	box-flex: 1;
+}
+

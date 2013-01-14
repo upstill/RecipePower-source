@@ -1,7 +1,9 @@
+<ul class="thumbnails">
 <% for @recipe in @collection.results_paged  %>
   <% @recipe.current_user = @user_id %>
-  <%= render "shared/recipe_smallpic" %>
+  <%= render "shared/recipe_grid" %>
 <% end %>
+</ul>
 <div class="digg_pagination">
 	<%= pagination_links @collection.npages, @collection.cur_page %>
 </div>
