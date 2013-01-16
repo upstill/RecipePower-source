@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130107212707) do
+ActiveRecord::Schema.define(:version => 20130115001038) do
 
   create_table "authentications", :force => true do |t|
     t.integer  "user_id"
@@ -108,6 +108,7 @@ ActiveRecord::Schema.define(:version => 20130107212707) do
     t.datetime "updated_at"
     t.text     "picurl"
     t.text     "tagpane"
+    t.integer  "thumbnail_id"
   end
 
   create_table "referent_relations", :force => true do |t|
@@ -195,6 +196,19 @@ ActiveRecord::Schema.define(:version => 20130107212707) do
     t.boolean  "isGlobal"
     t.integer  "referent_id"
   end
+
+  create_table "thumbnails", :force => true do |t|
+    t.text     "url"
+    t.text     "thumbdata"
+    t.integer  "status"
+    t.string   "status_text"
+    t.integer  "thumbwid",    :default => 120
+    t.integer  "thumbht",     :default => 120
+    t.datetime "created_at",                   :null => false
+    t.datetime "updated_at",                   :null => false
+  end
+
+  add_index "thumbnails", ["url"], :name => "index_thumbnails_on_url", :unique => true
 
   create_table "user_relations", :force => true do |t|
     t.integer  "follower_id"

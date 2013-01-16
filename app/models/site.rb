@@ -239,13 +239,35 @@ class Site < ActiveRecord::Base
     def self.result(link, resource=nil)
       begin
         url = resource ? URI.join(link, resource) : URI.parse(link)
+        return "400" unless url.host && url.port
         req = Net::HTTP.new(url.host, url.port)
         req.request_head(url.path).code
       rescue Exception => e
         # If the server doesn't want to talk, we assume that the URL is okay, at least
-        return 401 if e.kind_of?(Errno::ECONNRESET) || url
+        return "401" if e.kind_of?(Errno::ECONNRESET) || url
       end
     end
+    
+  def self.validate_link link
+    link =~ URI::regexp(%w{ http https data })
+  end
+  
+  # Try to make sense out of a given path in the context of another url.
+  # Return either a valid URL or nil
+  def self.valid_url(url, path)
+    path ||= ""
+    if self.validate_link(path) && good = self.test_link(path) # either the original URL or a replacement are good
+      return (good.class == String) ? good : path
+    elsif url
+      # The path may be relative. In fact, it may have backup characters
+      begin
+        uri = URI.join( url, path ).to_s
+        return self.validate_link(uri) && uri
+      rescue Exception => e
+        return nil
+      end
+    end
+  end
     
     # Confirm that a proposed URL (with an optional subpath) actually has content at the other end
     # If the link is badly formed (returns a 400 result from the server) then we return false

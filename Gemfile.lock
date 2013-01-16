@@ -195,6 +195,7 @@ GEM
     rake (10.0.3)
     rdoc (3.12)
       json (~> 1.4)
+    rmagick (2.12.0)
     rspec (2.6.0)
       rspec-core (~> 2.6.0)
       rspec-expectations (~> 2.6.0)
@@ -293,6 +294,7 @@ DEPENDENCIES
   omniauth-twitter
   pg
   rails (= 3.2.11)
+  rmagick (= 2.12.0)
   rspec-rails (= 2.6.1)
   ruby-openid
   ruby-prof!

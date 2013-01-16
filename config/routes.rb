@@ -1,5 +1,8 @@
 RP::Application.routes.draw do
 
+  resources :thumbnails
+
+
   match 'collection', :controller=>'collection', :action=>'index'
   
   match 'collection/query', :controller=>'collection', :action=>'query', :via => :post

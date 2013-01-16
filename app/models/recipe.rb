@@ -15,19 +15,8 @@ class GettableURLValidator < ActiveModel::EachValidator
                 nil
             end
         elsif attribute == :picurl
-            if !value || value.empty? || Site.test_link(value)
-                true
-            else
-                # The picurl may be a relative path. In fact, it may have backup characters
-                begin
-                  uri = URI.join( record.url, value) 
-                  record.picurl = uri.to_s
-                  true
-                rescue Exception => e
-                    record.errors.add :picurl, "\'#{value}\' doesn't seem to be a working URL"
-                    nil
-                end
-            end
+          debugger
+          record.thumbnail= Thumbnail.match( record.url, record.picurl ) if record.url_changed? || record.picurl_changed? || !record.thumbnail_id
         end
     end
 end
@@ -43,6 +32,8 @@ class Recipe < ActiveRecord::Base
   has_many :tagrefs, :dependent=>:destroy
   has_many :tags, :through=>:tagrefs, :autosave=>true
   attr_reader :tag_tokens
+  
+  belongs_to :thumbnail, :autosave => true
   
   has_many :ratings, :dependent=>:destroy
   has_many :scales, :through=>:ratings, :autosave=>true
@@ -150,6 +141,14 @@ class Recipe < ActiveRecord::Base
 
   def piclist
     Site.piclist self.url
+  end
+  
+  def thumburl
+    if !self.thumbnail # Equip us with a thumbnail
+      save
+    end
+    # ...and fetch the data
+    self.thumbnail.fetch
   end
 
   @@statuses = [

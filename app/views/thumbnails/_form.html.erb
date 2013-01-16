@@ -1,0 +1,33 @@
+<%= form_for(@thumbnail) do |f| %>
+  <% if @thumbnail.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@thumbnail.errors.count, "error") %> prohibited this thumbnail from being saved:</h2>
+
+      <ul>
+      <% @thumbnail.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :url %><br />
+    <%= f.text_area :url, rows: 3, style: "width:800px" %>
+  </div>
+  <div class="field">
+    <%= f.label :thumbdata %><br />
+    <%= f.text_area :thumbdata, rows: 12, style: "width:800px" %>
+  </div>
+  <div class="field">
+    <%= f.label :thumbwid %><br />
+    <%= f.number_field :thumbwid %>
+  </div>
+  <div class="field">
+    <%= f.label :thumbht %><br />
+    <%= f.number_field :thumbht %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

@@ -1,3 +1,4 @@
+require "Domain"
 module ApplicationHelper
     include ActionView::Helpers::DateHelper
     
@@ -208,10 +209,6 @@ module ApplicationHelper
       flash[name] = nil;
     end
     return fl.html_safe
-  end
-
-  def current_domain
-    Rails.env.development? ? "localhost:3000" : "www.recipepower.com"
   end
 
   # Deploy the links for naming the user and/or signing up/signing in

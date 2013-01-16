@@ -24,5 +24,40 @@ class SiteTest < ActiveSupport::TestCase
         site2 = Site.by_link(alcasample)
         assert_equal site1, site2, "Different samples from one site creates different sites"
     end
+    
+    test "Invalid URLs test invalid" do
+      assert_nil Site.valid_url("garbage_url", "nopath")
+      assert_nil Site.valid_url("htp://www.recipepower.com/url", "nopath")
+      assert_nil Site.valid_url("htp://www.recipepower.com/url", nil)
+      assert_nil Site.valid_url("htp://www.recipepower.com/url", "")
+    end
+    
+    test "Valid URLs test valid" do
+      assert_equal "http://www.recipepower.com/url", Site.valid_url("http://www.recipepower.com/url", nil), "Nil path doesn't defer to URL"
+      assert_equal "http://www.recipepower.com/url", Site.valid_url("http://www.recipepower.com/url", ""), "Empty path doesn't defer to URL"
+      assert_equal "http://www.recipepower.com/assets/nopic", Site.valid_url("http://www.recipepower.com", "assets/nopic" ), "Can't join URL to relative path"
+      assert_equal "http://www.recipepower.com/assets/nopic", Site.valid_url("http://www.recipepower.com", "/assets/nopic" ), "Can't join base URL to absolute path"
+      assert_equal "http://www.recipepower.com/assets/nopic", Site.valid_url("http://www.recipepower.com/somethingelse", "/assets/nopic" ), "Can't join base URL to absolute path"
+      assert_equal "http://www.recipepower.com/assets/nopic", Site.valid_url("http://www.recipepower.com/assets/nopic", "" ), "Path doesn't defer to url"
+      assert_equal "http://www.recipepower.com/public/pic2", Site.valid_url("http://www.recipepower.com/assets/nopic", "../public/pic2" ), "Path doesn't defer to url"
+    end
+    
+    test "Paths correctly followed" do
+      assert_equal  "http://www.recipepower.com/dir1/dir2/dir3/new.htm", 
+                    Site.valid_url("http://www.recipepower.com/dir1/dir2/index.htm", "dir3/new.htm"), 
+                    "Terminating file not dropped"
+      assert_equal  "http://www.recipepower.com/dir1/dir2/dir3/new.htm", 
+                    Site.valid_url("http://www.recipepower.com/dir1/dir2/", "dir3/new.htm"), 
+                    "Terminating directory dropped"
+      assert_equal  "http://www.recipepower.com/dir3/new.htm", 
+                    Site.valid_url("http://www.recipepower.com/dir1/dir2/index.htm", "/dir3/new.htm"), 
+                    "Absolute path doesn't descend from site home"
+    end
+    
+    test "Nigel Slater" do
+      debugger
+      assert Site.valid_url("http://www.guardian.co.uk/lifeandstyle/2013/jan/06/nigel-slater-epiphany-cake-recipe",     
+        "http://static.guim.co.uk/sys-images/Observer/Pix/pictures/2013/1/2/1357127540095/nigel-slater-rosc-n-de-re-008.jpg")
+    end
 
 end
