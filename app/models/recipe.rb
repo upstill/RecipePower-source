@@ -5,20 +5,25 @@ require 'nokogiri'
 require 'htmlentities'
 
 class GettableURLValidator < ActiveModel::EachValidator
-    def validate_each(record, attribute, value)
-        if(attribute == :url) 
-            if test_result = Site.test_link(value) # by_link(value)
-                record.url = test_result if test_result.kind_of?(String)
-                true
-            else
-                record.errors.add :url, "\'#{value}\' doesn't seem to be a valid URL (can you use it as an address in your browser?)"
-                nil
-            end
-        elsif attribute == :picurl
-          debugger
-          record.thumbnail= Thumbnail.match( record.url, record.picurl ) if record.url_changed? || record.picurl_changed? || !record.thumbnail_id
+  def validate_each(record, attribute, value)
+    if(attribute == :url) 
+      if test_result = Site.test_link(value) # by_link(value)
+        record.url = test_result if test_result.kind_of?(String)
+      else
+        record.errors.add :url, "\'#{value}\' doesn't seem to be a valid URL (can you use it as an address in your browser?)"
+        return nil
+      end
+    elsif attribute == :picurl
+      if record.url_changed? || record.picurl_changed? || !record.thumbnail_id
+        record.thumbnail= Thumbnail.acquire( record.url, record.picurl )
+        if record.thumbnail.badURL?
+          record.errors.add :picurl, "\'#{value}\' doesn't point to a picture"
+          return nil
         end
+      end
     end
+    true
+  end
 end
 
 class Recipe < ActiveRecord::Base

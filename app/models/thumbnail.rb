@@ -25,13 +25,13 @@ class Thumbnail < ActiveRecord::Base
       self.status = nil
       begin
         uri = URI.parse(url)
-        if uri.host && uri.port
-          http = Net::HTTP.new(uri.host, uri.port)
-          request = Net::HTTP::Get.new(uri.request_uri)
+        if uri.host && 
+           uri.port &&
+           (http = Net::HTTP.new(uri.host, uri.port)) &&
+           (request = Net::HTTP::Get.new(uri.request_uri))
           response = http.request(request)        
           self.status = response.code
-          str = response.body
-        else
+        else # Invalid URL
           self.status = 400
         end
       rescue Exception => e
@@ -43,19 +43,35 @@ class Thumbnail < ActiveRecord::Base
           self.status = -1
         end
       end
-      if status == 200
-        img = Magick::Image::from_blob(str).first
+      
+      case status
+      when 200 # Success!
+        img = Magick::Image::from_blob(response.body).first
         thumb = img.resize_to_fill 120
         thumb.format = "JPEG"
         thumb.write "thumb.jpg" unless Rails.env.production?
-        self.thumbdata = "data:image/jpeg;base64," + ActiveSupport::Base64.encode64(thumb.to_blob)
+        self.thumbdata = "data:image/jpeg;base64," + Base64.encode64(thumb.to_blob)
+      when 400, 403, 404 # Bad request, forbidden or not found => reject the URL entirely
+        debugger
+        rcd = Thumbnail.where(url: "http://www.recipepower.com/assets/BadPicURL.png")[0] 
+        rcd ||= Thumbnail.new(url: "http://www.recipepower.com/assets/BadPicURL.png")
+        return rcd.update_thumb
       else
-        return url # Give up and return the url
+        self.thumbdata = url # Maybe the image can be fetched by the client
       end
     end
-    self.thumbdata
+    self
   end
   
+  # Use a path and site to fetch a thumbnail record, which may match a priorly cached one
+  def self.acquire(site, path)
+    # If no path, we just use the "Missing Picture" thumb
+    Thumbnail.find_or_create_by_url(path.blank? ? 
+      "http://www.recipepower.com/assets/MissingPicture.png" :
+      (Site.valid_url(site, path) || "http://www.recipepower.com/assets/BadPicURL.png")).update_thumb
+  end
+  
+=begin  
   # Return a new record for the site and path, or invalid-URL record if not valid
   def self.match(site, path)
     self.new.validate_url(site, path)
@@ -66,6 +82,17 @@ class Thumbnail < ActiveRecord::Base
   def fetch(site=nil, path=nil)
     # validate the URL if path is present
     (path ? validate_url(site, path) : self).update_thumb # ...and update the thumbnail
+  end
+=end
+  
+  # Thumbnail is BadURL message
+  def badURL?
+    url == "http://www.recipepower.com/assets/BadPicURL.png"
+  end
+  
+  # Thumbnail is no-picture message
+  def missingPicture?
+    url == "http://www.recipepower.com/assets/MissingPicture.png"
   end
 
 end

@@ -241,7 +241,9 @@ class Site < ActiveRecord::Base
         url = resource ? URI.join(link, resource) : URI.parse(link)
         return "400" unless url.host && url.port
         req = Net::HTTP.new(url.host, url.port)
-        req.request_head(url.path).code
+        code = req.request_head(url.path).code
+        debugger if code == "301"
+        code
       rescue Exception => e
         # If the server doesn't want to talk, we assume that the URL is okay, at least
         return "401" if e.kind_of?(Errno::ECONNRESET) || url
