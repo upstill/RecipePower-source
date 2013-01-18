@@ -2,7 +2,7 @@
 <% logger.debug "Rendering recipe #{@recipe.id}" %>
 <li class="span3">
 	<div class="thumbnail <%# recipe_list_element_class @recipe %>" >
-		<div class="rcp_grid_pic_box"><%= page_fitPic @recipe.picurl, @recipe.id %></div>
+		<div class="rcp_grid_pic_box"><%= recipe_fit_pic @recipe %></div>
 		<div class="rcp_grid_datablock">
 			<h5 class="rcp_grid_element_title"><%= link_to @recipe.trimmed_title, @recipe.url %></h5>
 			<div class="rcp_grid_element_source">from <%= link_to @recipe.sourcename, @recipe.sourcehome %></div>

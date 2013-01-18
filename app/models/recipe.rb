@@ -8,17 +8,24 @@ class GettableURLValidator < ActiveModel::EachValidator
   def validate_each(record, attribute, value)
     if(attribute == :url) 
       if test_result = Site.test_link(value) # by_link(value)
-        record.url = test_result if test_result.kind_of?(String)
+        # If the URL has relocated, we'll smartly adjust our link--UNLESS we're duplicating another URL
+        debugger
+        if test_result.kind_of?(String)
+          record.url = test_result if Recipe.where(url: test_result).empty?
+        end
       else
         record.errors.add :url, "\'#{value}\' doesn't seem to be a valid URL (can you use it as an address in your browser?)"
         return nil
       end
     elsif attribute == :picurl
-      if record.url_changed? || record.picurl_changed? || !record.thumbnail_id
-        record.thumbnail= Thumbnail.acquire( record.url, record.picurl )
-        if record.thumbnail.badURL?
-          record.errors.add :picurl, "\'#{value}\' doesn't point to a picture"
-          return nil
+      unless record.picurl && (record.picurl =~ /^data:/) # Use a data URL directly w/o taking a thumbnail
+        if record.url_changed? || record.picurl_changed? || !record.thumbnail
+          puts "Validating picurl with url '#{record.url}' and picurl '#{record.picurl}'"
+          record.thumbnail= Thumbnail.acquire( record.url, record.picurl ) 
+          # if record.thumburl.bad_url?
+            # record.errors.add :picurl, "\'#{value}\' doesn't point to a picture"
+            # return nil
+          # end
         end
       end
     end
@@ -148,12 +155,14 @@ class Recipe < ActiveRecord::Base
     Site.piclist self.url
   end
   
+  # Sort out a suitable URL to stuff into an image thumbnail for a recipe
   def thumburl
-    if !self.thumbnail # Equip us with a thumbnail
-      save
+    if picurl && (picurl =~ /^data:/) # Use a data URL directly w/o taking a thumbnail
+      self.thumbnail = nil
+      picurl
+    else 
+      (thumbnail && thumbnail.thumbdata) or ""
     end
-    # ...and fetch the data
-    self.thumbnail.fetch
   end
 
   @@statuses = [

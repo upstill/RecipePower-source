@@ -81,6 +81,7 @@
 					height:150px;
 					margin-left:auto;
 					margin-right:auto;
+					text-align: center;
 					input {
 						display:none;
 					}
@@ -88,6 +89,9 @@
 						visibility: hidden;
 						&.loaded {
 							visibility: visible;
+							// margin-left: auto;
+							// margin-right: auto;
+							// text-align: center;
 						}
 					}
 				}

@@ -1,23 +1,9 @@
 require "RMagick"
 require "Domain"
 class Thumbnail < ActiveRecord::Base
-  attr_accessible :thumbht, :thumbwid, :thumbdata, :url, :site
+  attr_accessible :thumbsize, :thumbdata, :url, :site
   before_save :update_thumb
-  
-  # Set the url for the record, returning either the record or the invalid-URL record
-  # Bust the cache if the url changes
-  def validate_url(site, path)
-    # If no path, we just use the "Missing Picture" thumb
-    current_domain = "www.recipepower.com"
-    oldURL = url
-    rcd = 
-    Thumbnail.find_or_create_by_url(path.blank? ? 
-      "http://#{current_domain}/assets/MissingPicture.png" :
-      (Site.valid_url(site, path) || "http://#{current_domain}/assets/BadPicURL.png"))
-    thumbdata = nil if rcd == self && url != oldURL
-    rcd
-  end
-
+@@FileCount = 1
   # Try to fetch the thumbnail data for the record, presuming a valid URL
   # If the fetch fails, return a suitable placeholder thumbnail
   def update_thumb
@@ -46,19 +32,26 @@ class Thumbnail < ActiveRecord::Base
       
       case status
       when 200 # Success!
-        img = Magick::Image::from_blob(response.body).first
-        thumb = img.resize_to_fill 120
-        thumb.format = "JPEG"
-        thumb.write "thumb.jpg" unless Rails.env.production?
-        self.thumbdata = "data:image/jpeg;base64," + Base64.encode64(thumb.to_blob)
+        begin
+          img = Magick::Image::from_blob(response.body).first
+          if (img.columns < thumbsize || img.rows < thumbsize) 
+            thumb = img.resize_to_fit thumbsize
+          else
+            thumb = img.resize_to_fill thumbsize 
+          end
+          thumb.format = "JPEG"
+          thumb.write("thumb#{@@FileCount.to_s}.jpg") unless Rails.env.production?
+          @@FileCount = @@FileCount + 1
+          self.thumbdata = "data:image/jpeg;base64," + Base64.encode64(thumb.to_blob)
+        rescue Exception => e
+          return self.bad_url
+        end
       when 400, 403, 404 # Bad request, forbidden or not found => reject the URL entirely
-        debugger
-        rcd = Thumbnail.where(url: "http://www.recipepower.com/assets/BadPicURL.png")[0] 
-        rcd ||= Thumbnail.new(url: "http://www.recipepower.com/assets/BadPicURL.png")
-        return rcd.update_thumb
+        return self.bad_url
       else
         self.thumbdata = url # Maybe the image can be fetched by the client
       end
+      save if id
     end
     self
   end
@@ -71,27 +64,18 @@ class Thumbnail < ActiveRecord::Base
       (Site.valid_url(site, path) || "http://www.recipepower.com/assets/BadPicURL.png")).update_thumb
   end
   
-=begin  
-  # Return a new record for the site and path, or invalid-URL record if not valid
-  def self.match(site, path)
-    self.new.validate_url(site, path)
+  # Somehow this thumbnail has a bad URL: mark it thus
+  def bad_url
+    @@BadURL = Thumbnail.find_or_create_by_url(url: "http://www.recipepower.com/assets/BadPicURL.png")
   end
-  
-  # Validate the cache against the site and path, returning an invalid-URL record or an updated
-  # cache. We guarantee the resulting record to have a valid data cache
-  def fetch(site=nil, path=nil)
-    # validate the URL if path is present
-    (path ? validate_url(site, path) : self).update_thumb # ...and update the thumbnail
-  end
-=end
   
   # Thumbnail is BadURL message
-  def badURL?
+  def bad_url?
     url == "http://www.recipepower.com/assets/BadPicURL.png"
   end
   
   # Thumbnail is no-picture message
-  def missingPicture?
+  def missing_picture?
     url == "http://www.recipepower.com/assets/MissingPicture.png"
   end
 

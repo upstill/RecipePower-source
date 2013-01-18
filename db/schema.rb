@@ -202,8 +202,7 @@ ActiveRecord::Schema.define(:version => 20130115001038) do
     t.text     "thumbdata"
     t.integer  "status"
     t.string   "status_text"
-    t.integer  "thumbwid",    :default => 120
-    t.integer  "thumbht",     :default => 120
+    t.integer  "thumbsize",   :default => 200
     t.datetime "created_at",                   :null => false
     t.datetime "updated_at",                   :null => false
   end

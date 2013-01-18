@@ -45,6 +45,10 @@ module ApplicationHelper
   def recipe_popup( rcp )
       link_to image_tag("preview.png", title:"Show the recipe in a popup window", class: "preview_button"), rcp.url, target: "_blank", class: "popup", id: "popup#{rcp.id.to_s}"        
   end
+  
+  def recipe_fit_pic(recipe, placeholder_image="MissingPicture.png", selector=nil)
+    page_fitPic recipe.thumburl, recipe.id, placeholder_image, selector
+  end
 
   # Declare an image within an adjustable box. The images are downloaded by
   # the browser and their dimensions adjusted under Javascript by the fitImageOnLoad() function.
@@ -52,7 +56,7 @@ module ApplicationHelper
   # float_ttl -- indicates how to handle an empty URL
   # selector -- specifies an alternative selector for finding the picture for resizing
   def page_fitPic(picurl, id = "", placeholder_image = "MissingPicture.png", selector=nil)
-    logger.debug "page_fitPic placing #{picurl.blank? ? placeholder_image : picurl}"
+    logger.debug "page_fitPic placing #{picurl.blank? ? placeholder_image : picurl.truncate(40)}"
     # "fitPic" class gets fit inside pic_box with Javascript and jQuery
     idstr = "rcpPic"+id.to_s
     selector = selector || "##{idstr}"
@@ -61,7 +65,7 @@ module ApplicationHelper
     end
     # Allowing for the possibility of a data URI
     if picurl.match(/^data:image/)
-      %Q{<img alt="Some Image Available" class="fitPic" id="#{idstr}" onload="fitImageOnLoad('#{selector}')" src="#{picurl}">}.html_safe
+      %Q{<img alt="Some Image Available" class="thumbnail200" id="#{idstr}" src="#{picurl}" >}.html_safe
     else
       begin
     	  image_tag(picurl, 
@@ -89,7 +93,7 @@ module ApplicationHelper
       contents, 
       class: "pic_picker",
       style: "display:none;",
-      "data-url" => @recipe ? "recipes/#{@recipe.id}/edit?pic_picker=true" : ""
+      "data-url" => @recipe ? "/recipes/#{@recipe.id}/edit?pic_picker=true" : ""
   end
   
   # Build a picture-selection dialog with the default url, url for a page containing candidate images, id, and name of input field to set

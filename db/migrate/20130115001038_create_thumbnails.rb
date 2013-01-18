@@ -5,8 +5,7 @@ class CreateThumbnails < ActiveRecord::Migration
       t.text :thumbdata
       t.integer :status # Generally, a URL return code
       t.string  :status_text # Explanation for the status
-      t.integer :thumbwid, default: 120
-      t.integer :thumbht, default: 120
+      t.integer :thumbsize, default: 200
 
       t.timestamps
     end

@@ -45,14 +45,14 @@ function fitImage(img) {
 	  var newHeight = frameWidth/imgAR;
 	  $(img).css("width", frameWidth);
 	  $(img).css("height", newHeight);
-	  $(img).css("top", (frameHeight-newHeight)/2);
-	  $(img).css("left", 0);
+	  // $(img).css("top", (frameHeight-newHeight)/2);
+	  // $(img).css("left", 0);
 	} else {
 	  var newWidth = frameHeight*imgAR;
 	  $(img).css("width", newWidth);
 	  $(img).css("height", frameHeight);
-	  $(img).css("top", 0);
-	  $(img).css("left", (frameWidth-newWidth)/2);
+	  // $(img).css("top", 0);
+	  // $(img).css("left", (frameWidth-newWidth)/2);
 	}
   $(img).addClass("loaded")
   return true;

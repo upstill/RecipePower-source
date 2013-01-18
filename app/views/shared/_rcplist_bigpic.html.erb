@@ -3,7 +3,7 @@
 <% for recipe in @rcpquery.results_paged  %>
   <div class="rcp_list_bigelement" >
     <div class="rcp_list_bigpic_box">
-		<%= page_fitPic recipe.picurl, recipe.id %>
+		<%= recipe_fit_pic recipe %>
     </div>
     <div class="rcp_list_bigtext">
       <div class="rcp_list_element_title">
