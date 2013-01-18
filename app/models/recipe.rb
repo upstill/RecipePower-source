@@ -9,7 +9,6 @@ class GettableURLValidator < ActiveModel::EachValidator
     if(attribute == :url) 
       if test_result = Site.test_link(value) # by_link(value)
         # If the URL has relocated, we'll smartly adjust our link--UNLESS we're duplicating another URL
-        debugger
         if test_result.kind_of?(String)
           record.url = test_result if Recipe.where(url: test_result).empty?
         end
