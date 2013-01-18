@@ -136,14 +136,26 @@ div.notice-div {
 	padding:"1em";
 	margin:"auto"
 }
+
 // Space for a recipe picture to be fit into
 .fitPic {
-	align:center;
+	// align:center;
 	visibility:hidden;
 	&.loaded {
 		visibility: visible;
-		position: relative;
+		// position: relative;
+		margin-left: auto;
+		margin-right: auto;
+		vertical-align: center;
 	}
+}
+
+img.thumbnail200 {
+	vertical-align: center;
+	margin-left: auto;
+	margin-right: auto;
+	width: 200px;
+	height: 200px;
 }
 
 #logo_div {

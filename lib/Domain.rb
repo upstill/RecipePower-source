@@ -11,4 +11,7 @@ def path_from_url(url)
 	result = url.sub(/https*:\/\/[^\/]*/, '') # Eliminate http[s]:// and beyond to first slash
 end
 
+def current_domain
+  Rails.env.production? ? "www.recipepower.com" : "localhost:3000" 
+end
 

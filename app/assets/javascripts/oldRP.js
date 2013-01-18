@@ -252,7 +252,7 @@ function boostInTablist(list_element_class, list_element_body, targettab) {
 // Request the server to add a recipe to a user's collection, allowing for an 
 function rcpCollect(id) {
   // Call server on /recipes/:id/collect
-  jQuery.get( "recipes/"+id+"/collect", {},
+  jQuery.get( "/recipes/"+id+"/collect", {},
     function(data, status, hr) {
 	  if(status == "success") {
 		if(data.type == "dialog") {

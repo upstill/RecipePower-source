@@ -30,7 +30,7 @@ def recipe_pic_field(rcp, form, editable = true)
   picurl = @recipe.picurl
   preview = content_tag(
     :div, 
-    page_fitPic(@recipe.picurl, @recipe.id, "PickPicture.png", "div.recipe_pic_preview img")+
+    recipe_fit_pic(@recipe, "PickPicture.png", "div.recipe_pic_preview img")+
               form.text_field(:picurl, rel: "jpg,png,gif", hidden: true),
     class: "recipe_pic_preview"
   )
@@ -142,7 +142,7 @@ def recipe_editor
       <div class="edit_recipe_field pic"><div class="recipe_pic_preview"><img alt="Some Image Available" class="fitPic" id="rcpPic%%rcpID%%" onload="fitImageOnLoad('div.recipe_pic_preview img')" src="%%rcpPicURL%%" /><input hidden="hidden" id="recipe_picurl" name="recipe[picurl]" rel="jpg,png,gif" size="30" type="text" value="%%rcpPicURL%%" /></div>
         <div class="recipe_pic_picker">
          <a href="/" class="pic_picker_golink" data="recipe_picurl;div.recipe_pic_preview img">Pick Picture</a>
-         <div class="pic_picker" data-url="recipes/%%rcpID%%/edit?pic_picker=true" style="display:none;"></div>
+         <div class="pic_picker" data-url="/recipes/%%rcpID%%/edit?pic_picker=true" style="display:none;"></div>
         </div>
       </div>
          <div class="edit_recipe_field tags" >

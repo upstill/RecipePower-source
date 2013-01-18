@@ -235,12 +235,37 @@ class Site < ActiveRecord::Base
         end
     end
     
+  def self.validate_link link
+    link =~ URI::regexp(%w{ http https data })
+  end
+  
+  # Try to make sense out of a given path in the context of another url.
+  # Return either a valid URL or nil
+  def self.valid_url(url, path)
+    path ||= ""
+    if self.validate_link(path) && good = self.test_link(path) # either the original URL or a replacement are good
+      return (good.class == String) ? good : path
+    elsif url
+      # The path may be relative. In fact, it may have backup characters
+      begin
+        uri = URI.join( url, path ).to_s
+        return self.validate_link(uri) && uri
+      rescue Exception => e
+        return nil
+      end
+    end
+  end
+    
     # Probe a URL with its server, returning the result code for a head request
-    def self.result(link, resource=nil)
+    def self.header_result(link, resource=nil)
       begin
         url = resource ? URI.join(link, resource) : URI.parse(link)
+        # Reject it right off the bat if the url isn't valid
+        return 400 unless url.host && url.port
+        
         req = Net::HTTP.new(url.host, url.port)
-        req.request_head(url.path).code
+        code = req.request_head(url.path).code
+        (code == "301") ? req.request_head(url.path).header["location"] : code.to_i
       rescue Exception => e
         # If the server doesn't want to talk, we assume that the URL is okay, at least
         return 401 if e.kind_of?(Errno::ECONNRESET) || url
@@ -254,15 +279,16 @@ class Site < ActiveRecord::Base
     # Thus: false means fail; string means good but moved; true means everything is copacetic
     def self.test_link(link, resource=nil)
       # If the result method can't make sense of the link, then give up
-      return false unless result_code = self.result(link, resource)
-      if result_code == "301"
-          # If the location has moved permanently (result 301) we try to supplant this link internally
-          if ((new_location = res.header["location"]) &&
-              (self.result(new_location) == "200"))
-            return new_location
-          end
+      return false unless result_code = self.header_result(link, resource)
+      # Not very stringent: we only disallow ill-formed requests
+      return (result_code != 400) unless result_code.kind_of? String
+      
+      # If the location has moved permanently (result 301) we try to supplant this link internally
+      if (new_location = result_code) && (self.header_result(new_location) == 200)
+        new_location
+      else
+        true
       end
-      return result_code != "400" # Not very stringent: we only disallow ill-formed requests
     end
     
     # Find and return the site wherein the named link is stored

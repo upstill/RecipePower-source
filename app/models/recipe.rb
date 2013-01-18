@@ -5,31 +5,32 @@ require 'nokogiri'
 require 'htmlentities'
 
 class GettableURLValidator < ActiveModel::EachValidator
-    def validate_each(record, attribute, value)
-        if(attribute == :url) 
-            if test_result = Site.test_link(value) # by_link(value)
-                record.url = test_result if test_result.kind_of?(String)
-                true
-            else
-                record.errors.add :url, "\'#{value}\' doesn't seem to be a valid URL (can you use it as an address in your browser?)"
-                nil
-            end
-        elsif attribute == :picurl
-            if !value || value.empty? || Site.test_link(value)
-                true
-            else
-                # The picurl may be a relative path. In fact, it may have backup characters
-                begin
-                  uri = URI.join( record.url, value) 
-                  record.picurl = uri.to_s
-                  true
-                rescue Exception => e
-                    record.errors.add :picurl, "\'#{value}\' doesn't seem to be a working URL"
-                    nil
-                end
-            end
+  def validate_each(record, attribute, value)
+    if(attribute == :url) 
+      if test_result = Site.test_link(value) # by_link(value)
+        # If the URL has relocated, we'll smartly adjust our link--UNLESS we're duplicating another URL
+        debugger
+        if test_result.kind_of?(String)
+          record.url = test_result if Recipe.where(url: test_result).empty?
         end
+      else
+        record.errors.add :url, "\'#{value}\' doesn't seem to be a valid URL (can you use it as an address in your browser?)"
+        return nil
+      end
+    elsif attribute == :picurl
+      unless record.picurl && (record.picurl =~ /^data:/) # Use a data URL directly w/o taking a thumbnail
+        if record.url_changed? || record.picurl_changed? || !record.thumbnail
+          puts "Validating picurl with url '#{record.url}' and picurl '#{record.picurl}'"
+          record.thumbnail= Thumbnail.acquire( record.url, record.picurl ) 
+          # if record.thumburl.bad_url?
+            # record.errors.add :picurl, "\'#{value}\' doesn't point to a picture"
+            # return nil
+          # end
+        end
+      end
     end
+    true
+  end
 end
 
 class Recipe < ActiveRecord::Base
@@ -43,6 +44,8 @@ class Recipe < ActiveRecord::Base
   has_many :tagrefs, :dependent=>:destroy
   has_many :tags, :through=>:tagrefs, :autosave=>true
   attr_reader :tag_tokens
+  
+  belongs_to :thumbnail, :autosave => true
   
   has_many :ratings, :dependent=>:destroy
   has_many :scales, :through=>:ratings, :autosave=>true
@@ -150,6 +153,16 @@ class Recipe < ActiveRecord::Base
 
   def piclist
     Site.piclist self.url
+  end
+  
+  # Sort out a suitable URL to stuff into an image thumbnail for a recipe
+  def thumburl
+    if picurl && (picurl =~ /^data:/) # Use a data URL directly w/o taking a thumbnail
+      self.thumbnail = nil
+      picurl
+    else 
+      (thumbnail && thumbnail.thumbdata) or ""
+    end
   end
 
   @@statuses = [

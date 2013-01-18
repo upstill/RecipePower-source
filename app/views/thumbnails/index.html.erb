@@ -1,0 +1,19 @@
+<h1>Listing thumbnails</h1>
+
+<table>
+
+<% @thumbnails.each do |thumbnail| %>
+  <tr>
+    <td><%= thumbnail.url %></td>
+  </tr><tr>
+    <td><img src="<%= thumbnail.thumbdata -%>"></td>
+    <td><%= link_to 'Show', thumbnail %></td>
+    <td><%= link_to 'Edit', edit_thumbnail_path(thumbnail) %></td>
+    <td><%= link_to 'Destroy', thumbnail, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Thumbnail', new_thumbnail_path %>
