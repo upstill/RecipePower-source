@@ -3,7 +3,6 @@ require "Domain"
 class Thumbnail < ActiveRecord::Base
   attr_accessible :thumbsize, :thumbdata, :url, :site
   before_save :update_thumb
-@@FileCount = 1
   # Try to fetch the thumbnail data for the record, presuming a valid URL
   # If the fetch fails, return a suitable placeholder thumbnail
   def update_thumb
@@ -40,9 +39,9 @@ class Thumbnail < ActiveRecord::Base
             thumb = img.resize_to_fill thumbsize 
           end
           thumb.format = "JPEG"
-          thumb.write("thumb#{@@FileCount.to_s}.jpg") unless Rails.env.production?
-          @@FileCount = @@FileCount + 1
-          self.thumbdata = "data:image/jpeg;base64," + Base64.encode64(thumb.to_blob)
+          quality = 20
+          thumb.write("thumb#{id.to_s}-M#{quality.to_s}.jpg") { self.quality = quality } unless Rails.env.production?
+          self.thumbdata = "data:image/jpeg;base64," + Base64.encode64(thumb.to_blob{self.quality = quality })
         rescue Exception => e
           return self.bad_url
         end
@@ -54,6 +53,30 @@ class Thumbnail < ActiveRecord::Base
       save if id
     end
     self
+  end
+  
+  def self.rewrite n=10000
+    nrcds = 0
+    size_before = 0
+    size_after = 0
+    Thumbnail.all.each do |t|
+      unless t.url =~ /recipepower/ 
+        if t.thumbdata
+          size_before = size_before + t.thumbdata.length 
+          t.thumbdata = nil
+          t2 = t.update_thumb
+          debugger if (t2 != t) || !t2.thumbdata
+          size_after = size_after + t.thumbdata.length
+          t.save
+          nrcds = nrcds + 1
+        else
+          t.update_thumb
+          t.save
+        end
+      end
+      break if nrcds == n
+    end
+    puts "#{nrcds} revised; average size before: #{size_before/nrcds}, after: #{size_after/nrcds}" 
   end
   
   # Use a path and site to fetch a thumbnail record, which may match a priorly cached one
