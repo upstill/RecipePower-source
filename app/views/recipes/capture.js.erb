@@ -56,7 +56,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		var mgn = height+"px 0px 0px 0px";
 		capsule.style.margin=mgn;
 		*/
-
+debugger;
 		var ifr = document.getElementById("recipePower-iframe");
 		ifr.style.width = width.toString() + "px";
 		ifr.style.height = height.toString() + "px";
@@ -66,18 +66,26 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	}, 
 	
 	ifrOnload: function () {
-		// First, dispose of the placeholder and spinner images
+		// First, dispose of the placeholder and spinner images, if any
 		var img = document.getElementById("recipePower-placeholder");
 		var spinner = document.getElementById("recipePower-spinner");
 		var ifr = this;
+		if(img) {
+			ifr.style.left = img.style.left;
+			img.style.display = "none";
+			img.parentNode.removeChild(img);			
+		}
+		if(spinner) {
+			spinner.style.display = "none";
+			spinner.parentNode.removeChild(spinner);
+		}
+		debugger;
+		/*
 		// Move the iframe onscreen
-		ifr.style.left = img.style.left;
-		
-		// Delete the image from behind it
-		img.style.display = "none";
-		spinner.style.display = "none";
-		img.parentNode.removeChild(img);
-		spinner.parentNode.removeChild(spinner);
+		var width = ifr.style.width.replace("px","");
+		var offset = window.outerWidth-ifr.outerWidth;
+		ifr.style.left = ((offset)/2).toString() + "px";
+		*/
 		
 	  var ns = window.recipePower_namespace;
 	/* We would love to encapsulate the window content so we can move the top out of the way
@@ -89,15 +97,15 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		ifr.style.display = 'box';
 	*/
 		/* Define the style for highlighting images for picking */
-		var css = 'img.recipePower-highlight { border:#ffaa66 3px solid; outline:#ffaa66 3px solid; }',
+		var css = 'img.recipePower-highlight { outline:#ffaa66 5px solid; }',
 		    head = document.getElementsByTagName('head')[0],
 		    style = document.createElement('style');
 
 		style.type = 'text/css';
 		if(style.styleSheet){
-		    style.styleSheet.cssText = css;
+			style.styleSheet.cssText = css;
 		}else{
-		    style.appendChild(document.createTextNode(css));
+			style.appendChild(document.createTextNode(css));
 		}
 		head.appendChild(style);
 

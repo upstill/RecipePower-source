@@ -64,9 +64,9 @@ module ApplicationHelper
       picurl = placeholder_image
     end
     # Allowing for the possibility of a data URI
-    if picurl.match(/^data:image/)
-      %Q{<img alt="Some Image Available" class="thumbnail200" id="#{idstr}" src="#{picurl}" >}.html_safe
-    else
+#    if picurl.match(/^data:image/)
+#      %Q{<img alt="Some Image Available" class="thumbnail200" id="#{idstr}" src="#{picurl}" >}.html_safe
+#    else
       begin
     	  image_tag(picurl, 
           class: "fitPic",
@@ -80,7 +80,7 @@ module ApplicationHelper
           onload: "fitImageOnLoad('#{selector}')",
           alt: "Some Image Available")
       end
-    end
+#    end
   end
   
 #  def pic_picker picurl, pageurl, id

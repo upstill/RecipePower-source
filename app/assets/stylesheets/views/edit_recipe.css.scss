@@ -220,16 +220,17 @@
 				}
 			}
 			&.pic {
-				width:120px;
+				width:90px;
 				height:90px;
 				margin-left:auto;
 				margin-right:auto;
 				outline:#999 solid 1px;
 				div.recipe_pic_preview {
-					width:120px;
+					width:90px;
 					height:90px;
 					margin-left:auto;
 					margin-right:auto;
+					text-align: center;
 					input {
 						display:none
 					}

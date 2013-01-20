@@ -113,12 +113,12 @@ function armDialog(sourcehome) {
 	$(dlog).resize( function (evt) {
 		var dropdown = $('div.token-input-dropdown-facebook')[0]
 		var h = 0;
-		if(dropdown.style.display == "none") {
-			h = 0;
-		} else {
+		if(dropdown && (dropdown.style.display != "none")) {
 			h = dropdown.offsetHeight;
 		}
-		$.postMessage( { call: "execute_resize", width: dlog.offsetWidth, height: dlog.offsetHeight+h }, document.sourcehome );
+		if(dlog.offsetWidth > 0 && dlog.offsetHeight > 0) {
+			$.postMessage( { call: "execute_resize", width: dlog.offsetWidth, height: dlog.offsetHeight+h }, document.sourcehome );
+		}
 	});
 	
 	$('div.token-input-dropdown-facebook').resize( function (evt) {
