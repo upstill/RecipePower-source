@@ -99,13 +99,15 @@ class RecipesController < ApplicationController
         # Produce javascript in response to the bookmarklet, to render into an iframe, 
         # either the recipe editor or a login screen.
         # We need a domain to pass as sourcehome, so the injected iframe can communicate with the browser
-        uri = URI(params[:recipe][:url])
-        domain = uri.scheme+"://"+uri.host
-        @url = capture_recipes_url area: "at_top", layout: "injector", recipe: params[:recipe], sourcehome: domain
-        if !current_user # Apparently there's no way to check up on a user without hitting the database
-          # Push the editing URL so authentication happens first
-          session["user_return_to"] = @url
-          @url = new_authentication_url area: "at_top", layout: "injector", sourcehome: domain 
+        params[:recipe][:url].strip!
+        if uri = URI::HTTP.sans_query(params[:recipe][:url])
+          domain = uri.scheme+"://"+uri.host
+          @url = capture_recipes_url area: "at_top", layout: "injector", recipe: params[:recipe], sourcehome: domain
+          if !current_user # Apparently there's no way to check up on a user without hitting the database
+            # Push the editing URL so authentication happens first
+            session["user_return_to"] = @url
+            @url = new_authentication_url area: "at_top", layout: "injector", sourcehome: domain 
+          end
         end
         render
       }
