@@ -13,9 +13,11 @@
   <div class="logo">                                     
     <%= page_fitPic @site.logo, @site.id, "MissingLogo.png", "div.logo img"  %>
   </div> 
-  <%= link_to "Pick Logo", "/", :class=>"pic_picker_golink", :data=>"site_logo;div.logo img" %>
-  <%= f.text_field :logo, rel: "jpg,png,gif", hidden: true %>
-  <%= pic_picker @site.logo, @site.home+@site.sample, @site.id %>
+	<% if @site.logo && @site.home && @site.sample %>
+	  <%= link_to "Pick Logo", "/", :class=>"pic_picker_golink", :data=>"site_logo;div.logo img" %>
+	  <%= f.text_field :logo, rel: "jpg,png,gif", hidden: true %>
+	  <%= pic_picker @site.logo || "", @site.home+@site.sample, @site.id %>
+	<% end %>
   <div class="field">
     <%= f.label :Name %><br />
     <%= f.text_field :name %>

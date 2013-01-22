@@ -45,7 +45,7 @@ function fitImage(img) {
 	  var newHeight = frameWidth/imgAR;
 	  $(img).css("width", frameWidth);
 	  $(img).css("height", newHeight);
-	  // $(img).css("top", (frameHeight-newHeight)/2);
+	  $(img).css("top", (frameHeight-newHeight)/2);
 	  // $(img).css("left", 0);
 	} else {
 	  var newWidth = frameHeight*imgAR;

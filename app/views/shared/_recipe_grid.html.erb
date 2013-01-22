@@ -1,7 +1,7 @@
 <%# Partial for a single recipe in a "smallpic" recipe list %>
 <% logger.debug "Rendering recipe #{@recipe.id}" %>
-<li class="span3">
-	<div class="thumbnail <%# recipe_list_element_class @recipe %>" >
+<li class="span3 <%= recipe_grid_element_class @recipe %>">
+	<div class="thumbnail" >
 		<div class="rcp_grid_pic_box"><%= recipe_fit_pic @recipe %></div>
 		<div class="rcp_grid_datablock">
 			<h5 class="rcp_grid_element_title"><%= link_to @recipe.trimmed_title, @recipe.url %></h5>

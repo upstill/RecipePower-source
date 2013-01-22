@@ -55,7 +55,6 @@ class Recipe < ActiveRecord::Base
 
   has_many :rcprefs, :dependent=>:destroy
   has_many :users, :through=>:rcprefs, :autosave=>true
-  has_many :touches, :dependent=>:destroy
   attr_reader :comment
   attr_accessor :private, :current_user
   attr_reader :status
@@ -80,9 +79,12 @@ class Recipe < ActiveRecord::Base
       end
     else # No id: create based on url
       params.delete(:rcpref)
+      # Sanitize the URL
+      params[:url].strip!
+      params[:url].gsub!(/\{/, '%7B')
+      params[:url].gsub!(/\}/, '%7D')      
       rcp = Recipe.new params
       # Find the site for this url
-      debugger
       if (url = params[:url]) && (site = Site.by_link(url))
         if site.site == "http://www.recipepower.com"
           rcp.errors.add :url, "Sorry, can't cookmark pages from RecipePower. (Does that even make sense?)"
@@ -90,15 +92,13 @@ class Recipe < ActiveRecord::Base
           # Get the site to crack the page for this recipe
           # Pull title, picture and canonical URL from the result
           redirect = (site.yield :URI, url)[:URI] || url
-          # rcp.url = rcp.url || found[:URI]
-          # We may have re-interpreted the URL from the page, so
-          # need to re-check that the recipe doesn't already exist
+          # Check that the recipe doesn't already exist
           if saved = Recipe.where(url: redirect).first
             rcp = saved
           else
             rcp.url = redirect
             rcp.picurl = (site.yield :Image, url)[:Image] || ""
-            rcp.title = rcp.title || (site.yield :Title, url)[:Title] 
+            rcp.title = ((site.yield :Title, url)[:Title] || rcp.title).html_safe
             rcp.save
           end
         end

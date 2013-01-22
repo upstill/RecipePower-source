@@ -293,13 +293,15 @@ class Site < ActiveRecord::Base
       if (uri = URI::HTTP.sans_query(link)) && !uri.host.blank?
         # Find all sites assoc'd with the given domain
         sites = Site.where "host = ?", uri.host
-        # It's possible that multiple sites may proceed from the same domain, 
-        # so we need to find the one whose full site path (site+subste) matches the link
+        # If multiple sites may proceed from the same domain, 
+        # we need to find the one whose full site path (site+subsite) matches the link
         # So: among matching hosts, find one whose 'site+subsite' is an initial substring of the link
         matching_subsite = matching_site = nil
         sites.each do |site|
-          matching_site = site if link =~ /^#{site.site}/
-          matching_subsite = site if link =~ /^#{site.site+site.subsite}/
+          unless site.site.empty?
+            matching_site = site if link.index(site.site)
+            matching_subsite = site if !site.subsite.empty? && link.index(site.site+site.subsite)
+          end
         end
         matching_subsite || matching_site || Site.create(:sample=>link)
       else
@@ -351,39 +353,38 @@ class Site < ActiveRecord::Base
     end
     
     def yield (name, url = nil)
-        url = @crackedURL || self.sampleURL if url.blank?
-        debugger
-        unless @pagetags && (url == @crackedURL) # Rebuild the found tags
-          # Extract the key data from a page. page_type may specify what kind of page
-          # (recipe, video, etc.) it's meant to be
-          # Open the Nokogiri doc for the site
-          @crackedURL = url
-          @pagetags = nil
-          begin
-            if (ou = open url) && (doc = Nokogiri::HTML(ou))
-              @pagetags = PageTags.new doc, self.site
-              @pagetags.glean (self.tags.empty? ? Site.find_by_site('http://www.recipepower.com').tags : self.tags)+@@TitleTags
-              @pagetags.hrecipe 
-              ou.close 
-            end
-          rescue => e
-            x=2
+      url = @crackedURL || self.sampleURL if url.blank?
+      unless @pagetags && (url == @crackedURL) # Rebuild the found tags
+        # Extract the key data from a page. page_type may specify what kind of page
+        # (recipe, video, etc.) it's meant to be
+        # Open the Nokogiri doc for the site
+        @crackedURL = url
+        @pagetags = nil
+        begin
+          if (ou = open url) && (doc = Nokogiri::HTML(ou))
+            @pagetags = PageTags.new doc, self.site
+            @pagetags.glean (self.tags.empty? ? Site.find_by_site('http://www.recipepower.com').tags : self.tags)+@@TitleTags
+            # @pagetags.hrecipe 
+            ou.close 
           end
+        rescue => e
+          x=2
         end
-        result = {}
-        if (@pagetags && foundstr = @pagetags.result(name))
-            # Assuming the tag was fulfilled, there may be post-processing to do
-            case name
-            when :Title
-                titledata = foundstr.split('\t')
-                result[:URI] = titledata[1]
-                foundstr = self.trim_title titledata.first
-            when :Image
-                # Make picture path absolute if it's not already
-                foundstr = self.site+foundstr unless foundstr =~ /^\w*:/
-            end
-            result[name] = foundstr
+      end
+      result = {}
+      if (@pagetags && foundstr = @pagetags.result(name))
+        # Assuming the tag was fulfilled, there may be post-processing to do
+        case name
+        when :Title
+          titledata = foundstr.split('\t')
+          result[:URI] = titledata[1]
+          foundstr = self.trim_title titledata.first
+        when :Image
+          # Make picture path absolute if it's not already
+          foundstr = self.site+foundstr unless foundstr =~ /^\w*:/
         end
-        result
-    end     
+        result[name] = foundstr
+      end
+      result
+  end     
 end

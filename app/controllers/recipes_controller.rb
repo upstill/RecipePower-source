@@ -24,6 +24,7 @@ class RecipesController < ApplicationController
         if params[:action] != "destroy"
           go_link_body = with_format("html") do render_to_string :partial => "recipes/golink" end
           list_element_body = with_format("html") do render_to_string :partial => "shared/recipe_smallpic" end
+          grid_element_body = with_format("html") do render_to_string :partial => "shared/recipe_grid" end
         end
         render json:     { 
                          notice: notice,
@@ -32,6 +33,8 @@ class RecipesController < ApplicationController
                          go_link_body: go_link_body || "",
                          list_element_class: recipe_list_element_class(@recipe), 
                          list_element_body: list_element_body || "",
+                         grid_element_class: recipe_grid_element_class(@recipe), 
+                         grid_element_body: grid_element_body || "",
                          action: params[:action],
                          processorFcn: "RP.rcp_list.update"
                        } 
@@ -67,7 +70,6 @@ class RecipesController < ApplicationController
     # Here is where we take a hit on the "Add to RecipePower" widget,
     # and also invoke the 'new cookmark' dialog. The difference is whether
     # parameters are supplied for url, title and note (though only URI is required).
-    debugger
     @recipe = Recipe.ensure current_user_or_guest_id, params.slice(:url) # session[:user_id], params
     if @recipe.id # Mark of a fetched/successfully saved recipe: it has an id
     	# redirect to edit
