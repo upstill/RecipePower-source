@@ -91,7 +91,7 @@ class Recipe < ActiveRecord::Base
         else
           # Get the site to crack the page for this recipe
           # Pull title, picture and canonical URL from the result
-          redirect = (site.yield :URI, url)[:URI] || url
+          redirect = Site.valid_url(url, (site.yield :URI, url)[:URI]) || url
           # Check that the recipe doesn't already exist
           if saved = Recipe.where(url: redirect).first
             rcp = saved

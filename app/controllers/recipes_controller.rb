@@ -93,6 +93,7 @@ class RecipesController < ApplicationController
     respond_to do |format|
       format.html { # This is for capturing a new recipe. The injector (capture.js) calls for this
         @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params
+        debugger unless @recipe.id
         # The javascript includes an iframe for specific content
         @layout = "injector"
         render :edit, :layout => (params[:layout] || dialog_only)

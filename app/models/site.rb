@@ -176,6 +176,46 @@ class Site < ActiveRecord::Base
         { label: :Title, path: "title" } 
     ]
     
+    # Eliminate duplicates and bind Sites to the associated referent
+    def self.purge
+=begin
+      site = Site.find 2032
+      dupe = site.dup
+      dupe.save
+      dupe = site.dup
+      dupe.referent_id = nil
+      dupe.save
+      dupe = site.dup
+      dupe.save
+      debugger
+=end
+      names = {}
+      Site.all.each do |site| 
+        if names[site.name]
+          names[site.name] << site
+        else
+          names[site.name] = [ site ]
+        end
+      end
+      keys = names.keys.sort { |key1, key2| names[key1].count <=> names[key2].count }
+      winnow = []
+      keys.each do |key| 
+        if names[key].count > 1
+          puts key+": "+names[key].map { |site| site.id.to_s+"/"+site.referent_id.to_s }.join(', ')
+          save = nil
+          winnow << (save || names[key].first) if names[key].all? do |site| 
+            site.referent_id.nil? || (save ? (save.referent_id == site.referent_id) : (save=site) ) 
+          end
+        end
+      end
+      winnow.each { |saved|
+        Site.where(name: saved.name).each { |site| 
+          site.destroy unless (site == saved)
+        }
+      }
+      nil
+    end
+    
     # Use the site's name as a tag for creating a referent
     def ensure_referent
         self.referent = Referent.express(self.name, :Source)
@@ -189,10 +229,9 @@ class Site < ActiveRecord::Base
             self.errors << "Can't make sense of URI"
           else
             puts "Creating host matching #{urisq.host} for #{link} with subsite \'#{self.subsite||""}\'"
-
             puts "Link is '#{link}'; path is '#{urisq.path}'"
             # Define the site as the link minus the sample (sub)path
-            self.site = link[0,(link =~ /#{urisq.path}/) || link.length]
+            self.site = link.sub(urisq.path, "")
             puts "...from which extracted site '#{self.site}'"
             self.home = self.site # ...seems like a reasonable default...
 
