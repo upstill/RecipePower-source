@@ -7,6 +7,7 @@ RP.rcp_list.onload = ->
 RP.rcp_list.update = ( data ) ->
 	if data.action == "remove" || data.action == "destroy"
 		$('.'+data.list_element_class).remove()
+		$('.'+data.grid_element_class).remove()
 	else
 		if data.go_link_class 
 			$("."+data.go_link_class).replaceWith data.go_link_body
