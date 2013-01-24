@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130115001038) do
+ActiveRecord::Schema.define(:version => 20130123212710) do
 
   create_table "authentications", :force => true do |t|
     t.integer  "user_id"
@@ -162,7 +162,7 @@ ActiveRecord::Schema.define(:version => 20130115001038) do
     t.string   "scheme"
     t.string   "host"
     t.string   "port"
-    t.string   "name"
+    t.string   "oldname"
     t.string   "logo"
     t.text     "tags_serialized"
     t.datetime "created_at"

@@ -374,7 +374,7 @@ end
 class UnitReferent < Referent ; end  
 
 class SourceReferent < Referent ; 
-    has_one :site
+    has_one :site, foreign_key: "referent_id"
     
     attr_accessible :site
 end  

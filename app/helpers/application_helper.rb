@@ -164,8 +164,10 @@ module ApplicationHelper
   def touch_date_elmt recipe
     if params[:controller] == "collection"
       stmt = @collection.timestamp recipe
+    elsif td = recipe.touch_date
+      stmt = "Last touched/viewed #{time_ago_in_words td} ago."
     else
-      stmt = "Last viewed #{time_ago_in_words recipe.touch_date} ago."
+      stmt = "Never touched or viewed"
     end
     content_tag :span, stmt, class: touch_date_class(recipe)
   end    

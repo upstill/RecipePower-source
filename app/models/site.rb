@@ -153,7 +153,7 @@ public
 end
 
 class Site < ActiveRecord::Base
-    attr_accessible :site, :home, :scheme, :subsite, :sample, :host, :port, :name, :logo, :tags_serialized, :ttlcut, :ttlrepl, :site_referent
+    attr_accessible :site, :home, :scheme, :subsite, :sample, :host, :port, :logo, :tags_serialized, :ttlcut, :ttlrepl, :site_referent
     
     belongs_to :referent
     
@@ -161,7 +161,7 @@ class Site < ActiveRecord::Base
     attr_accessor :tags
     
     # When creating a site, also create a corresponding site referent
-    before_create :ensure_referent
+    # before_create :ensure_referent
     
     before_save :pack_tags
     
@@ -176,50 +176,24 @@ class Site < ActiveRecord::Base
         { label: :Title, path: "title" } 
     ]
     
-    # Eliminate duplicates and bind Sites to the associated referent
-    def self.purge
-=begin
-      site = Site.find 2032
-      dupe = site.dup
-      dupe.save
-      dupe = site.dup
-      dupe.referent_id = nil
-      dupe.save
-      dupe = site.dup
-      dupe.save
-      debugger
-=end
-      names = {}
-      Site.all.each do |site| 
-        if names[site.name]
-          names[site.name] << site
-        else
-          names[site.name] = [ site ]
-        end
-      end
-      keys = names.keys.sort { |key1, key2| names[key1].count <=> names[key2].count }
-      winnow = []
-      keys.each do |key| 
-        if names[key].count > 1
-          puts key+": "+names[key].map { |site| site.id.to_s+"/"+site.referent_id.to_s }.join(', ')
-          save = nil
-          winnow << (save || names[key].first) if names[key].all? do |site| 
-            site.referent_id.nil? || (save ? (save.referent_id == site.referent_id) : (save=site) ) 
-          end
-        end
-      end
-      winnow.each { |saved|
-        Site.where(name: saved.name).each { |site| 
-          site.destroy unless (site == saved)
-        }
-      }
-      nil
+    def name
+      self.referent ? referent.name : ("No name for site at "+self.host)
     end
     
+    def name=(str)
+      if referent
+        referent.express(str, :Source)
+      else
+        self.referent = Referent.express(str, :Source)
+      end
+    end      
+    
+=begin
     # Use the site's name as a tag for creating a referent
     def ensure_referent
         self.referent = Referent.express(self.name, :Source)
     end
+=end
     
     def post_init
       unless self.site
