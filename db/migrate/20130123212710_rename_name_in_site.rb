@@ -1,11 +1,12 @@
 class RenameNameInSite < ActiveRecord::Migration
   def up
+    rename_column :sites, :name, :oldname
     names = {}
     Site.all.each do |site| 
-      if names[site.name]
-        names[site.name] << site
+      if names[site.oldname]
+        names[site.oldname] << site
       else
-        names[site.name] = [ site ]
+        names[site.oldname] = [ site ]
       end
     end
     winnow = []
@@ -23,19 +24,18 @@ class RenameNameInSite < ActiveRecord::Migration
     end
     # For each site to be saved, destroy all others with the same name
     winnow.each { |saved|
-      Site.where(name: saved.name).each { |site| 
+      Site.where(name: saved.oldname).each { |site| 
         site.destroy unless (site == saved)
       }
     }
     # Now ensure that all sites have a referent and a Source tag
     Site.all.each do |site|
       unless site.referent
-        site.referent = Referent.express(self.name, :Source)
+        site.referent = Referent.express(site.oldname, :Source)
         site.save
       end
     end
     Referent.where(type: "InterestReferent").each { |ir| ir.destroy }
-    rename_column :sites, :name, :oldname
   end
 
   def down
