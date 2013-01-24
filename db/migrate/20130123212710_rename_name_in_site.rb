@@ -24,7 +24,7 @@ class RenameNameInSite < ActiveRecord::Migration
     end
     # For each site to be saved, destroy all others with the same name
     winnow.each { |saved|
-      Site.where(name: saved.oldname).each { |site| 
+      Site.where(oldname: saved.oldname).each { |site| 
         site.destroy unless (site == saved)
       }
     }
