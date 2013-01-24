@@ -35,6 +35,7 @@ class RenameNameInSite < ActiveRecord::Migration
         site.save
       end
     end
+    Referent.where(type: "InterestReferent").each { |ir| ir.destroy }
   end
 
   def down

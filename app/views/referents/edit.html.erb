@@ -4,3 +4,6 @@
 
 <%= link_to 'Show', @referent.becomes(Referent) %> |
 <%= link_to 'Back', referents_path %>
+<% if assoc = @referent.associate %>
+ | <%= link_to assoc.class.to_s+" "+assoc.name, "/#{assoc.class.to_s.downcase.pluralize}/#{assoc.id}/edit" %>
+<% end %>

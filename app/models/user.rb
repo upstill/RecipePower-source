@@ -240,6 +240,11 @@ public
       end
   end
   
+  # 'name' is just an alias for handle, for use by Channel referents
+  def name
+    handle
+  end
+  
   # Who is eligible to be
   def friend_candidates(for_channels)
     User.all.keep_if { |other| 

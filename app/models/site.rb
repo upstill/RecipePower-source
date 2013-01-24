@@ -153,7 +153,7 @@ public
 end
 
 class Site < ActiveRecord::Base
-    attr_accessible :site, :home, :scheme, :subsite, :sample, :host, :port, :logo, :tags_serialized, :ttlcut, :ttlrepl, :site_referent
+    attr_accessible :site, :home, :scheme, :subsite, :sample, :host, :name, :oldname, :port, :logo, :tags_serialized, :ttlcut, :ttlrepl
     
     belongs_to :referent
     
@@ -177,14 +177,15 @@ class Site < ActiveRecord::Base
     ]
     
     def name
-      self.referent ? referent.name : ("No name for site at "+self.host)
+      (self.referent && referent.name) || oldname
     end
     
     def name=(str)
+      self.oldname = str
       if referent
-        referent.express(str, :Source)
+        referent.express(str, :tagtype => :Source)
       else
-        self.referent = Referent.express(str, :Source)
+        self.referent = Referent.express(str, :tagtype => :Source)
       end
     end      
     
@@ -218,13 +219,13 @@ class Site < ActiveRecord::Base
             self.port = urisq.port
 
             # Give the site a provisional name, the host name minus 'www.', if any
-            self.name = urisq.host.sub(/www\./, '') unless self.name
+            self.name = urisq.host.sub(/www\./, '') unless self.oldname
           end
         else
           # "Empty" site (probably defaults)
           self.site = ""
           self.subsite = ""
-          self.name = "Anonymous" unless self.name
+          self.name = "Anonymous" unless self.oldname
         end
         self.subsite ||= ""
       end

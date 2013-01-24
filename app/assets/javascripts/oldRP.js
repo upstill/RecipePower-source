@@ -57,16 +57,6 @@ $(function() {
         onDelete: tokenChangeCallback,
         allowFreeTagging: true // allowCustomEntry: true
     });
-    $("#referent_channel_tag").tokenInput("/tags/match.json?tagtype=0", {
-        crossDomain: false,
-		noResultsText: "No matching tag found; hit Enter to make it a tag",
-        hintText: "Type a tag that will name the channel",
-        prePopulate: $("#referent_channel_tag").data("pre"),
-        theme: "facebook",
-		preventDuplicates: true,
-		tokenLimit: 1,
-        allowFreeTagging: true // allowCustomEntry: true
-    });
 	$('.remove_fields').click(function(event) {
 	    $(this).prev('input[type=hidden]').val('1')
 	    $(this).closest('tr').hide()
@@ -80,22 +70,6 @@ $(function() {
 	    event.preventDefault()
 	*/
 });
-
-function dependentSwitch() {
-	if($("#referent_dependent")[0].checked) { // "Channel for existing tag" checked
-      $("#referent_channel_tag").tokenInput("revise", "/tags/match.json?tagtypes=1,2,3,4,6,7,8,12,14", {
-		noResultsText: "No existing tag found to use as channel",
-        hintText: "Type an existing tag for the channel to track",
-        allowFreeTagging: false // allowCustomEntry: false
-      });
-    } else {
-      $("#referent_channel_tag").tokenInput("revise", "/tags/match.json?tagtype=0", {
-		noResultsText: "No matching tag found; hit Enter to make a new tag",
-        hintText: "Type a tag naming the channel",
-        allowFreeTagging: false // allowCustomEntry: true
-      });
-	}
-}
 
 // Callback to select another tag for editing
 function editAnotherTag(hi, li) {
