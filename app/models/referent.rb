@@ -188,7 +188,6 @@ class Referent < ActiveRecord::Base
         # Find or create an expression of this referent on this tag. If locale
         # or form aren't specified, match any expression
         args[:form] = Expression.formnum(:generic) unless args[:form]
-        debugger
         if self.id
           Expression.find_or_create self.id, tag.id, args 
         elsif self.expressions.empty? # We're not saved, so have no id

@@ -121,7 +121,6 @@ function getWdwData() {
 (function($){
   $.fn.mycheck = function() {
 	var val = $("#tags_tabset").tabs('option', 'selected');
-	// debugger;
     return 1;
   };
 })(jQuery);
@@ -156,7 +155,6 @@ function wdwFitImages(selection) {
 // NOT YET GUARANTEED
 // Responder for link to return to the user's list
 function backToMe(uid) {
-    // debugger;
     var x = 2;
 }
 
@@ -609,7 +607,6 @@ function add_rating(link, association, content) {
     // Once the last rating is selected and deployed,
     // change the prompt and deactivate the control
     // opts[0].prompt = "No more scales to add";
-    // debugger;
     // }
 }
 
