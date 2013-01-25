@@ -6,7 +6,7 @@
   <%= show_errors @recipe.errors %>
 
 	<div class="left">
-		<%= recipe_pic_field @recipe, f, false %>
+		<%= pic_field @recipe, :picurl, f, false %>
 		<% unless @recipe.picurl.blank? %>
 				<p>Prefer another picture?<br />Click one!</p>
 		<% end %>

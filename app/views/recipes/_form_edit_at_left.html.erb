@@ -1,6 +1,6 @@
 <%= form_for @recipe, :remote => true, :html => {:'data-type' => :json} do |f| %>
   <%= show_errors @recipe.errors %>
-  <%= recipe_pic_field @recipe, f, true %>
+  <%= pic_field @recipe, :picurl, f, true %>
 
   <div class="edit_recipe_field tags" >
 		<%= f.label :tag_tokens, "Tags" -%>

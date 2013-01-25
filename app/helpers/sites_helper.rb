@@ -17,8 +17,4 @@ module SitesHelper
     link_to "Sample", url
   end
   
-  def site_fit_pic(site, placeholder_image="MissingPicture.png", selector=nil)
-    page_fitPic site.logo, site.id, placeholder_image, selector
-  end
-
 end

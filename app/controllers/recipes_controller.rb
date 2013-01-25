@@ -125,7 +125,7 @@ class RecipesController < ApplicationController
       @Title = @recipe.title # Get title from the recipe
       if params[:pic_picker]
         # Setting the pic_picker param requests a picture-editing dialog
-        render :partial=> "pic_picker"
+        render :partial=> "shared/pic_picker"
       else
         @nav_current = nil
         @area = params[:area]

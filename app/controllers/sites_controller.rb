@@ -42,11 +42,11 @@ class SitesController < ApplicationController
   # GET /sites/1/edit
   def edit
     # return if need_login true, true
+    @site = Site.find(params[:id].to_i)
     if params[:pic_picker]
       # Setting the pic_picker param requests a picture-editing dialog
-      render :partial=> "recipes/pic_picker"
+      render :partial=> "shared/pic_picker"
     else
-      @site = Site.find(params[:id].to_i)
       @Title = @site.name
     end
   end

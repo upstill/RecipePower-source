@@ -80,6 +80,7 @@ protected
   end
   
 public
+  
   def glean (tags)
     tags = [tags] if tags.class == Hash 
     tags.each do |tagspec|

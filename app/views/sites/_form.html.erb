@@ -1,62 +1,59 @@
-<%= form_for(@site) do |f| %>
-  <% if @site.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(@site.errors.count, "error") %> prohibited this site from being saved:</h2>
+<div class="edit_site dialog page">
+	<%= form_for(@site) do |f| %>
+	  <% if @site.errors.any? %>
+	    <div id="error_explanation">
+	      <h2><%= pluralize(@site.errors.count, "error") %> prohibited this site from being saved:</h2>
 
-      <ul>
-      <% @site.errors.full_messages.each do |msg| %>
-        <li><%= msg %></li>
-      <% end %>
-      </ul>
-    </div>
-  <% end %>
-  <div class="logo">                                     
-    <%= page_fitPic @site.logo, @site.id, "MissingLogo.png", "div.logo img"  %>
-  </div> 
-	<% if @site.logo && @site.home && @site.sample %>
-	  <%= link_to "Pick Logo", "/", :class=>"pic_picker_golink", :data=>"site_logo;div.logo img" %>
-	  <%= f.text_field :logo, rel: "jpg,png,gif", hidden: true %>
-	  <%= pic_picker @site.logo || "", @site.home+@site.sample, @site.id %>
-	<% end %>
-	<% if params[:action] != "edit" %>
+	      <ul>
+	      <% @site.errors.full_messages.each do |msg| %>
+	        <li><%= msg %></li>
+	      <% end %>
+	      </ul>
+	    </div>
+	  <% end %>
+	  <div class="logo">                                     
+	  	<%= pic_field @site, :logo, f, true %>
+	  </div> 
+		<% if params[:action] != "edit" %>
+		  <div class="field">
+		    <%= f.label :Name %><br />
+		    <%= f.text_field :name %>
+		  </div>
+		<% end %>
 	  <div class="field">
-	    <%= f.label :Name %><br />
-	    <%= f.text_field :name %>
+	    <%= f.label :site %><br />
+	    <%= f.text_field :site %>
+	  </div>
+	  <div class="field">
+	    <%= f.label :home %><br />
+	    <%= f.text_field :home %>
+	  </div>
+	  <div class="field">
+	    <%= f.label :subsite %><br />
+	    <%= f.text_field :subsite %>
+	  </div>
+	  <div class="field">
+	    <%= f.label :sample %><br />
+	    <%= f.text_field :sample %>
+	  </div>
+	  <div>
+		Sample Title (raw): <strong><%= crack_sample %></strong><br> 
+		Sample Title (editted): <strong><%= trimmed_sample %></strong><br>
+	  </div>
+	  <div class="field">
+	    <%= f.label "RegExp to cut out of title" %><br />
+	    <%= f.text_field :ttlcut %>
+	  </div>
+	  <div class="field">
+	    <%= f.label "RegExp of replacement" %><br />
+	    <%= f.text_field :ttlrepl %>
+	  </div>
+	  <div class="actions">
+	    <%= f.submit %>
+	  </div>
+	  <div class="field">
+	    <%= f.label :tags %><br />
+	    <%= f.text_area :tags_serialized, :rows=>"20" %>
 	  </div>
 	<% end %>
-  <div class="field">
-    <%= f.label :site %><br />
-    <%= f.text_field :site %>
-  </div>
-  <div class="field">
-    <%= f.label :home %><br />
-    <%= f.text_field :home %>
-  </div>
-  <div class="field">
-    <%= f.label :subsite %><br />
-    <%= f.text_field :subsite %>
-  </div>
-  <div class="field">
-    <%= f.label :sample %><br />
-    <%= f.text_field :sample %>
-  </div>
-  <div>
-	Sample Title (raw): <strong><%= crack_sample %></strong><br> 
-	Sample Title (editted): <strong><%= trimmed_sample %></strong><br>
-  </div>
-  <div class="field">
-    <%= f.label "RegExp to cut out of title" %><br />
-    <%= f.text_field :ttlcut %>
-  </div>
-  <div class="field">
-    <%= f.label "RegExp of replacement" %><br />
-    <%= f.text_field :ttlrepl %>
-  </div>
-  <div class="actions">
-    <%= f.submit %>
-  </div>
-  <div class="field">
-    <%= f.label :tags %><br />
-    <%= f.text_area :tags_serialized, :rows=>"20" %>
-  </div>
-<% end %>
+</div>

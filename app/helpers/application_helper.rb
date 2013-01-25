@@ -45,10 +45,6 @@ module ApplicationHelper
   def recipe_popup( rcp )
       link_to image_tag("preview.png", title:"Show the recipe in a popup window", class: "preview_button"), rcp.url, target: "_blank", class: "popup", id: "popup#{rcp.id.to_s}"        
   end
-  
-  def recipe_fit_pic(recipe, placeholder_image="MissingPicture.png", selector=nil)
-    page_fitPic recipe.thumburl, recipe.id, placeholder_image, selector
-  end
 
   # Declare an image within an adjustable box. The images are downloaded by
   # the browser and their dimensions adjusted under Javascript by the fitImageOnLoad() function.
@@ -86,18 +82,48 @@ module ApplicationHelper
 #  def pic_picker picurl, pageurl, id
 #    pic_picker_shell (pic_picker_contents picurl, pageurl, id)
 #  end
+
+  # Show an image that will resize to fit an enclosing div, possibly with a link to an editing dialog
+  # We'll need the id of the object, and the name of the field containing the picture's url
+  def pic_field(obj, attribute, form, editable = true)
+    picurl = obj.send(attribute)
+    preview = content_tag(
+      :div, 
+      page_fitPic(picurl, obj.id, "PickPicture.png", "div.recipe_pic_preview img")+
+                form.text_field(attribute, rel: "jpg,png,gif", hidden: true),
+      class: "recipe_pic_preview"
+    )
+    picker = editable ?
+      content_tag(:div,
+            link_to( "Pick Picture", "/", :data=>"recipe_picurl;div.recipe_pic_preview img", :class => "pic_picker_golink")+
+            pic_picker_shell(obj), # pic_picker(obj.picurl, obj.url, obj.id), 
+            :class=>"recipe_pic_picker"
+            ) # Declare the picture-picking dialog
+    : ""
+    content_tag :div, preview + picker, class: "edit_recipe_field pic"
+  end
   
-  # Declare the (empty) contents of the pic_picker dialog, embedding a url for later requesting the actual dialog data
-  def pic_picker_shell contents=""
+  # Declare the (empty) contents of the pic_picker dialog, embedding a url for the client to request the actual dialog data
+  def pic_picker_shell obj, contents=""
+    controller = params[:controller]
     content_tag :div, 
       contents, 
       class: "pic_picker",
       style: "display:none;",
-      "data-url" => @recipe ? "/recipes/#{@recipe.id}/edit?pic_picker=true" : ""
+      "data-url" => "/#{controller}/#{obj.id}/edit?pic_picker=true"
   end
   
   # Build a picture-selection dialog with the default url, url for a page containing candidate images, id, and name of input field to set
-  def pic_picker_contents picurl, pageurl, id
+  def pic_picker_contents
+    if @recipe
+      picurl = @recipe.picurl
+      pageurl = @recipe.url
+      id = @recipe.id
+    else 
+      picurl = @site.logo
+      pageurl = @site.home+@site.sample
+      id = @site.id
+    end
     piclist = Site.piclist pageurl
     pictab = []
     # divide piclist into rows of four pics apiece

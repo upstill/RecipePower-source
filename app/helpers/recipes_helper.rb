@@ -25,25 +25,6 @@ def edit_recipe_link( label, recipe, *options)
   end
 end
 
-# Show a thumbnail of a recipe's image, possibly with a link to an editing dialog
-def recipe_pic_field(rcp, form, editable = true)
-  picurl = @recipe.picurl
-  preview = content_tag(
-    :div, 
-    recipe_fit_pic(@recipe, "PickPicture.png", "div.recipe_pic_preview img")+
-              form.text_field(:picurl, rel: "jpg,png,gif", hidden: true),
-    class: "recipe_pic_preview"
-  )
-  picker = editable ?
-    content_tag(:div,
-          link_to( "Pick Picture", "/", :data=>"recipe_picurl;div.recipe_pic_preview img", :class => "pic_picker_golink")+
-          pic_picker_shell(), # pic_picker(@recipe.picurl, @recipe.url, @recipe.id), 
-          :class=>"recipe_pic_picker"
-          ) # Declare the picture-picking dialog
-  : ""
-  content_tag :div, preview + picker, class: "edit_recipe_field pic"
-end
-
 # If the recipe doesn't belong to the current user's collection,
 #   provide a link to add it
 def ownership_status(rcp)
