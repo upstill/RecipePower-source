@@ -1,7 +1,9 @@
 RP::Application.routes.draw do
 
-  resources :thumbnails
+  resources :feeds
 
+
+  resources :thumbnails
 
   match 'collection', :controller=>'collection', :action=>'index'
   

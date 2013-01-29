@@ -1,0 +1,25 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Url:</b>
+  <%= @feed.url %>
+</p>
+
+<p>
+  <b>Type:</b>
+  <%= @feed.feedtypename %>
+</p>
+
+<p>
+  <%= (@feed.approved ? "Approved" : "Not Approved")+" for Feedthrough" %>
+</p>
+
+<p>
+  <b>Description:</b>
+  <%= @feed.description %>
+</p>
+
+<%= link_to 'Edit', edit_feed_path(@feed) %> |
+<%= link_to 'Back', feeds_path %>
+
+<%= feedlist %>

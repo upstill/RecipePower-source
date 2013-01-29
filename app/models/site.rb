@@ -1,5 +1,6 @@
+# encoding: UTF-8
 require 'yaml'
-# require 'uri'
+require 'uri'
 require 'open-uri'
 require 'nokogiri'
 
@@ -11,7 +12,8 @@ class String
   end
   
   def cleanup
-    self.strip.force_encoding('ASCII-8BIT').gsub(/[\xa0\s]+/, ' ').remove_non_ascii.encode('UTF-8').gsub(/ ,/, ',') unless self.nil?
+    # self.strip.force_encoding('ASCII-8BIT').gsub(/[\xa0\s]+/, ' ').remove_non_ascii.encode('UTF-8').gsub(/ ,/, ',') unless self.nil?
+    self.strip.force_encoding('ASCII-8BIT').remove_non_ascii.encode('UTF-8').gsub(/ ,/, ',') unless self.nil?
   end
 end
 
@@ -157,6 +159,8 @@ class Site < ActiveRecord::Base
     attr_accessible :site, :home, :scheme, :subsite, :sample, :host, :name, :oldname, :port, :logo, :tags_serialized, :ttlcut, :ttlrepl
     
     belongs_to :referent
+    
+    has_many :feeds
     
     # Virtual attribute tags is an array of specifications for finding a tag
     attr_accessor :tags
@@ -325,6 +329,81 @@ class Site < ActiveRecord::Base
       end
     end
     
+    # Scour the set of sites for feeds. Summarize the found sets.
+    def self.feedlist(n = -1)
+      count = skunked = added = feedcount = 0
+      rejects = []
+      Site.all.each { |site|
+        count = count+1
+        next if site.feeds.count > 0
+        added = added - site.feeds.count
+        rejects = rejects + site.feedlist
+        added = added + site.feeds.count
+        if site.feeds.count == 0
+          skunked = skunked+1 
+        else
+          feedcount = feedcount + site.feeds.count
+        end
+        n=n-1
+        break if n==0
+      }
+      puts count.to_s+" sites examined"
+      puts (count-skunked).to_s+" sites with at least one feed"
+      puts feedcount.to_s+" nominal feeds captured"
+      puts added.to_s+" feeds added this go-round"
+      puts "Rejected #{rejects.count.to_s} potential feeds:"
+      puts "\t"+rejects.join("\n\t")
+    end
+    
+    # Examine the sample page of a site (or a given other page) for RSS feeds
+    def feedlist(page_url=nil)
+      rejects = []
+      ((page_url && [page_url]) || [sampleURL, home]).each do |page_url|
+        begin 
+          return [] unless (ou = open page_url) && (doc = Nokogiri::HTML(ou))
+        rescue Exception => e
+          return []
+        end
+        puts "URL: "+page_url
+        candidates = {}
+        # We find the following elements:
+        # <a> elements where the link text OR the title attribute OR the href attribute includes 'RSS', 'rss', 'feedburner' or 'feedblitz'
+        # <link> tags with type="application/rss+xml": title and href attributes
+        
+        doc.css("a").each { |link| 
+          content = link.inner_html.encode("UTF-8")
+          href = link.attributes["href"].to_s
+          next if href == "#"
+          if content.include?("RSS") || content.include?("rss") || href.match(/rss|feedburner|feedblitz/i)           
+            candidates[href] = content
+          end
+        }
+        doc.css("link").each { |link|
+          href = link.attributes["href"].to_s
+          next if href == "#"
+          if link.attributes["type"].to_s =~ /^application\/rss/i
+            candidates[href] = link.attributes["title"].to_s
+          end
+        }
+        candidates.keys.each do |href| 
+          content = candidates[href].truncate(250)
+          begin
+            url = URI.join( page_url, href).to_s
+          rescue Exception => e
+            url = nil
+          end 
+          unless url.blank? || Feed.where(url: url).first || !(feed = Feed.new( url: url, description: content))
+            if feed.validate
+              self.feeds << feed 
+            else
+              rejects << feed.url
+            end
+          end
+        end
+      end
+      rejects
+    end
+    
      # Return a list of image URLs for a given page
     def self.piclist(url)
       begin 
@@ -340,17 +419,11 @@ class Site < ActiveRecord::Base
       }.uniq.keep_if { |url| # Purge duplicates
         url =~ /\.(gif|tif|tiff|png|jpg|jpeg|img)$/i # Accept only image tags
       }.map{ |path| 
-        # This could be a path relative to the home url
         begin
-          uri = URI.link(path)
-        rescue
-          begin
-            uri = URI.join( url, path) 
-          rescue
-            nil
-          end 
-        end
-        uri && uri.to_s # Fix up relative paths to be absolute by prepending site URL
+          (uri = URI.join( url, path)) && uri.to_s 
+        rescue Exception => e
+          nil
+        end 
       }.compact
     end
     

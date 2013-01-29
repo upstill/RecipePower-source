@@ -82,7 +82,7 @@ class Recipe < ActiveRecord::Base
       # Sanitize the URL
       params[:url].strip!
       params[:url].gsub!(/\{/, '%7B')
-      params[:url].gsub!(/\}/, '%7D')      
+      params[:url].gsub!(/\}/, '%7D') 
       rcp = Recipe.new params
       # Find the site for this url
       if (url = params[:url]) && (site = Site.by_link(url))

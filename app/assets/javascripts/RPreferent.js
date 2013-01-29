@@ -33,7 +33,7 @@ $(function() {
 		allowFreeTagging: true // allowCustomEntry: true
 	});
 	
-	$("#referent_channel_tag").tokenInput("/tags/match.json?tagtype=0", {
+	$("#referent_channel_tag").tokenInput("/tags/match.json?tagtypes=1,2,3,4,6,7,8,12,14", {
 		crossDomain: false,
 		noResultsText: "No matching tag found; hit Enter to make it a tag",
 		hintText: "Type a tag that will name the channel",
@@ -48,16 +48,16 @@ $(function() {
 
 function dependentSwitch() {
 	if($("#referent_dependent")[0].checked) { // "Channel for existing tag" checked
-		$("#referent_channel_tag").tokenInput("revise", "/tags/match.json?tagtypes=1,2,3,4,6,7,8,12,14", {
+		$("#referent_channel_tag").tokenInput( "setOptions", {
 			noResultsText: "No existing tag found to use as channel",
 			hintText: "Type an existing tag for the channel to track",
 			allowFreeTagging: false // allowCustomEntry: false
 		});
 	} else {
-		$("#referent_channel_tag").tokenInput("revise", "/tags/match.json?tagtype=0", {
-			noResultsText: "No matching tag found; hit Enter to make a new tag",
+		$("#referent_channel_tag").tokenInput( "/tags/match.json?tagtype=0", {
+			noResultsText: "Hit Enter to make a channel with a new name",
 			hintText: "Type a tag naming the channel",
-			allowFreeTagging: false // allowCustomEntry: true
+			allowFreeTagging: true // allowCustomEntry: true
 		});
 	}
 }
