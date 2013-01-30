@@ -1,4 +1,12 @@
 class FeedsController < ApplicationController
+  
+  def approve
+    @feed = Feed.find(params[:id])
+    @feed.approved = params[:approve] == 'Y'
+    @feed.save
+    redirect_to feeds_path, :notice => 'Feedthrough '+(@feed.approved ? "Approved" : "Blocked")
+  end
+  
   # GET /feeds
   # GET /feeds.json
   def index

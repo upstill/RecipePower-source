@@ -27,6 +27,7 @@ gem 'sass-rails', " ~> 3.2.3"
 gem 'bootstrap-sass', '2.2.2'
 gem 'ruby_parser'
 gem "rmagick", "2.12.0", :require => 'RMagick'
+gem "feedzirra"
 
 # gem 'exception_notification', :require => 'exception_notifier'
 gem 'exception_notification', :require => 'exception_notifier', git: 'git://github.com/alanjds/exception_notification.git' 

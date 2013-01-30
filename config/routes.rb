@@ -1,7 +1,7 @@
 RP::Application.routes.draw do
 
+  match 'feeds/:id/approve', :controller=>'feeds', :action=>'approve'
   resources :feeds
-
 
   resources :thumbnails
 

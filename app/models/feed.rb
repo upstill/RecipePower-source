@@ -1,52 +1,59 @@
-require 'rss'
-require 'open-uri'
+require 'feedzirra'
 
 class Feed < ActiveRecord::Base
   attr_accessible :description, :site_id, :feedtype, :approved, :url
   
   belongs_to :site
   
-  def validate
-    valid = true
+  def self.fetch(url)
     begin
-      open(url) do |rss|
-        feed = RSS::Parser.parse(rss)
-        self.description = feed.channel.title
-        valid = save
-      end
+      feed = Feedzirra::Feed.fetch_and_parse(url)
     rescue Exception => e
-      valid = false
     end
-    valid
+    feed
+  end
+  
+  def validate
+    if feed = Feed.fetch(url)
+      self.description = feed.title unless feed.title.blank?
+      self.url = feed.feed_url unless feed.feed_url.blank?
+    end
+    feed != nil
   end
   
   def items
-    @items = []
-    open(url) do |rss|
-      feed = RSS::Parser.parse(rss)
-      @items = feed.items
+    unless @items
+      @items = []
+      feed = Feedzirra::Feed.fetch_and_parse(url)
+      @items = feed.entries
     end
     @items
   end
-  
-  def show
-    items.each do |item|
-      puts "Item: <a href='#{item.link}'>#{item.title}</a>"
-      puts "Published on: #{item.date}"
-      puts "#{item.description}"
-      debugger
-    end
+
 =begin
-    open(url) do |rss|
-      feed = RSS::Parser.parse(rss)
-      puts "Title: #{feed.channel.title}"
-      feed.items.each do |item|
-        puts "Item: <a href='#{item.link}'>#{item.title}</a>"
-        puts "Published on: #{item.date}"
-        puts "#{item.description}"
-        debugger
-      end
+  # feed and entries accessors
+  feed.title          # => "Paul Dix Explains Nothing"
+  feed.url            # => "http://www.pauldix.net"
+  feed.feed_url       # => "http://feeds.feedburner.com/PaulDixExplainsNothing"
+  feed.etag           # => "GunxqnEP4NeYhrqq9TyVKTuDnh0"
+  feed.last_modified  # => Sat Jan 31 17:58:16 -0500 2009 # it's a Time object
+
+  entry = feed.entries.first
+  entry.title      # => "Ruby Http Client Library Performance"
+  entry.url        # => "http://www.pauldix.net/2009/01/ruby-http-client-library-performance.html"
+  entry.author     # => "Paul Dix"
+  entry.summary    # => "..."
+  entry.content    # => "..."
+  entry.published  # => Thu Jan 29 17:00:19 UTC 2009 # it's a Time object
+  entry.categories # => ["...", "..."]
 =end
+
+  def show
+    items.each do |entry|
+      puts "Item: <a href='#{entry.url}'>#{entry.title}</a>"
+      puts "Published on: #{entry.published}"
+      puts "#{entry.summary}"
+    end
     nil
   end
   

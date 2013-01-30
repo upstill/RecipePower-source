@@ -4,7 +4,7 @@
   <tr>
     <th>Description</th>
     <th>Type</th>
-    <th>Approval</th>
+    <th>Approved</th>
     <th>Url</th>
     <th></th>
     <th></th>
@@ -15,8 +15,8 @@
   <tr>
     <td><%= feed.description %></td>
     <td><%= feed.feedtypename %></td>
-    <td><%= feed.approved ? "Approved" : "" %></td>
-    <td><%= feed.url.truncate(100) %></td>
+    <td><%= feed.approved ? "Y" : (feed.approved.nil? ? "" : "N") %></td>
+    <td><%= link_to feed.url.truncate(50), feed.url %></td>
     <td><%= link_to 'Show', feed %></td>
     <td><%= link_to 'Edit', edit_feed_path(feed) %></td>
     <td><%= link_to 'Destroy', feed, method: :delete, data: { confirm: 'Are you sure?' } %></td>

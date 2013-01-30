@@ -14,6 +14,9 @@
   <%= (@feed.approved ? "Approved" : "Not Approved")+" for Feedthrough" %>
 </p>
 
+  <%= button_to "Approve feedthrough", "#{@feed.id}/approve?approve=Y"  %>
+  <%= button_to "Block feedthrough", "#{@feed.id}/approve?approve=N"  %>
+
 <p>
   <b>Description:</b>
   <%= @feed.description %>

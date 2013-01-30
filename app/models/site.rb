@@ -396,7 +396,7 @@ class Site < ActiveRecord::Base
             if feed.validate
               self.feeds << feed 
             else
-              rejects << feed.url
+              rejects << "#{feed.url} (from #{page_url})"
             end
           end
         end
