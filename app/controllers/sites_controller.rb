@@ -100,10 +100,10 @@ class SitesController < ApplicationController
   def scrape
     url = params[:url]
     if @site = Site.by_link(url)
-      ocount = @site.feeds.count
+      ocount = @site.feeds.size
       debugger
       @site.feedlist url
-      if @site.feeds.count > ocount
+      if @site.feeds.size > ocount
         @site.save
         render action: :show, notice: "Observe feeds for the site below"
       else

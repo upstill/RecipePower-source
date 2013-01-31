@@ -11,6 +11,11 @@
 </p>
 
 <p>
+  <b>From Site:</b>
+  <%= link_to @feed.site.name, site_path(@feed.site) %>
+</p>
+
+<p>
   <%= (@feed.approved ? "Approved" : "Not Approved")+" for Feedthrough" %>
 </p>
 

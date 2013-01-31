@@ -1,11 +1,12 @@
 <h3>Listing feeds</h3>
 
-<table>
+<table class="feeds">
   <tr>
-    <th>Description</th>
+    <th class="description">Description</th>
     <th>Type</th>
     <th>Approved</th>
-    <th>Url</th>
+    <th>Site</th>
+    <th class="url">Url</th>
     <th></th>
     <th></th>
     <th></th>
@@ -13,10 +14,11 @@
 
 <% @feeds.each do |feed| %>
   <tr>
-    <td><%= feed.description %></td>
+    <td class="description"><%= feed.description %></td>
     <td><%= feed.feedtypename %></td>
     <td><%= feed.approved ? "Y" : (feed.approved.nil? ? "" : "N") %></td>
-    <td><%= link_to feed.url.truncate(50), feed.url %></td>
+    <td><%= link_to feed.site.name, site_path(feed.site) %></td>
+    <td class="url"><%= link_to feed.url.truncate(40), feed.url %></td>
     <td><%= link_to 'Show', feed %></td>
     <td><%= link_to 'Edit', edit_feed_path(feed) %></td>
     <td><%= link_to 'Destroy', feed, method: :delete, data: { confirm: 'Are you sure?' } %></td>

@@ -14,6 +14,7 @@
 		<b>Name</b>: <%= site.name %><br>
 		<b><%= show_sample site %></b><br>
 		<b>Logo</b>: <%= site.logo %><br>
+		<b># Feeds:</b> <%= site.feeds.size %> (<%= site.feeds.where(approved: true).count %> approved for feedthrough)
 	</td>
 	<td><%= link_to 'Show', site %><br>
 		<%= link_to 'Edit', edit_site_path(site) %><br>
