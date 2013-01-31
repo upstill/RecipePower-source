@@ -43,6 +43,7 @@ RP::Application.routes.draw do
 
   devise_for :users, :controllers => {:invitations => 'invitations', :registrations => 'registrations'}
 
+  match '/site/scrape' => 'sites#scrape'
   resources :sites
 
   resources :expressions

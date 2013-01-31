@@ -8,7 +8,9 @@ class Feed < ActiveRecord::Base
   def self.fetch(url)
     begin
       feed = Feedzirra::Feed.fetch_and_parse(url)
+      feed = nil if feed.class == Fixnum
     rescue Exception => e
+      feed = nil
     end
     feed
   end
@@ -19,6 +21,23 @@ class Feed < ActiveRecord::Base
       self.url = feed.feed_url unless feed.feed_url.blank?
     end
     feed != nil
+  end
+  
+  def self.evaluate
+    prevurl = ""
+    feedcount = 0
+    File.open("/Users/upstill/dev/rss_rejects3.txt", "w") do |outfile|
+      File.open("/Users/upstill/dev/rss_rejects2.txt").each do |line|
+        fields = line.split(' ')
+        feedurl = fields[0]
+        pageurl = fields[2].sub(/\)$/, '')
+        if(pageurl != prevurl)
+          feedcount = (site = Site.by_link pageurl) ? site.feeds.count : 0
+          prevurl = pageurl
+        end
+        outfile.puts line unless feedcount > 0
+      end
+    end
   end
   
   def items

@@ -190,7 +190,7 @@ class Site < ActiveRecord::Base
       if referent
         referent.express(str, :tagtype => :Source)
       else
-        self.referent = Referent.express(str, :tagtype => :Source)
+        self.referent = Referent.express(str, :Source)
       end
     end      
     
@@ -330,7 +330,7 @@ class Site < ActiveRecord::Base
     end
     
     # Scour the set of sites for feeds. Summarize the found sets.
-    def self.feedlist(n = -1)
+    def self.scrapefeeds(n = -1)
       count = skunked = added = feedcount = 0
       rejects = []
       Site.all.each { |site|
@@ -353,6 +353,13 @@ class Site < ActiveRecord::Base
       puts added.to_s+" feeds added this go-round"
       puts "Rejected #{rejects.count.to_s} potential feeds:"
       puts "\t"+rejects.join("\n\t")
+    end
+    
+    # Check the page given for feeds
+    def self.feedlist(url)
+      if site = self.by_link(url)
+        site.feedlist url
+      end
     end
     
     # Examine the sample page of a site (or a given other page) for RSS feeds
@@ -388,11 +395,12 @@ class Site < ActiveRecord::Base
         candidates.keys.each do |href| 
           content = candidates[href].truncate(250)
           begin
-            url = URI.join( page_url, href).to_s
+            # For some strange reason we've seen feed URLs starting with 'feed:http:'
+            url = URI.join( page_url, href).to_s.sub(/feed:http:/, "http:")
           rescue Exception => e
             url = nil
           end 
-          unless url.blank? || Feed.where(url: url).first || !(feed = Feed.new( url: url, description: content))
+          unless url.blank? || Feed.exists?(url: url) || !(feed = Feed.new( url: url, description: content))
             if feed.validate
               self.feeds << feed 
             else

@@ -1,0 +1,9 @@
+<%= form_tag({controller: "sites", action: "scrape"}) do %>
+  <div class="field">
+    <%= label_tag "URL of page to scrape" %><br />
+    <%= text_field_tag :url, "", size: 200 %>
+  </div>
+  <div class="actions">
+		<%= submit_tag 'Scrape' %>
+  </div>
+<% end %>

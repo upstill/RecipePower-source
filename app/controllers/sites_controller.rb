@@ -96,4 +96,21 @@ class SitesController < ApplicationController
       format.json { head :ok }
     end
   end
+  
+  def scrape
+    url = params[:url]
+    if @site = Site.by_link(url)
+      ocount = @site.feeds.count
+      debugger
+      @site.feedlist url
+      if @site.feeds.count > ocount
+        @site.save
+        render action: :show, notice: "Observe feeds for the site below"
+      else
+        redirect_to "/feeds/new", notice: "No feeds found in page. Try copy-and-paste-ing RSS URLs individually."
+      end
+    else
+      redirect_to "/feeds/new", notice: "Couldn't make sense of URL"
+    end
+  end
 end
