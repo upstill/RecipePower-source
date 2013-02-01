@@ -148,8 +148,12 @@ class RcpBrowserElement
   def html(do_show)
     displaystyle = "display: "+(do_show ? "block" : "none" )+";"
     %Q{<li class="#{css_class}" id="#{css_id}" style="#{displaystyle}">
-         <a href="#">#{handle}</a>
+         <a href="#">#{handle}</a>#{add_button}
        </li>}.html_safe
+  end
+  
+  def add_button
+    ""
   end
   
 end
@@ -302,6 +306,10 @@ class RcpBrowserCompositeBlogs < RcpBrowserComposite
   def initialize(level, args)
     super
     @handle = "My Blogs"
+  end
+  
+  def add_button
+  	%Q{<a href="#" class="addlink" onclick="recipePowerGetAndRunJSON('/feeds/new', 'modal', 'floating' );">+</a>}
   end
   
 end

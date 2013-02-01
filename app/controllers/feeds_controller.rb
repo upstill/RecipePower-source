@@ -1,3 +1,5 @@
+require './lib/controller_utils.rb'
+
 class FeedsController < ApplicationController
   
   def approve
@@ -33,11 +35,9 @@ class FeedsController < ApplicationController
   # GET /feeds/new.json
   def new
     @feed = Feed.new
-
-    respond_to do |format|
-      format.html # new.html.erb
-      format.json { render json: @feed }
-    end
+    @Title = "Subscribe to a Feed"
+    @area = params[:area]
+    dialog_boilerplate 'new', 'modal'
   end
 
   # GET /feeds/1/edit
@@ -48,11 +48,14 @@ class FeedsController < ApplicationController
   # POST /feeds
   # POST /feeds.json
   def create
-    @feed = Feed.new(params[:feed])
-
+    @feed = Feed.new params[:feed]
+    @feed.approved = true
+    @feed.users << current_user_or_guest
+    debugger
+    # XXX Should be setting browser to show the new feed
     respond_to do |format|
       if @feed.save
-        format.html { redirect_to @feed, notice: 'Feed was successfully created.' }
+        format.html { redirect_to collection_path, :notice => "Now feeding you with '#{@feed.description}'" }
         format.json { render json: @feed, status: :created, location: @feed }
       else
         format.html { render action: "new" }

@@ -1,0 +1,22 @@
+
+// Formerly newRecipe
+div.new_feed.dialog {
+	width: 650px;
+	height: auto;
+	form {
+		width: 95%;
+		margin: 10px;
+		div.feed_url_div {
+			margin-top:15px;
+			margin-bottom:15px;
+			width:95%;
+			// outline:#999 solid 1px
+			label {
+				width: 100%;
+			}
+			input {
+				width: 100%;
+			}
+		}
+	}
+}

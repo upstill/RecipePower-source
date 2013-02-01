@@ -1,0 +1,11 @@
+<%# Fields for a new-feed dialog %>
+<%= dialogHeader :new_feed, "Add a Feed", @area %>
+<%= show_errors @feed.errors %>
+<%= form_for @feed, html: { class: "new_feed json" } do |f| %>
+	<div class="feed_url_div">
+		<%= f.label :url, "Paste URL here and click 'Add Feed' or hit Enter/Return", :class=>"feed_field_label" %>
+		<%= f.text_field :url %><br>
+	</div>
+	<%= f.submit :value=>"Add Feed" %>
+<% end %>
+<%= dialogFooter %>

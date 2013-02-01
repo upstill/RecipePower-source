@@ -24,6 +24,8 @@ class User < ActiveRecord::Base
   # Channels are just another kind of user. This field (channel_referent_id, externally) denotes such.
   belongs_to :channel, :class_name => "ChannelReferent"
   
+  has_and_belongs_to_many :feeds
+  
   # login is a virtual attribute placeholding for [username or email]
   attr_accessor :login
   

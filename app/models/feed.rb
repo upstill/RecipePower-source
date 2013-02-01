@@ -3,24 +3,39 @@ require 'feedzirra'
 class Feed < ActiveRecord::Base
   attr_accessible :description, :site_id, :feedtype, :approved, :url
   
-  belongs_to :site
+  # Ensure a feed has an associated site (meanwhile confirming that its feed is valid)
+  before_validation :ensure_site
   
-  def self.fetch(url)
-    begin
-      feed = Feedzirra::Feed.fetch_and_parse(url)
-      feed = nil if feed.class == Fixnum
-    rescue Exception => e
-      feed = nil
+  # Before validating the record, get the site from the URL
+  def ensure_site
+    if(fetch && (entry = @fetched.entries.first))
+      self.site = Site.by_link entry.url
+    else
+      self.errors.add (@fetched ? "Feed has no entries" : "Bad url for feed: "+url)
     end
-    feed
   end
   
-  def validate
-    if feed = Feed.fetch(url)
-      self.description = feed.title unless feed.title.blank?
-      self.url = feed.feed_url unless feed.feed_url.blank?
+  belongs_to :site
+  validates :site, :presence => true
+  
+  has_and_belongs_to_many :users
+  
+  # Get the external feed, setting the @fetched instance variable to point thereto
+  def fetch
+    return @fetched if @fetched
+    begin
+      @fetched = Feedzirra::Feed.fetch_and_parse(url)
+      if @fetched.class == Fixnum
+        self.errors << url+" is not the URL of a feed"
+        @fetched = nil 
+      else
+        self.description = @fetched.title unless @fetched.title.blank?
+        self.url = @fetched.feed_url unless @fetched.feed_url.blank?
+      end
+    rescue Exception => e
+      @fetched = nil
     end
-    feed != nil
+    @fetched
   end
   
   def self.evaluate
@@ -74,6 +89,18 @@ class Feed < ActiveRecord::Base
       puts "#{entry.summary}"
     end
     nil
+  end
+  
+  # Ensure that there is a feed for the given url
+  def self.ensure url
+    unless !url.blank? && feed = Feed.first(url: url)
+      feed = Feed.new(url: url)
+      debugger
+      unless url.blank?
+        feed.save
+      end
+    end
+    feed
   end
   
   @@feedtypes = [
