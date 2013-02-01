@@ -1,9 +1,10 @@
 <%# if permitted_to? :update, @recipe %>
   <span class="<%= recipe_list_element_golink_class @recipe %>"> 
     <% if (@recipe.current_user != User.guest_id) && @recipe.cookmarked(@recipe.current_user) %>
-	  	<%= edit_recipe_link "Edit", @recipe, class: "btn btn-mini" %>
+	  	<%# edit_recipe_link "Edit", @recipe, class: "btn btn-mini" %>
+	  	<a href="#" class="btn btn-mini" data-toggle="modal" data-target="#editRecipe">Edit</a>
  	<% else %>
-	 	  <%= link_to_dialog "Add", collect_recipe_path(@recipe), "modal", "floating", class: "btn btn-mini" %>
+	 	<%= link_to_dialog "Add", collect_recipe_path(@recipe), "modal", "floating", class: "btn btn-mini" %>
 	 <% end %>
   </span>
 <%# end %>

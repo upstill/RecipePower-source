@@ -26,6 +26,7 @@
 		</script>
   </head>
   <body>
+  	<%= dialogDiv :edit_recipe, "Tag That Recipe!", "at_left", recipe_editor() %>
     <%= render 'layouts/frame_top' %>
     <div class="container">
 	    <div class="row">
@@ -44,6 +45,7 @@
 			</div>
 		</div>
 	</div> <!--! end of .container -->
-	</div class="modal"></div>
+	<!-- </div class="modal"></div> -->
+	<%= render 'recipes/dialog_edit_recipe' %>
 	</body>
 </html>
