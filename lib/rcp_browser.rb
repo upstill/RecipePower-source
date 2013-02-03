@@ -3,7 +3,7 @@ require 'my_constants.rb'
 require "candihash.rb"
 include ActionView::Helpers::DateHelper
 
-class RcpBrowserElement
+class BrowserElement
   attr_accessor :npages, :cur_page, :nodeid
   attr_reader :handle, :level
   @@nextid = 1  
@@ -47,7 +47,7 @@ class RcpBrowserElement
   
   # ID for uniquely selecting the element
   def css_id
-    "RcpBrowserElement"+@nodeid.to_s
+    "ContentBrowserElement"+@nodeid.to_s
   end
   
   # The sources are a user, a list of users, or nil (for the master global list)
@@ -107,7 +107,7 @@ class RcpBrowserElement
   end
   
   # Return a list of results based on the query tags and the paging parameters
-  def results_paged(tagset)
+  def results_paged tagset
     npg = npages tagset
     ids = result_ids tagset
     maxlast = ids.count-1 
@@ -123,7 +123,11 @@ class RcpBrowserElement
       last = first+@@page_length-1
       last = maxlast if last > maxlast
     end
-    ids[first..last].collect { |rid| Recipe.where( id: rid ).first }.compact
+    convert_ids ids[first...last]
+  end
+  
+  def convert_ids list
+    list.collect { |rid| Recipe.where( id: rid ).first }.compact
   end
   
   def select
@@ -148,7 +152,7 @@ class RcpBrowserElement
   def html(do_show)
     displaystyle = "display: "+(do_show ? "block" : "none" )+";"
     %Q{<li class="#{css_class}" id="#{css_id}" style="#{displaystyle}">
-         <a href="#">#{handle}</a>#{add_button}
+         <a href="#">#{handle}</a>
        </li>}.html_safe
   end
   
@@ -158,8 +162,11 @@ class RcpBrowserElement
   
 end
 
+class RcpBrowserElement < BrowserElement
+end
+
 # Class of composites, collections of browser elements
-class RcpBrowserComposite < RcpBrowserElement
+class BrowserComposite < BrowserElement
   attr_accessor :children
   
   # Save instance variables plus chidren
@@ -199,8 +206,69 @@ class RcpBrowserComposite < RcpBrowserElement
   
 end
 
+class RcpBrowserComposite < BrowserComposite
+end
+
 # Element for all the recipes for a user (no children)
-class RcpBrowserElementFriend < RcpBrowserElement
+class FeedBrowserElement < BrowserElement
+  
+  def initialize(level, args)
+    @persisters = (@persisters || []) << :feedid
+    super
+    @feedid = args[:feedid]
+    @handle = Feed.find(@feedid).description
+  end
+  
+  def sources
+    @feedid
+  end
+  
+  # IDs of feed entries consistent with the tag set
+  def result_ids tagset 
+    Feed.find(@feedid).entry_ids
+  end
+
+  def convert_ids list
+    list.collect { |id| FeedEntry.where( id: id ).first }.compact
+  end
+  
+end
+
+# Element for all the recipes in a user's channels, with subheads for each channel
+class FeedBrowserComposite < BrowserComposite
+  
+  def initialize(level, args)
+    super
+    @handle = "My Feeds"
+    if @children.empty?
+      klass = Module.const_get("User")
+      if klass.is_a?(Class) # If User class is available (i.e., in Rails, as opposed to testing)
+        args.delete :nodeid
+        @children = user.feed_ids.map do |id| 
+          args[:feedid] = id
+          FeedBrowserElement.new level+1, args
+        end
+      end
+    end
+  end
+
+  def add_button
+  	%Q{<a href="#" class="addlink_off" onclick="recipePowerGetAndRunJSON('/feeds/new', 'modal', 'floating' );">+</a>}
+  end
+
+  def convert_ids list
+    list.collect { |id| FeedEntry.where( id: id ).first }.compact
+  end
+  
+  # Collect feed entries from the children
+  def result_ids tagset
+    Feed.entry_ids user.feed_ids
+  end
+  
+end
+
+# Element for all the recipes for a user (no children)
+class RcpBrowserElementFriend < BrowserElement
   
   def initialize(level, args)
     @persisters = (@persisters || []) << :friendid
@@ -300,20 +368,6 @@ class RcpBrowserCompositeChannels < RcpBrowserChannelsAndFriends
   
 end
 
-# Element for all the recipes in a user's channels, with subheads for each channel
-class RcpBrowserCompositeBlogs < RcpBrowserComposite
-  
-  def initialize(level, args)
-    super
-    @handle = "My Blogs"
-  end
-  
-  def add_button
-  	%Q{<a href="#" class="addlink" onclick="recipePowerGetAndRunJSON('/feeds/new', 'modal', 'floating' );">+</a>}
-  end
-  
-end
-
 # Element for recent recipes 
 class RcpBrowserElementRecent < RcpBrowserElement
   
@@ -385,7 +439,7 @@ end
 
 
 # Top-level recipe browser, comprising the standard lists, and adding a tag list
-class RcpBrowser < RcpBrowserComposite
+class ContentBrowser < BrowserComposite
   
   def initialize(userid_or_argshash)
     args = (userid_or_argshash.class.name == "Fixnum") ? { userid: userid_or_argshash } : userid_or_argshash
@@ -399,7 +453,7 @@ class RcpBrowser < RcpBrowserComposite
         RcpBrowserCompositeUser.new(1, userarg),
         RcpBrowserCompositeFriends.new(1, userarg),
         RcpBrowserCompositeChannels.new(1, userarg),
-        RcpBrowserCompositeBlogs.new(1, userarg),
+        FeedBrowserComposite.new(1, userarg),
         RcpBrowserElementAllRecipes.new(1, userarg),
         RcpBrowserElementRecent.new(1, userarg),
         RcpBrowserElementNews.new(1, userarg)
@@ -471,7 +525,7 @@ class RcpBrowser < RcpBrowserComposite
   # Load the whole tree from a YAML string by restoring the structure, then
   # recreating the top-level tree. Handles uninitialized string
   def self.load(str)
-    self.new YAML::load(str)
+    !str.blank? && self.new(YAML::load(str))
   end
   
   def html

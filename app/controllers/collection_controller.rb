@@ -46,7 +46,7 @@ class CollectionController < ApplicationController
       @collection.tagstxt = tagstxt
     end
     if id = params[:selected]
-      @collection.select_by_id(params[:selected].delete("RcpBrowserElement").to_i)
+      @collection.select_by_id(params[:selected].delete("ContentBrowserElement").to_i)
     end
     if page = params[:cur_page]
       @collection.cur_page = page.to_i

@@ -31,6 +31,8 @@
 
  *= require views/rcp_list
  *= require views/sign_in
+ *= require views/new_recipe
+ *= require views/new_feed
  *= require views/welcome
  *= require common/buttons
  *= require common/RPGlobal

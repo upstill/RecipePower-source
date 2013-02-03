@@ -12,7 +12,7 @@ class User < ActiveRecord::Base
   # Setup accessible (or protected) attributes for your model
   attr_accessible :id, :username, :fullname, :about, :login,
                 :email, :password, :password_confirmation, 
-                :recipes, :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens
+                :recipes, :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens, :subscription_tokens
   attr_writer :browser
 
   has_many :follower_relations, :foreign_key=>"followee_id", :dependent=>:destroy, :class_name=>"UserRelation"
@@ -30,7 +30,15 @@ class User < ActiveRecord::Base
   attr_accessor :login
   
   def browser
-    @browser = @browser || (browser_serialized ? RcpBrowser.load(browser_serialized) : RcpBrowser.new(id))
+    return @browser if @browser
+    # Try to get browser from serialized storage in the user record
+    # If something goes awry, we'll just create a new one.
+    begin
+      @browser = ContentBrowser.load(browser_serialized)
+    rescue Exception => e
+      @browser = nil
+    end
+    @browser = @browser || ContentBrowser.new(id)
   end
   
   def serialize_browser
@@ -105,6 +113,15 @@ public
           newlist.push key.to_i if (flist[key] == "1")
       end
       self.followee_ids = newlist
+  end
+  
+  # Presents a hash of IDs with a switch value for whether to include that followee
+  def subscription_tokens=(flist)
+      newlist = []
+      flist.each_key do |key| 
+          newlist.push key.to_i if (flist[key] == "1")
+      end
+      self.feed_ids = newlist
   end
   
   # Is a user a channel, as opposed to a human user?

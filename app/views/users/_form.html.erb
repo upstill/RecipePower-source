@@ -24,6 +24,10 @@
     <h4>My Channels</h4>
 	<%= followees_list f, @user, true %>
   </p>
+  <p>
+    <h4>My Feeds</h4>
+	<%= subscriptions_list f, @user, true %>
+  </p>
 <p>
   <% if permitted_to? :manage, @user %>
 	<%= f.label :role_id,  "Role: ",:id=>"user_role_label" -%>
