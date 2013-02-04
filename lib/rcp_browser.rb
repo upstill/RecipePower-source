@@ -110,20 +110,17 @@ class BrowserElement
   def results_paged tagset
     npg = npages tagset
     ids = result_ids tagset
-    maxlast = ids.count-1 
-    if npg <= 1
-      first = 0
-      last = maxlast
-    else
+    first = 0
+    ixbound = ids.count 
+    if npg > 1
       # Clamp current page to last page
       @cur_page = npg if @cur_page > npg
-  
-      # Now get indices of first and last records on the page
+      # Now get index bounds for the records on the page
       first = (@cur_page-1)*@@page_length
-      last = first+@@page_length-1
-      last = maxlast if last > maxlast
+      last = first+@@page_length
+      ixbound = last if ixbound > last
     end
-    convert_ids ids[first...last]
+    convert_ids ids[first...ixbound]
   end
   
   def convert_ids list
