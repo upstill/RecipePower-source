@@ -5,7 +5,13 @@
 <%# dialogFooter %>
 <div class="nav affix">
 	<ul class="nav nav-tabs nav-stacked">
-		<%= @collection.html %>
+		<% @collection.node_list.each do |node| %>
+	    <li class="<%= node.css_class %>" 
+				  id="<%= node.css_id %>"
+					style="display: <%= node.visible ? "block" : "none" %>;">
+         <a href="#"><%= node.handle %></a>
+      </li>
+		<% end %>
 	</ul>
 		<hr>
 	<div id="footer_nav_links">

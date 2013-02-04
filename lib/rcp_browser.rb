@@ -4,7 +4,7 @@ require "candihash.rb"
 include ActionView::Helpers::DateHelper
 
 class BrowserElement
-  attr_accessor :npages, :cur_page, :nodeid
+  attr_accessor :npages, :cur_page, :nodeid, :visible
   attr_reader :handle, :level
   @@nextid = 1  
   @@page_length = 20
@@ -150,6 +150,12 @@ class BrowserElement
     @selected && self
   end
   
+  # Used to gather a list of all nodes in the tree and tag each for display
+  def node_list do_show=false
+    @visible = do_show
+    [self]
+  end
+  
   # HTML for interpolating into the display
   def html(do_show)
     displaystyle = "display: "+(do_show ? "block" : "none" )+";"
@@ -202,6 +208,11 @@ class BrowserComposite < BrowserElement
       @children.each { |child| break if result = child.selected }
     end
     return result
+  end
+  
+  def node_list do_show=false
+    show_children = selected
+    super(do_show || show_children) + @children.collect { |child| child.node_list show_children }.flatten
   end
 
   # The HTML for the composite is just the HTML for the elements, joined with newlines
@@ -447,7 +458,7 @@ class RcpBrowserElementAllRecipes < RcpBrowserElement
   
   def initialize(level, args)
     super
-    @handle = "RecipePower&nbspCollection"
+    @handle = "RecipePower Collection"
   end
   
   def sources
