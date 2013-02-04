@@ -48,13 +48,13 @@ class FeedsController < ApplicationController
   # POST /feeds
   # POST /feeds.json
   def create
-    @feed = Feed.new params[:feed]
+    @feed = Feed.where(url: params[:feed][:url]).first || Feed.new(params[:feed])
     @feed.approved = true
-    @feed.users << current_user_or_guest
-    debugger
+    @feed.users << current_user_or_guest unless @feed.user_ids.include?(current_user_or_guest_id)
     # XXX Should be setting browser to show the new feed
     respond_to do |format|
-      if @feed.save
+      if @feed.update_attributes(params[:feed])
+        current_user_or_guest.add_feed @feed
         format.html { redirect_to collection_path, :notice => "Now feeding you with '#{@feed.description}'" }
         format.json { render json: @feed, status: :created, location: @feed }
       else

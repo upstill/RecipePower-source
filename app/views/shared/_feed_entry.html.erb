@@ -1,1 +1,18 @@
-<%= show_feed_entry %>
+<%# show_feed_entry %>
+<li class="<%= feed_list_element_class @feed_entry %>">
+	<h5 class="feed_list_element_title"><%= link_to @feed_entry.name, @feed_entry.url %>
+		<% if @recipe = @feed_entry.recipe %>
+		  <% @recipe.current_user = @user_id %>
+		  <%= render "recipes/golink" %>
+		<% else %>
+		  <% @recipe = Recipe.new(url: @feed_entry.url) %>
+			<%= link_to_dialog "Collect", new_recipe_path(@recipe, params: {feed_entry: @feed_entry.id }), "modal", "floating", class: "btn btn-mini" %>
+		<% end %>
+	</h5>
+	<div class="feed_list_element_source">(<%= @feed_entry.feed.description %>)
+		
+	<br>from <%= link_to @feed_entry.feed.site.name, @feed_entry.feed.site.home %></div>
+	<div class="feed_list_element_stats">Published <%= time_ago_in_words @feed_entry.published_at %> ago.</div>
+ <%= @feed_entry.summary.html_safe %>
+<hr>
+</li>

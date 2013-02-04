@@ -41,6 +41,14 @@ class User < ActiveRecord::Base
     @browser = @browser || ContentBrowser.new(id)
   end
   
+  # Bust the browser cache due to selections changing, optionally selecting an object
+  def refresh_browser(obj = nil)
+    browser_serialized = nil
+    @browser = ContentBrowser.new(id)
+    @browser.select_by_content if obj
+    save
+  end
+  
   def serialize_browser
     self.browser_serialized = @browser.dump if @browser
   end
@@ -54,8 +62,15 @@ class User < ActiveRecord::Base
     end
   end
   
+  # Add the feed to the browser's ContentBrowser
+  def add_feed feed
+    @browser = ContentBrowser.new(id)
+    @browser.select_by_content feed
+    save
+  end
+  
   def role
-      self.role_symbols.first.to_s
+    self.role_symbols.first.to_s
   end
   
   # Return the list of recipes owned by the user, optionally including every recipe they've touched. Options:

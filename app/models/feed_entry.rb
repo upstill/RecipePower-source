@@ -1,7 +1,8 @@
 class FeedEntry < ActiveRecord::Base
-  attr_accessible :guid, :name, :published_at, :summary, :url, :feed
+  attr_accessible :guid, :name, :published_at, :summary, :url, :feed, :recipe
   
   belongs_to :feed
+  belongs_to :recipe
   
   def self.update_from_feed(feed)
     feedz = Feedzirra::Feed.fetch_and_parse(feed.url)

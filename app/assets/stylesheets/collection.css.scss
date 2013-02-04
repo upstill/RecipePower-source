@@ -150,6 +150,7 @@ body { padding-top: 60px; }
 	box-flex: 1;
 }
 
+<<<<<<< HEAD
 .modal-footer .form-inline {
 	margin-bottom: 0px;
 }
@@ -159,3 +160,25 @@ body { padding-top: 60px; }
 }
 
 
+=======
+.feed_list_element_title {
+	margin-bottom: 0px;
+	font-size: 1.3em;
+}
+
+.feed_list_element_title > a {
+	// display: block;
+	// overflow: hidden;
+	max-height: 2.8em;
+}
+
+.feed_list_element_source {
+	font-size: 0.9em;
+	color: #999;
+}
+
+.feed_list_element_stats {
+	font-size: 0.8em;
+	color: #999;
+}
+>>>>>>> Adding feeds now smoother

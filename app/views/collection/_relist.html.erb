@@ -1,4 +1,4 @@
-<ul class="thumbnails">
+<ul class="<%= @collection.list_type == :recipe ? "thumbnails" : "feed_entries" %>">
 <% for @element in @collection.results_paged do %>
 	<% case @element %>
 	<% when Recipe %>

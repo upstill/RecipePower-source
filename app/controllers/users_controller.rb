@@ -81,6 +81,7 @@ class UsersController < ApplicationController
   def update
     @user = User.find params[:id]
     if @user.update_attributes(params[:user])
+      @user.refresh_browser # Assuming, perhaps incorrectly, that the browser contents have changed
       @Title = "Cookmarks from Update"
       redirect_to recipes_path, :notice => "Your profile has been updated."
     else

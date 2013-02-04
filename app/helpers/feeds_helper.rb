@@ -1,12 +1,12 @@
 module FeedsHelper
   def feedlist
-    @feed.items.collect { |item|
-      publish_date = item.published ? "Published on: "+item.published.strftime("%B %d, %Y")+"<br />" : ""
+    @feed.entries.collect { |entry|
+      publish_date = entry.published_at ? "Published on: "+entry.published_at.strftime("%B %d, %Y")+"<br />" : ""
       %Q{
-        <p><a href='#{item.url}'>#{item.title}
+        <p><a href='#{entry.url}'>#{entry.name}
        </a><br />
        #{publish_date}
-       #{item.summary}</p><hr>
+       #{entry.summary}</p><hr>
       }
     }.join.html_safe
   end

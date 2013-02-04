@@ -70,10 +70,20 @@ class RecipesController < ApplicationController
     # Here is where we take a hit on the "Add to RecipePower" widget,
     # and also invoke the 'new cookmark' dialog. The difference is whether
     # parameters are supplied for url, title and note (though only URI is required).
+    if params[:feed_entry]
+      # Create the new recipe off the feed entry
+      feed_entry = FeedEntry.find params[:feed_entry].to_i
+      params[:url] = feed_entry.url
+    end
     @recipe = Recipe.ensure current_user_or_guest_id, params.slice(:url) # session[:user_id], params
     if @recipe.id # Mark of a fetched/successfully saved recipe: it has an id
     	# redirect to edit
-    	redirect_to edit_recipe_url(@recipe), :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br>You might want to confirm the title and picture, and/or tag it?".html_safe
+    	if feed_entry
+    	  feed_entry.recipe = @recipe
+    	  feed_entry.save
+  	  end
+      reportRecipe( rcpqueries_path, truncate( @recipe.title, :length => 100)+" now appearing in your collection.", formats)
+    	# redirect_to edit_recipe_url(@recipe), :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br>You might want to confirm the title and picture, and/or tag it?".html_safe
     else
         @Title = "Cookmark a Recipe"
         @nav_current = :addcookmark

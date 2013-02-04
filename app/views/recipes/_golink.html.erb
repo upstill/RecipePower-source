@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <%# if permitted_to? :update, @recipe %>
   <span class="<%= recipe_list_element_golink_class @recipe %>"> 
     <% if (@recipe.current_user != User.guest_id) && @recipe.cookmarked(@recipe.current_user) %>
@@ -8,3 +9,12 @@
 	 <% end %>
   </span>
 <%# end %>
+=======
+<span class="<%= recipe_list_element_golink_class @recipe %>"> 
+	<% if (@recipe.current_user != User.guest_id) && @recipe.cookmarked(@recipe.current_user) %>
+		<%= edit_recipe_link (@feed_entry ? "Tag" : "Edit"), @recipe, class: "btn btn-mini" %>
+	<% else %>
+		<%= link_to_dialog (@feed_entry ? "Collect" : "Add"), collect_recipe_path(@recipe), "modal", "floating", class: "btn btn-mini" %>
+	<% end %>
+</span>
+>>>>>>> Adding feeds now smoother

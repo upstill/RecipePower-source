@@ -143,6 +143,11 @@ class BrowserElement
     @selected = (@nodeid == id)
   end
   
+  # Select a node based on its content (user, channel or feed)
+  def select_by_content(obj)
+    @selected = false
+  end
+  
   # Returns the browser element that's selected, ACROSS THE TREE
   def selected
     @selected && self
@@ -158,6 +163,10 @@ class BrowserElement
   
   def add_button
     ""
+  end
+  
+  def list_type
+    :recipe
   end
   
 end
@@ -211,6 +220,7 @@ end
 
 # Element for all the recipes for a user (no children)
 class FeedBrowserElement < BrowserElement
+  attr_accessor :feedid
   
   def initialize(level, args)
     @persisters = (@persisters || []) << :feedid
@@ -230,6 +240,14 @@ class FeedBrowserElement < BrowserElement
 
   def convert_ids list
     list.collect { |id| FeedEntry.where( id: id ).first }.compact
+  end
+  
+  def list_type
+    :feed
+  end
+  
+  def select_by_content obj
+    @selected = (obj.kind_of? Feed) && (obj.id == @feedid)
   end
   
 end
@@ -263,6 +281,10 @@ class FeedBrowserComposite < BrowserComposite
   # Collect feed entries from the children
   def result_ids tagset
     Feed.entry_ids user.feed_ids
+  end
+  
+  def list_type
+    :feed
   end
   
 end
@@ -562,6 +584,10 @@ class ContentBrowser < BrowserComposite
   
   def cur_page=(pagenum)
     selected.cur_page= pagenum
+  end
+  
+  def list_type
+    selected.list_type
   end
   
 end

@@ -111,8 +111,8 @@ function runResponse(responseData) {
 // This function can be tied to a link with only a URL to a controller for generating a dialog.
 // We will get the div and run the associated dialog.
 function recipePowerGetAndRunJSON(request, how, area) {
-	if(area)
-		request += "?area="+area
+	if(area) 
+		request += (request.match(/\?/) ? "&" : "?") + "area=" + area
 	
 	$('span.query').text(request);
 	$.ajax( {

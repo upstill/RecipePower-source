@@ -180,6 +180,10 @@ module ApplicationHelper
   def recipe_grid_element_class recipe
     "rcpGridElmt"+@recipe.id.to_s    
   end
+  
+  def feed_list_element_class entry
+    "feedListElmt"+entry.id.to_s    
+  end
 
   # Return the id of the DOM element giving the time-since-touched for a recipe
   def touch_date_class recipe

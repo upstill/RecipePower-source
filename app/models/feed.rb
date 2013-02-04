@@ -16,7 +16,14 @@ class Feed < ActiveRecord::Base
   def entry_ids
     @idcache ||= begin
       update_entries
-      FeedEntry.where(feed_id: id).order('published_at DESC').map(&:id)
+      FeedEntry.where(feed_id: id).order('published_at DESC')
+    end
+  end
+  
+  def entries
+    @entrycache ||= begin
+      update_entries
+      FeedEntry.where(feed_id: id).order('published_at DESC')
     end
   end
   
@@ -30,7 +37,7 @@ class Feed < ActiveRecord::Base
   end
   
   def update_entries
-    if (Time.now - updated_at) > 900 # Update at most every 15 minutes
+    if ((Time.now - updated_at) > 900) || feed_entries.empty? # Update at most every 15 minutes
       FeedEntry.update_from_feed self
       touch
     end
