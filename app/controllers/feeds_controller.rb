@@ -39,6 +39,26 @@ class FeedsController < ApplicationController
     @area = params[:area]
     dialog_boilerplate 'new', 'modal'
   end
+  
+  # Add a user to the friends of the current user
+  def collect
+  end
+  
+  # Remove a user from the friends of the current user
+  def remove
+    begin
+      feed = Feed.find(params[:id])
+    rescue Exception -> e
+      notice = "Couldn't get feed "+params[:id].to_s
+    end
+    if current_user && feed
+      current_user.feeds.delete feed
+      notice = "There you go! Unsubscribed from "+feed.description
+    else
+      notice ||= "No current user"
+    end
+    redirect_to collections_path, notice: notice
+  end
 
   # GET /feeds/1/edit
   def edit

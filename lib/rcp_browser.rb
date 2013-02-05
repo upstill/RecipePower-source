@@ -251,7 +251,7 @@ class FeedBrowserElement < BrowserElement
   end
   
   def delete_path
-    "/feeds/#{@feedid}/delete"
+    "/feeds/#{@feedid}/remove"
   end
   
 end

@@ -1,24 +1,22 @@
 RP::Application.routes.draw do
 
-  match 'feeds/:id/approve', :controller=>'feeds', :action=>'approve'
-  resources :feeds
+  resources :feeds do
+    member do 
+      get 'collect' # Add the feed to the current user
+      post 'remove' # Remove the feed from the current user's set
+      get 'approve' # (Admin only) approve the feed for presentation
+    end
+  end
 
   resources :thumbnails
 
   match 'collection', :controller=>'collection', :action=>'index'
-  
   match 'collection/query', :controller=>'collection', :action=>'query', :via => :post
-
   match "collection/update", :controller=>'collection', :action=>'update', :via => :post
-
   get "collection/show"
-
   get "collection/new"
-
   get "collection/edit"
-
   get "collection/create"
-
   get "collection/relist"
 
   get "show/new"
@@ -67,7 +65,12 @@ RP::Application.routes.draw do
   # Ask a user to identify him/herself by email address
   match 'users/identify' => 'users#identify'
   # match 'users/:id/show' => 'users#show'
-  resources :users
+  resources :users do
+    member do 
+      get 'collect'
+      post 'remove'
+    end
+  end
   
   # Super-user can edit user info, starting with roles
   #match 'signup' => 'users#new', :as => :signup

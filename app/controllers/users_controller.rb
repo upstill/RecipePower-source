@@ -54,6 +54,14 @@ class UsersController < ApplicationController
   # we try to match it to a user record. If no matchable email was provided, we create a new user.
   def create
   end
+  
+  # Add a user to the friends of the current user
+  def collect
+  end
+  
+  # Remove a user from the friends of the current user
+  def remove
+  end
 
   def edit
     if @user = ((params[:id] && User.find(params[:id])) || current_user)
