@@ -5,11 +5,7 @@
 	  	<ul class="nav pull-right">
 		<% if user_signed_in? %>
 			<li>
-				<% if @collection.list_type == :recipe %>
-					<%= link_to_dialog "Add a Cookmark", new_recipe_path, "modal", "floating"  %>
-				<% else %>
-					<%= link_to_dialog "Add a Feed", new_feed_path, "modal", "floating"  %>
-				<% end %>
+				<%= link_to_dialog "Add a Cookmark", new_recipe_path, "modal", "floating"  %>
 			</li>
 			<li class="dropdown">
 		    	<a id="userMenuLabel" datatarget="#" class="dropdown-toggle" data-toggle="dropdown" role="button"><%= current_user.handle %><b class="caret"></b></a>

@@ -181,4 +181,40 @@ body { padding-top: 60px; }
 	font-size: 0.8em;
 	color: #999;
 }
+<<<<<<< HEAD
 >>>>>>> Adding feeds now smoother
+=======
+
+li.RcpBrowser > a {
+  display: inline-block;
+  width: 80%;
+}
+
+li.RcpBrowser > a.mod_button {
+  display: inline-block;
+  visibility: hidden;
+  vertical-align: top;
+  text-align: center;
+  font-size: 1.0em;
+  background-color: white;
+  margin: 0px;
+  margin-top: 5px;
+  padding: 0px;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  left: -35px;
+  z-index: 3;
+	font-weight:bold;
+	color:#55AA55;
+	// background-color:#E6DAA1;
+	border-radius:10px;
+	border-color:hsl(0,0%,55%);
+	border-width:2px;
+	border-style: solid
+}
+
+li.RcpBrowser.active > a.mod_button {
+	visibility: visible;
+}
+>>>>>>> Add and remove button added to Content Browser (no function yet)

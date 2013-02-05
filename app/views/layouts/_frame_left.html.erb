@@ -3,13 +3,18 @@
 	<%# logger.debug render("recipes/form_edit_at_left") %>
 	<%# render "recipes/form_edit_at_left" %>
 <%# dialogFooter %>
-<div class="nav affix">
+<div class="nav affix content_browser">
 	<ul class="nav nav-tabs nav-stacked">
 		<% @collection.node_list.each do |node| %>
 	    <li class="<%= node.css_class %>" 
 				  id="<%= node.css_id %>"
-					style="display: <%= node.visible ? "block" : "none" %>;">
-         <a href="#"><%= node.handle %></a>
+					<%= %Q{style="display: none;"}.html_safe unless node.visible %> >
+        <a href="#"><%= node.handle %></a>
+				<% if add_path = node.add_path %>
+		  		<%= link_to_function "+", %Q{RP.content_browser.add_element("#{add_path}")}, class: "mod_button" %>
+				<% elsif delete_path = node.delete_path %>
+		  		<%= link_to_function "x", %Q{RP.content_browser.delete_element("#{delete_path}")}, class: "mod_button" %>
+				<% end %>
       </li>
 		<% end %>
 	</ul>

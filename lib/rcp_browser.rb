@@ -26,6 +26,16 @@ class BrowserElement
     end
   end
   
+  # The server callback to add an element of this type
+  def add_path
+    nil
+  end
+  
+  # The javascript call to delete an element of this type
+  def delete_path
+    nil
+  end
+  
   def timestamp recipe
     (cd = recipe.collection_date @userid) && "Cookmarked #{time_ago_in_words cd} ago."
   end
@@ -156,18 +166,6 @@ class BrowserElement
     [self]
   end
   
-  # HTML for interpolating into the display
-  def html(do_show)
-    displaystyle = "display: "+(do_show ? "block" : "none" )+";"
-    %Q{<li class="#{css_class}" id="#{css_id}" style="#{displaystyle}">
-         <a href="#">#{handle}</a>
-       </li>}.html_safe
-  end
-  
-  def add_button
-    ""
-  end
-  
   def list_type
     :recipe
   end
@@ -214,12 +212,6 @@ class BrowserComposite < BrowserElement
     show_children = selected
     super(do_show || show_children) + @children.collect { |child| child.node_list show_children }.flatten
   end
-
-  # The HTML for the composite is just the HTML for the elements, joined with newlines
-  def html(do_show)
-    show_children = selected
-    ([super(do_show || show_children)] + @children.map { |child| child.html(show_children) }).join("\n")
-  end
   
 end
 
@@ -258,6 +250,10 @@ class FeedBrowserElement < BrowserElement
     @selected = (obj.kind_of? Feed) && (obj.id == @feedid)
   end
   
+  def delete_path
+    "/feeds/#{@feedid}/delete"
+  end
+  
 end
 
 # Element for all the recipes in a user's channels, with subheads for each channel
@@ -277,9 +273,9 @@ class FeedBrowserComposite < BrowserComposite
       end
     end
   end
-
-  def add_button
-  	%Q{<a href="#" class="addlink_off" onclick="recipePowerGetAndRunJSON('/feeds/new', 'modal', 'floating' );">+</a>}
+  
+  def add_path
+    "/feeds/new"
   end
 
   def convert_ids list
@@ -558,8 +554,8 @@ class ContentBrowser < BrowserComposite
     !str.blank? && self.new(YAML::load(str))
   end
   
-  def html
-    @children.map { |child| child.html(true) }.join("\n").html_safe
+  def node_list
+    @children.collect { |child| child.node_list true }.flatten
   end
   
   # Get the results of the current query.
