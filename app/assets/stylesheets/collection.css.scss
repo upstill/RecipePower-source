@@ -18,7 +18,7 @@
  >>>>>>>>>>>>>> jquery/jquery-ui-1.8.17.custom.css
  >>>>>>>>>>>>>> jquery/token-input-facebook.css
  >>>>>>>>>>>>>> feedback (vendor)
-
+ *= require bootstrap_and_overrides
  *= require_self
  *  require_tree blueprint
  * require common/RPGlobal
@@ -36,9 +36,6 @@
  *= require common/ajax_loader
 
 */
-@import "bootstrap";
-body { padding-top: 60px; }
-@import "bootstrap-responsive";
 
 #logo_img_small {
 	width: 250px;

@@ -23,11 +23,10 @@ gem 'omniauth-openid'
 gem 'declarative_authorization'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
 gem 'thin'
 gem 'eventmachine', '1.0.0.rc.4'
-gem 'sass-rails', " ~> 3.2.3"
-gem 'bootstrap-sass', '2.2.2'
 gem 'ruby_parser'
 gem "rmagick", "2.12.0", :require => 'RMagick'
 gem "feedzirra"
+gem "simple_form"
 
 # gem 'exception_notification', :require => 'exception_notifier'
 gem 'exception_notification', :require => 'exception_notifier', git: 'git://github.com/alanjds/exception_notification.git' 
@@ -49,6 +48,8 @@ group :assets do
   gem 'coffee-rails', "~> 3.2.1"
   gem 'uglifier', '>= 1.0.3'
   gem 'compass-rails'
+  gem 'sass-rails', " ~> 3.2.3"
+  gem 'bootstrap-sass', '2.2.2'
 end
 
 gem 'jquery-rails'
