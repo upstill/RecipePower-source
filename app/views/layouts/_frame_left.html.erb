@@ -23,10 +23,9 @@
 		<% end %>
 	</ul>
 		<hr>
+<%= link_to "New Feed", "/feeds/new", {:remote => true, 'data-controls-modal' =>  "modal-window"} %>
 	<div id="footer_nav_links">
 		<%= footer_navlinks %>
 	</div>
 </div>
-<%= feedback_tab(:position => 'left') %>
-<% @recipe = Recipe.find 800 %>
-<% @area = "at_left" %>
+<%# feedback_tab(:position => 'left') %>

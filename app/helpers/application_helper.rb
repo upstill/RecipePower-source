@@ -368,13 +368,21 @@ module ApplicationHelper
     logger.debug "dialogHeader for "+globstring({dialog: which, area: area, layout: @layout, ttl: ttl})
     classname = which.to_s
     ttlspec = ttl ? (" title=\"#{ttl}\"") : ""
+
+    %Q{<div id="recipePowerDialog" class="modal hide fade #{classname} dialog #{area}" #{ttlspec}>
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>${ttl}</h3>
+      </div>}.html_safe
+=begin
     flash_helper() +
-    %Q{<div id="recipePowerDialog" class="#{classname} dialog #{area}" #{ttlspec}>}.html_safe +
+    %Q{<div class="" >}.html_safe +
     ((@layout && @layout=="injector") ? 
       content_tag(:div, 
         link_to_function("X", "cancelDialog", style:"text-decoration: none;", id: "recipePowerCancelBtn"),
         id: "recipePowerCancelDiv")
     : "")
+=end
   end
 
   def dialogFooter()

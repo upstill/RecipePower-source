@@ -36,22 +36,28 @@
 	    <div class="row">
 		    <div class="span3">
 			    <%= render 'layouts/frame_left' %>
-			</div>
-			<div class="span9">
-				<div class="content">
-					<% flash.each do |name, msg| %>
-					  <% next if msg.blank? %>
-						<div class="alert alert-<%= name==:notice ? "success" : "error" %>">
-							<a class="close" data-dismiss="alert">x</a>
-							<%= msg %>
-						</div>
-					<% end %>
-					<%= yield %>
+				</div>
+				<div class="span9">
+					<div class="content">
+						<% flash.each do |name, msg| %>
+						  <% next if msg.blank? %>
+							<div class="alert alert-<%= name==:notice ? "success" : "error" %>">
+								<a class="close" data-dismiss="alert">x</a>
+								<%= msg %>
+							</div>
+						<% end %>
+						<%= yield %>
+					</div>
 				</div>
 			</div>
+<<<<<<< HEAD
 		</div>
 	</div> <!--! end of .container -->
 	<!-- </div class="modal"></div> -->
 	<%= render 'recipes/dialog_edit_recipe' %>
+=======
+		</div> <!--! end of .container -->
+		<div class="modal"></div>
+>>>>>>> Modest changes toward bootstrap modal
 	</body>
 </html>

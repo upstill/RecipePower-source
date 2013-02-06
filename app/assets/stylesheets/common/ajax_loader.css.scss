@@ -1,22 +1,27 @@
 /* Styling support for the loading-content beachball.
-   Thanks and props to Jonathan Sampson */
+   Thanks and props to Jonathan Sampson http://stackoverflow.com/questions/1964839/jquery-please-wait-loading-animation
+*/
 
 /* Start by setting display:none to make this hidden.
    Then we position it in relation to the viewport window
    with position:fixed. Width, height, top and left speak
    speak for themselves. Background we set to 80% white with
    our animation centered, and no-repeating */
+<<<<<<< HEAD
 /*
 .modal {
+=======
+#ajax_loader {
+>>>>>>> Modest changes toward bootstrap modal
     display:    none;
     position:   fixed;
-    z-index:    1000;
+    z-index:    10000;
     top:        0;
     left:       0;
     height:     100%;
     width:      100%;
     background: rgba( 255, 255, 255, .8 ) 
-                url('assets/ajax_loader.gif') 
+                url('/assets/ajax-loader.gif') 
                 50% 50% 
                 no-repeat;
 }
@@ -32,8 +37,12 @@ body.loading {
 
 /* Anytime the body has the loading class, our
    modal element will be visible */
+<<<<<<< HEAD
 /*
 body.loading .modal {
+=======
+body.loading #ajax_loader {
+>>>>>>> Modest changes toward bootstrap modal
     display: block;
 }
 */

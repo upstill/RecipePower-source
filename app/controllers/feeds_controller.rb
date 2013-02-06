@@ -48,7 +48,7 @@ class FeedsController < ApplicationController
   def remove
     begin
       feed = Feed.find(params[:id])
-    rescue Exception -> e
+    rescue Exception => e
       notice = "Couldn't get feed "+params[:id].to_s
     end
     if current_user && feed

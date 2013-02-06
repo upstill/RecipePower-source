@@ -14,6 +14,7 @@ def dialog_boilerplate(action, default_area=nil)
   flash[:notice] = params[:notice]
   @area = params[:area]
   @layout = params[:layout]
+  @partial = !params[:partial].blank?
   respond_to do |format|
     format.html {
       @area ||= "page"  

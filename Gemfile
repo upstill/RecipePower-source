@@ -49,7 +49,7 @@ group :assets do
   gem 'uglifier', '>= 1.0.3'
   gem 'compass-rails'
   gem 'sass-rails', " ~> 3.2.3"
-  gem 'bootstrap-sass', '2.2.2'
+  gem 'bootstrap-sass', '~> 2.2.2.0'
 end
 
 gem 'jquery-rails'
