@@ -84,9 +84,10 @@ function runResponse(responseData) {
 				document.close;
 			}
 		}
+		if(responseData.notice)
+	  	$('.notifications-panel').html(responseData.notice);
+			// jNotify( responseData.notice, { HorizontalPosition: 'center', VerticalPosition: 'top', TimeShown: 1200 } );
 	} 
-	if(responseData.notice)
-		jNotify( responseData.notice, { HorizontalPosition: 'center', VerticalPosition: 'top', TimeShown: 1200 } );
 }
 
 /* Submit a request to the server for interactive HTML. It's meant to be JSON specifying how 
@@ -175,10 +176,14 @@ function dialogResult( dlog, obj ) {
   to the dialog, if any. */
 function postError( jqXHR, dlog ) {
 	// Any error page we get we will <try> to present modally
-	result = jqXHR.responseText ? { code: jqXHR.responseText, area: "floating", how: "modal" } : null;
+	result = jqXHR.responseText ? { errortext: jqXHR.responseText, area: "floating", how: "modal" } : null;
 	// Stash the result in the dialog, if any
-	if(dlog != 'undefined') 
-		dialogResult( dlog, result );
+	if(dlog != 'undefined') {
+	  if($('.notifications-panel', dlog).first) {
+		  $('.notifications-panel', dlog).html(jqXHR.responseText);
+		} else
+			dialogResult( dlog, result );
+	}
 	return result;
 }
 
@@ -244,6 +249,43 @@ function runModalDialog(body, area) {
 	return dlog;			
 }
 
+// Take a Boostrap dialog and run it modally. Trap the 
+// form submission event to give us a chance to get JSON data and inject it into the page
+// rather than do a full page reload.
+function recipePowerRunModal(dlog) {
+	$(dlog).on('shown', function() {
+		$('textarea', dlog).focus();
+	});
+	$(dlog).modal('show');
+	// Forms submissions that expect JSON structured data will be handled here:
+	$('form', dlog).filter('[data-type="json"]').submit( dlog, function (eventdata) {
+		var context = this;
+		var dlog = eventdata.data; // As stored when the dialog was set up
+		eventdata.preventDefault();
+		var process_result_normally;
+		if(process_result_normally = !dialogOnEvent("beforesave", dlog, eventdata.currentTarget)) {
+			// Okay to submit
+			/* To sort out errors from subsequent dialogs, we submit the form synchronously
+			   and use the result to determine whether to do normal forms processing. */
+			$(context).ajaxSubmit( {
+				async: false,
+				dataType: 'json',
+				error: function(jqXHR, textStatus, errorThrown) {
+					postError(jqXHR, dlog); // Show the error message in the dialog
+					// closeDialog(dlog);
+					process_result_normally = false;
+				},
+				success: function (responseData, statusText, xhr, form) {
+					process_result_normally = postSuccess(responseData, dlog, form);
+					closeDialog(dlog);
+				}
+			} ); 
+		} else 
+				closeDialog(dlog);
+		return process_result_normally;		
+	});
+}
+
 // Inject the dialog on the current document, using the given HTML code
 function injectDialog(code, area, modeless) {
   var dlog = $('div.dialog', $('<html></html>').html(code));
@@ -293,7 +335,7 @@ function launchDialog(dlog, area, modeless)
 		var context = this;
 		var dlog = eventdata.data; // As stored when the dialog was set up
 		eventdata.preventDefault();
-		var process_result_normally;;
+		var process_result_normally;
 		if(process_result_normally = !dialogOnEvent("beforesave", dlog, eventdata.currentTarget)) {
 			// Okay to submit
 			/* To sort out errors from subsequent dialogs, we submit the form synchronously
@@ -325,7 +367,10 @@ function launchDialog(dlog, area, modeless)
 
 // Remove the dialog and injected code
 function closeModal(dlog) {
-	$(dlog).dialog("destroy"); // If running a jquery dialog 
+	if('.modal-header', dlog)
+		$(dlog).modal('hide');
+	else
+		$(dlog).dialog("destroy"); // If running a jquery dialog 
 	// If the dialog has an associated manager, call its onclose function
 	if(!dialogOnEvent("close", dlog))
 		// Remove the first child of 'body', which is our dialog (if any)

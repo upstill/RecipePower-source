@@ -31,11 +31,7 @@
 		</script>
   </head>
   <body style="margin:0;">
-	<% if flash[:notice] %>
-		<div id="notice" class="notice"><%= flash[:notice] %></div>
-	<% elsif flash[:alert] %>
-		<div class="alert"><%= flash[:alert] %></div>
-	<% end %>
+	<%= flash_helper %>
 	<%= yield %>
   </body>
 </html>

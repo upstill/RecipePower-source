@@ -48,7 +48,7 @@ class Feed < ActiveRecord::Base
     if(fetch && (entry = @fetched.entries.first))
       self.site = Site.by_link entry.url
     else
-      self.errors.add (@fetched ? "Feed has no entries" : "Bad url for feed: "+url)
+      self.errors.add :url, (@fetched ? "points to a feed with no entries" : "doesn't point to a feed")
     end
   end
   

@@ -1,5 +1,4 @@
 <%= dialogHeader :new_recipe, "Add a Cookmark", @area %>
-<%= show_errors @recipe.errors %>
 <%= form_for @recipe, html: { class: "new_recipe json" } do |f| %>
     <div class="recipe_url_div">
         <%= f.label :url, "Paste URL here and click 'Add Cookmark' or hit Enter/Return", :class=>"recipe_field_label" %>

@@ -31,6 +31,7 @@ def dialog_boilerplate(action, default_area=nil)
         # Blithely assuming that we want a modal-dialog element if we're getting JSON
         render_to_string action, :layout => (@layout || false) # May have special iframe layout
       end
+      debugger
       render json: { code: hresult, area: @area }
     }
     format.js {

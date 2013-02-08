@@ -1,5 +1,5 @@
 <%= form_for @user do |f| %>
-  <%= show_errors @user.errors %>
+  <%= errors_helper @user %>
   <p>
     <%= f.label :username, "Username" %><br />
     <%= f.text_field :username %>

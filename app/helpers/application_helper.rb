@@ -239,14 +239,49 @@ module ApplicationHelper
     link_to image_tag("RPlogo.png", :alt=>"RecipePower", :id=>"logo_img"+(small ? "_small" : "") ), root_path
   end
   
+  def notification_out(msg, level)
+    alert_class = 
+    case level
+    when :notice 
+      "success" 
+    when :error
+      "error"
+    else # :alert
+      "info"
+    end
+    %Q{
+      <div class="alert alert-#{alert_class}">
+        <a class="close" data-dismiss="alert">x</a>
+        #{msg}
+      </div>
+    }.html_safe
+  end
+  
+  def enumerate_strs strs
+    case strs.count
+    when 0
+      ""
+    when 1
+      strs[0]
+    else
+      last = strs.pop
+      strs.join(', ')+" and " + last
+    end
+  end
+  
+  # Report ActiveRecord errors in a nice alert div, suitable for interpolation on the page
+  def errors_helper obj, attribute=nil
+    sentence = attribute ? (attribute.to_s.upcase+" "+enumerate_strs(obj.errors[attribute])+".") : obj.errors.full_messages.to_sentence
+    msg = "Couldn't #{params[:action]} the #{obj.class.to_s.downcase}: #{sentence}"
+    notification_out msg, :error
+  end
+      
+  # Present the current flash messages in a friendly alert format.
   def flash_helper
-      f_names = [:notice, :warning, :message]
-      fl = ''
-      for name in f_names
-        if flash[name]
-          fl = fl + "<div class=\"notice\">#{flash[name]}</div>"
-        end
-      flash[name] = nil;
+    fl = ""
+    flash.each do |name, msg|
+      fl << notification_out(msg, name)
+      flash[name] = nil
     end
     return fl.html_safe
   end
@@ -276,16 +311,6 @@ module ApplicationHelper
     end
     (bmtag+imgtag+"</a>").html_safe
   end
-      
-  # Turn the last comma in a comma-separated list into ' and'
-  def englishize_list(list)
-    set = list.split ', '
-    if(set.length > 1)
-      ending = " and " + set.pop
-      list = set.join(', ') + ending
-    end
-    list
-  end
 
   def navlink(label, link, is_current=false)
     if is_current
@@ -313,7 +338,8 @@ module ApplicationHelper
   	# navlinks << feedback_link("Feedback")
   	navlinks.join('  |  ').html_safe
   end
-
+  
+=begin
   def show_errors(errors)
     result = ""
     if errors.any?
@@ -329,7 +355,8 @@ module ApplicationHelper
     end
     result.html_safe
   end
-  
+=end
+
   def debug_dump(params)
       "<div id=\"debug\">#{debug(params)}</div>".html_safe
 	end
@@ -350,7 +377,6 @@ module ApplicationHelper
     logger.debug "dialogHeader for "+globstring({dialog: which, area: area, layout: @layout, ttl: ttl})
     classname = which.to_s
     ttlspec = ttl ? (" title=\"#{ttl}\"") : ""
-    flash_helper() +
     content_tag(:div, 
         "",
         class: classname+" dialog "+area, 
@@ -369,11 +395,12 @@ module ApplicationHelper
     classname = which.to_s
     ttlspec = ttl ? (" title=\"#{ttl}\"") : ""
 
-    %Q{<div id="recipePowerDialog" class="modal hide fade #{classname} dialog #{area}" #{ttlspec}>
+    %Q{<div id="recipePowerDialog" class="modal hide #{classname} dialog #{area}" #{ttlspec}>
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h3>${ttl}</h3>
-      </div>}.html_safe
+        <h3>#{ttl}</h3>
+      </div>
+      <div class="notifications-panel"></div>}.html_safe
 =begin
     flash_helper() +
     %Q{<div class="" >}.html_safe +

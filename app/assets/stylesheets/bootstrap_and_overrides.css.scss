@@ -12,4 +12,8 @@ $navbarLinkColor: #eee;
 
 body { padding-top: 60px; }
 
+#recipePowerDialog.new_feed textarea {
+	width: 600px;
+}
+
 @import "bootstrap-responsive";

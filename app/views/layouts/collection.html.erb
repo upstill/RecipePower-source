@@ -38,14 +38,8 @@
 			    <%= render 'layouts/frame_left' %>
 				</div>
 				<div class="span9">
+					<div class="notifications-panel"></div>
 					<div class="content">
-						<% flash.each do |name, msg| %>
-						  <% next if msg.blank? %>
-							<div class="alert alert-<%= name==:notice ? "success" : "error" %>">
-								<a class="close" data-dismiss="alert">x</a>
-								<%= msg %>
-							</div>
-						<% end %>
 						<%= yield %>
 					</div>
 				</div>

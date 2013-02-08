@@ -1,11 +1,5 @@
 <% title @Title %>
-  <% if flash[:notice] %>
-      <div class="notice"><%= flash[:notice] %></div>
-  <% elsif flash[:alert] %>
-      <div class="alert"><%= flash[:alert] %></div>
-  <% else %>
-      <br class="clear">
-  <% end %>
+<%= flash_helper %>
 <% for recipe in @recipes %>
   <div class="rcp_list_element" >
     <div class="rcp_list_pic_box">

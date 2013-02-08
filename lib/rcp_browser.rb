@@ -4,13 +4,12 @@ require "candihash.rb"
 include ActionView::Helpers::DateHelper
 
 class BrowserElement
-  attr_accessor :npages, :cur_page, :nodeid, :visible
+  attr_accessor :npages, :cur_page, :visible
   attr_reader :handle, :level
-  @@nextid = 1  
   @@page_length = 20
   # Persisters for all browser-element nodes; these may be augmented by a subclass by
   # setting @persisters BEFORE handing off init to superclass
-  @@persisters = [:selected, :handle, :nodeid, :userid, :cur_page]
+  @@persisters = [:selected, :handle, :userid, :cur_page]
   
   # Initialize a new element, either from supplied arguments or defaults
   def initialize(level, args)
@@ -20,10 +19,6 @@ class BrowserElement
     @selected = false unless @selected
     @handle = "Mystery Element" unless @handle
     @cur_page = @cur_page || 1
-    unless @nodeid = args[:nodeid]
-      @nodeid = @@nextid
-      @@nextid = @@nextid + 1
-    end
   end
   
   # The server callback to add an element of this type
@@ -57,7 +52,7 @@ class BrowserElement
   
   # ID for uniquely selecting the element
   def css_id
-    "ContentBrowserElement"+@nodeid.to_s
+    self.class.to_s
   end
   
   # The sources are a user, a list of users, or nil (for the master global list)
@@ -147,7 +142,7 @@ class BrowserElement
   
   # Change the current selection to match the given id
   def select_by_id(id)
-    @selected = (@nodeid == id)
+    @selected = (id==css_id)
   end
   
   # Select a node based on its content (user, channel or feed)
@@ -201,6 +196,7 @@ class BrowserComposite < BrowserElement
     @children.each { |child| child.select_by_id(id) }
   end
   
+  # Recursive search for the selected child
   def selected
     unless (result = super)
       @children.each { |child| break if result = child.selected }
@@ -208,9 +204,40 @@ class BrowserComposite < BrowserElement
     return result
   end
   
+  # Cause a child to self-select by matching obj
+  def select_by_content obj
+    old_selection = selected
+    new_selection = nil
+    @children.each { |child| break if new_selection = child.select_by_content(obj) } 
+    old_selection.deselect if old_selection && new_selection && (old_selection != new_selection)
+    new_selection
+  end
+  
   def node_list do_show=false
     show_children = selected
     super(do_show || show_children) + @children.collect { |child| child.node_list show_children }.flatten
+  end
+  
+  def delete_selected_child
+    @children.each_index { |ix| 
+      child = @children[ix]
+      if selected = child.selected
+        # Some child in this subtree is selected
+        if selected == child # Direct selection => we are this child's parent
+          @children.delete child
+          if @children[ix]
+            @children[ix].select
+          elsif ix > 0
+            @children[ix-1].select
+          else
+            select
+          end
+        else
+          child.delete_selected_child
+        end
+        break
+      end
+    }
   end
   
 end
@@ -247,11 +274,15 @@ class FeedBrowserElement < BrowserElement
   end
   
   def select_by_content obj
-    @selected = (obj.kind_of? Feed) && (obj.id == @feedid)
+    (@selected = (obj.kind_of? Feed) && (obj.id == @feedid)) && self
   end
   
   def delete_path
     "/feeds/#{@feedid}/remove"
+  end
+  
+  def css_id
+    self.class.to_s+@feedid.to_s
   end
   
 end
@@ -265,7 +296,6 @@ class FeedBrowserComposite < BrowserComposite
     if @children.empty?
       klass = Module.const_get("User")
       if klass.is_a?(Class) # If User class is available (i.e., in Rails, as opposed to testing)
-        args.delete :nodeid
         @children = user.feed_ids.map do |id| 
           args[:feedid] = id
           FeedBrowserElement.new level+1, args
@@ -315,6 +345,9 @@ class RcpBrowserElementFriend < BrowserElement
     @candidates = @candidates || User.find(@friendid).recipes(public: true, sort_by: :collected)
   end
   
+  def css_id
+    self.class.to_s+@friendid.to_s
+  end
 end
 
 # Element for all the recipes for the owner, with subheads for status and favored keys
@@ -348,7 +381,6 @@ class RcpBrowserChannelsAndFriends < RcpBrowserComposite
     if @children.empty?
       klass = Module.const_get("User")
       if klass.is_a?(Class) # If User class is available (i.e., in Rails, as opposed to testing)
-        args.delete :nodeid
         @children = user.follows(@isChannel).map do |followee| 
           args[:friendid] = followee.id
           RcpBrowserElementFriend.new level+1, args
@@ -436,6 +468,10 @@ class RcpBrowserElementStatus < RcpBrowserElement
     @candidates = @candidates || user.recipes(status: @status, sort_by: :collected)
   end
   
+  def css_id
+    self.class.to_s+@status.to_s
+  end
+  
 end
 
 # Element for a recipe list due to a tag
@@ -445,6 +481,10 @@ class RcpBrowserElementTaglist < RcpBrowserElement
     super
     @tagid = args[:tagid]
     @handle = "Tag #{@tagid.to_s}"
+  end
+  
+  def css_id
+    self.class.to_s+@tagid.to_s
   end
 
 end
@@ -486,6 +526,11 @@ class ContentBrowser < BrowserComposite
         ] 
     end
     @children[0].select unless selected # Ensure there's a selection
+  end
+  
+  # Remove the currently-selected element and select an appropriate new one: either 1) the next sibling, 2) the previous sibling, or 3) the parent
+  def delete_selected
+    delete_selected_child
   end
   
   def tagstxt()

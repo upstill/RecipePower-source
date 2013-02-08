@@ -3,7 +3,7 @@
 <p class="airy">
 	To attach this service to your RecipePower account, what's the email address on your account?</p>
 <%= form_for @user do |f| %>
-  <%= show_errors @user.errors %>
+  <%= errors_helper @user %>
     <%= f.label :email %>
     <%= f.text_field :email %>
     <%= f.submit "Go",  %>

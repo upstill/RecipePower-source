@@ -49,15 +49,16 @@ class FeedsController < ApplicationController
     begin
       feed = Feed.find(params[:id])
     rescue Exception => e
-      notice = "Couldn't get feed "+params[:id].to_s
+      flash[:error] = "Couldn't get feed "+params[:id].to_s
     end
     if current_user && feed
-      current_user.feeds.delete feed
-      notice = "There you go! Unsubscribed from "+feed.description
+      current_user.delete_feed feed
+      current_user.save
+      flash[:notice] = "There you go! Unsubscribed from "+feed.description
     else
-      notice ||= "No current user"
+      flash[:error] ||= ": No current user"
     end
-    redirect_to collections_path, notice: notice
+    redirect_to collection_path
   end
 
   # GET /feeds/1/edit
@@ -71,15 +72,24 @@ class FeedsController < ApplicationController
     @feed = Feed.where(url: params[:feed][:url]).first || Feed.new(params[:feed])
     @feed.approved = true
     @feed.users << current_user_or_guest unless @feed.user_ids.include?(current_user_or_guest_id)
-    # XXX Should be setting browser to show the new feed
     respond_to do |format|
       if @feed.update_attributes(params[:feed])
-        current_user_or_guest.add_feed @feed
-        format.html { redirect_to collection_path, :notice => "Now feeding you with '#{@feed.description}'" }
-        format.json { render json: @feed, status: :created, location: @feed }
+        user = current_user_or_guest
+        @node = user.add_feed @feed
+        flash[:notice] = "Now feeding you with '#{@feed.description}'"
+        format.html { redirect_to collection_path }
+        format.json { 
+          rs = with_format("html") do render_to_string :partial => "collection/node" end
+          json_data = { 
+            processorFcn: "RP.content_browser.insert_or_select",
+            entity: rs, 
+            notice: view_context.notification_out(notice, :notice) 
+          }
+          render json: json_data, status: :created, location: @feed 
+        }
       else
         format.html { render action: "new" }
-        format.json { render json: @feed.errors, status: :unprocessable_entity }
+        format.json { render json: view_context.errors_helper(@feed, :url), status: :unprocessable_entity }
       end
     end
   end
@@ -95,7 +105,7 @@ class FeedsController < ApplicationController
         format.json { head :no_content }
       else
         format.html { render action: "edit" }
-        format.json { render json: @feed.errors, status: :unprocessable_entity }
+        format.json { render json: @feed.errors[:url], status: :unprocessable_entity }
       end
     end
   end
