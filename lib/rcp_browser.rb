@@ -296,6 +296,7 @@ class FeedBrowserComposite < BrowserComposite
     if @children.empty?
       klass = Module.const_get("User")
       if klass.is_a?(Class) # If User class is available (i.e., in Rails, as opposed to testing)
+        args[:selected] = false
         @children = user.feed_ids.map do |id| 
           args[:feedid] = id
           FeedBrowserElement.new level+1, args
