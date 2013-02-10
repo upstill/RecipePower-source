@@ -69,13 +69,14 @@ class FeedsController < ApplicationController
   # POST /feeds
   # POST /feeds.json
   def create
+    user = current_user_or_guest
     @feed = Feed.where(url: params[:feed][:url]).first || Feed.new(params[:feed])
     @feed.approved = true
-    @feed.users << current_user_or_guest unless @feed.user_ids.include?(current_user_or_guest_id)
+    @feed.users << user unless @feed.user_ids.include?(user.id)
     respond_to do |format|
       if @feed.update_attributes(params[:feed])
-        user = current_user_or_guest
         @node = user.add_feed @feed
+        debugger
         flash[:notice] = "Now feeding you with '#{@feed.description}'"
         format.html { redirect_to collection_path }
         format.json { 

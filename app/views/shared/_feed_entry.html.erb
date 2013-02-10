@@ -13,6 +13,6 @@
 		
 	<br>from <%= link_to @feed_entry.feed.site.name, @feed_entry.feed.site.home %></div>
 	<div class="feed_list_element_stats">Published <%= time_ago_in_words @feed_entry.published_at %> ago.</div>
- <%= @feed_entry.summary.html_safe %>
+ <%= @feed_entry.summary && @feed_entry.summary.html_safe %>
 <hr>
 </li>

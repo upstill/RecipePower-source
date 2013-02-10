@@ -3,6 +3,18 @@ require 'my_constants.rb'
 require "candihash.rb"
 include ActionView::Helpers::DateHelper
 
+class Array
+  # Loop through all elements of the array, finding and returning any that returns a result
+  def poll 
+    self.each { |elmt| 
+      if val = yield(elmt)
+        return val
+      end
+    }
+    nil
+  end
+end
+
 class BrowserElement
   attr_accessor :npages, :cur_page, :visible
   attr_reader :handle, :level
@@ -146,8 +158,13 @@ class BrowserElement
   end
   
   # Select a node based on its content (user, channel or feed)
-  def select_by_content(obj)
-    @selected = false
+  def find_by_content(obj)
+    nil
+  end
+  
+  # Method to insert a new node representing a list (feed, friend, etc.)
+  # Only makes sense if overridden by a composite node
+  def add_by_content obj
   end
   
   # Returns the browser element that's selected, ACROSS THE TREE
@@ -198,19 +215,16 @@ class BrowserComposite < BrowserElement
   
   # Recursive search for the selected child
   def selected
-    unless (result = super)
-      @children.each { |child| break if result = child.selected }
-    end
-    return result
+    result = super || (@children.poll { |child| child.selected })
   end
   
-  # Cause a child to self-select by matching obj
-  def select_by_content obj
-    old_selection = selected
-    new_selection = nil
-    @children.each { |child| break if new_selection = child.select_by_content(obj) } 
-    old_selection.deselect if old_selection && new_selection && (old_selection != new_selection)
-    new_selection
+  # Find the child with the associated content
+  def find_by_content obj
+    @children.poll { |child| child.find_by_content obj }
+  end
+  
+  def add_by_content obj
+    @children.poll { |child| child.add_by_content obj }
   end
   
   def node_list do_show=false
@@ -252,8 +266,8 @@ class FeedBrowserElement < BrowserElement
   def initialize(level, args)
     @persisters = (@persisters || []) << :feedid
     super
-    @feedid = args[:feedid]
-    @handle = Feed.find(@feedid).description
+    @feedid = args[:feedid] || args[:feed].id
+    @handle = (args[:feed] || Feed.find(@feedid)).description
   end
   
   def sources
@@ -273,8 +287,10 @@ class FeedBrowserElement < BrowserElement
     :feed
   end
   
-  def select_by_content obj
-    (@selected = (obj.kind_of? Feed) && (obj.id == @feedid)) && self
+  def find_by_content obj
+    (obj.kind_of? Feed) && 
+    (obj.id == @feedid) && 
+    self
   end
   
   def delete_path
@@ -307,6 +323,10 @@ class FeedBrowserComposite < BrowserComposite
   
   def add_path
     "/feeds/new"
+  end
+  
+  def add_by_content obj
+    FeedBrowserElement.new(@level+1, { feed: obj, userid: user.id }) if (obj.kind_of? Feed)
   end
 
   def convert_ids list
@@ -638,6 +658,17 @@ class ContentBrowser < BrowserComposite
   
   def list_type
     selected.list_type
+  end
+  
+  # Select the browswer element corresponding to the given object
+  def select_by_content obj
+    old_selection = selected
+    new_selection = find_by_content(obj) || add_by_content(obj)
+    if new_selection && (old_selection != new_selection)
+      old_selection.deselect if old_selection
+      new_selection.select
+    end
+    new_selection
   end
   
 end

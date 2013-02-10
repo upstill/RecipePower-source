@@ -188,8 +188,7 @@ li.RcpBrowser > a {
 }
 
 li.RcpBrowser > a.mod_button {
-  display: inline-block;
-  visibility: hidden;
+  display: none;
   vertical-align: top;
   text-align: center;
   font-size: 1.0em;
@@ -212,6 +211,6 @@ li.RcpBrowser > a.mod_button {
 }
 
 li.RcpBrowser.active > a.mod_button {
-	visibility: visible;
+  display: inline-block;
 }
 >>>>>>> Add and remove button added to Content Browser (no function yet)

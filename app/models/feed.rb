@@ -16,7 +16,7 @@ class Feed < ActiveRecord::Base
   def entry_ids
     @idcache ||= begin
       update_entries
-      FeedEntry.where(feed_id: id).order('published_at DESC')
+      FeedEntry.where(feed_id: id).order('published_at DESC').map(&:id)
     end
   end
   

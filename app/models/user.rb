@@ -64,12 +64,11 @@ class User < ActiveRecord::Base
   
   # Add the feed to the browser's ContentBrowser and select it
   def add_feed feed
-    unless feeds.include? feed
-      feeds << feed 
-      @browser = ContentBrowser.new(id) # Regenerate the browser
-    end
-    browser.select_by_content feed
-    save
+    feeds << feed unless feeds.include? feed
+    bnode = browser.select_by_content feed
+    debugger
+    save # ...to preserve the selection
+    bnode
   end
   
   def delete_feed feed
