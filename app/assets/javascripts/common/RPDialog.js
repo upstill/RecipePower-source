@@ -256,6 +256,7 @@ function recipePowerRunModal(dlog) {
 	$(dlog).on('shown', function() {
 		$('textarea', dlog).focus();
 	});
+	debugger;
 	$(dlog).modal('show');
 	// Forms submissions that expect JSON structured data will be handled here:
 	$('form', dlog).filter('[data-type="json"]').submit( dlog, function (eventdata) {

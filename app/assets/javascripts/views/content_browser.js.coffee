@@ -92,6 +92,7 @@ RP.content_browser.delete_element = (path) ->
 # Run a dialog to add an element to the collection browser. Upon success,
 # We get called back with a new node to add to our children
 RP.content_browser.add_element = (path) ->
+	debugger;
 	dlog = $('#recipePowerDialog.new_feed')
 	recipePowerRunModal dlog
 	
