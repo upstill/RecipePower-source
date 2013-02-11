@@ -76,7 +76,6 @@ class FeedsController < ApplicationController
     respond_to do |format|
       if @feed.update_attributes(params[:feed])
         @node = user.add_feed @feed
-        debugger
         flash[:notice] = "Now feeding you with '#{@feed.description}'"
         format.html { redirect_to collection_path }
         format.json { 

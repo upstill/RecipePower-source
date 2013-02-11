@@ -326,7 +326,10 @@ class FeedBrowserComposite < BrowserComposite
   end
   
   def add_by_content obj
-    FeedBrowserElement.new(@level+1, { feed: obj, userid: user.id }) if (obj.kind_of? Feed)
+    if (obj.kind_of? Feed)
+      @children.unshift(new_elmt = FeedBrowserElement.new(@level+1, { feed: obj, userid: user.id }))
+      new_elmt
+    end 
   end
 
   def convert_ids list

@@ -92,7 +92,6 @@ RP.content_browser.delete_element = (path) ->
 # Run a dialog to add an element to the collection browser. Upon success,
 # We get called back with a new node to add to our children
 RP.content_browser.add_element = (path) ->
-	debugger;
 	dlog = $('#recipePowerDialog.new_feed')
 	recipePowerRunModal dlog
 	
@@ -104,15 +103,18 @@ RP.content_browser.add_element = (path) ->
 
 RP.content_browser.div = RP.content_browser.div || $('<div></div>')
 RP.content_browser.insert_or_select = (resp) ->
-	RP.collection.div.html(resp.entity)
+	debugger;
+	RP.content_browser.div.html(resp.entity)
 	div = RP.content_browser.div[0]
 	elmt = div.firstChild
 	selected = $('.RcpBrowser.active')[0]
 	if existing = $('#'+elmt.id)[0]
 		div.removeChild elmt
 		elmt = existing
+	else if selected.nextSibling
+	  selected.parentNode.insertBefore elmt, selected.nextSibling
 	else
-		selected.appendChild elmt
+		selected.parentNode.appendChild elmt
 	if selected != elmt
 		$(selected).removeClass "active"
 		$(elmt).addClass "active"

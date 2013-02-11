@@ -29,11 +29,9 @@ class Feed < ActiveRecord::Base
   
   # Return list of feed_entries by id for all feeds in the feedlist
   def self.entry_ids feedlist
-    @@idcache ||= begin
-      Feed.find(feedlist).each { |feed| feed.update_entries }
-      # We could be fetching individual feeds, then sorting, but we'll just let the database handle that...
-      FeedEntry.where(feed_id: feedlist).order('published_at DESC').map(&:id)
-    end
+    Feed.find(feedlist).each { |feed| feed.update_entries }
+    # We could be fetching individual feeds, then sorting, but we'll just let the database handle that...
+    FeedEntry.where(feed_id: feedlist).order('published_at DESC').map(&:id)
   end
   
   def update_entries
