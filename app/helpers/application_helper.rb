@@ -239,24 +239,6 @@ module ApplicationHelper
     link_to image_tag("RPlogo.png", :alt=>"RecipePower", :id=>"logo_img"+(small ? "_small" : "") ), root_path
   end
   
-  def notification_out(msg, level)
-    alert_class = 
-    case level
-    when :notice 
-      "success" 
-    when :error
-      "error"
-    else # :alert
-      "info"
-    end
-    %Q{
-      <div class="alert alert-#{alert_class}">
-        <a class="close" data-dismiss="alert">x</a>
-        #{msg}
-      </div>
-    }.html_safe
-  end
-  
   def enumerate_strs strs
     case strs.count
     when 0
@@ -282,10 +264,28 @@ module ApplicationHelper
   def flash_helper
     fl = ""
     flash.each do |name, msg|
-      fl << notification_out(msg, name)
+      fl << notification_out(msg, name) unless msg.blank? # ...because this message may have been cleared earlier...
       flash[name] = nil
     end
     return fl.html_safe
+  end
+  
+  def notification_out(msg, level)
+    alert_class = 
+    case level
+    when :notice 
+      "success" 
+    when :error
+      "error"
+    else # :alert
+      "info"
+    end
+    %Q{
+      <div class="alert alert-#{alert_class}">
+        <a class="close" data-dismiss="alert">x</a>
+        #{msg}
+      </div>
+    }.html_safe
   end
 
   # Deploy the links for naming the user and/or signing up/signing in
