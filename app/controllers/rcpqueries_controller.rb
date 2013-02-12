@@ -30,7 +30,7 @@ public
   # GET /rcpqueries
   # GET /rcpqueries.xml
   def index
-
+debugger
     # We wake up with optional parameters:
     #   owner: id of list owner
     @rcpquery = current_query params[:owner]

@@ -271,6 +271,7 @@ module ApplicationHelper
   
   # Report ActiveRecord errors in a nice alert div, suitable for interpolation on the page
   def errors_helper obj, attribute=nil
+    debugger
     sentence = attribute ? (attribute.to_s.upcase+" "+enumerate_strs(obj.errors[attribute])+".") : obj.errors.full_messages.to_sentence
     msg = "Couldn't #{params[:action]} the #{obj.class.to_s.downcase}: #{sentence}"
     notification_out msg, :error

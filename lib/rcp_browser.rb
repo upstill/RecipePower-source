@@ -33,6 +33,10 @@ class BrowserElement
     @cur_page = @cur_page || 1
   end
   
+  def content_name
+    self.class.to_s
+  end
+  
   # The server callback to add an element of this type
   def add_path
     nil
@@ -321,6 +325,10 @@ class FeedBrowserComposite < BrowserComposite
     end
   end
   
+  def content_name
+    "Feeds"
+  end
+  
   def add_path
     "/feeds/new"
   end
@@ -372,6 +380,17 @@ class RcpBrowserElementFriend < BrowserElement
   def css_id
     self.class.to_s+@friendid.to_s
   end
+  
+  def find_by_content obj
+    (obj.kind_of? User) && 
+    (obj.id == @friendid) && 
+    self
+  end
+  
+  def delete_path
+    "/users/#{@friendid}/remove"
+  end
+  
 end
 
 # Element for all the recipes for the owner, with subheads for status and favored keys
@@ -413,6 +432,17 @@ class RcpBrowserChannelsAndFriends < RcpBrowserComposite
     end
   end
   
+  def add_path
+    "/user/#{user.id}/befriend?channel=#{@isChannel.to_s}"
+  end
+  
+  def add_by_content obj
+    if (obj.kind_of? User)
+      @children.unshift(new_elmt = RecipeBrowserElementFriend.new(@level+1, { user: obj, userid: obj.id }))
+      new_elmt
+    end 
+  end
+  
   def sources
     user.follows(@isChannel).map { |followee| followee.id }
   end
@@ -437,6 +467,10 @@ class RcpBrowserCompositeFriends < RcpBrowserChannelsAndFriends
     @handle = "My Friends"
   end
   
+  def content_name
+    "Friends"
+  end
+  
 end
 
 # Element for all the recipes in a user's channels, with subheads for each channel
@@ -446,6 +480,10 @@ class RcpBrowserCompositeChannels < RcpBrowserChannelsAndFriends
     @isChannel = true
     super
     @handle = "My Channels"
+  end
+  
+  def content_name
+    "Channels"
   end
   
 end
@@ -651,6 +689,38 @@ class ContentBrowser < BrowserComposite
     selected.results_paged tags
   end
   
+  # If the collection has returned no results, suggest what the problem might have been
+  def explain_empty
+    report = "It looks like #{selected.handle} doesn't have anything that matches your search."
+    case tags.count
+    when 0
+      sug = nil
+    when 1
+      sug = "a different tag or no tags at all up there"
+    else
+      sug = "removing a tag up there"
+    end
+    if selected.class.to_s =~ /Composite/ 
+      if selected.children.empty?
+        report = "There's no content here because you have no #{selected.content_name} selected."
+        sug = " getting one by clicking the '+' sign over there to the left"
+      elsif tags.empty?
+        name = selected.content_name
+        report = ((selected.children.count < 2) ? "This "+name.singularize+" doesn't" : "These "+name+" don't")+" appear to have any content."
+        sug = nil
+      else
+        report = "It looks like there isn't anything that matches your search in '#{selected.handle}'."
+      end
+    else # Element
+      if tags.empty?
+        content = selected.content_name == "Feeds" ? "Entries" : "Recipes"
+        report = "#{selected.handle} doesn't appear to have any #{content.downcase} at present."
+        sug = nil
+      end
+    end
+    sug ? report+"<br>You might try #{sug}." : report
+  end
+  
   def cur_page
     selected.cur_page
   end
@@ -673,5 +743,4 @@ class ContentBrowser < BrowserComposite
     end
     new_selection
   end
-  
 end

@@ -1,18 +1,7 @@
 <ul class="<%= @collection.list_type == :recipe ? "thumbnails" : "feed_entries" %>">
-<% for @element in @collection.results_paged do %>
-	<% case @element %>
-	<% when Recipe %>
-		<% @recipe = @element %>
-	  <% @recipe.current_user = @user_id %>
-	  <%= render "shared/recipe_grid" %>
-	<% when FeedEntry %>
-	  <% @feed_entry = @element %>
-	  <%= render "shared/feed_entry" %>
-	<% else %>
-		<p>(Mysterious list element of type <%= @element.class.to_s %>)</p>
-	<% end %>
-<% end %>
+<%= collection_results %>
 </ul>
+<div class="notifications-panel"><%= flash_helper %></div>
 <div class="digg_pagination">
 	<%= pagination_links @collection.npages, @collection.cur_page %>
 </div>

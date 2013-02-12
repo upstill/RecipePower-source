@@ -67,13 +67,18 @@ class User < ActiveRecord::Base
     feeds.unshift feed unless feeds.include? feed
     bnode = browser.select_by_content feed
     save # ...to preserve the selection
-    debugger
     bnode
   end
   
   def delete_feed feed
     browser.delete_selected
     feeds.delete feed
+    save
+  end
+  
+  def delete_followee f
+    browser.delete_selected
+    followees.delete f
     save
   end
   

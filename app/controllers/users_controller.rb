@@ -42,11 +42,11 @@ class UsersController < ApplicationController
   end
   
   def show
-      @user = User.find params[:id]
+    @user = User.find params[:id]
   end
   
   def not_found
-      redirect_to root_path, :notice => "User not found"
+    redirect_to root_path, :notice => "User not found"
   end
 
   # With devise handling user creation, the only way we get here is from the 'identify' page.
@@ -61,6 +61,19 @@ class UsersController < ApplicationController
   
   # Remove a user from the friends of the current user
   def remove
+    begin
+      followee = User.find(params[:id])
+    rescue Exception => e
+      flash[:error] = "Couldn't find followee "+params[:id].to_s
+    end
+    if current_user && followee
+      current_user.delete_followee followee
+      current_user.save
+      flash[:notice] = "There you go! No longer following "+followee.handle
+    else
+      flash[:error] ||= ": No current user"
+    end
+    redirect_to collection_path
   end
 
   def edit
@@ -71,19 +84,19 @@ class UsersController < ApplicationController
   end
   
   def profile
-      if @user = current_user
-          @authentications = @user.authentications
-      end
-      @Title = "Edit Profile"
-      render :action => 'edit'
+    if @user = current_user
+      @authentications = @user.authentications
+    end
+    @Title = "Edit Profile"
+    render :action => 'edit'
   end
   
   # Ask user for an email address for login purposes
   def identify
-      @user = User.new
-      # if omniauth = session[:omniauth]
-          # @user.apply_omniauth(omniauth)
-      # end
+    @user = User.new
+    # if omniauth = session[:omniauth]
+      # @user.apply_omniauth(omniauth)
+    # end
   end
 
   def update
