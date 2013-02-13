@@ -271,7 +271,7 @@ class FeedBrowserElement < BrowserElement
     @persisters = (@persisters || []) << :feedid
     super
     @feedid = args[:feedid] || args[:feed].id
-    @handle = (args[:feed] || Feed.find(@feedid)).description
+    @handle = (args[:feed] || Feed.find(@feedid)).title
   end
   
   def sources

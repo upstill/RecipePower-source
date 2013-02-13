@@ -158,7 +158,6 @@ class Referent < ActiveRecord::Base
     #  this procedure lends itself to redundancy in the dictionary
     def self.express (tag, tagtype, args = {} )
         tag = Tag.assert_tag tag, tagtype: tagtype # Creating it if need be, and/or making it global 
-        debugger
         ref = tag.primary_meaning || 
               tag.referents.first || 
               # We don't immediately have a referent for this tag

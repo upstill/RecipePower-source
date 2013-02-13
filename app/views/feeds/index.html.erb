@@ -1,31 +1,49 @@
-<h3>Listing feeds</h3>
-
-<table class="feeds">
-  <tr>
-    <th class="description">Description</th>
-    <th>Type</th>
-    <th>Approved</th>
-    <th>Site</th>
-    <th class="url">Url</th>
-    <th></th>
-    <th></th>
-    <th></th>
-  </tr>
-
-<% @feeds.each do |feed| %>
-  <tr>
-    <td class="description"><%= feed.description %></td>
-    <td><%= feed.feedtypename %></td>
-    <td><%= feed.approved ? "Y" : (feed.approved.nil? ? "" : "N") %></td>
-    <td><%= link_to feed.site.name, site_path(feed.site) %></td>
-    <td class="url"><%= link_to feed.url.truncate(40), feed.url %></td>
-    <td><%= link_to 'Show', feed %></td>
-    <td><%= link_to 'Edit', edit_feed_path(feed) %></td>
-    <td><%= link_to 'Destroy', feed, method: :delete, data: { confirm: 'Are you sure?' } %></td>
-  </tr>
-<% end %>
+<h3>Listing Feeds</h3>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th class="span2">Title/Description/URL</th>
+      <th>Type</th>      
+      <th>Host Site</th>      
+      <% permitted_to?(:approve, :feeds) do %>
+        <th>Approved</th>
+      <% end %>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @feeds.each do |feed| %>
+      <tr>
+        <td><%= feed.id.to_s %></td>
+        <td>
+          <%= link_to feed.title.truncate(80), feed_path(feed) %><br>
+          <%= feed.description  %><br>
+          <%= link_to feed.url.truncate(40), feed.url %>
+        </td>
+        <td><%= feed.feedtypename %></td>
+        <td><%= link_to feed.site.name, site_path(feed.site) %></td>
+        <% permitted_to?(:approve, :feeds) do %>
+          <td><%= feed.approved ? "Y" : (feed.approved.nil? ? "" : "N") %></td>
+        <% end %>
+        <td>
+          <% if @user.feeds.include?(feed) %>
+            <%= link_to 'Unsubscribe', remove_feed_path(feed), class: "btn btn-mini" %>
+          <% else %>
+            <%= link_to 'Subscribe', collect_feed_path(feed), class: "btn btn-mini" %>
+          <% end %>
+          <% permitted_to?(:edit, :feeds) do %>
+            <%= link_to 'Edit', edit_feed_path(feed), class: "btn btn-mini" %>
+          <% end %>
+          <% permitted_to?(:destroy, :feeds) do %>
+            <%= link_to('Destroy', feed, :method => :delete, :class => "btn btn-mini btn-danger", confirm: 'Are you sure?') %>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
 </table>
 
 <br />
 
-<%= link_to 'New Feed', new_feed_path %>
+<%= link_to 'New Feed', new_feed_path, class: "btn" %>

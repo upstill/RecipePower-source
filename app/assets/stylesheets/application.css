@@ -21,6 +21,7 @@
  jQuery/jQuery-ui
  jQuery/tokenInput
 
+ *= require bootstrap_application
  * require_self
  *= require RP_recipes
  *= require views/authentication
@@ -54,4 +55,3 @@
  * require sites
 
 */
-

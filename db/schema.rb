@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130204022022) do
+ActiveRecord::Schema.define(:version => 20130213003752) do
 
   create_table "authentications", :force => true do |t|
     t.integer  "user_id"
@@ -67,6 +67,7 @@ ActiveRecord::Schema.define(:version => 20130204022022) do
     t.datetime "updated_at",                     :null => false
     t.boolean  "approved",    :default => false
     t.integer  "feedtype",    :default => 0
+    t.string   "title"
   end
 
   create_table "feeds_users", :force => true do |t|

@@ -4,7 +4,7 @@ RP::Application.routes.draw do
     member do 
       get 'collect' # Add the feed to the current user
       post 'remove' # Remove the feed from the current user's set
-      get 'approve' # (Admin only) approve the feed for presentation
+      post 'approve' # (Admin only) approve the feed for presentation
     end
   end
 

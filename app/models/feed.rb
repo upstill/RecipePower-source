@@ -1,16 +1,35 @@
 require 'feedzirra'
 
 class Feed < ActiveRecord::Base
-  attr_accessible :description, :site_id, :feedtype, :approved, :url
+  attr_accessible :title, :description, :site_id, :feedtype, :approved, :url
   
   # Ensure a feed has an associated site (meanwhile confirming that its feed is valid)
-  before_validation :ensure_site
+  before_validation do |feed|
+    if feed.fetch 
+      feed.site = Site.by_link (feed.fetch.url || feed.url)
+    end
+  end
   belongs_to :site
   validates :site, :presence => true
+  validates_uniqueness_of :url
   
   has_and_belongs_to_many :users
   
-  has_many :feed_entries
+  has_many :feed_entries, :dependent => :destroy
+  
+  def self.correct
+    Feed.all.each { |feed|
+      begin
+        unless feed.title || feed.save
+          debugger unless feed.errors[:url][0] == "has already been taken"
+          feed.destroy
+        end
+      rescue Exception => e
+        debugger
+        feed.destroy
+      end
+    }
+  end
   
   # Return list of feed_entries by id for this feed
   def entry_ids
@@ -43,11 +62,6 @@ class Feed < ActiveRecord::Base
   
   # Before validating the record, get the site from the URL
   def ensure_site
-    if(fetch && (entry = @fetched.entries.first))
-      self.site = Site.by_link entry.url
-    else
-      self.errors.add :url, (@fetched ? "points to a feed with no entries" : "doesn't point to a feed")
-    end
   end
   
   # Get the external feed, setting the @fetched instance variable to point thereto
@@ -56,14 +70,18 @@ class Feed < ActiveRecord::Base
     begin
       @fetched = Feedzirra::Feed.fetch_and_parse(url)
       if @fetched.class == Fixnum
-        self.errors << url+" is not the URL of a feed"
+        self.errors.add :url, "is not the URL of a feed"
         @fetched = nil 
-      else
-        self.description = @fetched.title unless @fetched.title.blank?
+      elsif @fetched
+        self.title = (@fetched.title || "").truncate(255)
+        self.description = @fetched.description.truncate(255) unless @fetched.description.blank?
         self.url = @fetched.feed_url unless @fetched.feed_url.blank?
+      else
+        self.errors.add :url, "doesn't point to a feed"
       end
     rescue Exception => e
       @fetched = nil
+      self.errors.add :url, "doesn't point to a feed"
     end
     @fetched
   end
