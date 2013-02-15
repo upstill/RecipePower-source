@@ -176,15 +176,31 @@ function dialogResult( dlog, obj ) {
   to the dialog, if any. */
 function postError( jqXHR, dlog ) {
 	// Any error page we get we will <try> to present modally
-	result = jqXHR.responseText ? { errortext: jqXHR.responseText, area: "floating", how: "modal" } : null;
+	var jstruct = {};
+	debugger
+	if(jqXHR.responseText) {
+		// See if it's valid JSON
+		try
+		{
+			jstruct = JSON && JSON.parse(jqXHR.responseText) || $.parseJSON(jqXHR.responseText);
+		}
+		catch(e)
+		{
+			// Not valid JSON. Assume it's just a string error report
+			jstruct = { errortext: jqXHR.responseText, area: "floating", how: "modal" };
+		}
+	}
+	result = null;
 	// Stash the result in the dialog, if any
 	if(dlog != 'undefined') {
-	  if($('.notifications-panel', dlog).first) {
-		  $('.notifications-panel', dlog).html(jqXHR.responseText);
-		} else
-			dialogResult( dlog, result );
+			if(jstruct.code) {
+				// Replace the dialog with the code from the response
+				$(dlog).html(jstruct.code);
+			} else {
+				dialogResult( dlog, jstruct );
+			}
 	}
-	return result;
+	return jstruct;
 }
 
 /* Handle successful return of a JSON request by running whatever success function

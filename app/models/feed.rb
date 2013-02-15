@@ -3,24 +3,37 @@ require 'feedzirra'
 class Feed < ActiveRecord::Base
   attr_accessible :title, :description, :site_id, :feedtype, :approved, :url
   
-  # Ensure a feed has an associated site (meanwhile confirming that its feed is valid)
-  before_validation do |feed|
-    if feed.fetch 
-      feed.site = Site.by_link (feed.fetch.url || feed.url)
-    end
-  end
+  # Setup a feed properly: do a reality check on the url, populate the information
+  # fields (title, description...), and ensure it has an associated site
+  before_validation { |feed| feed.follow_url if (new_record? || url_changed?) }
+  
   belongs_to :site
   validates :site, :presence => true
-  validates_uniqueness_of :url
+  validates :url, :presence => true, :uniqueness => true
   
   has_and_belongs_to_many :users
   
   has_many :feed_entries, :dependent => :destroy
-  
+
+  # When a feed is built, the url may be valid for getting to a feed, but it may also
+  # alias to the url of an already-extant feed (no good). We also need to extract the title and description 
+  # from the feed, but only once. Thus, we "follow" the url once, when a new feed is created
+  # or the url changes. 
+  def follow_url 
+    # First, check out the feed
+    if fetch
+      self.title = (@fetched.title || "").truncate(255)
+      self.description = (@fetched.description || "").truncate(255)
+      self.url = @fetched.feed_url unless @fetched.feed_url.blank?
+      self.site = Site.by_link (@fetched.url || url)
+    end
+  end
+    
   def self.correct
     Feed.all.each { |feed|
       begin
-        unless feed.title || feed.save
+        feed.follow_url
+        unless feed.save
           debugger unless feed.errors[:url][0] == "has already been taken"
           feed.destroy
         end
@@ -60,27 +73,16 @@ class Feed < ActiveRecord::Base
     end
   end
   
-  # Before validating the record, get the site from the URL
-  def ensure_site
-  end
-  
   # Get the external feed, setting the @fetched instance variable to point thereto
   def fetch
     return @fetched if @fetched
     begin
       @fetched = Feedzirra::Feed.fetch_and_parse(url)
-      if @fetched.class == Fixnum
-        self.errors.add :url, "is not the URL of a feed"
-        @fetched = nil 
-      elsif @fetched
-        self.title = (@fetched.title || "").truncate(255)
-        self.description = @fetched.description.truncate(255) unless @fetched.description.blank?
-        self.url = @fetched.feed_url unless @fetched.feed_url.blank?
-      else
-        self.errors.add :url, "doesn't point to a feed"
-      end
+      @fetched = nil if @fetched.class == Fixnum
     rescue Exception => e
       @fetched = nil
+    end
+    unless @fetched
       self.errors.add :url, "doesn't point to a feed"
     end
     @fetched
@@ -142,7 +144,8 @@ class Feed < ActiveRecord::Base
   @@feedtypes = [
     [:Misc, 0], 
     [:Recipes, 1], 
-    [:Tips, 2]
+    [:Tips, 2],
+    [:News, 3]
   ]
   
   @@feedtypenames = []

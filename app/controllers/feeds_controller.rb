@@ -6,7 +6,7 @@ class FeedsController < ApplicationController
     @feed = Feed.find(params[:id])
     @feed.approved = params[:approve] == 'Y'
     @feed.save
-    flash[:message] = 'Feedthrough '+(@feed.approved ? "Approved" : "Blocked")
+    flash[:notice] = 'Feedthrough '+(@feed.approved ? "Approved" : "Blocked")
     redirect_to feeds_path
   end
   
@@ -43,16 +43,16 @@ class FeedsController < ApplicationController
   
   # Add a user to the friends of the current user
   def collect
-    @feed = Feed.find params[:id]      
+    @feed = Feed.find params[:id]
     user = current_user_or_guest
     if @feed.user_ids.include?(user.id)
-      flash[:notice] = "You're already subscribed to '#{@feed.description}'."
+      flash[:notice] = "You're already subscribed to '#{@feed.title}'."
     else
       @feed.approved = true
-      @feed.users << user unless 
+      @feed.users << user 
       @feed.save
       @node = user.add_feed @feed
-      flash[:notice] = "Now feeding you with '#{@feed.description}'."
+      flash[:notice] = "Now feeding you with '#{@feed.title}'."
     end
     respond_to do |format|
       format.html { redirect_to collection_path }
@@ -94,17 +94,25 @@ class FeedsController < ApplicationController
   # POST /feeds.json
   def create
     user = current_user_or_guest
-    if @feed = Feed.where(url: params[:feed][:url]).first
-      @feed.update_attributes(params[:feed])
-    else
-      @feed = Feed.create(params[:feed])
+    @feed = Feed.create params[:feed]
+    # URLs uniquely identify feeds, so we may have clashed with an existing one.
+    # If so, simply adopt that one.
+    # NB If so, we merrily ignore the other attributes being provided as parameters--if any
+    if @feed.errors.any?
+      @feed = (Feed.where url: @feed.url)[0] || @feed
     end
     if @feed.errors.any?
+      view_context.flash_errors_now @feed
       respond_to do |format|
-        format.html { render action: "new" }
-        format.json { render json: view_context.errors_helper(@feed, :url), status: :unprocessable_entity }
+        format.html { render action: "new", status: :unprocessable_entity }
+        format.json { 
+          @area = "floating"
+          @headless = true
+          dialog_boilerplate "new", "modal", status: :unprocessable_entity 
+        }
       end
     else
+      debugger
       redirect_to collect_feed_path(@feed)
     end
   end
@@ -113,7 +121,6 @@ class FeedsController < ApplicationController
   # PUT /feeds/1.json
   def update
     @feed = Feed.find(params[:id])
-
     respond_to do |format|
       if @feed.update_attributes(params[:feed])
         format.html { redirect_to @feed, notice: 'Feed was successfully updated.' }

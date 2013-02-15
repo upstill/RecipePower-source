@@ -251,23 +251,17 @@ module ApplicationHelper
     end
   end
   
-  # Report ActiveRecord errors in a nice alert div, suitable for interpolation on the page
+  def error_notification obj, attribute = nil, preface = nil
+    sentence = attribute ? (attribute.to_s.upcase+" "+enumerate_strs(obj.errors[attribute])+".") : obj.errors.full_messages.to_sentence
+    preface ||= "Problem while trying to #{params[:action]} the #{obj.class.to_s.downcase}"
+    preface+(sentence.blank? ? "." : ":<br>#{sentence}")
+  end
+  
+  # Report the current errors on a record in a nice alert div, suitable for interpolation on the page
   def errors_helper obj, attribute=nil
     unless obj.errors.empty?
-      sentence = attribute ? (attribute.to_s.upcase+" "+enumerate_strs(obj.errors[attribute])+".") : obj.errors.full_messages.to_sentence
-      msg = "Problem while trying to #{params[:action]} the #{obj.class.to_s.downcase}: #{sentence}"
-      notification_out msg, :error
+      notification_out error_notification(obj, attribute), :error
     end
-  end
-      
-  # Present the current flash messages in a friendly alert format.
-  def flash_helper
-    fl = ""
-    flash.each do |name, msg|
-      fl << notification_out(msg, name) unless msg.blank? # ...because this message may have been cleared earlier...
-      flash[name] = nil
-    end
-    return fl.html_safe
   end
   
   def notification_out(msg, level)
@@ -286,6 +280,28 @@ module ApplicationHelper
         #{msg}
       </div>
     }.html_safe
+  end
+  
+  ### The following three methods post object errors into the flash and present them later ###
+  
+  # Stick ActiveRecord errors into the flash for presentation at the next action
+  def flash_errors obj, preface = ""
+    flash[:error] = error_notification obj, nil, preface
+  end
+  
+  # Stick ActiveRecord errors into the flash for presentation now
+  def flash_errors_now obj, preface = ""
+    flash.now[:error] = error_notification obj, nil, preface
+  end
+
+  # Present the current flash messages in a friendly alert format.
+  def flash_helper
+    fl = ""
+    flash.each do |name, msg|
+      fl << notification_out(msg, name) unless msg.blank? # ...because this message may have been cleared earlier...
+      flash[name] = nil
+    end
+    return fl.html_safe
   end
 
   # Deploy the links for naming the user and/or signing up/signing in
@@ -396,8 +412,8 @@ module ApplicationHelper
     logger.debug "dialogHeader for "+globstring({dialog: which, area: area, layout: @layout, ttl: ttl})
     classname = which.to_s
     ttlspec = ttl ? (" title=\"#{ttl}\"") : ""
-
-    %Q{<div id="recipePowerDialog" class="modal hide #{classname} dialog #{area}" #{ttlspec}>
+    head = @headless ? "" : %Q{<div id="recipePowerDialog" class="modal hide #{classname} dialog #{area}" #{ttlspec}>}
+    %Q{#{head}
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h3>#{ttl}</h3>
@@ -415,6 +431,7 @@ module ApplicationHelper
   end
 
   def dialogFooter()
+    return if @headless
     "</div><br class='clear'>".html_safe
   end
 end
