@@ -1,15 +1,6 @@
 class CollectionController < ApplicationController
   layout "collection"
-  before_filter :setup
   after_filter :save_browser
-  
-  def setup
-    @user_id = current_user_or_guest_id 
-    @user = User.find(@user_id)
-    @collection = @user.browser
-    # Initialize any entities for which we're building a New dialog on the page
-    @feed = Feed.new
-  end    
   
   def save_browser
     @user.save

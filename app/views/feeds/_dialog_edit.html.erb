@@ -1,0 +1,16 @@
+<%# Fields for an edit-feed dialog %>
+<%= dialogHeader :edit_feed, "Edit Feed", @area %>
+	<%= simple_form_for @feed, html: { class: "new_feed json", 'data-type' => :json } do |f| %>
+		<div class="modal-body">
+		  <%= flash_helper %>
+		  <%= f.input :title %>
+		  <%= f.input :description, input_html: { cols: 125, rows: 1 } %>
+		  <%= f.input :url, input_html: { cols: 125, rows: 1 } %>
+		  <%= f.input :approved %>
+		  <%= f.input :feedtype, collection: Feed.feedtype_selection %>
+		</div>
+		<div class="modal-footer">
+			<%= f.button :submit, "Save" %>
+	  </div>
+	<% end %>
+<%= dialogFooter %>

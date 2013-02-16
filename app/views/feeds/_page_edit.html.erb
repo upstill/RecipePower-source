@@ -1,0 +1,13 @@
+<h3>Editing feed</h3>
+
+<%= render 'form' %>
+<% permitted_to?(:destroy, :feeds) do %>
+  <%= link_to('Destroy', @feed, :method => :delete, :class => "btn btn-mini btn-danger", confirm: 'Are you sure?') %>
+<% end %>
+
+<%= link_to 'Show', @feed, class: "btn" %>
+<%= link_to 'Back', feeds_path, class: "btn" %>
+<hr>
+<h3>Preview</h3>
+<br class="clear">
+<%= feedlist %>

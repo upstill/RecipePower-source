@@ -1,11 +1,1 @@
-<h1>Editing feed</h1>
-
-<%= render 'form' %>
-<% permitted_to?(:destroy, :feeds) do %>
-  <%= link_to('Destroy', @feed, :method => :delete, :class => "btn btn-mini btn-danger", confirm: 'Are you sure?') %>
-<% end %>
-
-<%= link_to 'Show', @feed, class: "btn" %>
-<%= link_to 'Back', feeds_path, class: "btn" %>
-
-<%= feedlist %>
+<%= render (@partial ? 'feeds/dialog_edit' : 'page_edit') %>

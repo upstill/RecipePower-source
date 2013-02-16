@@ -5,7 +5,7 @@ class AddTitleToFeeds < ActiveRecord::Migration
     Feed.all.each { |feed|
       begin
         feed.follow_url
-        unless feed.save
+        unless feed.save  && feed.title
           feed.destroy
         end
       rescue Exception => e

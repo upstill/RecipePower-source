@@ -379,9 +379,14 @@ module ApplicationHelper
       "<div id=\"debug\">#{debug(params)}</div>".html_safe
 	end
 	
+	def button_to_dialog(label, path, how, where, options={})
+	  options[:class] = "btn btn-mini"
+	  link_to_dialog label, path, how, where, options
+	end
+	
 	# Embed a link to javascript for running a dialog by reference to a URL
-	def link_to_dialog(label, path, how, where, *options)
-  	link_to_function label, "recipePowerGetAndRunJSON('#{path}', '#{how}', '#{where}');", *options
+	def link_to_dialog(label, path, how, where, options={})
+  	link_to_function label, "recipePowerGetAndRunJSON('#{path}', '#{how}', '#{where}');", options
   end
 	
 	def globstring(hsh)

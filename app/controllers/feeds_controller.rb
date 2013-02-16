@@ -1,6 +1,7 @@
 require './lib/controller_utils.rb'
 
 class FeedsController < ApplicationController
+  layout "collection"
   
   def approve
     @feed = Feed.find(params[:id])
@@ -25,7 +26,6 @@ class FeedsController < ApplicationController
   # GET /feeds/1.json
   def show
     @feed = Feed.find(params[:id])
-
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @feed }
@@ -88,6 +88,7 @@ class FeedsController < ApplicationController
   # GET /feeds/1/edit
   def edit
     @feed = Feed.find(params[:id])
+    dialog_boilerplate "edit", "modal" 
   end
 
   # POST /feeds
@@ -112,7 +113,6 @@ class FeedsController < ApplicationController
         }
       end
     else
-      debugger
       redirect_to collect_feed_path(@feed)
     end
   end
