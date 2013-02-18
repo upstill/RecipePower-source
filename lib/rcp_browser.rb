@@ -565,16 +565,14 @@ class RcpBrowserElementAllRecipes < RcpBrowserElement
   
 end
 
-
 # Top-level recipe browser, comprising the standard lists, and adding a tag list
 class ContentBrowser < BrowserComposite
   
   def initialize(userid_or_argshash)
     args = (userid_or_argshash.class.name == "Fixnum") ? { userid: userid_or_argshash } : userid_or_argshash
-    @persisters = (@persisters || []) + [ :tagstxt, :specialtags ]
+    @persisters = @persisters || []
     super(0, args)
     @handle = ""
-    @tagstxt = "" unless @tagstxt
     if @children.empty?
       userarg = { userid: args[:userid] }
       @children = [
@@ -595,60 +593,6 @@ class ContentBrowser < BrowserComposite
     delete_selected_child
   end
   
-  def tagstxt()
-    @tagstxt
-  end
-  
-  # Accept new tags text, bust the cache, and return the new set of tags
-  def tagstxt=(txt)
-      # We either use the current tagstxt or the parameter, updating the tagstxt as needed
-      @tagstxt = txt
-      @tags = nil
-      tags
-  end
-  
-  # Use the 'querytags' string (in actuality a string provided by the unconstrained tags editor) to extract
-  # a set of tag tokens. The elements of the comma-separated string are either 1) a positive integer, representing
-  # a tag in the dictionary, or 2) an arbitrary other string on which to query.
-  # The tags method converts the latter into a transitory tag with a negative value, an index into an internally-stored
-  # array of pseudo-tags
-  def tags
-    return @tags if @tags # Use cache, if any
-    newspecial = {}
-    oldspecial = @specialtags || {}
-    # Accumulate resulting tags here:
-    @tags = []
-    @tagstxt.split(",").each do |e| 
-      e.strip!
-      if(e=~/^\d*$/) # numbers (sans quotes) represent existing tags that the user selected
-        @tags << Tag.find(e.to_i)
-      elsif e=~/^-\d*$/  # negative numbers (sans quotes) represent special tags from before
-        # Re-save this one
-        tag = Tag.new(name: (newspecial[e] = oldspecial[e]))
-        tag.id = e.to_i
-        @tags << tag
-      else
-        # This is a new special tag. Convert to an internal tag and add it to the cache
-        name = e.gsub(/\'/, '').strip
-        unless tag = Tag.strmatch( name, { matchall: true, uid: @userid }).first
-            tag = Tag.new( name: name )
-            tag.id = -1
-            # Search for an unused id
-            while(newspecial[tag.id.to_s] || oldspecial[tag.id.to_s]) do
-                tag.id = tag.id - 1 
-            end
-            newspecial[tag.id.to_s] = tag.name
-        end
-        @tags << tag
-      end
-    end
-    # Have to revise tagstxt to reflect special tags because otherwise, IDs will get 
-    # revised on the next read from DB
-    @tagstxt = @tags.collect { |t| t.id.to_s }.join ','
-    @specialtags = newspecial
-    @tags
-  end
-  
   # Uniquely, the top-level node collects a structure for itself and all
   # its children, then returns a YAML string
   def dump
@@ -666,31 +610,32 @@ class ContentBrowser < BrowserComposite
   end
   
   # Get the results of the current query.
-  def result_ids
+  def result_ids tags
     selected.result_ids tags
   end
   
-  def timestamp recipe
-    selected.timestamp recipe
+  # Return the timestamp for the given list tlement (generally, a recipe)
+  def timestamp obj
+    selected.timestamp obj
   end
   
   # How many pages in the current result set?
-  def npages
+  def npages tags
     selected.npages tags
   end
   
   # Are there any recipes waiting to come out of the query?
-  def empty?
+  def empty? tags
     selected.result_ids(tags).empty?
   end
   
   # Return a list of results based on the paging parameters
-  def results_paged
+  def results_paged tags
     selected.results_paged tags
   end
   
   # If the collection has returned no results, suggest what the problem might have been
-  def explain_empty
+  def explain_empty tags
     report = "It looks like #{selected.handle} doesn't have anything that matches your search."
     case tags.count
     when 0
@@ -719,6 +664,7 @@ class ContentBrowser < BrowserComposite
       end
     end
     sug ? report+"<br>You might try #{sug}." : report
+    { sug: sug, report: report }
   end
   
   def cur_page

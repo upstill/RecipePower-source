@@ -78,7 +78,7 @@ RP.collection.update = (params, url) ->
 	RP.edit_recipe.stop() # Close the recipe editor if it's open
 	jQuery.ajax
 		type: "POST"
-		url: (url || "collection/update")
+		url: (url || "collection/query")
 		data: params
 		dataType: "html"
 		beforeSend: (xhr) ->

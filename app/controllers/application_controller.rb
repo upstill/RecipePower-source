@@ -1,4 +1,5 @@
 require './lib/controller_authentication.rb'
+require './lib/seeker.rb'
 
 class ApplicationController < ActionController::Base
   before_filter :setup_collection
@@ -13,46 +14,47 @@ class ApplicationController < ActionController::Base
   def setup_collection
     @user_id = current_user_or_guest_id 
     @user = User.find(@user_id)
-    @collection = @user.browser
+    @browser = @user.browser
+    @seeker = ContentSeeker.new @browser, session[:seeker] # Default; other controllers may set up different seekers
     # Initialize any entities for which we're building a New dialog on the page
     @feed = Feed.new
   end
   
-    def permission_denied
-      action = case params[:action]
-      when "index"
-          "see the list of all"
-      when "show"
-          "examine"
-      when "new"
-          params[:controller] == "recipes" ? "cookmark" : "create new"
-      else
-          params[:action]
-      end
-      notice = "Sorry, but as a #{current_user_or_guest.role}, you're not allowed to #{action} #{params[:controller]}."
-      respond_to do |format|
-        format.html { redirect_to(:back, notice: notice) rescue redirect_to('/', notice: notice) }
-        format.xml  { head :unauthorized }
-        format.js   { head :unauthorized }
-      end
+  def permission_denied
+    action = case params[:action]
+    when "index"
+        "see the list of all"
+    when "show"
+        "examine"
+    when "new"
+        params[:controller] == "recipes" ? "cookmark" : "create new"
+    else
+        params[:action]
     end
+    notice = "Sorry, but as a #{current_user_or_guest.role}, you're not allowed to #{action} #{params[:controller]}."
+    respond_to do |format|
+      format.html { redirect_to(:back, notice: notice) rescue redirect_to('/', notice: notice) }
+      format.xml  { head :unauthorized }
+      format.js   { head :unauthorized }
+    end
+  end
 
-    def no_action_error
-        redirect_to home_path, :notice => "Sorry, action not found"
-    end
-    
-    def timeout_error
-        redirect_to authentications_path, :notice => "Sorry, access to that page took too long."
-    end
-    
-    def rescue_action_in_public
-        x=2
-    end
-    # alias_method :rescue_action_locally, :rescue_action_in_public    
-    
-    def orphantagid(tagid)
-        "orphantag_"+tagid.to_s
-    end
+  def no_action_error
+      redirect_to home_path, :notice => "Sorry, action not found"
+  end
+  
+  def timeout_error
+      redirect_to authentications_path, :notice => "Sorry, access to that page took too long."
+  end
+  
+  def rescue_action_in_public
+      x=2
+  end
+  # alias_method :rescue_action_locally, :rescue_action_in_public    
+  
+  def orphantagid(tagid)
+      "orphantag_"+tagid.to_s
+  end
       
   include ControllerAuthentication
   protect_from_forgery

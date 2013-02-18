@@ -1,8 +1,8 @@
 <div class="notifications-panel"><%= flash_helper %></div>
-<ul class="<%= @collection.list_type == :recipe ? "thumbnails" : "feed_entries" %>">
+<ul class="<%= @seeker.list_type == :recipe ? "thumbnails" : "feed_entries" %>">
 <%= collection_results %>
 </ul>
 <%= flash_helper %>
 <div class="digg_pagination">
-	<%= pagination_links @collection.npages, @collection.cur_page %>
+	<%= pagination_links @seeker.npages, @seeker.cur_page %>
 </div>

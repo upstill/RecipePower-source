@@ -9,7 +9,7 @@
 >>>>>>> installed simple_form
 <div class="nav affix content_browser">
 	<ul class="nav nav-tabs nav-stacked">
-		<% @collection.node_list.each do |node| %>
+		<% @browser.node_list.each do |node| %>
 		  <% @node = node %>
 		  <%= render partial: "collection/node" %>
 		<% end %>

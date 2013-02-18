@@ -193,7 +193,7 @@ module ApplicationHelper
   # Present the date and time the recipe was last touched by its current user
   def touch_date_elmt recipe
     if params[:controller] == "collection"
-      stmt = @collection.timestamp recipe
+      stmt = @seeker.timestamp recipe
     elsif td = recipe.touch_date
       stmt = "Last touched/viewed #{time_ago_in_words td} ago."
     else
