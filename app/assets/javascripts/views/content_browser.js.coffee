@@ -93,7 +93,7 @@ RP.content_browser.delete_element = (path) ->
 # We get called back with a new node to add to our children
 RP.content_browser.add_element = (path) ->
 	dlog = $('#recipePowerDialog.new_feed')
-	recipePowerRunModal dlog
+	recipePowerRunBootstrap dlog
 	
 # Handle adding a new entity into the collection:
 # -- post the message in the response

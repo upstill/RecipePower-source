@@ -45,6 +45,7 @@ class FeedsController < ApplicationController
   def collect
     @feed = Feed.find params[:id]
     user = current_user_or_guest
+    debugger
     if @feed.user_ids.include?(user.id)
       flash[:notice] = "You're already subscribed to '#{@feed.title}'."
     else
@@ -88,7 +89,7 @@ class FeedsController < ApplicationController
   # GET /feeds/1/edit
   def edit
     @feed = Feed.find(params[:id])
-    dialog_boilerplate "edit", "modal" 
+    dialog_boilerplate "edit", "floating" 
   end
 
   # POST /feeds
@@ -121,11 +122,11 @@ class FeedsController < ApplicationController
   # PUT /feeds/1.json
   def update
     @feed = Feed.find(params[:id])
-    respond_to do |format|
-      if @feed.update_attributes(params[:feed])
-        format.html { redirect_to @feed, notice: 'Feed was successfully updated.' }
-        format.json { head :no_content }
-      else
+    if @feed.update_attributes(params[:feed])
+      flash[:message] = 'Feed was successfully updated.'
+      redirect_to feeds_path
+    else
+      respond_to do |format|
         format.html { render action: "edit" }
         format.json { render json: @feed.errors[:url], status: :unprocessable_entity }
       end

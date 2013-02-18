@@ -33,7 +33,7 @@ def dialog_boilerplate(action, default_area=nil, renderopts={})
         renderopts[:layout] = (@layout || false)
         render_to_string action, renderopts # May have special iframe layout
       end
-      renderopts[:json] = { code: hresult, area: @area }
+      renderopts[:json] = { code: hresult, area: @area, how: "bootstrap" }
       render renderopts
     }
     format.js {

@@ -74,7 +74,9 @@ function runResponse(responseData) {
 			if(responseData.how == "modeless")
 				placed = injectDialog(code, responseData.area, true);
 			else if(responseData.how == "modal") // at_top and at_left run modelessly
-				placed = runModalDialog(code, responseData.area);					
+				placed = runModalDialog(code, responseData.area);	
+			else if(responseData.how == "bootstrap") 
+			  placed = recipePowerRunBootstrap(injectDialog(code, responseData.area, false));				
 
 			if (!placed) { // Force the page to be displayed. XXX Does nothing to the address bar
 				// $('#container').data("pending_page", code ); // Stash for doError function
@@ -163,11 +165,10 @@ function dialogOnEvent(what_event, dlog, entity) {
 // OR--if obj is undefined--return the stored struct
 function dialogResult( dlog, obj ) {
 	if(dlog) {
-		if(obj == undefined) {
+		if(obj == undefined)
 			return $(dlog).data("dialog_result");
-		} else {
+		else
 			$(dlog).data("dialog_result", obj);
-		}
 	}
 }
 
@@ -268,7 +269,7 @@ function runModalDialog(body, area) {
 // Take a Boostrap dialog and run it modally. Trap the 
 // form submission event to give us a chance to get JSON data and inject it into the page
 // rather than do a full page reload.
-function recipePowerRunModal(dlog) {
+function recipePowerRunBootstrap(dlog) {
 	$(dlog).on('shown', function() {
 		$('textarea', dlog).focus();
 	});
@@ -300,6 +301,7 @@ function recipePowerRunModal(dlog) {
 				closeDialog(dlog);
 		return process_result_normally;		
 	});
+	return true;
 }
 
 // Inject the dialog on the current document, using the given HTML code
