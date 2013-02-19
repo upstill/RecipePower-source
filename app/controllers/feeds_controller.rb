@@ -14,12 +14,29 @@ class FeedsController < ApplicationController
   # GET /feeds
   # GET /feeds.json
   def index
-    @feeds = permitted_to?(:approve, :feeds) ? Feed.all : Feed.where(:approved => true)
+    @feeds = permitted_to?(:approve, :feeds) ? Feed.scoped : Feed.where(:approved => true)
+    @seeker = FeedSeeker.new @feeds, session[:seeker] # Default; other controllers may set up different seekers
     @user = current_user_or_guest
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: @feeds }
     end
+  end
+  
+  # Query takes either a query string or a specification of page number
+  # We return a recipe list IFF the :cached parameter is not set
+  def query
+    @feeds = permitted_to?(:approve, :feeds) ? Feed.scoped : Feed.where(:approved => true)
+    @seeker = FeedSeeker.new @feeds, session[:seeker] # Default; other controllers may set up different seekers
+    @user = current_user_or_guest
+    if tagstxt = params[:tagstxt]
+      @seeker.tagstxt = tagstxt
+    end
+    if page = params[:cur_page]
+      @seeker.cur_page = page.to_i
+    end
+    session[:seeker] = @seeker.store
+    render '_relist', :layout=>false
   end
 
   # GET /feeds/1
@@ -45,7 +62,6 @@ class FeedsController < ApplicationController
   def collect
     @feed = Feed.find params[:id]
     user = current_user_or_guest
-    debugger
     if @feed.user_ids.include?(user.id)
       flash[:notice] = "You're already subscribed to '#{@feed.title}'."
     else

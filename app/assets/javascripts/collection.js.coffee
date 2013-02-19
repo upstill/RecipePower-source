@@ -66,12 +66,12 @@ jQuery ->
 	$(".pageclickr").click collection_pager
 
 collection_tagchange = (params, url) ->
-	RP.collection.update $('form.query_form').serialize()
+	RP.collection.update $('form.query_form').serialize(), $('form.query_form')[0].action
 
 collection_pager = (evt) ->
 	# Respond to page selection: replace results list
 	# Pagination spans have an associated value with the page number
-	RP.collection.update { cur_page: this.getAttribute("value") }
+	RP.collection.update { cur_page: this.getAttribute("value") }, this.dataset.url
 
 RP.collection.update = (params, url) ->
 	$('div.loader').addClass "loading" # show progress indicator
@@ -86,7 +86,7 @@ RP.collection.update = (params, url) ->
 		success: (resp, succ, xhr) ->
 			# Explicitly update the collection list
 			$('div.loader').removeClass "loading" # Remove progress indicator
-			$('div.collection_list')[0].innerHTML	= resp	
+			$('.collection_list')[0].innerHTML	= resp	
 			$(".pageclickr").click(collection_pager)
 			RP.rcp_list.onload()
 			window.scrollTo(0,0)

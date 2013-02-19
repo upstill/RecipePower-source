@@ -6,6 +6,9 @@ RP::Application.routes.draw do
       post 'remove' # Remove the feed from the current user's set
       post 'approve' # (Admin only) approve the feed for presentation
     end
+    collection do
+      post 'query' # Change the selection query
+    end
   end
 
   resources :thumbnails

@@ -28,7 +28,7 @@ class Candihash < Hash
     # Return the keys as an integer array, sorted by number of hits
     # 'rankings' is an array of rid/ranking pairs, denoting the place of 
     # each recipe in some prior ordering. Use that ranking to constrain the output
-    def results (rankings)
+    def results (rankings = nil)
     	# Extract the keys and sort them by success in matching
     	if rankings.blank?
       	return self.delete_if { |k, v| v == 0 }.sort { |k1, k2| self[k1] <=> self[k2] }.map { |k, v| k.to_i }

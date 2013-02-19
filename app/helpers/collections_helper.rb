@@ -7,10 +7,13 @@ module CollectionsHelper
   		when Recipe
   			@recipe = element
   		  @recipe.current_user = @user_id
-  		  render("shared/recipe_grid")
+  		  render "shared/recipe_grid"
   		when FeedEntry
   		  @feed_entry = element
-  		  render("shared/feed_entry")
+  		  render "shared/feed_entry"
+  		when Feed
+  		  @feed = element
+  		  render "feeds/feed"
   		else
   			"<p>(Mysterious list element of type #{element.class.to_s})</p>"
   		end

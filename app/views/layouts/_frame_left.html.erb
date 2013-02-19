@@ -13,12 +13,12 @@
 		  <% @node = node %>
 		  <%= render partial: "collection/node" %>
 		<% end %>
+		<% if params[:controller] != "collection" %>
+			<a href="<%= collection_path %>"><div class="content_browser_cover"></div></a>
+		<% end %>
 	</ul>
-		<hr>
+	<hr>
 	<div id="footer_nav_links">
 		<%= footer_navlinks %>
 	</div>
 </div>
-<%# Place the new-feed dialog (invisible) %>
-<%= render "feeds/dialog_new" %>
-<%# feedback_tab(:position => 'left') %>

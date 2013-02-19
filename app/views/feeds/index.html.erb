@@ -1,4 +1,5 @@
-<h3>Listing Feeds</h3>
+<h3>Feeds</h3>
+If you have copied a link to a feed, add it by clicking <%= link_to_function 'here', %Q{recipePowerGetAndRunJSON("feeds/new", "modal", "floating")}, class: "btn" %>. Or, browse for feeds below.
 <table class="table table-striped">
   <thead>
     <tr>
@@ -12,38 +13,8 @@
       <th>Actions</th>
     </tr>
   </thead>
-  <tbody>
-    <% @feeds.each do |feed| %>
-      <tr>
-        <td><%= feed.id.to_s %></td>
-        <td>
-          <%= link_to feed.title.truncate(80), feed_path(feed) %><br>
-          <%= feed.description  %><br>
-          <%= link_to feed.url.truncate(40), feed.url %>
-        </td>
-        <td><%= feed.feedtypename %></td>
-        <td><%= link_to feed.site.name, site_path(feed.site) %></td>
-        <% permitted_to?(:approve, :feeds) do %>
-          <td><%= feed.approved ? "Y" : (feed.approved.nil? ? "" : "N") %></td>
-        <% end %>
-        <td>
-          <% if @user.feeds.include?(feed) %>
-            <%= link_to 'Unsubscribe', remove_feed_path(feed), class: "btn btn-mini" %>
-          <% else %>
-            <%= link_to 'Subscribe', collect_feed_path(feed), class: "btn btn-mini" %>
-          <% end %>
-          <% permitted_to?(:edit, :feeds) do %>
-					  <%= button_to_dialog 'Edit', edit_feed_path(feed), "modal", "floating" %>
-          <% end %>
-          <% permitted_to?(:destroy, :feeds) do %>
-            <%= link_to('Destroy', feed, :method => :delete, :class => "btn btn-mini btn-danger", confirm: 'Are you sure?') %>
-          <% end %>
-        </td>
-      </tr>
-    <% end %>
+  <tbody class="collection_list">
+		<%= render "relist" %>
   </tbody>
 </table>
 
-<br />
-
-<%= link_to 'New Feed', new_feed_path, class: "btn" %>

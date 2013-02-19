@@ -117,16 +117,17 @@ class BrowserElement
   	end
   end
   
-  # How many pages in the current result set?
-  def npages(tagset)
-    (self.result_ids(tagset).count+(@@page_length-1))/@@page_length
-  end
-  
   # Are there any recipes waiting to come out of the query?
   def empty?(tagset)
       self.result_ids(tagset).empty?
   end
   
+=begin
+  # How many pages in the current result set?
+  def npages(tagset)
+    (self.result_ids(tagset).count+(@@page_length-1))/@@page_length
+  end
+
   # Return a list of results based on the query tags and the paging parameters
   def results_paged tagset
     npg = npages tagset
@@ -143,6 +144,7 @@ class BrowserElement
     end
     convert_ids ids[first...ixbound]
   end
+=end
   
   def convert_ids list
     list.collect { |rid| Recipe.where( id: rid ).first }.compact
@@ -263,7 +265,7 @@ end
 class RcpBrowserComposite < BrowserComposite
 end
 
-# Element for all the recipes for a user (no children)
+# Element for all the entries for a feed
 class FeedBrowserElement < BrowserElement
   attr_accessor :feedid
   
@@ -330,7 +332,7 @@ class FeedBrowserComposite < BrowserComposite
   end
   
   def add_path
-    "/feeds/new"
+    "/feeds"
   end
   
   def add_by_content obj
@@ -607,6 +609,10 @@ class ContentBrowser < BrowserComposite
   
   def node_list
     @children.collect { |child| child.node_list true }.flatten
+  end
+  
+  def convert_ids list
+    selected.convert_ids list
   end
   
   # Get the results of the current query.

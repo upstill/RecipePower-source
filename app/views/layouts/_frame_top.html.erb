@@ -22,7 +22,7 @@
 	  	</ul>
 		<ul class="nav">
 			<li>
-				<%= form_tag(@seeker.query_path, :method => "get", :class => "navbar-form form-search query_form") do %>
+				<%= form_tag(@seeker.query_path, :method => "post", :class => "navbar-form form-search query_form") do %>
 					<div id="collection_query_tokens">
 						<%= text_field_tag :tagstxt, "#{@seeker.tagstxt}", "data-pre" => @seeker.tags.map(&:attributes).to_json, :placeholder => "Seek and ye shall find...", :class => "search-query" %>
 					</div>

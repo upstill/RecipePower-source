@@ -45,8 +45,7 @@
 	margin-bottom: 0px
 }
 
-.RcpBrowser.active {
-	
+.RcpBrowser.active  {
 }
 
 .RcpBrowser.addlink {
@@ -181,6 +180,17 @@
 <<<<<<< HEAD
 >>>>>>> Adding feeds now smoother
 =======
+
+div.content_browser_cover {
+	width: 300px;
+	position: absolute;
+	top: 0;
+	height: 100%;
+  z-index:    10;
+  background: rgba( 255, 255, 255, .45 ) 
+              50% 50% 
+              no-repeat;
+}
 
 div.content_browser {
 	width: 270px;

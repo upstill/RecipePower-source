@@ -1,20 +1,28 @@
+require "candihash.rb"
+
 class Seeker < Object
   
+  @@page_length = 20
+
   # Save the Seeker data into session store
   def store
     # Serialize structure consisting of tagstxt and specialtags
-    YAML::dump( { :tagstxt => (@tagstxt || ""), :kind => @kind } ) 
+    savestr = YAML::dump( { :tagstxt => (@tagstxt || ""), :kind => @kind, :page => @cur_page || 1 } ) 
+    back = YAML::load(savestr)
+    savestr
   end
   
   def initialize affiliate, datastr=nil
-    case @affiliate = affiliate
-    when ContentBrowser
-      @kind = 1
-    when FeedBrowser
-      @kind = 2
-    end
+    @affiliate = affiliate
     prior = !datastr.blank? && YAML::load(datastr)
-    @tagstxt = (prior && (prior.kind == kind)) ? prior[:tagstxt] : "" 
+    if prior && (prior[:kind] == @kind)
+      debugger
+      @tagstxt = prior[:tagstxt] || ""
+      @cur_page = prior[:page] || 1
+    else
+      @tagstxt = "" 
+      @cur_page = 1
+    end
   end
   
   def tagstxt()
@@ -71,63 +79,51 @@ class Seeker < Object
     @tags
   end
   
-  # Get the results of the current query.
-  def result_ids
-    @affiliate.result_ids tags
-  end
-  
-  def timestamp obj
-    @affiliate.timestamp obj
-  end
-  
-  # How many pages in the current result set?
-  def npages
-    @affiliate.npages tags
-  end
-  
   # Are there any recipes waiting to come out of the query?
   def empty?
-    @affiliate.result_ids(tags).empty?
+    result_ids.empty?
   end
   
-  # Return a list of results based on the paging parameters
+  def npages
+    (result_ids.count+(@@page_length-1))/@@page_length
+  end
+  
+  def cur_page
+    @cur_page
+  end
+  
+  def cur_page=(pagenum)
+    @cur_page= pagenum
+  end
+  
+  # Return a list of results based on the query tags and the paging parameters
   def results_paged
-    @affiliate.results_paged tags
+    npg = npages
+    ids = result_ids 
+    first = 0
+    ixbound = ids.count 
+    if npg > 1
+      # Clamp current page to last page
+      self.cur_page = npg if cur_page > npg
+      # Now get index bounds for the records on the page
+      first = (cur_page-1)*@@page_length
+      last = first+@@page_length
+      ixbound = last if ixbound > last
+    end
+    convert_ids ids[first...ixbound]
+  end
+
+end
+
+class ContentSeeker < Seeker
+  
+  def initialize(affiliate, strdata)
+    super
+    @kind = 1
   end
   
-  # If the entity has returned no results, suggest what the problem might have been
-  def explain_empty
-    explanation = @affiliate.explain_empty tags
-=begin
-    report = "It looks like #{selected.handle} doesn't have anything that matches your search."
-    case tags.count
-    when 0
-      sug = nil
-    when 1
-      sug = "a different tag or no tags at all up there"
-    else
-      sug = "removing a tag up there"
-    end
-    if selected.class.to_s =~ /Composite/ 
-      if selected.children.empty?
-        report = "There's no content here because you have no #{selected.content_name} selected."
-        sug = " getting one by clicking the '+' sign over there to the left"
-      elsif tags.empty?
-        name = selected.content_name
-        report = ((selected.children.count < 2) ? "This "+name.singularize+" doesn't" : "These "+name+" don't")+" appear to have any content."
-        sug = nil
-      else
-        report = "It looks like there isn't anything that matches your search in '#{selected.handle}'."
-      end
-    else # Element
-      if tags.empty?
-        content = selected.content_name == "Feeds" ? "Entries" : "Recipes"
-        report = "#{selected.handle} doesn't appear to have any #{content.downcase} at present."
-        sug = nil
-      end
-    end
-=end
-    explanation[:sug] ? explanation[:report]+"<br>You might try #{explanation[:sug]}." : explanation[:report]
+  def query_path
+    "/collection/query"
   end
   
   def cur_page
@@ -138,20 +134,86 @@ class Seeker < Object
     @affiliate.cur_page= pagenum
   end
   
+  def convert_ids list
+    @affiliate.convert_ids list
+  end
+  
+  def timestamp obj
+    @affiliate.timestamp obj
+  end
+  
   def list_type
     @affiliate.list_type
   end
-
-end
-
-class ContentSeeker < Seeker
-  def query_path
-    "/collection/query"
+  
+  # Get the results of the current query.
+  def result_ids
+    @affiliate.result_ids tags
+  end
+  
+  # If the entity has returned no results, suggest what the problem might have been
+  def explain_empty
+    explanation = @affiliate.explain_empty tags
+    explanation[:sug] ? explanation[:report]+"<br>You might try #{explanation[:sug]}." : explanation[:report]
   end
 end
 
 class FeedSeeker < Seeker
+  
+  def initialize(affiliate, strdata)
+    super
+    # The affiliate is an ActiveRecord relation, the set of candidate feeds
+    @kind = 2
+  end
+
   def query_path
     "/feeds/query"
+  end
+  
+  def convert_ids list
+    Feed.where(id: list)
+  end
+  
+  def list_type
+    :feed
+  end
+  
+  # Get the results of the current query.
+  def result_ids
+  	return @results if @results # Keeping a cache of results
+    if tags.empty?
+      @results = @affiliate.map(&:id)
+    else
+      # We purge/massage the list only if there is a tags query here
+      # Otherwise, we simply sort the list by mod date
+      # Convert candidate array to a hash recipe_id=>#hits
+      candihash = Candihash.new @affiliate.map(&:id)
+            
+      # Rank/purge for tag matches
+      tags.each { |tag| 
+          # candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
+          # Get candidates by matching the tag's name against recipe titles and comments
+          candihash.apply @affiliate.where("title LIKE ?", "%#{tag.name}%").map(&:id)
+          candihash.apply @affiliate.where("description LIKE ?", "%#{tag.name}%").map(&:id)
+          debugger
+          Site.where("home LIKE ?", "%#{tag.name}%").each { |site| candihash.apply site.feed_ids }
+      }
+      # Convert back to a list of results
+      @results = candihash.results.reverse
+  	end
+  end
+
+  # If the entity has returned no results, suggest what the problem might have been
+  def explain_empty
+    report = "It looks like there aren't any feeds that match your search"
+    case tags.count
+    when 0
+      sug = nil
+    when 1
+      sug = "a different tag or no tags at all up there"
+    else
+      sug = "removing a tag up there"
+    end
+    report+((sug && ".<br>You might try #{sug}.") || ".")
   end
 end
