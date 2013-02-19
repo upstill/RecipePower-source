@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130213003752) do
+ActiveRecord::Schema.define(:version => 20130219214258) do
 
   create_table "authentications", :force => true do |t|
     t.integer  "user_id"
@@ -246,7 +246,7 @@ ActiveRecord::Schema.define(:version => 20130213003752) do
 
   create_table "users", :force => true do |t|
     t.string   "username"
-    t.string   "email",                                :default => "", :null => false
+    t.string   "email",                                :default => "",    :null => false
     t.string   "password_hash"
     t.string   "password_salt"
     t.datetime "created_at"
@@ -280,6 +280,7 @@ ActiveRecord::Schema.define(:version => 20130213003752) do
     t.text     "invitation_message"
     t.integer  "channel_referent_id",                  :default => 0
     t.text     "browser_serialized"
+    t.boolean  "private",                              :default => false
   end
 
   add_index "users", ["confirmation_token"], :name => "index_users_on_confirmation_token", :unique => true

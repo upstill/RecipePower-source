@@ -1,4 +1,6 @@
 class UsersController < ApplicationController
+  layout "collection"
+  
   rescue_from ActiveRecord::RecordNotFound, :with => :not_found
   before_filter :login_required, :except => [:new, :create, :identify]
   before_filter :authenticate_user!, :except => [:show, :index, :identify]
@@ -8,11 +10,17 @@ class UsersController < ApplicationController
     @focus_selector = "#user_login"
   end
   
-  # GET /tags
-  # GET /tags.xml
+  # GET /users
+  # GET /users.xml
   def index
       # 'index' page may be calling itself with filter parameters in the name and tagtype
       @Title = "Users"
+      @user = current_user_or_guest
+      @isChannel = params[:channel] && (params[:channel]=="true")
+      @users = @isChannel ? 
+        User.where("channel_referent_id > 0") : 
+        User.where("channel_referent_id = 0 AND id not in (?)", @user.followee_ids + [@user.id, 4, 5])
+      @seeker = FriendSeeker.new @users, session[:seeker] # Default; other controllers may set up different seekers
       # @filtertag.tagtype = params[:tag][:tagtype].to_i unless params[:tag][:tagtype].blank?
       @userlist = User.scoped.order("id").page(params[:page]).per_page(50)
     respond_to do |format|
@@ -20,6 +28,50 @@ class UsersController < ApplicationController
       format.html # index.html.erb
       format.xml  { render :xml => @taglist }
     end
+  end
+  
+  # Add a user or channel to the friends of the current user
+  def collect
+    @friend = User.find params[:id]
+    user = current_user_or_guest
+    debugger
+    if user.followee_ids.include?(@friend.id)
+      flash[:notice] = "You're already following '#{@friend.handle}'."
+    else
+      @node = user.add_followee @friend
+      flash[:notice] = "You're now connected with '#{@friend.handle}'."
+    end
+    respond_to do |format|
+      format.html { redirect_to collection_path }
+      format.json { 
+        render( 
+          json: { 
+            processorFcn: "RP.content_browser.insert_or_select",
+            entity: with_format("html") { render_to_string :partial => "collection/node" }, 
+            notice: view_context.notification_out(notice, :notice) 
+          }, 
+          status: :created, 
+          location: @friend 
+        )
+      }
+    end
+  end
+  
+  # Query takes either a query string or a specification of page number
+  # We return a recipe list IFF the :cached parameter is not set
+  def query
+    @isChannel = params[:channel] && (params[:channel]=="true")
+    @users = @isChannel ? User.where("channel_referent_id > 0") : User.where(:channel_referent_id => 0)
+    @seeker = FriendSeeker.new @users, session[:seeker] # Default; other controllers may set up different seekers
+    @user = current_user_or_guest
+    if tagstxt = params[:tagstxt]
+      @seeker.tagstxt = tagstxt
+    end
+    if page = params[:cur_page]
+      @seeker.cur_page = page.to_i
+    end
+    session[:seeker] = @seeker.store
+    render '_relist', :layout=>false
   end
   
   def new
@@ -53,10 +105,6 @@ class UsersController < ApplicationController
   # If the user has provided an email address (whether in the 'new user' or 'existing user' section),
   # we try to match it to a user record. If no matchable email was provided, we create a new user.
   def create
-  end
-  
-  # Add a user to the friends of the current user
-  def collect
   end
   
   # Remove a user from the friends of the current user

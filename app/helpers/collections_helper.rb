@@ -14,6 +14,9 @@ module CollectionsHelper
   		when Feed
   		  @feed = element
   		  render "feeds/feed"
+  		when User
+  		  @user = element
+  		  render "users/user"
   		else
   			"<p>(Mysterious list element of type #{element.class.to_s})</p>"
   		end

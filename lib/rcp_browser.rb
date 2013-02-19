@@ -364,7 +364,7 @@ class RcpBrowserElementFriend < BrowserElement
     @persisters = (@persisters || []) << :friendid
     super
     @friendid = args[:friendid]
-    @handle = User.find(@friendid).username
+    @handle = User.find(@friendid).handle
   end
   
   def sources
@@ -435,12 +435,12 @@ class RcpBrowserChannelsAndFriends < RcpBrowserComposite
   end
   
   def add_path
-    "/user/#{user.id}/befriend?channel=#{@isChannel.to_s}"
+    "/users?channel=#{@isChannel.to_s}"
   end
   
   def add_by_content obj
-    if (obj.kind_of? User)
-      @children.unshift(new_elmt = RecipeBrowserElementFriend.new(@level+1, { user: obj, userid: obj.id }))
+    if (obj.kind_of? User) && (obj.channel? == @isChannel)
+      @children.unshift(new_elmt = RcpBrowserElementFriend.new(@level+1, { user: obj, friendid: obj.id }))
       new_elmt
     end 
   end

@@ -89,12 +89,6 @@ RP.content_browser.delete_element = (path) ->
 		error: (jqXHR, textStatus, errorThrown) ->
 			$('.notifications-panel').html jqXHR.responseText
 
-# Run a dialog to add an element to the collection browser. Upon success,
-# We get called back with a new node to add to our children
-RP.content_browser.add_element = (path) ->
-	dlog = $('#recipePowerDialog.new_feed')
-	recipePowerRunBootstrap dlog
-	
 # Handle adding a new entity into the collection:
 # -- post the message in the response
 # -- translate the 'entity' field of the response into a DOM entry
@@ -103,7 +97,6 @@ RP.content_browser.add_element = (path) ->
 
 RP.content_browser.div = RP.content_browser.div || $('<div></div>')
 RP.content_browser.insert_or_select = (resp) ->
-	debugger;
 	RP.content_browser.div.html(resp.entity)
 	div = RP.content_browser.div[0]
 	elmt = div.firstChild

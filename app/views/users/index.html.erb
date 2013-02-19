@@ -1,34 +1,14 @@
-<h3>Users</h3>
-<div id="allusers" >
-  <% unless @userlist.empty? %>
-	<table>
-	  <tr class="list_header">
-	    <th class="list_header">ID</th>
-	    <th>Username</th>
-	    <th>Full Name</th>
-	    <th>Email</th>
-	    <th># Cookmarks</th>
-		<th># Friends</th>
-		<th># Channels</th>
-		<th>Action</th>
-	  </tr>
-
-	<% @userlist.each do |user| %>
-	  <tr id="tagrow_<%= user.id.to_s %>">
-		<td class="tag_type"><%= user.id.to_s %></td>
-		<td><%= user.username %></td>
-		<td><%= user.fullname %></td>
-		<td><%= user.email %></td>
-		<td><%= user.recipes.count %></td>
-		<td><%= user.follows(false).count %></td>
-		<td><%= user.follows(true).count %></td>
-		<% if permitted_to? :edit, user %>
-	    	<td><%= link_to 'Edit', edit_user_path(user) %></td>
-	    	<td><%= link_to 'Destroy', user, confirm: "Are you sure about deleting this user? It's a rather drastic step.", method: :delete %></td>
-		<% end %>
-	  </tr>
-	<% end %>
-	</table>
-  <% end %>
-  <%= link_to 'New User', new_user_path %>
-</div>
+<h3><%= @isChannel ? "Available Channels" : "Possible Friends" %></h3>
+<table class="table table-striped">
+  <thead>
+    <tr>
+	    <th>Handle</th>
+	    <th>About</th>
+	    <th># Recipes</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody class="collection_list">
+		<%= render "relist" %>
+  </tbody>
+</table>

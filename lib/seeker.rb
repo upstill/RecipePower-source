@@ -16,7 +16,6 @@ class Seeker < Object
     @affiliate = affiliate
     prior = !datastr.blank? && YAML::load(datastr)
     if prior && (prior[:kind] == @kind)
-      debugger
       @tagstxt = prior[:tagstxt] || ""
       @cur_page = prior[:page] || 1
     else
@@ -158,24 +157,24 @@ class ContentSeeker < Seeker
   end
 end
 
-class FeedSeeker < Seeker
+class FriendSeeker < Seeker
   
   def initialize(affiliate, strdata)
     super
-    # The affiliate is an ActiveRecord relation, the set of candidate feeds
+    # The affiliate is an ActiveRecord relation, the set of candidate users
     @kind = 2
   end
 
   def query_path
-    "/feeds/query"
+    "/users/query"
   end
   
   def convert_ids list
-    Feed.where(id: list)
+    User.where(id: list)
   end
   
   def list_type
-    :feed
+    :user
   end
   
   # Get the results of the current query.
@@ -191,12 +190,12 @@ class FeedSeeker < Seeker
             
       # Rank/purge for tag matches
       tags.each { |tag| 
-          # candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
-          # Get candidates by matching the tag's name against recipe titles and comments
-          candihash.apply @affiliate.where("title LIKE ?", "%#{tag.name}%").map(&:id)
-          candihash.apply @affiliate.where("description LIKE ?", "%#{tag.name}%").map(&:id)
-          debugger
-          Site.where("home LIKE ?", "%#{tag.name}%").each { |site| candihash.apply site.feed_ids }
+        # candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
+        # Get candidates by matching the tag's name against recipe titles and comments
+        candihash.apply @affiliate.where("username LIKE ?", "%#{tag.name}%").map(&:id)
+        candihash.apply @affiliate.where("email LIKE ?", "%#{tag.name}%").map(&:id)
+        candihash.apply @affiliate.where("fullname LIKE ?", "%#{tag.name}%").map(&:id)
+        candihash.apply @affiliate.where("about LIKE ?", "%#{tag.name}%").map(&:id)
       }
       # Convert back to a list of results
       @results = candihash.results.reverse
@@ -205,7 +204,7 @@ class FeedSeeker < Seeker
 
   # If the entity has returned no results, suggest what the problem might have been
   def explain_empty
-    report = "It looks like there aren't any feeds that match your search"
+    report = "It looks like there aren't any users that match your search"
     case tags.count
     when 0
       sug = nil

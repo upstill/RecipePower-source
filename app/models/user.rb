@@ -61,7 +61,7 @@ class User < ActiveRecord::Base
       where(conditions).first
     end
   end
-  
+
   # Add the feed to the browser's ContentBrowser and select it
   def add_feed feed
     feeds.unshift feed unless feeds.include? feed
@@ -69,13 +69,20 @@ class User < ActiveRecord::Base
     save # ...to preserve the selection
     bnode
   end
-  
+
   def delete_feed feed
     browser.delete_selected
     feeds.delete feed
     save
   end
-  
+
+  def add_followee friend
+    followees.unshift friend unless followees.include? friend
+    bnode = browser.select_by_content friend # Recreates the browser
+    save # ...to preserve the selection
+    bnode
+  end
+
   def delete_followee f
     browser.delete_selected
     followees.delete f
