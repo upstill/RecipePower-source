@@ -82,7 +82,7 @@ class FeedsController < ApplicationController
           }, 
           status: :created, 
           location: @feed 
-      })
+      )}
     end
   end
   
