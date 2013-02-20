@@ -4,7 +4,9 @@
 	<td><%= @user.recipes.count %></td>
 	<td><%= link_to (@user.channel? ? 'Add to Channels' : 'Make Friend'), collect_user_path(@user), :class => "btn btn-mini" %></td>
 	<% if permitted_to? :edit, @user %>
-		<td><%= link_to 'Edit', edit_user_path(@user), :class => "btn btn-mini" %></td>
+		<td><%# link_to 'Edit', edit_user_path(@user), :class => "btn btn-mini" %></td>
+		<td><%= link_to_function 'Edit', %Q{recipePowerGetAndRunJSON("#{edit_user_path(@user)}", "modal", "floating")}, :class => "btn btn-mini" %></td>
+		<td><%= link_to 'Hide', user_path(@user, user: { private: true }), :class => "btn btn-mini", method: :put %></td>
 		<td><%= link_to 'Destroy', @user, confirm: "Are you sure about deleting this user? It's a rather drastic step.", :class => "btn btn-mini btn-danger", method: :delete %></td>
 	<% end %>
 </tr>

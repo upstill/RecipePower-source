@@ -1,3 +1,71 @@
+function click_to_browser() {
+	var inside = elem;
+	var e = this.event;
+	var me = e.currentTarget;
+	elements = $('li.RcpBrowser')
+	var i=0; 
+	while (i < elements.length) {
+		var elem = elements[i];
+    var elemWidth = $(elem).width();
+    var elemHeight = $(elem).height();
+    var elemPosition = $(elem).offset();
+    var elemPosition2 = new Object;
+    elemPosition2.top = elemPosition.top + elemHeight;
+    elemPosition2.left = elemPosition.left + elemWidth;
+
+    if ((e.pageX > elemPosition.left && e.pageX < elemPosition2.left) && (e.pageY > elemPosition.top && e.pageY < elemPosition2.top)) {
+			inside = elem;
+		}
+		i = i+1;
+	}
+	if (inside) {
+		me.style.display = "none";
+		$(inside).click();
+	}
+}
+/* Submit a request to the server for interactive HTML. It's meant to be JSON specifying how 
+   to handle it, but if the controller doesn't produce JSON (or if the request gets redirected
+   to a controller which doesn't), the request may produce generic HTML, failing with an error 
+   but still providing the HTML. The HTML may be
+   either a dialog (in the form of a div with class 'dialog') or a full page. In turn, the full
+   page may have a dialog embedded in it (again, as a div.dialog). If a dialog, embedded or not,
+   we run it on the current page. If a full page without a dialog, we throw up our 
+   hands and just load the page.
+
+   If the request DOES return JSON, there are several possibilities:
+   -- any "page" attribute is treated as HTML, exactly as above
+   -- any "dialog" attribute is run on this page. The div containing the dialog may have classes
+			'at_left' or 'at_top', in which case they are run non-modally inside a div
+			Otherwise, run the dialog modally.
+   -- any "replacements" attribute is assumed to be a series of selector-value pairs, where the 
+		selectors stipulate elements to be replaced with the corresponding value
+   -- any "notification" attribute is used as the text for a notifier of success
+*/
+
+// This function can be tied to a link with only a URL to a controller for generating a dialog.
+// We will get the div and run the associated dialog.
+function recipePowerGetAndRunJSON(request, how, area ) {
+	how = how || "modal"
+	area = area || "floating"
+	request += (request.match(/\?/) ? "&" : "?") + "area=" + area
+	
+	$('span.query').text(request);
+	$.ajax( {
+		type: "GET",
+		dataType: "json",
+		url: request,
+		error: function(jqXHR, textStatus, errorThrown) {
+			$('span.source').text(jqXHR.responseText);
+			var responseData = postError(jqXHR);
+			runResponse(responseData);
+		},
+		success: function (responseData, statusText, xhr) {
+			responseData.how = responseData.how || how;
+			postSuccess(responseData); // Don't activate any response functions since we're just opening the dialog
+			runResponse(responseData);
+		}
+	});
+}
 
 /* Take an HTML stream and run a dialog from it. Assumptions:
   1) The body is a div element of class 'dialog'. (It will work if the 'div.dialog'
@@ -90,49 +158,6 @@ function runResponse(responseData) {
 	  	$('.notifications-panel').html(responseData.notice);
 			// jNotify( responseData.notice, { HorizontalPosition: 'center', VerticalPosition: 'top', TimeShown: 1200 } );
 	} 
-}
-
-/* Submit a request to the server for interactive HTML. It's meant to be JSON specifying how 
-   to handle it, but if the controller doesn't produce JSON (or if the request gets redirected
-   to a controller which doesn't), the request may produce generic HTML, failing with an error 
-   but still providing the HTML. The HTML may be
-   either a dialog (in the form of a div with class 'dialog') or a full page. In turn, the full
-   page may have a dialog embedded in it (again, as a div.dialog). If a dialog, embedded or not,
-   we run it on the current page. If a full page without a dialog, we throw up our 
-   hands and just load the page.
-
-   If the request DOES return JSON, there are several possibilities:
-   -- any "page" attribute is treated as HTML, exactly as above
-   -- any "dialog" attribute is run on this page. The div containing the dialog may have classes
-			'at_left' or 'at_top', in which case they are run non-modally inside a div
-			Otherwise, run the dialog modally.
-   -- any "replacements" attribute is assumed to be a series of selector-value pairs, where the 
-		selectors stipulate elements to be replaced with the corresponding value
-   -- any "notification" attribute is used as the text for a notifier of success
-*/
-
-// This function can be tied to a link with only a URL to a controller for generating a dialog.
-// We will get the div and run the associated dialog.
-function recipePowerGetAndRunJSON(request, how, area) {
-	if(area) 
-		request += (request.match(/\?/) ? "&" : "?") + "area=" + area
-	
-	$('span.query').text(request);
-	$.ajax( {
-		type: "GET",
-		dataType: "json",
-		url: request,
-		error: function(jqXHR, textStatus, errorThrown) {
-			$('span.source').text(jqXHR.responseText);
-			var responseData = postError(jqXHR);
-			runResponse(responseData);
-		},
-		success: function (responseData, statusText, xhr) {
-			responseData.how = responseData.how || how;
-			postSuccess(responseData); // Don't activate any response functions since we're just opening the dialog
-			runResponse(responseData);
-		}
-	});
 }
 
 // Determine either the callback (kind = "Fcn") or the message (kind="Msg")

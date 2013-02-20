@@ -74,14 +74,15 @@ class FeedsController < ApplicationController
     respond_to do |format|
       format.html { redirect_to collection_path }
       format.json { 
-        rs = with_format("html") do render_to_string :partial => "collection/node" end
-        json_data = { 
-          processorFcn: "RP.content_browser.insert_or_select",
-          entity: rs, 
-          notice: view_context.notification_out(notice, :notice) 
-        }
-        render json: json_data, status: :created, location: @feed 
-      }
+        render(
+          json: { 
+            processorFcn: "RP.content_browser.insert_or_select",
+            entity: with_format("html") { render_to_string :partial => "collection/node" }, 
+            notice: view_context.notification_out(notice, :notice) 
+          }, 
+          status: :created, 
+          location: @feed 
+      })
     end
   end
   

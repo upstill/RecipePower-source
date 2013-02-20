@@ -10,7 +10,7 @@ class User < ActiveRecord::Base
   before_save :serialize_browser
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :id, :username, :fullname, :about, :login,
+  attr_accessible :id, :username, :fullname, :about, :login, :private,
                 :email, :password, :password_confirmation, 
                 :recipes, :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens, :subscription_tokens
   attr_writer :browser
@@ -250,7 +250,7 @@ public
   # Return a 2-array of 1) the list of possible roles, and 2) the current role,
   # suitable for passing to options_for_select
   def role_select
-      [@@Roles.list, role_id]
+    @@Roles.list
   end
 
   # Class variable @@Super_user saves the super User

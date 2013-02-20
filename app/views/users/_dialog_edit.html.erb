@@ -1,0 +1,19 @@
+<%# Fields for an edit-user dialog %>
+<%= dialogHeader :edit_user, "Edit User", @area %>
+	<%= simple_form_for @user, html: { class: "edit_user json", 'data-type' => :json } do |f| %>
+		<div class="modal-body">
+		  <%= flash_helper %>
+		  <%= f.input :username %>
+		  <%= f.input :fullname, input_html: { cols: 125, rows: 1 } %>
+		  <%= f.input :about, label: "About Me", placeholder: "Who Are You? What Do You Eat?", input_html: { cols: 125, rows: 4 } %>
+		  <%= f.input :email, input_html: { cols: 125, rows: 1 } %>
+		  <%= f.input :private %>
+		  <% if permitted_to? :manage, @user %>
+				<%= f.input :role_id, label: "Role", collection: @user.role_select %>
+		  <% end %>
+		</div>
+		<div class="modal-footer">
+			<%= f.button :submit, "Update Details" %>
+		</div>
+	<% end %>
+<%= dialogFooter %>

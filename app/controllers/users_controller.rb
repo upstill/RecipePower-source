@@ -1,28 +1,34 @@
+require './lib/controller_utils.rb'
+
 class UsersController < ApplicationController
   layout "collection"
   
   rescue_from ActiveRecord::RecordNotFound, :with => :not_found
   before_filter :login_required, :except => [:new, :create, :identify]
   before_filter :authenticate_user!, :except => [:show, :index, :identify]
+  before_filter :setup_seeker, :only => [:index, :query ]
   # before_filter :declare_focus
   
   def declare_focus
     @focus_selector = "#user_login"
   end
   
+  def setup_seeker
+    @isChannel = params[:channel] && (params[:channel]=="true")
+    @users = @isChannel ? 
+      User.where("channel_referent_id > 0") : 
+      User.where("channel_referent_id = 0 AND id not in (?) AND private != true", @user.followee_ids + [@user.id, 4, 5])
+    @seeker = FriendSeeker.new @users, session[:seeker] # Default; other controllers may set up different seekers
+  end
+  
   # GET /users
   # GET /users.xml
   def index
-      # 'index' page may be calling itself with filter parameters in the name and tagtype
-      @Title = "Users"
-      @user = current_user_or_guest
-      @isChannel = params[:channel] && (params[:channel]=="true")
-      @users = @isChannel ? 
-        User.where("channel_referent_id > 0") : 
-        User.where("channel_referent_id = 0 AND id not in (?)", @user.followee_ids + [@user.id, 4, 5])
-      @seeker = FriendSeeker.new @users, session[:seeker] # Default; other controllers may set up different seekers
-      # @filtertag.tagtype = params[:tag][:tagtype].to_i unless params[:tag][:tagtype].blank?
-      @userlist = User.scoped.order("id").page(params[:page]).per_page(50)
+    # 'index' page may be calling itself with filter parameters in the name and tagtype
+    @Title = "Users"
+    @user = current_user_or_guest
+    # @filtertag.tagtype = params[:tag][:tagtype].to_i unless params[:tag][:tagtype].blank?
+    @userlist = User.scoped.order("id").page(params[:page]).per_page(50)
     respond_to do |format|
       format.json { render :json => @taglist.map { |tag| { :title=>tag.name+tag.id.to_s, :isLazy=>false, :key=>tag.id, :isFolder=>false } } }
       format.html # index.html.erb
@@ -34,7 +40,6 @@ class UsersController < ApplicationController
   def collect
     @friend = User.find params[:id]
     user = current_user_or_guest
-    debugger
     if user.followee_ids.include?(@friend.id)
       flash[:notice] = "You're already following '#{@friend.handle}'."
     else
@@ -60,8 +65,6 @@ class UsersController < ApplicationController
   # Query takes either a query string or a specification of page number
   # We return a recipe list IFF the :cached parameter is not set
   def query
-    @isChannel = params[:channel] && (params[:channel]=="true")
-    @users = @isChannel ? User.where("channel_referent_id > 0") : User.where(:channel_referent_id => 0)
     @seeker = FriendSeeker.new @users, session[:seeker] # Default; other controllers may set up different seekers
     @user = current_user_or_guest
     if tagstxt = params[:tagstxt]
@@ -129,6 +132,7 @@ class UsersController < ApplicationController
         @authentications = @user.authentications
     end
     @Title = "Edit Profile"
+    dialog_boilerplate "edit", "floating" 
   end
   
   def profile
@@ -152,7 +156,7 @@ class UsersController < ApplicationController
     if @user.update_attributes(params[:user])
       @user.refresh_browser # Assuming, perhaps incorrectly, that the browser contents have changed
       @Title = "Cookmarks from Update"
-      redirect_to recipes_path, :notice => "Your profile has been updated."
+      redirect_to collection_path, :notice => "Your profile has been updated."
     else
       @Title = "Edit Profile"
       render :action => 'edit'

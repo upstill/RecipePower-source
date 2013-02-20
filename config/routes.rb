@@ -73,6 +73,9 @@ RP::Application.routes.draw do
       get 'collect'
       post 'remove'
     end
+    collection do
+      post 'query' # Change the selection query
+    end
   end
   
   # Super-user can edit user info, starting with roles
