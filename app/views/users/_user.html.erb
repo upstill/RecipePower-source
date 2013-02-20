@@ -1,4 +1,4 @@
-<tr id="tagrow_<%= @user.id.to_s %>">
+<tr id="listrow_<%= @user.id.to_s %>">
 	<td><%= link_to @user.handle, user_path(@user) %></td>
 	<td><%= @user.about %></td>
 	<td><%= @user.recipes.count %></td>

@@ -74,7 +74,7 @@ class UsersController < ApplicationController
       @seeker.cur_page = page.to_i
     end
     session[:seeker] = @seeker.store
-    render '_relist', :layout=>false
+    render 'index', :layout=>false
   end
   
   def new
@@ -135,14 +135,6 @@ class UsersController < ApplicationController
     dialog_boilerplate "edit", "floating" 
   end
   
-  def profile
-    if @user = current_user
-      @authentications = @user.authentications
-    end
-    @Title = "Edit Profile"
-    render :action => 'edit'
-  end
-  
   # Ask user for an email address for login purposes
   def identify
     @user = User.new
@@ -150,13 +142,30 @@ class UsersController < ApplicationController
       # @user.apply_omniauth(omniauth)
     # end
   end
+  
+  def profile
+    if @user = current_user
+      @authentications = @user.authentications
+    end
+    @Title = "Edit Profile"
+    render :action => 'edit'
+  end
 
   def update
     @user = User.find params[:id]
     if @user.update_attributes(params[:user])
       @user.refresh_browser # Assuming, perhaps incorrectly, that the browser contents have changed
       @Title = "Cookmarks from Update"
-      redirect_to collection_path, :notice => "Your profile has been updated."
+      flash[:message] = (@user == current_user ? "Your profile" : @user.handle+"'s profile")+" has been updated."
+      respond_to do |format|
+        format.html { redirect_to collection_path }
+        format.json  { 
+          listitem = with_format("html") { render_to_string( partial: "user" ) }
+          render json: {
+            replacements: [ ["#listrow_"+@user.id.to_s, listitem], view_context.notifications_replacement ]
+          }
+        }
+      end
     else
       @Title = "Edit Profile"
       render :action => 'edit'

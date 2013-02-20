@@ -86,7 +86,7 @@ RP.collection.update = (params, url) ->
 		success: (resp, succ, xhr) ->
 			# Explicitly update the collection list
 			$('div.loader').removeClass "loading" # Remove progress indicator
-			$('.collection_list')[0].innerHTML	= resp	
+			$('div.content')[0].innerHTML	= resp	
 			$(".pageclickr").click(collection_pager)
 			RP.rcp_list.onload()
 			window.scrollTo(0,0)

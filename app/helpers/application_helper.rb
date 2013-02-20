@@ -250,7 +250,7 @@ module ApplicationHelper
       strs.join(', ')+" and " + last
     end
   end
-  
+	
   def error_notification obj, attribute = nil, preface = nil
     sentence = attribute ? (attribute.to_s.upcase+" "+enumerate_strs(obj.errors[attribute])+".") : obj.errors.full_messages.to_sentence
     preface ||= "Problem while trying to #{params[:action]} the #{obj.class.to_s.downcase}"
@@ -303,6 +303,16 @@ module ApplicationHelper
     end
     return fl.html_safe
   end
+  
+  # Helper to interpolate the notifications panel
+  def notifications_panel
+    %Q{<div class="notifications-panel">#{flash_helper}</div>}.html_safe
+	end
+	
+	# Returns a selector-value pair for replacing the notifications panel due to an update event
+	def notifications_replacement
+	  [ "div.notifications-panel", notifications_panel ]
+	end
 
   # Deploy the links for naming the user and/or signing up/signing in
   def user_status

@@ -130,6 +130,14 @@ function recipePowerGetAndRunHTML(request, params ) {
 function runResponse(responseData) {
 	// Wrapped in 'presentResponse', in the case where we're only presenting the results of the request
 	if(responseData) { // && !(typeof presentResponse === 'function' && presentResponse(responseData)))
+	  if (replacements = responseData.replacements) {
+			var i = 0;
+			while(i < replacements.length) {
+				replacement = replacements[i];
+				$(replacement[0]).replaceWith(replacement[1]);
+				i++;
+			}
+		}
 		if(code = responseData.code) {
 			var placed = false;
 			if(!responseData.how) {

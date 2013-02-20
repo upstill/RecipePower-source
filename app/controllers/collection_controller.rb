@@ -24,7 +24,7 @@ class CollectionController < ApplicationController
 
   # Render the results for the current state of the query and selected collection
   def relist
-    render '_relist.html.erb', :layout=>false
+    render '_relist', :layout=>false
   end
 
   # Update takes either a query string or a specification of a collection now selected
