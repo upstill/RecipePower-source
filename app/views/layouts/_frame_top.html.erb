@@ -17,7 +17,7 @@
 			    </ul>
 			</li>
 		<% else %>
-			<li><%= link_to_function "Sign In", %q{recipePowerGetAndRunJSON('authentications/new', 'modal')} %></li>
+			<li><%= link_to_dialog "Sign In", 'authentications/new', "bootstrap" %></li>
 	    <% end %>
 	  	</ul>
 		<ul class="nav">

@@ -24,10 +24,6 @@ module ApplicationHelper
   def encodeHTML(str)
       @@coder.encode str
   end
-  
-  def forgot_password_link
-    link_to_function "Forgot Password", %Q{recipePowerGetAndRunJSON('#{new_user_password_path}', 'modal')}
-  end
     
   def link_to_add_fields(name, f, association, *initializers)
     new_object = f.object.send(association).klass.new *initializers
@@ -395,7 +391,7 @@ module ApplicationHelper
 	end
 	
 	# Embed a link to javascript for running a dialog by reference to a URL
-	def link_to_dialog(label, path, how, where, options={})
+	def link_to_dialog(label, path, how="modal", where="floating", options={})
   	link_to_function label, "recipePowerGetAndRunJSON('#{path}', '#{how}', '#{where}');", options
   end
 	
@@ -423,26 +419,19 @@ module ApplicationHelper
   #   :captureRecipe
   #   :new_recipe (nee newRecipe)
   #   :sign_in
-  def dialogHeader( which, ttl=nil, area="floating")
+  def dialogHeader( which, ttl=nil, options)
+    area = options[:area] || "floating"
     logger.debug "dialogHeader for "+globstring({dialog: which, area: area, layout: @layout, ttl: ttl})
     classname = which.to_s
     ttlspec = ttl ? (" title=\"#{ttl}\"") : ""
-    head = @headless ? "" : %Q{<div id="recipePowerDialog" class="modal hide #{classname} dialog #{area}" #{ttlspec}>}
+    hide = options[:show] ? "" : "hide"
+    head = @headless ? "" : %Q{<div id="recipePowerDialog" class="modal dialog #{hide} #{classname} #{area}" #{ttlspec}>}
     %Q{#{head}
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h3>#{ttl}</h3>
       </div>
       <div class="notifications-panel"></div>}.html_safe
-=begin
-    flash_helper() +
-    %Q{<div class="" >}.html_safe +
-    ((@layout && @layout=="injector") ? 
-      content_tag(:div, 
-        link_to_function("X", "cancelDialog", style:"text-decoration: none;", id: "recipePowerCancelBtn"),
-        id: "recipePowerCancelDiv")
-    : "")
-=end
   end
 
   def dialogFooter()

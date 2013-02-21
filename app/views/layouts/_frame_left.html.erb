@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 <%# dialogDiv :edit_recipe, "Tag That Recipe!", "at_left", recipe_editor() %>
 <%# dialogHeader :edit_recipe, "Tag That Recipe!", "at_left" %>
 	<%# logger.debug render("recipes/form_edit_at_left") %>
@@ -7,16 +8,21 @@
 =======
 <%= dialogDiv :edit_recipe, "Tag That Recipe!", "at_left", recipe_editor() %>
 >>>>>>> installed simple_form
+=======
+>>>>>>> login dialogs behaving with errors
 <div class="nav affix content_browser">
 	<ul class="nav nav-tabs nav-stacked">
 		<% @browser.node_list.each do |node| %>
 		  <% @node = node %>
 		  <%= render partial: "collection/node" %>
 		<% end %>
-		<div class="content_browser_cover" onclick="click_to_browser();" style="display: <%= (params[:controller] != "collection") ? "block" : "none" %>"></div>
+		<div class="content_browser_cover" onclick="RP.content_browser.click_to_browser();" style="display: <%= (params[:controller] != "collection") ? "block" : "none" %>"></div>
 	</ul>
 	<hr>
 	<div id="footer_nav_links">
 		<%= footer_navlinks %>
 	</div>
 </div>
+<% if params[:controller] == "collection" %>
+	<%= dialogDiv :edit_recipe, "Tag That Recipe!", "at_left", recipe_editor() %>
+<% end %>

@@ -1,15 +1,12 @@
-<div class="dialog password_reset">
-
 <h3>Forgot your password?</h3>
-
-<%= form_for(resource, :as => resource_name, :url => password_path(resource_name), :html => { :method => :post }) do |f| %>
-  <%= devise_error_messages! %>
-
-  <div><%= f.label :login, "Username or Email (your choice)" %><br />
-  <%= f.text_field :login %></div>
-
-  <div><%= f.submit "Send me reset password instructions" %></div>
-<% end %>
-
-<%= render "links" %>
-</div>
+<%= dialogHeader :password_reset, "Reset Password", show: true %>
+	<%= simple_form_for resource, :as => resource_name, :url => password_path(resource_name), html: { class: "password_reset json", 'data-type' => :json } do |f| %>
+		<div class="modal-body">
+		  <%= flash_helper %>
+		  <%= f.input :login, label: "Username or Email (your choice)" %>
+		</div>
+		<div class="modal-footer">
+			<%= f.submit "Email instructions to reset password" %>
+	  </div>
+	<% end %>
+<%= dialogFooter %>

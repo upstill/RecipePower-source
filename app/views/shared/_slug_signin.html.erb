@@ -15,6 +15,6 @@
   <% end -%>
 
   <div class="gobutton"><%= f.submit "Sign in", class: "submit_button" %></div>
-  <%= forgot_password_link %>
+  <%= link_to_dialog "Forgot Password", new_user_password_path, 'modal' %>
 <% end %>
 </div>

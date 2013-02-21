@@ -9,11 +9,11 @@ div.bookmarklet_icon {
 	z-index:1000
 }
 div.welcome_sidebar {
-	font:20pt calibri;
+	font:14pt calibri;
 	line-height:130%;
 	color:#FFFFFF;
 	float:right;
-	width:200px;
+	width:250px;
 	background:#880000;
 	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#880000',endColorstr='#6c0000');
 	background:-webkit-gradient(linear,left top,left bottom,from(#880000),to(#6c0000));

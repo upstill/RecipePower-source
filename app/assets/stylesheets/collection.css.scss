@@ -30,6 +30,7 @@
  *= require views/sign_in
  *= require views/pic_picker
  *= require views/authentication
+ *= require views/welcome
  *= require common/buttons
  *= require paginate
  *= require_tree ../../../vendor/assets/stylesheets/jquery
@@ -186,11 +187,15 @@ div.content_browser_cover {
 	width: 300px;
 	position: absolute;
 	top: 0;
-	height: 100%;
+	height: 95%;
   z-index:    10;
   background: rgba( 255, 255, 255, .45 ) 
               50% 50% 
               no-repeat;
+}
+
+#footer_nav_links {
+	z-index: 11;
 }
 
 div.content_browser {

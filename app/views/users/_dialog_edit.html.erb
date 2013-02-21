@@ -1,5 +1,5 @@
 <%# Fields for an edit-user dialog %>
-<%= dialogHeader :edit_user, "Edit User", @area %>
+<%= dialogHeader :edit_user, "Edit User", area: @area %>
 	<%= simple_form_for @user, html: { class: "edit_user json", 'data-type' => :json } do |f| %>
 		<div class="modal-body">
 		  <%= flash_helper %>

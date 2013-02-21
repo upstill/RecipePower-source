@@ -77,7 +77,9 @@ class User < ActiveRecord::Base
   end
 
   def add_followee friend
-    followees.unshift friend unless followees.include? friend
+    self.followees << friend unless followee_ids.include? friend.id
+    # friend.follower_ids.unshift id unless friend.follower_ids.include? id
+    # friend.save
     bnode = browser.select_by_content friend # Recreates the browser
     save # ...to preserve the selection
     bnode
@@ -143,20 +145,20 @@ public
   
   # Presents a hash of IDs with a switch value for whether to include that followee
   def followee_tokens=(flist)
-      newlist = []
-      flist.each_key do |key| 
-          newlist.push key.to_i if (flist[key] == "1")
-      end
-      self.followee_ids = newlist
+    newlist = []
+    flist.each_key do |key| 
+        newlist.push key.to_i if (flist[key] == "1")
+    end
+    self.followee_ids = newlist
   end
   
   # Presents a hash of IDs with a switch value for whether to include that followee
   def subscription_tokens=(flist)
-      newlist = []
-      flist.each_key do |key| 
-          newlist.push key.to_i if (flist[key] == "1")
-      end
-      self.feed_ids = newlist
+    newlist = []
+    flist.each_key do |key| 
+        newlist.push key.to_i if (flist[key] == "1")
+    end
+    self.feed_ids = newlist
   end
   
   # Is a user a channel, as opposed to a human user?

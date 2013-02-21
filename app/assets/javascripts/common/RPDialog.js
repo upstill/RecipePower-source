@@ -1,28 +1,3 @@
-function click_to_browser() {
-	var inside = elem;
-	var e = this.event;
-	var me = e.currentTarget;
-	elements = $('li.RcpBrowser')
-	var i=0; 
-	while (i < elements.length) {
-		var elem = elements[i];
-    var elemWidth = $(elem).width();
-    var elemHeight = $(elem).height();
-    var elemPosition = $(elem).offset();
-    var elemPosition2 = new Object;
-    elemPosition2.top = elemPosition.top + elemHeight;
-    elemPosition2.left = elemPosition.left + elemWidth;
-
-    if ((e.pageX > elemPosition.left && e.pageX < elemPosition2.left) && (e.pageY > elemPosition.top && e.pageY < elemPosition2.top)) {
-			inside = elem;
-		}
-		i = i+1;
-	}
-	if (inside) {
-		me.style.display = "none";
-		$(inside).click();
-	}
-}
 /* Submit a request to the server for interactive HTML. It's meant to be JSON specifying how 
    to handle it, but if the controller doesn't produce JSON (or if the request gets redirected
    to a controller which doesn't), the request may produce generic HTML, failing with an error 
@@ -138,6 +113,16 @@ function runResponse(responseData) {
 				i++;
 			}
 		}
+		if(newdlog = responseData.dlog) {
+			debugger;
+			if($('div.dialog')[0])
+				$('div.dialog').replaceWith(newdlog);
+			else
+				// Add the new dialog at the end of the page body
+				document.getElementsByTagName("body")[0].appendChild(newdlog);
+			recipePowerRunBootstrap($('div.dialog')[0]);
+		}
+		postNotifications(responseData.notifications);
 		if(code = responseData.code) {
 			var placed = false;
 			if(!responseData.how) {
@@ -166,6 +151,29 @@ function runResponse(responseData) {
 	  	$('.notifications-panel').html(responseData.notice);
 			// jNotify( responseData.notice, { HorizontalPosition: 'center', VerticalPosition: 'top', TimeShown: 1200 } );
 	} 
+}
+
+// Insert any notifications into 'div.notifications-panel'
+function postNotifications(nots) {
+	if(nots) {
+		var i = 0;
+		var notsout = "";
+		debugger
+		while (i < nots.length) {
+			not = nots[i];
+			var alert_class = nat[0];
+			var alert_content = nat[1];
+			natsout << "<div class=\"alert alert-" + 
+									alert_class + 
+									"\"><a class=\"close\" data-dismiss=\"alert\">x</a>" +
+		    					alert_content + 
+		  						"</div>"
+			i = i+1;
+		}
+		var panel = $('div.notifications-panel')[0]
+		if (panel)
+			panel.innerHTML = natsout;
+	}
 }
 
 // Determine either the callback (kind = "Fcn") or the message (kind="Msg")
@@ -211,30 +219,34 @@ function dialogResult( dlog, obj ) {
 function postError( jqXHR, dlog ) {
 	// Any error page we get we will <try> to present modally
 	var jstruct = {};
-	debugger
-	if(jqXHR.responseText) {
+	var errtxt;
+	if(errtxt = jqXHR.responseText) {
 		// See if it's valid JSON
 		try
 		{
-			jstruct = JSON && JSON.parse(jqXHR.responseText) || $.parseJSON(jqXHR.responseText);
+			parsage = JSON && JSON.parse(errtxt) || $.parseJSON(errtxt);
 		}
 		catch(e)
 		{
-			// Not valid JSON. Assume it's just a string error report
-			jstruct = { errortext: jqXHR.responseText, area: "floating", how: "modal" };
+			// Not valid JSON. Maybe it's a page to go to?
+			if (errtxt.match(/^\s*<!DOCTYPE html>/)) {
+				var dom = $(errtxt);
+			  var newdlog = $('div.dialog', dom);
+				if(newdlog[0])
+					parsage = { dlog: newdlog[0] }
+				else
+					parsage = { page: errtxt }
+			} else
+				// Okay. Assume it's just a string error report
+				parsage = { errortext: errtxt };
 		}
 	}
 	result = null;
 	// Stash the result in the dialog, if any
-	if(dlog != 'undefined') {
-			if(jstruct.code) {
-				// Replace the dialog with the code from the response
-				$(dlog).html(jstruct.code);
-			} else {
-				dialogResult( dlog, jstruct );
-			}
-	}
-	return jstruct;
+	if(dlog != 'undefined') 
+		dialogResult( dlog, parsage );
+
+	return parsage;
 }
 
 /* Handle successful return of a JSON request by running whatever success function
@@ -321,8 +333,9 @@ function recipePowerRunBootstrap(dlog) {
 				async: false,
 				dataType: 'json',
 				error: function(jqXHR, textStatus, errorThrown) {
-					postError(jqXHR, dlog); // Show the error message in the dialog
+					jsonout = postError(jqXHR, dlog); // Show the error message in the dialog
 					// closeDialog(dlog);
+					runResponse(jsonout);
 					process_result_normally = false;
 				},
 				success: function (responseData, statusText, xhr, form) {

@@ -1,14 +1,10 @@
-<div class="rightblock">
-<!--
-  <div class="auth_signin">
-    <% render partial: 'shared/authentications_possible' %>
-  </div>
-  <br>
--->
-  <div class="right_signin">
-    <%= render partial: "shared/slug_signin" %>
-  </div>
-</div>
+<% unless current_user %>
+	<div class="rightblock">
+	  <div class="right_signin">
+	    <%= render partial: "shared/slug_signin" %>
+	  </div>
+	</div>
+<% end %>
 <div class="text_block">
 <h2 class="med">RecipePower:<br>The Scratchpad for Cooks</h2>
 <p class="airy">

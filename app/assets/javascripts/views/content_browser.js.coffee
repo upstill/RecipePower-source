@@ -20,6 +20,27 @@ RP.content_browser.onload = () ->
 			# Now that the selection is settled, we can fetch the recipe list
 			RP.collection.update { selected: @id }
 
+RP.content_browser.click_to_browser = () ->
+	inside = null
+	e = window.event
+	me = e.currentTarget
+	elements = $('li.RcpBrowser')
+	i=0
+	while i < elements.length
+		elem = elements[i]
+		elemWidth = $(elem).width()
+		elemHeight = $(elem).height()
+		elemPosition = $(elem).offset()
+		elemPosition2 = new Object
+		elemPosition2.top = elemPosition.top + elemHeight
+		elemPosition2.left = elemPosition.left + elemWidth
+		if ((e.pageX > elemPosition.left && e.pageX < elemPosition2.left) && (e.pageY > elemPosition.top && e.pageY < elemPosition2.top)) 
+			inside = elem
+		i = i+1
+	if inside
+		me.style.display = "none"
+		$(inside).click()
+
 # The parent of an element is the first element with a level lower than the element
 parentOf = (elmt) ->
 	thisLevel = elementLevel elmt

@@ -1,5 +1,5 @@
 <%# Fields for an edit-feed dialog %>
-<%= dialogHeader :edit_feed, "Edit Feed", @area %>
+<%= dialogHeader :edit_feed, "Edit Feed", area: @area %>
 	<%= simple_form_for @feed, html: { class: "new_feed json", 'data-type' => :json } do |f| %>
 		<div class="modal-body">
 		  <%= flash_helper %>

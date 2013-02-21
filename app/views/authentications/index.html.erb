@@ -5,7 +5,7 @@
 <% if current_user %>
 	<h3>Manage Sign-in Services</h3>
 <% end %>
-<%= dialogHeader :sign_in, "Sign In Please", @area %>
+<%= dialogHeader :sign_in, "Sign In Please", area: @area %>
   <div class="auth_signin <%= @area %>" >
     <%= render partial: 'shared/authentications_current' %>
     <%= render partial: 'shared/authentications_possible' %>
