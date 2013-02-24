@@ -42,6 +42,67 @@ function recipePowerGetAndRunJSON(request, how, area ) {
 	});
 }
 
+// Process response from a request. This will be an object supplied by a JSON request,
+// which may include code to be presented along with fields (how and area) telling how
+// to present it. The data may also consist of only 'code' if it results from an HTML request
+function runResponse(responseData) {
+	// Wrapped in 'presentResponse', in the case where we're only presenting the results of the request
+	if(responseData) { // && !(typeof presentResponse === 'function' && presentResponse(responseData)))
+	  if (replacements = responseData.replacements) {
+			var i = 0;
+			while(i < replacements.length) {
+				replacement = replacements[i];
+				$(replacement[0]).replaceWith(replacement[1]);
+				i++;
+			}
+		}
+		if(newdlog = responseData.dlog) {
+			debugger;
+			var dlog = $('div.dialog')[0]
+			if(dlog) {
+				dlog.parentNode.insertBefore(newdlog, dlog);
+				closeModal(dlog);
+			} else
+				// Add the new dialog at the end of the page body
+				document.getElementsByTagName("body")[0].appendChild(newdlog);
+			recipePowerRunBootstrap($('div.dialog')[0]);
+		}
+		postNotifications(responseData.notifications);
+		if(page = responseData.page) {
+			document.open();
+			document.write(page);
+			document.close;
+		}	
+		if(code = responseData.code) {
+			var placed = false;
+			if(!responseData.how) {
+				if(responseData.area == "floating") 
+					responseData.how = "modal"
+				else if ((responseData.area == "at_left") || (responseData.area == "at_top"))
+					responseData.how = "modeless"
+			}
+			
+			if(responseData.how == "modeless")
+				placed = injectDialog(code, responseData.area, true);
+			else if(responseData.how == "modal") // at_top and at_left run modelessly
+				placed = runModalDialog(code, responseData.area);	
+			else if(responseData.how == "bootstrap") 
+			  placed = recipePowerRunBootstrap(injectDialog(code, responseData.area, false));				
+
+			if (!placed) { // Force the page to be displayed. XXX Does nothing to the address bar
+				// $('#container').data("pending_page", code ); // Stash for doError function
+				// window.location.replace('javascript:doError()');	
+				document.open();
+				document.write(code);
+				document.close;
+			}
+		}
+		if(responseData.notice)
+	  	$('.notifications-panel').html(responseData.notice);
+			// jNotify( responseData.notice, { HorizontalPosition: 'center', VerticalPosition: 'top', TimeShown: 1200 } );
+	} 
+}
+
 /* Take an HTML stream and run a dialog from it. Assumptions:
   1) The body is a div element of class 'dialog'. (It will work if the 'div.dialog'
 	is embedded within the HTML, but it won't clean up properly.)
@@ -97,60 +158,6 @@ function recipePowerGetAndRunHTML(request, params ) {
 	  xmlhttp.setRequestHeader("Accept", "text/html" );
 	  xmlhttp.send();		
 	}
-}
-
-// Process response from a request. This will be an object supplied by a JSON request,
-// which may include code to be presented along with fields (how and area) telling how
-// to present it. The data may also consist of only 'code' if it results from an HTML request
-function runResponse(responseData) {
-	// Wrapped in 'presentResponse', in the case where we're only presenting the results of the request
-	if(responseData) { // && !(typeof presentResponse === 'function' && presentResponse(responseData)))
-	  if (replacements = responseData.replacements) {
-			var i = 0;
-			while(i < replacements.length) {
-				replacement = replacements[i];
-				$(replacement[0]).replaceWith(replacement[1]);
-				i++;
-			}
-		}
-		if(newdlog = responseData.dlog) {
-			debugger;
-			if($('div.dialog')[0])
-				$('div.dialog').replaceWith(newdlog);
-			else
-				// Add the new dialog at the end of the page body
-				document.getElementsByTagName("body")[0].appendChild(newdlog);
-			recipePowerRunBootstrap($('div.dialog')[0]);
-		}
-		postNotifications(responseData.notifications);
-		if(code = responseData.code) {
-			var placed = false;
-			if(!responseData.how) {
-				if(responseData.area == "floating") 
-					responseData.how = "modal"
-				else if ((responseData.area == "at_left") || (responseData.area == "at_top"))
-					responseData.how = "modeless"
-			}
-			
-			if(responseData.how == "modeless")
-				placed = injectDialog(code, responseData.area, true);
-			else if(responseData.how == "modal") // at_top and at_left run modelessly
-				placed = runModalDialog(code, responseData.area);	
-			else if(responseData.how == "bootstrap") 
-			  placed = recipePowerRunBootstrap(injectDialog(code, responseData.area, false));				
-
-			if (!placed) { // Force the page to be displayed. XXX Does nothing to the address bar
-				// $('#container').data("pending_page", code ); // Stash for doError function
-				// window.location.replace('javascript:doError()');	
-				document.open();
-				document.write(code);
-				document.close;
-			}
-		}
-		if(responseData.notice)
-	  	$('.notifications-panel').html(responseData.notice);
-			// jNotify( responseData.notice, { HorizontalPosition: 'center', VerticalPosition: 'top', TimeShown: 1200 } );
-	} 
 }
 
 // Insert any notifications into 'div.notifications-panel'

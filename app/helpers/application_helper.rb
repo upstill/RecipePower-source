@@ -413,17 +413,31 @@ module ApplicationHelper
         "data-template" => template)
   end
   
+  def modal_dialog( which, ttl=nil, options={})
+    (dialogHeader(which, ttl, options)+
+    yield+
+    dialogFooter).html_safe
+  end
+  
+  def modal_body
+    content_tag :div, yield, class: "modal-body"
+  end
+  
+  def modal_footer
+    content_tag :div, yield, class: "modal-footer"
+  end
+  
   # Place the header for a dialog, including setting its Onload function.
   # Currently handled this way (e.g., symbols that have been supported)
   #   :edit_recipe
   #   :captureRecipe
   #   :new_recipe (nee newRecipe)
   #   :sign_in
-  def dialogHeader( which, ttl=nil, options)
+  def dialogHeader( which, ttl=nil, options={})
     area = options[:area] || "floating"
     logger.debug "dialogHeader for "+globstring({dialog: which, area: area, layout: @layout, ttl: ttl})
     classname = which.to_s
-    ttlspec = ttl ? (" title=\"#{ttl}\"") : ""
+    ttlspec = ttl ? %Q{ title="#{ttl}"} : ""
     hide = options[:show] ? "" : "hide"
     head = @headless ? "" : %Q{<div id="recipePowerDialog" class="modal dialog #{hide} #{classname} #{area}" #{ttlspec}>}
     %Q{#{head}

@@ -131,6 +131,7 @@ class UsersController < ApplicationController
     if @user = ((params[:id] && User.find(params[:id])) || current_user)
         @authentications = @user.authentications
     end
+    @section = params[:section] || "profile"
     @Title = "Edit Profile"
     dialog_boilerplate "edit", "floating" 
   end
@@ -147,8 +148,10 @@ class UsersController < ApplicationController
     if @user = current_user
       @authentications = @user.authentications
     end
-    @Title = "Edit Profile"
-    render :action => 'edit'
+    @section = params[:section] || "profile"
+    @Title = "My "+@section.capitalize
+    # render :action => 'edit'
+    dialog_boilerplate "edit", "floating" 
   end
 
   def update

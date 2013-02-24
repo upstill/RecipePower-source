@@ -1,5 +1,5 @@
 <%# Fields for an edit-user dialog %>
-<%= dialogHeader :edit_user, "Edit User", area: @area %>
+<%= dialogHeader :edit_user, @Title || "Edit Profile", area: @area %>
 	<%= simple_form_for @user, html: { class: "edit_user json", 'data-type' => :json } do |f| %>
 		<div class="modal-body">
 		  <%= flash_helper %>
@@ -7,7 +7,7 @@
 		  <%= f.input :fullname, input_html: { cols: 125, rows: 1 } %>
 		  <%= f.input :about, label: "About Me", placeholder: "Who Are You? What Do You Eat?", input_html: { cols: 125, rows: 4 } %>
 		  <%= f.input :email, input_html: { cols: 125, rows: 1 } %>
-		  <%= f.input :private %>
+		  <%= f.input :private, :label => "Cloak of Invisibility", :hint => "i.e., no followers" %>
 		  <% if permitted_to? :manage, @user %>
 				<%= f.input :role_id, label: "Role", collection: @user.role_select %>
 		  <% end %>

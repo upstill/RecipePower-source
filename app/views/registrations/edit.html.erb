@@ -1,22 +1,18 @@
 <h3>Edit Password for <%= resource.handle %></h3>
-
-<%= form_for(resource, :as => resource_name, :url => registration_path(resource_name), :html => { :method => :put }) do |f| %>
-  <%= devise_error_messages! %>
-
-  <div><%= f.label :current_password %> <i>(we need your current password to confirm your changes)</i><br />
-  <%= f.password_field :current_password %></div>
-
-  <div><%= f.label :new_password %> <i>(leave blank if you don't want to change it)</i><br />
-  <%= f.password_field :password, :autocomplete => "off" %></div>
-
-  <div><%= f.label :confirm_new_password %><br />
-  <%= f.password_field :password_confirmation %></div>
-
-  <div><%= f.submit "Update", class="gobutton" %></div>
-<% end %>
+<%= dialogHeader :edit_password, "Change Password", show: true %>
+	<%= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name), :html => { class: "edit_password json", :method => :put, 'data-type' => :json }) do |f| %>
+	  <%= notifications_panel %>
+		<div class="modal-body">
+		  <%= f.input :current_password, hint: "(we need your current password to confirm your changes)" %>
+		  <%= f.input :password, :label => "New password", hint: "(leave blank if you don't want to change it)", :autocomplete => "off" %>
+		  <%= f.input :password_confirmation, :label => "Confirm new password" %>
+		</div>
+		<div class="modal-footer">
+		  <%= f.submit "Update" %>
+		</div>
+	<% end %>
+<%= dialogFooter %>
 
 <h3>Cancel my account</h3>
 
 <p>Unhappy? <%= link_to "Cancel my account", registration_path(resource_name), :confirm => "Really? Are you sure??!? This will delete all your Cookmarks, your tags, and everything from RecipePower.", :method => :delete %>.</p>
-
-<%= link_to "Back", :back %>
