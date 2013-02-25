@@ -101,6 +101,6 @@ class AuthenticationsController < ApplicationController
     @authentication = Authentication.find(params[:id])
     provider = @authentication.provider_name
     @authentication.destroy
-    redirect_to authentications_url, :notice => "Successfully destroyed authentication. No more #{provider} authentication for you!"
+    redirect_to authentications_url, :method => "get", :notice => "Successfully destroyed authentication. No more #{provider} authentication for you!"
   end
 end

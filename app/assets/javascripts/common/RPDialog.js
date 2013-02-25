@@ -42,6 +42,41 @@ function recipePowerGetAndRunJSON(request, how, area ) {
 	});
 }
 
+// onclick handler to fire a request at the server and appropriately handle the response
+function recipePowerRunRequest(request) {
+	var target = this.event.currentTarget;
+	var attribs = target.attributes;
+	var method = attribs.method.value;
+	var confirm = attribs.confirm.value;
+	bootbox.confirm(confirm, function(result) {
+		if(result)
+			recipePowerSubmit(request, method);
+	});
+}
+
+function recipePowerSubmit( request, method, assumptions ) {
+	assumptions = assumptions || {} // No assumptions if absent
+	debugger;
+	$.ajax( {
+		type: method,
+		dataType: "json",
+		url: request,
+		error: function(jqXHR, textStatus, errorThrown) {
+			$('span.source').text(jqXHR.responseText);
+			var responseData = postError(jqXHR);
+			responseData.how = responseData.how || assumptions.how;
+			runResponse(responseData);
+		},
+		success: function (responseData, statusText, xhr) {
+			// Pass any assumptions into the response data
+			responseData.how = responseData.how || assumptions.how;
+			postSuccess(responseData); 
+			runResponse(responseData);
+		}
+	});
+	
+}
+
 // Process response from a request. This will be an object supplied by a JSON request,
 // which may include code to be presented along with fields (how and area) telling how
 // to present it. The data may also consist of only 'code' if it results from an HTML request
@@ -57,7 +92,6 @@ function runResponse(responseData) {
 			}
 		}
 		if(newdlog = responseData.dlog) {
-			debugger;
 			var dlog = $('div.dialog')[0]
 			if(dlog) {
 				dlog.parentNode.insertBefore(newdlog, dlog);
@@ -148,9 +182,8 @@ function recipePowerGetAndRunHTML(request, params ) {
 					  postSuccess( result );
 				  result.how = how;
 				  result.area = area;
-				  if(typeof runResponse === 'function') {
+				  if(typeof runResponse === 'function')
 					  runResponse( result );
-				  }
 		    }
 			}
 	  }

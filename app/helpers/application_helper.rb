@@ -413,18 +413,21 @@ module ApplicationHelper
         "data-template" => template)
   end
   
-  def modal_dialog( which, ttl=nil, options={})
+  def modal_dialog( which, ttl=nil, options={}, &block )
+    dlg = with_output_buffer &block
     (dialogHeader(which, ttl, options)+
-    yield+
-    dialogFooter).html_safe
+     dlg+
+     dialogFooter).html_safe
   end
   
-  def modal_body
-    content_tag :div, yield, class: "modal-body"
+  def modal_body(&block)
+    bd = with_output_buffer &block
+    content_tag :div, flash_helper + bd, class: "modal-body"
   end
   
-  def modal_footer
-    content_tag :div, yield, class: "modal-footer"
+  def modal_footer(&block)
+    ft = with_output_buffer &block
+    content_tag :div, ft, class: "modal-footer"
   end
   
   # Place the header for a dialog, including setting its Onload function.
@@ -434,12 +437,21 @@ module ApplicationHelper
   #   :new_recipe (nee newRecipe)
   #   :sign_in
   def dialogHeader( which, ttl=nil, options={})
-    area = options[:area] || "floating"
+    # Render for a floating dialog unless an area is asserted OR we're rendering for the page
+    area = options[:area] || 
+      (@partial ? "floating" : "page")
     logger.debug "dialogHeader for "+globstring({dialog: which, area: area, layout: @layout, ttl: ttl})
     classname = which.to_s
+    # Assert a page title if given
     ttlspec = ttl ? %Q{ title="#{ttl}"} : ""
-    hide = options[:show] ? "" : "hide"
-    head = @headless ? "" : %Q{<div id="recipePowerDialog" class="modal dialog #{hide} #{classname} #{area}" #{ttlspec}>}
+    # dialog is loaded hidden unless we explicitly ask for it visible, OR we're rendering to the page
+    hide = (@partial && !options[:show]) ? "hide" : ""
+    
+    # class 'modal' is for use by Bootstrap modal; it's obviated when rendering to a page (though we can force
+    # it for pre-rendered dialogs by asserting the :modal option)
+    modal = (@partial || options[:modal]) ? "modal" : ""
+    
+    head = @headless ? "" : %Q{<div id="recipePowerDialog" class="#{modal} dialog #{hide} #{classname} #{area}" #{ttlspec}>}
     %Q{#{head}
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
