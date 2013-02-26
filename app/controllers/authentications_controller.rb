@@ -8,7 +8,7 @@ class AuthenticationsController < ApplicationController
       flash[:notice] = params[:notice]
       @area = params[:area]
       @layout = params[:layout]
-      dialog_boilerplate "new"
+      dialog_boilerplate "index"
     end
 
   # Get a new authentication (==login)
@@ -100,7 +100,7 @@ class AuthenticationsController < ApplicationController
   def destroy
     @authentication = Authentication.find(params[:id])
     provider = @authentication.provider_name
-    @authentication.destroy
-    redirect_to authentications_url, :method => "get", :notice => "Successfully destroyed authentication. No more #{provider} authentication for you!"
+    # @authentication.destroy
+    redirect_to authentications_url, :status => 303, :notice => "Successfully destroyed authentication. No more #{provider} authentication for you!"
   end
 end

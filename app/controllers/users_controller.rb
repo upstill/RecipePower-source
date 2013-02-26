@@ -1,7 +1,6 @@
 require './lib/controller_utils.rb'
 
 class UsersController < ApplicationController
-  layout "collection"
   
   rescue_from ActiveRecord::RecordNotFound, :with => :not_found
   before_filter :login_required, :except => [:new, :create, :identify]

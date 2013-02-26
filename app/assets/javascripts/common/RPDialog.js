@@ -56,7 +56,6 @@ function recipePowerRunRequest(request) {
 
 function recipePowerSubmit( request, method, assumptions ) {
 	assumptions = assumptions || {} // No assumptions if absent
-	debugger;
 	$.ajax( {
 		type: method,
 		dataType: "json",
@@ -82,6 +81,7 @@ function recipePowerSubmit( request, method, assumptions ) {
 // to present it. The data may also consist of only 'code' if it results from an HTML request
 function runResponse(responseData) {
 	// Wrapped in 'presentResponse', in the case where we're only presenting the results of the request
+	var success = false;
 	if(responseData) { // && !(typeof presentResponse === 'function' && presentResponse(responseData)))
 	  if (replacements = responseData.replacements) {
 			var i = 0;
@@ -92,7 +92,7 @@ function runResponse(responseData) {
 			}
 		}
 		if(newdlog = responseData.dlog) {
-			var dlog = $('div.dialog')[0]
+			var dlog = $('div.dialog.modal')[0]
 			if(dlog) {
 				dlog.parentNode.insertBefore(newdlog, dlog);
 				closeModal(dlog);
@@ -100,12 +100,14 @@ function runResponse(responseData) {
 				// Add the new dialog at the end of the page body
 				document.getElementsByTagName("body")[0].appendChild(newdlog);
 			recipePowerRunBootstrap($('div.dialog')[0]);
+			success = true;
 		}
 		postNotifications(responseData.notifications);
 		if(page = responseData.page) {
 			document.open();
 			document.write(page);
 			document.close;
+			success = true;
 		}	
 		if(code = responseData.code) {
 			var placed = false;
@@ -130,11 +132,13 @@ function runResponse(responseData) {
 				document.write(code);
 				document.close;
 			}
+			success = true;
 		}
 		if(responseData.notice)
 	  	$('.notifications-panel').html(responseData.notice);
 			// jNotify( responseData.notice, { HorizontalPosition: 'center', VerticalPosition: 'top', TimeShown: 1200 } );
 	} 
+	return success;
 }
 
 /* Take an HTML stream and run a dialog from it. Assumptions:
@@ -355,15 +359,17 @@ function runModalDialog(body, area) {
 // form submission event to give us a chance to get JSON data and inject it into the page
 // rather than do a full page reload.
 function recipePowerRunBootstrap(dlog) {
+	if(!$(dlog).hasClass("modal")) // The modality may be hidden for page-display purposes
+		$(dlog).addClass("modal");
 	$(dlog).on('shown', function() {
 		$('textarea', dlog).focus();
 	});
 	$(dlog).modal('show');
 	// Forms submissions that expect JSON structured data will be handled here:
-	$('form', dlog).filter('[data-type="json"]').submit( dlog, function (eventdata) {
+	// $('form', dlog).filter('[data-type="json"]').submit( dlog, function (eventdata) {
+	$('form', dlog).submit( dlog, function (eventdata) {
 		var context = this;
 		var dlog = eventdata.data; // As stored when the dialog was set up
-		eventdata.preventDefault();
 		var process_result_normally;
 		if(process_result_normally = !dialogOnEvent("beforesave", dlog, eventdata.currentTarget)) {
 			// Okay to submit
@@ -373,18 +379,37 @@ function recipePowerRunBootstrap(dlog) {
 				async: false,
 				dataType: 'json',
 				error: function(jqXHR, textStatus, errorThrown) {
+					// Try it with HTML
+					/*
+					$(context).ajaxSubmit( {
+						async: false,
+						dataType: 'html',
+						error: function(jqXHR, textStatus, errorThrown) {
+							debugger;
+							htmlout = postError(jqXHR, dlog); // Show the error message in the dialog
+							// closeDialog(dlog);
+							runResponse(htmlout);
+							process_result_normally = false;
+						},
+						success: function (responseData, statusText, xhr, form) {
+							process_result_normally = postSuccess(responseData, dlog, form);
+							closeDialog(dlog);
+						}
+					} ); 
+					*/
 					jsonout = postError(jqXHR, dlog); // Show the error message in the dialog
-					// closeDialog(dlog);
-					runResponse(jsonout);
-					process_result_normally = false;
+					process_result_normally = !runResponse(jsonout);
 				},
 				success: function (responseData, statusText, xhr, form) {
 					process_result_normally = postSuccess(responseData, dlog, form);
+					eventdata.preventDefault();
 					closeDialog(dlog);
 				}
 			} ); 
-		} else 
-				closeDialog(dlog);
+		} else {
+			closeDialog(dlog);
+			eventdata.preventDefault();
+		}
 		return process_result_normally;		
 	});
 	return true;

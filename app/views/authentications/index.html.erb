@@ -1,26 +1,7 @@
-<% title "Sign In Options" %>
-<% if !@dlog %>
-  <%= render partial: 'shared/authentications_sidebar' %>
-<% end %>
-<% if current_user %>
-	<h3>Manage Sign-in Services</h3>
-<% end %>
-<%= dialogHeader :sign_in, "Sign In Please", area: @area %>
+<%= modal_dialog :edit_authentications, "Manage Sign-in Services", area: @area do %>
   <div class="auth_signin <%= @area %>" >
     <%= render partial: 'shared/authentications_current' %>
     <%= render partial: 'shared/authentications_possible' %>
   </div>
-  <% if !@dlog %>
-    <br class="clear">
-  <% end %>
-  <% if !current_user %>
-    <div class="sign <%= @area %>" />
-	  <strong>Rather use a RecipePower account? <br></strong><hr>
-	  <%= render partial: "shared/slug_signin" %>
-	<div class="or" ><strong>OR</strong></div>
-	  <%# link_to("Sign In", new_user_session_path) %>
-	  <%= render partial: "shared/slug_signup" %>
-	  <%# link_to("Sign up", new_user_registration_path) %>
-    </div>
-  <% end %>
-<%= dialogFooter %>
+  <%= render partial: 'shared/authentications_sidebar' %>
+<% end %>

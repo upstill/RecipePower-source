@@ -1,12 +1,10 @@
-<h3>Forgot your password?</h3>
-<%= dialogHeader :password_reset, "Reset Password", show: true %>
+<%= modal_dialog :password_reset, "Forgot your password?" do %>
 	<%= simple_form_for resource, :as => resource_name, :url => password_path(resource_name), html: { class: "password_reset json", 'data-type' => :json } do |f| %>
-		<div class="modal-body">
-		  <%= flash_helper %>
+		<%= modal_body do %>
 		  <%= f.input :login, label: "Username or Email (your choice)" %>
-		</div>
-		<div class="modal-footer">
+		<% end %>
+		<%= modal_footer do %>
 			<%= f.submit "Email instructions to reset password" %>
-	  </div>
+		<% end %>
 	<% end %>
-<%= dialogFooter %>
+<% end %>

@@ -1,6 +1,5 @@
 class PagesController < ApplicationController
   # filter_access_to :all
-  layout "collection"
   
   def home_or_recipes
     if logged_in?

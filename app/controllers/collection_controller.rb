@@ -1,5 +1,4 @@
 class CollectionController < ApplicationController
-  layout "collection"
   after_filter :save_browser
   
   def save_browser

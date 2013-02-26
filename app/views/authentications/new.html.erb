@@ -2,10 +2,10 @@
 	<% title "Sign In Options" %>
 	<%= render partial: 'shared/authentications_sidebar' %>
 <% end %>
-<%= dialogHeader :sign_in, "Time to Sign In", area: @area %>
+<%= modal_dialog :sign_in, "Sign In Please", area: @area do %>
   <% if @area && (@area == "at_top") %>
     <%= render partial: 'shared/authentications_signin_at_top' %>
   <% else %>
     <%= render partial: 'shared/authentications_signup_or_signin' %>
   <% end %>
-<%= dialogFooter %>
+<% end %>

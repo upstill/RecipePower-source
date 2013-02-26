@@ -1,7 +1,6 @@
 require './lib/controller_utils.rb'
 
 class FeedsController < ApplicationController
-  layout "collection"
   
   def approve
     @feed = Feed.find(params[:id])
