@@ -1,4 +1,10 @@
-<%= dialogHeader :edit_recipe, "Tag That Recipe!", area: @area %>
-	<% logger.debug render("recipes/form_edit_at_left") %>
-	<%= render "form_edit"+(@area ? "_"+@area : "") %>
-<%= dialogFooter %>
+<% logger.debug render("recipes/form_edit_at_left") %>
+<% if @area == "at_top" %>
+	<%= dialogHeader :edit_recipe, "Tag That Recipe!", area: @area %>
+		<%= render "form_edit_at_top" %>
+	<%= dialogFooter %>
+<% else %>
+	<%= modal_dialog :edit_recipe, "Tag That Recipe!", area: @area do %>
+		<%= render "form_edit"+(@area ? "_"+@area : "") %>
+	<% end %>
+<% end %>

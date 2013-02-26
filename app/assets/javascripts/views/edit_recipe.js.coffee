@@ -43,7 +43,7 @@ RP.edit_recipe.onload = (dlog) ->
 	# Only proceed if the dialog has children
 	if $('.edit_recipe > *').length > 0
 		
-		$(dlog).show 500
+		recipePowerRunBootstrap dlog # $(dlog).show 500
 		# Setup tokenInput on the tags field
 		$("#recipe_tag_tokens", dlog).tokenInput("/tags/match.json", 
 			crossDomain: false,
@@ -78,7 +78,9 @@ RP.edit_recipe.onload = (dlog) ->
 			beforesaveFcn: "RP.edit_recipe.submission_redundant"
 		}
 		
-		$('input.save-tags-button.cancel', dlog).data "hooks",
+		$('input.cancel', dlog).data "hooks",
+		 	successMsg: "Cookmark secure and unharmed."
+		$('button.close', dlog).data "hooks",
 		 	successMsg: "Cookmark secure and unharmed."
 		$('form.remove', dlog).data "hooks",
 		 	saveMsg: "Cookmark removed from collection."

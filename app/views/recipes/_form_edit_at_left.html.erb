@@ -1,39 +1,43 @@
 <%= form_for @recipe, :remote => true, :html => {:'data-type' => :json} do |f| %>
-  <%= errors_helper @recipe %>
-  <%= pic_field @recipe, :picurl, f, true %>
+	<%= modal_body do %>
+	  <%= errors_helper @recipe %>
+	  <%= pic_field @recipe, :picurl, f, true %>
 
-  <div class="edit_recipe_field tags" >
-		<%= f.label :tag_tokens, "Tags" -%>
-		<%= f.text_field :tag_tokens, rows: "2", "data-pre" => @recipe.tags.map(&:attributes).to_json -%>
-  </div>
+	  <div class="edit_recipe_field tags" >
+			<%= f.label :tag_tokens, "Tags" -%>
+			<%= f.text_field :tag_tokens, rows: "2", "data-pre" => @recipe.tags.map(&:attributes).to_json -%>
+	  </div>
 
-  <div class="edit_recipe_field" >
-		<%= f.label :comment, "Notes" -%>
-		<%= f.text_area :comment, placeholder: "What are your thoughts about this recipe?", rows: "3" -%>
-  </div>
+	  <div class="edit_recipe_field" >
+			<%= f.label :comment, "Notes" -%>
+			<%= f.text_area :comment, placeholder: "What are your thoughts about this recipe?", rows: "3" -%>
+	  </div>
 
-  <div class="edit_recipe_field" >
-		<%= f.label :title, "Title" -%>
-		<% @recipe.check_title %>
-		<%= f.text_area :title, rows: "3" -%>
-  </div>
+	  <div class="edit_recipe_field" >
+			<%= f.label :title, "Title" -%>
+			<% @recipe.check_title %>
+			<%= f.text_area :title, rows: "3" -%>
+	  </div>
 
-  <div class="edit_recipe_field">
-		<%= f.label :status,  "Status: " -%>
-		<%= f.select :status,  Recipe.status_select %>
- </div>
+	  <div class="edit_recipe_field">
+			<%= f.label :status,  "Status: " -%>
+			<%= f.select :status,  Recipe.status_select %>
+	 </div>
 
- <div class="edit_recipe_field">
-		<%= f.check_box :private %>
-		<%= f.label :private, "Private (for my eyes only)" %>
-  </div>
-
-  <%= f.submit "Save", class: "save-tags-button submit" %>
-  <%= f.submit "Cancel", class: "save-tags-button cancel" %>
-<% end %>
-<% if permitted_to? :remove, @recipe %>
-  <%= button_to "Remove From Collection", remove_recipe_path(@recipe), class: "save-tags-button", :remote => true, :form => { "data-type" => "json", id: "remove" } %>
-<% end %>
-<% if permitted_to? :destroy, @recipe %>
-  <%= button_to "Destroy this Recipe", recipe_path(@recipe), :remote => true, :form => { "data-type" => "json", id: "destroy" }, :method => :delete, class: "save-tags-button", :confirm => "This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" %>
+	 <div class="edit_recipe_field">
+			<%= f.check_box :private %>
+			<%= f.label :private, "Private (for my eyes only)" %>
+	  </div>
+	<% end %>
+	<% debugger %>
+	<%= modal_footer do %>
+	  <%= f.submit "Save", class: "save-tags-button submit" %>
+	  <%= f.submit "Cancel", class: "save-tags-button cancel" %>
+		<% if permitted_to? :remove, @recipe %>
+		  <%= button_to "Remove From Collection", remove_recipe_path(@recipe), class: "save-tags-button", :remote => true, :form => { "data-type" => "json", id: "remove" } %>
+		<% end %>
+		<% if permitted_to? :destroy, @recipe %>
+		  <%= button_to "Destroy this Recipe", recipe_path(@recipe), :remote => true, :form => { "data-type" => "json", id: "destroy" }, :method => :delete, class: "save-tags-button", :confirm => "This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" %>
+		<% end %>
+	<% end %>
 <% end %>

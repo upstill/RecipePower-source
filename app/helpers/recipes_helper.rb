@@ -117,7 +117,11 @@ end
 # This is hardwired HTML for the recipe editing dialog, suitable for embedding into the dialog.
 # In fact, that's just what happens in edit_recipe.go
 def recipe_editor
+  # <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+  # <input class="save-tags-button cancel" name="commit" type="submit" value="Cancel" />
+  # <input class="close cancel" data-dismiss="modal" name="commit" type="submit" value="x" />
   editor = { :string =>
+<<<<<<< HEAD
       %q{
 		<form accept-charset="UTF-8" action="/recipes/%%rcpID%%" class="edit_recipe" data-remote="true" data-type="json" id="edit_recipe_%%rcpID%%" method="post"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="&#x2713;" /><input name="_method" type="hidden" value="put" /><input name="authenticity_token" type="hidden" value="%%authToken%%" /></div>
       <div class="edit_recipe_field pic"><div class="recipe_pic_preview"><img alt="Some Image Available" class="fitPic" id="rcpPic%%rcpID%%" onload="fitImageOnLoad('div.recipe_pic_preview img')" src="%%rcpPicURL%%" /><input hidden="hidden" id="recipe_picurl" name="recipe[picurl]" rel="jpg,png,gif" size="30" type="text" value="%%rcpPicURL%%" /></div>
@@ -125,29 +129,61 @@ def recipe_editor
          <a href="/" class="pic_picker_golink" data="recipe_picurl;div.recipe_pic_preview img">Pick Picture</a>
          <div class="pic_picker" data-url="/recipes/%%rcpID%%/edit?pic_picker=true" style="display:none;"></div>
         </div>
+=======
+%q{
+  <div class="notifications-panel"></div>  
+  <form accept-charset="UTF-8" action="/recipes/%%rcpID%%" class="edit_recipe" data-remote="true" data-type="json" id="edit_recipe_%%rcpID%%" method="post">
+    <div class="modal-header">
+      <input class="close cancel" data-dismiss="modal" name="commit" type="submit" value="x" />
+      <h3>Tag That Recipe!</h3>
+    </div>
+    <div class="modal-body">
+      <div style="margin:0;padding:0;display:inline">
+        <input name="utf8" type="hidden" value="&#x2713;" /><input name="_method" type="hidden" value="put" />
+        <input name="authenticity_token" type="hidden" value="%%authToken%%" />
+>>>>>>> Tweaked edit_recipe_at_left for bootstrap
       </div>
-         <div class="edit_recipe_field tags" >
-       		<label for="recipe_tag_tokens">Tags</label>		<input id="recipe_tag_tokens" name="recipe[tag_tokens]" rows="2" size="30" type="text" />  </div>
-         <div class="edit_recipe_field" >
-       		<label for="recipe_comment">Notes</label>		<textarea cols="40" id="recipe_comment" name="recipe[comment]" placeholder="What are your thoughts about this recipe?" rows="3">%%rcpComment%%</textarea>  </div>
-         <div class="edit_recipe_field" >
-       		<label for="recipe_title">Title</label>		<textarea cols="40" id="recipe_title" name="recipe[title]" rows="3">%%rcpTitle%%</textarea>  </div>
-         <div class="edit_recipe_field">
-       		<label for="recipe_status">Status: </label>		<select id="recipe_status" name="recipe[status]">
-            <option value="1">Now Cooking</option>
-            <option value="2">Keepers</option>
-            <option value="4">To Try</option>
-            <option value="8">Misc</option></select>
+        <div class="edit_recipe_field pic"><div class="recipe_pic_preview"><img alt="Some Image Available" class="fitPic" id="rcpPic%%rcpID%%" onload="fitImageOnLoad('div.recipe_pic_preview img')" src="%%rcpPicURL%%" /><input hidden="hidden" id="recipe_picurl" name="recipe[picurl]" rel="jpg,png,gif" size="30" type="text" value="%%rcpPicURL%%" /></div>
+          <div class="recipe_pic_picker">
+           <a href="/" class="pic_picker_golink" data="recipe_picurl;div.recipe_pic_preview img">Pick Picture</a>
+           <div class="pic_picker" data-url="/recipes/%%rcpID%%/edit?pic_picker=true" style="display:none;"></div>
+          </div>
         </div>
-        <div class="edit_recipe_field">
-       		<input name="recipe[private]" type="hidden" value="0" /><input %%rcpPrivate%% id="recipe_private" name="recipe[private]" type="checkbox" value="1" />
-       		<label for="recipe_private">Private (for my eyes only)</label>
-         </div>
-         <input class="save-tags-button submit" name="commit" type="submit" value="Save" />
-         <input class="save-tags-button cancel" name="commit" type="submit" value="Cancel" />
-         </form>  <form action="/recipes/%%rcpID%%/remove" class="button_to remove" data-remote="true" data-type="json" method="post"><div><input class="save-tags-button remove" type="submit" value="Remove From Collection" /><input name="authenticity_token" type="hidden" value="%%authToken%%" /></div></form>
-         <form action="/recipes/%%rcpID%%" class="button_to destroy" data-remote="true" data-type="json" method="post"><div><input name="_method" type="hidden" value="delete" /><input class="save-tags-button destroy" data-confirm="This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" type="submit" value="Destroy this Recipe" /><input name="authenticity_token" type="hidden" value="%%authToken%%" /></div></form>
-      }+
+           <div class="edit_recipe_field tags" >
+         		<label for="recipe_tag_tokens">Tags</label>		<input id="recipe_tag_tokens" name="recipe[tag_tokens]" rows="2" size="30" type="text" />  </div>
+           <div class="edit_recipe_field" >
+         		<label for="recipe_comment">Notes</label>		<textarea cols="40" id="recipe_comment" name="recipe[comment]" placeholder="What are your thoughts about this recipe?" rows="3">%%rcpComment%%</textarea>  </div>
+           <div class="edit_recipe_field" >
+         		<label for="recipe_title">Title</label>		<textarea cols="40" id="recipe_title" name="recipe[title]" rows="3">%%rcpTitle%%</textarea>  </div>
+           <div class="edit_recipe_field">
+         		<label for="recipe_status">Status: </label>		<select id="recipe_status" name="recipe[status]">
+              <option value="1">Now Cooking</option>
+              <option value="2">Keepers</option>
+              <option value="4">To Try</option>
+              <option value="8">Misc</option></select>
+          </div>
+          <div class="edit_recipe_field">
+         		<input name="recipe[private]" type="hidden" value="0" /><input %%rcpPrivate%% id="recipe_private" name="recipe[private]" type="checkbox" value="1" />
+         		<label for="recipe_private">Private (for my eyes only)</label>
+           </div>
+    </div>
+    <div class="modal-footer">
+      <input class="save-tags-button submit" name="commit" type="submit" value="Save" />
+    </div>
+  </form>  
+  <form action="/recipes/%%rcpID%%/remove" class="button_to remove" data-remote="true" data-type="json" method="post">
+    <div>
+      <input class="save-tags-button remove" type="submit" value="Remove From Collection" />
+      <input name="authenticity_token" type="hidden" value="%%authToken%%" />
+    </div>
+  </form>
+  <form action="/recipes/%%rcpID%%" class="button_to destroy" data-remote="true" data-type="json" method="post">
+    <div>
+      <input name="_method" type="hidden" value="delete" /><input class="save-tags-button destroy" data-confirm="This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" type="submit" value="Destroy this Recipe" />
+      <input name="authenticity_token" type="hidden" value="%%authToken%%" />
+    </div>
+  </form>
+  }+
     dialogFooter()
   }.to_json()
 end

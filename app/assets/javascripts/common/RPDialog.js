@@ -490,7 +490,8 @@ function launchDialog(dlog, area, modeless)
 	// Position dialog according to its area
 	if(area == "at_left") {
 		$(dlog).css( "position", "fixed" );
-		$(dlog).css( "top", "70px" );
+		$(dlog).css( "top", "30px" );
+		$(dlog).css( "left", "100px" );
 	}
 }
 
