@@ -23,6 +23,6 @@
 		<%= footer_navlinks %>
 	</div>
 </div>
-<% if params[:controller] == "collection" %>
+<% if (params[:controller] == "collection") && user_signed_in? %>
 	<%= dialogDiv :edit_recipe, "Tag That Recipe!", "at_left", recipe_editor() %>
 <% end %>

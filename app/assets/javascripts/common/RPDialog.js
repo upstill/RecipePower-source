@@ -81,7 +81,7 @@ function recipePowerSubmit( request, method, assumptions ) {
 // to present it. The data may also consist of only 'code' if it results from an HTML request
 function runResponse(responseData) {
 	// Wrapped in 'presentResponse', in the case where we're only presenting the results of the request
-	var success = false;
+	var sorted = false;
 	if(responseData) { // && !(typeof presentResponse === 'function' && presentResponse(responseData)))
 	  if (replacements = responseData.replacements) {
 			var i = 0;
@@ -95,19 +95,21 @@ function runResponse(responseData) {
 			var dlog = $('div.dialog.modal')[0]
 			if(dlog) {
 				dlog.parentNode.insertBefore(newdlog, dlog);
+				newdlog = dlog.previousSibling;
 				closeModal(dlog);
-			} else
+			} else {
 				// Add the new dialog at the end of the page body
-				document.getElementsByTagName("body")[0].appendChild(newdlog);
-			recipePowerRunBootstrap($('div.dialog')[0]);
-			success = true;
+				newdlog = document.getElementsByTagName("body")[0].appendChild(newdlog);
+			}
+			recipePowerRunBootstrap(newdlog);
+			sorted = true;
 		}
 		postNotifications(responseData.notifications);
 		if(page = responseData.page) {
 			document.open();
 			document.write(page);
 			document.close;
-			success = true;
+			sorted = true;
 		}	
 		if(code = responseData.code) {
 			var placed = false;
@@ -132,13 +134,10 @@ function runResponse(responseData) {
 				document.write(code);
 				document.close;
 			}
-			success = true;
+			sorted = true;
 		}
-		if(responseData.notice)
-	  	$('.notifications-panel').html(responseData.notice);
-			// jNotify( responseData.notice, { HorizontalPosition: 'center', VerticalPosition: 'top', TimeShown: 1200 } );
 	} 
-	return success;
+	return sorted;
 }
 
 /* Take an HTML stream and run a dialog from it. Assumptions:
@@ -359,8 +358,9 @@ function runModalDialog(body, area) {
 // form submission event to give us a chance to get JSON data and inject it into the page
 // rather than do a full page reload.
 function recipePowerRunBootstrap(dlog) {
-	if(!$(dlog).hasClass("modal")) // The modality may be hidden for page-display purposes
+	if(!$(dlog).hasClass("modal")) // The modality may be hidden if prepared for a page
 		$(dlog).addClass("modal");
+	$(dlog).removeClass("hide");
 	$(dlog).on('shown', function() {
 		$('textarea', dlog).focus();
 	});

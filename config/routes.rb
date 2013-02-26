@@ -58,10 +58,10 @@ RP::Application.routes.draw do
   match 'rcpqueries/tablist', :controller=>'rcpqueries', :action=>'tablist', :via => :get
 
   resources :rcpqueries
-
-  match '/auth/:provider/callback' => 'authentications#create'
   
   match 'rcpqueries/:id' => 'rcpqueries#update', :via => :post
+
+  match '/auth/:provider/callback' => 'authentications#create'
 
   # Calling 'profile' action in 'users' controller edits the current user
   match 'users/profile' => 'users#profile'
@@ -135,7 +135,7 @@ RP::Application.routes.draw do
   match '/FAQ', :to=>"pages#FAQ"
   match '/admin', :to=>"pages#admin"
   match '/spacetaker', :to=>"pages#spacetaker"
-  root :to => 'pages#home_or_recipes'
+  root :to => 'collection#user_only'
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

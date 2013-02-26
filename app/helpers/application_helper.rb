@@ -408,7 +408,7 @@ module ApplicationHelper
     ttlspec = ttl ? (" title=\"#{ttl}\"") : ""
     content_tag(:div, 
         "",
-        class: classname+" dialog "+area, 
+        class: classname+" dialog hide "+area, 
         id: "recipePowerDialog", 
         "data-template" => template)
   end

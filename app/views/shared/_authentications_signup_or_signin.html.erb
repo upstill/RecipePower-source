@@ -8,10 +8,16 @@
   </div>
   <% if !current_user %>
     <div class="sign <%= @area %>" >
-	  <hr><div class="prompt">Rather use a RecipePower account? <br></div>
-	  <%= render partial: "shared/slug_signin" %>
+	  <div class="prompt">Rather use a RecipePower account? <br></div>
+		<div class="signin">
+			<div class="prompt">Sign In</div>
+		  <%= render partial: "shared/slug_signin" %>
+		</div>
 	  <div class="or" >OR</div>
-	  <%= render partial: "shared/slug_signup" %>
+	  <div class="signup">
+			<div class="prompt">Sign Up</div>
+		  <%= render partial: "shared/slug_signup" %>
+		</div>
 	</div>
   <% end %>
 <%# dialogFooter %>

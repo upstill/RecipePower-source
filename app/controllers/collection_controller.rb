@@ -5,8 +5,15 @@ class CollectionController < ApplicationController
     @user.save
   end
   
+  def user_only
+    if user_signed_in?
+      render action: 'index'
+    else
+      redirect_to home_path
+    end
+  end
+  
   def index
-	  # logger.debug render_to_string 
   end
   
   def show
