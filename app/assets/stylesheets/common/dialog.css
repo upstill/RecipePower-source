@@ -87,7 +87,7 @@ input.gobutton.at_top {
 	border-radius:8px;
 	padding:3px 6px 3px 6px
 }
-div#recipePowerCancelDiv {
+div.recipePowerCancelDiv {
 	float:right;
 	width:auto;
 	height:auto;

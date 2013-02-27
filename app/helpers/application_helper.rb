@@ -451,11 +451,16 @@ module ApplicationHelper
         
     hdr = 
       %Q{<div id="recipePowerDialog" class="#{modal} dialog #{hide} #{which.to_s} #{area}" #{ttlspec}>}+
-      (options[:modal] ? %Q{
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-          <h3>#{ttl}</h3>
-        </div>} : "")+
+      (options[:modal] ? 
+        %Q{
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3>#{ttl}</h3>
+          </div>} : 
+        %q{
+          <div class="recipePowerCancelDiv">
+            <a href="#" id="recipePowerCancelBtn" onclick="cancelDialog; return false;" style="text-decoration: none;">X</a>
+          </div>})+
       %q{<div class="notifications-panel"></div>}
     hdr.html_safe
   end
