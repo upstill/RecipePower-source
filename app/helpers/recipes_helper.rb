@@ -29,7 +29,7 @@ end
 #   provide a link to add it
 def ownership_status(rcp)
 	# Summarize ownership as a list of owners, each linked to their collection
-	(rcp.users.map { |u| link_to u.handle, rcpqueries_path( :owner=>u.id.to_s) }.join(', ') || "").html_safe
+	(rcp.users.map { |u| link_to u.handle, collection_path( :owner=>u.id.to_s) }.join(', ') || "").html_safe
 end
 
 # Return an enumeration of a series of strings, separated by ',' except for the last two separated by 'and'

@@ -2,6 +2,8 @@
   <div class="auth_signin <%= @area %>" >
     <%= render partial: 'shared/authentications_current' %>
     <%= render partial: 'shared/authentications_possible' %>
+		<hr>
+	  <p><strong class="prompt">Click to </strong><%= link_to_dialog "change password", edit_user_registration_path  %></p>
   </div>
   <%= render partial: 'shared/authentications_sidebar' %>
 <% end %>

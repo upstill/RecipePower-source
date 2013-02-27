@@ -1,7 +1,7 @@
 class InvitationsController < Devise::InvitationsController
     
     def after_invite_path_for(resource)
-        rcpqueries_path
+        collection_path
     end
     
     # GET /resource/invitation/accept?invitation_token=abcdef
@@ -37,7 +37,7 @@ class InvitationsController < Devise::InvitationsController
                 }
               end
           end
-          redirect_to rcpqueries_path, :notice => notice
+          redirect_to collection_path, :notice => notice
       elsif resource.errors[:email] && (other = User.where(email: resource.email).first)
           # HA! request failed because email exists. Forget the invitation, just make us friends.
           id = other.email 
@@ -50,7 +50,7 @@ class InvitationsController < Devise::InvitationsController
               current_inviter.save
               notice = "But #{id} is already on RecipePower! Oh happy day!! <br>(We've gone ahead and made them your friend.)".html_safe
           end
-          redirect_to rcpqueries_path, :notice => notice
+          redirect_to collection_path, :notice => notice
       else
         respond_with_navigational(resource) { render :new }
       end

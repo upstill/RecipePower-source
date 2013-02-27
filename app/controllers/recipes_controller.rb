@@ -47,7 +47,7 @@ class RecipesController < ApplicationController
   end
 
   def index
-    redirect_to rcpqueries_url
+    redirect_to collection_url
     # return if need_login true
     # Get the collected recipes for the user named in query
     user = current_user_or_guest 
@@ -83,7 +83,7 @@ class RecipesController < ApplicationController
     	  feed_entry.recipe = @recipe
     	  feed_entry.save
   	  end
-      reportRecipe( rcpqueries_path, truncate( @recipe.title, :length => 100)+" now appearing in your collection.", formats)
+      reportRecipe( collection_path, truncate( @recipe.title, :length => 100)+" now appearing in your collection.", formats)
     	# redirect_to edit_recipe_url(@recipe), :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br>You might want to confirm the title and picture, and/or tag it?".html_safe
     else
         @Title = "Cookmark a Recipe"
@@ -181,7 +181,7 @@ class RecipesController < ApplicationController
     # return if need_login true
     @recipe = Recipe.find(params[:id])
     if params[:commit] == "Cancel"
-      reportRecipe rcpqueries_url, "Recipe secure and unchanged.", formats
+      reportRecipe collection_url, "Recipe secure and unchanged.", formats
     else
       @recipe.current_user = current_user_or_guest_id # session[:user_id]
       begin
@@ -191,7 +191,7 @@ class RecipesController < ApplicationController
             # @recipe.errors.add "Couldn't save recipe"
       end
       if saved_okay
-        reportRecipe( rcpqueries_url, "Successfully updated #{@recipe.title || 'recipe'}.", formats )
+        reportRecipe( collection_url, "Successfully updated #{@recipe.title || 'recipe'}.", formats )
       else
         @Title = "Tag That Recipe (Try Again)!"
         @nav_current = nil
@@ -231,7 +231,7 @@ class RecipesController < ApplicationController
     @list_name = "mine"
     @area = params[:area]
     if @recipe.errors.empty?
-      reportRecipe( rcpqueries_path, truncate( @recipe.title, :length => 100)+" now appearing in your collection.", formats)
+      reportRecipe( collection_path, truncate( @recipe.title, :length => 100)+" now appearing in your collection.", formats)
     else
       respond_to do |format|
         format.html { render nothing: true }
@@ -247,8 +247,8 @@ class RecipesController < ApplicationController
     @recipe = Recipe.ensure current_user_or_guest_id, params.slice(:id), false
     @recipe.remove_from_collection current_user_or_guest_id
     truncated = truncate(@recipe.title, :length => 40)
-    reportRecipe rcpqueries_url, "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections.", formats
-    # redirect_to rcpqueries_url, :notice => "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections."
+    reportRecipe collection_url, "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections.", formats
+    # redirect_to collection_url, :notice => "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections."
   end
 
   # Remove the recipe from the system entirely
@@ -256,8 +256,8 @@ class RecipesController < ApplicationController
     @recipe = Recipe.find params[:id] 
     title = @recipe.title
     @recipe.destroy
-    reportRecipe rcpqueries_url, "\"#{title}\" is gone for good.", formats
-    # redirect_to rcpqueries_url, :notice => "\"#{title}\" is gone for good."
+    reportRecipe collection_url, "\"#{title}\" is gone for good.", formats
+    # redirect_to collection_url, :notice => "\"#{title}\" is gone for good."
   end
 
   def revise # modify current recipe to reflect a client-side change

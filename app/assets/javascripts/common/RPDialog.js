@@ -82,7 +82,7 @@ function recipePowerSubmit( request, method, assumptions ) {
 function runResponse(responseData) {
 	// Wrapped in 'presentResponse', in the case where we're only presenting the results of the request
 	var sorted = false;
-	if(responseData) { // && !(typeof presentResponse === 'function' && presentResponse(responseData)))
+	if(responseData) {
 	  if (replacements = responseData.replacements) {
 			var i = 0;
 			while(i < replacements.length) {
@@ -275,9 +275,10 @@ function postError( jqXHR, dlog ) {
 			if (errtxt.match(/^\s*<!DOCTYPE html>/)) {
 				var dom = $(errtxt);
 			  var newdlog = $('div.dialog', dom);
-				if(newdlog[0])
-					parsage = { dlog: newdlog[0] }
-				else
+				if(newdlog[0]) {
+					var newelmt = $(newdlog).detach();
+					parsage = { dlog: newelmt[0] }
+				} else
 					parsage = { page: errtxt }
 			} else
 				// Okay. Assume it's just a string error report

@@ -347,7 +347,7 @@ module ApplicationHelper
   # Return the set of navigation links for the header
   def header_navlinks
     navlinks = []
-    navlinks.push(navlink "Cookmarks", rcpqueries_path, (@nav_current==:cookmarks)) 
+    navlinks.push(navlink "Cookmarks", collection_path, (@nav_current==:cookmarks)) 
     navlinks.push(link_to_dialog "Add a Cookmark", new_recipe_path, "modal", "floating" )
     # navlinks.push(link_to_function("Add a Cookmark", "rcpAdd()" )) # navlink "Add a Cookmark", new_recipe_path, (@nav_current==:addcookmark)) 
     navlinks.join('&nbsp|&nbsp').html_safe
@@ -385,7 +385,7 @@ module ApplicationHelper
       "<div id=\"debug\">#{debug(params)}</div>".html_safe
 	end
 	
-	def button_to_dialog(label, path, how, where, options={})
+	def button_to_dialog(label, path, how="modal", where="floating", options={})
 	  options[:class] = "btn btn-mini"
 	  link_to_dialog label, path, how, where, options
 	end
@@ -414,7 +414,7 @@ module ApplicationHelper
   end
   
   def modal_dialog( which, ttl=nil, options={}, &block )
-    options[:modal] = true
+    options[:modal] = true if options[:modal].nil?
     dlg = with_output_buffer &block
     (dialogHeader(which, ttl, options)+
      dlg+
@@ -440,11 +440,10 @@ module ApplicationHelper
   def dialogHeader( which, ttl=nil, options={})
     # Render for a floating dialog unless an area is asserted OR we're rendering for the page
     area = options[:area] || "floating" # (@partial ? "floating" : "page")
-    hide = (@partial && !options[:show]) ? "hide" : ""
+    hide = options[:show] ? "" : "hide"
     # class 'modal' is for use by Bootstrap modal; it's obviated when rendering to a page (though we can force
     # it for pre-rendered dialogs by asserting the :modal option)
     modal = options[:modal] ? "modal" : ""
-    
     logger.debug "dialogHeader for "+globstring({dialog: which, area: area, ttl: ttl})
     # Assert a page title if given
     ttlspec = ttl ? %Q{ title="#{ttl}"} : ""
