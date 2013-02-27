@@ -36,6 +36,10 @@ class Seeker < Object
     tags
   end
   
+  def entity_name
+    list_type.to_s
+  end
+  
   # Use the 'querytags' string (in actuality a string provided by the unconstrained tags editor) to extract
   # a set of tag tokens. The elements of the comma-separated string are either 1) a positive integer, representing
   # a tag in the dictionary, or 2) an arbitrary other string on which to query.
@@ -112,6 +116,20 @@ class Seeker < Object
     convert_ids ids[first...ixbound]
   end
 
+  # If the entity has returned no results, suggest what the problem might have been
+  def explain_empty
+    report = "It looks like there aren't any #{entity_name.pluralize} that match your search"
+    case tags.count
+    when 0
+      sug = nil
+    when 1
+      sug = "a different tag or no tag at all up there"
+    else
+      sug = "changing and/or deleting tags up there"
+    end
+    report+((sug && ".<br>You might try #{sug}.") || ".")
+  end
+
 end
 
 class ContentSeeker < Seeker
@@ -177,6 +195,10 @@ class FriendSeeker < Seeker
     :user
   end
   
+  def entity_name
+    @affiliate.channel? ? "channel" : "user"
+  end
+  
   # Get the results of the current query.
   def result_ids
   	return @results if @results # Keeping a cache of results
@@ -201,18 +223,50 @@ class FriendSeeker < Seeker
       @results = candihash.results.reverse
   	end
   end
+end
 
-  # If the entity has returned no results, suggest what the problem might have been
-  def explain_empty
-    report = "It looks like there aren't any users that match your search"
-    case tags.count
-    when 0
-      sug = nil
-    when 1
-      sug = "a different tag or no tags at all up there"
+class FeedSeeker < Seeker
+  
+  def initialize(affiliate, strdata)
+    super
+    # The affiliate is an ActiveRecord relation, the set of candidate users
+    @kind = 3
+  end
+
+  def query_path
+    "/feeds/query"
+  end
+  
+  def convert_ids list
+    Feed.where(id: list)
+  end
+  
+  def list_type
+    :feed
+  end
+  
+  # Get the results of the current query.
+  def result_ids
+  	return @results if @results # Keeping a cache of results
+    if tags.empty?
+      @results = @affiliate.map(&:id)
     else
-      sug = "removing a tag up there"
-    end
-    report+((sug && ".<br>You might try #{sug}.") || ".")
+      # We purge/massage the list only if there is a tags query here
+      # Otherwise, we simply sort the list by mod date
+      # Convert candidate array to a hash recipe_id=>#hits
+      candihash = Candihash.new @affiliate.map(&:id)
+            
+      # Rank/purge for tag matches
+      tags.each { |tag| 
+        debugger
+        semantic_list = Feed.where(site_id: Site.where(referent_id: tag.referent_ids).map(&:id)).map(&:id)
+        candihash.apply semantic_list
+        # Get candidates by matching the tag's name against recipe titles and comments
+        candihash.apply @affiliate.where("description LIKE ?", "%#{tag.name}%").map(&:id)
+        candihash.apply @affiliate.where("title LIKE ?", "%#{tag.name}%").map(&:id)
+      }
+      # Convert back to a list of results
+      @results = candihash.results.reverse
+  	end
   end
 end

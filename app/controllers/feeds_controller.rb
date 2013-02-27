@@ -35,7 +35,7 @@ class FeedsController < ApplicationController
       @seeker.cur_page = page.to_i
     end
     session[:seeker] = @seeker.store
-    render '_relist', :layout=>false
+    render 'index', :layout=>false
   end
 
   # GET /feeds/1
@@ -125,7 +125,6 @@ class FeedsController < ApplicationController
         format.html { render action: "new", status: :unprocessable_entity }
         format.json { 
           @area = "floating"
-          @headless = true
           dialog_boilerplate "new", "modal", status: :unprocessable_entity 
         }
       end

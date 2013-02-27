@@ -43,7 +43,8 @@ RP.edit_recipe.onload = (dlog) ->
 	# Only proceed if the dialog has children
 	if $('.edit_recipe > *').length > 0
 		
-		recipePowerRunBootstrap dlog # $(dlog).show 500
+		if(typeof recipePowerRunBootstrap == 'function') # Running locally
+			recipePowerRunBootstrap dlog # $(dlog).show 500
 		# Setup tokenInput on the tags field
 		$("#recipe_tag_tokens", dlog).tokenInput("/tags/match.json", 
 			crossDomain: false,
