@@ -240,7 +240,7 @@ function dialogOnEvent(what_event, dlog, entity) {
 			return fcn(dlog);
 		}
 	} else if(RP && RP.dialog)
-		return RP.dialog.apply('on'+what_event, dlog);
+		return RP.dialog.send_msg('on'+what_event, dlog);
 	return null;
 }
 
@@ -274,7 +274,7 @@ function postError( jqXHR, dlog ) {
 			// Not valid JSON. Maybe it's a page to go to?
 			if (errtxt.match(/^\s*<!DOCTYPE html>/)) {
 				var dom = $(errtxt);
-			  var newdlog = $('div.dialog', dom);
+			  var newdlog = $('div.dialog.modal', dom);
 				if(newdlog[0]) {
 					var newelmt = $(newdlog).detach();
 					parsage = { dlog: newelmt[0] }
@@ -447,7 +447,7 @@ function injectDialog(code, area, modeless) {
 function launchDialog(dlog, area, modeless)
 {
 	// We get and execute the onload function for the dialog
-	RP.dialog.apply("onload", dlog);
+	RP.dialog.onload(dlog);
 	// Cancel will remove the dialog and confirm null effect to user
 	$('input.cancel', dlog).click( function (event) {
 		dialogOnEvent("success", dlog, this); // Run the function or post the message for the cancel button

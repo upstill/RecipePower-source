@@ -294,7 +294,10 @@ module ApplicationHelper
   def flash_helper
     fl = ""
     flash.each do |name, msg|
-      fl << notification_out(msg, name) unless msg.blank? # ...because this message may have been cleared earlier...
+      unless msg.blank? # ...because this message may have been cleared earlier...
+        debugger
+        fl << notification_out(msg, name) 
+      end
       flash[name] = nil
     end
     return fl.html_safe
@@ -395,6 +398,16 @@ module ApplicationHelper
   	link_to_function label, "recipePowerGetAndRunJSON('#{path}', '#{how}', '#{where}');", options
   end
 	
+	def button_to_modal(label, path, how="modal", where="floating", options={})
+	  options[:class] = "btn btn-mini"
+	  link_to_modal label, path, how, where, options
+	end
+	
+	# Embed a link to javascript for running a dialog by reference to a URL
+	def link_to_modal(label, path, options={})
+  	link_to_function label, "RP.dialog.get_and_go('#{path}');", options
+  end
+	
 	def globstring(hsh)
     hsh.keys.each.collect { |key| 
       key.to_s+": ["+(hsh[key] ? hsh[key].to_s : "nil")+"]"
@@ -453,7 +466,7 @@ module ApplicationHelper
       (options[:modal] ? 
         %Q{
           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <button type="button" class="close" onclick="RP.dialog.cancel()" data-dismiss="modal" aria-hidden="true">&times;</button>
             <h3>#{ttl}</h3>
           </div>} : 
         %q{
