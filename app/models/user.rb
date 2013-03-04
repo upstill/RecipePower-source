@@ -12,7 +12,7 @@ class User < ActiveRecord::Base
   # Setup accessible (or protected) attributes for your model
   attr_accessible :id, :username, :fullname, :about, :login, :private,
                 :email, :password, :password_confirmation, 
-                :recipes, :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens, :subscription_tokens
+                :recipes, :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens, :subscription_tokens, :invitation_issuer
   attr_writer :browser
 
   has_many :follower_relations, :foreign_key=>"followee_id", :dependent=>:destroy, :class_name=>"UserRelation"
@@ -28,6 +28,15 @@ class User < ActiveRecord::Base
   
   # login is a virtual attribute placeholding for [username or email]
   attr_accessor :login
+  
+  def headers_for(action)
+    case action
+    when :invitation, :invitation_instructions
+      { :subject => invitation_issuer+" wants to get you cooking." }
+    else
+      {}
+    end
+  end  
   
   def browser
     return @browser if @browser

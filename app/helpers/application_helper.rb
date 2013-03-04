@@ -246,66 +246,10 @@ module ApplicationHelper
       strs.join(', ')+" and " + last
     end
   end
-	
-  def error_notification obj, attribute = nil, preface = nil
-    sentence = attribute ? (attribute.to_s.upcase+" "+enumerate_strs(obj.errors[attribute])+".") : obj.errors.full_messages.to_sentence
-    preface ||= "Problem while trying to #{params[:action]} the #{obj.class.to_s.downcase}"
-    preface+(sentence.blank? ? "." : ":<br>#{sentence}")
-  end
-  
-  # Report the current errors on a record in a nice alert div, suitable for interpolation on the page
-  def errors_helper obj, attribute=nil
-    unless obj.errors.empty?
-      notification_out error_notification(obj, attribute), :error
-    end
-  end
-  
-  def notification_out(msg, level)
-    alert_class = 
-    case level
-    when :notice 
-      "success" 
-    when :error
-      "error"
-    else # :alert
-      "info"
-    end
-    %Q{
-      <div class="alert alert-#{alert_class}">
-        <a class="close" data-dismiss="alert">x</a>
-        #{msg}
-      </div>
-    }.html_safe
-  end
-  
-  ### The following three methods post object errors into the flash and present them later ###
-  
-  # Stick ActiveRecord errors into the flash for presentation at the next action
-  def flash_errors obj, preface = ""
-    flash[:error] = error_notification obj, nil, preface
-  end
-  
-  # Stick ActiveRecord errors into the flash for presentation now
-  def flash_errors_now obj, preface = ""
-    flash.now[:error] = error_notification obj, nil, preface
-  end
-
-  # Present the current flash messages in a friendly alert format.
-  def flash_helper
-    fl = ""
-    flash.each do |name, msg|
-      unless msg.blank? # ...because this message may have been cleared earlier...
-        debugger
-        fl << notification_out(msg, name) 
-      end
-      flash[name] = nil
-    end
-    return fl.html_safe
-  end
   
   # Helper to interpolate the notifications panel
   def notifications_panel
-    %Q{<div class="notifications-panel">#{flash_helper}</div>}.html_safe
+    %Q{<div class="notifications-panel">#{flash_all}</div>}.html_safe
 	end
 	
 	# Returns a selector-value pair for replacing the notifications panel due to an update event
@@ -436,7 +380,7 @@ module ApplicationHelper
   
   def modal_body(&block)
     bd = with_output_buffer &block
-    content_tag :div, flash_helper + bd, class: "modal-body"
+    content_tag :div, flash_all + bd, class: "modal-body"
   end
   
   def modal_footer(&block)
@@ -456,7 +400,7 @@ module ApplicationHelper
     hide = options[:show] ? "" : "hide"
     # class 'modal' is for use by Bootstrap modal; it's obviated when rendering to a page (though we can force
     # it for pre-rendered dialogs by asserting the :modal option)
-    modal = options[:modal] ? "modal" : ""
+    modal = options[:modal] ? "modal-pending" : ""
     logger.debug "dialogHeader for "+globstring({dialog: which, area: area, ttl: ttl})
     # Assert a page title if given
     ttlspec = ttl ? %Q{ title="#{ttl}"} : ""
@@ -466,7 +410,6 @@ module ApplicationHelper
       (options[:modal] ? 
         %Q{
           <div class="modal-header">
-            <button type="button" class="close" onclick="RP.dialog.cancel()" data-dismiss="modal" aria-hidden="true">&times;</button>
             <h3>#{ttl}</h3>
           </div>} : 
         %q{
@@ -539,4 +482,62 @@ module ApplicationHelper
        links.join(' ').html_safe
      end
    end
+   
+  # Augments error display for record attributes (a la simple_form) with base-level errors
+  def display_base_errors resource
+    return '' if (resource.errors.empty?) or (resource.errors[:base].empty?)
+    flash_one :error, resource.errors[:base].map { |msg| content_tag(:p, msg) }.join
+  end
+	
+  def error_notification obj, attribute = nil, preface = nil
+    sentence = attribute ? (attribute.to_s.upcase+" "+enumerate_strs(obj.errors[attribute])+".") : obj.errors.full_messages.to_sentence
+    preface ||= "Problem while trying to #{params[:action]} the #{obj.class.to_s.downcase}"
+    preface+(sentence.blank? ? "." : ":<br>#{sentence}")
+  end
+  
+  # Report the current errors on a record in a nice alert div, suitable for interpolation on the page
+  def errors_helper obj, attribute=nil
+    unless obj.errors.empty?
+      flash_one :error, error_notification(obj, attribute)
+    end
+  end
+
+   # Stick ActiveRecord errors into the flash for presentation at the next action
+   def flash_errors obj, preface = ""
+     flash[:error] = error_notification obj, nil, preface
+   end
+
+   # Stick ActiveRecord errors into the flash for presentation now
+   def flash_errors_now obj, preface = ""
+     flash.now[:error] = error_notification obj, nil, preface
+   end
+
+  def flash_one level, message
+    bootstrap_class =
+    case level
+    when :success
+      "alert-success"
+    when :error
+      "alert-error"
+    when :alert
+      "alert-block"
+    when :notice
+      "alert-info"
+    else
+      flash_type.to_s
+    end
+     # This message may have been cleared earlier...
+    html = message.blank? ? "" : <<-HTML
+      <div class="alert #{bootstrap_class} alert_block fade in">
+        <button class="close" data-dismiss="alert">&#215;</button>
+        #{message}
+      </div>
+      HTML
+    flash.delete(level)
+    html.html_safe
+  end
+  
+  def flash_all 
+    flash.collect { |type, message| flash_one type, message }.join.html_safe
+  end
 end

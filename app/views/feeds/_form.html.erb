@@ -1,5 +1,7 @@
 <%= simple_form_for @feed, html: { class: "new_feed json", 'data-type' => :json } do |f| %>
-  <%= flash_helper %>
+  <%# flash_all %>
+  <%= f.error_notification %>
+  <%= display_base_errors resource %>
   <%= f.input :title %>
   <%= f.input :description, input_html: { cols: 125, rows: 1 } %>
   <%= f.input :url, input_html: { cols: 125, rows: 1 } %>

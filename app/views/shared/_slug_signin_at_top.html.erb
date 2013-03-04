@@ -1,19 +1,17 @@
 <div class="signin">
-<strong>Sign in with a password:</strong><br>
-<% if true %>
-<%= form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f| %>
-<div class="signin_credentials">
-  <%= f.label :login, "Username or Email".html_safe, class: "signin_element" %>
-  <%= f.text_field :login, class: "signin_element" %>
-  <%= f.label :password, class: "signin_element" %>
-  <%= f.password_field :password, class: "signin_element" %>
-</div>
-<div class="signin_go">
-  <% if devise_mapping.rememberable? -%>
-    <%= f.check_box :remember_me, :checked => true %> <%= f.label :remember_me %>
-  <% end -%>
-  <br><div class="gobutton at_top"><%= f.submit "Sign in", class: "submit_button" %></div>
-</div>
-<% end %>
-<% end %>
+	<strong>Sign in with a password:</strong><br>
+	<%= form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f| %>
+		<div class="signin_credentials">
+		  <%= f.label :login, "Username or Email".html_safe, class: "signin_element" %>
+		  <%= f.text_field :login, class: "signin_element" %>
+		  <%= f.label :password, class: "signin_element" %>
+		  <%= f.password_field :password, class: "signin_element" %>
+		</div>
+		<div class="signin_go">
+		  <% if devise_mapping.rememberable? -%>
+		    <%= f.check_box :remember_me, :checked => true %> <%= f.label :remember_me %>
+		  <% end -%>
+		  <br><div class="gobutton at_top"><%= f.submit "Sign in", class: "submit_button" %></div>
+		</div>
+	<% end %>
 </div>

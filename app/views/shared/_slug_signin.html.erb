@@ -1,4 +1,6 @@
 <%= simple_form_for(resource, :as => resource_name, :url => session_path(resource_name), html: { class: "signin json" }) do |f| %>
+  <%= f.error_notification %>
+  <%= display_base_errors resource %>
   <%= f.input :login, label: "Username or Email (your choice)" %></p>
   <%= f.input :password %></p>
   <% if devise_mapping.rememberable? -%>
@@ -7,4 +9,4 @@
 
   <div class="gobutton"><%= f.submit "Sign in", class: "submit_button" %></div>
 <% end %>
- <%= link_to_dialog "Forgot Password", new_user_password_path, 'modal' %>
+ <%= link_to_modal "Forgot Password", new_user_password_path %>

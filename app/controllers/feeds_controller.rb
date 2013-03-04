@@ -77,7 +77,7 @@ class FeedsController < ApplicationController
           json: { 
             processorFcn: "RP.content_browser.insert_or_select",
             entity: with_format("html") { render_to_string :partial => "collection/node" }, 
-            notice: view_context.notification_out(notice, :notice) 
+            notice: view_context.flash_one(:notice, notice) 
           }, 
           status: :created, 
           location: @feed 

@@ -9,6 +9,7 @@ class CollectionController < ApplicationController
     if user_signed_in?
       render action: 'index'
     else
+		flash.keep
       redirect_to home_path
     end
   end

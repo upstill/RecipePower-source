@@ -10,9 +10,9 @@
 			<li class="dropdown">
 		    	<a id="userMenuLabel" datatarget="#" class="dropdown-toggle" data-toggle="dropdown" role="button"><%= current_user.handle %><b class="caret"></b></a>
 		        <ul class="dropdown-menu" role="menu" aria-labelledby="userMenuLabel">
-			        <li><%= link_to_dialog "Profile", users_profile_path( section: "profile" ) %></li>
-			        <li><%= link_to_dialog "Sign-in Services", authentications_path %></li>
-			        <li><%= link_to_dialog "Invite", new_user_invitation_path %></li>
+			        <li><%= link_to_modal "Profile", users_profile_path( section: "profile" ) %></li>
+			        <li><%= link_to_modal "Sign-in Services", authentications_path %></li>
+			        <li><%= link_to_modal "Invite", new_user_invitation_path %></li>
 			        <% if permitted_to? :admin, :pages %>
 								<li><%= link_to "Admin", admin_path %></li>
 							<% end %>
@@ -20,7 +20,7 @@
 			    </ul>
 			</li>
 		<% else %>
-			<li><%= link_to_dialog "Sign In", authentications_new_path, "bootstrap" %></li>
+			<li><%= link_to_modal "Sign In", authentications_new_path %></li>
 	    <% end %>
 	  	</ul>
 		<ul class="nav">

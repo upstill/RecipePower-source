@@ -240,7 +240,7 @@ function dialogOnEvent(what_event, dlog, entity) {
 			return fcn(dlog);
 		}
 	} else if(RP && RP.dialog)
-		return RP.dialog.send_msg('on'+what_event, dlog);
+		return RP.dialog.notify_manager('on'+what_event, dlog);
 	return null;
 }
 

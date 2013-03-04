@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130219214258) do
+ActiveRecord::Schema.define(:version => 20130301055302) do
 
   create_table "authentications", :force => true do |t|
     t.integer  "user_id"
@@ -281,6 +281,7 @@ ActiveRecord::Schema.define(:version => 20130219214258) do
     t.integer  "channel_referent_id",                  :default => 0
     t.text     "browser_serialized"
     t.boolean  "private",                              :default => false
+    t.string   "invitation_issuer"
   end
 
   add_index "users", ["confirmation_token"], :name => "index_users_on_confirmation_token", :unique => true

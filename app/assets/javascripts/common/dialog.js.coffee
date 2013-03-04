@@ -130,13 +130,18 @@ process_response = (responseData, dlog) ->
 extract_modal = (code) ->
 	dom = $(code)
 	if $(dom).hasClass "dialog"
+		$(dom).removeClass('modal-pending').addClass('modal')
 		return dom[0]
 	else
-		newdlog = $('div.dialog.modal', dom)
+		debugger
+		newdlog = $('div.dialog.modal-pending', dom).removeClass('modal-pending').addClass('modal')
 		return $(newdlog).detach()[0]
 
 open_modal = (dlog) ->
 	notify "load", dlog
+	debugger
+	buttoncode = '<button type=\"button\" class=\"close\" onclick=\"RP.dialog.cancel()\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>'
+	$('div.modal-header').prepend buttoncode
 	$(dlog).modal 'show'
 	notify "open", dlog
 	dlog
@@ -183,7 +188,7 @@ filter_submit = (eventdata) ->
 			dataType: 'json',
 			error: (jqXHR, textStatus, errorThrown) ->
 				jsonout = post_error jqXHR, dlog # Show the error message in the dialog
-				process_result_normally = !process_response jsonout, dlog
+				return !process_response jsonout, dlog
 			success: (responseData, statusText, xhr, form) ->
 				post_success responseData, dlog, form
 				process_response responseData, dlog
@@ -206,6 +211,12 @@ manager_of = (dlog) ->
 				if mgr_name != "dialog" && RP[mgr_name] 
 					return RP[mgr_name]
 	return null	
+
+# Actually redundant wrt notify; here for legacy of RPDialog
+RP.dialog.notify_manager = (method, dlog) ->
+	mgr = manager_of dlog
+	if mgr && mgr[method]
+		mgr[method](dlog)
 
 # Determine either the callback (kind = "Fcn") or the message (kind="Msg")
 #  for a given event type from among:

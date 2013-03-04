@@ -16,4 +16,12 @@ body { padding-top: 60px; }
 	width: 600px;
 }
 
+div.dialog.modal input.string {
+	width: 90%;
+}
+
+div.dialog.modal textarea {
+	width: 90%;
+}
+
 @import "bootstrap-responsive";

@@ -154,6 +154,7 @@ class RecipesController < ApplicationController
   def create # Take a URL, then either lookup or create the recipe
     # return if need_login true
     # Find the recipe by URI (possibly correcting same), and bind it to the current user
+    debugger
     @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params[:recipe]
     if @recipe.errors.empty? # Success (valid recipe, either created or fetched)
       reportRecipe(  

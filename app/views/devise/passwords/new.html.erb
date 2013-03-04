@@ -1,5 +1,7 @@
 <%= modal_dialog :password_reset, "Forgot your password?" do %>
 	<%= simple_form_for resource, :as => resource_name, :url => password_path(resource_name), html: { class: "password_reset json", 'data-type' => :json } do |f| %>
+		<%= f.error_notification %>
+		<%= display_base_errors resource %>
 		<%= modal_body do %>
 		  <%= f.input :login, label: "Username or Email (your choice)" %>
 		<% end %>

@@ -1,5 +1,5 @@
 <%= collection_results %>
-<tr><td colspan=6><%= flash_helper %></td></tr>
+<tr><td colspan=6><%= flash_all %></td></tr>
 <% if @seeker.npages > 0 %>
 	<tr><td colspan=6><div class="digg_pagination">
 		<%= pagination_links @seeker.npages, @seeker.cur_page, "feeds/query" %>
