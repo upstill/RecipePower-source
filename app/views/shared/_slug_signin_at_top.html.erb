@@ -1,6 +1,6 @@
 <div class="signin">
 	<strong>Sign in with a password:</strong><br>
-	<%= form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f| %>
+	<%= form_for(resource, :as => resource_name, :url => session_path(resource_name), :html => { 'data-type' => 'json'} ) do |f| %>
 		<div class="signin_credentials">
 		  <%= f.label :login, "Username or Email".html_safe, class: "signin_element" %>
 		  <%= f.text_field :login, class: "signin_element" %>

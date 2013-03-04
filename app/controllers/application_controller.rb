@@ -96,8 +96,8 @@ class ApplicationController < ActionController::Base
 
   # returns the person to either the original url from a redirect_away or to a provided, default url
   def redirect_back(options = {})
-    logger.debug "REDIRECTING BACK TO "+(session[:original_uri] || "collection_path")
     uri = session[:original_uri] || collection_path
+    logger.debug "REDIRECTING BACK TO "+uri
     session[:original_uri] = nil
     redirect_to uri, options
   end

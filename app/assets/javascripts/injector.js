@@ -36,7 +36,7 @@ function submitDialog(eventdata) { // Supports multiple forms in dialog
 	   and use the result to determine whether to do normal forms processing. */
 	$(context).ajaxSubmit( {
 		async: false,
-		dataType: 'html',
+		dataType: 'json',
 		error: function(jqXHR, textStatus, errorThrown) {
 			// postError(jqXHR, dlog);
 			retire_iframe(); // closeDialog(dlog);

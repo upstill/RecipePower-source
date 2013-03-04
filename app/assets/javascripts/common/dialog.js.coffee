@@ -32,7 +32,6 @@ RP.dialog.get_and_go = (request, options={}) ->
 			process_response responseData, odlog
 
 RP.dialog.cancel = ->
-	debugger
 	if dlog = target_modal()
 		close_modal dlog
 
@@ -133,13 +132,11 @@ extract_modal = (code) ->
 		$(dom).removeClass('modal-pending').addClass('modal')
 		return dom[0]
 	else
-		debugger
 		newdlog = $('div.dialog.modal-pending', dom).removeClass('modal-pending').addClass('modal')
 		return $(newdlog).detach()[0]
 
 open_modal = (dlog) ->
 	notify "load", dlog
-	debugger
 	buttoncode = '<button type=\"button\" class=\"close\" onclick=\"RP.dialog.cancel()\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>'
 	$('div.modal-header').prepend buttoncode
 	$(dlog).modal 'show'
@@ -191,7 +188,10 @@ filter_submit = (eventdata) ->
 				return !process_response jsonout, dlog
 			success: (responseData, statusText, xhr, form) ->
 				post_success responseData, dlog, form
-				process_response responseData, dlog
+				sorted = process_response responseData, dlog
+				if responseData.success == false
+					# Equivalent to an error, so just return
+					return sorted
 				process_result_normally = false
 				eventdata.preventDefault()
 				close_modal dlog

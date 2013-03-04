@@ -24,6 +24,7 @@ function recipePowerGetAndRunJSON(request, how, area ) {
 	area = area || "floating"
 	request += (request.match(/\?/) ? "&" : "?") + "area=" + area
 	
+	debugger;
 	$('span.query').text(request);
 	$.ajax( {
 		type: "GET",
@@ -162,7 +163,7 @@ function recipePowerGetAndRunHTML(request, params ) {
 		  str.push(encodeURIComponent(p) + "=" + encodeURIComponent(params[p]));
 		request += "?" + str.join("&");
   }
-	
+	debugger;
 	$('span.query').text(request);
 	var xmlhttp;
 	// Send the request using minimal Javascript
@@ -330,6 +331,7 @@ function closeDialog(dlog) {
 // Run a dialog from a body of HTML, which should be a div with 'dialog' class as outlined above.
 function runModalDialog(body, area) {
 	var dlog = injectDialog(body, area, false); 
+	debugger;
 	// Any forms get submitted and their results handled appropriately. NB: the submission
 	// must be synchronous because we have to decide AFTER the results return whether to handle
 	// the form result normally.

@@ -42,7 +42,7 @@ RP::Application.routes.draw do
   match '/authentications/new' => 'authentications#new'
   resources :authentications
 
-  devise_for :users, :controllers => {:invitations => 'invitations', :registrations => 'registrations'}
+  devise_for :users, :controllers => {:sessions => 'sessions', :invitations => 'invitations', :registrations => 'registrations'}
 
   match '/site/scrape' => 'sites#scrape'
   resources :sites

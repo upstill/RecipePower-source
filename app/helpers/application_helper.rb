@@ -344,7 +344,7 @@ module ApplicationHelper
 	
 	def button_to_modal(label, path, how="modal", where="floating", options={})
 	  options[:class] = "btn btn-mini"
-	  link_to_modal label, path, how, where, options
+	  link_to_modal label, path, options
 	end
 	
 	# Embed a link to javascript for running a dialog by reference to a URL
@@ -406,7 +406,7 @@ module ApplicationHelper
     ttlspec = ttl ? %Q{ title="#{ttl}"} : ""
         
     hdr = 
-      %Q{<div id="recipePowerDialog" class="#{modal} dialog #{hide} #{which.to_s} #{area}" #{ttlspec}>}+
+      %Q{<div id="recipePowerDialog" class="#{modal} dialog #{which.to_s} #{area}" #{ttlspec}>}+
       (options[:modal] ? 
         %Q{
           <div class="modal-header">
