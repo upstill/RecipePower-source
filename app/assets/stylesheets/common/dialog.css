@@ -1,10 +1,14 @@
 // Default styling for dialogs
+
 div.dialog {
 	font:12px arial,sans-serif;
 	font-weight:bold
 }
 div#recipePowerDialog.at_top {
-	width:789px
+	width:790px
+}
+div#recipePowerDialog.at_top.password_reset {
+	width:580px
 }
 div.dialog.floating {
 	font:12px arial,sans-serif;
@@ -42,6 +46,13 @@ div.dialog.at_top {
 	padding-bottom:5px;
 	background-color:#EEE;
 	border:solid 3px #900
+}
+div.generic_alert { // Default, in the absence of bootstrap
+	display: block;
+	background-color: #fcf8e3; // bootstrap warning color
+	border: 1px solid darken(adjust-hue(#fcf8e3, -10), 3%);
+	padding: 3px;
+	margin: 3px;
 }
 .hdrdiv {
 	float:left;

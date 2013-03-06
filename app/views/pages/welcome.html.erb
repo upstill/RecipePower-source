@@ -1,40 +1,4 @@
 <h3>Welcome<%= current_user ? ", "+current_user.handle : "" %>!</h3> 
-<% if Rails.env.development? %>
-<%= form_tag("/search", :method => "get", id: "TestDialog") do %>
-<table>
-  <tr>
-	<th>Function</th>
-	<th>Where</th>
-	<th>Execute As</th>
-	<th>Format</th>
-  <tr>
-	<td><%= radio_button_tag(:url, "authentications/new") %><%= label_tag(:fcn_login, "Login") %></td>
-	<td><%= radio_button_tag(:area, "at_left") %><%= label_tag(:area_left, "at_left") %></td>
-	<td><%= radio_button_tag(:mode, "modal") %><%= label_tag(:mode_modal, "modal") %></td>
-	<td><%= radio_button_tag(:format, "HTML") %><%= label_tag(:format_html, "HTML") %></td>
-  </tr>
-  <tr>
-	<td><%= radio_button_tag(:url, "/recipes/new" ) %><%= label_tag(:fcn_newcm, "New Cookmark") %></td>
-	<td><%= radio_button_tag(:area, "at_top") %><%= label_tag(:area_top, "at_top") %></td>
-	<td><%= radio_button_tag(:mode, "modeless") %><%= label_tag(:mode_modeless, "modeless") %></td>
-	<td><%= radio_button_tag(:format, "JSON") %><%= label_tag(:format_json, "JSON") %></td>
-  </tr>
-  <tr>
-	<td><%= radio_button_tag(:url, "/recipes/58/collect") %><%= label_tag(:fcn_collectcm, "Collect Cookmark") %></td>
-	<td><%= radio_button_tag(:area, "floating") %><%= label_tag(:area_float, "floating") %></td>
-	<td><%= radio_button_tag(:mode, "page") %><%= label_tag(:mode_page, "page") %></td>
-  </tr>
-  <tr>
-	<td><%= radio_button_tag(:url, "/recipes/58/edit" ) %><%= label_tag(:fcn_editcm, "Edit Cookmark") %></td>
-	<td><%= radio_button_tag(:area, "page") %><%= label_tag(:area_page, "page") %></td>
-  </tr>
-</table>
-<br>  <%= submit_tag("Submit") %>
-<% end %>
-<button type="button" onclick="toggleResults()">Toggle Results Display</button></td>
-<div class="results">
-</div>
-<% end %>
 <div class="welcome_sidebar">
   <p><span class="large">Getting Started</span></p>
   <div class="bookmarklet">

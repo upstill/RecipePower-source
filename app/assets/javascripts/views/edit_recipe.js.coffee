@@ -101,10 +101,11 @@ RP.edit_recipe.onload = (dlog) ->
 
 # Handle a close event: when the dialog is closed, also close its pic picker
 RP.edit_recipe.onclose = (dlog) ->
-	$(dlog).hide()
-	picker_dlog = $("div.pic_picker")
-	closeModal(picker_dlog)
-	$(dlog).empty()
+	# $(dlog).hide()
+	if picker_dlog = $("div.pic_picker")
+		$(dlog).remove();	
+	# closeModal(picker_dlog)
+	# $(dlog).empty()
 	return true # Prevent normal close action
 	
 # Extract a name from a reference of the form "recipe[<name>]"
@@ -124,10 +125,10 @@ RP.edit_recipe.submission_redundant = (dlog) ->
 	dataAfter = recipedata $('form.edit_recipe', dlog).serializeArray()
 	for own attr, value of dataAfter
 		if dataBefore[attr] != value # Something's changed => do normal forms processing
-			return false
+			return null
 	# Nothing's changed => we can just silently close the dialog
-	true
+	return { done: true, notice: "Sorted! Cookmark secure and unchanged." }
 
-jQuery ->
-	if dlog = me()[0]
- 		RP.edit_recipe.onload dlog
+#jQuery ->
+#	if dlog = me()[0]
+# 		RP.edit_recipe.onload dlog

@@ -2,16 +2,15 @@ class SessionsController < Devise::SessionsController
   
   # GET /resource/sign_in
   def new
-    debugger
     self.resource = build_resource(nil, :unsafe => true)
     clean_up_passwords(resource)
     respond_to do |format|
       format.html { respond_with(resource, serialize_options(resource)) }
       format.json { 
-        debugger
         flash.now[:alert] = "Sorry--didn't recognize your credentials."
+        @area = params[:area]
         rendered = with_format("html") {
-          render_to_string :new, layout: false 
+          render_to_string "authentications/new", layout: false 
         }
         return render :json => {
           :success => false, 
@@ -22,7 +21,6 @@ class SessionsController < Devise::SessionsController
   end
 
   def create
-    debugger
     resource = warden.authenticate!(:scope => resource_name, :recall => "#{controller_path}#new" ) # :failure)
     return sign_in_and_redirect(resource_name, resource)
   end
@@ -31,7 +29,6 @@ class SessionsController < Devise::SessionsController
     scope = Devise::Mapping.find_scope!(resource_or_scope)
     resource ||= resource_or_scope
     sign_in(scope, resource) unless warden.user(scope) == resource
-    # return render :json => {:success => true, :redirect => session[:original_uri] || collection_path, :notice => "Welcome back! (Logged in successfully.)" }
     redirect_to session[:original_uri] || collection_path, :notice => "Welcome back, #{resource.handle}! (Logged in successfully.)"
   end
  

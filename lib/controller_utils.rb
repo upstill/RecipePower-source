@@ -43,3 +43,23 @@ def dialog_boilerplate(action, default_area=nil, renderopts={})
     }
   end
 end
+
+	def base_errors resource
+	  resource.errors[:base].empty? ? "" : ("PS (base errors): "+resource.errors[:base].map { |msg| content_tag(:p, msg) }.join)
+  end
+  
+  def error_notification obj, attribute = nil, preface = nil
+    sentence = attribute ? (attribute.to_s.upcase+" "+enumerate_strs(obj.errors[attribute])+".") : obj.errors.full_messages.to_sentence
+    preface ||= "Problem while trying to #{params[:action]} the #{obj.class.to_s.downcase}"
+    preface+(sentence.blank? ? "." : ":<br>#{sentence}")+base_errors(resource)
+  end
+
+   # Stick ActiveRecord errors into the flash for presentation at the next action
+   def flash_errors obj, preface = ""
+     flash[:error] = error_notification obj, nil, preface
+   end
+
+   # Stick ActiveRecord errors into the flash for presentation now
+   def flash_errors_now obj, preface = ""
+     flash.now[:error] = error_notification obj, nil, preface
+   end

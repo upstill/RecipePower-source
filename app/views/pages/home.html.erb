@@ -1,7 +1,8 @@
 <% unless current_user %>
 	<div class="rightblock">
 	  <div class="right_signin">
-	    <%= render partial: "shared/slug_signin" %>
+			<h3>Sign Up Here</h3>
+	    <%= render partial: "shared/slug_signup" %>
 	  </div>
 	</div>
 <% end %>
@@ -10,6 +11,6 @@
 <p class="airy">
 The Web lays a world of recipes at your feet--but where to keep the jewels you find? There's no simpler way to clip recipes from the Web than RecipePower. We keep "cookmarks" back to your favorites from <strong>any</strong> recipe site: no "import" hassles. Tag them so you can find them again in a snap, share them--and hear about more you might like. It's the falling-off-a-log simple way to keep you cooking--and exploring. 
 </p><p class="airy">
-Want to hear more? Visit our <%= link_to "About", about_path %> page. Ready to go? Why not just <%= link_to_function("Sign Up", "recipePowerGetAndRunJSON('authentications/new', 'modal')" ) %>? We'll give you a quick tour, and in five minutes the Web will get much friendlier to you as a cook. Come on in! RecipePower is here for you.
+Want to hear more? Visit our <%= link_to "About", about_path %> page. Ready to go? Why not just sign up (at right)? We'll give you a quick tour, and in five minutes the Web will get much friendlier to you as a cook. Come on in! RecipePower is here for you.
 </p>
-<br class="clear">
+</div>

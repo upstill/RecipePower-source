@@ -28,6 +28,7 @@ class RecipesController < ApplicationController
           grid_element_body = with_format("html") do render_to_string :partial => "shared/recipe_grid" end
         end
         render json:     { 
+                         done: true, # Denotes recipe-editing is finished
                          notice: notice,
                          title: truncated, 
                          go_link_class: recipe_list_element_golink_class(@recipe), 
@@ -109,6 +110,14 @@ class RecipesController < ApplicationController
         @layout = "injector"
         render :edit, :layout => (params[:layout] || dialog_only)
       }
+      format.json {
+        @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params
+        debugger unless @recipe.id
+        dialogstr = with_format("html") { render_to_string :edit, layout: false }
+        render json: {
+          code: dialogstr
+        }
+      }
       format.js { 
         # Produce javascript in response to the bookmarklet, to render into an iframe, 
         # either the recipe editor or a login screen.
@@ -119,7 +128,7 @@ class RecipesController < ApplicationController
           @url = capture_recipes_url area: "at_top", layout: "injector", recipe: params[:recipe], sourcehome: domain
           if !current_user # Apparently there's no way to check up on a user without hitting the database
             # Push the editing URL so authentication happens first
-            session["user_return_to"] = @url
+            session[:original_uri] = @url
             @url = new_authentication_url area: "at_top", layout: "injector", sourcehome: domain 
           end
         end

@@ -23,6 +23,4 @@
 		<%= footer_navlinks %>
 	</div>
 </div>
-<% if (params[:controller] == "collection") && user_signed_in? %>
-	<%= dialogDiv :edit_recipe, "Tag That Recipe!", "at_left", recipe_editor() %>
-<% end %>
+<%= content_tag :div, "", class: "edit_recipe at_left hide", id: "recipePowerDialog", "data-template" => recipe_editor %>

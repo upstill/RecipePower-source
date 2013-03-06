@@ -1,4 +1,5 @@
 require "Domain"
+require './lib/controller_utils.rb'
 module ApplicationHelper
     include ActionView::Helpers::DateHelper
     
@@ -351,6 +352,10 @@ module ApplicationHelper
 	def link_to_modal(label, path, options={})
   	link_to_function label, "RP.dialog.get_and_go('#{path}');", options
   end
+  
+  def link_to_redirect(label, url, options={} )
+  	link_to_function label, "redirect_to('#{url}');", options
+  end
 	
 	def globstring(hsh)
     hsh.keys.each.collect { |key| 
@@ -485,14 +490,7 @@ module ApplicationHelper
    
   # Augments error display for record attributes (a la simple_form) with base-level errors
   def display_base_errors resource
-    return '' if (resource.errors.empty?) or (resource.errors[:base].empty?)
-    flash_one :error, resource.errors[:base].map { |msg| content_tag(:p, msg) }.join
-  end
-	
-  def error_notification obj, attribute = nil, preface = nil
-    sentence = attribute ? (attribute.to_s.upcase+" "+enumerate_strs(obj.errors[attribute])+".") : obj.errors.full_messages.to_sentence
-    preface ||= "Problem while trying to #{params[:action]} the #{obj.class.to_s.downcase}"
-    preface+(sentence.blank? ? "." : ":<br>#{sentence}")
+    flash_one :error, base_errors(resource)
   end
   
   # Report the current errors on a record in a nice alert div, suitable for interpolation on the page
@@ -502,42 +500,37 @@ module ApplicationHelper
     end
   end
 
-   # Stick ActiveRecord errors into the flash for presentation at the next action
-   def flash_errors obj, preface = ""
-     flash[:error] = error_notification obj, nil, preface
-   end
-
-   # Stick ActiveRecord errors into the flash for presentation now
-   def flash_errors_now obj, preface = ""
-     flash.now[:error] = error_notification obj, nil, preface
-   end
-
-  def flash_one level, message
-    bootstrap_class =
-    case level
-    when :success
-      "alert-success"
-    when :error
-      "alert-error"
-    when :alert
-      "alert-block"
-    when :notice
-      "alert-info"
+  def flash_one level, message, for_bootstrap=true
+    return "".html_safe if message.blank?
+    if for_bootstrap
+      bootstrap_class =
+      case level
+      when :success
+        "alert-success"
+      when :error
+        "alert-error"
+      when :alert
+        "alert-block"
+      when :notice
+        "alert-info"
+      else
+        flash_type.to_s
+      end
+       # This message may have been cleared earlier...
+      html = <<-HTML
+        <div class="alert #{bootstrap_class} alert_block fade in">
+          <button class="close" data-dismiss="alert">&#215;</button>
+          #{message}
+        </div>
+        HTML
     else
-      flash_type.to_s
+      html = %Q{<div class="generic_alert" style="display: block; background-color:#fcf8e3; border: 1px solid #f9f6dc; padding:3px; border:3px;">#{message}</div>}
     end
-     # This message may have been cleared earlier...
-    html = message.blank? ? "" : <<-HTML
-      <div class="alert #{bootstrap_class} alert_block fade in">
-        <button class="close" data-dismiss="alert">&#215;</button>
-        #{message}
-      </div>
-      HTML
     flash.delete(level)
     html.html_safe
   end
   
-  def flash_all 
-    flash.collect { |type, message| flash_one type, message }.join.html_safe
+  def flash_all for_bootstrap=true
+    flash.collect { |type, message| flash_one type, message, for_bootstrap }.join.html_safe
   end
 end

@@ -64,6 +64,13 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		ifr.style.display = 'block';
 	}, 
 	
+	redirect_to: function (msg) {
+		var url = msg.url[0];
+		var link = document.getElementById('recipePower-golink');
+		link.href = url;
+		link.click(); // Click, and VOILA! We're off to RecipePower!
+	},
+	
 	ifrOnload: function () {
 		// First, dispose of the placeholder and spinner images, if any
 		var img = document.getElementById("recipePower-placeholder");
@@ -214,6 +221,12 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	document.body.appendChild(spinner);
 	// Move the image onscreen, centered
 	spinner.style.left = ((window.outerWidth-32)/2).toString() + "px";
+	
+	var goer = document.createElement('a');
+	goer.href = "http://localhost:3000/collection"
+	goer.id = 'recipePower-golink';
+	goer.style.display = 'none';
+	document.body.appendChild(goer);
 
 	var ifr = document.createElement("iframe");
 	// ifr.style.margin="1em";

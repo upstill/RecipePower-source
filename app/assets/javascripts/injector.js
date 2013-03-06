@@ -25,15 +25,104 @@ function replaceImg(data) {
     pickImg('input#recipe_picurl', 'img.fitPic', data.url[0]);
 }
 
+// Function for cracking param string
+function ptq(q) {
+	/* parse the message */
+	/* semicolons are nonstandard but we accept them */
+	var x = q.replace(/;/g, '&').split('&'), i, name, t;
+	/* q changes from string version of query to object */
+	for (q={}, i=0; i<x.length; i++) {
+		t = x[i].split('=', 2);
+		name = unescape(t[0]);
+		if (!q[name])
+			q[name] = [];
+		if (t.length > 1) {
+			q[name][q[name].length] = unescape(t[1]);
+		} else
+		/* next two lines are nonstandard */
+			q[name][q[name].length] = true;
+	}
+	return q;
+}
+
+function armDialog(sourcehome) {
+	// Set the dialog width to that of the accompanying encapsulation
+	if(sourcehome && sourcehome.length > 0) document.sourcehome = sourcehome;
+
+	var dlog = document.getElementById("recipePowerDialog"); // document.body.childNodes[0];
+	var onloadNode = dlog.attributes["onload"];
+	if(onloadNode) {
+		onloadFcn = onloadNode.nodeValue;
+		if (onloadFcn && (typeof window[onloadFcn] === 'function'))
+			window[onloadFcn](dlog);
+	}
+       
+	RP.dialog.run(dlog); // Hand off submit-handling to the dialog manager
+	// $('form', dlog).submit( dlog, submitDialog );
+	// Set the dialog's resize function to adjust size of the iframe
+	$(dlog).resize( function (evt) {
+		var dropdown = $('div.token-input-dropdown-facebook')[0]
+		var h = 0;
+		if(dropdown && (dropdown.style.display != "none")) {
+			h = dropdown.offsetHeight;
+		}
+		if(dlog.offsetWidth > 0 && dlog.offsetHeight > 0) {
+			$.postMessage( { call: "execute_resize", width: dlog.offsetWidth, height: dlog.offsetHeight+h }, document.sourcehome );
+		}
+	});
+	
+	$('div.token-input-dropdown-facebook').resize( function (evt) {
+		// Strangely, this do-nothing resize monitor is required to trigger resize of the dialog
+		var dropdown = $('div.token-input-dropdown-facebook')[0]
+	});
+	
+	$.receiveMessage( function(evt) {
+		var data = ptq(evt.data);
+		var call = data.call;
+		if(call && (typeof window[call] === 'function')) {
+			window[call](data);
+		}
+	})
+}
+
+// Called when the dialog is opened: resize the iframe
+function open_dialog(dlog) {
+	/// Cancel will remove the dialog and confirm null effect to user
+	var cancelBtn = document.getElementById("recipePowerCancelBtn");
+	if(cancelBtn) 
+		cancelBtn.onclick = retire_iframe;
+	// Report the window dimensions to the enclosing iframe
+	if(dlog.offsetWidth > 0 && dlog.offsetHeight > 0) 
+		$.postMessage( { call: "execute_resize", width: dlog.offsetWidth, height: dlog.offsetHeight }, document.sourcehome );
+}
+
+// Called when the dialog is closed
+function close_dialog(dlog) {
+	retire_iframe();
+}
+	
+function retire_iframe(notice) {
+	var msg = { call: "retire_iframe" };
+	if(notice && (typeof notice === 'string'))
+		msg.notice = notice;
+	$.postMessage( msg, document.sourcehome );
+}
+
+function redirect_to(url) {
+	var msg = { call: "redirect_to", url: url };
+	$.postMessage( msg, document.sourcehome );
+}
+
 // A submit handler for a modal dialog form. Submits the data 
 // request and stores the response so it can be used when the dialog is closed.
+/*
 function submitDialog(eventdata) { // Supports multiple forms in dialog
 	var context = this;
 	var dlog = eventdata.data; // As stored when the dialog was set up
 	var process_result_normally = false;
 	eventdata.preventDefault();
 	/* To sort out errors from subsequent dialogs, we submit the form asynchronously
-	   and use the result to determine whether to do normal forms processing. */
+	   and use the result to determine whether to do normal forms processing. * /
 	$(context).ajaxSubmit( {
 		async: false,
 		dataType: 'json',
@@ -70,77 +159,4 @@ function submitDialog(eventdata) { // Supports multiple forms in dialog
 	});
 	return process_result_normally;
 }
-
-// Function for cracking param string
-function ptq(q) {
-	/* parse the message */
-	/* semicolons are nonstandard but we accept them */
-	var x = q.replace(/;/g, '&').split('&'), i, name, t;
-	/* q changes from string version of query to object */
-	for (q={}, i=0; i<x.length; i++) {
-		t = x[i].split('=', 2);
-		name = unescape(t[0]);
-		if (!q[name])
-			q[name] = [];
-		if (t.length > 1) {
-			q[name][q[name].length] = unescape(t[1]);
-		} else
-		/* next two lines are nonstandard */
-			q[name][q[name].length] = true;
-	}
-	return q;
-}
-
-function armDialog(sourcehome) {
-	// Set the dialog width to that of the accompanying encapsulation
-	if(sourcehome && sourcehome.length > 0) document.sourcehome = sourcehome;
-
-	var dlog = document.getElementById("recipePowerDialog"); // document.body.childNodes[0];
-	var onloadNode = dlog.attributes["onload"];
-	if(onloadNode) {
-		onloadFcn = onloadNode.nodeValue;
-		if (onloadFcn && (typeof window[onloadFcn] === 'function'))
-			window[onloadFcn](dlog);
-	}
-       
-  // if((typeof (RP) != 'undefined') && (typeof RP.dialog != 'undefined'))
-		// RP.dialog.apply('onload', dlog);
-	/// Cancel will remove the dialog and confirm null effect to user
-	var cancelBtn = document.getElementById("recipePowerCancelBtn");
-	if(cancelBtn) cancelBtn.onclick = retire_iframe;
-	$('form', dlog).submit( dlog, submitDialog );
-	// Set the dialog's resize function to adjust size of the iframe
-	$(dlog).resize( function (evt) {
-		var dropdown = $('div.token-input-dropdown-facebook')[0]
-		var h = 0;
-		if(dropdown && (dropdown.style.display != "none")) {
-			h = dropdown.offsetHeight;
-		}
-		if(dlog.offsetWidth > 0 && dlog.offsetHeight > 0) {
-			$.postMessage( { call: "execute_resize", width: dlog.offsetWidth, height: dlog.offsetHeight+h }, document.sourcehome );
-		}
-	});
-	
-	$('div.token-input-dropdown-facebook').resize( function (evt) {
-		// Strangely, this do-nothing resize monitor is required to trigger resize of the dialog
-		var dropdown = $('div.token-input-dropdown-facebook')[0]
-	});
-	
-	// Finally, report the window dimensions to the enclosing window
-	$.postMessage( { call: "execute_resize", width: dlog.offsetWidth, height: dlog.offsetHeight }, document.sourcehome );
-	
-	$.receiveMessage( function(evt) {
-		var data = ptq(evt.data);
-		var call = data.call;
-		if(call && (typeof window[call] === 'function')) {
-			window[call](data);
-		}
-	})
-}
-	
-function retire_iframe(notice) {
-	var msg = { call: "retire_iframe" };
-	if(notice && (typeof notice === 'string'))
-		msg.notice = notice;
-	$.postMessage( msg, document.sourcehome );
-}
+*/

@@ -1,6 +1,7 @@
-<div class="signin">
-	<strong>Sign in with a password:</strong><br>
-	<%= form_for(resource, :as => resource_name, :url => session_path(resource_name), :html => { 'data-type' => 'json'} ) do |f| %>
+<%= form_for(resource, :as => resource_name, :url => session_path(resource_name, area: "at_top"), :html => { 'data-type' => 'json'} ) do |f| %>
+	<div class="signin">
+		<strong>Sign in with a password:</strong><br>
+		<%= flash_all false %>
 		<div class="signin_credentials">
 		  <%= f.label :login, "Username or Email".html_safe, class: "signin_element" %>
 		  <%= f.text_field :login, class: "signin_element" %>
@@ -12,6 +13,7 @@
 		    <%= f.check_box :remember_me, :checked => true %> <%= f.label :remember_me %>
 		  <% end -%>
 		  <br><div class="gobutton at_top"><%= f.submit "Sign in", class: "submit_button" %></div>
+			<%= link_to_modal "Forgot Password", new_user_password_path( area: "at_top" ), class: "signin_element" %>
 		</div>
-	<% end %>
-</div>
+	</div>
+<% end %>
