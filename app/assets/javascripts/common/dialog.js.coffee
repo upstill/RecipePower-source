@@ -150,6 +150,7 @@ open_modal = (dlog, omit_button) ->
 	if($(dlog).modal)
 		$(dlog).modal 'show'
 	notify "open", dlog
+	notify_injector "open", dlog
 	dlog
 
 # Remove the dialog and notify its handler prior to removing the element
@@ -158,6 +159,7 @@ close_modal = (dlog, epilog) ->
 		$(dlog).modal 'hide'
 	notify "close", dlog
 	$(dlog).remove()
+	notify_injector "close", dlog
 	if epilog && epilog != ""
 		user_note epilog
 
@@ -274,9 +276,6 @@ notify = (what, dlog, entity) ->
 	if (mgr = manager_of dlog) && (fcn = mgr[what] || mgr["on"+what])
 		return fcn dlog
 	
-	if fcn = RP.named_function what+"_dialog"
-		result = fcn dlog
-	
 	# Otherwise, run the default
 	switch what
 		when "open", "onopen"
@@ -295,8 +294,13 @@ notify = (what, dlog, entity) ->
 		# when "save", "onsave"
 		# when "cancel", "oncancel"
 		# when "close", "onclose"
-	return result
+	return
 
+# Special handler for dialogs imbedded in an iframe. See 'injector.js'
+notify_injector = (what, dlog) ->
+	if fcn = RP.named_function what+"_dialog"
+		fcn dlog
+	
 # Public convenience methods for handling events
 RP.dialog.onopen = (dlog, entity) ->
 	notify 'open', dlog, entity
