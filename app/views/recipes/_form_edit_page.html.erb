@@ -1,7 +1,7 @@
 <h3>Tag That Recipe!<%= recipe_popup @recipe %></h3>
 
 <%= form_for @recipe do |f| %>
-  <%= errors_helper @recipe %>
+  <%= resource_errors_helper @recipe %>
   <%= pic_field @recipe, :picurl, f, true %>
   <div class="recipe_fields_div">
     <div class="recipe_tags_div" >

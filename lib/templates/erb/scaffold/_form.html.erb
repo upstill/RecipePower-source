@@ -1,6 +1,6 @@
 <%%= simple_form_for(@<%= singular_table_name %>) do |f| %>
   <%%= f.error_notification %>
-  <%%= display_base_errors resource %>
+  <%%= base_errors_helper resource %>
 
   <div class="form-inputs">
   <%- attributes.each do |attribute| -%>

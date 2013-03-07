@@ -40,13 +40,13 @@ class UsersController < ApplicationController
     @friend = User.find params[:id]
     user = current_user_or_guest
     if user.followee_ids.include?(@friend.id)
-      flash[:notice] = "You're already following '#{@friend.handle}'."
+      notice = "You're already following '#{@friend.handle}'."
     else
       @node = user.add_followee @friend
-      flash[:notice] = "You're now connected with '#{@friend.handle}'."
+      notice = "You're now connected with '#{@friend.handle}'."
     end
     respond_to do |format|
-      format.html { redirect_to collection_path }
+      format.html { redirect_to collection_path, :notice => notice }
       format.json { 
         render( 
           json: { 

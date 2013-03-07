@@ -45,10 +45,9 @@ function ptq(q) {
 	return q;
 }
 
-function armDialog(sourcehome) {
+function launch_interaction(sourcehome) {
 	// Set the dialog width to that of the accompanying encapsulation
 	if(sourcehome && sourcehome.length > 0) document.sourcehome = sourcehome;
-
 	var dlog = document.getElementById("recipePowerDialog"); // document.body.childNodes[0];
 	var onloadNode = dlog.attributes["onload"];
 	if(onloadNode) {

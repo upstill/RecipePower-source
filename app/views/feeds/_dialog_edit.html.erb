@@ -3,7 +3,7 @@
 	<%= simple_form_for @feed, html: { class: "new_feed json", 'data-type' => :json } do |f| %>
 		<div class="modal-body">
 		  <%= f.error_notification %>
-		  <%= display_base_errors resource %>
+		  <%= base_errors_helper resource %>
 		  <%# flash_all %>
 		  <%= f.input :title %>
 		  <%= f.input :description, input_html: { cols: 125, rows: 1 } %>

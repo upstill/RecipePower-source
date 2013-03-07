@@ -62,16 +62,16 @@ class FeedsController < ApplicationController
     @feed = Feed.find params[:id]
     user = current_user_or_guest
     if @feed.user_ids.include?(user.id)
-      flash[:notice] = "You're already subscribed to '#{@feed.title}'."
+      notice = "You're already subscribed to '#{@feed.title}'."
     else
       @feed.approved = true
       @feed.users << user 
       @feed.save
       @node = user.add_feed @feed
-      flash[:notice] = "Now feeding you with '#{@feed.title}'."
+      notice = "Now feeding you with '#{@feed.title}'."
     end
     respond_to do |format|
-      format.html { redirect_to collection_path }
+      format.html { redirect_to collection_path, notice: notice }
       format.json { 
         render(
           json: { 
@@ -120,7 +120,7 @@ class FeedsController < ApplicationController
       @feed = (Feed.where url: @feed.url)[0] || @feed
     end
     if @feed.errors.any?
-      view_context.flash_errors_now @feed
+      resource_errors_to_flash_now @feed # Move resource errors into the flash
       respond_to do |format|
         format.html { render action: "new", status: :unprocessable_entity }
         format.json { 

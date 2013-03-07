@@ -457,7 +457,8 @@ class Site < ActiveRecord::Base
         @crackedURL = url
         @pagetags = nil
         begin
-          if (ou = open url) && (doc = Nokogiri::HTML(ou))
+          ou = open url
+          if ou && (doc = Nokogiri::HTML(ou))
             @pagetags = PageTags.new doc, self.site
             @pagetags.glean (self.tags.empty? ? Site.find_by_site('http://www.recipepower.com').tags : self.tags)+@@TitleTags
             # @pagetags.hrecipe 

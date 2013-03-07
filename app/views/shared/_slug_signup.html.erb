@@ -1,6 +1,6 @@
 <%= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name)) do |f| %>
   <%# devise_error_messages! %>
-  <%= errors_helper resource %>
+  <%= resource_errors_helper resource %>
 
   <%= f.input :username, label: "Username (optional)" %>
   <%= f.input :fullname, label: "Real Name (optional)" %>

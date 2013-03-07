@@ -14,8 +14,8 @@ class PasswordsController < Devise::PasswordsController
         }
       end
     else
-      flash_errors_now resource, "Sorry, can't reset password"
-      respond_with(resource)
+      resource_errors_to_flash_now resource, preface: "Sorry, can't reset password"
+      respond_with resource
     end
   end
 =begin

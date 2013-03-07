@@ -103,20 +103,26 @@ class RecipesController < ApplicationController
     @area = params[:area] || "at_top"
   	dialog_only = params[:how] == "modal" || params[:how] == "modeless"
     respond_to do |format|
-      format.html { # This is for capturing a new recipe. The injector (capture.js) calls for this
+      format.html { # This is for capturing a new recipe and tagging it using a new page. 
         @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params
-        debugger unless @recipe.id
-        # The javascript includes an iframe for specific content
+        # The injector (capture.js) calls for this to fill the iframe on the foreign page.
         @layout = "injector"
-        render :edit, :layout => (params[:layout] || dialog_only)
+        if @recipe.id
+          render :edit, :layout => (params[:layout] || dialog_only)
+        else
+          @resource = @recipe
+          render "pages/resource_errors", :layout => (params[:layout] || dialog_only)
+        end
       }
       format.json {
         @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params
-        debugger unless @recipe.id
-        dialogstr = with_format("html") { render_to_string :edit, layout: false }
-        render json: {
-          code: dialogstr
-        }
+        if @recipe.id
+          dialogstr = with_format("html") { render_to_string :edit, layout: false }
+        else
+          @resource = @recipe
+          alertstr = with_format("html") { render_to_string "pages/resource_errors", layout: false } 
+        end
+        render json: { code: alertstr }
       }
       format.js { 
         # Produce javascript in response to the bookmarklet, to render into an iframe, 
@@ -125,6 +131,7 @@ class RecipesController < ApplicationController
         params[:recipe][:url].strip!
         if uri = URI::HTTP.sans_query(params[:recipe][:url])
           domain = uri.scheme+"://"+uri.host
+          domain += ":"+uri.port.to_s if uri.port != 80
           @url = capture_recipes_url area: "at_top", layout: "injector", recipe: params[:recipe], sourcehome: domain
           if !current_user # Apparently there's no way to check up on a user without hitting the database
             # Push the editing URL so authentication happens first
@@ -163,13 +170,12 @@ class RecipesController < ApplicationController
   def create # Take a URL, then either lookup or create the recipe
     # return if need_login true
     # Find the recipe by URI (possibly correcting same), and bind it to the current user
-    debugger
     @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params[:recipe]
     if @recipe.errors.empty? # Success (valid recipe, either created or fetched)
       reportRecipe(  
-              edit_recipe_url(@recipe), 
-              "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br> You might want to confirm the title and picture, and/or tag it?".html_safe,
-              formats )
+        edit_recipe_url(@recipe), 
+        "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br> You might want to confirm the title and picture, and/or tag it?".html_safe,
+        formats )
     else # failure (not a valid recipe) => return to new
        @Title = "Cookmark a Recipe"
        @nav_current = :addcookmark

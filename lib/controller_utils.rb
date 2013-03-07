@@ -43,23 +43,38 @@ def dialog_boilerplate(action, default_area=nil, renderopts={})
     }
   end
 end
+  
+  # Default broad-level error report based on controller and action
+  def express_error_context resource
+    "Couldn't #{params[:action]} the #{resource.class.to_s.downcase}"
+  end
 
-	def base_errors resource
-	  resource.errors[:base].empty? ? "" : ("PS (base errors): "+resource.errors[:base].map { |msg| content_tag(:p, msg) }.join)
+  # Summarize base errors from a resource transaction
+	def express_base_errors resource
+	  resource.errors[:base].empty? ? "" : resource.errors[:base].map { |msg| content_tag(:p, msg) }.join
   end
   
-  def error_notification obj, attribute = nil, preface = nil
-    sentence = attribute ? (attribute.to_s.upcase+" "+enumerate_strs(obj.errors[attribute])+".") : obj.errors.full_messages.to_sentence
-    preface ||= "Problem while trying to #{params[:action]} the #{obj.class.to_s.downcase}"
-    preface+(sentence.blank? ? "." : ":<br>#{sentence}")+base_errors(resource)
+  # If no preface is provided, use the generic error context
+  # NB: preface can be locked out entirely by passing ""
+  def express_resource_errors resource, options={}
+    preface = options[:preface] || express_error_context(resource)
+    base_errors = options[:with_base] ? express_base_errors(resource) : ""
+    details = 
+      if attribute = options[:attribute]
+        (attribute.to_s.upcase+" "+enumerate_strs(resource.errors[attribute])+".")
+      else
+        resource.errors.full_messages.to_sentence
+      end + base_errors
+    preface += (details.blank? ? "." : ":<br>") unless preface.blank?
+    preface+details
   end
 
    # Stick ActiveRecord errors into the flash for presentation at the next action
-   def flash_errors obj, preface = ""
-     flash[:error] = error_notification obj, nil, preface
+   def resource_errors_to_flash resource, options={}
+     flash[:error] = express_resource_errors resource, options
    end
 
    # Stick ActiveRecord errors into the flash for presentation now
-   def flash_errors_now obj, preface = ""
-     flash.now[:error] = error_notification obj, nil, preface
+   def resource_errors_to_flash_now resource, options={}
+     flash.now[:error] = express_resource_errors resource, options
    end

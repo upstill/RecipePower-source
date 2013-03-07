@@ -1,7 +1,7 @@
 <%= simple_form_for @user, html: { class: "new_feed json", 'data-type' => :json } do |f| %>
   <%# flash_all %>
   <%= f.error_notification %>
-  <%= display_base_errors resource %>
+  <%= base_errors_helper resource %>
   <%= f.input :username %>
   <%= f.input :fullname, label: "Full name", input_html: { cols: 125, rows: 1 } %>
   <%= f.input :about, label: "About me", placeholder: "Who Are You? What Do You Eat?", input_html: { cols: 125, rows: 4 } %>

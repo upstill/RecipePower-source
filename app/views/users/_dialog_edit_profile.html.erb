@@ -3,7 +3,7 @@
 	<%= simple_form_for @user, html: { class: "edit_user json", 'data-type' => :json } do |f| %>
 		<%= modal_body do %>
 		  <%= f.error_notification %>
-		  <%= display_base_errors resource %>
+		  <%= base_errors_helper resource %>
 		  <%= f.input :username %>
 		  <%= f.input :fullname, input_html: { cols: 125, rows: 1 } %>
 		  <%= f.input :about, label: "About Me", placeholder: "Who Are You? What Do You Eat?", input_html: { cols: 125, rows: 4 } %>

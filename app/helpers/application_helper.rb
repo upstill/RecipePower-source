@@ -403,6 +403,7 @@ module ApplicationHelper
     # Render for a floating dialog unless an area is asserted OR we're rendering for the page
     area = options[:area] || "floating" # (@partial ? "floating" : "page")
     hide = options[:show] ? "" : "hide"
+    classes = options[:class] || ""
     # class 'modal' is for use by Bootstrap modal; it's obviated when rendering to a page (though we can force
     # it for pre-rendered dialogs by asserting the :modal option)
     modal = options[:modal] ? "modal-pending" : ""
@@ -411,7 +412,7 @@ module ApplicationHelper
     ttlspec = ttl ? %Q{ title="#{ttl}"} : ""
         
     hdr = 
-      %Q{<div id="recipePowerDialog" class="#{modal} dialog #{which.to_s} #{area}" #{ttlspec}>}+
+      %Q{<div id="recipePowerDialog" class="#{modal} dialog #{which.to_s} #{area} #{classes}" #{ttlspec}>}+
       (options[:modal] ? 
         %Q{
           <div class="modal-header">
@@ -488,15 +489,22 @@ module ApplicationHelper
      end
    end
    
+  # Incorporate error reporting for a resource within a form, preferring
+  # any base error from the resource to the standard notification
+  def errors_helper f, resource
+    base_errors = base_errors_helper(resource)
+    base_errors.blank? ? f.error_notification : base_errors 
+  end
+  
   # Augments error display for record attributes (a la simple_form) with base-level errors
-  def display_base_errors resource
-    flash_one :error, base_errors(resource)
+  def base_errors_helper resource
+    flash_one :error, express_base_errors(resource)
   end
   
   # Report the current errors on a record in a nice alert div, suitable for interpolation on the page
-  def errors_helper obj, attribute=nil
+  def resource_errors_helper obj, options={}
     unless obj.errors.empty?
-      flash_one :error, error_notification(obj, attribute)
+      flash_one :error, express_resource_errors(obj, options )
     end
   end
 
@@ -514,7 +522,7 @@ module ApplicationHelper
       when :notice
         "alert-info"
       else
-        flash_type.to_s
+        level.to_s
       end
        # This message may have been cleared earlier...
       html = <<-HTML
@@ -531,6 +539,8 @@ module ApplicationHelper
   end
   
   def flash_all for_bootstrap=true
-    flash.collect { |type, message| flash_one type, message, for_bootstrap }.join.html_safe
+    flash.collect { |type, message| 
+      flash_one type, message, for_bootstrap 
+    }.join.html_safe
   end
 end

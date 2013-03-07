@@ -147,7 +147,7 @@ open_modal = (dlog, omit_button) ->
 	if !omit_button
 		buttoncode = '<button type=\"button\" class=\"close\" onclick=\"RP.dialog.cancel()\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>'
 		$('div.modal-header').prepend buttoncode
-	if($(dlog).modal)
+	if $(dlog).modal
 		$(dlog).modal 'show'
 	notify "open", dlog
 	notify_injector "open", dlog
