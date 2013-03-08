@@ -23,13 +23,14 @@
  *  require_tree blueprint
  * require common/RPGlobal
  * require common/scaffolds
- *= require views/rcp_list
+ *= require views/authentication
  *= require views/edit_recipe
+ *= require views/rcp_list
  *= require views/new_recipe
  *= require views/new_feed
  *= require views/sign_in
  *= require views/pic_picker
- *= require views/authentication
+ *= require views/users
  *= require views/welcome
  *= require common/buttons
  *= require paginate

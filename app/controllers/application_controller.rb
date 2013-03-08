@@ -10,6 +10,12 @@ class ApplicationController < ActionController::Base
     rescue_from AbstractController::ActionNotFound, :with => :no_action_error
     
     helper_method :orphantagid
+    
+  # Get a presenter for the object fron within a controller
+  def present(object, klass = nil)
+    klass ||= "#{object.class}Presenter".constantize
+    klass.new(object, view_context)
+  end  
   
   def check_flash
     logger.debug "FLASH messages extant for "+params[:controller]+"#"+params[:action]+"(check_flash):"

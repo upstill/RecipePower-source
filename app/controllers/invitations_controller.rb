@@ -32,6 +32,7 @@ class InvitationsController < Devise::InvitationsController
         debugger
         self.resource = nil
       end
+      debugger
       if resource && resource.errors.empty? # Success!
         set_flash_message :notice, :send_instructions, :email => self.resource.email
         respond_with resource, :location => after_invite_path_for(resource)
@@ -49,7 +50,8 @@ class InvitationsController < Devise::InvitationsController
             flash[:error] = error
           end
           redirect_to collection_path
-      elsif resource.errors[:email] && (other = User.where(email: resource.email).first)
+      elsif resource.errors[:email] 
+        if(other = User.where(email: resource.email).first)
           # HA! request failed because email exists. Forget the invitation, just make us friends.
           id = other.email 
           id = other.handle if id.blank?
@@ -62,6 +64,9 @@ class InvitationsController < Devise::InvitationsController
               notice = "But #{id} is already on RecipePower! Oh happy day!! <br>(We've gone ahead and made them your friend.)".html_safe
           end
           redirect_to collection_path, :notice => notice
+        else # There's a resource error on email, but not because the user exists: go back for correction
+          render :new
+        end
       else
         respond_with_navigational(resource) { render :new }
       end
