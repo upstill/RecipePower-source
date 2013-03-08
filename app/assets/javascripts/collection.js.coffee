@@ -77,7 +77,7 @@ collection_pager = (evt) ->
 
 RP.collection.update = (params, url) ->
 	$('div.loader').addClass "loading" # show progress indicator
-	RP.edit_recipe.stop() # Close the recipe editor if it's open
+	RP.dialog.cancel() # Close any open modal dialogs
 	jQuery.ajax
 		type: "POST"
 		url: (url || "collection/query")

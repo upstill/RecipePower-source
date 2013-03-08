@@ -3,7 +3,7 @@
 RP.edit_recipe = RP.edit_recipe || {}
 
 me = () ->
-	$('div.edit_recipe.dialog')
+	$('div.edit_recipe')
 
 # Open the edit-recipe dialog on the recipe represented by 'rcpdata'
 RP.edit_recipe.go = (rcpdata) ->
@@ -31,11 +31,7 @@ RP.edit_recipe.go = (rcpdata) ->
 	$("#recipe_tag_tokens").data "pre", jQuery.parseJSON(rcpdata.rcpTagData)
 	
 	# Hand it off to the dialog handler
-	launchDialog dlog, "at_left", true
-
-RP.edit_recipe.stop = ->
-	# Close the recipe editor, if it's open
-	closeModeless me()
+	RP.dialog.run dlog
 
 # When dialog is loaded, activate its functionality
 RP.edit_recipe.onload = (dlog) ->
@@ -43,8 +39,8 @@ RP.edit_recipe.onload = (dlog) ->
 	# Only proceed if the dialog has children
 	if $('.edit_recipe > *').length > 0
 		
-		if(typeof recipePowerRunBootstrap == 'function') # Running locally
-			recipePowerRunBootstrap dlog # $(dlog).show 500
+		#		if(typeof recipePowerRunBootstrap == 'function') # Running locally
+		#			recipePowerRunBootstrap dlog # $(dlog).show 500
 		# Setup tokenInput on the tags field
 		$("#recipe_tag_tokens", dlog).tokenInput("/tags/match.json", 
 			crossDomain: false,
@@ -101,11 +97,8 @@ RP.edit_recipe.onload = (dlog) ->
 
 # Handle a close event: when the dialog is closed, also close its pic picker
 RP.edit_recipe.onclose = (dlog) ->
-	# $(dlog).hide()
 	if picker_dlog = $("div.pic_picker")
 		$(dlog).remove();	
-	# closeModal(picker_dlog)
-	# $(dlog).empty()
 	return true # Prevent normal close action
 	
 # Extract a name from a reference of the form "recipe[<name>]"
@@ -128,7 +121,3 @@ RP.edit_recipe.submission_redundant = (dlog) ->
 			return null
 	# Nothing's changed => we can just silently close the dialog
 	return { done: true, notice: "Sorted! Cookmark secure and unchanged." }
-
-#jQuery ->
-#	if dlog = me()[0]
-# 		RP.edit_recipe.onload dlog
