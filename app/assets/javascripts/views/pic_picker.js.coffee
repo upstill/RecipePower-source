@@ -27,7 +27,7 @@ RP.pic_picker.open = (ttl) ->
 				Okay: (event) ->
 					# Transfer the logo URL from the dialog's text input to the page text input
 					# THE PICPICKER MUST BE ARMED WITH NAMES IN ITS DATA
-					datavals = $("a.pic_picker_golink").attr("data").split(';');
+					datavals = $(".pic_picker_golink").attr("data").split(';');
 					previewImg("input.icon_picker", datavals[1], "input#"+datavals[0]);
 					$(this).dialog('close');
 					# Copy the image to the window's thumbnail

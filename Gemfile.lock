@@ -42,54 +42,31 @@ GEM
     activesupport (3.2.11)
       i18n (~> 0.6)
       multi_json (~> 1.0)
-    addressable (2.3.2)
+    addressable (2.3.3)
     annotate (2.4.0)
     ansi (1.4.3)
     arel (3.0.2)
     bcrypt-ruby (3.0.1)
-<<<<<<< HEAD
-    better_errors (0.5.0)
-=======
-<<<<<<< HEAD
-    bcrypt-ruby (3.0.1-x86-mingw32)
-<<<<<<< HEAD
-    better_errors (0.3.2)
-=======
-=======
->>>>>>> Installed gems to vendor bundle
-    better_errors (0.5.0)
->>>>>>> Modest changes toward bootstrap modal
->>>>>>> refs/heads/master
+    better_errors (0.7.2)
       coderay (>= 1.0.0)
       erubis (>= 2.6.6)
-    binding_of_caller (0.6.8)
+    binding_of_caller (0.7.1)
+      debug_inspector (>= 0.0.1)
     bootstrap-sass (2.2.2.0)
       sass (~> 3.2)
     builder (3.0.4)
     chunky_png (1.2.7)
-<<<<<<< HEAD
-    closure_tree (3.7.2)
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-    closure_tree (3.6.9)
-=======
-    closure_tree (3.7.1)
->>>>>>> Modest changes toward bootstrap modal
-=======
-    closure_tree (3.7.2)
->>>>>>> Installed gems to vendor bundle
->>>>>>> refs/heads/master
+    closure_tree (3.9.0)
       activerecord (>= 3.0.0)
-      with_advisory_lock
-    coderay (1.0.8)
+      with_advisory_lock (>= 0.0.6)
+    coderay (1.0.9)
     coffee-rails (3.2.2)
       coffee-script (>= 2.2.0)
       railties (~> 3.2.0)
     coffee-script (2.2.0)
       coffee-script-source
       execjs
-    coffee-script-source (1.4.0)
+    coffee-script-source (1.6.1)
     columnize (0.3.6)
     compass (0.12.2)
       chunky_png (~> 1.2)
@@ -99,57 +76,30 @@ GEM
       compass (>= 0.12.2, < 0.14)
     curb (0.7.18)
     daemons (1.1.9)
-<<<<<<< HEAD
-    debugger (1.3.1)
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-    debugger (1.2.4)
-=======
-    debugger (1.3.0)
->>>>>>> Modest changes toward bootstrap modal
-=======
-    debugger (1.3.1)
->>>>>>> Installed gems to vendor bundle
->>>>>>> refs/heads/master
+    debug_inspector (0.0.2)
+    debugger (1.4.0)
       columnize (>= 0.3.1)
       debugger-linecache (~> 1.1.1)
-      debugger-ruby_core_source (~> 1.1.8)
+      debugger-ruby_core_source (~> 1.2.0)
     debugger-linecache (1.1.2)
       debugger-ruby_core_source (>= 1.1.1)
-    debugger-ruby_core_source (1.1.8)
-    declarative_authorization (0.5.6)
-<<<<<<< HEAD
+    debugger-ruby_core_source (1.2.0)
+    declarative_authorization (0.5.7)
     devise (2.2.3)
-=======
-<<<<<<< HEAD
-    devise (2.2.2)
-=======
-    devise (2.2.3)
->>>>>>> Modest changes toward bootstrap modal
->>>>>>> refs/heads/master
       bcrypt-ruby (~> 3.0)
       orm_adapter (~> 0.1)
       railties (~> 3.1)
       warden (~> 1.2.1)
-<<<<<<< HEAD
-    devise_invitable (1.1.5)
-=======
-<<<<<<< HEAD
-    devise_invitable (1.1.4)
-=======
-    devise_invitable (1.1.5)
->>>>>>> Modest changes toward bootstrap modal
->>>>>>> refs/heads/master
+    devise_invitable (1.1.6)
       actionmailer (~> 3.0)
-      devise (>= 2.1.1)
+      devise (>= 2.1.2)
       railties (~> 3.0)
     diff-lcs (1.1.3)
     erubis (2.7.0)
     eventmachine (1.0.0.rc.4)
     execjs (1.4.0)
       multi_json (~> 1.0)
-    faraday (0.8.5)
+    faraday (0.8.6)
       multipart-post (~> 1.1)
     faraday_middleware (0.9.0)
       faraday (>= 0.7.4, < 0.9)
@@ -169,14 +119,14 @@ GEM
     htmlentities (4.3.1)
     http_parser.rb (0.5.3)
     httpauth (0.2.0)
-    i18n (0.6.1)
+    i18n (0.6.4)
     journey (1.0.4)
     jquery-rails (2.2.1)
       railties (>= 3.0, < 5.0)
       thor (>= 0.14, < 2.0)
     json (1.7.7)
-    jwt (0.1.5)
-      multi_json (>= 1.0)
+    jwt (0.1.7)
+      multi_json (>= 1.5)
     launchy (2.2.0)
       addressable (~> 2.3)
     letter_opener (1.1.0)
@@ -189,57 +139,23 @@ GEM
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
     metaclass (0.0.1)
-<<<<<<< HEAD
     mime-types (1.21)
-    minitest (4.6.0)
-    mocha (0.13.2)
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-    mime-types (1.19)
-    minitest (4.4.0)
-    mocha (0.13.1)
->>>>>>> refs/heads/master
+    minitest (4.6.2)
+    mocha (0.13.3)
       metaclass (~> 0.0.1)
-    multi_json (1.5.1)
-    multipart-post (1.1.5)
-<<<<<<< HEAD
-    newrelic_rpm (3.5.6.46)
+    multi_json (1.6.1)
+    multipart-post (1.2.0)
+    newrelic_rpm (3.5.8.72)
     nifty-generators (0.4.6)
     nokogiri (1.4.7)
-=======
-    newrelic_rpm (3.5.5.38)
-    nifty-generators (0.4.6)
-    nokogiri (1.5.6)
-    nokogiri (1.5.6-x86-mingw32)
-=======
-    mime-types (1.20.1)
-    minitest (4.5.0)
-=======
-    mime-types (1.21)
-    minitest (4.6.0)
->>>>>>> Installed gems to vendor bundle
-    mocha (0.13.2)
-      metaclass (~> 0.0.1)
-    multi_json (1.5.1)
-    multipart-post (1.1.5)
-    newrelic_rpm (3.5.6.46)
-    nifty-generators (0.4.6)
-    nokogiri (1.4.7)
-<<<<<<< HEAD
-    nokogiri (1.4.7-x86-mingw32)
->>>>>>> Modest changes toward bootstrap modal
-=======
->>>>>>> Installed gems to vendor bundle
->>>>>>> refs/heads/master
     oauth (0.4.7)
-    oauth2 (0.8.0)
+    oauth2 (0.8.1)
       faraday (~> 0.8)
       httpauth (~> 0.1)
       jwt (~> 0.1.4)
       multi_json (~> 1.0)
       rack (~> 1.2)
-    omniauth (1.1.2)
+    omniauth (1.1.3)
       hashie (~> 1.2)
       rack
     omniauth-facebook (1.4.1)
@@ -288,7 +204,7 @@ GEM
       rdoc (~> 3.4)
       thor (>= 0.14.6, < 2.0)
     rake (10.0.3)
-    rdoc (3.12.1)
+    rdoc (3.12.2)
       json (~> 1.4)
     rmagick (2.12.0)
     rspec (2.6.0)
@@ -304,18 +220,18 @@ GEM
       activesupport (~> 3.0)
       railties (~> 3.0)
       rspec (~> 2.6.0)
-    ruby-openid (2.2.2)
+    ruby-openid (2.2.3)
     ruby_parser (3.1.1)
       sexp_processor (~> 4.1)
-    sass (3.2.5)
+    sass (3.2.7)
     sass-rails (3.2.6)
       railties (~> 3.2.0)
       sass (>= 3.1.10)
       tilt (~> 1.3)
     sax-machine (0.0.20)
       nokogiri (> 0.0.0)
-    sexp_processor (4.1.4)
-    simple_form (2.0.4)
+    sexp_processor (4.1.5)
+    simple_form (2.1.0)
       actionpack (~> 3.0)
       activemodel (~> 3.0)
     simple_oauth (0.1.9)
@@ -329,7 +245,7 @@ GEM
       eventmachine (>= 0.12.6)
       rack (>= 1.0.0)
     thor (0.17.0)
-    tilt (1.3.3)
+    tilt (1.3.5)
     tinder (1.9.1)
       eventmachine (>= 0.12.0, < 2)
       faraday (~> 0.8)
@@ -349,7 +265,7 @@ GEM
       eventmachine (>= 0.12.8)
       http_parser.rb (~> 0.5.1)
       simple_oauth (~> 0.1.4)
-    tzinfo (0.3.35)
+    tzinfo (0.3.36)
     uglifier (1.3.0)
       execjs (>= 0.3.0)
       multi_json (~> 1.0, >= 1.0.2)
@@ -360,16 +276,8 @@ GEM
       rack (>= 1.0)
       rack-test (>= 0.5.3)
     will_paginate (3.0.4)
-<<<<<<< HEAD
-    with_advisory_lock (0.0.4)
-      activerecord (>= 3.2.0)
-=======
-<<<<<<< HEAD
-=======
-    with_advisory_lock (0.0.4)
-      activerecord (>= 3.2.0)
->>>>>>> Modest changes toward bootstrap modal
->>>>>>> refs/heads/master
+    with_advisory_lock (0.0.6)
+      activerecord (>= 3.0.0)
 
 PLATFORMS
   ruby

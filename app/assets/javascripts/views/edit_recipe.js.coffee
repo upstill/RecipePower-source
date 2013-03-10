@@ -51,13 +51,13 @@ RP.edit_recipe.onload = (dlog) ->
 			allowFreeTagging: true
 		)
 		
-		if $('a.pic_picker_golink', dlog).length > 0
+		if $('.pic_picker_golink', dlog).length > 0
 			# Get the picture picker in background
 			RP.pic_picker.load (picdlg) ->
-				$('a.pic_picker_golink', dlog).addClass('loaded');
+				$('.pic_picker_golink', dlog).removeClass('hide');
 			
 			# Arm the pic picker to open when clicked
-			$("a.pic_picker_golink", dlog).click ->
+			$(".pic_picker_golink", dlog).click ->
 				event.preventDefault()
 				return RP.pic_picker.open "Pick a Picture for the Recipe"
 		
