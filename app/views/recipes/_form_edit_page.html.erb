@@ -1,8 +1,8 @@
 <h3>Tag That Recipe!<%= recipe_popup @recipe %></h3>
 
 <%= form_for @recipe do |f| %>
-  <%= show_errors @recipe.errors %>
-  <%= recipe_pic_field @recipe, f, true %>
+  <%= resource_errors_helper @recipe %>
+  <%= pic_field @recipe, :picurl, f, true %>
   <div class="recipe_fields_div">
     <div class="recipe_tags_div" >
        <%= f.label :tag_tokens, "Tags", :class=>"recipe_field_label" -%>

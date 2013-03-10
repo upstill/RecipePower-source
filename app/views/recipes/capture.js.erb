@@ -56,7 +56,6 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		var mgn = height+"px 0px 0px 0px";
 		capsule.style.margin=mgn;
 		*/
-debugger;
 		var ifr = document.getElementById("recipePower-iframe");
 		ifr.style.width = width.toString() + "px";
 		ifr.style.height = height.toString() + "px";
@@ -64,6 +63,13 @@ debugger;
 		ifr.style.left = ((window.outerWidth-width)/2).toString() + "px";
 		ifr.style.display = 'block';
 	}, 
+	
+	redirect_to: function (msg) {
+		var url = msg.url[0];
+		var link = document.getElementById('recipePower-golink');
+		link.href = url;
+		link.click(); // Click, and VOILA! We're off to RecipePower!
+	},
 	
 	ifrOnload: function () {
 		// First, dispose of the placeholder and spinner images, if any
@@ -79,13 +85,13 @@ debugger;
 			spinner.style.display = "none";
 			spinner.parentNode.removeChild(spinner);
 		}
-		debugger;
 		/*
 		// Move the iframe onscreen
 		var width = ifr.style.width.replace("px","");
 		var offset = window.outerWidth-ifr.outerWidth;
 		ifr.style.left = ((offset)/2).toString() + "px";
 		*/
+		ifr.style.top = "0px";
 		
 	  var ns = window.recipePower_namespace;
 	/* We would love to encapsulate the window content so we can move the top out of the way
@@ -216,6 +222,12 @@ debugger;
 	document.body.appendChild(spinner);
 	// Move the image onscreen, centered
 	spinner.style.left = ((window.outerWidth-32)/2).toString() + "px";
+	
+	var goer = document.createElement('a');
+	goer.href = "http://localhost:3000/collection"
+	goer.id = 'recipePower-golink';
+	goer.style.display = 'none';
+	document.body.appendChild(goer);
 
 	var ifr = document.createElement("iframe");
 	// ifr.style.margin="1em";

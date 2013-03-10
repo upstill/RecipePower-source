@@ -18,16 +18,20 @@
  >>>>>>>>>>>>>> jquery/jquery-ui-1.8.17.custom.css
  >>>>>>>>>>>>>> jquery/token-input-facebook.css
  >>>>>>>>>>>>>> feedback (vendor)
-
+ *= require bootstrap_and_overrides
  *= require_self
  *  require_tree blueprint
  * require common/RPGlobal
  * require common/scaffolds
- *= require views/rcp_list
+ *= require views/authentication
  *= require views/edit_recipe
+ *= require views/rcp_list
  *= require views/new_recipe
+ *= require views/new_feed
  *= require views/sign_in
  *= require views/pic_picker
+ *= require views/users
+ *= require views/welcome
  *= require common/buttons
  *= require paginate
  *= require_tree ../../../vendor/assets/stylesheets/jquery
@@ -35,9 +39,6 @@
  *= require common/ajax_loader
 
 */
-@import "bootstrap";
-body { padding-top: 60px; }
-@import "bootstrap-responsive";
 
 #logo_img_small {
 	width: 250px;
@@ -47,8 +48,21 @@ body { padding-top: 60px; }
 	margin-bottom: 0px
 }
 
-.RcpBrowser.active {
-	
+.RcpBrowser.active  {
+}
+
+.RcpBrowser.addlink {
+	display: inline-block;
+	float: right;
+	text-decoration:none;
+	color:#5E4A18;
+	font-size:14px;
+	padding:2px;
+	background-color:#E6DAA1;
+	border-radius:2px;
+	border-color:hsl(0,0%,55%);
+	border-width:2px;
+	border-style: solid
 }
 
 .nav-tabs > .active > a, .nav-tabs > .active > a:hover {
@@ -143,4 +157,84 @@ body { padding-top: 60px; }
 	margin-right: 10px;
 }
 
+.feed_list_element_title {
+	margin-bottom: 0px;
+	font-size: 1.3em;
+}
 
+.feed_list_element_title > a {
+	// display: block;
+	// overflow: hidden;
+	max-height: 2.8em;
+}
+
+.feed_list_element_source {
+	font-size: 0.9em;
+	color: #999;
+}
+
+.feed_list_element_stats {
+	font-size: 0.8em;
+	color: #999;
+}
+
+div.content_browser_cover {
+	width: 300px;
+	position: absolute;
+	top: 0;
+	height: 95%;
+  z-index:    10;
+  background: rgba( 255, 255, 255, .45 ) 
+              50% 50% 
+              no-repeat;
+}
+
+#footer_nav_links {
+	z-index: 11;
+}
+
+div.content_browser {
+	width: 270px;
+}
+
+li.RcpBrowser {
+	position: relative;
+	left: 0px;
+	top: 0px;
+}
+
+li.RcpBrowser > a {
+  display: inline-block;
+  width: 90%;
+	padding-right: 30px;
+}
+
+li.RcpBrowser > a.mod_button {
+	position: absolute;
+	right: -12px;
+	top: 0px;
+  display: none;
+  vertical-align: top;
+  text-align: center;
+  font-size: 1.0em;
+  background-color: white;
+  margin: 0px;
+  margin-top: 5px;
+  padding: 0px;
+  width: 20px;
+  height: 20px;
+  // position: relative;
+  // left: -35px;
+  z-index: 3;
+	font-weight:bold;
+	color:#55AA55;
+	// background-color:#E6DAA1;
+	border-radius:10px;
+	border-color:hsl(0,0%,55%);
+	border-width:2px;
+	border-style: solid
+}
+
+li.RcpBrowser.active > a.mod_button {
+  display: inline-block;
+}

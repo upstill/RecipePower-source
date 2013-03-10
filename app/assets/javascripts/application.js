@@ -10,6 +10,7 @@
 //= require_self
 // require_directory .
 //= require_directory ../../../vendor/assets/javascripts/jquery
+//= require ../../../vendor/assets/javascripts/bootbox
 //= require jquery_ujs
 //= require_directory ./common
 //= require_directory ./views

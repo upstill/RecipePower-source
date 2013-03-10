@@ -1,29 +1,13 @@
-<div class="signup">
-<div class="prompt">Sign Up</div>
-<%= form_for(resource, :as => resource_name, :url => registration_path(resource_name)) do |f| %>
-  <%= devise_error_messages! %>
+<%= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name)) do |f| %>
+  <%# devise_error_messages! %>
+  <%= resource_errors_helper resource %>
 
-  <div class="field">
-		<%= f.label :username, "Username (optional)" %>
-	  <%= f.text_field :username %>
-  </div>
+  <%= f.input :username, label: "Username (optional)" %>
+  <%= f.input :fullname, label: "Real Name (optional)" %>
+	<%= f.input :email, label: "Email (required)" %>
 
-  <div class="field">
-		<%= f.label :email, "Email (required)" %>
-  	<%= f.email_field :email %>
-	</div>
-
-<% if resource.password_required? %>
-	<div class="field">
-		<%= f.label :password %>
-	  <%= f.password_field :password %>
-	</div>
-
-	<div class="field">
-		<%= f.label :password_confirmation %>
-	  <%= f.password_field :password_confirmation %>
-	</div>
-<% end %>
+	<% if resource.password_required? %>
+		<%= f.input :password %>
+	<% end %>
   <div class="gobutton"><%= f.submit "Sign up" %></div>
 <% end %>
-</div>

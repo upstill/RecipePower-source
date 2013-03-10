@@ -1,22 +1,25 @@
 RP::Application.routes.draw do
 
+  resources :feeds do
+    member do 
+      get 'collect' # Add the feed to the current user
+      post 'remove' # Remove the feed from the current user's set
+      post 'approve' # (Admin only) approve the feed for presentation
+    end
+    collection do
+      post 'query' # Change the selection query
+    end
+  end
+
   resources :thumbnails
 
-
   match 'collection', :controller=>'collection', :action=>'index'
-  
   match 'collection/query', :controller=>'collection', :action=>'query', :via => :post
-
   match "collection/update", :controller=>'collection', :action=>'update', :via => :post
-
   get "collection/show"
-
   get "collection/new"
-
   get "collection/edit"
-
   get "collection/create"
-
   get "collection/relist"
 
   get "show/new"
@@ -39,8 +42,13 @@ RP::Application.routes.draw do
   match '/authentications/new' => 'authentications#new'
   resources :authentications
 
-  devise_for :users, :controllers => {:invitations => 'invitations', :registrations => 'registrations'}
+  devise_for :users, :controllers => {
+    :sessions => 'sessions', 
+    :passwords => 'passwords', 
+    :invitations => 'invitations', 
+    :registrations => 'registrations'}
 
+  match '/site/scrape' => 'sites#scrape'
   resources :sites
 
   resources :expressions
@@ -54,17 +62,25 @@ RP::Application.routes.draw do
   match 'rcpqueries/tablist', :controller=>'rcpqueries', :action=>'tablist', :via => :get
 
   resources :rcpqueries
-
-  match '/auth/:provider/callback' => 'authentications#create'
   
   match 'rcpqueries/:id' => 'rcpqueries#update', :via => :post
+
+  match '/auth/:provider/callback' => 'authentications#create'
 
   # Calling 'profile' action in 'users' controller edits the current user
   match 'users/profile' => 'users#profile'
   # Ask a user to identify him/herself by email address
   match 'users/identify' => 'users#identify'
   # match 'users/:id/show' => 'users#show'
-  resources :users
+  resources :users do
+    member do 
+      get 'collect'
+      post 'remove'
+    end
+    collection do
+      post 'query' # Change the selection query
+    end
+  end
   
   # Super-user can edit user info, starting with roles
   #match 'signup' => 'users#new', :as => :signup
@@ -123,7 +139,7 @@ RP::Application.routes.draw do
   match '/FAQ', :to=>"pages#FAQ"
   match '/admin', :to=>"pages#admin"
   match '/spacetaker', :to=>"pages#spacetaker"
-  root :to => 'pages#home_or_recipes'
+  root :to => 'collection#user_only'
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

@@ -1,7 +1,7 @@
-<%= dialogHeader :captureRecipe, "Cookmark Captured", @area %>
+<%= dialogHeader :captureRecipe, "Cookmark Captured", area: @area %>
 Sorry, HTML format not supported for recipe capture.
 <!--
-<%= show_errors @recipe.errors %>
+<%= resource_errors_helper @recipe %>
 <%= form_for @recipe, html: { class: "capture_recipe json" } do |f| %>
 	<div class="recipe_comment_div" >
 	   <%= f.label :comment, "Notes", :class=>"recipe_field_label" -%>

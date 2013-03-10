@@ -41,9 +41,14 @@ class SitesController < ApplicationController
 
   # GET /sites/1/edit
   def edit
-      # return if need_login true, true
+    # return if need_login true, true
     @site = Site.find(params[:id].to_i)
-    @Title = @site.name
+    if params[:pic_picker]
+      # Setting the pic_picker param requests a picture-editing dialog
+      render :partial=> "shared/pic_picker"
+    else
+      @Title = @site.name
+    end
   end
 
   # POST /sites
@@ -89,6 +94,23 @@ class SitesController < ApplicationController
     respond_to do |format|
       format.html { redirect_to sites_url }
       format.json { head :ok }
+    end
+  end
+  
+  def scrape
+    url = params[:url]
+    if @site = Site.by_link(url)
+      ocount = @site.feeds.size
+      debugger
+      @site.feedlist url
+      if @site.feeds.size > ocount
+        @site.save
+        render action: :show, notice: "Observe feeds for the site below"
+      else
+        redirect_to "/feeds/new", notice: "No feeds found in page. Try copy-and-paste-ing RSS URLs individually."
+      end
+    else
+      redirect_to "/feeds/new", notice: "Couldn't make sense of URL"
     end
   end
 end

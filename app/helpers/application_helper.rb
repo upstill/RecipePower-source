@@ -1,6 +1,14 @@
 require "Domain"
+require './lib/controller_utils.rb'
 module ApplicationHelper
     include ActionView::Helpers::DateHelper
+
+    def present(object, klass = nil)
+      klass ||= "#{object.class}Presenter".constantize
+      presenter = klass.new(object, self)
+      yield presenter if block_given?
+      presenter
+    end
     
     def resource_name
       :user
@@ -24,10 +32,6 @@ module ApplicationHelper
   def encodeHTML(str)
       @@coder.encode str
   end
-  
-  def forgot_password_link
-    link_to_function "Forgot Password", %Q{recipePowerGetAndRunJSON('#{new_user_password_path}', 'modal')}
-  end
     
   def link_to_add_fields(name, f, association, *initializers)
     new_object = f.object.send(association).klass.new *initializers
@@ -44,10 +48,6 @@ module ApplicationHelper
   
   def recipe_popup( rcp )
       link_to image_tag("preview.png", title:"Show the recipe in a popup window", class: "preview_button"), rcp.url, target: "_blank", class: "popup", id: "popup#{rcp.id.to_s}"        
-  end
-  
-  def recipe_fit_pic(recipe, placeholder_image="MissingPicture.png", selector=nil)
-    page_fitPic recipe.thumburl, recipe.id, placeholder_image, selector
   end
 
   # Declare an image within an adjustable box. The images are downloaded by
@@ -86,18 +86,48 @@ module ApplicationHelper
 #  def pic_picker picurl, pageurl, id
 #    pic_picker_shell (pic_picker_contents picurl, pageurl, id)
 #  end
+
+  # Show an image that will resize to fit an enclosing div, possibly with a link to an editing dialog
+  # We'll need the id of the object, and the name of the field containing the picture's url
+  def pic_field(obj, attribute, form, editable = true)
+    picurl = obj.send(attribute)
+    preview = content_tag(
+      :div, 
+      page_fitPic(picurl, obj.id, "PickPicture.png", "div.recipe_pic_preview img")+
+                form.text_field(attribute, rel: "jpg,png,gif", hidden: true),
+      class: "recipe_pic_preview"
+    )
+    picker = editable ?
+      content_tag(:div,
+            link_to( "Pick Picture", "/", :data=>"recipe_picurl;div.recipe_pic_preview img", :class => "pic_picker_golink")+
+            pic_picker_shell(obj), # pic_picker(obj.picurl, obj.url, obj.id), 
+            :class=>"recipe_pic_picker"
+            ) # Declare the picture-picking dialog
+    : ""
+    content_tag :div, preview + picker, class: "edit_recipe_field pic"
+  end
   
-  # Declare the (empty) contents of the pic_picker dialog, embedding a url for later requesting the actual dialog data
-  def pic_picker_shell contents=""
+  # Declare the (empty) contents of the pic_picker dialog, embedding a url for the client to request the actual dialog data
+  def pic_picker_shell obj, contents=""
+    controller = params[:controller]
     content_tag :div, 
       contents, 
       class: "pic_picker",
       style: "display:none;",
-      "data-url" => @recipe ? "/recipes/#{@recipe.id}/edit?pic_picker=true" : ""
+      "data-url" => "/#{controller}/#{obj.id}/edit?pic_picker=true"
   end
   
   # Build a picture-selection dialog with the default url, url for a page containing candidate images, id, and name of input field to set
-  def pic_picker_contents picurl, pageurl, id
+  def pic_picker_contents
+    if @recipe
+      picurl = @recipe.picurl
+      pageurl = @recipe.url
+      id = @recipe.id
+    else 
+      picurl = @site.logo
+      pageurl = @site.home+@site.sample
+      id = @site.id
+    end
     piclist = Site.piclist pageurl
     pictab = []
     # divide piclist into rows of four pics apiece
@@ -150,6 +180,14 @@ module ApplicationHelper
   def recipe_list_element_class recipe
     "rcpListElmt"+@recipe.id.to_s    
   end
+  
+  def recipe_grid_element_class recipe
+    "rcpGridElmt"+@recipe.id.to_s    
+  end
+  
+  def feed_list_element_class entry
+    "feedListElmt"+entry.id.to_s    
+  end
 
   # Return the id of the DOM element giving the time-since-touched for a recipe
   def touch_date_class recipe
@@ -159,9 +197,11 @@ module ApplicationHelper
   # Present the date and time the recipe was last touched by its current user
   def touch_date_elmt recipe
     if params[:controller] == "collection"
-      stmt = @collection.timestamp recipe
+      stmt = @seeker.timestamp recipe
+    elsif td = recipe.touch_date
+      stmt = "Last touched/viewed #{time_ago_in_words td} ago."
     else
-      stmt = "Last viewed #{time_ago_in_words recipe.touch_date} ago."
+      stmt = "Never touched or viewed"
     end
     content_tag :span, stmt, class: touch_date_class(recipe)
   end    
@@ -203,17 +243,27 @@ module ApplicationHelper
     link_to image_tag("RPlogo.png", :alt=>"RecipePower", :id=>"logo_img"+(small ? "_small" : "") ), root_path
   end
   
-  def flash_helper
-      f_names = [:notice, :warning, :message]
-      fl = ''
-      for name in f_names
-        if flash[name]
-          fl = fl + "<div class=\"notice\">#{flash[name]}</div>"
-        end
-      flash[name] = nil;
+  def enumerate_strs strs
+    case strs.count
+    when 0
+      ""
+    when 1
+      strs[0]
+    else
+      last = strs.pop
+      strs.join(', ')+" and " + last
     end
-    return fl.html_safe
   end
+  
+  # Helper to interpolate the notifications panel
+  def notifications_panel
+    %Q{<div class="notifications-panel">#{flash_all}</div>}.html_safe
+	end
+	
+	# Returns a selector-value pair for replacing the notifications panel due to an update event
+	def notifications_replacement
+	  [ "div.notifications-panel", notifications_panel ]
+	end
 
   # Deploy the links for naming the user and/or signing up/signing in
   def user_status
@@ -240,16 +290,6 @@ module ApplicationHelper
     end
     (bmtag+imgtag+"</a>").html_safe
   end
-      
-  # Turn the last comma in a comma-separated list into ' and'
-  def englishize_list(list)
-    set = list.split ', '
-    if(set.length > 1)
-      ending = " and " + set.pop
-      list = set.join(', ') + ending
-    end
-    list
-  end
 
   def navlink(label, link, is_current=false)
     if is_current
@@ -262,7 +302,7 @@ module ApplicationHelper
   # Return the set of navigation links for the header
   def header_navlinks
     navlinks = []
-    navlinks.push(navlink "Cookmarks", rcpqueries_path, (@nav_current==:cookmarks)) 
+    navlinks.push(navlink "Cookmarks", collection_path, (@nav_current==:cookmarks)) 
     navlinks.push(link_to_dialog "Add a Cookmark", new_recipe_path, "modal", "floating" )
     # navlinks.push(link_to_function("Add a Cookmark", "rcpAdd()" )) # navlink "Add a Cookmark", new_recipe_path, (@nav_current==:addcookmark)) 
     navlinks.join('&nbsp|&nbsp').html_safe
@@ -277,7 +317,8 @@ module ApplicationHelper
   	# navlinks << feedback_link("Feedback")
   	navlinks.join('  |  ').html_safe
   end
-
+  
+=begin
   def show_errors(errors)
     result = ""
     if errors.any?
@@ -293,14 +334,34 @@ module ApplicationHelper
     end
     result.html_safe
   end
-  
+=end
+
   def debug_dump(params)
       "<div id=\"debug\">#{debug(params)}</div>".html_safe
 	end
 	
+	def button_to_dialog(label, path, how="modal", where="floating", options={})
+	  options[:class] = "btn btn-mini"
+	  link_to_dialog label, path, how, where, options
+	end
+	
 	# Embed a link to javascript for running a dialog by reference to a URL
-	def link_to_dialog(label, path, how, where, *options)
-  	link_to_function label, "recipePowerGetAndRunJSON('#{path}', '#{how}', '#{where}');", *options
+	def link_to_dialog(label, path, how="modal", where="floating", options={})
+  	link_to_function label, "recipePowerGetAndRunJSON('#{path}', '#{how}', '#{where}');", options
+  end
+	
+	def button_to_modal(label, path, how="modal", where="floating", options={})
+	  options[:class] = "btn btn-mini"
+	  link_to_modal label, path, options
+	end
+	
+	# Embed a link to javascript for running a dialog by reference to a URL
+	def link_to_modal(label, path, options={})
+  	link_to_function label, "RP.dialog.get_and_go('#{path}');", options
+  end
+  
+  def link_to_redirect(label, url, options={} )
+  	link_to_function label, "redirect_to('#{url}');", options
   end
 	
 	def globstring(hsh)
@@ -314,12 +375,29 @@ module ApplicationHelper
     logger.debug "dialogHeader for "+globstring({dialog: which, area: area, layout: @layout, ttl: ttl})
     classname = which.to_s
     ttlspec = ttl ? (" title=\"#{ttl}\"") : ""
-    flash_helper() +
     content_tag(:div, 
         "",
-        class: classname+" dialog "+area, 
+        class: classname+" dialog hide "+area, 
         id: "recipePowerDialog", 
         "data-template" => template)
+  end
+  
+  def modal_dialog( which, ttl=nil, options={}, &block )
+    options[:modal] = true if options[:modal].nil?
+    dlg = with_output_buffer &block
+    (dialogHeader(which, ttl, options)+
+     dlg+
+     dialogFooter).html_safe
+  end
+  
+  def modal_body(&block)
+    bd = with_output_buffer &block
+    content_tag :div, flash_all + bd, class: "modal-body"
+  end
+  
+  def modal_footer(&block)
+    ft = with_output_buffer &block
+    content_tag :div, ft, class: "modal-footer"
   end
   
   # Place the header for a dialog, including setting its Onload function.
@@ -328,20 +406,149 @@ module ApplicationHelper
   #   :captureRecipe
   #   :new_recipe (nee newRecipe)
   #   :sign_in
-  def dialogHeader( which, ttl=nil, area="floating")
-    logger.debug "dialogHeader for "+globstring({dialog: which, area: area, layout: @layout, ttl: ttl})
-    classname = which.to_s
-    ttlspec = ttl ? (" title=\"#{ttl}\"") : ""
-    flash_helper() +
-    %Q{<div id="recipePowerDialog" class="#{classname} dialog #{area}" #{ttlspec}>}.html_safe +
-    ((@layout && @layout=="injector") ? 
-      content_tag(:div, 
-        link_to_function("X", "cancelDialog", style:"text-decoration: none;", id: "recipePowerCancelBtn"),
-        id: "recipePowerCancelDiv")
-    : "")
+  def dialogHeader( which, ttl=nil, options={})
+    # Render for a floating dialog unless an area is asserted OR we're rendering for the page
+    area = options[:area] || "floating" # (@partial ? "floating" : "page")
+    hide = options[:show] ? "" : "hide"
+    classes = options[:class] || ""
+    # class 'modal' is for use by Bootstrap modal; it's obviated when rendering to a page (though we can force
+    # it for pre-rendered dialogs by asserting the :modal option)
+    modal = options[:modal] ? "modal-pending" : ""
+    logger.debug "dialogHeader for "+globstring({dialog: which, area: area, ttl: ttl})
+    # Assert a page title if given
+    ttlspec = ttl ? %Q{ title="#{ttl}"} : ""
+        
+    hdr = 
+      %Q{<div id="recipePowerDialog" class="#{modal} dialog #{which.to_s} #{area} #{classes}" #{ttlspec}>}+
+      (options[:modal] ? 
+        %Q{
+          <div class="modal-header">
+            <h3>#{ttl}</h3>
+          </div>} : 
+        %q{
+          <div class="recipePowerCancelDiv">
+            <a href="#" id="recipePowerCancelBtn" onclick="cancelDialog; return false;" style="text-decoration: none;">X</a>
+          </div>})+
+      %q{<div class="notifications-panel"></div>}
+    hdr.html_safe
   end
 
   def dialogFooter()
     "</div><br class='clear'>".html_safe
+  end
+
+   def pagination_link (text, pagenum, url)
+     # "<span value='#{p.to_s}' class='pageclickr'>#{p.to_s}</span>"
+     # We install the actual pagination handler in RPquery.js::queryTabOnLoad
+     link_to_function text.html_safe, ";", class: "pageclickr", value: pagenum.to_s, :"data-url" => url
+   end
+
+   def pagination_links(npages, cur_page, url="collection/query" )
+     if npages > 1
+       maxlinks = 11
+       halfwidth = (maxlinks-6)/2
+
+       cur_page = npages if cur_page > npages
+       blockleft = cur_page-1-halfwidth
+       blockright = cur_page-1 + halfwidth
+       shift = (3-blockleft)
+       if(shift > 0)
+           blockleft = blockleft + shift
+           blockright = blockright + shift
+       end
+       shift = blockright - (npages-4)
+       if(shift > 0)
+           blockright = blockright - shift
+           blockleft = blockleft - shift
+           blockleft = 3 if(blockleft < 3)
+       end
+
+       blockleft = 0 unless blockleft > 3
+       blockright = npages-1 unless blockright < (npages-4)
+       pages = (blockleft..blockright).map { |i| i+1 }
+       pages = [1,2,nil] + pages if(blockleft > 0)
+       pages << [ nil, (npages-1), npages] if(blockright < (npages-1))
+       links = pages.flatten.map do |p| 
+           case p
+           when nil
+               "<span class=\"disabled\">...</span>"
+           when cur_page
+               "<span class=\"current\">#{p.to_s}</span>"
+           else
+               pagination_link p.to_s, p, url
+           end
+       end
+       if cur_page > 1
+           links.unshift pagination_link("&#8592; Previous", cur_page-1, url)
+           links.unshift pagination_link("First ", 1, url)
+       else
+           links.unshift "<span class=\"disabled previous_page\">&#8592; Previous</span>"
+           links.unshift "<span class=\"disabled previous_page\">First </span>"
+       end
+       if cur_page < npages
+           links << pagination_link("Next &#8594;", cur_page+1, url)
+           links << pagination_link(" Last", npages, url)
+       else
+           links << "<span class=\"disabled next_page\">Next &#8594;</span>"
+           links << "<span class=\"disabled next_page\"> Last</span>"
+       end
+       links.join(' ').html_safe
+     end
+   end
+   
+  # Incorporate error reporting for a resource within a form, preferring
+  # any base error from the resource to the standard notification
+  def form_error_helper f, object=nil
+    resource = object || f.object
+    base_errors = base_errors_helper(resource)
+    base_errors.blank? ? f.error_notification : base_errors 
+  end
+  
+  # Augments error display for record attributes (a la simple_form) with base-level errors
+  def base_errors_helper resource
+    flash_one :error, express_base_errors(resource)
+  end
+  
+  # Report the current errors on a record in a nice alert div, suitable for interpolation on the page
+  def resource_errors_helper obj, options={}
+    unless obj.errors.empty?
+      flash_one :error, express_resource_errors(obj, options )
+    end
+  end
+
+  def flash_one level, message, for_bootstrap=true
+    return "".html_safe if message.blank?
+    if for_bootstrap
+      bootstrap_class =
+      case level
+      when :success
+        "alert-success"
+      when :error
+        "alert-error"
+      when :alert
+        "alert-block"
+      when :notice
+        "alert-info"
+      else
+        level.to_s
+      end
+       # This message may have been cleared earlier...
+      html = <<-HTML
+        <div class="alert #{bootstrap_class} alert_block fade in">
+          <button class="close" data-dismiss="alert">&#215;</button>
+          #{message}
+        </div>
+        HTML
+    else
+      html = %Q{<div class="generic_alert" style="display: block; background-color:#fcf8e3; border: 1px solid #f9f6dc; padding:3px; border:3px;">#{message}</div>}
+    end
+    flash.delete(level)
+    html.html_safe
+  end
+  
+  def flash_all for_bootstrap=true
+    flash.collect { |type, message| 
+      flash_one type, message, for_bootstrap 
+    }.join.html_safe
   end
 end

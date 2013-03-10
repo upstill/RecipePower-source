@@ -1,48 +1,73 @@
 require './lib/controller_authentication.rb'
+require './lib/seeker.rb'
 
 class ApplicationController < ActionController::Base
+    before_filter :setup_collection
+    before_filter :check_flash
     helper :all
     rescue_from Timeout::Error, :with => :timeout_error # self defined exception
     rescue_from OAuth::Unauthorized, :with => :timeout_error # self defined exception
     rescue_from AbstractController::ActionNotFound, :with => :no_action_error
     
     helper_method :orphantagid
+    
+  # Get a presenter for the object fron within a controller
+  def present(object, klass = nil)
+    klass ||= "#{object.class}Presenter".constantize
+    klass.new(object, view_context)
+  end  
   
-    def permission_denied
-      action = case params[:action]
-      when "index"
-          "see the list of all"
-      when "show"
-          "examine"
-      when "new"
-          params[:controller] == "recipes" ? "cookmark" : "create new"
-      else
-          params[:action]
-      end
-      notice = "Sorry, but as a #{current_user_or_guest.role}, you're not allowed to #{action} #{params[:controller]}."
-      respond_to do |format|
-        format.html { redirect_to(:back, notice: notice) rescue redirect_to('/', notice: notice) }
-        format.xml  { head :unauthorized }
-        format.js   { head :unauthorized }
-      end
+  def check_flash
+    logger.debug "FLASH messages extant for "+params[:controller]+"#"+params[:action]+"(check_flash):"
+    puts "    notice: "+flash[:notice] if flash[:notice]
+    puts "    error: "+flash[:error] if flash[:error]
+  end
+  
+  # All controllers displaying the collection need to have it setup 
+  def setup_collection
+    @user_id = current_user_or_guest_id 
+    @user = User.find(@user_id)
+    @browser = @user.browser
+    @seeker = ContentSeeker.new @browser, session[:seeker] # Default; other controllers may set up different seekers
+    # Initialize any entities for which we're building a New dialog on the page
+    @feed = Feed.new
+  end
+  
+  def permission_denied
+    action = case params[:action]
+    when "index"
+        "see the list of all"
+    when "show"
+        "examine"
+    when "new"
+        params[:controller] == "recipes" ? "cookmark" : "create new"
+    else
+        params[:action]
     end
+    notice = "Sorry, but as a #{current_user_or_guest.role}, you're not allowed to #{action} #{params[:controller]}."
+    respond_to do |format|
+      format.html { redirect_to(:back, notice: notice) rescue redirect_to('/', notice: notice) }
+      format.xml  { head :unauthorized }
+      format.js   { head :unauthorized }
+    end
+  end
 
-    def no_action_error
-        redirect_to home_path, :notice => "Sorry, action not found"
-    end
-    
-    def timeout_error
-        redirect_to authentications_path, :notice => "Sorry, access to that page took too long."
-    end
-    
-    def rescue_action_in_public
-        x=2
-    end
-    # alias_method :rescue_action_locally, :rescue_action_in_public    
-    
-    def orphantagid(tagid)
-        "orphantag_"+tagid.to_s
-    end
+  def no_action_error
+      redirect_to home_path, :notice => "Sorry, action not found"
+  end
+  
+  def timeout_error
+      redirect_to authentications_path, :notice => "Sorry, access to that page took too long."
+  end
+  
+  def rescue_action_in_public
+      x=2
+  end
+  # alias_method :rescue_action_locally, :rescue_action_in_public    
+  
+  def orphantagid(tagid)
+      "orphantag_"+tagid.to_s
+  end
       
   include ControllerAuthentication
   protect_from_forgery
@@ -56,7 +81,7 @@ class ApplicationController < ActionController::Base
     redirect ||
         if resource.is_a?(User)
           # flash[:notice] = "Congratulations, you're signed up!"
-          resource.sign_in_count < 2 ? welcome_path : rcpqueries_path
+          resource.sign_in_count < 2 ? welcome_path : collection_path
         else
           super(resource)
         end
@@ -77,8 +102,8 @@ class ApplicationController < ActionController::Base
 
   # returns the person to either the original url from a redirect_away or to a provided, default url
   def redirect_back(options = {})
-    logger.debug "REDIRECTING BACK TO "+(session[:original_uri] || "rcpqueries_path")
-    uri = session[:original_uri] || rcpqueries_path
+    uri = session[:original_uri] || collection_path
+    logger.debug "REDIRECTING BACK TO "+uri
     session[:original_uri] = nil
     redirect_to uri, options
   end

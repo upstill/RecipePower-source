@@ -92,12 +92,7 @@ protected
         sources = nil
         if user = User.where(id: self.owner_id).first
           if self.which_list =~ /mine/
-            if (self.status == 16) # Recent list: pre-empt to use recently-touched list
-              # The touches are collected in touch order 
-              candidates = user.touches.map { |touch| touch.recipe_id }
-            else
-              sources = self.owner_id
-            end
+            sources = self.owner_id
           elsif self.which_list =~ /friend/
             sources = (self.friend && self.friend.id) || user.follows(false).map { |followee| followee.id }
           elsif self.which_list =~ /channel/

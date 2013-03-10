@@ -3,14 +3,25 @@ require 'my_constants.rb'
 require "candihash.rb"
 include ActionView::Helpers::DateHelper
 
-class RcpBrowserElement
-  attr_accessor :npages, :cur_page, :nodeid
+class Array
+  # Loop through all elements of the array, finding and returning any that returns a result
+  def poll 
+    self.each { |elmt| 
+      if val = yield(elmt)
+        return val
+      end
+    }
+    nil
+  end
+end
+
+class BrowserElement
+  attr_accessor :npages, :cur_page, :visible
   attr_reader :handle, :level
-  @@nextid = 1  
   @@page_length = 20
   # Persisters for all browser-element nodes; these may be augmented by a subclass by
   # setting @persisters BEFORE handing off init to superclass
-  @@persisters = [:selected, :handle, :nodeid, :userid, :cur_page]
+  @@persisters = [:selected, :handle, :userid, :cur_page]
   
   # Initialize a new element, either from supplied arguments or defaults
   def initialize(level, args)
@@ -20,10 +31,20 @@ class RcpBrowserElement
     @selected = false unless @selected
     @handle = "Mystery Element" unless @handle
     @cur_page = @cur_page || 1
-    unless @nodeid = args[:nodeid]
-      @nodeid = @@nextid
-      @@nextid = @@nextid + 1
-    end
+  end
+  
+  def content_name
+    self.class.to_s
+  end
+  
+  # The server callback to add an element of this type
+  def add_path
+    nil
+  end
+  
+  # The javascript call to delete an element of this type
+  def delete_path
+    nil
   end
   
   def timestamp recipe
@@ -47,7 +68,7 @@ class RcpBrowserElement
   
   # ID for uniquely selecting the element
   def css_id
-    "RcpBrowserElement"+@nodeid.to_s
+    self.class.to_s
   end
   
   # The sources are a user, a list of users, or nil (for the master global list)
@@ -96,34 +117,37 @@ class RcpBrowserElement
   	end
   end
   
-  # How many pages in the current result set?
-  def npages(tagset)
-    (self.result_ids(tagset).count+(@@page_length-1))/@@page_length
-  end
-  
   # Are there any recipes waiting to come out of the query?
   def empty?(tagset)
       self.result_ids(tagset).empty?
   end
   
+=begin
+  # How many pages in the current result set?
+  def npages(tagset)
+    (self.result_ids(tagset).count+(@@page_length-1))/@@page_length
+  end
+
   # Return a list of results based on the query tags and the paging parameters
-  def results_paged(tagset)
+  def results_paged tagset
     npg = npages tagset
     ids = result_ids tagset
-    maxlast = ids.count-1 
-    if npg <= 1
-      first = 0
-      last = maxlast
-    else
+    first = 0
+    ixbound = ids.count 
+    if npg > 1
       # Clamp current page to last page
       @cur_page = npg if @cur_page > npg
-  
-      # Now get indices of first and last records on the page
+      # Now get index bounds for the records on the page
       first = (@cur_page-1)*@@page_length
-      last = first+@@page_length-1
-      last = maxlast if last > maxlast
+      last = first+@@page_length
+      ixbound = last if ixbound > last
     end
-    ids[first..last].collect { |rid| Recipe.where( id: rid ).first }.compact
+    convert_ids ids[first...ixbound]
+  end
+=end
+  
+  def convert_ids list
+    list.collect { |rid| Recipe.where( id: rid ).first }.compact
   end
   
   def select
@@ -136,7 +160,17 @@ class RcpBrowserElement
   
   # Change the current selection to match the given id
   def select_by_id(id)
-    @selected = (@nodeid == id)
+    @selected = (id==css_id)
+  end
+  
+  # Select a node based on its content (user, channel or feed)
+  def find_by_content(obj)
+    nil
+  end
+  
+  # Method to insert a new node representing a list (feed, friend, etc.)
+  # Only makes sense if overridden by a composite node
+  def add_by_content obj
   end
   
   # Returns the browser element that's selected, ACROSS THE TREE
@@ -144,18 +178,23 @@ class RcpBrowserElement
     @selected && self
   end
   
-  # HTML for interpolating into the display
-  def html(do_show)
-    displaystyle = "display: "+(do_show ? "block" : "none" )+";"
-    %Q{<li class="#{css_class}" id="#{css_id}" style="#{displaystyle}">
-         <a href="#">#{handle}</a>
-       </li>}.html_safe
+  # Used to gather a list of all nodes in the tree and tag each for display
+  def node_list do_show=false
+    @visible = do_show
+    [self]
+  end
+  
+  def list_type
+    :recipe
   end
   
 end
 
+class RcpBrowserElement < BrowserElement
+end
+
 # Class of composites, collections of browser elements
-class RcpBrowserComposite < RcpBrowserElement
+class BrowserComposite < BrowserElement
   attr_accessor :children
   
   # Save instance variables plus chidren
@@ -180,29 +219,152 @@ class RcpBrowserComposite < RcpBrowserElement
     @children.each { |child| child.select_by_id(id) }
   end
   
+  # Recursive search for the selected child
   def selected
-    unless (result = super)
-      @children.each { |child| break if result = child.selected }
-    end
-    return result
+    result = super || (@children.poll { |child| child.selected })
+  end
+  
+  # Find the child with the associated content
+  def find_by_content obj
+    @children.poll { |child| child.find_by_content obj }
+  end
+  
+  def add_by_content obj
+    @children.poll { |child| child.add_by_content obj }
+  end
+  
+  def node_list do_show=false
+    show_children = selected
+    super(do_show || show_children) + @children.collect { |child| child.node_list show_children }.flatten
+  end
+  
+  def delete_selected_child
+    @children.each_index { |ix| 
+      child = @children[ix]
+      if selected = child.selected
+        # Some child in this subtree is selected
+        if selected == child # Direct selection => we are this child's parent
+          @children.delete child
+          if @children[ix]
+            @children[ix].select
+          elsif ix > 0
+            @children[ix-1].select
+          else
+            select
+          end
+        else
+          child.delete_selected_child
+        end
+        break
+      end
+    }
+  end
+  
+end
+
+class RcpBrowserComposite < BrowserComposite
+end
+
+# Element for all the entries for a feed
+class FeedBrowserElement < BrowserElement
+  attr_accessor :feedid
+  
+  def initialize(level, args)
+    @persisters = (@persisters || []) << :feedid
+    super
+    @feedid = args[:feedid] || args[:feed].id
+    @handle = (args[:feed] || Feed.find(@feedid)).title
+  end
+  
+  def sources
+    @feedid
+  end
+  
+  # IDs of feed entries consistent with the tag set
+  def result_ids tagset 
+    Feed.find(@feedid).entry_ids
   end
 
-  # The HTML for the composite is just the HTML for the elements, joined with newlines
-  def html(do_show)
-    show_children = selected
-    ([super(do_show || show_children)] + @children.map { |child| child.html(show_children) }).join("\n")
+  def convert_ids list
+    list.collect { |id| FeedEntry.where( id: id ).first }.compact
+  end
+  
+  def list_type
+    :feed
+  end
+  
+  def find_by_content obj
+    (obj.kind_of? Feed) && 
+    (obj.id == @feedid) && 
+    self
+  end
+  
+  def delete_path
+    "/feeds/#{@feedid}/remove"
+  end
+  
+  def css_id
+    self.class.to_s+@feedid.to_s
+  end
+  
+end
+
+# Element for all the recipes in a user's channels, with subheads for each channel
+class FeedBrowserComposite < BrowserComposite
+  
+  def initialize(level, args)
+    super
+    @handle = "My Feeds"
+    if @children.empty?
+      klass = Module.const_get("User")
+      if klass.is_a?(Class) # If User class is available (i.e., in Rails, as opposed to testing)
+        args[:selected] = false
+        @children = user.feed_ids.map do |id| 
+          args[:feedid] = id
+          FeedBrowserElement.new level+1, args
+        end
+      end
+    end
+  end
+  
+  def content_name
+    "Feeds"
+  end
+  
+  def add_path
+    "/feeds"
+  end
+  
+  def add_by_content obj
+    if (obj.kind_of? Feed)
+      @children.unshift(new_elmt = FeedBrowserElement.new(@level+1, { feed: obj, userid: user.id }))
+      new_elmt
+    end 
+  end
+
+  def convert_ids list
+    list.collect { |id| FeedEntry.where( id: id ).first }.compact
+  end
+  
+  # Collect feed entries from the children
+  def result_ids tagset
+    Feed.entry_ids user.feed_ids
+  end
+  
+  def list_type
+    :feed
   end
   
 end
 
 # Element for all the recipes for a user (no children)
-class RcpBrowserElementFriend < RcpBrowserElement
+class RcpBrowserElementFriend < BrowserElement
   
   def initialize(level, args)
     @persisters = (@persisters || []) << :friendid
     super
     @friendid = args[:friendid]
-    @handle = User.find(@friendid).username
+    @handle = User.find(@friendid).handle
   end
   
   def sources
@@ -215,6 +377,20 @@ class RcpBrowserElementFriend < RcpBrowserElement
   
   def candidates
     @candidates = @candidates || User.find(@friendid).recipes(public: true, sort_by: :collected)
+  end
+  
+  def css_id
+    self.class.to_s+@friendid.to_s
+  end
+  
+  def find_by_content obj
+    (obj.kind_of? User) && 
+    (obj.id == @friendid) && 
+    self
+  end
+  
+  def delete_path
+    "/users/#{@friendid}/remove"
   end
   
 end
@@ -250,13 +426,23 @@ class RcpBrowserChannelsAndFriends < RcpBrowserComposite
     if @children.empty?
       klass = Module.const_get("User")
       if klass.is_a?(Class) # If User class is available (i.e., in Rails, as opposed to testing)
-        args.delete :nodeid
         @children = user.follows(@isChannel).map do |followee| 
           args[:friendid] = followee.id
           RcpBrowserElementFriend.new level+1, args
         end
       end
     end
+  end
+  
+  def add_path
+    "/users?channel=#{@isChannel.to_s}"
+  end
+  
+  def add_by_content obj
+    if (obj.kind_of? User) && (obj.channel? == @isChannel)
+      @children.unshift(new_elmt = RcpBrowserElementFriend.new(@level+1, { user: obj, friendid: obj.id }))
+      new_elmt
+    end 
   end
   
   def sources
@@ -283,6 +469,10 @@ class RcpBrowserCompositeFriends < RcpBrowserChannelsAndFriends
     @handle = "My Friends"
   end
   
+  def content_name
+    "Friends"
+  end
+  
 end
 
 # Element for all the recipes in a user's channels, with subheads for each channel
@@ -294,14 +484,8 @@ class RcpBrowserCompositeChannels < RcpBrowserChannelsAndFriends
     @handle = "My Channels"
   end
   
-end
-
-# Element for all the recipes in a user's channels, with subheads for each channel
-class RcpBrowserCompositeBlogs < RcpBrowserComposite
-  
-  def initialize(level, args)
-    super
-    @handle = "My Blogs"
+  def content_name
+    "Channels"
   end
   
 end
@@ -348,6 +532,10 @@ class RcpBrowserElementStatus < RcpBrowserElement
     @candidates = @candidates || user.recipes(status: @status, sort_by: :collected)
   end
   
+  def css_id
+    self.class.to_s+@status.to_s
+  end
+  
 end
 
 # Element for a recipe list due to a tag
@@ -358,6 +546,10 @@ class RcpBrowserElementTaglist < RcpBrowserElement
     @tagid = args[:tagid]
     @handle = "Tag #{@tagid.to_s}"
   end
+  
+  def css_id
+    self.class.to_s+@tagid.to_s
+  end
 
 end
 
@@ -366,7 +558,7 @@ class RcpBrowserElementAllRecipes < RcpBrowserElement
   
   def initialize(level, args)
     super
-    @handle = "RecipePower&nbspCollection"
+    @handle = "RecipePower Collection"
   end
   
   def sources
@@ -375,23 +567,21 @@ class RcpBrowserElementAllRecipes < RcpBrowserElement
   
 end
 
-
 # Top-level recipe browser, comprising the standard lists, and adding a tag list
-class RcpBrowser < RcpBrowserComposite
+class ContentBrowser < BrowserComposite
   
   def initialize(userid_or_argshash)
     args = (userid_or_argshash.class.name == "Fixnum") ? { userid: userid_or_argshash } : userid_or_argshash
-    @persisters = (@persisters || []) + [ :tagstxt, :specialtags ]
+    @persisters = @persisters || []
     super(0, args)
     @handle = ""
-    @tagstxt = "" unless @tagstxt
     if @children.empty?
       userarg = { userid: args[:userid] }
       @children = [
         RcpBrowserCompositeUser.new(1, userarg),
         RcpBrowserCompositeFriends.new(1, userarg),
         RcpBrowserCompositeChannels.new(1, userarg),
-        RcpBrowserCompositeBlogs.new(1, userarg),
+        FeedBrowserComposite.new(1, userarg),
         RcpBrowserElementAllRecipes.new(1, userarg),
         RcpBrowserElementRecent.new(1, userarg),
         RcpBrowserElementNews.new(1, userarg)
@@ -400,58 +590,9 @@ class RcpBrowser < RcpBrowserComposite
     @children[0].select unless selected # Ensure there's a selection
   end
   
-  def tagstxt()
-    @tagstxt
-  end
-  
-  # Accept new tags text, bust the cache, and return the new set of tags
-  def tagstxt=(txt)
-      # We either use the current tagstxt or the parameter, updating the tagstxt as needed
-      @tagstxt = txt
-      @tags = nil
-      tags
-  end
-  
-  # Use the 'querytags' string (in actuality a string provided by the unconstrained tags editor) to extract
-  # a set of tag tokens. The elements of the comma-separated string are either 1) a positive integer, representing
-  # a tag in the dictionary, or 2) an arbitrary other string on which to query.
-  # The tags method converts the latter into a transitory tag with a negative value, an index into an internally-stored
-  # array of pseudo-tags
-  def tags
-    return @tags if @tags # Use cache, if any
-    newspecial = {}
-    oldspecial = @specialtags || {}
-    # Accumulate resulting tags here:
-    @tags = []
-    @tagstxt.split(",").each do |e| 
-      e.strip!
-      if(e=~/^\d*$/) # numbers (sans quotes) represent existing tags that the user selected
-        @tags << Tag.find(e.to_i)
-      elsif e=~/^-\d*$/  # negative numbers (sans quotes) represent special tags from before
-        # Re-save this one
-        tag = Tag.new(name: (newspecial[e] = oldspecial[e]))
-        tag.id = e.to_i
-        @tags << tag
-      else
-        # This is a new special tag. Convert to an internal tag and add it to the cache
-        name = e.gsub(/\'/, '').strip
-        unless tag = Tag.strmatch( name, { matchall: true, uid: @userid }).first
-            tag = Tag.new( name: name )
-            tag.id = -1
-            # Search for an unused id
-            while(newspecial[tag.id.to_s] || oldspecial[tag.id.to_s]) do
-                tag.id = tag.id - 1 
-            end
-            newspecial[tag.id.to_s] = tag.name
-        end
-        @tags << tag
-      end
-    end
-    # Have to revise tagstxt to reflect special tags because otherwise, IDs will get 
-    # revised on the next read from DB
-    @tagstxt = @tags.collect { |t| t.id.to_s }.join ','
-    @specialtags = newspecial
-    @tags
+  # Remove the currently-selected element and select an appropriate new one: either 1) the next sibling, 2) the previous sibling, or 3) the parent
+  def delete_selected
+    delete_selected_child
   end
   
   # Uniquely, the top-level node collects a structure for itself and all
@@ -463,35 +604,73 @@ class RcpBrowser < RcpBrowserComposite
   # Load the whole tree from a YAML string by restoring the structure, then
   # recreating the top-level tree. Handles uninitialized string
   def self.load(str)
-    self.new YAML::load(str)
+    !str.blank? && self.new(YAML::load(str))
   end
   
-  def html
-    @children.map { |child| child.html(true) }.join("\n").html_safe
+  def node_list
+    @children.collect { |child| child.node_list true }.flatten
+  end
+  
+  def convert_ids list
+    selected.convert_ids list
   end
   
   # Get the results of the current query.
-  def result_ids
+  def result_ids tags
     selected.result_ids tags
   end
   
-  def timestamp recipe
-    selected.timestamp recipe
+  # Return the timestamp for the given list tlement (generally, a recipe)
+  def timestamp obj
+    selected.timestamp obj
   end
   
   # How many pages in the current result set?
-  def npages
+  def npages tags
     selected.npages tags
   end
   
   # Are there any recipes waiting to come out of the query?
-  def empty?
+  def empty? tags
     selected.result_ids(tags).empty?
   end
   
   # Return a list of results based on the paging parameters
-  def results_paged
+  def results_paged tags
     selected.results_paged tags
+  end
+  
+  # If the collection has returned no results, suggest what the problem might have been
+  def explain_empty tags
+    report = "It looks like #{selected.handle} doesn't have anything that matches your search."
+    case tags.count
+    when 0
+      sug = nil
+    when 1
+      sug = "a different tag or no tags at all up there"
+    else
+      sug = "removing a tag up there"
+    end
+    if selected.class.to_s =~ /Composite/ 
+      if selected.children.empty?
+        report = "There's no content here because you have no #{selected.content_name} selected."
+        sug = " getting one by clicking the '+' sign over there to the left"
+      elsif tags.empty?
+        name = selected.content_name
+        report = ((selected.children.count < 2) ? "This "+name.singularize+" doesn't" : "These "+name+" don't")+" appear to have any content."
+        sug = nil
+      else
+        report = "It looks like there isn't anything that matches your search in '#{selected.handle}'."
+      end
+    else # Element
+      if tags.empty?
+        content = selected.content_name == "Feeds" ? "Entries" : "Recipes"
+        report = "#{selected.handle} doesn't appear to have any #{content.downcase} at present."
+        sug = nil
+      end
+    end
+    sug ? report+"<br>You might try #{sug}." : report
+    { sug: sug, report: report }
   end
   
   def cur_page
@@ -502,4 +681,18 @@ class RcpBrowser < RcpBrowserComposite
     selected.cur_page= pagenum
   end
   
+  def list_type
+    selected.list_type
+  end
+  
+  # Select the browswer element corresponding to the given object
+  def select_by_content obj
+    old_selection = selected
+    new_selection = find_by_content(obj) || add_by_content(obj)
+    if new_selection && (old_selection != new_selection)
+      old_selection.deselect if old_selection
+      new_selection.select
+    end
+    new_selection
+  end
 end

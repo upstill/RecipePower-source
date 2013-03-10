@@ -1,0 +1,27 @@
+// Set the correct sprite paths
+$iconSpritePath: image-path('glyphicons-halflings.png');
+$iconWhiteSpritePath: image-path('glyphicons-halflings-white.png');
+
+// Set variables here, i.e. BEFORE loading bootstrap
+$navbarBackground: #555;
+$navbarBackgroundHighlight: #888;
+$navbarText: #eee;
+$navbarLinkColor: #eee;
+
+@import "bootstrap";
+
+body { padding-top: 60px; }
+
+#recipePowerDialog.new_feed textarea {
+	width: 600px;
+}
+
+div.dialog.modal input.string {
+	width: 90%;
+}
+
+div.dialog.modal textarea {
+	width: 90%;
+}
+
+@import "bootstrap-responsive";

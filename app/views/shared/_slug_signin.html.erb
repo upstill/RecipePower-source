@@ -1,20 +1,11 @@
-<div class="signin">
-<div class="prompt">Sign In</div>
-<%= form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f| %>
-  <p><%= f.label :login, "Username or Email (your choice)" %>
-  <%= f.text_field :login, size: 40 %></p>
-
-  <p><%= f.label :password %>
-  <%= f.password_field :password, size: 40 %></p>
-
+<%= simple_form_for(resource, :as => resource_name, :url => session_path(resource_name), html: { class: "signin json" }) do |f| %>
+  <%= form_error_helper f %>
+  <%= f.input :login, label: "Username or Email (your choice)" %></p>
+  <%= f.input :password %></p>
   <% if devise_mapping.rememberable? -%>
-    <p>
-			<%= f.check_box :remember_me, :checked => true, style: "margin:0px;" %> 
-			<%= f.label :remember_me, style: "display: inline-block; width:auto; margin:0px; margin-left:3px;" %>
-		</p>
+		<%= f.input :remember_me, :checked => true, style: "margin:0px;" %> 
   <% end -%>
 
   <div class="gobutton"><%= f.submit "Sign in", class: "submit_button" %></div>
-  <%= forgot_password_link %>
 <% end %>
-</div>
+ <%= link_to_modal "Forgot Password", new_user_password_path %>

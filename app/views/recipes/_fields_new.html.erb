@@ -1,11 +1,12 @@
-<%= dialogHeader :new_recipe, "Add a Cookmark", @area %>
-<%= show_errors @recipe.errors %>
-<%= form_for @recipe, html: { class: "new_recipe json" } do |f| %>
-    <div class="recipe_url_div">
-        <%= f.label :url, "Paste URL here and click 'Add Cookmark' or hit Enter/Return", :class=>"recipe_field_label" %>
-        <%= f.text_field :url %><br>
-    </div>
-    <%= f.submit :value=>"Add Cookmark" %>
+<%= modal_dialog :new_recipe, "Add a Cookmark", area: @area do %>
+	<%= simple_form_for @recipe, html: { class: "new_recipe json" } do |f| %>
+    <%= modal_body do %>
+			<%= form_error_helper f, @recipe %>
+			<%= f.input :url, label: "Paste URL here and click 'Add Cookmark' or hit Enter/Return" %>
+    <% end %>
+    <%= modal_footer do %>
+    	<%= f.submit :value=>"Add Cookmark" %>
+    <% end %>
+	<% end %>
 <% end %>
-<%= dialogFooter %>
 

@@ -1,9 +1,7 @@
-<ul class="thumbnails">
-<% for @recipe in @collection.results_paged  %>
-  <% @recipe.current_user = @user_id %>
-  <%= render "shared/recipe_grid" %>
-<% end %>
+<%= flash_all %>
+<ul class="<%= @seeker.list_type == :recipe ? "thumbnails" : "feed_entries" %>">
+<%= collection_results %>
 </ul>
 <div class="digg_pagination">
-	<%= pagination_links @collection.npages, @collection.cur_page %>
+	<%= pagination_links @seeker.npages, @seeker.cur_page %>
 </div>

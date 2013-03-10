@@ -3,7 +3,7 @@
 RP.edit_recipe = RP.edit_recipe || {}
 
 me = () ->
-	$('div.edit_recipe.dialog')
+	$('div.edit_recipe')
 
 # Open the edit-recipe dialog on the recipe represented by 'rcpdata'
 RP.edit_recipe.go = (rcpdata) ->
@@ -15,27 +15,24 @@ RP.edit_recipe.go = (rcpdata) ->
 	# Parse the data for the recipe and insert into the dialog's template.
 	# The dialog has placeholders of the form %%rcp<fieldname>%% for each part of the recipe
 	# The status must be set by activating one of the options
-	statustarget = '<option value="'+rcpdata.rcpStatus+'"'
-	statusrepl = statustarget + ' selected="selected"'
-	dlgsource = $(dlog).data("template").string.
-	replace(/%%rcpID%%/g, rcpdata.rcpID).
-	replace(/%%rcpTitle%%/g, rcpdata.rcpTitle).
-	replace(/%%rcpPicURL%%/g, rcpdata.rcpPicURL || "assets/MissingPicture.png" ).
-	replace(/%%rcpPrivate%%/g, rcpdata.rcpPrivate).
-	replace(/%%rcpComment%%/g, rcpdata.rcpComment).
-	replace(/%%authToken%%/g, rcpdata.authToken).
-	replace(statustarget, statusrepl)
-	
-	$(dlog).html dlgsource # This nukes any lingering children as well as initializing the dialog
+	if templ = $(dlog).data "template"
+		# ...but then again, the dialog may be complete without a template
+		statustarget = '<option value="'+rcpdata.rcpStatus+'"'
+		statusrepl = statustarget + ' selected="selected"'
+		dlgsource = templ.string.
+		replace(/%%rcpID%%/g, rcpdata.rcpID).
+		replace(/%%rcpTitle%%/g, rcpdata.rcpTitle).
+		replace(/%%rcpPicURL%%/g, rcpdata.rcpPicURL || "assets/MissingPicture.png" ).
+		replace(/%%rcpPrivate%%/g, rcpdata.rcpPrivate).
+		replace(/%%rcpComment%%/g, rcpdata.rcpComment).
+		replace(/%%authToken%%/g, rcpdata.authToken).
+		replace(statustarget, statusrepl)
+		$(dlog).html dlgsource # This nukes any lingering children as well as initializing the dialog
 	# The tag data is parsed and added to the tags field directly
 	$("#recipe_tag_tokens").data "pre", jQuery.parseJSON(rcpdata.rcpTagData)
 	
 	# Hand it off to the dialog handler
-	launchDialog dlog, "at_left", true
-
-RP.edit_recipe.stop = ->
-	# Close the recipe editor, if it's open
-	closeModeless me()
+	RP.dialog.run dlog
 
 # When dialog is loaded, activate its functionality
 RP.edit_recipe.onload = (dlog) ->
@@ -43,7 +40,6 @@ RP.edit_recipe.onload = (dlog) ->
 	# Only proceed if the dialog has children
 	if $('.edit_recipe > *').length > 0
 		
-		$(dlog).show 500
 		# Setup tokenInput on the tags field
 		$("#recipe_tag_tokens", dlog).tokenInput("/tags/match.json", 
 			crossDomain: false,
@@ -78,7 +74,9 @@ RP.edit_recipe.onload = (dlog) ->
 			beforesaveFcn: "RP.edit_recipe.submission_redundant"
 		}
 		
-		$('input.save-tags-button.cancel', dlog).data "hooks",
+		$('input.cancel', dlog).data "hooks",
+		 	successMsg: "Cookmark secure and unharmed."
+		$('button.close', dlog).data "hooks",
 		 	successMsg: "Cookmark secure and unharmed."
 		$('form.remove', dlog).data "hooks",
 		 	saveMsg: "Cookmark removed from collection."
@@ -98,10 +96,8 @@ RP.edit_recipe.onload = (dlog) ->
 
 # Handle a close event: when the dialog is closed, also close its pic picker
 RP.edit_recipe.onclose = (dlog) ->
-	$(dlog).hide()
-	picker_dlog = $("div.pic_picker")
-	closeModal(picker_dlog)
-	$(dlog).empty()
+	if picker_dlog = $("div.pic_picker")
+		$(dlog).remove();	
 	return true # Prevent normal close action
 	
 # Extract a name from a reference of the form "recipe[<name>]"
@@ -121,10 +117,6 @@ RP.edit_recipe.submission_redundant = (dlog) ->
 	dataAfter = recipedata $('form.edit_recipe', dlog).serializeArray()
 	for own attr, value of dataAfter
 		if dataBefore[attr] != value # Something's changed => do normal forms processing
-			return false
+			return null
 	# Nothing's changed => we can just silently close the dialog
-	true
-
-jQuery ->
-	if dlog = me()[0]
- 		RP.edit_recipe.onload dlog
+	return { done: true, notice: "Sorted! Cookmark secure and unchanged." }

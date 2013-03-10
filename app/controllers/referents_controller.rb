@@ -171,6 +171,7 @@ class ReferentsController < ApplicationController
     # This is prepended to the string
     fix_expression_tokens params[:referent][:expressions_attributes], @referent.typenum
     respond_to do |format|
+      params[:referent].delete(:typenum)
       if @referent.update_attributes(params[:referent])
         format.html { redirect_to @referent.becomes(Referent), notice: 'Referent was successfully updated.' }
         format.json { render json: [], status: :success }

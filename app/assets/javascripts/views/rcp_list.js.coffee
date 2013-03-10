@@ -7,6 +7,7 @@ RP.rcp_list.onload = ->
 RP.rcp_list.update = ( data ) ->
 	if data.action == "remove" || data.action == "destroy"
 		$('.'+data.list_element_class).remove()
+		$('.'+data.grid_element_class).remove()
 	else
 		if data.go_link_class 
 			$("."+data.go_link_class).replaceWith data.go_link_body
@@ -19,6 +20,13 @@ RP.rcp_list.update = ( data ) ->
 			fitImage img[0]
 			# RP.rcp_list.boostInRecent data.list_element_class, data.list_element_body, 3 # Put it at the top of My Cookmarks
 			# RP.rcp_list.boostInRecent data.list_element_class, data.list_element_body, 4 # Put it at the top of the Recent tab
+		if data.grid_element_class
+			$('.'+data.grid_element_class).replaceWith data.grid_element_body
+			img = $('.'+data.grid_element_class+' '+'img.fitPic')
+			$(img).load -> 
+				fitImage img[0]
+				x=2
+			fitImage img[0]
 	RP.notify data # Post errors and notices
 
 RP.rcp_list.boostInRecent = (list_element_class, list_element_body, targettab) ->

@@ -3,7 +3,7 @@
 <div class="<%= recipe_list_element_class @recipe %>" >
   <div class="rcp_list_element">
     <div class="rcp_list_pic_box">
-	  	<%= recipe_fit_pic @recipe %>
+	  	<%= page_fitPic @recipe.picurl, @recipe.id %>
 			<%# image_tag @recipe.thumburl, alt: "Image Not Accessible" %>
     </div>
     <div class="rcp_list_text">

@@ -55,7 +55,6 @@ class Recipe < ActiveRecord::Base
 
   has_many :rcprefs, :dependent=>:destroy
   has_many :users, :through=>:rcprefs, :autosave=>true
-  has_many :touches, :dependent=>:destroy
   attr_reader :comment
   attr_accessor :private, :current_user
   attr_reader :status
@@ -79,34 +78,31 @@ class Recipe < ActiveRecord::Base
         rcp.errors.add :id, "There is no recipe number #{id.to_s}"
       end
     else # No id: create based on url
-      url = params[:url]
-      if url && Recipe.exists?(:url => url)  # Previously captured => just look it up
-        rcp = Recipe.where("url = ?", url).first
+      params.delete(:rcpref)
+      # Sanitize the URL
+      params[:url].strip!
+      params[:url].gsub!(/\{/, '%7B')
+      params[:url].gsub!(/\}/, '%7D') 
+      rcp = Recipe.new params
+      if (url = params[:url]).blank?  # Check for non-empty URL
+        rcp.errors.add :url, "can't be blank"
+      elsif url.match %r{^http://#{current_domain}} # Check we're not trying to link to a RecipePower page
+        rcp.errors.add :base, "Sorry, can't cookmark pages from RecipePower. (Does that even make sense?)"
+      # Find the site for this url
+      elsif !(site = Site.by_link(url)) # Check to make sure site can be found/created
+        rcp.errors.add :url, "doesn't make sense or can't be found"
       else
-        params.delete(:rcpref)
-        rcp = Recipe.new params
-        # Find the site for this url
-        if rcp.url && site = Site.by_link(rcp.url)
-          if site.site == "http://www.recipepower.com"
-            rcp.errors.add :url, "Sorry, can't cookmark pages from RecipePower. (Does that even make sense?)"
-          else
-            # Get the site to crack the page for this recipe
-            # Pull title, picture and canonical URL from the result
-            # rcp.url = rcp.url || (site.yield :URI, rcp.url)[:URI]
-            found = site.yield :Title, rcp.url
-            # rcp.url = rcp.url || found[:URI]
-            # We may have re-interpreted the URL from the page, so
-            # need to re-check that the recipe doesn't already exist
-            if Recipe.exists? url: rcp.url  # Previously captured 
-              Recipe.where("url = ?", rcp.url).first
-            else
-              rcp.picurl = (site.yield :Image, rcp.url)[:Image] || ""
-              rcp.title = rcp.title || found[:Title] 
-              rcp.save
-            end
-          end
+        # Get the site to crack the page for this recipe
+        # Pull title, picture and canonical URL from the result
+        redirect = Site.valid_url(url, (site.yield :URI, url)[:URI]) || url
+        # Check that the recipe doesn't already exist
+        if saved = Recipe.where(url: redirect).first
+          rcp = saved
         else
-          rcp.errors.add :url, rcp.url.blank? ? "must be supplied" : "doesn't make sense or can't be found"
+          rcp.url = redirect
+          rcp.picurl = (site.yield :Image, url)[:Image] || ""
+          rcp.title = ((site.yield :Title, url)[:Title] || rcp.title).html_safe
+          rcp.save
         end
       end
     end

@@ -9,6 +9,8 @@
 
 #= require_self
 #= require_directory ../../../vendor/assets/javascripts/jquery
+#= require ../../../vendor/assets/javascripts/bootbox
+
 #= require jquery_ujs
 
 # require_directory ./controllers
@@ -45,6 +47,7 @@
 #= require bootstrap
 
 window.RP = window.RP || {}
+RP.collection = RP.collection || {}
 
 jQuery ->
 	$('div.loader').removeClass "loading" 
@@ -63,35 +66,21 @@ jQuery ->
 	
 	$("#tagstxt").first().focus()
 	$(".pageclickr").click collection_pager
-	
-	$('.RcpBrowser').click ->
-		if !$(this).hasClass("active")
-			# Hide all children of currently-selected collection
-			selected = $('.RcpBrowser.active')[0]
-			toClose = selected
-			while(toClose && elementLevel(toClose) >= elementLevel(this))
-				toggleChildren toClose
-				toClose = parentOf toClose
-			# Deselect current selection
-			$(selected).removeClass "active"
-			
-			$(this).addClass "active"
-			toggleChildren this # Make all children visible
-			data = $(this).data 'html'
-			if(data)
-				$('div.collection_list')[0].innerHTML = data
-			# Now that the selection is settled, we can fetch the recipe list
-			collection_update { selected: @id }
 
 collection_tagchange = (params, url) ->
-	collection_update $('form.query_form').serialize()
-	
-collection_update = (params, url) ->
+	RP.collection.update $('form.query_form').serialize(), $('form.query_form')[0].action
+
+collection_pager = (evt) ->
+	# Respond to page selection: replace results list
+	# Pagination spans have an associated value with the page number
+	RP.collection.update { cur_page: this.getAttribute("value") }, this.dataset.url
+
+RP.collection.update = (params, url) ->
 	$('div.loader').addClass "loading" # show progress indicator
-	RP.edit_recipe.stop() # Close the recipe editor if it's open
+	RP.dialog.cancel() # Close any open modal dialogs
 	jQuery.ajax
 		type: "POST"
-		url: (url || "collection/update")
+		url: (url || "collection/query")
 		data: params
 		dataType: "html"
 		beforeSend: (xhr) ->
@@ -99,48 +88,10 @@ collection_update = (params, url) ->
 		success: (resp, succ, xhr) ->
 			# Explicitly update the collection list
 			$('div.loader').removeClass "loading" # Remove progress indicator
-			$('div.collection_list')[0].innerHTML	= resp	
+			$('div.content')[0].innerHTML	= resp	
 			$(".pageclickr").click(collection_pager)
 			RP.rcp_list.onload()
 			window.scrollTo(0,0)
-	
-collection_pager = (evt) ->
-	# Respond to page selection: replace results list
-	# Pagination spans have an associated value with the page number
-	collection_update { cur_page: this.getAttribute("value") }
-
-# The parent of an element is the first element with a level lower than the element
-parentOf = (elmt) ->
-	thisLevel = elementLevel elmt
-	while(elmt = $(elmt).prev()[0])
-		if(elementLevel(elmt) < thisLevel)
-			break
-	return elmt
-
-# Check an ancestry relation.
-# For the ancestor to be above the descendent, it must be the
-# first predecessor of the descendant at its level
-isAncestor = (ancestor, descendant) ->
-	prior = descendant
-	targetLevel = elementLevel ancestor
-	while(elementLevel(prior) > targetLevel)
-		prior = $(prior).prev()[0]
-		if !prior
-			return false
-	prior == ancestor
-
-elementLevel = (elmt) ->
-	cn = elmt.className
-	ix = cn.indexOf 'Level'
-	if ix > 0
-		cn.charAt ix+5
-	else
-		"0"
-
-toggleChildren = (me) ->
-	myLevel = elementLevel me
-	while((me = $(me).next()[0]) && (elementLevel(me) > myLevel))
-		$(me).toggle 200
 
 # Callback when the query tag set changes
 queryChange = (hi, li) ->
@@ -148,4 +99,4 @@ queryChange = (hi, li) ->
 	# $(".rcplist_container").removeClass("current"); # Bust any cached collections
 	# Notify the server of the change and update as needed
 	form = $('form.query_form')[0]
-	collection_update $(form).serialize(), form.action
+	RP.collection.update $(form).serialize(), form.action

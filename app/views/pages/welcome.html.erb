@@ -1,40 +1,4 @@
 <h3>Welcome<%= current_user ? ", "+current_user.handle : "" %>!</h3> 
-<% if Rails.env.development? %>
-<%= form_tag("/search", :method => "get", id: "TestDialog") do %>
-<table>
-  <tr>
-	<th>Function</th>
-	<th>Where</th>
-	<th>Execute As</th>
-	<th>Format</th>
-  <tr>
-	<td><%= radio_button_tag(:url, "authentications/new") %><%= label_tag(:fcn_login, "Login") %></td>
-	<td><%= radio_button_tag(:area, "at_left") %><%= label_tag(:area_left, "at_left") %></td>
-	<td><%= radio_button_tag(:mode, "modal") %><%= label_tag(:mode_modal, "modal") %></td>
-	<td><%= radio_button_tag(:format, "HTML") %><%= label_tag(:format_html, "HTML") %></td>
-  </tr>
-  <tr>
-	<td><%= radio_button_tag(:url, "/recipes/new" ) %><%= label_tag(:fcn_newcm, "New Cookmark") %></td>
-	<td><%= radio_button_tag(:area, "at_top") %><%= label_tag(:area_top, "at_top") %></td>
-	<td><%= radio_button_tag(:mode, "modeless") %><%= label_tag(:mode_modeless, "modeless") %></td>
-	<td><%= radio_button_tag(:format, "JSON") %><%= label_tag(:format_json, "JSON") %></td>
-  </tr>
-  <tr>
-	<td><%= radio_button_tag(:url, "/recipes/58/collect") %><%= label_tag(:fcn_collectcm, "Collect Cookmark") %></td>
-	<td><%= radio_button_tag(:area, "floating") %><%= label_tag(:area_float, "floating") %></td>
-	<td><%= radio_button_tag(:mode, "page") %><%= label_tag(:mode_page, "page") %></td>
-  </tr>
-  <tr>
-	<td><%= radio_button_tag(:url, "/recipes/58/edit" ) %><%= label_tag(:fcn_editcm, "Edit Cookmark") %></td>
-	<td><%= radio_button_tag(:area, "page") %><%= label_tag(:area_page, "page") %></td>
-  </tr>
-</table>
-<br>  <%= submit_tag("Submit") %>
-<% end %>
-<button type="button" onclick="toggleResults()">Toggle Results Display</button></td>
-<div class="results">
-</div>
-<% end %>
 <div class="welcome_sidebar">
   <p><span class="large">Getting Started</span></p>
   <div class="bookmarklet">
@@ -55,7 +19,7 @@
 <p class="airy">Thank you for coming. May we introduce ourselves?</p>
 <h4>The Quick Skinny</h4>
 <p class="airy">
-RecipePower is for collecting <i>cookmarks</i>. A cookmark is just breadcrumbs back to any recipe on the Web: just like a bookmark, but better, in RecipePower. Collections of Cookmarks are what it's about: everyone has a collection--you, your friends--and there are also special-interest collections called <i>channels</i>. It's all there on the <strong><%= link_to "Cookmarks", rcpqueries_path %></strong> page. 
+RecipePower is for collecting <i>cookmarks</i>. A cookmark is just breadcrumbs back to any recipe on the Web: just like a bookmark, but better, in RecipePower. Collections of Cookmarks are what it's about: everyone has a collection--you, your friends--and there are also special-interest collections called <i>channels</i>. It's all there on the <strong><%= link_to "Cookmarks", collection_path %></strong> page. 
 </p><p class="airy">
 How do cookmarks get collected in the first place? With our handy bookmarklet! (See sidebar at right.) You can cookmark any recipe by just clicking the bookmarklet in your browser's bookmarks bar. The page containing the recipe (or rather, its cookmark) gets whisked over to RecipePower.
 </p><p class="airy">
@@ -76,7 +40,7 @@ How "should" you tag your recipes? Any way you like! If you want to tag a recipe
 As a cook, you probably have some special interests: maybe one-dish meals, or Atkins recipes, or barbecue. The possibilities are endless. You have interests, we have channels that serve those interests. There are channels for "Cocktails," "Simple but Swanky," and many more. If that sounds a little like tags, fair enough: a recipe gets put into a channel in exactly the same way it gets tagged, and you can look recipes up by channel, too, same as tags. But when you sign up for a channel, you not only get a look at all the recipes that have been posted there, you also hear about <i>new</i> recipes as they're added to the channel. They pop up in your news feed.
 <h4>Now What?</h4>
 <p class="airy">
-After you install the bookmarklet, why not head over to the <%= link_to "Cookmarks", rcpqueries_path %> page and have a look? You'll find that you have some friends there already. You might get started by browsing through their recipes and seeing their tags. We've also provided you with a starter set of Channels. If you want to add new friends or select other channels go to the Profile page under your name at the top right of the screen.
+After you install the bookmarklet, why not head over to the <%= link_to "Cookmarks", collection_path %> page and have a look? You'll find that you have some friends there already. You might get started by browsing through their recipes and seeing their tags. We've also provided you with a starter set of Channels. If you want to add new friends or select other channels go to the Profile page under your name at the top right of the screen.
 </p><p class="airy">
 But why not go out to the Web, find some of your favorite recipes, and bring them into RecipePower? It's a good feeling to know that your magic recipes are waiting for you any time you like.
 </p><p class="airy">

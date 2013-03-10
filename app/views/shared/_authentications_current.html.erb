@@ -8,7 +8,8 @@
           <div class="provider"><%= authentication.provider_name %></div>
           <div class="uid"><%= truncate authentication.uid.to_s, :length => 12 %></div>
 				  <% if @auth_delete || true %>
-            <%= link_to "X", authentication, :confirm => 'Are you sure you want to remove this authentication option?', :method => :delete, :class => "remove" %>
+	          <%# link_to "X", authentication, :confirm => 'Are you sure you want to remove this authentication option?', :method => :delete, :class => "remove" %>
+	          <%= link_to_function "X", "recipePowerRunRequest('#{authentication_url(authentication)}')", :confirm => 'Are you sure you want to remove this authentication option?', :method => :delete, :class => "remove" %>
 				  <% end %>
         </div>
       <% end %>

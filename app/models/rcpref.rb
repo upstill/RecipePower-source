@@ -96,7 +96,7 @@ class Rcpref < ActiveRecord::Base
     end
     
     # Just return the list of recipe ids
-	refs.map { |rr| rr.recipe_id } # .uniq
+	refs.map &:recipe_id
 end
 
     def status_bits_to_flags(bits)

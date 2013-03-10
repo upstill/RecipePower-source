@@ -1,17 +1,13 @@
-<%# dialogDiv :edit_recipe, "Tag That Recipe!", "at_left", recipe_editor() %>
-<%# dialogHeader :edit_recipe, "Tag That Recipe!", "at_left" %>
-	<%# logger.debug render("recipes/form_edit_at_left") %>
-	<%# render "recipes/form_edit_at_left" %>
-<%# dialogFooter %>
-<div class="nav affix">
+<div class="nav affix content_browser">
 	<ul class="nav nav-tabs nav-stacked">
-		<%= @collection.html %>
+		<% @browser.node_list.each do |node| %>
+		  <% @node = node %>
+		  <%= render partial: "collection/node" %>
+		<% end %>
+		<div class="content_browser_cover" onclick="RP.content_browser.click_to_browser();" style="display: <%= (params[:controller] != "collection") ? "block" : "none" %>"></div>
 	</ul>
-		<hr>
+	<hr>
 	<div id="footer_nav_links">
 		<%= footer_navlinks %>
 	</div>
 </div>
-<%= feedback_tab(:position => 'left') %>
-<% @recipe = Recipe.find 800 %>
-<% @area = "at_left" %>

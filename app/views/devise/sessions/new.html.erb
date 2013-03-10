@@ -1,7 +1,4 @@
-<h3>Sign in with password</h3>
-<div class="signin dialog">
-<%= render "shared/slug_signin" %>
-
-<%= render "devise/links" %>
-</div>
-<br class="clear">
+<%= modal_dialog :signin, "Sign in with password", :area => "floating" do %>
+	<%= render partial: "shared/slug_signin" %>
+	<%= render partial: "devise/links" %>
+<% end %>

@@ -1,0 +1,10 @@
+<%= simple_form_for @feed, html: { class: "new_feed json", 'data-type' => :json } do |f| %>
+  <%# flash_all %>
+  <%= form_error_helper f %>
+  <%= f.input :title %>
+  <%= f.input :description, input_html: { cols: 125, rows: 1 } %>
+  <%= f.input :url, input_html: { cols: 125, rows: 1 } %>
+  <%= f.input :approved %>
+  <%= f.input :feedtype, collection: Feed.feedtype_selection %>
+	<%= f.button :submit, "Save" %>
+<% end %>

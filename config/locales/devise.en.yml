@@ -4,7 +4,7 @@ en:
   errors:
     messages:
       expired: "has expired, please request a new one"
-      not_found: "not found"
+      not_found: "doesn't seem to be on file"
       already_confirmed: "was already confirmed, please try signing in"
       not_locked: "was not locked"
       not_saved:
@@ -17,7 +17,7 @@ en:
       unauthenticated: 'You need to sign in or sign up before continuing.'
       unconfirmed: 'You have to confirm your account before continuing.'
       locked: 'Your account is locked.'
-      invalid: 'Invalid email or password.'
+      invalid: "Sorry--the login or password didn't work."
       invalid_token: 'Invalid authentication token.'
       timeout: 'Your session expired, please sign in again to continue.'
       inactive: 'Your account was not activated yet.'

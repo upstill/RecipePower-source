@@ -21,15 +21,19 @@
  jQuery/jQuery-ui
  jQuery/tokenInput
 
+ *= require bootstrap_application
  * require_self
  *= require RP_recipes
  *= require views/authentication
  *= require common/dialog
  *= require views/edit_recipe
  *= require views/pic_picker
+ *= require views/feeds
 
  *= require views/rcp_list
  *= require views/sign_in
+ *= require views/new_recipe
+ *= require views/new_feed
  *= require views/welcome
  *= require common/buttons
  *= require common/RPGlobal
@@ -51,4 +55,3 @@
  * require sites
 
 */
-

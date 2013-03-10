@@ -9,8 +9,9 @@ authorization do
   
   role :user do
     includes :guest
-    has_permission_on [:recipes], :to => [ :update, :delete, :piclist, :touch ]
+    has_permission_on [:recipes], :to => [ :subscribe, :update, :delete, :piclist, :touch ]
     has_permission_on [:tags], :to => [:read]
+    has_permission_on [:feeds], :to => [:index, :show, :subscribe]
     
     #has_permission_on [:accounts, :categories, :matches, :transactions], :to => :create
     #has_permission_on [:accounts, :categories, :matches, :transactions], :to => :manage do
@@ -33,12 +34,16 @@ authorization do
     # :sessions, :users
     has_permission_on [:pages], :to => [:admin]
     has_permission_on [:recipes], :to => [:destroy]
+    has_permission_on [:feeds], :to => [:edit, :approve, :destroy]
     has_permission_on [:users], :to => [:manage]
     has_permission_on [:expressions, :links, :pages, :ratings, :rcpqueries, :recipes, :referents, :scales, :sites], :to => :manage
   end
 end
 
 privileges do
+  privilege :subscribe do
+    includes :collect, :remove
+  end
   privilege :create do
     includes :new
   end

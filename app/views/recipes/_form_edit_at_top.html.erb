@@ -1,12 +1,12 @@
-  <div class="edit_recipe_hdr">
-	 <%= image_tag "http://www.recipepower.com/assets/RPlogo.png", class: "small_logo", :alt => "RecipePower" %>
-	 <span>has added this to your collection. Tag it here if you like. (Or <%= link_to_function "not", "retire_iframe();" %>.)</span>
-  </div>
+<div class="edit_recipe_hdr" >
+	<%= image_tag "http://www.recipepower.com/assets/RPlogo.png", class: "small_logo", :alt => "RecipePower" %>
+	<span>has added this to your collection. Tag it here if you like. (Or <%= link_to_function "not", "retire_iframe();" %>.)</span>
+</div>
 <%= form_for @recipe, :html => { style: 'width:auto;height:auto'} do |f| %>
-  <%= show_errors @recipe.errors %>
+  <%= resource_errors_helper @recipe %>
 
 	<div class="left">
-		<%= recipe_pic_field @recipe, f, false %>
+		<%= pic_field @recipe, :picurl, f, false %>
 		<% unless @recipe.picurl.blank? %>
 				<p>Prefer another picture?<br />Click one!</p>
 		<% end %>

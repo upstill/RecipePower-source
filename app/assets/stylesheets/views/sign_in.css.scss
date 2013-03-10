@@ -1,5 +1,13 @@
 
+div.at_top div.signin_hdr {
+	height:24px;
+	width:auto;
+	margin:0.5em;
+	padding:0;
+}
+
 .sign_in.dialog {
+	top: 100px;
 	.sign {
 		width:620px;
 		margin:5px 20px;
@@ -29,6 +37,11 @@
 		font-weight:bold;
 		width:1000px;
 		height:auto;
+		form {
+			display: inline-block;
+			width: auto;
+			vertical-align: top;
+		}
 		.auth_poss {
 			display: inline-block;
 			font:16px arial,sans-serif;
@@ -70,12 +83,20 @@
 					width: 95%;
 				}
 			}
-			.signin_go {
-				width: 120px;
-				margin: 10px;
-				display: inline-block;
-				vertical-align: top;
-			}
+		}
+		.signin_go {
+			width: auto; // 120px;
+			margin: 10px;
+			display: inline-block;
+			vertical-align: bottom;
+		}
+		.get_password {
+			margin:10px 5px;
+			padding:7px;
+			display: block;
+			font:16px arial,sans-serif;
+			width:auto;
+			vertical-align: top;
 		}
 	}
 	&.floating {
@@ -101,12 +122,6 @@
 			}
 		}
 	}
-	div.signin_hdr {
-		height:24px;
-		width:auto;
-		margin:0.5em;
-		padding:0
-	}
 	.prompt {
 		margin:15px 0px;
 		font:20px arial,sans-serif;
@@ -122,7 +137,7 @@
 	}
 }
 
-.signin {
+div.sign_in .signin {
 	width:250px;
 	// border-right:solid 1px #999;
 	margin-right:10px;

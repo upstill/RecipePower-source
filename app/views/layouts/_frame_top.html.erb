@@ -4,25 +4,30 @@
 	  	<a class="brand" href="/collection">RecipePower</a>
 	  	<ul class="nav pull-right">
 		<% if user_signed_in? %>
-			<li><%= link_to_dialog "Add a Cookmark", new_recipe_path, "modal", "floating"  %></li>
+			<li>
+				<%= link_to_modal "Add a Cookmark", new_recipe_path %>
+			</li>
 			<li class="dropdown">
 		    	<a id="userMenuLabel" datatarget="#" class="dropdown-toggle" data-toggle="dropdown" role="button"><%= current_user.handle %><b class="caret"></b></a>
 		        <ul class="dropdown-menu" role="menu" aria-labelledby="userMenuLabel">
-			        <li><%= link_to "Settings", users_profile_path %></li>
-			        <li><%= link_to "Invite", new_user_invitation_path %></li>
-			        <% if permitted_to? :admin, :pages %><li><%= link_to "Admin", admin_path %></li><% end %>
+			        <li><%= link_to_modal "Profile", users_profile_path( section: "profile" ) %></li>
+			        <li><%= link_to_modal "Sign-in Services", authentications_path %></li>
+			        <li><%= link_to_modal "Invite", new_user_invitation_path %></li>
+			        <% if permitted_to? :admin, :pages %>
+								<li><%= link_to "Admin", admin_path %></li>
+							<% end %>
 			        <li><%= link_to "Sign Out", destroy_user_session_path, :method => "delete" %></li>
 			    </ul>
 			</li>
 		<% else %>
-			<li><%= link_to_function "Sign In", %q{recipePowerGetAndRunJSON('authentications/new', 'modal')} %></li>
+			<li><%= link_to_modal "Sign In", authentications_new_path %></li>
 	    <% end %>
 	  	</ul>
 		<ul class="nav">
 			<li>
-				<%= form_tag("/collection/update", :method => "get", :class => "navbar-form form-search query_form") do %>
+				<%= form_tag(@seeker.query_path, :method => "post", :class => "navbar-form form-search query_form") do %>
 					<div id="collection_query_tokens">
-						<%= text_field_tag :tagstxt, "#{@collection.tagstxt}", "data-pre" => @collection.tags.map(&:attributes).to_json, :placeholder => "Seek and ye shall find...", :class => "search-query" %>
+						<%= text_field_tag :tagstxt, "#{@seeker.tagstxt}", "data-pre" => @seeker.tags.map(&:attributes).to_json, :placeholder => "Seek and ye shall find...", :class => "search-query" %>
 					</div>
 				<% end %>
 			</li>

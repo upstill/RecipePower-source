@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130115001038) do
+ActiveRecord::Schema.define(:version => 20130301055302) do
 
   create_table "authentications", :force => true do |t|
     t.integer  "user_id"
@@ -35,6 +35,18 @@ ActiveRecord::Schema.define(:version => 20130115001038) do
     t.datetime "updated_at"
   end
 
+  create_table "feed_entries", :force => true do |t|
+    t.string   "name"
+    t.text     "summary"
+    t.string   "url"
+    t.datetime "published_at"
+    t.string   "guid"
+    t.datetime "created_at",   :null => false
+    t.datetime "updated_at",   :null => false
+    t.integer  "feed_id"
+    t.integer  "recipe_id"
+  end
+
   create_table "feedbacks", :force => true do |t|
     t.integer  "user_id"
     t.string   "email"
@@ -45,6 +57,22 @@ ActiveRecord::Schema.define(:version => 20130115001038) do
     t.datetime "updated_at"
     t.string   "subject"
     t.boolean  "docontact"
+  end
+
+  create_table "feeds", :force => true do |t|
+    t.text     "url"
+    t.string   "description"
+    t.integer  "site_id"
+    t.datetime "created_at",                     :null => false
+    t.datetime "updated_at",                     :null => false
+    t.boolean  "approved",    :default => false
+    t.integer  "feedtype",    :default => 1
+    t.string   "title"
+  end
+
+  create_table "feeds_users", :force => true do |t|
+    t.integer "feed_id"
+    t.integer "user_id"
   end
 
   create_table "link_refs", :force => true do |t|
@@ -162,7 +190,7 @@ ActiveRecord::Schema.define(:version => 20130115001038) do
     t.string   "scheme"
     t.string   "host"
     t.string   "port"
-    t.string   "name"
+    t.string   "oldname"
     t.string   "logo"
     t.text     "tags_serialized"
     t.datetime "created_at"
@@ -218,7 +246,7 @@ ActiveRecord::Schema.define(:version => 20130115001038) do
 
   create_table "users", :force => true do |t|
     t.string   "username"
-    t.string   "email",                                :default => "", :null => false
+    t.string   "email",                                :default => "",    :null => false
     t.string   "password_hash"
     t.string   "password_salt"
     t.datetime "created_at"
@@ -252,6 +280,8 @@ ActiveRecord::Schema.define(:version => 20130115001038) do
     t.text     "invitation_message"
     t.integer  "channel_referent_id",                  :default => 0
     t.text     "browser_serialized"
+    t.boolean  "private",                              :default => false
+    t.string   "invitation_issuer"
   end
 
   add_index "users", ["confirmation_token"], :name => "index_users_on_confirmation_token", :unique => true

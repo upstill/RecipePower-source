@@ -4,7 +4,8 @@ class RecipesController < ApplicationController
 
   before_filter :login_required, :except => [:index, :show, :capture ]
   before_filter { @focus_selector = "#recipe_url" }
-  
+  skip_before_filter :setup_collection, :only => [:capture]
+    
   filter_access_to :all
   include ApplicationHelper
   include ActionView::Helpers::TextHelper
@@ -24,14 +25,18 @@ class RecipesController < ApplicationController
         if params[:action] != "destroy"
           go_link_body = with_format("html") do render_to_string :partial => "recipes/golink" end
           list_element_body = with_format("html") do render_to_string :partial => "shared/recipe_smallpic" end
+          grid_element_body = with_format("html") do render_to_string :partial => "shared/recipe_grid" end
         end
         render json:     { 
+                         done: true, # Denotes recipe-editing is finished
                          notice: notice,
                          title: truncated, 
                          go_link_class: recipe_list_element_golink_class(@recipe), 
                          go_link_body: go_link_body || "",
                          list_element_class: recipe_list_element_class(@recipe), 
                          list_element_body: list_element_body || "",
+                         grid_element_class: recipe_grid_element_class(@recipe), 
+                         grid_element_body: grid_element_body || "",
                          action: params[:action],
                          processorFcn: "RP.rcp_list.update"
                        } 
@@ -43,7 +48,7 @@ class RecipesController < ApplicationController
   end
 
   def index
-    redirect_to rcpqueries_url
+    redirect_to collection_url
     # return if need_login true
     # Get the collected recipes for the user named in query
     user = current_user_or_guest 
@@ -67,11 +72,20 @@ class RecipesController < ApplicationController
     # Here is where we take a hit on the "Add to RecipePower" widget,
     # and also invoke the 'new cookmark' dialog. The difference is whether
     # parameters are supplied for url, title and note (though only URI is required).
-    debugger
+    if params[:feed_entry]
+      # Create the new recipe off the feed entry
+      feed_entry = FeedEntry.find params[:feed_entry].to_i
+      params[:url] = feed_entry.url
+    end
     @recipe = Recipe.ensure current_user_or_guest_id, params.slice(:url) # session[:user_id], params
     if @recipe.id # Mark of a fetched/successfully saved recipe: it has an id
     	# redirect to edit
-    	redirect_to edit_recipe_url(@recipe), :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br>You might want to confirm the title and picture, and/or tag it?".html_safe
+    	if feed_entry
+    	  feed_entry.recipe = @recipe
+    	  feed_entry.save
+  	  end
+      reportRecipe( collection_path, truncate( @recipe.title, :length => 100)+" now appearing in your collection.", formats)
+    	# redirect_to edit_recipe_url(@recipe), :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br>You might want to confirm the title and picture, and/or tag it?".html_safe
     else
         @Title = "Cookmark a Recipe"
         @nav_current = :addcookmark
@@ -89,23 +103,41 @@ class RecipesController < ApplicationController
     @area = params[:area] || "at_top"
   	dialog_only = params[:how] == "modal" || params[:how] == "modeless"
     respond_to do |format|
-      format.html { # This is for capturing a new recipe. The injector (capture.js) calls for this
+      format.html { # This is for capturing a new recipe and tagging it using a new page. 
         @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params
-        # The javascript includes an iframe for specific content
+        # The injector (capture.js) calls for this to fill the iframe on the foreign page.
         @layout = "injector"
-        render :edit, :layout => (params[:layout] || dialog_only)
+        if @recipe.id
+          render :edit, :layout => (params[:layout] || dialog_only)
+        else
+          @resource = @recipe
+          render "pages/resource_errors", :layout => (params[:layout] || dialog_only)
+        end
+      }
+      format.json {
+        @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params
+        if @recipe.id
+          dialogstr = with_format("html") { render_to_string :edit, layout: false }
+        else
+          @resource = @recipe
+          alertstr = with_format("html") { render_to_string "pages/resource_errors", layout: false } 
+        end
+        render json: { code: alertstr }
       }
       format.js { 
         # Produce javascript in response to the bookmarklet, to render into an iframe, 
         # either the recipe editor or a login screen.
         # We need a domain to pass as sourcehome, so the injected iframe can communicate with the browser
-        uri = URI(params[:recipe][:url])
-        domain = uri.scheme+"://"+uri.host
-        @url = capture_recipes_url area: "at_top", layout: "injector", recipe: params[:recipe], sourcehome: domain
-        if !current_user # Apparently there's no way to check up on a user without hitting the database
-          # Push the editing URL so authentication happens first
-          session["user_return_to"] = @url
-          @url = new_authentication_url area: "at_top", layout: "injector", sourcehome: domain 
+        params[:recipe][:url].strip!
+        if uri = URI::HTTP.sans_query(params[:recipe][:url])
+          domain = uri.scheme+"://"+uri.host
+          domain += ":"+uri.port.to_s if uri.port != 80
+          @url = capture_recipes_url area: "at_top", layout: "injector", recipe: params[:recipe], sourcehome: domain
+          if !current_user # Apparently there's no way to check up on a user without hitting the database
+            # Push the editing URL so authentication happens first
+            session[:original_uri] = @url
+            @url = new_authentication_url area: "at_top", layout: "injector", sourcehome: domain 
+          end
         end
         render
       }
@@ -120,7 +152,7 @@ class RecipesController < ApplicationController
       @Title = @recipe.title # Get title from the recipe
       if params[:pic_picker]
         # Setting the pic_picker param requests a picture-editing dialog
-        render :partial=> "pic_picker"
+        render :partial=> "shared/pic_picker"
       else
         @nav_current = nil
         @area = params[:area]
@@ -141,9 +173,9 @@ class RecipesController < ApplicationController
     @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params[:recipe]
     if @recipe.errors.empty? # Success (valid recipe, either created or fetched)
       reportRecipe(  
-              edit_recipe_url(@recipe), 
-              "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br> You might want to confirm the title and picture, and/or tag it?".html_safe,
-              formats )
+        edit_recipe_url(@recipe), 
+        "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br> You might want to confirm the title and picture, and/or tag it?".html_safe,
+        formats )
     else # failure (not a valid recipe) => return to new
        @Title = "Cookmark a Recipe"
        @nav_current = :addcookmark
@@ -165,7 +197,7 @@ class RecipesController < ApplicationController
     # return if need_login true
     @recipe = Recipe.find(params[:id])
     if params[:commit] == "Cancel"
-      reportRecipe rcpqueries_url, "Recipe secure and unchanged.", formats
+      reportRecipe collection_url, "Recipe secure and unchanged.", formats
     else
       @recipe.current_user = current_user_or_guest_id # session[:user_id]
       begin
@@ -175,7 +207,7 @@ class RecipesController < ApplicationController
             # @recipe.errors.add "Couldn't save recipe"
       end
       if saved_okay
-        reportRecipe( rcpqueries_url, "Successfully updated #{@recipe.title || 'recipe'}.", formats )
+        reportRecipe( collection_url, "Successfully updated #{@recipe.title || 'recipe'}.", formats )
       else
         @Title = "Tag That Recipe (Try Again)!"
         @nav_current = nil
@@ -215,7 +247,7 @@ class RecipesController < ApplicationController
     @list_name = "mine"
     @area = params[:area]
     if @recipe.errors.empty?
-      reportRecipe( rcpqueries_path, truncate( @recipe.title, :length => 100)+" now appearing in your collection.", formats)
+      reportRecipe( collection_path, truncate( @recipe.title, :length => 100)+" now appearing in your collection.", formats)
     else
       respond_to do |format|
         format.html { render nothing: true }
@@ -231,8 +263,8 @@ class RecipesController < ApplicationController
     @recipe = Recipe.ensure current_user_or_guest_id, params.slice(:id), false
     @recipe.remove_from_collection current_user_or_guest_id
     truncated = truncate(@recipe.title, :length => 40)
-    reportRecipe rcpqueries_url, "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections.", formats
-    # redirect_to rcpqueries_url, :notice => "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections."
+    reportRecipe collection_url, "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections.", formats
+    # redirect_to collection_url, :notice => "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections."
   end
 
   # Remove the recipe from the system entirely
@@ -240,8 +272,8 @@ class RecipesController < ApplicationController
     @recipe = Recipe.find params[:id] 
     title = @recipe.title
     @recipe.destroy
-    reportRecipe rcpqueries_url, "\"#{title}\" is gone for good.", formats
-    # redirect_to rcpqueries_url, :notice => "\"#{title}\" is gone for good."
+    reportRecipe collection_url, "\"#{title}\" is gone for good.", formats
+    # redirect_to collection_url, :notice => "\"#{title}\" is gone for good."
   end
 
   def revise # modify current recipe to reflect a client-side change

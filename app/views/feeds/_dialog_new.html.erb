@@ -1,0 +1,12 @@
+<%# Fields for a new-feed dialog %>
+<%= dialogHeader :new_feed, "Add a Feed", area: @area %>
+  <%= simple_form_for @feed, html: { class: "new_feed json", 'data-type' => :json } do |f| %>
+		<div class="modal-body">
+		  <%= form_error_helper f %>
+		  <%= f.input :url, label: "Paste the URL of an RSS feed here and click 'Add Feed'", placeholder: "http://blogs.somedomain.com/rss.xml", input_html: { cols: 125, rows: 2, "data-type" => "json" } %>
+		</div>
+	  <div class="modal-footer">
+			<%= f.button :submit, "Add Feed" %>
+	  </div>
+	<% end %>
+<%= dialogFooter %>

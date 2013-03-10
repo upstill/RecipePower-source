@@ -1,0 +1,21 @@
+<% if @area && (@area == "at_top") %>
+	<%= dialogHeader :heads_up, @title || express_error_context(@resource), area: @area, class: "generic_alert" %>
+		<h3><%= @title || express_error_context(@resource) %></h3>
+		<div class="error_box">
+			<%= express_resource_errors @resource, preface: (@title ? express_error_context(@resource) : "") %>
+		</div>
+		<div class="error_cancel">
+			<button type="button" class="cancel" onclick="RP.dialog.cancel()" >Okay</button>
+		</div>
+	<%= dialogFooter %>
+<% else %>
+	<%= modal_dialog :heads_up, @title || express_error_context(@resource), area: @area do %>
+		<%= modal_body %>
+			<%= express_resource_errors @resource, preface: (@title ? express_error_context(@resource) : "") %>
+		<% end %>
+		<%= modal_footer %>
+			<button type="button" class="cancel" onclick="RP.dialog.cancel()" >Okay</button>
+		<% end %>
+	<% end %>
+<% end %>
+

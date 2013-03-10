@@ -1,3 +1,1 @@
-<h3>Edit Profile</h3>
-
-<%= render 'form' %>
+<%= render (@partial ? 'users/dialog_edit_' : 'page_edit_')+@section %>

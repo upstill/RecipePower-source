@@ -11,26 +11,56 @@ $(function() {
 		preventDuplicates: true,
 	    allowFreeTagging: true // allowCustomEntry: true
 	});
+	
 	$("#referent_child_tokens").tokenInput(querystr, {
-	    crossDomain: false,
+		crossDomain: false,
 		noResultsText: "No existing tag found; hit Enter to make a new tag",
-	    hintText: "Categories that include this",
-	    prePopulate: $("#referent_parents").data("pre"),
-	    theme: "facebook",
+		hintText: "Categories that include this",
+		prePopulate: $("#referent_parents").data("pre"),
+		theme: "facebook",
 		preventDuplicates: true,
-	    allowFreeTagging: true // allowCustomEntry: true
+		allowFreeTagging: true // allowCustomEntry: true
 	});
+	
 	$("#referent_add_expression").tokenInput(querystr+"&untypedOK=1", {
-	    crossDomain: false,
+		crossDomain: false,
 		noResultsText: "No existing tag found; hit Enter to make a new tag",
-	    hintText: "Type/select another tag to express this thing",
-	    theme: "facebook",
+		hintText: "Type/select another tag to express this thing",
+		theme: "facebook",
 		tokenLimit: 1,
-	    onAdd: add_expression, // Respond to tag selection by adding expression and deleting tag
+		onAdd: add_expression, // Respond to tag selection by adding expression and deleting tag
 		preventDuplicates: true,
-	    allowFreeTagging: true // allowCustomEntry: true
+		allowFreeTagging: true // allowCustomEntry: true
 	});
+	
+	$("#referent_channel_tag").tokenInput("/tags/match.json?tagtypes=1,2,3,4,6,7,8,12,14", {
+		crossDomain: false,
+		noResultsText: "No matching tag found; hit Enter to make it a tag",
+		hintText: "Type a tag that will name the channel",
+		prePopulate: $("#referent_channel_tag").data("pre"),
+		theme: "facebook",
+		preventDuplicates: true,
+		tokenLimit: 1,
+		allowFreeTagging: true // allowCustomEntry: true
+	});
+	
 });
+
+function dependentSwitch() {
+	if($("#referent_dependent")[0].checked) { // "Channel for existing tag" checked
+		$("#referent_channel_tag").tokenInput( "setOptions", {
+			noResultsText: "No existing tag found to use as channel",
+			hintText: "Type an existing tag for the channel to track",
+			allowFreeTagging: false // allowCustomEntry: false
+		});
+	} else {
+		$("#referent_channel_tag").tokenInput( "/tags/match.json?tagtype=0", {
+			noResultsText: "Hit Enter to make a channel with a new name",
+			hintText: "Type a tag naming the channel",
+			allowFreeTagging: true // allowCustomEntry: true
+		});
+	}
+}
 
 /* Callback for the selection of a new tag for an expression */
 function add_expression(hi, li) {

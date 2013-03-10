@@ -10,9 +10,9 @@ class User < ActiveRecord::Base
   before_save :serialize_browser
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :id, :username, :fullname, :about, :login,
+  attr_accessible :id, :username, :fullname, :about, :login, :private,
                 :email, :password, :password_confirmation, 
-                :recipes, :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens
+                :recipes, :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens, :subscription_tokens, :invitation_issuer
   attr_writer :browser
 
   has_many :follower_relations, :foreign_key=>"followee_id", :dependent=>:destroy, :class_name=>"UserRelation"
@@ -24,11 +24,38 @@ class User < ActiveRecord::Base
   # Channels are just another kind of user. This field (channel_referent_id, externally) denotes such.
   belongs_to :channel, :class_name => "ChannelReferent"
   
+  has_and_belongs_to_many :feeds
+  
   # login is a virtual attribute placeholding for [username or email]
   attr_accessor :login
   
+  def headers_for(action)
+    case action
+    when :invitation, :invitation_instructions
+      { :subject => invitation_issuer+" wants to get you cooking." }
+    else
+      {}
+    end
+  end  
+  
   def browser
-    @browser = @browser || (browser_serialized ? RcpBrowser.load(browser_serialized) : RcpBrowser.new(id))
+    return @browser if @browser
+    # Try to get browser from serialized storage in the user record
+    # If something goes awry, we'll just create a new one.
+    begin
+      @browser = ContentBrowser.load(browser_serialized)
+    rescue Exception => e
+      @browser = nil
+    end
+    @browser = @browser || ContentBrowser.new(id)
+  end
+  
+  # Bust the browser cache due to selections changing, optionally selecting an object
+  def refresh_browser(obj = nil)
+    browser_serialized = nil
+    @browser = ContentBrowser.new(id)
+    @browser.select_by_content if obj
+    save
   end
   
   def serialize_browser
@@ -43,9 +70,38 @@ class User < ActiveRecord::Base
       where(conditions).first
     end
   end
+
+  # Add the feed to the browser's ContentBrowser and select it
+  def add_feed feed
+    feeds.unshift feed unless feeds.include? feed
+    bnode = browser.select_by_content feed
+    save # ...to preserve the selection
+    bnode
+  end
+
+  def delete_feed feed
+    browser.delete_selected
+    feeds.delete feed
+    save
+  end
+
+  def add_followee friend
+    self.followees << friend unless followee_ids.include? friend.id
+    # friend.follower_ids.unshift id unless friend.follower_ids.include? id
+    # friend.save
+    bnode = browser.select_by_content friend # Recreates the browser
+    save # ...to preserve the selection
+    bnode
+  end
+
+  def delete_followee f
+    browser.delete_selected
+    followees.delete f
+    save
+  end
   
   def role
-      self.role_symbols.first.to_s
+    self.role_symbols.first.to_s
   end
   
   # Return the list of recipes owned by the user, optionally including every recipe they've touched. Options:
@@ -98,11 +154,20 @@ public
   
   # Presents a hash of IDs with a switch value for whether to include that followee
   def followee_tokens=(flist)
-      newlist = []
-      flist.each_key do |key| 
-          newlist.push key.to_i if (flist[key] == "1")
-      end
-      self.followee_ids = newlist
+    newlist = []
+    flist.each_key do |key| 
+        newlist.push key.to_i if (flist[key] == "1")
+    end
+    self.followee_ids = newlist
+  end
+  
+  # Presents a hash of IDs with a switch value for whether to include that followee
+  def subscription_tokens=(flist)
+    newlist = []
+    flist.each_key do |key| 
+        newlist.push key.to_i if (flist[key] == "1")
+    end
+    self.feed_ids = newlist
   end
   
   # Is a user a channel, as opposed to a human user?
@@ -174,9 +239,6 @@ public
   has_many :rcprefs
   has_many :recipes, :through=>:rcprefs, :autosave=>true
   
-  has_many :touches, :order => "updated_at DESC"
-  has_many :touchings, :through=>:touches
-  
   validates :email, :presence => true
 
   # validates_presence_of :username
@@ -199,7 +261,7 @@ public
   # Return a 2-array of 1) the list of possible roles, and 2) the current role,
   # suitable for passing to options_for_select
   def role_select
-      [@@Roles.list, role_id]
+    @@Roles.list
   end
 
   # Class variable @@Super_user saves the super User
@@ -241,6 +303,11 @@ public
       else 
           username
       end
+  end
+  
+  # 'name' is just an alias for handle, for use by Channel referents
+  def name
+    handle
   end
   
   # Who is eligible to be
