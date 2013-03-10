@@ -136,13 +136,14 @@ process_response = (responseData, dlog) ->
 extract_modal = (code) ->
 	dom = $(code)
 	if $(dom).hasClass "dialog"
-		$(dom).removeClass('modal-pending').addClass('modal')
+		# $(dom).removeClass('modal-pending').addClass('modal')
 		return dom[0]
 	else
-		newdlog = $('div.dialog', dom).removeClass('modal-pending').addClass('modal')
+		newdlog = $('div.dialog', dom) # .removeClass('modal-pending').addClass('modal')
 		return $(newdlog).detach()[0]
 
 open_modal = (dlog, omit_button) ->
+	$(dlog).removeClass('modal-pending').removeClass('hide').addClass('modal')
 	notify "load", dlog
 	if !omit_button
 		buttoncode = '<button type=\"button\" class=\"close\" onclick=\"RP.dialog.cancel()\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>'

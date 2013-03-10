@@ -1,15 +1,3 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-<%# dialogDiv :edit_recipe, "Tag That Recipe!", "at_left", recipe_editor() %>
-<%# dialogHeader :edit_recipe, "Tag That Recipe!", "at_left" %>
-	<%# logger.debug render("recipes/form_edit_at_left") %>
-	<%# render "recipes/form_edit_at_left" %>
-<%# dialogFooter %>
-=======
-<%= dialogDiv :edit_recipe, "Tag That Recipe!", "at_left", recipe_editor() %>
->>>>>>> installed simple_form
-=======
->>>>>>> login dialogs behaving with errors
 <div class="nav affix content_browser">
 	<ul class="nav nav-tabs nav-stacked">
 		<% @browser.node_list.each do |node| %>
@@ -23,4 +11,3 @@
 		<%= footer_navlinks %>
 	</div>
 </div>
-<%= content_tag :div, "", class: "edit_recipe at_left hide", id: "recipePowerDialog", "data-template" => recipe_editor %>

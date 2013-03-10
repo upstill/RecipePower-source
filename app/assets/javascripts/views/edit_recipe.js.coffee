@@ -15,18 +15,19 @@ RP.edit_recipe.go = (rcpdata) ->
 	# Parse the data for the recipe and insert into the dialog's template.
 	# The dialog has placeholders of the form %%rcp<fieldname>%% for each part of the recipe
 	# The status must be set by activating one of the options
-	statustarget = '<option value="'+rcpdata.rcpStatus+'"'
-	statusrepl = statustarget + ' selected="selected"'
-	dlgsource = $(dlog).data("template").string.
-	replace(/%%rcpID%%/g, rcpdata.rcpID).
-	replace(/%%rcpTitle%%/g, rcpdata.rcpTitle).
-	replace(/%%rcpPicURL%%/g, rcpdata.rcpPicURL || "assets/MissingPicture.png" ).
-	replace(/%%rcpPrivate%%/g, rcpdata.rcpPrivate).
-	replace(/%%rcpComment%%/g, rcpdata.rcpComment).
-	replace(/%%authToken%%/g, rcpdata.authToken).
-	replace(statustarget, statusrepl)
-	
-	$(dlog).html dlgsource # This nukes any lingering children as well as initializing the dialog
+	if templ = $(dlog).data "template"
+		# ...but then again, the dialog may be complete without a template
+		statustarget = '<option value="'+rcpdata.rcpStatus+'"'
+		statusrepl = statustarget + ' selected="selected"'
+		dlgsource = templ.string.
+		replace(/%%rcpID%%/g, rcpdata.rcpID).
+		replace(/%%rcpTitle%%/g, rcpdata.rcpTitle).
+		replace(/%%rcpPicURL%%/g, rcpdata.rcpPicURL || "assets/MissingPicture.png" ).
+		replace(/%%rcpPrivate%%/g, rcpdata.rcpPrivate).
+		replace(/%%rcpComment%%/g, rcpdata.rcpComment).
+		replace(/%%authToken%%/g, rcpdata.authToken).
+		replace(statustarget, statusrepl)
+		$(dlog).html dlgsource # This nukes any lingering children as well as initializing the dialog
 	# The tag data is parsed and added to the tags field directly
 	$("#recipe_tag_tokens").data "pre", jQuery.parseJSON(rcpdata.rcpTagData)
 	
