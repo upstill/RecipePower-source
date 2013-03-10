@@ -32,7 +32,6 @@
   <body>
     <%= render 'layouts/frame_top' %>
     <div class="container">
-			<%= feedback_tab :position => 'left' %>
 	    <div class="row">
 		    <div class="span3">
 			    <%= render 'layouts/frame_left' %>
@@ -44,7 +43,12 @@
 					</div>
 				</div>
 			</div>
-		</div> 
-		<!--! end of .container -->
+		</div>
+	</div> <!--! end of .container -->
+	<%= feedback_tab :position => 'left' %>
+	<!-- </div class="modal"></div> -->
+	<%# dialogDiv :edit_recipe, "Tag That Recipe!", "at_left", recipe_editor() %>
+	<%= render 'recipes/edit' %>
+	<%# content_tag :div, "", class: "edit_recipe at_left hide", id: "recipePowerDialog", "data-template" => recipe_editor %>
 	</body>
 </html>
