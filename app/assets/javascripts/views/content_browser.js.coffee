@@ -39,6 +39,7 @@ RP.content_browser.click_to_browser = () ->
 		i = i+1
 	if inside
 		me.style.display = "none"
+		window.history.replaceState({ an: "object" }, 'Collection', '/collection');
 		$(inside).click()
 
 # The parent of an element is the first element with a level lower than the element

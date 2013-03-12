@@ -10,6 +10,7 @@
 #= require_self
 #= require_directory ../../../vendor/assets/javascripts/jquery
 #= require ../../../vendor/assets/javascripts/bootbox
+#= require ../../../vendor/assets/javascripts/history
 
 #= require jquery_ujs
 

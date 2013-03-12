@@ -22,7 +22,7 @@ module CollectionsHelper
   		end
 		end
 	  (results.empty? ? 
-	   flash_one(:error, @seeker.explain_empty) : 
+	   flash_one(:alert, @seeker.explain_empty) : 
 	   results.join('')).html_safe
 	end
 	

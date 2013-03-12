@@ -1,5 +1,5 @@
 <%# Fields for a new-feed dialog %>
-<%= dialogHeader :new_feed, "Add a Feed", area: @area %>
+<%= modal_dialog :new_feed, "Add a Feed" do %>
   <%= simple_form_for @feed, html: { class: "new_feed json", 'data-type' => :json } do |f| %>
 		<div class="modal-body">
 		  <%= form_error_helper f %>
@@ -9,4 +9,4 @@
 			<%= f.button :submit, "Add Feed" %>
 	  </div>
 	<% end %>
-<%= dialogFooter %>
+<% end %>

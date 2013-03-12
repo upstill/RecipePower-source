@@ -653,7 +653,8 @@ class ContentBrowser < BrowserComposite
     end
     if selected.class.to_s =~ /Composite/ 
       if selected.children.empty?
-        report = "There's no content here because you have no #{selected.content_name} selected."
+        verb = selected.content_name == "Friends" ? "picked" : "subscribed to"
+        report = "There's no content here because you haven't #{verb} any #{selected.content_name}."
         sug = " getting one by clicking the '+' sign over there to the left"
       elsif tags.empty?
         name = selected.content_name

@@ -156,7 +156,7 @@ module ApplicationHelper
       prompt = "There are no pictures on the page, but you can paste a URL below, then click Okay."
     else
       tblstr = "<br><table>#{picrows}</table>"
-      prompt = "Pick one of the thumbnails<br>or type/paste the URL below, then click Okay.".html_safe
+      prompt = "Pick one of the thumbnails, then click Okay.<br><br>You can also type or paste the URL of an image into the text box, if that's your pleasure.".html_safe
     end
     content_tag( :div, 
       page_fitPic( picurl, id, "MissingPicture.png", "div.preview img" ),
@@ -264,20 +264,6 @@ module ApplicationHelper
 	def notifications_replacement
 	  [ "div.notifications-panel", notifications_panel ]
 	end
-
-  # Deploy the links for naming the user and/or signing up/signing in
-  def user_status
-    userlinks = []
-    if user = current_user
-       userlinks << link_to(user.handle, users_profile_path) # users_edit_path 
-       userlinks << link_to("Sign Out", destroy_user_session_path, :method=>"delete")
-       userlinks << navlink("Invite", new_user_invitation_path, (@nav_current==:invite))
-    else
-       userlinks << link_to_function("Sign In", "recipePowerGetAndRunJSON('authentications/new', 'modal')" )
-    end
- 	userlinks << navlink("Admin", admin_path) if permitted_to?(:admin, :pages)
- 	userlinks.join('&nbsp|&nbsp').html_safe
-  end
 
   def bookmarklet
     imgtag = image_tag("cookmark_button.png", class:"bookmarklet", alt:"Cookmark") 

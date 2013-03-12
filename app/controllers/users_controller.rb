@@ -1,18 +1,5 @@
 require './lib/controller_utils.rb'
 
-class HandleValidator < ActiveModel::EachValidator
-  def validate_each(record, attribute, value)
-    if attribute == :username || attribute == :fullname
-      debugger
-      if record.handle.empty?
-        record.errors.add :handle, "We need either your username or full name so we don't have to refer to you by your email. (Safer, you know...)" 
-        return nil
-      end
-    end
-    true
-  end
-end
-
 class UsersController < ApplicationController
   
   rescue_from ActiveRecord::RecordNotFound, :with => :not_found
@@ -20,7 +7,6 @@ class UsersController < ApplicationController
   before_filter :authenticate_user!, :except => [:show, :index, :identify]
   before_filter :setup_seeker, :only => [:index, :query ]
   # before_filter :declare_focus
-  validates_with :handleValidator
   
   def declare_focus
     @focus_selector = "#user_login"
