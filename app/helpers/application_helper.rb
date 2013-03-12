@@ -284,15 +284,6 @@ module ApplicationHelper
       link_to label, link, class: "nav_link"
     end
   end
-
-  # Return the set of navigation links for the header
-  def header_navlinks
-    navlinks = []
-    navlinks.push(navlink "Cookmarks", collection_path, (@nav_current==:cookmarks)) 
-    navlinks.push(link_to_dialog "Add a Cookmark", new_recipe_path, "modal", "floating" )
-    # navlinks.push(link_to_function("Add a Cookmark", "rcpAdd()" )) # navlink "Add a Cookmark", new_recipe_path, (@nav_current==:addcookmark)) 
-    navlinks.join('&nbsp|&nbsp').html_safe
-  end
     
   def footer_navlinks
   	navlinks = []
@@ -326,16 +317,6 @@ module ApplicationHelper
       "<div id=\"debug\">#{debug(params)}</div>".html_safe
 	end
 	
-	def button_to_dialog(label, path, how="modal", where="floating", options={})
-	  options[:class] = "btn btn-mini"
-	  link_to_dialog label, path, how, where, options
-	end
-	
-	# Embed a link to javascript for running a dialog by reference to a URL
-	def link_to_dialog(label, path, how="modal", where="floating", options={})
-  	link_to_function label, "recipePowerGetAndRunJSON('#{path}', '#{how}', '#{where}');", options
-  end
-	
 	def button_to_modal(label, path, how="modal", where="floating", options={})
 	  options[:class] = "btn btn-mini"
 	  link_to_modal label, path, options
@@ -355,7 +336,8 @@ module ApplicationHelper
       key.to_s+": ["+(hsh[key] ? hsh[key].to_s : "nil")+"]"
     }.join(' ')
   end
-  
+
+=begin  
   # Declare a dialog div with content to be supplied later using the template
   def dialogDiv( which, ttl=nil, area="floating", template="")
     logger.debug "dialogHeader for "+globstring({dialog: which, area: area, layout: @layout, ttl: ttl})
@@ -367,6 +349,7 @@ module ApplicationHelper
         id: "recipePowerDialog", 
         "data-template" => template)
   end
+=end 
   
   def modal_dialog( which, ttl=nil, options={}, &block )
     options[:modal] = true if options[:modal].nil?

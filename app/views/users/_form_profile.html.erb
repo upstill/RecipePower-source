@@ -5,7 +5,7 @@
   <%= f.input :fullname, label: "Full name", input_html: { cols: 125, rows: 1 } %>
   <%= f.input :about, label: "About me", placeholder: "Who Are You? What Do You Eat?", input_html: { cols: 125, rows: 4 } %>
   <%= f.input :email, input_html: { cols: 125, rows: 1 } %>
-  <%= f.input :private %>
+  <%= f.input :private, :as => :boolean, :wrapper => :checkbox, :label => "Cloak of Invisibility (i.e., not listed as possible Friend)" %>
   <% if permitted_to? :manage, @user %>
 		<%= f.input :role_id, label: "Role", collection: @user.role_select %>
   <% end %>

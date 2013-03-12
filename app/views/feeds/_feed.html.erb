@@ -17,7 +17,7 @@
 			<%= link_to 'Subscribe', collect_feed_path(@feed), class: "btn btn-mini" %>
 		<% end %>
 		<% permitted_to?(:edit, :feeds) do %>
-			<%= button_to_dialog 'Edit', edit_feed_path(@feed), "modal", "floating" %>
+			<%= button_to_modal 'Edit', edit_feed_path(@feed) %>
 		<% end %>
 		<% permitted_to?(:destroy, :feeds) do %>
 			<%= link_to('Destroy', @feed, :method => :delete, :class => "btn btn-mini btn-danger", confirm: 'Are you sure?') %>
