@@ -10,10 +10,10 @@
 	<%= dialogFooter %>
 <% else %>
 	<%= modal_dialog :heads_up, @title || express_error_context(@resource), area: @area do %>
-		<%= modal_body %>
+		<%= modal_body do %>
 			<%= express_resource_errors @resource, preface: (@title ? express_error_context(@resource) : "") %>
 		<% end %>
-		<%= modal_footer %>
+		<%= modal_footer do %>
 			<button type="button" class="cancel" onclick="RP.dialog.cancel()" >Okay</button>
 		<% end %>
 	<% end %>

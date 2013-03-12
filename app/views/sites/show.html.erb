@@ -34,9 +34,9 @@
 <%= link_to 'Edit', edit_site_path(@site) %> |
 <%= link_to 'Back', sites_path %>
 <hr>
-<% @feeds = @site.feeds %>
 <% if @feeds.count > 0 %>
-	<%= render :template => "feeds/index" %>
+  <h4>Associated Feeds</h4>
+	<%= render "feeds/table" %>
 <% else %>
 ...site has no feeds.
 <% end %>

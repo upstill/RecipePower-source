@@ -1,17 +1,16 @@
 <%# Fields for an edit-feed dialog %>
-<%= dialogHeader :edit_feed, "Edit Feed", area: @area %>
+<%= modal_dialog :edit_feed, "Edit Feed" do %>
 	<%= simple_form_for @feed, html: { class: "new_feed json", 'data-type' => :json } do |f| %>
-		<div class="modal-body">
+		<%= modal_body do %>
 		  <%= form_error_helper f %>
-		  <%# flash_all %>
 		  <%= f.input :title %>
 		  <%= f.input :description, input_html: { cols: 125, rows: 1 } %>
 		  <%= f.input :url, input_html: { cols: 125, rows: 1 } %>
-		  <%= f.input :approved %>
+		  <%= f.input :approved, :as => :boolean, :wrapper => :checkbox, :label => "Approved for feedthrough" %>
 		  <%= f.input :feedtype, collection: Feed.feedtype_selection %>
-		</div>
-		<div class="modal-footer">
+		<% end %>
+		<%= modal_footer do %>
 			<%= f.button :submit, "Save" %>
-	  </div>
+		<% end %>
 	<% end %>
-<%= dialogFooter %>
+<% end %>

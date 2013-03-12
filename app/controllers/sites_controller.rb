@@ -21,7 +21,6 @@ class SitesController < ApplicationController
     @Title = @site.name
     
     # Setup to display the feeds for the site
-    debugger
     @feeds = @site.feeds
     @seeker = FeedSeeker.new @feeds, session[:seeker] # Default; other controllers may set up different seekers
 

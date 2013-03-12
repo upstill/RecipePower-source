@@ -1,0 +1,17 @@
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th class="span2">Title/Description/URL</th>
+      <th>Type</th>      
+      <th>Host Site</th>      
+      <% permitted_to?(:approve, :feeds) do %>
+        <th>Approved</th>
+      <% end %>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody class="collection_list">
+		<%= render "feeds/relist" %>
+  </tbody>
+</table>
