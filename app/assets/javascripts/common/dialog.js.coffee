@@ -203,14 +203,19 @@ post_notifications = (nots) ->
 filter_submit = (eventdata) ->
 	context = this
 	dlog = eventdata.data
-	if shortcircuit = notify "beforesave", dlog, eventdata.currentTarget
+	clicked = $("input[type=submit][clicked=true]")
+	# return true;
+	if ($(clicked).data("operation") == "Save") && (shortcircuit = notify "beforesave", dlog, eventdata.currentTarget)
 		eventdata.preventDefault()
 		process_response shortcircuit
 	else
 		# Okay to submit
 		# To sort out errors from subsequent dialogs, we submit the form synchronously
 		#  and use the result to determine whether to do normal forms processing.
+		$('input[name=_method]', this).attr "value", $(clicked).data("method") || context.method || 'GET'
 		$(context).ajaxSubmit
+			url: $(clicked).data("action") || context.action,
+			type: $('input[name=_method]', this).attr("value"),
 			async: false,
 			dataType: 'json',
 			error: (jqXHR, textStatus, errorThrown) ->
@@ -290,13 +295,40 @@ notify = (what, dlog, entity) ->
 				$('textarea', dlog).focus()
 			# Forms submissions that expect JSON structured data will be handled here:
 			$('form', dlog).submit dlog, filter_submit
-		# when "load", "onload"
+			$("form input[type=submit]").click ->
+				# Here is where we enable multiple submissions buttons with different routes
+				# The form gets 'data-action', 'data-method' and 'data-operation' fields to divert
+				# forms submission to a different URL and method. (data-operation declares the purpose
+				# of the submit for, e.g., pre-save checks)
+				$("input[type=submit]", dlog).removeAttr "clicked"
+				$(this).attr "clicked", "true"
+			
+			# Turn a Bootstrap button group into radio buttons
+			$('div.btn-group[data-toggle-name=*]').each ->
+				group   = $(this);
+				form    = group.parents('form').eq(0);
+				name    = group.attr 'data-toggle-name'
+				hidden  = $('input[name="' + name + '"]', form);
+				$('button', group).each ->
+					button = $(this);
+					if button.val() == hidden.val()
+						button.addClass 'active'
+					button.live 'click', ->
+						if $(this).hasClass "active"
+							hidden.val $(hidden).data("toggle-default")
+							$(this).removeClass "active"
+						else
+							hidden.val $(this).val()
+							$('button', group).each ->
+								$(this).removeClass "active"
+							$(this).addClass "active"
+		#	when "load", "onload"
 		# when "beforesave"
 		# when "save", "onsave"
 		# when "cancel", "oncancel"
 		# when "close", "onclose"
 	return
-
+	
 # Special handler for dialogs imbedded in an iframe. See 'injector.js'
 notify_injector = (what, dlog) ->
 	if fcn = RP.named_function what+"_dialog"
