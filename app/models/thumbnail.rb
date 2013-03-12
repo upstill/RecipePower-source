@@ -40,7 +40,7 @@ class Thumbnail < ActiveRecord::Base
           end
           thumb.format = "JPEG"
           quality = 20
-          thumb.write("thumb#{id.to_s}-M#{quality.to_s}.jpg") { self.quality = quality } unless Rails.env.production?
+          thumb.write("thumb#{id.to_s}-M#{quality.to_s}.jpg") { self.quality = quality } unless true # Rails.env.production?
           self.thumbdata = "data:image/jpeg;base64," + Base64.encode64(thumb.to_blob{self.quality = quality })
         rescue Exception => e
           return self.bad_url

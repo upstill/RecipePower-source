@@ -19,6 +19,11 @@ class SitesController < ApplicationController
       # return if need_login true, true
     @site = Site.find(params[:id])
     @Title = @site.name
+    
+    # Setup to display the feeds for the site
+    debugger
+    @feeds = @site.feeds
+    @seeker = FeedSeeker.new @feeds, session[:seeker] # Default; other controllers may set up different seekers
 
     respond_to do |format|
       format.html # show.html.erb
