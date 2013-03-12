@@ -32,7 +32,6 @@
   <body>
     <%= render 'layouts/frame_top' %>
     <div class="container">
-			<%= feedback_tab :position => 'left' %>
 	    <div class="row">
 		    <div class="span3">
 			    <%= render 'layouts/frame_left' %>
@@ -44,7 +43,9 @@
 					</div>
 				</div>
 			</div>
-		</div> 
-		<!--! end of .container -->
+		</div>
+	</div> <!--! end of .container -->
+	<%= feedback_tab :position => 'left' %>
+	<%= render 'recipes/edit_template' %>
 	</body>
 </html>

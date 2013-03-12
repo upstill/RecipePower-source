@@ -1,42 +1,66 @@
-<%= form_for @recipe, :remote => true, :html => {:'data-type' => :json} do |f| %>
-	<%= modal_body do %>
-	  <%= resource_errors_helper @recipe %>
-	  <%= pic_field @recipe, :picurl, f, true %>
-
-	  <div class="edit_recipe_field tags" >
-			<%= f.label :tag_tokens, "Tags" -%>
-			<%= f.text_field :tag_tokens, rows: "2", "data-pre" => @recipe.tags.map(&:attributes).to_json -%>
-	  </div>
-
-	  <div class="edit_recipe_field" >
-			<%= f.label :comment, "Notes" -%>
-			<%= f.text_area :comment, placeholder: "What are your thoughts about this recipe?", rows: "3" -%>
-	  </div>
-
-	  <div class="edit_recipe_field" >
-			<%= f.label :title, "Title" -%>
-			<% @recipe.check_title %>
-			<%= f.text_area :title, rows: "3" -%>
-	  </div>
-
-	  <div class="edit_recipe_field">
-			<%= f.label :status,  "Status: " -%>
-			<%= f.select :status,  Recipe.status_select %>
-	 </div>
-
-	 <div class="edit_recipe_field">
-			<%= f.check_box :private %>
-			<%= f.label :private, "Private (for my eyes only)" %>
-	  </div>
-	<% end %>
-	<%= modal_footer do %>
-	  <%= f.submit "Save", class: "save-tags-button submit" %>
-	  <%= f.submit "Cancel", class: "save-tags-button cancel" %>
-		<% if permitted_to? :remove, @recipe %>
-		  <%= button_to "Remove From Collection", remove_recipe_path(@recipe), class: "save-tags-button", :remote => true, :form => { "data-type" => "json", id: "remove" } %>
-		<% end %>
-		<% if permitted_to? :destroy, @recipe %>
-		  <%= button_to "Destroy this Recipe", recipe_path(@recipe), :remote => true, :form => { "data-type" => "json", id: "destroy" }, :method => :delete, class: "save-tags-button", :confirm => "This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" %>
-		<% end %>
-	<% end %>
-<% end %>
+<div class="edit_recipe at_left hide" id="recipePowerDialog">
+	<div class="modal-header">
+		<input class="close cancel" data-dismiss="modal" name="commit" type="submit" value="x" />
+		<h3>Tag That Recipe!</h3>
+	</div>
+	<form accept-charset="UTF-8" action="/recipes/%%rcpID%%" class="form-inline edit_recipe" data-remote="true" data-type="json" id="edit_recipe_%%rcpID%%">
+		<input name="utf8" type="hidden" value="&#x2713;" />
+		<input name="_method" type="hidden" value="post" />
+		<input name="authenticity_token" type="hidden" value="%%authToken%%" />
+		<div class="modal-body">
+				<div class="notifications-panel">
+				</div>
+				<div class="row-fluid">
+					<div class="span12">
+						<div class="span5">
+							<div class="edit_recipe_field pic">
+								<div class="recipe_pic_preview img-polaroid">
+									<img alt="Some Image Available" class="fitPic" id="rcpPic%%rcpID%%" onload="fitImageOnLoad('div.recipe_pic_preview img')" src="%%rcpPicURL%%" />
+									<input type="hidden" id="recipe_picurl" name="recipe[picurl]" rel="jpg,png,gif" size="30" type="text" value="%%rcpPicURL%%" />
+								</div>
+								<div class="recipe_pic_picker">
+									<a type="button" href="/" class="pic_picker_golink btn btn-link hide" data="recipe_picurl;div.recipe_pic_preview img" value="Choose Picture">
+									Pick Picture </a>
+									<div class="pic_picker" data-url="/recipes/%%rcpID%%/edit?pic_picker=true" style="display:none;">
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="span7">
+							<div class="control-group">
+								<input type="text" class="span12" id="recipe_title" name="recipe[title]" value="%%rcpTitle%%" placeholder="Title">
+							</div>
+							<div class="control-group">
+								<input type="text" class="span12" id="recipe_tag_tokens" name="recipe[tag_tokens]" rows="2" size="30" placeholder="Tags" />
+							</div>
+							<div class="control-group">
+								<textarea class="span12" id="recipe_comment" name="recipe[comment]" placeholder="Recipe Notes" rows="3">%%rcpComment%%</textarea>
+							</div>
+							<div class="control-group">
+								<div class="btn-group" data-toggle="buttons-checkbox" data-toggle-name="recipe[status]">
+									<button type="button" class="btn" value="1" data-toggle="button">Now Cooking</button>
+									<button type="button" class="btn" value="2" data-toggle="button">Favorites</button>
+									<button type="button" class="btn" value="4" data-toggle="button">Earmarked</button>
+								</div>
+								<input type="hidden" name="recipe[status]" value="%%rcpStatus%%" data-toggle-default="8"/>
+							</div>
+							<div class="control-group">
+							</div>
+						</div>
+					</div>
+				</div>
+		</div>
+		<div class="modal-footer">
+		  <input class="btn pull-left" type="submit" data-action="/recipes/%%rcpID%%/remove" value="Remove" data-method="post" />
+		  <% if permitted_to? :admin, :pages %>
+				<input class="btn btn-danger pull-left" type="submit" data-action = "/recipes/%%rcpID%%" data-method="delete" value="Destroy" data-confirm="This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" />
+			<% end %>
+	 		<input name="recipe[private]" type="hidden" value="0" />
+	 		<label for="recipe_private" class="checkbox">
+	   		<input %%rcpPrivate%% id="recipe_private" name="recipe[private]" type="checkbox" value="1" />Private cookmark
+			</label>
+			<input class="cancel btn" data-dismiss="modal" name="commit" type="submit" value="Cancel" />
+	    <input class="submit btn btn-primary" name="commit" type="submit" value="Save" data-method="put" />
+		</div>
+	</form>
+</div>

@@ -5,6 +5,11 @@
 	<%= dialogFooter %>
 <% else %>
 	<%= modal_dialog :edit_recipe, "Tag That Recipe!", area: @area do %>
+<<<<<<< HEAD
 		<%= render "form_edit"+(@area ? "_"+@area : "") %>
+=======
+		<%# render "form_edit"+(@area ? "_"+@area : "") %>
+		<%= render "recipes/dialog_edit_recipe" %>
+>>>>>>> refs/heads/presenters
 	<% end %>
 <% end %>

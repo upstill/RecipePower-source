@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <div id="editRecipe" class="modal hide fade">
 	<div class="modal-header">
 		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -43,4 +44,54 @@
 			<a href="#" class="btn btn-primary">Save</a>
 		</form>
 	</div>
+=======
+<div id="editRecipe" class="edit_recipe hide fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3>Edit Recipe</h3>
+  </div>
+  <div class="modal-body">
+		<form accept-charset="UTF-8" action="/recipes/%%rcpID%%" class="edit_recipe" data-remote="true" data-type="json" id="edit_recipe_%%rcpID%%" method="post">
+	  <div class="row-fluid">
+	  	<div class="span12">
+		  	<div class="span5">
+			  	<img class="img-polaroid" src="data:image/jpeg;base64,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">
+			  	<button class="btn btn-link" type="button">Choose Picture</button>
+		  	</div>
+		  	<div class="span7">
+			  	<form class="form">
+				  <div class="control-group">
+				    <input type="text" class="span12" id="recipe_title" placeholder="Title">
+				  </div>
+				  <div class="control-group">
+					<input id="recipe_tag_tokens" class="span12" name="recipe[tag_tokens]" rows="2" size="30" type="text" placeholder="Tags" />
+				  </div>
+				  <div class="control-group">
+					<textarea class="span12" id="recipe_comment" name="recipe[comment]" placeholder="Recipe Notes" rows="3"></textarea>
+				  </div>
+				  <div class="control-group">
+					<div class="btn-group" data-toggle="buttons-radio">
+					  <button type="button" class="btn active">To Try</button>
+					  <button type="button" class="btn">Now Cooking</button>
+					  <button type="button" class="btn">Keepers</button>
+					</div>
+				  </div>
+			    </form>
+		  	</div>
+	  	</div>
+	  </div>
+		</form>
+  </div>
+  <div class="modal-footer">
+  	<form class="form-inline">
+	  	<a href="#" class="btn pull-left">Remove</a>
+	  	<% if permitted_to? :admin, :pages %><a href="#" class="btn btn-danger pull-left">Destroy</a><% end %>
+	  	<label class="checkbox">
+				<input type="checkbox"> Private cookmark
+			</label>
+	    <a href="#" class="btn">Cancel</a>
+	    <a href="#" class="btn btn-primary">Save</a>
+	</form>
+  </div>
+>>>>>>> refs/heads/presenters
 </div>
