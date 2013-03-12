@@ -65,7 +65,7 @@ end
       else
         resource.errors.full_messages.to_sentence
       end + base_errors
-    preface += (details.blank? ? "." : ":<br>") unless preface.blank?
+    preface = "<h4>#{preface}</h4><br>" unless preface.blank?
     preface+details
   end
 

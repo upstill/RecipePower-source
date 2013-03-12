@@ -8,6 +8,15 @@ class User < ActiveRecord::Base
          :lockable # , :omniauthable
   after_invitation_accepted :initialize_friends
   before_save :serialize_browser
+  
+  validates_each :username do |record, attr, value|
+    if record.username.empty? && record.fullname.empty?
+      record.errors.add :base, "Sorry, but we need <strong>either</strong> a username or real name, just so we don't refer to you by email address. How's that sound?"
+      nil
+    else
+      true
+    end
+  end
 
   # Setup accessible (or protected) attributes for your model
   attr_accessible :id, :username, :fullname, :about, :login, :private,
