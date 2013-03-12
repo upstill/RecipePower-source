@@ -32,7 +32,6 @@ class InvitationsController < Devise::InvitationsController
         debugger
         self.resource = nil
       end
-      debugger
       if resource && resource.errors.empty? # Success!
         set_flash_message :notice, :send_instructions, :email => self.resource.email
         respond_with resource, :location => after_invite_path_for(resource)

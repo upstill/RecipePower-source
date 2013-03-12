@@ -80,7 +80,7 @@ RP.collection.update = (params, url) ->
 	RP.dialog.cancel() # Close any open modal dialogs
 	jQuery.ajax
 		type: "POST"
-		url: (url || "collection/query")
+		url: (url || "/collection/query")
 		data: params
 		dataType: "html"
 		beforeSend: (xhr) ->

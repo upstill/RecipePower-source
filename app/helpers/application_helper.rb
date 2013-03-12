@@ -443,7 +443,7 @@ module ApplicationHelper
      link_to_function text.html_safe, ";", class: "pageclickr", value: pagenum.to_s, :"data-url" => url
    end
 
-   def pagination_links(npages, cur_page, url="collection/query" )
+   def pagination_links(npages, cur_page, url="/collection/query" )
      if npages > 1
        maxlinks = 11
        halfwidth = (maxlinks-6)/2

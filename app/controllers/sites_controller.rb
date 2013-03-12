@@ -101,7 +101,6 @@ class SitesController < ApplicationController
     url = params[:url]
     if @site = Site.by_link(url)
       ocount = @site.feeds.size
-      debugger
       @site.feedlist url
       if @site.feeds.size > ocount
         @site.save

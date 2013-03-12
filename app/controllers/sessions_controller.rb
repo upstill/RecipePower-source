@@ -48,7 +48,6 @@ class SessionsController < ApplicationController
   def create
     @Title = "Login"
     user = User.authenticate(params[:login], params[:password])
-    debugger
     if user
       session[:user_id] = user.id
       redirect_back :notice =>"Welcome back! (Logged in successfully.)"

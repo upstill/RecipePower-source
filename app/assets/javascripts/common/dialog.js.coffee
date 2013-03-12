@@ -203,27 +203,19 @@ post_notifications = (nots) ->
 filter_submit = (eventdata) ->
 	context = this
 	dlog = eventdata.data
-<<<<<<< HEAD
-	if shortcircuit = notify "beforesave", dlog, eventdata.currentTarget
-=======
 	clicked = $("input[type=submit][clicked=true]")
 	# return true;
 	if ($(clicked).data("operation") == "Save") && (shortcircuit = notify "beforesave", dlog, eventdata.currentTarget)
->>>>>>> refs/heads/presenters
 		eventdata.preventDefault()
 		process_response shortcircuit
 	else
 		# Okay to submit
 		# To sort out errors from subsequent dialogs, we submit the form synchronously
 		#  and use the result to determine whether to do normal forms processing.
-<<<<<<< HEAD
-		$(context).ajaxSubmit
-=======
-		$('input[name=_method]', this).attr "value", $(clicked).data("method") || context.method || 'GET'
+		method = $(clicked).data("method") || $('input[name=_method]', this).attr "value"
 		$(context).ajaxSubmit
 			url: $(clicked).data("action") || context.action,
-			type: $('input[name=_method]', this).attr("value"),
->>>>>>> refs/heads/presenters
+			type: method, # $('input[name=_method]', this).attr("value"),
 			async: false,
 			dataType: 'json',
 			error: (jqXHR, textStatus, errorThrown) ->
@@ -256,87 +248,13 @@ RP.dialog.notify_manager = (method, dlog) ->
 	mgr = manager_of dlog
 	if mgr && mgr[method]
 		mgr[method](dlog)
-<<<<<<< HEAD
 
 user_note = (msg) ->
 	jNotify msg,
 		HorizontalPosition: 'center', 
 		VerticalPosition: 'top', 
 		TimeShown: 1200
-	
-# Determine either the callback (kind = "Fcn") or the message (kind="Msg")
-#  for a given event type from among:
-# load
-# beforesave
-# save
-# cancel
-# close
-# If there's a function for the event in the hooks, call it
-# If it doesn't exist, or returns false when called, and there's a message for the event in the hooks, post it
-# If it doesn't exist, or returns false when called, and there's a handler for the manager of the dialog, call it
-# If it doesn't exist, or returns false when called, apply the default event handler 
-notify = (what, dlog, entity) ->
-	hooks = $(entity || dlog).data("hooks");
-	fcn_name = what+"Fcn";
-	msg_name = what+"Msg";
-	# If the entity or the dialog have hooks declared, use them
-	if hooks
-		if hooks.hasOwnProperty msg_name
-			user_note hooks[msg_name]
-		if hooks.hasOwnProperty fcn_name
-			fcn = RP.named_function hooks[fcn_name]
-			return fcn dlog # We want an error if the function doesn't exist
-	
-	# If there's a manager module with a responder, call it
-	if (mgr = manager_of dlog) && (fcn = mgr[what] || mgr["on"+what])
-		return fcn dlog
-	
-	# Otherwise, run the default
-	switch what
-		when "open", "onopen"
-			# onopen handler that sets a Boostrap dialog up to run modally: Trap the 
-			# form submission event to give us a chance to get JSON data and inject it into the page
-			# rather than do a full page reload.
-			if !$(dlog).hasClass "modal" # The modality may be hidden if prepared for a page
-				$(dlog).addClass "modal"
-			$(dlog).removeClass "hide"
-			$(dlog).on 'shown', ->
-				$('textarea', dlog).focus()
-			# Forms submissions that expect JSON structured data will be handled here:
-			$('form', dlog).submit dlog, filter_submit
-		# when "load", "onload"
-		# when "beforesave"
-		# when "save", "onsave"
-		# when "cancel", "oncancel"
-		# when "close", "onclose"
-	return
 
-# Special handler for dialogs imbedded in an iframe. See 'injector.js'
-notify_injector = (what, dlog) ->
-	if fcn = RP.named_function what+"_dialog"
-		fcn dlog
-	
-# Public convenience methods for handling events
-RP.dialog.onopen = (dlog, entity) ->
-	notify 'open', dlog, entity
-
-RP.dialog.onclose = (dlog, entity) ->
-	notify 'close', dlog, entity
-
-RP.dialog.onload = (dlog, entity) ->
-	notify 'load', dlog, entity
-
-RP.dialog.onsave = (dlog, entity) ->
-	notify 'save', dlog, entity
-
-=======
-
-user_note = (msg) ->
-	jNotify msg,
-		HorizontalPosition: 'center', 
-		VerticalPosition: 'top', 
-		TimeShown: 1200
-	
 # Determine either the callback (kind = "Fcn") or the message (kind="Msg")
 #  for a given event type from among:
 # load
@@ -429,4 +347,3 @@ RP.dialog.onload = (dlog, entity) ->
 RP.dialog.onsave = (dlog, entity) ->
 	notify 'save', dlog, entity
 
->>>>>>> refs/heads/presenters

@@ -258,7 +258,6 @@ class FeedSeeker < Seeker
             
       # Rank/purge for tag matches
       tags.each { |tag| 
-        debugger
         semantic_list = Feed.where(site_id: Site.where(referent_id: tag.referent_ids).map(&:id)).map(&:id)
         candihash.apply semantic_list
         # Get candidates by matching the tag's name against recipe titles and comments

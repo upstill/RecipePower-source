@@ -24,7 +24,6 @@ function recipePowerGetAndRunJSON(request, how, area ) {
 	area = area || "floating"
 	request += (request.match(/\?/) ? "&" : "?") + "area=" + area
 	
-	debugger;
 	$('span.query').text(request);
 	$.ajax( {
 		type: "GET",
