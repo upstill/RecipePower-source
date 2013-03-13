@@ -100,6 +100,8 @@ process_response = (responseData, dlog) ->
 	dlog ||= $('div.dialog.modal')[0]
 	supplanted = false
 	if responseData
+		
+		# 'replacements' specifies a set of DOM elements and code to replace them
 		if replacements = responseData.replacements
 			i = 0;
 			while i < replacements.length
@@ -107,25 +109,31 @@ process_response = (responseData, dlog) ->
 				$(replacement[0]).replaceWith replacement[1]
 				i++
 		
+		# 'dlog' gives a dialog DOM element to replace the extant one
 		if newdlog = responseData.dlog
 			placed = replace_modal newdlog, dlog
 			supplanted = true
 		
+		# 'code' gives HTML code, presumably for a dialog, possibly wrapped in a page
+		# If it's a page that includes a dialog, assert that, otherwise replace the page
 		if code = responseData.code
 			if newdlog = extract_modal code
 				placed = replace_modal newdlog, dlog
 				supplanted = true;
 			else 
 				responseData.page ||= code
-
+		
+		# 'page' gives HTML for a page to replace the current one
 		if page = responseData.page
 			document.open();
 			document.write(page);
 			document.close;
 			supplanted = true;
 		
+		# 'notifications' provides any notifications to be posted
 		post_notifications responseData.notifications
 		
+		# 'done', when true, simply means close the dialog, with an optional notice
 		if responseData.done && !supplanted
 			close_modal dlog, responseData.notice
 			

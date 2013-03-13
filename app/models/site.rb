@@ -204,7 +204,8 @@ class Site < ActiveRecord::Base
     def post_init
       unless self.site
         # We need to initialize the fields of the record, starting with site, based on sample
-        if urisq = URI::HTTP.sans_query(link = self.sample)
+        link = self.sample
+        if link && urisq = URI::HTTP.sans_query(link)
           if urisq.host.blank?
             self.errors << "Can't make sense of URI"
           else

@@ -138,8 +138,10 @@ class FeedsController < ApplicationController
   def update
     @feed = Feed.find(params[:id])
     if @feed.update_attributes(params[:feed])
-      flash[:message] = 'Feed was successfully updated.'
-      redirect_to feeds_path
+      respond_to do |format|
+        format.html { redirect_to feeds_url, :status => :see_other, notice: 'Feed was successfully updated.' }
+        format.json { render json: { done: true, notice: "Feed saved" } }
+      end
     else
       respond_to do |format|
         format.html { render action: "edit" }
