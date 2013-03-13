@@ -885,7 +885,8 @@ $.TokenList = function (input, url_or_data, settings) {
                     this_li.addClass($(input).data("settings").classes.dropdownItem2);
                 }
 
-                if(index === 0) {
+								/* Select the first item, UNLESS we're freetagging */
+                if ((index === 0) && !$(input).data("settings").allowFreeTagging) {
                     select_dropdown_item(this_li);
                 }
 
@@ -909,14 +910,13 @@ $.TokenList = function (input, url_or_data, settings) {
 
     // Highlight an item in the results dropdown
     function select_dropdown_item (item) {
-        if(item) {
-            if(selected_dropdown_item) {
-                deselect_dropdown_item($(selected_dropdown_item));
-            }
-
-            item.addClass($(input).data("settings").classes.selectedDropdownItem);
-            selected_dropdown_item = item.get(0);
-        }
+      if(selected_dropdown_item) {
+          deselect_dropdown_item($(selected_dropdown_item));
+      }
+      if(item) {
+        item.addClass($(input).data("settings").classes.selectedDropdownItem);
+        selected_dropdown_item = item.get(0);
+      }
     }
 
     // Remove highlighting from an item in the results dropdown
@@ -924,6 +924,19 @@ $.TokenList = function (input, url_or_data, settings) {
         item.removeClass($(input).data("settings").classes.selectedDropdownItem);
         selected_dropdown_item = null;
     }
+
+		// Return the first item in the dropdown list, or null
+		function first_dropdown_item() {
+			debugger;
+			return $("li", dropdown).slice(0,1);
+		}
+
+		// Return the last item in the dropdown list, or null
+		function last_dropdown_item() {
+			debugger;
+			var items = $("li", dropdown);
+			return (items.length > 0) ? items.slice(-1) : items
+		}
 
     // Do a search and show the "searching" dropdown if the input is longer
     // than $(input).data("settings").minChars
