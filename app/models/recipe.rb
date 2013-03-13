@@ -156,7 +156,7 @@ class Recipe < ActiveRecord::Base
       self.thumbnail = nil
       picurl
     else 
-      (thumbnail && thumbnail.thumbdata) || picurl || ""
+      (thumbnail && thumbnail.thumbdata) || picurl || "MissingPicture.png"
     end
   end
 
