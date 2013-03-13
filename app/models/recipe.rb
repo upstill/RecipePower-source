@@ -156,7 +156,7 @@ class Recipe < ActiveRecord::Base
       self.thumbnail = nil
       picurl
     else 
-      (thumbnail && thumbnail.thumbdata) or ""
+      (thumbnail && thumbnail.thumbdata) || picurl || ""
     end
   end
 
