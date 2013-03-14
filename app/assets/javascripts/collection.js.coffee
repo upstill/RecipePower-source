@@ -51,7 +51,7 @@ window.RP = window.RP || {}
 RP.collection = RP.collection || {}
 
 jQuery ->
-	$('div.loader').removeClass "loading" 
+	# $('div.loader').removeClass "loading" 
 	$("#tagstxt").tokenInput("/tags/match.json",
 		crossDomain: false,
 		hintText: "",
@@ -77,7 +77,7 @@ collection_pager = (evt) ->
 	RP.collection.update { cur_page: this.getAttribute("value") }, this.dataset.url
 
 RP.collection.update = (params, url) ->
-	$('div.loader').addClass "loading" # show progress indicator
+	# $('div.loader').addClass "loading" # show progress indicator
 	RP.dialog.cancel() # Close any open modal dialogs
 	jQuery.ajax
 		type: "POST"
@@ -88,7 +88,7 @@ RP.collection.update = (params, url) ->
 			xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))
 		success: (resp, succ, xhr) ->
 			# Explicitly update the collection list
-			$('div.loader').removeClass "loading" # Remove progress indicator
+			# $('div.loader').removeClass "loading" # Remove progress indicator
 			$('div.content')[0].innerHTML	= resp	
 			$(".pageclickr").click(collection_pager)
 			RP.rcp_list.onload()

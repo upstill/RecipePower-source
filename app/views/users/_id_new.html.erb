@@ -4,7 +4,7 @@
 	All we need is a username and email address, and you're good to go.
 	<br>(You can provide/edit details later on your Profile page.)</p>
 <%= form_for @user do |f| %>
-  <%= resource_errors_helper @user %>
+  <%= form_errors_helper f, @user %>
   <%= f.label :username, "Username/Handle" %>
   <%= f.text_field :username %>
   <%= f.label :email, "Email address" %>

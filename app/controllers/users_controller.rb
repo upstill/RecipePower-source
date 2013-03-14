@@ -164,7 +164,7 @@ class UsersController < ApplicationController
         format.json  { 
           listitem = with_format("html") { render_to_string( partial: "user" ) }
           render json: {
-            replacements: [ ["#listrow_"+@user.id.to_s, listitem], view_context.notifications_replacement ]
+            replacements: [ ["#listrow_"+@user.id.to_s, listitem], view_context.flash_notifications_replacement ]
           }
         }
       end

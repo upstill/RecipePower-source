@@ -37,7 +37,8 @@
 			    <%= render 'layouts/frame_left' %>
 				</div>
 				<div class="span9">
-					<%= notifications_panel %>
+					<%= render 'layouts/flash_notifications' %>
+					<div class="ajax-loader"></div>
 					<div class="content">
 						<%= yield %>
 					</div>

@@ -254,16 +254,6 @@ module ApplicationHelper
       strs.join(', ')+" and " + last
     end
   end
-  
-  # Helper to interpolate the notifications panel
-  def notifications_panel
-    %Q{<div class="notifications-panel">#{flash_all}</div>}.html_safe
-	end
-	
-	# Returns a selector-value pair for replacing the notifications panel due to an update event
-	def notifications_replacement
-	  [ "div.notifications-panel", notifications_panel ]
-	end
 
   def bookmarklet
     imgtag = image_tag("cookmark_button.png", class:"bookmarklet", alt:"Cookmark") 
@@ -464,6 +454,11 @@ module ApplicationHelper
        links.join(' ').html_safe
      end
    end
+  
+	# Returns a selector-value pair for replacing the notifications panel due to an update event
+	def flash_notifications_replacement
+	  [ "div.flash_notifications", render_to_string('layouts/flash_notifications').html_safe ]
+	end
    
   # Incorporate error reporting for a resource within a form, preferring
   # any base error from the resource to the standard notification
@@ -478,7 +473,8 @@ module ApplicationHelper
     flash_one :error, express_base_errors(resource)
   end
   
-  # Report the current errors on a record in a nice alert div, suitable for interpolation on the page
+  # Report the current errors on a record in a nice alert div, suitable for interpolation within the
+  # form whose failure generated the error
   def resource_errors_helper obj, options={}
     unless obj.errors.empty?
       flash_one :error, express_resource_errors(obj, options )

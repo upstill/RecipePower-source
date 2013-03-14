@@ -95,7 +95,7 @@ RP.content_browser.delete_element = (path) ->
 		toselect = active.previousElementSibling
 	active.parentNode.removeChild active
 	$(toselect).addClass "active"
-	$('div.loader').addClass "loading" # show progress indicator
+	# $('div.loader').addClass "loading" # show progress indicator
 	jQuery.ajax
 		type: "POST"
 		url: path

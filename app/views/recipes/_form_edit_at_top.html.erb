@@ -3,7 +3,7 @@
 	<span>has added this to your collection. Tag it here if you like. (Or <%= link_to_function "not", "retire_iframe();" %>.)</span>
 </div>
 <%= form_for @recipe, :html => { style: 'width:auto;height:auto'} do |f| %>
-  <%= resource_errors_helper @recipe %>
+  <%= form_errors_helper f, @recipe %>
 
 	<div class="left">
 		<%= pic_field @recipe, :picurl, f, false %>
