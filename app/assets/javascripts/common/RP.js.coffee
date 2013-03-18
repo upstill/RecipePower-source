@@ -74,3 +74,15 @@ RP.named_function = (str) ->
 		if(typeof obj == 'function')
 			return obj
 	return null;
+
+# Show a beachball while an ajax request is pending
+RP.ajax_loading = () ->
+	if elmt = $('div.ajax-loader')[0]
+		parent = elmt.parentElement
+		elmt.style.width = ($(window).width()-parent.offsetLeft).toString()+"px"
+		elmt.style.height = ($(window).height()-parent.offsetTop).toString()+"px"
+		$(elmt).addClass "loading" 
+
+# Remove the beachball after return
+RP.ajax_loaded = () ->
+	$('div.ajax-loader').removeClass "loading"

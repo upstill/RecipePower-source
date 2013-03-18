@@ -79,6 +79,7 @@ collection_pager = (evt) ->
 RP.collection.update = (params, url) ->
 	# $('div.loader').addClass "loading" # show progress indicator
 	RP.dialog.cancel() # Close any open modal dialogs
+	RP.ajax_loading()
 	jQuery.ajax
 		type: "POST"
 		url: (url || "/collection/query")
@@ -93,6 +94,7 @@ RP.collection.update = (params, url) ->
 			$(".pageclickr").click(collection_pager)
 			RP.rcp_list.onload()
 			window.scrollTo(0,0)
+			RP.ajax_loaded()
 
 # Callback when the query tag set changes
 queryChange = (hi, li) ->

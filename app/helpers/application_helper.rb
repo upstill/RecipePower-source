@@ -153,10 +153,10 @@ module ApplicationHelper
     picID = "rcpPic"+id.to_s
     if picrows.empty?
       tblstr = ""
-      prompt = "There are no pictures on the page, but you can paste a URL below, then click Okay."
+      prompt = "There are no pictures on the recipe's page, but you can paste a URL into the text box below."
     else
       tblstr = "<br><table>#{picrows}</table>"
-      prompt = "Pick one of the thumbnails, then click Okay.<br><br>You can also type or paste the URL of an image into the text box, if that's your pleasure.".html_safe
+      prompt = "Pick one of the thumbnails, then click Okay.<br><br>Or, type or paste the URL of an image into the text box, if that's your pleasure.".html_safe
     end
     content_tag( :div, 
       page_fitPic( picurl, id, "MissingPicture.png", "div.preview img" ),
