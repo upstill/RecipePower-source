@@ -24,7 +24,6 @@
 # require sites
 
 #  require_directory ./common
-#= require common/ajax_loader
 #= require common/dialog
 #= require common/pics
 #= require common/RP
