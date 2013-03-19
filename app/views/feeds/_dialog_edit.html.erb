@@ -2,7 +2,7 @@
 <%= modal_dialog :edit_feed, "Edit Feed" do %>
 	<%= simple_form_for @feed, html: { class: "new_feed json", 'data-type' => :json } do |f| %>
 		<%= modal_body do %>
-		  <%= form_error_helper f %>
+		  <%= form_errors_helper f %>
 		  <%= f.input :title %>
 		  <%= f.input :description, input_html: { cols: 125, rows: 1 } %>
 		  <%= f.input :url, input_html: { cols: 125, rows: 1 } %>

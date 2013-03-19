@@ -1,5 +1,5 @@
 <%= simple_form_for(resource, :as => resource_name, :url => session_path(resource_name), html: { class: "signin json" }) do |f| %>
-  <%= form_error_helper f %>
+  <%= form_errors_helper f %>
   <%= f.input :login, label: "Username or Email (your choice)" %></p>
   <%= f.input :password %></p>
   <% if devise_mapping.rememberable? -%>

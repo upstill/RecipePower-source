@@ -2,7 +2,7 @@
 <%= modal_dialog :edit_user, @Title || "Edit Profile", area: @area do %>
 	<%= simple_form_for @user, html: { class: "edit_user json", 'data-type' => :json } do |f| %>
 		<%= modal_body do %>
-		  <%= form_error_helper f %>
+		  <%= form_errors_helper f %>
 		  <%= f.input :username %>
 		  <%= f.input :fullname, input_html: { cols: 125, rows: 1 } %>
 		  <%= f.input :about, label: "About Me", placeholder: "Who Are You? What Do You Eat?", input_html: { cols: 125, rows: 4 } %>

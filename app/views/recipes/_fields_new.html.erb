@@ -1,7 +1,7 @@
 <%= modal_dialog :new_recipe, "Add a Cookmark", area: @area do %>
 	<%= simple_form_for @recipe, html: { class: "new_recipe json" } do |f| %>
     <%= modal_body do %>
-			<%= form_error_helper f, @recipe %>
+			<%= form_errors_helper f, @recipe %>
 			<%= f.input :url, label: "Paste URL here and click 'Add Cookmark' or hit Enter/Return" %>
     <% end %>
     <%= modal_footer do %>

@@ -462,7 +462,7 @@ module ApplicationHelper
    
   # Incorporate error reporting for a resource within a form, preferring
   # any base error from the resource to the standard notification
-  def form_error_helper f, object=nil
+  def form_errors_helper f, object=nil
     resource = object || f.object
     base_errors = base_errors_helper(resource)
     base_errors.blank? ? f.error_notification : base_errors 

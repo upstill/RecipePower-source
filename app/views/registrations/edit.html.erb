@@ -2,7 +2,7 @@
 <%= modal_dialog :edit_password, "Change Password", show: true do %>
 	<%= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name), :html => { class: "edit_password json", :method => :put, 'data-type' => :json }) do |f| %>
 		<%= modal_body do %>
-		  <%= form_error_helper f %>
+		  <%= form_errors_helper f %>
 		  <%= f.input :current_password, hint: "(we need your current password to confirm your changes)" %>
 		  <%= f.input :password, :label => "New password", hint: "(leave blank if you don't want to change it)", :autocomplete => "off" %>
 		  <%# f.input :password_confirmation, :label => "Confirm new password" %>
