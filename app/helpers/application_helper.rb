@@ -464,8 +464,13 @@ module ApplicationHelper
   # any base error from the resource to the standard notification
   def form_errors_helper f, object=nil
     resource = object || f.object
-    base_errors = base_errors_helper(resource)
-    base_errors.blank? ? f.error_notification : base_errors 
+    base_errors = base_errors_helper resource
+    if base_errors.blank?
+      # We accept both ActionView form builders and simple_form builders, but only the latter has error notification
+      f.respond_to?(:error_notification) ? f.error_notification : resource_errors_helper(resource)
+    else 
+      base_errors
+    end
   end
   
   # Augments error display for record attributes (a la simple_form) with base-level errors
