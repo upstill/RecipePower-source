@@ -27,7 +27,7 @@
 #= require common/dialog
 #= require common/pics
 #= require common/RP
-#= require common/RPDialog
+# require common/RPDialog
 # require common/RPDialogs
 
 #= require_directory ./views

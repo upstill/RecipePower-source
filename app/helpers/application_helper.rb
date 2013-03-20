@@ -320,6 +320,20 @@ module ApplicationHelper
   def link_to_redirect(label, url, options={} )
   	link_to_function label, "redirect_to('#{url}');", options
   end
+  
+  def link_to_update(label, url, options={} )
+    # Play nice with data fields in the link
+    options[:last_modified] ||= Time.now.httpdate # Default for updating
+    data = {}
+    debugger
+    data_options = %w{ last_modified hold_msg msg_selector dataType type refresh contents_selector }
+    options.each do |key, val| 
+      key = key.to_s
+      key = "data-"+key if data_options.include? key
+      data[key] = val 
+    end
+    link_to_function label, "RP.get_content('#{url}', this);", data
+  end
 	
 	def globstring(hsh)
     hsh.keys.each.collect { |key| 

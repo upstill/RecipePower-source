@@ -26,4 +26,9 @@ module CollectionsHelper
 	   results.join('')).html_safe
 	end
 	
+	# Return a URL for refreshing the collection
+	def collection_refresher
+	  @seeker.query_path
+  end
+	
 end

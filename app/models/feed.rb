@@ -68,12 +68,11 @@ class Feed < ActiveRecord::Base
   
   # Check all feeds that are approved for feed-through for updates
   def self.update_now
-    Feed.where(:approved => true).each do |feed| 
-      logger.debug "[#{Time.now}] Updating feed "+feed.to_s
-      puts "[#{Time.now}] Updating feed "+feed.to_s
-      FeedEntry.update_from_feed feed
-      feed.touch
-    end
+    Feed.where(:approved => true).each { |feed| feed.perform }
+  end
+  
+  def fetch
+    Delayed::Job.enqueue self
   end
   
   def perform
