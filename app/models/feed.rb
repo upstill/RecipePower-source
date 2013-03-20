@@ -70,6 +70,7 @@ class Feed < ActiveRecord::Base
   def self.update_now
     Feed.where(:approved => true).each do |feed| 
       logger.debug "[#{Time.now}] Updating feed "+feed.to_s
+      puts "[#{Time.now}] Updating feed "+feed.to_s
       FeedEntry.update_from_feed feed
       feed.touch
     end
