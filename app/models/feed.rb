@@ -44,33 +44,44 @@ class Feed < ActiveRecord::Base
     }
   end
   
+  # Return list of feed_entries by id for all feeds in the feedlist
+  def self.entry_ids feedlist
+    # Feed.find(feedlist).each { |feed| feed.update_entries }
+    # We could be fetching individual feeds, then sorting, but we'll just let the database handle that...
+    FeedEntry.where(feed_id: feedlist).order('published_at DESC').map(&:id)
+  end
+  
   # Return list of feed_entries by id for this feed
   def entry_ids
     @idcache ||= begin
-      update_entries
+      # update_entries
       FeedEntry.where(feed_id: id).order('published_at DESC').map(&:id)
     end
   end
   
   def entries
     @entrycache ||= begin
-      update_entries
+      # update_entries
       FeedEntry.where(feed_id: id).order('published_at DESC')
     end
   end
   
-  # Return list of feed_entries by id for all feeds in the feedlist
-  def self.entry_ids feedlist
-    Feed.find(feedlist).each { |feed| feed.update_entries }
-    # We could be fetching individual feeds, then sorting, but we'll just let the database handle that...
-    FeedEntry.where(feed_id: feedlist).order('published_at DESC').map(&:id)
+  # Check all feeds that are approved for feed-through for updates
+  def self.update_now
+    Feed.where(:approved => true).each do |feed| 
+      logger.debug "Updating feed "+feed.to_s
+      FeedEntry.update_from_feed feed
+    end
   end
   
-  def update_entries
-    if ((Time.now - updated_at) > 900) || feed_entries.empty? # Update at most every 15 minutes
-      FeedEntry.update_from_feed self
-      touch
-    end
+  def perform
+    logger.debug "Updating feed "+to_s
+    FeedEntry.update_from_feed self
+    touch
+  end
+  
+  def to_s
+    title+" (#{url})"
   end
   
   # Get the external feed, setting the @fetched instance variable to point thereto
@@ -145,7 +156,8 @@ class Feed < ActiveRecord::Base
     [:Misc, 0], 
     [:Recipes, 1], 
     [:Tips, 2],
-    [:News, 3]
+    [:Blog, 3],
+    [:News, 4]
   ]
   
   @@feedtypenames = []
