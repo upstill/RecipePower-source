@@ -42,6 +42,15 @@ class BrowserElement
     nil
   end
   
+  def updated_at
+    Time.now
+  end
+  
+  # By default, browser elements are ready for refresh immediately
+  def refresh
+    true
+  end
+  
   # The javascript call to delete an element of this type
   def delete_path
     nil
@@ -291,6 +300,17 @@ class FeedBrowserElement < BrowserElement
   
   def list_type
     :feed
+  end
+  
+  def updated_at
+    Feed.find(@feedid).updated_at
+  end
+  
+  # Refresh in background, returning false to indicate a wait state
+  def refresh
+    feed = Feed.find(@feedid)
+    feed.refresh
+    false
   end
   
   def find_by_content obj
@@ -623,6 +643,16 @@ class ContentBrowser < BrowserComposite
   # Return the timestamp for the given list tlement (generally, a recipe)
   def timestamp obj
     selected.timestamp obj
+  end
+  
+  # Report the time this content was last updated
+  def updated_at
+    selected.updated_at
+  end
+  
+  # Update this content. Return true if it's ready now, false if we have to wait for completion
+  def refresh
+    selected.refresh
   end
   
   # How many pages in the current result set?

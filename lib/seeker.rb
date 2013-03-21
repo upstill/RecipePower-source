@@ -40,6 +40,16 @@ class Seeker < Object
     list_type.to_s
   end
   
+  # Update the contents and return true OR enqueue the update job and return false
+  def refresh
+    # By default, we're ready to go, but the affiliate may have to fire off an update job in background
+    @affiliate.respond_to?(:refresh) ? @affiliate.refresh : true
+  end
+  
+  def updated_at
+    @affiliate.respond_to?(:updated_at) ? @affiliate.updated_at : Time.now.httpdate
+  end
+  
   # Use the 'querytags' string (in actuality a string provided by the unconstrained tags editor) to extract
   # a set of tag tokens. The elements of the comma-separated string are either 1) a positive integer, representing
   # a tag in the dictionary, or 2) an arbitrary other string on which to query.
@@ -229,7 +239,6 @@ class FeedSeeker < Seeker
   
   def initialize(affiliate, strdata)
     super
-    # The affiliate is an ActiveRecord relation, the set of candidate users
     @kind = 3
   end
 

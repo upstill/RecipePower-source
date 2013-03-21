@@ -26,9 +26,9 @@ module CollectionsHelper
 	   results.join('')).html_safe
 	end
 	
-	# Return a URL for refreshing the collection
-	def collection_refresher
-	  @seeker.query_path
+	# Return the updated_at time for the collection, for update purposes
+	def collection_timestamp
+	  @seeker.updated_at.to_s
   end
 	
 end

@@ -28,15 +28,32 @@ class CollectionController < ApplicationController
 
   def create
   end
+  
+  # Update the collection to reflect any changes
+  def update
+    @seeker.refresh # Set the refresh process going
+    respond_to do |format|
+      format.html { 
+        render :text => "Refreshing..."
+      }
+    end
+  end
 
   # Render the results for the current state of the query and selected collection
   def relist
-    render '_relist', :layout=>false
+    otime = params[:mod_time] # request.headers['If-Modified-Since']
+    ntime = @seeker.updated_at.to_s
+    if otime == ntime # awaiting update
+      render :nothing => true, :status => :no_content
+    else
+      render :index, :layout=>false, :locals => { :feed => @feed }
+    end
   end
 
   # Update takes either a query string or a specification of a collection now selected
   # We return a recipe list IFF the :cached parameter is not set
   def query
+    debugger
     if id = params[:selected]
       @browser.select_by_id(params[:selected])
     end

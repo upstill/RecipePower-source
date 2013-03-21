@@ -321,11 +321,12 @@ module ApplicationHelper
   	link_to_function label, "redirect_to('#{url}');", options
   end
   
-  def link_to_update(label, url, options={} )
-    # Play nice with data fields in the link
-    options[:last_modified] ||= Time.now.httpdate # Default for updating
+  def link_to_update(label, url, mod_time, options={} )
+    # Play nice with data fields in the link: homegrown data attributes prefaced with "data-"
+    options[:last_modified] = mod_time || Time.now.httpdate # Default for updating
+    options[:refresh] = true # Default for updating
     data = {}
-    debugger
+    url += "?mod_time="+mod_time.to_s
     data_options = %w{ last_modified hold_msg msg_selector dataType type refresh contents_selector }
     options.each do |key, val| 
       key = key.to_s

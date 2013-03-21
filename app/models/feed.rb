@@ -71,12 +71,13 @@ class Feed < ActiveRecord::Base
     Feed.where(:approved => true).each { |feed| feed.perform }
   end
   
-  def fetch
+  def refresh
     Delayed::Job.enqueue self
   end
   
   def perform
     logger.debug "[#{Time.now}] Updating feed "+to_s
+    puts "[#{Time.now}] Updating feed "+to_s
     FeedEntry.update_from_feed self
     touch
   end
