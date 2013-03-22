@@ -73,7 +73,7 @@ class Feed < ActiveRecord::Base
   
   def refresh
     Delayed::Job.enqueue self
-  end
+  end 
   
   def perform
     logger.debug "[#{Time.now}] Updating feed "+to_s
