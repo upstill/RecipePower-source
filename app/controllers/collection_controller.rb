@@ -37,7 +37,7 @@ class CollectionController < ApplicationController
         render :text => "Refreshing..."
       }
     end
-  end
+  end 
 
   # Render the results for the current state of the query and selected collection
   def relist
