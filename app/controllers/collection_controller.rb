@@ -41,12 +41,12 @@ class CollectionController < ApplicationController
 
   # Render the results for the current state of the query and selected collection
   def relist
-    otime = params[:mod_time] # request.headers['If-Modified-Since']
+    otime = params[:mod_time] 
     ntime = @seeker.updated_at.to_s
     if otime == ntime # awaiting update
       render :nothing => true, :status => :no_content
     else
-      flash.now[:success] = "Feed is now up to date."
+      flash.now[:success] = "This feed is now up to date."
       render :index, :layout=>false, :locals => { :feed => @feed }
     end
   end
