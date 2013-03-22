@@ -1,10 +1,9 @@
 <%# Master form for taking a recipe query and returning a list of results %>
 <div class="collection">
 	<div class="collection_list">
-		<% if @placeholder %>
-			<%= flash_one :notice, "Getting content..." %>
-		<% else %>
-			<%= link_to_update "Update feed", "collection/relist", collection_timestamp %>
+		<%= render 'layouts/flash_notifications' %>
+		<% if !@results_pending %>
+			<%= collection_updater %>
 			<%= render "relist" %>
 		<% end %>
 	</div>

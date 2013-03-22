@@ -28,6 +28,7 @@ gem "rmagick", "2.12.0", :require => 'RMagick'
 gem "feedzirra"
 gem "simple_form"
 gem 'delayed_job_active_record'
+gem 'hirefire-resource'
 
 # gem 'exception_notification', :require => 'exception_notifier'
 gem 'exception_notification', :require => 'exception_notifier', git: 'git://github.com/alanjds/exception_notification.git' 

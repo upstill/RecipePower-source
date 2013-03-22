@@ -42,10 +42,6 @@ class BrowserElement
     nil
   end
   
-  def updated_at
-    Time.now
-  end
-  
   # By default, browser elements are ready for refresh immediately
   def refresh
     true
@@ -647,7 +643,7 @@ class ContentBrowser < BrowserComposite
   
   # Report the time this content was last updated
   def updated_at
-    selected.updated_at
+    selected.respond_to?(:updated_at) && selected.updated_at
   end
   
   # Update this content. Return true if it's ready now, false if we have to wait for completion

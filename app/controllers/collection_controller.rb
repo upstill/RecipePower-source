@@ -46,6 +46,7 @@ class CollectionController < ApplicationController
     if otime == ntime # awaiting update
       render :nothing => true, :status => :no_content
     else
+      flash.now[:success] = "Feed is now up to date."
       render :index, :layout=>false, :locals => { :feed => @feed }
     end
   end
@@ -53,7 +54,6 @@ class CollectionController < ApplicationController
   # Update takes either a query string or a specification of a collection now selected
   # We return a recipe list IFF the :cached parameter is not set
   def query
-    debugger
     if id = params[:selected]
       @browser.select_by_id(params[:selected])
     end
@@ -63,6 +63,6 @@ class CollectionController < ApplicationController
     if page = params[:cur_page]
       @seeker.cur_page = page.to_i
     end
-    render '_relist', :layout=>false
+    render :index, :layout=>false
   end
 end

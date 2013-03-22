@@ -121,6 +121,7 @@ GEM
     fssm (0.2.10)
     hashie (1.2.0)
     hike (1.2.1)
+    hirefire-resource (0.0.2)
     htmlentities (4.3.1)
     http_parser.rb (0.5.3)
     httpauth (0.2.0)
@@ -303,6 +304,7 @@ DEPENDENCIES
   eventmachine (= 1.0.0.rc.4)
   exception_notification!
   feedzirra
+  hirefire-resource
   htmlentities
   jquery-rails
   letter_opener

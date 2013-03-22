@@ -117,9 +117,7 @@ do_request = (url, ajax_options, processing_options) ->
 				if xmlhttp.status==200
 					# Now we have code, possibly required for jQuery and certainly 
 					# required for any of our javascript. Ensure the code is loaded.
-					result = xmlhttp.responseText
-					flash_notification "alert", "Update complete!"
-					$(processing_options.contents_selector).replaceWith result
+					$(processing_options.contents_selector).inner_html = xmlhttp.responseText
 				else 
 					debugger
 		xmlhttp.open "GET", url, true
@@ -130,12 +128,10 @@ do_request = (url, ajax_options, processing_options) ->
 poll_for_update = (url, ajax_options, processing_options) ->
 	ajax_options.success ||= (resp, succ, xhr) ->
 		if xhr.status == 204 # Use no-content status to indicate we're waiting for update
-			debugger
-			poll_for_update url, ajax_options, processing_options
+			setTimeout (-> poll_for_update url, ajax_options, processing_options), 1000
 		else if xhr.status == 200
 			if ajax_options.dataType == "html"
-				flash_notification "alert", "Update complete!"
-				$(processing_options.contents_selector).replaceWith xhr.responseText
+				$(processing_options.contents_selector).html xhr.responseText
 			else
 				# Process JSON response here
 				debugger
@@ -164,7 +160,7 @@ poll_for_update = (url, ajax_options, processing_options) ->
 #   -- contents_selector: CSS selector of element to be replaced by HTML result
 #   -- update: boolean indicating that the requisite item should be updated
 get_content = (url, last_modified, options) ->
-	hold_msg = options.hold_msg || "Updating..."
+	hold_msg = options.hold_msg || "Checking..."
 	msg_selector = options.msg_selector || "#notifications-panel"
 	
 	ajax_options = 
@@ -173,7 +169,7 @@ get_content = (url, last_modified, options) ->
 	# ajax_options.data = "refresh=true" if options.refresh
 	
 	processing_options = 
-		contents_selector: options.contents_selector || "div.collection"
+		contents_selector: options.contents_selector || "div.content"
 		
 	# Notify the user of the ongoing process by replacing the message selector with a bootstrap notification
 	$(msg_selector).replaceWith "<span>"+hold_msg+"</span>"
@@ -182,18 +178,13 @@ get_content = (url, last_modified, options) ->
 	ajax_options.requestHeaders['If-Modified-Since'] = last_modified
 	# ajax_options.requestHeaders['X-CSRF-Token'] ||= $('meta[name="csrf-token"]').attr 'content'
 	# ajax_options.cache = false
-	ajax_options.statusCode = 
-		304: (resp, succ, xhr) ->
-			debugger
-		200: (resp, succ, xhr) ->
-			debugger
 	
 	poll_for_update url, ajax_options, processing_options
 	# do_request url, ajax_options, processing_options
 
 # Linkable function to skin the get_content function. Associated link should have data values as above
 RP.get_content = (url, link) ->
-	jQuery.ajax "/collection/update", { async: false, type: "POST" }
+	jQuery.ajax "/collection/update", { type: "POST" }
 	last_modified = $(link).data 'last_modified'
 	get_content url, last_modified, 
 		hold_msg: $(link).data('hold_msg'),

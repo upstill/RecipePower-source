@@ -47,7 +47,7 @@ class Seeker < Object
   end
   
   def updated_at
-    @affiliate.respond_to?(:updated_at) ? @affiliate.updated_at : Time.now.httpdate
+    @affiliate.respond_to?(:updated_at) && @affiliate.updated_at
   end
   
   # Use the 'querytags' string (in actuality a string provided by the unconstrained tags editor) to extract

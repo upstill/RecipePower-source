@@ -25,10 +25,11 @@ module CollectionsHelper
 	   flash_one(:alert, @seeker.explain_empty) : 
 	   results.join('')).html_safe
 	end
-	
-	# Return the updated_at time for the collection, for update purposes
-	def collection_timestamp
-	  @seeker.updated_at.to_s
-  end
-	
+		
+	def collection_updater
+	  if updated_time = @seeker.updated_at
+	    %Q{This feed was last updated #{time_ago_in_words(updated_time)} ago. 
+	    #{button_to_update "Check for new entries", "collection/relist", updated_time.to_s} }.html_safe
+	  end
+	end
 end
