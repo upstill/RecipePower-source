@@ -89,6 +89,7 @@ class User < ActiveRecord::Base
   end
 
   def delete_feed feed
+    browser.select_by_content feed
     browser.delete_selected
     feeds.delete feed
     save

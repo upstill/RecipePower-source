@@ -9,10 +9,14 @@
 			<%= link_to_modal "Collect", new_recipe_path(@recipe, params: {feed_entry: @feed_entry.id }), class: "btn btn-mini" %>
 		<% end %>
 	</h5>
-	<div class="feed_list_element_source">(<%= @feed_entry.feed.description %>)
-		
-	<br>from <%= link_to @feed_entry.feed.site.name, @feed_entry.feed.site.home %></div>
-	<div class="feed_list_element_stats">Published <%= time_ago_in_words @feed_entry.published_at %> ago.</div>
+	<div class="feed_list_element_source">
+		<%= @feed_entry.feed.title.empty? ? "" : ("from <strong>"+@feed_entry.feed.title+"</strong>").html_safe %>
+		<%# @feed_entry.feed.description.empty? ? "" : ("("+@feed_entry.feed.description+")<br>").html_safe %>
+		on <strong><%= link_to @feed_entry.feed.site.name, @feed_entry.feed.site.home %></strong>
+	</div>
+	<div class="feed_list_element_stats">
+		Published <%= time_ago_in_words @feed_entry.published_at %> ago.
+	</div>
  <%= @feed_entry.summary && @feed_entry.summary.html_safe %>
 <hr>
 </li>

@@ -62,22 +62,27 @@ class FeedsController < ApplicationController
     @feed = Feed.find params[:id]
     user = current_user_or_guest
     if @feed.user_ids.include?(user.id)
-      notice = "You're already subscribed to '#{@feed.title}'."
+      @notice = "You're already subscribed to '#{@feed.title}'."
     else
       @feed.approved = true
       @feed.users << user 
       @feed.save
+      @feed.perform
       @node = user.add_feed @feed
-      notice = "Now feeding you with '#{@feed.title}'."
+      @notice = "Now feeding you with '#{@feed.title}'."
     end
     respond_to do |format|
-      format.html { redirect_to collection_path, notice: notice }
+      format.js { 
+        flash[:notice] = @notice 
+        render text: "RP.get_page(\""+collection_path+"\");"
+      }
+      format.html { redirect_to collection_path, notice: @notice }
       format.json { 
         render(
           json: { 
             processorFcn: "RP.content_browser.insert_or_select",
             entity: with_format("html") { render_to_string :partial => "collection/node" }, 
-            notice: view_context.flash_one(:notice, notice) 
+            notice: view_context.flash_one(:notice, @notice) 
           }, 
           status: :created, 
           location: @feed 
@@ -95,7 +100,7 @@ class FeedsController < ApplicationController
     if current_user && feed
       current_user.delete_feed feed
       current_user.save
-      flash[:notice] = "There you go! Unsubscribed from "+feed.description
+      flash[:notice] = "There you go! Unsubscribed"+(feed.title.empty? ? "..." : (" from "+feed.title))
     else
       flash[:error] ||= ": No current user"
     end

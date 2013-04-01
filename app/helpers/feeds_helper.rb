@@ -27,4 +27,13 @@ module FeedsHelper
      #{@feed_entry.summary}
     </p><hr>}.html_safe
   end
+  
+  def list_feeds preface, feeds
+    count = feeds.count
+    msg = [preface, (count > 1 ? count.to_s : 'a'), 'feed'.pluralize(count)].join(' ')+
+          ":<br><ul><li>"+
+          feeds.map(&:title).join('</li><li>')+
+          "</li></ul>"
+    msg.html_safe
+  end
 end

@@ -11,7 +11,7 @@ end
 
 # Generalized response for dialog for a particular area
 def dialog_boilerplate(action, default_area=nil, renderopts={})
-  flash[:notice] = params[:notice]
+  flash.now[:notice] = params[:notice] unless flash[:notice] # ...should a flash message come in via params
   @area = params[:area]
   @layout = params[:layout]
   @partial = !params[:partial].blank?

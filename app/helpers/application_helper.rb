@@ -325,7 +325,7 @@ module ApplicationHelper
     # Play nice with data fields in the link: homegrown data attributes prefaced with "data-"
     options[:last_modified] = mod_time || Time.now.httpdate # Default for updating
     options[:refresh] = true # Default for updating
-	  options[:class] = "btn btn-mini"
+	  options[:class] = "btn btn-mini update-button"
     data = {}
     url += "?mod_time="+mod_time.to_s
     data_options = %w{ last_modified hold_msg msg_selector dataType type refresh contents_selector }
@@ -334,7 +334,7 @@ module ApplicationHelper
       key = "data-"+key if data_options.include? key
       data[key] = val 
     end
-    link_to_function label, "RP.get_content('#{url}', this);", data
+    link_to_function label, "RP.get_content('#{url}', 'a.update-button');", data
   end
 	
 	def globstring(hsh)
@@ -470,11 +470,6 @@ module ApplicationHelper
        links.join(' ').html_safe
      end
    end
-  
-	# Returns a selector-value pair for replacing the notifications panel due to an update event
-	def flash_notifications_replacement
-	  [ "div.flash_notifications", render_to_string('layouts/flash_notifications').html_safe ]
-	end
    
   # Incorporate error reporting for a resource within a form, preferring
   # any base error from the resource to the standard notification
@@ -537,4 +532,14 @@ module ApplicationHelper
       flash_one type, message, for_bootstrap 
     }.join.html_safe
   end
+  
+  # Emit the flash_notifications for the page in a div.
+  def flash_notifications
+    content_tag :div, flash_all, class: "flash_notifications"
+  end
+  
+	# Returns a selector-value pair for replacing the notifications panel due to an update event
+	def flash_notifications_replacement
+	  [ "div.flash_notifications", flash_notifications ]
+	end
 end

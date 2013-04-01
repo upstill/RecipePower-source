@@ -12,9 +12,9 @@
 	<% end %>
 	<td>
 		<% if @user.feeds.include?(@feed) %>
-			<%= link_to 'Unsubscribe', remove_feed_path(@feed), class: "btn btn-mini" %>
+			<%= link_to 'Unsubscribe', remove_feed_path(@feed), class: "btn btn-mini", method: :post %>
 		<% else %>
-			<%= link_to 'Subscribe', collect_feed_path(@feed), class: "btn btn-mini" %>
+			<%= link_to 'Subscribe', collect_feed_path(@feed), class: "btn btn-mini", remote: true %>
 		<% end %>
 		<% permitted_to?(:edit, :feeds) do %>
 			<%= button_to_modal 'Edit', edit_feed_path(@feed) %>

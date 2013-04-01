@@ -377,12 +377,11 @@ class Site < ActiveRecord::Base
         # We find the following elements:
         # <a> elements where the link text OR the title attribute OR the href attribute includes 'RSS', 'rss', 'feedburner' or 'feedblitz'
         # <link> tags with type="application/rss+xml": title and href attributes
-        
         doc.css("a").each { |link| 
           content = link.inner_html.encode("UTF-8")
           href = link.attributes["href"].to_s
           next if href == "#"
-          if content.include?("RSS") || content.include?("rss") || href.match(/rss|feedburner|feedblitz/i)           
+          if content.include?("RSS") || content.include?("rss") || href.match(/rss|feedburner|feedblitz|atom/i)           
             candidates[href] = content
           end
         }
@@ -402,7 +401,7 @@ class Site < ActiveRecord::Base
             url = nil
           end 
           unless url.blank? || Feed.exists?(url: url) || !(feed = Feed.new( url: url, description: content))
-            if feed.validate
+            if feed.save
               self.feeds << feed 
             else
               rejects << "#{feed.url} (from #{page_url})"

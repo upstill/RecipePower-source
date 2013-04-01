@@ -160,7 +160,7 @@ poll_for_update = (url, ajax_options, processing_options) ->
 #   -- contents_selector: CSS selector of element to be replaced by HTML result
 #   -- update: boolean indicating that the requisite item should be updated
 get_content = (url, last_modified, options) ->
-	hold_msg = options.hold_msg || "Checking..."
+	hold_msg = options.hold_msg || "Checking for updates..."
 	msg_selector = options.msg_selector || "#notifications-panel"
 	
 	ajax_options = 
@@ -194,5 +194,8 @@ RP.get_content = (url, link) ->
 		refresh: $(link).data('refresh'),
 		contents_selector: $(link).data('contents_selector')
 
-		
-		
+# Replace the page with the results of the link, properly updating the address bar
+RP.get_page = (url) ->
+	$('body').load url, {}, (responseText, textStatus, XMLHttpRequest) ->
+		debugger;
+		# RP.get_content( url, "a.update-btn" );

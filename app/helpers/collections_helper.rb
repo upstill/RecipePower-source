@@ -28,8 +28,12 @@ module CollectionsHelper
 		
 	def collection_updater
 	  if updated_time = @seeker.updated_at
-	    %Q{This feed was last updated #{time_ago_in_words(updated_time)} ago. 
-	    #{button_to_update "Check for new entries", "collection/relist", updated_time.to_s} }.html_safe
+	    content_tag :div, 
+	                ["This feed was last updated", 
+	                  time_ago_in_words(updated_time), 
+	                  "ago.", 
+	                  button_to_update("Check for new entries", "collection/relist", updated_time.to_s, msg_selector: "div.updater")].join(' ').html_safe,
+	                class: "updater"
 	  end
 	end
 end

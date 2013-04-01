@@ -1,4 +1,4 @@
-<p id="notice"><%= notice %></p>
+<%= flash_all %>
 
 <p>
   <b>Name:</b>
@@ -34,9 +34,9 @@
 <%= link_to 'Edit', edit_site_path(@site) %> |
 <%= link_to 'Back', sites_path %>
 <hr>
-<% if @feeds.count > 0 %>
+<% if @feeds.blank? %>
+...site has no feeds.
+<% else %>
   <h4>Associated Feeds</h4>
 	<%= render "feeds/table" %>
-<% else %>
-...site has no feeds.
 <% end %>

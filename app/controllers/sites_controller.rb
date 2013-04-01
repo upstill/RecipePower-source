@@ -104,13 +104,18 @@ class SitesController < ApplicationController
   def scrape
     url = params[:url]
     if @site = Site.by_link(url)
-      ocount = @site.feeds.size
+      olist = @site.feeds.clone
       @site.feedlist url
-      if @site.feeds.size > ocount
-        @site.save
-        render action: :show, notice: "Observe feeds for the site below"
+      @feeds = @site.feeds
+      nlist = @feeds - olist
+      if nlist.empty?
+        codicil = olist.empty? ? ". " : view_context.list_feeds(", though the site already has", olist)
+        redirect_to "/feeds/new", notice: "No new feeds found in page#{codicil}If you want more, you might try copy-and-paste-ing RSS URLs individually."
       else
-        redirect_to "/feeds/new", notice: "No feeds found in page. Try copy-and-paste-ing RSS URLs individually."
+        @site.save
+        @seeker = FeedSeeker.new @feeds, session[:seeker] # Default; other controllers may set up different seekers
+        flash.now[:notice] = view_context.list_feeds("Scraped", nlist)
+        render action: :show
       end
     else
       redirect_to "/feeds/new", notice: "Couldn't make sense of URL"
