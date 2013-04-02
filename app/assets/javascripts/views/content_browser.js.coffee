@@ -18,7 +18,7 @@ RP.content_browser.onload = () ->
 			if(data)
 				$('div.collection_list')[0].innerHTML = data
 			# Now that the selection is settled, we can fetch the recipe list
-			RP.collection.update { selected: @id }
+		RP.collection.update { selected: @id }
 
 RP.content_browser.click_to_browser = () ->
 	inside = null
