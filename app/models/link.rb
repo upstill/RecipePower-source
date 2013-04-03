@@ -3,6 +3,8 @@ require './lib/Domain.rb'
 class Link < ActiveRecord::Base
     attr_accessible :domain, :uri, :resource_type
     
+    belongs_to :entity, :polymorphic => true
+    
     has_many :link_refs
     has_many :tags, :through=>:link_refs
     

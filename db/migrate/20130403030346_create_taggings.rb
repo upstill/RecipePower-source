@@ -3,8 +3,7 @@ class CreateTaggings < ActiveRecord::Migration
     create_table :taggings do |t|
       t.integer :user_id
       t.integer :tag_id
-      t.integer :entity_id
-      t.string  :entity_type
+      t.references :entity, :polymorphic => true
       t.boolean :is_definition, default: false
 
       t.timestamps

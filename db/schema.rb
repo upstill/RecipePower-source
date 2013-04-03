@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130401000052) do
+ActiveRecord::Schema.define(:version => 20130403054959) do
 
   create_table "authentications", :force => true do |t|
     t.integer  "user_id"
@@ -105,6 +105,13 @@ ActiveRecord::Schema.define(:version => 20130401000052) do
     t.integer  "resource_type"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "entity_id"
+    t.string   "entity_type"
+  end
+
+  create_table "products", :force => true do |t|
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
   end
 
   create_table "ratings", :force => true do |t|
@@ -153,6 +160,11 @@ ActiveRecord::Schema.define(:version => 20130401000052) do
     t.text     "picurl"
     t.text     "tagpane"
     t.integer  "thumbnail_id"
+  end
+
+  create_table "references", :force => true do |t|
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
   end
 
   create_table "referent_relations", :force => true do |t|
@@ -221,6 +233,16 @@ ActiveRecord::Schema.define(:version => 20130401000052) do
     t.integer  "user_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "taggings", :force => true do |t|
+    t.integer  "user_id"
+    t.integer  "tag_id"
+    t.integer  "entity_id"
+    t.string   "entity_type"
+    t.boolean  "is_definition", :default => false
+    t.datetime "created_at",                       :null => false
+    t.datetime "updated_at",                       :null => false
   end
 
   create_table "tagrefs", :force => true do |t|

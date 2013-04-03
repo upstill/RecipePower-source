@@ -33,16 +33,17 @@ class GettableURLValidator < ActiveModel::EachValidator
 end
 
 class Recipe < ActiveRecord::Base
-  attr_accessible :tag_tokens, :title, :url, :alias, :ratings_attributes, :comment, :current_user, :status, :private, :picurl, :tagpane
+  include Taggable
+  attr_accessible :title, :url, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane
   after_save :save_ref
 
   validates :title,:presence=>true 
   validates :url,  :presence=>true, :gettableURL => true
   validates :picurl, :gettableURL => true
 
+  # XXX Defunct as soon as tagging data gets moved to Taggings
   has_many :tagrefs, :dependent=>:destroy
-  has_many :tags, :through=>:tagrefs, :autosave=>true
-  attr_reader :tag_tokens
+  has_many :x_tags, :through=>:tagrefs, :autosave=>true, :class_name => "Tag"
   
   belongs_to :thumbnail, :autosave => true
   
@@ -52,6 +53,8 @@ class Recipe < ActiveRecord::Base
   accepts_nested_attributes_for :ratings, :reject_if => lambda { |a| a[:scale_val].nil? }, :allow_destroy=>true
 
   validates_uniqueness_of :url
+  
+  has_one :link, :as => :entity
 
   has_many :rcprefs, :dependent=>:destroy
   has_many :users, :through=>:rcprefs, :autosave=>true
@@ -60,6 +63,25 @@ class Recipe < ActiveRecord::Base
   attr_reader :status
   
   @@coder = HTMLEntities.new
+  
+  def x_tag_tokens()
+    self.x_tags.map(&:id)
+  end
+
+  # Write the virtual attribute tag_tokens (a list of ids) to
+  # update the real attribute tag_ids
+  def x_tag_tokens=(ids)
+    # The list may contain new terms, passed in single quotes
+    self.x_tags = ids.split(",").map { |e| 
+      if(e=~/^\d*$/) # numbers (sans quotes) represent existing tags
+        Tag.find e.to_i
+      else
+        e.sub!(/^\'(.*)\'$/, '\1') # Strip out enclosing quotes
+        Tag.strmatch(e, userid: self.current_user, assert: true)[0]
+      end
+    }.compact.uniq
+
+  end
     
   # Either fetch an exising recipe record or make a new one, based on the
   # params. If the params have an :id, we find on that, otherwise we look
@@ -171,21 +193,6 @@ class Recipe < ActiveRecord::Base
   def self.status_select
     @@statuses
   end
-
-  # Write the virtual attribute tag_tokens (a list of ids) to
-  # update the real attribute tag_ids
-  def tag_tokens=(ids)
-    # The list may contain new terms, passed in single quotes
-    self.tags = ids.split(",").map { |e| 
-      if(e=~/^\d*$/) # numbers (sans quotes) represent existing tags
-        Tag.find e.to_i
-      else
-        e.sub!(/^\'(.*)\'$/, '\1') # Strip out enclosing quotes
-        Tag.strmatch(e, userid: self.current_user, assert: true)[0]
-      end
-    }.compact.uniq
-  end
-
   public
   
 # Methods for data associated with a given user: comment, status, privacy, etc.
@@ -424,4 +431,6 @@ protected
     @current_ref = ref if uid == @current_user
     ref
   end
+public
+
 end
