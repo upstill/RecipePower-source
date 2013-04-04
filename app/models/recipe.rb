@@ -44,6 +44,7 @@ class Recipe < ActiveRecord::Base
   # XXX Defunct as soon as tagging data gets moved to Taggings
   has_many :tagrefs, :dependent=>:destroy
   has_many :x_tags, :through=>:tagrefs, :autosave=>true, :class_name => "Tag"
+  attr_accessor :x_tag_tokens
   
   belongs_to :thumbnail, :autosave => true
   
@@ -59,14 +60,10 @@ class Recipe < ActiveRecord::Base
   has_many :rcprefs, :dependent=>:destroy
   has_many :users, :through=>:rcprefs, :autosave=>true
   attr_reader :comment
-  attr_accessor :private, :current_user
+  attr_accessor :private
   attr_reader :status
   
   @@coder = HTMLEntities.new
-  
-  def x_tag_tokens()
-    self.x_tags.map(&:id)
-  end
 
   # Write the virtual attribute tag_tokens (a list of ids) to
   # update the real attribute tag_ids

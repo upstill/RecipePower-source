@@ -156,6 +156,7 @@ public
 end
 
 class Site < ActiveRecord::Base
+  include Taggable
     attr_accessible :site, :home, :scheme, :subsite, :sample, :host, :name, :oldname, :port, :logo, :tags_serialized, :ttlcut, :ttlrepl
     
     belongs_to :referent

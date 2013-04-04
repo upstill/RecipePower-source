@@ -1,5 +1,5 @@
 class Tagging < ActiveRecord::Base
-  attr_accessible :is_definition
+  attr_accessible :is_definition, :user_id, :tag_id, :entity_id, :entity_type
   
   belongs_to :tag
   belongs_to :user  

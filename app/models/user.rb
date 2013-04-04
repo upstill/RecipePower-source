@@ -1,6 +1,7 @@
 require "type_map.rb"
 require "rcp_browser.rb"
 class User < ActiveRecord::Base
+  include Taggable
   # Include default devise modules. Others available are:
   # :token_authenticatable, :encryptable, :confirmable, :timeoutable
   devise :invitable, :database_authenticatable, :registerable,

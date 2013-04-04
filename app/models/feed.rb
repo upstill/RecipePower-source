@@ -1,6 +1,7 @@
 require 'feedzirra'
 
 class Feed < ActiveRecord::Base
+  include Taggable
   attr_accessible :title, :description, :site_id, :feedtype, :approved, :url
   
   # Setup a feed properly: do a reality check on the url, populate the information

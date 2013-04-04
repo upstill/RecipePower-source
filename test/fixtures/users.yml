@@ -1,10 +1,14 @@
 thing1:
     username: thing1
     email: foo@bar.com
-    
+
 thing2:
     username: thing2
     email: foo2@bar.com
+
+thing3:
+    username: thing3
+    email: foo3@bar.com
 
 super:
     username: super

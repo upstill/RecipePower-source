@@ -18,6 +18,7 @@ def edit_recipe_link( label, recipe, *options)
       rcpStatus: recipe.status,
       authToken: form_authenticity_token
     }
+    debugger
     link_to_function label, "RP.edit_recipe.go(#{rcp_params.to_json});", *options
 end
 
