@@ -29,19 +29,27 @@ gem "feedzirra"
 gem "simple_form"
 gem 'delayed_job_active_record'
 gem 'hirefire-resource'
+gem 'rspec-rails', '2.6.1', :group => [:test, :development]
+gem 'debugger', :group => [:test, :development]
 
 # gem 'exception_notification', :require => 'exception_notifier'
 gem 'exception_notification', :require => 'exception_notifier', git: 'git://github.com/alanjds/exception_notification.git' 
 group :development do
-  gem 'rspec-rails', '2.6.1'
   gem 'annotate', '2.4.0'
   gem "nifty-generators"
-  gem 'debugger'
   gem 'log_buddy'
   gem 'ruby-prof', :git => 'git://github.com/wycats/ruby-prof.git'
   gem 'letter_opener'
   gem "better_errors"
   gem "binding_of_caller"
+end
+
+group :test do
+  # Pretty printed test output
+  gem 'turn', :require => false
+  gem 'webrat', '0.7.1'
+  # gem "capybara" # ...for simulating user interaction
+  # gem "guard-rspec" # ...for auto-running tests on file save
 end
 
 # Gems used only for assets and not required
@@ -61,13 +69,5 @@ gem 'jquery-rails'
 
 # Deploy with Capistrano
 # gem 'capistrano'
-
-group :test do
-  # Pretty printed test output
-  gem 'turn', :require => false
-  gem 'rspec-rails', '2.6.1'
-  gem 'debugger'
-  gem 'webrat', '0.7.1'
-end
 
 gem "mocha", :group => :test
