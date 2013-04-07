@@ -32,6 +32,7 @@
  *= require views/pic_picker
  *= require views/users
  *= require views/welcome
+ *= require views/need_to_know
  *= require common/buttons
  *= require paginate
  *= require_tree ../../../vendor/assets/stylesheets/jquery
@@ -191,6 +192,7 @@ div.content_browser_cover {
 
 #footer_nav_links {
 	z-index: 11;
+	text-align: center;
 }
 
 div.content_browser {

@@ -6,6 +6,10 @@ div.at_top div.signin_hdr {
 	padding:0;
 }
 
+div.auth_poss {
+	overflow: auto;
+}
+
 .sign_in.dialog {
 	top: 100px;
 	.sign {
@@ -132,6 +136,12 @@ div.at_top div.signin_hdr {
 		// border-right:1px solid black;
 		// border-left:1px solid black
 	}
+}
+
+div.prompt {
+	margin:15px 0px;
+	font:20px arial,sans-serif;
+	font-weight:bold;
 }
 
 div.sign_in .signin {

@@ -2,8 +2,8 @@
   <%# devise_error_messages! %>
   <%= form_errors_helper f, resource %>
 
-  <%= f.input :username, label: "Username" %>
-  <%= f.input :fullname, label: "Real Name" %>
+  <%= f.input :username, label: "Username (Handle)" %>
+  <%= f.input :fullname, label: "Full Name" %>
 	<%= f.input :email, label: "Email (required)" %>
 
 	<% if resource.password_required? %>

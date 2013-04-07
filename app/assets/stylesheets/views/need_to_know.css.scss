@@ -1,0 +1,23 @@
+div.need_to_know.dialog {
+	width: 770px;
+	height: 600px;
+	.know_snap {
+		width: 900px;
+		margin-top: 38px;
+		margin-left: 100px;
+		position: absolute;
+	}
+	.info-block {
+		display: inline-block;
+		padding: 0px 10px 5px;
+		margin: 5px;
+		width: 210px;
+		border:solid 2px #5882D3;
+		&.know_browser {
+			margin-left: 12px;
+		}
+		&.know_seek {
+			width: 215px;
+		}
+	}
+}

@@ -1,28 +1,14 @@
-<div class="welcome_sidebar" >
-<h3>Getting Started</h3>
-<p><%= bookmarklet %>
-To make it stupid-simple to capture recipes, drag this handy
-	button to your browser's Bookmarks bar. After that, life is sweet: when you find a recipe to remember,
-	click the Add Cookmark link to stow it in RecipePower. 
-</p><p>
-Without the button, you can always manually copy and paste links into RecipePower, (see the <%= link_to "Add a Cookmark", new_recipe_path %> link above). But that's not very convenient, is it?
-</p><p>
-To set up your private recipe collection, 
-we'll need to get you logged in. You can sign up for an
-account on RecipePower, but it might be easier just to use your 
-existing Facebook, Google, etc. account. 
-</p>
-</div>
+<%= render partial: (current_user ? "shared/bookmarklet_sidebar" : "shared/signup_at_right") %>
 <div class="text_block">
 <h2 class="med">Surfing the Web for Eats...Together</h2>
 <p class="airy">
-The Web is the greatest library for cooks, <strong>ever</strong>--and the search tools are amazing. But search engines have no memory: you start over from scratch every time, going through all those results. If you've ever wished you could stash those jewels away in your own brilliant collection, RecipePower is for you. On one level, it's just a simple scratchpad for recipes: a single place to keep all your food-related gleanings. Once you find something you like, from <i>anywhere</i> on the Web, just "cookmark" it in RecipePower and it's at your fingertips for good. Attach your notes to it. Tag it for organizing <strong>your</strong> way. Get it back wherever you can get to a Web browser.
+The Web is the greatest library for cooks, <strong>ever</strong>--and the search tools are amazing. But in a search engine, you start over every time: no remembering, no saving. RecipePower is not a search engine, or a "recipe site", it's a scrapbook for recipes: one place to keep all your food-related gleanings, <strong>no matter where they're from</strong>. "Cookmark" a recipe in RecipePower and it's at your fingertips for good. Attach a note to it. Pin it with reminders for finding it later. Have it there whenever you can get to a Web browser.
 </p><p class="airy">
-Once here, you'll also find like-minded cooks on the same quest. Share recipes with, learn from, teach and collaborate with fellow travellers in your neighborhood of the food world. And our "channels" are a pipeline to the kinds of recipes you want. Interested in wild mushrooms, or Atkins recipes, or cooking on a budget? Put your ear to those channels and the recipes come to you. Find a recipe that would be good for a channel? Drop it in, so others can see it!</p>
+But it's about more than your own cookmarks. At RecipePower, you'll also find like-minded cooks on the same quest. Share recipes with, learn from, teach and collaborate with fellow travellers in your neighborhood of the food world. And our "channels" are a pipeline to the kinds of recipes you want. Interested in wild mushrooms, or Atkins recipes, or cooking on a budget? Put your ear to those channels and the recipes come to you. Find a recipe that would be good for a channel? Drop it in, so others can see it!</p>
 <h4>What's Different about RecipePower?</h4>
 <p class="airy">
-There's nothing wrong with the Web's existing recipe-clipping and -sharing sites...and there are so many!--each with its own login, its own organization, and its own recipe box. But most of them support a limited set of cooking sites, and/or expect you to wrangle with importing recipes. RecipePower takes you above all that, giving you <strong>one place to connect them all</strong>. We don't import anything. Instead, our cookmarks simply remember where the recipe lives. The whole process is a breeze: capture, tag and share a recipe in seconds. And there are no limits to where you can collect from. If you see it in a browser window, you can cookmark it.
+The Web is full of sites for filing and sharing recipes...and that's sort of the problem: so many logins, so many formats, so many places to look, not to mention hassles importing recipes. Really, it's the Tower of Babel out there. But RecipePower takes you above all that, giving you <strong>one place to connect them all</strong>. We don't import anything. Instead, our cookmarks simply remember where the recipe can be found again. You can capture, tag and share a recipe in seconds. There are no limits to where you can collect from, no formatting or import hassles. If you see it in a browser window, you can cookmark it, and then you know where it is.
 </p><p class="airy">
-We have great plans for the future, of course. But for now, we think that simple is better, and we invite you to see how much Simple can do for you. Try some cookmarks and see for yourself.
+There's more to come, but we think the beginning is pretty cool--and simple. Come on in and get a taste of RecipePower.
 </p>
 </div>

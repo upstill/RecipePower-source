@@ -15,6 +15,7 @@ class CollectionController < ApplicationController
   end
   
   def index
+    flash.now[:guide] = @seeker.guide
   end
   
   def show
@@ -43,6 +44,7 @@ class CollectionController < ApplicationController
   def relist
     otime = params[:mod_time] 
     ntime = @seeker.updated_at.to_s
+    flash.now[:guide] = @seeker.guide
     if otime == ntime # awaiting update
       render :nothing => true, :status => :no_content
     else
@@ -63,6 +65,7 @@ class CollectionController < ApplicationController
     if page = params[:cur_page]
       @seeker.cur_page = page.to_i
     end
+    flash.now[:guide] = @seeker.guide
     render :index, :layout=>false
   end
 end

@@ -8,12 +8,22 @@ $navbarBackgroundHighlight: #888;
 $navbarText: #eee;
 $navbarLinkColor: #eee;
 
+$guideText:                #AB812E !default;
+$guideBackground:          #FAD8A7 !default;
+$guideBorder:              darken(adjust-hue($guideBackground, -10), 7%) !default;
+
 @import "bootstrap";
 
 body { padding-top: 60px; }
 
 #recipePowerDialog.new_feed textarea {
 	width: 600px;
+}
+
+.alert-guide {
+  background-color: $guideBackground;
+  border-color: $guideBorder;
+  color: $guideText;
 }
 
 div.dialog.modal input.string {

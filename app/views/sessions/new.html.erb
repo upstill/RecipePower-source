@@ -5,7 +5,7 @@
 		  <%= f.input :login, label: "Username or Email (your choice)" %></p>
 		  <%= f.input :password %></p>
 		  <% if devise_mapping.rememberable? -%>
-				<%= f.input :remember_me, :checked => true, style: "margin:0px;" %> 
+				<%= f.input :remember_me, :checked => true, style: "margin:0px;", :input_html => { :checked => true } %> 
 		  <% end -%>
 		<% end %>
 		<%= modal_footer do %>

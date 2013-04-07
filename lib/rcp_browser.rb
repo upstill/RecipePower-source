@@ -37,6 +37,10 @@ class BrowserElement
     self.class.to_s
   end
   
+  def guide()
+    "This is a browser element "+self.class.to_s
+  end
+  
   # The server callback to add an element of this type
   def add_path
     nil
@@ -281,6 +285,10 @@ class FeedBrowserElement < BrowserElement
     @handle = (args[:feed] || Feed.find(@feedid)).title
   end
   
+  def guide()
+    "These are the most recent posts from '#{Feed.find(@feedid).title}'.<br>You can remove a feed by clicking the 'X' next to its name."
+  end
+  
   def sources
     @feedid
   end
@@ -341,6 +349,10 @@ class FeedBrowserComposite < BrowserComposite
         end
       end
     end
+  end
+  
+  def guide()
+    "Here is where you see the posts from <strong>all</strong> your feeds in one place.<br>Add more feeds by clicking the '+'."
   end
   
   def content_name
@@ -409,6 +421,11 @@ class RcpBrowserElementFriend < BrowserElement
     "/users/#{@friendid}/remove"
   end
   
+  def guide
+    User.find(@friendid).channel? ?
+    "These are the recipes from the #{@handle} channel.<br>Withdraw from the channel by clicking the 'X' next to the name." :
+    "These are all the recipes collected by #{@handle}.<br>Tired of their friendship? Click the 'X' next to the name."
+  end
 end
 
 # Element for all the recipes for the owner, with subheads for status and favored keys
@@ -429,6 +446,10 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
   
   def candidates
     @candidates = @candidates || user.recipes(status: MyConstants::Rcpstatus_misc, sort_by: :collected)
+  end
+  
+  def guide()
+    "This is where all your cookmarks live. The subheads are for your most important selections."
   end
 
 end
@@ -489,6 +510,10 @@ class RcpBrowserCompositeFriends < RcpBrowserChannelsAndFriends
     "Friends"
   end
   
+  def guide()
+    "Here is where you see the recipes from all your friends in one place, ready for browsing or searching.<br>Feeling friendly? Look for more friends by clicking the '+'."
+  end
+  
 end
 
 # Element for all the recipes in a user's channels, with subheads for each channel
@@ -502,6 +527,10 @@ class RcpBrowserCompositeChannels < RcpBrowserChannelsAndFriends
   
   def content_name
     "Channels"
+  end
+  
+  def guide()
+    "Here is where you see the recipes from all your channels in one place.<br>Browse for more channels by clicking the '+'."
   end
   
 end
@@ -523,6 +552,10 @@ class RcpBrowserElementRecent < RcpBrowserElement
     (td = recipe.touch_date @userid) && "Last viewed #{time_ago_in_words td } ago."
   end
   
+  def guide()
+    "Here is where you see the recipes you've visited most recently."
+  end
+  
 end
 
 # Element for a news feed for a particular user
@@ -531,6 +564,10 @@ class RcpBrowserElementNews < RcpBrowserElement
   def initialize(level, args)
     super
     @handle = "News Feed"
+  end
+  
+  def guide()
+    "Here is where you get news flashes from your friends and channels"
   end
 
 end
@@ -550,6 +587,17 @@ class RcpBrowserElementStatus < RcpBrowserElement
   
   def css_id
     self.class.to_s+@status.to_s
+  end
+  
+  def guide()
+    case @status
+    when MyConstants::Rcpstatus_rotation
+      "'#{@handle}' is for recipes that you're making on a regular basis."
+    when MyConstants::Rcpstatus_favorites
+      "'#{@handle}' are your tried-and-true favorites."
+    when MyConstants::Rcpstatus_interesting
+      "'#{@handle}' earmarks recipes for auditioning ASAP."
+    end
   end
   
 end
@@ -579,6 +627,10 @@ class RcpBrowserElementAllRecipes < RcpBrowserElement
   
   def sources
     nil
+  end
+  
+  def guide()
+    "This list shows <strong>all</strong> the recipes that anyone has added to RecipePower."
   end
   
 end

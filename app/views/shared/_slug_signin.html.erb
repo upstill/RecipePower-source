@@ -3,7 +3,7 @@
   <%= f.input :login, label: "Username or Email (your choice)" %></p>
   <%= f.input :password %></p>
   <% if devise_mapping.rememberable? -%>
-		<%= f.input :remember_me, :as => :boolean, :wrapper => :checkbox %> 
+		<%= f.input :remember_me, :as => :boolean, :wrapper => :checkbox, :input_html => { :checked => true } %> 
   <% end -%>
 
   <div class="gobutton"><%= f.submit "Sign in", class: "submit_button" %></div>

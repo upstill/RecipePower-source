@@ -28,6 +28,11 @@ class Seeker < Object
     @tagstxt
   end
   
+  def guide()
+    # Describe this seeker for presentation to the user
+    (@affiliate && @affiliate.selected) ? @affiliate.selected.guide : "This is your friendly seeker"
+  end
+  
   # Accept new tags text, bust the cache, and return the new set of tags
   def tagstxt=(txt)
     # We either use the current tagstxt or the parameter, updating the tagstxt as needed
