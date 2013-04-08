@@ -138,9 +138,10 @@ class UsersController < ApplicationController
   # Ask user for an email address for login purposes
   def identify
     @user = User.new
-    # if omniauth = session[:omniauth]
-      # @user.apply_omniauth(omniauth)
-    # end
+    if omniauth = session[:omniauth]
+      @provider = omniauth.provider.capitalize
+      @user.apply_omniauth(omniauth)
+    end
   end
   
   def profile

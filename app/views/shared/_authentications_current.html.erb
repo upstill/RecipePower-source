@@ -1,22 +1,23 @@
 <% if @authentications && !@authentications.empty? %>
-<div class="auth_current <%= @area %>">
+	<div class="auth_current <%= @area %>">
     <div class="authentications">
-	  	<strong class="prompt">You can sign in to this account using:</strong><br>
+	  	<strong class="prompt">You can sign in to this account* using:</strong><br>
       <% for authentication in @authentications %>
-        <div class="authentication">
-          <%= image_tag "#{authentication.provider}_32.png", :size => "32x32" %>
-          <div class="provider"><%= authentication.provider_name %></div>
-          <div class="uid"><%= truncate authentication.uid.to_s, :length => 12 %></div>
-				  <% if @auth_delete || true %>
-	          <%# link_to "X", authentication, :confirm => 'Are you sure you want to remove this authentication option?', :method => :delete, :class => "remove" %>
-	          <%= link_to_function "X", "recipePowerRunRequest('#{authentication_url(authentication)}')", :confirm => 'Are you sure you want to remove this authentication option?', :method => :delete, :class => "remove" %>
-				  <% end %>
-        </div>
+				<div class="authentication">
+					<%= image_tag "#{authentication.provider}_32.png", :size => "32x32" %>
+					<div class="provider"><%= authentication.provider_name %></div>
+					<div class="uid"><%= truncate authentication.uid.to_s, :length => 12 %></div>
+					<% if @auth_delete || true %>
+						<%= link_to_submit "X", authentication_url(authentication), 
+															:confirm => "Are you sure you don't want to be able to login with #{authentication.provider_name} anymore?", 
+															:method => :delete, 
+															:class => "remove" %>
+					<% end %>
+				</div>
       <% end %>
-	  <br>
+		</div>
 	  <% if @auth_delete %>
-	    (Click the 'X' to revoke the authorization)
+	    *Click the 'X' to revoke the authorization.
 	  <% end %>
 	</div>
-</div>
 <% end %>

@@ -1,8 +1,8 @@
-<%= modal_dialog :edit_authentications, "Manage Sign-in Services", area: @area do %>
+<%= modal_dialog :edit_authentications, "Sign-in Services", area: @area do %>
   <div class="auth_signin <%= @area %>" >
     <%= render partial: 'shared/authentications_current' %>
     <%= render partial: 'shared/authentications_possible' %>
-		<hr>
+		<hr style="margin:3px;">
 	  <p><strong class="prompt">Click to </strong><%= link_to_modal "change password", edit_user_registration_path  %></p>
   </div>
   <%= render partial: 'shared/authentications_sidebar' %>

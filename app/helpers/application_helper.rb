@@ -285,6 +285,14 @@ module ApplicationHelper
   	(navlinks.join('  |  ')+"<br>"+(link_to_modal "Need to Know", know_path)).html_safe
   end
   
+  def auth_possible(service, img_file=nil)
+    svc_lower = service.downcase
+    css_class = "auth_provider"
+    css_class += " hide" if @authentications && @authentications.any? { |authentication| authentication.provider.match(/^#{svc_lower}/) }
+    content_tag :a, image_tag( (img_file || svc_lower+"_64.png"), :size => "64x64", :alt => service)+service, href: "/auth/"+svc_lower, class: css_class
+    # link_to_submit image_tag( (img_file || svc_lower+"_64.png"), :size => "64x64", :alt => service)+service, "/auth/"+svc_lower, class: css_class
+  end
+  
 =begin
   def show_errors(errors)
     result = ""
@@ -315,6 +323,11 @@ module ApplicationHelper
 	# Embed a link to javascript for running a dialog by reference to a URL
 	def link_to_modal(label, path, options={})
   	link_to_function label, "RP.dialog.get_and_go('#{path}');", options
+  end
+	
+	# Embed a link to javascript for running a dialog by reference to a URL
+	def link_to_submit(label, path, options={})
+  	link_to_function label, "RP.submit('#{path}');", options
   end
   
   def link_to_redirect(label, url, options={} )

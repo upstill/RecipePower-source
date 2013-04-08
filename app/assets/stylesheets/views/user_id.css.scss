@@ -1,0 +1,13 @@
+div.user_id {
+	display: inline-block;
+	vertical-align: top;
+	width: 300px;
+	margin: 10px;
+	border: 1px black;
+	&.user_id_new {
+		border-right: 1px solid black;
+	}
+
+	&.user_id_existing {
+	}
+}

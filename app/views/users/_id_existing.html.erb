@@ -1,11 +1,7 @@
-<h4>Returning RecipePowerUser:</h4>
-<div class="indent">
-<p class="airy">
-	To attach this service to your RecipePower account, what's the email address on your account?</p>
-<%= form_for @user do |f| %>
-  <%= form_errors_helper f, @user %>
-  <%= f.label :email %>
-  <%= f.text_field :email %>
-  <%= f.submit "Go",  %>
-<% end %>
+<div class="user_id user_id_existing">
+	<h4>Returning RecipePower User</h4>
+	<p class="airy">
+		If you already have a RecipePower account, log in (just this once) and we'll connect it to your <%= @provider %> account.
+	</p>
+	<%= render partial: "shared/slug_signin" %>
 </div>

@@ -13,7 +13,6 @@ OmniAuth.config.on_failure do |env|
   exception = env['omniauth.error']
   error_type = env['omniauth.error.type']
   strategy = env['omniauth.error.strategy']
-debugger
   Rails.logger.error("OmniAuth Error (#{error_type}): #{exception.inspect}")
   # ErrorNotifier.exception(exception, :strategy => strategy.inspect, :error_type => error_type)
 

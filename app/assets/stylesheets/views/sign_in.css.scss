@@ -8,6 +8,9 @@ div.at_top div.signin_hdr {
 
 div.auth_poss {
 	overflow: auto;
+	&.floating {
+		margin: 10px;
+	}
 }
 
 .sign_in.dialog {

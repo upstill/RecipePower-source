@@ -1,6 +1,7 @@
 div.authentications {
-	margin-top:30px;
-	margin-bottom:30px
+	margin:10px;
+	height: auto;
+	overflow: hidden;
 }
 .auth_sidebar {
 	width:300px;
@@ -50,7 +51,7 @@ div.authentications {
 	-moz-border-radius:8px;
 	-webkit-border-radius:8px;
 	position:relative;
-	margin-right:10px;
+	margin:5px;
 	.remove {
 		text-decoration:none;
 		position:absolute;

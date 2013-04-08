@@ -630,7 +630,7 @@ class RcpBrowserElementAllRecipes < RcpBrowserElement
   end
   
   def guide()
-    "This list shows <strong>all</strong> the recipes that anyone has added to RecipePower."
+    "These are <strong>all</strong> the recipes that have been collected in RecipePower."
   end
   
 end

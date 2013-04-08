@@ -42,7 +42,7 @@ class AuthenticationsController < ApplicationController
     elsif current_user
       current_user.apply_omniauth(omniauth)
       @authentication = current_user.authentications.create!(authparams) # Link to existing user
-      redirect_to authentications_url, :notice => "Yay! Successful authentication via #{@authentication.provider_name}."
+      redirect_to collection_url, :notice => "Yay! You'll now be able to login via #{@authentication.provider_name}."
     # This is a new authentication (not previously linked to a user) and there is 
     # no current user to link it to. It's possible that the authentication will come with
     # an email address which we can use to log the user in.
@@ -100,7 +100,7 @@ class AuthenticationsController < ApplicationController
   def destroy
     @authentication = Authentication.find(params[:id])
     provider = @authentication.provider_name
-    # @authentication.destroy
-    redirect_to authentications_url, :status => 303, :notice => "Successfully destroyed authentication. No more #{provider} authentication for you!"
+    @authentication.destroy
+    redirect_to authentications_url, :status => 303, :notice => "All done. No more #{provider} authentication for you!"
   end
 end

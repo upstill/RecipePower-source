@@ -199,3 +199,142 @@ RP.get_page = (url) ->
 	$('body').load url, {}, (responseText, textStatus, XMLHttpRequest) ->
 		debugger;
 		# RP.get_content( url, "a.update-btn" );
+
+submit_and_process = ( request, method, assumptions ) ->
+	assumptions = assumptions || {} # No assumptions if absent
+	method ||= "GET"
+	$.ajax
+		type: method,
+		dataType: "json",
+		url: request,
+		error: (jqXHR, textStatus, errorThrown) ->
+			$('span.source').text jqXHR.responseText
+			responseData = RP.post_error jqXHR
+			responseData.how = responseData.how || assumptions.how
+			RP.process_response responseData
+		success: (responseData, statusText, xhr) ->
+			# Pass any assumptions into the response data
+			responseData.how = responseData.how || assumptions.how;
+			RP.post_success responseData
+			RP.process_response responseData
+
+	# Handle successful return of a JSON request by running whatever success function
+	#   obtains, and stashing any resulting code away for invocation after closing the
+#   dialog, if any.
+RP.post_success = (jsonResponse, dlog, entity) ->
+
+	# Call processor function named in the response
+	if closer = RP.named_function jsonResponse.processorFcn
+		closer jsonResponse
+
+	# Call the dialog's response function
+	if(dlog != undefined) || (entity != undefined)
+		notify "save", dlog, entity
+
+	# Stash the result for later processing
+	# if dlog != undefined
+	#	dialogResult dlog, jsonResponse
+	return false
+
+# Handle the error result from either a forms submission or a request of the server
+#  by treating the html as code to be rendered and sticking it in an object attached
+#  to the dialog, if any.
+RP.post_error = ( jqXHR, dlog ) ->
+	# Any error page we get we will <try> to present modally
+	parsage = {}
+	if errtxt = jqXHR.responseText 
+		# See if it's valid JSON, b/c you never know...
+		try
+			parsage = JSON && JSON.parse(errtxt) || $.parseJSON(errtxt)
+		catch e
+			# Not valid JSON. Maybe it's a page to go to?
+			if errtxt.match /^\s*<!DOCTYPE html>/ 
+				if newdlog = RP.dialog.extract_modal errtxt
+					parsage =
+						dlog: newdlog
+				else
+					parsage =  
+						page: errtxt 
+			else
+				# Okay. Assume it's just a string error report
+				parsage = 
+					errortext: errtxt
+	result = null
+	# Stash the result in the dialog, if any
+	# if dlog != 'undefined'
+	# dialogResult dlog, parsage
+	return parsage;
+
+# Respond to a click by optionally checking for a confirmation, firing a request at the server and appropriately handling the response
+RP.submit = (request) ->
+	elmt = window.event.toElement
+	attribs = elmt.attributes;
+	data = $(elmt).data();
+	if confirm_msg = attribs.confirm.value
+		bootbox.confirm confirm_msg, (result) ->
+			if result
+				submit_and_process request, attribs.method.value, data
+	else
+		submit_and_process request, attribs.method.value, data
+	false
+
+# Insert any notifications into 'div.notifications-panel'
+RP.notify = (nots) ->
+	if nots && panel = $('div.notifications-panel')[0]
+		i = 0;
+		notsout = "";
+		while (i < nots.length)
+			nat = nots[i];
+			alert_class = nat[0];
+			alert_content = nat[1];
+			natsout << "<div class=\"alert alert-" + 
+			alert_class + 
+			"\"><a class=\"close\" data-dismiss=\"alert\">x</a>" +
+			alert_content + 
+			"</div>"
+			i = i+1;
+		panel.innerHTML = natsout;
+
+# Process response from a request. This will be an object supplied by a JSON request,
+# which may include code to be presented along with fields (how and area) telling how
+# to present it. The data may also consist of only 'code' if it results from an HTML request
+RP.process_response = (responseData, dlog) -> 
+	# 'dlog' is the dialog currently running, if any
+	# Wrapped in 'presentResponse', in the case where we're only presenting the results of the request
+	dlog ||= $('div.dialog.modal')[0]
+	supplanted = false
+	if responseData
+
+		# 'replacements' specifies a set of DOM elements and code to replace them
+		if replacements = responseData.replacements
+			i = 0;
+			while i < replacements.length
+				replacement = replacements[i]
+				$(replacement[0]).replaceWith replacement[1]
+				i++
+
+		# 'dlog' gives a dialog DOM element to replace the extant one
+		if newdlog = responseData.dlog
+			RP.dialog.replace_modal newdlog, dlog
+			supplanted = true
+
+		# 'code' gives HTML code, presumably for a dialog, possibly wrapped in a page
+		# If it's a page that includes a dialog, assert that, otherwise replace the page
+		if (code = responseData.code) && !supplanted = RP.dialog.supplant_modal dlog, code
+				responseData.page ||= code
+
+		# 'page' gives HTML for a page to replace the current one
+		if page = responseData.page
+			document.open()
+			document.write page
+			document.close()
+			supplanted = true
+
+		# 'notifications' provides any notifications to be posted
+		RP.notify responseData.notifications
+
+		# 'done', when true, simply means close the dialog, with an optional notice
+		if responseData.done && !supplanted
+			RP.dialog.close_modal dlog, responseData.notice
+
+	return supplanted;
