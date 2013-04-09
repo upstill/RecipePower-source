@@ -24,23 +24,34 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		// Remove mouse-hover highlighting and click handler for images
 		for(var i=0; i<this.imgs.length; i++) {
 			var img = this.imgs[i];
+			var parent = img.parentNode;
+			var theLink = null;
+			if (parent.nodeName.match(/^A$/))
+				theLink = parent;
 			if (img.removeEventListener) {
 				img.removeEventListener('mouseover', this.mouseon, false);
 				img.removeEventListener('mouseout', this.mouseoff, false);
 				img.removeEventListener('click', this.imgclick, false);
+				if(theLink)
+					theLink.removeEventListener('click', this.aclick, false);
 			} else if (img.detachEvent) {
 				img.detachEvent('onmouseover', this.mouseon );
 				img.detachEvent('onmouseout', this.mouseoff );
 				img.detachEvent('onclick', this.imgclick );
+				if(theLink)
+					theLink.detachEvent('onclick', this.aclick );
 			} else {
 				img.onmouseover = this.imghandlers[i].mouseon;
 				img.onmouseout = this.imghandlers[i].mouseoff;
 				img.onclick = this.imghandlers[i].imgclick;
+				if(theLink)
+					theLink.onclick = this.imghandlers[i].aclick
 			}	
 		}
 		delete this.mouseon;
 		delete this.mouseoff;
 		delete this.imgclick;
+		delete this.aclick;
 		
 		// Finally, remove all trace that we were ever here.
 		window.recipePower_namespace = undefined;
@@ -118,14 +129,22 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		// Define mouse-hover highlighting for images
 		for(var i=0; i<ns.imgs.length; i++) {
 			var img = ns.imgs[i];
+			var parent = img.parentNode;
+			var theLink = null;
+			if (parent.nodeName.match(/^A$/))
+				theLink = parent;
 			if (img.addEventListener) {
 				img.addEventListener('mouseover', ns.mouseon, false);
 				img.addEventListener('mouseout', ns.mouseoff, false);
 				img.addEventListener('click', ns.imgclick, false);
+				if (theLink)
+					theLink.addEventListener('click', ns.aclick, true);
 			} else if (img.attachEvent) {
 				img.attachEvent('onmouseover', ns.mouseon );
 				img.attachEvent('onmouseout', ns.mouseoff );
 				img.attachEvent('onclick', ns.imgclick );
+				if (theLink)
+					theLink.attachEvent('onclick', ns.aclick );
 			} else {
 				// We save the existing event handlers for restoral when closing out
 				ns.imghandlers[i] = {
@@ -136,6 +155,10 @@ window.recipePower_namespace = window.recipePower_namespace || {
 				img.onmouseover = ns.mouseon;
 				img.onmouseout = ns.mouseoff;
 				img.onclick = ns.imgclick;
+				if (theLink) {
+					ns.imghandlers[i].aclick = theLink.onclick;
+					theLInk.onclick = ns.aclick;
+				}
 			}	
 		}
 	},
@@ -169,6 +192,21 @@ window.recipePower_namespace = window.recipePower_namespace || {
 			{ url: this.src,
 				call: "replaceImg"
 			}, "http://<%= current_domain %>", iframe.contentWindow);
+		event.preventDefault();
+		event.stopPropagation();
+	},
+	
+  aclick: function (event) { // Handle a click on a link enclosing an image by sending its url to the iframe
+	  event = event || window.event;
+		var ns = window.recipePower_namespace;
+		var iframe = ns.iframe; // document.getElementById('recipePower-iframe')
+		debugger;
+		var childImgs = this.getElementsByTagName('img')
+		for(var i=0; i<childImgs.length; i++)
+			ns.postMessage(
+				{ url: childImgs[i].src,
+					call: "replaceImg"
+				}, "http://<%= current_domain %>", iframe.contentWindow);
 		event.preventDefault();
 		event.stopPropagation();
 	},
