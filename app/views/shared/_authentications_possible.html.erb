@@ -1,8 +1,7 @@
 <div class="auth_poss <%= @area %>">
   <% if @auth_context == :manage %>
     <% if current_user %>
-			<hr style="margin:3px;">
-      <strong class="prompt">Add another service to sign in with:</strong><br>
+      <strong class="prompt"><%= @authentications.empty? ? "Click on a service you'd like" : "Add another service" %> to sign in with:</strong><br>
     <% else %>
       <strong class="prompt">You can sign in with one of these services:</strong><br><br>
     <% end %>

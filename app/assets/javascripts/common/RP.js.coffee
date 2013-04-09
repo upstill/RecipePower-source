@@ -203,17 +203,21 @@ RP.get_page = (url) ->
 submit_and_process = ( request, method, assumptions ) ->
 	assumptions = assumptions || {} # No assumptions if absent
 	method ||= "GET"
+	debugger;
+	RP.modal_notify assumptions.wait_msg
 	$.ajax
 		type: method,
 		dataType: "json",
 		url: request,
 		error: (jqXHR, textStatus, errorThrown) ->
 			$('span.source').text jqXHR.responseText
+			RP.modal_notify()
 			responseData = RP.post_error jqXHR
 			responseData.how = responseData.how || assumptions.how
 			RP.process_response responseData
 		success: (responseData, statusText, xhr) ->
 			# Pass any assumptions into the response data
+			RP.modal_notify()
 			responseData.how = responseData.how || assumptions.how;
 			RP.post_success responseData
 			RP.process_response responseData
@@ -268,14 +272,18 @@ RP.post_error = ( jqXHR, dlog ) ->
 # Respond to a click by optionally checking for a confirmation, firing a request at the server and appropriately handling the response
 RP.submit = (request) ->
 	elmt = window.event.toElement
-	attribs = elmt.attributes;
+	attribs = elmt.attributes
+	if attribs.method 
+		method = attribs.method.value
+	else
+		method = "GET"
 	data = $(elmt).data();
-	if confirm_msg = attribs.confirm.value
+	if confirm_msg = attribs.confirm && attribs.confirm.value
 		bootbox.confirm confirm_msg, (result) ->
 			if result
-				submit_and_process request, attribs.method.value, data
+				submit_and_process request, method, data
 	else
-		submit_and_process request, attribs.method.value, data
+		submit_and_process request, method, data
 	false
 
 # Insert any notifications into 'div.notifications-panel'
@@ -294,6 +302,13 @@ RP.notify = (nots) ->
 			"</div>"
 			i = i+1;
 		panel.innerHTML = natsout;
+
+# Simple popup to notify the user of a process
+RP.modal_notify = (msg) ->
+	if msg && msg.length > 0
+		bootbox.alert msg
+	else
+		$('div.bootbox.modal').modal 'hide'
 
 # Process response from a request. This will be an object supplied by a JSON request,
 # which may include code to be presented along with fields (how and area) telling how

@@ -11,6 +11,7 @@
 						<%= link_to_submit "X", authentication_url(authentication), 
 															:confirm => "Are you sure you don't want to be able to login with #{authentication.provider_name} anymore?", 
 															:method => :delete, 
+															:"data-wait_msg" => "Hang on while we check with "+authentication.provider_name,
 															:class => "remove" %>
 					<% end %>
 				</div>
@@ -20,4 +21,5 @@
 	    *Click the 'X' to revoke the authorization.
 	  <% end %>
 	</div>
+	<hr style="margin:3px;">
 <% end %>
