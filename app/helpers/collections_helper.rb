@@ -21,9 +21,8 @@ module CollectionsHelper
   			"<p>(Mysterious list element of type #{element.class.to_s})</p>"
   		end
 		end
-	  (results.empty? ? 
-	   flash_one(:alert, @seeker.explain_empty) : 
-	   results.join('')).html_safe
+	  flash.now[:alert] = @seeker.explain_empty if results.empty?  
+	  results.join('').html_safe
 	end
 		
 	def collection_updater

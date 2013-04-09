@@ -33,6 +33,10 @@ class Seeker < Object
     (@affiliate && @affiliate.selected) ? @affiliate.selected.guide : "This is your friendly seeker"
   end
   
+  def hints()
+    (@affiliate && @affiliate.selected) ? @affiliate.selected.hints : "Handy Hints Here"
+  end
+  
   # Accept new tags text, bust the cache, and return the new set of tags
   def tagstxt=(txt)
     # We either use the current tagstxt or the parameter, updating the tagstxt as needed
@@ -186,7 +190,7 @@ class ContentSeeker < Seeker
   # If the entity has returned no results, suggest what the problem might have been
   def explain_empty
     explanation = @affiliate.explain_empty tags
-    explanation[:sug] ? explanation[:report]+"<br>You might try #{explanation[:sug]}." : explanation[:report]
+    (explanation[:sug] ? explanation[:report]+"<br>You might try #{explanation[:sug]}." : explanation[:report])+"<br>"+explanation[:hint]
   end
 end
 

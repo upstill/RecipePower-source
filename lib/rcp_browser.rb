@@ -285,8 +285,12 @@ class FeedBrowserElement < BrowserElement
     @handle = (args[:feed] || Feed.find(@feedid)).title
   end
   
-  def guide()
+  def guide
     "These are the most recent posts from '#{Feed.find(@feedid).title}'.<br>You can remove a feed by clicking the 'X' next to its name."
+  end
+  
+  def hints
+    "If there are no posts, the feed may have dried up. Nothing to see here, time to move on..."
   end
   
   def sources
@@ -353,6 +357,10 @@ class FeedBrowserComposite < BrowserComposite
   
   def guide()
     "Here is where you see the posts from <strong>all</strong> your feeds in one place.<br>Add more feeds by clicking the '+'."
+  end
+  
+  def hints()
+    "Otherwise, click into the individual feeds to see what's up."
   end
   
   def content_name
@@ -451,7 +459,13 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
   def guide()
     "This is where all your cookmarks live. The subheads are for your most important selections."
   end
-
+  
+  def hints()
+    "It doesn't look like you've cookmarked any recipes. You'll never get dinner on the table at this rate!"+
+    "<br>How about browsing through your Friends' recipes or one of your Channels and grabbing some of those? Or click on the RecipePower Collection and search through that?"+
+    "<br>Or even, dare we say it, head off to the Wide Wild Web and cookmark some findings there? (You <strong>do</strong> have the browser button installed, right?)"
+  end
+  
 end
 
 # Composite for all the recipes for the user's friends, with subheads for each friend
@@ -514,6 +528,10 @@ class RcpBrowserCompositeFriends < RcpBrowserChannelsAndFriends
     "Here is where you see the recipes from all your friends in one place, ready for browsing or searching.<br>Feeling friendly? Look for more friends by clicking the '+'."
   end
   
+  def hints()
+    "Are your friends useless? Do you even <strong>have</strong> any friends? Get some (more) today!"
+  end
+  
 end
 
 # Element for all the recipes in a user's channels, with subheads for each channel
@@ -531,6 +549,10 @@ class RcpBrowserCompositeChannels < RcpBrowserChannelsAndFriends
   
   def guide()
     "Here is where you see the recipes from all your channels in one place.<br>Browse for more channels by clicking the '+'."
+  end
+  
+  def hints()
+    ""
   end
   
 end
@@ -556,6 +578,10 @@ class RcpBrowserElementRecent < RcpBrowserElement
     "Here is where you see the recipes you've visited most recently."
   end
   
+  def hints()
+    "You obviously haven't been here long: this list will fill up quickly as you look around in RecipePower."
+  end
+  
 end
 
 # Element for a news feed for a particular user
@@ -568,6 +594,10 @@ class RcpBrowserElementNews < RcpBrowserElement
   
   def guide()
     "Here is where you get news flashes from your friends and channels"
+  end
+  
+  def hints()
+    "Your friends could be boring, or maybe you need more friends (channels). Click over to My Friends or My Channels to get more."
   end
 
 end
@@ -598,6 +628,10 @@ class RcpBrowserElementStatus < RcpBrowserElement
     when MyConstants::Rcpstatus_interesting
       "'#{@handle}' earmarks recipes for auditioning ASAP."
     end
+  end
+  
+  def hints()
+    "Once you've collected a recipe, add it to this list by poking the '#{@handle}' button while editing it."
   end
   
 end
@@ -721,9 +755,11 @@ class ContentBrowser < BrowserComposite
   # If the collection has returned no results, suggest what the problem might have been
   def explain_empty tags
     report = "It looks like #{selected.handle} doesn't have anything that matches your search."
+    hint = ""
     case tags.count
     when 0
       sug = nil
+      hint = selected.hints
     when 1
       sug = "a different tag or no tags at all up there"
     else
@@ -749,7 +785,7 @@ class ContentBrowser < BrowserComposite
       end
     end
     sug ? report+"<br>You might try #{sug}." : report
-    { sug: sug, report: report }
+    { sug: sug, report: report, hint: hint }
   end
   
   def cur_page
