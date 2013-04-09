@@ -285,12 +285,12 @@ module ApplicationHelper
   	(navlinks.join('  |  ')+"<br>"+(link_to_modal "Need to Know", know_path)).html_safe
   end
   
-  def auth_possible(service, img_file=nil)
-    svc_lower = service.downcase
+  def auth_possible(service, svc_lower=nil)
+    svc_lower ||= service.downcase
     css_class = "auth_provider"
     css_class += " hide" if @authentications && @authentications.any? { |authentication| authentication.provider.match(/^#{svc_lower}/) }
-    content_tag :a, image_tag( (img_file || svc_lower+"_64.png"), :size => "64x64", :alt => service)+service, href: "/auth/"+svc_lower, class: css_class
-    # link_to_submit image_tag( (img_file || svc_lower+"_64.png"), :size => "64x64", :alt => service)+service, "/auth/"+svc_lower, class: css_class
+    content_tag :a, image_tag( (svc_lower+"_64.png"), :size => "64x64", :alt => service)+service, href: "/auth/"+svc_lower, class: css_class
+    # link_to_submit image_tag( (svc_lower+"_64.png"), :size => "64x64", :alt => service)+service, "/auth/"+svc_lower, class: css_class
   end
   
 =begin
