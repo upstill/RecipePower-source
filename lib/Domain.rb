@@ -12,6 +12,6 @@ def path_from_url(url)
 end
 
 def current_domain
-  Rails.env.production? ? "www.recipepower.com" : "localhost:3000" 
+  Rails.env.production? ? "www.recipepower.com" : "local.recipepower.com:3000" 
 end
 

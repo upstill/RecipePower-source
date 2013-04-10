@@ -58,7 +58,6 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	},
 
 	execute_resize: function (dims) {
-
 		var width = dims.width[0];
 		var height = dims.height[0];
 
@@ -261,7 +260,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	spinner.style.left = ((window.outerWidth-32)/2).toString() + "px";
 	
 	var goer = document.createElement('a');
-	goer.href = "http://localhost:3000/collection"
+	goer.href = "http://<%= current_domain %>/collection"
 	goer.id = 'recipePower-golink';
 	goer.style.display = 'none';
 	document.body.appendChild(goer);
@@ -386,6 +385,7 @@ function unwrapWithoutCloning() {
   };
   
   $.receiveMessage = p_receiveMessage = function( callback, source_origin, delay ) {
+	debugger
     if ( has_postMessage ) {
       // Since the browser supports window.postMessage, the callback will be
       // bound to the actual event associated with window.postMessage.
