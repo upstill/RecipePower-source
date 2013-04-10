@@ -145,12 +145,6 @@ manager_of = (dlog) ->
 					return RP[mgr_name]
 	return null	
 
-# Actually redundant wrt notify; here for legacy of RPDialog
-RP.dialog.notify_manager = (method, dlog) ->
-	mgr = manager_of dlog
-	if mgr && mgr[method]
-		mgr[method](dlog)
-
 user_note = (msg) ->
 	jNotify msg,
 		HorizontalPosition: 'center', 

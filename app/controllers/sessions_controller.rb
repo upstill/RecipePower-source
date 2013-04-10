@@ -27,7 +27,7 @@ class SessionsController < Devise::SessionsController
   
   def destroy
     super
-    flash[:notice] = flash[:notice].sub("uhandle", resource.handle) if (flash[:notice] && resource)
+    flash[:notice] = flash[:notice].sub("uhandle", resource.handle) if flash[:notice] && resource
   end
   
   def sign_in_and_redirect(resource_or_scope, resource=nil)

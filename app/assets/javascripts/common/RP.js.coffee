@@ -203,7 +203,6 @@ RP.get_page = (url) ->
 submit_and_process = ( request, method, assumptions ) ->
 	assumptions = assumptions || {} # No assumptions if absent
 	method ||= "GET"
-	debugger;
 	RP.modal_notify assumptions.wait_msg
 	$.ajax
 		type: method,
@@ -233,7 +232,7 @@ RP.post_success = (jsonResponse, dlog, entity) ->
 
 	# Call the dialog's response function
 	if(dlog != undefined) || (entity != undefined)
-		notify "save", dlog, entity
+		RP.dialog.onsave dlog, entity
 
 	# Stash the result for later processing
 	# if dlog != undefined
@@ -318,6 +317,7 @@ RP.process_response = (responseData, dlog) ->
 	# Wrapped in 'presentResponse', in the case where we're only presenting the results of the request
 	dlog ||= $('div.dialog.modal')[0]
 	supplanted = false
+	debugger;
 	if responseData
 
 		# 'replacements' specifies a set of DOM elements and code to replace them

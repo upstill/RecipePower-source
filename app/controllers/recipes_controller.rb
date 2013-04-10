@@ -117,12 +117,12 @@ class RecipesController < ApplicationController
       format.json {
         @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params
         if @recipe.id
-          dialogstr = with_format("html") { render_to_string :edit, layout: false }
+          codestr = with_format("html") { render_to_string :edit, layout: false }
         else
           @resource = @recipe
-          alertstr = with_format("html") { render_to_string "pages/resource_errors", layout: false } 
+          codestr = with_format("html") { render_to_string "pages/resource_errors", layout: false } 
         end
-        render json: { code: alertstr }
+        render json: { code: codestr }
       }
       format.js { 
         # Produce javascript in response to the bookmarklet, to render into an iframe, 
