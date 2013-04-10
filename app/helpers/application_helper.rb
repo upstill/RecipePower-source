@@ -285,16 +285,6 @@ module ApplicationHelper
   	(navlinks.join('  |  ')+"<br>"+(link_to_modal "Need to Know", know_path)).html_safe
   end
   
-  def auth_possible(service, svc_lower=nil, small=false)
-    svc_lower ||= service.downcase
-    auth_url = "http://#{current_domain}/auth/"+svc_lower
-    css_class = "auth_provider"
-    css_class += " small" if small
-    css_class += " hide" if @authentications && @authentications.any? { |authentication| authentication.provider.match(/^#{svc_lower}/) }
-    content_tag :a, image_tag( (svc_lower+"_64.png"), :size => "64x64", :alt => service)+service, href: auth_url, class: css_class
-    # link_to_submit image_tag( (svc_lower+"_64.png"), :size => "64x64", :alt => service)+service, auth_url, class: css_class
-  end
-  
 =begin
   def show_errors(errors)
     result = ""
@@ -317,41 +307,6 @@ module ApplicationHelper
       "<div id=\"debug\">#{debug(params)}</div>".html_safe
 	end
 	
-	def button_to_modal(label, path, how="modal", where="floating", options={})
-	  options[:class] = "btn btn-mini"
-	  link_to_modal label, path, options
-	end
-	
-	# Embed a link to javascript for running a dialog by reference to a URL
-	def link_to_modal(label, path, options={})
-  	link_to_function label, "RP.dialog.get_and_go('#{path}');", options
-  end
-	
-	# Embed a link to javascript for running a dialog by reference to a URL
-	def link_to_submit(label, path, options={})
-  	link_to_function label, "RP.submit('#{path}');", options
-  end
-  
-  def link_to_redirect(label, url, options={} )
-  	link_to_function label, "redirect_to('#{url}');", options
-  end
-  
-  def button_to_update(label, url, mod_time, options={} )
-    # Play nice with data fields in the link: homegrown data attributes prefaced with "data-"
-    options[:last_modified] = mod_time || Time.now.httpdate # Default for updating
-    options[:refresh] = true # Default for updating
-	  options[:class] = "btn btn-mini update-button"
-    data = {}
-    url += "?mod_time="+mod_time.to_s
-    data_options = %w{ last_modified hold_msg msg_selector dataType type refresh contents_selector }
-    options.each do |key, val| 
-      key = key.to_s
-      key = "data-"+key if data_options.include? key
-      data[key] = val 
-    end
-    link_to_function label, "RP.get_content('#{url}', 'a.update-button');", data
-  end
-	
 	def globstring(hsh)
     hsh.keys.each.collect { |key| 
       key.to_s+": ["+(hsh[key] ? hsh[key].to_s : "nil")+"]"
@@ -371,61 +326,6 @@ module ApplicationHelper
         "data-template" => template)
   end
 =end 
-  
-  def modal_dialog( which, ttl=nil, options={}, &block )
-    options[:modal] = true if options[:modal].nil?
-    dlg = with_output_buffer &block
-    (dialogHeader(which, ttl, options)+
-     dlg+
-     dialogFooter).html_safe
-  end
-  
-  def modal_body(&block)
-    bd = with_output_buffer &block
-    content_tag :div, flash_all + bd, class: "modal-body"
-  end
-  
-  def modal_footer(&block)
-    ft = with_output_buffer &block
-    content_tag :div, ft, class: "modal-footer"
-  end
-  
-  # Place the header for a dialog, including setting its Onload function.
-  # Currently handled this way (e.g., symbols that have been supported)
-  #   :edit_recipe
-  #   :captureRecipe
-  #   :new_recipe (nee newRecipe)
-  #   :sign_in
-  def dialogHeader( which, ttl=nil, options={})
-    # Render for a floating dialog unless an area is asserted OR we're rendering for the page
-    area = options[:area] || "floating" # (@partial ? "floating" : "page")
-    hide = options[:show] ? "" : "hide"
-    classes = options[:class] || ""
-    # class 'modal' is for use by Bootstrap modal; it's obviated when rendering to a page (though we can force
-    # it for pre-rendered dialogs by asserting the :modal option)
-    modal = options[:modal] ? "modal-pending" : ""
-    logger.debug "dialogHeader for "+globstring({dialog: which, area: area, ttl: ttl})
-    # Assert a page title if given
-    ttlspec = ttl ? %Q{ title="#{ttl}"} : ""
-        
-    hdr = 
-      %Q{<div id="recipePowerDialog" class="#{modal} dialog #{which.to_s} #{area} #{classes}" #{ttlspec}>}+
-      (options[:modal] ? 
-        %Q{
-          <div class="modal-header">
-            <h3>#{ttl}</h3>
-          </div>} : 
-        %q{
-          <div class="recipePowerCancelDiv">
-            <a href="#" id="recipePowerCancelBtn" onclick="cancelDialog; return false;" style="text-decoration: none;">X</a>
-          </div>})+
-      %q{<div class="notifications-panel"></div>}
-    hdr.html_safe
-  end
-
-  def dialogFooter()
-    "</div><br class='clear'>".html_safe
-  end
 
    def pagination_link (text, pagenum, url)
      # "<span value='#{p.to_s}' class='pageclickr'>#{p.to_s}</span>"

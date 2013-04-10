@@ -17,7 +17,7 @@ gem 'devise'                        # auth, rails generate devise:install, rails
 gem 'devise_invitable'
 gem 'ruby-openid'
 gem 'omniauth-twitter'                      
-gem 'omniauth-facebook'                     
+gem 'omniauth-facebook', '1.4.0'                     
 gem 'omniauth-google-oauth2'                     
 gem 'omniauth-openid'                     
 gem 'declarative_authorization'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views

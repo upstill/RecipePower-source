@@ -317,7 +317,6 @@ RP.process_response = (responseData, dlog) ->
 	# Wrapped in 'presentResponse', in the case where we're only presenting the results of the request
 	dlog ||= $('div.dialog.modal')[0]
 	supplanted = false
-	debugger;
 	if responseData
 
 		# 'replacements' specifies a set of DOM elements and code to replace them

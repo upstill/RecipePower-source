@@ -30,6 +30,8 @@
 # require common/RPDialog
 # require common/RPDialogs
 
+#= require_directory ./auth
+
 #= require_directory ./views
 # require views/edit_recipe
 # require views/pic_picker
