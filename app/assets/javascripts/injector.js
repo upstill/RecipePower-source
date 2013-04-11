@@ -7,6 +7,7 @@
 // Place your application-specific JavaScript functions and classes here
 
 //= require_self
+//= require auth/facebook
 //= require common/pics
 //= require common/RP
 //= require common/dialog
@@ -16,6 +17,7 @@
 //= require jquery/jNotify.jquery
 //= require jquery/jquery.tokeninput
 //= require jquery/jquery.ba-resize
+//= require ../../../vendor/assets/javascripts/bootbox
 
 window.RP = window.RP || {}
 

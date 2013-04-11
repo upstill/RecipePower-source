@@ -9,7 +9,8 @@ jQuery ->
 RP.facebook ||= {}
 
 RP.facebook.connect = ->
-	RP.modal_notify "Hang on while we check with Facebook..."
+	debugger
+	# RP.modal_notify "Hang on while we check with Facebook..."
 	FB.login (response) ->
 		window.location = '/auth/facebook/callback' if response.authResponse
 

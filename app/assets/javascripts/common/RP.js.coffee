@@ -286,7 +286,7 @@ RP.submit = (request) ->
 	false
 
 # Insert any notifications into 'div.notifications-panel'
-RP.notify = (nots) ->
+RP.to_notifications = (nots) ->
 	if nots && panel = $('div.notifications-panel')[0]
 		i = 0;
 		notsout = "";
@@ -345,7 +345,7 @@ RP.process_response = (responseData, dlog) ->
 			supplanted = true
 
 		# 'notifications' provides any notifications to be posted
-		RP.notify responseData.notifications
+		RP.to_notifications responseData.notifications
 
 		# 'done', when true, simply means close the dialog, with an optional notice
 		if responseData.done && !supplanted
