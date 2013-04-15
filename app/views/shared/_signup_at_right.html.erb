@@ -4,13 +4,12 @@
 			<h3>Sign Up Here</h3>
 			<div class="auth_poss at_home">
 	      <div class="prompt">You can sign in with one of these services:</div>
-	<%= link_to_function "Facebook login", "RP.facebook.connect();" %>
 			  <%= auth_possible "Facebook" %>
-			  <%= auth_possible "Google", "google_oauth2" %>
+			  <%= auth_possible "Google", :svc_lower => "google_oauth2" %>
 			  <%= auth_possible "Twitter" %>
 			  <%= auth_possible "Aol" %>
 			  <%= auth_possible "Yahoo" %>
-			  <%= auth_possible "OpenID", "open_id" %>
+			  <%= auth_possible "OpenID", :svc_lower => "open_id" %>
 			</div>
 		  <div class="prompt">Or go the full signup route:</div>
 	    <%= render partial: "shared/slug_signup" %>

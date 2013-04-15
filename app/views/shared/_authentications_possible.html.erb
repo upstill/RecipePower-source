@@ -1,5 +1,4 @@
 <div class="auth_poss <%= @area %>">
-	<%= link_to_function "Facebook login", "RP.facebook.connect();" %>
   <% if @auth_context == :manage %>
     <% if current_user %>
       <strong class="prompt"><%= @authentications.empty? ? "Click on a service you'd like" : "Add another service" %> to sign in with:</strong><br>
@@ -10,9 +9,9 @@
     <strong class="prompt">Or, click to sign in using one of these fine services (see sidebar):</strong><br>
   <% end %>
   <%= auth_possible "Facebook" %>
-  <%= auth_possible "Google", "google_oauth2" %>
+  <%= auth_possible "Google", :svc_lower => "google_oauth2" %>
   <%= auth_possible "Twitter" %>
   <%= auth_possible "Aol" %>
   <%= auth_possible "Yahoo" %>
-  <%= auth_possible "OpenID", "open_id" %>
+  <%= auth_possible "OpenID", :svc_lower => "open_id" %>
 </div>

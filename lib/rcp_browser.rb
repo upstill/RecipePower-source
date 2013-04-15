@@ -37,6 +37,10 @@ class BrowserElement
     self.class.to_s
   end
   
+  def content_empty_report
+     ""
+  end
+  
   def guide()
     "This is a browser element "+self.class.to_s
   end
@@ -221,6 +225,10 @@ class BrowserComposite < BrowserElement
         childargs[:classname].constantize.new (level+1), childargs
       end
       : []
+  end
+  
+  def content_empty_report
+     ((children.count < 2) ? "This "+content_name.singularize+" doesn't" : "These "+content_name+" don't")+" appear to have any content."
   end
   
   def select_by_id(id)
@@ -460,10 +468,13 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
     "This is where all your cookmarks live. The subheads are for your most important selections."
   end
   
+  def content_empty_report()
+    "It doesn't look like you've cookmarked any recipes. You'll never get dinner on the table at this rate!"
+  end
+  
   def hints()
-    "It doesn't look like you've cookmarked any recipes. You'll never get dinner on the table at this rate!"+
     "<br>How about browsing through your Friends' recipes or one of your Channels and grabbing some of those? Or click on the RecipePower Collection and search through that?"+
-    "<br>Or even, dare we say it, head off to the Wide Wild Web and cookmark some findings there? (You <strong>do</strong> have the browser button installed, right?)"
+    "<br>Or even, dare we say it, head off to the Wild World Web and cookmark some findings there? (You <strong>do</strong> have the browser button installed, right?)"
   end
   
 end
@@ -772,7 +783,7 @@ class ContentBrowser < BrowserComposite
         sug = " getting one by clicking the '+' sign over there to the left"
       elsif tags.empty?
         name = selected.content_name
-        report = ((selected.children.count < 2) ? "This "+name.singularize+" doesn't" : "These "+name+" don't")+" appear to have any content."
+        report = selected.content_empty_report
         sug = nil
       else
         report = "It looks like there isn't anything that matches your search in '#{selected.handle}'."

@@ -56,6 +56,12 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		// Finally, remove all trace that we were ever here.
 		window.recipePower_namespace = undefined;
 	},
+	
+	redirect_from_iframe: function (params) {
+		var url = params.url[0];
+		debugger;
+		window.location = url;
+	},
 
 	execute_resize: function (dims) {
 		var width = dims.width[0];

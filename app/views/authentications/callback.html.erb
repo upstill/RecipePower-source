@@ -1,0 +1,8 @@
+<script type="text/javascript">
+	// If there's a popup, load the url into its parent, other just load the window with the url
+	if(window.opener) {
+		window.opener.location = '<%= @after_sign_in_url %>';
+	  window.close();
+	} else
+  	window.location = '<%= @after_sign_in_url %>';
+</script>

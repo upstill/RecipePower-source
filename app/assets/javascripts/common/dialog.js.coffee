@@ -92,7 +92,7 @@ RP.dialog.close_modal = (dlog, epilog) ->
 	$(dlog).remove()
 	notify_injector "close", dlog
 	if epilog && epilog != ""
-		user_note epilog
+		RP.dialog.user_note epilog
 
 # Remove the dialog and notify its handler prior to removing the element
 cancel_modal = (dlog) ->
@@ -145,7 +145,7 @@ manager_of = (dlog) ->
 					return RP[mgr_name]
 	return null	
 
-user_note = (msg) ->
+RP.dialog.user_note = (msg) ->
 	jNotify msg,
 		HorizontalPosition: 'center', 
 		VerticalPosition: 'top', 
@@ -169,7 +169,7 @@ notify = (what, dlog, entity) ->
 	# If the entity or the dialog have hooks declared, use them
 	if hooks
 		if hooks.hasOwnProperty msg_name
-			user_note hooks[msg_name]
+			RP.dialog.user_note hooks[msg_name]
 		if hooks.hasOwnProperty fcn_name
 			fcn = RP.named_function hooks[fcn_name]
 			return fcn dlog # We want an error if the function doesn't exist

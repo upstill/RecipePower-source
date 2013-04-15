@@ -7,7 +7,7 @@
 // Place your application-specific JavaScript functions and classes here
 
 //= require_self
-//= require auth/facebook
+// require auth/facebook
 //= require common/pics
 //= require common/RP
 //= require common/dialog
@@ -101,7 +101,26 @@ function open_dialog(dlog) {
 function close_dialog(dlog) {
 	retire_iframe();
 }
-	
+
+// Service the click on a link to, say, login with Facebook by loading that URL. The link should contain data for the
+// expected width and height of the "dialog"
+function yield_iframe(e) {
+	var link = e.currentTarget;
+	$.postMessage( { call: "redirect_from_iframe", url: $(link).attr("href") }, document.sourcehome );
+/*
+	debugger
+	$.postMessage( { call: "execute_resize", width: $(link).data("width"), height: $(link).data("height") }, document.sourcehome );
+	$('body').replaceWith("<h3>"+$(link).data("hold_msg")+"</h3>")
+	window.addEventListener( 'load', function() {
+		debugger;
+	}, false);
+	window.location = $(link).attr("href");
+*/
+	e.stopPropagation();
+	e.preventDefault();
+	false
+}
+
 function retire_iframe(notice) {
 	var msg = { call: "retire_iframe" };
 	if(notice && (typeof notice === 'string'))

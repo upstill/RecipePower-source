@@ -14,6 +14,8 @@
 
 #= require jquery_ujs
 
+#= require authentication
+
 # require_directory ./controllers
 # require bm
 # require errors
@@ -29,8 +31,6 @@
 #= require common/RP
 # require common/RPDialog
 # require common/RPDialogs
-
-#= require_directory ./auth
 
 #= require_directory ./views
 # require views/edit_recipe

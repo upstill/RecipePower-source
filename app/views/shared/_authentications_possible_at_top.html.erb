@@ -1,10 +1,9 @@
 <div class="auth_poss <%= @area %>">
     <strong>You might click on one of these services:</strong><br>
-	<%= link_to_function "Facebook login", "RP.facebook.connect();" %>
-	  <%= auth_possible "Facebook", nil, true %>
-	  <%= auth_possible "Google", "google_oauth2", true %>
-	  <%= auth_possible "Twitter", nil, true %>
-	  <%= auth_possible "Aol", nil, true %>
-	  <%= auth_possible "Yahoo", nil, true %>
-	  <%= auth_possible "OpenID", "open_id", true %>
+	  <%= auth_possible "Facebook", :at_top => (@area == "at_top") %>
+	  <%= auth_possible "Google", :svc_lower => "google_oauth2", :at_top => (@area == "at_top") %>
+	  <%= auth_possible "Twitter", :at_top => (@area == "at_top") %>
+	  <%= auth_possible "Aol", :at_top => (@area == "at_top") %>
+	  <%= auth_possible "Yahoo", :at_top => (@area == "at_top") %>
+	  <%= auth_possible "OpenID", :svc_lower => "open_id", :at_top => (@area == "at_top") %>
 </div>

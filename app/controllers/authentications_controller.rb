@@ -37,8 +37,10 @@ class AuthenticationsController < ApplicationController
     authparams = omniauth.slice('provider', 'uid')
     if @authentication = Authentication.find_by_provider_and_uid(omniauth['provider'], omniauth['uid'])
       flash[:notice] = "Yay! Signed in with #{@authentication.provider_name}. Welcome back, #{@authentication.user.handle}!"
-      # sign_in_and_redirect(:user, @authentication.user)
-      result = sign_in_and_redirect @authentication.user # , :bypass => true
+      # result = sign_in_and_redirect @authentication.user # , :bypass => true
+      sign_in @authentication.user, :event => :authentication
+      @after_sign_in_url = session[:original_uri] || after_sign_in_path_for(@authentication.user)
+      render 'callback', :layout => false
     elsif current_user
       current_user.apply_omniauth(omniauth)
       @authentication = current_user.authentications.create!(authparams) # Link to existing user
@@ -49,8 +51,10 @@ class AuthenticationsController < ApplicationController
     elsif (info = omniauth['info']) && (email = info['email']) && (user = User.find_by_email(email))
       user.apply_omniauth(omniauth)
       @authentication = user.authentications.create!(authparams) # Link to existing user
+      sign_in user, :event => :authentication
       flash[:notice] = "Yay! Signed in with #{@authentication.provider_name}. Nice to see you again, #{user.handle}!"
-      sign_in_and_redirect(:user, user)
+      @after_sign_in_url = session[:original_uri] || after_sign_in_path_for(user)
+      render 'callback', :layout => false
     elsif user = (session[:invitation_token] && User.where(:invitation_token => session[:invitation_token]).first)
         # If we have an invitation out for this user we go ahead and log them in
         user.username = session[:invitation_username]
@@ -76,7 +80,9 @@ class AuthenticationsController < ApplicationController
         session[:omniauth] = omniauth.except('extra')
         # flash[:notice] = "Hmm, that's a new one. Would you enter your email address below so we can sort out who you are?"
         flash[:notice] = nil
-        redirect_to users_identify_url
+        @after_sign_in_url = users_identify_url
+        render 'callback', :layout => false
+        # redirect_to users_identify_url
       end
 =begin
       @authentication = user.authentications.build(authparams)
