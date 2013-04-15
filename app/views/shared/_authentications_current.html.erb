@@ -9,7 +9,6 @@
 					<div class="uid"><%= truncate authentication.uid.to_s, :length => 12 %></div>
 					<% if @auth_delete || true %>
 						<%= link_to_submit "X", authentication_url(authentication), 
-															:confirm => "Are you sure you don't want to be able to login with #{authentication.provider_name} anymore?", 
 															:method => :delete, 
 															:"data-wait_msg" => "Hang on while we check with "+authentication.provider_name,
 															:class => "remove" %>

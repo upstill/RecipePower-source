@@ -10,12 +10,10 @@ RP.authentication ||= {}
 popupCenter = (url, width, height, name, msg) ->
 	left = (screen.width/2)-(width/2)
 	top = (screen.height/2)-(height/2)
-	debugger
 	myWindow=window.open '',name,"menubar=no,toolbar=no,status=no,width="+width+",height="+height+",toolbar=no,left="+left+",top="+top
+	myWindow.document.body.innerHTML = RP.notification_html msg
 	myWindow.focus()
-	RP.dialog.user_note msg
 	myWindow.location = url
-	# window.open(url, name, "menubar=no,toolbar=no,status=no,width="+width+",height="+height+",toolbar=no,left="+left+",top="+top);
 
 RP.authentication.connect = (e) ->
 	link = e.currentTarget

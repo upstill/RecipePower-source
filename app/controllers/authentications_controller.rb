@@ -7,21 +7,23 @@ class AuthenticationsController < ApplicationController
   # which case we forget about handling it in the embedded iframe: remove the "area=at_top" 
   # and "layout=injector" query parameters
   def strip_query(url)
-    uri = URI url
-    return url unless uri.query
-    uri.query = uri.query.split('&').delete_if { |p| p.match(/^(area|layout)=/) }.join '&'
-    uri.to_s
+    if url
+      uri = URI url
+      return url unless uri.query
+      uri.query = uri.query.split('&').delete_if { |p| p.match(/^(area|layout)=/) }.join '&'
+      uri.to_s
+    end
   end
   
-    def index
-      @authentications = current_user.authentications if current_user
-      @auth_delete = true
-      @auth_context = :manage
-      flash[:notice] = params[:notice]
-      @area = params[:area]
-      @layout = params[:layout]
-      dialog_boilerplate "index"
-    end
+  def index
+    @authentications = current_user.authentications if current_user
+    @auth_delete = true
+    @auth_context = :manage
+    flash[:notice] = params[:notice]
+    @area = params[:area]
+    @layout = params[:layout]
+    dialog_boilerplate "index"
+  end
 
   # Get a new authentication (==login)
   def new
@@ -34,7 +36,20 @@ class AuthenticationsController < ApplicationController
   end
 
   def failure
-      redirect_to authentications_url, :notice => "Sorry, authentication failed."
+    flash[:notice] = "Sorry, authentication failed."
+    @after_sign_in_url = nil # authentications_url
+    if session[:original_uri]
+      uri = URI session[:original_uri]
+      if uri.query
+        uri.query.split('&').each do |qp| 
+          if md = qp.match( /^recipe%5Burl%5D=(.*$)/ )
+            @after_sign_in_url = URI.unescape md[1]
+          end
+        end
+      end
+      session.delete :original_uri
+    end
+    render 'callback', :layout => false
   end
   
   def handle_unverified_request
@@ -54,9 +69,12 @@ class AuthenticationsController < ApplicationController
       @after_sign_in_url = strip_query(session[:original_uri]) || after_sign_in_path_for(@authentication.user)
       render 'callback', :layout => false
     elsif current_user
+      # Just adding an authentication method to the current user
       current_user.apply_omniauth(omniauth)
       @authentication = current_user.authentications.create!(authparams) # Link to existing user
-      redirect_to collection_url, :notice => "Yay! You'll now be able to login via #{@authentication.provider_name}."
+      flash[:notice] = "Yay! You're now connected to RecipePower through #{@authentication.provider_name}."
+      @after_sign_in_url = collection_url
+      render 'callback', :layout => false
     # This is a new authentication (not previously linked to a user) and there is 
     # no current user to link it to. It's possible that the authentication will come with
     # an email address which we can use to log the user in.
