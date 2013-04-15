@@ -108,7 +108,13 @@ class RecipesController < ApplicationController
         # The injector (capture.js) calls for this to fill the iframe on the foreign page.
         @layout = "injector"
         if @recipe.id
-          render :edit, :layout => (params[:layout] || dialog_only)
+          if params[:area]
+            render :edit, :layout => (params[:layout] || dialog_only)
+          else
+            # If we're collecting a recipe outside the context of the iframe, just
+            # redirect back to the recipe. We can't edit the recipe, but too bad.
+            redirect_to @recipe.url
+          end
         else
           @resource = @recipe
           render "pages/resource_errors", :layout => (params[:layout] || dialog_only)
