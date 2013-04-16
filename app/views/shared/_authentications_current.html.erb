@@ -1,7 +1,7 @@
 <% if @authentications && !@authentications.empty? %>
 	<div class="auth_current <%= @area %>">
     <div class="authentications">
-	  	<strong class="prompt">You can sign in to this account* using:</strong><br>
+	  	<strong class="prompt">You have authorized RecipePower to contact:</strong><br>
       <% for authentication in @authentications %>
 				<div class="authentication">
 					<%= image_tag "#{authentication.provider}_32.png", :size => "32x32" %>

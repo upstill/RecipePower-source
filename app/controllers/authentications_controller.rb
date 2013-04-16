@@ -36,13 +36,13 @@ class AuthenticationsController < ApplicationController
   end
 
   def failure
-    flash[:notice] = "Sorry, authentication failed."
     @after_sign_in_url = nil # authentications_url
     if session[:original_uri]
       uri = URI session[:original_uri]
       if uri.query
         uri.query.split('&').each do |qp| 
           if md = qp.match( /^recipe%5Burl%5D=(.*$)/ )
+    	    @after_sign_in_msg = "Sorry, authentication failed. Returning to the recipe..."
             @after_sign_in_url = URI.unescape md[1]
           end
         end

@@ -1,14 +1,10 @@
-<h3>Returning to the recipe...</h3>
+<h3><%= @after_sign_in_msg || "Returning to the recipe..." %></h3>
 <script type="text/javascript">
 	// If there's a popup, load the url into its parent, other just load the window with the url
-	if(window.opener) {
-		<% if @after_sign_in_url %>
-			window.opener.location = '<%= @after_sign_in_url %>';
-		<% end %>
+	var targetWindow = window.opener || window
+	<% if @after_sign_in_url %>
+		targetWindow.location = '<%= @after_sign_in_url %>';
+	<% end %>
+	if(window.opener)
 	  window.close();
-	} else {
-		<% if @after_sign_in_url %>
-			window.location = '<%= @after_sign_in_url %>';
-		<% end %>
-	}
 </script>
