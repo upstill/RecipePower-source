@@ -49,7 +49,8 @@ module DialogsHelper
           <div class="recipePowerCancelDiv">
             <a href="#" id="recipePowerCancelBtn" onclick="cancelDialog; return false;" style="text-decoration: none;">X</a>
           </div>})+
-      %q{<div class="notifications-panel"></div>}
+      %q{<div class="notifications-panel"></div>}+
+      flash_all
     hdr.html_safe
   end
 

@@ -38,7 +38,8 @@ module ControllerAuthentication
     unless logged_in?
       scope = Devise::Mapping.find_scope!(User)
       session["#{scope}_return_to"] = request.url 
-      redirect_to authentications_path, alert: alert # login_url, :alert => alert
+      flash[:alert] = alert
+      redirect_to authentications_new_path # login_url, :alert => alert
     end
   end
 

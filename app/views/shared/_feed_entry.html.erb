@@ -1,6 +1,7 @@
 <%# show_feed_entry %>
 <li class="<%= feed_list_element_class @feed_entry %>">
-	<h5 class="feed_list_element_title"><%= link_to @feed_entry.name, @feed_entry.url %>
+	<h5 class="feed_list_element_title" id="FeedListElement"+<%= @feed_entry.id.to_s %>>
+		<%= link_to @feed_entry.name, @feed_entry.url %>
 		<% if @recipe = @feed_entry.recipe %>
 		  <% @recipe.current_user = @user_id %>
 		  <%= render "recipes/golink" %>

@@ -67,6 +67,7 @@ class AuthenticationsController < ApplicationController
       # result = sign_in_and_redirect @authentication.user # , :bypass => true
       sign_in @authentication.user, :event => :authentication
       @after_sign_in_url = strip_query(session[:original_uri]) || after_sign_in_path_for(@authentication.user)
+      session.delete :original_uri
       render 'callback', :layout => false
     elsif current_user
       # Just adding an authentication method to the current user
@@ -84,6 +85,7 @@ class AuthenticationsController < ApplicationController
       sign_in user, :event => :authentication
       flash[:notice] = "Yay! Signed in with #{@authentication.provider_name}. Nice to see you again, #{user.handle}!"
       @after_sign_in_url = strip_query(session[:original_uri]) || after_sign_in_path_for(user)
+      session.delete :original_uri
       render 'callback', :layout => false
     elsif user = (session[:invitation_token] && User.where(:invitation_token => session[:invitation_token]).first)
         # If we have an invitation out for this user we go ahead and log them in
@@ -111,6 +113,7 @@ class AuthenticationsController < ApplicationController
         # flash[:notice] = "Hmm, that's a new one. Would you enter your email address below so we can sort out who you are?"
         flash[:notice] = nil
         session[:original_uri] = strip_query(session[:original_uri])
+        session.delete :original_uri
         @after_sign_in_url = users_identify_url
         render 'callback', :layout => false
         # redirect_to users_identify_url

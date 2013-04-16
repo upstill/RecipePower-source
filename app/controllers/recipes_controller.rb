@@ -11,7 +11,7 @@ class RecipesController < ApplicationController
   include ActionView::Helpers::TextHelper
   
   # Render to html, json or js the results of a recipe manipulation
-  def reportRecipe( url, notice, formats)
+  def report_recipe( url, notice, formats)
     truncated = truncate @recipe.title, :length => 140
     respond_to do |fmt|
       fmt.html { 
@@ -22,24 +22,33 @@ class RecipesController < ApplicationController
         end
       }
       fmt.json { 
+        replacements = []
         if params[:action] != "destroy"
-          go_link_body = with_format("html") do render_to_string :partial => "recipes/golink" end
-          list_element_body = with_format("html") do render_to_string :partial => "shared/recipe_smallpic" end
-          grid_element_body = with_format("html") do render_to_string :partial => "shared/recipe_grid" end
+          replacements << [
+            "."+recipe_list_element_golink_class(@recipe), 
+            with_format("html") do render_to_string :partial => "recipes/golink" end
+          ]
+          replacements << [
+            "."+recipe_list_element_class(@recipe), 
+            with_format("html") do render_to_string :partial => "shared/recipe_smallpic" end
+          ]
+          replacements << [
+            "."+recipe_grid_element_class(@recipe), 
+            with_format("html") do render_to_string :partial => "shared/recipe_grid" end
+          ]
+          replacements << [
+            "."+feed_list_element_class(@feed_entry), 
+            with_format("html") do render_to_string :partial => "shared/feed_entry" end
+          ] if @feed_entry
         end
-        render json:     { 
-                         done: true, # Denotes recipe-editing is finished
-                         notice: notice,
-                         title: truncated, 
-                         go_link_class: recipe_list_element_golink_class(@recipe), 
-                         go_link_body: go_link_body || "",
-                         list_element_class: recipe_list_element_class(@recipe), 
-                         list_element_body: list_element_body || "",
-                         grid_element_class: recipe_grid_element_class(@recipe), 
-                         grid_element_body: grid_element_body || "",
-                         action: params[:action],
-                         processorFcn: "RP.rcp_list.update"
-                       } 
+        render json: { 
+                       done: true, # Denotes recipe-editing is finished
+                       notice: notice,
+                       title: truncated, 
+                       replacements: replacements,
+                       action: params[:action],
+                       processorFcn: "RP.rcp_list.update"
+                     } 
       }
       fmt.js { 
         render text: @recipe.title 
@@ -74,17 +83,17 @@ class RecipesController < ApplicationController
     # parameters are supplied for url, title and note (though only URI is required).
     if params[:feed_entry]
       # Create the new recipe off the feed entry
-      feed_entry = FeedEntry.find params[:feed_entry].to_i
-      params[:url] = feed_entry.url
+      @feed_entry = FeedEntry.find params[:feed_entry].to_i
+      params[:url] = @feed_entry.url
     end
     @recipe = Recipe.ensure current_user_or_guest_id, params.slice(:url) # session[:user_id], params
     if @recipe.id # Mark of a fetched/successfully saved recipe: it has an id
     	# redirect to edit
-    	if feed_entry
-    	  feed_entry.recipe = @recipe
-    	  feed_entry.save
+    	if @feed_entry
+    	  @feed_entry.recipe = @recipe
+    	  @feed_entry.save
   	  end
-      reportRecipe( collection_path, truncate( @recipe.title, :length => 100)+" now appearing in your collection.", formats)
+      report_recipe( collection_path, truncate( @recipe.title, :length => 100)+" now appearing in your collection.", formats)
     	# redirect_to edit_recipe_url(@recipe), :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br>You might want to confirm the title and picture, and/or tag it?".html_safe
     else
         @Title = "Cookmark a Recipe"
@@ -178,7 +187,7 @@ class RecipesController < ApplicationController
     # Find the recipe by URI (possibly correcting same), and bind it to the current user
     @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params[:recipe]
     if @recipe.errors.empty? # Success (valid recipe, either created or fetched)
-      reportRecipe(  
+      report_recipe(  
         edit_recipe_url(@recipe), 
         "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br> You might want to confirm the title and picture, and/or tag it?".html_safe,
         formats )
@@ -203,7 +212,7 @@ class RecipesController < ApplicationController
     # return if need_login true
     @recipe = Recipe.find(params[:id])
     if params[:commit] == "Cancel"
-      reportRecipe collection_url, "Recipe secure and unchanged.", formats
+      report_recipe collection_url, "Recipe secure and unchanged.", formats
     else
       @recipe.current_user = current_user_or_guest_id # session[:user_id]
       begin
@@ -213,7 +222,7 @@ class RecipesController < ApplicationController
             # @recipe.errors.add "Couldn't save recipe"
       end
       if saved_okay
-        reportRecipe( collection_url, "Successfully updated #{@recipe.title || 'recipe'}.", formats )
+        report_recipe( collection_url, "Successfully updated #{@recipe.title || 'recipe'}.", formats )
       else
         @Title = "Tag That Recipe (Try Again)!"
         @nav_current = nil
@@ -253,7 +262,7 @@ class RecipesController < ApplicationController
     @list_name = "mine"
     @area = params[:area]
     if @recipe.errors.empty?
-      reportRecipe( collection_path, truncate( @recipe.title, :length => 100)+" now appearing in your collection.", formats)
+      report_recipe( collection_path, truncate( @recipe.title, :length => 100)+" now appearing in your collection.", formats)
     else
       respond_to do |format|
         format.html { render nothing: true }
@@ -269,7 +278,7 @@ class RecipesController < ApplicationController
     @recipe = Recipe.ensure current_user_or_guest_id, params.slice(:id), false
     @recipe.remove_from_collection current_user_or_guest_id
     truncated = truncate(@recipe.title, :length => 40)
-    reportRecipe collection_url, "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections.", formats
+    report_recipe collection_url, "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections.", formats
     # redirect_to collection_url, :notice => "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections."
   end
 
@@ -278,7 +287,7 @@ class RecipesController < ApplicationController
     @recipe = Recipe.find params[:id] 
     title = @recipe.title
     @recipe.destroy
-    reportRecipe collection_url, "\"#{title}\" is gone for good.", formats
+    report_recipe collection_url, "\"#{title}\" is gone for good.", formats
     # redirect_to collection_url, :notice => "\"#{title}\" is gone for good."
   end
 
