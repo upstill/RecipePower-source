@@ -11,7 +11,7 @@ class RecipesController < ApplicationController
   include ActionView::Helpers::TextHelper
   
   # Render to html, json or js the results of a recipe manipulation
-  def report_recipe( url, notice, formats)
+  def report_recipe( url, notice, formats, delete=false)
     truncated = truncate @recipe.title, :length => 140
     respond_to do |fmt|
       fmt.html { 
@@ -22,24 +22,17 @@ class RecipesController < ApplicationController
         end
       }
       fmt.json { 
-        replacements = []
-        if params[:action] != "destroy"
-          replacements << [
-            "."+recipe_list_element_golink_class(@recipe), 
-            with_format("html") do render_to_string :partial => "recipes/golink" end
-          ]
-          replacements << [
-            "."+recipe_list_element_class(@recipe), 
-            with_format("html") do render_to_string :partial => "shared/recipe_smallpic" end
-          ]
-          replacements << [
-            "."+recipe_grid_element_class(@recipe), 
-            with_format("html") do render_to_string :partial => "shared/recipe_grid" end
-          ]
-          replacements << [
-            "."+feed_list_element_class(@feed_entry), 
-            with_format("html") do render_to_string :partial => "shared/feed_entry" end
-          ] if @feed_entry
+        replacements = [
+          [ "."+recipe_list_element_golink_class(@recipe) ], 
+          [ "."+recipe_list_element_class(@recipe) ], 
+          [ "."+recipe_grid_element_class(@recipe) ] 
+        ]
+        replacements << [ "."+feed_list_element_class(@feed_entry) ] if @feed_entry
+        if !delete
+          replacements[0][1] = with_format("html") do render_to_string :partial => "recipes/golink" end
+          replacements[1][1] = with_format("html") do render_to_string :partial => "shared/recipe_smallpic" end
+          replacements[2][1] = with_format("html") do render_to_string :partial => "shared/recipe_grid" end
+          replacements[3][1] = with_format("html") do render_to_string :partial => "shared/feed_entry" end if @feed_entry
         end
         render json: { 
                        done: true, # Denotes recipe-editing is finished
@@ -278,7 +271,7 @@ class RecipesController < ApplicationController
     @recipe = Recipe.ensure current_user_or_guest_id, params.slice(:id), false
     @recipe.remove_from_collection current_user_or_guest_id
     truncated = truncate(@recipe.title, :length => 40)
-    report_recipe collection_url, "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections.", formats
+    report_recipe collection_url, "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections.", formats, true
     # redirect_to collection_url, :notice => "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections."
   end
 
@@ -287,7 +280,7 @@ class RecipesController < ApplicationController
     @recipe = Recipe.find params[:id] 
     title = @recipe.title
     @recipe.destroy
-    report_recipe collection_url, "\"#{title}\" is gone for good.", formats
+    report_recipe collection_url, "\"#{title}\" is gone for good.", formats, true
     # redirect_to collection_url, :notice => "\"#{title}\" is gone for good."
   end
 

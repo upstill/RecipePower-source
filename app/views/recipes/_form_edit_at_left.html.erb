@@ -38,9 +38,9 @@
 							</div>
 							<div class="control-group">
 								<div class="btn-group" data-toggle="buttons-checkbox" data-toggle-name="recipe[status]">
-									<button type="button" class="btn" value="1" data-toggle="button">Now Cooking</button>
-									<button type="button" class="btn" value="2" data-toggle="button">Favorites</button>
-									<button type="button" class="btn" value="4" data-toggle="button">Earmarked</button>
+									<button type="button" class="btn" value="1" data-toggle="button"><%= t :recipe_status_high %></button>
+									<button type="button" class="btn" value="2" data-toggle="button"><%= t :recipe_status_medium %></button>
+									<button type="button" class="btn" value="4" data-toggle="button"><%= t :recipe_status_low %></button>
 								</div>
 								<input type="hidden" name="recipe[status]" value="%%rcpStatus%%" data-toggle-default="8"/>
 							</div>

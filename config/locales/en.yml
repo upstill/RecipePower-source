@@ -3,3 +3,7 @@
 
 en:
   hello: "Hello world"
+  recipe_status_high: "Now Cooking"
+  recipe_status_medium: "Keepers"
+  recipe_status_low: "To Try"
+  recipe_status_default: "All Recipes"

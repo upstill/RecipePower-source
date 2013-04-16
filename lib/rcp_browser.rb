@@ -586,7 +586,7 @@ class RcpBrowserElementRecent < RcpBrowserElement
   end
   
   def guide()
-    "Here is where you see the recipes you've visited most recently."
+    "Here are the recipes you've visited most recently."
   end
   
   def hints()
@@ -619,7 +619,7 @@ class RcpBrowserElementStatus < RcpBrowserElement
   def initialize(level, args)
     @persisters = (@persisters || []) << :status
     super
-    @handle = MyConstants::Rcpstatus_names[@status]
+    @handle = I18n.t MyConstants::Rcpstatus_names[@status]
   end
   
   def candidates

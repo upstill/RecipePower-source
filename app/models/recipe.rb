@@ -161,10 +161,10 @@ class Recipe < ActiveRecord::Base
   end
 
   @@statuses = [
-    ["Now Cooking", MyConstants::Rcpstatus_rotation], 
-    [:Keepers, MyConstants::Rcpstatus_favorites],
-    ["To Try", MyConstants::Rcpstatus_interesting],
-    [:Misc, MyConstants::Rcpstatus_misc]
+    [:recipe_status_high, MyConstants::Rcpstatus_rotation], 
+    [:recipe_status_medium, MyConstants::Rcpstatus_favorites],
+    [:recipe_status_low, MyConstants::Rcpstatus_interesting],
+    [:recipe_status_default, MyConstants::Rcpstatus_misc]
   ]
 
   # return an array of status/value pairs for passing to select()
