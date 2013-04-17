@@ -350,6 +350,9 @@ RP.process_response = (responseData, dlog) ->
 		# 'notifications' provides any notifications to be posted
 		RP.to_notifications responseData.notifications
 
+		# Post a popup message, if any
+		RP.modal_notify responseData.popup_msg
+		
 		# 'done', when true, simply means close the dialog, with an optional notice
 		if responseData.done && !supplanted
 			RP.dialog.close_modal dlog, responseData.notice

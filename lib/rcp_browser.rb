@@ -130,6 +130,11 @@ class BrowserElement
   	end
   end
   
+  # By default, all recipes show
+  def should_show(recipe)
+    true
+  end
+  
   # Are there any recipes waiting to come out of the query?
   def empty?(tagset)
       self.result_ids(tagset).empty?
@@ -464,6 +469,10 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
     @candidates = @candidates || user.recipes(status: MyConstants::Rcpstatus_misc, sort_by: :collected)
   end
   
+  def should_show(recipe)
+    recipe.cookmarked(user.id)
+  end
+  
   def guide()
     "This is where all your cookmarks live. The subheads are for your most important selections."
   end
@@ -626,6 +635,10 @@ class RcpBrowserElementStatus < RcpBrowserElement
     @candidates = @candidates || user.recipes(status: @status, sort_by: :collected)
   end
   
+  def should_show(recipe)
+    recipe.cookmarked(user.id) && (recipe.status <= @status)
+  end
+  
   def css_id
     self.class.to_s+@status.to_s
   end
@@ -701,6 +714,14 @@ class ContentBrowser < BrowserComposite
         ] 
     end
     @children[0].select unless selected # Ensure there's a selection
+  end
+  
+  # Should a recipe be seen in the current browser? This is for updating a list based on changes to the recipe, including:
+  # -- removing from a user's collection
+  # -- changing tags on the recipe
+  # -- changing the recipe's status
+  def should_show(recipe)
+    selected.should_show recipe
   end
   
   # Remove the currently-selected element and select an appropriate new one: either 1) the next sibling, 2) the previous sibling, or 3) the parent

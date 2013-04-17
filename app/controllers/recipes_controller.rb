@@ -11,7 +11,7 @@ class RecipesController < ApplicationController
   include ActionView::Helpers::TextHelper
   
   # Render to html, json or js the results of a recipe manipulation
-  def report_recipe( url, notice, formats, delete=false)
+  def report_recipe( url, notice, formats, destroyed = false)
     truncated = truncate @recipe.title, :length => 140
     respond_to do |fmt|
       fmt.html { 
@@ -28,7 +28,7 @@ class RecipesController < ApplicationController
           [ "."+recipe_grid_element_class(@recipe) ] 
         ]
         replacements << [ "."+feed_list_element_class(@feed_entry) ] if @feed_entry
-        if !delete
+        if current_user.browser.should_show(@recipe) && !destroyed
           replacements[0][1] = with_format("html") do render_to_string :partial => "recipes/golink" end
           replacements[1][1] = with_format("html") do render_to_string :partial => "shared/recipe_smallpic" end
           replacements[2][1] = with_format("html") do render_to_string :partial => "shared/recipe_grid" end
@@ -36,7 +36,7 @@ class RecipesController < ApplicationController
         end
         render json: { 
                        done: true, # Denotes recipe-editing is finished
-                       notice: notice,
+                       popup_msg: notice,
                        title: truncated, 
                        replacements: replacements,
                        action: params[:action],
@@ -271,7 +271,9 @@ class RecipesController < ApplicationController
     @recipe = Recipe.ensure current_user_or_guest_id, params.slice(:id), false
     @recipe.remove_from_collection current_user_or_guest_id
     truncated = truncate(@recipe.title, :length => 40)
-    report_recipe collection_url, "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections.", formats, true
+    report_recipe collection_url, 
+      "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections.", 
+      formats
     # redirect_to collection_url, :notice => "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections."
   end
 

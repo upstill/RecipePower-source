@@ -71,18 +71,9 @@ RP.edit_recipe.onload = (dlog) ->
 		dataBefore = recipedata $('form.edit_recipe', dlog).serializeArray()
 		$('form.edit_recipe', dlog).data "hooks", {
 			dataBefore: recipedata($('form.edit_recipe', dlog).serializeArray()),
-			saveMsg: "Cookmark successfully saved.",
 			beforesaveFcn: "RP.edit_recipe.submission_redundant"
 		}
 		
-		$('input.cancel', dlog).data "hooks",
-		 	successMsg: "Cookmark secure and unharmed."
-		$('button.close', dlog).data "hooks",
-		 	successMsg: "Cookmark secure and unharmed."
-		$('form.remove', dlog).data "hooks",
-		 	saveMsg: "Cookmark removed from collection."
-		$('form.destroy', dlog).data "hooks",
-	 		saveMsg: "Cookmark destroyed for now and evermore."
 		RP.makeExpandingArea $('div.expandingArea', dlog)
 		
 #		$('input.save-tags-button.cancel', dlog).click RP.edit_recipe.oncancel 
