@@ -111,4 +111,4 @@ RP.edit_recipe.submission_redundant = (dlog) ->
 		if dataBefore[attr] != value # Something's changed => do normal forms processing
 			return null
 	# Nothing's changed => we can just silently close the dialog
-	return { done: true, notice: "Sorted! Cookmark secure and unchanged." }
+	return { done: true, popup: "Sorted! Cookmark secure and unchanged." }

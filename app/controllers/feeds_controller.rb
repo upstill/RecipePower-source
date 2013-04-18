@@ -145,7 +145,7 @@ class FeedsController < ApplicationController
     if @feed.update_attributes(params[:feed])
       respond_to do |format|
         format.html { redirect_to feeds_url, :status => :see_other, notice: 'Feed was successfully updated.' }
-        format.json { render json: { done: true, notice: "Feed saved" } }
+        format.json { render json: { done: true, "popup" => "Feed saved" } }
       end
     else
       respond_to do |format|

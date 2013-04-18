@@ -36,7 +36,7 @@ class RecipesController < ApplicationController
         end
         render json: { 
                        done: true, # Denotes recipe-editing is finished
-                       alert: notice,
+                       popup: notice,
                        title: truncated, 
                        replacements: replacements,
                        action: params[:action],
@@ -259,7 +259,7 @@ class RecipesController < ApplicationController
     else
       respond_to do |format|
         format.html { render nothing: true }
-        format.json { render json: { type: :error, error: @recipe.errors.messages.first.last.last } }
+        format.json { render json: { type: :error, popup: @recipe.errors.messages.first.last.last } }
         format.js { render :text => e.message, :status => 403 }
       end
     end

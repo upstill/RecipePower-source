@@ -107,7 +107,7 @@ filter_submit = (eventdata) ->
 	dlog = eventdata.data
 	clicked = $("input[type=submit][clicked=true]")
 	# return true;
-	if ($(clicked).data("operation") == "Save") && (shortcircuit = notify "beforesave", dlog, eventdata.currentTarget)
+	if ($(clicked).attr("value") == "Save") && (shortcircuit = notify "beforesave", dlog, eventdata.currentTarget)
 		eventdata.preventDefault()
 		RP.process_response shortcircuit
 	else

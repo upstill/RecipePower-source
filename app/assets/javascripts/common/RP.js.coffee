@@ -247,7 +247,7 @@ RP.submit = (request) ->
 RP.process_response = (responseData, dlog) -> 
 	# 'dlog' is the dialog currently running, if any
 	# Wrapped in 'presentResponse', in the case where we're only presenting the results of the request
-	dlog ||= $('div.dialog.modal')[0]
+	dlog ||= $('div.modal')[0]
 	supplanted = false
 	if responseData
 
