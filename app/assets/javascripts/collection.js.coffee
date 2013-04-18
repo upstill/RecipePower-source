@@ -29,6 +29,7 @@
 #= require common/dialog
 #= require common/pics
 #= require common/RP
+#= require common/notifications
 # require common/RPDialog
 # require common/RPDialogs
 
@@ -78,9 +79,8 @@ collection_pager = (evt) ->
 	RP.collection.update { cur_page: this.getAttribute("value") }, this.dataset.url
 
 RP.collection.update = (params, url) ->
-	# $('div.loader').addClass "loading" # show progress indicator
 	RP.dialog.cancel() # Close any open modal dialogs
-	RP.ajax_loading()
+	RP.notifications.wait()
 	jQuery.ajax
 		type: "POST"
 		url: (url || "/collection/query")
@@ -95,7 +95,7 @@ RP.collection.update = (params, url) ->
 			$(".pageclickr").click(collection_pager)
 			RP.rcp_list.onload()
 			window.scrollTo(0,0)
-			RP.ajax_loaded()
+			RP.notifications.done()
 
 # Callback when the query tag set changes
 queryChange = (hi, li) ->

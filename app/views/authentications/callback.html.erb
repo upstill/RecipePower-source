@@ -1,10 +1,10 @@
 <h3><%= @after_sign_in_msg || "Returning to the recipe..." %></h3>
 <script type="text/javascript">
-	// If there's a popup, load the url into its parent, other just load the window with the url
-	var targetWindow = window.opener || window
-	<% if @after_sign_in_url %>
-		targetWindow.location = '<%= @after_sign_in_url %>';
-	<% end %>
-	if(window.opener)
+	if(window.opener) {
+		<% if @after_sign_in_url %>
+			window.opener.location = '<%= @after_sign_in_url %>';
+		<% end %>
 	  window.close();
+	} else
+		window.location = '<%= @after_sign_in_url || home_path %>';
 </script>

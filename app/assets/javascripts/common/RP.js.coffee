@@ -1,30 +1,6 @@
 # Establish RecipePower name space and define widely-used utility functionality
 window.RP = window.RP || {}
 
-# Formerly genericHandling
-# Post any errors or notifications from a JSON response
-# data.error gives error message
-# data.notice gives non-alarming informational message
-RP.notify = (data, preface) ->
-	if data.error
-		RP.postError preface+data.error
-	else if data.notice 
-		RP.postNotice data.notice
-
-RP.postError = (str) ->
-	if str && (str.length > 0) 
-		$('#container').data "errorPost", str
-
-RP.postNotice = (str) ->
-	if str && (str.length > 0)
-		$('#container').data "noticePost", str
-#		jNotify str, 
-#			HorizontalPosition: 'center', 
-#			VerticalPosition: 'top'
-
-RP.notification_html = (msg) ->
-	"<span style=\"text-align:center\"><strong>"+msg+"</strong></span>"
-
 # Respond to the preview-recipe button by opening a popup loaded with its URL.
 #   If the popup gets blocked, return true so that the recipe is opened in a new
 #   window/tab.
@@ -77,29 +53,6 @@ RP.named_function = (str) ->
 		if(typeof obj == 'function')
 			return obj
 	return null;
-
-# Show a beachball while an ajax request is pending
-RP.ajax_loading = () ->
-	if elmt = $('div.ajax-loader')[0]
-		parent = elmt.parentElement
-		elmt.style.width = ($(window).width()-parent.offsetLeft).toString()+"px"
-		elmt.style.height = ($(window).height()-parent.offsetTop).toString()+"px"
-		$(elmt).addClass "loading" 
-
-# Remove the beachball after return
-RP.ajax_loaded = () ->
-	$('div.ajax-loader').removeClass "loading"
-
-# Post a flash notification into the 'div.flash_notifications' element
-flash_notification = (level, message) ->
-	bootstrap_class = "alert-"+level
-	html = "<div class=\"alert "+
-		bootstrap_class+
-		"	alert_block fade in\">
-	      <button class=\"close\" data-dismiss=\"alert\">&#215;</button>"+
-    message+
-    "</div>"
-	$('div.flash_notifications').replaceWith html
 	
 # Use a vanilla httprequest to ping the server, bypassing jQuery
 do_request = (url, ajax_options, processing_options) ->
@@ -139,17 +92,17 @@ poll_for_update = (url, ajax_options, processing_options) ->
 				# Process JSON response here
 				debugger
 		else
-			flash_notification("error", "Sorry: got an error trying to update")
+			RP.notifications.post "Sorry: got an error trying to update", "flash-error"
 	
 	ajax_options.error ||= (jqXHR, textStatus, errorThrown) ->
 		# Threw an error.  We got either replacement HTML (because the controller couldn't produce JSON)
 		# or a simple message string (to be placed into the notifications panel)
 		dom = $(jqXHR.responseText)
 		if dom.length > 0
-			flash_notification "alert", "Update complete!"
+			RP.notifications.post "Update complete!", "flash-alert"
 			$(processing_options.contents_selector).replaceWith dom
 		else
-			flash_notification "alert", jqXHR.responseText
+			RP.notifications.post jqXHR.responseText, "flash-alert" 
 	
 	jQuery.ajax url, ajax_options # setTimeout jQuery.ajax(url, ajax_options), 1000
 
@@ -206,20 +159,20 @@ RP.get_page = (url) ->
 submit_and_process = ( request, method, assumptions ) ->
 	assumptions = assumptions || {} # No assumptions if absent
 	method ||= "GET"
-	RP.modal_notify assumptions.wait_msg
+	RP.notifications.wait assumptions.wait_msg
 	$.ajax
 		type: method,
 		dataType: "json",
 		url: request,
 		error: (jqXHR, textStatus, errorThrown) ->
 			$('span.source').text jqXHR.responseText
-			RP.modal_notify()
+			RP.notifications.done()
 			responseData = RP.post_error jqXHR
 			responseData.how = responseData.how || assumptions.how
 			RP.process_response responseData
 		success: (responseData, statusText, xhr) ->
 			# Pass any assumptions into the response data
-			RP.modal_notify()
+			RP.notifications.done()
 			responseData.how = responseData.how || assumptions.how;
 			RP.post_success responseData
 			RP.process_response responseData
@@ -288,30 +241,6 @@ RP.submit = (request) ->
 		submit_and_process request, method, data
 	false
 
-# Insert any notifications into 'div.notifications-panel'
-RP.to_notifications = (nots) ->
-	if nots && panel = $('div.notifications-panel')[0]
-		i = 0;
-		notsout = "";
-		while (i < nots.length)
-			nat = nots[i];
-			alert_class = nat[0];
-			alert_content = nat[1];
-			natsout << "<div class=\"alert alert-" + 
-			alert_class + 
-			"\"><a class=\"close\" data-dismiss=\"alert\">x</a>" +
-			alert_content + 
-			"</div>"
-			i = i+1;
-		panel.innerHTML = natsout;
-
-# Simple popup to notify the user of a process
-RP.modal_notify = (msg) ->
-	if msg && msg.length > 0
-		bootbox.alert msg
-	else
-		$('div.bootbox.modal').modal 'hide'
-
 # Process response from a request. This will be an object supplied by a JSON request,
 # which may include code to be presented along with fields (how and area) telling how
 # to present it. The data may also consist of only 'code' if it results from an HTML request
@@ -346,12 +275,9 @@ RP.process_response = (responseData, dlog) ->
 			document.write page
 			document.close()
 			supplanted = true
-
-		# 'notifications' provides any notifications to be posted
-		RP.to_notifications responseData.notifications
-
-		# Post a popup message, if any
-		RP.modal_notify responseData.popup_msg
+		
+		# Handle any notifications in the response
+		RP.notifications.from_response responseData
 		
 		# 'done', when true, simply means close the dialog, with an optional notice
 		if responseData.done && !supplanted

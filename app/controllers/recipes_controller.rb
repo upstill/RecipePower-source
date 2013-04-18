@@ -36,7 +36,7 @@ class RecipesController < ApplicationController
         end
         render json: { 
                        done: true, # Denotes recipe-editing is finished
-                       popup_msg: notice,
+                       alert: notice,
                        title: truncated, 
                        replacements: replacements,
                        action: params[:action],

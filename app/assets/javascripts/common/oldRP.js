@@ -247,12 +247,9 @@ function rcpCollect(id) {
 		    boostInTablist(data.list_element_class, data.list_element_body, 3) // Put it at the top of My Cookmarks
 		    boostInTablist(data.list_element_class, data.list_element_body, 4) // Put it at the top of the Recent tab
 		    $("div.ack_popup").text(data.title);
-		    jNotify( "Got it! Now appearing at the top of My Cookmarks.", 
-				{ HorizontalPosition: 'center', VerticalPosition: 'top'} );
+		    RP.notifications.post( "Got it! Now appearing at the top of My Cookmarks.", "popup");
 		} else if(data.type == "error" ) {
-		    jNotify( "Sorry, couldn't grab cookmark: "+data.error, 
-				{ HorizontalPosition: 'center', VerticalPosition: 'top'} );
-			
+		    RP.notifications.post( "Sorry, couldn't grab cookmark: "+data.error, "popup");
 		}
 	  }
     }, "json" );
@@ -269,8 +266,7 @@ function rcpAdd() { // Add a recipe to the cookmarks by pasting in a URL
 		    boostInTablist(data.list_element_class, data.list_element_body, 3) // Put it at the top of My Cookmarks
 		    boostInTablist(data.list_element_class, data.list_element_body, 4) // Put it at the top of the Recent tab
 		    $("div.ack_popup").text(data.title);
-		    jNotify( "Got it! Added to collection and now appearing at the top of My Cookmarks.", 
-				{ HorizontalPosition: 'center', VerticalPosition: 'top'} );
+		    RP.notifications.post( "Got it! Added to collection and now appearing at the top of My Cookmarks.", "popup");
 		}
 	  }
   }, "json" );

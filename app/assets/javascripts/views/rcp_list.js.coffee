@@ -27,7 +27,6 @@ RP.rcp_list.update = ( data ) ->
 				fitImage img[0]
 				x=2
 			fitImage img[0]
-	RP.notify data # Post errors and notices
 
 RP.rcp_list.boostInRecent = (list_element_class, list_element_body, targettab) ->
 	# Insert the resulting element at the top of the All Cookmarks tab, if open

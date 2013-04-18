@@ -11,6 +11,7 @@
 //= require common/pics
 //= require common/RP
 //= require common/dialog
+//= require common/notifications
 //= require views/edit_recipe
 //= require jquery/jquery.form
 //= require jquery/jquery.ba-postmessage
@@ -107,15 +108,6 @@ function close_dialog(dlog) {
 function yield_iframe(e) {
 	var link = e.currentTarget;
 	$.postMessage( { call: "redirect_from_iframe", url: $(link).attr("href") }, document.sourcehome );
-/*
-	debugger
-	$.postMessage( { call: "execute_resize", width: $(link).data("width"), height: $(link).data("height") }, document.sourcehome );
-	$('body').replaceWith("<h3>"+$(link).data("hold_msg")+"</h3>")
-	window.addEventListener( 'load', function() {
-		debugger;
-	}, false);
-	window.location = $(link).attr("href");
-*/
 	e.stopPropagation();
 	e.preventDefault();
 	false
@@ -147,7 +139,6 @@ function submitDialog(eventdata) { // Supports multiple forms in dialog
 		async: false,
 		dataType: 'json',
 		error: function(jqXHR, textStatus, errorThrown) {
-			// postError(jqXHR, dlog);
 			retire_iframe(); // closeDialog(dlog);
 			process_result_normally = false;
 		},
