@@ -447,6 +447,11 @@ class RcpBrowserElementFriend < BrowserElement
     "These are the recipes from the #{@handle} channel.<br>Withdraw from the channel by clicking the 'X' next to the name." :
     "These are all the recipes collected by #{@handle}.<br>Tired of their friendship? Click the 'X' next to the name."
   end
+  
+  def hints()
+    "Not much to do about that..."
+  end
+
 end
 
 # Element for all the recipes for the owner, with subheads for status and favored keys
@@ -786,6 +791,7 @@ class ContentBrowser < BrowserComposite
   
   # If the collection has returned no results, suggest what the problem might have been
   def explain_empty tags
+    debugger
     report = "It looks like #{selected.handle} doesn't have anything that matches your search."
     hint = ""
     case tags.count
