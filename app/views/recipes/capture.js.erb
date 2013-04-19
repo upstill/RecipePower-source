@@ -88,6 +88,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	},
 	
 	ifrOnload: function () {
+    
 		// First, dispose of the placeholder and spinner images, if any
 		var img = document.getElementById("recipePower-placeholder");
 		var spinner = document.getElementById("recipePower-spinner");
@@ -265,6 +266,18 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	// Move the image onscreen, centered
 	spinner.style.left = ((window.outerWidth-32)/2).toString() + "px";
 	
+	// Extract a proposed, canonical URL
+	debugger;
+  var extracted_url = null;
+  var extracted_title = null;
+  // Here comes code to extract the url and title from the original page (if any)
+  <%= @site.extraction_js %>
+	var callback = "<%= @url %>";
+	if(extracted_url)
+		callback += "&amp;recipe[url]="+encodeURIComponent(extracted_url || window.location.href);
+	if(extracted_title)
+		callback += "&amp;recipe[title]="+encodeURIComponent(extracted_title || document.title);
+	
 	var goer = document.createElement('a');
 	goer.href = "http://<%= current_domain %>/collection"
 	goer.id = 'recipePower-golink';
@@ -283,7 +296,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	ifr.style.overflow = 'visible';
 	ifr.style.border = "0px";
 	ifr.id = "recipePower-iframe";
-	ifr.src = "<%= @url %>";
+	ifr.src = callback;
 	if (ifr.attachEvent){
     ifr.attachEvent("onload", window.recipePower_namespace.ifrOnload);
 	} else {

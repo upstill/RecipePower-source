@@ -79,6 +79,10 @@ class Recipe < ActiveRecord::Base
     }.compact.uniq
 
   end
+  
+  def site
+    @site ||= Site.by_link(url)
+  end
     
   # Either fetch an exising recipe record or make a new one, based on the
   # params. If the params have an :id, we find on that, otherwise we look
@@ -98,22 +102,16 @@ class Recipe < ActiveRecord::Base
       end
     else # No id: create based on url
       params.delete(:rcpref)
-      # Sanitize the URL
-      params[:url].strip!
-      params[:url].gsub!(/\{/, '%7B')
-      params[:url].gsub!(/\}/, '%7D') 
       rcp = Recipe.new params
       if (url = params[:url]).blank?  # Check for non-empty URL
         rcp.errors.add :url, "can't be blank"
       elsif url.match %r{^http://#{current_domain}} # Check we're not trying to link to a RecipePower page
         rcp.errors.add :base, "Sorry, can't cookmark pages from RecipePower. (Does that even make sense?)"
       # Find the site for this url
-      elsif !(site = Site.by_link(url)) # Check to make sure site can be found/created
-        rcp.errors.add :url, "doesn't make sense or can't be found"
-      else
+      elsif rcp.site # ...if site can be found/created under this URL
         # Get the site to crack the page for this recipe
         # Pull title, picture and canonical URL from the result
-        redirect = Site.valid_url(url, (site.yield :URI, url)[:URI]) || url
+        redirect = Site.valid_url(url, (rcp.site.yield :URI, url)[:URI]) || url
         # Check that the recipe doesn't already exist
         if saved = Recipe.where(url: redirect).first
           rcp = saved
@@ -123,6 +121,8 @@ class Recipe < ActiveRecord::Base
           rcp.title = ((site.yield :Title, url)[:Title] || rcp.title).html_safe
           rcp.save
         end
+      else
+          rcp.errors.add :url, "doesn't make sense or can't be found"
       end
     end
     # If all is well, make sure it's on the user's list

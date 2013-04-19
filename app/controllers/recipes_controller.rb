@@ -106,6 +106,7 @@ class RecipesController < ApplicationController
   	dialog_only = params[:how] == "modal" || params[:how] == "modeless"
     respond_to do |format|
       format.html { # This is for capturing a new recipe and tagging it using a new page. 
+        debugger
         @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params
         # The injector (capture.js) calls for this to fill the iframe on the foreign page.
         @layout = "injector"
@@ -123,6 +124,7 @@ class RecipesController < ApplicationController
         end
       }
       format.json {
+        debugger
         @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params
         if @recipe.id
           codestr = with_format("html") { render_to_string :edit, layout: false }
@@ -133,18 +135,16 @@ class RecipesController < ApplicationController
         render json: { code: codestr }
       }
       format.js { 
-        # Produce javascript in response to the bookmarklet, to render into an iframe, 
-        # either the recipe editor or a login screen.
-        # We need a domain to pass as sourcehome, so the injected iframe can communicate with the browser
-        params[:recipe][:url].strip!
-        if uri = URI::HTTP.sans_query(params[:recipe][:url])
-          domain = uri.scheme+"://"+uri.host
-          domain += ":"+uri.port.to_s if uri.port != 80
-          @url = capture_recipes_url area: "at_top", layout: "injector", recipe: params[:recipe], sourcehome: domain
+        # Produce javascript in response to the bookmarklet, to render  the recipe editor into an iframe, 
+        # possibly preceded by login negotiation.
+        # We need a domain to pass as sourcehome, so the injected iframe can communicate with the browser.
+        # This gets extracted from the href passed as a parameter
+        if @site = Site.by_link(params[:recipe][:url])
+          @url = capture_recipes_url area: "at_top", layout: "injector", sourcehome: @site.domain
           if !current_user # Apparently there's no way to check up on a user without hitting the database
             # Push the editing URL so authentication happens first
             session[:original_uri] = @url
-            @url = new_authentication_url area: "at_top", layout: "injector", sourcehome: domain 
+            @url = new_authentication_url area: "at_top", layout: "injector", sourcehome: @site.domain 
           end
         end
         render

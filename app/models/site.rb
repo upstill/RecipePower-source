@@ -182,6 +182,54 @@ class Site < ActiveRecord::Base
         { label: :Title, path: "title" } 
     ]
     
+    def self.dump_tags
+      alltags = {}
+      tagset = @@TitleTags
+      Site.all.map(&:tags).each do |tagspecs| 
+        tagspecs.each do |tagspec|
+          tagset << tagspec unless tagset.any? do |candidate|
+            tagspec == candidate
+=begin
+            if((tagspec[:label].equal? candidate[:label]) &&
+              (tagspec[:path].equal? candidate[:path]) &&
+              (tagspec[:linkpath].equal? candidate[:linkpath]) &&
+              (tagspec[:pattern].equal? candidate[:pattern]) &&
+              (tagspec[:attribute].equal? candidate[:attribute]) &&
+              (tagspec[:cut].equal? candidate[:cut])) &&
+              true
+            else
+              debugger
+              false
+            end
+=end
+          end
+        end
+      end
+      tagset.each do |tag|
+        path = tag[:path]
+        label = tag[:label]
+        debugger if tag[:xpath]
+        alltags[label] ||= {}
+        alltags[label][path] ||= []
+        alltags[label][path] << tag
+      end
+      alltags.each do |label, labelset|
+        puts label.to_s+":"
+        labelset.each do |path, pathset|
+          puts "\t"+path+":"
+          pathset.each do |tags| 
+            tags.each do |name, value|
+              next if name == :label || name == :path
+              nq = name.class == Symbol ? "\'"+name.to_s+"\'" : "\""+name+"\""
+              vq = value.class == Symbol ? "\'"+value.to_s+"\'" : "\""+value+"\""
+              puts "\t\t"+nq+": "+vq
+            end
+            puts "\t\t--------------------------------------"
+          end
+        end
+      end
+    end
+    
     def name
       (self.referent && referent.name) || oldname
     end
@@ -201,6 +249,27 @@ class Site < ActiveRecord::Base
         self.referent = Referent.express(self.name, :Source)
     end
 =end
+
+  # Generate Javascript to pull the title and url from the page
+  def extraction_js
+    %q{
+      var links = document.getElementsByTagName("link");
+      for (var i = 0; i < links.length; i ++) {
+        if (links[i].getAttribute("rel") === "canonical") {
+          extracted_url = links[i].getAttribute("href")
+        }
+      }
+    	if (!extracted_url) {
+        links = document.getElementsByTagName("a");
+        for (var i = 0; i < links.length; i ++) {
+          if (links[i].getAttribute("rel") === "bookmark") {
+            extracted_url = links[i].getAttribute("href")
+    				break;
+          }
+        }
+    	}
+  	}.html_safe
+  end
     
     def post_init
       unless self.site
@@ -309,8 +378,16 @@ class Site < ActiveRecord::Base
       end
     end
     
+    def domain
+      scheme+"://"+host+((port=="80") ? "" : (":"+port))
+    end
+    
     # Find and return the site wherein the named link is stored
     def self.by_link (link)
+      # Sanitize the URL
+      link.strip!
+      link.gsub!(/\{/, '%7B')
+      link.gsub!(/\}/, '%7D') 
       if (uri = URI::HTTP.sans_query(link)) && !uri.host.blank?
         # Find all sites assoc'd with the given domain
         sites = Site.where "host = ?", uri.host
