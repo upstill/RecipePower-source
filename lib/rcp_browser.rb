@@ -45,6 +45,10 @@ class BrowserElement
     "This is a browser element "+self.class.to_s
   end
   
+  def hints
+    nil
+  end
+  
   # The server callback to add an element of this type
   def add_path
     nil
@@ -791,7 +795,6 @@ class ContentBrowser < BrowserComposite
   
   # If the collection has returned no results, suggest what the problem might have been
   def explain_empty tags
-    debugger
     report = "It looks like #{selected.handle} doesn't have anything that matches your search."
     hint = ""
     case tags.count
