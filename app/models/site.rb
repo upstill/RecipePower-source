@@ -204,34 +204,8 @@ class Site < ActiveRecord::Base
 =end
 
   # Generate Javascript to pull the title and url from the page
-  def extraction_js
-    Site.collect_tags(:URI).each do |tag|
-      tag[:path].split(/\s+/).each do |locator| 
-        breakdown = locator.match /^(\w*)((([.#])(.*))|(\[(\w*)=\'([^']*)\'\]))?/
-        field_val_arr = [ :unbound :tag :unbound :unbound :class_or_id_char :class_or_id_str :unbound :propname :propvalue ].zip breakdown
-        fields = Hash[*field_val_arr.flatten]
-        debugger
-        x=2
-      end
-    end
-    %q{
-      var links = document.getElementsByTagName("link");
-      for (var i = 0; i < links.length; i ++) {
-        if (links[i].getAttribute("rel") === "canonical") {
-          extracted_url = links[i].getAttribute("href")
-        }
-      }
-    	if (!extracted_url) {
-        links = document.getElementsByTagName("a");
-        for (var i = 0; i < links.length; i ++) {
-          if (links[i].getAttribute("rel") === "bookmark") {
-            extracted_url = links[i].getAttribute("href")
-    				break;
-          }
-        }
-    	}
-    	debugger;
-    	finders = [
+  def finders
+  	[
       {label: "URI", path: "link[rel='canonical']", attribute: "href", count: 169},
       {label: "URI", path: "meta[property='ogurl']", attribute: "content", count: 113},
       {label: "URI", path: ".post a[rel='bookmark']", attribute: "href", count: 46},
@@ -242,9 +216,9 @@ class Site < ActiveRecord::Base
       {label: "URI", path: ".hrecipe a[rel='bookmark']", attribute: "href", count: 3},
       {label: "URI", path: "a.addthis_button_pinterest", attribute: "pi:pinit:url", count: 3},
       {label: "URI", path: "#recipe_tab", attribute: "href", count: 2},
-      {label: "URI", path: "div.hrecipe a[rel='bookmark']", attribute: "href", count: 1}}
-      ];
-  	}.html_safe
+      {label: "URI", path: "div.hrecipe a[rel='bookmark']", attribute: "href", count: 1}
+    ]+
+    @@TitleTags
   end
     
     def post_init

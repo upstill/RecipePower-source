@@ -234,12 +234,109 @@ window.recipePower_namespace = window.recipePower_namespace || {
 				q[name][q[name].length] = true;
 		}
 		return q;
-	}
+	},
 	
-	pathFilter: function(candidates, spec) {
+	nlToArr: function(nl) {
+		var arr = [];
+		for(var i = nl.length; i--; arr.unshift(nl[i]));
+		return arr;
+	},
+	
+	filterElementsByTag: function(candidates, tagname) {
+		if(!tagname) return candidates;
+		var ns = window.recipePower_namespace;
+		var results = [];
+		for(var i=0; i<candidates.length; i++) {
+			var candidate = candidates[i];
+			results = results.concat( ns.nlToArr(candidate.getElementsByTagName(tagname)) );
+		}
+		return results;
+	},
+	
+	filterElementsByClassOrID: function(candidates, propname, name) {
+		if(!propname) return candidates;
+		var ns = window.recipePower_namespace;
+		var results = [];
+		for(var i=0; i<candidates.length; i++) {
+			var candidate = candidates[i];
+			if(propname == '.')
+				results = results.concat( ns.nlToArr(candidate.getElementsByClassName(name)) );
+			else if (candidate = candidate.getElementByID)
+				results.unshift( candidate );
+		}
+		return results;
+	},
+	
+	filterElementsByAttribute: function(candidates, attrname, attrval) {
+		if(!attrname) return candidates;
+		var results = [];
+		for(var i=0; i<candidates.length; i++) {
+			var candidate = candidates[i];
+			var actualVal = candidate.getAttribute(attrname);
+			if (actualVal && (actualVal == attrval))
+				results.unshift( candidate );
+		}
+		return results;
+	},
+	
+	getAttributeFromElements: function(elements, attrname) {
+		var results = [];
+		for(var i=0; i<candidates.length; i++) {
+			var attrval = candidates[i].getAttribute(attrname);
+			if (attrval) 
+				results.unshift( attrval );
+		}
+		return results;
+	},
+	
+	pathFilter: function(candidates, specstring) {
+		var ns = window.recipePower_namespace;
+		var breakdown = specstring.match(/^(\w*)((([.#])(.*))|(\[(\w*)=\'([^']*)\'\]))?/);
+		var spec = { 
+			tag:  breakdown[1],
+			classOrIDChoice:  breakdown[4],
+			classOrIDName:  breakdown[5],
+			propspec:  breakdown[6],
+			propname:  breakdown[7],
+			propval:  breakdown[8]
+		}
+		candidates = ns.filterElementsByTag(candidates, spec.tag)
+		candidates = ns.filterElementsByClassOrID(candidates, spec.classOrIDChoice, spec.classOrIDName)
+		candidates = ns.filterElementsByAttribute(candidates, spec.propname, spec.propval)
 		return candidates;
-	}
+	}, 
 	
+	applyFinders: function(finders, name) {
+		var result = null;
+		var ns = window.recipePower_namespace;
+		for(var ix=0; ix<finders.length; ix++) {
+			finder = finders[ix];
+			if (finder.label == name) {
+				var candidates = [window.document];
+				var pathlist = finder.path.split(/\s+/);
+				for(var jx=0; jx<pathlist.length; jx++) {
+					candidates = ns.pathFilter(candidates, pathlist[jx]);
+				}
+				if($(finder.path)[0] != candidates[0])
+					debugger;
+				if (candidates.length > 0) {
+					var found = null;
+					var jfound = null;
+					if(finder.attribute) {
+						found = candidates[0].getAttribute(finder.attribute);
+						jfound = $(finder.path).attr(finder.attribute);
+					} else {
+						found = jfound = candidates[0].innerHTML;
+					}
+					if(found != jfound)
+						debugger;
+					result = result || found;
+					finder.found = found;
+				} 
+			}
+		}
+		return result;
+	}
 };
 
 // Now create the iframe
@@ -271,27 +368,16 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	spinner.style.left = ((window.outerWidth-32)/2).toString() + "px";
 	
 	// Extract a proposed, canonical URL
-  var extracted_url = null;
-  var extracted_title = null;
-  var finders = [];
-	var namespace = window.recipePower_namespace;
-  // Here comes code to extract the url and title from the original page (if any)
-  <%= @site.extraction_js %>
-	for(var ix=0; ix<finders.length; ix++) {
-		finders = finders[ix];
-		var candidates = [window.document];
-		var pathlist = finder.path.split(/\s*/);
-		for(var jx=0; jx<pathlist.length; jx++) {
-			pathElmt = pathlist[jx];
-			candidates = namespace.pathFilter(candidates, pathElmt);
-		}
-		// Now the candidates are a set of DOM elements that match the path
-		debugger;
-	}
+	var ns = window.recipePower_namespace;
+  // The extraction_js helper should declare finders for needed elements
 	var callback = "<%= @url %>";
-	if(extracted_url)
+	debugger;
+	var finders = JSON.parse ("<%= j @site.finders.to_json.html_safe %>") ;
+	var extracted_url;
+	if(extracted_url = ns.applyFinders(finders, "URI"))
 		callback += "&amp;recipe[url]="+encodeURIComponent(extracted_url || window.location.href);
-	if(extracted_title)
+	var extracted_title;
+	if(extracted_title = ns.applyFinders(finders, "Title"))
 		callback += "&amp;recipe[title]="+encodeURIComponent(extracted_title || document.title);
 	
 	var goer = document.createElement('a');
