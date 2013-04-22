@@ -83,6 +83,7 @@ protected
   
 public
   
+  # Examine a page for matches against the given set of tags, specified with a CSS path
   def glean (tags)
     tags = [tags] if tags.class == Hash 
     tags.each do |tagspec|
@@ -182,54 +183,6 @@ class Site < ActiveRecord::Base
         { label: :Title, path: "title" } 
     ]
     
-    def self.dump_tags
-      alltags = {}
-      tagset = @@TitleTags
-      Site.all.map(&:tags).each do |tagspecs| 
-        tagspecs.each do |tagspec|
-          tagset << tagspec unless tagset.any? do |candidate|
-            tagspec == candidate
-=begin
-            if((tagspec[:label].equal? candidate[:label]) &&
-              (tagspec[:path].equal? candidate[:path]) &&
-              (tagspec[:linkpath].equal? candidate[:linkpath]) &&
-              (tagspec[:pattern].equal? candidate[:pattern]) &&
-              (tagspec[:attribute].equal? candidate[:attribute]) &&
-              (tagspec[:cut].equal? candidate[:cut])) &&
-              true
-            else
-              debugger
-              false
-            end
-=end
-          end
-        end
-      end
-      tagset.each do |tag|
-        path = tag[:path]
-        label = tag[:label]
-        debugger if tag[:xpath]
-        alltags[label] ||= {}
-        alltags[label][path] ||= []
-        alltags[label][path] << tag
-      end
-      alltags.each do |label, labelset|
-        puts label.to_s+":"
-        labelset.each do |path, pathset|
-          puts "\t"+path+":"
-          pathset.each do |tags| 
-            tags.each do |name, value|
-              next if name == :label || name == :path
-              nq = name.class == Symbol ? "\'"+name.to_s+"\'" : "\""+name+"\""
-              vq = value.class == Symbol ? "\'"+value.to_s+"\'" : "\""+value+"\""
-              puts "\t\t"+nq+": "+vq
-            end
-            puts "\t\t--------------------------------------"
-          end
-        end
-      end
-    end
-    
     def name
       (self.referent && referent.name) || oldname
     end
@@ -252,6 +205,15 @@ class Site < ActiveRecord::Base
 
   # Generate Javascript to pull the title and url from the page
   def extraction_js
+    Site.collect_tags(:URI).each do |tag|
+      tag[:path].split(/\s+/).each do |locator| 
+        breakdown = locator.match /^(\w*)((([.#])(.*))|(\[(\w*)=\'([^']*)\'\]))?/
+        field_val_arr = [ :unbound :tag :unbound :unbound :class_or_id_char :class_or_id_str :unbound :propname :propvalue ].zip breakdown
+        fields = Hash[*field_val_arr.flatten]
+        debugger
+        x=2
+      end
+    end
     %q{
       var links = document.getElementsByTagName("link");
       for (var i = 0; i < links.length; i ++) {
@@ -268,6 +230,20 @@ class Site < ActiveRecord::Base
           }
         }
     	}
+    	debugger;
+    	finders = [
+      {label: "URI", path: "link[rel='canonical']", attribute: "href", count: 169},
+      {label: "URI", path: "meta[property='ogurl']", attribute: "content", count: 113},
+      {label: "URI", path: ".post a[rel='bookmark']", attribute: "href", count: 46},
+      {label: "URI", path: ".title a", attribute: "href", count: 38},
+      {label: "URI", path: "input[name='uri']", attribute: "value", count: 17},
+      {label: "URI", path: "div.post h2 a[rel='bookmark']", attribute: "href", count: 11},
+      {label: "URI", path: "a.permalink", attribute: "href", count: 10},
+      {label: "URI", path: ".hrecipe a[rel='bookmark']", attribute: "href", count: 3},
+      {label: "URI", path: "a.addthis_button_pinterest", attribute: "pi:pinit:url", count: 3},
+      {label: "URI", path: "#recipe_tab", attribute: "href", count: 2},
+      {label: "URI", path: "div.hrecipe a[rel='bookmark']", attribute: "href", count: 1}}
+      ];
   	}.html_safe
   end
     
@@ -562,4 +538,142 @@ class Site < ActiveRecord::Base
       end
       result
   end     
+  
+  def self.collect_tags(which=nil)
+    which = which.to_s if which
+    tagset = []
+    Site.all.map(&:tags).each do |tagspecs| 
+      tagspecs.each do |tagspec|
+        tagspec.each { |key, value| tagspec[key] = value.to_s }
+        next if (which && (tagspec[:label] != which)) || tagset.any? { |candidate| tagspec == candidate }
+        tagset << tagspec
+      end
+    end
+    tagset
+  end
+  
+  # Examine every page on the site and count the number of hits on the global tag set
+  def self.study(which=nil)
+    # Get the set of tags to glean with
+    alltags = self.collect_tags(which)
+    # Initialize the counts to zero
+    alltags.each { |tag| tag[:count] = 0 }
+    which = which.to_s
+    self.all.each do |site|
+      begin
+        ou = open site.sampleURL
+        if ou && (doc = Nokogiri::HTML(ou))
+          alltags.each do |tag|
+            @pagetags = PageTags.new doc, site.site
+            @pagetags.glean([tag])
+            output = @pagetags.result(which)
+            tag[:count] += 1 unless output.blank?
+          end
+          # @pagetags.hrecipe 
+          ou.close 
+        end
+      rescue => e
+        x=2
+      end
+    end
+    alltags.sort { |t1,t2| t2[:count] <=> t1[:count] }.each { |tag| puts tag.to_s }
+  end
+
+  def self.dump_tags(which = nil)
+    tagset = self.collect_tags(which)+@@TitleTags
+    alltags = {}
+    tagset.each do |tag|
+      path = tag[:path]
+      label = tag[:label]
+      debugger if tag[:xpath]
+      alltags[label] ||= {}
+      alltags[label][path] ||= []
+      alltags[label][path] << tag
+    end
+    alltags.each do |label, labelset|
+      puts label.to_s+":"
+      labelset.each do |path, pathset|
+        puts "\t"+path+":"
+        pathset.each do |tags| 
+          tags.each do |name, value|
+            # next if name == :label || name == :path
+            nq = name.class == Symbol ? "\'"+name.to_s+"\'" : "\""+name+"\""
+            vq = value.class == Symbol ? "\'"+value.to_s+"\'" : "\""+value+"\""
+            puts "\t\t"+nq+": "+vq
+          end
+          puts "\t\t--------------------------------------"
+        end
+      end
+    end
+  end
 end
+
+=begin
+URI:
+link[rel='canonical']:
+	'label': "URI"
+	'path': "link[rel='canonical']"
+	'attribute': "href"
+	--------------------------------------
+meta[property='og:url']:
+	'label': "URI"
+	'path': "meta[property='og:url']"
+	'attribute': "content"
+	--------------------------------------
+.title a:
+	'label': "URI"
+	'path': ".title a"
+	'attribute': "href"
+	--------------------------------------
+div.hrecipe a[rel='bookmark']:
+	'label': "URI"
+	'path': "div.hrecipe a[rel='bookmark']"
+	'attribute': "href"
+	--------------------------------------
+#recipe_tab:
+	'label': "URI"
+	'path': "#recipe_tab"
+	'attribute': "href"
+	--------------------------------------
+a.addthis_button_pinterest:
+	'label': "URI"
+	'path': "a.addthis_button_pinterest"
+	'attribute': "pi:pinit:url"
+	--------------------------------------
+a.permalink:
+	'label': "URI"
+	'path': "a.permalink"
+	'attribute': "href"
+	--------------------------------------
+input[name='uri']:
+	'label': "URI"
+	'path': "input[name='uri']"
+	'attribute': "value"
+	--------------------------------------
+div.post h2 a[rel='bookmark']:
+	'label': "URI"
+	'path': "div.post h2 a[rel='bookmark']"
+	'attribute': "href"
+	--------------------------------------
+.hrecipe a[rel='bookmark']:
+	'label': "URI"
+	'path': ".hrecipe a[rel='bookmark']"
+	'attribute': "href"
+	--------------------------------------
+	.post a[rel='bookmark']:
+	'label': "URI"
+	'path': ".post a[rel='bookmark']"
+	'attribute': "href"
+	--------------------------------------
+{:label=>"URI", :path=>"link[rel='canonical']", :attribute=>"href", :count=>169
+{:label=>"URI", :path=>"meta[property='og:url']", :attribute=>"content", :count=>113
+{:label=>"URI", :path=>".post a[rel='bookmark']", :attribute=>"href", :count=>46
+{:label=>"URI", :path=>".title a", :attribute=>"href", :count=>38
+{:label=>"URI", :path=>"input[name='uri']", :attribute=>"value", :count=>17
+{:label=>"URI", :path=>"div.post h2 a[rel='bookmark']", :attribute=>"href", :count=>11
+{:label=>"URI", :path=>"a.permalink", :attribute=>"href", :count=>10
+{:label=>"URI", :path=>".hrecipe a[rel='bookmark']", :attribute=>"href", :count=>3
+{:label=>"URI", :path=>"a.addthis_button_pinterest", :attribute=>"pi:pinit:url", :count=>3
+{:label=>"URI", :path=>"#recipe_tab", :attribute=>"href", :count=>2
+{:label=>"URI", :path=>"div.hrecipe a[rel='bookmark']", :attribute=>"href", :count=>1}] 
+=end

@@ -236,6 +236,10 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		return q;
 	}
 	
+	pathFilter: function(candidates, spec) {
+		return candidates;
+	}
+	
 };
 
 // Now create the iframe
@@ -267,11 +271,23 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	spinner.style.left = ((window.outerWidth-32)/2).toString() + "px";
 	
 	// Extract a proposed, canonical URL
-	debugger;
   var extracted_url = null;
   var extracted_title = null;
+  var finders = [];
+	var namespace = window.recipePower_namespace;
   // Here comes code to extract the url and title from the original page (if any)
   <%= @site.extraction_js %>
+	for(var ix=0; ix<finders.length; ix++) {
+		finders = finders[ix];
+		var candidates = [window.document];
+		var pathlist = finder.path.split(/\s*/);
+		for(var jx=0; jx<pathlist.length; jx++) {
+			pathElmt = pathlist[jx];
+			candidates = namespace.pathFilter(candidates, pathElmt);
+		}
+		// Now the candidates are a set of DOM elements that match the path
+		debugger;
+	}
 	var callback = "<%= @url %>";
 	if(extracted_url)
 		callback += "&amp;recipe[url]="+encodeURIComponent(extracted_url || window.location.href);
