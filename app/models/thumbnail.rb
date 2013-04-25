@@ -1,4 +1,5 @@
 require "RMagick"
+require './lib/controller_utils.rb'
 require "Domain"
 class Thumbnail < ActiveRecord::Base
   attr_accessible :thumbsize, :thumbdata, :url, :site
@@ -84,7 +85,7 @@ class Thumbnail < ActiveRecord::Base
     # If no path, we just use the "Missing Picture" thumb
     Thumbnail.find_or_create_by_url(path.blank? ? 
       "http://www.recipepower.com/assets/MissingPicture.png" :
-      (Site.valid_url(site, path) || "http://www.recipepower.com/assets/BadPicURL.png")).update_thumb
+      (valid_url(site, path) || "http://www.recipepower.com/assets/BadPicURL.png")).update_thumb
   end
   
   # Somehow this thumbnail has a bad URL: mark it thus

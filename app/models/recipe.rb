@@ -1,5 +1,6 @@
 require './lib/Domain.rb'
 require './lib/RPDOM.rb'
+require './lib/uri_utils.rb'
 require 'open-uri'
 require 'nokogiri'
 require 'htmlentities'
@@ -7,7 +8,7 @@ require 'htmlentities'
 class GettableURLValidator < ActiveModel::EachValidator
   def validate_each(record, attribute, value)
     if(attribute == :url) 
-      if test_result = Site.test_link(value) # by_link(value)
+      if test_result = test_link(value) # by_link(value)
         # If the URL has relocated, we'll smartly adjust our link--UNLESS we're duplicating another URL
         if test_result.kind_of?(String)
           record.url = test_result if Recipe.where(url: test_result).empty?
@@ -34,7 +35,7 @@ end
 
 class Recipe < ActiveRecord::Base
   include Taggable
-  attr_accessible :title, :url, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane
+  attr_accessible :title, :url, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href
   after_save :save_ref
 
   validates :title,:presence=>true 
@@ -81,7 +82,7 @@ class Recipe < ActiveRecord::Base
   end
   
   def site
-    @site ||= Site.by_link(url)
+    @site ||= Site.by_link(url) || (href && Site.by_link(href))
   end
     
   # Either fetch an exising recipe record or make a new one, based on the
@@ -90,7 +91,18 @@ class Recipe < ActiveRecord::Base
   # If a new recipe record needs to be created, we also do QA on the provided URL
   # and dig around for a title.
   # Either way, we also make sure that the recipe is associated with the given user
-  def self.ensure( userid, params, add_to_collection = true)
+  def self.ensure( userid, params, add_to_collection = true, extractions = nil)
+    if extractions
+      # Extractions are parameters derived directly from the page
+      if extractions[:URI]
+        params[:url] = extractions[:URI] 
+      elsif extractions[:href]
+        params[:url] = extractions[:href] 
+      end
+      params[:picurl] = extractions[:Image] if extractions[:Image]
+      params[:title] = extractions[:Title] if extractions[:Title]
+      params[:href] = extractions[:href] if extractions[:href]
+    end
     if params.blank?
       rcp = self.new      
     elsif (id = params[:id].to_i) && (id > 0) # id of 0 means create a new recipe
@@ -101,24 +113,24 @@ class Recipe < ActiveRecord::Base
         rcp.errors.add :id, "There is no recipe number #{id.to_s}"
       end
     else # No id: create based on url
+      debugger
       params.delete(:rcpref)
       rcp = Recipe.new params
-      if (url = params[:url]).blank?  # Check for non-empty URL
+      if rcp.url.blank?  # Check for non-empty URL
         rcp.errors.add :url, "can't be blank"
-      elsif url.match %r{^http://#{current_domain}} # Check we're not trying to link to a RecipePower page
+      elsif rcp.url.match %r{^http://#{current_domain}} # Check we're not trying to link to a RecipePower page
         rcp.errors.add :base, "Sorry, can't cookmark pages from RecipePower. (Does that even make sense?)"
       # Find the site for this url
-      elsif rcp.site # ...if site can be found/created under this URL
-        # Get the site to crack the page for this recipe
-        # Pull title, picture and canonical URL from the result
-        redirect = Site.valid_url(url, (rcp.site.yield :URI, url)[:URI]) || url
+      elsif rcp.site # ...if site can be found/created under this URL (or href)
+        rcp.url = rcp.site.check_uri rcp.url
+        redirect = valid_url(rcp.site.home, rcp.url) || rcp.url
         # Check that the recipe doesn't already exist
         if saved = Recipe.where(url: redirect).first
           rcp = saved
         else
           rcp.url = redirect
-          rcp.picurl = (site.yield :Image, url)[:Image] || ""
-          rcp.title = ((site.yield :Title, url)[:Title] || rcp.title).html_safe
+          rcp.picurl = rcp.site.check_uri rcp.picurl # = ((site.yield :Image, url)[:Image] || "") unless rcp.picurl
+          rcp.title = rcp.site.trim_title rcp.title # = ((site.yield :Title, url)[:Title] || rcp.title).html_safe unless rcp.title
           rcp.save
         end
       else
@@ -146,7 +158,7 @@ class Recipe < ActiveRecord::Base
   # Before editing, try and fill in a blank title by cracking the url
   def check_title
     if self.title.blank? && st = (url && Site.by_link(self.url))
-      self.title = (st.yield :Title)[:Title] || ""
+      self.title = (st.yield :Title, st.sampleURL)[:Title] || ""
       self.title = self.trimmed_title
     else
       self.title

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130403054959) do
+ActiveRecord::Schema.define(:version => 20130425045403) do
 
   create_table "authentications", :force => true do |t|
     t.integer  "user_id"
@@ -160,6 +160,7 @@ ActiveRecord::Schema.define(:version => 20130403054959) do
     t.text     "picurl"
     t.text     "tagpane"
     t.integer  "thumbnail_id"
+    t.text     "href"
   end
 
   create_table "references", :force => true do |t|

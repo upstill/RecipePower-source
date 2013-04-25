@@ -306,12 +306,13 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		return candidates;
 	}, 
 	
-	applyFinders: function(finders, name) {
-		var result = null;
+	// Goes through a list of finders and extracts elements, one for each label
+	applyFinders: function(finders) {
+		var result = {};
 		var ns = window.recipePower_namespace;
 		for(var ix=0; ix<finders.length; ix++) {
 			finder = finders[ix];
-			if (finder.label == name) {
+			if (!result[finder.label]) {
 				var candidates = [window.document];
 				var pathlist = finder.path.split(/\s+/);
 				for(var jx=0; jx<pathlist.length; jx++) {
@@ -330,13 +331,20 @@ window.recipePower_namespace = window.recipePower_namespace || {
 					}
 					if(found != jfound)
 						debugger;
-					result = result || found;
-					finder.found = found;
+					result[finder.label] = found;
 				} 
 			}
 		}
 		return result;
+	},
+	
+	encodeExtractions: function(extrs) {
+		var result = "";
+		for(field in extrs)
+			result += "&amp;extractions["+field+"]="+encodeURIComponent(extrs[field]);
+		return result;
 	}
+	
 };
 
 // Now create the iframe
@@ -372,13 +380,13 @@ window.recipePower_namespace = window.recipePower_namespace || {
   // The extraction_js helper should declare finders for needed elements
 	var callback = "<%= @url %>";
 	debugger;
+	// The finders are specifications for extracting data of different types
 	var finders = JSON.parse ("<%= j @site.finders.to_json.html_safe %>") ;
-	var extracted_url;
-	if(extracted_url = ns.applyFinders(finders, "URI"))
-		callback += "&amp;recipe[url]="+encodeURIComponent(extracted_url || window.location.href);
-	var extracted_title;
-	if(extracted_title = ns.applyFinders(finders, "Title"))
-		callback += "&amp;recipe[title]="+encodeURIComponent(extracted_title || document.title);
+	var extractions = ns.applyFinders(finders); // Scrape the page for definitive URL, Title and image (etc.)
+	extractions.URI = extractions.URI;
+	extractions.href = window.location.href;
+	extractions.title = extractions.title || document.title;
+	callback += ns.encodeExtractions(extractions);
 	
 	var goer = document.createElement('a');
 	goer.href = "http://<%= current_domain %>/collection"

@@ -106,7 +106,7 @@ class RecipesController < ApplicationController
   	dialog_only = params[:how] == "modal" || params[:how] == "modeless"
     respond_to do |format|
       format.html { # This is for capturing a new recipe and tagging it using a new page. 
-        @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params
+        @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe]||{}, true, params[:extractions] # session[:user_id], params
         # The injector (capture.js) calls for this to fill the iframe on the foreign page.
         @layout = "injector"
         if @recipe.id
@@ -123,8 +123,7 @@ class RecipesController < ApplicationController
         end
       }
       format.json {
-        debugger
-        @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params
+        @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe], true, params[:extractions] # session[:user_id], params
         if @recipe.id
           codestr = with_format("html") { render_to_string :edit, layout: false }
         else
