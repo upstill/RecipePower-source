@@ -30,7 +30,7 @@ RP.edit_recipe.go = (rcpdata) ->
 		replace(/%%authToken%%/g, rcpdata.authToken) # .replace(statustarget, statusrepl)
 		$(template).html dlgsource # This nukes any lingering children as well as initializing the dialog
 	# The tag data is parsed and added to the tags field directly
-	$("#recipe_tag_tokens").data "pre", jQuery.parseJSON(rcpdata.rcpTagData)
+	$("#recipe_x_tag_tokens").data "pre", jQuery.parseJSON(rcpdata.rcpTagData)
 	
 	# Hand it off to the dialog handler
 	RP.dialog.run me()
@@ -42,11 +42,11 @@ RP.edit_recipe.onload = (dlog) ->
 	if $('.edit_recipe > *').length > 0
 		
 		# Setup tokenInput on the tags field
-		$("#recipe_tag_tokens", dlog).tokenInput("/tags/match.json", 
+		$("#recipe_x_tag_tokens", dlog).tokenInput("/tags/match.json", 
 			crossDomain: false,
 			noResultsText: "No matching tag found; hit Enter to make it a tag",
 			hintText: "Type your own tag(s) for the recipe",
-			prePopulate: $("#recipe_tag_tokens").data("pre"),
+			prePopulate: $("#recipe_x_tag_tokens").data("pre"),
 			theme: "facebook",
 			preventDuplicates: true,
 			allowFreeTagging: true

@@ -18,7 +18,6 @@ class GettableURLValidator < ActiveModel::EachValidator
         return nil
       end
     elsif attribute == :picurl
-      debugger
       unless record.picurl && (record.picurl =~ /^data:/) # Use a data URL directly w/o taking a thumbnail
         if record.url_changed? || record.picurl_changed? || !record.thumbnail
           Delayed::Job.enqueue record
@@ -36,7 +35,7 @@ end
 
 class Recipe < ActiveRecord::Base
   include Taggable
-  attr_accessible :title, :url, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href, :tag_tokens
+  attr_accessible :title, :url, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href, :x_tag_tokens
   after_save :save_ref
 
   validates :title,:presence=>true 
@@ -45,7 +44,7 @@ class Recipe < ActiveRecord::Base
 
   # XXX Defunct as soon as tagging data gets moved to Taggings
   has_many :tagrefs, :dependent=>:destroy
-  has_many :x_tags, :through=>:tagrefs, :autosave=>true, :class_name => "Tag", :foreign_key => :tag_id
+  has_many :x_tags, :through=>:tagrefs, :autosave=>true, :class_name => "Tag", :source => :tag, :foreign_key => :tag_id
   attr_accessor :x_tag_tokens
   
   belongs_to :thumbnail, :autosave => true
@@ -66,10 +65,6 @@ class Recipe < ActiveRecord::Base
   attr_reader :status
   
   @@coder = HTMLEntities.new
-
-  def x_tag_tokens
-     self.tagstxt
-  end
 
   # Write the virtual attribute tag_tokens (a list of ids) to
   # update the real attribute tag_ids
