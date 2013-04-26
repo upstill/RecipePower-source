@@ -7,7 +7,7 @@ require 'htmlentities'
 
 class GettableURLValidator < ActiveModel::EachValidator
   def validate_each(record, attribute, value)
-    if(attribute == :url) 
+    if(attribute == :url) && record.url_changed?
       if test_result = test_link(value) # by_link(value)
         # If the URL has relocated, we'll smartly adjust our link--UNLESS we're duplicating another URL
         if test_result.kind_of?(String)
@@ -18,10 +18,11 @@ class GettableURLValidator < ActiveModel::EachValidator
         return nil
       end
     elsif attribute == :picurl
+      debugger
       unless record.picurl && (record.picurl =~ /^data:/) # Use a data URL directly w/o taking a thumbnail
         if record.url_changed? || record.picurl_changed? || !record.thumbnail
-          puts "Validating picurl with url '#{record.url}' and picurl '#{record.picurl}'"
-          record.thumbnail= Thumbnail.acquire( record.url, record.picurl ) 
+          Delayed::Job.enqueue record
+          # record.thumbnail= Thumbnail.acquire( record.url, record.picurl ) 
           # if record.thumburl.bad_url?
             # record.errors.add :picurl, "\'#{value}\' doesn't point to a picture"
             # return nil
@@ -35,16 +36,16 @@ end
 
 class Recipe < ActiveRecord::Base
   include Taggable
-  attr_accessible :title, :url, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href
+  attr_accessible :title, :url, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href, :tag_tokens
   after_save :save_ref
 
   validates :title,:presence=>true 
-  validates :url,  :presence=>true, :gettableURL => true
+#  validates :url,  :presence=>true, :gettableURL => true
   validates :picurl, :gettableURL => true
 
   # XXX Defunct as soon as tagging data gets moved to Taggings
   has_many :tagrefs, :dependent=>:destroy
-  has_many :x_tags, :through=>:tagrefs, :autosave=>true, :class_name => "Tag"
+  has_many :x_tags, :through=>:tagrefs, :autosave=>true, :class_name => "Tag", :foreign_key => :tag_id
   attr_accessor :x_tag_tokens
   
   belongs_to :thumbnail, :autosave => true
@@ -66,11 +67,15 @@ class Recipe < ActiveRecord::Base
   
   @@coder = HTMLEntities.new
 
+  def x_tag_tokens
+     self.tagstxt
+  end
+
   # Write the virtual attribute tag_tokens (a list of ids) to
   # update the real attribute tag_ids
   def x_tag_tokens=(ids)
     # The list may contain new terms, passed in single quotes
-    self.x_tags = ids.split(",").map { |e| 
+    self.tags = ids.split(",").map { |e| 
       if(e=~/^\d*$/) # numbers (sans quotes) represent existing tags
         Tag.find e.to_i
       else
@@ -79,6 +84,16 @@ class Recipe < ActiveRecord::Base
       end
     }.compact.uniq
 
+  end
+  
+  def refresh
+    Delayed::Job.enqueue self
+  end 
+  
+  def perform
+    puts "Validating picurl with url '#{url}' and picurl '#{picurl}'"
+    self.thumbnail= Thumbnail.acquire( url, picurl ) 
+    save
   end
   
   def site
@@ -92,7 +107,7 @@ class Recipe < ActiveRecord::Base
   # and dig around for a title.
   # Either way, we also make sure that the recipe is associated with the given user
   def self.ensure( userid, params, add_to_collection = true, extractions = nil)
-    if extractions
+    if extractions ||= Site.extract_from_page(params[:url])
       # Extractions are parameters derived directly from the page
       if extractions[:URI]
         params[:url] = extractions[:URI] 
@@ -113,7 +128,6 @@ class Recipe < ActiveRecord::Base
         rcp.errors.add :id, "There is no recipe number #{id.to_s}"
       end
     else # No id: create based on url
-      debugger
       params.delete(:rcpref)
       rcp = Recipe.new params
       if rcp.url.blank?  # Check for non-empty URL
@@ -121,20 +135,15 @@ class Recipe < ActiveRecord::Base
       elsif rcp.url.match %r{^http://#{current_domain}} # Check we're not trying to link to a RecipePower page
         rcp.errors.add :base, "Sorry, can't cookmark pages from RecipePower. (Does that even make sense?)"
       # Find the site for this url
-      elsif rcp.site # ...if site can be found/created under this URL (or href)
-        rcp.url = rcp.site.check_uri rcp.url
-        redirect = valid_url(rcp.site.home, rcp.url) || rcp.url
-        # Check that the recipe doesn't already exist
-        if saved = Recipe.where(url: redirect).first
-          rcp = saved
-        else
-          rcp.url = redirect
-          rcp.picurl = rcp.site.check_uri rcp.picurl # = ((site.yield :Image, url)[:Image] || "") unless rcp.picurl
-          rcp.title = rcp.site.trim_title rcp.title # = ((site.yield :Title, url)[:Title] || rcp.title).html_safe unless rcp.title
-          rcp.save
-        end
+      elsif !rcp.site # ...if site can be found/created under this URL (or href)
+        rcp.errors.add :url, "doesn't make sense or can't be found"
+      elsif saved = Recipe.where(url: (rcp.url = rcp.site.make_link_absolute(rcp.url))).first
+        # Recipe already exists under this url
+        rcp = saved
       else
-          rcp.errors.add :url, "doesn't make sense or can't be found"
+        rcp.picurl = rcp.site.make_link_absolute rcp.picurl if rcp.picurl
+        rcp.title = rcp.site.trim_title rcp.title # = ((site.yield :Title, url)[:Title] || rcp.title).html_safe unless rcp.title
+        rcp.save
       end
     end
     # If all is well, make sure it's on the user's list

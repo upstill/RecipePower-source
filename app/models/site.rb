@@ -228,30 +228,38 @@ http://d2k9njawademcf.cloudfront.net/slides/4973/original/032911F_570.JPG?130145
     def post_init
       unless self.site
         # We need to initialize the fields of the record, starting with site, based on sample
-        link = self.sample
-        if link && urisq = URI::HTTP.sans_query(link)
-          if urisq.host.blank?
-            self.errors << "Can't make sense of URI"
-          else
+        # Ignore the query for purposes of gleaning the site
+        if link = self.sample
+          breakdown = link.match /(^[^?]*)(\?.*$)?/
+          linksq, query = breakdown[1..2]
+          begin
+            urisq = URI linksq
+          rescue Exception => e
+            urisq = nil
+          end
+          if urisq && !urisq.host.blank?
             puts "Creating host matching #{urisq.host} for #{link} with subsite \'#{self.subsite||""}\'"
             puts "Link is '#{link}'; path is '#{urisq.path}'"
             # Define the site as the link minus the sample (sub)path
-            self.site = link.sub(urisq.path, "")
+            self.site = linksq.sub(/#{urisq.path}$/, "")
             puts "...from which extracted site '#{self.site}'"
             self.home = self.site # ...seems like a reasonable default...
 
             # Reconstruct the sample from the link's path, query and fragment
-            self.sample = urisq.path + link.sub(/^[^?]*/, "")
+            self.sample = urisq.path + (query || "")
 
             # Save scheme, host and port information from the link parse
             self.scheme = urisq.scheme
             self.host = urisq.host
-            self.port = urisq.port
+            self.port = urisq.port.to_s
 
             # Give the site a provisional name, the host name minus 'www.', if any
             self.name = urisq.host.sub(/www\./, '') unless self.oldname
+          else
+            self.errors << "Can't make sense of URI"
           end
-        else
+        end
+        if !self.site
           # "Empty" site (probably defaults)
           self.site = ""
           self.subsite = ""
@@ -291,7 +299,12 @@ http://d2k9njawademcf.cloudfront.net/slides/4973/original/032911F_570.JPG?130145
       link.strip!
       link.gsub!(/\{/, '%7B')
       link.gsub!(/\}/, '%7D') 
-      if (uri = URI::HTTP.sans_query(link)) && !uri.host.blank?
+      begin
+        uri = URI link
+      rescue Exception => e
+        uri = nil
+      end
+      if uri && !uri.host.blank?
         # Find all sites assoc'd with the given domain
         sites = Site.where "host = ?", uri.host
         # If multiple sites may proceed from the same domain, 
@@ -459,8 +472,14 @@ private
 public
 
   # Make sure the given uri isn't relative, and make it absolute if it is
-  def check_uri(candidate)
+  def make_link_absolute(candidate)
     (candidate =~ /^\w*:/) ? candidate : site+candidate
+  end
+  
+  def self.extract_from_page(url)
+    if !url.blank? && (site = self.by_link url)
+      site.extract_from_page url
+    end
   end
     
     # Examine a page and return a hash mapping labels into found fields
@@ -468,7 +487,9 @@ public
       tags = spec[:tags] || finders
       if label = spec[:label] # Can specify either a single label or a set
         labels = ((label.class == Array) ? label : [label]).collect { |l| l.to_s }
-        tags = (tags || finders).keep_if { |t| labels.include? t[:label] }
+        tags = tags.keep_if { |t| labels.include? t[:label] }
+      else
+        labels = tags.collect { |tag| tag[:label].to_s }.uniq
       end
       results = {}
       

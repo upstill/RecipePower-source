@@ -26,7 +26,7 @@
 
 	  <div class="edit_recipe_field tags" >
 			<%= f.label :x_tag_tokens, "Tags" -%>
-			<%= f.text_field :x_tag_tokens, rows: "1", "data-pre" => @recipe.tags.map(&:attributes).to_json -%>
+			<%= f.text_field :x_tag_tokens, rows: "1", "data-pre" => @recipe.x_tags.map(&:attributes).to_json -%>
 	  </div>
 
 	  <div class="edit_recipe_field" >
