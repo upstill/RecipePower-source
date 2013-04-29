@@ -34,6 +34,7 @@
 # require common/RPDialogs
 
 #= require_directory ./views
+#= require_directory ./concerns
 # require views/edit_recipe
 # require views/pic_picker
 # require views/rcp_list

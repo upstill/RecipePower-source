@@ -70,7 +70,7 @@ class Recipe < ActiveRecord::Base
   # update the real attribute tag_ids
   def x_tag_tokens=(ids)
     # The list may contain new terms, passed in single quotes
-    self.tags = ids.split(",").map { |e| 
+    self.x_tags = ids.split(",").map { |e| 
       if(e=~/^\d*$/) # numbers (sans quotes) represent existing tags
         Tag.find e.to_i
       else
@@ -78,7 +78,6 @@ class Recipe < ActiveRecord::Base
         Tag.strmatch(e, userid: self.current_user, assert: true)[0]
       end
     }.compact.uniq
-
   end
   
   def refresh

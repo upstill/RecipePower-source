@@ -13,6 +13,7 @@
 //= require common/dialog
 //= require common/notifications
 //= require views/edit_recipe
+//= require concerns/tagger
 //= require jquery/jquery.form
 //= require jquery/jquery.ba-postmessage
 //= require jquery/jNotify.jquery
