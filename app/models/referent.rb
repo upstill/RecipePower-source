@@ -40,8 +40,28 @@ class Referent < ActiveRecord::Base
     # validates_associated :children
     validates_with ReferentValidator
     
+    before_destroy :fix_references
+    
     # before_save :ensure_expression
     after_save :ensure_tagtypes
+    
+    # Callback before destroying this referent, to fix any tags that use it as primary meaning
+    def fix_references
+      tags.each do |tag| 
+        if tag.primary_meaning == self
+          # Choose a new primary meaning
+          tag.referents.each do |referent|
+            if referent != self
+              tag.primary_meaning = referent
+              tag.save
+              return
+            end
+          end
+          tag.primary_meaning = nil
+          tag.save
+        end
+      end
+    end
     
     # The associate is the model associated with any particular class of referent, if any
     # By default, referents have no associate; currently, only Channels and Sources have one

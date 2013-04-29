@@ -238,7 +238,8 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	
 	nlToArr: function(nl) {
 		var arr = [];
-		for(var i = nl.length; i--; arr.unshift(nl[i]));
+		for(var i = 0; i < nl.length; i++)
+			arr.push(nl[i]);
 		return arr;
 	},
 	
@@ -262,7 +263,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 			if(propname == '.')
 				results = results.concat( ns.nlToArr(candidate.getElementsByClassName(name)) );
 			else if (candidate = candidate.getElementByID)
-				results.unshift( candidate );
+				results.push( candidate );
 		}
 		return results;
 	},
@@ -274,7 +275,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 			var candidate = candidates[i];
 			var actualVal = candidate.getAttribute(attrname);
 			if (actualVal && (actualVal == attrval))
-				results.unshift( candidate );
+				results.push( candidate );
 		}
 		return results;
 	},
@@ -284,7 +285,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		for(var i=0; i<candidates.length; i++) {
 			var attrval = candidates[i].getAttribute(attrname);
 			if (attrval) 
-				results.unshift( attrval );
+				results.push( attrval );
 		}
 		return results;
 	},

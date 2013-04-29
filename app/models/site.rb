@@ -57,12 +57,13 @@ class PageTags
       
 private
     
-  def initialize (nkdoc, site, finders, do_all=nil)
+  def initialize (nkdoc, site, finders, do_all=nil, verbose = true)
     @finderset = finders
     @results = {}
     @finderset.collect { |finder| finder[:label] }.uniq.each { |label| @results[label] = [] }
     @nkdoc = nkdoc
     @site = site
+    @verbose = verbose
     # Initialize the results
     @finderset.each do |tagspec|
       label = tagspec[:label]
@@ -91,7 +92,7 @@ private
         end
       end
       if @result.found
-        @result.report
+        @result.report if @verboase
         @results[label] << @result 
       end
     end
@@ -133,7 +134,7 @@ class Site < ActiveRecord::Base
   include Taggable
     attr_accessible :site, :home, :scheme, :subsite, :sample, :host, :name, :oldname, :port, :logo, :tags_serialized, :ttlcut, :ttlrepl
     
-    belongs_to :referent
+    belongs_to :referent, :dependent=>:destroy
     
     has_many :feeds
     
@@ -159,9 +160,9 @@ class Site < ActiveRecord::Base
       {:label=>"Image", :path=>"img[itemprop='image']", :attribute=>"src"}, 
       {:label=>"Image", :path=>"img[itemprop='photo']", :attribute=>"src"}, 
       {:label=>"Image", :path=>".entry img", :attribute=>"src"}, 
-      {:label=>"Title", :path=>"meta[property='og:title']", :attribute=>:content}, 
-      {:label=>"Title", :path=>"meta[property='dc:title']", :attribute=>:content}, 
-      {:label=>"Title", :path=>"meta[name='title']", :attribute=>:content}, 
+      {:label=>"Title", :path=>"meta[property='og:title']", :attribute=>"content"}, 
+      {:label=>"Title", :path=>"meta[property='dc:title']", :attribute=>"content"}, 
+      {:label=>"Title", :path=>"meta[name='title']", :attribute=>"content"}, 
       {:label=>"Title", path: "title" },
     ]
 =begin
@@ -444,7 +445,7 @@ http://d2k9njawademcf.cloudfront.net/slides/4973/original/032911F_570.JPG?130145
     end
 
 private    
-    def page_tags(url, tags, do_all)
+    def page_tags(url, tags, do_all, verbose=falise)
       begin
         ou = open url
       rescue Exception => e
@@ -461,7 +462,7 @@ private
       end
       
       begin
-        @pagetags = PageTags.new doc, site, tags, do_all
+        @pagetags = PageTags.new doc, site, tags, do_all, verbose
       rescue Exception => e
         puts "!!! Exception opening PageTags on "+url
         ou.close
@@ -493,7 +494,7 @@ public
       end
       results = {}
       
-      if @pagetags = page_tags(url, tags, spec[:all])
+      if @pagetags = page_tags(url, tags, spec[:all], false)
         # We've cracked the page for all tags. Now report them into the result
         labels.each do |label|
           if foundstr = @pagetags.result_for(label)
@@ -553,6 +554,142 @@ public
       result
   end     
 =end
+
+  # Revise the sites to reflect the current global defaults
+  def self.groom(r=nil)
+    case r
+    when NilClass
+      sites = Site.all
+    when Range
+      sites = Site.all[r]
+    when Fixnum, Array
+      sites = Site.where(:id => r)
+    when String
+      sites = Site.where('host LIKE ?', "%#{r}%")
+    end
+    
+    if sites && (sites.count > 0)
+      sites.each do |site|
+        site.groom (r != nil)# Eliminate the current global defaults
+        site.save
+      end
+    else
+      puts "No sites found by "+r.to_s
+    end
+  end
+  
+  def recipes
+    stripped_host = (host =~ /^www./) ? host[4..-1] : host
+    Recipe.where('url LIKE ?', "%#{stripped_host}%")
+  end
+    
+  # Delete any finder tags that also appear in @@DefaultTags
+  def groom (fullcheck=true)
+    done = false
+    tags # Set up @tags
+    while !done
+      done = true
+      puts ">>>>>>>>>>>>>>> Grooming #{id} (#{site})"
+      # Purge tags that are already amongst the defaults
+      @tags = @tags.each { |finder| 
+        finder.each { |key, value| finder[key] = value.to_s } 
+        if finder[:cut]
+          s.ttlcut = finder[:cut] if (finder[:label] == "Title")
+          finder.delete(:cut)
+        end
+      }.keep_if { |tag| 
+        !@@DefaultTags.any? { |dt| dt == tag } 
+      }
+      self.home.sub!(/\/$/, "")
+      self.home = home.strip.sub(/http:\/\b/, "http://")
+      self.site = site.strip.sub(/http:\/\b/, "http://")
+      if !test_link(home)
+        if test_link(link = "http://www.#{oldname}") ||
+          test_link(link = "http://#{oldname}")
+          self.home = self.site = link
+        else
+          puts "Site #{oldname} has a bad home link '#{home}'. Delete?"
+          answer = gets.strip
+          case answer
+          when "y", "Y"
+            self.destroy
+            return
+          when "q", "Q"
+            exit
+          end
+        end
+      end
+      # Take results from all the recipes attached to the site (if none, question whether to retain the site)
+      if fullcheck
+        if (recipeset = recipes).empty?
+          puts "Site #{oldname} (#{home}) has no recipes. Delete?"
+          answer = gets.strip
+          if answer == "y"
+            self.destroy
+            return
+          end
+        elsif !@tags.empty?
+          init_results @tags
+          recipeset[0..4].each do |recipe|
+            # Glean from the recipe
+            "...scanning recipe \'"+recipe.title+"\'..."
+            collect_results recipe.url, @tags, nil, false
+          end
+          @tags.each do |finder|
+            puts "#{finder[:label]}: #{finder[:path]}"
+            finder.each { |key, value| puts "\t(#{key}: #{value})" unless [:label, :path, :count, :foundlings].include?(key) }
+            # Trim any found title using the 'ttlcut' attribute of the site
+            if finder[:label] == "Title" && ttlcut
+              finder[:foundlings].each_index do |ix| 
+                ttl, url = finder[:foundlings][ix].match(/^\[([^\]]*)\] \(from (.*)\)$/)[1,2]
+                finder[:foundlings][ix] = "[#{trim_title ttl}] (from #{url})"
+              end
+            end
+            puts "\t["+finder[:foundlings].join("\n\t ")+"\t]"
+            puts "Action? ([dD]=Delete [qQ]=quit [C cutstring])"
+            answer = gets.strip
+            if m = answer.match(/^([Cc])\s*(\S.*$)/)
+              answer, cutstring = m[1,2]
+            end
+            case answer
+            when "d", "D"
+              @tags.delete_if { |tag| tag == finder }
+              done = false
+            when "q", "Q"
+              exit
+            when "c", "C"
+              if finder[:label] == "Title"
+                puts "Really cut titles from this site using '#{cutstring}'?"
+                if gets.strip == 'y'
+                  puts "...okay..."
+                  self.ttlcut = cutstring
+                  done = false
+                end
+              end
+            when ""
+            else
+              # Replace the path with input text
+              puts "Really replace path '#{finder[:path]}' with '#{answer}'?"
+              next unless gets.strip == 'y' 
+              puts "...okay..."
+              finder[:path] = answer
+              @tags.each do |tag| 
+                if tag == finder
+                  tag[:path] = answer
+                end
+              end
+              done = false
+            end
+          end
+          @tags.each do |finder|
+            finder.delete(:count)
+            finder.delete(:foundlings)
+          end
+        end
+      end
+    end
+    save
+  end
   
   def self.all_tags(which=nil)
     which = which.to_s if which
@@ -653,6 +790,30 @@ public
     puts suspect.join("\n")
   end
   
+  def init_results(finders)
+    finders.each do |finder|
+      finder[:count] = 0
+      finder[:foundlings] = []
+    end
+  end
+  
+  def collect_results(url, finders, labelset=nil, verbose=true)
+    labelset ||= finders.collect { |finder| finder[:label].to_s }.uniq
+    if pt = page_tags(url, finders, true, verbose) # Collect all results from the page
+      labelset.each do |label|
+        if labelset.include?(label = label.to_s) 
+          @pagetags.results_for(label).each do |result| 
+            foundset = "["+result.out.join("\n\t\t ")+"] (from "+url+")"
+            finder = result.finder
+            finder[:count] = finder[:count] + 1 
+            finder[:foundlings] << foundset
+          end
+        end
+      end
+      return pt
+    end
+  end
+  
   # Examine every page on the site and count the number of hits on the global tag set
   def self.study(only = nil)
     # Get the set of tags to glean with
@@ -668,21 +829,11 @@ public
       puts "home: "+site.home
       puts "site: "+site.site
       puts "sample: "+site.sampleURL
-      if @pagetags = page_tags(site.sampleURL, alltags)
+      site.init_results alltags
+      if @pagetags = site.collect_results(site.sampleURL, alltags, [:URI,:Title,:Image])
         puts ">>>>>>>>>>>>>>> Results >>>>>>>>>>>>>>>>>>"
-        [:URI,:Title,:Image].each do |label|
+        [:URI, :Title, :Image].each do |label|
           label = label.to_s
-          next if only && !only.include?(label) 
-          @pagetags.results_for(label).each do |result| 
-            finder = result.finder
-            finder[:count] = finder[:count] + 1 
-            foundset = "["+result.out.join("\n\t\t ")+"] (from "+site.sampleURL+")"
-            if finder[:foundlings]
-              finder[:foundlings] << foundset
-            else
-              finder[:foundlings] = [foundset]
-            end            
-          end
           result = (@pagetags.result_for(label) || "** Nothing Found **")
           found_or_not = ""
           if label=="URI" && result!=site.sampleURL
