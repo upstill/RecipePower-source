@@ -35,7 +35,7 @@ end
 
 class Recipe < ActiveRecord::Base
   include Taggable
-  attr_accessible :title, :url, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href, :x_tag_tokens
+  attr_accessible :title, :url, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href
   after_save :save_ref
 
   validates :title,:presence=>true 
@@ -45,7 +45,6 @@ class Recipe < ActiveRecord::Base
   # XXX Defunct as soon as tagging data gets moved to Taggings
   has_many :tagrefs, :dependent=>:destroy
   has_many :x_tags, :through=>:tagrefs, :autosave=>true, :class_name => "Tag", :source => :tag, :foreign_key => :tag_id
-  attr_accessor :x_tag_tokens
   
   belongs_to :thumbnail, :autosave => true
   
@@ -66,20 +65,6 @@ class Recipe < ActiveRecord::Base
   
   @@coder = HTMLEntities.new
 
-  # Write the virtual attribute tag_tokens (a list of ids) to
-  # update the real attribute tag_ids
-  def x_tag_tokens=(ids)
-    # The list may contain new terms, passed in single quotes
-    self.x_tags = ids.split(",").map { |e| 
-      if(e=~/^\d*$/) # numbers (sans quotes) represent existing tags
-        Tag.find e.to_i
-      else
-        e.sub!(/^\'(.*)\'$/, '\1') # Strip out enclosing quotes
-        Tag.strmatch(e, userid: self.current_user, assert: true)[0]
-      end
-    }.compact.uniq
-  end
-  
   def refresh
     Delayed::Job.enqueue self
   end 

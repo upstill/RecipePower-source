@@ -6,7 +6,8 @@ module Taggable
     has_many :taggings, :as => :entity, :dependent => :destroy
     # has_many :tags, :through => :taggings
     has_many :taggers, :through => :taggings, :class_name => "User"
-    attr_accessor :tag_tokens, :current_user
+    attr_accessor :current_user
+    attr_reader :tag_tokens
   end
 
   def tags(uid=nil)

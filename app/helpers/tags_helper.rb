@@ -179,6 +179,6 @@ BLOCK_END
   end
   
   def tag_field(f, options={})
-		f.text_field :tag_tokens, rows: "1", :data => { :pre => f.object.tags.map(&:attributes).to_json, :hint => "Type your tag(s) for the #{f.objecct.class.lower} here" }
+		f.text_field :tag_tokens, rows: "1", :data => { :pre => f.object.tags.map(&:attributes).to_json, :hint => "Type your tag(s) for the #{f.object.class.to_s.downcase} here" }
   end
 end

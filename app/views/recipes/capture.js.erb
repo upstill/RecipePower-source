@@ -381,7 +381,6 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	var ns = window.recipePower_namespace;
   // The extraction_js helper should declare finders for needed elements
 	var callback = "<%= @url %>";
-	debugger;
 	// The finders are specifications for extracting data of different types
 	var finders = JSON.parse ("<%= j @site.finders.to_json.html_safe %>") ;
 	var extractions = ns.applyFinders(finders); // Scrape the page for definitive URL, Title and image (etc.)

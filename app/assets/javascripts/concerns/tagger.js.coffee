@@ -7,7 +7,6 @@ RP.tagger.init = (selector, data) ->
 		$(selector).data prop, value
 
 RP.tagger.onload = (selector=".tagging_field", options={}) ->
-	debugger
 	$(selector).each ->
 		hint = $(this).data("hint") || "Type your own tag(s)"
 		if query = $(this).data("query")
