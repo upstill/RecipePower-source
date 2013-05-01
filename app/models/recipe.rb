@@ -215,17 +215,6 @@ class Recipe < ActiveRecord::Base
     if ref = ref_for(nil, false) # Use current user, don't create ref
       ref.save 
     end
-=begin
-    if(@current_ref && (@current_ref.user_id == @current_user))
-      refs = self.rcprefs.where(:user_id=>@current_user)
-      if(ref = refs.first)
-        ref.comment = @current_ref.comment
-        ref.status = @current_ref.status
-        ref.private = @current_ref.private
-        ref.save
-      end
-    end
-=end
   end
   
   # Set the updated_at field for the rcpref for this user and this recipe
