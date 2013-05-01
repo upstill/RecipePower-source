@@ -6,7 +6,7 @@ module Taggable
     has_many :taggings, :as => :entity, :dependent => :destroy
     # has_many :tags, :through => :taggings
     has_many :taggers, :through => :taggings, :class_name => "User"
-    attr_accessor :current_user
+    attr_accessor :tag_tokens, :current_user
   end
 
   def tags(uid=nil)
@@ -48,5 +48,10 @@ module Taggable
         Tag.strmatch(e, userid: current_user, assert: true)[0] # Match or assert the string
       end
     }.compact.uniq
+  end
+  
+  # Declare a data structure suitable for passing to RP.tagger.init
+  def tag_data
+    { :pre => tags.map(&:attributes), :hint => "Type your tag(s) for the recipe here" }.to_json
   end
 end

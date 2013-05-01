@@ -177,4 +177,8 @@ BLOCK_END
       # otherstrs = others.collect { |other| summarize_tag_similar other, (args[:absorb_btn] && tag.can_absorb(other)) }
       tag_info_section label, others.collect { |other| summarize_tag_similar other, (args[:absorb_btn] && tag.can_absorb(other)) }
   end
+  
+  def tag_field(f, options={})
+		f.text_field :tag_tokens, rows: "1", :data => { :pre => f.object.tags.map(&:attributes).to_json, :hint => "Type your tag(s) for the #{f.objecct.class.lower} here" }
+  end
 end

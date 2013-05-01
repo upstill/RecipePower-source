@@ -4,7 +4,7 @@ RP.edit_recipe = RP.edit_recipe || {}
 
 me = () ->
 	$('div.edit_recipe')
-tagger_selector = "div.edit_recipe #recipe_x_tag_tokens"
+tagger_selector = "div.edit_recipe #recipe_tag_tokens"
 
 # Open the edit-recipe dialog on the recipe represented by 'rcpdata'
 RP.edit_recipe.go = (rcpdata) ->
@@ -31,7 +31,7 @@ RP.edit_recipe.go = (rcpdata) ->
 		replace(/%%authToken%%/g, rcpdata.authToken) # .replace(statustarget, statusrepl)
 		$(template).html dlgsource # This nukes any lingering children as well as initializing the dialog
 	# The tag data is parsed and added to the tags field directly
-	RP.tagger.init tagger_selector, jQuery.parseJSON(rcpdata.rcpTagData) #$("#recipe_x_tag_tokens").data "pre", jQuery.parseJSON(rcpdata.rcpTagData)
+	RP.tagger.init tagger_selector, jQuery.parseJSON(rcpdata.rcpTagData)
 	
 	# Hand it off to the dialog handler
 	RP.dialog.run me()
@@ -43,8 +43,7 @@ RP.edit_recipe.onload = (dlog) ->
 	if $('.edit_recipe > *').length > 0
 		
 		# Setup tokenInput on the tags field
-		RP.tagger.onload tagger_selector,
-			hint: "Type your own tag(s) for the recipe"
+		RP.tagger.onload tagger_selector
 		
 		if $('.pic_picker_golink', dlog).length > 0
 			# Get the picture picker in background
