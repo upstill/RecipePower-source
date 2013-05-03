@@ -1,4 +1,6 @@
 require 'uri'
+require 'open-uri'
+require 'nokogiri'
 
 def validate_link link
   link =~ URI::regexp(%w{ http https data })
@@ -54,4 +56,27 @@ def test_link(link, resource=nil)
   else
     true
   end
+end
+
+ # Return a list of image URLs for a given page
+def page_piclist(url)
+  begin 
+    return [] unless (ou = open url) && (doc = Nokogiri::HTML(ou))
+  rescue Exception => e
+    return []
+  end
+  # Get all the img tags, uniqify them, purge non-compliant ones and insert the domain as required
+  doc.css("img").map { |img| 
+    img.attributes["src"] # Collect all the "src" attributes from <img tags
+  }.compact.map { |src| # Ignore if nil
+    src.value # Extract value (URL string)
+  }.uniq.keep_if { |url| # Purge duplicates
+    url =~ /\.(gif|tif|tiff|png|jpg|jpeg|img)$/i # Accept only image tags
+  }.map{ |path| 
+    begin
+      (uri = URI.join( url, path)) && uri.to_s 
+    rescue Exception => e
+      nil
+    end 
+  }.compact
 end

@@ -128,7 +128,7 @@ module ApplicationHelper
       pageurl = @site.home+@site.sample
       id = @site.id
     end
-    piclist = Site.piclist pageurl
+    piclist = page_piclist pageurl
     pictab = []
     # divide piclist into rows of four pics apiece
     picrows = ""

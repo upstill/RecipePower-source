@@ -192,7 +192,7 @@ class RecipesController < ApplicationController
   # Respond to a request from the recipe editor for a list of pictures
   def piclist
       @recipe = Recipe.find(params[:id])
-      @piclist = @recipe.piclist
+      @piclist = page_piclist @recipe.url
       respond_to do |format|
         format.html # index.html.erb
         format.json { render json: @piclist }

@@ -105,7 +105,7 @@ class SitesController < ApplicationController
     url = params[:url]
     if @site = Site.by_link(url)
       olist = @site.feeds.clone
-      @site.feedlist url
+	FeedServices.scrape_page @site, url
       @feeds = @site.feeds
       nlist = @feeds - olist
       if nlist.empty?

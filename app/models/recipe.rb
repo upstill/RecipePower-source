@@ -86,7 +86,7 @@ class Recipe < ActiveRecord::Base
   # and dig around for a title.
   # Either way, we also make sure that the recipe is associated with the given user
   def self.ensure( userid, params, add_to_collection = true, extractions = nil)
-    if extractions ||= Site.extract_from_page(params[:url])
+    if extractions ||= SiteServices.extract_from_page(params[:url], :label => [:URI, :Image, :Title])
       # Extractions are parameters derived directly from the page
       if extractions[:URI]
         params[:url] = extractions[:URI] 
@@ -163,10 +163,6 @@ class Recipe < ActiveRecord::Base
   def sourcehome
     @site = @site || Site.by_link(self.url)
     @site.home
-  end
-
-  def piclist
-    Site.piclist self.url
   end
   
   # Sort out a suitable URL to stuff into an image thumbnail for a recipe
