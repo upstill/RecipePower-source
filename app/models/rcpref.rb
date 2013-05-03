@@ -42,49 +42,46 @@ class Rcpref < ActiveRecord::Base
   #   single id => the recipes for a particular owner
   #   [array of ids] => recipes from them all
   def Rcpref.recipe_ids(owner_id, requestor_id, *params)
-	# requestor_id is the user_id of the user requesting the list; resulting set will be filtered according
-	#    to the relationship between the two users
-	# :comment is text to match against the comment field
-	# :title is text to match against the recipe's title 
-	# NB: If both are given, recipes are returned which match in either
-	# :status is the set of status flags to match
-	# :sorted gives criterion for sorting (currently only sort by updated_at field)
-  args = params.first || {}
-  commentstr = args[:comment]
-  titlestr = args[:title]
-  sortfield = args[:sorted]
-	statuses = args[:status] || StatusAny
-
-	sort_by_touched = args[:status] & StatusRecentMask 
-	if owner_id.kind_of? Fixnum
-	    owner_is_super = (owner_id == User.super_id)
-	    owner_is_requestor = (owner_id == requestor_id)
-	end
-	# We reduce the relation based on owner_id unless the requestor is nil or super
-	if owner_is_super
-	  # super sees all
-	  refs = Rcpref.scoped
+  	# requestor_id is the user_id of the user requesting the list; resulting set will be filtered according
+  	#    to the relationship between the two users
+  	# :comment is text to match against the comment field
+  	# :title is text to match against the recipe's title 
+  	# NB: If both are given, recipes are returned which match in either
+  	# :status is the set of status flags to match
+  	# :sorted gives criterion for sorting (currently only sort by updated_at field)
+    args = params.first || {}
+    commentstr = args[:comment]
+    titlestr = args[:title]
+    sortfield = args[:sorted]
+  	statuses = args[:status] || StatusAny
+  	sort_by_touched = args[:status] & StatusRecentMask 
+  	if owner_id.kind_of? Fixnum
+      owner_is_super = (owner_id == User.super_id)
+      owner_is_requestor = (owner_id == requestor_id)
+  	end
+  	# We reduce the relation based on owner_id unless the requestor is nil or super
+  	if owner_is_super
+  	  # super sees all
+  	  refs = Rcpref.scoped
     else
-	  refs = owner_id.nil? ? Rcpref.scoped : Rcpref.where(user_id: owner_id) # NB: owner_id can be an array of ids
-	
-	  refs = refs.where("NOT private") unless owner_is_requestor 
-
-	  # Unless we're going for restricted status, just get 'em all
-	  refs = refs.where("status <= ?", statuses) if statuses < StatusMiscMask
-	end
+  	  refs = owner_id.nil? ? Rcpref.scoped : Rcpref.where(user_id: owner_id) # NB: owner_id can be an array of ids
+  	  refs = refs.where("NOT private") unless owner_is_requestor 
+  	  # Unless we're going for restricted status, just get 'em all
+  	  refs = refs.where("status <= ?", statuses) if statuses < StatusMiscMask
+  	end
 
     refs = refs.order(sortfield) if sortfield
     refs = refs.order("updated_at").reverse_order() if sort_by_touched
     
     # We apply the titlestr, if any
     if titlestr
- 	  regexp = /#{titlestr}/i
-      titleset = refs.keep_if{ |rr| rr.recipe.title =~ regexp }
+      regexp = /#{titlestr}/i
+      titleset = refs.keep_if{ |rr| rr.recipe && (rr.recipe.title =~ regexp) }
     end
     
     if commentstr
-	  # If there is a :comment parameter, use that in the query
-	  commentset = refs.where("comment LIKE ?", "%"+commentstr+"%")
+      # If there is a :comment parameter, use that in the query
+      commentset = refs.where("comment LIKE ?", "%"+commentstr+"%")
     end
     
     # We prefer recipes that match in both title and comment, 
@@ -96,7 +93,7 @@ class Rcpref < ActiveRecord::Base
     end
     
     # Just return the list of recipe ids
-	refs.map &:recipe_id
+    refs.map &:recipe_id
 end
 
     def status_bits_to_flags(bits)

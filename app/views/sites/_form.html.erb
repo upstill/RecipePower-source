@@ -1,59 +1,31 @@
-<div class="edit_site dialog page">
-	<%= form_for(@site) do |f| %>
-	  <% if @site.errors.any? %>
-	    <div id="error_explanation">
-	      <h2><%= pluralize(@site.errors.count, "error") %> prohibited this site from being saved:</h2>
-
-	      <ul>
-	      <% @site.errors.full_messages.each do |msg| %>
-	        <li><%= msg %></li>
-	      <% end %>
-	      </ul>
-	    </div>
-	  <% end %>
+<%= simple_form_for(@site) do |f| %>
+	<%= modal_body do %>
+	  <%= form_errors_helper f %>
 	  <div class="logo">                                     
 	  	<%= pic_field @site, :logo, f, true %>
 	  </div> 
 		<% if params[:action] != "edit" %>
-		  <div class="field">
-		    <%= f.label :Name %><br />
-		    <%= f.text_field :name %>
-		  </div>
+			<%= f.input :name %>
 		<% end %>
-	  <div class="field">
-	    <%= f.label :site %><br />
-	    <%= f.text_field :site %>
-	  </div>
-	  <div class="field">
-	    <%= f.label :home %><br />
-	    <%= f.text_field :home %>
-	  </div>
-	  <div class="field">
-	    <%= f.label :subsite %><br />
-	    <%= f.text_field :subsite %>
-	  </div>
-	  <div class="field">
-	    <%= f.label :sample %><br />
-	    <%= f.text_field :sample %>
-	  </div>
+	  <%= f.input :site %>
+	  <%= f.input :home %>
+	  <%= f.input :subsite %>
+	  <%= f.input :sample %>
 	  <div>
 		Sample Title (raw): <strong><%= crack_sample %></strong><br> 
 		Sample Title (editted): <strong><%= trimmed_sample %></strong><br>
 	  </div>
-	  <div class="field">
-	    <%= f.label "RegExp to cut out of title" %><br />
-	    <%= f.text_field :ttlcut %>
-	  </div>
-	  <div class="field">
-	    <%= f.label "RegExp of replacement" %><br />
-	    <%= f.text_field :ttlrepl %>
-	  </div>
-	  <div class="actions">
-	    <%= f.submit %>
-	  </div>
-	  <div class="field">
-	    <%= f.label :tags %><br />
-	    <%= f.text_area :tags_serialized, :rows=>"20" %>
-	  </div>
+		<%= f.input :ttlcut, label: "RegExp to cut out of title" %>
+		<%= f.input :ttlrepl, label: "RegExp of replacement" %>
+	  <%= f.input :tags_serialized, :html => { :rows=>"20" } %>
+
+		<% if ref = @site.referent %>
+		 | <%= link_to ref.class.to_s+" "+ref.name, edit_referent_path(ref) %>
+		<% end %>
+		<%= link_to 'Show', @site %> |
+		<%= link_to 'Back', sites_path %>
 	<% end %>
-</div>
+	<%= modal_footer do %>
+		<%= f.button :submit, "Save" %>
+	<% end %>
+<% end %>

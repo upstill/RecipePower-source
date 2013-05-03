@@ -1,8 +1,3 @@
-<h3>Editing site '<%= @site.name %>'</h3>
-<%= render 'form' %>
-
-<%= link_to 'Show', @site %> |
-<%= link_to 'Back', sites_path %>
-<% if ref = @site.referent %>
- | <%= link_to ref.class.to_s+" "+ref.name, edit_referent_path(ref) %>
+<%= modal_dialog :edit_site, "Edit Site" do %>
+	<%= render 'form' %>
 <% end %>

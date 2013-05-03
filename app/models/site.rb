@@ -7,7 +7,7 @@ class Site < ActiveRecord::Base
   
   belongs_to :referent, :dependent=>:destroy
   
-  has_many :feeds
+  has_many :feeds, :dependent=>:destroy
   
   # When creating a site, also create a corresponding site referent
   # before_create :ensure_referent
