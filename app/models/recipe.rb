@@ -85,7 +85,6 @@ public
   
   def perform
     puts ">>>>>>>>>>>>>>>>>>>>>>>>>>>>> Validating picurl with url '#{url}' and picurl '#{picurl}'"
-    debugger
     unless thumbnail
       self.thumbnail= Thumbnail.acquire( url, picurl )
       save
