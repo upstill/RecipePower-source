@@ -1,6 +1,19 @@
 
+function checkForLoading(selector) {
+	$(selector).one('load', function() {
+	  fitImage(this);
+	}).each(function() {
+	  if(this.complete && !$(this).hasClass("loaded")) $(this).load();
+	});
+	
+}
 // Onload function for images, to fit themselves (found by id) into the enclosing container.
 function fitImageOnLoad(selector) {
+//	$(".stuffypic").one('load', () ->
+//		fitImage this
+//	).each () ->
+//		if this.complete 
+//			$(this).load();
     $(selector).each(function() {
         fitImage(this);
     });
@@ -14,45 +27,43 @@ function ensureOnload(selector, context) {
 }
 
 function fitImage(img) {
-
-    if (!(img && img.complete)) {
-        return false;
-    }
-
-    if(!(img.width > 5 && img.height > 5)) {
-		return false;
-	}
 	
-	var picWidth = img.naturalWidth; // width();
-	var picHeight = img.naturalHeight; // height();
+	if(!img) return false;
 
-    // In case the image hasn't loaded yet
-	if(!(picWidth > 5 && picHeight > 5)) {
-		return false;
-	}
+	var parent = img.parentElement, frameWidth, frameHeight, picWidth, picHeight;
 	
-	var parent = img.parentElement;
-	var frameWidth = $(parent).width(); // img.parentElement.clientWidth;
-	var frameHeight = $(parent).height(); // img.parentElement.clientHeight;
-
-	if(!(frameWidth > 5 && frameHeight > 5)) {
-		return false;
-	}
+	if (!(img.complete && 
+			(img.width > 5) && 
+			(img.height > 5) &&
+			((picWidth = img.naturalWidth) > 5) && 
+			((picHeight = img.naturalHeight) > 5) &&
+			((frameWidth = $(parent).width()) > 5) &&
+			((frameHeight = $(parent).height()) > 5)
+	)) return false;
 
 	var frameAR = frameWidth/frameHeight;
 	var imgAR = picWidth/picHeight;
-	if(imgAR > frameAR) { 
-	  var newHeight = frameWidth/imgAR;
-	  $(img).css("width", frameWidth);
-	  $(img).css("height", newHeight);
-	  $(img).css("top", (frameHeight-newHeight)/2);
-	  // $(img).css("left", 0);
+	var fillmode;
+	if (fillmode = $(img).data("fillmode")) {
+		if(fillmode == "width") {
+			// Size image to fit parent's width
+			$(img).css("width", frameWidth);
+			$(img).css("height", frameWidth/imgAR );
+		}
 	} else {
-	  var newWidth = frameHeight*imgAR;
-	  $(img).css("width", newWidth);
-	  $(img).css("height", frameHeight);
-	  // $(img).css("top", 0);
-	  // $(img).css("left", (frameWidth-newWidth)/2);
+		if(imgAR > frameAR) { 
+		  var newHeight = frameWidth/imgAR;
+		  $(img).css("width", frameWidth);
+		  $(img).css("height", newHeight);
+		  $(img).css("padding-top", (frameHeight-newHeight)/2);
+		  // $(img).css("left", 0);
+		} else {
+		  var newWidth = frameHeight*imgAR;
+		  $(img).css("width", newWidth);
+		  $(img).css("height", frameHeight);
+		  // $(img).css("top", 0);
+		  $(img).css("padding-left", (frameWidth-newWidth)/2);
+		}
 	}
   $(img).addClass("loaded")
   return true;

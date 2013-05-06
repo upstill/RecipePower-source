@@ -38,15 +38,29 @@ class Recipe < ActiveRecord::Base
   attr_accessible :title, :url, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href
   after_save :save_ref
 
-  validates :title,:presence=>true 
+  validates :title, :presence=>true 
 #  validates :url,  :presence=>true, :gettableURL => true
-  validates :picurl, :gettableURL => true
+#  validates :picurl, :gettableURL => true
+# private
 
+  # Before saving the recipe, take the chance to generate a thumbnail (in background)
+  before_save :generate_thumbnail
+
+private
+  def generate_thumbnail 
+    unless picurl && (picurl =~ /^data:/) # Use a data URL directly w/o taking a thumbnail
+      if url_changed? || picurl_changed? || !thumbnail
+        self.thumbnail = nil
+        Delayed::Job.enqueue self
+      end
+    end
+  end
+public
   # XXX Defunct as soon as tagging data gets moved to Taggings
   has_many :tagrefs, :dependent=>:destroy
   has_many :x_tags, :through=>:tagrefs, :autosave=>true, :class_name => "Tag", :source => :tag, :foreign_key => :tag_id
   
-  belongs_to :thumbnail, :autosave => true
+  belongs_to :thumbnail, :autosave => true, :dependent => :destroy
   
   has_many :ratings, :dependent=>:destroy
   has_many :scales, :through=>:ratings, :autosave=>true
@@ -70,9 +84,12 @@ class Recipe < ActiveRecord::Base
   end 
   
   def perform
-    puts "Validating picurl with url '#{url}' and picurl '#{picurl}'"
-    self.thumbnail= Thumbnail.acquire( url, picurl ) 
-    save
+    puts ">>>>>>>>>>>>>>>>>>>>>>>>>>>>> Validating picurl with url '#{url}' and picurl '#{picurl}'"
+    debugger
+    unless thumbnail
+      self.thumbnail= Thumbnail.acquire( url, picurl )
+      save
+    end
   end
   
   def site
@@ -163,16 +180,6 @@ class Recipe < ActiveRecord::Base
   def sourcehome
     @site = @site || Site.by_link(self.url)
     @site.home
-  end
-  
-  # Sort out a suitable URL to stuff into an image thumbnail for a recipe
-  def thumburl
-    if picurl && (picurl =~ /^data:/) # Use a data URL directly w/o taking a thumbnail
-      self.thumbnail = nil
-      picurl
-    else 
-      (thumbnail && thumbnail.thumbdata) || picurl || "MissingPicture.png"
-    end
   end
 
   @@statuses = [

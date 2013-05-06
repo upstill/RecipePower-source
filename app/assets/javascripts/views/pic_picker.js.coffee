@@ -6,10 +6,10 @@ me = () ->
 # Prepare the picture picker prior to opening it.
 RP.pic_picker.load = (callback) ->
 	dlog = me()
-	url = $(dlog).data("url")
+	url = $(dlog).data "url"
 	$(dlog).load url, (responseText, textStatus, XMLHttpRequest) ->
 		if jQuery.type(callback) == 'function'
-			callback(dlog);
+			callback dlog
 
 # Respond to a link by bringing up a dialog for picking among the image fields of a page
 # -- the pic_picker div is ready to be a diaog

@@ -70,9 +70,9 @@ def page_piclist(url)
     img.attributes["src"] # Collect all the "src" attributes from <img tags
   }.compact.map { |src| # Ignore if nil
     src.value # Extract value (URL string)
-  }.uniq.keep_if { |url| # Purge duplicates
-    url =~ /\.(gif|tif|tiff|png|jpg|jpeg|img)$/i # Accept only image tags
-  }.map{ |path| 
+  }.uniq. # Purge duplicates
+  # keep_if { |url| url =~ /\.(gif|tif|tiff|png|jpg|jpeg|img)$/i }. # Accept only image tags (NB: apparently irrelevant)
+  map{ |path| 
     begin
       (uri = URI.join( url, path)) && uri.to_s 
     rescue Exception => e

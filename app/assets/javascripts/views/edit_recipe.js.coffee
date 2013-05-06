@@ -13,7 +13,6 @@ RP.edit_recipe.go = (rcpdata) ->
 	# If it has children it's active, and should be put away, starting with hiding it.
 	if $('.edit_recipe > *').length > 0
 		$(dlog).hide()
-		
 	# Parse the data for the recipe and insert into the dialog's template.
 	# The dialog has placeholders of the form %%rcp<fieldname>%% for each part of the recipe
 	# The status must be set by activating one of the options
@@ -44,7 +43,6 @@ RP.edit_recipe.onload = (dlog) ->
 		
 		# Setup tokenInput on the tags field
 		RP.tagger.onload tagger_selector
-		
 		if $('.pic_picker_golink', dlog).length > 0
 			# Get the picture picker in background
 			RP.pic_picker.load (picdlg) ->
@@ -82,7 +80,7 @@ RP.edit_recipe.onload = (dlog) ->
 # Handle a close event: when the dialog is closed, also close its pic picker
 RP.edit_recipe.onclose = (dlog) ->
 	if picker_dlog = $("div.pic_picker")
-		$(dlog).remove();	
+		$(picker_dlog).remove();	
 	return true # Prevent normal close action
 	
 # Extract a name from a reference of the form "recipe[<name>]"

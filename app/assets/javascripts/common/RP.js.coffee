@@ -253,11 +253,8 @@ RP.process_response = (responseData, dlog) ->
 
 		# 'replacements' specifies a set of DOM elements and code to replace them
 		if replacements = responseData.replacements
-			i = 0;
-			while i < replacements.length
-				replacement = replacements[i]
+			for replacement in replacements
 				$(replacement[0]).replaceWith replacement[1]
-				i++
 
 		# 'dlog' gives a dialog DOM element to replace the extant one
 		if newdlog = responseData.dlog
