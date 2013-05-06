@@ -44,13 +44,21 @@ class Recipe < ActiveRecord::Base
 # private
 
   # Before saving the recipe, take the chance to generate a thumbnail (in background)
+  before_save :nuke_thumbnail
   before_save :generate_thumbnail
 
 private
+  def nuke_thumbnail 
+    unless picurl && (picurl =~ /^data:/) # Use a data URL directly w/o taking a thumbnail
+      if url_changed? || picurl_changed?
+        self.thumbnail = nil
+      end
+    end
+  end
+  
   def generate_thumbnail 
     unless picurl && (picurl =~ /^data:/) # Use a data URL directly w/o taking a thumbnail
-      if url_changed? || picurl_changed? || !thumbnail
-        self.thumbnail = nil
+      if !thumbnail
         Delayed::Job.enqueue self
       end
     end
