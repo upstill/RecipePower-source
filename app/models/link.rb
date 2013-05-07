@@ -2,9 +2,11 @@ require './lib/Domain.rb'
 
 class Link < ActiveRecord::Base
     attr_accessible :domain, :uri, :resource_type
-    
+  
+    # Possible entity types: Recipe, Feed, FeedEntry, Site, Reference, Offering, Image
     belongs_to :entity, :polymorphic => true
     
+    # Link refs were used to accumulate glossary entries
     has_many :link_refs
     has_many :tags, :through=>:link_refs
     

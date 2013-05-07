@@ -30,6 +30,9 @@ class Referent < ActiveRecord::Base
     
     has_and_belongs_to_many :channels, :class_name => "Referent", :foreign_key => "channel_id", :join_table => "channels_referents", :uniq => true
     
+    has_many :referments, :dependent => :destroy
+    has_many :references, :through => :referments
+    
     attr_accessible :tag, :type, :description, :isCountable, :dependent,
         :expressions_attributes, :add_expression, :tag_id,
         :parents, :children, :parent_tokens, :child_tokens, :typeindex
@@ -176,8 +179,12 @@ class Referent < ActiveRecord::Base
     # or to find an existing one.
     # WARNING: while some effort is made to find an existing referent and use that,
     #  this procedure lends itself to redundancy in the dictionary
-    def self.express (tag, tagtype, args = {} )
-        tag = Tag.assert_tag tag, tagtype: tagtype # Creating it if need be, and/or making it global 
+    def self.express (tag, tagtype = nil, args = {} )
+        if tag.class == Tag # Creating it if need be, and/or making it global 
+          tagtype = tag.tagtype
+        else
+          tag = Tag.assert_tag(tag, tagtype: tagtype) 
+        end
         ref = tag.primary_meaning || 
               tag.referents.first || 
               # We don't immediately have a referent for this tag
