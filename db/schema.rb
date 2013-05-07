@@ -186,7 +186,8 @@ ActiveRecord::Schema.define(:version => 20130507213525) do
 
   create_table "referments", :force => true do |t|
     t.integer  "referent_id"
-    t.integer  "reference_id"
+    t.integer  "referee_id"
+    t.string   "referee_type"
     t.datetime "created_at",   :null => false
     t.datetime "updated_at",   :null => false
   end

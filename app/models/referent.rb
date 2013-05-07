@@ -30,8 +30,8 @@ class Referent < ActiveRecord::Base
     
     has_and_belongs_to_many :channels, :class_name => "Referent", :foreign_key => "channel_id", :join_table => "channels_referents", :uniq => true
     
-    has_many :referments, :dependent => :destroy
-    has_many :references, :through => :referments
+    has_many :referments, :dependent => :destroy, :inverse_of => :referent
+    has_many :references, :through => :referments, :source => :referee, :source_type => "Reference"
     
     attr_accessible :tag, :type, :description, :isCountable, :dependent,
         :expressions_attributes, :add_expression, :tag_id,
