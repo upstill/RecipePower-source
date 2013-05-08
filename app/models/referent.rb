@@ -32,6 +32,7 @@ class Referent < ActiveRecord::Base
     
     has_many :referments, :dependent => :destroy, :inverse_of => :referent
     has_many :references, :through => :referments, :source => :referee, :source_type => "Reference"
+    has_many :recipes, :through => :referments, :source => :referee, :source_type => "Recipe"
     
     attr_accessible :tag, :type, :description, :isCountable, :dependent,
         :expressions_attributes, :add_expression, :tag_id,
