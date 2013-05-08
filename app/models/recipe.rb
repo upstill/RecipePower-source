@@ -36,6 +36,7 @@ end
 class Recipe < ActiveRecord::Base
   include Taggable
   include Referrable
+  include Linkable
   attr_accessible :title, :url, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href
   after_save :save_ref
 

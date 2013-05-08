@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130507213525) do
+ActiveRecord::Schema.define(:version => 20130508054210) do
 
   create_table "authentications", :force => true do |t|
     t.integer  "user_id"
@@ -164,8 +164,9 @@ ActiveRecord::Schema.define(:version => 20130507213525) do
   end
 
   create_table "references", :force => true do |t|
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.datetime "created_at",     :null => false
+    t.datetime "updated_at",     :null => false
+    t.integer  "reference_type"
   end
 
   create_table "referent_relations", :force => true do |t|

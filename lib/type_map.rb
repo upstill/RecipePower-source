@@ -1,6 +1,6 @@
 class TypeMap < Array
     
-    def initialize init_table, nullname
+    def initialize init_table, nullname="unclassified"
         @TypeToSym = [ nil ]
         @TypeToName = [ nullname ]
         @SymToType = { nil => 0 }

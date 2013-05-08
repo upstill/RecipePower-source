@@ -22,6 +22,14 @@ class Link < ActiveRecord::Base
         self.domain = domain_from_url self.uri
     end
     
+    # Ensure the existence of a link on the given uri, for an entity of the given type.
+    # If such a link/entity pair already exists, return the link
+    # Otherwise, create the link, bind it to a new entity and return the link
+    def self.assert(uri, entity_class)
+      self.where( uri: uri, entity_type: entity_class ).first ||
+      self.new(uri: uri)
+    end
+    
     # Managing types of resource
     # NB: The resource_type indexes into these arrays
     @@TypeToSym = [:none, :vendor, :store, :book, :blog, :rcpsite, :cookingsite, :othersite, :video, :glossary, :recipe]

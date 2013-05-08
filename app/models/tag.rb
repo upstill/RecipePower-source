@@ -1,9 +1,26 @@
 # encoding: UTF-8
-require "type_map.rb"
 class Tag < ActiveRecord::Base
     # require 'iconv'
-
-    attr_accessible :name, :id, :tagtype, :typename, :isGlobal, :links, :recipes, :referents, :users, :primary_meaning
+    include Typeable
+    
+    typeable( :tagtype, 
+        Genre: ["Genre", 1], 
+        Role: ["Role", 2], 
+        Process: ["Process", 3], 
+        Ingredient: ["Ingredient", 4], 
+        Unit: ["Unit", 5], 
+        Source: ["Source", 6], 
+        Author: ["Author", 7], 
+        Occasion: ["Occasion", 8], 
+        PantrySection: ["Pantry Section", 9], 
+        StoreSection: ["Store Section", 10], 
+        Channel: ["Channel", 11], 
+        Tool: ["Tool", 12], 
+        Nutrient: ["Nutrient", 13], 
+        CulinaryTerm: ["Culinary Term", 14]
+    )
+    
+    attr_accessible :name, :id, :tagtype, :isGlobal, :links, :recipes, :referents, :users, :primary_meaning
     
     # tagrefs associate tags with recipes
     has_many :tagrefs
@@ -91,11 +108,7 @@ class Tag < ActiveRecord::Base
         t2.destroy
         return !self.errors.any?
     end
-    
-    # 'typename' is a virtual attribute for the string associated with the tag's type (tagtype attribute)
-
-    attr_reader :typename
-    
+        
     # When a tag is asserted into the database, we do have minimal sanitary standards:
     #  no leading or trailing whitespace
     #  all internal whitespace is replaced by a single space character
@@ -135,83 +148,15 @@ class Tag < ActiveRecord::Base
         true
     end
     
-    @@TagTypes = TypeMap.new( {
-        Genre: ["Genre", 1], 
-        Role: ["Role", 2], 
-        Process: ["Process", 3], 
-        Ingredient: ["Ingredient", 4], 
-        Unit: ["Unit", 5], 
-        Source: ["Source", 6], 
-        Author: ["Author", 7], 
-        Occasion: ["Occasion", 8], 
-        PantrySection: ["Pantry Section", 9], 
-        StoreSection: ["Store Section", 10], 
-        Channel: ["Channel", 11], 
-        Tool: ["Tool", 12], 
-        Nutrient: ["Nutrient", 13], 
-        CulinaryTerm: ["Culinary Term", 14]
-    }, "unclassified")
-    
-    # Get the type number, taking any of the accepted datatypes
-    def self.typenum tt
-        @@TagTypes.num tt
-    end
-    
-    # Get the symbol for the type, taking any of the accepted datatypes
-    def self.typesym tt
-        @@TagTypes.sym tt
-    end
-    
-    # Get the name for the type, taking any of the accepted datatypes
-    def self.typename tt
-        @@TagTypes.name tt
-    end
-    
-    def typenum
-        self.tagtype
-    end
-    
-    def typenum=(tt, do_merge = false )
-        # Need to be careful: the tag needs to agree in type with any expressions that include
-        # it
-        return nil unless self.referents.all? { |ref| ref.drop self }
-        self.tagtype = Tag.typenum tt
-    end
-    
-    # Return the symbol for the type of self
-    def typesym
-        @@TagTypes.sym self.tagtype
-    end
-    
-    # Return the name for the type of self
-    def typename
-        @@TagTypes.name self.tagtype
-    end
-    
-    # Return a list of name/type pairs, suitable for making a selection list
-    def self.type_selections
-        @@TagTypes.list
-    end
-
-    # Taking an index into the table of tag types, return the symbol for that type
-    # (used to build a set of tabs, one for each tag type)
-    # NB: returns nil for nil index and for index beyond the last type. This is useful
-    # for generating a table that covers all types
-    def self.index_to_type(index)
-        index if index && (index <= @@TagTypes.max_index)
-    end
-
-    # Is my tagtype the same as the given type(s) (given as string, symbol, integer or array)
-    def typematch(tt)
-        return true if tt.nil? # nil type matches any tag type
-        if tt.kind_of?(Array)
-            tt.any? { |type| self.typematch type }
-        else
-            Tag.typenum(tt) == self.tagtype
-        end
-    end
-    
    public 
+   
+   def typenum=(tt)
+     # Need to be careful: the tag needs to agree in type with any expressions that include it
+     tn = Tag.typenum tt
+     return tn if (tn == self.tagtype) # Don't do anything if the type isn't changing
+     return nil unless self.referents.all? { |ref| ref.drop self }
+     self.tagtype = Tag.typenum(tt)
+   end
    
    # Move the tag to a new type, possibly merging it with another tag of identical spelling
    def project(tt)
