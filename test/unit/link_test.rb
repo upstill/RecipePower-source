@@ -14,7 +14,7 @@ class LinkTest < ActiveSupport::TestCase
     
     test "domain extracted on save" do 
         links(:jal).uri
-        link = Link.new( uri: links(:jal).uri, type:links(:jal).resource_type )
+        link = Link.new( uri: links(:jal).uri, resource_type:links(:jal).resource_type )
         assert_nil link.domain, "Domain field empty before save"
         assert link.save, "Saving link"
         assert_equal "cookthink.com", link.domain, "Domain not saved correctly"

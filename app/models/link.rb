@@ -25,9 +25,21 @@ class Link < ActiveRecord::Base
     # Ensure the existence of a link on the given uri, for an entity of the given type.
     # If such a link/entity pair already exists, return the link
     # Otherwise, create the link, bind it to a new entity and return the link
-    def self.assert(uri, entity_class)
-      self.where( uri: uri, entity_type: entity_class ).first ||
-      self.new(uri: uri)
+    def self.assert(uri, entity_or_class)
+      case entity_or_class
+      when Symbol, String
+        entity = nil
+        entity_class = entity_or_class.to_s
+      when Class
+        entity = nil
+        entity_class = entity_or_class.to_s
+      else # Other entities are assumed to be viable partners
+        entity = entity_or_class
+        entity_class = entity.class.to_s
+      end
+      link = self.where( uri: uri, entity_type: entity_class ).first || self.new(uri: uri)
+      link.entity = entity if entity
+      link
     end
     
     # Managing types of resource
