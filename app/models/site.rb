@@ -66,16 +66,6 @@ public
     scheme+"://"+host+((port=="80") ? "" : (":"+port))
   end
   
-  # Doctor a scanned title coming in from a web page, according to the site parameters
-  def trim_title(ttl)
-    if ttl
-      unless self.ttlcut.blank?
-        ttl.gsub! /#{self.ttlcut}/i, (self.ttlrepl || '')
-      end
-      ttl.strip
-    end
-  end
-  
   def sampleURL
       self.site+(self.sample||"")
   end
@@ -125,8 +115,8 @@ public
   end      
 
   # Make sure the given uri isn't relative, and make it absolute if it is
-  def make_link_absolute(candidate)
-    (candidate =~ /^\w*:/) ? candidate : site+candidate
+  def resolve(candidate)
+    (!candidate.blank?) && ((candidate =~ /^\w*:/) ? candidate : site+candidate)
   end
   
   def recipes

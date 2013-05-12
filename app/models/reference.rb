@@ -21,15 +21,12 @@ class Reference < ActiveRecord::Base
     end
     return nil unless rft
     
-    link = Link.assert(uri, :Reference)
-    if me = link.entity
-      me.typenum = type
-    else
-      me = self.new reference_type: self.typenum(type)
+    me = self.find_or_initialize( url: uri )
+    if me.errors.empty?
+      me.referents << rft unless me.referents.exists?(id: rft.id)
+      me.reference_type = self.typenum(type)
+      me.save
     end
-    me.referents << rft unless me.referents.exists? id: rft.id
-    me.link = link
-    me.save
     me
   end
 end

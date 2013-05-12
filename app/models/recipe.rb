@@ -1,43 +1,14 @@
 require './lib/Domain.rb'
 require './lib/RPDOM.rb'
-require './lib/uri_utils.rb'
 require 'open-uri'
 require 'nokogiri'
 require 'htmlentities'
-
-class GettableURLValidator < ActiveModel::EachValidator
-  def validate_each(record, attribute, value)
-    if(attribute == :url) && record.url_changed?
-      if test_result = test_link(value) # by_link(value)
-        # If the URL has relocated, we'll smartly adjust our link--UNLESS we're duplicating another URL
-        if test_result.kind_of?(String)
-          record.url = test_result if Recipe.where(url: test_result).empty?
-        end
-      else
-        record.errors.add :url, "\'#{value}\' doesn't seem to be a valid URL (can you use it as an address in your browser?)"
-        return nil
-      end
-    elsif attribute == :picurl
-      unless record.picurl && (record.picurl =~ /^data:/) # Use a data URL directly w/o taking a thumbnail
-        if record.url_changed? || record.picurl_changed? || !record.thumbnail
-          Delayed::Job.enqueue record
-          # record.thumbnail= Thumbnail.acquire( record.url, record.picurl ) 
-          # if record.thumburl.bad_url?
-            # record.errors.add :picurl, "\'#{value}\' doesn't point to a picture"
-            # return nil
-          # end
-        end
-      end
-    end
-    true
-  end
-end
 
 class Recipe < ActiveRecord::Base
   include Taggable
   include Referrable
   include Linkable
-  attr_accessible :title, :url, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href
+  attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href
   after_save :save_ref
 
   validates :title, :presence=>true 
@@ -76,8 +47,6 @@ public
   has_many :scales, :through=>:ratings, :autosave=>true
   # attr_reader :ratings_attributes
   accepts_nested_attributes_for :ratings, :reject_if => lambda { |a| a[:scale_val].nil? }, :allow_destroy=>true
-
-  validates_uniqueness_of :url
   
   has_one :link, :as => :entity
 
@@ -99,10 +68,6 @@ public
       self.thumbnail= Thumbnail.acquire( url, picurl )
       save
     end
-  end
-  
-  def site
-    @site ||= Site.by_link(url) || (href && Site.by_link(href))
   end
     
   # Either fetch an exising recipe record or make a new one, based on the
@@ -134,6 +99,17 @@ public
       end
     else # No id: create based on url
       params.delete(:rcpref)
+      rcp = Recipe.find_or_initialize params
+      if rcp.url.match %r{^http://#{current_domain}} # Check we're not trying to link to a RecipePower page
+        rcp.errors.add :base, "Sorry, can't cookmark pages from RecipePower. (Does that even make sense?)"
+      end
+      if rcp.errors.empty?
+        ss = SiteServices.new rcp.site
+        rcp.picurl = ss.resolve rcp.picurl if rcp.picurl
+        rcp.title = ss.trim_title rcp.title # = ((site.yield :Title, url)[:Title] || rcp.title).html_safe unless rcp.title
+        rcp.save
+      end
+=begin
       rcp = Recipe.new params
       if rcp.url.blank?  # Check for non-empty URL
         rcp.errors.add :url, "can't be blank"
@@ -142,14 +118,15 @@ public
       # Find the site for this url
       elsif !rcp.site # ...if site can be found/created under this URL (or href)
         rcp.errors.add :url, "doesn't make sense or can't be found"
-      elsif saved = Recipe.where(url: (rcp.url = rcp.site.make_link_absolute(rcp.url))).first
+      elsif saved = Recipe.where(url: (rcp.url = rcp.site.resolve(rcp.url))).first
         # Recipe already exists under this url
         rcp = saved
       else
-        rcp.picurl = rcp.site.make_link_absolute rcp.picurl if rcp.picurl
+        rcp.picurl = rcp.site.resolve rcp.picurl if rcp.picurl
         rcp.title = rcp.site.trim_title rcp.title # = ((site.yield :Title, url)[:Title] || rcp.title).html_safe unless rcp.title
         rcp.save
       end
+=end
     end
     # If all is well, make sure it's on the user's list
     if userid && rcp.id && rcp.errors.empty?
@@ -163,7 +140,7 @@ public
   def trimmed_title
     ttl = self.title || ""
     if st = self.url && Site.by_link(self.url)
-      ttl = st.trim_title ttl
+      ttl = SiteServices.new(st).trim_title ttl
     end
     # Convert HTML entities
     @@coder.decode ttl
@@ -177,18 +154,6 @@ public
     else
       self.title
     end
-  end
-
-  # Return the human-readable name for the recipe's source
-  def sourcename
-    @site = @site || Site.by_link(self.url)
-    @site.name
-  end
-
-  # Return the URL for the recipe's source's home page
-  def sourcehome
-    @site = @site || Site.by_link(self.url)
-    @site.home
   end
 
   @@statuses = [

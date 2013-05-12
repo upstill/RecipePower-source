@@ -39,6 +39,29 @@ def header_result(link, resource=nil)
   end
 end
 
+def safe_parse(url)
+  begin
+    URI.parse(url) if url
+  rescue Exception => e
+    return nil
+  end
+end
+
+def normalize_url(url)
+  (uri = safe_parse(url)) && uri.normalize.to_s
+end
+
+def normalize_and_test_url(url, href=nil)
+  return nil unless normalized = normalize_url(url)
+  if !(valid_url = test_link(normalized))
+    # Try to construct a valid url by merging the href and the url
+    if (uri = safe_parse(href)) && (normalized = uri.normalize.merge(normalized).to_s)
+      valid_url = test_link normalized
+    end
+  end
+  ((valid_url.kind_of? String) ? valid_url : normalized) if valid_url
+end
+
 # Confirm that a proposed URL (with an optional subpath) actually has content at the other end
 # If the link is badly formed (returns a 400 result from the server) then we return false
 # If the resource has moved (result 301) and the new location works, we return the new link

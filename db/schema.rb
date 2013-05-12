@@ -167,6 +167,7 @@ ActiveRecord::Schema.define(:version => 20130508054210) do
     t.datetime "created_at",     :null => false
     t.datetime "updated_at",     :null => false
     t.integer  "reference_type"
+    t.string   "url"
   end
 
   create_table "referent_relations", :force => true do |t|

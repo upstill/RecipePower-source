@@ -6,8 +6,9 @@ module SitesHelper
   end
   
   def trimmed_sample
-    extractions = SiteServices.new(@site).extract_from_page @site.sampleURL, :label => :Title
-    @site.trim_title extractions[:Title] || ""
+    ss = SiteServices.new(@site)
+    extractions = ss.extract_from_page @site.sampleURL, :label => :Title
+    ss.trim_title extractions[:Title] || ""
   end
   
   def show_sample(site)

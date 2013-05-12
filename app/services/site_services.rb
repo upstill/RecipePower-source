@@ -95,7 +95,7 @@ class FinderResults
       if finder[:label] == "Title" && @site.ttlcut
         finder[:foundlings].each_index do |ix| 
           ttl, url = finder[:foundlings][ix].match(/^\[([^\]]*)\] \(from (.*)\)$/)[1,2]
-          finder[:foundlings][ix] = "[#{@site.trim_title ttl}] (from #{url})"
+          finder[:foundlings][ix] = "[#{trim_title ttl}] (from #{url})"
         end
       end
       puts "\t["+finder[:foundlings].join("\n\t ")+"\t]"
@@ -290,6 +290,16 @@ protected
   end
 
 public
+  
+  # Doctor a scanned title coming in from a web page, according to the site parameters
+  def trim_title(ttl)
+    if ttl
+      unless @site.ttlcut.blank?
+        ttl.gsub! /#{@site.ttlcut}/i, (@site.ttlrepl || '')
+      end
+      ttl.strip
+    end
+  end
 
   def get_input(prompt="? ")
     print prompt
@@ -482,10 +492,10 @@ public
           # A title may produce both a title and a URL, conventionally separated by a tab
           titledata = foundstr.split('\t')
           results[:URI] = titledata[1] if titledata[1]
-          foundstr = @site.trim_title titledata.first
+          foundstr = trim_title titledata.first
         when "Image", "URI"
           # Make picture path absolute if it's not already
-          foundstr = @site.make_link_absolute foundstr 
+          foundstr = @site.resolve foundstr 
         end
         results[label.to_sym] = foundstr
       end

@@ -11,7 +11,6 @@ class ReferenceTest < ActiveSupport::TestCase
     rft = jal.primary_meaning
     refid = rft.id
     assert ref.referents.exists?(id: refid), "Referent wasn't added properly"
-    assert_equal uri, ref.link.uri, "Link doesn't match reference"
   end
   
   test "Assert Redundant Reference Properly" do
