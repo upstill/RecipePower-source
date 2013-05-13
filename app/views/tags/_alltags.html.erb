@@ -16,7 +16,8 @@
 		<% end %>
 	  </tr>
 
-	<% @taglist.each do |tag| %><tr id="tagrow_<%= tag.id.to_s %>">
+	<% @taglist.each do |tag| %>
+	<tr id="tagrow_<%= tag.id.to_s %>">
 		<td class="tag_type"><%= tag.id.to_s %></td>
 		<td><%= summarize_tag tag %></td>
 		<td><%= select_tag :tagtype, type_selections(tag), class: "tag_type_selector" %></td>

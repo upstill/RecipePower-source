@@ -26,8 +26,9 @@ module Typeable
     end
     
     # Return a list of name/type pairs, suitable for making a selection list
-    def type_selections
-        @TagTypes.list
+    def type_selections(withnull=false)
+      range = withnull ? 0..-1 : 1..-1
+      @TagTypes.list.compact[range]
     end
     
     def attrib_name

@@ -4,26 +4,23 @@ class TagsController < ApplicationController
   # GET /tags
   # GET /tags.xml
   def index
-      # 'index' page may be calling itself with filter parameters in the name and tagtype
-      @Title = "Tags"
-      @filtertag = Tag.new params[:tag]
-      # @filtertag.tagtype = params[:tag][:tagtype].to_i unless params[:tag][:tagtype].blank?
-      @taglist = 
-      if @filtertag.name
-          # Use matching functionality of Tag model
-          Tag.strmatch(@filtertag.name, tagtype: @filtertag.tagtype)
-      elsif @filtertag.tagtype
-          Tag.where(tagtype: @filtertag.tagtype)
-      else
-          Tag.scoped
-      end
-      # We should have a Relation for the relevant tags
-      @taglist = @taglist.order("id").page(params[:page]).per_page(50)
+    @Title = "Tags"
+    @tags = Tag.scoped
+    @seeker = TagSeeker.new @tags, session[:seeker], params # Default; other controllers may set up different seekers
+    session[:seeker] = @seeker.store
     respond_to do |format|
       # format.json { render :json => @taglist.map { |tag| { :title=>tag.name+tag.id.to_s, :isLazy=>false, :key=>tag.id, :isFolder=>false } } }
       format.html # index.html.erb
       format.xml  { render :xml => @userlist }
     end
+  end
+  
+  def query
+    @Title = "Tags"
+    @tags = Tag.scoped
+    @seeker = TagSeeker.new @tags, session[:seeker], params # Default; other controllers may set up different seekers
+    session[:seeker] = @seeker.store
+    render 'index', :layout=>false
   end
 
 # POST /tags

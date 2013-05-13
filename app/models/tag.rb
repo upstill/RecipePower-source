@@ -4,6 +4,7 @@ class Tag < ActiveRecord::Base
     include Typeable
     
     typeable( :tagtype, 
+        Untyped: ["Untyped", 0 ],
         Genre: ["Genre", 1], 
         Role: ["Role", 2], 
         Process: ["Process", 3], 

@@ -1,5 +1,5 @@
 <h3>Available Feeds</h3>
 <p>This is a long list. You can narrow it down by searching: use the search box above to type in words and terms
 </p><p>If you have copied a link to a feed, add it by clicking <%= link_to_modal "Here", "/feeds/new", class: "btn" %>. Or, browse for feeds below.</p>
-<%= render "feeds/table" %>
+<%= seeker_table nil, [ "ID", "Title/Description/URL", "Type", "Host Site", permitted_to?(:approve, :feeds) && "Approved", "Actions" ] %>
 

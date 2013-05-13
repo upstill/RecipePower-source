@@ -31,6 +31,7 @@ gem 'delayed_job_active_record'
 gem 'hirefire-resource'
 gem 'rspec-rails', '2.6.1', :group => [:test, :development]
 gem 'debugger', :group => [:test, :development]
+gem 'awesome_nested_set'
 
 # gem 'exception_notification', :require => 'exception_notifier'
 gem 'exception_notification', :require => 'exception_notifier', git: 'git://github.com/alanjds/exception_notification.git' 

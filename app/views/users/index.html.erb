@@ -1,14 +1,1 @@
-<h3><%= @isChannel ? "Available Channels" : "Possible Friends" %></h3>
-<table class="table table-striped">
-  <thead>
-    <tr>
-	    <th>Handle</th>
-	    <th>About</th>
-	    <th># Recipes</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody class="collection_list">
-		<%= render "relist" %>
-  </tbody>
-</table>
+<%= seeker_table (@isChannel ? "Available Channels" : "Possible Friends"), [ "Handle", "About", "# Recipes", "" ] %>

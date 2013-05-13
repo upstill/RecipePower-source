@@ -7,25 +7,44 @@ class Seeker < Object
   # Save the Seeker data into session store
   def store
     # Serialize structure consisting of tagstxt and specialtags
-    savestr = YAML::dump( { :tagstxt => (@tagstxt || ""), :kind => @kind, :page => @cur_page || 1 } ) 
+    savestr = YAML::dump( { :tagstxt => (@tagstxt || ""), :tagtype => @tagtype, :kind => @kind, :page => @cur_page || 1 } ) 
     back = YAML::load(savestr)
     savestr
   end
   
-  def initialize affiliate, datastr=nil
+  def initialize affiliate, datastr=nil, params=nil
     @affiliate = affiliate
     prior = !datastr.blank? && YAML::load(datastr)
     if prior && (prior[:kind] == @kind)
       @tagstxt = prior[:tagstxt] || ""
+      @tagtype = prior[:tagtype]
       @cur_page = prior[:page] || 1
     else
       @tagstxt = "" 
+      @tagtype = nil
       @cur_page = 1
+    end
+    # Params for tagstxt and cur_page will override the prior info
+    if params
+      if params[:tagstxt]
+        @tagstxt = params[:tagstxt]
+        @tags = nil
+      end
+      if ttstr = params[:tagtype]
+        @tagtype = ttstr.empty? ? nil : params[:tagtype].to_i
+      end
+      if page = params[:cur_page]
+        @cur_page = page.to_i
+      end
     end
   end
   
   def tagstxt()
     @tagstxt
+  end
+  
+  def tagtype
+    @tagtype
   end
   
   def guide()
@@ -153,7 +172,7 @@ end
 
 class ContentSeeker < Seeker
   
-  def initialize(affiliate, strdata)
+  def initialize(affiliate, strdata, params=nil)
     super
     @kind = 1
   end
@@ -196,7 +215,7 @@ end
 
 class FriendSeeker < Seeker
   
-  def initialize(affiliate, strdata)
+  def initialize(affiliate, strdata, params=nil)
     super
     # The affiliate is an ActiveRecord relation, the set of candidate users
     @kind = 2
@@ -244,9 +263,110 @@ class FriendSeeker < Seeker
   end
 end
 
+class ReferenceSeeker < Seeker
+  
+  def initialize(affiliate, strdata, params=nil)
+    super
+    # The affiliate is a list of References, the Reference relation
+  end
+
+  def query_path
+    "/references/query"
+  end
+  
+  def convert_ids list
+    Reference.where(id: list)
+  end
+  
+  def list_type
+    :reference
+  end
+  
+  def entity_name
+    "reference"
+  end
+  
+  # Get the results of the current query.
+  def result_ids
+  	return @results if @results # Keeping a cache of results
+    if tags.empty?
+      @results = @affiliate.map(&:id)
+    else
+      # We purge/massage the list only if there is a tags query here
+      # Otherwise, we simply sort the list by mod date
+      # Convert candidate array to a hash recipe_id=>#hits
+      candihash = Candihash.new @affiliate.map(&:id)
+            
+      # Rank/purge for tag matches
+      tags.each { |tag| 
+        # candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
+        # Get candidates by matching the tag's name against recipe titles and comments
+        candihash.apply @affiliate.where("url LIKE ?", "%#{tag.name}%").map(&:id)
+      }
+      # Convert back to a list of results
+      @results = candihash.results.reverse
+  	end
+  end
+end
+
+class TagSeeker < Seeker
+  
+  def initialize(affiliate, strdata, params=nil)
+    super
+    # The affiliate is the Tag relation
+  end
+
+  def query_path
+    "/tags/query"
+  end
+  
+  def convert_ids list
+    Tag.where(id: list)
+  end
+  
+  def list_type
+    :tag
+  end
+  
+  def entity_name
+    "tag"
+  end
+  
+  # Get the results of the current query.
+  def result_ids
+  	return @results if @results # Keeping a cache of results
+    if @tagtype
+      scope = @affiliate.where(tagtype: @tagtype)
+    else
+      scope = @affiliate
+    end
+    case tags.count
+    when 0
+      @results = scope.map(&:id)
+    when 1
+      constraints = @tagtype ? { tagtype: @tagtype } : {}
+      @results = Tag.strmatch(tags.first.name, constraints).map(&:id)
+    else
+      # We purge/massage the list only if there is a tags query here
+      # Otherwise, we simply sort the list by mod date
+      # Convert candidate array to a hash recipe_id=>#hits
+      candihash = Candihash.new scope.map(&:id)
+            
+      # Rank/purge for tag matches
+      tags.each { |tag| 
+        # candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
+        # Get candidates by matching the tag's name against recipe titles and comments
+        candihash.apply Tag.strmatch(tag.name, tagtype: tag.tagtype).map(&:id)
+      }
+      # Convert back to a list of results
+      @results = candihash.results.reverse
+  	end
+  end
+end
+
 class FeedSeeker < Seeker
   
-  def initialize(affiliate, strdata)
+  def initialize(affiliate, strdata, params=nil)
     super
     @kind = 3
   end

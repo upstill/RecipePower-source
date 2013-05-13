@@ -17,6 +17,12 @@ module CollectionsHelper
   		when User
   		  @user = element
   		  render "users/user"
+  		when Reference
+  		  @reference = element
+  		  render "references/reference"
+  		when Tag
+  		  @tag = element
+  		  render "tags/tag"
   		else
   			"<p>(Mysterious list element of type #{element.class.to_s})</p>"
   		end

@@ -46,6 +46,8 @@ GEM
     annotate (2.4.0)
     ansi (1.4.3)
     arel (3.0.2)
+    awesome_nested_set (2.1.6)
+      activerecord (>= 3.0.0)
     bcrypt-ruby (3.0.1)
     better_errors (0.8.0)
       coderay (>= 1.0.0)
@@ -289,6 +291,7 @@ PLATFORMS
 
 DEPENDENCIES
   annotate (= 2.4.0)
+  awesome_nested_set
   better_errors
   binding_of_caller
   bootstrap-sass (~> 2.2.2.0)

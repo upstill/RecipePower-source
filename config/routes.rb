@@ -1,5 +1,22 @@
 RP::Application.routes.draw do
 
+  resources :references
+
+
+  get "references/index"
+
+  get "references/create"
+
+  get "references/new"
+
+  get "references/edit"
+
+  get "references/show"
+
+  get "references/update"
+
+  get "references/destroy"
+
   resources :feeds do
     member do 
       get 'collect' # Add the feed to the current user
@@ -50,11 +67,10 @@ RP::Application.routes.draw do
 
   match '/site/scrape' => 'sites#scrape'
   resources :sites
-
   resources :expressions
-
   resources :referents
-
+  match 'references/query', :controller=>'references', :action=>'query', :via => :post
+  resources :references
   resources :links
 
   match 'rcpqueries/relist', :controller=>'rcpqueries', :action=>'relist', :via => :post
@@ -94,6 +110,7 @@ RP::Application.routes.draw do
   match 'tags/typify', :controller=>'tags', :action=>'typify'
   match 'tags/match', :controller=>'tags', :action=>'match'
   match 'tags/:id/absorb', :controller=>'tags', :action=>'absorb'
+  match 'tags/query', :controller=>'tags', :action=>'query', :via => :post
   resources :tags
 
   resources :ratings

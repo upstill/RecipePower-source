@@ -33,9 +33,11 @@
     <%= render 'layouts/frame_top' %>
     <div class="container">
 	    <div class="row">
-		    <div class="span3">
-			    <%= render 'layouts/frame_left' %>
-				</div>
+				<% if params[:controller] == "collections" %>
+			    <div class="span3">
+				    <%= render 'layouts/frame_left' %>
+					</div>
+				<% end %>
 				<div class="span9">
 					<div class="ajax-loader"></div>
 					<div class="content">
