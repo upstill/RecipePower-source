@@ -177,8 +177,8 @@ submit_and_process = ( request, method, assumptions ) ->
 			RP.post_success responseData
 			RP.process_response responseData
 
-	# Handle successful return of a JSON request by running whatever success function
-	#   obtains, and stashing any resulting code away for invocation after closing the
+# Handle successful return of a JSON request by running whatever success function
+#   obtains, and stashing any resulting code away for invocation after closing the
 #   dialog, if any.
 RP.post_success = (jsonResponse, dlog, entity) ->
 
@@ -241,6 +241,24 @@ RP.submit = (request) ->
 		submit_and_process request, method, data
 	false
 
+# Respond to the change of a popup (say) by submtting a request. Both
+# request and its data are encoded in the element's data; the value is added to the request here
+RP.change = () ->
+	elmt = window.event.target
+	data = $(elmt).data()
+	# Stick the value of the element into the named parameter ('value' default)
+	if data.valueparam
+		data.querydata[data.valueparam] = elmt.value
+	else
+		data.querydata.value = elmt.value
+	debugger
+	# Encode the querydata into the request string
+	str = []
+	for attrname,attrvalue of data.querydata
+		str.push(encodeURIComponent(attrname) + "=" + encodeURIComponent(attrvalue));
+	# Fire off an Ajax call notifying the server of the (re)classification
+	submit_and_process data.request+"?"+str.join("&"), "GET", data
+	
 # Process response from a request. This will be an object supplied by a JSON request,
 # which may include code to be presented along with fields (how and area) telling how
 # to present it. The data may also consist of only 'code' if it results from an HTML request
@@ -255,6 +273,10 @@ RP.process_response = (responseData, dlog) ->
 		if replacements = responseData.replacements
 			for replacement in replacements
 				$(replacement[0]).replaceWith replacement[1]
+
+		if deletions = responseData.deletions
+			for deletion in deletions
+				$(deletion).remove()
 
 		# 'dlog' gives a dialog DOM element to replace the extant one
 		if newdlog = responseData.dlog
@@ -280,4 +302,4 @@ RP.process_response = (responseData, dlog) ->
 		if responseData.done && !supplanted
 			RP.dialog.close_modal dlog, responseData.notice
 
-	return supplanted;
+	return supplanted
