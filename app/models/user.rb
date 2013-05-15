@@ -128,6 +128,10 @@ class User < ActiveRecord::Base
     ordering = (options[:sort_by] == :collected) ? "created_at" : "updated_at"
     Rcpref.where(constraints).order(ordering+" DESC").select("recipe_id").map(&:recipe_id)
   end
+  
+  def tag_owner
+    User.super_id
+  end
 
 private
   @@leasts = {}

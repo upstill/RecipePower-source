@@ -1,10 +1,11 @@
-<tr>
+<tr id="feed<%= @feed.id.to_s %>">
 	<td><%= @feed.id.to_s %></td>
 	<td>
 		<%= link_to @feed.title.truncate(80), feed_path(@feed) %><br>
 		<%= @feed.description  %><br>
 		<%= link_to @feed.url.truncate(40), @feed.url %>
 	</td>
+	<td><%= taggable_list @feed %></td>
 	<td><%= @feed.feedtypename %></td>
 	<td><%= link_to @feed.site.name, site_path(@feed.site) %></td>
 	<% permitted_to?(:approve, :feeds) do %>

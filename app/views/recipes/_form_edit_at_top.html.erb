@@ -24,11 +24,7 @@
 			</div>			
 	  </div>
 
-	  <div class="edit_recipe_field tags" >
-			<%= f.label :tag_tokens, "Tags" -%>
-			<%= tag_field f, rows: "1" %>
-			<%# f.text_field :tag_tokens, rows: "1", :data => { :pre => @recipe.tags.map(&:attributes).to_json, :hint => "Type your tag(s) for the recipe here" } -%>
-	  </div>
+		<%= taggable_div f, "edit_recipe_field" %>
 
 	  <div class="edit_recipe_field" >
 			<%= f.label :comment, "Notes" -%>

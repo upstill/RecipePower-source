@@ -109,24 +109,6 @@ public
         rcp.title = ss.trim_title rcp.title # = ((site.yield :Title, url)[:Title] || rcp.title).html_safe unless rcp.title
         rcp.save
       end
-=begin
-      rcp = Recipe.new params
-      if rcp.url.blank?  # Check for non-empty URL
-        rcp.errors.add :url, "can't be blank"
-      elsif rcp.url.match %r{^http://#{current_domain}} # Check we're not trying to link to a RecipePower page
-        rcp.errors.add :base, "Sorry, can't cookmark pages from RecipePower. (Does that even make sense?)"
-      # Find the site for this url
-      elsif !rcp.site # ...if site can be found/created under this URL (or href)
-        rcp.errors.add :url, "doesn't make sense or can't be found"
-      elsif saved = Recipe.where(url: (rcp.url = rcp.site.resolve(rcp.url))).first
-        # Recipe already exists under this url
-        rcp = saved
-      else
-        rcp.picurl = rcp.site.resolve rcp.picurl if rcp.picurl
-        rcp.title = rcp.site.trim_title rcp.title # = ((site.yield :Title, url)[:Title] || rcp.title).html_safe unless rcp.title
-        rcp.save
-      end
-=end
     end
     # If all is well, make sure it's on the user's list
     if userid && rcp.id && rcp.errors.empty?

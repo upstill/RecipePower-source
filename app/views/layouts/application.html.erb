@@ -33,7 +33,7 @@
     <%= render 'layouts/frame_top' %>
     <div class="container">
 	    <div class="row">
-				<% if params[:controller] == "collections" %>
+				<% if params[:controller] == "collection" %>
 			    <div class="span3">
 				    <%= render 'layouts/frame_left' %>
 					</div>
@@ -43,7 +43,7 @@
 				<% end %>
 					<div class="ajax-loader"></div>
 					<div class="content">
-						<%= flash_notifications %>
+						<%= flash_notifications if params[:controller] != "collection" %>
 						<%= yield %>
 					</div>
 				</div>

@@ -1,5 +1,5 @@
 module SeekerHelper
-	def seeker_table(heading, column_heads, &block )
+	def seeker_table(heading, column_heads )
 	  header = heading ? "<h3>#{heading}</h3>" : ""
     pager = (@seeker.npages > 0) ?
 	  %Q{

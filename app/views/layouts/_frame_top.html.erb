@@ -3,6 +3,11 @@
   	<div class="container">
 	  	<a class="brand" href="/collection">RecipePower</a>
 	  	<ul class="nav pull-right">
+		<% if params[:controller] != "collection" %>
+			<li>
+				<%= link_to "Back to Collections", collection_path %>
+			</li>
+		<% end %>
 		<% if user_signed_in? %>
 			<li>
 				<%= link_to_modal "Add a Cookmark", new_recipe_path %>
@@ -26,9 +31,7 @@
 		<ul class="nav">
 			<li>
 				<%= form_tag(@seeker.query_path, :method => "post", :class => "navbar-form form-search query_form") do %>
-					<div id="collection_query_tokens">
-						<%= text_field_tag :tagstxt, "#{@seeker.tagstxt}", "data-pre" => @seeker.tags.map(&:attributes).to_json, :placeholder => "Seek and ye shall find...", :class => "search-query" %>
-					</div>
+			  	<%= taggable_div @seeker, "collection_query_tokens", nil, :placeholder => "Seek and ye shall find...", :class => "search-query" %>
 				<% end %>
 			</li>
 		</ul>

@@ -36,4 +36,11 @@ module FeedsHelper
           "</li></ul>"
     msg.html_safe
   end
+  
+  def feeds_table
+    table_out @feeds, [ "ID", "Title/Description/URL", "Tag(s)", "Type", "Host Site", permitted_to?(:approve, :feeds) && "Approved", "Actions" ] do |feed|
+      @feed = feed
+      render "feeds/feed"
+    end
+  end
 end

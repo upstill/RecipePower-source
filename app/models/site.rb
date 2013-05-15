@@ -113,11 +113,6 @@ public
       self.referent = Referent.express(str, :Source)
     end
   end      
-
-  # Make sure the given uri isn't relative, and make it absolute if it is
-  def resolve(candidate)
-    (!candidate.blank?) && ((candidate =~ /^\w*:/) ? candidate : site+candidate)
-  end
   
   def recipes
     stripped_host = (host =~ /^www./) ? host[4..-1] : host

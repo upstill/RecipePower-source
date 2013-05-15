@@ -5,22 +5,22 @@ class LinkRefServices
   end
   
   # Make the link_refs unnecessary by transferring content to References
-  def self.obviate(report_only=true)
-    report = []
-    rownum = 0
-    tagarr = []
-    Tag.all.each do |tag| 
-      tagarr[tag.id] = tag 
-      if (tag.tagtype == 0) && !tag.links.empty?
-        report << "Tag ##{tag.id.to_s}(#{tag.name}): No tagtype, but has link(s): "+tag.links.each { |link| "##{link.id.to_s}(#{link.uri})" }.join('\n\t')
-      end
-    end
-    unless report.empty?
-      puts 'Tag report: \n'+report.join('\n\t') 
-      return
-    end
-    rownum = 0
+  def self.obviate(report_only=false)
     if report_only
+      report = []
+      rownum = 0
+      tagarr = []
+      Tag.all.each do |tag| 
+        tagarr[tag.id] = tag 
+        if (tag.tagtype == 0) && !tag.links.empty?
+          report << "Tag ##{tag.id.to_s}(#{tag.name}): No tagtype, but has link(s): "+tag.links.each { |link| "##{link.id.to_s}(#{link.uri})" }.join('\n\t')
+        end
+      end
+      unless report.empty?
+        puts 'Tag report: \n'+report.join('\n\t') 
+        return
+      end
+      rownum = 0
       Link.all.each do |link|
         if link.tags.size > 1
           refid = nil
@@ -31,19 +31,10 @@ class LinkRefServices
           end
         end
       end
+      puts "Reference report:\n"+report.join("\n")
     else
-      LinkRef.all.each do |lr|
-        tag = tagarr[lr.tag_id]
-        link = lr.link
-        if ref = Reference.seek_on_url(link.uri)
-          report << "Row ##{rownum.to_s}: Link #{link.id.to_s}(#{link.uri}) already associated with tag."
-        elsif !Reference.assert(link.uri, tag)
-          report << "Row ##{rownum.to_s}: Couldn't reference tag ##{tag.id.to_s}(#{tag.name}) because "+(lr.referents.empty? ? "it has no referents" : "Who knows why? (It has referents)")
-        end
-        rownum = rownum+1
-      end
+      Delayed::Job.enqueue LinkRef.first
     end
-    puts "Reference report:\n"+report.join("\n")
     nil
   end
   

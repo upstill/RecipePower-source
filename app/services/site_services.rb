@@ -290,6 +290,11 @@ protected
   end
 
 public
+
+  # Make sure the given uri isn't relative, and make it absolute if it is
+  def resolve(candidate)
+    (!candidate.blank?) && ((candidate =~ /^\w*:/) ? candidate : @site.site+candidate)
+  end
   
   # Doctor a scanned title coming in from a web page, according to the site parameters
   def trim_title(ttl)
@@ -495,7 +500,7 @@ public
           foundstr = trim_title titledata.first
         when "Image", "URI"
           # Make picture path absolute if it's not already
-          foundstr = @site.resolve foundstr 
+          foundstr = resolve foundstr 
         end
         results[label.to_sym] = foundstr
       end

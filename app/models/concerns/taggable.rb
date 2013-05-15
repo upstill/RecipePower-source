@@ -2,16 +2,22 @@ module Taggable
   extend ActiveSupport::Concern
 
   included do
-    attr_accessible :tag_tokens, :current_user
+    attr_accessible :tag_tokens
     has_many :taggings, :as => :entity, :dependent => :destroy
     # has_many :tags, :through => :taggings
     has_many :taggers, :through => :taggings, :class_name => "User"
     attr_accessor :current_user
     attr_reader :tag_tokens
   end
+  
+  # The tags will be owned by the declared user. Classes can override this method
+  # as desired
+  def tag_owner
+    current_user || User.super_id
+  end
 
   def tags(uid=nil)
-    uid ||= current_user
+    uid ||= tag_owner
     Tag.where(id: tag_ids(uid))
   end
   
@@ -21,20 +27,20 @@ module Taggable
   end
 
   def tag_ids(uid=nil)
-    uid ||= current_user
+    uid ||= tag_owner
     taggings.where(:user_id => uid).map(&:tag_id)
   end
   
   # Set the tag ids associated with the current user
   def tag_ids=(nids)
     # Ensure that the user's tags are all and only those in nids
-    oids = tag_ids current_user
+    oids = tag_ids tag_owner
     to_add = nids - oids
     to_remove = oids - nids
     # Add new tags as necessary
-    to_add.each { |tagid| Tagging.create(user_id: current_user, tag_id: tagid, entity_id: id, entity_type: self.class.name) }
+    to_add.each { |tagid| Tagging.create(user_id: tag_owner, tag_id: tagid, entity_id: id, entity_type: self.class.name) }
     # Remove tags as nec.
-    to_remove.each { |tagid| Tagging.where(user_id: current_user, tag_id: tagid, entity_id: id, entity_type: self.class.name).map(&:destroy) } # each { |tg| tg.destroy } }
+    to_remove.each { |tagid| Tagging.where(user_id: tag_owner, tag_id: tagid, entity_id: id, entity_type: self.class.name).map(&:destroy) } # each { |tg| tg.destroy } }
   end
 
   # Write the virtual attribute tag_tokens (a list of ids) to
@@ -46,7 +52,7 @@ module Taggable
         Tag.find e.to_i
       else
         e.sub!(/^\'(.*)\'$/, '\1') # Strip out enclosing quotes
-        Tag.strmatch(e, userid: current_user, assert: true)[0] # Match or assert the string
+        Tag.strmatch(e, userid: tag_owner, assert: true)[0] # Match or assert the string
       end
     }.compact.uniq
   end

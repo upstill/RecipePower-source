@@ -36,6 +36,22 @@ class LinkRef < ActiveRecord::Base
         end
         link
     end
+    
+    def perform
+      rownum = 0
+      report = []
+      LinkRef.all.each do |lr|
+        tag = lr.tag
+        link = lr.link
+        if ref = Reference.seek_on_url(link.uri)
+          report << "Row ##{rownum.to_s}: Link #{link.id.to_s}(#{link.uri}) already associated with tag."
+        end
+        if !Reference.assert(link.uri, tag)
+          report << "Row ##{rownum.to_s}: Couldn't reference tag ##{tag.id.to_s}(#{tag.name}) because "+(lr.referents.empty? ? "it has no referents" : "Who knows why? (It has referents)")
+        end
+        rownum = rownum+1
+      end
+    end
         
 require 'csv'
     def self.import_CSVfile(fname)
