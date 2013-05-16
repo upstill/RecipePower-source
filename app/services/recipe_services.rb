@@ -5,7 +5,8 @@ class RecipeServices
     @recipe = recipe
     @current_user = current_user
   end
-  
+
+=begin
   def supplant_x_tags
     @recipe.current_user = @current_user
     self.tags = @recipe.x_tags
@@ -24,21 +25,8 @@ class RecipeServices
     end
   end
   
-  def tags
-    @recipe.tags(@current_user)
-  end
-  
-  def tags=(tags)
-    @recipe.current_user = @current_user
-    @recipe.tags = tags
-  end
-  
   def show_x_tags(file=STDOUT)
     file.puts @recipe.x_tags.sort { |t1, t2| t1.id <=> t2.id }.collect { |tag| "#{tag.id.to_s}: #{tag.name}" }.join "\n"
-  end
-  
-  def show_tags(file=STDOUT)
-    file.puts tags.sort { |t1, t2| t1.id <=> t2.id }.collect { |tag| "#{tag.id.to_s}: #{tag.name}" }.join "\n"
   end
   
   def compare_tags(file=STDOUT, xfile=STDOUT)
@@ -78,5 +66,19 @@ class RecipeServices
         end
       end
     end
+  end
+=end
+  
+  def tags
+    @recipe.tags(@current_user)
+  end
+  
+  def tags=(tags)
+    @recipe.current_user = @current_user
+    @recipe.tags = tags
+  end
+  
+  def show_tags(file=STDOUT)
+    file.puts tags.sort { |t1, t2| t1.id <=> t2.id }.collect { |tag| "#{tag.id.to_s}: #{tag.name}" }.join "\n"
   end
 end

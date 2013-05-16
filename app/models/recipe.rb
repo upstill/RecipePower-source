@@ -38,8 +38,8 @@ private
   end
 public
   # XXX Defunct as soon as tagging data gets moved to Taggings
-  has_many :tagrefs, :dependent=>:destroy
-  has_many :x_tags, :through=>:tagrefs, :autosave=>true, :class_name => "Tag", :source => :tag, :foreign_key => :tag_id
+#   has_many :tagrefs, :dependent=>:destroy
+#  has_many :x_tags, :through=>:tagrefs, :autosave=>true, :class_name => "Tag", :source => :tag, :foreign_key => :tag_id
   
   belongs_to :thumbnail, :autosave => true, :dependent => :destroy
   
