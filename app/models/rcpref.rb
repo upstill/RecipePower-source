@@ -81,7 +81,7 @@ class Rcpref < ActiveRecord::Base
     
     if commentstr
       # If there is a :comment parameter, use that in the query
-      commentset = refs.where("comment LIKE ?", "%"+commentstr+"%")
+      commentset = refs.where("comment ILIKE ?", "%"+commentstr+"%")
     end
     
     # We prefer recipes that match in both title and comment, 

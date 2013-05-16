@@ -1,5 +1,5 @@
 <tr id="listrow_<%= @user.id.to_s %>">
-	<td><%= link_to @user.handle, user_path(@user) %></td>
+	<td><%= link_to_modal @user.handle, user_path(@user) %></td>
 	<td><%= @user.about %></td>
 	<td><%= taggable_list @user %></td>
 	<td><%= @user.recipes.count %></td>

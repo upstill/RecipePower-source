@@ -117,6 +117,14 @@ module ApplicationHelper
       "data-url" => "/#{controller}/#{obj.id}/edit?pic_picker=true"
   end
   
+  def button_to(imagelink, path, options={} )
+    link_to(
+      image_tag(imagelink, class: "back_button" ), 
+      path,
+      options
+    )
+  end
+  
   # Build a picture-selection dialog with the default url, url for a page containing candidate images, id, and name of input field to set
   def pic_picker_contents
     if @recipe

@@ -117,6 +117,7 @@ class BrowserElement
       
       # Rank/purge for tag matches
       tagset.each { |tag| 
+        debugger
           candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
           # Get candidates by matching the tag's name against recipe titles and comments
           candihash.apply Rcpref.recipe_ids(source_set, 

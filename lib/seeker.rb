@@ -234,7 +234,7 @@ class FriendSeeker < Seeker
   end
   
   def entity_name
-    @affiliate.channel? ? "channel" : "user"
+    @affiliate.first.channel? ? "channel" : "user"
   end
   
   # Get the results of the current query.
@@ -250,12 +250,13 @@ class FriendSeeker < Seeker
             
       # Rank/purge for tag matches
       tags.each { |tag| 
+        candihash.apply tag.user_ids if tag.id > 0
         # candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
         # Get candidates by matching the tag's name against recipe titles and comments
-        candihash.apply @affiliate.where("username LIKE ?", "%#{tag.name}%").map(&:id)
-        candihash.apply @affiliate.where("email LIKE ?", "%#{tag.name}%").map(&:id)
-        candihash.apply @affiliate.where("fullname LIKE ?", "%#{tag.name}%").map(&:id)
-        candihash.apply @affiliate.where("about LIKE ?", "%#{tag.name}%").map(&:id)
+        candihash.apply @affiliate.where("username ILIKE ?", "%#{tag.name}%").map(&:id)
+        candihash.apply @affiliate.where("email ILIKE ?", "%#{tag.name}%").map(&:id)
+        candihash.apply @affiliate.where("fullname ILIKE ?", "%#{tag.name}%").map(&:id)
+        candihash.apply @affiliate.where("about ILIKE ?", "%#{tag.name}%").map(&:id)
       }
       # Convert back to a list of results
       @results = candihash.results.reverse

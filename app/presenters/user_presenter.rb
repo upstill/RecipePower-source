@@ -40,6 +40,10 @@ class UserPresenter < BasePresenter
       markdown(user.about)
     end
   end
+  
+  def tags
+    user.tags.collect { |tag| tag.name }.join(', ')
+  end
 
 private
 

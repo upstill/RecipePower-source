@@ -187,7 +187,7 @@ public
   
   # Is a user a channel, as opposed to a human user?
   def channel?
-      self.channel_referent_id > 0
+    self.channel_referent_id > 0
   end
 
   # Who does this user follow? 

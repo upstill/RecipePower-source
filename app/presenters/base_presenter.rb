@@ -1,4 +1,5 @@
 class BasePresenter
+  require 'redcarpet'
   def initialize(object, template)
     @object = object
     @template = template
@@ -17,7 +18,9 @@ private
   end
 
   def markdown(text)
-    Redcarpet.new(text, :hard_wrap, :filter_html, :autolink).to_html.html_safe
+    renderer = Redcarpet::Render::HTML.new(:hard_wrap => true, :filter_html => true, :autolink => true)
+    markdown = Redcarpet::Markdown.new(renderer)
+    markdown.render(text).html_safe
   end
   
   def method_missing(*args, &block)

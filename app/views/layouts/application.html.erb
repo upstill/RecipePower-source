@@ -39,7 +39,8 @@
 					</div>
 				<div class="span9">
 				<% else %>
-				<div class="span12">
+					<%= button_to("back_button.png", collection_path, class: "back_button") if params[:controller] != 'pages' %>
+					<div class="span12">
 				<% end %>
 					<div class="ajax-loader"></div>
 					<div class="content">

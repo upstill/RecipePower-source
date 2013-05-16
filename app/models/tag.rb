@@ -24,8 +24,10 @@ class Tag < ActiveRecord::Base
     attr_accessible :name, :id, :tagtype, :isGlobal, :links, :recipes, :referents, :users, :primary_meaning
     
     # tagrefs associate tags with recipes
-    has_many :tagrefs
-    has_many :recipes, :through=>:tagrefs
+    #  has_many :tagrefs
+    # has_many :recipes, :through=>:tagrefs
+    has_many :taggings, :dependent => :destroy
+    # has_many :recipes, :through => :taggings, :class_name => "Recipe"
     
     # expressions associate tags with the foods (roles, processes, etc.) they refer to
     # These are the "meanings" of a tag
@@ -49,6 +51,22 @@ class Tag < ActiveRecord::Base
     # Pre-check to determine whether a tag can absorb another tag
     def can_absorb other
         other.normalized_name == self.normalized_name && ((other.tagtype==0) || (other.tagtype == self.tagtype))    
+    end
+    
+    def recipe_ids(uid=nil)
+      if uid
+        Tagging.where(tag_id: id, user_id: uid, entity_type: "Recipe").map(&:entity_id)
+      else
+        Tagging.where(tag_id: id, entity_type: "Recipe").map(&:entity_id)
+      end
+    end
+    
+    def user_ids(uid=nil)
+      if uid
+        Tagging.where(tag_id: id, user_id: uid, entity_type: "User").map(&:entity_id)
+      else
+        Tagging.where(tag_id: id, entity_type: "User").map(&:entity_id)
+      end
     end
     
     # Eliminate the tag of the given id, replacing it with this one
