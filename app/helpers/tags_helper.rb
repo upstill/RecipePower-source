@@ -34,8 +34,7 @@ module TagsHelper
         
     def summarize_synonyms tag
         # The synonyms are the other expressions of this tag's referents
-        ids = tag.referents.collect { |ref| ref.tag_ids }.flatten.uniq.delete_if { |id| id == tag.id }
-        ids.empty? ? "" : ids.collect { |id| Tag.find(id).name+"(#{id.to_s})" }.join(', ').html_safe
+        TagServices.new(tag).synonyms.collect { |tag| tag.name+"(#{tag.id.to_s})" }.join(', ').html_safe
     end
     
     def summarize_tag tag, withtype = false, do_link = true

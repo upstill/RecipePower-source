@@ -249,15 +249,28 @@ class FriendSeeker < Seeker
       candihash = Candihash.new @affiliate.map(&:id)
             
       # Rank/purge for tag matches
-      tags.each { |tag| 
-        candihash.apply tag.user_ids if tag.id > 0
+      neighbors = TagServices.lexical_neighborhood(tags)
+      weightings = TagServices.semantic_neighborhood(tag_ids = neighbors.map(&:id))
+      # Get tags that aren't in the original set
+      (tags + Tag.where(id: weightings.keys - tag_ids)).each do |tag| 
+        user_ids = tag.user_ids
+        # debugger if user_ids.first
+        candihash.apply user_ids, weightings[tag.id] if tag.id > 0
         # candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
         # Get candidates by matching the tag's name against recipe titles and comments
-        candihash.apply @affiliate.where("username ILIKE ?", "%#{tag.name}%").map(&:id)
-        candihash.apply @affiliate.where("email ILIKE ?", "%#{tag.name}%").map(&:id)
-        candihash.apply @affiliate.where("fullname ILIKE ?", "%#{tag.name}%").map(&:id)
-        candihash.apply @affiliate.where("about ILIKE ?", "%#{tag.name}%").map(&:id)
-      }
+        users = @affiliate.where("username ILIKE ?", "%#{tag.name}%")
+        # debugger if (users).first
+        candihash.apply users.map(&:id), 1.0
+=begin
+        debugger if (users = @affiliate.where("email ILIKE ?", "%#{tag.name}%")).first
+        candihash.apply users.map(&:id), 1.0
+        debugger if (users = @affiliate.where("fullname ILIKE ?", "%#{tag.name}%")).first
+        candihash.apply users.map(&:id), 1.0
+=end
+        users = @affiliate.where("about ILIKE ?", "%#{tag.name}%")
+        # debugger if (users).first
+        candihash.apply users.map(&:id), 1.0
+      end
       # Convert back to a list of results
       @results = candihash.results.reverse
   	end

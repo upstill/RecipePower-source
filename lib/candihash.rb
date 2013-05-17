@@ -3,25 +3,25 @@
 class Candihash < Hash
     # Initialize the candihash to a set of keys
     def initialize(startset) # , mode)
-       startset.each { |rid| self[rid.to_s] = 0 }
+       startset.each { |rid| self[rid.to_s] = 0.0 }
        # @mode = mode
     end
 
     def reset keys
        self.clear
-       keys.each { |key| self[key.to_s] = 0 }
+       keys.each { |key| self[key.to_s] = 0.0 }
     end
 
     # Apply a new set of keys to the existing set, either
     # by bumping the presence counts (:rcpquery_loose)
     # or by intersecting the sets (:rcpquery_strict)
-    def apply(newset)
+    def apply(newset, weight=1.0)
         # case @mode 
     	# when :rcpquery_strict
     	    # newset.select { |id| self[id.to_s] }
     	    # self.reset newset
     	# when :rcpquery_loose 
-    	    newset.each { |id| self[id.to_s] += 1 if self[id.to_s] }
+    	    newset.each { |id| self[id.to_s] += weight if self[id.to_s] }
     	# end
     end
 

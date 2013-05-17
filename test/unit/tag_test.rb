@@ -2,6 +2,8 @@
 require 'test_helper'
 class TagTest < ActiveSupport::TestCase 
     fixtures :tags
+    fixtures :referents
+    fixtures :expressions
     
     # ------------- Data Integrity -----------------
     
@@ -132,5 +134,64 @@ class TagTest < ActiveSupport::TestCase
         assert_equal 0, Tag.typenum(nil), "nil doesn't return nil"
         assert_equal 4, Tag.typenum(4), "Integer type not returned"
         assert_equal [5,7,8], Tag.typenum([:Unit, 7, "Occasion"]), "Array of types not parsed correctly"
+    end
+    
+    test "Synonyms identified correctly" do
+      pie = tags(:pie)
+      pies = tags(:pies)
+      assert_equal [pies], TagServices.new(pie).synonyms
+
+      dessert = tags(:dessert)
+      desserts = tags(:desserts)
+      assert_equal [desserts], TagServices.new(dessert).synonyms
+
+      cake = tags(:cake)
+      cakes = tags(:cakes)
+      gateau = tags(:gateau)
+      cake_syns = TagServices.new(cake).synonyms
+      assert cake_syns.include?(cakes), "Cake should have cakes as synonym"
+      assert cake_syns.include?(gateau), "Cake should have gateau as synonym"
+      assert_equal 2, cake_syns.count, "Cake should only have two synonyms"
+    end
+
+    test "Children identified correctly" do
+      pie = tags(:pie)
+      pies = tags(:pies)
+      dessert = tags(:dessert)
+      desserts = tags(:desserts)
+      cake = tags(:cake)
+      cakes = tags(:cakes)
+      gateau = tags(:gateau)
+      children = TagServices.new(dessert).children
+      assert children.include?(pie), "Children of dessert should include pie."
+      assert children.include?(pies), "Children of dessert should include pies."
+      assert children.include?(cake), "Children of dessert should include cake."
+      assert children.include?(cakes), "Children of dessert should include cakes."
+      assert children.include?(gateau), "Children of dessert should include gateau."
+      assert_equal 5, children.count, "Dessert should only have five children."
+    end
+
+    test "Parent identified correctly" do
+      pie = tags(:pie)
+      dessert = tags(:dessert)
+      desserts = tags(:desserts)
+      parents = TagServices.new(pie).parents
+      assert parents.include?(dessert), "Parents of pie should include dessert."
+      assert parents.include?(desserts), "Parents of pie should include dessert."
+      assert_equal 2, parents.count, "Pie should have just two parents."
+    end
+    
+    test "Semantic neighborhood works" do
+      pie = tags(:pie)
+      pies = tags(:pies)
+      dessert = tags(:dessert)
+      desserts = tags(:desserts)
+      cake = tags(:cake)
+      cakes = tags(:cakes)
+      gateau = tags(:gateau)
+      nb = TagServices.semantic_neighborhood(dessert.id)
+      assert_equal 1.0, nb[dessert.id], "Dessert should have weight 1 in its semantic neighborhood"
+      assert_equal 1.0, nb[desserts.id], "Desserts should have weight 1 in dessert's semantic neighborhood"
+      assert_equal 0.5, nb[cake.id], "Cake should have weight 0.5 in dessert's semantic neighborhood"
     end
 end

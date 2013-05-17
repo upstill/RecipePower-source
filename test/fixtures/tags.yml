@@ -15,3 +15,54 @@ chilibean:
     name: chili bean
     tagtype: 4
     isGlobal: true
+
+dessert:
+  id: 4
+  name: dessert
+  tagtype: 4
+  isGlobal: true
+  referent_id: 1
+
+desserts:
+  id: 5
+  name: dessert
+  tagtype: 4
+  isGlobal: true
+  referent_id: 1
+
+pie:
+  id: 6
+  name: pie
+  tagtype: 4
+  isGlobal: true
+  referent_id: 2
+
+pies:
+  id: 7
+  name: pies
+  tagtype: 4
+  isGlobal: true
+  referent_id: 2
+
+cake:
+  id: 8
+  name: cake
+  tagtype: 4
+  isGlobal: true
+  referent_id: 3
+
+cakes:
+  id: 9
+  name: cakes
+  tagtype: 4
+  isGlobal: true
+  referent_id: 3
+
+gateau:
+  id: 10
+  name: gateau
+  tagtype: 4
+  isGlobal: true
+  referent_id: 3
+  
+  
