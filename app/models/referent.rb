@@ -186,8 +186,8 @@ class Referent < ActiveRecord::Base
         else
           tag = Tag.assert_tag(tag, tagtype: tagtype) 
         end
-        ref = tag.primary_meaning || 
-              tag.referents.first || 
+        ref = tag.primary_meaning ||
+              tag.referents.first ||
               # We don't immediately have a referent for this tag
               #...but there may already be one as a plural or a singular
               tag.aliases.collect { |tag| tag.primary_meaning || tag.referents.first }.compact.first ||

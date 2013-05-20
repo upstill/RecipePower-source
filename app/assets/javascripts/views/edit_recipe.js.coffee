@@ -23,7 +23,7 @@ RP.edit_recipe.go = (rcpdata) ->
 		dlgsource = templ.string.
 		replace(/%%rcpID%%/g, rcpdata.rcpID).
 		replace(/%%rcpTitle%%/g, rcpdata.rcpTitle).
-		replace(/%%rcpPicURL%%/g, rcpdata.rcpPicURL || "assets/MissingPicture.png" ).
+		replace(/%%rcpPicURL%%/g, rcpdata.rcpPicURL || "assets/NoPictureOnFile.png" ).
 		replace(/%%rcpPrivate%%/g, rcpdata.rcpPrivate).
 		replace(/%%rcpComment%%/g, rcpdata.rcpComment).
 		replace(/%%rcpStatus%%/g, rcpdata.rcpStatus).
@@ -54,7 +54,7 @@ RP.edit_recipe.onload = (dlog) ->
 				return RP.pic_picker.open "Pick a Picture for the Recipe"
 		
 		# Fit the recipe's image into its place
-		fitImageOnLoad "div.recipe_pic_preview img"
+		fitImageOnLoad "div.pic_preview img"
 		
 		# When submitting the form, we abort if there's no change
 		# Stash the serialized form data for later comparison

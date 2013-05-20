@@ -50,11 +50,11 @@ class TagServices
   # ...a tag in the original set and its synonyms get a weight of 1
   # ...semantic children of the originals get weight 1/2
   # ...semantic parents of the originals get weight 1/3
-  def self.semantic_neighborhood(tag_ids)
+  def self.semantic_neighborhood(tag_ids, min_weight = 0.4)
     result = Hash.new
     new_tag_ids = self.synonym_ids(tag_ids) + [tag_ids].flatten
     weight = 1.0
-    until new_tag_ids.empty? do
+    until new_tag_ids.empty? || (weight < min_weight) do
       new_tag_ids.each { |tagid| result[tagid] = weight }
       new_tag_ids = self.child_ids(new_tag_ids) - result.keys
       weight = weight/2

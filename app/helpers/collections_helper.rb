@@ -11,6 +11,7 @@ module CollectionsHelper
   		when FeedEntry
   		  @feed_entry = element
   		  render "shared/feed_entry"
+=begin
   		when Feed
   		  @feed = element
   		  render "feeds/feed"
@@ -23,8 +24,12 @@ module CollectionsHelper
   		when Tag
   		  @tag = element
   		  render "tags/tag"
+=end
   		else
-  			"<p>(Mysterious list element of type #{element.class.to_s})</p>"
+  		  # Default is to set instance variable @<Klass> and render "<klass>s/<klass>"
+  		  ename = element.class.to_s.downcase
+  		  self.instance_variable_set("@"+ename, element)
+  		  render ename.pluralize+"/"+ename 
   		end
 		end
 	  flash.now[:alert] = @seeker.explain_empty if results.empty?  

@@ -3,7 +3,7 @@ require './lib/uri_utils.rb'
 
 class Site < ActiveRecord::Base
   include Taggable
-  attr_accessible :site, :home, :scheme, :subsite, :sample, :host, :name, :oldname, :port, :logo, :tags_serialized, :ttlcut, :ttlrepl
+  attr_accessible :site, :home, :scheme, :subsite, :sample, :host, :name, :port, :logo, :tags_serialized, :ttlcut, :ttlrepl
   
   belongs_to :referent, :dependent=>:destroy
   
@@ -45,7 +45,7 @@ protected
           self.port = urisq.port.to_s
 
           # Give the site a provisional name, the host name minus 'www.', if any
-          self.name = urisq.host.sub(/www\./, '') unless self.oldname
+          self.name = urisq.host.sub(/www\./, '')
         else
           self.errors << "Can't make sense of URI"
         end
@@ -54,7 +54,7 @@ protected
         # "Empty" site (probably defaults)
         self.site = ""
         self.subsite = ""
-        self.name = "Anonymous" unless self.oldname
+        self.name = "Anonymous"
       end
       self.subsite ||= ""
     end
@@ -102,15 +102,14 @@ public
   end
 
   def name
-    (self.referent && referent.name) || oldname
+    referent.name
   end
 
   def name=(str)
-    self.oldname = str
     if referent
-      referent.express(str, :tagtype => :Source)
+      referent.express(str, :tagtype => :Source, :form => :generic )
     else
-      self.referent = Referent.express(str, :Source)
+      self.referent = Referent.express(str, :Source, :form => :generic )
     end
   end      
   

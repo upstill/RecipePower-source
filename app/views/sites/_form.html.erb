@@ -1,14 +1,13 @@
 <%= simple_form_for(@site) do |f| %>
 	<%= modal_body do %>
-	  <%= form_errors_helper f %>
 	  <div class="logo">                                     
 	  	<%= pic_field @site, :logo, f, true %>
 	  </div> 
-		<% if params[:action] != "edit" %>
-			<%= f.input :name %>
-		<% end %>
 	  <%= f.input :site %>
 	  <%= f.input :home %>
+		<%# if params[:action] != "edit" %>
+			<%= f.input :name %>
+		<%# end %>
 	  <%= f.input :subsite %>
 	  <%= f.input :sample %>
 	  <div>
@@ -17,15 +16,15 @@
 	  </div>
 		<%= f.input :ttlcut, label: "RegExp to cut out of title" %>
 		<%= f.input :ttlrepl, label: "RegExp of replacement" %>
-	  <%= f.input :tags_serialized, :html => { :rows=>"20" } %>
+	  <%# f.input :tags_serialized, :html => { :rows=>"20" } %>
 
-		<% if ref = @site.referent %>
-		 | <%= link_to ref.class.to_s+" "+ref.name, edit_referent_path(ref) %>
-		<% end %>
-		<%= link_to 'Show', @site %> |
-		<%= link_to 'Back', sites_path %>
 	<% end %>
 	<%= modal_footer do %>
+	<% if ref = @site.referent %>
+	 <%= link_to_modal ref.class.to_s+" "+ref.name, edit_referent_path(ref) %>
+	<% end %>
+	<%= link_to 'Show', @site %> |
+	<%= link_to 'Back', sites_path %>
 		<%= f.button :submit, "Save" %>
 	<% end %>
 <% end %>

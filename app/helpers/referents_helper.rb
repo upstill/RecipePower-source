@@ -33,8 +33,7 @@ module ReferentsHelper
 	def summarize_ref_name referent, long=false
     ("#{referent.id.to_s}: "+
       "<i>#{referent.typename}</i> "+
-      "<strong>\"#{referent.name}\"</strong> "+
-      (long ? "" : "")
+      "<strong>'#{referent.name}'</strong> "
     ).html_safe
 	end
 	

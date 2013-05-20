@@ -1,9 +1,6 @@
-<h3>Editing <%= summarize_ref_name @referent %></h3>
-<br>
-<%= render 'form' %>
-
-<%= link_to 'Show', @referent.becomes(Referent) %> |
-<%= link_to 'Back', referents_path %>
-<% if assoc = @referent.associate %>
- | <%= link_to assoc.class.to_s+" "+assoc.name, "/#{assoc.class.to_s.downcase.pluralize}/#{assoc.id}/edit" %>
+<%= modal_dialog :edit_referent, "Edit Entity #{summarize_ref_name(@referent)}" do %>
+	<%= render 'form' %>
+	<%# if assoc = @referent.associate %>
+ | <%# link_to assoc.class.to_s+" "+assoc.name, "/#{assoc.class.to_s.downcase.pluralize}/#{assoc.id}/edit" %>
+	<%# end %>
 <% end %>

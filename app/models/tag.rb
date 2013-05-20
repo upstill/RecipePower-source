@@ -53,20 +53,28 @@ class Tag < ActiveRecord::Base
         other.normalized_name == self.normalized_name && ((other.tagtype==0) || (other.tagtype == self.tagtype))    
     end
     
-    def recipe_ids(uid=nil)
+    def recipes(uid=nil)
       if uid
-        Tagging.where(tag_id: id, user_id: uid, entity_type: "Recipe").map(&:entity_id)
+        Tagging.where(tag_id: id, user_id: uid, entity_type: "Recipe")
       else
-        Tagging.where(tag_id: id, entity_type: "Recipe").map(&:entity_id)
+        Tagging.where(tag_id: id, entity_type: "Recipe")
+      end
+    end
+    
+    def recipe_ids(uid=nil)
+      recipes(uid).map(&:entity_id)
+    end
+    
+    def users(uid=nil)
+      if uid
+        Tagging.where(tag_id: id, user_id: uid, entity_type: "User")
+      else
+        Tagging.where(tag_id: id, entity_type: "User")
       end
     end
     
     def user_ids(uid=nil)
-      if uid
-        Tagging.where(tag_id: id, user_id: uid, entity_type: "User").map(&:entity_id)
-      else
-        Tagging.where(tag_id: id, entity_type: "User").map(&:entity_id)
-      end
+      users(uid).map(&:entity_id)
     end
     
     # Eliminate the tag of the given id, replacing it with this one

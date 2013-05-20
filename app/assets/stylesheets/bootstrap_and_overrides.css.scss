@@ -26,6 +26,10 @@ body { padding-top: 60px; }
   color: $guideText;
 }
 
+input.hidden_text {
+	display: none;
+}
+
 div.dialog.modal input.string {
 	width: 90%;
 }

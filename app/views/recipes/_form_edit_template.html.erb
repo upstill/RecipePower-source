@@ -16,12 +16,12 @@
 			<div class="span12">
 				<div class="span5">
 					<div class="edit_recipe_field pic">
-						<div class="recipe_pic_preview">
-							<img alt="Some Image Available" class="fitPic" id="rcpPic%%rcpID%%" onload="fitImageOnLoad('div.recipe_pic_preview img')" src="%%rcpPicURL%%" />
+						<div class="pic_preview">
+							<img alt="Some Image Available" class="fitPic" id="rcpPic%%rcpID%%" onload="fitImageOnLoad('div.pic_preview img')" src="%%rcpPicURL%%" />
 							<input hidden="hidden" id="recipe_picurl" name="recipe[picurl]" rel="jpg,png,gif" size="30" type="text" value="%%rcpPicURL%%" />
 						</div>
-						<div class="recipe_pic_picker">
-							<a href="/" class="pic_picker_golink" data="recipe_picurl;div.recipe_pic_preview img">
+						<div class="pic_picker_link">
+							<a href="/" class="pic_picker_golink" data="recipe_picurl;div.pic_preview img">
 							Pick Picture </a>
 							<button class="btn btn-link" type="button">Choose Picture</button>
 							<div class="pic_picker" data-url="/recipes/%%rcpID%%/edit?pic_picker=true" style="display:none;">

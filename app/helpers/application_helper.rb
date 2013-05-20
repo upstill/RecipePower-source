@@ -55,7 +55,7 @@ module ApplicationHelper
   # id -- used to define an id attribute for this picture (all fitpics will have class 'fitPic')
   # float_ttl -- indicates how to handle an empty URL
   # selector -- specifies an alternative selector for finding the picture for resizing
-  def page_fitPic(picurl, id = "", placeholder_image = "MissingPicture.png", selector=nil)
+  def page_fitPic(picurl, id = "", placeholder_image = "NoPictureOnFile.png", selector=nil)
     logger.debug "page_fitPic placing #{picurl.blank? ? placeholder_image : picurl.truncate(40)}"
     # "fitPic" class gets fit inside pic_box with Javascript and jQuery
     idstr = "rcpPic"+id.to_s
@@ -89,19 +89,19 @@ module ApplicationHelper
 
   # Show an image that will resize to fit an enclosing div, possibly with a link to an editing dialog
   # We'll need the id of the object, and the name of the field containing the picture's url
-  def pic_field(obj, attribute, form, editable = true)
+  def pic_field(obj, attribute, form, editable = true, fallback_img="NoPictureOnFile.png")
     picurl = obj.send(attribute)
     preview = content_tag(
       :div, 
-      page_fitPic(picurl, obj.id, "PickPicture.png", "div.recipe_pic_preview img")+
-                form.text_field(attribute, rel: "jpg,png,gif", hidden: true),
-      class: "recipe_pic_preview"
+      page_fitPic(picurl, obj.id, fallback_img, "div.pic_preview img")+
+                form.text_field(attribute, rel: "jpg,png,gif", hidden: true, class: "hidden_text" ),
+      class: "pic_preview"
     )
     picker = editable ?
       content_tag(:div,
-            link_to( "Pick Picture", "/", :data=>"recipe_picurl;div.recipe_pic_preview img", :class => "pic_picker_golink")+
+            link_to( "Pick Picture", "/", :data=>"recipe_picurl;div.pic_preview img", :class => "pic_picker_golink")+
             pic_picker_shell(obj), # pic_picker(obj.picurl, obj.url, obj.id), 
-            :class=>"recipe_pic_picker"
+            :class=>"pic_picker_link"
             ) # Declare the picture-picking dialog
     : ""
     content_tag :div, preview + picker, class: "edit_recipe_field pic"
@@ -167,7 +167,7 @@ module ApplicationHelper
       prompt = "Pick one of the thumbnails, then click Okay.<br><br>Or, type or paste the URL of an image into the text box, if that's your pleasure.".html_safe
     end
     content_tag( :div, 
-      page_fitPic( picurl, id, "MissingPicture.png", "div.preview img" ),
+      page_fitPic( picurl, id, "NoPictureOnFile.png", "div.preview img" ),
       class: "preview" )+
     content_tag( :div, prompt, class: "prompt" )+
     %Q{

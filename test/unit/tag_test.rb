@@ -189,9 +189,11 @@ class TagTest < ActiveSupport::TestCase
       cake = tags(:cake)
       cakes = tags(:cakes)
       gateau = tags(:gateau)
-      nb = TagServices.semantic_neighborhood(dessert.id)
+      nb = TagServices.semantic_neighborhood(dessert.id, 0.4)
       assert_equal 1.0, nb[dessert.id], "Dessert should have weight 1 in its semantic neighborhood"
       assert_equal 1.0, nb[desserts.id], "Desserts should have weight 1 in dessert's semantic neighborhood"
       assert_equal 0.5, nb[cake.id], "Cake should have weight 0.5 in dessert's semantic neighborhood"
+      nb = TagServices.semantic_neighborhood(dessert.id, 0.8)
+      assert !nb.any? { |neighbor| neighbor[1] < 0.8 }, "No neighbor should have weight below imposed threshold of 0.8"
     end
 end

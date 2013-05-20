@@ -6,11 +6,22 @@ class SitesController < ApplicationController
   def index
       # return if need_login true, true
     @sites = Site.all # paginate(:per_page => 5, :page => params[:page])
-    
+    @sites = Site.scoped
+    @seeker = SiteSeeker.new @sites, session[:seeker], params # Default; other controllers may set up different seekers
+    session[:seeker] = @seeker.store
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: @sites }
     end
+  end
+
+  def query
+    # return if need_login true, true
+    @sites = Site.all # paginate(:per_page => 5, :page => params[:page])
+    @sites = Site.scoped
+    @seeker = SiteSeeker.new @sites, session[:seeker], params # Default; other controllers may set up different seekers
+    session[:seeker] = @seeker.store
+    render 'index', :layout=>false
   end
 
   # GET /sites/1
@@ -52,6 +63,7 @@ class SitesController < ApplicationController
       render :partial=> "shared/pic_picker"
     else
       @Title = @site.name
+      dialog_boilerplate "edit", "floating" 
     end
   end
 
@@ -80,7 +92,15 @@ class SitesController < ApplicationController
     respond_to do |format|
       if @site.update_attributes(params[:site])
         format.html { redirect_to @site, notice: 'Site was successfully updated.' }
-        format.json { head :ok }
+        format.json { 
+          render json: { 
+                         done: true, # Denotes recipe-editing is finished
+                         popup: "#{@site.name} updated",
+                         replacements: [
+                           ["tr#site#{@site.id.to_s}", with_format("html") { render_to_string :partial => "sites/site" }]
+                         ]
+                       } 
+      }
       else
         format.html { render action: "edit" }
         format.json { render json: @site.errors, status: :unprocessable_entity }

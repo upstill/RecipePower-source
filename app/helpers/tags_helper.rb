@@ -8,13 +8,6 @@ module TagsHelper
             "**no tag**"
         end
     end
-    
-    def count_recipes tag
-        count = tag.recipe_ids.size
-        return "" if count == 0
-        txt = pluralize(count, "Recipe").sub(/\s/, " ")
-        # link_to(txt, new_rcpquery_path(tag: tag.id.to_s))
-    end
         
     def count_owners tag
         ct = tag.user_ids.size
@@ -139,6 +132,13 @@ BLOCK_END
              </div>}
         }
     tag_info_section "Recipes", rcpstrs, ""
+  end
+  
+  def count_recipes tag
+    count = tag.recipe_ids.size
+    return "" if count == 0
+    txt = pluralize(count, "Recipe").sub(/\s/, " ")
+    # link_to(txt, new_rcpquery_path(tag: tag.id.to_s))
   end
   
   def summarize_tag_parents tag, label = "Categorized Under"

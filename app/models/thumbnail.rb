@@ -84,7 +84,7 @@ class Thumbnail < ActiveRecord::Base
   def self.acquire(site, path)
     # If no path, we just use the "Missing Picture" thumb
     Thumbnail.find_or_create_by_url(path.blank? ? 
-      "http://www.recipepower.com/assets/MissingPicture.png" :
+      "http://www.recipepower.com/assets/NoPictureOnFile.png" :
       (valid_url(site, path) || "http://www.recipepower.com/assets/BadPicURL.png")).update_thumb
   end
   
@@ -100,7 +100,7 @@ class Thumbnail < ActiveRecord::Base
   
   # Thumbnail is no-picture message
   def missing_picture?
-    url == "http://www.recipepower.com/assets/MissingPicture.png"
+    url == "http://www.recipepower.com/assets/NoPictureOnFile.png"
   end
 
 end

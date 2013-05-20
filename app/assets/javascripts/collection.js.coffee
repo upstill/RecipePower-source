@@ -7,6 +7,7 @@
 # Place your application-specific JavaScript functions and classes here
 # This file is automatically included by javascript_include_tag :defaults
 
+#= require ../../../vendor/assets/javascripts/jquery-1.7.1
 #= require_self
 #= require_directory ../../../vendor/assets/javascripts/jquery
 #= require ../../../vendor/assets/javascripts/bootbox

@@ -282,7 +282,7 @@ protected
   end
   
   def site_finders
-    @site_finders = @site_finders || @site.tags_serialized ? YAML::load(@site.tags_serialized) : []
+    @site_finders ||= @site.tags_serialized ? YAML::load(@site.tags_serialized) : []
   end
   
   def site_finders= (f)

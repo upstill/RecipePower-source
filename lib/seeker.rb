@@ -14,6 +14,7 @@ class Seeker < Object
   
   def initialize affiliate, datastr=nil, params=nil
     @affiliate = affiliate
+    @entity_name = affiliate.klass.to_s.downcase
     prior = !datastr.blank? && YAML::load(datastr)
     if prior && (prior[:kind] == @kind)
       @tagstxt = prior[:tagstxt] || ""
@@ -37,6 +38,22 @@ class Seeker < Object
         @cur_page = page.to_i
       end
     end
+  end
+
+  def query_path
+    "/#{@entity_name.pluralize}/query"
+  end
+  
+  def convert_ids list
+    @entity_name.capitalize.constantize.where(id: list)
+  end
+  
+  def list_type
+    @entity_name.to_sym
+  end
+  
+  def entity_name
+    @entity_name
   end
   
   def tagstxt()
@@ -153,6 +170,22 @@ class Seeker < Object
     end
     convert_ids ids[first...ixbound]
   end
+  
+  # Return the list of ids matching the tags, by calling an application method
+  def result_ids
+  	return @results if @results # Keeping a cache of results
+    if tags.empty?
+      @results = @affiliate.map(&:id)
+    else
+      # We purge/massage the list only if there is a tags query here
+      # Otherwise, we simply sort the list by mod date
+      # Convert candidate array to a hash recipe_id=>#hits
+      candihash = Candihash.new @affiliate.map(&:id)
+      apply_tags candihash
+      # Convert back to a list of results
+      @results = candihash.results.reverse
+  	end
+  end
 
   # If the entity has returned no results, suggest what the problem might have been
   def explain_empty
@@ -172,21 +205,10 @@ end
 
 class ContentSeeker < Seeker
   
-  def initialize(affiliate, strdata, params=nil)
-    super
-    @kind = 1
-  end
-  
-  def query_path
-    "/collection/query"
-  end
-  
+  delegate :cur_page, :convert_ids, :timestamp, :list_type, :result_ids, :to => :"@affiliate"
+=begin
   def cur_page
     @affiliate.cur_page
-  end
-  
-  def cur_page=(pagenum)
-    @affiliate.cur_page= pagenum
   end
   
   def convert_ids list
@@ -204,6 +226,20 @@ class ContentSeeker < Seeker
   # Get the results of the current query.
   def result_ids
     @affiliate.result_ids tags
+  end
+=end
+  
+  def initialize(affiliate, strdata, params=nil)
+    super
+    @kind = 1
+  end
+  
+  def query_path
+    "/collection/query"
+  end
+  
+  def cur_page=(pagenum)
+    @affiliate.cur_page= pagenum
   end
   
   # If the entity has returned no results, suggest what the problem might have been
@@ -224,7 +260,7 @@ class FriendSeeker < Seeker
   def query_path
     "/users/query"
   end
-  
+=begin
   def convert_ids list
     User.where(id: list)
   end
@@ -232,49 +268,38 @@ class FriendSeeker < Seeker
   def list_type
     :user
   end
-  
+=end  
   def entity_name
     @affiliate.first.channel? ? "channel" : "user"
   end
   
   # Get the results of the current query.
-  def result_ids
-  	return @results if @results # Keeping a cache of results
-    if tags.empty?
-      @results = @affiliate.map(&:id)
-    else
-      # We purge/massage the list only if there is a tags query here
-      # Otherwise, we simply sort the list by mod date
-      # Convert candidate array to a hash recipe_id=>#hits
-      candihash = Candihash.new @affiliate.map(&:id)
-            
-      # Rank/purge for tag matches
-      neighbors = TagServices.lexical_neighborhood(tags)
-      weightings = TagServices.semantic_neighborhood(tag_ids = neighbors.map(&:id))
-      # Get tags that aren't in the original set
-      (tags + Tag.where(id: weightings.keys - tag_ids)).each do |tag| 
-        user_ids = tag.user_ids
-        # debugger if user_ids.first
-        candihash.apply user_ids, weightings[tag.id] if tag.id > 0
-        # candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
-        # Get candidates by matching the tag's name against recipe titles and comments
-        users = @affiliate.where("username ILIKE ?", "%#{tag.name}%")
-        # debugger if (users).first
-        candihash.apply users.map(&:id), 1.0
+  def apply_tags(candihash)
+    # Rank/purge for tag matches
+    neighbors = TagServices.lexical_neighborhood(tags)
+    weightings = TagServices.semantic_neighborhood(tag_ids = neighbors.map(&:id), 0.8)
+    # Get tags that aren't in the original set
+    (tags + Tag.where(id: weightings.keys - tag_ids)).each do |tag| 
+      user_ids = tag.user_ids
+      # debugger if user_ids.first
+      candihash.apply user_ids, weightings[tag.id] if tag.id > 0
+      # candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
+      # Get candidates by matching the tag's name against recipe titles and comments
+      users = @affiliate.where("username ILIKE ?", "%#{tag.name}%")
+      # debugger if (users).first
+      candihash.apply users.map(&:id), 1.0
 =begin
-        debugger if (users = @affiliate.where("email ILIKE ?", "%#{tag.name}%")).first
-        candihash.apply users.map(&:id), 1.0
-        debugger if (users = @affiliate.where("fullname ILIKE ?", "%#{tag.name}%")).first
-        candihash.apply users.map(&:id), 1.0
+      debugger if (users = @affiliate.where("email ILIKE ?", "%#{tag.name}%")).first
+      candihash.apply users.map(&:id), 1.0
+      debugger if (users = @affiliate.where("fullname ILIKE ?", "%#{tag.name}%")).first
+      candihash.apply users.map(&:id), 1.0
 =end
-        users = @affiliate.where("about ILIKE ?", "%#{tag.name}%")
-        # debugger if (users).first
-        candihash.apply users.map(&:id), 1.0
-      end
-      # Convert back to a list of results
-      @results = candihash.results.reverse
-  	end
+      users = @affiliate.where("about ILIKE ?", "%#{tag.name}%")
+      # debugger if (users).first
+      candihash.apply users.map(&:id), 1.0
+    end
   end
+  
 end
 
 class ReferenceSeeker < Seeker
@@ -283,7 +308,7 @@ class ReferenceSeeker < Seeker
     super
     # The affiliate is a list of References, the Reference relation
   end
-
+=begin
   def query_path
     "/references/query"
   end
@@ -299,27 +324,33 @@ class ReferenceSeeker < Seeker
   def entity_name
     "reference"
   end
+=end  
+  # Get the results of the current query.
+  def apply_tags(candihash)
+    # Rank/purge for tag matches
+    tags.each { |tag| 
+      # candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
+      # Get candidates by matching the tag's name against recipe titles and comments
+      candihash.apply @affiliate.where("url LIKE ?", "%#{tag.name}%").map(&:id)
+    }
+  end
+end
+
+class SiteSeeker < Seeker
+  
+  def initialize(affiliate, strdata, params=nil)
+    super
+    # The affiliate is a list of Sites, the Site relation
+  end
   
   # Get the results of the current query.
-  def result_ids
-  	return @results if @results # Keeping a cache of results
-    if tags.empty?
-      @results = @affiliate.map(&:id)
-    else
-      # We purge/massage the list only if there is a tags query here
-      # Otherwise, we simply sort the list by mod date
-      # Convert candidate array to a hash recipe_id=>#hits
-      candihash = Candihash.new @affiliate.map(&:id)
-            
-      # Rank/purge for tag matches
-      tags.each { |tag| 
-        # candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
-        # Get candidates by matching the tag's name against recipe titles and comments
-        candihash.apply @affiliate.where("url LIKE ?", "%#{tag.name}%").map(&:id)
-      }
-      # Convert back to a list of results
-      @results = candihash.results.reverse
-  	end
+  def apply_tags(candihash)
+    # Rank/purge for tag matches
+    tags.each { |tag| 
+      # candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
+      # Get candidates by matching the tag's name against recipe titles and comments
+      candihash.apply @affiliate.where("site LIKE ?", "%#{tag.name}%").map(&:id)
+    }
   end
 end
 
@@ -329,7 +360,7 @@ class TagSeeker < Seeker
     super
     # The affiliate is the Tag relation
   end
-
+=begin
   def query_path
     "/tags/query"
   end
@@ -345,7 +376,7 @@ class TagSeeker < Seeker
   def entity_name
     "tag"
   end
-  
+=end  
   # Get the results of the current query.
   def result_ids
   	return @results if @results # Keeping a cache of results
@@ -361,20 +392,17 @@ class TagSeeker < Seeker
       constraints = @tagtype ? { tagtype: @tagtype } : {}
       @results = Tag.strmatch(tags.first.name, constraints).map(&:id)
     else
-      # We purge/massage the list only if there is a tags query here
-      # Otherwise, we simply sort the list by mod date
-      # Convert candidate array to a hash recipe_id=>#hits
-      candihash = Candihash.new scope.map(&:id)
-            
-      # Rank/purge for tag matches
-      tags.each { |tag| 
-        # candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
-        # Get candidates by matching the tag's name against recipe titles and comments
-        candihash.apply Tag.strmatch(tag.name, tagtype: tag.tagtype).map(&:id)
-      }
-      # Convert back to a list of results
-      @results = candihash.results.reverse
+      super
   	end
+  end
+  
+  def apply_tags(candihash)
+    # Rank/purge for tag matches
+    tags.each { |tag| 
+      # candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
+      # Get candidates by matching the tag's name against recipe titles and comments
+      candihash.apply Tag.strmatch(tag.name, tagtype: tag.tagtype).map(&:id)
+    }
   end
 end
 
@@ -384,7 +412,7 @@ class FeedSeeker < Seeker
     super
     @kind = 3
   end
-
+=begin
   def query_path
     "/feeds/query"
   end
@@ -396,28 +424,16 @@ class FeedSeeker < Seeker
   def list_type
     :feed
   end
-  
+=end  
   # Get the results of the current query.
-  def result_ids
-  	return @results if @results # Keeping a cache of results
-    if tags.empty?
-      @results = @affiliate.map(&:id)
-    else
-      # We purge/massage the list only if there is a tags query here
-      # Otherwise, we simply sort the list by mod date
-      # Convert candidate array to a hash recipe_id=>#hits
-      candihash = Candihash.new @affiliate.map(&:id)
-            
-      # Rank/purge for tag matches
-      tags.each { |tag| 
-        semantic_list = Feed.where(site_id: Site.where(referent_id: tag.referent_ids).map(&:id)).map(&:id)
-        candihash.apply semantic_list
-        # Get candidates by matching the tag's name against recipe titles and comments
-        candihash.apply @affiliate.where("description ILIKE ?", "%#{tag.name}%").map(&:id)
-        candihash.apply @affiliate.where("title ILIKE ?", "%#{tag.name}%").map(&:id)
-      }
-      # Convert back to a list of results
-      @results = candihash.results.reverse
-  	end
+  def apply_tags(candihash)
+    # Rank/purge for tag matches
+    tags.each { |tag| 
+      semantic_list = Feed.where(site_id: Site.where(referent_id: tag.referent_ids).map(&:id)).map(&:id)
+      candihash.apply semantic_list
+      # Get candidates by matching the tag's name against recipe titles and comments
+      candihash.apply @affiliate.where("description ILIKE ?", "%#{tag.name}%").map(&:id)
+      candihash.apply @affiliate.where("title ILIKE ?", "%#{tag.name}%").map(&:id)
+    }
   end
 end

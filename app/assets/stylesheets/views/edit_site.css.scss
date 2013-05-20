@@ -1,0 +1,32 @@
+.edit_site.dialog {
+	// width:95%;
+	// margin:5px;
+	// padding:5px;
+	// padding-bottom:0;
+	// background-color:#EEE;
+	// z-index: 9000001;
+	div.pic_preview {
+		width:120px;
+		height:90px;
+		margin-left:auto;
+		margin-right:auto;
+		text-align: center;
+		input {
+			display:none;
+		}
+		img {
+			visibility: hidden;
+			&.loaded {
+				visibility: visible;
+				// margin-left: auto;
+				// margin-right: auto;
+				// text-align: center;
+			}
+		}
+	}
+	div.pic_picker_link {
+		margin-left:auto;
+		margin-right:auto;
+		text-align: center;
+	}
+}

@@ -15,7 +15,7 @@ def recipe_image_div(recipe, div_class="recipe_image_div")
   else
     # options[:onload] = %Q{fitImageOnLoad('#{options[:id]}')}
     options[:class] = "stuffypic"
-    recipe.picurl || "MissingPicture.png"
+    recipe.picurl || "NoPictureOnFile.png"
   end
   content_tag( :div, 
     image_tag(url, options),

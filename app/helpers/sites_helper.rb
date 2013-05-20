@@ -15,4 +15,11 @@ module SitesHelper
     link_to "Sample", site.sampleURL
   end
   
+  def sites_table
+    table_out @sites, [ "Info", "Links" ] do |site|
+      @site = site
+      render "sites/site"
+    end
+  end
+  
 end

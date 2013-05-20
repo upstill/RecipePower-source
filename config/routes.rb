@@ -67,6 +67,7 @@ RP::Application.routes.draw do
 
   match '/site/scrape' => 'sites#scrape'
   resources :sites
+  match 'sites/query', :controller=>'sites', :action=>'query', :via => :post
   resources :expressions
   resources :referents
   match 'references/query', :controller=>'references', :action=>'query', :via => :post
