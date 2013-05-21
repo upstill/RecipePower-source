@@ -22,6 +22,13 @@ class ApplicationController < ActionController::Base
     puts "    error: "+flash[:error] if flash[:error]
   end
   
+  def init_seeker(klass, clear_tags=false, scope=nil)
+    @user = current_user_or_guest
+    @seeker = "#{klass}Seeker".constantize.new (scope || klass.scoped), session[:seeker], params # Default; other controllers may set up different seekers
+    @seeker.tagstxt = "" if clear_tags
+    session[:seeker] = @seeker.store
+  end
+  
   def permission_denied
     action = case params[:action]
     when "index"

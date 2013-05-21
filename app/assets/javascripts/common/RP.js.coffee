@@ -153,8 +153,8 @@ RP.get_content = (url, link) ->
 # Replace the page with the results of the link, properly updating the address bar
 RP.get_page = (url) ->
 	$('body').load url, {}, (responseText, textStatus, XMLHttpRequest) ->
-		debugger;
-		# RP.get_content( url, "a.update-btn" );
+		debugger
+		window.history.replaceState { an: "object" }, 'Collection', url
 
 submit_and_process = ( request, method, assumptions ) ->
 	assumptions = assumptions || {} # No assumptions if absent

@@ -6,7 +6,7 @@ module CollectionsHelper
   		case element
   		when Recipe
   			@recipe = element
-  		  @recipe.current_user = @user_id
+  		  @recipe.current_user = @user.id
   		  render "shared/recipe_grid"
   		when FeedEntry
   		  @feed_entry = element

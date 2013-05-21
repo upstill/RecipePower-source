@@ -7,16 +7,16 @@ class Seeker < Object
   # Save the Seeker data into session store
   def store
     # Serialize structure consisting of tagstxt and specialtags
-    savestr = YAML::dump( { :tagstxt => (@tagstxt || ""), :tagtype => @tagtype, :kind => @kind, :page => @cur_page || 1 } ) 
+    savestr = YAML::dump( { :tagstxt => (@tagstxt || ""), :tagtype => @tagtype, :page => @cur_page || 1 } ) 
     back = YAML::load(savestr)
     savestr
   end
   
   def initialize affiliate, datastr=nil, params=nil
+    # The affiliate is generally a scope, but in the case of the content browser, it's the browser itself
     @affiliate = affiliate
-    @entity_name = affiliate.klass.to_s.downcase
     prior = !datastr.blank? && YAML::load(datastr)
-    if prior && (prior[:kind] == @kind)
+    if prior
       @tagstxt = prior[:tagstxt] || ""
       @tagtype = prior[:tagtype]
       @cur_page = prior[:page] || 1
@@ -41,19 +41,19 @@ class Seeker < Object
   end
 
   def query_path
-    "/#{@entity_name.pluralize}/query"
+    "/#{entity_name.pluralize}/query"
   end
   
   def convert_ids list
-    @entity_name.capitalize.constantize.where(id: list)
+    entity_name.capitalize.constantize.where(id: list)
   end
   
   def list_type
-    @entity_name.to_sym
+    entity_name.to_sym
   end
   
   def entity_name
-    @entity_name
+    @affiliate.klass.to_s.downcase
   end
   
   def tagstxt()
@@ -79,10 +79,6 @@ class Seeker < Object
     @tagstxt = txt
     @tags = nil
     tags
-  end
-  
-  def entity_name
-    list_type.to_s
   end
   
   # Update the contents and return true OR enqueue the update job and return false
@@ -205,33 +201,11 @@ end
 
 class ContentSeeker < Seeker
   
-  delegate :cur_page, :convert_ids, :timestamp, :list_type, :result_ids, :to => :"@affiliate"
-=begin
-  def cur_page
-    @affiliate.cur_page
-  end
-  
-  def convert_ids list
-    @affiliate.convert_ids list
-  end
-  
-  def timestamp obj
-    @affiliate.timestamp obj
-  end
-  
-  def list_type
-    @affiliate.list_type
-  end
+  delegate :cur_page, :convert_ids, :timestamp, :list_type, :to => :"@affiliate"
   
   # Get the results of the current query.
   def result_ids
     @affiliate.result_ids tags
-  end
-=end
-  
-  def initialize(affiliate, strdata, params=nil)
-    super
-    @kind = 1
   end
   
   def query_path
@@ -249,26 +223,8 @@ class ContentSeeker < Seeker
   end
 end
 
-class FriendSeeker < Seeker
+class UserSeeker < Seeker
   
-  def initialize(affiliate, strdata, params=nil)
-    super
-    # The affiliate is an ActiveRecord relation, the set of candidate users
-    @kind = 2
-  end
-
-  def query_path
-    "/users/query"
-  end
-=begin
-  def convert_ids list
-    User.where(id: list)
-  end
-  
-  def list_type
-    :user
-  end
-=end  
   def entity_name
     @affiliate.first.channel? ? "channel" : "user"
   end
@@ -288,12 +244,6 @@ class FriendSeeker < Seeker
       users = @affiliate.where("username ILIKE ?", "%#{tag.name}%")
       # debugger if (users).first
       candihash.apply users.map(&:id), 1.0
-=begin
-      debugger if (users = @affiliate.where("email ILIKE ?", "%#{tag.name}%")).first
-      candihash.apply users.map(&:id), 1.0
-      debugger if (users = @affiliate.where("fullname ILIKE ?", "%#{tag.name}%")).first
-      candihash.apply users.map(&:id), 1.0
-=end
       users = @affiliate.where("about ILIKE ?", "%#{tag.name}%")
       # debugger if (users).first
       candihash.apply users.map(&:id), 1.0
@@ -304,27 +254,6 @@ end
 
 class ReferenceSeeker < Seeker
   
-  def initialize(affiliate, strdata, params=nil)
-    super
-    # The affiliate is a list of References, the Reference relation
-  end
-=begin
-  def query_path
-    "/references/query"
-  end
-  
-  def convert_ids list
-    Reference.where(id: list)
-  end
-  
-  def list_type
-    :reference
-  end
-  
-  def entity_name
-    "reference"
-  end
-=end  
   # Get the results of the current query.
   def apply_tags(candihash)
     # Rank/purge for tag matches
@@ -332,16 +261,17 @@ class ReferenceSeeker < Seeker
       # candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
       # Get candidates by matching the tag's name against recipe titles and comments
       candihash.apply @affiliate.where("url LIKE ?", "%#{tag.name}%").map(&:id)
+      constraints = @tagtype ? { tagtype: @tagtype } : {}
+      # collect all the references of all the referents of all matching tags
+      debugger
+      list = Tag.strmatch(tag.name).collect { |tag| tag.referents }.flatten
+      list = list.collect { |referent| referent.reference_ids }
+      candihash.apply list.flatten.uniq
     }
   end
 end
 
 class SiteSeeker < Seeker
-  
-  def initialize(affiliate, strdata, params=nil)
-    super
-    # The affiliate is a list of Sites, the Site relation
-  end
   
   # Get the results of the current query.
   def apply_tags(candihash)
@@ -358,27 +288,6 @@ end
 
 class TagSeeker < Seeker
   
-  def initialize(affiliate, strdata, params=nil)
-    super
-    # The affiliate is the Tag relation
-  end
-=begin
-  def query_path
-    "/tags/query"
-  end
-  
-  def convert_ids list
-    Tag.where(id: list)
-  end
-  
-  def list_type
-    :tag
-  end
-  
-  def entity_name
-    "tag"
-  end
-=end  
   # Get the results of the current query.
   def result_ids
   	return @results if @results # Keeping a cache of results
@@ -410,23 +319,6 @@ end
 
 class FeedSeeker < Seeker
   
-  def initialize(affiliate, strdata, params=nil)
-    super
-    @kind = 3
-  end
-=begin
-  def query_path
-    "/feeds/query"
-  end
-  
-  def convert_ids list
-    Feed.where(id: list)
-  end
-  
-  def list_type
-    :feed
-  end
-=end  
   # Get the results of the current query.
   def apply_tags(candihash)
     # Rank/purge for tag matches

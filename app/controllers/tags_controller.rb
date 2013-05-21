@@ -5,21 +5,12 @@ class TagsController < ApplicationController
   # GET /tags.xml
   def index
     @Title = "Tags"
-    @tags = Tag.scoped
-    @seeker = TagSeeker.new @tags, session[:seeker], params # Default; other controllers may set up different seekers
-    session[:seeker] = @seeker.store
-    respond_to do |format|
-      # format.json { render :json => @taglist.map { |tag| { :title=>tag.name+tag.id.to_s, :isLazy=>false, :key=>tag.id, :isFolder=>false } } }
-      format.html # index.html.erb
-      format.xml  { render :xml => @userlist }
-    end
+    init_seeker(Tag, true)
   end
   
   def query
     @Title = "Tags"
-    @tags = Tag.scoped
-    @seeker = TagSeeker.new @tags, session[:seeker], params # Default; other controllers may set up different seekers
-    session[:seeker] = @seeker.store
+    init_seeker(Tag, false)
     render 'index', :layout=>false
   end
 

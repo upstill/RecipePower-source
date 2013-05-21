@@ -5,19 +5,20 @@ class UsersController < ApplicationController
   rescue_from ActiveRecord::RecordNotFound, :with => :not_found
   before_filter :login_required, :except => [:new, :create, :identify]
   before_filter :authenticate_user!, :except => [:show, :index, :identify]
-  before_filter :setup_seeker, :only => [:index, :query ]
   # before_filter :declare_focus
   
   def declare_focus
     @focus_selector = "#user_login"
   end
   
-  def setup_seeker
+  def setup_seeker(clear_query=false)
     @isChannel = params[:channel] && (params[:channel]=="true")
+    @user = current_user_or_guest
     @users = @isChannel ? 
       User.where("channel_referent_id > 0 AND id not in (?)", @user.followee_ids + [@user.id, 4, 5]) : 
       User.where("channel_referent_id = 0 AND id not in (?) AND private != true", @user.followee_ids + [@user.id, 4, 5])
-    @seeker = FriendSeeker.new @users, session[:seeker] # Default; other controllers may set up different seekers
+    init_seeker(User, clear_query, @users)
+    # @seeker = FriendSeeker.new @users, session[:seeker] # Default; other controllers may set up different seekers
   end
   
   # GET /users
@@ -25,7 +26,8 @@ class UsersController < ApplicationController
   def index
     # 'index' page may be calling itself with filter parameters in the name and tagtype
     @Title = "Users"
-    @user = current_user_or_guest
+    setup_seeker true
+=begin
     # @filtertag.tagtype = params[:tag][:tagtype].to_i unless params[:tag][:tagtype].blank?
     @userlist = User.scoped.order("id").page(params[:page]).per_page(50)
     respond_to do |format|
@@ -33,6 +35,25 @@ class UsersController < ApplicationController
       format.html # index.html.erb
       format.xml  { render :xml => @taglist }
     end
+=end
+  end
+  
+  # Query takes either a query string or a specification of page number
+  # We return a recipe list IFF the :cached parameter is not set
+  def query
+    setup_seeker
+=begin
+    @seeker = FriendSeeker.new @users, session[:seeker] # Default; other controllers may set up different seekers
+    @user = current_user_or_guest
+    if tagstxt = params[:tagstxt]
+      @seeker.tagstxt = tagstxt
+    end
+    if page = params[:cur_page]
+      @seeker.cur_page = page.to_i
+    end
+    session[:seeker] = @seeker.store
+=end
+    render 'index', :layout=>false
   end
   
   # Add a user or channel to the friends of the current user
@@ -59,21 +80,6 @@ class UsersController < ApplicationController
         )
       }
     end
-  end
-  
-  # Query takes either a query string or a specification of page number
-  # We return a recipe list IFF the :cached parameter is not set
-  def query
-    @seeker = FriendSeeker.new @users, session[:seeker] # Default; other controllers may set up different seekers
-    @user = current_user_or_guest
-    if tagstxt = params[:tagstxt]
-      @seeker.tagstxt = tagstxt
-    end
-    if page = params[:cur_page]
-      @seeker.cur_page = page.to_i
-    end
-    session[:seeker] = @seeker.store
-    render 'index', :layout=>false
   end
   
   def new

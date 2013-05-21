@@ -4,11 +4,14 @@ class SitesController < ApplicationController
   # GET /sites
   # GET /sites.json
   def index
-      # return if need_login true, true
+    # return if need_login true, true
+    init_seeker(Site, true)
+=begin
     @sites = Site.all # paginate(:per_page => 5, :page => params[:page])
     @sites = Site.scoped
     @seeker = SiteSeeker.new @sites, session[:seeker], params # Default; other controllers may set up different seekers
     session[:seeker] = @seeker.store
+=end
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: @sites }
@@ -16,11 +19,14 @@ class SitesController < ApplicationController
   end
 
   def query
+    init_seeker Site
+=begin
     # return if need_login true, true
     @sites = Site.all # paginate(:per_page => 5, :page => params[:page])
     @sites = Site.scoped
     @seeker = SiteSeeker.new @sites, session[:seeker], params # Default; other controllers may set up different seekers
     session[:seeker] = @seeker.store
+=end
     render 'index', :layout=>false
   end
 

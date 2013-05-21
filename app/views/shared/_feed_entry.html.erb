@@ -3,7 +3,7 @@
 	<h5 class="feed_list_element_title" id="FeedListElement"+<%= @feed_entry.id.to_s %>>
 		<%= link_to @feed_entry.name, @feed_entry.url %>
 		<% if @recipe = @feed_entry.recipe %>
-		  <% @recipe.current_user = @user_id %>
+		  <% @recipe.current_user = @user.id %>
 		  <%= render "recipes/golink" %>
 		<% else %>
 		  <% @recipe = Recipe.new(url: @feed_entry.url) %>

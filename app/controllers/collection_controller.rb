@@ -4,15 +4,11 @@ class CollectionController < ApplicationController
   
   # All controllers displaying the collection need to have it setup 
   def setup_collection
-    @user_id = current_user_or_guest_id 
-    @user = User.find(@user_id)
-    if (params[:action] == "index")
-      # When reloading the page, reinitialize the browser
-      debugger
-      @user.browser = ContentBrowser.new(@user_id) 
-      @user.save
-    end
+    @user = current_user_or_guest
     @browser = @user.browser
+    @seeker = ContentSeeker.new @browser, session[:seeker], params # Default; other controllers may set up different seekers
+    @seeker.tagstxt = "" if (params[:action] == "index")
+    session[:seeker] = @seeker.store
   end
   
   def save_browser
