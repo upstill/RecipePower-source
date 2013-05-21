@@ -1,5 +1,19 @@
 class CollectionController < ApplicationController
+  before_filter :setup_collection
   after_filter :save_browser
+  
+  # All controllers displaying the collection need to have it setup 
+  def setup_collection
+    @user_id = current_user_or_guest_id 
+    @user = User.find(@user_id)
+    if (params[:action] == "index")
+      # When reloading the page, reinitialize the browser
+      debugger
+      @user.browser = ContentBrowser.new(@user_id) 
+      @user.save
+    end
+    @browser = @user.browser
+  end
   
   def save_browser
     @user.save

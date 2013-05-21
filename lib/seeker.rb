@@ -350,6 +350,8 @@ class SiteSeeker < Seeker
       # candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
       # Get candidates by matching the tag's name against recipe titles and comments
       candihash.apply @affiliate.where("site LIKE ?", "%#{tag.name}%").map(&:id)
+      # Find lexically-related tags of Source type and see if they point to sites
+      # Find sites that have been tagged similarly
     }
   end
 end

@@ -2,7 +2,6 @@ require './lib/controller_authentication.rb'
 require './lib/seeker.rb'
 
 class ApplicationController < ActionController::Base
-    before_filter :setup_collection
     before_filter :check_flash
     helper :all
     rescue_from Timeout::Error, :with => :timeout_error # self defined exception
@@ -21,16 +20,6 @@ class ApplicationController < ActionController::Base
     logger.debug "FLASH messages extant for "+params[:controller]+"#"+params[:action]+"(check_flash):"
     puts "    notice: "+flash[:notice] if flash[:notice]
     puts "    error: "+flash[:error] if flash[:error]
-  end
-  
-  # All controllers displaying the collection need to have it setup 
-  def setup_collection
-    @user_id = current_user_or_guest_id 
-    @user = User.find(@user_id)
-    @browser = @user.browser
-    @seeker = ContentSeeker.new @browser, session[:seeker] # Default; other controllers may set up different seekers
-    # Initialize any entities for which we're building a New dialog on the page
-    @feed = Feed.new
   end
   
   def permission_denied
