@@ -2,7 +2,8 @@ require './lib/controller_authentication.rb'
 require './lib/seeker.rb'
 
 class ApplicationController < ActionController::Base
-    before_filter :check_flash
+  before_filter :setup_collection
+  before_filter :check_flash
     helper :all
     rescue_from Timeout::Error, :with => :timeout_error # self defined exception
     rescue_from OAuth::Unauthorized, :with => :timeout_error # self defined exception
@@ -27,6 +28,13 @@ class ApplicationController < ActionController::Base
     @seeker = "#{klass}Seeker".constantize.new (scope || klass.scoped), session[:seeker], params # Default; other controllers may set up different seekers
     @seeker.tagstxt = "" if clear_tags
     session[:seeker] = @seeker.store
+  end
+  
+  # All controllers displaying the collection need to have it setup 
+  def setup_collection
+    @user = current_user_or_guest
+    @browser = @user.browser
+    @seeker = ContentSeeker.new @browser, session[:seeker] # Default; other controllers may set up different seekers
   end
   
   def permission_denied
