@@ -33,7 +33,7 @@ class LinkRefServices
       end
       puts "Reference report:\n"+report.join("\n")
     else
-      LinkRef.all[0..5].each { |lr| Delayed::Job.enqueue lr }
+      LinkRef.all.each { |lr| Delayed::Job.enqueue lr }
     end
     nil
   end

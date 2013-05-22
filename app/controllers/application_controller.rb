@@ -30,7 +30,8 @@ class ApplicationController < ActionController::Base
     session[:seeker] = @seeker.store
   end
   
-  # All controllers displaying the collection need to have it setup 
+  # All controllers displaying the collection need to have it set up. This should be called after prefiltering (i.e., init_seeker) as it supplants
+  # the default seeker.
   def setup_collection
     @user = current_user_or_guest
     @browser = @user.browser
