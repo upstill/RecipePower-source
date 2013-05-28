@@ -349,6 +349,10 @@ public
   def all_finders
     site_finders + @@DefaultFinders
   end
+  
+  def self.scrape_for_feeds(n=-1)
+    Site.all[0..n].each { |site| Delayed::Job.enqueue site }
+  end 
 
   # Examine each site and confirm that its sample page URL matches a recipe
   def self.QA

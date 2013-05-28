@@ -9,7 +9,7 @@
 							  querydata: { tagid: @tag.id } } %></td>
 		<td><%= count_recipes @tag %>
 		   <br><%= count_owners @tag %>
-		   <br><%= count_links @tag %></td>
+		   <br><%= count_references @tag %></td>
 		<td><%= @tag.isGlobal ? "Y" : "N" %>
 		<td><%= summarize_tag_similars @tag, label: "", absorb_btn: true, joiner: "<br>" %></td>
 		<td><%= summarize_synonyms @tag %></td>

@@ -13,6 +13,10 @@ class Site < ActiveRecord::Base
   # before_create :ensure_referent
   
   after_initialize :post_init
+  
+  def perform
+    FeedServices.scrape_page self
+  end
 
 protected
   

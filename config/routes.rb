@@ -72,7 +72,6 @@ RP::Application.routes.draw do
   resources :referents
   match 'references/query', :controller=>'references', :action=>'query', :via => :post
   resources :references
-  resources :links
 
   match 'rcpqueries/relist', :controller=>'rcpqueries', :action=>'relist', :via => :post
   match 'rcpqueries/:id/relist', :controller=>'rcpqueries', :action=>'relist', :via => :get

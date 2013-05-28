@@ -8,7 +8,7 @@
 	<%= summarize_referent ref, "Other Meaning(s)" %>
 <% end %>
 <%= summarize_tag_recipes @tag %>
-<%= summarize_tag_links @tag %>
+<%= summarize_tag_references @tag %>
 <%= summarize_tag_relations @tag %>
 <br>
 <% if permitted_to? :edit, @tag %>

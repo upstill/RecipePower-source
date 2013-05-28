@@ -1,23 +1,42 @@
 module TagsHelper
     
-    def taglink(id)
-        if id
-            tag = Tag.find id
-            link_to(tag.name, tag)
-        else
-            "**no tag**"
-        end
-    end
-        
-    def count_owners tag
-        ct = tag.user_ids.size
-        (ct > 0) ? pluralize(ct, "Owner").sub(/\s/, "&nbsp;").html_safe : ""
-    end
-        
-    def count_links tag
-        ct = tag.link_ids.size
-        (ct > 0) ? pluralize(ct, "Link").sub(/\s/, "&nbsp;").html_safe : ""
-    end
+  def taglink(id)
+      if id
+          tag = Tag.find id
+          link_to(tag.name, tag)
+      else
+          "**no tag**"
+      end
+  end
+      
+  def count_owners tag
+      ct = tag.user_ids.size
+      (ct > 0) ? pluralize(ct, "Owner").sub(/\s/, "&nbsp;").html_safe : ""
+  end
+
+  def count_references tag
+      ct = tag.link_ids.size
+      (ct > 0) ? pluralize(ct, "Link").sub(/\s/, "&nbsp;").html_safe : ""
+  end
+
+  # Return HTML for the links associated with this tag
+  def summarize_tag_references tag, label = "See "
+    tag_info_section(
+      (label + "'#{tag.name}'" + " on"), 
+      tag.links.collect{ |link| "<div class=\"tog_info_rcp_title\">" + present_link(link) + "</div>" },
+    "")
+  end
+
+  # Return HTML for the links related to a given tag (i.e., the links for 
+  # all tags related to this one)
+  def summarize_tag_relations tag
+    links = Referent.related(tag, true, true).keep_if{ |rel| rel.id != tag.id }.collect { |rel| 
+             if tl = summarize_tag_references(rel, "") 
+               "<div class=\"tog_info_rcp_title\">"+tl+"</div>"                
+             end
+           }.keep_if{ |s| !s.blank? }
+    tag_info_section "See Also", links, ""
+  end
     
     def summarize_meaning tag
         if tag.primary_meaning
@@ -46,12 +65,7 @@ module TagsHelper
     
     def grabtag(tag)
         # orphantagid() is a helper method in application_controller.rb (so tags_controller can use it)
-        if link = tag.links.first
-            name = "<a href=\"#{link.uri}\">#{tag.name}</a>"
-        else
-            name = tag.name
-        end
-        ("<div class=\"orphantag\" id=\"#{orphantagid(tag.id)}\">"+name+"</div>").html_safe
+        ("<div class=\"orphantag\" id=\"#{orphantagid(tag.id)}\">#{tag.name}</div>").html_safe
     end
     
     # Build a set of tabs for use by jQuery UI, with the current tab given as a parameter
@@ -101,25 +115,6 @@ BLOCK_END
          "</div>"
         ).html_safe
     end
-  end
-       
-  # Return HTML for the links associated with this tag
-   def summarize_tag_links tag, label = "See "
-     tag_info_section(
-       (label + "'#{tag.name}'" + " on"), 
-       tag.links.collect{ |link| "<div class=\"tog_info_rcp_title\">" + present_link(link) + "</div>" },
-       "")
-   end
-       
-  # Return HTML for the links related to a given tag (i.e., the links for 
-  # all tags related to this one)
-  def summarize_tag_relations tag
-    links = Referent.related(tag, true, true).keep_if{ |rel| rel.id != tag.id }.collect { |rel| 
-            if tl = summarize_tag_links(rel, "") 
-                "<div class=\"tog_info_rcp_title\">"+tl+"</div>"                
-            end
-        }.keep_if{ |s| !s.blank? }
-    tag_info_section "See Also", links, ""
   end
   
   def summarize_tag_recipes tag

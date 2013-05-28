@@ -38,8 +38,8 @@ class Tag < ActiveRecord::Base
     belongs_to :primary_meaning, :class_name => "Referent", :foreign_key => "referent_id"
     
     # linkrefs give access to glossary entries, etc.
-    has_many :link_refs
-    has_many :links, :through=>:link_refs
+    # has_many :link_refs
+    # has_many :links, :through=>:link_refs
     
     # ownership of tags restrict visible tags
     has_many :tag_owners
@@ -119,7 +119,7 @@ class Tag < ActiveRecord::Base
 =end
         self.referents = (self.referents + t2.referents).uniq
         
-        self.links = (self.links + t2.links).uniq
+        # self.links = (self.links + t2.links).uniq
         
         # Correct any query that uses t2
         Rcpquery.all.each do |rq| 
