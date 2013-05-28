@@ -23,17 +23,23 @@ class FeedServices
     puts feedcount.to_s+" nominal feeds captured"
     puts added.to_s+" feeds added this go-round"
     puts "Rejected #{rejects.count.to_s} potential feeds:"
-    puts "\t"+rejects.join("\n\t")
+    puts "\t"+rejects.join("\n")
   end
   
   # Examine the sample page of a site (or a given other page) for RSS feeds
   def self.scrape_page(site, page_url=nil)
     rejects = []
-    ((page_url && [page_url]) || [site.sampleURL, site.home]).each do |page_url|
+    queue = page_url ? [page_url] : [site.sampleURL, site.home]
+    visited = {}
+    while (page_url = queue.shift)  
+      visited[page_url] = true
+      doc = nil
       begin 
-        return [] unless (ou = open page_url) && (doc = Nokogiri::HTML(ou))
+        if(ou = open page_url)
+          doc = Nokogiri::HTML(ou)
+        end
       rescue Exception => e
-        return []
+        next
       end
       puts "URL: "+page_url
       candidates = {}
@@ -66,8 +72,11 @@ class FeedServices
         unless url.blank? || Feed.exists?(url: url) || !(feed = Feed.new( url: url, description: content))
           if feed.save
             site.feeds << feed 
+          elsif (!visited[url]) && (Site.by_link(url) == site) # Another page on the same site with rss in the url; maybe a page of links?
+            puts "PUSHING #{url}; is it an rss page?"
+            queue.push url
           else
-            rejects << "#{feed.url} (from #{page_url})"
+            rejects << url+"\n\t...from #{page_url}) rejected because\n\t"+feed.errors.collect { |k, v| k.to_s+" "+v }.join('\n\t...')
           end
         end
       end

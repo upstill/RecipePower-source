@@ -11,10 +11,10 @@ class TagOwnershipTest < ActiveSupport::TestCase
         assert t.isGlobal, "Tag asserted by super isn't global"
         assert_equal t, Tag.assert_tag(t, userid: thing2id ), "Reasserting tag for new user makes new tag"
         assert t.isGlobal, "Tag asserted by thing2 is no longer global"
-        assert ! t.user_ids.include?(thing2id), "User asserted for global tag added to list"
+        assert ! t.owner_ids.include?(thing2id), "User asserted for global tag added to list"
         assert_equal t, Tag.assert_tag(t, userid: -1 ), "Reasserting tag for invalid user makes new tag"
         assert t.isGlobal, "Tag asserted by invalid user is no longer global"
-        assert ! t.user_ids.include?(-1), "Invalid user asserted for global tag added to list"
+        assert ! t.owner_ids.include?(-1), "Invalid user asserted for global tag added to list"
     end
     
     # Admitting invalid user for non-global tag fails
@@ -22,9 +22,9 @@ class TagOwnershipTest < ActiveSupport::TestCase
         thing1id = users(:thing1).id
         t = Tag.assert_tag("local tag", userid: thing1id)
         assert_nil t.isGlobal, "Local tag for specific user turned up global"
-        assert_equal [thing1id], t.user_ids, "Owner ids for local tag is wrong"
+        assert_equal [thing1id], t.owner_ids, "Owner ids for local tag is wrong"
         assert_equal t, Tag.assert_tag(t, userid: -1 ), "Reasserting tag for invalid user makes new tag"
-        assert_equal [thing1id], t.user_ids, "Asserting invalid user on tag changes owners"
+        assert_equal [thing1id], t.owner_ids, "Asserting invalid user on tag changes owners"
         assert_nil t.isGlobal, "Asserting invalid owner on local tag made it global"
     end
     
@@ -45,7 +45,7 @@ class TagOwnershipTest < ActiveSupport::TestCase
         # Now assert it for thing2
         assert_equal t, Tag.assert_tag(t, userid: thing2id ), "Reasserting local tag for new, valid user makes new tag"
         # Make sure thing2 appears among tag owners
-        assert t.user_ids.include?(thing2id), "New user for local tag doesn't appear"
+        assert t.owner_ids.include?(thing2id), "New user for local tag doesn't appear"
         # Make sure thing2 can now see it
         assert Tag.strmatch(tagstr, userid: thing2id).first, "Can't find co-owned local tag on new user"
     end
@@ -67,7 +67,7 @@ class TagOwnershipTest < ActiveSupport::TestCase
         # Admit user directly, rather than by assert_tag
         t.admit_user thing2id
         # Make sure thing2 appears among tag owners
-        assert t.user_ids.include?(thing2id), "New user for local tag doesn't appear"
+        assert t.owner_ids.include?(thing2id), "New user for local tag doesn't appear"
         # Make sure thing2 can now see it
         assert Tag.strmatch(tagstr, userid: thing2id).first, "Can't find co-owned local tag on new user"
     end

@@ -21,7 +21,7 @@ class Tag < ActiveRecord::Base
         CulinaryTerm: ["Culinary Term", 14]
     )
     
-    attr_accessible :name, :id, :tagtype, :isGlobal, :links, :recipes, :referents, :users, :primary_meaning
+    attr_accessible :name, :id, :tagtype, :isGlobal, :links, :recipes, :referents, :users, :owners, :primary_meaning
     
     # tagrefs associate tags with recipes
     #  has_many :tagrefs
@@ -43,7 +43,7 @@ class Tag < ActiveRecord::Base
     
     # ownership of tags restrict visible tags
     has_many :tag_owners
-    has_many :users, :through=>:tag_owners
+    has_many :owners, :through=>:tag_owners, :class_name => "User", :foreign_key => "user_id"
     
     validates_presence_of :name
     before_validation :tagqa
@@ -54,27 +54,23 @@ class Tag < ActiveRecord::Base
     end
     
     def recipes(uid=nil)
-      if uid
-        Tagging.where(tag_id: id, user_id: uid, entity_type: "Recipe")
-      else
-        Tagging.where(tag_id: id, entity_type: "Recipe")
-      end
+      Recipe.where id: recipe_ids(uid)
     end
     
     def recipe_ids(uid=nil)
-      recipes(uid).map(&:entity_id)
+      constraints = { tag_id: id, entity_type: "Recipe" }
+      constraints[:user_id] = uid if uid
+      Tagging.where(constraints).map &:entity_id
     end
     
     def users(uid=nil)
-      if uid
-        Tagging.where(tag_id: id, user_id: uid, entity_type: "User")
-      else
-        Tagging.where(tag_id: id, entity_type: "User")
-      end
+      User.where id: user_ids(uid)
     end
     
     def user_ids(uid=nil)
-      users(uid).map(&:entity_id)
+      constraints = { tag_id: id, entity_type: "User" }
+      constraints[:user_id] = uid if uid
+      Tagging.where(constraints).map &:entity_id
     end
     
     # Eliminate the tag of the given id, replacing it with this one
@@ -83,7 +79,7 @@ class Tag < ActiveRecord::Base
         return false unless can_absorb t2
         newid = self.id
         # Only consider absorbing tags of non-clashing type
-        ownerids = self.user_ids
+        ownerids = self.owner_ids
             
         # Absorb recipe taggings (Tagrefs) by replacing references to t2 with this id, avoiding duplication
 =begin
@@ -95,14 +91,14 @@ class Tag < ActiveRecord::Base
                 tr.save
             end
             # Make sure the owner of the link can see the replaced link
-            admit_user tr.user_id
+            admit_user tr.owner_id
         end
 =end
         self.recipes = (self.recipes + t2.recipes).uniq
         
         # Merge owners by taking on all owners of the absorbee
-        # t2.user_ids.each { |uid| admit_user uid }
-        self.users = self.users + t2.users
+        # t2.owner_ids.each { |uid| admit_user uid }
+        self.owners = self.owners + t2.owners
         
         # Replace referents' DIRECT use of the tag
         Referent.where(tag_id: oldid).each do |ref| 
@@ -235,10 +231,10 @@ class Tag < ActiveRecord::Base
        unless self.isGlobal
            if (uid.nil? || (uid == User.super_id))
                self.isGlobal = true
-           elsif !self.users.exists?(uid) # Reality check on the user id
+           elsif !self.owners.exists?(uid) # Reality check on the user id
                begin
                    user = User.find(uid)
-                   self.users << user 
+                   self.owners << user 
                rescue
                    # Take no other action
                end 
@@ -331,7 +327,7 @@ class Tag < ActiveRecord::Base
         end
     else
         # Restrict the found set to any asserted user
-    	tags.keep_if { |tag| tag.isGlobal || tag.users.exists?(uid) } if uid && (uid != User.super_id)
+    	tags.keep_if { |tag| tag.isGlobal || tag.owners.exists?(uid) } if uid && (uid != User.super_id)
     end
     # Prioritize the list for initial substring matches
     if (!fuzzyname.blank?) && opts[:partition] && (tags.count > 1)

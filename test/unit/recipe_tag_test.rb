@@ -21,21 +21,23 @@ class RecipeTagTest < ActiveSupport::TestCase
       thing2id = users(:thing2).id
       jalid = tags(:jal).id
       chilibeanid = tags(:chilibean).id
+      tagee = recipes(:rcp)
       
-      recipes(:rcp).current_user = thing1id
-      recipes(:rcp).tag_ids = [jalid]
+      tagee.current_user = thing1id
+      tagee.tag_ids = [jalid]
       
-      recipes(:rcp).current_user = thing2id
-      recipes(:rcp).tag_ids = [chilibeanid]
+      tagee.current_user = thing2id
+      tagee.tag_ids = [chilibeanid]
       
-      assert_equal recipes(:rcp).tag_ids(thing1id), [jalid], "Recipe should have tag for thing1"
-      assert_equal recipes(:rcp).tag_ids(thing2id), [chilibeanid], "Recipe should have tag for thing2"
+      assert_equal tagee.tag_ids(thing1id), [jalid], "Recipe should have tag for thing1"
+      assert_equal tagee.tag_ids(thing2id), [chilibeanid], "Recipe should have tag for thing2"
       assert_equal 2, Tagging.count, "There should now be exactly two taggings"
       
-      recipes(:rcp).current_user = thing1id
-      recipes(:rcp).tag_ids = []
-      assert_equal recipes(:rcp).tag_ids(thing1id), [], "Recipe should have removed tag for thing1"
-      assert_equal recipes(:rcp).tag_ids(thing2id), [chilibeanid], "Recipe should still have tag for thing2"
+      tagee.current_user = thing1id
+      tagee.tag_ids = []
+      
+      assert_equal tagee.tag_ids(thing1id), [], "Recipe should have removed tag for thing1"
+      assert_equal tagee.tag_ids(thing2id), [chilibeanid], "Recipe should still have tag for thing2"
     end
         
     test "recipe takes and removes different tags for different users" do
@@ -43,21 +45,22 @@ class RecipeTagTest < ActiveSupport::TestCase
       thing2id = users(:thing2).id
       jal = tags(:jal)
       chilibean = tags(:chilibean)
+      tagee = recipes(:rcp)
       
-      recipes(:rcp).current_user = thing1id
-      recipes(:rcp).tags = [jal]
+      tagee.current_user = thing1id
+      tagee.tags = [jal]
       
-      recipes(:rcp).current_user = thing2id
-      recipes(:rcp).tags = [chilibean]
+      tagee.current_user = thing2id
+      tagee.tags = [chilibean]
       
-      assert_equal recipes(:rcp).tags(thing1id), [jal], "Recipe should have tag for thing1"
-      assert_equal recipes(:rcp).tags(thing2id), [chilibean], "Recipe should have tag for thing2"
+      assert_equal tagee.tags(thing1id), [jal], "Recipe should have tag for thing1"
+      assert_equal tagee.tags(thing2id), [chilibean], "Recipe should have tag for thing2"
       assert_equal 2, Tagging.count, "There should now be exactly two taggings"
       
-      recipes(:rcp).current_user = thing1id
-      recipes(:rcp).tags = []
-      assert_equal recipes(:rcp).tags(thing1id), [], "Recipe should have removed tag for thing1"
-      assert_equal recipes(:rcp).tags(thing2id), [chilibean], "Recipe should still have tag for thing2"
+      tagee.current_user = thing1id
+      tagee.tags = []
+      assert_equal tagee.tags(thing1id), [], "Recipe should have removed tag for thing1"
+      assert_equal tagee.tags(thing2id), [chilibean], "Recipe should still have tag for thing2"
       assert_equal 1, Tagging.count, "There should now be exactly one tagging"
     end
     

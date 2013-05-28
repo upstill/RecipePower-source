@@ -129,8 +129,20 @@ class User < ActiveRecord::Base
     Rcpref.where(constraints).order(ordering+" DESC").select("recipe_id").map(&:recipe_id)
   end
   
+  # This override means that all taggings are owned by super, visible to all users
   def tag_owner
     User.super_id
+  end
+  
+  # Wrap the tags and tag_ids methods to eliminate sensitivity to the userid, deferring to super
+  alias_method :original_tags, :tags
+  def tags(uid=nil)
+    original_tags
+  end
+  
+  alias_method :original_tag_ids, :tag_ids
+  def tag_ids(uid=nil)
+    original_tag_ids
   end
 
 private

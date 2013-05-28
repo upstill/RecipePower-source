@@ -20,21 +20,21 @@ module Taggable
     uid ||= tag_owner
     Tag.where(id: tag_ids(uid))
   end
-  
-  def tags=(tags)
-    # Ensure that the user's tags are all and only those in nids
-    self.tag_ids=tags.map(&:id)
-  end
 
   def tag_ids(uid=nil)
     uid ||= tag_owner
     taggings.where(:user_id => uid).map(&:tag_id)
   end
   
+  def tags=(tags)
+    # Ensure that the user's tags are all and only those given
+    self.tag_ids=tags.map(&:id)
+  end
+  
   # Set the tag ids associated with the current user
   def tag_ids=(nids)
     # Ensure that the user's tags are all and only those in nids
-    oids = tag_ids tag_owner
+    oids = tag_ids
     to_add = nids - oids
     to_remove = oids - nids
     # Add new tags as necessary

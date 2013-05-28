@@ -142,7 +142,7 @@ class Referent < ActiveRecord::Base
     def parent_tokens=(tokenlist)
         # After collecting tags, scan list to eliminate references to self
         tokenlist = tokenlist.split(',')
-        self.parents = tag_tokens_to_referents(tokenlist).delete_if { |rel| (rel.id == self.id) && errors.add(:parents, "Can't be its own parent.") }
+        self.parents = tag_tokens_to_referents(tokenlist).delete_if { |rel| (rel.id == self.id) && errors.add(:parents, "Can't be its own parent.") }.uniq
     end
     
     def child_tokens
@@ -156,7 +156,7 @@ class Referent < ActiveRecord::Base
     def child_tokens=(tokenlist)
         # After collecting tags, scan list to eliminate references to self
         tokenlist = tokenlist.split(',')
-        self.children = tag_tokens_to_referents(tokenlist).delete_if { |rel| (rel.id == self.id)  && errors.add(:children, "Can't be its own child.") }
+        self.children = tag_tokens_to_referents(tokenlist).delete_if { |rel| (rel.id == self.id)  && errors.add(:children, "Can't be its own child.") }.uniq
     end
     
     # Convert a list of referents into the tags that reference them.
@@ -176,6 +176,10 @@ class Referent < ActiveRecord::Base
         refs
     end
     
+    def self.referent_class_for_tagtype(typenum)
+      (((typenum > 0) ? Tag.typesym(typenum).to_s : "")+"Referent")
+    end
+    
     # Class method to create a referent of a given type under the given tag, 
     # or to find an existing one.
     # WARNING: while some effort is made to find an existing referent and use that,
@@ -192,7 +196,7 @@ class Referent < ActiveRecord::Base
               #...but there may already be one as a plural or a singular
               tag.aliases.collect { |tag| tag.primary_meaning || tag.referents.first }.compact.first ||
               # Tag doesn't have an existing referent, so need to make one
-              Referent.create(:type=>Referent.referent_class_for_tagtype(tagtype), tag_id: tag.id )
+              Referent.referent_class_for_tagtype(tag.tagtype).constantize.create(tag_id: tag.id)
         if ref.id # Successfully created
           ref.express tag, args
           ref
@@ -254,15 +258,6 @@ class Referent < ActiveRecord::Base
     
     def typenum
         Tag.typenum self.typesym
-    end
-    
-    # For mapping from tag type to the class of referent that handles it
-    def self.referent_class_for_tagtype(tagtype)
-        if(Tag.typenum(tagtype) > 0)
-            Tag.typesym(tagtype).to_s+"Referent"
-        else
-            "Referent"
-        end
     end
     
     def self.show_tree(key = nil, level = 0)

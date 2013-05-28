@@ -12,7 +12,7 @@ class ReferentTest < ActiveSupport::TestCase
     end
     
     test "Make token list into a parent by tag number" do
-        ref = FoodReferent.create
+        ref = IngredientReferent.create
         tagid = tags(:jal).id
         assert tags(:jal).save, "Couldn't save tag"
         tag = Tag.find tagid
@@ -24,7 +24,9 @@ class ReferentTest < ActiveSupport::TestCase
     end
     
     test "Make token list into a parent by tag name on existing tag" do
-        ref = FoodReferent.create
+        ref = IngredientReferent.new
+        ref.canonical_expression = tags(:jal2)
+        ref.save
         tagid = tags(:jal).id
         tagname = tags(:jal).name
         ref.parent_tokens= "'#{tagname}'"
@@ -33,7 +35,7 @@ class ReferentTest < ActiveSupport::TestCase
     end
     
     test "Make token list into a parent by tag name on new tag" do
-        ref = FoodReferent.create
+        ref = IngredientReferent.create
         tagname = "New Tag"
         ref.parent_tokens= "'#{tagname}'"
         assert_equal 1, ref.parents.size, "Didn't create exactly one parent"
@@ -41,7 +43,7 @@ class ReferentTest < ActiveSupport::TestCase
     end
 
     test "Create parent tokens and token list" do
-        ref = FoodReferent.create
+        ref = IngredientReferent.create
         parent = Referent.express tags(:chilibean).name, ref.typenum
         puts "Got expression for '#{tags(:chilibean).name}'"
         puts "Before adding parent #{parent.name}, parents are: "
@@ -55,7 +57,7 @@ class ReferentTest < ActiveSupport::TestCase
     end
 
     test "Fail to match referent and token of different types" do
-        ref = GenreReferent.create
+        ref = GenreReferent.create tag_id: tags(:cake).id
         tagid = tags(:chilibean).id
         tagname = tags(:chilibean).name
         parent = Referent.express tagname, ref.typenum
@@ -66,7 +68,7 @@ class ReferentTest < ActiveSupport::TestCase
     end
 
     test "Create parents list, convert to tokens and back again" do
-        ref = FoodReferent.create
+        ref = IngredientReferent.create
         parent1 = Referent.express tags(:jal).name, ref.typenum
         assert_equal tags(:jal).name, parent1.name, "Expression doesn't pan out"
         parent2 = Referent.express tags(:chilibean).name, ref.typenum
@@ -96,27 +98,27 @@ class ReferentTest < ActiveSupport::TestCase
     end
     
     test "Parents and children are unique" do
-        ref = FoodReferent.create
+        ref = IngredientReferent.create
         ref.parent_tokens= "#{tags(:jal).id}, '#{tags(:jal).name}'"
-        assert_equal 1, ref.parents(true).count, "Two identical parents successfully asserted"
+        assert_equal 1, ref.parents.length, "Two identical parents successfully asserted as one"
         ref.child_tokens= "#{tags(:chilibean).id}, '#{tags(:chilibean).name}'"
-        assert_equal 1, ref.children(true).count, "Two identical children successfully asserted"
+        assert_equal 1, ref.children.length, "Two identical children successfully asserted as one"
     end
 
     test "parent-child relation established" do
-        r1 = FoodReferent.create
-        r2 = FoodReferent.create
+        r1 = IngredientReferent.create tag_id: tags(:jal).id
+        r2 = IngredientReferent.create tag_id: tags(:jal2).id
         r1.children << r2
-        assert_equal 1, r1.child_ids.count, "Added child, but no child_ids"
+        assert_equal 1, r1.child_ids.length, "Added child, but no child_ids"
         assert_equal r2.id, r1.child_ids.first, "Added child #{r2.id}, but parent only shows #{r1.child_ids.first}"
         r2.reload
-        assert_equal 1, r2.parent_ids.count, "Added child, but child doesn't list parent"
+        assert_equal 1, r2.parent_ids.length, "Added child, but child doesn't list parent"
         assert_equal r1.id, r2.parent_ids.first, "Added child to #{r2.id}, but parent only shows  as #{r1.parent_ids.first}"
     end
     
     test "parent-child relation on GenreReferent subclass established" do
-        r1 = GenreReferent.create
-        r2 = GenreReferent.create
+        r1 = GenreReferent.create tag_id: tags(:cake).id
+        r2 = GenreReferent.create tag_id: tags(:gateau).id
         r1.children << r2
         assert_equal 1, r1.child_ids.count, "Added child, but no child_ids"
         assert_equal r2.id, r1.child_ids.first, "Added child #{r2.id}, but parent only shows #{r1.child_ids.first}"
@@ -133,9 +135,9 @@ class ReferentTest < ActiveSupport::TestCase
         
     end
     
-    test "polymorphic relation on GenreReferent and FoodReferent subclasses established" do
-        r1 = GenreReferent.create
-        r2 = FoodReferent.create
+    test "polymorphic relation on GenreReferent and IngredientReferent subclasses established" do
+        r1 = GenreReferent.create tag_id: tags(:cake).id
+        r2 = IngredientReferent.create tag_id: tags(:jal2).id
         begin
             r1.children << r2
         rescue Exception => e
@@ -151,20 +153,20 @@ class ReferentTest < ActiveSupport::TestCase
     end
     
     test "destroying parent doesn't change child" do
-        assert_equal 0, ReferentRelation.all.count, "There are ReferentRelations initially"
-        r1 = Referent.create :type => "FoodReferent"
+        nrels = ReferentRelation.all.count
+        r1 = Referent.create :type => "IngredientReferent", tag_id: tags(:jal).id
         puts "r1 created with type #{r1.type}"
-        r2 = FoodReferent.create
+        r2 = IngredientReferent.create tag_id: tags(:jal2).id
         puts "r2 created with type #{r2.type}"
         r1.children << r2
         r1.destroy
         r3 = Referent.find r2.id
         assert_equal 0, r3.parents.size, "Destroyed parent #{r1.id}, but child still shows parent #{r3.parent_ids.first}"
-        r4 = Referent.create :type => "FoodReferent"
+        r4 = Referent.create :type => "IngredientReferent", tag_id: tags(:chilibean).id
         r3.parents << r4
         r3.destroy
         assert_equal 0, r4.children.size, "Destroyed child #{r3.id}, but parent #{r4.id} still shows child #{r4.child_ids.first}"
-        assert_equal 0, ReferentRelation.all.count, "There are still ReferentRelations after destruction"
+        assert_equal nrels, ReferentRelation.all.count, "The number of ReferentRelations changed despite destruction"
     end
     
     test "Names, Numbers and Symbols for Types" do
@@ -172,14 +174,14 @@ class ReferentTest < ActiveSupport::TestCase
         assert_equal "GenreReferent", Referent.referent_class_for_tagtype(1), "Wrong class for tagtype 1"
         assert_equal "RoleReferent", Referent.referent_class_for_tagtype(2), "Wrong class for tagtype 2"
         assert_equal "ProcessReferent", Referent.referent_class_for_tagtype(3), "Wrong class for tagtype 3"
-        assert_equal "FoodReferent", Referent.referent_class_for_tagtype(4), "Wrong class for tagtype 4"
+        assert_equal "IngredientReferent", Referent.referent_class_for_tagtype(4), "Wrong class for tagtype 4"
         assert_equal "UnitReferent", Referent.referent_class_for_tagtype(5), "Wrong class for tagtype 5"
         assert_equal "SourceReferent", Referent.referent_class_for_tagtype(6), "Wrong class for tagtype 6"
         assert_equal "AuthorReferent", Referent.referent_class_for_tagtype(7), "Wrong class for tagtype 7"
         assert_equal "OccasionReferent", Referent.referent_class_for_tagtype(8), "Wrong class for tagtype 8"
         assert_equal "PantrySectionReferent", Referent.referent_class_for_tagtype(9), "Wrong class for tagtype 9"
         assert_equal "StoreSectionReferent", Referent.referent_class_for_tagtype(10), "Wrong class for tagtype 10"
-        assert_equal "InterestReferent", Referent.referent_class_for_tagtype(11), "Wrong class for tagtype 11"
+        assert_equal "ChannelReferent", Referent.referent_class_for_tagtype(11), "Wrong class for tagtype 11"
         assert_equal "ToolReferent", Referent.referent_class_for_tagtype(12), "Wrong class for tagtype 12"
         assert_equal "NutrientReferent", Referent.referent_class_for_tagtype(13), "Wrong class for tagtype 13"
         assert_equal "CulinaryTermReferent", Referent.referent_class_for_tagtype(14), "Wrong class for tagtype 14"
@@ -199,9 +201,9 @@ class ReferentTest < ActiveSupport::TestCase
         assert_equal :Process, ref.typesym, "Bad Type Symbol"
         assert_equal 3, ref.typenum, "Bad Type Number"
         
-        ref = FoodReferent.new
-        assert_equal "Food", ref.typename, "Bad Type Name"
-        assert_equal :Food, ref.typesym, "Bad Type Symbol"
+        ref = IngredientReferent.new
+        assert_equal "Ingredient", ref.typename, "Bad Type Name"
+        assert_equal :Ingredient, ref.typesym, "Bad Type Symbol"
         assert_equal 4, ref.typenum, "Bad Type Number"
         
         ref = UnitReferent.new
@@ -234,9 +236,9 @@ class ReferentTest < ActiveSupport::TestCase
         assert_equal :StoreSection, ref.typesym, "Bad Type Symbol"
         assert_equal 10, ref.typenum, "Bad Type Number"
         
-        ref = InterestReferent.new
-        assert_equal "Interest", ref.typename, "Bad Type Name"
-        assert_equal :Interest, ref.typesym, "Bad Type Symbol"
+        ref = ChannelReferent.new
+        assert_equal "Channel", ref.typename, "Bad Type Name"
+        assert_equal :Channel, ref.typesym, "Bad Type Symbol"
         assert_equal 11, ref.typenum, "Bad Type Number"
         
         ref = ToolReferent.new

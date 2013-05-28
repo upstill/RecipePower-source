@@ -7,7 +7,7 @@ class RefermentTest < ActiveSupport::TestCase
     
     test "Referent takes Reference" do
       rft = Referent.express tags(:jal)
-      assert (rft.class==Referent), "Couldn't get referent"
+      assert (rft.class==IngredientReferent), "Couldn't get referent"
       rfc = Reference.create
       assert (rfc.class==Reference), "Couldn't get reference"
       rft.references << rfc
@@ -17,7 +17,7 @@ class RefermentTest < ActiveSupport::TestCase
   
     test "Reference takes Referent" do
       rft = Referent.express tags(:jal)
-      assert (rft.class==Referent), "Couldn't get referent"
+      assert (rft.class==IngredientReferent), "Couldn't get referent"
       rfc = Reference.create
       assert (rfc.class==Reference), "Couldn't get reference"
       rfc.referents << rft
@@ -27,7 +27,7 @@ class RefermentTest < ActiveSupport::TestCase
     
     test "Adding Recipe to Referent" do
       rft = Referent.express tags(:jal)
-      assert (rft.class==Referent), "Couldn't get referent"
+      assert (rft.class==IngredientReferent), "Couldn't get referent"
       rcp = Recipe.first
       assert (rcp.class==Recipe), "Couldn't get recipe"
       rft.recipes << rcp
@@ -37,7 +37,7 @@ class RefermentTest < ActiveSupport::TestCase
   
     test "Adding Referent to Recipe" do
       rft = Referent.express tags(:jal)
-      assert (rft.class==Referent), "Couldn't get referent"
+      assert (rft.class==IngredientReferent), "Couldn't get referent"
       rcp = Recipe.first
       assert (rcp.class==Recipe), "Couldn't get recipe"
       rcp.referents << rft
