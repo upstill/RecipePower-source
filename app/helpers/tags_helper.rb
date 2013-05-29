@@ -1,5 +1,125 @@
 module TagsHelper
+  
+  def summarize_tag withtype = false, do_link = true
+    @tagserv ||= TagServices.new(@tag)
+    ((withtype ? "<i>#{@tagserv.typename}</i> " : "" )+
+      "'<strong>#{do_link ? link_to(@tagserv.name, @tagserv.tag) : @tagserv.name}</strong>'").html_safe
+  end
+  
+  def summarize_meaning
+    @tagserv ||= TagServices.new(@tag)
+    if (meaning = @tagserv.primary_meaning) && !meaning.description.blank?
+      "<p class=\"airy\"><strong>...described as</strong> '#{@tagserv.primary_meaning.description}'</p>".html_safe
+    end
+  end
+  
+  def summarize_tag_owners
+    @tagserv ||= TagServices.new(@tag)
+    ownerstrs = @tagserv.isGlobal ? ["everyone (it's global)"] : @tagserv.owners.collect { |owner| owner.handle }
+    tag_info_section "...owned by", ownerstrs
+  end
+  
+  # Helper for showing the tags which are potentially redundant wrt. this tag:
+  # They match in the normalized_name field
+  def summarize_tag_similars args={} 
+    @tagserv ||= TagServices.new(@tag)
+    label= args[:label] || "Similar tags: "
+    joiner = args[:joiner] || "" #  ", "
+    others = Tag.where(normalized_name: @tagserv.normalized_name).delete_if { |other| other.id == @tagserv.id }
+    tag_info_section label, others.collect { |other| summarize_tag_similar other, (args[:absorb_btn] && @tagserv.can_absorb(other)) }
+  end
+  
+  def summarize_tag_parents label = "Categorized Under"
+    @tagserv ||= TagServices.new(@tag)
+    tag_info_section(label,     
+      @tagserv.referents.collect { |ref| ref.parents }.flatten.uniq.collect { |parent| link_to parent.name, parent.canonical_expression }
+    )
+  end
+	
+  def summarize_tag_children label = "Examples"
+    @tagserv ||= TagServices.new(@tag)
+    tag_info_section(label,     
+      @tagserv.referents.collect { |ref| ref.children }.flatten.uniq.collect { |child| link_to child.name, child.canonical_expression }
+    )
+  end
+  
+  def summarize_tag_referents
+    @tagserv ||= TagServices.new(@tag)
+    @tagserv.referents.keep_if { |ref| ref != @tagserv.primary_meaning }.each do |ref|
+    	summarize_referent ref, "Other Meaning(s)"
+    end
+  end
+  
+  def summarize_tag_recipes
+    @tagserv ||= TagServices.new(@tag)
+    rcpstrs = @tagserv.recipes.uniq.collect { |rcp| 
+      taglink = (permitted_to? :edit, rcp) ?
+        link_to("[Tagger]", edit_recipe_path(rcp)) :
+        ""
+        %Q{<div class="tog_info_rcp_title">
+        	   #{link_to rcp.trimmed_title, rcp.url} #{recipe_popup rcp} #{taglink}
+           </div>}
+      }
+    tag_info_section "Recipes", rcpstrs, ""
+  end
+
+  # Return HTML for the links associated with this tag
+  def summarize_tag_references label = "See "
+    @tagserv ||= TagServices.new(@tag)
+    tag_info_section(
+      (label + "'#{@tagserv.name}'" + " on"), 
+      @tagserv.references.collect{ |reference| content_tag :div, present_reference(reference), class: "tog_info_rcp_title" } 
+    )
+  end
+
+  # Return HTML for the links related to a given tag (i.e., the links for 
+  # all tags related to this one)
+  def summarize_tag_relations label = "See Also "
+    @tagserv ||= TagServices.new(@tag)
+    tag_info_section( "See Also",
+      Referent.related(@tagserv.tag, true, true).collect { |rel| 
+        if(rel.id != @tagserv.id) &&  
+          (tl = tag_info_section(
+            (label + "'#{rel.name}'" + " on"), 
+            TagServices.new(rel).references.collect{ |reference| content_tag :div, present_reference(reference), class: "tog_info_rcp_title" },
+          ""))
+          content_tag( :div, tl, class: "tog_info_rcp_title" ) 
+        end
+      }.compact,
+    "")
+  end
+
+  def summarize_tag_reference_count
+    @tagserv ||= TagServices.new(@tag)
+    ((ct = @tagserv.reference_count) > 0) ? pluralize(ct, "Reference").sub(/\s/, "&nbsp;").html_safe : ""
+  end
+  
+  def summarize_tag_recipe_count
+    @tagserv ||= TagServices.new(@tag)
+    count = @tagserv.recipe_ids.size
+    return "" if count == 0
+    txt = pluralize(count, "Recipe").sub(/\s/, " ")
+  end
+      
+  def summarize_tag_owner_count
+    @tagserv ||= TagServices.new(@tag)
+      ct = @tagserv.user_ids.size
+      (ct > 0) ? pluralize(ct, "Owner").sub(/\s/, "&nbsp;").html_safe : ""
+  end
+
+  def summarize_tag_synonyms
+    @tagserv ||= TagServices.new(@tag)
+    # The synonyms are the other expressions of this tag's referents
+    @tagserv.synonyms.collect { |tag| tag.name+"(#{tag.id.to_s})" }.join(', ').html_safe
+  end
+
+=begin
+  def summarize_tags(tags)
+  	tags.collect{|tag| summarize_tag tag }.join(', ')
+  end
+=end
     
+  # ----------------------------------
   def taglink(id)
       if id
           tag = Tag.find id
@@ -8,55 +128,6 @@ module TagsHelper
           "**no tag**"
       end
   end
-      
-  def count_owners tag
-      ct = tag.user_ids.size
-      (ct > 0) ? pluralize(ct, "Owner").sub(/\s/, "&nbsp;").html_safe : ""
-  end
-
-  def count_references tag
-      ct = tag.link_ids.size
-      (ct > 0) ? pluralize(ct, "Link").sub(/\s/, "&nbsp;").html_safe : ""
-  end
-
-  # Return HTML for the links associated with this tag
-  def summarize_tag_references tag, label = "See "
-    tag_info_section(
-      (label + "'#{tag.name}'" + " on"), 
-      tag.links.collect{ |link| "<div class=\"tog_info_rcp_title\">" + present_link(link) + "</div>" },
-    "")
-  end
-
-  # Return HTML for the links related to a given tag (i.e., the links for 
-  # all tags related to this one)
-  def summarize_tag_relations tag
-    links = Referent.related(tag, true, true).keep_if{ |rel| rel.id != tag.id }.collect { |rel| 
-             if tl = summarize_tag_references(rel, "") 
-               "<div class=\"tog_info_rcp_title\">"+tl+"</div>"                
-             end
-           }.keep_if{ |s| !s.blank? }
-    tag_info_section "See Also", links, ""
-  end
-    
-    def summarize_meaning tag
-        if tag.primary_meaning
-            "<p class=\"airy\"><strong>Described as</strong> '#{tag.primary_meaning.description}'</p>".html_safe
-        end
-    end
-        
-    def summarize_synonyms tag
-        # The synonyms are the other expressions of this tag's referents
-        TagServices.new(tag).synonyms.collect { |tag| tag.name+"(#{tag.id.to_s})" }.join(', ').html_safe
-    end
-    
-    def summarize_tag tag, withtype = false, do_link = true
-	    ((withtype ? "<i>#{tag.typename}</i> " : "" )+
-        "'<strong>#{do_link ? link_to(tag.name, tag) : tag.name}</strong>'").html_safe
-    end
-    
-    def summarize_tags(tags)
-    	tags.collect{|tag| summarize_tag tag }.join(', ')
-    end
     
     # Return HTML for each tag of the given type
     def taglist(taglist)
@@ -109,48 +180,13 @@ BLOCK_END
     if contentstrs && !contentstrs.empty?
         contentstr = contentclass.blank? ? 
                      contentstrs.join('') : 
-                     ("<span class=\"#{contentclass}\">" + contentstrs.join(', ') + "</span>")
-        ("<div class=\"tag_info_section\"><span class=\"tag_info_section_title\">#{label}</span>: " +
-         contentstr +
-         "</div>"
-        ).html_safe
+                     content_tag(:span, contentstrs.join(', ').html_safe, class: contentclass)
+        content_tag( :div, 
+          content_tag( :span, label, class: "tag_info_section_title")+contentstr.html_safe, 
+          class: "tag_info_section"
+        )
+        
     end
-  end
-  
-  def summarize_tag_recipes tag
-    rcpstrs = tag.recipes.uniq.collect { |rcp| 
-        taglink = (permitted_to? :edit, rcp) ?
-          link_to("[Tagger]", edit_recipe_path(rcp)) :
-          ""
-          %Q{<div class="tog_info_rcp_title">
-          	   #{link_to rcp.trimmed_title, rcp.url} #{recipe_popup rcp} #{taglink}
-             </div>}
-        }
-    tag_info_section "Recipes", rcpstrs, ""
-  end
-  
-  def count_recipes tag
-    count = tag.recipe_ids.size
-    return "" if count == 0
-    txt = pluralize(count, "Recipe").sub(/\s/, " ")
-    # link_to(txt, new_rcpquery_path(tag: tag.id.to_s))
-  end
-  
-  def summarize_tag_parents tag, label = "Categorized Under"
-    if ref = tag.primary_meaning
-	  tag_info_section label, ref.parents.collect { |parent| link_to parent.name, parent.canonical_expression }
-    end
-  end
-	
-  def summarize_tag_children tag, label = "Examples"
-    if ref = tag.primary_meaning
-      tag_info_section label, ref.children.collect { |child| link_to child.name, child.canonical_expression }
-    end
-  end
-  
-  def summarize_tag_owners tag
-      ownerstrs = tag.isGlobal ? ["everyone (it's global)"] : tag.users.collect { |user| user.handle }
-      tag_info_section "It's owned by", ownerstrs
   end
   
   def summarize_tag_similar tag, absorb_btn = false
@@ -160,15 +196,5 @@ BLOCK_END
       "(#{tag.typename} #{tagidstr})"+
       (absorb_btn ? button_to_function("Absorb", "merge_tags();", class: "absorb_button", id: "absorb_tag_#{tagidstr}") : "")+
       "</span>" 
-  end
-  
-  # Helper for showing the tags which are potentially redundant wrt. this tag:
-  # They match in the normalized_name field
-  def summarize_tag_similars tag, args={} 
-      label= args[:label] || "Similar tags"
-      joiner = args[:joiner] || "" #  ", "
-      others = Tag.where(normalized_name: tag.normalized_name).delete_if { |other| other.id == tag.id }
-      # otherstrs = others.collect { |other| summarize_tag_similar other, (args[:absorb_btn] && tag.can_absorb(other)) }
-      tag_info_section label, others.collect { |other| summarize_tag_similar other, (args[:absorb_btn] && tag.can_absorb(other)) }
   end
 end

@@ -359,11 +359,10 @@ class Referent < ActiveRecord::Base
     
     # Return the tag expressing this referent according to the given form and locale, if any
     def expression(args = {})
-        args = Expression.scrub_args args
-        if (args.size > 0) && (expr = self.expressions.where(args).first)
-            return expr.tag
-        end
-        self.canonical_expression
+      args = Expression.scrub_args args
+      ((args.size > 0) && (expr = self.expressions.where(args).first)) ?
+        expr.tag :
+        canonical_expression
     end
     
     # Return the name of the referent

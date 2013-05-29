@@ -1,15 +1,15 @@
-<h3>Everything There Is To Know About <%= summarize_tag @tag, true, false %></h3>
-<%= summarize_meaning @tag %>
-<%= summarize_tag_owners @tag %>
-<%= summarize_tag_similars @tag %>
-<%= summarize_tag_parents @tag %>
-<%= summarize_tag_children @tag %>
-<% @tag.referents.collect{ |ref| ref unless @tag.primary_meaning && (ref.id == @tag.primary_meaning.id) }.compact.each do |ref| %>
-	<%= summarize_referent ref, "Other Meaning(s)" %>
-<% end %>
-<%= summarize_tag_recipes @tag %>
-<%= summarize_tag_references @tag %>
-<%= summarize_tag_relations @tag %>
+<% @tagserv = TagServices.new @tag %>
+<h3>Everything There Is To Know About <%= summarize_tag true, false %></h3>
+<h4>Meaning</h4> <%= summarize_meaning %>
+<h4>Owners</h4> <%= summarize_tag_owners %>
+<h4>Synonyms</h4> <%= summarize_tag_synonyms %>
+<h4>Similars</h4> <%= summarize_tag_similars %>
+<h4>Referents</h4> <%= summarize_tag_referents %>
+<h4>Parents</h4> <%= summarize_tag_parents %>
+<h4>Children</h4> <%= summarize_tag_children %>
+<h4>References</h4> <%= summarize_tag_references %>
+<h4>Recipes</h4> <%= summarize_tag_recipes %>
+<h4>Relations</h4> <%= summarize_tag_relations %>
 <br>
 <% if permitted_to? :edit, @tag %>
   <%= link_to 'Edit', edit_tag_path(@tag) %>

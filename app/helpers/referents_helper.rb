@@ -1,5 +1,5 @@
 module ReferentsHelper
-    
+  
   def list_expressions referent, do_tag=true
     ("Expressions: "+(referent.expressions.collect { |expr| 
       "<br>&nbsp;&nbsp;'"+

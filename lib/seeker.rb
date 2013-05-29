@@ -263,7 +263,6 @@ class ReferenceSeeker < Seeker
       candihash.apply @affiliate.where("url LIKE ?", "%#{tag.name}%").map(&:id)
       constraints = @tagtype ? { tagtype: @tagtype } : {}
       # collect all the references of all the referents of all matching tags
-      debugger
       list = Tag.strmatch(tag.name).collect { |tag| tag.referents }.flatten
       list = list.collect { |referent| referent.reference_ids }
       candihash.apply list.flatten.uniq

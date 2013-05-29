@@ -1,8 +1,0 @@
-<% if @rcpquery.which_list == "mine" %>
-  <% @list_name = "mine" %>
-  <div class="rcplist_container" id="rcpquery_mine_list_container">
-    <%= render 'form_rcplist', :layout=>false %>
-  </div>
-<% else %>
-  <%= query_container "mine", "Content coming soon..." %>
-<% end %>
