@@ -1,7 +1,7 @@
 <tr>
   <td><%= f.hidden_field :tag_token %>
   <%= f.hidden_field :referent_id %>
-  <%= f.label :tagname, taglink(f.object.tag_id), class: "expr_tag" %></td>
+  <%= f.label :tagname, tag_link(f.object), class: "expr_tag" %></td>
   <td><%= f.select :locale, Expression.locales %></td>
   <td><%= f.select :form, Expression.forms %></td>
   <td><%= f.hidden_field :_destroy %>

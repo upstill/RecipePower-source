@@ -232,7 +232,7 @@ class UserSeeker < Seeker
   # Get the results of the current query.
   def apply_tags(candihash)
     # Rank/purge for tag matches
-    neighbors = TagServices.lexical_neighborhood(tags)
+    neighbors = TagServices.lexical_similars(tags)
     weightings = TagServices.semantic_neighborhood(tag_ids = neighbors.map(&:id), 0.8)
     # Get tags that aren't in the original set
     (tags + Tag.where(id: weightings.keys - tag_ids)).each do |tag| 

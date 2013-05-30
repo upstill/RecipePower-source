@@ -8,17 +8,28 @@
 			data: { request: 	"/tags/typify", 
 							valueparam: "typenum",
 						  querydata: { tagid: @tag.id } } %></td>
-	<td><%= summarize_tag_recipe_count %>
-	   <br><%= summarize_tag_owner_count %>
-	   <br><%= summarize_tag_reference_count %></td>
-	<td><%= @tagserv.isGlobal ? "Y" : "N" %>
-	<td><%= summarize_tag_similars label: "", absorb_btn: true, joiner: "<br>" %></td>
-	<td><%= summarize_tag_synonyms %></td>
-	<td><% @tag.referents.each do |ref| %>
-	      <%= link_to ref.name, referent_path(ref) %><%= ", " unless ref == @tag.referents.last %>
-	<% end %></td>
+	<td>
+		<%= summarize_tag_recipe_count %>
+		<%= summarize_tag_owner_count %>
+		<%= summarize_tag_parents_count %>
+		<%= summarize_tag_children_count %>
+		<%= summarize_tag_reference_count %>
+	</td><td>
+		<%= @tagserv.isGlobal ? "Y" : "N" %>
+	</td><td>
+		<%= summarize_tag_similars label: "", absorb_btn: true, joiner: "<br>" %>
+	</td><td>
+		<%= summarize_tag_synonyms "" %>
+	</td><td>
+		<% @tag.referents.each do |ref| %>
+      <%= link_to ref.name, referent_path(ref) %><%= ", " unless ref == @tag.referents.last %>
+		<% end %>
+	</td>
 	<% if permitted_to? :edit, @tag %>
-    	<td><%= link_to 'Edit', edit_tag_path(@tag) %></td>
-    	<td><%= link_to 'Destroy', @tag, confirm: 'Are you sure?', method: :delete %></td>
+   	<td>
+			<%= link_to 'Edit', edit_tag_path(@tag) %>
+		</td><td>
+			<%= link_to 'Destroy', @tag, confirm: 'Are you sure?', method: :delete %>
+		</td>
 	<% end %>
 </tr>
