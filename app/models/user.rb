@@ -26,7 +26,6 @@ class User < ActiveRecord::Base
   attr_writer :browser
   
   has_many :rcprefs, :dependent => :destroy
-  has_many :taggings, :dependent => :destroy
 
   has_many :follower_relations, :foreign_key=>"followee_id", :dependent=>:destroy, :class_name=>"UserRelation"
   has_many :followers, :through => :follower_relations, :source => :follower, :uniq => true 

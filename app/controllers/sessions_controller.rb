@@ -8,7 +8,7 @@ class SessionsController < Devise::SessionsController
       format.html { respond_with(resource, serialize_options(resource)) }
       format.json { 
         flash.now[:alert] = "Sorry--didn't recognize your credentials."
-        @area = params[:area]
+        @area = params[:area] || "floating"
         rendered = with_format("html") {
           render_to_string "authentications/new", layout: false 
         }
