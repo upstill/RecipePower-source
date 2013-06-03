@@ -123,7 +123,7 @@ class RecipesController < ApplicationController
         end
       }
       format.json {
-        @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe], true, params[:extractions] # session[:user_id], params
+        @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe]||{}, true, params[:extractions] # session[:user_id], params
         if @recipe.id
           codestr = with_format("html") { render_to_string :edit, layout: false }
         else
@@ -138,7 +138,7 @@ class RecipesController < ApplicationController
         # We need a domain to pass as sourcehome, so the injected iframe can communicate with the browser.
         # This gets extracted from the href passed as a parameter
         if @site = Site.by_link(params[:recipe][:url])
-          @url = capture_recipes_url area: "at_top", layout: "injector", sourcehome: @site.domain
+          @url = capture_recipes_url area: "at_top", layout: "injector", sourcehome: @site.domain, recipe: params[:recipe]
           if !current_user # Apparently there's no way to check up on a user without hitting the database
             # Push the editing URL so authentication happens first
             session[:original_uri] = @url

@@ -32,7 +32,6 @@ class FeedServices
     queue = page_url ? [page_url] : [site.sampleURL, site.home]
     visited = {}
     while (page_url = queue.shift)  
-      visited[page_url] = true
       doc = nil
       begin 
         if(ou = open page_url)
@@ -66,14 +65,15 @@ class FeedServices
         begin
           # For some strange reason we've seen feed URLs starting with 'feed:http:'
           url = URI.join( site.home, href).to_s.sub(/feed:http:/, "http:")
-          debugger
         rescue Exception => e
           url = nil
         end 
+        next if url.blank? || visited[url]
+        visited[url] = true
         unless url.blank? || Feed.exists?(url: url) || !(feed = Feed.new( url: url, description: content))
           if feed.save
             site.feeds << feed 
-          elsif (!visited[url]) && (Site.by_link(url) == site) # Another page on the same site with rss in the url; maybe a page of links?
+          elsif (!queue.include?(url)) && (Site.by_link(url) == site) # Another page on the same site with rss in the url; maybe a page of links?
             puts "PUSHING #{url}; is it an rss page?"
             queue.push url
           else
@@ -81,6 +81,7 @@ class FeedServices
           end
         end
       end
+      visited[page_url] = true
     end
     rejects
   end
