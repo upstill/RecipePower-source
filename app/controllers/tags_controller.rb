@@ -14,17 +14,17 @@ class TagsController < ApplicationController
     render 'index', :layout=>false
   end
 
-# POST /tags
-# POST /tags.xml
-# Since we don't actually create tags using the form, this action is used by the tags lister
-# to gather parameters for filtering the list. Thus, we collect the form data and redirect
-def create
-  # We get the create action in two circumstances: 
-  #  1) we actually are creating a new tag;
-  #  2) we get called from the index page with a tag filter
-  if params[:commit] =~ /Filter/
+  # POST /tags
+  # POST /tags.xml
+  # Since we don't actually create tags using the form, this action is used by the tags lister
+  # to gather parameters for filtering the list. Thus, we collect the form data and redirect
+  def create
+    # We get the create action in two circumstances: 
+    #  1) we actually are creating a new tag;
+    #  2) we get called from the index page with a tag filter
+    if params[:commit] =~ /Filter/
       redirect_to controller: "tags", action: "index", tag: params[:tag]
-  else
+    else
       @Title = "Tags"
       @tag = Tag.new(params[:tag])
       respond_to do |format|
@@ -39,8 +39,8 @@ def create
           format.xml  { render :xml => @tag.errors, :status => :unprocessable_entity }
         end
       end
+    end
   end
-end
   
 =begin
 # Shouldn't be using this anymore
@@ -151,7 +151,7 @@ end
 
   # GET /tags/1/edit
   def edit
-      @Title = "Tags"
+    @Title = "Tags"
     @tag = Tag.find(params[:id])
   end
   
@@ -170,14 +170,18 @@ end
   # GET /id/absorb
   # Merge two tags together, returning a list of DOM elements to nuke as a result
   def absorb
-      tagid = params[:id]
-      tag = Tag.find tagid.to_i
-      victimidstr = params[:victim]
-      if tag.absorb(victimidstr.to_i)
-          render :json=>{deletions: ["#tagrow_#{victimidstr}", "#tagrow_#{victimidstr}HR", ".absorb_#{victimidstr}"]}
-      else
-          render :json=>{errors: tag.errors }
-      end
+    debugger
+    absorber = Tag.find params[:id].to_i
+    victim = Tag.find params[:victim].to_i
+    survivor = victim.disappear_into absorber 
+    if survivor.errors.empty?
+      victimidstr = ((survivor == victim) ? absorber : victim).id.to_s
+      render :json=>{
+        deletions: ["#tagrow_#{victimidstr}", "#tagrow_#{victimidstr}HR", ".absorb_#{victimidstr}"]
+      }
+    else
+      render :json=>{errors: survivor.errors }
+    end
   end
   
   # GET /typify
@@ -192,15 +196,13 @@ end
           puts "Success on "+idsChanged.inspect
       elsif params["tagid"] && params["typenum"]
           # Change the type of a single tag
-          tagidstr = params["tagid"]
-          tag = Tag.find tagidstr.to_i
           # We ask and allow for the possibility that the tag will be absorbed into another 
           # tag of the target type
-          tag = tag.project params["typenum"].to_i
-          idsChanged = tag.save ? [tag.id] : []
+          tag = (Tag.find params["tagid"].to_i).project params["typenum"]
+          idsChanged = tag.errors.empty? && [tag.id]
       end
       if idsChanged
-        render :json=>{ deletions: idsChanged.map{ |id| ["#tagrow_#{tagidstr}", "#tagrow_#{tagidstr}HR", ".absorb_#{tagidstr}"] }.flatten ,
+        render :json=>{ deletions: idsChanged.map{ |id| ["#tagrow_#{id.to_s}", "#tagrow_#{id.to_s}HR", ".absorb_#{id.to_s}"] }.flatten ,
                         popup: (tag ? "'#{tag.name}' now typed as '#{tag.typename}'" : "Tags changed successfully")
         }
       else
@@ -211,15 +213,17 @@ end
   # PUT /tags/1
   # PUT /tags/1.xml
   def update
-      @Title = "Tags"
+    @Title = "Tags"
     @tag = Tag.find(params[:id])
-
+    debugger
     respond_to do |format|
 puts "Tag controller converting "+params[:tag][:tagtype].to_s
       params[:tag][:tagtype] = params[:tag][:tagtype].to_i unless params[:tag][:tagtype].nil?
 puts "...to "+params[:tag][:tagtype].to_s
-      if @tag.update_attributes(params[:tag])
-        @tag.save
+      if !(success = @tag.update_attributes(params[:tag])) && @tag.errors[:key]
+        @tag = @tag.disappear
+      end
+      if !@tag.errors.any?
         format.html { redirect_to(@tag, :notice => "Tag was successfully updated for type #{params[:tag][:tagtype].to_s} to #{@tag.typename}.") }
         format.xml  { head :ok }
       else
@@ -232,7 +236,7 @@ puts "...to "+params[:tag][:tagtype].to_s
   # DELETE /tags/1
   # DELETE /tags/1.xml
   def destroy
-      @Title = "Tags"
+    @Title = "Tags"
     @tag = Tag.find(params[:id])
     @tag.destroy
 

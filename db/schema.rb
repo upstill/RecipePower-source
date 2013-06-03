@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130527025613) do
+ActiveRecord::Schema.define(:version => 20130602224337) do
 
   create_table "authentications", :force => true do |t|
     t.integer  "user_id"
@@ -256,6 +256,8 @@ ActiveRecord::Schema.define(:version => 20130527025613) do
     t.datetime "updated_at",                       :null => false
   end
 
+  add_index "taggings", ["user_id", "tag_id", "entity_id", "entity_type", "is_definition"], :name => "tagging_unique", :unique => true
+
   create_table "tags", :force => true do |t|
     t.string   "name"
     t.datetime "created_at"
@@ -265,6 +267,9 @@ ActiveRecord::Schema.define(:version => 20130527025613) do
     t.boolean  "isGlobal"
     t.integer  "referent_id"
   end
+
+  add_index "tags", ["name", "tagtype"], :name => "tag_name_type_unique", :unique => true
+  add_index "tags", ["normalized_name"], :name => "tag_normalized_name_index"
 
   create_table "thumbnails", :force => true do |t|
     t.text     "url"

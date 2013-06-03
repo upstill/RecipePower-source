@@ -226,6 +226,7 @@ RP.post_error = ( jqXHR, dlog ) ->
 
 # Respond to a click by optionally checking for a confirmation, firing a request at the server and appropriately handling the response
 RP.submit = (request) ->
+	debugger
 	elmt = window.event.toElement
 	attribs = elmt.attributes
 	if attribs.method 
@@ -251,7 +252,6 @@ RP.change = () ->
 		data.querydata[data.valueparam] = elmt.value
 	else
 		data.querydata.value = elmt.value
-	debugger
 	# Encode the querydata into the request string
 	str = []
 	for attrname,attrvalue of data.querydata
@@ -267,6 +267,7 @@ RP.process_response = (responseData, dlog) ->
 	# Wrapped in 'presentResponse', in the case where we're only presenting the results of the request
 	dlog ||= $('div.modal')[0]
 	supplanted = false
+	debugger
 	if responseData
 
 		# 'replacements' specifies a set of DOM elements and code to replace them

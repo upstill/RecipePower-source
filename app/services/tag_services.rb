@@ -3,11 +3,21 @@ class TagServices
   attr_accessor :tag
   
   delegate :id, :typename, :name, :normalized_name, :primary_meaning, :isGlobal, 
-    :users, :user_ids, :owners, :owner_ids, :reference_count, :referents, :recipes, :recipe_ids, :can_absorb, :to => :tag
+    :users, :user_ids, :owners, :owner_ids, :reference_count, :referents, :can_absorb, :to => :tag
   
   def initialize(tag, user=nil)
     self.tag = tag
     @user = user || User.super_id
+  end
+# -----------------------------------------------    
+  def recipe_ids with_synonyms=false
+    with_synonyms ?
+      Tag.where(id: ([id] + synonym_ids) ).collect { |tag| tag.recipe_ids }.flatten.uniq :
+      tag.recipe_ids
+  end
+  
+  def recipes with_synonyms=false
+    Recipe.where(id: recipe_ids(with_synonyms) )
   end
 # -----------------------------------------------    
   # Return the references associated with the tag. This includes all the references from synonyms of the tag
@@ -92,4 +102,17 @@ class TagServices
     end
     result
   end
+  
+
+  # Class method meant to be run from a console, to clean up redundant tags (name/index pair not unique) before adding index to prevent them
+  def self.qa
+    Tag.all.each do |tag|
+      if !tag.tagqa
+        result = tag.errors[:key] && tag.disappear
+        debugger
+        x=3
+      end
+    end
+  end
+
 end

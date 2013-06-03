@@ -33,6 +33,7 @@ authorization do
     includes :editor
     # :sessions, :users
     has_permission_on [:pages], :to => [:admin]
+    has_permission_on [:tags], :to => [:destroy]
     has_permission_on [:recipes], :to => [:destroy]
     has_permission_on [:feeds], :to => [:edit, :approve, :destroy]
     has_permission_on [:users], :to => [:manage]

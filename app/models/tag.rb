@@ -23,11 +23,7 @@ class Tag < ActiveRecord::Base
     
     attr_accessible :name, :id, :tagtype, :isGlobal, :links, :recipes, :referents, :users, :owners, :primary_meaning
     
-    # tagrefs associate tags with recipes
-    #  has_many :tagrefs
-    # has_many :recipes, :through=>:tagrefs
     has_many :taggings, :dependent => :destroy
-    # has_many :recipes, :through => :taggings, :class_name => "Recipe"
     
     # expressions associate tags with the foods (roles, processes, etc.) they refer to
     # These are the "meanings" of a tag
@@ -36,10 +32,6 @@ class Tag < ActiveRecord::Base
     
     # The primary meaning is the default meaning of a tag
     belongs_to :primary_meaning, :class_name => "Referent", :foreign_key => "referent_id"
-    
-    # linkrefs give access to glossary entries, etc.
-    # has_many :link_refs
-    # has_many :links, :through=>:link_refs
     
     # ownership of tags restrict visible tags
     has_many :tag_owners
@@ -73,65 +65,6 @@ class Tag < ActiveRecord::Base
       Tagging.where(constraints).map &:entity_id
     end
     
-    # Eliminate the tag of the given id, replacing it with this one
-    def absorb oldid
-        t2 = Tag.find oldid
-        return false unless can_absorb t2
-        newid = self.id
-        # Only consider absorbing tags of non-clashing type
-        ownerids = self.owner_ids
-            
-        # Absorb recipe taggings (Tagrefs) by replacing references to t2 with this id, avoiding duplication
-=begin
-        rids = self.recipe_ids
-        t2.tagrefs.each do |tr| 
-            # Do nothing if this recipe is already listed under the new tag
-            unless rids.include? tr.recipe_id 
-                tr.tag_id = newid
-                tr.save
-            end
-            # Make sure the owner of the link can see the replaced link
-            admit_user tr.owner_id
-        end
-=end
-        self.recipes = (self.recipes + t2.recipes).uniq
-        
-        # Merge owners by taking on all owners of the absorbee
-        # t2.owner_ids.each { |uid| admit_user uid }
-        self.owners = self.owners + t2.owners
-        
-        # Replace referents' DIRECT use of the tag
-        Referent.where(tag_id: oldid).each do |ref| 
-            ref.tag_id = newid # Now it's all about ME ME ME
-            ref.save
-        end
-        
-        # Replace the use of the tag in expressions
-=begin
-        myrefids = self.referent_ids
-        Expressions.where(tag_id: oldid).each do |expr|
-            # If we're not already linked to the referent, do so now
-            unless myrefids.include?(expr.referent_id) 
-                expr.tag_id = newid
-                expr.save
-            end
-        end
-=end
-        self.referents = (self.referents + t2.referents).uniq
-        
-        # self.links = (self.links + t2.links).uniq
-        
-        # Correct any query that uses t2
-        Rcpquery.all.each do |rq| 
-            do_save = false
-            rq.tags = rq.tags.each { |tag| ((do_save = true) && (tag.id = newid)) if tag.id == oldid }
-            rq.save if do_save
-        end
-        
-        t2.destroy
-        return !self.errors.any?
-    end
-        
     # When a tag is asserted into the database, we do have minimal sanitary standards:
     #  no leading or trailing whitespace
     #  all internal whitespace is replaced by a single space character
@@ -160,34 +93,80 @@ class Tag < ActiveRecord::Base
         str.strip.gsub(/[.,'‘’“”'"]+/, '').parameterize.split('-').collect{ |word| @@wordmap[word] || word }.join('-')
     end
     
+    def clashing_tag
+      Tag.where(name: name, tagtype: [tagtype, 0]).detect { |other| other.id != id }
+    end
+    
+    # self can't be saved because some other tag already has its name/type combination. Find that tag and make self
+    # disappear into it, UNLESS self already is typed and the other isn't, in which case the other disappears into
+    # self. In any case, nuke the disappeared tag, and save and return the survivor
+    # NB: this method functions like save but returns either the surviving tag (in case of success) 
+    #  or the original tag, with errors
+    def disappear
+      if target = clashing_tag
+        ((target.tagtype == 0) && (tagtype != 0)) ? target.disappear_into(self) : disappear_into(target)
+      else
+        save
+        self
+      end
+    end
+    
+    # Make self disappear by absorbing it into the target
+    def disappear_into target
+      # Normal procedure: 
+      TaggingServices.change_tag(id, target.id)
+      ReferentServices.change_tag(id, target.id) # Change the canonical expression of any referent which uses us
+      # Merge the general uses of self as an expression into those of the target
+      target.referent_ids = (referent_ids+target.referent_ids).uniq
+      target.primary_meaning ||= primary_meaning
+      
+      # Take on all owners of the absorbee unless one of them is global
+      if target.isGlobal ||= isGlobal
+        target.owners.clear
+      else
+        target.owner_ids = (owner_ids + target.owner_ids).uniq
+      end
+      if target.errors.any?
+        # Failure: copy errors into the original record and return it
+        target.errors.each { |k, v| self.errors[k] = v }
+        self
+      else
+        Tag.transaction do
+          self.destroy
+          target.save
+        end
+        target
+      end
+    end
+    
     # Callback for tidying up the name and setting the normalized_name field and ensuring the tagtype
     # has a value
     def tagqa
-        # Clean up the name by removing/collapsing whitespace
-        self.name = Tag.tidyName self.name
-        # ...and setting the normalized name
-        self.normalized_name = Tag.normalizeName(self.name) unless self.normalized_name
-        self.tagtype = 0 unless self.tagtype
-        true
+      # Clean up the name by removing/collapsing whitespace
+      self.name = Tag.tidyName name
+      # ...and setting the normalized name
+      self.normalized_name = Tag.normalizeName name
+      self.tagtype = 0 unless tagtype
+      return true unless clashing_tag
+      # Shouldn't be saved, because either 1) it will violate uniqueness, or 2) an existing untyped tag can be used
+      self.errors[:key] = "Tag can't be saved because of possible redundancy"
+      false
     end
     
    public 
    
    def typenum=(tt)
      # Need to be careful: the tag needs to agree in type with any expressions that include it
-     tn = Tag.typenum tt
-     return tn if (tn == self.tagtype) # Don't do anything if the type isn't changing
+     return typenum if typematch(tt) # Don't do anything if the type isn't changing
      return nil unless self.referents.all? { |ref| ref.drop self }
      self.tagtype = Tag.typenum(tt)
    end
    
    # Move the tag to a new type, possibly merging it with another tag of identical spelling
    def project(tt)
-       newtypenum = Tag.typenum tt
-       return self if self.tagtype == newtypenum # We're already in the target type!
-       replacement = Tag.where(name: self.name, tagtype: newtypenum).first
-       return nil unless (self.typenum = newtypenum)
-       (replacement && replacement.absorb(self)) ? replacement : self
+     return self if typematch(tt) # We're already in the target type!
+     self.typenum = tt
+     clashing_tag ? disappear : self
    end
    
    # Taking either a tag, a string or an id, make sure there's a corresponding tag

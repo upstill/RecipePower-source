@@ -54,15 +54,14 @@ module TagsHelper
   
   def summarize_tag_recipes header="<h4>Used as Breadcrumb for Recipe(s)</h4>"
     @tagserv ||= TagServices.new(@tag)
-    rcpstrs = @tagserv.recipes.uniq.collect { |rcp| 
-      taglink = (permitted_to? :edit, rcp) ?
-        link_to("[Tagger]", edit_recipe_path(rcp)) :
-        ""
-        %Q{<div class="tog_info_rcp_title">
-        	   #{link_to rcp.trimmed_title, rcp.url} #{recipe_popup rcp} #{taglink}
-           </div>}
-      }
-    tag_info_section rcpstrs, contentclass: "", label: header
+    tag_info_section( 
+      @tagserv.recipes(true).uniq.collect { |rcp| 
+        taglink = (permitted_to? :edit, rcp) ? edit_recipe_link( "Edit", rcp, class: "btn btn-mini") : ""
+        content_tag :div, "#{link_to rcp.trimmed_title, rcp.url} #{recipe_popup rcp} #{taglink}".html_safe, class: "tog_info_rcp_title"
+      }, 
+      contentclass: "", 
+      label: header
+    )
   end
 
   # Return HTML for the links associated with this tag
@@ -116,7 +115,7 @@ module TagsHelper
   
   def summarize_tag_recipe_count
     @tagserv ||= TagServices.new(@tag)
-    count = @tagserv.recipe_ids.size
+    count = @tagserv.recipe_ids(true).size
     return "" if count == 0
     (pluralize(count, "Recipe").sub(/\s/, " ")+"<br>").html_safe
   end
@@ -201,7 +200,7 @@ BLOCK_END
       tagidstr = tag.id.to_s
       content_tag :span,
         tag_link(tag, true) +
-        (absorb_btn ? button_to_function("Absorb", "merge_tags();", class: "absorb_button", id: "absorb_tag_#{tagidstr}") : ""),
+        (absorb_btn ? button_tag("Absorb", onclick: %Q{RP.submit("tags/#{@tag.id.to_s}/absorb?victim=#{tagidstr}");}, class: "absorb_button", id: "absorb_tag_#{tagidstr}") : ""),
         class: "absorb_"+tagidstr
   end
 end
