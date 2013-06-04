@@ -31,7 +31,7 @@ class FeedServices
     rejects = []
     queue = page_url ? [page_url] : [site.sampleURL, site.home]
     visited = {}
-    while (page_url = queue.shift)  
+    while (page_url = queue.shift) && (visited.length < 10)
       doc = nil
       begin 
         if(ou = open page_url)
