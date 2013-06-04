@@ -72,15 +72,19 @@ class FeedServices
         visited[url] = true
         unless url.blank? || Feed.exists?(url: url) || !(feed = Feed.new( url: url, description: content))
           if feed.save
-            puts "\tSCRAPED #{url}"
+            puts "\tCAPTURED feed #{url}"
             site.feeds << feed 
-          elsif (!queue.include?(url)) 
-            if Site.by_link(url) == site # Another page on the same site with rss in the url; maybe a page of links?
-              puts "\tPUSHING #{url}"
-              queue.push url
-            else 
-              puts "\tREJECTED #{url}" 
-              rejects << url+"\n\t...from #{page_url}) rejected because\n\t"+feed.errors.collect { |k, v| k.to_s+" "+v }.join('\n\t...')
+          else
+            puts "\tREJECTED #{url}...because\n\t"+feed.errors.collect { |k, v| k.to_s+" "+v }.join('\n\t...')
+            if (url =~ /rss|xml/) && (Site.by_link(url) == site) # Another page on the same site with rss in the url; maybe a page of links?
+              unless queue.include?(url)
+                if queue.length < 10
+                  puts "\tPUSHING #{url}"
+                  queue.push url
+                else
+                  puts "\AVOIDING #{url} (too many bloody pages)"
+                end
+              end
             end
           end
         end
