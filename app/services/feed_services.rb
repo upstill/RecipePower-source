@@ -40,7 +40,7 @@ class FeedServices
       rescue Exception => e
         next
       end
-      puts "URL: "+page_url
+      puts "SCRAPING #{page_url}..."
       candidates = {}
       # We find the following elements:
       # <a> elements where the link text OR the title attribute OR the href attribute includes 'RSS', 'rss', 'feedburner' or 'feedblitz'
@@ -72,12 +72,16 @@ class FeedServices
         visited[url] = true
         unless url.blank? || Feed.exists?(url: url) || !(feed = Feed.new( url: url, description: content))
           if feed.save
+            puts "\tSCRAPED #{url}"
             site.feeds << feed 
-          elsif (!queue.include?(url)) && (Site.by_link(url) == site) # Another page on the same site with rss in the url; maybe a page of links?
-            puts "PUSHING #{url}; is it an rss page?"
-            queue.push url
-          else
-            rejects << url+"\n\t...from #{page_url}) rejected because\n\t"+feed.errors.collect { |k, v| k.to_s+" "+v }.join('\n\t...')
+          elsif (!queue.include?(url)) 
+            if Site.by_link(url) == site # Another page on the same site with rss in the url; maybe a page of links?
+              puts "\tPUSHING #{url}"
+              queue.push url
+            else 
+              puts "\tREJECTED #{url}" 
+              rejects << url+"\n\t...from #{page_url}) rejected because\n\t"+feed.errors.collect { |k, v| k.to_s+" "+v }.join('\n\t...')
+            end
           end
         end
       end
