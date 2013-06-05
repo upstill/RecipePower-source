@@ -64,12 +64,12 @@ class Seeker < Object
     @tagtype
   end
   
-  def guide()
+  def guide
     # Describe this seeker for presentation to the user
     (@affiliate && @affiliate.selected) ? @affiliate.selected.guide : "This is your friendly seeker"
   end
   
-  def hints()
+  def hints
     (@affiliate && @affiliate.selected) ? @affiliate.selected.hints : "Handy Hints Here"
   end
   
@@ -219,7 +219,7 @@ class ContentSeeker < Seeker
   # If the entity has returned no results, suggest what the problem might have been
   def explain_empty
     explanation = @affiliate.explain_empty tags
-    (explanation[:sug] ? explanation[:report]+"<br>You might try #{explanation[:sug]}." : explanation[:report])+"<br>"+explanation[:hint]
+    (explanation[:sug] ? explanation[:report]+"<br>You might try #{explanation[:sug]}." : explanation[:report])+"<br>#{explanation[:hint]}"
   end
 end
 
@@ -237,15 +237,12 @@ class UserSeeker < Seeker
     # Get tags that aren't in the original set
     (tags + Tag.where(id: weightings.keys - tag_ids)).each do |tag| 
       user_ids = tag.user_ids
-      # debugger if user_ids.first
       candihash.apply user_ids, weightings[tag.id] if tag.id > 0
       # candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
       # Get candidates by matching the tag's name against recipe titles and comments
       users = @affiliate.where("username ILIKE ?", "%#{tag.name}%")
-      # debugger if (users).first
       candihash.apply users.map(&:id), 1.0
       users = @affiliate.where("about ILIKE ?", "%#{tag.name}%")
-      # debugger if (users).first
       candihash.apply users.map(&:id), 1.0
     end
   end
@@ -290,13 +287,9 @@ class TagSeeker < Seeker
   # Get the results of the current query.
   def result_ids
   	return @results if @results # Keeping a cache of results
-    if @tagtype
-      scope = @affiliate.where(tagtype: @tagtype)
-    else
-      scope = @affiliate
-    end
     case tags.count
     when 0
+      scope = @tagtype ? @affiliate.where(tagtype: @tagtype) : @affiliate
       @results = scope.map(&:id)
     when 1
       constraints = @tagtype ? { tagtype: @tagtype } : {}

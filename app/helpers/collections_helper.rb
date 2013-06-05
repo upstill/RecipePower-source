@@ -35,6 +35,12 @@ module CollectionsHelper
 	  flash.now[:alert] = @seeker.explain_empty if results.empty?  
 	  results.join('').html_safe
 	end
+	
+	def collection_itemtitle
+	  ttl = @node.guide(false)
+	  debugger
+	  @node.selected ? "" : %Q{title="#{ttl}"}
+  end
 		
 	def collection_updater
 	  if updated_time = @seeker.updated_at

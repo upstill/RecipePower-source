@@ -166,6 +166,7 @@ class Tag < ActiveRecord::Base
    def project(tt)
      return self if typematch(tt) # We're already in the target type!
      self.typenum = tt
+     save
      clashing_tag ? disappear : self
    end
    

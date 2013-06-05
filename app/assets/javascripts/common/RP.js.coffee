@@ -153,7 +153,6 @@ RP.get_content = (url, link) ->
 # Replace the page with the results of the link, properly updating the address bar
 RP.get_page = (url) ->
 	$('body').load url, {}, (responseText, textStatus, XMLHttpRequest) ->
-		debugger
 		window.history.replaceState { an: "object" }, 'Collection', url
 
 submit_and_process = ( request, method, assumptions ) ->
@@ -226,7 +225,6 @@ RP.post_error = ( jqXHR, dlog ) ->
 
 # Respond to a click by optionally checking for a confirmation, firing a request at the server and appropriately handling the response
 RP.submit = (request) ->
-	debugger
 	elmt = window.event.toElement
 	attribs = elmt.attributes
 	if attribs.method 
@@ -267,7 +265,6 @@ RP.process_response = (responseData, dlog) ->
 	# Wrapped in 'presentResponse', in the case where we're only presenting the results of the request
 	dlog ||= $('div.modal')[0]
 	supplanted = false
-	debugger
 	if responseData
 
 		# 'replacements' specifies a set of DOM elements and code to replace them
