@@ -229,6 +229,10 @@ class UserSeeker < Seeker
     @affiliate.first.channel? ? "channel" : "user"
   end
   
+  def convert_ids list
+    User.where(id: list)
+  end
+  
   # Get the results of the current query.
   def apply_tags(candihash)
     # Rank/purge for tag matches
