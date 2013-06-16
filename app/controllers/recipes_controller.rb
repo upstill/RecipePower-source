@@ -144,6 +144,8 @@ class RecipesController < ApplicationController
             session[:original_uri] = @url
             @url = new_authentication_url area: "at_top", layout: "injector", sourcehome: @site.domain 
           end
+        else
+          # XXX Handle null site!!!
         end
         render
       }
