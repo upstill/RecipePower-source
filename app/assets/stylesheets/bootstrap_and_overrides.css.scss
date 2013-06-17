@@ -20,6 +20,10 @@ body { padding-top: 60px; }
 	width: 600px;
 }
 
+.modal-body {
+    max-height: 450px;
+}
+
 .alert-guide {
   background-color: $guideBackground;
   border-color: $guideBorder;

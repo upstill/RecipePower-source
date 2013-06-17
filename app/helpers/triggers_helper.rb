@@ -3,14 +3,15 @@
 module TriggersHelper
   
   # Trigger a modal dialog via button
-	def button_to_modal(label, path, how="modal", where="floating", options={})
-	  options[:class] = "btn btn-mini"
+	def button_to_modal(label, path, options={})
+	  options[:class] ||= "btn btn-mini"
 	  link_to_modal label, path, options
 	end
 	
 	# Embed a link to javascript for running a dialog by reference to a URL
 	def link_to_modal(label, path, options={})
-  	link_to_function label, "RP.dialog.get_and_go('#{path}');", options
+	  options.delete(:selector) if selector = options[:selector]
+  	link_to_function label, "RP.dialog.get_and_go('#{path}', '#{selector}');", options
   end
 	
 	# Embed a link to javascript for running a dialog by reference to a URL

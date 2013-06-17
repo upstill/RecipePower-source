@@ -4,10 +4,10 @@ RP.dialog = RP.dialog || {}
 # Hit the server for a dialog via JSON, and run the result
 # This function can be tied to a link with only a URL to a controller for generating a dialog.
 # We will get the div and run the associated dialog.
-RP.dialog.get_and_go = (request, options={}) ->
+RP.dialog.get_and_go = (request, selector) ->
 	# old_dlog is extracted from what triggered this call (if any)
-	how = options.how || "modal"
-	area = options.area || "floating"
+	how = "modal"
+	area = "floating"
 	if request.match /\?/
 		q = '&'
 	else
@@ -19,17 +19,20 @@ RP.dialog.get_and_go = (request, options={}) ->
 		request += q+"how=" + how
 	
 	odlog = target_modal()
-	$.ajax
-		type: "GET",
-		dataType: "json",
-		url: request,
-		error: (jqXHR, textStatus, errorThrown) ->
-			responseData = RP.post_error jqXHR
-			RP.process_response responseData, odlog
-		success: (responseData, statusText, xhr) ->
-			responseData.how = responseData.how || how;
-			RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
-			RP.process_response responseData, odlog
+	if selector && (ndlog = $(selector)[0])
+		RP.dialog.replace_modal ndlog, odlog
+	else
+		$.ajax
+			type: "GET",
+			dataType: "json",
+			url: request,
+			error: (jqXHR, textStatus, errorThrown) ->
+				responseData = RP.post_error jqXHR
+				RP.process_response responseData, odlog
+			success: (responseData, statusText, xhr) ->
+				responseData.how = responseData.how || how;
+				RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
+				RP.process_response responseData, odlog
 
 RP.dialog.cancel = ->
 	if dlog = target_modal()
@@ -63,8 +66,9 @@ RP.dialog.replace_modal = (newdlog, odlog) ->
 		newdlog = odlog.previousSibling
 		cancel_modal odlog
 	else
-		# Add the new dialog at the end of the page body
-		newdlog = document.getElementsByTagName("body")[0].appendChild newdlog
+		# Add the new dialog at the end of the page body if necessary
+		if !newdlog.parentNode
+			newdlog = document.getElementsByTagName("body")[0].appendChild newdlog
 	return open_modal newdlog
 
 # Return the dialog element for the current event target

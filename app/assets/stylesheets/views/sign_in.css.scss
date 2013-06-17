@@ -8,9 +8,7 @@ div.at_top div.signin_hdr {
 
 div.auth_poss {
 	overflow: auto;
-	&.floating {
-		margin: 10px;
-	}
+	margin-bottom: 10px;
 }
 
 .sign_in.dialog {
@@ -127,7 +125,7 @@ div.auth_poss {
 		}
 	}
 	.prompt {
-		margin:15px 0px;
+		margin:5px 0px;
 		font:20px arial,sans-serif;
 		font-weight:bold
 	}
@@ -142,7 +140,7 @@ div.auth_poss {
 }
 
 div.prompt {
-	margin:15px 0px;
+	margin:5px 0px 10px 0px;
 	font:20px arial,sans-serif;
 	font-weight:bold;
 }

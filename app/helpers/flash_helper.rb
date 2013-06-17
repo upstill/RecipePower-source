@@ -26,7 +26,7 @@ module FlashHelper
   end
 
   def flash_one level, message, for_bootstrap=true
-    return "".html_safe if message.blank?
+    # return "".html_safe if message.blank?
     if for_bootstrap
       bootstrap_class =
       case level
@@ -43,13 +43,15 @@ module FlashHelper
       else
         level.to_s
       end
+      if message.blank?
+        hide = "hide"
+      else
+        hide = ""
+      end
+      message = "<span>#{message}</span>".html_safe
+      button = "<button class=\"close\" data-dismiss=\"alert\">&#215;</button>".html_safe
        # This message may have been cleared earlier...
-      html = <<-HTML
-        <div class="alert #{bootstrap_class} alert_block fade in">
-          <button class="close" data-dismiss="alert">&#215;</button>
-          #{message}
-        </div>
-        HTML
+      html = content_tag :div, button+message, class: "alert #{bootstrap_class} alert_block fade in #{hide}"
     else
       html = %Q{<div class="generic_alert" style="display: block; background-color:#fcf8e3; border: 1px solid #f9f6dc; padding:3px; border:3px;">#{message}</div>}
     end

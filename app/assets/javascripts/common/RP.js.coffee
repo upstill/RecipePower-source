@@ -213,10 +213,28 @@ RP.post_error = ( jqXHR, dlog ) ->
 				else
 					parsage =  
 						page: errtxt 
+			else if errtxt.match /^\s*<form/ # Detect a form replacement
+				wrapper = document.createElement('div');
+				wrapper.innerHTML = errtxt;
+				formnode = wrapper.firstChild
+				parsage = 
+					form: formnode;
+				wrapper.removeChild formnode 
 			else
 				# Okay. Assume it's just a string error report
 				parsage = 
 					errortext: errtxt
+	if errors = parsage.errors
+		clicked = $("input[type=submit][clicked=true]")
+		form = $(clicked).parents('form:first')
+		if baseErrorDiv = $('div.alert', form)[0]
+			if errors.base
+				for node in baseErrorDiv.childNodes
+					if (node.nodeType == 3)
+						node.nodeValue = errors.base
+				$(baseErrorDiv).show()
+			else
+				$(baseErrorDiv).hide()
 	result = null
 	# Stash the result in the dialog, if any
 	# if dlog != 'undefined'
@@ -271,6 +289,7 @@ RP.process_response = (responseData, dlog) ->
 		if replacements = responseData.replacements
 			for replacement in replacements
 				$(replacement[0]).replaceWith replacement[1]
+			RP.dialog.replace_modal dlog
 
 		if deletions = responseData.deletions
 			for deletion in deletions
@@ -285,14 +304,20 @@ RP.process_response = (responseData, dlog) ->
 		# If it's a page that includes a dialog, assert that, otherwise replace the page
 		if (code = responseData.code) && !supplanted = RP.dialog.supplant_modal dlog, code
 				responseData.page ||= code
-
+			
+		if form = responseData.form
+			# Find the form to replace in error scenarios
+			action = form.getAttribute("action")
+			if replaced = $("form[action=\'"+action+"\']")[0]
+				replaced.parentNode.replaceChild(form, replaced);
+		
 		# 'page' gives HTML for a page to replace the current one
 		if page = responseData.page
 			document.open()
 			document.write page
 			document.close()
 			supplanted = true
-		
+				
 		# Handle any notifications in the response
 		RP.notifications.from_response responseData
 		

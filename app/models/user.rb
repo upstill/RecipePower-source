@@ -12,7 +12,7 @@ class User < ActiveRecord::Base
   
   validates_each :username do |record, attr, value|
     if record.username.empty? && record.fullname.empty?
-      record.errors.add :base, "Sorry, but we need <strong>either</strong> a username or real name, just so we don't refer to you by email address. How's that sound?"
+      record.errors.add :base, "Sorry, but we need to call you SOMETHING. Could you provide a username or a full name, pretty-please?"
       nil
     else
       true
