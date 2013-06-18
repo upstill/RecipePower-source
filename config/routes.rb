@@ -137,7 +137,7 @@ RP::Application.routes.draw do
   # get "pages/contact"
   # get "pages/about"
   match '/home', :to => 'pages#home'
-  match '/know', :to => 'pages#know'
+  match '/popup', :to => 'pages#popup'
   match '/contact', :to => 'pages#contact'
   match '/about', :to => 'pages#about'
   match '/welcome', :to => 'pages#welcome'

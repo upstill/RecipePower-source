@@ -297,6 +297,8 @@ RP.process_response = (responseData, dlog) ->
 
 		# 'dlog' gives a dialog DOM element to replace the extant one
 		if newdlog = responseData.dlog
+			if typeof newdlog == "string"
+				newdlog = RP.dialog.extract_modal newdlog
 			RP.dialog.replace_modal newdlog, dlog
 			supplanted = true
 

@@ -18,10 +18,13 @@
 			        <li><%= link_to_modal "Profile", users_profile_path( section: "profile" ) %></li>
 			        <li><%= link_to_modal "Sign-in Services", authentications_path %></li>
 			        <li><%= link_to_modal "Invite", new_user_invitation_path %></li>
-			        <% if permitted_to? :admin, :pages %>
-								<li><%= link_to "Admin", admin_path %></li>
-							<% end %>
 			        <li><%= link_to "Sign Out", destroy_user_session_path, :method => "delete" %></li>
+			        <% if permitted_to? :admin, :pages %>
+								<li><hr></li>
+								<li><%= link_to "Admin", admin_path %></li>
+								<li><%= link_to_modal "Show Step 2", popup_path(name: "starting_step2") %></li>
+								<li><%= link_to_modal "Need to Know", popup_path(name: "need_to_know") %></li>
+							<% end %>
 			    </ul>
 			</li>
 		<% else %>

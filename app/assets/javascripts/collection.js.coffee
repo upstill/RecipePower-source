@@ -72,6 +72,10 @@ jQuery ->
 	$("#tagstxt").first().focus()
 	$(".pageclickr").click collection_pager
 	checkForLoading ".stuffypic"
+	
+	debugger
+	if dlog = $('div.dialog.show_now')[0]
+		RP.dialog.run dlog
 
 collection_tagchange = (params, url) ->
 	RP.collection.update $('form.query_form').serialize(), $('form.query_form')[0].action

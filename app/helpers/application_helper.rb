@@ -264,7 +264,7 @@ module ApplicationHelper
   end
 
   def bookmarklet
-    imgtag = image_tag("cookmark_button.png", class:"bookmarklet", alt:"Cookmark") 
+    imgtag = image_tag("cookmark_button.png", class:"bookmarklet", style: "display: inline-block", alt:"Cookmark") 
     if Rails.env.development? || true
       # New bookmarklet
       bmtag = %Q{<a class="bookmarklet" title="Cook Me Later" href="javascript:(function%20()%20{var%20s%20=%20document.createElement(%27script%27);s.setAttribute(%27language%27,%27javascript%27);s.setAttribute(%27id%27,%20%27recipePower-injector%27);s.setAttribute(%27src%27,%27http://#{current_domain}/recipes/capture.js?recipe[url]=%27+encodeURIComponent(window.location.href)+%27&recipe[title]=%27+encodeURIComponent(document.title)+%27&recipe[rcpref][comment]=%27+encodeURIComponent(%27%27+(window.getSelection?window.getSelection():document.getSelection?document.getSelection():document.selection.createRange().text))+%27&v=6&jump=yes%27);document.body.appendChild(s);}())">}
@@ -290,7 +290,7 @@ module ApplicationHelper
   	navlinks << navlink("Home", home_path, (@nav_current==:home)) 
   	navlinks << navlink("FAQ", "/FAQ", (@nav_current==:FAQ)) 
   	# navlinks << feedback_link("Feedback")
-  	(navlinks.join('  |  ')+"<br>"+(link_to_modal "Need to Know", know_path)).html_safe
+  	(navlinks.join('  |  ')+"<br>"+(link_to_modal "Need to Know", popup_path(name: "need_to_know"))).html_safe
   end
   
 =begin

@@ -16,17 +16,16 @@ class RegistrationsController < Devise::RegistrationsController
           end
       else
         if request.format == "application/json"
-          debugger
           build_resource
 
           if resource.save
             if resource.active_for_authentication?
-              set_flash_message :notice, :signed_up if is_navigational_format?
+              # set_flash_message :notice, :signed_up if is_navigational_format?
               sign_up(resource_name, resource)
               respond_with resource do |format|
                 format.json { 
                   render json: { 
-                            dlog: with_format("html") { render_to_string :partial => "user/dialog_step2" }
+                            dlog: with_format("html") { render_to_string :partial => "users/dialog_step2" }
                           }
                 }
               end

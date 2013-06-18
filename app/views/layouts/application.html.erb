@@ -57,5 +57,6 @@
 	</div>
 	<%= feedback_tab :position => 'left' %>
 	<%= render 'recipes/edit_template' %>
+	<%= render( 'pages/'+params[:popup].to_s) if params[:popup] %>
 	</body>
 </html>

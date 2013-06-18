@@ -1,0 +1,10 @@
+<%# Fields for an edit-user dialog %>
+<%= modal_dialog :step2, @Title || "Step 3: There Is No Step 3", area: @area, class: "hide show_now" do %>
+  <%= modal_body("welcome_dialog") do %>
+<p class="airy">That's it! You're ready to roll. Remember: any time you see a recipe (or whatever) you like, the Cook Me Later button is there to send it to RecipePower.
+		</p><p class="airy">
+FYI: Just so you don't get lonely, we've provided you with a starter set of friends, feeds and channels you might enjoy. Tailor them to your liking (invite more friends!) any time.
+</p>
+		<br><%= link_to("Start Me Up", collection_path(:popup => "need_to_know"), class: "btn btn-large btn-info", style: "float:right") %>
+	<% end %>
+<% end %>

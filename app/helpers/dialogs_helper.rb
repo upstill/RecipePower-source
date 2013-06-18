@@ -10,9 +10,9 @@ module DialogsHelper
      dialogFooter).html_safe
   end
   
-  def modal_body(&block)
+  def modal_body(style="", &block)
     bd = with_output_buffer &block
-    content_tag :div, flash_all + bd, class: "modal-body"
+    content_tag :div, flash_all + bd, class: "modal-body #{style}"
   end
   
   def modal_footer(&block)
