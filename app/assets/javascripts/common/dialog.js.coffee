@@ -35,6 +35,7 @@ RP.dialog.get_and_go = (request, selector) ->
 				RP.process_response responseData, odlog
 
 RP.dialog.cancel = ->
+	debugger
 	if dlog = target_modal()
 		RP.dialog.close_modal dlog
 
@@ -45,17 +46,34 @@ RP.dialog.run = (dlog) ->
 # From a block of code (which may be a whole HTML page), extract a
 # modal dialog and return the element
 RP.dialog.extract_modal = (code) ->
-	dom = $(code)
-	if $(dom).hasClass "dialog"
+	debugger
+	# Assuming the code is a fragment for the dialog...
+	wrapper = document.createElement('div');
+	wrapper.innerHTML = code;
+	dlog = wrapper.firstElementChild
+	if $(dlog).hasClass('dialog')
+		wrapper.removeChild dlog
+		return dlog 
+	# ...It may also be a 'modal-yield' dialog embedded in a page
+	# dom = $(code)
+	# if newdlog = $('div.dialog', dom)[0]
+		# return $(newdlog, dom).detach()[0]
+	# else if $(dom).hasClass "dialog"
 		# $(dom).removeClass('modal-pending').addClass('modal')
-		return dom[0]
-	else
-		newdlog = $('div.dialog', dom) # .removeClass('modal-pending').addClass('modal')
-		return $(newdlog).detach()[0]
+		# return dom[0]
+	doc = document.implementation.createHTMLDocument("Temp Page")
+	doc.open()
+	doc.write code
+	doc.close()
+	# We extract dialogs that are meant to be opened instead of the whole page
+	if newdlog = $('div.dialog.modal-yield', doc.body)[0]
+		$(newdlog).removeClass("modal-yield")
+		$(newdlog).addClass("modal-pending")
+		return $(newdlog, doc.body).detach()[0]
 
 # Check whether the HTML code appropriately replaces the dialog
 RP.dialog.supplant_modal = (dlog, code) ->
-	if newdlog = RP.dialog.extract_modal code
+	if newdlog = RP.dialog.extract_modal code # $(code) # 
 		RP.dialog.replace_modal newdlog, dlog
 	return newdlog
 
@@ -79,7 +97,7 @@ target_modal = ->
 open_modal = (dlog, omit_button) ->
 	$(dlog).removeClass('modal-pending').removeClass('hide').addClass('modal')
 	notify "load", dlog
-	if !omit_button
+	if !(omit_button || $('button.close', dlog)[0])
 		buttoncode = '<button type=\"button\" class=\"close\" onclick=\"RP.dialog.cancel()\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>'
 		$('div.modal-header').prepend buttoncode
 	if $(dlog).modal

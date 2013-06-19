@@ -17,18 +17,13 @@ class RegistrationsController < Devise::RegistrationsController
       else
         if request.format == "application/json"
           build_resource
-
           if resource.save
             if resource.active_for_authentication?
               # set_flash_message :notice, :signed_up if is_navigational_format?
               sign_up(resource_name, resource)
-              respond_with resource do |format|
-                format.json { 
-                  render json: { 
-                            dlog: with_format("html") { render_to_string :partial => "users/dialog_step2" }
-                          }
-                }
-              end
+              session[:flash_popup] = "pages/starting_step2"
+              # respond_with resource, :location => after_sign_up_path_for(resource)
+              redirect_to after_sign_up_path_for(resource)
             else
               set_flash_message :notice, :"signed_up_but_#{resource.inactive_message}" if is_navigational_format?
               expire_session_data_after_sign_in!

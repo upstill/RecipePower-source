@@ -1,9 +1,20 @@
-div.need_to_know.dialog {
+div.dialog.need_to_know {
 	width: 770px;
 	height: 600px;
+	.modal-body {
+		font:14pt calibri;
+		line-height:130%;
+		height: 600px;
+		// color:#FFFFFF;
+		overflow: auto;
+		background:#F8F8F8; // #880000;
+		// filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#880000',endColorstr='#6c0000');
+		// background:-webkit-gradient(linear,left top,left bottom,from(#880000),to(#6c0000));
+		// background:-moz-linear-gradient(top,#880000,#6c0000);
+	}
 	.know_snap {
 		width: 900px;
-		margin-top: 38px;
+		margin-top: 73px;
 		margin-left: 100px;
 		position: absolute;
 	}
@@ -11,8 +22,8 @@ div.need_to_know.dialog {
 		display: inline-block;
 		padding: 0px 10px 5px;
 		margin: 5px;
-		width: 210px;
-		border:solid 2px #5882D3;
+		width: 200px;
+		// border:solid 2px #5882D3;
 		&.know_browser {
 			margin-left: 12px;
 		}

@@ -57,6 +57,10 @@
 	</div>
 	<%= feedback_tab :position => 'left' %>
 	<%= render 'recipes/edit_template' %>
-	<%= render( 'pages/'+params[:popup].to_s) if params[:popup] %>
+	<% if session[:flash_popup] %>
+		<% debugger %>
+		<%= render session[:flash_popup] %>
+		<% session.delete(:flash_popup) %>
+	<% end %>
 	</body>
 </html>

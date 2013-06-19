@@ -86,7 +86,8 @@ class ApplicationController < ActionController::Base
     redirect ||
         if resource.is_a?(User)
           # flash[:notice] = "Congratulations, you're signed up!"
-          resource.sign_in_count < 2 ? welcome_path : collection_path
+          # resource.sign_in_count < 2 ? welcome_path : collection_path
+          collection_path
         else
           super(resource)
         end

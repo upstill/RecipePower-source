@@ -1,17 +1,20 @@
-<%= modal_dialog :need_to_know, "Everything You Need To Know About RecipePower", class: "hide show_now" do %>
-	<div class="know_snap">
-		<%= image_tag "NeedToKnow.png" %>
+<%= modal_dialog :need_to_know, "Everything You Need To Know About RecipePower" do %>
+	<%= modal_body(style: "height: 600px") do %>
+		<div class="know_snap">
+			<%= image_tag "NeedToKnow.png" %>
+		</div>
+		<div class="info-block know_browser">
+			<h4>Choose</h4>
+			Choose the collection to look at.
+		</div>
+		<div class="info-block know_seek">
+			<h4>Search</h4>
+			Find things <strong>within the collection</strong>.
+		</div>
+		<div class="info-block know_list">
+			<h4>See</h4>
+			Everything in the collection (that matches the search).
+		</div>
 	</div>
-	<div class="info-block know_browser">
-		<h4>Choose</h4>
-		Choose the collection to look at.
-	</div>
-	<div class="info-block know_seek">
-		<h4>Search</h4>
-		Find things <strong>within the collection</strong>.
-	</div>
-	<div class="info-block know_list">
-		<h4>See</h4>
-		Everything in the collection (that matches the search).
-	</div>
+	<% end %>
 <% end %>

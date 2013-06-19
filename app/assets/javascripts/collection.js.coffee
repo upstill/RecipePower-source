@@ -73,8 +73,7 @@ jQuery ->
 	$(".pageclickr").click collection_pager
 	checkForLoading ".stuffypic"
 	
-	debugger
-	if dlog = $('div.dialog.show_now')[0]
+	if dlog = $('div.dialog.immediate')[0]
 		RP.dialog.run dlog
 
 collection_tagchange = (params, url) ->

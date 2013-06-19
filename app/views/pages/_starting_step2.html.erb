@@ -1,24 +1,18 @@
 <%# Fields for an edit-user dialog %>
-<%= modal_dialog :step2, @Title || "Step 2: Install the 'Cook Me Later' Button", area: @area do %>
+<%= modal_dialog :step2, "Step 2: Install the 'Cookmark' Button", area: @area, class: "immediate" do %>
   <%= modal_body("welcome_dialog") do %>
 		<div class="instructions_header">
 		  <p style="float: left; width: 90px;"><%= bookmarklet %></p>
-			<p style="float: left; width: 350px;"> This is the <em>Cook Me Later</em> button, a bookmark with special powers: it sends recipes to RecipePower.</p>
+			<p style="float: left; width: 400px;"> This is the <em>Cookmark</em> button, a bookmark with a special power: sending recipes to RecipePower.</p>
 		</div>
-		<hr>
-		<div class="instructions_column">
-		  <div class="instructions_step">
-				<%= page_fitPic "drag_pic.png", "_step2" %>
-		  </div>
-		  <p>Drag the Cookmark button onto your browser's bookmarks bar.
-		  <br><span class="small">(If the bookmarks bar isn't visible, you can find it under "View" in the top menus)</p>
+	  <p style="float: left; width: 350px; margin-top: 20px;">Drag the Cookmark button onto your browser's bookmarks bar.
+	  <br><span class="small">(If the bookmarks bar isn't visible, you can find it under "View" in the top menus)</p>
+	  <div class="instructions_step">
+			<%= page_fitPic "drag_pic.png", "_step2" %>
+	  </div><div class="instructions_step">
+	    <%= page_fitPic "click_cookmark.png", "_step3" %>
 		</div>
-		<div class="instructions_column">
-		  <div class="instructions_step">
-		    <%= page_fitPic "click_cookmark.png", "_step3" %>
-		  </div>
-		  <p>When you see a recipe you like, click the Cookmark button to stash it in RecipePower. You'll get a chance to select a picture or add a note and/or tags, then you can go about your business.</p>
-		</div>
-		<br><%= link_to("Okay, All Set", collection_path(:popup => "starting_step3"), class: "btn btn-large btn-info", style: "float:right") %>
+	  <p style="float: left; width: 350px; margin-top: 20px;">When you see a recipe you like, click the Cookmark button to stash it in RecipePower. You'll get a chance to select a picture or add a note and/or tags, then you can go about your business.</p>
+		<br><%= link_to_modal("Okay, All Set", popup_path(:name => "starting_step3"), class: "btn btn-large btn-info", style: "float:right") %>
 	<% end %>
 <% end %>

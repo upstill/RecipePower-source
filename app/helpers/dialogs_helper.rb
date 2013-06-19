@@ -33,23 +33,21 @@ module DialogsHelper
     classes = options[:class] || ""
     # class 'modal' is for use by Bootstrap modal; it's obviated when rendering to a page (though we can force
     # it for pre-rendered dialogs by asserting the :modal option)
-    modal = options[:modal] ? "modal-pending" : ""
+    modal = options[:modal] ? "modal-pending hide" : ""
     logger.debug "dialogHeader for "+globstring({dialog: which, area: area, ttl: ttl})
     # Assert a page title if given
     ttlspec = ttl ? %Q{ title="#{ttl}"} : ""
-        
+    cancel_button = content_tag( :div, 
+        %q{<a href="#" id="recipePowerCancelBtn" onclick="RP.dialog.cancel(); return false;" style="text-decoration: none;">X</a>}.html_safe,
+        class: "recipePowerCancelDiv")
     hdr = 
-      %Q{<div id="recipePowerDialog" class="#{modal} dialog #{which.to_s} #{area} #{classes}" #{ttlspec}>}+
-      (options[:modal] ? 
-        %Q{
-          <div class="modal-header">
-            <h3>#{ttl}</h3>
-          </div>} : 
-        %q{
-          <div class="recipePowerCancelDiv">
-            <a href="#" id="recipePowerCancelBtn" onclick="cancelDialog; return false;" style="text-decoration: none;">X</a>
-          </div>})+
-      %q{<div class="notifications-panel"></div>}+
+      %Q{
+        <div id="recipePowerDialog" class="#{modal} dialog #{which.to_s} #{area} #{classes}" #{ttlspec}>
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h3>#{ttl}</h3>
+        </div>}+
+      content_tag(:div, "", class: "notifications-panel")+
       flash_all
     hdr.html_safe
   end

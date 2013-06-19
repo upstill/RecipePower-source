@@ -44,8 +44,8 @@ div.bookmarklet {
 
 div.instructions_step {
 	float: left;
-	height:200px;
-	width: 200px;
+	height:170px;
+	width: 170px;
 	margin: 5px
 }
 
@@ -66,6 +66,9 @@ div.welcome_dialog {
 	// margin:25px;
 	// padding:15px;
 	// padding-top:10px
+	.hr {
+		margin: 10px 0;
+	}
 }
 div.instructions_header {
 	// border: 1px solid black;

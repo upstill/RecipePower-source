@@ -240,6 +240,11 @@ RP.post_error = ( jqXHR, dlog ) ->
 	# if dlog != 'undefined'
 	# dialogResult dlog, parsage
 	return parsage;
+	
+# Safely detach a node from its parent
+RP.detach = (node) ->
+	parent = node.parentNode;
+	parent.removeChild(node);
 
 # Respond to a click by optionally checking for a confirmation, firing a request at the server and appropriately handling the response
 RP.submit = (request) ->
@@ -298,7 +303,7 @@ RP.process_response = (responseData, dlog) ->
 		# 'dlog' gives a dialog DOM element to replace the extant one
 		if newdlog = responseData.dlog
 			if typeof newdlog == "string"
-				newdlog = RP.dialog.extract_modal newdlog
+				newdlog = RP.dialog.extract_modal newdlog # $(newdlog) # 
 			RP.dialog.replace_modal newdlog, dlog
 			supplanted = true
 
