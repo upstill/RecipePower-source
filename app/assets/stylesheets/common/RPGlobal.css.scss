@@ -40,20 +40,13 @@ label {
 	// font:18px calibri;
 	// line-height:150%
 }
-p.airy {
+.airy {
 	font:18px calibri;
 	line-height:150%;
-	// font-size:105%;
 	// letter-spacing:1px
-}
-p.airy.bld {
-	font-size:14px
-}
-li.airy {
-	font:18px calibri;
-	line-height:150%;
-	// font-size:105%;
-	// letter-spacing:1px
+	.bld {
+		font-size:14px
+	}
 }
 /* Links
 a {

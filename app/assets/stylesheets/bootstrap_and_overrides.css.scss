@@ -38,8 +38,11 @@ select.tag_type_selector {
 	width: 140px;
 }
 
-div.dialog.modal input.string {
-	width: 90%;
+div.dialog.modal {
+	input.string,
+	input.password {
+		width: 90%;
+	}
 }
 
 div.dialog.modal textarea {

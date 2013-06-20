@@ -42,15 +42,9 @@ div.bookmarklet {
 	margin:0px 65px 0px 65px
 }
 
-div.instructions_step {
-	float: left;
-	height:170px;
-	width: 170px;
-	margin: 5px
-}
-
 div.welcome_dialog {
-	font:14pt calibri;
+	// font:14pt calibri;
+	font-size: 13pt;
 	line-height:130%;
 	color:#FFFFFF;
 	// width:100%;
@@ -81,4 +75,32 @@ div.instructions_column {
 	// border: 1px solid blue;
 	margin: 0px 25px;
 	width: 215px;
+}
+
+div.instructions_step {
+	float: left;
+	height:170px;
+	width: 170px;
+	margin: 5px;
+}
+
+div.dialog.step2 {
+	p.bm-pic {
+		float: left; 
+		width: 90px
+	}
+	p.bm-text {
+		float: left; 
+		width: 400px;
+	}
+	p.drag-text {
+		float: left; 
+		width: 320px; 
+		margin-top: 20px;
+	}
+	p.cookmark-text {
+		float: left; 
+		width: 330px; 
+		margin: 10px 0px 20px 10px;
+	}
 }

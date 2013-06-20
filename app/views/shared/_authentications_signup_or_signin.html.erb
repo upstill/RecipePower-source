@@ -6,16 +6,17 @@
     <%= render partial: 'shared/authentications_possible' %>
   </div>
   <% if !current_user %>
+		<hr>
     <div class="sign <%= @area %>" >
-	  <div class="prompt">Rather use a RecipePower account? <br></div>
-		<div class="signin">
-			<div class="prompt">Sign In</div>
-		  <%= render partial: "shared/slug_signin" %>
+		  <div class="prompt">Rather use a RecipePower account? <br></div>
+			<div class="signin">
+				<div class="prompt">Sign In</div>
+			  <%= render partial: "shared/slug_signin" %>
+			</div>
+			<div class="or"><h3>OR</h3></div>
+		  <div class="signup">
+				<div class="prompt">Sign Up</div>
+			  <%= render partial: "shared/slug_signup" %>
+			</div>
 		</div>
-	  <div class="or" >OR</div>
-	  <div class="signup">
-			<div class="prompt">Sign Up</div>
-		  <%= render partial: "shared/slug_signup" %>
-		</div>
-	</div>
   <% end %>

@@ -5,7 +5,8 @@
   <% if devise_mapping.rememberable? -%>
 		<%= f.input :remember_me, :as => :boolean, :wrapper => :checkbox, :input_html => { :checked => true } %> 
   <% end -%>
-
-  <div class="gobutton"><%= f.submit "Sign in", class: "submit_button" %></div>
+<p style="text-align:right">
+  <%= f.submit "Sign in", class: "btn btn-success" %>
+</p>
 <% end %>
  <%= link_to_modal "Forgot Password", new_user_password_path %>

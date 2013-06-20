@@ -42,8 +42,8 @@
 	     <%= f.check_box :private %>
 	     <%= f.label :private, "Private" %>
 	  </div>
-		<%= f.submit "Save", class: "gobutton at_top" %>
-		<%# button_to "Forget It", remove_recipe_path(@recipe), class: "gobutton #{@area}" %>
+		<%= f.submit "Save", class: "btn btn-small btn-success" %>
+		<%# button_to "Forget It", remove_recipe_path(@recipe), class: "btn btn-small btn-success" %>
 		<%= hidden_field_tag 'layout', 'injector' %>
   </div>
 <% end %>

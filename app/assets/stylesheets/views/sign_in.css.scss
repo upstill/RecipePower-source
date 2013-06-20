@@ -19,21 +19,29 @@ div.auth_poss {
 		float:left;
 		&.floating {
 			width:600px;
-			margin:5px 12px;
+			margin:0px 20px;
+			padding-top: 10px;
+			border-top: 1px solid #DDDDDD;
 			float:left
 		}
 	}
 	.signup {
 		width:250px;
-		border-left:solid 1px #999;
+		// border-left:solid 1px #999;
 		margin:0px;
 		padding-left:20px;
 		display: inline-block;
 	}
 	.or {
-		font:24px arial,sans-serif;
-		margin-top:100px;
-		margin-right:10px;
+		width: 50px;
+		height: 230px;
+		border-right: solid 1px #DDDDDD;
+		border-left: solid 1px #DDDDDD;
+		// font:24px arial,sans-serif;
+		// margin-top:100px;
+		padding-top: 100px;
+		margin:10px 0px 10px 0px;
+		padding: 100px 0px 0px 10px;
 		display: inline-block;
 		vertical-align: top;
 	}
@@ -105,17 +113,23 @@ div.auth_poss {
 		}
 	}
 	&.floating {
-		width:600px;
+		width:620px;
+		height: auto;
 		margin-top:2em;
 		float:left;
 		.signup {
-			width:230px;
+			width:235px;
+			margin-top:10px;
+		}
+		.new_user {
+			margin-top:10px;
 		}
 		.signin {
-			width:230px;
-			border-right:solid 1px #999;
-			padding-right:10px;
-			margin-right:10px;
+			width:250px;
+			// border-right:solid 1px #999;
+			padding-right: 0px;
+			margin-right: 0px;
+			margin-top: 10px;
 			padding-right:10px;
 			display: inline-block;
 			vertical-align: top;
@@ -159,7 +173,7 @@ div.sign_in .signin {
 	margin-left:20px;
 	float:left;
 	&.floating {
-		margin:0px 20px;
+		margin:10px 20px 0px;
 		float:left
 	}
 	&.at_top {

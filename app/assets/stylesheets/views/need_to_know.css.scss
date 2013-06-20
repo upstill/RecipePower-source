@@ -1,10 +1,11 @@
 div.dialog.need_to_know {
 	width: 770px;
-	height: 600px;
+	height: auto; // 600px;
 	.modal-body {
-		font:14pt calibri;
+		// font:14pt calibri;
 		line-height:130%;
 		height: 600px;
+		padding-top: 0px;
 		// color:#FFFFFF;
 		overflow: auto;
 		background:#F8F8F8; // #880000;
@@ -14,18 +15,21 @@ div.dialog.need_to_know {
 	}
 	.know_snap {
 		width: 900px;
-		margin-top: 73px;
+		margin-top: 33px;
 		margin-left: 100px;
 		position: absolute;
 	}
 	.info-block {
 		display: inline-block;
-		padding: 0px 10px 5px;
+		padding: 0px 10px 0px;
 		margin: 5px;
 		width: 200px;
 		// border:solid 2px #5882D3;
 		&.know_browser {
+			width: 215px;
 			margin-left: 12px;
+			margin-bottom: 0px;
+			padding-bottom: 0px;
 		}
 		&.know_seek {
 			width: 215px;

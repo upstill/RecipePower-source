@@ -46,7 +46,6 @@ RP.dialog.run = (dlog) ->
 # From a block of code (which may be a whole HTML page), extract a
 # modal dialog and return the element
 RP.dialog.extract_modal = (code) ->
-	debugger
 	# Assuming the code is a fragment for the dialog...
 	wrapper = document.createElement('div');
 	wrapper.innerHTML = code;

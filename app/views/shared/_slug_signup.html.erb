@@ -9,5 +9,7 @@
 	<% if resource.password_required? %>
 		<%= f.input :password %>
 	<% end %>
-  <div class="gobutton"><%= f.submit "Sign up" %></div>
+	<p style="text-align:right">
+  	<%= f.submit "Sign up", class: "btn btn-success" %> 
+	</p>
 <% end %>
