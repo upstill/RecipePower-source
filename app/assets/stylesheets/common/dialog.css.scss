@@ -38,7 +38,17 @@ div.dialog {
 		padding-bottom:5px;
 		background-color:#EEE;
 		border:solid 3px #900;
+    input.go_button {
+        margin: 10px;
+        font:16px arial,sans-serif;
+        color: #FFFFFF;
+        background: #51a351;
+    }
 		&.generic_alert { // Default, in the absence of bootstrap
+			display: block;
+			background-color:#fcf8e3;
+			border: 1px solid #f9f6dc;
+			padding:3px; border:3px;
 			font:18px arial,sans-serif;
 			.error_box {
 				background-color: #fcf8e3; // bootstrap warning color

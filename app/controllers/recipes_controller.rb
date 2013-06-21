@@ -123,6 +123,7 @@ class RecipesController < ApplicationController
         end
       }
       format.json {
+        debugger
         @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe]||{}, true, params[:extractions] # session[:user_id], params
         if @recipe.id
           codestr = with_format("html") { render_to_string :edit, layout: false }
@@ -137,17 +138,27 @@ class RecipesController < ApplicationController
         # possibly preceded by login negotiation.
         # We need a domain to pass as sourcehome, so the injected iframe can communicate with the browser.
         # This gets extracted from the href passed as a parameter
-        if @site = Site.by_link(params[:recipe][:url])
-          @url = capture_recipes_url area: "at_top", layout: "injector", sourcehome: @site.domain, recipe: params[:recipe]
-          if !current_user # Apparently there's no way to check up on a user without hitting the database
-            # Push the editing URL so authentication happens first
-            session[:original_uri] = @url
-            @url = new_authentication_url area: "at_top", layout: "injector", sourcehome: @site.domain 
+        url = params[:recipe][:url]
+        msg = %Q{"Sorry, but RecipePower can't make sense of the cookmark '#{url}'"}
+        begin
+          uri = URI(url)
+          if uri.host == current_domain.sub(/:\d*/,'') # Compare the host to the current domain (minus the port)
+            render js: %Q{alert("Sorry, but RecipePower doesn't cookmark its own pages(does that even make sense?)") ; }
+          elsif !(@site = Site.by_link(url))
+            # If we couldn't even get the site from the domain, we just bail entirely
+            render js: %Q{alert(#{msg});}
+          else
+            @url = capture_recipes_url area: "at_top", layout: "injector", sourcehome: @site.domain, recipe: params[:recipe]
+            if !current_user # Apparently there's no way to check up on a user without hitting the database
+              # Push the editing URL so authentication happens first
+              session[:original_uri] = @url
+              @url = new_authentication_url area: "at_top", layout: "injector", sourcehome: @site.domain 
+            end
+            render
           end
-        else
-          # XXX Handle null site!!!
+        rescue
+          render js: %Q{alert(#{msg});}
         end
-        render
       }
     end
   end

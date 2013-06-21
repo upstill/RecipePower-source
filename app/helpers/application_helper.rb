@@ -289,8 +289,14 @@ module ApplicationHelper
   	navlinks << navlink("Contact", contact_path, (@nav_current==:contact)) 
   	navlinks << navlink("Home", home_path, (@nav_current==:home)) 
   	navlinks << navlink("FAQ", "/FAQ", (@nav_current==:FAQ)) 
+  	infolinks = 
+  	  [ 
+  	    link_to_modal("Need to Know", popup_path(name: "pages/need_to_know")),
+	      link_to_modal("Cookmark Button", popup_path(name: "pages/starting_step2") )
+	    ]
+    
   	# navlinks << feedback_link("Feedback")
-  	(navlinks.join('  |  ')+"<br>"+(link_to_modal "Need to Know", popup_path(name: "need_to_know"))).html_safe
+  	[ navlinks.join('  |  '), infolinks.join('  |  ') ].join("<br>").html_safe
   end
   
 =begin

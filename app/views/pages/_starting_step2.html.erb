@@ -1,5 +1,5 @@
 <%# Fields for an edit-user dialog %>
-<%= modal_dialog :step2, "Step 2: Install the 'Cookmark' Button", area: @area, class: "immediate" do %>
+<%= modal_dialog :step2, (params[:context] == "signup" ? "Step 2: Install the Cookmark Button" : "Installing the 'Cookmark' Button"), area: @area, class: "immediate" do %>
   <%= modal_body("welcome_dialog") do %>
 		<div class="instructions_header">
 		  <p class="bm-pic"><%= bookmarklet %></p>
@@ -13,6 +13,11 @@
 	    <%= page_fitPic "click_cookmark.png", "_step3" %>
 		</div>
 	  <p class="cookmark-text">When you see a recipe you like, click the Cookmark button to stash it in RecipePower. You'll get a chance to select a picture or add a note and/or tags, then you can go about your business.</p>
-		<br><%= link_to_modal("Okay, All Set", popup_path(:name => "starting_step3"), class: "btn btn-large btn-info", style: "float:right") %>
+		<br>
+		<% if params[:context] == "signup" %>
+			<%= link_to_modal("Okay, All Set", popup_path(:name => "starting_step3"), class: "btn btn-large btn-info", style: "float:right") %>
+		<% else %>
+			<%= modal_cancel_button("Okay, All Set", class: "btn btn-large btn-info", style: "float:right") %>
+		<% end %>
 	<% end %>
 <% end %>

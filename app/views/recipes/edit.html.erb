@@ -1,6 +1,6 @@
 <% logger.debug render("recipes/form_edit"+(@area ? "_"+@area : "")) %>
 <% if @area == "at_top" %>
-	<%= dialogHeader :edit_recipe, "Tag This Recipe!", area: @area %>
+	<%= dialogHeader :edit_recipe, "Tag This Recipe!", area: @area, noflash: true %>
 		<%= render "form_edit_at_top" %>
 	<%= dialogFooter %>
 <% else %>

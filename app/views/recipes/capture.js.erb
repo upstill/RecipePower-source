@@ -87,7 +87,6 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	},
 	
 	ifrOnload: function () {
-    
 		// First, dispose of the placeholder and spinner images, if any
 		var img = document.getElementById("recipePower-placeholder");
 		var spinner = document.getElementById("recipePower-spinner");
@@ -381,11 +380,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
   // The extraction_js helper should declare finders for needed elements
 	var callback = "<%= @url %>";
 	// The finders are specifications for extracting data of different types
-<% if @site %>
 	var finders = JSON.parse ("<%= j SiteServices.new(@site).all_finders.to_json.html_safe %>") ;
-<% else %>
-	var finders = [] ;
-<% end %>
 	var extractions = ns.applyFinders(finders); // Scrape the page for definitive URL, Title and image (etc.)
 	if(extractions.URI)
 		extractions.URI = extractions.URI;
@@ -410,6 +405,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	ifr.style.display = 'block';
 	ifr.style.overflow = 'visible';
 	ifr.style.border = "0px";
+	ifr.style.width = "1000px"
 	ifr.id = "recipePower-iframe";
 	ifr.src = callback;
 	if (ifr.attachEvent){
@@ -519,6 +515,7 @@ function unwrapWithoutCloning() {
   };
   
   $.receiveMessage = p_receiveMessage = function( callback, source_origin, delay ) {
+	debugger;
     if ( has_postMessage ) {
       // Since the browser supports window.postMessage, the callback will be
       // bound to the actual event associated with window.postMessage.

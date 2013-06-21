@@ -3,7 +3,7 @@
 	<span>has added this to your collection. Tag it here if you like. (Or <%= link_to_function "not", "retire_iframe();" %>.)</span>
 </div>
 <%= form_for @recipe, :html => { style: 'width:auto;height:auto'} do |f| %>
-  <%= form_errors_helper f, @recipe %>
+  <%= form_errors_helper f, @recipe, false %>
 
 	<div class="left">
 		<%= pic_field @recipe, :picurl, f, false, "PickPicture.png" %>
@@ -42,7 +42,7 @@
 	     <%= f.check_box :private %>
 	     <%= f.label :private, "Private" %>
 	  </div>
-		<%= f.submit "Save", class: "btn btn-small btn-success" %>
+		<%= f.submit "Save", class: "go_button" %>
 		<%# button_to "Forget It", remove_recipe_path(@recipe), class: "btn btn-small btn-success" %>
 		<%= hidden_field_tag 'layout', 'injector' %>
   </div>

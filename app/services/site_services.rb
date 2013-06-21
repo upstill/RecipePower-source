@@ -252,8 +252,8 @@ class SiteServices
   attr_accessor :site
   
   def initialize site
-    @site = site
-    @site_finders = site_finders
+      @site = site
+      site_finders # Preload the finders
   end
 
   @@DefaultFinders = [
@@ -282,7 +282,7 @@ protected
   end
   
   def site_finders
-    @site_finders ||= @site.tags_serialized ? YAML::load(@site.tags_serialized) : []
+    @site_finders ||= (@site && @site.tags_serialized) ? YAML::load(@site.tags_serialized) : []
   end
   
   def site_finders= (f)

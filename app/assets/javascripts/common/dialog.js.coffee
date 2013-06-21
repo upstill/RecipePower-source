@@ -35,7 +35,6 @@ RP.dialog.get_and_go = (request, selector) ->
 				RP.process_response responseData, odlog
 
 RP.dialog.cancel = ->
-	debugger
 	if dlog = target_modal()
 		RP.dialog.close_modal dlog
 

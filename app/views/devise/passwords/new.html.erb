@@ -1,5 +1,5 @@
 <% if params[:area] && params[:area] == "at_top" %>
-	<%= modal_dialog :password_reset, "Email Please", area: @area, modal: (@area != "page") && (@area != "at_top") do %>
+	<%= modal_dialog :password_reset, "Email Please", area: @area, class: "modal-yield" do %>
 		<%= render partial: "new_password_at_top" %>
 	<% end %>
 <% else %>

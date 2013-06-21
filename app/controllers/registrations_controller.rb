@@ -1,3 +1,5 @@
+require './lib/uri_utils.rb'
+
 class RegistrationsController < Devise::RegistrationsController
     before_filter :authenticate_user!, :except => [:show, :index]
     respond_to :html, :json
@@ -23,7 +25,7 @@ class RegistrationsController < Devise::RegistrationsController
               sign_up(resource_name, resource)
               session[:flash_popup] = "pages/starting_step2"
               # respond_with resource, :location => after_sign_up_path_for(resource)
-              redirect_to after_sign_up_path_for(resource)
+              redirect_to assert_query( after_sign_up_path_for(resource), context: "signup")
             else
               set_flash_message :notice, :"signed_up_but_#{resource.inactive_message}" if is_navigational_format?
               expire_session_data_after_sign_in!

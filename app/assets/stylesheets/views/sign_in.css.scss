@@ -98,14 +98,21 @@ div.auth_poss {
 			}
 		}
 		.signin_go {
-			width: auto; // 120px;
-			margin: 10px;
+			width: 135px; // auto; 
+			margin: 0px;
+			margin-left: 10px;
 			display: inline-block;
-			vertical-align: bottom;
+			vertical-align: top;
+			input.btn {
+				margin: 10px 5px 0px;
+				font:16px arial,sans-serif;
+				color: #FFFFFF;
+				background: #51a351;
+			}
 		}
 		.get_password {
-			margin:10px 5px;
-			padding:7px;
+			margin:0px;
+			padding:7px 7px 0px;
 			display: block;
 			font:16px arial,sans-serif;
 			width:auto;

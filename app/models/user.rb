@@ -11,7 +11,7 @@ class User < ActiveRecord::Base
   before_save :serialize_browser
   
   validates_each :username do |record, attr, value|
-    if record.username.empty? && record.fullname.empty?
+    if record.username.blank? && record.fullname.blank?
       record.errors.add :base, "Sorry, but we need to call you SOMETHING. Could you provide a username or a full name, pretty-please?"
       nil
     else

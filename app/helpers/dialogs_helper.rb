@@ -31,29 +31,36 @@ module DialogsHelper
     area = options[:area] || "floating" # (@partial ? "floating" : "page")
     hide = options[:show] ? "" : "hide"
     classes = options[:class] || ""
-    # class 'modal' is for use by Bootstrap modal; it's obviated when rendering to a page (though we can force
-    # it for pre-rendered dialogs by asserting the :modal option)
-    modal = options[:modal] ? "modal-pending hide" : ""
     logger.debug "dialogHeader for "+globstring({dialog: which, area: area, ttl: ttl})
     # Assert a page title if given
     ttlspec = ttl ? %Q{ title="#{ttl}"} : ""
-    cancel_button = content_tag( :div, 
-        %q{<a href="#" id="recipePowerCancelBtn" onclick="RP.dialog.cancel(); return false;" style="text-decoration: none;">X</a>}.html_safe,
-        class: "recipePowerCancelDiv")
+    for_bootstrap = options[:area].blank? || options[:area] != "at_top"
+    bs_classes = for_bootstrap ? "modal-pending hide" : ""
     hdr = 
-      %Q{
-        <div id="recipePowerDialog" class="#{modal} dialog #{which.to_s} #{area} #{classes}" #{ttlspec}>
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-          <h3>#{ttl}</h3>
-        </div>}+
-      content_tag(:div, "", class: "notifications-panel")+
-      flash_all
+      %Q{<div id="recipePowerDialog" class="#{bs_classes} dialog #{which.to_s} #{area} #{classes}" #{ttlspec}>}+
+      (for_bootstrap ? 
+        content_tag( :div,         
+          %Q{
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3>#{ttl}</h3>
+          }.html_safe,
+          class: "modal-header") :
+        generic_cancel_button('X') 
+      )
+      hdr <<= (content_tag(:div, "", class: "notifications-panel")+flash_all) unless options[:noflash]
     hdr.html_safe
   end
 
   def dialogFooter()
     "</div><br class='clear'>".html_safe
   end
+  
+  def generic_cancel_button name, options={}
+    content_tag( :div, 
+        %q{<a href="#" id="recipePowerCancelBtn" onclick="RP.dialog.cancel(); return false;" style="text-decoration: none;">X</a>}.html_safe,
+        class: "recipePowerCancelDiv")
+    # link_to_function name, "RP.dialog.cancel();", options
+  end
+    
   
 end

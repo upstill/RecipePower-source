@@ -103,3 +103,13 @@ def page_piclist(url)
     end 
   }.compact
 end
+
+def assert_query url, queryparams
+  uri = URI(url)
+  oldquery = uri.query
+  newquery = queryparams.collect { |k, v|
+    "#{k.to_s}=#{v.to_s}" unless v.empty?
+  }.compact.join('&')
+  uri.query = (oldquery.blank? ? newquery : ("?"+newquery)) unless newquery.blank?
+  uri.to_s
+end
