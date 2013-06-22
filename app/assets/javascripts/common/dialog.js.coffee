@@ -102,6 +102,9 @@ open_modal = (dlog, omit_button) ->
 		$(dlog).modal 'show'
 	notify "open", dlog
 	notify_injector "open", dlog
+	# Set text focus as appropriate
+	if (focus_sel = $(dlog).data("focus")) && (focus_elmt = $(focus_sel, dlog)[0])
+		focus_elmt.focus()
 	dlog
 
 # Remove the dialog and notify its handler prior to removing the element

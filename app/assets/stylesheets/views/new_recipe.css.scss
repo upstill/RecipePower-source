@@ -1,11 +1,22 @@
-
 // Formerly newRecipe
 div.new_recipe.dialog {
 	width: 650px;
 	height: auto;
+	.prompt {
+		font:18px arial,sans-serif;
+		font-weight:bold;
+	}
+	.modal-body h3 {
+		margin-top: 0px;
+		padding: 0px;
+	}
 	form {
-		width: 95%;
+		width: 90%;
 		margin: 10px;
+		padding: 15px;
+		border: 3px solid #CCD3CC;
+		background: #DDE3DD;
+		overflow: auto;
 		div.recipe_url_div {
 			margin-top:15px;
 			margin-bottom:15px;

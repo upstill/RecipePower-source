@@ -285,10 +285,10 @@ module ApplicationHelper
     
   def footer_navlinks
   	navlinks = []
-  	navlinks << navlink("About", about_path, (@nav_current==:about)) 
+  	navlinks << link_to_modal("About", popup_path(name: "pages/about")) 
   	navlinks << navlink("Contact", contact_path, (@nav_current==:contact)) 
   	navlinks << navlink("Home", home_path, (@nav_current==:home)) 
-  	navlinks << navlink("FAQ", "/FAQ", (@nav_current==:FAQ)) 
+  	navlinks << link_to_modal("FAQ", popup_path(name: "pages/faq")) 
   	infolinks = 
   	  [ 
   	    link_to_modal("Need to Know", popup_path(name: "pages/need_to_know")),
@@ -297,6 +297,13 @@ module ApplicationHelper
     
   	# navlinks << feedback_link("Feedback")
   	[ navlinks.join('  |  '), infolinks.join('  |  ') ].join("<br>").html_safe
+  end
+  
+  def question_section q, &block
+    (
+      content_tag(:h4, link_to_function(q, "RP.showhide();"))+
+      content_tag(:div, with_output_buffer(&block), class: "answer hide")
+    ).html_safe
   end
   
 =begin

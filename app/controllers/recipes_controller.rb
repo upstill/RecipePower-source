@@ -79,8 +79,9 @@ class RecipesController < ApplicationController
       @feed_entry = FeedEntry.find params[:feed_entry].to_i
       params[:url] = @feed_entry.url
     end
-    @recipe = Recipe.ensure current_user_or_guest_id, params.slice(:url) # session[:user_id], params
-    if @recipe.id # Mark of a fetched/successfully saved recipe: it has an id
+    if (params[:url] &&
+        (@recipe = Recipe.ensure current_user_or_guest_id, params.slice(:url)) && 
+        @recipe.id) # Mark of a fetched/successfully saved recipe: it has an id
     	# redirect to edit
     	if @feed_entry
     	  @feed_entry.recipe = @recipe
@@ -91,9 +92,35 @@ class RecipesController < ApplicationController
     else
         @Title = "Cookmark a Recipe"
         @nav_current = :addcookmark
+        @recipe ||= Recipe.new
         @recipe.current_user = current_user_or_guest_id # session[:user_id]
         @area = params[:area]
         dialog_boilerplate 'new', 'modal'
+    end
+  end
+
+  # Action for creating a recipe in response to the the 'new' page:
+  def create # Take a URL, then either lookup or create the recipe
+    # return if need_login true
+    # Find the recipe by URI (possibly correcting same), and bind it to the current user
+    @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params[:recipe]
+    if @recipe.errors.empty? # Success (valid recipe, either created or fetched)
+      session[:recipe_pending] = @recipe.id
+      redirect_to collection_path
+=begin
+      report_recipe(  
+        edit_recipe_url(@recipe), 
+        "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br> You might want to confirm the title and picture, and/or tag it?".html_safe,
+        formats )
+=end
+    else # failure (not a valid recipe) => return to new
+      debugger
+       @Title = "Cookmark a Recipe"
+       @nav_current = :addcookmark
+       # render :action => 'new'
+       @recipe.current_user = current_user_or_guest_id # session[:user_id]
+       @area = params[:area]
+       dialog_boilerplate 'new', 'modal'
     end
   end
 
@@ -182,23 +209,6 @@ class RecipesController < ApplicationController
     else
       @Title = "Cookmark a Recipe"
       @nav_current = :addcookmark
-    end
-  end
-
-  # Action for creating a recipe in response to the the 'new' page:
-  def create # Take a URL, then either lookup or create the recipe
-    # return if need_login true
-    # Find the recipe by URI (possibly correcting same), and bind it to the current user
-    @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params[:recipe]
-    if @recipe.errors.empty? # Success (valid recipe, either created or fetched)
-      report_recipe(  
-        edit_recipe_url(@recipe), 
-        "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br> You might want to confirm the title and picture, and/or tag it?".html_safe,
-        formats )
-    else # failure (not a valid recipe) => return to new
-       @Title = "Cookmark a Recipe"
-       @nav_current = :addcookmark
-       render :action => 'new'
     end
   end
   

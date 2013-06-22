@@ -10,7 +10,11 @@
 		<% end %>
 		<% if user_signed_in? %>
 			<li>
-				<%= link_to_modal "Add a Cookmark", new_recipe_path %>
+				<% if params[:controller] == "collection" %>
+					<%= link_to_modal "Add a Cookmark", new_recipe_path %>
+				<% else %>
+					<%= link_to "Collections", collection_path %>
+				<% end %>
 			</li>
 			<li class="dropdown">
 		    	<a id="userMenuLabel" datatarget="#" class="dropdown-toggle" data-toggle="dropdown" role="button"><%= current_user.handle %><b class="caret"></b></a>

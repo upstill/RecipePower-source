@@ -3,10 +3,10 @@
 	<%= simple_form_for @user, html: { class: "edit_user json", 'data-type' => :json } do |f| %>
 		<%= modal_body do %>
 		  <%= form_errors_helper f %>
-		  <%= f.input :username %>
-		  <%= f.input :fullname, input_html: { cols: 125, rows: 1 } %>
+		  <%= f.input :username, label: "Username (Handle)" %>
+		  <%= f.input :fullname, label: "Full Name", input_html: { cols: 125, rows: 1 } %>
 		  <%= f.input :about, label: "About Me", placeholder: "Who Are You? What Do You Eat?", input_html: { cols: 125, rows: 4 } %>
-			<%= taggable_div f, "control-group", "Interests (breadcrumbs that apply to you)" %>
+			<%= taggable_div f, "control-group", "Interests (tags that apply to you)" %>
 		  <%= f.input :email, input_html: { cols: 125, rows: 1 } %>
 		  <%= f.input :private, :as => :boolean, :wrapper => :checkbox, :label => "Cloak of Invisibility (i.e., not listed as possible Friend)" %>
 		  <% if permitted_to? :manage, @user %>

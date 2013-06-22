@@ -54,6 +54,16 @@ RP.named_function = (str) ->
 			return obj
 	return null;
 	
+# For the FAQ page: click on a question to show the associated answer
+RP.showhide = ->
+	associated = event.currentTarget.parentNode.nextSibling
+	show_sib = $(associated).hasClass "hide"
+	$('div.answer').hide 200
+	$('div.answer').addClass "hide"
+	if show_sib
+		$(associated).show 300
+		$(associated).removeClass "hide"
+	
 # Use a vanilla httprequest to ping the server, bypassing jQuery
 do_request = (url, ajax_options, processing_options) ->
 	# Send the request using minimal Javascript

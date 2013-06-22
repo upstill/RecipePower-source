@@ -515,7 +515,6 @@ function unwrapWithoutCloning() {
   };
   
   $.receiveMessage = p_receiveMessage = function( callback, source_origin, delay ) {
-	debugger;
     if ( has_postMessage ) {
       // Since the browser supports window.postMessage, the callback will be
       // bound to the actual event associated with window.postMessage.

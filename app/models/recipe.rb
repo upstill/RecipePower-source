@@ -77,17 +77,24 @@ public
   # and dig around for a title.
   # Either way, we also make sure that the recipe is associated with the given user
   def self.ensure( userid, params, add_to_collection = true, extractions = nil)
-    if extractions ||= SiteServices.extract_from_page(params[:url], :label => [:URI, :Image, :Title])
-      # Extractions are parameters derived directly from the page
-      if extractions[:URI]
-        params[:url] = extractions[:URI] 
-      elsif extractions[:href]
-        params[:url] = extractions[:href] 
+    if !extractions 
+      debugger
+      extractions = SiteServices.extract_from_page(params[:url], :label => [:URI, :Image, :Title])
+      if extractions.empty?
+        rcp = self.new
+        rcp.errors[:url] = "Doesn't appear to be a working URL: we can't open it for analysis"
+        return rcp
       end
-      params[:picurl] = extractions[:Image] if extractions[:Image]
-      params[:title] = extractions[:Title] if extractions[:Title]
-      params[:href] = extractions[:href] if extractions[:href]
     end
+    # Extractions are parameters derived directly from the page
+    if extractions[:URI]
+      params[:url] = extractions[:URI] 
+    elsif extractions[:href]
+      params[:url] = extractions[:href] 
+    end
+    params[:picurl] = extractions[:Image] if extractions[:Image]
+    params[:title] = extractions[:Title] if extractions[:Title]
+    params[:href] = extractions[:href] if extractions[:href]
     if params.blank?
       rcp = self.new      
     elsif (id = params[:id].to_i) && (id > 0) # id of 0 means create a new recipe

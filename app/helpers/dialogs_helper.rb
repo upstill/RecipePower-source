@@ -2,21 +2,55 @@
 
 module DialogsHelper
   
+  def simple_modal(which, ttl, options={}, &block)
+    options[:body_contents] = modal_body(options.slice(:style), &block)
+    options.delete :style
+    modal_dialog(which,ttl,options).html_safe
+  end
+  
   def modal_dialog( which, ttl=nil, options={}, &block )
-    options[:modal] = true if options[:modal].nil?
-    dlg = with_output_buffer &block
-    (dialogHeader(which, ttl, options)+
-     dlg+
-     dialogFooter).html_safe
+    for_bootstrap = options[:area].blank? || options[:area] != "at_top"
+    header = modal_header( for_bootstrap, ttl, !options[:noflash])
+    body = options[:body_contents] || with_output_buffer(&block)
+    options[:class] = 
+      [ "dialog", 
+        which.to_s, 
+        options[:area] || "floating", 
+        ("hide" unless options[:show]),
+        ("modal-pending fade" if for_bootstrap), 
+        options[:class] 
+      ].compact.join(' ')
+    [:area, :show, :noflash, :modal, :body_contents].each { |k| options.delete k }
+    options[:id] = "recipePowerDialog"
+    options[:title] = ttl if ttl
+    content_tag(:div, header+body, options).html_safe
   end
   
-  def modal_body(style="", &block)
+  def modal_header( for_bootstrap, ttl, doflash )
+    # Render for a floating dialog unless an area is asserted OR we're rendering for the page
+    content = if for_bootstrap
+      content_tag( :div,         
+        %Q{
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h3>#{ttl}</h3>
+        }.html_safe,
+        class: "modal-header")
+    else
+      generic_cancel_button('X') 
+    end
+    content <<= (content_tag(:div, flash_all, class: "notifications-panel")) if doflash
+    content.html_safe
+  end
+  
+  def modal_body(options={}, &block)
     bd = with_output_buffer &block
-    content_tag :div, flash_all + bd, class: "modal-body #{style}"
+    options[:class] = "modal-body #{options[:class]}"
+    content_tag(:div, flash_all + bd, options).html_safe
   end
   
-  def modal_footer(&block)
+  def modal_footer(options={}, &block)
     ft = with_output_buffer &block
+    options[:class] = "modal-footer #{options[:class]}"
     content_tag :div, ft, class: "modal-footer"
   end
   
@@ -35,7 +69,7 @@ module DialogsHelper
     # Assert a page title if given
     ttlspec = ttl ? %Q{ title="#{ttl}"} : ""
     for_bootstrap = options[:area].blank? || options[:area] != "at_top"
-    bs_classes = for_bootstrap ? "modal-pending hide" : ""
+    bs_classes = for_bootstrap ? "modal-pending hide fade" : ""
     hdr = 
       %Q{<div id="recipePowerDialog" class="#{bs_classes} dialog #{which.to_s} #{area} #{classes}" #{ttlspec}>}+
       (for_bootstrap ? 
@@ -59,8 +93,10 @@ module DialogsHelper
     content_tag( :div, 
         %q{<a href="#" id="recipePowerCancelBtn" onclick="RP.dialog.cancel(); return false;" style="text-decoration: none;">X</a>}.html_safe,
         class: "recipePowerCancelDiv")
-    # link_to_function name, "RP.dialog.cancel();", options
+  end
+  
+  def dialog_cancel_button name, options={}
+    link_to_function name, "RP.dialog.cancel();", options
   end
     
-  
 end
