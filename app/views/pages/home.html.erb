@@ -16,5 +16,9 @@ Using the Web for cooking: it's not a big part of life, but we've got you covere
 	</p>
 <%= button_to_modal("Sign Me Up", collection_path(), class: "btn btn-large btn-success", selector: "div.dialog.signup") unless current_user %>
 &nbsp;&nbsp;&nbsp;&nbsp;
-<%= link_to(current_user ? "To My Collections!!" : "Show Me First", collection_path(popup: "pages/need_to_know", :on_tour => true), class: "btn btn-large btn-info") %>
+<% if current_user %>
+	<%= link_to("To My Collections!!", collection_path(), class: "btn btn-large btn-info") %>
+<% else %>
+	<%= link_to("Show Me First", collection_path(popup: "pages/need_to_know", :on_tour => true), class: "btn btn-large btn-info") %>
+<% end %>
 </div>
