@@ -286,7 +286,7 @@ module ApplicationHelper
   def footer_navlinks
   	navlinks = []
   	navlinks << link_to_modal("About", popup_path(name: "pages/about")) 
-  	navlinks << navlink("Contact", contact_path, (@nav_current==:contact)) 
+  	navlinks << link_to_modal("Contact", popup_path(name: "pages/contact")) 
   	navlinks << navlink("Home", home_path, (@nav_current==:home)) 
   	navlinks << link_to_modal("FAQ", popup_path(name: "pages/faq")) 
   	infolinks = 
