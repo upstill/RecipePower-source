@@ -14,8 +14,7 @@ Over on RecipePower, you can organize your growing collection, so when opportuni
 </p><p class="airy">
 Using the Web for cooking: it's not a big part of life, but we've got you covered.
 	</p>
-<%= button_to_modal("Sign Me Up", collection_path, class: "btn btn-large btn-success", selector: "div.dialog.signup") unless current_user %>
+<%= button_to_modal("Sign Me Up", collection_path(), class: "btn btn-large btn-success", selector: "div.dialog.signup") unless current_user %>
 &nbsp;&nbsp;&nbsp;&nbsp;
-<%= link_to(current_user ? "To My Collections!!" : "Show Me First", collection_path, class: "btn btn-large btn-info") %>
+<%= link_to(current_user ? "To My Collections!!" : "Show Me First", collection_path(popup: "pages/need_to_know", :on_tour => true), class: "btn btn-large btn-info") %>
 </div>
-<%= render partial: "shared/signup_dialog" %>

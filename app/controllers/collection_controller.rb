@@ -4,11 +4,16 @@ class CollectionController < ApplicationController
   
   # All controllers displaying the collection need to have it setup 
   def setup_collection
-    @user = current_user_or_guest
-    @browser = @user.browser
-    @seeker = ContentSeeker.new @browser, session[:seeker], params # Default; other controllers may set up different seekers
-    @seeker.tagstxt = "" if (params[:action] == "index")
-    session[:seeker] = @seeker.store
+    if popup = params[:popup]
+      session[:flash_popup] = popup
+      redirect_to collection_path
+    else
+      @user = current_user_or_guest
+      @browser = @user.browser
+      @seeker = ContentSeeker.new @browser, session[:seeker], params # Default; other controllers may set up different seekers
+      @seeker.tagstxt = "" if (params[:action] == "index")
+      session[:seeker] = @seeker.store
+    end
   end
   
   def save_browser

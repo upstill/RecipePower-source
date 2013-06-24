@@ -1,13 +1,12 @@
-<div class="nav affix content_browser">
-	<ul class="nav nav-tabs nav-stacked">
+<div class="nav affix browser_house ">
+	<ul class="nav nav-tabs nav-stacked scrollable">
 		<% @browser.node_list.each do |node| %>
 		  <% @node = node %>
 		  <%= render partial: "collection/node" %>
 		<% end %>
 		<div class="content_browser_cover" onclick="RP.content_browser.click_to_browser();" style="display: <%= (params[:controller] != "collection") ? "block" : "none" %>"></div>
 	</ul>
-	<hr>
-	<div id="footer_nav_links">
-		<%= footer_navlinks %>
-	</div>
 </div>
+<% unless current_user %>
+	<%= render partial: "shared/signup_dialog" %>
+<% end %>

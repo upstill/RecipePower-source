@@ -31,19 +31,26 @@
   </head>
   <body>
     <%= render 'layouts/frame_top' %>
+		<% if params[:controller] == "collection" %>
+			<div class="span3 left_house">
+				<%= render 'layouts/frame_left' %>
+				<div id="footer_nav_links">
+					<%= footer_navlinks %>
+				</div>
+			</div>
+		<% end%>
     <div class="container">
 	    <div class="row">
 				<% if params[:controller] == "collection" %>
 			    <div class="span3">
-				    <%= render 'layouts/frame_left' %>
 					</div>
-				<div class="span9">
+					<div class="span9">
 				<% else %>
 					<%= button_to("back_button.png", collection_path, class: "back_button") if params[:controller] != 'pages' %>
 					<div class="span12">
 				<% end %>
 					<div class="ajax-loader"></div>
-					<div class="content">
+					<div class="content" <%= (params[:controller] == "collection") ? "" : %q{style="margin-left: 30px"} %>>
 						<%= flash_notifications if params[:controller] != "collection" %>
 						<%= yield %>
 					</div>
@@ -60,6 +67,9 @@
 	<% if session[:flash_popup] %>
 		<%= render session[:flash_popup] %>
 		<% session.delete(:flash_popup) %>
+	<% end %>
+	<% unless current_user %>
+		<%= render partial: "shared/signup_dialog" %>
 	<% end %>
 	</body>
 </html>

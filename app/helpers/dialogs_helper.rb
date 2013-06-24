@@ -3,8 +3,12 @@
 module DialogsHelper
   
   def simple_modal(which, ttl, options={}, &block)
-    options[:body_contents] = modal_body(options.slice(:style), &block)
-    options.delete :style
+    options[:body_contents] = dialog_cancel_button (options[:close_label] || "Done")
+    mf = modal_footer options
+    options.delete :body_contents
+    options[:body_contents] = 
+      modal_body(options.slice(:style), &block)+mf
+    [:style, :close_label].each { |k| options.delete k }
     modal_dialog(which,ttl,options).html_safe
   end
   
@@ -43,15 +47,14 @@ module DialogsHelper
   end
   
   def modal_body(options={}, &block)
-    bd = with_output_buffer &block
+    bd = options[:body_contents] || with_output_buffer(&block)
     options[:class] = "modal-body #{options[:class]}"
     content_tag(:div, flash_all + bd, options).html_safe
   end
   
   def modal_footer(options={}, &block)
-    ft = with_output_buffer &block
-    options[:class] = "modal-footer #{options[:class]}"
-    content_tag :div, ft, class: "modal-footer"
+    ft = options[:body_contents] || with_output_buffer(&block)
+    content_tag :div, ft, class: "modal-footer #{options[:class]}"
   end
   
   # Place the header for a dialog, including setting its Onload function.
@@ -96,6 +99,7 @@ module DialogsHelper
   end
   
   def dialog_cancel_button name, options={}
+    options[:class] = "#{options[:class]} btn btn-info"
     link_to_function name, "RP.dialog.cancel();", options
   end
     

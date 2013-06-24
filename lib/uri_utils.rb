@@ -104,6 +104,7 @@ def page_piclist(url)
   }.compact
 end
 
+# Ensure that a hash of query parameters makes it into the given url
 def assert_query url, queryparams
   uri = URI(url)
   oldquery = uri.query

@@ -58,9 +58,6 @@
 	margin-bottom: 0px
 }
 
-.RcpBrowser.active  {
-}
-
 .RcpBrowser.addlink {
 	display: inline-block;
 	float: right;
@@ -201,54 +198,58 @@ div.content_browser_cover {
 }
 
 #footer_nav_links {
+	width: 100%;
+	margin: 0 auto;
+	position: absolute;;
+	bottom: 10px; // 15px;
 	z-index: 11;
 	text-align: center;
 }
 
 div.content_browser {
+	width: 100%;
+	height: 100%;
+	// position: fixed;
+	padding: 0px;
+	margin: 0px;
 	# width: 270px;
+	border: 2px solid blue;
 }
 
 li.RcpBrowser {
 	position: relative;
 	left: 0px;
 	top: 0px;
+	.active {
+		right: 30px;
+	}
 }
 
-li.RcpBrowser > a {
-  display: inline-block;
-  width: 90%;
-	padding-right: 30px;
+.RcpBrowser.active > div.mod_box  {
+	display: block;
 }
 
-li.RcpBrowser > a.mod_button {
-	position: absolute;
-	right: -12px;
-	top: 0px;
+li.RcpBrowser > div.mod_box {
+	float: right; // position: absolute; right: 0px;
   display: none;
-  vertical-align: top;
-  text-align: center;
-  font-size: 1.0em;
-  background-color: white;
-  margin: 0px;
-  margin-top: 5px;
-  padding: 0px;
-  width: 20px;
-  height: 20px;
-  // position: relative;
-  // left: -35px;
-  z-index: 3;
-	font-weight:bold;
-	color:#55AA55;
-	// background-color:#E6DAA1;
+	margin: 5px;
+	width: 15px;
+	height: 16px;
 	border-radius:10px;
 	border-color:hsl(0,0%,55%);
 	border-width:2px;
-	border-style: solid
-}
-
-li.RcpBrowser.active > a.mod_button {
-  display: inline-block;
+	border-style: solid;
+	background-color:#FFFFFF;
+	a.mod_button {
+	  text-align: center;
+	  font-size: 1.2em;
+	  position: relative;
+		top: -4px;
+		left: 2px;
+		z-index: 3;
+		// font-weight:bold;
+		color:rgb(0,85,128);
+	}
 }
 
 .modal-footer .form-inline {

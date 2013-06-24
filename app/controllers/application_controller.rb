@@ -21,6 +21,7 @@ class ApplicationController < ActionController::Base
     logger.debug "FLASH messages extant for "+params[:controller]+"#"+params[:action]+"(check_flash):"
     puts "    notice: "+flash[:notice] if flash[:notice]
     puts "    error: "+flash[:error] if flash[:error]
+    session[:on_tour] = true if params[:on_tour]
   end
   
   def init_seeker(klass, clear_tags=false, scope=nil)
