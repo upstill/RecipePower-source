@@ -77,44 +77,48 @@ public
   # and dig around for a title.
   # Either way, we also make sure that the recipe is associated with the given user
   def self.ensure( userid, params, add_to_collection = true, extractions = nil)
-    if !extractions 
-      debugger
-      extractions = SiteServices.extract_from_page(params[:url], :label => [:URI, :Image, :Title])
-      if extractions.empty?
-        rcp = self.new
-        rcp.errors[:url] = "Doesn't appear to be a working URL: we can't open it for analysis"
-        return rcp
+    if params[:id]
+      # Recipe exists and we're just touching it for the user
+      rcp = Recipe.find params[:id]
+    else
+      if !extractions
+        extractions = SiteServices.extract_from_page(params[:url], :label => [:URI, :Image, :Title])
+        if extractions.empty?
+          rcp = self.new
+          rcp.errors[:url] = "Doesn't appear to be a working URL: we can't open it for analysis"
+          return rcp
+        end
       end
-    end
-    # Extractions are parameters derived directly from the page
-    if extractions[:URI]
-      params[:url] = extractions[:URI] 
-    elsif extractions[:href]
-      params[:url] = extractions[:href] 
-    end
-    params[:picurl] = extractions[:Image] if extractions[:Image]
-    params[:title] = extractions[:Title] if extractions[:Title]
-    params[:href] = extractions[:href] if extractions[:href]
-    if params.blank?
-      rcp = self.new      
-    elsif (id = params[:id].to_i) && (id > 0) # id of 0 means create a new recipe
-      begin
-        rcp = Recipe.find id
-      rescue => e
-        rcp = self.new
-        rcp.errors.add :id, "There is no recipe number #{id.to_s}"
+      # Extractions are parameters derived directly from the page
+      if extractions[:URI]
+        params[:url] = extractions[:URI] 
+      elsif extractions[:href]
+        params[:url] = extractions[:href] 
       end
-    else # No id: create based on url
-      params.delete(:rcpref)
-      rcp = Recipe.find_or_initialize params
-      if rcp.url.match %r{^http://#{current_domain}} # Check we're not trying to link to a RecipePower page
-        rcp.errors.add :base, "Sorry, can't cookmark pages from RecipePower. (Does that even make sense?)"
-      end
-      if rcp.errors.empty?
-        ss = SiteServices.new rcp.site
-        rcp.picurl = ss.resolve rcp.picurl if rcp.picurl
-        rcp.title = ss.trim_title rcp.title # = ((site.yield :Title, url)[:Title] || rcp.title).html_safe unless rcp.title
-        rcp.save
+      params[:picurl] = extractions[:Image] if extractions[:Image]
+      params[:title] = extractions[:Title] if extractions[:Title]
+      params[:href] = extractions[:href] if extractions[:href]
+      if params.blank?
+        rcp = self.new      
+      elsif (id = params[:id].to_i) && (id > 0) # id of 0 means create a new recipe
+        begin
+          rcp = Recipe.find id
+        rescue => e
+          rcp = self.new
+          rcp.errors.add :id, "There is no recipe number #{id.to_s}"
+        end
+      else # No id: create based on url
+        params.delete(:rcpref)
+        rcp = Recipe.find_or_initialize params
+        if rcp.url.match %r{^http://#{current_domain}} # Check we're not trying to link to a RecipePower page
+          rcp.errors.add :base, "Sorry, can't cookmark pages from RecipePower. (Does that even make sense?)"
+        end
+        if rcp.errors.empty?
+          ss = SiteServices.new rcp.site
+          rcp.picurl = ss.resolve rcp.picurl if rcp.picurl
+          rcp.title = ss.trim_title rcp.title # = ((site.yield :Title, url)[:Title] || rcp.title).html_safe unless rcp.title
+          rcp.save
+        end
       end
     end
     # If all is well, make sure it's on the user's list

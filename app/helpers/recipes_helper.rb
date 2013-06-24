@@ -19,10 +19,11 @@ def recipe_image_div(recipe, div_class="recipe_image_div")
       recipe.picurl || "NoPictureOnFile.png"
     end
     content = image_tag(url, options)
-  rescue
+  rescue Exception => e
     url = "data URL" if url =~ /^data:/
     content = 
       "Error rendering image #{url.truncate(255)} from "+ (recipe ? "recipe #{recipe.id}: '#{recipe.title}'" : "null recipe")
+    ExceptionNotifier::Notifier.exception_notification(request.env, e, data: { message: content}).deliver
   end
   content_tag( :div, content, class: div_class )
 end

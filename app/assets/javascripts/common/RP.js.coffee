@@ -304,7 +304,7 @@ RP.process_response = (responseData, dlog) ->
 		if replacements = responseData.replacements
 			for replacement in replacements
 				$(replacement[0]).replaceWith replacement[1]
-			RP.dialog.replace_modal dlog
+			# RP.dialog.replace_modal dlog
 
 		if deletions = responseData.deletions
 			for deletion in deletions
