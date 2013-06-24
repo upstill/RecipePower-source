@@ -6,20 +6,25 @@ module RecipesHelper
   
 # Sort out a suitable URL to stuff into an image thumbnail for a recipe
 def recipe_image_div(recipe, div_class="recipe_image_div")
-  options = { alt: "Image Not Accessible", id: "RecipeImage"+recipe.id.to_s }
-  url = if recipe.picurl && (recipe.picurl =~ /^data:/) # Use a data URL directly w/o taking a thumbnail
-    recipe.thumbnail = nil
-    recipe.picurl
-  elsif recipe.thumbnail && recipe.thumbnail.thumbdata
-    recipe.thumbnail.thumbdata
-  else
-    # options[:onload] = %Q{fitImageOnLoad('#{options[:id]}')}
-    options[:class] = "stuffypic"
-    recipe.picurl || "NoPictureOnFile.png"
+  begin
+    options = { alt: "Image Not Accessible", id: "RecipeImage"+recipe.id.to_s }
+    url = if recipe.picurl && (recipe.picurl =~ /^data:/) # Use a data URL directly w/o taking a thumbnail
+      recipe.thumbnail = nil
+      recipe.picurl
+    elsif recipe.thumbnail && recipe.thumbnail.thumbdata
+      recipe.thumbnail.thumbdata
+    else
+      # options[:onload] = %Q{fitImageOnLoad('#{options[:id]}')}
+      options[:class] = "stuffypic"
+      recipe.picurl || "NoPictureOnFile.png"
+    end
+    content = image_tag(url, options)
+  rescue
+    url = "data URL" if url =~ /^data:/
+    content = 
+      "Error rendering image #{url.truncate(255)} from "+ (recipe ? "recipe #{recipe.id}: '#{recipe.title}'" : "null recipe")
   end
-  content_tag( :div, 
-    image_tag(url, options),
-    class: div_class )
+  content_tag( :div, content, class: div_class )
 end
   
 def grab_recipe_link label, recipe
