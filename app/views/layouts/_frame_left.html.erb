@@ -7,6 +7,9 @@
 		<div class="content_browser_cover" onclick="RP.content_browser.click_to_browser();" style="display: <%= (params[:controller] != "collection") ? "block" : "none" %>"></div>
 	</ul>
 </div>
+<div id="footer_nav_links">
+	<%= footer_navlinks %>
+</div>
 <% unless current_user %>
 	<%= render partial: "shared/signup_dialog" %>
 <% end %>

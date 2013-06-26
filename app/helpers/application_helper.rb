@@ -274,33 +274,20 @@ module ApplicationHelper
     end
     (bmtag+imgtag+"</a>").html_safe
   end
-
-  def navlink(label, link, is_current=false)
-    if is_current
-      "<span class='nav_link_strong'><i>#{label}</i></span>"
-    else
-      link_to label, link, class: "nav_link"
-    end
-  end
     
   def footer_navlinks
   	navlinks = []
   	navlinks << link_to_modal("About", popup_path(name: "pages/about")) 
   	navlinks << link_to_modal("Contact", popup_path(name: "pages/contact")) 
-  	navlinks << navlink("Home", home_path, (@nav_current==:home)) 
+  	navlinks << link_to("Home", home_path, class: "nav_link") 
   	navlinks << link_to_modal("FAQ", popup_path(name: "pages/faq")) 
   	infolinks = 
   	  [ 
   	    link_to_modal("Need to Know", popup_path(name: "pages/need_to_know")),
 	      link_to_modal("Cookmark Button", popup_path(name: "pages/starting_step2") )
 	    ]
-	  signup =
-    if !current_user && session[:on_tour]
-      "<br>".html_safe + 
-    	button_to_modal("Sign Me Up", collection_path, class: "btn btn-large btn-success", selector: "div.dialog.signup")
-    end
   	# navlinks << feedback_link("Feedback")
-  	[ navlinks.join('  |  '), infolinks.join('  |  '), signup ].compact.join("<br>").html_safe
+  	[ navlinks.join('  |  '), infolinks.join('  |  ') ].compact.join("<br>").html_safe
   end
   
   def question_section q, &block

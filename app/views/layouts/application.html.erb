@@ -31,12 +31,14 @@
   </head>
   <body>
     <%= render 'layouts/frame_top' %>
+    <% if !current_user && session[:on_tour] %>
+			<div class="button_house">
+	    	<%= button_to_modal("Sign Me Up", collection_path, class: "btn btn-large btn-success", selector: "div.dialog.signup") %>
+			</div>
+    <% end %>
 		<% if params[:controller] == "collection" %>
-			<div class="span3 left_house">
+			<div class="span3 left_house" <%= %q{style="top: 120px;"}.html_safe if !current_user && session[:on_tour] %> >
 				<%= render 'layouts/frame_left' %>
-				<div id="footer_nav_links">
-					<%= footer_navlinks %>
-				</div>
 			</div>
 		<% end%>
     <div class="container">
