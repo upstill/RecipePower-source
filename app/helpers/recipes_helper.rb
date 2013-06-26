@@ -23,7 +23,11 @@ def recipe_image_div(recipe, div_class="recipe_image_div")
     end
     content = image_tag(url, options)
   rescue Exception => e
-    url = "data URL" if url =~ /^data:/
+    if url
+      url = "data URL" if url =~ /^data:/
+    else
+      url = "nil URL"
+    end
     content = 
       "Error rendering image #{url.truncate(255)} from "+ (recipe ? "recipe #{recipe.id}: '#{recipe.title}'" : "null recipe")
     ExceptionNotifier::Notifier.exception_notification(request.env, e, data: { message: content}).deliver
