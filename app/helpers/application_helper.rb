@@ -15,7 +15,7 @@ module ApplicationHelper
     end
 
     def resource
-      @resource ||= User.new
+      @resource ||= User.new( :remember_me => true )
     end
 
     def devise_mapping
