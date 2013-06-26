@@ -19,7 +19,7 @@ def recipe_image_div(recipe, div_class="recipe_image_div")
       recipe.thumbnail.thumbdata
     else
       options[:class] = "stuffypic"
-      rcp.picurl
+      recipe.picurl
     end
     content = image_tag(url, options)
   rescue Exception => e
