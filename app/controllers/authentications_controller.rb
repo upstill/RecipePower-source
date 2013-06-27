@@ -2,19 +2,7 @@ require './lib/controller_utils.rb'
 require 'uri'
   
 class AuthenticationsController < ApplicationController
-  
-  # Edge case: we may get here in the course of authorizing collecting a recipe, in 
-  # which case we forget about handling it in the embedded iframe: remove the "area=at_top" 
-  # and "layout=injector" query parameters
-  def strip_query(url)
-    if url
-      uri = URI url
-      return url unless uri.query
-      uri.query = uri.query.split('&').delete_if { |p| p.match(/^(area|layout)=/) }.join '&'
-      uri.to_s
-    end
-  end
-  
+    
   def index
     @authentications = current_user.authentications if current_user
     @auth_delete = true
@@ -28,6 +16,10 @@ class AuthenticationsController < ApplicationController
   # Get a new authentication (==login)
   def new
       @authentications = current_user.authentications if current_user
+      if current_user
+        flash[:notice] = "All signed in. Welcome back, #{current_user.handle}!"
+        redirect_to collection_path 
+      end
       @auth_delete = true
       @auth_context = :manage
       flash[:notice] = params[:notice]
@@ -37,17 +29,10 @@ class AuthenticationsController < ApplicationController
 
   def failure
     @after_sign_in_url = nil # authentications_url
-    if session[:original_uri]
-      uri = URI session[:original_uri]
-      if uri.query
-        uri.query.split('&').each do |qp| 
-          if md = qp.match( /^recipe%5Burl%5D=(.*$)/ )
-    	    @after_sign_in_msg = "Sorry, authentication failed. Returning to the recipe..."
-            @after_sign_in_url = URI.unescape md[1]
-          end
-        end
-      end
-      session.delete :original_uri
+    if data = deferred_capture(true)
+      if @after_sign_in_url = data[:recipe][:url]
+  	    @after_sign_in_msg = "Sorry, authentication failed. Returning to the recipe..."
+  	  end
     end
     render 'callback', :layout => false
   end
@@ -66,8 +51,7 @@ class AuthenticationsController < ApplicationController
       flash[:notice] = "Yay! Signed in with #{@authentication.provider_name}. Welcome back, #{@authentication.user.handle}!"
       # result = sign_in_and_redirect @authentication.user # , :bypass => true
       sign_in @authentication.user, :event => :authentication
-      @after_sign_in_url = strip_query(session[:original_uri]) || after_sign_in_path_for(@authentication.user)
-      session.delete :original_uri
+      @after_sign_in_url = stripped_capture || after_sign_in_path_for(@authentication.user)
       render 'callback', :layout => false
     elsif current_user
       # Just adding an authentication method to the current user
@@ -84,8 +68,7 @@ class AuthenticationsController < ApplicationController
       @authentication = user.authentications.create!(authparams) # Link to existing user
       sign_in user, :event => :authentication
       flash[:notice] = "Yay! Signed in with #{@authentication.provider_name}. Nice to see you again, #{user.handle}!"
-      @after_sign_in_url = strip_query(session[:original_uri]) || after_sign_in_path_for(user)
-      session.delete :original_uri
+      @after_sign_in_url = stripped_capture || after_sign_in_path_for(user)
       render 'callback', :layout => false
     elsif user = (session[:invitation_token] && User.where(:invitation_token => session[:invitation_token]).first)
         # If we have an invitation out for this user we go ahead and log them in
@@ -112,8 +95,6 @@ class AuthenticationsController < ApplicationController
         session[:omniauth] = omniauth.except('extra')
         # flash[:notice] = "Hmm, that's a new one. Would you enter your email address below so we can sort out who you are?"
         flash[:notice] = nil
-        session[:original_uri] = strip_query(session[:original_uri])
-        session.delete :original_uri
         @after_sign_in_url = users_identify_url
         render 'callback', :layout => false
         # redirect_to users_identify_url

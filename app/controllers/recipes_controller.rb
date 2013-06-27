@@ -133,36 +133,49 @@ class RecipesController < ApplicationController
   	dialog_only = params[:how] == "modal" || params[:how] == "modeless"
     respond_to do |format|
       format.html { # This is for capturing a new recipe and tagging it using a new page. 
-        @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe]||{}, true, params[:extractions] # session[:user_id], params
-        # The injector (capture.js) calls for this to fill the iframe on the foreign page.
-        @layout = "injector"
-        if @recipe.id
-          if params[:area]
-            render :edit, :layout => (params[:layout] || dialog_only)
+        debugger
+        if current_user
+          @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe]||{}, true, params[:extractions] # session[:user_id], params
+          # The injector (capture.js) calls for this to fill the iframe on the foreign page.
+          @layout = "injector"
+          if @recipe.id
+            if params[:area]
+              render :edit, :layout => (params[:layout] || dialog_only)
+            else
+              # If we're collecting a recipe outside the context of the iframe, just
+              # redirect back to the recipe. We can't edit the recipe, but too bad.
+              redirect_to @recipe.url
+            end
           else
-            # If we're collecting a recipe outside the context of the iframe, just
-            # redirect back to the recipe. We can't edit the recipe, but too bad.
-            redirect_to @recipe.url
+            @resource = @recipe
+            render "pages/resource_errors", :layout => (params[:layout] || dialog_only)
           end
         else
-          @resource = @recipe
-          render "pages/resource_errors", :layout => (params[:layout] || dialog_only)
+          # Nobody logged in => 
+          defer_capture params.slice(:recipe, :extractions, :sourcehome )
+          redirect_to new_authentication_url(area: "at_top", layout: "injector" )
         end
       }
       format.json {
         debugger
-        @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe]||{}, true, params[:extractions] # session[:user_id], params
-        if @recipe.id
-          codestr = with_format("html") { render_to_string :edit, layout: false }
+        if current_user          
+          @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe]||{}, true, params[:extractions] # session[:user_id], params
+          if @recipe.id
+            codestr = with_format("html") { render_to_string :edit, layout: false }
+          else
+            @resource = @recipe
+            codestr = with_format("html") { render_to_string "pages/resource_errors", layout: false } 
+          end
+          render json: { code: codestr }
         else
-          @resource = @recipe
-          codestr = with_format("html") { render_to_string "pages/resource_errors", layout: false } 
+          # Nobody logged in => 
+          defer_capture params.slice(:recipe, :extractions, :sourcehome )
+          redirect_to new_authentication_url(area: "at_top")
         end
-        render json: { code: codestr }
       }
       format.js { 
-        # Produce javascript in response to the bookmarklet, to render  the recipe editor into an iframe, 
-        # possibly preceded by login negotiation.
+        # Produce javascript in response to the bookmarklet, to build minimal javascript into the host page
+        # (from capture.js) which then renders the recipe editor into an iframe, powered by injector.js
         # We need a domain to pass as sourcehome, so the injected iframe can communicate with the browser.
         # This gets extracted from the href passed as a parameter
         url = params[:recipe][:url]
@@ -170,17 +183,12 @@ class RecipesController < ApplicationController
         begin
           uri = URI(url)
           if uri.host == current_domain.sub(/:\d*/,'') # Compare the host to the current domain (minus the port)
-            render js: %Q{alert("Sorry, but RecipePower doesn't cookmark its own pages(does that even make sense?)") ; }
+            render js: %Q{alert("Sorry, but RecipePower doesn't cookmark its own pages (does that even make sense?)") ; }
           elsif !(@site = Site.by_link(url))
             # If we couldn't even get the site from the domain, we just bail entirely
             render js: %Q{alert(#{msg});}
           else
             @url = capture_recipes_url area: "at_top", layout: "injector", sourcehome: @site.domain, recipe: params[:recipe]
-            if !current_user # Apparently there's no way to check up on a user without hitting the database
-              # Push the editing URL so authentication happens first
-              session[:original_uri] = @url
-              @url = new_authentication_url area: "at_top", layout: "injector", sourcehome: @site.domain 
-            end
             render
           end
         rescue

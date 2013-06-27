@@ -1,5 +1,5 @@
 <div class="edit_recipe_hdr" >
-	<%= image_tag "http://www.recipepower.com/assets/RPlogo.png", class: "small_logo", :alt => "RecipePower" %>
+	<%= image_tag "RPlogo.png", class: "small_logo", :alt => "RecipePower" %>
 	<span>has added this to your collection. Tag it here if you like. (Or <%= link_to_function "not", "retire_iframe();" %>.)</span>
 </div>
 <%= form_for @recipe, :html => { style: 'width:auto;height:auto'} do |f| %>

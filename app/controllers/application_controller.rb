@@ -10,6 +10,8 @@ class ApplicationController < ActionController::Base
     rescue_from AbstractController::ActionNotFound, :with => :no_action_error
     
     helper_method :orphantagid
+    helper_method :stored_location_for
+    include ApplicationHelper
     
   # Get a presenter for the object fron within a controller
   def present(object, klass = nil)
@@ -75,6 +77,15 @@ class ApplicationController < ActionController::Base
   def orphantagid(tagid)
       "orphantag_"+tagid.to_s
   end
+  
+  def stored_location_for(resource)
+    debugger
+    if redirect = super
+      uri = URI.new(redirect)
+      x=2
+    end
+    redirect
+  end
       
   include ControllerAuthentication
   protect_from_forgery
@@ -83,6 +94,7 @@ class ApplicationController < ActionController::Base
   # If there was a redirect to the login page, we go back to the source of the redirect.
   # Otherwise, new users go to the welcome page and logged-in-before users to the queries page.
   def after_sign_in_path_for(resource)
+    debugger
     redirect = stored_location_for(resource)
     logger.debug "AFTER SIGNIN, STORED LOCATION IS "+(redirect||"empty")
     redirect ||
@@ -94,28 +106,44 @@ class ApplicationController < ActionController::Base
           super(resource)
         end
   end
-
-  # redirect somewhere that will eventually return back to here
-  def redirect_away(url, options = {})
-    logger.debug "REDIRECTING AWAY FROM "+request.url+" TO "+url
-    session[:original_uri] = request.url # url.sub /\w*:\/\/[^\/]*/, ''
-    redirect_to url, options
+  
+  # In the event that a recipe capture is deferred by login, this stores the requisite information
+  # in the session for retrieval after login
+  def defer_capture data
+    if data
+      session[:capture_data] = data.clone
+    else
+      session.delete :capture_data
+    end
   end
   
-  # save the given url in the expectation of coming back to it
-  def push_page(url)
-      logger.debug "PUSHING PAGE TO "+url
-      session[:original_uri] = url
-  end
-
-  # returns the person to either the original url from a redirect_away or to a provided, default url
-  def redirect_back(options = {})
-    uri = session[:original_uri] || collection_path
-    logger.debug "REDIRECTING BACK TO "+uri
-    session[:original_uri] = nil
-    redirect_to uri, options
+  def deferred_capture forget=false
+    if cd = session[:capture_data]
+      session.delete(:capture_data) if forget
+      cd
+    end
   end
   
+  # Recall the deferred capture--if any--as a url that can be redirected to
+  def recall_capture forget=false
+    if capture_data = deferred_capture(forget)
+      url = capture_recipes_url capture_data
+      x=2
+      url
+    end
+  end
+
+  def stripped_capture forget=false
+    # Edge case: we may get here in the course of authorizing collecting a recipe, in 
+    # which case we forget about handling it in the embedded iframe: remove the "area=at_top" 
+    # and "layout=injector" query parameters
+    if capture_data = deferred_capture(forget)
+      capture_data.delete[:area]
+      capture_data.delete[:layout]
+      capture_data
+    end
+  end
+    
   protected
     def render_optional_error_file(status_code)
       logger.info "Logger sez: Error 500"
