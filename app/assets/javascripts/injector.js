@@ -51,7 +51,13 @@ function ptq(q) {
 
 function launch_interaction(sourcehome) {
 	// Set the dialog width to that of the accompanying encapsulation
-	if(sourcehome && sourcehome.length > 0) document.sourcehome = sourcehome;
+	if (!(document.referrer && (document.referrer.indexOf(sourcehome) == 0))) // sourcehome matches referrer
+		debugger;
+	if(sourcehome && sourcehome.length > 0) 
+		RP.embedding_url = sourcehome;
+	else
+		RP.embedding_url = document.referrer
+	end
 	var dlog = document.getElementById("recipePowerDialog"); // document.body.childNodes[0];
 	var onloadNode = dlog.attributes["onload"];
 	if(onloadNode) {
@@ -70,7 +76,7 @@ function launch_interaction(sourcehome) {
 			h = dropdown.offsetHeight;
 		}
 		if(dlog.offsetWidth > 0 && dlog.offsetHeight > 0) {
-			$.postMessage( { call: "execute_resize", width: dlog.offsetWidth, height: dlog.offsetHeight+h }, document.sourcehome );
+			$.postMessage( { call: "execute_resize", width: dlog.offsetWidth, height: dlog.offsetHeight+h }, RP.embedding_url );
 		}
 	});
 	
@@ -96,7 +102,7 @@ function open_dialog(dlog) {
 		cancelBtn.onclick = retire_iframe;
 	// Report the window dimensions to the enclosing iframe
 	if(dlog.offsetWidth > 0 && dlog.offsetHeight > 0) 
-		$.postMessage( { call: "execute_resize", width: dlog.offsetWidth, height: dlog.offsetHeight }, document.sourcehome );
+		$.postMessage( { call: "execute_resize", width: dlog.offsetWidth, height: dlog.offsetHeight }, RP.embedding_url );
 }
 
 // Called when the dialog is closed
@@ -108,7 +114,7 @@ function close_dialog(dlog) {
 // expected width and height of the "dialog"
 function yield_iframe(e) {
 	var link = e.currentTarget;
-	$.postMessage( { call: "redirect_from_iframe", url: $(link).attr("href") }, document.sourcehome );
+	$.postMessage( { call: "redirect_from_iframe", url: $(link).attr("href") }, RP.embedding_url );
 	e.stopPropagation();
 	e.preventDefault();
 	false
@@ -118,12 +124,12 @@ function retire_iframe(notice) {
 	var msg = { call: "retire_iframe" };
 	if(notice && (typeof notice === 'string'))
 		msg.notice = notice;
-	$.postMessage( msg, document.sourcehome );
+	$.postMessage( msg, RP.embedding_url );
 }
 
 function redirect_to(url) {
 	var msg = { call: "redirect_to", url: url };
-	$.postMessage( msg, document.sourcehome );
+	$.postMessage( msg, RP.embedding_url );
 }
 
 // A submit handler for a modal dialog form. Submits the data 

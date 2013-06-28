@@ -114,7 +114,6 @@ class RecipesController < ApplicationController
         formats )
 =end
     else # failure (not a valid recipe) => return to new
-      debugger
        @Title = "Cookmark a Recipe"
        @nav_current = :addcookmark
        # render :action => 'new'
@@ -133,7 +132,6 @@ class RecipesController < ApplicationController
   	dialog_only = params[:how] == "modal" || params[:how] == "modeless"
     respond_to do |format|
       format.html { # This is for capturing a new recipe and tagging it using a new page. 
-        debugger
         if current_user
           @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe]||{}, true, params[:extractions] # session[:user_id], params
           # The injector (capture.js) calls for this to fill the iframe on the foreign page.
@@ -153,11 +151,10 @@ class RecipesController < ApplicationController
         else
           # Nobody logged in => 
           defer_capture params.slice(:recipe, :extractions, :sourcehome )
-          redirect_to new_authentication_url(area: "at_top", layout: "injector" )
+          redirect_to new_authentication_url(area: "at_top", layout: "injector", sourcehome: params[:sourcehome] )
         end
       }
       format.json {
-        debugger
         if current_user          
           @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe]||{}, true, params[:extractions] # session[:user_id], params
           if @recipe.id
@@ -170,7 +167,7 @@ class RecipesController < ApplicationController
         else
           # Nobody logged in => 
           defer_capture params.slice(:recipe, :extractions, :sourcehome )
-          redirect_to new_authentication_url(area: "at_top")
+          redirect_to new_authentication_url(area: "at_top", layout: "injector", sourcehome: params[:sourcehome] )
         end
       }
       format.js { 
