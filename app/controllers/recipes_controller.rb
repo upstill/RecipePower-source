@@ -155,6 +155,8 @@ class RecipesController < ApplicationController
         end
       }
       format.json {
+        @area = "floating"
+        debugger
         if current_user          
           @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe]||{}, true, params[:extractions] # session[:user_id], params
           if @recipe.id
@@ -163,7 +165,7 @@ class RecipesController < ApplicationController
             @resource = @recipe
             codestr = with_format("html") { render_to_string "pages/resource_errors", layout: false } 
           end
-          render json: { code: codestr }
+          render json: { dlog: codestr }
         else
           # Nobody logged in => 
           defer_capture params.slice(:recipe, :extractions, :sourcehome )

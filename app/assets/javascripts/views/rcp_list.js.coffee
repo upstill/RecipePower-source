@@ -34,11 +34,12 @@ RP.rcp_list.boostInRecent = (list_element_class, list_element_body, targettab) -
 # there).
 RP.rcp_list.touch_recipe = (id) ->		# Formerly rcpTouch from oldRP.js
 	# First, replace all the "Recipe last viewed at" lines according to the server
-	jQuery.get( "/recipes/"+id+"/touch", {}, (body, status, instance) ->
-			if status == "success"
-				$("."+body.touch_class).replaceWith(body.touch_body);
-				# boostInTablist(body.list_element_class, body.list_element_body, 4)
-		, "json" )
+	if id && (id > 0)
+		jQuery.get( "/recipes/"+id+"/touch", {}, (body, status, instance) ->
+				if status == "success"
+					$("."+body.touch_class).replaceWith(body.touch_body);
+					# boostInTablist(body.list_element_class, body.list_element_body, 4)
+			, "json" )
 
 jQuery ->
 	# Enable recipe-preview popup

@@ -57,7 +57,6 @@ function launch_interaction(sourcehome) {
 		RP.embedding_url = sourcehome;
 	else
 		RP.embedding_url = document.referrer
-	end
 	var dlog = document.getElementById("recipePowerDialog"); // document.body.childNodes[0];
 	var onloadNode = dlog.attributes["onload"];
 	if(onloadNode) {

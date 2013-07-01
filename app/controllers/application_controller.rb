@@ -127,6 +127,7 @@ class ApplicationController < ActionController::Base
   # Recall the deferred capture--if any--as a url that can be redirected to
   def recall_capture forget=false
     if capture_data = deferred_capture(forget)
+      debugger
       url = capture_recipes_url capture_data
       x=2
       url
