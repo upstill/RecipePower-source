@@ -16,10 +16,6 @@ $guideBorder:              darken(adjust-hue($guideBackground, -10), 7%) !defaul
 
 body { padding-top: 60px; }
 
-#recipePowerDialog.new_feed textarea {
-	width: 600px;
-}
-
 .modal-body {
     max-height: 520px;
 }

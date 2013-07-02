@@ -325,20 +325,6 @@ module ApplicationHelper
     }.join(' ')
   end
 
-=begin  
-  # Declare a dialog div with content to be supplied later using the template
-  def dialogDiv( which, ttl=nil, area="floating", template="")
-    logger.debug "dialogHeader for "+globstring({dialog: which, area: area, layout: @layout, ttl: ttl})
-    classname = which.to_s
-    ttlspec = ttl ? (" title=\"#{ttl}\"") : ""
-    content_tag(:div, 
-        "",
-        class: classname+" dialog hide "+area, 
-        id: "recipePowerDialog", 
-        "data-template" => template)
-  end
-=end 
-
    def pagination_link (text, pagenum, url)
      # "<span value='#{p.to_s}' class='pageclickr'>#{p.to_s}</span>"
      # We install the actual pagination handler in RPquery.js::queryTabOnLoad

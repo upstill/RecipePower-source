@@ -25,7 +25,7 @@ module DialogsHelper
         options[:class] 
       ].compact.join(' ')
     [:area, :show, :noflash, :modal, :body_contents].each { |k| options.delete k }
-    options[:id] = "recipePowerDialog"
+    # options[:id] = "recipePowerDialog"
     options[:title] = ttl if ttl
     content_tag(:div, header+body, options).html_safe
   end
@@ -74,7 +74,7 @@ module DialogsHelper
     for_bootstrap = options[:area].blank? || options[:area] != "at_top"
     bs_classes = for_bootstrap ? "modal-pending hide fade" : ""
     hdr = 
-      %Q{<div id="recipePowerDialog" class="#{bs_classes} dialog #{which.to_s} #{area} #{classes}" #{ttlspec}>}+
+      %Q{<div class="#{bs_classes} dialog #{which.to_s} #{area} #{classes}" #{ttlspec}>}+
       (for_bootstrap ? 
         content_tag( :div,         
           %Q{

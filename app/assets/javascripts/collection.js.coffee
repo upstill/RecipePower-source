@@ -84,7 +84,6 @@ jQuery ->
 	 	elmt.style.bottom = (navlinks.offsetHeight + 5).toString() + "px";
 	
 	if (elmt = $("a.recipe_edit_trigger")[0])
-		debugger
 		RP.dialog.get_and_go null, elmt.href
 
 collection_tagchange = (params, url) ->

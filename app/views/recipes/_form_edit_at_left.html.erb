@@ -1,6 +1,6 @@
-<div class="<%= recipe ? "dialog" : "" %> edit_recipe at_left hide" id="recipePowerDialog" style="overflow:visible">
+<div class="<%= recipe ? "dialog" : "" %> edit_recipe at_left hide" style="overflow:visible">
 	<div class="modal-header">
-		<input class="close cancel" data-dismiss="modal" name="commit" type="submit" value="x" />
+		<%# <input class="close cancel" data-dismiss="modal" name="commit" type="submit" value="x" /> %>
 		<h3>Tag That Recipe!</h3>
 	</div>
 	<form accept-charset="UTF-8" action="/recipes/<%= recipe_field_or_placeholder recipe, "rcpID" %>" class="form-inline edit_recipe" data-remote="true" data-type="json" id="edit_recipe_<%= recipe_field_or_placeholder recipe, "rcpID" %>">

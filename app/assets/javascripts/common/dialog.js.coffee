@@ -44,6 +44,7 @@ RP.dialog.cancel = (event) ->
 		dlog = $('div.dialog')[0]
 	if dlog
 		RP.dialog.close_modal dlog
+	event.preventDefault();			
 
 # Take over a previously-loaded dialog and run it
 RP.dialog.run = (dlog) ->
@@ -114,6 +115,7 @@ open_modal = (dlog, omit_button) ->
 	# Set text focus as appropriate
 	if (focus_sel = $(dlog).data("focus")) && (focus_elmt = $(focus_sel, dlog)[0])
 		focus_elmt.focus()
+	$('input.cancel', dlog).click RP.dialog.cancel
 	dlog
 
 # Remove the dialog and notify its handler prior to removing the element
@@ -261,7 +263,8 @@ notify = (what, dlog, entity) ->
 # Special handler for dialogs imbedded in an iframe. See 'injector.js'
 notify_injector = (what, dlog) ->
 	if fcn = RP.named_function what+"_dialog"
-		fcn dlog
+		debugger
+		# fcn dlog
 	
 # Public convenience methods for handling events
 RP.dialog.onopen = (dlog, entity) ->
