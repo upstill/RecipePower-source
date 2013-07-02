@@ -51,7 +51,7 @@ class AuthenticationsController < ApplicationController
       flash[:notice] = "Yay! Signed in with #{@authentication.provider_name}. Welcome back, #{@authentication.user.handle}!"
       # result = sign_in_and_redirect @authentication.user # , :bypass => true
       sign_in @authentication.user, :event => :authentication
-      @after_sign_in_url = stripped_capture || after_sign_in_path_for(@authentication.user)
+      @after_sign_in_url = after_sign_in_path_for(@authentication.user)
       render 'callback', :layout => false
     elsif current_user
       # Just adding an authentication method to the current user
@@ -68,7 +68,7 @@ class AuthenticationsController < ApplicationController
       @authentication = user.authentications.create!(authparams) # Link to existing user
       sign_in user, :event => :authentication
       flash[:notice] = "Yay! Signed in with #{@authentication.provider_name}. Nice to see you again, #{user.handle}!"
-      @after_sign_in_url = stripped_capture || after_sign_in_path_for(user)
+      @after_sign_in_url = after_sign_in_path_for(user)
       render 'callback', :layout => false
     elsif user = (session[:invitation_token] && User.where(:invitation_token => session[:invitation_token]).first)
         # If we have an invitation out for this user we go ahead and log them in

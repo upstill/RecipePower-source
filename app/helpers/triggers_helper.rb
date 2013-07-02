@@ -11,12 +11,12 @@ module TriggersHelper
 	# Embed a link to javascript for running a dialog by reference to a URL
 	def link_to_modal(label, path, options={})
 	  options.delete(:selector) if selector = options[:selector]
-  	link_to_function label, "RP.dialog.get_and_go('#{path}', '#{selector}');", options
+  	link_to_function label, "RP.dialog.get_and_go(event, '#{path}', '#{selector}');", options
   end
 	
 	# Embed a link to javascript for running a dialog by reference to a URL
 	def link_to_submit(label, path, options={})
-  	link_to_function label, "RP.submit('#{path}');", options
+  	link_to_function label, "RP.submit(event, '#{path}');", options
   end
   
   def link_to_redirect(label, url, options={} )

@@ -4,6 +4,7 @@
 	<%= dialogFooter %>
 <% else %>
 	<%# modal_dialog :edit_recipe, "Tag That Recipe!", area: @area do %>
-		<%= render "recipes/dialog_edit_recipe" %>
+	<%# render "recipes/dialog_edit_recipe" %>
+	<%= render "form_edit_at_left", recipe: @recipe %>
 	<%# end %>
 <% end %>

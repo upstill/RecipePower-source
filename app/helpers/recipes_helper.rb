@@ -126,8 +126,8 @@ def present_comments (recipe, user_id)
     out.html_safe
 end
 
-# Provide the cookmark-count line
-def cookmark_count(rcp)
+  # Provide the cookmark-count line
+  def cookmark_count(rcp)
      count = rcp.num_cookmarks
      result = count.to_s+" Cookmark"+((count>1)?"s":"")
      if rcp.cookmarked session[:user_id]
@@ -139,6 +139,31 @@ def cookmark_count(rcp)
 				 :update => "response5")
      end
      "<span class=\"cmcount\" id=\"cmcount#{rcp.id}\">#{result}</span>".html_safe
-end
+  end
 
+  # Declare a div for triggering a recipe edit operation
+  def recipe_spring_load
+    if capture_data = deferred_capture(false)
+      content_tag :a, "",
+        href: capture_recipes_url(capture_data),
+        class: "recipe_edit_trigger"
+    end
+  end
+
+  def recipe_field_or_placeholder recipe, fieldname
+    if recipe
+      case fieldname
+      when "authToken"
+        form_authenticity_token
+      when "rcpPrivate"
+        recipe.private ? %q{checked="checked"} : ""
+      else
+        attrname = fieldname.sub("rcp", '').downcase
+        recipe.send(attrname.to_sym).to_s.html_safe
+      end
+    else # Without a recipe specified, we simply return a placeholder for later
+      "%%#{fieldname}%%" 
+    end
+  end
+  
 end

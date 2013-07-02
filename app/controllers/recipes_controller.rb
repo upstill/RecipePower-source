@@ -155,8 +155,6 @@ class RecipesController < ApplicationController
         end
       }
       format.json {
-        @area = "floating"
-        debugger
         if current_user          
           @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe]||{}, true, params[:extractions] # session[:user_id], params
           if @recipe.id

@@ -2,6 +2,23 @@ require './lib/controller_utils.rb'
 class PasswordsController < Devise::PasswordsController
   before_filter { @area = params[:area] || "" }
   
+  # GET /resource/password/new
+  def new
+    if request.format == "application/json"
+      build_resource({})
+      respond_with resource do |format|
+        # format.html { render :partial => "registrations/form" }
+        format.json { 
+          render json: { 
+                    dlog: with_format("html") { render_to_string :new, layout: false }
+                  }
+        }
+      end
+    else
+      super
+    end
+  end
+  
   def create
     self.resource = resource_class.send_reset_password_instructions(resource_params)
     if successfully_sent?(resource)

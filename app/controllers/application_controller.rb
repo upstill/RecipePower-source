@@ -11,6 +11,7 @@ class ApplicationController < ActionController::Base
     
     helper_method :orphantagid
     helper_method :stored_location_for
+    helper_method :deferred_capture
     include ApplicationHelper
     
   # Get a presenter for the object fron within a controller
@@ -77,35 +78,43 @@ class ApplicationController < ActionController::Base
   def orphantagid(tagid)
       "orphantag_"+tagid.to_s
   end
-  
-  def stored_location_for(resource)
-    debugger
-    if redirect = super
-      uri = URI.new(redirect)
-      x=2
-    end
-    redirect
-  end
       
   include ControllerAuthentication
   protect_from_forgery
   
+  def stored_location_for(resource_or_scope)
+    # If user is logging in because they were capturing a recipe, we return 
+    # the path to completing the capture/tagging process
+    scope = Devise::Mapping.find_scope!(resource_or_scope)
+    redir = 
+    if scope && (scope==:user)
+      if params[:area] == "at_top" # Signing in from remote site => respond directly
+        capture_recipes_url deferred_capture(true)
+      else
+        # Signing in from RecipePower => load collection, let deferred
+        # capture call be made on client side with a trigger
+        collection_path
+      end
+    end
+    redir || super
+  end
+  
   # This is an override of the Devise method to determine where to go after login.
   # If there was a redirect to the login page, we go back to the source of the redirect.
   # Otherwise, new users go to the welcome page and logged-in-before users to the queries page.
-  def after_sign_in_path_for(resource)
-    debugger
-    redirect = stored_location_for(resource)
-    logger.debug "AFTER SIGNIN, STORED LOCATION IS "+(redirect||"empty")
-    redirect ||
-        if resource.is_a?(User)
-          # flash[:notice] = "Congratulations, you're signed up!"
-          # resource.sign_in_count < 2 ? welcome_path : collection_path
-          collection_path
-        else
-          super(resource)
-        end
+  def after_sign_in_path_for(resource_or_scope)
+    scope = Devise::Mapping.find_scope!(resource_or_scope)
+    stored_location_for(resource_or_scope) || 
+    (scope && (scope==:user) && collection_path) || 
+    super
   end
+  
+  # def after_sign_in_path_for(resource_or_scope)
+    # recall_capture || collection_path
+    # stripped_capture
+    # redirect_url = recall_capture || collection_path
+    # stored_location_for(resource_or_scope) || signed_in_root_path(resource_or_scope)
+  # end
   
   # In the event that a recipe capture is deferred by login, this stores the requisite information
   # in the session for retrieval after login
@@ -123,28 +132,18 @@ class ApplicationController < ActionController::Base
       cd
     end
   end
-  
-  # Recall the deferred capture--if any--as a url that can be redirected to
-  def recall_capture forget=false
-    if capture_data = deferred_capture(forget)
-      debugger
-      url = capture_recipes_url capture_data
-      x=2
-      url
-    end
-  end
 
   def stripped_capture forget=false
     # Edge case: we may get here in the course of authorizing collecting a recipe, in 
     # which case we forget about handling it in the embedded iframe: remove the "area=at_top" 
     # and "layout=injector" query parameters
     if capture_data = deferred_capture(forget)
-      capture_data.delete[:area]
-      capture_data.delete[:layout]
+      capture_data.delete :area
+      capture_data.delete :layout
       capture_data
     end
   end
-    
+            
   protected
     def render_optional_error_file(status_code)
       logger.info "Logger sez: Error 500"

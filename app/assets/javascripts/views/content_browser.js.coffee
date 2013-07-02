@@ -22,9 +22,8 @@ RP.content_browser.onload = () ->
 		else
 			RP.collection.update()
 
-RP.content_browser.click_to_browser = () ->
+RP.content_browser.click_to_browser = (e) ->
 	inside = null
-	e = window.event
 	me = e.currentTarget
 	elements = $('li.RcpBrowser')
 	i=0

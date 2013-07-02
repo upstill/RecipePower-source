@@ -5,7 +5,7 @@
 			<%= express_resource_errors @resource, preface: (@title ? express_error_context(@resource) : "") %>
 		</div>
 		<div class="error_cancel">
-			<button type="button" class="cancel" onclick="RP.dialog.cancel()" >Okay</button>
+			<%= dialog_cancel_button "Okay" %>
 		</div>
 	<%= dialogFooter %>
 <% else %>
@@ -14,7 +14,7 @@
 			<%= express_resource_errors @resource, preface: (@title ? express_error_context(@resource) : "") %>
 		<% end %>
 		<%= modal_footer do %>
-			<button type="button" class="cancel" onclick="RP.dialog.cancel()" >Okay</button>
+			<%= dialog_cancel_button "Okay" %>
 		<% end %>
 	<% end %>
 <% end %>

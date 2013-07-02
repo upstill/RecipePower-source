@@ -94,13 +94,13 @@ module DialogsHelper
   
   def generic_cancel_button name, options={}
     content_tag( :div, 
-        %q{<a href="#" id="recipePowerCancelBtn" onclick="RP.dialog.cancel(); return false;" style="text-decoration: none;">X</a>}.html_safe,
+        %q{<a href="#" id="recipePowerCancelBtn" onclick="RP.dialog.cancel(event); return false;" style="text-decoration: none;">X</a>}.html_safe,
         class: "recipePowerCancelDiv")
   end
   
   def dialog_cancel_button name, options={}
     options[:class] = "#{options[:class]} btn btn-info"
-    link_to_function name, "RP.dialog.cancel();", options
+    link_to_function name, "RP.dialog.cancel(event);", options
   end
     
 end

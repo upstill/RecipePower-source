@@ -4,7 +4,7 @@ RP.dialog = RP.dialog || {}
 # Hit the server for a dialog via JSON, and run the result
 # This function can be tied to a link with only a URL to a controller for generating a dialog.
 # We will get the div and run the associated dialog.
-RP.dialog.get_and_go = (request, selector) ->
+RP.dialog.get_and_go = (event, request, selector) ->
 	# old_dlog is extracted from what triggered this call (if any)
 	how = "modal"
 	area = "floating"
@@ -18,8 +18,11 @@ RP.dialog.get_and_go = (request, selector) ->
 	if !request.match /how=/
 		request += q+"how=" + how
 	
-	odlog = target_modal()
-	if selector && (ndlog = $(selector)[0])
+	if event
+		odlog = target_modal(event)
+	else
+		odlog = null
+	if selector && (ndlog = $(selector)[0]) # If dialog already loaded, replace the responding dialog
 		RP.dialog.replace_modal ndlog, odlog
 	else
 		$.ajax
@@ -34,8 +37,12 @@ RP.dialog.get_and_go = (request, selector) ->
 				RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
 				RP.process_response responseData, odlog
 
-RP.dialog.cancel = ->
-	if dlog = target_modal()
+RP.dialog.cancel = (event) ->
+	if event
+		dlog = target_modal(event)
+	else
+		dlog = $('div.dialog')[0]
+	if dlog
 		RP.dialog.close_modal dlog
 
 # Take over a previously-loaded dialog and run it
@@ -88,15 +95,17 @@ RP.dialog.replace_modal = (newdlog, odlog) ->
 	return open_modal newdlog
 
 # Return the dialog element for the current event target
-target_modal = ->
-	if (odlog = $('div.dialog.modal')[0]) && $(window.event.currentTarget, odlog)[0]
+target_modal = (event) ->
+	if !event
+		event = window.event
+	if (odlog = $('div.dialog.modal')[0]) && $(event.currentTarget, odlog)[0]
 		return odlog
 
 open_modal = (dlog, omit_button) ->
 	$(dlog).removeClass('modal-pending').removeClass('hide').addClass('modal')
 	notify "load", dlog
 	if !(omit_button || $('button.close', dlog)[0])
-		buttoncode = '<button type=\"button\" class=\"close\" onclick=\"RP.dialog.cancel()\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>'
+		buttoncode = '<button type=\"button\" class=\"close\" onclick=\"RP.dialog.cancel(event)\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>'
 		$('div.modal-header').prepend buttoncode
 	if $(dlog).modal
 		$(dlog).modal 'show'
@@ -109,11 +118,12 @@ open_modal = (dlog, omit_button) ->
 
 # Remove the dialog and notify its handler prior to removing the element
 RP.dialog.close_modal = (dlog, epilog) ->
-	if($(dlog).modal)
-		$(dlog).modal 'hide'
-	notify "close", dlog
-	$(dlog).remove()
-	notify_injector "close", dlog
+	if dlog
+		if($(dlog).modal)
+			$(dlog).modal 'hide'
+		notify "close", dlog
+		$(dlog).remove()
+		notify_injector "close", dlog
 	if epilog && epilog != ""
 		RP.dialog.user_note epilog
 

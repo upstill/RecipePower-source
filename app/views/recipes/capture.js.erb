@@ -171,7 +171,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
   prev: undefined,
 
   mouseon: function (event) {
-	  event = event || window.event;
+	  // event = event || window.event;
 		var ns = window.recipePower_namespace;
     if (this != ns.prev) {
 			if (ns.prev) {
@@ -183,13 +183,13 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	},
 
   mouseoff: function (event) {
-	  event = event || window.event;
+// 	  event = event || window.event;
 		this.className = this.className.replace(/\brecipePower-highlight\b/, '');
 		window.recipePower_namespace.prev = undefined;
   },
 
   imgclick: function (event) { // Handle a click on an image by sending its url to the iframe
-	  event = event || window.event;
+// 	  event = event || window.event;
 		var ns = window.recipePower_namespace;
 		var iframe = ns.iframe; // document.getElementById('recipePower-iframe')
 		ns.postMessage(
@@ -201,7 +201,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	},
 	
   aclick: function (event) { // Handle a click on a link enclosing an image by sending its url to the iframe
-	  event = event || window.event;
+// 	  event = event || window.event;
 		var ns = window.recipePower_namespace;
 		var iframe = ns.iframe; // document.getElementById('recipePower-iframe')
 		var childImgs = this.getElementsByTagName('img')

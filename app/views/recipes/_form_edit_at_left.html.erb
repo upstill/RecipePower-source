@@ -1,12 +1,12 @@
-<div class="edit_recipe at_left hide" id="recipePowerDialog" style="overflow:visible">
+<div class="<%= recipe ? "dialog" : "" %> edit_recipe at_left hide" id="recipePowerDialog" style="overflow:visible">
 	<div class="modal-header">
 		<input class="close cancel" data-dismiss="modal" name="commit" type="submit" value="x" />
 		<h3>Tag That Recipe!</h3>
 	</div>
-	<form accept-charset="UTF-8" action="/recipes/%%rcpID%%" class="form-inline edit_recipe" data-remote="true" data-type="json" id="edit_recipe_%%rcpID%%">
+	<form accept-charset="UTF-8" action="/recipes/<%= recipe_field_or_placeholder recipe, "rcpID" %>" class="form-inline edit_recipe" data-remote="true" data-type="json" id="edit_recipe_<%= recipe_field_or_placeholder recipe, "rcpID" %>">
 		<input name="utf8" type="hidden" value="&#x2713;" />
 		<input name="_method" type="hidden" value="post" />
-		<input name="authenticity_token" type="hidden" value="%%authToken%%" />
+		<input name="authenticity_token" type="hidden" value="<%= recipe_field_or_placeholder recipe, "authToken" %>" />
 		<div class="modal-body" style="overflow:visible">
 				<div class="notifications-panel">
 				</div>
@@ -15,26 +15,26 @@
 						<div class="span5">
 							<div class="edit_recipe_field pic">
 								<div class="pic_preview img-polaroid" >
-									<img alt="Some Image Available" class="fitPic" data-fillmode="width" id="rcpPic%%rcpID%%" onload="fitImageOnLoad('div.pic_preview img')" src="%%rcpPicURL%%" />
-									<input type="hidden" id="recipe_picurl" name="recipe[picurl]" rel="jpg,png,gif" size="30" type="text" value="%%rcpPicURL%%" />
+									<img alt="Some Image Available" class="fitPic" data-fillmode="width" id="rcpPic<%= recipe_field_or_placeholder recipe, "rcpID" %>" onload="fitImageOnLoad('div.pic_preview img')" src="<%= recipe_field_or_placeholder recipe, "rcpPicURL" %>" />
+									<input type="hidden" id="recipe_picurl" name="recipe[picurl]" rel="jpg,png,gif" size="30" type="text" value="<%= recipe_field_or_placeholder recipe, "rcpPicURL" %>" />
 								</div>
 								<div class="pic_picker_link">
 									<a type="button" href="/" class="pic_picker_golink btn btn-link hide" data="recipe_picurl;div.pic_preview img" value="Choose Picture">
 									Pick Picture </a>
-									<div class="pic_picker" data-url="/recipes/%%rcpID%%/edit?pic_picker=true" style="display:none;">
+									<div class="pic_picker" data-url="/recipes/<%= recipe_field_or_placeholder recipe, "rcpID" %>/edit?pic_picker=true" style="display:none;">
 									</div>
 								</div>
 							</div>
 						</div>
 						<div class="span7">
 							<div class="control-group">
-								<input type="text" class="span12" id="recipe_title" name="recipe[title]" value="%%rcpTitle%%" placeholder="Title">
+								<input type="text" class="span12" id="recipe_title" name="recipe[title]" value="<%= recipe_field_or_placeholder recipe, "rcpTitle" %>" placeholder="Title">
 							</div>
 							<div class="control-group">
 								<input type="text" class="span12" id="recipe_tag_tokens" name="recipe[tag_tokens]" rows="2" size="30" placeholder="Tags" />
 							</div>
 							<div class="control-group">
-								<textarea class="span12" id="recipe_comment" name="recipe[comment]" placeholder="Recipe Notes" rows="3">%%rcpComment%%</textarea>
+								<textarea class="span12" id="recipe_comment" name="recipe[comment]" placeholder="Recipe Notes" rows="3"><%= recipe_field_or_placeholder recipe, "rcpComment" %></textarea>
 							</div>
 							<div class="control-group">
 								<div class="btn-group" data-toggle="buttons-checkbox" data-toggle-name="recipe[status]">
@@ -42,7 +42,7 @@
 									<button type="button" class="btn" value="2" data-toggle="button"><%= t :recipe_status_medium %></button>
 									<button type="button" class="btn" value="4" data-toggle="button"><%= t :recipe_status_low %></button>
 								</div>
-								<input type="hidden" name="recipe[status]" value="%%rcpStatus%%" data-toggle-default="8"/>
+								<input type="hidden" name="recipe[status]" value="<%= recipe_field_or_placeholder recipe, "rcpStatus" %>" data-toggle-default="8"/>
 							</div>
 							<div class="control-group">
 							</div>
@@ -51,13 +51,13 @@
 				</div>
 		</div>
 		<div class="modal-footer">
-		  <input class="btn pull-left" type="submit" data-action="/recipes/%%rcpID%%/remove" value="Remove" data-method="post" />
+		  <input class="btn pull-left" type="submit" data-action="/recipes/<%= recipe_field_or_placeholder recipe, "rcpID" %>/remove" value="Remove" data-method="post" />
 		  <% if permitted_to? :admin, :pages %>
-				<input class="btn btn-danger pull-left" type="submit" data-action = "/recipes/%%rcpID%%" data-method="delete" value="Destroy" data-confirm="This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" />
+				<input class="btn btn-danger pull-left" type="submit" data-action = "/recipes/<%= recipe_field_or_placeholder recipe, "rcpID" %>" data-method="delete" value="Destroy" data-confirm="This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" />
 			<% end %>
 	 		<input name="recipe[private]" type="hidden" value="0" />
 	 		<label for="recipe_private" class="checkbox">
-	   		<input %%rcpPrivate%% id="recipe_private" name="recipe[private]" type="checkbox" value="1" />Private cookmark
+	   		<input <%= recipe_field_or_placeholder recipe, "rcpPrivate" %> id="recipe_private" name="recipe[private]" type="checkbox" value="1" />Private cookmark
 			</label>
 			<input class="cancel btn" data-dismiss="modal" name="commit" type="submit" value="Cancel" />
 	    <input class="submit btn btn-primary" name="commit" type="submit" value="Save" data-method="put" />

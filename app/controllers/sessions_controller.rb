@@ -45,8 +45,9 @@ class SessionsController < Devise::SessionsController
     else
       notice = "Welcome back, #{resource.handle}! (Logged in successfully.)"
     end
-    redirect_url = recall_capture || collection_path
-    redirect_to redirect_url, :notice => notice
+    # redirect_url = recall_capture || collection_path
+    # redirect_to redirect_url, :notice => notice
+    redirect_to after_sign_in_path_for(resource_or_scope), notice: notice
   end
  
   def failure

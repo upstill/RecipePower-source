@@ -257,8 +257,8 @@ RP.detach = (node) ->
 	parent.removeChild(node);
 
 # Respond to a click by optionally checking for a confirmation, firing a request at the server and appropriately handling the response
-RP.submit = (request) ->
-	elmt = window.event.toElement
+RP.submit = (event, request) ->
+	elmt = event.toElement
 	attribs = elmt.attributes
 	if attribs.method 
 		method = attribs.method.value
@@ -275,8 +275,8 @@ RP.submit = (request) ->
 
 # Respond to the change of a popup (say) by submtting a request. Both
 # request and its data are encoded in the element's data; the value is added to the request here
-RP.change = () ->
-	elmt = window.event.target
+RP.change = (event) ->
+	elmt = event.target
 	data = $(elmt).data()
 	# Stick the value of the element into the named parameter ('value' default)
 	if data.valueparam

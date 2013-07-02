@@ -200,7 +200,7 @@ BLOCK_END
       tagidstr = tag.id.to_s
       content_tag :span,
         tag_link(tag, true) +
-        (absorb_btn ? button_tag("Absorb", onclick: %Q{RP.submit("tags/#{@tag.id.to_s}/absorb?victim=#{tagidstr}");}, class: "absorb_button", id: "absorb_tag_#{tagidstr}") : ""),
+        (absorb_btn ? button_tag("Absorb", onclick: %Q{RP.submit(event, "tags/#{@tag.id.to_s}/absorb?victim=#{tagidstr}");}, class: "absorb_button", id: "absorb_tag_#{tagidstr}") : ""),
         class: "absorb_"+tagidstr
   end
 end

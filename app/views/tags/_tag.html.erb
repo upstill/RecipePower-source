@@ -4,7 +4,7 @@
 	<td><%= summarize_tag %></td>
 	<td><%= select_tag :tagtype, options_from_collection_for_select(Tag.type_selections(true), :last, :first, @tag.tagtype), 
 			class: "tag_type_selector",
-			onchange: "RP.change();",
+			onchange: "RP.change(event);",
 			data: { request: 	"/tags/typify", 
 							valueparam: "typenum",
 						  querydata: { tagid: @tag.id } } %></td>
