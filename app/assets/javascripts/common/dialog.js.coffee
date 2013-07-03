@@ -103,6 +103,8 @@ target_modal = (event) ->
 		return odlog
 
 open_modal = (dlog, omit_button) ->
+	if (onget = $(dlog).data "onget" ) && (fcn = RP.named_function "RP."+onget.shift() )
+		fcn.apply null, onget
 	$(dlog).removeClass('modal-pending').removeClass('hide').addClass('modal')
 	notify "load", dlog
 	if !(omit_button || $('button.close', dlog)[0])
@@ -128,7 +130,7 @@ RP.dialog.close_modal = (dlog, epilog) ->
 		notify_injector "close", dlog
 	if epilog && epilog != ""
 		RP.dialog.user_note epilog
-
+		
 # Remove the dialog and notify its handler prior to removing the element
 cancel_modal = (dlog) ->
 	if($(dlog).modal)

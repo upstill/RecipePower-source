@@ -85,8 +85,8 @@ jQuery ->
 	
 	if (elmt = $("a.recipe_edit_trigger")[0])
 		RP.dialog.get_and_go null, elmt.href
-		
-	if (dlog = $('div.dialog.trigger'))
+	
+	if (dlog = $('div.dialog.trigger')[0])
 		RP.dialog.run dlog
 
 collection_tagchange = (params, url) ->

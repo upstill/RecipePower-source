@@ -1,5 +1,177 @@
 .edit_recipe.dialog {
-	&.gone {
+	&.at_top {
+		font:12px arial,sans-serif;
+		font-weight:bold;
+		width:790px;
+		height:auto;
+		margin:0em;
+		padding:0em;
+		border:solid 3px #900;
+		background-color:#EEE;
+		z-index: 9000001;
+		div.edit_recipe_hdr {
+			height:30px;
+			width:auto;
+			margin:0.8em;
+			margin-top:0.4em;
+			margin-bottom:0.2em;
+			padding:0;
+			span {
+				display:inline-block;
+				vertical-align:top;
+				margin-top:12px
+			}
+			img {
+				display:inline-block;
+				z-index: 900001;
+			}
+		}
+		div.left {
+			float:left;
+			width:150px;
+			height:auto;
+			// border:1px solid red
+			p {
+				display:block;
+				font:12px arial,sans-serif;
+				font-weight:bold;
+				text-align:center;
+				margin:3px
+			}
+		}
+		div.middle {
+			float:left;
+			width:530px;
+			height:auto;
+			// border:1px solid green
+		}
+		div.right {
+			float:left;
+			width:100px;
+			height:auto;
+			// border:1px solid blue
+		}
+		div.edit_recipe_element {
+			height:40px;
+			padding-bottom:0.2em
+		}
+		div.edit_recipe_field_textarea {
+			display:inline-block;
+			vertical-align:top;
+			width:460px
+		}
+		div.edit_recipe_field {
+			margin:0.5em;
+			width:100%;
+			label {
+				display:inline-block;
+				vertical-align:top;
+				width:50px;
+				margin-top:5px
+			}
+			textarea {
+				display:inline-block;
+				vertical-align:top;
+				resize: none;
+				width:460px
+			}
+			ul {
+				display:inline-block;
+				vertical-align:top;
+				width:463px;
+				clear:none
+			}
+			input {
+				display:inline-block;
+				margin:5px
+			}
+			&.tags {
+				textarea {
+					width: 430px;
+				}
+				ul {
+					width: 430px;
+				}
+			}
+			&.pic {
+				width:90px;
+				height:90px;
+				margin-left:auto;
+				margin-right:auto;
+				outline:#999 solid 1px;
+				div.pic_preview {
+					width:90px;
+					height:90px;
+					margin-left:auto;
+					margin-right:auto;
+					text-align: center;
+					input {
+						display:none
+					}
+					p {
+						font:12px arial,sans-serif;
+						font-weight:bold;
+						text-align:center;
+						margin:3px
+					}
+				}
+			}
+		}
+		// Cribbed from http://www.alistapart.com/articles/expanding-text-areas-made-elegant/
+		textarea, 
+		pre {
+		  margin: 0;
+		  padding: 0;
+		  outline: 0;
+		  border: 0;
+		}
+		.expandingArea {
+		  position: relative;
+		  border: 1px solid #888;
+		  background: #fff;
+		}
+		.expandingArea > textarea,
+		.expandingArea > pre {
+		  padding: 5px;
+		  background: transparent;
+		  font: 400 13px/16px arial, sans-serif;
+		  /* Make the text soft-wrap */
+		  white-space: pre-wrap;
+		  word-wrap: break-word;
+		}
+		.expandingArea > textarea {
+		  /* The border-box box model is used to allow
+		   * padding whilst still keeping the overall width
+		   * at exactly that of the containing element.
+		   */
+		  -webkit-box-sizing: border-box;
+		     -moz-box-sizing: border-box;
+		      -ms-box-sizing: border-box;
+		          box-sizing: border-box;
+		  width: 100%;
+		  /* This height is used when JS is disabled */
+		  height: 100px;
+		}
+		.expandingArea.active > textarea {
+		  /* Hide any scrollbars */
+		  overflow: hidden;
+		  position: absolute;
+		  top: 0;
+		  left: 0;
+		  height: 100%;
+		  /* Remove WebKit user-resize widget */
+		  resize: none;
+		}
+		.expandingArea > pre {
+		  display: none;
+		}
+		.expandingArea.active > pre {
+		  display: block;
+		  /* Hide the text; just using it for sizing */
+		  visibility: hidden;
+		}	
+	}
+	&.at_top_1 {
 		width:95%;
 		margin:5px;
 		padding:5px;
@@ -60,76 +232,7 @@
 		  visibility: hidden;
 		}	
 	}
-	&.at_left_prior {
-		width:270px;
-		margin:3px;
-		padding:8px;
-		border:2px solid black;
-		display: none;
-		form {
-			margin:0
-		}
-		div.edit_recipe_field {
-			margin-top:5px;
-			width:100%;
-			height:auto;
-			&.pic {
-				width:200px;
-				height:auto;
-				margin-left:auto;
-				margin-right:auto;
-				div.pic_preview {
-					width:200px;
-					height:150px;
-					margin-left:auto;
-					margin-right:auto;
-					text-align: center;
-					input {
-						display:none;
-					}
-					img {
-						visibility: hidden;
-						&.loaded {
-							visibility: visible;
-							// margin-left: auto;
-							// margin-right: auto;
-							// text-align: center;
-						}
-					}
-				}
-				div.pic_picker_link {
-					font:14px arial,sans-serif;
-					font-weight:bold;
-					text-align:center;
-					margin-bottom:0px;
-					margin-top:5px;
-					.pic_picker_golink {
-						visibility: hidden;
-						&.loaded {
-							visibility: visible
-						}
-					}
-				}
-			}
-			&.tags {
-				margin-bottom:10px
-			}
-			label {
-				font:14px arial,sans-serif;
-				font-weight:bold;
-				float:left
-			}
-			input {
-				float:left;
-				margin:2px;
-				margin-right:6px
-			}
-			textarea {
-				width:222px
-			}
-		}
-	}
-	&.at_top {
+	&.at_top_2 {
 		font:12px arial,sans-serif;
 		font-weight:bold;
 		width:auto;
@@ -243,6 +346,75 @@
 						margin:3px
 					}
 				}
+			}
+		}
+	}
+	&.at_left_prior {
+		width:270px;
+		margin:3px;
+		padding:8px;
+		border:2px solid black;
+		display: none;
+		form {
+			margin:0
+		}
+		div.edit_recipe_field {
+			margin-top:5px;
+			width:100%;
+			height:auto;
+			&.pic {
+				width:200px;
+				height:auto;
+				margin-left:auto;
+				margin-right:auto;
+				div.pic_preview {
+					width:200px;
+					height:150px;
+					margin-left:auto;
+					margin-right:auto;
+					text-align: center;
+					input {
+						display:none;
+					}
+					img {
+						visibility: hidden;
+						&.loaded {
+							visibility: visible;
+							// margin-left: auto;
+							// margin-right: auto;
+							// text-align: center;
+						}
+					}
+				}
+				div.pic_picker_link {
+					font:14px arial,sans-serif;
+					font-weight:bold;
+					text-align:center;
+					margin-bottom:0px;
+					margin-top:5px;
+					.pic_picker_golink {
+						visibility: hidden;
+						&.loaded {
+							visibility: visible
+						}
+					}
+				}
+			}
+			&.tags {
+				margin-bottom:10px
+			}
+			label {
+				font:14px arial,sans-serif;
+				font-weight:bold;
+				float:left
+			}
+			input {
+				float:left;
+				margin:2px;
+				margin-right:6px
+			}
+			textarea {
+				width:222px
 			}
 		}
 	}

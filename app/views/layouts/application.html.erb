@@ -73,8 +73,7 @@
 	<% if session[:flash_popup] %>
 		<%= render session[:flash_popup] %>
 		<% session.delete(:flash_popup) %>
-	<% end %>
-	<% if current_user %>
+	<% elsif current_user %>
 		<%= recipe_spring_load %>
 	<% else %>
 		<%= render partial: "shared/signup_dialog" %>

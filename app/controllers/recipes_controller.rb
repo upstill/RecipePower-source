@@ -105,8 +105,20 @@ class RecipesController < ApplicationController
     # Find the recipe by URI (possibly correcting same), and bind it to the current user
     @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params[:recipe]
     if @recipe.errors.empty? # Success (valid recipe, either created or fetched)
-      session[:recipe_pending] = @recipe.id
-      redirect_to collection_path
+      respond_to do |format|
+        format.html { # This is for capturing a new recipe and tagging it using a new page. 
+          session[:recipe_pending] = @recipe.id
+          redirect_to collection_path
+        }
+        format.json { 
+          @data = { onget: [ "dialog.get_and_go", nil, collection_url(layout: false) ] }
+          render json: {
+            dlog: with_format("html") { 
+              render_to_string :edit, layout: false
+            }
+          }
+        }
+      end
 =begin
       report_recipe(  
         edit_recipe_url(@recipe), 
@@ -158,6 +170,8 @@ class RecipesController < ApplicationController
         if current_user          
           @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe]||{}, true, params[:extractions] # session[:user_id], params
           if @recipe.id
+            debugger
+            @data = { onget: [ "dialog.get_and_go", nil, collection_url(layout: false) ] } if params[:area] != "at_top"
             codestr = with_format("html") { render_to_string :edit, layout: false }
           else
             @resource = @recipe

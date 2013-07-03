@@ -31,6 +31,19 @@ class CollectionController < ApplicationController
   
   def index
     flash.now[:guide] = @seeker.guide
+    respond_to do |format|
+      format.html { }
+      format.json { 
+        # In a json response we just re-render the collection list for replacement
+        if params[:context] == "signup"
+          render json: { page: with_format("html") { render_to_string :index } }
+        else
+          list = with_format("html") { render_to_string :index, :layout => false }
+          replacement = ["div.collection", list]
+          render json: { replacements: [ replacement ] }
+        end
+      }
+    end
   end
   
   def show
