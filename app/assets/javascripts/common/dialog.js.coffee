@@ -40,11 +40,11 @@ RP.dialog.get_and_go = (event, request, selector) ->
 RP.dialog.cancel = (event) ->
 	if event
 		dlog = target_modal(event)
+		event.preventDefault();			
 	else
 		dlog = $('div.dialog')[0]
 	if dlog
 		RP.dialog.close_modal dlog
-	event.preventDefault();			
 
 # Take over a previously-loaded dialog and run it
 RP.dialog.run = (dlog) ->
@@ -263,8 +263,7 @@ notify = (what, dlog, entity) ->
 # Special handler for dialogs imbedded in an iframe. See 'injector.js'
 notify_injector = (what, dlog) ->
 	if fcn = RP.named_function what+"_dialog"
-		debugger
-		# fcn dlog
+		fcn dlog
 	
 # Public convenience methods for handling events
 RP.dialog.onopen = (dlog, entity) ->

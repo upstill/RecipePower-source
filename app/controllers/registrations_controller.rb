@@ -50,10 +50,6 @@ class RegistrationsController < Devise::RegistrationsController
         session[:omniauth] = nil unless @user.new_record?
       end
     end
-    
-    def new
-        super
-    end
 
     private
 

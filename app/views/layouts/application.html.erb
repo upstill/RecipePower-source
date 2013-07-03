@@ -70,12 +70,13 @@
 	</div>
 	<%= feedback_tab :position => 'left' %>
 	<%= render 'recipes/edit_template', recipe: nil %>
-	<%= recipe_spring_load %>
 	<% if session[:flash_popup] %>
 		<%= render session[:flash_popup] %>
 		<% session.delete(:flash_popup) %>
 	<% end %>
-	<% unless current_user %>
+	<% if current_user %>
+		<%= recipe_spring_load %>
+	<% else %>
 		<%= render partial: "shared/signup_dialog" %>
 	<% end %>
 	</body>

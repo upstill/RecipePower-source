@@ -1,4 +1,4 @@
-<%= modal_dialog( :signup, ttl="Step 1: Sign Up", class: "hide" ) do %>
+<%= modal_dialog( :signup, ttl="Step 1: Sign Up", class: "hide "+(params[:trigger_signup] ? "trigger" : "") ) do %>
 	<%= modal_body do %>
 		<div class="auth_poss at_home">
       <div class="prompt">You can sign in with these services:</div>
