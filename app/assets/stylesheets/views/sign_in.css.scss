@@ -1,11 +1,4 @@
 
-div.at_top div.signin_hdr {
-	height:24px;
-	width:auto;
-	margin:0.5em;
-	padding:0;
-}
-
 div.auth_poss {
 	overflow: auto;
 	margin-bottom: 10px;
@@ -44,80 +37,6 @@ div.auth_poss {
 		padding: 100px 0px 0px 10px;
 		display: inline-block;
 		vertical-align: top;
-	}
-	&.at_top {
-		font:12px arial,sans-serif;
-		font-weight:bold;
-		width:800px;
-		height:auto;
-		form {
-			display: inline-block;
-			width: auto;
-			vertical-align: top;
-		}
-		.auth_poss {
-			display: inline-block;
-			font:16px arial,sans-serif;
-			width:auto;
-			margin:0.5em .1em ;			
-			border-right:1px solid black;
-			.auth_provider {
-				display: inline-block;
-				text-decoration:none;
-				text-align:center;
-				margin-bottom:10px;
-				width:55px;
-				height:auto;
-				margin:0;
-				font-size:12px;
-				img {
-					width:48px;
-					height:48px;
-					margin-left:auto;
-					margin-right:auto;
-					display:block
-				}
-			}
-		}
-		.signin {
-			margin:0px 5px;
-			padding:7px;
-			display: inline-block;
-			font:16px arial,sans-serif;
-			width:auto;
-			border-left:1px solid black;
-			vertical-align: top;
-			.signin_credentials {
-				width: 210px;
-				display: inline-block;
-				vertical-align: top;
-				margin-top: 0.2em;
-				.signin_element {
-					width: 95%;
-				}
-			}
-		}
-		.signin_go {
-			width: 135px; // auto; 
-			margin: 0px;
-			margin-left: 10px;
-			display: inline-block;
-			vertical-align: top;
-			input.btn {
-				margin: 10px 5px 0px;
-				font:16px arial,sans-serif;
-				color: #FFFFFF;
-				background: #51a351;
-			}
-		}
-		.get_password {
-			margin:0px;
-			padding:7px 7px 0px;
-			display: block;
-			font:16px arial,sans-serif;
-			width:auto;
-			vertical-align: top;
-		}
 	}
 	&.floating {
 		width:620px;

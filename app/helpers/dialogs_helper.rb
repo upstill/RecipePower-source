@@ -2,6 +2,43 @@
 
 module DialogsHelper
   
+  def injector_dialog which=:generic, hdr_text="", options={}, &block
+    
+    case dismiss_label = options[:dismiss_button]
+    when nil
+      dismiss_label = "Okay"
+    when false
+      dismiss_label = nil
+    end
+  	pic = 
+  	content_tag :div, 
+  	    image_tag( "http://www.recipepower.com/assets/RPlogo.png", class: "small_logo", :alt => "RecipePower"), 
+  	    class: "small_logo"
+    body_content = with_output_buffer(&block)
+    alert = options[:noflash] ? "" : (content_tag(:div, "", class: "notifications-panel").html_safe+flash_all(false))
+    
+    content = generic_cancel_button('X') + 
+      content_tag( :div,
+        pic + content_tag(:div, hdr_text, class: "injector-header-content").html_safe,
+        class: "injector-header").html_safe
+        
+    content <<
+      content_tag( :div,
+        alert.html_safe+body_content.html_safe,
+        class: "injector-body").html_safe
+        
+    if dismiss_label
+      content <<
+      content_tag( :div, 
+        dialog_cancel_button(dismiss_label),
+        class: "injector-footer").html_safe
+    end
+    
+    content_tag( :div,
+      content.html_safe,
+      class: "dialog injector #{which} at_top").html_safe
+  end
+  
   def simple_modal(which, ttl, options={}, &block)
     options[:body_contents] = dialog_cancel_button (options[:close_label] || "Done")
     mf = modal_footer options
@@ -99,7 +136,7 @@ module DialogsHelper
   end
   
   def dialog_cancel_button name, options={}
-    options[:class] = "#{options[:class]} btn btn-info"
+    options[:class] = "#{options[:class]} btn btn-success"
     link_to_function name, "RP.dialog.cancel(event);", options
   end
     

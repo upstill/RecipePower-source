@@ -1,0 +1,9 @@
+<% if defined?(@area) && (@area == "at_top" || @area == "injector") %>
+	<%= injector_dialog :alert, "has heard your command, and obeys.", dismiss_button: "Ack" do %>
+		<%= render "alerts/injector_popup" %>
+	<% end %>
+<% else %>
+	<%= modal_dialog :popup, "Your Work Here Is Done", area: "at_top", class: "modal-yield" do %>
+		<%= render partial: "popup/popup" %>
+	<% end %>
+<% end %>

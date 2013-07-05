@@ -27,28 +27,25 @@ class PasswordsController < Devise::PasswordsController
           respond_with({}, :location => after_sending_reset_password_instructions_path_for(resource_name))
         }
         format.json {
-          render json: { done: true }
+          @area = params[:area]
+          content = with_format("html") { render_to_string "alerts/popup", layout: false }
+          render json: { dlog: content }
         }
       end
     else
+      # respond_with resource
       resource_errors_to_flash_now resource, preface: "Sorry, can't reset password"
-      respond_with resource
+      respond_to do |format|
+        format.html {  }
+        format.json { 
+          @area = params[:area]
+          rendered = with_format("html") { render_to_string :new, layout: false }
+          render :json => {
+            :success => false, 
+            :dlog => rendered 
+          }
+        }
+      end
     end
   end
-=begin
-    respond_to do |format|
-      format.html { super }
-      format.json { 
-        debugger
-        @area = params[:area]
-        rendered = with_format("html") {
-          render_to_string :new, layout: false 
-        }
-        render :json => {
-          :success => false, 
-          :code => rendered 
-        }
-      }
-    end
-=end
 end

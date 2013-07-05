@@ -12,8 +12,8 @@
 		  <% if devise_mapping.rememberable? -%>
 		    <%= f.check_box :remember_me %> <%= f.label :remember_me %>
 		  <% end -%>
-		  <br><%= f.submit "Sign In", class: "btn btn-success" %>
-			<br><%= link_to_modal "Forgot Password", new_user_password_path( area: "at_top" ), class: "get_password" %>
+		  <div style="width:100%;height:40px;"><%= f.submit "Sign In", class: "btn btn-success" %></div>
+			<div style="width:100%"><%= link_to_modal "Forgot Password", new_user_password_path( area: "at_top" ), class: "get_password" %></div>
 		</div>
 	</div>
 <% end %>

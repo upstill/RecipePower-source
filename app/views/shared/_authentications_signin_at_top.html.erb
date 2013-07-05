@@ -3,7 +3,5 @@
 	<div class="hdrdiv">&nbsp;needs you to sign in to collect this cookmark. Not a member? <u><%= link_to_redirect "Sign up!", collection_url(trigger_signup: true) %></u></div>
 </div>
 <%= render partial: 'shared/authentications_possible_at_top' %>
-<div class="signin_or">
-	&nbsp;OR&nbsp;
-</div>
+<div class="or"><h4>OR</h4></div>
 <%= render partial: "shared/slug_signin_at_top" %>

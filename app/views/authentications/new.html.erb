@@ -3,10 +3,15 @@
 	<% title "Sign In Options" %>
 	<%= render partial: 'shared/authentications_sidebar' %>
 <% end %>
-<%= modal_dialog :sign_in, "Sign In Please", area: @area, modal: (@area != "page") && (@area != "at_top") do %>
-	<% if @area == "at_top" %>
-	  <%= render partial: 'shared/authentications_signin_at_top' %>
-	<% else %>
-    <%= render partial: 'shared/authentications_signup_or_signin' %>
-  <% end %>
+<% if defined?(@area) && (@area == "at_top" || @area == "injector") %>
+	<% prompt = "needs you to sign in to collect this cookmark. Not a member? " %>
+	<% prompt << link_to_redirect("Sign up!", "http://#{current_domain}") %>
+	<%= injector_dialog :sign_in, prompt.html_safe, dismiss_button: false do %>
+	  <%# render partial: 'shared/authentications_signin_at_top' %>
+	  <%= render partial: 'signin_injector' %>
+	<% end %>
+<% else %>
+	<%= modal_dialog :sign_in, "Sign In Please", area: @area, modal: (@area != "page") && (@area != "at_top") do %>
+		<%= render partial: 'shared/authentications_signup_or_signin' %>
+	<% end %>
 <% end %>

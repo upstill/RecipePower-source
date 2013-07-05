@@ -1,6 +1,6 @@
-<% if params[:area] && params[:area] == "at_top" %>
-	<%= modal_dialog :password_reset, "Email Please", area: @area, class: "modal-yield" do %>
-		<%= render partial: "new_password_at_top" %>
+<% if params[:area] && params[:area] == ("at_top" || params[:area] == "injector") %>
+	<%= injector_dialog :new_password, "will reset your password if you're a member.", noflash: true, dismiss_button: false do %>
+		<%= render "new_password_injector" %>
 	<% end %>
 <% else %>
 	<%= modal_dialog :password_reset, "Forgot your password?" do %>

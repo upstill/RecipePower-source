@@ -69,7 +69,7 @@ module FlashHelper
        # This message may have been cleared earlier...
       html = content_tag :div, button+message, class: "alert #{bootstrap_class} alert_block fade in #{hide}"
     else
-      html = content_tag :div, message, class: "generic_alert #{hide}"
+      html = content_tag :div, message, class: "alert #{hide}"
     end
     flash.delete(level)
     html.html_safe

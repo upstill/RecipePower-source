@@ -1,7 +1,9 @@
-<% if @area == "at_top" %>
-	<%= dialogHeader :edit_recipe, "Tag This Recipe!", area: @area, noflash: true %>
-		<%= render "form_edit_at_top" %>
-	<%= dialogFooter %>
+<% if defined?(@area) && (@area == "at_top" || @area == "injector") %>
+	<% prompt = "has added this to your collection. Tag it here if you like. (Or " %>
+	<% prompt << link_to_function("not", "retire_iframe();") %>
+	<%= injector_dialog :edit_recipe, (prompt+")").html_safe, noflash: true, dismiss_button: false do %>
+		<%= render "form_edit_injector" %>
+	<% end %>
 <% else %>
 	<%# modal_dialog :edit_recipe, "Tag That Recipe!", area: @area do %>
 	<%# render "recipes/dialog_edit_recipe" %>
