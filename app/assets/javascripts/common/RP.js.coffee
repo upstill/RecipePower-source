@@ -55,7 +55,7 @@ RP.named_function = (str) ->
 	return null;
 	
 # For the FAQ page: click on a question to show the associated answer
-RP.showhide = ->
+RP.showhide = (event) ->
 	associated = event.currentTarget.parentNode.nextSibling
 	show_sib = $(associated).hasClass "hide"
 	$('div.answer').hide 200

@@ -292,7 +292,7 @@ module ApplicationHelper
   
   def question_section q, &block
     (
-      content_tag(:h4, link_to_function(q, "RP.showhide();"))+
+      content_tag(:h4, link_to_function(q, "RP.showhide(event);"))+
       content_tag(:div, with_output_buffer(&block), class: "answer hide")
     ).html_safe
   end
