@@ -29,33 +29,99 @@ div.dialog.at_top {
 	padding-bottom:5px;
 	background-color:#EEE;
 	border:solid 3px #900;
-	&.edit_recipe {
+	z-index: 9000001;
+	&.new_password {
+		width:500px;
+	}
+	&.alert {
+		width:500px;
+	}
+	&.sign_in {
+		width:820px;
 		font:12px arial,sans-serif;
 		font-weight:bold;
-		width:810px;
 		height:auto;
-		margin:0em;
-		padding:0em;
-		border:solid 3px #900;
-		background-color:#EEE;
-		z-index: 9000001;
-		div.edit_recipe_hdr {
-			height:30px;
+		form {
+			float: left; // display: inline-block; vertical-align: top;
+			width: auto;
+		}
+		.auth_poss {
+			float: left; // display: inline-block;
+			font:16px arial,sans-serif;
 			width:auto;
-			margin:0.8em;
-			margin-top:0.4em;
-			margin-bottom:0.2em;
-			padding:0;
-			span {
-				display:inline-block;
-				vertical-align:top;
-				margin-top:12px
-			}
-			img {
-				display:inline-block;
-				z-index: 900001;
+			margin:0.5em .1em ;			
+			// border-right:1px solid black;
+			.auth_provider {
+				display: inline-block;
+				text-decoration:none;
+				text-align:center;
+				margin-bottom:10px;
+				width:55px;
+				height:auto;
+				margin:0;
+				font-size:12px;
+				img {
+					width:48px;
+					height:48px;
+					margin-left:auto;
+					margin-right:auto;
+					display:block
+				}
 			}
 		}
+		.or {
+			width: 30px;
+			height: 80px;
+			border-right: solid 1px #CCCCCC;
+			border-left: solid 1px #CCCCCC;
+			margin: 0px;
+			margin-top: 5px;
+			padding: 0px 10px;
+			font-size:18px;
+			float: left; // display: inline-block; vertical-align: top;
+		}
+		.signin {
+			margin:0px 5px;
+			padding:7px;
+			display: inline-block;
+			font:16px arial,sans-serif;
+			width:auto;
+			// border-left:1px solid black;
+			vertical-align: top;
+			.signin_credentials {
+				width: 210px;
+				display: inline-block;
+				vertical-align: top;
+				margin-top: 0.2em;
+				.signin_element {
+					width: 95%;
+				}
+			}
+		}
+		.signin_go {
+			width: 135px; // auto; 
+			margin: 0px;
+			margin-left: 10px;
+			display: inline-block;
+			vertical-align: top;
+			input.btn {
+				margin: 10px 5px 0px;
+				font:16px arial,sans-serif;
+				color: #FFFFFF;
+				background: #51a351;
+			}
+		}
+		.get_password {
+			margin:0px;
+			padding:7px 7px 0px;
+			display: block;
+			font:16px arial,sans-serif;
+			width:auto;
+			vertical-align: top;
+		}
+	}
+	&.edit_recipe {
+		width:810px;
 		div.left {
 			float:left;
 			width:150px;
@@ -200,96 +266,6 @@ div.dialog.at_top {
 		  /* Hide the text; just using it for sizing */
 		  visibility: hidden;
 		}	
-	}
-	&.new_password {
-		width:500px;
-	}
-	&.alert {
-		width:500px;
-	}
-	&.sign_in {
-		width:820px;
-		font:12px arial,sans-serif;
-		font-weight:bold;
-		height:auto;
-		form {
-			float: left; // display: inline-block; vertical-align: top;
-			width: auto;
-		}
-		.auth_poss {
-			float: left; // display: inline-block;
-			font:16px arial,sans-serif;
-			width:auto;
-			margin:0.5em .1em ;			
-			// border-right:1px solid black;
-			.auth_provider {
-				display: inline-block;
-				text-decoration:none;
-				text-align:center;
-				margin-bottom:10px;
-				width:55px;
-				height:auto;
-				margin:0;
-				font-size:12px;
-				img {
-					width:48px;
-					height:48px;
-					margin-left:auto;
-					margin-right:auto;
-					display:block
-				}
-			}
-		}
-		.or {
-			width: 30px;
-			height: 80px;
-			border-right: solid 1px #CCCCCC;
-			border-left: solid 1px #CCCCCC;
-			margin: 0px;
-			margin-top: 5px;
-			padding: 0px 10px;
-			font-size:18px;
-			float: left; // display: inline-block; vertical-align: top;
-		}
-		.signin {
-			margin:0px 5px;
-			padding:7px;
-			display: inline-block;
-			font:16px arial,sans-serif;
-			width:auto;
-			// border-left:1px solid black;
-			vertical-align: top;
-			.signin_credentials {
-				width: 210px;
-				display: inline-block;
-				vertical-align: top;
-				margin-top: 0.2em;
-				.signin_element {
-					width: 95%;
-				}
-			}
-		}
-		.signin_go {
-			width: 135px; // auto; 
-			margin: 0px;
-			margin-left: 10px;
-			display: inline-block;
-			vertical-align: top;
-			input.btn {
-				margin: 10px 5px 0px;
-				font:16px arial,sans-serif;
-				color: #FFFFFF;
-				background: #51a351;
-			}
-		}
-		.get_password {
-			margin:0px;
-			padding:7px 7px 0px;
-			display: block;
-			font:16px arial,sans-serif;
-			width:auto;
-			vertical-align: top;
-		}
 	}
 	input.btn {
 		margin: 10px;
