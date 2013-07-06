@@ -34,14 +34,18 @@ class CollectionController < ApplicationController
     respond_to do |format|
       format.html { }
       format.json { 
+=begin
         # In a json response we just re-render the collection list for replacement
         if params[:context] == "signup"
+=end
           render json: { page: with_format("html") { render_to_string :index } }
+=begin
         else
           list = with_format("html") { render_to_string :index, :layout => false }
           replacement = ["div.collection", list]
           render json: { replacements: [ replacement ] }
         end
+=end
       }
     end
   end
