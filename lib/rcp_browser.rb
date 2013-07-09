@@ -148,30 +148,6 @@ class BrowserElement
       self.result_ids(tagset).empty?
   end
   
-=begin
-  # How many pages in the current result set?
-  def npages(tagset)
-    (self.result_ids(tagset).count+(@@page_length-1))/@@page_length
-  end
-
-  # Return a list of results based on the query tags and the paging parameters
-  def results_paged tagset
-    npg = npages tagset
-    ids = result_ids tagset
-    first = 0
-    ixbound = ids.count 
-    if npg > 1
-      # Clamp current page to last page
-      @cur_page = npg if @cur_page > npg
-      # Now get index bounds for the records on the page
-      first = (@cur_page-1)*@@page_length
-      last = first+@@page_length
-      ixbound = last if ixbound > last
-    end
-    convert_ids ids[first...ixbound]
-  end
-=end
-  
   def convert_ids list
     list.collect { |rid| Recipe.where( id: rid ).first }.compact
   end

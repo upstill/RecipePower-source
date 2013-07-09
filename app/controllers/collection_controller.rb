@@ -90,9 +90,11 @@ class CollectionController < ApplicationController
   def query
     if id = params[:selected]
       @browser.select_by_id(params[:selected])
+      @seeker.cur_page = 1
     end
     if tagstxt = params[:tagstxt]
       @seeker.tagstxt = tagstxt
+      @seeker.cur_page = 1
     end
     if page = params[:cur_page]
       @seeker.cur_page = page.to_i

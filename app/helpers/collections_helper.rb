@@ -11,20 +11,6 @@ module CollectionsHelper
   		when FeedEntry
   		  @feed_entry = element
   		  render "shared/feed_entry"
-=begin
-  		when Feed
-  		  @feed = element
-  		  render "feeds/feed"
-  		when User
-  		  @user = element
-  		  render "users/user"
-  		when Reference
-  		  @reference = element
-  		  render "references/reference"
-  		when Tag
-  		  @tag = element
-  		  render "tags/tag"
-=end
   		else
   		  # Default is to set instance variable @<Klass> and render "<klass>s/<klass>"
   		  ename = element.class.to_s.downcase
