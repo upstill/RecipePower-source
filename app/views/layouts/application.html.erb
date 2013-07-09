@@ -69,12 +69,12 @@
     <span>Msg Goes Here</span>
 	</div>
 	<%= feedback_tab :position => 'left' %>
-	<%= render 'recipes/edit_template', recipe: nil %>
 	<% if session[:flash_popup] %>
 		<%= render session[:flash_popup] %>
 		<% session.delete(:flash_popup) %>
-	<% elsif current_user %>
-		<%= recipe_spring_load %>
+	<% end %>
+	<% if current_user %>
+		<%= render 'recipes/edit_template', recipe: nil %>
 	<% else %>
 		<%= render partial: "shared/signup_dialog" %>
 	<% end %>

@@ -7,4 +7,7 @@
 			<%= render "relist" %>
 		<% end %>
 	</div>
+	<% if current_user && deferred_capture(false) %>
+		<%= recipe_spring_load %>
+	<% end %>
 </div>

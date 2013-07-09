@@ -149,6 +149,7 @@ class RecipesController < ApplicationController
           # The injector (capture.js) calls for this to fill the iframe on the foreign page.
           @layout = "injector"
           if @recipe.id
+            deferred_capture true # Delete the pending recipe
             if params[:area]
               render :edit, :layout => (params[:layout] || dialog_only)
             else
@@ -171,6 +172,7 @@ class RecipesController < ApplicationController
           @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe]||{}, true, params[:extractions] # session[:user_id], params
           if @recipe.id
             @data = { onget: [ "dialog.get_and_go", nil, collection_url(layout: false) ] } if params[:area] != "at_top"
+            deferred_capture true # Delete the pending recipe
             codestr = with_format("html") { render_to_string :edit, layout: false }
           else
             @resource = @recipe

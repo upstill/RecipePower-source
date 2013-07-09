@@ -93,7 +93,7 @@ class ApplicationController < ActionController::Base
       else
         # Signing in from RecipePower => load collection, let deferred
         # capture call be made on client side with a trigger
-        collection_path
+        collection_path href: true
       end
     end
     redir || super
@@ -105,7 +105,7 @@ class ApplicationController < ActionController::Base
   def after_sign_in_path_for(resource_or_scope)
     scope = Devise::Mapping.find_scope!(resource_or_scope)
     stored_location_for(resource_or_scope) || 
-    (scope && (scope==:user) && collection_path) || 
+    (scope && (scope==:user) && collection_path(href: true)) || 
     super
   end
   

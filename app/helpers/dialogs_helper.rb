@@ -72,7 +72,7 @@ module DialogsHelper
     content = if for_bootstrap
       content_tag( :div,         
         %Q{
-          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <button type="button" class="close" onclick="RP.dialog.cancel(event);" aria-hidden="true">&times;</button>
           <h3>#{ttl}</h3>
         }.html_safe,
         class: "modal-header")
@@ -103,7 +103,6 @@ module DialogsHelper
   def dialogHeader( which, ttl=nil, options={})
     # Render for a floating dialog unless an area is asserted OR we're rendering for the page
     area = options[:area] || "floating" # (@partial ? "floating" : "page")
-    hide = options[:show] ? "" : "hide"
     classes = options[:class] || ""
     logger.debug "dialogHeader for "+globstring({dialog: which, area: area, ttl: ttl})
     # Assert a page title if given

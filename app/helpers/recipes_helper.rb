@@ -10,7 +10,6 @@ def recipe_image_div(recipe, div_class="recipe_image_div")
     
     options = { alt: "Image Not Accessible", id: "RecipeImage"+recipe.id.to_s }
     url = if recipe.picurl.blank?
-      options[:class] = "stuffypic"
       "NoPictureOnFile.png"
     elsif recipe.picurl =~ /^data:/ # Use a data URL directly w/o taking a thumbnail
       recipe.thumbnail = nil
@@ -18,9 +17,9 @@ def recipe_image_div(recipe, div_class="recipe_image_div")
     elsif recipe.thumbnail && recipe.thumbnail.thumbdata
       recipe.thumbnail.thumbdata
     else
-      options[:class] = "stuffypic"
       recipe.picurl
     end
+    options[:class] = "stuffypic" unless url =~ /^data:/
     content = image_tag(url, options)
   rescue Exception => e
     if url
@@ -143,7 +142,7 @@ end
 
   # Declare a div for triggering a recipe edit operation
   def recipe_spring_load
-    if capture_data = deferred_capture(true)
+    if capture_data = deferred_capture(false)
       content_tag :a, "",
         href: capture_recipes_url(capture_data),
         class: "recipe_edit_trigger"

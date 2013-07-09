@@ -54,6 +54,12 @@ RP.named_function = (str) ->
 			return obj
 	return null;
 	
+RP.fire_triggers = ->
+	if dlog = $('div.dialog.trigger')[0]
+		RP.dialog.run dlog
+	else if (elmt = $("a.recipe_edit_trigger")[0])
+		RP.dialog.get_and_go null, elmt.href
+
 # For the FAQ page: click on a question to show the associated answer
 RP.showhide = (event) ->
 	associated = event.currentTarget.parentNode.nextSibling
@@ -306,6 +312,9 @@ RP.process_response = (responseData, dlog) ->
 				$(replacement[0]).replaceWith replacement[1]
 			# RP.dialog.replace_modal dlog
 
+		if href = responseData.href
+			window.location.assign href # "http://local.recipepower.com:3000/collection" #  href = href
+		
 		if deletions = responseData.deletions
 			for deletion in deletions
 				$(deletion).remove()

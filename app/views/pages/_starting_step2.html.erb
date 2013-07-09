@@ -1,5 +1,5 @@
 <%# Fields for an edit-user dialog %>
-<%= modal_dialog :step2, (params[:context] == "signup" ? "Step 2: Install the Cookmark Button" : "Installing the 'Cookmark' Button"), area: @area, class: "immediate" do %>
+<%= modal_dialog :step2, (params[:context] == "signup" ? "Step 2: Install the Cookmark Button" : "Installing the 'Cookmark' Button"), area: @area, class: "trigger" do %>
   <%= modal_body(class: "welcome_dialog") do %>
 		<div class="instructions_header">
 		  <p class="bm-pic"><%= bookmarklet %></p>

@@ -111,6 +111,6 @@ def assert_query url, queryparams
   newquery = queryparams.collect { |k, v|
     "#{k.to_s}=#{v.to_s}" unless v.empty?
   }.compact.join('&')
-  uri.query = (oldquery.blank? ? newquery : ("?"+newquery)) unless newquery.blank?
+  uri.query = (oldquery.blank? ? newquery : (oldquery+"&"+newquery)) unless newquery.blank?
   uri.to_s
 end

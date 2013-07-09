@@ -72,9 +72,6 @@ jQuery ->
 	$("#tagstxt").first().focus()
 	$(".pageclickr").click collection_pager
 	checkForLoading ".stuffypic"
-	
-	if dlog = $('div.dialog.immediate')[0]
-		RP.dialog.run dlog
 
 	$(window).resize -> # Fix the height of the browser
 		if (elmt = $("div.browser_house")[0]) && (navlinks = $('div#footer_nav_links')[0])
@@ -83,11 +80,7 @@ jQuery ->
 	if (elmt = $("div.browser_house")[0]) && (navlinks = $('div#footer_nav_links')[0])
 	 	elmt.style.bottom = (navlinks.offsetHeight + 5).toString() + "px";
 	
-	if (elmt = $("a.recipe_edit_trigger")[0])
-		RP.dialog.get_and_go null, elmt.href
-	
-	if (dlog = $('div.dialog.trigger')[0])
-		RP.dialog.run dlog
+	RP.fire_triggers()
 
 collection_tagchange = (params, url) ->
 	RP.collection.update $('form.query_form').serialize(), $('form.query_form')[0].action

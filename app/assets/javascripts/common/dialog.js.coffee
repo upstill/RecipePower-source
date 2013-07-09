@@ -88,7 +88,7 @@ RP.dialog.replace_modal = (newdlog, odlog) ->
 	if odlog 
 		odlog.parentNode.insertBefore newdlog, odlog
 		newdlog = odlog.previousSibling
-		cancel_modal odlog
+		cancel_modal odlog, false
 	else
 		# Add the new dialog at the end of the page body if necessary
 		if !newdlog.parentNode
@@ -130,13 +130,18 @@ RP.dialog.close_modal = (dlog, epilog) ->
 		notify_injector "close", dlog
 	if epilog && epilog != ""
 		RP.dialog.user_note epilog
+	# If there's another dialog or recipe to edit waiting in the wings, trigger it
+	RP.fire_triggers()
 		
 # Remove the dialog and notify its handler prior to removing the element
-cancel_modal = (dlog) ->
+cancel_modal = (dlog, check_for_triggers=true) ->
 	if($(dlog).modal)
 		$(dlog).modal 'hide'
 	notify "cancel", dlog
 	$(dlog).remove()
+	# If there's another dialog or recipe to edit waiting in the wings, trigger it
+	if check_for_triggers
+		RP.fire_triggers()
 
 # Filter for submit events, ala javascript. Must return a flag for processing the event normally
 filter_submit = (eventdata) ->
