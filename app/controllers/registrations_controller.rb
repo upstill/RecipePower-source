@@ -17,7 +17,7 @@ class RegistrationsController < Devise::RegistrationsController
               redirect_to users_identify_url, :notice => "Sorry, we don't have any records of an '#{params[:user][:email]}'."
           end
       else
-        if request.format == "application/json"
+        # if request.format == "application/json"
           build_resource
           if resource.save
             if resource.active_for_authentication?
@@ -34,7 +34,7 @@ class RegistrationsController < Devise::RegistrationsController
           else
             clean_up_passwords resource
             respond_with resource do |format|
-              # format.html { render :partial => "registrations/form" }
+              format.html { }
               format.json { 
                 render json: { 
                           replacements: [
@@ -44,9 +44,9 @@ class RegistrationsController < Devise::RegistrationsController
               }
             end
           end
-        else
-          super
-        end
+        # else
+          # super
+        # end
         session[:omniauth] = nil unless @user.new_record?
       end
     end

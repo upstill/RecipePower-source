@@ -517,8 +517,9 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
   end
   
   def hints
+    bb = %q{<a href="#" onclick="RP.dialog.get_and_go(event, '/popup?name=pages%2Fstarting_step2', ''); return false;">Cookmark Button</a>}.html_safe
     "<br>How about browsing through your Friends' recipes or one of your Channels and grabbing some of those? Or click on The Big List and search through that?"+
-    "<br>Or even, dare we say it, head off to the Wild World Web and cookmark some findings there? (You <strong>do</strong> have the browser button installed, right?)"
+    "<br>Or even, dare we say it, head off to the Wild World Web and cookmark some findings there? (...after installing the #{bb}, of course...)"
   end
   
 end
