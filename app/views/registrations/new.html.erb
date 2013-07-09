@@ -1,3 +1,3 @@
-<%= modal_dialog :sign_up, "New User", area: "at_top", class: "modal-yield" do %>
+<%= modal_dialog :sign_up, "New User", area: "at_top", class: "modal-yield", data: { focus: "input#user_username" } do %>
 	<%= render partial: "form" %>
 <% end %>
