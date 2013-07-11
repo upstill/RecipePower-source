@@ -85,8 +85,12 @@ module DialogsHelper
   
   def modal_body(options={}, &block)
     bd = options[:body_contents] || with_output_buffer(&block)
+    if prompt = options.delete( :prompt )
+      prompt = content_tag( :div, prompt, class: "prompt" ).html_safe
+    end
+    prompt = ""
     options[:class] = "modal-body #{options[:class]}"
-    content_tag(:div, flash_all + bd, options).html_safe
+    content_tag(:div, "#{prompt}#{flash_all}#{bd}".html_safe, options).html_safe
   end
   
   def modal_footer(options={}, &block)

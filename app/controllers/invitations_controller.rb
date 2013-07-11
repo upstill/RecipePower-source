@@ -7,9 +7,10 @@ class InvitationsController < Devise::InvitationsController
     # GET /resource/invitation/new
     def new
       build_resource
+      @recipe = params[:recipe_id] && Recipe.find(params[:recipe_id])
       self.resource.invitation_issuer = current_user.fullname.blank? ? current_user.handle : current_user.fullname
       current_user.handle
-      render :new
+      dialog_boilerplate(@recipe ? :share : :new)
     end
     
     # GET /resource/invitation/accept?invitation_token=abcdef

@@ -20,6 +20,16 @@ body { padding-top: 60px; }
     max-height: 520px;
 }
 
+div.dialog.modal {
+	div.prompt {
+		font:14px arial,sans-serif;
+		font-weight:bold;
+		width: 90%;
+		margin: auto;
+		padding: 5px;
+	}
+}
+
 .alert-guide {
   background-color: $guideBackground;
   border-color: $guideBorder;

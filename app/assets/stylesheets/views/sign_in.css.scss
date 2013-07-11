@@ -6,6 +6,11 @@ div.auth_poss {
 
 .sign_in.dialog {
 	top: 100px;
+	.prompt {
+		margin:5px 0px 10px 0px;
+		font:20px arial,sans-serif;
+		font-weight:bold;
+	}
 	.sign {
 		width:620px;
 		margin:5px 20px;
@@ -65,11 +70,6 @@ div.auth_poss {
 			}
 		}
 	}
-	.prompt {
-		margin:5px 0px;
-		font:20px arial,sans-serif;
-		font-weight:bold
-	}
 	div.signin_or {
 		display: inline-block;
 		padding-top:1.5em;
@@ -78,12 +78,6 @@ div.auth_poss {
 		// border-right:1px solid black;
 		// border-left:1px solid black
 	}
-}
-
-div.prompt {
-	margin:5px 0px 10px 0px;
-	font:20px arial,sans-serif;
-	font-weight:bold;
 }
 
 div.sign_in .signin {
