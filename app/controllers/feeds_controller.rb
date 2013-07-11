@@ -73,9 +73,9 @@ class FeedsController < ApplicationController
       @feed.users << user 
       @feed.save
       @feed.perform
-      @node = user.add_feed @feed
       @notice = "Now feeding you with '#{@feed.title}'."
     end
+    @node = user.add_feed @feed # No harm if the user already has the feed
     respond_to do |format|
       format.js { 
         flash[:notice] = @notice 
