@@ -1,0 +1,5 @@
+<% if @recipe.thumbnail %>
+	<%= recipe_image_div @recipe, "share_recipe_pic_box" %>
+<% end %>
+	<br><%= link_to @recipe.title, @recipe.url, class: "share_recipe_title" %>
+	<p>from&nbsp;<%= link_to @recipe.sourcename, @recipe.sourcehome, class: "share_recipe_source" %></p>

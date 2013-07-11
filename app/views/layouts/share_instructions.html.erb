@@ -1,0 +1,48 @@
+<%# inviter_name = (@resource.invited_by_id && User.find(@resource.invited_by_id).handle) %>
+<% inviter_name = @resource.invitation_issuer %>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+		<%= stylesheet_link_tag "sharemail", :media => "all" %>
+  </head>
+  <body>
+		<div class="header_content">
+			<div class="message_banner">
+				<strong><%= inviter_name || "Someone" %></strong> sez: Look what I found on
+				<%= link_to "RecipePower", 
+							root_url.sub(/strong-galaxy-5765.herokuapp.com/,"www.recipepower.com"), 
+							class: "brand",
+							style: "font-size:18px;" %>.
+			</div>
+			<% unless @resource.invitation_message.blank? %>
+				<div class="message_content">
+				  <% if(@resource.invitation_message.length > 20) %>
+						<blockquote><%= @resource.invitation_message %></blockquote>
+				  <% else %>
+						<q><%= @resource.invitation_message %></q><p>
+				  <% end %>
+				</div>
+			<% end %>
+		</div>
+		<div class="message_box">
+			<%= render "devise/mailer/recipe_share" %>
+		</div>
+		<br>
+		<div class="message_box">
+			<div class="signup_message">
+				<p><strong>Rather not deal with this now?</strong></p>
+				<p>Save it to RecipePower and have it waiting for you.</p>
+			</div>
+			<%= link_to("Cook Me Later", 
+						accept_invitation_url(@resource, 
+							:invitation_token => 			
+								@resource.invitation_token).sub(/strong-galaxy-5765.herokuapp.com/,"www.recipepower.com"),
+						:class => "get_button btn-large btn-success") %>
+		</div>
+		<div class="footer">
+	  	<p><a class="brand" href="/collection">RecipePower</a></p>
+			<p>Copyright 2013 by RecipePower. All Rights Reserved</p>
+		</div>
+  </body>
+</html>
