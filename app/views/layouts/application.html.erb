@@ -36,8 +36,8 @@
   <body>
     <%= render 'layouts/frame_top' %>
     <% if !current_user && session[:on_tour] %>
-			<div class="button_house">
-	    	<%= button_to_modal("Sign Me Up", collection_path, class: "btn btn-large btn-success", selector: "div.dialog.signup") %>
+			<div class="button_house span3">
+				<%= signup_button %>
 			</div>
     <% end %>
 		<% if params[:controller] == "collection" %>

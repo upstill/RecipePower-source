@@ -4,6 +4,7 @@ require './lib/seeker.rb'
 class ApplicationController < ActionController::Base
   before_filter :setup_collection
   before_filter :check_flash
+  before_filter :detect_invitation_token
     helper :all
     rescue_from Timeout::Error, :with => :timeout_error # self defined exception
     rescue_from OAuth::Unauthorized, :with => :timeout_error # self defined exception
@@ -19,6 +20,13 @@ class ApplicationController < ActionController::Base
     klass ||= "#{object.class}Presenter".constantize
     klass.new(object, view_context)
   end  
+  
+  def detect_invitation_token
+    if params[:invitation_token]
+      session[:invitation_token] = params[:invitation_token] 
+      session[:invited_user] = params[:user]
+    end
+  end
   
   def check_flash
     logger.debug "FLASH messages extant for "+params[:controller]+"#"+params[:action]+"(check_flash):"

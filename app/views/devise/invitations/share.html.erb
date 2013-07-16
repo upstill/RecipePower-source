@@ -4,9 +4,20 @@
 		<%= modal_body do %>
 		  <%# devise_error_messages! %>
 		  <%= form_errors_helper f %>
-		  <%= f.input :email %></p>
+			<%= f.input :invitee_tokens, 
+									:label => "Email(s) and/or RecipePower Friends", 
+									:input_html => { 
+											:"data-pre" => (resource.invitee_tokens || []).collect { |token| 
+												token.kind_of?(Fixnum) ? 
+												{ "id" => token.to_s, "name" => User.find(token).handle } :
+												{ "id" => token, "name" => token } 
+											}.to_json,
+											:"data-request" => "/users/#{current_user.id}/match_friends.json" 
+									} %>
+		  <%# f.input :email %></p>
 			<%= f.input :invitation_issuer, label: "How to identify you in the message" %>
 		  <%= f.input :invitation_message, label: "Invitation Message (optional)", :input_html => { :rows=>"4", value: ( "Look what I found on RecipePower")} %></p>
+      <%= f.hidden_field(:shared_recipe) if resource.shared_recipe %>
 		<% end %>
 		<%= modal_footer do %>
 	  	<%= f.submit "Share the Love" %>

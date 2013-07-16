@@ -11,7 +11,7 @@ RP.tagger.init = (selector, data) ->
 RP.tagger.onload = (selector=".tagging_field") ->
 	$(selector).each ->
 		data = $(this).data() || {}
-		request = "/tags/match.json"
+		request = data.request || "/tags/match.json"
 		if data.query
 			request += "?"+encodeURIComponent(data.query)
 		$(this).tokenInput(request,

@@ -22,11 +22,10 @@ body { padding-top: 60px; }
 
 div.dialog.modal {
 	div.prompt {
-		font:14px arial,sans-serif;
+		font:18px arial,sans-serif;
 		font-weight:bold;
-		width: 90%;
-		margin: auto;
-		padding: 5px;
+		margin: 0px 0px 15px 10px;
+		padding: 0px;
 	}
 }
 
@@ -82,7 +81,7 @@ label {
 	position: fixed;
 	top: 60px;
 	left: 20px;
-	width: 150px;
+	// width: 150px;
 	height: 60px;
 	text-align: center;
 }

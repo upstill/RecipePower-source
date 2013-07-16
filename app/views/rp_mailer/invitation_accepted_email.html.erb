@@ -3,17 +3,15 @@
   <head>
     <meta charset="utf-8" content="text/html" http-equiv="Content-Type" />
   </head>
-  <body>
-    <h3><%= @invitee.handle %> has accepted your RecipePower invitation.</h3>
-    <p>
-		Since you issued the invitation, by default you will follow 
-		each other as friends.
+  <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+    <h3><%= @invitee.handle %> has accepted your invitation to join RecipePower.</h3>
+    <p>This makes you 
+			mutual Friends: you'll see them in your list of "My Friends", 
+			and vice versa. If that doesn't suit, you can always remove them
+			from your list by clicking the 'X' next to their name there.
     </p>
-    <p>
-      To change this, or make other changes to your profile, go to the <%= link_to("RecipePower Profile Page", @profile_url) %>.
-    </p>
-    <p>Thanks for passing the word, and make a great day.</p>
+    <p>Thanks for helping build the RecipePower community, and Happy Eating!</p>
     <p><br>Best Regards,</p>
-    <p>Steve & Max, aka The RecipePower Boys.</p>
+    <p>The RecipePower Team.</p>
   </body>
 </html>

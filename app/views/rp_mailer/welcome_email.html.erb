@@ -3,26 +3,26 @@
   <head>
     <meta charset="utf-8" http-equiv="Content-Type" content="text/html" />
   </head>
-  <body>
-    <h3>Welcome to RecipePower.com, <%= @user.handle %></h3>
+  <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+    <h3>Welcome to RecipePower, <%= @user.handle %></h3>
     <p>
-      You have successfully signed up to RecipePower.com.
-      <br>You can log in at the <%= link_to "Login Page", @login_url %>, using <%= login_choices @user %>.
-    </p>
-    <p>
-    <% if @inviter %>
-		<%= @inviter.handle %> invited you, so by default you will follow 
-		each other as friends.
-    </p>
-    <p>
-      To change this
-    <% else %>
-	  To select friends, open channels
-	<% end %>
-	 or make other changes to your profile, go to the <%= link_to("RecipePower Profile Page", @profile_url) %>.
-    </p>
-    <p>Thanks for joining us in making sense of the world of recipes on the Web.</p>
-    <p><br> Best Regards,</p>
-    <p>Steve & Max, aka The RecipePower Boys.</p>
+      You are now a member in good standing (but behave yourself!) 
+			of the RecipePower community, all signed in and everything. 
+			Your collection awaits you at <%= link_to "www.recipepower.com", home_url %>. Of
+			course, it's fairly empty at the moment--but if you install our
+			<%= link_to "Cookmark Button", collection_url(context: "signup") %>,
+			you can add to your collection from anywhere on the Web.</p>
+		<% if @inviter %>
+	    <p>Since <%= @inviter.handle %> invited you, you are Friends by default, 
+			so you will find their collection at "<%= @inviter.handle %>" when you click 
+			the <strong>My Friends</strong> label. If this
+			doesn't suit, just click the 'X' next to their name there.
+		<% end %>
+    </p><p>We've worked hard to keep RecipePower simple, but if you get confused, hit the <strong>Help</strong> 
+		link at the bottom left of the page.</p>
+		<p>Just one more thing: we're <strong>always</strong> keen to hear what you have to say, especially if something's bugging you. Click the red <strong>Feedback</strong> tab and tell us how it's going. Response Guaranteed!</p>
+    <p>We're glad you've joined us, <%= @user.handle %>. Happy Eating!</p>
+    <p><br>Warm Regards,</p>
+    <p>The RecipePower Team</p>
   </body>
 </html>

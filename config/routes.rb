@@ -84,6 +84,7 @@ RP::Application.routes.draw do
     member do 
       get 'collect'
       post 'remove'
+      get 'match_friends'
     end
     collection do
       post 'query' # Change the selection query

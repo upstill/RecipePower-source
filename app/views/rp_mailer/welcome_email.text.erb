@@ -1,0 +1,25 @@
+Welcome to RecipePower, <%= @user.handle %>! You are now a 
+member in good standing of the RecipePower community, all 
+signed in and everything. Your collection awaits you 
+at www.recipepower.com. 
+
+<% if @inviter %>
+Since <%= @inviter.handle %> invited you, you are Friends by 
+default, so you will find their collection at "<%= @inviter.handle %>" 
+when you choose the "My Friends" label. If this doesn't suit, 
+just click the 'X' next to their name and they're no longer 
+your friend. Sad but true.
+
+<% end %>
+We've worked hard to keep RecipePower simple, but if you 
+get confused, hit the Help link at the bottom left of the page.
+
+Just one more thing: we're always keen to hear what you 
+have to say, especially if something's bugging you. Click 
+the red Feedback tab at left and tell us how it's going. 
+Response Guaranteed!
+
+We're glad you've joined us, <%= @user.handle %>. Happy Eating!
+
+Best Regards,
+The RecipePower Team

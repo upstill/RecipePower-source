@@ -297,6 +297,21 @@ module ApplicationHelper
     ).html_safe
   end
   
+  def signup_button
+    unless current_user
+      if session[:invitation_token]
+        label = "Accept Invitation" 
+        path = accept_user_invitation_path(invitation_token: session[:invitation_token] )
+        button_to_modal(label, path, class: "btn btn-large btn-success" ) 
+      else
+        label = "Sign Me Up"
+        selector = "div.dialog.signup"
+        path = collection_path()
+        button_to_modal(label, path, class: "btn btn-large btn-success", selector: selector ) 
+      end
+    end
+  end
+  
 =begin
   def show_errors(errors)
     result = ""
