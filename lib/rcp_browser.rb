@@ -175,6 +175,11 @@ class BrowserElement
   def add_by_content obj
   end
   
+  # Find function for the parent of a given node. Elements need not apply
+  def parent_of node
+    nil
+  end
+  
   # Returns the browser element that's selected, ACROSS THE TREE
   def selected
     @selected && self
@@ -237,6 +242,11 @@ class BrowserComposite < BrowserElement
   
   def add_by_content obj
     @children.poll { |child| child.add_by_content obj }
+  end
+  
+  # Find function for the parent of a given node. Elements need not apply
+  def parent_of node
+    @children.poll { |child| (child == node) ? self : child.parent_of(node) }
   end
   
   def node_list do_show=false

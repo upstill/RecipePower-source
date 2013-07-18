@@ -120,20 +120,28 @@ RP.content_browser.delete_element = (path) ->
 
 RP.content_browser.div = RP.content_browser.div || $('<div></div>')
 RP.content_browser.insert_or_select = (resp) ->
-	RP.content_browser.div.html(resp.entity)
-	div = RP.content_browser.div[0]
-	elmt = div.firstChild
-	selected = $('.RcpBrowser.active')[0]
-	if existing = $('#'+elmt.id)[0]
-		div.removeChild elmt
-		elmt = existing
-	else if selected.nextSibling
-	  selected.parentNode.insertBefore elmt, selected.nextSibling
-	else
-		selected.parentNode.appendChild elmt
-	if selected != elmt
-		$(selected).removeClass "active"
-		$(elmt).addClass "active"
+	entities = resp.entity
+	if typeof entities == 'string'
+		entities = [entities]
+	for entity in entities
+		RP.content_browser.div.html(entity)
+		div = RP.content_browser.div[0]
+		elmt = div.firstChild
+		if existing = $('#'+elmt.id)[0]
+			div.removeChild elmt
+			elmt = existing
+		if (parent_id = $(elmt).data("parent_id")) && (parent_elmt = $('#'+parent_id)[0])
+			target = parent_elmt
+		else
+			target = $('.RcpBrowser.active')[0] # Default target: the first active node
+		# The node to insert after is either the parent or the selected node
+		if target.nextSibling
+		  target.parentNode.insertBefore elmt, target.nextSibling
+		else
+			target.parentNode.appendChild elmt
+	$('.RcpBrowser.active').removeClass "active"
+	$(elmt).addClass "active"
+	if target != elmt
 		RP.collection.update { selected: elmt.id }
 
 jQuery ->

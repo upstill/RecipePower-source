@@ -1,6 +1,7 @@
 <li class="<%= @node.css_class %>" 
-		id="<%= @node.css_id %>"
-		<%= %Q{style="display: none;"}.html_safe unless (@node.selected || @node.visible) %> >
+	id="<%= @node.css_id %>"
+	data-parent_id="<%= current_user.browser.parent_of(@node).css_id %>"
+	<%= %Q{style="display: none;"}.html_safe unless (@node.selected || @node.visible) %> >
 		<% if add_path = @node.add_path %>
 			<div class="mod_box">
 				<%= link_to "&plus;".html_safe, add_path, class: "mod_button" %>
