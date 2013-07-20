@@ -25,7 +25,7 @@ dessert:
 
 desserts:
   id: 5
-  name: dessert
+  name: desserts
   tagtype: 1
   isGlobal: true
   referent_id: 1

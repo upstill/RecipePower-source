@@ -179,7 +179,7 @@
 			</div>
 			<% unless @resource.invitation_message.blank? %>
 				<div class="message_content">
-					<blockquote><%= @resource.invitation_message.join(' ') %></blockquote>
+					<blockquote><%= @resource.invitation_message %></blockquote>
 				</div>
 			<% end %>
 		</div>

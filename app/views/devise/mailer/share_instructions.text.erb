@@ -4,7 +4,7 @@
 
 <%= inviter_name || "Someone" %> says: Look what I found on RecipePower (http://www.recipepower.com)
 
-<% @resource.invitation_message.each do |line| %>
+<% splitstr(@resource.invitation_message, 72).each do |line| %>
     <%= strip_tags line %>
 <% end %>
 
@@ -13,3 +13,4 @@ at <%= @recipe.url %>.
 
 BUT WAIT! Rather not deal with this now? Save it to RecipePower and have it waiting for you.
 Just click this link: <%= home_url @resource, :invitation_token => @resource.invitation_token %>
+

@@ -5,7 +5,7 @@
 		
 <p><%= accept_str.sub(/>accept /, ">Accept ").html_safe %></p>
 <%= inviter_name || "Someone" %> is inviting you to join
-<%= link_to("RecipePower", root_url.sub(/strong-galaxy-5765.herokuapp.com/,"www.recipepower.com"))+(@resource.invitation_message.blank? ? "." : ", saying") %>
+<%= link_to("RecipePower", root_url)+(@resource.invitation_message.blank? ? "." : ", saying") %>
 <% unless @resource.invitation_message.blank? %>
   <% if(@resource.invitation_message.length > 20) %>
 	<blockquote><%= @resource.invitation_message %></blockquote>

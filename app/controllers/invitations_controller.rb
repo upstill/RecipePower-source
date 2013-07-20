@@ -6,23 +6,6 @@ class InvitationsController < Devise::InvitationsController
     def after_invite_path_for(resource)
         collection_path
     end
-    
-    def splitstr(str, ncols=80)
-      str = HTMLEntities.new.decode(str)
-      out = []
-      line = ""
-      str.split(/\s+/).each do |word|
-        word << " "
-        if (line.length + word.length) >= ncols
-          out << line
-          line = word
-        else
-          line << word
-        end
-      end
-      out << line if line.length > 0
-      out
-    end   
      
     # GET /resource/invitation/new
     def new
@@ -50,95 +33,98 @@ class InvitationsController < Devise::InvitationsController
       params[resource_name][:invitee_tokens] = params[resource_name][:invitee_tokens] ||
         params[resource_name][:email].split(',').collect { |email| %Q{'#{email.downcase.strip}'} }.join(',')
       # Check email addresses in the tokenlist for validity
-      @user = User.new params[resource_name]
-      for_sharing = @user.shared_recipe && true
-      err_address = @user.invitee_tokens.detect do |token|
+      @staged = User.new params[resource_name]
+      for_sharing = @staged.shared_recipe && true
+      err_address = @staged.invitee_tokens.detect do |token|
         token.kind_of?(String) && !(token =~ /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i) 
       end
       if err_address # if there's an invalid email, go back to the user
-        @user.errors.add :invitee_tokens, "'#{err_address}' doesn't look like an email address."
-        @recipe = for_sharing && Recipe.find(@user.shared_recipe)
+        @staged.errors.add (for_sharing ? :invitee_tokens : :email), "'#{err_address}' doesn't look like an email address."
+        @recipe = for_sharing && Recipe.find(@staged.shared_recipe)
+        self.resource = @staged
         dialog_boilerplate(for_sharing ? :share : :new)
         return
       end
-      params[resource_name][:invitation_message] = 
-        splitstr( params[resource_name][:invitation_message], 100) # Format the message for text
         
-      messages = [] # This will be an array of messages to report back to the user
-      popup = nil
+      alerts = [] # This will be an array of messages to report back to the user
+      popups = []
       
       # Now that the invitee tokens are "valid", send mail to each
-      breakdown = UserServices.new(@user).analyze_invitees(current_user)
+      breakdown = UserServices.new(@staged).analyze_invitees(current_user)
       friend_nodes = nil
       if breakdown[:new_friends].count > 0
+        # New friends must be added to the Browser list
         friend_nodes = breakdown[:new_friends].collect { |nf| 
           @node = current_user.add_followee nf 
           with_format("html") { render_to_string :partial => "collection/node" } 
         }
       end
       build_resource
-      
-      # Do inviations and/or shares, as appropriate
-      failures = []
-      invited = []
+      # Do invitations and/or shares, as appropriate
+      breakdown[:invited] = []
+      breakdown[:failures] = []
       # breakdown[:to_invite] is the list of complete outsiders who need invitations as well as shares
-      breakdown[:to_invite].each do |invitee|
+      # breakdown[:pending] are invitees who haven't yet accepted
+      (breakdown[:to_invite]+breakdown[:pending]).each do |invitee|
+        # Fresh invitations to a genuine external user
         begin
           pr = params[resource_name]
-          pr[:email] = invitee.downcase
+          pr[:email] = invitee.email.downcase
           pr[:skip_invitation] = true # Hold off on invitation so we can redirect to share, as nec.
           @resource = self.resource = resource_class.invite!(pr, current_inviter)
           @resource.invitation_sent_at = Time.now.utc
           @resource.save(validate: false) # ...because the invitee doesn't have a handle yet
           @resource.issue_instructions(for_sharing ? :share_instructions : :invitation_instructions)
-          invited << @resource
-        rescue Exception => e
-          failures.push({ email: invited.pop, error: e.to_s })
-          self.resource = nil
+          breakdown[:invited] << @resource
+#        rescue Exception => e
+#          breakdown[:failures].push({ email: invitee.email, error: e.to_s })
+#          self.resource = nil
         end
       end
       what_to_send = for_sharing ? "a sharing notice" : "an invitation"
-      unless (emails = invited.map(&:email)).empty? # New invitations
-        if (emails.count > 1) 
-          subj_verb = what_to_send.sub(/^[^\s]*\s*/, '').capitalize+"s are winging their way"
-        else
-          subj_verb = what_to_send.capitalize+" is winging its way"
-        end
-        popup = "Yay! #{subj_verb} to "+liststrs(emails)
-      end
-      unless failures.empty?
-        what_to_send = what_to_send.sub(/^[^\s]*\s*/, '')+"s"
-        messages << "Couldn't send #{what_to_send} to:"
-        messages << failures.collect { |f| "<li>#{f.email}: #{f.error}</li>" }.join+"</ul>"
-      end
+      popups << 
+        breakdown.report(:invited, :email) { |names, count|
+          subj_verb = (count > 1) ?
+            (what_to_send.sub(/^[^\s]*\s*/, '').capitalize+"s are winging their way") :
+            (what_to_send.capitalize+" is winging its way")
+          %Q{Yay! #{subj_verb} to #{names}}
+        }
+      alerts << 
+        breakdown.report(:failures) { |items, count|
+          what_to_send = what_to_send.sub(/^[^\s]*\s*/, '')+"s" if count > 1
+          "Couldn't send #{what_to_send} to:"+
+          "<ul>" + items.collect { |item| "<li>#{item[:email]}: #{item[:error]}</li>" }.join + "</ul>" 
+        }
       
       if for_sharing
         breakdown[:redundancies].each do |red|
-          # Existing friend: send share notice
+          # Share with existing friend
+          # Mail existing-friend share notice
+          # Cook Me Later: add to collection
         end
-        pending = [] # Invited but not yet confirmed
-        new_friends = [] # Newly-added friends (member's share notice sent)
-        invited = [] # New invitations (non-member share notice sent)
+        breakdown[:new_friends].each do |friend|
+          # Share with existing user => send share notice
+          # Cook Me Later: add to collection
+        end
+        # All categories of user get notified of the share
+        set = breakdown[:redundancies]+breakdown[:pending]+breakdown[:new_friends]+breakdown[:invited]
+        set.uniq.each { |target|
+          current_user.send_notification(target, :share_recipe, what: @staged.shared_recipe)
+        }
       else
-        unless (handles = breakdown[:redundancies].map(&:handle)).empty?
-          messages << ["You're already friends with", liststrs(handles)].join(' ')
-        end
-        unless (emails = breakdown[:pending].map(&:email)).empty? # Invited but not yet confirmed
-          messages << [
-            liststrs(emails),
-            (breakdown[:pending].count > 1 ? "have" : "has"),
-            "already been invited but #{verb}n't logged in."
-          ].join(' ')
-        end
-        unless (handles = breakdown[:new_friends].map(&:handle)).empty?
-          messages << [ 
-            liststrs(handles), 
-            (breakdown[:new_friends].count > 1 ? "are" : "is"), 
-            "already on RecipePower, so we've added them to your friends."
-          ].join(' ')
-        end
+        alerts << [
+          breakdown.report(:redundancies, :handle) { |names, count|
+            "You're already friends with #{names}." }, 
+          breakdown.report(:pending, :email) { |names, count|
+            verb = count > 1 ? "have" : "has"
+            %Q{#{names} #{verb} already been invited but #{verb}n't accepted.}
+          },
+          breakdown.report(:new_friends, :handle) { |names, count| 
+            %Q{#{names} #{count > 1 ? "are" : "is"} already on RecipePower, so we've added them to your friends.} 
+          }
+        ]
       end
-      @recipe = for_sharing && Recipe.find(@user.shared_recipe)
+      @recipe = for_sharing && Recipe.find(@staged.shared_recipe)
       respond_to { |format|
         format.json { 
           response = { done: true }
@@ -147,11 +133,10 @@ class InvitationsController < Devise::InvitationsController
             response[:entity] = friend_nodes
           end
           # If there's a single message, report it in a popup, otherwise use an alert
-          if messages.empty?
-            response[:popup] = popup if popup
+          if (alerts = alerts.flatten.compact).empty?
+            response[popups.count == 1 ? :popup : :alert] = popups.join('<br>').html_safe unless popups.empty?
           else
-            messages.unshift(popup) if popup
-            response[:alert] = messages.join('<br>').html_safe
+            response[:alert] = (popups+alerts).compact.join('<br>').html_safe
           end
           render json: response 
         }
@@ -174,7 +159,6 @@ class InvitationsController < Devise::InvitationsController
           @resource.save(validate: false) # ...because the invitee doesn't have a handle yet
           @resource.issue_instructions(:share_instructions)
         rescue Exception => e
-          debugger
           self.resource = nil
         end
       end

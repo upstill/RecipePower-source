@@ -27,6 +27,9 @@ class User < ActiveRecord::Base
   attr_accessor :shared_recipe, :invitee_tokens
   
   has_many :rcprefs, :dependent => :destroy
+  
+  has_many :notifications_sent, :foreign_key => :source_id, :class_name => "Notification", :dependent => :destroy
+  has_many :notifications_received, :foreign_key => :target_id, :class_name => "Notification", :dependent => :destroy
 
   has_many :follower_relations, :foreign_key=>"followee_id", :dependent=>:destroy, :class_name=>"UserRelation"
   has_many :followers, :through => :follower_relations, :source => :follower, :uniq => true 
@@ -365,6 +368,12 @@ public
     User.where("fullname ILIKE ?", "%#{txt}%") + 
     User.where("email ILIKE ?", "%#{txt}%")).uniq  
     friends
+  end
+  
+  def send_notification( target, notification_type, options={})
+    self.notifications_sent << Notification.create(
+      :info => options, :source_id => id, :target_id => target.id, :typenum => notification_type
+    )
   end
       
 =begin

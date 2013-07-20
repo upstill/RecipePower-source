@@ -37,6 +37,16 @@ class UserServices
         result[:to_invite] << invitee
       end
     end
+    
+    # Define a singleton method on the hash for reporting out the results
+    def result.report(which, selector = nil) 
+      unless (items = self[which]).empty?
+        count = items.size
+        items = liststrs(items.map(&selector)) if selector
+        yield(items, count)
+      end
+    end
+    
     result
   end
 
