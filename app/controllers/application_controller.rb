@@ -13,6 +13,7 @@ class ApplicationController < ActionController::Base
     helper_method :orphantagid
     helper_method :stored_location_for
     helper_method :deferred_capture
+    helper_method :deferred_collect
     include ApplicationHelper
     
   # Get a presenter for the object fron within a controller
@@ -91,13 +92,16 @@ class ApplicationController < ActionController::Base
   protect_from_forgery
   
   def stored_location_for(resource_or_scope)
-    # If user is logging in because they were capturing a recipe, we return 
+    # If user is logging in to complete some process, we return 
     # the path to completing the capture/tagging process
     scope = Devise::Mapping.find_scope!(resource_or_scope)
     redir = 
     if scope && (scope==:user)
       if params[:area] == "at_top" # Signing in from remote site => respond directly
         capture_recipes_url deferred_capture(true)
+      elsif deferred = deferred_collect(true)
+        rcp = Recipe.find deferred.delete(:id)
+        collect_recipe_url(rcp, deferred) 
       else
         # Signing in from RecipePower => load collection, let deferred
         # capture call be made on client side with a trigger
@@ -123,6 +127,17 @@ class ApplicationController < ActionController::Base
     # redirect_url = recall_capture || collection_path
     # stored_location_for(resource_or_scope) || signed_in_root_path(resource_or_scope)
   # end
+  
+  def defer_collect(rid, uid)
+    session[:collect_data] = { id: rid, uid: uid }
+  end
+  
+  def deferred_collect(delete=false)
+    if data = session[:collect_data]
+      session.delete(:collect_data) if delete
+    end
+    data
+  end
   
   # In the event that a recipe capture is deferred by login, this stores the requisite information
   # in the session for retrieval after login

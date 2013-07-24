@@ -69,12 +69,12 @@ class InvitationsController < Devise::InvitationsController
         # Fresh invitations to a genuine external user
         begin
           pr = params[resource_name]
-          pr[:email] = invitee.email.downcase
+          pr[:email] = (invitee.kind_of?(User) ? invitee.email : invitee).downcase
           pr[:skip_invitation] = true # Hold off on invitation so we can redirect to share, as nec.
           @resource = self.resource = resource_class.invite!(pr, current_inviter)
           @resource.invitation_sent_at = Time.now.utc
           @resource.save(validate: false) # ...because the invitee doesn't have a handle yet
-          @resource.issue_instructions(for_sharing ? :share_instructions : :invitation_instructions)
+          @resource.issue_instructions(for_sharing ? :sharing_invitation_instructions : :invitation_instructions)
           breakdown[:invited] << @resource
 #        rescue Exception => e
 #          breakdown[:failures].push({ email: invitee.email, error: e.to_s })
@@ -97,20 +97,16 @@ class InvitationsController < Devise::InvitationsController
         }
       
       if for_sharing
-        breakdown[:redundancies].each do |red|
-          # Share with existing friend
-          # Mail existing-friend share notice
+        (breakdown[:new_friends]+breakdown[:redundancies]).each do |sharee|
+          # Mail generic share notice with action button to collect recipe
           # Cook Me Later: add to collection
-        end
-        breakdown[:new_friends].each do |friend|
-          # Share with existing user => send share notice
-          # Cook Me Later: add to collection
+          sharee.notify(:share_recipe, current_user, what: params[resource_name][:shared_recipe] )
+          breakdown[:invited] << sharee
         end
         # All categories of user get notified of the share
-        set = breakdown[:redundancies]+breakdown[:pending]+breakdown[:new_friends]+breakdown[:invited]
-        set.uniq.each { |target|
-          current_user.send_notification(target, :share_recipe, what: @staged.shared_recipe)
-        }
+        (breakdown[:pending]+breakdown[:invited]).each do |sharee|
+          sharee.post_notification(:share_recipe, current_user, what: params[resource_name][:shared_recipe])
+        end
       else
         alerts << [
           breakdown.report(:redundancies, :handle) { |names, count|

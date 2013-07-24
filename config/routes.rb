@@ -1,7 +1,8 @@
 RP::Application.routes.draw do
 
-  resources :references
+  get "notifications/accept"
 
+  resources :references
 
   get "references/index"
 
@@ -85,12 +86,14 @@ RP::Application.routes.draw do
       get 'collect'
       post 'remove'
       get 'match_friends'
+      get 'notify'
+      get 'acquire' # Acquire a recipe (etc.)
     end
     collection do
       post 'query' # Change the selection query
     end
   end
-  
+
   # Super-user can edit user info, starting with roles
   #match 'signup' => 'users#new', :as => :signup
   #match 'logout' => 'sessions#destroy', :as => :logout

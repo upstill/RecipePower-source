@@ -1,8 +1,8 @@
-<% @recipe = Recipe.find @resource.shared_recipe %>
+<% @recipe = @recipe || Recipe.find(@resource.shared_recipe) %>
 <% if @recipe.thumbnail && (url = @recipe.thumbnail.thumbdata) && (url =~ /^data:/) %>
   <div class="share_recipe_pic_box">
     <%= image_tag url %>
   </div>
 <% end %>
-	<br><%= link_to @recipe.title, @recipe.url, class: "share_recipe_title" %>
-	<p>from&nbsp;<%= link_to @recipe.sourcename, @recipe.sourcehome, class: "share_recipe_source" %></p>
+<br><%= link_to @recipe.title, @recipe.url, class: "share_recipe_title" %>
+<p>from&nbsp;<%= link_to @recipe.sourcename, @recipe.sourcehome, class: "share_recipe_source" %></p>

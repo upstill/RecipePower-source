@@ -4,6 +4,7 @@ class CreateNotifications < ActiveRecord::Migration
       t.integer :source_id
       t.integer :target_id
       t.integer :notification_type
+      t.string :acceptance_token
       t.text :info
 
       t.timestamps

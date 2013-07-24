@@ -1,5 +1,5 @@
 class Notification < ActiveRecord::Base
-  attr_accessible :info, :source_id, :target_id, :notification_type, :typenum
+  attr_accessible :info, :source_id, :target_id, :notification_type, :typenum, :typesym, :acceptance_token
   serialize :info
   
   belongs_to :target, :class_name => "User"

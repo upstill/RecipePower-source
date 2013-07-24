@@ -45,19 +45,6 @@ class User < ActiveRecord::Base
   # login is a virtual attribute placeholding for [username or email]
   attr_accessor :login
   
-  def issue_instructions(what = :invitation_instructions)
-    send_devise_notification(what)
-  end
-  
-  def headers_for(action)
-    case action
-    when :invitation, :invitation_instructions
-      { :subject => invitation_issuer+" wants to get you cooking." }
-    else
-      {}
-    end
-  end  
-  
   def browser
     return @browser if @browser
     # Try to get browser from serialized storage in the user record
@@ -370,10 +357,55 @@ public
     friends
   end
   
-  def send_notification( target, notification_type, options={})
-    self.notifications_sent << Notification.create(
-      :info => options, :source_id => id, :target_id => target.id, :typenum => notification_type
-    )
+  def issue_instructions(what = :invitation_instructions)
+    send_devise_notification(what)
+  end
+  
+=begin
+  def send_devise_notification(notification, opts={})
+    devise_mailer.send(notification, self, opts).deliver
+  end
+=end
+ 
+  def headers_for(action)
+    case action
+    when :invitation, :invitation_instructions
+      { :subject => invitation_issuer+" wants to get you cooking." }
+    when :sharing_notice, :sharing_invitation_instructions
+      { :subject => invitation_issuer+" has something tasty for you." }
+    else
+      {}
+    end
+  end  
+  
+  # Notify self of an event, possibly (if profile allows) sending email
+  def notify( notification_type, source_user, options={})
+    notification = post_notification(notification_type, source_user, options)
+    if true # XXX User's profile approves
+      # Mapping from notification types to email types
+      case notification_type
+      when :share_recipe
+        self.shared_recipe = options[:what]
+        RpMailer.sharing_notice(notification).deliver
+      when :make_friend
+        :friend_notice
+      end
+    end
+  end
+  
+  # Post a notification event without sending email
+  def post_notification( notification_type, from = nil, options={})
+    attributes = { 
+      :info => options, 
+      :source_id => from.id, 
+      :target_id => id, 
+      :typenum => notification_type,
+      :acceptance_token => "XXX"
+    }
+    attributes[:source_id] = from.id if from
+    notification = Notification.create( attributes )
+    self.notifications_received << notification
+    notification
   end
       
 =begin

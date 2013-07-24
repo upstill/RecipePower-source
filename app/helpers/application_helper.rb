@@ -297,6 +297,15 @@ module ApplicationHelper
     ).html_safe
   end
   
+  # If there are any tasks awaiting which need a login, set up the appropriate one.
+  # Otherwise, preload the signup dialog
+  def login_setup
+		if data = deferred_collect(false)
+			@user = User.find data[:uid]
+			link_to "", new_authentication_path, class: "trigger" 
+		end
+	end
+  
   def signup_button
     unless current_user
       if session[:invitation_token]

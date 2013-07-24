@@ -76,7 +76,7 @@
 	<% if current_user %>
 		<%= render 'recipes/edit_template', recipe: nil %>
 	<% else %>
-		<%= render partial: "shared/signup_dialog" %>
+		<%= login_setup || render(partial: "shared/signup_dialog") %>
 	<% end %>
 	</body>
 </html>
