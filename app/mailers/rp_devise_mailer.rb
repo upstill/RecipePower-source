@@ -1,5 +1,5 @@
 
-class MyMailer < Devise::Mailer  
+class RPDeviseMailer < Devise::Mailer  
   # require ActionView::Helpers::TagHelper
   helper :application # gives access to all helpers defined within `application_helper`.
   

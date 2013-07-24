@@ -297,7 +297,13 @@ class RecipesController < ApplicationController
       @list_name = "mine"
       @area = params[:area]
       if @recipe.errors.empty?
-        report_recipe( collection_path, truncate( @recipe.title, :length => 100)+" now appearing in your collection.", formats)
+        notice = truncate( @recipe.title, :length => 100)+" now appearing in your collection."
+        if params[:uid]
+          flash[:notice] = notice
+          render json: { href: collection_path }
+        else
+          report_recipe( collection_path, notice, formats)
+        end
       else
         respond_to do |format|
           format.html { render nothing: true }

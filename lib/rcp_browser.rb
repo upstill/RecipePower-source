@@ -483,7 +483,7 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
   end
   
   def candidates
-    @candidates = @candidates || user.recipes(status: MyConstants::Rcpstatus_misc, sort_by: :collected)
+    @candidates = @candidates || user.recipes # (status: MyConstants::Rcpstatus_misc, sort_by: :collected)
   end
   
   def should_show(recipe)
