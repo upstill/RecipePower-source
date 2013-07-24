@@ -293,8 +293,7 @@ class RecipesController < ApplicationController
   # GET recipes/:id/collect
   def collect
     if current_user
-      @recipe = Recipe.ensure current_user_or_guest_id, params
-      @recipe.touch true
+      @recipe = Recipe.ensure current_user_or_guest_id, params, true
       @list_name = "mine"
       @area = params[:area]
       if @recipe.errors.empty?

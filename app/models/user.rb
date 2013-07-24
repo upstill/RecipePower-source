@@ -400,7 +400,6 @@ public
       :source_id => from.id, 
       :target_id => id, 
       :typenum => notification_type,
-      :acceptance_token => "XXX"
     }
     attributes[:source_id] = from.id if from
     notification = Notification.create( attributes )
