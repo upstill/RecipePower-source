@@ -113,10 +113,10 @@ ActiveRecord::Schema.define(:version => 20130719165250) do
     t.integer  "source_id"
     t.integer  "target_id"
     t.integer  "notification_type"
-    t.string   "acceptance_token"
+    t.string   "notification_token"
     t.text     "info"
-    t.datetime "created_at",        :null => false
-    t.datetime "updated_at",        :null => false
+    t.datetime "created_at",         :null => false
+    t.datetime "updated_at",         :null => false
   end
 
   create_table "products", :force => true do |t|

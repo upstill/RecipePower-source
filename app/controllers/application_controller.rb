@@ -4,7 +4,7 @@ require './lib/seeker.rb'
 class ApplicationController < ActionController::Base
   before_filter :setup_collection
   before_filter :check_flash
-  before_filter :detect_invitation_token
+  before_filter :detect_notification_token
     helper :all
     rescue_from Timeout::Error, :with => :timeout_error # self defined exception
     rescue_from OAuth::Unauthorized, :with => :timeout_error # self defined exception
@@ -14,6 +14,7 @@ class ApplicationController < ActionController::Base
     helper_method :stored_location_for
     helper_method :deferred_capture
     helper_method :deferred_collect
+    helper_method :deferred_notification
     include ApplicationHelper
     
   # Get a presenter for the object fron within a controller
@@ -22,11 +23,8 @@ class ApplicationController < ActionController::Base
     klass.new(object, view_context)
   end  
   
-  def detect_invitation_token
-    if params[:invitation_token]
-      session[:invitation_token] = params[:invitation_token] 
-      session[:invited_user] = params[:user]
-    end
+  def detect_notification_token
+    session[:notification_token] = params[:notification_token] if params[:notification_token]
   end
   
   def check_flash
@@ -99,10 +97,13 @@ class ApplicationController < ActionController::Base
     if scope && (scope==:user)
       if params[:area] == "at_top" # Signing in from remote site => respond directly
         capture_recipes_url deferred_capture(true)
-      elsif deferred = deferred_collect(true)
-        rcp = Recipe.find deferred.delete(:id)
-        collect_recipe_url(rcp, deferred) 
       else
+        if (nt = session[:notification_token]) && 
+          (notification = Notification.where(notification_token: nt).first) && 
+          (notification.target == current_user)
+            session.delete(:notification_token)
+            notification.accept
+        end
         # Signing in from RecipePower => load collection, let deferred
         # capture call be made on client side with a trigger
         collection_path href: true
@@ -119,6 +120,45 @@ class ApplicationController < ActionController::Base
     stored_location_for(resource_or_scope) || 
     (scope && (scope==:user) && collection_path(href: true)) || 
     super
+  end
+  
+  def defer_invitation
+    if params[:invitation_token]
+      session[:invitation_token] = params[:invitation_token]
+    else
+      session.delete :invitation_token
+    end
+    deferred_invitation
+  end
+  
+  # Validate and return the extant invitation token
+  def deferred_invitation
+    if token = session[:invitation_token] 
+      unless User.exists? :invitation_token => token
+        token = nil
+        session.delete :invitation_token 
+      end
+    end
+    token
+  end
+  
+  def defer_notification
+    if params[:notification_token]
+      session[:notification_token] = params[:notification_token]
+    else
+      session.delete :notification_token
+    end
+    deferred_notification
+  end
+  
+  def deferred_notification
+    if token = session[:notification_token] 
+      unless Notification.exists? :notification_token => token
+        token = nil
+        session.delete :notification_token 
+      end
+    end
+    token
   end
   
   # def after_sign_in_path_for(resource_or_scope)

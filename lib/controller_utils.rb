@@ -19,7 +19,11 @@ def dialog_boilerplate(action, default_area=nil, renderopts={})
     format.html {
       @area ||= "page"  
       if @area == "page" # Not partial at all => whole page
-        render action, renderopts
+        if renderopts[:redirect]
+          redirect_to renderopts[:redirect]
+        else
+          render action, renderopts
+        end
       else
         renderopts[:layout] = (@layout || false)
         render action, renderopts # May have special iframe layout

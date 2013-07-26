@@ -69,10 +69,7 @@
     <span>Msg Goes Here</span>
 	</div>
 	<%= feedback_tab :position => 'left' %>
-	<% if session[:flash_popup] %>
-		<%= render session[:flash_popup] %>
-		<% session.delete(:flash_popup) %>
-	<% end %>
+	<%= render session.delete(:flash_popup) if session[:flash_popup] %>
 	<% if current_user %>
 		<%= render 'recipes/edit_template', recipe: nil %>
 	<% else %>

@@ -357,8 +357,8 @@ public
     friends
   end
   
-  def issue_instructions(what = :invitation_instructions)
-    send_devise_notification(what)
+  def issue_instructions(what = :invitation_instructions, opts={})
+    send_devise_notification(what, opts)
   end
   
 =begin

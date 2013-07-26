@@ -1,6 +1,14 @@
 RP::Application.routes.draw do
 
   get "notifications/accept"
+  
+=begin
+  resources :notifications do 
+    member do
+      put 'accept'
+    end
+  end
+=end
 
   resources :references
 
@@ -59,7 +67,7 @@ RP::Application.routes.draw do
   match '/auth/failure' => 'authentications#failure'
   match '/authentications/new' => 'authentications#new'
   resources :authentications
-
+     
   devise_for :users, :controllers => {
     :sessions => 'sessions', 
     :passwords => 'passwords', 

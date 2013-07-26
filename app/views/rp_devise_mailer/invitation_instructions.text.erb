@@ -1,6 +1,6 @@
 <%# inviter_name = (@resource.invited_by_id && User.find(@resource.invited_by_id).handle) %>
 <% inviter_name = @resource.invitation_issuer %>
-<% accept_url = accept_invitation_url(@resource, :invitation_token => @resource.invitation_token).sub(/strong-galaxy-5765.herokuapp.com/,"www.recipepower.com") %>
+<% accept_url = accept_user_invitation_url(:invitation_token => @resource.invitation_token).sub(/strong-galaxy-5765.herokuapp.com/,"www.recipepower.com") %>
 		
 <%= inviter_name || "Someone" %> is inviting you to join them on RecipePower (<%= accept_url %>)<%= @resource.invitation_message.blank? ? "." : ", saying" %>
 

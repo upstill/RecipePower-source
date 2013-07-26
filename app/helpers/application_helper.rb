@@ -298,9 +298,21 @@ module ApplicationHelper
   end
   
   # If there are any tasks awaiting which need a login, set up the appropriate one.
-  # Otherwise, preload the signup dialog
+  # If we return nil, preload the signup dialog
   def login_setup
-		if data = deferred_collect(false)
+    if session[:invitation_token]
+      # load the invitation-acceptance dialog. If the user isn't on tour, set it to
+      # trigger when the page is loaded
+      unless session[:on_tour]
+  			link_to "", accept_user_invitation_path(invitation_token: session[:invitation_token]), class: "trigger"
+  		end
+    elsif token = deferred_notification
+      debugger
+      notification = Notification.find_by_notification_token(token)
+			@user = notification.target
+			link_to "", new_authentication_path, class: "trigger" 
+    elsif data = deferred_collect(false)
+      debugger
 			@user = User.find data[:uid]
 			link_to "", new_authentication_path, class: "trigger" 
 		end

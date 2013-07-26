@@ -29,12 +29,4 @@ class PagesController < ApplicationController
     end
   end
 
-  def share 
-    @resource = User.new( )
-    @resource.invitation_issuer = "Some Geek"
-    @resource.invitation_message = "Come on down!"
-    @resource.invitation_token = "jlkjkjvoiwe"
-    @recipe = Recipe.all.first { |rcp| params[:nothumb] ? !rcp.thumbnail : rcp.thumbnail }
-    render layout: "share_instructions"
-  end
 end
