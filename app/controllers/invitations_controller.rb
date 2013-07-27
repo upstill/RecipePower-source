@@ -1,5 +1,6 @@
 require 'token_input.rb'
 require 'string_utils.rb'
+require 'uri_utils.rb'
 
 class InvitationsController < Devise::InvitationsController
 
