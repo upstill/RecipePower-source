@@ -195,7 +195,7 @@
 			<% url = accept_user_invitation_url(
 				:invitation_token => @resource.invitation_token,
 				:notification_token => @notification_token ) %>
-			<% url.sub!(/strong-galaxy-5765.herokuapp.com/,"www.recipepower.com") %>
+			<%# url.sub!(/strong-galaxy-5765.herokuapp.com/,"www.recipepower.com") %>
 			<%= link_to("Cook Me Later", url, :class => "get_button btn-large btn-success") %>
 		</div>
 		<div class="footer">
