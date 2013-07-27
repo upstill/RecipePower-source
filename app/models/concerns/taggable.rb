@@ -1,3 +1,5 @@
+require 'token_input.rb'
+
 module Taggable
   extend ActiveSupport::Concern
 
@@ -46,15 +48,27 @@ module Taggable
   # Write the virtual attribute tag_tokens (a list of ids) to
   # update the real attribute tag_ids
   def tag_tokens=(idstring)
+    self.tags = 
+    TokenInput.parse_tokens(idstring) do |token| # parse_tokens analyzes each token in the list as either integer or string
+      case token
+      when Fixnum
+        Tag.find token
+      when String
+        Tag.strmatch(token, userid: tag_owner, assert: true)[0] # Match or assert the string
+      end
+    end
+=begin
+This is the old functionality, now moved to token_input.rb
     # The list may contain new terms, passed in single quotes
     self.tags = idstring.split(",").map { |e| 
       if(e=~/^\d*$/) # numbers (sans quotes) represent existing tags
         Tag.find e.to_i
       else
         e.sub!(/^\'(.*)\'$/, '\1') # Strip out enclosing quotes
-        Tag.strmatch(e, userid: tag_owner, assert: true)[0] # Match or assert the string
+        Tag.strmatch(token, userid: tag_owner, assert: true)[0] # Match or assert the string
       end
     }.compact.uniq
+=end
   end
   
   # Declare a data structure suitable for passing to RP.tagger.init

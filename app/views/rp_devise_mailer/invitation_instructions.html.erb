@@ -1,11 +1,11 @@
 <%# inviter_name = (@resource.invited_by_id && User.find(@resource.invited_by_id).handle) %>
 <% inviter_name = @resource.invitation_issuer %>
 <% accept_str = link_to("accept the invitation", 
-		accept_invitation_url(@resource, :invitation_token => @resource.invitation_token).sub(/strong-galaxy-5765.herokuapp.com/,"www.recipepower.com")) %>
+		accept_user_invitation_url(:invitation_token => @resource.invitation_token).sub(/strong-galaxy-5765.herokuapp.com/,"www.recipepower.com")) %>
 		
 <p><%= accept_str.sub(/>accept /, ">Accept ").html_safe %></p>
 <%= inviter_name || "Someone" %> is inviting you to join
-<%= link_to("RecipePower", root_url.sub(/strong-galaxy-5765.herokuapp.com/,"www.recipepower.com"))+(@resource.invitation_message.blank? ? "." : ", saying") %>
+<%= link_to("RecipePower", root_url)+(@resource.invitation_message.blank? ? "." : ", saying") %>
 <% unless @resource.invitation_message.blank? %>
   <% if(@resource.invitation_message.length > 20) %>
 	<blockquote><%= @resource.invitation_message %></blockquote>

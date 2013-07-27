@@ -24,4 +24,11 @@ class RpMailer < ActionMailer::Base
     @profile_url = "http://www.recipepower.com/users/profile"
     mail to: @user.email, :subject => "Your invitation was accepted"
   end
+  
+  # Notify the user via email of a recipe share
+  def sharing_notice(notification, opts={})
+    @notification = notification
+    @recipe = Recipe.find(notification.info[:what])
+    mail to: notification.target.email, subject: "#{notification.source.handle} has something tasty for you"
+  end
 end

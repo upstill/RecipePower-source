@@ -297,6 +297,40 @@ module ApplicationHelper
     ).html_safe
   end
   
+  # If there are any tasks awaiting which need a login, set up the appropriate one.
+  # If we return nil, preload the signup dialog
+  def login_setup
+    if session[:invitation_token]
+      # load the invitation-acceptance dialog. If the user isn't on tour, set it to
+      # trigger when the page is loaded
+      unless session[:on_tour]
+  			link_to "", accept_user_invitation_path(invitation_token: session[:invitation_token]), class: "trigger"
+  		end
+    elsif token = deferred_notification
+			@user = Notification.find_by_notification_token(token).target
+			link_to "", new_user_session_path(user: { id: @user.id, email: @user.email } ), class: "trigger" 
+    elsif data = deferred_collect(false)
+      debugger
+			@user = User.find data[:uid]
+			link_to "", new_authentication_path, class: "trigger" 
+		end
+	end
+  
+  def signup_button
+    unless current_user
+      if session[:invitation_token]
+        label = "Accept Invitation" 
+        path = accept_user_invitation_path(invitation_token: session[:invitation_token] )
+        button_to_modal(label, path, class: "btn btn-large btn-success" ) 
+      else
+        label = "Sign Me Up"
+        selector = "div.dialog.signup"
+        path = collection_path()
+        button_to_modal(label, path, class: "btn btn-large btn-success", selector: selector ) 
+      end
+    end
+  end
+  
 =begin
   def show_errors(errors)
     result = ""

@@ -20,6 +20,15 @@ body { padding-top: 60px; }
     max-height: 520px;
 }
 
+div.dialog.modal {
+	div.prompt {
+		font:18px arial,sans-serif;
+		font-weight:bold;
+		margin: 0px 0px 15px 10px;
+		padding: 0px;
+	}
+}
+
 .alert-guide {
   background-color: $guideBackground;
   border-color: $guideBorder;
@@ -72,7 +81,7 @@ label {
 	position: fixed;
 	top: 60px;
 	left: 20px;
-	width: 150px;
+	// width: 150px;
 	height: 60px;
 	text-align: center;
 }

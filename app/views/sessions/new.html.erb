@@ -1,16 +1,26 @@
-<%= modal_dialog :signin, "Sign in with password", :area => "floating" do %>
+<%= modal_dialog :signin, resource.id ? "Login for #{resource.handle}" : "Sign in with password", :area => "floating" do %>
 	<%= simple_form_for(resource, :as => resource_name, :url => session_path(resource_name), html: { class: "signin json" }) do |f| %>
 		<%= modal_body do %>
 		  <%= form_errors_helper f %>
-		  <%= f.input :login, label: "Username or Email (your choice)" %></p>
+			<% if resource.id %>
+				<%= f.hidden_field :id %>
+				<%= f.hidden_field :login, value: resource.email %>
+			<% else %>
+			  <%= f.input :login, label: "Username or Email (your choice)" %></p>
+			<% end %>
 		  <%= f.input :password %></p>
 		  <% if devise_mapping.rememberable? -%>
-				<%= f.input :remember_me, :checked => true, style: "margin:0px;", :input_html => { :checked => true } %> 
+				<%= f.input :remember_me, :as => :boolean, :wrapper => :checkbox %> 
 		  <% end -%>
 		<% end %>
 		<%= modal_footer do %>
 		  <%= f.submit "Sign in", class: "submit_button" %>
-			&nbsp;&nbsp;&nbsp;Forgot your password? Click <%= button_to_modal "here", new_user_password_path %>
+			&nbsp;&nbsp;&nbsp;Forgot your password? Click 
+			<% if resource.id %>
+				<%= link_to "here", user_password_path(user: {login: resource.email}), method: "POST", class: "btn btn-mini" %>
+			<% else %>
+				<%= button_to_modal "here", new_user_password_path %>
+			<% end %>
 		<% end %>
 	<% end %>
 <% end %>

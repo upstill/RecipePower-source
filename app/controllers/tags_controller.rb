@@ -189,7 +189,6 @@ class TagsController < ApplicationController
   def typify
       # Return array of ids of tags successfully converted
       # We can take an array of tagids or a single tagid together with a new type spec
-      debugger
       if params["tagids"] 
           puts "Typify"+params["tagids"].inspect
           idsChanged = Tag.convertTypesByIndex(params["tagids"].map{|p| p.delete("orphantag_").to_i}, params["fromtabindex"].to_i, params["totabindex"].to_i, true)

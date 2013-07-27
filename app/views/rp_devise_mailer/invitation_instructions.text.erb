@@ -1,0 +1,22 @@
+<%# inviter_name = (@resource.invited_by_id && User.find(@resource.invited_by_id).handle) %>
+<% inviter_name = @resource.invitation_issuer %>
+<% accept_url = accept_user_invitation_url(:invitation_token => @resource.invitation_token).sub(/strong-galaxy-5765.herokuapp.com/,"www.recipepower.com") %>
+		
+<%= inviter_name || "Someone" %> is inviting you to join them on RecipePower (<%= accept_url %>)<%= @resource.invitation_message.blank? ? "." : ", saying" %>
+
+<% unless @resource.invitation_message.blank? %>
+	<% require 'iconv' %>
+	<%# msg = Iconv.conv('ascii//translit//ignore', 'UTF-8', @resource.invitation_message).to_s %>
+	<%= raw splitstr( @resource.invitation_message, 72).join("\n\t") %>
+
+<% end %>
+RecipePower (<%= root_url.sub(/strong-galaxy-5765.herokuapp.com/,"www.recipepower.com") %>) makes sure you never forget a 
+recipe again, lets you find them again quickly, and clues you in to your 
+friends' discoveries too. Join <%= inviter_name || "us" %> and you'll be cooking 
+like never before. Getting started takes just a few seconds, then 
+you'll be snagging the best recipes from the Web--for good. 
+
+So accept already! Go to <%= accept_url %>.
+
+Best Regards,
+The RecipePower team

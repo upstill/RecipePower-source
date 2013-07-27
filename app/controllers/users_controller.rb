@@ -21,6 +21,19 @@ class UsersController < ApplicationController
     # @seeker = FriendSeeker.new @users, session[:seeker] # Default; other controllers may set up different seekers
   end
   
+  # Take a tokenInput query string and match the input against the given user's set of friends/channels
+  def match_friends
+    me = User.find params[:id]
+    respond_to do |format|
+      format.json { 
+        friends = me.match_friends(params[:q]).collect { |friend| 
+          { id: friend.id.to_s, name: (friend.handle+" (#{friend.email})") }
+        }
+        render :json => friends
+      }
+    end
+  end
+  
   # GET /users
   # GET /users.xml
   def index

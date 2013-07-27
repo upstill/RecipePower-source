@@ -36,8 +36,8 @@
   <body>
     <%= render 'layouts/frame_top' %>
     <% if !current_user && session[:on_tour] %>
-			<div class="button_house">
-	    	<%= button_to_modal("Sign Me Up", collection_path, class: "btn btn-large btn-success", selector: "div.dialog.signup") %>
+			<div class="button_house span3">
+				<%= signup_button %>
 			</div>
     <% end %>
 		<% if params[:controller] == "collection" %>
@@ -69,14 +69,11 @@
     <span>Msg Goes Here</span>
 	</div>
 	<%= feedback_tab :position => 'left' %>
-	<% if session[:flash_popup] %>
-		<%= render session[:flash_popup] %>
-		<% session.delete(:flash_popup) %>
-	<% end %>
+	<%= render session.delete(:flash_popup) if session[:flash_popup] %>
 	<% if current_user %>
 		<%= render 'recipes/edit_template', recipe: nil %>
 	<% else %>
-		<%= render partial: "shared/signup_dialog" %>
+		<%= login_setup || render(partial: "shared/signup_dialog") %>
 	<% end %>
 	</body>
 </html>

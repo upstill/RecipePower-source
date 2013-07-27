@@ -1,7 +1,16 @@
 RP::Application.routes.draw do
 
-  resources :references
+  get "notifications/accept"
+  
+=begin
+  resources :notifications do 
+    member do
+      put 'accept'
+    end
+  end
+=end
 
+  resources :references
 
   get "references/index"
 
@@ -58,7 +67,7 @@ RP::Application.routes.draw do
   match '/auth/failure' => 'authentications#failure'
   match '/authentications/new' => 'authentications#new'
   resources :authentications
-
+     
   devise_for :users, :controllers => {
     :sessions => 'sessions', 
     :passwords => 'passwords', 
@@ -84,12 +93,15 @@ RP::Application.routes.draw do
     member do 
       get 'collect'
       post 'remove'
+      get 'match_friends'
+      get 'notify'
+      get 'acquire' # Acquire a recipe (etc.)
     end
     collection do
       post 'query' # Change the selection query
     end
   end
-  
+
   # Super-user can edit user info, starting with roles
   #match 'signup' => 'users#new', :as => :signup
   #match 'logout' => 'sessions#destroy', :as => :logout
@@ -138,6 +150,7 @@ RP::Application.routes.draw do
   # get "pages/about"
   match '/home', :to => 'pages#home'
   match '/popup', :to => 'pages#popup'
+  match '/share', :to => 'pages#share'
   match '/contact', :to => 'pages#contact'
   match '/about', :to => 'pages#about'
   match '/welcome', :to => 'pages#welcome'

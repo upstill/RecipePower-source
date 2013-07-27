@@ -4,6 +4,7 @@ require './lib/seeker.rb'
 class ApplicationController < ActionController::Base
   before_filter :setup_collection
   before_filter :check_flash
+  before_filter :detect_notification_token
     helper :all
     rescue_from Timeout::Error, :with => :timeout_error # self defined exception
     rescue_from OAuth::Unauthorized, :with => :timeout_error # self defined exception
@@ -12,6 +13,8 @@ class ApplicationController < ActionController::Base
     helper_method :orphantagid
     helper_method :stored_location_for
     helper_method :deferred_capture
+    helper_method :deferred_collect
+    helper_method :deferred_notification
     include ApplicationHelper
     
   # Get a presenter for the object fron within a controller
@@ -19,6 +22,10 @@ class ApplicationController < ActionController::Base
     klass ||= "#{object.class}Presenter".constantize
     klass.new(object, view_context)
   end  
+  
+  def detect_notification_token
+    session[:notification_token] = params[:notification_token] if params[:notification_token]
+  end
   
   def check_flash
     logger.debug "FLASH messages extant for "+params[:controller]+"#"+params[:action]+"(check_flash):"
@@ -83,7 +90,7 @@ class ApplicationController < ActionController::Base
   protect_from_forgery
   
   def stored_location_for(resource_or_scope)
-    # If user is logging in because they were capturing a recipe, we return 
+    # If user is logging in to complete some process, we return 
     # the path to completing the capture/tagging process
     scope = Devise::Mapping.find_scope!(resource_or_scope)
     redir = 
@@ -91,6 +98,12 @@ class ApplicationController < ActionController::Base
       if params[:area] == "at_top" # Signing in from remote site => respond directly
         capture_recipes_url deferred_capture(true)
       else
+        if (nt = session[:notification_token]) && 
+          (notification = Notification.where(notification_token: nt).first) && 
+          (notification.target == current_user)
+            session.delete(:notification_token)
+            notification.accept
+        end
         # Signing in from RecipePower => load collection, let deferred
         # capture call be made on client side with a trigger
         collection_path href: true
@@ -109,12 +122,62 @@ class ApplicationController < ActionController::Base
     super
   end
   
+  def defer_invitation
+    if params[:invitation_token]
+      session[:invitation_token] = params[:invitation_token]
+    else
+      session.delete :invitation_token
+    end
+    deferred_invitation
+  end
+  
+  # Validate and return the extant invitation token
+  def deferred_invitation
+    if token = session[:invitation_token] 
+      unless User.exists? :invitation_token => token
+        token = nil
+        session.delete :invitation_token 
+      end
+    end
+    token
+  end
+  
+  def defer_notification
+    if params[:notification_token]
+      session[:notification_token] = params[:notification_token]
+    else
+      session.delete :notification_token
+    end
+    deferred_notification
+  end
+  
+  def deferred_notification
+    if token = session[:notification_token] 
+      unless Notification.exists? :notification_token => token
+        token = nil
+        session.delete :notification_token 
+      end
+    end
+    token
+  end
+  
   # def after_sign_in_path_for(resource_or_scope)
     # recall_capture || collection_path
     # stripped_capture
     # redirect_url = recall_capture || collection_path
     # stored_location_for(resource_or_scope) || signed_in_root_path(resource_or_scope)
   # end
+  
+  def defer_collect(rid, uid)
+    session[:collect_data] = { id: rid, uid: uid }
+  end
+  
+  def deferred_collect(delete=false)
+    if data = session[:collect_data]
+      session.delete(:collect_data) if delete
+    end
+    data
+  end
   
   # In the event that a recipe capture is deferred by login, this stores the requisite information
   # in the session for retrieval after login

@@ -1,6 +1,3 @@
-<h3>Invite a friend</h3>
-
-<p class="airy">RecipePower is currently invitation-only. Why not do a friend a favor and open the door for them?</p>
 <%= modal_dialog :new_invitation, "Invite a Friend" do %>
 	<%= simple_form_for resource, :as => resource_name, :url => invitation_path(resource_name), :html => {:method => :post} do |f| %>
 		<%= modal_body do %>

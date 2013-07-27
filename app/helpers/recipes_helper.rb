@@ -141,13 +141,24 @@ end
   end
 
   # Declare a div for triggering a recipe edit operation
-  def recipe_spring_load
+  def recipe_edit_trigger
     if capture_data = deferred_capture(false)
       content_tag :a, "",
         href: capture_recipes_url(capture_data),
-        class: "recipe_edit_trigger"
+        class: "trigger"
     end
   end
+
+=begin
+  # Declare a div for triggering a recipe edit operation
+  def recipe_collect_trigger
+    if collect_data = deferred_collect(false)
+      content_tag :a, "",
+        href: collect_recipe_url(collect_data),
+        class: "trigger"
+    end
+  end
+=end
 
   def recipe_field_or_placeholder recipe, fieldname
     if recipe

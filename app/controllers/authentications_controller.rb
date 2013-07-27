@@ -27,6 +27,20 @@ class AuthenticationsController < ApplicationController
       dialog_boilerplate "new"
   end
 
+  # Get a new authentication (==login) for a specific user
+  def verify
+      @authentications = current_user.authentications if current_user
+      if current_user
+        flash[:notice] = "All signed in. Welcome back, #{current_user.handle}!"
+        redirect_to collection_path(href: true)
+      end
+      @auth_delete = true
+      @auth_context = :manage
+      flash[:notice] = params[:notice]
+      # @area = params[:area]
+      dialog_boilerplate "verify"
+  end
+
   def failure
     @after_sign_in_url = nil # authentications_url
     if data = deferred_capture(true)
@@ -70,9 +84,9 @@ class AuthenticationsController < ApplicationController
       flash[:notice] = "Yay! Signed in with #{@authentication.provider_name}. Nice to see you again, #{user.handle}!"
       @after_sign_in_url = after_sign_in_path_for(user)
       render 'callback', :layout => false
-    elsif user = (session[:invitation_token] && User.where(:invitation_token => session[:invitation_token]).first)
+    elsif token = deferred_invitation
+        user = User.find_by_invitation_token token
         # If we have an invitation out for this user we go ahead and log them in
-        user.username = session[:invitation_username]
         user.apply_omniauth(omniauth)
         @authentication = user.authentications.build(authparams)
         if user.save
@@ -80,9 +94,7 @@ class AuthenticationsController < ApplicationController
           if user.sign_in_count > 1
               flash[:notice] += " Welcome back, #{user.handle}!"
           end
-          if user.invited?
-              user.accept_invitation!
-          end
+          user.accept_invitation! if user.invited?
           sign_in_and_redirect(:user, user)
         end
       end  
@@ -114,8 +126,7 @@ class AuthenticationsController < ApplicationController
         redirect_to users_identify_url
       end
 =end
-      session[:invitation_token] = nil
-      session[:invitation_username] = nil
+      session.delete :invitation_token
   end
 
   def destroy

@@ -57,8 +57,9 @@ RP.named_function = (str) ->
 RP.fire_triggers = ->
 	if dlog = $('div.dialog.trigger')[0]
 		RP.dialog.run dlog
-	else if (elmt = $("a.recipe_edit_trigger")[0])
+	else if (elmt = $("a.trigger")[0])
 		RP.dialog.get_and_go null, elmt.href
+		$(elmt).remove()
 
 # For the FAQ page: click on a question to show the associated answer
 RP.showhide = (event) ->

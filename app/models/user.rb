@@ -20,12 +20,16 @@ class User < ActiveRecord::Base
   end
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :id, :username, :fullname, :about, :login, :private,
-                :email, :password, :password_confirmation, 
+  attr_accessible :id, :username, :fullname, :about, :login, :private, :skip_invitation, 
+                :email, :password, :password_confirmation, :shared_recipe, :invitee_tokens,
                 :recipes, :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens, :subscription_tokens, :invitation_issuer
   attr_writer :browser
+  attr_accessor :shared_recipe, :invitee_tokens
   
   has_many :rcprefs, :dependent => :destroy
+  
+  has_many :notifications_sent, :foreign_key => :source_id, :class_name => "Notification", :dependent => :destroy
+  has_many :notifications_received, :foreign_key => :target_id, :class_name => "Notification", :dependent => :destroy
 
   has_many :follower_relations, :foreign_key=>"followee_id", :dependent=>:destroy, :class_name=>"UserRelation"
   has_many :followers, :through => :follower_relations, :source => :follower, :uniq => true 
@@ -40,15 +44,6 @@ class User < ActiveRecord::Base
   
   # login is a virtual attribute placeholding for [username or email]
   attr_accessor :login
-  
-  def headers_for(action)
-    case action
-    when :invitation, :invitation_instructions
-      { :subject => invitation_issuer+" wants to get you cooking." }
-    else
-      {}
-    end
-  end  
   
   def browser
     return @browser if @browser
@@ -347,6 +342,69 @@ public
          (other.channel? || (other.sign_in_count && (other.sign_in_count > 0))) && # Excluded unconfirmed invites
          (other.id != id) # Don't include this user
     }
+  end
+  
+  def invitee_tokens=(tokenstr)
+    @invitee_tokens = tokenstr.blank? ? [] : TokenInput.parse_tokens(tokenstr)
+  end
+  
+  # Return a list of my friends who match the input text
+  def match_friends(txt)
+    friends = 
+    (User.where("username ILIKE ?", "%#{txt}%") + 
+    User.where("fullname ILIKE ?", "%#{txt}%") + 
+    User.where("email ILIKE ?", "%#{txt}%")).uniq  
+    friends
+  end
+  
+  def issue_instructions(what = :invitation_instructions, opts={})
+    send_devise_notification(what, opts)
+  end
+  
+=begin
+  def send_devise_notification(notification, opts={})
+    devise_mailer.send(notification, self, opts).deliver
+  end
+=end
+ 
+  def headers_for(action)
+    case action
+    when :invitation, :invitation_instructions
+      { :subject => invitation_issuer+" wants to get you cooking." }
+    when :sharing_notice, :sharing_invitation_instructions
+      { :subject => invitation_issuer+" has something tasty for you." }
+    else
+      {}
+    end
+  end  
+  
+  # Notify self of an event, possibly (if profile allows) sending email
+  def notify( notification_type, source_user, options={})
+    notification = post_notification(notification_type, source_user, options)
+    if true # XXX User's profile approves
+      # Mapping from notification types to email types
+      case notification_type
+      when :share_recipe
+        self.shared_recipe = options[:what]
+        RpMailer.sharing_notice(notification).deliver
+      when :make_friend
+        :friend_notice
+      end
+    end
+  end
+  
+  # Post a notification event without sending email
+  def post_notification( notification_type, from = nil, options={})
+    attributes = { 
+      :info => options, 
+      :source_id => from.id, 
+      :target_id => id, 
+      :typenum => notification_type,
+    }
+    attributes[:source_id] = from.id if from
+    notification = Notification.create( attributes )
+    self.notifications_received << notification
+    notification
   end
       
 =begin

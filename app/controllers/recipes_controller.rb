@@ -2,7 +2,7 @@ require './lib/controller_utils.rb'
 
 class RecipesController < ApplicationController
 
-  before_filter :login_required, :except => [:index, :show, :capture ]
+  before_filter :login_required, :except => [:index, :show, :capture, :collect ]
   before_filter { @focus_selector = "#recipe_url" }
   skip_before_filter :setup_collection, :only => [:capture]
     
@@ -289,20 +289,34 @@ class RecipesController < ApplicationController
     end
   end
   
-  # Add a recipe to the user's collection without going to edit tags. Full-page render is just rcpqueries page
+  # Add a recipe to the user's collection without going to edit tags. Full-page render is just collection page
   # GET recipes/:id/collect
   def collect
-    @recipe = Recipe.ensure current_user_or_guest_id, params
-    @list_name = "mine"
-    @area = params[:area]
-    if @recipe.errors.empty?
-      report_recipe( collection_path, truncate( @recipe.title, :length => 100)+" now appearing in your collection.", formats)
-    else
-      respond_to do |format|
-        format.html { render nothing: true }
-        format.json { render json: { type: :error, popup: @recipe.errors.messages.first.last.last } }
-        format.js { render :text => e.message, :status => 403 }
+    if current_user
+      @recipe = Recipe.ensure current_user_or_guest_id, params, true
+      @list_name = "mine"
+      @area = params[:area]
+      if @recipe.errors.empty?
+        notice = truncate( @recipe.title, :length => 100)+" now appearing in your collection."
+        if params[:uid]
+          flash[:notice] = notice
+          respond_to do |format|
+            format.html { redirect_to collection_path }
+            format.json { render json: { href: collection_path } }
+          end
+        else
+          report_recipe( collection_path, notice, formats)
+        end
+      else
+        respond_to do |format|
+          format.html { render nothing: true }
+          format.json { render json: { type: :error, popup: @recipe.errors.messages.first.last.last } }
+          format.js { render :text => e.message, :status => 403 }
+        end
       end
+    else # Nobody logged in; defer the collection and render home page with login dialog
+      defer_collect params[:id], params[:uid]
+      redirect_to home_path
     end
   end
 
