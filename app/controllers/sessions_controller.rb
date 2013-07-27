@@ -3,14 +3,18 @@ class SessionsController < Devise::SessionsController
   # GET /resource/sign_in
   def new
     self.resource = build_resource(nil, :unsafe => true)
+    if u = params[:user] && params[:user][:id] && User.find_by_id(params[:user][:id])
+      self.resource.username = u.username
+      self.resource.fullname = u.fullname
+    end
     clean_up_passwords(resource)
     respond_to do |format|
       format.html { respond_with(resource, serialize_options(resource)) }
       format.json { 
-        flash.now[:alert] = "Sorry--didn't recognize your credentials."
         @area = params[:area] || "floating"
         rendered = with_format("html") {
-          render_to_string "authentications/new", layout: false 
+          # render_to_string "authentications/new", layout: false 
+          render_to_string layout: false 
         }
         return render :json => {
           :success => false, 

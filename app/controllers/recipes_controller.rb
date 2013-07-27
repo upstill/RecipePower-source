@@ -300,7 +300,10 @@ class RecipesController < ApplicationController
         notice = truncate( @recipe.title, :length => 100)+" now appearing in your collection."
         if params[:uid]
           flash[:notice] = notice
-          render json: { href: collection_path }
+          respond_to do |format|
+            format.html { redirect_to collection_path }
+            format.json { render json: { href: collection_path } }
+          end
         else
           report_recipe( collection_path, notice, formats)
         end

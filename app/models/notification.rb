@@ -15,7 +15,6 @@ class Notification < ActiveRecord::Base
   
   # Do whatever is entailed by the notification
   def accept
-    debugger
     case typesym
     when :share_recipe
       recipe = Recipe.find info[:what]

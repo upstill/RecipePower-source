@@ -4,7 +4,6 @@ class NotificationsController < ApplicationController
   # The request must come with an acceptance token which 
   # provides security, and is used to find the 
   def accept
-    debugger
     if token = defer_notification 
       note = Notification.find_by_notification_token(token)
       if current_user && (current_user.id != note.target_id)

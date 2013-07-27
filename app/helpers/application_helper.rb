@@ -307,10 +307,8 @@ module ApplicationHelper
   			link_to "", accept_user_invitation_path(invitation_token: session[:invitation_token]), class: "trigger"
   		end
     elsif token = deferred_notification
-      debugger
-      notification = Notification.find_by_notification_token(token)
-			@user = notification.target
-			link_to "", new_authentication_path, class: "trigger" 
+			@user = Notification.find_by_notification_token(token).target
+			link_to "", new_user_session_path(user: { id: @user.id, email: @user.email } ), class: "trigger" 
     elsif data = deferred_collect(false)
       debugger
 			@user = User.find data[:uid]
