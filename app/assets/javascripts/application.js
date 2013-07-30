@@ -22,7 +22,7 @@
 //= require RPDialogTest
 //= require RPfields
 //= require RPquery
-//= require RPreferent
+// require RPreferent
 //  require RPDialog
 
 //= require bootstrap
