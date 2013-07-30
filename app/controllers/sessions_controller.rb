@@ -9,7 +9,7 @@ class SessionsController < Devise::SessionsController
     end
     clean_up_passwords(resource)
     respond_to do |format|
-      format.html { respond_with(resource, serialize_options(resource)) }
+      format.html { redirect_to home_path }
       format.json { 
         @area = params[:area] || "floating"
         rendered = with_format("html") {

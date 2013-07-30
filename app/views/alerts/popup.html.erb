@@ -3,7 +3,7 @@
 		<%= render "alerts/injector_popup" %>
 	<% end %>
 <% else %>
-	<%= modal_dialog :popup, "Your Work Here Is Done", area: "at_top", class: "modal-yield" do %>
-		<%= render partial: "popup/popup" %>
+	<%= modal_dialog :popup, "Your Work Here Is Done", class: "modal-yield" do %>
+		<%# The flash message will do... render partial: "alerts/popup" %>
 	<% end %>
 <% end %>

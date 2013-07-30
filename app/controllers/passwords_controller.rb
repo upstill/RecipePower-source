@@ -4,6 +4,7 @@ class PasswordsController < Devise::PasswordsController
   
   # GET /resource/password/new
   def new
+    session[:on_tour] = true
     if request.format == "application/json"
       build_resource({})
       respond_with resource do |format|
@@ -21,6 +22,7 @@ class PasswordsController < Devise::PasswordsController
   
   def create
     self.resource = resource_class.send_reset_password_instructions(resource_params)
+    session[:on_tour] = true
     if successfully_sent?(resource)
       respond_to do |format|
         format.html { # This is for capturing a new recipe. The injector (capture.js) calls for this

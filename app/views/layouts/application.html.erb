@@ -35,12 +35,12 @@
   </head>
   <body>
     <%= render 'layouts/frame_top' %>
-    <% if !current_user && session[:on_tour] %>
-			<div class="button_house span3">
-				<%= signup_button %>
-			</div>
-    <% end %>
 		<% if params[:controller] == "collection" %>
+	    <% if !current_user && session[:on_tour] %>
+				<div class="button_house span3">
+					<%= signup_button %>
+				</div>
+	    <% end %>
 			<div class="span3 left_house" <%= %q{style="top: 120px;"}.html_safe if !current_user && session[:on_tour] %> >
 				<%= render 'layouts/frame_left' %>
 			</div>

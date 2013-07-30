@@ -2,8 +2,8 @@ class PagesController < ApplicationController
   # filter_access_to :all
   respond_to :html, :json
   def home
-    session.delete :on_tour # Tour's over!
-  	@Title = "Home"
+    # session.delete :on_tour # Tour's over!
+    @Title = "Home"
     @auth_context = :manage
   end
 
