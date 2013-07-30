@@ -188,17 +188,18 @@
 		</div>
 		<br>
 		<div class="message_box">
-			<div class="signup_message">
-				<p><strong>Rather not deal with this now?</strong></p>
-				<p>Save it to RecipePower and have it waiting for you.</p>
-			</div>
 			<% url = accept_user_invitation_url(
 				:invitation_token => @resource.invitation_token,
 				:notification_token => @notification_token ) %>
-			<%= link_to("Cook Me Later", url, :class => "get_button btn-large btn-success") %>
+			<div class="signup_message">
+				<h3>Rather not deal with this now?</h3>
+			<%= link_to("Save It To RecipePower", url, :class => "get_button btn-large btn-success") %>
+				<br>
+				<p>...and have it waiting for you.</p>
+			</div>
 		</div>
 		<div class="footer">
-	  	<p><a class="brand" href="/collection">RecipePower</a></p>
+	  	<p><%= link_to "Recipe Power", collection_url, class: "brand" %></p>
 			<p>Copyright 2013 by RecipePower. All Rights Reserved</p>
 		</div>
   </body>
