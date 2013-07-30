@@ -58,7 +58,13 @@ class ReferentsController < ApplicationController
 
     respond_to do |format|
       format.html { render (@tabindex==11 ? "new_channel.html.erb" : "new") }
-      format.json { render json: [{ :title=>@referent.longname, :isLazy=>true, :key=>@referent.id, :isFolder=>false }] }
+      format.json { 
+        if params[:tagid]
+          render json: [ { :title=>@referent.longname, :isLazy=>true, :key=>@referent.id, :isFolder=>false } ]
+        else
+          render json: { dlog: with_format("html") { render_to_string((@tabindex==11 ? "new_channel.html.erb" : "new"), layout: false) } }
+        end
+      }
     end
   end
 
@@ -75,6 +81,7 @@ class ReferentsController < ApplicationController
   # POST /referents?tagid=1&mode={over,before,after}&target=referentid
   # POST /referents.json?tagid=1&mode={over,before,after}&target=referentid
   def create
+    debugger
     if params[:tabindex] # Obsolete: coming from the old tag-organizing page
         @tabindex = params[:tabindex].to_i || 0
         handlerclass = @@HandlersByIndex[@tabindex]
@@ -144,7 +151,13 @@ class ReferentsController < ApplicationController
     respond_to do |format|
       if @referent && @referent.save
         format.html { redirect_to @referent.becomes(Referent), notice: 'Referent was successfully created/aliased.' }
-        format.json { render json: [{ :title=>@referent.longname, :isLazy=>true, :key=>keyback, :isFolder=>false }], status: :created }
+        format.json { 
+          if params[:tagid]
+            render json: [{ :title=>@referent.longname, :isLazy=>true, :key=>keyback, :isFolder=>false }], status: :created 
+          else
+            render json: { done: true, notice: "Successfully created "+@referent.longname }, status: :created 
+          end
+        }
       else
         @typeselections = Tag.type_selections
         @typeselections.shift

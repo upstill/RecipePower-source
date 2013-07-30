@@ -274,6 +274,36 @@ module ApplicationHelper
     end
     (bmtag+imgtag+"</a>").html_safe
   end
+  
+  def header_menu
+
+    item_list = [
+      link_to_modal( "Profile", users_profile_path( section: "profile" )),
+      link_to_modal( "Sign-in Services", authentications_path),
+      link_to_modal( "Invite", new_user_invitation_path ),
+      link_to( "Sign Out", destroy_user_session_path, :method => "delete") 
+    ]
+  
+    item_list += [
+  		"<hr>",
+  		link_to( "Admin", admin_path),
+  		link_to_modal( "Show Step 2", popup_path(name: "starting_step2")),
+  		link_to_modal( "Need to Know", popup_path(name: "need_to_know"))
+  	] if permitted_to? :admin, :pages
+  
+    header_link =
+    link_to (current_user.handle+'<b class="caret"></b>').html_safe, "#",
+      class: "dropdown-toggle", data: { toggle: "dropdown" }, role: "button"
+
+    menu = 
+    content_tag :ul, 
+      ("<li>#{ item_list.join("</li><li>") }</li>").html_safe, 
+      class: "dropdown-menu", 
+      role: "menu",
+      :"aria-labelledby" => "userMenuLabel"
+      
+    (header_link+menu).html_safe
+  end
     
   def footer_navlinks
   	navlinks = []

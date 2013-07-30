@@ -47,7 +47,6 @@
 # require RPDialogTest
 # require RPfields
 # require RPquery
-# require RPreferent
 
 #= require bootstrap
 
