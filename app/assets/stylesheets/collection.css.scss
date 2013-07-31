@@ -45,7 +45,8 @@
 */
 
 div.centerblock {
-	width: 400px;
+	position: relative;
+	width: 500px;
 	height: 80px;
 	margin: 10px auto;
 	text-align: center;
@@ -60,8 +61,10 @@ div.centerblock {
 		font-weight: bold;
 		color: #555555;
 	}
-	&.logo {
-		margin-top: 40px;
+	&.sub {
+		margin-top:50px;
+	}
+	.logo {
 		font-size:70px;
 		font-weight: 50;
 		color: #BBBBBB;
