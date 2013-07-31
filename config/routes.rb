@@ -149,6 +149,7 @@ RP::Application.routes.draw do
   # get "pages/contact"
   # get "pages/about"
   match '/home', :to => 'pages#home'
+  match '/newhome', :to => 'pages#newhome'
   match '/popup', :to => 'pages#popup'
   match '/share', :to => 'pages#share'
   match '/contact', :to => 'pages#contact'

@@ -44,6 +44,30 @@
 
 */
 
+div.centerblock {
+	width: 400px;
+	height: 80px;
+	margin: 10px auto;
+	text-align: center;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	line-height: 20px;
+	text-decoration: none;
+	font-size: 40px;
+	font-weight: 150;
+	color: #999999;
+	# text-shadow: 0 1px 0 #888888;
+	&.bold {
+		font-weight: bold;
+		color: #555555;
+	}
+	&.logo {
+		margin-top: 40px;
+		font-size:70px;
+		font-weight: 50;
+		color: #BBBBBB;
+	}
+}
+
 #logo_img_small {
 	width: 250px;
 }
