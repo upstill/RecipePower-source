@@ -167,16 +167,22 @@ class Seeker < Object
     convert_ids ids[first...ixbound]
   end
   
+  # By default, the initial scope for a search is the whole affiliate.
+  # The point here is to be able to override it
+  def starting_scope
+    @affiliate
+  end
+  
   # Return the list of ids matching the tags, by calling an application method
   def result_ids
   	return @results if @results # Keeping a cache of results
     if tags.empty?
-      @results = @affiliate.map(&:id)
+      @results = starting_scope.map(&:id)
     else
       # We purge/massage the list only if there is a tags query here
       # Otherwise, we simply sort the list by mod date
       # Convert candidate array to a hash recipe_id=>#hits
-      candihash = Candihash.new @affiliate.map(&:id)
+      candihash = Candihash.new starting_scope.map(&:id)
       apply_tags candihash
       # Convert back to a list of results
       @results = candihash.results.reverse
@@ -233,6 +239,10 @@ class UserSeeker < Seeker
     User.where(id: list)
   end
   
+  def starting_scope
+    @affiliate.first.channel? ? @affiliate : @affiliate.where("sign_in_count > 0")
+  end
+  
   # Get the results of the current query.
   def apply_tags(candihash)
     # Rank/purge for tag matches
@@ -244,9 +254,9 @@ class UserSeeker < Seeker
       candihash.apply user_ids, weightings[tag.id] if tag.id > 0
       # candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
       # Get candidates by matching the tag's name against recipe titles and comments
-      users = @affiliate.where("username ILIKE ?", "%#{tag.name}%")
+      users = starting_scope.where("username ILIKE ?", "%#{tag.name}%")
       candihash.apply users.map(&:id), 1.0
-      users = @affiliate.where("about ILIKE ?", "%#{tag.name}%")
+      users = starting_scope.where("about ILIKE ?", "%#{tag.name}%")
       candihash.apply users.map(&:id), 1.0
     end
   end
@@ -261,7 +271,7 @@ class ReferenceSeeker < Seeker
     tags.each { |tag| 
       # candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
       # Get candidates by matching the tag's name against recipe titles and comments
-      candihash.apply @affiliate.where("url LIKE ?", "%#{tag.name}%").map(&:id)
+      candihash.apply starting_scope.where("url LIKE ?", "%#{tag.name}%").map(&:id)
       constraints = @tagtype ? { tagtype: @tagtype } : {}
       # collect all the references of all the referents of all matching tags
       list = Tag.strmatch(tag.name).collect { |tag| tag.referents }.flatten
@@ -279,7 +289,7 @@ class SiteSeeker < Seeker
     tags.each { |tag| 
       # candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
       # Get candidates by matching the tag's name against recipe titles and comments
-      candihash.apply @affiliate.where("site LIKE ?", "%#{tag.name}%").map(&:id)
+      candihash.apply starting_scope.where("site LIKE ?", "%#{tag.name}%").map(&:id)
       # Find lexically-related tags of Source type and see if they point to sites
       # Find sites that have been tagged similarly
     }
@@ -293,7 +303,7 @@ class TagSeeker < Seeker
   	return @results if @results # Keeping a cache of results
     case tags.count
     when 0
-      scope = @tagtype ? @affiliate.where(tagtype: @tagtype) : @affiliate
+      scope = @tagtype ? starting_scope.where(tagtype: @tagtype) : starting_scope
       @results = scope.map(&:id)
     when 1
       constraints = @tagtype ? { tagtype: @tagtype } : {}
@@ -322,8 +332,8 @@ class FeedSeeker < Seeker
       semantic_list = Feed.where(site_id: Site.where(referent_id: tag.referent_ids).map(&:id)).map(&:id)
       candihash.apply semantic_list
       # Get candidates by matching the tag's name against recipe titles and comments
-      candihash.apply @affiliate.where("description ILIKE ?", "%#{tag.name}%").map(&:id)
-      candihash.apply @affiliate.where("title ILIKE ?", "%#{tag.name}%").map(&:id)
+      candihash.apply starting_scope.where("description ILIKE ?", "%#{tag.name}%").map(&:id)
+      candihash.apply starting_scope.where("title ILIKE ?", "%#{tag.name}%").map(&:id)
     }
   end
 end
