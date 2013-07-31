@@ -108,6 +108,8 @@ class InvitationsController < Devise::InvitationsController
         (breakdown[:new_friends]+breakdown[:redundancies]).each do |sharee|
           # Mail generic share notice with action button to collect recipe
           # Cook Me Later: add to collection
+          sharee.invitation_message = params[:user][:invitation_message]
+          sharee.save
           sharee.notify(:share_recipe, current_user, what: params[resource_name][:shared_recipe] )
           breakdown[:invited] << sharee
         end

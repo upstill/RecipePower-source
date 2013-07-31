@@ -23,7 +23,7 @@
 
 		div.message_box {
 			margin: 0px 50px;
-			padding-right: 10px;
+			padding-left: 15px;
 			border: 2px solid #CCCCCC;
 			display: block;
 			overflow: auto;
@@ -33,11 +33,6 @@
 		div.message_content {
 			font-size: 18px;
 			margin: 10px 0px 10px 50px;
-		}
-
-		div.signup_message {
-			margin: 5px 20px;
-			float: left;
 		}
 
 		a.get_button {
@@ -188,15 +183,15 @@
 		</div>
 		<br>
 		<div class="message_box">
+			<div style="width:90%;margin: 20px 0px 0px;float: left;font-size:20px; font-weight:bold;">Rather not deal with this now?</div>
 			<% url = accept_user_invitation_url(
 				:invitation_token => @resource.invitation_token,
 				:notification_token => @notification_token ) %>
-			<div class="signup_message">
-				<h3>Rather not deal with this now?</h3>
-			<%= link_to("Save It To RecipePower", url, :class => "get_button btn-large btn-success") %>
-				<br>
-				<p>...and have it waiting for you.</p>
+			<div style="width:90%; margin: 0px;float: left;">
+				<%= link_to "Save It To RecipePower", url, 
+									:class => "get_button btn-large btn-success" %>
 			</div>
+			<div style="width:90%; margin: 20px 0px;float: left; font-size:16px;">...and have it waiting for you.</div>
 		</div>
 		<div class="footer">
 	  	<p><%= link_to "Recipe Power", collection_url, class: "brand" %></p>
