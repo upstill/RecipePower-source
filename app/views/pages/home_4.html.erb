@@ -1,0 +1,24 @@
+<%= flash_all %>
+<%# render partial: (current_user ? "shared/bookmarklet_sidebar" : "shared/signup_at_right") %>
+<%= render partial: "shared/big_idea" %>
+<div class="text_block">
+	<h2 class="med">RecipePower<small><br>The Next Step in Mining the Web for Recipes</small></h2>
+<p class="airy">
+To find a great recipe on a search engine like Google, throwing food terms at it is only the beginning. Once you dive into the slush pile and surface with exactly what you're looking for, do you save it, or does it slip back into the ocean? 
+</p><p class="airy">
+Isn't that a waste?
+</p><p class="airy">
+Do you have an easy place to tuck those prizes away? Do you actually use it? If not, then welcome to RecipePower. One click and that jewel snaps into your private collection. No import hassles, no noisy website, just simplicity you feel like using. 
+	</p><p class="airy">
+Over on RecipePower, you can organize your growing collection, so when opportunity knocks, inspiration answers! Make friends and get tipped off to their findings. If you still crave more, tuck into our Channels and Feeds for more ideas tailored to your interests.
+</p><p class="airy">
+Using the Web for cooking: it's not a big part of life, but we've got you covered.
+	</p>
+<%= signup_button %>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<% if current_user %>
+	<%= link_to("To My Collections!!", collection_path(), class: "btn btn-large btn-info") %>
+<% else %>
+	<%= link_to("Show Me First", collection_path(popup: "pages/need_to_know", :on_tour => true), class: "btn btn-large btn-info") %>
+<% end %>
+</div>

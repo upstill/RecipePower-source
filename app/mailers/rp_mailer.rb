@@ -1,5 +1,5 @@
 class RpMailer < ActionMailer::Base
-  default from: "support@recipepower.com"
+  # default from: "rpm@recipepower.com"
   add_template_helper(UsersHelper)
   
   def feedback(feedback)
@@ -29,6 +29,8 @@ class RpMailer < ActionMailer::Base
   def sharing_notice(notification, opts={})
     @notification = notification
     @recipe = Recipe.find(notification.info[:what])
-    mail to: notification.target.email, subject: "#{notification.source.handle} has something tasty for you"
+    mail to: notification.target.email, 
+      from: notification.source.polite_name+" on RecipePower <sport@recipepower.com>",
+      subject: notification.source.polite_name+" has something tasty for you"
   end
 end

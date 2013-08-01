@@ -1,6 +1,15 @@
 class PagesController < ApplicationController
   # filter_access_to :all
   respond_to :html, :json
+  
+  def root
+    if current_user
+      redirect_to collection_path
+    else
+      redirect_to home_path
+    end
+  end
+  
   def home
     # session.delete :on_tour # Tour's over!
     @Title = "Home"

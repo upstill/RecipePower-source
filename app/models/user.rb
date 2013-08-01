@@ -322,11 +322,15 @@ public
   # -- fullname
   # -- email
   def handle
-      if username.blank?
-          fullname.blank? ? email : fullname
-      else 
-          username
-      end
+    if username.blank?
+      fullname.blank? ? email : fullname
+    else 
+      username
+    end
+  end
+  
+  def polite_name
+    fullname.blank? ? (username.blank? ? email : username) : fullname
   end
   
   # 'name' is just an alias for handle, for use by Channel referents
@@ -370,9 +374,15 @@ public
   def headers_for(action)
     case action
     when :invitation, :invitation_instructions
-      { :subject => invitation_issuer+" wants to get you cooking." }
+      { 
+        :subject => invitation_issuer+" wants to get you cooking.",
+        :from => invitation_issuer+" on RecipePower <support@recipepower.com>"
+      }
     when :sharing_notice, :sharing_invitation_instructions
-      { :subject => invitation_issuer+" has something tasty for you." }
+      { 
+        :subject => invitation_issuer+" has something tasty for you.",
+        :from => invitation_issuer+" on RecipePower <support@recipepower.com>"
+      }
     else
       {}
     end
@@ -386,7 +396,9 @@ public
       case notification_type
       when :share_recipe
         self.shared_recipe = options[:what]
-        RpMailer.sharing_notice(notification).deliver
+        msg = RpMailer.sharing_notice(notification)
+        debugger
+        msg.deliver
       when :make_friend
         :friend_notice
       end

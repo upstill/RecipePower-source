@@ -149,7 +149,6 @@ RP::Application.routes.draw do
   # get "pages/contact"
   # get "pages/about"
   match '/home', :to => 'pages#home'
-  match '/newhome', :to => 'pages#newhome'
   match '/popup', :to => 'pages#popup'
   match '/share', :to => 'pages#share'
   match '/contact', :to => 'pages#contact'
@@ -157,7 +156,7 @@ RP::Application.routes.draw do
   match '/welcome', :to => 'pages#welcome'
   match '/FAQ', :to=>"pages#FAQ"
   match '/admin', :to=>"pages#admin"
-  root :to => 'collection#user_only'
+  root :to => 'pages#root'
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
