@@ -30,6 +30,7 @@ private
   end
   
   def generate_thumbnail 
+    debugger
     unless picurl && (picurl =~ /^data:/) # Use a data URL directly w/o taking a thumbnail
       if !thumbnail
         Delayed::Job.enqueue self

@@ -287,7 +287,7 @@ module ApplicationHelper
     item_list += [
   		"<hr>",
   		link_to( "Admin", admin_path),
-  		link_to_modal( "Show Step 2", popup_path(name: "starting_step2")),
+  		link_to_function( "Refresh Masonry", "RP.collection.justify();" ),
   		link_to_modal( "Need to Know", popup_path(name: "need_to_know"))
   	] if permitted_to? :admin, :pages
   

@@ -7,6 +7,7 @@ class Thumbnail < ActiveRecord::Base
   # Try to fetch the thumbnail data for the record, presuming a valid URL
   # If the fetch fails, return a suitable placeholder thumbnail
   def update_thumb
+    debugger
     if thumbdata.blank?
       self.status = nil
       begin
@@ -49,7 +50,7 @@ class Thumbnail < ActiveRecord::Base
       when 400, 403, 404 # Bad request, forbidden or not found => reject the URL entirely
         return self.bad_url
       else
-        self.thumbdata = url # Maybe the image can be fetched by the client
+        self.thumbdata = nil # Maybe the image can be fetched by the client
       end
       save if id
     end

@@ -66,6 +66,7 @@ function fitImage(img) {
 		}
 	}
   $(img).addClass("loaded")
+	RP.collection.justify()
   return true;
 }
 

@@ -7,12 +7,12 @@
 # Place your application-specific JavaScript functions and classes here
 # This file is automatically included by javascript_include_tag :defaults
 
-# require ../../../vendor/assets/javascripts/jquery-1.7.1
+# require jquery-1.7.1
 #= require_self
 #= require_directory ../../../vendor/assets/javascripts/jquery
-#= require ../../../vendor/assets/javascripts/bootbox
-#= require ../../../vendor/assets/javascripts/history
-
+#= require bootbox
+#= require history
+#= require masonry.pkgd
 #= require jquery_ujs
 
 #= require authentication
@@ -71,6 +71,13 @@ jQuery ->
 	$("#tagstxt").first().focus()
 	$(".pageclickr").click collection_pager
 	checkForLoading ".stuffypic"
+	
+	# Initialize Masonry handling for list items
+	container = $('#masonry-container')
+	# initialize Masonry
+	$(container).masonry
+	  columnWidth: 220,
+	  itemSelector: '.masonry-item'
 
 	$(window).resize -> # Fix the height of the browser
 		if (elmt = $("div.browser_house")[0]) && (navlinks = $('div#footer_nav_links')[0])
@@ -107,6 +114,10 @@ RP.collection.update = (params, url) ->
 			RP.rcp_list.onload()
 			window.scrollTo(0,0)
 			RP.notifications.done()
+
+RP.collection.justify = () ->
+	container = $('#masonry-container')
+	$(container).masonry()
 
 # Callback when the query tag set changes
 queryChange = (hi, li) ->

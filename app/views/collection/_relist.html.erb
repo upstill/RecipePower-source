@@ -1,5 +1,11 @@
 <%= flash_all %>
-<ul class="<%= @seeker.list_type == :recipe ? "thumbnails" : "feed_entries" %>">
-	<%= collection_results %>
-</ul>
+<% if @seeker.list_type == :recipe %>
+	<div id="masonry-container" class="thumbnails span9" >
+		<%= collection_results %>
+	</div>
+<% else %>
+	<ul class="feed_entries" >
+		<%= collection_results %>
+	</ul>
+<% end %>
 <%= render "shared/paginate_list" %>

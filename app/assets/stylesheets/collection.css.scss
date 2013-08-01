@@ -111,7 +111,7 @@ div.centerblock {
 
 .rcp_grid_pic_box {
 	width: 100%;
-	height: 220px;
+	height: auto; // 220px;
 	display: -webkit-box;
 	display: -moz-box;
 	display: box;
@@ -131,7 +131,7 @@ div.centerblock {
 
 .rcp_grid_datablock {
 	padding: 0px 8px;
-	height: 4.6em;
+	height: auto; // 4.6em;
 }
 
 .rcp_grid_element_title {
@@ -150,6 +150,10 @@ div.centerblock {
 }
 
 .rcp_grid_element_footer {
+	height: 20px;
+	align: right;
+	position: relative;
+	
 	display: -webkit-box;
 	display: -moz-box;
 	display: box;
@@ -172,9 +176,15 @@ div.centerblock {
 	background-image: linear-gradient(to bottom, #ffffff, #f2f2f2);
 }
 
+.rcp_grid_element_links {
+	position: absolute;
+	right: 2px;
+} 
+
 .rcp_grid_element_stats {
 	font-size: 0.8em;
 	color: #999;
+	height: auto;
 }
 
 .rcp_grid_element_spacer {

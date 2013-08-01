@@ -1,6 +1,6 @@
 <% logger.debug "Rendering recipe #{@recipe.id}" %>
-<li class="span3 <%= recipe_grid_element_class @recipe %>">
-	<div class="thumbnail" >
+<div class="masonry-item <%= recipe_grid_element_class @recipe %>">
+	<div class="thumbnail" style="width:200px" >
 		<%= recipe_image_div @recipe, "rcp_grid_pic_box" %>
 		<div class="rcp_grid_datablock">
 			<h5 class="rcp_grid_element_title"><%= link_to @recipe.trimmed_title, @recipe.url %></h5>
@@ -8,10 +8,12 @@
 			<!-- <div class="rcp_grid_element_tag_summary"><%= summarize_alltags @recipe %></div> -->
 		</div>
 		<div class="rcp_grid_element_footer">
+<!--
 			<div class="rcp_grid_element_stats"><%= touch_date_elmt @recipe %></div>
-			<div class="rcp_grid_element_spacer">&nbsp;</div>
-			<div class="rcp_grid_element_golink"><%= render "recipes/golink" %></div>
-			<div class="rcp_grid_element_golink"><%= render "recipes/sharelink" %></div>
+-->
+			<div class="rcp_grid_element_links" >
+				<%= render "recipes/golink" %><%= render "recipes/sharelink" %>
+			</div>
 		</div>
 	</div>
-</li>
+</div>

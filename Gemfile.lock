@@ -145,6 +145,8 @@ GEM
       i18n (>= 0.4.0)
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
+    masonry-rails (0.2.0)
+      rails
     metaclass (0.0.1)
     mime-types (1.22)
     minitest (4.7.1)
@@ -213,7 +215,6 @@ GEM
     rake (10.0.4)
     rdoc (3.12.2)
       json (~> 1.4)
-    redcarpet (2.2.2)
     rmagick (2.12.0)
     rspec (2.6.0)
       rspec-core (~> 2.6.0)
@@ -312,6 +313,7 @@ DEPENDENCIES
   jquery-rails
   letter_opener
   log_buddy
+  masonry-rails
   minitest
   mocha
   newrelic_rpm
@@ -323,7 +325,6 @@ DEPENDENCIES
   omniauth-twitter
   pg
   rails (= 3.2.11)
-  redcarpet
   rmagick (= 2.12.0)
   rspec-rails (= 2.6.1)
   ruby-openid
