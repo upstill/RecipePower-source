@@ -2,6 +2,6 @@
 	<% if (@recipe.current_user != User.guest_id) && @recipe.cookmarked(@recipe.current_user) %>
 		<%= edit_recipe_link (@feed_entry ? "Tag" : "Edit"), @recipe, class: "btn btn-mini" %>
 	<% else %>
-		<%= link_to_modal (@feed_entry ? "Collect" : "Add"), collect_recipe_path(@recipe), class: "btn btn-mini" %>
+		<%= link_to_modal (@feed_entry ? "Collect" : "Cookmark"), collect_recipe_path(@recipe), class: "btn btn-mini" %>
 	<% end %>
   </span>
