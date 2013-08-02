@@ -55,6 +55,7 @@ function fitImage(img) {
 		  var newHeight = frameWidth/imgAR;
 		  $(img).css("width", frameWidth);
 		  $(img).css("height", newHeight);
+		  $(img).css("padding-left", 0);
 		  $(img).css("padding-top", (frameHeight-newHeight)/2);
 		  // $(img).css("left", 0);
 		} else {
@@ -62,6 +63,7 @@ function fitImage(img) {
 		  $(img).css("width", newWidth);
 		  $(img).css("height", frameHeight);
 		  // $(img).css("top", 0);
+		  $(img).css("padding-top", 0);
 		  $(img).css("padding-left", (frameWidth-newWidth)/2);
 		}
 	}
@@ -83,9 +85,10 @@ function previewImg(inputsel, imagesel, formsel) {
   var url = $(inputsel).attr("value");
   if (url != $(formsel).attr("value"))
 		$(formsel).attr("value", url )
-	
-	// Set the image(s) to the URL and fit them in their frames
+		
 	var imageset = $(imagesel)
+	// For display purposes we use a no-picture picture
+	if (url.length < 1) url = "/assets/NoPictureOnFile.png"
 	if(imageset.attr("src") != url) {
 		imageset.removeClass("loaded");
 		imageset.attr("src", url )

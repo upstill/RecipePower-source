@@ -164,7 +164,7 @@ module ApplicationHelper
       prompt = "There are no pictures on the recipe's page, but you can paste a URL into the text box below."
     else
       tblstr = "<br><table>#{picrows}</table>"
-      prompt = "Pick one of the thumbnails, then click Okay.<br><br>Or, type or paste the URL of an image into the text box, if that's your pleasure.".html_safe
+      prompt = "Pick one of the thumbnails, then click Okay.<br><br>Or, type or paste the URL of an image.".html_safe
     end
     content_tag( :div, 
       page_fitPic( picurl, id, "NoPictureOnFile.png", "div.preview img" ),
@@ -174,9 +174,8 @@ module ApplicationHelper
         <br class="clear"> 
         <input type="text" class="icon_picker" 
           rel="jpg,png,gif" 
-          value="#{picurl}" 
-          onchange="previewImg('input.icon_picker', 'div.preview img', '')" />
-        <u>Preview</u>
+          value="#{picurl}" />
+        #{link_to_function "Preview", "previewImg('input.icon_picker', 'div.preview img', '')" }
         #{tblstr}       
     }.html_safe      
   end
