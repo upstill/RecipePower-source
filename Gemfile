@@ -43,8 +43,9 @@ group :development do
   gem 'letter_opener'
   gem "better_errors"
   gem "binding_of_caller"
-  gem "masonry-rails"
 end
+
+gem "masonry-rails"
 
 group :test do
   # Pretty printed test output
