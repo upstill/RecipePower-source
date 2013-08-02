@@ -38,7 +38,7 @@ class PasswordsController < Devise::PasswordsController
       # respond_with resource
       resource_errors_to_flash_now resource, preface: "Sorry, can't reset password"
       respond_to do |format|
-        format.html { render controller: :pages, action: :home }
+        format.html { redirect_to home_path, notice: "Sorry, can't reset password" }
         format.json { 
           @area = params[:area]
           rendered = with_format("html") { render_to_string :new, layout: false }
