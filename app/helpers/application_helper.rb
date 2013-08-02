@@ -329,7 +329,7 @@ module ApplicationHelper
   
   # If there are any tasks awaiting which need a login, set up the appropriate one.
   # Returning nil implies to preload the signup dialog
-  def login_setup
+  def login_setup 
     return if session[:on_tour]
     if session[:invitation_token]
       # load the invitation-acceptance dialog. If the user isn't on tour, set it to
