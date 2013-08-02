@@ -71,14 +71,8 @@ jQuery ->
 	$("#tagstxt").first().focus()
 	$(".pageclickr").click collection_pager
 	checkForLoading ".stuffypic"
+	RP.collection.justify()
 	
-	# Initialize Masonry handling for list items
-	container = $('#masonry-container')
-	# initialize Masonry
-	$(container).masonry
-	  columnWidth: 220,
-	  itemSelector: '.masonry-item'
-
 	$(window).resize -> # Fix the height of the browser
 		if (elmt = $("div.browser_house")[0]) && (navlinks = $('div#footer_nav_links')[0])
 		 	elmt.style.bottom = (navlinks.offsetHeight + 5).toString() + "px";
@@ -109,15 +103,25 @@ RP.collection.update = (params, url) ->
 		success: (resp, succ, xhr) ->
 			# Explicitly update the collection list
 			# $('div.loader').removeClass "loading" # Remove progress indicator
+			$('#masonry-container').masonry('destroy')
 			$('div.content')[0].innerHTML	= resp	
 			$(".pageclickr").click(collection_pager)
 			RP.rcp_list.onload()
 			window.scrollTo(0,0)
 			RP.notifications.done()
+			window.setTimeout -> 
+				RP.collection.justify()
+			, 300
 
+RP.collection.rejustify = () ->
+	$('#masonry-container').masonry()
+	
 RP.collection.justify = () ->
-	container = $('#masonry-container')
-	$(container).masonry()
+	# Initialize Masonry handling for list items
+	$('#masonry-container').masonry
+		columnWidth: 220,
+		gutter: 20,
+		itemSelector: '.masonry-item'
 
 # Callback when the query tag set changes
 queryChange = (hi, li) ->

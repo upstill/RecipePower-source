@@ -1,6 +1,5 @@
 <% logger.debug "Rendering recipe #{@recipe.id}" %>
-<div class="masonry-item <%= recipe_grid_element_class @recipe %>">
-	<div class="thumbnail" style="width:200px" >
+	<div class="thumbnail <%= recipe_grid_element_class @recipe %>" style="width:200px;margin-bottom:20px;" >
 		<%= recipe_image_div @recipe, "rcp_grid_pic_box" %>
 		<div class="rcp_grid_datablock">
 			<h5 class="rcp_grid_element_title"><%= link_to @recipe.trimmed_title, @recipe.url %></h5>
@@ -16,4 +15,3 @@
 			</div>
 		</div>
 	</div>
-</div>

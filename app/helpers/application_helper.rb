@@ -339,7 +339,6 @@ module ApplicationHelper
 			@user = Notification.find_by_notification_token(token).target
 			link_to "", new_user_session_path(user: { id: @user.id, email: @user.email } ), class: "trigger" 
     elsif data = deferred_collect(false)
-      debugger
 			@user = User.find data[:uid]
 			link_to "", new_authentication_path, class: "trigger" 
 		end

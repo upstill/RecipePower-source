@@ -7,7 +7,9 @@ module CollectionsHelper
   		when Recipe
   			@recipe = element
   		  @recipe.current_user = @user.id
-  		  render "shared/recipe_grid"
+  		  content_tag( :div, 
+  		    render("shared/recipe_grid"),
+  		    class: "masonry-item" )
   		when FeedEntry
   		  @feed_entry = element
   		  render "shared/feed_entry"
