@@ -26,7 +26,7 @@ class PasswordsController < Devise::PasswordsController
     if successfully_sent?(resource)
       respond_to do |format|
         format.html { # This is for capturing a new recipe. The injector (capture.js) calls for this
-          respond_with({}, :location => after_sending_reset_password_instructions_path_for(resource_name))
+          redirect_to home_path
         }
         format.json {
           @area = params[:area]

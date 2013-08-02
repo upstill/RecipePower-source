@@ -25,7 +25,7 @@ en:
       signed_in: 'Signed in successfully.'
       signed_out: 'All signed out, uhandle. Sorry to see you go!'
     passwords:
-      send_instructions: 'Instructions for resetting your password are in the (e)mail.'
+      send_instructions: 'Instructions for resetting your password are in the (e)mail.<br>Look for a message from support@recipepower.com.'
       updated: 'Your password was changed successfully. You are now signed in.'
       updated_not_active: 'Your password was changed successfully.'
       send_paranoid_instructions: "If your e-mail exists on our database, you will receive a password recovery link on your e-mail"
