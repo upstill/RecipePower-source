@@ -68,7 +68,8 @@ function fitImage(img) {
 		}
 	}
   $(img).addClass("loaded")
-	RP.collection.rejustify()
+	var fcn = RP.named_function("RP.collection.rejustify")
+	if(fcn) fcn();
   return true;
 }
 
