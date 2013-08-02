@@ -17,30 +17,46 @@ class Recipe < ActiveRecord::Base
 # private
 
   # Before saving the recipe, take the chance to generate a thumbnail (in background)
-  before_save :nuke_thumbnail
-  before_save :generate_thumbnail
+  before_save :check_thumbnail
 
 private
-  def nuke_thumbnail 
-    unless picurl && (picurl =~ /^data:/) # Use a data URL directly w/o taking a thumbnail
-      if url_changed? || picurl_changed?
-        self.thumbnail = nil
-      end
+  
+  # Confirm that the thumbnail accurately reflects the recipe's image
+  def check_thumbnail
+    picurl = nil if picurl.blank?
+    if picurl.nil? || picurl =~ /^data:/
+      # Shouldn't have a thumbnail
+      self.thumbnail = nil
+    elsif picdata =~ /^data:/
+      # The current thumbnail is valid
+    elsif picurl && (self.thumbnail = Thumbnail.acquire( url, picurl )) && !thumbnail.thumbdata
+      Delayed::Job.enqueue self # Update the thumbnail image in background
     end
+    true
   end
   
-  def generate_thumbnail 
-    debugger
-    unless picurl && (picurl =~ /^data:/) # Use a data URL directly w/o taking a thumbnail
-      if !thumbnail
-        Delayed::Job.enqueue self
-      end
+public
+  
+  # Generate the thumbnail in background. We assume that the thumbnail is referencing
+  # the same image as the recipe (see check_thumbnail)
+  def perform
+    puts ">>>>>>>>>>>>>>>>>>>>>>>>>>>>> Validating picurl with url '#{url}' and picurl '#{picurl}'"
+    thumbnail.update_thumb
+  end
+  
+  # Return the image for the recipe, either as a URL or a data specifier
+  # The image may have an associated thumbnail, but it doesn't count unless 
+  # the thumbnail reflects the image's current picurl
+  def picdata
+    case
+    when !picurl || (picurl =~ /^data:/)
+      picurl
+    when thumbnail && thumbnail.matches?(url, picurl) && (thumbnail.thumbdata =~ /^data:/)
+      thumbnail.thumbdata
+    else
+      picurl unless picurl.blank?
     end
   end
-public
-  # XXX Defunct as soon as tagging data gets moved to Taggings
-#   has_many :tagrefs, :dependent=>:destroy
-#  has_many :x_tags, :through=>:tagrefs, :autosave=>true, :class_name => "Tag", :source => :tag, :foreign_key => :tag_id
   
   belongs_to :thumbnail, :autosave => true, :dependent => :destroy
   
@@ -58,18 +74,6 @@ public
   attr_reader :status
   
   @@coder = HTMLEntities.new
-
-  def refresh
-    Delayed::Job.enqueue self
-  end 
-  
-  def perform
-    puts ">>>>>>>>>>>>>>>>>>>>>>>>>>>>> Validating picurl with url '#{url}' and picurl '#{picurl}'"
-    unless thumbnail
-      self.thumbnail= Thumbnail.acquire( url, picurl )
-      save
-    end
-  end
     
   # Either fetch an exising recipe record or make a new one, based on the
   # params. If the params have an :id, we find on that, otherwise we look

@@ -23,7 +23,7 @@ RP.edit_recipe.go = (rcpdata) ->
 		dlgsource = templ.string.
 		replace(/%%rcpID%%/g, rcpdata.rcpID).
 		replace(/%%rcpTitle%%/g, rcpdata.rcpTitle).
-		replace(/%%rcpPicURL%%/g, rcpdata.rcpPicURL || "assets/NoPictureOnFile.png" ).
+		replace(/%%rcpPicURL%%/g, rcpdata.rcpPicURL).
 		replace(/%%rcpPrivate%%/g, rcpdata.rcpPrivate).
 		replace(/%%rcpComment%%/g, rcpdata.rcpComment).
 		replace(/%%rcpStatus%%/g, rcpdata.rcpStatus).

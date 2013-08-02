@@ -4,12 +4,13 @@ require "Domain"
 class Thumbnail < ActiveRecord::Base
   attr_accessible :thumbsize, :thumbdata, :url, :site
   before_save :update_thumb
+  
   # Try to fetch the thumbnail data for the record, presuming a valid URL
-  # If the fetch fails, return a suitable placeholder thumbnail
-  def update_thumb
-    debugger
-    if thumbdata.blank?
-      self.status = nil
+  # If the fetch fails, leave the thumbdata as nil
+  def update_thumb(force = false)
+    self.thumbdata = nil if force
+    unless thumbdata =~ /^data:/
+      self.status = self.thumbdata = nil
       begin
         uri = URI.parse(url)
         if uri.host && 
@@ -31,8 +32,7 @@ class Thumbnail < ActiveRecord::Base
         end
       end
       
-      case status
-      when 200 # Success!
+      if status == 200 # Success! Write the thumbdata if poss.
         begin
           img = Magick::Image::from_blob(response.body).first
           if (img.columns < thumbsize || img.rows < thumbsize) 
@@ -45,63 +45,23 @@ class Thumbnail < ActiveRecord::Base
           thumb.write("thumb#{id.to_s}-M#{quality.to_s}.jpg") { self.quality = quality } unless true # Rails.env.production?
           self.thumbdata = "data:image/jpeg;base64," + Base64.encode64(thumb.to_blob{self.quality = quality })
         rescue Exception => e
-          return self.bad_url
         end
-      when 400, 403, 404 # Bad request, forbidden or not found => reject the URL entirely
-        return self.bad_url
-      else
-        self.thumbdata = nil # Maybe the image can be fetched by the client
       end
       save if id
     end
     self
   end
   
-  def self.rewrite n=10000
-    nrcds = 0
-    size_before = 0
-    size_after = 0
-    Thumbnail.all.each do |t|
-      unless t.url =~ /recipepower/ 
-        if t.thumbdata
-          size_before = size_before + t.thumbdata.length 
-          t.thumbdata = nil
-          t2 = t.update_thumb
-          debugger if (t2 != t) || !t2.thumbdata
-          size_after = size_after + t.thumbdata.length
-          t.save
-          nrcds = nrcds + 1
-        else
-          t.update_thumb
-          t.save
-        end
-      end
-      break if nrcds == n
-    end
-    puts "#{nrcds} revised; average size before: #{size_before/nrcds}, after: #{size_after/nrcds}" 
-  end
-  
   # Use a path and site to fetch a thumbnail record, which may match a priorly cached one
   def self.acquire(site, path)
-    # If no path, we just use the "Missing Picture" thumb
-    Thumbnail.find_or_create_by_url(path.blank? ? 
-      "http://www.recipepower.com/assets/NoPictureOnFile.png" :
-      (valid_url(site, path) || "http://www.recipepower.com/assets/BadPicURL.png")).update_thumb
+    if url = valid_url(site, path)
+      Thumbnail.find_or_create_by_url url
+    end
   end
   
-  # Somehow this thumbnail has a bad URL: mark it thus
-  def bad_url
-    @@BadURL = Thumbnail.find_or_create_by_url(url: "http://www.recipepower.com/assets/BadPicURL.png")
-  end
-  
-  # Thumbnail is BadURL message
-  def bad_url?
-    url == "http://www.recipepower.com/assets/BadPicURL.png"
-  end
-  
-  # Thumbnail is no-picture message
-  def missing_picture?
-    url == "http://www.recipepower.com/assets/NoPictureOnFile.png"
+  # Does a thumbnail reflect the given site and path?
+  def matches? (site, path)
+    (full_url = valid_url(site, path)) && (full_url == url)
   end
 
 end

@@ -7,17 +7,8 @@ module RecipesHelper
 # Sort out a suitable URL to stuff into an image thumbnail for a recipe
 def recipe_image_div(recipe, div_class="recipe_image_div")
   begin
+    return unless url = recipe.picdata
     options = { alt: "Image Not Accessible", id: "RecipeImage"+recipe.id.to_s }
-    return if recipe.picurl.blank?
-    url = 
-    if recipe.picurl =~ /^data:/ # Use a data URL directly w/o taking a thumbnail
-      recipe.thumbnail = nil
-      recipe.picurl
-    elsif recipe.thumbnail && recipe.thumbnail.thumbdata
-      recipe.thumbnail.thumbdata
-    else
-      recipe.picurl
-    end
     options[:class] = "stuffypic" unless url =~ /^data:/
     content = image_tag(url, options)
   rescue Exception => e
