@@ -397,7 +397,6 @@ public
       when :share_recipe
         self.shared_recipe = options[:what]
         msg = RpMailer.sharing_notice(notification)
-        debugger
         msg.deliver
       when :make_friend
         :friend_notice

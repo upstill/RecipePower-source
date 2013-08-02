@@ -1,5 +1,5 @@
 <% @recipe = @recipe || Recipe.find(@resource.shared_recipe) %>
-<% if @recipe.thumbnail && (url = @recipe.thumbnail.thumbdata) && (url =~ /^data:/) %>
+<% if url = @recipe.picdata %>
   <div class="share_recipe_pic_box">
     <%= image_tag url %>
   </div>
