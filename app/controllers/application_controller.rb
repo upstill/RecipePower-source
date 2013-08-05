@@ -104,6 +104,9 @@ class ApplicationController < ActionController::Base
             session.delete(:notification_token)
             notification.accept
         end
+        if col = deferred_collect(true)
+          Recipe.ensure current_user.id, col
+        end
         # Signing in from RecipePower => load collection, let deferred
         # capture call be made on client side with a trigger
         collection_path href: true

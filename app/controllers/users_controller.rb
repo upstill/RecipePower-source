@@ -4,7 +4,7 @@ class UsersController < ApplicationController
   
   rescue_from ActiveRecord::RecordNotFound, :with => :not_found
   before_filter :login_required, :except => [:new, :create, :identify]
-  before_filter :authenticate_user!, :except => [:show, :index, :identify]
+  before_filter :authenticate_user!, :except => [:new, :show, :index, :identify]
   # before_filter :declare_focus
   
   def declare_focus
@@ -98,8 +98,13 @@ class UsersController < ApplicationController
   def new
     @user = User.new
     @Title = "Create RecipePower Account"
-    if(!session[:user_id])
-       redirect_to new_visitor_url, :notice => "Sorry, but RecipePower is not open for business as yet. Stay tuned, or sign up for our mailing list"
+    respond_to do |format|
+      format.html { redirect_to home_path }
+      format.json {
+        render( 
+          json: { dlog: with_format("html") { render_to_string partial: "shared/signup_dialog", layout: false } } 
+        )
+      }
     end
   end
   

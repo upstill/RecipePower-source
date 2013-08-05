@@ -314,9 +314,16 @@ class RecipesController < ApplicationController
           format.js { render :text => e.message, :status => 403 }
         end
       end
-    else # Nobody logged in; defer the collection and render home page with login dialog
+    else # Nobody logged in; defer the collection and render with login dialog
       defer_collect params[:id], params[:uid]
-      redirect_to home_path
+      notice = "You need to have an account to collect recipes."
+      respond_to do |format|
+        format.html { redirect_to home_path, notice: notice }
+        format.json { 
+          flash.now[:alert] = notice
+          render json: { dlog: with_format("html") { render_to_string partial: "shared/signup_dialog", layout: false } } 
+        }
+      end
     end
   end
 
