@@ -1,3 +1,5 @@
+require 'ruby-prof'
+
 class Rcpref < ActiveRecord::Base
     belongs_to :recipe
     belongs_to :user
@@ -49,6 +51,8 @@ class Rcpref < ActiveRecord::Base
   	# NB: If both are given, recipes are returned which match in either
   	# :status is the set of status flags to match
   	# :sorted gives criterion for sorting (currently only sort by updated_at field)
+# RubyProf.start
+tstart = Time.now
     args = params.first || {}
     commentstr = args[:comment]
     titlestr = args[:title]
@@ -91,7 +95,13 @@ class Rcpref < ActiveRecord::Base
     else
         refs = titleset || commentset || refs
     end
-    
+# result = RubyProf.stop
+# printer = RubyProf::GraphPrinter.new(result)
+# printer.print(STDOUT, {})
+tstop = Time.now
+rpt = "TIMECHECK RcpRef with params #{params.to_s}: "+(tstop-tstart).to_s+" sec."
+logger.debug rpt
+# debugger
     # Just return the list of recipe ids
     refs.map &:recipe_id
 end

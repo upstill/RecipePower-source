@@ -54,6 +54,9 @@ window.RP = window.RP || {}
 RP.collection = RP.collection || {}
 
 jQuery ->
+	collection_onload()
+	
+collection_onload = () ->
 	# $('div.loader').removeClass "loading" 
 	$("#tagstxt").tokenInput("/tags/match.json",
 		crossDomain: false,
@@ -117,9 +120,8 @@ RP.collection.update = (params, url, format="json") ->
 			else
 				debugger
 				RP.process_response { page: resp }
-				window.history.pushState
-					pageTitle: "Collections"
-				,"Collections", url
+				window.history.pushState {	pageTitle: "Collections" }, "Collections", url
+				# collection_onload()
 
 RP.collection.rejustify = () ->
 	$('#masonry-container').masonry()

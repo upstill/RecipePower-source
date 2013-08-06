@@ -1,8 +1,14 @@
 module CollectionsHelper
   
 	def collection_results
+	  tstart = Time.now
+	  page = @seeker.results_paged
+	  tstop = Time.now
+    rpt = "TIMECHECK collection_results acquiring: "+(tstop-tstart).to_s+" sec."
+    logger.debug rpt
+	  tstart = Time.now
 	  results =
-		@seeker.results_paged.collect do |element|
+		page.collect do |element|
   		case element
   		when Recipe
   			@recipe = element
@@ -21,6 +27,9 @@ module CollectionsHelper
   		end
 		end
 	  flash.now[:alert] = @seeker.explain_empty if results.empty?  
+	  tstop = Time.now
+    rpt = "TIMECHECK collection_results rendering #{page.count.to_s} items: "+(tstop-tstart).to_s+" sec."
+    logger.debug rpt
 	  results.join('').html_safe
 	end
 	
