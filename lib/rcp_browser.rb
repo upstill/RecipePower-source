@@ -108,9 +108,10 @@ class BrowserElement
   end
   
   # Get the results of the current query.
-  def result_ids(tagset)
-  	return @results if @results # Keeping a cache of results
+  def result_ids(tagset = [])
+  	return @results if @results && (tagset == @tagset) # Keeping a cache of results for a given tagset
     if tagset.empty?
+      @tagset = tagset
       @results = candidates
     else
       # We purge/massage the list only if there is a tags query here
@@ -134,8 +135,10 @@ class BrowserElement
                                             :title=>tag.name) 
       }
       # Convert back to a list of results
+      @tagset = tagset
       @results = candihash.results(@rankings).reverse
   	end
+  	@results
   end
   
   # By default, all recipes show

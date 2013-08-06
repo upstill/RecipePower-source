@@ -26,7 +26,6 @@ module CollectionsHelper
 	
 	def collection_itemtitle
 	  ttl = @node.guide(false)
-	  debugger
 	  @node.selected ? "" : %Q{title="#{ttl}"}
   end
 		

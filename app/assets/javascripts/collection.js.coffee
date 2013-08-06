@@ -82,36 +82,44 @@ jQuery ->
 	
 	RP.fire_triggers()
 
-collection_tagchange = (params, url) ->
-	RP.collection.update $('form.query_form').serialize(), $('form.query_form')[0].action
+collection_tagchange = () ->
+	formitem = $('form.query_form')
+	RP.collection.update $(formitem).serialize(), formitem.action, $(formitem).data("format")
 
 collection_pager = (evt) ->
 	# Respond to page selection: replace results list
 	# Pagination spans have an associated value with the page number
 	RP.collection.update { cur_page: this.getAttribute("value") }, this.dataset.url
 
-RP.collection.update = (params, url) ->
+RP.collection.update = (params, url, format="json") ->
 	RP.dialog.cancel() # Close any open modal dialogs
 	RP.notifications.wait()
 	jQuery.ajax
 		type: "POST"
 		url: (url || "/collection/query")
 		data: params
-		dataType: "html"
+		dataType: format
 		beforeSend: (xhr) ->
 			xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))
 		success: (resp, succ, xhr) ->
 			# Explicitly update the collection list
 			# $('div.loader').removeClass "loading" # Remove progress indicator
-			$('#masonry-container').masonry('destroy')
-			$('div.content')[0].innerHTML	= resp	
-			$(".pageclickr").click(collection_pager)
-			RP.rcp_list.onload()
-			window.scrollTo(0,0)
-			RP.notifications.done()
-			window.setTimeout -> 
-				RP.collection.justify()
-			, 300
+			if format == 'json'
+				$('#masonry-container').masonry('destroy')
+				RP.process_response resp
+				$(".pageclickr").click(collection_pager)
+				RP.rcp_list.onload()
+				window.scrollTo(0,0)
+				RP.notifications.done()
+				window.setTimeout -> 
+					RP.collection.justify()
+				, 800
+			else
+				debugger
+				RP.process_response { page: resp }
+				window.history.pushState
+					pageTitle: "Collections"
+				,"Collections", url
 
 RP.collection.rejustify = () ->
 	$('#masonry-container').masonry()
@@ -124,9 +132,9 @@ RP.collection.justify = () ->
 		itemSelector: '.masonry-item'
 
 # Callback when the query tag set changes
-queryChange = (hi, li) ->
+# queryChange = (hi, li) ->
 	# Invalidate all lists
 	# $(".rcplist_container").removeClass("current"); # Bust any cached collections
 	# Notify the server of the change and update as needed
-	form = $('form.query_form')[0]
-	RP.collection.update $(form).serialize(), form.action
+	# form = $('form.query_form')[0]
+	# RP.collection.update $(form).serialize(), form.action

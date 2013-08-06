@@ -10,8 +10,8 @@ class CollectionController < ApplicationController
     else
       @user = current_user_or_guest
       @browser = @user.browser
+      params[:tagstxt] = "" if (params[:action] == "index")
       @seeker = ContentSeeker.new @browser, session[:seeker], params # Default; other controllers may set up different seekers
-      @seeker.tagstxt = "" if (params[:action] == "index")
       session[:seeker] = @seeker.store
     end
   end
@@ -29,10 +29,12 @@ class CollectionController < ApplicationController
     end
   end
   
-  def index
+  def list
     flash.now[:guide] = @seeker.guide
     respond_to do |format|
-      format.html { }
+      format.html { # Render the whole page
+        render :index
+      }
       format.json { 
         # In a json response we just re-render the collection list for replacement
         # If we need to replace the page, we send back a link to do it with
@@ -48,6 +50,10 @@ class CollectionController < ApplicationController
         end
       }
     end
+  end
+  
+  def index
+    list
   end
   
   def show
@@ -99,7 +105,6 @@ class CollectionController < ApplicationController
     if page = params[:cur_page]
       @seeker.cur_page = page.to_i
     end
-    flash.now[:guide] = @seeker.guide
-    render :index, :layout=>false
+    list
   end
 end

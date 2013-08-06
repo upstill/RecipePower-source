@@ -25,8 +25,9 @@
 	  	</ul>
 		<ul class="nav">
 			<li>
-				<%= form_tag( (params[:controller] == "collection") ? @seeker.query_path : collection_path, 
+				<%= form_tag( defined?(@seeker) ? @seeker.query_path : collection_path, 
 							:method => "post", 
+							:data => { format: (params[:controller] == "collection") ? "json" : "html" },
 							:class => "navbar-form form-search query_form") do %>
 			  	<%= taggable_div @seeker, 
 							"collection_query_tokens", 
