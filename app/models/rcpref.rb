@@ -1,6 +1,7 @@
-require 'ruby-prof'
+require 'time_check'
 
 class Rcpref < ActiveRecord::Base
+  
     belongs_to :recipe
     belongs_to :user
     # before_save :ensure_unique
@@ -51,60 +52,50 @@ class Rcpref < ActiveRecord::Base
   	# NB: If both are given, recipes are returned which match in either
   	# :status is the set of status flags to match
   	# :sorted gives criterion for sorting (currently only sort by updated_at field)
-# RubyProf.start
-tstart = Time.now
-    args = params.first || {}
-    commentstr = args[:comment]
-    titlestr = args[:title]
-    sortfield = args[:sorted]
-  	statuses = args[:status] || StatusAny
-  	sort_by_touched = args[:status] & StatusRecentMask 
-  	if owner_id.kind_of? Fixnum
-      owner_is_super = (owner_id == User.super_id)
-      owner_is_requestor = (owner_id == requestor_id)
-  	end
-  	# We reduce the relation based on owner_id unless the requestor is nil or super
-  	if owner_is_super
-  	  # super sees all
-  	  refs = Rcpref.scoped
-    else
-  	  refs = owner_id.nil? ? Rcpref.scoped : Rcpref.where(user_id: owner_id) # NB: owner_id can be an array of ids
-  	  refs = refs.where("NOT private") unless owner_is_requestor 
-  	  # Unless we're going for restricted status, just get 'em all
-  	  refs = refs.where("status <= ?", statuses) if statuses < StatusMiscMask
-  	end
+    time_check_log("RcpRef with params #{params.to_s}") do 
+      args = params.first || {}
+      commentstr = args[:comment]
+      titlestr = args[:title]
+      sortfield = args[:sorted]
+    	statuses = args[:status] || StatusAny
+    	sort_by_touched = args[:status] & StatusRecentMask 
+    	if owner_id.kind_of? Fixnum
+        owner_is_super = (owner_id == User.super_id)
+        owner_is_requestor = (owner_id == requestor_id)
+    	end
+    	# We reduce the relation based on owner_id unless the requestor is nil or super
+    	if owner_is_super
+    	  # super sees all
+    	  refs = Rcpref.scoped
+      else
+    	  refs = owner_id.nil? ? Rcpref.scoped : Rcpref.where(user_id: owner_id) # NB: owner_id can be an array of ids
+    	  refs = refs.where("NOT private") unless owner_is_requestor 
+    	  # Unless we're going for restricted status, just get 'em all
+    	  refs = refs.where("status <= ?", statuses) if statuses < StatusMiscMask
+    	end
 
-    refs = refs.order(sortfield) if sortfield
-    refs = refs.order("updated_at").reverse_order() if sort_by_touched
+      refs = refs.order(sortfield) if sortfield
+      refs = refs.order("updated_at").reverse_order() if sort_by_touched
     
-    # We apply the titlestr, if any
-    if titlestr
-      regexp = /#{titlestr}/i
-      titleset = refs.keep_if{ |rr| rr.recipe && (rr.recipe.title =~ regexp) }
-    end
+      # We apply the titlestr, if any
+      if titlestr
+        titleset = refs.joins(:recipe).where('title ILIKE ?', "%#{titlestr}%" ).map &:recipe_id
+      end
     
-    if commentstr
-      # If there is a :comment parameter, use that in the query
-      commentset = refs.where("comment ILIKE ?", "%"+commentstr+"%")
-    end
+      if commentstr
+        # If there is a :comment parameter, use that in the query
+        commentset = refs.where("comment ILIKE ?", "%#{commentstr}%").map &:recipe_id
+      end
     
-    # We prefer recipes that match in both title and comment, 
-    # otherwise, first title matches, then comment matches
-    if commentset && titleset
-        refs = (commentset & titleset) | titleset | commentset
-    else
-        refs = titleset || commentset || refs
+      # We prefer recipes that match in both title and comment, 
+      # otherwise, first title matches, then comment matches
+      if commentset && titleset
+        (commentset & titleset) | titleset | commentset
+      else
+        titleset || commentset || refs.map(&:recipe_id)
+      end
     end
-# result = RubyProf.stop
-# printer = RubyProf::GraphPrinter.new(result)
-# printer.print(STDOUT, {})
-tstop = Time.now
-rpt = "TIMECHECK RcpRef with params #{params.to_s}: "+(tstop-tstart).to_s+" sec."
-logger.debug rpt
-# debugger
-    # Just return the list of recipe ids
-    refs.map &:recipe_id
-end
+  end
 
     def status_bits_to_flags(bits)
 	{:status_rotation=>(bits & StatusRotationMask),

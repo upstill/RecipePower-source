@@ -1,35 +1,33 @@
 module CollectionsHelper
+require "time_check"
   
 	def collection_results
+	  page = 
+	  time_check_log("collection_results acquiring") do
+  	  @seeker.results_paged
+  	end
 	  tstart = Time.now
-	  page = @seeker.results_paged
-	  tstop = Time.now
-    rpt = "TIMECHECK collection_results acquiring: "+(tstop-tstart).to_s+" sec."
-    logger.debug rpt
-	  tstart = Time.now
-	  results =
-		page.collect do |element|
-  		case element
-  		when Recipe
-  			@recipe = element
-  		  @recipe.current_user = @user.id
-  		  content_tag( :div, 
-  		    render("shared/recipe_grid"),
-  		    class: "masonry-item" )
-  		when FeedEntry
-  		  @feed_entry = element
-  		  render "shared/feed_entry"
-  		else
-  		  # Default is to set instance variable @<Klass> and render "<klass>s/<klass>"
-  		  ename = element.class.to_s.downcase
-  		  self.instance_variable_set("@"+ename, element)
-  		  render ename.pluralize+"/"+ename 
+	  results = time_check_log("collection_results rendering #{page.count.to_s} items") do
+  		page.collect do |element|
+    		case element
+    		when Recipe
+    			@recipe = element
+    		  @recipe.current_user = @user.id
+    		  content_tag( :div, 
+    		    render("shared/recipe_grid"),
+    		    class: "masonry-item" )
+    		when FeedEntry
+    		  @feed_entry = element
+    		  render "shared/feed_entry"
+    		else
+    		  # Default is to set instance variable @<Klass> and render "<klass>s/<klass>"
+    		  ename = element.class.to_s.downcase
+    		  self.instance_variable_set("@"+ename, element)
+    		  render ename.pluralize+"/"+ename 
+    		end
   		end
 		end
 	  flash.now[:alert] = @seeker.explain_empty if results.empty?  
-	  tstop = Time.now
-    rpt = "TIMECHECK collection_results rendering #{page.count.to_s} items: "+(tstop-tstart).to_s+" sec."
-    logger.debug rpt
 	  results.join('').html_safe
 	end
 	
