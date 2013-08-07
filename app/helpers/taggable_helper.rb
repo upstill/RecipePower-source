@@ -7,7 +7,7 @@ module TaggableHelper
     options[:data][:hint] ||= "Type your tag(s) for the #{object.class.to_s.downcase} here"
     options[:data][:pre] = object.tags.map(&:attributes).to_json
     if f==object # Not in the context of a form
-      text_field_tag :tagstxt, "#{object.tagstxt}"
+      text_field_tag :tagstxt, "#{object.tagstxt}", options
     else
   		f.text_field :tag_tokens, options
 		end

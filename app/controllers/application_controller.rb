@@ -2,7 +2,6 @@ require './lib/controller_authentication.rb'
 require './lib/seeker.rb'
 
 class ApplicationController < ActionController::Base
-  before_filter :setup_collection
   before_filter :check_flash
   before_filter :detect_notification_token
     helper :all
@@ -40,14 +39,59 @@ class ApplicationController < ActionController::Base
     @seeker = "#{klass}Seeker".constantize.new (scope || klass.scoped), session[:seeker], params # Default; other controllers may set up different seekers
     @seeker.tagstxt = "" if clear_tags
     session[:seeker] = @seeker.store
+    @seeker
   end
   
-  # All controllers displaying the collection need to have it set up. This should be called after prefiltering (i.e., init_seeker) as it supplants
-  # the default seeker.
+  # All controllers displaying the collection need to have it setup 
   def setup_collection
-    @user = current_user_or_guest
-    @browser = @user.browser
-    @seeker = ContentSeeker.new @browser, session[:seeker] # Default; other controllers may set up different seekers
+    if popup = params[:popup]
+      session[:flash_popup] = popup
+      redirect_to collection_path
+    else
+      @user = current_user_or_guest
+      @browser = @user.browser
+      params[:tagstxt] = "" if (params[:controller] != "collection") # Clear the query
+      unless @seeker
+        @seeker = ContentSeeker.new @browser, session[:seeker], params # Default; other controllers may set up different seekers
+        session[:seeker] = @seeker.store
+      end
+      if (params[:controller] == "pages")
+        format = "html"
+        query_path = collection_path
+      else
+        format = "json"
+        query_path = @seeker.query_path
+      end
+      content_for :seeker_entry, 
+                  render_to_string(
+                    :template => "shared/seeker_entry", 
+                    :layout => false,
+                    :locals => { format: format, query_path: query_path }
+                  ).html_safe
+    end
+  end
+  
+  # This is one-stop-shopping for a controller using the query to filter a list
+  # See tags_controller for an example
+  # Options: selector: CSS selector for the outermost container of the rendered index template
+  def seeker_result(klass, options={})
+    selector = options[:selector] || "div.#{klass.to_s.downcase}_list"
+    init_seeker(klass, options[:clear_tags], options[:scope])
+    respond_to do |format|
+      format.html { 
+        setup_collection
+        render :index 
+      }
+      format.json do 
+        replacement = with_format("html") { render_to_string 'index', :layout=>false }
+        flash = with_format("html") { render_to_string 'shared/flash_notifications', :layout=>false }
+        render json: { replacements: [
+                            ["div.flash_notifications", flash],
+                            [ selector, replacement ]
+                        ] 
+                      }
+      end
+    end
   end
   
   def permission_denied

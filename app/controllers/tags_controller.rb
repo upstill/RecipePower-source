@@ -5,14 +5,12 @@ class TagsController < ApplicationController
   # GET /tags.xml
   def index
     @Title = "Tags"
-    init_seeker(Tag, true)
+    seeker_result Tag, clear_tags: true
   end
   
   def query
     @Title = "Tags"
-    debugger
-    init_seeker(Tag, false)
-    render 'index', :layout=>false
+    seeker_result Tag
   end
 
   # POST /tags

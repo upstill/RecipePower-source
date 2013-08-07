@@ -2,6 +2,11 @@ class PagesController < ApplicationController
   # filter_access_to :all
   respond_to :html, :json
   
+  before_filter :define_query
+  
+  def define_query
+	end
+  
   def root
     if current_user
       redirect_to collection_path
@@ -14,6 +19,7 @@ class PagesController < ApplicationController
     # session.delete :on_tour # Tour's over!
     @Title = "Home"
     @auth_context = :manage
+    setup_collection
   end
 
   def contact

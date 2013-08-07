@@ -76,6 +76,7 @@ GEM
       sass (~> 3.1)
     compass-rails (1.0.3)
       compass (>= 0.12.2, < 0.14)
+    content_for_in_controllers (0.0.2)
     curb (0.7.18)
     daemons (1.1.9)
     debug_inspector (0.0.2)
@@ -301,6 +302,7 @@ DEPENDENCIES
   closure_tree
   coffee-rails (~> 3.2.1)
   compass-rails
+  content_for_in_controllers
   debugger
   declarative_authorization
   delayed_job_active_record

@@ -13,21 +13,23 @@ class FeedsController < ApplicationController
   # GET /feeds
   # GET /feeds.json
   def index
-    init_seeker Feed, true, (permitted_to?(:approve, :feeds) ? Feed.scoped : Feed.where(:approved => true))
+    seeker_result Feed, scope: (permitted_to?(:approve, :feeds) ? Feed.scoped : Feed.where(:approved => true))
+    # init_seeker Feed, true, (permitted_to?(:approve, :feeds) ? Feed.scoped : Feed.where(:approved => true))
 =begin
     @feeds = permitted_to?(:approve, :feeds) ? Feed.scoped : Feed.where(:approved => true)
     @seeker = FeedSeeker.new @feeds, session[:seeker] # Default; other controllers may set up different seekers
-=end
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: @feeds }
     end
+=end
   end
   
   # Query takes either a query string or a specification of page number
   # We return a recipe list IFF the :cached parameter is not set
   def query
-    init_seeker Feed, false, (permitted_to?(:approve, :feeds) ? Feed.scoped : Feed.where(:approved => true))
+    seeker_result Feed, scope: (permitted_to?(:approve, :feeds) ? Feed.scoped : Feed.where(:approved => true))
+    # init_seeker Feed, false, (permitted_to?(:approve, :feeds) ? Feed.scoped : Feed.where(:approved => true))
 =begin
     @feeds = permitted_to?(:approve, :feeds) ? Feed.scoped : Feed.where(:approved => true)
     @seeker = FeedSeeker.new @feeds, session[:seeker] # Default; other controllers may set up different seekers
@@ -40,7 +42,7 @@ class FeedsController < ApplicationController
     end
     session[:seeker] = @seeker.store
 =end
-    render 'index', :layout=>false
+    # render 'index', :layout=>false
   end
 
   # GET /feeds/1

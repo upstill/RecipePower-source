@@ -2,20 +2,6 @@ class CollectionController < ApplicationController
   before_filter :setup_collection
   after_filter :save_browser
   
-  # All controllers displaying the collection need to have it setup 
-  def setup_collection
-    if popup = params[:popup]
-      session[:flash_popup] = popup
-      redirect_to collection_path
-    else
-      @user = current_user_or_guest
-      @browser = @user.browser
-      params[:tagstxt] = "" if (params[:action] == "index")
-      @seeker = ContentSeeker.new @browser, session[:seeker], params # Default; other controllers may set up different seekers
-      session[:seeker] = @seeker.store
-    end
-  end
-  
   def save_browser
     @user.save
   end

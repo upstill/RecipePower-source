@@ -87,7 +87,7 @@ collection_onload = () ->
 
 collection_tagchange = () ->
 	formitem = $('form.query_form')
-	RP.collection.update $(formitem).serialize(), formitem.action, $(formitem).data("format")
+	RP.collection.update $(formitem).serialize(), $(formitem).attr("action"), $(formitem).data("format")
 
 collection_pager = (evt) ->
 	# Respond to page selection: replace results list
@@ -104,6 +104,11 @@ RP.collection.update = (params, url, format="json") ->
 		dataType: format
 		beforeSend: (xhr) ->
 			xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))
+		error: (jqXHR, textStatus, errorThrown) ->
+			RP.notifications.done()
+			responseData = RP.post_error jqXHR
+			# responseData.how = responseData.how || assumptions.how
+			RP.process_response responseData
 		success: (resp, succ, xhr) ->
 			# Explicitly update the collection list
 			# $('div.loader').removeClass "loading" # Remove progress indicator

@@ -1,10 +1,11 @@
-<h3>Tags of type:
-<%= form_tag(@seeker.query_path, :method => "post", :class => "navbar-form form-search tagtype_form") do %>
-    <%= select_tag :tagtype, options_from_collection_for_select(Tag.type_selections(true), :last, :first, @seeker.tagtype), 
-			:include_blank => true, 
-			:onchange => %Q{ RP.collection.update($('form.tagtype_form').serialize(), $('form.tagtype_form')[0].action) } %>
-<% end %>
-</h3>
-<%= link_to 'New Tag', new_tag_path %>
-<%= seeker_table "", [ "ID", "Name", "Type", "", "Public?", "Similar", "Synonym(s)", "Meaning(s)", "", "" ] %>
-
+<div class="tag_list"> 
+	<h3>Tags of type:
+	<%= form_tag(@seeker.query_path, :method => "post", :class => "navbar-form form-search tagtype_form") do %>
+	    <%= select_tag :tagtype, options_from_collection_for_select(Tag.type_selections(true), :last, :first, @seeker.tagtype), 
+				:include_blank => true, 
+				:onchange => %Q{ RP.collection.update($('form.tagtype_form').serialize(), $('form.tagtype_form')[0].action) } %>
+	<% end %>
+	</h3>
+	<%= link_to 'New Tag', new_tag_path %>
+	<%= seeker_table "", [ "ID", "Name", "Type", "", "Public?", "Similar", "Synonym(s)", "Meaning(s)", "", "" ] %>
+</div>

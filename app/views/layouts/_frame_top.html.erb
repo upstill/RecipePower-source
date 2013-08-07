@@ -3,38 +3,29 @@
   	<div class="container">
 	  	<a class="brand" href="/collection">RecipePower</a>
 	  	<ul class="nav pull-right">
-		<% if false && params[:controller] != "collection" %>
-			<li>
-				<%= link_to "Back to Collections", collection_path %>
-			</li>
-		<% end %>
-		<% if user_signed_in? %>
-			<li>
-				<% if params[:controller] == "collection" %>
-					<%= link_to_modal "Add a Cookmark", new_recipe_path %>
-				<% else %>
-					<%= link_to "Collections", collection_path %>
+				<% if false && params[:controller] != "collection" %>
+					<li>
+						<%= link_to "Back to Collections", collection_path %>
+					</li>
 				<% end %>
-			</li>
-			<li class="dropdown">
-				<%= header_menu %>
-			</li>
-		<% else %>
-			<li><%= link_to_modal "Sign In", authentications_new_path %></li>
-	    <% end %>
+				<% if user_signed_in? %>
+					<li>
+						<% if params[:controller] == "collection" %>
+							<%= link_to_modal "Add a Cookmark", new_recipe_path %>
+						<% else %>
+							<%= link_to "Collections", collection_path %>
+						<% end %>
+					</li>
+					<li class="dropdown">
+						<%= header_menu %>
+					</li>
+				<% else %>
+					<li><%= link_to_modal "Sign In", authentications_new_path %></li>
+		    <% end %>
 	  	</ul>
 		<ul class="nav">
 			<li>
-				<%= form_tag( defined?(@seeker) ? @seeker.query_path : collection_path, 
-							:method => "post", 
-							:data => { format: (params[:controller] == "collection") ? "json" : "html" },
-							:class => "navbar-form form-search query_form") do %>
-			  	<%= taggable_div @seeker, 
-							"collection_query_tokens", 
-							nil, 
-							:placeholder => "Seek and ye shall find...", 
-							:class => "search-query" %>
-				<% end %>
+				<%= yield :seeker_entry %>
 			</li>
 		</ul>
 	</div>
