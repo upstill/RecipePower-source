@@ -15,9 +15,11 @@
 		<%# @feed_entry.feed.description.empty? ? "" : ("("+@feed_entry.feed.description+")<br>").html_safe %>
 		on <strong><%= link_to @feed_entry.feed.site.name, @feed_entry.feed.site.home %></strong>
 	</div>
-	<div class="feed_list_element_stats">
-		Published <%= time_ago_in_words @feed_entry.published_at %> ago.
-	</div>
+	<% if @feed_entry.published_at %>
+		<div class="feed_list_element_stats">
+			Published <%= time_ago_in_words @feed_entry.published_at %> ago.
+		</div>
+	<% end %>
  <%= @feed_entry.summary && @feed_entry.summary.html_safe %>
 <hr>
 </li>
