@@ -38,10 +38,6 @@ class CollectionController < ApplicationController
     end
   end
   
-  def index
-    list
-  end
-  
   def show
   end
 
@@ -63,6 +59,10 @@ class CollectionController < ApplicationController
       }
     end
   end 
+  
+  def index
+    list
+  end
 
   # Render the results for the current state of the query and selected collection
   def relist

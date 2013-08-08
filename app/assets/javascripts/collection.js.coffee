@@ -87,21 +87,24 @@ collection_onload = () ->
 
 collection_tagchange = () ->
 	formitem = $('form.query_form')
-	RP.collection.update $(formitem).serialize(), $(formitem).attr("action"), $(formitem).data("format")
+	if $(formitem).data("format") == "html"
+		formitem.submit()
+	else
+		RP.collection.update $(formitem).serialize(), $(formitem).attr("action")
 
 collection_pager = (evt) ->
 	# Respond to page selection: replace results list
 	# Pagination spans have an associated value with the page number
 	RP.collection.update { cur_page: this.getAttribute("value") }, this.dataset.url
 
-RP.collection.update = (params, url, format="json") ->
+RP.collection.update = (params, url) ->
 	RP.dialog.cancel() # Close any open modal dialogs
 	RP.notifications.wait()
 	jQuery.ajax
 		type: "POST"
 		url: (url || "/collection/query")
 		data: params
-		dataType: format
+		dataType: "json"
 		beforeSend: (xhr) ->
 			xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))
 		error: (jqXHR, textStatus, errorThrown) ->
@@ -112,21 +115,15 @@ RP.collection.update = (params, url, format="json") ->
 		success: (resp, succ, xhr) ->
 			# Explicitly update the collection list
 			# $('div.loader').removeClass "loading" # Remove progress indicator
-			if format == 'json'
-				$('#masonry-container').masonry('destroy')
-				RP.process_response resp
-				$(".pageclickr").click(collection_pager)
-				RP.rcp_list.onload()
-				window.scrollTo(0,0)
-				RP.notifications.done()
-				window.setTimeout -> 
-					RP.collection.justify()
-				, 800
-			else
-				debugger
-				RP.process_response { page: resp }
-				window.history.pushState {	pageTitle: "Collections" }, "Collections", url
-				# collection_onload()
+			$('#masonry-container').masonry('destroy')
+			RP.process_response resp
+			$(".pageclickr").click(collection_pager)
+			RP.rcp_list.onload()
+			window.scrollTo(0,0)
+			RP.notifications.done()
+			window.setTimeout -> 
+				RP.collection.justify()
+			, 800
 
 RP.collection.rejustify = () ->
 	$('#masonry-container').masonry()
