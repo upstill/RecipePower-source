@@ -80,7 +80,7 @@ class User < ActiveRecord::Base
 
   # Add the feed to the browser's ContentBrowser and select it
   def add_feed feed
-    feeds.unshift feed unless feeds.include? feed
+    self.feeds = feeds.unshift(feed) unless feeds.include? feed
     bnode = browser.select_by_content feed
     save # ...to preserve the selection
     bnode

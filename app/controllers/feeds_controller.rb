@@ -43,7 +43,7 @@ class FeedsController < ApplicationController
     dialog_boilerplate 'new', 'modal'
   end
   
-  # Add a user to the friends of the current user
+  # Add a feed to the feeds of the current user
   def collect
     @feed = Feed.find params[:id]
     user = current_user_or_guest
@@ -57,6 +57,7 @@ class FeedsController < ApplicationController
       @notice = "Now feeding you with '#{@feed.title}'."
     end
     @node = user.add_feed @feed # No harm if the user already has the feed
+    @browser = user.browser
     respond_to do |format|
       format.js { 
         flash[:notice] = @notice 
@@ -67,7 +68,7 @@ class FeedsController < ApplicationController
         render(
           json: { 
             processorFcn: "RP.content_browser.insert_or_select",
-            entity: with_format("html") { render_to_string :partial => "collection/node" }, 
+            entity: with_format("html") { render_to_string :partial => "collection/node", locals: { b: 2 } }, 
             notice: view_context.flash_one(:notice, @notice) 
           }, 
           status: :created, 
