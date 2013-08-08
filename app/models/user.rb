@@ -317,6 +317,10 @@ public
       @@Special_ids << [id]
   end
   
+  def guest? 
+    id == User.guest.id
+  end
+  
   # Return the string by which this user is referred. Preferentially return (in order)
   # -- username
   # -- fullname

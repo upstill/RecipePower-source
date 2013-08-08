@@ -56,6 +56,10 @@ class ApplicationController < ActionController::Base
         session[:seeker] = @seeker.store
       end
       if (params[:controller] == "pages")
+        # The search box in generic pages redirects collections, either "The Big List" for guests or
+        # the user's whole collection 
+        @browser.select_by_id(@user.guest? ? "RcpBrowserElementAllRecipes" : "RcpBrowserCompositeUser")
+        @user.save
         format = "html"
         query_path = collection_path
       else
