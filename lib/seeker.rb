@@ -289,7 +289,7 @@ class SiteSeeker < Seeker
     tags.each { |tag| 
       # candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
       # Get candidates by matching the tag's name against recipe titles and comments
-      candihash.apply starting_scope.where("site LIKE ?", "%#{tag.name}%").map(&:id)
+      candihash.apply starting_scope.where("site ILIKE ?", "%#{tag.name}%").map(&:id)
       # Find lexically-related tags of Source type and see if they point to sites
       # Find sites that have been tagged similarly
     }
