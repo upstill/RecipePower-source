@@ -4,36 +4,18 @@ class SitesController < ApplicationController
   # GET /sites
   # GET /sites.json
   def index
-    # return if need_login true, true
-    init_seeker(Site, true)
-=begin
-    @sites = Site.all # paginate(:per_page => 5, :page => params[:page])
-    @sites = Site.scoped
-    @seeker = SiteSeeker.new @sites, session[:seeker], params # Default; other controllers may set up different seekers
-    session[:seeker] = @seeker.store
-=end
-    respond_to do |format|
-      format.html # index.html.erb
-      format.json { render json: @sites }
-    end
+    seeker_result Site, clear_tags: true
   end
 
   def query
-    init_seeker Site
-=begin
-    # return if need_login true, true
-    @sites = Site.all # paginate(:per_page => 5, :page => params[:page])
-    @sites = Site.scoped
-    @seeker = SiteSeeker.new @sites, session[:seeker], params # Default; other controllers may set up different seekers
-    session[:seeker] = @seeker.store
-=end
-    render 'index', :layout=>false
+    seeker_result Site
   end
 
   # GET /sites/1
   # GET /sites/1.json
   def show
-      # return if need_login true, true
+    # return if need_login true, true
+    @user = current_user_or_guest
     @site = Site.find(params[:id])
     @Title = @site.name
     
