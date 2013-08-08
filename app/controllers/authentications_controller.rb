@@ -18,7 +18,7 @@ class AuthenticationsController < ApplicationController
       @authentications = current_user.authentications if current_user
       if current_user
         flash[:notice] = "All signed in. Welcome back, #{current_user.handle}!"
-        redirect_to collection_path(href: true)
+        redirect_to collection_path(redirect: true)
       end
       @auth_delete = true
       @auth_context = :manage
@@ -32,7 +32,7 @@ class AuthenticationsController < ApplicationController
       @authentications = current_user.authentications if current_user
       if current_user
         flash[:notice] = "All signed in. Welcome back, #{current_user.handle}!"
-        redirect_to collection_path(href: true)
+        redirect_to collection_path(redirect: true)
       end
       @auth_delete = true
       @auth_context = :manage

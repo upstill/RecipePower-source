@@ -24,10 +24,10 @@ class CollectionController < ApplicationController
       format.json { 
         # In a json response we just re-render the collection list for replacement
         # If we need to replace the page, we send back a link to do it with
-        if params[:href]
+        if params[:redirect]
           render json: { 
             # page: with_format("html") { render_to_string :index },
-            href: collection_url( params.slice 'context' )
+            redirect: collection_url( params.slice 'context' )
           }
         else
           list = with_format("html") { render_to_string :index, :layout => false }

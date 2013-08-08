@@ -347,8 +347,8 @@ RP.process_response = (responseData, dlog) ->
 				$(replacement[0]).replaceWith replacement[1]
 			# RP.dialog.replace_modal dlog
 
-		if href = responseData.href
-			window.location.assign href # "http://local.recipepower.com:3000/collection" #  href = href
+		if redirect = responseData.redirect
+			window.location.assign redirect # "http://local.recipepower.com:3000/collection" #  href = href
 		
 		if deletions = responseData.deletions
 			for deletion in deletions

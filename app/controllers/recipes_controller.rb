@@ -302,7 +302,7 @@ class RecipesController < ApplicationController
           flash[:notice] = notice
           respond_to do |format|
             format.html { redirect_to collection_path }
-            format.json { render json: { href: collection_path } }
+            format.json { render json: { redirect: collection_path } }
           end
         else
           report_recipe( collection_path, notice, formats)
