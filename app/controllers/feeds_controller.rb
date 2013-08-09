@@ -12,7 +12,6 @@ class FeedsController < ApplicationController
       format.json { redirect_to feeds_path }
       format.js {
         @user = current_user
-        @selector = "tr#feed"+@feed.id.to_s
       }
     end
     

@@ -1,1 +1,1 @@
-$("<%= @selector %>").replaceWith("<%= @itemtext %>");
+$("tr#feed<%= @feed.id.to_s %>").replaceWith('<%= escape_javascript render(partial: @feed) %>');
