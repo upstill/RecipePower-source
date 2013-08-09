@@ -9,7 +9,7 @@
 	<td><%= @feed.feedtypename %></td>
 	<td><%= link_to @feed.site.name, site_path(@feed.site) %></td>
 	<% permitted_to?(:approve, :feeds) do %>
-		<td><%= @feed.approved ? "Y" : (@feed.approved.nil? ? "" : "N") %></td>
+		<td><%= feed_approval %></td>
 	<% end %>
 	<td>
 		<% if @user.feeds.include?(@feed) %>

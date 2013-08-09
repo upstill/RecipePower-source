@@ -7,7 +7,15 @@ class FeedsController < ApplicationController
     @feed.approved = params[:approve] == 'Y'
     @feed.save
     flash[:notice] = 'Feedthrough '+(@feed.approved ? "Approved" : "Blocked")
-    redirect_to feeds_path
+    respond_to do |format|
+      format.html { redirect_to feeds_path }
+      format.json { redirect_to feeds_path }
+      format.js {
+        @user = current_user
+        @selector = "tr#feed"+@feed.id.to_s
+      }
+    end
+    
   end
   
   # GET /feeds
