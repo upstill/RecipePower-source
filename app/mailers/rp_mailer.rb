@@ -7,7 +7,7 @@ class RpMailer < ActionMailer::Base
     subject     = "#{feedback.subject} ##{feedback.id}"
 
     @feedback = feedback
-    mail :to => recipients, :subject => subject
+    mail :to => recipients, :from => @feedback.email, :subject => subject
   end
   
   def welcome_email(user)
