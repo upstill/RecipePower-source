@@ -1,7 +1,6 @@
 <%# Master form for taking a recipe query and returning a list of results %>
 <div class="collection">
 	<div class="collection_list">
-		<%= render 'layouts/flash_notifications' %>
 		<% if !@results_pending %>
 			<%= collection_updater %>
 			<%= render "relist" %>

@@ -88,9 +88,8 @@ class ApplicationController < ActionController::Base
       }
       format.json do 
         replacement = with_format("html") { render_to_string 'index', :layout=>false }
-        flash = with_format("html") { render_to_string 'shared/flash_notifications', :layout=>false }
         render json: { replacements: [
-                            ["div.flash_notifications", flash],
+                            view_context.flash_notifications_replacement,
                             [ selector, replacement ]
                         ] 
                       }

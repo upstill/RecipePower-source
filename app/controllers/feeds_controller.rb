@@ -6,15 +6,13 @@ class FeedsController < ApplicationController
     @feed = Feed.find(params[:id])
     @feed.approved = params[:approve] == 'Y'
     @feed.save
-    flash[:notice] = 'Feedthrough '+(@feed.approved ? "Approved" : "Blocked")
-    respond_to do |format|
-      format.html { redirect_to feeds_path }
-      format.json { redirect_to feeds_path }
-      format.js {
-        @user = current_user
-      }
+    if request.format == 'text/javascript'
+      @user = current_user
+      @notice = 'Feedthrough '+(@feed.approved ? "Approved" : "Blocked")
+    else
+      flash[:notice] = 'Feedthrough '+(@feed.approved ? "Approved" : "Blocked")
+      redirect_to feeds_path
     end
-    
   end
   
   # GET /feeds
@@ -136,6 +134,7 @@ class FeedsController < ApplicationController
   # PUT /feeds/1.json
   def update
     @feed = Feed.find(params[:id])
+    @user = current_user
     if @feed.update_attributes(params[:feed])
       respond_to do |format|
         format.html { redirect_to feeds_url, :status => :see_other, notice: 'Feed was successfully updated.' }
