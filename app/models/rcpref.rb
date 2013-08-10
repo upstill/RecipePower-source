@@ -90,9 +90,9 @@ class Rcpref < ActiveRecord::Base
       # We prefer recipes that match in both title and comment, 
       # otherwise, first title matches, then comment matches
       if commentset && titleset
-        (commentset & titleset) | titleset | commentset
+        ((commentset & titleset) | titleset | commentset).uniq
       else
-        titleset || commentset || refs.map(&:recipe_id)
+        (titleset || commentset || refs.map(&:recipe_id)).uniq
       end
     end
   end
