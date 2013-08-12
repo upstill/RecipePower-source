@@ -27,6 +27,7 @@ class User < ActiveRecord::Base
   attr_accessor :shared_recipe, :invitee_tokens
   
   has_many :rcprefs, :dependent => :destroy
+  has_many :recipes, :through=>:rcprefs, :autosave=>true
   
   has_many :notifications_sent, :foreign_key => :source_id, :class_name => "Notification", :dependent => :destroy
   has_many :notifications_received, :foreign_key => :target_id, :class_name => "Notification", :dependent => :destroy
@@ -259,9 +260,6 @@ public
   # ownership of tags restrict visible tags
   has_many :tag_owners
   has_many :tags, :through=>:tag_owners
-
-  has_many :rcprefs
-  has_many :recipes, :through=>:rcprefs, :autosave=>true
   
   validates :email, :presence => true
 
