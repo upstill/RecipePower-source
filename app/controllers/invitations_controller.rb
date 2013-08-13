@@ -52,14 +52,6 @@ class InvitationsController < Devise::InvitationsController
 
     # Now that the invitee tokens are "valid", send mail to each
     breakdown = UserServices.new(@staged).analyze_invitees(current_user)
-    friend_nodes = nil
-    if breakdown[:new_friends].count > 0
-      # New friends must be added to the Browser list
-      friend_nodes = breakdown[:new_friends].collect { |nf|
-        @node = current_user.add_followee nf
-        with_format("html") { render_to_string :partial => "collection/node" }
-      }
-    end
     build_resource
     # Do invitations and/or shares, as appropriate
     breakdown[:invited] = []
@@ -130,9 +122,14 @@ class InvitationsController < Devise::InvitationsController
               respond_to { |format|
                 format.json {
                   response = { done: true }
-                  if friend_nodes
+                  if breakdown[:new_friends].count > 0
+                    # New friends must be added to the Browser list
+                    response[:entity] = breakdown[:new_friends].collect { |nf|
+                      @node = current_user.add_followee nf
+                      @browser = current_user.browser
+                      with_format("html") { render_to_string :partial => "collection/node" }
+                    }
                     response[:processorFcn] = "RP.content_browser.insert_or_select"
-                    response[:entity] = friend_nodes
                   end
                   # If there's a single message, report it in a popup, otherwise use an alert
                   if (alerts = alerts.flatten.compact).empty?
