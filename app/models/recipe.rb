@@ -41,7 +41,7 @@ public
   # the same image as the recipe (see check_thumbnail)
   def perform
     puts ">>>>>>>>>>>>>>>>>>>>>>>>>>>>> Validating picurl with url '#{url}' and picurl '#{picurl}'"
-    thumbnail.update_thumb
+    thumbnail.update_thumb if thumbnail
   end
   
   # Return the image for the recipe, either as a URL or a data specifier

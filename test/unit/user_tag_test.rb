@@ -21,6 +21,7 @@ class UserTagTest < ActiveSupport::TestCase
     end
     
     test "user takes and removes different tag ids for different users" do
+      tagging_count = Tagging.count
       thing1id = users(:thing1).id
       thing2id = users(:thing2).id
       tagee = users(:thing3)
@@ -34,7 +35,7 @@ class UserTagTest < ActiveSupport::TestCase
       tagee.current_user = thing2id
       tagee.tag_ids = tagee.tag_ids + [chilibeanid]
       
-      assert_equal 2, Tagging.count, "There should now be exactly two taggings"
+      assert_equal 2, Tagging.count - tagging_count, "There should now be exactly two taggings"
       assert tagee.tag_ids(thing1id).include?(jalid), "tagee should be tagged for :jal"
       assert tagee.tag_ids(thing2id).include?(chilibeanid), "tagee should have tag for :chilibean"
       
@@ -45,6 +46,7 @@ class UserTagTest < ActiveSupport::TestCase
     end
         
     test "user takes and removes different tags for different users" do
+      tagging_count = Tagging.count
       thing1id = users(:thing1).id
       thing2id = users(:thing2).id
       tagee = users(:thing3)
@@ -59,13 +61,13 @@ class UserTagTest < ActiveSupport::TestCase
       
       assert_equal tagee.tags(thing1id), [chilibean], "tagee should have tag for :chilibean"
       assert_equal tagee.tags(thing2id), [chilibean], "tagee should have tag for :chilibean"
-      assert_equal 1, Tagging.count, "There should now be exactly two taggings"
+      assert_equal 1, Tagging.count-tagging_count, "There should now be exactly two taggings"
       
       tagee.current_user = thing1id
       tagee.tags = []
       assert_equal [], tagee.tags(thing1id), "tagee should have removed tag for thing1"
       assert_equal [], tagee.tags(thing2id), "tagee should have removed tag for thing2"
-      assert_equal 0, Tagging.count, "There should now be exactly one tagging"
+      assert_equal 0, Tagging.count-tagging_count, "There should now be exactly one tagging"
     end
     
 end

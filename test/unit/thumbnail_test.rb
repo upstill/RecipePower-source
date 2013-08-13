@@ -1,27 +1,17 @@
 # encoding: UTF-8
 require 'test_helper'
 class ThumbnailTest < ActiveSupport::TestCase 
-    
-  test "Missing Picture" do
-		thumb = Thumbnail.acquire("nonsense", nil)
-		assert thumb.missing_picture?, "Nil path should show Missing Picture"
-		thumb = Thumbnail.acquire("nonsense", "")
-		assert thumb.missing_picture?, "Nil path should show Missing Picture"
-	end
 	
 	test "Bad URLs" do
 	  thumb =  Thumbnail.acquire("garbage_url", "nopath")
-		assert thumb.bad_url?, "Bad URL should show BadPicURL picture"
+		assert_nil thumb, "Bad URL should produce nil Thumbnail"
 	  thumb =  Thumbnail.acquire("htp://www.recipepower.com/url", "nopath")
-		assert thumb.bad_url?, "Bad URL should show BadPicURL picture"
+		assert_nil thumb, "Bad URL should produce nil thumbnail"
 	end
 		
 	test "Same paths should resolve to same thumbnail" do
-	  thumb1 =  Thumbnail.acquire("garbage_url", "nopath")
-	  thumb2 =  Thumbnail.acquire("htp://www.recipepower.com/url", "nopath")
-		assert_equal thumb1, thumb2, "Bad URLs should produce same BadPicURL thumb"
-	  thumb1 =  Thumbnail.acquire("http://localhost:3000/assets/index.htm", "aol_64.png")
-	  thumb2 =  Thumbnail.acquire("http://localhost:3000", "/assets/aol_64.png")
+	  thumb1 =  Thumbnail.acquire("http://local.recipepower.com:3000/assets/index.htm", "aol_64.png")
+	  thumb2 =  Thumbnail.acquire("http://local.recipepower.com:3000", "/assets/aol_64.png")
 		assert_equal thumb1, thumb2, "Paths with same reference should resolve to same thumbnail"
   end
   

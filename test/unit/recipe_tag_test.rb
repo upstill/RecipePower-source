@@ -17,6 +17,7 @@ class RecipeTagTest < ActiveSupport::TestCase
     end
     
     test "recipe takes and removes different tag ids for different users" do
+      tagging_count = Tagging.count
       thing1id = users(:thing1).id
       thing2id = users(:thing2).id
       jalid = tags(:jal).id
@@ -31,7 +32,7 @@ class RecipeTagTest < ActiveSupport::TestCase
       
       assert_equal tagee.tag_ids(thing1id), [jalid], "Recipe should have tag for thing1"
       assert_equal tagee.tag_ids(thing2id), [chilibeanid], "Recipe should have tag for thing2"
-      assert_equal 2, Tagging.count, "There should now be exactly two taggings"
+      assert_equal 2, Tagging.count-tagging_count, "There should now be exactly two taggings"
       
       tagee.current_user = thing1id
       tagee.tag_ids = []
@@ -41,6 +42,7 @@ class RecipeTagTest < ActiveSupport::TestCase
     end
         
     test "recipe takes and removes different tags for different users" do
+      tagging_count = Tagging.count
       thing1id = users(:thing1).id
       thing2id = users(:thing2).id
       jal = tags(:jal)
@@ -55,13 +57,13 @@ class RecipeTagTest < ActiveSupport::TestCase
       
       assert_equal tagee.tags(thing1id), [jal], "Recipe should have tag for thing1"
       assert_equal tagee.tags(thing2id), [chilibean], "Recipe should have tag for thing2"
-      assert_equal 2, Tagging.count, "There should now be exactly two taggings"
+      assert_equal 2, Tagging.count-tagging_count, "There should now be exactly two taggings"
       
       tagee.current_user = thing1id
       tagee.tags = []
       assert_equal tagee.tags(thing1id), [], "Recipe should have removed tag for thing1"
       assert_equal tagee.tags(thing2id), [chilibean], "Recipe should still have tag for thing2"
-      assert_equal 1, Tagging.count, "There should now be exactly one tagging"
+      assert_equal 1, Tagging.count-tagging_count, "There should now be exactly one tagging"
     end
     
 end

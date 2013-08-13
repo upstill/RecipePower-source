@@ -7,7 +7,7 @@ class RecipeThumbnailTest < ActiveSupport::TestCase
     bpr = recipes(:badpicrcp)
     bpr.perform
     success = bpr.save
-    assert recipes(:badpicrcp).thumbnail.bad_url?, "Recipe with bad pic url should get bad_url thumbnail"
+    assert_nil recipes(:badpicrcp).thumbnail, "Recipe with bad pic url should get nil thumbnail"
   end
   
   test "Save success with good pic URL" do

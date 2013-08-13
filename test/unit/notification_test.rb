@@ -6,7 +6,7 @@ class NotificationTest < ActiveSupport::TestCase
   test "User Sends Notification" do
     source = users(:thing1)
     target = users(:thing2)
-    source.send_notification(target, :share_recipe)
+    target.post_notification( :share_recipe, source)
     notification = Notification.first
     assert_not_nil notification, "No notification exists after creation"
     assert_equal notification.source, source, "Notification doesn't have proper source"
@@ -20,7 +20,7 @@ class NotificationTest < ActiveSupport::TestCase
   test "Deleting Sender Deletes Notification" do
     source = users(:thing1)
     target = users(:thing2)
-    source.send_notification(target, :share_recipe)
+    target.post_notification( :share_recipe, source)
     source.destroy
     assert_equal 0, Notification.count, "Still a notification after deleting Sender"
   end
@@ -28,7 +28,7 @@ class NotificationTest < ActiveSupport::TestCase
   test "Deleting Receiver Deletes Notification" do
     source = users(:thing1)
     target = users(:thing2)
-    source.send_notification(target, :share_recipe)
+    target.post_notification( :share_recipe, source)
     target.destroy
     assert_equal 0, Notification.count, "Still a notification after deleting Target"
   end

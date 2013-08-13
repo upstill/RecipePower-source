@@ -380,11 +380,13 @@ public
       { 
         :subject => invitation_issuer+" wants to get you cooking.",
         :from => invitation_issuer+" on RecipePower <#{inviter.email}>",
+        :reply_to => inviter.email
       }
     when :sharing_notice, :sharing_invitation_instructions
       { 
         :subject => invitation_issuer+" has something tasty for you.",
         :from => invitation_issuer+" on RecipePower <#{inviter.email}>",
+        :reply_to => inviter.email
       }
     else
       {}
