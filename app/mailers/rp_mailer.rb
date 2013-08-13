@@ -30,7 +30,7 @@ class RpMailer < ActionMailer::Base
     @notification = notification
     @recipe = Recipe.find(notification.info[:what])
     mail to: notification.target.email, 
-      from: notification.source.polite_name+" on RecipePower <support@recipepower.com>",
+      from: notification.source.polite_name+" on RecipePower <#{notification.source.email}>",
       subject: notification.source.polite_name+" has something tasty for you"
   end
 end
