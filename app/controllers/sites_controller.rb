@@ -123,6 +123,7 @@ class SitesController < ApplicationController
         @site.save
         @seeker = FeedSeeker.new @feeds, session[:seeker] # Default; other controllers may set up different seekers
         flash.now[:notice] = view_context.list_feeds("Scraped", nlist)
+        @user = current_user
         render action: :show
       end
     else

@@ -201,6 +201,7 @@ class RecipesController < ApplicationController
             # If we couldn't even get the site from the domain, we just bail entirely
             render js: %Q{alert(#{msg});}
           else
+            params[:recipe][:title] = "Recipe from "+@site.name if params[:recipe][:title].blank?
             @url = capture_recipes_url area: "at_top", layout: "injector", sourcehome: @site.domain, recipe: params[:recipe]
             render
           end
