@@ -26,11 +26,10 @@ class FeedEntry < ActiveRecord::Base
     entries.each do |entry|
       entry.published = Time.current unless entry.published
       unless exists? :guid => entry.id
-        if (entry.title.length > 254 || entry.url.length > 254 || entry.guid.length > 254)
-          logger.debug "FEED ENTRY ERROR: title, url or guid too long: "
+        if (entry.title.length > 254 || entry.url.length > 254)
+          logger.debug "FEED ENTRY ERROR: title or url too long: "
           logger.debug "\ttitle: "+entry.title
           logger.debug "\turl: "+entry.url
-          logger.debug "\tguid: "+entry.guid
         end
         create!(
           :name         => entry.title,
