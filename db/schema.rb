@@ -56,7 +56,7 @@ ActiveRecord::Schema.define(:version => 20130904001851) do
     t.text     "summary"
     t.text     "url"
     t.datetime "published_at"
-    t.string   "guid"
+    t.text     "guid"
     t.datetime "created_at",   :null => false
     t.datetime "updated_at",   :null => false
     t.integer  "feed_id"
