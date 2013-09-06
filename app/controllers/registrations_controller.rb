@@ -3,6 +3,12 @@ require './lib/uri_utils.rb'
 class RegistrationsController < Devise::RegistrationsController
     before_filter :authenticate_user!, :except => [:show, :index]
     respond_to :html, :json
+    
+    def edit
+      @user = (params[:id] && User.find(params[:id])) || current_user
+      dialog_boilerplate "edit", "floating"
+    end
+    
     def create
       # We can be coming from users#identify on the 'existing user' form
       if params[:commit] == "Go"
@@ -51,6 +57,31 @@ class RegistrationsController < Devise::RegistrationsController
       end
     end
 
+    # PUT /resource
+    # We need to use a copy of the resource because we don't want to change
+    # the current user in place.
+    def update
+      self.resource = resource_class.to_adapter.get!(send(:"current_#{resource_name}").to_key)
+      prev_unconfirmed_email = resource.unconfirmed_email if resource.respond_to?(:unconfirmed_email)
+      if resource.update_with_password(resource_params)
+        if is_navigational_format?
+          flash_key = update_needs_confirmation?(resource, prev_unconfirmed_email) ?
+            :update_needs_confirmation : :updated
+          set_flash_message :notice, flash_key
+        end
+        sign_in resource_name, resource, :bypass => true
+        respond_with(resource) do |format|
+          format.html { redirect_to after_update_path_for(resource) }
+          format.json { render :json => { done: true } }
+        end
+      else
+        clean_up_passwords resource
+        @user = resource
+        dialog_boilerplate "edit", "floating"
+        # respond_with resource
+      end
+    end
+
     private
 
     def build_resource(*args)
@@ -66,5 +97,9 @@ class RegistrationsController < Devise::RegistrationsController
     # in your own RegistrationsController.
     def after_sign_up_path_for(resource)
       after_sign_in_path_for(resource)
+    end
+    
+    def user_root_path
+      collection_path
     end
 end

@@ -58,7 +58,7 @@ module DialogsHelper
         which.to_s, 
         options[:area] || "floating", 
         ("hide" unless options[:show]),
-        ("modal-pending fade" if for_bootstrap), 
+        ("modal-pending fade" if for_bootstrap && !options[:show]), 
         options[:class] 
       ].compact.join(' ')
     [:area, :show, :noflash, :modal, :body_contents].each { |k| options.delete k }
