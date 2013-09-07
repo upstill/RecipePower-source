@@ -45,5 +45,9 @@ module RP
     config.assets.initialize_on_precompile = false
     # On config/application.rb forcing your application to not access the DB
     # or load models when precompiling your assets.
+    
+    config.action_dispatch.default_headers = {
+        'X-Frame-Options' => 'ALLOWALL'
+    }    
   end
 end

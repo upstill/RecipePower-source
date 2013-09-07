@@ -10,7 +10,7 @@
 			<% end %>
 		  <%= f.input :password %></p>
 		  <% if devise_mapping.rememberable? -%>
-				<%= f.input :remember_me, :as => :boolean, :wrapper => :checkbox %> 
+				<%= f.input :remember_me, :as => :boolean, :label => false, :inline_label => true, input_html: { value: '1' } %> 
 		  <% end -%>
 		<% end %>
 		<%= modal_footer do %>
