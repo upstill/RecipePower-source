@@ -266,8 +266,8 @@ public
   # validates_presence_of :username
   validates_uniqueness_of :username, allow_blank: true
   validates_uniqueness_of :email, :if => :email_changed?
-  validates_format_of :username, :allow_blank => true, :with => /^[-\w\s\.!_@]+$/i, :message => "can't take funny characters (letters, spaces, numbers, or .-!_@ only)"
-  validates_format_of :email, :allow_blank => true, :with => /^[-a-z0-9_+\.]+\@([-a-z0-9]+\.)+[a-z0-9]{2,4}$/i
+  validates_format_of :username, :allow_blank => true, :with => /\A[-\w\s\.!_@]+\z/i, :message => "can't take funny characters (letters, spaces, numbers, or .-!_@ only)"
+  validates_format_of :email, :allow_blank => true, :with => /\A[-a-z0-9_+\.]+\@([-a-z0-9]+\.)+[a-z0-9]{2,4}\z/i
 
   before_save :qa
 

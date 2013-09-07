@@ -1,7 +1,8 @@
 source 'http://rubygems.org'
 
 ruby '1.9.3'
-gem 'rails', '3.2.11'
+gem 'rails', '4.0.0' # '3.2.11' #
+gem 'rails4_upgrade'
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
@@ -10,7 +11,7 @@ gem 'pg'
 
 gem 'closure_tree'
 gem 'htmlentities'
-gem 'nokogiri'
+gem 'nokogiri', "~> 1.5.10"
 gem 'will_paginate', '~> 3.0'
 gem 'minitest'
 gem 'newrelic_rpm'
@@ -27,10 +28,10 @@ gem 'eventmachine', '1.0.0.rc.4'
 gem 'ruby_parser'
 gem "rmagick", "2.12.0", :require => 'RMagick'
 gem "feedzirra"
-gem "simple_form"
+gem "simple_form", :git => 'git://github.com/plataformatec/simple_form.git'
 gem 'delayed_job_active_record'
 gem 'hirefire-resource'
-gem 'rspec-rails', '2.6.1', :group => [:test, :development]
+gem 'rspec-rails', :group => [:test, :development]
 gem 'debugger', :group => [:test, :development]
 gem 'awesome_nested_set'
 gem 'redcarpet'
@@ -60,15 +61,19 @@ end
 
 # Gems used only for assets and not required
 # in production environments by default.
-group :assets do
-  gem 'coffee-rails', "~> 3.2.1"
-  gem 'uglifier', '>= 1.0.3'
-  gem 'compass-rails'
-  gem 'sass-rails', " ~> 3.2.3"
-  gem 'bootstrap-sass', '~> 2.2.2.0'
-end
+gem 'coffee-rails', "~> 4.0.0"
+gem 'uglifier', '>= 1.3.0'
+gem 'compass-rails'
+gem 'sass-rails', " ~> 4.0.0.rc1"
+gem 'bootstrap-sass', '~> 2.2.2.0'
 
 gem 'jquery-rails'
+
+# add these gems to help with the transition:
+gem 'protected_attributes'
+gem 'rails-observers'
+gem 'actionpack-page_caching'
+gem 'actionpack-action_caching'
 
 # Use unicorn as the web server
 # gem 'unicorn'

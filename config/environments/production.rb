@@ -12,7 +12,7 @@ RP::Application.configure do
   config.serve_static_assets = false
 
   # Compress JavaScripts and CSS
-  config.assets.compress = true
+  config.assets.js_compressor = :uglifier
 
   # Don't fallback to assets pipeline if a precompiled asset is missed
   config.assets.compile = false
@@ -93,6 +93,8 @@ RP::Application.configure do
 
   # Enable threaded mode
   # config.threadsafe!
+  
+  config.eager_load = true
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation can not be found)

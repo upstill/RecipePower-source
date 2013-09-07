@@ -2,6 +2,7 @@ require './lib/controller_authentication.rb'
 require './lib/seeker.rb'
 
 class ApplicationController < ActionController::Base
+  
   before_filter :check_flash
   before_filter :detect_notification_token
     helper :all

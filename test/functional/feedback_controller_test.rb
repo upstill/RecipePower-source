@@ -1,15 +1,19 @@
 require File.dirname(__FILE__) + '/../test_helper'
 
 class FeedbackControllerTest < ActionController::TestCase
+  include Devise::TestHelpers
 
   def setup
+    debugger
+    sign_in User.first
     @controller = FeedbackController.new
-    @request    = ActionController::TestRequest.new
+    @controller.request = @request = ActionController::TestRequest.new
     @response   = ActionController::TestResponse.new
   end
 
 
   def test_should_have_minimal_feedback_form
+  	debugger
     get :new
     assert_select "form#feedback_form", true do
       assert_select "[action=?]", "/feedbacks"
@@ -19,6 +23,7 @@ class FeedbackControllerTest < ActionController::TestCase
   end
 
   def test_should_post_create
+  	debugger
     post :create, :feedback => {:comment => "Great website!"}
     assert :success # Doesn't test much
     assert_nil @error_message
@@ -26,6 +31,7 @@ class FeedbackControllerTest < ActionController::TestCase
 
 
   def test_should_set_error_message_when_not_valid
+  	debugger
     post :create, :feedback => {:comment => ""}
     assert !assigns(:error_message).blank?
   end
