@@ -2,7 +2,8 @@ class SessionsController < Devise::SessionsController
   
   # GET /resource/sign_in
   def new
-    self.resource = build_resource(nil, :unsafe => true)
+    debugger
+    self.resource = resource_class.new # build_resource(nil, :unsafe => true)
     if u = params[:user] && params[:user][:id] && User.find_by_id(params[:user][:id])
       self.resource.username = u.username
       self.resource.fullname = u.fullname

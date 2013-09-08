@@ -6,7 +6,7 @@ class PasswordsController < Devise::PasswordsController
   def new
     session[:on_tour] = true
     if request.format == "application/json"
-      build_resource({})
+      self.resource = resource_class.new()
       respond_with resource do |format|
         # format.html { render :partial => "registrations/form" }
         format.json { 

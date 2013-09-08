@@ -10,7 +10,7 @@ class InvitationsController < Devise::InvitationsController
 
   # GET /resource/invitation/new
   def new
-    build_resource
+    self.resource = resource_class.new()
     resource.shared_recipe = params[:recipe_id]
     @recipe = resource.shared_recipe && Recipe.find(resource.shared_recipe)
     self.resource.invitation_issuer = current_user.fullname.blank? ? current_user.handle : current_user.fullname
@@ -52,7 +52,7 @@ class InvitationsController < Devise::InvitationsController
 
     # Now that the invitee tokens are "valid", send mail to each
     breakdown = UserServices.new(@staged).analyze_invitees(current_user)
-    build_resource
+    self.resource = resource_class.new()
     # Do invitations and/or shares, as appropriate
     breakdown[:invited] = []
     breakdown[:failures] = []
