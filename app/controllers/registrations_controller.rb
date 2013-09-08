@@ -24,7 +24,7 @@ class RegistrationsController < Devise::RegistrationsController
           end
       else
         # if request.format == "application/json"
-          build_resource
+          build_resource params[:user]
           if resource.save
             if resource.active_for_authentication?
               # set_flash_message :notice, :signed_up if is_navigational_format?
