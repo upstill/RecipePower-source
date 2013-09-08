@@ -263,4 +263,12 @@ class ApplicationController < ActionController::Base
       logger.info "Logger sez: Error 500"
       render :template => "errors/500", :status => 500, :layout => 'application'
     end
+
+  private
+
+  # The capture action should be embeddable in the iframe
+  def allow_iframe
+    # response.headers.except! 'X-Frame-Options'
+  	response.header['X-Frame-Options'] = "ALLOWALL"
+  end
 end

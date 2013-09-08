@@ -2,6 +2,7 @@ require './lib/controller_utils.rb'
 require 'uri'
   
 class AuthenticationsController < ApplicationController
+  after_action :allow_iframe, only: :new
     
   def index
     @authentications = current_user.authentications if current_user

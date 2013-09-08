@@ -1,6 +1,7 @@
 require './lib/controller_utils.rb'
 
 class RecipesController < ApplicationController
+  after_action :allow_iframe, only: :capture
 
   before_filter :login_required, :except => [:index, :show, :capture, :collect ]
   before_filter { @focus_selector = "#recipe_url" }
@@ -143,7 +144,6 @@ class RecipesController < ApplicationController
     # parameters are supplied for url, title and note (though only URI is required).
     @area = params[:area] || "at_top"
   	dialog_only = params[:how] == "modal" || params[:how] == "modeless"
-  	response.header[:"X-Frame-Options"] = "ALLOWALL"
     respond_to do |format|
       format.html { # This is for capturing a new recipe and tagging it using a new page. 
         if current_user
