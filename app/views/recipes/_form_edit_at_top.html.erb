@@ -1,6 +1,8 @@
 <div class="edit_recipe_hdr" >
 	<%= image_tag "RPlogo.png", class: "small_logo", :alt => "RecipePower" %>
-	<span>has added this to your collection. Tag it here if you like. (Or <%= link_to_function "not", "retire_iframe();" %>.)</span>
+	<span>has added this to your collection. Tag it here if you like. (Or 
+	<%= link_to "not", "#", id: "retire_iframe", remote: true %>
+	.)</span>
 </div>
 <%= form_for @recipe, :html => { style: 'width:auto;height:auto'} do |f| %>
   <%= form_errors_helper f, @recipe, false %>

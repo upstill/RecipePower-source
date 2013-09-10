@@ -21,6 +21,8 @@ RP.content_browser.onload = () ->
 			RP.collection.update { selected: @id }
 		else
 			RP.collection.update()
+	
+	$('.delete_element').bind('ajax:error', RP.content_browser.failed_deletion )
 
 RP.content_browser.click_to_browser = (e) ->
 	inside = null
@@ -75,6 +77,9 @@ toggleChildren = (me) ->
 	myLevel = elementLevel me
 	while((me = $(me).next()[0]) && (elementLevel(me) > myLevel))
 		$(me).toggle 200
+
+RP.content_browser.failed_deletion = (evt, xhr, status, error) ->
+	$('.notifications-panel').html xhr.responseText
 
 # Delete an element of the collection, assuming that the server approves
 # We get back an id suitable for removing an element from the collection
