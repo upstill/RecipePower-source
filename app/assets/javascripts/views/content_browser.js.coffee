@@ -81,42 +81,6 @@ toggleChildren = (me) ->
 RP.content_browser.failed_deletion = (evt, xhr, status, error) ->
 	$('.notifications-panel').html xhr.responseText
 
-# Delete an element of the collection, assuming that the server approves
-# We get back an id suitable for removing an element from the collection
-# NB Since this may have been the selected node, we have to ensure that 
-# there's a selection extant at the end.
-# ALSO: must send using DELETE method
-RP.content_browser.delete_element = (path) ->
-	# Submit the delete
-	# Get the ID of the deleted element via JSON
-	# Decide what element to select next (next element at same level, otherwise
-	# previous element regardless of level)
-	# Notify server of new selection; response: new list
-	# Replace list with response
-	active = $('.RcpBrowser.active')[0]
-	sibclass = active.className.match(/Level(\d)/)[0]
-	parent = active.parentNode
-	toselect = active.nextElementSibling
-	if !$(toselect).hasClass sibclass
-		toselect = active.previousElementSibling
-	active.parentNode.removeChild active
-	$(toselect).addClass "active"
-	# $('div.loader').addClass "loading" # show progress indicator
-	jQuery.ajax
-		type: "POST"
-		url: path
-		dataType: "html"
-		beforeSend: (xhr) ->
-			xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))
-		success: (resp, succ, xhr) ->
-			# Explicitly update the collection list
-			document.open()
-			document.write resp
-			document.close()
-			RP.content_browser.onload()
-		error: (jqXHR, textStatus, errorThrown) ->
-			$('.notifications-panel').html jqXHR.responseText
-
 # Handle adding a new entity into the collection:
 # -- post the message in the response
 # -- translate the 'entity' field of the response into a DOM entry
