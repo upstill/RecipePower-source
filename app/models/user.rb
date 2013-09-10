@@ -39,7 +39,7 @@ class User < ActiveRecord::Base
   has_many :followees, :through => :followee_relations, :source => :followee, :uniq => true
   
   # Channels are just another kind of user. This field (channel_referent_id, externally) denotes such.
-  belongs_to :channel, :class_name => "ChannelReferent", :dependent => :destroy
+  belongs_to :channel, :class_name => "Referent", :dependent => :destroy, :foreign_key => "channel_referent_id"
   
   has_and_belongs_to_many :feeds
   

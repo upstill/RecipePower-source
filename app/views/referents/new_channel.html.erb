@@ -7,9 +7,9 @@
 		  <% f.object.type = @reftype %>
 		  <%= f.hidden_field :typenum %>
 		  <%= f.input :dependent, 
-									:label => "Use Existing Tag (vs. building a freestanding channel)", 
-									:as => :boolean, 
-									:wrapper => :checkbox %>
+									:label => false,
+									:inline_label => "Use Existing Tag (vs. building a freestanding channel)", 
+									:as => :boolean %>
 			<%= f.input :tag_token, label: "Name:", :id=>"referent_channel_tag", data: { pre: "" } %>
 		  <%= f.input :description, id: "referent_description" %>
 		<% end %>

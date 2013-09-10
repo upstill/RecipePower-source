@@ -4,7 +4,7 @@
   <%= f.input :title %>
   <%= f.input :description, input_html: { cols: 125, rows: 1 } %>
   <%= f.input :url, input_html: { cols: 125, rows: 1 } %>
-  <%= f.input :approved %>
+  <%= f.input :approved, :as => :boolean, :label => false, :inline_label => true %>
   <%= f.input :feedtype, collection: Feed.feedtype_selection %>
 	<%= f.button :submit, "Save" %>
 <% end %>

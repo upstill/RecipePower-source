@@ -8,7 +8,7 @@
 		  <%= f.input :about, label: "About Me", placeholder: "Who Are You? What Do You Eat?", input_html: { cols: 125, rows: 4 } %>
 			<%= taggable_div f, "control-group", "Interests (tags that apply to you)" %>
 		  <%= f.input :email, input_html: { cols: 125, rows: 1 } %>
-		  <%= f.input :private, :as => :boolean, :wrapper => :checkbox, :label => "Cloak of Invisibility (i.e., not listed as possible Friend)" %>
+		  <%= f.input :private, :as => :boolean, :label => false, :inline_label => "Cloak of Invisibility (i.e., not listed as possible Friend)" %>
 		  <% if permitted_to? :manage, @user %>
 				<%= f.input :role_id, label: "Role", collection: @user.role_select %>
 		  <% end %>

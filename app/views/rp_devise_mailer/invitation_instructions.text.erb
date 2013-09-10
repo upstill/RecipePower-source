@@ -1,7 +1,7 @@
 <% inviter_name = @resource.invitation_issuer %>
 <% accept_url = accept_user_invitation_url(:invitation_token => @resource.invitation_token) %>
 		
-<%= inviter_name || "Someone" %> is inviting you to join them on RecipePower (<%= accept_url %>)<%= @resource.invitation_message.blank? ? "." : ", saying" %>
+<%= inviter_name || "Someone" %> is inviting you to join them on RecipePower (<%= accept_url %> )<%= @resource.invitation_message.blank? ? "." : ", saying" %>
 
 <% unless @resource.invitation_message.blank? %>
 	<% require 'iconv' %>
@@ -9,13 +9,13 @@
 	<%= raw splitstr( @resource.invitation_message, 72).join("\n\t") %>
 
 <% end %>
-RecipePower (<%= root_url %>) makes sure you never forget a 
+RecipePower (<%= root_url %> ) makes sure you never forget a 
 recipe again, lets you find them again quickly, and clues you in to your 
 friends' discoveries too. Join <%= inviter_name || "us" %> and you'll be cooking 
 like never before. Getting started takes just a few seconds, then 
 you'll be snagging the best recipes from the Web--for good. 
 
-So accept already! Go to <%= accept_url %>.
+So accept already! Go to <%= accept_url %>
 
 Best Regards,
 The RecipePower team

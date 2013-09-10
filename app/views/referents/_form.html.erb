@@ -20,7 +20,7 @@
 			</table>
 		</div>
 		<%# f.input :referent, label: "Add Expression", "data-type" => @referent_type.to_s %>
-		<%= f.input :isCountable, :label => "Countable", :as => :boolean, :wrapper => :checkbox %>
+		<%= f.input :isCountable, :label => false, :inline_label => "Countable", :as => :boolean %>
 	<% end %>
 	<%= modal_footer do %>
 	  <div class="actions">

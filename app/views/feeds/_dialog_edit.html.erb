@@ -7,7 +7,7 @@
 		  <%= f.input :description, input_html: { cols: 125, rows: 1 } %>
 			<%= taggable_div f, "" %>
 		  <%= f.input :url, input_html: { cols: 125, rows: 1 } %>
-		  <%= f.input :approved, :as => :boolean, :wrapper => :checkbox, :label => "Approved for feedthrough" %>
+		  <%= f.input :approved, :as => :boolean, :label => false, :inline_label => "Approved for feedthrough" %>
 		  <%= f.input :feedtype, collection: Feed.feedtype_selection %>
 		<% end %>
 		<%= modal_footer do %>

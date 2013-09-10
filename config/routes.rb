@@ -39,7 +39,7 @@ RP::Application.routes.draw do
 
   resources :thumbnails
 
-  get 'collection', :controller=>'collection', :action=>'index'
+  match 'collection', :controller=>'collection', :action=>'index', :via => [:get, :post]
   match 'collection/query', :controller=>'collection', :action=>'query', :via => :post
   match "collection/update", :controller=>'collection', :action=>'update', :via => :post
   get "collection/show"
