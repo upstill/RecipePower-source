@@ -118,6 +118,7 @@ open_modal = (dlog, omit_button) ->
 	if (focus_sel = $(dlog).data("focus")) && (focus_elmt = $(focus_sel, dlog)[0])
 		focus_elmt.focus()
 	$('input.cancel', dlog).click RP.dialog.cancel
+	$('a.dialog-cancel-button', dlog).click RP.dialog.cancel
 	dlog
 
 # Remove the dialog and notify its handler prior to removing the element

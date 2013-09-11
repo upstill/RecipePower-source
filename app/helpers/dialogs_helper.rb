@@ -138,8 +138,8 @@ module DialogsHelper
   end
   
   def dialog_cancel_button name, options={}
-    options[:class] = "#{options[:class]} btn btn-success"
-    link_to_function name, "RP.dialog.cancel(event);", options
+    options[:class] = "#{options[:class]} btn btn-success dialog-cancel-button"
+    link_to name, "#", options
   end
     
 end
