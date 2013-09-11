@@ -20,7 +20,8 @@ module TriggersHelper
   end
   
   def link_to_redirect(label, url, options={} )
-  	link_to_function label, "redirect_to('#{url}');", options
+    # This requires Javascript to bind a click handler to the link
+  	link_to label, "#", options.merge( id: "link_to_redirect", "data-url" => url )
   end
   
   def button_to_update(label, url, mod_time, options={} )

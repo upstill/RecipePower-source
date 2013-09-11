@@ -102,6 +102,8 @@ function open_dialog(dlog) {
 	// Report the window dimensions to the enclosing iframe
 	if(dlog.offsetWidth > 0 && dlog.offsetHeight > 0) 
 		$.postMessage( { call: "execute_resize", width: dlog.offsetWidth, height: dlog.offsetHeight }, RP.embedding_url );
+	$('#retire_iframe').click( retire_iframe )
+	$('#link_to_redirect').click( redirect_to )
 }
 
 // Called when the dialog is closed
@@ -126,8 +128,8 @@ function retire_iframe(notice) {
 	$.postMessage( msg, RP.embedding_url );
 }
 
-function redirect_to(url) {
-	var msg = { call: "redirect_to", url: url };
+function redirect_to(evt) {
+	var msg = { call: "redirect_to", url: $(this).data('url') };
 	$.postMessage( msg, RP.embedding_url );
 }
 

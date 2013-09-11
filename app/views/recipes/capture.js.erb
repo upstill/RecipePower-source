@@ -80,11 +80,10 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		ifr.style.display = 'block';
 	}, 
 	
+	// Respond to message from embedded page redirecting the whole window elsewhere
 	redirect_to: function (msg) {
 		var url = msg.url[0];
-		var link = document.getElementById('recipePower-golink');
-		link.href = url;
-		link.click(); // Click, and VOILA! We're off to RecipePower!
+		window.location.href = url;
 	},
 	
 	ifrOnload: function () {
@@ -167,7 +166,8 @@ window.recipePower_namespace = window.recipePower_namespace || {
 			}	
 		}
 		// Finally, bind the retire_iframe function to that link
-		$('#retire_iframe').bind("ajax:beforeSend", retire_iframe )
+		// $('#retire_iframe').bind("ajax:beforeSend", retire_iframe )
+		// $('#link_to_redirect').bind("ajax:beforeSend", redirect_to )
 	},
 	
 	// For the benefit of mouse tracking functions below
