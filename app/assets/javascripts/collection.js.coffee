@@ -72,7 +72,9 @@ collection_onload = () ->
 	)
 	
 	$("#tagstxt").first().focus()
-	$(".pageclickr").click collection_pager
+	# Page buttons do a remote fetch which needs to replace the collection
+	$('.pageclickr').bind "ajax:beforeSend", collection_beforeSend
+	$('.pageclickr').bind "ajax:success", collection_success
 	checkForLoading ".stuffypic"
 	RP.collection.justify()
 	
@@ -92,15 +94,31 @@ collection_tagchange = () ->
 	else
 		RP.collection.update $(formitem).serialize(), $(formitem).attr("action")
 
-collection_pager = (evt) ->
-	# Respond to page selection: replace results list
-	# Pagination spans have an associated value with the page number
-	RP.collection.update { cur_page: this.getAttribute("value") }, this.dataset.url
+# Event responder to ajax:success on the remote collection-query results
+collection_success = (evt, data, status, xhr) ->
+	RP.collection.update_success data
+	
+# Event responder to ajax:beforeSend on the remote collection-query results
+collection_beforeSend = (evt, xhr, settings) ->
+	RP.dialog.cancel() # Close any open modal dialogs
+	RP.notifications.wait()
+	true
+	
+RP.collection.update_success = (resp) ->
+	# Explicitly update the collection list
+	# $('div.loader').removeClass "loading" # Remove progress indicator
+	$('#masonry-container').masonry('destroy')
+	RP.process_response resp
+	RP.rcp_list.onload()
+	window.scrollTo(0,0)
+	RP.notifications.done()
+	window.setTimeout -> 
+		RP.collection.justify()
+	, 800
 
 # Fire the current query state at the server and get back a refreshed recipe list
 RP.collection.update = (params, url) ->
-	RP.dialog.cancel() # Close any open modal dialogs
-	RP.notifications.wait()
+	RP.collection.before_send()
 	jQuery.ajax
 		type: "POST"
 		url: (url || "/collection/query")
@@ -114,17 +132,7 @@ RP.collection.update = (params, url) ->
 			# responseData.how = responseData.how || assumptions.how
 			RP.process_response responseData
 		success: (resp, succ, xhr) ->
-			# Explicitly update the collection list
-			# $('div.loader').removeClass "loading" # Remove progress indicator
-			$('#masonry-container').masonry('destroy')
-			RP.process_response resp
-			$(".pageclickr").click(collection_pager)
-			RP.rcp_list.onload()
-			window.scrollTo(0,0)
-			RP.notifications.done()
-			window.setTimeout -> 
-				RP.collection.justify()
-			, 800
+			RP.collection.update_success resp
 
 RP.collection.rejustify = () ->
 	$('#masonry-container').masonry()
