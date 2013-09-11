@@ -7,7 +7,8 @@ me = () ->
 tagger_selector = "div.edit_recipe #recipe_tag_tokens"
 
 # Open the edit-recipe dialog on the recipe represented by 'rcpdata'
-RP.edit_recipe.go = (rcpdata) ->
+RP.edit_recipe.go = (evt, xhr, settings) ->
+	rcpdata = $(this).data()
 	template = $('#recipePowerEditRecipeTemplate')
 	dlog = me()
 	# If it has children it's active, and should be put away, starting with hiding it.
@@ -21,19 +22,20 @@ RP.edit_recipe.go = (rcpdata) ->
 		# statustarget = '<option value="'+rcpdata.rcpStatus+'"'
 		# statusrepl = statustarget + ' selected="selected"'
 		dlgsource = templ.string.
-		replace(/%%rcpID%%/g, rcpdata.rcpID).
-		replace(/%%rcpTitle%%/g, rcpdata.rcpTitle).
-		replace(/%%rcpPicURL%%/g, rcpdata.rcpPicURL || "/assets/NoPictureOnFile.png" ).
-		replace(/%%rcpPrivate%%/g, rcpdata.rcpPrivate).
-		replace(/%%rcpComment%%/g, rcpdata.rcpComment).
-		replace(/%%rcpStatus%%/g, rcpdata.rcpStatus).
-		replace(/%%authToken%%/g, rcpdata.authToken) # .replace(statustarget, statusrepl)
+		replace(/%%rcpID%%/g, rcpdata.rcpid).
+		replace(/%%rcpTitle%%/g, rcpdata.rcptitle).
+		replace(/%%rcpPicURL%%/g, rcpdata.rcppicurl || "/assets/NoPictureOnFile.png" ).
+		replace(/%%rcpPrivate%%/g, rcpdata.rcpprivate).
+		replace(/%%rcpComment%%/g, rcpdata.rcpcomment).
+		replace(/%%rcpStatus%%/g, rcpdata.rcpstatus).
+		replace(/%%authToken%%/g, rcpdata.authtoken) # .replace(statustarget, statusrepl)
 		$(template).html dlgsource # This nukes any lingering children as well as initializing the dialog
 	# The tag data is parsed and added to the tags field directly
-	RP.tagger.init tagger_selector, jQuery.parseJSON(rcpdata.rcpTagData)
+	RP.tagger.init tagger_selector, jQuery.parseJSON(rcpdata.rcptagdata)
 	
 	# Hand it off to the dialog handler
 	RP.dialog.run me()
+	false
 
 # When dialog is loaded, activate its functionality
 RP.edit_recipe.onload = (dlog) ->

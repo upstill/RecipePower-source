@@ -27,7 +27,7 @@ end
 def grab_recipe_link label, recipe
 end
 
-def edit_recipe_link( label, recipe, *options)
+def edit_recipe_link( label, recipe, options={})
     rcp_params = {
       rcpID: recipe.id,
       rcpTitle: recipe.title,
@@ -38,7 +38,8 @@ def edit_recipe_link( label, recipe, *options)
       rcpStatus: recipe.status,
       authToken: form_authenticity_token
     }
-    link_to_function label, "RP.edit_recipe.go(#{rcp_params.to_json});", *options
+    options[:class] = "edit_recipe_link "+(options[:class] || "")
+    link_to label, "#", options.merge(remote: true, data: rcp_params)
 end
 
 # If the recipe doesn't belong to the current user's collection,

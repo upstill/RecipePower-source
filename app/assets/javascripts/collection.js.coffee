@@ -97,6 +97,7 @@ collection_pager = (evt) ->
 	# Pagination spans have an associated value with the page number
 	RP.collection.update { cur_page: this.getAttribute("value") }, this.dataset.url
 
+# Fire the current query state at the server and get back a refreshed recipe list
 RP.collection.update = (params, url) ->
 	RP.dialog.cancel() # Close any open modal dialogs
 	RP.notifications.wait()

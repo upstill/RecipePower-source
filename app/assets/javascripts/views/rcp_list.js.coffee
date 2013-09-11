@@ -1,6 +1,7 @@
 RP.rcp_list = RP.rcp_list || {}
 
 RP.rcp_list.onload = ->
+	$('.edit_recipe_link').bind 'ajax:beforeSend', RP.edit_recipe.go
 	$(".popup").click(RP.servePopup);
 
 # Callback to update content in a recipe list due to JSON feedback
@@ -21,6 +22,7 @@ RP.rcp_list.update = ( data ) ->
 		if data.grid_element_class
 			$('.'+data.grid_element_class).replaceWith data.grid_element_body
 		checkForLoading ".stuffypic"
+		RP.rcp_list.onload()
 
 RP.rcp_list.boostInRecent = (list_element_class, list_element_body, targettab) ->
 	# Insert the resulting element at the top of the All Cookmarks tab, if open
