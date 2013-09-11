@@ -54,9 +54,6 @@ window.RP = window.RP || {}
 RP.collection = RP.collection || {}
 
 jQuery ->
-	collection_onload()
-	
-collection_onload = () ->
 	# $('div.loader').removeClass "loading" 
 	$("#tagstxt").tokenInput("/tags/match.json",
 		crossDomain: false,
@@ -71,13 +68,6 @@ collection_onload = () ->
 		zindex: 1500
 	)
 	
-	$("#tagstxt").first().focus()
-	# Page buttons do a remote fetch which needs to replace the collection
-	$('.pageclickr').bind "ajax:beforeSend", collection_beforeSend
-	$('.pageclickr').bind "ajax:success", collection_success
-	checkForLoading ".stuffypic"
-	RP.collection.justify()
-	
 	$(window).resize -> # Fix the height of the browser
 		if (elmt = $("div.browser_house")[0]) && (navlinks = $('div#footer_nav_links')[0])
 		 	elmt.style.bottom = (navlinks.offsetHeight + 5).toString() + "px";
@@ -85,8 +75,20 @@ collection_onload = () ->
 	if (elmt = $("div.browser_house")[0]) && (navlinks = $('div#footer_nav_links')[0])
 	 	elmt.style.bottom = (navlinks.offsetHeight + 5).toString() + "px";
 	
+	collection_onload()
 	RP.fire_triggers()
 
+collection_onload = () ->
+	$("#tagstxt").first().focus()
+	# Page buttons do a remote fetch which needs to replace the collection
+	$('.pageclickr').bind "ajax:beforeSend", collection_beforeSend
+	$('.pageclickr').bind "ajax:success", collection_success
+	checkForLoading ".stuffypic"
+	RP.rcp_list.onload()
+	window.setTimeout -> 
+		RP.collection.justify()
+	, 800
+	
 collection_tagchange = () ->
 	formitem = $('form.query_form')
 	if $(formitem).data("format") == "html"
@@ -96,7 +98,7 @@ collection_tagchange = () ->
 
 # Event responder to ajax:success on the remote collection-query results
 collection_success = (evt, data, status, xhr) ->
-	RP.collection.update_success data
+	collection_update_success data
 	
 # Event responder to ajax:beforeSend on the remote collection-query results
 collection_beforeSend = (evt, xhr, settings) ->
@@ -104,21 +106,18 @@ collection_beforeSend = (evt, xhr, settings) ->
 	RP.notifications.wait()
 	true
 	
-RP.collection.update_success = (resp) ->
+collection_update_success = (resp) ->
 	# Explicitly update the collection list
 	# $('div.loader').removeClass "loading" # Remove progress indicator
 	$('#masonry-container').masonry('destroy')
 	RP.process_response resp
-	RP.rcp_list.onload()
 	window.scrollTo(0,0)
 	RP.notifications.done()
-	window.setTimeout -> 
-		RP.collection.justify()
-	, 800
+	collection_onload()
 
 # Fire the current query state at the server and get back a refreshed recipe list
 RP.collection.update = (params, url) ->
-	RP.collection.before_send()
+	collection_beforeSend()
 	jQuery.ajax
 		type: "POST"
 		url: (url || "/collection/query")
@@ -132,7 +131,7 @@ RP.collection.update = (params, url) ->
 			# responseData.how = responseData.how || assumptions.how
 			RP.process_response responseData
 		success: (resp, succ, xhr) ->
-			RP.collection.update_success resp
+			collection_update_success resp
 
 RP.collection.rejustify = () ->
 	$('#masonry-container').masonry()
