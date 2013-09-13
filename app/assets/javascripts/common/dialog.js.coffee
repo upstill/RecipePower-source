@@ -136,6 +136,7 @@ target_modal = (event) ->
 		return odlog
 
 open_modal = (dlog, omit_button) ->
+	debugger
 	if (onget = $(dlog).data "onget" ) && (fcn = RP.named_function "RP."+onget.shift() )
 		fcn.apply null, onget
 	$(dlog).removeClass('modal-pending').removeClass('hide').addClass('modal')

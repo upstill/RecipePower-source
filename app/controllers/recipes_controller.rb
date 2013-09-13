@@ -109,12 +109,10 @@ class RecipesController < ApplicationController
     if @recipe.errors.empty? # Success (valid recipe, either created or fetched)
       respond_to do |format|
         format.html { # This is for capturing a new recipe and tagging it using a new page. 
-          debugger
           session[:recipe_pending] = @recipe.id
           redirect_to collection_path
         }
         format.json { 
-          debugger
           @data = { onget: [ "dialog.get_and_go", nil, collection_url(layout: false) ] }
           render json: {
             dlog: with_format("html") { 
