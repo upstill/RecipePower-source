@@ -33,6 +33,7 @@ RP.rcp_list.boostInRecent = (list_element_class, list_element_body, targettab) -
 # list element in the Recent list and place it at the top (removing any that's already 
 # there).
 RP.rcp_list.touch_recipe = (id) ->		# Formerly rcpTouch from oldRP.js
+	debugger
 	# First, replace all the "Recipe last viewed at" lines according to the server
 	if id && (id > 0)
 		jQuery.get( "/recipes/"+id+"/touch", {}, (body, status, instance) ->
