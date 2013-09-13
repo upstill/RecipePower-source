@@ -505,10 +505,17 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
     "It doesn't look like you've cookmarked any recipes. You'll never get dinner on the table at this rate!"
   end
   
-  def hints
-    bb = %q{<a href="#" onclick="RP.dialog.get_and_go(event, '/popup?name=pages%2Fstarting_step2', ''); return false;">Cookmark Button</a>}.html_safe
+  def hints 
+=begin
+    bb = link_to 'Cookmark Button', 
+            '/popup?name=pages%2Fstarting_step2&area=floating&how=modal', 
+            remote: true,
+            class: "dialog-run",
+            "data-type" => :JSON
+    bb = link_to_modal 'Cookmark Button', '/popup?name=pages%2Fstarting_step2&area=floating&how=modal'
+=end
     "<br>How about browsing through your Friends' recipes or one of your Channels and grabbing some of those? Or click on The Big List and search through that?"+
-    "<br>Or even, dare we say it, head off to the Wild World Web and cookmark some findings there? (...after installing the #{bb}, of course...)"
+    "<br>Or even, dare we say it, head off to the Wild World Web and cookmark some findings there? (...after installing the Cookmark Button of course...)"
   end
   
 end

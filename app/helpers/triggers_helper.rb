@@ -1,4 +1,5 @@
 # Methods for linking user actions to javascript
+require 'uri_utils'
 
 module TriggersHelper
   
@@ -10,8 +11,22 @@ module TriggersHelper
 	
 	# Embed a link to javascript for running a dialog by reference to a URL
 	def link_to_modal(label, path, options={})
-	  options.delete(:selector) if selector = options[:selector]
-  	link_to_function label, "RP.dialog.get_and_go(event, '#{path}', '#{selector}');", options
+	  # We get the dialog with a JSON request
+	  if options[:data]
+	    options[:data].merge! type: :JSON
+    else
+      options[:data] = { type: :JSON }
+    end
+    # The selector optionally specifies an element to replace.
+    # Move it to the element's data
+	  if selector = options[:selector]
+  	  options.delete(:selector) 
+  	  options[:data].merge! selector: selector
+	  end
+  	options.merge! remote: true
+  	options[:class] = "dialog-run "+(options[:class] || "")
+  	path = assert_query path, area: "floating", how: "modal"
+  	link_to label, path, options
   end
 	
 	# Embed a link to javascript for running a dialog by reference to a URL

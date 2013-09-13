@@ -1,23 +1,47 @@
 # Generic dialog management
 RP.dialog = RP.dialog || {}
 
+jQuery ->
+	RP.dialog.arm_links()
+	$(document).on("ajax:beforeSend", '.dialog-run', RP.dialog.beforeSend )
+	$(document).on("ajax:success", '.dialog-run', RP.dialog.success )
+	$(document).on("ajax:error", '.dialog-run', RP.dialog.error )
+
+RP.dialog.arm_links = (dlog) ->
+	dlog ||= window
+	$('input.cancel', dlog).click RP.dialog.cancel
+	$('a.dialog-cancel-button', dlog).click RP.dialog.cancel
+
+# Before making a dialog request, see if the dialog is preloaded
+RP.dialog.beforeSend = (event, xhr, settings) ->
+	debugger
+	selector = $(this).data 'selector'
+	odlog = target_modal event
+	if selector && (ndlog = $(selector)[0]) # If dialog already loaded, replace the responding dialog
+		RP.dialog.replace_modal ndlog, odlog
+		return false;
+	else
+		return true;
+	
+# Success handler for fetching dialog from server
+RP.dialog.success = (event, responseData, status, xhr) ->
+	debugger
+	responseData.how = responseData.how || "modal"
+	RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
+	RP.process_response responseData, target_modal(event)
+	
+RP.dialog.error = (event, jqXHR, status, error) ->
+	debugger
+	responseData = RP.post_error jqXHR
+	odlog = target_modal event
+	RP.process_response responseData, odlog
+
 # Hit the server for a dialog via JSON, and run the result
 # This function can be tied to a link with only a URL to a controller for generating a dialog.
 # We will get the div and run the associated dialog.
 RP.dialog.get_and_go = (event, request, selector) ->
 	# old_dlog is extracted from what triggered this call (if any)
-	how = "modal"
-	area = "floating"
-	if request.match /\?/
-		q = '&'
-	else
-		q = '?'
-	if !request.match /area=/
-		request += q+"area=" + area
-		q = '&'
-	if !request.match /how=/
-		request += q+"how=" + how
-	
+	debugger
 	if event
 		odlog = target_modal(event)
 	else
@@ -25,17 +49,26 @@ RP.dialog.get_and_go = (event, request, selector) ->
 	if selector && (ndlog = $(selector)[0]) # If dialog already loaded, replace the responding dialog
 		RP.dialog.replace_modal ndlog, odlog
 	else
+		# Ensure that the request has :area and :how query parameters
+		how = "modal"
+		area = "floating"
+		if request.match /\?/
+			q = '&'
+		else
+			q = '?'
+		if !request.match /area=/
+			request += q+"area=" + area
+			q = '&'
+		if !request.match /how=/
+			request += q+"how=" + how
 		$.ajax
 			type: "GET",
 			dataType: "json",
 			url: request,
 			error: (jqXHR, textStatus, errorThrown) ->
-				responseData = RP.post_error jqXHR
-				RP.process_response responseData, odlog
+				RP.dialog.error event, jqXHR, textStatus, errorThrown
 			success: (responseData, statusText, xhr) ->
-				responseData.how = responseData.how || how;
-				RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
-				RP.process_response responseData, odlog
+				RP.dialog.success event, responseData, statusText, xhr
 
 RP.dialog.cancel = (event) ->
 	if event
@@ -117,8 +150,7 @@ open_modal = (dlog, omit_button) ->
 	# Set text focus as appropriate
 	if (focus_sel = $(dlog).data("focus")) && (focus_elmt = $(focus_sel, dlog)[0])
 		focus_elmt.focus()
-	$('input.cancel', dlog).click RP.dialog.cancel
-	$('a.dialog-cancel-button', dlog).click RP.dialog.cancel
+	RP.dialog.arm_links()
 	dlog
 
 # Remove the dialog and notify its handler prior to removing the element

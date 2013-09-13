@@ -275,9 +275,9 @@ module ApplicationHelper
     item_list += [
   		"<hr>",
   		link_to( "Admin", admin_path),
-  		link_to_function( "Refresh Masonry", "RP.collection.justify();" ),
-  		link_to_function( "Address Bar Magic", "RP.getgo('#{home_path}', 'http://local.recipepower.com:3000/bar.html##{bookmarklet_script}')" ), 
-  		link_to_function( "Bookmark Magic", "RP.bm('Cookmark', '#{bookmarklet_script}')"), 
+  		link_to( "Refresh Masonry", "#", onclick: "RP.collection.justify();" ),
+  		link_to( "Address Bar Magic", "#", onclick: "RP.getgo('#{home_path}', 'http://local.recipepower.com:3000/bar.html##{bookmarklet_script}')" ), 
+  		link_to( "Bookmark Magic", "#", onclick: "RP.bm('Cookmark', '#{bookmarklet_script}')"), 
   		link_to_modal( "Need to Know", popup_path(name: "need_to_know"))
   	] if permitted_to? :admin, :pages
   

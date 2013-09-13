@@ -134,14 +134,17 @@ end
   # Declare a div for triggering a recipe edit operation
   def recipe_edit_trigger
     if capture_data = deferred_capture(false)
-      content_tag :a, "",
-        href: capture_recipes_url(capture_data),
-        class: "trigger"
+      debugger
+=begin
+      link_to_modal "", capture_recipes_url(capture_data), class: "trigger"
+=end
+      link_to( "", "", onclick: %Q{RP.dialog.get_and_go(event, '#{capture_recipes_url(capture_data)}', '')},
+        class: "trigger")
     end
   end
 
 =begin
-  # Declare a div for triggering a recipe edit operation
+  # Declare a div for triggering a recipe capture operation
   def recipe_collect_trigger
     if collect_data = deferred_collect(false)
       content_tag :a, "",

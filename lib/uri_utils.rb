@@ -105,12 +105,11 @@ def page_piclist(url)
 end
 
 # Ensure that a hash of query parameters makes it into the given url
-def assert_query url, queryparams
+def assert_query url, newparams={}
+  return url if newparams.empty?
   uri = URI(url)
-  oldquery = uri.query
-  newquery = queryparams.collect { |k, v|
-    "#{k.to_s}=#{v.to_s}" unless v.empty?
-  }.compact.join('&')
-  uri.query = (oldquery.blank? ? newquery : (oldquery+"&"+newquery)) unless newquery.blank?
+  qparams = uri.query.blank? ? { } : CGI::parse(uri.query)
+	newparams.each { |k, v| qparams[k] = [ v ] } # Assert the new params, poss. over the old
+  uri.query = qparams.collect { |k, v| "#{k.to_s}=#{CGI::escape v[0]}" unless v.empty? }.compact.join('&')
   uri.to_s
 end
