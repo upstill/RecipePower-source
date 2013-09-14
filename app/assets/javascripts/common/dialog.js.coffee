@@ -14,7 +14,6 @@ RP.dialog.arm_links = (dlog) ->
 
 # Before making a dialog request, see if the dialog is preloaded
 RP.dialog.beforeSend = (event, xhr, settings) ->
-	debugger
 	selector = $(this).data 'selector'
 	odlog = target_modal event
 	if selector && (ndlog = $(selector)[0]) # If dialog already loaded, replace the responding dialog
@@ -22,16 +21,14 @@ RP.dialog.beforeSend = (event, xhr, settings) ->
 		return false;
 	else
 		return true;
-	
+
 # Success handler for fetching dialog from server
 RP.dialog.success = (event, responseData, status, xhr) ->
-	debugger
 	responseData.how = responseData.how || "modal"
 	RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
 	RP.process_response responseData, target_modal(event)
 	
 RP.dialog.error = (event, jqXHR, status, error) ->
-	debugger
 	responseData = RP.post_error jqXHR
 	odlog = target_modal event
 	RP.process_response responseData, odlog
@@ -41,7 +38,6 @@ RP.dialog.error = (event, jqXHR, status, error) ->
 # We will get the div and run the associated dialog.
 RP.dialog.get_and_go = (event, request, selector) ->
 	# old_dlog is extracted from what triggered this call (if any)
-	debugger
 	if event
 		odlog = target_modal(event)
 	else
@@ -136,7 +132,6 @@ target_modal = (event) ->
 		return odlog
 
 open_modal = (dlog, omit_button) ->
-	debugger
 	if (onget = $(dlog).data "onget" ) && (fcn = RP.named_function "RP."+onget.shift() )
 		fcn.apply null, onget
 	$(dlog).removeClass('modal-pending').removeClass('hide').addClass('modal')

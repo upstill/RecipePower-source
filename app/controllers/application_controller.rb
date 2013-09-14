@@ -220,12 +220,10 @@ class ApplicationController < ActionController::Base
   # end
   
   def defer_collect(rid, uid)
-    debugger
     session[:collect_data] = { id: rid, uid: uid }
   end
   
   def deferred_collect(delete=false)
-    debugger
     if data = session[:collect_data]
       session.delete(:collect_data) if delete
     end
@@ -235,7 +233,6 @@ class ApplicationController < ActionController::Base
   # In the event that a recipe capture is deferred by login, this stores the requisite information
   # in the session for retrieval after login
   def defer_capture data
-    debugger
     if data
       session[:capture_data] = data.clone
     else
@@ -244,7 +241,6 @@ class ApplicationController < ActionController::Base
   end
   
   def deferred_capture forget=false
-    debugger
     if cd = session[:capture_data]
       session.delete(:capture_data) if forget
       cd

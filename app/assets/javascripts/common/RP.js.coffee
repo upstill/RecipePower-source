@@ -92,10 +92,9 @@ RP.fire_triggers = ->
 	if dlog = $('div.dialog.trigger')[0]
 		RP.dialog.run dlog
 	else if (elmt = $("a.trigger")[0])
+		$(elmt).trigger "click"
 		debugger
-		elmt.click()
-		# RP.dialog.get_and_go null, elmt.href
-		$(elmt).remove()
+		$(elmt).removeClass("trigger")
 
 # For the FAQ page: click on a question to show the associated answer
 RP.showhide = (event) ->
