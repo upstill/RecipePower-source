@@ -38,25 +38,7 @@ RP.dialog.error = (event, jqXHR, status, error) ->
 # We will get the div and run the associated dialog.
 RP.dialog.get_and_go = (event, request, selector) ->
 	# old_dlog is extracted from what triggered this call (if any)
-	if event
-		odlog = target_modal(event)
-	else
-		odlog = null
-	if selector && (ndlog = $(selector)[0]) # If dialog already loaded, replace the responding dialog
-		RP.dialog.replace_modal ndlog, odlog
-	else
-		# Ensure that the request has :area and :how query parameters
-		how = "modal"
-		area = "floating"
-		if request.match /\?/
-			q = '&'
-		else
-			q = '?'
-		if !request.match /area=/
-			request += q+"area=" + area
-			q = '&'
-		if !request.match /how=/
-			request += q+"how=" + how
+	if RP.dialog.beforeSend event
 		$.ajax
 			type: "GET",
 			dataType: "json",
