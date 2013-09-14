@@ -162,14 +162,13 @@ module ApplicationHelper
       page_fitPic( picurl, id, "NoPictureOnFile.png", "div.preview img" ),
       class: "preview" )+
     content_tag( :div, prompt, class: "prompt" )+
-    %Q{
-        <br class="clear"> 
+    ( %Q{<br class="clear"> 
         <input type="text" class="icon_picker" 
-          rel="jpg,png,gif" 
-          value="#{picurl}" />
-        #{link_to_function "Preview", "previewImg('input.icon_picker', 'div.preview img', '')" }
-        #{tblstr}       
-    }.html_safe      
+        rel="jpg,png,gif" 
+        value="#{picurl}" />&nbsp;}+
+      link_to("Preview", "#", class: "image_preview_button" )+
+      tblstr      
+    ).html_safe      
   end
   
   def recipe_list_element_golink_class recipe
@@ -312,7 +311,7 @@ module ApplicationHelper
   
   def question_section q, &block
     (
-      content_tag(:h4, link_to_function(q, "RP.showhide(event);"))+
+      content_tag(:h4, link_to(q, "#", class: "question_section"))+
       content_tag(:div, with_output_buffer(&block), class: "answer hide")
     ).html_safe
   end

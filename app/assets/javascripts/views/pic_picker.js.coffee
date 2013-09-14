@@ -31,6 +31,8 @@ RP.pic_picker.open = (ttl) ->
 					previewImg("input.icon_picker", datavals[1], "input#"+datavals[0]);
 					$(this).dialog('close');
 					# Copy the image to the window's thumbnail
+		$('a.image_preview_button').click ->
+			previewImg('input.icon_picker', 'div.preview img', '')
 		return true
 	else
 		return false

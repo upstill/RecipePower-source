@@ -8,9 +8,10 @@ jQuery ->
 	$(document).on("ajax:error", '.dialog-run', RP.dialog.error )
 
 RP.dialog.arm_links = (dlog) ->
-	dlog ||= window
+	dlog ||= window.document
 	$('input.cancel', dlog).click RP.dialog.cancel
 	$('a.dialog-cancel-button', dlog).click RP.dialog.cancel
+	$('a.question_section', dlog).click RP.showhide
 
 # Before making a dialog request, see if the dialog is preloaded
 RP.dialog.beforeSend = (event, xhr, settings) ->
