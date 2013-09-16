@@ -4,6 +4,12 @@ ruby '1.9.3'
 gem 'rails', '4.0.0' # '3.2.11' #
 gem 'rails4_upgrade'
 
+# add these gems to help with the transition:
+gem 'protected_attributes'
+gem 'rails-observers'
+gem 'actionpack-page_caching'
+gem 'actionpack-action_caching'
+
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
 
@@ -29,7 +35,9 @@ gem 'ruby_parser'
 gem "rmagick", "2.12.0", :require => 'RMagick'
 gem "feedzirra"
 gem "simple_form", :git => 'git://github.com/plataformatec/simple_form.git'
-gem 'delayed_job_active_record'
+gem 'delayed_job', git: 'git://github.com/collectiveidea/delayed_job.git'
+gem 'delayed_job_active_record', git: 'git://github.com/collectiveidea/delayed_job_active_record.git'
+# gem 'delayed_job_active_record'
 gem 'hirefire-resource'
 gem 'rspec-rails', :group => [:test, :development]
 gem 'debugger', :group => [:test, :development]
@@ -68,12 +76,6 @@ gem 'sass-rails', " ~> 4.0.0.rc1"
 gem 'bootstrap-sass', '~> 2.2.2.0'
 
 gem 'jquery-rails'
-
-# add these gems to help with the transition:
-gem 'protected_attributes'
-gem 'rails-observers'
-gem 'actionpack-page_caching'
-gem 'actionpack-action_caching'
 
 # Use unicorn as the web server
 # gem 'unicorn'

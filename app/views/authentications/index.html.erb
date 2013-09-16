@@ -1,4 +1,4 @@
-<%= modal_dialog :edit_authentications, "Sign-in Services", area: @area do %>
+<%= modal_dialog :edit_authentications, "Sign-in Services", area: @area, requires: %w{submit} do %>
   <div class="auth_signin <%= @area %>" >
     <%= render partial: 'shared/authentications_current' %>
     <%= render partial: 'shared/authentications_possible' %>

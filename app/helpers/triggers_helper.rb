@@ -29,9 +29,13 @@ module TriggersHelper
   	link_to label, path, options
   end
 	
-	# Embed a link to javascript for running a dialog by reference to a URL
+	# Hit a URL, with options for confirmation (:confirm-msg) and waiting (:wait-msg)
 	def link_to_submit(label, path, options={})
-  	link_to_function label, "RP.submit(event, '#{path}');", options
+	  options[:remote] = true
+  	options[:class] = "talky-submit "+(options[:class] || "")
+  	options[:data] = { :method => options[:method] } if options[:method]
+	  button_to label, path, options
+  	# link_to_function label, "RP.submit(event, '#{path}');", options
   end
   
   def link_to_redirect(label, url, options={} )
@@ -39,19 +43,14 @@ module TriggersHelper
   	link_to label, "#", options.merge( id: "link_to_redirect", "data-url" => url )
   end
   
-  def button_to_update(label, url, mod_time, options={} )
+  def button_to_update(label, url, mod_time, data={} )
     # Play nice with data fields in the link: homegrown data attributes prefaced with "data-"
-    options[:last_modified] = mod_time || Time.now.httpdate # Default for updating
-    options[:refresh] = true # Default for updating
+    data[:last_modified] = mod_time || Time.now.httpdate # Default for updating
+    data[:refresh] = true # Default for updating
+	  data[:url] = assert_query url, mod_time: mod_time.to_s
+    options = data.slice! :url, :last_modified, :hold_msg, :msg_selector, :dataType, :type, :refresh, :contents_selector
 	  options[:class] = "btn btn-mini update-button"
-    data = {}
-    url += "?mod_time="+mod_time.to_s
-    data_options = %w{ last_modified hold_msg msg_selector dataType type refresh contents_selector }
-    options.each do |key, val| 
-      key = key.to_s
-      key = "data-"+key if data_options.include? key
-      data[key] = val 
-    end
-    link_to_function label, "RP.get_content('#{url}', 'a.update-button');", data
+	  options[:data] = data
+    link_to label, "#", options
   end
 end

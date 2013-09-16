@@ -7,11 +7,16 @@ jQuery ->
 	$(document).on("ajax:success", '.dialog-run', RP.dialog.success )
 	$(document).on("ajax:error", '.dialog-run', RP.dialog.error )
 
+# Set up all ujs for the dialog and its requirements
 RP.dialog.arm_links = (dlog) ->
 	dlog ||= window.document
 	$('input.cancel', dlog).click RP.dialog.cancel
 	$('a.dialog-cancel-button', dlog).click RP.dialog.cancel
 	$('a.question_section', dlog).click RP.showhide
+	if requires = $(dlog).data 'dialog-requires'
+		for requirement in requires
+			if fcn = RP.named_function "RP."+requirement+".bind" 
+				fcn.apply()
 
 # Before making a dialog request, see if the dialog is preloaded
 RP.dialog.beforeSend = (event, xhr, settings) ->
@@ -129,7 +134,7 @@ open_modal = (dlog, omit_button) ->
 	# Set text focus as appropriate
 	if (focus_sel = $(dlog).data("focus")) && (focus_elmt = $(focus_sel, dlog)[0])
 		focus_elmt.focus()
-	RP.dialog.arm_links()
+	RP.dialog.arm_links dlog
 	dlog
 
 # Remove the dialog and notify its handler prior to removing the element
@@ -166,6 +171,10 @@ filter_submit = (eventdata) ->
 		RP.process_response shortcircuit
 	else
 		# Okay to submit
+		if (confirm_msg = $(clicked).data 'confirm-msg') && !confirm(confirm_msg)
+			return false
+		if wait_msg = $(clicked).data('wait-msg')
+			RP.notifications.wait wait_msg
 		# To sort out errors from subsequent dialogs, we submit the form synchronously
 		#  and use the result to determine whether to do normal forms processing.
 		method = $(clicked).data("method") || $('input[name=_method]', this).attr "value"
@@ -175,10 +184,12 @@ filter_submit = (eventdata) ->
 			async: false,
 			dataType: 'json',
 			error: (jqXHR, textStatus, errorThrown) ->
+				RP.notifications.done()
 				jsonout = RP.post_error jqXHR, dlog # Show the error message in the dialog
 				eventdata.preventDefault()
 				return !RP.process_response jsonout, dlog
 			success: (responseData, statusText, xhr, form) ->
+				RP.notifications.done()
 				RP.post_success responseData, dlog, form
 				eventdata.preventDefault()
 				sorted = RP.process_response responseData, dlog

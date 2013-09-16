@@ -61,7 +61,9 @@ module DialogsHelper
         ("modal-pending fade" if for_bootstrap && !options[:show]), 
         options[:class] 
       ].compact.join(' ')
-    [:area, :show, :noflash, :modal, :body_contents].each { |k| options.delete k }
+    # The :requires option specifies JS modules that this dialog uses
+    options[:data] = { :"dialog-requires" => options[:requires] } if options[:requires]
+    options = options.slice! :area, :show, :noflash, :modal, :body_contents, :requires
     # options[:id] = "recipePowerDialog"
     options[:title] = ttl if ttl
     content_tag(:div, header+body, options).html_safe

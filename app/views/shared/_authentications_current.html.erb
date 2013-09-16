@@ -10,7 +10,8 @@
 					<% if @auth_delete || true %>
 						<%= link_to_submit "X", authentication_url(authentication), 
 															:method => :delete, 
-															:"data-wait_msg" => "Hang on while we check with "+authentication.provider_name,
+															:"data-confirm-msg" => "Yes, disconnect from '"+authentication.provider_name+"'?",
+															:"data-wait-msg" => "Hang on while we check with "+authentication.provider_name,
 															:class => "remove" %>
 					<% end %>
 				</div>

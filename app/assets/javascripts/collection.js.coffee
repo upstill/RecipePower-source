@@ -30,6 +30,7 @@
 #= require common/dialog
 #= require common/pics
 #= require common/RP
+#= require common/submit
 #= require common/notifications
 # require common/RPDialog
 # require common/RPDialogs
@@ -74,7 +75,10 @@ jQuery ->
 
 	if (elmt = $("div.browser_house")[0]) && (navlinks = $('div#footer_nav_links')[0])
 	 	elmt.style.bottom = (navlinks.offsetHeight + 5).toString() + "px";
-	
+
+	$('a.update-button').click ->
+		if url = $(this).data("url")
+			RP.get_content url, 'a.update-button'
 	collection_onload()
 	RP.fire_triggers()
 
