@@ -1,7 +1,7 @@
 require './lib/controller_utils.rb'
 
 class RecipesController < ApplicationController
-  after_action :allow_iframe, only: :capture
+  after_filter :allow_iframe, only: :capture
 
   before_filter :login_required, :except => [:index, :show, :capture, :collect ]
   before_filter { @focus_selector = "#recipe_url" }

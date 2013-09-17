@@ -10,7 +10,7 @@ RP::Application.configure do
   config.log_level = :debug
 
   # Log error messages when you accidentally call methods on nil.
-  # Obsolete in Rails 4: config.whiny_nils = true
+  config.whiny_nils = true # Obsolete in Rails 4: 
 
   # Show full error reports and disable caching
   config.consider_all_requests_local       = true
@@ -25,7 +25,8 @@ RP::Application.configure do
 
   # Expands the lines which load the assets
   config.assets.debug = true
-  
+  config.assets.compress = false
+    
   # Don't fallback to assets pipeline if a precompiled asset is missed
   # config.assets.compile = true
   # config.assets.digest = true
@@ -41,5 +42,5 @@ RP::Application.configure do
 
   config.action_mailer.delivery_method = :letter_opener # :smtp
 
-  config.eager_load = false
+  # Added for Rails 4: config.eager_load = false
 end

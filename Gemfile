@@ -1,14 +1,14 @@
 source 'http://rubygems.org'
 
 ruby '1.9.3'
-gem 'rails', '4.0.0' # '3.2.11' #
-gem 'rails4_upgrade'
+gem 'rails', '3.2.11' # '4.0.0' #
+# gem 'rails4_upgrade'
 
 # add these gems to help with the transition:
-gem 'protected_attributes'
-gem 'rails-observers'
-gem 'actionpack-page_caching'
-gem 'actionpack-action_caching'
+# gem 'protected_attributes'
+# gem 'rails-observers'
+# gem 'actionpack-page_caching'
+# gem 'actionpack-action_caching'
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
@@ -34,10 +34,9 @@ gem 'eventmachine', '1.0.0.rc.4'
 gem 'ruby_parser'
 gem "rmagick", "2.12.0", :require => 'RMagick'
 gem "feedzirra"
-gem "simple_form", :git => 'git://github.com/plataformatec/simple_form.git'
-gem 'delayed_job', git: 'git://github.com/collectiveidea/delayed_job.git'
-gem 'delayed_job_active_record', git: 'git://github.com/collectiveidea/delayed_job_active_record.git'
-# gem 'delayed_job_active_record'
+gem "simple_form" # , :git => 'git://github.com/plataformatec/simple_form.git'
+gem 'delayed_job' # , git: 'git://github.com/collectiveidea/delayed_job.git'
+gem 'delayed_job_active_record' # , git: 'git://github.com/collectiveidea/delayed_job_active_record.git'
 gem 'hirefire-resource'
 gem 'rspec-rails', :group => [:test, :development]
 gem 'debugger', :group => [:test, :development]
@@ -69,11 +68,11 @@ end
 
 # Gems used only for assets and not required
 # in production environments by default.
-gem 'coffee-rails', "~> 4.0.0"
+gem 'coffee-rails' # , "~> 4.0.0"
 gem 'uglifier', '>= 1.3.0'
-gem 'compass-rails'
-gem 'sass-rails', " ~> 4.0.0.rc1"
-gem 'bootstrap-sass', '~> 2.2.2.0'
+# gem 'compass-rails'
+gem 'sass-rails' # , " ~> 4.0.0.rc1"
+gem 'bootstrap-sass' # , '~> 2.2.2.0'
 
 gem 'jquery-rails'
 
