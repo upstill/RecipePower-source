@@ -109,13 +109,18 @@ RP::Application.routes.draw do
   #resources :sessions
   #resources :users
 
-  match 'tags/editor', :controller=>'tags', :action=>'editor', :via => :get
-  match 'tags/list', :controller=>'tags', :action=>'list', :via => :get
-  get 'tags/typify', :controller=>'tags', :action=>'typify'
-  get 'tags/match', :controller=>'tags', :action=>'match'
-  get 'tags/:id/absorb', :controller=>'tags', :action=>'absorb'
-  get 'tags/query', :controller=>'tags', :action=>'query', :via => :post
-  resources :tags
+  resources :tags do 
+    member do
+      get 'absorb'
+    end
+    collection do
+      post 'query'
+      get 'editor'
+      get 'list'
+      get 'typify'
+      get 'match'
+    end
+  end
 
   resources :ratings
 
