@@ -212,9 +212,10 @@ public
 
   # Set the mod time of the recipe to now (so it sorts properly in Recent lists)
   # If a uid is provided, touch the associated rcpref instead
-  def touch add_to_collection = true
+  def touch add_to_collection = true, user = nil
+    user ||= @current_user
     # Fetch the reference for this user, creating it if necessary
-    ref = ref_for(@current_user, true) # Make if necessary
+    ref = ref_for(user, true) # Make if necessary
     if do_save = (add_to_collection && !ref.in_collection) # Collecting for the first time
       ref.in_collection = true
       do_stamp = ref.created_at && ((Time.now - ref.created_at) > 5) # It's been saved before => update created_at time

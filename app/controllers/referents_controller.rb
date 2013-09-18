@@ -81,7 +81,6 @@ class ReferentsController < ApplicationController
   # POST /referents?tagid=1&mode={over,before,after}&target=referentid
   # POST /referents.json?tagid=1&mode={over,before,after}&target=referentid
   def create
-    debugger
     if params[:tabindex] # Obsolete: coming from the old tag-organizing page
         @tabindex = params[:tabindex].to_i || 0
         handlerclass = @@HandlersByIndex[@tabindex]
