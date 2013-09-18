@@ -1,48 +1,11 @@
-/*
- * This is a manifest file that'll automatically include all the stylesheets available in this directory
- * and any sub-directories. You're free to add application-wide styles to this file and they'll appear at
- * the top of the compiled file, but it's generally better to create a new file per style scope.
-
-// Place all the styles related to the collection controller here.
-// They will automatically be included in application.css.
-// You can use Sass (SCSS) here: http://sass-lang.com/
- >>>>>>> collection
- >>>>>>> RPGlobal.css
- >>>>> scaffolds.css 
- >>>>>>>> common/dialogs
- >>>>>>>>>>>> views/rcp_list
- >>>>>>>>>> views/edit_recipe 
- >>>>>>>>>> common/buttons
- >>>>>>>>> paginate (vendor)
- >>>>>>>>>>> jquery/jNotify.jquery.css
- >>>>>>>>>>>>>> jquery/jquery-ui-1.8.17.custom.css
- >>>>>>>>>>>>>> jquery/token-input-facebook.css
- >>>>>>>>>>>>>> feedback (vendor)
- *= require bootstrap_and_overrides
- *= require_self
- *  require_tree blueprint
- * require common/RPGlobal
- * require common/scaffolds
- *= require_tree ./views
- *  require views/authentication
- *  require views/edit_recipe
- *  require views/edit_site
- *  require views/need_to_know
- *  require views/new_recipe
- *  require views/new_feed
- *  require views/pic_picker
- *  require views/rcp_list
- *  require views/sign_in
- *  require views/user_id
- *  require views/users
- *  require views/welcome
-
- *= require common/buttons
- *= require paginate
- *= require_tree ../../../vendor/assets/stylesheets/jquery
- *= require feedback
-
-*/
+@import 'bootstrap_and_overrides';
+@import 'views/*';
+@import 'common/buttons';
+@import 'paginate';
+@import "jquery/jNotify.jquery";
+@import 'jquery/jquery-ui-1.8.17.custom';
+@import 'jquery/token-input-bootstrappy';
+@import 'feedback';
 
 div.centerblock {
 	position: relative;
