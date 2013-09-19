@@ -1,0 +1,6 @@
+<widget xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0" id="com.jonathanstark.jqm-test" versionCode="1" version="0.0.1">
+<name>jQM Test App</name>
+<description>Carb tracker for gestational diabetes.</description>
+<author href="http://jonathanstark.com" email="jqm-test@jonathanstark.com">Jonathan Stark</author>
+<preference name="permissions" value="none"/>
+</widget>
