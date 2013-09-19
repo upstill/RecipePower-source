@@ -19,9 +19,9 @@ def recipe_image_div(recipe, div_class="recipe_image_div")
     end
     content = 
       "Error rendering image #{url.truncate(255)} from "+ (recipe ? "recipe #{recipe.id}: '#{recipe.title}'" : "null recipe")
-    ExceptionNotifier::Notifier.exception_notification(request.env, e, data: { message: content}).deliver
+    ExceptionNotification::Notifier.exception_notification(request.env, e, data: { message: content}).deliver
   end
-  content_tag( :div, content, class: div_class )
+  link_to content_tag( :div, content, class: div_class ), recipe.url
 end
   
 def grab_recipe_link label, recipe

@@ -10,7 +10,7 @@ RP::Application.configure do
   config.log_level = :debug
 
   # Log error messages when you accidentally call methods on nil.
-  config.whiny_nils = true # Obsolete in Rails 4: 
+  # Obsolete in Rails 4: config.whiny_nils = true 
 
   # Show full error reports and disable caching
   config.consider_all_requests_local       = true
@@ -34,13 +34,20 @@ RP::Application.configure do
 
   # Precompile additional assets (application.js, application.css, and all non-JS/CSS are already added)
   config.assets.precompile += %w( collection.css collection.js injector.css injector.js )
-  
-  config.middleware.use ExceptionNotifier,
+  config.middleware.use ExceptionNotification::Rack,
+    :email => {
+      :email_prefix => "[RecipePower Failure!!] ",
+      :sender_address => %{"notifier" <notifier@recipepower.com>},
+      :exception_recipients => %w{recipepowerfeedback@gmail.com}
+    }  
+=begin
+  config.middleware.use ExceptionNotification,
     :email_prefix => "[RecipePower Failure!!] ",
     :sender_address => %{"notifier" <notifier@recipepower.com>},
     :exception_recipients => %w{recipepowerfeedback@gmail.com}
+=end
 
   config.action_mailer.delivery_method = :letter_opener # :smtp
 
-  # Added for Rails 4: config.eager_load = false
+  config.eager_load = false # Added for Rails 4: 
 end

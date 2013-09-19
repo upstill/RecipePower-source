@@ -12,7 +12,7 @@ RP::Application.configure do
   config.static_cache_control = "public, max-age=3600"
 
   # Log error messages when you accidentally call methods on nil
-  config.whiny_nils = true
+  # Removed for Rails 4: config.whiny_nils = true
 
   # Show full error reports and disable caching
   config.consider_all_requests_local       = true
@@ -40,5 +40,5 @@ RP::Application.configure do
   # Allow pass debug_assets=true as a query parameter to load pages with unpackaged assets
   config.assets.allow_debugging = true
   
-  config.eager_load = false
+  config.eager_load = false # New in Rails 4: 
 end
