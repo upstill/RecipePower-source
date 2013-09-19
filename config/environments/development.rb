@@ -25,7 +25,7 @@ RP::Application.configure do
 
   # Expands the lines which load the assets
   config.assets.debug = true
-  config.assets.compress = false
+  # Removed for Rails 4: config.assets.compress = false
     
   # Don't fallback to assets pipeline if a precompiled asset is missed
   # config.assets.compile = true
