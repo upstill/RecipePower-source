@@ -7,7 +7,7 @@
 
   jQuery(function() {
     var elmt, navlinks;
-    $("#tagstxt").tokenInput("/tags/match.json", {
+    $("#tagstxt").tokenInput("http://www.recipepower.com/tags/match.json", {
       crossDomain: false,
       hintText: "",
       noResultsText: "No matching tag found; hit Enter to search with text",
@@ -9295,7 +9295,7 @@ function previewImg(inputsel, imagesel, formsel) {
     dlog = me();
     RP.tagger.onload(tagger_selector);
     tagtype = $('#referent_parent_tokens').data("type");
-    querystr = "/tags/match.json?tagtype=" + tagtype;
+    querystr = "http://www.recipepower.com/tags/match.json?tagtype=" + tagtype;
     $("#referent_parent_tokens").tokenInput(querystr, {
       crossDomain: false,
       noResultsText: "No existing tag found; hit Enter to make a new tag",
@@ -9379,7 +9379,7 @@ function previewImg(inputsel, imagesel, formsel) {
 
   RP.new_channel.onload = function(dlog) {
     dlog = me();
-    $("#referent_tag_token").tokenInput("/tags/match.json?tagtype=0", {
+    $("#referent_tag_token").tokenInput("http://www.recipepower.com/tags/match.json?tagtype=0", {
       crossDomain: false,
       noResultsText: "No matching tag found; hit Enter to make it a tag",
       hintText: "Name the channel",
@@ -9392,14 +9392,14 @@ function previewImg(inputsel, imagesel, formsel) {
     return $('input#referent_dependent').change(function(evt) {
       if ($("#referent_dependent")[0].checked) {
         return $("#referent_tag_token").tokenInput("setOptions", {
-          url: "/tags/match.json?tagtypes=1,2,3,4,6,7,8,12,14",
+          url: "http://www.recipepower.com/tags/match.json?tagtypes=1,2,3,4,6,7,8,12,14",
           noResultsText: "No existing tag found to use as channel",
           hintText: "Type an existing tag for the channel to track",
           allowFreeTagging: false
         });
       } else {
         return $("#referent_tag_token").tokenInput("setOptions", {
-          url: "/tags/match.json?tagtype=0",
+          url: "http://www.recipepower.com/tags/match.json?tagtype=0",
           noResultsText: "Hit Enter to make a channel with a new name",
           hintText: "Type a tag naming the channel",
           allowFreeTagging: true
@@ -9569,7 +9569,7 @@ function previewImg(inputsel, imagesel, formsel) {
     return $(selector).each(function() {
       var data, request;
       data = $(this).data() || {};
-      request = data.request || "/tags/match.json";
+      request = data.request || "http://www.recipepower.com/tags/match.json";
       if (data.query) {
         request += "?" + encodeURIComponent(data.query);
       }
