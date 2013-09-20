@@ -4,10 +4,11 @@
   window.RP = window.RP || {};
 
   RP.collection = RP.collection || {};
+	RP.webhome = "http://local.recipepower.com:3000"
 
   jQuery(function() {
     var elmt, navlinks;
-    $("#tagstxt").tokenInput("http://www.recipepower.com/tags/match.json", {
+    $("#tagstxt").tokenInput(RP.webhome+"/tags/match.json", {
       crossDomain: false,
       hintText: "",
       noResultsText: "No matching tag found; hit Enter to search with text",
@@ -81,7 +82,7 @@
     collection_beforeSend();
     return jQuery.ajax({
       type: "POST",
-      url: url || "http://www.recipepower.com/collection/query",
+      url: url || RP.webhome+"/collection/query",
       data: params,
       dataType: "json",
       beforeSend: function(xhr) {
@@ -8676,7 +8677,7 @@ function previewImg(inputsel, imagesel, formsel) {
 
   RP.get_content = function(url, link) {
     var last_modified;
-    jQuery.ajax("http://www.recipepower.com/collection/update", {
+    jQuery.ajax(RP.webhome+"/collection/update", {
       type: "POST"
     });
     last_modified = $(link).data('last_modified');
@@ -9295,7 +9296,7 @@ function previewImg(inputsel, imagesel, formsel) {
     dlog = me();
     RP.tagger.onload(tagger_selector);
     tagtype = $('#referent_parent_tokens').data("type");
-    querystr = "http://www.recipepower.com/tags/match.json?tagtype=" + tagtype;
+    querystr = RP.webhome+"/tags/match.json?tagtype=" + tagtype;
     $("#referent_parent_tokens").tokenInput(querystr, {
       crossDomain: false,
       noResultsText: "No existing tag found; hit Enter to make a new tag",
@@ -9379,7 +9380,7 @@ function previewImg(inputsel, imagesel, formsel) {
 
   RP.new_channel.onload = function(dlog) {
     dlog = me();
-    $("#referent_tag_token").tokenInput("http://www.recipepower.com/tags/match.json?tagtype=0", {
+    $("#referent_tag_token").tokenInput(RP.webhome+"/tags/match.json?tagtype=0", {
       crossDomain: false,
       noResultsText: "No matching tag found; hit Enter to make it a tag",
       hintText: "Name the channel",
@@ -9392,14 +9393,14 @@ function previewImg(inputsel, imagesel, formsel) {
     return $('input#referent_dependent').change(function(evt) {
       if ($("#referent_dependent")[0].checked) {
         return $("#referent_tag_token").tokenInput("setOptions", {
-          url: "http://www.recipepower.com/tags/match.json?tagtypes=1,2,3,4,6,7,8,12,14",
+          url: RP.webhome+"/tags/match.json?tagtypes=1,2,3,4,6,7,8,12,14",
           noResultsText: "No existing tag found to use as channel",
           hintText: "Type an existing tag for the channel to track",
           allowFreeTagging: false
         });
       } else {
         return $("#referent_tag_token").tokenInput("setOptions", {
-          url: "http://www.recipepower.com/tags/match.json?tagtype=0",
+          url: RP.webhome+"/tags/match.json?tagtype=0",
           noResultsText: "Hit Enter to make a channel with a new name",
           hintText: "Type a tag naming the channel",
           allowFreeTagging: true
@@ -9569,7 +9570,7 @@ function previewImg(inputsel, imagesel, formsel) {
     return $(selector).each(function() {
       var data, request;
       data = $(this).data() || {};
-      request = data.request || "http://www.recipepower.com/tags/match.json";
+      request = data.request || RP.webhome+"/tags/match.json";
       if (data.query) {
         request += "?" + encodeURIComponent(data.query);
       }
