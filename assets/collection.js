@@ -81,7 +81,7 @@
     collection_beforeSend();
     return jQuery.ajax({
       type: "POST",
-      url: url || "/collection/query",
+      url: url || "http://www.recipepower.com/collection/query",
       data: params,
       dataType: "json",
       beforeSend: function(xhr) {
@@ -8676,7 +8676,7 @@ function previewImg(inputsel, imagesel, formsel) {
 
   RP.get_content = function(url, link) {
     var last_modified;
-    jQuery.ajax("/collection/update", {
+    jQuery.ajax("http://www.recipepower.com/collection/update", {
       type: "POST"
     });
     last_modified = $(link).data('last_modified');
