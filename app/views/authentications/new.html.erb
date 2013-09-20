@@ -11,7 +11,5 @@
 	  <%= render partial: 'signin_injector' %>
 	<% end %>
 <% else %>
-	<%= modal_dialog :sign_in, "Sign In Please", area: @area, modal: (@area != "page") && (@area != "at_top") do %>
-		<%= render partial: 'shared/authentications_signup_or_signin' %>
-	<% end %>
+	<%= render "signin_dialog" %>
 <% end %>

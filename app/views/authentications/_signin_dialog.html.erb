@@ -1,0 +1,6 @@
+<%= modal_dialog :sign_in, 
+	"Sign In Please", 
+	area: @area, 
+	modal: (@area != "page") && (@area != "at_top") do %>
+	<%= render partial: 'shared/authentications_signup_or_signin' %>
+<% end %>
