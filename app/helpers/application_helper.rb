@@ -295,7 +295,7 @@ module ApplicationHelper
   	navlinks << link_to_modal("About", popup_path(name: "pages/about")) 
   	navlinks << link_to_modal("Contact", popup_path(name: "pages/contact")) 
   	navlinks << link_to("Home", home_path, class: "nav_link") 
-  	navlinks << link_to_modal("FAQ", popup_path(name: "pages/faq")) 
+  	navlinks << link_to_modal("FAQ", popup_path(name: "pages/faq_dialog")) 
   	infolinks = 
   	  [ 
   	    link_to_modal("Need to Know", popup_path(name: "pages/need_to_know")),
