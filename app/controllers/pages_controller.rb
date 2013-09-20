@@ -34,6 +34,12 @@ class PagesController < ApplicationController
     @Title = "FAQ"
   end
   
+  # Serve mobile page using the jqm layout
+  def mobi
+    @area = "mobile"
+    render layout: "jqm"
+  end
+  
   def popup
     respond_with do |format|
       format.json { 
