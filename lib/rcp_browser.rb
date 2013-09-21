@@ -508,11 +508,11 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
   def hints 
 =begin
     bb = link_to 'Cookmark Button', 
-            '/popup?name=pages%2Fstarting_step2&area=floating&how=modal', 
+            '/popup?name=pages%2Fstarting_step2_modal&area=floating&how=modal', 
             remote: true,
             class: "dialog-run",
             "data-type" => :JSON
-    bb = link_to_modal 'Cookmark Button', '/popup?name=pages%2Fstarting_step2&area=floating&how=modal'
+    bb = link_to_modal 'Cookmark Button', '/popup?name=pages%2Fstarting_step2_modal&area=floating&how=modal'
 =end
     "<br>How about browsing through your Friends' recipes or one of your Channels and grabbing some of those? Or click on The Big List and search through that?"+
     "<br>Or even, dare we say it, head off to the Wild World Web and cookmark some findings there? (...after installing the Cookmark Button of course...)"

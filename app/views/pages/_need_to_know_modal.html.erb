@@ -1,0 +1,6 @@
+<%= title="Everything You Need To Know About RecipePower"; title = "PS: "+title if params[:context] == "signup" %>
+<%= modal_dialog :need_to_know, title, class: "trigger" do %>
+	<%= modal_body(style: "height: 600px") do %>
+		<%= render "pages/need_to_know_content" %>
+	<% end %>
+<% end %>

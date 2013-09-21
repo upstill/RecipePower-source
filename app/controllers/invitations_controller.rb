@@ -213,7 +213,7 @@ class InvitationsController < Devise::InvitationsController
                   session.delete :invitation_token
                   set_flash_message :notice, :updated
                   sign_in(resource_name, resource)
-                  session[:flash_popup] = "pages/starting_step2"
+                  session[:flash_popup] = "pages/starting_step2_modal"
                   respond_with resource, :location => assert_query( after_accept_path_for(resource), context: "signup")
                 else
                   respond_with_navigational(resource){ dialog_boilerplate :edit }
