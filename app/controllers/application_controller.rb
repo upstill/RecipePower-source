@@ -29,8 +29,8 @@ class ApplicationController < ActionController::Base
   
   def check_flash
     logger.debug "FLASH messages extant for "+params[:controller]+"#"+params[:action]+"(check_flash):"
-    puts "    notice: "+flash[:notice] if flash[:notice]
-    puts "    error: "+flash[:error] if flash[:error]
+    logger.debug "    notice: "+flash[:notice] if flash[:notice]
+    logger.debug "    error: "+flash[:error] if flash[:error]
 		session[:on_tour] = true if params[:on_tour]
 		session[:on_tour] = false if current_user
   end
@@ -144,7 +144,9 @@ class ApplicationController < ActionController::Base
     redir = 
     if scope && (scope==:user)
       if params[:area] == "at_top" # Signing in from remote site => respond directly
-        capture_recipes_url deferred_capture(true)
+        logger.debug "stored_location_for: Getting stored location..."
+        raise "XXXX stored_location_for: Can't get deferred capture" unless dc = deferred_capture(true)
+        capture_recipes_url dc
       else
         if (nt = session[:notification_token]) && 
           (notification = Notification.where(notification_token: nt).first) && 
@@ -242,6 +244,7 @@ class ApplicationController < ActionController::Base
   
   def deferred_capture forget=false
     if cd = session[:capture_data]
+      logger.debug "deferred_capture: Deferred capture '#{cd}' is #{forget ? '' : 'not '}to be forgotten"
       session.delete(:capture_data) if forget
       cd
     end

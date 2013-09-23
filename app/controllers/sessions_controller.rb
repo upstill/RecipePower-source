@@ -35,6 +35,8 @@ class SessionsController < Devise::SessionsController
   end
   
   def sign_in_and_redirect(resource_or_scope, resource=nil)
+    logger.debug "sign_in_and_redirect: Signing in #{(resource||resource_or_scope).handle}; redirecting with..."
+    deferred_capture false
     scope = Devise::Mapping.find_scope!(resource_or_scope)
     resource ||= resource_or_scope
     sign_in(scope, resource) unless warden.user(scope) == resource
@@ -47,8 +49,10 @@ class SessionsController < Devise::SessionsController
       notice = "Well done, #{resource.handle}! You're logged in, AND you can now log in with #{omniauth.provider.capitalize}.<br>(You can make changes to this in Sign-In Services.)"
       session.delete(:omniauth)
     else
-      notice = "Welcome back, #{resource.handle}! (Logged in successfully.)"
+      notice = "Welcome back, #{resource.handle}! You are logged in to RecipePower."
     end
+    logger.debug "sign_in_and_redirect: Signed in #{resource.handle}; redirecting with..."
+    deferred_capture false
     redirect_to after_sign_in_path_for(resource_or_scope), notice: notice
   end
  
