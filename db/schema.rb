@@ -80,12 +80,12 @@ ActiveRecord::Schema.define(version: 20130923172034) do
 
   create_table "feeds", force: true do |t|
     t.text     "url"
+    t.integer  "feedtype",    default: 0
     t.string   "description"
     t.integer  "site_id"
-    t.datetime "created_at",                  null: false
-    t.datetime "updated_at",                  null: false
-    t.boolean  "approved",    default: false
-    t.integer  "feedtype",    default: 0
+    t.boolean  "approved"
+    t.datetime "created_at",              null: false
+    t.datetime "updated_at",              null: false
     t.string   "title"
   end
 
