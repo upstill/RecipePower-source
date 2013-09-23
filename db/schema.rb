@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130908060919) do
+ActiveRecord::Schema.define(version: 20130923172034) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -330,7 +330,7 @@ ActiveRecord::Schema.define(version: 20130908060919) do
     t.string   "fullname",                          default: ""
     t.string   "image",                             default: ""
     t.text     "about",                             default: ""
-    t.string   "invitation_token",       limit: 60
+    t.string   "invitation_token",       limit: 66
     t.datetime "invitation_sent_at"
     t.datetime "invitation_accepted_at"
     t.integer  "invitation_limit"
