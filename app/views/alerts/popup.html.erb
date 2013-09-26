@@ -1,4 +1,5 @@
-<% if defined?(@area) && (@area == "at_top" || @area == "injector") %>
+<%# if defined?(@_area) && (@_area == "at_top" || @_area == "injector") %>
+<% if response_service.injector?
 	<%= injector_dialog :alert, "has heard your command, and obeys.", dismiss_button: "Ack" do %>
 		<%= render "alerts/injector_popup" %>
 	<% end %>

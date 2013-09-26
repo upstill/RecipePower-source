@@ -10,6 +10,7 @@ class ApplicationController < ActionController::Base
     rescue_from OAuth::Unauthorized, :with => :timeout_error # self defined exception
     rescue_from AbstractController::ActionNotFound, :with => :no_action_error
     
+    helper_method :response_service
     helper_method :orphantagid
     helper_method :stored_location_for
     helper_method :deferred_capture
@@ -128,7 +129,11 @@ class ApplicationController < ActionController::Base
   def rescue_action_in_public
       x=2
   end
-  # alias_method :rescue_action_locally, :rescue_action_in_public    
+  # alias_method :rescue_action_locally, :rescue_action_in_public  
+  
+  def response_service
+    @response_service ||= ResponseServices.new
+  end  
   
   def orphantagid(tagid)
       "orphantag_"+tagid.to_s

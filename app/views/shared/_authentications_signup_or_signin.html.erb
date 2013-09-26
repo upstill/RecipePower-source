@@ -1,13 +1,13 @@
 <% if current_user && false %>
 	<h3>Manage Sign-in Services</h3>
 <% end %>
-  <div class="auth_signin <%= @area %>" >
+  <div class="auth_signin <%# @_area %><%= response_service.area_class %>" >
     <%= render partial: 'shared/authentications_current' %>
     <%= render partial: 'shared/authentications_possible' %>
   </div>
   <% if !current_user %>
 		<hr>
-    <div class="sign <%= @area %>" >
+    <div class="sign <%# @_area %><%= response_service.area_class %>" >
 		  <div class="prompt">Rather use a RecipePower account? <br></div>
 			<div class="signin">
 				<div class="prompt">Sign In</div>

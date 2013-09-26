@@ -1,4 +1,5 @@
-<%= modal_dialog :new_recipe, "Add a Cookmark the Hard Way", area: @area, data: { focus: "form #recipe_url" } do %>
+<%# modal_dialog :new_recipe, "Add a Cookmark the Hard Way", area: @_area, data: { focus: "form #recipe_url" } do %>
+<%= modal_dialog :new_recipe, "Add a Cookmark the Hard Way", response_service.modal_options( data: { focus: "form #recipe_url" }) do %>
 	<%= modal_body do %>
 		<div class="lesson">
 			<p class="prompt">To add a recipe to your collection by hand:</p>
