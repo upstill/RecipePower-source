@@ -51,6 +51,7 @@ module TriggersHelper
     options = data.slice! :url, :last_modified, :hold_msg, :msg_selector, :dataType, :type, :refresh, :contents_selector
 	  options[:class] = "btn btn-mini update-button"
 	  options[:data] = data
+  	options.merge! remote: true
     link_to label, "#", options
   end
 end
