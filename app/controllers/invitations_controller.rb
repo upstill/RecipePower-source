@@ -3,7 +3,7 @@ require 'string_utils.rb'
 require 'uri_utils.rb'
 
 class InvitationsController < Devise::InvitationsController
-  skip_before_filter :verify_authenticity_token
+  # skip_before_filter :verify_authenticity_token
 
   def after_invite_path_for(resource)
     collection_path
