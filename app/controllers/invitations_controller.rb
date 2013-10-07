@@ -31,10 +31,10 @@ class InvitationsController < Devise::InvitationsController
 
   # POST /resource/invitation
   def create
-    # unless current_user
-      # logger.debug "NULL CURRENT_USER in invitation/create without raising authenticity error"
+    unless current_user
+      logger.debug "NULL CURRENT_USER in invitation/create without raising authenticity error"
       raise ActionController::InvalidAuthenticityToken
-    # end
+    end
     # If dialog has no invitee_tokens, get them from email field
     params[resource_name][:invitee_tokens] = params[resource_name][:invitee_tokens] ||
       params[resource_name][:email].split(',').collect { |email| %Q{'#{email.downcase.strip}'} }.join(',')
