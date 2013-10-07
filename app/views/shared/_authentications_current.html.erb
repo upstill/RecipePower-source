@@ -1,5 +1,5 @@
 <% if @authentications && !@authentications.empty? %>
-	<div class="auth_current <%= @area %>">
+	<div class="auth_current <%# @_area %><%= response_service.area_class %>">
     <div class="authentications">
 	  	<strong class="prompt">You have authorized RecipePower to contact:</strong><br>
       <% for authentication in @authentications %>

@@ -1,5 +1,6 @@
 <%# Fields for an edit-user dialog %>
-<%= modal_dialog :step3, @Title || "Step 3: There Is No Step 3", area: @area do %>
+<%# modal_dialog :step3, @Title || "Step 3: There Is No Step 3", area: @_area do %>
+<%= modal_dialog :step3, @Title || "Step 3: There Is No Step 3", response_service.modal_options do %>
   <%= modal_body(class: "welcome_dialog") do %>
 <p class="airy">
 	That's it! You're ready to roll. Welcome to RecipePower, <%= current_user.handle %>!

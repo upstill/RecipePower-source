@@ -1,5 +1,6 @@
 <%# Fields for an edit-user dialog %>
-<%= modal_dialog :step2, (params[:context] == "signup" ? "Step 2: Install the Cookmark Button" : "Installing the 'Cookmark' Button"), area: @area, class: "trigger" do %>
+<%# modal_dialog :step2, (params[:context] == "signup" ? "Step 2: Install the Cookmark Button" : "Installing the 'Cookmark' Button"), area: @_area, class: "trigger" do %>
+<%= modal_dialog :step2, (params[:context] == "signup" ? "Step 2: Install the Cookmark Button" : "Installing the 'Cookmark' Button"), response_service.modal_options(class: "trigger") do %>
   <%= modal_body(class: "welcome_dialog") do %>
 		<%= render "pages/starting_step2_content" %>
 	<% end %>

@@ -7,11 +7,13 @@ class ApplicationController < ActionController::Base
   before_filter :check_flash
   before_filter :report_cookie_string
   before_filter :detect_notification_token
+  before_filter :setup_response_service
     helper :all
     rescue_from Timeout::Error, :with => :timeout_error # self defined exception
     rescue_from OAuth::Unauthorized, :with => :timeout_error # self defined exception
     rescue_from AbstractController::ActionNotFound, :with => :no_action_error
     
+    helper_method :response_service
     helper_method :orphantagid
     helper_method :stored_location_for
     helper_method :deferred_capture
@@ -149,7 +151,17 @@ class ApplicationController < ActionController::Base
   def rescue_action_in_public
       x=2
   end
-  # alias_method :rescue_action_locally, :rescue_action_in_public    
+  # alias_method :rescue_action_locally, :rescue_action_in_public  
+  
+  def setup_response_service
+    @response_service ||= ResponseServices.new
+    # Mobile is sticky: it stays on for the session once the "mobile" area parameter appears
+    @response_service.is_mobile if (@area == "mobile")
+  end
+  
+  def response_service
+    @response_service ||= ResponseServices.new
+  end  
   
   def orphantagid(tagid)
       "orphantag_"+tagid.to_s

@@ -1,4 +1,4 @@
-<div class="auth_poss <%= @area %>">
+<div class="auth_poss <%# @area %><%= response_service.area_class %>">
   <% if @auth_context == :manage %>
     <% if current_user %>
       <strong class="prompt"><%= @authentications.empty? ? "Click on a service you'd like" : "Add another service" %> to sign in with:</strong><br>
