@@ -43,15 +43,16 @@ class ApplicationController < ActionController::Base
       cs.split('; ').each { |str| 
         logger.debug "\t"+str
         if m = str.match( /_rp_session=(.*)$/ )
-          if sess = Rack::Session::Cookie::Base64::Marshal.new.decode(m[1])
-            logger.debug "\t\t(decoded): "+sess.pretty_inspect
-          elsif cook = env["action_dispatch.request.unsigned_session_cookie"]
-            logger.debug "\t\t(from env): "+cook.pretty_inspect
-          else
-            logger.debug "\t\t= NIL"
-          end
+          sess = Rack::Session::Cookie::Base64::Marshal.new.decode(m[1])
+          logger.debug "\t\t"+sess.pretty_inspect
         end
       }
+    end
+    logger.debug "SESSION STORE:"
+    if cook = env["action_dispatch.request.unsigned_session_cookie"]
+      logger.debug "\t\t"+cook.pretty_inspect
+    else
+      logger.debug "\t\t= NIL"
     end
   end
   
