@@ -38,21 +38,21 @@ class ApplicationController < ActionController::Base
   end
   
   def report_cookie_string
-    logger.debug "COOKIE_STRING:"
+    logger.info "COOKIE_STRING:"
     if cs = request.env["rack.request.cookie_string"]
       cs.split('; ').each { |str| 
-        logger.debug "\t"+str
+        logger.info "\t"+str
         if m = str.match( /_rp_session=(.*)$/ )
           sess = Rack::Session::Cookie::Base64::Marshal.new.decode(m[1])
-          logger.debug "\t\t"+sess.pretty_inspect
+          logger.info "\t\t"+sess.pretty_inspect
         end
       }
     end
-    logger.debug "SESSION STORE:"
+    logger.info "SESSION STORE:"
     if cook = env["action_dispatch.request.unsigned_session_cookie"]
-      logger.debug "\t\t"+cook.pretty_inspect
+      logger.info "\t\t"+cook.pretty_inspect
     else
-      logger.debug "\t\t= NIL"
+      logger.info "\t\t= NIL"
     end
   end
   
