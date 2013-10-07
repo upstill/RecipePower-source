@@ -7,6 +7,7 @@ class ApplicationController < ActionController::Base
   before_filter :check_flash
   before_filter :report_cookie_string
   before_filter :detect_notification_token
+  before_filter :setup_response_service
     helper :all
     rescue_from Timeout::Error, :with => :timeout_error # self defined exception
     rescue_from OAuth::Unauthorized, :with => :timeout_error # self defined exception
@@ -151,6 +152,12 @@ class ApplicationController < ActionController::Base
       x=2
   end
   # alias_method :rescue_action_locally, :rescue_action_in_public  
+  
+  def setup_response_service
+    @response_service ||= ResponseServices.new
+    # Mobile is sticky: it stays on for the session once the "mobile" area parameter appears
+    @response_service.is_mobile if (@area == "mobile")
+  end
   
   def response_service
     @response_service ||= ResponseServices.new

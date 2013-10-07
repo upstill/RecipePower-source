@@ -17,12 +17,27 @@ class ResponseServices
     @how = params[:how]
   end
   
+  # Returns true if we're in the context of a foreign page
   def injector?
     defined?(@area) && (@area == "at_top" || @area == "injector")
   end
   
+  # True if we are to render a whole page
   def page?
     @area == "page"
+  end
+  
+  def is_mobile(on=true)
+    if on
+      session[:mobile] = true
+    else
+      session.delete :mobile
+    end
+  end
+  
+  # True if we're targetting mobile
+  def mobile?
+    session[:mobile] && true
   end
   
   # Return relevant options for modal dialog

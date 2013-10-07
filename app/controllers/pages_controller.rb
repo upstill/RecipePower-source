@@ -16,6 +16,7 @@ class PagesController < ApplicationController
   end
   
   def home
+    @response_service.is_mobile false
     # session.delete :on_tour # Tour's over!
     @Title = "Home"
     @auth_context = :manage
