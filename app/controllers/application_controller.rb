@@ -2,8 +2,10 @@ require './lib/controller_authentication.rb'
 require './lib/seeker.rb'
 
 class ApplicationController < ActionController::Base
+  protect_from_forgery with: :exception
   
   before_filter :check_flash
+  before_filter :report_cookie_string
   before_filter :detect_notification_token
     helper :all
     rescue_from Timeout::Error, :with => :timeout_error # self defined exception
@@ -29,10 +31,29 @@ class ApplicationController < ActionController::Base
   
   def check_flash
     logger.debug "FLASH messages extant for "+params[:controller]+"#"+params[:action]+"(check_flash):"
-    puts "    notice: "+flash[:notice] if flash[:notice]
-    puts "    error: "+flash[:error] if flash[:error]
+    logger.debug "    notice: "+flash[:notice] if flash[:notice]
+    logger.debug "    error: "+flash[:error] if flash[:error]
 		session[:on_tour] = true if params[:on_tour]
 		session[:on_tour] = false if current_user
+  end
+  
+  def report_cookie_string
+    logger.info "COOKIE_STRING:"
+    if cs = request.env["rack.request.cookie_string"]
+      cs.split('; ').each { |str| 
+        logger.info "\t"+str
+        if m = str.match( /_rp_session=(.*)$/ )
+          sess = Rack::Session::Cookie::Base64::Marshal.new.decode(m[1])
+          logger.info "\t\t"+sess.pretty_inspect
+        end
+      }
+    end
+    logger.info "SESSION STORE:"
+    if cook = env["action_dispatch.request.unsigned_session_cookie"]
+      logger.info "\t\t"+cook.pretty_inspect
+    else
+      logger.info "\t\t= NIL"
+    end
   end
   
   def init_seeker(klass, clear_tags=false, scope=nil)
@@ -144,7 +165,9 @@ class ApplicationController < ActionController::Base
     redir = 
     if scope && (scope==:user)
       if params[:area] == "at_top" # Signing in from remote site => respond directly
-        capture_recipes_url deferred_capture(true)
+        logger.debug "stored_location_for: Getting stored location..."
+        raise "XXXX stored_location_for: Can't get deferred capture" unless dc = deferred_capture(true)
+        capture_recipes_url dc
       else
         if (nt = session[:notification_token]) && 
           (notification = Notification.where(notification_token: nt).first) && 
@@ -242,6 +265,7 @@ class ApplicationController < ActionController::Base
   
   def deferred_capture forget=false
     if cd = session[:capture_data]
+      logger.debug "deferred_capture: Deferred capture '#{cd}' is #{forget ? '' : 'not '}to be forgotten"
       session.delete(:capture_data) if forget
       cd
     end

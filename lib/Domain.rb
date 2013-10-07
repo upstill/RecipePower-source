@@ -12,6 +12,13 @@ def path_from_url(url)
 end
 
 def current_domain
-  Rails.env.production? ? "www.recipepower.com" : "local.recipepower.com:3000" 
+  case
+  when Rails.env.production?
+    "www.recipepower.com"
+  when Rails.env.development?, Rails.env.test?
+    "local.recipepower.com:3000" 
+  when Rails.env.staging?
+    "strong-galaxy-5765-74.herokuapp.com"
+  end
 end
 
