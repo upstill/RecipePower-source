@@ -38,6 +38,7 @@ class PagesController < ApplicationController
   # Serve mobile page using the jqm layout
   def mobi
     @area = "mobile"
+    response_service.is_mobile true # Persists across page requests
     render layout: "jqm"
   end
   
