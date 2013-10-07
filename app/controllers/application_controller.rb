@@ -5,6 +5,7 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
   
   before_filter :check_flash
+  before_filter :report_cookie_string
   before_filter :detect_notification_token
     helper :all
     rescue_from Timeout::Error, :with => :timeout_error # self defined exception
@@ -34,6 +35,24 @@ class ApplicationController < ActionController::Base
     logger.debug "    error: "+flash[:error] if flash[:error]
 		session[:on_tour] = true if params[:on_tour]
 		session[:on_tour] = false if current_user
+  end
+  
+  def report_cookie_string
+    logger.debug "COOKIE_STRING:"
+    if cs = request.env["rack.request.cookie_string"]
+      cs.split('; ').each { |str| 
+        logger.debug "\t"+str
+        if m = str.match( /_rp_session=(.*)$/ )
+          if sess = Rack::Session::Cookie::Base64::Marshal.new.decode(m[1])
+            logger.debug "\t\t(decoded): "+sess.pretty_inspect
+          elsif cook = env["action_dispatch.request.unsigned_session_cookie"]
+            logger.debug "\t\t(from env): "+cook.pretty_inspect
+          else
+            logger.debug "\t\t= NIL"
+          end
+        end
+      }
+    end
   end
   
   def init_seeker(klass, clear_tags=false, scope=nil)
