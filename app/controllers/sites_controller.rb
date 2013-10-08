@@ -51,7 +51,8 @@ class SitesController < ApplicationController
       render :partial=> "shared/pic_picker"
     else
       @Title = @site.name
-      dialog_boilerplate "edit", "floating" 
+      # dialog_boilerplate "edit", "floating" 
+      smartrender "edit", area: "floating" 
     end
   end
 

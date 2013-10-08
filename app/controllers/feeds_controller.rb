@@ -44,8 +44,9 @@ class FeedsController < ApplicationController
   def new
     @feed = Feed.new
     @Title = "Subscribe to a Feed"
-    @area = params[:area]
-    dialog_boilerplate 'new', 'modal'
+    # @area = params[:area]
+    # dialog_boilerplate 'new', 'modal'
+    smartrender 'new', area: 'modal'
   end
   
   # Add a feed to the feeds of the current user
@@ -102,7 +103,8 @@ class FeedsController < ApplicationController
   # GET /feeds/1/edit
   def edit
     @feed = Feed.find(params[:id])
-    dialog_boilerplate "edit", "floating" 
+    # dialog_boilerplate "edit", "floating" 
+    smartrender "edit", area: "floating" 
   end
 
   # POST /feeds
@@ -121,8 +123,9 @@ class FeedsController < ApplicationController
       respond_to do |format|
         format.html { render action: "new", status: :unprocessable_entity }
         format.json { 
-          @area = "floating"
-          dialog_boilerplate "new", "modal", status: :unprocessable_entity 
+          # @area = "floating"
+          # dialog_boilerplate "new", "modal", status: :unprocessable_entity 
+          smartrender "new", area: "modal", status: :unprocessable_entity 
         }
       end
     else

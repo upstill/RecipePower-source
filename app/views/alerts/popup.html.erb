@@ -1,10 +1,10 @@
 <%# if defined?(@_area) && (@_area == "at_top" || @_area == "injector") %>
-<% if response_service.injector?
+<% if response_service.injector? %>
 	<%= injector_dialog :alert, "has heard your command, and obeys.", dismiss_button: "Ack" do %>
 		<%= render "alerts/injector_popup" %>
 	<% end %>
 <% else %>
-	<%= modal_dialog :popup, "Your Work Here Is Done", class: "modal-yield" do %>
+	<%= modal_dialog :popup, "Your Work Here Is Done", response_service.modal_options do %>
 		<%# The flash message will do... render partial: "alerts/popup" %>
 	<% end %>
 <% end %>

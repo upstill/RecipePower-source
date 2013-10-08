@@ -1,6 +1,6 @@
 require './lib/controller_utils.rb'
 class PasswordsController < Devise::PasswordsController
-  before_filter { @area = params[:area] || "" }
+  # before_filter { @area = params[:area] || "" }
   
   # GET /resource/password/new
   def new
@@ -29,7 +29,7 @@ class PasswordsController < Devise::PasswordsController
           redirect_to home_path
         }
         format.json {
-          @area = params[:area]
+          # @area = params[:area]
           content = with_format("html") { render_to_string "alerts/popup", layout: false }
           render json: { dlog: content }
         }
@@ -40,7 +40,7 @@ class PasswordsController < Devise::PasswordsController
       respond_to do |format|
         format.html { redirect_to home_path, notice: "Sorry, can't reset password" }
         format.json { 
-          @area = params[:area]
+          # @area = params[:area]
           rendered = with_format("html") { render_to_string :new, layout: false }
           render :json => {
             :success => false, 

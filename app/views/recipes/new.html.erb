@@ -1,4 +1,5 @@
-<% if @partial %>
+<%# if @_partial %>
+<% if response_service.dialog? %>
 	<%= render 'dialog_new' %>
 <% else %>
 	<h3>Add a Cookmark</h3>

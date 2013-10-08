@@ -15,14 +15,16 @@ class InvitationsController < Devise::InvitationsController
     resource.shared_recipe = params[:recipe_id]
     @recipe = resource.shared_recipe && Recipe.find(resource.shared_recipe)
     self.resource.invitation_issuer = current_user.fullname.blank? ? current_user.handle : current_user.fullname
-    dialog_boilerplate(@recipe ? :share : :new)
+    # dialog_boilerplate(@recipe ? :share : :new)
+    smartrender @recipe ? :share : :new
   end
 
   # GET /resource/invitation/accept?invitation_token=abcdef
   def edit
     if defer_invitation
       session[:notification_token] = params[:notification_token] if params[:notification_token]   
-      dialog_boilerplate :edit, "page", redirect: home_path
+      # dialog_boilerplate :edit, "page", redirect: home_path
+      smartrender :edit, area: "page", redirect: home_path
     else
       set_flash_message(:alert, :invitation_token_invalid)
       redirect_to after_sign_out_path_for(resource_name)
@@ -48,7 +50,8 @@ class InvitationsController < Devise::InvitationsController
       @staged.errors.add (for_sharing ? :invitee_tokens : :email), "'#{err_address}' doesn't look like an email address."
       @recipe = for_sharing && Recipe.find(@staged.shared_recipe)
       self.resource = @staged
-      dialog_boilerplate(for_sharing ? :share : :new)
+      # dialog_boilerplate(for_sharing ? :share : :new)
+      smartrender for_sharing ? :share : :new
       return
     end
 
@@ -199,7 +202,8 @@ class InvitationsController < Devise::InvitationsController
                     current_inviter.save
                     notice = "But #{id} is already on RecipePower! Oh happy day!! <br>(We've gone ahead and made them your friend.)".html_safe
                   end
-                  dialog_boilerplate :new # redirect_to collection_path, :notice => notice
+                  # dialog_boilerplate :new # redirect_to collection_path, :notice => notice
+                  smartrender :new # redirect_to collection_path, :notice => notice
                 else # There's a resource error on email, but not because the user exists: go back for correction
                   render :new
                 end
@@ -221,7 +225,8 @@ class InvitationsController < Devise::InvitationsController
                   session[:flash_popup] = "pages/starting_step2_modal"
                   respond_with resource, :location => assert_query( after_accept_path_for(resource), context: "signup")
                 else
-                  respond_with_navigational(resource){ dialog_boilerplate :edit }
+                  # respond_with_navigational(resource){ dialog_boilerplate :edit }
+                  respond_with_navigational(resource){ smartrender :edit }
                 end
               end
 

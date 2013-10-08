@@ -60,7 +60,7 @@ RP::Application.routes.draw do
 
   get "iframe/create"
 
-  get "bm/bookmarklet(.:format)" => "bm#bookmarklet", :as => :bookmarklet
+  # get "bm/bookmarklet(.:format)" => "bm#bookmarklet", :as => :bookmarklet
 
   resources :feedback, :only => [:new, :create]
 

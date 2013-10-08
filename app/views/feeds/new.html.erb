@@ -1,1 +1,2 @@
-<%= render (@partial ? 'feeds/dialog_new' : 'page_new') %>
+<%# render (@_partial ? 'feeds/dialog_new' : 'page_new') %>
+<%= render (response_service.dialog? ? 'feeds/dialog_new' : 'page_new') %>

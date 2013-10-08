@@ -6,7 +6,8 @@ class RegistrationsController < Devise::RegistrationsController
     
     def edit
       @user = (params[:id] && User.find(params[:id])) || current_user
-      dialog_boilerplate "edit", "floating"
+      # dialog_boilerplate "edit", "floating"
+      smartrender "edit", area: "floating"
     end
     
     def create
@@ -77,7 +78,8 @@ class RegistrationsController < Devise::RegistrationsController
       else
         clean_up_passwords resource
         @user = resource
-        dialog_boilerplate "edit", "floating"
+        # dialog_boilerplate "edit", "floating"
+        smartrender "edit", area: "floating"
         # respond_with resource
       end
     end

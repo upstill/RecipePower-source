@@ -154,13 +154,14 @@ class ApplicationController < ActionController::Base
   # alias_method :rescue_action_locally, :rescue_action_in_public  
   
   def setup_response_service
-    @response_service ||= ResponseServices.new
+    @response_service ||= ResponseServices.new params, session
     # Mobile is sticky: it stays on for the session once the "mobile" area parameter appears
-    @response_service.is_mobile if (@area == "mobile")
+    @response_service.is_mobile if (params[:area] == "mobile")
   end
   
+  # This object directs conditional view code according to target device and context
   def response_service
-    @response_service ||= ResponseServices.new
+    @response_service
   end  
   
   def orphantagid(tagid)
@@ -176,7 +177,7 @@ class ApplicationController < ActionController::Base
     scope = Devise::Mapping.find_scope!(resource_or_scope)
     redir = 
     if scope && (scope==:user)
-      if params[:area] == "at_top" # Signing in from remote site => respond directly
+      if response_service.injector? # params[:area] == "at_top" # Signing in from remote site => respond directly
         logger.debug "stored_location_for: Getting stored location..."
         raise "XXXX stored_location_for: Can't get deferred capture" unless dc = deferred_capture(true)
         capture_recipes_url dc
@@ -290,7 +291,50 @@ class ApplicationController < ActionController::Base
     if capture_data = deferred_capture(forget)
       capture_data.delete :area
       capture_data.delete :layout
+      capture_data.delete :context
       capture_data
+    end
+  end
+  
+  # Generalized response for dialog for a particular area
+  def smartrender(action, renderopts={})
+    flash.now[:notice] = params[:notice] unless flash[:notice] # ...should a flash message come in via params
+    # @area = params[:area]
+    # @layout = params[:layout]
+    # @partial = !params[:partial].blank?
+    # Apply the default render params, honoring those passed in
+    renderopts = response_service.render_params renderopts
+    respond_to do |format|
+      format.html {
+        # @area ||= "page"  
+        if response_service.page? # @area == "page" # Not partial at all => whole page
+          if renderopts[:redirect]
+            redirect_to renderopts[:redirect]
+          else
+            render action, renderopts
+          end
+        else
+          # renderopts[:layout] = (@layout || false)
+          render action, renderopts # May have special iframe layout
+        end
+       }
+      format.json { 
+        @partial = true
+        # @area ||= (default_area || "floating")
+        hresult = with_format("html") do
+          # Blithely assuming that we want a modal-dialog element if we're getting JSON
+          # renderopts[:layout] = (@layout || false)
+          render_to_string action, renderopts # May have special iframe layout
+        end
+        # renderopts[:json] = { code: hresult, area: @area, how: "bootstrap" }
+        renderopts[:json] = { code: hresult, area: response_service.area_class, how: "bootstrap" }
+        render renderopts
+      }
+      format.js {
+        # XXX??? Must have set @partial in preparation
+        debugger
+        render renderopts.merge( action: "capture" )
+      }
     end
   end
             
