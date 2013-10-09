@@ -296,8 +296,7 @@ module ApplicationHelper
   	navlinks << link_to_modal("About", about_path) 
   	navlinks << link_to_modal("Contact", contact_path) 
   	navlinks << link_to("Home", home_path, class: "nav_link") 
-  	debugger
-  	navlinks << link_to_modal("FAQ", "/FAQ") 
+  	navlinks << link_to_modal("FAQ", faq_path) 
   	infolinks = 
   	  [ 
   	    link_to_modal("Need to Know", popup_path(name: "pages/need_to_know_modal")),

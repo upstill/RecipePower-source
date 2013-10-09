@@ -7,6 +7,7 @@ class FeedbackController < ApplicationController
         @feedback.email = current_user.email
         @feedback.user_id = current_user.id
     end
+    smartrender
   end
 
   def create
