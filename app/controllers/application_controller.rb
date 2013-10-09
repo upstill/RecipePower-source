@@ -177,7 +177,7 @@ class ApplicationController < ActionController::Base
     scope = Devise::Mapping.find_scope!(resource_or_scope)
     redir = 
     if scope && (scope==:user)
-      if response_service.injector? # params[:area] == "at_top" # Signing in from remote site => respond directly
+      if response_service.injector? # params[:_area] == "at_top" # Signing in from remote site => respond directly
         logger.debug "stored_location_for: Getting stored location..."
         raise "XXXX stored_location_for: Can't get deferred capture" unless dc = deferred_capture(true)
         capture_recipes_url dc
@@ -297,36 +297,37 @@ class ApplicationController < ActionController::Base
   end
   
   # Generalized response for dialog for a particular area
-  def smartrender(action, renderopts={})
+  def smartrender(renderopts={})
+    action = renderopts[:action] || params[:action]
     flash.now[:notice] = params[:notice] unless flash[:notice] # ...should a flash message come in via params
-    # @area = params[:area]
-    # @layout = params[:layout]
-    # @partial = !params[:partial].blank?
+    # @_area = params[:_area]
+    # @_layout = params[:_layout]
+    # @_partial = !params[:_partial].blank?
     # Apply the default render params, honoring those passed in
     renderopts = response_service.render_params renderopts
     respond_to do |format|
       format.html {
-        # @area ||= "page"  
-        if response_service.page? # @area == "page" # Not partial at all => whole page
+        # @_area ||= "page"  
+        if response_service.page? # @_area == "page" # Not partial at all => whole page
           if renderopts[:redirect]
             redirect_to renderopts[:redirect]
           else
             render action, renderopts
           end
         else
-          # renderopts[:layout] = (@layout || false)
+          # renderopts[:_layout] = (@_layout || false)
           render action, renderopts # May have special iframe layout
         end
        }
       format.json { 
-        @partial = true
-        # @area ||= (default_area || "floating")
+        @_partial = true
+        # @_area ||= (default_area || "floating")
         hresult = with_format("html") do
           # Blithely assuming that we want a modal-dialog element if we're getting JSON
-          # renderopts[:layout] = (@layout || false)
+          # renderopts[:_layout] = (@_layout || false)
           render_to_string action, renderopts # May have special iframe layout
         end
-        # renderopts[:json] = { code: hresult, area: @area, how: "bootstrap" }
+        # renderopts[:json] = { code: hresult, area: @_area, how: "bootstrap" }
         renderopts[:json] = { code: hresult, area: response_service.area_class, how: "bootstrap" }
         render renderopts
       }

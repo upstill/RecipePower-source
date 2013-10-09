@@ -1,4 +1,4 @@
-<%= modal_dialog :edit_account, @Title || "Edit Account", response_service.modal_params do %>
+<%= modal_dialog :edit_account, @Title || "Edit Account", response_service.modal_options do %>
 	<%= modal_body do %>
 		<%= render partial: 'shared/authentications_current' %>
 		<%= render partial: 'shared/authentications_possible' %>

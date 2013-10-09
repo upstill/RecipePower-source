@@ -50,20 +50,20 @@ module DialogsHelper
   end
   
   def modal_dialog( which, ttl=nil, options={}, &block )
-    # for_bootstrap = options[:area].blank? || options[:area] != "at_top"
+    # for_bootstrap = options[:_area].blank? || options[:_area] != "at_top"
     header = modal_header( ttl, !options[:noflash])
     body = options[:body_contents] || with_output_buffer(&block)
     options[:class] = 
       [ "dialog", 
         which.to_s, 
-        response_service.area_class, # options[:area] || "floating", 
+        response_service.area_class, # options[:_area] || "floating", 
         ("hide" unless options[:show]),
         ("modal-pending fade" unless response_service.injector? || options[:show]), 
         options[:class] 
       ].compact.join(' ')
     # The :requires option specifies JS modules that this dialog uses
     options[:data] = { :"dialog-requires" => options[:requires] } if options[:requires]
-    options = options.slice! :area, :show, :noflash, :modal, :body_contents, :requires
+    options = options.slice! :area, :show, :noflash, :body_contents, :requires
     # options[:id] = "recipePowerDialog"
     options[:title] = ttl if ttl
     content_tag(:div, header+body, options).html_safe
@@ -85,7 +85,7 @@ module DialogsHelper
   end
   
   def modal_body(options={}, &block)
-    bd = options[:body_contents] || with_output_buffer(&block)
+    bd = options[:body_contents] || capture(&block)
     if prompt = options.delete( :prompt )
       prompt = content_tag( :div, prompt, class: "prompt" ).html_safe
     end
@@ -106,12 +106,12 @@ module DialogsHelper
   #   :sign_in
   def dialogHeader( which, ttl=nil, options={})
     # Render for a floating dialog unless an area is asserted OR we're rendering for the page
-    # area = options[:area] || "floating" # (@partial ? "floating" : "page")
+    # area = options[:_area] || "floating" # (@partial ? "floating" : "page")
     classes = options[:class] || ""
     logger.debug "dialogHeader for "+globstring({dialog: which, area: response_service.area_class, ttl: ttl})
     # Assert a page title if given
     ttlspec = ttl ? %Q{ title="#{ttl}"} : ""
-    # for_bootstrap = options[:area].blank? || options[:area] != "at_top"
+    # for_bootstrap = options[:_area].blank? || options[:_area] != "at_top"
     bs_classes = !response_service.injector? ? "" : "modal-pending hide fade"
     hdr = 
       %Q{<div class="#{bs_classes} dialog #{which.to_s} #{response_service.area_class} #{classes}" #{ttlspec}>}+

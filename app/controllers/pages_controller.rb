@@ -2,11 +2,6 @@ class PagesController < ApplicationController
   # filter_access_to :all
   respond_to :html, :json
   
-  before_filter :define_query
-  
-  def define_query
-	end
-  
   def root
     if current_user
       redirect_to collection_path
@@ -25,22 +20,25 @@ class PagesController < ApplicationController
 
   def contact
   	@Title = "Contact"
+    smartrender
   end
 
   def about
   	@Title = "About"
+    smartrender
   end
 
   def faq
     @Title = "FAQ"
+    smartrender
   end
   
+  # Generic action for displaying a popup by name
   def popup
     respond_with do |format|
       format.json { 
-        render json: {
-          dlog: with_format("html") { render_to_string :partial => params[:name] }
-        }
+        dlog = with_format("html") { render_to_string partial: params[:name] }
+        render json: { dlog: dlog }
       }
     end
   end

@@ -48,11 +48,11 @@ class SitesController < ApplicationController
     @site = Site.find(params[:id].to_i)
     if params[:pic_picker]
       # Setting the pic_picker param requests a picture-editing dialog
-      render :partial=> "shared/pic_picker"
+      render partial: "shared/pic_picker"
     else
       @Title = @site.name
       # dialog_boilerplate "edit", "floating" 
-      smartrender "edit", area: "floating" 
+      smartrender area: "floating" 
     end
   end
 
@@ -86,7 +86,7 @@ class SitesController < ApplicationController
                          done: true, # Denotes recipe-editing is finished
                          popup: "#{@site.name} updated",
                          replacements: [
-                           ["tr#site#{@site.id.to_s}", with_format("html") { render_to_string :partial => "sites/site" }]
+                           ["tr#site#{@site.id.to_s}", with_format("html") { render_to_string partial: "sites/site" }]
                          ]
                        } 
       }

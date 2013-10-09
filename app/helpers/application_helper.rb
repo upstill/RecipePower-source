@@ -292,10 +292,12 @@ module ApplicationHelper
     
   def footer_navlinks
   	navlinks = []
-  	navlinks << link_to_modal("About", popup_path(name: "pages/about_modal")) 
-  	navlinks << link_to_modal("Contact", popup_path(name: "pages/contact_modal")) 
+  	# navlinks << link_to_modal("About", popup_path(name: "pages/about_modal")) 
+  	navlinks << link_to_modal("About", about_path) 
+  	navlinks << link_to_modal("Contact", contact_path) 
   	navlinks << link_to("Home", home_path, class: "nav_link") 
-  	navlinks << link_to_modal("FAQ", popup_path(name: "pages/faq_modal")) 
+  	debugger
+  	navlinks << link_to_modal("FAQ", "/FAQ") 
   	infolinks = 
   	  [ 
   	    link_to_modal("Need to Know", popup_path(name: "pages/need_to_know_modal")),
@@ -440,4 +442,25 @@ module ApplicationHelper
        links.join(' ').html_safe
      end
    end
+
+  # Helper for "standard" template which goes to either a page or a modal dialog,
+  # depending on context. The content is found in <controller>/<action>_content,
+  # and if robomodal is false, the modal dialog is in <controller>/<action>_modal
+  def simple_page ttl, robomodal = false
+    if response_service.dialog?
+      if robomodal
+        # The content is simple enough to render in a generic popup using the content
+        simple_modal params[:action], ttl, style: "margin: 0px 15px;" do
+        	render params[:action]+"_content"
+        end
+      else
+        render params[:action]+"_modal"
+      end
+    else
+      content_tag :div, 
+        content_tag(:h2, ttl, class: "med")+
+        render(params[:action]+"_content"),
+      class: "text_block"
+    end
+  end
 end

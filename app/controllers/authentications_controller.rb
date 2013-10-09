@@ -9,10 +9,10 @@ class AuthenticationsController < ApplicationController
     @auth_delete = true
     @auth_context = :manage
     flash[:notice] = params[:notice]
-    # @area = params[:area]
-    # @layout = params[:layout]
+    # @_area = params[:_area]
+    # @_layout = params[:_layout]
     # dialog_boilerplate "index"
-    smartrender "index"
+    smartrender 
   end
 
   # Get a new authentication (==login)
@@ -25,9 +25,9 @@ class AuthenticationsController < ApplicationController
       @auth_delete = true
       @auth_context = :manage
       flash[:notice] = params[:notice]
-      # @area = params[:area]
+      # @_area = params[:_area]
       # dialog_boilerplate "new"
-      smartrender "new"
+      smartrender 
   end
 
   # Get a new authentication (==login) for a specific user
@@ -40,9 +40,9 @@ class AuthenticationsController < ApplicationController
       @auth_delete = true
       @auth_context = :manage
       flash[:notice] = params[:notice]
-      # @area = params[:area]
+      # @_area = params[:_area]
       # dialog_boilerplate "verify"
-      smartrender "verify"
+      smartrender 
   end
 
   def failure

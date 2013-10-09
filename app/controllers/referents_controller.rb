@@ -76,7 +76,7 @@ class ReferentsController < ApplicationController
       @typeselections = Tag.type_selections
       @typeselections.shift
       # dialog_boilerplate "edit", "floating" 
-      smartrender "edit", area: "floating" 
+      smartrender area: "floating" 
   end
 
   # POST /referents?tagid=1&mode={over,before,after}&target=referentid

@@ -17,24 +17,25 @@ class ResponseServices
     @area = params[:area]
     @layout = params[:layout]
     @partial = !params[:partial].blank?
-    @how = params[:how]
     debugger
     # Context is one of "desktop", "mobile" and "injector"
-    @context = (params[:context] || "desktop") unless session[:mobile]
+    @format = (params[:format] || "page")
+    @format = "dialog" if (params[:how] == "modal")
+    @target = (params[:target] || "desktop") unless session[:mobile]
   end
   
   def dialog?
-    @how == "modal" || @how == "modeless"
+    @format == "dialog"
   end
   
   def is_injector
-    @context = "injector"
+    @target = "injector"
   end
   
   # Returns true if we're in the context of a foreign page
   def injector?
     # defined?(@area) && (@area == "at_top" || @area == "injector")
-    @context == "injector"
+    @target == "injector"
   end
   
   # True if we are to render a whole page
@@ -45,10 +46,10 @@ class ResponseServices
   def is_mobile(on=true)
     if on
       @session[:mobile] = true
-      @context = nil
+      @target = nil
     else
       @session.delete :mobile
-      @context = "desktop"
+      @target = "desktop"
     end
   end
   
@@ -59,18 +60,13 @@ class ResponseServices
   
   # Return relevant options for modal dialog
   def modal_options options_in = {}
-    # XXX Should be adding 'modal-yield' to class, not replacing it
     klass = (options_in[:class] || "")+" modal-yield"
-    options_in.merge  area: @area, 
-                      modal: dialog?, # (@area != "page") && (@area != "at_top"), 
-                      class: klass
+    options_in.merge  area: @area, class: klass
   end
   
-  # Forward the appropriate parameter to a subsequent request
-  def params options_in = {}
-    options = {}
-    options.merge! :context => "injector" if injector?
-    options_in.merge options
+  # Forward the appropriate parameters to a subsequent request
+  def redirect_params options_in = {}
+    injector? ? options_in.merge( :target => "injector" ) : options_in
   end
   
   # Return appropriate render parameters, asserting defaults as necessary
@@ -89,7 +85,7 @@ class ResponseServices
       end
   end
   
-  # Return the class specifier for styling according to area_class
+  # Return the class specifier for styling according to the target
   def area_class
     # @area
     case

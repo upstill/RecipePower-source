@@ -1,9 +1,9 @@
 <div class="auth_poss <%# @_area %><%= response_service.area_class %>">
     <strong>You might click on one of these services:</strong><br>
-	  <%= auth_possible "Facebook", response_service.params %>
-	  <%= auth_possible "Google", response_service.params( :svc_lower => "google_oauth2") %>
-	  <%= auth_possible "Twitter", response_service.params %>
-	  <%= auth_possible "Aol", response_service.params %>
-	  <%= auth_possible "Yahoo", response_service.params %>
-	  <%= auth_possible "OpenID", response_service.params( :svc_lower => "open_id" ) %>
+	  <%= auth_possible "Facebook", response_service.redirect_params %>
+	  <%= auth_possible "Google", response_service.redirect_params( :svc_lower => "google_oauth2") %>
+	  <%= auth_possible "Twitter", response_service.redirect_params %>
+	  <%= auth_possible "Aol", response_service.redirect_params %>
+	  <%= auth_possible "Yahoo", response_service.redirect_params %>
+	  <%= auth_possible "OpenID", response_service.redirect_params( :svc_lower => "open_id" ) %>
 </div>

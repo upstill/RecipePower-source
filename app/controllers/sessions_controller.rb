@@ -11,7 +11,7 @@ class SessionsController < Devise::SessionsController
     respond_to do |format|
       format.html { redirect_to home_path }
       format.json { 
-        # @area = params[:area] || "floating"
+        # @_area = params[:_area] || "floating"
         rendered = with_format("html") {
           # render_to_string "authentications/new", layout: false 
           render_to_string layout: false 
