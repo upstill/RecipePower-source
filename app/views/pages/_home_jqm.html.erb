@@ -1,25 +1,10 @@
-<div data-role="page" id="Home">
-    <div data-role="header" data-position="fixed">
-        <h1>RecipePower</h1>
-        <a href="#Nav" >Nav</a>
-        <a href="#Settings" data-transition="slideup" data-icon="gear">Settings</a>
-    </div>
-    <div data-role="content">
-        <ul data-role="listview" data-inset="true">
-            <li><a data-transition="slide" href="#FAQ">FAQ</a></li>
-            <li><a data-transition="slide" href="#Blog">Blog</a></li>
-            <li><a data-transition="slide" href="#SignIn">Sign In with Password</a></li>
-        </ul>
-    </div>
-    <div data-role="footer" data-position="fixed">
-        <h4>This is a <a href="http://nitch.cc">Nitch</a> app.</h4>
-    </div>
-    <div data-role="panel" id="Nav">
-        <h3>Navigation</h3>
-        <p>Peek-a-boo!</p>
-        <a data-role="button" data-rel="close" href="#Home">Close panel</a>
-    </div>
-</div>
+<% content_for :home_content do %>
+	<ul data-role="listview" data-inset="true">
+    <li><a data-transition="slide" href="#FAQ">FAQ</a></li>
+    <li><a data-transition="slide" href="#Blog">Blog</a></li>
+    <li><a data-transition="slide" href="#SignIn">Sign In with Password</a></li>
+	</ul>
+<% end %>
 <div data-role="page" id="FAQ">
     <div data-role="header" data-position="fixed">
         <h1>FAQ</h1>

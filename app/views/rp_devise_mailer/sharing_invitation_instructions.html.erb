@@ -184,8 +184,9 @@
 		<br>
 		<div class="message_box">
 			<div style="width:90%;margin: 20px 0px 0px;float: left;font-size:20px; font-weight:bold;">Rather not deal with this now?</div>
+			<% debugger %>
 			<% url = accept_user_invitation_url(
-				:invitation_token => @resource.invitation_token,
+				:invitation_token => @resource.raw_invitation_token,
 				:notification_token => @notification_token ) %>
 			<div style="width:90%; margin: 0px;float: left;">
 				<%= link_to "Save It To RecipePower", url, 

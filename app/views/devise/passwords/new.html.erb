@@ -1,4 +1,3 @@
-<%# if params[:area] && params[:area] == ("at_top" || params[:area] == "injector") %>
 <% if response_service.injector? %>
 	<%= injector_dialog :new_password, "will reset your password if you're a member.", noflash: true, dismiss_button: false do %>
 		<%= render "new_password_injector" %>

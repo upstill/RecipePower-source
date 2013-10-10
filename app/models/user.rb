@@ -20,11 +20,11 @@ class User < ActiveRecord::Base
   end
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :id, :username, :fullname, :about, :login, :private, :skip_invitation, 
+  attr_accessible :id, :username, :fullname, :about, :login, :private, :skip_invitation,
                 :email, :password, :password_confirmation, :shared_recipe, :invitee_tokens,
                 :recipes, :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens, :subscription_tokens, :invitation_issuer
   attr_writer :browser
-  attr_accessor :shared_recipe, :invitee_tokens
+  attr_accessor :shared_recipe, :invitee_tokens, :raw_invitation_token
   
   has_many :rcprefs, :dependent => :destroy
   has_many :recipes, :through=>:rcprefs, :autosave=>true
@@ -364,7 +364,10 @@ public
   end
   
   def issue_instructions(what = :invitation_instructions, opts={})
-    send_devise_notification(what, opts)
+    # send_devise_notification(what, opts)
+    self.update_attribute :invitation_sent_at, Time.now.utc unless self.invitation_sent_at
+    generate_invitation_token! unless @raw_invitation_token
+    send_devise_notification(what, @raw_invitation_token, opts)
   end
   
 =begin

@@ -1,4 +1,10 @@
 <%# Master form for taking a recipe query and returning a list of results %>
+<% content_for :nav do %>
+	<% @browser.node_list.each do |node| %>
+	  <% @node = node %>
+	  <%= render partial: "collection/node" %>
+	<% end %>
+<% end %>
 <div class="collection">
 	<div class="collection_list">
 		<% if !@results_pending %>

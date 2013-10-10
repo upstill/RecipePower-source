@@ -60,7 +60,7 @@ RP::Application.routes.draw do
 
   get "iframe/create"
 
-  get "bm/bookmarklet(.:format)" => "bm#bookmarklet", :as => :bookmarklet
+  # get "bm/bookmarklet(.:format)" => "bm#bookmarklet", :as => :bookmarklet
 
   resources :feedback, :only => [:new, :create]
 
@@ -159,7 +159,7 @@ RP::Application.routes.draw do
   get '/contact', :to => 'pages#contact'
   get '/about', :to => 'pages#about'
   get '/welcome', :to => 'pages#welcome'
-  get '/FAQ', :to=>"pages#FAQ"
+  get '/faq', :to=>"pages#faq"
   get '/admin', :to=>"pages#admin"
   get '/mobi', :to=>"pages#mobi"
   root :to => 'pages#root'

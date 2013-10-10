@@ -292,10 +292,11 @@ module ApplicationHelper
     
   def footer_navlinks
   	navlinks = []
-  	navlinks << link_to_modal("About", popup_path(name: "pages/about_modal")) 
-  	navlinks << link_to_modal("Contact", popup_path(name: "pages/contact_modal")) 
+  	# navlinks << link_to_modal("About", popup_path(name: "pages/about_modal")) 
+  	navlinks << link_to_modal("About", about_path) 
+  	navlinks << link_to_modal("Contact", contact_path) 
   	navlinks << link_to("Home", home_path, class: "nav_link") 
-  	navlinks << link_to_modal("FAQ", popup_path(name: "pages/faq_modal")) 
+  	navlinks << link_to_modal("FAQ", faq_path) 
   	infolinks = 
   	  [ 
   	    link_to_modal("Need to Know", popup_path(name: "pages/need_to_know_modal")),
@@ -317,10 +318,11 @@ module ApplicationHelper
   def login_setup 
     if session[:on_tour]
 	    render(partial: "shared/signup_dialog")
-    elsif session[:invitation_token]
+    elsif it = session[:invitation_token]
       # load the invitation-acceptance dialog. If the user isn't on tour, set it to
       # trigger when the page is loaded
-			link_to "", accept_user_invitation_path(invitation_token: session[:invitation_token]), class: "trigger"
+      session.delete :invitation_token
+			link_to_modal "", accept_user_invitation_path(invitation_token: it), class: "trigger"
     elsif token = deferred_notification
 			@user = Notification.find_by_notification_token(token).target
 			link_to "", new_user_session_path(user: { id: @user.id, email: @user.email } ), class: "trigger" 
@@ -440,4 +442,25 @@ module ApplicationHelper
        links.join(' ').html_safe
      end
    end
+
+  # Helper for "standard" template which goes to either a page or a modal dialog,
+  # depending on context. The content is found in <controller>/<action>_content,
+  # and if robomodal is false, the modal dialog is in <controller>/<action>_modal
+  def simple_page ttl, robomodal = false
+    if response_service.dialog?
+      if robomodal
+        # The content is simple enough to render in a generic popup using the content
+        simple_modal params[:action], ttl, style: "margin: 0px 15px;" do
+        	render params[:action]+"_content"
+        end
+      else
+        render params[:action]+"_modal"
+      end
+    else
+      content_tag :div, 
+        content_tag(:h2, ttl, class: "med")+
+        render(params[:action]+"_content"),
+      class: "text_block"
+    end
+  end
 end

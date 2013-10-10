@@ -1,0 +1,36 @@
+<%= flash_all %>
+<div class="centerblock" style="margin-top:50px;">
+		<div style="position:absolute; bottom: 0px; height: 75px;"><%= image_tag "cookmark_button.png", style: "float: left; height:59px; width: 70px;", alt:"Cookmark" %></div>
+		<div style="position:absolute; bottom: 0px; left: 90px; height: 55px;"><span class="logo">RecipePower</span></div>
+</div>
+<%# <div class="centerblock bold">Vault</div>
+<div class="centerblock bold">Water Cooler</div>
+<div class="centerblock bold">Newsstand</div> %>
+<div class="centerblock sub">Never Lose A Recipe Again</div>
+<div class="centerblock">
+	<% if current_user %>
+		<%= link_to("To My Collections!!", collection_path(), class: "btn btn-large btn-info") %>
+		<%# link_to("Show Me First", collection_path(popup: "pages/need_to_know_modal", :on_tour => true), class: "btn btn-large btn-info") %>
+	<% else %>
+		<%= signup_button %>
+	<% end %>
+</div>
+<div class="need_to_know" style="margin: 10px auto;">
+	<div class="know_snap">
+		<%= image_tag "NeedToKnow.png" %>
+	</div>
+	<div class="know_block" style="width: 750px">
+		<div class="info-block know_browser">
+			<h4>Choose</h4>
+			Pick a collection to show.
+		</div>
+		<div class="info-block know_seek">
+			<h4>Search</h4>
+			Find things <strong>within the collection</strong>.
+		</div>
+		<div class="info-block know_list">
+			<h4>See</h4>
+			Everything in the collection (that matches the search).
+		</div>
+	</div>
+</div>

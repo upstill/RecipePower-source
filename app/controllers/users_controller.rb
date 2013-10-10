@@ -86,7 +86,7 @@ class UsersController < ApplicationController
         render( 
           json: { 
             processorFcn: "RP.content_browser.insert_or_select",
-            entity: with_format("html") { render_to_string :partial => "collection/node" }, 
+            entity: with_format("html") { render_to_string partial: "collection/node" }, 
             notice: view_context.flash_one(:notice, notice) 
           }, 
           status: :created, 
@@ -157,7 +157,8 @@ class UsersController < ApplicationController
     end
     @section = params[:section] || "profile"
     @Title = "Edit Profile"
-    dialog_boilerplate "edit", "floating" 
+    # dialog_boilerplate "edit", "floating" 
+    smartrender area: "floating" 
   end
   
   # Ask user for an email address for login purposes
@@ -176,7 +177,8 @@ class UsersController < ApplicationController
     @section = params[:section] || "profile"
     @Title = "My "+@section.capitalize
     # render :action => 'edit'
-    dialog_boilerplate "edit", "floating" 
+    # dialog_boilerplate "edit", "floating" 
+    smartrender action: "edit", area: "floating" 
   end
 
   def update
@@ -198,7 +200,8 @@ class UsersController < ApplicationController
     else
       @section = params[:user][:email] ? "profile" : "account"
       @Title = "Edit #{@section}"
-      dialog_boilerplate "edit", "floating" 
+      # dialog_boilerplate "edit", "floating" 
+      smartrender action: "edit", area: "floating" 
     end
   end
 

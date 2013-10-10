@@ -3,7 +3,7 @@ module AuthenticationsHelper
   # Offer an authentication option in the form of an icon and a title
   def auth_possible(service, options = {} )
     svc_lower = options[:svc_lower] || service.downcase
-    in_iframe = options[:at_top]
+    in_iframe = options[:context] && (options[:context] == "injector")
     auth_url = "http://#{current_domain}/auth/"+svc_lower
     css_class = "auth_provider"
     css_class += " small" if in_iframe

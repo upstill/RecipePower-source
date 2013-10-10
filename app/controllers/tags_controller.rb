@@ -61,7 +61,7 @@ class TagsController < ApplicationController
     else
         @taglist = Tag.strmatch("", userid: session[:user_id], tagtype: tagtype)
     end
-    render :partial=>"alltags"
+    render partial: "alltags"
   end
 =end
 
@@ -117,7 +117,7 @@ class TagsController < ApplicationController
                 @taglist.map(&:attributes).map { |match| {:id=>match["id"], :name=>match["name"]} } 
             end
         }
-        format.html { render :partial=>"tags/taglist" }
+        format.html { render partial: "tags/taglist" }
         format.xml  { render :xml => @taglist }
       end
   end
@@ -163,7 +163,7 @@ class TagsController < ApplicationController
     # The list of orphan tags gets all tags of this type which aren't linked to a table
     @taglist = Tag.strmatch("", userid: session[:user_id], tagtype: Tag.index_to_type(@tabindex) )
     session[:tabindex] = @tabindex
-    render :partial=>"editor"
+    render partial: "editor"
   end
   
   # GET /id/absorb

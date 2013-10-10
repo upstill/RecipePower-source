@@ -1,4 +1,5 @@
 class CollectionController < ApplicationController
+  layout :rs_layout # Let response_service pick the layout
   before_filter :setup_collection
   after_filter :save_browser
   
