@@ -12,5 +12,5 @@ Check out "<%= @recipe.title %>"
 at <%= @recipe.url %>.
 
 BUT WAIT! Rather not deal with this now? Save it to RecipePower and have it waiting for you.
-Just click this link: <%= accept_user_invitation_url :invitation_token => @resource.invitation_token %>
+Just click this link: <%= accept_user_invitation_url :invitation_token => @resource.raw_invitation_token %>
 

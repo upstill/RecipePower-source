@@ -17,14 +17,17 @@ class InvitationsController < Devise::InvitationsController
     self.resource.invitation_issuer = current_user.fullname.blank? ? current_user.handle : current_user.fullname
     # dialog_boilerplate(@recipe ? :share : :new)
     if @recipe
-	smartrender :action => :share
-	else
-	smartrender
+      smartrender :action => :share
+    else
+      smartrender
+    end
   end
 
   # GET /resource/invitation/accept?invitation_token=abcdef
   def edit
-    if defer_invitation
+    if response_service.dialog? 
+      smartrender
+    elsif defer_invitation
       session[:notification_token] = params[:notification_token] if params[:notification_token]   
       # dialog_boilerplate :edit, "page", redirect: home_path
       smartrender area: "page", redirect: home_path
@@ -42,9 +45,9 @@ class InvitationsController < Devise::InvitationsController
     end
     # If dialog has no invitee_tokens, get them from email field
     params[resource_name][:invitee_tokens] = params[resource_name][:invitee_tokens] ||
-      params[resource_name][:email].split(',').collect { |email| %Q{'#{email.downcase.strip}'} }.join(',')
+    params[resource_name][:email].split(',').collect { |email| %Q{'#{email.downcase.strip}'} }.join(',')
     # Check email addresses in the tokenlist for validity
-    @staged = User.new params[resource_name]
+    @staged = User.new params[resource_name] # invite_resource 
     for_sharing = @staged.shared_recipe && true
     err_address = @staged.invitee_tokens.detect do |token|
       token.kind_of?(String) && !(token =~ /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i)
@@ -98,142 +101,143 @@ class InvitationsController < Devise::InvitationsController
       (what_to_send.sub(/^[^\s]*\s*/, '').capitalize+"s are winging their way") :
       (what_to_send.capitalize+" is winging its way")
       %Q{Yay! #{subj_verb} to #{names}}
-         }
-      alerts <<
-      breakdown.report(:failures) { |items, count|
-        what_to_send = what_to_send.sub(/^[^\s]*\s*/, '')+"s" if count > 1
-        "Couldn't send #{what_to_send} to:"+
-        "<ul>" + items.collect { |item| "<li>#{item[:email]}: #{item[:error]}</li>" }.join + "</ul>"
-      }
+    }
+    alerts <<
+    breakdown.report(:failures) { |items, count|
+      what_to_send = what_to_send.sub(/^[^\s]*\s*/, '')+"s" if count > 1
+      "Couldn't send #{what_to_send} to:"+
+      "<ul>" + items.collect { |item| "<li>#{item[:email]}: #{item[:error]}</li>" }.join + "</ul>"
+    }
 
-      if for_sharing
-        # All categories of user get notified of the share
-        (breakdown[:new_friends]+breakdown[:redundancies]).each do |sharee|
-          # Mail generic share notice with action button to collect recipe
-          # Cook Me Later: add to collection
-          sharee.invitation_message = params[:user][:invitation_message]
-          sharee.save
-          sharee.notify(:share_recipe, current_user, what: params[resource_name][:shared_recipe] )
-          breakdown[:invited] << sharee
-        end
-      else
-        alerts << [
-          breakdown.report(:redundancies, :handle) { |names, count|
+    if for_sharing
+      # All categories of user get notified of the share
+      (breakdown[:new_friends]+breakdown[:redundancies]).each do |sharee|
+        # Mail generic share notice with action button to collect recipe
+        # Cook Me Later: add to collection
+        sharee.invitation_message = params[:user][:invitation_message]
+        sharee.save
+        sharee.notify(:share_recipe, current_user, what: params[resource_name][:shared_recipe] )
+        breakdown[:invited] << sharee
+      end
+    else
+      alerts << [
+        breakdown.report(:redundancies, :handle) { |names, count|
           "You're already friends with #{names}." },
           breakdown.report(:pending, :email) { |names, count|
             verb = count > 1 ? "have" : "has"
             %Q{#{names} #{verb} already been invited but #{verb}n't accepted.}
-               },
+            },
             breakdown.report(:new_friends, :handle) { |names, count|
               %Q{#{names} #{count > 1 ? "are" : "is"} already on RecipePower, so we've added them to your friends.}
-                 }
-              ]
-              end
-              @recipe = for_sharing && Recipe.find(@staged.shared_recipe)
-              respond_to { |format|
-                format.json {
-                  response = { done: true }
-                  if breakdown[:new_friends].count > 0
-                    # New friends must be added to the Browser list
-                    response[:entity] = breakdown[:new_friends].collect { |nf|
-                      @node = current_user.add_followee nf
-                      @browser = current_user.browser
-                      with_format("html") { render_to_string partial: "collection/node" }
-                    }
-                    response[:processorFcn] = "RP.content_browser.insert_or_select"
-                  end
-                  # If there's a single message, report it in a popup, otherwise use an alert
-                  if (alerts = alerts.flatten.compact).empty?
-                    response[popups.count == 1 ? :popup : :alert] = popups.join('<br>').html_safe unless popups.empty?
-                  else
-                    response[:alert] = (popups+alerts).compact.join('<br>').html_safe
-                  end
-                  render json: response
-                }
-              }
-              return
-              # Now we're done processing invitations, notifications and shares. Report back.
-              ##################
-              email = params[resource_name][:email].downcase
-              if resource = User.where(email: email).first
-                resource.errors[:email] << "We already have a user with that email address"
-              else
-                params[resource_name][:invitation_message] =
-                  splitstr( params[resource_name][:invitation_message], 100)
-                begin
-                  pr = params[resource_name]
-                  pr[:skip_invitation] = true
-                  @resource = self.resource = resource_class.invite!(pr, current_inviter)
-                  @resource.invitation_sent_at = Time.now.utc
-                  @resource.shared_recipe = Recipe.first.id
-                  @resource.save(validate: false) # ...because the invitee doesn't have a handle yet
-                  @resource.issue_instructions(:share_instructions)
-                rescue Exception => e
-                  self.resource = nil
-                end
-              end
-              if resource && resource.errors.empty? # Success!
-                set_flash_message :notice, :send_instructions, :email => self.resource.email
-                notice = "Yay! An invitation is winging its way to #{resource.email}"
-                respond_with resource, :location => after_invite_path_for(resource) do |format|
-                  format.json { render json: { done: true, alert: notice }}
-                end
-              elsif !resource
-                if e.class == ActiveRecord::RecordNotUnique
-                  other = User.find_by_email email
-                  flash[:notice] = "What do you know? '#{other.handle}' has already been invited/signed up."
-                else
-                  error = "Sorry, can't create invitation for some reason."
-                  if e
-                    e.to_s.split("\n").each { |line|
-                      error << "\n"+line if (line =~ /DETAIL:/)
-                    }
-                  end
-                  flash[:error] = error
-                end
-                redirect_to collection_path
-              elsif resource.errors[:email]
-                if(other = User.where(email: resource.email).first)
-                  # HA! request failed because email exists. Forget the invitation, just make us friends.
-                  id = other.email
-                  id = other.handle if id.blank?
-                  id << " (aka #{other.handle})" if (other.handle != id)
-                  if current_inviter.followee_ids.include? other.id
-                    notice = "#{id} is already on RecipePower--and a friend of yours."
-                  else
-                    current_inviter.followees << other
-                    current_inviter.save
-                    notice = "But #{id} is already on RecipePower! Oh happy day!! <br>(We've gone ahead and made them your friend.)".html_safe
-                  end
-                  # dialog_boilerplate :new # redirect_to collection_path, :notice => notice
-                  smartrender :action => :new # redirect_to collection_path, :notice => notice
-                else # There's a resource error on email, but not because the user exists: go back for correction
-                  render :new
-                end
-              else
-                respond_with_navigational(resource) { render :new }
-              end
-              end
+            }
+          ]
+    end
+    @recipe = for_sharing && Recipe.find(@staged.shared_recipe)
+    respond_to { |format|
+      format.json {
+        response = { done: true }
+        if breakdown[:new_friends].count > 0
+          # New friends must be added to the Browser list
+          response[:entity] = breakdown[:new_friends].collect { |nf|
+            @node = current_user.add_followee nf
+            @browser = current_user.browser
+            with_format("html") { render_to_string partial: "collection/node" }
+          }
+          response[:processorFcn] = "RP.content_browser.insert_or_select"
+        end
+        # If there's a single message, report it in a popup, otherwise use an alert
+        if (alerts = alerts.flatten.compact).empty?
+          response[popups.count == 1 ? :popup : :alert] = popups.join('<br>').html_safe unless popups.empty?
+        else
+          response[:alert] = (popups+alerts).compact.join('<br>').html_safe
+        end
+        render json: response
+      }
+    }
+    return
+    # Now we're done processing invitations, notifications and shares. Report back.
+    ##################
+    email = params[resource_name][:email].downcase
+    if resource = User.where(email: email).first
+      resource.errors[:email] << "We already have a user with that email address"
+    else
+      params[resource_name][:invitation_message] =
+      splitstr( params[resource_name][:invitation_message], 100)
+      begin
+        pr = params[resource_name]
+        pr[:skip_invitation] = true
+        @resource = self.resource = resource_class.invite!(pr, current_inviter)
+        @resource.invitation_sent_at = Time.now.utc
+        @resource.shared_recipe = Recipe.first.id
+        @resource.save(validate: false) # ...because the invitee doesn't have a handle yet
+        @resource.issue_instructions(:share_instructions)
+      rescue Exception => e
+        self.resource = nil
+      end
+    end
+    if resource && resource.errors.empty? # Success!
+      set_flash_message :notice, :send_instructions, :email => self.resource.email
+      notice = "Yay! An invitation is winging its way to #{resource.email}"
+      respond_with resource, :location => after_invite_path_for(resource) do |format|
+        format.json { render json: { done: true, alert: notice }}
+      end
+    elsif !resource
+      if e.class == ActiveRecord::RecordNotUnique
+        other = User.find_by_email email
+        flash[:notice] = "What do you know? '#{other.handle}' has already been invited/signed up."
+      else
+        error = "Sorry, can't create invitation for some reason."
+        if e
+          e.to_s.split("\n").each { |line|
+            error << "\n"+line if (line =~ /DETAIL:/)
+          }
+        end
+        flash[:error] = error
+      end
+      redirect_to collection_path
+    elsif resource.errors[:email]
+      if(other = User.where(email: resource.email).first)
+        # HA! request failed because email exists. Forget the invitation, just make us friends.
+        id = other.email
+        id = other.handle if id.blank?
+        id << " (aka #{other.handle})" if (other.handle != id)
+        if current_inviter.followee_ids.include? other.id
+          notice = "#{id} is already on RecipePower--and a friend of yours."
+        else
+          current_inviter.followees << other
+          current_inviter.save
+          notice = "But #{id} is already on RecipePower! Oh happy day!! <br>(We've gone ahead and made them your friend.)".html_safe
+        end
+        # dialog_boilerplate :new # redirect_to collection_path, :notice => notice
+        smartrender :action => :new # redirect_to collection_path, :notice => notice
+      else # There's a resource error on email, but not because the user exists: go back for correction
+        render :new
+      end
+    else
+      respond_with_navigational(resource) { render :new }
+    end
+  end
 
-              # PUT /resource/invitation
-              def update
-                self.resource = resource_class.accept_invitation!(params[resource_name])
+  # PUT /resource/invitation
+  def update
+    self.resource = resource_class.accept_invitation!(params[resource_name])
 
-                if resource.errors.empty?
-                  RpMailer.welcome_email(resource).deliver
-                  RpMailer.invitation_accepted_email(resource).deliver
-                  session.delete :invitation_token
-                  set_flash_message :notice, :updated
-                  sign_in(resource_name, resource)
-                  session[:flash_popup] = "pages/starting_step2_modal"
-                  respond_with resource, :location => assert_query( after_accept_path_for(resource), context: "signup")
-                else
-                  # respond_with_navigational(resource){ dialog_boilerplate :edit }
-                  respond_with_navigational(resource){ smartrender :action => :edit }
-                end
-              end
+    if resource.errors.empty?
+      RpMailer.welcome_email(resource).deliver
+      RpMailer.invitation_accepted_email(resource).deliver
+      session.delete :invitation_token
+      set_flash_message :notice, :updated
+      sign_in(resource_name, resource)
+      session[:flash_popup] = "pages/starting_step2_modal"
+      redirect_to response_service.decorate_path( after_accept_path_for(resource), context: "signup"), status: 303
+      # respond_with resource, :location => assert_query( after_accept_path_for(resource), context: "signup")
+    else
+      # respond_with_navigational(resource){ dialog_boilerplate :edit }
+      respond_with_navigational(resource){ smartrender :action => :edit }
+    end
+  end
 
-              def after_accept_path_for resource
-                after_sign_in_path_for(resource) # welcome_path
-              end
-              end
+  def after_accept_path_for resource
+    after_sign_in_path_for(resource) # welcome_path
+  end
+end

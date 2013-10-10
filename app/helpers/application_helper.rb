@@ -318,10 +318,11 @@ module ApplicationHelper
   def login_setup 
     if session[:on_tour]
 	    render(partial: "shared/signup_dialog")
-    elsif session[:invitation_token]
+    elsif it = session[:invitation_token]
       # load the invitation-acceptance dialog. If the user isn't on tour, set it to
       # trigger when the page is loaded
-			link_to "", accept_user_invitation_path(invitation_token: session[:invitation_token]), class: "trigger"
+      session.delete :invitation_token
+			link_to_modal "", accept_user_invitation_path(invitation_token: it), class: "trigger"
     elsif token = deferred_notification
 			@user = Notification.find_by_notification_token(token).target
 			link_to "", new_user_session_path(user: { id: @user.id, email: @user.email } ), class: "trigger" 

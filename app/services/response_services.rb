@@ -17,11 +17,15 @@ class ResponseServices
     @area = params[:area]
     @layout = params[:layout]
     @partial = !params[:partial].blank?
-    debugger
-    # Context is one of "desktop", "mobile" and "injector"
+    # Target is one of "desktop", "mobile" and "injector"
+    @target = (params[:target] || "desktop") unless session[:mobile]
+    # Format refers to how to present the content: within a dialog, or on a page
     @format = (params[:format] || "page")
     @format = "dialog" if (params[:how] == "modal")
-    @target = (params[:target] || "desktop") unless session[:mobile]
+  end
+  
+  def is_dialog
+    @format = "dialog"
   end
   
   def dialog?
@@ -80,8 +84,10 @@ class ResponseServices
         false
       when injector?
         "injector"
-      else
+      when page?
         "application"
+      else
+        false
       end
   end
   
@@ -98,4 +104,9 @@ class ResponseServices
     end
   end
 
+  # Modify a path to match the current request, asserting other options as provided
+  def decorate_path path, options_in={}
+    options_out = options_in # XXX Should be asserting current state
+    assert_query path, options_out
+  end
 end

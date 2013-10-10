@@ -157,11 +157,12 @@ class ApplicationController < ActionController::Base
     @response_service ||= ResponseServices.new params, session
     # Mobile is sticky: it stays on for the session once the "mobile" area parameter appears
     @response_service.is_mobile if (params[:area] == "mobile")
+    @response_service
   end
   
   # This object directs conditional view code according to target device and context
   def response_service
-    @response_service
+    @response_service || setup_response_service
   end  
   
   def orphantagid(tagid)
@@ -221,7 +222,7 @@ class ApplicationController < ActionController::Base
   # Validate and return the extant invitation token
   def deferred_invitation
     if token = session[:invitation_token] 
-      unless User.exists? :invitation_token => token
+      unless User.find_by_invitation_token(token, true)
         token = nil
         session.delete :invitation_token 
       end
@@ -320,14 +321,11 @@ class ApplicationController < ActionController::Base
         end
        }
       format.json { 
-        @_partial = true
-        # @_area ||= (default_area || "floating")
         hresult = with_format("html") do
           # Blithely assuming that we want a modal-dialog element if we're getting JSON
-          # renderopts[:_layout] = (@_layout || false)
+          renderopts[:layout] = (@layout || false)
           render_to_string action, renderopts # May have special iframe layout
         end
-        # renderopts[:json] = { code: hresult, area: @_area, how: "bootstrap" }
         renderopts[:json] = { code: hresult, area: response_service.area_class, how: "bootstrap" }
         render renderopts
       }

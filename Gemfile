@@ -25,7 +25,7 @@ gem 'will_paginate', '~> 3.0'
 gem 'minitest', '~> 4.2'
 gem 'newrelic_rpm'
 gem 'devise', '~> 3.1.0'                       # auth, rails generate devise:install, rails generate devise MODEL
-gem 'devise_invitable', git: 'git://github.com/scambra/devise_invitable.git'
+gem 'devise_invitable', '~> 1.3.0' # git: 'git://github.com/scambra/devise_invitable.git'
 gem 'ruby-openid'
 gem 'omniauth-twitter'                      
 gem 'omniauth-facebook', '~> 1.4.0'                     
