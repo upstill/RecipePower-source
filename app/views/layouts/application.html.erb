@@ -37,24 +37,23 @@
     <%= render 'layouts/frame_top' %>
 		<% if params[:controller] == "collection" %>
 	    <% if !current_user && session[:on_tour] %>
-				<div class="button_house span3">
+				<div class="button_house col-md-3">
 					<%= signup_button %>
 				</div>
 	    <% end %>
-			<div class="span3 left_house" <%= %q{style="top: 120px;"}.html_safe if !current_user && session[:on_tour] %> >
+			<div class="col-md-3 left_house" <%= %q{style="top: 120px;"}.html_safe if !current_user && session[:on_tour] %> >
 				<%= render 'layouts/frame_left' %>
 			</div>
 		<% end%>
     <div class="container">
 	    <div class="row">
 				<% if params[:controller] == "collection" %>
-			    <div class="span3">
+			    <div class="col-md-3 col-xs-1">
 					</div>
-					<div class="span9">
+					<div class="col-md-9 col-sm-3 col-xs-1">
 				<% else %>
-					<div class="span11">
+					<div class="col-md-11">
 				<% end %>
-					<div class="ajax-loader"></div>
 					<div class="content" <%= (params[:controller] == "collection") ? "" : %q{style="margin-left: 30px"} %>>
 						<%= flash_notifications_div %>
 						<%= yield %>

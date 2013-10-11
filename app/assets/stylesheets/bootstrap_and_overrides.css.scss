@@ -14,6 +14,8 @@ $guideBorder:              darken(adjust-hue($guideBackground, -10), 7%) !defaul
 
 @import "bootstrap";
 
+@import "bootstrap-responsive";
+
 body { padding-top: 60px; }
 
 .modal-body {
