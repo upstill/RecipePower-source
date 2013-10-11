@@ -13,6 +13,6 @@ module FeedbackHelper
   end
 
   def feedback_link(text, options = {})
-    link_to text, '#', :class => "feedback_link"
+    link_to_modal text, new_feedback_path, :class => "feedback_link"
   end
 end

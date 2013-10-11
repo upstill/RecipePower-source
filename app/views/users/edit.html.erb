@@ -1,1 +1,2 @@
-<%= render (@partial ? 'users/dialog_edit_' : 'page_edit_')+@section %>
+<%# render (@_partial ? 'users/dialog_edit_' : 'page_edit_')+@section %>
+<%= render (response_service.dialog? ? 'users/dialog_edit_' : 'page_edit_')+@section %>

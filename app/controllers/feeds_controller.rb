@@ -44,8 +44,9 @@ class FeedsController < ApplicationController
   def new
     @feed = Feed.new
     @Title = "Subscribe to a Feed"
-    @area = params[:area]
-    dialog_boilerplate 'new', 'modal'
+    # @_area = params[:_area]
+    # dialog_boilerplate 'new', 'modal'
+    smartrender area: 'modal'
   end
   
   # Add a feed to the feeds of the current user
@@ -73,7 +74,7 @@ class FeedsController < ApplicationController
         render(
           json: { 
             processorFcn: "RP.content_browser.insert_or_select",
-            entity: with_format("html") { render_to_string :partial => "collection/node", locals: { b: 2 } }, 
+            entity: with_format("html") { render_to_string partial: "collection/node", locals: { b: 2 } }, 
             notice: view_context.flash_one(:notice, @notice) 
           }, 
           status: :created, 
@@ -102,7 +103,8 @@ class FeedsController < ApplicationController
   # GET /feeds/1/edit
   def edit
     @feed = Feed.find(params[:id])
-    dialog_boilerplate "edit", "floating" 
+    # dialog_boilerplate "edit", "floating" 
+    smartrender area: "floating" 
   end
 
   # POST /feeds
@@ -121,8 +123,9 @@ class FeedsController < ApplicationController
       respond_to do |format|
         format.html { render action: "new", status: :unprocessable_entity }
         format.json { 
-          @area = "floating"
-          dialog_boilerplate "new", "modal", status: :unprocessable_entity 
+          # @_area = "floating"
+          # dialog_boilerplate "new", "modal", status: :unprocessable_entity 
+          smartrender action: "new", area: "modal", status: :unprocessable_entity 
         }
       end
     else
@@ -140,7 +143,7 @@ class FeedsController < ApplicationController
         format.html { redirect_to feeds_url, :status => :see_other, notice: 'Feed was successfully updated.' }
         format.json { render json: { 
                         done: true, 
-                        replacements: [ [ "#feed"+@feed.id.to_s, with_format("html") { render_to_string :partial => "feeds/feed" } ] ],
+                        replacements: [ [ "#feed"+@feed.id.to_s, with_format("html") { render_to_string partial: "feeds/feed" } ] ],
                         popup: "Feed saved" } 
                     }
       end

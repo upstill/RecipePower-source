@@ -6,7 +6,8 @@ class RegistrationsController < Devise::RegistrationsController
     
     def edit
       @user = (params[:id] && User.find(params[:id])) || current_user
-      dialog_boilerplate "edit", "floating"
+      # dialog_boilerplate "edit", "floating"
+      smartrender area: "floating"
     end
     
     def create
@@ -44,7 +45,7 @@ class RegistrationsController < Devise::RegistrationsController
               format.json { 
                 render json: { 
                           replacements: [
-                            ["form[action='/users']", with_format("html") { render_to_string :partial => "registrations/form" }]
+                            ["form[action='/users']", with_format("html") { render_to_string partial: "registrations/form" }]
                           ]
                         }
               }
@@ -77,7 +78,8 @@ class RegistrationsController < Devise::RegistrationsController
       else
         clean_up_passwords resource
         @user = resource
-        dialog_boilerplate "edit", "floating"
+        # dialog_boilerplate "edit", "floating"
+        smartrender :action => "edit", area: "floating"
         # respond_with resource
       end
     end

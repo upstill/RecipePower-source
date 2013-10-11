@@ -5,12 +5,15 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
   
   before_filter :check_flash
+  before_filter :report_cookie_string
   before_filter :detect_notification_token
+  before_filter :setup_response_service
     helper :all
     rescue_from Timeout::Error, :with => :timeout_error # self defined exception
     rescue_from OAuth::Unauthorized, :with => :timeout_error # self defined exception
     rescue_from AbstractController::ActionNotFound, :with => :no_action_error
     
+    helper_method :response_service
     helper_method :orphantagid
     helper_method :stored_location_for
     helper_method :deferred_capture
@@ -34,6 +37,25 @@ class ApplicationController < ActionController::Base
     logger.debug "    error: "+flash[:error] if flash[:error]
 		session[:on_tour] = true if params[:on_tour]
 		session[:on_tour] = false if current_user
+  end
+  
+  def report_cookie_string
+    logger.info "COOKIE_STRING:"
+    if cs = request.env["rack.request.cookie_string"]
+      cs.split('; ').each { |str| 
+        logger.info "\t"+str
+        if m = str.match( /_rp_session=(.*)$/ )
+          sess = Rack::Session::Cookie::Base64::Marshal.new.decode(m[1])
+          logger.info "\t\t"+sess.pretty_inspect
+        end
+      }
+    end
+    logger.info "SESSION STORE:"
+    if cook = env["action_dispatch.request.unsigned_session_cookie"]
+      logger.info "\t\t"+cook.pretty_inspect
+    else
+      logger.info "\t\t= NIL"
+    end
   end
   
   def init_seeker(klass, clear_tags=false, scope=nil)
@@ -129,7 +151,19 @@ class ApplicationController < ActionController::Base
   def rescue_action_in_public
       x=2
   end
-  # alias_method :rescue_action_locally, :rescue_action_in_public    
+  # alias_method :rescue_action_locally, :rescue_action_in_public  
+  
+  def setup_response_service
+    @response_service ||= ResponseServices.new params, session
+    # Mobile is sticky: it stays on for the session once the "mobile" area parameter appears
+    @response_service.is_mobile if (params[:area] == "mobile")
+    @response_service
+  end
+  
+  # This object directs conditional view code according to target device and context
+  def response_service
+    @response_service || setup_response_service
+  end  
   
   def orphantagid(tagid)
       "orphantag_"+tagid.to_s
@@ -144,7 +178,7 @@ class ApplicationController < ActionController::Base
     scope = Devise::Mapping.find_scope!(resource_or_scope)
     redir = 
     if scope && (scope==:user)
-      if params[:area] == "at_top" # Signing in from remote site => respond directly
+      if response_service.injector? # params[:_area] == "at_top" # Signing in from remote site => respond directly
         logger.debug "stored_location_for: Getting stored location..."
         raise "XXXX stored_location_for: Can't get deferred capture" unless dc = deferred_capture(true)
         capture_recipes_url dc
@@ -188,7 +222,7 @@ class ApplicationController < ActionController::Base
   # Validate and return the extant invitation token
   def deferred_invitation
     if token = session[:invitation_token] 
-      unless User.exists? :invitation_token => token
+      unless User.find_by_invitation_token(token, true)
         token = nil
         session.delete :invitation_token 
       end
@@ -258,7 +292,48 @@ class ApplicationController < ActionController::Base
     if capture_data = deferred_capture(forget)
       capture_data.delete :area
       capture_data.delete :layout
+      capture_data.delete :context
       capture_data
+    end
+  end
+  
+  # Generalized response for dialog for a particular area
+  def smartrender(renderopts={})
+    action = renderopts[:action] || params[:action]
+    flash.now[:notice] = params[:notice] unless flash[:notice] # ...should a flash message come in via params
+    # @_area = params[:_area]
+    # @_layout = params[:_layout]
+    # @_partial = !params[:_partial].blank?
+    # Apply the default render params, honoring those passed in
+    renderopts = response_service.render_params renderopts
+    respond_to do |format|
+      format.html {
+        # @_area ||= "page"  
+        if response_service.page? # @_area == "page" # Not partial at all => whole page
+          if renderopts[:redirect]
+            redirect_to renderopts[:redirect]
+          else
+            render action, renderopts
+          end
+        else
+          # renderopts[:_layout] = (@_layout || false)
+          render action, renderopts # May have special iframe layout
+        end
+       }
+      format.json { 
+        hresult = with_format("html") do
+          # Blithely assuming that we want a modal-dialog element if we're getting JSON
+          renderopts[:layout] = (@layout || false)
+          render_to_string action, renderopts # May have special iframe layout
+        end
+        renderopts[:json] = { code: hresult, area: response_service.area_class, how: "bootstrap" }
+        render renderopts
+      }
+      format.js {
+        # XXX??? Must have set @partial in preparation
+        debugger
+        render renderopts.merge( action: "capture" )
+      }
     end
   end
             

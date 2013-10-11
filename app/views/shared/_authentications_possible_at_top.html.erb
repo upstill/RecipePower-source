@@ -1,9 +1,0 @@
-<div class="auth_poss <%= @area %>">
-    <strong>You might click on one of these services:</strong><br>
-	  <%= auth_possible "Facebook", :at_top => (@area == "at_top") %>
-	  <%= auth_possible "Google", :svc_lower => "google_oauth2", :at_top => (@area == "at_top") %>
-	  <%= auth_possible "Twitter", :at_top => (@area == "at_top") %>
-	  <%= auth_possible "Aol", :at_top => (@area == "at_top") %>
-	  <%= auth_possible "Yahoo", :at_top => (@area == "at_top") %>
-	  <%= auth_possible "OpenID", :svc_lower => "open_id", :at_top => (@area == "at_top") %>
-</div>

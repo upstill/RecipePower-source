@@ -1,5 +1,6 @@
 <%# Fields for an edit-user dialog %>
-<%= modal_dialog :edit_user, @Title || "Edit Profile", area: @area do %>
+<%# modal_dialog :edit_user, @Title || "Edit Profile", area: @_area do %>
+<%= modal_dialog :edit_user, @Title || "Edit Profile", response_service.modal_options do %>
 	<%= simple_form_for @user, html: { class: "edit_user json", 'data-type' => :json } do |f| %>
 		<%= modal_body do %>
 		  <%= form_errors_helper f %>

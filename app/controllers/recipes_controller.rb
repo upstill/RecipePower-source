@@ -16,7 +16,7 @@ class RecipesController < ApplicationController
     truncated = truncate @recipe.title, :length => 140
     respond_to do |fmt|
       fmt.html { 
-        if (params[:layout] && params[:layout] == "injector")
+        if response_service.injector? # (params[:_layout] && params[:_layout] == "injector")
           render text: notice
         else
           redirect_to url, :notice  => notice
@@ -31,10 +31,10 @@ class RecipesController < ApplicationController
         replacements << [ "."+feed_list_element_class(@feed_entry) ] if @feed_entry
         @user = @recipe.current_user ? Recipe.find(@recipe.current_user) : current_user_or_guest
         if current_user.browser.should_show(@recipe) && !destroyed
-          replacements[0][1] = with_format("html") do render_to_string :partial => "recipes/golink" end
-          replacements[1][1] = with_format("html") do render_to_string :partial => "shared/recipe_smallpic" end
-          replacements[2][1] = with_format("html") do render_to_string :partial => "shared/recipe_grid" end
-          replacements[3][1] = with_format("html") do render_to_string :partial => "shared/feed_entry" end if @feed_entry
+          replacements[0][1] = with_format("html") do render_to_string partial: "recipes/golink" end
+          replacements[1][1] = with_format("html") do render_to_string partial: "shared/recipe_smallpic" end
+          replacements[2][1] = with_format("html") do render_to_string partial: "shared/recipe_grid" end
+          replacements[3][1] = with_format("html") do render_to_string partial: "shared/feed_entry" end if @feed_entry
         end
         render json: { 
                        done: true, # Denotes recipe-editing is finished
@@ -96,8 +96,9 @@ class RecipesController < ApplicationController
         @nav_current = :addcookmark
         @recipe ||= Recipe.new
         @recipe.current_user = current_user_or_guest_id # session[:user_id]
-        @area = params[:area]
-        dialog_boilerplate 'new', 'modal'
+        # @_area = params[:_area]
+        # dialog_boilerplate 'new', 'modal'
+        smartrender area: 'modal'
     end
   end
 
@@ -132,8 +133,9 @@ class RecipesController < ApplicationController
        @nav_current = :addcookmark
        # render :action => 'new'
        @recipe.current_user = current_user_or_guest_id # session[:user_id]
-       @area = params[:area]
-       dialog_boilerplate 'new', 'modal'
+       # @_area = params[:_area]
+       # dialog_boilerplate 'new', 'modal'
+       smartrender :action => 'new', area: 'modal'
     end
   end
 
@@ -142,18 +144,19 @@ class RecipesController < ApplicationController
     # Here is where we take a hit on the "Add to RecipePower" widget,
     # and also invoke the 'new cookmark' dialog. The difference is whether
     # parameters are supplied for url, title and note (though only URI is required).
-    @area = params[:area] || "at_top"
-  	dialog_only = params[:how] == "modal" || params[:how] == "modeless"
+    # @_area = params[:_area] || "at_top"
+    # dialog_only = params[:_how] == "modal" || params[:_how] == "modeless"
     respond_to do |format|
       format.html { # This is for capturing a new recipe and tagging it using a new page. 
+        debugger
         if current_user
           @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe]||{}, true, params[:extractions] # session[:user_id], params
           # The injector (capture.js) calls for this to fill the iframe on the foreign page.
-          @layout = "injector"
+          # @_layout = "injector"
           if @recipe.id
             deferred_capture true # Delete the pending recipe
-            if params[:area]
-              render :edit, :layout => (params[:layout] || dialog_only)
+            if response_service.injector?
+              smartrender :action => :edit # :_layout => (params[:_layout] || response_service.dialog?)
             else
               # If we're collecting a recipe outside the context of the iframe, just
               # redirect back to the recipe. We can't edit the recipe, but too bad.
@@ -161,19 +164,22 @@ class RecipesController < ApplicationController
             end
           else
             @resource = @recipe
-            render "pages/resource_errors", :layout => (params[:layout] || dialog_only)
+            render "pages/resource_errors", response_service.render_params
           end
         else
           # Nobody logged in => 
           defer_capture params.slice(:recipe, :extractions, :sourcehome )
-          redirect_to new_authentication_url(area: "at_top", layout: "injector", sourcehome: params[:sourcehome] )
+          # redirect_to new_authentication_url(area: "at_top", layout: "injector", sourcehome: params[:sourcehome] )
+          redirect_to new_authentication_url( response_service.redirect_params params.slice(:sourcehome) )
         end
       }
       format.json {
+        debugger
         if current_user          
           @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe]||{}, true, params[:extractions] # session[:user_id], params
           if @recipe.id
-            @data = { onget: [ "dialog.get_and_go", nil, collection_url(layout: false) ] } if params[:area] != "at_top"
+            # @data = { onget: [ "dialog.get_and_go", nil, collection_url(layout: false) ] } if params[:_area] != "at_top"
+            @data = { onget: [ "dialog.get_and_go", nil, collection_url(layout: false) ] } unless response_service.injector?
             deferred_capture true # Delete the pending recipe
             codestr = with_format("html") { render_to_string :edit, layout: false }
           else
@@ -184,7 +190,8 @@ class RecipesController < ApplicationController
         else
           # Nobody logged in => 
           defer_capture params.slice(:recipe, :extractions, :sourcehome )
-          redirect_to new_authentication_url(area: "at_top", layout: "injector", sourcehome: params[:sourcehome] )
+          response_service.is_injector
+          redirect_to new_authentication_url(recipe_service.params params.slice(:sourcehome) )
         end
       }
       format.js { 
@@ -192,6 +199,7 @@ class RecipesController < ApplicationController
         # (from capture.js) which then renders the recipe editor into an iframe, powered by injector.js
         # We need a domain to pass as sourcehome, so the injected iframe can communicate with the browser.
         # This gets extracted from the href passed as a parameter
+        response_service.is_injector
         url = params[:recipe][:url]
         msg = %Q{"Sorry, but RecipePower can't make sense of the cookmark '#{url}'"}
         begin
@@ -203,7 +211,8 @@ class RecipesController < ApplicationController
             render js: %Q{alert(#{msg});}
           else
             params[:recipe][:title] = "Recipe from "+@site.name if params[:recipe][:title].blank?
-            @url = capture_recipes_url area: "at_top", layout: "injector", sourcehome: @site.domain, recipe: params[:recipe]
+            # @url = capture_recipes_url area: "at_top", layout: "injector", sourcehome: @site.domain, recipe: params[:recipe]
+            @url = capture_recipes_url response_service.redirect_params( params.slice(:recipe).merge sourcehome: @site.domain)
             render
           end
         rescue
@@ -221,13 +230,14 @@ class RecipesController < ApplicationController
       @Title = @recipe.title # Get title from the recipe
       if params[:pic_picker]
         # Setting the pic_picker param requests a picture-editing dialog
-        render :partial=> "shared/pic_picker"
+        render partial: "shared/pic_picker"
       else
         @nav_current = nil
-        @area = params[:area]
+        # @_area = params[:_area]
         # Now go forth and edit
-        @layout = params[:layout]
-        dialog_boilerplate('edit', 'at_left')
+        # @_layout = params[:_layout]
+        # dialog_boilerplate('edit', 'at_left')
+        smartrender area: 'at_left'
       end
     else
       @Title = "Cookmark a Recipe"
@@ -264,10 +274,11 @@ class RecipesController < ApplicationController
         @Title = "Tag That Recipe (Try Again)!"
         @nav_current = nil
         # render :action => 'edit', :notice => "Huhh??!?"
-        @area = "page" # params[:area]
+        # @_area = "page" # params[:_area]
         # Now go forth and edit
-        @layout = nil # params[:layout]
-        dialog_boilerplate('edit', 'at_left')
+        # @_layout = nil # params[:_layout]
+        # dialog_boilerplate('edit', 'at_left')
+        smartrender :action => 'edit', area: 'at_left'
       end
     end
   end
@@ -277,7 +288,7 @@ class RecipesController < ApplicationController
   def touch
     @recipe = Recipe.ensure current_user_or_guest_id, params.slice(:id, :url), false # session[:user_id], params
     respond_to do |format|
-      list_element_body = render_to_string(:partial => "shared/recipe_smallpic") 
+      list_element_body = render_to_string partial: "shared/recipe_smallpic"
       format.json { 
           render json: { touch_class: touch_date_class(@recipe), 
                          touch_body: touch_date_elmt(@recipe), 
@@ -298,7 +309,7 @@ class RecipesController < ApplicationController
     if current_user
       @recipe = Recipe.ensure current_user_or_guest_id, params, true
       @list_name = "mine"
-      @area = params[:area]
+      # @_area = params[:_area]
       if @recipe.errors.empty?
         notice = truncate( @recipe.title, :length => 100)+" now appearing in your collection."
         if params[:uid]

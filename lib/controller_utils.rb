@@ -10,11 +10,12 @@ def with_format(format, &block)
 end
 
 # Generalized response for dialog for a particular area
+=begin
 def dialog_boilerplate(action, default_area=nil, renderopts={})
   flash.now[:notice] = params[:notice] unless flash[:notice] # ...should a flash message come in via params
-  @area = params[:area]
-  @layout = params[:layout]
-  @partial = !params[:partial].blank?
+  @_area = params[:_area]
+  @_layout = params[:_layout]
+  @_partial = !params[:_partial].blank?
   respond_to do |format|
     format.html {
       @area ||= "page"  
@@ -25,28 +26,29 @@ def dialog_boilerplate(action, default_area=nil, renderopts={})
           render action, renderopts
         end
       else
-        renderopts[:layout] = (@layout || false)
+        renderopts[:_layout] = (@_layout || false)
         render action, renderopts # May have special iframe layout
       end
      }
     format.json { 
-      @partial = true
+      @_partial = true
       @area ||= (default_area || "floating")
       hresult = with_format("html") do
         # Blithely assuming that we want a modal-dialog element if we're getting JSON
-        renderopts[:layout] = (@layout || false)
+        renderopts[:_layout] = (@_layout || false)
         render_to_string action, renderopts # May have special iframe layout
       end
       renderopts[:json] = { code: hresult, area: @area, how: "bootstrap" }
       render renderopts
     }
     format.js {
-      # Must have set @partial in preparation
+      # Must have set @_partial in preparation
       renderopts[:action] = "capture"
       render renderopts
     }
   end
 end
+=end
   
   # Default broad-level error report based on controller and action
   def express_error_context resource

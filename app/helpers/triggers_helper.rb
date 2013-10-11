@@ -13,9 +13,9 @@ module TriggersHelper
 	def link_to_modal(label, path, options={})
 	  # We get the dialog with a JSON request
 	  if options[:data]
-	    options[:data].merge! type: :JSON
+	    options[:data].merge! type: "json"
     else
-      options[:data] = { type: :JSON }
+      options[:data] = { type: "json" }
     end
     # The selector optionally specifies an element to replace.
     # Move it to the element's data

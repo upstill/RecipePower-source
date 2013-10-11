@@ -9,14 +9,6 @@ GIT
       sax-machine (~> 0.2.0.rc1)
 
 GIT
-  remote: git://github.com/scambra/devise_invitable.git
-  revision: b10a796980eaf592f2d9e1c8f85565fd1e8ef3dc
-  specs:
-    devise_invitable (1.2.2)
-      actionmailer (>= 3.2.6, < 5)
-      devise (>= 3.1.0)
-
-GIT
   remote: git://github.com/smartinez87/exception_notification.git
   revision: 9eda7885682b2e3ab1e6e6bc53e8157ce65d9fb4
   specs:
@@ -106,6 +98,9 @@ GEM
       railties (>= 3.2.6, < 5)
       thread_safe (~> 0.1)
       warden (~> 1.2.3)
+    devise_invitable (1.3.0)
+      actionmailer (>= 3.2.6, < 5)
+      devise (>= 3.1.0)
     diff-lcs (1.2.4)
     erubis (2.7.0)
     eventmachine (1.0.3)
@@ -288,7 +283,7 @@ DEPENDENCIES
   delayed_job
   delayed_job_active_record
   devise (~> 3.1.0)
-  devise_invitable!
+  devise_invitable (~> 1.3.0)
   eventmachine (~> 1.0.3)
   exception_notification!
   feedzirra!

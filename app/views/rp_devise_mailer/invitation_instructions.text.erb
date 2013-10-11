@@ -1,5 +1,5 @@
 <% inviter_name = @resource.invitation_issuer %>
-<% accept_url = accept_user_invitation_url(:invitation_token => @resource.invitation_token) %>
+<% accept_url = accept_user_invitation_url(:invitation_token => @resource.raw_invitation_token) %>
 		
 <%= inviter_name || "Someone" %> is inviting you to join them on RecipePower (<%= accept_url %> )<%= @resource.invitation_message.blank? ? "." : ", saying" %>
 
