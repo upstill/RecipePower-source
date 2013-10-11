@@ -1,9 +1,4 @@
-<div class="nav affix browser_house ">
-	<ul class="nav nav-tabs nav-stacked scrollable">
-		<%= yield :browser_nav %>
-		<div class="content_browser_cover" onclick="RP.content_browser.click_to_browser(event);" style="display: <%= (params[:controller] != "collection") ? "block" : "none" %>"></div>
-	</ul>
-</div>
+		<%= yield :nav %>
 <div id="footer_nav_links">
 	<%= footer_navlinks %>
 </div>

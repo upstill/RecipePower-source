@@ -44,7 +44,7 @@ class ResponseServices
   
   # True if we are to render a whole page
   def page?
-    @area == "page"
+    @area == "page" || @format == "page"
   end
   
   def is_mobile(on=true)
@@ -73,22 +73,26 @@ class ResponseServices
     injector? ? options_in.merge( :target => "injector" ) : options_in
   end
   
+  # What's the appropriate layout for the current context?
+  def layout
+    case 
+    when mobile?
+      "jqm"
+    when dialog?
+      false
+    when injector?
+      "injector"
+    when page?
+      "application"
+    else
+      false
+    end
+  end
+  
   # Return appropriate render parameters, asserting defaults as necessary
   def render_params defaults = {}
     @area = defaults[:area] if defaults[:area]
-    defaults.merge layout: 
-      case 
-      when mobile?
-        "jqm"
-      when dialog?
-        false
-      when injector?
-        "injector"
-      when page?
-        "application"
-      else
-        false
-      end
+    defaults.merge layout: layout
   end
   
   # Return the class specifier for styling according to the target

@@ -42,33 +42,33 @@
   <body>
 		<%# This is the standard home screen for mobile %>
 		<div data-role="page" id="Home">
-		    <div data-role="header" data-position="fixed">
-		        <h1>RecipePower</h1>
-						<% if content_for? :nav %>
-			        <a href="#Nav" >Nav</a>
-						<% end %>
-						<% if content_for? :seeker_entry %>
-							<%= yield :seeker_entry %>
-						<% end %>
-		        <a href="#Settings" data-transition="slideup" data-icon="gear">Settings</a>
-		    </div>
-		    <div data-role="content">
-						<% if content_for? :home_content %>
-							<%= yield :home_content %>
-						<% end %>
-		    </div>
-		    <div data-role="footer" data-position="fixed">
-		        <h4>This is a <a href="http://nitch.cc">Nitch</a> app.</h4>
-		    </div>
+	    <div data-role="header" data-position="fixed">
 				<% if content_for? :nav %>
-			    <div data-role="panel" id="Nav">
-		        <h3>Navigation</h3>
-		        <p>Peek-a-boo!</p>
-						<%= yield :nav %>
-		        <a data-role="button" data-rel="close" href="#Home">Close panel</a>
-			    </div>
+	        <a href="#Nav" >Nav</a>
 				<% end %>
+				<span class="brand">RecipePower</span>
+				<% if content_for? :seeker_entry %>
+					<%= yield :seeker_entry %>
+				<% end %>
+        <a href="#Settings" data-transition="slideup" data-icon="gear">Settings</a>
+	    </div>
+	    <div data-role="content">
+				<%= yield %>
+	    </div>
+	    <div data-role="footer" data-position="fixed">
+				<%= footer_navlinks true %>
+	    </div>
+			<% if content_for? :nav %>
+		    <div data-role="panel" id="Nav">
+	        <h3>Navigation</h3>
+	        <p>Peek-a-boo!</p>
+					<%= yield :nav %>
+	        <a data-role="button" data-rel="close" href="#Home">Close panel</a>
+		    </div>
+			<% end %>
 		</div>
-		<%= yield %>
+		<% if content_for? :pages %>
+			<%= yield :pages %>
+		<% end %>
 	</body>
 </html>

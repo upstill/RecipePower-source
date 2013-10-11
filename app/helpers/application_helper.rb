@@ -290,7 +290,7 @@ module ApplicationHelper
     (header_link+menu).html_safe
   end
     
-  def footer_navlinks
+  def footer_navlinks for_mobile=false
   	navlinks = []
   	# navlinks << link_to_modal("About", popup_path(name: "pages/about_modal")) 
   	navlinks << link_to_modal("About", about_path) 
@@ -303,7 +303,11 @@ module ApplicationHelper
 	      link_to_modal("Cookmark Button", popup_path(name: "pages/starting_step2_modal") )
 	    ]
   	# navlinks << feedback_link("Feedback")
-  	[ navlinks.join('  |  '), infolinks.join('  |  ') ].compact.join("<br>").html_safe
+  	if for_mobile 
+  	  navlinks.flatten.join(' ').html_safe
+  	else
+  	  [ navlinks.join('  |  '), infolinks.join('  |  ') ].compact.join("<br>").html_safe
+  	end
   end
   
   def question_section q, &block

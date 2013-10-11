@@ -2,6 +2,7 @@ require './lib/controller_authentication.rb'
 require './lib/seeker.rb'
 
 class ApplicationController < ActionController::Base
+  # layout :rs_layout # Declare in any controller to let response_service pick the layout
   protect_from_forgery with: :exception
   
   before_filter :check_flash
@@ -20,6 +21,11 @@ class ApplicationController < ActionController::Base
     helper_method :deferred_collect
     helper_method :deferred_notification
     include ApplicationHelper
+  
+  # Use the layout stipulated by the response_service
+  def rs_layout
+    response_service.layout
+  end
     
   # Get a presenter for the object fron within a controller
   def present(object, klass = nil)
@@ -90,6 +96,17 @@ class ApplicationController < ActionController::Base
         format = "json"
         query_path = @seeker.query_path
       end
+      # Render the navigation panel
+  		browserlist = @browser.node_list.collect { |node|
+    		  @node = node
+    		  render_to_string partial: "collection/node"
+    		}.join(' ')
+      content_for :nav,
+        %Q{<div class="nav affix browser_house ">
+          <ul class="nav nav-tabs nav-stacked scrollable">
+            #{browserlist}
+        	</ul>
+        </div>}.html_safe
       content_for :seeker_entry, 
                   render_to_string(
                     :template => "shared/seeker_entry", 
