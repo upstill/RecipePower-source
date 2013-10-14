@@ -3,10 +3,10 @@
 	<td><%= @user.about %></td>
 	<td><%= taggable_list @user %></td>
 	<td><%= @user.recipes.count %></td>
-	<td><%= link_to (@user.channel? ? 'Add to Channels' : 'Make Friend'), collect_user_path(@user), :class => "btn btn-mini" %></td>
+	<td><%= link_to (@user.channel? ? 'Add to Channels' : 'Make Friend'), collect_user_path(@user), :class => "btn btn-xs" %></td>
 	<% if permitted_to? :edit, @user %>
-		<td><%= link_to_modal 'Edit', edit_user_path(@user), :class => "btn btn-mini" %></td>
-		<td><%= link_to 'Hide', user_path(@user, user: { private: true }), :class => "btn btn-mini", method: :put %></td>
-		<td><%= link_to 'Destroy', @user, confirm: "Are you sure about deleting this user? It's a rather drastic step.", :class => "btn btn-mini btn-danger", method: :delete %></td>
+		<td><%= link_to_modal 'Edit', edit_user_path(@user), :class => "btn btn-xs" %></td>
+		<td><%= link_to 'Hide', user_path(@user, user: { private: true }), :class => "btn btn-xs", method: :put %></td>
+		<td><%= link_to 'Destroy', @user, confirm: "Are you sure about deleting this user? It's a rather drastic step.", :class => "btn btn-xs btn-danger", method: :delete %></td>
 	<% end %>
 </tr>

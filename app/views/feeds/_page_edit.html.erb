@@ -2,7 +2,7 @@
 
 <%= render 'form' %>
 <% permitted_to?(:destroy, :feeds) do %>
-  <%= link_to('Destroy', @feed, :method => :delete, :class => "btn btn-mini btn-danger", confirm: 'Are you sure?') %>
+  <%= link_to('Destroy', @feed, :method => :delete, :class => "btn btn-xs btn-danger", confirm: 'Are you sure?') %>
 <% end %>
 
 <%= link_to 'Show', @feed, class: "btn" %>

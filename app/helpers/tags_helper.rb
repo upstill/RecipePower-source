@@ -56,7 +56,7 @@ module TagsHelper
     @tagserv ||= TagServices.new(@tag)
     tag_info_section( 
       @tagserv.recipes(true).uniq.collect { |rcp| 
-        taglink = (permitted_to? :edit, rcp) ? edit_recipe_link( "Edit", rcp, class: "btn btn-mini") : ""
+        taglink = (permitted_to? :edit, rcp) ? edit_recipe_link( "Edit", rcp, class: "btn btn-xs") : ""
         content_tag :div, "#{link_to rcp.trimmed_title, rcp.url} #{recipe_popup rcp} #{taglink}".html_safe, class: "tog_info_rcp_title"
       }, 
       contentclass: "", 

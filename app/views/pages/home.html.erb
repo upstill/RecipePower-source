@@ -9,8 +9,8 @@
 <div class="centerblock sub">Never Lose A Recipe Again</div>
 <div class="centerblock">
 	<% if current_user %>
-		<%= link_to("To My Collections!!", collection_path(), class: "btn btn-large btn-info") %>
-		<%# link_to("Show Me First", collection_path(popup: "pages/need_to_know_modal", :on_tour => true), class: "btn btn-large btn-info") %>
+		<%= link_to("To My Collections!!", collection_path(), class: "btn btn-lg btn-info") %>
+		<%# link_to("Show Me First", collection_path(popup: "pages/need_to_know_modal", :on_tour => true), class: "btn btn-lg btn-info") %>
 	<% else %>
 		<%= signup_button %>
 	<% end %>

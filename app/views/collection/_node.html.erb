@@ -1,15 +1,15 @@
-<li class="<%= @node.css_class %>" 
+<li class="list-group-item <%= @node.css_class %>" 
 	id="<%= @node.css_id %>"
 	data-parent_id="<%= @browser.parent_of(@node).css_id %>"
 	<%= %Q{style="display: none;"}.html_safe unless (@node.selected || @node.visible) %> >
 		<% if add_path = @node.add_path %>
-			<div class="mod_box">
-				<%= link_to "&plus;".html_safe, add_path, class: "mod_button" %>
-			</div>
+			<span class="badge">
+				<%= link_to "&plus;".html_safe, add_path %>
+			</span>
 		<% elsif delete_path = @node.delete_path %>
-			<div class="mod_box">
-				<%= link_to "&times;".html_safe, delete_path, class: "delete_element", method: :POST %>
-			</div>
+			<span class="badge">
+				<%= link_to "&times;".html_safe, delete_path, method: :POST %>
+			</span>
 		<% end %>
 	<%= link_to @node.handle, "#", title: (@node.selected ? "" : @node.popup_text) %>
 </li>

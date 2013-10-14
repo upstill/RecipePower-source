@@ -47,8 +47,8 @@ module FeedsHelper
   def feed_approval
 
     if @feed.approved.nil?
-      yes_btn = link_to 'Y', approve_feed_path(@feed, approve: "Y"), class: "btn btn-mini", remote: true, method: "POST"
-      no_btn = link_to 'N', approve_feed_path(@feed, approve: "N"), class: "btn btn-mini", remote: true, method: "POST"
+      yes_btn = link_to 'Y', approve_feed_path(@feed, approve: "Y"), class: "btn btn-xs", remote: true, method: "POST"
+      no_btn = link_to 'N', approve_feed_path(@feed, approve: "N"), class: "btn btn-xs", remote: true, method: "POST"
   		(yes_btn+no_btn).html_safe
   	else
   	  @feed.approved ? "Y" : "N"

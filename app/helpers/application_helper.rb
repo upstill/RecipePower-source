@@ -345,15 +345,15 @@ module ApplicationHelper
       if session[:invitation_token]
         label = "Accept Invitation" 
         path = accept_user_invitation_path(invitation_token: session[:invitation_token] )
-        button_to_modal(label, path, class: "btn btn-large btn-success" ) 
+        button_to_modal(label, path, class: "btn btn-lg btn-success" ) 
       elsif token = deferred_notification
   			@user = Notification.find_by_notification_token(token).target
-  			button_to_modal "Take Share", new_user_session_path(user: { id: @user.id, email: @user.email } ), class: "btn btn-large btn-success" 
+  			button_to_modal "Take Share", new_user_session_path(user: { id: @user.id, email: @user.email } ), class: "btn btn-lg btn-success" 
       else
         label = "Sign Me Up"
         selector = "div.dialog.signup"
         path = collection_path()
-        button_to_modal(label, path, class: "btn btn-large btn-success", selector: selector ) 
+        button_to_modal(label, path, class: "btn btn-lg btn-success", selector: selector ) 
       end
     end
   end
