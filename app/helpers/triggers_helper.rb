@@ -5,7 +5,7 @@ module TriggersHelper
   
   # Trigger a modal dialog via button
 	def button_to_modal(label, path, options={})
-	  options[:class] ||= "btn btn-xs"
+	  options[:class] ||= "btn btn-default btn-xs"
 	  link_to_modal label, path, options
 	end
 	
@@ -49,7 +49,7 @@ module TriggersHelper
     data[:refresh] = true # Default for updating
 	  data[:url] = assert_query url, mod_time: mod_time.to_s
     options = data.slice! :url, :last_modified, :hold_msg, :msg_selector, :dataType, :type, :refresh, :contents_selector
-	  options[:class] = "btn btn-xs update-button"
+	  options[:class] = "btn btn-default btn-xs update-button"
 	  options[:data] = data
   	options.merge! remote: true
     link_to label, "#", options
