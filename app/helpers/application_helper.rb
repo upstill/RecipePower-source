@@ -283,11 +283,13 @@ module ApplicationHelper
     menu = 
     content_tag :ul, 
       ("<li>#{ item_list.join("</li><li>") }</li>").html_safe, 
-      class: "dropdown-menu", 
+      class: "dropdown-menu", # "nav navbar-nav", 
       role: "menu",
       :"aria-labelledby" => "userMenuLabel"
       
-    (header_link+menu).html_safe
+    content_tag :li,
+      (header_link+menu),
+      class: "dropdown"
   end
     
   def footer_navlinks

@@ -5,8 +5,8 @@ $iconWhiteSpritePath: image-path('glyphicons-halflings-white.png');
 // Set variables here, i.e. BEFORE loading bootstrap
 $navbarBackground: #555;
 $navbarBackgroundHighlight: #888;
-$navbarText: #eee;
 $navbarLinkColor: #eee;
+$navbar-default-color:             #fff;
 
 $guideText:                #AB812E !default;
 $guideBackground:          #FAD8A7 !default;
@@ -14,12 +14,27 @@ $guideBorder:              darken(adjust-hue($guideBackground, -10), 7%) !defaul
 
 @import "bootstrap";
 
-@import "bootstrap-responsive";
+.navbar-inverse .navbar-nav > li > a { 
+	color: #eeeeee;
+}
+
+.navbar-inverse .navbar-header > a  { 
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 20px;
+	font-weight: 200;
+	color: #eeeeee;
+}
+
+// @import "bootstrap-responsive";
 
 body { padding-top: 60px; }
 
 .modal-body {
     max-height: 520px;
+}
+
+.navbar-form {
+	float: left;
 }
 
 div.dialog.modal {
@@ -67,6 +82,24 @@ label {
 	border: 2px solid black;
 }
 
+.button_house {
+	position: fixed;
+	top: 60px;
+	left: 20px;
+	// width: 150px;
+	height: 60px;
+	text-align: center;
+}
+
+.content-column {
+	border: 2px solid red;
+}
+
+.navigation-column {
+	border: 2px solid blue;
+}
+
+/*
 .left_house {
     display: block;
     position:fixed;
@@ -78,30 +111,25 @@ label {
 		margin: 0px;
 		padding: 0px;
 }
-
-.button_house {
-	position: fixed;
-	top: 60px;
-	left: 20px;
-	// width: 150px;
-	height: 60px;
-	text-align: center;
-}
+*/
 
 .browser_house {
-	display: block;
-	position: absolute;
-	height: auto;
-  bottom: 45px;
-  top:0px;
-  left:0px;
-  right:0;
+	// display: block;
+	// position: absolute;
+	// height: auto;
+  // bottom: 45px;
+  // top:0px;
+  // left:0px;
+  // right:0;
 	background-color: white; 
-	margin-left: 30px;
+	// margin-left: 30px;
 	ul.scrollable {
 		border: none;
 		border-bottom: 1px solid #DDDDDD;
 	}
 }
 
-@import "bootstrap-responsive";
+.thumbnail {
+	width:200px;
+	margin-bottom:20px;
+}
