@@ -1,5 +1,5 @@
 <% logger.debug "Rendering recipe #{@recipe.id}" %>
-	<div class="thumbnail <%= recipe_grid_element_class @recipe %>" >
+	<div class="collection-item <%= recipe_grid_element_class @recipe %>" >
 		<%= recipe_image_div @recipe, "rcp_grid_pic_box" %>
 		<div class="rcp_grid_datablock">
 			<h5 class="rcp_grid_element_title"><%= link_to @recipe.trimmed_title, @recipe.url %></h5>

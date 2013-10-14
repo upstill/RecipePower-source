@@ -14,6 +14,10 @@ $guideBorder:              darken(adjust-hue($guideBackground, -10), 7%) !defaul
 
 @import "bootstrap";
 
+.btn-xs {
+	font-size:10.5px;
+}
+
 .navbar-inverse .navbar-nav > li > a { 
 	color: #eeeeee;
 }
@@ -90,7 +94,7 @@ label {
 	border: 2px solid blue;
 }
 
-.thumbnail {
+.collection-item {
 	width:200px;
 	margin-bottom:20px;
 }
