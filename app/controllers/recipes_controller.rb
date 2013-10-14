@@ -286,6 +286,7 @@ class RecipesController < ApplicationController
   # Register that the recipe was touched by the current user--if they own it.
   # Since that recipe will now be at the head return a new first-recipe in the list.
   def touch
+    debugger
     @recipe = Recipe.ensure current_user_or_guest_id, params.slice(:id, :url), false # session[:user_id], params
     respond_to do |format|
       list_element_body = render_to_string partial: "shared/recipe_smallpic"

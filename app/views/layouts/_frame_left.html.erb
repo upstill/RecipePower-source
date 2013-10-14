@@ -1,20 +1,16 @@
-<% if false %>
-This is the browser column on the left. It wraps to the column width
-<% else %>
-	<% if session[:on_tour] %>
-		<div class="button_house">
-			<%= signup_button %>
-		</div>
-	<% end %>
-	<div class="bs-sidebar hidden-print" role="complementary">
-		<ul class="list-group">
-			<% @browser.node_list.each do |node| %>
-			  <% @node = node %>
-			  <%= render partial: "collection/node" %>
-			<% end %>
-		</ul>
+<% if session[:on_tour] %>
+	<div class="button_house">
+		<%= signup_button %>
 	</div>
 <% end %>
-	<div id="footer_nav_links">
-		<%# footer_navlinks %>
-	</div>
+<div class="bs-sidebar hidden-print" role="complementary">
+	<ul class="list-group">
+		<% @browser.node_list.each do |node| %>
+		  <% @node = node %>
+		  <%= render partial: "collection/node" %>
+		<% end %>
+	</ul>
+</div>
+<div id="footer_nav_links">
+	<%= footer_navlinks %>
+</div>

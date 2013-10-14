@@ -66,7 +66,11 @@ module DialogsHelper
     options = options.slice! :area, :show, :noflash, :body_contents, :requires
     # options[:id] = "recipePowerDialog"
     options[:title] = ttl if ttl
-    content_tag(:div, header+body, options).html_safe
+    content_tag(:div, 
+      content_tag(:div, 
+        content_tag(:div, header+body, class: "modal-content"), 
+        class: "modal-dialog"), 
+      options).html_safe
   end
   
   def modal_header( ttl, doflash )

@@ -23,6 +23,7 @@ private
   
   # Confirm that the thumbnail accurately reflects the recipe's image
   def check_thumbnail
+    debugger
     picurl = nil if picurl.blank?
     if picurl.nil? || picurl =~ /^data:/
       # Shouldn't have a thumbnail

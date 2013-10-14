@@ -1,8 +1,10 @@
 <%= content_tag(:div, 
-			class: "dialog edit_recipe at_left hide", 
+			class: "dialog edit_recipe modal at_left hide", 
 			style: "overflow:visible", 
 			data: (defined?(@data) ? @data : {})) do %>
-	<div class="modal-header">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
 		<% unless recipe %>
 			<input class="close cancel" data-dismiss="modal" name="commit" type="submit" value="x" />
 		<% end %>
@@ -68,4 +70,6 @@
 	    <input class="submit btn btn-primary" name="commit" type="submit" value="Save" data-method="put" />
 		</div>
 	</form>
+	</div>
+	</div>
 <% end %>

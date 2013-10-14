@@ -39,10 +39,10 @@
 	    <div class="row">
 				<% if params[:controller] == "collection" %>
 					<%# The collection lays out as a control panel on the left and content on the right %>
-					<div class="navigation-column col-md-3 col-sm-4 col-xs-6 left_house">
+					<div class="navigation-column col-md-3 col-sm-4 col-xs-12 left_house">
 						<%= render 'layouts/frame_left' %>
 					</div>
-					<div class="content col-md-9 col-sm-8 col-xs-6 content-column">
+					<div class="content col-md-9 col-sm-8 col-xs-12 content-column">
 				<% else %>
 					<div class="content col-md-12 content-column">
 				<% end %>

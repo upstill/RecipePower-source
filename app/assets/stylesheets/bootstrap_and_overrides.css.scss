@@ -12,7 +12,31 @@ $guideText:                #AB812E !default;
 $guideBackground:          #FAD8A7 !default;
 $guideBorder:              darken(adjust-hue($guideBackground, -10), 7%) !default;
 
+label.control-label {
+	display: block;
+	margin-bottom: 5px;
+}
+
+div.control-group {
+	margin-bottom: 10px;
+}
+
 @import "bootstrap";
+
+.modal-header h3 {
+	margin: 0;
+	line-height: 30px;
+}
+
+.badge > a {
+	color: #ffffff;
+}
+
+li.list-group-item {
+	&.active > a {
+		color: #ffffff;
+	}
+}
 
 .btn-xs {
 	font-size:10.5px;
@@ -68,6 +92,7 @@ div.dialog.modal {
 	input.string,
 	input.password {
 		width: 90%;
+		margin-bottom: 10px;
 	}
 }
 

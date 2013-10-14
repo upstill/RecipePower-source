@@ -90,7 +90,9 @@ div.centerblock {
 }
 
 .rcp_grid_element_title {
-	margin-bottom: 0px;
+	margin-top: 7px;
+	font-weight: bold;
+	margin-bottom: 5px;
 }
 
 .rcp_grid_element_title > a {
@@ -105,7 +107,7 @@ div.centerblock {
 }
 
 .rcp_grid_element_footer {
-	height: 25px;
+	height: 28px;
 	align: right;
 	position: relative;
 	
@@ -192,8 +194,8 @@ div.content_browser_cover {
 #footer_nav_links {
 	width: 100%;
 	margin: 0 auto;
-	position: absolute;;
-	bottom: 10px; // 15px;
+	// position: absolute;
+	// bottom: 10px; // 15px;
 	z-index: 11;
 	text-align: center;
 }
