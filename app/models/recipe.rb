@@ -23,7 +23,7 @@ public # private
   
   # Confirm that the thumbnail accurately reflects the recipe's image
   def check_thumbnail
-    self.picurl = nil if self.picurl.blank?
+    self.picurl = nil if self.picurl.blank? || (self.picurl == "/assets/NoPictureOnFile.png")
     if self.picurl.nil? || self.picurl =~ /^data:/
       # Shouldn't have a thumbnail
       self.thumbnail = nil
@@ -60,7 +60,6 @@ public
   # The image may have an associated thumbnail, but it doesn't count unless 
   # the thumbnail reflects the image's current picurl
   def picdata
-    debugger
     case
     when !picurl || (picurl =~ /^data:/)
       picurl

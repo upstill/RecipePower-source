@@ -56,7 +56,6 @@ class Thumbnail < ActiveRecord::Base
         rescue Exception => e
         end
       end
-      save if id
     end
     self
   end
