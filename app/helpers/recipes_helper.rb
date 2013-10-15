@@ -7,7 +7,6 @@ module RecipesHelper
 # Sort out a suitable URL to stuff into an image thumbnail for a recipe
 def recipe_image_div(recipe, div_class="recipe_image_div")
   begin
-    debugger
     return unless url = recipe.picdata
     options = { 
       alt: "Image Not Accessible", 

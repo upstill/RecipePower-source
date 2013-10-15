@@ -1,5 +1,5 @@
 .edit_recipe.dialog {
-	&.at_left_prior {
+	&.at_left {
 		width:270px;
 		margin:3px;
 		padding:8px;
@@ -12,6 +12,7 @@
 			margin-top:5px;
 			width:100%;
 			height:auto;
+			display: block;
 			&.pic {
 				width:200px;
 				height:auto;
@@ -42,12 +43,6 @@
 					text-align:center;
 					margin-bottom:0px;
 					margin-top:5px;
-					.pic_picker_golink {
-						visibility: hidden;
-						&.loaded {
-							visibility: visible
-						}
-					}
 				}
 			}
 			&.tags {
