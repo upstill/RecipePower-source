@@ -8,11 +8,8 @@ module RecipesHelper
 def recipe_image_div(recipe, div_class="recipe_image_div")
   begin
     return unless url = recipe.picdata
-    options = { 
-      alt: "Image Not Accessible", 
-      id: "RecipeImage"+recipe.id.to_s,
-      data: { fillmode: "width" } }
-    options[:class] = "stuffypic" unless url =~ /^data:/
+    options = { alt: "Image Not Accessible", id: "RecipeImage"+recipe.id.to_s }
+    options.merge!( class: "stuffypic", data: { fillmode: "width" } ) unless url =~ /^data:/
     content = image_tag(url, options)
   rescue Exception => e
     if url

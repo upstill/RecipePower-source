@@ -8,7 +8,7 @@ class Recipe < ActiveRecord::Base
   include Taggable
   include Referrable
   include Linkable
-  attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href
+  attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href, :picAR
   after_save :save_ref
 
   validates :title, :presence=>true 
@@ -19,21 +19,29 @@ class Recipe < ActiveRecord::Base
   # Before saving the recipe, take the chance to generate a thumbnail (in background)
   before_save :check_thumbnail
 
-private
+public # private
   
   # Confirm that the thumbnail accurately reflects the recipe's image
   def check_thumbnail
-    debugger
-    picurl = nil if picurl.blank?
-    if picurl.nil? || picurl =~ /^data:/
+    self.picurl = nil if self.picurl.blank?
+    if self.picurl.nil? || self.picurl =~ /^data:/
       # Shouldn't have a thumbnail
       self.thumbnail = nil
-    elsif picdata =~ /^data:/
-      # The current thumbnail is valid
-    elsif picurl && (self.thumbnail = Thumbnail.acquire( url, picurl )) && !thumbnail.thumbdata
-      Delayed::Job.enqueue self # Update the thumbnail image in background
+    elsif !(self.picdata =~ /^data:/)
+      update_thumb
     end
     true
+  end
+  
+  def update_thumb
+    return unless picurl 
+    self.thumbnail = Thumbnail.acquire( url, picurl )
+    if thumbnail && thumbnail.thumbdata
+      self.picAR = thumbnail.picAR unless self.thumbnail.picAR.nil?
+    else
+      # Update the thumbnail image in background
+      Delayed::Job.enqueue self 
+    end
   end
   
 public
@@ -42,13 +50,17 @@ public
   # the same image as the recipe (see check_thumbnail)
   def perform
     puts ">>>>>>>>>>>>>>>>>>>>>>>>>>>>> Validating picurl with url '#{url}' and picurl '#{picurl}'"
-    thumbnail.update_thumb if thumbnail
+    if thumbnail
+      thumbnail.update_thumb 
+      self.picAR = thumbnail.picAR unless self.thumbnail.picAR.nil?
+    end
   end
   
   # Return the image for the recipe, either as a URL or a data specifier
   # The image may have an associated thumbnail, but it doesn't count unless 
   # the thumbnail reflects the image's current picurl
   def picdata
+    debugger
     case
     when !picurl || (picurl =~ /^data:/)
       picurl

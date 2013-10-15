@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130923172034) do
+ActiveRecord::Schema.define(version: 20131015024543) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -174,6 +174,7 @@ ActiveRecord::Schema.define(version: 20130923172034) do
     t.text     "tagpane"
     t.integer  "thumbnail_id"
     t.text     "href"
+    t.float    "picAR"
   end
 
   create_table "references", force: true do |t|
@@ -292,6 +293,7 @@ ActiveRecord::Schema.define(version: 20130923172034) do
     t.integer  "thumbsize",   default: 200
     t.datetime "created_at",                null: false
     t.datetime "updated_at",                null: false
+    t.float    "picAR"
   end
 
   add_index "thumbnails", ["url"], name: "index_thumbnails_on_url", unique: true, using: :btree
