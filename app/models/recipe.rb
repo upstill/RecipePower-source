@@ -8,7 +8,7 @@ class Recipe < ActiveRecord::Base
   include Taggable
   include Referrable
   include Linkable
-  attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href, :picAR
+  attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href # , :picAR
   after_save :save_ref
 
   validates :title, :presence=>true 
