@@ -19,7 +19,7 @@ class Recipe < ActiveRecord::Base
   # Before saving the recipe, take the chance to generate a thumbnail (in background)
   before_save :check_thumbnail
 
-public # private
+private
   
   # Confirm that the thumbnail accurately reflects the recipe's image
   def check_thumbnail
@@ -28,20 +28,17 @@ public # private
       # Shouldn't have a thumbnail
       self.thumbnail = nil
     elsif !(self.picdata =~ /^data:/)
-      update_thumb
+      self.thumbnail = Thumbnail.acquire( url, picurl )
+=begin
+      if thumbnail && thumbnail.thumbdata
+        self.picAR = thumbnail.picAR unless thumbnail.picAR.nil?
+      else
+        # Update the thumbnail image in background
+      end
+=end
+      Delayed::Job.enqueue self unless thumbnail && thumbnail.thumbdata
     end
     true
-  end
-  
-  def update_thumb
-    return unless picurl 
-    self.thumbnail = Thumbnail.acquire( url, picurl )
-    if thumbnail && thumbnail.thumbdata
-      self.picAR = thumbnail.picAR unless self.thumbnail.picAR.nil?
-    else
-      # Update the thumbnail image in background
-      Delayed::Job.enqueue self 
-    end
   end
   
 public
@@ -52,7 +49,7 @@ public
     puts ">>>>>>>>>>>>>>>>>>>>>>>>>>>>> Validating picurl with url '#{url}' and picurl '#{picurl}'"
     if thumbnail
       thumbnail.update_thumb 
-      self.picAR = thumbnail.picAR unless self.thumbnail.picAR.nil?
+      # self.picAR = thumbnail.picAR unless thumbnail.picAR.nil?
     end
   end
   

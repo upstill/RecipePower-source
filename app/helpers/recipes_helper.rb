@@ -8,8 +8,11 @@ module RecipesHelper
 def recipe_image_div(recipe, div_class="recipe_image_div")
   begin
     return unless url = recipe.picdata
-    options = { alt: "Image Not Accessible", id: "RecipeImage"+recipe.id.to_s }
-    options.merge!( class: "stuffypic", data: { fillmode: "width" } ) unless url =~ /^data:/
+    options = { 
+      alt: "Image Not Accessible", 
+      id: "RecipeImage"+recipe.id.to_s,
+      style: "width:100%; height:auto;" }
+    # options.merge!( class: "stuffypic", data: { fillmode: "width" } ) # unless url =~ /^data:/
     content = image_tag(url, options)
   rescue Exception => e
     if url
@@ -21,7 +24,10 @@ def recipe_image_div(recipe, div_class="recipe_image_div")
       "Error rendering image #{url.truncate(255)} from "+ (recipe ? "recipe #{recipe.id}: '#{recipe.title}'" : "null recipe")
     ExceptionNotification::Notifier.exception_notification(request.env, e, data: { message: content}).deliver
   end
-  link_to content_tag( :div, content, class: div_class ), recipe.url
+  # link_to content_tag( :div, content, class: div_class ), recipe.url
+  content_tag :div, 
+    link_to(content, recipe.url), 
+    class: div_class
 end
   
 def grab_recipe_link label, recipe

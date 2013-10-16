@@ -2,15 +2,16 @@ require "RMagick"
 require './lib/controller_utils.rb'
 require "Domain"
 class Thumbnail < ActiveRecord::Base
-  attr_accessible :thumbsize, :thumbdata, :url, :site, :picAR
+  attr_accessible :thumbsize, :thumbdata, :url, :site # , :picAR
   before_save :update_thumb
   
   # Try to fetch the thumbnail data for the record, presuming a valid URL
   # If the fetch fails, leave the thumbdata as nil
   def update_thumb(force = false)
     self.thumbdata = nil if force
-    unless (thumbdata =~ /^data:/) && !picAR.nil?
-      self.status = self.thumbdata = self.picAR = nil
+    unless (thumbdata =~ /^data:/) # && !picAR.nil?
+      self.status = self.thumbdata = nil
+      # self.picAR = nil
       begin
         uri = URI.parse(url)
         if uri.host && 
@@ -50,7 +51,7 @@ class Thumbnail < ActiveRecord::Base
 =end
           thumb.format = "JPEG"
           quality = 20
-          self.picAR = thumb.rows.to_f/thumb.columns
+          # self.picAR = thumb.rows.to_f/thumb.columns
           thumb.write("thumb#{id.to_s}-M#{quality.to_s}.jpg") { self.quality = quality } unless true # Rails.env.production?
           self.thumbdata = "data:image/jpeg;base64," + Base64.encode64(thumb.to_blob{self.quality = quality })
         rescue Exception => e

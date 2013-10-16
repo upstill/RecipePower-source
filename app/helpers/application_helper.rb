@@ -56,9 +56,7 @@ module ApplicationHelper
     # "fitPic" class gets fit inside pic_box with Javascript and jQuery
     idstr = "rcpPic"+id.to_s
     selector = selector || "##{idstr}"
-    if picurl.blank?
-      picurl = placeholder_image
-    end
+    picurl = placeholder_image if picurl.blank?
     # Allowing for the possibility of a data URI
 #    if picurl.match(/^data:image/)
 #      %Q{<img alt="Some Image Available" class="thumbnail200" id="#{idstr}" src="#{picurl}" >}.html_safe
@@ -136,10 +134,9 @@ module ApplicationHelper
         idstr = "thumbnail"+(thumbNum = thumbNum+1).to_s
         content_tag( :div,
           image_tag(url, 
-            class: "fitPic", 
+            style: "width:100%; height: auto;", 
             id: idstr, 
-            onclick: "pickImg('input.icon_picker', 'div.preview img', '#{url}')", 
-            onload: "fitImageOnLoad('##{idstr}')", 
+            onclick: "pickImg('input.icon_picker', 'div.preview img', '#{url}')", class: "fitPic", onload: "fitImageOnLoad('##{idstr}')", 
             alt: "No Image Available"),
           class: "picCell")
       }.join('</td><td>')+
