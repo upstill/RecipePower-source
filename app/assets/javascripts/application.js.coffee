@@ -31,6 +31,7 @@
 #= require common/dialog
 #= require common/pics
 #= require common/RP
+#= require common/stream
 #= require common/submit
 #= require common/notifications
 # require common/RPDialog
