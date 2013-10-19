@@ -32,7 +32,7 @@ gem 'omniauth-facebook', '~> 1.4.0'
 gem 'omniauth-google-oauth2'                     
 gem 'omniauth-openid'                     
 gem 'declarative_authorization'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
-gem 'thin'
+gem 'puma' # 'thin'
 gem 'eventmachine', '~> 1.0.3'
 gem 'ruby_parser'
 gem "rmagick", "~> 2.13.2", :require => 'RMagick'
