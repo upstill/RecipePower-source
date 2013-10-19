@@ -22,7 +22,7 @@ require "time_check"
   end
   
 	def collection_results
-	  return %q{<div class="streamer">Hang on a second...</div>}.html_safe
+	  return "".html_safe
 	  page = 
 	  time_check_log("collection_results acquiring") do
   	  @seeker.results_paged
