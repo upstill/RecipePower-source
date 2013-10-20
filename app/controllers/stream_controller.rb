@@ -13,12 +13,10 @@ class StreamController < ApplicationController
     sleep(5)
     response.stream.write "data: Here's another item\n\n"
     sleep(5)
-    response.stream.write "data: Here's a third item\n\n"
+    response.stream.write "data: Here's the last item\n\n"
   rescue IOError
-    debugger
     logger.info "Stream closed"
   ensure
-    response.stream.write "event: end_of_stream\ndata: null\n\n"
     response.stream.close
   end
 

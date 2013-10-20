@@ -50,6 +50,7 @@ RP::Application.routes.draw do
   get "collection/relist"
 
   get "stream/stream"
+  get "stream/buffer_test"
   
   get "show/new"
 
