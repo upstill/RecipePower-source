@@ -6,6 +6,7 @@ jQuery ->
 	$('div.collection div.streamer').each RP.stream.go
 
 RP.stream.go = (index, elmt )->
+	$(elmt).removeClass 'streamer'
 	source = new EventSource('/stream/stream')
 	source.addEventListener 'end_of_stream', (e) ->
 		source.close()
@@ -20,5 +21,6 @@ RP.stream.buffer_test = ->
 	source.addEventListener 'end_of_stream', (e) ->
 		source.close()
 	source.addEventListener 'message', (e) ->
-		$('#masonry-container').append("<div>"+e.data+"</div>")
+		jdata = JSON.parse e.data
+		$('#masonry-container').append("<div>"+jdata.text+"</div>")
 

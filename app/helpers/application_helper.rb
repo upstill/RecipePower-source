@@ -270,7 +270,7 @@ module ApplicationHelper
   		link_to( "Refresh Masonry", "#", onclick: "RP.collection.justify();" ),
   		link_to( "Address Bar Magic", "#", onclick: "RP.getgo('#{home_path}', 'http://local.recipepower.com:3000/bar.html##{bookmarklet_script}')" ), 
   		link_to( "Bookmark Magic", "#", onclick: "RP.bm('Cookmark', '#{bookmarklet_script}')"), 
-  		link_to_modal( "Need to Know", popup_path(name: "need_to_know_modal"))
+  		link_to( "Stream Test", "#", onclick: "RP.stream.buffer_test();" )
   	] if permitted_to? :admin, :pages
   
     header_link =

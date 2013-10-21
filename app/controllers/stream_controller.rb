@@ -1,3 +1,5 @@
+require 'reloader/sse'
+
 class StreamController < ApplicationController
   include ActionController::Live
   
@@ -9,15 +11,16 @@ class StreamController < ApplicationController
   
   def buffer_test
     response.headers["Content-Type"] = "text/event-stream"
-    response.stream.write "data: Here's an item\n\n"
+    sse = Reloader::SSE.new(response.stream)
+    sse.write text: "Here's an item" 
     sleep(5)
-    response.stream.write "data: Here's another item\n\n"
+    sse.write text: "Here's another item"
     sleep(5)
-    response.stream.write "data: Here's the last item\n\n"
+    sse.write text: "Here's the last item"
   rescue IOError
     logger.info "Stream closed"
   ensure
-    response.stream.close
+    sse.close
   end
 
   # Streams items in the current query
@@ -26,16 +29,17 @@ class StreamController < ApplicationController
     # response.stream.write "data: <div>This is a result ##{n.to_s}</div>\n\n"
     # response.stream.write "data: <div>This is another result ##{n.to_s}</div>\n\n"
     setup_collection false
+    sse = Reloader::SSE.new(response.stream)
  	  @seeker.results_paged.each do |element| 
       item = with_format("html") { view_context.collection_element element } # "<div>Just one element</div" # 
-      itemstr = JSON.dump ( { elmt: item } )
-      response.stream.write "event: collection_element\ndata: #{itemstr}\n\n"
+      # itemstr = JSON.dump ( { elmt: item } )
+      sse.write :collection_element, elmt: item
  	  end
   rescue IOError
     logger.info "Stream closed"
   ensure
-    response.stream.write "event: end_of_stream\ndata: null\n\n"
-    response.stream.close
+    # response.stream.write "event: end_of_stream\ndata: null\n\n"
+    sse.close
   end
 
 end
