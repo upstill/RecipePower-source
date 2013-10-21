@@ -1,12 +1,6 @@
-
 RP.stream ||= {}
 
-jQuery ->
-	# Set load handler to invoke stream and handle items
-	$('div.collection div.streamer').each RP.stream.go
-
-RP.stream.go = (index, elmt )->
-	$(elmt).removeClass 'streamer'
+RP.stream.go = ->
 	source = new EventSource('/stream/stream')
 	source.addEventListener 'end_of_stream', (e) ->
 		source.close()
