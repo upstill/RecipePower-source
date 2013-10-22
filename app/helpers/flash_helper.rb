@@ -4,8 +4,8 @@
 module FlashHelper   
   
   # Emit the flash_notifications for the page in a div.
-  def flash_notifications_div
-    content_tag :div, flash_all, class: "flash_notifications"
+  def flash_notifications_div cssclass = "flash_notifications", for_bootstrap = true
+    content_tag :div, flash_all(for_bootstrap), class: cssclass
   end
   
 	# Returns a selector-value pair for replacing the notifications panel due to an update event

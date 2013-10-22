@@ -1,4 +1,11 @@
-		<%= yield :nav %>
+<div class="bs-sidebar hidden-print" role="complementary">
+	<ul class="list-group">
+		<% @browser.node_list.each do |node| %>
+		  <% @node = node %>
+		  <%= render partial: "collection/node" %>
+		<% end %>
+	</ul>
+</div>
 <div id="footer_nav_links">
 	<%= footer_navlinks %>
 </div>

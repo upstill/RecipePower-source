@@ -51,8 +51,9 @@ module DialogsHelper
   
   def modal_dialog( which, ttl=nil, options={}, &block )
     # for_bootstrap = options[:_area].blank? || options[:_area] != "at_top"
-    header = modal_header( ttl, !options[:noflash])
-    body = options[:body_contents] || with_output_buffer(&block)
+    header = modal_header ttl 
+    options[:body_contents] ||= with_output_buffer(&block)
+    body = modal_body options.slice(:prompt, :body_contents, :noFlash)
     options[:class] = 
       [ "dialog", 
         which.to_s, 
@@ -66,14 +67,14 @@ module DialogsHelper
     options = options.slice! :area, :show, :noflash, :body_contents, :requires
     # options[:id] = "recipePowerDialog"
     options[:title] = ttl if ttl
-    content_tag(:div, 
-      content_tag(:div, 
+    content_tag(:div, # Outer block: dialog
+      content_tag(:div, # modal-dialog
         content_tag(:div, header+body, class: "modal-content"), 
         class: "modal-dialog"), 
       options).html_safe
   end
   
-  def modal_header( ttl, doflash )
+  def modal_header( ttl )
     # Render for a floating dialog unless an area is asserted OR we're rendering for the page
     content = 
       response_service.injector? ? 
@@ -84,17 +85,16 @@ module DialogsHelper
           <h3>#{ttl}</h3>
         }.html_safe,
         class: "modal-header")
-    content <<= (content_tag(:div, flash_all, class: "notifications-panel")) if doflash
     content.html_safe
   end
   
   def modal_body(options={}, &block)
-    bd = options[:body_contents] || capture(&block)
-    if prompt = options.delete( :prompt )
-      prompt = content_tag( :div, prompt, class: "prompt" ).html_safe
-    end
+    contents = ""
+    contents << flash_notifications_div("notifications-panel") unless options.delete(:noFlash)
+    contents << content_tag( :div, prompt, class: "prompt" ).html_safe if prompt = options.delete( :prompt )
+    contents << ( options.delete(:body_contents) || capture(&block) )
     options[:class] = "modal-body #{options[:class]}"
-    content_tag(:div, "#{prompt}#{flash_all}#{bd}".html_safe, options).html_safe
+    content_tag(:div, contents.html_safe, options).html_safe
   end
   
   def modal_footer(options={}, &block)

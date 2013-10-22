@@ -1,13 +1,15 @@
 <%= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name)) do |f| %>
   <%# devise_error_messages! %>
   <%= form_errors_helper f, resource %>
-	<div style="width:220px;float:left;margin:10px">
-	  <%= f.input :username, label: "Username (Handle)", placeholder: "CoolBeans" %>
-		<%= f.input :email, label: "Email", placeholder: 'user@domain.com' %>
-	</div>
-	<div style="width:220px;float:left;margin:10px">
-	  <%= f.input :fullname, label: "Full Name", placeholder: "Joe Cool" %>
-		<%= f.input :password %>
-		<%= f.submit "Sign me up!", class: "btn btn-success" %>
+	<div class="row">
+		<div class="col-md-6">
+		  <%= f.input :username, label: "Username (Handle)", placeholder: "CoolBeans" %>
+			<%= f.input :email, label: "Email", placeholder: 'user@domain.com' %>
+		</div>
+		<div class="col-md-6">
+		  <%= f.input :fullname, label: "Full Name", placeholder: "Joe Cool" %>
+			<%= f.input :password %>
+			<%= f.submit "Sign me up!", class: "btn btn-success" %>
+		</div>
 	</div>
 <% end %>

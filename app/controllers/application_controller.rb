@@ -96,23 +96,14 @@ class ApplicationController < ActionController::Base
         format = "json"
         query_path = @seeker.query_path
       end
-      # Render the navigation panel
-  		browserlist = @browser.node_list.collect { |node|
-    		  @node = node
-    		  render_to_string partial: "collection/node"
-    		}.join(' ')
-      content_for :nav,
-        %Q{<div class="nav affix browser_house ">
-          <ul class="nav nav-tabs nav-stacked scrollable">
-            #{browserlist}
-        	</ul>
-        </div>}.html_safe
-      content_for :seeker_entry, 
-                  render_to_string(
-                    :template => "shared/seeker_entry", 
-                    :layout => false,
-                    :locals => { format: format, query_path: query_path }
-                  ).html_safe
+      if seeker_entry_content
+        content_for :seeker_entry, 
+                    render_to_string(
+                      :template => "shared/seeker_entry", 
+                      :layout => false,
+                      :locals => { format: format, query_path: query_path }
+                    ).html_safe
+      end
     end
   end
   
