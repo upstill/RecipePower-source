@@ -1,15 +1,13 @@
 <%= modal_dialog( :signup, ttl="Step 1: Sign Up", class: (params[:trigger_signup] ? "trigger" : ""), data: { focus: "input#user_username" } ) do %>
-	<%# modal_body do %>
-		<div class="auth_poss at_home">
-      <div class="prompt">You can sign in with these services:</div>
-		  <%= auth_possible "Facebook" %>
-		  <%= auth_possible "Google", :svc_lower => "google_oauth2" %>
-		  <%= auth_possible "Twitter" %>
-		  <%= auth_possible "Aol" %>
-		  <%= auth_possible "Yahoo" %>
-		  <%= auth_possible "OpenID", :svc_lower => "open_id" %>
-		</div>
-	  <div class="prompt">...Or go the full signup route:</div>
-		<%= render partial: "registrations/form" %>
-	<%# end %>
+	<div class="auth_poss at_home">
+    <div class="prompt">You can sign in with these services:</div>
+	  <%= auth_possible "Facebook" %>
+	  <%= auth_possible "Google", :svc_lower => "google_oauth2" %>
+	  <%= auth_possible "Twitter" %>
+	  <%= auth_possible "Aol" %>
+	  <%= auth_possible "Yahoo" %>
+	  <%= auth_possible "OpenID", :svc_lower => "open_id" %>
+	</div>
+  <div class="prompt">...Or go the full signup route:</div>
+	<%= render partial: "registrations/form" %>
 <% end %>

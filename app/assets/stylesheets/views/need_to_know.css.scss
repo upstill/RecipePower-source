@@ -1,6 +1,9 @@
 .need_to_know {
-	width: 770px;
-	height: auto; // 600px;
+	// width: 770px;
+	// height: auto; // 600px;
+	.modal-dialog {
+		width: 100%;
+	}
 	.modal-body {
 		// font:14pt calibri;
 		line-height:130%;

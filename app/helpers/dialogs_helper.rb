@@ -53,7 +53,7 @@ module DialogsHelper
     # for_bootstrap = options[:_area].blank? || options[:_area] != "at_top"
     header = modal_header ttl 
     options[:body_contents] ||= with_output_buffer(&block)
-    body = modal_body options.slice(:prompt, :body_contents, :noFlash)
+    body = modal_body options.slice(:prompt, :body_contents, :noFlash, :body_class)
     options[:class] = 
       [ "dialog", 
         which.to_s, 
@@ -64,7 +64,7 @@ module DialogsHelper
       ].compact.join(' ')
     # The :requires option specifies JS modules that this dialog uses
     options[:data] = { :"dialog-requires" => options[:requires] } if options[:requires]
-    options = options.slice! :area, :show, :noflash, :body_contents, :requires
+    options = options.slice! :area, :show, :noflash, :body_contents, :body_class, :requires
     # options[:id] = "recipePowerDialog"
     options[:title] = ttl if ttl
     content_tag(:div, # Outer block: dialog
@@ -93,7 +93,7 @@ module DialogsHelper
     contents << flash_notifications_div("notifications-panel") unless options.delete(:noFlash)
     contents << content_tag( :div, prompt, class: "prompt" ).html_safe if prompt = options.delete( :prompt )
     contents << ( options.delete(:body_contents) || capture(&block) )
-    options[:class] = "modal-body #{options[:class]}"
+    options[:class] = "modal-body #{options.delete :body_class}"
     content_tag(:div, contents.html_safe, options).html_safe
   end
   

@@ -14,8 +14,4 @@
 	<% end %>
 <% else %>
 	<%= render partial: "signin_dialog" %>
-	<%# modal_dialog :sign_in, "Sign In Please", area: @_area, modal: (@_area != "page") && (@_area != "at_top") do %>
-	<%# modal_dialog :sign_in, "Sign In Please", response_service.modal_options do %>
-		<%# render partial: 'shared/authentications_signup_or_signin' %>
-	<%# end %>
 <% end %>
