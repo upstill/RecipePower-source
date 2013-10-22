@@ -1,6 +1,6 @@
 <%# render partial: 'shared/authentications_sidebar' %>
 <%= modal_dialog :edit_invitation, "Come on In!", class: "trigger" do %>
-	<%= modal_body prompt: "Just give yourself a username or full name (one or both) and a password, and you're good to go." do %>
+	<%# modal_body prompt: "Just give yourself a username or full name (one or both) and a password, and you're good to go." do %>
 		<%= simple_form_for resource, :as => resource_name, :url => invitation_path(resource_name), :html => { :method => :put } do |f| %>
 	  	<%= form_errors_helper f %>
 		  <%= f.hidden_field :invitation_token %>
@@ -12,5 +12,5 @@
 		  <p><%= f.submit "Bring it on", class: "btn btn-lg btn-success" %></p>
 		<% end %>
 		<%# render partial: 'shared/authentications_possible' %>
-	<% end %>
+	<%# end %>
 <% end %>

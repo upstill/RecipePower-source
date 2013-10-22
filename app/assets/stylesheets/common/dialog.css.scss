@@ -27,10 +27,13 @@ div.dialog {
 		left:0
 	}
 	.red_body {
+		font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+		font-weight: normal;
 		color:#FFFFFF;
 		background:#880000;
 		font-size: 13pt;
 		line-height:130%;
+		overflow: auto;
 		filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#880000',endColorstr='#6c0000');
 		background:-webkit-gradient(linear,left top,left bottom,from(#880000),to(#6c0000));
 		background:-moz-linear-gradient(top,#880000,#6c0000);

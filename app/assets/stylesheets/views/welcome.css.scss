@@ -38,35 +38,11 @@ span.large {
 	highlight-color:#FFFFFF;
 	display:block
 }
+
 div.bookmarklet {
 	margin:0px 65px 0px 65px
 }
 
-div.red_body {
-	color:#FFFFFF;
-	background:#880000;
-	font-size: 13pt;
-	line-height:130%;
-	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#880000',endColorstr='#6c0000');
-	background:-webkit-gradient(linear,left top,left bottom,from(#880000),to(#6c0000));
-	background:-moz-linear-gradient(top,#880000,#6c0000);
-}
-
-div.welcome_dialog {
-	// font:14pt calibri;
-	// width:100%;
-	// margin: 0px;
-	// height: auto;
-	overflow: auto;
-	// border:3px solid #B31107;
-	// border-radius:10px;
-	// margin:25px;
-	// padding:15px;
-	// padding-top:10px
-	.hr {
-		margin: 10px 0;
-	}
-}
 div.instructions_header {
 	// border: 1px solid black;
 	width: 100%;

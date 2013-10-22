@@ -70,6 +70,10 @@ div.dialog.modal {
 	}
 }
 
+a.dialog-cancel-button {
+	float:right;
+}
+
 .alert-guide {
   background-color: $guideBackground;
   border-color: $guideBorder;
