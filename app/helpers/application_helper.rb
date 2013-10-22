@@ -256,6 +256,8 @@ module ApplicationHelper
   end
   
   def header_menu
+    
+    return "" unless current_user
 
     item_list = [
       link_to_modal( "Profile", users_profile_path( section: "profile" )),
