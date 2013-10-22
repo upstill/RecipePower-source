@@ -42,12 +42,16 @@ RP::Application.routes.draw do
   match 'collection', :controller=>'collection', :action=>'index', :via => [:get, :post]
   match 'collection/query', :controller=>'collection', :action=>'query', :via => :post
   match "collection/update", :controller=>'collection', :action=>'update', :via => :post
+  get "collection/feed"
   get "collection/show"
   get "collection/new"
   get "collection/edit"
   get "collection/create"
   get "collection/relist"
 
+  get "stream/stream"
+  get "stream/buffer_test"
+  
   get "show/new"
 
   get "show/edit"

@@ -73,14 +73,14 @@ class ApplicationController < ActionController::Base
   end
   
   # All controllers displaying the collection need to have it setup 
-  def setup_collection
+  def setup_collection seeker_entry_content=true
     if popup = params[:popup]
       session[:flash_popup] = popup
       redirect_to collection_path
     else
       @user = current_user_or_guest
       @browser = @user.browser
-      params[:tagstxt] = "" if (params[:controller] != "collection") # Clear the query
+      params[:tagstxt] = "" if (params[:controller] != "collection") && (params[:controller] != "stream") # Clear the query
       unless @seeker
         @seeker = ContentSeeker.new @browser, session[:seeker], params # Default; other controllers may set up different seekers
         session[:seeker] = @seeker.store

@@ -7,7 +7,7 @@
 		  <%= render "recipes/golink" %>
 		<% else %>
 		  <% @recipe = Recipe.new(url: @feed_entry.url) %>
-			<%= link_to_modal "Collect", new_recipe_path(@recipe, params: {feed_entry: @feed_entry.id }), class: "btn btn-mini" %>
+			<%= link_to_modal "Collect", new_recipe_path(@recipe, params: {feed_entry: @feed_entry.id }), class: "btn btn-default btn-xs" %>
 		<% end %>
 	</h5>
 	<div class="feed_list_element_source">

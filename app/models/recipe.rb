@@ -8,7 +8,7 @@ class Recipe < ActiveRecord::Base
   include Taggable
   include Referrable
   include Linkable
-  attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href
+  attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href # , :picAR
   after_save :save_ref
 
   validates :title, :presence=>true 
@@ -23,14 +23,20 @@ private
   
   # Confirm that the thumbnail accurately reflects the recipe's image
   def check_thumbnail
-    picurl = nil if picurl.blank?
-    if picurl.nil? || picurl =~ /^data:/
+    self.picurl = nil if self.picurl.blank? || (self.picurl == "/assets/NoPictureOnFile.png")
+    if self.picurl.nil? || self.picurl =~ /^data:/
       # Shouldn't have a thumbnail
       self.thumbnail = nil
-    elsif picdata =~ /^data:/
-      # The current thumbnail is valid
-    elsif picurl && (self.thumbnail = Thumbnail.acquire( url, picurl )) && !thumbnail.thumbdata
-      Delayed::Job.enqueue self # Update the thumbnail image in background
+    elsif !(self.picdata =~ /^data:/)
+      self.thumbnail = Thumbnail.acquire( url, picurl )
+=begin
+      if thumbnail && thumbnail.thumbdata
+        self.picAR = thumbnail.picAR unless thumbnail.picAR.nil?
+      else
+        # Update the thumbnail image in background
+      end
+=end
+      Delayed::Job.enqueue self unless thumbnail && thumbnail.thumbdata
     end
     true
   end
@@ -41,7 +47,10 @@ public
   # the same image as the recipe (see check_thumbnail)
   def perform
     puts ">>>>>>>>>>>>>>>>>>>>>>>>>>>>> Validating picurl with url '#{url}' and picurl '#{picurl}'"
-    thumbnail.update_thumb if thumbnail
+    if thumbnail
+      thumbnail.update_thumb 
+      # self.picAR = thumbnail.picAR unless thumbnail.picAR.nil?
+    end
   end
   
   # Return the image for the recipe, either as a URL or a data specifier

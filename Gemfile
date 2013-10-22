@@ -20,7 +20,7 @@ gem 'builder', '~> 3.1.0'
 
 gem 'closure_tree'
 gem 'htmlentities'
-gem 'nokogiri', "~> 1.5.3"
+gem 'nokogiri', "~> 1.5" # "~> 1.5.3"
 gem 'will_paginate', '~> 3.0'
 gem 'minitest', '~> 4.2'
 gem 'newrelic_rpm'
@@ -32,11 +32,12 @@ gem 'omniauth-facebook', '~> 1.4.0'
 gem 'omniauth-google-oauth2'                     
 gem 'omniauth-openid'                     
 gem 'declarative_authorization'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
-gem 'thin'
+gem 'unicorn' # 'thin'
+gem 'unicorn-rails'
 gem 'eventmachine', '~> 1.0.3'
 gem 'ruby_parser'
 gem "rmagick", "~> 2.13.2", :require => 'RMagick'
-gem "feedzirra", :git => 'git://github.com/pauldix/feedzirra.git'
+gem "feedzirra", "~> 0.2" # :git => 'git://github.com/pauldix/feedzirra.git'
 gem "simple_form", '~> 3.0.0.beta1' # , :git => 'git://github.com/plataformatec/simple_form.git'
 gem 'delayed_job' # , git: 'git://github.com/collectiveidea/delayed_job.git'
 gem 'delayed_job_active_record' # , git: 'git://github.com/collectiveidea/delayed_job_active_record.git'
@@ -73,7 +74,8 @@ gem 'coffee-rails', "~> 4.0.0"
 gem 'uglifier', '>= 1.3.0'
 # gem 'compass-rails'
 gem 'sass-rails', " ~> 4.0.0"
-gem 'bootstrap-sass' # , '~> 2.2.2.0'
+# gem 'bootstrap-sass', '~> 2.3.2.1'
+gem 'bootstrap-sass', github: 'thomas-mcdonald/bootstrap-sass', branch: '3'
 
 gem 'jquery-rails'
 

@@ -17,7 +17,7 @@
 		  <%= f.submit "Sign in", class: "submit_button" %>
 			&nbsp;&nbsp;&nbsp;Forgot your password? Click 
 			<% if resource.id %>
-				<%= link_to "here", user_password_path(user: {login: resource.email}), method: "POST", class: "btn btn-mini" %>
+				<%= link_to "here", user_password_path(user: {login: resource.email}), method: "POST", class: "btn btn-default btn-xs" %>
 			<% else %>
 				<%= button_to_modal "here", new_user_password_path %>
 			<% end %>

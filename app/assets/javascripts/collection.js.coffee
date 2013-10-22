@@ -30,6 +30,7 @@ jQuery ->
 
 collection_onload = () ->
 	$("#tagstxt").first().focus()
+	RP.stream.go()
 	# Page buttons do a remote fetch which needs to replace the collection
 	$('.pageclickr').bind "ajax:beforeSend", collection_beforeSend
 	$('.pageclickr').bind "ajax:success", collection_success
@@ -89,7 +90,7 @@ RP.collection.rejustify = () ->
 RP.collection.justify = () ->
 	# Initialize Masonry handling for list items
 	$('#masonry-container').masonry
-		columnWidth: 220,
+		columnWidth: 200,
 		gutter: 20,
 		itemSelector: '.masonry-item'
 

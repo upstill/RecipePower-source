@@ -56,9 +56,7 @@ module ApplicationHelper
     # "fitPic" class gets fit inside pic_box with Javascript and jQuery
     idstr = "rcpPic"+id.to_s
     selector = selector || "##{idstr}"
-    if picurl.blank?
-      picurl = placeholder_image
-    end
+    picurl = placeholder_image if picurl.blank?
     # Allowing for the possibility of a data URI
 #    if picurl.match(/^data:image/)
 #      %Q{<img alt="Some Image Available" class="thumbnail200" id="#{idstr}" src="#{picurl}" >}.html_safe
@@ -136,10 +134,9 @@ module ApplicationHelper
         idstr = "thumbnail"+(thumbNum = thumbNum+1).to_s
         content_tag( :div,
           image_tag(url, 
-            class: "fitPic", 
+            style: "width:100%; height: auto;", 
             id: idstr, 
-            onclick: "pickImg('input.icon_picker', 'div.preview img', '#{url}')", 
-            onload: "fitImageOnLoad('##{idstr}')", 
+            onclick: "pickImg('input.icon_picker', 'div.preview img', '#{url}')", class: "fitPic", onload: "fitImageOnLoad('##{idstr}')", 
             alt: "No Image Available"),
           class: "picCell")
       }.join('</td><td>')+
@@ -259,6 +256,8 @@ module ApplicationHelper
   end
   
   def header_menu
+    
+    return "" unless current_user
 
     item_list = [
       link_to_modal( "Profile", users_profile_path( section: "profile" )),
@@ -273,7 +272,7 @@ module ApplicationHelper
   		link_to( "Refresh Masonry", "#", onclick: "RP.collection.justify();" ),
   		link_to( "Address Bar Magic", "#", onclick: "RP.getgo('#{home_path}', 'http://local.recipepower.com:3000/bar.html##{bookmarklet_script}')" ), 
   		link_to( "Bookmark Magic", "#", onclick: "RP.bm('Cookmark', '#{bookmarklet_script}')"), 
-  		link_to_modal( "Need to Know", popup_path(name: "need_to_know_modal"))
+  		link_to( "Stream Test", "#", onclick: "RP.stream.buffer_test();" )
   	] if permitted_to? :admin, :pages
   
     header_link =
@@ -283,11 +282,13 @@ module ApplicationHelper
     menu = 
     content_tag :ul, 
       ("<li>#{ item_list.join("</li><li>") }</li>").html_safe, 
-      class: "dropdown-menu", 
+      class: "dropdown-menu", # "nav navbar-nav", 
       role: "menu",
       :"aria-labelledby" => "userMenuLabel"
       
-    (header_link+menu).html_safe
+    content_tag :li,
+      (header_link+menu),
+      class: "dropdown"
   end
     
   def footer_navlinks for_mobile=false
@@ -347,15 +348,15 @@ module ApplicationHelper
       if session[:invitation_token]
         label = "Accept Invitation" 
         path = accept_user_invitation_path(invitation_token: session[:invitation_token] )
-        button_to_modal(label, path, class: "btn btn-large btn-success" ) 
+        button_to_modal(label, path, class: "btn btn-lg btn-success" ) 
       elsif token = deferred_notification
   			@user = Notification.find_by_notification_token(token).target
-  			button_to_modal "Take Share", new_user_session_path(user: { id: @user.id, email: @user.email } ), class: "btn btn-large btn-success" 
+  			button_to_modal "Take Share", new_user_session_path(user: { id: @user.id, email: @user.email } ), class: "btn btn-lg btn-success" 
       else
         label = "Sign Me Up"
         selector = "div.dialog.signup"
         path = collection_path()
-        button_to_modal(label, path, class: "btn btn-large btn-success", selector: selector ) 
+        button_to_modal(label, path, class: "btn btn-lg btn-success", selector: selector ) 
       end
     end
   end

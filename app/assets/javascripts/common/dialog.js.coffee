@@ -142,6 +142,7 @@ RP.dialog.close_modal = (dlog, epilog) ->
 	if dlog
 		if($(dlog).modal)
 			$(dlog).modal 'hide'
+			$('div.modal-backdrop').remove();
 		notify "close", dlog
 		$(dlog).remove()
 		notify_injector "close", dlog
@@ -167,6 +168,8 @@ filter_submit = (eventdata) ->
 	clicked = $("input[type=submit][clicked=true]")
 	# return true;
 	if ($(clicked).attr("value") == "Save") && (shortcircuit = notify "beforesave", dlog, eventdata.currentTarget)
+		$(dlog).modal('hide')
+		$('div.modal-backdrop').hide();
 		eventdata.preventDefault()
 		RP.process_response shortcircuit
 	else

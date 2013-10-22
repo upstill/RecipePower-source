@@ -1,8 +1,8 @@
 <% logger.debug "Rendering recipe #{@recipe.id}" %>
-	<div class="thumbnail <%= recipe_grid_element_class @recipe %>" style="width:200px;margin-bottom:20px;" >
+	<div class="collection-item <%= recipe_grid_element_class @recipe %>" >
 		<%= recipe_image_div @recipe, "rcp_grid_pic_box" %>
 		<div class="rcp_grid_datablock">
-			<h5 class="rcp_grid_element_title"><%= link_to @recipe.trimmed_title, @recipe.url %></h5>
+			<p class="rcp_grid_element_title"><%= link_to @recipe.trimmed_title, @recipe.url %></h5>
 			<div class="rcp_grid_element_source">from <%= link_to @recipe.sourcename, @recipe.sourcehome %></div>
 			<!-- <div class="rcp_grid_element_tag_summary"><%= summarize_alltags @recipe %></div> -->
 		</div>

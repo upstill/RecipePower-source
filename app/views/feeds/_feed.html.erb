@@ -13,15 +13,15 @@
 	<% end %>
 	<td>
 		<% if @user.feeds.include?(@feed) %>
-			<%= link_to 'Unsubscribe', remove_feed_path(@feed), class: "btn btn-mini", method: :post %>
+			<%= link_to 'Unsubscribe', remove_feed_path(@feed), class: "btn btn-default btn-xs", method: :post %>
 		<% else %>
-			<%= link_to 'Subscribe', collect_feed_path(@feed), class: "btn btn-mini", remote: true %>
+			<%= link_to 'Subscribe', collect_feed_path(@feed), class: "btn btn-default btn-xs", remote: true %>
 		<% end %>
 		<% permitted_to?(:edit, :feeds) do %>
 			<%= button_to_modal 'Edit', edit_feed_path(@feed) %>
 		<% end %>
 		<% permitted_to?(:destroy, :feeds) do %>
-			<%= link_to('Destroy', @feed, :method => :delete, :class => "btn btn-mini btn-danger", confirm: 'Are you sure?') %>
+			<%= link_to('Destroy', @feed, :method => :delete, :class => "btn btn-default btn-xs btn-danger", confirm: 'Are you sure?') %>
 		<% end %>
 	</td>
 </tr>

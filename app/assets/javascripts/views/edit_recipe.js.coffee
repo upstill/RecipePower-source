@@ -24,7 +24,8 @@ RP.edit_recipe.go = (evt, xhr, settings) ->
 		dlgsource = templ.string.
 		replace(/%%rcpID%%/g, rcpdata.rcpid).
 		replace(/%%rcpTitle%%/g, rcpdata.rcptitle).
-		replace(/%%rcpPicURL%%/g, rcpdata.rcppicurl || "/assets/NoPictureOnFile.png" ).
+		replace(/%%rcpPicSafeURL%%/g, rcpdata.rcppicurl || "/assets/NoPictureOnFile.png" ).
+		replace(/%%rcpPicURL%%/g, rcpdata.rcppicurl || "" ).
 		replace(/%%rcpPrivate%%/g, rcpdata.rcpprivate).
 		replace(/%%rcpComment%%/g, rcpdata.rcpcomment).
 		replace(/%%rcpStatus%%/g, rcpdata.rcpstatus).

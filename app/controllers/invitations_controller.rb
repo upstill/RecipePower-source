@@ -44,6 +44,8 @@ class InvitationsController < Devise::InvitationsController
       raise ActionController::InvalidAuthenticityToken
     end
     # If dialog has no invitee_tokens, get them from email field
+    debugger
+    raise ActionController::InvalidAuthenticityToken
     params[resource_name][:invitee_tokens] = params[resource_name][:invitee_tokens] ||
     params[resource_name][:email].split(',').collect { |email| %Q{'#{email.downcase.strip}'} }.join(',')
     # Check email addresses in the tokenlist for validity

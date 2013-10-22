@@ -12,7 +12,7 @@
  <p class="cookmark-text">When you see a recipe you like, click the Cookmark button to stash it in RecipePower. You'll get a chance to select a picture or add a note and/or tags, then you can go about your business.</p>
 <br>
 <% if params[:context] == "signup" %>
-	<%= link_to_modal("Okay, All Set", popup_path(:name => "starting_step3_modal"), class: "btn btn-large btn-info", style: "float:right") %>
+	<%= link_to_modal("Okay, All Set", popup_path(:name => "starting_step3_modal"), class: "btn btn-lg btn-info", style: "float:right") %>
 <% else %>
-	<%= dialog_cancel_button("Okay, All Set", class: "btn btn-large btn-info", style: "float:right") %>
+	<%= dialog_cancel_button("Okay, All Set", class: "btn btn-lg btn-info", style: "float:right") %>
 <% end %>

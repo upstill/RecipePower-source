@@ -5,19 +5,64 @@ $iconWhiteSpritePath: image-path('glyphicons-halflings-white.png');
 // Set variables here, i.e. BEFORE loading bootstrap
 $navbarBackground: #555;
 $navbarBackgroundHighlight: #888;
-$navbarText: #eee;
 $navbarLinkColor: #eee;
+$navbar-default-color:             #fff;
 
 $guideText:                #AB812E !default;
 $guideBackground:          #FAD8A7 !default;
 $guideBorder:              darken(adjust-hue($guideBackground, -10), 7%) !default;
 
+label.control-label {
+	display: block;
+	margin-bottom: 5px;
+}
+
+div.control-group {
+	margin-bottom: 10px;
+}
+
 @import "bootstrap";
+
+.modal-header h3 {
+	margin: 0;
+	line-height: 30px;
+}
+
+.badge > a {
+	color: #ffffff;
+}
+
+li.list-group-item {
+	&.active > a {
+		color: #ffffff;
+	}
+}
+
+.btn-xs {
+	font-size:10.5px;
+}
+
+.navbar-inverse .navbar-nav > li > a { 
+	color: #eeeeee;
+}
+
+.navbar-inverse .navbar-header > a  { 
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 20px;
+	font-weight: 200;
+	color: #eeeeee;
+}
+
+// @import "bootstrap-responsive";
 
 body { padding-top: 60px; }
 
 .modal-body {
     max-height: 520px;
+}
+
+.navbar-form {
+	float: left;
 }
 
 div.dialog.modal {
@@ -47,6 +92,7 @@ div.dialog.modal {
 	input.string,
 	input.password {
 		width: 90%;
+		margin-bottom: 10px;
 	}
 }
 
@@ -65,41 +111,15 @@ label {
 	border: 2px solid black;
 }
 
-.left_house {
-    display: block;
-    position:fixed;
-    height:auto;
-    bottom:0px;
-    top:60px;
-    left:10px;
-    right:0;
-		margin: 0px;
-		padding: 0px;
+.content-column {
+	border: 2px solid red;
 }
 
-.button_house {
-	position: fixed;
-	top: 60px;
-	left: 20px;
-	// width: 150px;
-	height: 60px;
-	text-align: center;
+.navigation-column {
+	border: 2px solid blue;
 }
 
-.browser_house {
-	display: block;
-	position: absolute;
-	height: auto;
-  bottom: 45px;
-  top:0px;
-  left:0px;
-  right:0;
-	background-color: white; 
-	margin-left: 30px;
-	ul.scrollable {
-		border: none;
-		border-bottom: 1px solid #DDDDDD;
-	}
+.collection-item {
+	width:200px;
+	margin-bottom:20px;
 }
-
-@import "bootstrap-responsive";

@@ -16,8 +16,8 @@ class Array
 end
 
 class BrowserElement
-  attr_accessor :npages, :cur_page, :visible
-  attr_reader :handle, :level
+  attr_accessor :npages, :cur_page, :visible, :handle
+  attr_reader :level
   @@page_length = 20
   # Persisters for all browser-element nodes; these may be augmented by a subclass by
   # setting @persisters BEFORE handing off init to superclass
@@ -29,8 +29,11 @@ class BrowserElement
     @level = level
     @persisters.each { |name| instance_variable_set("@#{name}", args[name]) if args[name] } if @persisters
     @selected = false unless @selected
-    @handle = "Mystery Element" unless @handle
     @cur_page = @cur_page || 1
+  end
+  
+  def handle
+    @handle ||= "Mystery Element"
   end
   
   def content_name
@@ -289,10 +292,14 @@ class FeedBrowserElement < BrowserElement
   attr_accessor :feedid
   
   def initialize(level, args)
-    @persisters = (@persisters || []) << :feedid
+    @persisters = (@persisters || [])
+    @persisters << :feedid
     super
-    @feedid = args[:feedid] || args[:feed].id
-    @handle = (args[:feed] || Feed.find(@feedid)).title
+    @feedid = args[:feedid]
+  end
+  
+  def handle
+    @handle ||= Feed.find(@feedid).title
   end
   
   def popup_text
@@ -415,10 +422,14 @@ end
 class RcpBrowserElementFriend < BrowserElement
   
   def initialize(level, args)
-    @persisters = (@persisters || []) << :friendid
+    @persisters = (@persisters || [])
+    @persisters << :friendid
     super
     @friendid = args[:friendid]
-    @handle = User.find(@friendid).handle
+  end
+  
+  def handle
+    @handle ||= User.find(@friendid).handle
   end
   
   def sources
@@ -449,17 +460,17 @@ class RcpBrowserElementFriend < BrowserElement
   
   def popup_text
     if User.find(@friendid).channel?
-      "Recipes collected in the channel '#{@handle}'."
+      "Recipes collected in the channel '#{handle}'."
     else
-      "The collection of user '#{@handle}'."
+      "The collection of user '#{handle}'."
     end
   end
   
   def guide
     if User.find(@friendid).channel?
-      "These are the recipes from the #{@handle} channel.<br>Withdraw from the channel by clicking the 'X' next to the name."
+      "These are the recipes from the #{handle} channel.<br>Withdraw from the channel by clicking the 'X' next to the name."
     else
-      "These are all the recipes collected by #{@handle}.<br>Tired of their friendship? Click the 'X' next to the name."
+      "These are all the recipes collected by #{handle}.<br>Tired of their friendship? Click the 'X' next to the name."
     end
   end
   
@@ -705,11 +716,11 @@ class RcpBrowserElementStatus < RcpBrowserElement
   def guide
     case @status
     when MyConstants::Rcpstatus_rotation
-      "'#{@handle}' is for recipes that you're making on a regular basis."
+      "'#{handle}' is for recipes that you're making on a regular basis."
     when MyConstants::Rcpstatus_favorites
-      "'#{@handle}' are your tried-and-true favorites."
+      "'#{handle}' are your tried-and-true favorites."
     when MyConstants::Rcpstatus_interesting
-      "'#{@handle}' earmarks recipes for auditioning sooner or later."
+      "'#{handle}' earmarks recipes for auditioning sooner or later."
     end
   end
   
