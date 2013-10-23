@@ -1,9 +1,8 @@
 <%= modal_dialog :edit_authentications, "Sign-in Services", response_service.modal_options( requires: %w{submit}) do %>
-  <div class="auth_signin <%= response_service.area_class %><%# @_area %>" >
-    <%= render partial: 'shared/authentications_current' %>
-    <%= render partial: 'shared/authentications_possible' %>
+    <%= render partial: 'current' %>
+    <%= render partial: 'possible' %>
 		<hr style="margin:3px;">
 	  <p><strong class="prompt">Click to </strong><%= link_to_modal "change password", edit_user_registration_path  %></p>
   </div>
-  <%= render partial: 'shared/authentications_sidebar' %>
+  <%= render partial: 'sidebar' %>
 <% end %>

@@ -5,7 +5,7 @@ div.auth_poss {
 }
 
 .sign_in.dialog {
-	top: 100px;
+	// top: 100px;
 	.prompt {
 		margin:5px 0px 10px 0px;
 		font:20px arial,sans-serif;
@@ -44,11 +44,11 @@ div.auth_poss {
 		vertical-align: top;
 	}
 	&.floating {
-		width:620px;
-		height: auto;
-		margin-top:2em;
-		float:left;
-		top: 50px;
+		// width:620px;
+		// height: auto;
+		// margin-top:2em;
+		// float:left;
+		// top: 50px;
 		.signup {
 			width:235px;
 			margin-top:10px;

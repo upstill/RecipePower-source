@@ -1,23 +1,42 @@
 // Default styling for dialogs
 div.dialog {
-	font:12px arial,sans-serif;
-	font-weight:bold;
+	font:18px arial,sans-serif;
+	font-weight:normal;
+	p {
+		font-size: 90%;
+		line-height:130%;
+		font-weight: normal;
+	}
+	li {
+		margin-top: 10px;
+		font-size: 90%;
+		line-height:130%;
+		font-weight: normal;
+	}
+	&.modal {
+		div.prompt {
+			font:18px arial,sans-serif;
+			font-weight:bold;
+			margin: 0px 0px 15px 10px;
+			padding: 0px;
+		}
+	}
 	&.floating {
-		font:12px arial,sans-serif;
-		font-weight:bold;
+		// font:18px arial,sans-serif;
+		// font-weight:bold;
 		// width:auto;
-		font-size:80%;
+		// font-size:80%;
 		padding-left:1%;
 		padding-right:1%;
-		margin-left:0;
-		margin-right:0
+		// margin-left:0;
+		// margin-right:0
 	}
 	&.at_left {
-		font:12px arial,sans-serif;
-		font-weight:bold;
+		// font:18px arial,sans-serif;
+		// font-weight:bold;
 		width:auto;
 		position:absolute;
-		font-size:80%;
+		// font-size:80%;
 		padding-left:1%;
 		padding-right:1%;
 		margin-left:0;

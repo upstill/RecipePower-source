@@ -1,16 +1,16 @@
 <%# render partial: 'shared/authentications_sidebar' %>
-<%= modal_dialog :edit_invitation, "Come on In!", class: "trigger" do %>
-	<%# modal_body prompt: "Just give yourself a username or full name (one or both) and a password, and you're good to go." do %>
-		<%= simple_form_for resource, :as => resource_name, :url => invitation_path(resource_name), :html => { :method => :put } do |f| %>
-	  	<%= form_errors_helper f %>
-		  <%= f.hidden_field :invitation_token %>
-		  <%= f.input :username, label: "User Name (your handle on RecipePower)" %></p>
-		  <%= f.input :fullname, label: "Full Name" %></p>
-		  <%= f.input :password %></p>
-		  <%# f.input :password_confirmation %></p>
-
-		  <p><%= f.submit "Bring it on", class: "btn btn-lg btn-success" %></p>
+<%= modal_dialog :edit_invitation, "Come on In to RecipePower", class: "trigger" do %>
+	<p>We're glad you've come!</p>
+	<p>Now, if you'll just provide a couple of details, you're good to go.</p><br>
+	<%= simple_form_for resource, :as => resource_name, :url => invitation_path(resource_name), :html => { :method => :put } do |f| %>
+  	<%= form_errors_helper f %>
+	  <%= f.hidden_field :invitation_token %>
+	  <%= f.input :username, label: %q{User Name <span style="font-weight:normal;">(your handle on RecipePower)</span>} %>
+	  <%= f.input :fullname, label: %q{Full Name <span style="font-weight:normal;">(you know, like in the real world)</span>} %>
+	  <%= f.input :password, label: %q{Password <span style="font-weight:normal;">(so no one hijacks your account)</span>} %>
+		<%= modal_footer do %>
+		  <%= f.submit "Bring it on", class: "btn btn-lg btn-success dialog-submit-button" %>
 		<% end %>
-		<%# render partial: 'shared/authentications_possible' %>
-	<%# end %>
+	<% end %>
+	<%# render partial: 'shared/authentications_possible' %>
 <% end %>

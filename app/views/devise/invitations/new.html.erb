@@ -1,4 +1,4 @@
-<%= modal_dialog :new_invitation, "Invite a Friend" do %>
+<%= modal_dialog :new_invitation, "Invite a Friend", data: { focus: "input#user_email" } do %>
 	<%= simple_form_for resource, :as => resource_name, :url => invitation_path(resource_name), :html => {:method => :post} do |f| %>
 		<%= modal_body do %>
 		  <%# devise_error_messages! %>
@@ -9,7 +9,7 @@
 		  <%= f.input :invitation_message, label: "Invitation Message (optional)", :input_html => { :rows=>"4", value: ((current_user && current_user.email =~ /upstill/) ? steve_msg : "I'd like you to join me on RecipePower, exploring the world of recipes on the Web.")} %></p>
 		<% end %>
 		<%= modal_footer do %>
-	  	<%= f.submit "Send an invitation" %>
+	  	<%= f.submit "Send an invitation", class: "btn btn-lg btn-success dialog-submit-button" %>
 		<% end %>
 	<% end %>
 <% end %>

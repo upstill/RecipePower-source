@@ -1,7 +1,6 @@
 <%= modal_dialog :sign_in, 
 	"Sign In Please", 
-	area: @area, 
-	modal: (@area != "page") && (@area != "at_top") do %>
+	response_service.modal_options do %>
 		<%= render partial: 'shared/authentications_current' %>
 		<%= render partial: 'shared/authentications_possible' %>
 		<hr>

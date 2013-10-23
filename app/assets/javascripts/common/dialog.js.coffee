@@ -133,7 +133,8 @@ open_modal = (dlog, omit_button) ->
 	notify_injector "open", dlog
 	# Set text focus as appropriate
 	if (focus_sel = $(dlog).data("focus")) && (focus_elmt = $(focus_sel, dlog)[0])
-		focus_elmt.focus()
+		$(dlog).on 'shown.bs.modal', ->
+			$(focus_sel).focus()
 	RP.dialog.arm_links dlog
 	dlog
 

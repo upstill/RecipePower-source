@@ -1,6 +1,6 @@
 <%# modal_dialog :new_recipe, "Add a Cookmark the Hard Way", area: @_area, data: { focus: "form #recipe_url" } do %>
 <%= modal_dialog :new_recipe, "Add a Cookmark the Hard Way", response_service.modal_options( data: { focus: "form #recipe_url" }) do %>
-	<%= modal_body do %>
+	<%# modal_body do %>
 		<div class="lesson">
 			<p class="prompt">To add a recipe to your collection by hand:</p>
 		  <ul>
@@ -20,6 +20,6 @@
 			<p class="airy">Much better is to drag this button into your browser's bookmarks bar. A new bookmark, dubbed "Cookmark" will appear-- but clicking it doesn't send you to another page; instead, it collects the page you're on...instantly! It also chooses a picture for the recipe and lets you add your own info, all without leaving the page. Slick, eh?
 			</p>
 		</div>
-	<% end %>
+	<%# end %>
 <% end %>
 
