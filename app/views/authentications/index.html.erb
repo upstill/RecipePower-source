@@ -1,8 +1,9 @@
 <%= modal_dialog :edit_authentications, "Sign-in Services", response_service.modal_options( requires: %w{submit}) do %>
     <%= render partial: 'current' %>
     <%= render partial: 'possible' %>
-		<hr style="margin:3px;">
-	  <p><strong class="prompt">Click to </strong><%= link_to_modal "change password", edit_user_registration_path  %></p>
-  </div>
+		<hr style="margin:13px;">
+	  <div class="prompt" style="float:left">Click to <%= link_to_modal "change password", edit_user_registration_path  %></div>
+		<%= dialog_cancel_button "Done" %>
+		<br class="clear">
   <%= render partial: 'sidebar' %>
 <% end %>

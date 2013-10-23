@@ -1,18 +1,18 @@
 source 'http://rubygems.org'
 
 ruby '1.9.3'
-gem 'rails', '4.0.0' # '3.2.11' #
+gem 'rails', '~> 4.0' # '3.2.11' #
+# gem 'rails',     :git => 'git://github.com/rails/rails.git'
 # gem 'rails4_upgrade'
 gem 'rails_12factor', group: :production
 
 # add these gems to help with the transition:
 gem 'protected_attributes'
 gem 'rails-observers'  
-gem 'actionpack-page_caching'
-gem 'actionpack-action_caching'
+# gem 'actionpack-page_caching'
+# gem 'actionpack-action_caching'
 
 # Bundle edge Rails instead:
-# gem 'rails',     :git => 'git://github.com/rails/rails.git'
 
 gem 'pg'
 
@@ -38,7 +38,7 @@ gem 'eventmachine', '~> 1.0.3'
 gem 'ruby_parser'
 gem "rmagick", "~> 2.13.2", :require => 'RMagick'
 gem "feedzirra", "~> 0.2" # :git => 'git://github.com/pauldix/feedzirra.git'
-gem "simple_form", '~> 3.0.0.beta1' # , :git => 'git://github.com/plataformatec/simple_form.git'
+gem "simple_form", :git => 'git://github.com/plataformatec/simple_form.git' # , '~> 3.0.0.beta1' 
 gem 'delayed_job' # , git: 'git://github.com/collectiveidea/delayed_job.git'
 gem 'delayed_job_active_record' # , git: 'git://github.com/collectiveidea/delayed_job_active_record.git'
 gem 'hirefire-resource'

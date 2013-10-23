@@ -1,7 +1,8 @@
 RP.rcp_list = RP.rcp_list || {}
 
 RP.rcp_list.onload = ->
-	$('.edit_recipe_link').bind 'ajax:beforeSend', RP.edit_recipe.go
+	$(document).on 'ajax:beforeSend', '.edit_recipe_link', RP.edit_recipe.go
+	# $('.edit_recipe_link').bind 'ajax:beforeSend', RP.edit_recipe.go
 	$(".popup").click(RP.servePopup);
 
 # Callback to update content in a recipe list due to JSON feedback

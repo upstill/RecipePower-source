@@ -4,14 +4,15 @@ div.authentications {
 	overflow: hidden;
 }
 .auth_sidebar {
-	width:300px;
-	float:right;
-	margin:15px 5px 15px 30px;
+	// width:300px;
+	// float:right;
+	margin:5px 5px 15px 30px;
+	margin-top: 30px;
 	border:3px solid black;
 	padding:10px;
 	&.floating {
-		width: 450px;
-    margin: 15px 50px;
+		// width: 450px;
+    // margin: 15px 50px;
 	}
 }
 .auth_buttons {

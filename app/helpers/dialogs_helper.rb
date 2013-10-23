@@ -141,8 +141,8 @@ module DialogsHelper
         class: "recipePowerCancelDiv")
   end
   
-  def dialog_cancel_button name, options={}
-    options[:class] = "#{options[:class]} btn btn-success dialog-cancel-button"
+  def dialog_cancel_button name = "Cancel", options={}
+    options[:class] = "#{options[:class]} btn btn-lg btn-info dialog-cancel-button"
     link_to name, "#", options
   end
     

@@ -49,11 +49,15 @@ class InvitationsController < Devise::InvitationsController
     # Check email addresses in the tokenlist for validity
     @staged = User.new params[resource_name] # invite_resource 
     for_sharing = @staged.shared_recipe && true
-    err_address = @staged.invitee_tokens.detect do |token|
-      token.kind_of?(String) && !(token =~ /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i)
-    end
+    err_address = @staged.invitee_tokens.empty? ? "" :
+      @staged.invitee_tokens.detect { |token|
+        token.kind_of?(String) && !(token =~ /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i)
+      }
     if err_address # if there's an invalid email, go back to the user
-      @staged.errors.add (for_sharing ? :invitee_tokens : :email), "'#{err_address}' doesn't look like an email address."
+      @staged.errors.add (for_sharing ? :invitee_tokens : :email), 
+        err_address.blank? ? 
+          "Can't send an invitation without an email to send it to!" : 
+          "'#{err_address}' doesn't look like an email address."
       @recipe = for_sharing && Recipe.find(@staged.shared_recipe)
       self.resource = @staged
       # dialog_boilerplate(for_sharing ? :share : :new)
