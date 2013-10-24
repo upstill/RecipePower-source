@@ -512,7 +512,7 @@ $.TokenList = function (input, url_or_data, settings) {
     };
 
     // Resize input to maximum width so the placeholder can be seen
-    resize_input();
+    // resize_input();
 
     //
     // Private functions
@@ -555,8 +555,14 @@ $.TokenList = function (input, url_or_data, settings) {
         // Enter new content into resizer and resize input accordingly
         input_resizer.html(_escapeHTML(input_val));
         // Get maximum width, minimum the size of input and maximum the widget's width
-        input_box.width(Math.min(token_list.width(),
-                                 Math.max(width_left, input_resizer.width() + 30)));
+				var resizer_width = input_resizer.width() + 30;
+				var tlw = token_list.width();
+				var mx = Math.max(width_left, resizer_width);
+				if(tlw > 0) {
+	      	input_box.width( Math.min(tlw, mx));
+				} else {
+	      	input_box.width( mx );
+				}
     }
 
     function is_printable_character(keycode) {

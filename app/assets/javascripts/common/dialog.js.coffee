@@ -127,14 +127,17 @@ open_modal = (dlog, omit_button) ->
 	if !(omit_button || $('button.close', dlog)[0])
 		buttoncode = '<button type=\"button\" class=\"close\" onclick=\"RP.dialog.cancel(event)\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>'
 		$('div.modal-header').prepend buttoncode
+	# $('.tagging_field', dlog).on 'shown.bs.modal', (evt) ->
+		# debugger
 	if $(dlog).modal
-		$(dlog).modal 'show'
+		$(dlog).modal()
 	notify "open", dlog
 	notify_injector "open", dlog
 	# Set text focus as appropriate
-	# if (focus_sel = $(dlog).data("focus")) && (focus_elmt = $(focus_sel, dlog)[0])
-		# $(dlog).on 'shown.bs.modal', ->
-			# $(focus_sel).focus()
+	$('.tagging_field', dlog).each ->
+		RP.tagger.setup this
+	if (focus_sel = $(dlog).data("focus")) && (focus_elmt = $(focus_sel, dlog)[0])
+		$(focus_sel).focus()
 	RP.dialog.arm_links dlog
 	dlog
 

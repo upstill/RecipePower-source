@@ -2,13 +2,18 @@
 div.dialog {
 	font:18px arial,sans-serif;
 	font-weight:normal;
+	div.tags > ul > li {
+		font:18px arial,sans-serif;
+		font-weight:normal;
+	}
 	p {
 		font-size: 90%;
 		line-height:130%;
 		font-weight: normal;
 	}
 	li {
-		margin-top: 10px;
+		margin-top: 5px;
+		margin-bottom: 5px;
 		font-size: 90%;
 		line-height:130%;
 		font-weight: normal;

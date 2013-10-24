@@ -17,6 +17,14 @@ module Taggable
   def tag_owner
     current_user || User.super_id
   end
+  
+  def tagstxt
+    @tagstxt ||= ""
+  end
+  
+  def tagstxt= tt
+    @tagstxt = tt
+  end
 
   def tags(uid=nil)
     uid ||= tag_owner

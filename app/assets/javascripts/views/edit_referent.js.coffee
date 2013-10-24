@@ -30,10 +30,13 @@ add_expression = (hi, li) ->
 	$('#referent_add_expression').tokenInput "remove", 
 		id: hi.id
 
+RP.edit_referent.onopen = (dlog) ->
+	dlog = me()
+	RP.tagger.onopen tagger_selector
+
 # When dialog is loaded, activate its functionality
 RP.edit_referent.onload = (dlog) ->
 	dlog = me()
-	RP.tagger.onload tagger_selector
 	# Bind tokenInput to the text fields
 	tagtype = $('#referent_parent_tokens').data "type"
 	querystr = "/tags/match.json?tagtype="+tagtype

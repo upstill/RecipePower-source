@@ -45,7 +45,7 @@ RP.edit_recipe.onload = (dlog) ->
 	if $('.edit_recipe > *').length > 0
 		
 		# Setup tokenInput on the tags field
-		RP.tagger.onload tagger_selector
+		RP.tagger.onopen tagger_selector
 		if $('.pic_picker_golink', dlog).length > 0
 			# Get the picture picker in background
 			RP.pic_picker.load (picdlg) ->
