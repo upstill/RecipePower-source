@@ -18,15 +18,13 @@ class FeedsController < ApplicationController
   # GET /feeds
   # GET /feeds.json
   def index
-    scope = permitted_to?(:approve, :feeds) ? Feed.scoped : Feed.where(:approved => true)
-    seeker_result Feed, clear_tags: true, scope: scope
+    seeker_result Feed, clear_tags: true, approved_only: !permitted_to?(:approve, :feeds)
   end
   
   # Query takes either a query string or a specification of page number
   # We return a recipe list IFF the :cached parameter is not set
   def query
-    scope = permitted_to?(:approve, :feeds) ? Feed.scoped : Feed.where(:approved => true)
-    seeker_result Feed, scope: scope
+    seeker_result Feed, clear_tags: false, approved_only: !permitted_to?(:approve, :feeds)
   end
 
   # GET /feeds/1

@@ -30,10 +30,10 @@ class StreamController < ApplicationController
     # response.stream.write "data: <div>This is a result ##{n.to_s}</div>\n\n"
     # response.stream.write "data: <div>This is another result ##{n.to_s}</div>\n\n"
     kind.sub! /Seeker$/, ''
-    debugger
-    setup_seeker kind
+    retrieve_seeker
     begin
       sse = Reloader::SSE.new(response.stream)
+      debugger
    	  @seeker.results_paged[0..2].each do |element| 
         item = with_format("html") { view_context.seeker_stream_item element }
         sse.write :stream_item, item

@@ -64,28 +64,37 @@ class ApplicationController < ActionController::Base
     end
   end
   
-  def setup_seeker(klass, clear_tags=false, scope=nil)
-    @user = current_user_or_guest
-    scope ||= klass.constantize.scoped
-    @seeker = "#{klass}Seeker".constantize.new scope, session[:seeker], params # Default; other controllers may set up different seekers
-    @seeker.tagstxt = "" if clear_tags
+  # Get the seeker from the session store (mainly used for streaming)
+  def retrieve_seeker
+    debugger
+    @user ||= current_user_or_guest
+    @browser ||= @user.browser
+    if klass = session[:seeker_class]
+      @seeker = klass.constantize.new @browser, session[:seeker]
+    end
+  end
+  
+  def setup_seeker(klass, options={})
+    @user ||= current_user_or_guest
+    @browser ||= @user.browser
+    @seeker = "#{klass}Seeker".constantize.new @browser, session[:seeker], params # Default; other controllers may set up different seekers
+    @seeker.tagstxt = "" if options[:clear_tags]
     session[:seeker] = @seeker.store
+    session[:seeker_class] = @seeker.class.to_s
     @seeker
   end
   
   # All controllers displaying the collection need to have it setup 
-  def setup_collection seeker_entry_content=true
+  def setup_collection klass="Content", options={}
     if popup = params[:popup]
       session[:flash_popup] = popup
       redirect_to collection_path
     else
       @user = current_user_or_guest
       @browser = @user.browser
-      params[:tagstxt] = "" if (params[:controller] != "collection") && (params[:controller] != "stream") # Clear the query
-      unless @seeker
-        @seeker = ContentSeeker.new @browser, session[:seeker], params # Default; other controllers may set up different seekers
-        session[:seeker] = @seeker.store
-      end
+      default_options = {}
+      default_options[:clear_tags] = (params[:controller] != "collection") && (params[:controller] != "stream")
+      setup_seeker klass, default_options.merge(options)
       if (params[:controller] == "pages")
         # The search box in generic pages redirects collections, either "The Big List" for guests or
         # the user's whole collection 
@@ -97,14 +106,12 @@ class ApplicationController < ActionController::Base
         format = "json"
         query_path = @seeker.query_path
       end
-      if seeker_entry_content
-        content_for :seeker_entry, 
-                    render_to_string(
-                      :template => "shared/seeker_entry", 
-                      :layout => false,
-                      :locals => { format: format, query_path: query_path }
-                    ).html_safe
-      end
+      content_for :seeker_entry, 
+                  render_to_string(
+                    :template => "shared/seeker_entry", 
+                    :layout => false,
+                    :locals => { format: format, query_path: query_path }
+                  ).html_safe
     end
   end
   
@@ -112,15 +119,15 @@ class ApplicationController < ActionController::Base
   # See tags_controller for an example
   # Options: selector: CSS selector for the outermost container of the rendered index template
   def seeker_result(klass, options={})
-    selector = options[:selector] || "div.#{klass.to_s.downcase}_list"
-    setup_seeker(klass, options[:clear_tags], options[:scope])
     respond_to do |format|
       format.html { 
-        setup_collection
+        setup_collection klass, options
         render :index 
       }
       format.json do 
+    	  setup_seeker(klass, options.slice(:clear_tags, :scope))
         replacement = with_format("html") { render_to_string 'index', :layout=>false }
+        selector = options[:selector] || "div.#{klass.to_s.downcase}_list"
         render json: { replacements: [
                             view_context.flash_notifications_replacement,
                             [ selector, replacement ]

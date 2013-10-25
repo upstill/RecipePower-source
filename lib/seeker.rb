@@ -12,9 +12,16 @@ class Seeker < Object
     savestr
   end
   
-  def initialize affiliate, datastr=nil, params=nil
+private 
+  def affiliate browser = nil, params = nil
+    @affiliate ||= 
+    (browser || self.class.to_s.sub(/Seeker$/, '').scoped)
+  end
+public
+
+  def initialize browser = nil, datastr = nil, params = nil
     # The affiliate is generally a scope, but in the case of the content browser, it's the browser itself
-    @affiliate = affiliate
+    affiliate browser, params # We leave it to subclasses to define a different affiliate from params
     prior = !datastr.blank? && YAML::load(datastr)
     if prior
       @tagstxt = prior[:tagstxt] || ""
@@ -53,7 +60,7 @@ class Seeker < Object
   end
   
   def entity_name
-    @affiliate.klass.to_s.downcase
+    @affiliate.class.to_s.downcase
   end
   
   def tagstxt()
@@ -324,6 +331,14 @@ class TagSeeker < Seeker
 end
 
 class FeedSeeker < Seeker
+  
+  def entity_name
+    "feed"
+  end
+  
+  def affiliate browser=nil, params=nil
+    @affiliate ||= (params && params[:approved_only]) ? Feed.where(:approved => true) : Feed.scoped
+  end
   
   # Get the results of the current query.
   def apply_tags(candihash)
