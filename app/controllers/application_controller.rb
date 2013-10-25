@@ -64,9 +64,10 @@ class ApplicationController < ActionController::Base
     end
   end
   
-  def init_seeker(klass, clear_tags=false, scope=nil)
+  def setup_seeker(klass, clear_tags=false, scope=nil)
     @user = current_user_or_guest
-    @seeker = "#{klass}Seeker".constantize.new (scope || klass.scoped), session[:seeker], params # Default; other controllers may set up different seekers
+    scope ||= klass.constantize.scoped
+    @seeker = "#{klass}Seeker".constantize.new scope, session[:seeker], params # Default; other controllers may set up different seekers
     @seeker.tagstxt = "" if clear_tags
     session[:seeker] = @seeker.store
     @seeker
@@ -112,7 +113,7 @@ class ApplicationController < ActionController::Base
   # Options: selector: CSS selector for the outermost container of the rendered index template
   def seeker_result(klass, options={})
     selector = options[:selector] || "div.#{klass.to_s.downcase}_list"
-    init_seeker(klass, options[:clear_tags], options[:scope])
+    setup_seeker(klass, options[:clear_tags], options[:scope])
     respond_to do |format|
       format.html { 
         setup_collection

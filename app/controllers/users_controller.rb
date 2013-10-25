@@ -17,7 +17,7 @@ class UsersController < ApplicationController
     @users = @isChannel ? 
       User.where("channel_referent_id > 0 AND id not in (?)", @user.followee_ids + [@user.id, 4, 5]) : 
       User.where("channel_referent_id = 0 AND id not in (?) AND private != true", @user.followee_ids + [@user.id, 4, 5])
-    # init_seeker(User, clear_tags, @users)
+    # setup_seeker(User, clear_tags, @users)
     # @seeker = FriendSeeker.new @users, session[:seeker] # Default; other controllers may set up different seekers
     seeker_result User, clear_tags: clear_tags, scope: @users
   end

@@ -25,21 +25,25 @@ class StreamController < ApplicationController
 
   # Streams items in the current query
   def stream
+    kind = params[:kind] || "ContentSeeker"
     response.headers["Content-Type"] = "text/event-stream"
     # response.stream.write "data: <div>This is a result ##{n.to_s}</div>\n\n"
     # response.stream.write "data: <div>This is another result ##{n.to_s}</div>\n\n"
-    setup_collection false
-    sse = Reloader::SSE.new(response.stream)
- 	  @seeker.results_paged.each do |element| 
-      item = with_format("html") { view_context.collection_element element } # "<div>Just one element</div" # 
-      # itemstr = JSON.dump ( { elmt: item } )
-      sse.write :collection_element, elmt: item
- 	  end
-  rescue IOError
-    logger.info "Stream closed"
-  ensure
-    # response.stream.write "event: end_of_stream\ndata: null\n\n"
-    sse.close
+    kind.sub! /Seeker$/, ''
+    debugger
+    setup_seeker kind
+    begin
+      sse = Reloader::SSE.new(response.stream)
+   	  @seeker.results_paged[0..2].each do |element| 
+        item = with_format("html") { view_context.seeker_stream_item element }
+        sse.write :stream_item, item
+   	  end
+    rescue IOError
+      logger.info "Stream closed"
+    ensure
+      # response.stream.write "event: end_of_stream\ndata: null\n\n"
+      sse.close
+    end
   end
 
 end

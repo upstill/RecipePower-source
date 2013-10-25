@@ -30,7 +30,6 @@ jQuery ->
 
 collection_onload = () ->
 	$("#tagstxt").first().focus()
-	RP.stream.go()
 	# Page buttons do a remote fetch which needs to replace the collection
 	$('.pageclickr').bind "ajax:beforeSend", collection_beforeSend
 	$('.pageclickr').bind "ajax:success", collection_success

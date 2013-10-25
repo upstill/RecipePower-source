@@ -1,4 +1,8 @@
 module TableHelper
+  def table_collection_selector
+    'tbody.collection_list'
+  end
+  
   def table_out(list, headers, &block)
     hdrlist = headers.collect { |ttl| "<th>#{ttl}</th>" unless ttl.blank? }.compact.join("\n")
     bodylist = list.collect { |object| "<tr>"+block.call(object)+"</tr>" }.join("\n")
