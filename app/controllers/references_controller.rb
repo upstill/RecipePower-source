@@ -3,7 +3,7 @@ class ReferencesController < ApplicationController
   # GET /references.json
   def index
     @Title = "References"
-    setup_seeker(Reference, clear_tags: true)
+    setup_seeker(Reference, { clear_tags: true }, params)
 =begin
     # 'index' page may be calling itself with filter parameters in the name and tagtype
     @references = Reference.scoped
@@ -18,7 +18,7 @@ class ReferencesController < ApplicationController
   # We return a recipe list IFF the :cached parameter is not set
   def query
     @Title = "References"
-    setup_seeker Reference
+    setup_seeker Reference, nil, params
     render 'index', :layout=>false
   end
 

@@ -7,21 +7,23 @@ class Seeker < Object
   # Save the Seeker data into session store
   def store
     # Serialize structure consisting of tagstxt and specialtags
-    savestr = YAML::dump( { :tagstxt => (@tagstxt || ""), :tagtype => @tagtype, :page => @cur_page || 1 } ) 
+    savestr = YAML::dump( datastore ) 
     back = YAML::load(savestr)
     savestr
   end
   
 private 
-  def affiliate browser = nil, params = nil
-    @affiliate ||= 
-    (browser || self.class.to_s.sub(/Seeker$/, '').scoped)
+  
+  # class-specific data storage
+  def datastore
+    { 
+      :tagstxt => (@tagstxt || ""), 
+      :tagtype => @tagtype, 
+      :page => @cur_page || 1 
+    }
   end
-public
-
-  def initialize browser = nil, datastr = nil, params = nil
-    # The affiliate is generally a scope, but in the case of the content browser, it's the browser itself
-    affiliate browser, params # We leave it to subclasses to define a different affiliate from params
+  
+  def dataload datastr
     prior = !datastr.blank? && YAML::load(datastr)
     if prior
       @tagstxt = prior[:tagstxt] || ""
@@ -32,6 +34,20 @@ public
       @tagtype = nil
       @cur_page = 1
     end
+    prior || {}
+  end
+  
+  def affiliate browser = nil, params = nil
+    @affiliate ||= (browser || self.class.to_s.sub(/Seeker$/, '').scoped)
+  end
+public
+
+  def initialize user, browser = nil, datastr = nil, params = nil
+    @user = user
+    # Retrieve prior data from datastr if provided
+    dataload datastr
+    # The affiliate is generally a scope, but in the case of the content browser, it's the browser itself
+    affiliate browser, params # We leave it to subclasses to define a different affiliate from params
     # Params for tagstxt and cur_page will override the prior info
     if params
       if params[:tagstxt]
@@ -60,7 +76,11 @@ public
   end
   
   def entity_name
-    @affiliate.class.to_s.downcase
+    affiliate.class.to_s.downcase
+  end
+  
+  def table_header
+    entity_name.capitalize.pluralize
   end
   
   def tagstxt()
@@ -73,11 +93,11 @@ public
   
   def guide
     # Describe this seeker for presentation to the user
-    (@affiliate && @affiliate.selected) ? @affiliate.selected.guide : "This is your friendly seeker"
+    (affiliate && @affiliate.selected) ? @affiliate.selected.guide : "This is your friendly seeker"
   end
   
   def hints
-    (@affiliate && @affiliate.selected) ? @affiliate.selected.hints : "Handy Hints Here"
+    (affiliate && @affiliate.selected) ? @affiliate.selected.hints : "Handy Hints Here"
   end
   
   # Accept new tags text, bust the cache, and return the new set of tags
@@ -91,11 +111,11 @@ public
   # Update the contents and return true OR enqueue the update job and return false
   def refresh
     # By default, we're ready to go, but the affiliate may have to fire off an update job in background
-    @affiliate.respond_to?(:refresh) ? @affiliate.refresh : true
+    affiliate.respond_to?(:refresh) ? affiliate.refresh : true
   end
   
   def updated_at
-    @affiliate.respond_to?(:updated_at) && @affiliate.updated_at
+    affiliate.respond_to?(:updated_at) && affiliate.updated_at
   end
   
   # Use the 'querytags' string (in actuality a string provided by the unconstrained tags editor) to extract
@@ -174,22 +194,16 @@ public
     convert_ids ids[first...ixbound]
   end
   
-  # By default, the initial scope for a search is the whole affiliate.
-  # The point here is to be able to override it
-  def starting_scope
-    @affiliate
-  end
-  
   # Return the list of ids matching the tags, by calling an application method
   def result_ids
   	return @results if @results # Keeping a cache of results
     if tags.empty?
-      @results = starting_scope.map(&:id)
+      @results = affiliate.map(&:id)
     else
       # We purge/massage the list only if there is a tags query here
       # Otherwise, we simply sort the list by mod date
       # Convert candidate array to a hash recipe_id=>#hits
-      candihash = Candihash.new starting_scope.map(&:id)
+      candihash = Candihash.new affiliate.map(&:id)
       apply_tags candihash
       # Convert back to a list of results
       @results = candihash.results.reverse
@@ -218,7 +232,7 @@ class ContentSeeker < Seeker
   
   # Get the results of the current query.
   def result_ids
-    @affiliate.result_ids tags
+    affiliate.result_ids tags
   end
   
   def query_path
@@ -226,28 +240,48 @@ class ContentSeeker < Seeker
   end
   
   def cur_page=(pagenum)
-    @affiliate.cur_page= pagenum
+    affiliate.cur_page= pagenum
   end
   
   # If the entity has returned no results, suggest what the problem might have been
   def explain_empty
-    explanation = @affiliate.explain_empty tags
+    explanation = affiliate.explain_empty tags
     (explanation[:sug] ? explanation[:report]+"<br>You might try #{explanation[:sug]}." : explanation[:report])+"<br>#{explanation[:hint]}"
   end
 end
 
 class UserSeeker < Seeker
   
+  def datastore
+    super.merge is_channel: (@is_channel || false)
+  end
+  
+  def dataload datastr
+    data = super
+    @is_channel = data[:is_channel] || false
+  end
+  
+  def affiliate browser=nil, params=nil
+    @is_channel ||= params && params[:channel] && (params[:channel]=="true")
+    @affiliate ||= @is_channel ? 
+      User.where("channel_referent_id > 0 AND id not in (?)", @user.followee_ids + [@user.id, 4, 5]) :
+      User.where("channel_referent_id = 0 AND id not in (?) AND private != true AND sign_in_count > 0", @user.followee_ids + [@user.id, 4, 5])
+  end
+
+  def query_path
+    "/users/query?channel="+@is_channel.to_s
+  end
+  
   def entity_name
-    @affiliate.first.channel? ? "channel" : "user"
+    @is_channel ? "channel" : "user"
+  end
+  
+  def table_header
+    @is_channel ? "Available Channels" : "Possible Friends"
   end
   
   def convert_ids list
     User.where(id: list)
-  end
-  
-  def starting_scope
-    @affiliate.first.channel? ? @affiliate : @affiliate.where("sign_in_count > 0")
   end
   
   # Get the results of the current query.
@@ -261,9 +295,9 @@ class UserSeeker < Seeker
       candihash.apply user_ids, weightings[tag.id] if tag.id > 0
       # candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
       # Get candidates by matching the tag's name against recipe titles and comments
-      users = starting_scope.where("username ILIKE ?", "%#{tag.name}%")
+      users = affiliate.where("username ILIKE ?", "%#{tag.name}%")
       candihash.apply users.map(&:id), 1.0
-      users = starting_scope.where("about ILIKE ?", "%#{tag.name}%")
+      users = affiliate.where("about ILIKE ?", "%#{tag.name}%")
       candihash.apply users.map(&:id), 1.0
     end
   end
@@ -278,7 +312,7 @@ class ReferenceSeeker < Seeker
     tags.each { |tag| 
       # candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
       # Get candidates by matching the tag's name against recipe titles and comments
-      candihash.apply starting_scope.where("url LIKE ?", "%#{tag.name}%").map(&:id)
+      candihash.apply affiliate.where("url LIKE ?", "%#{tag.name}%").map(&:id)
       constraints = @tagtype ? { tagtype: @tagtype } : {}
       # collect all the references of all the referents of all matching tags
       list = Tag.strmatch(tag.name).collect { |tag| tag.referents }.flatten
@@ -296,7 +330,7 @@ class SiteSeeker < Seeker
     tags.each { |tag| 
       # candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
       # Get candidates by matching the tag's name against recipe titles and comments
-      candihash.apply starting_scope.where("site ILIKE ?", "%#{tag.name}%").map(&:id)
+      candihash.apply affiliate.where("site ILIKE ?", "%#{tag.name}%").map(&:id)
       # Find lexically-related tags of Source type and see if they point to sites
       # Find sites that have been tagged similarly
     }
@@ -310,8 +344,7 @@ class TagSeeker < Seeker
   	return @results if @results # Keeping a cache of results
     case tags.count
     when 0
-      scope = @tagtype ? starting_scope.where(tagtype: @tagtype) : starting_scope
-      @results = scope.map(&:id)
+      @results = (@tagtype ? affiliate.where(tagtype: @tagtype) : affiliate).map(&:id)
     when 1
       constraints = @tagtype ? { tagtype: @tagtype } : {}
       @results = Tag.strmatch(tags.first.name, constraints).map(&:id)
@@ -332,12 +365,22 @@ end
 
 class FeedSeeker < Seeker
   
+  def datastore
+    super.merge all_feeds: (@all_feeds || false)
+  end
+  
+  def dataload datastr
+    data = super
+    @all_feeds = data[:all_feeds] || false
+  end
+  
   def entity_name
     "feed"
   end
   
   def affiliate browser=nil, params=nil
-    @affiliate ||= (params && params[:approved_only]) ? Feed.where(:approved => true) : Feed.scoped
+    @all_feeds ||= params && params[:all_feeds]
+    @affiliate ||= @all_feeds ? Feed.scoped : Feed.where(:approved => true)
   end
   
   # Get the results of the current query.
@@ -347,8 +390,8 @@ class FeedSeeker < Seeker
       semantic_list = Feed.where(site_id: Site.where(referent_id: tag.referent_ids).map(&:id)).map(&:id)
       candihash.apply semantic_list
       # Get candidates by matching the tag's name against recipe titles and comments
-      candihash.apply starting_scope.where("description ILIKE ?", "%#{tag.name}%").map(&:id)
-      candihash.apply starting_scope.where("title ILIKE ?", "%#{tag.name}%").map(&:id)
+      candihash.apply affiliate.where("description ILIKE ?", "%#{tag.name}%").map(&:id)
+      candihash.apply affiliate.where("title ILIKE ?", "%#{tag.name}%").map(&:id)
     }
   end
 end

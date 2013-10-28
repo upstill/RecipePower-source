@@ -12,13 +12,7 @@ class UsersController < ApplicationController
   end
   
   def user_seeker_result(clear_tags=false)
-    @isChannel = params[:channel] && (params[:channel]=="true")
-    @user = current_user_or_guest
-    @users = @isChannel ? 
-      User.where("channel_referent_id > 0 AND id not in (?)", @user.followee_ids + [@user.id, 4, 5]) : 
-      User.where("channel_referent_id = 0 AND id not in (?) AND private != true", @user.followee_ids + [@user.id, 4, 5])
-    setup_seeker(@isChannel?"Channel":"Friend", clear_tags: clear_tags)
-    seeker_result User, clear_tags: clear_tags, scope: @users
+    seeker_result User, clear_tags: clear_tags
   end
   
   # Take a tokenInput query string and match the input against the given user's set of friends/channels

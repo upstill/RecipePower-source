@@ -21,7 +21,7 @@ class SitesController < ApplicationController
     
     # Setup to display the feeds for the site
     @feeds = @site.feeds
-    @seeker = FeedSeeker.new @feeds, session[:seeker] # Default; other controllers may set up different seekers
+    @seeker = FeedSeeker.new @user, @feeds, session[:seeker] # Default; other controllers may set up different seekers
 
     respond_to do |format|
       format.html # show.html.erb
@@ -122,9 +122,9 @@ class SitesController < ApplicationController
         redirect_to "/feeds/new", notice: "No new feeds found in page#{codicil}If you want more, you might try copy-and-paste-ing RSS URLs individually."
       else
         @site.save
-        @seeker = FeedSeeker.new @feeds, session[:seeker] # Default; other controllers may set up different seekers
-        flash.now[:notice] = view_context.list_feeds("Scraped", nlist)
         @user = current_user
+        @seeker = FeedSeeker.new @user, @feeds, session[:seeker] # Default; other controllers may set up different seekers
+        flash.now[:notice] = view_context.list_feeds("Scraped", nlist)
         render action: :show
       end
     else

@@ -66,21 +66,18 @@ class ApplicationController < ActionController::Base
   
   # Get the seeker from the session store (mainly used for streaming)
   def retrieve_seeker
-    debugger
-    @user ||= current_user_or_guest
-    @browser ||= @user.browser
     if klass = session[:seeker_class]
-      @seeker = klass.constantize.new @browser, session[:seeker]
+      setup_seeker klass
     end
   end
   
-  def setup_seeker(klass, options={})
+  def setup_seeker(klass, options=nil, params=nil)
     @user ||= current_user_or_guest
     @browser ||= @user.browser
-    @seeker = "#{klass}Seeker".constantize.new @browser, session[:seeker], params # Default; other controllers may set up different seekers
-    @seeker.tagstxt = "" if options[:clear_tags]
+    @seeker = "#{klass}Seeker".constantize.new @user, @browser, session[:seeker], params # Default; other controllers may set up different seekers
+    @seeker.tagstxt = "" if options && options[:clear_tags]
     session[:seeker] = @seeker.store
-    session[:seeker_class] = @seeker.class.to_s
+    session[:seeker_class] = klass
     @seeker
   end
   
@@ -94,7 +91,7 @@ class ApplicationController < ActionController::Base
       @browser = @user.browser
       default_options = {}
       default_options[:clear_tags] = (params[:controller] != "collection") && (params[:controller] != "stream")
-      setup_seeker klass, default_options.merge(options)
+      setup_seeker klass, default_options.merge(options), params
       if (params[:controller] == "pages")
         # The search box in generic pages redirects collections, either "The Big List" for guests or
         # the user's whole collection 
@@ -125,7 +122,7 @@ class ApplicationController < ActionController::Base
         render :index 
       }
       format.json do 
-    	  setup_seeker(klass, options.slice(:clear_tags, :scope))
+    	  setup_seeker(klass, options.slice(:clear_tags, :scope), params)
         replacement = with_format("html") { render_to_string 'index', :layout=>false }
         selector = options[:selector] || "div.#{klass.to_s.downcase}_list"
         render json: { replacements: [

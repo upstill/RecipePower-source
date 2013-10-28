@@ -540,7 +540,7 @@ class RcpBrowserChannelsAndFriends < RcpBrowserComposite
     if @children.empty?
       klass = Module.const_get("User")
       if klass.is_a?(Class) # If User class is available (i.e., in Rails, as opposed to testing)
-        @children = user.follows(@isChannel).map do |followee| 
+        @children = user.follows(@is_channel).map do |followee| 
           args[:friendid] = followee.id
           RcpBrowserElementFriend.new level+1, args
         end
@@ -549,36 +549,26 @@ class RcpBrowserChannelsAndFriends < RcpBrowserComposite
   end
   
   def add_path
-    "/users?channel=#{@isChannel.to_s}"
+    "/users?channel=#{@is_channel.to_s}"
   end
   
   def add_by_content obj
-    if (obj.kind_of? User) && (obj.channel? == @isChannel)
+    if (obj.kind_of? User) && (obj.channel? == @is_channel)
       @children.unshift(new_elmt = RcpBrowserElementFriend.new(@level+1, { user: obj, friendid: obj.id }))
       new_elmt
     end 
   end
   
   def sources
-    user.follows(@isChannel).map { |followee| followee.id }
+    user.follows(@is_channel).map { |followee| followee.id }
   end
-
-=begin
-  # Only need to override when we don't save friends
-  def save
-    saved = super
-    # Don't save the children; they will be reconstructed from the database
-    saved.delete(:children)
-    saved
-  end
-=end
   
 end
 
 class RcpBrowserCompositeFriends < RcpBrowserChannelsAndFriends
   
   def initialize(level, args)
-    @isChannel = false
+    @is_channel = false
     super
     @handle = "My Friends"
   end
@@ -605,7 +595,7 @@ end
 class RcpBrowserCompositeChannels < RcpBrowserChannelsAndFriends
   
   def initialize(level, args)
-    @isChannel = true
+    @is_channel = true
     super
     @handle = "My Channels"
   end
