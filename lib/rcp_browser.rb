@@ -366,6 +366,15 @@ class FeedBrowserElement < BrowserElement
     self.class.to_s+@feedid.to_s
   end
   
+  # Filter a set of candidate ids using one tag
+  def apply_tag tag, source_set, candihash
+    # Default procedure, for recipes
+    # Apply tags to feed entries candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
+    # Get candidates by matching the tag's name against recipe titles and comments
+    candihash.apply FeedEntry.where(feed_id: @feedid).where( "name ILIKE ? OR summary ILIKE ? OR url ILIKE ?", 
+      "%#{tag.name}%", "%#{tag.name}%", "%#{tag.name}%").map(&:id)
+  end
+  
 end
 
 # Element for all the recipes in a user's channels, with subheads for each channel
@@ -426,12 +435,9 @@ class FeedBrowserComposite < BrowserComposite
     # Default procedure, for recipes
     # Apply tags to feed entries candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
     # Get candidates by matching the tag's name against recipe titles and comments
-    matches = FeedEntry.where( "name ILIKE ?", "%#{tag.name}%").map(&:id)
-    candihash.apply matches
-    matches = FeedEntry.where( "summary ILIKE ?", "%#{tag.name}%").map(&:id)
-    candihash.apply matches
-    matches = FeedEntry.where( "url ILIKE ?", "%#{tag.name}%").map(&:id)
-    candihash.apply matches
+    candihash.apply FeedEntry.where(feed_id: user.feed_ids).
+      where( "name ILIKE ? OR summary ILIKE ? OR url ILIKE ?", 
+        "%#{tag.name}%", "%#{tag.name}%", "%#{tag.name}%").map(&:id)
   end
   
   def list_type
