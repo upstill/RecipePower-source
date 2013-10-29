@@ -3,23 +3,14 @@ class ReferencesController < ApplicationController
   # GET /references.json
   def index
     @Title = "References"
-    setup_seeker(Reference, { clear_tags: true }, params)
-=begin
-    # 'index' page may be calling itself with filter parameters in the name and tagtype
-    @references = Reference.scoped
-    @seeker = ReferenceSeeker.new @references, session[:seeker], params # Default; other controllers may set up different seekers
-    # @user = current_user_or_guest
-    session[:seeker] = @seeker.store
-=end
-    render 'index' # , :layout=>false
+    seeker_result Reference, { clear_tags: true }
   end
   
   # Query takes either a query string or a specification of page number
   # We return a recipe list IFF the :cached parameter is not set
   def query
     @Title = "References"
-    setup_seeker Reference, nil, params
-    render 'index', :layout=>false
+    seeker_result Reference
   end
 
   # GET /references/1

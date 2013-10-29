@@ -43,6 +43,7 @@ module SeekerHelper
 	def render_seeker_results
 	  return link_to "Click to load", "#", 
 	    onclick: "RP.stream.go(event);",
+	    class: "streamer",
 	    data: { kind: @seeker.class.to_s }
 	  # return %q{<div class='streamer' onready="RP.stream.go();">Hang on a second...</div>}.html_safe
 	  page = 

@@ -11,10 +11,6 @@ class UsersController < ApplicationController
     @focus_selector = "#user_login"
   end
   
-  def user_seeker_result(clear_tags=false)
-    seeker_result User, clear_tags: clear_tags
-  end
-  
   # Take a tokenInput query string and match the input against the given user's set of friends/channels
   def match_friends
     me = User.find params[:id]
@@ -33,34 +29,13 @@ class UsersController < ApplicationController
   def index
     # 'index' page may be calling itself with filter parameters in the name and tagtype
     @Title = "Users"
-    user_seeker_result true
-=begin
-    # @filtertag.tagtype = params[:tag][:tagtype].to_i unless params[:tag][:tagtype].blank?
-    @userlist = User.scoped.order("id").page(params[:page]).per_page(50)
-    respond_to do |format|
-      format.json { render :json => @taglist.map { |tag| { :title=>tag.name+tag.id.to_s, :isLazy=>false, :key=>tag.id, :isFolder=>false } } }
-      format.html # index.html.erb
-      format.xml  { render :xml => @taglist }
-    end
-=end
+    seeker_result User, clear_tags: true
   end
   
   # Query takes either a query string or a specification of page number
   # We return a recipe list IFF the :cached parameter is not set
   def query
-    user_seeker_result
-=begin
-    @seeker = FriendSeeker.new @users, session[:seeker] # Default; other controllers may set up different seekers
-    @user = current_user_or_guest
-    if tagstxt = params[:tagstxt]
-      @seeker.tagstxt = tagstxt
-    end
-    if page = params[:cur_page]
-      @seeker.cur_page = page.to_i
-    end
-    session[:seeker] = @seeker.store
-=end
-    # render 'index', :layout=>false
+    seeker_result User
   end
   
   # Add a user or channel to the friends of the current user
@@ -115,6 +90,7 @@ class UsersController < ApplicationController
   
   def show
     @user = User.find params[:id]
+    smartrender
   end
   
   def not_found

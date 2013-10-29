@@ -38,7 +38,7 @@ private
   end
   
   def affiliate browser = nil, params = nil
-    @affiliate ||= (browser || self.class.to_s.sub(/Seeker$/, '').scoped)
+    @affiliate ||= model_class.all
   end
 public
 
@@ -67,8 +67,12 @@ public
     "/#{entity_name.pluralize}/query"
   end
   
+  def model_class
+    entity_name.capitalize.constantize
+  end
+  
   def convert_ids list
-    entity_name.capitalize.constantize.where(id: list)
+    model_class.where(id: list)
   end
   
   def list_type
@@ -76,7 +80,7 @@ public
   end
   
   def entity_name
-    affiliate.class.to_s.downcase
+    self.class.to_s.sub(/Seeker$/, '').downcase
   end
   
   def table_header
@@ -230,6 +234,10 @@ class ContentSeeker < Seeker
   
   delegate :cur_page, :convert_ids, :timestamp, :list_type, :to => :"@affiliate"
   
+  def affiliate browser = nil, params = nil
+    @affiliate ||= browser
+  end
+  
   # Get the results of the current query.
   def result_ids
     affiliate.result_ids tags
@@ -262,7 +270,7 @@ class UserSeeker < Seeker
   end
   
   def affiliate browser=nil, params=nil
-    @is_channel ||= params && params[:channel] && (params[:channel]=="true")
+    @is_channel = (params[:channel]=="true") if params && params[:channel]
     @affiliate ||= @is_channel ? 
       User.where("channel_referent_id > 0 AND id not in (?)", @user.followee_ids + [@user.id, 4, 5]) :
       User.where("channel_referent_id = 0 AND id not in (?) AND private != true AND sign_in_count > 0", @user.followee_ids + [@user.id, 4, 5])
@@ -374,13 +382,9 @@ class FeedSeeker < Seeker
     @all_feeds = data[:all_feeds] || false
   end
   
-  def entity_name
-    "feed"
-  end
-  
   def affiliate browser=nil, params=nil
     @all_feeds ||= params && params[:all_feeds]
-    @affiliate ||= @all_feeds ? Feed.scoped : Feed.where(:approved => true)
+    @affiliate ||= @all_feeds ? Feed.all : Feed.where(:approved => true)
   end
   
   # Get the results of the current query.

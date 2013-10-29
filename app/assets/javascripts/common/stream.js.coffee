@@ -1,9 +1,10 @@
 RP.stream ||= {}
 
-RP.stream.go = (evt) ->
-	me = evt.currentTarget
+RP.stream.go = (elmt) ->
+	me = elmt # evt.currentTarget
 	# Check with the stream generator for content
-	kind = $(me).data('kind')
+	kind = $(elmt).data('kind')
+	$(elmt).remove()
 	source = new EventSource "/stream/stream?kind="+kind
 	source.addEventListener 'end_of_stream', (e) ->
 		source.close()

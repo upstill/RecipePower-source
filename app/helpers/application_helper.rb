@@ -393,7 +393,8 @@ module ApplicationHelper
    def pagination_link (text, pagenum, url)
      # "<span value='#{p.to_s}' class='pageclickr'>#{p.to_s}</span>"
      # We install the actual pagination handler in RPquery.js::queryTabOnLoad
-     link_to text.html_safe, url+"?cur_page="+pagenum.to_s, class: "pageclickr", remote: true, method: :POST, "data-type" => :JSON
+     url = assert_query url, cur_page: pagenum
+     link_to text.html_safe, url, class: "pageclickr", remote: true, method: :POST, "data-type" => :JSON
    end
 
    def pagination_links(npages, cur_page, url )

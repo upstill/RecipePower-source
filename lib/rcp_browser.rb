@@ -110,7 +110,25 @@ class BrowserElement
     @candidates = @candidates || Rcpref.recipe_ids( sources, @userid)
   end
   
-  # Get the results of the current query.
+  # Filter a set of candidate ids using one tag
+  def apply_tag tag, source_set, candihash
+    # Default procedure, for recipes
+    candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
+    # Get candidates by matching the tag's name against recipe titles and comments
+    candihash.apply Rcpref.recipe_ids(source_set, 
+                                    @userid,
+                                    :status=>@status||MyConstants::Rcpstatus_misc,
+                                    :comment=>tag.name) 
+    # Get candidates that match specialtags in the title
+    candihash.apply Rcpref.recipe_ids(source_set, 
+                                      @userid,
+                                      :status=>@status||MyConstants::Rcpstatus_misc,
+                                      :title=>tag.name) 
+  end
+  
+  # Get the results of the current query. This is a generic method for applying a list of tags to an
+  # abstract type of result. Short of changing the algorithm, it is made specific by overriding apply_tag, 
+  # above
   def result_ids(tagset = [])
   	return @results if @results && (tagset == @tagset) # Keeping a cache of results for a given tagset
     if tagset.empty?
@@ -124,19 +142,7 @@ class BrowserElement
       source_set = sources
       
       # Rank/purge for tag matches
-      tagset.each { |tag| 
-          candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
-          # Get candidates by matching the tag's name against recipe titles and comments
-          candihash.apply Rcpref.recipe_ids(source_set, 
-                                          @userid,
-                                          :status=>@status||MyConstants::Rcpstatus_misc,
-                                          :comment=>tag.name) 
-          # Get candidates that match specialtags in the title
-          candihash.apply Rcpref.recipe_ids(source_set, 
-                                            @userid,
-                                            :status=>@status||MyConstants::Rcpstatus_misc,
-                                            :title=>tag.name) 
-      }
+      tagset.each { |tag| apply_tag tag, source_set, candihash }
       # Convert back to a list of results
       @tagset = tagset
       @results = candihash.results(@rankings).reverse
@@ -318,10 +324,14 @@ class FeedBrowserElement < BrowserElement
     @feedid
   end
   
-  # IDs of feed entries consistent with the tag set
-  def result_ids tagset 
-    Feed.find(@feedid).entry_ids
+  def candidates
+    @candidates ||= Feed.find(@feedid).entry_ids
   end
+  
+  # IDs of feed entries consistent with the tag set
+  # def result_ids tagset 
+    # Feed.find(@feedid).entry_ids
+  # end
 
   def convert_ids list
     list.collect { |id| FeedEntry.where( id: id ).first }.compact
@@ -407,9 +417,21 @@ class FeedBrowserComposite < BrowserComposite
     list.collect { |id| FeedEntry.where( id: id ).first }.compact
   end
   
-  # Collect feed entries from the children
-  def result_ids tagset
-    Feed.entry_ids user.feed_ids
+  def candidates
+    @candidates ||= Feed.entry_ids user.feed_ids
+  end
+  
+  # Filter a set of candidate ids using one tag
+  def apply_tag tag, source_set, candihash
+    # Default procedure, for recipes
+    # Apply tags to feed entries candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
+    # Get candidates by matching the tag's name against recipe titles and comments
+    matches = FeedEntry.where( "name ILIKE ?", "%#{tag.name}%").map(&:id)
+    candihash.apply matches
+    matches = FeedEntry.where( "summary ILIKE ?", "%#{tag.name}%").map(&:id)
+    candihash.apply matches
+    matches = FeedEntry.where( "url ILIKE ?", "%#{tag.name}%").map(&:id)
+    candihash.apply matches
   end
   
   def list_type

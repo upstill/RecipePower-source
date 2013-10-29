@@ -23,7 +23,7 @@ class StreamController < ApplicationController
     retrieve_seeker
     begin
       sse = Reloader::SSE.new(response.stream)
-   	  @seeker.results_paged[0..2].each do |element| 
+   	  @seeker.results_paged.each do |element| 
         item = with_format("html") { view_context.seeker_stream_item element }
         sse.write :stream_item, item
    	  end
