@@ -33,7 +33,8 @@ RP.edit_recipe.go = (evt, xhr, settings) ->
 		$(template).html dlgsource # This nukes any lingering children as well as initializing the dialog
 	# The tag data is parsed and added to the tags field directly
 	RP.tagger.init tagger_selector, rcpdata.rcptagdata # jQuery.parseJSON(rcpdata.rcptagdata)
-	
+	$('textarea').autosize()
+		
 	# Hand it off to the dialog handler
 	RP.dialog.run me()
 	false

@@ -4,34 +4,72 @@ require './lib/Domain.rb'
 
 module RecipesHelper
   
-# Sort out a suitable URL to stuff into an image thumbnail for a recipe
-def recipe_image_div(recipe, div_class="recipe_image_div")
-  begin
-    return unless url = recipe.picdata
-    options = { 
-      alt: "Image Not Accessible", 
-      id: "RecipeImage"+recipe.id.to_s,
-      style: "width:100%; height:auto;" }
-    # options.merge!( class: "stuffypic", data: { fillmode: "width" } ) # unless url =~ /^data:/
-    content = image_tag(url, options)
-  rescue Exception => e
-    if url
-      url = "data URL" if url =~ /^data:/
-    else
-      url = "nil URL"
-    end
-    content = 
-      "Error rendering image #{url.truncate(255)} from "+ (recipe ? "recipe #{recipe.id}: '#{recipe.title}'" : "null recipe")
-    ExceptionNotification::Notifier.exception_notification(request.env, e, data: { message: content}).deliver
+  def recipe_title_div recipe
+    "<div><h3>#{recipe.title}</h3></div>".html_safe
   end
-  # link_to content_tag( :div, content, class: div_class ), recipe.url
-  content_tag :div, 
-    link_to(content, recipe.url), 
-    class: div_class
-end
   
-def grab_recipe_link label, recipe
-end
+  # Sort out a suitable URL to stuff into an image thumbnail for a recipe
+  def recipe_image_div(recipe, div_class="recipe_image_div")
+    begin
+      return unless url = recipe.picdata
+      options = { 
+        alt: "Image Not Accessible", 
+        id: "RecipeImage"+recipe.id.to_s,
+        style: "width:100%; height:auto;" }
+      # options.merge!( class: "stuffypic", data: { fillmode: "width" } ) # unless url =~ /^data:/
+      content = image_tag(url, options)
+    rescue Exception => e
+      if url
+        url = "data URL" if url =~ /^data:/
+      else
+        url = "nil URL"
+      end
+      content = 
+        "Error rendering image #{url.truncate(255)} from "+ (recipe ? "recipe #{recipe.id}: '#{recipe.title}'" : "null recipe")
+      ExceptionNotification::Notifier.exception_notification(request.env, e, data: { message: content}).deliver
+    end
+    content_tag :div, 
+      link_to(content, recipe.url), 
+      class: div_class
+  end
+
+  def recipe_tags_div recipe
+    content_tag :div, 
+      summarize_alltags(recipe) || 
+      %Q{<p>...a dish with no tags or ratings in RecipePower!?! Why not #{edit_recipe_link(%q{add some}, recipe)}?</p>}.html_safe
+  end
+
+  def recipe_comments_div recipe, whose
+    user = User.find recipe.tag_owner
+    comments =
+    case whose
+    when :mine
+      header_text = "My Comments"
+      (commstr = recipe.comment user.id) ? [ { body: commstr } ] : [] 
+    when :friends
+      header_text = "Comments of Friends"
+      user.followee_ids.collect { |fid| 
+        commstr = recipe.comment fid 
+        { source: User.find(fid).handle, body: commstr } if commstr && !recipe.private(fid)
+      }.compact
+    when :others
+      header_text = "Comments of Others"
+      Rcpref.where(recipe_id: recipe.id).
+        where("comment <> '' AND private <> TRUE").
+        where("user_id not in (?)", user.followee_ids<<user.id).collect { |rref|
+          { source: rref.user.handle, body: rref.comment }
+        }
+    end
+    return if comments.empty?
+    commentstr = comments.collect { |comment| 
+      srcstr = comment[:source] ? %Q{<strong>#{comment[:source]}</strong>: } : ""
+      %Q{<li>#{srcstr}#{comment[:body]}</li>} 
+    }.join('')
+    content_tag :div, "<h3>#{header_text}</h3><ul>#{commentstr}</ul>".html_safe
+  end
+  
+  def grab_recipe_link label, recipe
+  end
 
 def edit_recipe_link( label, recipe, options={})
     rcp_params = {
@@ -77,6 +115,7 @@ def summarize_alltags(rcp)
 
     tags = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
     rcp.tags.each { |tag| tags[tag.tagtype] << tag }
+    return if tags.flatten.compact.empty?
     
     genrestr = tagjoin tags[1], false, "", " "
     rolestr = tagjoin tags[2], false, " for "

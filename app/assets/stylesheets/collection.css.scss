@@ -40,19 +40,30 @@ div.centerblock {
 	margin-bottom: 0px
 }
 
-.RcpBrowser.addlink {
-	display: inline-block;
-	float: right;
-	text-decoration:none;
-	color:#5E4A18;
-	font-size:14px;
-	padding:2px;
-	background-color:#E6DAA1;
-	border-radius:2px;
-	border-color:hsl(0,0%,55%);
-	border-width:2px;
-	border-style: solid
+li.RcpBrowser {
+	span.badge {
+		display: none;
+	}
+	&.active {
+		span.badge {
+			display: inline;
+		}
+	}
+	&.addlink {
+		display: inline-block;
+		float: right;
+		text-decoration:none;
+		color:#5E4A18;
+		font-size:14px;
+		padding:2px;
+		background-color:#E6DAA1;
+		border-radius:2px;
+		border-color:hsl(0,0%,55%);
+		border-width:2px;
+		border-style: solid
+	}
 }
+
 
 .nav-tabs > .active > a, .nav-tabs > .active > a:hover {
 	color: #ffffff;

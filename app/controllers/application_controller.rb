@@ -73,7 +73,9 @@ class ApplicationController < ActionController::Base
   
   def setup_seeker(klass, options=nil, params=nil)
     @user ||= current_user_or_guest
-    @browser ||= @user.browser
+    params[:cur_page] = "1" if params && params[:selected]
+    @browser = @user.browser params
+    # Go back to page 1 when a new browser element is selected
     @seeker = "#{klass}Seeker".constantize.new @user, @browser, session[:seeker], params # Default; other controllers may set up different seekers
     @seeker.tagstxt = "" if options && options[:clear_tags]
     session[:seeker] = @seeker.store
@@ -87,15 +89,11 @@ class ApplicationController < ActionController::Base
       session[:flash_popup] = popup
       redirect_to collection_path
     else
-      @user = current_user_or_guest
-      @browser = @user.browser
+      @user ||= current_user_or_guest
+      @browser ||= @user.browser params
       default_options = {}
       default_options[:clear_tags] = (params[:controller] != "collection") && (params[:controller] != "stream")
       setup_seeker klass, default_options.merge(options), params
-      if params[:selected]
-        @browser.select_by_id(params[:selected])
-        @seeker.cur_page = 1
-      end
       if (params[:controller] == "pages")
         # The search box in generic pages redirects collections, either "The Big List" for guests or
         # the user's whole collection 

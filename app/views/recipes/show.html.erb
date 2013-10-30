@@ -1,7 +1,20 @@
-
+<div class="col-md-12">
+	<%= recipe_title_div @recipe %>
+	<div class="row">
+		<div class="col-md-4">
+			<%= recipe_image_div @recipe %>
+		</div
+		<div class="col-md-8">
+			<%= recipe_tags_div @recipe %>
+		</div>
+	</div>
+	<%= recipe_comments_div @recipe, :mine %>
+	<%= recipe_comments_div @recipe, :friends %>
+	<%= recipe_comments_div @recipe, :others %>
+</div>
+	
   <div class="tag_summary">
      <%= "What I think: \"<strong>#{@recipe.comment}</strong>\"<br>".html_safe unless @recipe.comment.nil? || @recipe.comment.empty? %>
      <%= summarize_alltags(@recipe) ||
-        "<p>...a dish with no tags or ratings in RecipePower!?! Why not #{link_to(%q{add some}, edit_recipe_path(@recipe))}?".html_safe %></p>
   </div>
 

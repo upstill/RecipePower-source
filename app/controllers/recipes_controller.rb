@@ -67,7 +67,7 @@ class RecipesController < ApplicationController
     @recipe.current_user = current_user_or_guest_id # session[:user_id]
     @Title = ""
     @nav_current = nil
-    redirect_to @recipe.url
+    # redirect_to @recipe.url
   end
 
   def new # Collect URL, then redirect to edit

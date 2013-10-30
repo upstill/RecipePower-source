@@ -24,7 +24,7 @@ class BrowserElement
   @@persisters = [:selected, :handle, :userid, :cur_page]
   
   # Initialize a new element, either from supplied arguments or defaults
-  def initialize(level, args)
+  def initialize(level, args={})
     @persisters = (@@persisters + (@persisters || [])).uniq
     @level = level
     @persisters.each { |name| instance_variable_set("@#{name}", args[name]) if args[name] } if @persisters
@@ -811,6 +811,15 @@ class ContentBrowser < BrowserComposite
     end
     @children[0].select unless selected # Ensure there's a selection
   end
+  
+  # Take heed of any relevant incoming parameters
+  def apply_params params=nil
+    if params
+      self.select_by_id(params[:selected]) if params[:selected]
+      self.cur_page = params[:cur_page].to_i if params[:cur_page]
+    end
+  end
+    
   
   # Should a recipe be seen in the current browser? This is for updating a list based on changes to the recipe, including:
   # -- removing from a user's collection
