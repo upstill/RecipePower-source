@@ -37,9 +37,7 @@ collection_onload = () ->
 	$('.pageclickr').bind "ajax:success", collection_success
 	checkForLoading ".stuffypic"
 	RP.rcp_list.onload()
-	window.setTimeout -> 
-		RP.collection.justify()
-	, 800
+	RP.collection.justify()
 	
 collection_tagchange = () ->
 	formitem = $('form.query_form')

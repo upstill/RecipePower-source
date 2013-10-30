@@ -40,39 +40,10 @@ div.centerblock {
 	margin-bottom: 0px
 }
 
-li.RcpBrowser {
-	span.badge {
-		display: none;
-	}
-	&.active {
-		span.badge {
-			display: inline;
-		}
-	}
-	&.addlink {
-		display: inline-block;
-		float: right;
-		text-decoration:none;
-		color:#5E4A18;
-		font-size:14px;
-		padding:2px;
-		background-color:#E6DAA1;
-		border-radius:2px;
-		border-color:hsl(0,0%,55%);
-		border-width:2px;
-		border-style: solid
-	}
-}
-
-
 .nav-tabs > .active > a, .nav-tabs > .active > a:hover {
 	color: #ffffff;
 	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2);
 	background-color: #0088cc;
-}
-
-.RcpBrowser.Level2 {
-	margin-left: 30px;
 }
 
 .rcp_grid_pic_box {
@@ -225,35 +196,17 @@ li.RcpBrowser {
 	position: relative;
 	left: 0px;
 	top: 0px;
-	.active {
-		right: 30px;
+	span.badge {
+		display: none;
 	}
-}
-
-.RcpBrowser.active > div.mod_box  {
-	display: block;
-}
-
-li.RcpBrowser > div.mod_box {
-	float: right; // position: absolute; right: 0px;
-  display: none;
-	margin: 5px;
-	width: 15px;
-	height: 16px;
-	border-radius:10px;
-	border-color:hsl(0,0%,55%);
-	border-width:2px;
-	border-style: solid;
-	background-color:#FFFFFF;
-	a.mod_button {
-	  text-align: center;
-	  font-size: 1.2em;
-	  position: relative;
-		top: -4px;
-		left: 2px;
-		z-index: 3;
-		// font-weight:bold;
-		color:rgb(0,85,128);
+	&.active {
+		right: 30px;
+		span.badge {
+			display: inline;
+		}
+	}
+	&.Level2 { // Indent subheads
+		margin-left: 30px;
 	}
 }
 

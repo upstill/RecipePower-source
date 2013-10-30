@@ -50,7 +50,7 @@ module RecipesHelper
       header_text = "Comments of Friends"
       user.followee_ids.collect { |fid| 
         commstr = recipe.comment fid 
-        { source: User.find(fid).handle, body: commstr } if commstr && !recipe.private(fid)
+        { source: User.find(fid).handle, body: commstr } unless commstr.blank? || recipe.private(fid)
       }.compact
     when :others
       header_text = "Comments of Others"
@@ -63,8 +63,8 @@ module RecipesHelper
     return if comments.empty?
     commentstr = comments.collect { |comment| 
       srcstr = comment[:source] ? %Q{<strong>#{comment[:source]}</strong>: } : ""
-      %Q{<li>#{srcstr}#{comment[:body]}</li>} 
-    }.join('')
+      %Q{<li>#{srcstr}#{comment[:body]}</li>} unless comment[:body].blank?
+    }.compact.join('')
     content_tag :div, "<h3>#{header_text}</h3><ul>#{commentstr}</ul>".html_safe
   end
   

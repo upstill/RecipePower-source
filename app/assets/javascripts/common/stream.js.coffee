@@ -19,6 +19,8 @@ RP.stream.go = (elmt) ->
 			$(selector).append item
 			if selector == '#masonry-container'
 				$('#masonry-container').masonry 'appended', item
+				$('div.rcp_grid_pic_box', item).hover RP.rcp_list.show_panel, RP.rcp_list.hide_panel
+				$('div.rcp_grid_datablock', item).hover RP.rcp_list.show_panel, RP.rcp_list.hide_panel
 		
 RP.stream.buffer_test = ->
 	source = new EventSource('/stream/buffer_test')

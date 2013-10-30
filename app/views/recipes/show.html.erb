@@ -12,9 +12,3 @@
 	<%= recipe_comments_div @recipe, :friends %>
 	<%= recipe_comments_div @recipe, :others %>
 </div>
-	
-  <div class="tag_summary">
-     <%= "What I think: \"<strong>#{@recipe.comment}</strong>\"<br>".html_safe unless @recipe.comment.nil? || @recipe.comment.empty? %>
-     <%= summarize_alltags(@recipe) ||
-  </div>
-

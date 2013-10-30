@@ -3,7 +3,14 @@ RP.rcp_list = RP.rcp_list || {}
 RP.rcp_list.onload = ->
 	$(document).on 'ajax:beforeSend', '.edit_recipe_link', RP.edit_recipe.go
 	$(".popup").click(RP.servePopup);
+	$('div.collection_item').hover RP.rcp_list.show_panel, RP.rcp_list.hide_panel
 
+RP.rcp_list.show_panel = (event) ->
+	debugger
+
+RP.rcp_list.hide_panel = (event) ->
+	debugger
+	
 # Callback to update content in a recipe list due to JSON feedback
 RP.rcp_list.update = ( data ) ->
 	if data.action == "remove" || data.action == "destroy"
