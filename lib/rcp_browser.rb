@@ -100,16 +100,6 @@ class BrowserElement
     @userid
   end
   
-  # The candidates are a list of recipes by id
-  def candidates
-    # Get a set of candidates, determined by:
-    # -- who the owner of the list is 
-    # -- who the viewer is
-    # -- targetted status of the recipe (Rotation, etc.)
-    # -- text to match against titles and comments
-    @candidates = @candidates || Rcpref.recipe_ids( sources, @userid)
-  end
-  
   # Filter a set of candidate ids using one tag
   def apply_tag tag, source_set, candihash
     # Default procedure, for recipes
@@ -205,6 +195,17 @@ class BrowserElement
   
   def list_type
     :recipe
+  end
+
+private  
+  # The candidates are a list of recipes by id
+  def candidates
+    # Get a set of candidates, determined by:
+    # -- who the owner of the list is 
+    # -- who the viewer is
+    # -- targetted status of the recipe (Rotation, etc.)
+    # -- text to match against titles and comments
+    @candidates ||= Rcpref.recipe_ids( sources, @userid)
   end
   
 end
@@ -324,10 +325,6 @@ class FeedBrowserElement < BrowserElement
     @feedid
   end
   
-  def candidates
-    @candidates ||= Feed.find(@feedid).entry_ids
-  end
-  
   # IDs of feed entries consistent with the tag set
   # def result_ids tagset 
     # Feed.find(@feedid).entry_ids
@@ -366,13 +363,23 @@ class FeedBrowserElement < BrowserElement
     self.class.to_s+@feedid.to_s
   end
   
-  # Filter a set of candidate ids using one tag
-  def apply_tag tag, source_set, candihash
-    # Default procedure, for recipes
-    # Apply tags to feed entries candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
-    # Get candidates by matching the tag's name against recipe titles and comments
-    candihash.apply FeedEntry.where(feed_id: @feedid).where( "name ILIKE ? OR summary ILIKE ? OR url ILIKE ?", 
-      "%#{tag.name}%", "%#{tag.name}%", "%#{tag.name}%").map(&:id)
+  # Get the results of the current query. This is a generic method for applying a list of tags to an
+  # abstract type of result. Short of changing the algorithm, it is made specific by overriding apply_tag, 
+  # above
+  def result_ids(tagset = [])
+  	return @results if @results && (tagset == @tagset) # Keeping a cache of results for a given tagset
+  	matches = candidates
+    tagset.each do |tag|
+      matches = matches.where "name ILIKE ? OR summary ILIKE ? OR url ILIKE ?", 
+        "%#{tag.name}%", "%#{tag.name}%", "%#{tag.name}%"
+  	end
+    @tagset = tagset
+  	@results = matches.map(&:id)
+  end
+
+private  
+  def candidates
+    @candidates ||= FeedEntry.where feed_id: @feedid
   end
   
 end
@@ -426,22 +433,27 @@ class FeedBrowserComposite < BrowserComposite
     list.collect { |id| FeedEntry.where( id: id ).first }.compact
   end
   
-  def candidates
-    @candidates ||= Feed.entry_ids user.feed_ids
-  end
-  
-  # Filter a set of candidate ids using one tag
-  def apply_tag tag, source_set, candihash
-    # Default procedure, for recipes
-    # Apply tags to feed entries candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
-    # Get candidates by matching the tag's name against recipe titles and comments
-    candihash.apply FeedEntry.where(feed_id: user.feed_ids).
-      where( "name ILIKE ? OR summary ILIKE ? OR url ILIKE ?", 
-        "%#{tag.name}%", "%#{tag.name}%", "%#{tag.name}%").map(&:id)
+  # Get the results of the current query. This is a generic method for applying a list of tags to an
+  # abstract type of result. Short of changing the algorithm, it is made specific by overriding apply_tag, 
+  # above
+  def result_ids(tagset = [])
+  	return @results if @results && (tagset == @tagset) # Keeping a cache of results for a given tagset
+  	matches = candidates
+    tagset.each do |tag|
+      matches = matches.where "name ILIKE ? OR summary ILIKE ? OR url ILIKE ?", 
+        "%#{tag.name}%", "%#{tag.name}%", "%#{tag.name}%"
+  	end
+    @tagset = tagset
+  	@results = matches.map(&:id)
   end
   
   def list_type
     :feed
+  end
+
+private  
+  def candidates
+    @candidates ||= FeedEntry.where feed_id: user.feed_ids
   end
   
 end
@@ -466,10 +478,6 @@ class RcpBrowserElementFriend < BrowserElement
   
   def timestamp recipe
     (cd = recipe.collection_date @friendid) && "Cookmarked #{time_ago_in_words cd} ago."
-  end
-  
-  def candidates
-    @candidates = @candidates || User.find(@friendid).recipes(public: true, sort_by: :collected)
   end
   
   def css_id
@@ -506,6 +514,11 @@ class RcpBrowserElementFriend < BrowserElement
     "Not much to do about that..."
   end
 
+private  
+  def candidates
+    @candidates ||= User.find(@friendid).recipes(public: true, sort_by: :collected)
+  end
+
 end
 
 # Element for all the recipes for the owner, with subheads for status and favored keys
@@ -522,10 +535,6 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
         RcpBrowserElementStatus.new(level+1, args)
       end
     end
-  end
-  
-  def candidates
-    @candidates = @candidates || user.recipes # (status: MyConstants::Rcpstatus_misc, sort_by: :collected)
   end
   
   def should_show(recipe)
@@ -545,16 +554,13 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
   end
   
   def hints 
-=begin
-    bb = link_to 'Cookmark Button', 
-            '/popup?name=pages%2Fstarting_step2_modal&area=floating&how=modal', 
-            remote: true,
-            class: "dialog-run",
-            "data-type" => :JSON
-    bb = link_to_modal 'Cookmark Button', '/popup?name=pages%2Fstarting_step2_modal&area=floating&how=modal'
-=end
     "<br>How about browsing through your Friends' recipes or one of your Channels and grabbing some of those? Or click on The Big List and search through that?"+
     "<br>Or even, dare we say it, head off to the Wild World Web and cookmark some findings there? (...after installing the Cookmark Button of course...)"
+  end
+
+private  
+  def candidates
+    @candidates ||= user.recipes # (status: MyConstants::Rcpstatus_misc, sort_by: :collected)
   end
   
 end
@@ -654,11 +660,6 @@ class RcpBrowserElementRecent < RcpBrowserElement
     @handle = "Recent"
   end
   
-  # Candidates for the Recent list are all recipes touched by the user
-  def candidates
-    user.recipes all: true
-  end
-  
   def timestamp recipe
     (td = recipe.touch_date @userid) && "Last viewed #{time_ago_in_words td } ago."
   end
@@ -673,6 +674,12 @@ class RcpBrowserElementRecent < RcpBrowserElement
   
   def hints
     "You obviously haven't been here long: this list will fill up quickly as you look around in RecipePower."
+  end
+
+private
+  # Candidates for the Recent list are all recipes touched by the user
+  def candidates
+    user.recipes all: true
   end
   
 end
@@ -708,10 +715,6 @@ class RcpBrowserElementStatus < RcpBrowserElement
     @handle = I18n.t MyConstants::Rcpstatus_names[@status]
   end
   
-  def candidates
-    @candidates = @candidates || user.recipes(status: @status, sort_by: :collected)
-  end
-  
   def should_show(recipe)
     recipe.cookmarked(user.id) && (recipe.status <= @status)
   end
@@ -740,6 +743,11 @@ class RcpBrowserElementStatus < RcpBrowserElement
     when MyConstants::Rcpstatus_interesting
       "'#{handle}' earmarks recipes for auditioning sooner or later."
     end
+  end
+
+private  
+  def candidates
+    @candidates = @candidates || user.recipes(status: @status, sort_by: :collected)
   end
   
 end

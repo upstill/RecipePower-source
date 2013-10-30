@@ -16,6 +16,16 @@ class CollectionController < ApplicationController
     end
   end
   
+  def index
+    list
+  end
+
+  # Update takes either a query string or a specification of a collection now selected
+  # We return a recipe list IFF the :cached parameter is not set
+  def query
+    list
+  end
+  
   def list
     flash.now[:guide] = @seeker.guide
     respond_to do |format|
@@ -60,10 +70,6 @@ class CollectionController < ApplicationController
       }
     end
   end 
-  
-  def index
-    list
-  end
 
   # Render the results for the current state of the query and selected collection
   def relist
@@ -76,22 +82,5 @@ class CollectionController < ApplicationController
       flash.now[:success] = "This feed is now up to date."
       render :index, :layout=>false, :locals => { :feed => @feed }
     end
-  end
-
-  # Update takes either a query string or a specification of a collection now selected
-  # We return a recipe list IFF the :cached parameter is not set
-  def query
-    if id = params[:selected]
-      @browser.select_by_id(params[:selected])
-      @seeker.cur_page = 1
-    end
-    if tagstxt = params[:tagstxt]
-      @seeker.tagstxt = tagstxt
-      @seeker.cur_page = 1
-    end
-    if page = params[:cur_page]
-      @seeker.cur_page = page.to_i
-    end
-    list
   end
 end

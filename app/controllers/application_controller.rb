@@ -92,6 +92,10 @@ class ApplicationController < ActionController::Base
       default_options = {}
       default_options[:clear_tags] = (params[:controller] != "collection") && (params[:controller] != "stream")
       setup_seeker klass, default_options.merge(options), params
+      if params[:selected]
+        @browser.select_by_id(params[:selected])
+        @seeker.cur_page = 1
+      end
       if (params[:controller] == "pages")
         # The search box in generic pages redirects collections, either "The Big List" for guests or
         # the user's whole collection 
@@ -131,6 +135,46 @@ class ApplicationController < ActionController::Base
                         ] 
                       }
       end
+    end
+  end
+  
+  # Generalized response for dialog for a particular area
+  def smartrender(renderopts={})
+    action = renderopts[:action] || params[:action]
+    flash.now[:notice] = params[:notice] unless flash[:notice] # ...should a flash message come in via params
+    # @_area = params[:_area]
+    # @_layout = params[:_layout]
+    # @_partial = !params[:_partial].blank?
+    # Apply the default render params, honoring those passed in
+    renderopts = response_service.render_params renderopts
+    respond_to do |format|
+      format.html {
+        # @_area ||= "page"  
+        if response_service.page? # @_area == "page" # Not partial at all => whole page
+          if renderopts[:redirect]
+            redirect_to renderopts[:redirect]
+          else
+            render action, renderopts
+          end
+        else
+          # renderopts[:_layout] = (@_layout || false)
+          render action, renderopts # May have special iframe layout
+        end
+       }
+      format.json { 
+        hresult = with_format("html") do
+          # Blithely assuming that we want a modal-dialog element if we're getting JSON
+          renderopts[:layout] = (@layout || false)
+          render_to_string action, renderopts # May have special iframe layout
+        end
+        renderopts[:json] = { code: hresult, area: response_service.area_class, how: "bootstrap" }
+        render renderopts
+      }
+      format.js {
+        # XXX??? Must have set @partial in preparation
+        debugger
+        render renderopts.merge( action: "capture" )
+      }
     end
   end
   
@@ -307,46 +351,6 @@ class ApplicationController < ActionController::Base
       capture_data.delete :layout
       capture_data.delete :context
       capture_data
-    end
-  end
-  
-  # Generalized response for dialog for a particular area
-  def smartrender(renderopts={})
-    action = renderopts[:action] || params[:action]
-    flash.now[:notice] = params[:notice] unless flash[:notice] # ...should a flash message come in via params
-    # @_area = params[:_area]
-    # @_layout = params[:_layout]
-    # @_partial = !params[:_partial].blank?
-    # Apply the default render params, honoring those passed in
-    renderopts = response_service.render_params renderopts
-    respond_to do |format|
-      format.html {
-        # @_area ||= "page"  
-        if response_service.page? # @_area == "page" # Not partial at all => whole page
-          if renderopts[:redirect]
-            redirect_to renderopts[:redirect]
-          else
-            render action, renderopts
-          end
-        else
-          # renderopts[:_layout] = (@_layout || false)
-          render action, renderopts # May have special iframe layout
-        end
-       }
-      format.json { 
-        hresult = with_format("html") do
-          # Blithely assuming that we want a modal-dialog element if we're getting JSON
-          renderopts[:layout] = (@layout || false)
-          render_to_string action, renderopts # May have special iframe layout
-        end
-        renderopts[:json] = { code: hresult, area: response_service.area_class, how: "bootstrap" }
-        render renderopts
-      }
-      format.js {
-        # XXX??? Must have set @partial in preparation
-        debugger
-        render renderopts.merge( action: "capture" )
-      }
     end
   end
             

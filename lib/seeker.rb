@@ -2,7 +2,7 @@ require "candihash.rb"
 
 class Seeker < Object
   
-  @@page_length = 20
+  @@page_length = 10
 
   # Save the Seeker data into session store
   def store
@@ -19,7 +19,8 @@ private
     { 
       :tagstxt => (@tagstxt || ""), 
       :tagtype => @tagtype, 
-      :page => @cur_page || 1 
+      :page => @cur_page || 1,
+      :items_per_page => @items_per_page
     }
   end
   
@@ -29,10 +30,12 @@ private
       @tagstxt = prior[:tagstxt] || ""
       @tagtype = prior[:tagtype]
       @cur_page = prior[:page] || 1
+      @items_per_page = prior[:items_per_page] ? prior[:items_per_page].to_i : @@page_length
     else
       @tagstxt = "" 
       @tagtype = nil
       @cur_page = 1
+      @items_per_page
     end
     prior || {}
   end
@@ -50,15 +53,16 @@ public
     affiliate browser, params # We leave it to subclasses to define a different affiliate from params
     # Params for tagstxt and cur_page will override the prior info
     if params
+      @items_per_page = params[:items_per_page].to_i if params[:items_per_page]
       if params[:tagstxt]
         @tagstxt = params[:tagstxt]
         @tags = nil
       end
       if ttstr = params[:tagtype]
-        @tagtype = ttstr.empty? ? nil : params[:tagtype].to_i
+        @tagtype = ttstr.empty? ? nil : ttstr.to_i
       end
       if page = params[:cur_page]
-        @cur_page = page.to_i
+        self.cur_page = page.to_i
       end
     end
   end
@@ -170,7 +174,7 @@ public
   end
   
   def npages
-    (result_ids.count+(@@page_length-1))/@@page_length
+    (result_ids.count+(@items_per_page-1))/@items_per_page
   end
   
   def cur_page
@@ -191,8 +195,8 @@ public
       # Clamp current page to last page
       self.cur_page = npg if cur_page > npg
       # Now get index bounds for the records on the page
-      first = (cur_page-1)*@@page_length
-      last = first+@@page_length
+      first = (cur_page-1)*@items_per_page
+      last = first+@items_per_page
       ixbound = last if ixbound > last
     end
     convert_ids ids[first...ixbound]

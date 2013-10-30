@@ -361,24 +361,6 @@ module ApplicationHelper
       end
     end
   end
-  
-=begin
-  def show_errors(errors)
-    result = ""
-    if errors.any?
-      result << "<div id=\"error_explanation\"><h2>\n"
-      result << "Sorry, but "
-      result << (errors.count > 1 ? "#{errors.count.to_s} errors are" : "an error is")
-      result << " keeping that from happening:</h2>\n"
-      result << "<ul>"
-      errors.full_messages.each do |msg|
-          result << "<li>#{msg}</li>\n"
-      end
-      result << "</ul>\n</div>"
-    end
-    result.html_safe
-  end
-=end
 
   def debug_dump(params)
       "<div id=\"debug\">#{debug(params)}</div>".html_safe
