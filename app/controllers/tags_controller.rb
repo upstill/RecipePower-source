@@ -5,12 +5,12 @@ class TagsController < ApplicationController
   # GET /tags.xml
   def index
     @Title = "Tags"
-    seeker_result Tag, clear_tags: true
+    collection_result Tag, clear_tags: true
   end
   
   def query
     @Title = "Tags"
-    seeker_result Tag
+    collection_result Tag
   end
 
   # POST /tags

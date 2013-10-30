@@ -5,7 +5,6 @@ class RecipesController < ApplicationController
 
   before_filter :login_required, :except => [:index, :show, :capture, :collect ]
   before_filter { @focus_selector = "#recipe_url" }
-  skip_before_filter :setup_collection, :only => [:capture]
     
   filter_access_to :all
   include ApplicationHelper

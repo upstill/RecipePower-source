@@ -29,13 +29,13 @@ class UsersController < ApplicationController
   def index
     # 'index' page may be calling itself with filter parameters in the name and tagtype
     @Title = "Users"
-    seeker_result User, clear_tags: true
+    collection_result User, clear_tags: true
   end
   
   # Query takes either a query string or a specification of page number
   # We return a recipe list IFF the :cached parameter is not set
   def query
-    seeker_result User
+    collection_result User
   end
   
   # Add a user or channel to the friends of the current user

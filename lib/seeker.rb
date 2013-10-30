@@ -242,7 +242,7 @@ class ContentSeeker < Seeker
     @affiliate ||= browser
   end
   
-  # Get the results of the current query.
+  # Get the results of the current query from the affiliated browser.
   def result_ids
     affiliate.result_ids tags
   end

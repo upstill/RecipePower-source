@@ -4,11 +4,11 @@ class SitesController < ApplicationController
   # GET /sites
   # GET /sites.json
   def index
-    seeker_result Site, clear_tags: true
+    collection_result Site, clear_tags: true
   end
 
   def query
-    seeker_result Site
+    collection_result Site
   end
 
   # GET /sites/1

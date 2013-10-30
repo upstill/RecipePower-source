@@ -119,21 +119,32 @@ class ApplicationController < ActionController::Base
   # This is one-stop-shopping for a controller using the query to filter a list
   # See tags_controller for an example
   # Options: selector: CSS selector for the outermost container of the rendered index template
-  def seeker_result(klass, options={})
+  def collection_result(klass, options={})
     respond_to do |format|
       format.html { 
         setup_collection klass, options
+        flash.now[:guide] = @seeker.guide
         render :index 
       }
       format.json do 
-    	  setup_seeker(klass, options.slice(:clear_tags, :scope), params)
-        replacement = with_format("html") { render_to_string 'index', :layout=>false }
-        selector = options[:selector] || "div.#{klass.to_s.downcase}_list"
-        render json: { replacements: [
-                            view_context.flash_notifications_replacement,
-                            [ selector, replacement ]
-                        ] 
-                      }
+        # In a json response we just re-render the collection list for replacement
+        # If we need to replace the page, we send back a link to do it with
+        if params[:redirect]
+          render json: { 
+            # page: with_format("html") { render_to_string :index },
+            redirect: collection_url( params.slice 'context' )
+          }
+        else
+      	  setup_seeker(klass, options.slice(:clear_tags, :scope), params)
+          flash.now[:guide] = @seeker.guide
+          replacement = with_format("html") { render_to_string 'index', :layout=>false }
+          selector = options[:selector] || "div.#{klass.to_s.downcase}_list"
+          render json: { replacements: [
+                              view_context.flash_notifications_replacement,
+                              [ selector, replacement ]
+                          ] 
+                        }
+        end
       end
     end
   end
