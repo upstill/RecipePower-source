@@ -15,4 +15,46 @@ module TableHelper
         </tbody>
         </table>}.html_safe
   end
-end
+
+  def present_table display_table, name, &block
+
+    banner = content_tag :h3, name+" Sorted By "+display_table.sort_field[:name]
+
+    chooser =
+        display_table.fields.collect { |field|
+          content_tag :li, link_to(field[:name], "/admin/stats?sort_by="+field[:sym].to_s)
+        }.join("\n").html_safe
+
+    header =
+        display_table.fields.collect { |field|
+          content_tag :th, field[:name]
+        }.join("\n").html_safe
+
+    body =
+        display_table.rows.collect { |row|
+          content_tag :tr, display_table.fields.collect { |field|
+            field_sym = field[:sym]
+            row_matter = yield row, field_sym
+            content_tag :td, (row_matter || row[field_sym].to_s).html_safe
+          }.join("\n").html_safe
+        }.join("\n").html_safe
+
+    %Q{
+    #{banner}
+      <div class="btn-group">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+          Sort By <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu">#{chooser}</ul>
+      </div>
+      <table class="table table-striped">
+        <thead>
+          <tr>#{header}</tr>
+        </thead>
+        <tbody>#{body}</tbody>
+      </table
+    }.html_safe
+
+  end
+
+  end

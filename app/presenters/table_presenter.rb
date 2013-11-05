@@ -1,4 +1,4 @@
-class DisplayTable
+class TablePresenter
 
   def initialize stats_hash, field_labels = {}
     @field_labels = field_labels
@@ -35,4 +35,5 @@ class DisplayTable
       end * reverse
     }
   end
+
 end

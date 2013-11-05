@@ -1,24 +1,21 @@
-require 'display_table.rb'
+require 'table_presenter.rb'
 
 class AdminController < ApplicationController
   def stats
     stats = []
     session[:sort_field] = (params[:sort_by] || session[:sort_field] || :id)
     User.all.each do |user|
-      if (invitees = User.where(:invited_by_id => user.id)).count > 0
-        invites = "#{invitees.count}(#{invitees.where('invitation_accepted_at IS NOT NULL').count})"
-        x=2
-      else
-        invites = ""
-      end
+      accepts = ((invitees = User.where(:invited_by_id => user.id)).count > 0) ?
+          invitees.where('invitation_accepted_at IS NOT NULL').count : 0
 
       stats[user.id] = RpEvent.user_stats(user.id).merge(
         user: user,
         id: user.id,
         handle: user.handle,
-        nrecipes: user.recipes.size,
+        num_recipes: user.recipes.size,
         edit_count: 0,
-        invites: invites
+        accepts: accepts,
+        invites: invitees.count
       )
     end
     Rcpref.all.each { |rr|
@@ -27,7 +24,7 @@ class AdminController < ApplicationController
         user_stats[:edit_count] += rr.edit_count
       end
     }
-    @display_table = DisplayTable.new stats,
+    @display_table = TablePresenter.new stats,
       id: "ID",
       handle: "Handle",
       num_recipes: "#Recipes",
@@ -38,7 +35,7 @@ class AdminController < ApplicationController
       invites: "Invitations Issued (Accepted)"
 
     sortfield = session[:sort_field].to_sym
-    descending = [:nrecipes, :edit_count, :add_time, :last_visit, :recent_visits, :invites ].include?(sortfield)
+    descending = [:num_recipes, :edit_count, :add_time, :last_visit, :recent_visits, :invites ].include?(sortfield)
     @display_table.sort sortfield, descending
   end
 
