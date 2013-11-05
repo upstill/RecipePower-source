@@ -1,5 +1,6 @@
 require './lib/controller_authentication.rb'
 require './lib/seeker.rb'
+require 'rp_event'
 
 class ApplicationController < ActionController::Base
   # layout :rs_layout # Declare in any controller to let response_service pick the layout
@@ -9,6 +10,8 @@ class ApplicationController < ActionController::Base
   before_filter :report_cookie_string
   before_filter :detect_notification_token
   before_filter :setup_response_service
+  before_filter :log_serve
+
     helper :all
     rescue_from Timeout::Error, :with => :timeout_error # self defined exception
     rescue_from OAuth::Unauthorized, :with => :timeout_error # self defined exception
@@ -21,7 +24,31 @@ class ApplicationController < ActionController::Base
     helper_method :deferred_collect
     helper_method :deferred_notification
     include ApplicationHelper
-  
+
+  # Track the session, saving session events when the session goes stale
+  def log_serve
+    who = current_user.id if current_user
+    logger.info %Q{RPEVENT\tServe\t#{who}\t#{params[:controller]}\t#{params[:action]}\t#{params[:id]}}
+    return unless who
+    if session[:start_time] && session[:last_time]
+      time_now = Time.now
+      elapsed_time = time_now - session[:last_time]
+      if (elapsed_time < 20.seconds)
+        session[:last_time] = time_now
+        session[:serve_count] += 1
+        return
+      elsif last_serve = RpEvent.where( :event_type => RpEvent.typenum("Serve"), :user_id => who ).order( :updated_at ).last
+        # Close out and update the previous session to record serve count and last time
+        last_serve.serve_count = session[:serve_count]
+        last_serve.updated_at = session[:last_time]
+        last_serve.save
+      end
+    end
+    last_serve = RpEvent.create user_id: current_user.id, event_type: RpEvent.typenum("Serve"), :serve_count => 1
+    session[:serve_count] = 1
+    session[:start_time] = session[:last_time] = last_serve.created_at
+  end
+
   # Use the layout stipulated by the response_service
   def rs_layout
     response_service.layout

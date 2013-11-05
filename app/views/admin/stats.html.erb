@@ -1,0 +1,34 @@
+<h3>Users Sorted By <%= @display_table.sort_field[:name] %></h3>
+<div class="btn-group">
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+      Sort By <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" role="menu">
+      <% @display_table.fields.each do |field| %>
+          <li><a href="/admin/stats?sort_by=<%= field[:sym].to_s %>"><%= field[:name] %></a></li>
+      <% end %>
+    </ul>
+  </div>
+<table class="table table-striped">
+    <thead>
+        <tr>
+          <% @display_table.fields.each do |field| %>
+              <th><%= field[:name] %></th>
+          <% end %>
+        </tr>
+    </thead>
+    <tbody>
+        <% @display_table.rows.each do |row| %>
+            <tr>
+              <td><%= row[:id].to_s %></td>
+              <td><%= link_to_modal row[:handle], user_path(row[:user]) %></td>
+              <td><%= row[:nrecipes] %></td>
+              <td><%= row[:edit_count].to_s %></td>
+              <td><%= time_ago_in_words(row[:add_time]) if row[:add_time] %></td>
+              <td><%= time_ago_in_words(row[:last_visit]) if row[:last_visit]%></td>
+              <td><%= row[:recent_visits].to_s if row[:recent_visits] %></td>
+              <td><%= row[:invites] if row[:invites] %></td
+            </tr>
+        <% end %>
+    </tbody>
+</table>

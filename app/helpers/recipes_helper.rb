@@ -33,6 +33,15 @@ module RecipesHelper
       class: div_class
   end
 
+  def recipe_grid_datablock recipe
+    grid_element = content_tag :p, link_to(recipe.trimmed_title, recipe.url), class: "rcp_grid_element_title"
+    source_element = content_tag :div, ("from "+link_to(recipe.sourcename, recipe.sourcehome)).html_safe, class: "rcp_grid_element_source"
+    alltags = summarize_alltags(recipe) || ""
+    tags = CGI::escapeHTML alltags
+    popover_data = { title: recipe.title, tags: tags }
+    content_tag :div, grid_element+source_element, class: "rcp_grid_datablock", data: popover_data
+  end
+
   def recipe_tags_div recipe
     content_tag :div, 
       summarize_alltags(recipe) || 

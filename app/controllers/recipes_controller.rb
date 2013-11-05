@@ -261,13 +261,11 @@ class RecipesController < ApplicationController
       report_recipe collection_url, "Recipe secure and unchanged.", formats
     else
       @recipe.current_user = current_user_or_guest_id # session[:user_id]
-      begin
-        saved_okay = @recipe.update_attributes(params[:recipe])
-        # rescue => e
-            # saved_okay = false
-            # @recipe.errors.add "Couldn't save recipe"
-      end
-      if saved_okay
+      if saved_okay = @recipe.update_attributes(params[:recipe])
+        if ref = Rcpref.where( user_id: @recipe.current_user, recipe_id: @recipe.id ).first
+          ref.edit_count += 1
+          ref.save
+        end
         report_recipe( collection_url, "Successfully updated #{@recipe.title || 'recipe'}.", formats )
       else
         @Title = "Tag That Recipe (Try Again)!"

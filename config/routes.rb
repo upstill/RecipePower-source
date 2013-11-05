@@ -1,5 +1,7 @@
 RP::Application.routes.draw do
 
+  get "admin/stats"
+  get "admin/control"
   get "notifications/accept"
   
 =begin

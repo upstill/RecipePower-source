@@ -12,6 +12,13 @@ $guideText:                #AB812E !default;
 $guideBackground:          #FAD8A7 !default;
 $guideBorder:              darken(adjust-hue($guideBackground, -10), 7%) !default;
 
+#masonry-container {
+  div.popover {
+    max-width: 430px;
+    width: 430px;
+  }
+}
+
 label.control-label {
 	display: block;
 	margin-bottom: 5px;

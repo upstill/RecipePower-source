@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130923172034) do
+ActiveRecord::Schema.define(version: 20131104050529) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -162,6 +162,7 @@ ActiveRecord::Schema.define(version: 20130923172034) do
     t.integer  "status",        default: 8
     t.boolean  "private",       default: false
     t.boolean  "in_collection", default: false
+    t.integer  "edit_count",    default: 0
   end
 
   create_table "recipes", force: true do |t|
@@ -205,6 +206,15 @@ ActiveRecord::Schema.define(version: 20130923172034) do
     t.string   "referee_type"
     t.datetime "created_at",   null: false
     t.datetime "updated_at",   null: false
+  end
+
+  create_table "rp_events", force: true do |t|
+    t.integer  "event_type"
+    t.integer  "user_id"
+    t.integer  "serve_count"
+    t.boolean  "on_mobile"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "scales", force: true do |t|

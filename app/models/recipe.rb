@@ -29,13 +29,6 @@ private
       self.thumbnail = nil
     elsif !(self.picdata =~ /^data:/)
       self.thumbnail = Thumbnail.acquire( url, picurl )
-=begin
-      if thumbnail && thumbnail.thumbdata
-        self.picAR = thumbnail.picAR unless thumbnail.picAR.nil?
-      else
-        # Update the thumbnail image in background
-      end
-=end
       Delayed::Job.enqueue self unless thumbnail && thumbnail.thumbdata
     end
     true

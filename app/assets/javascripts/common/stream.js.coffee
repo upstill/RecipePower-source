@@ -18,10 +18,21 @@ RP.stream.go = (elmt) ->
 			selector = jdata.selector || '.collection_list'
 			$(selector).append item
 			if selector == '#masonry-container'
-				$('#masonry-container').masonry 'appended', item
-				$('div.rcp_grid_pic_box', item).hover RP.rcp_list.show_panel, RP.rcp_list.hide_panel
-				$('div.rcp_grid_datablock', item).hover RP.rcp_list.show_panel, RP.rcp_list.hide_panel
-		
+        $('#masonry-container').masonry 'appended', item
+        if img = $('img', item)[0]
+          srcstr = img.getAttribute('src')
+          contentstr = "<img src=\""+srcstr+"\" style=\"width: 100%; height: auto\">"
+        else
+          contentstr = ""
+        datablock = $('div.rcp_grid_datablock', item)
+        tagstr = $(datablock).data "tags"
+        decoded = $('<div/>').html(tagstr).text();
+        $(datablock).popover
+          trigger: "click",
+          placement: "auto top",
+          html: true,
+          content: contentstr+decoded
+
 RP.stream.buffer_test = ->
 	source = new EventSource('/stream/buffer_test')
 	source.addEventListener 'end_of_stream', (e) ->

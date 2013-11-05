@@ -6,29 +6,29 @@ module Typeable
   module ClassMethods
     
     def typeable(attribute, list)
-      @TagTypes = TypeMap.new(list, "unclassified")
+      @tag_types = TypeMap.new(list, "unclassified")
       @attrib_name = attribute
     end
     
     # Get the type number, taking any of the accepted datatypes
     def typenum tt
-        @TagTypes.num tt
+        @tag_types.num tt
     end
     
     # Get the symbol for the type, taking any of the accepted datatypes
     def typesym tt
-        @TagTypes.sym tt
+        @tag_types.sym tt
     end
     
     # Get the name for the type, taking any of the accepted datatypes
     def typename tt
-        @TagTypes.name tt
+        @tag_types.name tt
     end
     
     # Return a list of name/type pairs, suitable for making a selection list
     def type_selections(withnull=false)
       range = withnull ? 0..-1 : 1..-1
-      @TagTypes.list.compact[range]
+      @tag_types.list.compact[range]
     end
     
     def attrib_name
@@ -40,7 +40,7 @@ module Typeable
     # NB: returns nil for nil index and for index beyond the last type. This is useful
     # for generating a table that covers all types
     def index_to_type(index)
-        index if index && (index <= @TagTypes.max_index)
+        index if index && (index <= @tag_types.max_index)
     end
   end
   
