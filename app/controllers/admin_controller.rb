@@ -8,7 +8,7 @@ class AdminController < ApplicationController
       accepts = ((invitees = User.where(:invited_by_id => user.id)).count > 0) ?
           invitees.where('invitation_accepted_at IS NOT NULL').count : 0
 
-      stats[user.id] = RpEvent.user_stats(user.id).merge(
+      stats[user.id] = RpEvent.user_stats(user, 1.month.ago).merge(
         user: user,
         id: user.id,
         handle: user.handle,

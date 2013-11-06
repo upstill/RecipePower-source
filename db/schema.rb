@@ -209,10 +209,13 @@ ActiveRecord::Schema.define(version: 20131104050529) do
   end
 
   create_table "rp_events", force: true do |t|
-    t.integer  "event_type"
-    t.integer  "user_id"
-    t.integer  "serve_count"
-    t.boolean  "on_mobile"
+    t.integer  "verb"
+    t.integer  "source_id"
+    t.string   "subject_type"
+    t.integer  "subject_id"
+    t.string   "object_type"
+    t.integer  "object_id"
+    t.text     "data"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

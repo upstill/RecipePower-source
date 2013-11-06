@@ -27,9 +27,8 @@ class ApplicationController < ActionController::Base
 
   # Track the session, saving session events when the session goes stale
   def log_serve
-    who = current_user.id if current_user
-    logger.info %Q{RPEVENT\tServe\t#{who}\t#{params[:controller]}\t#{params[:action]}\t#{params[:id]}}
-    return unless who
+    logger.info %Q{RPEVENT\tServe\t#{current_user.id if current_user}\t#{params[:controller]}\t#{params[:action]}\t#{params[:id]}}
+    return unless current_user
     if session[:start_time] && session[:last_time]
       time_now = Time.now
       elapsed_time = time_now - session[:last_time]
@@ -37,14 +36,15 @@ class ApplicationController < ActionController::Base
         session[:last_time] = time_now
         session[:serve_count] += 1
         return
-      elsif last_serve = RpEvent.where( :event_type => RpEvent.typenum("Serve"), :user_id => who ).order( :updated_at ).last
+      elsif last_serve = RpEvent.last(:Serve, current_user)
         # Close out and update the previous session to record serve count and last time
-        last_serve.serve_count = session[:serve_count]
+        last_serve.data = { serve_count: session[:serve_count] }
         last_serve.updated_at = session[:last_time]
         last_serve.save
       end
     end
-    last_serve = RpEvent.create user_id: current_user.id, event_type: RpEvent.typenum("Serve"), :serve_count => 1
+    # last_serve = RpEvent.create source_id: current_user.id, verb: RpEvent.typenum("Serve"), :serve_count => 1
+    last_serve = RpEvent.post :Serve, current_user, nil, nil, :serve_count => 1
     session[:serve_count] = 1
     session[:start_time] = session[:last_time] = last_serve.created_at
   end

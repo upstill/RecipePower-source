@@ -1,10 +1,13 @@
 class CreateRpEvents < ActiveRecord::Migration
   def change
     create_table :rp_events do |t|
-      t.integer :event_type
-      t.integer :user_id
-      t.integer :serve_count
-      t.boolean :on_mobile
+      t.integer :verb
+      t.integer :source_id
+      t.string :subject_type
+      t.integer :subject_id
+      t.string :object_type
+      t.integer :object_id
+      t.text :data
 
       t.timestamps
     end
