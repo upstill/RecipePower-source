@@ -162,7 +162,6 @@ function recipePowerGetAndRunHTML(request, params ) {
 		  str.push(encodeURIComponent(p) + "=" + encodeURIComponent(params[p]));
 		request += "?" + str.join("&");
   }
-	debugger;
 	$('span.query').text(request);
 	var xmlhttp;
 	// Send the request using minimal Javascript
@@ -201,7 +200,6 @@ function postNotifications(nots) {
 	if(nots) {
 		var i = 0;
 		var notsout = "";
-		debugger
 		while (i < nots.length) {
 			not = nots[i];
 			var alert_class = nat[0];
@@ -330,7 +328,6 @@ function closeDialog(dlog) {
 // Run a dialog from a body of HTML, which should be a div with 'dialog' class as outlined above.
 function runModalDialog(body, area) {
 	var dlog = injectDialog(body, area, false); 
-	debugger;
 	// Any forms get submitted and their results handled appropriately. NB: the submission
 	// must be synchronous because we have to decide AFTER the results return whether to handle
 	// the form result normally.
@@ -387,7 +384,6 @@ function recipePowerRunBootstrap(dlog) {
 						async: false,
 						dataType: 'html',
 						error: function(jqXHR, textStatus, errorThrown) {
-							debugger;
 							htmlout = postError(jqXHR, dlog); // Show the error message in the dialog
 							// closeDialog(dlog);
 							runResponse(htmlout);

@@ -42,7 +42,6 @@ RP.makeExpandingArea = (containers) ->
 ###
 # Add a bookmark for the current page
 RP.bm = (title, addr) ->
-	debugger
 	if window.sidebar # Mozilla Firefox Bookmark
 		window.sidebar.addPanel location.href, document.title, ""
 	else if false # IE Favorite
@@ -55,7 +54,6 @@ RP.bm = (title, addr) ->
 
 # Go to a page and push a special state
 RP.getgo = (request, addr) ->
-	debugger
 	$.ajax
 		type: "GET",
 		dataType: "html",
@@ -64,7 +62,6 @@ RP.getgo = (request, addr) ->
 			debugger
 		success: (response, statusText, xhr) ->
 			# Pass any assumptions into the response data
-			debugger
 			document.getElementsByTagName("html")[0].innerHTML = response;
 			document.title = "Cookmark";
 			window.history.pushState
@@ -93,7 +90,6 @@ RP.fire_triggers = ->
 		RP.dialog.run dlog
 	else if (elmt = $("a.trigger")[0])
 		$(elmt).trigger "click"
-		debugger
 		$(elmt).removeClass("trigger")
 
 # For the FAQ page: click on a question to show the associated answer

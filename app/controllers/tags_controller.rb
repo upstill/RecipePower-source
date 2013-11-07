@@ -213,7 +213,6 @@ class TagsController < ApplicationController
   def update
     @Title = "Tags"
     @tag = Tag.find(params[:id])
-    debugger
     respond_to do |format|
 puts "Tag controller converting "+params[:tag][:tagtype].to_s
       params[:tag][:tagtype] = params[:tag][:tagtype].to_i unless params[:tag][:tagtype].nil?

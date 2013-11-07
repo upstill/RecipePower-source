@@ -109,8 +109,6 @@ class TagServices
     Tag.all.each do |tag|
       if !tag.tagqa
         result = tag.errors[:key] && tag.disappear
-        debugger
-        x=3
       end
     end
   end

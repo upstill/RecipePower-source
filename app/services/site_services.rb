@@ -312,7 +312,6 @@ public
   end
 
   def test_finders(url = nil)
-    debugger
     fr = FinderResults.new @site, site_finders
     fr.collect_results url || @site.sampleURL
     self.site_finders = fr.revise_interactively

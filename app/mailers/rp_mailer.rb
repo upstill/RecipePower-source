@@ -31,7 +31,6 @@ class RpMailer < ActionMailer::Base
     @recipe = Recipe.find(notification.info[:what])
     @sender = notification.source
     @recipient = notification.target
-    debugger
     mail to: @recipient.email, 
       from: @sender.polite_name+" on RecipePower <#{@sender.email}>",
       subject: @sender.polite_name+" has something tasty for you"

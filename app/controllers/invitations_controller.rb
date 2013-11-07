@@ -84,7 +84,6 @@ class InvitationsController < Devise::InvitationsController
     (breakdown[:to_invite]+breakdown[:pending]).each do |invitee|
       # Fresh invitations to a genuine external user
       begin
-        debugger
         pr = params[resource_name]
         pr[:email] = (invitee.kind_of?(User) ? invitee.email : invitee).downcase
         pr[:skip_invitation] = true # Hold off on invitation so we can redirect to share, as nec.
@@ -151,7 +150,6 @@ class InvitationsController < Devise::InvitationsController
       format.json {
         response = { done: true }
         if breakdown[:new_friends].count > 0
-          debugger
           # New friends must be added to the Browser list
           response[:entity] = breakdown[:new_friends].collect { |nf|
             @browser, @node = current_user.add_followee nf
