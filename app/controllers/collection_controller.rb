@@ -4,7 +4,7 @@ class CollectionController < ApplicationController
   after_filter :save_browser
   
   def save_browser
-    @user.save
+    @user.save if @user
   end
   
   def user_only

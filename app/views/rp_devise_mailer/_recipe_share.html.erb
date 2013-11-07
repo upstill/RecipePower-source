@@ -1,8 +1,20 @@
-<% @recipe = @recipe || Recipe.find(@resource.shared_recipe) %>
+<% @recipe = @recipe || Recipe.find(@recipient.shared_recipe) %>
 <% if url = @recipe.picdata %>
   <div class="share_recipe_pic_box">
     <%= image_tag url %>
   </div>
 <% end %>
-<br><%= link_to @recipe.title, @recipe.url, class: "share_recipe_title" %>
-<p>from&nbsp;<%= link_to @recipe.sourcename, @recipe.sourcehome, class: "share_recipe_source" %></p>
+<br>
+<%= link_to @recipe.title, 
+					divert_user_invitation_url(
+						sender: @sender.id, 
+						recipient: @recipient.id, 
+						url: CGI::escape(@recipe.url)), 
+					class: "share_recipe_title" %>
+<p>from&nbsp;
+<%= link_to @recipe.sourcename, 
+					divert_user_invitation_url(
+						url: CGI::escape(@recipe.sourcehome),
+						sender: @sender.id, 
+						recipient: @recipient.id), 
+				class: "share_recipe_source" %></p>

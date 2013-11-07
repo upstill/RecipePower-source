@@ -1,29 +1,29 @@
 class RpEvent < ActiveRecord::Base
-  attr_accessible :on_mobile, :serve_count, :verb, :source_id, :subject_id, :object_id, :data
+  attr_accessible :on_mobile, :serve_count, :verb, :source_id, :subject_id, :target_id, :data
 
   serialize :data
 
   belongs_to :source, class_name: "User"
   belongs_to :subject, polymorphic: true
-  belongs_to :object, polymorphic: true
+  belongs_to :target, polymorphic: true
 
   include Typeable
 
   typeable( :verb,
             Untyped: ["Untyped", 0 ],
-            Serve: ["Serve", 1],
-            Share_initiate: ["Initiate Share", 2],
-            Share_answer: ["Answer Share", 3],
-            Share_accept: ["Accept Share", 4],
-            Share_divert: ["Diverted Share", 5]
+            serve: ["Serve", 1],
+            invitation_sent: ["Send Invitation", 2],
+            invitation_responded: ["Respond to Invitation", 3],
+            invitation_accepted: ["Accepted Invitation", 4],
+            invitation_diverted: ["Invitation Diverted", 5]
      )
 
   belongs_to :user
 
   # Return a hash of stats for the user
   def self.user_stats user, interval
-    if last_visit = self.last(:Serve, user)
-      recent_visits = self.where( 'verb = ? AND source_id = ? AND created_at > ?', typenum(:Serve), user.id, interval ).count
+    if last_visit = self.last(:serve, user)
+      recent_visits = self.where( 'verb = ? AND source_id = ? AND created_at > ?', typenum(:serve), user.id, interval ).count
       {last_visit: last_visit.created_at, recent_visits: recent_visits}
     else
       {}
@@ -38,12 +38,12 @@ class RpEvent < ActiveRecord::Base
   end
 
   # post an event of the given type
-  def self.post verb, source, subject, object, data={}
+  def self.post verb, source, subject, target, data={}
     # last_serve = RpEvent.create source_id: current_user.id, verb: RpEvent.typenum("Serve"), :serve_count => 1
     evt = self.new verb: typenum(verb)
     evt.source = source
     evt.subject = subject
-    evt.object = object
+    evt.target = target
     evt.data = data
     evt.save
     evt

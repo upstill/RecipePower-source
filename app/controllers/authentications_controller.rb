@@ -23,7 +23,7 @@ class AuthenticationsController < ApplicationController
         redirect_to collection_path(redirect: true)
       end
       @auth_delete = true
-      @auth_context = :manage
+      # @auth_context = :manage
       flash[:notice] = params[:notice]
       # @_area = params[:_area]
       # dialog_boilerplate "new"

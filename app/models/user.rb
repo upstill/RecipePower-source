@@ -103,7 +103,7 @@ class User < ActiveRecord::Base
     # friend.save
     bnode = browser.select_by_content friend # Recreates the browser
     save # ...to preserve the selection
-    bnode
+    [ browser, bnode ]
   end
 
   def delete_followee f

@@ -349,10 +349,10 @@ module ApplicationHelper
       if session[:invitation_token]
         label = "Accept Invitation" 
         path = accept_user_invitation_path(invitation_token: session[:invitation_token] )
-        button_to_modal(label, path, class: "btn btn-lg btn-success" ) 
+        button_to_modal(label, path, class: "btn btn-lg btn-success trigger" ) 
       elsif token = deferred_notification
   			@user = Notification.find_by_notification_token(token).target
-  			button_to_modal "Take Share", new_user_session_path(user: { id: @user.id, email: @user.email } ), class: "btn btn-lg btn-success" 
+  			button_to_modal "Take Share", new_user_session_path(user: { id: @user.id, email: @user.email } ), class: "btn btn-lg btn-success trigger" 
       else
         label = "Sign Me Up"
         selector = "div.dialog.signup"
@@ -451,5 +451,11 @@ module ApplicationHelper
         render(params[:action]+"_content"),
       class: "text_block"
     end
+  end
+  
+  # Wrap a link in a link to invitations/diversion, so as to report 
+  # the invitee getting diverted to the reference
+  def invitation_diversion_link url, invitee
+    divert_user_invitation_url(invitation_token: invitee.raw_invitation_token, url: CGI::escape(url))
   end
 end

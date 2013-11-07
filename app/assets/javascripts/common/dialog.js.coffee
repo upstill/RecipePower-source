@@ -127,17 +127,16 @@ open_modal = (dlog, omit_button) ->
 	if !(omit_button || $('button.close', dlog)[0])
 		buttoncode = '<button type=\"button\" class=\"close\" onclick=\"RP.dialog.cancel(event)\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>'
 		$('div.modal-header').prepend buttoncode
-	# $('.tagging_field', dlog).on 'shown.bs.modal', (evt) ->
-		# debugger
 	if $(dlog).modal
 		$(dlog).modal()
 	notify "open", dlog
 	notify_injector "open", dlog
-	# Set text focus as appropriate
-	$('.tagging_field', dlog).each ->
+	$('.token-input-field', dlog).each ->
 		RP.tagger.setup this
-	if (focus_sel = $(dlog).data("focus")) && (focus_elmt = $(focus_sel, dlog)[0])
-		$(focus_sel).focus()
+	# Set text focus as appropriate
+	$('[autofocus]:first').focus();
+	#if (focus_sel = $(dlog).data("focus")) && (focus_elmt = $(focus_sel, dlog)[0])
+	#	focus_elmt.focus()
 	RP.dialog.arm_links dlog
 	dlog
 
@@ -248,7 +247,7 @@ notify = (what, dlog, entity) ->
 	
 	# If there's a manager module with a responder, call it
 	if (mgr = manager_of dlog) && (fcn = mgr[what] || mgr["on"+what])
-		return fcn dlog
+		fcn dlog
 	
 	# Otherwise, run the default
 	switch what

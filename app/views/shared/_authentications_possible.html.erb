@@ -6,7 +6,7 @@
       <strong class="prompt">You can sign in with one of these services:</strong><br><br>
     <% end %>
   <% else %>
-    <strong class="prompt">Or, click to sign in using one of these fine services (see sidebar):</strong><br>
+    <strong class="prompt">Or, sign in using one of these fine services:</strong><br>
   <% end %>
   <%= auth_possible "Facebook" %>
   <%= auth_possible "Google", :svc_lower => "google_oauth2" %>

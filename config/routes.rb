@@ -78,7 +78,12 @@ RP::Application.routes.draw do
     :sessions => 'sessions', 
     :passwords => 'passwords', 
     :invitations => 'invitations', 
-    :registrations => 'registrations'}
+    :registrations => 'registrations' } 
+    
+  devise_scope :user do
+    get "/users/invitation/divert" => "invitations#divert", :as => "divert_user_invitation"
+    # get "/invitations/divert", :to => "invitations", :as => "invitation_diversion", :action => "divert"
+  end
 
   get '/site/scrape' => 'sites#scrape'
   resources :sites

@@ -9,8 +9,7 @@ me = () ->
 RP.share_recipe.onopen = (dlog) ->
 	dlog = me()
 	# Only proceed if the dialog has children
-	if $('.share_recipe > *').length > 0
-		RP.tagger.onopen "div.user_invitee_tokens input"
+	# if $('.share_recipe > *').length > 0
 				
 jQuery ->
 	if dlog = me()[0]

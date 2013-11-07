@@ -5,11 +5,6 @@ class UsersController < ApplicationController
   rescue_from ActiveRecord::RecordNotFound, :with => :not_found
   before_filter :login_required, :except => [:new, :create, :identify]
   before_filter :authenticate_user!, :except => [:new, :show, :index, :identify]
-  # before_filter :declare_focus
-  
-  def declare_focus
-    @focus_selector = "#user_login"
-  end
   
   # Take a tokenInput query string and match the input against the given user's set of friends/channels
   def match_friends
@@ -19,6 +14,12 @@ class UsersController < ApplicationController
         friends = me.match_friends(params[:q]).collect { |friend| 
           { id: friend.id.to_s, name: (friend.handle+" (#{friend.email})") }
         }
+        if friends.empty? 
+          if params[:q].match(Devise::email_regexp)
+            # A "valid" address goes back paired with itself
+            friends = [ { id: params[:q], name: params[:q] } ]
+          end
+        end
         render :json => friends
       }
     end
@@ -45,7 +46,7 @@ class UsersController < ApplicationController
     if user.followee_ids.include?(@friend.id)
       notice = "You're already following '#{@friend.handle}'."
     else
-      @node = user.add_followee @friend
+      @browser, @node = user.add_followee @friend
       notice = "You're now connected with '#{@friend.handle}'."
     end
     respond_to do |format|

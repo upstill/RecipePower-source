@@ -25,9 +25,14 @@ class InvitationsController < Devise::InvitationsController
 
   # GET /resource/invitation/accept?invitation_token=abcdef
   def edit
-    if response_service.dialog? 
+    if response_service.dialog? # Referred by on-site link => do dialog
       smartrender
     elsif defer_invitation
+      # Invitation link was followed => issue the 'responded' event
+      if params[:invitation_token] && 
+        (self.resource = resource_class.find_by_invitation_token(params[:invitation_token], false))
+        RpEvent.post :invitation_responded, resource, nil, resource_class.find(resource.invited_by_id)
+      end
       session[:notification_token] = params[:notification_token] if params[:notification_token]   
       # dialog_boilerplate :edit, "page", redirect: home_path
       smartrender area: "page", redirect: home_path
@@ -79,6 +84,7 @@ class InvitationsController < Devise::InvitationsController
     (breakdown[:to_invite]+breakdown[:pending]).each do |invitee|
       # Fresh invitations to a genuine external user
       begin
+        debugger
         pr = params[resource_name]
         pr[:email] = (invitee.kind_of?(User) ? invitee.email : invitee).downcase
         pr[:skip_invitation] = true # Hold off on invitation so we can redirect to share, as nec.
@@ -92,6 +98,10 @@ class InvitationsController < Devise::InvitationsController
           @resource.save(validate: false) # ...because the invitee doesn't have a handle yet
           @resource.issue_instructions(:invitation_instructions)
         end
+        RpEvent.post :invitation_sent, 
+          current_inviter, 
+          (Recipe.find(@resource.shared_recipe) if for_sharing), 
+          @resource
         breakdown[:invited] << @resource
         #        rescue Exception => e
         #          breakdown[:failures].push({ email: invitee.email, error: e.to_s })
@@ -141,10 +151,10 @@ class InvitationsController < Devise::InvitationsController
       format.json {
         response = { done: true }
         if breakdown[:new_friends].count > 0
+          debugger
           # New friends must be added to the Browser list
           response[:entity] = breakdown[:new_friends].collect { |nf|
-            @node = current_user.add_followee nf
-            @browser = current_user.browser params
+            @browser, @node = current_user.add_followee nf
             with_format("html") { render_to_string partial: "collection/node" }
           }
           response[:processorFcn] = "RP.content_browser.insert_or_select"
@@ -225,8 +235,8 @@ class InvitationsController < Devise::InvitationsController
   # PUT /resource/invitation
   def update
     self.resource = resource_class.accept_invitation!(params[resource_name])
-
     if resource.errors.empty?
+      RpEvent.post :invitation_accepted, resource, nil, User.find(resource.invited_by_id)
       RpMailer.welcome_email(resource).deliver
       RpMailer.invitation_accepted_email(resource).deliver
       session.delete :invitation_token
@@ -239,6 +249,15 @@ class InvitationsController < Devise::InvitationsController
       # respond_with_navigational(resource){ dialog_boilerplate :edit }
       respond_with_navigational(resource){ smartrender :action => :edit }
     end
+  end
+  
+  # When the user gets distracted by the recipe link in a sharing notice
+  def divert
+    RpEvent.post :invitation_diverted, 
+      resource_class.find(params[:recipient]), 
+      nil, 
+      resource_class.find(params[:sender])
+    redirect_to CGI::unescape(params[:url])
   end
 
   def after_accept_path_for resource

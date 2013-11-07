@@ -6,8 +6,10 @@ class SessionsController < Devise::SessionsController
     if u = params[:user] && params[:user][:id] && User.find_by_id(params[:user][:id])
       self.resource.username = u.username
       self.resource.fullname = u.fullname
+      self.resource.login = u.username || u.email
     end
     clean_up_passwords(resource)
+    resource.remember_me = 1
     respond_to do |format|
       format.html { redirect_to home_path }
       format.json { 

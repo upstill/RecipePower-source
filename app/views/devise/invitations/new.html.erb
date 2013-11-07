@@ -3,13 +3,31 @@
 		<%= modal_body do %>
 		  <%# devise_error_messages! %>
 		  <%= form_errors_helper f %>
-		  <%= f.input :email %></p>
+			<%= f.input :invitee_tokens, 
+									:label => "Email(s)", 
+									:input_html => {
+										:class => "token-input-field", 
+										:autofocus => true,
+										:data => { 
+											:pre => (resource.invitee_tokens || []).collect { |token| 
+												token.kind_of?(Fixnum) ? 
+												{ "id" => token.to_s, "name" => User.find(token).handle } :
+												{ "id" => token, "name" => token } 
+											}.to_json,
+											:no_results_text => "Not a valid email address...yet",
+											:hint => "Type email addresses",
+											:free_tagging => false,
+											:enabler => "input.dialog-submit-button",
+											:request => "/users/#{current_user.id}/match_friends.json" 
+										}
+									} %>
+		  <%# f.input :email %></p>
 			<%= f.input :invitation_issuer, label: "How to identify you" %>
 			<% steve_msg = "As requested, here is your invitation to the website. At this stage, I'm really looking for two things: 1) Don't be shy about being critical! I can't promise to implement every suggestion, but I CAN promise to take very seriously your experience of the site. I really want to make something people love to use. 2) If you go out to the Web and cookmark 10 or 12 of your favorite recipes, that will not only get you over the hump to using the site, but it'll be a HUGE help for us in getting our content levered up. ...but thanks for whatever you have time to do.".html_safe %>
 		  <%= f.input :invitation_message, label: "Invitation Message (optional)", :input_html => { :rows=>"4", value: ((current_user && current_user.email =~ /upstill/) ? steve_msg : "I'd like you to join me on RecipePower, exploring the world of recipes on the Web.")} %></p>
 		<% end %>
 		<%= modal_footer do %>
-	  	<%= f.submit "Send an invitation", class: "btn btn-lg btn-success dialog-submit-button" %>
+	  	<%= f.submit "Send an invitation", class: "btn btn-lg btn-success dialog-submit-button", disabled: true %>
 			<%= dialog_cancel_button "Never Mind" %>
 		<% end %>
 	<% end %>

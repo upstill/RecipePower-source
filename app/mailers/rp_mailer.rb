@@ -29,8 +29,11 @@ class RpMailer < ActionMailer::Base
   def sharing_notice(notification, opts={})
     @notification = notification
     @recipe = Recipe.find(notification.info[:what])
-    mail to: notification.target.email, 
-      from: notification.source.polite_name+" on RecipePower <#{notification.source.email}>",
-      subject: notification.source.polite_name+" has something tasty for you"
+    @sender = notification.source
+    @recipient = notification.target
+    debugger
+    mail to: @recipient.email, 
+      from: @sender.polite_name+" on RecipePower <#{@sender.email}>",
+      subject: @sender.polite_name+" has something tasty for you"
   end
 end

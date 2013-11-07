@@ -32,19 +32,18 @@ class ApplicationController < ActionController::Base
     if session[:start_time] && session[:last_time]
       time_now = Time.now
       elapsed_time = time_now - session[:last_time]
-      if (elapsed_time < 20.seconds)
+      if (elapsed_time < 10.minutes)
         session[:last_time] = time_now
         session[:serve_count] += 1
         return
-      elsif last_serve = RpEvent.last(:Serve, current_user)
+      elsif last_serve = RpEvent.last(:serve, current_user)
         # Close out and update the previous session to record serve count and last time
         last_serve.data = { serve_count: session[:serve_count] }
         last_serve.updated_at = session[:last_time]
         last_serve.save
       end
     end
-    # last_serve = RpEvent.create source_id: current_user.id, verb: RpEvent.typenum("Serve"), :serve_count => 1
-    last_serve = RpEvent.post :Serve, current_user, nil, nil, :serve_count => 1
+    last_serve = RpEvent.post :serve, current_user, nil, nil, :serve_count => 1
     session[:serve_count] = 1
     session[:start_time] = session[:last_time] = last_serve.created_at
   end

@@ -5,14 +5,22 @@
 		  <%# devise_error_messages! %>
 		  <%= form_errors_helper f %>
 			<%= f.input :invitee_tokens, 
-									:label => "Email(s) and/or RecipePower Friends", 
-									:input_html => { 
-											:"data-pre" => (resource.invitee_tokens || []).collect { |token| 
+									:label => "Email(s) and/or RecipePower Friends",
+									:input_html => {
+										:class => "token-input-field", 
+										:autofocus => true,
+										:data => { 
+											:pre => (resource.invitee_tokens || []).collect { |token| 
 												token.kind_of?(Fixnum) ? 
 												{ "id" => token.to_s, "name" => User.find(token).handle } :
 												{ "id" => token, "name" => token } 
 											}.to_json,
-											:"data-request" => "/users/#{current_user.id}/match_friends.json" 
+											:no_results_text => "No matches among friends, but outside emails work too",
+											:hint => "Type email addresses or match friends",
+											:free_tagging => false,
+											:enabler => "input.dialog-submit-button",
+											:request => "/users/#{current_user.id}/match_friends.json" 
+										}
 									} %>
 		  <%# f.input :email %></p>
 			<%= f.input :invitation_issuer, label: "How to identify you in the message" %>
@@ -20,7 +28,7 @@
       <%= f.hidden_field(:shared_recipe) if resource.shared_recipe %>
 		<% end %>
 		<%= modal_footer do %>
-	  	<%= f.submit "Share the Love" %>
+	  	<%= f.submit "Share the Love", class: "btn btn-lg btn-success dialog-submit-button", disabled: true %>
 		<% end %>
 	<% end %>
 <% end %>
