@@ -65,7 +65,7 @@ class User < ActiveRecord::Base
   def refresh_browser(obj = nil)
     browser_serialized = nil
     @browser = ContentBrowser.new(id)
-    @browser.select_by_content if obj
+    @browser.select_by_content(obj) if obj
     save
   end
   
@@ -85,9 +85,7 @@ class User < ActiveRecord::Base
   # Add the feed to the browser's ContentBrowser and select it
   def add_feed feed
     self.feeds = feeds.unshift(feed) unless feeds.include? feed
-    bnode = browser.select_by_content feed
-    save # ...to preserve the selection
-    bnode
+    refresh_browser feed
   end
 
   def delete_feed feed
@@ -99,11 +97,7 @@ class User < ActiveRecord::Base
 
   def add_followee friend
     self.followees << friend unless followee_ids.include? friend.id
-    # friend.follower_ids.unshift id unless friend.follower_ids.include? id
-    # friend.save
-    bnode = browser.select_by_content friend # Recreates the browser
-    save # ...to preserve the selection
-    [ browser, bnode ]
+    refresh_browser friend
   end
 
   def delete_followee f

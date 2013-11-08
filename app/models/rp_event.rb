@@ -39,7 +39,6 @@ class RpEvent < ActiveRecord::Base
 
   # post an event of the given type
   def self.post verb, source, subject, target, data={}
-    # last_serve = RpEvent.create source_id: current_user.id, verb: RpEvent.typenum("Serve"), :serve_count => 1
     evt = self.new verb: typenum(verb)
     evt.source = source
     evt.subject = subject

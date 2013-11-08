@@ -2,9 +2,11 @@
 
 RP.tagger = RP.tagger || {}
 
+# Set up an input element for tagging
 RP.tagger.init = (selector, data) ->
-	for prop, value of data
-		$(selector).data prop, value
+  $(selector).addClass "token-input-field"
+  for prop, value of data
+    $(selector).data prop, value
 
 # When a tagging field is loaded, get tokenInput running, either from the 
 # element's data field or the imposed harddata

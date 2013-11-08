@@ -46,13 +46,15 @@ class UsersController < ApplicationController
     if user.followee_ids.include?(@friend.id)
       notice = "You're already following '#{@friend.handle}'."
     else
-      @browser, @node = user.add_followee @friend
+      user.add_followee @friend
       notice = "You're now connected with '#{@friend.handle}'."
     end
     respond_to do |format|
       format.html { redirect_to collection_path, :notice => notice }
-      format.json { 
-        render( 
+      format.json {
+        @browser = user.browser
+        @node = @browser.selected
+        render(
           json: { 
             processorFcn: "RP.content_browser.insert_or_select",
             entity: with_format("html") { render_to_string partial: "collection/node" }, 

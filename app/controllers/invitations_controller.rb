@@ -152,7 +152,9 @@ class InvitationsController < Devise::InvitationsController
         if breakdown[:new_friends].count > 0
           # New friends must be added to the Browser list
           response[:entity] = breakdown[:new_friends].collect { |nf|
-            @browser, @node = current_user.add_followee nf
+            current_user.add_followee nf
+            @browser = current_user.browser
+            @node = @browser.selected
             with_format("html") { render_to_string partial: "collection/node" }
           }
           response[:processorFcn] = "RP.content_browser.insert_or_select"

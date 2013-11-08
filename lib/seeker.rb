@@ -101,11 +101,11 @@ public
   
   def guide
     # Describe this seeker for presentation to the user
-    (affiliate && @affiliate.selected) ? @affiliate.selected.guide : "This is your friendly seeker"
+    (affiliate && @affiliate.respond_to?(:selected) && @affiliate.selected) ? @affiliate.selected.guide : "This is your friendly seeker"
   end
   
   def hints
-    (affiliate && @affiliate.selected) ? @affiliate.selected.hints : "Handy Hints Here"
+    (affiliate && @affiliate.respond_to?(:selected) && @affiliate.selected) ? @affiliate.selected.hints : "Handy Hints Here"
   end
   
   # Accept new tags text, bust the cache, and return the new set of tags

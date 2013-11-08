@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/plataformatec/simple_form.git
-  revision: 146cff7ec6bdaba00201b73704f3417a7b978e31
+  revision: 7f743fd161a73839202a12d2ec765a41896e2f5b
   specs:
     simple_form (3.0.0)
       actionpack (>= 4.0.0, < 4.1)
@@ -75,16 +75,9 @@ GEM
       coffee-script-source
       execjs
     coffee-script-source (1.6.3)
-    columnize (0.3.6)
     content_for_in_controllers (0.0.2)
     curb (0.8.5)
     debug_inspector (0.0.2)
-    debugger (1.6.2)
-      columnize (>= 0.3.1)
-      debugger-linecache (~> 1.2.0)
-      debugger-ruby_core_source (~> 1.2.3)
-    debugger-linecache (1.2.0)
-    debugger-ruby_core_source (1.2.3)
     declarative_authorization (0.5.7)
     delayed_job (4.0.0)
       activesupport (>= 3.0, < 4.1)
@@ -144,7 +137,7 @@ GEM
       metaclass (~> 0.0.1)
     multi_json (1.8.2)
     multipart-post (1.2.0)
-    newrelic_rpm (3.6.8.168)
+    newrelic_rpm (3.6.9.171)
     nifty-generators (0.4.6)
     nokogiri (1.6.0)
       mini_portile (~> 0.5.0)
@@ -211,7 +204,7 @@ GEM
     redcarpet (3.0.0)
     rmagick (2.13.2)
     rspec-core (2.14.7)
-    rspec-expectations (2.14.3)
+    rspec-expectations (2.14.4)
       diff-lcs (>= 1.1.3, < 2.0)
     rspec-mocks (2.14.4)
     rspec-rails (2.14.0)
@@ -285,7 +278,6 @@ DEPENDENCIES
   closure_tree
   coffee-rails (~> 4.0.0)
   content_for_in_controllers
-  debugger
   declarative_authorization
   delayed_job
   delayed_job_active_record
