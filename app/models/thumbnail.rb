@@ -3,13 +3,12 @@ require './lib/controller_utils.rb'
 require "Domain"
 class Thumbnail < ActiveRecord::Base
   attr_accessible :thumbsize, :thumbdata, :url, :site # , :picAR
-  before_save :update_thumb
+  # before_save :update_thumb
   
   # Try to fetch the thumbnail data for the record, presuming a valid URL
-  # If the fetch fails, leave the thumbdata as nil
-  def update_thumb(force = false)
-    self.thumbdata = nil if force
-    unless (thumbdata =~ /^data:/) # && !picAR.nil?
+  def perform
+    unless thumbdata && (thumbdata =~ /^data:/)
+      logger.info ">>>>>>>>>>>>>>>>>>>>>>>>>>>>> Acquiring Thumbnail data on url '#{url}' >>>>>>>>>>>>>>>>>>>>>>>>>"
       self.status = self.thumbdata = nil
       # self.picAR = nil
       begin
@@ -42,36 +41,26 @@ class Thumbnail < ActiveRecord::Base
           else
             thumb = img
           end
-=begin
-          if (img.columns < thumbsize || img.rows < thumbsize) 
-            thumb = img.resize_to_fit thumbsize
-          else
-            thumb = img.resize_to_fill thumbsize 
-          end
-=end
           thumb.format = "JPEG"
           quality = 20
-          # self.picAR = thumb.rows.to_f/thumb.columns
           thumb.write("thumb#{id.to_s}-M#{quality.to_s}.jpg") { self.quality = quality } unless true # Rails.env.production?
           self.thumbdata = "data:image/jpeg;base64," + Base64.encode64(thumb.to_blob{self.quality = quality })
-        rescue Exception => e
+          save
         end
       end
     end
     self
   end
   
-  # Use a path and site to fetch a thumbnail record, which may match a priorly cached one
+  # Use a path and site to fetch a thumbnail record,
+  # which may or may not match a previously cached one,
+  # and may or may not have valid cached data
   def self.acquire(site, path)
     if url = valid_url(site, path)
       tn = Thumbnail.find_or_create_by url: url
-      tn.update_thumb # In case either the thumbdata or the AR are invalid
+      Delayed::Job.enqueue tn unless tn && tn.thumbdata
+      tn
     end
-  end
-  
-  # Does a thumbnail reflect the given site and path?
-  def matches? (site, path)
-    (full_url = valid_url(site, path)) && (full_url == url)
   end
 
 end

@@ -11,4 +11,8 @@ module AdminHelper
     end
   end
 
+  def aggregate_admin_table_row row, field
+
+  end
+
 end

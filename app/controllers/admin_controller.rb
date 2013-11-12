@@ -2,6 +2,11 @@ require 'table_presenter.rb'
 
 class AdminController < ApplicationController
   def stats
+    # Generate the aggregate table
+    aggregates = []
+    intervals = AnalyticsServices.on_intervals( :monthly, 5, true)
+
+    # Generate the stats table
     stats = []
     session[:sort_field] = (params[:sort_by] || session[:sort_field] || :id)
     User.all.each do |user|
@@ -37,6 +42,7 @@ class AdminController < ApplicationController
     sortfield = session[:sort_field].to_sym
     descending = [:num_recipes, :edit_count, :add_time, :last_visit, :recent_visits, :invites ].include?(sortfield)
     @display_table.sort sortfield, descending
+
   end
 
   def control

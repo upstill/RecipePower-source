@@ -183,10 +183,11 @@
 		<br>
 		<div class="message_box">
 			<div style="width:90%;margin: 20px 0px 0px;float: left;font-size:20px; font-weight:bold;">Rather not deal with this now?</div>
-			<% url = accept_user_invitation_url(
-				:invitation_token => @recipient.raw_invitation_token,
-				:notification_token => @notification_token ) %>
-			<div style="width:90%; margin: 0px;float: left;">
+          <% url = accept_user_invitation_url(
+                  :rpevent => RpEvent.embed_trigger(:invitation_responded, @recipient, @invitation_event, @recipient.invited_by),
+                  :invitation_token => @recipient.raw_invitation_token,
+                  :notification_token => @notification_token) %>
+          <div style="width:90%; margin: 0px;float: left;">
 				<%= link_to "Save It To RecipePower", url, 
 									:class => "get_button btn-lg btn-success" %>
 			</div>

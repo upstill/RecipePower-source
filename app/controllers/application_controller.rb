@@ -28,6 +28,7 @@ class ApplicationController < ActionController::Base
   # Track the session, saving session events when the session goes stale
   def log_serve
     logger.info %Q{RPEVENT\tServe\t#{current_user.id if current_user}\t#{params[:controller]}\t#{params[:action]}\t#{params[:id]}}
+    RpEvent.fire_trigger(params[:rpevent]) if params[:rpevent]
     return unless current_user
     if session[:start_time] && session[:last_time]
       time_now = Time.now

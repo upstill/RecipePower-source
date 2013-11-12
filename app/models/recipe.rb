@@ -27,25 +27,15 @@ private
     if self.picurl.nil? || self.picurl =~ /^data:/
       # Shouldn't have a thumbnail
       self.thumbnail = nil
-    elsif !(self.picdata =~ /^data:/)
+    elsif picurl_changed? || !thumbnail
+      # Make sure we've got the right thumbnail
       self.thumbnail = Thumbnail.acquire( url, picurl )
-      Delayed::Job.enqueue self unless thumbnail && thumbnail.thumbdata
     end
     true
   end
   
 public
-  
-  # Generate the thumbnail in background. We assume that the thumbnail is referencing
-  # the same image as the recipe (see check_thumbnail)
-  def perform
-    puts ">>>>>>>>>>>>>>>>>>>>>>>>>>>>> Validating picurl with url '#{url}' and picurl '#{picurl}'"
-    if thumbnail
-      thumbnail.update_thumb 
-      # self.picAR = thumbnail.picAR unless thumbnail.picAR.nil?
-    end
-  end
-  
+
   # Return the image for the recipe, either as a URL or a data specifier
   # The image may have an associated thumbnail, but it doesn't count unless 
   # the thumbnail reflects the image's current picurl
@@ -53,14 +43,14 @@ public
     case
     when !picurl || (picurl =~ /^data:/)
       picurl
-    when thumbnail && thumbnail.matches?(url, picurl) && (thumbnail.thumbdata =~ /^data:/)
+    when thumbnail && thumbnail.thumbdata
       thumbnail.thumbdata
     else
       picurl unless picurl.blank?
     end
   end
   
-  belongs_to :thumbnail, :autosave => true, :dependent => :destroy
+  belongs_to :thumbnail, :autosave => true
   
   has_many :ratings, :dependent=>:destroy
   has_many :scales, :through=>:ratings, :autosave=>true

@@ -1,7 +1,10 @@
 <%# inviter_name = (@resource.invited_by_id && User.find(@resource.invited_by_id).handle) %>
 <% inviter_name = @resource.invitation_issuer %>
 <% accept_str = link_to("accept the invitation", 
-		accept_user_invitation_url(:invitation_token => @resource.raw_invitation_token)) %>
+		accept_user_invitation_url(
+                :rpevent => RpEvent.embed_trigger(:invitation_responded, @recipient, @invitation_event, @recipient.invited_by),
+                :invitation_token => @resource.raw_invitation_token
+        )) %>
 		
 <p><%= accept_str.sub(/>accept /, ">Accept ").html_safe %></p>
 <%= inviter_name || "Someone" %> is inviting you to join

@@ -31,7 +31,7 @@ class InvitationsController < Devise::InvitationsController
       # Invitation link was followed => issue the 'responded' event
       if params[:invitation_token] && 
         (self.resource = resource_class.find_by_invitation_token(params[:invitation_token], false))
-        RpEvent.post :invitation_responded, resource, nil, resource_class.find(resource.invited_by_id)
+        # RpEvent.post :invitation_responded, resource, nil, resource_class.find(resource.invited_by_id)
       end
       session[:notification_token] = params[:notification_token] if params[:notification_token]   
       # dialog_boilerplate :edit, "page", redirect: home_path
@@ -92,15 +92,12 @@ class InvitationsController < Devise::InvitationsController
         if for_sharing
           @notification = @resource.post_notification(:share_recipe, current_inviter, what: params[resource_name][:shared_recipe])
           @resource.save(validate: false) # ...because the invitee doesn't have a handle yet
-          @resource.issue_instructions(:sharing_invitation_instructions, notification_token: @notification.notification_token)
+          @resource.issue_instructions(:sharing_invitation_instructions,
+                                       notification_token: @notification.notification_token)
         else
           @resource.save(validate: false) # ...because the invitee doesn't have a handle yet
           @resource.issue_instructions(:invitation_instructions)
         end
-        RpEvent.post :invitation_sent, 
-          current_inviter, 
-          (Recipe.find(@resource.shared_recipe) if for_sharing), 
-          @resource
         breakdown[:invited] << @resource
         #        rescue Exception => e
         #          breakdown[:failures].push({ email: invitee.email, error: e.to_s })
@@ -236,7 +233,8 @@ class InvitationsController < Devise::InvitationsController
   def update
     self.resource = resource_class.accept_invitation!(params[resource_name])
     if resource.errors.empty?
-      RpEvent.post :invitation_accepted, resource, nil, User.find(resource.invited_by_id)
+      invitation_event = RpEvent.where( source_id: resource.invited_by_id, target_id: resource.id, target_type: resource.class.to_s ).first
+      RpEvent.post :invitation_accepted, resource, invitation_event, User.find(resource.invited_by_id )
       RpMailer.welcome_email(resource).deliver
       RpMailer.invitation_accepted_email(resource).deliver
       session.delete :invitation_token
@@ -253,10 +251,12 @@ class InvitationsController < Devise::InvitationsController
   
   # When the user gets distracted by the recipe link in a sharing notice
   def divert
+=begin
     RpEvent.post :invitation_diverted, 
       resource_class.find(params[:recipient]), 
       nil, 
       resource_class.find(params[:sender])
+=end
     redirect_to CGI::unescape(params[:url])
   end
 
