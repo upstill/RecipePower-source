@@ -12,7 +12,7 @@ module AdminHelper
   end
 
   def aggregate_admin_table_row row, field
-
+     format("%.2f", row[field]) if row[field].class == Float
   end
 
 end

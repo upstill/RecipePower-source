@@ -11,7 +11,7 @@ class RpEvent < ActiveRecord::Base
 
   typeable( :verb,
             Untyped: ["Untyped", 0 ],
-            serve: ["Serve", 1],
+            session: ["Session", 1],
             invitation_sent: ["Send Invitation", 2],
             invitation_responded: ["Respond to Invitation", 3],
             invitation_accepted: ["Accepted Invitation", 4],

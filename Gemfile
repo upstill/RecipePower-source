@@ -68,6 +68,7 @@ group :test do
   gem 'webrat', '~> 0.7.3'
   # gem "capybara" # ...for simulating user interaction
   # gem "guard-rspec" # ...for auto-running tests on file save
+  gem 'factory_girl_rails'
 end
 
 gem 'coffee-rails', "~> 4.0.0"

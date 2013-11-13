@@ -34,8 +34,9 @@ module TableHelper
         display_table.rows.collect { |row|
           content_tag :tr, display_table.fields.collect { |field|
             field_sym = field[:sym]
-            row_matter = yield row, field_sym
-            content_tag :td, (row_matter || row[field_sym].to_s).html_safe
+            row_matter = yield( row, field_sym ) || row[field_sym]
+            row_text = row_matter.class == Float ? format("%.2f", row_matter) : row_matter.to_s
+            content_tag :td, row_text.html_safe
           }.join("\n").html_safe
         }.join("\n").html_safe
 
