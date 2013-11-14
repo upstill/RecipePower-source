@@ -115,10 +115,15 @@ div.centerblock {
 	background-image: linear-gradient(to bottom, #ffffff, #f2f2f2);
 }
 
-.rcp_grid_element_links {
-	position: absolute;
-	right: 2px;
-} 
+.rcp_grid_element_icons {
+  position: absolute;
+  left: 2px;
+}
+
+.rcp_grid_element_buttons {
+  position: absolute;
+  right: 2px;
+}
 
 .rcp_grid_element_stats {
 	font-size: 0.8em;

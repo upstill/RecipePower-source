@@ -31,11 +31,11 @@ RP.stream.go = (elmt) ->
 				# when they appear.
 				$(item).on 'resize', (evt) ->
 					$('#masonry-container').masonry()
-				datablock = $('div.rcp_grid_datablock', item)
+				datablock = $('span.recipe-info-button', item)
 				tagstr = $(datablock).data "tags"
 				decoded = $('<div/>').html(tagstr).text();
 				$(datablock).popover
-					trigger: "hover",
+					trigger: "click",
 					placement: "auto right",
 					html: true,
 					content: contentstr+decoded
