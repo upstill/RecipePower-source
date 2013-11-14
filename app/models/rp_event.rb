@@ -20,7 +20,7 @@ class RpEvent < ActiveRecord::Base
 
   belongs_to :user
 
-  # Return a hash of stats for the user
+  # Return a hash of aggregate_user_table for the user
   def self.user_stats user, interval
     if last_visit = self.last(:serve, user)
       recent_visits = self.where( 'verb = ? AND source_id = ? AND created_at > ?', typenum(:serve), user.id, interval ).count

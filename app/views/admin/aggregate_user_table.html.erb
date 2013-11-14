@@ -1,0 +1,2 @@
+<%= link_to "Individual User Breakdown", admin_data_path( type: "single_user") %>
+<%= present_table @table do |row, field| aggregate_user_table_row(row, field) end %>

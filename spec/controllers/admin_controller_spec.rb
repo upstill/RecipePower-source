@@ -2,9 +2,9 @@ require 'spec_helper'
 
 describe AdminController do
 
-  describe "GET 'stats'" do
+  describe "GET 'aggregate_user_table'" do
     it "returns http success" do
-      get 'stats'
+      get 'aggregate_user_table'
       response.should be_success
     end
   end

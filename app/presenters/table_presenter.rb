@@ -1,6 +1,8 @@
 class TablePresenter
+  attr_accessor :name
 
-  def initialize stats_hash, field_labels = {}
+  def initialize name, stats_hash, field_labels = {}
+    @name = name
     @field_labels = field_labels
     @data = stats_hash
     @sortfield = field_labels.first[0]
@@ -24,6 +26,7 @@ class TablePresenter
     @sortfield = sortfield.to_sym
     reverse = descending ? -1 : 1
     @data = @data.compact.sort { |us1, us2|
+      comp =
       if us1[@sortfield] && us2[@sortfield]
         us1[@sortfield] <=> us2[@sortfield]
       elsif us1[@sortfield]
@@ -32,7 +35,8 @@ class TablePresenter
         -1
       else
         0
-      end * reverse
+      end
+      comp * reverse
     }
   end
 

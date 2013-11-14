@@ -153,7 +153,7 @@ class AnalyticsServices
 
     headers = {name: ""}
     columns.each { |col| headers[col.name] = col.name }
-    TablePresenter.new rows, headers
+    TablePresenter.new "Aggregate User Data", rows, headers
   end
 
 end

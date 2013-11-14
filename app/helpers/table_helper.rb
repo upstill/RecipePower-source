@@ -16,14 +16,24 @@ module TableHelper
         </table>}.html_safe
   end
 
-  def present_table display_table, name, &block
+  def present_table display_table, type = nil, &block
 
-    banner = content_tag :h3, name+" Sorted By "+display_table.sort_field[:name]
+    if type
+      chooser =
+          display_table.fields.collect { |field|
+            content_tag :li, link_to(field[:name], "/admin/data?type=#{type}&sort_by="+field[:sym].to_s)
+          }.join("\n").html_safe
+      chooser = %Q{
+        <div class="btn-group">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+              Sort By <span class="caret"></span>
+              </button>
+          <ul class="dropdown-menu" role="menu">#{chooser}</ul>
+        </div>
+      }
+    end
 
-    chooser =
-        display_table.fields.collect { |field|
-          content_tag :li, link_to(field[:name], "/admin/stats?sort_by="+field[:sym].to_s)
-        }.join("\n").html_safe
+    banner = content_tag :h3, display_table.name+(chooser ? " Sorted By "+display_table.sort_field[:name] : "")
 
     header =
         display_table.fields.collect { |field|
@@ -42,12 +52,7 @@ module TableHelper
 
     %Q{
     #{banner}
-      <div class="btn-group">
-        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-          Sort By <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu" role="menu">#{chooser}</ul>
-      </div>
+    #{chooser}
       <table class="table table-striped">
         <thead>
           <tr>#{header}</tr>

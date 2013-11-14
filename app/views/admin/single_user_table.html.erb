@@ -1,0 +1,2 @@
+<%= link_to "Aggregate Data", admin_data_path( type: "aggregate_user") %>
+<%= present_table @table, "single_user" do |row, field| single_user_table_row(row, field) end %>

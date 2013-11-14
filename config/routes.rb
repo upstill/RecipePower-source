@@ -1,6 +1,6 @@
 RP::Application.routes.draw do
 
-  get "admin/stats"
+  get "admin/data"
   get "admin/control"
   get "notifications/accept"
   
