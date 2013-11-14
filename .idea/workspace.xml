@@ -2,12 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="11143819-dbfd-4599-8209-07d96301a1c5" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/stylesheets/bootstrap_and_overrides.css.scss" afterPath="$PROJECT_DIR$/app/assets/stylesheets/bootstrap_and_overrides.css.scss" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/javascripts/common/stream.js.coffee" afterPath="$PROJECT_DIR$/app/assets/javascripts/common/stream.js.coffee" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="RP.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Dummy.txt" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384402965631" ignored="false" />
+    <file path="/Dummy.txt" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384404125897" ignored="false" />
     <file path="/fragment.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384400876762" ignored="false" />
     <file path="/user.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1383875643013" ignored="false" />
     <file path="/feeds_controller.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1383873837455" ignored="false" />
@@ -63,10 +64,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="stream.js.coffee" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="stream.js.coffee" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/assets/javascripts/common/stream.js.coffee">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="24" column="20" selection-start="835" selection-end="856" vertical-scroll-proportion="0.316">
+            <state line="24" column="40" selection-start="839" selection-end="855" vertical-scroll-proportion="-6.076923">
               <folding />
             </state>
           </provider>
@@ -125,10 +126,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="recipes_helper.rb" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="recipes_helper.rb" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/helpers/recipes_helper.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="11" column="58" selection-start="292" selection-end="308" vertical-scroll-proportion="-4.730769">
+            <state line="11" column="58" selection-start="292" selection-end="308" vertical-scroll-proportion="0.39">
               <folding />
             </state>
           </provider>
@@ -1177,7 +1178,11 @@
       <created>1384402967584</created>
       <updated>1384402967584</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Magnifying-glass no longer shows in closeup recipe view">
+      <created>1384404129875</created>
+      <updated>1384404129875</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -1190,12 +1195,12 @@
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32587412" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.26346433" sideWeight="0.806993" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.26346433" sideWeight="0.4055944" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3944056" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32867134" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.19300699" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.5944056" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -1246,7 +1251,7 @@
     <option name="WRAP_WHEN_TYPING_REACHES_RIGHT_MARGIN" value="false" />
     <option name="FORCE_NON_EMPTY_COMMENT" value="false" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="false" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added magnifying-glass icon to git" />
+    <option name="LAST_COMMIT_MESSAGE" value="Magnifying-glass no longer shows in closeup recipe view" />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="false" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_FILES_UP_TO_DATE_BEFORE_COMMIT" value="false" />
@@ -1267,6 +1272,7 @@
     <MESSAGE value="Individual and aggregate user data split into separate pages and added to admin page; added tags and tags-per-recipe to user-data page" />
     <MESSAGE value="Recipe editing dialog fixed." />
     <MESSAGE value="Added magnifying-glass icon to git" />
+    <MESSAGE value="Magnifying-glass no longer shows in closeup recipe view" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1406,16 +1412,16 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/helpers/recipes_helper.rb">
+    <entry file="file://$PROJECT_DIR$/app/assets/javascripts/common/stream.js.coffee">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="11" column="58" selection-start="292" selection-end="308" vertical-scroll-proportion="-4.730769">
+        <state line="24" column="40" selection-start="839" selection-end="855" vertical-scroll-proportion="-6.076923">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/assets/javascripts/common/stream.js.coffee">
+    <entry file="file://$PROJECT_DIR$/app/helpers/recipes_helper.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="24" column="20" selection-start="835" selection-end="856" vertical-scroll-proportion="0.316">
+        <state line="11" column="58" selection-start="292" selection-end="308" vertical-scroll-proportion="0.39">
           <folding />
         </state>
       </provider>

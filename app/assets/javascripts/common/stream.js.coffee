@@ -22,7 +22,7 @@ RP.stream.go = (elmt) ->
 			$(selector).append item
 			if selector == '#masonry-container'
 				$('#masonry-container').masonry 'appended', item
-				if img = $('div.recipe_image_div img', item)[0]
+				if img = $('div.rcp_grid_pic_box img', item)[0]
 					srcstr = img.getAttribute('src')
 					contentstr = "<img src=\""+srcstr+"\" style=\"width: 100%; height: auto\">"
 				else
