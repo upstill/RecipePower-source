@@ -2,21 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="11143819-dbfd-4599-8209-07d96301a1c5" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/recipes/_infolink.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/pages/_about_content.html.erb" afterPath="$PROJECT_DIR$/app/views/pages/_about_content.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/recipes/_form_edit_at_left.html.erb" afterPath="$PROJECT_DIR$/app/views/recipes/_form_edit_at_left.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/shared/_recipe_grid.html.erb" afterPath="$PROJECT_DIR$/app/views/shared/_recipe_grid.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/stylesheets/collection.css.scss" afterPath="$PROJECT_DIR$/app/assets/stylesheets/collection.css.scss" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/assets/collection.css" afterPath="$PROJECT_DIR$/assets/collection.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/stylesheets/common/dialog.css.scss" afterPath="$PROJECT_DIR$/app/assets/stylesheets/common/dialog.css.scss" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/stylesheets/views/edit_recipe.css.scss" afterPath="$PROJECT_DIR$/app/assets/stylesheets/views/edit_recipe.css.scss" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/helpers/recipes_helper.rb" afterPath="$PROJECT_DIR$/app/helpers/recipes_helper.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/javascripts/common/stream.js.coffee" afterPath="$PROJECT_DIR$/app/assets/javascripts/common/stream.js.coffee" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/assets/images/magnifying_glass_12x12.png" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="RP.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Dummy.txt" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384393581137" ignored="false" />
+    <file path="/Dummy.txt" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384402245981" ignored="false" />
     <file path="/fragment.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384400876762" ignored="false" />
     <file path="/user.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1383875643013" ignored="false" />
     <file path="/feeds_controller.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1383873837455" ignored="false" />
@@ -75,7 +66,7 @@
       <file leaf-file-name="stream.js.coffee" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/assets/javascripts/common/stream.js.coffee">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="34" column="0" selection-start="1231" selection-end="1231" vertical-scroll-proportion="0.5900383">
+            <state line="15" column="63" selection-start="479" selection-end="479" vertical-scroll-proportion="0.093495935">
               <folding />
             </state>
           </provider>
@@ -791,6 +782,10 @@
               <option name="myItemId" value="assets" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="images" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
@@ -1178,7 +1173,11 @@
       <created>1384393588236</created>
       <updated>1384393588236</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Recipe editing dialog fixed.">
+      <created>1384402254012</created>
+      <updated>1384402254012</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -1191,12 +1190,12 @@
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32587412" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.26346433" sideWeight="0.83776224" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.26346433" sideWeight="0.45174825" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3944056" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32867134" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.16223776" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.54825175" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -1247,7 +1246,7 @@
     <option name="WRAP_WHEN_TYPING_REACHES_RIGHT_MARGIN" value="false" />
     <option name="FORCE_NON_EMPTY_COMMENT" value="false" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="false" />
-    <option name="LAST_COMMIT_MESSAGE" value="Individual and aggregate user data split into separate pages and added to admin page; added tags and tags-per-recipe to user-data page" />
+    <option name="LAST_COMMIT_MESSAGE" value="Recipe editing dialog fixed." />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="false" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_FILES_UP_TO_DATE_BEFORE_COMMIT" value="false" />
@@ -1266,6 +1265,7 @@
     <MESSAGE value="Thumbnails now work properly and recipe images load sensibly, even if there's no thumbnail or the thumbnail is pending. Thumbnail production and URL checking now done in background" />
     <MESSAGE value="Got aggregates analytics table on its feet, though requiring double-check of figures" />
     <MESSAGE value="Individual and aggregate user data split into separate pages and added to admin page; added tags and tags-per-recipe to user-data page" />
+    <MESSAGE value="Recipe editing dialog fixed." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1414,7 +1414,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/assets/javascripts/common/stream.js.coffee">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="34" column="0" selection-start="1231" selection-end="1231" vertical-scroll-proportion="0.5900383">
+        <state line="15" column="63" selection-start="479" selection-end="479" vertical-scroll-proportion="0.093495935">
           <folding />
         </state>
       </provider>
