@@ -2,13 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="11143819-dbfd-4599-8209-07d96301a1c5" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/stylesheets/bootstrap_and_overrides.css.scss" afterPath="$PROJECT_DIR$/app/assets/stylesheets/bootstrap_and_overrides.css.scss" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/javascripts/common/stream.js.coffee" afterPath="$PROJECT_DIR$/app/assets/javascripts/common/stream.js.coffee" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="RP.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Dummy.txt" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384404125897" ignored="false" />
+    <file path="/Dummy.txt" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384405235212" ignored="false" />
     <file path="/fragment.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384400876762" ignored="false" />
     <file path="/user.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1383875643013" ignored="false" />
     <file path="/feeds_controller.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1383873837455" ignored="false" />
@@ -43,7 +41,7 @@
     <file path="/_about_content.html.erb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384394970709" ignored="false" />
     <file path="/collection.css.scss" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384396056761" ignored="false" />
     <file path="/recipes_helper.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384398250583" ignored="false" />
-    <file path="/a.coffee" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384398625055" ignored="false" />
+    <file path="/a.coffee" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384405843995" ignored="false" />
     <file path="/dialog.css.scss" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384400499867" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -64,90 +62,28 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="stream.js.coffee" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/assets/javascripts/common/stream.js.coffee">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="24" column="40" selection-start="839" selection-end="855" vertical-scroll-proportion="-6.076923">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="_edit_template.html.erb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/views/recipes/_edit_template.html.erb">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="-0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="_form_edit_at_left.html.erb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/views/recipes/_form_edit_at_left.html.erb">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="5" column="41" selection-start="253" selection-end="253" vertical-scroll-proportion="-3.125">
-              <folding>
-                <element signature="e#1016#1040#0" expanded="true" />
-                <element signature="e#2118#2139#0" expanded="true" />
-                <element signature="e#2405#2423#0" expanded="true" />
-                <element signature="e#2856#2874#0" expanded="true" />
-                <element signature="e#3217#3238#0" expanded="true" />
-                <element signature="e#3352#3375#0" expanded="true" />
-                <element signature="e#3489#3509#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="edit_recipe.css.scss" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/assets/stylesheets/views/edit_recipe.css.scss">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="6" column="9" selection-start="138" selection-end="138" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="dialog.css.scss" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/assets/stylesheets/common/dialog.css.scss">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="26" column="10" selection-start="506" selection-end="506" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="recipe.rb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/models/recipe.rb">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="33" column="0" selection-start="1079" selection-end="1079" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="recipes_helper.rb" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="recipes_helper.rb" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/helpers/recipes_helper.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="11" column="58" selection-start="292" selection-end="308" vertical-scroll-proportion="0.39">
+            <state line="11" column="58" selection-start="292" selection-end="308" vertical-scroll-proportion="-3.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="_infolink.html.erb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/views/recipes/_infolink.html.erb">
+      <file leaf-file-name="_recipe_grid.html.erb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/views/shared/_recipe_grid.html.erb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="1" column="0" selection-start="32" selection-end="32" vertical-scroll-proportion="-0.625">
+            <state line="2" column="22" selection-start="131" selection-end="147" vertical-scroll-proportion="-1.25">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="_golink.html.erb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/views/recipes/_golink.html.erb">
+      <file leaf-file-name="show.html.erb" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/views/recipes/show.html.erb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="4" column="127" selection-start="359" selection-end="392" vertical-scroll-proportion="-2.5">
+            <state line="4" column="16" selection-start="108" selection-end="108" vertical-scroll-proportion="1.1320754">
               <folding />
             </state>
           </provider>
@@ -449,6 +385,28 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="views" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="RP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="RP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="views" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="shared" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -792,7 +750,7 @@
     <property name="options.splitter.main.proportions" value="0.3" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="recentsLimit" value="5" />
-    <property name="options.lastSelected" value="preferences.sourceCode.CoffeeScript" />
+    <property name="options.lastSelected" value="web.server" />
     <property name="FullScreen" value="false" />
     <property name="dynamic.classpath" value="false" />
     <property name="options.splitter.details.proportions" value="0.2" />
@@ -1182,12 +1140,16 @@
       <created>1384404129875</created>
       <updated>1384404129875</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Closeup recipe view has image again, and is larger">
+      <created>1384405240797</created>
+      <updated>1384405240797</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="9" y="22" width="1420" height="812" extended-state="0" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32867134" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32867134" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -1195,12 +1157,12 @@
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32587412" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.26346433" sideWeight="0.4055944" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.26346433" sideWeight="0.14685315" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3944056" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32867134" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.5944056" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.85314685" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -1251,7 +1213,7 @@
     <option name="WRAP_WHEN_TYPING_REACHES_RIGHT_MARGIN" value="false" />
     <option name="FORCE_NON_EMPTY_COMMENT" value="false" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="false" />
-    <option name="LAST_COMMIT_MESSAGE" value="Magnifying-glass no longer shows in closeup recipe view" />
+    <option name="LAST_COMMIT_MESSAGE" value="Closeup recipe view has image again, and is larger" />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="false" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_FILES_UP_TO_DATE_BEFORE_COMMIT" value="false" />
@@ -1273,6 +1235,7 @@
     <MESSAGE value="Recipe editing dialog fixed." />
     <MESSAGE value="Added magnifying-glass icon to git" />
     <MESSAGE value="Magnifying-glass no longer shows in closeup recipe view" />
+    <MESSAGE value="Closeup recipe view has image again, and is larger" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1306,13 +1269,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/app/models/concerns/taggable.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/helpers/admin_helper.rb">
       <provider selected="true" editor-type-id="text-editor">
         <state line="11" column="39" selection-start="414" selection-end="414" vertical-scroll-proportion="0.0">
@@ -1344,13 +1300,6 @@
     <entry file="file://$PROJECT_DIR$/app/assets/stylesheets/collection.css.scss">
       <provider selected="true" editor-type-id="text-editor">
         <state line="119" column="9" selection-start="2077" selection-end="2077" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/views/shared/_recipe_grid.html.erb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="12" column="12" selection-start="521" selection-end="521" vertical-scroll-proportion="-7.5">
           <folding />
         </state>
       </provider>
@@ -1421,7 +1370,21 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/helpers/recipes_helper.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="11" column="58" selection-start="292" selection-end="308" vertical-scroll-proportion="0.39">
+        <state line="11" column="58" selection-start="292" selection-end="308" vertical-scroll-proportion="-3.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/shared/_recipe_grid.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="2" column="22" selection-start="131" selection-end="147" vertical-scroll-proportion="-1.25">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/recipes/show.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="4" column="16" selection-start="108" selection-end="108" vertical-scroll-proportion="1.1320754">
           <folding />
         </state>
       </provider>

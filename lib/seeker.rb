@@ -35,7 +35,7 @@ private
       @tagstxt = "" 
       @tagtype = nil
       @cur_page = 1
-      @items_per_page
+      @items_per_page = @@page_length
     end
     prior || {}
   end
