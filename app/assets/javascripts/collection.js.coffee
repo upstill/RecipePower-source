@@ -28,14 +28,19 @@ jQuery ->
 	collection_onload()
 	RP.fire_triggers()
 
+RP.collection.onload = (event) ->
+	collection_onload()
+
 collection_onload = () ->
 	$("#tagstxt").first().focus()
-	$('a.streamer').each (index, item) ->
-		RP.stream.go item
+	$('.content-streamer').each (ix, elmt) ->
+		RP.stream.fire elmt
+	# $('a.streamer').each (index, item) ->
+		# RP.stream.go item
 	# Page buttons do a remote fetch which needs to replace the collection
 	$('.pageclickr').bind "ajax:beforeSend", collection_beforeSend
 	$('.pageclickr').bind "ajax:success", collection_success
-	checkForLoading ".stuffypic"
+	# checkForLoading ".stuffypic"
 	RP.rcp_list.onload()
 	RP.collection.justify()
 	

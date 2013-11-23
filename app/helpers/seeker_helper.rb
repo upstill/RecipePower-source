@@ -41,12 +41,12 @@ module SeekerHelper
   end
   
 	def render_seeker_results
-	  return link_to "Click to load", "#", 
-	    onclick: "RP.stream.go(event);",
-	    class: "streamer",
+	  return link_to "Click to load", "#",
+	    onload: 'RP.stream.go(event);',
+	    class: 'content-streamer hidden',
 	    data: { kind: @seeker.class.to_s }
-	  # return %q{<div class='streamer' onready="RP.stream.go();">Hang on a second...</div>}.html_safe
-	  page = 
+    return %q{<div class='streamer' onready="RP.stream.go(event);">Hang on a second...</div>}.html_safe
+	  page =
 	  time_check_log("render_seeker_results acquiring") do
   	  @seeker.results_paged
   	end

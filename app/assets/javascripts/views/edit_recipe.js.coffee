@@ -56,10 +56,7 @@ RP.edit_recipe.onload = (dlog) ->
 			$(".pic_picker_golink", dlog).click ->
 				event.preventDefault()
 				return RP.pic_picker.open "Pick a Picture for the Recipe"
-		
-		# Fit the recipe's image into its place
-		fitImageOnLoad "div.pic_preview img"
-		
+
 		# When submitting the form, we abort if there's no change
 		# Stash the serialized form data for later comparison
 		# $('form.edit_recipe').data "before", recipedata $('form.edit_recipe').serializeArray()

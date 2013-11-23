@@ -6,8 +6,12 @@ me = () ->
 # Prepare the picture picker prior to opening it.
 RP.pic_picker.load = (callback) ->
 	dlog = me()
+	# Don't load twice
+	return if $(dlog).hasClass('loading')
 	url = $(dlog).data "url"
+	$(dlog).addClass('loading')
 	$(dlog).load url, (responseText, textStatus, XMLHttpRequest) ->
+		$(dlog).removeClass('loading')
 		if jQuery.type(callback) == 'function'
 			callback dlog
 

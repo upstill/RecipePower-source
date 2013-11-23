@@ -20,7 +20,7 @@
 				margin-right:auto;
 				div.pic_preview {
 					width:200px;
-					height:150px;
+					height:auto;
 					margin-left:auto;
 					margin-right:auto;
 					text-align: center;
@@ -28,9 +28,9 @@
 						display:none;
 					}
 					img {
-						visibility: hidden;
+						// visibility: hidden;
 						&.loaded {
-							visibility: visible;
+							// visibility: visible;
 							// margin-left: auto;
 							// margin-right: auto;
 							// text-align: center;

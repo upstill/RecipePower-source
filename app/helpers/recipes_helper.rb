@@ -1,6 +1,7 @@
 require 'open-uri'
 require 'json'
 require './lib/Domain.rb'
+require 'string_utils'
 
 module RecipesHelper
   
@@ -108,19 +109,6 @@ def ownership_status(rcp)
 	(rcp.users.map { |u| link_to u.handle, collection_path( :owner=>u.id.to_s) }.join(', ') || "").html_safe
 end
 
-# Return an enumeration of a series of strings, separated by ',' except for the last two separated by 'and'
-# RETURN BLANK STRING IF STRS ARE EMPTY
-def strjoin strs, before = "", after = "", joiner = ', '
-    if strs.keep_if { |str| !str.blank? }.size > 0
-        last = strs.pop
-        liststr = strs.join joiner
-        liststr += " and " unless liststr.blank?
-        before+liststr+last+after
-    else
-        ""
-    end
-end
-
 def tagjoin tags, enquote = false, before = "", after = "", joiner = ','
     strjoin tags.collect{ |tag| link_to (enquote ? "'#{tag.name}'" : tag.name), tag, class: "rcp_list_element_tag" }, before, after, joiner
 end
@@ -209,20 +197,4 @@ end
   end
 =end
 
-  def recipe_field_or_placeholder recipe, fieldname
-    if recipe
-      case fieldname
-      when "authToken"
-        form_authenticity_token
-      when "rcpPrivate"
-        recipe.private ? %q{checked="checked"} : ""
-      else
-        attrname = fieldname.sub("rcp", '').downcase
-        recipe.send(attrname.to_sym).to_s.html_safe
-      end
-    else # Without a recipe specified, we simply return a placeholder for later
-      "%%#{fieldname}%%" 
-    end
-  end
-  
 end

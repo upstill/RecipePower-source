@@ -1,7 +1,12 @@
 RP.stream ||= {}
 
-RP.stream.go = (elmt) ->
-	me = elmt # evt.currentTarget
+# Event-driven interface, an onload handler
+RP.stream.go = (evt) ->
+	elmt = evt.target
+	RP.stream.fire elmt
+
+# jQuery-driven interface
+RP.stream.fire = (elmt) ->
 	# Check with the stream generator for content
 	kind = $(elmt).data('kind')
 	$(elmt).remove()

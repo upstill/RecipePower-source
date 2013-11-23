@@ -13,6 +13,19 @@ def splitstr(str, ncols=80)
   out
 end
 
+# Return an enumeration of a series of strings, separated by ',' except for the last two separated by 'and'
+# RETURN BLANK STRING IF STRS ARE EMPTY
+def strjoin strs, before = "", after = "", joiner = ', '
+  if strs.keep_if { |str| !str.blank? }.size > 0
+    last = strs.pop
+    liststr = strs.join joiner
+    liststr += " and " unless liststr.blank?
+    before+liststr+last+after
+  else
+    ""
+  end
+end
+
 # Join strings into a "i, j and k" list
 def liststrs(strs)
   return "" if strs.empty?

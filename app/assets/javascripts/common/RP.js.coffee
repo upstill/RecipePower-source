@@ -304,6 +304,7 @@ RP.process_response = (responseData, dlog) ->
 		if replacements = responseData.replacements
 			for replacement in replacements
 				$(replacement[0]).replaceWith replacement[1]
+				$(replacement[0]).trigger "load"
 			# RP.dialog.replace_modal dlog
 
 		if redirect = responseData.redirect

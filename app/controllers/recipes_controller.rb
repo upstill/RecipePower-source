@@ -65,6 +65,7 @@ class RecipesController < ApplicationController
     # return if need_login true
     @recipe = Recipe.find(params[:id])
     @recipe.current_user = current_user_or_guest_id # session[:user_id]
+    @decorator = @recipe.decorate
     @Title = ""
     @nav_current = nil
     # redirect_to @recipe.url
@@ -112,7 +113,8 @@ class RecipesController < ApplicationController
           session[:recipe_pending] = @recipe.id
           redirect_to collection_path
         }
-        format.json { 
+        format.json {
+          @decorator = @recipe.decorate
           @data = { onget: [ "dialog.get_and_go", nil, collection_url(layout: false) ] }
           render json: {
             dlog: with_format("html") { 

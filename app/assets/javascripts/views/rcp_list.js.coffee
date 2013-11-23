@@ -1,16 +1,10 @@
 RP.rcp_list = RP.rcp_list || {}
 
 RP.rcp_list.onload = ->
+	$(document).off 'ajax:beforeSend', '.edit_recipe_link', RP.edit_recipe.go
 	$(document).on 'ajax:beforeSend', '.edit_recipe_link', RP.edit_recipe.go
 	$(".popup").click(RP.servePopup);
-	$('div.collection_item').hover RP.rcp_list.show_panel, RP.rcp_list.hide_panel
 
-RP.rcp_list.show_panel = (event) ->
-	debugger
-
-RP.rcp_list.hide_panel = (event) ->
-	debugger
-	
 # Callback to update content in a recipe list due to JSON feedback
 RP.rcp_list.update = ( data ) ->
 	if data.action == "remove" || data.action == "destroy"
@@ -28,7 +22,7 @@ RP.rcp_list.update = ( data ) ->
 			# RP.rcp_list.boostInRecent data.list_element_class, data.list_element_body, 4 # Put it at the top of the Recent tab
 		if data.grid_element_class
 			$('.'+data.grid_element_class).replaceWith data.grid_element_body
-		checkForLoading ".stuffypic"
+		# checkForLoading ".stuffypic"
 		RP.rcp_list.onload()
 
 RP.rcp_list.boostInRecent = (list_element_class, list_element_body, targettab) ->

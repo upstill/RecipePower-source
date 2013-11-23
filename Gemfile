@@ -17,7 +17,7 @@ gem 'rails-observers'
 gem 'pg'
 
 gem 'builder', '~> 3.1.0'
-
+gem 'draper', '~> 1.3'
 gem 'closure_tree'
 gem 'htmlentities'
 gem 'nokogiri', "~> 1.5" # "~> 1.5.3"

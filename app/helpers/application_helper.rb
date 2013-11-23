@@ -46,37 +46,54 @@ module ApplicationHelper
       link_to image_tag("preview.png", title:"Show the recipe in a popup window", class: "preview_button"), rcp.url, target: "_blank", class: "popup", id: "popup#{rcp.id.to_s}"        
   end
 
-  # Declare an image within an adjustable box. The images are downloaded by
-  # the browser and their dimensions adjusted under Javascript by the fitImageOnLoad() function.
+  # Declare an image which gets resized to fit upon loading
   # id -- used to define an id attribute for this picture (all fitpics will have class 'fitPic')
   # float_ttl -- indicates how to handle an empty URL
   # selector -- specifies an alternative selector for finding the picture for resizing
-  def page_fitPic(picurl, id = "", placeholder_image = "NoPictureOnFile.png", selector=nil)
-    logger.debug "page_fitPic placing #{picurl.blank? ? placeholder_image : picurl.truncate(40)}"
-    # "fitPic" class gets fit inside pic_box with Javascript and jQuery
+  def page_fitPic(picurl, id = "")
     idstr = "rcpPic"+id.to_s
-    selector = selector || "##{idstr}"
-    picurl = placeholder_image if picurl.blank?
+    picurl = "NoPictureOnFile.png" if picurl.blank?
     # Allowing for the possibility of a data URI
-#    if picurl.match(/^data:image/)
-#      %Q{<img alt="Some Image Available" class="thumbnail200" id="#{idstr}" src="#{picurl}" >}.html_safe
-#    else
       begin
-    	  image_tag(picurl, 
+    	  image_tag(picurl,
           class: "fitPic",
           id: idstr,
-          onload: "fitImageOnLoad('#{selector}')",
+          onload: 'doFitImage(event);',
           alt: "Some Image Available")
       rescue
-    	  image_tag(placeholder_image, 
+    	  image_tag("NoPictureOnFile.png",
           class: "fitPic",
           id: idstr,
-          onload: "fitImageOnLoad('#{selector}')",
+          onload: 'doFitImage(event);',
           alt: "Some Image Available")
       end
 #    end
-  end
-  
+    end
+
+    # Same protocol, only image will be scaled to 100% of the width of its parent, with adjustable height
+    def page_width_pic(picurl, id = "", placeholder_image = "NoPictureOnFile.png", selector=nil)
+      logger.debug "page_width_pic placing #{picurl.blank? ? placeholder_image : picurl.truncate(40)}"
+      # "fitPic" class gets fit inside pic_box with Javascript and jQuery
+      idstr = "rcpPic"+id.to_s
+      selector = selector || "##{idstr}"
+      picurl = placeholder_image if picurl.blank?
+      # Allowing for the possibility of a data URI
+      #    if picurl.match(/^data:image/)
+      #      %Q{<img alt="Some Image Available" class="thumbnail200" id="#{idstr}" src="#{picurl}" >}.html_safe
+      #    else
+      begin
+        image_tag(picurl,
+                  style: "width: 100%; height: auto",
+                  id: idstr,
+                  alt: "Some Image Available")
+      rescue
+        image_tag(placeholder_image,
+                  style: "width: 100%; height: auto",
+                  id: idstr,
+                  alt: "Some Image Available")
+      end
+    end
+
 #  def pic_picker picurl, pageurl, id
 #    pic_picker_shell (pic_picker_contents picurl, pageurl, id)
 #  end
@@ -87,7 +104,7 @@ module ApplicationHelper
     picurl = obj.send(attribute)
     preview = content_tag(
       :div, 
-      page_fitPic(picurl, obj.id, fallback_img, "div.pic_preview img")+
+      page_width_pic(picurl, obj.id, fallback_img, "div.pic_preview img")+
                 form.text_field(attribute, rel: "jpg,png,gif", hidden: true, class: "hidden_text" ),
       class: "pic_preview"
     )
@@ -136,7 +153,7 @@ module ApplicationHelper
           image_tag(url, 
             style: "width:100%; height: auto;", 
             id: idstr, 
-            onclick: "pickImg('input.icon_picker', 'div.preview img', '#{url}')", class: "fitPic", onload: "fitImageOnLoad('##{idstr}')", 
+            onclick: "pickImg('input.icon_picker', 'div.preview img', '#{url}')", class: "fitPic", onload: "doFitImage(event);",
             alt: "No Image Available"),
           class: "picCell")
       }.join('</td><td>')+
@@ -152,7 +169,7 @@ module ApplicationHelper
       prompt = "Pick one of the thumbnails, then click Okay.<br><br>Or, type or paste the URL of an image.".html_safe
     end
     content_tag( :div, 
-      page_fitPic( picurl, id, "NoPictureOnFile.png", "div.preview img" ),
+      page_width_pic( picurl, id, "NoPictureOnFile.png", "div.preview img" ),
       class: "preview" )+
     content_tag( :div, prompt, class: "prompt" )+
     ( %Q{<br class="clear"> 
@@ -458,4 +475,16 @@ module ApplicationHelper
   def invitation_diversion_link url, invitee
     divert_user_invitation_url(invitation_token: invitee.raw_invitation_token, url: CGI::escape(url))
   end
+
+  def present_field what
+    return form_authenticity_token if what == "authToken"
+    ((@decorator && @decorator.extract(what)) || "%%#{what.to_s}%%").html_safe
+  end
+
+  def present_field_wrapped what
+    content_tag :span,
+                present_field(what),
+                class: "hide-if-empty"
+  end
+
 end

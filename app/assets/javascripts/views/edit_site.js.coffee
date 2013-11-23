@@ -22,7 +22,7 @@ RP.edit_site.onload = (dlog) ->
 				return RP.pic_picker.open "Pick a Logo for the Site"
 		
 		# Fit the site's image into its place
-		fitImageOnLoad "div.pic_preview img"
+		# fitImageOnLoad "div.pic_preview img"
 
 jQuery ->
 	if dlog = me()[0]

@@ -1,35 +1,10 @@
 
-function checkForLoading(selector) {
-	$(selector).one('load', function() {
-	  fitImage(this);
-	}).each(function() {
-	  if(this.complete && !$(this).hasClass("loaded")) $(this).load();
-	});
-	
-}
-// Onload function for images, to fit themselves (found by id) into the enclosing container.
-function fitImageOnLoad(selector) {
-//	$(".stuffypic").one('load', () ->
-//		fitImage this
-//	).each () ->
-//		if this.complete 
-//			$(this).load();
-    $(selector).each(function() {
-			if (!$(this).hasClass('loaded')) {
-        fitImage(this);
-			}
-    });
-}
-
-function ensureOnload(selector, context) {
-		$(selector, context).load( function(evt) {
-			fitImage(evt.currentTarget);
-			x=2;
-		});
+function doFitImage(evt) {
+    fitImage(evt.target)
 }
 
 function fitImage(img) {
-	
+
 	if(!img) return false;
 
 	var parent = img.parentElement, frameWidth, frameHeight, picWidth, picHeight;
@@ -95,6 +70,6 @@ function previewImg(inputsel, imagesel, formsel) {
 	if(imageset.attr("src") != url) {
 		imageset.removeClass("loaded");
 		imageset.attr("src", url )
-		fitImage(imageset[0])
+		// fitImage(imageset[0])
 	}
 }

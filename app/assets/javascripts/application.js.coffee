@@ -27,16 +27,7 @@
 # require registrations
 # require sites
 
-#  require_directory ./common
-#= require common/dialog
-#= require common/pics
-#= require common/RP
-#= require common/stream
-#= require common/submit
-#= require common/notifications
-# require common/RPDialog
-# require common/RPDialogs
-
+#= require_directory ./common
 #= require_directory ./views
 #= require_directory ./concerns
 # require views/edit_recipe

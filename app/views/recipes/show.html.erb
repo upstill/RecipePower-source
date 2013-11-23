@@ -1,14 +1,95 @@
 <div class="col-md-12">
-	<%= recipe_title_div @recipe %>
-	<div class="row">
-		<div class="col-md-4">
-			<%= recipe_image_div @recipe %>
-		</div
-		<div class="col-md-8">
-			<%= recipe_tags_div @recipe %>
-		</div>
-	</div>
-	<%= recipe_comments_div @recipe, :mine %>
-	<%= recipe_comments_div @recipe, :friends %>
-	<%= recipe_comments_div @recipe, :others %>
+  <div class="row">
+    <div class="col-md-4">
+      <img src="<%= present_field "rcpPicSafeURL" %>" class="recipe-preview pull-right" width="100%">
+    </div>
+    <div class="col-md-8">
+      <div class="panel pull-left panel-default hide-if-empty">
+        <div class="panel-heading">
+          <h1 class="hide-if-empty"><%= present_field_wrapped "rcpTitle" %></h1>
+          <p class="hide-if-empty">A recipe
+            <span class="hide-if-empty"> by <%= present_field_wrapped "Author_tags" %></span>
+            <span class="hide-if-empty"> in <%= present_field_wrapped "Source_tags" %></span>
+            <span class="hide-if-empty"> from <%= present_field_wrapped "site" %></span>.</p>
+        </div>
+        <div class="panel-body">
+          <div class="container">
+            <div class="row hide-if-empty">
+              <div class="col-xs-3 col-md-2">
+                <p class="pull-right"><b>Ingredients</b></p>
+              </div>
+              <div class="col-xs-9 col-md-10">
+                <p><%= present_field_wrapped "Ingredient_tags" %></p>
+              </div>
+            </div>
+            <div class="row hide-if-empty">
+              <div class="col-xs-3 col-md-2">
+                <p class="pull-right"><b>Produces</b></p>
+              </div>
+              <div class="col-xs-9 col-md-10">
+                <p><%= present_field_wrapped "Role_tags" %></p>
+              </div>
+            </div>
+            <div class="row hide-if-empty">
+              <div class="col-xs-3 col-md-2">
+                <p class="pull-right"><b>Genre</b></p>
+              </div>
+              <div class="col-xs-9 col-md-10">
+                <p><%= present_field_wrapped "Genre_tags" %></p>
+              </div>
+            </div>
+            <div class="row hide-if-empty">
+              <div class="col-xs-3 col-md-2">
+                <p class="pull-right"><b>Occasions</b></p>
+              </div>
+              <div class="col-xs-9 col-md-10">
+                <p><%= present_field_wrapped "Occasion_tags" %></p>
+              </div>
+            </div>
+            <div class="row hide-if-empty">
+              <div class="col-xs-3 col-md-2">
+                <p class="pull-right"><b>Channel</b></p>
+              </div>
+              <div class="col-xs-9 col-md-10">
+                <p><%= present_field_wrapped "Channel_tags" %></p>
+              </div>
+            </div>
+            <div class="row hide-if-empty">
+              <div class="col-xs-3 col-md-2">
+                <p class="pull-right"><b>Processes</b></p>
+              </div>
+              <div class="col-xs-9 col-md-10">
+                <p><%= present_field_wrapped "Process_tags" %></p>
+              </div>
+            </div>
+            <div class="row hide-if-empty">
+              <div class="col-xs-3 col-md-2">
+                <p class="pull-right"><b>Tools</b></p>
+              </div>
+              <div class="col-xs-9 col-md-10">
+                <p><%= present_field_wrapped "Tool_tags" %></p>
+              </div>
+            </div>
+            <div class="row hide-if-empty">
+              <div class="col-xs-3 col-md-2">
+                <p class="pull-right"><b>Other Tags</b></p>
+              </div>
+              <div class="col-xs-9 col-md-10">
+                <p><%= present_field_wrapped "Other_tags" %></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="hide-if-empty">
+    <div class="row">
+      <div class="col-sm-12"><h3>My Two Cents</h3></div>
+    </div>
+    <div class="row">
+      <div class="col-sm-4 col-md-2"></div>
+      <div class="col-sm-8 col-md-8"><%= present_field_wrapped "comments_mine" %></div>
+    </div>
+  </div>
 </div>
