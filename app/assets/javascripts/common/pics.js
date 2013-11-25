@@ -50,26 +50,21 @@ function fitImage(img) {
   return true;
 }
 
-// Handle a click on a thumbnail image by passing the URL on to the 
-// associated input field
-function pickImg(inputsel, imagesel, url) {
-	$(inputsel).attr("value", url );
-	previewImg(inputsel, imagesel, "");
-}
-
 // Copy an input URL to both the preview image and the (hidden) form field
 function previewImg(inputsel, imagesel, formsel) {
 	// Copy the url from the input field to the form field
-  var url = $(inputsel).attr("value");
+  var inputElmt = $(inputsel)[0];
+  var url = $(inputElmt).attr("value");
   if (url != $(formsel).attr("value"))
 		$(formsel).attr("value", url )
-		
-	var imageset = $(imagesel)
+
+    // If not specified by the selector, the preview image is a sibling of the input element
+	var imageElmt = $(imagesel)[0] || $('img', inputElmt.parentElement)[0];
 	// For display purposes we use a no-picture picture
 	if (url.length < 1) url = "/assets/NoPictureOnFile.png"
-	if(imageset.attr("src") != url) {
-		imageset.removeClass("loaded");
-		imageset.attr("src", url )
+	if($(imageElmt).attr("src") != url) {
+        $(imageElmt).removeClass("loaded");
+        $(imageElmt).attr("src", url )
 		// fitImage(imageset[0])
 	}
 }

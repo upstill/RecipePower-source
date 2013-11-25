@@ -100,15 +100,17 @@ module ApplicationHelper
 
   # Show an image that will resize to fit an enclosing div, possibly with a link to an editing dialog
   # We'll need the id of the object, and the name of the field containing the picture's url
-  def pic_field(obj, attribute, form, editable = true, fallback_img="NoPictureOnFile.png")
+  def pic_field(obj, attribute, form, is_local = true, fallback_img="NoPictureOnFile.png")
     picurl = obj.send(attribute)
+    pic_area = is_local ?
+      page_width_pic(picurl, obj.id, fallback_img, "div.pic_preview img") :
+      page_fitPic(picurl, obj.id)
     preview = content_tag(
       :div, 
-      page_width_pic(picurl, obj.id, fallback_img, "div.pic_preview img")+
-                form.text_field(attribute, rel: "jpg,png,gif", hidden: true, class: "hidden_text" ),
+      pic_area+form.text_field(attribute, rel: "jpg,png,gif", hidden: true, class: "hidden_text" ),
       class: "pic_preview"
     )
-    picker = editable ?
+    picker = is_local ?
       content_tag(:div,
             link_to( "Pick Picture", "/", :data=>"recipe_picurl;div.pic_preview img", :class => "pic_picker_golink")+
             pic_picker_shell(obj), # pic_picker(obj.picurl, obj.url, obj.id), 
@@ -153,7 +155,7 @@ module ApplicationHelper
           image_tag(url, 
             style: "width:100%; height: auto;", 
             id: idstr, 
-            onclick: "pickImg('input.icon_picker', 'div.preview img', '#{url}')", class: "fitPic", onload: "doFitImage(event);",
+            onclick: "RP.pic_picker.make_selection('#{url}')", class: "fitPic", onload: "doFitImage(event);",
             alt: "No Image Available"),
           class: "picCell")
       }.join('</td><td>')+

@@ -50,3 +50,10 @@ RP.pic_picker.open = (ttl) ->
 # 	thePic.attr("src", url)
 # 	return false;
 # }
+
+# Handle a click on a thumbnail image by passing the URL on to the
+# associated input field
+RP.pic_picker.make_selection = (url) ->
+	$('input.icon_picker').attr "value", url
+	previewImg 'input.icon_picker', 'div.preview img', ''
+
