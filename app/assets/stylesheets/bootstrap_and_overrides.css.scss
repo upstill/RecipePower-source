@@ -93,15 +93,20 @@ select.tag_type_selector {
 }
 
 div.dialog.modal {
+    div.modal-dialog {
+        &.large {
+            width: 100%; // responsive width
+            margin-left:0%; // width/2)
+        }
+    }
 	input.string,
 	input.password {
 		width: 90%;
 		margin-bottom: 10px;
 	}
-}
-
-div.dialog.modal textarea {
-	width: 90%;
+    textarea {
+        width: 90%;
+    }
 }
 
 label {

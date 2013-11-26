@@ -43,8 +43,10 @@ module RecipesHelper
   def recipe_info_icon recipe
     alltags = summarize_alltags(recipe) || ""
     tags = CGI::escapeHTML alltags
+    modal_link = link_to_modal image_tag("magnifying_glass_12x12.png"), recipe_path(recipe)
+    # modal_link = link_to_show recipe, image_tag("magnifying_glass_12x12.png")
     content_tag :span,
-                image_tag("magnifying_glass_12x12.png"),
+                modal_link.html_safe,
                 class: "recipe-info-button btn btn-default btn-xs",
                 data: { title: recipe.title, tags: tags }
   end
@@ -185,16 +187,5 @@ end
       link_to_modal "", capture_recipes_url(capture_data), class: "trigger"
     end
   end
-
-=begin
-  # Declare a div for triggering a recipe capture operation
-  def recipe_collect_trigger
-    if collect_data = deferred_collect(false)
-      content_tag :a, "",
-        href: collect_recipe_url(collect_data),
-        class: "trigger"
-    end
-  end
-=end
 
 end

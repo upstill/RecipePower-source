@@ -1,8 +1,9 @@
 <div class="navbar navbar-inverse navbar-fixed-top">
   <div class="navbar-header">
 	  	<a class="navbar-brand" href="/collection">RecipePower</a>
-			<%= yield :seeker_entry %>
-	</div>
+			<%# yield :seeker_entry %>
+            <%= render "shared/seeker_entry" %>
+  </div>
   <ul class="nav navbar-nav navbar-right">
 		<li>
 			<% if user_signed_in? %>

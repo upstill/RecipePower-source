@@ -2,14 +2,28 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="11143819-dbfd-4599-8209-07d96301a1c5" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/rp_devise_mailer/invitation_instructions.html.erb" afterPath="$PROJECT_DIR$/app/views/rp_devise_mailer/invitation_instructions.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/mailers/rp_devise_mailer.rb" afterPath="$PROJECT_DIR$/app/mailers/rp_devise_mailer.rb" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/app/views/shared/seeker_entry.html.erb" afterPath="$PROJECT_DIR$/app/views/shared/_seeker_entry.html.erb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/layouts/_frame_top.html.erb" afterPath="$PROJECT_DIR$/app/views/layouts/_frame_top.html.erb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/layouts/application.html.erb" afterPath="$PROJECT_DIR$/app/views/layouts/application.html.erb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/application_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/application_controller.rb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/stylesheets/bootstrap_and_overrides.css.scss" afterPath="$PROJECT_DIR$/app/assets/stylesheets/bootstrap_and_overrides.css.scss" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/javascripts/common/dialog.js.coffee" afterPath="$PROJECT_DIR$/app/assets/javascripts/common/dialog.js.coffee" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/helpers/dialogs_helper.rb" afterPath="$PROJECT_DIR$/app/helpers/dialogs_helper.rb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/javascripts/common/hider.js.coffee" afterPath="$PROJECT_DIR$/app/assets/javascripts/common/hider.js.coffee" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/pages/home.html.erb" afterPath="$PROJECT_DIR$/app/views/pages/home.html.erb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/collection/index.html.erb" afterPath="$PROJECT_DIR$/app/views/collection/index.html.erb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/decorators/recipe_decorator.rb" afterPath="$PROJECT_DIR$/app/decorators/recipe_decorator.rb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/recipes_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/recipes_controller.rb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/helpers/recipes_helper.rb" afterPath="$PROJECT_DIR$/app/helpers/recipes_helper.rb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/recipes/show.html.erb" afterPath="$PROJECT_DIR$/app/views/recipes/show.html.erb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/javascripts/common/stream.js.coffee" afterPath="$PROJECT_DIR$/app/assets/javascripts/common/stream.js.coffee" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/helpers/triggers_helper.rb" afterPath="$PROJECT_DIR$/app/helpers/triggers_helper.rb" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="RP.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Dummy.txt" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385187333552" ignored="false" />
-    <file path="/fragment.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384400876762" ignored="false" />
+    <file path="/Dummy.txt" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385202419126" ignored="false" />
+    <file path="/fragment.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385420612028" ignored="false" />
     <file path="/user.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1383875643013" ignored="false" />
     <file path="/feeds_controller.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1383873837455" ignored="false" />
     <file path="/invitations_controller.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384156985017" ignored="false" />
@@ -22,7 +36,7 @@
     <file path="/analytics_services.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384376657226" ignored="false" />
     <file path="/admin_helper.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384393165634" ignored="false" />
     <file path="/admin_controller.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384393379509" ignored="false" />
-    <file path="/application_controller.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384142305588" ignored="false" />
+    <file path="/application_controller.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385432048689" ignored="false" />
     <file path="/_recipe_share.html.erb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384148082324" ignored="false" />
     <file path="/sharing_invitation_instructions.html.erb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384145340451" ignored="false" />
     <file path="/rp_devise_mailer.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385202089827" ignored="false" />
@@ -42,27 +56,36 @@
     <file path="/_infolink.html.erb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384397386102" ignored="false" />
     <file path="/_about_content.html.erb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384394970709" ignored="false" />
     <file path="/collection.css.scss" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384396056761" ignored="false" />
-    <file path="/recipes_helper.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385179112962" ignored="false" />
+    <file path="/recipes_helper.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385413656834" ignored="false" />
     <file path="/a.coffee" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384405843995" ignored="false" />
     <file path="/dialog.css.scss" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384400499867" ignored="false" />
-    <file path="/hider.js.coffee" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385100809663" ignored="false" />
-    <file path="/application_helper.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385179789417" ignored="false" />
-    <file path="/show.html.erb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385186016025" ignored="false" />
+    <file path="/hider.js.coffee" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385359265361" ignored="false" />
+    <file path="/application_helper.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385346924175" ignored="false" />
+    <file path="/show.html.erb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385412890870" ignored="false" />
     <file path="/recipe_presenter.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385102755920" ignored="false" />
-    <file path="/recipes_controller.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385104201544" ignored="false" />
-    <file path="/recipe_decorator.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385105753793" ignored="false" />
+    <file path="/recipes_controller.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385430921749" ignored="false" />
+    <file path="/recipe_decorator.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385359530926" ignored="false" />
     <file path="/seeker_helper.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385160011293" ignored="false" />
     <file path="/collection.js.coffee" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385161419077" ignored="false" />
     <file path="/RP.js.coffee" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385156185928" ignored="false" />
-    <file path="/application.html.erb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385152129203" ignored="false" />
-    <file path="/index.html.erb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385156640939" ignored="false" />
-    <file path="/pics.js" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385173272262" ignored="false" />
+    <file path="/application.html.erb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385431917505" ignored="false" />
+    <file path="/index.html.erb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385431068601" ignored="false" />
+    <file path="/pics.js" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385344827018" ignored="false" />
     <file path="/edit_site.js.coffee" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385164383269" ignored="false" />
     <file path="/edit_recipe.css.scss" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385168398016" ignored="false" />
     <file path="/pic_picker.css.scss" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385168614177" ignored="false" />
-    <file path="/pic_picker.js.coffee" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385181278016" ignored="false" />
+    <file path="/pic_picker.js.coffee" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385345800974" ignored="false" />
     <file path="/rcp_list.js.coffee" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385183685681" ignored="false" />
     <file path="/invitation_instructions.html.erb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385202353844" ignored="false" />
+    <file path="/capture.js.erb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385342821332" ignored="false" />
+    <file path="/injector.js" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385345381864" ignored="false" />
+    <file path="/triggers_helper.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385356547270" ignored="false" />
+    <file path="/show_recipe.css.scss" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385361349780" ignored="false" />
+    <file path="/bootstrap_and_overrides.css.scss" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385412269287" ignored="false" />
+    <file path="/dialogs_helper.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385412759714" ignored="false" />
+    <file path="/_frame_top.html.erb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385428717045" ignored="false" />
+    <file path="/seeker_entry.html.erb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385428978093" ignored="false" />
+    <file path="/home.html.erb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385431557737" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -82,55 +105,37 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="invitations_controller.rb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/controllers/invitations_controller.rb">
+      <file leaf-file-name="application_controller.rb" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/controllers/application_controller.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="196" column="0" selection-start="7675" selection-end="7675" vertical-scroll-proportion="0.6030928">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="user.rb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/models/user.rb">
+      <file leaf-file-name="application.html.erb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/views/layouts/application.html.erb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="39" column="23" selection-start="1395" selection-end="1395" vertical-scroll-proportion="-2.2">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="invitation_instructions.html.erb" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/app/views/rp_devise_mailer/invitation_instructions.html.erb">
+      <file leaf-file-name="index.html.erb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/views/collection/index.html.erb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="4" column="112" selection-start="334" selection-end="334" vertical-scroll-proportion="0.19672132">
+            <state line="5" column="35" selection-start="255" selection-end="255" vertical-scroll-proportion="-3.125">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="rp_devise_mailer.rb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/mailers/rp_devise_mailer.rb">
+      <file leaf-file-name="triggers_helper.rb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/helpers/triggers_helper.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="21" column="17" selection-start="1056" selection-end="1056" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="mailer.rb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/devise_invitable-1.3.1/lib/devise_invitable/mailer.rb">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="6" column="8" selection-start="108" selection-end="108" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="rp_mailer.rb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/mailers/rp_mailer.rb">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="61" column="0" selection-start="2344" selection-end="2344" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -154,22 +159,22 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/app/helpers/seeker_helper.rb" />
-        <option value="$PROJECT_DIR$/app/assets/javascripts/common/stream.js.coffee" />
-        <option value="$PROJECT_DIR$/app/assets/javascripts/collection.js.coffee" />
-        <option value="$PROJECT_DIR$/app/assets/javascripts/views/edit_site.js.coffee" />
-        <option value="$PROJECT_DIR$/app/views/recipes/_form_edit_at_left.html.erb" />
-        <option value="$PROJECT_DIR$/app/assets/stylesheets/views/edit_recipe.css.scss" />
-        <option value="$PROJECT_DIR$/app/assets/stylesheets/views/pic_picker.css.scss" />
-        <option value="$PROJECT_DIR$/app/helpers/recipes_helper.rb" />
-        <option value="$PROJECT_DIR$/app/helpers/application_helper.rb" />
-        <option value="$PROJECT_DIR$/app/assets/javascripts/views/pic_picker.js.coffee" />
-        <option value="$PROJECT_DIR$/app/assets/javascripts/views/rcp_list.js.coffee" />
+        <option value="$PROJECT_DIR$/app/assets/javascripts/common/dialog.js.coffee" />
+        <option value="$PROJECT_DIR$/app/assets/javascripts/common/hider.js.coffee" />
+        <option value="$PROJECT_DIR$/app/decorators/recipe_decorator.rb" />
+        <option value="$PROJECT_DIR$/app/assets/stylesheets/views/show_recipe.css.scss" />
+        <option value="$PROJECT_DIR$/app/helpers/dialogs_helper.rb" />
+        <option value="$PROJECT_DIR$/app/assets/stylesheets/bootstrap_and_overrides.css.scss" />
         <option value="$PROJECT_DIR$/app/views/recipes/show.html.erb" />
-        <option value="$PROJECT_DIR$/app/assets/javascripts/common/pics.js" />
-        <option value="$PROJECT_DIR$/app/assets/javascripts/views/edit_recipe.js.coffee" />
-        <option value="$PROJECT_DIR$/app/mailers/rp_devise_mailer.rb" />
-        <option value="$PROJECT_DIR$/app/views/rp_devise_mailer/invitation_instructions.html.erb" />
+        <option value="$PROJECT_DIR$/app/helpers/recipes_helper.rb" />
+        <option value="$PROJECT_DIR$/app/helpers/triggers_helper.rb" />
+        <option value="$PROJECT_DIR$/app/views/shared/seeker_entry.html.erb" />
+        <option value="$PROJECT_DIR$/app/views/layouts/_frame_top.html.erb" />
+        <option value="$PROJECT_DIR$/app/views/collection/index.html.erb" />
+        <option value="$PROJECT_DIR$/app/controllers/recipes_controller.rb" />
+        <option value="$PROJECT_DIR$/app/views/pages/home.html.erb" />
+        <option value="$PROJECT_DIR$/app/views/layouts/application.html.erb" />
+        <option value="$PROJECT_DIR$/app/controllers/application_controller.rb" />
       </list>
     </option>
   </component>
@@ -466,6 +471,28 @@
               <option name="myItemId" value="views" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="users" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="RP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="RP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="views" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -573,6 +600,28 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="pages" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="RP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="RP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="views" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="layouts" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -596,6 +645,28 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="devise" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="RP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="RP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="views" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="collection" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -645,7 +716,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="models" />
+              <option name="myItemId" value="mailers" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -663,7 +734,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="mailers" />
+              <option name="myItemId" value="helpers" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -1118,7 +1189,11 @@
       <created>1385187341275</created>
       <updated>1385187341275</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Fixed Max's invitation bug">
+      <created>1385202431672</created>
+      <updated>1385202431672</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TodoView" selected-index="0">
@@ -1148,11 +1223,11 @@
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32867134" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32867134" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32867134" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.44615385" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32587412" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.26346433" sideWeight="0.5538462" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3944056" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.26346433" sideWeight="0.6363636" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.36363637" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32867134" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -1207,7 +1282,7 @@
     <option name="WRAP_WHEN_TYPING_REACHES_RIGHT_MARGIN" value="false" />
     <option name="FORCE_NON_EMPTY_COMMENT" value="false" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="false" />
-    <option name="LAST_COMMIT_MESSAGE" value="Eliminated gratuitous image resizes, improved pic_picker loading, solidified stream handling in collection" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed Max's invitation bug" />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="false" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_FILES_UP_TO_DATE_BEFORE_COMMIT" value="false" />
@@ -1233,20 +1308,11 @@
     <MESSAGE value="Syntax error" />
     <MESSAGE value="Same syntax error, more places" />
     <MESSAGE value="Eliminated gratuitous image resizes, improved pic_picker loading, solidified stream handling in collection" />
+    <MESSAGE value="Fixed Max's invitation bug" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" type="ruby-line">
-          <url>file://$PROJECT_DIR$/lib/uri_utils.rb</url>
-          <line>13</line>
-          <option name="timeStamp" value="67" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="ruby-line">
-          <url>file://$PROJECT_DIR$/lib/uri_utils.rb</url>
-          <line>14</line>
-          <option name="timeStamp" value="68" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" type="ruby-line">
           <url>file://$PROJECT_DIR$/app/models/thumbnail.rb</url>
           <line>58</line>
@@ -1267,120 +1333,118 @@
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="87" />
+      <option name="time" value="105" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/app/views/recipes/_form_edit_at_left.html.erb">
+    <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/activerecord-4.0.1/lib/active_record/connection_adapters/abstract/connection_pool.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="24" column="135" selection-start="1352" selection-end="1384" vertical-scroll-proportion="0.5194805">
-          <folding>
-            <element signature="n#style#0;n#img#0;n#div#0;n#div#0;n#div#0;n#div#1;n#div#0;n#form#0;n#div#0;n#div#0;n#!!top" expanded="true" />
-          </folding>
+        <state line="544" column="0" selection-start="18761" selection-end="18761" vertical-scroll-proportion="0.0">
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/string_utils.rb">
+    <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/activerecord-4.0.1/lib/active_record/connection_adapters/abstract/database_statements.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="192" column="0" selection-start="7699" selection-end="7699" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/activerecord-4.0.1/lib/active_record/transactions.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="333" column="0" selection-start="13938" selection-end="13938" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/content_for_in_controllers-0.0.2/lib/content_for_in_controllers.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="9" column="0" selection-start="245" selection-end="245" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/actionpack-4.0.1/lib/action_view/helpers/capture_helper.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="148" column="0" selection-start="5486" selection-end="5486" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/actionpack-4.0.1/lib/action_controller/metal/rescue.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="30" column="0" selection-start="1023" selection-end="1023" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/helpers/triggers_helper.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="61" column="0" selection-start="2344" selection-end="2344" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/shared/_seeker_entry.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="2" column="34" selection-start="78" selection-end="78" vertical-scroll-proportion="-1.25">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/layouts/_frame_top.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="4" column="31" selection-start="207" selection-end="207" vertical-scroll-proportion="-2.5">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/services/response_services.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="94" column="0" selection-start="2336" selection-end="2336" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/collection/index.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="5" column="35" selection-start="255" selection-end="255" vertical-scroll-proportion="-3.125">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/controllers/recipes_controller.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="70" column="4" selection-start="2680" selection-end="2680" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/pages/home.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="50" selection-start="50" selection-end="50" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/layouts/_frame_left.html.erb">
       <provider selected="true" editor-type-id="text-editor">
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/helpers/recipes_helper.rb">
+    <entry file="file://$PROJECT_DIR$/app/views/layouts/application.html.erb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="3" column="21" selection-start="81" selection-end="81" vertical-scroll-proportion="0.13554217">
+        <state line="39" column="23" selection-start="1395" selection-end="1395" vertical-scroll-proportion="-2.2">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/views/recipes/show.html.erb">
+    <entry file="file://$PROJECT_DIR$/app/controllers/application_controller.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="3" column="16" selection-start="87" selection-end="123" vertical-scroll-proportion="0.14018692">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/assets/javascripts/views/rcp_list.js.coffee">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="11" column="84" selection-start="481" selection-end="481" vertical-scroll-proportion="0.40643275">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/assets/javascripts/views/pic_picker.js.coffee">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="8" column="20" selection-start="187" selection-end="187" vertical-scroll-proportion="0.32608697">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/assets/javascripts/common/pics.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="-2.0127795">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/helpers/application_helper.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="64" column="10" selection-start="2098" selection-end="2098" vertical-scroll-proportion="0.67781156">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/assets/javascripts/views/edit_recipe.js.coffee">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="58" column="0" selection-start="2393" selection-end="2393" vertical-scroll-proportion="0.7336956">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/assets/javascripts/common/stream.js.coffee">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="25" selection-start="152" selection-end="152" vertical-scroll-proportion="0.2853261">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/models/user.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/controllers/invitations_controller.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/mailers/rp_mailer.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/mailers/rp_devise_mailer.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="21" column="17" selection-start="1056" selection-end="1056" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/devise_invitable-1.3.1/lib/devise_invitable/mailer.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="6" column="8" selection-start="108" selection-end="108" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/views/rp_devise_mailer/invitation_instructions.html.erb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="4" column="112" selection-start="334" selection-end="334" vertical-scroll-proportion="0.19672132">
+        <state line="196" column="0" selection-start="7675" selection-end="7675" vertical-scroll-proportion="0.6030928">
           <folding />
         </state>
       </provider>

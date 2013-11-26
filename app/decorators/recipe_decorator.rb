@@ -19,6 +19,8 @@ class RecipeDecorator < Draper::Decorator
         object.private ? %q{checked="checked"} : ""
       when "picsafeurl"
         object.picurl.blank? ? "/assets/NoPictureOnFile.png" : object.picurl
+      when "titlelink"
+        h.link_to object.title, object.url
       else
         object.send(attrname.to_sym).to_s if object.respond_to? attrname
       end

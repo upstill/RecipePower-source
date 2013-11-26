@@ -68,6 +68,7 @@ class RecipesController < ApplicationController
     @decorator = @recipe.decorate
     @Title = ""
     @nav_current = nil
+    smartrender :area => :modal
     # redirect_to @recipe.url
   end
 

@@ -126,18 +126,21 @@ class ApplicationController < ActionController::Base
         # the user's whole collection 
         @browser.select_by_id(@user.guest? ? "RcpBrowserElementAllRecipes" : "RcpBrowserCompositeUser")
         @user.save
-        format = "html"
-        query_path = collection_path
+        @query_format = "html"
+        @query_path = collection_path
       else
-        format = "json"
-        query_path = @seeker.query_path
+        @query_format = "json"
+        @query_path = @seeker.query_path
       end
-      content_for :seeker_entry, 
-                  render_to_string(
-                    :template => "shared/seeker_entry", 
-                    :layout => false,
-                    :locals => { format: format, query_path: query_path }
-                  ).html_safe
+=begin NB: Now deferred to _frame_top
+      seeker_entry =
+        render_to_string(
+            :template => "shared/seeker_entry",
+            :layout => false,
+            :locals => {format: format, query_path: query_path}
+        ).html_safe
+      content_for :seeker_entry, seeker_entry
+=end
     end
   end
   
@@ -184,19 +187,24 @@ class ApplicationController < ActionController::Base
     # Apply the default render params, honoring those passed in
     renderopts = response_service.render_params renderopts
     respond_to do |format|
-      format.html {
-        # @_area ||= "page"  
-        if response_service.page? # @_area == "page" # Not partial at all => whole page
-          if renderopts[:redirect]
-            redirect_to renderopts[:redirect]
+      format.html do
+        if response_service.page? && # @_area == "page" # Not partial at all => whole page
+            renderopts[:redirect]
+          redirect_to renderopts[:redirect]
+        elsif renderopts[:area] == :modal
+          # An HTML request for a modal dialog => render a trigger link for inserting into the layout
+          view_context.defer_trigger request.original_url
+          setup_collection
+          if current_user
+            render "collection/index"
           else
-            render action, renderopts
+            @browser = nil
+            render "pages/home"
           end
         else
-          # renderopts[:_layout] = (@_layout || false)
-          render action, renderopts # May have special iframe layout
+          render action, renderopts
         end
-       }
+      end
       format.json { 
         hresult = with_format("html") do
           # Blithely assuming that we want a modal-dialog element if we're getting JSON
@@ -359,7 +367,7 @@ class ApplicationController < ActionController::Base
     end
     data
   end
-  
+
   # In the event that a recipe capture is deferred by login, this stores the requisite information
   # in the session for retrieval after login
   def defer_capture data

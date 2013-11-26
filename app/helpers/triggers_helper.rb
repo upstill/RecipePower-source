@@ -28,6 +28,10 @@ module TriggersHelper
   	path = assert_query path, area: "floating", how: "modal"
   	link_to label, path, options
   end
+
+  def link_to_show object, label, options={}
+    button_to "Show", object, remote: true, :method => :get, form: { "data-type" => "json", class: "dialog-run" }
+  end
 	
 	# Hit a URL, with options for confirmation (:confirm-msg) and waiting (:wait-msg)
 	def link_to_submit(label, path, options={})
@@ -54,4 +58,20 @@ module TriggersHelper
   	options.merge! remote: true
     link_to label, "#", options
   end
+
+  def defer_trigger str
+    if str
+      session[:trigger] = str
+    else
+      session.delete[:trigger]
+    end
+  end
+
+  def deferred_trigger forget=false
+    if str = session[:trigger]
+      session.delete(:trigger) if forget
+      str
+    end
+  end
+
 end

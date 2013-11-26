@@ -37,7 +37,7 @@
     <%= render 'layouts/frame_top' %>
     <div class="container">
 	    <div class="row">
-				<% if params[:controller] == "collection" %>
+				<% if @browser %>
 					<%# The collection lays out as a control panel on the left and content on the right %>
 					<div class="navigation-column col-md-3 col-sm-4 col-xs-12 left_house">
 						<%= render 'layouts/frame_left' %>
@@ -62,5 +62,8 @@
 		<% else %>
 			<%= login_setup %>
 		<% end %>
+        <% if trigger = deferred_trigger(true) %>
+          <%= link_to_modal "#", trigger, class: "trigger" %>
+        <% end %>
 	</body>
 </html>

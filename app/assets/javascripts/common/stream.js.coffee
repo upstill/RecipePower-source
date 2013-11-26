@@ -40,7 +40,7 @@ RP.stream.fire = (elmt) ->
 				tagstr = $(datablock).data "tags"
 				decoded = $('<div/>').html(tagstr).text();
 				$(datablock).popover
-					trigger: "click",
+					trigger: "hover",
 					placement: "auto right",
 					html: true,
 					content: contentstr+decoded

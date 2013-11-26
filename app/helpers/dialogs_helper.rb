@@ -50,6 +50,7 @@ module DialogsHelper
   end
   
   def modal_dialog( which, ttl=nil, options={}, &block )
+    dialog_class = options[:dialog_class]
     # for_bootstrap = options[:_area].blank? || options[:_area] != "at_top"
     header = modal_header ttl 
     options[:body_contents] ||= with_output_buffer(&block)
@@ -65,12 +66,11 @@ module DialogsHelper
     # The :requires option specifies JS modules that this dialog uses
     options[:data] = { :"dialog-requires" => options[:requires] } if options[:requires]
     options = options.slice! :area, :show, :noflash, :body_contents, :body_class, :requires
-    # options[:id] = "recipePowerDialog"
     options[:title] = ttl if ttl
     content_tag(:div, # Outer block: dialog
       content_tag(:div, # modal-dialog
         content_tag(:div, header+body, class: "modal-content"), 
-        class: "modal-dialog"), 
+        class: "modal-dialog #{dialog_class}"),
       options).html_safe
   end
   

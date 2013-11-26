@@ -122,6 +122,7 @@ target_modal = (event) ->
 open_modal = (dlog, omit_button) ->
 	if (onget = $(dlog).data "onget" ) && (fcn = RP.named_function "RP."+onget.shift() )
 		fcn.apply null, onget
+	RP.hide_all_empty()
 	$(dlog).removeClass('modal-pending').removeClass('hide').addClass('modal')
 	notify "load", dlog
 	if !(omit_button || $('button.close', dlog)[0])
