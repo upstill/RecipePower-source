@@ -125,21 +125,24 @@ class TagsController < ApplicationController
   # GET /tags/1
   # GET /tags/1.xml
   def show
-      # return if need_login true, true
-      @Title = "Tags"
+    # return if need_login true, true
+    @Title = "Tags"
     @tag = Tag.find(params[:id])
     session[:tabindex] = @tabindex
 
+    smartrender :area => :modal
+=begin
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render :xml => @tag }
     end
+=end
   end
 
   # GET /tags/new
   # GET /tags/new.xml
   def new
-      @Title = "Tags"
+    @Title = "Tags"
     @tag = Tag.new
 
     respond_to do |format|
@@ -152,6 +155,7 @@ class TagsController < ApplicationController
   def edit
     @Title = "Tags"
     @tag = Tag.find(params[:id])
+    smartrender :area => :modal
   end
   
   # GET /tags/editor?tabindex=index

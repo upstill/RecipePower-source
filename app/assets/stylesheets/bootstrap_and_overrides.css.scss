@@ -94,9 +94,13 @@ select.tag_type_selector {
 
 div.dialog.modal {
     div.modal-dialog {
-        &.large {
+        &.modal-xl {
             width: 100%; // responsive width
             margin-left:0%; // width/2)
+        }
+        &.modal-lg {
+            width: 80%; // responsive width
+            margin-left:10%; // width/2)
         }
     }
 	input.string,

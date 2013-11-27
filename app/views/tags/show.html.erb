@@ -1,16 +1,18 @@
 <% @tagserv = TagServices.new @tag %>
-<h3>Everything There Is To Know About <%= summarize_tag true, false %><%= summarize_tag_synonyms %></h3>
-<%= summarize_meaning %>
-<%= summarize_tag_owners %>
-<%= summarize_tag_similars %>
-<%# summarize_tag_referents %>
-<%= summarize_tag_parents %>
-<%= summarize_tag_children %>
-<%= summarize_tag_references %>
-<%= summarize_tag_relations %>
-<%= summarize_tag_recipes %>
-<br>
-<% if permitted_to? :edit, @tag %>
-  <%= link_to 'Edit', edit_tag_path(@tag) %>
+<%= modal_dialog :show_tag, "What We Know About #{summarize_tag true, false}" do %>
+    <%= summarize_tag_synonyms %>
+    <%= summarize_meaning %>
+    <%= summarize_tag_owners %>
+    <%= summarize_tag_similars %>
+    <%# summarize_tag_referents %>
+    <%= summarize_tag_parents %>
+    <%= summarize_tag_children %>
+    <%= summarize_tag_references %>
+    <%= summarize_tag_relations %>
+    <%= summarize_tag_recipes %>
+    <br>
+    <% if permitted_to? :edit, @tag %>
+      <%= link_to 'Edit', edit_tag_path(@tag) %>
+    <% end %>
+    <%# link_to 'All Tags', tags_path # ...with suitable permissions %>
 <% end %>
-<%# link_to 'All Tags', tags_path # ...with suitable permissions %>

@@ -192,14 +192,15 @@ class ApplicationController < ActionController::Base
             renderopts[:redirect]
           redirect_to renderopts[:redirect]
         elsif renderopts[:area] == :modal
-          # An HTML request for a modal dialog => render a trigger link for inserting into the layout
-          view_context.defer_trigger request.original_url
-          setup_collection
+          # Strip everything up to the path
+          uri = URI.parse(url = request.original_url)
+          index = url.index uri.path
+          relative_url = url[index..-1]
+          hashtag = "#dialog:#{CGI::escape relative_url}"
           if current_user
-            render "collection/index"
+            redirect_to "/collection#{hashtag}"
           else
-            @browser = nil
-            render "pages/home"
+            redirect_to "/pages/home#{hashtag}"
           end
         else
           render action, renderopts

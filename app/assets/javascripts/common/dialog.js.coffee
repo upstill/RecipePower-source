@@ -44,7 +44,7 @@ RP.dialog.error = (event, jqXHR, status, error) ->
 # We will get the div and run the associated dialog.
 RP.dialog.get_and_go = (event, request, selector) ->
 	# old_dlog is extracted from what triggered this call (if any)
-	if RP.dialog.beforeSend event
+	if (!event) || RP.dialog.beforeSend event
 		$.ajax
 			type: "GET",
 			dataType: "json",
@@ -148,6 +148,7 @@ RP.dialog.close_modal = (dlog, epilog) ->
 			$(dlog).modal 'hide'
 			$('div.modal-backdrop').remove();
 		notify "close", dlog
+		RP.state.onCloseDialog dlog
 		$(dlog).remove()
 		notify_injector "close", dlog
 	if epilog && epilog != ""

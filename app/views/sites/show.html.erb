@@ -1,19 +1,4 @@
-<%= flash_all %>
-
-<p>
-  <b>Name:</b>
-  <%= @site.name %>
-</p>
-
-<p>
-  <b>Site:</b>
-  <%= @site.site %>
-</p>
-
-<p>
-  <b>Home:</b>
-  <%= @site.home %>
-</p>
+<%= modal_dialog :show_site, "Site #{link_to @site.name, @site.home}", dialog_class: "modal-xl" do %>
 
 <p>
   <b>Sample:</b>
@@ -31,12 +16,13 @@
 </p>
 
 
-<%= link_to_modal 'Edit', edit_site_path(@site) %> |
-<%= link_to 'Back', sites_path %>
-<hr>
-<% if @feeds.blank? %>
-...site has no feeds.
-<% else %>
-  <h4>Associated Feeds</h4>
-	<%= render "feeds/table" %>
+    <%= link_to_modal 'Edit', edit_site_path(@site) %> |
+    <%= link_to 'Back', sites_path %>
+    <hr>
+    <% if @feeds.blank? %>
+        ...site has no feeds.
+    <% else %>
+        <h4>Associated Feeds</h4>
+        <%= render "feeds/table" %>
+    <% end %>
 <% end %>

@@ -20,8 +20,9 @@ module TagsHelper
   
   def summarize_tag_owners
     @tagserv ||= TagServices.new(@tag)
-    ownerstrs = @tagserv.isGlobal ? ["everyone (it's global)"] : @tagserv.owners.collect { |owner| owner.handle }
-    tag_info_section ownerstrs, label: "...owned by "
+    return if @tagserv.isGlobal || (owners = @tagserv.owners).empty?
+    ownerstrs = owners.collect { |owner| owner.handle }
+    tag_info_section ownerstrs, label: "...private to "
   end
   
   # Helper for showing the tags which are potentially redundant wrt. this tag:
@@ -52,12 +53,11 @@ module TagsHelper
       }, label: "Referents: ")
   end
   
-  def summarize_tag_recipes header="<h4>Used as Breadcrumb for Recipe(s)</h4>"
+  def summarize_tag_recipes header="<h4>Used as Tag on Recipe(s)</h4>"
     @tagserv ||= TagServices.new(@tag)
     tag_info_section( 
       @tagserv.recipes(true).uniq.collect { |rcp| 
-        taglink = (permitted_to? :edit, rcp) ? edit_recipe_link( "Edit", rcp, class: "btn btn-default btn-xs") : ""
-        content_tag :div, "#{link_to rcp.trimmed_title, rcp.url} #{recipe_popup rcp} #{taglink}".html_safe, class: "tog_info_rcp_title"
+        content_tag :div, "#{link_to rcp.trimmed_title, rcp.url} #{recipe_info_icon rcp}".html_safe, class: "tog_info_rcp_title"
       }, 
       contentclass: "", 
       label: header
@@ -89,10 +89,11 @@ module TagsHelper
       contentclass: "")
   end
 
-  def summarize_tag_synonyms label=", aka "
+  def summarize_tag_synonyms label="Synonyms: "
     @tagserv ||= TagServices.new(@tag)
     # The synonyms are the other expressions of this tag's referents
-    synstrs = @tagserv.synonyms.collect { |tag| tag_link tag, true }
+    return if (syns = @tagserv.synonyms).empty?
+    synstrs = syns.collect { |tag| tag_link tag, true }
     label.blank? ?
       tag_info_section( synstrs, label: label, joinstr: "<br>") : 
       (label + synstrs.join(", ")).html_safe
