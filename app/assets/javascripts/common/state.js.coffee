@@ -24,24 +24,28 @@ RP.state.check_hash = (event) ->
 		if (dlog = $('div.dialog')[0]) && $(dlog).modal
 			RP.dialog.close_modal dlog
 
+RP.state.onDialogOpen = (dlog) ->
+	dlog_title = dlog.title || dlog.innerText
+	history.replaceState (history.state || document.title), dlog_title, window.location
+	document.title = dlog_title
+
 # If a dialog has been acquired via AJAX, modify history accordingly
 RP.state.onAJAXSuccess = (event, responseData, status, xhr) ->
 	if $(dlog = event.result).hasClass('dialog')
 		target_title = (event.target && event.target.innerText) || dlog.title || dlog.innerText
 		window_url = window.location.pathname+window.location.search+"#dialog:"+getEncodedPathFromURL(event.target.href)
-		if !$(event.result).hasClass 'historic'
-			history.replaceState document.title, target_title, window_url
-		# else
-		#	history.pushState null, target_title, window_url
-		# document.title = target_title
+		#  if !$(event.result).hasClass 'historic'
+		history.replaceState (history.state || document.title), target_title, window_url
+		document.title = target_title
 
 # When a dialog is closed, it's either recoverable (can be backed down to) or transient (traces
 # of it can be forgotten). If recoverable, we push the state without the hashtag. If transient,
 # We simply remove the hashtag from the current state.
 RP.state.onCloseDialog = (dlog) ->
 	window_url = window.location.pathname+window.location.search  # No hashtag
+	saved_title = history.state
 	if $(dlog).hasClass 'historic' # A transient dialog leaves no trace on the history stack
-		history.pushState null, window.document.title, window_url
+		history.pushState null, saved_title, window_url
 	else
-		history.replaceState null, window.document.title, window_url
-	document.title = window.document.title
+		history.replaceState null, saved_title, window_url
+	document.title = saved_title || "Collection"

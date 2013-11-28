@@ -17,6 +17,7 @@ class CollectionController < ApplicationController
   end
   
   def index
+    @Title = "Collections"
     collection_result "Content", clear_tags: true, :selector => 'div.collection'
   end
 

@@ -2,16 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="11143819-dbfd-4599-8209-07d96301a1c5" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/javascripts/collection.js.coffee" afterPath="$PROJECT_DIR$/app/assets/javascripts/collection.js.coffee" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/helpers/application_helper.rb" afterPath="$PROJECT_DIR$/app/helpers/application_helper.rb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/collection_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/collection_controller.rb" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/javascripts/common/dialog.js.coffee" afterPath="$PROJECT_DIR$/app/assets/javascripts/common/dialog.js.coffee" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/recipes/new.html.erb" afterPath="$PROJECT_DIR$/app/views/recipes/new.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/recipes/show.html.erb" afterPath="$PROJECT_DIR$/app/views/recipes/show.html.erb" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/javascripts/common/state.js.coffee" afterPath="$PROJECT_DIR$/app/assets/javascripts/common/state.js.coffee" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="RP.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Dummy.txt" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385589953221" ignored="false" />
+    <file path="/Dummy.txt" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385610915818" ignored="false" />
     <file path="/fragment.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385442253096" ignored="false" />
     <file path="/user.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1383875643013" ignored="false" />
     <file path="/feeds_controller.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1383873837455" ignored="false" />
@@ -49,7 +48,7 @@
     <file path="/a.coffee" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384405843995" ignored="false" />
     <file path="/dialog.css.scss" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1384400499867" ignored="false" />
     <file path="/hider.js.coffee" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385359265361" ignored="false" />
-    <file path="/application_helper.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385346924175" ignored="false" />
+    <file path="/application_helper.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385612695500" ignored="false" />
     <file path="/show.html.erb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385609715569" ignored="false" />
     <file path="/recipe_presenter.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385102755920" ignored="false" />
     <file path="/recipes_controller.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385430921749" ignored="false" />
@@ -79,9 +78,10 @@
     <file path="/tags_controller.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385435779262" ignored="false" />
     <file path="/tags_helper.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385436595070" ignored="false" />
     <file path="/edit.html.erb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385437978226" ignored="false" />
-    <file path="/dialog.js.coffee" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385602734176" ignored="false" />
-    <file path="/state.js.coffee" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385610615685" ignored="false" />
+    <file path="/dialog.js.coffee" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385611923817" ignored="false" />
+    <file path="/state.js.coffee" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385612279347" ignored="false" />
     <file path="/_dialog_new.html.erb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385597102878" ignored="false" />
+    <file path="/collection_controller.rb" changelist="11143819-dbfd-4599-8209-07d96301a1c5" time="1385612828142" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -104,16 +104,45 @@
       <file leaf-file-name="dialog.js.coffee" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/assets/javascripts/common/dialog.js.coffee">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="115" column="0" selection-start="4165" selection-end="4165" vertical-scroll-proportion="-47.384617">
+            <state line="127" column="28" selection-start="4607" selection-end="4607" vertical-scroll-proportion="-13.346154">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="state.js.coffee" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="state.js.coffee" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/assets/javascripts/common/state.js.coffee">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="35" column="6" selection-start="1469" selection-end="1469" vertical-scroll-proportion="0.5339806">
+            <state line="27" column="0" selection-start="947" selection-end="947" vertical-scroll-proportion="-2.5">
+              <folding>
+                <marker date="1385612345000" expanded="true" signature="1932:2280" placeholder="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="application.html.erb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/views/layouts/application.html.erb">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="5" column="22" selection-start="1394" selection-end="1429" vertical-scroll-proportion="-3.125">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="application_helper.rb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/helpers/application_helper.rb">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="247" column="0" selection-start="9456" selection-end="9456" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="collection_controller.rb" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/controllers/collection_controller.rb">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="19" column="25" selection-start="428" selection-end="428" vertical-scroll-proportion="0.52680224">
               <folding />
             </state>
           </provider>
@@ -137,8 +166,6 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/app/controllers/users_controller.rb" />
-        <option value="$PROJECT_DIR$/app/views/tags/show.html.erb" />
         <option value="$PROJECT_DIR$/app/helpers/tags_helper.rb" />
         <option value="$PROJECT_DIR$/app/controllers/tags_controller.rb" />
         <option value="$PROJECT_DIR$/app/views/tags/edit.html.erb" />
@@ -148,11 +175,13 @@
         <option value="$PROJECT_DIR$/app/helpers/dialogs_helper.rb" />
         <option value="$PROJECT_DIR$/app/assets/javascripts/collection.js.coffee" />
         <option value="$PROJECT_DIR$/app/views/recipes/new.html.erb" />
-        <option value="$PROJECT_DIR$/app/assets/javascripts/common/dialog.js.coffee" />
         <option value="$PROJECT_DIR$/app/views/recipes/_form_edit_at_left.html.erb" />
         <option value="$PROJECT_DIR$/app/views/recipes/_dialog_new.html.erb" />
         <option value="$PROJECT_DIR$/app/views/recipes/show.html.erb" />
+        <option value="$PROJECT_DIR$/app/assets/javascripts/common/dialog.js.coffee" />
         <option value="$PROJECT_DIR$/app/assets/javascripts/common/state.js.coffee" />
+        <option value="$PROJECT_DIR$/app/helpers/application_helper.rb" />
+        <option value="$PROJECT_DIR$/app/controllers/collection_controller.rb" />
       </list>
     </option>
   </component>
@@ -1311,7 +1340,11 @@
       <created>1385589979175</created>
       <updated>1385589979176</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="Saving and restoring of recipe pages">
+      <created>1385610922073</created>
+      <updated>1385610922073</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TodoView" selected-index="0">
@@ -1400,7 +1433,7 @@
     <option name="WRAP_WHEN_TYPING_REACHES_RIGHT_MARGIN" value="false" />
     <option name="FORCE_NON_EMPTY_COMMENT" value="false" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="false" />
-    <option name="LAST_COMMIT_MESSAGE" value="Hashtag navigation up and running" />
+    <option name="LAST_COMMIT_MESSAGE" value="Saving and restoring of recipe pages" />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="false" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_FILES_UP_TO_DATE_BEFORE_COMMIT" value="false" />
@@ -1429,6 +1462,7 @@
     <MESSAGE value="Fixed Max's invitation bug" />
     <MESSAGE value="Modal recipe dialog works and preserves original URL" />
     <MESSAGE value="Hashtag navigation up and running" />
+    <MESSAGE value="Saving and restoring of recipe pages" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1467,20 +1501,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/app/helpers/tags_helper.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="59" column="0" selection-start="2460" selection-end="2460" vertical-scroll-proportion="-8.423077">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/controllers/tags_controller.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="158" column="0" selection-start="5957" selection-end="5957" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/views/tags/show.html.erb">
       <provider selected="true" editor-type-id="text-editor">
         <state line="2" column="33" selection-start="155" selection-end="155" vertical-scroll-proportion="-1.25">
@@ -1491,13 +1511,6 @@
     <entry file="file://$PROJECT_DIR$/app/views/tags/edit.html.erb">
       <provider selected="true" editor-type-id="text-editor">
         <state line="7" column="38" selection-start="205" selection-end="205" vertical-scroll-proportion="-4.375">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/views/layouts/application.html.erb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="39" column="57" selection-start="1394" selection-end="1429" vertical-scroll-proportion="-5.2083335">
           <folding />
         </state>
       </provider>
@@ -1544,13 +1557,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/assets/javascripts/common/dialog.js.coffee">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="115" column="0" selection-start="4165" selection-end="4165" vertical-scroll-proportion="-47.384617">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/views/recipes/_form_edit_at_left.html.erb">
       <provider selected="true" editor-type-id="text-editor">
         <state line="1" column="61" selection-start="83" selection-end="83" vertical-scroll-proportion="0.029761905">
@@ -1572,9 +1578,39 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/app/assets/javascripts/common/dialog.js.coffee">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="127" column="28" selection-start="4607" selection-end="4607" vertical-scroll-proportion="-13.346154">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/app/assets/javascripts/common/state.js.coffee">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="35" column="6" selection-start="1469" selection-end="1469" vertical-scroll-proportion="0.5339806">
+        <state line="27" column="0" selection-start="947" selection-end="947" vertical-scroll-proportion="-2.5">
+          <folding>
+            <marker date="1385612345000" expanded="true" signature="1932:2280" placeholder="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/layouts/application.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="5" column="22" selection-start="1394" selection-end="1429" vertical-scroll-proportion="-3.125">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/helpers/application_helper.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="247" column="0" selection-start="9456" selection-end="9456" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/controllers/collection_controller.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="19" column="25" selection-start="428" selection-end="428" vertical-scroll-proportion="0.52680224">
           <folding />
         </state>
       </provider>

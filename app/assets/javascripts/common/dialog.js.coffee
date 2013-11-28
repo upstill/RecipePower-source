@@ -125,6 +125,7 @@ open_modal = (dlog, omit_button) ->
 	RP.hide_all_empty()
 	$(dlog).removeClass('modal-pending').removeClass('hide').addClass('modal')
 	notify "load", dlog
+	RP.state.onDialogOpen dlog
 	if !(omit_button || $('button.close', dlog)[0])
 		buttoncode = '<button type=\"button\" class=\"close\" onclick=\"RP.dialog.cancel(event)\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>'
 		$('div.modal-header').prepend buttoncode
