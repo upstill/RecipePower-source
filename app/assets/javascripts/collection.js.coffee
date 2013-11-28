@@ -27,7 +27,6 @@ jQuery ->
 			RP.get_content url, 'a.update-button'
 	collection_onload()
 	RP.fire_triggers()
-	RP.state.check_hash()
 
 RP.collection.onload = (event) ->
 	collection_onload()

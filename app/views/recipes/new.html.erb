@@ -1,27 +1,2 @@
 <%# if @_partial %>
-<% if response_service.dialog? %>
-	<%= render 'dialog_new' %>
-<% else %>
-	<h3>Add a Cookmark</h3>
-	<%= render "fields_new" %>
-	<div class="lesson">
-	<p class="airy">To "cookmark" a recipe for your RecipePower collection:</p>
-	  <ul>
-	      <li>Open it up anywhere on the Web.</li>
-	      <li>Copy its address from the source site. (Viewing the recipe page, select the contents of the browser's address bar and do Edit:Copy.)</li>
-	      <li>Paste it into the box above.</li>
-	      <li>Click the Add Cookmark button.</li>
-	  </ul>
-	<p class="airy">
-	<%= bookmarklet %>
-	<strong>PS</strong> You don't <strong>have</strong> 
-	to copy and paste URLs to capture recipes.
-	Instead, click and drag this handy widget into your browser's
-	bookmarks bar. Then, whenever you see a recipe you like on 
-	the Web, just click the "Cookmark" button and that page will be 
-	whisked off to your collection. 
-	</p><p class="airy">
-	No no, no need to thank us. Just doing our job here.
-	</p>
-	</div>
-<% end %>
+<%= render 'dialog_new' %>

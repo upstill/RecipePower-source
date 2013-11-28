@@ -33,7 +33,7 @@ RP.dialog.success = (event, responseData, status, xhr) ->
 	responseData.how = responseData.how || "modal"
 	RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
 	RP.process_response responseData, target_modal(event)
-	
+
 RP.dialog.error = (event, jqXHR, status, error) ->
 	responseData = RP.post_error jqXHR
 	odlog = target_modal event
