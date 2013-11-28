@@ -37,12 +37,12 @@ module TagsHelper
   
   def summarize_tag_parents label = "Categorized Under: "
     @tagserv ||= TagServices.new(@tag)
-    tag_info_section @tagserv.parents.collect { |parent| tag_link parent, true }, label: label
+    tag_info_section @tagserv.parents.collect { |parent| tag_link parent }, label: label
   end
 	
   def summarize_tag_children label = "Examples: "
     @tagserv ||= TagServices.new(@tag)
-    tag_info_section @tagserv.children.collect { |child| tag_link child, true }, label: label
+    tag_info_section @tagserv.children.collect { |child| tag_link child }, label: label
   end
   
   def summarize_tag_referents
@@ -55,13 +55,13 @@ module TagsHelper
   
   def summarize_tag_recipes header="<h4>Used as Tag on Recipe(s)</h4>"
     @tagserv ||= TagServices.new(@tag)
-    tag_info_section( 
+    recipes =
       @tagserv.recipes(true).uniq.collect { |rcp| 
-        content_tag :div, "#{link_to rcp.trimmed_title, rcp.url} #{recipe_info_icon rcp}".html_safe, class: "tog_info_rcp_title"
-      }, 
-      contentclass: "", 
-      label: header
-    )
+        content_tag :li, "#{link_to rcp.trimmed_title, rcp.url} #{recipe_info_icon rcp}".html_safe, class: "tog_info_rcp_title"
+      }
+    unless recipes.empty?
+      ("<ul>"+recipes.join('<br>')+"</ul>").html_safe
+    end
   end
 
   # Return HTML for the links associated with this tag
@@ -69,8 +69,10 @@ module TagsHelper
     @tagserv ||= TagServices.new(@tag)
     refstrs = @tagserv.references.collect{ |reference| present_reference(reference) }
     unless refstrs.empty?
-      ("<h4>References</h4>"+
-      tag_info_section( refstrs, label: (label + "'#{@tagserv.name}'" + " on ") )).html_safe
+      (content_tag( :h3, "References")+
+       content_tag( :div,
+                  tag_info_section( refstrs, label: (label + "'#{@tagserv.name}'" + " on ") ).html_safe,
+                  class: "container")).html_safe
     end
   end
 
@@ -93,10 +95,8 @@ module TagsHelper
     @tagserv ||= TagServices.new(@tag)
     # The synonyms are the other expressions of this tag's referents
     return if (syns = @tagserv.synonyms).empty?
-    synstrs = syns.collect { |tag| tag_link tag, true }
-    label.blank? ?
-      tag_info_section( synstrs, label: label, joinstr: "<br>") : 
-      (label + synstrs.join(", ")).html_safe
+    synstrs = syns.collect { |tag| tag_link tag }
+    tag_info_section synstrs, label: label, joinstr: "<br>"
   end
 
   def summarize_tag_reference_count
@@ -187,20 +187,30 @@ BLOCK_END
     label = options[:label] || ""
     joinstr = options[:joinstr] || ", "
     if contentstrs && !contentstrs.empty?
-        contentstr = contentclass.blank? ? 
-                     contentstrs.join('') : 
-                     content_tag(:span, contentstrs.join(joinstr).html_safe, class: contentclass)
-        content_tag( :div, 
-          (label+contentstr).html_safe, 
-          class: "tag_info_section"
-        )
+      contentstr = contentclass.blank? ?
+                   contentstrs.join('') :
+                   content_tag(:span, contentstrs.join(joinstr).html_safe, class: contentclass)
+      # content_tag( :div,
+      #   (label+contentstr).html_safe,
+      #  class: "tag_info_section"
+      # )
+      result =
+      content_tag :div,
+        content_tag( :div,
+                     content_tag(:p, "<strong>#{label}</strong>".html_safe, class: "pull-right"),
+                     class: "col-md-4")+
+        content_tag( :div,
+                     content_tag(:p, contentstr, class: "pull-left"),
+                     class: "col-md-8"),
+        class: "row"
+      result.html_safe
     end
   end
   
   def summarize_tag_similar tag, absorb_btn = false
       tagidstr = tag.id.to_s
       content_tag :span,
-        tag_link(tag, true) +
+        tag_link(tag) +
         (absorb_btn ? button_tag("Absorb", onclick: %Q{RP.submit(event, "tags/#{@tag.id.to_s}/absorb?victim=#{tagidstr}");}, class: "absorb_button", id: "absorb_tag_#{tagidstr}") : ""),
         class: "absorb_"+tagidstr
   end

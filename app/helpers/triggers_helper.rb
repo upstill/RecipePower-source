@@ -10,7 +10,8 @@ module TriggersHelper
 	end
 	
 	# Embed a link to javascript for running a dialog by reference to a URL
-	def link_to_modal(label, path, options={})
+	def link_to_modal(label, path_or_object, options={})
+    path = url_for(path_or_object)
 	  # We get the dialog with a JSON request
 	  if options[:data]
 	    options[:data].merge! type: "json"
