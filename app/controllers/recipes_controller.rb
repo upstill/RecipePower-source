@@ -65,6 +65,7 @@ class RecipesController < ApplicationController
     # return if need_login true
     @recipe = Recipe.find(params[:id])
     @recipe.current_user = current_user_or_guest_id # session[:user_id]
+    @recipe.touch false
     @decorator = @recipe.decorate
     @Title = ""
     @nav_current = nil

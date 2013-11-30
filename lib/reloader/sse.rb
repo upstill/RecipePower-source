@@ -19,8 +19,8 @@ module Reloader
       @io.write "data: #{jstr}\n\n"
     end
 
-    def close
-      write :end_of_stream
+    def close data = {}
+      write :end_of_stream, data
       @io.close
     end
   end

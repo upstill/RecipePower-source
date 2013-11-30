@@ -30,7 +30,7 @@ class StreamController < ApplicationController
     rescue IOError
       logger.info "Stream closed"
     ensure
-      sse.close
+      sse.close more_to_come: (@seeker.npages > @seeker.cur_page)
     end
   end
 

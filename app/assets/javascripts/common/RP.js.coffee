@@ -307,6 +307,12 @@ RP.process_response = (responseData, dlog) ->
 				$(replacement[0]).trigger "load"
 			# RP.dialog.replace_modal dlog
 
+		if streams = responseData.streams
+			for stream in streams
+				if !stream[1].append
+					$(stream[0]).empty()
+				RP.stream.fire stream[1].kind, stream[1].append
+
 		if redirect = responseData.redirect
 			window.location.assign redirect # "http://local.recipepower.com:3000/collection" #  href = href
 		

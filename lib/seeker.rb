@@ -63,6 +63,8 @@ public
       end
       if page = params[:cur_page]
         self.cur_page = page.to_i
+      elsif params[:next_page]
+        self.cur_page += 1
       end
     end
   end

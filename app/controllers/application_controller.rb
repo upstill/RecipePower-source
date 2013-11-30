@@ -132,15 +132,6 @@ class ApplicationController < ActionController::Base
         @query_format = "json"
         @query_path = @seeker.query_path
       end
-=begin NB: Now deferred to _frame_top
-      seeker_entry =
-        render_to_string(
-            :template => "shared/seeker_entry",
-            :layout => false,
-            :locals => {format: format, query_path: query_path}
-        ).html_safe
-      content_for :seeker_entry, seeker_entry
-=end
     end
   end
   
@@ -149,7 +140,8 @@ class ApplicationController < ActionController::Base
   # Options: selector: CSS selector for the outermost container of the rendered index template
   def collection_result(klass, options={})
     respond_to do |format|
-      format.html { 
+      format.html {
+        params[:cur_page] = 1
         setup_collection klass, options
         flash.now[:guide] = @seeker.guide
         render :index 
@@ -165,13 +157,16 @@ class ApplicationController < ActionController::Base
         else
       	  setup_seeker(klass, options.slice(:clear_tags, :scope), params)
           flash.now[:guide] = @seeker.guide
-          replacement = with_format("html") { render_to_string 'index', :layout=>false }
-          selector = options[:selector] || "div.#{klass.to_s.downcase}_list"
-          render json: { replacements: [
-                              view_context.flash_notifications_replacement,
-                              [ selector, replacement ]
-                          ] 
-                        }
+          # If this is the first page, we replace the list altogether, wiring the list
+          # to stream results. If it's a subsequent page, we just set up a stream to serve that page.
+          render json: (@seeker.cur_page == 1) ?
+            { replacements: [
+                view_context.flash_notifications_replacement,
+                [ (options[:selector] || "div.#{klass.to_s.downcase}_list"),
+                  with_format("html") { render_to_string 'index', :layout=>false } ]
+            ]} :
+            {  streams: [['div#masonry-container', {kind: @seeker.class.to_s, append: @seeker.cur_page>1}]]
+            }
         end
       end
     end

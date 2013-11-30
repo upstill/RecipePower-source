@@ -31,13 +31,20 @@ jQuery ->
 RP.collection.onload = (event) ->
 	collection_onload()
 
+RP.collection.more_to_come = (armed) ->
+	if armed
+		RP.scroll.set_handler 'div.collection_list', ->
+			RP.collection.update { next_page: true }, "collection/query" # Fire a "more-content" event
+	else
+		RP.scroll.set_handler 'div.collection_list', null
+
 collection_onload = () ->
 	$("#tagstxt").first().focus()
 	$('.content-streamer').each (ix, elmt) ->
-		RP.stream.fire elmt
-	# $('a.streamer').each (index, item) ->
-		# RP.stream.go item
+		RP.stream.fire $(elmt).data('kind')
+		$(elmt).remove()
 	# Page buttons do a remote fetch which needs to replace the collection
+
 	$('.pageclickr').bind "ajax:beforeSend", collection_beforeSend
 	$('.pageclickr').bind "ajax:success", collection_success
 	# checkForLoading ".stuffypic"
@@ -64,9 +71,9 @@ collection_beforeSend = (evt, xhr, settings) ->
 collection_update_success = (resp) ->
 	# Explicitly update the collection list
 	# $('div.loader').removeClass "loading" # Remove progress indicator
-	$('#masonry-container').masonry('destroy')
+	# $('#masonry-container').masonry('destroy')
 	RP.process_response resp
-	window.scrollTo(0,0)
+	# window.scrollTo(0,0)
 	RP.notifications.done()
 	collection_onload()
 

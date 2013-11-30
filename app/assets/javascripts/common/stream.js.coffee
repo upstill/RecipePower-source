@@ -3,19 +3,18 @@ RP.stream ||= {}
 # Event-driven interface, an onload handler
 RP.stream.go = (evt) ->
 	elmt = evt.target
-	RP.stream.fire elmt
+	RP.stream.fire $(elmt).data('kind')
 
 # jQuery-driven interface
-RP.stream.fire = (elmt) ->
+RP.stream.fire = (kind, do_append) ->
 	# Check with the stream generator for content
-	kind = $(elmt).data('kind')
-	$(elmt).remove()
 	source = new EventSource "/stream/stream?kind="+kind
 	source.onerror = (evt) ->
 		state = evt.target.readyState
-		debugger
 	source.addEventListener 'end_of_stream', (e) ->
+		jdata = JSON.parse e.data
 		source.close()
+		RP.collection.more_to_come jdata.more_to_come
 	source.addEventListener 'stream_item', (e) ->
 		jdata = JSON.parse e.data
 		# If the item specifies a handler, call that
