@@ -293,7 +293,12 @@ public
 
   # Make sure the given uri isn't relative, and make it absolute if it is
   def resolve(candidate)
-    (!candidate.blank?) && ((candidate =~ /^\w*:/) ? candidate : @site.site+candidate)
+    return candidate if candidate.blank? || (candidate =~ /^\w*:/)
+    begin
+      URI.join(@site.site, candidate).to_s
+    rescue
+      candidate
+    end
   end
   
   # Doctor a scanned title coming in from a web page, according to the site parameters

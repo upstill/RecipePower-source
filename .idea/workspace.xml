@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="11143819-dbfd-4599-8209-07d96301a1c5" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/application_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/application_controller.rb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/models/recipe.rb" afterPath="$PROJECT_DIR$/app/models/recipe.rb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/services/site_services.rb" afterPath="$PROJECT_DIR$/app/services/site_services.rb" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="RP.iws" />
@@ -29,43 +30,46 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="scroll.js.coffee" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/assets/javascripts/common/scroll.js.coffee">
+      <file leaf-file-name="recipe.rb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/models/recipe.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="8" column="0" selection-start="242" selection-end="242" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="345">
-              <folding>
-                <marker date="1385848765000" expanded="true" signature="29:241" placeholder="..." />
-                <marker date="1385848765000" expanded="true" signature="54:241" placeholder="..." />
-                <marker date="1385848765000" expanded="true" signature="134:241" placeholder="..." />
-                <marker date="1385848765000" expanded="true" signature="160:241" placeholder="..." />
-                <marker date="1385848765000" expanded="true" signature="287:465" placeholder="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="stream_controller.rb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/controllers/stream_controller.rb">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="32" column="123" selection-start="947" selection-end="947" vertical-scroll-proportion="0.0" vertical-offset="242" max-vertical-offset="645">
+            <state line="114" column="69" selection-start="4211" selection-end="4211" vertical-scroll-proportion="-5.9615383" vertical-offset="1555" max-vertical-offset="5940">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="application_controller.rb" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/app/controllers/application_controller.rb">
+      <file leaf-file-name="site_services.rb" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/services/site_services.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="172" column="0" selection-start="6749" selection-end="6749" vertical-scroll-proportion="0.3846154" vertical-offset="2430" max-vertical-offset="6285">
+            <state line="510" column="21" selection-start="16543" selection-end="16543" vertical-scroll-proportion="0.6464435" vertical-offset="7341" max-vertical-offset="9255">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="collection.js.coffee" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/assets/javascripts/collection.js.coffee">
+      <file leaf-file-name="uri_utils.rb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/uri_utils.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="42" column="6" selection-start="1345" selection-end="1361" vertical-scroll-proportion="0.0" vertical-offset="1215" max-vertical-offset="1800">
+            <state line="28" column="21" selection-start="802" selection-end="826" vertical-scroll-proportion="0.0" vertical-offset="256" max-vertical-offset="1815">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="recipes_helper.rb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/helpers/recipes_helper.rb">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="15" column="0" selection-start="385" selection-end="385" vertical-scroll-proportion="0.0" vertical-offset="95" max-vertical-offset="2955">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="recipe_decorator.rb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/decorators/recipe_decorator.rb">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="28" column="118" selection-start="997" selection-end="997" vertical-scroll-proportion="-9.423077" vertical-offset="175" max-vertical-offset="1080">
               <folding />
             </state>
           </provider>
@@ -105,6 +109,8 @@
         <option value="$PROJECT_DIR$/app/assets/javascripts/collection.js.coffee" />
         <option value="$PROJECT_DIR$/app/assets/javascripts/common/scroll.js.coffee" />
         <option value="$PROJECT_DIR$/app/controllers/application_controller.rb" />
+        <option value="$PROJECT_DIR$/app/services/site_services.rb" />
+        <option value="$PROJECT_DIR$/app/models/recipe.rb" />
       </list>
     </option>
   </component>
@@ -442,6 +448,10 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="models" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -1081,7 +1091,11 @@
       <created>1385848945735</created>
       <updated>1385848945735</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="Apparently fixed refresh-on-query issue">
+      <created>1385931283195</created>
+      <updated>1385931283195</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="TodoView" selected-index="0">
@@ -1106,23 +1120,23 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="9" y="22" width="1420" height="812" extended-state="0" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32867134" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32867134" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32867134" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32509753" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.43953186" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.27552447" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32867134" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32867134" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.26760563" sideWeight="0.55944055" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.43953186" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32867134" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.27552447" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32587412" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -1161,7 +1175,8 @@
     <MESSAGE value="Reformatted tag page" />
     <MESSAGE value="Infinite Scrolling, v. 1" />
     <MESSAGE value="Now scrolling only once per end-of-page event&#10;" />
-    <option name="LAST_COMMIT_MESSAGE" value="Now scrolling only once per end-of-page event&#10;" />
+    <MESSAGE value="Apparently fixed refresh-on-query issue" />
+    <option name="LAST_COMMIT_MESSAGE" value="Apparently fixed refresh-on-query issue" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1192,6 +1207,21 @@
           <line>168</line>
           <option name="timeStamp" value="137" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="ruby-line">
+          <url>file://$PROJECT_DIR$/app/decorators/recipe_decorator.rb</url>
+          <line>20</line>
+          <option name="timeStamp" value="138" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="ruby-line">
+          <url>file://$PROJECT_DIR$/app/models/recipe.rb</url>
+          <line>48</line>
+          <option name="timeStamp" value="140" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="ruby-line">
+          <url>file://$PROJECT_DIR$/app/models/recipe.rb</url>
+          <line>42</line>
+          <option name="timeStamp" value="141" />
+        </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/app/assets/javascripts/common/RP.js.coffee</url>
           <line>88</line>
@@ -1206,15 +1236,10 @@
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="138" />
+      <option name="time" value="142" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/app/models/recipe.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="206" column="6" selection-start="6883" selection-end="6883" vertical-scroll-proportion="0.43817204" vertical-offset="0" max-vertical-offset="0" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/assets/javascripts/common/submit.js.coffee">
       <provider selected="true" editor-type-id="text-editor">
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="0" />
@@ -1303,18 +1328,67 @@
       <provider selected="true" editor-type-id="text-editor">
         <state line="8" column="0" selection-start="242" selection-end="242" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="345">
           <folding>
-            <marker date="1385848765000" expanded="true" signature="29:241" placeholder="..." />
-            <marker date="1385848765000" expanded="true" signature="54:241" placeholder="..." />
-            <marker date="1385848765000" expanded="true" signature="134:241" placeholder="..." />
-            <marker date="1385848765000" expanded="true" signature="160:241" placeholder="..." />
-            <marker date="1385848765000" expanded="true" signature="287:465" placeholder="..." />
+            <marker date="1385848765000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1385848765000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1385848765000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1385848765000" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1385848765000" expanded="true" signature="-1:-1" placeholder="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/controllers/application_controller.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="172" column="0" selection-start="6749" selection-end="6749" vertical-scroll-proportion="0.3846154" vertical-offset="2430" max-vertical-offset="6285">
+        <state line="172" column="0" selection-start="6749" selection-end="6749" vertical-scroll-proportion="0.0" vertical-offset="2430" max-vertical-offset="6285">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/decorators/recipe_decorator.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="28" column="118" selection-start="997" selection-end="997" vertical-scroll-proportion="-9.423077" vertical-offset="175" max-vertical-offset="1080">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/activesupport-4.0.1/lib/active_support/core_ext/object/blank.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="92" column="0" selection-start="1981" selection-end="1981" vertical-scroll-proportion="0.0" vertical-offset="1246" max-vertical-offset="1665">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/activerecord-4.0.1/lib/active_record/attribute_methods/read.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="58" column="0" selection-start="2704" selection-end="2704" vertical-scroll-proportion="0.0" vertical-offset="736" max-vertical-offset="1785">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/helpers/recipes_helper.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="15" column="0" selection-start="385" selection-end="385" vertical-scroll-proportion="0.0" vertical-offset="95" max-vertical-offset="2955">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/uri_utils.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="28" column="21" selection-start="802" selection-end="826" vertical-scroll-proportion="0.0" vertical-offset="256" max-vertical-offset="1815">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/models/recipe.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="114" column="69" selection-start="4211" selection-end="4211" vertical-scroll-proportion="-5.9615383" vertical-offset="1555" max-vertical-offset="5940">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/services/site_services.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="510" column="21" selection-start="16543" selection-end="16543" vertical-scroll-proportion="0.6464435" vertical-offset="7341" max-vertical-offset="9255">
           <folding />
         </state>
       </provider>

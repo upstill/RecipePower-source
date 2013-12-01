@@ -112,7 +112,7 @@ public
         end
         if rcp.errors.empty?
           ss = SiteServices.new rcp.site
-          rcp.picurl = ss.resolve rcp.picurl if rcp.picurl
+          rcp.picurl = ss.resolve rcp.picurl unless rcp.picurl.blank?
           rcp.title = ss.trim_title rcp.title # = ((site.yield :Title, url)[:Title] || rcp.title).html_safe unless rcp.title
           rcp.save
         end
