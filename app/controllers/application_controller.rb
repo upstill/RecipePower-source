@@ -159,14 +159,17 @@ class ApplicationController < ActionController::Base
           flash.now[:guide] = @seeker.guide
           # If this is the first page, we replace the list altogether, wiring the list
           # to stream results. If it's a subsequent page, we just set up a stream to serve that page.
-          render json: (@seeker.cur_page == 1) ?
-            { replacements: [
+          if (@seeker.cur_page == 1)
+            data = { replacements: [
                 view_context.flash_notifications_replacement,
                 [ (options[:selector] || "div.#{klass.to_s.downcase}_list"),
                   with_format("html") { render_to_string 'index', :layout=>false } ]
-            ]} :
-            {  streams: [['div#masonry-container', {kind: @seeker.class.to_s, append: @seeker.cur_page>1}]]
-            }
+            ]}
+          else
+            data = {  streams: [ ['div#masonry-container', {kind: @seeker.class.to_s, append: @seeker.cur_page>1}] ] }
+
+          end
+          render json: data
         end
       end
     end

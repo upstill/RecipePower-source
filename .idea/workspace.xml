@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="11143819-dbfd-4599-8209-07d96301a1c5" name="Default" comment="Infinite Scrolling, v. 1&#10;">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/javascripts/common/scroll.js.coffee" afterPath="$PROJECT_DIR$/app/assets/javascripts/common/scroll.js.coffee" />
+    <list default="true" id="11143819-dbfd-4599-8209-07d96301a1c5" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/application_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/application_controller.rb" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="RP.iws" />
@@ -15,7 +15,7 @@
   </component>
   <component name="ChangesViewManager" flattened_view="true" show_ignored="false" />
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/RP@Development__RP.coverage" NAME="Development: RP Coverage Results" MODIFIED="1385848801434" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="rcov" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" MODULE_NAME="RP" />
+    <SUITE FILE_PATH="coverage/RP@Development__RP.coverage" NAME="Development: RP Coverage Results" MODIFIED="1385930403581" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="rcov" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" MODULE_NAME="RP" />
   </component>
   <component name="CreatePatchCommitExecutor">
     <option name="PATCH_PATH" value="" />
@@ -33,7 +33,13 @@
         <entry file="file://$PROJECT_DIR$/app/assets/javascripts/common/scroll.js.coffee">
           <provider selected="true" editor-type-id="text-editor">
             <state line="8" column="0" selection-start="242" selection-end="242" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="345">
-              <folding />
+              <folding>
+                <marker date="1385848765000" expanded="true" signature="29:241" placeholder="..." />
+                <marker date="1385848765000" expanded="true" signature="54:241" placeholder="..." />
+                <marker date="1385848765000" expanded="true" signature="134:241" placeholder="..." />
+                <marker date="1385848765000" expanded="true" signature="160:241" placeholder="..." />
+                <marker date="1385848765000" expanded="true" signature="287:465" placeholder="..." />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -50,7 +56,7 @@
       <file leaf-file-name="application_controller.rb" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/controllers/application_controller.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="161" column="0" selection-start="6259" selection-end="6259" vertical-scroll-proportion="0.33333334" vertical-offset="2285" max-vertical-offset="6240">
+            <state line="172" column="0" selection-start="6749" selection-end="6749" vertical-scroll-proportion="0.3846154" vertical-offset="2430" max-vertical-offset="6285">
               <folding />
             </state>
           </provider>
@@ -97,8 +103,8 @@
         <option value="$PROJECT_DIR$/app/controllers/stream_controller.rb" />
         <option value="$PROJECT_DIR$/app/views/collection/_relist.html.erb" />
         <option value="$PROJECT_DIR$/app/assets/javascripts/collection.js.coffee" />
-        <option value="$PROJECT_DIR$/app/controllers/application_controller.rb" />
         <option value="$PROJECT_DIR$/app/assets/javascripts/common/scroll.js.coffee" />
+        <option value="$PROJECT_DIR$/app/controllers/application_controller.rb" />
       </list>
     </option>
   </component>
@@ -1071,7 +1077,11 @@
       <created>1385774441084</created>
       <updated>1385774441084</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="Now scrolling only once per end-of-page event&#10;">
+      <created>1385848945735</created>
+      <updated>1385848945735</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TodoView" selected-index="0">
@@ -1150,7 +1160,8 @@
     <MESSAGE value="History for recipe pages seems to work" />
     <MESSAGE value="Reformatted tag page" />
     <MESSAGE value="Infinite Scrolling, v. 1" />
-    <option name="LAST_COMMIT_MESSAGE" value="Infinite Scrolling, v. 1" />
+    <MESSAGE value="Now scrolling only once per end-of-page event&#10;" />
+    <option name="LAST_COMMIT_MESSAGE" value="Now scrolling only once per end-of-page event&#10;" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1176,6 +1187,11 @@
           <line>14</line>
           <option name="timeStamp" value="105" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="ruby-line">
+          <url>file://$PROJECT_DIR$/app/controllers/application_controller.rb</url>
+          <line>168</line>
+          <option name="timeStamp" value="137" />
+        </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/app/assets/javascripts/common/RP.js.coffee</url>
           <line>88</line>
@@ -1190,7 +1206,7 @@
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="132" />
+      <option name="time" value="138" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
@@ -1286,13 +1302,19 @@
     <entry file="file://$PROJECT_DIR$/app/assets/javascripts/common/scroll.js.coffee">
       <provider selected="true" editor-type-id="text-editor">
         <state line="8" column="0" selection-start="242" selection-end="242" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="345">
-          <folding />
+          <folding>
+            <marker date="1385848765000" expanded="true" signature="29:241" placeholder="..." />
+            <marker date="1385848765000" expanded="true" signature="54:241" placeholder="..." />
+            <marker date="1385848765000" expanded="true" signature="134:241" placeholder="..." />
+            <marker date="1385848765000" expanded="true" signature="160:241" placeholder="..." />
+            <marker date="1385848765000" expanded="true" signature="287:465" placeholder="..." />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/controllers/application_controller.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="161" column="0" selection-start="6259" selection-end="6259" vertical-scroll-proportion="0.33333334" vertical-offset="2285" max-vertical-offset="6240">
+        <state line="172" column="0" selection-start="6749" selection-end="6749" vertical-scroll-proportion="0.3846154" vertical-offset="2430" max-vertical-offset="6285">
           <folding />
         </state>
       </provider>
