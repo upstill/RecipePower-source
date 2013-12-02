@@ -23,7 +23,7 @@ class StreamController < ApplicationController
     retrieve_seeker
     begin
       sse = Reloader::SSE.new(response.stream)
-      results = @seeker.results_paged
+       results = @seeker.results_paged
       if results.empty?
         sse.write :stream_item,
                   view_context.element_item('.collection_list',

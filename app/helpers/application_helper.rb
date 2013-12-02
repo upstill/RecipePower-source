@@ -357,7 +357,7 @@ module ApplicationHelper
   		  link_to "", new_user_path, class: "trigger" 
   		end
 	  else
-	    render(partial: "shared/signup_dialog")
+	    render "shared/signup_dialog"
 		end
 	end
   
@@ -373,7 +373,7 @@ module ApplicationHelper
       else
         label = "Sign Me Up"
         selector = "div.dialog.signup"
-        path = collection_path()
+        path = new_user_registration_path()
         button_to_modal(label, path, class: "btn btn-lg btn-success", selector: selector ) 
       end
     end

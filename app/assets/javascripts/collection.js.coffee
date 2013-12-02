@@ -14,7 +14,7 @@ jQuery ->
 		placeholder: "Seek and ye shall find...",
 		zindex: 1500
 	)
-	
+
 	$(window).resize -> # Fix the height of the browser
 		if (elmt = $("div.browser_house")[0]) && (navlinks = $('div#footer_nav_links')[0])
 		 	elmt.style.bottom = (navlinks.offsetHeight + 5).toString() + "px";

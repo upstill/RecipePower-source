@@ -1,4 +1,4 @@
-<%= modal_dialog( :signup, ttl="Step 1: Sign Up", class: (params[:trigger_signup] ? "trigger" : ""), data: { focus: "input#user_username" } ) do %>
+<%= modal_dialog( :signup, ttl="Step 1: Sign Up", class: "keeparound "+(params[:trigger_signup] ? "trigger" : ""), data: { focus: "input#user_username" } ) do %>
 	<div class="auth_poss at_home">
     <div class="prompt">You can sign in with these services:</div>
 	  <%= auth_possible "Facebook" %>

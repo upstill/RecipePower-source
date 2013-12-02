@@ -102,7 +102,7 @@ RP.dialog.supplant_modal = (dlog, code) ->
 
 # Insert a new modal dialog, possibly closing and replacing any predecessor
 RP.dialog.replace_modal = (newdlog, odlog) ->
-	if odlog 
+	if odlog && (odlog != newdlog) # We might be just reopening a retained dialog
 		odlog.parentNode.insertBefore newdlog, odlog
 		newdlog = odlog.previousSibling
 		cancel_modal odlog, false
@@ -150,7 +150,10 @@ RP.dialog.close_modal = (dlog, epilog) ->
 			$('div.modal-backdrop').remove();
 		notify "close", dlog
 		RP.state.onCloseDialog dlog
-		$(dlog).remove()
+		if $(dlog).hasClass 'keeparound'
+			$(dlog).addClass('modal-pending').removeClass('modal')
+		else
+			$(dlog).remove()
 		notify_injector "close", dlog
 	if epilog && epilog != ""
 		RP.dialog.user_note epilog

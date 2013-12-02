@@ -46,8 +46,11 @@ class PagesController < ApplicationController
   # Generic action for displaying a popup by name
   def popup
     respond_with do |format|
+      format.html {
+        render action: params[:name].sub(/pages\//, '')
+      }
       format.json { 
-        dlog = with_format("html") { render_to_string partial: params[:name] }
+        dlog = with_format("html") { render_to_string template: params[:name] }
         render json: { dlog: dlog }
       }
     end

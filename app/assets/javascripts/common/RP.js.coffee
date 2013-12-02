@@ -326,6 +326,8 @@ RP.process_response = (responseData, dlog) ->
 				newdlog = RP.dialog.extract_modal newdlog # $(newdlog) # 
 			RP.dialog.replace_modal newdlog, dlog
 			supplanted = true
+		else if responseData.replacements && dlog
+			RP.dialog.run dlog
 
 		# 'code' gives HTML code, presumably for a dialog, possibly wrapped in a page
 		# If it's a page that includes a dialog, assert that, otherwise replace the page

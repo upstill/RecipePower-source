@@ -20,8 +20,8 @@ RP.state.check_hash = (event) ->
 		if (match = hashtag.match(/#dialog:(.*)$/)) && (url = match[1])
 			url = decodeURIComponent url
 			RP.dialog.get_and_go null, url
-	else # No hashtag: make sure there's no dialog
-		if (dlog = $('div.dialog')[0]) && $(dlog).modal
+	else # No hashtag: make sure there's no dialog--allowing for preloaded dialogs pending
+		if (dlog = $('div.dialog')[0]) && $(dlog).modal && !$(dlog).hasClass('modal-pending')
 			RP.dialog.close_modal dlog
 
 RP.state.onDialogOpen = (dlog) ->
