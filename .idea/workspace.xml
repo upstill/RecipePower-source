@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="11143819-dbfd-4599-8209-07d96301a1c5" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/models/recipe.rb" afterPath="$PROJECT_DIR$/app/models/recipe.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/services/site_services.rb" afterPath="$PROJECT_DIR$/app/services/site_services.rb" />
+    <list default="true" id="11143819-dbfd-4599-8209-07d96301a1c5" name="Default" comment="Fixed recipe.picurl turning 'false'&#10;">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/helpers/flash_helper.rb" afterPath="$PROJECT_DIR$/app/helpers/flash_helper.rb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/collection/index.html.erb" afterPath="$PROJECT_DIR$/app/views/collection/index.html.erb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/helpers/seeker_helper.rb" afterPath="$PROJECT_DIR$/app/helpers/seeker_helper.rb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/stream_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/stream_controller.rb" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="RP.iws" />
@@ -16,7 +18,7 @@
   </component>
   <component name="ChangesViewManager" flattened_view="true" show_ignored="false" />
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/RP@Development__RP.coverage" NAME="Development: RP Coverage Results" MODIFIED="1385930403581" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="rcov" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" MODULE_NAME="RP" />
+    <SUITE FILE_PATH="coverage/RP@Development__RP.coverage" NAME="Development: RP Coverage Results" MODIFIED="1385941263044" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="rcov" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" MODULE_NAME="RP" />
   </component>
   <component name="CreatePatchCommitExecutor">
     <option name="PATCH_PATH" value="" />
@@ -30,46 +32,73 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="recipe.rb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/models/recipe.rb">
+      <file leaf-file-name="flash_helper.rb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/helpers/flash_helper.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="114" column="69" selection-start="4211" selection-end="4211" vertical-scroll-proportion="-5.9615383" vertical-offset="1555" max-vertical-offset="5940">
+            <state line="59" column="11" selection-start="2305" selection-end="2312" vertical-scroll-proportion="0.0" vertical-offset="660" max-vertical-offset="1320">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="site_services.rb" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/app/services/site_services.rb">
+      <file leaf-file-name="stream_controller.rb" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/controllers/stream_controller.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="510" column="21" selection-start="16543" selection-end="16543" vertical-scroll-proportion="0.6464435" vertical-offset="7341" max-vertical-offset="9255">
+            <state line="25" column="0" selection-start="645" selection-end="645" vertical-scroll-proportion="0.33157894" vertical-offset="249" max-vertical-offset="750">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="uri_utils.rb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/uri_utils.rb">
+      <file leaf-file-name="controller_utils.rb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/controller_utils.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="28" column="21" selection-start="802" selection-end="826" vertical-scroll-proportion="0.0" vertical-offset="256" max-vertical-offset="1815">
+            <state line="7" column="0" selection-start="269" selection-end="269" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1380">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="recipes_helper.rb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/helpers/recipes_helper.rb">
+      <file leaf-file-name="rescue.rb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/actionpack-4.0.1/lib/action_controller/metal/rescue.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="15" column="0" selection-start="385" selection-end="385" vertical-scroll-proportion="0.0" vertical-offset="95" max-vertical-offset="2955">
+            <state line="31" column="0" selection-start="1117" selection-end="1117" vertical-scroll-proportion="0.0" vertical-offset="212" max-vertical-offset="615">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="recipe_decorator.rb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/decorators/recipe_decorator.rb">
+      <file leaf-file-name="instrumenter.rb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/activesupport-4.0.1/lib/active_support/notifications/instrumenter.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="28" column="118" selection-start="997" selection-end="997" vertical-scroll-proportion="-9.423077" vertical-offset="175" max-vertical-offset="1080">
+            <state line="22" column="0" selection-start="643" selection-end="643" vertical-scroll-proportion="0.0" vertical-offset="196" max-vertical-offset="1170">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="seeker.rb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/seeker.rb">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="203" column="0" selection-start="5829" selection-end="5829" vertical-scroll-proportion="0.0" vertical-offset="2915" max-vertical-offset="6195">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="rcp_browser.rb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/rcp_browser.rb">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="139" column="0" selection-start="4187" selection-end="4187" vertical-scroll-proportion="0.0" vertical-offset="1955" max-vertical-offset="14340">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="seeker_helper.rb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/helpers/seeker_helper.rb">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="77" column="31" selection-start="2084" selection-end="2084" vertical-scroll-proportion="0.0" vertical-offset="864" max-vertical-offset="1290">
               <folding />
             </state>
           </provider>
@@ -104,13 +133,16 @@
         <option value="$PROJECT_DIR$/app/assets/javascripts/common/RP.js.coffee" />
         <option value="$PROJECT_DIR$/app/assets/javascripts/common/stream.js.coffee" />
         <option value="$PROJECT_DIR$/lib/reloader/sse.rb" />
-        <option value="$PROJECT_DIR$/app/controllers/stream_controller.rb" />
         <option value="$PROJECT_DIR$/app/views/collection/_relist.html.erb" />
         <option value="$PROJECT_DIR$/app/assets/javascripts/collection.js.coffee" />
         <option value="$PROJECT_DIR$/app/assets/javascripts/common/scroll.js.coffee" />
         <option value="$PROJECT_DIR$/app/controllers/application_controller.rb" />
         <option value="$PROJECT_DIR$/app/services/site_services.rb" />
         <option value="$PROJECT_DIR$/app/models/recipe.rb" />
+        <option value="$PROJECT_DIR$/app/views/collection/index.html.erb" />
+        <option value="$PROJECT_DIR$/app/helpers/flash_helper.rb" />
+        <option value="$PROJECT_DIR$/app/controllers/stream_controller.rb" />
+        <option value="$PROJECT_DIR$/app/helpers/seeker_helper.rb" />
       </list>
     </option>
   </component>
@@ -1095,7 +1127,11 @@
       <created>1385931283195</created>
       <updated>1385931283195</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="Fixed recipe.picurl turning 'false'">
+      <created>1385935298207</created>
+      <updated>1385935298207</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TodoView" selected-index="0">
@@ -1120,13 +1156,13 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="9" y="22" width="1420" height="812" extended-state="0" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32867134" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32509753" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.43953186" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32509753" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.43953186" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.27552447" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
@@ -1176,7 +1212,8 @@
     <MESSAGE value="Infinite Scrolling, v. 1" />
     <MESSAGE value="Now scrolling only once per end-of-page event&#10;" />
     <MESSAGE value="Apparently fixed refresh-on-query issue" />
-    <option name="LAST_COMMIT_MESSAGE" value="Apparently fixed refresh-on-query issue" />
+    <MESSAGE value="Fixed recipe.picurl turning 'false'" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed recipe.picurl turning 'false'" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1212,16 +1249,6 @@
           <line>20</line>
           <option name="timeStamp" value="138" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="ruby-line">
-          <url>file://$PROJECT_DIR$/app/models/recipe.rb</url>
-          <line>48</line>
-          <option name="timeStamp" value="140" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="ruby-line">
-          <url>file://$PROJECT_DIR$/app/models/recipe.rb</url>
-          <line>42</line>
-          <option name="timeStamp" value="141" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/app/assets/javascripts/common/RP.js.coffee</url>
           <line>88</line>
@@ -1236,7 +1263,7 @@
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="142" />
+      <option name="time" value="148" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
@@ -1250,18 +1277,6 @@
         <state line="27" column="0" selection-start="947" selection-end="947" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="0" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/views/collection/index.html.erb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/seeker.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="240" column="0" selection-start="6941" selection-end="6941" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/better_errors-1.0.1/lib/better_errors/core_ext/exception.rb">
       <provider selected="true" editor-type-id="text-editor">
         <state line="5" column="0" selection-start="169" selection-end="169" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="0" />
@@ -1269,29 +1284,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/reloader/sse.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="22" column="0" selection-start="543" selection-end="543" vertical-scroll-proportion="0.5272206" vertical-offset="0" max-vertical-offset="0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/views/collection/_relist.html.erb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="10" column="3" selection-start="234" selection-end="234" vertical-scroll-proportion="0.0" vertical-offset="150" max-vertical-offset="255">
-          <folding>
-            <marker date="1385693116000" expanded="true" signature="-1:-1" placeholder="..." />
-            <marker date="1385693116000" expanded="true" signature="-1:-1" placeholder="..." />
-          </folding>
+        <state line="22" column="0" selection-start="543" selection-end="543" vertical-scroll-proportion="0.5272206" vertical-offset="0" max-vertical-offset="0">
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/assets/javascripts/common/stream.js.coffee">
       <provider selected="true" editor-type-id="text-editor">
         <state line="13" column="40" selection-start="393" selection-end="406" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/helpers/seeker_helper.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="45" column="30" selection-start="1183" selection-end="1199" vertical-scroll-proportion="0.0" vertical-offset="675" max-vertical-offset="1245">
           <folding />
         </state>
       </provider>
@@ -1306,13 +1306,6 @@
     <entry file="file://$PROJECT_DIR$/app/assets/javascripts/common/RP.js.coffee">
       <provider selected="true" editor-type-id="text-editor">
         <state line="312" column="30" selection-start="11511" selection-end="11511" vertical-scroll-proportion="0.0" vertical-offset="4680" max-vertical-offset="5415">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/controllers/stream_controller.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="32" column="123" selection-start="947" selection-end="947" vertical-scroll-proportion="0.0" vertical-offset="242" max-vertical-offset="645">
           <folding />
         </state>
       </provider>
@@ -1379,16 +1372,93 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/models/recipe.rb">
+    <entry file="file://$PROJECT_DIR$/app/services/site_services.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="114" column="69" selection-start="4211" selection-end="4211" vertical-scroll-proportion="-5.9615383" vertical-offset="1555" max-vertical-offset="5940">
+        <state line="510" column="21" selection-start="16543" selection-end="16543" vertical-scroll-proportion="0.0" vertical-offset="7341" max-vertical-offset="9255">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/services/site_services.rb">
+    <entry file="file://$PROJECT_DIR$/app/models/recipe.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="510" column="21" selection-start="16543" selection-end="16543" vertical-scroll-proportion="0.6464435" vertical-offset="7341" max-vertical-offset="9255">
+        <state line="48" column="0" selection-start="1463" selection-end="1463" vertical-scroll-proportion="0.331565" vertical-offset="595" max-vertical-offset="5940">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/collection/index.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="2" column="0" selection-start="140" selection-end="140" vertical-scroll-proportion="0.079155676" vertical-offset="0" max-vertical-offset="379">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/collection/_relist.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="3" column="17" selection-start="111" selection-end="132" vertical-scroll-proportion="0.11873351" vertical-offset="0" max-vertical-offset="379">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/helpers/application_helper.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="342" column="49" selection-start="13269" selection-end="13269" vertical-scroll-proportion="0.37362638" vertical-offset="4994" max-vertical-offset="7440">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/helpers/flash_helper.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="59" column="11" selection-start="2305" selection-end="2312" vertical-scroll-proportion="0.0" vertical-offset="660" max-vertical-offset="1320">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/rcp_browser.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="139" column="0" selection-start="4187" selection-end="4187" vertical-scroll-proportion="0.0" vertical-offset="1955" max-vertical-offset="14340">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/seeker.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="203" column="0" selection-start="5829" selection-end="5829" vertical-scroll-proportion="0.0" vertical-offset="2915" max-vertical-offset="6195">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/actionpack-4.0.1/lib/action_controller/metal/rescue.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="31" column="0" selection-start="1117" selection-end="1117" vertical-scroll-proportion="0.0" vertical-offset="212" max-vertical-offset="615">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/activesupport-4.0.1/lib/active_support/notifications/instrumenter.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="22" column="0" selection-start="643" selection-end="643" vertical-scroll-proportion="0.0" vertical-offset="196" max-vertical-offset="1170">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/controller_utils.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="7" column="0" selection-start="269" selection-end="269" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1380">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/helpers/seeker_helper.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="77" column="31" selection-start="2084" selection-end="2084" vertical-scroll-proportion="0.0" vertical-offset="864" max-vertical-offset="1290">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/controllers/stream_controller.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="25" column="0" selection-start="645" selection-end="645" vertical-scroll-proportion="0.33157894" vertical-offset="249" max-vertical-offset="750">
           <folding />
         </state>
       </provider>

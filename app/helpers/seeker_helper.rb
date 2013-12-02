@@ -56,9 +56,12 @@ module SeekerHelper
   		  render_seeker_item element
   		end
 		end
-	  flash.now[:alert] = @seeker.explain_empty if results.empty?  
 	  results.join('').html_safe
-	end
+  end
+
+  def element_item selector, elmt
+    { elmt: elmt, selector: selector }
+  end
 
   # Package up a collection element for passing into a stream
   def seeker_stream_item element
@@ -72,6 +75,6 @@ module SeekerHelper
     else
       '.collection_list'
     end
-    { elmt: elmt, selector: selector }
+    element_item selector, elmt
   end
 end

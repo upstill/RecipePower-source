@@ -1,6 +1,6 @@
 <%# Master form for taking a recipe query and returning a list of results %>
 <div class="collection" onload="RP.collection.onload(event);">
-	<div class="collection_list">
+  <div class="collection_list">
 		<% if !@results_pending %>
 			<%= collection_updater %>
 			<%= render "collection/relist" %>

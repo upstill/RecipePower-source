@@ -1,8 +1,8 @@
 # Provide the capability of displaying closeable flash messages. In general it is better to 
 # wrap all such messages in a notifications div (provideed by flash_notifications) because
 # 1) such messages are removed when the close-box is clicked and 2) the content may need to be replaced
-module FlashHelper   
-  
+module FlashHelper
+
   # Emit the flash_notifications for the page in a div.
   def flash_notifications_div cssclass = "flash_notifications", for_bootstrap = true
     content_tag :div, flash_all(for_bootstrap), class: cssclass
@@ -71,13 +71,13 @@ module FlashHelper
     else
       html = content_tag :div, message, class: "alert #{hide}"
     end
-    flash.delete(level)
     html.html_safe
   end
   
   def flash_all for_bootstrap=true
-    flash.collect { |type, message| 
-      flash_one type, message, for_bootstrap 
+    flash.collect { |type, message|
+      flash.delete type
+      flash_one type, message, for_bootstrap
     }.join.html_safe
   end
 end

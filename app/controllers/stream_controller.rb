@@ -23,10 +23,17 @@ class StreamController < ApplicationController
     retrieve_seeker
     begin
       sse = Reloader::SSE.new(response.stream)
-   	  @seeker.results_paged.each do |element| 
-        item = with_format("html") { view_context.seeker_stream_item element }
-        sse.write :stream_item, item
-   	  end
+      results = @seeker.results_paged
+      if results.empty?
+        sse.write :stream_item,
+                  view_context.element_item('.collection_list',
+                                            view_context.flash_one(:notice, @seeker.explain_empty))
+      else
+        results.each do |element|
+          item = with_format("html") { view_context.seeker_stream_item element }
+          sse.write :stream_item, item
+        end
+      end
     rescue IOError
       logger.info "Stream closed"
     ensure
