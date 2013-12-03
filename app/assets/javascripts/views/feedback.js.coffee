@@ -1,0 +1,3 @@
+RP.feedback ||= {}
+
+jQuery ->

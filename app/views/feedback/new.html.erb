@@ -1,1 +1,24 @@
-<%= simple_page "Feedback", true %>
+<%# simple_page "Feedback", true %>
+<%= modal_dialog :feedback, "Feedback to The Power" do %>
+    <% resource = @feedback %>
+    <%= simple_form_for resource, :url => feedback_index_path do |f| %>
+        <p>Getting your thoughts is the only way we can make RecipePower the best it can be. Thanks in advance for this priceless information.</p>
+        <%= form_errors_helper f %>
+        <hr>
+        <div class="row">
+          <div class="col-md-12">
+            <%= f.input :subject, collection: ['Problem', 'Suggestion', 'Question', 'Other'], label: "Kind of Feedback", selected: "Question", input_html: {style: "width: 30%"} %>
+            <%= f.input :email, label: "Username or Email (your choice)", autofocus: resource.email.blank? %>
+            <%= f.input :comment, label: "Message", placeholder: "Your Feedback Here" %>
+            <%= f.input :docontact, as: :boolean, label: false, inline_label: "I'd like a response" %>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <p style="text-align:right">
+              <%= f.submit "Send Feedback", class: "btn btn-lg btn-success dialog-submit-button" %>
+            </p>
+          </div>
+        </div>
+    <% end %>
+<% end %>

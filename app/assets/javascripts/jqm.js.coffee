@@ -11,7 +11,6 @@
 #= require collection
 # require ../../../vendor/assets/javascripts/jquery
 #= require jquery/jquery.tokeninput
-#= require jquery/jquery.feedback
 #= require bootbox
 #= require history
 #= require masonry.pkgd

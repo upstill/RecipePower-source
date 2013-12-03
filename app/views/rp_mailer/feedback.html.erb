@@ -8,10 +8,11 @@
       Subject: [Feedback] <%= @feedback.subject %> <br />
       User's email: <%= @feedback.email %> <br />
       Sent at: <%= Time.now %> <br />
-      From Page: <%= @feedback.page %> <br />
+      From Page: <%= @feedback.page %><br>
+      Response Requested: <%= @feedback.docontact ? "Yes" : "No" %>
     </p>
     <p>
-      Comment: <br />
+      <%= @feedback.subject %>: <br />
       <%= @feedback.comment %>
     </p>
   </body>
