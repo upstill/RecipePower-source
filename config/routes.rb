@@ -165,6 +165,7 @@ RP::Application.routes.draw do
   # get "pages/contact"
   # get "pages/about"
   get '/home', :to => 'pages#home'
+  get '/popup/:name', :to => 'pages#popup'
   get '/popup', :to => 'pages#popup'
   get '/share', :to => 'pages#share'
   get '/contact', :to => 'pages#contact'

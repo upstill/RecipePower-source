@@ -61,7 +61,6 @@
             <span>Msg Goes Here</span>
 		</div>
 		<%= feedback_tab :position => 'left' %>
-		<%= render session.delete(:flash_popup) if session[:flash_popup] %>
         <% if trigger = deferred_trigger(true) %>
           <%= link_to_modal "#", trigger, class: "trigger" %>
         <% end %>

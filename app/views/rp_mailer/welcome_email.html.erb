@@ -10,7 +10,7 @@
 			of the RecipePower community, all signed in and everything. 
 			Your collection awaits you at <%= link_to "www.recipepower.com", home_url %>. Of
 			course, it's fairly empty at the moment--but if you install our
-			<%= link_to "Cookmark Button", collection_url(context: "signup") %>,
+			<%= link_to "Cookmark Button", assert_popup("starting_step2", collection_url(context: "signup")) %>,
 			you can add to your collection from anywhere on the Web.</p>
 		<% if @inviter %>
 	    <p>Since <%= @inviter.handle %> invited you, you are Friends by default, 

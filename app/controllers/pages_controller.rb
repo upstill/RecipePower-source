@@ -45,19 +45,10 @@ class PagesController < ApplicationController
 
   # Generic action for displaying a popup by name
   def popup
-    params[:name] = params[:name].sub(/pages\//, '')
-    smartrender action: params[:name], how: :modal, url: "/#{params[:name]}"
-=begin
-    respond_with do |format|
-      format.html {
-        render action: params[:name]
-      }
-      format.json { 
-        dlog = with_format("html") { render_to_string template: params[:name] }
-        render json: { dlog: dlog }
-      }
-    end
-=end
+    params[:name] = params[:name].sub(/pages\//, '') # Legacy thing...
+    response_service.is_dialog
+    view_context.check_popup params[:name] # If we're serving the popup, remove it from the session
+    smartrender
   end
 
 end

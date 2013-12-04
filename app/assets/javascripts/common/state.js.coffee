@@ -17,8 +17,8 @@ RP.state.check_hash = (event) ->
 	# We return when page-load triggers onpopstate (state is null) because we've already
 	# checked the hash, above.
 	if hashtag = window.location.hash
+		hashtag = decodeURIComponent hashtag
 		if (match = hashtag.match(/#dialog:(.*)$/)) && (url = match[1])
-			url = decodeURIComponent url
 			RP.dialog.get_and_go null, url
 	else # No hashtag: make sure there's no dialog--allowing for preloaded dialogs pending
 		if (dlog = $('div.dialog')[0]) && $(dlog).modal && !$(dlog).hasClass('modal-pending')

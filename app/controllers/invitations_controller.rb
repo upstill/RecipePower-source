@@ -240,9 +240,7 @@ class InvitationsController < Devise::InvitationsController
       session.delete :invitation_token
       set_flash_message :notice, :updated
       sign_in(resource_name, resource)
-      session[:flash_popup] = "pages/starting_step2"
-      redirect_to response_service.decorate_path( after_accept_path_for(resource), context: "signup"), status: 303
-      # respond_with resource, :location => assert_query( after_accept_path_for(resource), context: "signup")
+      redirect_to after_accept_path_for(resource), status: 303
     else
       # respond_with_navigational(resource){ dialog_boilerplate :edit }
       respond_with_navigational(resource){ smartrender :action => :edit }
@@ -261,6 +259,6 @@ class InvitationsController < Devise::InvitationsController
   end
 
   def after_accept_path_for resource
-    after_sign_in_path_for(resource) # welcome_path
+    assert_popup "starting_step2?context=signup", after_sign_in_path_for(resource) # welcome_path
   end
 end

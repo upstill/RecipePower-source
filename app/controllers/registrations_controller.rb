@@ -30,9 +30,7 @@ class RegistrationsController < Devise::RegistrationsController
             if resource.active_for_authentication?
               # set_flash_message :notice, :signed_up if is_navigational_format?
               sign_up(resource_name, resource)
-              session[:flash_popup] = "pages/starting_step2"
-              # respond_with resource, :location => after_sign_up_path_for(resource)
-              redirect_to assert_query( after_sign_up_path_for(resource), context: "signup")
+              redirect_to after_sign_up_path_for(resource)
             else
               set_flash_message :notice, :"signed_up_but_#{resource.inactive_message}" if is_navigational_format?
               expire_session_data_after_sign_in!
@@ -98,7 +96,7 @@ class RegistrationsController < Devise::RegistrationsController
     # The path used after sign up. You need to overwrite this method
     # in your own RegistrationsController.
     def after_sign_up_path_for(resource)
-      after_sign_in_path_for(resource)
+      assert_popup "starting_step2?context=signup", after_sign_in_path_for(resource)
     end
     
     def user_root_path

@@ -290,7 +290,7 @@ module ApplicationHelper
   		link_to( "Address Bar Magic", "#", onclick: "RP.getgo('#{home_path}', 'http://local.recipepower.com:3000/bar.html##{bookmarklet_script}')" ), 
   		link_to( "Bookmark Magic", "#", onclick: "RP.bm('Cookmark', '#{bookmarklet_script}')"), 
   		link_to( "Stream Test", "#", onclick: "RP.stream.buffer_test();" ),
-  		link_to_modal("Step 3", popup_path(:name => "starting_step3_modal"))
+  		link_to_modal("Step 3", popup_path("starting_step3"))
   	] if permitted_to? :admin, :pages
   
     header_link =
@@ -317,8 +317,8 @@ module ApplicationHelper
   	navlinks << link_to_modal("FAQ", faq_path) 
   	infolinks = 
   	  [ 
-  	    link_to_modal("Need to Know", popup_path(name: "pages/need_to_know")),
-	      link_to_modal("Cookmark Button", popup_path(name: "pages/starting_step2") )
+  	    link_to_modal("Need to Know", popup_path("need_to_know")),
+	      link_to_modal("Cookmark Button", popup_path("starting_step2") )
 	    ]
   	# navlinks << feedback_link("Feedback")
   	if for_mobile 
@@ -467,6 +467,24 @@ module ApplicationHelper
         render(params[:action]+"_content"),
       class: "text_block"
     end
+  end
+
+  def popup_path(name)
+    "/popup/#{name}"
+  end
+
+  # Ensure that the popup includes a hashtag for showing the given popup upon page load
+  def assert_popup popup_request, url
+    popup_request ||= session[:popup]
+    return url if popup_request.blank?
+    uri = URI(url)
+    uri.fragment = CGI::escape "dialog:popup/#{popup_request}"
+    session[:popup] = popup_request
+    uri.to_s
+  end
+
+  def check_popup name
+    session.delete(:popup) if session[:popup] && (session[:popup] =~ /^#{name}\b/)
   end
   
   # Wrap a link in a link to invitations/diversion, so as to report 

@@ -112,10 +112,12 @@ class ApplicationController < ActionController::Base
   
   # All controllers displaying the collection need to have it setup 
   def setup_collection klass="Content", options={}
+=begin
     if popup = params[:popup]
       session[:flash_popup] = popup
       redirect_to collection_path
     else
+=end
       @user ||= current_user_or_guest
       @browser ||= @user.browser params
       default_options = {}
@@ -132,7 +134,7 @@ class ApplicationController < ActionController::Base
         @query_format = "json"
         @query_path = @seeker.query_path
       end
-    end
+    # end
   end
   
   # This is one-stop-shopping for a controller using the query to filter a list
@@ -150,10 +152,8 @@ class ApplicationController < ActionController::Base
         # In a json response we just re-render the collection list for replacement
         # If we need to replace the page, we send back a link to do it with
         if params[:redirect]
-          render json: { 
             # page: with_format("html") { render_to_string :index },
-            redirect: collection_url( params.slice 'context' )
-          }
+            render json: { redirect: assert_popup(nil, request.original_url) }
         else
       	  setup_seeker(klass, options.slice(:clear_tags, :scope), params)
           flash.now[:guide] = @seeker.guide
@@ -190,7 +190,7 @@ class ApplicationController < ActionController::Base
         if response_service.page? && # @_area == "page" # Not partial at all => whole page
             renderopts[:redirect]
           redirect_to renderopts[:redirect]
-        elsif renderopts[:how] == :modal
+        elsif response_service.dialog?
           # Strip everything up to the path
           uri = URI.parse(url)
           index = url.index uri.path
