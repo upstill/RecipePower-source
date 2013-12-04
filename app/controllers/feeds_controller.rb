@@ -44,7 +44,7 @@ class FeedsController < ApplicationController
     @Title = "Subscribe to a Feed"
     # @_area = params[:_area]
     # dialog_boilerplate 'new', 'modal'
-    smartrender area: 'modal'
+    smartrender how: 'modal'
   end
   
   # Add a feed to the feeds of the current user
@@ -124,7 +124,7 @@ class FeedsController < ApplicationController
         format.json { 
           # @_area = "floating"
           # dialog_boilerplate "new", "modal", status: :unprocessable_entity 
-          smartrender action: "new", area: "modal", status: :unprocessable_entity 
+          smartrender action: "new", how: "modal", status: :unprocessable_entity 
         }
       end
     else

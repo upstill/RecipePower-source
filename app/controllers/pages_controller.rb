@@ -45,15 +45,19 @@ class PagesController < ApplicationController
 
   # Generic action for displaying a popup by name
   def popup
+    params[:name] = params[:name].sub(/pages\//, '')
+    smartrender action: params[:name], how: :modal, url: "/#{params[:name]}"
+=begin
     respond_with do |format|
       format.html {
-        render action: params[:name].sub(/pages\//, '')
+        render action: params[:name]
       }
       format.json { 
         dlog = with_format("html") { render_to_string template: params[:name] }
         render json: { dlog: dlog }
       }
     end
+=end
   end
 
 end

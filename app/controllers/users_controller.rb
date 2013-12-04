@@ -93,7 +93,7 @@ class UsersController < ApplicationController
   
   def show
     @user = User.find params[:id]
-    smartrender :area => :modal
+    smartrender :how => :modal
   end
   
   def not_found

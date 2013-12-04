@@ -1,0 +1,10 @@
+<div class="welcome-dialog">
+  <p class="airy">
+    That's it! You're ready to roll. Welcome to RecipePower, <%= current_user.handle %>!
+  </p><p class="airy">
+  Remember: any time you're out on the Web and see a recipe (or whatever) you like, the Cookmark button is there to send it rocketing to RecipePower.
+</p><p class="airy">
+  FYI: Just so you don't get lonely, we've provided you with a starter set of friends, feeds and channels you might enjoy. Tailor them to your liking (invite more friends!) any time.
+</p>
+  <%= link_to_modal "Start Me Up", popup_path(:name => "need_to_know_modal"), class: "btn btn-lg btn-info btn-success dialog-submit-button" %>
+</div>

@@ -178,6 +178,7 @@ class ApplicationController < ActionController::Base
   # Generalized response for dialog for a particular area
   def smartrender(renderopts={})
     action = renderopts[:action] || params[:action]
+    url = renderopts[:url] || request.original_url
     flash.now[:notice] = params[:notice] unless flash[:notice] # ...should a flash message come in via params
     # @_area = params[:_area]
     # @_layout = params[:_layout]
@@ -189,11 +190,11 @@ class ApplicationController < ActionController::Base
         if response_service.page? && # @_area == "page" # Not partial at all => whole page
             renderopts[:redirect]
           redirect_to renderopts[:redirect]
-        elsif renderopts[:area] == :modal
+        elsif renderopts[:how] == :modal
           # Strip everything up to the path
-          uri = URI.parse(url = request.original_url)
+          uri = URI.parse(url)
           index = url.index uri.path
-          relative_url = url[index..-1]
+          relative_url = assert_query(url[index..-1], :how => :modal)
           hashtag = "#dialog:#{CGI::escape relative_url}"
           if current_user
             redirect_to "/collection#{hashtag}"
@@ -204,7 +205,7 @@ class ApplicationController < ActionController::Base
           render action, renderopts
         end
       end
-      format.json { 
+      format.json {
         hresult = with_format("html") do
           # Blithely assuming that we want a modal-dialog element if we're getting JSON
           renderopts[:layout] = (@layout || false)

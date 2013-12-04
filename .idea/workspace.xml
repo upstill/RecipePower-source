@@ -2,15 +2,25 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="11143819-dbfd-4599-8209-07d96301a1c5" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/assets/javascripts/views/feedback.js.coffee" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/vendor/assets/javascripts/jquery/jquery.feedback.js" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/feedback/_new_content.html.erb" afterPath="$PROJECT_DIR$/app/views/feedback/_new_content.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/sessions/_signin_dialog.html.erb" afterPath="$PROJECT_DIR$/app/views/sessions/_signin_dialog.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/rp_mailer/feedback.html.erb" afterPath="$PROJECT_DIR$/app/views/rp_mailer/feedback.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/feedback_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/feedback_controller.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/helpers/feedback_helper.rb" afterPath="$PROJECT_DIR$/app/helpers/feedback_helper.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/javascripts/jqm.js.coffee" afterPath="$PROJECT_DIR$/app/assets/javascripts/jqm.js.coffee" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/pages/_starting_step3_content.html.erb" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/pages/need_to_know.html.erb" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/pages/starting_step2.html.erb" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/pages/starting_step3.html.erb" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/pages/feedback.html.erb" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/pages/_contact_content.html.erb" afterPath="$PROJECT_DIR$/app/views/pages/_contact_content.html.erb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/pages/_starting_step3_modal.html.erb" afterPath="$PROJECT_DIR$/app/views/pages/_starting_step3_modal.html.erb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/application_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/application_controller.rb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/helpers/application_helper.rb" afterPath="$PROJECT_DIR$/app/helpers/application_helper.rb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/feeds_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/feeds_controller.rb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/invitations_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/invitations_controller.rb" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/feedback/new.html.erb" afterPath="$PROJECT_DIR$/app/views/feedback/new.html.erb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/pages_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/pages_controller.rb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/pages/popup.html.erb" afterPath="$PROJECT_DIR$/app/views/pages/popup.html.erb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/recipes_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/recipes_controller.rb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/registrations_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/registrations_controller.rb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/sites_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/sites_controller.rb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/tags_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/tags_controller.rb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/users_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/users_controller.rb" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="RP.iws" />
@@ -23,7 +33,7 @@
   </component>
   <component name="ChangesViewManager" flattened_view="true" show_ignored="false" />
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/RP@Development__RP.coverage" NAME="Development: RP Coverage Results" MODIFIED="1386020868416" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="rcov" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" MODULE_NAME="RP" />
+    <SUITE FILE_PATH="coverage/RP@Development__RP.coverage" NAME="Development: RP Coverage Results" MODIFIED="1386125578134" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="rcov" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" MODULE_NAME="RP" />
   </component>
   <component name="CreatePatchCommitExecutor">
     <option name="PATCH_PATH" value="" />
@@ -37,55 +47,55 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="feedback_controller.rb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/controllers/feedback_controller.rb">
+      <file leaf-file-name="application_controller.rb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/controllers/application_controller.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="13" column="0" selection-start="257" selection-end="257" vertical-scroll-proportion="0.0" vertical-offset="35" max-vertical-offset="510">
+            <state line="186" column="0" selection-start="7264" selection-end="7264" vertical-scroll-proportion="0.0" vertical-offset="2644" max-vertical-offset="6300">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="rp_mailer.rb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/mailers/rp_mailer.rb">
+      <file leaf-file-name="pages_controller.rb" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/controllers/pages_controller.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="660">
+            <state line="47" column="53" selection-start="839" selection-end="892" vertical-scroll-proportion="0.29867256" vertical-offset="570" max-vertical-offset="1035">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="feedback.html.erb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/views/rp_mailer/feedback.html.erb">
+      <file leaf-file-name="_need_to_know_modal.html.erb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/views/pages/_need_to_know_modal.html.erb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="11" column="0" selection-start="321" selection-end="321" vertical-scroll-proportion="-6.875" vertical-offset="0" max-vertical-offset="375">
+            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="-0.0" vertical-offset="0" max-vertical-offset="150">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="RP.js.coffee" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/assets/javascripts/common/RP.js.coffee">
+      <file leaf-file-name="starting_step2.html.erb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/views/pages/starting_step2.html.erb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="350" column="30" selection-start="12884" selection-end="12884" vertical-scroll-proportion="0.0" vertical-offset="4910" max-vertical-offset="5445">
+            <state line="0" column="29" selection-start="0" selection-end="42" vertical-scroll-proportion="-0.0" vertical-offset="0" max-vertical-offset="90">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="feedback_helper.rb" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/app/helpers/feedback_helper.rb">
+      <file leaf-file-name="need_to_know.html.erb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/views/pages/need_to_know.html.erb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="2" column="19" selection-start="75" selection-end="75" vertical-scroll-proportion="0.06315789" vertical-offset="0" max-vertical-offset="475">
+            <state line="1" column="16" selection-start="50" selection-end="50" vertical-scroll-proportion="-0.625" vertical-offset="0" max-vertical-offset="165">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="triggers_helper.rb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/helpers/triggers_helper.rb">
+      <file leaf-file-name="application_helper.rb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/helpers/application_helper.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="12" column="6" selection-start="350" selection-end="350" vertical-scroll-proportion="0.0" vertical-offset="22" max-vertical-offset="1260">
+            <state line="458" column="0" selection-start="17721" selection-end="17721" vertical-scroll-proportion="0.0" vertical-offset="6716" max-vertical-offset="7425">
               <folding />
             </state>
           </provider>
@@ -121,7 +131,6 @@
         <option value="$PROJECT_DIR$/lib/reloader/sse.rb" />
         <option value="$PROJECT_DIR$/app/views/collection/_relist.html.erb" />
         <option value="$PROJECT_DIR$/app/assets/javascripts/common/scroll.js.coffee" />
-        <option value="$PROJECT_DIR$/app/controllers/application_controller.rb" />
         <option value="$PROJECT_DIR$/app/services/site_services.rb" />
         <option value="$PROJECT_DIR$/app/models/recipe.rb" />
         <option value="$PROJECT_DIR$/app/views/collection/index.html.erb" />
@@ -129,7 +138,6 @@
         <option value="$PROJECT_DIR$/app/helpers/seeker_helper.rb" />
         <option value="$PROJECT_DIR$/app/controllers/stream_controller.rb" />
         <option value="$PROJECT_DIR$/app/views/layouts/_frame_top.html.erb" />
-        <option value="$PROJECT_DIR$/app/controllers/pages_controller.rb" />
         <option value="$PROJECT_DIR$/app/helpers/application_helper.rb" />
         <option value="$PROJECT_DIR$/app/views/layouts/application.html.erb" />
         <option value="$PROJECT_DIR$/app/assets/javascripts/common/state.js.coffee" />
@@ -141,11 +149,20 @@
         <option value="$PROJECT_DIR$/vendor/assets/javascripts/jquery/jquery.feedback.js" />
         <option value="$PROJECT_DIR$/app/assets/javascripts/views/feedback.js.coffee" />
         <option value="$PROJECT_DIR$/app/views/feedback/_new_content.html.erb" />
-        <option value="$PROJECT_DIR$/app/views/feedback/new.html.erb" />
         <option value="$PROJECT_DIR$/app/assets/javascripts/jqm.js.coffee" />
         <option value="$PROJECT_DIR$/app/controllers/feedback_controller.rb" />
         <option value="$PROJECT_DIR$/app/views/rp_mailer/feedback.html.erb" />
         <option value="$PROJECT_DIR$/app/helpers/feedback_helper.rb" />
+        <option value="$PROJECT_DIR$/app/views/feedback/new.html.erb" />
+        <option value="$PROJECT_DIR$/app/views/pages/_contact_content.html.erb" />
+        <option value="$PROJECT_DIR$/app/views/pages/popup.html.erb" />
+        <option value="$PROJECT_DIR$/app/views/pages/starting_step2.html.erb" />
+        <option value="$PROJECT_DIR$/app/views/pages/starting_step3.html.erb" />
+        <option value="$PROJECT_DIR$/app/views/pages/starting_step3_content.html.erb" />
+        <option value="$PROJECT_DIR$/app/views/pages/_starting_step3_modal.html.erb" />
+        <option value="$PROJECT_DIR$/app/controllers/application_controller.rb" />
+        <option value="$PROJECT_DIR$/app/views/pages/need_to_know.html.erb" />
+        <option value="$PROJECT_DIR$/app/controllers/pages_controller.rb" />
       </list>
     </option>
   </component>
@@ -157,8 +174,8 @@
     <option name="CUSTOM_FILTER" />
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="10" />
-    <option name="y" value="60" />
+    <option name="x" value="6" />
+    <option name="y" value="35" />
     <option name="width" value="1420" />
     <option name="height" value="812" />
   </component>
@@ -476,28 +493,6 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="rp_mailer" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="RP" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="RP" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="app" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="views" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
               <option name="myItemId" value="pages" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -521,6 +516,28 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="layouts" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="RP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="RP" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="views" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="feedback" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -1230,7 +1247,11 @@
       <created>1386025434080</created>
       <updated>1386025434080</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="Feedback now working as standard modal">
+      <created>1386103850109</created>
+      <updated>1386103850109</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TodoView" selected-index="0">
@@ -1254,7 +1275,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="10" y="60" width="1420" height="812" extended-state="0" />
+    <frame x="6" y="35" width="1420" height="812" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32867134" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -1314,7 +1335,8 @@
     <MESSAGE value="Fixed recipe.picurl turning 'false'" />
     <MESSAGE value="Fixed recipe.picurl turning 'false'&#10;" />
     <MESSAGE value="Sign Me Up dialog can have errors multiple times, and persists when cancelled; query box not shown when no seeker present&#10;" />
-    <option name="LAST_COMMIT_MESSAGE" value="Sign Me Up dialog can have errors multiple times, and persists when cancelled; query box not shown when no seeker present&#10;" />
+    <MESSAGE value="Feedback now working as standard modal" />
+    <option name="LAST_COMMIT_MESSAGE" value="Feedback now working as standard modal" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1336,9 +1358,34 @@
           <option name="timeStamp" value="86" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="ruby-line">
+          <url>file://$PROJECT_DIR$/app/helpers/application_helper.rb</url>
+          <line>458</line>
+          <option name="timeStamp" value="193" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="ruby-line">
           <url>file://$PROJECT_DIR$/app/controllers/pages_controller.rb</url>
-          <line>52</line>
-          <option name="timeStamp" value="152" />
+          <line>48</line>
+          <option name="timeStamp" value="194" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="ruby-line">
+          <url>file://$PROJECT_DIR$/app/controllers/application_controller.rb</url>
+          <line>186</line>
+          <option name="timeStamp" value="199" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="ruby-line">
+          <url>file://$PROJECT_DIR$/app/controllers/application_controller.rb</url>
+          <line>191</line>
+          <option name="timeStamp" value="200" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="ruby-line">
+          <url>file://$PROJECT_DIR$/app/controllers/application_controller.rb</url>
+          <line>211</line>
+          <option name="timeStamp" value="203" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="ruby-line">
+          <url>file://$PROJECT_DIR$/app/controllers/application_controller.rb</url>
+          <line>213</line>
+          <option name="timeStamp" value="204" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/app/assets/javascripts/common/RP.js.coffee</url>
@@ -1369,115 +1416,10 @@
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="171" />
+      <option name="time" value="205" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/activerecord-4.0.1/lib/active_record/attribute_methods/read.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="58" column="0" selection-start="2704" selection-end="2704" vertical-scroll-proportion="0.0" vertical-offset="736" max-vertical-offset="1785">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/helpers/recipes_helper.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="15" column="0" selection-start="385" selection-end="385" vertical-scroll-proportion="0.0" vertical-offset="95" max-vertical-offset="2955">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/uri_utils.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="28" column="21" selection-start="802" selection-end="826" vertical-scroll-proportion="0.0" vertical-offset="256" max-vertical-offset="1815">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/services/site_services.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="510" column="21" selection-start="16543" selection-end="16543" vertical-scroll-proportion="0.0" vertical-offset="7341" max-vertical-offset="9255">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/models/recipe.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="48" column="0" selection-start="1463" selection-end="1463" vertical-scroll-proportion="0.331565" vertical-offset="595" max-vertical-offset="5940">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/views/collection/index.html.erb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="2" column="0" selection-start="140" selection-end="140" vertical-scroll-proportion="0.079155676" vertical-offset="0" max-vertical-offset="379">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/views/collection/_relist.html.erb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="3" column="17" selection-start="111" selection-end="132" vertical-scroll-proportion="0.11873351" vertical-offset="0" max-vertical-offset="379">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/helpers/flash_helper.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="59" column="11" selection-start="2305" selection-end="2312" vertical-scroll-proportion="0.0" vertical-offset="660" max-vertical-offset="1320">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/rcp_browser.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="139" column="0" selection-start="4187" selection-end="4187" vertical-scroll-proportion="0.0" vertical-offset="1955" max-vertical-offset="14340">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/seeker.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="203" column="0" selection-start="5829" selection-end="5829" vertical-scroll-proportion="0.0" vertical-offset="2915" max-vertical-offset="6195">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/actionpack-4.0.1/lib/action_controller/metal/rescue.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="31" column="0" selection-start="1117" selection-end="1117" vertical-scroll-proportion="0.0" vertical-offset="212" max-vertical-offset="615">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/activesupport-4.0.1/lib/active_support/notifications/instrumenter.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="22" column="0" selection-start="643" selection-end="643" vertical-scroll-proportion="0.0" vertical-offset="196" max-vertical-offset="1170">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/controller_utils.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="0" selection-start="269" selection-end="269" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1380">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/helpers/seeker_helper.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="77" column="31" selection-start="2084" selection-end="2084" vertical-scroll-proportion="0.0" vertical-offset="864" max-vertical-offset="1290">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/controllers/stream_controller.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="25" column="1" selection-start="646" selection-end="646" vertical-scroll-proportion="0.0" vertical-offset="249" max-vertical-offset="750">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/helpers/taggable_helper.rb">
       <provider selected="true" editor-type-id="text-editor">
         <state line="5" column="0" selection-start="217" selection-end="217" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="510">
@@ -1513,37 +1455,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/views/pages/popup.html.erb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="403">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/views/pages/faq.html.erb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="12" selection-start="12" selection-end="12" vertical-scroll-proportion="-0.0" vertical-offset="0" max-vertical-offset="105">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/controllers/application_controller.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="180" column="0" selection-start="6931" selection-end="6931" vertical-scroll-proportion="0.0" vertical-offset="2570" max-vertical-offset="6285">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/decorators/recipe_decorator.rb">
       <provider selected="true" editor-type-id="text-editor">
         <state line="20" column="0" selection-start="676" selection-end="676" vertical-scroll-proportion="0.0" vertical-offset="166" max-vertical-offset="1080">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/controllers/pages_controller.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="52" column="0" selection-start="973" selection-end="973" vertical-scroll-proportion="-7.0" vertical-offset="598" max-vertical-offset="975">
           <folding />
         </state>
       </provider>
@@ -1636,23 +1550,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/helpers/triggers_helper.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="12" column="6" selection-start="350" selection-end="350" vertical-scroll-proportion="0.0" vertical-offset="22" max-vertical-offset="1260">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/assets/javascripts/views/feedback.js.coffee">
       <provider selected="true" editor-type-id="text-editor">
         <state line="3" column="0" selection-start="30" selection-end="30" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="135">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/helpers/application_helper.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="454" column="6" selection-start="17568" selection-end="17568" vertical-scroll-proportion="0.0" vertical-offset="6664" max-vertical-offset="7440">
           <folding />
         </state>
       </provider>
@@ -1692,26 +1592,24 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/app/helpers/feedback_helper.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="2" column="19" selection-start="75" selection-end="75" vertical-scroll-proportion="0.06315789" vertical-offset="0" max-vertical-offset="475">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/app/assets/javascripts/common/RP.js.coffee">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="350" column="30" selection-start="12884" selection-end="12884" vertical-scroll-proportion="0.0" vertical-offset="4910" max-vertical-offset="5445">
+        <state line="350" column="30" selection-start="12884" selection-end="12884" vertical-scroll-proportion="0.73593074" vertical-offset="4910" max-vertical-offset="5445">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/controllers/feedback_controller.rb">
+    <entry file="file://$PROJECT_DIR$/app/views/rp_mailer/feedback.html.erb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="13" column="0" selection-start="257" selection-end="257" vertical-scroll-proportion="0.0" vertical-offset="35" max-vertical-offset="510">
+        <state line="11" column="0" selection-start="321" selection-end="321" vertical-scroll-proportion="0.36585367" vertical-offset="0" max-vertical-offset="451">
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/views/feedback/new.html.erb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="3" column="0" selection-start="125" selection-end="125" vertical-scroll-proportion="-1.875" vertical-offset="0" max-vertical-offset="435">
-          <folding>
-            <element signature="e#1042#1066#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1722,16 +1620,163 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/views/rp_mailer/feedback.html.erb">
+    <entry file="file://$PROJECT_DIR$/app/controllers/feedback_controller.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="11" column="0" selection-start="321" selection-end="321" vertical-scroll-proportion="-6.875" vertical-offset="0" max-vertical-offset="375">
+        <state line="13" column="0" selection-start="257" selection-end="257" vertical-scroll-proportion="0.33684212" vertical-offset="35" max-vertical-offset="510">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/helpers/feedback_helper.rb">
+    <entry file="file://$PROJECT_DIR$/app/helpers/triggers_helper.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="2" column="19" selection-start="75" selection-end="75" vertical-scroll-proportion="0.06315789" vertical-offset="0" max-vertical-offset="475">
+        <state line="12" column="6" selection-start="350" selection-end="350" vertical-scroll-proportion="0.3326316" vertical-offset="22" max-vertical-offset="1260">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/better_errors-1.0.1/lib/better_errors/stack_frame.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="10" column="0" selection-start="299" selection-end="299" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="2475">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/feedback/new.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="4" column="122" selection-start="319" selection-end="319" vertical-scroll-proportion="0.1369863" vertical-offset="0" max-vertical-offset="438">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/pages/contact.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="14" selection-start="14" selection-end="14" vertical-scroll-proportion="-0.0" vertical-offset="0" max-vertical-offset="105">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/pages/_contact_content.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="5" column="137" selection-start="964" selection-end="964" vertical-scroll-proportion="-3.125" vertical-offset="0" max-vertical-offset="195">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/actionpack-4.0.1/lib/action_controller/metal/strong_parameters.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="271" column="0" selection-start="10008" selection-end="10008" vertical-scroll-proportion="0.0" vertical-offset="3915" max-vertical-offset="7965">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/pages/_starting_step2_modal.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="478">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/pages/faq.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="12" selection-start="12" selection-end="12" vertical-scroll-proportion="-0.0" vertical-offset="0" max-vertical-offset="105">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/pages/_starting_step2_content.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="462">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/pages/_starting_step3_content.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="10" column="0" selection-start="669" selection-end="669" vertical-scroll-proportion="-6.25" vertical-offset="0" max-vertical-offset="240">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/pages/_starting_step3_modal.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="3" column="22" selection-start="276" selection-end="276" vertical-scroll-proportion="-1.875" vertical-offset="0" max-vertical-offset="165">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/pages/starting_step3.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="32" selection-start="32" selection-end="32" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="421">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/pages/popup.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="27" selection-start="27" selection-end="27" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="444">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/pages/welcome.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="570">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/pages/share.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="422">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/helpers/application_helper.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="458" column="0" selection-start="17721" selection-end="17721" vertical-scroll-proportion="0.0" vertical-offset="6716" max-vertical-offset="7425">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/pages/_need_to_know_modal.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="475">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/pages/starting_step2.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="29" selection-start="0" selection-end="42" vertical-scroll-proportion="-0.0" vertical-offset="0" max-vertical-offset="90">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/services/response_services.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1815">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/pages/need_to_know.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="1" column="16" selection-start="50" selection-end="50" vertical-scroll-proportion="-0.625" vertical-offset="0" max-vertical-offset="165">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/controllers/application_controller.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="186" column="0" selection-start="7264" selection-end="7264" vertical-scroll-proportion="0.0" vertical-offset="2644" max-vertical-offset="6300">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/controllers/pages_controller.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="47" column="53" selection-start="839" selection-end="892" vertical-scroll-proportion="0.29867256" vertical-offset="570" max-vertical-offset="1035">
           <folding />
         </state>
       </provider>

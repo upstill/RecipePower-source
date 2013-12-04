@@ -311,15 +311,14 @@ module ApplicationHelper
     
   def footer_navlinks for_mobile=false
   	navlinks = []
-  	# navlinks << link_to_modal("About", popup_path(name: "pages/about_modal")) 
   	navlinks << link_to_modal("About", about_path) 
   	navlinks << link_to_modal("Contact", contact_path) 
   	navlinks << link_to("Home", home_path, class: "nav_link") 
   	navlinks << link_to_modal("FAQ", faq_path) 
   	infolinks = 
   	  [ 
-  	    link_to_modal("Need to Know", popup_path(name: "pages/need_to_know_modal")),
-	      link_to_modal("Cookmark Button", popup_path(name: "pages/starting_step2_modal") )
+  	    link_to_modal("Need to Know", popup_path(name: "pages/need_to_know")),
+	      link_to_modal("Cookmark Button", popup_path(name: "pages/starting_step2") )
 	    ]
   	# navlinks << feedback_link("Feedback")
   	if for_mobile 

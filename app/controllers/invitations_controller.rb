@@ -240,7 +240,7 @@ class InvitationsController < Devise::InvitationsController
       session.delete :invitation_token
       set_flash_message :notice, :updated
       sign_in(resource_name, resource)
-      session[:flash_popup] = "pages/starting_step2_modal"
+      session[:flash_popup] = "pages/starting_step2"
       redirect_to response_service.decorate_path( after_accept_path_for(resource), context: "signup"), status: 303
       # respond_with resource, :location => assert_query( after_accept_path_for(resource), context: "signup")
     else

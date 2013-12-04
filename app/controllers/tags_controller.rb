@@ -130,7 +130,7 @@ class TagsController < ApplicationController
     @tag = Tag.find(params[:id])
     session[:tabindex] = @tabindex
 
-    smartrender :area => :modal
+    smartrender :how => :modal
 =begin
     respond_to do |format|
       format.html # show.html.erb
@@ -155,7 +155,7 @@ class TagsController < ApplicationController
   def edit
     @Title = "Tags"
     @tag = Tag.find(params[:id])
-    smartrender :area => :modal
+    smartrender :how => :modal
   end
   
   # GET /tags/editor?tabindex=index

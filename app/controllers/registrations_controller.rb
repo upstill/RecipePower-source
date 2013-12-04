@@ -30,7 +30,7 @@ class RegistrationsController < Devise::RegistrationsController
             if resource.active_for_authentication?
               # set_flash_message :notice, :signed_up if is_navigational_format?
               sign_up(resource_name, resource)
-              session[:flash_popup] = "pages/starting_step2_modal"
+              session[:flash_popup] = "pages/starting_step2"
               # respond_with resource, :location => after_sign_up_path_for(resource)
               redirect_to assert_query( after_sign_up_path_for(resource), context: "signup")
             else
