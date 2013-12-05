@@ -1,19 +1,18 @@
-<%= modal_dialog :show_site, "Site #{link_to @site.name, @site.home}", dialog_class: "modal-xl" do %>
+<%= page_or_modal title: "Site #{link_to @site.name, @site.home}", dialog_class: "modal-xl" do %>
+    <p>
+      <b>Sample:</b>
+      <%= crack_sample %>
+    </p>
 
-<p>
-  <b>Sample:</b>
-  <%= crack_sample %>
-</p>
+    <p>
+      <b>Logo:</b>
+      <%= @site.logo %>
+    </p>
 
-<p>
-  <b>Logo:</b>
-  <%= @site.logo %>
-</p>
-
-<p>
-  <b>Tags:</b>
-  <%= @site.tags %>
-</p>
+    <p>
+      <b>Tags:</b>
+      <%= @site.tags %>
+    </p>
 
 
     <%= link_to_modal 'Edit', edit_site_path(@site) %> |

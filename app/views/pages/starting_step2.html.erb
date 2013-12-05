@@ -1,4 +1,6 @@
-	<div class="instructions_header">
+<% title = (params[:context] == "signup" ? "Step 2: Install the Cookmark Button" : "Installing the 'Cookmark' Button") %>
+<%= page_or_modal response_service.modal_options(class: "trigger").merge( :action => :step2, :title => title, body_class: "red_body") do %>
+    <div class="instructions_header">
 	  <p class="bm-pic"><%= bookmarklet %></p>
 		<p class="bm-text"> This is the <em>Cookmark</em> button, a bookmark with a special power: sending recipes to RecipePower.</p>
 	</div>
@@ -16,3 +18,4 @@
 	<% else %>
 		<%= dialog_cancel_button("Okay, All Set", class: "btn btn-lg btn-info", style: "float:right") %>
 	<% end %>
+<% end %>

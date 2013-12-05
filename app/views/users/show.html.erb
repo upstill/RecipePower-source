@@ -1,4 +1,4 @@
-<%= modal_dialog "show_user" do %>
+<%= page_or_modal title: "User Profile" do %>
 	<% present @user do |user_presenter| %>
 	  <div id="profile">
 			<table>

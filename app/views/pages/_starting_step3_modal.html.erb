@@ -1,5 +1,0 @@
-<%# Fields for an edit-user dialog %>
-<%# modal_dialog :step3, @Title || "Step 3: There Is No Step 3", area: @_area do %>
-<%= modal_dialog :step3, @Title || "Step 3: There Is No Step 3", response_service.modal_options.merge(body_class: "red_body") do %>
-    <%= render "pages/starting_step3_content" %>
-<% end %>

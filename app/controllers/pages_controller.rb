@@ -48,7 +48,7 @@ class PagesController < ApplicationController
     params[:name] = params[:name].sub(/pages\//, '') # Legacy thing...
     response_service.is_dialog
     view_context.check_popup params[:name] # If we're serving the popup, remove it from the session
-    smartrender
+    smartrender action: params[:name]
   end
 
 end

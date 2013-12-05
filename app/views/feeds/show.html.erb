@@ -1,37 +1,38 @@
-<h3>About '<%= @feed.title %>'</h3>
+<%= page_or_modal do %>
 
-<p>
-  <%= @feed.description %>
-</p>
+    <p>
+      <%= @feed.description %>
+    </p>
 
-<p>
-  <b>Url:</b> <%= @feed.url %>
-</p>
+    <p>
+      <b>Url:</b> <%= @feed.url %>
+    </p>
 
-<p>
-  <b>Type:</b> <%= @feed.feedtypename %>
-</p>
+    <p>
+      <b>Type:</b> <%= @feed.feedtypename %>
+    </p>
 
-<p>
-  <b>From Site:</b>
-  <%= link_to @feed.site.name, site_path(@feed.site) %>
-</p>
+    <p>
+      <b>From Site:</b>
+      <%= link_to_modal @feed.site.name, site_path(@feed.site) %>
+    </p>
 
-<% permitted_to?(:approve, :feeds) do %>
-  <p>
-    Feedthrough <%= @feed.approved ? "Approved" : (@feed.approved.nil? ? "Not Approved" : "Blocked") %>
-  </p>
-  <% if @feed.approved || @feed.approved.nil? %>
-    <%= button_to "Block feedthrough", "#{@feed.id}/approve?approve=N"  %>
-  <% end %>
-  <% if !@feed.approved %>
-    <%= button_to "Approve feedthrough", "#{@feed.id}/approve?approve=Y"  %>
-  <% end %>
+    <% permitted_to?(:approve, :feeds) do %>
+        <p>
+          Feedthrough <%= @feed.approved ? "Approved" : (@feed.approved.nil? ? "Not Approved" : "Blocked") %>
+        </p>
+        <% if @feed.approved || @feed.approved.nil? %>
+            <%= button_to "Block feedthrough", "#{@feed.id}/approve?approve=N"  %>
+        <% end %>
+        <% if !@feed.approved %>
+            <%= button_to "Approve feedthrough", "#{@feed.id}/approve?approve=Y"  %>
+        <% end %>
+    <% end %>
+    <% permitted_to?(:edit, :feeds) do %>
+        <%= link_to_modal 'Edit', edit_feed_path(@feed), class: "btn" %>
+    <% end %>
+    <%= link_to_modal 'Back to Feeds', feeds_path, class: "btn" %>
+
+    <h3>Preview</h3>
+    <%= feedlist %>
 <% end %>
-<% permitted_to?(:edit, :feeds) do %>
-  <%= link_to 'Edit', edit_feed_path(@feed), class: "btn" %>
-<% end %>
-<%= link_to 'Back to Feeds', feeds_path, class: "btn" %>
-
-<h3>Preview</h3>
-<%= feedlist %>

@@ -6,7 +6,7 @@
 		<b>Logo</b>: <%= @site.logo %><br>
 		<b># Feeds:</b> <%= @site.feeds.size %> (<%= @site.feeds.where(approved: true).count %> approved for feedthrough)
 	</td>
-	<td><%= link_to 'Show', @site %><br>
+	<td><%= link_to_modal 'Show', @site %><br>
 		<%= link_to_modal 'Edit', edit_site_path(@site) %><br>
 		<%= link_to 'Destroy', @site, confirm: 'Are you sure?', method: :delete %><br>
 	</td>

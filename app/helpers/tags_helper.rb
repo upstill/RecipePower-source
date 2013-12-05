@@ -2,7 +2,7 @@ module TagsHelper
   
   # Emit a link to a tag using the tag's name and, optionally, its type and id
   def tag_link tag, with_id=false
-    link_to( tag.name, tag )+(with_id ? "(#{tag.typename} #{tag.id.to_s})" : "")
+    link_to_modal( tag.name, tag )+(with_id ? "(#{tag.typename} #{tag.id.to_s})" : "")
   end
   
   def summarize_tag withtype = false, do_link = true, with_id=false
@@ -60,7 +60,7 @@ module TagsHelper
         content_tag :li, "#{link_to rcp.trimmed_title, rcp.url} #{recipe_info_icon rcp}".html_safe, class: "tog_info_rcp_title"
       }
     unless recipes.empty?
-      ("<ul>"+recipes.join('<br>')+"</ul>").html_safe
+      ("#{header}<ul>"+recipes.join('<br>')+"</ul>").html_safe
     end
   end
 

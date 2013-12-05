@@ -448,6 +448,7 @@ module ApplicationHelper
      end
    end
 
+=begin Defunct: supplanted by page_or_modal
   # Helper for "standard" template which goes to either a page or a modal dialog,
   # depending on context. The content is found in <controller>/<action>_content,
   # and if robomodal is false, the modal dialog is in <controller>/<action>_modal
@@ -468,6 +469,7 @@ module ApplicationHelper
       class: "text_block"
     end
   end
+=end
 
   def popup_path(name)
     "/popup/#{name}"
@@ -485,6 +487,19 @@ module ApplicationHelper
 
   def check_popup name
     session.delete(:popup) if session[:popup] && (session[:popup] =~ /^#{name}\b/)
+  end
+
+  # Render content, either for a page or a dialog
+  def page_or_modal options={}, &block
+    title = options[:title] || @Title
+    action = options[:action] || params[:action]
+    options[:body_contents] = with_output_buffer(&block)
+    if response_service.dialog?
+      name = :"#{action}_#{params[:controller].singularize}"
+      modal_dialog name, title, options.slice!(:title, :action) # Pass other options through to modal
+    else
+      "<h3>#{title}</h3>".html_safe+options[:body_contents]
+    end
   end
   
   # Wrap a link in a link to invitations/diversion, so as to report 

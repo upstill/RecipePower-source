@@ -31,10 +31,8 @@ class FeedsController < ApplicationController
   # GET /feeds/1.json
   def show
     @feed = Feed.find(params[:id])
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @feed }
-    end
+    @Title = "About #{@feed.title}"
+    smartrender
   end
 
   # GET /feeds/new
