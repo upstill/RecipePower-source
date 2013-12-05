@@ -78,17 +78,19 @@ module TagsHelper
 
   # Return HTML for the links related to a given tag (i.e., the links for 
   # all tags related to this one)
-  def summarize_tag_relations label = "<h4>See Also</h4>"
+  def summarize_tag_relations label = "See Also"
     @tagserv ||= TagServices.new(@tag)
-    tag_info_section( 
-      Referent.related(@tagserv.tag, false, true).collect { |rel| 
+    content_tag( :h3, label)+
+      Referent.related(@tagserv, false, true).collect { |rel|
         if(rel.id != @tagserv.id)  
-          refstrs = TagServices.new(rel).references.collect{ |reference| present_reference(reference) }
-          tag_info_section refstrs, label: ("'#{rel.name}'" + " on ")
+          ts = TagServices.new(rel)
+          refs = ts.references
+          refstrs = refs.collect{ |reference| present_reference(reference) }
+          content_tag(:div,
+                      tag_info_section(refstrs, label: ("'#{rel.name}'" + " on ")).html_safe,
+                      class: "container").html_safe unless refstrs.empty?
         end
-      }.compact,
-      label: label,
-      contentclass: "")
+      }.compact.join(', ').html_safe
   end
 
   def summarize_tag_synonyms label="Synonyms: "
@@ -188,7 +190,7 @@ BLOCK_END
     joinstr = options[:joinstr] || ", "
     if contentstrs && !contentstrs.empty?
       contentstr = contentclass.blank? ?
-                   contentstrs.join('') :
+                   contentstrs.join('').html_safe :
                    content_tag(:span, contentstrs.join(joinstr).html_safe, class: contentclass)
       # content_tag( :div,
       #   (label+contentstr).html_safe,
@@ -200,7 +202,7 @@ BLOCK_END
                      content_tag(:p, "<strong>#{label}</strong>".html_safe, class: "pull-right"),
                      class: "col-md-4")+
         content_tag( :div,
-                     content_tag(:p, contentstr, class: "pull-left"),
+                     content_tag(:p, contentstr.html_safe, class: "pull-left"),
                      class: "col-md-8"),
         class: "row"
       result.html_safe

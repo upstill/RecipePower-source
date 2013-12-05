@@ -238,14 +238,13 @@ class Referent < ActiveRecord::Base
     # ...all the parents (if required) of
     # ...all the children (if required) of
     # ...all the referents of this tag
-    def self.related tagid, doSynonyms = false, doParents = false, doChildren = false
-        [Tag.find(tagid)].collect { |tag| 
-            tag.referents.collect { |ref|
-                (doSynonyms ? ref.tag_ids : []) +
-                (doParents ? ref.parents.collect{ |parent| parent.tag_ids } : []) +
-                (doChildren ? ref.children.collect{ |child| child.tag_ids } : [])
-            }
-        }.flatten.uniq.delete_if{ |id| id == tagid }.collect{ |id| Tag.find id }
+    def self.related tag, doSynonyms = false, doParents = false, doChildren = false
+      unique_referents = tag.referents.collect { |ref|
+          [(ref.parents if doParents), (ref.children if doChildren)]
+      }.flatten.compact.uniq - tag.referents
+      tag_ids = unique_referents.collect { |ref| ref.tag_id }
+      tag_ids = tag_ids + tag.referents.collect { |ref| ref.tag_id } if doSynonyms
+      tag_ids.uniq.delete_if{ |id| id == tag.id }.collect{ |id| Tag.find id }
     end
 
     def typesym
