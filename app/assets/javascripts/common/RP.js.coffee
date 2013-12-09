@@ -18,6 +18,18 @@ RP.servePopup = () ->
 		popUp.focus()
 		return false
 
+RP.get_replacement = (event, request, selector) ->
+	# old_dlog is extracted from what triggered this call (if any)
+	if (!event) # || RP.dialog.beforeSend event
+		$.ajax
+			type: "GET",
+			dataType: "json",
+			url: request,
+			error: (jqXHR, textStatus, errorThrown) ->
+				debugger # RP.dialog.error event, jqXHR, textStatus, errorThrown
+			success: (responseData, statusText, xhr) ->
+				debugger # RP.dialog.success event, responseData, statusText, xhr
+
 # Cribbed from http://www.alistapart.com/articles/expanding-text-areas-made-elegant/
 RP.makeExpandingArea = (containers) ->
 	i = 0;

@@ -305,6 +305,7 @@
     <orderEntry type="library" scope="PROVIDED" name="webrat (v0.7.3, RVM: ruby-1.9.3-p286) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="will_paginate (v3.0.5, RVM: ruby-1.9.3-p286) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="with_advisory_lock (v0.0.10, RVM: ruby-1.9.3-p286) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="youtube_addy (v1.0.2, RVM: ruby-1.9.3-p286) [gem]" level="application" />
   </component>
   <component name="RModuleSettingsStorage">
     <LOAD_PATH number="0" />

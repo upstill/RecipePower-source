@@ -265,9 +265,10 @@ class SiteServices
     {:label=>"Image", :path=>"meta[property='og:image']", :attribute=>"content"}, 
     {:label=>"Image", :path=>"img.recipe_image", :attribute=>"src"}, 
     {:label=>"Image", :path=>"img.mainIMG", :attribute=>"src"}, 
-    {:label=>"Image", :path=>"div.entry_content img", :attribute=>"src"}, 
-    {:label=>"Image", :path=>"img[itemprop='image']", :attribute=>"src"}, 
-    {:label=>"Image", :path=>"img[itemprop='photo']", :attribute=>"src"}, 
+    {:label=>"Image", :path=>"div.entry_content img", :attribute=>"src"},
+    {:label=>"Image", :path=>"img[itemprop='image']", :attribute=>"src"},
+    {:label=>"Image", :path=>"link[itemprop='image']", :attribute=>"href"},
+    {:label=>"Image", :path=>"img[itemprop='photo']", :attribute=>"src"},
     {:label=>"Image", :path=>".entry img", :attribute=>"src"}, 
     {:label=>"Title", :path=>"meta[property='og:title']", :attribute=>"content"}, 
     {:label=>"Title", :path=>"meta[property='dc:title']", :attribute=>"content"}, 
@@ -280,7 +281,9 @@ protected
   def default_finder?(tag)
     @@DefaultFinders.any? { |dt| dt == tag } 
   end
-  
+
+public
+
   def site_finders
     @site_finders ||= (@site && @site.tags_serialized) ? YAML::load(@site.tags_serialized) : []
   end
@@ -288,8 +291,6 @@ protected
   def site_finders= (f)
     @site.tags_serialized = YAML::dump (@site_finders = f)
   end
-
-public
 
   # Make sure the given uri isn't relative, and make it absolute if it is
   def resolve(candidate)
@@ -478,6 +479,64 @@ public
       extractions = ss.extract_from_page url, spec
     end
     extractions
+  end
+
+  def self.stab_at_samples limit=-1
+    exclusions = %w{
+       tname=copyright
+      charset=UTF-8
+      rel=stylesheet
+    }
+    f = File.open("stab.txt", "w")
+    summ = { "link" => {}, "meta" => {} }
+    nsites = 0
+    Site.all.each { |site|
+      next if site.recipes.count < 1
+      self.new(site).stab_at_sample summ
+      nsites += 1
+      limit = limit - 1
+      break if limit == 0
+    }
+    f = File.open("stabsumm.txt", "w")
+    summ.each { |k, v|
+      f.puts k+":"
+      v.each { |ik, iv|
+        f.puts "\t#{ik}(#{iv.count}/#{nsites}):"
+        iv.each { |iiv|
+          f.puts "\t\t"+iiv
+        }
+      }
+    }
+    f.close
+  end
+
+  def stab_at_sample summ = {}
+    puts "Processing Site #{@site.sampleURL}"
+    begin
+      @nkdoc = Nokogiri::HTML(open @site.sampleURL)
+    rescue
+      puts "Error: couldn't open page '#{@site.sampleURL}' for analysis."
+      recipe = @site.recipes.first
+      puts "Processing Recipe #{recipe.url}"
+      begin
+        @nkdoc = Nokogiri::HTML(open recipe.url)
+      rescue
+        puts "Error: couldn't open recipe '#{recipe.url}' for analysis."
+        return {}
+      end
+    end
+    candidates = summ.keys.collect { |key| @nkdoc.css(key) }.flatten
+    candidates.each do |candidate|
+      attribs = candidate.keys
+      tag = candidate.name
+      map = summ[tag]
+      attribs.each { |attrib|
+        next if attrib == "href" || attrib == "content"
+        key_name_value = "#{attrib}=#{candidate.attributes[attrib].value}"
+        remainder = (attribs - [attrib]).collect { |attrib| attrib+'='+candidate.attributes[attrib].value }
+        (map[key_name_value] ||= []) << remainder.join("\t")
+      }
+    end
   end
 
   # Examine a page and return a hash mapping labels into found fields

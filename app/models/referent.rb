@@ -373,6 +373,11 @@ class Referent < ActiveRecord::Base
     def name(args = {})
         (tag = self.expression args) ? tag.name : "**no tag**"
     end
+
+    # Provide an array of all the names of all the tags for this referent
+    def names
+      self.expressions.map(&:name)
+    end
     
     # Return the name, appended with all associated forms
     def longname

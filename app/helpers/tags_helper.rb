@@ -37,7 +37,7 @@ module TagsHelper
   
   def summarize_tag_parents label = "Categorized Under: "
     @tagserv ||= TagServices.new(@tag)
-    tag_info_section @tagserv.parents.collect { |parent| tag_link parent }, label: label
+    tag_info_section @tagserv.parents.collect { |parent_list| parent_list.collect { |parent| tag_link parent }.join('/&#8201')}, label: label
   end
 	
   def summarize_tag_children label = "Examples: "
@@ -87,7 +87,7 @@ module TagsHelper
           refs = ts.references
           refstrs = refs.collect{ |reference| present_reference(reference) }
           content_tag(:div,
-                      tag_info_section(refstrs, label: ("'#{rel.name}'" + " on ")).html_safe,
+                      tag_info_section(refstrs, label: ("'#{rel.synonyms.map(&:name).join('/&#8201')}'" + " on ")).html_safe,
                       class: "container").html_safe unless refstrs.empty?
         end
       }.compact.join(', ').html_safe

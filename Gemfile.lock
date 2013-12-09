@@ -275,6 +275,7 @@ GEM
     will_paginate (3.0.5)
     with_advisory_lock (0.0.10)
       activerecord (>= 3.0.0)
+    youtube_addy (1.0.2)
 
 PLATFORMS
   ruby
@@ -333,3 +334,4 @@ DEPENDENCIES
   unicorn-rails
   webrat (~> 0.7.3)
   will_paginate (~> 3.0)
+  youtube_addy

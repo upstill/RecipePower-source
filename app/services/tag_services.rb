@@ -60,15 +60,16 @@ class TagServices
   end
 # -----------------------------------------------    
   def parent_ids
-    ExpressionServices.parent_ids_of_tags(id) - [id]
+    ExpressionServices.parent_ids_of_tags(id)
   end
   
   def self.parent_ids(ids)
-    ExpressionServices.parent_ids_of_tags(ids) - [ids].flatten
+    ExpressionServices.parent_ids_of_tags(ids)
   end
   
   def parents
-    Tag.where id: parent_ids
+    parent_ids.collect { |parent_set| Tag.where id: parent_set }
+    # Tag.where id: parent_ids
   end
 # -----------------------------------------------    
   # Return tags that match any of the given tags lexically, regardless of type

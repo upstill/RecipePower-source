@@ -21,7 +21,7 @@ class ExpressionServices
     ExpressionServices.expression_ids refids
   end
   
-  # Return all the semantic children of the tag(s)
+  # Return all the semantic children of the tag(s) as an array of arrays
   def self.child_ids_of_tags(tag_ids)
     # Get all the referents of all the tags
     refids = ExpressionServices.meaning_ids tag_ids
@@ -29,12 +29,13 @@ class ExpressionServices
     ExpressionServices.expression_ids child_refids
   end
   
-  # Return all the semantic parents of the tag(s)
+  # Return all the semantic parents of the tag(s) as an array of arrays
   def self.parent_ids_of_tags(tag_ids)
     # Get all the referents of all the tags
     refids = ExpressionServices.meaning_ids tag_ids
     parent_refids = ReferentServices.direct_parent_ids refids
-    ExpressionServices.expression_ids parent_refids
+    parent_refids.collect { |parent_id| ExpressionServices.expression_ids parent_id }
+    # ExpressionServices.expression_ids parent_refids
   end
   
   # Return all the semantic siblings of the tag(s)

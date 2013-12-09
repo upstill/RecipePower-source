@@ -320,20 +320,13 @@ window.recipePower_namespace = window.recipePower_namespace || {
 				for(var jx=0; jx<pathlist.length; jx++) {
 					candidates = ns.pathFilter(candidates, pathlist[jx]);
 				}
-//				if($(finder.path)[0] != candidates[0])
-//					debugger;
 				if (candidates.length > 0) {
 					var found = null;
-//					var jfound = null;
 					if(finder.attribute) {
 						found = candidates[0].getAttribute(finder.attribute);
-//						jfound = $(finder.path).attr(finder.attribute);
 					} else {
 						found = candidates[0].innerHTML;
-//						jfound = found;
 					}
-//					if(found != jfound)
-//						debugger;
 					result[finder.label] = found;
 				} 
 			}

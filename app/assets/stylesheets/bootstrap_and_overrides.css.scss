@@ -136,3 +136,20 @@ label {
 	width:200px;
 	margin-bottom:20px;
 }
+
+div#vidbox {
+  display: inline-block;
+  position: relative;
+  width: 100%;
+  #vbdummy {
+    padding-top: 75%; // 4:3 aspect ratio */
+  }
+  #vbelement {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: silver // show me! */
+  }
+}

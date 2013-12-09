@@ -117,7 +117,7 @@ class RecipesController < ApplicationController
         }
         format.json {
           @decorator = @recipe.decorate
-          @data = { onget: [ "dialog.get_and_go", nil, collection_url(layout: false) ] }
+          @data = { onget: [ "get_replacement", nil, collection_url(layout: false) ] }
           render json: {
             dlog: with_format("html") { 
               render_to_string :edit, layout: false
@@ -176,7 +176,6 @@ class RecipesController < ApplicationController
         end
       }
       format.json {
-        debugger
         if current_user          
           @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe]||{}, true, params[:extractions] # session[:user_id], params
           if @recipe.id
