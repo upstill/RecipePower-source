@@ -18,18 +18,6 @@ RP.servePopup = () ->
 		popUp.focus()
 		return false
 
-RP.get_replacement = (event, request, selector) ->
-	# old_dlog is extracted from what triggered this call (if any)
-	if (!event) # || RP.dialog.beforeSend event
-		$.ajax
-			type: "GET",
-			dataType: "json",
-			url: request,
-			error: (jqXHR, textStatus, errorThrown) ->
-				debugger # RP.dialog.error event, jqXHR, textStatus, errorThrown
-			success: (responseData, statusText, xhr) ->
-				debugger # RP.dialog.success event, responseData, statusText, xhr
-
 # Cribbed from http://www.alistapart.com/articles/expanding-text-areas-made-elegant/
 RP.makeExpandingArea = (containers) ->
 	i = 0;
@@ -338,8 +326,6 @@ RP.process_response = (responseData, dlog) ->
 				newdlog = RP.dialog.extract_modal newdlog # $(newdlog) # 
 			RP.dialog.replace_modal newdlog, dlog
 			supplanted = true
-		else if responseData.replacements && dlog
-			RP.dialog.run dlog
 
 		# 'code' gives HTML code, presumably for a dialog, possibly wrapped in a page
 		# If it's a page that includes a dialog, assert that, otherwise replace the page
@@ -363,7 +349,10 @@ RP.process_response = (responseData, dlog) ->
 		RP.notifications.from_response responseData
 		
 		# 'done', when true, simply means close the dialog, with an optional notice
-		if responseData.done && !supplanted
-			RP.dialog.close_modal dlog, responseData.notice
+		if !supplanted
+			if responseData.done
+				RP.dialog.close_modal dlog, responseData.notice
+			else if responseData.replacements && dlog
+				RP.dialog.run dlog
 
 	return supplanted

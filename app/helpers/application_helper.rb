@@ -525,4 +525,11 @@ module ApplicationHelper
                 class: "hide-if-empty"
   end
 
+  # Set up a remote interaction via the get_content javascript module
+  def button_to_get_content label, options={}
+    options[:class] = "btn btn-default btn-xs get-content"
+    options.merge! remote: true
+    link_to label, "#", options
+  end
+
 end

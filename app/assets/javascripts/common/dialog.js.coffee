@@ -7,37 +7,24 @@ jQuery ->
 	$(document).on("ajax:success", '.dialog-run', RP.dialog.success )
 	$(document).on("ajax:error", '.dialog-run', RP.dialog.error )
 
-# Set up all ujs for the dialog and its requirements
-RP.dialog.arm_links = (dlog) ->
-	dlog ||= window.document
-	$('input.cancel', dlog).click RP.dialog.cancel
-	$('a.dialog-cancel-button', dlog).click RP.dialog.cancel
-	$('a.question_section', dlog).click RP.showhide
-	if requires = $(dlog).data 'dialog-requires'
-		for requirement in requires
-			if fcn = RP.named_function "RP."+requirement+".bind" 
-				fcn.apply()
-
 # Before making a dialog request, see if the dialog is preloaded
 RP.dialog.beforeSend = (event, xhr, settings) ->
 	selector = $(this).data 'selector'
-	odlog = target_modal event
 	if selector && (ndlog = $(selector)[0]) # If dialog already loaded, replace the responding dialog
-		RP.dialog.replace_modal ndlog, odlog
+		RP.dialog.replace_modal ndlog, target_modal(event)
 		return false;
 	else
 		return true;
 
 # Success handler for fetching dialog from server
 RP.dialog.success = (event, responseData, status, xhr) ->
-	responseData.how = responseData.how || "modal"
+	responseData.how ||= "modal"
 	RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
 	RP.process_response responseData, target_modal(event)
 
 RP.dialog.error = (event, jqXHR, status, error) ->
 	responseData = RP.post_error jqXHR
-	odlog = target_modal event
-	RP.process_response responseData, odlog
+	RP.process_response responseData, target_modal(event)
 
 # Hit the server for a dialog via JSON, and run the result
 # This function can be tied to a link with only a URL to a controller for generating a dialog.
@@ -54,14 +41,24 @@ RP.dialog.get_and_go = (event, request, selector) ->
 			success: (responseData, statusText, xhr) ->
 				RP.dialog.success event, responseData, statusText, xhr
 
+# Set up all ujs for the dialog and its requirements
+RP.dialog.arm_links = (dlog) ->
+	dlog ||= window.document
+	$('input.cancel', dlog).click RP.dialog.cancel
+	$('a.dialog-cancel-button', dlog).click RP.dialog.cancel
+	$('a.question_section', dlog).click RP.showhide
+	if requires = $(dlog).data 'dialog-requires'
+		for requirement in requires
+			if fcn = RP.named_function "RP."+requirement+".bind"
+				fcn.apply()
+
 RP.dialog.cancel = (event) ->
 	if event
 		dlog = target_modal(event)
 		event.preventDefault();			
 	else
 		dlog = $('div.dialog')[0]
-	if dlog
-		RP.dialog.close_modal dlog
+	RP.dialog.close_modal dlog
 
 # Take over a previously-loaded dialog and run it
 RP.dialog.run = (dlog) ->
@@ -114,9 +111,8 @@ RP.dialog.replace_modal = (newdlog, odlog) ->
 
 # Return the dialog element for the current event target
 target_modal = (event) ->
-	if !event
-		event = window.event
-	if (odlog = $('div.dialog.modal')[0]) && $(event.currentTarget, odlog)[0]
+	elmt = (event || window.event).currentTarget
+	if (odlog = $('div.dialog.modal')[0]) && $(elmt, odlog)[0]
 		return odlog
 
 open_modal = (dlog, omit_button) ->
