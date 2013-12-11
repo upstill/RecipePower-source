@@ -1,14 +1,33 @@
 # encoding: UTF-8
 require './lib/uri_utils.rb'
+=begin
+class Finder < Object
+  attr_accessor :label, :path, :attribute
+  def initialize label, path, attribute
+    self.label = label
+    self.path = path
+    self.attribute = attribute
+    super()
+  end
+
+  def self.model_name
+    ActiveModel::Name.new Site::Finder
+  end
+end
+=end
 
 class Site < ActiveRecord::Base
   include Taggable
-  attr_accessible :site, :home, :scheme, :subsite, :sample, :host, :name, :port, :logo, :tags_serialized, :ttlcut, :ttlrepl
-  
+  attr_accessible :finders_attributes, :site, :home, :scheme, :subsite, :sample, :host, :name, :port, :logo, :tags_serialized, :ttlcut, :ttlrepl, :finders
+#   serialize :finders, Array
+
   belongs_to :referent, :dependent=>:destroy
+
+  has_and_belongs_to_many :finders
+  accepts_nested_attributes_for :finders
   
   has_many :feeds, :dependent=>:destroy
-  
+
   # When creating a site, also create a corresponding site referent
   # before_create :ensure_referent
   

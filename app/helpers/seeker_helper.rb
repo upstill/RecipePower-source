@@ -1,6 +1,6 @@
 module SeekerHelper
 	def seeker_table( heading, column_heads )
-	  header = heading || "<h3>#{@seeker.table_header}</h3>"
+	  header = heading || (@seeker && "<h3>#{@seeker.table_header}</h3>") || ""
 	  (%Q{
       #{header}
   		<table class="table table-striped">
