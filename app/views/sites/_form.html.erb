@@ -3,31 +3,24 @@
 	  <div class="logo">                                     
 	  	<%= pic_field @site, :logo, f, true %>
 	  </div>
-      <h4>Data Finders <a href="" onclick="RP.edit_site.add_finder()" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-plus"></span></a></h3>
+      <h4>Data Finders </h4>
       <div class="row">
-        <div class="col-md-3">
+        <div class="col-md-2">
           To Extract
         </div>
-        <div class="col-md-6">
+        <div class="col-md-5">
           Use Selector
         </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
           Read Attribute
         </div>
       </div>
-      <%= f.simple_fields_for :finders do |p| %>
-        <div class="row">
-          <div class="col-md-3">
-            <%= p.select :finds, %w{ URI Image Title Author SiteName Keywords }.unshift(""), label: false %>
-          </div>
-          <div class="col-md-6">
-            <%= p.input :selector, label: false %>
-          </div>
-          <div class="col-md-3">
-            <%= p.select :read_attrib, %w{ href content src }.unshift(""), label: false %>
-          </div>
-        </div>
-      <% end %>
+      <div class="finder-fields">
+        <%= f.simple_fields_for :finders do |p| %>
+          <%= render "finder_fields", f: p %>
+        <% end %>
+        <%= link_to_add_fields 'Add New', f, :finders %>
+      </div>
       <hr>
 	  <%= f.input :site %>
 	  <%= f.input :home %>

@@ -24,7 +24,7 @@ class Site < ActiveRecord::Base
   belongs_to :referent, :dependent=>:destroy
 
   has_and_belongs_to_many :finders
-  accepts_nested_attributes_for :finders
+  accepts_nested_attributes_for :finders, :allow_destroy => true
   
   has_many :feeds, :dependent=>:destroy
 
