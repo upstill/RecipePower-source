@@ -1,12 +1,12 @@
 <div class="row finder-field">
   <div class="col-md-2">
-    <%= f.input :finds, collection: %w{ URI Image Title Author SiteName Keywords }, label: false, required: true %>
+    <%= f.input :finds, collection: SiteServices.data_choices, label: false, required: true %>
   </div>
   <div class="col-md-5">
     <%= f.input :selector, label: false, required: true %>
   </div>
   <div class="col-md-3">
-    <%= f.input :read_attrib, collection: %w{ href content src }, label: false, required: true %>
+    <%= f.input :read_attrib, collection: SiteServices.attribute_choices, label: false %>
   </div>
   <div class="col-md-2">
     <%= f.input :_destroy, :as => :hidden, label: false %>

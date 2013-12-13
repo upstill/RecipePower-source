@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20131211082921) do
+ActiveRecord::Schema.define(version: 20131213024919) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -98,13 +98,7 @@ ActiveRecord::Schema.define(version: 20131211082921) do
     t.string   "finds"
     t.string   "selector"
     t.string   "read_attrib"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  create_table "finders_sites", force: true do |t|
     t.integer  "site_id"
-    t.integer  "finder_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -190,6 +184,7 @@ ActiveRecord::Schema.define(version: 20131211082921) do
     t.text     "tagpane"
     t.integer  "thumbnail_id"
     t.text     "href"
+    t.text     "description"
   end
 
   create_table "references", force: true do |t|
@@ -276,8 +271,9 @@ ActiveRecord::Schema.define(version: 20131211082921) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "ttlcut"
-    t.string   "ttlrepl"
     t.integer  "referent_id"
+    t.boolean  "reviewed",        default: false
+    t.text     "description"
   end
 
   create_table "tag_owners", force: true do |t|

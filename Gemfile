@@ -43,7 +43,7 @@ gem 'delayed_job' # , git: 'git://github.com/collectiveidea/delayed_job.git'
 gem 'delayed_job_active_record' # , git: 'git://github.com/collectiveidea/delayed_job_active_record.git'
 gem 'hirefire-resource'
 gem 'rspec-rails', :group => [:test, :development]
-# gem 'debugger', :group => [:test, :development]
+gem 'debugger', :group => [:test, :development]
 gem 'awesome_nested_set'
 gem 'redcarpet'
 gem 'content_for_in_controllers'

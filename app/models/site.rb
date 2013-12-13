@@ -18,12 +18,12 @@ end
 
 class Site < ActiveRecord::Base
   include Taggable
-  attr_accessible :finders_attributes, :site, :home, :scheme, :subsite, :sample, :host, :name, :port, :logo, :tags_serialized, :ttlcut, :ttlrepl, :finders
+  attr_accessible :finders_attributes, :site, :home, :scheme, :subsite, :sample, :host, :name, :port, :logo, :ttlcut, :finders, :reviewed
 #   serialize :finders, Array
 
   belongs_to :referent, :dependent=>:destroy
 
-  has_and_belongs_to_many :finders
+  has_many :finders, :dependent=>:destroy
   accepts_nested_attributes_for :finders, :allow_destroy => true
   
   has_many :feeds, :dependent=>:destroy
@@ -94,7 +94,7 @@ public
   end
   
   # Find and return the site wherein the named link is stored
-  def self.by_link (link)
+  def self.by_link (link, all=false)
     # Sanitize the URL
     link.strip!
     link.gsub!(/\{/, '%7B')
@@ -110,14 +110,14 @@ public
       # If multiple sites may proceed from the same domain, 
       # we need to find the one whose full site path (site+subsite) matches the link
       # So: among matching hosts, find one whose 'site+subsite' is an initial substring of the link
-      matching_subsite = matching_site = nil
+      matching_subsites = []; matching_sites = []
       sites.each do |site|
         unless site.site.empty?
-          matching_site = site if link.index(site.site)
-          matching_subsite = site if !site.subsite.empty? && link.index(site.site+site.subsite)
+          matching_sites << site if link.index(site.site)
+          matching_subsites << site if !site.subsite.empty? && link.index(site.site+site.subsite)
         end
       end
-      matching_subsite || matching_site || Site.create(:sample=>link)
+      all ? (matching_sites+matching_subsites).uniq : (matching_subsites[0] || matching_sites[0] || Site.create(:sample=>link))
     else
       puts "Ill-formed link: '#{link}'"
       nil

@@ -1,44 +1,25 @@
 <%= simple_form_for(@site) do |f| %>
-	<%= modal_body do %>
-	  <div class="logo">                                     
-	  	<%= pic_field @site, :logo, f, true %>
-	  </div>
-      <h4>Data Finders </h4>
-      <div class="row">
-        <div class="col-md-2">
-          To Extract
+    <%= modal_body do %>
+        <div class="logo">
+          <%= pic_field @site, :logo, f, true %>
         </div>
-        <div class="col-md-5">
-          Use Selector
+        <%= f.input :site %>
+        <%= f.input :home %>
+        <%# if params[:action] != "edit" %>
+        <%= f.input :name %>
+        <%# end %>
+        <%= f.input :subsite %>
+        <%= f.input :sample %>
+        <div>
+          Sample Title (raw): <strong><%= crack_sample %></strong><br>
+          Sample Title (editted): <strong><%= trimmed_sample %></strong><br>
         </div>
-        <div class="col-md-4">
-          Read Attribute
-        </div>
-      </div>
-      <div class="finder-fields">
-        <%= f.simple_fields_for :finders do |p| %>
-          <%= render "finder_fields", f: p %>
-        <% end %>
-        <%= link_to_add_fields 'Add New', f, :finders %>
-      </div>
-      <hr>
-	  <%= f.input :site %>
-	  <%= f.input :home %>
-		<%# if params[:action] != "edit" %>
-			<%= f.input :name %>
-		<%# end %>
-	  <%= f.input :subsite %>
-	  <%= f.input :sample %>
-	  <div>
-		Sample Title (raw): <strong><%= crack_sample %></strong><br> 
-		Sample Title (editted): <strong><%= trimmed_sample %></strong><br>
-	  </div>
-		<%= f.input :ttlcut, label: "RegExp to cut out of title" %>
-		<%= f.input :ttlrepl, label: "RegExp of replacement" %>
-	  <%# f.input :tags_serialized, :html => { :rows=>"20" } %>
+        <%= f.input :ttlcut, label: "RegExp to cut out of title" %>
+        <%# f.input :tags_serialized, :html => { :rows=>"20" } %>
+        <%= render("finders", f: f) if permitted_to? :edit, :finders %>
 
-	<% end %>
-	<%= modal_footer do %>
+    <% end %>
+    <%= modal_footer do %>
 	<% if ref = @site.referent %>
 	 <%= link_to_modal ref.class.to_s+" "+ref.name, edit_referent_path(ref) %>
 	<% end %>

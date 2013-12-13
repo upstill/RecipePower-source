@@ -8,7 +8,7 @@ class Recipe < ActiveRecord::Base
   include Taggable
   include Referrable
   include Linkable
-  attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href # , :picAR
+  attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href, :description # , :picAR
   after_save :save_ref
 
   validates :title, :presence=>true 
@@ -66,12 +66,12 @@ public
   attr_reader :status
   
   @@coder = HTMLEntities.new
-    
-  # Either fetch an exising recipe record or make a new one, based on the
+
+  # Either fetch an existing recipe record or make a new one, based on the
   # params. If the params have an :id, we find on that, otherwise we look
   # for a record matching the :url. If there are no params, just return a new recipe
   # If a new recipe record needs to be created, we also do QA on the provided URL
-  # and dig around for a title.
+  # and dig around for a title, description, etc.
   # Either way, we also make sure that the recipe is associated with the given user
   def self.ensure( userid, params, add_to_collection = true, extractions = nil)
     if params[:id]
@@ -79,7 +79,8 @@ public
       rcp = Recipe.find params[:id]
     else
       if !extractions
-        extractions = SiteServices.extract_from_page(params[:url], :label => [:URI, :Image, :Title])
+        # extractions = SiteServices.extract_from_page(params[:url] )
+        extractions = SiteServices.extract_from_page(params[:url] )
         if extractions.empty?
           rcp = self.new
           rcp.errors[:url] = "Doesn't appear to be a working URL: we can't open it for analysis"
@@ -87,6 +88,7 @@ public
         end
       end
       # Extractions are parameters derived directly from the page
+      params[:description] = extractions[:Description] if extractions[:Description]
       if extractions[:URI]
         params[:url] = extractions[:URI] 
       elsif extractions[:href]

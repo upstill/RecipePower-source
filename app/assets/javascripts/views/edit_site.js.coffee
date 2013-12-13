@@ -48,8 +48,10 @@ RP.edit_site.onload = (dlog) ->
 			fix_buttons dlog
 			event.preventDefault()
 		$(dlog).on 'click', '.delete-finder', (event) ->
-			$('input[type=hidden]', $(this).prev('div.form-group.hidden')).val('1')
-			$(this).closest('.row').hide()
+			$('input[type=hidden]', $(this).siblings('div.form-group.hidden')).val('1')
+			my_row = $(this).closest('.row')
+			$(my_row).hide()
+			$('.required', my_row).removeClass('required').removeAttr('required')
 			fix_buttons dlog
 			event.preventDefault()
 

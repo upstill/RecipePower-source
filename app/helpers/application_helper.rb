@@ -112,7 +112,7 @@ module ApplicationHelper
     )
     picker = is_local ?
       content_tag(:div,
-            link_to( "Pick Picture", "/", :data=>"recipe_picurl;div.pic_preview img", :class => "pic_picker_golink")+
+            link_to( "Pick Picture", "/", :data=>"recipe_picurl;div.pic_preview img", :class => "pic_picker_golink hide")+
             pic_picker_shell(obj), # pic_picker(obj.picurl, obj.url, obj.id), 
             :class=>"pic_picker_link"
             ) # Declare the picture-picking dialog

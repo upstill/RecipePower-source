@@ -6,17 +6,17 @@ class String
     # XXX Should be mapping single quotes into ASCII equivalent
     Iconv.conv('ASCII//IGNORE', 'UTF8', self)
   end
-  
+
   def cleanup
     # self.strip.force_encoding('ASCII-8BIT').gsub(/[\xa0\s]+/, ' ').remove_non_ascii.encode('UTF-8').gsub(/ ,/, ',') unless self.nil?
     self.strip.force_encoding('ASCII-8BIT').remove_non_ascii.encode('UTF-8').gsub(/ ,/, ',') unless self.nil?
   end
 end
 
-class Result 
-  
-  attr_accessor :finder, :out 
-  
+class Result
+
+  attr_accessor :finder, :out
+
   def initialize(f)
     @finder = f
     @out = []
@@ -31,7 +31,7 @@ class Result
       self.out << str # Add to the list of results
     end
   end
-  
+
   def found
     out.join('').length > 0
   end
@@ -40,16 +40,16 @@ class Result
     puts "...results due to #{@finder}:"
     puts "\t"+out.join("\n\t")
   end
-  
+
   def is_for(label)
     @finder[:label] == label
   end
-  
+
 end
 
 # Accumulates the results of a finder set
 class FinderResults
-  
+
   def initialize(site, finders, only=nil)
     @finders = finders
     @site = site
@@ -76,16 +76,16 @@ class FinderResults
       return nil
     end
     labelset.each do |label|
-      pagetags.results_for(label = label.to_s).each do |result| 
+      pagetags.results_for(label = label.to_s).each do |result|
         foundset = "["+result.out.join("\n\t\t ")+"] (from "+url+")"
         finder = result.finder
-        finder[:count] = finder[:count] + 1 
+        finder[:count] = finder[:count] + 1
         finder[:foundlings] << foundset
       end
     end
     return pagetags
   end
-  
+
   # Interact via the terminal on the fate of the finders
   def revise_interactively
     @finders.each do |finder|
@@ -93,8 +93,8 @@ class FinderResults
       finder.each { |key, value| puts "\t(#{key}: #{value})" unless [:label, :path, :count, :foundlings].include?(key) }
       # Trim any found title using the 'ttlcut' attribute of the site
       if finder[:label] == "Title" && @site.ttlcut
-        finder[:foundlings].each_index do |ix| 
-          ttl, url = finder[:foundlings][ix].match(/^\[([^\]]*)\] \(from (.*)\)$/)[1,2]
+        finder[:foundlings].each_index do |ix|
+          ttl, url = finder[:foundlings][ix].match(/^\[([^\]]*)\] \(from (.*)\)$/)[1, 2]
           finder[:foundlings][ix] = "[#{trim_title ttl}] (from #{url})"
         end
       end
@@ -102,36 +102,36 @@ class FinderResults
       puts "Action? ([dD]=Delete [qQ]=quit [C cutstring])"
       answer = gets.strip
       if m = answer.match(/^([Cc])\s*(\S.*$)/)
-        answer, cutstring = m[1,2]
+        answer, cutstring = m[1, 2]
       end
       case answer
-      when "d", "D"
-        @finders.delete_if { |f| f == finder }
-        done = false
-      when "q", "Q"
-        exit
-      when "c", "C"
-        if finder[:label] == "Title"
-          puts "Really cut titles from this site using '#{cutstring}'?"
-          if gets.strip == 'y'
-            puts "...okay..."
-            @site.ttlcut = cutstring
-            done = false
+        when "d", "D"
+          @finders.delete_if { |f| f == finder }
+          done = false
+        when "q", "Q"
+          exit
+        when "c", "C"
+          if finder[:label] == "Title"
+            puts "Really cut titles from this site using '#{cutstring}'?"
+            if gets.strip == 'y'
+              puts "...okay..."
+              @site.ttlcut = cutstring
+              done = false
+            end
           end
-        end
-      when ""
-      else
-        # Replace the path with input text
-        puts "Really replace path '#{finder[:path]}' with '#{answer}'?"
-        next unless gets.strip == 'y' 
-        puts "...okay..."
-        finder[:path] = answer
-        @finders.each do |tag| 
-          if tag == finder
-            tag[:path] = answer
+        when ""
+        else
+          # Replace the path with input text
+          puts "Really replace path '#{finder[:path]}' with '#{answer}'?"
+          next unless gets.strip == 'y'
+          puts "...okay..."
+          finder[:path] = answer
+          @finders.each do |tag|
+            if tag == finder
+              tag[:path] = answer
+            end
           end
-        end
-        done = false
+          done = false
       end
     end
     @finders.each do |finder|
@@ -140,7 +140,7 @@ class FinderResults
     end
     @finders
   end
-  
+
   def report
     # finderset = self.collect_tags(which)+@@TitleTags
     foundlist = {}
@@ -155,7 +155,7 @@ class FinderResults
       puts label.to_s+":"
       labelset.each do |path, pathset|
         puts "\t"+path+":"
-        pathset.each do |tags| 
+        pathset.each do |tags|
           tags.each do |name, value|
             next if name == :label || name == :path || name == :foundlings
             nq = name.class == Symbol ? "\'"+name.to_s+"\'" : "\""+name+"\""
@@ -171,23 +171,23 @@ class FinderResults
 end
 
 # PageTags accumulates the tags for a page
-class PageTags 
-      
-private
-    
+class PageTags
+
+  private
+
   def initialize (url, site, finders, do_all=nil, verbose = true)
     @nkdoc = Nokogiri::HTML(open url)
     @finderset = finders
     @results = {}
-    @finderset.collect { |finder| finder[:label] }.uniq.each { |label| @results[label] = [] }
+    SiteServices.data_choices().each { |label| @results[label] = [] }
     @site = site
     @verbose = verbose
     # Initialize the results
     @finderset.each do |finder|
       label = finder[:label]
-      next unless @results[label].empty? && finder[:path] && 
-                  (matches = @nkdoc.css(finder[:path])) && 
-                  (matches.count > 0)
+      next unless (do_all || @results[label].empty?) && (selector = finder[:path]) &&
+          (matches = @nkdoc.css(selector)) &&
+          (matches.count > 0)
       attribute_name = finder[:attribute]
       @result = Result.new finder # For accumulating results
       matches.each do |ou|
@@ -201,7 +201,7 @@ private
           elsif child.name == 'img'
             outstr = child.attributes['src'].to_s
             @result.push outstr unless finder[:pattern] && !(outstr =~ /#{finder[:pattern]}/)
-          # If there's an enclosed link coextensive with the content, emit the link
+            # If there's an enclosed link coextensive with the content, emit the link
           elsif (atag = child.css("a").first) && (cleanupstr(atag.content) == cleanupstr(child.content))
             glean_atag finder, atag
           else # Otherwise, it's just vanilla content
@@ -211,7 +211,8 @@ private
       end
       if @result.found
         @result.report if @verboase
-        @results[label] << @result 
+        @results[label] << @result
+        @results[finder[:id]] = [@result]
       end
     end
   end
@@ -232,64 +233,86 @@ private
     str.strip.gsub(/\s+/, ' ').gsub(/ ,/, ',') unless str.nil?
   end
 
-public
-  
+  public
+
   # Return the first result under the given label
   def result_for (label)
     (results = @results[label]) && # There are results for this tag
-    results.first &&  # First hash in the list of results
-    results.first.out[0]
+        results.first && # First hash in the list of results
+        results.first.out[0]
   end
-  
+
   # Return the array of results under the given label
   def results_for (label)
     @results[label] || []
   end
-  
+
 end
 
 class SiteServices
   attr_accessor :site
-  
+
   def initialize site
-      @site = site
-      site_finders # Preload the finders
+    @site = site
+    site_finders # Preload the finders
   end
 
   @@DefaultFinders = [
-    {:label=>"URI", :path=>"link[rel='canonical']", :attribute=>"href" },
-    {:label=>"URI", :path=>"meta[property='og:url']", :attribute=>"content" },
-    {:label=>"URI", :path=>"div.post a[rel='bookmark']", :attribute=>"href"},
-    {:label=>"URI", :path=>".title a", :attribute=>"href"},
-    {:label=>"URI", :path=>"a.permalink", :attribute=>"href"},
-    {:label=>"Image", :path=>"meta[property='og:image']", :attribute=>"content"}, 
-    {:label=>"Image", :path=>"img.recipe_image", :attribute=>"src"}, 
-    {:label=>"Image", :path=>"img.mainIMG", :attribute=>"src"}, 
-    {:label=>"Image", :path=>"div.entry_content img", :attribute=>"src"},
-    {:label=>"Image", :path=>"img[itemprop='image']", :attribute=>"src"},
-    {:label=>"Image", :path=>"link[itemprop='image']", :attribute=>"href"},
-    {:label=>"Image", :path=>"img[itemprop='photo']", :attribute=>"src"},
-    {:label=>"Image", :path=>".entry img", :attribute=>"src"}, 
-    {:label=>"Title", :path=>"meta[property='og:title']", :attribute=>"content"}, 
-    {:label=>"Title", :path=>"meta[property='dc:title']", :attribute=>"content"}, 
-    {:label=>"Title", :path=>"meta[name='title']", :attribute=>"content"}, 
-    {:label=>"Title", path: "title" },
+      {:label => "URI", :path => "link[rel='canonical']", :attribute => "href"},
+      {:label => "URI", :path => "meta[property='og:url']", :attribute => "content"},
+      {:label => "URI", :path => "div.post a[rel='bookmark']", :attribute => "href"},
+      {:label => "URI", :path => ".title a", :attribute => "href"},
+      {:label => "URI", :path => "a.permalink", :attribute => "href"},
+      {:label => "Image", :path => "meta[itemprop='image']", :attribute => "content"},
+      {:label => "Image", :path => "img.recipe_image", :attribute => "src"},
+      {:label => "Image", :path => "img.mainIMG", :attribute => "src"},
+      {:label => "Image", :path => "div.entry_content img", :attribute => "src"},
+      {:label => "Image", :path => "img[itemprop='image']", :attribute => "src"},
+      {:label => "Image", :path => "link[itemprop='image']", :attribute => "href"},
+      {:label => "Image", :path => "link[rel='image_src']", :attribute => "href"},
+      {:label => "Image", :path => "img[itemprop='photo']", :attribute => "src"},
+      {:label => "Image", :path => ".entry img", :attribute => "src"},
+      {:label => "Title", :path => "meta[name='title']", :attribute => "content"},
+      {:label => "Title", path: "title"},
+      {:label => "Title", :path => "meta[name='fb_title']", :attribute => "content"},
+      {:label => "Title", :path => "meta[property='og:title']", :attribute => "content"},
+      {:label => "Title", :path => "meta[property='dc:title']", :attribute => "content"},
+      {:label => "Author Name", path: "meta[name='author']", :attribute => "content"},
+      {:label => "Author Name", path: "meta[itemprop='author']", :attribute => "content"},
+      {:label => "Author Name", path: "meta[name='author.name']", :attribute => "content"},
+      {:label => "Author Name", path: "meta[name='article.author']", :attribute => "content"},
+      {:label => "Author Link", path: "link[rel='author']", :attribute => "href"},
+      {:label => "Description", path: "meta[name='description']", :attribute => "content"},
+      {:label => "Description", path: "meta[property='og:description']", :attribute => "content"},
+      {:label => "Description", path: "meta[property='description']", :attribute => "content"},
+      {:label => "Description", path: "meta[itemprop='description']", :attribute => "content"},
+      {:label => "Site Name", path: "meta[property='og:site_name']", :attribute => "content"},
+      {:label => "Site Name", path: "meta[name='application_name']", :attribute => "content"},
+      {:label => "Tags", path: "meta[name='keywords']", :attribute => "content"},
   ]
 
-protected    
-  
-  def default_finder?(tag)
-    @@DefaultFinders.any? { |dt| dt == tag } 
+#   @@DataChoices = [ "URI", "Image", "Title", "Description", "Author Name", "Author Link", "Site Name", "Keywords", "Tags" ]
+
+  def self.data_choices
+    @@DataChoices ||= (@@DefaultFinders.collect { |f| f[:label] } << "Site Logo").uniq
   end
 
-public
+  def self.attribute_choices
+    @@AttributeChoices ||= @@DefaultFinders.collect { |f| f[:attribute] }.uniq
+  end
+
+  protected
+
+  def default_finder?(tag)
+    @@DefaultFinders.any? { |dt| dt == tag }
+  end
+
+  public
 
   def site_finders
-    @site_finders ||= (@site && @site.tags_serialized) ? YAML::load(@site.tags_serialized) : []
-  end
-  
-  def site_finders= (f)
-    @site.tags_serialized = YAML::dump (@site_finders = f)
+    @site_finders ||=
+        @site.finders.collect { |f| {:label => f.finds, :path => f.selector, :attribute => f.read_attrib, :id => f.id} }
+    # result << {:label=>"Image", :path=>"p.bodytext img", :attribute=>"src"},
   end
 
   # Make sure the given uri isn't relative, and make it absolute if it is
@@ -301,12 +324,15 @@ public
       candidate
     end
   end
-  
+
   # Doctor a scanned title coming in from a web page, according to the site parameters
   def trim_title(ttl)
     if ttl
       unless @site.ttlcut.blank?
-        ttl.gsub! /#{@site.ttlcut}/i, (@site.ttlrepl || '')
+        re = /#{@site.ttlcut}/
+        if md = re.match(ttl)
+          ttl = md[1] || ttl.sub(re, '')
+        end
       end
       ttl.strip
     end
@@ -322,23 +348,23 @@ public
     fr.collect_results url || @site.sampleURL
     self.site_finders = fr.revise_interactively
     case get_input("Any finder to add ([yY]: yes, [qQ]: quit without saving)? ")
-    when "y", "Y"
-      finder = {}
-      finder[:label] = get_input("Label: ")
-      finder[:path] = get_input("Path: ")
-      unless (attrib = get_input("Attribute: ")).blank?
-        finder[:attribute] = attrib
-      end
-      ss.add_finder finder
-    when "q", "Q"
-      return
-    else
-      @site.save
+      when "y", "Y"
+        finder = {}
+        finder[:label] = get_input("Label: ")
+        finder[:path] = get_input("Path: ")
+        unless (attrib = get_input("Attribute: ")).blank?
+          finder[:attribute] = attrib
+        end
+        ss.add_finder finder
+      when "q", "Q"
+        return
+      else
+        @site.save
     end
   end
 
   def add_finder (finder={})
-    finder.each do |k, v| 
+    finder.each do |k, v|
       unless [:label, :path, :attribute].include?(k)
         puts k.to_s+" is not a valid field"
         return
@@ -347,17 +373,49 @@ public
     end
     fr = FinderResults.new @site, [finder]
     fr.collect_results @site.sampleURL
-    self.site_finders = (self.site_finders + fr.revise_interactively) 
+    self.site_finders = (self.site_finders + fr.revise_interactively)
     @site.save
   end
-  
+
   def all_finders
+    # Give the DefaultFinders a unique id
+    @@DefaultFinders.each { |df|
+      df[:id] = Finder.where(finds: df[:label], selector: df[:path], read_attrib: df[:attribute]).first_or_create.id
+    } unless @@DefaultFinders.first[:id]
     site_finders + @@DefaultFinders
   end
-  
+
+  def scrape
+    extractions = extract_from_page(@site.sampleURL)
+    puts "Site # #{@site.id.to_s}"
+    puts "\tname: #{@site.name}"
+    puts "\thome: (#{@site.home})"
+    puts "\tsubsite: (#{@site.subsite})"
+    puts "\tlogo: (#{@site.logo})"
+    extractions.each { |k, v| puts "\t\t#{k.to_s}: #{v}" }
+  end
+
+  def self.purge do_it=false
+    used_sites = []
+    Recipe.all.each { |r|
+      site_id = r.site.id
+      used_sites[site_id] = site_id
+    }
+    Reference.all.each { |r|
+      site_id = r.site.id
+      used_sites[site_id] = site_id
+    }
+    puts "#{used_sites.compact.count.to_s} of #{Site.all.count.to_s} reachable"
+    if do_it
+      Site.all.each { |site|
+        site.destroy unless used_sites[site.id]
+      }
+    end
+  end
+
   def self.scrape_for_feeds(n=-1)
     Site.all[0..n].each { |site| Delayed::Job.enqueue site }
-  end 
+  end
 
   # Examine each site and confirm that its sample page URL matches a recipe
   def self.QA
@@ -381,7 +439,7 @@ public
     bogus_out = []
     moved_out = []
     unmapped = []
-    Site.all.each do |site| 
+    Site.all.each do |site|
       puts "---------------"
       sought = sought+1
 
@@ -396,7 +454,7 @@ public
       end
 
       ss = SiteServices.new site
-      if( (results = ss.extract_from_page(test_url, :label => :URI, :finders => @@DefaultFinders )) && (recipe_url = results[:URI]))
+      if ((results = ss.extract_from_page(test_url, :label => :URI, :finders => @@DefaultFinders)) && (recipe_url = results[:URI]))
         found = found + 1
       else
         suspect << test_url
@@ -421,9 +479,9 @@ public
         puts "Unredirected URI matches recipe: "+test_url
         matched = matched + 1
       end
-      
+
       if !site_map[site.id]
-        puts "#{site.name} has no recipes" 
+        puts "#{site.name} has no recipes"
         unmapped << "\t"+site.name
       end
     end
@@ -452,14 +510,14 @@ public
       puts "home: "+site.home
       puts "site: "+site.site
       puts "sample: "+site.sampleURL
-      if pagetags = fr.collect_results(site.sampleURL, [:URI,:Title,:Image], true, site)
+      if pagetags = fr.collect_results(site.sampleURL, [:URI, :Title, :Image], true, site)
         puts ">>>>>>>>>>>>>>> Results >>>>>>>>>>>>>>>>>>"
         [:URI, :Title, :Image].each do |label|
           label = label.to_s
           result = (pagetags.result_for(label) || "** Nothing Found **")
           found_or_not = ""
           if label=="URI" && result!=site.sampleURL
-            found_or_not = "(NO MATCH!)" 
+            found_or_not = "(NO MATCH!)"
           end
           puts label+found_or_not+": "+result
         end
@@ -475,7 +533,7 @@ public
 
   def self.extract_from_page(url, spec={})
     extractions = {}
-    if !url.blank? && (site = Site.by_link url) && (ss = SiteServices.new(site) )
+    if !url.blank? && (site = Site.by_link url) && (ss = SiteServices.new(site))
       extractions = ss.extract_from_page url, spec
     end
     extractions
@@ -488,7 +546,7 @@ public
       rel=stylesheet
     }
     f = File.open("stab.txt", "w")
-    summ = { "link" => {}, "meta" => {} }
+    summ = {"link" => {}, "meta" => {}}
     nsites = 0
     Site.all.each { |site|
       next if site.recipes.count < 1
@@ -546,7 +604,7 @@ public
       labels = ((label.class == Array) ? label : [label]).collect { |l| l.to_s }
       finders = finders.keep_if { |t| labels.include? t[:label] }
     else
-      labels = finders.collect { |tag| tag[:label].to_s }.uniq
+      labels = SiteServices.data_choices
     end
     begin
       pagetags = PageTags.new(url, @site, finders, spec[:all], false)
@@ -560,14 +618,14 @@ public
       if foundstr = pagetags.result_for(label)
         # Assuming the tag was fulfilled, there may be post-processing to do
         case label
-        when "Title"
-          # A title may produce both a title and a URL, conventionally separated by a tab
-          titledata = foundstr.split('\t')
-          results[:URI] = titledata[1] if titledata[1]
-          foundstr = trim_title titledata.first
-        when "Image", "URI"
-          # Make picture path absolute if it's not already
-          foundstr = resolve foundstr 
+          when "Title"
+            # A title may produce both a title and a URL, conventionally separated by a tab
+            titledata = foundstr.split('\t')
+            results[:URI] = titledata[1] if titledata[1]
+            foundstr = trim_title titledata.first
+          when "Image", "URI"
+            # Make picture path absolute if it's not already
+            foundstr = resolve foundstr
         end
         results[label.to_sym] = foundstr
       end
@@ -575,10 +633,121 @@ public
     results
   end
 
+  # Go through all sites, presenting a sample recipe and querying the appropriateness
+  # of all the associated finders.
+  def self.screen
+    done_did = [] # Keep record of sites visited
+    Site.where(reviewed: nil).each do |site|
+      site.save if site.reviewed = self.new(site).poll_extractions
+    end
+    Recipe.all.each do |recipe|
+      unless (site = recipe.site).reviewed
+        ss = self.new site
+        next if site.reviewed
+        site.save if site.reviewed = (ss.poll_extractions(recipe.url) || ss.poll_extractions(recipe.href))
+      end
+    end
+  end
+
+  def poll_extractions url=nil
+    url ||= site.sampleURL
+    finders = all_finders
+    begin
+      pagetags = PageTags.new(url, @site, finders, true, false)
+      correct_result = nil
+      finders.each do |finder|
+        pagetags.results_for(finder[:id]).each do |result|
+        # pagetags.results_for(label).each do |result|
+        # finder = result.finder
+          puts "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+          puts "URL: #{url}"
+          label = finder[:label]
+          finder.each { |key, value| puts "\t(#{key}: #{value})" unless [:label, :count, :foundlings].include?(key) }
+=begin
+          # Trim any found title using the 'ttlcut' attribute of the site
+          if finder[:label] == "Title" && @site.ttlcut
+            finder[:foundlings].each_index do |ix|
+              ttl, url = finder[:foundlings][ix].match(/^\[([^\]]*)\] \(from (.*)\)$/)[1,2]
+              finder[:foundlings][ix] = "[#{trim_title ttl}] (from #{url})"
+            end
+          end
+=end
+          if foundstr = result.out[0]
+            unless column = correct_result && (foundstr == correct_result) && :yes_votes
+              puts "#{label}: #{foundstr}"
+              site_option = [ "URI", "Description", "Site Name", "Title", "Image" ].include?(label) ? " S(ave value to Site) " : ""
+              puts "Good? y(es) n(o) Y(attach finder to site) #{site_option}"
+              answer = gets.strip
+              case answer[0]
+                when 'N', 'n'
+                  column = :no_votes
+                when 'Y', 'y'
+                  column = :yes_votes
+                  correct_result = foundstr
+                  if (answer[0] == 'Y') || ["Author Name", "Author Link", "Description", "Tags" ].include?(finder[:label])
+                    # Include the finder on the site
+                    unless @site.finder_ids.include?(finder[:id])
+                      @site.finders << Finder.create(finds: finder[:label], selector: finder[:path], read_attrib: finder[:attribute])
+                      @site.save
+                    end
+                  end
+                when 'S'
+                  # Copy the value to the corresponding field on the site
+                  rest_of_line = answer[1..-1].strip
+                  field_val = rest_of_line.blank? ? foundstr : rest_of_line
+                  case label
+                    when "URI", "Image"
+                      @site.logo = field_val
+                      @site.save
+                    when "Description"
+                      @site.description = field_val
+                      @site.save
+                    when "Site Name", "Title"
+                      @site.name = field_val
+                      @site.save
+                    else
+                      puts "There's no field on the site for #{label}"
+                  end
+              end
+            end
+            if column
+              finder[column] = 0 unless finder[column]
+              finder[column] = finder[column]+1
+            end
+            if label == "Title"
+              done = false
+              until done
+                trimmed = trim_title foundstr
+                puts "Title In: #{foundstr}"
+                puts "Title Out: #{trimmed}"
+                puts "Good? (sS to save, qQ to quit, otherwise type new regexp for title) "
+                answer = gets.strip
+                case answer
+                  when 's', 'S'
+                    site.save
+                    done = true
+                  when 'q', 'Q'
+                    done = true
+                  else
+                    @site.ttlcut = answer
+                end
+              end
+            end
+          end
+        end
+      end
+      return true
+    rescue Exception => e
+      debugger
+      puts "Error: couldn't open page '#{url}' for analysis."
+      return false
+    end
+  end
+
   def self.all_finders(which=nil)
     which = which.to_s if which
     finderset = []
-    Site.all.map(&:tags_serialized).each do |yaml| 
+    Site.all.map(&:tags_serialized).each do |yaml|
       yaml && YAML::load(yaml).each do |finder|
         next if (which && (finder[:label] != which)) || finderset.any? { |candidate| finder == candidate }
         finderset << finder
@@ -590,19 +759,19 @@ public
   # Revise the sites to reflect the current global defaults
   def self.groom(r=nil)
     case r
-    when NilClass
-      sites = Site.all
-    when Range
-      sites = Site.all[r]
-    when Fixnum, Array
-      sites = Site.where(:id => r)
-    when String
-      sites = Site.where('host LIKE ?', "%#{r}%")
+      when NilClass
+        sites = Site.all
+      when Range
+        sites = Site.all[r]
+      when Fixnum, Array
+        sites = Site.where(:id => r)
+      when String
+        sites = Site.where('host LIKE ?', "%#{r}%")
     end
 
     if sites && (sites.count > 0)
       sites.each do |site|
-        self.new(site).groom (r != nil)# Eliminate the current global defaults
+        self.new(site).groom (r != nil) # Eliminate the current global defaults
         site.save
       end
     else
@@ -618,8 +787,8 @@ public
       done = true
       puts ">>>>>>>>>>>>>>> Grooming #{@site.id} (#{@site.site})"
       # Purge finders that are already amongst the defaults
-      @site_finders = @site_finders.each { |finder| 
-        finder.each { |key, value| finder[key] = value.to_s } 
+      @site_finders = @site_finders.each { |finder|
+        finder.each { |key, value| finder[key] = value.to_s }
         if finder[:cut]
           s.ttlcut = finder[:cut] if (finder[:label] == "Title")
           finder.delete(:cut)
@@ -630,17 +799,17 @@ public
       @site.site = @site.site.strip.sub(/http:\/\b/, "http://")
       if !test_link(@site.home)
         if test_link(link = "http://www.#{oldname}") ||
-          test_link(link = "http://#{oldname}")
+            test_link(link = "http://#{oldname}")
           @site.home = @site.site = link
         else
           puts "Site #{@site.oldname} has a bad home link '#{@site.home}'. Delete?"
           answer = gets.strip
           case answer
-          when "y", "Y"
-            @site.destroy
-            return
-          when "q", "Q"
-            exit
+            when "y", "Y"
+              @site.destroy
+              return
+            when "q", "Q"
+              exit
           end
         end
       end
@@ -666,5 +835,5 @@ public
     end
     @site.save
   end
-  
+
 end

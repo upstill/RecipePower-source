@@ -6,6 +6,18 @@ class RecipeServices
     @current_user = current_user
   end
 
+  def scrape
+    extractions = SiteServices.extract_from_page(@recipe.url )
+    puts "Recipe # #{@recipe.id}: #{@recipe.title}"
+    puts "\tsite: #{@recipe.site.name} (#{@recipe.site.home})"
+    puts "\turl: #{@recipe.url}"
+    puts "\thref: #{@recipe.href}"
+    puts "\tdescription: #{@recipe.description}"
+    puts "\tpicurl: #{@recipe.picurl}"
+    puts "\tExtractions:"
+    extractions.each { |k, v| puts "\t\t#{k.to_s}: #{v}"}
+  end
+
 =begin
   def supplant_x_tags
     @recipe.current_user = @current_user
