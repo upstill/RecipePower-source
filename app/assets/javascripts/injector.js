@@ -12,6 +12,8 @@
 //= require common/RP
 //= require common/dialog
 //= require common/notifications
+//= require common/hider
+//= require common/state
 //= require views/edit_recipe
 //= require concerns/tagger
 //= require jquery/jquery.form

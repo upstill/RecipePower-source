@@ -3,6 +3,8 @@ window.RP = window.RP || {}
 jQuery ->
 	RP.hide_all_empty()
 
+# hide_all_empty takes care of removing empty elements from display--including
+# the parents of such elements
 RP.hide_all_empty = ->
 	$('.hide-if-empty').addClass('hide-pending').each (ix, e) ->
 		RP.hide_empty e

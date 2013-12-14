@@ -663,15 +663,6 @@ class SiteServices
           puts "URL: #{url}"
           label = finder[:label]
           finder.each { |key, value| puts "\t(#{key}: #{value})" unless [:label, :count, :foundlings].include?(key) }
-=begin
-          # Trim any found title using the 'ttlcut' attribute of the site
-          if finder[:label] == "Title" && @site.ttlcut
-            finder[:foundlings].each_index do |ix|
-              ttl, url = finder[:foundlings][ix].match(/^\[([^\]]*)\] \(from (.*)\)$/)[1,2]
-              finder[:foundlings][ix] = "[#{trim_title ttl}] (from #{url})"
-            end
-          end
-=end
           if foundstr = result.out[0]
             unless column = correct_result && (foundstr == correct_result) && :yes_votes
               puts "#{label}: #{foundstr}"
