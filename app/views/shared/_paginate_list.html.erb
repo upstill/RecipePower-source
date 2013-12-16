@@ -1,6 +1,0 @@
-<div colspan=6><%= flash_all %></div>
-<% if @seeker.npages > 0 %>
-	<div class="digg_pagination">
-		<%= pagination_links @seeker.npages, @seeker.cur_page, @seeker.query_path %>
-	</div>
-<% end %>

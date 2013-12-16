@@ -3,14 +3,14 @@ class ReferencesController < ApplicationController
   # GET /references.json
   def index
     @Title = "References"
-    collection_result Reference, { clear_tags: true }
+    seeker_result Reference, 'div.reference_list', clear_tags: true
   end
   
   # Query takes either a query string or a specification of page number
   # We return a recipe list IFF the :cached parameter is not set
   def query
     @Title = "References"
-    collection_result Reference
+    seeker_result Reference, 'div.reference_list'
   end
 
   # GET /references/1

@@ -30,8 +30,9 @@ RP.collection.onload = (event) ->
 
 RP.collection.more_to_come = (armed) ->
 	if armed
+		querypath = $('#seeker_results').data("query-path")
 		RP.scroll.set_handler 'div.collection_list', ->
-			RP.collection.update { next_page: true }, "collection/query" # Fire a "more-content" event
+			RP.collection.update { next_page: true }, querypath # Fire a "more-content" event
 	else
 		RP.scroll.set_handler 'div.collection_list', null
 
@@ -68,18 +69,18 @@ collection_beforeSend = (evt, xhr, settings) ->
 collection_update_success = (resp) ->
 	# Explicitly update the collection list
 	# $('div.loader').removeClass "loading" # Remove progress indicator
-	# $('#masonry-container').masonry('destroy')
+	# $('#seeker_table.masonry-container').masonry('destroy')
 	RP.process_response resp
 	# window.scrollTo(0,0)
 	RP.notifications.done()
 	collection_onload()
 
 # Fire the current query state at the server and get back a refreshed recipe list
-RP.collection.update = (params, url) ->
+RP.collection.update = (params, querypath) ->
 	collection_beforeSend()
 	jQuery.ajax
 		type: "POST"
-		url: (url || "/collection/query")
+		url: querypath
 		data: params
 		dataType: "json"
 		beforeSend: (xhr) ->
@@ -93,11 +94,11 @@ RP.collection.update = (params, url) ->
 			collection_update_success resp
 
 RP.collection.rejustify = () ->
-	$('#masonry-container').masonry()
+	$('#seeker_results.masonry-container').masonry()
 	
 RP.collection.justify = () ->
 	# Initialize Masonry handling for list items
-	$('#masonry-container').masonry
+	$('#seeker_results.masonry-container').masonry
 		columnWidth: 200,
 		gutter: 20,
 		itemSelector: '.masonry-item'

@@ -2,5 +2,5 @@
 	<h3>Available Feeds</h3>
 	<p>This is a long list. You can narrow it down by searching: use the search box above to type in words and terms
 	</p><p>If you have copied a link to a feed, add it by clicking <%= link_to_modal "Here", "/feeds/new", class: "btn" %>. Or, browse for feeds below.</p>
-	<%= seeker_table nil, [ "ID", "Title/Description/URL", "Tag(s)", "Type", "Host Site", ("Approved" if permitted_to?(:approve, :feeds)) , "Actions" ].compact %>
+	<%= seeker_table nil, "feeds/query", [ "ID", "Title/Description/URL", "Tag(s)", "Type", "Host Site", ("Approved" if permitted_to?(:approve, :feeds)) , "Actions" ].compact %>
 </div>

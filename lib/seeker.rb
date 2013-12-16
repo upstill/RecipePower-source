@@ -57,6 +57,7 @@ public
       if params[:tagstxt]
         @tagstxt = params[:tagstxt]
         @tags = nil
+        params[:cur_page] = 1
       end
       if ttstr = params[:tagtype]
         @tagtype = ttstr.empty? ? nil : ttstr.to_i
@@ -64,8 +65,11 @@ public
       if page = params[:cur_page]
         self.cur_page = page.to_i
       elsif params[:next_page]
-        self.cur_page += 1
+        params[:cur_page] = self.cur_page + 1
       end
+    end
+    if params && params[:cur_page]
+      self.cur_page = params[:cur_page].to_i
     end
   end
 
@@ -254,7 +258,7 @@ class ContentSeeker < Seeker
   end
   
   def cur_page=(pagenum)
-    affiliate.cur_page= pagenum
+    affiliate.cur_page=( pagenum) if affiliate
   end
   
   # If the entity has returned no results, suggest what the problem might have been

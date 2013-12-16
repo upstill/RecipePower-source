@@ -1,5 +1,5 @@
 module SeekerHelper
-	def seeker_table( heading, column_heads )
+	def seeker_table( heading, query_path, column_heads )
 	  header = heading || (@seeker && "<h3>#{@seeker.table_header}</h3>") || ""
 	  (%Q{
       #{header}
@@ -11,13 +11,9 @@ module SeekerHelper
 	  %Q{
   		    </tr>
   		  </thead>
-  		  <tbody class="collection_list">
-  				#{render_seeker_results}
-  		  </tbody>
+        #{render_seeker_results "tbody", query_path, class: "collection_list"}
   		</table>
-  	}+
-  	render("shared/paginate_list")
-  	).html_safe
+  	}).html_safe
   end
   
 	# Render an element of a collection, depending on its class
@@ -39,24 +35,17 @@ module SeekerHelper
 		  render ename.pluralize+"/"+ename 
 		end
   end
-  
-	def render_seeker_results
-	  return link_to "Click to load", "#",
+
+  # Set up a DOM element to receive a stream of seeker results
+	def render_seeker_results enclosing_element, querypath, options={}
+    stream_link = link_to "Click to load", "#",
 	    onload: 'RP.stream.go(event);',
 	    class: 'content-streamer hidden',
 	    data: { kind: @seeker.class.to_s }
-    return %q{<div class='streamer' onready="RP.stream.go(event);">Hang on a second...</div>}.html_safe
-	  page =
-	  time_check_log("render_seeker_results acquiring") do
-  	  @seeker.results_paged
-  	end
-	  tstart = Time.now
-	  results = time_check_log("render_seeker_results rendering #{page.count.to_s} items") do
-  		page.collect do |element|
-  		  render_seeker_item element
-  		end
-		end
-	  results.join('').html_safe
+    options[:data] ||= {}
+    options[:data][:"query-path"] = querypath
+    options[:id] = "seeker_results"
+    content_tag enclosing_element, stream_link, options
   end
 
   def element_item selector, elmt
@@ -66,12 +55,15 @@ module SeekerHelper
   # Package up a collection element for passing into a stream
   def seeker_stream_item element
     elmt = render_seeker_item element
+    return { elmt: elmt }
     selector = 
     case element
     when Recipe
       '#masonry-container'
     when FeedEntry
       'ul.feed_entries'
+    when Tag
+      'tbody.collection_list'
     else
       '.collection_list'
     end

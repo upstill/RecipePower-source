@@ -18,13 +18,13 @@ class FeedsController < ApplicationController
   # GET /feeds
   # GET /feeds.json
   def index
-    collection_result Feed, clear_tags: true, all_feeds: permitted_to?(:approve, :feeds)
+    seeker_result Feed, 'div.feed_list', clear_tags: true, all_feeds: permitted_to?(:approve, :feeds)
   end
   
   # Query takes either a query string or a specification of page number
   # We return a recipe list IFF the :cached parameter is not set
   def query
-    collection_result Feed, all_feeds: permitted_to?(:approve, :feeds)
+    seeker_result Feed, 'div.feed_list', all_feeds: permitted_to?(:approve, :feeds)
   end
 
   # GET /feeds/1

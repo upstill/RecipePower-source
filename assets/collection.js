@@ -78,11 +78,11 @@
     return collection_onload();
   };
 
-  RP.collection.update = function(params, url) {
+  RP.collection.update = function(params, querypath) {
     collection_beforeSend();
     return jQuery.ajax({
       type: "POST",
-      url: url || RP.webhome+"/collection/query",
+      url: querypath,
       data: params,
       dataType: "json",
       beforeSend: function(xhr) {

@@ -1,12 +1,12 @@
 <%# Master form for taking a recipe query and returning a list of results %>
 <div class="collection" onload="RP.collection.onload(event);">
   <div class="collection_list">
-		<% if !@results_pending %>
-			<%= collection_updater %>
-			<%= render "collection/relist" %>
-		<% end %>
-	</div>
-	<% if current_user %>
-		<%= recipe_edit_trigger if deferred_capture(false) %>
-	<% end %>
+    <% if !@results_pending %>
+        <%= collection_updater %>
+        <%= render "collection/relist" %>
+    <% end %>
+  </div>
+  <% if current_user %>
+      <%= recipe_edit_trigger if deferred_capture(false) %>
+  <% end %>
 </div>
