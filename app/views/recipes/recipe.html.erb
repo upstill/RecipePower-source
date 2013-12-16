@@ -1,0 +1,110 @@
+<!doctype html>
+
+<html>
+  <!-- Built with Divshot - http://www.divshot.com -->
+  
+  <head>
+    <title>New Page</title>
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="recipe.css">
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.1/css/bootstrap.min.css">
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script type="text/javascript" src="https://netdna.bootstrapcdn.com/bootstrap/3.0.1/js/bootstrap.min.js"></script>
+  </head>
+  
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4">
+          <img src="https://app.divshot.com/img/placeholder-100x100.gif" class="recipe-preview pull-right" width="100%">
+        </div>
+        <div class="col-md-8">
+          <div class="panel pull-left panel-default">
+            <div class="panel-heading">
+              <h1 class="hide-if-empty">&lt;%= present "title" %&gt;</h1>
+              <p class="hide-if-empty"><span class="hide-if-empty">A recipe by &lt;%= present "author" %&gt;</span><span class="hide-if-empty"> in &lt;%= present "Source_tags" %&gt;</span><span class="hide-if-empty"> from &lt;%= present "site" %&gt;</span>.</p>
+            </div>
+            <div class="panel-body">
+              <div class="container">
+                <div class="row hide-if-empty">
+                  <div class="col-xs-3 col-md-2">
+                    <p class="pull-right"><b>Ingredients</b></p>
+                  </div>
+                  <div class="col-xs-9 col-md-10">
+                    <p>&lt;%= present "Ingredient_tags" %&gt;</p>
+                  </div>
+                </div>
+                <div class="row hide-if-empty">
+                  <div class="col-xs-3 col-md-2">
+                    <p class="pull-right"><b>Produces</b></p>
+                  </div>
+                  <div class="col-xs-9 col-md-10">
+                    <p>&lt;%= present "Role_tags" %&gt;</p>
+                  </div>
+                </div>
+                <div class="row hide-if-empty">
+                  <div class="col-xs-3 col-md-2">
+                    <p class="pull-right"><b>Genre</b></p>
+                  </div>
+                  <div class="col-xs-9 col-md-10">
+                    <p>&lt;%= present "Genre_tags" %&gt;</p>
+                  </div>
+                </div>
+                <div class="row hide-if-empty">
+                  <div class="col-xs-3 col-md-2">
+                    <p class="pull-right"><b>Occasions</b></p>
+                  </div>
+                  <div class="col-xs-9 col-md-10">
+                    <p>&lt;%= present "Occasion_tags" %&gt;</p>
+                  </div>
+                </div>
+                <div class="row hide-if-empty">
+                  <div class="col-xs-3 col-md-2">
+                    <p class="pull-right"><b>Channel</b></p>
+                  </div>
+                  <div class="col-xs-9 col-md-10">
+                    <p>&lt;%= present "Channel_tags" %&gt;</p>
+                  </div>
+                </div>
+                <div class="row hide-if-empty">
+                  <div class="col-xs-3 col-md-2">
+                    <p class="pull-right"><b>Processes</b></p>
+                  </div>
+                  <div class="col-xs-9 col-md-10">
+                    <p>&lt;%= present "Process_tags" %&gt;</p>
+                  </div>
+                </div>
+                <div class="row hide-if-empty">
+                  <div class="col-xs-3 col-md-2">
+                    <p class="pull-right"><b>Tools</b></p>
+                  </div>
+                  <div class="col-xs-9 col-md-10">
+                    <p>&lt;%= present "Tool_tags" %&gt;</p>
+                  </div>
+                </div>
+                <div class="row hide-if-empty">
+                  <div class="col-xs-3 col-md-2">
+                    <p class="pull-right"><b>Other Tags</b></p>
+                  </div>
+                  <div class="col-xs-9 col-md-10">
+                    <p>&lt;%= present "Other_tags" %&gt;</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hide-if-empty">
+        <div class="row">
+          <div class="col-sm-12"><h3>My Two Cents</h3></div>
+        </div>
+        <div class="row">
+          <div class="col-sm-4 col-md-2"></div>
+          <div class="col-sm-8 col-md-8"></div>
+        </div>
+      </div>
+    </div>
+  </body>
+
+</html>

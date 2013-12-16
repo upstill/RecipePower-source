@@ -140,38 +140,40 @@ class ApplicationController < ActionController::Base
   # This is one-stop-shopping for a controller using the query to filter a list
   # See tags_controller for an example
   # Options: selector: CSS selector for the outermost container of the rendered index template
-  def collection_result(klass, options={})
+  def seeker_result(klass, frame_selector, options={})
+    def jsondata(klass, frame_selector, options)
+      # In a json response we just re-render the collection list for replacement
+      # If we need to replace the page, we send back a link to do it with
+      if params[:redirect]
+        # page: with_format("html") { render_to_string :index },
+        { redirect: assert_popup(nil, request.original_url) }
+      else
+        setup_seeker(klass, options.slice(:clear_tags, :scope), params)
+        flash.now[:guide] = @seeker.guide
+        # If this is the first page, we replace the list altogether, wiring the list
+        # to stream results. If it's a subsequent page, we just set up a stream to serve that page.
+        if (@seeker.cur_page == 1)
+          { replacements: [
+              view_context.flash_notifications_replacement,
+              [ frame_selector, with_format("html") { render_to_string 'index', :layout=>false } ]
+          ]}
+        else
+          {  streams: [ ['#seeker_results', {kind: @seeker.class.to_s, append: @seeker.cur_page.to_i>1}] ] }
+        end
+      end
+    end
     respond_to do |format|
       format.html {
         params[:cur_page] = 1
         setup_collection klass, options
         flash.now[:guide] = @seeker.guide
-        render :index 
+        render :index
       }
-      format.json do 
-        # In a json response we just re-render the collection list for replacement
-        # If we need to replace the page, we send back a link to do it with
-        if params[:redirect]
-            # page: with_format("html") { render_to_string :index },
-            render json: { redirect: assert_popup(nil, request.original_url) }
-        else
-      	  setup_seeker(klass, options.slice(:clear_tags, :scope), params)
-          flash.now[:guide] = @seeker.guide
-          # If this is the first page, we replace the list altogether, wiring the list
-          # to stream results. If it's a subsequent page, we just set up a stream to serve that page.
-          if (@seeker.cur_page == 1)
-            data = { replacements: [
-                view_context.flash_notifications_replacement,
-                [ (options[:selector] || "div.#{klass.to_s.downcase}_list"),
-                  with_format("html") { render_to_string 'index', :layout=>false } ]
-            ]}
-          else
-            data = {  streams: [ ['div#masonry-container', {kind: @seeker.class.to_s, append: @seeker.cur_page>1}] ] }
-
-          end
-          render json: data
-        end
+      format.js do
+        @jsondata = jsondata(klass, frame_selector, options)
+        render template: "shared/get_content"
       end
+      format.json { render json: jsondata(klass, frame_selector, options) }
     end
   end
   
@@ -216,7 +218,6 @@ class ApplicationController < ActionController::Base
       }
       format.js {
         # XXX??? Must have set @partial in preparation
-        debugger
         render renderopts.merge( action: "capture" )
       }
     end
