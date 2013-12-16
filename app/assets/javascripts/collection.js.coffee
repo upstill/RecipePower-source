@@ -31,7 +31,7 @@ RP.collection.onload = (event) ->
 RP.collection.more_to_come = (armed) ->
 	if armed
 		querypath = $('#seeker_results').data("query-path")
-		RP.scroll.set_handler 'div.collection_list', ->
+		RP.scroll.set_handler '#seeker_results', ->
 			RP.collection.update { next_page: true }, querypath # Fire a "more-content" event
 	else
 		RP.scroll.set_handler 'div.collection_list', null

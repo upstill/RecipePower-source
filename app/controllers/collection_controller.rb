@@ -18,11 +18,11 @@ class CollectionController < ApplicationController
   
   def index
     @Title = "Collections"
-    seeker_result "Content", 'div.collection', clear_tags: true, :selector => 'div.collection'
+    seeker_result "Content", 'div.collection', clear_tags: true
   end
 
   def query
-    seeker_result "Content", 'div.collection', :selector => 'div.collection'
+    seeker_result "Content", 'div.collection'
   end
   
   def show
