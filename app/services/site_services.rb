@@ -407,9 +407,7 @@ class SiteServices
     }
     puts "#{used_sites.compact.count.to_s} of #{Site.all.count.to_s} reachable"
     if do_it
-      Site.all.each { |site|
-        site.destroy unless used_sites[site.id]
-      }
+      Site.all.each { |site| site.destroy unless used_sites[site.id] }
     end
   end
 

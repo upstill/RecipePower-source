@@ -242,7 +242,7 @@ class Referent < ActiveRecord::Base
       unique_referents = tag.referents.collect { |ref|
           [(ref.parents if doParents), (ref.children if doChildren)]
       }.flatten.compact.uniq - tag.referents
-      tag_ids = unique_referents.collect { |ref| ref.tag_id }
+       tag_ids = unique_referents.collect { |ref| ref.tag_id }
       tag_ids = tag_ids + tag.referents.collect { |ref| ref.tag_id } if doSynonyms
       tag_ids.uniq.delete_if{ |id| id == tag.id }.collect{ |id| Tag.find id }
     end

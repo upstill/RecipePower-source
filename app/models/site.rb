@@ -21,7 +21,7 @@ class Site < ActiveRecord::Base
   attr_accessible :finders_attributes, :site, :home, :scheme, :subsite, :sample, :host, :name, :port, :logo, :ttlcut, :finders, :reviewed
 #   serialize :finders, Array
 
-  belongs_to :referent, :dependent=>:destroy
+  belongs_to :referent # See before_destroy method, :dependent=>:destroy
 
   has_many :finders, :dependent=>:destroy
   accepts_nested_attributes_for :finders, :allow_destroy => true
@@ -38,7 +38,14 @@ class Site < ActiveRecord::Base
   end
 
 protected
-  
+
+  # If this is the last site associated with its referent, destroy the referent
+  before_destroy do |site|
+    debugger
+    sibling_sites = Site.where(referent_id: site.referent_id)
+    site.referent.destroy if (sibling_sites.count == 1) && (sibling_sites.first.id == site.id)
+  end
+
   def post_init
     unless self.site
       # We need to initialize the fields of the record, starting with site, based on sample
