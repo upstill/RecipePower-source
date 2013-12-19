@@ -15,7 +15,6 @@
           Sample Title (editted): <strong><%= trimmed_sample %></strong><br>
         </div>
         <%= f.input :ttlcut, label: "RegExp to cut out of title" %>
-        <%# f.input :tags_serialized, :html => { :rows=>"20" } %>
         <%= render("finders", f: f) if permitted_to? :edit, :finders %>
 
     <% end %>

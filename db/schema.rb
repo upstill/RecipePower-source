@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20131213024919) do
+ActiveRecord::Schema.define(version: 20131219013153) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -267,12 +267,11 @@ ActiveRecord::Schema.define(version: 20131213024919) do
     t.string   "port"
     t.string   "oldname"
     t.string   "logo"
-    t.text     "tags_serialized"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "ttlcut"
     t.integer  "referent_id"
-    t.boolean  "reviewed",        default: false
+    t.boolean  "reviewed",    default: false
     t.text     "description"
   end
 

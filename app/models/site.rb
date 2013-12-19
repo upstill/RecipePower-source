@@ -41,7 +41,6 @@ protected
 
   # If this is the last site associated with its referent, destroy the referent
   before_destroy do |site|
-    debugger
     sibling_sites = Site.where(referent_id: site.referent_id)
     site.referent.destroy if (sibling_sites.count == 1) && (sibling_sites.first.id == site.id)
   end

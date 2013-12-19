@@ -79,7 +79,6 @@ public
       rcp = Recipe.find params[:id]
     else
       if !extractions
-        # extractions = SiteServices.extract_from_page(params[:url] )
         extractions = SiteServices.extract_from_page(params[:url] )
         if extractions.empty?
           rcp = self.new
@@ -88,6 +87,8 @@ public
         end
       end
       # Extractions are parameters derived directly from the page
+      logger.debug "Extracted from #{params[:url]}:"
+      extractions.each { |key, value| logger.debug "\t#{key}: #{value}"}
       params[:description] = extractions[:Description] if extractions[:Description]
       if extractions[:URI]
         params[:url] = extractions[:URI] 

@@ -377,6 +377,7 @@ class SiteServices
     @site.save
   end
 
+  # Return the set of finders that apply to the site (those assigned to the site, then global ones)
   def all_finders
     # Give the DefaultFinders a unique id
     @@DefaultFinders.each { |df|
@@ -396,19 +397,11 @@ class SiteServices
   end
 
   def self.purge do_it=false
-    used_sites = []
-    Recipe.all.each { |r|
-      site_id = r.site.id
-      used_sites[site_id] = site_id
-    }
-    Reference.all.each { |r|
-      site_id = r.site.id
-      used_sites[site_id] = site_id
-    }
-    puts "#{used_sites.compact.count.to_s} of #{Site.all.count.to_s} reachable"
-    if do_it
-      Site.all.each { |site| site.destroy unless used_sites[site.id] }
-    end
+    used_sites = Set.new(
+      Recipe.all.collect { |r| r.site.id } +
+      Reference.all.collect { |r| r.site.id } +
+      Feed.all.collect { |f| r.site_id })
+    Site.all.each { |site| site.destroy unless used_sites.include? site.id } if do_it
   end
 
   def self.scrape_for_feeds(n=-1)
@@ -537,6 +530,8 @@ class SiteServices
     extractions
   end
 
+  # Study a sample of every site for its response to extractions, summarizing the results
+  # for every extraction strategy.
   def self.stab_at_samples limit=-1
     exclusions = %w{
        tname=copyright
@@ -647,6 +642,8 @@ class SiteServices
     end
   end
 
+  # Use the extant finders on a site, interactively querying their appropriateness and potentially assigning
+  # results (either extractors or hard values) to the site
   def poll_extractions url=nil
     url ||= site.sampleURL
     finders = all_finders
@@ -733,18 +730,6 @@ class SiteServices
     end
   end
 
-  def self.all_finders(which=nil)
-    which = which.to_s if which
-    finderset = []
-    Site.all.map(&:tags_serialized).each do |yaml|
-      yaml && YAML::load(yaml).each do |finder|
-        next if (which && (finder[:label] != which)) || finderset.any? { |candidate| finder == candidate }
-        finderset << finder
-      end
-    end
-    finderset
-  end
-
   # Revise the sites to reflect the current global defaults
   def self.groom(r=nil)
     case r
@@ -768,7 +753,7 @@ class SiteServices
     end
   end
 
-  # Delete any finders that also appear in @@DefaultFinders
+  # Delete any of the site's finders that also appear in the global set
   def groom (fullcheck=true)
     done = false
     site_finders # Set up @site_finders
@@ -823,6 +808,19 @@ class SiteServices
       end
     end
     @site.save
+  end
+
+  # Study the extant sites and report redundancies (different sites that have the same home)
+  def self.report_redundancies
+    keys = {}
+    Site.all.each do |site|
+      if keys[site.home]
+        keys[site.home] << site.id
+      else
+        keys[site.home] = [site.id]
+      end
+    end
+    keys.each { |k, v| puts "#{k}: #{v.to_s}" if v.count > 1 } && false
   end
 
 end
