@@ -1,4 +1,8 @@
 class TaggingServices
+
+  def initialize taggable_entity
+    @taggable_entity = taggable_entity
+  end
   
   # Eliminate all references to one tag in favor of another
   def self.change_tag(fromid, toid)
@@ -28,6 +32,19 @@ class TaggingServices
         is_definition: tagging.is_definition)
       tagging.destroy if matches.count > 1
     }
+  end
+
+  # Assert a tag associated with the given tagger. If a tag
+  # given by name doesn't exist, make a new one
+  def tag_with tag_or_string, options={}
+    tagger_id = options[:tagger] || @taggable_entity.tag_owner
+    if tag_or_string.is_a? String
+      tags = Tag.strmatch tag_or_string, matchall: true, tagtype: options[:type], assert: true, userid: tagger_id
+      tag = tags.first
+    else
+      tag = tag_or_string
+    end
+    @taggable_entity.tag_with tag, tagger_id
   end
 
 end

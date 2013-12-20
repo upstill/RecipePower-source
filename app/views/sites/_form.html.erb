@@ -1,21 +1,35 @@
 <%= simple_form_for(@site) do |f| %>
     <%= modal_body do %>
-        <div class="logo">
+      <div class="row">
+        <div class="col-md-5">
           <%= pic_field @site, :logo, f, true %>
         </div>
-        <%= f.input :site %>
-        <%= f.input :home %>
-        <%# if params[:action] != "edit" %>
-        <%= f.input :name %>
-        <%# end %>
-        <%= f.input :subsite %>
-        <%= f.input :sample %>
-        <div>
+        <div class="col-md-7">
+          <%= f.input :site %>
+          <%= f.input :home %>
+          <%# if params[:action] != "edit" %>
+          <%= f.input :name %>
+          <%# end %>
+          <%= f.input :subsite %>
+          <%= f.input :sample %>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
           Sample Title (raw): <strong><%= crack_sample %></strong><br>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <%= f.input :ttlcut, label: "RegExp to cut out of title" %>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
           Sample Title (editted): <strong><%= trimmed_sample %></strong><br>
         </div>
-        <%= f.input :ttlcut, label: "RegExp to cut out of title" %>
-        <%= render("finders", f: f) if permitted_to? :edit, :finders %>
+      </div>
+      <%= render("finders", f: f) if permitted_to? :edit, :finders %>
 
     <% end %>
     <%= modal_footer do %>

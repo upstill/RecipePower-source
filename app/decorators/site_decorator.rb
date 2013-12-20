@@ -1,0 +1,2 @@
+class SiteDecorator < TaggableDecorator
+end

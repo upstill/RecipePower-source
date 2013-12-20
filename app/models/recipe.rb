@@ -118,6 +118,7 @@ public
           rcp.picurl = ss.resolve rcp.picurl unless rcp.picurl.blank?
           rcp.title = ss.trim_title rcp.title # = ((site.yield :Title, url)[:Title] || rcp.title).html_safe unless rcp.title
           rcp.save
+          RecipeServices.new(rcp).robotags = extractions
         end
       end
     end

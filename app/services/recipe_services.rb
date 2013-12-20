@@ -18,6 +18,25 @@ class RecipeServices
     extractions.each { |k, v| puts "\t\t#{k.to_s}: #{v}"}
   end
 
+  def robotags= extractions={}
+    ts = nil
+    if author = extractions["Author Name"]
+      ts ||= TaggingServices.new @recipe
+      ts.tag_with author, tagger: User.super_id, type: "Author"
+    end
+    if tagstring = extractions["Tags"]
+      ts ||= TaggingServices.new @recipe
+      tagstring.split(',').collect { |tagname| tagname.strip!; tagname if (tagname.length>0) }.compact.each { |tagname|
+        ts.tag_with tagname, tagger: User.super_id
+      }
+    end
+  end
+
+  # The robotags are those owned by super
+  def robotags
+    @recipe.tags User.super_id
+  end
+
 =begin
   def supplant_x_tags
     @recipe.current_user = @current_user

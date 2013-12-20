@@ -10,23 +10,27 @@ class Reference < ActiveRecord::Base
     NewsItem: ["News Item", 2],
     Tip: ["Tip", 4],
     Video: ["Video", 8],
-    Definition: ["Glossary Entry", 16]
+    Definition: ["Glossary Entry", 16],
+    HomePage: ["Home Page", 32]
   )
   
   def self.assert(uri, tag_or_referent, type=:Definition )
-    if tag_or_referent.class == Tag
-      rft = Referent.express tag_or_referent
-    else
-      rft = tag_or_referent
-    end
-    return nil unless rft
-    
-    me = self.find_or_initialize( url: uri )
-    if me.errors.empty?
-      me.referents << rft unless me.referents.exists?(id: rft.id)
-      me.reference_type = self.typenum(type)
-      me.save
+    if (me = self.find_or_initialize( url: uri )).errors.empty?
+      me.assert tag_or_referent, type
     end
     me
+  end
+
+  def assert tag_or_referent, type=:Definition
+    return nil unless rft =
+        case tag_or_referent
+          when Tag
+            Referent.express tag_or_referent
+          else
+            tag_or_referent
+        end
+    self.referents << rft unless referents.exists?(id: rft.id)
+    self.reference_type = self.typenum(type)
+    save
   end
 end

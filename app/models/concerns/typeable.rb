@@ -42,6 +42,11 @@ module Typeable
     def index_to_type(index)
         index if index && (index <= @tag_types.max_index)
     end
+
+    # Return a list of all valid types
+    def all_types
+    end
+
   end
   
     def self.included(base)

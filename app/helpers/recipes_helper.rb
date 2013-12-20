@@ -48,7 +48,7 @@ module RecipesHelper
     content_tag :span,
                 modal_link.html_safe,
                 class: "recipe-info-button btn btn-default btn-xs",
-                data: { title: recipe.title, tags: tags }
+                data: { title: recipe.title, tags: tags, description: recipe.description || "" }
   end
 
   def recipe_tags_div recipe

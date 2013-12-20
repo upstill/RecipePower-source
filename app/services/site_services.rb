@@ -661,7 +661,7 @@ class SiteServices
           if foundstr = result.out[0]
             unless column = correct_result && (foundstr == correct_result) && :yes_votes
               puts "#{label}: #{foundstr}"
-              site_option = [ "URI", "Description", "Site Name", "Title", "Image" ].include?(label) ? " S(ave value to Site) " : ""
+              site_option = [ "URI", "Description", "Site Name", "Title", "Image", "Author Name", "Author Link", "Tags" ].include?(label) ? " S(ave value to Site) " : ""
               puts "Good? y(es) n(o) Y(attach finder to site) #{site_option}"
               answer = gets.strip
               case answer[0]
@@ -691,6 +691,22 @@ class SiteServices
                     when "Site Name", "Title"
                       @site.name = field_val
                       @site.save
+                    when "Author Name"
+                      TaggingServices.new( @site).tag_with field_val, tagger: User.super_id, type: "Author"
+                      @site.save
+                    when "Author Link"
+                      # Add a reference to the author, if any
+                      @site.tags(User.super_id, tag_type: "Author").each { |author|
+                        Reference.assert field_val, author, "Home Page"
+                      }
+                    when "Tags"
+                      ts = TaggingServices.new @site
+                      field_val.split(',').collect { |tagname|
+                        tagname = tagname.split(':').last.strip
+                        tagname if (tagname.length>0)
+                      }.compact.each { |tagname|
+                        ts.tag_with tagname, tagger: User.super_id
+                      }
                     else
                       puts "There's no field on the site for #{label}"
                   end

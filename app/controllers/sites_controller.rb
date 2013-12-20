@@ -17,6 +17,7 @@ class SitesController < ApplicationController
     # return if need_login true, true
     @user = current_user_or_guest
     @site = Site.find(params[:id])
+    @decorator = @site.decorate
     @Title = @site.name
     
     # Setup to display the feeds for the site

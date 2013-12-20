@@ -25,70 +25,7 @@
             </div>
             <div class="panel-body">
               <div class="container">
-                <div class="row hide-if-empty">
-                  <div class="col-md-4">
-                    <p class="pull-right"><b>Ingredients</b></p>
-                  </div>
-                  <div class="col-md-8">
-                    <p><%= present_field_wrapped "Ingredient_tags" %></p>
-                  </div>
-                </div>
-                <div class="row hide-if-empty">
-                  <div class="col-md-4">
-                    <p class="pull-right"><b>Produces</b></p>
-                  </div>
-                  <div class="col-md-8">
-                    <p><%= present_field_wrapped "Role_tags" %></p>
-                  </div>
-                </div>
-                <div class="row hide-if-empty">
-                  <div class="col-md-4">
-                    <p class="pull-right"><b>Genre</b></p>
-                  </div>
-                  <div class="col-md-8">
-                    <p><%= present_field_wrapped "Genre_tags" %></p>
-                  </div>
-                </div>
-                <div class="row hide-if-empty">
-                  <div class="col-md-4">
-                    <p class="pull-right"><b>Occasions</b></p>
-                  </div>
-                  <div class="col-md-8">
-                    <p><%= present_field_wrapped "Occasion_tags" %></p>
-                  </div>
-                </div>
-                <div class="row hide-if-empty">
-                  <div class="col-md-4">
-                    <p class="pull-right"><b>Channel</b></p>
-                  </div>
-                  <div class="col-md-8">
-                    <p><%= present_field_wrapped "Channel_tags" %></p>
-                  </div>
-                </div>
-                <div class="row hide-if-empty">
-                  <div class="col-md-4">
-                    <p class="pull-right"><b>Processes</b></p>
-                  </div>
-                  <div class="col-md-8">
-                    <p><%= present_field_wrapped "Process_tags" %></p>
-                  </div>
-                </div>
-                <div class="row hide-if-empty">
-                  <div class="col-md-4">
-                    <p class="pull-right"><b>Tools</b></p>
-                  </div>
-                  <div class="col-md-8">
-                    <p><%= present_field_wrapped "Tool_tags" %></p>
-                  </div>
-                </div>
-                <div class="row hide-if-empty">
-                  <div class="col-md-4">
-                    <p class="pull-right"><b>Other Tags</b></p>
-                  </div>
-                  <div class="col-md-8">
-                    <p><%= present_field_wrapped "Other_tags" %></p>
-                  </div>
-                </div>
+                <%= show_tags [ "Ingredient_tags", ["Role_tags", "Produces"], "Genre_tags", "Occasion_tags", "Channel_tags", "Process_tags", "Tool_tags", "Other_tags"] %>
               </div>
             </div>
           </div>

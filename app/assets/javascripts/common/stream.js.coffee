@@ -39,11 +39,13 @@ RP.stream.fire = (kind, do_append) ->
 				datablock = $('span.recipe-info-button', item)
 				tagstr = $(datablock).data "tags"
 				decoded = $('<div/>').html(tagstr).text();
+				description = $(datablock).data "description"
+				descripted = (description && $('<div/>').html(description).text()) || "";
 				$(datablock).popover
 					trigger: "hover",
 					placement: "auto right",
 					html: true,
-					content: contentstr+decoded
+					content: descripted+contentstr+decoded
 
 RP.stream.buffer_test = ->
 	source = new EventSource('/stream/buffer_test')

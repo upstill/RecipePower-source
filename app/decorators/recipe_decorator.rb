@@ -1,17 +1,12 @@
 require 'string_utils.rb'
 
-class RecipeDecorator < Draper::Decorator
+class RecipeDecorator < TaggableDecorator
 
   def extract fieldname
     case fieldname
-    when /_tags$/
+      when /_tags$/
       tagtype = fieldname.sub /_tags$/, ''
-      matching_types = tagtype == "Other" ?
-          [Tag.typenum("Culinary Term"), Tag.typenum("Untyped")] :
-          [Tag.typenum(tagtype)]
-      strjoin object.tags.select { |tag| matching_types.include? tag.tagtype }.collect { |tag|
-        h.link_to_modal tag.name, tag, class: "rcp_list_element_tag"
-      }
+      super(tagtype)
     when /^rcp/
       attrname = fieldname.sub( /^rcp/, '').downcase
       case attrname

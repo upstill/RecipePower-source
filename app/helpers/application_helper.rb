@@ -508,18 +508,18 @@ module ApplicationHelper
     divert_user_invitation_url(invitation_token: invitee.raw_invitation_token, url: CGI::escape(url))
   end
 
-  def field_value what
-    return form_authenticity_token if what == "authToken"
+  def field_value what=nil
+    return form_authenticity_token if what && (what == "authToken")
     if val = @decorator && @decorator.extract(what)
       val.html_safe
     end
   end
 
-  def present_field what
-    field_value(what) || "%%#{what.to_s}%%".html_safe
+  def present_field what=nil
+    field_value(what) || %Q{%%#{(what || "").to_s}%%}.html_safe
   end
 
-  def present_field_wrapped what
+  def present_field_wrapped what=nil
     content_tag :span,
                 present_field(what),
                 class: "hide-if-empty"

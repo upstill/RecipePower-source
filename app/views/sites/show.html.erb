@@ -1,4 +1,6 @@
 <%= page_or_modal title: "Site #{link_to @site.name, @site.home}", dialog_class: "modal-xl" do %>
+  <div class="container">
+
     <p>
       <b>Sample:</b>
       <%= crack_sample %>
@@ -10,9 +12,11 @@
     </p>
 
     <p>
-      <b>Tags:</b>
-      <%= @site.tags %>
+    <div class="container">
+      <%= show_tags [ "Author" ] %>
+    </div>
     </p>
+  </div>
 
 
     <%= link_to_modal 'Edit', edit_site_path(@site) %> |

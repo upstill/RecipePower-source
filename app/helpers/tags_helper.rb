@@ -216,4 +216,17 @@ BLOCK_END
         (absorb_btn ? button_tag("Absorb", onclick: %Q{RP.submit(event, "tags/#{@tag.id.to_s}/absorb?victim=#{tagidstr}");}, class: "absorb_button", id: "absorb_tag_#{tagidstr}") : ""),
         class: "absorb_"+tagidstr
   end
+
+  # Present a collection of tags, by type
+  def show_tags fields
+    fields.collect { |field|
+      if field.is_a? Array
+        field, label = field[0], field[1]
+      else
+        label = field.sub "_tags", ''
+      end
+      label << "(s)"
+      render "tags/show_labelled", label: label, name: field
+    }.join('').html_safe
+  end
 end
