@@ -672,8 +672,8 @@ class SiteServices
                   correct_result = foundstr
                   if (answer[0] == 'Y') || ["Author Name", "Author Link", "Description", "Tags" ].include?(finder[:label])
                     # Include the finder on the site
-                    unless @site.finder_ids.include?(finder[:id])
-                      @site.finders << Finder.create(finds: finder[:label], selector: finder[:path], read_attrib: finder[:attribute])
+                    unless @site.finders.exists?(finds: finder[:label], selector: finder[:path], read_attrib: finder[:attribute])
+                      @site.finders.create(finds: finder[:label], selector: finder[:path], read_attrib: finder[:attribute])
                       @site.save
                     end
                   end
