@@ -403,7 +403,7 @@ class SiteServices
     used_sites = Set.new(
       Recipe.all.collect { |r| r.site.id } +
       Reference.all.collect { |r| r.site.id } +
-      Feed.all.collect { |f| r.site_id })
+      Feed.all.collect { |f| f.site_id })
     Site.all.each { |site| site.destroy unless used_sites.include? site.id } if do_it
   end
 
@@ -634,14 +634,18 @@ class SiteServices
   def self.screen site_id = nil
     @@DefaultFinders = @@DefaultFinders + @@CandidateFinders unless (@@DefaultFinders.last == @@CandidateFinders.last)
     done_did = [] # Keep record of sites visited
-    (site_id ? Site.where(id: site_id) : Site.where(reviewed: nil)).each do |site|
-      site.save if site.reviewed = self.new(site).poll_extractions
+    (site_id ? Site.where(id: site_id) : Site.where(reviewed: [false, nil] )).each do |site|
+      return if (site.reviewed = self.new(site).poll_extractions).nil?
+      site.save if site.reviewed
     end
+
+    return if site_id
     Recipe.all.each do |recipe|
       unless (site = recipe.site).reviewed
         ss = self.new site
-        next if site.reviewed
-        site.save if site.reviewed = (ss.poll_extractions(recipe.url) || ss.poll_extractions(recipe.href))
+        return if (site.reviewed = ss.poll_extractions(recipe.url)).nil?
+        return if (!site.reviewed) && (site.reviewed = ss.poll_extractions(recipe.url)).nil?
+        site.save if site.reviewed
       end
     end
   end
@@ -650,7 +654,6 @@ class SiteServices
   # results (either extractors or hard values) to the site
   def poll_extractions url=nil
     url ||= site.sampleURL
-    debugger
     finders = all_finders
     begin
       pagetags = PageTags.new(url, @site, finders, true, false)
@@ -667,9 +670,11 @@ class SiteServices
             unless column = correct_result && (foundstr == correct_result) && :yes_votes
               puts "#{label}: #{foundstr}"
               site_option = [ "URI", "Description", "Site Name", "Title", "Image", "Author Name", "Author Link", "Tags" ].include?(label) ? " S(ave value to Site) " : ""
-              puts "Good? y(es) n(o) Y(attach finder to site) #{site_option}"
+              puts "Good? y(es) n(o) Y(attach finder to site) #{site_option} Q(uit)"
               answer = gets.strip
               case answer[0]
+                when 'Q'
+                  return nil
                 when 'N', 'n'
                   column = :no_votes
                 when 'Y', 'y'

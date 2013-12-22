@@ -30,7 +30,7 @@ class Reference < ActiveRecord::Base
             tag_or_referent
         end
     self.referents << rft unless referents.exists?(id: rft.id)
-    self.reference_type = self.typenum(type)
+    self.reference_type = Reference.typenum type
     save
   end
 end
