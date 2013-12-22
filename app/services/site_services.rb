@@ -743,7 +743,6 @@ class SiteServices
       end
       return true
     rescue Exception => e
-      debugger
       puts "Error: couldn't open page '#{url}' for analysis."
       return false
     end

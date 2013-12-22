@@ -122,8 +122,6 @@ do_request = (url, ajax_options, processing_options) ->
 					# Now we have code, possibly required for jQuery and certainly 
 					# required for any of our javascript. Ensure the code is loaded.
 					$(processing_options.contents_selector).inner_html = xmlhttp.responseText
-				else 
-					debugger
 		xmlhttp.open "GET", url, true
 		xmlhttp.setRequestHeader "Accept", "text/html" 
 		xmlhttp.setRequestHeader 'If-Modified-Since', ajax_options.requestHeaders['If-Modified-Since']
@@ -136,9 +134,6 @@ poll_for_update = (url, ajax_options, processing_options) ->
 		else if xhr.status == 200
 			if ajax_options.dataType == "html"
 				$(processing_options.contents_selector).html xhr.responseText
-			else
-				# Process JSON response here
-				debugger
 		else
 			RP.notifications.post "Sorry: got an error trying to update", "flash-error"
 	

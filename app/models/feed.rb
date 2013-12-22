@@ -35,11 +35,9 @@ class Feed < ActiveRecord::Base
       begin
         feed.follow_url
         unless feed.save
-          # debugger unless feed.errors[:url][0] == "has already been taken"
           feed.destroy
         end
       rescue Exception => e
-        debugger
         feed.destroy
       end
     }

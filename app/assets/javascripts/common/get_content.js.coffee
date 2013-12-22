@@ -6,7 +6,6 @@ jQuery ->
 	$(document).on("ajax:error", '.get-content', RP.get_content.error)
 
 RP.get_content.assimilate = (contentstr)  ->
-	debugger
 	obj = JSON.parse contentstr.replace(/&quot;/g,'"')
 	RP.process_response obj
 
@@ -15,7 +14,6 @@ RP.get_content.assimilate = (contentstr)  ->
 # We will get the div and run the associated dialog.
 RP.get_content.go = (event, request, selector) ->
 	# old_dlog is extracted from what triggered this call (if any)
-	debugger
 	if (!event) || RP.get_content.beforeSend event
 		$.ajax
 			type: "GET",
