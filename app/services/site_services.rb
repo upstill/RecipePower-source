@@ -277,6 +277,9 @@ class SiteServices
       {:label => "Title", :path => "meta[name='fb_title']", :attribute => "content"},
       {:label => "Title", :path => "meta[property='og:title']", :attribute => "content"},
       {:label => "Title", :path => "meta[property='dc:title']", :attribute => "content"},
+  ]
+
+  @@CandidateFinders = {
       {:label => "Author Name", path: "meta[name='author']", :attribute => "content"},
       {:label => "Author Name", path: "meta[itemprop='author']", :attribute => "content"},
       {:label => "Author Name", path: "meta[name='author.name']", :attribute => "content"},
@@ -286,10 +289,10 @@ class SiteServices
       {:label => "Description", path: "meta[property='og:description']", :attribute => "content"},
       {:label => "Description", path: "meta[property='description']", :attribute => "content"},
       {:label => "Description", path: "meta[itemprop='description']", :attribute => "content"},
+      {:label => "Tags", path: "meta[name='keywords']", :attribute => "content"},
       {:label => "Site Name", path: "meta[property='og:site_name']", :attribute => "content"},
       {:label => "Site Name", path: "meta[name='application_name']", :attribute => "content"},
-      {:label => "Tags", path: "meta[name='keywords']", :attribute => "content"},
-  ]
+  }
 
 #   @@DataChoices = [ "URI", "Image", "Title", "Description", "Author Name", "Author Link", "Site Name", "Keywords", "Tags" ]
 
@@ -646,7 +649,7 @@ class SiteServices
   # results (either extractors or hard values) to the site
   def poll_extractions url=nil
     url ||= site.sampleURL
-    finders = all_finders
+    finders = all_finders + @@CandidateFinders
     begin
       pagetags = PageTags.new(url, @site, finders, true, false)
       correct_result = nil
