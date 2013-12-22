@@ -279,7 +279,7 @@ class SiteServices
       {:label => "Title", :path => "meta[property='dc:title']", :attribute => "content"},
   ]
 
-  @@CandidateFinders = {
+  @@CandidateFinders = [
       {:label => "Author Name", path: "meta[name='author']", :attribute => "content"},
       {:label => "Author Name", path: "meta[itemprop='author']", :attribute => "content"},
       {:label => "Author Name", path: "meta[name='author.name']", :attribute => "content"},
@@ -292,7 +292,7 @@ class SiteServices
       {:label => "Tags", path: "meta[name='keywords']", :attribute => "content"},
       {:label => "Site Name", path: "meta[property='og:site_name']", :attribute => "content"},
       {:label => "Site Name", path: "meta[name='application_name']", :attribute => "content"},
-  }
+  ]
 
 #   @@DataChoices = [ "URI", "Image", "Title", "Description", "Author Name", "Author Link", "Site Name", "Keywords", "Tags" ]
 
