@@ -631,9 +631,10 @@ class SiteServices
 
   # Go through all sites, presenting a sample recipe and querying the appropriateness
   # of all the associated finders.
-  def self.screen
+  def self.screen site_id = nil
+    @@DefaultFinders = @@DefaultFinders + @@CandidateFinders unless (@@DefaultFinders.last == @@CandidateFinders.last)
     done_did = [] # Keep record of sites visited
-    Site.where(reviewed: nil).each do |site|
+    (site_id ? Site.where(id: site_id) : Site.where(reviewed: nil)).each do |site|
       site.save if site.reviewed = self.new(site).poll_extractions
     end
     Recipe.all.each do |recipe|
@@ -649,7 +650,8 @@ class SiteServices
   # results (either extractors or hard values) to the site
   def poll_extractions url=nil
     url ||= site.sampleURL
-    finders = all_finders + @@CandidateFinders
+    debugger
+    finders = all_finders
     begin
       pagetags = PageTags.new(url, @site, finders, true, false)
       correct_result = nil
