@@ -743,7 +743,8 @@ class SiteServices
       end
       return true
     rescue Exception => e
-      puts "Error: couldn't open page '#{url}' for analysis."
+      puts "Error: couldn't open page '#{url}' for analysis:"
+      puts e.to_s
       return false
     end
   end
