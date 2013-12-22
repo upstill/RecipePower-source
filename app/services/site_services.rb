@@ -680,13 +680,13 @@ class SiteServices
                 when 'Y', 'y'
                   column = :yes_votes
                   correct_result = foundstr
-                  if (answer[0] == 'Y') || ["Author Name", "Author Link", "Description", "Tags" ].include?(finder[:label])
+#                  if (answer[0] == 'Y') || ["Author Name", "Author Link", "Description", "Tags" ].include?(finder[:label])
                     # Include the finder on the site
                     unless @site.finders.exists?(finds: finder[:label], selector: finder[:path], read_attrib: finder[:attribute])
                       @site.finders.create(finds: finder[:label], selector: finder[:path], read_attrib: finder[:attribute])
                       @site.save
                     end
-                  end
+#                  end
                 when 'S'
                   # Copy the value to the corresponding field on the site
                   rest_of_line = answer[1..-1].strip
