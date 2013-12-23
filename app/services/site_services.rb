@@ -667,7 +667,8 @@ class SiteServices
           label = finder[:label]
           finder.each { |key, value| puts "\t(#{key}: #{value})" unless [:label, :count, :foundlings].include?(key) }
           accepted = false
-          while (foundstr = result.out.unshift) && !accepted
+          while (foundstr = result.out.shift) && !accepted
+            debugger
             unless column = correct_result && (foundstr == correct_result) && :yes_votes
               puts "#{label}: #{foundstr}"
               site_option = ["Description", "Site Name", "Title", "Image", "Author Name", "Author Link", "Tags"].include?(label) ? " S(ave value to Site) " : ""
@@ -678,6 +679,7 @@ class SiteServices
                   return nil
                 when 'N', 'n'
                   column = :no_votes
+                  return false if answer[0] == 'N'
                 when 'Y', 'y', nil
                   column = :yes_votes
                   accepted = (answer[0] == 'Y')
