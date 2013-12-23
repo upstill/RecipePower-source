@@ -669,22 +669,28 @@ class SiteServices
           if foundstr = result.out[0]
             unless column = correct_result && (foundstr == correct_result) && :yes_votes
               puts "#{label}: #{foundstr}"
-              site_option = [ "URI", "Description", "Site Name", "Title", "Image", "Author Name", "Author Link", "Tags" ].include?(label) ? " S(ave value to Site) " : ""
-              puts "Good? y(es) n(o) Y(attach finder to site) #{site_option} Q(uit)"
+              site_option = [ "Description", "Site Name", "Title", "Image", "Author Name", "Author Link", "Tags" ].include?(label) ? " S(ave value to Site) " : ""
+              puts "Good? [y](es) n(o) #{site_option} Q(uit)"
               answer = gets.strip
               case answer[0]
                 when 'Q'
                   return nil
                 when 'N', 'n'
                   column = :no_votes
-                when 'Y', 'y'
+                when 'Y', 'y', nil
                   column = :yes_votes
                   correct_result = foundstr
 #                  if (answer[0] == 'Y') || ["Author Name", "Author Link", "Description", "Tags" ].include?(finder[:label])
                     # Include the finder on the site
                     unless @site.finders.exists?(finds: finder[:label], selector: finder[:path], read_attrib: finder[:attribute])
-                      @site.finders.create(finds: finder[:label], selector: finder[:path], read_attrib: finder[:attribute])
-                      @site.save
+                      if existing = @site.finders.where(finds: finder[:label]).first
+                        existing.selector = finder[:path]
+                        existing.read_attrib = finder[:attribute]
+                        existing.save
+                      else
+                        @site.finders.create(finds: finder[:label], selector: finder[:path], read_attrib: finder[:attribute])
+                        @site.save
+                      end
                     end
 #                  end
                 when 'S'
@@ -692,7 +698,7 @@ class SiteServices
                   rest_of_line = answer[1..-1].strip
                   field_val = rest_of_line.blank? ? foundstr : rest_of_line
                   case label
-                    when "URI", "Image"
+                    when "Image"
                       @site.logo = field_val
                       @site.save
                     when "Description"
@@ -754,99 +760,6 @@ class SiteServices
       puts e.to_s
       return false
     end
-  end
-
-  # Revise the sites to reflect the current global defaults
-  def self.groom(r=nil)
-    case r
-      when NilClass
-        sites = Site.all
-      when Range
-        sites = Site.all[r]
-      when Fixnum, Array
-        sites = Site.where(:id => r)
-      when String
-        sites = Site.where('host LIKE ?', "%#{r}%")
-    end
-
-    if sites && (sites.count > 0)
-      sites.each do |site|
-        self.new(site).groom (r != nil) # Eliminate the current global defaults
-        site.save
-      end
-    else
-      puts "No sites found by "+r.to_s
-    end
-  end
-
-  # Delete any of the site's finders that also appear in the global set
-  def groom (fullcheck=true)
-    done = false
-    site_finders # Set up @site_finders
-    while !done
-      done = true
-      puts ">>>>>>>>>>>>>>> Grooming #{@site.id} (#{@site.site})"
-      # Purge finders that are already amongst the defaults
-      @site_finders = @site_finders.each { |finder|
-        finder.each { |key, value| finder[key] = value.to_s }
-        if finder[:cut]
-          s.ttlcut = finder[:cut] if (finder[:label] == "Title")
-          finder.delete(:cut)
-        end
-      }.keep_if { |tag| !default_finder? tag }
-      @site.home.sub!(/\/$/, "")
-      @site.home = @site.home.strip.sub(/http:\/\b/, "http://")
-      @site.site = @site.site.strip.sub(/http:\/\b/, "http://")
-      if !test_link(@site.home)
-        if test_link(link = "http://www.#{oldname}") ||
-            test_link(link = "http://#{oldname}")
-          @site.home = @site.site = link
-        else
-          puts "Site #{@site.oldname} has a bad home link '#{@site.home}'. Delete?"
-          answer = gets.strip
-          case answer
-            when "y", "Y"
-              @site.destroy
-              return
-            when "q", "Q"
-              exit
-          end
-        end
-      end
-      # Take results from all the recipes attached to the site (if none, question whether to retain the site)
-      if fullcheck
-        if (recipeset = @site.recipes).empty?
-          puts "Site #{@site.oldname} (#{@site.home}) has no recipes. Delete?"
-          answer = gets.strip
-          if answer == "y"
-            @site.destroy
-            return
-          end
-        elsif !@site_finders.empty?
-          fr = FinderResults.new @site, @site_finders
-          recipeset[0..4].each do |recipe|
-            # Glean from the recipe
-            "...scanning recipe \'"+recipe.title+"\'..."
-            fr.collect_results recipe.url, nil, false
-          end
-          site_finders = fr.revise_interactively
-        end
-      end
-    end
-    @site.save
-  end
-
-  # Study the extant sites and report redundancies (different sites that have the same home)
-  def self.report_redundancies
-    keys = {}
-    Site.all.each do |site|
-      if keys[site.home]
-        keys[site.home] << site.id
-      else
-        keys[site.home] = [site.id]
-      end
-    end
-    keys.each { |k, v| puts "#{k}: #{v.to_s}" if v.count > 1 } && false
   end
 
 end
