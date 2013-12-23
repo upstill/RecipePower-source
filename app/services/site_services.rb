@@ -660,16 +660,17 @@ class SiteServices
       correct_result = nil
       finders.each do |finder|
         pagetags.results_for(finder[:id]).each do |result|
-        # pagetags.results_for(label).each do |result|
-        # finder = result.finder
+          # pagetags.results_for(label).each do |result|
+          # finder = result.finder
           puts "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
           puts "URL: #{url}"
           label = finder[:label]
           finder.each { |key, value| puts "\t(#{key}: #{value})" unless [:label, :count, :foundlings].include?(key) }
-          if foundstr = result.out[0]
+          accepted = false
+          while (foundstr = result.out.unshift) && !accepted
             unless column = correct_result && (foundstr == correct_result) && :yes_votes
               puts "#{label}: #{foundstr}"
-              site_option = [ "Description", "Site Name", "Title", "Image", "Author Name", "Author Link", "Tags" ].include?(label) ? " S(ave value to Site) " : ""
+              site_option = ["Description", "Site Name", "Title", "Image", "Author Name", "Author Link", "Tags"].include?(label) ? " S(ave value to Site) " : ""
               puts "Good? [y](es) n(o) #{site_option} Q(uit)"
               answer = gets.strip
               case answer[0]
@@ -679,20 +680,39 @@ class SiteServices
                   column = :no_votes
                 when 'Y', 'y', nil
                   column = :yes_votes
+                  accepted = (answer[0] == 'Y')
                   correct_result = foundstr
-#                  if (answer[0] == 'Y') || ["Author Name", "Author Link", "Description", "Tags" ].include?(finder[:label])
-                    # Include the finder on the site
-                    unless @site.finders.exists?(finds: finder[:label], selector: finder[:path], read_attrib: finder[:attribute])
-                      if existing = @site.finders.where(finds: finder[:label]).first
-                        existing.selector = finder[:path]
-                        existing.read_attrib = finder[:attribute]
-                        existing.save
-                      else
-                        @site.finders.create(finds: finder[:label], selector: finder[:path], read_attrib: finder[:attribute])
-                        @site.save
+                  # Include the finder on the site
+                  unless @site.finders.exists?(finds: finder[:label], selector: finder[:path], read_attrib: finder[:attribute])
+                    if existing = @site.finders.where(finds: finder[:label]).first
+                      existing.selector = finder[:path]
+                      existing.read_attrib = finder[:attribute]
+                      existing.save
+                    else
+                      @site.finders.create(finds: finder[:label], selector: finder[:path], read_attrib: finder[:attribute])
+                      @site.save
+                    end
+                  end
+                  # Saved the title finder: take a crack at the editing RegExp
+                  if label == "Title"
+                    done = false
+                    until done
+                      trimmed = trim_title foundstr
+                      puts "Title In: #{foundstr}"
+                      puts "Title Out: #{trimmed}"
+                      puts "Good? (sS to save, qQ to quit, otherwise type new regexp for title) "
+                      answer = gets.strip
+                      case answer
+                        when 's', 'S'
+                          site.save
+                          done = true
+                        when 'q', 'Q'
+                          done = true
+                        else
+                          @site.ttlcut = answer
                       end
                     end
-#                  end
+                  end
                 when 'S'
                   # Copy the value to the corresponding field on the site
                   rest_of_line = answer[1..-1].strip
@@ -708,7 +728,7 @@ class SiteServices
                       @site.name = field_val
                       @site.save
                     when "Author Name"
-                      TaggingServices.new( @site).tag_with field_val, tagger: User.super_id, type: "Author"
+                      TaggingServices.new(@site).tag_with field_val, tagger: User.super_id, type: "Author"
                       @site.save
                     when "Author Link"
                       # Add a reference to the author, if any
@@ -731,25 +751,6 @@ class SiteServices
             if column
               finder[column] = 0 unless finder[column]
               finder[column] = finder[column]+1
-            end
-            if label == "Title"
-              done = false
-              until done
-                trimmed = trim_title foundstr
-                puts "Title In: #{foundstr}"
-                puts "Title Out: #{trimmed}"
-                puts "Good? (sS to save, qQ to quit, otherwise type new regexp for title) "
-                answer = gets.strip
-                case answer
-                  when 's', 'S'
-                    site.save
-                    done = true
-                  when 'q', 'Q'
-                    done = true
-                  else
-                    @site.ttlcut = answer
-                end
-              end
             end
           end
         end
