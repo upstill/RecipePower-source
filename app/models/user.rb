@@ -84,8 +84,12 @@ class User < ActiveRecord::Base
 
   # Add the feed to the browser's ContentBrowser and select it
   def add_feed feed
-    self.feeds = feeds.unshift(feed) unless feeds.include? feed
-    refresh_browser feed
+    if feeds.exists? id: feed.id
+      browser.select_by_content feed
+    else
+      self.feeds = feeds.unshift(feed)
+      refresh_browser feed
+    end
   end
 
   def delete_feed feed

@@ -71,13 +71,13 @@ class Feed < ActiveRecord::Base
   end
   
   def refresh
-    Delayed::Job.enqueue self
+    # Delayed::Job.enqueue self
   end 
   
   def perform
     logger.debug "[#{Time.now}] Updating feed #{to_s}; approved=#{approved ? 'Y' : 'N'}"
     puts "[#{Time.now}] Updating feed "+to_s
-    FeedEntry.update_from_feed self
+    # FeedEntry.update_from_feed self
     touch
   end
   

@@ -679,7 +679,11 @@ class SiteServices
                   return nil
                 when 'N', 'n'
                   column = :no_votes
-                  return false if answer[0] == 'N'
+                  if answer[0] == 'N'
+                    @site.reviewed = nil
+                    @site.save
+                    return false
+                  end
                 when 'Y', 'y', nil
                   column = :yes_votes
                   accepted = (answer[0] == 'Y')
