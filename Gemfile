@@ -41,6 +41,7 @@ gem "feedzirra", "~> 0.2" # :git => 'git://github.com/pauldix/feedzirra.git'
 gem "simple_form", :git => 'git://github.com/plataformatec/simple_form.git' # , '~> 3.0.0.beta1' 
 gem 'delayed_job' # , git: 'git://github.com/collectiveidea/delayed_job.git'
 gem 'delayed_job_active_record' # , git: 'git://github.com/collectiveidea/delayed_job_active_record.git'
+gem 'daemons'
 gem 'hirefire-resource'
 gem 'rspec-rails', :group => [:test, :development]
 # gem 'debugger', :group => [:test, :development]
