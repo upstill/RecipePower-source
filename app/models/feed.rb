@@ -77,10 +77,25 @@ class Feed < ActiveRecord::Base
   def perform
     logger.debug "[#{Time.now}] Updating feed #{to_s}; approved=#{approved ? 'Y' : 'N'}"
     puts "[#{Time.now}] Updating feed "+to_s
-    # FeedEntry.update_from_feed self
-    touch
+    if feed = Feed.where(id: id).first
+      FeedEntry.update_from_feed feed
+    end
   end
-  
+
+  def enqueue_update later = false
+    Delayed::Job.enqueue self, run_at: (later ? (Time.new.beginning_of_week(:sunday)+1.week) : (Time.now+20))
+  end
+
+  def success(job)
+    # When the feed is updated successfully, re-queue it for one week hence
+    feed = YAML::load(job.handler)
+    logger.debug "Updated feed ##{job.id}"
+    if feed = Feed.where(id: feed.id).first
+      feed.enqueue_update true
+      feed.touch
+    end
+  end
+
   def to_s
     title+" (#{url})"
   end
@@ -174,3 +189,4 @@ class Feed < ActiveRecord::Base
   end
   
 end
+

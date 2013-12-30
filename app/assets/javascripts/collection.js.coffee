@@ -78,6 +78,7 @@ collection_update_success = (resp) ->
 # Fire the current query state at the server and get back a refreshed recipe list
 RP.collection.update = (params, querypath) ->
 	collection_beforeSend()
+	querypath ||= "/collection"
 	jQuery.ajax
 		type: "POST"
 		url: querypath
@@ -92,6 +93,7 @@ RP.collection.update = (params, querypath) ->
 			RP.process_response responseData
 		success: (resp, succ, xhr) ->
 			collection_update_success resp
+			history.replaceState null, "RecipePower | Collections", querypath
 
 RP.collection.rejustify = () ->
 	$('#seeker_results.masonry-container').masonry()
