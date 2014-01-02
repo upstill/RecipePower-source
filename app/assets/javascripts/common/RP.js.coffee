@@ -196,6 +196,7 @@ RP.get_content = (url, link) ->
 # Replace the page with the results of the link, properly updating the address bar
 RP.get_page = (url) ->
 	$('body').load url, {}, (responseText, textStatus, XMLHttpRequest) ->
+		$('body').trigger('load')
 		window.history.replaceState { an: "object" }, 'Collection', url
 
 # Handle successful return of a JSON request by running whatever success function
