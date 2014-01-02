@@ -43,6 +43,7 @@ module SeekerHelper
 	    class: 'content-streamer hidden',
 	    data: { kind: @seeker.class.to_s }
     options[:data] ||= {}
+    querypath = "/#{querypath}" unless querypath =~ /^\//
     options[:data][:"query-path"] = querypath
     options[:id] = "seeker_results"
     content_tag enclosing_element, stream_link, options
