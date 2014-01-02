@@ -6,7 +6,7 @@ RP.stream.go = (evt) ->
 	RP.stream.fire $(elmt).data('kind')
 
 # jQuery-driven interface
-RP.stream.fire = (kind, do_append) ->
+RP.stream.fire = (kind) ->
 	# Check with the stream generator for content
 	source = new EventSource "/stream/stream?kind="+kind
 	source.onerror = (evt) ->

@@ -39,9 +39,9 @@ module SeekerHelper
   # Set up a DOM element to receive a stream of seeker results
 	def render_seeker_results enclosing_element, querypath, options={}
     stream_link = link_to "Click to load", "#",
-	    onload: 'RP.stream.go(event);',
+	    # onload: 'RP.stream.go(event);',
 	    class: 'content-streamer hidden',
-	    data: { kind: @seeker.class.to_s }
+	    data: { kind: @seeker.class.to_s, alert: ((current_user && (current_user.id == 3)) ? "Firing Stream" : "") }
     options[:data] ||= {}
     querypath = "/#{querypath}" unless querypath =~ /^\//
     options[:data][:"query-path"] = querypath

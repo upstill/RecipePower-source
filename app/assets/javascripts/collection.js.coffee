@@ -39,6 +39,8 @@ RP.collection.more_to_come = (armed) ->
 collection_onload = () ->
 	$("#tagstxt").first().focus()
 	$('.content-streamer').each (ix, elmt) ->
+		if (alertstr = $(elmt).data('alert')) && (alertstr.length > 0)
+			alert alertstr
 		RP.stream.fire $(elmt).data('kind')
 		$(elmt).remove()
 	# Page buttons do a remote fetch which needs to replace the collection
