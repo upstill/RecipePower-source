@@ -201,7 +201,7 @@ class ApplicationController < ActionController::Base
           if current_user
             redirect_to "/collection#{hashtag}"
           else
-            redirect_to "/pages/home#{hashtag}"
+            redirect_to "/home#{hashtag}"
           end
         else
           render action, renderopts
