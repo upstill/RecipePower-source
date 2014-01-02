@@ -53,12 +53,11 @@ class FeedsController < ApplicationController
       @notice = "You're already subscribed to '#{@feed.title}'."
     else
       @feed.approved = true
-      @feed.users << user 
       @feed.save
       @feed.perform
       @notice = "Now feeding you with '#{@feed.title}'."
     end
-    user.add_feed @feed # No harm if the user already has the feed
+    user.add_feed @feed # Selects the feed whether previously subscribed or not
     @browser = user.browser params
     @node = @browser.selected
     respond_to do |format|

@@ -7,6 +7,10 @@ class Feed < ActiveRecord::Base
   # Setup a feed properly: do a reality check on the url, populate the information
   # fields (title, description...), and ensure it has an associated site
   before_validation { |feed| feed.follow_url if (new_record? || url_changed?) }
+
+  before_destroy do |feed|
+    feed.users.each { |subscriber| subscriber.delete_feed feed }
+  end
   
   belongs_to :site
   validates :site, :presence => true
