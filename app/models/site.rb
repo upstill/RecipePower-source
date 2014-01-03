@@ -34,7 +34,7 @@ class Site < ActiveRecord::Base
   after_initialize :post_init
   
   def perform
-    feeds.each { |feed| feed.destroy unless feed.users.count > 0 }
+    feeds.each { |feed| feed.destroy unless (feed.user_ids-[4]).empty? }
   end
 
 protected
