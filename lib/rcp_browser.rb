@@ -161,12 +161,17 @@ class BrowserElement
   def deselect
     @selected = false
   end
-  
+
   # Change the current selection to match the given id
   def select_by_id(id)
     @selected = (id==css_id)
   end
-  
+
+  # Change the current selection to match the given id
+  def find_by_id(id)
+    self if id==css_id
+  end
+
   # Select a node based on its content (user, channel or feed)
   def find_by_content(obj)
     nil
@@ -237,12 +242,16 @@ class BrowserComposite < BrowserElement
   def content_empty_report
      ((children.count < 2) ? "This "+content_name.singularize+" doesn't" : "These "+content_name+" don't")+" appear to have any content."
   end
-  
+
   def select_by_id(id)
     super
     @children.each { |child| child.select_by_id(id) }
   end
-  
+
+  def find_by_id(id)
+    super || @children.find { |child| child.find_by_id(id) }
+  end
+
   # Recursive search for the selected child
   def selected
     result = super || (@children.poll { |child| child.selected })
@@ -815,7 +824,14 @@ class ContentBrowser < BrowserComposite
   # Take heed of any relevant incoming parameters
   def apply_params params=nil
     if params
-      self.select_by_id(params[:selected]) if params[:selected]
+      if params[:selected]
+        # Validate the new selection before setting it, so we don't wind up with a nil selection
+        if self.find_by_id params[:selected]
+          self.select_by_id params[:selected]
+        else
+          raise Exception, "Apparently that #{params[:selected][0..3]} is missing in action"
+        end
+      end
       self.cur_page = params[:cur_page].to_i if params[:cur_page]
     end
   end

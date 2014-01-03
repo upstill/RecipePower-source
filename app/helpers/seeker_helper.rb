@@ -41,7 +41,7 @@ module SeekerHelper
     stream_link = link_to "Click to load", "#",
 	    # onload: 'RP.stream.go(event);',
 	    class: 'content-streamer hidden',
-	    data: { kind: @seeker.class.to_s, alert: ((current_user && (current_user.id == 3)) ? "Firing Stream" : "") }
+	    data: { kind: @seeker.class.to_s } # , alert: ((current_user && (current_user.id == 3)) ? "Firing Stream" : "") }
     options[:data] ||= {}
     querypath = "/#{querypath}" unless querypath =~ /^\//
     options[:data][:"query-path"] = querypath

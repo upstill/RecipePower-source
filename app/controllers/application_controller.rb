@@ -148,7 +148,14 @@ class ApplicationController < ActionController::Base
         # page: with_format("html") { render_to_string :index },
         { redirect: assert_popup(nil, request.original_url) }
       else
-        setup_seeker(klass, options.slice(:clear_tags, :scope), params)
+        begin
+          setup_seeker(klass, options.slice(:clear_tags, :scope), params)
+        rescue Exception => e
+          # Response to a setup error is to reload the page
+          flash[:error] = e.to_s
+          return { redirect: "/collection" }
+        end
+
         flash.now[:guide] = @seeker.guide
         # If this is the first page, we replace the list altogether, wiring the list
         # to stream results. If it's a subsequent page, we just set up a stream to serve that page.

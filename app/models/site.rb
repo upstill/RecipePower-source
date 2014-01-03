@@ -34,7 +34,7 @@ class Site < ActiveRecord::Base
   after_initialize :post_init
   
   def perform
-    FeedServices.scrape_page self
+    feeds.each { |feed| feed.destroy }
   end
 
 protected
