@@ -232,10 +232,14 @@
     <orderEntry type="library" scope="PROVIDED" name="coffee-rails (v4.0.1, RVM: ruby-1.9.3-p286) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="coffee-script (v2.2.0, RVM: ruby-1.9.3-p286) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="coffee-script-source (v1.6.3, RVM: ruby-1.9.3-p286) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="columnize (v0.3.6, RVM: ruby-1.9.3-p286) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="content_for_in_controllers (v0.0.2, RVM: ruby-1.9.3-p286) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="curb (v0.8.5, RVM: ruby-1.9.3-p286) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="daemons (v1.1.9, RVM: ruby-1.9.3-p286) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="debug_inspector (v0.0.2, RVM: ruby-1.9.3-p286) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="debugger (v1.6.2, RVM: ruby-1.9.3-p286) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="debugger-linecache (v1.2.0, RVM: ruby-1.9.3-p286) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="debugger-ruby_core_source (v1.2.3, RVM: ruby-1.9.3-p286) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="declarative_authorization (v0.5.7, RVM: ruby-1.9.3-p286) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="delayed_job (v4.0.0, RVM: ruby-1.9.3-p286) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="delayed_job_active_record (v4.0.0, RVM: ruby-1.9.3-p286) [gem]" level="application" />
