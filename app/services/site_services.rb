@@ -666,9 +666,8 @@ class SiteServices
           puts "URL: #{url}"
           label = finder[:label]
           finder.each { |key, value| puts "\t(#{key}: #{value})" unless [:label, :count, :foundlings].include?(key) }
-          accepted = false
-          while (foundstr = result.out.shift) && !accepted
-            debugger
+          # accepted = false
+          if (foundstr = result.out.shift)
             unless column = correct_result && (foundstr == correct_result) && :yes_votes
               puts "#{label}: #{foundstr}"
               site_option = ["Description", "Site Name", "Title", "Image", "Author Name", "Author Link", "Tags"].include?(label) ? " S(ave value to Site) " : ""
@@ -686,7 +685,7 @@ class SiteServices
                   end
                 when 'Y', 'y', nil
                   column = :yes_votes
-                  accepted = (answer[0] == 'Y')
+                  # accepted = (answer[0] == 'Y')
                   correct_result = foundstr
                   # Include the finder on the site
                   unless @site.finders.exists?(finds: finder[:label], selector: finder[:path], read_attrib: finder[:attribute])
