@@ -11,7 +11,7 @@ module SeekerHelper
 	  %Q{
   		    </tr>
   		  </thead>
-        #{render_seeker_results "tbody", query_path, class: "collection_list"}
+        #{arm_seeker_stream "tbody", query_path, class: "collection_list"}
   		</table>
   	}).html_safe
   end
@@ -37,7 +37,7 @@ module SeekerHelper
   end
 
   # Set up a DOM element to receive a stream of seeker results
-	def render_seeker_results enclosing_element, querypath, options={}
+	def arm_seeker_stream enclosing_element, querypath, options={}
     stream_link = link_to "Click to load", "#",
 	    # onload: 'RP.stream.go(event);',
 	    class: 'content-streamer hidden',

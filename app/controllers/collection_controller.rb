@@ -38,14 +38,14 @@ class CollectionController < ApplicationController
   end
   
   # Update the collection to reflect any changes
-  def update
+  def refresh
     @seeker.refresh # Set the refresh process going
-    respond_to do |format|
-      format.html { 
-        render :text => "Refreshing..."
-      }
-    end
-  end 
+    seeker_result "Content", 'div.collection'
+  end
+
+  def update
+
+  end
 
   # Render the results for the current state of the query and selected collection
   def relist
@@ -56,7 +56,9 @@ class CollectionController < ApplicationController
       render :nothing => true, :status => :no_content
     else
       flash.now[:success] = "This feed is now up to date."
-      render :index, :layout=>false, :locals => { :feed => @feed }
+      @Title = "Collections"
+      seeker_result "Content", 'div.collection'
+      # render :index, :layout=>false, :locals => { :feed => @feed }
     end
   end
 end

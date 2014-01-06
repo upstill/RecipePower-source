@@ -354,8 +354,8 @@ class FeedBrowserElement < BrowserElement
   # Refresh in background, returning false to indicate a wait state
   def refresh
     feed = Feed.find(@feedid)
-    feed.refresh
-    false
+    feed.perform
+    true
   end
   
   def find_by_content obj
@@ -388,7 +388,7 @@ class FeedBrowserElement < BrowserElement
 
 private  
   def candidates
-    @candidates ||= FeedEntry.where feed_id: @feedid
+    @candidates ||= FeedEntry.where(feed_id: @feedid).order('published_at DESC')
   end
   
 end

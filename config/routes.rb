@@ -42,8 +42,9 @@ RP::Application.routes.draw do
   resources :thumbnails
 
   match 'collection', :controller=>'collection', :action=>'index', :via => [:get, :post]
-  match 'collection/query', :controller=>'collection', :action=>'query', :via => :post
+  match 'collection/query', :controller=>'collection', :action=>'query', :via => [ :get, :post ]
   match "collection/update", :controller=>'collection', :action=>'update', :via => :post
+  get "collection/refresh"
   get "collection/feed"
   get "collection/show"
   get "collection/new"

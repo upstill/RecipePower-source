@@ -1,1 +1,4 @@
-RP.get_content.assimilate("<%= j @jsondata.to_json %>")
+var contentstr = "<%= j @jsondata.to_json %>";
+var obj = JSON.parse(contentstr.replace(/&quot;/g,'"'));
+RP.process_response(obj);
+RP.notifications.done();

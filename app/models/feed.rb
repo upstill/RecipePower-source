@@ -18,7 +18,7 @@ class Feed < ActiveRecord::Base
   
   has_and_belongs_to_many :users
   
-  has_many :feed_entries, :dependent => :destroy
+  has_many :feed_entries, :dependent => :destroy, :order => 'published_at DESC'
 
   # When a feed is built, the url may be valid for getting to a feed, but it may also
   # alias to the url of an already-extant feed (no good). We also need to extract the title and description 
@@ -73,16 +73,13 @@ class Feed < ActiveRecord::Base
   def self.update_now
     Feed.where(:approved => true).each { |feed| feed.perform }
   end
-  
-  def refresh
-    # Delayed::Job.enqueue self
-  end 
-  
+
   def perform
     logger.debug "[#{Time.now}] Updating feed #{to_s}; approved=#{approved ? 'Y' : 'N'}"
     puts "[#{Time.now}] Updating feed "+to_s
     if feed = Feed.where(id: id).first
       FeedEntry.update_from_feed feed
+      feed.touch
     end
   end
 

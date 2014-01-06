@@ -12,7 +12,7 @@ require "time_check"
 	                ["This feed was last updated", 
 	                  time_ago_in_words(updated_time), 
 	                  "ago.", 
-	                  button_to_update("Check for new entries", "collection/relist", updated_time.to_s, msg_selector: "div.updater")].join(' ').html_safe,
+	                  button_to_update("Check for new entries", "/collection/refresh", updated_time.to_s, wait_msg: "Checking for updates...", msg_selector: "div.updater")].join(' ').html_safe,
 	                class: "updater"
 	  end
 	end

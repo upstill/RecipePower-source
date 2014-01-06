@@ -27,11 +27,14 @@ RP.notifications.wait = (msg) ->
 		parent = elmt.parentElement
 		elmt.style.width = ($(window).width()-parent.offsetLeft).toString()+"px"
 		elmt.style.height = ($(window).height()-parent.offsetTop).toString()+"px"
-		$(elmt).addClass "loading" 
+		$(elmt).addClass "loading"
+	else
+		bootbox_alert msg
 
 # Finished with wait process (msg optional)
 RP.notifications.done = (msg) ->
 	$('div.ajax-loader').removeClass "loading"
+	bootbox_alert()
 	if msg
 		RP.notifications.post msg
 
@@ -75,5 +78,6 @@ bootbox_alert = (msg) ->
 		if msg && msg.length > 0
 			bootbox.alert msg
 		else
-			$('div.bootbox.modal').modal 'hide'
+			$('div.bootbox .modal-footer button').click() # $('div.bootbox').modal('hide') # $('div.bootbox.modal').modal 'hide'
+			$('div.modal-backdrop').remove()
 	return available

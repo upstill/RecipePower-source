@@ -37,7 +37,7 @@ module TriggersHelper
 	# Hit a URL, with options for confirmation (:confirm-msg) and waiting (:wait-msg)
 	def link_to_submit(label, path, options={})
 	  options[:remote] = true
-  	options[:class] = "talky-submit "+(options[:class] || "")
+  	options[:class] = "submit "+(options[:class] || "")
   	options[:data] = { :method => options[:method] } if options[:method]
 	  button_to label, path, options
   	# link_to_function label, "RP.submit(event, '#{path}');", options
@@ -52,10 +52,10 @@ module TriggersHelper
     # Play nice with data fields in the link: homegrown data attributes prefaced with "data-"
     data[:last_modified] = mod_time || Time.now.httpdate # Default for updating
     data[:refresh] = true # Default for updating
-	  data[:url] = assert_query url, mod_time: mod_time.to_s
-    options = data.slice! :url, :last_modified, :hold_msg, :msg_selector, :dataType, :type, :refresh, :contents_selector
+	  url = assert_query url, mod_time: mod_time.to_s
+    options = data.slice! :last_modified, :wait_msg, :msg_selector, :dataType, :type, :refresh, :contents_selector
     options[:data] = data
-    button_to_get_content label, options
+    button_to_submit label, url, options
   end
 
   def defer_trigger str
