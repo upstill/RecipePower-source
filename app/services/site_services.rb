@@ -297,11 +297,11 @@ class SiteServices
 #   @@DataChoices = [ "URI", "Image", "Title", "Description", "Author Name", "Author Link", "Site Name", "Keywords", "Tags" ]
 
   def self.data_choices
-    @@DataChoices ||= (@@DefaultFinders.collect { |f| f[:label] } << "Site Logo").uniq
+    @@DataChoices ||= ((@@DefaultFinders+@@CandidateFinders).collect { |f| f[:label] } << "Site Logo").uniq
   end
 
   def self.attribute_choices
-    @@AttributeChoices ||= @@DefaultFinders.collect { |f| f[:attribute] }.uniq
+    @@AttributeChoices ||= (@@DefaultFinders+@@CandidateFinders).collect { |f| f[:attribute] }.uniq
   end
 
   protected
