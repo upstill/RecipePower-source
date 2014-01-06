@@ -117,7 +117,7 @@ class RecipesController < ApplicationController
         }
         format.json {
           @decorator = @recipe.decorate
-          @data = { onget: [ "submit.go", nil, collection_url(layout: false) ] }
+          @data = { onget: [ "submit.submit_and_process", collection_url(layout: false) ] }
           render json: {
             dlog: with_format("html") { 
               render_to_string :edit, layout: false
@@ -179,8 +179,7 @@ class RecipesController < ApplicationController
         if current_user          
           @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe]||{}, true, params[:extractions] # session[:user_id], params
           if @recipe.id
-            # @data = { onget: [ "dialog.get_and_go", nil, collection_url(layout: false) ] } if params[:_area] != "at_top"
-            @data = { onget: [ "submit.go", nil, collection_url(layout: false) ] } unless response_service.injector?
+            @data = { onget: [ "submit.submit_and_process", collection_url(layout: false) ] } unless response_service.injector?
             deferred_capture true # Delete the pending recipe
             codestr = with_format("html") { render_to_string :edit, layout: false }
           else
