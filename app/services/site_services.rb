@@ -792,6 +792,7 @@ class SiteServices
         puts "\tid: #{site.id}"
         puts "\tname: #{name}"
         puts "\tdescription: #{site.description}"
+        puts "\tlogo#{site.logo}"
         begin
           okay_to_quit = true
           if site.ttlcut && site.ttlcut.match(site.name)
@@ -806,6 +807,11 @@ class SiteServices
               when /^D\s/
                 site.description = newname.sub(/^D\s*/, '')
                 puts "Saving Description \'#{site.description}\'"
+                site.save
+                okay_to_quit = false
+              when /^L\s/
+                site.logo = newname.sub(/^L\s*/, '')
+                puts "Saving Logo \'#{site.logo}\'"
                 site.save
                 okay_to_quit = false
               else
