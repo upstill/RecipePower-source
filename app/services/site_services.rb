@@ -633,12 +633,21 @@ class SiteServices
 
   # Go through all sites, presenting a sample recipe and querying the appropriateness
   # of all the associated finders.
+  # If a site_id is provided, go through all sites starting with the one thus indicated.
+  # If no site_id is provided, go through all unreviewed sites
   def self.screen site_id = nil
     @@DefaultFinders = @@DefaultFinders + @@CandidateFinders unless (@@DefaultFinders.last == @@CandidateFinders.last)
-    done_did = [] # Keep record of sites visited
-    (site_id ? Site.where(id: site_id) : Site.where(reviewed: [false, nil] )).each do |site|
-      return if (site.reviewed = self.new(site).poll_extractions).nil?
-      site.save if site.reviewed
+    if site_id
+      site = Site.find(site_id)
+      site.reviewed = false
+      site.save
+    end
+    first_found = site_id.nil?
+    (site_id ? Site.all : Site.where(reviewed: [false, nil] )).each do |site|
+      if (first_found ||= (site.id == site_id))
+        return if (site.reviewed = self.new(site).poll_extractions).nil?
+        site.save if site.reviewed
+      end
     end
 
     return if site_id
@@ -767,6 +776,51 @@ class SiteServices
       puts "Error: couldn't open page '#{url}' for analysis:"
       puts e.to_s
       return false
+    end
+  end
+
+  # Examine site names, possibly starting at a given id
+  def self.names id=nil
+    first_found = id.nil?
+    nsites = Site.all.count
+    site_n = 1
+    Site.all.each do |site|
+      name = site.name
+      if (first_found ||= (site.id == id))
+        puts "#{site_n}/#{nsites} >>>>>>>>>>>>>>>>>>>>>>"
+        puts site.sampleURL
+        puts "\tid: #{site.id}"
+        puts "\tname: #{name}"
+        puts "\tdescription: #{site.description}"
+        begin
+          okay_to_quit = true
+          if site.ttlcut && site.ttlcut.match(site.name)
+            puts "\tttlcut: #{site.ttlcut}"
+            puts "...assuming name is okay"
+          else
+            puts "Name? (blank to keep as is)"
+            newname = gets.strip
+            case newname
+              when 'Q'
+                return
+              when /^D\s/
+                site.description = newname.sub(/^D\s*/, '')
+                puts "Saving Description \'#{site.description}\'"
+                site.save
+                okay_to_quit = false
+              else
+                unless newname.blank?
+                  site.name = newname
+                  site.save
+                end
+            end
+            return if newname == 'Q'
+          end
+        end until okay_to_quit
+      else
+        puts "...skipping #{name}..."
+      end
+      site_n += 1
     end
   end
 
