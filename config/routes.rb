@@ -1,98 +1,34 @@
+# Most of this is fairly generic except for added controller methods. The main oddity
+# is querying collections via the index action. POSTing to #index modifies query parameters,
+# whereas GETting from #index starts afresh. This overloading was necessitated by problems using
+# a second, POST, method (#query), which wasn't being POSTed to upon page reload.
+
 RP::Application.routes.draw do
 
-  get "admin/data"
-  get "admin/control"
-  get "notifications/accept"
-  
-=begin
-  resources :notifications do 
-    member do
-      put 'accept'
-    end
-  end
-=end
-
-  resources :references
-
-  get "references/index"
-
-  get "references/create"
-
-  get "references/new"
-
-  get "references/edit"
-
-  get "references/show"
-
-  get "references/update"
-
-  get "references/destroy"
-
-  resources :feeds do
-    member do 
-      get 'collect' # Add the feed to the current user
-      post 'remove' # Remove the feed from the current user's set
-      post 'approve' # (Admin only) approve the feed for presentation
-    end
-    collection do
-      post 'query' # Change the selection query
-    end
-  end
-
-  resources :thumbnails
-
-  match 'collection', :controller=>'collection', :action=>'index', :via => [:get, :post]
-  match 'collection/query', :controller=>'collection', :action=>'query', :via => [ :get, :post ]
-  match "collection/update", :controller=>'collection', :action=>'update', :via => :post
-  get "collection/refresh"
-  get "collection/feed"
-  get "collection/show"
-  get "collection/new"
-  get "collection/edit"
-  get "collection/create"
-  get "collection/relist"
-
-  get "stream/stream"
-  get "stream/buffer_test"
-  
-  get "show/new"
-
-  get "show/edit"
-
-  get "show/create"
-
-  get "show/relist"
-
-  get "show/update"
-
-  get "iframe/create"
-
-  # get "bm/bookmarklet(.:format)" => "bm#bookmarklet", :as => :bookmarklet
-
-  resources :feedback, :only => [:new, :create]
-
   get '/auth/failure' => 'authentications#failure'
-  get '/authentications/new' => 'authentications#new'
+  # get '/authentications/new' => 'authentications#new'
   resources :authentications
-     
-  devise_for :users, :controllers => {
-    :sessions => 'sessions', 
-    :passwords => 'passwords', 
-    :invitations => 'invitations', 
-    :registrations => 'registrations' } 
-    
-  devise_scope :user do
-    get "/users/invitation/divert" => "invitations#divert", :as => "divert_user_invitation"
-    # get "/invitations/divert", :to => "invitations", :as => "invitation_diversion", :action => "divert"
-  end
 
-  get '/site/scrape' => 'sites#scrape'
-  resources :sites
-  match 'sites/query', :controller=>'sites', :action=>'query', :via => :post
-  resources :expressions
-  resources :referents
-  match 'references/query', :controller=>'references', :action=>'query', :via => :post
-  resources :references
+  devise_for :users, :skip => [ :registrations ], :controllers => {
+      :sessions => 'sessions',
+      :passwords => 'passwords',
+      :invitations => 'invitations',
+      # :registrations => 'registrations' # Had to elide this and use devise_scope to define /users/register instead of /users to create
+  }
+
+  match 'users', :controller=>'users', :action=>'index', :via => [:get, :post]
+
+  devise_scope :user do
+    post "/users/register" => "registrations#create", :as => "user_registration"
+    get "/users/sign_up" => "registrations#new", :as => "new_user_registration"
+    get "/users/edit" => "registrations#edit", :as => "edit_user_registration"
+    get "/users/cancel" => "registrations#cancel", :as => "cancel_user_registration"
+    put "/users" => "registrations#update"
+    delete "/users" => "registrations#destroy"
+    patch "/users" => "registrations#update"
+
+    get "/users/invitation/divert" => "invitations#divert", :as => "divert_user_invitation"
+  end
 
   get '/auth/:provider/callback' => 'authentications#create'
 
@@ -101,52 +37,76 @@ RP::Application.routes.draw do
   # Ask a user to identify him/herself by email address
   get 'users/identify' => 'users#identify'
   # get 'users/:id/show' => 'users#show'
-  resources :users do
-    member do 
+  resources :users, :except => [ :index, :create ] do
+    member do
       get 'collect'
       post 'remove'
       get 'match_friends'
       get 'notify'
       get 'acquire' # Acquire a recipe (etc.)
     end
-    collection do
-      post 'query' # Change the selection query
-    end
   end
 
-  # Super-user can edit user info, starting with roles
-  #match 'signup' => 'users#new', :as => :signup
-  #match 'logout' => 'sessions#destroy', :as => :logout
-  #match 'login' => 'sessions#new', :as => :login
-  #resources :sessions
-  #resources :users
+  post '/site' => 'sites#create', :as => 'create_site'
+  resources :sites, except: [ :index, :create ] do
+    member do
+      get 'scrape'
+    end
+  end
+  match 'sites', :controller=>'sites', :action=>'index', :via => [:get, :post]
 
-  resources :tags do 
+  post '/reference' => 'references#create', :as => 'create_reference'
+  resources :references, :except => [ :index, :create ]
+  match 'references', :controller=>'references', :action=>'index', :via => [:get, :post]
+
+  post '/feed' => 'feeds#create', :as => 'create_feed'
+  resources :feeds, :except => [ :index, :create ] do
+    member do
+      get 'collect' # Add the feed to the current user
+      post 'remove' # Remove the feed from the current user's set
+      post 'approve' # (Admin only) approve the feed for presentation
+    end
+  end
+  match 'feeds', :controller=>'feeds', :action=>'index', :via => [:get, :post]
+
+  post '/tag' => 'tags#create', :as => 'create_tag'
+  resources :tags, except: [ :index, :create ] do
     member do
       get 'absorb'
     end
     collection do
-      post 'query'
       get 'editor'
       get 'list'
       get 'typify'
       get 'match'
     end
   end
+  match 'tags', :controller=>'tags', :action=>'index', :via => [:get, :post]
 
+  match 'collection', :controller=>'collection', :action=>'index', :via => [:get, :post]
+  post 'collection/update'
+  get "collection/refresh"
+  get "collection/feed"
+  get "collection/show", as: 'collection_show'
+  get "collection/new"
+  get "collection/edit"
+  get "collection/create"
+  get "collection/relist"
+
+  get "stream/stream"
+  get "stream/buffer_test"
+  get "iframe/create"
+  get "admin/data"
+  get "admin/control"
+  get "notifications/accept"
+
+  resources :thumbnails
+  resources :feedback, :only => [:new, :create]
+  resources :expressions
+  resources :referents
   resources :ratings
-
   resources :scales
-  
-  # match 'recipes/capture' => 'recipes#capture'
-  # match 'recipes/:id/collect' => 'recipes#collect'
-  # match 'recipes/:id/touch' => 'recipes#touch'
-  # match 'recipes/:id/piclist' => 'recipes#piclist'
-  # match 'recipes/:id/remove' => 'recipes#remove'
-  # match 'recipes/:id/destroy' => 'recipes#destroy'
-  # match 'recipes/:id/show' => 'recipes#show'
-  # match 'recipes/parse' => 'recipes#parse', :via => :post
-  # match 'recipes/:id' => 'recipes#update', :via => :post
+
   resources :recipes do
     member do 
       get 'collect'
@@ -159,7 +119,6 @@ RP::Application.routes.draw do
       post 'parse'
     end
   end
-
   get '/revise', :to => 'recipes#revise'
 
   # get "pages/home"

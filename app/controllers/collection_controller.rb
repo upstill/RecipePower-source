@@ -1,6 +1,6 @@
 class CollectionController < ApplicationController
   layout :rs_layout # Let response_service pick the layout
-  before_filter :setup_collection, except: [ :index, :query ]
+  before_filter :setup_collection, except: [ :index ]
   after_filter :save_browser
   
   def save_browser
@@ -18,12 +18,14 @@ class CollectionController < ApplicationController
   
   def index
     @Title = "Collections"
-    seeker_result "Content", 'div.collection', clear_tags: true
+    seeker_result "Content", 'div.collection' # , clear_tags: true
   end
 
+=begin
   def query
     seeker_result "Content", 'div.collection'
   end
+=end
   
   def show
   end
@@ -36,15 +38,14 @@ class CollectionController < ApplicationController
 
   def create
   end
-  
+
+  def update
+  end
+
   # Update the collection to reflect any changes
   def refresh
     @seeker.refresh # Set the refresh process going
     seeker_result "Content", 'div.collection'
-  end
-
-  def update
-
   end
 
   # Render the results for the current state of the query and selected collection

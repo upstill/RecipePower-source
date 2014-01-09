@@ -792,7 +792,7 @@ class SiteServices
         puts "\tid: #{site.id}"
         puts "\tname: #{name}"
         puts "\tdescription: #{site.description}"
-        puts "\tlogo#{site.logo}"
+        puts "\tlogo: #{site.logo}"
         begin
           okay_to_quit = true
           if site.ttlcut && site.ttlcut.match(site.name)

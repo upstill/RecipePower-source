@@ -50,7 +50,7 @@ collection_onload = () ->
 	# checkForLoading ".stuffypic"
 	RP.rcp_list.onload()
 	RP.collection.justify()
-	
+
 collection_tagchange = () ->
 	formitem = $('form.query_form')
 	if $(formitem).data("format") == "html"

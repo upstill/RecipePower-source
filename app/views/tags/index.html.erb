@@ -7,5 +7,5 @@
 	<% end %>
 	</h3>
 	<%= link_to 'New Tag', new_tag_path %>
-	<%= seeker_table "", "tags/query", [ "ID", "Name", "Type", "", "Public?", "Similar", "Synonym(s)", "Meaning(s)", "", "" ] %>
+	<%= seeker_table "", tags_path, [ "ID", "Name", "Type", "", "Public?", "Similar", "Synonym(s)", "Meaning(s)", "", "" ] %>
 </div>

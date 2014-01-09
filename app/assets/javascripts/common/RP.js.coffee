@@ -1,6 +1,12 @@
 # Establish RecipePower name space and define widely-used utility functionality
 window.RP = window.RP || {}
 
+jQuery ->
+	$('body').on "click", 'a.tablink', (event) ->
+		window.open this.href,'_blank'
+		event.preventDefault()
+
+
 # Respond to the preview-recipe button by opening a popup loaded with its URL.
 #   If the popup gets blocked, return true so that the recipe is opened in a new
 #   window/tab.

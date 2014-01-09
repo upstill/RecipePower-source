@@ -74,7 +74,7 @@ public
   end
 
   def query_path
-    "/#{entity_name.pluralize}/query"
+    "/#{entity_name.pluralize}"
   end
   
   def model_class
@@ -254,7 +254,7 @@ class ContentSeeker < Seeker
   end
   
   def query_path
-    "/collection/query"
+    "/collection"
   end
   
   def cur_page=(pagenum)
@@ -287,7 +287,7 @@ class UserSeeker < Seeker
   end
 
   def query_path
-    "/users/query?channel="+@is_channel.to_s
+    "/users?channel="+@is_channel.to_s
   end
   
   def entity_name
