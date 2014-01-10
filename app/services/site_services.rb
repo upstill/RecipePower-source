@@ -395,7 +395,7 @@ class SiteServices
     extractions = extract_from_page(@site.sampleURL)
     puts "Site # #{@site.id.to_s}"
     puts "\tname: #{@site.name}"
-    puts "\thome: (#{@site.home})"
+    puts "\thome: (#{@site.home_page})"
     puts "\tsubsite: (#{@site.subsite})"
     puts "\tlogo: (#{@site.logo})"
     extractions.each { |k, v| puts "\t\t#{k.to_s}: #{v}" }
@@ -503,8 +503,8 @@ class SiteServices
     Site.all[100..110].each do |site|
       ss = self.new site
       puts "------------------------------------------------------------------------"
-      puts "home: "+site.home
       puts "site: "+site.site
+      puts "home: "+site.home_page
       puts "sample: "+site.sampleURL
       if pagetags = fr.collect_results(site.sampleURL, [:URI, :Title, :Image], true, site)
         puts ">>>>>>>>>>>>>>> Results >>>>>>>>>>>>>>>>>>"

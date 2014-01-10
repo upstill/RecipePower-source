@@ -13,7 +13,7 @@
 	<div class="feed_list_element_source">
 		<%= @feed_entry.feed.title.empty? ? "" : ("from <strong>"+@feed_entry.feed.title+"</strong>").html_safe %>
 		<%# @feed_entry.feed.description.empty? ? "" : ("("+@feed_entry.feed.description+")<br>").html_safe %>
-		on <strong><%= link_to @feed_entry.feed.site.name, @feed_entry.feed.site.home %></strong>
+		on <strong><%= link_to @feed_entry.feed.site.name, @feed_entry.feed.site.home_page %></strong>
 	</div>
 	<% if @feed_entry.published_at %>
 		<div class="feed_list_element_stats">

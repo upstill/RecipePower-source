@@ -138,7 +138,7 @@ module ApplicationHelper
       id = @recipe.id
     else 
       picurl = @site.logo
-      pageurl = @site.home+@site.sample
+      pageurl = @site.sampleURL
       id = @site.id
     end
     piclist = page_piclist pageurl

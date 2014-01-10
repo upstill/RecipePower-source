@@ -2,7 +2,12 @@ module SitesHelper
   def crack_sample
     
     extractions = SiteServices.new(@site).extract_from_page @site.sampleURL, :label => [:Title, :URI]
-    link_to extractions[:Title], extractions[:URI]
+    if extractions[:Title] && extractions[:URI]
+      link_to extractions[:Title], extractions[:URI]
+    else
+      "[site sample can't be read]"
+    end
+
   end
   
   def trimmed_sample

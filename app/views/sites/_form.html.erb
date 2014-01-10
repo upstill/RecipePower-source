@@ -1,10 +1,12 @@
 <%= simple_form_for(@site) do |f| %>
     <%= modal_body do %>
       <div class="row">
+<!--
         <div class="col-md-5">
-          <%= pic_field @site, :logo, f, true %>
+          <%# pic_field @site, :logo, f, true %>
         </div>
-        <div class="col-md-7">
+-->
+        <div class="col-md-12">
           <%= f.input :site %>
           <%= f.input :home %>
           <%# if params[:action] != "edit" %>
@@ -12,6 +14,9 @@
           <%# end %>
           <%= f.input :subsite %>
           <%= f.input :sample %>
+          <%= f.input :description %>
+          <%= f.input :logo %>
+          <%= taggable_field f %>
         </div>
       </div>
       <div class="row">

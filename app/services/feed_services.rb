@@ -29,7 +29,7 @@ class FeedServices
   # Examine the sample page of a site (or a given other page) for RSS feeds
   def self.scrape_page(site, page_url=nil)
     rejects = []
-    queue = page_url ? [page_url] : [site.sampleURL, site.home]
+    queue = page_url ? [page_url] : [site.sampleURL, site.home_page]
     visited = {}
     while (page_url = queue.shift) && (visited.length < 10)
       doc = nil
@@ -64,7 +64,7 @@ class FeedServices
         content = candidates[href].truncate(250)
         begin
           # For some strange reason we've seen feed URLs starting with 'feed:http:'
-          url = URI.join( site.home, href).to_s.sub(/feed:http:/, "http:")
+          url = URI.join( site.home_page, href).to_s.sub(/feed:http:/, "http:")
         rescue Exception => e
           url = nil
         end 

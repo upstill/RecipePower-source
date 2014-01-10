@@ -49,9 +49,7 @@ module Linkable
 
   # Return the URL for the recipe's source's home page
   def sourcehome
-    # @site = @site || Site.by_link(self.url)
-    # @site.home
-    site.home
+    site.home_page
   end
 
 end

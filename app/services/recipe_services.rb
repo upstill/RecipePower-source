@@ -9,7 +9,7 @@ class RecipeServices
   def scrape
     extractions = SiteServices.extract_from_page(@recipe.url )
     puts "Recipe # #{@recipe.id}: #{@recipe.title}"
-    puts "\tsite: #{@recipe.site.name} (#{@recipe.site.home})"
+    puts "\tsite: #{@recipe.site.name} (#{@recipe.site.home_page})"
     puts "\turl: #{@recipe.url}"
     puts "\thref: #{@recipe.href}"
     puts "\tdescription: #{@recipe.description}"

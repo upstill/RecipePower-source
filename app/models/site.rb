@@ -18,6 +18,14 @@ end
 
 class Site < ActiveRecord::Base
   include Taggable
+  # site: root of the domain (i.e., protocol + domain); suitable for pattern-matching on a reference URL to glean a set of matching Sites
+  # subsite: a path relative to the domain which differentiates among Sites with the same domain (site attribute)
+  # home: where the nominal site lives. This MAY be (site+subsite), but in cases of indirection, it may be an entirely
+  #      different domain. (See Splendid Table on publicradio.org redirect to splendidtable.org)
+  # So, (site+sample) and (site+subsite) should be valid links, but not necessarily (home+sample), since redirection
+  #      may alter the path
+  # Also, in most cases, site==home (when the domain is home, i.e. subsite is empty); in others, (site+subsite)==home,
+  #     and only rarely will home be different from either of those
   attr_accessible :finders_attributes, :site, :home, :scheme, :subsite, :sample, :host, :name, :port, :logo, :ttlcut, :finders, :reviewed
 #   serialize :finders, Array
 
@@ -63,7 +71,6 @@ protected
           # Define the site as the link minus the sample (sub)path
           self.site = linksq.sub(/#{urisq.path}$/, "")
           puts "...from which extracted site '#{self.site}'"
-          self.home = self.site # ...seems like a reasonable default...
 
           # Reconstruct the sample from the link's path, query and fragment
           self.sample = urisq.path + (query || "")
@@ -90,13 +97,19 @@ protected
   end
 
 public
-  
+
   def domain
     scheme+"://"+host+((port=="80") ? "" : (":"+port))
   end
-  
+
   def sampleURL
-      self.site+(self.sample||"")
+    self.site+(self.sample||"")
+  end
+
+  # By default the site's home page is (site+subsite), but that may be overridden (due to indirection) by
+  # setting the home attribute
+  def home_page
+    home.blank? ? (site+(subsite||"")) : home
   end
   
   # Find and return the site wherein the named link is stored
