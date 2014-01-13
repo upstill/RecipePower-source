@@ -23,12 +23,14 @@
           <% end %>
         </div>
       </div>
-      <form class="navbar-form navbar-left form-search query_form" action="#{@query_path}" data-format="#{@query_format}" >
-        <div class="search-query form-group collection_query_tokens tags">
-          <%= taggable_field @seeker, rows: 1, placeholder: "Seek and ye shall find..." %>
-          <!--<input type="text" class="form-control" placeholder="Seek and Ye Shall Find">-->
-        </div>
-      </form>
+      <% if @query_path %>
+          <form class="navbar-form navbar-left form-search query_form" action="<%= @query_path %>" data-format="<%= @query_format %>" >
+            <div class="search-query form-group collection_query_tokens tags">
+              <%= taggable_field @seeker, rows: 1, placeholder: "Seek and ye shall find..." %>
+              <!--<input type="text" class="form-control" placeholder="Seek and Ye Shall Find">-->
+            </div>
+          </form>
+      <% end %>
     </div>
   </div>
 </div>
