@@ -6,6 +6,10 @@ jQuery ->
 		window.open this.href,'_blank'
 		event.preventDefault()
 
+	# Adjust the pading on the window contents to accomodate the navbar, on load and wheneer the navbar resizes
+	$('body')[0].style.paddingTop = ($('div.navbar')[0].offsetHeight+7).toString()+"px"
+	$('div.navbar').on "resize", (event) ->
+		$('body')[0].style.paddingTop = ($('div.navbar')[0].offsetHeight+7).toString()+"px"
 
 # Respond to the preview-recipe button by opening a popup loaded with its URL.
 #   If the popup gets blocked, return true so that the recipe is opened in a new

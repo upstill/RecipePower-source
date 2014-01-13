@@ -124,14 +124,10 @@ label {
 	border: 2px solid black;
 }
 
-.content-column {
-	// border: 2px solid red;
+div.content {
+  padding-left: 5px;
+  padding-right: 5px;
 }
-
-.navigation-column {
-	// border: 2px solid blue;
-}
-
 .collection-item {
 	width:200px;
 	margin-bottom:20px;

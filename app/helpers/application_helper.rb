@@ -271,35 +271,42 @@ module ApplicationHelper
     imgtag = image_tag("cookmark_button.png", class:"bookmarklet", style: "display: inline-block", alt:"Cookmark") 
     content_tag :a, imgtag, href: bookmarklet_script, title: "Cookmark", class: "bookmarklet"
   end
+
+  def header_menu_items
+
+    item_list = [
+        link_to_modal( "Profile", users_profile_path( section: "profile" )),
+        link_to_modal( "Sign-in Services", authentications_path),
+        link_to_modal( "Invite", new_user_invitation_path ),
+        link_to( "Sign Out", destroy_user_session_path, :method => "delete")
+    ]
+
+    item_list += [
+        "<hr>",
+        link_to( "Admin", admin_path),
+        link_to( "Refresh Masonry", "#", onclick: "RP.collection.justify();" ),
+        link_to( "Address Bar Magic", "#", onclick: "RP.getgo('#{home_path}', 'http://local.recipepower.com:3000/bar.html##{bookmarklet_script}')" ),
+        link_to( "Bookmark Magic", "#", onclick: "RP.bm('Cookmark', '#{bookmarklet_script}')"),
+        link_to( "Stream Test", "#", onclick: "RP.stream.buffer_test();" ),
+        link_to_modal("Step 3", popup_path("starting_step3"))
+    ] if permitted_to? :admin, :pages
+
+    ("<li>" +
+        item_list.join("</li>\n<li>")+
+    "</li>").html_safe
+  end
   
   def header_menu
     
     return "" unless current_user
 
-    item_list = [
-      link_to_modal( "Profile", users_profile_path( section: "profile" )),
-      link_to_modal( "Sign-in Services", authentications_path),
-      link_to_modal( "Invite", new_user_invitation_path ),
-      link_to( "Sign Out", destroy_user_session_path, :method => "delete") 
-    ]
-  
-    item_list += [
-  		"<hr>",
-  		link_to( "Admin", admin_path),
-  		link_to( "Refresh Masonry", "#", onclick: "RP.collection.justify();" ),
-  		link_to( "Address Bar Magic", "#", onclick: "RP.getgo('#{home_path}', 'http://local.recipepower.com:3000/bar.html##{bookmarklet_script}')" ), 
-  		link_to( "Bookmark Magic", "#", onclick: "RP.bm('Cookmark', '#{bookmarklet_script}')"), 
-  		link_to( "Stream Test", "#", onclick: "RP.stream.buffer_test();" ),
-  		link_to_modal("Step 3", popup_path("starting_step3"))
-  	] if permitted_to? :admin, :pages
-  
     header_link =
     link_to (current_user.handle+'<b class="caret"></b>').html_safe, "#",
       class: "dropdown-toggle", data: { toggle: "dropdown" }, role: "button"
 
     menu = 
     content_tag :ul, 
-      ("<li>#{ item_list.join("</li><li>") }</li>").html_safe, 
+      header_menu_items,
       class: "dropdown-menu", # "nav navbar-nav", 
       role: "menu",
       :"aria-labelledby" => "userMenuLabel"

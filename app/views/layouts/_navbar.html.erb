@@ -1,0 +1,34 @@
+<div class="navbar navbar-fixed-top navbar-inverse">
+  <div class="container">
+    <div class="navbar-header col-md-12">
+      <a href="#" class="navbar-brand">RecipePower</a>
+      <% if user_signed_in? %>
+          <div class="dropdown navbar-right pull-right" style="margin-top: 14px; margin-left:10px;">
+            <a class="dropdown-toggle navbar-inverse" data-toggle="dropdown" href="#">            <span style="color: white;"><%= current_user.handle %>&nbsp;▿</span>            </a>
+            <ul class="dropdown-menu">
+              <%= header_menu_items %>
+            </ul>
+          </div>
+      <% end %>
+      <div class="navbar-right" style="margin-top:15px;margin-right:10px;">
+        <div style="text-align: right;">
+          <% if user_signed_in? %>
+              <% if params[:controller] == "collection" %>
+                  <%= link_to_modal "Add a Cookmark", new_recipe_path %>
+              <% else %>
+                  <%= link_to "Collections", collection_path %>
+              <% end %>
+          <% else %>
+              <%= link_to_modal "Sign In", new_user_session_path %>
+          <% end %>
+        </div>
+      </div>
+      <form class="navbar-form navbar-left form-search query_form" action="#{@query_path}" data-format="#{@query_format}" >
+        <div class="search-query form-group collection_query_tokens tags">
+          <%= taggable_field @seeker, rows: 1, placeholder: "Seek and ye shall find..." %>
+          <!--<input type="text" class="form-control" placeholder="Seek and Ye Shall Find">-->
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
