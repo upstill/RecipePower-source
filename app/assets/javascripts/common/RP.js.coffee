@@ -111,6 +111,7 @@ RP.showhide = (event) ->
 	if show_sib
 		$(associated).show 300
 		$(associated).removeClass "hide"
+	event.preventDefault()
 	
 # Use a vanilla httprequest to ping the server, bypassing jQuery
 do_request = (url, ajax_options, processing_options) ->

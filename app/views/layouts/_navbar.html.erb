@@ -4,7 +4,7 @@
       <a href="#" class="navbar-brand">RecipePower</a>
       <% if user_signed_in? %>
           <div class="dropdown navbar-right pull-right" style="margin-top: 14px; margin-left:10px;">
-            <a class="dropdown-toggle navbar-inverse" data-toggle="dropdown" href="#">            <span style="color: white;"><%= current_user.handle %>&nbsp;▿</span>            </a>
+            <a class="dropdown-toggle navbar-inverse" data-toggle="dropdown" href="#">            <span class="text-on-black"><%= current_user.handle %>&nbsp;▿</span>            </a>
             <ul class="dropdown-menu">
               <%= header_menu_items %>
             </ul>
@@ -14,12 +14,12 @@
         <div style="text-align: right;">
           <% if user_signed_in? %>
               <% if params[:controller] == "collection" %>
-                  <%= link_to_modal "Add a Cookmark", new_recipe_path %>
+                  <%= link_to_modal "Add a Cookmark", new_recipe_path, class: "text-on-black" %>
               <% else %>
-                  <%= link_to "Collections", collection_path %>
+                  <%= link_to "Collections", collection_path, class: "text-on-black" %>
               <% end %>
           <% else %>
-              <%= link_to_modal "Sign In", new_user_session_path %>
+              <%= link_to_modal "Sign In", new_user_session_path, class: "text-on-black" %>
           <% end %>
         </div>
       </div>
