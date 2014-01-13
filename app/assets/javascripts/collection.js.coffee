@@ -23,7 +23,6 @@ jQuery ->
 	 	elmt.style.bottom = (navlinks.offsetHeight + 5).toString() + "px";
 
 	collection_onload()
-	RP.fire_triggers()
 
 RP.collection.onload = (event) ->
 	collection_onload()

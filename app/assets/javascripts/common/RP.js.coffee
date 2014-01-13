@@ -11,6 +11,8 @@ jQuery ->
 	$('div.navbar').on "resize", (event) ->
 		$('body')[0].style.paddingTop = ($('div.navbar')[0].offsetHeight+7).toString()+"px"
 
+	RP.fire_triggers()
+
 # Respond to the preview-recipe button by opening a popup loaded with its URL.
 #   If the popup gets blocked, return true so that the recipe is opened in a new
 #   window/tab.
@@ -94,9 +96,11 @@ RP.named_function = (str) ->
 		if(typeof obj == 'function')
 			return obj
 	return null;
-	
+
+# Automatically open dialogs or click links that have 'trigger' class
 RP.fire_triggers = ->
 	if dlog = $('div.dialog.trigger')[0]
+		$(dlog).removeClass("trigger")
 		RP.dialog.run dlog
 	else if (elmt = $("a.trigger")[0])
 		$(elmt).trigger "click"

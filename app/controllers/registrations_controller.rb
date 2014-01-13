@@ -56,6 +56,11 @@ class RegistrationsController < Devise::RegistrationsController
       end
     end
 
+    def new
+      build_resource({})
+      smartrender action: "new", trigger_signup: true
+    end
+
     # PUT /resource
     # We need to use a copy of the resource because we don't want to change
     # the current user in place.

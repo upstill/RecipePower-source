@@ -208,7 +208,7 @@ class ApplicationController < ActionController::Base
           if current_user
             redirect_to "/collection#{hashtag}"
           else
-            redirect_to "/home#{hashtag}"
+            redirect_to "/home?trigger_signup=true#{hashtag}"
           end
         else
           render action, renderopts

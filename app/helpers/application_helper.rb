@@ -291,9 +291,7 @@ module ApplicationHelper
         link_to_modal("Step 3", popup_path("starting_step3"))
     ] if permitted_to? :admin, :pages
 
-    ("<li>" +
-        item_list.join("</li>\n<li>")+
-    "</li>").html_safe
+    ("<li>" + item_list.join("</li>\n<li>") + "</li>").html_safe
   end
   
   def header_menu
@@ -380,7 +378,7 @@ module ApplicationHelper
         label = "Sign Me Up"
         selector = "div.dialog.signup"
         path = new_user_registration_path()
-        button_to_modal(label, path, class: "btn btn-lg btn-success", selector: selector ) 
+        button_to_modal(label, path, class: "btn btn-lg btn-success", selector: selector )
       end
     end
   end
