@@ -177,7 +177,7 @@
 			<% end %>
 		</div>
 		<div class="message_box">
-			<%= render "rp_devise_mailer/recipe_share" %>
+			<%= render "rp_devise_mailer/recipe_share", accept_invitation_link: notifications_accept_url(notification_token: @notification.notification_token) %>
 		</div>
 		<br>
 		<div class="message_box">

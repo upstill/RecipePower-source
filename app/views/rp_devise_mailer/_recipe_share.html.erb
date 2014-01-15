@@ -5,12 +5,11 @@
   </div>
 <% end %>
 <br>
-<%= link_to @recipe.title,
-            divert_user_invitation_url(
-                    rpevent: RpEvent.embed_trigger(:invitation_diverted, @recipient, @invitation_event, @sender),
-                    sender: @sender.id,
-                    recipient: @recipient.id,
-                    url: CGI::escape(@recipe.url)),
+<%= link_to @recipe.title, accept_invitation_link ?
+            recipe_url(@recipe,
+                      :how => :modal,
+                      :accept_invitation_link => accept_invitation_link) :
+            @recipe.url,
             class: "share_recipe_title" %>
 <p>from&nbsp;
 <%= link_to @recipe.sourcename,

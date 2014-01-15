@@ -177,23 +177,26 @@
 				</div>
 			<% end %>
 		</div>
+        <% accept_invitation_link = accept_user_invitation_url(
+                :rpevent => RpEvent.embed_trigger(:invitation_responded, @recipient, @invitation_event, @recipient.invited_by),
+                :invitation_token => @recipient.raw_invitation_token,
+                :notification_token => @notification_token) %>
 		<div class="message_box">
-			<%= render "rp_devise_mailer/recipe_share" %>
+			<%= render "rp_devise_mailer/recipe_share", accept_invitation_link: accept_invitation_link %>
 		</div>
 		<br>
-		<div class="message_box">
-			<div style="width:90%;margin: 20px 0px 0px;float: left;font-size:20px; font-weight:bold;">Rather not deal with this now?</div>
-          <% url = accept_user_invitation_url(
-                  :rpevent => RpEvent.embed_trigger(:invitation_responded, @recipient, @invitation_event, @recipient.invited_by),
-                  :invitation_token => @recipient.raw_invitation_token,
-                  :notification_token => @notification_token) %>
+
+        <div class="message_box">
+          <div style="width:90%;margin: 20px 0px 0px;float: left;font-size:20px; font-weight:bold;">
+            Rather not deal with this now?
+          </div>
           <div style="width:90%; margin: 0px;float: left;">
-				<%= link_to "Save It To RecipePower", url, 
-									:class => "get_button btn-lg btn-success" %>
-			</div>
-			<div style="width:90%; margin: 20px 0px;float: left; font-size:16px;">...and have it waiting for you.</div>
-		</div>
-		<div class="footer">
+            <%= link_to "Save It To RecipePower", accept_invitation_link,
+                        :class => "get_button btn-lg btn-success" %>
+          </div>
+          <div style="width:90%; margin: 20px 0px;float: left; font-size:16px;">...and have it waiting for you.</div>
+        </div>
+        <div class="footer">
 	  	<p><%= link_to "Recipe Power", collection_url, class: "brand" %></p>
 			<p>Copyright 2013 by RecipePower. All Rights Reserved</p>
 		</div>

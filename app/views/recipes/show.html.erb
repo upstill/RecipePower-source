@@ -29,8 +29,14 @@
               </div>
             </div>
           </div>
+          <% if params[:accept_invitation_link] %>
+              <div style="width: 400px; margin: 0 auto;">
+                <%= link_to "Save on RecipePower", params[:accept_invitation_link], class: "btn btn-lg btn-success", style: "margin-right:40px; margin-top:30px" %>
+                <%= link_to "Go to Recipe", @recipe.url, class: "btn btn-lg btn-info", style: "margin-top: 30px" %>
+              </div>
+          <% end %>
         </div>
-      </div>
+       </div>
       <div class="hide-if-empty">
         <div class="row">
           <div class="col-sm-12"><h3>My Two Cents</h3></div>
