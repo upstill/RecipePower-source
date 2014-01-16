@@ -23,27 +23,20 @@ class ExpressionsController < ApplicationController
   # GET /expressions/1.json
   def show
     @expression = Expression.find(params[:id])
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @expression }
-    end
+    smartrender
   end
 
   # GET /expressions/new
   # GET /expressions/new.json
   def new
     @expression = Expression.new
-
-    respond_to do |format|
-      format.html # new.html.erb
-      format.json { render json: @expression }
-    end
+    smartrender
   end
 
   # GET /expressions/1/edit
   def edit
     @expression = Expression.find(params[:id])
+    smartrender
   end
 
   # POST /expressions

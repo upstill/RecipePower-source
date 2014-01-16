@@ -1,5 +1,0 @@
-<%= simple_form_for @recipe, html: { class: "new_recipe json" } do |f| %>
-	<%= form_errors_helper f, @recipe %>
-	<%= f.input :url, label: "Paste URL here and click 'Add Cookmark'" %>
- 	<%= f.submit :value=>"Add Cookmark", class: "btn btn-lg btn-success dialog-submit-button" %>
-<% end %>

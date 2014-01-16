@@ -1,0 +1,49 @@
+<div class="col-md-12">
+  <div class="row">
+    <div class="col-md-6">
+      <% if (vid = field_value("rcpVideo")) %>
+          <div id="vidbox">
+            <div id="vbdummy">
+              <div id="vbelement">
+                <iframe width="100%" height="100%" src="<%= vid %>" frameborder="0"></iframe>
+              </div>
+            </div>
+          </div>
+      <% else %>
+          <img src="<%= present_field "rcpPicSafeURL" %>" class="recipe-preview pull-right" width="100%">
+      <% end %>
+    </div>
+    <div class="col-md-6">
+      <div class="panel pull-left panel-default hide-if-empty" style="width:100%">
+        <div class="panel-heading">
+          <p class="hide-if-empty">A recipe
+            <span class="hide-if-empty"> by <%= present_field_wrapped "Author_tags" %></span>
+            <span class="hide-if-empty"> in <%= present_field_wrapped "Source_tags" %></span>
+            <span class="hide-if-empty"> from <%= present_field_wrapped "site" %></span>.</p>
+
+          <p class="hide-if-empty"><%= present_field_wrapped "rcpDescription" %></p>
+        </div>
+        <div class="panel-body">
+          <div class="container">
+            <%= show_tags ["Ingredient_tags", ["Role_tags", "Produces"], "Genre_tags", "Occasion_tags", "Channel_tags", "Process_tags", "Tool_tags", "Other Tag_tags"] %>
+          </div>
+        </div>
+      </div>
+      <% if params[:accept_invitation_link] %>
+          <div style="width: 400px; margin: 0 auto;">
+            <%= link_to "Save on RecipePower", params[:accept_invitation_link], class: "btn btn-lg btn-success", style: "margin-right:40px; margin-top:30px" %>
+            <%= link_to "Go to Recipe", @recipe.url, class: "btn btn-lg btn-info", style: "margin-top: 30px" %>
+          </div>
+      <% end %>
+    </div>
+  </div>
+  <div class="hide-if-empty">
+    <div class="row">
+      <div class="col-sm-12"><h3>My Two Cents</h3></div>
+    </div>
+    <div class="row">
+      <div class="col-sm-4 col-md-2"></div>
+      <div class="col-sm-8 col-md-8"><%= present_field_wrapped "comments_mine" %></div>
+    </div>
+  </div>
+</div>

@@ -14,8 +14,7 @@
 			<%= f.input :role_id, label: "Role", collection: @user.role_select %>
 	  <% end %>
 		<%= modal_footer do %>
-			<%= f.button :submit, "Update Details", class: "btn btn-success dialog-submit-button" %>
-			<%= dialog_cancel_button %>
+          <%= form_actions f, submit_label: "Update Details", cancel_path: users_path %>
 		<% end %>
 	<% end %>
 <% end %>

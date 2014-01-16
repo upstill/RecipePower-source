@@ -23,7 +23,7 @@ module SitesHelper
   def sites_table
     table_out @sites, [ "Info", "Links" ] do |site|
       @site = site
-      render "sites/site"
+      render "sites/show_table_row"
     end
   end
   

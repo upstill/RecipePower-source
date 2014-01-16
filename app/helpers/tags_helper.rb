@@ -32,7 +32,10 @@ module TagsHelper
     others = Tag.where(normalized_name: @tagserv.normalized_name).delete_if { |other| other.id == @tagserv.id } #  @tagserv.lexical_similars
     label= args[:label] || "Similar tags: "
     joiner = args[:joiner] || " " #  ", "
-    tag_info_section others.collect { |other| summarize_tag_similar other, (args[:absorb_btn] && @tagserv.can_absorb(other)) }, label: label, joinstr: joiner
+    ("<span>#{label}"+
+        others.collect { |other| summarize_tag_similar other, (args[:absorb_btn] && @tagserv.can_absorb(other)) }.join(joiner)+
+    "</span>").html_safe
+    # tag_info_section others.collect { |other| summarize_tag_similar other, (args[:absorb_btn] && @tagserv.can_absorb(other)) }, label: label, joinstr: joiner
   end
   
   def summarize_tag_parents label = "Categorized Under: "
@@ -213,7 +216,7 @@ BLOCK_END
       tagidstr = tag.id.to_s
       content_tag :span,
         tag_link(tag) +
-        (absorb_btn ? button_tag("Absorb", onclick: %Q{RP.submit(event, "tags/#{@tag.id.to_s}/absorb?victim=#{tagidstr}");}, class: "absorb_button", id: "absorb_tag_#{tagidstr}") : ""),
+        (absorb_btn ? link_to_submit("Absorb", "tags/#{@tag.id.to_s}/absorb?victim=#{tagidstr}", class: "absorb_button", id: "absorb_button_#{tagidstr}") : ""),
         class: "absorb_"+tagidstr
   end
 

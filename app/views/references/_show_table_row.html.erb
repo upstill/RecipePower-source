@@ -1,0 +1,14 @@
+<tr>
+	<td>
+		<%= @reference.typename %>
+	</td><td>
+		<%= link_to @reference.url, @reference.url %>
+		<%= reference_expressions @reference %>
+	</td><td>
+		<%= link_to_modal 'Show', @reference %>
+	</td>
+	<% if permitted_to? :edit, @reference %>
+		<td><%= link_to_modal 'Edit', edit_reference_path(@reference) %></td>
+		<td><%= link_to 'Destroy', @reference, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+	<% end %>
+</tr>

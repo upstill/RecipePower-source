@@ -54,8 +54,10 @@ RP.dialog.arm_links = (dlog) ->
 
 RP.dialog.cancel = (event) ->
 	if event
-		dlog = target_modal(event)
-		event.preventDefault();			
+		if dlog = target_modal(event)
+			event.preventDefault()
+		else
+			return true # Do regular click-handling, presumably returning from whence we came
 	else
 		dlog = $('div.dialog')[0]
 	RP.dialog.close_modal dlog

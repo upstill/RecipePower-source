@@ -1,0 +1,24 @@
+<div class="lesson">
+  <p class="prompt">To add a recipe to your collection by hand:</p>
+  <ul>
+    <li>Get its web page up in your browser.</li>
+    <li>Double-click inside the address bar (that long box with the incomprehensible text near the top of the window) to select the <strong>whole</strong> address (100% of the gobbledygook).</li>
+    <li>Choose Copy from the Edit menu.</li>
+    <li>Come back here and paste it into the box below.</li>
+    <li>Click the button.</li>
+  </ul>
+</div>
+<%= simple_form_for @recipe, html: { class: "new_recipe json" } do |f| %>
+    <%= form_errors_helper f, @recipe %>
+    <%= f.input :url, label: "Paste URL here and click 'Add Cookmark'" %>
+    <%= form_actions f, submit_label: "Add Cookmark" %>
+    <%# f.submit :value=>"Add Cookmark", class: "btn btn-lg btn-success dialog-submit-button" %>
+<% end %>
+<div class="lesson", style="margin: 20px; margin-top: 0px;">
+<br><h3> PS: How to collect a recipe the easy way </h3>
+<div style="float: left; margin: 6px 12px 4px 12px;">
+  <%= bookmarklet %>
+</div>
+<p class="airy">Much better is to drag this button into your browser's bookmarks bar. A new bookmark, dubbed "Cookmark" will appear-- but clicking it doesn't send you to another page; instead, it collects the page you're on...instantly! It also chooses a picture for the recipe and lets you add your own info, all without leaving the page. Slick, eh?
+</p>
+</div>

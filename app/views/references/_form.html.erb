@@ -1,15 +1,12 @@
 <%= simple_form_for(@reference) do |f| %>
-  <%= form_errors_helper f %>
+  <%= modal_body do %>
+    <%= form_errors_helper f %>
 
-  <div class="form-inputs">
-		<%# f.select :reference_type, Reference.type_selections %>
-		<%= f.input :reference_type, collection: Reference.type_selections %>
-		<%# f.select :reference_type, collection: 0..4, :label_method => lambda { |sel| Reference.type_selections[sel].first }, :value_method => lambda { |sel| Reference.type_selections[sel].last } %>
-    <%# f.input :reference_type %>
+    <%= f.input :reference_type, collection: Reference.type_selections %>
     <%= f.input :url %>
-  </div>
 
-  <div class="form-actions">
-    <%= f.button :submit %>
-  </div>
+  <% end %>
+  <%= modal_footer do %>
+    <%= form_actions f, cancel_path: references_path %>
+  <% end %>
 <% end %>

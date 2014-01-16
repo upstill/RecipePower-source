@@ -164,7 +164,7 @@ class UsersController < ApplicationController
       respond_to do |format|
         format.html { redirect_to collection_path }
         format.json  { 
-          listitem = with_format("html") { render_to_string( partial: "user" ) }
+          listitem = with_format("html") { render_to_string( partial: "show_table_row") }
           render json: {
             done: true,
             replacements: [ ["#listrow_"+@user.id.to_s, listitem], view_context.flash_notifications_replacement ]

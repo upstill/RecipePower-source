@@ -1,0 +1,6 @@
+<% if @feeds.blank? %>
+    ...site has no feeds.
+<% else %>
+    <h4>Associated Feeds</h4>
+    <%= render "feeds/table" %>
+<% end %>

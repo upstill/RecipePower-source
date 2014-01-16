@@ -100,7 +100,7 @@ class RecipesController < ApplicationController
         @recipe.current_user = current_user_or_guest_id # session[:user_id]
         # @_area = params[:_area]
         # dialog_boilerplate 'new', 'modal'
-        smartrender :how => :modal
+        smartrender
     end
   end
 

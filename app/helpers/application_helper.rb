@@ -537,4 +537,15 @@ module ApplicationHelper
     link_to label, url, options
   end
 
+  # Generic termination buttons for dialogs--or any other forms
+  def form_actions f, options = {}
+    cancel_path = options[:cancel_path] || collection_path
+    submit_label = options[:submit_label] || "Save"
+    content_tag :div,
+                (
+                  f.submit(submit_label, class: "dialog-submit-button btn btn-lg btn-success") +
+                  link_to("Cancel", cancel_path, class: "dialog-cancel-button btn btn-info btn-lg")
+                ).html_safe,
+                class: "form-group actions"
+  end
 end
