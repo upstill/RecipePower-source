@@ -1,0 +1,16 @@
+<tr frame="below">
+  <td valign="top">
+    <hr>
+    <%= summarize_ref_name referent %>
+    <br><%= link_to_modal 'Show', referent.becomes(Referent) %>
+    <%= link_to_modal 'Edit', edit_referent_path(referent.becomes(Referent)) %>
+    <%# link_to 'Destroy', referent.becomes(Referent), confirm: 'Are you sure?', method: :delete %>
+  </td>
+  <td><%= referent.isCountable ? "C" : "NC" %><td>
+  <td>
+    <hr>
+    <%= list_expressions referent %><br>
+    <%= list_parents referent %><br>
+    <%= list_children referent %>
+  </td>
+</tr>

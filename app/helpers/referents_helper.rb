@@ -31,10 +31,8 @@ module ReferentsHelper
   end
 
 	def summarize_ref_name referent, long=false
-    ("#{referent.id.to_s}: "+
-      "<i>#{referent.typename}</i> "+
-      "<strong>'#{referent.name}'</strong> "
-    ).html_safe
+    extra = long ? "going by the name of " : ""
+    "<i>#{referent.typename}</i> #{extra}<strong>'#{referent.name}'</strong> ".html_safe
 	end
 	
 	def summarize_referent ref, label="...Meaning"

@@ -1,0 +1,5 @@
+<h3>Edit <%= summarize_ref_name(@referent, true) %></h3>
+<%= render 'form' %>
+<%# if assoc = @referent.associate %>
+    | <%# link_to assoc.class.to_s+" "+assoc.name, "/#{assoc.class.to_s.downcase.pluralize}/#{assoc.id}/edit" %>
+    <%# end %>
