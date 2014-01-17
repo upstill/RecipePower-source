@@ -39,7 +39,7 @@ module ControllerAuthentication
       scope = Devise::Mapping.find_scope!(User)
       session["#{scope}_return_to"] = request.url 
       flash[:alert] = alert
-      redirect_to authentications_new_path # login_url, :alert => alert
+      redirect_to new_authentication_path # login_url, :alert => alert
     end
   end
 
