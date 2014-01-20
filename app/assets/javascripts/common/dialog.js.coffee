@@ -11,7 +11,8 @@ jQuery ->
 RP.dialog.beforeSend = (event, xhr, settings) ->
 	selector = $(this).data 'selector'
 	if selector && (ndlog = $(selector)[0]) # If dialog already loaded, replace the responding dialog
-		RP.dialog.replace_modal ndlog, target_modal(event)
+		RP.dialog.replace_modal event.result = ndlog, target_modal(event)
+		RP.state.onAJAXSuccess event
 		return false;
 	else
 		return true;

@@ -333,7 +333,7 @@ class RecipesController < ApplicationController
         format.html { redirect_to home_path, notice: notice }
         format.json { 
           flash.now[:alert] = notice
-          render json: { dlog: with_format("html") { render_to_string partial: "shared/signup_dialog", layout: false } } 
+          render json: { dlog: with_format("html") { render_to_string partial: "registrations/new_dialog", layout: false } }
         }
       end
     end

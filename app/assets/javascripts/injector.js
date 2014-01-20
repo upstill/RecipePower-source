@@ -21,6 +21,7 @@
 //= require jquery/jNotify.jquery
 //= require jquery/jquery.tokeninput
 //= require jquery/jquery.ba-resize
+//= require jquery_ujs
 //= require ../../../vendor/assets/javascripts/bootbox
 
 window.RP = window.RP || {}

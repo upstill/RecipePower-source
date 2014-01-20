@@ -11,7 +11,7 @@ class SessionsController < Devise::SessionsController
     clean_up_passwords(resource)
     resource.remember_me = 1
     respond_to do |format|
-      format.html { redirect_to home_path }
+      format.html
       format.json { 
         # @_area = params[:_area] || "floating"
         rendered = with_format("html") {

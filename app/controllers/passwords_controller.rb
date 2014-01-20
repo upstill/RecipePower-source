@@ -1,5 +1,6 @@
 require './lib/controller_utils.rb'
 class PasswordsController < Devise::PasswordsController
+  after_filter :allow_iframe, only: :new
   # before_filter { @_area = params[:_area] || "" }
   
   # GET /resource/password/new

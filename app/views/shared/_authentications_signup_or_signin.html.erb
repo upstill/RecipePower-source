@@ -3,7 +3,7 @@
 <% end %>
   <div class="auth_signin <%# @_area %><%= response_service.area_class %>" >
     <%= render partial: 'shared/authentications_current' %>
-    <%= render partial: 'shared/authentications_possible' %>
+    <%= render partial: 'authentications/authentications_possible' %>
   </div>
   <% if !current_user %>
 		<hr>

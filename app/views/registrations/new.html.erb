@@ -1,4 +1,2 @@
-<%# modal_dialog :sign_up, "New User", area: "at_top", class: "modal-yield", data: { focus: "input#user_username" } do %>
-<%# modal_dialog :sign_up, "New User", response_service.modal_options( data: { focus: "input#user_username" }) do %>
-	<%# render partial: "form" %>
-<%# end %>
+<!-- Redundant wrt application/new to prevent devise from responding -->
+<%= render "new_"+(response_service.dialog? ? 'modal' : 'page') %>

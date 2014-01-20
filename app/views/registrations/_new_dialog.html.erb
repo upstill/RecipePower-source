@@ -1,0 +1,3 @@
+<%= modal_dialog( :signup, ttl="Step 1: Sign Up", class: "keeparound "+(params[:trigger_signup] ? "trigger" : ""), data: { focus: "input#user_username" } ) do %>
+  <%= render 'registrations/options' %>
+<% end %>

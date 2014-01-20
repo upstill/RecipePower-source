@@ -1,4 +1,4 @@
-<%# render partial: 'shared/authentications_sidebar' %>
+<%# render partial: 'authentications/sidebar' %>
 <%= modal_dialog :edit_invitation, "Come on In to RecipePower", class: "trigger" do %>
 	<p>We're glad you've come!</p>
 	<p>Now, if you'll just provide a couple of details, you're good to go.</p><br>
@@ -12,5 +12,5 @@
 		  <%= f.submit "Bring it on", class: "btn btn-lg btn-success dialog-submit-button" %>
 		<% end %>
 	<% end %>
-	<%# render partial: 'shared/authentications_possible' %>
+	<%# render partial: 'authentications/authentications_possible' %>
 <% end %>

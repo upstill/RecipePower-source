@@ -1,0 +1,20 @@
+<%= simple_form_for(resource, :as => resource_name, :url => session_path(resource_name),) do |f| %>
+    <%= form_errors_helper f %>
+    <div class="row">
+      <div class="col-md-6">
+        <%= f.input :login, label: "Username or Email (your choice)", autofocus: resource.login.blank? %>
+      </div>
+      <div class="col-md-6">
+        <%= f.input :password, autofocus: !resource.login.blank? %></p>
+      </div>
+    </div>
+    <div class="row">
+      <div style="margin-left: 20px">
+        <% if devise_mapping.rememberable? -%>
+            <%= f.input :remember_me, :as => :boolean, :label => false, :inline_label => true, value: 1, input_html: {value: '1'} %>
+        <% end -%>
+        <%= link_to_modal "Forgot Password", new_user_password_path %>
+      </div>
+      <%= form_actions f, submit_label: "Sign In", cancel_path: home_path %>
+    </div>
+<% end %>

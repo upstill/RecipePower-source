@@ -1,8 +1,8 @@
 <%= modal_dialog :edit_account, @Title || "Edit Account", response_service.modal_options do %>
 	<%= modal_body do %>
 		<%= render partial: 'shared/authentications_current' %>
-		<%= render partial: 'shared/authentications_possible' %>
-		<%= render partial: 'shared/authentications_sidebar' %>
+		<%= render partial: 'authentications/authentications_possible' %>
+		<%= render partial: 'authentications/sidebar' %>
 	<% end %>
 	<%= modal_footer do %>
 		Want to change your password or cancel your account? <%= link_to_modal "Click here", edit_user_registration_path %>

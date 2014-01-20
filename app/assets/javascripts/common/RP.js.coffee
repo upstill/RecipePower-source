@@ -7,7 +7,8 @@ jQuery ->
 		event.preventDefault()
 
 	# Adjust the pading on the window contents to accomodate the navbar, on load and wheneer the navbar resizes
-	$('body')[0].style.paddingTop = ($('div.navbar')[0].offsetHeight+7).toString()+"px"
+	if navbar = $('div.navbar')[0]
+		$('body')[0].style.paddingTop = (navbar.offsetHeight+7).toString()+"px"
 	$('div.navbar').on "resize", (event) ->
 		$('body')[0].style.paddingTop = ($('div.navbar')[0].offsetHeight+7).toString()+"px"
 

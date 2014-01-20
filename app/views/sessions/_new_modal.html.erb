@@ -1,0 +1,7 @@
+<%= modal_dialog :sign_in, 
+	"Welcome Back! If you'll just sign in...", 
+	response_service.modal_options do %>
+        <%= render 'sessions/form' %>
+    <hr>
+    <%= render partial: 'authentications/authentications_possible' %>
+<% end %>
