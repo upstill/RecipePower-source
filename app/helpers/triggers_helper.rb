@@ -30,6 +30,15 @@ module TriggersHelper
   	link_to label, path, options
   end
 
+  # Generate a hashtag which triggers a modal dialog
+  def hash_to_modal url, base_url=nil
+    base_url ||= collection_url
+    uri = URI.parse(url)
+    index = url.index uri.path
+    relative_url = assert_query(url[index..-1], :how => :modal)
+    "#{base_url}#dialog:#{CGI::escape relative_url}"
+  end
+
   def link_to_show object, label, options={}
     button_to "Show", object, remote: true, :method => :get, form: { "data-type" => "json", class: "dialog-run" }
   end

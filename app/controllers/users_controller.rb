@@ -76,7 +76,7 @@ class UsersController < ApplicationController
       format.html { redirect_to home_path }
       format.json {
         render( 
-          json: { dlog: with_format("html") { render_to_string partial: "registrations/new_dialog", layout: false } }
+          json: { dlog: with_format("html") { render_to_string partial: "registrations/new_modal", layout: false } }
         )
       }
     end

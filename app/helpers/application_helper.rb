@@ -344,7 +344,7 @@ module ApplicationHelper
   # Returning nil implies to preload the signup dialog
   def login_setup 
     if session[:on_tour]
-	    render(partial: "registrations/new_dialog")
+	    render(partial: "registrations/new_modal")
     elsif it = session[:invitation_token]
       # load the invitation-acceptance dialog. If the user isn't on tour, set it to
       # trigger when the page is loaded
@@ -361,7 +361,7 @@ module ApplicationHelper
   		  link_to "", new_user_path, class: "trigger" 
   		end
 	  else
-	    render "registrations/new_dialog"
+	    render "registrations/new_modal"
 		end
 	end
   

@@ -62,7 +62,7 @@
             <span>Msg Goes Here</span>
 		</div>
 		<%= feedback_tab :position => 'left' %>
-        <% if trigger = deferred_trigger(true) %>
+        <% if trigger = params[:trigger] || deferred_trigger(true) %>
           <%= link_to_modal "#", trigger, class: "trigger" %>
         <% end %>
 	</body>

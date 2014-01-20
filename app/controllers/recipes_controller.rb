@@ -172,7 +172,7 @@ class RecipesController < ApplicationController
           # Nobody logged in => 
           defer_capture params.slice(:recipe, :extractions, :sourcehome )
           # redirect_to new_authentication_url(area: "at_top", layout: "injector", sourcehome: params[:sourcehome] )
-          redirect_to new_authentication_url( response_service.redirect_params params.slice(:sourcehome) )
+          redirect_to new_user_session_url( response_service.redirect_params params.slice(:sourcehome) )
         end
       }
       format.json {
@@ -333,7 +333,7 @@ class RecipesController < ApplicationController
         format.html { redirect_to home_path, notice: notice }
         format.json { 
           flash.now[:alert] = notice
-          render json: { dlog: with_format("html") { render_to_string partial: "registrations/new_dialog", layout: false } }
+          render json: { dlog: with_format("html") { render_to_string partial: "registrations/new_modal", layout: false } }
         }
       end
     end
@@ -348,7 +348,6 @@ class RecipesController < ApplicationController
     report_recipe collection_url, 
       "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections.", 
       formats
-    # redirect_to collection_url, :notice => "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections."
   end
 
   # Remove the recipe from the system entirely
@@ -357,7 +356,6 @@ class RecipesController < ApplicationController
     title = @recipe.title
     @recipe.destroy
     report_recipe collection_url, "\"#{title}\" is gone for good.", formats, true
-    # redirect_to collection_url, :notice => "\"#{title}\" is gone for good."
   end
 
   def revise # modify current recipe to reflect a client-side change

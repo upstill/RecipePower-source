@@ -187,7 +187,7 @@ class InvitationsController < Devise::InvitationsController
       end
     end
     if resource && resource.errors.empty? # Success!
-      set_flash_message :notice, :send_instructions, :email => self.resource.email
+      set_flash_message :notice, :send_instructions_html, :email => self.resource.email
       notice = "Yay! An invitation is winging its way to #{resource.email}"
       respond_with resource, :location => after_invite_path_for(resource) do |format|
         format.json { render json: { done: true, alert: notice }}

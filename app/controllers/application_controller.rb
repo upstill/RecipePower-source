@@ -196,19 +196,15 @@ class ApplicationController < ActionController::Base
     renderopts = response_service.render_params renderopts
     respond_to do |format|
       format.html do
-        if response_service.page? && # @_area == "page" # Not partial at all => whole page
-            renderopts[:redirect]
+        if response_service.page? && renderopts[:redirect]
           redirect_to renderopts[:redirect]
         elsif response_service.dialog?
           # Strip everything up to the path
-          uri = URI.parse(url)
-          index = url.index uri.path
-          relative_url = assert_query(url[index..-1], :how => :modal)
-          hashtag = "#dialog:#{CGI::escape relative_url}"
           if current_user
-            redirect_to "/collection#{hashtag}"
+            redirect_to view_context.hash_to_modal( url, collection_url ) # "/collection#{hashtag}"
           else
-            redirect_to "/home?trigger_signup=true#{hashtag}"
+            defer_trigger url
+            redirect_to view_context.hash_to_modal( new_user_session_path, home_url )
           end
         else
           render action, renderopts

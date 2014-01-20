@@ -1,20 +1,42 @@
-<%= simple_form_for(resource, :as => resource_name, :url => session_path(resource_name),) do |f| %>
-    <%= form_errors_helper f %>
-    <div class="row">
-      <div class="col-md-6">
-        <%= f.input :login, label: "Username or Email (your choice)", autofocus: resource.login.blank? %>
-      </div>
-      <div class="col-md-6">
-        <%= f.input :password, autofocus: !resource.login.blank? %></p>
-      </div>
-    </div>
-    <div class="row">
-      <div style="margin-left: 20px">
-        <% if devise_mapping.rememberable? -%>
-            <%= f.input :remember_me, :as => :boolean, :label => false, :inline_label => true, value: 1, input_html: {value: '1'} %>
-        <% end -%>
-        <%= link_to_modal "Forgot Password", new_user_password_path %>
-      </div>
-      <%= form_actions f, submit_label: "Sign In", cancel_path: home_path %>
-    </div>
+<% if response_service.injector? %>
+    <%= form_for(resource, :as => resource_name, :url => session_path(resource_name, response_service.redirect_params), :html => {'data-type' => 'json'}) do |f| %>
+        <div class="signin">
+          <strong>Sign in with a password:</strong><br>
+          <%= flash_all false %>
+          <div class="signin_credentials">
+            <%= f.label :login, "Username or Email".html_safe, class: "signin_element" %>
+            <%= f.text_field :login, class: "signin_element" %>
+            <%= f.label :password, class: "signin_element" %>
+            <%= f.password_field :password, class: "signin_element" %>
+          </div>
+          <div class="signin_go">
+            <% if devise_mapping.rememberable? -%>
+                <%= f.check_box :remember_me %> <%= f.label :remember_me %>
+            <% end -%>
+            <div style="width:100%;height:40px;"><%= f.submit "Sign In", class: "btn btn-success dialog-submit-button" %></div>
+            <div style="width:100%"><%= link_to_modal "Forgot Password", new_user_password_path(response_service.redirect_params), class: "get_password" %></div>
+          </div>
+        </div>
+    <% end %>
+<% else %>
+    <%= simple_form_for(resource, :as => resource_name, :url => session_path(resource_name),) do |f| %>
+        <%= form_errors_helper f %>
+        <div class="row">
+          <div class="col-md-6">
+            <%= f.input :login, label: "Username or Email (your choice)", autofocus: resource.login.blank? %>
+          </div>
+          <div class="col-md-6">
+            <%= f.input :password, autofocus: !resource.login.blank? %></p>
+          </div>
+        </div>
+        <div class="row">
+          <div style="margin-left: 20px">
+            <% if devise_mapping.rememberable? -%>
+                <%= f.input :remember_me, :as => :boolean, :label => false, :inline_label => true, value: 1, input_html: {value: '1'} %>
+            <% end -%>
+            <%= link_to_modal "Forgot Password", new_user_password_path %>
+          </div>
+          <%= form_actions f, submit_label: "Sign In", cancel_path: home_path %>
+        </div>
+    <% end %>
 <% end %>

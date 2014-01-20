@@ -58,7 +58,7 @@ class RegistrationsController < Devise::RegistrationsController
 
     def new
       build_resource({})
-      smartrender action: "new", trigger_signup: true
+      smartrender action: "new"
     end
 
     # PUT /resource

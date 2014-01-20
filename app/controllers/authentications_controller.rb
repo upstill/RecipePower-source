@@ -2,7 +2,7 @@ require './lib/controller_utils.rb'
 require 'uri'
   
 class AuthenticationsController < ApplicationController
-  after_filter :allow_iframe, only: :new
+#  after_filter :allow_iframe, only: :new
     
   def index
     @authentications = current_user.authentications if current_user
@@ -25,9 +25,7 @@ class AuthenticationsController < ApplicationController
       @auth_delete = true
       # @auth_context = :manage
       flash[:notice] = params[:notice]
-      # @_area = params[:_area]
-      # dialog_boilerplate "new"
-      smartrender 
+      smartrender
   end
 
   # Get a new authentication (==login) for a specific user
