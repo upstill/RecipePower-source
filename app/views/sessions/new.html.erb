@@ -1,11 +1,3 @@
 <!-- Redundant wrt application/new to prevent devise from responding -->
-<% if response_service.injector? %>
-    <% prompt = "needs you to sign in to collect this cookmark. Not a member? " %>
-    <% prompt << link_to_redirect("Sign up!", hash_to_modal( new_user_registration_path )) %>
-    <%= injector_dialog :sign_in, prompt.html_safe, dismiss_button: false do %>
-        <%= render 'sessions/new_injector' %>
-    <% end %>
-<% else %>
-    <%= render "sessions/new_#{response_service.dialog? ? 'modal' : 'page'}" %>
-<% end %>
+<%= render response_service.select_render %>
 

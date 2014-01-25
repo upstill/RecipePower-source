@@ -1,2 +1,2 @@
 <%# Generic edit template that optionally deploys content in a dialog  %>
-<%= render "show_"+(response_service.dialog? ? 'modal' : 'page') %>
+<%= render response_service.select_render %>

@@ -30,15 +30,6 @@ module TriggersHelper
   	link_to label, path, options
   end
 
-  # Generate a hashtag which triggers a modal dialog
-  def hash_to_modal url, base_url=nil
-    base_url ||= collection_url
-    uri = URI.parse(url)
-    index = url.index uri.path
-    relative_url = assert_query(url[index..-1], :how => :modal)
-    "#{base_url}#dialog:#{CGI::escape relative_url}"
-  end
-
   def link_to_show object, label, options={}
     button_to "Show", object, remote: true, :method => :get, form: { "data-type" => "json", class: "dialog-run" }
   end
@@ -67,18 +58,11 @@ module TriggersHelper
     button_to_submit label, url, options
   end
 
-  def defer_trigger str
-    if str
-      session[:trigger] = str
-    else
-      session.delete[:trigger]
-    end
-  end
-
-  def deferred_trigger forget=false
-    if str = session[:trigger]
-      session.delete(:trigger) if forget
-      str
+  # If there's a deferred request that can be expressed as a trigger, do so, by inserting a trigger link      .
+  # THIS INCLUDES DIALOG REQUESTS EMBEDDED IN THE URL
+  def trigger_pending_modal delete_after=true
+    if trigger = response_service.pending_modal_trigger
+      link_to_modal "", trigger, class: "trigger"
     end
   end
 

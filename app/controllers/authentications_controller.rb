@@ -2,7 +2,7 @@ require './lib/controller_utils.rb'
 require 'uri'
   
 class AuthenticationsController < ApplicationController
-#  after_filter :allow_iframe, only: :new
+  after_filter :allow_iframe, only: :new
     
   def index
     @authentications = current_user.authentications if current_user
@@ -19,8 +19,9 @@ class AuthenticationsController < ApplicationController
   def new
       @authentications = current_user.authentications if current_user
       if current_user
-        flash[:notice] = "All signed in. Welcome back, #{current_user.handle}!"
-        redirect_to collection_path(redirect: true)
+        # flash[:notice] = "All signed in. Welcome back, #{current_user.handle}!"
+        # redirect_to collection_path(redirect: true)
+        redirect_to after_sign_in_path_for(current_user), notice: "All signed in. Welcome back, #{current_user.handle}!"
       end
       @auth_delete = true
       # @auth_context = :manage
@@ -32,8 +33,9 @@ class AuthenticationsController < ApplicationController
   def verify
       @authentications = current_user.authentications if current_user
       if current_user
-        flash[:notice] = "All signed in. Welcome back, #{current_user.handle}!"
-        redirect_to collection_path(redirect: true)
+        # flash[:notice] = "All signed in. Welcome back, #{current_user.handle}!"
+        # redirect_to collection_path(redirect: true)
+        redirect_to after_sign_in_path_for(current_user), notice: "All signed in. Welcome back, #{current_user.handle}!"
       end
       @auth_delete = true
       @auth_context = :manage
@@ -45,14 +47,16 @@ class AuthenticationsController < ApplicationController
 
   def failure
     @after_sign_in_url = nil # authentications_url
+=begin
     if data = deferred_capture(true)
       if @after_sign_in_url = data[:recipe][:url]
   	    @after_sign_in_msg = "Sorry, authentication failed. Returning to the recipe..."
   	  end
     end
+=end
     render 'callback', :layout => false
   end
-  
+
   def handle_unverified_request
       true
   end

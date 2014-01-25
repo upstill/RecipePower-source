@@ -3,7 +3,7 @@ module AuthenticationsHelper
   # Offer an authentication option in the form of an icon and a title
   def auth_possible(service, options = {} )
     svc_lower = options[:svc_lower] || service.downcase
-    in_iframe = options[:context] && (options[:context] == "injector")
+    in_iframe = options[:target] && (options[:target] == "injector")
     auth_url = "http://#{current_domain}/auth/"+svc_lower
     css_class = "auth_provider"
     css_class += " small" if in_iframe
@@ -12,7 +12,7 @@ module AuthenticationsHelper
       :class => css_class,
       :size => "64x64", 
       :href => auth_url, 
-      :onclick => in_iframe ? "yield_iframe(event)" : "RP.authentication.connect(event)", 
+      :onclick => "RP.authentication.connect(event)", # in_iframe ? "yield_iframe(event)" : "RP.authentication.connect(event)",
       :"data-hold_msg" => "Hang on while we check with "+service+"...",
       :"data-width" => 600, 
       :"data-height" => 300

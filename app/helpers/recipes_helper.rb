@@ -181,11 +181,4 @@ end
      "<span class=\"cmcount\" id=\"cmcount#{rcp.id}\">#{result}</span>".html_safe
   end
 
-  # Declare a div for triggering a recipe edit operation
-  def recipe_edit_trigger
-    if capture_data = deferred_capture(false)
-      link_to_modal "", capture_recipes_url(capture_data), class: "trigger"
-    end
-  end
-
 end

@@ -1,2 +1,2 @@
 <%# Generic new template that optionally deploys content in a dialog  %>
-<%= render "new_"+(response_service.dialog? ? 'modal' : 'page') %>
+<%= render response_service.select_render %>

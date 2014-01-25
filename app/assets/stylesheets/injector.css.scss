@@ -36,6 +36,30 @@ div.dialog.at_top {
 	&.alert {
 		width:500px;
 	}
+    .auth_poss {
+      float: left; // display: inline-block;
+      font:16px arial,sans-serif;
+      width:auto;
+      margin:0.5em .1em ;
+      // border-right:1px solid black;
+      .auth_provider {
+        display: inline-block;
+        text-decoration:none;
+        text-align:center;
+        margin-bottom:10px;
+        width:55px;
+        height:auto;
+        margin:0;
+        font-size:12px;
+        img {
+          width:48px;
+          height:48px;
+          margin-left:auto;
+          margin-right:auto;
+          display:block
+        }
+      }
+    }
 	&.sign_in {
 		width:820px;
 		font:12px arial,sans-serif;
@@ -44,30 +68,6 @@ div.dialog.at_top {
 		form {
 			float: left; // display: inline-block; vertical-align: top;
 			width: auto;
-		}
-		.auth_poss {
-			float: left; // display: inline-block;
-			font:16px arial,sans-serif;
-			width:auto;
-			margin:0.5em .1em ;			
-			// border-right:1px solid black;
-			.auth_provider {
-				display: inline-block;
-				text-decoration:none;
-				text-align:center;
-				margin-bottom:10px;
-				width:55px;
-				height:auto;
-				margin:0;
-				font-size:12px;
-				img {
-					width:48px;
-					height:48px;
-					margin-left:auto;
-					margin-right:auto;
-					display:block
-				}
-			}
 		}
 		.or {
 			width: 30px;

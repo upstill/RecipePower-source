@@ -283,6 +283,7 @@ module ApplicationHelper
 
     item_list += [
         "<hr>",
+        link_to_modal( "Add Cookmark", new_recipe_path ),
         link_to( "Admin", admin_path),
         link_to( "Refresh Masonry", "#", onclick: "RP.collection.justify();" ),
         link_to( "Address Bar Magic", "#", onclick: "RP.getgo('#{home_path}', 'http://local.recipepower.com:3000/bar.html##{bookmarklet_script}')" ),
@@ -342,9 +343,11 @@ module ApplicationHelper
   
   # If there are any tasks awaiting which need a login, set up the appropriate one.
   # Returning nil implies to preload the signup dialog
-  def login_setup 
-    if session[:on_tour]
-	    render(partial: "registrations/new_modal")
+  def preloads
+    if current_user
+      render partial: 'recipes/edit_template', recipe: nil
+    elsif session[:on_tour]
+	    render partial: "registrations/new_modal"
     elsif it = session[:invitation_token]
       # load the invitation-acceptance dialog. If the user isn't on tour, set it to
       # trigger when the page is loaded
@@ -353,6 +356,7 @@ module ApplicationHelper
     elsif token = deferred_notification
 			@user = Notification.find_by_notification_token(token).target
 			link_to "", new_user_session_path(user: { id: @user.id, email: @user.email } ), class: "trigger" 
+=begin
     elsif data = deferred_collect(false)
       if data[:uid]
   			@user = User.find data[:uid]
@@ -361,7 +365,8 @@ module ApplicationHelper
   		  link_to "", new_user_path, class: "trigger" 
   		end
 	  else
-	    render "registrations/new_modal"
+=end
+	    render partial: "registrations/new_modal"
 		end
 	end
   
@@ -548,4 +553,5 @@ module ApplicationHelper
                 ).html_safe,
                 class: "form-group actions"
   end
+
 end

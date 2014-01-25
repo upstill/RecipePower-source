@@ -5,6 +5,7 @@
 
 RP::Application.routes.draw do
 
+  get "redirect/go"
   get '/auth/failure' => 'authentications#failure'
   # get '/authentications/new' => 'authentications#new'
   resources :authentications
@@ -25,6 +26,7 @@ RP::Application.routes.draw do
     get "/users/cancel" => "registrations#cancel", :as => "cancel_user_registration"
     put "/users" => "registrations#update"
     delete "/users" => "registrations#destroy"
+    get "/users/sign_out" => "sessions#destroy"
     patch "/users" => "registrations#update"
 
     get "/users/invitation/divert" => "invitations#divert", :as => "divert_user_invitation"
