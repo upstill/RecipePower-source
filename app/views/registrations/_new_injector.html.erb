@@ -1,3 +1,11 @@
-<%= injector_dialog :new_registration, "welcomes you!", noflash: true, dismiss_button: false do %>
-  <%= render 'registrations/options' %>
+<% prompt = "welcomes you! Already a member? " %>
+<%# prompt << link_to_redirect("Sign up!", hash_to_modal( new_user_registration_url, home_url )) %>
+<% prompt << link_to_modal("Sign in!", new_user_session_path(@user, target: "injector")) %>
+<%= injector_dialog :new_registration, prompt.html_safe, :noflash => true, dismiss_button: false do %>
+    <hr>
+    <div style="width: 200px; padding-left: 10px;">
+      <%= render 'authentications/authentications_possible', prompt: "You can create an account using one of these fine services:" %>
+    </div>
+    <div class="or"><h4>OR</h4></div>
+    <%= render "registrations/form" %>
 <% end %>

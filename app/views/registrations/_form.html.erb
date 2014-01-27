@@ -1,15 +1,35 @@
-<%= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name)) do |f| %>
-    <%# devise_error_messages! %>
-    <%= form_errors_helper f, resource %>
-    <div class="row">
-      <div class="col-md-6">
-        <%= f.input :username, label: "Username (Handle)", placeholder: "CoolBeans" %>
-        <%= f.input :email, label: "Email", placeholder: 'user@domain.com' %>
-      </div>
-      <div class="col-md-6">
-        <%= f.input :fullname, label: "Full Name", placeholder: "Joe Cool" %>
-        <%= f.input :password %>
-        <%= f.submit "Sign me up!", class: "btn btn-success" %>
-      </div>
-    </div>
+<% if response_service.injector? %>
+    <%= form_for(resource, :as => resource_name, :url => registration_path(resource_name, response_service.redirect_params), :html => {'data-type' => 'json'}) do |f| %>
+        <div class="signin">
+          <strong>Set up with a few details:</strong><br>
+          <%= form_errors_helper f, resource %>
+          <div class="signin_credentials">
+            <%= f.label :username, "Username (Handle)".html_safe, class: "signin_element" %>
+            <%= f.text_field :username, class: "signin_element", placeholder: "CoolBeans" %>
+            <%= f.label :fullname, "Full Name".html_safe, class: "signin_element" %>
+            <%= f.text_field :fullname, class: "signin_element", placeholder: "Joe Cool" %>
+            <%= f.label :email, "Email".html_safe, class: "signin_element" %>
+            <%= f.text_field :email, class: "signin_element", placeholder: "peerless@nonpareil.net" %>
+            <%= f.label :password, class: "signin_element" %>
+            <%= f.password_field :password, class: "signin_element" %>
+          </div>
+          <br><%= f.submit "Sign me up!", class: "btn btn-success " %>
+        </div>
+    <% end %>
+<% else %>
+    <%= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name)) do |f| %>
+        <%# devise_error_messages! %>
+        <%= form_errors_helper f, resource %>
+        <div class="row">
+          <div class="col-md-6">
+            <%= f.input :username, label: "Username (Handle)", placeholder: "CoolBeans" %>
+            <%= f.input :email, label: "Email", placeholder: 'user@domain.com' %>
+          </div>
+          <div class="col-md-6">
+            <%= f.input :fullname, label: "Full Name", placeholder: "Joe Cool" %>
+            <%= f.input :password %>
+            <%= f.submit "Sign me up!", class: "btn btn-success" %>
+          </div>
+        </div>
+    <% end %>
 <% end %>

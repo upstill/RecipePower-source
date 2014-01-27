@@ -28,6 +28,15 @@ class ResponseServices
     @format = (params[:format] || "page")
     @format = "dialog" if (params[:how] == "modal")
   end
+
+  # Change the response parameters to accommodate late-breaking information, e.g. the
+  # parameters that come in via omniauth
+  def amend params={}
+    @target = params[:target] if params[:target] unless @session[:mobile]
+    # Format refers to how to present the content: within a dialog, or on a page
+    @format = params[:format] if params[:format]
+    @format = "dialog" if params[:how] && (params[:how] == "modal")
+  end
   
   def is_dialog
     @format = "dialog"
@@ -79,7 +88,12 @@ class ResponseServices
     options[:how] = "modal" if dialog?
     options
   end
-  
+
+  # Modify a path to match the current request, asserting other options as provided
+  def decorate_path path, options={}
+    assert_query path, redirect_params( options )
+  end
+
   # What's the appropriate layout for the current context?
   def layout
     case 
@@ -113,12 +127,6 @@ class ResponseServices
     else
       "page"
     end
-  end
-
-  # Modify a path to match the current request, asserting other options as provided
-  def decorate_path path, options_in={}
-    options_out = options_in # XXX Should be asserting current state
-    assert_query path, options_out
   end
 
   # Recall an earlier, deferred, request that can be redirected to in the current context .

@@ -67,6 +67,10 @@ class AuthenticationsController < ApplicationController
     omniauth = request.env['omniauth.auth']
     # render text: omniauth.to_yaml
     authparams = omniauth.slice('provider', 'uid')
+    # Our query parameters appear in env['omniauth.params']
+    if env['omniauth.params']
+      response_service.amend Hash[ env['omniauth.params'].map{|e| [e.first.to_sym, e.last] } ]
+    end
     if @authentication = Authentication.find_by_provider_and_uid(omniauth['provider'], omniauth['uid'])
       flash[:notice] = "Yay! Signed in with #{@authentication.provider_name}. Welcome back, #{@authentication.user.handle}!"
       # result = sign_in_and_redirect @authentication.user # , :bypass => true

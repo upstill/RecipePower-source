@@ -43,7 +43,7 @@ class RegistrationsController < Devise::RegistrationsController
               format.json { 
                 render json: { 
                           replacements: [
-                            ["form[action='/users']", with_format("html") { render_to_string partial: "registrations/form" }]
+                            ["form.new_user", with_format("html") { render_to_string partial: "registrations/form" }]
                           ]
                         }
               }

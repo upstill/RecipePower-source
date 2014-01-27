@@ -1,11 +1,3 @@
-<div class="auth_poss at_home">
-  <div class="prompt">You can sign in with these services:</div>
-  <%= auth_possible "Facebook" %>
-  <%= auth_possible "Google", :svc_lower => "google_oauth2" %>
-  <%= auth_possible "Twitter" %>
-  <%= auth_possible "Aol" %>
-  <%= auth_possible "Yahoo" %>
-  <%= auth_possible "OpenID", :svc_lower => "open_id" %>
-</div>
+<%= render 'authentications/authentications_possible', prompt: "You can sign in with one of these fine services:" %>
 <div class="prompt">...Or go the full signup route:</div>
 <%= render "registrations/form" %>

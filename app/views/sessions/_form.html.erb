@@ -2,7 +2,8 @@
     <%= form_for(resource, :as => resource_name, :url => session_path(resource_name, response_service.redirect_params), :html => {'data-type' => 'json'}) do |f| %>
         <div class="signin">
           <strong>Sign in with a password:</strong><br>
-          <%= flash_all false %>
+          <%# form_errors_helper f, resource %>
+          <%= flash_all(false) %>
           <div class="signin_credentials">
             <%= f.label :login, "Username or Email".html_safe, class: "signin_element" %>
             <%= f.text_field :login, class: "signin_element" %>

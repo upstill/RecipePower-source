@@ -30,10 +30,11 @@ div.dialog.at_top {
 	background-color:#EEE;
 	border:solid 3px #900;
 	z-index: 9000001;
+    h4 {
+      margin-top: 3px;
+      margin-bottom: 1px;
+    }
 	&.new_password {
-		width:500px;
-	}
-	&.alert {
 		width:500px;
 	}
     .auth_poss {
@@ -60,66 +61,128 @@ div.dialog.at_top {
         }
       }
     }
-	&.sign_in {
-		width:820px;
-		font:12px arial,sans-serif;
-		font-weight:bold;
-		height:auto;
-		form {
-			float: left; // display: inline-block; vertical-align: top;
-			width: auto;
-		}
-		.or {
-			width: 30px;
-			height: 80px;
-			border-right: solid 1px #CCCCCC;
-			border-left: solid 1px #CCCCCC;
-			margin: 0px;
-			margin-top: 5px;
-			padding: 0px 10px;
-			font-size:18px;
-			float: left; // display: inline-block; vertical-align: top;
-		}
-		.signin {
-			margin:0px 5px;
-			padding:7px;
-			display: inline-block;
-			font:16px arial,sans-serif;
-			width:auto;
-			// border-left:1px solid black;
-			vertical-align: top;
-			.signin_credentials {
-				width: 210px;
-				display: inline-block;
-				vertical-align: top;
-				margin-top: 0.2em;
-				.signin_element {
-					width: 95%;
-				}
-			}
-		}
-		.signin_go {
-			width: 135px; // auto; 
-			margin: 0px;
-			margin-left: 10px;
-			display: inline-block;
-			vertical-align: top;
-			input.btn {
-				margin: 10px 5px 0px;
-				font:16px arial,sans-serif;
-				color: #FFFFFF;
-				background: #51a351;
-			}
-		}
-		.get_password {
-			margin:0px;
-			padding:7px 7px 0px;
-			display: block;
-			font:16px arial,sans-serif;
-			width:auto;
-			vertical-align: top;
-		}
-	}
+  &.new_registration {
+    width:560px;
+    font:12px arial,sans-serif;
+    font-weight:bold;
+    height:auto;
+    form {
+      float: left; // display: inline-block; vertical-align: top;
+      width: 250px;
+    }
+    .or {
+      width: 30px;
+      height: 180px;
+      border-right: solid 1px #CCCCCC;
+      border-left: solid 1px #CCCCCC;
+      margin: 0px;
+      margin-right: 10px;
+      margin-top: 10px;
+      padding: 0px 10px;
+      padding-top: 40px;
+      font-size:18px;
+      float: left; // display: inline-block; vertical-align: top;
+    }
+    .signin {
+      margin:0px 5px;
+      padding:7px;
+      float: left; // display: inline-block;
+      font:16px arial,sans-serif;
+      width:auto;
+      // border-left:1px solid black;
+      vertical-align: top;
+      .signin_credentials {
+        width: 210px;
+        display: inline-block;
+        vertical-align: top;
+        margin-top: 0.2em;
+        .signin_element {
+          width: 95%;
+        }
+      }
+    }
+    .signin_go {
+      width: 135px; // auto;
+      margin: 0px;
+      margin-left: 10px;
+      display: inline-block;
+      vertical-align: top;
+      input.btn {
+        margin: 10px 5px 0px;
+        font:16px arial,sans-serif;
+        color: #FFFFFF;
+        background: #51a351;
+      }
+    }
+    .get_password {
+      margin:0px;
+      padding:7px 7px 0px;
+      display: block;
+      font:16px arial,sans-serif;
+      width:auto;
+      vertical-align: top;
+    }
+  }
+  &.sign_in {
+    width:820px;
+    font:12px arial,sans-serif;
+    font-weight:bold;
+    height:auto;
+    form {
+      float: left; // display: inline-block; vertical-align: top;
+      width: auto;
+    }
+    .or {
+      width: 30px;
+      height: 80px;
+      border-right: solid 1px #CCCCCC;
+      border-left: solid 1px #CCCCCC;
+      margin: 0px;
+      margin-top: 5px;
+      padding: 20px 10px;
+      font-size:18px;
+      float: left; // display: inline-block; vertical-align: top;
+    }
+    .signin {
+      margin:0px 5px;
+      padding:7px;
+      display: inline-block;
+      font:16px arial,sans-serif;
+      width:auto;
+      // border-left:1px solid black;
+      vertical-align: top;
+      .signin_credentials {
+        width: 210px;
+        display: inline-block;
+        vertical-align: top;
+        margin-top: 0.2em;
+        .signin_element {
+          width: 95%;
+        }
+      }
+    }
+    .signin_go {
+      width: 135px; // auto;
+      margin: 0px;
+      margin-left: 10px;
+      display: inline-block;
+      vertical-align: top;
+      input.btn {
+        margin: 10px 5px 0px;
+        font:16px arial,sans-serif;
+        color: #FFFFFF;
+        background: #51a351;
+      }
+    }
+    .get_password {
+      margin:0px;
+      padding:7px 7px 0px;
+      display: block;
+      font:16px arial,sans-serif;
+      width:auto;
+      vertical-align: top;
+    }
+  }
 	&.edit_recipe {
 		width:810px;
 		div.left {
@@ -341,20 +404,22 @@ div.dialog.at_top {
 		color: #b94a48;
 	}
 	.alert {
-	  padding: 8px 35px 8px 14px;
+	  padding: 5px;
+      margin: 0;
+      width: 100%;
 	  margin-bottom: 5px;
 	  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
-	  background-color: #fcf8e3;
-	  border: 1px solid #fbeed5;
+	  // background-color: #fcf8e3;
+	  // border: 1px solid #fbeed5;
 	  -webkit-border-radius: 4px;
 	  -moz-border-radius: 4px;
 	  border-radius: 4px;
-		.alert-error {
-			  color: #b94a48;
-			  background-color: #d9edf7;
-			  border-color: #bce8f1;
-			  // color: #3a87ad;
-		}
+      color: #b94a48;
+      background-color: #d9edf7;
+      border-color: #bce8f1;
+      button.close {
+        display: none;
+      }
 	}
 	&.generic_alert { // Default, in the absence of bootstrap
 		display: block;

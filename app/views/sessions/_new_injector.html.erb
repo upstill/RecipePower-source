@@ -1,17 +1,9 @@
 <% prompt = "needs you to sign in to collect this cookmark. Not a member? " %>
 <%# prompt << link_to_redirect("Sign up!", hash_to_modal( new_user_registration_url, home_url )) %>
-<% prompt << link_to("Sign up!", "#", onclick: %Q{$('#hidden_bottom').show(); event.preventDefault()}) %>
-<%= injector_dialog :sign_in, prompt.html_safe, dismiss_button: false do %>
-    <%= render 'authentications/authentications_possible_injector' %>
+<% prompt << link_to_modal("Sign up!", new_registration_path(@user, target: "injector")) %>
+<%= injector_dialog :sign_in, prompt.html_safe, :noflash => true, dismiss_button: false do %>
+    <hr>
+    <%= render 'authentications/authentications_possible', prompt: "You can sign in with one of these services:" %>
     <div class="or"><h4>OR</h4></div>
     <%= render "sessions/form" %>
-    <div id="hidden_bottom" style="display: none;">
-      <hr>
-      <div class="prompt" style="width:40%; float: left;">You can join up by clicking one of the services above,
-        or go the full signup route, viz:
-      </div>
-      <div style="width:60%; float: left">
-        <%= render "registrations/form_injector" %>
-      </div>
-    </div>
 <% end %>
