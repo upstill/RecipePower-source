@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="11143819-dbfd-4599-8209-07d96301a1c5" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/recipes/_form_edit_at_left.html.erb" afterPath="$PROJECT_DIR$/app/views/recipes/_form_edit_at_left.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/services/response_services.rb" afterPath="$PROJECT_DIR$/app/services/response_services.rb" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <list id="21d2ff77-1c8c-4a30-94eb-9a678f6d7e6f" name="New changelist" comment="" />
@@ -31,117 +29,7 @@
     <favorites_list name="RP" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file leaf-file-name="recipes_controller.rb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/controllers/recipes_controller.rb">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="224" column="0" selection-start="10045" selection-end="10045" vertical-scroll-proportion="0.0" vertical-offset="3235" max-vertical-offset="5805">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="_form_edit_at_left.html.erb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/views/recipes/_form_edit_at_left.html.erb">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="41" column="0" selection-start="2351" selection-end="2351" vertical-scroll-proportion="-1.2692307" vertical-offset="516" max-vertical-offset="1200">
-              <folding>
-                <element signature="n#style#0;n#img#0;n#div#0;n#div#0;n#div#0;n#div#1;n#div#0;n#form#0;n#div#0;n#div#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#div#0;n#div#1;n#div#0;n#div#0;n#div#1;n#div#0;n#form#0;n#div#0;n#div#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#textarea#0;n#div#0;n#div#1;n#div#1;n#div#0;n#form#0;n#div#0;n#div#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#textarea#0;n#div#2;n#div#1;n#div#1;n#div#0;n#form#0;n#div#0;n#div#0;n#!!top" expanded="true" />
-                <element signature="e#3088#3109#0" expanded="true" />
-                <element signature="e#3223#3246#0" expanded="true" />
-                <element signature="e#3360#3380#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="edit.html.erb" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/app/views/recipes/edit.html.erb">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="364">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="_form_edit_injector.html.erb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/views/recipes/_form_edit_injector.html.erb">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="22" column="18" selection-start="645" selection-end="645" vertical-scroll-proportion="-11.25" vertical-offset="60" max-vertical-offset="765">
-              <folding>
-                <marker date="1389757434000" expanded="true" signature="141:314" placeholder="..." />
-                <marker date="1389757434000" expanded="true" signature="338:1000" placeholder="..." />
-                <marker date="1389757434000" expanded="true" signature="373:630" placeholder="..." />
-                <marker date="1389757434000" expanded="true" signature="482:617" placeholder="..." />
-                <marker date="1389757434000" expanded="true" signature="514:604" placeholder="..." />
-                <marker date="1389757434000" expanded="true" signature="712:991" placeholder="..." />
-                <marker date="1389757434000" expanded="true" signature="794:978" placeholder="..." />
-                <marker date="1389757434000" expanded="true" signature="826:965" placeholder="..." />
-                <marker date="1389757434000" expanded="true" signature="1022:1343" placeholder="..." />
-                <marker date="1389757434000" expanded="true" signature="1058:1143" placeholder="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="taggable_helper.rb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/helpers/taggable_helper.rb">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="7" column="64" selection-start="362" selection-end="399" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="810">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="application_helper.rb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/helpers/application_helper.rb">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="537" column="2" selection-start="19992" selection-end="19992" vertical-scroll-proportion="0.0" vertical-offset="7780" max-vertical-offset="8445">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="dialog.js.coffee" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/assets/javascripts/common/dialog.js.coffee">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="32" column="11" selection-start="1339" selection-end="1341" vertical-scroll-proportion="-4.769231" vertical-offset="356" max-vertical-offset="4920">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="edit_recipe.js.coffee" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/assets/javascripts/views/edit_recipe.js.coffee">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="34" column="14" selection-start="1608" selection-end="1608" vertical-scroll-proportion="0.0" vertical-offset="405" max-vertical-offset="1680">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="tagger.js.coffee" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/assets/javascripts/concerns/tagger.js.coffee">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="5" column="10" selection-start="106" selection-end="106" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="750">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="application_controller.rb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/controllers/application_controller.rb">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="191" column="0" selection-start="7492" selection-end="7492" vertical-scroll-proportion="0.0" vertical-offset="2733" max-vertical-offset="6735">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf />
   </component>
   <component name="FindManager">
     <FindUsagesManager>
@@ -1962,7 +1850,11 @@
       <created>1390790301126</created>
       <updated>1390790301126</updated>
     </task>
-    <option name="localTasksCounter" value="91" />
+    <task id="LOCAL-00091" summary="Editing recipe after remote selection (but no login) works correctly">
+      <created>1390796213532</created>
+      <updated>1390796213533</updated>
+    </task>
+    <option name="localTasksCounter" value="92" />
     <servers />
   </component>
   <component name="TodoView" selected-index="4">
@@ -1987,7 +1879,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="4" y="22" width="1420" height="812" extended-state="0" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32775453" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.74755925" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
@@ -2000,7 +1892,7 @@
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32775453" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32775453" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.26760563" sideWeight="0.55944055" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.26760563" sideWeight="0.55944055" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32775453" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -2022,7 +1914,6 @@
     <option name="myTodoPanelSettings">
       <TodoPanelSettings />
     </option>
-    <MESSAGE value="Browser now handles deletion of feeds" />
     <MESSAGE value="Sites purging feeds" />
     <MESSAGE value="Sites purging feeds&#10;" />
     <MESSAGE value="Finalizing site screening" />
@@ -2047,7 +1938,8 @@
     <MESSAGE value="Much work on logins, both locally and remotely" />
     <MESSAGE value="Remote authorization handled in injector&#10;" />
     <MESSAGE value="Committing redirect files" />
-    <option name="LAST_COMMIT_MESSAGE" value="Committing redirect files" />
+    <MESSAGE value="Editing recipe after remote selection (but no login) works correctly" />
+    <option name="LAST_COMMIT_MESSAGE" value="Editing recipe after remote selection (but no login) works correctly" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -2484,24 +2376,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/views/recipes/_form_edit_injector.html.erb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="22" column="18" selection-start="645" selection-end="645" vertical-scroll-proportion="-11.25" vertical-offset="60" max-vertical-offset="765">
-          <folding>
-            <marker date="1389757434000" expanded="true" signature="141:314" placeholder="..." />
-            <marker date="1389757434000" expanded="true" signature="338:1000" placeholder="..." />
-            <marker date="1389757434000" expanded="true" signature="373:630" placeholder="..." />
-            <marker date="1389757434000" expanded="true" signature="482:617" placeholder="..." />
-            <marker date="1389757434000" expanded="true" signature="514:604" placeholder="..." />
-            <marker date="1389757434000" expanded="true" signature="712:991" placeholder="..." />
-            <marker date="1389757434000" expanded="true" signature="794:978" placeholder="..." />
-            <marker date="1389757434000" expanded="true" signature="826:965" placeholder="..." />
-            <marker date="1389757434000" expanded="true" signature="1022:1343" placeholder="..." />
-            <marker date="1389757434000" expanded="true" signature="1058:1143" placeholder="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/helpers/taggable_helper.rb">
       <provider selected="true" editor-type-id="text-editor">
         <state line="7" column="64" selection-start="362" selection-end="399" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="810">
@@ -2516,16 +2390,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/controllers/recipes_controller.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="224" column="0" selection-start="10045" selection-end="10045" vertical-scroll-proportion="0.0" vertical-offset="3235" max-vertical-offset="5805">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/views/recipes/_form_edit_at_left.html.erb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="41" column="0" selection-start="2351" selection-end="2351" vertical-scroll-proportion="-1.2692307" vertical-offset="516" max-vertical-offset="1200">
+        <state line="36" column="73" selection-start="2090" selection-end="2090" vertical-scroll-proportion="0.08080808" vertical-offset="516" max-vertical-offset="1200">
           <folding>
             <element signature="n#style#0;n#img#0;n#div#0;n#div#0;n#div#0;n#div#1;n#div#0;n#form#0;n#div#0;n#div#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#div#0;n#div#1;n#div#0;n#div#0;n#div#1;n#div#0;n#form#0;n#div#0;n#div#0;n#!!top" expanded="true" />
@@ -2541,6 +2408,20 @@
     <entry file="file://$PROJECT_DIR$/app/views/recipes/edit.html.erb">
       <provider selected="true" editor-type-id="text-editor">
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="388">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/controllers/recipes_controller.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="224" column="0" selection-start="10045" selection-end="10045" vertical-scroll-proportion="0.33333334" vertical-offset="3235" max-vertical-offset="5805">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/recipes/_form_edit_injector.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="22" column="18" selection-start="645" selection-end="645" vertical-scroll-proportion="0.6976744" vertical-offset="60" max-vertical-offset="765">
           <folding />
         </state>
       </provider>
