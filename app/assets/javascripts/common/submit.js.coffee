@@ -14,7 +14,7 @@ jQuery ->
 
 # Handle submission links
 RP.submit.bind = (dlog) ->
-	dlog ||= window.document
+	dlog ||= $('body') # window.document
 	$(dlog).on("ajax:beforeSend", '.submit', RP.submit.beforeSend )
 	$(dlog).on("ajax:success", '.submit', RP.submit.success )
 	$(dlog).on("ajax:error", '.submit', RP.submit.error )

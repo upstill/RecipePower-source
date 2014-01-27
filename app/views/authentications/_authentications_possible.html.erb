@@ -1,13 +1,6 @@
+<% prompt ||= "You can sign in using one of these fine services:" %>
 <div class="auth_poss <%= response_service.area_class %>" style="overflow: visible">
   <h4><%= prompt.html_safe %></strong></h4>
-<!--
-  <%# if current_user %>
-      <strong class="prompt"><%# @authentications.empty? ? "Click on a service you'd like" : "Add another service" %>
-        to sign in with:</strong><br>
-  <%# else %>
-      <h4>You can sign in with one of these services:</h4>
-  <%# end %>
--->
   <div class="row">
     <div class="col-md-2 auth"><%= auth_possible "Facebook" %></div>
     <div class="col-md-2 auth"><%= auth_possible "Google", :svc_lower => "google_oauth2" %></div>

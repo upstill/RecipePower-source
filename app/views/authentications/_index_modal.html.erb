@@ -1,0 +1,4 @@
+<%= modal_dialog :edit_authentications, "Sign-in Services", response_service.modal_options(requires: %w{submit}) do %>
+  <%= render "authentications/index_content" %>
+  <%= dialog_cancel_button "Done" %></div>
+<% end %>
