@@ -141,7 +141,7 @@ class ResponseServices
       if df[:format] == @request.format.symbol
         # We can handle this request directly because its format agrees with the current request
         clear_pending_request # Clear the pending request
-        assert_query df[:fullpath], :target => ('injector' if injector?)
+        df[:fullpath]
       elsif df[:format] == :html
         clear_pending_request
         assert_query "/redirect/go", to: df[:fullpath]
@@ -198,7 +198,8 @@ class ResponseServices
   def pending_request
     if dr = @session[:deferred_request]
       dr = YAML::load dr
-      dr[:fullpath] = URI::encode dr[:fullpath]
+      # Ensure that the target of the deferred request agrees with that of the present request
+      dr[:fullpath] = assert_query URI::encode( dr[:fullpath]), :target => ('injector' if injector?)
       dr[:format] = dr[:format].to_sym
       dr
     end
