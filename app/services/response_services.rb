@@ -29,13 +29,25 @@ class ResponseServices
     @format = "dialog" if (params[:how] == "modal")
   end
 
-  # Change the response parameters to accommodate late-breaking information, e.g. the
-  # parameters that come in via omniauth
-  def amend params={}
-    @target = params[:target] if params[:target] unless @session[:mobile]
+  # Provide a URL that reproduces the current request
+  def originator
+    @request.url
+  end
+
+  def omniauth_pending clear = false
+    @session.delete(:omniauth) if clear
+    @session[:omniauth] && @session[:omniauth][:provider]
+  end
+
+  # Change the response parameters to accommodate another URL, e.g. one that came in via omniauth
+  def amend origin_url
+    origin_url.sub! /^"?([^"]*)"?/, '\\1'  # Remove any enclosing quotes
+    query_str = (match = origin_url.match /^[^?]*\?(.*)/ ) ? match[1] : ""
+    query_params = query_str.empty? ? {} : Hash[ CGI.parse(query_str).map { |elmt| [elmt.first.to_sym, elmt.last.first] } ]
+    @target = query_params[:target] if query_params[:target] unless @session[:mobile]
     # Format refers to how to present the content: within a dialog, or on a page
-    @format = params[:format] if params[:format]
-    @format = "dialog" if params[:how] && (params[:how] == "modal")
+    @format = query_params[:format] if query_params[:format]
+    @format = "dialog" if query_params[:how] && (query_params[:how] == "modal")
   end
   
   def is_dialog
@@ -148,6 +160,17 @@ class ResponseServices
       end
     end
     request
+  end
+
+  # Take a url and return a version of that url that's good for a redirect, given
+  #  that the redirect will have the format and method of the current request. The
+  #  options are used to assert a specific format, possibly different from the current one
+  def url_for_redirect url, options={}
+    if (!options[:format]) || (options[:format].to_sym == @request.format.symbol)  # They already match
+      url
+    else
+      assert_query "/redirect/go", to: url
+    end
   end
 
   # Save the current request pending (presumably) a login, such that deferred_request and deferred_trigger

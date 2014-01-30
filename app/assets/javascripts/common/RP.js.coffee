@@ -150,6 +150,14 @@ RP.get_page = (url) ->
 		$('body').trigger('load')
 		window.history.replaceState { an: "object" }, 'Collection', url
 
+# Parse a url to either replace a dialog or reload the page
+RP.get_and_go = (data) ->
+	url = decodeURIComponent data.url
+	if url.match /how=modal/
+		RP.dialog.get_and_go null, data.url
+	else
+		window.location = data.url # RP.get_page data.url
+
 # Handle successful return of a JSON request by running whatever success function
 #   obtains, and stashing any resulting code away for invocation after closing the
 #   dialog, if any.

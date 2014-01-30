@@ -1,5 +1,7 @@
-<%= render partial: 'current' %>
-<%= render partial: 'possible' %>
+<%= flash_notifications_div %>
+<%= render 'current' %>
+<% prompt = (@authentications.empty? ? "Click on a" : "Click another")+" service to link it to your account" %>
+<%= render 'authentications/possible', prompt: prompt, origin: authentications_path %>
 <hr style="margin:13px;">
 <div class="prompt" >
   Click to <%= link_to_modal "change password", edit_user_registration_path %>

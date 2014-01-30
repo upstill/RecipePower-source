@@ -17,6 +17,7 @@
 #= require jquery_ujs
 
 #= require authentication
+#= require messaging
 
 # require_directory ./controllers
 # require bm

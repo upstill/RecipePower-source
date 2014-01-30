@@ -181,7 +181,7 @@ class ApplicationController < ActionController::Base
   def smartrender(renderopts={})
     response_service.action = renderopts[:action] || params[:action]
     url = renderopts[:url] || request.original_url
-    flash.now[:notice] = params[:notice] unless flash[:notice] # ...should a flash message come in via params
+    # flash.now[:notice] = params[:notice] unless flash[:notice] # ...should a flash message come in via params
     # @_area = params[:_area]
     # @_layout = params[:_layout]
     # @_partial = !params[:_partial].blank?
@@ -329,6 +329,15 @@ class ApplicationController < ActionController::Base
     redirect_to( response_service.deferred_request || default, *args)
   end
 
+  def build_resource(*args)
+    super
+    if omniauth = session[:omniauth]
+      @user.apply_omniauth(omniauth)
+      @user.authentications.build(omniauth.slice('provider','uid'))
+      @user.valid?
+    end
+  end
+
   protect_from_forgery
 
   def stored_location_for(resource_or_scope)
@@ -344,7 +353,7 @@ class ApplicationController < ActionController::Base
         notification.accept
       end
       # If on the site, login triggers a refresh of the collection
-      response_service.deferred_request || collection_path
+      response_service.deferred_request || response_service.url_for_redirect(collection_path, :format => :html)
 =begin
       if response_service.injector? # params[:_area] == "at_top" # Signing in from remote site => respond directly
         logger.debug "stored_location_for: Getting stored location..."

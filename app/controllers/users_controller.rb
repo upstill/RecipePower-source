@@ -72,14 +72,6 @@ class UsersController < ApplicationController
   def new
     @user = User.new
     @Title = "Create RecipePower Account"
-    respond_to do |format|
-      format.html { redirect_to home_path }
-      format.json {
-        render( 
-          json: { dlog: with_format("html") { render_to_string partial: "registrations/new_modal", layout: false } }
-        )
-      }
-    end
   end
   
   # DELETE /users/1

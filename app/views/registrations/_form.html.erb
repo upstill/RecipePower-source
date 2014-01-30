@@ -21,13 +21,13 @@
         <%# devise_error_messages! %>
         <%= form_errors_helper f, resource %>
         <div class="row">
-          <div class="col-md-6">
-            <%= f.input :username, label: "Username (Handle)", placeholder: "CoolBeans" %>
-            <%= f.input :email, label: "Email", placeholder: 'user@domain.com' %>
+          <div class="col-md-8">
+            <%# f.input :username, label: "Username (Handle)", placeholder: "CoolBeans" %>
+            <%= f.input :email, label: nil, placeholder: 'user@domain.com' %>
           </div>
-          <div class="col-md-6">
-            <%= f.input :fullname, label: "Full Name", placeholder: "Joe Cool" %>
-            <%= f.input :password %>
+          <div class="col-md-3">
+            <%# f.input :fullname, label: "Full Name", placeholder: "Joe Cool" %>
+            <%# f.input :password %>
             <%= f.submit "Sign me up!", class: "btn btn-success" %>
           </div>
         </div>

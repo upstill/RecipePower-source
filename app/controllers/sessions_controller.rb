@@ -16,7 +16,6 @@ class SessionsController < Devise::SessionsController
       end
       clean_up_passwords(resource)
       resource.remember_me = 1
-      flash[:notice] = params[:notice]
       smartrender :action => :new
     end
   end

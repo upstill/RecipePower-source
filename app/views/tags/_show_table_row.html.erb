@@ -22,7 +22,7 @@
 		<%= summarize_tag_synonyms "" %>
 	</td><td>
 		<% @tag.referents.each do |ref| %>
-      <%= link_to ref.name, referent_path(ref) %><%= ", " unless ref == @tag.referents.last %>
+      <%= link_to_modal ref.name, referent_path(ref) %><%= ", " unless ref == @tag.referents.last %>
 		<% end %>
 	</td>
 	<% if permitted_to? :edit, @tag %>

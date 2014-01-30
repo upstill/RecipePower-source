@@ -1,3 +1,11 @@
-<%= render 'authentications/authentications_possible' %>
-<div class="prompt">...Or go the full signup route:</div>
+<% if response_service.omniauth_pending %>
+    <div class="prompt">
+      You're now set up for <%= response_service.omniauth_pending %>. Just approve your details and you're good to go.
+      <%= link_to_modal( "Forget #{response_service.omniauth_pending}", new_user_registration_path(clear_omniauth: true), class: "btn btn-default") if response_service.omniauth_pending %>
+    </div>
+<% else %>
+    <%= render 'authentications/possible', intention: 'signup' %>
+    <hr>
+    <div class="prompt">...Or just give us an email address:</div>
+<% end %>
 <%= render "registrations/form" %>

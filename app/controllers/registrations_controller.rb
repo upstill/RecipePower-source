@@ -57,6 +57,7 @@ class RegistrationsController < Devise::RegistrationsController
     end
 
     def new
+      response_service.omniauth_pending(params[:clear_omniauth])
       build_resource({})
       smartrender action: "new"
     end
@@ -97,7 +98,7 @@ class RegistrationsController < Devise::RegistrationsController
         @user.valid?
       end
     end
-    
+
     # The path used after sign up. You need to overwrite this method
     # in your own RegistrationsController.
     def after_sign_up_path_for(resource)

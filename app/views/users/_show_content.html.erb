@@ -1,0 +1,31 @@
+<% present @user do |user_presenter| %>
+    <div id="profile">
+      <table>
+        <tr>
+          <td class="user_left"><%= user_presenter.avatar %></td>
+          <td class="user_right"><h1><%= user_presenter.linked_name %></h1></td>
+        </tr><tr>
+        <td class="user_left">Username:</td>
+        <td class="user_right"><%= user_presenter.username %></td>
+      </tr><tr>
+        <td class="user_left">Full Name:</td>
+        <td class="user_right"><%= user_presenter.fullname %></td>
+      </tr><tr>
+        <td class="user_left">Member Since:</td>
+        <td class="user_right"><%= user_presenter.member_since %></td>
+      </tr><tr>
+        <!--
+		      <td>Website URL:</td>
+		      <td><%# user_presenter.website %></td>
+		      <td>Twitter Name:</td>
+		      <td><%# user_presenter.twitter %></td>
+	-->
+        <td class="user_left">About:</td>
+        <td class="user_right"><%= user_presenter.about %></td>
+      </tr><tr>
+        <td class="user_left">Interests:</td>
+        <td class="user_right"><%= user_presenter.tags %></td>
+      </tr>
+      </table>
+    </div>
+<% end %>
