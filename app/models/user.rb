@@ -9,15 +9,6 @@ class User < ActiveRecord::Base
          :lockable # , :omniauthable
   after_invitation_accepted :initialize_friends
   before_save :serialize_browser
-  
-  validates_each :username do |record, attr, value|
-    if record.username.blank? && record.fullname.blank?
-      record.errors.add :base, "Sorry, but we need to call you SOMETHING. Could you provide a username or a full name, pretty-please?"
-      nil
-    else
-      true
-    end
-  end
 
   # Setup accessible (or protected) attributes for your model
   attr_accessible :id, :username, :fullname, :about, :login, :private, :skip_invitation,
@@ -260,21 +251,25 @@ public
         uiname = mapping[attrname] || attrname.to_s
         write_attribute(attrname, oi[uiname]) if read_attribute(attrname).blank? unless oi[uiname].blank?
       end
-
-      if username.blank?
-        # Synthesize a unique username from the email address or fullname
-        n = 0
-        startname = handle if (startname = email.sub(/@.*/, '')).blank?
-        self.username = startname
-        until (User.where(username: username).empty?) do
-          n += 1
-          self.username = startname+n.to_s
-        end
-      end
-      # Provide a random password if none exists already
-      self.password = (0...8).map { (65 + rand(26)).chr }.join if password.blank?
-      self.fullname = "#{first_name} #{last_name}" if fullname.blank? && !(first_name.blank? || last_name.blank?)
+      extend_fields
     end
+  end
+
+  # Fill in blank fields from existing ones
+  def extend_fields
+    if username.blank?
+      # Synthesize a unique username from the email address or fullname
+      n = 0
+      startname = handle if (startname = email.sub(/@.*/, '')).blank?
+      self.username = startname
+      until (User.where(username: username).empty?) do
+        n += 1
+        self.username = startname+n.to_s
+      end
+    end
+    # Provide a random password if none exists already
+    self.password = (0...8).map { (65 + rand(26)).chr }.join if password.blank?
+    self.fullname = "#{first_name} #{last_name}" if fullname.blank? && !(first_name.blank? || last_name.blank?)
   end
 
   def password_required?

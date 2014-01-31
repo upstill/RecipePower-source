@@ -91,7 +91,7 @@ class UsersController < ApplicationController
   end
   
   def not_found
-    redirect_to root_path, :notice => "User not found"
+    redirect_to root_path, :notice => "User not found", method: "get"
   end
 
   # With devise handling user creation, the only way we get here is from the 'identify' page.
@@ -148,6 +148,15 @@ class UsersController < ApplicationController
   end
 
   def update
+=begin
+    account_update_params = devise_parameter_sanitizer.sanitize(:account_update)
+    # required for settings form to submit when password is left blank
+    if account_update_params[:password].blank?
+      account_update_params.delete("password")
+      account_update_params.delete("password_confirmation")
+    end
+=end
+
     @user = User.find params[:id]
     if @user.update_attributes(params[:user])
       @user.refresh_browser # Assuming, perhaps incorrectly, that the browser contents have changed

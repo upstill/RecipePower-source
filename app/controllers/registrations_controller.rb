@@ -24,8 +24,8 @@ class RegistrationsController < Devise::RegistrationsController
               redirect_to users_identify_url, :notice => "Sorry, we don't have any records of an '#{params[:user][:email]}'."
           end
       else
-        # if request.format == "application/json"
           build_resource params[:user]
+          resource.extend_fields
           if resource.save
             if resource.active_for_authentication?
               # set_flash_message :notice, :signed_up if is_navigational_format?
@@ -49,9 +49,6 @@ class RegistrationsController < Devise::RegistrationsController
               }
             end
           end
-        # else
-          # super
-        # end
         session[:omniauth] = nil unless @user.new_record?
       end
     end
@@ -66,9 +63,16 @@ class RegistrationsController < Devise::RegistrationsController
     # We need to use a copy of the resource because we don't want to change
     # the current user in place.
     def update
+      account_update_params = devise_parameter_sanitizer.sanitize(:account_update)
+      # required for settings form to submit when password is left blank
+      if account_update_params[:password].blank?
+        account_update_params.delete("password")
+        account_update_params.delete("password_confirmation")
+      end
+
       self.resource = resource_class.to_adapter.get!(send(:"current_#{resource_name}").to_key)
       prev_unconfirmed_email = resource.unconfirmed_email if resource.respond_to?(:unconfirmed_email)
-      if resource.update_with_password(resource_params)
+      if resource.update_attributes(account_update_params) # resource.update_with_password(resource_params)
         if is_navigational_format?
           flash_key = update_needs_confirmation?(resource, prev_unconfirmed_email) ?
             :update_needs_confirmation : :updated
@@ -77,14 +81,12 @@ class RegistrationsController < Devise::RegistrationsController
         sign_in resource_name, resource, :bypass => true
         respond_with(resource) do |format|
           format.html { redirect_to after_update_path_for(resource) }
-          format.json { render :json => { done: true } }
+          format.json { render :json => { done: true, popup: view_context.flash_popup } }
         end
       else
         clean_up_passwords resource
         @user = resource
-        # dialog_boilerplate "edit", "floating"
         smartrender :action => "edit", area: "floating"
-        # respond_with resource
       end
     end
 

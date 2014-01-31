@@ -57,13 +57,23 @@ class AuthenticationsController < ApplicationController
     if originator = env['omniauth.params']['originator']  # Remove any enclosing quotes
       originator.sub! /^"?([^"]*)"?/, '\\1'
     end
+    # Check for existing authorization
+    @authentication = Authentication.find_by_provider_and_uid(omniauth['provider'], omniauth['uid'])
     if current_user
-      # Just adding an authentication method to the current user. We return to the authentications dialog
-      current_user.apply_omniauth(omniauth)
-      @authentication = current_user.authentications.create!(authparams) # Link to existing user
-      flash[:notice] = "Yay! You're now connected to RecipePower through #{@authentication.provider_name}."
+      if @authentication # Authentication already in use
+        if @authentication.user == current_user
+          flash[:notice] = "You're already connected through #{@authentication.provider_name}!"
+        else
+          flash[:notice] = "Sorry, your current #{@authentication.provider_name} login is tied to another RecipePower user."
+        end
+      else
+        # Add the authentication method to the current user. We return to the authentications dialog
+        current_user.apply_omniauth(omniauth)
+        @authentication = current_user.authentications.create!(authparams) # Link to existing user
+        flash[:notice] = "Yay! You're now connected to RecipePower through #{@authentication.provider_name}."
+      end
       url_to = origin_url
-    elsif @authentication = Authentication.find_by_provider_and_uid(omniauth['provider'], omniauth['uid'])
+    elsif @authentication
       flash[:notice] = "Yay! Signed in with #{@authentication.provider_name}. Welcome back, #{@authentication.user.handle}!"
       sign_in @authentication.user, :event => :authentication
       url_to = after_sign_in_path_for(@authentication.user)

@@ -80,4 +80,13 @@ module FlashHelper
       flash_one type, message, for_bootstrap
     }.join.html_safe
   end
+
+  # Return the current flash text, suitable for popping up
+  def flash_popup
+    msg = flash.collect  { |type, message|
+      flash.delete type
+      message
+    }.join.html_safe
+    msg
+  end
 end
