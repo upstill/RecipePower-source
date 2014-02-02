@@ -489,8 +489,23 @@ module ApplicationHelper
   def assert_popup popup_request, url
     popup_request ||= session[:popup]
     return url if popup_request.blank?
+    fragment = CGI::escape("#dialog:popup/#{popup_request}")
     uri = URI(url)
-    uri.fragment = CGI::escape "dialog:popup/#{popup_request}"
+    if uri.path == "/redirect/go"
+      # The fragment needs to be inserted into the target of the redirect, inside quotes for precedent's sake
+      q = uri.query
+      q.split('&').each { |param|
+        key, value = param.split '='
+        if key == 'to'
+          unquoted = value.sub /^"?([^"]*)"?/, '\\1'  # Remove any enclosing quotes
+          # uri.query = q.sub value, %Q{"#{unquoted+fragment}"}
+          url = assert_query uri.to_s, to: %Q{"#{unquoted+fragment}"}
+          return url
+        end
+      }
+    else
+      uri.fragment = fragment
+    end
     session[:popup] = popup_request
     uri.to_s
   end

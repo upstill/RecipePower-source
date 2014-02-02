@@ -54,6 +54,7 @@ class AuthenticationsController < ApplicationController
     if origin_url = env['omniauth.origin']  # Remove any enclosing quotes
       origin_url.sub! /^"?([^"]*)"?/, '\\1'
     end
+    # Originator is where we came from, so we can go back there if login fails
     if originator = env['omniauth.params']['originator']  # Remove any enclosing quotes
       originator.sub! /^"?([^"]*)"?/, '\\1'
     end
@@ -76,6 +77,7 @@ class AuthenticationsController < ApplicationController
     elsif @authentication
       flash[:notice] = "Yay! Signed in with #{@authentication.provider_name}. Welcome back, #{@authentication.user.handle}!"
       sign_in @authentication.user, :event => :authentication
+      response_service.amend originator
       url_to = after_sign_in_path_for(@authentication.user)
     # This is a new authentication (not previously linked to a user) and there is
     # no current user to link it to. It's possible that the authentication will come with
@@ -85,6 +87,7 @@ class AuthenticationsController < ApplicationController
       @authentication = user.authentications.create!(authparams) # Link to existing user
       sign_in user, :event => :authentication
       flash[:notice] = "Yay! Signed in with #{@authentication.provider_name}. Nice to see you again, #{user.handle}!"
+      response_service.amend originator
       url_to = after_sign_in_path_for(user)
     elsif (intention = env['omniauth.params']['intention']) && (intention == 'signup')
       # In the context of a signup dialog: just create the account, getting what we can get out of the authorization info
@@ -101,7 +104,6 @@ class AuthenticationsController < ApplicationController
         # If user can't be saved, go back to edit params
         url_to = response_service.decorate_path(new_user_registration_url)
       end
-      # session[:omniauth] = env['omniauth.auth']
     elsif token = deferred_invitation
       user = User.find_by_invitation_token token
       # If we have an invitation out for this user we go ahead and log them in

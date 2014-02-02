@@ -105,6 +105,16 @@ def page_piclist(url)
   }.compact
 end
 
+# Inverse of CGI.parse: take a hash of key/array-of-value pairs and produce a query string
+# NB: THIS ESCAPES EVERYTHING, SO THIS IS NOT A STRICT INVERSE, I.E., IT IS LIKELY TO PRODUCE A DIFFERENT QUERY STRING
+def build_query(params)
+  params.map do |name,values|
+    values.map do |value|
+      "#{CGI.escape name}=#{CGI.escape value}"
+    end
+  end.flatten.join("&")
+end
+
 # Ensure that a hash of query parameters makes it into the given url
 def assert_query url, newparams={}
   return url if newparams.empty?
