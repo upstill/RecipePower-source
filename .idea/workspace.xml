@@ -1,237 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="11143819-dbfd-4599-8209-07d96301a1c5" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/db/migrate/20140130043207_add_names_to_users.rb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/expressions/_edit_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/feeds/_edit_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/references/_edit_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/referents/_edit_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/registrations/_edit_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/tags/_edit_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/users/_edit_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/expressions/_edit_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/feeds/_edit_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/references/_edit_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/referents/_edit_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/registrations/_edit_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/sites/_edit_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/tags/_edit_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/users/_edit_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/sessions/_form.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/users/_form.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/users/_form_password.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/authentications/_index_content.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/authentications/_index_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/authentications/_index_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/feeds/_new_form.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/recipes/_new_form.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/registrations/_new_injector.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/sessions/_new_injector.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/expressions/_new_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/feeds/_new_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/recipes/_new_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/references/_new_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/referents/_new_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/registrations/_new_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/sessions/_new_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/sites/_new_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/tags/_new_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/expressions/_new_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/feeds/_new_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/recipes/_new_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/references/_new_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/referents/_new_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/registrations/_new_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/sessions/_new_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/sites/_new_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/tags/_new_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/registrations/_options.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/recipes/_show.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/references/_show.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/referents/_show.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/tags/_show.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/users/_show_content.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/sites/_show_feeds.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/expressions/_show_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/feeds/_show_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/recipes/_show_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/references/_show_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/referents/_show_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/sites/_show_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/tags/_show_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/users/_show_modal.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/users/_show_page.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/expressions/_show_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/feeds/_show_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/recipes/_show_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/references/_show_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/referents/_show_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/sites/_show_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/tags/_show_page.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/sites/_show_site.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/referents/_show_table_row.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/pages/_signup.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/tags/absorb.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/lib/tasks/coffee.rake" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/authentications/destroy.js.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/application/edit.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/redirect/go.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/spec/views/redirect/go.html.erb_spec.rb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/redirect/go.js.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/application/index.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/assets/javascripts/messaging.js.coffee" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/application/new.html.erb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/assets/stylesheets/redirect.css.scss" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/assets/javascripts/redirect.js.coffee" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/controllers/redirect_controller.rb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/spec/controllers/redirect_controller_spec.rb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/decorators/redirect_decorator.rb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/spec/decorators/redirect_decorator_spec.rb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/helpers/redirect_helper.rb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/spec/helpers/redirect_helper_spec.rb" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/views/application/show.html.erb" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/authentications/_signin_injector.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/authentications/index.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/devise/sessions/new.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/expressions/edit.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/expressions/new.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/feeds/_dialog_edit.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/feeds/_dialog_new.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/feeds/_page_edit.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/feeds/_page_new.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/feeds/edit.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/feeds/new.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/recipes/_dialog_new.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/recipes/_form_new.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/recipes/new.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/recipes/show.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/references/edit.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/references/new.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/references/show.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/referents/edit.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/referents/new.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/referents/show.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/sessions/_signin_dialog.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/shared/_authentications_possible.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/shared/_authentications_possible_injector.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/shared/_authentications_sidebar.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/shared/_authentications_signin_injector.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/shared/_authentications_signup_or_signin.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/shared/_signup_at_right.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/shared/_signup_dialog.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/shared/_slug_authentications.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/shared/_slug_signin_injector.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/sites/new.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/sites/show.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/tags/edit.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/tags/new.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/tags/show.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/users/_dialog_edit_account.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/users/_dialog_edit_profile.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/users/_form_profile.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/users/_page_edit_account.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/users/_page_edit_profile.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/users/edit.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/users/new.html.erb" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/views/users/show.html.erb" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/app/assets/javascripts/RPfields.js.coffee" afterPath="$PROJECT_DIR$/app/assets/javascripts/common/RPfields.js.coffee" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/app/views/expressions/show.html.erb" afterPath="$PROJECT_DIR$/app/views/expressions/_show.erb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/app/views/feeds/_feed.html.erb" afterPath="$PROJECT_DIR$/app/views/feeds/_show_table_row.html.erb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/app/views/feeds/_form.html.erb" afterPath="$PROJECT_DIR$/app/views/feeds/_edit_form.html.erb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/app/views/feeds/show.html.erb" afterPath="$PROJECT_DIR$/app/views/feeds/_show.html.erb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/app/views/references/_reference.html.erb" afterPath="$PROJECT_DIR$/app/views/references/_show_table_row.html.erb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/app/views/sites/_site.html.erb" afterPath="$PROJECT_DIR$/app/views/sites/_show_table_row.html.erb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/app/views/sites/edit.html.erb" afterPath="$PROJECT_DIR$/app/views/sites/_edit_modal.html.erb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/app/views/tags/_tag.html.erb" afterPath="$PROJECT_DIR$/app/views/tags/_show_table_row.html.erb" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/app/views/users/_user.html.erb" afterPath="$PROJECT_DIR$/app/views/users/_show_table_row.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/.rakeTasks" afterPath="$PROJECT_DIR$/.idea/.rakeTasks" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Gemfile.lock" afterPath="$PROJECT_DIR$/Gemfile.lock" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Gemfile" afterPath="$PROJECT_DIR$/Gemfile" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/RP.iml" afterPath="$PROJECT_DIR$/.idea/RP.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/javascripts/common/RP.js.coffee" afterPath="$PROJECT_DIR$/app/assets/javascripts/common/RP.js.coffee" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/tags/_alltags.html.erb" afterPath="$PROJECT_DIR$/app/views/tags/_alltags.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/authentications/_current.html.erb" afterPath="$PROJECT_DIR$/app/views/authentications/_current.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/recipes/_edit_template.html.erb" afterPath="$PROJECT_DIR$/app/views/recipes/_edit_template.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/referents/_expression_fields.html.erb" afterPath="$PROJECT_DIR$/app/views/referents/_expression_fields.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/expressions/_form.html.erb" afterPath="$PROJECT_DIR$/app/views/expressions/_form.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/references/_form.html.erb" afterPath="$PROJECT_DIR$/app/views/references/_form.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/referents/_form.html.erb" afterPath="$PROJECT_DIR$/app/views/referents/_form.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/registrations/_form.html.erb" afterPath="$PROJECT_DIR$/app/views/registrations/_form.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/sites/_form.html.erb" afterPath="$PROJECT_DIR$/app/views/sites/_form.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/tags/_form.html.erb" afterPath="$PROJECT_DIR$/app/views/tags/_form.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/recipes/_form_edit_at_left.html.erb" afterPath="$PROJECT_DIR$/app/views/recipes/_form_edit_at_left.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/pages/_home_application.html.erb" afterPath="$PROJECT_DIR$/app/views/pages/_home_application.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/layouts/_navbar.html.erb" afterPath="$PROJECT_DIR$/app/views/layouts/_navbar.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/devise/passwords/_new_password_at_top.html.erb" afterPath="$PROJECT_DIR$/app/views/devise/passwords/_new_password_at_top.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/devise/passwords/_new_password_injector.html.erb" afterPath="$PROJECT_DIR$/app/views/devise/passwords/_new_password_injector.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/alerts/_popup.html.erb" afterPath="$PROJECT_DIR$/app/views/alerts/_popup.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/authentications/_possible.html.erb" afterPath="$PROJECT_DIR$/app/views/authentications/_possible.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/stylesheets/application.css.scss" afterPath="$PROJECT_DIR$/app/assets/stylesheets/application.css.scss" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/layouts/application.html.erb" afterPath="$PROJECT_DIR$/app/views/layouts/application.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/javascripts/application.js.coffee" afterPath="$PROJECT_DIR$/app/assets/javascripts/application.js.coffee" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/application_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/application_controller.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/helpers/application_helper.rb" afterPath="$PROJECT_DIR$/app/helpers/application_helper.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/stylesheets/views/authentication.css.scss" afterPath="$PROJECT_DIR$/app/assets/stylesheets/views/authentication.css.scss" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/javascripts/authentication.js.coffee.erb" afterPath="$PROJECT_DIR$/app/assets/javascripts/authentication.js.coffee.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/authentications_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/authentications_controller.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/helpers/authentications_helper.rb" afterPath="$PROJECT_DIR$/app/helpers/authentications_helper.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/stylesheets/bootstrap_and_overrides.css.scss" afterPath="$PROJECT_DIR$/app/assets/stylesheets/bootstrap_and_overrides.css.scss" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/authentications/callback.html.erb" afterPath="$PROJECT_DIR$/app/views/authentications/callback.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/recipes/capture.js.erb" afterPath="$PROJECT_DIR$/app/views/recipes/capture.js.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/controller_authentication.rb" afterPath="$PROJECT_DIR$/lib/controller_authentication.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/config/locales/devise.en.yml" afterPath="$PROJECT_DIR$/config/locales/devise.en.yml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/javascripts/common/dialog.js.coffee" afterPath="$PROJECT_DIR$/app/assets/javascripts/common/dialog.js.coffee" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/helpers/dialogs_helper.rb" afterPath="$PROJECT_DIR$/app/helpers/dialogs_helper.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/devise/invitations/edit.html.erb" afterPath="$PROJECT_DIR$/app/views/devise/invitations/edit.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/registrations/edit.html.erb" afterPath="$PROJECT_DIR$/app/views/registrations/edit.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/javascripts/views/edit_referent.js.coffee" afterPath="$PROJECT_DIR$/app/assets/javascripts/views/edit_referent.js.coffee" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/config/locales/en.yml" afterPath="$PROJECT_DIR$/config/locales/en.yml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/models/expression.rb" afterPath="$PROJECT_DIR$/app/models/expression.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/expressions_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/expressions_controller.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/feeds_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/feeds_controller.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/helpers/feeds_helper.rb" afterPath="$PROJECT_DIR$/app/helpers/feeds_helper.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/helpers/flash_helper.rb" afterPath="$PROJECT_DIR$/app/helpers/flash_helper.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/collection/index.html.erb" afterPath="$PROJECT_DIR$/app/views/collection/index.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/expressions/index.html.erb" afterPath="$PROJECT_DIR$/app/views/expressions/index.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/feeds/index.html.erb" afterPath="$PROJECT_DIR$/app/views/feeds/index.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/referents/index.html.erb" afterPath="$PROJECT_DIR$/app/views/referents/index.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/tags/index.html.erb" afterPath="$PROJECT_DIR$/app/views/tags/index.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/stylesheets/injector.css.scss" afterPath="$PROJECT_DIR$/app/assets/stylesheets/injector.css.scss" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/javascripts/injector.js" afterPath="$PROJECT_DIR$/app/assets/javascripts/injector.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/invitations_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/invitations_controller.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/authentications/new.html.erb" afterPath="$PROJECT_DIR$/app/views/authentications/new.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/registrations/new.html.erb" afterPath="$PROJECT_DIR$/app/views/registrations/new.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/sessions/new.html.erb" afterPath="$PROJECT_DIR$/app/views/sessions/new.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/feeds/new.js.erb" afterPath="$PROJECT_DIR$/app/views/feeds/new.js.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/config/initializers/omniauth.rb" afterPath="$PROJECT_DIR$/config/initializers/omniauth.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/passwords_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/passwords_controller.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/recipes_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/recipes_controller.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/helpers/recipes_helper.rb" afterPath="$PROJECT_DIR$/app/helpers/recipes_helper.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/references_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/references_controller.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/referents_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/referents_controller.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/helpers/referents_helper.rb" afterPath="$PROJECT_DIR$/app/helpers/referents_helper.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/registrations_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/registrations_controller.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/services/response_services.rb" afterPath="$PROJECT_DIR$/app/services/response_services.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/config/routes.rb" afterPath="$PROJECT_DIR$/config/routes.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/db/schema.rb" afterPath="$PROJECT_DIR$/db/schema.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/helpers/seeker_helper.rb" afterPath="$PROJECT_DIR$/app/helpers/seeker_helper.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/sessions_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/sessions_controller.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/stylesheets/views/sign_in.css.scss" afterPath="$PROJECT_DIR$/app/assets/stylesheets/views/sign_in.css.scss" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/sites_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/sites_controller.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/helpers/sites_helper.rb" afterPath="$PROJECT_DIR$/app/helpers/sites_helper.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/javascripts/common/submit.js.coffee" afterPath="$PROJECT_DIR$/app/assets/javascripts/common/submit.js.coffee" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/helpers/taggable_helper.rb" afterPath="$PROJECT_DIR$/app/helpers/taggable_helper.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/javascripts/concerns/tagger.js.coffee" afterPath="$PROJECT_DIR$/app/assets/javascripts/concerns/tagger.js.coffee" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/tags_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/tags_controller.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/helpers/tags_helper.rb" afterPath="$PROJECT_DIR$/app/helpers/tags_helper.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/helpers/triggers_helper.rb" afterPath="$PROJECT_DIR$/app/helpers/triggers_helper.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/uri_utils.rb" afterPath="$PROJECT_DIR$/lib/uri_utils.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/models/user.rb" afterPath="$PROJECT_DIR$/app/models/user.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/users_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/users_controller.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-    </list>
+    <list default="true" id="11143819-dbfd-4599-8209-07d96301a1c5" name="Default" comment="" />
     <list id="21d2ff77-1c8c-4a30-94eb-9a678f6d7e6f" name="New changelist" comment="" />
     <ignored path="RP.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -243,7 +13,7 @@
   </component>
   <component name="ChangesViewManager" flattened_view="true" show_ignored="false" />
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/RP@Development__RP.coverage" NAME="Development: RP Coverage Results" MODIFIED="1391373973528" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="rcov" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" MODULE_NAME="RP" />
+    <SUITE FILE_PATH="coverage/RP@Development__RP.coverage" NAME="Development: RP Coverage Results" MODIFIED="1391461877943" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="rcov" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" MODULE_NAME="RP" />
     <SUITE FILE_PATH="coverage/RP@Rails_console__RP.coverage" NAME="Rails console: RP Coverage Results" MODIFIED="1388270311888" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="rcov" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" MODULE_NAME="RP" />
   </component>
   <component name="CreatePatchCommitExecutor">
@@ -261,7 +31,7 @@
       <file leaf-file-name="invitations_controller.rb" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/controllers/invitations_controller.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="28" column="0" selection-start="858" selection-end="858" vertical-scroll-proportion="0.0" vertical-offset="288" max-vertical-offset="4050">
+            <state line="26" column="0" selection-start="775" selection-end="775" vertical-scroll-proportion="0.0" vertical-offset="258" max-vertical-offset="4050">
               <folding />
             </state>
           </provider>
@@ -276,10 +46,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="application_helper.rb" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="application_helper.rb" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/helpers/application_helper.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="497" column="0" selection-start="18805" selection-end="18805" vertical-scroll-proportion="0.0" vertical-offset="7323" max-vertical-offset="8670">
+            <state line="497" column="0" selection-start="18805" selection-end="18805" vertical-scroll-proportion="0.3316583" vertical-offset="7323" max-vertical-offset="8670">
               <folding />
             </state>
           </provider>
@@ -303,15 +73,6 @@
         <entry file="file://$PROJECT_DIR$/app/views/authentications/new.html.erb">
           <provider selected="true" editor-type-id="text-editor">
             <state line="11" column="0" selection-start="539" selection-end="539" vertical-scroll-proportion="-6.875" vertical-offset="0" max-vertical-offset="255">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="controller_authentication.rb" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/lib/controller_authentication.rb">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="34" column="0" selection-start="1109" selection-end="1109" vertical-scroll-proportion="0.7580645" vertical-offset="181" max-vertical-offset="615">
               <folding />
             </state>
           </provider>
@@ -1929,7 +1690,7 @@
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32775453" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.74755925" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32357043" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32357043" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.38772663" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
@@ -2136,16 +1897,6 @@
           <option name="timeStamp" value="662" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="ruby-line">
-          <url>file://$PROJECT_DIR$/app/helpers/application_helper.rb</url>
-          <line>493</line>
-          <option name="timeStamp" value="665" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="ruby-line">
-          <url>file://$PROJECT_DIR$/app/helpers/application_helper.rb</url>
-          <line>497</line>
-          <option name="timeStamp" value="666" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="ruby-line">
           <url>file://$PROJECT_DIR$/app/controllers/invitations_controller.rb</url>
           <line>26</line>
           <option name="timeStamp" value="677" />
@@ -2232,7 +1983,9 @@
     </entry>
     <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/devise-3.1.1/app/controllers/devise_controller.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="169" column="0" selection-start="5127" selection-end="5127" vertical-scroll-proportion="0.7113402" vertical-offset="2259" max-vertical-offset="2670" />
+        <state line="169" column="0" selection-start="5127" selection-end="5127" vertical-scroll-proportion="0.7113402" vertical-offset="2259" max-vertical-offset="2670">
+          <folding />
+        </state>
       </provider>
     </entry>
     <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/devise-3.1.1/lib/devise/models/database_authenticatable.rb">
@@ -2281,12 +2034,16 @@
     </entry>
     <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/actionpack-4.0.1/lib/action_controller/metal/implicit_render.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="5" column="0" selection-start="140" selection-end="140" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="375" />
+        <state line="5" column="0" selection-start="140" selection-end="140" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="375">
+          <folding />
+        </state>
       </provider>
     </entry>
     <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/activesupport-4.0.1/lib/active_support/callbacks.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="494" column="0" selection-start="16592" selection-end="16592" vertical-scroll-proportion="0.0" vertical-offset="7281" max-vertical-offset="8700" />
+        <state line="494" column="0" selection-start="16592" selection-end="16592" vertical-scroll-proportion="0.0" vertical-offset="7281" max-vertical-offset="8700">
+          <folding />
+        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/controllers/registrations_controller.rb">
@@ -2305,7 +2062,9 @@
     </entry>
     <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/actionpack-4.0.1/lib/action_controller/metal/rescue.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="30" column="0" selection-start="1023" selection-end="1023" vertical-scroll-proportion="0.0" vertical-offset="227" max-vertical-offset="615" />
+        <state line="30" column="0" selection-start="1023" selection-end="1023" vertical-scroll-proportion="0.0" vertical-offset="227" max-vertical-offset="615">
+          <folding />
+        </state>
       </provider>
     </entry>
     <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/activerecord-4.0.1/lib/active_record/associations/builder/association.rb">
@@ -2320,7 +2079,9 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/uri_utils.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="108" column="73" selection-start="3794" selection-end="3794" vertical-scroll-proportion="0.32846716" vertical-offset="1485" max-vertical-offset="2205" />
+        <state line="108" column="73" selection-start="3794" selection-end="3794" vertical-scroll-proportion="0.32846716" vertical-offset="1485" max-vertical-offset="2205">
+          <folding />
+        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/assets/stylesheets/injector.css.scss">
@@ -2386,23 +2147,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/helpers/application_helper.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="497" column="0" selection-start="18805" selection-end="18805" vertical-scroll-proportion="0.0" vertical-offset="7323" max-vertical-offset="8670">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/models/user.rb">
       <provider selected="true" editor-type-id="text-editor">
         <state line="271" column="0" selection-start="9480" selection-end="9480" vertical-scroll-proportion="0.0" vertical-offset="3716" max-vertical-offset="7275">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/controllers/invitations_controller.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="28" column="0" selection-start="858" selection-end="858" vertical-scroll-proportion="0.0" vertical-offset="288" max-vertical-offset="4050">
           <folding />
         </state>
       </provider>
@@ -2419,13 +2166,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/views/authentications/new.html.erb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="11" column="0" selection-start="539" selection-end="539" vertical-scroll-proportion="-6.875" vertical-offset="0" max-vertical-offset="255">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/controllers/application_controller.rb">
       <provider selected="true" editor-type-id="text-editor">
         <state line="327" column="6" selection-start="11760" selection-end="11760" vertical-scroll-proportion="0.0" vertical-offset="4765" max-vertical-offset="6870">
@@ -2435,7 +2175,28 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/controller_authentication.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="34" column="0" selection-start="1109" selection-end="1109" vertical-scroll-proportion="0.7580645" vertical-offset="181" max-vertical-offset="615">
+        <state line="34" column="0" selection-start="1109" selection-end="1109" vertical-scroll-proportion="1.0" vertical-offset="122" max-vertical-offset="615">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/authentications/new.html.erb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="11" column="0" selection-start="539" selection-end="539" vertical-scroll-proportion="-6.875" vertical-offset="0" max-vertical-offset="255">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/controllers/invitations_controller.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="26" column="0" selection-start="775" selection-end="775" vertical-scroll-proportion="0.0" vertical-offset="258" max-vertical-offset="4050">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/helpers/application_helper.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="497" column="0" selection-start="18805" selection-end="18805" vertical-scroll-proportion="0.3316583" vertical-offset="7323" max-vertical-offset="8670">
           <folding />
         </state>
       </provider>
