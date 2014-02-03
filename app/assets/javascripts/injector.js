@@ -27,6 +27,7 @@
 
 window.RP = window.RP || {}
 
+// MESSAGE RESPONDER
 // Called to replace the form's image with the given URL in response to a message from the owning window
 function replaceImg(data) {
     var url = data.url && data.url[0];
@@ -37,6 +38,11 @@ function replaceImg(data) {
     }
 }
 
+// MESSAGE RESPONDER to take a URL and replace either the page or the current dialog
+function get_and_go(data) {
+    RP.get_and_go(data); // window.location = data.url;
+}
+
 // Function for cracking param string
 function ptq(q) {
 	/* parse the message */
@@ -44,29 +50,26 @@ function ptq(q) {
 	var x = q.replace(/;/g, '&').split('&'), i, name, t;
 	/* q changes from string version of query to object */
 	for (q={}, i=0; i<x.length; i++) {
-		t = x[i].split('=', 2);
-		name = unescape(t[0]);
+		namevalue = x[i].split('=', 2);
+		name = unescape(namevalue[0]);
+/*
 		if (!q[name])
 			q[name] = [];
-		if (t.length > 1) {
-			q[name][q[name].length] = unescape(t[1]);
+*/
+		if (namevalue.length > 1) {
+            q[name] = unescape(namevalue[1]); // q[name][q[name].length] = unescape(namevalue[1]);
 		} else
 		/* next two lines are nonstandard */
-			q[name][q[name].length] = true;
+            q[name] = true; // q[name][q[name].length] = true;
 	}
 	return q;
 }
 
-function get_and_go(data) {
-    window.location = data.url;
-}
-
 function process_message(evt) {
-    var data = ptq(evt.data);
-    var call = data.call;
-    if (call && (typeof window[call] === 'function')) {
-        window[call](data);
-    }
+  var data = ptq(evt.data);
+  var call = data.call;
+  if (call && (typeof (fcn = window[call]) === 'function'))
+    fcn(data);
 }
 
 function launch_interaction(sourcehome) {

@@ -2,7 +2,6 @@
 <%# prompt << link_to_redirect("Sign up!", hash_to_modal( new_user_registration_url, home_url )) %>
 <% prompt << link_to_modal("Sign up!", new_registration_path(@user, target: "injector")) %>
 <%= injector_dialog :sign_in, prompt.html_safe, :noflash => true, dismiss_button: false do %>
-    <hr>
     <%= render 'authentications/possible', prompt: "You can sign in with one of these fine services:" %>
     <div class="or"><h4>OR</h4></div>
     <%= render "sessions/form" %>

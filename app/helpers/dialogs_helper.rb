@@ -21,10 +21,10 @@ module DialogsHelper
       content_tag( :div,
         pic + content_tag(:div, hdr_text, class: "injector-header-content").html_safe,
         class: "injector-header").html_safe
-        
+
     content <<
       content_tag( :div,
-        alert.html_safe+body_content.html_safe,
+        ("<hr>"+alert).html_safe+body_content.html_safe,
         class: "injector-body").html_safe
         
     if dismiss_label
