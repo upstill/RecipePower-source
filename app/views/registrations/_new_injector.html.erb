@@ -3,9 +3,7 @@
 <% prompt << link_to_modal("Sign in!", new_user_session_path(@user, target: "injector")) %>
 <%= injector_dialog :new_registration, prompt.html_safe, :noflash => true, dismiss_button: false do %>
     <hr>
-    <div style="width: 200px; padding-left: 10px;">
-      <%= render 'authentications/authentications_possible', prompt: "You can create an account using one of these fine services:" %>
-    </div>
+    <%= render 'authentications/possible', prompt: "You can click one of these to sign up...&nbsp;&nbsp", intention: "signup" %>
     <div class="or"><h4>OR</h4></div>
     <%= render "registrations/form" %>
 <% end %>

@@ -60,7 +60,31 @@ class AuthenticationsController < ApplicationController
     end
     # Check for existing authorization
     @authentication = Authentication.find_by_provider_and_uid(omniauth['provider'], omniauth['uid'])
-    if current_user
+    (info = omniauth['info']) && (email = info['email']) && (user = User.find_by_email(email))
+    intention = env['omniauth.params']['intention'] # If intention is 'signup', don't accept existing authentications
+    if intention == "signup"
+      if @authentication || user # This authentication method already in use
+        flash[:notice] = "That #{@authentication.provider_name} login is already used on RecipePower. Perhaps you just need to sign in?"
+        response_service.amend originator
+        url_to = originator
+      else  # No user and no authentication: perfect
+        # Just create the account, getting what we can get out of the authorization info
+        (user = User.new).apply_omniauth(omniauth)
+        response_service.amend originator
+        if user.save
+          @authentication = user.authentications.create!(authparams) # Link authorization to user
+          sign_in user, :event => :authentication
+          flash[:notice] =
+              %Q{Welcome to RecipePower, #{user.polite_name}! You can always connect with #{@authentication.provider_name}, but you can also login with your
+                email address (#{user.email} or username (#{user.username}). Change any of this by editing your Profile. }
+          url_to = after_sign_in_path_for(user)
+        else
+          # If user can't be saved, go back to edit params
+          url_to = response_service.decorate_path(new_user_registration_url)
+        end
+      end
+      # Intention is not signing up
+    elsif current_user
       if @authentication # Authentication already in use
         if @authentication.user == current_user
           flash[:notice] = "You're already connected through #{@authentication.provider_name}!"
@@ -82,28 +106,13 @@ class AuthenticationsController < ApplicationController
     # This is a new authentication (not previously linked to a user) and there is
     # no current user to link it to. It's possible that the authentication will come with
     # an email address which we can use to log the user in.
-    elsif (info = omniauth['info']) && (email = info['email']) && (user = User.find_by_email(email))
+    elsif user
       user.apply_omniauth(omniauth)
       @authentication = user.authentications.create!(authparams) # Link to existing user
       sign_in user, :event => :authentication
       flash[:notice] = "Yay! Signed in with #{@authentication.provider_name}. Nice to see you again, #{user.handle}!"
       response_service.amend originator
       url_to = after_sign_in_path_for(user)
-    elsif (intention = env['omniauth.params']['intention']) && (intention == 'signup')
-      # In the context of a signup dialog: just create the account, getting what we can get out of the authorization info
-      (user = User.new).apply_omniauth(omniauth)
-      response_service.amend originator
-      if user.save
-        @authentication = user.authentications.create!(authparams) # Link authorization to user
-        sign_in user, :event => :authentication
-        flash[:notice] =
-            %Q{Welcome to RecipePower, #{user.polite_name}! You can always connect with #{@authentication.provider_name}, but you can also login with your
-              email address (#{user.email} or username (#{user.username}). Change any of this by editing your Profile. }
-        url_to = after_sign_in_path_for(user)
-      else
-        # If user can't be saved, go back to edit params
-        url_to = response_service.decorate_path(new_user_registration_url)
-      end
     elsif token = deferred_invitation
       user = User.find_by_invitation_token token
       # If we have an invitation out for this user we go ahead and log them in

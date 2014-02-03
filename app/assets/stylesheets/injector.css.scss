@@ -40,7 +40,7 @@ div.dialog.at_top {
     .auth_poss {
       float: left; // display: inline-block;
       font:16px arial,sans-serif;
-      width:auto;
+      width:370px; // auto;
       margin:0.5em .1em ;
       // border-right:1px solid black;
       .auth_provider {
@@ -61,27 +61,27 @@ div.dialog.at_top {
         }
       }
     }
+  .or {
+    width: 30px;
+    height: 80px;
+    border-right: solid 1px #CCCCCC;
+    border-left: solid 1px #CCCCCC;
+    margin: 0px;
+    margin-right: 10px;
+    margin-top: 10px;
+    padding: 0px 10px;
+    padding-top: 40px;
+    font-size:18px;
+    float: left; // display: inline-block; vertical-align: top;
+  }
   &.new_registration {
-    width:560px;
+    width:840px;
     font:12px arial,sans-serif;
     font-weight:bold;
     height:auto;
     form {
       float: left; // display: inline-block; vertical-align: top;
-      width: 250px;
-    }
-    .or {
-      width: 30px;
-      height: 180px;
-      border-right: solid 1px #CCCCCC;
-      border-left: solid 1px #CCCCCC;
-      margin: 0px;
-      margin-right: 10px;
-      margin-top: 10px;
-      padding: 0px 10px;
-      padding-top: 40px;
-      font-size:18px;
-      float: left; // display: inline-block; vertical-align: top;
+      width: 330px;
     }
     .signin {
       margin:0px 5px;
@@ -124,7 +124,7 @@ div.dialog.at_top {
     }
   }
   &.sign_in {
-    width:820px;
+    width:840px;
     font:12px arial,sans-serif;
     font-weight:bold;
     height:auto;
@@ -178,7 +178,7 @@ div.dialog.at_top {
       margin:0px;
       padding:7px 7px 0px;
       display: block;
-      font:16px arial,sans-serif;
+      font:14px arial,sans-serif;
       width:auto;
       vertical-align: top;
     }

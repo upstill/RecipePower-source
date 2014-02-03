@@ -2,7 +2,7 @@
 <% origin ||= nil %>
 <% intention ||= nil # Set to 'signup' if creating a new account %>
 <div class="auth_poss <%= response_service.area_class %>" style="overflow: visible">
-  <h4><%= prompt.html_safe %></strong></h4>
+  <h4><%= prompt.html_safe %></strong></h4><br>
   <div class="row">
     <%= auth_possible "Facebook", origin, intention %>
     <%= auth_possible "Google", origin, intention, :svc_lower => "google_oauth2" %>
