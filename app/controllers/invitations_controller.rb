@@ -31,6 +31,7 @@ class InvitationsController < Devise::InvitationsController
       # Invitation link was followed => issue the 'responded' event
       if params[:invitation_token] && 
         (self.resource = resource_class.find_by_invitation_token(params[:invitation_token], false))
+        resource.extend_fields # Default values for name, etc.
         # RpEvent.post :invitation_responded, resource, nil, resource_class.find(resource.invited_by_id)
       end
       session[:notification_token] = params[:notification_token] if params[:notification_token]   

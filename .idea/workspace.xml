@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="11143819-dbfd-4599-8209-07d96301a1c5" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/javascripts/common/RP.js.coffee" afterPath="$PROJECT_DIR$/app/assets/javascripts/common/RP.js.coffee" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/registrations/_new_injector.html.erb" afterPath="$PROJECT_DIR$/app/views/registrations/_new_injector.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/views/sessions/_new_injector.html.erb" afterPath="$PROJECT_DIR$/app/views/sessions/_new_injector.html.erb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/helpers/dialogs_helper.rb" afterPath="$PROJECT_DIR$/app/helpers/dialogs_helper.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/assets/javascripts/injector.js" afterPath="$PROJECT_DIR$/app/assets/javascripts/injector.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/controllers/invitations_controller.rb" afterPath="$PROJECT_DIR$/app/controllers/invitations_controller.rb" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <list id="21d2ff77-1c8c-4a30-94eb-9a678f6d7e6f" name="New changelist" comment="" />
@@ -35,75 +31,37 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="callback.html.erb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/views/authentications/callback.html.erb">
+      <file leaf-file-name="invitations_controller.rb" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/controllers/invitations_controller.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="6" column="44" selection-start="258" selection-end="258" vertical-scroll-proportion="-3.75" vertical-offset="0" max-vertical-offset="285">
+            <state line="28" column="0" selection-start="858" selection-end="858" vertical-scroll-proportion="0.3316583" vertical-offset="288" max-vertical-offset="4050">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="RP.js.coffee" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/assets/javascripts/common/RP.js.coffee">
+      <file leaf-file-name="user.rb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/models/user.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="155" column="0" selection-start="5212" selection-end="5212" vertical-scroll-proportion="-7.076923" vertical-offset="2141" max-vertical-offset="4785">
+            <state line="271" column="0" selection-start="9480" selection-end="9480" vertical-scroll-proportion="0.0" vertical-offset="3716" max-vertical-offset="7275">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="_new_injector.html.erb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/views/sessions/_new_injector.html.erb">
+      <file leaf-file-name="application_helper.rb" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/helpers/application_helper.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="8" column="128" selection-start="552" selection-end="552" vertical-scroll-proportion="-5.0" vertical-offset="0" max-vertical-offset="210">
+            <state line="497" column="0" selection-start="18805" selection-end="18805" vertical-scroll-proportion="0.0" vertical-offset="7323" max-vertical-offset="8670">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="_new_injector.html.erb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/views/registrations/_new_injector.html.erb">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="3" column="11" selection-start="253" selection-end="253" vertical-scroll-proportion="-1.875" vertical-offset="0" max-vertical-offset="195">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="injector.js" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/assets/javascripts/injector.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="71" column="4" selection-start="2398" selection-end="2398" vertical-scroll-proportion="-6.0185184" vertical-offset="740" max-vertical-offset="3420">
-              <folding>
-                <element signature="n#!!doc" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="redirect_controller.rb" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="redirect_controller.rb" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/controllers/redirect_controller.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="7" column="0" selection-start="318" selection-end="318" vertical-scroll-proportion="0.27061856" vertical-offset="0" max-vertical-offset="388">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="messaging.js.coffee" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/assets/javascripts/messaging.js.coffee">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="21" column="15" selection-start="565" selection-end="565" vertical-scroll-proportion="0.0" vertical-offset="84" max-vertical-offset="570">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="dialogs_helper.rb" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/helpers/dialogs_helper.rb">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="24" column="0" selection-start="813" selection-end="813" vertical-scroll-proportion="0.0" vertical-offset="120" max-vertical-offset="2325">
+            <state line="7" column="0" selection-start="318" selection-end="318" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="255">
               <folding />
             </state>
           </provider>
@@ -127,7 +85,6 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/app/views/users/_edit_modal.html.erb" />
         <option value="$PROJECT_DIR$/app/views/users/_show_content.html.erb" />
         <option value="$PROJECT_DIR$/app/views/users/_show_page.erb" />
         <option value="$PROJECT_DIR$/app/views/users/_show_modal.html.erb" />
@@ -178,6 +135,7 @@
         <option value="$PROJECT_DIR$/app/assets/javascripts/injector.js" />
         <option value="$PROJECT_DIR$/app/assets/javascripts/common/RP.js.coffee" />
         <option value="$PROJECT_DIR$/app/views/sessions/_new_injector.html.erb" />
+        <option value="$PROJECT_DIR$/app/controllers/invitations_controller.rb" />
       </list>
     </option>
   </component>
@@ -1756,7 +1714,11 @@
       <created>1391395333602</created>
       <updated>1391395333602</updated>
     </task>
-    <option name="localTasksCounter" value="96" />
+    <task id="LOCAL-00096" summary="Correct parsing and handling of messages in injector from authentication">
+      <created>1391423125353</created>
+      <updated>1391423125353</updated>
+    </task>
+    <option name="localTasksCounter" value="97" />
     <servers />
   </component>
   <component name="TodoView" selected-index="4">
@@ -1781,13 +1743,13 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="6" y="22" width="1420" height="812" extended-state="0" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32775453" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.74755925" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32357043" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.38772663" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.38772663" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.27552447" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
@@ -1816,7 +1778,6 @@
     <option name="myTodoPanelSettings">
       <TodoPanelSettings />
     </option>
-    <MESSAGE value="Feeds now manually updateable; eliminated get_content module; RP.submit sensibly organized" />
     <MESSAGE value="previewImg now returns false to prevent click propagation from closing the dialog" />
     <MESSAGE value="Adding recipe doesn't cause a JS crash preventing editing" />
     <MESSAGE value="Enable selection of all Finder targets in site dialog" />
@@ -1841,7 +1802,8 @@
     <MESSAGE value="User resource management now working correctly" />
     <MESSAGE value="User resource management now working correctly&#10;" />
     <MESSAGE value="Fixing authentications in injector" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixing authentications in injector" />
+    <MESSAGE value="Correct parsing and handling of messages in injector from authentication" />
+    <option name="LAST_COMMIT_MESSAGE" value="Correct parsing and handling of messages in injector from authentication" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1889,7 +1851,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="ruby-line">
           <url>file://$PROJECT_DIR$/app/controllers/invitations_controller.rb</url>
-          <line>256</line>
+          <line>257</line>
           <option name="timeStamp" value="437" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="ruby-line">
@@ -2012,6 +1974,11 @@
           <line>497</line>
           <option name="timeStamp" value="666" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="ruby-line">
+          <url>file://$PROJECT_DIR$/app/controllers/invitations_controller.rb</url>
+          <line>26</line>
+          <option name="timeStamp" value="677" />
+        </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/app/assets/javascripts/common/RP.js.coffee</url>
           <line>98</line>
@@ -2031,25 +1998,13 @@
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="677" />
+      <option name="time" value="678" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/app/views/pages/_home_application.html.erb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="14" column="11" selection-start="851" selection-end="851" vertical-scroll-proportion="-7.125" vertical-offset="9" max-vertical-offset="615" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/views/pages/home.html.erb">
       <provider selected="true" editor-type-id="text-editor">
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="388" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/models/user.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="271" column="0" selection-start="9480" selection-end="9480" vertical-scroll-proportion="-4.769231" vertical-offset="3941" max-vertical-offset="7275">
-          <folding />
-        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/views/authentications/_current.html.erb">
@@ -2210,13 +2165,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/helpers/application_helper.rb">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="497" column="0" selection-start="18805" selection-end="18805" vertical-scroll-proportion="0.0" vertical-offset="7339" max-vertical-offset="8670">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/.rvm/gems/ruby-1.9.3-p286/gems/activerecord-4.0.1/lib/active_record/associations/builder/association.rb">
       <provider selected="true" editor-type-id="text-editor">
         <state line="69" column="0" selection-start="1553" selection-end="1553" vertical-scroll-proportion="0.0" vertical-offset="906" max-vertical-offset="1710">
@@ -2307,7 +2255,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/helpers/dialogs_helper.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="24" column="0" selection-start="813" selection-end="813" vertical-scroll-proportion="0.0" vertical-offset="120" max-vertical-offset="2325">
+        <state line="24" column="0" selection-start="813" selection-end="813" vertical-scroll-proportion="0.60301507" vertical-offset="120" max-vertical-offset="2325">
           <folding />
         </state>
       </provider>
@@ -2335,7 +2283,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/assets/javascripts/messaging.js.coffee">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="21" column="15" selection-start="565" selection-end="565" vertical-scroll-proportion="0.0" vertical-offset="75" max-vertical-offset="570">
+        <state line="21" column="15" selection-start="565" selection-end="565" vertical-scroll-proportion="0.5620438" vertical-offset="84" max-vertical-offset="570">
           <folding />
         </state>
       </provider>
@@ -2363,9 +2311,30 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/app/helpers/application_helper.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="497" column="0" selection-start="18805" selection-end="18805" vertical-scroll-proportion="0.0" vertical-offset="7339" max-vertical-offset="8670">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/app/controllers/redirect_controller.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="0" selection-start="318" selection-end="318" vertical-scroll-proportion="0.27061856" vertical-offset="0" max-vertical-offset="388">
+        <state line="7" column="0" selection-start="318" selection-end="318" vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="255">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/models/user.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="271" column="0" selection-start="9480" selection-end="9480" vertical-scroll-proportion="0.0" vertical-offset="3716" max-vertical-offset="7275">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/controllers/invitations_controller.rb">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="28" column="0" selection-start="858" selection-end="858" vertical-scroll-proportion="0.3316583" vertical-offset="288" max-vertical-offset="4050">
           <folding />
         </state>
       </provider>
