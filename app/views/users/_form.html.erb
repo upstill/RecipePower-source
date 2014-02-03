@@ -1,0 +1,45 @@
+<%= simple_form_for @user, html: { class: "edit_user json", 'data-type' => :json } do |f| %>
+    <%# modal_body do %>
+    <%= form_errors_helper f %>
+    <div class="row">
+      <div class="col-md-12">
+        <%= f.input :username, label: "Username (Handle)", autofocus: true %>
+      </div>
+    </div>
+    <div class=""row">
+        <div class="col-md-6">
+          <%= f.input :first_name, input_html: { cols: 125, rows: 1 } %>
+        </div>
+        <div class="col-md-6">
+          <%= f.input :last_name, input_html: { cols: 125, rows: 1 } %>
+        </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <%= f.input :fullname, label: "Full Name (if different)", input_html: { cols: 125, rows: 1 } %>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <%= f.input :about, label: "About Me", placeholder: "Who Are You? What Do You Eat?", input_html: { cols: 125, rows: 4 } %>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <%= taggable_div f, "control-group", "Interests (tags that apply to you)" %>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <%= f.input :email, input_html: { cols: 125, rows: 1 } %>
+      </div>
+    </div>
+    <%= f.input :private, :as => :boolean, :label => false, :inline_label => "Cloak of Invisibility (i.e., not listed as possible Friend)" %>
+    <% if permitted_to? :manage, @user %>
+        <%= f.input :role_id, label: "Role", collection: @user.role_select %>
+    <% end %>
+    <%= form_actions f, submit_label: "Update Details", cancel_path: users_path do
+        link_to_modal( "Change Password", edit_user_registration_path, class: "btn btn-default")+
+        link_to_modal( "Sign-in Services", authentications_path, class: "btn btn-default")
+    end %>
+<% end %>

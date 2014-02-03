@@ -1,0 +1,6 @@
+<%= modal_dialog :edit_referent, "Edit #{summarize_ref_name(@referent, true)}" do %>
+    <%= render 'form' %>
+    <%# if assoc = @referent.associate %>
+    | <%# link_to assoc.class.to_s+" "+assoc.name, "/#{assoc.class.to_s.downcase.pluralize}/#{assoc.id}/edit" %>
+    <%# end %>
+<% end %>

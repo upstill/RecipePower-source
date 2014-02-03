@@ -31,11 +31,11 @@ class InvitationsController < Devise::InvitationsController
       # Invitation link was followed => issue the 'responded' event
       if params[:invitation_token] && 
         (self.resource = resource_class.find_by_invitation_token(params[:invitation_token], false))
+        resource.extend_fields # Default values for name, etc.
         # RpEvent.post :invitation_responded, resource, nil, resource_class.find(resource.invited_by_id)
       end
       session[:notification_token] = params[:notification_token] if params[:notification_token]   
-      # dialog_boilerplate :edit, "page", redirect: home_path
-      smartrender area: "page", redirect: home_path
+      smartrender area: "page", redirect_to: home_path
     else
       set_flash_message(:alert, :invitation_token_invalid)
       redirect_to after_sign_out_path_for(resource_name)
@@ -86,7 +86,7 @@ class InvitationsController < Devise::InvitationsController
       begin
         pr = params[resource_name]
         pr[:email] = (invitee.kind_of?(User) ? invitee.email : invitee).downcase
-        pr[:skip_invitation] = true # Hold off on invitation so we can redirect to share, as nec.
+        pr[:skip_invitation] = true # Hold off on invitation so we can re-direct to share, as nec.
         @resource = self.resource = resource_class.invite!(pr, current_inviter)
         @resource.invitation_sent_at = Time.now.utc
         if for_sharing
@@ -187,7 +187,7 @@ class InvitationsController < Devise::InvitationsController
       end
     end
     if resource && resource.errors.empty? # Success!
-      set_flash_message :notice, :send_instructions, :email => self.resource.email
+      set_flash_message :notice, :send_instructions_html, :email => self.resource.email
       notice = "Yay! An invitation is winging its way to #{resource.email}"
       respond_with resource, :location => after_invite_path_for(resource) do |format|
         format.json { render json: { done: true, alert: notice }}

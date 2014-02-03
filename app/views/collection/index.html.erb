@@ -6,7 +6,9 @@
         <%= render "collection/relist" %>
     <% end %>
   </div>
-  <% if current_user %>
-      <%= recipe_edit_trigger if deferred_capture(false) %>
-  <% end %>
+  <%# if current_user %>
+      <%# recipe_edit_trigger if deferred_capture(false) %>
+  <%# end %>
+  <%# Introduce any deferred action (in case we're rendering as a partial %>
+  <%= trigger_pending_modal %>
 </div>

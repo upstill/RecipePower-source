@@ -9,15 +9,6 @@ class User < ActiveRecord::Base
          :lockable # , :omniauthable
   after_invitation_accepted :initialize_friends
   before_save :serialize_browser
-  
-  validates_each :username do |record, attr, value|
-    if record.username.blank? && record.fullname.blank?
-      record.errors.add :base, "Sorry, but we need to call you SOMETHING. Could you provide a username or a full name, pretty-please?"
-      nil
-    else
-      true
-    end
-  end
 
   # Setup accessible (or protected) attributes for your model
   attr_accessible :id, :username, :fullname, :about, :login, :private, :skip_invitation,
@@ -240,13 +231,45 @@ public
   
   has_many :authentications, :dependent => :destroy
   # Pass info from an authentication onto a user as needed
+  @@AuthenticationMappings = {
+      'facebook' => { :fullname => 'name' },
+      'google_oauth2' => { },
+      'twitter' => { },
+      'aol' => { },
+      'open_id' => { },
+      'yahoo' => { },
+  }
+
   def apply_omniauth(omniauth)
-    if ui = omniauth['info']
-      self.email = ui['email'] if email.blank? && !ui['email'].blank?
-      self.image = ui['image'] if image.blank? && !ui['image'].blank?
-      self.username = ui['nickname'] if username.blank? && !ui['nickname'].blank?
-      self.fullname = ui['name'] if fullname.blank? && !ui['name'].blank?
+    def get_attribute_from_omniauth(attrname, uiname=nil)
+      uiname ||= attrname.to_s
+      instance_variable_set(attrname, omniauth['info'][uiname]) if instance_variable_get(attrname).blank? unless omniauth['info'][uiname].blank?
     end
+    if oi = omniauth['info']
+      mapping = @@AuthenticationMappings[omniauth['provider']]
+      [:email, :image, :username, :fullname, :first_name, :last_name].each do |attrname|
+        uiname = mapping[attrname] || attrname.to_s
+        write_attribute(attrname, oi[uiname]) if read_attribute(attrname).blank? unless oi[uiname].blank?
+      end
+      extend_fields
+    end
+  end
+
+  # Fill in blank fields from existing ones
+  def extend_fields
+    if username.blank?
+      # Synthesize a unique username from the email address or fullname
+      n = 0
+      startname = handle if (startname = email.sub(/@.*/, '')).blank?
+      self.username = startname
+      until (User.where(username: username).empty?) do
+        n += 1
+        self.username = startname+n.to_s
+      end
+    end
+    # Provide a random password if none exists already
+    self.password = (0...8).map { (65 + rand(26)).chr }.join if password.blank?
+    self.fullname = "#{first_name} #{last_name}" if fullname.blank? && !(first_name.blank? || last_name.blank?)
   end
 
   def password_required?
@@ -325,15 +348,19 @@ public
   # -- fullname
   # -- email
   def handle
-    if username.blank?
-      fullname.blank? ? email : fullname
-    else 
-      username
-    end
+    @handle ||=
+      (username unless username.blank?) ||
+      (fullname unless fullname.blank?) ||
+      ("#{first_name} #{last_name}" unless (first_name.blank? && last_name.blank?)) ||
+      email.sub(/@.*/, '')
   end
   
   def polite_name
-    fullname.blank? ? (username.blank? ? email : username) : fullname
+    @polite_name ||=
+        (fullname unless fullname.blank?) ||
+        ("#{first_name} #{last_name}" unless (first_name.blank? && last_name.blank?)) ||
+        (username unless username.blank?) ||
+        email.sub(/@.*/, '')
   end
   
   # 'name' is just an alias for handle, for use by Channel referents

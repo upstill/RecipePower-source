@@ -1,0 +1,20 @@
+<div class="container">
+
+  <p>
+    <b>Sample page:</b>
+    <%= crack_sample %>
+  </p>
+
+  <% unless @site.description.blank? %>
+      <p>
+        <b>Description:</b>
+        <%= @site.description %>
+      </p>
+  <% end %>
+
+  <p>
+  <div class="container">
+    <%= show_tags [ "Author", "Channel" ] %>
+  </div>
+  </p>
+</div>

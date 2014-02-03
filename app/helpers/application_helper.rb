@@ -39,7 +39,7 @@ module ApplicationHelper
     fields = f.simple_fields_for(association, new_object, child_index: id) do |builder|
       render(association.to_s.singularize + "_fields", f: builder)
     end
-    link_to(name, '#', class: "add_fields", data: {id: id, fields: fields.gsub("\n", "")} )
+    link_to(name, '#', style: "display:none", class: "add_fields", data: {id: id, fields: fields.gsub("\n", "")} )
   end
   
   def recipe_popup( rcp )
@@ -283,6 +283,7 @@ module ApplicationHelper
 
     item_list += [
         "<hr>",
+        link_to_modal( "Add Cookmark", new_recipe_path ),
         link_to( "Admin", admin_path),
         link_to( "Refresh Masonry", "#", onclick: "RP.collection.justify();" ),
         link_to( "Address Bar Magic", "#", onclick: "RP.getgo('#{home_path}', 'http://local.recipepower.com:3000/bar.html##{bookmarklet_script}')" ),
@@ -342,9 +343,11 @@ module ApplicationHelper
   
   # If there are any tasks awaiting which need a login, set up the appropriate one.
   # Returning nil implies to preload the signup dialog
-  def login_setup 
-    if session[:on_tour]
-	    render(partial: "shared/signup_dialog")
+  def preloads
+    if current_user
+      render partial: 'recipes/edit_template', recipe: nil
+    elsif session[:on_tour]
+	    render partial: "registrations/new_modal"
     elsif it = session[:invitation_token]
       # load the invitation-acceptance dialog. If the user isn't on tour, set it to
       # trigger when the page is loaded
@@ -353,6 +356,7 @@ module ApplicationHelper
     elsif token = deferred_notification
 			@user = Notification.find_by_notification_token(token).target
 			link_to "", new_user_session_path(user: { id: @user.id, email: @user.email } ), class: "trigger" 
+=begin
     elsif data = deferred_collect(false)
       if data[:uid]
   			@user = User.find data[:uid]
@@ -361,7 +365,8 @@ module ApplicationHelper
   		  link_to "", new_user_path, class: "trigger" 
   		end
 	  else
-	    render "shared/signup_dialog"
+=end
+	    render partial: "registrations/new_modal"
 		end
 	end
   
@@ -484,8 +489,23 @@ module ApplicationHelper
   def assert_popup popup_request, url
     popup_request ||= session[:popup]
     return url if popup_request.blank?
+    fragment = CGI::escape("#dialog:popup/#{popup_request}")
     uri = URI(url)
-    uri.fragment = CGI::escape "dialog:popup/#{popup_request}"
+    if uri.path == "/redirect/go"
+      # The fragment needs to be inserted into the target of the redirect, inside quotes for precedent's sake
+      q = uri.query
+      q.split('&').each { |param|
+        key, value = param.split '='
+        if key == 'to'
+          unquoted = value.sub /^"?([^"]*)"?/, '\\1'  # Remove any enclosing quotes
+          # uri.query = q.sub value, %Q{"#{unquoted+fragment}"}
+          url = assert_query uri.to_s, to: %Q{"#{unquoted+fragment}"}
+          return url
+        end
+      }
+    else
+      uri.fragment = fragment
+    end
     session[:popup] = popup_request
     uri.to_s
   end
@@ -535,6 +555,18 @@ module ApplicationHelper
     options[:class] = "btn btn-default btn-xs submit"
     options.merge! remote: true
     link_to label, url, options
+  end
+
+  # Generic termination buttons for dialogs--or any other forms
+  def form_actions f, options = {}
+    cancel_path = options[:cancel_path] || collection_path
+    submit_label = options[:submit_label] || "Save"
+    content_tag :div,
+                ((block_given? ? yield : "") +
+                  f.submit(submit_label, class: "dialog-submit-button btn btn-success") +
+                  link_to("Cancel", cancel_path, class: "dialog-cancel-button btn btn-info")
+                ).html_safe,
+                class: "form-group actions"
   end
 
 end

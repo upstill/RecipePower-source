@@ -1,25 +1,25 @@
 <% if @authentications && !@authentications.empty? %>
-	<div class="auth_current <%# @_area %><%= response_service.area_class %>">
-    <div class="authentications">
-	  	<div class="prompt">You have authorized RecipePower to contact:</div>
-      <% for authentication in @authentications %>
-				<div class="authentication">
-					<%= image_tag "#{authentication.provider}_32.png", :size => "32x32" %>
-					<div class="provider"><%= authentication.provider_name %></div>
-					<div class="uid"><%= truncate authentication.uid.to_s, :length => 12 %></div>
-					<% if @auth_delete || true %>
-						<%= link_to_submit "X", authentication_url(authentication), 
-															:method => :delete, 
-															:"data-confirm-msg" => "Yes, disconnect from '"+authentication.provider_name+"'?",
-															:"data-wait-msg" => "Hang on while we check with "+authentication.provider_name,
-															:class => "remove" %>
-					<% end %>
-				</div>
+    <div class="auth_current <%# @_area %><%= response_service.area_class %>">
+      <div class="authentications">
+        <div class="prompt">You can log in to RecipePower using:</div>
+        <% for authentication in @authentications %>
+            <div class="authentication">
+              <%= image_tag "#{authentication.provider}_32.png", :size => "32x32" %>
+              <div class="provider"><%= authentication.provider_name %></div>
+              <div class="uid"><%= truncate authentication.uid.to_s, :length => 12 %></div>
+              <% if @auth_delete || true %>
+                  <%= link_to_submit "X", authentication_url(authentication),
+                                     :method => :delete,
+                                     :"data-confirm-msg" => "Yes, disconnect from '"+authentication.provider_name+"'?",
+                                     :"data-wait-msg" => "Hang on while we check with "+authentication.provider_name,
+                                     :class => "remove" %>
+              <% end %>
+            </div>
+        <% end %>
+      </div>
+      <% if @auth_delete %>
+          <p>*Click the 'X' to revoke the authorization.</p>
       <% end %>
-		</div>
-	  <% if @auth_delete %>
-	    <p>*Click the 'X' to revoke the authorization.</p>
-	  <% end %>
-	</div>
-	<hr style="margin:3px;">
+    </div>
+    <hr style="margin:3px;">
 <% end %>

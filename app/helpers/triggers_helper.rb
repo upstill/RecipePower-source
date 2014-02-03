@@ -58,18 +58,11 @@ module TriggersHelper
     button_to_submit label, url, options
   end
 
-  def defer_trigger str
-    if str
-      session[:trigger] = str
-    else
-      session.delete[:trigger]
-    end
-  end
-
-  def deferred_trigger forget=false
-    if str = session[:trigger]
-      session.delete(:trigger) if forget
-      str
+  # If there's a deferred request that can be expressed as a trigger, do so, by inserting a trigger link      .
+  # THIS INCLUDES DIALOG REQUESTS EMBEDDED IN THE URL
+  def trigger_pending_modal delete_after=true
+    if trigger = response_service.pending_modal_trigger
+      link_to_modal "", trigger, class: "trigger"
     end
   end
 

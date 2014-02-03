@@ -19,27 +19,20 @@ class ReferencesController < ApplicationController
   # GET /references/1.json
   def show
     @reference = Reference.find(params[:id])
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @reference }
-    end
+    smartrender
   end
 
   # GET /references/new
   # GET /references/new.json
   def new
     @reference = Reference.new
-
-    respond_to do |format|
-      format.html # new.html.erb
-      format.json { render json: @reference }
-    end
+    smartrender
   end
 
   # GET /references/1/edit
   def edit
     @reference = Reference.find(params[:id])
+    smartrender
   end
 
   # POST /references

@@ -105,12 +105,37 @@ def page_piclist(url)
   }.compact
 end
 
+# Inverse of CGI.parse: take a hash of key/array-of-value pairs and produce a query string
+# NB: THIS ESCAPES EVERYTHING, SO THIS IS NOT A STRICT INVERSE, I.E., IT IS LIKELY TO PRODUCE A DIFFERENT QUERY STRING
+def build_query(params)
+  params.map do |name,values|
+    values.map do |value|
+      "#{CGI.escape name}=#{CGI.escape value}"
+    end
+  end.flatten.join("&")
+end
+
 # Ensure that a hash of query parameters makes it into the given url
 def assert_query url, newparams={}
   return url if newparams.empty?
   uri = URI(url)
   qparams = uri.query.blank? ? { } : CGI::parse(uri.query)
-	newparams.each { |k, v| qparams[k.to_s] = [ v.to_s ] } # Assert the new params, poss. over the old
+	newparams.each { |k, v|
+    if v
+      qparams[k.to_s] = [ v.to_s ]
+    else
+      qparams.delete k.to_s
+    end
+  } # Assert the new params, poss. over the old
   uri.query = qparams.collect { |k, v| "#{k.to_s}=#{CGI::escape v[0]}" unless v.empty? }.compact.join('&')
   uri.to_s
+end
+
+# Generate a hashtag which triggers a modal dialog
+def hash_to_modal url, base_path=nil
+  base_path ||= "/collection"
+  uri = URI.parse(url)
+  index = url.index uri.path
+  relative_url = assert_query(url[index..-1], :how => :modal)
+  "#{base_path}#dialog:#{CGI::escape relative_url}"
 end

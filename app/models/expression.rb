@@ -28,7 +28,7 @@ class Expression < ActiveRecord::Base
         tg.typenum = ref.typenum if (tg.typenum != ref.typenum) && (tg.typenum == 0)
     end
     
-    attr_accessible :tag_id, :referent_id, :locale, :form, :tagname, :tag_token
+    attr_accessible :tag_id, :referent_id, :locale, :form, :tagname, :tag_token, :localename, :formname
     
     @@Attribs = [:tag_id, :referent_id, :form, :locale]
     
@@ -60,9 +60,13 @@ class Expression < ActiveRecord::Base
     def localename
         @@Locales.name self.locale
     end
+
+    def localename=(tt)
+      self.set_locale tt
+    end
     
     def set_locale tt
-        self.locale = @@Locales.num(tt)
+        self.locale = @@Locales.sym(tt)
     end
     
     def self.locales
@@ -107,7 +111,15 @@ class Expression < ActiveRecord::Base
     def formname
         @@Forms.name self.form
     end
-    
+
+    def formname=(f)
+      self.set_form f
+    end
+
+    def set_form tt
+      self.form = @@Forms.num(tt)
+    end
+
     # Return a list of name/type pairs, suitable for making a selection list
     def self.forms
         @@Forms.list

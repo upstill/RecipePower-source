@@ -8,16 +8,16 @@
 RP.authentication ||= {}
 
 popupCenter = (url, width, height, name, msg) ->
-	left = (screen.width/2)-(width/2)
-	top = (screen.height/2)-(height/2)
-	myWindow=window.open '',name,"menubar=no,toolbar=no,status=no,width="+width+",height="+height+",toolbar=no,left="+left+",top="+top
-	myWindow.document.body.innerHTML = RP.notifications.html msg
-	myWindow.focus()
-	myWindow.location = url
+    left = (screen.width / 2) - (width / 2)
+    top = (screen.height / 2) - (height / 2)
+    myWindow = window.open '', name, "menubar=no,toolbar=no,status=no,width=" + width + ",height=" + height + ",toolbar=no,left=" + left + ",top=" + top
+    myWindow.document.body.innerHTML = RP.notifications.html msg
+    myWindow.focus()
+    myWindow.location = url
 
 RP.authentication.connect = (e) ->
-	link = e.currentTarget
-	popupCenter $(link).attr("href"), $(link).attr("data-width"), $(link).attr("data-height"), "authPopup", $(link).attr("data-hold_msg")
-	e.stopPropagation()
-	e.preventDefault()
-	false
+    link = e.currentTarget
+    popupCenter $(link).attr("href"), $(link).attr("data-width"), $(link).attr("data-height"), "authPopup", $(link).attr("data-hold_msg")
+    e.stopPropagation()
+    e.preventDefault()
+    false

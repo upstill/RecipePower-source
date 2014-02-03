@@ -112,12 +112,6 @@ class ApplicationController < ActionController::Base
   
   # All controllers displaying the collection need to have it setup 
   def setup_collection klass="Content", options={}
-=begin
-    if popup = params[:popup]
-      session[:flash_popup] = popup
-      redirect_to collection_path
-    else
-=end
       @user ||= current_user_or_guest
       @browser ||= @user.browser params
       default_options = {}
@@ -145,13 +139,12 @@ class ApplicationController < ActionController::Base
       # In a json response we just re-render the collection list for replacement
       # If we need to replace the page, we send back a link to do it with
       if params[:redirect]
-        # page: with_format("html") { render_to_string :index },
         { redirect: assert_popup(nil, request.original_url) }
       else
         begin
           setup_seeker(klass, options.slice(:clear_tags, :scope), params)
         rescue Exception => e
-          # Response to a setup error is to reload the page
+          # Response to a setup error is to reload the collections page
           flash[:error] = e.to_s
           return { redirect: "/collection" }
         end
@@ -186,9 +179,9 @@ class ApplicationController < ActionController::Base
   
   # Generalized response for dialog for a particular area
   def smartrender(renderopts={})
-    action = renderopts[:action] || params[:action]
+    response_service.action = renderopts[:action] || params[:action]
     url = renderopts[:url] || request.original_url
-    flash.now[:notice] = params[:notice] unless flash[:notice] # ...should a flash message come in via params
+    # flash.now[:notice] = params[:notice] unless flash[:notice] # ...should a flash message come in via params
     # @_area = params[:_area]
     # @_layout = params[:_layout]
     # @_partial = !params[:_partial].blank?
@@ -196,29 +189,21 @@ class ApplicationController < ActionController::Base
     renderopts = response_service.render_params renderopts
     respond_to do |format|
       format.html do
-        if response_service.page? && # @_area == "page" # Not partial at all => whole page
-            renderopts[:redirect]
-          redirect_to renderopts[:redirect]
+        if response_service.page? && renderopts[:redirect_to]
+          redirect_to renderopts[:redirect_to]
         elsif response_service.dialog?
-          # Strip everything up to the path
-          uri = URI.parse(url)
-          index = url.index uri.path
-          relative_url = assert_query(url[index..-1], :how => :modal)
-          hashtag = "#dialog:#{CGI::escape relative_url}"
-          if current_user
-            redirect_to "/collection#{hashtag}"
-          else
-            redirect_to "/home?trigger_signup=true#{hashtag}"
-          end
+          # Run the request as a dialog within the collection page
+          redirect_to_modal url
         else
-          render action, renderopts
+          render response_service.action, renderopts
         end
       end
       format.json {
+        # Blithely assuming that we want a modal-dialog element if we're getting JSON
+        response_service.is_dialog
+        renderopts[:layout] = (@layout || false)
         hresult = with_format("html") do
-          # Blithely assuming that we want a modal-dialog element if we're getting JSON
-          renderopts[:layout] = (@layout || false)
-          render_to_string action, renderopts # May have special iframe layout
+          render_to_string response_service.action, renderopts # May have special iframe layout
         end
         renderopts[:json] = { code: hresult, area: response_service.area_class, how: "bootstrap" }
         render renderopts
@@ -263,7 +248,7 @@ class ApplicationController < ActionController::Base
   # alias_method :rescue_action_locally, :rescue_action_in_public  
   
   def setup_response_service
-    @response_service ||= ResponseServices.new params, session
+    @response_service ||= ResponseServices.new params, session, request
     # Mobile is sticky: it stays on for the session once the "mobile" area parameter appears
     @response_service.is_mobile if (params[:area] == "mobile")
     @response_service
@@ -278,47 +263,7 @@ class ApplicationController < ActionController::Base
       "orphantag_"+tagid.to_s
   end
       
-  include ControllerAuthentication
-  protect_from_forgery
-  
-  def stored_location_for(resource_or_scope)
-    # If user is logging in to complete some process, we return 
-    # the path to completing the capture/tagging process
-    scope = Devise::Mapping.find_scope!(resource_or_scope)
-    redir = 
-    if scope && (scope==:user)
-      if response_service.injector? # params[:_area] == "at_top" # Signing in from remote site => respond directly
-        logger.debug "stored_location_for: Getting stored location..."
-        raise "XXXX stored_location_for: Can't get deferred capture" unless dc = deferred_capture(true)
-        capture_recipes_url dc
-      else
-        if (nt = session[:notification_token]) && 
-          (notification = Notification.where(notification_token: nt).first) && 
-          (notification.target == current_user)
-            session.delete(:notification_token)
-            notification.accept
-        end
-        if col = deferred_collect(true)
-          Recipe.ensure current_user.id, col
-        end
-        # Signing in from RecipePower => load collection, let deferred
-        # capture call be made on client side with a trigger
-        collection_path redirect: true
-      end
-    end
-    redir || super
-  end
-  
-  # This is an override of the Devise method to determine where to go after login.
-  # If there was a redirect to the login page, we go back to the source of the redirect.
-  # Otherwise, new users go to the welcome page and logged-in-before users to the queries page.
-  def after_sign_in_path_for(resource_or_scope)
-    scope = Devise::Mapping.find_scope!(resource_or_scope)
-    stored_location_for(resource_or_scope) || 
-    (scope && (scope==:user) && collection_path(redirect: true)) || 
-    super
-  end
-  
+
   def defer_invitation
     if params[:invitation_token]
       session[:invitation_token] = params[:invitation_token]
@@ -357,14 +302,82 @@ class ApplicationController < ActionController::Base
     end
     token
   end
-  
-  # def after_sign_in_path_for(resource_or_scope)
-    # recall_capture || collection_path
-    # stripped_capture
-    # redirect_url = recall_capture || collection_path
-    # stored_location_for(resource_or_scope) || signed_in_root_path(resource_or_scope)
-  # end
-  
+
+  include ControllerAuthentication
+
+  # Enable a modal dialog to run by embedding its URL in the URL of a page, then redirecting to it
+  def redirect_to_modal dialog, page=nil
+    redirect_to hash_to_modal(dialog, page)
+  end
+
+  # before_filter on controller that needs login to do anything
+  def login_required alert = "Let's get you logged in so we can do this properly.", elements={}
+    unless logged_in?
+      elements = response_service.defer_request elements
+      flash[:alert] = alert if alert
+      if elements[:format] == :json
+        redirect_to new_authentication_url(recipe_service.params params.slice(:sourcehome) )
+      else
+        redirect_to new_user_session_url( response_service.redirect_params params.slice(:sourcehome) )
+      end
+    end
+  end
+
+  # This overrides the method for returning to a request after logging in. Formerly, session[:return_to]
+  # handled this recovery
+  def redirect_to_target_or_default(default, *args)
+    redirect_to( response_service.deferred_request || default, *args)
+  end
+
+  def build_resource(*args)
+    super
+    if omniauth = session[:omniauth]
+      @user.apply_omniauth(omniauth)
+      @user.authentications.build(omniauth.slice('provider','uid'))
+      @user.valid?
+    end
+  end
+
+  protect_from_forgery
+
+  def stored_location_for(resource_or_scope)
+    # If user is logging in to complete some process, we return
+    # the path to completing the capture/tagging process
+    scope = Devise::Mapping.find_scope!(resource_or_scope)
+    if scope && (scope==:user)
+      # Process any pending invitation notifications
+      if (nt = session[:notification_token]) &&
+          (notification = Notification.where(notification_token: nt).first) &&
+          (notification.target == current_user)
+        session.delete(:notification_token)
+        notification.accept
+      end
+      # If on the site, login triggers a refresh of the collection
+      response_service.deferred_request || response_service.url_for_redirect(collection_path, :format => :html)
+=begin
+      if response_service.injector? # params[:_area] == "at_top" # Signing in from remote site => respond directly
+        logger.debug "stored_location_for: Getting stored location..."
+        raise "XXXX stored_location_for: Can't get deferred capture" unless dc = deferred_capture(true)
+        dc[:target] = "injector"
+        capture_recipes_url dc
+      else
+        # Signing in from the site (as opposed to the iframe). Redirect to any deferred requests
+        deferred_collect_path(current_user.id) ||
+        deferred_capture_path(current_user.id) ||
+        collection_path
+      end
+=end
+    end || super
+  end
+
+  # This is an override of the Devise method to determine where to go after login.
+  # If there was a re-direct to the login page, we go back to the source of the re-direct.
+  # Otherwise, new users go to the welcome page and logged-in-before users to the queries page.
+  def after_sign_in_path_for(resource_or_scope)
+    stored_location_for(resource_or_scope) || super
+  end
+
+=begin
   def defer_collect(rid, uid)
     session[:collect_data] = { id: rid, uid: uid }
   end
@@ -376,6 +389,21 @@ class ApplicationController < ActionController::Base
     data
   end
 
+  # Return the path for redirecting to a recipe collect
+  def deferred_collect_path(uid)
+    if col = deferred_collect(true)
+      collect_recipe_path(Recipe.find(col[:id]))
+    end
+  end
+
+  def deferred_capture forget=false
+    if cd = session[:capture_data]
+      logger.debug "deferred_capture: Deferred capture '#{cd}' is #{forget ? '' : 'not '}to be forgotten"
+      session.delete(:capture_data) if forget
+      cd
+    end
+  end
+
   # In the event that a recipe capture is deferred by login, this stores the requisite information
   # in the session for retrieval after login
   def defer_capture data
@@ -385,13 +413,14 @@ class ApplicationController < ActionController::Base
       session.delete :capture_data
     end
   end
-  
-  def deferred_capture forget=false
-    if cd = session[:capture_data]
-      logger.debug "deferred_capture: Deferred capture '#{cd}' is #{forget ? '' : 'not '}to be forgotten"
-      session.delete(:capture_data) if forget
-      cd
+
+  def deferred_capture_path(uid)
+    if cd = deferred_capture(true)
+      cd[:target] = "injector" if response_service.injector?
+      result = capture_recipes_path cd
+      result
     end
+
   end
 
   def stripped_capture forget=false
@@ -405,7 +434,8 @@ class ApplicationController < ActionController::Base
       capture_data
     end
   end
-            
+=end
+
   protected
     def render_optional_error_file(status_code)
       logger.info "Logger sez: Error 500"

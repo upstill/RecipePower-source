@@ -10,8 +10,8 @@ RP.tagger.init = (selector, data) ->
 
 # When a tagging field is loaded, get tokenInput running, either from the 
 # element's data field or the imposed harddata
-RP.tagger.onopen = (dlog) ->
-	$('.token-input-field', dlog).each -> 
+RP.tagger.onopen = (selector = '.token-input-field') ->
+	$(selector).each ->
 		RP.tagger.setup this
 
 # Use data attached to the element to initiate tokenInput

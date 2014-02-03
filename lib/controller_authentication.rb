@@ -17,7 +17,7 @@
 #   before_filter :login_required, :except => [:index, :show]
 module ControllerAuthentication
   def self.included(controller)
-      controller.send :helper_method, :current_user_or_guest_id, :logged_in?, :redirect_to_target_or_default
+      controller.send :helper_method, :current_user_or_guest_id, :logged_in?
       # controller.send :helper_method, :current_user, :logged_in?, :redirect_to_target_or_default
   end
   
@@ -31,26 +31,5 @@ module ControllerAuthentication
 
   def logged_in?
     current_user != nil
-  end
-
-  # before_filter on controller that needs login to do anything
-  def login_required(alert = "Let's get you logged in so we can do this properly.")
-    unless logged_in?
-      scope = Devise::Mapping.find_scope!(User)
-      session["#{scope}_return_to"] = request.url 
-      flash[:alert] = alert
-      redirect_to new_authentication_path # login_url, :alert => alert
-    end
-  end
-
-  def redirect_to_target_or_default(default, *args)
-    redirect_to(session[:return_to] || default, *args)
-    session[:return_to] = nil
-  end
-
-  private
-
-  def store_target_location
-    session[:return_to] = request.url
   end
 end

@@ -1,4 +1,4 @@
-<h1>Listing expressions</h1>
+<h3>Listing Expressions</h3>
 
 <table>
   <tr>
@@ -16,10 +16,10 @@
     <td><%= expression.tag_id %></td>
     <td><%= expression.referent_id %></td>
     <td><%= expression.form %></td>
-    <td><%= expression.locality %></td>
-    <td><%= link_to 'Show', expression %></td>
-    <td><%= link_to 'Edit', edit_expression_path(expression) %></td>
-    <td><%= link_to 'Destroy', expression, confirm: 'Are you sure?', method: :delete %></td>
+    <td><%= expression.locale %></td>
+    <td><%= link_to_modal 'Show', expression %></td>
+    <td><%= link_to_modal 'Edit', edit_expression_path(expression) %></td>
+    <td><%= link_to 'Destroy', expression, data: { confirm: 'Are you sure?' }, method: :delete %></td>
   </tr>
 <% end %>
 </table>

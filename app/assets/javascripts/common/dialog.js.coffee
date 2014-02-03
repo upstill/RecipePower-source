@@ -11,7 +11,8 @@ jQuery ->
 RP.dialog.beforeSend = (event, xhr, settings) ->
 	selector = $(this).data 'selector'
 	if selector && (ndlog = $(selector)[0]) # If dialog already loaded, replace the responding dialog
-		RP.dialog.replace_modal ndlog, target_modal(event)
+		RP.dialog.replace_modal event.result = ndlog, target_modal(event)
+		RP.state.onAJAXSuccess event
 		return false;
 	else
 		return true;
@@ -54,8 +55,10 @@ RP.dialog.arm_links = (dlog) ->
 
 RP.dialog.cancel = (event) ->
 	if event
-		dlog = target_modal(event)
-		event.preventDefault();			
+		if dlog = target_modal(event)
+			event.preventDefault()
+		else
+			return true # Do regular click-handling, presumably returning from whence we came
 	else
 		dlog = $('div.dialog')[0]
 	RP.dialog.close_modal dlog

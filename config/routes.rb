@@ -5,6 +5,7 @@
 
 RP::Application.routes.draw do
 
+  get "redirect/go"
   get '/auth/failure' => 'authentications#failure'
   # get '/authentications/new' => 'authentications#new'
   resources :authentications
@@ -25,6 +26,7 @@ RP::Application.routes.draw do
     get "/users/cancel" => "registrations#cancel", :as => "cancel_user_registration"
     put "/users" => "registrations#update"
     delete "/users" => "registrations#destroy"
+    get "/users/sign_out" => "sessions#destroy"
     patch "/users" => "registrations#update"
 
     get "/users/invitation/divert" => "invitations#divert", :as => "divert_user_invitation"
@@ -72,7 +74,7 @@ RP::Application.routes.draw do
   post '/tag' => 'tags#create', :as => 'create_tag'
   resources :tags, except: [ :index, :create ] do
     member do
-      get 'absorb'
+      post 'absorb'
     end
     collection do
       get 'editor'

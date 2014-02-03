@@ -1,19 +1,14 @@
-<div class="auth_poss <%# @_area %><%= response_service.area_class %>">
-	<br><div class="prompt">
-	  <% if @auth_context == :manage %>
-	    <% if current_user %>
-	      <%= @authentications.empty? ? "Click on a service you'd like" : "Add another service" %> to sign in with:
-	    <% else %>
-	      You can sign in with one of these services:
-	    <% end %>
-	  <% else %>
-	    Or, click to sign in using one of these fine services (see sidebar):
-	  <% end %>
-	</div>
-  <%= auth_possible "Facebook" %>
-  <%= auth_possible "Google", :svc_lower => "google_oauth2" %>
-  <%= auth_possible "Twitter" %>
-  <%= auth_possible "Aol" %>
-  <%= auth_possible "Yahoo" %>
-  <%= auth_possible "OpenID", :svc_lower => "open_id" %>
+<% prompt ||= "You can sign in using one of these fine services:" %>
+<% origin ||= nil %>
+<% intention ||= nil # Set to 'signup' if creating a new account %>
+<div class="auth_poss <%= response_service.area_class %>" style="overflow: visible">
+  <h4><%= prompt.html_safe %></strong></h4><br>
+  <div class="row">
+    <%= auth_possible "Facebook", origin, intention %>
+    <%= auth_possible "Google", origin, intention, :svc_lower => "google_oauth2" %>
+    <%= auth_possible "Twitter", origin, intention %>
+    <%= auth_possible "Aol", origin, intention %>
+    <%= auth_possible "OpenID", origin, intention, :svc_lower => "open_id" %>
+    <%= auth_possible "Yahoo", origin, intention %>
+  </div>
 </div>

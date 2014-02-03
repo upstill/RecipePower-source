@@ -1,8 +1,13 @@
 RP.edit_referent = RP.edit_referent || {}
 
+jQuery ->
+	if me()[0]
+		RP.edit_referent.onload()
+
 me = () ->
-	$('div.edit_referent')
-tagger_selector = "div.edit_referent input#referent_add_expression"
+	$('form.referent_form')
+
+# tagger_selector = "div.edit_referent input#referent_add_expression"
 
 # Callback for the selection of a new tag for an expression
 add_expression = (hi, li) ->
@@ -14,8 +19,10 @@ add_expression = (hi, li) ->
 	newfields = $(that).data('fields').replace regexp, time
 
 	# Insert the tag
+	regexp = new RegExp "\\[\\w+ \\d+\\]"
+	tagname = hi.name.replace regexp, ''
 	regexp = new RegExp "\\*\\*no tag\\*\\*", 'g'
-	newfields = newfields.replace regexp, hi.name
+	newfields = newfields.replace regexp, tagname
 
 	# Insert the tag id
 	regexp = new RegExp "type=.hidden."
@@ -30,13 +37,8 @@ add_expression = (hi, li) ->
 	$('#referent_add_expression').tokenInput "remove", 
 		id: hi.id
 
-RP.edit_referent.onopen = (dlog) ->
-	dlog = me()
-	RP.tagger.onopen tagger_selector
-
 # When dialog is loaded, activate its functionality
-RP.edit_referent.onload = (dlog) ->
-	dlog = me()
+RP.edit_referent.onload = ->
 	# Bind tokenInput to the text fields
 	tagtype = $('#referent_parent_tokens').data "type"
 	querystr = "/tags/match.json?tagtype="+tagtype
@@ -44,7 +46,7 @@ RP.edit_referent.onload = (dlog) ->
 		crossDomain: false,
 		noResultsText: "No existing tag found; hit Enter to make a new tag",
 		hintText: "Tags for things that come under this category",
-		prePopulate: $("#referent_children").data("pre"),
+		prePopulate: $("#referent_parent_tokens").data("pre"),
 		theme: "facebook",
 		preventDuplicates: true,
 		allowFreeTagging: true # allowCustomEntry: true
@@ -53,7 +55,7 @@ RP.edit_referent.onload = (dlog) ->
 		crossDomain: false,
 		noResultsText: "No existing tag found; hit Enter to make a new tag",
 		hintText: "Categories that include this",
-		prePopulate: $("#referent_parents").data("pre"),
+		prePopulate: $("#referent_child_tokens").data("pre"),
 		theme: "facebook",
 		preventDuplicates: true,
 		allowFreeTagging: true # allowCustomEntry: true

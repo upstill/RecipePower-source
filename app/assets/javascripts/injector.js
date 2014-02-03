@@ -7,6 +7,7 @@
 // Place your application-specific JavaScript functions and classes here
 
 //= require_self
+//= require authentication
 // require auth/facebook
 //= require common/pics
 //= require common/RP
@@ -21,10 +22,12 @@
 //= require jquery/jNotify.jquery
 //= require jquery/jquery.tokeninput
 //= require jquery/jquery.ba-resize
+//= require jquery_ujs
 //= require ../../../vendor/assets/javascripts/bootbox
 
 window.RP = window.RP || {}
 
+// MESSAGE RESPONDER
 // Called to replace the form's image with the given URL in response to a message from the owning window
 function replaceImg(data) {
     var url = data.url && data.url[0];
@@ -35,6 +38,11 @@ function replaceImg(data) {
     }
 }
 
+// MESSAGE RESPONDER to take a URL and replace either the page or the current dialog
+function get_and_go(data) {
+    RP.get_and_go(data); // window.location = data.url;
+}
+
 // Function for cracking param string
 function ptq(q) {
 	/* parse the message */
@@ -42,17 +50,26 @@ function ptq(q) {
 	var x = q.replace(/;/g, '&').split('&'), i, name, t;
 	/* q changes from string version of query to object */
 	for (q={}, i=0; i<x.length; i++) {
-		t = x[i].split('=', 2);
-		name = unescape(t[0]);
+		namevalue = x[i].split('=', 2);
+		name = unescape(namevalue[0]);
+/*
 		if (!q[name])
 			q[name] = [];
-		if (t.length > 1) {
-			q[name][q[name].length] = unescape(t[1]);
+*/
+		if (namevalue.length > 1) {
+            q[name] = unescape(namevalue[1]); // q[name][q[name].length] = unescape(namevalue[1]);
 		} else
 		/* next two lines are nonstandard */
-			q[name][q[name].length] = true;
+            q[name] = true; // q[name][q[name].length] = true;
 	}
 	return q;
+}
+
+function process_message(evt) {
+  var data = ptq(evt.data);
+  var call = data.call;
+  if (call && (typeof (fcn = window[call]) === 'function'))
+    fcn(data);
 }
 
 function launch_interaction(sourcehome) {
@@ -74,6 +91,7 @@ function launch_interaction(sourcehome) {
 	RP.dialog.run(dlog); // Hand off submit-handling to the dialog manager
 	// $('form', dlog).submit( dlog, submitDialog );
 	// Set the dialog's resize function to adjust size of the iframe
+/*
 	$(dlog).resize( function (evt) {
 		var dropdown = $('div.token-input-dropdown-facebook')[0]
 		var h = 0;
@@ -84,19 +102,26 @@ function launch_interaction(sourcehome) {
 			$.postMessage( { call: "execute_resize", width: dlog.offsetWidth, height: dlog.offsetHeight+h }, RP.embedding_url );
 		}
 	});
-	
+*/
+
 	$('div.token-input-dropdown-facebook').resize( function (evt) {
 		// Strangely, this do-nothing resize monitor is required to trigger resize of the dialog
 		var dropdown = $('div.token-input-dropdown-facebook')[0]
 	});
 	
-	$.receiveMessage( function(evt) {
-		var data = ptq(evt.data);
-		var call = data.call;
-		if(call && (typeof window[call] === 'function')) {
-			window[call](data);
-		}
-	})
+	$.receiveMessage( process_message )
+
+    // Handle messages that come from outside the iframe, e.g. from an authentication window
+    if (window.addEventListener) {
+        addEventListener("message", process_message, false)
+    } else {
+        attachEvent("onmessage", process_message )
+    }
+}
+
+function resize_dialog(dlog) {
+    if(dlog.offsetWidth > 0 && dlog.offsetHeight > 0)
+        $.postMessage( { call: "execute_resize", width: dlog.offsetWidth, height: dlog.offsetHeight }, RP.embedding_url );
 }
 
 // Called when the dialog is opened: resize the iframe
@@ -105,9 +130,13 @@ function open_dialog(dlog) {
 	var cancelBtn = document.getElementById("recipePowerCancelBtn");
 	if(cancelBtn) 
 		cancelBtn.onclick = retire_iframe;
+    // Adjust the enclosing iframe whenever the dialog's size changes
+    $(dlog).resize( function(e) {
+        resize_dialog(dlog);
+    })
+    // Ensure a good fit on open
+    resize_dialog(dlog)
 	// Report the window dimensions to the enclosing iframe
-	if(dlog.offsetWidth > 0 && dlog.offsetHeight > 0) 
-		$.postMessage( { call: "execute_resize", width: dlog.offsetWidth, height: dlog.offsetHeight }, RP.embedding_url );
 	$('#retire_iframe').click( retire_iframe )
 	$('#link_to_redirect').click( redirect_to )
 }
@@ -119,13 +148,19 @@ function close_dialog(dlog) {
 
 // Service the click on a link to, say, login with Facebook by loading that URL. The link should contain data for the
 // expected width and height of the "dialog"
+/*
+Eliminated this method of invoking an authorization because the authorizing site couldn't be depended on not to
+include a SameOrigin header, preventing the authorization window from being displayed in the iframe
 function yield_iframe(e) {
 	var link = e.currentTarget;
-	$.postMessage( { call: "redirect_from_iframe", url: $(link).attr("href") }, RP.embedding_url );
+    debugger;
+    window.open($(link).href,'_blank');
+    // $.postMessage( { call: "redirect_from_iframe", url: $(link).attr("href") }, RP.embedding_url );
 	e.stopPropagation();
 	e.preventDefault();
 	false
 }
+*/
 
 function retire_iframe(notice) {
 	var msg = { call: "retire_iframe" };

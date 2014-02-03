@@ -38,11 +38,7 @@ class ReferentsController < ApplicationController
       @tabindex = (session[:tabindex] || params[:tabindex] || 0).to_i
       handlerclass = @@HandlersByIndex[@tabindex]
     @referent = handlerclass.find(params[:id])
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @referent }
-    end
+    smartrender
   end
 
   # Get a new referent based on the given tag id
@@ -76,7 +72,7 @@ class ReferentsController < ApplicationController
       @typeselections = Tag.type_selections
       @typeselections.shift
       # dialog_boilerplate "edit", "floating" 
-      smartrender area: "floating" 
+      smartrender
   end
 
   # POST /referents?tagid=1&mode={over,before,after}&target=referentid
@@ -187,8 +183,12 @@ class ReferentsController < ApplicationController
     respond_to do |format|
       params[:referent].delete(:typenum)
       if @referent.update_attributes(params[:referent])
-        format.html { redirect_to @referent.becomes(Referent), notice: 'Referent was successfully updated.' }
-        format.json { render json: [], status: :success }
+        format.html {
+          redirect_to @referent.becomes(Referent), notice: 'Referent was successfully updated.'
+        }
+        format.json {
+          render json: { done: true, popup: "Referent was successfully updated." }
+        }
       else
         @referent.becomes(Referent)
         @referent_type = @referent.typenum

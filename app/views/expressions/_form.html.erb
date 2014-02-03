@@ -24,10 +24,8 @@
     <%= f.number_field :form %>
   </div>
   <div class="field">
-    <%= f.label :locality %><br />
-    <%= f.text_field :locality %>
+    <%= f.label :locale %><br />
+    <%= f.text_field :locale %>
   </div>
-  <div class="actions">
-    <%= f.submit %>
-  </div>
+  <%= form_actions f, cancel_path: expressions_path %>
 <% end %>

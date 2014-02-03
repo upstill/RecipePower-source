@@ -38,11 +38,9 @@
 
     <% end %>
     <%= modal_footer do %>
-	<% if ref = @site.referent %>
-	 <%= link_to_modal ref.class.to_s+" "+ref.name, edit_referent_path(ref) %>
-	<% end %>
-	<%= link_to 'Show', @site %> |
-	<%= link_to 'Back', sites_path %>
-		<%= f.button :submit, "Save" %>
+      <%# if ref = @site.referent %>
+        <%# link_to_modal ref.class.to_s+" "+ref.name, edit_referent_path(ref) %>
+      <%# end %>
+      <%= form_actions f %>
 	<% end %>
 <% end %>

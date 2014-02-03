@@ -72,14 +72,6 @@ class UsersController < ApplicationController
   def new
     @user = User.new
     @Title = "Create RecipePower Account"
-    respond_to do |format|
-      format.html { redirect_to home_path }
-      format.json {
-        render( 
-          json: { dlog: with_format("html") { render_to_string partial: "shared/signup_dialog", layout: false } } 
-        )
-      }
-    end
   end
   
   # DELETE /users/1
@@ -99,7 +91,7 @@ class UsersController < ApplicationController
   end
   
   def not_found
-    redirect_to root_path, :notice => "User not found"
+    redirect_to root_path, :notice => "User not found", method: "get"
   end
 
   # With devise handling user creation, the only way we get here is from the 'identify' page.
@@ -156,6 +148,15 @@ class UsersController < ApplicationController
   end
 
   def update
+=begin
+    account_update_params = devise_parameter_sanitizer.sanitize(:account_update)
+    # required for settings form to submit when password is left blank
+    if account_update_params[:password].blank?
+      account_update_params.delete("password")
+      account_update_params.delete("password_confirmation")
+    end
+=end
+
     @user = User.find params[:id]
     if @user.update_attributes(params[:user])
       @user.refresh_browser # Assuming, perhaps incorrectly, that the browser contents have changed
@@ -164,7 +165,7 @@ class UsersController < ApplicationController
       respond_to do |format|
         format.html { redirect_to collection_path }
         format.json  { 
-          listitem = with_format("html") { render_to_string( partial: "user" ) }
+          listitem = with_format("html") { render_to_string( partial: "show_table_row") }
           render json: {
             done: true,
             replacements: [ ["#listrow_"+@user.id.to_s, listitem], view_context.flash_notifications_replacement ]

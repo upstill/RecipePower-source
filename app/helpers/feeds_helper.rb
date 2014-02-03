@@ -40,7 +40,7 @@ module FeedsHelper
   def feeds_table
     table_out @feeds, [ "ID", "Title/Description/URL", "Tag(s)", "Type", "Host Site", permitted_to?(:approve, :feeds) && "Approved", "Actions" ] do |feed|
       @feed = feed
-      render "feeds/feed"
+      render "feeds/show_table_row"
     end
   end
   

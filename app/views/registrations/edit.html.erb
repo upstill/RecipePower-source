@@ -1,18 +1,2 @@
-<%= modal_dialog :edit_password, "Change Password", show: true do %>
-	<%= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name), :html => { class: "edit_password json", :method => :put, 'data-type' => :json }) do |f| %>
-		<%= modal_body do %>
-		  <%= form_errors_helper f %>
-		  <%= f.input :current_password, hint: "(we need your current password to confirm your changes)" %>
-		  <%= f.input :password, :label => "New password", hint: "(leave blank if you don't want to change it)", :autocomplete => "off" %>
-		  <%# f.input :password_confirmation, :label => "Confirm new password" %>
-		<% end %>
-		<%= modal_footer do %>
-		  <%= f.submit "Update", class: "btn btn-lg btn-success dialog-submit-button"%>
-		<% end %>
-	<% end %>
-<% end %>
-<h3>Edit Password for <%= resource.handle %></h3>
-
-<h3>Cancel my account</h3>
-
-<p>Unhappy? <%= link_to "Cancel my account", registration_path(resource_name), :confirm => "Really? Are you sure??!? This will delete all your Cookmarks, your tags, and everything from RecipePower.", :method => :delete %>.</p>
+<!-- Redundant wrt application/edit to prevent devise from responding -->
+<%= render response_service.select_render %>

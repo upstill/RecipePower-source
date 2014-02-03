@@ -64,12 +64,12 @@ module FlashHelper
       else
         level.to_s
       end
-      message = "<span>#{message}</span>".html_safe
+      message = "<span>#{message.html_safe}</span>".html_safe
       button = "<button class=\"close\" data-dismiss=\"alert\">&#215;</button>".html_safe
        # This message may have been cleared earlier...
       html = content_tag :div, button+message, class: "alert #{bootstrap_class} alert_block fade in #{hide}"
     else
-      html = content_tag :div, message, class: "alert #{hide}"
+      html = content_tag :div, message.html_safe, class: "alert #{hide}"
     end
     html.html_safe
   end
@@ -79,5 +79,14 @@ module FlashHelper
       flash.delete type
       flash_one type, message, for_bootstrap
     }.join.html_safe
+  end
+
+  # Return the current flash text, suitable for popping up
+  def flash_popup
+    msg = flash.collect  { |type, message|
+      flash.delete type
+      message
+    }.join.html_safe
+    msg
   end
 end

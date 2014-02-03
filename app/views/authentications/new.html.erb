@@ -1,17 +1,11 @@
-<%# @_area ||= "" %>
-<%# if @_area == "page" %>
-<% if response_service.page? %>
-	<% title "Sign In Options" %>
-	<%= render partial: 'shared/authentications_sidebar' %>
+`<% if response_service.injector? %>
+    <% prompt = "needs you to sign in to collect this cookmark. Not a member? " %>
+    <%# prompt << link_to_redirect("Sign up!", hash_to_modal( new_user_registration_path, home_url )) %>
+    <% prompt << link_to_modal("Sign up!", new_user_registration_path) %>
+    <%= injector_dialog :sign_in, prompt.html_safe, dismiss_button: false do %>
+        <%= render 'sessions/new_injector' %>
+    <% end %>
+<% else %>
+    <%= render "sessions/new_#{response_service.page? ? "page" : "modal"}" %>
 <% end %>
-<%# if defined?(@_area) && (@_area == "at_top" || @_area == "injector") %>
-<%# if response_service.injector? %>
-	<% prompt = "needs you to sign in to collect this cookmark. Not a member? " %>
-	<% prompt << link_to_redirect("Sign up!", "http://#{current_domain}") %>
-	<%= injector_dialog :sign_in, prompt.html_safe, dismiss_button: false do %>
-	  <%# render partial: 'shared/authentications_signin_injector' %>
-	  <%= render partial: 'signin_injector' %>
-	<% end %>
-<%# else %>
-	<%# render partial: "signin_dialog" Gone to sessions/_signin_dialog %>
-<%# end %>
+

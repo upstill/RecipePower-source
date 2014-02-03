@@ -116,12 +116,31 @@ class TagsController < ApplicationController
                 @taglist.map(&:attributes).map { |match| match["name"] }
             else # assuming "tokenInput" because that js won't send a parameter
                 # for tokenInput: an array of hashes, each with "id" and "name" values
-                @taglist.map(&:attributes).map { |match| {:id=>match["id"], :name=>match["name"]} } 
+                @taglist.map(&:attributes).map { |match|
+                  referent_id = match["referent_id"] || ""
+                  name = match["name"] + ' [' + Tag.typename(match["tagtype"].to_i) + ' ' + referent_id.to_s + ']'
+                  {:id=>match["id"], :name=>name}
+                }
             end
         }
         format.html { render partial: "tags/taglist" }
         format.xml  { render :xml => @taglist }
       end
+  end
+
+  # GET /tags/new
+  # GET /tags/new.xml
+  def new
+    @Title = "Tags"
+    @tag = Tag.new
+    smartrender
+  end
+
+  # GET /tags/1/edit
+  def edit
+    @Title = "Tags"
+    @tag = Tag.find(params[:id])
+    smartrender
   end
 
   # GET /tags/1
@@ -131,35 +150,9 @@ class TagsController < ApplicationController
     @Title = "Tags"
     @tag = Tag.find(params[:id])
     session[:tabindex] = @tabindex
-
-    smartrender :how => :modal
-=begin
-    respond_to do |format|
-      format.html # show.html.erb
-      format.xml  { render :xml => @tag }
-    end
-=end
+    smartrender
   end
 
-  # GET /tags/new
-  # GET /tags/new.xml
-  def new
-    @Title = "Tags"
-    @tag = Tag.new
-
-    respond_to do |format|
-      format.html # new.html.erb
-      format.xml  { render :xml => @tag }
-    end
-  end
-
-  # GET /tags/1/edit
-  def edit
-    @Title = "Tags"
-    @tag = Tag.find(params[:id])
-    smartrender :how => :modal
-  end
-  
   # GET /tags/editor?tabindex=index
   # Return HTML for the editor for classifying tags
   def editor
@@ -180,11 +173,24 @@ class TagsController < ApplicationController
     survivor = victim.disappear_into absorber 
     if survivor.errors.empty?
       victimidstr = ((survivor == victim) ? absorber : victim).id.to_s
-      render :json=>{
-        deletions: ["#tagrow_#{victimidstr}", "#tagrow_#{victimidstr}HR", ".absorb_#{victimidstr}"]
+      @tag = survivor
+      @jsondata = {
+          deletions: [
+              "#tagrow_#{victimidstr}", "#tagrow_#{victimidstr}HR"
+          ],
+          replacements: [
+             [ "#tagrow_#{@tag.id.to_s}", with_format("html") { render_to_string partial: "tags/show_table_row" } ]
+          ]
       }
     else
-      render :json=>{errors: survivor.errors }
+      @jsondata = { errors: survivor.errors }
+    end
+    respond_to do |format|
+      format.html # absorb.html.erb
+      format.json  {
+        render :json => @jsondata
+      }
+      format.js { render "shared/get_content" }
     end
   end
   

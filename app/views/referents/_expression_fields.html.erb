@@ -2,8 +2,8 @@
   <td><%= f.hidden_field :tag_token %>
   <%= f.hidden_field :referent_id %>
   <%= f.label :tagname, expression_link(f.object), class: "expr_tag" %></td>
-  <td><%= f.select :locale, Expression.locales %></td>
-  <td><%= f.select :form, Expression.forms %></td>
+  <td><%= f.input :localename, label: false, collection: Expression.locales.collect { |entry| entry[0] } %></td>
+  <td><%= f.input :formname, label: false, collection: Expression.forms.collect { |entry| entry[0] } %></td>
   <td><%= f.hidden_field :_destroy %>
   <%= link_to "remove", '#', class: "remove_fields" %></td>
 </tr>  

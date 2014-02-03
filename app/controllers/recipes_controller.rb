@@ -73,7 +73,7 @@ class RecipesController < ApplicationController
     # redirect_to @recipe.url
   end
 
-  def new # Collect URL, then redirect to edit
+  def new # Collect URL, then re-direct to edit
     # return if need_login true
     # Here is where we take a hit on the "Add to RecipePower" widget,
     # and also invoke the 'new cookmark' dialog. The difference is whether
@@ -86,7 +86,7 @@ class RecipesController < ApplicationController
     if (params[:url] &&
         (@recipe = Recipe.ensure current_user_or_guest_id, params.slice(:url)) && 
         @recipe.id) # Mark of a fetched/successfully saved recipe: it has an id
-    	# redirect to edit
+    	# re-direct to edit
     	if @feed_entry
     	  @feed_entry.recipe = @recipe
     	  @feed_entry.save
@@ -100,7 +100,7 @@ class RecipesController < ApplicationController
         @recipe.current_user = current_user_or_guest_id # session[:user_id]
         # @_area = params[:_area]
         # dialog_boilerplate 'new', 'modal'
-        smartrender :how => :modal
+        smartrender
     end
   end
 
@@ -142,7 +142,7 @@ class RecipesController < ApplicationController
     end
   end
 
-  def capture # Collect URL from foreign site, asking whether to redirect to edit
+  def capture # Collect URL from foreign site, asking whether to re-direct to edit
     # return if need_login true
     # Here is where we take a hit on the "Add to RecipePower" widget,
     # and also invoke the 'new cookmark' dialog. The difference is whether
@@ -156,23 +156,20 @@ class RecipesController < ApplicationController
           # The injector (capture.js) calls for this to fill the iframe on the foreign page.
           # @_layout = "injector"
           if @recipe.id
-            deferred_capture true # Delete the pending recipe
+            # deferred_capture true # Delete the pending recipe
             if response_service.injector?
               smartrender :action => :edit # :_layout => (params[:_layout] || response_service.dialog?)
             else
-              # If we're collecting a recipe outside the context of the iframe, just
-              # redirect back to the recipe. We can't edit the recipe, but too bad.
-              redirect_to @recipe.url
+              # If we're collecting a recipe outside the context of the iframe, redirect to
+              # the collection page with an embedded modal dialog invocation
+              redirect_to_modal edit_recipe_path(@recipe)
             end
           else
             @resource = @recipe
             render "pages/resource_errors", response_service.render_params
           end
         else
-          # Nobody logged in => 
-          defer_capture params.slice(:recipe, :extractions, :sourcehome )
-          # redirect_to new_authentication_url(area: "at_top", layout: "injector", sourcehome: params[:sourcehome] )
-          redirect_to new_authentication_url( response_service.redirect_params params.slice(:sourcehome) )
+          login_required nil # format: :html, params: params.slice(:recipe, :extractions, :sourcehome )
         end
       }
       format.json {
@@ -180,7 +177,7 @@ class RecipesController < ApplicationController
           @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe]||{}, true, params[:extractions] # session[:user_id], params
           if @recipe.id
             @data = { onget: [ "submit.submit_and_process", collection_url(layout: false) ] } unless response_service.injector?
-            deferred_capture true # Delete the pending recipe
+            # deferred_capture true # Delete the pending recipe
             codestr = with_format("html") { render_to_string :edit, layout: false }
           else
             @resource = @recipe
@@ -189,9 +186,8 @@ class RecipesController < ApplicationController
           render json: { dlog: codestr }
         else
           # Nobody logged in => 
-          defer_capture params.slice(:recipe, :extractions, :sourcehome )
           response_service.is_injector
-          redirect_to new_authentication_url(recipe_service.params params.slice(:sourcehome) )
+          login_required nil # :format => :json, :params => params.slice(:recipe, :extractions, :sourcehome )
         end
       }
       format.js { 
@@ -228,6 +224,7 @@ class RecipesController < ApplicationController
     @recipe = Recipe.ensure current_user_or_guest_id, params.slice(:id) # session[:user_id], params
     if @recipe && @recipe.errors.empty? # Success (recipe found)
       @Title = @recipe.title # Get title from the recipe
+      @decorator = @recipe.decorate
       if params[:pic_picker]
         # Setting the pic_picker param requests a picture-editing dialog
         render partial: "shared/pic_picker"
@@ -327,15 +324,7 @@ class RecipesController < ApplicationController
         end
       end
     else # Nobody logged in; defer the collection and render with login dialog
-      defer_collect params[:id], params[:uid]
-      notice = "You need to have an account to collect recipes."
-      respond_to do |format|
-        format.html { redirect_to home_path, notice: notice }
-        format.json { 
-          flash.now[:alert] = notice
-          render json: { dlog: with_format("html") { render_to_string partial: "shared/signup_dialog", layout: false } } 
-        }
-      end
+      login_required "You need to be logged in to collect recipes."
     end
   end
 
@@ -348,7 +337,6 @@ class RecipesController < ApplicationController
     report_recipe collection_url, 
       "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections.", 
       formats
-    # redirect_to collection_url, :notice => "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections."
   end
 
   # Remove the recipe from the system entirely
@@ -357,7 +345,6 @@ class RecipesController < ApplicationController
     title = @recipe.title
     @recipe.destroy
     report_recipe collection_url, "\"#{title}\" is gone for good.", formats, true
-    # redirect_to collection_url, :notice => "\"#{title}\" is gone for good."
   end
 
   def revise # modify current recipe to reflect a client-side change

@@ -1,10 +1,13 @@
+<% url_to ||= nil %>
 <h3><%= @after_sign_in_msg || "Returning to the recipe..." %></h3>
+Template to refer the client to another page
 <script type="text/javascript">
-	if(window.opener) {
-		<% if @after_sign_in_url %>
-			window.opener.location = '<%= @after_sign_in_url %>';
-		<% end %>
-	  window.close();
-	} else
-		window.location = '<%= @after_sign_in_url || home_path %>';
+    if (window.opener) {
+        <% if url_to %>
+            window.opener.postMessage('call=get_and_go&url='+encodeURIComponent('<%= url_to %>'), '*'); // window.opener.location.replace( '<%= url_to %>' );
+        <% end %>
+        window.close();
+    } else {
+        window.location = '<%= url_to || home_path %>';
+    }
 </script>

@@ -1,34 +1,29 @@
 class SessionsController < Devise::SessionsController
-  
+  after_filter :allow_iframe, only: :new
+
   # GET /resource/sign_in
   def new
-    self.resource = resource_class.new # build_resource(nil, :unsafe => true)
-    if u = params[:user] && params[:user][:id] && User.find_by_id(params[:user][:id])
-      self.resource.username = u.username
-      self.resource.fullname = u.fullname
-      self.resource.login = u.username || u.email
-    end
-    clean_up_passwords(resource)
-    resource.remember_me = 1
-    respond_to do |format|
-      format.html { redirect_to home_path }
-      format.json { 
-        # @_area = params[:_area] || "floating"
-        rendered = with_format("html") {
-          # render_to_string "authentications/new", layout: false 
-          render_to_string layout: false 
-        }
-        return render :json => {
-          :success => false, 
-          :code => rendered 
-        }
-      }
+    if current_user
+      # flash[:notice] = "All signed in. Welcome back, #{current_user.handle}!"
+      # redirect_to collection_path(redirect: true)
+      redirect_to after_sign_in_path_for(current_user), notice: "All signed in. Welcome back, #{current_user.handle}!"
+    else
+      self.resource = resource_class.new # build_resource(nil, :unsafe => true)
+      if u = params[:user] && params[:user][:id] && User.find_by_id(params[:user][:id])
+        self.resource.username = u.username
+        self.resource.fullname = u.fullname
+        self.resource.login = u.username || u.email
+      end
+      clean_up_passwords(resource)
+      resource.remember_me = 1
+      smartrender :action => :new
     end
   end
 
   def create
     resource = warden.authenticate!(:scope => resource_name, :recall => "#{controller_path}#new" ) # :failure)
-    return sign_in_and_redirect(resource_name, resource)
+    result = sign_in_and_redirect(resource_name, resource)
+    return result
   end
   
   def destroy
@@ -38,7 +33,6 @@ class SessionsController < Devise::SessionsController
   
   def sign_in_and_redirect(resource_or_scope, resource=nil)
     logger.debug "sign_in_and_redirect: Signing in #{(resource||resource_or_scope).handle}; redirecting with..."
-    deferred_capture false
     scope = Devise::Mapping.find_scope!(resource_or_scope)
     resource ||= resource_or_scope
     sign_in(scope, resource) unless warden.user(scope) == resource
@@ -54,7 +48,6 @@ class SessionsController < Devise::SessionsController
       notice = "Welcome back, #{resource.handle}! You are logged in to RecipePower."
     end
     logger.debug "sign_in_and_redirect: Signed in #{resource.handle}; redirecting with..."
-    deferred_capture false
     redirect_to after_sign_in_path_for(resource_or_scope), notice: notice
   end
  

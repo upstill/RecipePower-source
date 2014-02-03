@@ -1,0 +1,4 @@
+<% @tagserv = TagServices.new @tag %>
+<%= modal_dialog :show_tag, "What We Know About #{summarize_tag true, false}" do %>
+  <%= render 'show' %>
+<% end %>

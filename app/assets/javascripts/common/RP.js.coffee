@@ -7,7 +7,8 @@ jQuery ->
 		event.preventDefault()
 
 	# Adjust the pading on the window contents to accomodate the navbar, on load and wheneer the navbar resizes
-	$('body')[0].style.paddingTop = ($('div.navbar')[0].offsetHeight+7).toString()+"px"
+	if navbar = $('div.navbar')[0]
+		$('body')[0].style.paddingTop = (navbar.offsetHeight+7).toString()+"px"
 	$('div.navbar').on "resize", (event) ->
 		$('body')[0].style.paddingTop = ($('div.navbar')[0].offsetHeight+7).toString()+"px"
 
@@ -148,6 +149,14 @@ RP.get_page = (url) ->
 	$('body').load url, {}, (responseText, textStatus, XMLHttpRequest) ->
 		$('body').trigger('load')
 		window.history.replaceState { an: "object" }, 'Collection', url
+
+# Parse a url to either replace a dialog or reload the page
+RP.get_and_go = (data) ->
+	url = decodeURIComponent data.url
+	if url.match /how=modal/
+		RP.dialog.get_and_go null, url
+	else
+		window.location = url # RP.get_page data.url
 
 # Handle successful return of a JSON request by running whatever success function
 #   obtains, and stashing any resulting code away for invocation after closing the
