@@ -6,7 +6,6 @@ class RegistrationsController < Devise::RegistrationsController
     
     def edit
       @user = (params[:id] && User.find(params[:id])) || current_user
-      # dialog_boilerplate "edit", "floating"
       smartrender area: "floating"
     end
     

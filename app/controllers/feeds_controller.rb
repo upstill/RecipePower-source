@@ -101,7 +101,6 @@ class FeedsController < ApplicationController
   # GET /feeds/1/edit
   def edit
     @feed = Feed.find(params[:id])
-    # dialog_boilerplate "edit", "floating" 
     smartrender area: "floating" 
   end
 
@@ -121,8 +120,6 @@ class FeedsController < ApplicationController
       respond_to do |format|
         format.html { render action: "new", status: :unprocessable_entity }
         format.json { 
-          # @_area = "floating"
-          # dialog_boilerplate "new", "modal", status: :unprocessable_entity 
           smartrender action: "new", how: "modal", status: :unprocessable_entity 
         }
       end

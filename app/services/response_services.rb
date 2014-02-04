@@ -65,7 +65,6 @@ class ResponseServices
   
   # Returns true if we're in the context of a foreign page
   def injector?
-    # defined?(@area) && (@area == "at_top" || @area == "injector")
     @target == "injector"
   end
   
@@ -134,7 +133,7 @@ class ResponseServices
     # @area
     case
     when injector? 
-      "at_top"
+      "injector"
     when dialog?
       "floating"
     else

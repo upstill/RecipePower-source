@@ -71,7 +71,6 @@ class ReferentsController < ApplicationController
       @referent_type = @referent.typenum
       @typeselections = Tag.type_selections
       @typeselections.shift
-      # dialog_boilerplate "edit", "floating" 
       smartrender
   end
 

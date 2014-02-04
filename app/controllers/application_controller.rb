@@ -205,7 +205,8 @@ class ApplicationController < ActionController::Base
         hresult = with_format("html") do
           render_to_string response_service.action, renderopts # May have special iframe layout
         end
-        renderopts[:json] = { code: hresult, area: response_service.area_class, how: "bootstrap" }
+        # renderopts[:json] = { code: hresult, area: response_service.area_class, how: "bootstrap" }
+        renderopts[:json] = { code: hresult, how: "bootstrap" }
         render renderopts
       }
       format.js {
@@ -249,8 +250,8 @@ class ApplicationController < ActionController::Base
   
   def setup_response_service
     @response_service ||= ResponseServices.new params, session, request
-    # Mobile is sticky: it stays on for the session once the "mobile" area parameter appears
-    @response_service.is_mobile if (params[:area] == "mobile")
+    # Mobile is sticky: it stays on for the session once the "mobile" target parameter appears
+    @response_service.is_mobile if (params[:target] == "mobile")
     @response_service
   end
   
@@ -357,7 +358,7 @@ class ApplicationController < ActionController::Base
       # If on the site, login triggers a refresh of the collection
       response_service.deferred_request || response_service.url_for_redirect(collection_path, :format => :html)
 =begin
-      if response_service.injector? # params[:_area] == "at_top" # Signing in from remote site => respond directly
+      if response_service.injector? # Signing in from remote site => respond directly
         logger.debug "stored_location_for: Getting stored location..."
         raise "XXXX stored_location_for: Can't get deferred capture" unless dc = deferred_capture(true)
         dc[:target] = "injector"
@@ -378,65 +379,6 @@ class ApplicationController < ActionController::Base
   def after_sign_in_path_for(resource_or_scope)
     stored_location_for(resource_or_scope) || super
   end
-
-=begin
-  def defer_collect(rid, uid)
-    session[:collect_data] = { id: rid, uid: uid }
-  end
-  
-  def deferred_collect(delete=false)
-    if data = session[:collect_data]
-      session.delete(:collect_data) if delete
-    end
-    data
-  end
-
-  # Return the path for redirecting to a recipe collect
-  def deferred_collect_path(uid)
-    if col = deferred_collect(true)
-      collect_recipe_path(Recipe.find(col[:id]))
-    end
-  end
-
-  def deferred_capture forget=false
-    if cd = session[:capture_data]
-      logger.debug "deferred_capture: Deferred capture '#{cd}' is #{forget ? '' : 'not '}to be forgotten"
-      session.delete(:capture_data) if forget
-      cd
-    end
-  end
-
-  # In the event that a recipe capture is deferred by login, this stores the requisite information
-  # in the session for retrieval after login
-  def defer_capture data
-    if data
-      session[:capture_data] = data.clone
-    else
-      session.delete :capture_data
-    end
-  end
-
-  def deferred_capture_path(uid)
-    if cd = deferred_capture(true)
-      cd[:target] = "injector" if response_service.injector?
-      result = capture_recipes_path cd
-      result
-    end
-
-  end
-
-  def stripped_capture forget=false
-    # Edge case: we may get here in the course of authorizing collecting a recipe, in 
-    # which case we forget about handling it in the embedded iframe: remove the "area=at_top" 
-    # and "layout=injector" query parameters
-    if capture_data = deferred_capture(forget)
-      capture_data.delete :area
-      capture_data.delete :layout
-      capture_data.delete :context
-      capture_data
-    end
-  end
-=end
 
   protected
     def render_optional_error_file(status_code)

@@ -123,7 +123,6 @@ class UsersController < ApplicationController
     end
     @section = params[:section] || "profile"
     @Title = "Edit Profile"
-    # dialog_boilerplate "edit", "floating" 
     smartrender area: "floating" 
   end
   
@@ -143,7 +142,6 @@ class UsersController < ApplicationController
     @section = params[:section] || "profile"
     @Title = "My "+@section.capitalize
     # render :action => 'edit'
-    # dialog_boilerplate "edit", "floating" 
     smartrender action: "edit", area: "floating" 
   end
 
@@ -175,7 +173,6 @@ class UsersController < ApplicationController
     else
       @section = params[:user][:email] ? "profile" : "account"
       @Title = "Edit #{@section}"
-      # dialog_boilerplate "edit", "floating" 
       smartrender action: "edit", area: "floating" 
     end
   end

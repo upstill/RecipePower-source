@@ -36,7 +36,7 @@ module DialogsHelper
     
     content_tag( :div,
       content.html_safe,
-      class: "dialog injector #{which} at_top").html_safe
+      class: "dialog injector #{which} ").html_safe
   end
   
   def simple_modal(which, ttl, options={}, &block)
@@ -51,14 +51,13 @@ module DialogsHelper
   
   def modal_dialog( which, ttl=nil, options={}, &block )
     dialog_class = options[:dialog_class]
-    # for_bootstrap = options[:_area].blank? || options[:_area] != "at_top"
     header = modal_header ttl 
     options[:body_contents] ||= with_output_buffer(&block)
     body = modal_body options.slice(:prompt, :body_contents, :noFlash, :body_class)
     options[:class] = 
       [ "dialog", 
         which.to_s, 
-        response_service.area_class, # options[:_area] || "floating", 
+        response_service.area_class, 
         ("hide" unless options[:show]),
         ("modal-pending fade" unless response_service.injector? || options[:show]), 
         options[:class] 
@@ -75,7 +74,6 @@ module DialogsHelper
   end
   
   def modal_header( ttl )
-    # Render for a floating dialog unless an area is asserted OR we're rendering for the page
     content = 
       response_service.injector? ? 
       generic_cancel_button('X') :
@@ -109,13 +107,10 @@ module DialogsHelper
   #   :new_recipe (nee newRecipe)
   #   :sign_in
   def dialogHeader( which, ttl=nil, options={})
-    # Render for a floating dialog unless an area is asserted OR we're rendering for the page
-    # area = options[:_area] || "floating" # (@partial ? "floating" : "page")
     classes = options[:class] || ""
     logger.debug "dialogHeader for "+globstring({dialog: which, area: response_service.area_class, ttl: ttl})
     # Assert a page title if given
     ttlspec = ttl ? %Q{ title="#{ttl}"} : ""
-    # for_bootstrap = options[:_area].blank? || options[:_area] != "at_top"
     bs_classes = !response_service.injector? ? "" : "modal-pending hide fade"
     hdr = 
       %Q{<div class="#{bs_classes} dialog #{which.to_s} #{response_service.area_class} #{classes}" #{ttlspec}>}+

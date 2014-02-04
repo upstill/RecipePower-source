@@ -147,7 +147,6 @@ class RecipesController < ApplicationController
     # Here is where we take a hit on the "Add to RecipePower" widget,
     # and also invoke the 'new cookmark' dialog. The difference is whether
     # parameters are supplied for url, title and note (though only URI is required).
-    # @_area = params[:_area] || "at_top"
     # dialog_only = params[:_how] == "modal" || params[:_how] == "modeless"
     respond_to do |format|
       format.html { # This is for capturing a new recipe and tagging it using a new page. 
@@ -207,7 +206,6 @@ class RecipesController < ApplicationController
             render js: %Q{alert(#{msg});}
           else
             params[:recipe][:title] = "Recipe from "+@site.name if params[:recipe][:title].blank?
-            # @url = capture_recipes_url area: "at_top", layout: "injector", sourcehome: @site.domain, recipe: params[:recipe]
             @url = capture_recipes_url response_service.redirect_params( params.slice(:recipe).merge sourcehome: @site.domain)
             render
           end

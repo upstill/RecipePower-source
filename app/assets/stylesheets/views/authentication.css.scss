@@ -11,10 +11,6 @@ div.authentications {
 	border:3px solid black;
 	margin-left: 20px;
 	padding:10px;
-	&.floating {
-		// width: 450px;
-    // margin: 15px 50px;
-	}
 }
 .auth_buttons {
 	margin-bottom:20px
@@ -94,12 +90,12 @@ div.authentications {
 	margin:0.1em;
 	border:1px solid black
 }
-.signin_field.at_top {
+.signin_field.injector {
 	float:left;
 	margin:0.5em 1em 0.3em 1em;
 	width:auto
 }
-div.gobutton.at_top input {
+div.gobutton.injector input {
 	margin:0em;
 	display:inline-block;
 	text-align:center;
