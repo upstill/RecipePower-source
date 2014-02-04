@@ -25,17 +25,17 @@ class InvitationsController < Devise::InvitationsController
 
   # GET /resource/invitation/accept?invitation_token=abcdef
   def edit
-    if response_service.dialog? # Referred by on-site link => do dialog
-      smartrender
-    elsif defer_invitation
-      # Invitation link was followed => issue the 'responded' event
-      if params[:invitation_token] && 
+    if params[:invitation_token] &&
         (self.resource = resource_class.find_by_invitation_token(params[:invitation_token], false))
-        resource.extend_fields # Default values for name, etc.
-        # RpEvent.post :invitation_responded, resource, nil, resource_class.find(resource.invited_by_id)
+      resource.extend_fields # Default values for name, etc.
+      # RpEvent.post :invitation_responded, resource, nil, resource_class.find(resource.invited_by_id)
+      if response_service.dialog? # Referred by on-site link => do dialog
+        smartrender
+      else # elsif defer_invitation
+        # Invitation link was followed => issue the 'responded' event
+        session[:notification_token] = params[:notification_token] if params[:notification_token]
+        redirect_to hash_to_modal(accept_user_invitation_path(:invitation_token => params[:invitation_token]), home_path) # smartrender area: "page", redirect_to: home_path
       end
-      session[:notification_token] = params[:notification_token] if params[:notification_token]   
-      smartrender area: "page", redirect_to: home_path
     else
       set_flash_message(:alert, :invitation_token_invalid)
       redirect_to after_sign_out_path_for(resource_name)
@@ -232,6 +232,7 @@ class InvitationsController < Devise::InvitationsController
   # PUT /resource/invitation
   def update
     self.resource = resource_class.accept_invitation!(params[resource_name])
+    resource.password = resource.email if resource.password.blank?
     if resource.errors.empty?
       invitation_event = RpEvent.where( source_id: resource.invited_by_id, target_id: resource.id, target_type: resource.class.to_s ).first
       RpEvent.post :invitation_accepted, resource, invitation_event, User.find(resource.invited_by_id )

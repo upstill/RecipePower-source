@@ -263,6 +263,7 @@ class ApplicationController < ActionController::Base
       "orphantag_"+tagid.to_s
   end
       
+=begin
 
   def defer_invitation
     if params[:invitation_token]
@@ -283,7 +284,8 @@ class ApplicationController < ActionController::Base
     end
     token
   end
-  
+
+=end
   def defer_notification
     if params[:notification_token]
       session[:notification_token] = params[:notification_token]

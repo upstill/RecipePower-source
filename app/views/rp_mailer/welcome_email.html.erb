@@ -1,28 +1,50 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" http-equiv="Content-Type" content="text/html" />
-  </head>
-  <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
-    <h3>Welcome to RecipePower, <%= @user.handle %></h3>
+<head>
+  <meta charset="utf-8" http-equiv="Content-Type" content="text/html"/>
+</head>
+<body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+<h3>Welcome to RecipePower, <%= @user.handle %></h3>
+
+<p>
+  You are now a member in good standing (but behave yourself!)
+  of the RecipePower community, all signed in and everything.
+  Your collection awaits you at <%= link_to "www.recipepower.com", collection_url %>. Of
+  course, it's fairly empty at the moment--but if you install our
+  <%= link_to "Cookmark Button", popup_url+"/starting_step2" %>,
+  you can add to your collection from anywhere on the Web.
+</p>
+
+<p>Right now, your settings go like this:</p>
+<ul>
+  <li><strong>Username: </strong><%= @user.username %></li>
+  <li><strong>Polite name: </strong><%= @user.polite_name %></li>
+  <li><strong>Email: </strong><%= @user.email %></li>
+  <li><strong>Password: </strong>unless you've changed it, same as your email.</li>
+</ul>
+<p>If any of this (especially the password) doesn't suit, you can get to your
+  Profile on the menu under your name--or
+  click <%= link_to "here", hash_to_modal(users_profile_path, collection_url) %></p>
+<% if @inviter %>
+    <p>Since <%= @inviter.handle %> invited you, you are Friends by default,
+      so you will find their collection at "<%= @inviter.handle %>" when you click
+      the <strong>My Friends</strong> label. If this
+      doesn't suit, just click the 'X' next to their name there.
+
     <p>
-      You are now a member in good standing (but behave yourself!) 
-			of the RecipePower community, all signed in and everything. 
-			Your collection awaits you at <%= link_to "www.recipepower.com", home_url %>. Of
-			course, it's fairly empty at the moment--but if you install our
-			<%= link_to "Cookmark Button", popup_url+"/starting_step2" %>,
-			you can add to your collection from anywhere on the Web.</p>
-		<% if @inviter %>
-	    <p>Since <%= @inviter.handle %> invited you, you are Friends by default, 
-			so you will find their collection at "<%= @inviter.handle %>" when you click 
-			the <strong>My Friends</strong> label. If this
-			doesn't suit, just click the 'X' next to their name there.
-		<% end %>
-    </p><p>We've worked hard to keep RecipePower simple, but if you get confused, hit the <strong>Help</strong> 
-		link at the bottom left of the page.</p>
-		<p>Just one more thing: we're <strong>always</strong> keen to hear what you have to say, especially if something's bugging you. Click the red <strong>Feedback</strong> tab and tell us how it's going. Response Guaranteed!</p>
-    <p>We're glad you've joined us, <%= @user.handle %>. Happy Eating!</p>
-    <p><br>Warm Regards,</p>
-    <p>The RecipePower Team</p>
-  </body>
+
+    </p>
+<% end %>
+</p><p>We've worked hard to keep RecipePower simple, but if you get confused, hit the <strong>Help</strong>
+  link at the bottom left of the page.</p>
+
+<p>Just one more thing: we're <strong>always</strong> keen to hear what you have to say, especially if something's
+  bugging you. Click the red <strong>Feedback</strong> tab and tell us how it's going. Response Guaranteed!</p>
+
+<p>We're glad you've joined us, <%= @user.handle %>. Happy Eating!</p>
+
+<p><br>Warm Regards,</p>
+
+<p>The RecipePower Team</p>
+</body>
 </html>

@@ -11,7 +11,7 @@ class RpMailer < ActionMailer::Base
   end
   
   def welcome_email(user)
-    return unless @inviter = User.where(id: user.invited_by).first
+    @inviter = User.where(id: user.invited_by).first
     @user = user
     @profile_url = "http://www.recipepower.com/users/profile"
     @login_url  = "http://recipepower.com/login"

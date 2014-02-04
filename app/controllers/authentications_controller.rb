@@ -74,9 +74,9 @@ class AuthenticationsController < ApplicationController
         if user.save
           @authentication = user.authentications.create!(authparams) # Link authorization to user
           sign_in user, :event => :authentication
+          RpMailer.welcome_email(user).deliver
           flash[:notice] =
-              %Q{Welcome to RecipePower, #{user.polite_name}! You can always connect with #{@authentication.provider_name}, but you can also login with your
-                email address (#{user.email} or username (#{user.username}). Change any of this by editing your Profile. }
+              %Q{Welcome to RecipePower, #{user.polite_name}! Introductory email is on its way. }
           url_to = after_sign_in_path_for(user)
         else
           # If user can't be saved, go back to edit params
@@ -113,24 +113,9 @@ class AuthenticationsController < ApplicationController
       flash[:notice] = "Yay! Signed in with #{@authentication.provider_name}. Nice to see you again, #{user.handle}!"
       response_service.amend originator
       url_to = after_sign_in_path_for(user)
-    elsif token = deferred_invitation
-      user = User.find_by_invitation_token token
-      # If we have an invitation out for this user we go ahead and log them in
-      user.apply_omniauth(omniauth)
-      @authentication = user.authentications.build(authparams)
-      if user.save
-        flash[:notice] = "Signed in via #{@authentication.provider_name}."
-        if user.sign_in_count > 1
-          flash[:notice] += " Welcome back, #{user.handle}!"
-        end
-        user.accept_invitation! if user.invited?
-        session.delete :invitation_token
-        sign_in_and_redirect(:user, user)
-        return
-      end
     end
     # We haven't managed to get the user signed in by other means, but we still have an authorization
-    if !(current_user || token || user)  # Failed login not because of failed invitation
+    if !(current_user || user)  # Failed login not because of failed invitation
       # The email didn't come in the authorization, so we now need to
       # discriminate between an existing user(and have them log in)
       # and a new user (and have them sign up). Time to throw the problem

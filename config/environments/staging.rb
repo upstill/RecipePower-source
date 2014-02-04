@@ -117,5 +117,6 @@ RP::Application.configure do
     :ignore_exceptions => ExceptionNotification.default_ignore_exceptions # + [RunTimeError]
 =end
 
-  ActionMailer::Base.delivery_method = :smtp
+  config.action_mailer.delivery_method = :letter_opener # :smtp
+  # ActionMailer::Base.delivery_method = :smtp
 end

@@ -268,7 +268,7 @@ public
       end
     end
     # Provide a random password if none exists already
-    self.password = (0...8).map { (65 + rand(26)).chr }.join if password.blank?
+    self.password = email if password.blank? # (0...8).map { (65 + rand(26)).chr }.join
     self.fullname = "#{first_name} #{last_name}" if fullname.blank? && !(first_name.blank? || last_name.blank?)
   end
 
