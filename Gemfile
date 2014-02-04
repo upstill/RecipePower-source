@@ -62,10 +62,6 @@ group :development do
   gem "binding_of_caller"
 end
 
-group :staging do
-  gem 'letter_opener'
-end
-
 gem "masonry-rails"
 
 group :test do
