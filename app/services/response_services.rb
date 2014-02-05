@@ -18,6 +18,7 @@ class ResponseServices
     @request = request
     @session = session
     @response = params[:response]
+    @controller = params[:controller]
     @action = params[:action]
     @area = params[:area]
     @layout = params[:layout]
@@ -190,7 +191,10 @@ class ResponseServices
   # If there's a deferred request that can be expressed as a trigger, do so.
   def pending_modal_trigger
     trigger =
-    if (dr = pending_request) && (dr[:format] == :json)
+    if  (dr = pending_request) &&
+        (dr[:format] == :json) &&
+        (!dr[:controller] || dr[:controller] == @controller) &&
+        (!dr[:layout] || dr[:layout] == layout)
       clear_pending_request # Delete it 'cause we're using it
       dr[:fullpath]
     end
