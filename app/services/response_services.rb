@@ -137,10 +137,9 @@ class ResponseServices
     end
   end
 
-  # Return appropriate render parameters, asserting defaults as necessary
+  # Return appropriate parameters for a render call, asserting defaults as necessary
   def render_params defaults = {}
-    # @area = defaults[:area] if defaults[:area]
-    defaults.merge target: @target # layout: layout
+    defaults.merge target: @target, layout: layout
   end
 
   # Recall an earlier, deferred, request that can be redirected to in the current context .
