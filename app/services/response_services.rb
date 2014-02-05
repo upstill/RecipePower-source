@@ -20,14 +20,17 @@ class ResponseServices
     @response = params[:response]
     @controller = params[:controller]
     @action = params[:action]
-    @area = params[:area]
-    @layout = params[:layout]
-    @partial = !params[:partial].blank?
+    # @area = params[:area]
+    # @layout = params[:layout]
+    # @partial = !params[:partial].blank?
+
     # Target is one of "desktop", "mobile" and "injector"
     @target = (params[:target] || "desktop") unless @session[:mobile]
+
     # Format refers to how to present the content: within a dialog, or on a page
-    @format = (params[:format] || "page")
-    @format = "dialog" if (params[:how] == "modal")
+    # @format = (params[:format] || "page")
+    # @format = "dialog" if (params[:how] == "modal")
+    @modal = params[:modal]
   end
 
   # Provide a URL that reproduces the current request
@@ -47,16 +50,16 @@ class ResponseServices
     query_params = query_str.empty? ? {} : Hash[ CGI.parse(query_str).map { |elmt| [elmt.first.to_sym, elmt.last.first] } ]
     @target = query_params[:target] if query_params[:target] unless @session[:mobile]
     # Format refers to how to present the content: within a dialog, or on a page
-    @format = query_params[:format] if query_params[:format]
-    @format = "dialog" if query_params[:how] && (query_params[:how] == "modal")
+    @modal = query_params[:modal]
+    # @format = "dialog" if query_params[:how] && (query_params[:how] == "modal")
   end
   
   def is_dialog
-    @format = "dialog"
+    @modal = true
   end
   
   def dialog?
-    @format == "dialog"
+    !@modal.nil?
   end
   
   def is_injector
@@ -70,7 +73,7 @@ class ResponseServices
   
   # True if we are to render a whole page
   def page?
-    @area == "page" || @format == "page"
+    @modal.nil? # @format == "page"
   end
   
   def is_mobile(on=true)
@@ -91,13 +94,13 @@ class ResponseServices
   # Return relevant options for modal dialog
   def modal_options options_in = {}
     klass = (options_in[:class] || "")+" modal-yield"
-    options_in.merge  area: @area, class: klass
+    options_in.merge class: klass
   end
   
   # Forward the appropriate parameters to a subsequent request
   def redirect_params options = {}
-    options[:target] = "injector" if injector?
-    options[:how] = "modal" if dialog?
+    options[:target] = @target # "injector" if injector?
+    options[:modal] = @modal # options[:how] = "modal" if dialog?
     options
   end
 
@@ -106,39 +109,38 @@ class ResponseServices
     assert_query path, redirect_params( options )
   end
 
-  # What's the appropriate layout for the current context?
+  # What's the appropriate layout (in the Rails sense) for the current context?
   def layout
-    case 
-    when mobile?
-      "jqm"
-    when dialog?
-      false
-    when injector?
-      "injector"
-    when page?
-      "application"
-    else
-      false
+    case
+      when injector?
+        "injector"
+      when page?
+        "application"
+      when mobile?
+        "jqm"
+      else
+        false
     end
   end
-  
+
+  # Return the class specifier for styling according to the target
+  def format_class
+    case
+      when injector?
+        "injector"
+      when dialog?
+        "floating"
+      when mobile?
+        "mobile"
+      else
+        "page"
+    end
+  end
+
   # Return appropriate render parameters, asserting defaults as necessary
   def render_params defaults = {}
-    @area = defaults[:area] if defaults[:area]
-    defaults.merge layout: layout
-  end
-  
-  # Return the class specifier for styling according to the target
-  def area_class
-    # @area
-    case
-    when injector? 
-      "injector"
-    when dialog?
-      "floating"
-    else
-      "page"
-    end
+    # @area = defaults[:area] if defaults[:area]
+    defaults.merge target: @target # layout: layout
   end
 
   # Recall an earlier, deferred, request that can be redirected to in the current context .

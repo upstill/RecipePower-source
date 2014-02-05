@@ -138,7 +138,7 @@ class RecipesController < ApplicationController
        @recipe.current_user = current_user_or_guest_id # session[:user_id]
        # @_area = params[:_area]
        # dialog_boilerplate 'new', 'modal'
-       smartrender :action => 'new', :how => :modal
+       smartrender :action => 'new', modal: true # , :how => :modal
     end
   end
 
@@ -147,7 +147,6 @@ class RecipesController < ApplicationController
     # Here is where we take a hit on the "Add to RecipePower" widget,
     # and also invoke the 'new cookmark' dialog. The difference is whether
     # parameters are supplied for url, title and note (though only URI is required).
-    # dialog_only = params[:_how] == "modal" || params[:_how] == "modeless"
     respond_to do |format|
       format.html { # This is for capturing a new recipe and tagging it using a new page. 
         if current_user

@@ -1,5 +1,5 @@
 <% if @authentications && !@authentications.empty? %>
-    <div class="auth_current <%# @_area %><%= response_service.area_class %>">
+    <div class="auth_current <%# @_area %><%= response_service.format_class %>">
       <div class="authentications">
         <div class="prompt">You can log in to RecipePower using:</div>
         <% for authentication in @authentications %>

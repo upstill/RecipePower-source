@@ -7,7 +7,7 @@
 <br>
 <%= link_to @recipe.title, accept_invitation_link ?
             recipe_url(@recipe,
-                      :how => :modal,
+                      modal: true, # :how => :modal,
                       :accept_invitation_link => accept_invitation_link) :
             @recipe.url,
             class: "share_recipe_title" %>

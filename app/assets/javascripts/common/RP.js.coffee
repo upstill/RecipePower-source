@@ -153,7 +153,7 @@ RP.get_page = (url) ->
 # Parse a url to either replace a dialog or reload the page
 RP.get_and_go = (data) ->
 	url = decodeURIComponent data.url
-	if url.match /how=modal/
+	if url.match /modal=/
 		RP.dialog.get_and_go null, url
 	else
 		window.location = url # RP.get_page data.url

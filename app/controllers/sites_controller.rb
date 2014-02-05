@@ -26,7 +26,7 @@ class SitesController < ApplicationController
     @feeds = @site.feeds
     @seeker = FeedSeeker.new @user, @feeds, session[:seeker] # Default; other controllers may set up different seekers
 
-    smartrender :how => :modal
+    smartrender modal: true # :how => :modal
 =begin
     respond_to do |format|
       format.html # show.html.erb

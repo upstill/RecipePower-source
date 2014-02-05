@@ -57,14 +57,14 @@ module DialogsHelper
     options[:class] = 
       [ "dialog", 
         which.to_s, 
-        response_service.area_class, 
+        response_service.format_class,
         ("hide" unless options[:show]),
         ("modal-pending fade" unless response_service.injector? || options[:show]), 
         options[:class] 
       ].compact.join(' ')
     # The :requires option specifies JS modules that this dialog uses
     options[:data] = { :"dialog-requires" => options[:requires] } if options[:requires]
-    options = options.slice! :area, :show, :noflash, :body_contents, :body_class, :requires
+    options = options.slice! :show, :noflash, :body_contents, :body_class, :requires
     options[:title] ||= ttl if ttl
     content_tag(:div, # Outer block: dialog
       content_tag(:div, # modal-dialog
@@ -108,12 +108,12 @@ module DialogsHelper
   #   :sign_in
   def dialogHeader( which, ttl=nil, options={})
     classes = options[:class] || ""
-    logger.debug "dialogHeader for "+globstring({dialog: which, area: response_service.area_class, ttl: ttl})
+    logger.debug "dialogHeader for "+globstring({dialog: which, format: response_service.format_class, ttl: ttl})
     # Assert a page title if given
     ttlspec = ttl ? %Q{ title="#{ttl}"} : ""
     bs_classes = !response_service.injector? ? "" : "modal-pending hide fade"
     hdr = 
-      %Q{<div class="#{bs_classes} dialog #{which.to_s} #{response_service.area_class} #{classes}" #{ttlspec}>}+
+      %Q{<div class="#{bs_classes} dialog #{which.to_s} #{response_service.format_class} #{classes}" #{ttlspec}>}+
       (response_service.injector? ? generic_cancel_button('X') :
         content_tag( :div,         
           %Q{

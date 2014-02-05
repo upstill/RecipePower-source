@@ -205,7 +205,7 @@ class ApplicationController < ActionController::Base
         hresult = with_format("html") do
           render_to_string response_service.action, renderopts # May have special iframe layout
         end
-        # renderopts[:json] = { code: hresult, area: response_service.area_class, how: "bootstrap" }
+        # renderopts[:json] = { code: hresult, area: response_service.format_class, how: "bootstrap" }
         renderopts[:json] = { code: hresult, how: "bootstrap" }
         render renderopts
       }

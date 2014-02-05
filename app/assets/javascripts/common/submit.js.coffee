@@ -30,7 +30,7 @@ RP.submit.beforeSend = (event, xhr, settings) ->
 # Success handler for fetching dialog from server
 RP.submit.success = (event, responseData, status, xhr) ->
 	RP.notifications.done()
-	responseData.how = responseData.how || "modal"
+	# responseData.how = responseData.how || "modal"
 	RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
 	RP.process_response responseData, target_modal(event)
 

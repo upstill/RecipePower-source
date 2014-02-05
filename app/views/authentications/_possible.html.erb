@@ -1,7 +1,7 @@
 <% prompt ||= "You can sign in using one of these fine services:" %>
 <% origin ||= nil %>
 <% intention ||= nil # Set to 'signup' if creating a new account %>
-<div class="auth_poss <%= response_service.area_class %>" style="overflow: visible">
+<div class="auth_poss <%= response_service.format_class %>" style="overflow: visible">
   <h4><%= prompt.html_safe %></strong></h4><br>
   <div class="row">
     <%= auth_possible "Facebook", origin, intention %>
