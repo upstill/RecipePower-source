@@ -27,7 +27,7 @@ class ResponseServices
     # Target is one of "desktop", "mobile" and "injector"
     @target = (params[:target] || "desktop") unless @session[:mobile]
 
-    # Format refers to how to present the content: within a dialog, or on a page
+    # Format dictates CSS style for the content (though not verbatim): within a dialog, or on a page
     # @format = (params[:format] || "page")
     # @format = "dialog" if (params[:how] == "modal")
     @modal = params[:modal]
