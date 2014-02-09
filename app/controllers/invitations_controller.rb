@@ -93,7 +93,8 @@ class InvitationsController < Devise::InvitationsController
           @notification = @resource.post_notification(:share_recipe, current_inviter, what: params[resource_name][:shared_recipe])
           @resource.save(validate: false) # ...because the invitee doesn't have a handle yet
           @resource.issue_instructions(:sharing_invitation_instructions,
-                                       notification_token: @notification.notification_token)
+                                       notification_token: @notification.notification_token,
+                                       subject: @resource.invitation_issuer+" has something tasty for you")
         else
           @resource.save(validate: false) # ...because the invitee doesn't have a handle yet
           @resource.issue_instructions(:invitation_instructions)
