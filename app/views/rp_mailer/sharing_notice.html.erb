@@ -167,7 +167,7 @@
   <body>
 		<div class="header_content">
 			<div class="message_banner">
-				<strong><%= @sender.handle %></strong> sez: Look what I found on
+				<strong><%= @sender.polite_name %></strong> sez: Look what I found on
 				<%= link_to "RecipePower", root_url, class: "brand", style: "font-size:18px;" %>.
 			</div>
 			<% unless @recipient.invitation_message.blank? %>
@@ -191,7 +191,7 @@
 		</div>
 		<div class="footer">
 	  	<p><a class="brand" href="/collection">RecipePower</a></p>
-			<p>Copyright 2013 by RecipePower. All Rights Reserved</p>
+			<p>Copyright 2014 by RecipePower. All Rights Reserved</p>
 		</div>
   </body>
 </html>
