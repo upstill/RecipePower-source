@@ -4,7 +4,7 @@
       <a href="#" class="navbar-brand">RecipePower</a>
       <% if user_signed_in? %>
           <div class="dropdown navbar-right pull-right" style="margin-top: 14px; margin-left:10px;">
-            <a class="dropdown-toggle navbar-inverse" data-toggle="dropdown" href="#">            <span class="text-on-black"><%= current_user.handle %>&nbsp;▿</span>            </a>
+            <a class="dropdown-toggle navbar-inverse" data-toggle="dropdown" href="#">            <span class="handle text-on-black"><%= current_user.handle %>&nbsp;&or;</span>            </a>
             <ul class="dropdown-menu">
               <%= header_menu_items %>
             </ul>

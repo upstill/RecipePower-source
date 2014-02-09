@@ -164,9 +164,13 @@ class UsersController < ApplicationController
         format.html { redirect_to collection_path }
         format.json  { 
           listitem = with_format("html") { render_to_string( partial: "show_table_row") }
+          handleitem = %Q{<span class="handle text-on-black">#{@user.handle}&nbsp;&or;</span>}.html_safe
           render json: {
             done: true,
-            replacements: [ ["#listrow_"+@user.id.to_s, listitem], view_context.flash_notifications_replacement ]
+            replacements: [ ["#listrow_"+@user.id.to_s, listitem],
+                            view_context.flash_notifications_replacement,
+                            ['span.handle', handleitem ]
+            ]
           }
         }
       end
