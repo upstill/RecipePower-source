@@ -11,7 +11,7 @@ class User < ActiveRecord::Base
   before_save :serialize_browser
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :id, :username, :fullname, :about, :login, :private, :skip_invitation,
+  attr_accessible :id, :username, :first_name, :last_name, :fullname, :about, :login, :private, :skip_invitation,
                 :email, :password, :password_confirmation, :shared_recipe, :invitee_tokens,
                 :recipes, :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens, :subscription_tokens, :invitation_issuer
   attr_writer :browser
