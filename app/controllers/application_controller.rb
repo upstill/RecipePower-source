@@ -8,7 +8,7 @@ class ApplicationController < ActionController::Base
   
   before_filter :check_flash
   before_filter :report_cookie_string
-  before_filter :detect_notification_token
+  # before_filter :detect_notification_token
   before_filter :setup_response_service
   before_filter :log_serve
 
@@ -22,7 +22,7 @@ class ApplicationController < ActionController::Base
     helper_method :stored_location_for
     helper_method :deferred_capture
     helper_method :deferred_collect
-    helper_method :deferred_notification
+    # helper_method :deferred_notification
     include ApplicationHelper
 
   # Track the session, saving session events when the session goes stale
@@ -59,11 +59,7 @@ class ApplicationController < ActionController::Base
     klass ||= "#{object.class}Presenter".constantize
     klass.new(object, view_context)
   end  
-  
-  def detect_notification_token
-    session[:notification_token] = params[:notification_token] if params[:notification_token]
-  end
-  
+
   def check_flash
     logger.debug "FLASH messages extant for "+params[:controller]+"#"+params[:action]+"(check_flash):"
     logger.debug "    notice: "+flash[:notice] if flash[:notice]
@@ -286,7 +282,12 @@ class ApplicationController < ActionController::Base
     token
   end
 
-=end
+
+  # We keep a notification token in the session pending login
+  def detect_notification_token
+    session[:notification_token] = params[:notification_token] if params[:notification_token]
+  end
+
   def defer_notification
     if params[:notification_token]
       session[:notification_token] = params[:notification_token]
@@ -305,6 +306,7 @@ class ApplicationController < ActionController::Base
     end
     token
   end
+=end
 
   include ControllerAuthentication
 
@@ -348,13 +350,20 @@ class ApplicationController < ActionController::Base
     # the path to completing the capture/tagging process
     scope = Devise::Mapping.find_scope!(resource_or_scope)
     if scope && (scope==:user)
-      # Process any pending invitation notifications
+      # Process any pending notifications
+      notifications = current_user.notifications_received.where(accepted: false)
+      while notification = notifications.pop
+        notification.accept
+      end
+=begin
       if (nt = session[:notification_token]) &&
           (notification = Notification.where(notification_token: nt).first) &&
           (notification.target == current_user)
         session.delete(:notification_token)
         notification.accept
       end
+=end
+
       # If on the site, login triggers a refresh of the collection
       response_service.deferred_request || response_service.url_for_redirect(collection_path, :format => :html)
 =begin

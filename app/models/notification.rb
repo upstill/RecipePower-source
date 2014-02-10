@@ -1,5 +1,5 @@
 class Notification < ActiveRecord::Base
-  attr_accessible :info, :source_id, :target_id, :notification_type, :typenum, :typesym, :notification_token
+  attr_accessible :info, :source_id, :target_id, :notification_type, :typenum, :typesym, :notification_token, :accepted
   serialize :info
   
   belongs_to :target, :class_name => "User"
@@ -22,6 +22,8 @@ class Notification < ActiveRecord::Base
       recipe.touch true # Touch the recipe and add it to the user's collection
     when :make_friend
     end
+    self.accepted = true
+    save
   end
 
   protected

@@ -362,6 +362,12 @@ public
         (username unless username.blank?) ||
         email.sub(/@.*/, '')
   end
+
+  def salutation
+    (first_name unless first_name.blank?) ||
+    (fullname.split(/\s/).first unless fullname.blank?) ||
+    username
+  end
   
   # 'name' is just an alias for handle, for use by Channel referents
   def name
@@ -447,6 +453,7 @@ public
       :source_id => from.id, 
       :target_id => id, 
       :typenum => notification_type,
+      :accepted => false
     }
     attributes[:source_id] = from.id if from
     notification = Notification.create( attributes )

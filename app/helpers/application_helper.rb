@@ -353,10 +353,10 @@ module ApplicationHelper
       # trigger when the page is loaded
       session.delete :invitation_token
 			link_to_modal "", accept_user_invitation_path(invitation_token: it), class: "trigger"
+=begin
     elsif token = deferred_notification
 			@user = Notification.find_by_notification_token(token).target
 			link_to "", new_user_session_path(user: { id: @user.id, email: @user.email } ), class: "trigger" 
-=begin
     elsif data = deferred_collect(false)
       if data[:uid]
   			@user = User.find data[:uid]
@@ -364,27 +364,38 @@ module ApplicationHelper
   		else
   		  link_to "", new_user_path, class: "trigger" 
   		end
-	  else
 =end
+    else
 	    render partial: "registrations/new_modal"
 		end
 	end
   
   def signup_button
     unless current_user
-      if session[:invitation_token]
-        label = "Accept Invitation" 
-        path = accept_user_invitation_path(invitation_token: session[:invitation_token] )
-        button_to_modal(label, path, class: "btn btn-lg btn-success trigger" ) 
-      elsif token = deferred_notification
-  			@user = Notification.find_by_notification_token(token).target
-  			button_to_modal "Take Share", new_user_session_path(user: { id: @user.id, email: @user.email } ), class: "btn btn-lg btn-success trigger" 
+      options = { class: "btn btn-lg btn-success" }
+      if token = params[:invitation_token]
+        user = User.find_by_invitation_token(token, false)
+        notifications = user.notifications_received.where(accepted: false)
+        if notifications.empty?
+          label = "Accept Invitation"
+          options[:class] << " trigger"
+        else
+          label = "Take Share"
+          # path = new_user_session_path(user: {id: @user.id, email: @user.email})
+          options[:class] << " trigger"
+        end
+        path = accept_user_invitation_path(invitation_token: token)
+      elsif token = params[:notification_token]
+        user = Notification.find_by_notification_token(token).target
+        label = "Take Share"
+        path = new_user_session_path(user: {id: user.id, username: user.username})
+        options[:class] << " trigger"
       else
         label = "Sign Me Up"
-        selector = "div.dialog.signup"
+        options[:selector] = "div.dialog.signup"
         path = new_user_registration_path()
-        button_to_modal(label, path, class: "btn btn-lg btn-success", selector: selector )
       end
+      button_to_modal label, path, options
     end
   end
 

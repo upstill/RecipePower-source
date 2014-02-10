@@ -33,8 +33,8 @@ class InvitationsController < Devise::InvitationsController
         smartrender
       else # elsif defer_invitation
         # Invitation link was followed => issue the 'responded' event
-        session[:notification_token] = params[:notification_token] if params[:notification_token]
-        redirect_to hash_to_modal(accept_user_invitation_path(:invitation_token => params[:invitation_token]), home_path) # smartrender area: "page", redirect_to: home_path
+        # session[:notification_token] = params[:notification_token] if params[:notification_token]
+        redirect_to home_path(:invitation_token => params[:invitation_token]) # hash_to_modal(accept_user_invitation_path(:invitation_token => params[:invitation_token]), home_path) # smartrender area: "page", redirect_to: home_path
       end
     else
       set_flash_message(:alert, :invitation_token_invalid)
