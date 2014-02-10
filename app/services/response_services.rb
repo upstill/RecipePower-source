@@ -1,15 +1,13 @@
 # Class to govern production of pages and dialogs depending on context and params
 # Contexts:
 # => injector
-# => modal
-# => browser
+# => mobile
+# => desktop
 # Format:
-# => json: return response structure with directive/data pairs
-# => html: return page, possibly with dialog embedded
-# => js: remote request: return data with js to apply it
-# Presentation:
 # => page
-# => modal
+# => modal (iff param[:modal] == true)
+
+
 class ResponseServices
 
   attr_accessor :action
@@ -20,6 +18,8 @@ class ResponseServices
     @response = params[:response]
     @controller = params[:controller]
     @action = params[:action]
+    @invitation_token = params[:invitation_token]
+    @notification_token = params[:notification_token]
     # @area = params[:area]
     # @layout = params[:layout]
     # @partial = !params[:partial].blank?
@@ -199,6 +199,30 @@ class ResponseServices
       dr[:fullpath]
     end
     trigger
+  end
+
+  # The signup button on the home page responds differently (and may or may not be a trigger)
+  #  depending on the presence of an invitation token or a notification token in the params
+  def signup_button_options
+    options = { class: "btn btn-lg btn-success" }
+    if @invitation_token
+      # We've invited a new user, with or without a recipe share
+      user = User.find_by_invitation_token(@invitation_token, false)
+      notifications = user.notifications_received.where(accepted: false)
+      options[:label] = notifications.empty? ? "Accept Invitation" : "Take Share"
+      options[:class] << " trigger"
+      options[:path] = Rails.application.routes.url_helpers.accept_user_invitation_path(invitation_token: @invitation_token)
+    elsif @notification_token
+      user = Notification.find_by_notification_token(@notification_token).target
+      options[:label] = "Take Share"
+      options[:path] = Rails.application.routes.url_helpers.new_user_session_path(user: {id: user.id, username: user.username})
+      options[:class] << " trigger"
+    else
+      options[:label] = "Sign Me Up"
+      options[:selector] = "div.dialog.signup"
+      options[:path] = Rails.application.routes.url_helpers.new_user_registration_path()
+    end
+    options
   end
 
   # Used in templates for standard actions (e.g., new, edit, show) to choose a partial depending on

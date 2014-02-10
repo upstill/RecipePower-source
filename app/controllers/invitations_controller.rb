@@ -31,9 +31,8 @@ class InvitationsController < Devise::InvitationsController
       # RpEvent.post :invitation_responded, resource, nil, resource_class.find(resource.invited_by_id)
       if response_service.dialog? # Referred by on-site link => do dialog
         smartrender
-      else # elsif defer_invitation
+      else
         # Invitation link was followed => issue the 'responded' event
-        # session[:notification_token] = params[:notification_token] if params[:notification_token]
         redirect_to home_path(:invitation_token => params[:invitation_token]) # hash_to_modal(accept_user_invitation_path(:invitation_token => params[:invitation_token]), home_path) # smartrender area: "page", redirect_to: home_path
       end
     else
@@ -239,7 +238,6 @@ class InvitationsController < Devise::InvitationsController
       RpEvent.post :invitation_accepted, resource, invitation_event, User.find(resource.invited_by_id )
       RpMailer.welcome_email(resource).deliver
       RpMailer.invitation_accepted_email(resource).deliver
-      session.delete :invitation_token
       set_flash_message :notice, :updated
       sign_in(resource_name, resource)
       redirect_to after_accept_path_for(resource), status: 303

@@ -346,25 +346,6 @@ module ApplicationHelper
   def preloads
     if current_user
       render partial: 'recipes/edit_template', recipe: nil
-    elsif session[:on_tour]
-	    render partial: "registrations/new_modal"
-    elsif it = session[:invitation_token]
-      # load the invitation-acceptance dialog. If the user isn't on tour, set it to
-      # trigger when the page is loaded
-      session.delete :invitation_token
-			link_to_modal "", accept_user_invitation_path(invitation_token: it), class: "trigger"
-=begin
-    elsif token = deferred_notification
-			@user = Notification.find_by_notification_token(token).target
-			link_to "", new_user_session_path(user: { id: @user.id, email: @user.email } ), class: "trigger" 
-    elsif data = deferred_collect(false)
-      if data[:uid]
-  			@user = User.find data[:uid]
-  			link_to "", new_authentication_path, class: "trigger" 
-  		else
-  		  link_to "", new_user_path, class: "trigger" 
-  		end
-=end
     else
 	    render partial: "registrations/new_modal"
 		end
@@ -372,29 +353,9 @@ module ApplicationHelper
   
   def signup_button
     unless current_user
-      options = { class: "btn btn-lg btn-success" }
-      if token = params[:invitation_token]
-        user = User.find_by_invitation_token(token, false)
-        notifications = user.notifications_received.where(accepted: false)
-        if notifications.empty?
-          label = "Accept Invitation"
-          options[:class] << " trigger"
-        else
-          label = "Take Share"
-          # path = new_user_session_path(user: {id: @user.id, email: @user.email})
-          options[:class] << " trigger"
-        end
-        path = accept_user_invitation_path(invitation_token: token)
-      elsif token = params[:notification_token]
-        user = Notification.find_by_notification_token(token).target
-        label = "Take Share"
-        path = new_user_session_path(user: {id: user.id, username: user.username})
-        options[:class] << " trigger"
-      else
-        label = "Sign Me Up"
-        options[:selector] = "div.dialog.signup"
-        path = new_user_registration_path()
-      end
+      options = response_service.signup_button_options
+      label = options.delete :label
+      path = options.delete :path
       button_to_modal label, path, options
     end
   end

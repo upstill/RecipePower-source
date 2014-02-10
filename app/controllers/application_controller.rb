@@ -260,54 +260,6 @@ class ApplicationController < ActionController::Base
       "orphantag_"+tagid.to_s
   end
       
-=begin
-
-  def defer_invitation
-    if params[:invitation_token]
-      session[:invitation_token] = params[:invitation_token]
-    else
-      session.delete :invitation_token
-    end
-    deferred_invitation
-  end
-  
-  # Validate and return the extant invitation token
-  def deferred_invitation
-    if token = session[:invitation_token] 
-      unless User.find_by_invitation_token(token, true)
-        token = nil
-        session.delete :invitation_token 
-      end
-    end
-    token
-  end
-
-
-  # We keep a notification token in the session pending login
-  def detect_notification_token
-    session[:notification_token] = params[:notification_token] if params[:notification_token]
-  end
-
-  def defer_notification
-    if params[:notification_token]
-      session[:notification_token] = params[:notification_token]
-    else
-      session.delete :notification_token
-    end
-    deferred_notification
-  end
-  
-  def deferred_notification
-    if token = session[:notification_token] 
-      unless Notification.exists? :notification_token => token
-        token = nil
-        session.delete :notification_token 
-      end
-    end
-    token
-  end
-=end
-
   include ControllerAuthentication
 
   # Enable a modal dialog to run by embedding its URL in the URL of a page, then redirecting to it
@@ -355,30 +307,8 @@ class ApplicationController < ActionController::Base
       while notification = notifications.pop
         notification.accept
       end
-=begin
-      if (nt = session[:notification_token]) &&
-          (notification = Notification.where(notification_token: nt).first) &&
-          (notification.target == current_user)
-        session.delete(:notification_token)
-        notification.accept
-      end
-=end
-
       # If on the site, login triggers a refresh of the collection
       response_service.deferred_request || response_service.url_for_redirect(collection_path, :format => :html)
-=begin
-      if response_service.injector? # Signing in from remote site => respond directly
-        logger.debug "stored_location_for: Getting stored location..."
-        raise "XXXX stored_location_for: Can't get deferred capture" unless dc = deferred_capture(true)
-        dc[:target] = "injector"
-        capture_recipes_url dc
-      else
-        # Signing in from the site (as opposed to the iframe). Redirect to any deferred requests
-        deferred_collect_path(current_user.id) ||
-        deferred_capture_path(current_user.id) ||
-        collection_path
-      end
-=end
     end || super
   end
 
