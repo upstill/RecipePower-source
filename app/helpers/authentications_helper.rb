@@ -1,11 +1,11 @@
 module AuthenticationsHelper
-  
+
   # Offer an authentication option in the form of an icon and a title
-  def auth_possible(service, origin, intention, options = {} )
+  def auth_possible(service, origin, originator, intention, options = {} )
     svc_lower = options[:svc_lower] || service.downcase
     return if @authentications && @authentications.any? { |authentication| authentication.provider.match(/^#{svc_lower}/) }
 
-    query_params = { intention: intention, originator: '"' + response_service.originator + '"' }
+    query_params = { intention: intention, originator: %Q{"#{originator}"} }
     if origin
       query_params[:origin] = '"' + URI::encode( response_service.decorate_path( origin )) + '"'
     end

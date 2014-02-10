@@ -4,7 +4,7 @@
       <%= link_to_modal( "Forget #{response_service.omniauth_pending}", new_user_registration_path(clear_omniauth: true), class: "btn btn-default") if response_service.omniauth_pending %>
     </div>
 <% else %>
-    <%= render 'authentications/possible', intention: 'signup', prompt: "Sign up using one of these fine services..." %>
+    <%= render 'authentications/possible', originator: new_user_registration_path(modal: true), intention: 'signup', prompt: "Sign up using one of these fine services..." %>
     <hr>
     <div class="prompt">...or with just an email address:</div>
 <% end %>
