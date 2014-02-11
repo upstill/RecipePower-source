@@ -302,11 +302,6 @@ class ApplicationController < ActionController::Base
     # the path to completing the capture/tagging process
     scope = Devise::Mapping.find_scope!(resource_or_scope)
     if scope && (scope==:user)
-      # Process any pending notifications
-      notifications = current_user.notifications_received.where(accepted: false)
-      while notification = notifications.pop
-        notification.accept
-      end
       # If on the site, login triggers a refresh of the collection
       response_service.deferred_request || response_service.url_for_redirect(collection_path, :format => :html)
     end || super
@@ -316,6 +311,9 @@ class ApplicationController < ActionController::Base
   # If there was a re-direct to the login page, we go back to the source of the re-direct.
   # Otherwise, new users go to the welcome page and logged-in-before users to the queries page.
   def after_sign_in_path_for(resource_or_scope)
+    # Process any pending notifications
+    notices = current_user.notifications_received.where(accepted: false).collect { |notification| notification.accept }.join('<br>'.html_safe)
+    flash[:success] = notices unless notices.blank?
     stored_location_for(resource_or_scope) || super
   end
 

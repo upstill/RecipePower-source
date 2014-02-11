@@ -15,15 +15,18 @@ class Notification < ActiveRecord::Base
   
   # Do whatever is entailed by the notification
   def accept
+    msg = ""
     case typesym
     when :share_recipe
       recipe = Recipe.find info[:what]
       recipe.current_user = target_id
       recipe.touch true # Touch the recipe and add it to the user's collection
+      msg = "'#{recipe.title}' now appearing in your collection"
     when :make_friend
     end
     self.accepted = true
     save
+    msg
   end
 
   protected
