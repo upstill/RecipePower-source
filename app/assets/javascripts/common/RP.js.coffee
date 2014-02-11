@@ -100,12 +100,9 @@ RP.named_function = (str) ->
 
 # Automatically open dialogs or click links that have 'trigger' class
 RP.fire_triggers = ->
-	if dlog = $('div.dialog.trigger')[0]
-		$(dlog).removeClass("trigger")
+	$('div.dialog.trigger').removeClass("trigger").each (ix, dlog) ->
 		RP.dialog.run dlog
-	else if (elmt = $("a.trigger")[0])
-		$(elmt).trigger "click"
-		$(elmt).removeClass("trigger")
+	$("a.trigger").removeClass("trigger").trigger "click"
 
 # For the FAQ page: click on a question to show the associated answer
 RP.showhide = (event) ->

@@ -12,11 +12,15 @@ getEncodedPathFromURL = (url) ->
 	a = $('<a>', { href:url } )[0];
 	encodeURIComponent a.pathname+a.search
 
+RP.state.ignorePopEvent = false
+
 # Called on page load and popstate to check if a dialog is waiting in the hashtag
 RP.state.check_hash = (event) ->
 	# We return when page-load triggers onpopstate (state is null) because we've already
 	# checked the hash, above.
-	if hashtag = window.location.hash
+	if RP.state.ignorePopEvent # If the pop event came from setting the hashtag, don't repeat
+		RP.state.ignorePopEvent = false
+	else if hashtag = window.location.hash
 		hashtag = decodeURIComponent hashtag
 		if (match = hashtag.match(/#dialog:(.*)$/)) && (url = match[1])
 			RP.dialog.get_and_go null, url
@@ -35,6 +39,7 @@ RP.state.onAJAXSuccess = (event, responseData, status, xhr) ->
 		target_title = (event.target && event.target.innerText) || dlog.title || dlog.innerText
 		window_url = window.location.pathname+window.location.search+"#dialog:"+getEncodedPathFromURL(event.target.href)
 		#  if !$(event.result).hasClass 'historic'
+		RP.state.ignorePopEvent = true
 		history.replaceState (history.state || document.title), target_title, window_url
 		document.title = target_title
 
