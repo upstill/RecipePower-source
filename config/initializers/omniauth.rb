@@ -6,7 +6,7 @@ Rails.application.config.middleware.use OmniAuth::Builder do
     provider :google_oauth2, "1067222779279.apps.googleusercontent.com", "xXk99dnzhxDOGKZC1xhXxBph", {access_type: 'online', approval_prompt: ''}
     # provider :google_oauth2, ENV['GOOGLE_ID'], ENV['GOOGLE_SECRET'], {access_type: 'online', approval_prompt: ''}
 
-    provider :openid, :store => OpenID::Store::Filesystem.new('./tmp'), :name => 'yahoo', :identifier => 'yahoo.com' 
+    provider :openid, :store => OpenID::Store::Filesystem.new('./tmp'), :name => 'yahoo', :identifier => 'yahoo.com'
     provider :openid, :store => OpenID::Store::Filesystem.new('./tmp'), :name => 'aol', :identifier => 'openid.aol.com'
     provider :openid, :store => OpenID::Store::Filesystem.new('./tmp'), :name => 'open_id'
 end

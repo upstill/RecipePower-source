@@ -33,6 +33,7 @@ RP::Application.routes.draw do
   end
 
   get '/auth/:provider/callback' => 'authentications#create'
+  post '/auth/:provider/callback' => 'authentications#create'
 
   # Calling 'profile' action in 'users' controller edits the current user
   get 'users/profile' => 'users#profile'
