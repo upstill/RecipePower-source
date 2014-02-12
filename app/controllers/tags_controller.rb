@@ -120,9 +120,14 @@ class TagsController < ApplicationController
   def show
     # return if need_login true, true
     @Title = "Tags"
-    @tag = Tag.find(params[:id])
-    session[:tabindex] = @tabindex
-    smartrender
+    begin
+      @tag = Tag.find(params[:id])
+      session[:tabindex] = @tabindex
+      smartrender
+    rescue
+      render text: "There is no tag #{params[:id]}. Where did you get that idea?"
+    end
+
   end
 
   # GET /tags/editor?tabindex=index

@@ -32,9 +32,13 @@ class FeedsController < ApplicationController
   # GET /feeds/1
   # GET /feeds/1.json
   def show
-    @feed = Feed.find(params[:id])
-    @Title = "About #{@feed.title}"
-    smartrender
+    begin
+      @feed = Feed.find(params[:id])
+      @Title = "About #{@feed.title}"
+      smartrender
+    rescue
+      render text: "Sorry, but there is no such feed. Whatever made you ask?"
+    end
   end
 
   # GET /feeds/new

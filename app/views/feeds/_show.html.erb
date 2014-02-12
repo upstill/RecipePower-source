@@ -12,7 +12,7 @@
 
     <p>
       <b>From Site:</b>
-      <%= link_to_modal @feed.site.name, site_path(@feed.site) %>
+      <%= link_to_modal( @feed.site.name, site_path(@feed.site)) if @feed.site %>
     </p>
 
     <% permitted_to?(:approve, :feeds) do %>
