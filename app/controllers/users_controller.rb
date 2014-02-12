@@ -45,7 +45,7 @@ class UsersController < ApplicationController
   def collect
     @friend = User.find params[:id]
     user = current_user_or_guest
-    if user.followee_ids.include?(@friend.id)
+    if user.follows? @friend
       notice = "You're already following '#{@friend.handle}'."
     else
       user.add_followee @friend
