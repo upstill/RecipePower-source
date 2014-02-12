@@ -528,6 +528,7 @@ class RcpBrowserElementFriend < BrowserElement
   end
 
   private
+
   def candidates
     return @candidates if @candidates
     @candidates = user.recipes(public: true, sort_by: :collected)
@@ -617,17 +618,6 @@ class RcpBrowserChannelsAndFriends < RcpBrowserComposite
   def sources
     user.follows(@is_channel).map { |followee| followee.id }
   end
-
-  private
-  # The candidates are a list of recipes by id
-  def candidates
-    # Get a set of candidates, determined by:
-    # -- who the owner of the list is
-    # -- who the viewer is
-    # -- targetted status of the recipe (Rotation, etc.)
-    # -- text to match against titles and comments
-    @candidates ||= Rcpref.recipe_ids( sources, @userid)
-  end
 end
 
 class RcpBrowserCompositeFriends < RcpBrowserChannelsAndFriends
@@ -680,7 +670,26 @@ class RcpBrowserCompositeChannels < RcpBrowserChannelsAndFriends
   def hints
     ""
   end
-  
+
+  private
+  # The candidates are a list of recipes by id
+  def candidates
+    # Get a set of candidates, determined by:
+    # -- who the owner of the list is
+    # -- who the viewer is
+    # -- targetted status of the recipe (Rotation, etc.)
+    # -- text to match against titles and comments
+    # @candidates ||= Rcpref.recipe_ids( sources, @userid)
+    @candidates ||= User.find(sources).collect { |user|
+      owned = user.recipes
+      # For a channel, we merge all the recipes from all the associated tags
+      tagged = user.tags.collect { |tag|
+        tag.taggings.where(entity_type: "Recipe").map(&:entity_id)
+      }
+      owned+tagged
+    }.flatten.uniq
+  end
+
 end
 
 # Element for recent recipes 
