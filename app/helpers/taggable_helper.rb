@@ -43,7 +43,7 @@ module TaggableHelper
   end
   
   def taggable_list taggable
-    taggable.tags.collect { |tag| "<span>#{tag.name}</span>" }.join('<br>').html_safe
+    taggable.tags.collect { |tag| "<span>#{tag.typedname}</span>" }.join('<br>').html_safe
   end
 	
 end

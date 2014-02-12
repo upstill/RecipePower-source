@@ -1,3 +1,4 @@
+<% tags_column_header = (@seeker.entity_name == "channel") ? "Associated Tags" : "Interest(s)" %>
 <div class="user_list">
-	<%= seeker_table nil, users_path, [ "Handle", "About", "Interest(s)", "# Recipes", "" ] %>
+	<%= seeker_table nil, users_path, [ "Handle", "About", tags_column_header, "# Recipes", "" ] %>
 </div>
