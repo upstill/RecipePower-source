@@ -478,7 +478,7 @@ class RcpBrowserElementFriend < BrowserElement
   end
   
   def handle
-    @handle ||= User.find(@friendid).handle
+    @handle ||= user.handle
   end
   
   def sources
@@ -504,7 +504,7 @@ class RcpBrowserElementFriend < BrowserElement
   end
   
   def popup_text
-    if User.find(@friendid).channel?
+    if user.channel?
       "Recipes collected in the channel '#{handle}'."
     else
       "The collection of user '#{handle}'."
@@ -512,7 +512,7 @@ class RcpBrowserElementFriend < BrowserElement
   end
   
   def guide
-    if User.find(@friendid).channel?
+    if user.channel?
       "These are the recipes from the #{handle} channel.<br>Withdraw from the channel by clicking the 'X' next to the name."
     else
       "These are all the recipes collected by #{handle}.<br>Tired of their friendship? Click the 'X' next to the name."
@@ -523,9 +523,21 @@ class RcpBrowserElementFriend < BrowserElement
     "Not much to do about that..."
   end
 
-private  
+  def user
+    @user ||= User.find @friendid
+  end
+
+  private
   def candidates
-    @candidates ||= User.find(@friendid).recipes(public: true, sort_by: :collected)
+    return @candidates if @candidates
+    @candidates = user.recipes(public: true, sort_by: :collected)
+    if user.channel?
+      # For a channel, we merge all the recipes from all the associated tags
+      @candidates = (@candidates + user.tags.collect { |tag|
+        tag.taggings.where(entity_type: "Recipe").map(&:entity_id)
+      }.flatten).uniq
+    end
+
   end
 
 end
@@ -605,7 +617,17 @@ class RcpBrowserChannelsAndFriends < RcpBrowserComposite
   def sources
     user.follows(@is_channel).map { |followee| followee.id }
   end
-  
+
+  private
+  # The candidates are a list of recipes by id
+  def candidates
+    # Get a set of candidates, determined by:
+    # -- who the owner of the list is
+    # -- who the viewer is
+    # -- targetted status of the recipe (Rotation, etc.)
+    # -- text to match against titles and comments
+    @candidates ||= Rcpref.recipe_ids( sources, @userid)
+  end
 end
 
 class RcpBrowserCompositeFriends < RcpBrowserChannelsAndFriends
