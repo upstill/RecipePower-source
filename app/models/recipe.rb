@@ -198,6 +198,11 @@ public
     end
     # (ref = (uid.nil? ? current_ref : ref_for(uid, false))) && ref.in_collection
   end
+
+  def add_to_collection uid, do_save=true
+    self.current_user = uid
+    self.touch true # Touch the recipe and add it to the user's collection
+  end
   
   def remove_from_collection uid=nil
     if (ref = ref_for(uid, false)) and ref.in_collection

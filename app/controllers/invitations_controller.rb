@@ -47,30 +47,40 @@ class InvitationsController < Devise::InvitationsController
       logger.debug "NULL CURRENT_USER in invitation/create without raising authenticity error"
       raise ActionController::InvalidAuthenticityToken
     end
+
+    alerts = [] # This will be an array of messages to report back to the user
+    popups = []
+
     # If dialog has no invitee_tokens, get them from email field
     params[resource_name][:invitee_tokens] = params[resource_name][:invitee_tokens] ||
     params[resource_name][:email].split(',').collect { |email| %Q{'#{email.downcase.strip}'} }.join(',')
     # Check email addresses in the tokenlist for validity
-    @staged = User.new params[resource_name] # invite_resource 
+    @staged = User.new params[resource_name] # invite_resource
     for_sharing = @staged.shared_recipe && true
-    err_address = @staged.invitee_tokens.empty? ? "" :
+    if @recipe = for_sharing && Recipe.find(@staged.shared_recipe)
+      # First thing, post the recipe to the specified channels
+      @staged.channel_tokens.each { |channelid|
+        @recipe.add_to_collection channelid
+        popups << "'#{@recipe.title}' added to #{User.find(channelid).handle}"
+      }
+    end
+
+    # It is an error to provide a bogus email address
+    # Also, an email address is required if there are no channels specified
+    err_address =
       @staged.invitee_tokens.detect { |token|
         token.kind_of?(String) && !(token =~ /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i)
-      }
+      } || ("" if @staged.channel_tokens.empty?)
     if err_address # if there's an invalid email, go back to the user
       @staged.errors.add (for_sharing ? :invitee_tokens : :email), 
         err_address.blank? ? 
           "Can't send an invitation without an email to send it to!" : 
           "'#{err_address}' doesn't look like an email address."
-      @recipe = for_sharing && Recipe.find(@staged.shared_recipe)
       self.resource = @staged
       # dialog_boilerplate(for_sharing ? :share : :new)
       smartrender :action => (for_sharing ? :share : :new)
       return
     end
-
-    alerts = [] # This will be an array of messages to report back to the user
-    popups = []
 
     # Now that the invitee tokens are "valid", send mail to each
     breakdown = UserServices.new(@staged).analyze_invitees(current_user)
