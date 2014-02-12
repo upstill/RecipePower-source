@@ -153,7 +153,13 @@ class Tag < ActiveRecord::Base
       false
     end
     
-   public 
+   public
+
+   # Return the tag's name with a marker of its type, to clear up ambiguities
+   def typedname include_ref=false
+     referent_str = (referent_id && (" "+referent_id.to_s)) || ""
+     %Q{#{name} [#{typename}#{referent_str}]}
+   end
    
    def typenum=(tt)
      # Need to be careful: the tag needs to agree in type with any expressions that include it

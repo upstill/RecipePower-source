@@ -42,30 +42,6 @@ class TagsController < ApplicationController
       end
     end
   end
-  
-=begin
-# Shouldn't be using this anymore
-# GET /tags/list?tabindex=index
-# Return HTML for the list of tags (presumably called by the tags tablist)
-  def list
-    # return if need_login true, true
-    @Title = "Tags"
-    if params[:tagtype]
-        tagtype = params[:tagtype].to_i
-    else
-        @tabindex = params[:tabindex] ? params[:tabindex].to_i : (session[:tabindex] || 0)
-        # The list of orphan tags gets all tags of this type which aren't linked to a table
-        tagtype = @tabindex > 0 ? Tag.index_to_type(@tabindex) : 0
-        session[:tabindex] = @tabindex
-    end
-    if true
-        @taglist = Tag.where(tagtype: tagtype).order("id").page(params[:page]).per_page(5)
-    else
-        @taglist = Tag.strmatch("", userid: session[:user_id], tagtype: tagtype)
-    end
-    render partial: "alltags"
-  end
-=end
 
   # GET /tags/match
   # This action is for remotely querying the tags that match a given string. It gets used in:
@@ -116,11 +92,7 @@ class TagsController < ApplicationController
                 @taglist.map(&:attributes).map { |match| match["name"] }
             else # assuming "tokenInput" because that js won't send a parameter
                 # for tokenInput: an array of hashes, each with "id" and "name" values
-                @taglist.map(&:attributes).map { |match|
-                  referent_id = match["referent_id"] || ""
-                  name = match["name"] + ' [' + Tag.typename(match["tagtype"].to_i) + ' ' + referent_id.to_s + ']'
-                  {:id=>match["id"], :name=>name}
-                }
+                @taglist.collect { |match| {id: match.id, :name => match.typedname([1,3].include? current_user_or_guest_id)} }
             end
         }
         format.html { render partial: "tags/taglist" }
