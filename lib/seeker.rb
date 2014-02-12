@@ -278,12 +278,19 @@ class UserSeeker < Seeker
     data = super
     @is_channel = data[:is_channel] || false
   end
-  
+
   def affiliate browser=nil, params=nil
     @is_channel = (params[:channel]=="true") if params && params[:channel]
-    @affiliate ||= @is_channel ? 
-      User.where("channel_referent_id > 0 AND id not in (?)", @user.followee_ids + [@user.id, 4, 5]) :
-      User.where("channel_referent_id = 0 AND id not in (?) AND private != true AND sign_in_count > 0", @user.followee_ids + [@user.id, 4, 5])
+    unless @affiliate
+      if @is_channel
+        @affiliate = User.where("channel_referent_id > 0")
+      else
+        @affiliate = User.where("channel_referent_id = 0 AND sign_in_count > 0")
+      end
+      excluded_ids = @user.followee_ids + [@user.id, 4, 5] # Don't list guest, super, or the current user
+      @affiliate = @affiliate.where("id not in (?) AND private != true", excluded_ids) unless [1, 3].include?(@user.id) # Show Max and Steve everything
+    end
+    @affiliate
   end
 
   def query_path
