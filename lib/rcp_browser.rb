@@ -530,15 +530,7 @@ class RcpBrowserElementFriend < BrowserElement
   private
 
   def candidates
-    return @candidates if @candidates
-    @candidates = user.recipes(public: true, sort_by: :collected)
-    if user.channel?
-      # For a channel, we merge all the recipes from all the associated tags
-      @candidates = (@candidates + user.tags.collect { |tag|
-        tag.taggings.where(entity_type: "Recipe").map(&:entity_id)
-      }.flatten).uniq
-    end
-
+    @candidates ||= user.recipes(public: true, sort_by: :collected)
   end
 
 end
@@ -680,14 +672,7 @@ class RcpBrowserCompositeChannels < RcpBrowserChannelsAndFriends
     # -- targetted status of the recipe (Rotation, etc.)
     # -- text to match against titles and comments
     # @candidates ||= Rcpref.recipe_ids( sources, @userid)
-    @candidates ||= User.find(sources).collect { |user|
-      owned = user.recipes
-      # For a channel, we merge all the recipes from all the associated tags
-      tagged = user.tags.collect { |tag|
-        tag.taggings.where(entity_type: "Recipe").map(&:entity_id)
-      }
-      owned+tagged
-    }.flatten.uniq
+    @candidates ||= User.find(sources).collect { |user| user.recipes }.flatten.uniq
   end
 
 end

@@ -110,13 +110,21 @@ class User < ActiveRecord::Base
   # :sort_by = :collected => order recipes by when they were collected (as opposed to recently touched)
   # :status => Select for recipes with this status or lower
   # :public => Only public recipes
-  def recipes options={} 
-    constraints = { :user_id => id }
+  def recipes options={}
+    constraints = {:user_id => id}
     constraints[:in_collection] = true unless options[:all]
     constraints[:status] = 1..options[:status] if options[:status]
     constraints[:private] = false if options[:public]
     ordering = (options[:sort_by] == :collected) ? "created_at" : "updated_at"
-    Rcpref.where(constraints).order(ordering+" DESC").select("recipe_id").map(&:recipe_id)
+    collection = Rcpref.where(constraints).order(ordering+" DESC").select("recipe_id").map(&:recipe_id)
+    if channel?
+      collection << tags.collect { |tag| # For a channel, we merge all the recipes from all the associated tags
+        tag.taggings.where(entity_type: "Recipe").map(&:entity_id)
+      }
+      collection.flatten.uniq
+    else
+      collection
+    end
   end
   
   # This override means that all taggings are owned by super, visible to all users
