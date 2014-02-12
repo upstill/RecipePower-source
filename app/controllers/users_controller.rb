@@ -11,8 +11,10 @@ class UsersController < ApplicationController
     me = User.find params[:id]
     respond_to do |format|
       format.json { 
-        friends = me.match_friends(params[:q]).collect { |friend| 
-          { id: friend.id.to_s, name: (friend.handle+" (#{friend.email})") }
+        friends = me.match_friends(params[:q], params[:channel]).collect { |friend|
+          name = friend.handle
+          name << " (#{friend.email})" unless params[:channel]
+          { id: friend.id.to_s, name: name }
         }
         if friends.empty? 
           if params[:q].match(Devise::email_regexp)

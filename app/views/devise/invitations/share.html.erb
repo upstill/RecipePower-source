@@ -1,10 +1,28 @@
 <%= modal_dialog :share_recipe, "Share '#{@recipe.title.truncate(80)}'" do %>
-	<div class="prompt">Pick a RecipePower friend, or provide an email address.</div>
 	<%= simple_form_for resource, :as => resource_name, :url => invitation_path(resource_name), :html => {:method => :post} do |f| %>
-		<%= modal_body do %>
 		  <%# devise_error_messages! %>
-		  <%= form_errors_helper f %>
-			<%= f.input :invitee_tokens, 
+          <%= form_errors_helper f %>
+          <div><h3>Choose Channel(s) to send the recipe to:</h3></div>
+        <%= f.input :channel_tokens,
+                    :label => "Email(s) and/or RecipePower Friends",
+                    :input_html => {
+                            :class => "token-input-field",
+                            :autofocus => true,
+                            :data => {
+                                    :pre => (resource.channel_tokens || []).collect { |token|
+                                      token.kind_of?(Fixnum) ?
+                                              { "id" => token.to_s, "name" => User.find(token).handle } :
+                                              { "id" => token, "name" => token }
+                                    }.to_json,
+                                    :no_results_text => "No matches among friends, but outside emails work too",
+                                    :hint => "Type email addresses or match friends",
+                                    :free_tagging => false,
+                                    :enabler => "input.dialog-submit-button",
+                                    :request => match_friends_user_path(current_user.id, channel: true) # "/users/#{current_user.id}/match_friends.json?channel=true"
+                            }
+                    } %>
+          <div><h3>Pick a RecipePower friend, or provide an email address.</h3></div>
+			<%= f.input :invitee_tokens,
 									:label => "Email(s) and/or RecipePower Friends",
 									:input_html => {
 										:class => "token-input-field", 
@@ -19,14 +37,13 @@
 											:hint => "Type email addresses or match friends",
 											:free_tagging => false,
 											:enabler => "input.dialog-submit-button",
-											:request => "/users/#{current_user.id}/match_friends.json" 
+											:request => match_friends_user_path(current_user.id) # "/users/#{current_user.id}/match_friends.json"
 										}
 									} %>
 		  <%# f.input :email %></p>
 			<%= f.input :invitation_issuer, label: "How to identify you in the message" %>
 		  <%= f.input :invitation_message, label: "Invitation Message (optional)", :input_html => { :rows=>"4", value: ( "Here's a recipe that I'm really into right now. Take a look and tell me what you think.")} %></p>
       <%= f.hidden_field(:shared_recipe) if resource.shared_recipe %>
-		<% end %>
 		<%= modal_footer do %>
 	  	<%= f.submit "Share the Love", class: "btn btn-lg btn-success dialog-submit-button", disabled: true %>
 		<% end %>

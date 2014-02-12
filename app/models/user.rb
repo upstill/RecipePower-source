@@ -12,10 +12,10 @@ class User < ActiveRecord::Base
 
   # Setup accessible (or protected) attributes for your model
   attr_accessible :id, :username, :first_name, :last_name, :fullname, :about, :login, :private, :skip_invitation,
-                :email, :password, :password_confirmation, :shared_recipe, :invitee_tokens,
+                :email, :password, :password_confirmation, :shared_recipe, :invitee_tokens, :channel_tokens,
                 :recipes, :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens, :subscription_tokens, :invitation_issuer
   attr_writer :browser
-  attr_accessor :shared_recipe, :invitee_tokens, :raw_invitation_token
+  attr_accessor :shared_recipe, :invitee_tokens, :channel_tokens, :raw_invitation_token
   
   has_many :rcprefs, :dependent => :destroy
   has_many :recipes, :through=>:rcprefs, :autosave=>true
@@ -391,17 +391,21 @@ public
          (other.id != id) # Don't include this user
     }
   end
-  
+
   def invitee_tokens=(tokenstr)
     @invitee_tokens = tokenstr.blank? ? [] : TokenInput.parse_tokens(tokenstr)
   end
-  
+
+  def channel_tokens=(tokenstr)
+    @channel_tokens = tokenstr.blank? ? [] : TokenInput.parse_tokens(tokenstr)
+  end
+
   # Return a list of my friends who match the input text
-  def match_friends(txt)
+  def match_friends(txt, is_channel=nil)
+    channel_constraint = is_channel ? "channel_referent_id > 0" : "channel_referent_id = 0"
+    name_constraint = "%#{txt}%"
     friends = 
-    (User.where("username ILIKE ?", "%#{txt}%") + 
-    User.where("fullname ILIKE ?", "%#{txt}%") + 
-    User.where("email ILIKE ?", "%#{txt}%")).uniq  
+      User.where("(username ILIKE ? OR fullname ILIKE ? OR email ILIKE ?) AND #{channel_constraint}", name_constraint, name_constraint, name_constraint)
     friends
   end
   
