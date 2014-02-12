@@ -1,6 +1,13 @@
 .need_to_know {
+  &.page {
+    width: 750px;
+    margin: 10px auto;
+  }
+  div.prompt {
+    margin-bottom: 0px;
+  }
 	.modal-dialog {
-		width: 100%;
+		width: 800px;
 	}
 	.modal-body {
 		height: 600px;
@@ -13,14 +20,17 @@
 		// background:-moz-linear-gradient(top,#880000,#6c0000);
 		.spiel {
 			font-size: 12pt;
-			margin: 20px;
-			margin-bottom: 0px;
+			margin: 0px;
+			margin-top: 10px;
 		}
 	}
+    .know_block {
+      width: 680px;
+    }
 	.know_snap {
 		width: 650px;
-		margin-top: 40px;
-		margin-left: 100px;
+		margin-top: -50px;
+		margin-left: 40px;
 		position: absolute;
 	}
 	.info-block {
@@ -29,7 +39,6 @@
 		padding: 0px 10px 0px;
 		margin: 5px;
 		width: 200px;
-		// border:solid 2px #5882D3;
 		&.know_browser {
 			width: 215px;
 			margin-left: 12px;
