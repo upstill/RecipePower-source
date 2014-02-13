@@ -30,7 +30,7 @@ window.RP = window.RP || {}
 // MESSAGE RESPONDER
 // Called to replace the form's image with the given URL in response to a message from the owning window
 function replaceImg(data) {
-    var url = data.url && data.url[0];
+    var url = data.url; // && data.url[0];
     if(url)   {
         // pickImgForInput(data.url[0], 'input#recipe_picurl' );
         $('input#recipe_picurl').attr("value", url );
