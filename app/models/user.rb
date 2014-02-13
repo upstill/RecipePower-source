@@ -402,13 +402,11 @@ public
 
   # Return a list of my friends who match the input text
   def match_friends(txt, is_channel=nil)
+    re = Regexp.new(txt, Regexp::IGNORECASE) # Match any embedded text, independent of case
     channel_constraint = is_channel ? "channel_referent_id > 0" : "channel_referent_id = 0"
-=begin
-    name_constraint = "%#{txt}%"
-    friends =
-        User.where("(username ILIKE ? OR fullname ILIKE ? OR email ILIKE ?) AND #{channel_constraint}", name_constraint, name_constraint, name_constraint)
-=end
-    followees.select { |other| other.username.match(txt) || other.fullname.match(txt) || other.email.match(txt)}
+    followees.where(channel_constraint).select { |other|
+      re.match(other.username) || re.match(other.fullname) || re.match(other.email)
+    }
   end
 
   def issue_instructions(what = :invitation_instructions, opts={})
