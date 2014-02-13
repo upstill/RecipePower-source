@@ -373,7 +373,7 @@ public
 
   def salutation
     (first_name unless first_name.blank?) ||
-    (fullname.split(/\s/).first unless fullname.blank?) ||
+    (fullname.split(/\b/).first unless fullname.blank?) ||
     username
   end
   
@@ -403,12 +403,14 @@ public
   # Return a list of my friends who match the input text
   def match_friends(txt, is_channel=nil)
     channel_constraint = is_channel ? "channel_referent_id > 0" : "channel_referent_id = 0"
+=begin
     name_constraint = "%#{txt}%"
-    friends = 
-      User.where("(username ILIKE ? OR fullname ILIKE ? OR email ILIKE ?) AND #{channel_constraint}", name_constraint, name_constraint, name_constraint)
-    friends
+    friends =
+        User.where("(username ILIKE ? OR fullname ILIKE ? OR email ILIKE ?) AND #{channel_constraint}", name_constraint, name_constraint, name_constraint)
+=end
+    followees.select { |other| other.username.match(txt) || other.fullname.match(txt) || other.email.match(txt)}
   end
-  
+
   def issue_instructions(what = :invitation_instructions, opts={})
     # send_devise_notification(what, opts)
     self.update_attribute :invitation_sent_at, Time.now.utc unless self.invitation_sent_at
