@@ -168,7 +168,7 @@ class InvitationsController < Devise::InvitationsController
         end
         # If there's a single message, report it in a popup, otherwise use an alert
         if (alerts = alerts.flatten.compact).empty?
-          response[popups.count == 1 ? :popup : :alert] = popups.join('<br>').html_safe unless popups.empty?
+          response[(popups.compact!).count == 1 ? :popup : :alert] = popups.join('<br>').html_safe unless popups.empty?
         else
           response[:alert] = (popups+alerts).compact.join('<br>').html_safe
         end

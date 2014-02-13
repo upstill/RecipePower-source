@@ -18,7 +18,7 @@ class Notification < ActiveRecord::Base
     msg = ""
     case typesym
     when :share_recipe
-      (recipe = Recipe.find(info[:what])).add_to_collection target_id, true
+      (recipe = Recipe.find(info[:what])).add_to_collection target_id
       msg = "'#{recipe.title}' now appearing in your collection"
     when :make_friend
     end
