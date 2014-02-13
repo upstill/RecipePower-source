@@ -404,7 +404,7 @@ public
   def match_friends(txt, is_channel=nil)
     re = Regexp.new(txt, Regexp::IGNORECASE) # Match any embedded text, independent of case
     channel_constraint = is_channel ? "channel_referent_id > 0" : "channel_referent_id = 0"
-    followees.where(channel_constraint).select { |other|
+    (is_channel ? User.all : followees).where(channel_constraint).select { |other|
       re.match(other.username) || re.match(other.fullname) || re.match(other.email)
     }
   end
