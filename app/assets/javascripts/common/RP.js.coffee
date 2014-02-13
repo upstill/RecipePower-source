@@ -296,15 +296,15 @@ RP.process_response = (responseData, dlog) ->
 			document.write page
 			document.close()
 			supplanted = true
-				
-		# Handle any notifications in the response
-		RP.notifications.from_response responseData
-		
+
 		# 'done', when true, simply means close the dialog, with an optional notice
 		if !supplanted
 			if responseData.done
 				RP.dialog.close_modal dlog, responseData.notice
 			else if responseData.replacements && dlog
 				RP.dialog.run dlog
+
+		# Handle any notifications in the response
+		RP.notifications.from_response responseData
 
 	return supplanted

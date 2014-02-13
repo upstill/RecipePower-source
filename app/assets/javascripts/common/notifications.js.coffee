@@ -14,12 +14,17 @@ RP.notifications.post = (msg, how) ->
 			level = how.replace("flash-","") || "alert"
 			how = "flash"
 
-		((how == "flash") && insert_flash(msg, level)) ||
-		((how == "alert") && (bootbox_alert msg)) ||
-		((how == "popup") && (jnotify_popup msg)) ||
-		insert_flash(msg, "alert") ||
-		bootbox_alert(msg) ||
-		jnotify_popup(msg)
+		switch how
+			when "flash"
+				insert_flash msg, level
+			when "alert"
+				bootbox_alert "<h4>"+msg+"</h4>"
+			when "popup"
+				jnotify_popup msg
+			else
+				insert_flash(msg, "alert") ||
+				bootbox_alert(msg) ||
+				jnotify_popup(msg)
 
 # Let the user know that something's happening during an ajax request
 RP.notifications.wait = (msg) ->

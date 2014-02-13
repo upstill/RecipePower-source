@@ -365,7 +365,7 @@ public
 
   def salutation
     (first_name unless first_name.blank?) ||
-    (fullname.split(/\s/).first unless fullname.blank?) ||
+    (fullname.split(/\b/).first unless fullname.blank?) ||
     username
   end
   

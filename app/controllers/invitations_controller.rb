@@ -129,6 +129,7 @@ class InvitationsController < Devise::InvitationsController
         sharee.notify(:share_recipe, current_user, what: params[resource_name][:shared_recipe] )
         breakdown[:invited] << sharee
       end
+      popups << breakdown.report(:redundancies, :salutation) { |names, count| %Q{#{names} #{count > 1 ? "have" : "has" } been notified on your behalf.} }
     else
       alerts << [
         breakdown.report(:redundancies, :handle) { |names, count|
@@ -156,10 +157,13 @@ class InvitationsController < Devise::InvitationsController
           }
           response[:processorFcn] = "RP.content_browser.insert_or_select"
         end
-        # If there's a single message, report it in a popup, otherwise use an alert
-        if (alerts = alerts.flatten.compact).empty?
+        alerts = alerts.flatten.compact
+        popups = popups.flatten.compact
+        if alerts.empty?
+          # If there's a single popup, report it in a popup, otherwise use an alert
           response[popups.count == 1 ? :popup : :alert] = popups.join('<br>').html_safe unless popups.empty?
         else
+          # Alerts get reported as alerts
           response[:alert] = (popups+alerts).compact.join('<br>').html_safe
         end
         render json: response
