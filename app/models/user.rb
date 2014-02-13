@@ -390,13 +390,16 @@ public
   
   # Return a list of my friends who match the input text
   def match_friends(txt)
-    friends = 
+    followees.select { |other| other.username.match(txt) || other.fullname.match(txt) || other.email.match(txt)}
+=begin
+    friends =
     (User.where("username ILIKE ?", "%#{txt}%") + 
     User.where("fullname ILIKE ?", "%#{txt}%") + 
     User.where("email ILIKE ?", "%#{txt}%")).uniq  
     friends
+=end
   end
-  
+
   def issue_instructions(what = :invitation_instructions, opts={})
     # send_devise_notification(what, opts)
     self.update_attribute :invitation_sent_at, Time.now.utc unless self.invitation_sent_at
