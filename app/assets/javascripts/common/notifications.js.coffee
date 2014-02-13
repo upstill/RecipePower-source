@@ -8,23 +8,24 @@ RP.notifications ||= {}
 # "popup" -- jNotify popup
 RP.notifications.post = (msg, how) ->
 	if msg && msg.length > 0
-
+		msg = RP.notifications.html msg
 		# Handle 'how' that's like "flash-<level>"
 		if how && how.match /^flash/
 			level = how.replace("flash-","") || "alert"
 			how = "flash"
-
+		done = false
 		switch how
 			when "flash"
-				insert_flash msg, level
+				done = insert_flash msg, level
 			when "alert"
-				bootbox_alert "<h4>"+msg+"</h4>"
+				done = bootbox_alert "<h4>"+msg+"</h4>"
 			when "popup"
-				jnotify_popup msg
-			else
-				insert_flash(msg, "alert") ||
-				bootbox_alert(msg) ||
-				jnotify_popup(msg)
+				done = jnotify_popup msg
+		# If any of these methods fail, try another
+		done ||
+		insert_flash(msg, "alert") ||
+		bootbox_alert(msg) ||
+		jnotify_popup(msg)
 
 # Let the user know that something's happening during an ajax request
 RP.notifications.wait = (msg) ->
@@ -67,15 +68,23 @@ jnotify_popup = (msg) ->
 # Post a flash notification into the 'div.flash_notifications' element
 insert_flash = (message, level) ->
 	if available = $('div.flash_notifications')[0]
-		bootstrap_class = "alert-"+level
+		switch level # Map flash types to bootstrap classes
+			when "notice"
+				bootstrap_class = "alert-info"
+			when "alert"
+				bootstrap_class = "alert-warning"
+			when "error"
+				bootstrap_class = "alert-danger"
+			else
+				bootstrap_class = "alert-"+level
 		html = "<div class=\"alert "+
 			bootstrap_class+
 			"	alert_block fade in\">
 		      <button class=\"close\" data-dismiss=\"alert\">&#215;</button>"+
 	    message+
 	    "</div>"
-		$('div.flash_notifications').replaceWith html
-	return available
+		$('div.flash_notifications').html html
+	available
 
 # Simple popup to notify the user of a process
 bootbox_alert = (msg) ->
@@ -85,4 +94,4 @@ bootbox_alert = (msg) ->
 		else
 			$('div.bootbox .modal-footer button').click() # $('div.bootbox').modal('hide') # $('div.bootbox.modal').modal 'hide'
 			$('div.modal-backdrop').remove()
-	return available
+	available
