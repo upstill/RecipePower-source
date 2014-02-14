@@ -412,12 +412,14 @@ class ChannelReferent < Referent ;
   accepts_nested_attributes_for :user
   
   before_validation :check_tag
-  before_save :ensure_user
   after_save :fix_user
 
-  def initialize
-    super
-    self.user = User.new
+  def initialize *args
+    super *args
+    # Each channel gets a corresponding user with the super-user password
+    self.user = User.find(User.super_id).dup
+    user.email = "channels@recipepower.com"
+    user.channel = self
   end
   
   def associate
@@ -453,7 +455,12 @@ class ChannelReferent < Referent ;
   def check_tag
       # At this point in the history of a channel, it presumably has a canonical expression.
       # We need to check that type
+
       return if !(tag = canonical_expression) # All referents must have a tag; this error will get picked up elsewhere
+      # ensure_user
+      # self.canonical_expression = self.expressions.first.tag unless self.canonical_expression || self.expressions.empty?
+      # user.username = canonical_expression.name
+      user.username = tag.name
       if @dependent # We're saving from editing
           if @dependent == "1"
               # The tag needs to be a type OTHER than 'unclassified' or 'Channel'
@@ -470,20 +477,7 @@ class ChannelReferent < Referent ;
           end
       end
   end
-  
-  # We ensure that every channel has an associated user
-  def ensure_user
-      self.canonical_expression = self.expressions.first.tag unless self.canonical_expression || self.expressions.empty?
-      unless self.user
-          # Each channel gets a corresponding user with the super-user password
-          user = User.find(User.super_id).dup
-          user.username = self.canonical_expression.name
-          user.email = "channels@recipepower.com"
-          user.channel = self
-          self.user = user
-      end
-  end
-  
+
   # after_save method to correct the channel's user's email address
   def fix_user
     # Need to make sure the tag is linked to self
