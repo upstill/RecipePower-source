@@ -408,11 +408,17 @@ end
 
 class ChannelReferent < Referent ; 
   has_one :user    
-  attr_accessible :user, :tag_token
+  attr_accessible :user, :tag_token, :user_attributes
+  accepts_nested_attributes_for :user
   
   before_validation :check_tag
   before_save :ensure_user
   after_save :fix_user
+
+  def initialize
+    super
+    self.user = User.new
+  end
   
   def associate
     self.user

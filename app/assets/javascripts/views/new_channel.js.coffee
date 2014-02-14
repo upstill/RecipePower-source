@@ -6,10 +6,10 @@ me = () ->
 RP.new_channel.onload = (dlog) ->
 	dlog = me()
 		
-	$("#referent_tag_token").tokenInput "/tags/match.json?tagtype=0",
+	$("#referent_tag_token").tokenInput "/tags/match.json?tagtypes=1,2,3,4,6,7,8,12,14",
 		crossDomain: false,
 		noResultsText: "No matching tag found; hit Enter to make it a tag",
-		hintText: "Name the channel",
+		hintText: "Select an existing tag--or make up a new one",
 		prePopulate: $("#referent_channel_tag").data("pre"),
 		theme: "facebook",
 		preventDuplicates: true,

@@ -71,11 +71,18 @@ body { padding-top: 60px; }
 .dialog-cancel-button {
 	float:right;
 	margin-right: 10px;
+    margin-bottom: 10px;
 }
 
 .dialog-submit-button {
 	float:right;
 	margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+div.form-group.actions {
+    margin-top: 5px;
+    height: 20px;
 }
 
 .alert-guide {

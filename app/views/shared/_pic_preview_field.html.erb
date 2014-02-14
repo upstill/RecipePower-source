@@ -1,0 +1,15 @@
+<!--
+ Partial for an image-URL field equipped with preview pane
+ Expected variables:
+ -- f: simple-form builder
+ -- urlfield: name of the object's field being editted
+-->
+<div class="row">
+  <div class="col-md-4 preview">
+    <%= page_width_pic f.object.read_attribute(urlfield), urlfield, "NoPictureOnFile.png", "div.preview img" %>
+  </div>
+  <div class="col-md-8">
+    <%= f.input urlfield, label: "Image URL (when ready, click 'Preview'", input_html: {class: urlfield}, rel: "jpg,png,gif" %>
+    <%= link_to("Preview", "#", class: "image_preview_button", onclick: %Q{previewImg('input.#{urlfield}', 'div.preview img', '')}) %>
+  </div>
+</div>

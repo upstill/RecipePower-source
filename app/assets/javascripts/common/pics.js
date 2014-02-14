@@ -67,5 +67,7 @@ function previewImg(inputsel, imagesel, formsel) {
         $(imageElmt).attr("src", url )
 		// fitImage(imageset[0])
 	}
+  if(typeof event === 'object')
+    event.preventDefault();
   return false;
 }
