@@ -408,7 +408,7 @@ end
 
 class ChannelReferent < Referent ; 
   has_one :user    
-  attr_accessible :user, :tag_token, :user_attributes
+  attr_accessible :user, :tag_tokens, :user_attributes
   accepts_nested_attributes_for :user
   
   before_validation :check_tag

@@ -26,4 +26,8 @@ class TokenInput < SimpleForm::Inputs::Base
     }.compact.uniq
   end
 
+  def input_html_classes
+    super.push('token-input-field')
+  end
+
 end

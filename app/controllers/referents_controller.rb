@@ -6,6 +6,7 @@ class ReferentsController < ApplicationController
             SourceReferent, AuthorReferent, OccasionReferent, 
             PantrySectionReferent, StoreSectionReferent, ChannelReferent, ToolReferent ]
     @@HandlerClass = Referent
+
   # GET /referents
   # GET /referents.json
   def index
@@ -35,9 +36,7 @@ class ReferentsController < ApplicationController
   # GET /referents/1
   # GET /referents/1.json
   def show
-      @tabindex = (session[:tabindex] || params[:tabindex] || 0).to_i
-      handlerclass = @@HandlersByIndex[@tabindex]
-    @referent = handlerclass.find(params[:id])
+    @referent = Referent.find(params[:id])
     smartrender
   end
 
@@ -45,14 +44,15 @@ class ReferentsController < ApplicationController
   # GET /referents/new
   # GET /referents/new.json?tagid=1&mode={over,before,after}&parent=referentid
   def new
-    @tabindex = (params[:tabindex] || session[:tabindex] || 4).to_i
-    handlerclass = @@HandlersByIndex[@tabindex]
+    # @tabindex = (params[:tabindex] || session[:tabindex] || 4).to_i
+
+    handlerclass = "#{params[:type]}Referent".constantize # @@HandlersByIndex[@tabindex]
     @referent = handlerclass.new
     @referent.express (params[:tagid]) if params[:tagid]
     @typeselections = Tag.type_selections
     @typeselections.shift
 
-    @is_channel = @tabindex==11 # XXX Should be using a better signal
+    @is_channel = handlerclass==ChannelReferent # XXX Should be using a better signal
     respond_to do |format|
       # format.html { render (@tabindex==11 ? "new_channel.html.erb" : "new") }
       format.json { 
@@ -85,9 +85,10 @@ class ReferentsController < ApplicationController
         tagid = params[:tagid].to_i # Id of expression
         targetid = params[:target] ? params[:target].to_i : 0
     else
-        @tabindex = params[:referent][:typenum].to_i || 0
-        tagid = params[:referent][:tag_id]
-        if @tabindex == 11
+        handlerclass = "#{params[:type]}Referent".constantize # @@HandlersByIndex[@tabindex]
+        param_key = ActiveModel::Naming.param_key(handlerclass)
+        tagid = params[param_key][:tag_id]
+        if @is_channel = handlerclass == ChannelReferent
             # This is a channel. It needs a referent to key off of.
             if params[:dependent] == 1 
                 # We're not creating a free-standing channel, but piggy-backing
@@ -98,8 +99,7 @@ class ReferentsController < ApplicationController
                 # sends to itself.
             end
         end
-        handlerclass = @@HandlersByIndex[@tabindex]
-        params[:referent].delete :typenum
+        params[param_key].delete :typenum
     end
     go = 0
     keyback = 0
@@ -134,22 +134,21 @@ class ReferentsController < ApplicationController
     end
 
     if params[:mode] == "over"
-        # "over" indicates to add the tag to the referent's expressions
-        @referent = handlerclass.find params[:target].to_i
-        @referent.express tagid
+      # "over" indicates to add the tag to the referent's expressions
+      @referent = handlerclass.find params[:target].to_i
+      @referent.express tagid
     elsif params[:mode]
-        @referent = handlerclass.create tag: tagid
-        keyback = @referent.id
+      @referent = handlerclass.create tag: tagid
+      keyback = @referent.id
     else
-        # The standard New Referent return has no mode
-        @referent = handlerclass.new params[:referent]
+      # The standard New Referent return has no mode
+      @referent = handlerclass.new params[param_key]
     end
 
-    @is_channel = handlerclass == ChannelReferent
     respond_to do |format|
       if @referent && @referent.save
         if @is_channel # Need to assign user's tags, but only after it has an id
-          @referent.user.update_attributes params[:referent][:user_attributes]
+          @referent.user.update_attributes params[param_key][:user_attributes]
         end
         format.html { redirect_to @referent.becomes(Referent), notice: 'Referent was successfully created/aliased.' }
         format.json { 

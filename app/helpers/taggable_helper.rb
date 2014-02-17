@@ -29,6 +29,7 @@ module TaggableHelper
     if f==object # Not in the context of a form
       text_field_tag :"#{attrname.to_s}txt", "#{object.read_attribute("#{attrname}txt")}", options
     else
+      options[:html_options] = options.slice :class
       f.text_field :"#{attrname.to_s.singularize}_tokens", options
     end
   end
