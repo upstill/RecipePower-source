@@ -27,30 +27,28 @@ module Taggable
   end
 
   # Fetch the tags associated with the entity
-  def tags(uid=nil, options = {})
-    uid ||= tag_owner
+  def tags options = {}
     if options[:tag_type]
-      Tag.where(id: tag_ids(uid), tagtype: Tag.typenum(options[:tag_type]))
+      Tag.where id: tag_ids, tagtype: Tag.typenum(options[:tag_type])
     else
-      Tag.where(id: tag_ids(uid))
+      Tag.where id: tag_ids
     end
 
   end
 
   # Fetch the ids of the tags associated with the entity
-  def tag_ids(uid=nil)
-    uid ||= tag_owner
-    taggings.where(:user_id => uid).map(&:tag_id)
+  def tag_ids
+    taggings.where(:user_id => tag_owner).map &:tag_id
   end
 
   # Set the tags associated with the entity
-  def tags=(tags)
+  def tags= tags
     # Ensure that the user's tags are all and only those given
     self.tag_ids=tags.map(&:id)
   end
   
   # Set the tag ids associated with the current user
-  def tag_ids=  nids
+  def tag_ids= nids
     # Ensure that the user's tags are all and only those in nids
     oids = tag_ids
     to_add = nids - oids
@@ -62,15 +60,14 @@ module Taggable
   end
 
   # Associate a tag with this entity in the domain of the given user (or the current user if not given)
-  def tag_with tag, uid=nil
-    uid ||= tag_owner
-    Tagging.create(user_id: uid, tag_id: tag.id, entity_id: id, entity_type: self.class.name) unless tag_ids(uid).include? tag.id
+  def tag_with tag
+    Tagging.create(user_id: tag_owner, tag_id: tag.id, entity_id: id, entity_type: self.class.name) unless tag_ids(uid).include? tag.id
   end
 
   # Write the virtual attribute tag_tokens (a list of ids) to
   # update the real attribute tag_ids
   def tag_tokens=(idstring)
-    self.tags = 
+    self.tags =
     TokenInput.parse_tokens(idstring) do |token| # parse_tokens analyzes each token in the list as either integer or string
       case token
       when Fixnum

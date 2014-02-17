@@ -426,14 +426,14 @@ class ChannelReferent < Referent ;
     self.user
   end
   
-  # The tag_token VA is special to channels, since 1) the name of the channel could
+  # The tag_tokens VA is special to channels, since 1) the name of the channel could
   # refer to a referent of another type (for dependent channels) and 2) a tag may or
   # may not be appropriate.
-  def tag_token
-      [canonical_expression].compact.map(&:attributes).to_json
+  def tag_tokens
+      [canonical_expression].compact
   end
   
-  def tag_token=(tokenlist)
+  def tag_tokens=(tokenlist)
     if token = tokenlist.split(',').first
       token.strip!
       if token.sub!(/^\'(.*)\'$/, '\1') || (token.to_i == 0) # A quote-delimited string a la tokeninput

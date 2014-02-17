@@ -1,3 +1,9 @@
-<%= modal_dialog :new_referent, "New Entity" do %>
-  <%= render 'form' %>
+<% if @is_channel %>
+    <%= modal_dialog :new_channel, "Add a Channel" do %>
+        <%= render 'form_channel' %>
+    <% end %>
+<% else %>
+    <%= modal_dialog :new_referent, "New Entity" do %>
+        <%= render 'form' %>
+    <% end %>
 <% end %>

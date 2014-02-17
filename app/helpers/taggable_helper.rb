@@ -22,15 +22,14 @@ module TaggableHelper
 
   def token_input_field(f, attrname, options={})
     object = (f.class.to_s.match /FormBuilder/) ? f.object : f
-    tags = object.read_attribute(attrname)
     options[:data] ||= {}
     options[:data][:hint] ||= "Type your tag(s) for the #{object.class.to_s.downcase} here"
-    options[:data][:pre] = tags.map(&:attributes).to_json
+    options[:data][:pre] = (options[:attrval] || object.read_attribute(attrname)).map(&:attributes).to_json
     options[:class] = "token-input-field #{options[:class]}"
     if f==object # Not in the context of a form
-      text_field_tag :"#{attrname}txt", "#{object.read_attribute("#{attrname}txt")}", options
+      text_field_tag :"#{attrname.to_s}txt", "#{object.read_attribute("#{attrname}txt")}", options
     else
-      f.text_field :"#{attrname.singularize}_tokens", options
+      f.text_field :"#{attrname.to_s.singularize}_tokens", options
     end
   end
 

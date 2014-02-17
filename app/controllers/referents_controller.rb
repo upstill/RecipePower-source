@@ -52,13 +52,14 @@ class ReferentsController < ApplicationController
     @typeselections = Tag.type_selections
     @typeselections.shift
 
+    @is_channel = @tabindex==11 # XXX Should be using a better signal
     respond_to do |format|
-      format.html { render (@tabindex==11 ? "new_channel.html.erb" : "new") }
+      # format.html { render (@tabindex==11 ? "new_channel.html.erb" : "new") }
       format.json { 
         if params[:tagid]
           render json: [ { :title=>@referent.longname, :isLazy=>true, :key=>@referent.id, :isFolder=>false } ]
         else
-          render json: { dlog: with_format("html") { render_to_string((@tabindex==11 ? "new_channel.html.erb" : "new"), layout: false) } }
+          render json: { dlog: with_format("html") { render_to_string layout: false } }
         end
       }
     end
@@ -71,6 +72,7 @@ class ReferentsController < ApplicationController
       @referent_type = @referent.typenum
       @typeselections = Tag.type_selections
       @typeselections.shift
+      @is_channel = @referent.class==ChannelReferent
       smartrender
   end
 
@@ -143,8 +145,12 @@ class ReferentsController < ApplicationController
         @referent = handlerclass.new params[:referent]
     end
 
+    @is_channel = handlerclass == ChannelReferent
     respond_to do |format|
       if @referent && @referent.save
+        if @is_channel # Need to assign user's tags, but only after it has an id
+          @referent.user.update_attributes params[:referent][:user_attributes]
+        end
         format.html { redirect_to @referent.becomes(Referent), notice: 'Referent was successfully created/aliased.' }
         format.json { 
           if params[:tagid]
@@ -156,7 +162,7 @@ class ReferentsController < ApplicationController
       else
         @typeselections = Tag.type_selections
         @typeselections.shift
-        format.html { render action: (@tabindex==11 ? "new_channel.html.erb" : "new") }
+        # format.html { render action: (@tabindex==11 ? "new_channel.html.erb" : "new") }
         format.json { render json: @referent.errors, status: :unprocessable_entity }
       end
     end
@@ -176,17 +182,26 @@ class ReferentsController < ApplicationController
     # @tabindex = session[:tabindex] || params[:tabindex] || 0
     # handlerclass = @@HandlersByIndex[@tabindex]
     @referent = Referent.find(params[:id]) # .becomes(Referent)
+    param_key = ActiveModel::Naming.param_key(@referent.class)
     # Any free tags specified as tag tokens will need a type associated with them.
     # This is prepended to the string
-    fix_expression_tokens params[:referent][:expressions_attributes], @referent.typenum
+    fix_expression_tokens params[param_key][:expressions_attributes], @referent.typenum
     respond_to do |format|
-      params[:referent].delete(:typenum)
-      if @referent.update_attributes(params[:referent])
+      params[param_key].delete(:typenum)
+      if @referent.update_attributes(params[param_key])
         format.html {
           redirect_to @referent.becomes(Referent), notice: 'Referent was successfully updated.'
         }
         format.json {
-          render json: { done: true, popup: "Referent was successfully updated." }
+          row_object = (@referent.class == ChannelReferent) ?  @referent.user : @referent
+          render json: {
+            done: true,
+            popup: "Referent now updated to serve you better",
+            replacements: [
+                [ "#listrow_#{@referent.user.id}",
+                  with_format("html") { view_context.render_seeker_item row_object } ]
+            ]
+          }
         }
       else
         @referent.becomes(Referent)
