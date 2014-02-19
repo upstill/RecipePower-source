@@ -14,23 +14,45 @@ module TaggableHelper
 		end
   end
 
-  # Generalization of taggable_field for arbitrary attribute names (not just 'tags'), and allowing
+  # Generalization of taggable_field for arbitrary attribute names (not just 'tags'--the default), and allowing
   #   for both form_for and simple_form fields as well as for raw objects
-  # Convention MUST BE HONORED! For a tag attribute named 'tags':
-  #   1) tags can be set by writing to 'tag_tokens'
-  #   2) the text for the field can be read from and written to 'tagstxt'
+  # Convention MUST BE HONORED! For a tag attribute named 'tag'('tags'):
+  #   1) tags can be set by 'tag_token='('tag_tokens=') -- this is the name of the field
+  #   2) the text for the field can be read from and written to 'tagtxt' ('tagstxt')
 
-  def token_input_field(f, attrname, options={})
+  def token_input_field f, tags_attribute_name, options={}
+    if tags_attribute_name.is_a? Hash
+      options = tags_attribute_name
+      tags_attribute_name = nil
+    end
+    tags_attribute_name = tags_attribute_name ? tags_attribute_name.to_s : "tags"
+    attribute_name_singular = tags_attribute_name.singularize
+    is_plural = attribute_name_singular != tags_attribute_name
+    tags_attribute_name = attribute_name_singular
+    tags_attribute_name << "_tag" unless attribute_name_singular == "tag"
+    tags_input_field = attribute_name_singular+"_token"
+    if is_plural
+      tags_input_field << "s"
+      tags_attribute_name << 's'
+    end
+
     object = (f.class.to_s.match /FormBuilder/) ? f.object : f
     options[:data] ||= {}
     options[:data][:hint] ||= "Type your tag(s) for the #{object.class.to_s.downcase} here"
-    options[:data][:pre] = (options[:attrval] || object.read_attribute(attrname)).map(&:attributes).to_json
+    options[:data][:pre] ||= (options[:attrval] || object.send(tags_attribute_name)).map(&:attributes).to_json
     options[:class] = "token-input-field #{options[:class]}"
     if f==object # Not in the context of a form
-      text_field_tag :"#{attrname.to_s}txt", "#{object.read_attribute("#{attrname}txt")}", options
+      text_field_name = tags_attribute_name+txt
+      text_field_tag text_field_name, "#{object.read_attribute(text_field_name)}", options
+    elsif f.class.to_s.match /SimpleForm/
+      options[:input_html] ||= {}
+      # Pass the :data and :class options to the input field via input_html
+      options[:input_html][:data] = options.delete :data
+      options[:input_html][:class] = options.delete :class
+      f.input tags_input_field, options
     else
       options[:html_options] = options.slice :class
-      f.text_field :"#{attrname.to_s.singularize}_tokens", options
+      f.text_field tags_input_field, options
     end
   end
 

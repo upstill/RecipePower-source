@@ -1,10 +1,12 @@
-<% @reftype = @referent.type %>
-<%= simple_form_for(@referent.becomes(Referent), html: {class: "referent_form"}) do |f| %>
-    <% f.object.type = @reftype %>
+<%= simple_form_for(@referent, url: (@referent.id ? referent_path(@referent) : referents_path), html: {class: "referent_form"}) do |f| %>
     <%= f.select :typenum, @typeselections %>
     <%= f.input :description %>
-    <%= f.input :parent_tokens, label: "Categories it's under", input_html: {data: {type: @referent_type.to_s, pre: @referent.parent_tokens}} %>
-    <%= f.input :child_tokens, label: "#{@referent.typename.pluralize} in this category", input_html: {data: {type: @referent_type.to_s, pre: @referent.child_tokens}} %>
+    <%= f.input :parent_tokens, label: "Categories it's under", input_html: { class: "token-input-field", data: {type: @referent_type.to_s, pre: @referent.parent_tokens}} %>
+    <%# f.input :child_tokens, label: "#{@referent.typename.pluralize} in this category", input_html: { class: "token-input-field", data: {type: @referent_type.to_s, pre: @referent.child_tokens}} %>
+    <%= token_input_field f,
+                          :children,
+                          label: "#{@referent.typename.pluralize} in this category",
+                          data: { type: @referent_type.to_s } %>
     <h3>Names for this <%= @referent.typename %></h3>
     <div class="field">
       <table id="expression_table">

@@ -8,8 +8,7 @@
                     :as => :boolean %>
     <div class="row">
       <div class="col-md-12">
-        <%= f.label "Primary Tag (make one up if none fits)" %>
-        <%= token_input_field f, :tag, attrval: @referent.tag_tokens, label: "Primary Tag (make one up if none fits)", :id => "referent_channel_tag", data: {pre: ""} %>
+        <%= token_input_field f, :tag, label: "Primary Tag (make one up if none fits)", :id => "referent_channel_tag" %>
       </div>
     </div>
     <hr><%= f.simple_fields_for :user do |builder| %>

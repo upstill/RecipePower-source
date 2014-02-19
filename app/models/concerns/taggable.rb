@@ -17,14 +17,16 @@ module Taggable
   def tag_owner
     current_user || User.super_id
   end
-  
+
   def tagstxt
     @tagstxt ||= ""
   end
-  
+  alias_method :tagtxt, :tagstxt
+
   def tagstxt= tt
     @tagstxt = tt
   end
+  alias_method :"tagtxt=", :"tagstxt="
 
   # Fetch the tags associated with the entity
   def tags options = {}
@@ -35,18 +37,21 @@ module Taggable
     end
 
   end
+  alias_method :tag, :tags
 
   # Fetch the ids of the tags associated with the entity
   def tag_ids
     taggings.where(:user_id => tag_owner).map &:tag_id
   end
+  alias_method :tag_id, :tag_ids
 
   # Set the tags associated with the entity
   def tags= tags
     # Ensure that the user's tags are all and only those given
     self.tag_ids=tags.map(&:id)
   end
-  
+  alias_method :"tag=", :"tags="
+
   # Set the tag ids associated with the current user
   def tag_ids= nids
     # Ensure that the user's tags are all and only those in nids
@@ -58,6 +63,7 @@ module Taggable
     # Remove tags as nec.
     to_remove.each { |tagid| Tagging.where(user_id: tag_owner, tag_id: tagid, entity_id: id, entity_type: self.class.name).map(&:destroy) } # each { |tg| tg.destroy } }
   end
+  alias_method :"tag_id=", :"tag_ids="
 
   # Associate a tag with this entity in the domain of the given user (or the current user if not given)
   def tag_with tag
@@ -89,7 +95,8 @@ This is the old functionality, now moved to token_input.rb
     }.compact.uniq
 =end
   end
-  
+  alias_method :"tag_token=", :"tag_tokens="
+
   # Declare a data structure suitable for passing to RP.tagger.init
   def tag_data
     { :pre => tags.map(&:attributes), :hint => "Type your tag(s) for the recipe here" }.to_json
