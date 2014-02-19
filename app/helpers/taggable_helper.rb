@@ -25,10 +25,10 @@ module TaggableHelper
       options = tags_attribute_name
       tags_attribute_name = nil
     end
-    tags_attribute_name = tags_attribute_name ? tags_attribute_name.to_s : "tags"
-    attribute_name_singular = tags_attribute_name.singularize
-    is_plural = attribute_name_singular != tags_attribute_name
-    tags_attribute_name = attribute_name_singular
+    attribute_name = tags_attribute_name ? tags_attribute_name.to_s : "tags"
+    attribute_name_singular = attribute_name.singularize
+    is_plural = attribute_name_singular != attribute_name
+    tags_attribute_name = attribute_name_singular.clone
     tags_attribute_name << "_tag" unless attribute_name_singular == "tag"
     tags_input_field = attribute_name_singular+"_token"
     if is_plural
@@ -42,8 +42,8 @@ module TaggableHelper
     options[:data][:pre] ||= (options[:attrval] || object.send(tags_attribute_name)).map(&:attributes).to_json
     options[:class] = "token-input-field #{options[:class]}"
     if f==object # Not in the context of a form
-      text_field_name = tags_attribute_name+txt
-      text_field_tag text_field_name, "#{object.read_attribute(text_field_name)}", options
+      text_field_name = tags_attribute_name+"txt"
+      text_field_tag text_field_name, "#{object.send(text_field_name)}", options
     elsif f.class.to_s.match /SimpleForm/
       options[:input_html] ||= {}
       # Pass the :data and :class options to the input field via input_html
