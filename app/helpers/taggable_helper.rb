@@ -65,7 +65,7 @@ module TaggableHelper
     end
   end
 
-  def taggable_div(f, classname="", label="Tags", options={})
+  def taggable_div(f, classname="", options={})
     options[:rows] ||= "1"
     content_tag :div, 
       token_input_field( f, options.delete(:attribute_name), options),
