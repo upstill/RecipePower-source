@@ -31,18 +31,24 @@ module TaggableHelper
     tags_attribute_name = aname.singularize
     is_plural = tags_attribute_name != aname
     tags_input_field = tags_attribute_name+"_token"
-    tags_attribute_name << "_tag" unless tags_attribute_name == "tag"
+    label = tags_attribute_name.capitalize
+    unless tags_attribute_name == "tag"
+      tags_attribute_name << "_tag"
+      label << " Tag"
+    end
+
     if is_plural
       tags_input_field << "s"
       tags_attribute_name << 's'
+      label << 's'
     end
+    options[:label] ||= label
 
     object = (f.class.to_s.match /FormBuilder/) ? f.object : f
     options[:data] ||= {}
     options[:data][:hint] ||= "Type your tag(s) for the #{object.class.to_s.downcase} here"
     options[:data][:pre] ||= (options[:attrval] || object.send(tags_attribute_name)).map(&:attributes).to_json
     options[:class] = "token-input-field #{options[:class]}"
-    label = options[:label]
     if f==object # Not in the context of a form
       text_field_name = tags_attribute_name+"txt"
       text_field_tag text_field_name, "#{object.send(text_field_name)}", options
@@ -54,7 +60,7 @@ module TaggableHelper
       f.input tags_input_field, options
     else
       options[:html_options] = options.slice :class
-      (label ? f.label(tags_input_field.to_sym, label) : "") +
+      (label ? f.label(tags_input_field.to_sym, options[:label]) : "") +
       (f.text_field tags_input_field, options)
     end
   end
