@@ -33,6 +33,8 @@ RP.tagger.setup = (elmt) ->
 		allowFreeTagging: data.freeTagging
 	# The enabler is a selector to, e.g., a Submit button that can be enabled when a 
 	# token has been input
+	if data.tokenLimit
+		options.tokenLimit = data.tokenLimit
 	if data.enabler?
 		options.onAdd = options.onDelete = (item) ->
 			selector = $(this).data "enabler"
