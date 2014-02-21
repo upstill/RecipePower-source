@@ -427,7 +427,7 @@ class ChannelReferent < Referent ;
   end
 
   def tag
-    [canonical_expression]
+    [canonical_expression].compact
   end
   
   # The tag_tokens VA is special to channels, since 1) the name of the channel could

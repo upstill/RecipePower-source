@@ -16,6 +16,7 @@ RP.new_channel.onload = (dlog) ->
 		tokenLimit: 1,
 		allowFreeTagging: true # allowCustomEntry: true
 		
+###
 	$('input#referent_dependent').change (evt) ->
 		if $("#referent_dependent")[0].checked  # "Channel for existing tag" checked
 			$("#referent_tag_token").tokenInput "setOptions",
@@ -29,3 +30,4 @@ RP.new_channel.onload = (dlog) ->
 				noResultsText: "Hit Enter to make a channel with a new name",
 				hintText: "Type a tag naming the channel",
 				allowFreeTagging: true # allowCustomEntry: true
+###
