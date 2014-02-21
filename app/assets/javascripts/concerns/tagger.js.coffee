@@ -21,7 +21,7 @@ RP.tagger.setup = (elmt) ->
 	if !(data.freeTagging?)
 		data.freeTagging = true
 	if data.query
-		request += "?"+encodeURIComponent(data.query)
+		request += "?"+data.query # encodeURIComponent(data.query)
 	options = 
 		crossDomain: false,
 		noResultsText: data.noResultsText || "No existing tag found; hit Enter to make it a new tag",

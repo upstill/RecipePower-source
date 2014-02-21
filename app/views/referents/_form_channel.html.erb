@@ -10,11 +10,12 @@
       <div class="col-md-12">
         <%= token_input_field f,
                               :tag,
-                              label: "Primary Tag (make one up if none fits)",
-                              :id => "referent_channel_tag" %>
+                              :label => "Primary Tag (make one up if none fits)",
+                              :id => "referent_channel_tag",
+                              :data => { query: "tagtypes=1,2,3,4,6,7,8,12,14" } %>
       </div>
     </div>
-    <hr><%= f.simple_fields_for :user do |builder| %>
+    <%= f.simple_fields_for :user do |builder| %>
         <%= render "shared/pic_preview_field",
                    :f => builder,
                    :urlfield => :image %>
@@ -26,7 +27,11 @@
         </div>
         <div class="row">
           <div class="col-md-12">
-            <%= taggable_div builder, "control-group", label: "Other tags this channel watches", uid: User.super_id %>
+            <%= taggable_div builder,
+                             "control-group",
+                             :label => "Other tags this channel watches",
+                             :uid => User.super_id,
+                             :data => { query: "tagtypes=1,2,3,4,6,7,8,12,14" } %>
           </div>
         </div>
     <% end %>
