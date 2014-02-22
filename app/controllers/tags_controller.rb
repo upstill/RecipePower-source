@@ -92,7 +92,12 @@ class TagsController < ApplicationController
                 @taglist.map(&:attributes).map { |match| match["name"] }
             else # assuming "tokenInput" because that js won't send a parameter
                 # for tokenInput: an array of hashes, each with "id" and "name" values
-                @taglist.collect { |match| {id: match.id, :name => match.typedname([1,3].include? current_user_or_guest_id)} }
+                @taglist.collect { |match| {
+                    id: match.id,
+                    :name => ((tagtype.is_a?(Array) && (tagtype.size>1)) ?
+                        match.typedname([1,3].include? current_user_or_guest_id) :
+                        match.name)
+                } }
             end
         }
         format.html { render partial: "tags/taglist" }

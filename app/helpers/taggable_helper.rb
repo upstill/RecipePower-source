@@ -50,7 +50,8 @@ module TaggableHelper
     options[:data][:pre] ||= (options[:attrval] || object.send(tags_attribute_name)).map(&:attributes).to_json
     options[:data][:token_limit] = 1 unless is_plural
     if type = options[:data][:type]
-      options[:data][:query] = "tagtype=" + ((type.is_a? Array) ? type.map(&:to_s).join(',') : type.to_s)
+      type = [type] unless type.is_s? Array
+      options[:data][:query] = "tagtypes=#{type.map(&:to_s).join(',')}"
     end
     options[:class] = "token-input-field #{options[:class]}"
     if f==object # Not in the context of a form
