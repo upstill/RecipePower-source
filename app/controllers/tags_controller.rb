@@ -80,6 +80,8 @@ class TagsController < ApplicationController
           partition: true
       }
       @taglist = Tag.strmatch(matchstr, matchopts).uniq
+      # By default, we disambiguate tags when searching over more than one type
+      include_type = tagtype.nil? || (tagtype.is_a?(Array) && (tagtype.size>1))
       @taglist.delete_if { |t| !t.referents.empty? } if params[:unbound_only] == "true"
       respond_to do |format|
         format.json { render :json => 
@@ -94,7 +96,7 @@ class TagsController < ApplicationController
                 # for tokenInput: an array of hashes, each with "id" and "name" values
                 @taglist.collect { |match| {
                     id: match.id,
-                    :name => ((tagtype.is_a?(Array) && (tagtype.size>1)) ?
+                    :name => (include_type ?
                         match.typedname([1,3].include? current_user_or_guest_id) :
                         match.name)
                 } }
