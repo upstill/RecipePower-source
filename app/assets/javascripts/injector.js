@@ -91,18 +91,6 @@ function launch_interaction(sourcehome) {
 	RP.dialog.run(dlog); // Hand off submit-handling to the dialog manager
 	// $('form', dlog).submit( dlog, submitDialog );
 	// Set the dialog's resize function to adjust size of the iframe
-/*
-	$(dlog).resize( function (evt) {
-		var dropdown = $('div.token-input-dropdown-facebook')[0]
-		var h = 0;
-		if(dropdown && (dropdown.style.display != "none")) {
-			h = dropdown.offsetHeight;
-		}
-		if(dlog.offsetWidth > 0 && dlog.offsetHeight > 0) {
-			$.postMessage( { call: "execute_resize", width: dlog.offsetWidth, height: dlog.offsetHeight+h }, RP.embedding_url );
-		}
-	});
-*/
 
 	$('div.token-input-dropdown-facebook').resize( function (evt) {
 		// Strangely, this do-nothing resize monitor is required to trigger resize of the dialog
@@ -119,9 +107,17 @@ function launch_interaction(sourcehome) {
     }
 }
 
-function resize_dialog(dlog) {
-    if(dlog.offsetWidth > 0 && dlog.offsetHeight > 0)
-        $.postMessage( { call: "execute_resize", width: dlog.offsetWidth, height: dlog.offsetHeight }, RP.embedding_url );
+// Respond to a resize event on the dialog, including presentation of the tokenInput dropdown
+function resize_dialog(e) {
+    var dlog = $('div.dialog')[0]
+    var dropdown = $('div.token-input-dropdown-facebook', dlog)[0]
+    var h = 0;
+    if (dropdown && (dropdown.style.display != "none")) {
+        h = dropdown.offsetHeight;
+    }
+    if (dlog.offsetWidth > 0 && dlog.offsetHeight > 0) {
+        $.postMessage({ call: "execute_resize", width: dlog.offsetWidth, height: dlog.offsetHeight + h }, RP.embedding_url);
+    }
 }
 
 // Called when the dialog is opened: resize the iframe
@@ -131,11 +127,9 @@ function open_dialog(dlog) {
 	if(cancelBtn) 
 		cancelBtn.onclick = retire_iframe;
     // Adjust the enclosing iframe whenever the dialog's size changes
-    $(dlog).resize( function(e) {
-        resize_dialog(dlog);
-    })
+    $(dlog).resize( resize_dialog )
     // Ensure a good fit on open
-    resize_dialog(dlog)
+    resize_dialog()
 	// Report the window dimensions to the enclosing iframe
 	$('#retire_iframe').click( retire_iframe )
 	$('#link_to_redirect').click( redirect_to )
