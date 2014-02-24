@@ -10,7 +10,7 @@ me = () ->
 # tagger_selector = "div.edit_referent input#referent_add_expression"
 
 # Callback for the selection of a new tag for an expression
-add_expression = (hi, li) ->
+RP.edit_referent.add_expression = (hi, li) ->
 	# hi.id is the tag id; hi.data is the string
 	that = $('.add_fields') # The add-fields element carries the data for the new stuff
 	time = new Date().getTime()
@@ -38,10 +38,22 @@ add_expression = (hi, li) ->
 		id: hi.id
 
 # When dialog is loaded, activate its functionality
+###
 RP.edit_referent.onload = ->
 	# Bind tokenInput to the text fields
 	tagtype = $('#referent_parent_tokens').data "type"
 	querystr = "/tags/match.json?tagtype="+tagtype
+
+	$("#referent_add_expression").tokenInput querystr+"&untypedOK=1",
+		crossDomain: false,
+		noResultsText: "No existing tag found; hit Enter to make a new tag",
+		hintText: "Type/select another tag to express this thing",
+		theme: "facebook",
+		tokenLimit: 1,
+		onAdd: add_expression, # Respond to tag selection by adding expression and deleting tag
+		preventDuplicates: true,
+		allowFreeTagging: true # allowCustomEntry: true
+
 	$("#referent_parent_tokens").tokenInput querystr,
 		crossDomain: false,
 		noResultsText: "No existing tag found; hit Enter to make a new tag",
@@ -59,13 +71,4 @@ RP.edit_referent.onload = ->
 		theme: "facebook",
 		preventDuplicates: true,
 		allowFreeTagging: true # allowCustomEntry: true
-
-	$("#referent_add_expression").tokenInput querystr+"&untypedOK=1",
-		crossDomain: false,
-		noResultsText: "No existing tag found; hit Enter to make a new tag",
-		hintText: "Type/select another tag to express this thing",
-		theme: "facebook",
-		tokenLimit: 1,
-		onAdd: add_expression, # Respond to tag selection by adding expression and deleting tag
-		preventDuplicates: true,
-		allowFreeTagging: true # allowCustomEntry: true
+###

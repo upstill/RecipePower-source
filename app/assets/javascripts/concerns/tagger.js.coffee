@@ -18,8 +18,6 @@ RP.tagger.onopen = (selector = '.token-input-field') ->
 RP.tagger.setup = (elmt) ->
 	data = $(elmt).data() || {}
 	request = data.request || "/tags/match.json"
-	if !(data.freeTagging?)
-		data.freeTagging = true
 	if data.query
 		request += "?"+data.query # encodeURIComponent(data.query)
 	options = 
@@ -27,14 +25,19 @@ RP.tagger.setup = (elmt) ->
 		noResultsText: data.noResultsText || "No existing tag found; hit Enter to make it a new tag",
 		hintText: data.hint || "Type your own tag(s)",
 		zindex: 1052,
-		prePopulate: data.pre,
+		prePopulate: data.pre || "",
 		theme: "facebook",
 		preventDuplicates: true,
-		allowFreeTagging: data.freeTagging
+		allowFreeTagging: (data.freeTagging != false)
 	# The enabler is a selector to, e.g., a Submit button that can be enabled when a 
 	# token has been input
+	for attr in ['tokenLimit', 'onAdd']
+		if data[attr]
+			options[attr] = data[attr]
 	if data.tokenLimit
 		options.tokenLimit = data.tokenLimit
+	if data.onAdd
+		options.onAdd = RP.named_function data.onAdd
 	if data.enabler?
 		options.onAdd = options.onDelete = (item) ->
 			selector = $(this).data "enabler"
