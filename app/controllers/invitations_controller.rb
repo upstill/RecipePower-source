@@ -11,7 +11,7 @@ class InvitationsController < Devise::InvitationsController
 
   # GET /resource/invitation/new
   def new
-    self.resource = resource_class.new()
+    self.resource = resource_class.new(invitation_message: "Here's a recipe that I'm really into right now. Take a look and tell me what you think.")
     resource.shared_recipe = params[:recipe_id]
     @recipe = resource.shared_recipe && Recipe.find(resource.shared_recipe)
     self.resource.invitation_issuer = current_user.polite_name
@@ -70,8 +70,8 @@ class InvitationsController < Devise::InvitationsController
     err_address =
       @staged.invitee_tokens.detect { |token|
         token.kind_of?(String) && !(token =~ /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i)
-      } || ("" if @staged.channel_tokens.empty?)
-    if err_address # if there's an invalid email, go back to the user
+      }
+    if err_address || (@staged.invitee_tokens.empty? && @staged.channel_tokens.empty?) # if there's an invalid email, go back to the user
       @staged.errors.add (for_sharing ? :invitee_tokens : :email), 
         err_address.blank? ? 
           "Can't send an invitation without an email to send it to!" : 

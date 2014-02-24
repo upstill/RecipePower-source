@@ -42,7 +42,7 @@
 									} %>
 		  <%# f.input :email %></p>
 			<%= f.input :invitation_issuer, label: "How to identify you in the message" %>
-		  <%= f.input :invitation_message, label: "Invitation Message (optional)", :input_html => { :rows=>"4", value: ( "Here's a recipe that I'm really into right now. Take a look and tell me what you think.")} %></p>
+		  <%= f.input :invitation_message, label: "Invitation Message (optional)", :input_html => { :rows=>"4" } %></p>
       <%= f.hidden_field(:shared_recipe) if resource.shared_recipe %>
 		<%= modal_footer do %>
 	  	<%= f.submit "Share the Love", class: "btn btn-lg btn-success dialog-submit-button", disabled: true %>
