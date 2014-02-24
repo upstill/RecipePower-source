@@ -196,7 +196,7 @@ class ReferentsController < ApplicationController
             html = with_format("html") { render_to_string partial: "users/show_table_row" }
           else
             selector = "#Referent#{@referent.id}"
-            html = with_format("html") { render_to_string partial: "referents/show_table_row", locals: {referent: @referent} }
+            html = with_format("html") { view_context.render_seeker_item @referent.becomes(Referent) }
           end
           render json: {
             done: true,
