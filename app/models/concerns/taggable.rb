@@ -30,18 +30,18 @@ module Taggable
 
   # Fetch the tags associated with the entity
   def tags options = {}
-    if options[:tag_type]
-      Tag.where id: tag_ids, tagtype: Tag.typenum(options[:tag_type])
+    if tt = options.delete(:tag_type)
+      Tag.where id: tag_ids(options), tagtype: Tag.typenum(tt)
     else
-      Tag.where id: tag_ids
+      Tag.where id: tag_ids(options)
     end
 
   end
   alias_method :tag, :tags
 
   # Fetch the ids of the tags associated with the entity
-  def tag_ids
-    taggings.where(:user_id => tag_owner).map &:tag_id
+  def tag_ids options={}
+    taggings.where(:user_id => (options[:owner_id] || tag_owner)).map &:tag_id
   end
   alias_method :tag_id, :tag_ids
 
