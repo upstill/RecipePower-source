@@ -96,9 +96,7 @@ class TagsController < ApplicationController
                 # for tokenInput: an array of hashes, each with "id" and "name" values
                 @taglist.collect { |match| {
                     id: match.id,
-                    :name => (include_type ?
-                        match.typedname([1,3].include? current_user_or_guest_id) :
-                        match.name)
+                    name: match.name( include_type, ([1,3].include? current_user_or_guest_id))
                 } }
             end
         }

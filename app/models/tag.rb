@@ -155,9 +155,10 @@ class Tag < ActiveRecord::Base
     
    public
 
+   alias_attribute :simple_name, :name
    # Return the tag's name with a marker of its type, to clear up ambiguities
-   def typedname include_ref=false
-     return name unless typenum > 0
+   def name include_type=false, include_ref=false
+     return simple_name unless include_type && (typenum > 0)
      referent_str = (referent_id && (" "+referent_id.to_s)) || ""
      %Q{#{name} [#{typename}#{referent_str}]}
    end
