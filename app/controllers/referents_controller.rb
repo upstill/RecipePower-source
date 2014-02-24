@@ -191,17 +191,16 @@ class ReferentsController < ApplicationController
         format.html { redirect_to @referent.becomes(Referent), notice: 'Referent was successfully updated.' }
         format.json {
           if @referent.class == ChannelReferent
-            @user = @referent.user
-            selector = "#listrow_#{@user.id}"
-            html = with_format("html") { render_to_string partial: "users/show_table_row" }
+            selector = "#listrow_#{@referent.user.id}"
+            element = @referent.user
           else
             selector = "#Referent#{@referent.id}"
-            html = with_format("html") { view_context.render_seeker_item @referent.becomes(Referent) }
+            element = @referent.becomes(Referent)
           end
           render json: {
             done: true,
             popup: "Referent now updated to serve you better",
-            replacements: [ [ selector, html ] ]
+            replacements: [ [ selector, with_format("html") { view_context.render_seeker_item element } ] ]
           }
         }
       else
