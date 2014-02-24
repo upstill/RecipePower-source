@@ -17,7 +17,7 @@ module SeekerHelper
   end
   
 	# Render an element of a collection, depending on its class
-	def render_seeker_item element
+	def render_seeker_item element, ename = nil
 		case element
 		when Recipe
 			@recipe = element
@@ -30,9 +30,9 @@ module SeekerHelper
 		  render "shared/feed_entry"
 		else
 		  # Default is to set instance variable @<Klass> and render "<klass>s/<klass>"
-		  ename = element.class.to_s.downcase
+		  ename ||= element.class.to_s.downcase
 		  self.instance_variable_set("@"+ename, element)
-		  render "#{ename.pluralize}/show_table_row"
+		  render partial: "#{ename.pluralize}/show_table_row", ename.to_sym => element
 		end
   end
 

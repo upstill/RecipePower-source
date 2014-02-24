@@ -1,14 +1,5 @@
 RP.edit_referent = RP.edit_referent || {}
 
-jQuery ->
-	if me()[0]
-		RP.edit_referent.onload()
-
-me = () ->
-	$('form.referent_form')
-
-# tagger_selector = "div.edit_referent input#referent_add_expression"
-
 # Callback for the selection of a new tag for an expression
 RP.edit_referent.add_expression = (hi, li) ->
 	# hi.id is the tag id; hi.data is the string

@@ -188,18 +188,20 @@ class ReferentsController < ApplicationController
     respond_to do |format|
       params[param_key].delete(:typenum)
       if @referent.update_attributes(params[param_key])
-        format.html {
-          redirect_to @referent.becomes(Referent), notice: 'Referent was successfully updated.'
-        }
+        format.html { redirect_to @referent.becomes(Referent), notice: 'Referent was successfully updated.' }
         format.json {
-          row_object = (@referent.class == ChannelReferent) ?  @referent.user : @referent
+          if @referent.class == ChannelReferent
+            @user = @referent.user
+            selector = "#listrow_#{@user.id}"
+            html = with_format("html") { render_to_string partial: "users/show_table_row" }
+          else
+            selector = "#Referent#{@referent.id}"
+            html = with_format("html") { render_to_string partial: "referents/show_table_row", locals: {referent: @referent} }
+          end
           render json: {
             done: true,
             popup: "Referent now updated to serve you better",
-            replacements: [
-                [ "#listrow_#{@referent.user.id}",
-                  with_format("html") { view_context.render_seeker_item row_object } ]
-            ]
+            replacements: [ [ selector, html ] ]
           }
         }
       else
