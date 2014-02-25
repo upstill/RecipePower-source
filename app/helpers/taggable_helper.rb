@@ -79,7 +79,7 @@ module TaggableHelper
   end
   
   def taggable_list taggable, with_type=false
-    taggable.tags.collect { |tag| "<span>#{tag.name(with_type)}</span>" }.join('<br>').html_safe
+    taggable.tags.collect { |tag| "<span>#{tag.typedname(with_type)}</span>" }.join('<br>').html_safe
   end
 	
 end
