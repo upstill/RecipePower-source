@@ -49,11 +49,12 @@ module TaggableHelper
     options[:data][:hint] ||= "Type your tag(s) for the #{object.class.to_s.downcase} here"
     options[:data][:pre] ||= (options[:attrval] || object.send(tags_attribute_name)).map(&:attributes).to_json
     options[:data][:token_limit] = 1 unless is_plural
+    options[:data][:"min-chars"] ||= 2
     if type = options[:data][:type]
       type = [type] unless type.is_a? Array
       options[:data][:query] = "tagtypes=#{type.map(&:to_s).join(',')}"
     end
-    options[:class] = "token-input-field #{options[:class]}"
+    options[:class] = "token-input-field #{options[:class]}" # The token-input-field class triggers tokenInput
     if f==object # Not in the context of a form
       text_field_name = tags_attribute_name+"txt"
       text_field_tag text_field_name, "#{object.send(text_field_name)}", options

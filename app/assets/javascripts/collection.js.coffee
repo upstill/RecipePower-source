@@ -1,7 +1,17 @@
 RP.collection = RP.collection || {}
 
 jQuery ->
-	# $('div.loader').removeClass "loading" 
+	$(window).resize -> # Fix the height of the browser
+		if (elmt = $("div.browser_house")[0]) && (navlinks = $('div#footer_nav_links')[0])
+			elmt.style.bottom = (navlinks.offsetHeight + 5).toString() + "px";
+
+	if (elmt = $("div.browser_house")[0]) && (navlinks = $('div#footer_nav_links')[0])
+		elmt.style.bottom = (navlinks.offsetHeight + 5).toString() + "px";
+
+	collection_onload()
+
+	# $('div.loader').removeClass "loading"
+###
 	$("#tagstxt").tokenInput("/tags/match.json",
 		crossDomain: false,
 		hintText: "",
@@ -15,15 +25,7 @@ jQuery ->
 		minChars: 2,
 		zindex: 1500
 	)
-
-	$(window).resize -> # Fix the height of the browser
-		if (elmt = $("div.browser_house")[0]) && (navlinks = $('div#footer_nav_links')[0])
-		 	elmt.style.bottom = (navlinks.offsetHeight + 5).toString() + "px";
-
-	if (elmt = $("div.browser_house")[0]) && (navlinks = $('div#footer_nav_links')[0])
-	 	elmt.style.bottom = (navlinks.offsetHeight + 5).toString() + "px";
-
-	collection_onload()
+###
 
 RP.collection.onload = (event) ->
 	collection_onload()
@@ -37,6 +39,7 @@ RP.collection.more_to_come = (armed) ->
 		RP.scroll.set_handler 'div.collection_list', null
 
 collection_onload = () ->
+	RP.tagger.onopen()
 	$("#tagstxt").first().focus()
 	$('.content-streamer').each (ix, elmt) ->
 		if (alertstr = $(elmt).data('alert')) && (alertstr.length > 0)
@@ -51,7 +54,7 @@ collection_onload = () ->
 	RP.rcp_list.onload()
 	RP.collection.justify()
 
-collection_tagchange = () ->
+RP.collection.tagchange = () ->
 	formitem = $('form.query_form')
 	if $(formitem).data("format") == "html"
 		formitem.submit()

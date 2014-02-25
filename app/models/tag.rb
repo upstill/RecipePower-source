@@ -338,7 +338,7 @@ class Tag < ActiveRecord::Base
         end
         equivs[tag.normalized_name] = tag if accept
 
-=begin
+=begin Semantic folding didn't really work out. Necessary?
         tag.referent_ids.each { |rid|
           # Does the referent already have a representative in the equivs?
           equivs[tag.normalized_name] = tag unless (prior = equivs[rid]) &&
