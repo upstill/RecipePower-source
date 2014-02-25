@@ -103,7 +103,7 @@ class TagServices
     end
     result
   end
-  
+
 
   # Class method meant to be run from a console, to clean up redundant tags (name/index pair not unique) before adding index to prevent them
   def self.qa

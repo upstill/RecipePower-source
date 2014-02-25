@@ -12,6 +12,7 @@ jQuery ->
 		onDelete: collection_tagchange,
 		allowFreeTagging: true,
 		placeholder: "Seek and ye shall find...",
+		minChars: 2,
 		zindex: 1500
 	)
 

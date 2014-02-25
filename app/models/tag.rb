@@ -247,6 +247,7 @@ class Tag < ActiveRecord::Base
    # assert: return a key of the given type matching the name, even if it has to be created anew
    # matchall: search only succeeds if it matches the whole string
    # untypedOK: add type 0 to search to look for untyped tags
+   # fold: reduce the set of candidate tags using lexical and semantic equivalence classes
    
    # If the :assert option is true, strmatch WILL return a tag on the given name, of the
    # given type, visible to the given user. This may not require making a new tag, but only opening 
@@ -257,6 +258,7 @@ class Tag < ActiveRecord::Base
     type = opts[:tagtype] && Tag.typenum(opts[:tagtype])
     assert = opts[:assert]
     name = name || ""  # nil matches anything
+    do_fold = opts[:fold]
 	# Case-insensitive lookup
 	fuzzyname = Tag.normalizeName name
 	if opts[:matchall] || assert
@@ -277,6 +279,7 @@ class Tag < ActiveRecord::Base
         	tags = Tag.where "normalized_name like ? ", "%#{fuzzyname}%" 
         end
     end
+    tags = tags.limit(50)
     # We now have a list of tags which match the input, perhaps fuzzily.
     # If we don't need to assert the full string, we're done
     if assert
@@ -315,6 +318,36 @@ class Tag < ActiveRecord::Base
     else
         # Restrict the found set to any asserted user
     	tags.keep_if { |tag| tag.isGlobal || tag.owners.exists?(uid) } if uid && (uid != User.super_id)
+    end
+    if do_fold
+      # Fold the set of tags to reduce redundancy as follows:
+      # -- at most one tag from the equivalence class of tags with the same normalized_name
+      # -- at most one tag from the equivalence class of tags sharing a referent, with the referent's canonical expression preferred
+      equivs = {}
+      tags.each { |tag|
+        accept = true
+        if prior = equivs[tag.normalized_name]
+          # Shootout between two lexically equivalent tags. Prefer the one whose match is earlier in the string,
+          # then prefer the one with a case match
+          case tag.name.index(/#{fuzzyname}/i) <=> prior.name.index(/#{fuzzyname}/i)
+            when -1 # Old tag wins => Move on
+              accept = false
+            when 0
+              accept = tag.name.match(fuzzyname)
+          end
+        end
+        equivs[tag.normalized_name] = tag if accept
+
+=begin
+        tag.referent_ids.each { |rid|
+          # Does the referent already have a representative in the equivs?
+          equivs[tag.normalized_name] = tag unless (prior = equivs[rid]) &&
+              (referent = Referent.find(rid)) &&
+              (referent.tag_id == prior.id)
+        }
+=end
+      }
+      tags = equivs.values.uniq
     end
     # Prioritize the list for initial substring matches
     if (!fuzzyname.blank?) && opts[:partition] && (tags.count > 1)

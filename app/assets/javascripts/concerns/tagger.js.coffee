@@ -28,6 +28,7 @@ RP.tagger.setup = (elmt) ->
 		prePopulate: data.pre || "",
 		theme: "facebook",
 		preventDuplicates: true,
+		minChars: 2,
 		allowFreeTagging: (data.freeTagging != false)
 	# The enabler is a selector to, e.g., a Submit button that can be enabled when a 
 	# token has been input
