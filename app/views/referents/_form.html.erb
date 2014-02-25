@@ -1,12 +1,10 @@
 <%= simple_form_for(@referent, url: (@referent.id ? referent_path(@referent) : referents_path), html: {class: "referent_form"}) do |f| %>
     <%= f.select :typenum, @typeselections %>
     <%= f.input :description %>
-    <%# f.input :parent_tokens, label: "Categories it's under", input_html: { class: "token-input-field", data: {type: @referent_type.to_s, pre: @referent.parent_tokens}} %>
     <%= token_input_field f,
                           :parents,
                           label: "Categories it's under",
                           data: { type: @referent_type.to_s } %>
-    <%# f.input :child_tokens, label: "#{@referent.typename.pluralize} in this category", input_html: { class: "token-input-field", data: {type: @referent_type.to_s, pre: @referent.child_tokens}} %>
     <%= token_input_field f,
                           :children,
                           label: "#{@referent.typename.pluralize} in this category",
@@ -26,7 +24,7 @@
       <h4>Add Name:</h4>
       <%= link_to_add_fields "Add Name:", f, :expressions, referent_id: @referent.id, localename: "English", formname: "Generic" %>
       <%= text_field_tag :"expression_txt", "",
-                         class: "token-input-field",
+                         class: "token-input-field-pending",
                          id: "referent_add_expression",
                          data: { pre: "",
                                  "token-limit" => 1,

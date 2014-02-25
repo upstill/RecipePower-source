@@ -131,7 +131,7 @@ open_modal = (dlog, omit_button) ->
 		$(dlog).modal()
 	notify "open", dlog
 	notify_injector "open", dlog
-	$('.token-input-field', dlog).each ->
+	$('.token-input-field-pending', dlog).each ->
 		RP.tagger.setup this
 	# Set text focus as appropriate
 	$('[autofocus]:first').focus();

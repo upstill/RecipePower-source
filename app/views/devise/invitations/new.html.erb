@@ -6,7 +6,7 @@
 			<%= f.input :invitee_tokens, 
 									:label => "Email(s)", 
 									:input_html => {
-										:class => "token-input-field", 
+										:class => "token-input-field-pending", 
 										:autofocus => true,
 										:data => { 
 											:pre => (resource.invitee_tokens || []).collect { |token| 
