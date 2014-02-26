@@ -227,8 +227,9 @@ BLOCK_END
         field, label = field[0], field[1]
       else
         label = field.sub "_tags", ''
+        extension = label.pluralize.sub label, ''
+        label << "(#{extension})" unless extension.blank?
       end
-      label << "(s)"
       render "tags/show_labelled", label: label, name: field
     }.join('').html_safe
   end
