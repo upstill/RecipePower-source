@@ -2,7 +2,7 @@
 
 RP.tagger = RP.tagger || {}
 
-# Set up an input element for tagging
+# Set up an input element for tagging by populating the data of the element as specified
 RP.tagger.init = (selector, data) ->
   $(selector).addClass "token-input-field-pending"
   for prop, value of data
@@ -30,10 +30,11 @@ RP.tagger.setup = (elmt) ->
 		preventDuplicates: true,
 		minChars: 2,
 		allowFreeTagging: (data.freeTagging != false)
-	for attr in ['tokenLimit']
+	for attr in ['tokenLimit', 'placeholder']
 		if data[attr]
 			options[attr] = data[attr]
 
+	options.placeholder = "Seek and ye shall find..."
 	# onAdd and onDelete specify functions to be called when the selection changes
 	if data.onAdd
 		options.onAdd = RP.named_function data.onAdd

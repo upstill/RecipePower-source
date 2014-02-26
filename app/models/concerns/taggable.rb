@@ -98,7 +98,8 @@ This is the old functionality, now moved to token_input.rb
   alias_method :"tag_token=", :"tag_tokens="
 
   # Declare a data structure suitable for passing to RP.tagger.init
-  def tag_data
-    { :pre => tags.map(&:attributes), :hint => "Type your tag(s) for the recipe here" }.to_json
+  def tag_data typed=false
+    attribs = tags.collect { |tag| { id: tag.id, name: tag.typedname(typed) } }
+    { :pre => attribs, :hint => "Type your tag(s) for the recipe here" }.to_json
   end
 end
