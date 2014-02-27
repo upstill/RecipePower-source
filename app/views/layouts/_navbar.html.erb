@@ -31,9 +31,10 @@
                                     placeholder: "Seek and ye shall find...",
                                     autofocus: true,
               data: { :"on-add" => "RP.collection.tagchange",
+                      :"on-delete" => "RP.collection.tagchange",
                       :hint => "", # "Search the collection by typing terms here",
-                      :"no-results-text" => "No matching tag found; hit Enter to search with text",
-                      :"on-delete" => "RP.collection.tagchange" } %>
+                      placeholder: "Seek and ye shall find...",
+                      :"no-results-text" => "No matching tag found; hit Enter to search with text" } %>
               <!--<input type="text" class="form-control" placeholder="Seek and Ye Shall Find">-->
             </div>
           </form>

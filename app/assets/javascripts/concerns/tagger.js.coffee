@@ -23,7 +23,7 @@ RP.tagger.setup = (elmt) ->
 	options = 
 		crossDomain: false,
 		noResultsText: data.noResultsText || "No existing tag found; hit Enter to make it a new tag",
-		hintText: data.hint || "Type your own tag(s)",
+		hintText: "Type your own tag(s)",
 		zindex: 1052,
 		prePopulate: data.pre || "",
 		theme: "facebook",
@@ -34,12 +34,13 @@ RP.tagger.setup = (elmt) ->
 		if data[attr]
 			options[attr] = data[attr]
 
-	options.placeholder = "Seek and ye shall find..."
 	# onAdd and onDelete specify functions to be called when the selection changes
 	if data.onAdd
 		options.onAdd = RP.named_function data.onAdd
 	if data.onDelete
 		options.onDelete = RP.named_function data.onDelete
+	if typeof data.hint == 'string'
+		options.hintText = data.hint
 
 	# An enabler specifies an element that will be en/disabled when there are tokens extant
 	# e.g., a Submit button that can be enabled when a token has been input
