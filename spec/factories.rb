@@ -1,4 +1,4 @@
-actoryGirl.define do
+FactoryGirl.define do
   factory :user do
     username "foo"
     password "foobar"

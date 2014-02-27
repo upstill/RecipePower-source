@@ -1,21 +1,5 @@
 module TaggableHelper
   
-=begin
-  # Declare a tagging field, either within the context of a form, or as a vanilla text field
-  def taggable_field(f, options={})
-    object = (f.class.to_s.match /FormBuilder/) ? f.object : f
-    options[:data] ||= {}
-    options[:data][:hint] ||= "Type your tag(s) for the #{object.class.to_s.downcase} here"
-    options[:data][:pre] = object.tags.map(&:attributes).to_json
-    options[:class] = "token-input-field #{options[:class]}"
-    if f==object # Not in the context of a form
-      text_field_tag :tagstxt, "#{object.tagstxt}", options
-    else
-  		f.text_field :tag_tokens, options
-		end
-  end
-=end
-
   # Generalization of taggable_field for arbitrary attribute names (not just 'tags'--the default), and allowing
   #   for both form_for and simple_form fields as well as for raw objects
   # Convention MUST BE HONORED! For a tag attribute named 'tag'('tags'):
@@ -54,7 +38,7 @@ module TaggableHelper
       type = [type] unless type.is_a? Array
       options[:data][:query] = "tagtypes=#{type.map(&:to_s).join(',')}"
     end
-    options[:class] = "token-input-field #{options[:class]}" # The token-input-field class triggers tokenInput
+    options[:class] = "token-input-field-pending #{options[:class]}" # The token-input-field-pending class triggers tokenInput
     if f==object # Not in the context of a form
       text_field_name = tags_attribute_name+"txt"
       text_field_tag text_field_name, "#{object.send(text_field_name)}", options

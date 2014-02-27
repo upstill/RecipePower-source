@@ -17,10 +17,10 @@ class Referent < ActiveRecord::Base
     # Referents don't have a strict tree structure, just categories defined by an isa relationship.
     # This relationship is implemented by the ReferentRelation table, with parent_id and child_id keys
     has_many :child_relations, :foreign_key=>"parent_id", :dependent=>:destroy, :class_name=>"ReferentRelation"
-    has_many :children, :through => :child_relations, :source => :child, :uniq => true 
+    has_many :children, -> { uniq }, :through => :child_relations, :source => :child
     
     has_many :parent_relations, :foreign_key => "child_id", :dependent=>:destroy, :class_name => "ReferentRelation"
-    has_many :parents, :through => :parent_relations, :source => :parent, :uniq => true
+    has_many :parents, -> { uniq }, :through => :parent_relations, :source => :parent
 
     has_many :expressions
     has_many :tags, :through=>:expressions
@@ -28,7 +28,7 @@ class Referent < ActiveRecord::Base
 
     belongs_to :canonical_expression, :class_name => "Tag", :foreign_key => "tag_id"
     
-    has_and_belongs_to_many :channels, :class_name => "Referent", :foreign_key => "channel_id", :join_table => "channels_referents", :uniq => true
+    has_and_belongs_to_many :channels, -> { uniq }, :class_name => "Referent", :foreign_key => "channel_id", :join_table => "channels_referents"
     
     has_many :referments, :dependent => :destroy, :inverse_of => :referent
     has_many :references, :through => :referments, :source => :referee, :source_type => "Reference"
@@ -48,6 +48,20 @@ class Referent < ActiveRecord::Base
     
     # before_save :ensure_expression
     after_save :ensure_tagtypes
+
+    def merge other
+      return false if type != other.type
+      puts "Merging '"+name+"' (#{children.count} children) with '"+other.name+"' (#{other.children.count} children):"
+      other.children.each { |child| children << child }
+      other.parents.each { |parent| parents << parent }
+      other.expressions.each { |expr| self.express expr.tag }
+      other.recipes.each { |rcp| self.recipes << rcp }
+      other.references.each { |rfc| self.references << rfc }
+      self.description = other.description if self.description.blank?
+      self.save
+      other.destroy
+      Referent.find self.id
+    end
     
     # Callback before destroying this referent, to fix any tags that use it as primary meaning
     def fix_references

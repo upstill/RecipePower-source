@@ -18,7 +18,7 @@ class Feed < ActiveRecord::Base
   
   has_and_belongs_to_many :users
   
-  has_many :feed_entries, :dependent => :destroy, :order => 'published_at DESC'
+  has_many :feed_entries, -> { order 'published_at DESC' }, :dependent => :destroy
 
   # When a feed is built, the url may be valid for getting to a feed, but it may also
   # alias to the url of an already-extant feed (no good). We also need to extract the title and description 
