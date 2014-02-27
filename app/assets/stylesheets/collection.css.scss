@@ -205,10 +205,13 @@ li.RcpBrowser {
 		display: none;
 	}
 	&.active {
-		right: 30px;
-		span.badge {
-			display: inline;
-		}
+	  right: 30px;
+      color: white;
+      background-color: #428bca;
+      border-color: #428bca;
+      span.badge {
+          display: inline;
+      }
 	}
 	&.Level2 { // Indent subheads
 		margin-left: 30px;
