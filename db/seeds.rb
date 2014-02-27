@@ -10,6 +10,7 @@
 # parse recipe pages. We will create one Site record for each site we've sussed out, but first
 # we will create a default which is used for sites that don't appear in the site list.
 
+=begin
 site = Site.find_or_create_by_site('http://www.recipepower.com')
 site.tags = [
     { label: :Author, path: ".hrecipe span.author" },
@@ -699,6 +700,7 @@ sitekeys.keys.each { |handle|
         end
     end
 }
+=end
 
 # Seed logins--unless they're already there
 unless User.by_name :guest
@@ -814,4 +816,4 @@ Tag.all.each { |tag| tag.tagtype = 0 ; tag.save }
 Referent.all.each { |rr| rr.destroy }
 ReferentRelation.all.each { |rr| rr.destroy }
 
-LinkRef.import_CSVfile "db/data/Full Dictionary Revised.csv"
+# LinkRef.import_CSVfile "db/data/Full Dictionary Revised.csv"

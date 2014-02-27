@@ -24,10 +24,10 @@ class User < ActiveRecord::Base
   has_many :notifications_received, :foreign_key => :target_id, :class_name => "Notification", :dependent => :destroy
 
   has_many :follower_relations, :foreign_key=>"followee_id", :dependent=>:destroy, :class_name=>"UserRelation"
-  has_many :followers, :through => :follower_relations, :source => :follower, :uniq => true 
+  has_many :followers, -> { uniq }, :through => :follower_relations, :source => :follower
 
   has_many :followee_relations, :foreign_key => "follower_id", :dependent=>:destroy, :class_name => "UserRelation"
-  has_many :followees, :through => :followee_relations, :source => :followee, :uniq => true
+  has_many :followees, -> { uniq }, :through => :followee_relations, :source => :followee
   
   # Channels are just another kind of user. This field (channel_referent_id, externally) denotes such.
   belongs_to :channel, :class_name => "Referent", :dependent => :destroy, :foreign_key => "channel_referent_id"
