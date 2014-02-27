@@ -61,7 +61,7 @@ class ApplicationController < ActionController::Base
   end  
 
   def check_flash
-    logger.debug "FLASH messages extant for #{params[:controller]}##{params[:action]} (#{check_flash}):"
+    logger.debug "FLASH messages extant for #{params[:controller]}##{params[:action]} (check_flash):"
     logger.debug "    notice: "+flash[:notice] if flash[:notice]
     logger.debug "    error: "+flash[:error] if flash[:error]
 		session[:on_tour] = true if params[:on_tour]
