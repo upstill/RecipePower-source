@@ -466,7 +466,9 @@ class ChannelReferent < Referent ;
   def notice_resource(resource)
     resource.kind_of?(Recipe) && user && (resource.touch(true, user.id))
   end
-  
+
+  # This is a pre-validation check on the tag selected for a channel. The user can either select an existing tag
+  # of any type (except Channel), or type a new tag, in which case a new tag of type Channel is created.
   # For a channel based on another class of referent, the tag must have an associated referent, or
   # at least have a type so that a referent can be created.
   # For a freestanding channel, the tag CANNOT have an existing type (other than 'unclassified')
@@ -478,7 +480,7 @@ class ChannelReferent < Referent ;
       # ensure_user
       # self.canonical_expression = self.expressions.first.tag unless self.canonical_expression || self.expressions.empty?
       # user.username = canonical_expression.name
-      user.username = tag.name
+      user.username = tag.name # XXX What if the channel/user's name is not unique?
       if @dependent # We're saving from editing
           if @dependent == "1"
               # The tag needs to be a type OTHER than 'unclassified' or 'Channel'

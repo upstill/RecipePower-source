@@ -1,4 +1,4 @@
-<% if @is_channel %>
+<% if @referent.class==ChannelReferent %>
     <%= modal_dialog :edit_channel, "Edit Channel" do %>
         <%= render 'form_channel' %>
     <% end %>
