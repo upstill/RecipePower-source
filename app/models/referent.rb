@@ -481,30 +481,16 @@ class ChannelReferent < Referent ;
       # self.canonical_expression = self.expressions.first.tag unless self.canonical_expression || self.expressions.empty?
       # user.username = canonical_expression.name
       user.username = tag.name
-      if @dependent # We're saving from editing
-          if @dependent == "1"
-              # The tag needs to be a type OTHER than 'unclassified' or 'Channel'
-              if [0,11].include? tag.typenum
-                  errors.add(:tags, "If you want a channel based on another type, you need to give it a name from that type. #{tag.name} is a #{tag.typename}")
-              end
-          elsif [0,11].include? tag.typenum
-              # Since we're not dependent, we ensure we have a tag and make ourself our own channel
-              express tag
-              channels << self
-          else
-              # Error: channel is not dependent on another type
-              errors.add(:tags, "You're giving this channel a name that already exists for a #{tag.typename}. Either create the channel with a unique name, or make the channel Dependent.")
-          end
+      if [0,11].include? tag.typenum
+        express tag
+        channels << self
       end
   end
 
-  # after_save method to correct the channel's user's email address
+  # after_save method to direct the primary key's referent hither and correct the channel's user's email address
   def fix_user
     # Need to make sure the tag is linked to self
-    tag = self.canonical_expression
-    if @dependent == "1"
-      # We're coming out of editing. Now that we're saved, it's safe to
-      # add ourself to the channels of the (foreign) tag
+    if (tag = self.canonical_expression) && (tag.typenum != 11)
       ref = Referent.express tag, tag.typenum
       ref.channels << self
       ref.save

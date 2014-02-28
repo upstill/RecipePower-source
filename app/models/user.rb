@@ -319,7 +319,7 @@ public
       query << " and username = ?"
       query << " and id != #{user.id}" if user.id
       other = User.where query, value
-      user.errors[:username] << %Q{has already been taken by another #{user.channel ? "channel" : "user"}} unless other.empty?
+      user.errors[:username] << %Q{is already taken by another #{user.channel ? "channel" : "user"}} unless other.empty?
       user.errors[:username] << "can't take funny characters. Letters, spaces, numbers, and/or .-!_@ only, please" unless value.match /\A[-\w\s\.!_@]+\z/i
     end
 
