@@ -150,11 +150,9 @@ class ReferentsController < ApplicationController
       @typeselections = Tag.type_selections
       @typeselections.shift
       if name_error = @referent.errors["user.username"]
-        @referent.errors[:tag_token] = name_error[0]
+        @referent.errors.add :tag_token, name_error[0]
       end
-
-      # format.html { render action: (@tabindex==11 ? "new_channel.html.erb" : "new") }
-      smartrender :action => :edit # format.json { render json: @referent.errors, status: :unprocessable_entity }
+      smartrender :action => :new
     end
   end
   

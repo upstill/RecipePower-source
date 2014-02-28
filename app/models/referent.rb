@@ -480,7 +480,7 @@ class ChannelReferent < Referent ;
       # ensure_user
       # self.canonical_expression = self.expressions.first.tag unless self.canonical_expression || self.expressions.empty?
       # user.username = canonical_expression.name
-      user.username = tag.name # XXX What if the channel/user's name is not unique?
+      user.username = tag.name
       if @dependent # We're saving from editing
           if @dependent == "1"
               # The tag needs to be a type OTHER than 'unclassified' or 'Channel'
