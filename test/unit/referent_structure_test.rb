@@ -168,11 +168,11 @@ class ReferentStructureTest < ActiveSupport::TestCase
   end
 
   test "Destroying referent doesn't leave elements dangling" do
-
+    # Check that user of a channel referent is gone
   end
 
   test "Marge of two referents has the right channel(s)" do
-
+    # Check that user's recipes get copied over for channel referent
   end
 
   test "Merge of referents has the right reference(s)" do

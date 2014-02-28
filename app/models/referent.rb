@@ -57,6 +57,10 @@ class Referent < ActiveRecord::Base
       other.expressions.each { |expr| self.express expr.tag }
       other.recipes.each { |rcp| self.recipes << rcp }
       other.references.each { |rfc| self.references << rfc }
+      other.channels.each do |channel|
+        # When merging channels, the mergee's user's recipes need to be associated with this channel's user
+        self.channels << channel if channel != other
+      end
       self.description = other.description if self.description.blank?
       self.save
       other.destroy
@@ -421,7 +425,7 @@ class SourceReferent < Referent ;
 end  
 
 class ChannelReferent < Referent ; 
-  has_one :user    
+  has_one :user, :dependent => :destroy
   attr_accessible :user, :tag_token, :tag_tokens, :user_attributes
   accepts_nested_attributes_for :user
   
