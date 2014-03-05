@@ -54,11 +54,13 @@ class RecipesController < ApplicationController
     redirect_to collection_url
     # return if need_login true
     # Get the collected recipes for the user named in query
-    user = current_user_or_guest 
+=begin
+    user = current_user_or_guest
     @listowner = user.id
     @recipes = user.recipes 
     @Title = "#{user.handle}\'s Cookmarks"
     @nav_current = nil
+=end
   end
 
   def show

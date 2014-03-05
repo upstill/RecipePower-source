@@ -13,7 +13,7 @@ class User < ActiveRecord::Base
   # Setup accessible (or protected) attributes for your model
   attr_accessible :id, :username, :first_name, :last_name, :fullname, :about, :login, :private, :skip_invitation,
                 :email, :password, :password_confirmation, :shared_recipe, :invitee_tokens, :channel_tokens, :image,
-                :recipes, :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens, :subscription_tokens, :invitation_issuer
+                :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens, :subscription_tokens, :invitation_issuer
   attr_writer :browser
   attr_accessor :shared_recipe, :invitee_tokens, :channel_tokens, :raw_invitation_token
   
@@ -110,7 +110,7 @@ class User < ActiveRecord::Base
   # :sort_by = :collected => order recipes by when they were collected (as opposed to recently touched)
   # :status => Select for recipes with this status or lower
   # :public => Only public recipes
-  def recipes options={}
+  def recipe_ids_g options={}
     constraints = {:user_id => id}
     constraints[:in_collection] = true unless options[:all]
     constraints[:status] = 1..options[:status] if options[:status]
@@ -499,7 +499,17 @@ public
     self.notifications_received << notification
     notification
   end
-      
+
+  # Users can be merged if their channels merge
+  def merge other_user
+    self.image = other_user.image unless image
+    self.about = other_user.about unless about.blank?
+    other_user.followers.each { |follower| self.followers << follower }
+    other_user.followees.each { |followee| self.followees << followee }
+    other_user.recipes.each { |recipe| recipe.touch true, self }
+    save
+  end
+
 =begin
   # Return a list of username/id pairs suitable for popup selection
   # owner: the id that should be hidden under "Choose Another"

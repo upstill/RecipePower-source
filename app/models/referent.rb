@@ -57,9 +57,10 @@ class Referent < ActiveRecord::Base
       other.expressions.each { |expr| self.express expr.tag }
       other.recipes.each { |rcp| self.recipes << rcp }
       other.references.each { |rfc| self.references << rfc }
-      other.channels.each do |channel|
-        # When merging channels, the mergee's user's recipes need to be associated with this channel's user
-        self.channels << channel if channel != other
+      other.channels.each { |channel| self.channels << channel }
+      if (self.is_a? ChannelReferent) && (other_user = other.associate)
+        # When merging channels, the mergee's user's data, including recipes, need to be associated with this channel's user
+        user.merge other
       end
       self.description = other.description if self.description.blank?
       self.save

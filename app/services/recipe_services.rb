@@ -77,7 +77,7 @@ class RecipeServices
         while (count >= 0)
           # Pick a random user and a random recipe that they own
           user = users[rand(users.count)]
-          rcpids = user.recipes
+          rcpids = user.recipe_ids
           next unless rcpids.count > 0
           rcpid = rcpids[rand(rcpids.count)]
           # Compare the x_tags with the user's tags
