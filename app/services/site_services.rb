@@ -757,7 +757,7 @@ class SiteServices
                         tagname = tagname.split(':').last.strip
                         tagname if (tagname.length>0)
                       }.compact.each { |tagname|
-                        ts.tag_with tagname, tagger: User.super_id
+                        ts.tag_with tagname, User.super_id
                       }
                     else
                       puts "There's no field on the site for #{label}"

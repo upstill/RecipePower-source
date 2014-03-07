@@ -65,9 +65,10 @@ module Taggable
   end
   alias_method :"tag_id=", :"tag_ids="
 
-  # Associate a tag with this entity in the domain of the given user (or the current user if not given)
-  def tag_with tag
-    Tagging.create(user_id: tag_owner, tag_id: tag.id, entity_id: id, entity_type: self.class.name) unless tag_ids(uid).include? tag.id
+  # Associate a tag with this entity in the domain of the given user (or the tag's current owner if not given)
+  def tag_with tag, who=nil
+    who ||= tag_owner
+    Tagging.create(user_id: who, tag_id: tag.id, entity_id: id, entity_type: self.class.name) unless tag_ids(owner_id: who).include? tag.id
   end
 
   # Write the virtual attribute tag_tokens (a list of ids) to
