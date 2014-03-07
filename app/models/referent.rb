@@ -49,7 +49,7 @@ class Referent < ActiveRecord::Base
     # before_save :ensure_expression
     after_save :ensure_tagtypes
 
-    def merge other
+    def merge other, nuke_it=true
       return false if type != other.type
       puts "Merging '"+name+"' (#{children.count} children) with '"+other.name+"' (#{other.children.count} children):"
       other.children.each { |child| children << child }
@@ -60,12 +60,12 @@ class Referent < ActiveRecord::Base
       other.channels.each { |channel| self.channels << channel }
       if (self.is_a? ChannelReferent) && (other_user = other.associate)
         # When merging channels, the mergee's user's data, including recipes, need to be associated with this channel's user
-        user.merge other
+        user.merge other_user
       end
-      self.description = other.description if self.description.blank?
+      self.description = other.description if description.blank?
       self.save
-      other.destroy
-      Referent.find self.id
+      other.destroy if nuke_it
+      self.reload
     end
     
     # Callback before destroying this referent, to fix any tags that use it as primary meaning
