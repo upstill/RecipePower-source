@@ -530,7 +530,7 @@ class RcpBrowserElementFriend < BrowserElement
   private
 
   def candidates
-    @candidates ||= user.recipes(public: true, sort_by: :collected)
+    @candidates ||= user.recipe_ids_g(public: true, sort_by: :collected)
   end
 
 end
@@ -574,7 +574,7 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
 
 private  
   def candidates
-    @candidates ||= user.recipes # (status: MyConstants::Rcpstatus_misc, sort_by: :collected)
+    @candidates ||= user.recipe_ids_g # (status: MyConstants::Rcpstatus_misc, sort_by: :collected)
   end
   
 end
@@ -672,7 +672,7 @@ class RcpBrowserCompositeChannels < RcpBrowserChannelsAndFriends
     # -- targetted status of the recipe (Rotation, etc.)
     # -- text to match against titles and comments
     # @candidates ||= Rcpref.recipe_ids( sources, @userid)
-    @candidates ||= User.find(sources).collect { |user| user.recipes }.flatten.uniq
+    @candidates ||= User.find(sources).collect { |user| user.recipe_ids_g }.flatten.uniq
   end
 
 end
@@ -704,7 +704,7 @@ class RcpBrowserElementRecent < RcpBrowserElement
 private
   # Candidates for the Recent list are all recipes touched by the user
   def candidates
-    user.recipes all: true
+    user.recipe_ids_g all: true
   end
   
 end
@@ -772,7 +772,7 @@ class RcpBrowserElementStatus < RcpBrowserElement
 
 private  
   def candidates
-    @candidates = @candidates || user.recipes(status: @status, sort_by: :collected)
+    @candidates = @candidates || user.recipe_ids_g(status: @status, sort_by: :collected)
   end
   
 end

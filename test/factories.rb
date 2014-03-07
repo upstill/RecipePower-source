@@ -47,4 +47,12 @@ FactoryGirl.define do
     "dish#{n}"
   end
 
+  factory :channel_referent do
+    trait :name do
+      association :canonical_expression, factory: :ingredient_tag, name: "Some Channel Name"
+    end
+    description "This is a channel referent"
+    # association :canonical_expression, factory: :ingredient_tag, name: "#{name}"
+  end
+
 end

@@ -30,7 +30,7 @@ class User < ActiveRecord::Base
   has_many :followees, -> { uniq }, :through => :followee_relations, :source => :followee
   
   # Channels are just another kind of user. This field (channel_referent_id, externally) denotes such.
-  belongs_to :channel, :class_name => "Referent", :dependent => :destroy, :foreign_key => "channel_referent_id"
+  belongs_to :channel, :class_name => "Referent", :foreign_key => "channel_referent_id"
   
   has_and_belongs_to_many :feeds
   
@@ -502,12 +502,15 @@ public
 
   # Users can be merged if their channels merge
   def merge other_user
-    self.image = other_user.image unless image
-    self.about = other_user.about unless about.blank?
-    other_user.followers.each { |follower| self.followers << follower }
-    other_user.followees.each { |followee| self.followees << followee }
-    other_user.recipes.each { |recipe| recipe.touch true, self }
-    save
+    if channel? && other_user.channel?
+      self.image = other_user.image if image.blank?
+      self.about = other_user.about if about.blank?
+      other_user.followers.each { |follower| self.followers << follower }
+      other_user.followees.each { |followee| self.followees << followee }
+      other_user.recipes.each { |recipe| recipe.touch true, self }
+      other_user.feeds.each { |feed| self.feeds << feed }
+      save
+    end
   end
 
 =begin
