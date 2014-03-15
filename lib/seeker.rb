@@ -242,7 +242,7 @@ end
 
 class ContentSeeker < Seeker
   
-  delegate :cur_page, :convert_ids, :timestamp, :list_type, :to => :"@affiliate"
+  delegate :convert_ids, :timestamp, :list_type, :to => :"@affiliate"
   
   def affiliate browser = nil, params = nil
     @affiliate ||= browser
@@ -257,9 +257,11 @@ class ContentSeeker < Seeker
     "/collection"
   end
   
+=begin
   def cur_page=(pagenum)
     affiliate.cur_page=( pagenum) if affiliate
   end
+=end
   
   # If the entity has returned no results, suggest what the problem might have been
   def explain_empty
