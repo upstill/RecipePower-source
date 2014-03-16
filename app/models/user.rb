@@ -309,9 +309,23 @@ public
   validates :email, :presence => true
 
   # validates_presence_of :username
-  validates_uniqueness_of :username, allow_blank: true
+  # validates_uniqueness_of :username, allow_blank: true
+  # validates_format_of :username, :allow_blank => true, :with => /\A[-\w\s\.!_@]+\z/i, :message => "can't take funny characters (letters, spaces, numbers, or .-!_@ only)"
+  validates_each :username do |user, attribute, value|
+    # The name must be unique within channels and within users, but not across the two, i.e. it's
+    # okay to have a channel named 'upstill'
+    unless value.blank?
+      query = user.channel ? "channel_referent_id > 0" : "channel_referent_id = 0"
+      query << " and username = ?"
+      query << " and id != #{user.id}" if user.id
+      other = User.where query, value
+      user.errors[:username] << %Q{is already taken by another #{user.channel ? "channel" : "user"}} unless other.empty?
+      user.errors[:username] << "can't take funny characters. Letters, spaces, numbers, and/or .-!_@ only, please" unless value.match /\A[-\w\s\.!_@]+\z/i
+    end
+
+  end
+
   validates_uniqueness_of :email, :if => :email_changed?
-  validates_format_of :username, :allow_blank => true, :with => /\A[-\w\s\.!_@]+\z/i, :message => "can't take funny characters (letters, spaces, numbers, or .-!_@ only)"
   validates_format_of :email, :allow_blank => true, :with => /\A[-a-z0-9_+\.]+\@([-a-z0-9]+\.)+[a-z0-9]{2,4}\z/i
 
   before_save :qa
