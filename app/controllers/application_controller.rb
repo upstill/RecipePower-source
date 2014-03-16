@@ -98,6 +98,7 @@ class ApplicationController < ActionController::Base
     @user ||= current_user_or_guest
     params[:cur_page] = "1" if params && params[:selected]
     @browser = @user.browser params
+    @user.save
     # Go back to page 1 when a new browser element is selected
     @seeker = "#{klass}Seeker".constantize.new @user, @browser, session[:seeker], params # Default; other controllers may set up different seekers
     @seeker.tagstxt = "" if options && options[:clear_tags]

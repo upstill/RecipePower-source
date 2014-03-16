@@ -54,7 +54,7 @@ class User < ActiveRecord::Base
   
   # Bust the browser cache due to selections changing, optionally selecting an object
   def refresh_browser(obj = nil)
-    browser_serialized = nil
+    self.browser_serialized = nil
     @browser = ContentBrowser.new(id)
     @browser.select_by_content(obj) if obj
     save

@@ -11,7 +11,11 @@ class Reference < ActiveRecord::Base
     Tip: ["Tip", 4],
     Video: ["Video", 8],
     Definition: ["Glossary Entry", 16],
-    HomePage: ["Home Page", 32]
+    HomePage: ["Home Page", 32],
+    Product: ["Product", 64],
+    Offering: ["Offering", 128],
+    Recipe: ["Recipe", 256],
+    Image: ["Image", 512]
   )
   
   def self.assert(uri, tag_or_referent, type=:Definition )

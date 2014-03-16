@@ -16,12 +16,12 @@ class Array
 end
 
 class BrowserElement
-  attr_accessor :npages, :cur_page, :visible, :handle
+  attr_accessor :npages, :visible, :handle # , :cur_page
   attr_reader :level
   @@page_length = 20
   # Persisters for all browser-element nodes; these may be augmented by a subclass by
   # setting @persisters BEFORE handing off init to superclass
-  @@persisters = [:selected, :handle, :userid, :cur_page]
+  @@persisters = [:selected, :handle, :userid] # , :cur_page]
   
   # Initialize a new element, either from supplied arguments or defaults
   def initialize(level, args={})
@@ -29,7 +29,7 @@ class BrowserElement
     @level = level
     @persisters.each { |name| instance_variable_set("@#{name}", args[name]) if args[name] } if @persisters
     @selected = false unless @selected
-    @cur_page = @cur_page || 1
+    # @cur_page = @cur_page || 1
   end
   
   def handle
@@ -848,7 +848,7 @@ class ContentBrowser < BrowserComposite
           raise Exception, "Apparently that #{params[:selected][0..3]} is missing in action"
         end
       end
-      self.cur_page = params[:cur_page].to_i if params[:cur_page]
+      # self.cur_page = params[:cur_page].to_i if params[:cur_page]
     end
   end
     
@@ -957,6 +957,7 @@ class ContentBrowser < BrowserComposite
     { sug: sug, report: report, hint: hint }
   end
   
+=begin
   def cur_page
     selected.cur_page
   end
@@ -964,6 +965,7 @@ class ContentBrowser < BrowserComposite
   def cur_page=(pagenum)
     selected.cur_page= pagenum
   end
+=end
   
   def list_type
     selected.list_type
