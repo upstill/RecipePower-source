@@ -1,4 +1,4 @@
-<div class="col-md-12">
+<div class="container-fluid">
   <div class="row">
     <div class="col-md-6">
       <% if (vid = field_value("rcpVideo")) %>
@@ -24,9 +24,7 @@
           <p class="hide-if-empty"><%= present_field_wrapped "rcpDescription" %></p>
         </div>
         <div class="panel-body">
-          <div class="container">
-            <%= show_tags ["Ingredient_tags", ["Role_tags", "Produces"], "Genre_tags", "Occasion_tags", "Channel_tags", "Process_tags", "Tool_tags", "Other Tag_tags"] %>
-          </div>
+          <%= show_tags ["Ingredient_tags", ["Role_tags", "Produces"], "Genre_tags", "Occasion_tags", "Channel_tags", "Process_tags", "Tool_tags", "Other Tag_tags"] %>
         </div>
       </div>
       <% if params[:accept_invitation_link] %>
