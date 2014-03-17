@@ -877,9 +877,27 @@ class ContentBrowser < BrowserComposite
   def self.load(str)
     !str.blank? && self.new(YAML::load(str))
   end
-  
-  def node_list
-    @children.collect { |child| child.node_list true }.flatten
+
+  def id_for which
+    case which
+      when :personal
+        "RcpBrowserCompositeUser"
+      when :friends
+        "RcpBrowserCompositeFriends"
+      when :public
+        "RcpBrowserCompositeChannels"
+    end
+  end
+
+  def node_list which = nil
+    id = id_for which
+    parent = id ? find_by_id(id) : self
+    parent.children.collect { |child| child.node_list true }.flatten
+  end
+
+  def selected_is_under which
+    parent = parent_of(selected)
+    parent.css_id == id_for(which)
   end
   
   def convert_ids list

@@ -1,0 +1,21 @@
+<div class="row" style="margin:20px">
+  <span style="font-size: 18px"><%= collection_name %>&nbsp;&nbsp;</span>
+  <% if @query_path %>
+    <div class="form-group" style="display:inline-block">
+      <form class="form-search query_form" action="<%= @query_path %>" data-format="<%= @query_format %>" >
+        <div class="search-query form-group collection_query_tokens tags">
+          <%= token_input_field @seeker,
+                                rows: 1,
+                                placeholder: "Seek and ye shall find...",
+                                autofocus: true,
+                                data: { :"on-add" => "RP.collection.tagchange",
+                                        :"on-delete" => "RP.collection.tagchange",
+                                        :hint => "", # "Search the collection by typing terms here",
+                                        placeholder: "Seek and ye shall find...",
+                                        :"no-results-text" => "No matching tag found; hit Enter to search with text" } %>
+          <!--<input type="text" class="form-control" placeholder="Seek and Ye Shall Find">-->
+        </div>
+      </form>
+    </div>
+  <% end %>
+</div>

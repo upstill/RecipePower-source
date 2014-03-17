@@ -18,6 +18,7 @@ class CollectionController < ApplicationController
   
   def index
     @Title = "Collections"
+    @rp_old = false
     seeker_result "Content", 'div.collection' # , clear_tags: true
   end
 
