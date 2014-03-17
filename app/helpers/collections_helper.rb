@@ -24,7 +24,7 @@ require "time_check"
 
   def collection_dropdown which
     menu_items = @browser.node_list(which).collect { |node|
-      link_to node.handle, "#"
+      link_to node.handle, "#", class: "collection_selection", id: node.css_id
     }
     active = @browser.selected_is_under which
     case which

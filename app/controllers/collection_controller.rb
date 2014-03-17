@@ -1,6 +1,6 @@
 class CollectionController < ApplicationController
   layout :rs_layout # Let response_service pick the layout
-  before_filter :setup_collection, except: [ :index ]
+  before_filter :setup_collection # , except: [ :index ]
   after_filter :save_browser
   
   def save_browser
@@ -53,7 +53,7 @@ class CollectionController < ApplicationController
   def relist
     otime = params[:mod_time] 
     ntime = @seeker.updated_at.to_s
-    flash.now[:guide] = @seeker.guide
+    # flash.now[:guide] = @seeker.guide
     if otime == ntime # awaiting update
       render :nothing => true, :status => :no_content
     else

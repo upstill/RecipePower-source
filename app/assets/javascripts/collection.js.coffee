@@ -53,6 +53,9 @@ collection_onload = () ->
 	# checkForLoading ".stuffypic"
 	RP.rcp_list.onload()
 	RP.collection.justify()
+	$('a.collection_selection').click (event) ->
+		RP.collection.update { selected: this.id }
+		event.preventDefault()
 
 RP.collection.tagchange = () ->
 	formitem = $('form.query_form')
