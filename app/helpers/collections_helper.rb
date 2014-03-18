@@ -41,20 +41,25 @@ require "time_check"
     active = @browser.selected.classed_as == which
     case which
       when :personal  # Add "All My Cookmarks", "Recently Viewed" and "New Collection..." items
-        menu_items << collection_selection( @browser.find_by_id "RcpBrowserCompositeUser")
+        menu_css_id = "RcpBrowserCompositeUser"
+        # menu_items << collection_selection( @browser.find_by_id menu_css_id)
         menu_items << collection_selection( @browser.find_by_id "RcpBrowserElementRecent"  )
         menu_items << collection_selection( nil, "New Personal Collection...", "WTF?" )
       when :friends  # Add "All Friends' Cookmarks" and "Make a Friend..." items
-        menu_items << collection_selection( @browser.find_by_id "RcpBrowserCompositeFriends" )
+        menu_css_id = "RcpBrowserCompositeFriends"
+        # menu_items << collection_selection( @browser.find_by_id menu_css_id )
         menu_items << link_to("Make a Friend...", @browser.find_by_id("RcpBrowserCompositeFriends").add_path)
       when :public   # Add "The Master Collection", and "Another Collection..." item
+        menu_css_id = "RcpBrowserElementAllRecipes"
+        # menu_items << collection_selection( @browser.find_by_id menu_css_id )
         menu_items << collection_selection( @browser.find_by_id "RcpBrowserCompositeChannels" )
-        menu_items << collection_selection( @browser.find_by_id "RcpBrowserElementAllRecipes" )
         menu_items << link_to("Another Public Collection...", @browser.find_by_id("RcpBrowserCompositeChannels").add_path)
     end
     menu_list = "<li>" + menu_items.join('</li><li>') + "</li>"
+    menu_label = %Q{#{which.to_s.capitalize}<span class="caret"><span>}.html_safe
     content_tag :li,
-      link_to( %Q{#{which.to_s.capitalize}<span class="caret"><span>}.html_safe, "#", class: "dropdown-toggle", data: {toggle: "dropdown"} )+
+      # link_to( menu_label, "#", class: "dropdown-toggle", data: {toggle: "dropdown"} )+
+      collection_selection(nil, menu_label, menu_css_id )+
       content_tag(:ul, menu_list.html_safe, class: "dropdown-menu"),
       class: "dropdown"+(active ? " active" : "")
   end
