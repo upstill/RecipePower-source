@@ -18,19 +18,39 @@ require "time_check"
   end
 
   # The current browser entity
-  def collection_name
-    @browser.selected.handle
+  def collection_header
+    @browser.selected.handle(true) +
+    if (nfound = @seeker.result_ids.count) > 0
+      " (#{nfound} found)"
+    else
+      ""
+    end
   end
 
+  def collection_selection node, label=nil, id=nil
+    label ||= node.handle
+    id ||= node.css_id
+    link_to label, "#", class: "collection_selection", id: id
+  end
+
+  # Declare the dropdown for a particular class of collection
   def collection_dropdown which
     menu_items = @browser.node_list(which).collect { |node|
-      link_to node.handle, "#", class: "collection_selection", id: node.css_id
-    }
-    active = @browser.selected_is_under which
+      collection_selection node
+    } << %q{<hr style="margin:5px">}
+    active = @browser.selected.classed_as == which
     case which
       when :personal  # Add "All My Cookmarks", "Recently Viewed" and "New Collection..." items
-      when :friends  # Add "All Friends' Recipes" and "Make a Friend..." items
-      when :public   # Add "Another Collection..." item
+        menu_items << collection_selection( @browser.find_by_id "RcpBrowserCompositeUser")
+        menu_items << collection_selection( @browser.find_by_id "RcpBrowserElementRecent"  )
+        menu_items << collection_selection( nil, "New Personal Collection...", "WTF?" )
+      when :friends  # Add "All Friends' Cookmarks" and "Make a Friend..." items
+        menu_items << collection_selection( @browser.find_by_id "RcpBrowserCompositeFriends" )
+        menu_items << collection_selection( nil, "Make a Friend...", "WTF?" )
+      when :public   # Add "The Master Collection", and "Another Collection..." item
+        menu_items << collection_selection( @browser.find_by_id "RcpBrowserCompositeChannels" )
+        menu_items << collection_selection( @browser.find_by_id "RcpBrowserElementAllRecipes" )
+        menu_items << collection_selection( nil, "Another Public Collection...", "WTF?" )
     end
     menu_list = "<li>" + menu_items.join('</li><li>') + "</li>"
     content_tag :li,

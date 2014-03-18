@@ -17,22 +17,23 @@ end
 
 class BrowserElement
   attr_accessor :npages, :visible, :handle # , :cur_page
-  attr_reader :level
+  attr_reader :level, :classed_as
   @@page_length = 20
   # Persisters for all browser-element nodes; these may be augmented by a subclass by
   # setting @persisters BEFORE handing off init to superclass
   @@persisters = [:selected, :handle, :userid] # , :cur_page]
-  
+
   # Initialize a new element, either from supplied arguments or defaults
   def initialize(level, args={})
     @persisters = (@@persisters + (@persisters || [])).uniq
     @level = level
     @persisters.each { |name| instance_variable_set("@#{name}", args[name]) if args[name] } if @persisters
     @selected = false unless @selected
+    @classed_as = :public
     # @cur_page = @cur_page || 1
   end
-  
-  def handle
+
+  def handle extend=false
     @handle ||= "Mystery Element"
   end
   
@@ -314,7 +315,7 @@ class FeedBrowserElement < BrowserElement
     @feedid = args[:feedid]
   end
   
-  def handle
+  def handle extend=false
     @handle ||= Feed.find(@feedid).title
   end
   
@@ -476,9 +477,17 @@ class RcpBrowserElementFriend < BrowserElement
     super
     @friendid = args[:friendid]
   end
+
+  def classed_as
+    # Channels are public
+    user.channel? ? :public : :friends
+  end
   
-  def handle
+  def handle extend=false
     @handle ||= user.handle
+    extend ?
+        ((classed_as == :public) ? "The #{@handle} Collection" : "The Collected Cookmarks of #{@handle}") :
+        @handle
   end
   
   def sources
@@ -540,7 +549,8 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
   
   def initialize(level, args)
     super
-    @handle = "My Collection"
+    @handle = "All My Cookmarks"
+    @classed_as = :personal
     if @children.empty?
       @children = [ MyConstants::Rcpstatus_rotation, 
         MyConstants::Rcpstatus_favorites, 
@@ -550,7 +560,7 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
       end
     end
   end
-  
+
   def should_show(recipe)
     recipe.cookmarked(user.id)
   end
@@ -617,7 +627,8 @@ class RcpBrowserCompositeFriends < RcpBrowserChannelsAndFriends
   def initialize(level, args)
     @is_channel = false
     super
-    @handle = "My Friends"
+    @handle = "All Friends' Cookmarks"
+    @classed_as = :friends
   end
   
   def content_name
@@ -644,7 +655,7 @@ class RcpBrowserCompositeChannels < RcpBrowserChannelsAndFriends
   def initialize(level, args)
     @is_channel = true
     super
-    @handle = "My Channels"
+    @handle = "All My Public Collections"
   end
   
   def content_name
@@ -682,7 +693,8 @@ class RcpBrowserElementRecent < RcpBrowserElement
   
   def initialize(level, args)
     super
-    @handle = "Recent"
+    @handle = "Recently Viewed"
+    @classed_as = :personal
   end
   
   def timestamp recipe
@@ -738,6 +750,11 @@ class RcpBrowserElementStatus < RcpBrowserElement
     @persisters = (@persisters || []) << :status
     super
     @handle = I18n.t MyConstants::Rcpstatus_names[@status]
+    @classed_as = :personal
+  end
+
+  def handle extend=false
+    extend ? "My '#{@handle}' Collection" : @handle
   end
   
   def should_show(recipe)
@@ -784,6 +801,7 @@ class RcpBrowserElementTaglist < RcpBrowserElement
     super
     @tagid = args[:tagid]
     @handle = "Tag #{@tagid.to_s}"
+    @classed_as = :personal
   end
   
   def css_id
@@ -797,7 +815,7 @@ class RcpBrowserElementAllRecipes < RcpBrowserElement
   
   def initialize(level, args)
     super
-    @handle = "The Big List"
+    @handle = "Every Cookmark There Is"
   end
   
   def sources
@@ -878,6 +896,7 @@ class ContentBrowser < BrowserComposite
     !str.blank? && self.new(YAML::load(str))
   end
 
+  # Return the css_id for the composite of the given type
   def id_for which
     case which
       when :personal
@@ -895,11 +914,23 @@ class ContentBrowser < BrowserComposite
     parent.children.collect { |child| child.node_list true }.flatten
   end
 
+=begin
   def selected_is_under which
-    parent = parent_of(selected)
-    parent.css_id == id_for(which)
+    id = id_for which
+    (selected.css_id == id) || (parent_of(selected).css_id == id) ||
+        (which == :personal) && (selected.css_id == "RcpBrowserElementRecent") ||
+        (which == :public) && (selected.css_id == "RcpBrowserElementAllRecipes")
+        case which
+          when :personal
+            selected.css_id == "RcpBrowserElementRecent"
+          when :friends
+            selected.css_id == "RcpBrowserElementRecent"
+          when :public
+            selected.css_id == "RcpBrowserElementAllRecipes"
+        end
   end
-  
+
+=end
   def convert_ids list
     selected.convert_ids list
   end
