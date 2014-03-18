@@ -46,11 +46,11 @@ require "time_check"
         menu_items << collection_selection( nil, "New Personal Collection...", "WTF?" )
       when :friends  # Add "All Friends' Cookmarks" and "Make a Friend..." items
         menu_items << collection_selection( @browser.find_by_id "RcpBrowserCompositeFriends" )
-        menu_items << collection_selection( nil, "Make a Friend...", "WTF?" )
+        menu_items << link_to("Make a Friend...", @browser.find_by_id("RcpBrowserCompositeFriends").add_path)
       when :public   # Add "The Master Collection", and "Another Collection..." item
         menu_items << collection_selection( @browser.find_by_id "RcpBrowserCompositeChannels" )
         menu_items << collection_selection( @browser.find_by_id "RcpBrowserElementAllRecipes" )
-        menu_items << collection_selection( nil, "Another Public Collection...", "WTF?" )
+        menu_items << link_to("Another Public Collection...", @browser.find_by_id("RcpBrowserCompositeChannels").add_path)
     end
     menu_list = "<li>" + menu_items.join('</li><li>') + "</li>"
     content_tag :li,

@@ -16,12 +16,11 @@ class Array
 end
 
 class BrowserElement
-  attr_accessor :npages, :visible, :handle # , :cur_page
+  attr_accessor :visible, :handle
   attr_reader :level, :classed_as
-  @@page_length = 20
   # Persisters for all browser-element nodes; these may be augmented by a subclass by
   # setting @persisters BEFORE handing off init to superclass
-  @@persisters = [:selected, :handle, :userid] # , :cur_page]
+  @@persisters = [:selected, :handle, :userid]
 
   # Initialize a new element, either from supplied arguments or defaults
   def initialize(level, args={})
@@ -30,7 +29,6 @@ class BrowserElement
     @persisters.each { |name| instance_variable_set("@#{name}", args[name]) if args[name] } if @persisters
     @selected = false unless @selected
     @classed_as = :public
-    # @cur_page = @cur_page || 1
   end
 
   def handle extend=false
@@ -551,7 +549,7 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
     super
     @handle = "All My Cookmarks"
     @classed_as = :personal
-    if @children.empty?
+    if @children.empty?  # Default, in case never saved before
       @children = [ MyConstants::Rcpstatus_rotation, 
         MyConstants::Rcpstatus_favorites, 
         MyConstants::Rcpstatus_interesting].map do |status| 
@@ -794,22 +792,6 @@ private
   
 end
 
-# Element for a recipe list due to a tag
-class RcpBrowserElementTaglist < RcpBrowserElement
-  
-  def initialize(level, args)
-    super
-    @tagid = args[:tagid]
-    @handle = "Tag #{@tagid.to_s}"
-    @classed_as = :personal
-  end
-  
-  def css_id
-    self.class.to_s+@tagid.to_s
-  end
-
-end
-
 # Element for a recipe list for all the recipes in the system
 class RcpBrowserElementAllRecipes < RcpBrowserElement
   
@@ -866,7 +848,6 @@ class ContentBrowser < BrowserComposite
           raise Exception, "Apparently that #{params[:selected][0..3]} is missing in action"
         end
       end
-      # self.cur_page = params[:cur_page].to_i if params[:cur_page]
     end
   end
     
@@ -954,12 +935,7 @@ class ContentBrowser < BrowserComposite
   def refresh
     selected.refresh
   end
-  
-  # How many pages in the current result set?
-  def npages tags
-    selected.npages tags
-  end
-  
+
   # Are there any recipes waiting to come out of the query?
   def empty? tags
     selected.result_ids(tags).empty?
@@ -1005,17 +981,7 @@ class ContentBrowser < BrowserComposite
     sug ? report+"<br>You might try #{sug}." : report
     { sug: sug, report: report, hint: hint }
   end
-  
-=begin
-  def cur_page
-    selected.cur_page
-  end
-  
-  def cur_page=(pagenum)
-    selected.cur_page= pagenum
-  end
-=end
-  
+
   def list_type
     selected.list_type
   end
@@ -1030,4 +996,34 @@ class ContentBrowser < BrowserComposite
     end
     new_selection
   end
+end
+
+# Element for a recipe list due to a tag
+class RcpBrowserElementTaglist < RcpBrowserElement
+
+  def initialize(level, args)
+    super
+    @tagid = args[:tagid]
+    @handle = "Tag #{@tagid.to_s}"
+    @classed_as = :personal
+  end
+
+  def css_id
+    self.class.to_s+@tagid.to_s
+  end
+
+  def tag
+    @tag ||= Tag.find(@tagid)
+  end
+
+  def handle extended=false
+    tag.name
+  end
+
+  private
+  # The candidates are a list of recipes by id
+  def candidates
+    @candidates ||= tag.recipe_ids(@user_id)
+  end
+
 end
