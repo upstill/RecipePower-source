@@ -547,6 +547,7 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
   
   def initialize(level, args)
     super
+    @level = level
     @handle = "All My Cookmarks"
     @classed_as = :personal
     if @children.empty?  # Default, in case never saved before
@@ -556,7 +557,19 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
         args[:status] = status
         RcpBrowserElementStatus.new(level+1, args)
       end
+      klass = Module.const_get("User")
+      if klass.is_a?(Class) # If User class is available (i.e., in Rails, as opposed to testing)
+        @children += user.collection_tags.map do |tag|
+          args[:tagid] = tag.id
+          RcpBrowserElementTaglist.new level+1, args
+        end
+      end
     end
+  end
+
+  # Add a collection by reference to a tag
+  def add_by_content tag
+    @children << RcpBrowserElementTaglist.new(@level+1, tagid: tag.id) unless find_by_content(tag)
   end
 
   def should_show(recipe)
@@ -580,7 +593,11 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
     "<br>Or even, dare we say it, head off to the Wild World Web and cookmark some findings there? (...after installing the Cookmark Button of course...)"
   end
 
-private  
+  def add_path
+    "/collection/new?modal=true"
+  end
+
+private
   def candidates
     @candidates ||= user.recipe_ids_g # (status: MyConstants::Rcpstatus_misc, sort_by: :collected)
   end
@@ -1003,8 +1020,10 @@ class RcpBrowserElementTaglist < RcpBrowserElement
 
   def initialize(level, args)
     super
-    @tagid = args[:tagid]
-    @handle = "Tag #{@tagid.to_s}"
+    @persisters = (@persisters+[:tagid, :userid]).uniq
+    @level = level
+    @persisters.each { |name| instance_variable_set("@#{name}", args[name]) if args[name] } if @persisters
+    # @handle = "Tag #{@tagid.to_s}" # tag.name
     @classed_as = :personal
   end
 
@@ -1016,14 +1035,18 @@ class RcpBrowserElementTaglist < RcpBrowserElement
     @tag ||= Tag.find(@tagid)
   end
 
+  def find_by_content tag
+    self if tag.id == @tagid
+  end
+
   def handle extended=false
-    tag.name
+    extended ? "My #{tag.name} Collection" : tag.name
   end
 
   private
   # The candidates are a list of recipes by id
   def candidates
-    @candidates ||= tag.recipe_ids(@user_id)
+    @candidates ||= tag.recipe_ids(user.id)
   end
 
 end

@@ -22,22 +22,40 @@ class CollectionController < ApplicationController
     seeker_result "Content", 'div.collection' # , clear_tags: true
   end
 
-=begin
-  def query
-    seeker_result "Content", 'div.collection'
-  end
-=end
-  
   def show
   end
 
+  # GET /collection/new
+  # GET /collection/new.xml
   def new
+    @Title = "Tags"
+    @tag = Tag.new
+    smartrender
   end
 
   def edit
   end
 
+  # POST /collection
+  # POST /collection.xml
   def create
+      @Title = "New Collection"
+      respond_to do |format|
+        if @tag = Tag.assert_tag(params[:tag][:name], userid: current_user.id)
+          current_user.add_channel @tag
+          # Create the collection, private to user
+          # Make the collection current in the browser
+          notice = "You now have a '#{@tag.name}' Collection, and you can add any recipe to it."
+          format.html { redirect_to controller: "collection", action: "index", notice: notice }
+          format.json { render :json => { done: true, notice: notice } }
+          format.xml  { render :xml => @tag, :status => :created, :location => @tag }
+        else
+          @tag = Tag.new(name: params[:tag][:name])
+          format.html
+          format.json
+          format.xml  { render :xml => @tag.errors, :status => :unprocessable_entity }
+        end
+      end
   end
 
   def update

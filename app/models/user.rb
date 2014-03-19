@@ -33,6 +33,10 @@ class User < ActiveRecord::Base
   belongs_to :channel, :class_name => "Referent", :foreign_key => "channel_referent_id"
   
   has_and_belongs_to_many :feeds
+
+  # Private collections
+  has_many :private_subscriptions, :dependent=>:destroy
+  has_many :collection_tags, :through => :private_subscriptions, :source => :tag, :class_name => "Tag"
   
   # login is a virtual attribute placeholding for [username or email]
   attr_accessor :login
@@ -78,7 +82,7 @@ class User < ActiveRecord::Base
     if feeds.exists? id: feed.id
       browser.select_by_content feed
     else
-      self.feeds = feeds.unshift(feed)
+      self.feeds << feed
       refresh_browser feed
     end
   end
@@ -90,9 +94,22 @@ class User < ActiveRecord::Base
     save
   end
 
+  def add_channel tag
+    self.collection_tags << tag unless collection_tags.exists?(id: tag.id)
+    browser.select_by_content(tag)
+    save
+  end
+
+  def delete_channel tag
+    browser.delete_selected if browser.select_by_content(tag)
+    self.collection_tags.delete tag
+    save
+  end
+
   def add_followee friend
     self.followees << friend unless followee_ids.include? friend.id
     refresh_browser friend
+    save
   end
 
   def delete_followee f
@@ -304,7 +321,7 @@ public
   
   # ownership of tags restrict visible tags
   has_many :tag_owners
-  has_many :tags, :through=>:tag_owners
+  has_many :private_tags, :through=>:tag_owners, :source => :tag, :class_name => "Tag"
   
   validates :email, :presence => true
 
