@@ -20,7 +20,7 @@ module TagsHelper
   
   def summarize_tag_owners
     @tagserv ||= TagServices.new(@tag)
-    return if @tagserv.isGlobal || (owners = @tagserv.owners).empty?
+    return if @tagserv.is_global || (owners = @tagserv.owners).empty?
     ownerstrs = owners.collect { |owner| owner.handle }
     tag_info_section ownerstrs, label: "...private to "
   end

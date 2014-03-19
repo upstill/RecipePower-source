@@ -2,7 +2,7 @@ class TagServices
   
   attr_accessor :tag
   
-  delegate :id, :typename, :name, :normalized_name, :primary_meaning, :isGlobal, 
+  delegate :id, :typename, :name, :normalized_name, :primary_meaning, :is_global, 
     :users, :user_ids, :owners, :owner_ids, :reference_count, :referents, :can_absorb, :to => :tag
   
   def initialize(tag, user=nil)
