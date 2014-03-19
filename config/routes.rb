@@ -93,7 +93,7 @@ RP::Application.routes.draw do
   get "collection/show", as: 'collection_show'
   get "collection/new"
   get "collection/edit"
-  get "collection/create"
+  post "collection/create"
   get "collection/relist"
 
   get "stream/stream"

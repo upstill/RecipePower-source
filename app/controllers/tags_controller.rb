@@ -7,13 +7,6 @@ class TagsController < ApplicationController
     @Title = "Tags"
     seeker_result Tag, 'div.tag_list' # , clear_tags: true
   end
-  
-=begin
-  def query
-    @Title = "Tags"
-    seeker_result Tag, 'div.tag_list'
-  end
-=end
 
   # POST /tags
   # POST /tags.xml
