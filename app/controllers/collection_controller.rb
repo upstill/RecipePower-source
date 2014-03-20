@@ -42,12 +42,12 @@ class CollectionController < ApplicationController
       @Title = "New Collection"
       respond_to do |format|
         if @tag = Tag.assert_tag(params[:tag][:name], userid: current_user.id)
-          current_user.add_channel @tag
+          current_user.add_collection @tag
           # Create the collection, private to user
           # Make the collection current in the browser
           notice = "You now have a '#{@tag.name}' Collection, and you can add any recipe to it."
           format.html { redirect_to controller: "collection", action: "index", notice: notice }
-          format.json { render :json => { done: true, notice: notice } }
+          format.json { render :json => { done: true, notice: notice, redirect: collection_path } }
           format.xml  { render :xml => @tag, :status => :created, :location => @tag }
         else
           @tag = Tag.new(name: params[:tag][:name])

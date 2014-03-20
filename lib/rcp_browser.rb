@@ -75,7 +75,7 @@ class BrowserElement
   end
   
   def user
-    @user || User.find(@userid)
+    @user ||= User.find(@userid)
   end
   
   # Class method to return a hash sufficient to reconstruct the element
@@ -484,7 +484,7 @@ class RcpBrowserElementFriend < BrowserElement
   def handle extend=false
     @handle ||= user.handle
     extend ?
-        ((classed_as == :public) ? "The #{@handle} Collection" : "The Collected Cookmarks of #{@handle}") :
+        ((classed_as == :public) ? "The <strong>#{@handle}</strong> Collection" : "The Collected Cookmarks of <strong>#{@handle}</strong>") :
         @handle
   end
   
@@ -769,7 +769,7 @@ class RcpBrowserElementStatus < RcpBrowserElement
   end
 
   def handle extend=false
-    extend ? "My '#{@handle}' Collection" : @handle
+    extend ? "My <strong>#{@handle}</strong> Collection" : @handle
   end
   
   def should_show(recipe)
@@ -1020,7 +1020,7 @@ class RcpBrowserElementTaglist < RcpBrowserElement
 
   def initialize(level, args)
     super
-    @persisters = (@persisters+[:tagid, :userid]).uniq
+    @persisters << :tagid unless @persisters.include? :tagid
     @level = level
     @persisters.each { |name| instance_variable_set("@#{name}", args[name]) if args[name] } if @persisters
     # @handle = "Tag #{@tagid.to_s}" # tag.name
@@ -1040,13 +1040,20 @@ class RcpBrowserElementTaglist < RcpBrowserElement
   end
 
   def handle extended=false
-    extended ? "My #{tag.name} Collection" : tag.name
+    extended ? "My <strong>#{tag.name}</strong> Collection" : tag.name
+  end
+
+  # Class method to return a hash sufficient to reconstruct the element
+  def save
+    result = Hash[@persisters.map { |name| instance_variable_get("@#{name.to_s}") && [name, instance_variable_get("@#{name.to_s}")] }.compact]
+    result[:classname] = self.class.name
+    result
   end
 
   private
   # The candidates are a list of recipes by id
   def candidates
-    @candidates ||= tag.recipe_ids(user.id)
+    @candidates ||= tag.recipe_ids(@userid)
   end
 
 end

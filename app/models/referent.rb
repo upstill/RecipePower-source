@@ -125,13 +125,13 @@ class Referent < ActiveRecord::Base
         mytype = self.typenum
         self.tags.each do |tag|
             # Ensure that all associated tags have the right type, are global, and have a meaning
-            unless tag.tagtype == mytype && tag.is_global
+            unless tag.tagtype == mytype && tag.isGlobal
                 if tag.tagtype != mytype && (tag.tagtype > 0) # ERROR!! Can't convert tag from another type
                     errors.add(:tags, "#{tag.name} is a '#{tag.typename}', not '#{Tag.typename(mytype)}'")
                 else
                     tag.tagtype = mytype
                     tag.primary_meaning = self unless tag.primary_meaning # Give tag this meaning if there's no other
-                    tag.is_global = true
+                    tag.isGlobal = true
                     tag.save
                 end
             end

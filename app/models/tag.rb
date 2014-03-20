@@ -21,7 +21,7 @@ class Tag < ActiveRecord::Base
         CulinaryTerm: ["Culinary Term", 14]
     )
     
-    attr_accessible :name, :id, :tagtype, :is_global, :links, :recipes, :referents, :users, :owners, :primary_meaning
+    attr_accessible :name, :id, :tagtype, :isGlobal, :links, :recipes, :referents, :users, :owners, :primary_meaning
     
     has_many :taggings, :dependent => :destroy
     
@@ -121,7 +121,7 @@ class Tag < ActiveRecord::Base
       target.primary_meaning ||= primary_meaning
       
       # Take on all owners of the absorbee unless one of them is global
-      if target.is_global ||= is_global
+      if target.isGlobal ||= isGlobal
         target.owners.clear
       else
         target.owner_ids = (owner_ids + target.owner_ids).uniq
@@ -204,7 +204,7 @@ class Tag < ActiveRecord::Base
            # Clone the tag for another type, but if it's a free tag, just change types
            tag = tag.dup if tag.tagtype != 0 # If free tag, just change type
            tag.tagtype = opts[:tagtype].kind_of?(Array) ? opts[:tagtype].first : opts[:tagtype]
-           tag.is_global = opts[:userid].nil? # If userid not asserted, globalize it
+           tag.isGlobal = opts[:userid].nil? # If userid not asserted, globalize it
            tag.save
        end
        # Ensure that the tag is available to the user (or globally, depending)
@@ -215,9 +215,9 @@ class Tag < ActiveRecord::Base
    
    # Expose this tag to the given user; if user is nil or super, make the tag global
    def admit_user(uid = nil)
-       unless self.is_global
+       unless self.isGlobal
            if (uid.nil? || (uid == User.super_id))
-               self.is_global = true
+               self.isGlobal = true
            elsif !self.owners.exists?(uid) # Reality check on the user id
                begin
                    user = User.find(uid)
@@ -294,7 +294,7 @@ class Tag < ActiveRecord::Base
           return [] if name.blank?
           tag = nil
           if type.nil? # No type specified
-            tag = Tag.find_or_create_by_name name # It'll be a free tag, but if you don't care enough to specify...
+            tag = Tag.find_or_create_by :name => name # It'll be a free tag, but if you don't care enough to specify...
           else
             if type.kind_of?(Array) # Look for the tag among the given types
               type.find { |t| tag ||= Tag.find_by_name_and_tagtype(name, t) }
@@ -318,12 +318,17 @@ class Tag < ActiveRecord::Base
         end
       elsif uid && (uid != User.super_id)
         # Restrict the found set to any asserted user
-        user_tag_ids = TagOwner.where(user_id: uid).map(&:tag_id)
-        debugger
-        tags.keep_if { |tag| tag.is_global || user_tag_ids.include?(tag.id) }
+        # user_tag_ids = TagOwner.where(user_id: uid).map(&:tag_id)
+        # tags.keep_if { |tag| tag.isGlobal || user_tag_ids.include?(tag.id) }
+        user_tag_id_list = TagOwner.where(user_id: uid).map(&:tag_id)
+        unless user_tag_id_list.empty?
+          user_tag_id_list = user_tag_id_list.collect { |id| id.to_s }.join ', '
+          tags = tags.where %Q{"tags"."isGlobal" = 't' or "tags"."id" in (#{user_tag_id_list}) }
+        else
+          tags = tags.where isGlobal: true
+        end
       else # No user specified => only global tags allowed
-        debugger
-        tags = tags.where("is_global = 't'") unless uid == User.super_id
+        tags = tags.where(isGlobal: true) unless uid == User.super_id
       end
       if do_fold
         # Fold the set of tags to reduce redundancy as follows:
@@ -392,7 +397,7 @@ class Tag < ActiveRecord::Base
        tagids.keep_if do |id|
             if tag = self.find(id)
                 tag.tagtype = toType; # XXX Should check for existing tag, folding them together if nec.
-                tag.is_global = true if globalize
+                tag.isGlobal = true if globalize
                 tag.save
             end
        end

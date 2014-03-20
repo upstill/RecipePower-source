@@ -2,7 +2,7 @@ class UserServices
   
   attr_accessor :user
   
-  delegate :id, :typename, :name, :normalized_name, :primary_meaning, :is_global, 
+  delegate :id, :typename, :name, :normalized_name, :primary_meaning, :isGlobal, 
     :users, :user_ids, :owners, :owner_ids, :reference_count, :referents, :can_absorb, :to => :tag
   
   def initialize(user)

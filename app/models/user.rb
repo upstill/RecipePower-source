@@ -94,7 +94,7 @@ class User < ActiveRecord::Base
     save
   end
 
-  def add_channel tag
+  def add_collection tag
     self.collection_tags << tag unless collection_tags.exists?(id: tag.id)
     browser.select_by_content(tag)
     save

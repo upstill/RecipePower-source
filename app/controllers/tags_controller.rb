@@ -67,7 +67,7 @@ class TagsController < ApplicationController
       tagtype = [0, tagtype].flatten if params[:untypedOK] && tagtype
       matchstr = params[:q] || params[:term] || ""
       matchopts = {
-          userid: params[:user_id] || session[:user_id],
+          userid: params[:user_id] || current_user.id,
           tagtype: tagtype,
           assert: (params[:makeormatch] == "true"),
           partition: true,
