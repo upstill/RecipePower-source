@@ -231,10 +231,14 @@ class BrowserComposite < BrowserElement
   def initialize(level, args)
     super
     @children = args[:children] ? 
-      args[:children].map do |childargs|
+      args[:children].collect { |childargs|
         # For each child, determine its class, then create a new one, supplying its arguments
-        childargs[:classname].constantize.new (level+1), childargs
-      end
+        begin
+          childargs[:classname].constantize.new (level+1), childargs
+        rescue
+          nil
+        end
+      }.compact
       : []
   end
   
@@ -484,7 +488,7 @@ class RcpBrowserElementFriend < BrowserElement
   def handle extend=false
     @handle ||= user.handle
     extend ?
-        ((classed_as == :public) ? "The <strong>#{@handle}</strong> Collection" : "The Collected Cookmarks of <strong>#{@handle}</strong>") :
+        ((classed_as == :public) ? "The <strong>#{@handle}</strong> Collection" : "The Collected Cookmarks of <strong>#{@handle}</strong>").html_safe :
         @handle
   end
   
@@ -569,7 +573,7 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
 
   # Add a collection by reference to a tag
   def add_by_content tag
-    @children << RcpBrowserElementTaglist.new(@level+1, tagid: tag.id) unless find_by_content(tag)
+    @children << RcpBrowserElementTaglist.new(@level+1, tagid: tag.id, userid: @userid) unless find_by_content(tag)
   end
 
   def should_show(recipe)
@@ -769,7 +773,7 @@ class RcpBrowserElementStatus < RcpBrowserElement
   end
 
   def handle extend=false
-    extend ? "My <strong>#{@handle}</strong> Collection" : @handle
+    extend ? "My <strong>#{@handle}</strong> Collection".html_safe : @handle
   end
   
   def should_show(recipe)
@@ -1025,6 +1029,7 @@ class RcpBrowserElementTaglist < RcpBrowserElement
     @persisters.each { |name| instance_variable_set("@#{name}", args[name]) if args[name] } if @persisters
     # @handle = "Tag #{@tagid.to_s}" # tag.name
     @classed_as = :personal
+    tag # Will throw exception if tag doesn't exist
   end
 
   def css_id
@@ -1040,7 +1045,7 @@ class RcpBrowserElementTaglist < RcpBrowserElement
   end
 
   def handle extended=false
-    extended ? "My <strong>#{tag.name}</strong> Collection" : tag.name
+    extended ? "My <strong>#{tag.name}</strong> Collection".html_safe : tag.name
   end
 
   # Class method to return a hash sufficient to reconstruct the element

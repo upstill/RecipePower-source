@@ -29,7 +29,10 @@ class Tag < ActiveRecord::Base
     # These are the "meanings" of a tag
     has_many :expressions
     has_many :referents, :through=>:expressions
-    
+
+    # When a tag is used as the basis for a personal collection, destroying the tag destroys the collection
+    has_many :private_subscriptions, :dependent=>:destroy
+
     # The primary meaning is the default meaning of a tag
     belongs_to :primary_meaning, :class_name => "Referent", :foreign_key => "referent_id"
     
