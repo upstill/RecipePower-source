@@ -250,7 +250,6 @@ class Tag < ActiveRecord::Base
    # tagtype: either a single value or an array, specifying key type(s) to search
    # assert: return a key of the given type matching the name, even if it has to be created anew
    # matchall: search only succeeds if it matches the whole string
-   # untypedOK: add type 0 to search to look for untyped tags
    # fold: reduce the set of candidate tags using lexical and semantic equivalence classes
    
    # If the :assert option is true, strmatch WILL return a tag on the given name, of the
@@ -260,7 +259,8 @@ class Tag < ActiveRecord::Base
       uid = opts[:userid]
       # private_scope = uid ? Tag.find(TagOwner.where(user_id: uid).map(&:tag_id)) : nil
       # Convert to internal form
-      type = opts[:tagtype] && Tag.typenum(opts[:tagtype])
+      type = opts[:tagtype] && Tag.typenum(opts[:tagtype])        # Restricted to types
+      type_x = opts[:tagtype_x] && Tag.typenum(opts[:tagtype_x])  # Types excluded
       assert = opts[:assert]
       name = name || "" # nil matches anything
       do_fold = opts[:fold]
@@ -269,18 +269,19 @@ class Tag < ActiveRecord::Base
       if opts[:matchall] || assert
         if type
           tags = Tag.where normalized_name: fuzzyname, tagtype: type
-        else # Specific collection of types
+        elsif type_x # Specific collection of types
+          tags = Tag.where.not(tagtype: type_x).where normalized_name: fuzzyname
+        else
           tags = Tag.where normalized_name: fuzzyname
         end
       else # Substring match
         if type
-          if type.kind_of?(Array)
-            # Sigh. Construct a query where the array of types is hardcoded
-            tags = Tag.where "normalized_name like ? AND tagtype IN "+type.to_s.sub(/^\[(.*)\]$/, "(\\1)"), "%#{fuzzyname}%"
-          else
-            tags = Tag.where "normalized_name like ? AND tagtype = ?", "%#{fuzzyname}%", type
-          end
-        else # Specific collection of types
+          typelist = (type.kind_of? Array) ? type.map(&:to_s).join(',') : type.to_s
+          tags = Tag.where "normalized_name like ? AND tagtype IN (#{typelist})", "%#{fuzzyname}%"
+        elsif type_x # Specific collection of types
+          typelist = (type.kind_of? Array) ? type.map(&:to_s).join(',') : type.to_s
+          tags = Tag.where.not("tagtype IN (#{typelist})").where "normalized_name like ?", "%#{fuzzyname}%"
+        else
           tags = Tag.where "normalized_name like ? ", "%#{fuzzyname}%"
         end
       end

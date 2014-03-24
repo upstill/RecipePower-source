@@ -4,6 +4,8 @@ RP.edit_recipe = RP.edit_recipe || {}
 
 me = () ->
 	$('div.edit_recipe')
+channel_tagger_selector = "div.edit_recipe #recipe_channel_tokens"
+collection_tagger_selector = "div.edit_recipe #recipe_collection_tokens"
 tagger_selector = "div.edit_recipe #recipe_tag_tokens"
 
 # Open the edit-recipe dialog on the recipe represented by 'rcpdata'
@@ -32,7 +34,11 @@ RP.edit_recipe.go = (evt, xhr, settings) ->
 		replace(/%%authToken%%/g, rcpdata.authtoken) # .replace(statustarget, statusrepl)
 		$(template).html dlgsource # This nukes any lingering children as well as initializing the dialog
 	# The tag data is parsed and added to the tags field directly
-	rcpdata.rcptagdata.query = "tagtypes=[0,1,2,3,4,7,8,11,12,13,14]&showtype=true&verbose=true"
+	rcpdata.rcpcollectiondata.query = "tagtype=15&showtype=false&verbose=false"
+	RP.tagger.init collection_tagger_selector, rcpdata.rcpcollectiondata # jQuery.parseJSON(rcpdata.rcptagdata)
+	rcpdata.rcpchanneldata.query = "tagtype=11&showtype=false&verbose=false"
+	RP.tagger.init channel_tagger_selector, rcpdata.rcpchanneldata # jQuery.parseJSON(rcpdata.rcptagdata)
+	rcpdata.rcptagdata.query = "tagtype=0,1,2,3,4,7,8,12,13,14&showtype=true&verbose=true"
 	RP.tagger.init tagger_selector, rcpdata.rcptagdata # jQuery.parseJSON(rcpdata.rcptagdata)
 	$('textarea').autosize()
 		

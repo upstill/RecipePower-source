@@ -41,23 +41,35 @@
                 <div class="control-group">
                   <input type="text"
                          class="token-input-field-pending"
+                         id="recipe_collection_tokens"
+                         name="recipe[collection_tokens]"
+                         rows="2"
+                         size="30"
+                         placeholder="In My Collections"
+                         data-pre="<%= @recipe ? @recipe.tags(tag_type: 15).map(&:attributes).to_json : "" %>"/>
+                </div>
+                <div class="control-group">
+                  <input type="text"
+                         class="token-input-field-pending"
+                         id="recipe_channel_tokens"
+                         name="recipe[channel_tokens]"
+                         rows="2"
+                         size="30"
+                         placeholder="Channels"
+                         data-pre="<%= @recipe ? @recipe.tags(tag_type: 11).map(&:attributes).to_json : "" %>"/>
+                </div>
+                <div class="control-group">
+                  <input type="text"
+                         class="token-input-field-pending"
                          id="recipe_tag_tokens"
                          name="recipe[tag_tokens]"
                          rows="2"
                          size="30"
                          placeholder="Tags"
-                         data-pre="<%= @recipe ? @recipe.tags.map(&:attributes).to_json : "" %>"/>
+                         data-pre="<%= @recipe ? @recipe.tags(tag_type_x: [11, 15]).map(&:attributes).to_json : "" %>"/>
                 </div>
                 <div class="control-group">
                   <textarea id="recipe_comment" name="recipe[comment]" placeholder="Recipe Notes" rows="3" style="width:100%"><%= present_field "rcpComment" %></textarea>
-                </div>
-                <div class="control-group">
-                  <div class="btn-group" data-toggle="buttons-checkbox" data-toggle-name="recipe[status]">
-                    <button type="button" class="btn btn-default" value="1" data-toggle="button"><%= t :recipe_status_high %></button>
-                    <button type="button" class="btn btn-default" value="2" data-toggle="button"><%= t :recipe_status_medium %></button>
-                    <button type="button" class="btn btn-default" value="4" data-toggle="button"><%= t :recipe_status_low %></button>
-                  </div>
-                  <input type="hidden" name="recipe[status]" value="<%= present_field "rcpStatus" %>" data-toggle-default="8"/>
                 </div>
               </div>
             </div>

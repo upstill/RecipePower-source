@@ -28,14 +28,12 @@ module Taggable
   end
   alias_method :"tagtxt=", :"tagstxt="
 
-  # Fetch the tags associated with the entity
+  # Fetch the tags associated with the entity, possibly with constraints of userid and type
   def tags options = {}
     if tt = options.delete(:tag_type)
-      types = (tt.is_a? Array) ? (tts.collect { |tt| Tag.typenum tt}) : Tag.typenum(tt)
-      Tag.where id: tag_ids(options), tagtype: types
+      Tag.where id: tag_ids(options), tagtype: Tag.typenum(tt)
     elsif nt = options.delete(:tag_type_x)
-      types_x = (nt.is_a? Array) ? (nt.collect { |nt| Tag.typenum nt}) : Tag.typenum(nt)
-      tags = Tag.where.not tagtype: types_x
+      tags = Tag.where.not tagtype: Tag.typenum(nt)
       tags.where( id: tag_ids(options))
     else
       Tag.where id: tag_ids(options)
@@ -77,33 +75,33 @@ module Taggable
 
   # Write the virtual attribute tag_tokens (a list of ids) to
   # update the real attribute tag_ids
-  def tag_tokens=(idstring)
-    self.tags =
+  def tag_tokens=(idstring, constraints={})
+    constraints.userid = tag_owner
+    constraints.assert = true
+    asserted =
     TokenInput.parse_tokens(idstring) do |token| # parse_tokens analyzes each token in the list as either integer or string
       case token
       when Fixnum
         Tag.find token
       when String
-        Tag.strmatch(token, userid: tag_owner, assert: true)[0] # Match or assert the string
+        Tag.strmatch(token, constraints)[0] # Match or assert the string
       end
     end
-=begin
-This is the old functionality, now moved to token_input.rb
-    # The list may contain new terms, passed in single quotes
-    self.tags = idstring.split(",").map { |e| 
-      if(e=~/^\d*$/) # numbers (sans quotes) represent existing tags
-        Tag.find e.to_i
-      else
-        e.sub!(/^\'(.*)\'$/, '\1') # Strip out enclosing quotes
-        Tag.strmatch(token, userid: tag_owner, assert: true)[0] # Match or assert the string
-      end
-    }.compact.uniq
-=end
+    if constraints[:tag_type] # Restricting to certain types: don't touch the others
+      constraints[:tag_type_x] = constraints.delete :tag_type
+      self.tags = asserted + tags(constraints)
+    elsif constraints[:tag_type_x] # Excluding certain types => don't touch them
+      constraints[:tag_type] = constraints.delete :tag_type_x
+      self.tags = asserted + tags(constraints)
+    else
+      self.tags = asserted
+    end
   end
   alias_method :"tag_token=", :"tag_tokens="
 
   # Declare a data structure suitable for passing to RP.tagger.init
   def tag_data typed=false, options={}
+    options, typed = typed, false if typed.is_a? Hash
     attribs = tags(options).collect { |tag| { id: tag.id, name: tag.typedname(typed) } }
     { :pre => attribs, :hint => "Type your tag(s) for the recipe here" }.to_json
   end
