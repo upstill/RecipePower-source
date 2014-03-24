@@ -35,7 +35,7 @@ class User < ActiveRecord::Base
   has_and_belongs_to_many :feeds
 
   # Private collections
-  has_many :private_subscriptions, :dependent=>:destroy
+  has_many :private_subscriptions, -> { order "priority ASC" }, :dependent=>:destroy
   has_many :collection_tags, :through => :private_subscriptions, :source => :tag, :class_name => "Tag"
   
   # login is a virtual attribute placeholding for [username or email]
@@ -94,13 +94,21 @@ class User < ActiveRecord::Base
     save
   end
 
-  def add_collection tag
+  def add_collection tag, priority=nil
     self.collection_tags << tag unless collection_tags.exists?(id: tag.id)
+    if priority # Can assign priority to subscription in the user's list
+      private_subscriptions.each do |ps|
+        if ps.tag.id == tag.id
+          ps.priority = priority
+          ps.save
+        end
+      end
+    end
     browser.select_by_content(tag)
     save
   end
 
-  def delete_channel tag
+  def delete_collection tag
     browser.delete_selected if browser.select_by_content(tag)
     self.collection_tags.delete tag
     save

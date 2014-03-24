@@ -2,8 +2,9 @@ class UserServices
   
   attr_accessor :user
   
-  delegate :id, :typename, :name, :normalized_name, :primary_meaning, :isGlobal, 
-    :users, :user_ids, :owners, :owner_ids, :reference_count, :referents, :can_absorb, :to => :tag
+  delegate :id, :username, :first_name, :last_name, :fullname, :about, :login, :private, :skip_invitation, :add_collection, :delete_collection,
+           :email, :password, :password_confirmation, :shared_recipe, :invitee_tokens, :channel_tokens, :image,
+           :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens, :subscription_tokens, :invitation_issuer, :to => :user
   
   def initialize(user)
     self.user = user
@@ -50,4 +51,24 @@ class UserServices
     result
   end
 
+  def self.tagify_status
+    User.all.each { |user| self.new(user).tagify_status }
+  end
+
+  # Convert the status markers for recipes into a collection
+  def tagify_status
+    statusval = 1
+    tags = []
+    ['Now Cooking', 'Keepers', 'To Try' ].each do |tagname|
+      # Assert user's inclusion in tag
+      # For each recipe of that status, apply appropriate tag
+      self.add_collection (tags[statusval] = Tag.assert_tag(tagname, userid: id)), statusval
+      statusval *= 2
+    end
+    Rcpref.where(status: [1,2,4], user_id: id).each do |rr|
+      rr.recipe.tag_with tags[rr.status], id
+    end
+    @user.browser_serialized = nil
+    @user.save
+  end
 end

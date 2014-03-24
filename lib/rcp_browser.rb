@@ -554,13 +554,15 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
     @level = level
     @handle = "All My Cookmarks"
     @classed_as = :personal
-    if @children.empty?  # Default, in case never saved before
-      @children = [ MyConstants::Rcpstatus_rotation, 
+    if @children.empty?  # Default, in case never saved before, or rebuilding browser
+=begin
+      @children = [ MyConstants::Rcpstatus_rotation,
         MyConstants::Rcpstatus_favorites, 
         MyConstants::Rcpstatus_interesting].map do |status| 
         args[:status] = status
         RcpBrowserElementStatus.new(level+1, args)
       end
+=end
       klass = Module.const_get("User")
       if klass.is_a?(Class) # If User class is available (i.e., in Rails, as opposed to testing)
         @children += user.collection_tags.map do |tag|
