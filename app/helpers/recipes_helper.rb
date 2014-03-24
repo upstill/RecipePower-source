@@ -93,7 +93,7 @@ def edit_recipe_link( label, recipe, options={})
     rcp_params = {
       rcpID: recipe.id,
       rcpTitle: recipe.title,
-      rcpTagData: recipe.tag_data(true), # recipe.tags.map(&:attributes).to_json,
+      rcpTagData: recipe.tag_data(true, tag_type_x: [11, :Collection]), # recipe.tags.map(&:attributes).to_json,
       rcpPicURL: recipe.picurl,
       rcpPrivate: recipe.private ? %q{checked="checked"} : "",
       rcpComment: recipe.comment,

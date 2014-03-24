@@ -31,11 +31,15 @@ module Taggable
   # Fetch the tags associated with the entity
   def tags options = {}
     if tt = options.delete(:tag_type)
-      Tag.where id: tag_ids(options), tagtype: Tag.typenum(tt)
+      types = (tt.is_a? Array) ? (tts.collect { |tt| Tag.typenum tt}) : Tag.typenum(tt)
+      Tag.where id: tag_ids(options), tagtype: types
+    elsif nt = options.delete(:tag_type_x)
+      types_x = (nt.is_a? Array) ? (nt.collect { |nt| Tag.typenum nt}) : Tag.typenum(nt)
+      tags = Tag.where.not tagtype: types_x
+      tags.where( id: tag_ids(options))
     else
       Tag.where id: tag_ids(options)
     end
-
   end
   alias_method :tag, :tags
 
@@ -99,8 +103,8 @@ This is the old functionality, now moved to token_input.rb
   alias_method :"tag_token=", :"tag_tokens="
 
   # Declare a data structure suitable for passing to RP.tagger.init
-  def tag_data typed=false
-    attribs = tags.collect { |tag| { id: tag.id, name: tag.typedname(typed) } }
+  def tag_data typed=false, options={}
+    attribs = tags(options).collect { |tag| { id: tag.id, name: tag.typedname(typed) } }
     { :pre => attribs, :hint => "Type your tag(s) for the recipe here" }.to_json
   end
 end
