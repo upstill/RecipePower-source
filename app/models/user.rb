@@ -40,26 +40,25 @@ class User < ActiveRecord::Base
   
   # login is a virtual attribute placeholding for [username or email]
   attr_accessor :login
-  
-    def browser params=nil
-      return @browser if @browser && !params
-      # Try to get browser from serialized storage in the user record
-      # If something goes awry, we'll just create a new one.
-      begin
-        @browser = ContentBrowser.load browser_serialized
-      rescue Exception => e
-        @browser = nil
-      end
-      @browser ||= ContentBrowser.new id
-      # Take heed of any query parameters that apply to the browser
-      @browser.apply_params(params) if params
-      @browser
+
+  def browser params=nil
+    return @browser if @browser && !params
+    # Try to get browser from serialized storage in the user record
+    # If something goes awry, we'll create a new one.
+    begin
+      @browser ||= ContentBrowser.load browser_serialized
+    rescue Exception => e
+      @browser = nil
     end
+    @browser ||= ContentBrowser.new id
+    # Take heed of any query parameters that apply to the browser
+    save if @browser && @browser.apply_params(params)
+    @browser
+  end
 
   # Bust the browser cache due to selections changing, optionally selecting an object
   def refresh_browser(obj = nil)
-    self.browser_serialized = nil
-    @browser = ContentBrowser.new(id)
+    @browser = ContentBrowser.new id
     @browser.select_by_content(obj) if obj
     save
   end

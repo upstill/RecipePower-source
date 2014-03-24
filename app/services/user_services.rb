@@ -68,7 +68,6 @@ class UserServices
     Rcpref.where(status: [1,2,4], user_id: id).each do |rr|
       rr.recipe.tag_with tags[rr.status], id
     end
-    @user.browser_serialized = nil
-    @user.save
+    @user.refresh_browser
   end
 end

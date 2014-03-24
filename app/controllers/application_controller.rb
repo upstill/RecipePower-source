@@ -110,7 +110,7 @@ class ApplicationController < ActionController::Base
   # All controllers displaying the collection need to have it setup 
   def setup_collection klass="Content", options={}
       @user ||= current_user_or_guest
-      @browser ||= @user.browser params
+      @browser = @user.browser params
       default_options = {}
       default_options[:clear_tags] = (params[:controller] != "collection") && (params[:controller] != "stream")
       setup_seeker klass, default_options.merge(options), params
