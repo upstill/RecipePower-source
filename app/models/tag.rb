@@ -15,10 +15,11 @@ class Tag < ActiveRecord::Base
         Occasion: ["Occasion", 8], 
         PantrySection: ["Pantry Section", 9], 
         StoreSection: ["Store Section", 10], 
-        Channel: ["Channel", 11], 
+        Channel: ["Public Collection", 11],
         Tool: ["Tool", 12], 
-        Nutrient: ["Nutrient", 13], 
-        CulinaryTerm: ["Culinary Term", 14]
+        Nutrient: ["Nutrient", 13],
+        CulinaryTerm: ["Culinary Term", 14],
+        Collection: ["Private Collection", 15]
     )
     
     attr_accessible :name, :id, :tagtype, :isGlobal, :links, :recipes, :referents, :users, :owners, :primary_meaning
