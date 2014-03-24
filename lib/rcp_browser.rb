@@ -867,6 +867,7 @@ class ContentBrowser < BrowserComposite
         # Validate the new selection before setting it, so we don't wind up with a nil selection
         if self.find_by_id params[:selected]
           self.select_by_id params[:selected]
+          true # Browser has changed (=> maybe we want to save it?)
         else
           raise Exception, "Apparently that #{params[:selected][0..3]} is missing in action"
         end
