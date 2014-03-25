@@ -5,6 +5,8 @@
 
 RP::Application.routes.draw do
 
+  resources :votes
+
   get "redirect/go"
   get '/auth/failure' => 'authentications#failure'
   # get '/authentications/new' => 'authentications#new'

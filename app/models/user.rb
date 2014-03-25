@@ -2,6 +2,7 @@ require "type_map.rb"
 require "rcp_browser.rb"
 class User < ActiveRecord::Base
   include Taggable
+  include Voteable
   # Include default devise modules. Others available are:
   # :token_authenticatable, :encryptable, :confirmable, :timeoutable
   devise :invitable, :database_authenticatable, :registerable,
@@ -28,7 +29,7 @@ class User < ActiveRecord::Base
 
   has_many :followee_relations, :foreign_key => "follower_id", :dependent=>:destroy, :class_name => "UserRelation"
   has_many :followees, -> { uniq }, :through => :followee_relations, :source => :followee
-  
+
   # Channels are just another kind of user. This field (channel_referent_id, externally) denotes such.
   belongs_to :channel, :class_name => "Referent", :foreign_key => "channel_referent_id"
   

@@ -8,6 +8,7 @@ class Recipe < ActiveRecord::Base
   include Taggable
   include Referrable
   include Linkable
+  include Voteable
   attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href, :description,
                   :misc_tag_tokens, :collection_tokens, :channel_tokens
   after_save :save_ref
