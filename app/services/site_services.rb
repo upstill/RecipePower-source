@@ -748,7 +748,7 @@ class SiteServices
                       @site.save
                     when "Author Link"
                       # Add a reference to the author, if any
-                      @site.tags(User.super_id, tag_type: "Author").each { |author|
+                      @site.tags(User.super_id, tagtype: "Author").each { |author|
                         Reference.assert field_val, author, "Home Page"
                       }
                     when "Tags"

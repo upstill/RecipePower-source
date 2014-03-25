@@ -8,7 +8,8 @@ class Recipe < ActiveRecord::Base
   include Taggable
   include Referrable
   include Linkable
-  attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href, :description # , :picAR
+  attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href, :description,
+                  :misc_tag_tokens, :collection_tokens, :channel_tokens
   after_save :save_ref
 
   validates :title, :presence=>true 
@@ -199,12 +200,57 @@ public
     # (ref = (uid.nil? ? current_ref : ref_for(uid, false))) && ref.in_collection
   end
 
-  def collection_tokens
+  # We divide the tag fields of a recipe into collections, channels, and other tags
 
+  def misc_tags
+    tags tagtype_x: [11, 15]
   end
 
-  def collection_tokens=
+  def misc_tag_tokens
+    tag_tokens tagtype_x: [11, 15]
+  end
 
+  def misc_tag_tokens= tokenstr
+    self.tag_tokens = { tokenstr: tokenstr, tagtype_x: [11, 15] }
+  end
+
+  def misc_tag_data options={}
+    options[:tagtype_x] = [11, :Collection]
+    tag_data options
+  end
+
+  def collections
+    tags tagtype: 15
+  end
+
+  def collection_tokens
+    tag_tokens tagtype: 15
+  end
+
+  def collection_tokens= tokenstr
+    self.tag_tokens = { tokenstr: tokenstr, :tagtype => 15 }
+  end
+
+  def collection_data options={}
+    options[:tagtype] = :Collection
+    tag_data options
+  end
+
+  def channels
+    tags tagtype: 11
+  end
+
+  def channel_tokens
+    tag_tokens tagtype: 11
+  end
+
+  def channel_tokens= tokenstr
+    self.tag_tokens = { tokenstr: tokenstr, :tagtype => 11 }
+  end
+
+  def channel_data options={}
+    options[:tagtype] = 11
+    tag_data options
   end
 
   def add_to_collection uid

@@ -29,10 +29,11 @@ module Taggable
   alias_method :"tagtxt=", :"tagstxt="
 
   # Fetch the tags associated with the entity, possibly with constraints of userid and type
-  def tags options = {}
-    if tt = options.delete(:tag_type)
+  def tags opts = {}
+    options = opts.clone # Don't muck with the options
+    if tt = options.delete(:tagtype)
       Tag.where id: tag_ids(options), tagtype: Tag.typenum(tt)
-    elsif nt = options.delete(:tag_type_x)
+    elsif nt = options.delete(:tagtype_x)
       tags = Tag.where.not tagtype: Tag.typenum(nt)
       tags.where( id: tag_ids(options))
     else
@@ -74,12 +75,19 @@ module Taggable
   end
 
   # Write the virtual attribute tag_tokens (a list of ids) to
-  # update the real attribute tag_ids
-  def tag_tokens=(idstring, constraints={})
-    constraints.userid = tag_owner
-    constraints.assert = true
+  # update the real attribute tag_ids. To apply constraints, the token string
+  # is passed as a member of a hash.
+  def tag_tokens= tokenstr
+    if tokenstr.is_a? Hash
+      constraints = tokenstr.clone
+      tokenstr = constraints.delete :tokenstr
+    else
+      constraints = {}
+    end
+    constraints[:userid] = tag_owner
+    constraints[:assert] = true
     asserted =
-    TokenInput.parse_tokens(idstring) do |token| # parse_tokens analyzes each token in the list as either integer or string
+    TokenInput.parse_tokens(tokenstr) do |token| # parse_tokens analyzes each token in the list as either integer or string
       case token
       when Fixnum
         Tag.find token
@@ -87,11 +95,13 @@ module Taggable
         Tag.strmatch(token, constraints)[0] # Match or assert the string
       end
     end
-    if constraints[:tag_type] # Restricting to certain types: don't touch the others
-      constraints[:tag_type_x] = constraints.delete :tag_type
+    # If we're asserting tokens OF A PARTICULAR TYPE(S), we need to leave the other types untouched.
+    # We do this by augmenting the declared set appropriately
+    if constraints[:tagtype] # Restricting to certain types: don't touch the others
+      constraints[:tagtype_x] = constraints.delete :tagtype
       self.tags = asserted + tags(constraints)
-    elsif constraints[:tag_type_x] # Excluding certain types => don't touch them
-      constraints[:tag_type] = constraints.delete :tag_type_x
+    elsif constraints[:tagtype_x] # Excluding certain types => don't touch them
+      constraints[:tagtype] = constraints.delete :tagtype_x
       self.tags = asserted + tags(constraints)
     else
       self.tags = asserted
@@ -100,9 +110,12 @@ module Taggable
   alias_method :"tag_token=", :"tag_tokens="
 
   # Declare a data structure suitable for passing to RP.tagger.init
-  def tag_data typed=false, options={}
-    options, typed = typed, false if typed.is_a? Hash
-    attribs = tags(options).collect { |tag| { id: tag.id, name: tag.typedname(typed) } }
-    { :pre => attribs, :hint => "Type your tag(s) for the recipe here" }.to_json
+  def tag_data options={}
+    data = { :hint => options.delete(:hint) || "Type your tag(s) here" }
+    data[:pre] = tags(options).collect { |tag| { id: tag.id, name: tag.typedname(options[:showtype]) } }
+    data[:query] = options.slice :verbose, :showtype
+    data[:query][:tagtype] = Tag.typenum(options[:tagtype]) if options[:tagtype]
+    data[:query][:tagtype_x] = Tag.typenum(options[:tagtype_x]) if options[:tagtype_x]
+    data.to_json
   end
 end
