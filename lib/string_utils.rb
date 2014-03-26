@@ -1,5 +1,5 @@
 def splitstr(str, ncols=80)
-	str = HTMLEntities.new.decode(str)
+  str = HTMLEntities.new.decode(str)
   out = []
   line = ""
   str.split(/\s+/).each do |word|
@@ -35,4 +35,11 @@ def liststrs(strs)
     last = strs.pop
     [strs.join(', '), last].join(' and ')
   end
+end
+
+# Two strings with space-separated words: merge them uniquely
+def merge_word_strings str1, str2
+  return str2||"" if str1.blank?
+  return str1 if str2.blank?
+  (str1.split(/\s+/) + str2.split(/\s+/)).uniq.join(' ')
 end

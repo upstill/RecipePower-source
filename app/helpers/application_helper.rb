@@ -1,5 +1,6 @@
 require "Domain"
 require './lib/controller_utils.rb'
+require './lib/string_utils.rb'
 module ApplicationHelper
     include ActionView::Helpers::DateHelper
 
@@ -524,9 +525,13 @@ module ApplicationHelper
 
   # Set up a remote interaction via the submit javascript module
   def button_to_submit label, url, options={}
-    options[:class] = "btn btn-default btn-xs submit"
+    options[:class] = merge_word_strings options[:class], "btn btn-default btn-xs submit"
     options.merge! remote: true
-    link_to label, url, options
+    if options.delete :button_to
+      button_to label, url, options
+    else
+      link_to label, url, options
+    end
   end
 
   # Generic termination buttons for dialogs--or any other forms

@@ -1,5 +1,5 @@
 class VotesController < ApplicationController
-  before_action :set_vote, only: [:show, :edit, :update, :destroy]
+  before_action :set_vote, only: [:show, :edit, :update, :destroy, :create]
 
   # GET /votes
   def index
@@ -21,12 +21,24 @@ class VotesController < ApplicationController
 
   # POST /votes
   def create
-    @vote = Vote.new(vote_params)
-
-    if @vote.save
-      redirect_to @vote, notice: 'Vote was successfully created.'
+    # Get from first_or_initialize implicitly # @vote = Vote.new(vote_params)
+    if @vote.up != (up = params[:up] == 'true')
+      @vote.up = up
+      @vote.save
+      notice = "Your vote has been counted."
     else
-      render action: 'new'
+      notice = %Q{You've voted this #{up ? "up" : "down"} before.}
+    end
+    respond_to do |format|
+      format.json {
+        style = params[:style] || "h" # 'h' is the default style
+        button = with_format("html") { render_to_string partial: "button", locals: { entity: @vote.entity, style: style } }
+        button_selector = "div#"+view_context(vote_div_id(@vote.entity))
+        render json: {
+                replacements: [ [ button_selector, button] ],
+                notice: notice
+        }
+      }
     end
   end
 
@@ -48,7 +60,13 @@ class VotesController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_vote
-      @vote = Vote.find(params[:id])
+      elmts = request.path.split('/')
+      entity_type, entity_id = elmts[-2], elmts[-1]
+      @vote = Vote.where(
+          entity_type: entity_type.singularize.capitalize,
+          entity_id: entity_id,
+          user_id: current_user.id
+      ).first_or_initialize
     end
 
     # Only allow a trusted parameter "white list" through.

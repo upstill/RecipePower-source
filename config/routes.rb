@@ -5,7 +5,7 @@
 
 RP::Application.routes.draw do
 
-  resources :votes
+  post '/votes/recipes/:recipe_id' => 'votes#create', :as => "vote_recipe"
 
   get "redirect/go"
   get '/auth/failure' => 'authentications#failure'
