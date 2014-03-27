@@ -1,6 +1,8 @@
 class VotesController < ApplicationController
   before_action :set_vote, only: [:show, :edit, :update, :destroy, :create]
 
+  helper_method :vote_button_replacement
+
   # GET /votes
   def index
     @votes = Vote.all
@@ -25,20 +27,21 @@ class VotesController < ApplicationController
     if @vote.up != (up = params[:up] == 'true')
       @vote.up = up
       @vote.save
-      notice = "Your vote has been counted."
+      flash.now[:notice] = "Your vote has been counted."
     else
-      notice = %Q{You've voted this #{up ? "up" : "down"} before.}
+      flash.now[:notice] = %Q{You've voted this #{up ? "up" : "down"} before.}
     end
     respond_to do |format|
-      format.json {
-        style = params[:style] || "h" # 'h' is the default style
-        button = with_format("html") { render_to_string partial: "button", locals: { entity: @vote.entity, style: style } }
-        button_selector = "div#"+view_context(vote_div_id(@vote.entity))
-        render json: {
-                replacements: [ [ button_selector, button] ],
-                notice: notice
-        }
-      }
+      format.js do
+        button = with_format("html") { render_to_string partial: "button", locals: { entity: @vote.entity, style: params[:style] || "h" } }
+        @jsondata = # with_format("json") { render "show", layout: false }
+          { replacements: [
+               [ "div#"+view_context.vote_div_id(@vote.entity), button ]
+            ],
+            notice: flash[:notice]
+          }
+        render template: "shared/get_content"
+      end
     end
   end
 

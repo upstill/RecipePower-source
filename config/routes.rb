@@ -5,6 +5,7 @@
 
 RP::Application.routes.draw do
 
+  resources :votes, :only => :create
   post '/votes/recipes/:recipe_id' => 'votes#create', :as => "vote_recipe"
 
   get "redirect/go"

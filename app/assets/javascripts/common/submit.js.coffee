@@ -32,12 +32,12 @@ RP.submit.success = (event, responseData, status, xhr) ->
 	RP.notifications.done()
 	# responseData.how = responseData.how || "modal"
 	RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
-	RP.process_response responseData, target_modal(event)
+	RP.process_response responseData, RP.dialog.target_modal(event)
 
 RP.submit.error = (event, jqXHR, status, error) ->
 	RP.notifications.done()
 	responseData = RP.post_error jqXHR
-	RP.process_response responseData, target_modal(event)
+	RP.process_response responseData, RP.dialog.target_modal(event)
 
 # Respond to a click by optionally checking for a confirmation, firing a request at the server and appropriately handling the response
 RP.submit.go = (event, request) ->

@@ -8,10 +8,11 @@
 -->
           <div class="rcp_grid_element_icons" >
             <%= render "recipes/infolink" %>
-            <%= vote_button @recipe %>
+            <%= render partial: "votes/button", locals: { entity: @recipe, style: "h" } %>
           </div>
           <div class="rcp_grid_element_buttons" >
-            <%= render "recipes/golink" %><%= render "recipes/sharelink" %>
+            <%= render "recipes/golink" %>
+            <%= render "recipes/sharelink" %>
           </div>
 		</div>
 	</div>
