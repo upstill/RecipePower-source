@@ -59,7 +59,7 @@ class TagsController < ApplicationController
       @Title = "Tags"
       matchstr = params[:q] || params[:term] || ""
       matchopts = {
-          userid: params[:user_id] || current_user.id,
+          userid: params[:user_id] || (current_user && current_user.id) || User.guest_id,
           assert: (params[:makeormatch] == "true"),
           partition: true,
           fold: !params[:verbose]
