@@ -17,7 +17,7 @@ module VotesHelper
   end
 
   def vote_button_class up, style
-    "submit vote-button btn btn-default btn-xs glyphicon glyphicon-thumbs-"+(up ? "up" : "down")
+    "vote-button btn btn-default btn-xs glyphicon glyphicon-thumbs-"+(up ? "up" : "down")
   end
 
   def vote_div_class style

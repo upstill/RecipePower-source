@@ -29,7 +29,7 @@ class VotesController < ApplicationController
       @vote.save
       flash.now[:notice] = "Your vote has been counted."
     else
-      flash.now[:notice] = %Q{You've voted this #{up ? "up" : "down"} before.}
+      flash.now[:notice] = %Q{You've already voted this #{up ? "up" : "down"}.}
     end
     respond_to do |format|
       format.js do
@@ -38,7 +38,7 @@ class VotesController < ApplicationController
           { replacements: [
                [ "div#"+view_context.vote_div_id(@vote.entity), button ]
             ],
-            notice: flash[:notice]
+            popup: flash[:notice]
           }
         render template: "shared/get_content"
       end
