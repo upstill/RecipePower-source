@@ -114,6 +114,9 @@ RP::Application.routes.draw do
   resources :scales
 
   resources :recipes do
+    resources :tags do
+      member { post 'remove', :to => 'recipes#untag' }
+    end
     member do 
       get 'collect'
       get 'touch'

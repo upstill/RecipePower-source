@@ -37,21 +37,20 @@ module VotesHelper
 
   def vote_button entity, options={} # Style can be 'h', with more to come
     style = options[:style] || "h"
-    # up_button = button_to_submit "", vote_link(entity, true, style), class: vote_button_class(true, style)
-    # down_button = button_to_submit "", vote_link(entity, false, style), class: vote_button_class(false, style)
     up_button = link_to "",
                         vote_link(entity, true, style),
                         method: "post",
                         remote: true,
-                        # form: { "data-type" => "json" },
+                        title: "Vote this up",
                         class: vote_button_class(true, style)
     down_button = link_to "",
                           vote_link(entity, false, style),
                           method: "post",
                           remote: true,
-                          # form: { "data-type" => "json" },
+                          title: "Vote this down",
                           class: vote_button_class(false, style)
-    count = content_tag :span, entity.upvotes.to_s, class: vote_count_class(style)
+    vote_counter = (entity.upvotes > 0 && entity.upvotes.to_s) || ""
+    count = content_tag :span, vote_counter, class: vote_count_class(style)
     content_tag :div, (up_button+count+down_button).html_safe, class: vote_div_class(style), id: vote_div_id(entity)
   end
 

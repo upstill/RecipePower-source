@@ -57,14 +57,20 @@ module Taggable
 
   # Set the tag ids associated with the current user
   def tag_ids= nids
+    if nids.is_a? Hash
+      owner = nids[:owner_id]
+      nids = nids[:tag_ids]
+    else
+      owner = tag_owner
+    end
     # Ensure that the user's tags are all and only those in nids
-    oids = tag_ids
+    oids = tag_ids owner_id: owner
     to_add = nids - oids
     to_remove = oids - nids
     # Add new tags as necessary
-    to_add.each { |tagid| Tagging.create(user_id: tag_owner, tag_id: tagid, entity_id: id, entity_type: self.class.name) }
+    to_add.each { |tagid| Tagging.create(user_id: owner, tag_id: tagid, entity_id: id, entity_type: self.class.name) }
     # Remove tags as nec.
-    to_remove.each { |tagid| Tagging.where(user_id: tag_owner, tag_id: tagid, entity_id: id, entity_type: self.class.name).map(&:destroy) } # each { |tg| tg.destroy } }
+    to_remove.each { |tagid| Tagging.where(user_id: owner, tag_id: tagid, entity_id: id, entity_type: self.class.name).map(&:destroy) } # each { |tg| tg.destroy } }
   end
   alias_method :"tag_id=", :"tag_ids="
 

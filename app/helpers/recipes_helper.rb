@@ -43,11 +43,11 @@ module RecipesHelper
   def recipe_info_icon recipe
     alltags = summarize_alltags(recipe) || ""
     tags = CGI::escapeHTML alltags
-    modal_link = link_to_modal image_tag("magnifying_glass_12x12.png"), recipe_path(recipe)
+    modal_link = link_to_modal "", recipe_path(recipe) # image_tag("magnifying_glass_12x12.png"), recipe_path(recipe)
     # modal_link = link_to_show recipe, image_tag("magnifying_glass_12x12.png")
     content_tag :span,
                 modal_link.html_safe,
-                class: "recipe-info-button btn btn-default btn-xs",
+                class: "recipe-info-button btn btn-default btn-xs glyphicon glyphicon-open",
                 data: { title: recipe.title, tags: tags, description: recipe.description || "" }
   end
 
@@ -112,6 +112,16 @@ def ownership_status(rcp)
 	# Summarize ownership as a list of owners, each linked to their collection
 	(rcp.users.map { |u| link_to u.handle, collection_path( :owner=>u.id.to_s) }.join(', ') || "").html_safe
 end
+
+  def recipe_uncollect_button recipe, browser_item
+    return unless recipe && browser_item.respond_to?(:tag) && (tag = browser_item.tag)
+    link_to "X",
+            remove_recipe_tag_path(recipe, tag),
+            method: "POST",
+            remote: true,
+            title: "Remove from this collection",
+            class: "top_right_corner btn btn-default btn-xs"
+  end
 
 def tagjoin tags, enquote = false, before = "", after = "", joiner = ','
     strjoin tags.collect{ |tag| link_to (enquote ? "'#{tag.name}'" : tag.name), tag, class: "rcp_list_element_tag" }, before, after, joiner

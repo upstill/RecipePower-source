@@ -296,6 +296,28 @@ class RecipesController < ApplicationController
       }
     end
   end
+
+  def untag
+    x=1
+    @recipe = Recipe.find params[:recipe_id]
+    tag_id = params[:id].to_i
+    tag_ids = @recipe.tag_ids owner_id: current_user.id
+    tag_ids = tag_ids.delete_if { |id| id == tag_id }
+    @recipe.tag_ids = { owner_id: current_user.id, tag_ids: tag_ids }
+    @recipe.save
+    @recipe.reload
+    tag_ids = @recipe.tag_ids owner_id: current_user.id
+    @jsondata = {
+        replacements: [
+            [ "div.rcpGridElmt"+@recipe.id.to_s, "" ]
+        ],
+        popup: "Fear not. '#{@recipe.title}' has been vanquished from this collection."
+    }
+    respond_to do |format|
+      format.json { render json: @jsondata }
+      format.js { render template: "shared/get_content" }
+    end
+  end
   
   # Add a recipe to the user's collection without going to edit tags. Full-page render is just collection page
   # GET recipes/:id/collect

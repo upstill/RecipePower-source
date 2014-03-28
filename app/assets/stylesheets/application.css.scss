@@ -20,6 +20,13 @@
 	# text-shadow: 0 1px 0 #888888;
 }
 
+.top_right_corner {
+  position: absolute;
+  z-index: 1000;
+  top: 0px;
+  right: 0px;
+}
+
 div.prompt {
   font:18px arial,sans-serif;
   font-weight:bold;
