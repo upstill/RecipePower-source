@@ -11,7 +11,7 @@ jQuery ->
 RP.dialog.beforeSend = (event, xhr, settings) ->
 	selector = $(this).data 'selector'
 	if selector && (ndlog = $(selector)[0]) # If dialog already loaded, replace the responding dialog
-		RP.dialog.replace_modal event.result = ndlog, RP.target.target_modal(event)
+		RP.dialog.replace_modal event.result = ndlog, RP.dialog.target_modal(event)
 		RP.state.onAJAXSuccess event
 		return false;
 	else
@@ -20,11 +20,11 @@ RP.dialog.beforeSend = (event, xhr, settings) ->
 # Success handler for fetching dialog from server
 RP.dialog.success = (event, responseData, status, xhr) ->
 	RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
-	RP.process_response responseData, RP.target.target_modal(event)
+	RP.process_response responseData, RP.dialog.target_modal(event)
 
 RP.dialog.error = (event, jqXHR, status, error) ->
 	responseData = RP.post_error jqXHR
-	RP.process_response responseData, RP.target.target_modal(event)
+	RP.process_response responseData, RP.dialog.target_modal(event)
 
 # Hit the server for a dialog via JSON, and run the result
 # This function can be tied to a link with only a URL to a controller for generating a dialog.
@@ -54,7 +54,7 @@ RP.dialog.arm_links = (dlog) ->
 
 RP.dialog.cancel = (event) ->
 	if event
-		if dlog = RP.target.target_modal(event)
+		if dlog = RP.dialog.target_modal(event)
 			event.preventDefault()
 		else
 			return true # Do regular click-handling, presumably returning from whence we came
