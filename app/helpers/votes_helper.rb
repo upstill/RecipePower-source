@@ -28,6 +28,13 @@ module VotesHelper
     "vote-"+entity.class.to_s.downcase+entity.id.to_s
   end
 
+  def vote_button_replacer entity, style="h"
+    [
+        "div#"+vote_div_id(entity),
+        vote_button(entity, style: style)
+    ]
+  end
+
   def vote_button entity, options={} # Style can be 'h', with more to come
     style = options[:style] || "h"
     # up_button = button_to_submit "", vote_link(entity, true, style), class: vote_button_class(true, style)
@@ -48,11 +55,4 @@ module VotesHelper
     content_tag :div, (up_button+count+down_button).html_safe, class: vote_div_class(style), id: vote_div_id(entity)
   end
 
-  def vote_button_replacement entity, style
-    [
-      "div#"+vote_div_id(entity),
-      vote_button(entity, style)
-    ]
-  end
-
-  end
+end

@@ -27,20 +27,19 @@ class VotesController < ApplicationController
     if @vote.up != (up = params[:up] == 'true')
       @vote.up = up
       @vote.save
-      flash.now[:notice] = "Your vote has been counted."
+      notice = "Your vote has been counted."
     else
-      flash.now[:notice] = %Q{You've already voted this #{up ? "up" : "down"}.}
+      notice = %Q{You've already voted this #{up ? "up" : "down"}.}
     end
     respond_to do |format|
+      # We're only responding to the vote link remotely => return javascript that just updates the button and feeds back a notice
       format.js do
-        button = with_format("html") { render_to_string partial: "button", locals: { entity: @vote.entity, style: params[:style] || "h" } }
-        @jsondata = # with_format("json") { render "show", layout: false }
-          { replacements: [
-               [ "div#"+view_context.vote_div_id(@vote.entity), button ]
-            ],
-            popup: flash[:notice]
-          }
-        render template: "shared/get_content"
+        button_replacement = view_context.vote_button_replacer(@vote.entity, params[:style] || "h")
+        @jsondata = {
+            replacements: [ button_replacement ],
+            popup: notice
+        }
+        render template: "shared/get_content"  # Send the jsondata and process it.
       end
     end
   end
