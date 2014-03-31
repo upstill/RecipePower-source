@@ -54,7 +54,12 @@ class SitesController < ApplicationController
     @site = Site.find(params[:id].to_i)
     if params[:pic_picker]
       # Setting the pic_picker param requests a picture-editing dialog
-      render partial: "shared/pic_picker"
+      render partial: "shared/pic_picker",
+             locals: {
+                 picurl: @site.logo,
+                 pageurl: @site.sampleURL,
+                 id: @site.id
+             }
     else
       @Title = @site.name
       smartrender area: "floating" 

@@ -1,1 +1,23 @@
-<%= pic_picker_contents %>
+<%# pic_picker_contents %>
+<!--
+Expecting the following local variables:
+    * picurl: the URL of the picture to be selected
+    * pageurl: the URL of the page where the choices will be sourced
+    * id: the id of the recipe/site in question
+-->
+<% pic_select_table = page_pic_select_table pageurl %>
+<div class="preview">
+  <%= page_width_pic picurl, id, "NoPictureOnFile.png", "div.preview img" %>
+</div>
+<div class="prompt">
+  <%= pic_select_table.empty? ?
+              "There are no pictures on the recipe's page, but you can paste a URL into the text box below." :
+              "Pick one of the thumbnails, then click Okay.<br><br>Or, type or paste the URL of an image.".html_safe
+  %>
+</div>
+<br class="clear">
+<input type="text" class="icon_picker"
+       rel="jpg,png,gif"
+       value="<%= picurl %>" />&nbsp;
+<%= link_to "Preview", "#", class: "image_preview_button" %>
+<%= pic_select_table.html_safe %>

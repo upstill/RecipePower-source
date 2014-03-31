@@ -224,7 +224,12 @@ class RecipesController < ApplicationController
       @decorator = @recipe.decorate
       if params[:pic_picker]
         # Setting the pic_picker param requests a picture-editing dialog
-        render partial: "shared/pic_picker"
+        render partial: "shared/pic_picker",
+               locals: {
+                   picurl: @recipe.picurl,
+                   pageurl: @recipe.url,
+                   id: @recipe.id
+               }
       else
         @nav_current = nil
         # @_area = params[:_area]
