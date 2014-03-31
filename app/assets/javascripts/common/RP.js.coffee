@@ -257,7 +257,6 @@ RP.process_response = (responseData, dlog) ->
 			for replacement in replacements
 				$(replacement[0]).replaceWith replacement[1]
 				$(replacement[0]).trigger "load"
-			# RP.dialog.replace_modal dlog
 
 		if streams = responseData.streams
 			for stream in streams
@@ -275,13 +274,13 @@ RP.process_response = (responseData, dlog) ->
 		# 'dlog' gives a dialog DOM element to replace the extant one
 		if newdlog = responseData.dlog
 			if typeof newdlog == "string"
-				newdlog = RP.dialog.extract_modal newdlog # $(newdlog) # 
+				newdlog = RP.dialog.extract_modal newdlog # $(newdlog) #
 			RP.dialog.replace_modal newdlog, dlog
 			supplanted = true
 
 		# 'code' gives HTML code, presumably for a dialog, possibly wrapped in a page
 		# If it's a page that includes a dialog, assert that, otherwise replace the page
-		if (code = responseData.code) && !supplanted = RP.dialog.supplant_modal dlog, code
+		if (code = responseData.code) && !supplanted = RP.dialog.replace_modal code, dlog
 				responseData.page ||= code
 			
 		if form = responseData.form

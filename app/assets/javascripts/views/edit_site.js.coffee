@@ -57,13 +57,13 @@ RP.edit_site.onload = (dlog) ->
 
 		if $('.pic_picker_golink', dlog).length > 0
 			# Get the picture picker in background
-			RP.pic_picker.load (picdlg) ->
+			RP.pic_picker.preload (picdlg) ->
 				$('.pic_picker_golink', dlog).removeClass('hide');
 			
 			# Arm the pic picker to open when clicked
 			$(".pic_picker_golink", dlog).click ->
 				event.preventDefault()
-				return RP.pic_picker.open "Pick a Logo for the Site"
+				return RP.dialog_open RP.pic_picker.dlog()
 		
 		# Fit the site's image into its place
 		# fitImageOnLoad "div.pic_preview img"

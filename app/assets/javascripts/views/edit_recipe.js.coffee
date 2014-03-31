@@ -3,7 +3,8 @@
 RP.edit_recipe = RP.edit_recipe || {}
 
 me = () ->
-	$('div.edit_recipe')
+	$('div.edit_recipe')[0]
+
 tagger_selector = "div.edit_recipe #recipe_tag_tokens"
 
 # Open the edit-recipe dialog on the recipe represented by 'rcpdata'
@@ -48,15 +49,11 @@ RP.edit_recipe.onload = (dlog) ->
 		
 		# Setup tokenInput on the tags field
 		if $('.pic_picker_golink', dlog).length > 0
-			# Get the picture picker in background
-			RP.pic_picker.load (picdlg) ->
-				$('.pic_picker_golink', dlog).removeClass('hide');
-			
-			# Arm the pic picker to open when clicked
-			$(".pic_picker_golink", dlog).click ->
-				event.preventDefault()
-				return RP.pic_picker.open "Pick a Picture for the Recipe"
-
+			# Get the picture picker in background, showing the link only when it's loaded
+			RP.pic_picker.preload ->
+				$('.pic_picker_golink', dlog).removeClass('hide').click ->
+					event.preventDefault()
+					RP.pic_picker.go dlog
 		# When submitting the form, we abort if there's no change
 		# Stash the serialized form data for later comparison
 		# $('form.edit_recipe').data "before", recipedata $('form.edit_recipe').serializeArray()
