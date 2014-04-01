@@ -103,6 +103,7 @@ RP.fire_triggers = ->
 	$('div.dialog.trigger').removeClass("trigger").each (ix, dlog) ->
 		RP.dialog.run dlog
 	$("a.trigger").removeClass("trigger").trigger "click"
+	$('a.preload').trigger "preload"
 
 # For the FAQ page: click on a question to show the associated answer
 RP.showhide = (event) ->

@@ -93,25 +93,31 @@ RP.dialog.extract_modal = (code) ->
 		$(newdlog).addClass("modal-pending")
 		return $(newdlog, doc.body).detach()[0]
 
-RP.dialog.replace_modal = (newdlog, odlog) ->
-	newdlog = RP.dialog.push_modal newdlog, odlog
-	if odlog && newdlog && (odlog != newdlog) # We might be just reopening a retained dialog
-		cancel_modal odlog, false
-	newdlog
-
-# Insert a new modal dialog, possibly closing and replacing any predecessor
-RP.dialog.push_modal = (newdlog, odlog) ->
+# Insert a new modal dialog, whether it is given as a DOM element or a code string
+insert_modal = (newdlog, odlog) ->
 	if typeof newdlog == 'string'
 		newdlog = RP.dialog.extract_modal newdlog
-	if odlog
-		sleep_modal newdlog, odlog
-		if (odlog != newdlog) && odlog.parentNode # We might be just reopening a retained dialog
-			odlog.parentNode.insertBefore newdlog, odlog
-			newdlog = odlog.previousSibling
+	if (odlog != newdlog) && odlog.parentNode # We might be just reopening a retained dialog
+		odlog.parentNode.insertBefore newdlog, odlog
+		newdlog = odlog.previousSibling
 	# Add the new dialog at the end of the page body if necessary
 	if !newdlog.parentNode
 		newdlog = document.getElementsByTagName("body")[0].appendChild newdlog
-	return open_modal newdlog
+	newdlog
+
+# Insert a new modal dialog while saving its predecessor
+RP.dialog.push_modal = (newdlog, odlog) ->
+	# RP.dialog.close_modal odlog
+	newdlog = insert_modal newdlog, odlog
+	push_modal newdlog, odlog
+	open_modal newdlog
+
+# Insert a new modal dialog, closing and replacing any predecessor
+RP.dialog.replace_modal = (newdlog, odlog) ->
+	newdlog = insert_modal newdlog, odlog
+	if odlog && newdlog && (odlog != newdlog) # We might be just reopening a retained dialog
+		cancel_modal odlog, false
+	newdlog
 
 # Return the dialog element for the current event target
 target_modal = (event) ->
@@ -140,15 +146,17 @@ open_modal = (dlog, omit_button) ->
 	#if (focus_sel = $(dlog).data("focus")) && (focus_elmt = $(focus_sel, dlog)[0])
 	#	focus_elmt.focus()
 	RP.dialog.arm_links dlog
+	RP.fire_triggers()
 	dlog
 
 # The following pair pushes and pops the dialog state
-sleep_modal = (spawn, progenitor) ->
-	$(progenitor).removeClass("modal").addClass('modal-pending')
+push_modal = (spawn, progenitor) ->
+	$(progenitor).removeClass("modal").addClass('modal-pending').detach()
 	$(spawn).data("progenitor", progenitor)
 
-awaken_progenitor = (spawn) ->
+pop_modal = (spawn) ->
 	if progenitor = $(spawn).data "progenitor"
+		insert_modal progenitor, spawn
 		$(progenitor).removeClass("modal-pending").removeClass('hide').addClass('modal')
 	else
 		$('div.modal-backdrop').remove()
@@ -158,9 +166,9 @@ RP.dialog.close_modal = (dlog, epilog) ->
 	if dlog
 		if($(dlog).modal)
 			$(dlog).modal 'hide'
+		pop_modal dlog
 		notify "close", dlog
 		RP.state.onCloseDialog dlog
-		awaken_progenitor dlog
 		if $(dlog).hasClass 'keeparound'
 			$(dlog).addClass('modal-pending').removeClass('modal')
 		else

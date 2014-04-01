@@ -5,23 +5,38 @@ Expecting the following local variables:
     * pageurl: the URL of the page where the choices will be sourced
     * id: the id of the recipe/site in question
 -->
-<%= modal_dialog :pic_picker, "Pick an Applicable Picture Here", response_service.modal_options do %>
-    <% pic_select_table = page_pic_select_table pageurl %>
-    <div class="preview">
-      <%= page_width_pic picurl, id, "NoPictureOnFile.png", "div.preview img" %>
-    </div>
-    <div class="prompt">
-      <%= pic_select_table.empty? ?
-                  "There are no pictures on the recipe's page, but you can paste a URL into the text box below." :
-                  "Pick one of the thumbnails, then click Okay.<br><br>Or, type or paste the URL of an image.".html_safe
-      %>
-    </div>
-    <br class="clear">
-    <input type="text" class="icon_picker"
-           rel="jpg,png,gif"
-           value="<%= picurl %>"/>&nbsp;
-    <%= link_to "Preview", "#", class: "image_preview_button" %>
-    <%= pic_select_table.html_safe %>
+<%= modal_dialog :pic_picker, "Pick an Applicable Picture Here", response_service.modal_options(dialog_class: "modal-lg") do %>
+    <% pic_select_list = page_pic_select_list pageurl %>
+    <div class="content">
+      <div class="row">
+        <div class="col-xs-12 col-sm-6 col-md-5">
+          <div class="preview">
+            <%= page_width_pic picurl, id, "NoPictureOnFile.png", "div.preview img" %>
+          </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-7">
+          <span class="prompt">
+            <%= pic_select_list.empty? ?
+                      "There are no pictures on the recipe's page, but you can paste a web address into the text box below." :
+                      "Click on a thumbnail to grab it.<br><br>Or, type or paste the web address of an image below.".html_safe
+          %></span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12">
+            <input type="text"
+                   rel="jpg,png,gif"
+                   value="<%= picurl %>"
+                   class="icon_picker"
+                   style="width: 100%" />
+        </div>
+      </div>
+      <div class="row">
+          <%= link_to "Preview", "#", class: "btn btn-info image_preview_button" %>
+      </div>
+      <%= pic_select_list.html_safe %>
+  <%= modal_footer do %>
+    <%= link_to "Okay", "#", class: "btn btn-lg btn-primary pic_picker_okay dialog-submit-button" %>
     <%= dialog_cancel_button "Cancel" %>
-    <%= link_to "Okay", "#", class: "btn btn-lg btn-primary pic_picker_okay" %>
+  <% end %>
 <% end %>

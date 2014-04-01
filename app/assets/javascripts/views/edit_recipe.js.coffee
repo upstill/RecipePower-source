@@ -46,14 +46,10 @@ RP.edit_recipe.onload = (dlog) ->
 	dlog = me()
 	# Only proceed if the dialog has children
 	if $('.edit_recipe > *').length > 0
-		
-		# Setup tokenInput on the tags field
-		if $('.pic_picker_golink', dlog).length > 0
-			# Get the picture picker in background, showing the link only when it's loaded
-			RP.pic_picker.preload ->
-				$('.pic_picker_golink', dlog).removeClass('hide').click ->
-					event.preventDefault()
-					RP.pic_picker.go dlog
+		$(dlog).on 'preload', 'a.pic_picker_golink', ->
+			RP.pic_picker.preload dlog, ->
+				$('.pic_picker_golink', dlog).removeClass 'hide'
+		# Get the picture picker in background, showing the link only when it's loaded
 		# When submitting the form, we abort if there's no change
 		# Stash the serialized form data for later comparison
 		# $('form.edit_recipe').data "before", recipedata $('form.edit_recipe').serializeArray()

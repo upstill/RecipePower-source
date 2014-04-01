@@ -30,6 +30,18 @@ module TriggersHelper
   	link_to label, path, options
   end
 
+  # Declare a link which preloads its result (a JSON query) and stores it in its data
+  def link_to_preload label, path_or_object, options={}
+    path = url_for(path_or_object)
+    if options[:data]
+      options[:data].merge! type: "json"
+    else
+      options[:data] = { type: "json" }
+    end
+    options[:class] = "preload "+(options[:class] || "")
+    link_to label, path, options
+  end
+
   def link_to_show object, label, options={}
     button_to "Show", object, remote: true, :method => :get, form: { "data-type" => "json", class: "dialog-run" }
   end

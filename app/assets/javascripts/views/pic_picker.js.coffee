@@ -1,30 +1,33 @@
 RP.pic_picker = RP.pic_picker || {}
 
-me = () ->
-	$('div.pic_picker')
+mylink = () ->
+	$('a.pic_picker_golink')
 
-RP.pic_picker.dlog = ->
+mydlog = () ->
 	$('div.dialog.pic_picker')
 
 # Prepare the picture picker prior to opening it.
-RP.pic_picker.preload = (callback) ->
-	dlog = me()
+RP.pic_picker.preload = (parent, callback) ->
+	link = mylink()
 	# Don't load twice
-	return if $(dlog).hasClass('loading')
-	url = $(dlog).data "url"
-	$(dlog).addClass('loading')
+	return if $(link).hasClass('loading')
+	url = link[0].href # $(dlog).data "url"
+	$(link).addClass('loading')
 	$.ajax
 		type: "GET",
-		dataType: "html",
+		dataType: "json",
 		url: url,
 		error: (jqXHR, textStatus, errorThrown) ->
 			x=2
 		success: (response, statusText, xhr) ->
 			# Pass any assumptions into the response data
-			$(dlog).removeClass('loading')
-			$(dlog).data "markup", response
+			$(link).removeClass('loading')
+			$(link).data "response", response
+			$(link).click ->
+				event.preventDefault()
+				RP.pic_picker.go parent
 			if jQuery.type(callback) == 'function'
-				callback dlog
+				callback link
 
 ###
 	$(dlog).load url, (responseText, textStatus, XMLHttpRequest) ->
@@ -34,9 +37,10 @@ RP.pic_picker.preload = (callback) ->
 RP.pic_picker.go = (odlog) ->
 	# Arm the pic picker to open when clicked
 	# RP.dialog.close_modal odlog
-	marker_div = me()
-	dlog_markup = $(marker_div).data "markup"
-	RP.dialog.push_modal dlog_markup, odlog
+	link = mylink()
+	response = $(link).data "response"
+	RP.dialog.push_modal response.dlog, odlog
+	# RP.process_response response, odlog
 
 # Respond to a link by bringing up a dialog for picking among the image fields of a page
 # -- the pic_picker div is ready to be a diaog
@@ -46,11 +50,12 @@ RP.pic_picker.open = (dlog) ->
 	$('.pic_picker_okay', dlog).click ->
 		# Transfer the logo URL from the dialog's text input to the page text input
 		# THE PICPICKER MUST BE ARMED WITH NAMES IN ITS DATA
-		datavals = $(".pic_picker_golink").attr("data").split(';');
+		datavals = $(".pic_picker_golink").data("vals").split(';');
 		previewImg("input.icon_picker", datavals[1], "input#"+datavals[0]);
 		# Copy the image to the window's thumbnail
 	$('a.image_preview_button').click ->
 		previewImg('input.icon_picker', 'div.preview img', '')
+	# $(dlog).removeClass('page').addClass('at_left')
 	return true
 	###
 			$(dlog).dialog # nee: iconpicker
@@ -62,7 +67,7 @@ RP.pic_picker.open = (dlog) ->
 					Okay: (event) ->
 						# Transfer the logo URL from the dialog's text input to the page text input
 						# THE PICPICKER MUST BE ARMED WITH NAMES IN ITS DATA
-						datavals = $(".pic_picker_golink").attr("data").split(';');
+						datavals = $(".pic_picker_golink").data("vals").split(';');
 						previewImg("input.icon_picker", datavals[1], "input#"+datavals[0]);
 						$(this).dialog('close');
 						# Copy the image to the window's thumbnail
