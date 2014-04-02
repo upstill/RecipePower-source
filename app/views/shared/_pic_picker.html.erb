@@ -17,9 +17,10 @@ Expecting the following local variables:
         <div class="col-xs-12 col-sm-6 col-md-7">
           <span class="prompt">
             <%= pic_select_list.empty? ?
-                      "There are no pictures on the recipe's page, but you can paste a web address into the text box below." :
+                      "It doen't look like we can extract pictures from the recipe's page, but you can paste a web address into the text box below." :
                       "Click on a thumbnail to grab it.<br><br>Or, type or paste the web address of an image below.".html_safe
           %></span>
+          <%= "<br>(Alternatively, you can go to the recipe's page, hit the Cookmark button, and pick a picture with the cookmarking dialog.)" if pic_select_list.empty? %>
         </div>
       </div>
       <div class="row">

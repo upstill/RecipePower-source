@@ -207,7 +207,7 @@ pop_modal = (dlog, action) ->
 
 close_modal = (dlog, action) ->
 	if dlog
-		pop_modal dlog, (action || "close")
+		pop_modal dlog, (action || "close") # Modal can either be closed or cancelled
 		RP.state.onCloseDialog dlog
 		if !$(dlog).hasClass 'keeparound'
 			$(dlog).remove()
