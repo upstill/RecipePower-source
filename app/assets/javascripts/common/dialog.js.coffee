@@ -90,14 +90,6 @@ RP.dialog.close_modal = (dlog, epilog) ->
 	# If there's another dialog or recipe to edit waiting in the wings, trigger it
 	RP.fire_triggers()
 
-###
-RP.dialog.user_note = (msg) ->
-	jNotify msg,
-		HorizontalPosition: 'center',
-		VerticalPosition: 'top',
-		TimeShown: 1200
-###
-
 # Public convenience methods for handling events
 RP.dialog.onopen = (dlog, entity) ->
 	notify 'open', dlog, entity
@@ -138,7 +130,7 @@ insert_modal = (newdlog, odlog) ->
 			# We extract dialogs that are meant to be opened instead of the whole page
 			newdlog = $('div.dialog.modal-yield', doc.body).removeClass("modal-yield").addClass("modal-pending").detach()[0]
 	# Now the dialog is a detached DOM elmt: attach it relative to the parent
-	if (odlog != newdlog) && odlog.parentNode # We might be just reopening a retained dialog
+	if odlog && (odlog != newdlog) && odlog.parentNode # We might be just reopening a retained dialog
 		odlog.parentNode.insertBefore newdlog, odlog
 		newdlog = odlog.previousSibling
 	# Add the new dialog at the end of the page body if necessary
@@ -189,12 +181,14 @@ show_modal = (dlog) ->
 		$(dlog).modal 'show'
 
 # The following pair push and pop the dialog state
+# 'push' detaches the parent dialog and stores it in the child's data
 push_modal = (dlog, parent) ->
 	hide_modal parent
 	$(parent).detach()
 	$(dlog).data("parent", parent)
 
 # Remove the child dialog, notifying it of the action, and reopen the parent
+# The parent was stored in the child's data
 pop_modal = (dlog, action) ->
 	hide_modal dlog
 	if parent = $(dlog).data "parent"
@@ -298,11 +292,6 @@ notify = (what, dlog, entity) ->
 		# form submission event to give us a chance to get JSON data and inject it into the page
 		# rather than do a full page reload.
 			show_modal dlog
-			###
-			if !$(dlog).hasClass "modal" # The modality may be hidden if prepared for a page
-				$(dlog).addClass "modal"
-			$(dlog).removeClass "hide"
-			###
 			$(dlog).on 'shown', ->
 				$('textarea', dlog).focus()
 			# Forms submissions that expect JSON structured data will be handled here:
