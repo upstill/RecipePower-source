@@ -3,7 +3,8 @@
 RP.edit_recipe = RP.edit_recipe || {}
 
 me = () ->
-	$('div.edit_recipe')
+	$('div.edit_recipe')[0]
+
 channel_tagger_selector = "div.edit_recipe #recipe_channel_tokens"
 collection_tagger_selector = "div.edit_recipe #recipe_collection_tokens"
 tagger_selector = "div.edit_recipe #recipe_misc_tag_tokens"
