@@ -44,6 +44,15 @@ RP.edit_recipe.go = (evt, xhr, settings) ->
 		
 	# Hand it off to the dialog handler
 	RP.dialog.run me()
+	# When submitting the form, we abort if there's no change
+	# Stash the serialized form data for later comparison
+	# $('form.edit_recipe').data "before", recipedata $('form.edit_recipe').serializeArray()
+	dataBefore = recipedata $('form.edit_recipe', dlog).serializeArray()
+	$('form.edit_recipe', dlog).data "hooks", {
+		dataBefore: recipedata($('form.edit_recipe', dlog).serializeArray()),
+		beforesaveFcn: "RP.edit_recipe.submission_redundant"
+	}
+	RP.makeExpandingArea $('div.expandingArea', dlog)
 	false
 
 # When dialog is loaded, activate its functionality
@@ -51,35 +60,10 @@ RP.edit_recipe.onload = (dlog) ->
 	dlog = me()
 	# Only proceed if the dialog has children
 	if $('.edit_recipe > *').length > 0
-		
-		# Setup tokenInput on the tags field
-		if $('.pic_picker_golink', dlog).length > 0
-			# Get the picture picker in background
-			RP.pic_picker.load (picdlg) ->
-				$('.pic_picker_golink', dlog).removeClass('hide');
-			
-			# Arm the pic picker to open when clicked
-			$(".pic_picker_golink", dlog).click ->
-				event.preventDefault()
-				return RP.pic_picker.open "Pick a Picture for the Recipe"
-
-		# When submitting the form, we abort if there's no change
-		# Stash the serialized form data for later comparison
-		# $('form.edit_recipe').data "before", recipedata $('form.edit_recipe').serializeArray()
-		dataBefore = recipedata $('form.edit_recipe', dlog).serializeArray()
-		$('form.edit_recipe', dlog).data "hooks", {
-			dataBefore: recipedata($('form.edit_recipe', dlog).serializeArray()),
-			beforesaveFcn: "RP.edit_recipe.submission_redundant"
-		}
-		
-		RP.makeExpandingArea $('div.expandingArea', dlog)
-		
-#		$('input.save-tags-button.cancel', dlog).click RP.edit_recipe.oncancel 
-#		$('form.edit_recipe').on 'ajax:beforeSend', submission_redundant
-#		$('form.edit_recipe').on 'ajax:success', submission_success
-#		$('form#remove').on 'ajax:success', submission_success
-#		$('form#destroy').on 'ajax:success', submission_success
-		
+		# The pic picker is preloaded onto its link element. Unhide the link when loading is complete
+		$(dlog).on 'preload', 'a.pic_picker_golink', ->
+			RP.pic_picker.preload dlog, ->
+				$('.pic_picker_golink', dlog).removeClass 'hide'
 		rcpid = $('form.edit_recipe', dlog).attr("id").replace /\D*/g, ''
 		if touch_recipe = RP.named_function "RP.rcp_list.touch_recipe"
 			touch_recipe rcpid

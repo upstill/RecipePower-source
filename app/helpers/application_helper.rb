@@ -113,7 +113,7 @@ module ApplicationHelper
     )
     picker = is_local ?
       content_tag(:div,
-            link_to( "Pick Picture", "/", :data=>"recipe_picurl;div.pic_preview img", :class => "pic_picker_golink hide")+
+            link_to( "Pick Picture", "/", :data=>{ vals: "recipe_picurl;div.pic_preview img" }, :class => "pic_picker_golink hide")+
             pic_picker_shell(obj), # pic_picker(obj.picurl, obj.url, obj.id), 
             :class=>"pic_picker_link"
             ) # Declare the picture-picking dialog
@@ -183,7 +183,55 @@ module ApplicationHelper
       tblstr      
     ).html_safe      
   end
-  
+
+  def page_pic_select_table pageurl
+    piclist = page_piclist pageurl # Crack the page for its image links
+    return "" if piclist.empty?
+    pictab = []
+    # divide piclist into rows of four pics apiece
+    picrows = ""
+    thumbNum = 0
+    # Divide the piclist of URLs into rows of four, accumulating HTML for each row
+    until piclist.empty?
+      picrows << "<tr><td>"+
+          piclist.slice(0..5).collect{ |url|
+            idstr = "thumbnail"+(thumbNum = thumbNum+1).to_s
+            content_tag( :div,
+                         image_tag(url,
+                                   style: "width:100%; height: auto;",
+                                   id: idstr,
+                                   onclick: "RP.pic_picker.make_selection('#{url}')", class: "fitPic", onload: "doFitImage(event);",
+                                   alt: "No Image Available"),
+                         class: "picCell")
+          }.join('</td><td>')+
+          "</td></tr>"
+      piclist = piclist.slice(6..-1) || [] # Returns nil when off the end of the array
+    end
+    "<br>"+content_tag(:table, picrows.html_safe)
+  end
+
+  def page_pic_select_list pageurl
+    piclist = page_piclist pageurl # Crack the page for its image links
+    return "" if piclist.empty?
+    # divide piclist into rows of six pics apiece
+    picrows, thumbNum = "", 0
+    # Divide the piclist of URLs into rows of four, accumulating HTML for each row
+    until piclist.empty?
+      picrow = piclist.slice!(0..11).collect { |url|
+        content_tag(:div,
+                    image_tag(url,
+                              style: "width:100%; height: auto;",
+                              id: "thumbnail#{thumbNum += 1}",
+                              onclick: "RP.pic_picker.make_selection('#{url}')", # class: "fitPic", onload: "doFitImage(event);",
+                              alt: "No Image Available"),
+                    class: "col-xs-6 col-sm-4 col-md-3 col-lg-2",
+                    style: "margin-bottom: 10px")
+      }.join(' ')
+      picrows << content_tag(:div, picrow.html_safe, class: "row")
+    end
+    picrows
+  end
+
   def recipe_list_element_golink_class recipe
     "rcpListGotag"+@recipe.id.to_s    
   end

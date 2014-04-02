@@ -83,7 +83,7 @@ def test_link(link, resource=nil)
 end
 
  # Return a list of image URLs for a given page
-def page_piclist(url)
+def page_piclist url
   begin 
     return [] unless (ou = open url) && (doc = Nokogiri::HTML(ou))
   rescue Exception => e

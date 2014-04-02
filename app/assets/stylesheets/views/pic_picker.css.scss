@@ -1,32 +1,25 @@
 div.pic_picker {
-	display:inline-block;
-	width:750px;
-	margin:5px;
-	padding:5px;
-	border:#000000 2px solid;
 	.preview {
-		width:200px;
-		height:auto;
-		float: left;
 		margin-bottom: 10px;
-		outline:#909090 2px solid;
+		// outline:#909090 2px solid;
 		text-align: center;
 	}
+    .image_preview_button {
+      margin: 20px;
+      float: right;
+    }
+    .pic_picker_okay {
+      float: right;
+      margin-left: 10px;
+    }
 	.prompt {
-		display: block;
-		float: left;
-		width: 400px;
-		margin:20px;
 		font:18px arial,sans-serif;
 		font-weight:bold;
-	}
-	input {
-		width: 580px;
 	}
 	.picCell {
 		width:96px;
 		height:72px;
-		margin:5px;
+		margin:10px;
 		text-align:center
 	}
 }
