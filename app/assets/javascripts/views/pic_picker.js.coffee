@@ -42,17 +42,23 @@ RP.pic_picker.go = (odlog) ->
 	RP.dialog.push_modal response.dlog, odlog
 	# RP.process_response response, odlog
 
+# Close with save
+RP.pic_picker.close = (dlog) ->
+	# Transfer the logo URL from the dialog's text input to the page text input
+	# THE PICPICKER MUST BE ARMED WITH NAMES IN ITS DATA
+	datavals = $(".pic_picker_golink").data("vals").split(';');
+	# Copy the image to the window's thumbnail
+	previewImg("input.icon_picker", datavals[1], "input#"+datavals[0]);
+
+# Cancel when closing unsaved
+RP.pic_picker.cancel = (dlog) ->
+	x=2
+
 # Respond to a link by bringing up a dialog for picking among the image fields of a page
 # -- the pic_picker div is ready to be a diaog
 # -- the data of the link must contain urls for each image, separated by ';'
 # formerly PicPicker
 RP.pic_picker.open = (dlog) ->
-	$('.pic_picker_okay', dlog).click ->
-		# Transfer the logo URL from the dialog's text input to the page text input
-		# THE PICPICKER MUST BE ARMED WITH NAMES IN ITS DATA
-		datavals = $(".pic_picker_golink").data("vals").split(';');
-		previewImg("input.icon_picker", datavals[1], "input#"+datavals[0]);
-		# Copy the image to the window's thumbnail
 	$('a.image_preview_button').click ->
 		previewImg('input.icon_picker', 'div.preview img', '')
 	# $(dlog).removeClass('page').addClass('at_left')

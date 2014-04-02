@@ -187,12 +187,8 @@ RP.post_error = ( jqXHR, dlog ) ->
 		catch e
 			# Not valid JSON. Maybe it's a page to go to?
 			if errtxt.match /^\s*<!DOCTYPE html>/ 
-				if newdlog = RP.dialog.extract_modal errtxt
-					parsage =
-						dlog: newdlog
-				else
-					parsage =  
-						page: errtxt 
+				parsage =
+					page: errtxt
 			else if errtxt.match /^\s*<form/ # Detect a form replacement
 				wrapper = document.createElement('div');
 				wrapper.innerHTML = errtxt;
@@ -274,8 +270,6 @@ RP.process_response = (responseData, dlog) ->
 
 		# 'dlog' gives a dialog DOM element to replace the extant one
 		if newdlog = responseData.dlog
-			if typeof newdlog == "string"
-				newdlog = RP.dialog.extract_modal newdlog # $(newdlog) #
 			RP.dialog.replace_modal newdlog, dlog
 			supplanted = true
 
