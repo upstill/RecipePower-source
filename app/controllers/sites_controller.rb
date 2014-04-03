@@ -1,5 +1,3 @@
-# require 'will_paginate'
-
 class SitesController < ApplicationController
   # GET /sites
   # GET /sites.json

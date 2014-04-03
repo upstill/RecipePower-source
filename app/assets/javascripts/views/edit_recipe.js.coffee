@@ -29,6 +29,7 @@ RP.edit_recipe.go = (evt, xhr, settings) ->
 		replace(/%%rcpTitle%%/g, rcpdata.rcptitle).
 		replace(/%%rcpPicSafeURL%%/g, rcpdata.rcppicurl || "/assets/NoPictureOnFile.png" ).
 		replace(/%%rcpPicURL%%/g, rcpdata.rcppicurl || "" ).
+		replace(/%%rcpURL%%/g, rcpdata.rcpurl).
 		replace(/%%rcpPrivate%%/g, rcpdata.rcpprivate).
 		replace(/%%rcpComment%%/g, rcpdata.rcpcomment).
 		replace(/%%rcpStatus%%/g, rcpdata.rcpstatus).
