@@ -1,7 +1,9 @@
 module PicPickerHelper
 
+  # Bare-metal version of the pic preview widget, for use in a template file
   def pic_preview_widget page_url, img_url, entity_id, options={}
     input_id = "recipe_picurl"
+    input_name = "recipe[picurl]"
     img_id = "rcpPic#{entity_id}"
     link_id = "golink#{entity_id}"
     pic_picker_link = pic_preview_golink page_url, img_url, link_id, img_id, input_id
@@ -12,7 +14,7 @@ module PicPickerHelper
               style="width:100%; height: auto">
          <input type="hidden"
                 id="#{input_id}"
-                name="recipe[picurl]"
+                name="#{input_name}"
                 rel="jpg,png,gif"
                 type="text"
                 value="#{img_url}>
@@ -21,10 +23,8 @@ module PicPickerHelper
     content_tag( :div, pic_picker_link, :class => :pic_picker_link)
   end
 
-  # The link to the picture-picking dialog preloads
+  # The link to the picture-picking dialog preloads the dialog, extracting picture links from the recipe's page
   def pic_preview_golink page_url, img_url, link_id, img_id, input_id
-    # img_url =  URI::encode img_url
-    # page_url =  URI::encode page_url
     link_to_preload "Pick Picture",
                     %Q{/pic_picker/new?picurl=#{img_url}&pageurl=#{page_url}&golinkid=#{link_id}}, # %Q{/recipes/#{entity_id}/edit?pic_picker=true},
                     id: link_id,
