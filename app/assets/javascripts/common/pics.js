@@ -71,3 +71,18 @@ function previewImg(inputsel, imagesel, formsel) {
     event.preventDefault();
   return false;
 }
+
+// Place an image URL into both an input field and an accompanying preview image
+// The img element is the first sibling of the input by default,
+// but may be identified with an id stored in the 'imageid' data field of the input element
+function imagePreviewWidgetSet(imgID, inputID, url) {
+    var inputElmt = $("input#"+inputID)[0];
+    if (inputElmt && $(inputElmt).attr("value") != url) $(inputElmt).attr("value", url);
+
+    if (url.length < 1) url = "/assets/NoPictureOnFile.png" // Use placeholder in the image for empty image url
+
+    // The image element is either the first sibling of the input, or given by an 'imageselector' data attribute
+    var imageElmt = (imgID && $("img#"+imgID)[0]) || (inputElmt && $('img', inputElmt.parentElement)[0]);
+    if (imageElmt && ($(imageElmt).attr("src") != url)) $(imageElmt).removeClass("loaded").attr("src", url)
+    return false;
+}

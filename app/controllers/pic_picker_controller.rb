@@ -5,7 +5,7 @@ class PicPickerController < ApplicationController
            locals: {
                picurl: params[:picurl], # @site.logo,
                pageurl: params[:pageurl], # @site.sampleURL,
-               id: params[:entity_id] # @site.id
+               golinkid: params[:golinkid]
            }
     respond_to do |format|
       format.html # index.html.erb

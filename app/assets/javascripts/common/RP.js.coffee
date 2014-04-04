@@ -232,13 +232,18 @@ RP.change = (event) ->
 		data.querydata[data.valueparam] = elmt.value
 	else
 		data.querydata.value = elmt.value
+	# Fire off an Ajax call notifying the server of the (re)classification
+	RP.submit.submit_and_process RP.build_request(data), "GET", data
+
+# Build a request string from a structure with attributes 'request' and 'querydata'
+RP.build_request = (data) ->
 	# Encode the querydata into the request string
 	str = []
 	for attrname,attrvalue of data.querydata
 		str.push(encodeURIComponent(attrname) + "=" + encodeURIComponent(attrvalue));
 	# Fire off an Ajax call notifying the server of the (re)classification
-	RP.submit.submit_and_process data.request+"?"+str.join("&"), "GET", data
-	
+	data.request+"?"+str.join("&")
+
 # Process response from a request. This will be an object supplied by a JSON request,
 # which may include code to be presented along with fields (how and area) telling how
 # to present it. The data may also consist of only 'code' if it results from an HTML request
