@@ -15,7 +15,8 @@
           <%= f.input :subsite %>
           <%= f.input :sample %>
           <%= f.input :description %>
-          <%= f.input :logo %>
+          <%# f.input :logo %>
+          <%= pic_field f, :logo, :sample %>
           <%= token_input_field f %>
         </div>
       </div>

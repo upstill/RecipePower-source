@@ -225,28 +225,12 @@ class RecipesController < ApplicationController
     if @recipe && @recipe.errors.empty? # Success (recipe found)
       @Title = @recipe.title # Get title from the recipe
       @decorator = @recipe.decorate
-      if params[:pic_picker]
-        # Setting the pic_picker param requests a picture-editing dialog
-        partial = render_to_string(
-            partial: "shared/pic_picker",
-            locals: {
-                picurl: @recipe.picurl,
-                pageurl: @recipe.url,
-                id: @recipe.id
-            }
-        )
-        respond_to do |format|
-          format.html # index.html.erb
-          format.json { render json: { dlog: partial } }
-        end
-      else
-        @nav_current = nil
-        # @_area = params[:_area]
-        # Now go forth and edit
-        # @_layout = params[:_layout]
-        # dialog_boilerplate('edit', 'at_left')
-        smartrender area: 'at_left'
-      end
+      @nav_current = nil
+      # @_area = params[:_area]
+      # Now go forth and edit
+      # @_layout = params[:_layout]
+      # dialog_boilerplate('edit', 'at_left')
+      smartrender # area: 'at_left'
     else
       @Title = "Cookmark a Recipe"
       @nav_current = :addcookmark

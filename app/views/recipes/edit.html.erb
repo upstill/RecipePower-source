@@ -4,8 +4,8 @@
 	<%= injector_dialog :edit_recipe, (prompt+")").html_safe, noflash: true, dismiss_button: false do %>
 		<%= render "form_edit_injector" %>
 	<% end %>
-<% else %>
-	<%# render "recipes/dialog_edit_recipe" %>
+<% elsif response_service.dialog? %>
 	<%= render "form_edit_at_left", recipe: @recipe %>
-	<%# end %>
+<% else %>
+    <%= render "form_edit_page", recipe: @recipe %>
 <% end %>

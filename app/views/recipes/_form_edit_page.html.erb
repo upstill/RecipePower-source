@@ -2,7 +2,7 @@
 
 <%= form_for @recipe do |f| %>
   <%= form_errors_helper f, @recipe %>
-  <%= pic_field @recipe, :picurl, f, true %>
+  <%= pic_field f, :picurl, :url %>
   <div class="recipe_fields_div">
     <div class="recipe_tags_div" >
        <%= f.label :tag_tokens, "Tags", :class=>"recipe_field_label" -%>

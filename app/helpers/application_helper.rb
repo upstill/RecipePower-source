@@ -47,56 +47,6 @@ module ApplicationHelper
       link_to image_tag("preview.png", title:"Show the recipe in a popup window", class: "preview_button"), rcp.url, target: "_blank", class: "popup", id: "popup#{rcp.id.to_s}"        
   end
 
-  # Declare an image which gets resized to fit upon loading
-  # id -- used to define an id attribute for this picture (all fitpics will have class 'fitPic')
-  # float_ttl -- indicates how to handle an empty URL
-  # selector -- specifies an alternative selector for finding the picture for resizing
-  def page_fitPic(picurl, id = "")
-    idstr = "rcpPic"+id.to_s
-    picurl = "NoPictureOnFile.png" if picurl.blank?
-    # Allowing for the possibility of a data URI
-      begin
-    	  image_tag(picurl,
-          class: "fitPic",
-          id: idstr,
-          onload: 'doFitImage(event);',
-          alt: "Some Image Available")
-      rescue
-    	  image_tag("NoPictureOnFile.png",
-          class: "fitPic",
-          id: idstr,
-          onload: 'doFitImage(event);',
-          alt: "Some Image Available")
-      end
-#    end
-    end
-
-  def page_pic_select_table pageurl
-    piclist = page_piclist pageurl # Crack the page for its image links
-    return "" if piclist.empty?
-    pictab = []
-    # divide piclist into rows of four pics apiece
-    picrows = ""
-    thumbNum = 0
-    # Divide the piclist of URLs into rows of four, accumulating HTML for each row
-    until piclist.empty?
-      picrows << "<tr><td>"+
-          piclist.slice(0..5).collect{ |url|
-            idstr = "thumbnail"+(thumbNum = thumbNum+1).to_s
-            content_tag( :div,
-                         image_tag(url,
-                                   style: "width:100%; height: auto;",
-                                   id: idstr,
-                                   onclick: "RP.pic_picker.make_selection('#{url}')", class: "fitPic", onload: "doFitImage(event);",
-                                   alt: "No Image Available"),
-                         class: "picCell")
-          }.join('</td><td>')+
-          "</td></tr>"
-      piclist = piclist.slice(6..-1) || [] # Returns nil when off the end of the array
-    end
-    "<br>"+content_tag(:table, picrows.html_safe)
-  end
-
   def recipe_list_element_golink_class recipe
     "rcpListGotag"+@recipe.id.to_s    
   end

@@ -50,18 +50,8 @@ class SitesController < ApplicationController
   def edit
     # return if need_login true, true
     @site = Site.find(params[:id].to_i)
-    if params[:pic_picker]
-      # Setting the pic_picker param requests a picture-editing dialog
-      render partial: "shared/pic_picker",
-             locals: {
-                 picurl: @site.logo,
-                 pageurl: @site.sampleURL,
-                 id: @site.id
-             }
-    else
-      @Title = @site.name
-      smartrender area: "floating" 
-    end
+    @Title = @site.name
+    smartrender area: "floating"
   end
 
   # POST /sites
