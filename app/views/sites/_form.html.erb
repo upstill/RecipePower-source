@@ -1,11 +1,6 @@
 <%= simple_form_for(@site) do |f| %>
     <%= modal_body do %>
       <div class="row">
-<!--
-        <div class="col-md-5">
-          <%# pic_field @site, :logo, f, true %>
-        </div>
--->
         <div class="col-md-12">
           <%= f.input :site %>
           <%= f.input :home %>
@@ -16,7 +11,7 @@
           <%= f.input :sample %>
           <%= f.input :description %>
           <%# f.input :logo %>
-          <%= pic_field f, :logo, :sample %>
+          <%= pic_field f, :logo, :sample, home: @site.home %>
           <%= token_input_field f %>
         </div>
       </div>

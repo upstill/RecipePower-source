@@ -2,7 +2,7 @@
   <%= form_errors_helper f, @recipe, false %>
 
 	<div class="left">
-		<%= pic_field f, :picurl, nil, "PickPicture.png" %>
+		<%= pic_field f, :picurl, nil, :fallback_img => "PickPicture.png" %>
 		<% unless @recipe.picurl.blank? %>
 				<p>Prefer another picture?<br />Click one!</p>
 		<% end %>

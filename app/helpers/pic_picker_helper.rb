@@ -2,17 +2,22 @@ module PicPickerHelper
 
   # Show an image that will resize to fit an enclosing div, possibly with a link to an editing dialog
   # We'll need the id of the object, and the name of the field containing the picture's url
-  def pic_field(form, pic_attribute, page_attribute, fallback_img="NoPictureOnFile.png")
+  def pic_field(form, pic_attribute, page_attribute, options={})
     obj = form.object
     picurl = obj.send(pic_attribute)
+    pageurl = page_attribute && obj.send(page_attribute)
+    if home = options[:home]
+      picurl = valid_url(picurl, home) unless picurl.blank?
+      pageurl = valid_url(pageurl, home) if pageurl
+    end
     input_id = obj.class.to_s.downcase + "_" + pic_attribute.to_s
     img_id = "rcpPic#{obj.id}"
     link_id = "golink#{obj.id}"
-    pic_area = page_width_pic picurl, img_id, fallback_img
+    pic_area = page_width_pic picurl, img_id, (options[:fallback_img] || "NoPictureOnFile.png")
     preview = content_tag :div,
                           pic_area+form.text_field(pic_attribute, rel: "jpg,png,gif", hidden: true, class: "hidden_text"),
                           class: "pic_preview"
-    preview << pic_preview_golink(obj.send(page_attribute), picurl, link_id, img_id, input_id) if page_attribute
+    preview << pic_preview_golink(pageurl, picurl, link_id, img_id, input_id) if pageurl
     content_tag :div, preview, class: "edit_recipe_field pic"
   end
 

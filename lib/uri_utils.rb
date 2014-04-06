@@ -8,8 +8,7 @@ end
 
 # Try to make sense out of a given path in the context of another url.
 # Return either a valid URL or nil
-def valid_url(url, path=nil)
-  path ||= ""
+def valid_url(path, url)
   if validate_link(path) && good = test_link(path) # either the original URL or a replacement are good
     return (good.class == String) ? good : path
   elsif url
