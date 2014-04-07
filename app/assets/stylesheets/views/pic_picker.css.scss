@@ -1,4 +1,36 @@
-div.pic_picker {
+div.pic_picker_field {
+  div.pic_picker_link {
+    font:14px arial,sans-serif;
+    font-weight:bold;
+    margin-left:auto;
+    margin-right:auto;
+    text-align:center;
+    margin-top:5px;
+  }
+}
+
+// Portion of a pic_picker which shows an image, accompanied by its url in a hidden field
+div.pic_preview {
+  width:100%;
+  height:auto;
+  margin-left:auto;
+  margin-right:auto;
+  text-align: center;
+  input {
+    display:none;
+  }
+  img {
+    // visibility: hidden;
+    &.loaded {
+      // visibility: visible;
+      // margin-left: auto;
+      // margin-right: auto;
+      // text-align: center;
+    }
+  }
+}
+
+div.pic_picker { // Dialog
 	.preview {
 		margin-bottom: 10px;
 		// outline:#909090 2px solid;

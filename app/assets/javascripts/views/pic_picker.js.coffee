@@ -1,5 +1,11 @@
 RP.pic_picker = RP.pic_picker || {}
 
+RP.pic_picker.arm = (event) ->
+
+###
+	$(dlog).on 'preload', 'a.pic_picker_golink', ->
+###
+
 mylink = () ->
 	$('a.pic_picker_golink')
 
@@ -7,31 +13,31 @@ mydlog = () ->
 	$('div.dialog.pic_picker')
 
 # Prepare the picture picker prior to opening it.
-RP.pic_picker.preload = (parent, callback) ->
-	link = mylink()
-	# Don't load twice
-	return if $(link).hasClass('loading')
-	if !$(link).data('preloaded')
-		if durl = $(link).data('preload')
-			url = RP.build_request durl
-		else
-			url = link[0].href # $(dlog).data "url"
-		$(link).addClass('loading')
-		$.ajax
-			type: "GET",
-			dataType: "json",
-			url: url,
-			error: (jqXHR, textStatus, errorThrown) ->
-				x=2
-			success: (response, statusText, xhr) ->
-				# Pass any assumptions into the response data
-				$(link).removeClass('loading')
-				$(link).data "response", response
-				$(link).click ->
-					event.preventDefault()
-					RP.pic_picker.go parent
-				if jQuery.type(callback) == 'function'
-					callback link
+RP.pic_picker.load = (event) ->
+	if parent = RP.dialog.target_modal event
+		link = mylink()
+		# Don't load twice
+		return if $(link).hasClass('loading')
+		if !$(link).data('preloaded')
+			if durl = $(link).data('preload')
+				url = RP.build_request durl
+			else
+				url = link[0].href # $(dlog).data "url"
+			$(link).addClass('loading')
+			$.ajax
+				type: "GET",
+				dataType: "json",
+				url: url,
+				error: (jqXHR, textStatus, errorThrown) ->
+					x=2
+				success: (response, statusText, xhr) ->
+					# Pass any assumptions into the response data
+					$(link).removeClass('loading')
+					$(link).data "response", response
+					$(link).click ->
+						event.preventDefault()
+						RP.pic_picker.go parent
+					$('.pic_picker_golink', parent).removeClass 'hide'
 
 ###
 	$(dlog).load url, (responseText, textStatus, XMLHttpRequest) ->

@@ -15,10 +15,12 @@ module PicPickerHelper
     link_id = "golink#{obj.id}"
     pic_area = page_width_pic picurl, img_id, (options[:fallback_img] || "NoPictureOnFile.png")
     preview = content_tag :div,
-                          pic_area+form.text_field(pic_attribute, rel: "jpg,png,gif", hidden: true, class: "hidden_text"),
+                          pic_area+form.hidden_field(pic_attribute, rel: "jpg,png,gif", class: "hidden_text"),
                           class: "pic_preview"
-    preview << pic_preview_golink(pageurl, picurl, link_id, img_id, input_id) if pageurl
-    content_tag :div, preview, class: "edit_recipe_field pic"
+    preview << content_tag(:div,
+                           pic_preview_golink(pageurl, picurl, link_id, img_id, input_id),
+                           class: "pic_picker_link") if pageurl
+    preview
   end
 
   # Bare-metal version of the pic preview widget, for use in a template file
@@ -38,7 +40,7 @@ module PicPickerHelper
                 name="#{input_name}"
                 rel="jpg,png,gif"
                 type="text"
-                value="#{img_url}>
+                value="#{img_url}">
         }.html_safe
     content_tag( :div, pic_preview, :class => :pic_preview)+
     content_tag( :div, pic_picker_link, :class => :pic_picker_link)
@@ -50,6 +52,7 @@ module PicPickerHelper
                     %Q{/pic_picker/new?picurl=#{img_url}&pageurl=#{page_url}&golinkid=#{link_id}}, # %Q{/recipes/#{entity_id}/edit?pic_picker=true},
                     id: link_id,
                     class: "hide pic_picker_golink",
+                    onload: "RP.pic_picker.load(event);",
                     data: {
                         img_id: img_id,
                         input_id: input_id,

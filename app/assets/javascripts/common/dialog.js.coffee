@@ -138,9 +138,13 @@ insert_modal = (newdlog, odlog) ->
 		newdlog = document.getElementsByTagName("body")[0].appendChild newdlog
 	newdlog
 
-# Return the dialog element for the current event target
+# Return the dialog element for the current event target, correctly handling the event whether
+# it's a jQuery event or not
 RP.dialog.target_modal = (event) ->
-	elmt = (event || window.event).currentTarget
+	if event && (typeof event.target == "object")
+		elmt = event.target
+	else
+		elmt = (event || window.event).currentTarget
 	if (odlog = $('div.dialog.modal')[0]) && $(elmt, odlog)[0]
 		return odlog
 
@@ -287,6 +291,8 @@ notify = (what, dlog, entity) ->
 
 	# Otherwise, run the default
 	switch what
+		when 'load', 'onload'
+			$('[onload]', dlog).trigger 'load'
 		when "open", "onopen"
 		# onopen handler that sets a Boostrap dialog up to run modally: Trap the
 		# form submission event to give us a chance to get JSON data and inject it into the page

@@ -63,9 +63,6 @@ RP.edit_recipe.onload = (dlog) ->
 	# Only proceed if the dialog has children
 	if $('.edit_recipe > *').length > 0
 		# The pic picker is preloaded onto its link element. Unhide the link when loading is complete
-		$(dlog).on 'preload', 'a.pic_picker_golink', ->
-			RP.pic_picker.preload dlog, ->
-				$('.pic_picker_golink', dlog).removeClass 'hide'
 		rcpid = $('form.edit_recipe', dlog).attr("id").replace /\D*/g, ''
 		if touch_recipe = RP.named_function "RP.rcp_list.touch_recipe"
 			touch_recipe rcpid

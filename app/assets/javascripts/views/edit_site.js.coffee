@@ -55,19 +55,6 @@ RP.edit_site.onload = (dlog) ->
 			fix_buttons dlog
 			event.preventDefault()
 
-		if $('.pic_picker_golink', dlog).length > 0
-			# Get the picture picker in background
-			RP.pic_picker.preload (picdlg) ->
-				$('.pic_picker_golink', dlog).removeClass('hide');
-			
-			# Arm the pic picker to open when clicked
-			$(".pic_picker_golink", dlog).click ->
-				event.preventDefault()
-				return RP.dialog_open RP.pic_picker.dlog()
-		
-		# Fit the site's image into its place
-		# fitImageOnLoad "div.pic_preview img"
-
 jQuery ->
 	if dlog = me()[0]
  		RP.edit_site.onload dlog

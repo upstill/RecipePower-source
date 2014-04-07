@@ -1,42 +1,50 @@
 <%= simple_form_for(@site) do |f| %>
     <%= modal_body do %>
-      <div class="row">
-        <div class="col-md-12">
-          <%= f.input :site %>
-          <%= f.input :home %>
-          <%# if params[:action] != "edit" %>
-          <%= f.input :name %>
-          <%# end %>
-          <%= f.input :subsite %>
-          <%= f.input :sample %>
-          <%= f.input :description %>
-          <%# f.input :logo %>
-          <%= pic_field f, :logo, :sample, home: @site.home %>
-          <%= token_input_field f %>
+        <div class="row">
+          <div class="col-md-4">
+            <div class="pic_picker_field">
+              <%= pic_field f, :logo, :sample, home: @site.home %>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <%= f.input :name %>
+            <%= f.input :description %>
+          </div>
         </div>
-      </div>
-      <div class="row">
-        <div class="col-md-12">
-          Sample Title (raw): <strong><%= crack_sample %></strong><br>
+        <div class="row">
+          <div class="col-md-12">
+            <%= f.input :site %>
+            <%= f.input :home %>
+            <%# if params[:action] != "edit" %>
+            <%# end %>
+            <%= f.input :subsite %>
+            <%= f.input :sample %>
+            <%# f.input :logo %>
+            <%= token_input_field f %>
+          </div>
         </div>
-      </div>
-      <div class="row">
-        <div class="col-md-12">
-          <%= f.input :ttlcut, label: "RegExp to cut out of title" %>
+        <div class="row">
+          <div class="col-md-12">
+            Sample Title (raw): <strong><%= crack_sample %></strong><br>
+          </div>
         </div>
-      </div>
-      <div class="row">
-        <div class="col-md-12">
-          Sample Title (editted): <strong><%= trimmed_sample %></strong><br>
+        <div class="row">
+          <div class="col-md-12">
+            <%= f.input :ttlcut, label: "RegExp to cut out of title" %>
+          </div>
         </div>
-      </div>
-      <%= render("finders", f: f) if permitted_to? :edit, :finders %>
+        <div class="row">
+          <div class="col-md-12">
+            Sample Title (editted): <strong><%= trimmed_sample %></strong><br>
+          </div>
+        </div>
+        <%= render("finders", f: f) if permitted_to? :edit, :finders %>
 
     <% end %>
     <%= modal_footer do %>
-      <%# if ref = @site.referent %>
+        <%# if ref = @site.referent %>
         <%# link_to_modal ref.class.to_s+" "+ref.name, edit_referent_path(ref) %>
-      <%# end %>
-      <%= form_actions f %>
-	<% end %>
+        <%# end %>
+        <%= form_actions f %>
+    <% end %>
 <% end %>
