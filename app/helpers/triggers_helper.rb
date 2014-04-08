@@ -25,7 +25,7 @@ module TriggersHelper
   	  options[:data].merge! selector: selector
 	  end
   	options.merge! remote: true
-  	options[:class] = "dialog-run "+(options[:class] || "")
+  	options[:class] = "dialog-run "+(options[:class] || "") unless options.delete :preload
   	path = assert_query path, modal: true # how: "modal" # , area: "floating"
   	link_to label, path, options
   end
@@ -39,6 +39,7 @@ module TriggersHelper
       options[:data] = { type: "json" }
     end
     options[:class] = "preload "+(options[:class] || "")
+    options[:remote] = true
     link_to label, path, options
   end
 

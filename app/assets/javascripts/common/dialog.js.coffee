@@ -3,10 +3,10 @@ RP.dialog = RP.dialog || {}
 
 # Handle 'dialog-run' remote links
 jQuery ->
-	RP.dialog.arm_links()
 	$(document).on("ajax:beforeSend", '.dialog-run', RP.dialog.beforeSend)
 	$(document).on("ajax:success", '.dialog-run', RP.dialog.success)
 	$(document).on("ajax:error", '.dialog-run', RP.dialog.error)
+	RP.dialog.arm_links()
 
 # Set up all ujs for the dialog and its requirements
 RP.dialog.arm_links = (dlog) ->
@@ -14,6 +14,7 @@ RP.dialog.arm_links = (dlog) ->
 	$('input.cancel', dlog).click RP.dialog.cancel
 	$('a.dialog-cancel-button', dlog).click RP.dialog.cancel
 	$('a.question_section', dlog).click RP.showhide
+	$('a.preload').click()
 	if requires = $(dlog).data 'dialog-requires'
 		for requirement in requires
 			if fcn = RP.named_function "RP." + requirement + ".bind"
@@ -36,20 +37,40 @@ RP.dialog.get_and_go = (event, request, selector) ->
 
 # Before making a dialog request, see if the dialog is preloaded
 RP.dialog.beforeSend = (event, xhr, settings) ->
-	selector = $(this).data 'selector'
-	if selector && (ndlog = $(selector)[0]) # If dialog already loaded, replace the responding dialog
-		RP.dialog.replace_modal event.result = ndlog, RP.dialog.target_modal(event)
+	odlog = RP.dialog.target_modal event
+	if $(this).hasClass 'loading'
+		return true; # Prevent submitting the link twice
+	if (selector = $(this).data 'selector') &&
+		  (ndlog = $(selector)[0]) # If dialog is already loaded, replace the responding dialog
+		RP.dialog.replace_modal event.result = ndlog, odlog
 		RP.state.onAJAXSuccess event
 		return false;
-	else
-		return true;
+	if $(this).hasClass("preload")
+		responseData = $(this).data "response"
+		if ndlog = $(this).data("preloaded") || (responseData && responseData.dlog)
+			RP.dialog.push_modal( ndlog, odlog) # RP.dialog.replace_modal $(this), RP.dialog.target_modal(event)
+			return false;
+		else if responseData
+			RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
+			RP.process_response responseData, odlog
+			RP.state.onAJAXSuccess event
+			$(this).data 'response', null
+			return false;
+		$(this).addClass 'loading'
+	return true; # Proceed normally
 
 # Success handler for fetching dialog from server
 RP.dialog.success = (event, responseData, status, xhr) ->
-	RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
-	RP.process_response responseData, RP.dialog.target_modal(event)
+	if $(this).hasClass 'preload'
+		$(this).data "response", responseData
+		$(this).removeClass('loading').addClass 'loaded'
+		false # i.e., we didn't close the parent dialog
+	else
+		RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
+		RP.process_response responseData, RP.dialog.target_modal(event)
 
 RP.dialog.error = (event, jqXHR, status, error) ->
+	$(this).hasClass('preload').removeClass('loading')
 	responseData = RP.post_error jqXHR
 	RP.process_response responseData, RP.dialog.target_modal(event)
 
@@ -141,10 +162,7 @@ insert_modal = (newdlog, odlog) ->
 # Return the dialog element for the current event target, correctly handling the event whether
 # it's a jQuery event or not
 RP.dialog.target_modal = (event) ->
-	if event && (typeof event.target == "object")
-		elmt = event.target
-	else
-		elmt = (event || window.event).currentTarget
+	elmt = RP.event_target event
 	if (odlog = $('div.dialog.modal')[0]) && $(elmt, odlog)[0]
 		return odlog
 

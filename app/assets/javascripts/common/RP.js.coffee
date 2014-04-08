@@ -83,6 +83,12 @@ RP.getgo = (request, addr) ->
 			,"Cookmark", addr
 ###
 
+RP.event_target = (event) ->
+	if event && (typeof event.target == "object")
+		return event.target
+	else
+		return (event || window.event).currentTarget
+
 # get the function associated with a given string, even if the string refers to elements of nested structures.
 RP.named_function = (str) ->
 	if(str) 

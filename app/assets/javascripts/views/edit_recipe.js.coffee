@@ -25,11 +25,14 @@ RP.edit_recipe.go = (evt, xhr, settings) ->
 		# statustarget = '<option value="'+rcpdata.rcpStatus+'"'
 		# statusrepl = statustarget + ' selected="selected"'
 		dlgsource = templ.string.
-		replace(/%%rcpID%%/g, rcpdata.rcpid).
+		replace(/%(25)?%(25)?rcpID%(25)?%(25)?/g, rcpdata.rcpid). # May have been URI encoded
 		replace(/%%rcpTitle%%/g, rcpdata.rcptitle).
 		replace(/%%rcpPicSafeURL%%/g, rcpdata.rcppicurl || "/assets/NoPictureOnFile.png" ).
 		replace(/%%rcpPicURL%%/g, rcpdata.rcppicurl || "" ).
 		replace(/%%rcpURL%%/g, rcpdata.rcpurl).
+		replace(/%25%25rcpPicSafeURL%25%25/g, encodeURIComponent(rcpdata.rcppicurl || "/assets/NoPictureOnFile.png" )).
+		replace(/%25%25rcpPicURL%25%25/g, encodeURIComponent(rcpdata.rcppicurl || "")).
+		replace(/%25%25rcpURL%25%25/g, encodeURIComponent(rcpdata.rcpurl)).
 		replace(/%%rcpPrivate%%/g, rcpdata.rcpprivate).
 		replace(/%%rcpComment%%/g, rcpdata.rcpcomment).
 		replace(/%%rcpStatus%%/g, rcpdata.rcpstatus).

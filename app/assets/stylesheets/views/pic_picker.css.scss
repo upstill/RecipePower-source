@@ -5,7 +5,13 @@ div.pic_picker_field {
     margin-left:auto;
     margin-right:auto;
     text-align:center;
-    margin-top:5px;
+    a.pic_picker_golink {
+      margin-top:10px;
+      visibility: hidden;
+      &.loaded {
+        visibility: visible;
+      }
+    }
   }
 }
 

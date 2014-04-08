@@ -12,45 +12,6 @@ mylink = () ->
 mydlog = () ->
 	$('div.dialog.pic_picker')
 
-# Prepare the picture picker prior to opening it.
-RP.pic_picker.load = (event) ->
-	if parent = RP.dialog.target_modal event
-		link = mylink()
-		# Don't load twice
-		return if $(link).hasClass('loading')
-		if !$(link).data('preloaded')
-			if durl = $(link).data('preload')
-				url = RP.build_request durl
-			else
-				url = link[0].href # $(dlog).data "url"
-			$(link).addClass('loading')
-			$.ajax
-				type: "GET",
-				dataType: "json",
-				url: url,
-				error: (jqXHR, textStatus, errorThrown) ->
-					x=2
-				success: (response, statusText, xhr) ->
-					# Pass any assumptions into the response data
-					$(link).removeClass('loading')
-					$(link).data "response", response
-					$(link).click ->
-						event.preventDefault()
-						RP.pic_picker.go parent
-					$('.pic_picker_golink', parent).removeClass 'hide'
-
-###
-	$(dlog).load url, (responseText, textStatus, XMLHttpRequest) ->
-		$(dlog).removeClass('loading')
-###
-
-RP.pic_picker.go = (odlog) ->
-	# Arm the pic picker to open when clicked
-	# RP.dialog.close_modal odlog
-	link = mylink()
-	response = $(link).data "response"
-	RP.dialog.push_modal( ndlog, odlog) if ndlog = $(link).data("preloaded") || (response && response.dlog)
-
 # Close with save
 RP.pic_picker.close = (dlog) ->
 	# Transfer the logo URL from the dialog's text input to the page text input
