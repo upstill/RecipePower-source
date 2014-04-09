@@ -41,23 +41,31 @@ RP.pic_picker.open = (dlog) ->
 		url = clickee.getAttribute 'src'
 		$('input.icon_picker').attr "value", url
 		previewImg 'input.icon_picker', 'div.preview img', ''
+	$('img.pic_pickee').each (index, img) ->
+		if img.complete && (img.naturalWidth > 100 && img.naturalHeight > 100)
+			$(img).show()
+		true
+	$('div#masonry-pic-pickees', dlog).masonry
+		columnWidth: 100,
+		gutter: 20,
+		itemSelector: '.pic_pickee'
+	$('img.pic_pickee').load (evt) ->
+		if this.complete && (this.naturalWidth > 100 && this.naturalHeight > 100)
+			$(this).show()
+			$('div#masonry-pic-pickees', dlog).masonry('appended', this)
 	# imagesLoaded fires when all the images are loaded
-	imagesLoaded 'div#masonry-pic-pickees img.pic_pickee', (instance) ->
-		$('img.pic_pickee').each (index, img) ->
-			if img.complete && (this.naturalWidth > 100 && this.naturalHeight > 100)
+	imagesLoaded 'div#masonry-pic-pickees this.pic_pickee', (instance) ->
+		# Just in case: when all images are loaded, check for qualifying images that are still hidden
+		$(':hidden', dlog).each (index, img) ->
+			if (img.tagName == "IMG) && img.complete && (img.naturalWidth > 100 && img.naturalHeight > 100)
 				$(img).show()
-		$('div#masonry-pic-pickees', dlog).masonry
-			columnWidth: 100, # ( containerWidth ) ->
-			#	containerWidth / 5
-			gutter: 20,
-			# isFitWidth: true,
-			itemSelector: '.pic_pickee'
+				$('div#masonry-pic-pickees', dlog).masonry('appended', img)
 	return true
 
 # Handle a click on a thumbnail image by passing the URL on to the
 # associated input field
 RP.pic_picker.make_selection = (url) ->
 	$('input.icon_picker').attr "value", url
-	previewImg 'input.icon_picker', 'div.preview img', ''
-	# imagePreviewWidgetSet 'input.icon_picker', 'div.preview img', ''
+	previewImg 'input.icon_picker', 'div.preview this', ''
+	# imagePreviewWidgetSet 'input.icon_picker', 'div.preview this', ''
 

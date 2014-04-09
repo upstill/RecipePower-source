@@ -68,11 +68,11 @@ module PicPickerHelper
                   style: "width:100px; height: auto; margin:10px; display: none;",
                   class: "pic_pickee",
                   id: "thumbnail#{thumbNum += 1}",
-                  # onload: "RP.pic_picker.imgLoaded(event);",
                   alt: "No Image Available")
       }.join(' ').html_safe
     end
     content_tag :div,
+                # %q{<h4 id="wait" style="margin-left: 20px;">Picture selection arriving shortly...</h4>}.html_safe+
                 content_tag(:div, picrows.html_safe, id: "masonry-pic-pickees", style: "height: auto;"),
                 class: "row"
   end
