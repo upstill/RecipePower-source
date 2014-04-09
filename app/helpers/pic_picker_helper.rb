@@ -50,18 +50,10 @@ module PicPickerHelper
   def pic_preview_golink page_url, img_url, link_id, img_id, input_id
     queryparams = { picurl: img_url, golinkid: link_id }
     queryparams[:pageurl] = page_url if page_url
-    link_to_preload page_url ? "Pick Picture" : "Get Picture from Web",
-                    pic_picker_new_path(queryparams), #  %Q{/pic_picker/new?picurl=#{img_url}&pageurl=#{page_url}&golinkid=#{link_id}}, # %Q{/recipes/#{entity_id}/edit?pic_picker=true},
+    link_to_modal page_url ? "Pick Picture" : "Get Picture from Web",
+                    pic_picker_new_path(queryparams),
                     id: link_id,
-                    class: "dialog-run pic_picker_golink",
-                    data: {
-                        img_id: img_id,
-                        input_id: input_id,
-                        preload: {
-                            request: pic_picker_new_path,
-                            querydata: queryparams
-                        }
-                    }
+                    class: "preload pic_picker_golink"
   end
 
   def pic_picker_select_list pageurl
@@ -71,7 +63,7 @@ module PicPickerHelper
     picrows, thumbNum = "", 0
     # Divide the piclist of URLs into rows of four, accumulating HTML for each row
     until piclist.empty?
-      picrow = piclist.slice!(0..11).collect { |url|
+      picrows = piclist.slice!(0..11).collect { |url|
         content_tag(:div,
                     image_tag(url,
                               style: "width:100%; height: auto;",

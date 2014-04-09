@@ -25,22 +25,9 @@ module TriggersHelper
   	  options[:data].merge! selector: selector
 	  end
   	options.merge! remote: true
-  	options[:class] = "dialog-run "+(options[:class] || "") unless options.delete :preload
+  	options[:class] = "dialog-run "+(options[:class] || "")
   	path = assert_query path, modal: true # how: "modal" # , area: "floating"
   	link_to label, path, options
-  end
-
-  # Declare a link which preloads its result (a JSON query) and stores it in its data
-  def link_to_preload label, path_or_object, options={}
-    path = url_for(path_or_object)
-    if options[:data]
-      options[:data].merge! type: "json"
-    else
-      options[:data] = { type: "json" }
-    end
-    options[:class] = "preload "+(options[:class] || "")
-    options[:remote] = true
-    link_to label, path, options
   end
 
   def link_to_show object, label, options={}
