@@ -36,7 +36,37 @@ RP.pic_picker.open = (dlog) ->
 	$('a.image_preview_button').click ->
 		previewImg('input.icon_picker', 'div.preview img', '')
 		# imagePreviewWidgetSet($('input.icon_picker').attr("value"), 'div.preview img', '')
+	$('img.pic_pickee').click (event) ->
+		clickee = RP.event_target event
+		url = clickee.getAttribute 'src'
+		$('input.icon_picker').attr "value", url
+		previewImg 'input.icon_picker', 'div.preview img', ''
+	$('div#masonry-pic-pickees', dlog).masonry
+		columnWidth: 100, # ( containerWidth ) ->
+		#	containerWidth / 5
+		gutter: 20,
+		# isFitWidth: true,
+		itemSelector: '.pic_pickee'
+	$('img.pic_pickee').on 'load', (event) ->
+		if this.naturalWidth > 100 && this.naturalHeight > 100
+			$(this).show()
+			$('div#masonry-pic-pickees', dlog).masonry()
+	# Now show/hide the already-loaded images
+	$('img.pic_pickee').each (index, img) ->
+		if img.complete && (this.naturalWidth > 100 && this.naturalHeight > 100)
+			$(img).show()
+			$('div#masonry-pic-pickees', dlog).masonry()
 	return true
+
+###
+RP.pic_picker.imgLoaded = (event) ->
+	img = RP.event_target event
+	if img.naturalWidth < 100 || img.naturalHeight < 100
+		$(img).hide()
+	else
+		$(img).show()
+	true
+###
 
 # Handle a click on a thumbnail image by passing the URL on to the
 # associated input field

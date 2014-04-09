@@ -59,23 +59,22 @@ module PicPickerHelper
   def pic_picker_select_list pageurl
     piclist = page_piclist pageurl # Crack the page for its image links
     return "" if piclist.empty?
-    # divide piclist into rows of six pics apiece
     picrows, thumbNum = "", 0
-    # Divide the piclist of URLs into rows of four, accumulating HTML for each row
+    # Divide the piclist of URLs into 12 columns
+    column_length = (piclist.count-1)/12
     until piclist.empty?
-      picrows = piclist.slice!(0..11).collect { |url|
-        content_tag(:div,
-                    image_tag(url,
-                              style: "width:100%; height: auto;",
-                              id: "thumbnail#{thumbNum += 1}",
-                              onclick: "RP.pic_picker.make_selection('#{url}')", # class: "fitPic", onload: "doFitImage(event);",
-                              alt: "No Image Available"),
-                    class: "col-xs-6 col-sm-4 col-md-3 col-lg-2",
-                    style: "margin-bottom: 10px")
-      }.join(' ')
-      picrows << content_tag(:div, picrow.html_safe, class: "row")
+      picrows << piclist.slice!(0..column_length).collect { |url|
+        image_tag(url,
+                  style: "width:100px; height: auto; margin:10px; display: none;",
+                  class: "pic_pickee",
+                  id: "thumbnail#{thumbNum += 1}",
+                  # onload: "RP.pic_picker.imgLoaded(event);",
+                  alt: "No Image Available")
+      }.join(' ').html_safe
     end
-    picrows
+    content_tag :div,
+                content_tag(:div, picrows.html_safe, id: "masonry-pic-pickees", style: "height: auto;"),
+                class: "row"
   end
 
   # Declare an image which gets resized to fit upon loading
