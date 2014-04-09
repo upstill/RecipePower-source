@@ -65,6 +65,17 @@ function previewImg(inputsel, imagesel, formsel) {
 	if($(imageElmt).attr("src") != url) {
         $(imageElmt).removeClass("loaded");
         $(imageElmt).attr("src", url )
+        imgLoad = imagesLoaded(imageElmt);
+        imgLoad.on( 'progress', function (instance, image) {
+            if(image.isLoaded) {
+                $('.image_failure_advisory').hide();
+                $('.image_success_advisory').show();
+           } else {
+                $('.image_failure_advisory').show();
+                $('.image_success_advisory').hide();
+                image.img.src = "/assets/BadPicURL.png"
+            }
+        })
 		// fitImage(imageset[0])
 	}
   if(typeof event === 'object')

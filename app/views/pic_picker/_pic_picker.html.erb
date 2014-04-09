@@ -15,13 +15,17 @@ Expecting the following local variables:
         <div class="col-xs-12 col-sm-6 col-md-7">
           <span class="prompt">
             <%= pic_select_list.empty? ?
-                      "It doen't look like we can extract pictures from the recipe, but you can paste a web address into the text box below." :
-                      "Click on a thumbnail to grab it.<br><br>Or, type or paste the web address of an image below.".html_safe
-          %></span>
-          <%= "<br>(Alternatively, you can visit the recipe's webpage, hit the Cookmark button, and pick a picture from there.)".html_safe if pic_select_list.empty? %>
+                        "It doen't look like we can extract pictures from the recipe, but you can paste a web address into the text box below." :
+                        "Click on a thumbnail to grab it.<br><br>Or, type or paste the web address of an image below.".html_safe
+            %></span>
+          <% if pic_select_list.empty? %>
+              <br>(Alternatively, you can visit the recipe's webpage, hit the Cookmark button, and pick a picture from
+              there.)
+          <% end %>
+          <apan class="prompt image_failure_advisory" style="display: none;"><br><br><br>Sorry, but that address doesn't lead to an image. Can you point your browser at it?</apan>
+          <apan class="prompt image_success_advisory" style="display: none;"><br><br><br>Click Save to use this image.</apan>
         </div>
-      </div>
-      <div class="row">
+        <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12">
             <input type="text"
                    rel="jpg,png,gif"

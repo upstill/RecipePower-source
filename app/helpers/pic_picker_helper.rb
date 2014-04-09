@@ -62,15 +62,13 @@ module PicPickerHelper
     thumbNum = 0
     pics = piclist.collect { |url|
         image_tag(url,
-                  style: "width:100px; height: auto; margin:10px; display: none;",
+                  style: "width:120px; height: auto; margin:10px; display: none;",
                   class: "pic_pickee",
                   id: "thumbnail#{thumbNum += 1}",
                   alt: "No Image Available")
     }.join(' ').html_safe
-    # %q{<div class="row"><div class="col-md-12">}.html_safe +
+    %q{<div class="row"><div class="col-md-12">}.html_safe + pics + "</div></div>".html_safe
     # content_tag(:div, pics, id: "masonry-pic-pickees")
-    # "</div></div>".html_safe
-    pics
   end
 
   # Declare an image which gets resized to fit upon loading
