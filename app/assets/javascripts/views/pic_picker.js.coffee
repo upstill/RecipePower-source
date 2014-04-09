@@ -22,7 +22,7 @@ RP.pic_picker.close = (dlog) ->
 	# The golink points to the original image and/or input fields
 	linkdata = $(targetGolinkSelector).data()
 	url = $("input.icon_picker").attr("value")
-	imagePreviewWidgetSet linkdata.imgId, linkdata.inputId, url
+	imagePreviewWidgetSet linkdata.thisId, linkdata.inputId, url
 
 	# Finally, clone the dialog and save the clone in the link for later
 	clone = dlog.cloneNode true
@@ -42,25 +42,30 @@ RP.pic_picker.open = (dlog) ->
 		$('input.icon_picker').attr "value", url
 		previewImg 'input.icon_picker', 'div.preview img', ''
 	$('img.pic_pickee').each (index, img) ->
-		if img.complete && (img.naturalWidth > 100 && img.naturalHeight > 100)
-			$(img).show()
+		check_image img
 		true
+	###
 	$('div#masonry-pic-pickees', dlog).masonry
 		columnWidth: 100,
 		gutter: 20,
-		itemSelector: '.pic_pickee'
+		itemSelector: '.pic_pickee_loaded'
+	###
 	$('img.pic_pickee').load (evt) ->
-		if this.complete && (this.naturalWidth > 100 && this.naturalHeight > 100)
-			$(this).show()
-			$('div#masonry-pic-pickees', dlog).masonry('appended', this)
+		check_image this #, $('div#masonry-pic-pickees', dlog)
 	# imagesLoaded fires when all the images are loaded
-	imagesLoaded 'div#masonry-pic-pickees this.pic_pickee', (instance) ->
+	imagesLoaded 'img.pic_pickee', (instance) ->
 		# Just in case: when all images are loaded, check for qualifying images that are still hidden
 		$(':hidden', dlog).each (index, img) ->
-			if (img.tagName == "IMG) && img.complete && (img.naturalWidth > 100 && img.naturalHeight > 100)
-				$(img).show()
-				$('div#masonry-pic-pickees', dlog).masonry('appended', img)
+			check_image img #, $('div#masonry-pic-pickees', dlog)
 	return true
+
+check_image = (img, masonrySet) ->
+	# We only allow images that are over 100 pixels in size, with a maximum A/R of 3
+	if (img.tagName == "IMG") && img.complete && (img.naturalWidth > 100 && img.naturalHeight > 100 && img.naturalHeight > (img.naturalWidth/3))
+		console.log "img "+$(img).attr("id")+": "+img.naturalWidth+" x "+img.naturalHeight
+		$(img).show()
+		$(img).addClass "pic_pickee_loaded"
+		masonrySet.masonry('appended', img) if masonrySet
 
 # Handle a click on a thumbnail image by passing the URL on to the
 # associated input field

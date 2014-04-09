@@ -59,22 +59,18 @@ module PicPickerHelper
   def pic_picker_select_list pageurl
     piclist = page_piclist pageurl # Crack the page for its image links
     return "" if piclist.empty?
-    picrows, thumbNum = "", 0
-    # Divide the piclist of URLs into 12 columns
-    column_length = (piclist.count-1)/12
-    until piclist.empty?
-      picrows << piclist.slice!(0..column_length).collect { |url|
+    thumbNum = 0
+    pics = piclist.collect { |url|
         image_tag(url,
                   style: "width:100px; height: auto; margin:10px; display: none;",
                   class: "pic_pickee",
                   id: "thumbnail#{thumbNum += 1}",
                   alt: "No Image Available")
-      }.join(' ').html_safe
-    end
-    content_tag :div,
-                # %q{<h4 id="wait" style="margin-left: 20px;">Picture selection arriving shortly...</h4>}.html_safe+
-                content_tag(:div, picrows.html_safe, id: "masonry-pic-pickees", style: "height: auto;"),
-                class: "row"
+    }.join(' ').html_safe
+    # %q{<div class="row"><div class="col-md-12">}.html_safe +
+    # content_tag(:div, pics, id: "masonry-pic-pickees")
+    # "</div></div>".html_safe
+    pics
   end
 
   # Declare an image which gets resized to fit upon loading
