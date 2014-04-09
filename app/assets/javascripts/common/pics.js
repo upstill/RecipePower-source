@@ -68,11 +68,9 @@ function previewImg(inputsel, imagesel, formsel) {
         imgLoad = imagesLoaded(imageElmt);
         imgLoad.on( 'progress', function (instance, image) {
             if(image.isLoaded) {
-                $('.image_failure_advisory').hide();
-                $('.image_success_advisory').show();
+                RP.notifications.post("Click Save to use this image.", "flash-alert")
            } else {
-                $('.image_failure_advisory').show();
-                $('.image_success_advisory').hide();
+                RP.notifications.post("Sorry, but that address doesn't lead to an image. Does it appear if you point your browser at it?", "flash-error")
                 image.img.src = "/assets/BadPicURL.png"
             }
         })
