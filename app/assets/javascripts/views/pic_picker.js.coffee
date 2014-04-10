@@ -1,8 +1,8 @@
-RP.pic_picker = RP.pic_picker || {}
-
-RP.pic_picker.arm = (event) ->
+RP.pic_picker ||= {}
 
 ###
+RP.pic_picker.arm = (event) ->
+
 	$(dlog).on 'preload', 'a.pic_picker_golink', ->
 ###
 
@@ -36,7 +36,7 @@ RP.pic_picker.open = (dlog) ->
 	$('div.preview img').on 'ready', (event) ->
 		if $(this).hasClass 'bogus'
 			$('a.dialog-submit-button', dlog).addClass 'disabled'
-			RP.notifications.post "Sorry, but that address doesn't lead to an image. Does it appear if you point your browser at it?", "flash-error"
+			RP.notifications.post "Sorry, but that address doesn't lead to an image. If you point your browser at it, does the image load?", "flash-error"
 		else
 			$('a.dialog-submit-button', dlog).removeClass 'disabled'
 			RP.notifications.post "Click Save to use this image.", "flash-alert"
@@ -51,33 +51,23 @@ RP.pic_picker.open = (dlog) ->
 	$('img.pic_pickee').each (index, img) ->
 		check_image img
 		true
-	###
-	$('div#masonry-pic-pickees', dlog).masonry
-		columnWidth: 100,
-		gutter: 20,
-		itemSelector: '.pic_pickee_loaded'
-	###
 	$('img.pic_pickee').load (evt) ->
-		check_image this #, $('div#masonry-pic-pickees', dlog)
+		check_image this
 	# imagesLoaded fires when all the images are loaded
 	imagesLoaded 'img.pic_pickee', (instance) ->
 		# Just in case: when all images are loaded, check for qualifying images that are still hidden
 		$(':hidden', dlog).each (index, img) ->
-			check_image img #, $('div#masonry-pic-pickees', dlog)
+			check_image img
 	return true
 
-check_image = (img, masonrySet) ->
+check_image = (img) ->
 	# We only allow images that are over 100 pixels in size, with a maximum A/R of 3
 	if (img.tagName == "IMG") && img.complete && (img.naturalWidth > 100 && img.naturalHeight > 100 && img.naturalHeight > (img.naturalWidth/3))
 		console.log "img "+$(img).attr("id")+": "+img.naturalWidth+" x "+img.naturalHeight
 		$(img).show()
-		$(img).addClass "pic_pickee_loaded"
-		masonrySet.masonry('appended', img) if masonrySet
 
 # Handle a click on a thumbnail image by passing the URL on to the
 # associated input field
 RP.pic_picker.make_selection = (url) ->
-	$('input.icon_picker').attr "value", url
 	previewImg 'input.icon_picker', 'div.preview this', ''
-	# imagePreviewWidgetSet 'input.icon_picker', 'div.preview this', ''
 
