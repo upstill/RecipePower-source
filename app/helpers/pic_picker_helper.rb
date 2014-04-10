@@ -13,7 +13,7 @@ module PicPickerHelper
     input_id = obj.class.to_s.downcase + "_" + pic_attribute.to_s
     img_id = "rcpPic#{obj.id}"
     link_id = "golink#{obj.id}"
-    pic_area = page_width_pic picurl, img_id, (options[:fallback_img] || "NoPictureOnFile.png")
+    pic_area = page_width_pic picurl, img_id, (options[:fallback_img] || "/assets/NoPictureOnFile.png")
     preview = content_tag :div,
                           pic_area+form.hidden_field(pic_attribute, rel: "jpg,png,gif", class: "hidden_text"),
                           class: "pic_preview"
@@ -78,14 +78,14 @@ module PicPickerHelper
   # selector -- specifies an alternative selector for finding the picture for resizing
   def page_fitPic(picurl, id = "", placeholder_image = "NoPictureOnFile.png")
     idstr = "rcpPic"+id.to_s
-    picurl = "NoPictureOnFile.png" if picurl.blank?
     # Allowing for the possibility of a data URI
     begin
-      image_tag(picurl,
+      image_tag(picurl || "",
                 class: "fitPic",
                 id: idstr,
                 onload: 'doFitImage(event);',
-                alt: "Some Image Available")
+                alt: "Some Image Available",
+		data: { fallbackurl: placeholder_image })
     rescue
       image_tag(placeholder_image,
                 class: "fitPic",
@@ -96,18 +96,19 @@ module PicPickerHelper
   end
 
   # Same protocol, only image will be scaled to 100% of the width of its parent, with adjustable height
-  def page_width_pic(picurl, idstr="rcpPic", placeholder_image = "NoPictureOnFile.png")
+  def page_width_pic(picurl, idstr="rcpPic", placeholder_image = "/assets/NoPictureOnFile.png")
     logger.debug "page_width_pic placing #{picurl.blank? ? placeholder_image : picurl.truncate(40)}"
-    picurl = placeholder_image if picurl.blank?
     # Allowing for the possibility of a data URI
     #    if picurl.match(/^data:image/)
     #      %Q{<img alt="Some Image Available" class="thumbnail200" id="#{idstr}" src="#{picurl}" >}.html_safe
     #    else
     begin
-      image_tag(picurl,
+      image_tag(picurl || "",
                 style: "width: 100%; height: auto",
                 id: idstr,
-                alt: "Some Image Available")
+                onload: "RP.validate_img(event);",
+                alt: "Some Image Available",
+		data: { fallbackurl: placeholder_image })
     rescue
       image_tag(placeholder_image,
                 style: "width: 100%; height: auto",
