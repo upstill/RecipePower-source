@@ -22,7 +22,7 @@ RP.pic_picker.close = (dlog) ->
 	# The golink points to the original image and/or input fields
 	linkdata = $(targetGolinkSelector).data()
 	url = $("input.icon_picker").attr("value")
-	imagePreviewWidgetSet linkdata.thisId, linkdata.inputId, url
+	imagePreviewWidgetSet linkdata.imageid, linkdata.inputid, url
 
 	# Finally, clone the dialog and save the clone in the link for later
 	clone = dlog.cloneNode true
@@ -33,6 +33,13 @@ RP.pic_picker.close = (dlog) ->
 # -- the data of the link must contain urls for each image, separated by ';'
 # formerly PicPicker
 RP.pic_picker.open = (dlog) ->
+	$('div.preview img').on 'ready', (event) ->
+		if $(this).hasClass 'bogus'
+			$('a.dialog-submit-button', dlog).addClass 'disabled'
+			RP.notifications.post "Sorry, but that address doesn't lead to an image. Does it appear if you point your browser at it?", "flash-error"
+		else
+			$('a.dialog-submit-button', dlog).removeClass 'disabled'
+			RP.notifications.post "Click Save to use this image.", "flash-alert"
 	$('a.image_preview_button').click ->
 		previewImg('input.icon_picker', 'div.preview img', '')
 		# imagePreviewWidgetSet($('input.icon_picker').attr("value"), 'div.preview img', '')

@@ -2,7 +2,7 @@ module PicPickerHelper
 
   # Show an image that will resize to fit an enclosing div, possibly with a link to an editing dialog
   # We'll need the id of the object, and the name of the field containing the picture's url
-  def pic_field(form, pic_attribute, page_attribute, options={})
+  def pic_field(form, pic_attribute, page_attribute=nil, options={})
     obj = form.object
     picurl = obj.send(pic_attribute)
     pageurl = page_attribute && obj.send(page_attribute)
@@ -19,7 +19,7 @@ module PicPickerHelper
                           class: "pic_preview"
     preview << content_tag(:div,
                            pic_preview_golink(pageurl, picurl, link_id, img_id, input_id),
-                           class: "pic_picker_link") if pageurl
+                           class: "pic_picker_link")
     preview
   end
 
@@ -53,7 +53,8 @@ module PicPickerHelper
     link_to_modal page_url ? "Pick Picture" : "Get Picture from Web",
                     pic_picker_new_path(queryparams),
                     id: link_id,
-                    class: "preload pic_picker_golink"
+                    class: "preload pic_picker_golink",
+                    data: { inputid: input_id, imageid: img_id }
   end
 
   def pic_picker_select_list pageurl

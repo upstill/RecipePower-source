@@ -70,7 +70,7 @@ RP.dialog.success = (event, responseData, status, xhr) ->
 		RP.process_response responseData, RP.dialog.target_modal(event)
 
 RP.dialog.error = (event, jqXHR, status, error) ->
-	$(this).hasClass('preload').removeClass('loading')
+	$('.preload', this).removeClass('loading')
 	responseData = RP.post_error jqXHR
 	RP.process_response responseData, RP.dialog.target_modal(event)
 

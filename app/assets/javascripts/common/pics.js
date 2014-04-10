@@ -53,26 +53,30 @@ function fitImage(img) {
 // Copy an input URL to both the preview image and the (hidden) form field
 function previewImg(inputsel, imagesel, formsel) {
 	// Copy the url from the input field to the form field
-  var inputElmt = $(inputsel)[0];
-  var url = $(inputElmt).attr("value");
-  if (url != $(formsel).attr("value"))
-		$(formsel).attr("value", url )
+  var url = $(inputsel).attr("value");
 
     // If not specified by the selector, the preview image is a sibling of the input element
-	var imageElmt = $(imagesel)[0] || $('img', inputElmt.parentElement)[0];
+	// var imageElmt = $(imagesel)[0] || $('img', inputElmt.parentElement)[0];
 	// For display purposes we use a no-picture picture
-	if (url.length < 1) url = "/assets/NoPictureOnFile.png"
+    set_image_safely(imagesel, url, formsel, "/assets/NoPictureOnFile.png");
+    return false;
+}
+
+function set_image_safely(imageElmt, url, formsel, fallback_url) {
+    if(url.length < 1) url = fallback_url
 	if($(imageElmt).attr("src") != url) {
-        $(imageElmt).removeClass("loaded");
-        $(imageElmt).attr("src", url )
+        $(imageElmt).removeClass("loaded").attr("src", url).data("formsel", formsel)
         imgLoad = imagesLoaded(imageElmt);
         imgLoad.on( 'progress', function (instance, image) {
             if(image.isLoaded) {
-                RP.notifications.post("Click Save to use this image.", "flash-alert")
+                var formsel = $(image.img).data("formsel")
+                $(image.img).removeClass("bogus").addClass("loaded")
+                $(formsel).attr("value", url )
            } else {
-                RP.notifications.post("Sorry, but that address doesn't lead to an image. Does it appear if you point your browser at it?", "flash-error")
+                $(image.img).addClass("bogus").removeClass("loaded")
                 image.img.src = "/assets/BadPicURL.png"
-            }
+           }
+           $(image.img).trigger('ready')
         })
 		// fitImage(imageset[0])
 	}
@@ -81,10 +85,11 @@ function previewImg(inputsel, imagesel, formsel) {
   return false;
 }
 
-// Place an image URL into both an input field and an accompanying preview image
+// Place an image URL into both a preview image  and an accompanying input field, if any
 // The img element is the first sibling of the input by default,
 // but may be identified with an id stored in the 'imageid' data field of the input element
 function imagePreviewWidgetSet(imgID, inputID, url) {
+/*
     var inputElmt = $("input#"+inputID)[0];
     if (inputElmt && $(inputElmt).attr("value") != url) $(inputElmt).attr("value", url);
 
@@ -93,5 +98,8 @@ function imagePreviewWidgetSet(imgID, inputID, url) {
     // The image element is either the first sibling of the input, or given by an 'imageselector' data attribute
     var imageElmt = (imgID && $("img#"+imgID)[0]) || (inputElmt && $('img', inputElmt.parentElement)[0]);
     if (imageElmt && ($(imageElmt).attr("src") != url)) $(imageElmt).removeClass("loaded").attr("src", url)
+    return false;
+*/
+    set_image_safely("img#"+imgID, url, "input#"+inputID, "/assets/NoPictureOnFile.png")
     return false;
 }
