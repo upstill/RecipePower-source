@@ -104,6 +104,7 @@ RP.validate_img = function (event) {
         if($(img).attr('src').length < 1) {
             // Empty URL: not a bad URL but still needs standin
             img.src = $(img).data('fallbackurl') || "/assets/NoPictureOnFile.png"
+            $(img).addClass('bogus')
         }
     } else { // Loaded but not complete => error
         if(!$(img).hasClass("bogus")) {   // Replace url with invalid-image url if this is the first try
