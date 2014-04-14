@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140325203628) do
+ActiveRecord::Schema.define(version: 20140414032344) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -201,6 +201,7 @@ ActiveRecord::Schema.define(version: 20140325203628) do
     t.datetime "updated_at",     null: false
     t.integer  "reference_type"
     t.string   "url"
+    t.integer  "thumbnail_id"
   end
 
   create_table "referent_relations", force: true do |t|
@@ -280,8 +281,9 @@ ActiveRecord::Schema.define(version: 20140325203628) do
     t.datetime "updated_at"
     t.string   "ttlcut"
     t.integer  "referent_id"
-    t.boolean  "reviewed",    default: false
+    t.boolean  "reviewed",     default: false
     t.text     "description"
+    t.integer  "thumbnail_id"
   end
 
   create_table "tag_owners", force: true do |t|

@@ -11,9 +11,9 @@ class Recipe < ActiveRecord::Base
   include Voteable
   include Picable
 
-  picable(:picurl)
+  picable(:picurl, :url)
 
-  attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :tagpane, :href, :description,
+  attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href, :description,
                   :misc_tag_tokens, :collection_tokens, :channel_tokens
   after_save :save_ref
 

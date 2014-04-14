@@ -4,48 +4,60 @@ module Picable
 
     module ClassMethods
 
-      def picable(attribute, sample=nil)
+      def picable(attribute, home)
         @pic_attrib_name = attribute
-        @sample_name = sample
+        @home_attrib_name = home
       end
 
       def pic_attrib_name
         @pic_attrib_name
       end
 
+      def home_attrib_name
+        @home_attrib_name
+      end
     end
 
-    def self.included(base)
-      base.extend(ClassMethods)
+    included do
+      attr_accessible :thumbnail
+
+      # An image reference has a local thumbnail for cached image data
+      belongs_to :thumbnail, :autosave => true
+
+      # Before saving the recipe, take the chance to generate a thumbnail (in background)
+      before_save :check_thumbnail
     end
 
-    attr_accessible :thumbnail
+    protected
 
-    # An image reference has a local thumbnail for cached image data
-    belongs_to :thumbnail, :autosave => true
-
-    # Before saving the recipe, take the chance to generate a thumbnail (in background)
-    before_save :check_thumbnail
-
-    def picurl
+    def private_picurl
       self.read_attribute self.class.pic_attrib_name
     end
 
-    def picurl=(url)
-      self.write_attribute self.class.pic_attrib_name, url
+    def private_homeurl
+      self.read_attribute self.class.home_attrib_name
     end
 
-    private
+=begin
+    def private_picurl=(url)
+      self.attributes = { self.class.pic_attrib_name => url }
+      # self.write_attribute self.class.pic_attrib_name, url
+    end
+=end
+
+    def private_picurl_changed?
+      changed_attributes.key? self.class.pic_attrib_name.to_s
+    end
 
     # Confirm that the thumbnail accurately reflects the recipe's image
     def check_thumbnail
-      self.picurl = nil if self.picurl.blank? || (self.picurl == "/assets/NoPictureOnFile.png")
-      if self.picurl.nil? || self.picurl =~ /^data:/
+      self.private_picurl = nil if self.private_picurl.blank? || (self.private_picurl == "/assets/NoPictureOnFile.png")
+      if self.private_picurl.nil? || self.private_picurl =~ /^data:/
         # Shouldn't have a thumbnail
         self.thumbnail = nil
-      elsif picurl_changed? || !thumbnail
+      elsif private_picurl_changed? || !thumbnail
         # Make sure we've got the right thumbnail
-        self.thumbnail = Thumbnail.acquire( url, picurl )
+        self.thumbnail = Thumbnail.acquire( private_homeurl, private_picurl )
       end
       true
     end
@@ -54,15 +66,15 @@ module Picable
 
     # Return the image for the recipe, either as a URL or a data specifier
     # The image may have an associated thumbnail, but it doesn't count unless
-    # the thumbnail reflects the image's current picurl
+    # the thumbnail reflects the image's current private_picurl
     def picdata
       case
-        when !picurl || (picurl =~ /^data:/)
-          picurl
+        when !private_picurl || (private_picurl =~ /^data:/)
+          private_picurl
         when thumbnail && thumbnail.thumbdata
           thumbnail.thumbdata
         else
-          picurl unless picurl.blank?
+          private_picurl unless private_picurl.blank?
       end
     end
 

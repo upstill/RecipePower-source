@@ -20,7 +20,7 @@ class Site < ActiveRecord::Base
   include Taggable
   include Picable
 
-  picable(:logo, :sample)
+  picable(:logo, :home)
   # site: root of the domain (i.e., protocol + domain); suitable for pattern-matching on a reference URL to glean a set of matching Sites
   # subsite: a path relative to the domain which differentiates among Sites with the same domain (site attribute)
   # home: where the nominal site lives. This MAY be (site+subsite), but in cases of indirection, it may be an entirely
@@ -29,7 +29,7 @@ class Site < ActiveRecord::Base
   #      may alter the path
   # Also, in most cases, site==home (when the domain is home, i.e. subsite is empty); in others, (site+subsite)==home,
   #     and only rarely will home be different from either of those
-  attr_accessible :finders_attributes, :site, :home, :scheme, :subsite, :sample, :host, :name, :port, :logo, :ttlcut, :finders, :reviewed
+  attr_accessible :finders_attributes, :site, :home, :scheme, :subsite, :sample, :host, :name, :port, :logo, :ttlcut, :finders, :reviewed, :description
 #   serialize :finders, Array
 
   belongs_to :referent # See before_destroy method, :dependent=>:destroy
