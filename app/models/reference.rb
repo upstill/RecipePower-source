@@ -2,20 +2,24 @@ class Reference < ActiveRecord::Base
   include Linkable
   include Referrable
   include Typeable
-  
+  include Picable
+
+  picable(:url) # Use the url attribute for the pic, and provide a corresponding thumbnail
+
   attr_accessible :reference_type
   
   typeable( :reference_type, 
     Article: ["Article", 1],
-    NewsItem: ["News Item", 2],
+    Newsitem: ["News Item", 2],
     Tip: ["Tip", 4],
     Video: ["Video", 8],
     Definition: ["Glossary Entry", 16],
-    HomePage: ["Home Page", 32],
+    Homepage: ["Home Page", 32],
     Product: ["Product", 64],
     Offering: ["Offering", 128],
     Recipe: ["Recipe", 256],
-    Image: ["Image", 512]
+    Image: ["Image", 512],
+    Site: ["Site", 1024]
   )
   
   def self.assert(uri, tag_or_referent, type=:Definition )
@@ -37,4 +41,5 @@ class Reference < ActiveRecord::Base
     self.reference_type = Reference.typenum type
     save
   end
+
 end

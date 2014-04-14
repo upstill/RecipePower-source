@@ -9,51 +9,17 @@ class Recipe < ActiveRecord::Base
   include Referrable
   include Linkable
   include Voteable
-  attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href, :description,
+  include Picable
+
+  picable(:picurl)
+
+  attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :tagpane, :href, :description,
                   :misc_tag_tokens, :collection_tokens, :channel_tokens
   after_save :save_ref
 
   validates :title, :presence=>true 
-#  validates :url,  :presence=>true, :gettableURL => true
-#  validates :picurl, :gettableURL => true
 # private
 
-  # Before saving the recipe, take the chance to generate a thumbnail (in background)
-  before_save :check_thumbnail
-
-private
-  
-  # Confirm that the thumbnail accurately reflects the recipe's image
-  def check_thumbnail
-    self.picurl = nil if self.picurl.blank? || (self.picurl == "/assets/NoPictureOnFile.png")
-    if self.picurl.nil? || self.picurl =~ /^data:/
-      # Shouldn't have a thumbnail
-      self.thumbnail = nil
-    elsif picurl_changed? || !thumbnail
-      # Make sure we've got the right thumbnail
-      self.thumbnail = Thumbnail.acquire( url, picurl )
-    end
-    true
-  end
-  
-public
-
-  # Return the image for the recipe, either as a URL or a data specifier
-  # The image may have an associated thumbnail, but it doesn't count unless 
-  # the thumbnail reflects the image's current picurl
-  def picdata
-    case
-    when !picurl || (picurl =~ /^data:/)
-      picurl
-    when thumbnail && thumbnail.thumbdata
-      thumbnail.thumbdata
-    else
-      picurl unless picurl.blank?
-    end
-  end
-  
-  belongs_to :thumbnail, :autosave => true
-  
   has_many :ratings, :dependent=>:destroy
   has_many :scales, :through=>:ratings, :autosave=>true
   # attr_reader :ratings_attributes

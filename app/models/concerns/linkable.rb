@@ -11,7 +11,7 @@ module Linkable
   
   module ClassMethods
     
-    # Critical method to ensure no two recipes have the same link
+    # Critical method to ensure no two references have the same link
     def find_or_initialize(params)
       # Normalize it
       obj = self.new params
