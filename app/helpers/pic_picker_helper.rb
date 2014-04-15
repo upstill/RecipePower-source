@@ -19,7 +19,7 @@ module PicPickerHelper
                           class: "pic_preview"
     preview << content_tag(:div,
                            pic_preview_golink(pageurl, picurl, link_id, img_id, input_id),
-                           class: "pic_picker_link")
+                           class: "pic_picker_link") unless options[:nopicker]
     preview
   end
 

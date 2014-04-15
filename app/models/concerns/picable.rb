@@ -7,6 +7,7 @@ module Picable
       def picable(attribute, home)
         @pic_attrib_name = attribute
         @home_attrib_name = home
+        attr_accessible attribute
       end
 
       def pic_attrib_name

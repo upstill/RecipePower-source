@@ -1,10 +1,16 @@
 class Reference < ActiveRecord::Base
   include Linkable
+  linkable :url
+
   include Referrable
   include Typeable
+=begin
   include Picable
 
-  picable(:url) # Use the url attribute for the pic, and provide a corresponding thumbnail
+  picable(:url, nil) # Use the url attribute for the pic, and provide a corresponding thumbnail
+=end
+
+  belongs_to :affiliate, polymorphic: true
 
   attr_accessible :reference_type
   

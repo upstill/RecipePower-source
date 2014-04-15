@@ -7,13 +7,15 @@ require 'htmlentities'
 class Recipe < ActiveRecord::Base
   include Taggable
   include Referrable
-  include Linkable
   include Voteable
+
+  include Linkable
+  linkable :url, :href
+
   include Picable
+  picable :picurl, :url
 
-  picable(:picurl, :url)
-
-  attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href, :description,
+  attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :tagpane, :description, # , :picurl, :href
                   :misc_tag_tokens, :collection_tokens, :channel_tokens
   after_save :save_ref
 
@@ -25,7 +27,8 @@ class Recipe < ActiveRecord::Base
   # attr_reader :ratings_attributes
   accepts_nested_attributes_for :ratings, :reject_if => lambda { |a| a[:scale_val].nil? }, :allow_destroy=>true
   
-  has_one :link, :as => :entity
+  # belongs_to :reference # has_one :link, :as => :entity
+  has_one
 
   has_many :rcprefs, :dependent=>:destroy
   has_many :users, :through=>:rcprefs, :autosave=>true
@@ -65,7 +68,7 @@ class Recipe < ActiveRecord::Base
       end
       params[:picurl] = extractions[:Image] if extractions[:Image]
       params[:title] = extractions[:Title] if extractions[:Title]
-      params[:href] = extractions[:href] if extractions[:href]
+      # params[:href] = extractions[:href] if extractions[:href]
       if params.blank?
         rcp = self.new      
       elsif (id = params[:id].to_i) && (id > 0) # id of 0 means create a new recipe
@@ -84,7 +87,7 @@ class Recipe < ActiveRecord::Base
         if rcp.errors.empty?
           ss = SiteServices.new rcp.site
           rcp.picurl = ss.resolve rcp.picurl unless rcp.picurl.blank?
-          rcp.title = ss.trim_title rcp.title # = ((site.yield :Title, url)[:Title] || rcp.title).html_safe unless rcp.title
+          rcp.title = ss.trim_title rcp.title
           rcp.save
           RecipeServices.new(rcp).robotags = extractions
         end
@@ -101,8 +104,8 @@ class Recipe < ActiveRecord::Base
   # Make the recipe title nice for display
   def trimmed_title
     ttl = self.title || ""
-    if st = self.url && Site.by_link(self.url)
-      ttl = SiteServices.new(st).trim_title ttl
+    if site
+      ttl = SiteServices.new(site).trim_title ttl
     end
     # Convert HTML entities
     @@coder.decode ttl
@@ -110,8 +113,8 @@ class Recipe < ActiveRecord::Base
   
   # Before editing, try and fill in a blank title by cracking the url
   def check_title
-    if self.title.blank? && st = (url && Site.by_link(self.url))
-      self.title = (st.yield :Title, st.sampleURL)[:Title] || ""
+    if self.title.blank? && site
+      self.title = (site.yield :Title, site.sampleURL)[:Title] || ""
       self.title = self.trimmed_title
     else
       self.title
