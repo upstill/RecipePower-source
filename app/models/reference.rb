@@ -4,15 +4,10 @@ class Reference < ActiveRecord::Base
 
   include Referrable
   include Typeable
-=begin
-  include Picable
-
-  picable(:url, nil) # Use the url attribute for the pic, and provide a corresponding thumbnail
-=end
 
   belongs_to :affiliate, polymorphic: true
 
-  attr_accessible :reference_type
+  attr_accessible :reference_type, :type
   
   typeable( :reference_type, 
     Article: ["Article", 1],
@@ -47,5 +42,51 @@ class Reference < ActiveRecord::Base
     self.reference_type = Reference.typenum type
     save
   end
+
+end
+
+class ArticleReference < Reference
+
+end
+
+class NewsitemReference < Reference
+
+end
+
+class TipReference < Reference
+
+end
+
+class VideoReference < Reference
+
+end
+
+class DefinitionReference < Reference
+
+end
+
+class HomepageReference < Reference
+
+end
+
+class ProductReference < Reference
+
+end
+
+class OfferingReference < Reference
+
+end
+
+class RecipeReference < Reference
+
+end
+
+class ImageReference < Reference
+  include Picable
+  picable(:url) # Use the url attribute for the pic, and provide a corresponding thumbnail
+
+end
+
+class SiteReference < Reference
 
 end

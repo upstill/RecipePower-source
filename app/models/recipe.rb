@@ -27,8 +27,11 @@ class Recipe < ActiveRecord::Base
   # attr_reader :ratings_attributes
   accepts_nested_attributes_for :ratings, :reject_if => lambda { |a| a[:scale_val].nil? }, :allow_destroy=>true
   
-  # belongs_to :reference # has_one :link, :as => :entity
-  has_one
+  belongs_to :reference # has_one :link, :as => :entity
+  accepts_nested_attributes_for :reference
+
+  belongs_to :picture, :class_name => "Reference"
+  accepts_nested_attributes_for :picture
 
   has_many :rcprefs, :dependent=>:destroy
   has_many :users, :through=>:rcprefs, :autosave=>true
@@ -37,6 +40,22 @@ class Recipe < ActiveRecord::Base
   attr_reader :status
   
   @@coder = HTMLEntities.new
+
+  def self.find_or_initialize params
+    ref = Reference.find_or_initialize params.slice(:url, :href).merge(type: "RecipeReference")
+    unless rcp = ref.affiliate
+      otherparams = params.clone
+      rcp = Recipe.where(otherparams.slice! :url, :href).first_or_initialize
+      rcp.reference = ref
+      ref.affiliate = rcp
+    end
+
+    # Now handle the picture by creating an image reference for it
+    ss = SiteServices.new rcp.site
+    rcp.picurl = ss.resolve rcp.picurl unless rcp.picurl.blank?
+    rcp.title = ss.trim_title rcp.title
+
+  end
 
   # Either fetch an existing recipe record or make a new one, based on the
   # params. If the params have an :id, we find on that, otherwise we look
@@ -81,13 +100,10 @@ class Recipe < ActiveRecord::Base
       else # No id: create based on url
         params.delete(:rcpref)
         rcp = Recipe.find_or_initialize params
-        if rcp.url.match %r{^http://#{current_domain}} # Check we're not trying to link to a RecipePower page
+        if rcp.reference.url.match %r{^http://#{current_domain}} # Check we're not trying to link to a RecipePower page
           rcp.errors.add :base, "Sorry, can't cookmark pages from RecipePower. (Does that even make sense?)"
         end
         if rcp.errors.empty?
-          ss = SiteServices.new rcp.site
-          rcp.picurl = ss.resolve rcp.picurl unless rcp.picurl.blank?
-          rcp.title = ss.trim_title rcp.title
           rcp.save
           RecipeServices.new(rcp).robotags = extractions
         end

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140415004133) do
+ActiveRecord::Schema.define(version: 20140415025624) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -184,15 +184,20 @@ ActiveRecord::Schema.define(version: 20140415004133) do
     t.integer  "thumbnail_id"
     t.text     "href"
     t.text     "description"
+    t.integer  "reference_id"
+    t.integer  "picture_id"
   end
 
   create_table "references", force: true do |t|
-    t.datetime "created_at",     null: false
-    t.datetime "updated_at",     null: false
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
     t.integer  "reference_type"
     t.string   "url"
     t.integer  "affiliate_id"
     t.string   "affiliate_type"
+    t.string   "type",           default: "Reference"
+    t.text     "picurl"
+    t.integer  "thumbnail_id"
   end
 
   create_table "referent_relations", force: true do |t|

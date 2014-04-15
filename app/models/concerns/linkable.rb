@@ -9,8 +9,8 @@ module Linkable
     def linkable(attribute, href_attribute=nil)
       @url_attrib_name = attribute
       @href_attrib_name = href_attribute
-      attr_accessible attribute,
-      attr_accessible href_attribute if href_attribute
+      attr_accessible attribute
+      attr_accessible(href_attribute) if href_attribute
       validates_uniqueness_of attribute
     end
 
@@ -28,9 +28,9 @@ module Linkable
       obj = self.new params
       if obj.private_url.blank?  # Check for non-empty URL
         obj.errors.add url_attrib_name, "can't be blank"
-      elsif !(normalized = normalize_and_test_url(obj.private_url, params[href_attrib_name] if href_attrib_name))
+      elsif !(normalized = normalize_and_test_url(obj.private_url, (params[href_attrib_name] if href_attrib_name)))
         obj.errors.add url_attrib_name, "\'#{obj.private_url}\' doesn't seem to be a working URL. Can you use it as an address in your browser?"
-      elsif extant = self.where(url_attrib_name => obj.private_url = normalized).first
+      elsif extant = self.where(params.slice(:type).merge(url_attrib_name => obj.private_url = normalized)).first
         # Recipe already exists under this url
         obj = extant
       end

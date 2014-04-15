@@ -6,6 +6,12 @@ class RecipeServices
     @current_user = current_user
   end
 
+  def fix_reference
+    unless @recipe.reference_id
+      @recipe.reference = Reference.find_or_initialize url: @recipe.url, type: "RecipeReference"
+    end
+  end
+
   def scrape
     extractions = SiteServices.extract_from_page(@recipe.url )
     puts "Recipe # #{@recipe.id}: #{@recipe.title}"

@@ -39,12 +39,10 @@ module Picable
       self.read_attribute self.class.home_attrib_name
     end
 
-=begin
     def private_picurl=(url)
       self.attributes = { self.class.pic_attrib_name => url }
       # self.write_attribute self.class.pic_attrib_name, url
     end
-=end
 
     def private_picurl_changed?
       changed_attributes.key? self.class.pic_attrib_name.to_s
