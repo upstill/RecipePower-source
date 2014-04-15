@@ -27,10 +27,10 @@ class Recipe < ActiveRecord::Base
   # attr_reader :ratings_attributes
   accepts_nested_attributes_for :ratings, :reject_if => lambda { |a| a[:scale_val].nil? }, :allow_destroy=>true
   
-  belongs_to :reference # has_one :link, :as => :entity
+  belongs_to :reference, :conditions => "type = RecipeReference" # has_one :link, :as => :entity
   accepts_nested_attributes_for :reference
 
-  belongs_to :picture, :class_name => "Reference"
+  belongs_to :picture, :class_name => "Reference", :conditions => "type = ImageReference", :foreign_key => "picture_id"
   accepts_nested_attributes_for :picture
 
   has_many :rcprefs, :dependent=>:destroy
@@ -115,6 +115,10 @@ class Recipe < ActiveRecord::Base
       rcp.touch add_to_collection
     end
     rcp
+  end
+
+  def url
+    reference.url if reference
   end
   
   # Make the recipe title nice for display
