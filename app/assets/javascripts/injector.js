@@ -24,6 +24,7 @@
 //= require jquery/jquery.ba-resize
 //= require jquery_ujs
 //= require ../../../vendor/assets/javascripts/bootbox
+//= require ../../../vendor/assets/javascripts/imagesloaded.pkgd.min
 
 window.RP = window.RP || {}
 
@@ -32,9 +33,7 @@ window.RP = window.RP || {}
 function replaceImg(data) {
     var url = data.url; // && data.url[0];
     if(url)   {
-        // pickImgForInput(data.url[0], 'input#recipe_picurl' );
-        $('input#recipe_picurl').attr("value", url );
-        previewImg('input#recipe_picurl', null, "");
+        set_image_safely("div.pic_preview img", url, "div.pic_preview input")
     }
 }
 

@@ -339,7 +339,7 @@ class SiteServices
           ttl = md[1] || ttl.sub(re, '')
         end
       end
-      ttl.strip
+      ttl.gsub(/\s+/, ' ').strip
     end
   end
 

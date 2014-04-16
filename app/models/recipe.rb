@@ -27,10 +27,10 @@ class Recipe < ActiveRecord::Base
   # attr_reader :ratings_attributes
   accepts_nested_attributes_for :ratings, :reject_if => lambda { |a| a[:scale_val].nil? }, :allow_destroy=>true
   
-  belongs_to :reference, :conditions => "type = RecipeReference" # has_one :link, :as => :entity
+  belongs_to :reference, :conditions => "type = 'RecipeReference'" # has_one :link, :as => :entity
   accepts_nested_attributes_for :reference
 
-  belongs_to :picture, :class_name => "Reference", :conditions => "type = ImageReference", :foreign_key => "picture_id"
+  belongs_to :picture, :class_name => "Reference", :conditions => "type = 'ImageReference'", :foreign_key => "picture_id"
   accepts_nested_attributes_for :picture
 
   has_many :rcprefs, :dependent=>:destroy
@@ -41,20 +41,29 @@ class Recipe < ActiveRecord::Base
   
   @@coder = HTMLEntities.new
 
+  # Here lies the heart of enforcement, where we ensure that a recipe is uniquely linked to its url and vice versa
   def self.find_or_initialize params
     ref = Reference.find_or_initialize params.slice(:url, :href).merge(type: "RecipeReference")
-    unless rcp = ref.affiliate
-      otherparams = params.clone
-      rcp = Recipe.where(otherparams.slice! :url, :href).first_or_initialize
+    otherparams = params.clone.slice! :picurl, :title # , :url, :href # Remove these parameters
+    if rcp = ref.affiliate
+      rcp.update_attributes otherparams
+    else
+      rcp = Recipe.new( otherparams )
       rcp.reference = ref
       ref.affiliate = rcp
     end
-
-    # Now handle the picture by creating an image reference for it
-    ss = SiteServices.new rcp.site
-    rcp.picurl = ss.resolve rcp.picurl unless rcp.picurl.blank?
-    rcp.title = ss.trim_title rcp.title
-
+    if ref.errors.any?
+      rcp.errors.add :url, "doesn't lead anywhere"
+    else
+      # Now handle the picture by creating an image reference for it
+      ss = SiteServices.new rcp.site
+      picurl = ss.resolve(params[:picurl])
+      picture = Reference.find_or_initialize(type: "ImageReference", url: picurl) unless params[:picurl].blank?
+      rcp.picture = picture unless picture.errors.any?
+      # rcp.picurl = ss.resolve rcp.picurl unless rcp.picurl.blank?
+      rcp.title = ss.trim_title params[:title] unless params[:title].blank?
+    end
+    rcp
   end
 
   # Either fetch an existing recipe record or make a new one, based on the

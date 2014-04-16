@@ -8,6 +8,8 @@ class Reference < ActiveRecord::Base
   belongs_to :affiliate, polymorphic: true
 
   attr_accessible :reference_type, :type
+
+  validates_uniqueness_of :url, :scope => :type
   
   typeable( :reference_type, 
     Article: ["Article", 1],

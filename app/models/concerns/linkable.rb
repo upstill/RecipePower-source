@@ -7,19 +7,19 @@ module Linkable
   module ClassMethods
 
     def linkable(attribute, href_attribute=nil)
-      @url_attrib_name = attribute
-      @href_attrib_name = href_attribute
+      @@url_attrib_name = attribute
+      @@href_attrib_name = href_attribute
       attr_accessible attribute
       attr_accessible(href_attribute) if href_attribute
-      validates_uniqueness_of attribute
+      # validates_uniqueness_of attribute
     end
 
     def url_attrib_name
-      @url_attrib_name
+      @@url_attrib_name
     end
 
     def href_attrib_name
-      @href_attrib_name
+      @@href_attrib_name
     end
 
     # Critical method to ensure no two linkables of the same class [offset] have the same link

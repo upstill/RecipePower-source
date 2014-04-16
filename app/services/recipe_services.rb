@@ -6,10 +6,18 @@ class RecipeServices
     @current_user = current_user
   end
 
-  def fix_reference
+  def self.fix_all
+    Recipe.all.each { |recipe| self.new(recipe).fix_one }
+  end
+
+  def fix_one
     unless @recipe.reference_id
       @recipe.reference = Reference.find_or_initialize url: @recipe.url, type: "RecipeReference"
     end
+    if @recipe.picurl && !@recipe.picture_id
+      @recipe.picture = Reference.find_or_initialize url: @recipe.picurl, type: "ImageReference"
+    end
+    @recipe.save
   end
 
   def scrape

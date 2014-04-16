@@ -3,7 +3,7 @@
 
     <div class="left">
       <div class="edit_recipe_field pic_picker_field">
-        <%= pic_field f, :picurl, nil, :fallback_img => "PickPicture.png", :nopicker => true %>
+        <%= pic_field f, :picurl, nil, :fallback_img => "/assets/PickPicture.png", :nopicker => true %>
       </div>
       <% unless @recipe.picurl.blank? %>
           <p>Prefer another picture?<br/>Click one!</p>

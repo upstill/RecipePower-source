@@ -4,7 +4,7 @@ module Picable
 
     module ClassMethods
 
-      def picable(attribute, home)
+      def picable(attribute, home=nil)
         @pic_attrib_name = attribute
         @home_attrib_name = home
         attr_accessible attribute
@@ -36,7 +36,7 @@ module Picable
     end
 
     def private_homeurl
-      self.read_attribute self.class.home_attrib_name
+      self.read_attribute self.class.home_attrib_name if self.class.home_attrib_name
     end
 
     def private_picurl=(url)
