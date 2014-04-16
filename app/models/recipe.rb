@@ -126,10 +126,6 @@ class Recipe < ActiveRecord::Base
     rcp
   end
 
-  def url
-    reference.url if reference
-  end
-  
   # Make the recipe title nice for display
   def trimmed_title
     ttl = self.title || ""

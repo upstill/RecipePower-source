@@ -11,7 +11,20 @@ module Linkable
       @@href_attrib_name = href_attribute
       attr_accessible attribute
       attr_accessible(href_attribute) if href_attribute
-      # validates_uniqueness_of attribute
+
+      # Define accessor that gets link field from reference if possible, otherwise just returns the field
+      define_method(attribute) do
+        report = "Entering #{self.class.url_attrib_name} in #{self.class.to_s}, which "
+        begin
+          ref_obj = reference # If defined
+          report << "does"
+        rescue
+          ref_obj = nil
+          report << "does not"
+        end
+        logger.debug report+" have reference."
+        ref_obj ? ref_obj.url : self.read_attribute(attribute)
+      end
     end
 
     def url_attrib_name
@@ -26,10 +39,10 @@ module Linkable
     def find_or_initialize(params)
       # Normalize it
       obj = self.new params
-      if obj.private_url.blank?  # Check for non-empty URL
+      if params[url_attrib_name].blank?  # Check for non-empty URL
         obj.errors.add url_attrib_name, "can't be blank"
-      elsif !(normalized = normalize_and_test_url(obj.private_url, (params[href_attrib_name] if href_attrib_name)))
-        obj.errors.add url_attrib_name, "\'#{obj.private_url}\' doesn't seem to be a working URL. Can you use it as an address in your browser?"
+      elsif !(normalized = normalize_and_test_url(params[url_attrib_name], (params[href_attrib_name] if href_attrib_name)))
+        obj.errors.add url_attrib_name, "\'#{params[url_attrib_name]}\' doesn't seem to be a working URL. Can you use it as an address in your browser?"
       elsif extant = self.where(params.slice(:type).merge(url_attrib_name => obj.private_url = normalized)).first
         # Recipe already exists under this url
         obj = extant
@@ -42,7 +55,11 @@ module Linkable
     end
     
   end
-  
+
+  # def InstanceMethods
+
+  # end
+
   def self.included(base)
     base.extend(ClassMethods)
   end
