@@ -10,12 +10,20 @@ class Recipe < ActiveRecord::Base
   include Voteable
 
   include Linkable
-  linkable :url, :href
+  # The url attribute is handled by a reference of type RecipeReference
+  linkable :url, :reference, "RecipeReference"
 
+=begin
+  belongs_to :reference, :conditions => "type = 'RecipeReference'" # has_one :link, :as => :entity
+  accepts_nested_attributes_for :reference
+=end
+
+=begin
   include Picable
   picable :picurl, :url
+=end
 
-  attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :tagpane, :description, # , :picurl, :href
+  attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :tagpane, :description, :picurl, # :href
                   :misc_tag_tokens, :collection_tokens, :channel_tokens
   after_save :save_ref
 
@@ -26,9 +34,6 @@ class Recipe < ActiveRecord::Base
   has_many :scales, :through=>:ratings, :autosave=>true
   # attr_reader :ratings_attributes
   accepts_nested_attributes_for :ratings, :reject_if => lambda { |a| a[:scale_val].nil? }, :allow_destroy=>true
-  
-  belongs_to :reference, :conditions => "type = 'RecipeReference'" # has_one :link, :as => :entity
-  accepts_nested_attributes_for :reference
 
   belongs_to :picture, :class_name => "Reference", :conditions => "type = 'ImageReference'", :foreign_key => "picture_id"
   accepts_nested_attributes_for :picture
@@ -109,7 +114,7 @@ class Recipe < ActiveRecord::Base
       else # No id: create based on url
         params.delete(:rcpref)
         rcp = Recipe.find_or_initialize params
-        if rcp.reference.url.match %r{^http://#{current_domain}} # Check we're not trying to link to a RecipePower page
+        if rcp.url.match %r{^http://#{current_domain}} # Check we're not trying to link to a RecipePower page
           rcp.errors.add :base, "Sorry, can't cookmark pages from RecipePower. (Does that even make sense?)"
         end
         if rcp.errors.empty?

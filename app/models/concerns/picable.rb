@@ -5,17 +5,50 @@ module Picable
     module ClassMethods
 
       def picable(attribute, home=nil)
-        @pic_attrib_name = attribute
-        @home_attrib_name = home
+        @@pic_attrib_name = attribute
+        @@home_attrib_name = home
         attr_accessible attribute
+        @@getter_method = nil
+
+        define_method(attribute) do
+          report = "Entering #{self.class.url_attrib_name} in #{self.class.to_s}, which "
+          begin
+            ref_obj = reference # If defined
+            report << "does"
+          rescue
+            ref_obj = nil
+            report << "does not"
+          end
+          logger.debug report+" have reference."
+          ref_obj ? ref_obj.url : super()
+        end
+        define_method "#{attribute}=" do |pu|
+          report = "Entering #{self.class.url_attrib_name}= in #{self.class.to_s}, which "
+          unless @@getter_method
+            s = self.class.new
+            @@getter_method = s.method attribute
+          end
+          prior = @@getter_method.call
+          return pu if (pu || "") == (prior || "")  # Compares correctly even if one is nil
+          begin
+            ref_obj = reference # If defined
+            report << "does"
+            self.picture = pu.blank? ? nil : Reference.find_or_initialize(type: "ImageReference", url: pu)
+          rescue
+            super(pu)
+            report << "does not"
+          end
+          logger.debug report+" have reference."
+          pu
+        end
       end
 
       def pic_attrib_name
-        @pic_attrib_name
+        @@pic_attrib_name
       end
 
       def home_attrib_name
-        @home_attrib_name
+        @@home_attrib_name
       end
     end
 

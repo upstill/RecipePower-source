@@ -6,25 +6,56 @@ module Linkable
 
   module ClassMethods
 
-    def linkable(attribute, href_attribute=nil)
+    # If only the attribute is passed, this class has the field directly
+    def linkable(attribute, ref_attribute=nil, ref_type=nil, href_attribute=nil)
       @@url_attrib_name = attribute
+      @@ref_attrib_name = ref_attribute
+      @@ref_type_name = ref_type
       @@href_attrib_name = href_attribute
       attr_accessible attribute
       attr_accessible(href_attribute) if href_attribute
+      @@getter_method = @@setter_method = nil
+      @@ref_getter_method = @@ref_setter_method = nil
 
-      # Define accessor that gets link field from reference if possible, otherwise just returns the field
-      define_method(attribute) do
-        report = "Entering #{self.class.url_attrib_name} in #{self.class.to_s}, which "
-        begin
-          ref_obj = reference # If defined
-          report << "does"
-        rescue
-          ref_obj = nil
-          report << "does not"
-        end
-        logger.debug report+" have reference."
-        ref_obj ? ref_obj.url : self.read_attribute(attribute)
+      if ref_attribute
+        belongs_to ref_attribute, :conditions => "type = '#{ref_type}'" # has_one :link, :as => :entity
+        accepts_nested_attributes_for ref_attribute
       end
+
+      define_method(@@url_attrib_name) do
+        s = self.class.new
+        if @@ref_attrib_name
+          unless @@ref_getter_method
+            debugger
+            @@ref_getter_method = self.method @@ref_attrib_name
+          end
+          ref_obj = @@ref_getter_method.call
+          ref_obj ? ref_obj.url : super()
+        else
+          super()
+        end
+      end
+
+      define_method "#{@@url_attrib_name}=" do |pu|
+        s = self.class.new
+        unless @@getter_method
+          @@getter_method = s.method @@url_attrib_name
+        end
+        prior = @@getter_method.call
+        return pu if (pu || "") == (prior || "")  # Compares correctly even if one is nil
+        if @@ref_attrib_name
+          debugger
+          unless @@ref_setter_method
+            @@ref_setter_method = s.method "#{@@ref_attrib_name}="
+          end
+          newref = pu.blank? ? nil : Reference.find_or_initialize(type: @@ref_type_name, url: pu)
+          @@ref_setter_method.call newref
+        else
+          super(pu) # Assume that the generic setter method applies, i.e., that the field exists explicitly
+        end
+        pu
+      end
+
     end
 
     def url_attrib_name
@@ -49,11 +80,34 @@ module Linkable
       end
       obj
     end
-    
+
     def seek_on_url(url)
-      (normalized = normalize_url(private_url)) && self.where(url_attrib_name => normalized).first
+      (normalized = normalize_url(url)) && self.where(url_attrib_name => normalized).first
     end
-    
+
+  end
+
+  self.instance_eval do
+    debugger
+    define_method "#{@@url_attrib_name}=" do |pu|
+      s = self.class.new
+      unless @@getter_method
+        @@getter_method = s.method @@url_attrib_name
+      end
+      prior = @@getter_method.call
+      return pu if (pu || "") == (prior || "")  # Compares correctly even if one is nil
+      if @@ref_attrib_name
+        debugger
+        unless @@ref_setter_method
+          @@ref_setter_method = s.method "#{@@ref_attrib_name}="
+        end
+        newref = pu.blank? ? nil : Reference.find_or_initialize(type: @@ref_type_name, url: pu)
+        @@ref_setter_method.call newref
+      else
+        super(pu) # Assume that the generic setter method applies, i.e., that the field exists explicitly
+      end
+      pu
+    end
   end
 
   # def InstanceMethods
