@@ -6,113 +6,88 @@ module Linkable
 
   module ClassMethods
 
-    # If only the attribute is passed, this class has the field directly
-    def linkable(attribute, ref_attribute=nil, ref_type=nil, href_attribute=nil)
-      @@url_attrib_name = attribute
-      @@ref_attrib_name = ref_attribute
-      @@ref_type_name = ref_type
-      @@href_attrib_name = href_attribute
+    # Make an attribute of the class linkable, i.e., it contains a URL which is unique to the class,
+    # and which is supplanted by a Reference object, except in the case of the Reference class.
+    # Options (the first two of which may be given positionally or by name in the options hash):
+    # ref_attribute: a symbol for the attribute carrying a Reference object
+    # ref_type: the type of Reference that is to contain (URLs are only unique within a type)
+    # href_attribute: a secondary URL attribute which can be used to complete a primary URL (i.e., in
+    #   the case of images, which may have a relative path)
+    # site_from: specifies an attribute that can be used to look up the site associated with the URL
+    #   (only matters for classes with multiple linkable attributes)
+    def linkable(attribute, ref_attribute=nil, ref_type=nil, options = {} )
+      if ref_attribute.is_a? Hash
+        options = ref_attribute
+        ref_attribute = options[:ref_attribute]
+        ref_type = options[:ref_type]
+      end
+
       attr_accessible attribute
-      attr_accessible(href_attribute) if href_attribute
-      @@getter_method = @@setter_method = nil
-      @@ref_getter_method = @@ref_setter_method = nil
+
+      @@URLAttributeName ||= attribute  # Defaults to the first attribute named as linkable
+      @@URLAttributeName = options[:site_from] if options[:site_from] #...but can be forced thus
+
+      attr_accessible (@@HrefAttributeName = options[:href_attribute]) if options[:href_attribute]
 
       if ref_attribute
-        belongs_to ref_attribute, :conditions => "type = '#{ref_type}'" # has_one :link, :as => :entity
+        belongs_to ref_attribute, :class_name => "Reference", :conditions => "type = '#{ref_type}'" # has_one :link, :as => :entity
         accepts_nested_attributes_for ref_attribute
       end
 
-      define_method(@@url_attrib_name) do
-        s = self.class.new
-        if @@ref_attrib_name
-          unless @@ref_getter_method
-            debugger
-            @@ref_getter_method = self.method @@ref_attrib_name
+      self.instance_eval do
+        define_method "#{attribute}=" do |pu|
+          prior = self.method(attribute).call
+          return pu if (pu || "") == (prior || "") # Compares correctly even if one is nil
+          if ref_attribute
+            newref = pu.blank? ? nil : Reference.find_or_initialize(type: ref_type, url: pu)
+            self.method("#{ref_attribute}=").call newref
+          else
+            super(pu) # Assume that the generic setter method applies, i.e., that the field exists explicitly
           end
-          ref_obj = @@ref_getter_method.call
-          ref_obj ? ref_obj.url : super()
-        else
-          super()
+          pu
+        end
+
+        define_method(attribute) do
+          s = self.class.new
+          if ref_attribute
+            ref_obj = self.method(ref_attribute).call
+            ref_obj ? ref_obj.url : super()
+          else
+            super()
+          end
         end
       end
+    end # Linkable
 
-      define_method "#{@@url_attrib_name}=" do |pu|
-        s = self.class.new
-        unless @@getter_method
-          @@getter_method = s.method @@url_attrib_name
-        end
-        prior = @@getter_method.call
-        return pu if (pu || "") == (prior || "")  # Compares correctly even if one is nil
-        if @@ref_attrib_name
-          debugger
-          unless @@ref_setter_method
-            @@ref_setter_method = s.method "#{@@ref_attrib_name}="
-          end
-          newref = pu.blank? ? nil : Reference.find_or_initialize(type: @@ref_type_name, url: pu)
-          @@ref_setter_method.call newref
-        else
-          super(pu) # Assume that the generic setter method applies, i.e., that the field exists explicitly
-        end
-        pu
-      end
-
+    def url_attribute_name
+      @@URLAttributeName
     end
 
-    def url_attrib_name
-      @@url_attrib_name
-    end
-
-    def href_attrib_name
-      @@href_attrib_name
+    def href_attribute_name
+      @@HrefAttributeName
     end
 
     # Critical method to ensure no two linkables of the same class [offset] have the same link
     def find_or_initialize(params)
       # Normalize it
+      url = params[@@URLAttributeName]
+      href = params[@@HrefAttributeName]
       obj = self.new params
-      if params[url_attrib_name].blank?  # Check for non-empty URL
-        obj.errors.add url_attrib_name, "can't be blank"
-      elsif !(normalized = normalize_and_test_url(params[url_attrib_name], (params[href_attrib_name] if href_attrib_name)))
-        obj.errors.add url_attrib_name, "\'#{params[url_attrib_name]}\' doesn't seem to be a working URL. Can you use it as an address in your browser?"
-      elsif extant = self.where(params.slice(:type).merge(url_attrib_name => obj.private_url = normalized)).first
-        # Recipe already exists under this url
-        obj = extant
+      if url.blank? # Check for non-empty URL
+        obj.errors.add @@URLAttributeName, "can't be blank"
+      elsif !(normalized = normalize_and_test_url url, href)
+        obj.errors.add @@URLAttributeName, "\'#{url}\' doesn't seem to be a working URL. Can you use it as an address in your browser?"
+      else
+        urlspec = {@@URLAttributeName => normalized}
+        obj.attributes = urlspec
+        if extant = self.where(params.slice(:type).merge urlspec).first
+          # Recipe already exists under this url
+          obj = extant
+        end
       end
       obj
     end
-
-    def seek_on_url(url)
-      (normalized = normalize_url(url)) && self.where(url_attrib_name => normalized).first
-    end
-
-  end
-
-  self.instance_eval do
-    debugger
-    define_method "#{@@url_attrib_name}=" do |pu|
-      s = self.class.new
-      unless @@getter_method
-        @@getter_method = s.method @@url_attrib_name
-      end
-      prior = @@getter_method.call
-      return pu if (pu || "") == (prior || "")  # Compares correctly even if one is nil
-      if @@ref_attrib_name
-        debugger
-        unless @@ref_setter_method
-          @@ref_setter_method = s.method "#{@@ref_attrib_name}="
-        end
-        newref = pu.blank? ? nil : Reference.find_or_initialize(type: @@ref_type_name, url: pu)
-        @@ref_setter_method.call newref
-      else
-        super(pu) # Assume that the generic setter method applies, i.e., that the field exists explicitly
-      end
-      pu
-    end
-  end
-
-  # def InstanceMethods
-
-  # end
+  end # ClassMethods
 
   def self.included(base)
     base.extend(ClassMethods)
@@ -120,26 +95,20 @@ module Linkable
 
   public
 
-  def private_url
-    self.read_attribute self.class.url_attrib_name
-  end
-
-  def private_url=(url)
-    self.attributes = { self.class.url_attrib_name => url }
-  end
-
-  def private_href
-    self.read_attribute( self.class.href_attrib_name) if self.class.href_attrib_name
-  end
-
   def site
-    @site ||= private_url && Site.by_link(private_url)
-    @site ||= private_href && Site.by_link(private_href)
+    debugger
+    return @site if @site
+    primary_url = self.method(self.class.url_attribute_name).call
+    unless @site = primary_url && Site.by_link(primary_url)
+      secondary_url = self.class.href_attribute_name && self.method(self.class.href_attribute_name).call
+      @site = secondary_url && Site.by_link(secondary_url)
+    end
+    @site
   end
 
   # Return the human-readable name for the recipe's source
   def sourcename
-     site.name
+    site.name
   end
 
   # Return the URL for the recipe's source's home page

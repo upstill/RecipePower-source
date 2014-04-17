@@ -11,17 +11,9 @@ class Recipe < ActiveRecord::Base
 
   include Linkable
   # The url attribute is handled by a reference of type RecipeReference
-  linkable :url, :reference, "RecipeReference"
-
-=begin
-  belongs_to :reference, :conditions => "type = 'RecipeReference'" # has_one :link, :as => :entity
-  accepts_nested_attributes_for :reference
-=end
-
-=begin
-  include Picable
-  picable :picurl, :url
-=end
+  linkable :url, :reference, "RecipeReference", :site_from => :url
+  # The image url attribute is handled by a reference of type ImageReference
+  linkable :picurl, :picture, "ImageReference", :href_attribute => :url
 
   attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :tagpane, :description, :picurl, # :href
                   :misc_tag_tokens, :collection_tokens, :channel_tokens
@@ -34,9 +26,6 @@ class Recipe < ActiveRecord::Base
   has_many :scales, :through=>:ratings, :autosave=>true
   # attr_reader :ratings_attributes
   accepts_nested_attributes_for :ratings, :reject_if => lambda { |a| a[:scale_val].nil? }, :allow_destroy=>true
-
-  belongs_to :picture, :class_name => "Reference", :conditions => "type = 'ImageReference'", :foreign_key => "picture_id"
-  accepts_nested_attributes_for :picture
 
   has_many :rcprefs, :dependent=>:destroy
   has_many :users, :through=>:rcprefs, :autosave=>true

@@ -84,8 +84,6 @@ class RecipeReference < Reference
 end
 
 class ImageReference < Reference
-  include Picable
-  picable(:url) # Use the url attribute for the pic, and provide a corresponding thumbnail
 
 end
 

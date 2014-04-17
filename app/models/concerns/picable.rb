@@ -11,19 +11,16 @@ module Picable
         @@getter_method = nil
 
         define_method(attribute) do
-          report = "Entering #{self.class.url_attrib_name} in #{self.class.to_s}, which "
+          debugger
           begin
             ref_obj = reference # If defined
-            report << "does"
           rescue
             ref_obj = nil
-            report << "does not"
           end
-          logger.debug report+" have reference."
           ref_obj ? ref_obj.url : super()
         end
         define_method "#{attribute}=" do |pu|
-          report = "Entering #{self.class.url_attrib_name}= in #{self.class.to_s}, which "
+          debugger
           unless @@getter_method
             s = self.class.new
             @@getter_method = s.method attribute
@@ -32,13 +29,10 @@ module Picable
           return pu if (pu || "") == (prior || "")  # Compares correctly even if one is nil
           begin
             ref_obj = reference # If defined
-            report << "does"
             self.picture = pu.blank? ? nil : Reference.find_or_initialize(type: "ImageReference", url: pu)
           rescue
             super(pu)
-            report << "does not"
           end
-          logger.debug report+" have reference."
           pu
         end
       end
