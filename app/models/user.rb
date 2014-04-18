@@ -3,6 +3,10 @@ require "rcp_browser.rb"
 class User < ActiveRecord::Base
   include Taggable
   include Voteable
+  include Linkable # Required by Picable
+  include Picable
+  picable :image, :thumbnail
+
   # Include default devise modules. Others available are:
   # :token_authenticatable, :encryptable, :confirmable, :timeoutable
   devise :invitable, :database_authenticatable, :registerable,

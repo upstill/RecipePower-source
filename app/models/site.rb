@@ -18,9 +18,10 @@ end
 
 class Site < ActiveRecord::Base
   include Taggable
+  include Linkable # Required by Picable
   include Picable
+  picable :logo, :thumbnail, :home # Keep a logo URL identified with an ImageReference denoted by :thumbnail
 
-  picable(:logo, :home)
   # site: root of the domain (i.e., protocol + domain); suitable for pattern-matching on a reference URL to glean a set of matching Sites
   # subsite: a path relative to the domain which differentiates among Sites with the same domain (site attribute)
   # home: where the nominal site lives. This MAY be (site+subsite), but in cases of indirection, it may be an entirely

@@ -13,9 +13,10 @@ class Recipe < ActiveRecord::Base
   # The url attribute is handled by a reference of type RecipeReference
   linkable :url, :reference, "RecipeReference", :site_from => :url
   # The image url attribute is handled by a reference of type ImageReference
-  linkable :picurl, :picture, "ImageReference", :href_attribute => :url
+  include Picable
+  picable :picurl, :picture, :url # linkable :picurl, :picture, "ImageReference", :href_attribute => :url
 
-  attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :tagpane, :description, :picurl, # :href
+  attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :tagpane, :description, #, :picurl :href
                   :misc_tag_tokens, :collection_tokens, :channel_tokens
   after_save :save_ref
 

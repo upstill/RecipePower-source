@@ -1,10 +1,12 @@
 # A picable class has an associated image
 module Picable
     extend ActiveSupport::Concern
+    include Linkable
 
     module ClassMethods
 
-      def picable(attribute, home=nil)
+      def picable(attribute, reference_name, home=nil)
+        linkable attribute, reference_name, "ImageReference", href_attribute: home
         @@pic_attrib_name = attribute
         @@home_attrib_name = home
         attr_accessible attribute
