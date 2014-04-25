@@ -7,44 +7,16 @@ module Picable
 
       def picable(attribute, reference_name, home=nil)
         linkable attribute, reference_name, "ImageReference", href_attribute: home
-        @@pic_attrib_name = attribute
-        @@home_attrib_name = home
-        attr_accessible attribute
-        @@getter_method = nil
-
-        define_method(attribute) do
-          debugger
-          begin
-            ref_obj = reference # If defined
-          rescue
-            ref_obj = nil
+        self.class_eval do
+          class_variable_set '@@pic_attribute_name', attribute
+          class_variable_set '@@home_attribute_name', home
+          define_singleton_method :pic_attribute_name do
+            self.class_variable_get '@@pic_attribute_name'
           end
-          ref_obj ? ref_obj.url : super()
+          define_singleton_method :home_attribute_name do
+            self.class_variable_get '@@home_attribute_name'
+          end
         end
-        define_method "#{attribute}=" do |pu|
-          debugger
-          unless @@getter_method
-            s = self.class.new
-            @@getter_method = s.method attribute
-          end
-          prior = @@getter_method.call
-          return pu if (pu || "") == (prior || "")  # Compares correctly even if one is nil
-          begin
-            ref_obj = reference # If defined
-            self.picture = pu.blank? ? nil : Reference.find_or_initialize(type: "ImageReference", url: pu)
-          rescue
-            super(pu)
-          end
-          pu
-        end
-      end
-
-      def pic_attrib_name
-        @@pic_attrib_name
-      end
-
-      def home_attrib_name
-        @@home_attrib_name
       end
     end
 
@@ -61,20 +33,20 @@ module Picable
     protected
 
     def private_picurl
-      self.read_attribute self.class.pic_attrib_name
+      self.read_attribute self.class.pic_attribute_name
     end
 
     def private_homeurl
-      self.read_attribute self.class.home_attrib_name if self.class.home_attrib_name
+      self.read_attribute self.class.home_attribute_name if self.class.home_attribute_name
     end
 
     def private_picurl=(url)
-      self.attributes = { self.class.pic_attrib_name => url }
-      # self.write_attribute self.class.pic_attrib_name, url
+      self.attributes = { self.class.pic_attribute_name => url }
+      # self.write_attribute self.class.pic_attribute_name, url
     end
 
     def private_picurl_changed?
-      changed_attributes.key? self.class.pic_attrib_name.to_s
+      changed_attributes.key? self.class.pic_attribute_name.to_s
     end
 
     # Confirm that the thumbnail accurately reflects the recipe's image

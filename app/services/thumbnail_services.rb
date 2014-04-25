@@ -8,13 +8,16 @@ class ThumbnailServices
     end
 
     def self.convert_all_to_reference
+      Thumbnail.all[0..10].each { |th|
+        self.new(th).convert_to_reference
+      }
 
     end
 
     def convert_to_reference
-      debugger
-      imageref = Reference.find_or_initialize url: @thumbnail.url, type: "ImageReference"
+      imageref = Reference::ImageReference.find_or_initialize url: @thumbnail.url
       if imageref.id
+        debugger
         # Image Reference with same URL as thumbnail: check that thumbdata matches
         if imageref.thumbdata != @thumbnail.thumbdata
           puts %Q{ImageReference ##{imagref.id} (url #{imageref.url})doesn't match thumbdata of Thumbnail ##{@thumbnail.thumbdata}}

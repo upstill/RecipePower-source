@@ -1,6 +1,6 @@
 class Reference < ActiveRecord::Base
   include Linkable
-  linkable :url # A Reference has a unique (within the reference class) URL
+  key_linkable :url # A Reference has a unique (within the reference class) URL
 
   include Referrable
   include Typeable
@@ -81,6 +81,11 @@ end
 
 class RecipeReference < Reference
 
+  def self.find_or_initialize params
+    paramsclone = params.clone.merge type: "RecipeReference"
+    super(paramsclone)
+  end
+
 end
 
 class ImageReference < Reference
@@ -152,6 +157,34 @@ class ImageReference < Reference
 
 end
 
+# Site references can be accessed by matching a URL which may be much longer than the reference URL
 class SiteReference < Reference
+  # Find and return the site wherein the named link is stored
+  def self.by_link (link, all=false)
+    # Sanitize the URL
+    link = link.strip.gsub(/\{/, '%7B').gsub(/\}/, '%7D')
+    begin
+      uri = URI link
+    rescue Exception => e
+      uri = nil
+    end
+    debugger
+    if uri && !uri.host.blank?
+      uri.path = ""
+      uri.query = uri.fragment = nil
+      matches = Reference.where(type: "SiteReference").where('url ILIKE ?', "#{uri.to_s}%")
+      if all
+        matches
+      else
+        matches[1..-1].inject(matches.first) { |result, this|
+          # If more than one match, seek the longest
+          (link.match this.url) && (result.url.length < this.url.length) ? this : result
+        } #  || Site.create(:sample => link)
+      end
+    else
+      puts "Ill-formed link: '#{link}'"
+      nil
+    end
+  end
 
 end

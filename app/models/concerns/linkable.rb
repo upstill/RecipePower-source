@@ -2,15 +2,6 @@ require './lib/uri_utils.rb'
 
 # Manage a URL associated with a model such that the URL is unique across the model's class
 module Linkable
-=begin
-  def included(base)
-    debugger
-    base.extend ClassMethods
-    base.class_eval do
-      @@href_attribute_name = @@url_attribute_name = nil
-    end
-  end
-=end
   extend ActiveSupport::Concern
 
   module ClassMethods
@@ -24,10 +15,68 @@ module Linkable
     #   the case of images, which may have a relative path)
     # site_from: specifies an attribute that can be used to look up the site associated with the URL
     #   (only matters for classes with multiple linkable attributes)
-    def linkable(attribute, ref_attribute=nil, ref_type=nil, options = {} )
-      if ref_attribute.is_a? Hash
-        options = ref_attribute
-        ref_attribute = options[:ref_attribute]
+
+    # A linkable attribute isn't a key for the class, but DOES have a corresponding reference
+    def linkable(url_attribute, href_attribute, ref_type, options = {} )
+      if href_attribute.is_a? Hash
+        options = href_attribute
+        href_attribute = options[:href_attribute]
+        ref_type = options[:ref_type]
+      end
+      self.class_eval do
+        # Critical method to ensure no two linkables of the same class [offset] have the same link
+        define_singleton_method :find_or_initialize do |params|
+          # Normalize it
+          url = params[url_attribute]
+          href = params[href_attribute]
+          obj = self.new params
+          if url.blank? # Check for non-empty URL
+            obj.errors.add url_attribute, "can't be blank"
+          elsif !(normalized = normalize_and_test_url url, href)
+            obj.errors.add url_attribute, "\'#{url}\' doesn't seem to be a working URL. Can you use it as an address in your browser?"
+          else
+            urlspec = {url_attribute => normalized}
+            obj.attributes = urlspec
+            if extant = self.where(params.slice(:type).merge urlspec).first
+              # Recipe already exists under this url
+              obj = extant
+            end
+          end
+          obj
+        end
+      end # class_eval
+
+      attr_accessible url_attribute
+      if options[:href_attribute] # This is a fallback attribute, a url for resolving partial paths
+        attr_accessible options[:href_attribute]
+      end
+      belongs_to href_attribute, :class_name => "Reference", :conditions => "type = '#{ref_type}'" # has_one :link, :as => :entity
+      accepts_nested_attributes_for href_attribute
+
+      self.instance_eval do
+        # Define singleton getter and setter methods for the reference
+        define_method "#{url_attribute}=" do |pu|
+          prior = self.method(url_attribute).call
+          unless (pu || "") == (prior || "") # Compares correctly even if one is nil
+            newref = pu.blank? ? nil : Reference.find_or_initialize(type: ref_type, url: pu)
+            self.method("#{href_attribute}=").call newref
+          end
+          pu
+        end
+
+        define_method(url_attribute) do
+          ref_obj = self.method(href_attribute).call
+          ref_obj ? ref_obj.url : super()
+        end
+      end
+    end
+
+    # key_linkable refers to a url attribute that must be unique across the owning class.
+    # The URL may or may not be defined by a corresponding Reference
+    def key_linkable(url_attribute, href_attribute=nil, ref_type=nil, options = {} )
+      if href_attribute.is_a? Hash
+        options = href_attribute
+        href_attribute = options[:href_attribute]
         ref_type = options[:ref_type]
       end
       self.class_eval do
@@ -39,73 +88,63 @@ module Linkable
         define_singleton_method :href_attribute_name do
           self.class_variable_get '@@href_attribute_name'
         end
+
+        # Critical method to ensure no two linkables of the same class [offset] have the same link
+        define_singleton_method :find_or_initialize do |params|
+          # Normalize it
+          url_attribute_name = self.url_attribute_name # self.class_variable_get '@@url_attribute_name'
+          url = params[url_attribute_name]
+          href_attribute_name = self.href_attribute_name # self.class_variable_get '@@href_attribute_name'
+          href = params[href_attribute_name]
+          obj = self.new params
+          if url.blank? # Check for non-empty URL
+            obj.errors.add url_attribute_name, "can't be blank"
+          elsif !(normalized = normalize_and_test_url url, href)
+            obj.errors.add url_attribute_name, "\'#{url}\' doesn't seem to be a working URL. Can you use it as an address in your browser?"
+          else
+            urlspec = {url_attribute_name => normalized}
+            obj.attributes = urlspec
+            if extant = self.where(params.slice(:type).merge urlspec).first
+              # Recipe already exists under this url
+              obj = extant
+            end
+          end
+          obj
+        end
       end
 
-      attr_accessible attribute
-      debugger
-      self.class_variable_set '@@url_attribute_name', attribute unless self.class_variable_get '@@url_attribute_name'
-      # self.url_attribute_name = attribute unless self.url_attribute_name  # Defaults to the first attribute named as linkable
+      attr_accessible url_attribute
+      self.class_variable_set '@@url_attribute_name', url_attribute unless self.class_variable_get '@@url_attribute_name'
+      # self.url_attribute_name = url_attribute unless self.url_attribute_name  # Defaults to the first url_attribute named as linkable
       self.class_variable_set '@@url_attribute_name', options[:site_from] if options[:site_from] #...but can be forced thus
 
-      if options[:href_attribute]
+      if options[:href_attribute] # This is a fallback attribute, a url for resolving partial paths
         self.class_variable_set '@@href_attribute_name', options[:href_attribute]
         attr_accessible options[:href_attribute]
       end
 
-      if ref_attribute
-        belongs_to ref_attribute, :class_name => "Reference", :conditions => "type = '#{ref_type}'" # has_one :link, :as => :entity
-        accepts_nested_attributes_for ref_attribute
-      end
+      if href_attribute # Delegate URL access to a corresponding reference
+        belongs_to href_attribute, :class_name => "Reference", :conditions => "type = '#{ref_type}'" # has_one :link, :as => :entity
+        accepts_nested_attributes_for href_attribute
 
-      if ref_attribute
         self.instance_eval do
-          define_method "#{attribute}=" do |pu|
-            prior = self.method(attribute).call
-            return pu if (pu || "") == (prior || "") # Compares correctly even if one is nil
-            if ref_attribute
+          # Define singleton getter and setter methods for the reference
+          define_method "#{url_attribute}=" do |pu|
+            prior = self.method(url_attribute).call
+            unless (pu || "") == (prior || "") # Compares correctly even if one is nil
               newref = pu.blank? ? nil : Reference.find_or_initialize(type: ref_type, url: pu)
-              self.method("#{ref_attribute}=").call newref
-            else
-              super(pu) # Assume that the generic setter method applies, i.e., that the field exists explicitly
+              self.method("#{href_attribute}=").call newref
             end
             pu
           end
 
-          define_method(attribute) do
-            if ref_attribute
-              ref_obj = self.method(ref_attribute).call
-              ref_obj ? ref_obj.url : super()
-            else
-              super()
-            end
+          define_method(url_attribute) do
+            ref_obj = self.method(href_attribute).call
+            ref_obj ? ref_obj.url : super()
           end
         end
       end
     end # Linkable
-
-    # Critical method to ensure no two linkables of the same class [offset] have the same link
-    def find_or_initialize(params)
-      # Normalize it
-      debugger
-      url_attribute_name = self.url_attribute_name # self.class_variable_get '@@url_attribute_name'
-      url = params[url_attribute_name]
-      href_attribute_name = self.href_attribute_name # self.class_variable_get '@@href_attribute_name'
-      href = params[href_attribute_name]
-      obj = self.new params
-      if url.blank? # Check for non-empty URL
-        obj.errors.add url_attribute_name, "can't be blank"
-      elsif !(normalized = normalize_and_test_url url, href)
-        obj.errors.add url_attribute_name, "\'#{url}\' doesn't seem to be a working URL. Can you use it as an address in your browser?"
-      else
-        urlspec = {url_attribute_name => normalized}
-        obj.attributes = urlspec
-        if extant = self.where(params.slice(:type).merge urlspec).first
-          # Recipe already exists under this url
-          obj = extant
-        end
-      end
-      obj
-    end
   end # ClassMethods
 
   def self.included(base)
@@ -115,7 +154,6 @@ module Linkable
   public
 
   def site
-    debugger
     return @site if @site
     primary_url = self.method(self.class.url_attribute_name).call
     unless @site = primary_url && Site.by_link(primary_url)

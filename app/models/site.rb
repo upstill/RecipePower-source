@@ -19,6 +19,7 @@ end
 class Site < ActiveRecord::Base
   include Taggable
   include Linkable # Required by Picable
+  key_linkable :home
   include Picable
   picable :logo, :thumbnail, :home # Keep a logo URL identified with an ImageReference denoted by :thumbnail
 
@@ -30,7 +31,7 @@ class Site < ActiveRecord::Base
   #      may alter the path
   # Also, in most cases, site==home (when the domain is home, i.e. subsite is empty); in others, (site+subsite)==home,
   #     and only rarely will home be different from either of those
-  attr_accessible :finders_attributes, :site, :home, :scheme, :subsite, :sample, :host, :name, :port, :logo, :ttlcut, :finders, :reviewed, :description
+  attr_accessible :finders_attributes, :oldsite, :home, :scheme, :subsite, :sample, :host, :name, :port, :logo, :ttlcut, :finders, :reviewed, :description
 #   serialize :finders, Array
 
   belongs_to :referent # See before_destroy method, :dependent=>:destroy
@@ -58,7 +59,7 @@ protected
   end
 
   def post_init
-    unless self.site
+    unless self.oldsite
       # We need to initialize the fields of the record, starting with site, based on sample
       # Ignore the query for purposes of gleaning the site
       if link = self.sample
@@ -73,8 +74,8 @@ protected
           puts "Creating host matching #{urisq.host} for #{link} with subsite \'#{self.subsite||""}\'"
           puts "Link is '#{link}'; path is '#{urisq.path}'"
           # Define the site as the link minus the sample (sub)path
-          self.site = linksq.sub(/#{urisq.path}$/, "")
-          puts "...from which extracted site '#{self.site}'"
+          self.oldsite = linksq.sub(/#{urisq.path}$/, "")
+          puts "...from which extracted site '#{self.oldsite}'"
 
           # Reconstruct the sample from the link's path, query and fragment
           self.sample = urisq.path + (query || "")
@@ -90,9 +91,9 @@ protected
           self.errors << "Can't make sense of URI"
         end
       end
-      if !self.site
+      if !self.oldsite
         # "Empty" site (probably defaults)
-        self.site = ""
+        self.oldsite = ""
         self.subsite = ""
         self.name = "Anonymous"
       end
@@ -107,7 +108,7 @@ public
   end
 
   def sampleURL
-    self.site+(self.sample||"")
+    self.oldsite+(self.sample||"")
   end
 
   # By default the site's home page is (site+subsite), but that may be overridden (due to indirection) by
@@ -135,9 +136,9 @@ public
       # So: among matching hosts, find one whose 'site+subsite' is an initial substring of the link
       matching_subsites = []; matching_sites = []
       sites.each do |site|
-        unless site.site.empty?
-          matching_sites << site if link.index(site.site)
-          matching_subsites << site if !site.subsite.empty? && link.index(site.site+site.subsite)
+        unless site.oldsite.empty?
+          matching_sites << site if link.index(site.oldsite)
+          matching_subsites << site if !site.subsite.empty? && link.index(site.oldsite+site.subsite)
         end
       end
       all ? (matching_sites+matching_subsites).uniq : (matching_subsites[0] || matching_sites[0] || Site.create(:sample=>link))

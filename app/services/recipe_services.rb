@@ -12,10 +12,10 @@ class RecipeServices
 
   def fix_one
     unless @recipe.reference_id
-      @recipe.reference = Reference.find_or_initialize url: @recipe.url, type: "RecipeReference"
+      @recipe.reference = Reference::RecipeReference.find_or_initialize url: @recipe.url
     end
     if @recipe.picurl && !@recipe.picture_id
-      @recipe.picture = Reference.find_or_initialize url: @recipe.picurl, type: "ImageReference"
+      @recipe.picture = Reference::ImageReference.find_or_initialize url: @recipe.picurl
     end
     @recipe.save
   end

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140417223359) do
+ActiveRecord::Schema.define(version: 20140425032208) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -249,24 +249,8 @@ ActiveRecord::Schema.define(version: 20140417223359) do
     t.integer  "user_id"
   end
 
-  create_table "site_referents", force: true do |t|
-    t.string   "site"
-    t.string   "sample"
-    t.string   "home"
-    t.string   "subsite"
-    t.string   "scheme"
-    t.string   "host"
-    t.string   "port"
-    t.string   "logo"
-    t.text     "tags_serialized"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.string   "ttlcut"
-    t.string   "ttlrepl"
-  end
-
   create_table "sites", force: true do |t|
-    t.string   "site"
+    t.string   "oldsite"
     t.text     "sample"
     t.string   "home"
     t.string   "subsite"

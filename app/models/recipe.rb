@@ -11,8 +11,8 @@ class Recipe < ActiveRecord::Base
 
   include Linkable
   # The url attribute is handled by a reference of type RecipeReference
-  linkable :url, :reference, "RecipeReference", :site_from => :url
-  # The image url attribute is handled by a reference of type ImageReference
+  key_linkable :url, :reference, "RecipeReference", :site_from => :url
+  # The picurl attribute is handled by the :picture reference of type ImageReference
   include Picable
   picable :picurl, :picture, :url # linkable :picurl, :picture, "ImageReference", :href_attribute => :url
 

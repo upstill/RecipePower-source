@@ -252,6 +252,18 @@ end
 class SiteServices
   attr_accessor :site
 
+  def self.convert_to_sti
+    self.all.each { |site| self.new(site).convert_to_sti }
+  end
+
+  def convert_to_sti
+    ref_path = "#{@site.oldsite}#{@site.subsite}"
+    debugger
+    ref = Reference::SiteReference.find_or_initialize url: ref_path
+    ref.affiliate = @site
+    ref.save
+  end
+
   def initialize site
     @site = site
     site_finders # Preload the finders
@@ -324,7 +336,7 @@ class SiteServices
   def resolve(candidate)
     return candidate if candidate.blank? || (candidate =~ /^\w*:/)
     begin
-      URI.join(@site.site, candidate).to_s
+      URI.join(@site.oldsite, candidate).to_s
     rescue
       candidate
     end
@@ -503,7 +515,7 @@ class SiteServices
     Site.all[100..110].each do |site|
       ss = self.new site
       puts "------------------------------------------------------------------------"
-      puts "site: "+site.site
+      puts "site: "+site.oldsite
       puts "home: "+site.home_page
       puts "sample: "+site.sampleURL
       if pagetags = fr.collect_results(site.sampleURL, [:URI, :Title, :Image], true, site)
