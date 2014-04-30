@@ -11,7 +11,7 @@ class Recipe < ActiveRecord::Base
 
   include Linkable
   # The url attribute is handled by a reference of type RecipeReference
-  key_linkable :url, :reference, "RecipeReference", :site_from => :url
+  key_linkable :url, :reference, :site_from => :url
   # The picurl attribute is handled by the :picture reference of type ImageReference
   include Picable
   picable :picurl, :picture, :url # linkable :picurl, :picture, "ImageReference", :href_attribute => :url
@@ -38,8 +38,8 @@ class Recipe < ActiveRecord::Base
 
   # Here lies the heart of enforcement, where we ensure that a recipe is uniquely linked to its url and vice versa
   def self.find_or_initialize params
-    ref = Reference.find_or_initialize params.slice(:url, :href).merge(type: "RecipeReference")
-    otherparams = params.clone.slice! :picurl, :title # , :url, :href # Remove these parameters
+    ref = RecipeReference.find_or_initialize params[:url]
+    otherparams = params.clone.slice! :picurl, :title # Handle these separately
     if rcp = ref.affiliate
       rcp.update_attributes otherparams
     else
@@ -50,16 +50,18 @@ class Recipe < ActiveRecord::Base
     if ref.errors.any?
       rcp.errors.add :url, "doesn't lead anywhere"
     else
+      ref.save
       # Now handle the picture by creating an image reference for it
       ss = SiteServices.new rcp.site
       picurl = ss.resolve(params[:picurl])
-      picture = Reference.find_or_initialize(type: "ImageReference", url: picurl) unless params[:picurl].blank?
+      picture = ImageReference.find_or_initialize(picurl) unless picurl.blank?
       rcp.picture = picture unless picture.errors.any?
       # rcp.picurl = ss.resolve rcp.picurl unless rcp.picurl.blank?
       rcp.title = ss.trim_title params[:title] unless params[:title].blank?
     end
     rcp
   end
+
 
   # Either fetch an existing recipe record or make a new one, based on the
   # params. If the params have an :id, we find on that, otherwise we look

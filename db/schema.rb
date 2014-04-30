@@ -192,14 +192,12 @@ ActiveRecord::Schema.define(version: 20140425032208) do
     t.datetime "created_at",                           null: false
     t.datetime "updated_at",                           null: false
     t.integer  "reference_type"
-    t.string   "url"
+    t.text     "url"
     t.integer  "affiliate_id"
-    t.string   "affiliate_type"
     t.string   "type",           default: "Reference"
-    t.text     "picurl"
-    t.integer  "thumbnail_id"
     t.text     "thumbdata"
     t.integer  "status"
+    t.boolean  "canonical",      default: false
   end
 
   create_table "referent_relations", force: true do |t|

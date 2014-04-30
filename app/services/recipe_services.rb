@@ -1,3 +1,5 @@
+require 'reference.rb'
+
 class RecipeServices
   attr_accessor :current_user, :recipe
   
@@ -6,18 +8,50 @@ class RecipeServices
     @current_user = current_user
   end
 
-  def self.fix_all
-    Recipe.all.each { |recipe| self.new(recipe).fix_one }
+  def self.convert_all_to_references n=1
+    Recipe.all[0..n].each { |recipe|
+      recipe.picture_id = recipe.reference_id = nil
+      self.new(recipe).convert_to_reference
+    }
   end
 
-  def fix_one
-    unless @recipe.reference_id
-      @recipe.reference = Reference::RecipeReference.find_or_initialize url: @recipe.url
+  def convert_to_reference
+    @recipe.reference = RecipeReference.find_or_create @recipe.url, affiliate: @recipe
+
+    if @recipe.picurl
+      @recipe.picture = ImageReference.find_or_create @recipe.picurl, thumbdata: (@recipe.thumbnail ? @recipe.thumbnail.thumbdata : nil)
     end
-    if @recipe.picurl && !@recipe.picture_id
-      @recipe.picture = Reference::ImageReference.find_or_initialize url: @recipe.picurl
-    end
+
     @recipe.save
+  end
+
+  def self.test_all_conversions
+    Recipe.all.each { |recipe| self.new(recipe).test_conversion }
+  end
+
+  def test_conversion
+    thumbnail = @recipe.thumbnail
+    picture = @recipe.picture
+    if thumbnail && (
+      (thumbnail.nil? != picture.nil?) ||
+      (thumbnail.url != picture.url) ||
+      (thumbnail.thumbdata != picture.thumbdata)
+    )
+      puts "Recipe ##{@recipe.id}: url #{@recipe.url} picurl #{@recipe.picurl}"
+      puts "\tThumbnail ##{thumbnail.id}: url #{thumbnail.url}, thumbdata #{(thumbnail.thumbdata||"")[0..50]}" if thumbnail
+      puts "\t Picture  #{picture.id}: url #{picture.url}, thumbdata #{(picture.thumbdata||"")[0..50]}" if picture
+      debugger
+      x=2
+    end
+    siteref = Reference::SiteReference.by_link @recipe.url
+    if siteref.affiliate != @recipe.site
+      puts "Recipe ##{@recipe.id}: url #{@recipe.url} picurl #{@recipe.picurl}"
+      puts "\tSite ##{@recipe.site.id}: oldsite #{@recipe.site.oldsite}, subsite: #{@recipe.site.subsite}"
+      puts "\tReference #{siteref.id}: url #{siteref.url}"
+      puts "\tRef. Affiliate Site ##{siteref.affiliate.id}: oldsite #{siteref.affiliate.oldsite}, subsite: #{siteref.affiliate.subsite}"
+      debugger
+      x=2
+    end
   end
 
   def scrape

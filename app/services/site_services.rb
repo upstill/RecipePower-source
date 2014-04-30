@@ -1,4 +1,5 @@
 require 'yaml'
+require 'reference.rb'
 
 class String
   def remove_non_ascii
@@ -252,16 +253,75 @@ end
 class SiteServices
   attr_accessor :site
 
-  def self.convert_to_sti
-    self.all.each { |site| self.new(site).convert_to_sti }
+  def self.convert_all_to_references n=-1
+
+    bad = []
+    Site.all[0..n].each { |site|
+      bad << site unless self.new(site).convert_to_reference
+    }
+    debugger
+    puts "Bad sites: "
+    bad.each { |bs|
+      puts "Site ##{bs.id} (home #{bs.oldsite}#{bs.subsite}) collides with..."
+      ref = SiteReference.find_or_initialize "#{bs.oldsite}#{bs.subsite}"
+      extant = ref.site
+      puts "...site ##{extant.id} (home #{extant.oldsite}#{extant.subsite})"
+    }
+    nil
   end
 
-  def convert_to_sti
+  def convert_to_reference
+    begin
+      SiteReference.find_or_create "#{@site.oldsite}#{@site.subsite}", affiliate: @site
+    rescue => exc
+      ref = SiteReference.find_or_initialize "#{@site.oldsite}#{@site.subsite}"
+      puts "Site ##{@site.id} (home #{@site.oldsite}#{@site.subsite}) is colliding with existing..."
+      extant = ref.site
+      puts "...site ##{extant.id} (home #{extant.oldsite}#{extant.subsite})"
+      # extant.merge @site
+      nil
+    end
+=begin
+    ref = SiteReference.find_or_initialize "#{@site.oldsite}#{@site.subsite}", affiliate: @site
+    if ref.id
+      puts "Site ##{@site.id} (home #{@site.oldsite}#{@site.subsite}) is colliding with existing..."
+      debugger
+      other = ref.affiliate
+      puts "...site ##{other.id} (home #{other.oldsite}#{other.subsite})"
+    else
+      ref.affiliate = @site
+      ref.save
+    end
+=end
+  end
+
+  # Confirm that the site references correspond to legacy sites
+  def self.test_conversion
+    Site.all.each { |site|  self.new(site).test_conversion }
+    Recipe.all.each { |recipe|
+      site_ref = SiteReference.by_link recipe.url
+      rcpsite = recipe.site # Find by standard means
+      if !site_ref || (recipe.site != site_ref.site)
+        puts "Recipe's site ##{rcpsite.id} (home #{rcpsite.oldsite}#{rcpsite.subsite}) doesn't match SiteReference..."
+        if site_ref
+          puts "...##{site_ref.id} url #{site_ref.url}"
+          puts "...to site ##{site_ref.affiliate.id} (home #{site_ref.affiliate.oldsite}#{site_ref.affiliate.subsite})"
+        else
+          puts "(none found)"
+        end
+        debugger
+        x=2
+      end
+    }
+  end
+
+  def test_conversion
     ref_path = "#{@site.oldsite}#{@site.subsite}"
-    debugger
-    ref = Reference::SiteReference.find_or_initialize url: ref_path
-    ref.affiliate = @site
-    ref.save
+    site_ref = SiteReference.by_link ref_path
+    if !site_ref || site_ref.affiliate != @site
+      debugger
+      x=2
+    end
   end
 
   def initialize site

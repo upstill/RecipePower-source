@@ -47,19 +47,38 @@ def safe_parse(url)
   end
 end
 
-def normalize_url(url)
-  (uri = safe_parse(url)) && uri.normalize.to_s
+def sanitize_url url
+  url.strip.gsub(/\{/, '%7B').gsub(/\}/, '%7D')
 end
 
-def normalize_and_test_url(url, href=nil)
-  return nil unless normalized = normalize_url(url)
+# Return nil if anything is amiss, including nil or empty url
+def normalize_url url
+  ((uri = safe_parse(sanitize_url url)) && uri.normalize.to_s) unless url.blank?
+end
+
+# Parse the url and return the protocol, host and port portion
+def host_url url
+  if (uri = safe_parse(sanitize_url url)) && !uri.host.blank?
+    uri.path = ""
+    uri.query = uri.fragment = nil
+    uri.normalize.to_s
+  end
+end
+
+# Test that a (previously normalized) url works, possibly relative to a secondary href.
+def test_url normalized, href=nil
   if !(valid_url = test_link(normalized))
-    # Try to construct a valid url by merging the href and the url
+    # Try to construct a valid normalized by merging the href and the url
     if (uri = safe_parse(href)) && (normalized = uri.normalize.merge(normalized).to_s)
       valid_url = test_link normalized
     end
   end
   ((valid_url.kind_of? String) ? valid_url : normalized) if valid_url
+end
+
+def normalize_and_test_url(url, href=nil)
+  return nil unless normalized = normalize_url(url)
+  test_url normalized, href
 end
 
 # Confirm that a proposed URL (with an optional subpath) actually has content at the other end

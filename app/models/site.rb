@@ -118,7 +118,7 @@ public
   end
   
   # Find and return the site wherein the named link is stored
-  def self.by_link (link, all=false)
+  def self.by_link link
     # Sanitize the URL
     link.strip!
     link.gsub!(/\{/, '%7B')
@@ -141,11 +141,32 @@ public
           matching_subsites << site if !site.subsite.empty? && link.index(site.oldsite+site.subsite)
         end
       end
-      all ? (matching_sites+matching_subsites).uniq : (matching_subsites[0] || matching_sites[0] || Site.create(:sample=>link))
+      (matching_subsites[0] || matching_sites[0] || Site.create(:sample=>link))
     else
       puts "Ill-formed link: '#{link}'"
       nil
     end
+  end
+
+  # Merge another site into this one, optionally destroying the other
+  def merge other, nuke=true
+    # If the other has a Reference, that's a deal-breaker
+    if other.reference
+      raise "Can't nuke site which has an attached reference"
+    end
+    # Merge corresponding referents
+    if other.referent
+      if self.referent
+        self.referent.merge other.referent
+      else
+        other.referent.destroy
+      end
+    end
+    # If these refer to the same external site, merge the other's feeds in
+    if SiteReference.canonical_url("#{oldsite}#{subsite}") == SiteReference.canonical_url("#{other.oldsite}#{other.subsite}")
+      self.feed_ids = (self.feed_ids + other.feed_ids).uniq
+    end
+    other.destroy if nuke
   end
 
   def name

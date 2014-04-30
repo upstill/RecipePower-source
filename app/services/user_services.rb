@@ -1,3 +1,4 @@
+require 'reference.rb'
 class UserServices
   
   attr_accessor :user
@@ -8,6 +9,13 @@ class UserServices
   
   def initialize(user)
     self.user = user
+  end
+
+  def self.convert_all_to_references n=-1
+    User.where("image <> ''")[0..n].each do |u|
+      u.thumbnail = ImageReference.find_or_create u.image
+      u.save
+    end
   end
 
   def analyze_invitees(against_user)
