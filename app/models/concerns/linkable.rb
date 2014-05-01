@@ -32,8 +32,12 @@ module Linkable
       attr_accessible url_attribute
 
       # Can get back to references this way:
-      has_many reference_association_pl, -> { where type: ref_type }, foreign_key: "affiliate_id", class_name: ref_type
-      has_one reference_association, -> { where type: ref_type, canonical: true }, foreign_key: "affiliate_id", class_name: ref_type
+      if options[:as]
+        belongs_to reference_association, class_name: ref_type
+      else
+        has_many reference_association_pl, -> { where type: ref_type }, foreign_key: "affiliate_id", class_name: ref_type
+        has_one reference_association, -> { where type: ref_type, canonical: true }, foreign_key: "affiliate_id", class_name: ref_type
+      end
 
       self.class_eval do
         unless options[:as]

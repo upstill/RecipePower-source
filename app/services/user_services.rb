@@ -13,6 +13,7 @@ class UserServices
 
   def self.convert_all_to_references n=-1
     User.where("image <> ''")[0..n].each do |u|
+      debugger
       u.thumbnail = ImageReference.find_or_create u.image
       u.save
     end
