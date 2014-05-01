@@ -5,16 +5,12 @@ module Picable
 
     module ClassMethods
 
-      def picable(attribute, reference_name, home=nil)
-        linkable attribute, reference_name, "ImageReference", href_attribute: home
+      def picable attribute, reference_name=:picture
+        linkable attribute, reference_name, :as => "ImageReference"
         self.class_eval do
           class_variable_set '@@pic_attribute_name', attribute
-          class_variable_set '@@home_attribute_name', home
           define_singleton_method :pic_attribute_name do
             self.class_variable_get '@@pic_attribute_name'
-          end
-          define_singleton_method :home_attribute_name do
-            self.class_variable_get '@@home_attribute_name'
           end
         end
       end

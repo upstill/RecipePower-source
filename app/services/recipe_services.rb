@@ -10,16 +10,16 @@ class RecipeServices
 
   def self.convert_all_to_references n=1
     Recipe.all[0..n].each { |recipe|
-      recipe.picture_id = recipe.reference_id = nil
+      recipe.picture_id = nil
       self.new(recipe).convert_to_reference
     }
   end
 
   def convert_to_reference
-    @recipe.reference = RecipeReference.find_or_create @recipe.url, affiliate: @recipe
+    @recipe.url = @recipe.url # @recipe.reference = RecipeReference.find_or_create @recipe.url, affiliate: @recipe
 
     if @recipe.picurl
-      @recipe.picture = ImageReference.find_or_create @recipe.picurl, thumbdata: (@recipe.thumbnail ? @recipe.thumbnail.thumbdata : nil)
+      @recipe.picture = ImageReference.find_or_initialize @recipe.picurl, thumbdata: (@recipe.thumbnail ? @recipe.thumbnail.thumbdata : nil)
     end
 
     @recipe.save

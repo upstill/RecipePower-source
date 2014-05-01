@@ -11,10 +11,10 @@ class Recipe < ActiveRecord::Base
 
   include Linkable
   # The url attribute is handled by a reference of type RecipeReference
-  key_linkable :url, :reference, :site_from => :url
+  linkable :url, :reference
   # The picurl attribute is handled by the :picture reference of type ImageReference
   include Picable
-  picable :picurl, :picture, :url # linkable :picurl, :picture, "ImageReference", :href_attribute => :url
+  picable :picurl, :picture
 
   attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :tagpane, :description, #, :picurl :href
                   :misc_tag_tokens, :collection_tokens, :channel_tokens

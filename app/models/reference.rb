@@ -1,13 +1,11 @@
 class Reference < ActiveRecord::Base
-  # include Linkable
-  # key_linkable :url # A Reference has a unique (within the reference class) URL
 
   include Referrable
   include Typeable
 
   # belongs_to :affiliate, polymorphic: true
 
-  attr_accessible :reference_type, :type
+  attr_accessible :reference_type, :type, :url
 
   validates_uniqueness_of :url, :scope => :type
   
@@ -96,6 +94,12 @@ class Reference < ActiveRecord::Base
       obj.affiliate = affiliate
       root_ref.save if root_ref != obj
     end
+    obj
+  end
+
+  def self.find_or_create url, params={}
+    obj = self.find_or_initialize url, params
+    obj.save unless obj.id || obj.errors.any?
     obj
   end
 
@@ -222,11 +226,12 @@ end
 class SiteReference < Reference
   belongs_to :site, foreign_key: "affiliate_id"
 
-  # Find and return the source site for the named link
+  # Find and return the SiteReference for the named link
   def self.by_link link
     # Sanitize and normalize the URL
-    if canonical_url = self.canonical_url(link)
-      Reference.where(type: self.to_s, url: canonical_url).first || super.find_or_initialize(host_url link)
+    if !link.blank? && canonical_url = self.canonical_url(link)
+      self.find_or_create canonical_url
+      # Reference.where(type: self.to_s, url: canonical_url).first || self.find_or_initialize(host_url link)
     end
   end
 
@@ -238,7 +243,7 @@ class SiteReference < Reference
     if host_url = host_url(normalized_link)
       # Candidates are all sites with a matching host
       matches = Reference.where(type: "SiteReference").where('url ILIKE ?', "#{host_url}%")
-      longest = matches[1..-1].inject(matches.first) { |result, this|
+      longest = matches.first && matches[1..-1].inject(matches.first) { |result, this|
         # If more than one match, seek the longest
         (normalized_link.match this.url) && (result.url.length < this.url.length) ? this : result
       }

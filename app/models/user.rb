@@ -5,7 +5,7 @@ class User < ActiveRecord::Base
   include Voteable
   include Linkable # Required by Picable
   include Picable
-  # Keep an avatar URL denoted by :image and stored in :thumbnail
+  # Keep an avatar URL denoted by the :image attribute and kept as :thumbnail
   picable :image, :thumbnail
 
   # Include default devise modules. Others available are:

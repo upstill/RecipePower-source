@@ -184,8 +184,6 @@ ActiveRecord::Schema.define(version: 20140425032208) do
     t.integer  "thumbnail_id"
     t.text     "href"
     t.text     "description"
-    t.integer  "reference_id"
-    t.integer  "picture_id"
   end
 
   create_table "references", force: true do |t|
