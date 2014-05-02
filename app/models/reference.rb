@@ -43,6 +43,17 @@ class Reference < ActiveRecord::Base
     save
   end
 
+  # Index a Reference by a URL. NB: This WILL resort to a ping on the URL if no reference is found directly on the normalized url
+  # In general it is MUCH faster to find the reference for an object via its :reference association
+  def self.by_link url
+    normalized = normalize_url url
+    unless normalized.blank? # Check for non-empty URL
+      Reference.where(type: self.to_s, url: normalized).first ||
+      ((redirected = test_url(url)) &&
+        Reference.where(type: self.to_s, url: redirected).first)
+    end
+  end
+
   # Return a (perhaps unsaved) reference for the given url
   def self.find_or_initialize url, params = {}
 
@@ -105,7 +116,7 @@ class Reference < ActiveRecord::Base
 
   # Ping the reference's URL, setting its canonical bit appropriately
   def ping
-    self.url = normalize_url(url) unless self.canonical
+    self.url = normalize_url(url) unless self.canonical # We keep the canonical url exactly as redirected (no normalization)
     if redirected = test_url(url)
       unless self.canonical = (redirected == url)
         # We need a separate canonical record
@@ -231,7 +242,6 @@ class SiteReference < Reference
     # Sanitize and normalize the URL
     if !link.blank? && canonical_url = self.canonical_url(link)
       self.find_or_create canonical_url
-      # Reference.where(type: self.to_s, url: canonical_url).first || self.find_or_initialize(host_url link)
     end
   end
 

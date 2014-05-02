@@ -33,8 +33,10 @@ module Linkable
 
       # Can get back to references this way:
       if options[:as]
+        # References for ancillary attributes (e.g., thumbnails) belong to their affiliates
         belongs_to reference_association, class_name: ref_type
       else
+        # References that define the location of their affiliates have a many-to-one relationship (i.e. many URLs can refer to the same entity)
         has_many reference_association_pl, -> { where type: ref_type }, foreign_key: "affiliate_id", class_name: ref_type
         has_one reference_association, -> { where type: ref_type, canonical: true }, foreign_key: "affiliate_id", class_name: ref_type
       end
@@ -87,12 +89,17 @@ module Linkable
           # Since we can't modify references once created, we can only assert a new
           # URL by resort to a new reference
           oldref = self.method(reference_association).call
-          self.method(:"#{reference_association}=").call Reference.find_or_initialize(pu, type: ref_type, affiliate: self)
-          if oldref != self.method(reference_association).call
-            if oldref
-              oldref.canonical = false
-              oldref.affiliate_id = id
-              oldref.save
+          if options[:as]
+            self.method(:"#{reference_association}=").call (pu.blank? ? nil : ref_type.constantize.find_or_initialize(pu))
+          else
+            self.errors.add("#{url_attribute} can't be blank") if pu.blank?
+            self.method(:"#{reference_association}=").call ref_type.constantize.find_or_initialize(pu, affiliate: self )
+            if oldref != self.method(reference_association).call
+              if oldref
+                oldref.canonical = false
+                oldref.affiliate_id = id
+                oldref.save
+              end
             end
           end
           if self.has_attribute? url_attribute

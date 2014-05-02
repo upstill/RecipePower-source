@@ -259,7 +259,6 @@ class SiteServices
     Site.all[0..n].each { |site|
       bad << site unless self.new(site).convert_to_reference
     }
-    debugger
     puts "Bad sites: "
     bad.each { |bs|
       puts "Site ##{bs.id} (home #{bs.oldsite}#{bs.subsite}) collides with..."
@@ -285,7 +284,6 @@ class SiteServices
     ref = SiteReference.find_or_initialize "#{@site.oldsite}#{@site.subsite}", affiliate: @site
     if ref.id
       puts "Site ##{@site.id} (home #{@site.oldsite}#{@site.subsite}) is colliding with existing..."
-      debugger
       other = ref.affiliate
       puts "...site ##{other.id} (home #{other.oldsite}#{other.subsite})"
     else
@@ -309,8 +307,6 @@ class SiteServices
         else
           puts "(none found)"
         end
-        debugger
-        x=2
       end
     }
   end
@@ -318,10 +314,8 @@ class SiteServices
   def test_conversion
     ref_path = "#{@site.oldsite}#{@site.subsite}"
     site_ref = SiteReference.by_link ref_path
-    if !site_ref || site_ref.affiliate != @site
-      debugger
-      x=2
-    end
+    # if !site_ref || site_ref.affiliate != @site
+    # end
   end
 
   def initialize site

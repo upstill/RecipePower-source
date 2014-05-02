@@ -8,20 +8,22 @@ class RecipeServices
     @current_user = current_user
   end
 
-  def self.convert_all_to_references n=1
+  def self.convert_all_to_references n=-1
+    bad = []
     Recipe.all[0..n].each { |recipe|
       recipe.picture_id = nil
-      self.new(recipe).convert_to_reference
+      begin
+        self.new(recipe).convert_to_reference
+      rescue => e
+        bad << recipe
+      end
     }
+    puts "Ids of redundant recipes: "+bad.map(&:id).join(', ')
   end
 
   def convert_to_reference
+    @recipe.picurl = @recipe.picurl
     @recipe.url = @recipe.url # @recipe.reference = RecipeReference.find_or_create @recipe.url, affiliate: @recipe
-
-    if @recipe.picurl
-      @recipe.picture = ImageReference.find_or_initialize @recipe.picurl, thumbdata: (@recipe.thumbnail ? @recipe.thumbnail.thumbdata : nil)
-    end
-
     @recipe.save
   end
 
@@ -40,18 +42,52 @@ class RecipeServices
       puts "Recipe ##{@recipe.id}: url #{@recipe.url} picurl #{@recipe.picurl}"
       puts "\tThumbnail ##{thumbnail.id}: url #{thumbnail.url}, thumbdata #{(thumbnail.thumbdata||"")[0..50]}" if thumbnail
       puts "\t Picture  #{picture.id}: url #{picture.url}, thumbdata #{(picture.thumbdata||"")[0..50]}" if picture
-      debugger
-      x=2
     end
-    siteref = Reference::SiteReference.by_link @recipe.url
+    siteref = SiteReference.by_link @recipe.url
     if siteref.affiliate != @recipe.site
       puts "Recipe ##{@recipe.id}: url #{@recipe.url} picurl #{@recipe.picurl}"
       puts "\tSite ##{@recipe.site.id}: oldsite #{@recipe.site.oldsite}, subsite: #{@recipe.site.subsite}"
       puts "\tReference #{siteref.id}: url #{siteref.url}"
       puts "\tRef. Affiliate Site ##{siteref.affiliate.id}: oldsite #{siteref.affiliate.oldsite}, subsite: #{siteref.affiliate.subsite}"
-      debugger
-      x=2
     end
+  end
+
+  # Find all recipes that are redundant (ie., they have the same canonical url as another) and merge them into their other.
+  def self.fix_redundant
+    redundant = []
+    Recipe.all.each { |rcp|
+      redundant << rcp unless rcp.reference
+    }
+    redundant.each { |rcp|
+      old_ref = RecipeReference.by_link(rcp.url) # Get the competitor
+      old_rcp = old_ref.recipe
+      puts "Recipe ##{rcp.id} (url #{rcp.url})..."
+      puts "  ...clashes with recipe ##{old_rcp.id} (url #{old_rcp.url})"
+      debugger
+    }
+  end
+
+
+  # Merge this recipe into another, optionally deleting it
+  def merge_into rcp, destroy=false
+    # Apply thumbnail and comment, if any
+    rcp.picurl = @recipe.picurl unless rcp.picurl
+    rcp.description = @recipe.description if rcp.description.blank?
+    @recipe.rcprefs.each { |my_ref|
+      # Redirect each rcpref to the other, merging them when there's already one for a user
+      # comment, private, status, in_collection, edit_count
+      if other_ref = rcp.ref_for(my_ref.user_id)
+        # Transfer reference information
+        other_ref.private ||= my_ref.private_methods
+        other_ref.comment = my_ref.comment if other_ref.comment.blank?
+        other_ref.in_collection ||= my_ref.in_collection
+        other_ref.edit_count += my_ref.edit_count
+      else
+        # Simply redirect the ref, thus moving the owner from the old recipe to the new
+        @recipe.rcprefs.delete my_ref
+        rcp.rcprefs << my_ref
+      end
+    }
   end
 
   def scrape

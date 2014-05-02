@@ -12,7 +12,7 @@ class ReferenceServices
   def self.convert_to_sti n=-1
     set = Reference.where(type: "Reference")[0..n].each do |ref|
       ref.type = ref.typesym.to_s+"Reference"
-      ref.ping
+      ref.save # ref.ping
     end
   end
 
