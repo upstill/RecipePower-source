@@ -33,7 +33,7 @@ module Picable
     end
 
     def private_homeurl
-      self.read_attribute self.class.home_attribute_name if self.class.home_attribute_name
+      self.read_attribute self.class.url_attribute_name if self.class.url_attribute_name
     end
 
     def private_picurl=(url)
