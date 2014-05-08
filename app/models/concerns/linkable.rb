@@ -2,13 +2,18 @@ require './lib/uri_utils.rb'
 require 'reference.rb'
 
 # Manage a URL associated with a model such that the URL is unique across the model's class
+
+# The mapping between URLs (expressed in References) and entities is many-to-one: many URLs
+# can point to the same entity (in particular, if a website redirects a request, both the
+# original and redirected URLs/References get applied to the same entity) but only one entity
+# can be associated with any given URL.
 module Linkable
   extend ActiveSupport::Concern
 
   module ClassMethods
 
-    # Make an attribute of the class linkable, i.e., it contains a URL which is unique to the class,
-    # and which is supplanted by a Reference object, except in the case of the Reference class.
+    # Make an attribute of the class linkable, i.e., it contains a URL which is unique within the class,
+    # and which is supplanted by a Reference object.
     # Options (the first two of which may be given positionally or by name in the options hash):
     # ref_attribute: a symbol for the attribute carrying a Reference object
     # as: the type of Reference that is to contain (URLs are only unique within a type)
@@ -18,9 +23,22 @@ module Linkable
     #   (only matters for classes with multiple linkable attributes)
 
 
-    # linkable declares a url attribute by which the given entity may be found. An entity may
-    # be referenced by multiple URLS but each URL leads to at most one entity.
-    # The URL may or may not be defined by a corresponding Reference
+    # linkable declares 1) a url attribute by which the given entity may be found, and 2) a polymorphic
+    # association for the corresponding reference. Generally, the url is actually stored in the reference,
+    # but for backward compatibility the url may also be found in the entity.
+    #
+    # Any entity may be referenced by multiple URLS but each URL leads to at most one entity. References
+    # have such affiliates for entities like recipes and sites that have more information than the URL. The
+    # type of the reference is constructed from the type of the entity plus "Reference", e.g. "RecipeReference"
+    # is a reference that has a Recipe as its extension, and is held by a Recipe.
+
+    # References may also be without affiliate for things like definitions, whose information is solely
+    # external, and images, which are captured from elsewhere but which have thumbnail data cached locally.
+    # The latter type may be referenced by entities, e.g. for the logo of a site, or the profile picture of
+    # a user, or the image associated with a recipe.
+    # In this case, the type of reference being used is given by the :as option to linkable, viz :as => ImageReference
+    #
+
     # options[:as]: the class which the referent keeps as an affiliate
     def linkable(url_attribute, reference_association, options = {})
       reference_association_pl = reference_association.to_s.pluralize.to_sym
@@ -63,13 +81,9 @@ module Linkable
               obj.errors.add url_attribute_name, "can't be blank"
             else
               # Normalize the url for lookup
-              ref = Reference.find_or_initialize(type: "#{self.to_s}Reference", url: url)
-              if ref.affiliate_id # Already referred to
-                ref.affiliate
-              else
-                ref.affiliate = obj = self.new(params)
-                ref.save
-              end
+              ref = Reference.find_or_initialize url, type: "#{self.to_s}Reference"
+              obj = ref.affiliate || self.new(params)
+              obj.method(:"#{reference_association}=").call ref
             end
             obj
           end
@@ -84,26 +98,38 @@ module Linkable
 
       self.instance_eval do
 
-        # Define singleton getter and setter methods for the URL, using a reference
+        # Define singleton getter and setter methods for the URL by using a Reference object.
+        # Once a URL is in use for an entity of a particular type (Recipe, site, image, etc.), it
+        # remains bound to that entity until the entity is destroyed.
+        # In particular, this gives a special meaning to url assignment: the URL is 1) checked that it
+        #  is unique within the class (actually, type of Reference) and then 2) non-destructively assigned
+        #  to the object by creating a new Reference bound to the object.
+        # IT IS AN ERROR TO ASSIGN A URL WHICH IS IN USE BY ANOTHER ENTITY OF THE SAME CLASS.
         define_method "#{url_attribute}=" do |pu|
           # Since we can't modify references once created, we can only assert a new
           # URL by resort to a new reference
-          oldref = self.method(reference_association).call
+          # Get the existing reference
           if options[:as]
+            # The reference is to another entity type: we just index by URL and assign the reference association
             self.method(:"#{reference_association}=").call (pu.blank? ? nil : ref_type.constantize.find_or_initialize(pu))
           else
+            # If the reference is to an identical type
             self.errors.add("#{url_attribute} can't be blank") if pu.blank?
+            oldref = self.method(reference_association).call # Remember the existing reference, if any
+
+            # Create a new reference as necessary, raising an exception if one already exists that is assigned
+            # to another entity.
             self.method(:"#{reference_association}=").call ref_type.constantize.find_or_initialize(pu, affiliate: self )
-            if oldref != self.method(reference_association).call
-              if oldref
-                oldref.canonical = false
-                oldref.affiliate_id = id
-                oldref.save
-              end
+            # The canonical reference for an entity is the one that is used for its reference association (as opposed
+            #  to its 'references' association of all the corresponding references)
+            if oldref && (oldref != self.method(reference_association).call)
+              oldref.canonical = false
+              oldref.affiliate_id = id  # XXX Why is this necessary? If the oldref exists, it should already be referring to us
+              oldref.save
             end
           end
           if self.has_attribute? url_attribute
-            # Set the old url attribute if it still exists
+            # Set the old url attribute--if it still exists
             super pu
           end
           pu

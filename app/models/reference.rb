@@ -3,8 +3,6 @@ class Reference < ActiveRecord::Base
   include Referrable
   include Typeable
 
-  # belongs_to :affiliate, polymorphic: true
-
   attr_accessible :reference_type, :type, :url
 
   validates_uniqueness_of :url, :scope => :type
@@ -139,6 +137,13 @@ class Reference < ActiveRecord::Base
       else
         self.affiliate_id = affiliate.id
       end
+    end
+  end
+
+  # Extract the affiliated object, according to the type of reference
+  def affiliate
+    if affiliate_id && (affiliate_type = self.class.to_s.sub(/Reference$/, ''))
+      affiliate_type.constantize.find(affiliate_id)
     end
   end
 

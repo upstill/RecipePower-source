@@ -37,30 +37,33 @@ class Recipe < ActiveRecord::Base
   @@coder = HTMLEntities.new
 
   # Here lies the heart of enforcement, where we ensure that a recipe is uniquely linked to its url and vice versa
+=begin
   def self.find_or_initialize params
+    rcp = super
     ref = RecipeReference.find_or_initialize params[:url]
     otherparams = params.clone.slice! :picurl, :title # Handle these separately
-    if rcp = ref.affiliate
+    if rcp = ref.recipe
       rcp.update_attributes otherparams
     else
       rcp = Recipe.new( otherparams )
       rcp.reference = ref
-      ref.affiliate = rcp
+      ref.recipe = rcp
     end
-    if ref.errors.any?
-      rcp.errors.add :url, "doesn't lead anywhere"
-    else
-      ref.save
-      # Now handle the picture by creating an image reference for it
-      ss = SiteServices.new rcp.site
-      picurl = ss.resolve(params[:picurl])
-      picture = ImageReference.find_or_initialize(picurl) unless picurl.blank?
-      rcp.picture = picture unless picture.errors.any?
-      # rcp.picurl = ss.resolve rcp.picurl unless rcp.picurl.blank?
-      rcp.title = ss.trim_title params[:title] unless params[:title].blank?
+    return rcp if rcp.errors.any?
+    if rcp.title.blank?
+      rcp.errors.add :title, "can't be blank"
+      return rcp
     end
+
+    ss = SiteServices.new rcp.site
+    picurl = ss.resolve(params[:picurl])
+    picture = ImageReference.find_or_initialize(picurl) unless picurl.blank?
+    rcp.picture = picture unless picture.errors.any?
+    # rcp.picurl = ss.resolve rcp.picurl unless rcp.picurl.blank?
+    rcp.title = ss.trim_title rcp.title unless rcp.title.blank?
     rcp
   end
+=end
 
 
   # Either fetch an existing recipe record or make a new one, based on the
@@ -105,11 +108,16 @@ class Recipe < ActiveRecord::Base
         end
       else # No id: create based on url
         params.delete(:rcpref)
-        rcp = Recipe.find_or_initialize params
+        rcp = self.find_or_initialize params
         if rcp.url.match %r{^http://#{current_domain}} # Check we're not trying to link to a RecipePower page
           rcp.errors.add :base, "Sorry, can't cookmark pages from RecipePower. (Does that even make sense?)"
         end
+        if rcp.title.empty?
+          rcp.errors.add :title, "can't be blank"
+        end
         if rcp.errors.empty?
+          ss = SiteServices.new rcp.site
+          rcp.title = ss.trim_title rcp.title
           rcp.save
           RecipeServices.new(rcp).robotags = extractions
         end

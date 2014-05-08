@@ -280,17 +280,6 @@ class SiteServices
       # extant.merge @site
       nil
     end
-=begin
-    ref = SiteReference.find_or_initialize "#{@site.oldsite}#{@site.subsite}", affiliate: @site
-    if ref.id
-      puts "Site ##{@site.id} (home #{@site.oldsite}#{@site.subsite}) is colliding with existing..."
-      other = ref.affiliate
-      puts "...site ##{other.id} (home #{other.oldsite}#{other.subsite})"
-    else
-      ref.affiliate = @site
-      ref.save
-    end
-=end
   end
 
   # Confirm that the site references correspond to legacy sites
