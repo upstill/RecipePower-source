@@ -13,9 +13,13 @@ class UserServices
 
   def self.convert_all_to_references n=-1
     User.where("image <> ''")[0..n].each do |u|
-      u.image = u.image  # Creates the reference
+      unless u.image.blank?
+        u.image = u.image  # Creates the reference
+      end
+      u.thumbnail && u.thumbnail.perform
       u.save
     end
+    "Users Converted"
   end
 
   def analyze_invitees(against_user)

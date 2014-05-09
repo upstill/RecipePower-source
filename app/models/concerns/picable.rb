@@ -69,9 +69,9 @@ module Picable
     # Return the image for the entity, either as a URL or a data specifier
     # The image may have an associated thumbnail, but it doesn't count unless
     # the thumbnail reflects the image's current private_picurl
-    def picdata
+    def picdata data_only = false
       imageref = self.method(self.class.image_reference_name).call
-      (imageref && imageref.thumbdata) || private_picurl
+      (imageref && imageref.thumbdata) || (!data_only && private_picurl)
     end
 
   end

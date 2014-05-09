@@ -298,7 +298,14 @@ public
     end
     if oi = omniauth['info']
       mapping = @@AuthenticationMappings[omniauth['provider']]
-      [:email, :image, :username, :fullname, :first_name, :last_name].each do |attrname|
+      # Get the user's image, replacing it if possible
+      uiname = mapping[:image] || "image"
+      unless picdata || oi[uiname].blank? || ((image||"") == oi[uiname])
+        self.image = oi[uiname]
+        # While we're here, fetch the image data as a thumbnail
+        thumbnail.perform if thumbnail # Fetch the user's thumbnail data while the authorization is fresh
+      end
+      [:email, :username, :fullname, :first_name, :last_name].each do |attrname|
         uiname = mapping[attrname] || attrname.to_s
         write_attribute(attrname, oi[uiname]) if read_attribute(attrname).blank? unless oi[uiname].blank?
       end

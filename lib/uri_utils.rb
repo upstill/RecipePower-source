@@ -31,8 +31,9 @@ def header_result(link, resource=nil)
 
     req = Net::HTTP.new(url.host, url.port)
     partial = url.path + ((query = url.query) ? "?#{query}" : "")
-    code = req.request_head(partial).code
-    (code == "301") ? req.request_head(partial).header["location"] : code.to_i
+    code = req.request_head(partial).code.to_i
+    # Redirection codes
+    [301, 302].include?(code) ? req.request_head(partial).header["location"] : code
   rescue Exception => e
     # If the server doesn't want to talk, we assume that the URL is okay, at least
     return 401 if e.kind_of?(Errno::ECONNRESET) || url

@@ -18,7 +18,8 @@ class Reference < ActiveRecord::Base
     Offering: ["Offering", 128],
     Recipe: ["Recipe", 256],
     Image: ["Image", 512],
-    Site: ["Site", 1024]
+    Site: ["Site", 1024],
+    Event: ["Event", 2048]
   )
 
   def self.assert(uri, tag_or_referent, type=:Definition )
@@ -127,6 +128,57 @@ class Reference < ActiveRecord::Base
     self.save
   end
 
+  # Get data from the reference
+  def fetch
+    def get_response url
+      self.status = response = nil
+      begin
+        uri = URI.parse(url)
+=begin
+        req = Net::HTTP.new(url.host, url.port)
+        partial = url.path + ((query = url.query) ? "?#{query}" : "")
+        code = req.request_head(partial).code.to_i
+        # Redirection codes
+        [301, 302].include?(code) ? req.request_head(partial).header["location"] : code
+=end
+        if uri.host &&
+            uri.port &&
+            (http = Net::HTTP.new(uri.host, uri.port)) &&
+            (request = Net::HTTP::Get.new(uri.request_uri))
+          response = http.request(request)
+          self.status = response.code.to_i
+        else # Invalid URL
+          self.status = 400
+        end
+      rescue Exception => e
+        # If the server doesn't want to talk, we assume that the URL is okay, at least
+        case e
+          when Errno::ECONNRESET
+            self.status = 401
+          else
+            self.status = -1
+        end
+      end
+      response
+    end
+
+    # get_response records the status of the last HTTP access in self.status
+    tried = {}
+    next_try = url
+    until tried[next_try]
+      tried[next_try] = true
+      response = get_response next_try
+      case status
+        when 200
+          return response.body
+        when 301, 302 # Redirection
+          next_try = response.header["location"]
+        when 401 # Unauthorized
+          next_try.sub! /^https/, 'http'
+      end
+    end
+  end
+
   # Give a reference an affiliate object (if any), raising an exception if one already exists, or types don't match
   def affiliate= affiliate
     if affiliate
@@ -194,31 +246,9 @@ class ImageReference < Reference
   def perform
     unless thumbdata && (thumbdata =~ /^data:/)
       logger.info ">>>>>>>>>>>>>>>>>>>>>>>>>>>>> Acquiring Thumbnail data on url '#{url}' >>>>>>>>>>>>>>>>>>>>>>>>>"
-      self.status = self.thumbdata = nil
-      begin
-        uri = URI.parse(url)
-        if uri.host &&
-            uri.port &&
-            (http = Net::HTTP.new(uri.host, uri.port)) &&
-            (request = Net::HTTP::Get.new(uri.request_uri))
-          response = http.request(request)
-          self.status = response.code
-        else # Invalid URL
-          self.status = 400
-        end
-      rescue Exception => e
-        # If the server doesn't want to talk, we assume that the URL is okay, at least
-        case e
-          when Errno::ECONNRESET
-            self.status = 401
-          else
-            self.status = -1
-        end
-      end
-
-      if status == 200 # Success! Write the thumbdata if poss.
+      if response_body = fetch # Attempt to get data at the other end of the URL
         begin
-          img = Magick::Image::from_blob(response.body).first
+          img = Magick::Image::from_blob(response_body).first
           if img.columns > 200
             scalefactor = 200.0/img.columns
             thumb = img.scale(scalefactor)
