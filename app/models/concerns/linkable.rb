@@ -55,8 +55,8 @@ module Linkable
         belongs_to reference_association, class_name: ref_type
       else
         # References that define the location of their affiliates have a many-to-one relationship (i.e. many URLs can refer to the same entity)
-        has_many reference_association_pl, -> { where type: ref_type }, foreign_key: "affiliate_id", class_name: ref_type
         has_one reference_association, -> { where type: ref_type, canonical: true }, foreign_key: "affiliate_id", class_name: ref_type
+        has_many reference_association_pl, -> { where type: ref_type }, foreign_key: "affiliate_id", class_name: ref_type, dependent: :nullify
       end
 
       self.class_eval do

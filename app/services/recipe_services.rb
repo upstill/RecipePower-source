@@ -54,9 +54,9 @@ class RecipeServices
     siteref = SiteReference.by_link @recipe.url
     if siteref.site != @recipe.site
       puts "Recipe ##{@recipe.id}: url #{@recipe.url} picurl #{@recipe.picurl}"
-      puts "\tSite ##{@recipe.site.id}: oldsite #{@recipe.site.oldsite}, subsite: #{@recipe.site.subsite}"
+      puts "\tSite ##{@recipe.site.id}: " # oldsite #{@recipe.site.oldsite}, subsite: #{@recipe.site.subsite}"
       puts "\tReference #{siteref.id}: url #{siteref.url}"
-      puts "\tRef. Affiliate Site ##{siteref.affiliate.id}: oldsite #{siteref.affiliate.oldsite}, subsite: #{siteref.affiliate.subsite}"
+      puts "\tRef. Affiliate Site ##{siteref.affiliate.id}: " # oldsite #{siteref.affiliate.oldsite}, subsite: #{siteref.affiliate.subsite}"
       # debugger
     end
   end

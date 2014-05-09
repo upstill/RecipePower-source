@@ -307,6 +307,21 @@ class SiteServices
     # end
   end
 
+  def self.test_creation n=-1
+    # Destroy that pesky free-floating AmazingRibs site
+    Site.all.map(&:id).unshift(1243).unshift(1242).each { |sid|
+      debugger
+      site = Site.find sid
+      attribs = site.attributes.slice "sample", "home", "subsite", "oldname", "ttlcut"
+      referent_id = site.referent_id
+      # attribs["url"] = (uri = URI.join( attribs["home"], attribs["sample"])) && uri.to_s
+      site.destroy
+      s2 = Site.new(attribs)
+      s2.referent_id = referent_id
+      s2.save
+    }
+  end
+
   def initialize site
     @site = site
     site_finders # Preload the finders

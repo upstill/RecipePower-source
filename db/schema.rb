@@ -241,7 +241,7 @@ ActiveRecord::Schema.define(version: 20140508005728) do
   create_table "sites", force: true do |t|
     t.string   "oldsite"
     t.text     "sample"
-    t.string   "home"
+    t.string   "home"   # Very optional location of the site's home page, which may redirect to subsite
     t.string   "subsite"
     t.string   "scheme"
     t.string   "host"

@@ -33,7 +33,7 @@ class Site < ActiveRecord::Base
   #      may alter the path
   # Also, in most cases, site==home (when the domain is home, i.e. subsite is empty); in others, (site+subsite)==home,
   #     and only rarely will home be different from either of those
-  attr_accessible :finders_attributes, :oldsite, :home, :scheme, :subsite, :sample, :host, :name, :port, :logo, :ttlcut, :finders, :reviewed, :description
+  attr_accessible :finders_attributes, :home, :subsite, :sample, :oldname, :ttlcut, :finders, :reviewed, :description # , :logo, :oldsite, :scheme, :host, :port
 #   serialize :finders, Array
 
   belongs_to :referent # See before_destroy method, :dependent=>:destroy
@@ -61,38 +61,42 @@ protected
   end
 
   def post_init
-    unless self.oldsite
+    unless id # self.oldsite
+      debugger
       # We need to initialize the fields of the record, starting with site, based on sample
       # Ignore the query for purposes of gleaning the site
-      if link = self.sample
-        breakdown = link.match /(^[^?]*)(\?.*$)?/
-        linksq, query = breakdown[1..2]
-        begin
-          urisq = URI linksq
-        rescue Exception => e
-          urisq = nil
+      if self.sample = normalize_url(sample)
+        # breakdown = link.match /(^[^?]*)(\?.*$)?/
+        # linksq, query = breakdown[1..2]
+        # the sample is EITHER a full URL, or a partial path relative to home
+        if (uri = safe_parse(sample)).host.blank?
+          uri = URI.join( home, sample)
         end
-        if urisq && !urisq.host.blank?
-          puts "Creating host matching #{urisq.host} for #{link} with subsite \'#{self.subsite||""}\'"
-          puts "Link is '#{link}'; path is '#{urisq.path}'"
-          # Define the site as the link minus the sample (sub)path
-          self.oldsite = linksq.sub(/#{urisq.path}$/, "")
-          puts "...from which extracted site '#{self.oldsite}'"
+        unless uri.host.blank?
+          # Define the site as the link minus the sample (sub)path plus the subsite
+          reflink = "#{host_url(uri.to_s)}#{subsite}".gsub /\/+/, '/'
+          self.reference = Reference.find_or_initialize reflink, type: "SiteReference", affiliate: self
+          # self.oldsite = linksq.sub(/#{uri.path}$/, "")
 
-          # Reconstruct the sample from the link's path, query and fragment
-          self.sample = urisq.path + (query || "")
+          # Reconstruct the sample (page relative to the domain) from the link's path, query and fragment
+          self.sample = uri.path # uri.path + (query || "")
+          self.sample << "?#{uri.query}" unless uri.query.blank?
+          self.sample << "##{uri.fragment}" unless uri.fragment.blank?
 
+=begin
           # Save scheme, host and port information from the link parse
-          self.scheme = urisq.scheme
-          self.host = urisq.host
-          self.port = urisq.port.to_s
+          self.scheme = uri.scheme
+          self.host = uri.host
+          self.port = uri.port.to_s
+=end
 
           # Give the site a provisional name, the host name minus 'www.', if any
-          self.name = urisq.host.sub(/www\./, '')
+          self.name = uri.host.sub(/www\./, '')
         else
-          self.errors << "Can't make sense of URI"
+          self.errors.add :url, "Can't make sense of URI"
         end
       end
+=begin
       if !self.oldsite
         # "Empty" site (probably defaults)
         self.oldsite = ""
@@ -100,13 +104,18 @@ protected
         self.name = "Anonymous"
       end
       self.subsite ||= ""
+=end
     end
   end
 
 public
 
   def domain
-    scheme+"://"+host+((port=="80") ? "" : (":"+port))
+    host_url home # scheme+"://"+host+((port=="80") ? "" : (":"+port))
+  end
+
+  def oldsite
+    reference.url
   end
 
   def sampleURL
@@ -116,11 +125,15 @@ public
   # By default the site's home page is (site+subsite), but that may be overridden (due to indirection) by
   # setting the home attribute
   def home_page
-    home.blank? ? (site+(subsite||"")) : home
+    home.blank? ? "#{site}#{subsite}" : home
   end
   
   # Find and return the site wherein the named link is stored
   def self.by_link link
+    ref = SiteReference.by_link link
+    ref.site || Site.create(:sample=>link) # Should find the same site reference
+
+=begin
     # Sanitize the URL
     link.strip!
     link.gsub!(/\{/, '%7B')
@@ -148,6 +161,7 @@ public
       puts "Ill-formed link: '#{link}'"
       nil
     end
+=end
   end
 
   # Merge another site into this one, optionally destroying the other
@@ -181,11 +195,21 @@ public
     else
       self.referent = Referent.express(str, :Source, :form => :generic )
     end
-  end      
+  end
+
+  def parsed_host
+    if uri = safe_parse(home)
+      uri.host
+    end
+  end
   
   def recipes
-    stripped_host = (host =~ /^www./) ? host[4..-1] : host
-    Recipe.where('url LIKE ?', "%#{stripped_host}%")
+    if host = parsed_host
+      stripped_host = (host =~ /^www./) ? host[4..-1] : host
+      Recipe.find RecipeReference.where('url LIKE ?', "%#{stripped_host}%").map(&affiliate_id).uniq
+    else
+      []
+    end
   end
 end
 
