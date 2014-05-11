@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140508005728) do
+ActiveRecord::Schema.define(version: 20140509015444) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -167,28 +167,22 @@ ActiveRecord::Schema.define(version: 20140508005728) do
 
   create_table "recipes", force: true do |t|
     t.string   "title"
-    t.string   "url"
-    t.integer  "alias"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.text     "picurl"
     t.text     "tagpane"
-    t.integer  "thumbnail_id"
-    t.text     "href"
     t.text     "description"
     t.integer  "picture_id"
   end
 
   create_table "references", force: true do |t|
-    t.datetime "created_at",                           null: false
-    t.datetime "updated_at",                           null: false
-    t.integer  "reference_type"
+    t.datetime "created_at",                         null: false
+    t.datetime "updated_at",                         null: false
     t.text     "url"
     t.integer  "affiliate_id"
-    t.string   "type",           default: "Reference"
+    t.string   "type",         default: "Reference"
     t.text     "thumbdata"
     t.integer  "status"
-    t.boolean  "canonical",      default: false
+    t.boolean  "canonical",    default: false
   end
 
   create_table "referent_relations", force: true do |t|
@@ -239,15 +233,10 @@ ActiveRecord::Schema.define(version: 20140508005728) do
   end
 
   create_table "sites", force: true do |t|
-    t.string   "oldsite"
     t.text     "sample"
-    t.string   "home"   # Very optional location of the site's home page, which may redirect to subsite
+    t.string   "home"
     t.string   "subsite"
-    t.string   "scheme"
-    t.string   "host"
-    t.string   "port"
     t.string   "oldname"
-    t.string   "logo"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "ttlcut"
@@ -333,7 +322,6 @@ ActiveRecord::Schema.define(version: 20140508005728) do
     t.datetime "locked_at"
     t.integer  "role_id",                           default: 2
     t.string   "fullname",                          default: ""
-    t.string   "image",                             default: ""
     t.text     "about",                             default: ""
     t.string   "invitation_token",       limit: 66
     t.datetime "invitation_sent_at"
