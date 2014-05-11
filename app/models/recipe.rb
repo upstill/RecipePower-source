@@ -16,7 +16,7 @@ class Recipe < ActiveRecord::Base
   include Picable
   picable :picurl, :picture
 
-  attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :tagpane, :description, #, :picurl :href
+  attr_accessible :title, :ratings_attributes, :comment, :status, :private, :tagpane, :description, #, :alias, :picurl :href
                   :misc_tag_tokens, :collection_tokens, :channel_tokens
   after_save :save_ref
 
