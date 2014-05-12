@@ -272,6 +272,10 @@ class SiteServices
   def convert_to_reference
     begin
       SiteReference.find_or_create "#{@site.oldsite}#{@site.subsite}", affiliate: @site
+      if @site.home.blank?
+        @site.home = @site.oldsite
+        @site.save
+      end
     rescue => exc
       ref = SiteReference.find_or_initialize "#{@site.oldsite}#{@site.subsite}"
       puts "Site ##{@site.id} (home #{@site.oldsite}#{@site.subsite}) is colliding with existing..."
@@ -303,16 +307,20 @@ class SiteServices
   def test_conversion
     ref_path = "#{@site.oldsite}#{@site.subsite}"
     site_ref = SiteReference.by_link ref_path
-    # if !site_ref || site_ref.affiliate != @site
-    # end
+    if !site_ref || site_ref.site != @site
+      debugger
+      x=2
+    end
   end
 
   def self.test_creation n=-1
     # Destroy that pesky free-floating AmazingRibs site
-    Site.all.map(&:id).unshift(1243).unshift(1242).each { |sid|
-      debugger
+    ids = Site.all.map(&:id)[0..n]
+    ids.delete(3419)
+    ids.unshift(3419).each { |sid|
       site = Site.find sid
       attribs = site.attributes.slice "sample", "home", "subsite", "oldname", "ttlcut"
+      attribs["home"] ||= site.oldsite
       referent_id = site.referent_id
       # attribs["url"] = (uri = URI.join( attribs["home"], attribs["sample"])) && uri.to_s
       site.destroy

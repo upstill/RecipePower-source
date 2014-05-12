@@ -62,12 +62,9 @@ protected
 
   def post_init
     unless id # self.oldsite
-      debugger
       # We need to initialize the fields of the record, starting with site, based on sample
       # Ignore the query for purposes of gleaning the site
       if self.sample = normalize_url(sample)
-        # breakdown = link.match /(^[^?]*)(\?.*$)?/
-        # linksq, query = breakdown[1..2]
         # the sample is EITHER a full URL, or a partial path relative to home
         if (uri = safe_parse(sample)).host.blank?
           uri = URI.join( home, sample)
@@ -82,13 +79,6 @@ protected
           self.sample = uri.path # uri.path + (query || "")
           self.sample << "?#{uri.query}" unless uri.query.blank?
           self.sample << "##{uri.fragment}" unless uri.fragment.blank?
-
-=begin
-          # Save scheme, host and port information from the link parse
-          self.scheme = uri.scheme
-          self.host = uri.host
-          self.port = uri.port.to_s
-=end
 
           # Give the site a provisional name, the host name minus 'www.', if any
           self.name = uri.host.sub(/www\./, '')
@@ -167,22 +157,32 @@ public
   # Merge another site into this one, optionally destroying the other
   def merge other, nuke=true
     # If the other has a Reference, that's a deal-breaker
-    if other.reference
-      raise "Can't nuke site which has an attached reference"
-    end
+    refs = other.references
+    # if other.reference
+      # raise "Can't nuke site which has an attached reference"
+    # end
     # Merge corresponding referents
     if other.referent
-      if self.referent
+      self.referent ||= other.referent
+      if self.referent != other.referent
         self.referent.merge other.referent
-      else
-        other.referent.destroy
+        other.referent = nil
       end
     end
     # If these refer to the same external site, merge the other's feeds in
     if SiteReference.canonical_url("#{oldsite}#{subsite}") == SiteReference.canonical_url("#{other.oldsite}#{other.subsite}")
       self.feed_ids = (self.feed_ids + other.feed_ids).uniq
     end
-    other.destroy if nuke
+    if nuke
+      other.destroy
+      refs.each { |ref|
+        if ref.affiliate_id
+          raise "Merged site's references still have affiliate"
+        else
+          ref.destroy
+        end
+      }
+    end
   end
 
   def name
