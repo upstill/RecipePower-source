@@ -273,12 +273,27 @@ class SiteServices
     begin
       # Start by doing QA on the site's attributes:
       # -- :home
-      SiteReference.find_or_create "#{@site.oldsite}#{@site.subsite}", affiliate: @site
+      newhome = (@site.home || @site.oldsite)
+      newhome = valid_url(@site.subsite, newhome) unless @site.subsite.blank?
+      if newhome != (@site.home || @site.oldsite)
+        puts "Site ##{@site.id}"
+        puts "\toldsite: #{@site.oldsite}"
+        puts "\thome: #{@site.home}"
+        puts "\tsubsite: #{@site.subsite}"
+        puts "\t=> intended newhome: #{newhome}"
+        # SiteReference.find_or_create "#{@site.oldsite}#{@site.subsite}", affiliate: @site
+        debugger
+      end
+      @site.home = newhome # Creates and initializes the reference
+      true
     rescue => exc
+      debugger
+=begin
       ref = SiteReference.find_or_initialize "#{@site.oldsite}#{@site.subsite}"
       puts "Site ##{@site.id} (home #{@site.oldsite}#{@site.subsite}) is colliding with existing..."
       extant = ref.site
       puts "...site ##{extant.id} (home #{extant.oldsite}#{extant.subsite})"
+=end
       # extant.merge @site
       nil
     end
