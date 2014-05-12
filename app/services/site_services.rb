@@ -255,6 +255,15 @@ class SiteServices
 
   def self.convert_all_to_references n=-1
 
+    Site.find(3419).merge(Site.find(3418)) if Site.exists?(3418)
+    Site.find(3419).merge(Site.find(1292)) if Site.exists?(1292)
+    Site.find(2062).merge(Site.find(1996)) if Site.exists?(1996)
+    Site.find(2081).merge(Site.find(1377)) if Site.exists?(1377)   # Culinate
+    [3419,2112,2122,3447].each { |id|
+      s = Site.find id
+      s.home = host_url (s.home || s.oldsite)
+      s.save
+    }
     bad = []
     Site.all[0..n].each { |site|
       bad << site unless self.new(site).convert_to_reference
@@ -271,16 +280,28 @@ class SiteServices
 
   def convert_to_reference
     begin
-      SiteReference.find_or_create "#{@site.oldsite}#{@site.subsite}", affiliate: @site
-      if @site.home.blank?
-        @site.home = @site.oldsite
-        @site.save
+      # Start by doing QA on the site's attributes:
+      # -- :home
+      newhome = (@site.home || @site.oldsite)
+      newhome = valid_url(@site.subsite, newhome) unless @site.subsite.blank?
+      if newhome != (@site.home || @site.oldsite)
+        puts "Site ##{@site.id}"
+        puts "\toldsite: #{@site.oldsite}"
+        puts "\thome: #{@site.home}"
+        puts "\tsubsite: #{@site.subsite}"
+        puts "\t=> intended newhome: #{newhome}"
+        debugger
       end
+      @site.home = newhome # Creates and initializes the reference
+      true
     rescue => exc
+      debugger
+=begin
       ref = SiteReference.find_or_initialize "#{@site.oldsite}#{@site.subsite}"
       puts "Site ##{@site.id} (home #{@site.oldsite}#{@site.subsite}) is colliding with existing..."
       extant = ref.site
       puts "...site ##{extant.id} (home #{extant.oldsite}#{extant.subsite})"
+=end
       # extant.merge @site
       nil
     end
@@ -305,7 +326,7 @@ class SiteServices
   end
 
   def test_conversion
-    ref_path = "#{@site.oldsite}#{@site.subsite}"
+    ref_path = "#{@site.home || @site.oldsite}#{@site.subsite}"
     site_ref = SiteReference.by_link ref_path
     if !site_ref || site_ref.site != @site
       debugger

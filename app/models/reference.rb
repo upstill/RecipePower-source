@@ -98,11 +98,19 @@ class Reference < ActiveRecord::Base
                  Reference.new(type: params[:type], url: redirected)
       root_ref.canonical = true
       obj = (normalized == redirected) ? root_ref : Reference.new(type: params[:type], :url => normalized)
+      # Propagate affiliate to any new reference
+      obj.affiliate_id = root_ref.affiliate_id
 
       # Attach the affiliate, if given and doesn't collide with existing affiliate
-      root_ref.affiliate = affiliate
-      obj.affiliate = affiliate
-      root_ref.save if root_ref != obj
+      if affiliate
+        obj.affiliate = affiliate
+        if root_ref != obj
+          root_ref.affiliate = affiliate
+          root_ref.save
+        end
+      elsif root_ref.affiliate_id # Give the new object the same affiliate as any priorly existing root_ref
+        obj.affiliate_id = root_ref.affiliate_id
+      end
     end
     obj
   end
@@ -288,9 +296,10 @@ class SiteReference < Reference
     if host_url = host_url(normalized_link)
       # Candidates are all sites with a matching host
       matches = Reference.where(type: "SiteReference").where('url ILIKE ?', "#{host_url}%")
-      longest = matches.first && matches[1..-1].inject(matches.first) { |result, this|
+      longest = matches.first && matches.inject(nil) { |result, this|
         # If more than one match, seek the longest
-        (normalized_link.match this.url) && (result.url.length < this.url.length) ? this : result
+        normalized_link.start_with?(this.url) &&
+        (!result || (result.url.length < this.url.length)) ? this : result
       }
       longest ? longest.url : host_url
     else
