@@ -320,8 +320,27 @@ class SiteServices
   def test_conversion
     ref_path = "#{@site.oldsite}#{@site.subsite}"
     site_ref = SiteReference.by_link ref_path
-    # if !site_ref || site_ref.affiliate != @site
-    # end
+    if !site_ref || site_ref.site != @site
+      debugger
+      x=2
+    end
+  end
+
+  def self.test_creation n=-1
+    # Destroy that pesky free-floating AmazingRibs site
+    ids = Site.all.map(&:id)[0..n]
+    ids.delete(3419)
+    ids.unshift(3419).each { |sid|
+      site = Site.find sid
+      attribs = site.attributes.slice "sample", "home", "subsite", "oldname", "ttlcut"
+      attribs["home"] ||= site.oldsite
+      referent_id = site.referent_id
+      # attribs["url"] = (uri = URI.join( attribs["home"], attribs["sample"])) && uri.to_s
+      site.destroy
+      s2 = Site.new(attribs)
+      s2.referent_id = referent_id
+      s2.save
+    }
   end
 
   def initialize site
