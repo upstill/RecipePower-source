@@ -271,6 +271,8 @@ class SiteServices
 
   def convert_to_reference
     begin
+      # Start by doing QA on the site's attributes:
+      # -- :home
       SiteReference.find_or_create "#{@site.oldsite}#{@site.subsite}", affiliate: @site
     rescue => exc
       ref = SiteReference.find_or_initialize "#{@site.oldsite}#{@site.subsite}"
