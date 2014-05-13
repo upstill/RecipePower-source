@@ -12,8 +12,8 @@ class TaggingServices
           tag_id: tochange.tag_id, 
           user_id: tochange.user_id, 
           entity_id: tochange.entity_id, 
-          entity_type: tochange.entity_type, 
-          is_definition: tochange.is_definition)
+          entity_type: tochange.entity_type) #,
+          # is_definition: tochange.is_definition)
         tochange.destroy # Assuming that it failed validation because not unique
       else
         tochange.save
@@ -28,8 +28,8 @@ class TaggingServices
         tag_id: tagging.tag_id, 
         user_id: tagging.user_id, 
         entity_id: tagging.entity_id, 
-        entity_type: tagging.entity_type, 
-        is_definition: tagging.is_definition)
+        entity_type: tagging.entity_type) # ,
+        # is_definition: tagging.is_definition)
       tagging.destroy if matches.count > 1
     }
   end

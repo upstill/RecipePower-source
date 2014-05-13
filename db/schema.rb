@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140508005728) do
+ActiveRecord::Schema.define(version: 20140509015444) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -169,7 +169,6 @@ ActiveRecord::Schema.define(version: 20140508005728) do
     t.string   "title"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.text     "tagpane"
     t.text     "description"
     t.integer  "picture_id"
   end
@@ -234,8 +233,6 @@ ActiveRecord::Schema.define(version: 20140508005728) do
 
   create_table "sites", force: true do |t|
     t.text     "sample"
-    t.string   "home"
-    t.string   "subsite"
     t.string   "oldname"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -258,12 +255,9 @@ ActiveRecord::Schema.define(version: 20140508005728) do
     t.integer  "tag_id"
     t.integer  "entity_id"
     t.string   "entity_type"
-    t.boolean  "is_definition", default: false
-    t.datetime "created_at",                    null: false
-    t.datetime "updated_at",                    null: false
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
   end
-
-  add_index "taggings", ["user_id", "tag_id", "entity_id", "entity_type", "is_definition"], name: "tagging_unique", unique: true, using: :btree
 
   create_table "tags", force: true do |t|
     t.string   "name"
@@ -337,7 +331,6 @@ ActiveRecord::Schema.define(version: 20140508005728) do
     t.datetime "invitation_created_at"
     t.string   "first_name"
     t.string   "last_name"
-    t.integer  "thumbnail_id"
   end
 
   add_index "users", ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true, using: :btree
