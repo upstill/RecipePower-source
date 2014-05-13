@@ -33,7 +33,7 @@ class Site < ActiveRecord::Base
   #      may alter the path
   # Also, in most cases, site==home (when the domain is home, i.e. subsite is empty); in others, (site+subsite)==home,
   #     and only rarely will home be different from either of those
-  attr_accessible :finders_attributes, :home, :subsite, :sample, :oldname, :ttlcut, :finders, :reviewed, :description # , :logo, :oldsite, :scheme, :host, :port
+  attr_accessible :finders_attributes, :sample, :oldname, :ttlcut, :finders, :reviewed, :description # , :subsite, :home, :logo, :oldsite, :scheme, :host, :port
 #   serialize :finders, Array
 
   belongs_to :referent # See before_destroy method, :dependent=>:destroy
@@ -71,14 +71,8 @@ protected
         end
         unless uri.host.blank?
           # Define the site as the link minus the sample (sub)path plus the subsite
-          reflink = "#{host_url(uri.to_s)}#{subsite}".gsub /\/+/, '/'
-          self.reference = Reference.find_or_initialize reflink, type: "SiteReference", affiliate: self
-          # self.oldsite = linksq.sub(/#{uri.path}$/, "")
-
-          # Reconstruct the sample (page relative to the domain) from the link's path, query and fragment
-          self.sample = uri.path # uri.path + (query || "")
-          self.sample << "?#{uri.query}" unless uri.query.blank?
-          self.sample << "##{uri.fragment}" unless uri.fragment.blank?
+          # reflink = "#{host_url(uri.to_s)}#{subsite}".gsub /\/+/, '/'
+          self.reference = SiteReference.find_or_initialize(uri.to_s, affiliate: self) # Reference.find_or_initialize reflink, type: "SiteReference", affiliate: self
 
           # Give the site a provisional name, the host name minus 'www.', if any
           self.name = uri.host.sub(/www\./, '')
@@ -86,15 +80,6 @@ protected
           self.errors.add :url, "Can't make sense of URI"
         end
       end
-=begin
-      if !self.oldsite
-        # "Empty" site (probably defaults)
-        self.oldsite = ""
-        self.subsite = ""
-        self.name = "Anonymous"
-      end
-      self.subsite ||= ""
-=end
     end
   end
 
@@ -109,80 +94,19 @@ public
   end
 
   def sampleURL
-    self.oldsite+(self.sample||"")
+    sample ? URI.join( sample, reference.url ).to_s : ""
   end
 
   # By default the site's home page is (site+subsite), but that may be overridden (due to indirection) by
   # setting the home attribute
   def home_page
-    home.blank? ? "#{site}#{subsite}" : home
+    reference.url # home.blank? ? "#{site}#{subsite}" : home
   end
   
   # Find and return the site wherein the named link is stored
   def self.by_link link
     ref = SiteReference.by_link link
     ref.site || Site.create(:sample=>link) # Should find the same site reference
-
-=begin
-    # Sanitize the URL
-    link.strip!
-    link.gsub!(/\{/, '%7B')
-    link.gsub!(/\}/, '%7D') 
-    begin
-      uri = URI link
-    rescue Exception => e
-      uri = nil
-    end
-    if uri && !uri.host.blank?
-      # Find all sites assoc'd with the given domain
-      sites = Site.where "host = ?", uri.host
-      # If multiple sites may proceed from the same domain, 
-      # we need to find the one whose full site path (site+subsite) matches the link
-      # So: among matching hosts, find one whose 'site+subsite' is an initial substring of the link
-      matching_subsites = []; matching_sites = []
-      sites.each do |site|
-        unless site.oldsite.empty?
-          matching_sites << site if link.index(site.oldsite)
-          matching_subsites << site if !site.subsite.empty? && link.index(site.oldsite+site.subsite)
-        end
-      end
-      (matching_subsites[0] || matching_sites[0] || Site.create(:sample=>link))
-    else
-      puts "Ill-formed link: '#{link}'"
-      nil
-    end
-=end
-  end
-
-  # Merge another site into this one, optionally destroying the other
-  def merge other, nuke=true
-    # If the other has a Reference, that's a deal-breaker
-    refs = other.references
-    # if other.reference
-      # raise "Can't nuke site which has an attached reference"
-    # end
-    # Merge corresponding referents
-    if other.referent
-      self.referent ||= other.referent
-      if self.referent != other.referent
-        self.referent.merge other.referent
-        other.referent = nil
-      end
-    end
-    # If these refer to the same external site, merge the other's feeds in
-    if SiteReference.canonical_url("#{oldsite}#{subsite}") == SiteReference.canonical_url("#{other.oldsite}#{other.subsite}")
-      self.feed_ids = (self.feed_ids + other.feed_ids).uniq
-    end
-    if nuke
-      other.destroy
-      refs.each { |ref|
-        if ref.affiliate_id
-          raise "Merged site's references still have affiliate"
-        else
-          ref.destroy
-        end
-      }
-    end
   end
 
   def name
@@ -197,287 +121,7 @@ public
     end
   end
 
-  def parsed_host
-    if uri = safe_parse(home)
-      uri.host
-    end
-  end
-  
   def recipes
-    if host = parsed_host
-      stripped_host = (host =~ /^www./) ? host[4..-1] : host
-      Recipe.find RecipeReference.where('url LIKE ?', "%#{stripped_host}%").map(&affiliate_id).uniq
-    else
-      []
-    end
+    RecipeReference.affiliates_by_url references.map(&:url)
   end
 end
-
-=begin
-Title:
-	title:
-		'cut': " - Calabria from scratch"
-		'count': "269"
-		--------------------------------------
-		'cut': "spicy icecream: "
-		'count': "269"
-		--------------------------------------
-		'cut': " Recipe \| Steamy Kitchen Recipes"
-		'count': "269"
-		--------------------------------------
-		'cut': " \| RecipeGirl.com"
-		'count': "269"
-		--------------------------------------
-		'count': "269"
-		--------------------------------------
-	meta[property='og:title']:
-		'attribute': "content"
-		'count': "122"
-		--------------------------------------
-		'attribute': "content"
-		'cut': " - Drink Recipe.*"
-		'count': "122"
-		--------------------------------------
-		'attribute': "content"
-		'cut': "Recipe: "
-		'count': "122"
-		--------------------------------------
-		'attribute': "content"
-		'cut': " Recipe.*$"
-		'count': "122"
-		--------------------------------------
-		'attribute': "content"
-		'cut': "How to Make.*- "
-		'count': "122"
-		--------------------------------------
-		'attribute': "content"
-		'cut': "IDEAS IN FOOD: "
-		'count': "122"
-		--------------------------------------
-		'attribute': "content"
-		'cut': " recipe"
-		'count': "122"
-		--------------------------------------
-	.fn:
-		'count': "96"
-		--------------------------------------
-	span.fn:
-		'count': "55"
-		--------------------------------------
-	tr td div:
-		'count': "52"
-		--------------------------------------
-	.title a:
-		'count': "36"
-		--------------------------------------
-	h1.title:
-		'count': "28"
-		--------------------------------------
-	meta[name='title']:
-		'attribute': "content"
-		'count': "22"
-		--------------------------------------
-	h2 a[rel='bookmark']:
-		'count': "13"
-		--------------------------------------
-	div.post h2 a[rel='bookmark']:
-		'count': "11"
-		--------------------------------------
-	#title:
-		'count': "11"
-		--------------------------------------
-	h3.entry-title a:
-		'count': "7"
-		--------------------------------------
-	meta[property='dc:title']:
-		'attribute': "content"
-		'count': "3"
-		--------------------------------------
-	.recipe .title:
-		'count': "3"
-		--------------------------------------
-	#zlrecipe-title:
-		'count': "2"
-		--------------------------------------
-	.storytitle:
-		'count': "2"
-		--------------------------------------
-	#recipe_title:
-		'count': "1"
-		--------------------------------------
-	#page-title-link:
-		'count': "1"
-		--------------------------------------
-	#main-article-info h1:
-		'cut': " recipe"
-		'count': "1"
-		--------------------------------------
-	#maincontent .content h2 a[rel='bookmark']:
-		'count': "1"
-		--------------------------------------
-	#article-body-blocks h2:
-		'count': "0"
-		--------------------------------------
-Image:
-	img:
-		'count': "261"
-		--------------------------------------
-	meta[property='og:image']:
-		'attribute': "content"
-		'count': "113"
-		--------------------------------------
-	img.photo:
-		'count': "63"
-		--------------------------------------
-	div.entry-content a img:
-		'count': "50"
-		--------------------------------------
-	table img:
-		'attribute': "alt"
-		'count': "44"
-		--------------------------------------
-	img.size-full:
-		'count': "38"
-		--------------------------------------
-	.entry img:
-		'count': "36"
-		--------------------------------------
-	img.aligncenter:
-		'count': "29"
-		--------------------------------------
-	.post-body img:
-		'count': "20"
-		--------------------------------------
-	img[itemprop='image']:
-		'attribute': "src"
-		'count': "15"
-		--------------------------------------
-		'count': "15"
-		--------------------------------------
-	div.post div.entry a:first-child img:first-child:
-		'count': "14"
-		--------------------------------------
-	img[itemprop='photo']:
-		'count': "5"
-		--------------------------------------
-	div.holder img:
-		'count': "4"
-		--------------------------------------
-	img.recipe_image:
-		'count': "2"
-		--------------------------------------
-	a#recipe-image:
-		'attribute': "href"
-		'count': "1"
-		--------------------------------------
-	div.featRecipeImg img:
-		'count': "1"
-		--------------------------------------
-	div.photo img[itemprop='image']:
-		'count': "1"
-		--------------------------------------
-	#drink_infopicvid img:
-		'count': "1"
-		--------------------------------------
-	.listing-photo img:
-		'count': "1"
-		--------------------------------------
-	a[rel='modal-recipe-photos'] img:
-		'count': "1"
-		--------------------------------------
-	.hfeed .featured-img img:
-		'count': "1"
-		--------------------------------------
-	.storycontent img:
-		'count': "1"
-		--------------------------------------
-	#picture img:
-		'count': "1"
-		--------------------------------------
-	#recipe-image:
-		'attribute': "href"
-		'count': "1"
-		--------------------------------------
-	#main-content-picture img:
-		'count': "1"
-		--------------------------------------
-	div.box div.post div.entry a img:
-		'attribute': "src"
-		'count': "1"
-		--------------------------------------
-	.landscape-image img:
-		'count': "1"
-		--------------------------------------
-	#rec-photo img:
-		'count': "0"
-		--------------------------------------
-	link[rel='image_source']:
-		'attribute': "href"
-		'count': "0"
-		--------------------------------------
-	img#photo-target:
-		'count': "0"
-		--------------------------------------
-	img.mainIMG:
-		'count': "0"
-		--------------------------------------
-	#photo-target:
-		'count': "0"
-		--------------------------------------
-	.tdm_recipe_image img[itemprop='image']:
-		'attribute': "src"
-		'count': "0"
-		--------------------------------------
-	div.recipe-image-large img:
-		'count': "0"
-		--------------------------------------
-	td img:
-		'pattern': "images/food/"
-		'count': "0"
-		--------------------------------------
-URI:
-	link[rel='canonical']:
-		'attribute': "href"
-		'count': "170"
-		--------------------------------------
-	meta[property='og:url']:
-		'attribute': "content"
-		'count': "114"
-		--------------------------------------
-	.post a[rel='bookmark']:
-		'attribute': "href"
-		'count': "46"
-		--------------------------------------
-	.title a:
-		'attribute': "href"
-		'count': "37"
-		--------------------------------------
-	input[name='uri']:
-		'attribute': "value"
-		'count': "17"
-		--------------------------------------
-	div.post h2 a[rel='bookmark']:
-		'attribute': "href"
-		'count': "11"
-		--------------------------------------
-	a.permalink:
-		'attribute': "href"
-		'count': "10"
-		--------------------------------------
-	a.addthis_button_pinterest:
-		'attribute': "pi:pinit:url"
-		'count': "3"
-		--------------------------------------
-	.hrecipe a[rel='bookmark']:
-		'attribute': "href"
-		'count': "3"
-		--------------------------------------
-	#recipe_tab:
-		'attribute': "href"
-		'count': "2"
-		--------------------------------------
-	div.hrecipe a[rel='bookmark']:
-		'attribute': "href"
-		'count': "1"
-		--------------------------------------
-=end

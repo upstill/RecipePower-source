@@ -11,6 +11,7 @@ class DropRefUrls < ActiveRecord::Migration
 	remove_column :recipes, :alias
 	remove_column :recipes, :thumbnail_id
 	remove_column :sites, :logo
+	remove_column :sites, :home
 	remove_column :sites, :oldsite
 	remove_column :sites, :subsite
 	remove_column :sites, :scheme

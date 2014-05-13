@@ -22,8 +22,9 @@ class Reference < ActiveRecord::Base
     Event: ["Event", 2048]
   )
 
+  # Assert a reference to the given URL, linking back to a referent
   def self.assert(uri, tag_or_referent, type=:Definition )
-    if (me = self.find_or_initialize uri).errors.empty?
+    if (me = "#{type}Reference".constantize.find_or_initialize uri).errors.empty?
       me.assert tag_or_referent, type
     end
     me
@@ -38,7 +39,7 @@ class Reference < ActiveRecord::Base
             tag_or_referent
         end
     self.referents << rft unless referents.exists?(id: rft.id)
-    self.reference_type = Reference.typenum type
+    # self.reference_type = Reference.typenum type
     save
   end
 
@@ -54,6 +55,8 @@ class Reference < ActiveRecord::Base
   end
 
   # Return a (perhaps unsaved) reference for the given url
+  # params containts attribute name-value pairs for initializing the reference
+  # AND ALSO an :affiliate, the object the reference is about (e.g., Site, Recipe...)
   def self.find_or_initialize url, params = {}
 
     # URL may be passed as a parameter or in the params hash
@@ -190,7 +193,7 @@ class Reference < ActiveRecord::Base
   # Give a reference an affiliate object (if any), raising an exception if one already exists, or types don't match
   def affiliate= affiliate
     if affiliate
-      if self.class.to_s != "#{affiliate.class.to_s}Reference"
+      if affiliate.class != affiliate_class # self.class.to_s != "#{affiliate.class.to_s}Reference"
         raise "Attempt to affiliate #{self.class.to_s} reference with #{affiliate.class} object."
       elsif affiliate_id && (affiliate_id != affiliate.id)
         raise "Attempt to create ambiguous reference by asserting new affiliate"
@@ -202,8 +205,31 @@ class Reference < ActiveRecord::Base
 
   # Extract the affiliated object, according to the type of reference
   def affiliate
-    if affiliate_id && (affiliate_type = self.class.to_s.sub(/Reference$/, ''))
-      affiliate_type.constantize.find(affiliate_id)
+    if affiliate_id && self.affiliate_class
+      self.affiliate_class.find(affiliate_id)
+    end
+  end
+
+  # What's the class of the associated affiliate?
+  def affiliate_class
+    self.class.affiliate_class
+  end
+
+  # What's the class of the associated affiliate (subclasses of Reference only)
+  def self.affiliate_class
+    self.to_s.sub(/Reference$/, '').constantize unless (self == Reference)
+  end
+
+  # Lookup the affiliates that match the given url or urls
+  def self.affiliates_by_url url
+    if self.affiliate_class # Referents need not apply (unknown affiliate class)
+      urls = url.is_a?(String) ? [url] : url
+      self.affiliate_class.where id: urls.collect { |url|
+        # stripped_host = (host =~ /^www./) ? host[4..-1] : host
+        Reference.where("type = '#{self.to_s}'").where("url LIKE ?", "%#{url}%").map(&:affiliate_id)
+      }.flatten.compact.uniq
+    else
+      []
     end
   end
 
@@ -286,6 +312,15 @@ class SiteReference < Reference
     if !link.blank? && canonical_url = self.canonical_url(link)
       self.find_or_create canonical_url
     end
+  end
+
+  def self.find_or_initialize url, params={}
+    # URL may be passed as a parameter or in the params hash
+    if url.is_a? Hash
+      params = url
+      url = params.delete :url
+    end
+    super(self.canonical_url(url), params)
   end
 
   # Return the definitive url for a given link. NB: This will only be the site portion of the URL, per by_link

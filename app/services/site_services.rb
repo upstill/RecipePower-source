@@ -351,6 +351,37 @@ class SiteServices
     }
   end
 
+  # Merge another site into this one, optionally destroying the other
+  def merge other, nuke=true
+    # If the other has a Reference, that's a deal-breaker
+    refs = other.references
+    # if other.reference
+    # raise "Can't nuke site which has an attached reference"
+    # end
+    # Merge corresponding referents
+    if other.referent
+      @site.referent ||= other.referent
+      if @site.referent != other.referent
+        @site.referent.merge other.referent
+        other.referent = nil
+      end
+    end
+    # If these refer to the same external site, merge the other's feeds in
+    if SiteReference.canonical_url("#{oldsite}#{subsite}") == SiteReference.canonical_url("#{other.oldsite}#{other.subsite}")
+      @site.feed_ids = (@site.feed_ids + other.feed_ids).uniq
+    end
+    if nuke
+      other.destroy
+      refs.each { |ref|
+        if ref.affiliate_id
+          raise "Merged site's references still have affiliate"
+        else
+          ref.destroy
+        end
+      }
+    end
+  end
+
   def initialize site
     @site = site
     site_finders # Preload the finders
