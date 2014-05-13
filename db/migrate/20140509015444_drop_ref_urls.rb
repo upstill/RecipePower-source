@@ -7,6 +7,7 @@ class DropRefUrls < ActiveRecord::Migration
 	drop_table :thumbnails
 	remove_column :recipes, :url
 	remove_column :recipes, :picurl
+	remove_column :recipes, :tagpane
 	remove_column :recipes, :href
 	remove_column :recipes, :alias
 	remove_column :recipes, :thumbnail_id
