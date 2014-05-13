@@ -1,20 +1,5 @@
 # encoding: UTF-8
 require './lib/uri_utils.rb'
-=begin
-class Finder < Object
-  attr_accessor :label, :path, :attribute
-  def initialize label, path, attribute
-    self.label = label
-    self.path = path
-    self.attribute = attribute
-    super()
-  end
-
-  def self.model_name
-    ActiveModel::Name.new Site::Finder
-  end
-end
-=end
 
 class Site < ActiveRecord::Base
   include Taggable
@@ -34,7 +19,6 @@ class Site < ActiveRecord::Base
   # Also, in most cases, site==home (when the domain is home, i.e. subsite is empty); in others, (site+subsite)==home,
   #     and only rarely will home be different from either of those
   attr_accessible :finders_attributes, :sample, :oldname, :ttlcut, :finders, :reviewed, :description # , :subsite, :home, :logo, :oldsite, :scheme, :host, :port
-#   serialize :finders, Array
 
   belongs_to :referent # See before_destroy method, :dependent=>:destroy
 
@@ -60,22 +44,20 @@ protected
     site.referent.destroy if (sibling_sites.count == 1) && (sibling_sites.first.id == site.id)
   end
 
+  # When a site is first created, it needs to have a SiteReference built from its sample attribute
   def post_init
     unless id # self.oldsite
       # We need to initialize the fields of the record, starting with site, based on sample
       # Ignore the query for purposes of gleaning the site
       if self.sample = normalize_url(sample)
-        # the sample is EITHER a full URL, or a partial path relative to home
-        if (uri = safe_parse(sample)).host.blank?
-          uri = URI.join( home, sample)
-        end
+        uri = safe_parse(sample)
         unless uri.host.blank?
           # Define the site as the link minus the sample (sub)path plus the subsite
           # reflink = "#{host_url(uri.to_s)}#{subsite}".gsub /\/+/, '/'
           self.reference = SiteReference.find_or_initialize(uri.to_s, affiliate: self) # Reference.find_or_initialize reflink, type: "SiteReference", affiliate: self
 
           # Give the site a provisional name, the host name minus 'www.', if any
-          self.name = uri.host.sub(/www\./, '')
+          self.name = uri.host.sub(/www\./, '') # Creates a corresponding referent
         else
           self.errors.add :url, "Can't make sense of URI"
         end

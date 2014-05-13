@@ -8,59 +8,6 @@ class RecipeServices
     @current_user = current_user
   end
 
-  def self.convert_all_to_references n=-1
-    bad = []
-    Recipe.all[0..n].each { |recipe|
-      recipe.picture_id = nil
-      begin
-        self.new(recipe).convert_to_reference
-      rescue => e
-        bad << recipe
-      end
-    }
-    puts "Ids of redundant recipes: "+bad.map(&:id).join(', ')
-  end
-
-  def convert_to_reference
-    if (@recipe.picurl = @recipe.picurl) &&
-        (pic = @recipe.picture) &&
-        (thumb = @recipe.thumbnail) &&
-        thumb.thumbdata
-      pic.thumbdata = thumb.thumbdata
-      pic.status = thumb.status
-      pic.save
-    end
-    @recipe.url = @recipe.url # @recipe.reference = RecipeReference.find_or_create @recipe.url, affiliate: @recipe
-    @recipe.save
-  end
-
-  def self.test_all_conversions
-    Recipe.all.each { |recipe| self.new(recipe).test_conversion }
-  end
-
-  def test_conversion
-    thumbnail = @recipe.thumbnail
-    picture = @recipe.picture
-    if thumbnail && (
-      (thumbnail.nil? != picture.nil?) ||
-      (thumbnail.url != picture.url) ||
-      (thumbnail.thumbdata != picture.thumbdata)
-    )
-      puts "Recipe ##{@recipe.id}: url #{@recipe.url} picurl #{@recipe.picurl}"
-      puts "\tThumbnail ##{thumbnail.id}: url #{thumbnail.url}, thumbdata #{(thumbnail.thumbdata||"")[0..50]}" if thumbnail
-      puts "\t Picture  #{picture.id}: url #{picture.url}, thumbdata #{(picture.thumbdata||"")[0..50]}" if picture
-      # debugger
-    end
-    siteref = SiteReference.by_link @recipe.url
-    if siteref.site != @recipe.site
-      puts "Recipe ##{@recipe.id}: url #{@recipe.url} picurl #{@recipe.picurl}"
-      puts "\tSite ##{@recipe.site.id}: " # oldsite #{@recipe.site.oldsite}, subsite: #{@recipe.site.subsite}"
-      puts "\tReference #{siteref.id}: url #{siteref.url}"
-      puts "\tRef. Affiliate Site ##{siteref.affiliate.id}: " # oldsite #{siteref.affiliate.oldsite}, subsite: #{siteref.affiliate.subsite}"
-      # debugger
-    end
-  end
-
   # Find all recipes that are redundant (ie., they have the same canonical url as another) and merge them into the one that already owns the URL.
   def self.fix_redundant
     redundant = []

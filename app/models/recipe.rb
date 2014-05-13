@@ -16,7 +16,7 @@ class Recipe < ActiveRecord::Base
   include Picable
   picable :picurl, :picture
 
-  attr_accessible :title, :ratings_attributes, :comment, :status, :private, :tagpane, :description, #, :alias, :picurl :href
+  attr_accessible :title, :ratings_attributes, :description, #, :comment, :tagpane, :status, :private, :alias, :picurl :href
                   :misc_tag_tokens, :collection_tokens, :channel_tokens
   after_save :save_ref
 
@@ -30,10 +30,7 @@ class Recipe < ActiveRecord::Base
 
   has_many :rcprefs, :dependent=>:destroy
   has_many :users, :through=>:rcprefs, :autosave=>true
-  attr_reader :comment
-  attr_accessor :private
-  attr_reader :status
-  
+
   @@coder = HTMLEntities.new
 
   # Here lies the heart of enforcement, where we ensure that a recipe is uniquely linked to its url and vice versa
