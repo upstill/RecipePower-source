@@ -110,7 +110,7 @@ public
   end
 
   def sampleURL
-    self.oldsite+(self.sample||"")
+    valid_url sample, oldsite
   end
 
   # By default the site's home page is (site+subsite), but that may be overridden (due to indirection) by

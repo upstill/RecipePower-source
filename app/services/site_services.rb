@@ -293,6 +293,7 @@ class SiteServices
         debugger
       end
       @site.home = newhome # Creates and initializes the reference
+      @site.sample = @site.sampleURL
       true
     rescue => exc
       debugger
