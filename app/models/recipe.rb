@@ -17,8 +17,10 @@ class Recipe < ActiveRecord::Base
   picable :picurl, :picture
 
   attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :tagpane, :description, #, :picurl :href
-                  :misc_tag_tokens, :collection_tokens, :channel_tokens
+                  :misc_tag_tokens, :collection_tokens, :channel_tokens, :thumbnail
   after_save :save_ref
+
+  belongs_to :thumbnail
 
   validates :title, :presence=>true 
 # private

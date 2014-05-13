@@ -15,6 +15,7 @@ class RecipeServices
       begin
         self.new(recipe).convert_to_reference
       rescue => e
+        debugger
         bad << recipe
       end
     }
