@@ -74,7 +74,7 @@ class RecipeServices
       puts "  ...clashes with recipe ##{old_rcp.id} (url #{old_rcp.url})"
       self.new(rcp).merge_into old_rcp
       self.new(old_rcp).test_conversion
-      x=2
+      rcp.destroy
     }
   end
 
