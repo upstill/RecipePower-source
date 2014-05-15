@@ -8,9 +8,6 @@ module Picable
       def picable attribute, reference_name=:picture
         linkable attribute, reference_name, :as => "ImageReference"
         self.class_eval do
-          define_singleton_method :pic_attribute_name do
-            attribute
-          end
           define_singleton_method :image_reference_name do
             reference_name
           end
@@ -28,7 +25,6 @@ module Picable
       # Before saving the recipe, take the chance to generate a thumbnail (in background)
       # before_save :check_thumbnail
     end
-=end
 
     protected
 
@@ -50,7 +46,6 @@ module Picable
     end
 
     # Confirm that the thumbnail accurately reflects the recipe's image
-=begin
     def check_thumbnail
       self.private_picurl = nil if self.private_picurl.blank? || (self.private_picurl == "/assets/NoPictureOnFile.png")
       if self.private_picurl.nil? || self.private_picurl =~ /^data:/
@@ -70,8 +65,9 @@ module Picable
     # The image may have an associated thumbnail, but it doesn't count unless
     # the thumbnail reflects the image's current private_picurl
     def picdata data_only = false
-      imageref = self.method(self.class.image_reference_name).call
-      (imageref && imageref.thumbdata) || (!data_only && private_picurl)
+      if imageref = self.method(self.class.image_reference_name).call
+        imageref.thumbdata || imageref.url
+      end
     end
 
   end
