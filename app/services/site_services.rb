@@ -261,14 +261,16 @@ class SiteServices
     # raise "Can't nuke site which has an attached reference"
     # end
     # Merge corresponding referents
-    if other.referent
-      @site.referent ||= other.referent
-      if @site.referent != other.referent
-        @site.referent.merge other.referent
-        other.referent = nil
+    begin
+      if other.referent
+        @site.referent ||= other.referent
+        if @site.referent != other.referent
+          @site.referent.merge other.referent
+          other.referent = nil
+        end
+        @site.home = newhome # Creates and initializes the reference
+        true
       end
-      @site.home = newhome # Creates and initializes the reference
-      true
     rescue => exc
       debugger
       nil
