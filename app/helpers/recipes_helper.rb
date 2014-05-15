@@ -12,7 +12,7 @@ module RecipesHelper
   # Sort out a suitable URL to stuff into an image thumbnail for a recipe
   def recipe_image_div(recipe, div_class="recipe_image_div")
     begin
-      return unless url = recipe.picdata
+      return if (url = recipe.picdata).blank?
       options = { 
         alt: "Image Not Accessible", 
         id: "RecipeImage"+recipe.id.to_s,

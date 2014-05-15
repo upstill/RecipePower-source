@@ -253,6 +253,7 @@ end
 class SiteServices
   attr_accessor :site
 
+  def self.convert_all_to_references n=-1
 
   # Merge another site into this one, optionally destroying the other
   def merge other, nuke=true
@@ -268,6 +269,18 @@ class SiteServices
         @site.referent.merge other.referent
         other.referent = nil
       end
+      @site.home = newhome # Creates and initializes the reference
+      true
+    rescue => exc
+      debugger
+=begin
+      ref = SiteReference.find_or_initialize "#{@site.oldsite}#{@site.subsite}"
+      puts "Site ##{@site.id} (home #{@site.oldsite}#{@site.subsite}) is colliding with existing..."
+      extant = ref.site
+      puts "...site ##{extant.id} (home #{extant.oldsite}#{extant.subsite})"
+=end
+      # extant.merge @site
+      nil
     end
     # If these refer to the same external site, merge the other's feeds in
     if SiteReference.canonical_url("#{oldsite}#{subsite}") == SiteReference.canonical_url("#{other.oldsite}#{other.subsite}")
