@@ -261,19 +261,12 @@ class SiteServices
     # raise "Can't nuke site which has an attached reference"
     # end
     # Merge corresponding referents
-    begin
-      if other.referent
-        @site.referent ||= other.referent
-        if @site.referent != other.referent
-          @site.referent.merge other.referent
-          other.referent = nil
-        end
-        @site.home = newhome # Creates and initializes the reference
-        true
+    if other.referent
+      @site.referent ||= other.referent
+      if @site.referent != other.referent
+        @site.referent.merge other.referent
+        other.referent = nil
       end
-    rescue => exc
-      debugger
-      nil
     end
     # If these refer to the same external site, merge the other's feeds in
     if SiteReference.canonical_url("#{oldsite}#{subsite}") == SiteReference.canonical_url("#{other.oldsite}#{other.subsite}")
