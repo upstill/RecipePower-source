@@ -51,22 +51,24 @@ function fitImage(img) {
     return true;
 }
 
+// Set the source for the preview image, only loading the form field when the image is successfully loaded
+// NB: an empty image url is valid, and substituted in the image (but not in the form) with a fallback url
 function set_image_safely(imageElmt, url, formsel) {
-    if (url.length < 1) {
-        url = $(imageElmt).data('fallbackurl') || "/assets/NoPictureOnFile.png"
-        $(imageElmt).addClass('bogus')
-    } else {
-        $(imageElmt).removeClass('bogus')
+    var url_shown = url;
+    if (url.length < 1) {  // Substitute empty url with placeholder for display purposes only
+        url_shown = $(imageElmt).data('fallbackurl') || "/assets/NoPictureOnFile.png"
+        $(imageElmt).addClass('empty')
     }
-//	if($(imageElmt).attr("src") != url) {
-    $(imageElmt).removeClass("loaded").attr("src", url).data("formsel", formsel)
+    $(imageElmt).removeClass('bogus') // Pending load attempt
+    // Apply the display url to the preview, and save the form selector and actual URL pending successful load
+    $(imageElmt).removeClass("loaded").attr("src", url_shown).data("formsel", formsel).data("url_actual", url)
     imgLoad = imagesLoaded(imageElmt);
     imgLoad.on('progress', function (instance, image) {
         var img = image.img
         if (image.isLoaded) {
             var formsel = $(img).data("formsel")
             $(img).addClass("loaded")
-            $(formsel).attr("value", img.src)
+            $(formsel).attr("value", $(img).data("url_actual"))
         } else {
             $(img).addClass("bogus").removeClass("loaded")
             img.src = "/assets/BadPicURL.png"

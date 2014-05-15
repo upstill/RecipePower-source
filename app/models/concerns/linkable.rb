@@ -47,7 +47,7 @@ module Linkable
 
       # The url attribute is accessible, but access is through an instance method that
       # defers to a Reference
-      attr_accessible url_attribute
+      attr_accessible url_attribute, reference_association
 
       # Can get back to references this way:
       if options[:as]

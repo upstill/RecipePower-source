@@ -250,11 +250,32 @@ class ImageReference < Reference
   # An Image Reference maintains a local thumbnail of the image
   attr_accessible :thumbdata, :status
 
+  def check_url
+    # Nominally, an ImageReference records a URL plus its expansion into a thumbnail.
+    # However, the URL may come in as data: already, which makes the indexer unhappy.
+    # In this case, we transfer the data to thumbdata and set the URL to a pseudo-random key (to satisfy the uniqueness constraint on References)
+    if url =~ /^data:/
+      self.thumbdata = url
+      randstr = (0...8).map { (65 + rand(26)).chr }.join
+      self.url = Time.new.to_s + randstr
+      false
+    else
+      true # Assume the url is valid
+    end
+  end
+
+  def self.find_or_initialize url, params={}
+    candidate = super
+    candidate.check_url
+    candidate
+  end
+
   # Try to fetch the thumbnail data for the record, presuming a valid URL
   def perform
     unless thumbdata && (thumbdata =~ /^data:/)
       logger.info ">>>>>>>>>>>>>>>>>>>>>>>>>>>>> Acquiring Thumbnail data on url '#{url}' >>>>>>>>>>>>>>>>>>>>>>>>>"
-      if response_body = fetch # Attempt to get data at the other end of the URL
+      # If the URL is already data:, copy it over to the thumbdata and
+      if check_url && response_body = fetch # Attempt to get data at the other end of the URL
         begin
           img = Magick::Image::from_blob(response_body).first
           if img.columns > 200
@@ -284,7 +305,9 @@ class SiteReference < Reference
   def self.by_link link
     # Sanitize and normalize the URL
     if !link.blank? && canonical_url = self.canonical_url(link)
-      self.find_or_create canonical_url
+      sr = self.find_or_create canonical_url
+      sr.site ||= Site.create(:sample=>sr.url, :reference=>sr)
+      sr
     end
   end
 

@@ -253,6 +253,141 @@ end
 class SiteServices
   attr_accessor :site
 
+  def self.time_lookup ix=1
+    site_urls = [
+        'http://umamimart.com',
+        'http://www.simplyrecipes.com',
+        'http://www.cookinglight.com',
+        'http://www.taste.com.au',
+        'http://www.therecipedetective.com',
+        'http://spoonful.com',
+        'http://www.momswhothink.com',
+        'http://ohmyveggies.com',
+        'http://blog.countrytrading.co.nz',
+        'http://paperandsalt.org',
+        'http://www.bhg.com',
+        'http://www.afar.com',
+        'http://blogs.kqed.org',
+        'http://mideastfood.about.com',
+        'http://www.cooks.com',
+        'http://scrapbook.lacolombe.com',
+        'http://www.kitchenkonfidence.com',
+        'http://sfc.smallfarmcentral.com',
+        'http://framework.latimes.com',
+        'http://www.e-tingfood.com',
+        'http://www.injennieskitchen.com',
+        'http://www.theyummylife.com',
+        'http://www.goodhousekeeping.com',
+        'http://www.sprinklebakes.com',
+        'http://crockpot365.blogspot.com',
+        'http://racheleats.wordpress.com',
+        'https://www.goodeggs.com',
+        'http://www.maangchi.com',
+        'http://www.today.com/',
+        'http://www.vietworldkitchen.com',
+        'http://blog.onemedical.com',
+        'http://www.buzzfeed.com',
+        'http://vegetarian.about.com',
+        'http://thaifood.about.com',
+        'http://blogs.plos.org',
+        'http://www.dukandiet.com',
+        'http://blog.eladgil.com',
+        'http://maine.craigslist.org',
+        'http://www.bestyummyrecipes.com',
+        'https://www.teacherspayteachers.com',
+        'http://sweetpaul.typepad.com',
+        'https://plus.google.com/+MeatheadGoldwyn',
+        'http://www.grubstreet.com',
+        'http://m.allrecipes.com',
+        'http://chezpim.com',
+        'http://www.rachelcooks.com',
+        'http://www.sweetmarias.com',
+        'http://www.coolhunting.com',
+        'http://www.maps.org',
+        'http://bruery.blogspot.com',
+        'http://www.pastemagazine.com',
+        'http://www.playingwithfireandwater.com',
+        'http://amazingribs.com',
+        'http://edibleevolution.blogspot.com',
+        'http://tampopopress.blogspot.com',
+        'http://www.budgetsavvydiva.com',
+        'http://nourishedkitchen.com',
+        'http://iwanttocookthat.wordpress.com',
+        'http://oaxacaculture.com',
+        'http://www.newstatesman.com',
+        'http://www.yumsugar.com',
+        'http://www.americastestkitchenfeed.com',
+        'http://davescupboard.blogspot.com',
+        'http://simplyrecipes.com',
+        'http://flamingobear.com',
+        'http://norecipes.com',
+        'http://www.youtube.com',
+        'http://seidhr.blogspot.com',
+        'http://www.telegraph.co.uk',
+        'http://www.brooklynfarmhouse.com',
+        'http://mexicocooks.typepad.com',
+        'http://rollybrook.com',
+        'http://www.fabulousfoods.com',
+        'http://www.empellon.com',
+        'http://www.localforage.com',
+        'http://lidiasitaly.com',
+        'http://ricette.giallozafferano.it',
+        'http://www.redtri.com',
+        'http://www.mariquita.com',
+        'http://www.cookingissues.com',
+        'http://www.answers.com',
+        'http://blog.junbelen.com',
+        'http://www.bonappetit.com',
+        'http://www.kingarthurflour.com',
+        'http://www.food.com',
+        'http://www.cookthink.com',
+        'http://www.foodista.com',
+        'http://www.pbs.org',
+        'http://www.imbibemagazine.com',
+        'http://www.thebittenword.com',
+        'http://en.wikipedia.org',
+        'https://www.evernote.com',
+        'http://si.wsj.net',
+        'http://www.tasteofhome.com',
+        'http://m.saveur.com',
+        'http://ashevillecooks-homeedition.blogspot.com',
+        'http://www.boston.com',
+        'http://gourmetfood.about.com',
+        'http://tasteofbeirut.wpengine.netdna-cdn.com',
+        'http://www.goodeggs.com',
+        'http://labellecuisine.com'
+    ]
+    label = ""
+    index_name = index_table = nil
+    time = Benchmark.measure do
+      case ix
+        when 1
+          label = "Reference via Site"
+          index_table = :references
+          index_name = "references_index_by_url_and_type"
+          site_urls.each { |url|
+            site = Site.by_link url
+            ref = site.home
+          }
+        when 2
+          label = "Site via Reference"
+          index_table = :references
+          index_name = "references_index_by_url_and_type"
+          site_urls.each { |url|
+            ref = SiteReference.by_link url
+            site = ref.site
+          }
+        else
+          return false
+      end
+    end
+    index_status = ActiveRecord::Base.connection.index_name_exists?(index_table, index_name, false) ? "indexed" : "unindexed"
+    File.open("db_timings", 'a') { |file|
+      file.write(label+" (#{Time.new} #{index_status}): "+time.to_s+"\n")
+    }
+    true
+  end
+
   def self.convert_all_to_references n=-1
 
     Site.find(3419).merge(Site.find(3418)) if Site.exists?(3418)
@@ -294,7 +429,7 @@ class SiteServices
       end
       @site.home = newhome # Creates and initializes the reference
       @site.sample = @site.sampleURL
-      true
+      @site.save
     rescue => exc
       debugger
 =begin
