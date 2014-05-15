@@ -188,7 +188,6 @@ ActiveRecord::Schema.define(version: 20140515015444) do
   end
 
   add_index "references", ["affiliate_id", "type"], name: "references_index_by_affil_and_type", using: :btree
-  add_index "references", ["id"], name: "references_index_by_id", unique: true, using: :btree
   add_index "references", ["url", "type"], name: "references_index_by_url_and_type", unique: true, using: :btree
 
   create_table "referent_relations", force: true do |t|
@@ -249,8 +248,6 @@ ActiveRecord::Schema.define(version: 20140515015444) do
     t.text     "description"
     t.integer  "thumbnail_id"
   end
-
-  add_index "sites", ["id"], name: "sites_index_by_id", unique: true, using: :btree
 
   create_table "tag_owners", force: true do |t|
     t.integer  "tag_id"
