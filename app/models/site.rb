@@ -47,9 +47,6 @@ protected
   # When a site is first created, it needs to have a SiteReference built from its sample attribute
   def post_init
     unless id
-      self.sample = normalize_url sample
-      # Attach relevant references if they haven't been mass-assigned
-      self.home = sample if self.references.empty?
       # Give the site a provisional name, the host name minus 'www.', if any
       self.name = domain.sub(/www\./, '') if domain # Creates a corresponding referent
     end
@@ -57,11 +54,34 @@ protected
 
 public
 
+  def sample= url
+    # Attach relevant references if they haven't been mass-assigned
+    url = normalize_url url
+    if self.references.empty?
+      self.home = url
+    else
+      debugger
+      # Ensure that this url gets back to this site
+      canonical = SiteReference.canonical_url url
+      # Find the shortest sub-path of the url that doesn't collide with another site
+      until [nil, id].include? (refs = SiteReference.find_or_initialize( canonical, true)).first.affiliate_id
+        relative = url.sub(/#{canonical}/, '')
+        if (m = relative.match '^[^/]*/') && m[0]
+          canonical << m[0]
+        else
+          return nil
+        end
+      end
+      # Add the new references to the site's
+      refs.each { |ref| references << ref unless ref.affiliate_id && (ref.affiliate_id == id)}
+    end
+    write_attribute :sample, url
+  end
+
   # Produce a Site for a given url whether or not one already exists
   def self.find_or_create link_or_links
     links = link_or_links.is_a?(String) ? [link_or_links] : link_or_links
-    debugger
-    refs = SiteReference.find_or_initialize_canonical links
+    refs = SiteReference.find_or_initialize links
     if refs && refs.first
       refs.first.site || self.create(sample: links.first, references: refs, reference: refs.first )
     end

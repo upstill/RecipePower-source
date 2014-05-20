@@ -376,14 +376,14 @@ class SiteReference < Reference
     self.lookup_affiliates self.canonical_url(url)
   end
 
-  def self.find_or_initialize_canonical url_or_urls
-    urls = (url_or_urls.is_a?(String) ? [url_or_urls] : url_or_urls).map { |url| canonical_url url }.compact.uniq
+  # Generelly we reduce the find to the shortest available subpath of a url
+  def self.find_or_initialize url_or_urls, in_full=false
+    urls = (url_or_urls.is_a?(String) ? [url_or_urls] : url_or_urls)
+    urls = urls.map { |url| canonical_url url }.compact.uniq unless in_full
     urls.each { |url|
       siterefs = self.lookup(url, true)
       return siterefs unless siterefs.empty?
     }
-    # We tread carefully because several sites could share the same host. In that case, we return the longest path
-    # that matches the url. If there are none such, we return the host url itself.
-    self.find_or_initialize(urls.first)
+    super urls.first
   end
 end

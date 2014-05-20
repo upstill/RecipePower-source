@@ -57,6 +57,11 @@ module Linkable
         # References that define the location of their affiliates have a many-to-one relationship (i.e. many URLs can refer to the same entity)
         has_one reference_association, -> { where type: ref_type, canonical: true }, foreign_key: "affiliate_id", class_name: ref_type
         has_many reference_association_pl, -> { where type: ref_type }, foreign_key: "affiliate_id", class_name: ref_type, dependent: :nullify
+        after_save do
+          debugger
+          # Ensure that all the associated references have the same site
+          self.method(reference_association_pl).call.each { |reference| self.site.sample = reference.url }
+        end
       end
 
       self.class_eval do
@@ -65,35 +70,6 @@ module Linkable
           define_singleton_method :url_attribute_name do
             url_attribute
           end
-=begin
-          # Critical method to ensure no two linkables of the same class [offset] have the same reference
-          define_singleton_method :find_or_initialize do |url, params = {}|
-            # URL may be passed as a parameter or in the params hash
-            url_attribute_name = self.url_attribute_name
-            if url.is_a? Hash
-              params = url
-              url = params[url_attribute_name]
-            else
-              params[url_attribute_name] = url
-            end
-            if url.blank? # Check for non-empty URL
-              obj = self.new params # Initialize a record just to report the error
-              obj.errors.add url_attribute_name, "can't be blank"
-            else
-              # Normalize the url for lookup
-              ref = Reference.find_or_initialize url, type: "#{self.to_s}Reference"
-              obj = ref.affiliate || self.new(params)
-              obj.method(:"#{reference_association}=").call ref
-            end
-            obj
-          end
-
-          define_singleton_method :find_or_create do |url, params={}|
-            obj = self.find_or_initialize url, params
-            obj.save unless obj.id || obj.errors.any?
-            obj
-          end
-=end
         end
       end
 
