@@ -27,12 +27,12 @@ class Reference < ActiveRecord::Base
   # Index a Reference by URL or URLs, assuming it exists (i.e., no initialization or creation)
   def self.lookup url_or_urls, partial=false
     if self.affiliate_class
-      (url_or_urls.is_a?(Array) ? url_or_urls : [url_or_urls]).collect { |url|
+      (url_or_urls.is_a?(Array) ? url_or_urls : [url_or_urls]).map { |url| normalize_url url }.uniq.collect { |url|
         unless (normalized = normalize_url url).blank? # Check for non-empty URL
           if partial
-            list = Reference.where(type: self.to_s).where("type = '#{self.to_s}' and url LIKE ?", normalized+"%")
+            list = Reference.where "type = '#{self.to_s}' and url LIKE ?", normalized+"%"
           else
-            list = Reference.where(type: self.to_s, url: normalized) # Check for non-empty URL
+            list = Reference.where type: self.to_s, url: normalized # Check for non-empty URL
           end
           list
         end
@@ -45,11 +45,10 @@ class Reference < ActiveRecord::Base
   def self.lookup_affiliates url_or_urls, partial=false
     if self.affiliate_class # Referents need not apply (unknown affiliate class)
       unless (ids = self.lookup(url_or_urls, partial).map(&:affiliate_id).compact.uniq).empty?
-        self.affiliate_class.find ids
+        return self.affiliate_class.find ids
       end
-    else
-      []
     end
+    []
   end
 
   def self.lookup_affiliate url_or_urls, partial=false
@@ -279,8 +278,8 @@ end
 class RecipeReference < Reference
   belongs_to :recipe, foreign_key: "affiliate_id"
 
-  def self.lookup_recipe url
-    self.lookup_affiliate url
+  def self.lookup_recipe url_or_urls, by_site=false
+    self.lookup_affiliate url_or_urls, by_site
   end
 
   def self.lookup_recipes url, by_site=false
@@ -377,12 +376,14 @@ class SiteReference < Reference
     self.lookup_affiliates self.canonical_url(url)
   end
 
-  def self.find_or_initialize_canonical url
+  def self.find_or_initialize_canonical url_or_urls
+    urls = (url_or_urls.is_a?(String) ? [url_or_urls] : url_or_urls).map { |url| canonical_url url }.compact.uniq
+    urls.each { |url|
+      siterefs = self.lookup(url, true)
+      return siterefs unless siterefs.empty?
+    }
     # We tread carefully because several sites could share the same host. In that case, we return the longest path
     # that matches the url. If there are none such, we return the host url itself.
-    debugger
-    if canonical_url = self.canonical_url(url)
-      self.find_or_initialize canonical_url
-    end
+    self.find_or_initialize(urls.first)
   end
 end

@@ -260,22 +260,19 @@ class SiteServices
 
   def self.test_lookup_by_id id
     s1 = Site.find id
-    s2 = SiteReference.lookup_site s1.sample
-    new = nil
-    if s2 != s1
-      puts "Sample from site ##{s1.id} (#{s1.sample}) looks up to..."
-      if s2
-        puts "\t... site ##{s2.id} (#{s2.sample})"
-        canon = SiteReference.canonical_url(s1.sample)
+    s1.recipes.each { |rcp|
+      s2 = rcp.site # SiteReference.lookup_site rcp.url
+      if s2 != s1
+        puts "Recipe ##{rcp.id} #{rcp.url}..."
+        puts "...from site ##{s1.id} (#{s1.reference.url}) finds another site:"
+        puts "\t... site ##{s2.id} (#{s2.reference.url})"
+        canon = SiteReference.canonical_url(rcp.url)
         puts "\t... due to Reference(s) off of canonical link #{canon}:"
         SiteReference.lookup(canon).each { |sr| puts "\t\t##{sr.id} with url #{sr.url}" }
-      else
         debugger
-        new = Site.lookup s1.sample  # Creates the site where there was none before
+        x=2
       end
-      debugger
-      x=2
-    end
+    }
   end
 
   # Merge another site into this one, optionally destroying the other

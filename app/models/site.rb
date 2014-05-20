@@ -58,32 +58,18 @@ protected
 public
 
   # Produce a Site for a given url whether or not one already exists
-  def self.lookup link
-    refs = SiteReference.find_or_initialize_canonical link
+  def self.find_or_create link_or_links
+    links = link_or_links.is_a?(String) ? [link_or_links] : link_or_links
+    debugger
+    refs = SiteReference.find_or_initialize_canonical links
     if refs && refs.first
-      refs.first.site || self.create(sample: link, references: refs, reference: refs.first)
+      refs.first.site || self.create(sample: links.first, references: refs, reference: refs.first )
     end
   end
 
   def domain
-    host_url home # scheme+"://"+host+((port=="80") ? "" : (":"+port))
+    host_url home
   end
-
-=begin
-  def oldsite
-    reference.url
-  end
-
-  def sampleURL
-    sample ? URI.join( sample, reference.url ).to_s : ""
-  end
-
-  # By default the site's home page is (site+subsite), but that may be overridden (due to indirection) by
-  # setting the home attribute
-  def home_page
-    reference.url # home.blank? ? "#{site}#{subsite}" : home
-  end
-=end
 
   def name
     referent.name

@@ -138,7 +138,7 @@ module Linkable
         unless options[:as]
           # The site for a referenced object
           define_method :site do
-            @site ||= Site.lookup self.method(url_attribute).call
+            @site ||= Site.find_or_create self.method(reference_association_pl).call.map(&:url)
           end
         end
 
