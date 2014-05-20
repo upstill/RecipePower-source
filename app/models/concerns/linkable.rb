@@ -65,7 +65,7 @@ module Linkable
           define_singleton_method :url_attribute_name do
             url_attribute
           end
-
+=begin
           # Critical method to ensure no two linkables of the same class [offset] have the same reference
           define_singleton_method :find_or_initialize do |url, params = {}|
             # URL may be passed as a parameter or in the params hash
@@ -93,6 +93,7 @@ module Linkable
             obj.save unless obj.id || obj.errors.any?
             obj
           end
+=end
         end
       end
 
@@ -111,22 +112,15 @@ module Linkable
           # Get the existing reference
           if options[:as]
             # The reference is to another entity type: we just index by URL and assign the reference association
-            self.method(:"#{reference_association}=").call (pu.blank? ? nil : ref_type.constantize.find_or_initialize(pu))
+            self.method(:"#{reference_association}=").call (pu.blank? ? nil : ref_type.constantize.find_or_initialize(pu).first)
+          elsif pu.blank?
+            self.errors.add("#{url_attribute} can't be blank")
           else
-            # If the reference is to an identical type
-            self.errors.add("#{url_attribute} can't be blank") if pu.blank?
-            oldref = self.method(reference_association).call # Remember the existing reference, if any
-
-            # Create a new reference as necessary, raising an exception if one already exists that is assigned
-            # to another entity.
-            self.method(:"#{reference_association}=").call ref_type.constantize.find_or_initialize(pu, affiliate: self )
-            # The canonical reference for an entity is the one that is used for its reference association (as opposed
-            #  to its 'references' association of all the corresponding references)
-            if oldref && (oldref != self.method(reference_association).call)
-              oldref.canonical = false
-              oldref.affiliate_id = id  # XXX Why is this necessary? If the oldref exists, it should already be referring to us
-              oldref.save
-            end
+            # Create a new reference (or references, if there's a redirect involved) as necessary
+            refs = ref_type.constantize.find_or_initialize(pu)
+            # Give me the new references
+            self.method(:"#{reference_association}=").call refs.first
+            self.method(:"#{reference_association_pl}=").call refs
           end
           if self.has_attribute? url_attribute
             # Set the old url attribute--if it still exists
@@ -144,10 +138,7 @@ module Linkable
         unless options[:as]
           # The site for a referenced object
           define_method :site do
-            @site ||=
-                (url = self.method(url_attribute).call) &&
-                    (sr = SiteReference.by_link(url)) &&
-                    sr.site
+            @site ||= Site.lookup self.method(url_attribute).call
           end
         end
 
@@ -168,7 +159,7 @@ module Linkable
 
   # Return the URL for the recipe's source's home page
   def sourcehome
-    site.home_page
+    site.home
   end
 
 end

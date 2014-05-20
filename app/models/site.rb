@@ -18,7 +18,7 @@ class Site < ActiveRecord::Base
   #      may alter the path
   # Also, in most cases, site==home (when the domain is home, i.e. subsite is empty); in others, (site+subsite)==home,
   #     and only rarely will home be different from either of those
-  attr_accessible :finders_attributes, :sample, :oldname, :ttlcut, :finders, :reviewed, :description # , :subsite, :home, :logo, :oldsite, :scheme, :host, :port
+  attr_accessible :finders_attributes, :sample, :oldname, :ttlcut, :finders, :reviewed, :description, :reference, :references # , :subsite, :home, :logo, :oldsite, :scheme, :host, :port
 
   belongs_to :referent # See before_destroy method, :dependent=>:destroy
 
@@ -46,31 +46,30 @@ protected
 
   # When a site is first created, it needs to have a SiteReference built from its sample attribute
   def post_init
-    unless id # self.oldsite
-      # We need to initialize the fields of the record, starting with site, based on sample
-      # Ignore the query for purposes of gleaning the site
-      if self.sample = normalize_url(sample)
-        uri = safe_parse(sample)
-        unless uri.host.blank?
-          # Define the site as the link minus the sample (sub)path plus the subsite
-          # reflink = "#{host_url(uri.to_s)}#{subsite}".gsub /\/+/, '/'
-          self.reference = SiteReference.find_or_initialize(uri.to_s, affiliate: self) # Reference.find_or_initialize reflink, type: "SiteReference", affiliate: self
-
-          # Give the site a provisional name, the host name minus 'www.', if any
-          self.name = uri.host.sub(/www\./, '') # Creates a corresponding referent
-        else
-          self.errors.add :url, "Can't make sense of URI"
-        end
-      end
+    unless id
+      self.sample = normalize_url sample
+      # Attach relevant references if they haven't been mass-assigned
+      self.home = sample if self.references.empty?
+      # Give the site a provisional name, the host name minus 'www.', if any
+      self.name = domain.sub(/www\./, '') if domain # Creates a corresponding referent
     end
   end
 
 public
 
+  # Produce a Site for a given url whether or not one already exists
+  def self.lookup link
+    refs = SiteReference.find_or_initialize_canonical link
+    if refs && refs.first
+      refs.first.site || self.create(sample: link, references: refs, reference: refs.first)
+    end
+  end
+
   def domain
     host_url home # scheme+"://"+host+((port=="80") ? "" : (":"+port))
   end
 
+=begin
   def oldsite
     reference.url
   end
@@ -84,12 +83,7 @@ public
   def home_page
     reference.url # home.blank? ? "#{site}#{subsite}" : home
   end
-  
-  # Find and return the site wherein the named link is stored
-  def self.by_link link
-    ref = SiteReference.by_link link
-    ref.site || Site.create(:sample=>link) # Should find the same site reference
-  end
+=end
 
   def name
     referent.name
@@ -104,6 +98,7 @@ public
   end
 
   def recipes
-    RecipeReference.affiliates_by_url references.map(&:url)
+    # The recipes for a site are all those that match the site's references
+    RecipeReference.lookup_recipes references.map(&:url), true
   end
 end

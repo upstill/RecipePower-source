@@ -15,7 +15,7 @@ class RecipeServices
     all_ids = Set.new Recipe.all.map(&:id)
     (all_ids - current_ids).each { |id|
       rcp = Recipe.find id
-      old_ref = RecipeReference.by_link(rcp.url) # Get the competitor
+      old_ref = RecipeReference.lookup rcp.url # Get the competitor
       old_rcp = old_ref.recipe
       puts "Recipe ##{rcp.id} (url #{rcp.url})..."
       puts "  ...clashes with recipe ##{old_rcp.id} (url #{old_rcp.url})"
@@ -76,7 +76,7 @@ class RecipeServices
   def scrape
     extractions = SiteServices.extract_from_page(@recipe.url )
     puts "Recipe # #{@recipe.id}: #{@recipe.title}"
-    puts "\tsite: #{@recipe.site.name} (#{@recipe.site.home_page})"
+    puts "\tsite: #{@recipe.site.name} (#{@recipe.site.home})"
     puts "\turl: #{@recipe.url}"
     puts "\thref: #{@recipe.href}"
     puts "\tdescription: #{@recipe.description}"
@@ -501,7 +501,7 @@ class RecipeServices
           index_name = "references_index_by_url_and_type"
           index_table = :references
           recipe_urls.each { |url|
-            ref = RecipeReference.by_link url
+            ref = RecipeReference.lookup url
             recipe = ref.recipe
           }
         when 3

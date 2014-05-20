@@ -253,6 +253,31 @@ end
 class SiteServices
   attr_accessor :site
 
+  def self.test_lookup n=-1
+    Site.all[0..n].map(&:id).each { |id| self.test_lookup_by_id id }
+    nil
+  end
+
+  def self.test_lookup_by_id id
+    s1 = Site.find id
+    s2 = SiteReference.lookup_site s1.sample
+    new = nil
+    if s2 != s1
+      puts "Sample from site ##{s1.id} (#{s1.sample}) looks up to..."
+      if s2
+        puts "\t... site ##{s2.id} (#{s2.sample})"
+        canon = SiteReference.canonical_url(s1.sample)
+        puts "\t... due to Reference(s) off of canonical link #{canon}:"
+        SiteReference.lookup(canon).each { |sr| puts "\t\t##{sr.id} with url #{sr.url}" }
+      else
+        debugger
+        new = Site.lookup s1.sample  # Creates the site where there was none before
+      end
+      debugger
+      x=2
+    end
+  end
+
   # Merge another site into this one, optionally destroying the other
   def merge other, nuke=true
     # If the other has a Reference, that's a deal-breaker
@@ -269,7 +294,7 @@ class SiteServices
       end
     end
     # If these refer to the same external site, merge the other's feeds in
-    if SiteReference.canonical_url("#{oldsite}#{subsite}") == SiteReference.canonical_url("#{other.oldsite}#{other.subsite}")
+    if @site.home == other.home
       @site.feed_ids = (@site.feed_ids + other.feed_ids).uniq
     end
     if nuke
@@ -356,7 +381,7 @@ class SiteServices
   def resolve(candidate)
     return candidate if candidate.blank? || (candidate =~ /^\w*:/)
     begin
-      URI.join(@site.oldsite, candidate).to_s
+      URI.join(@site.home, candidate).to_s
     rescue
       candidate
     end
@@ -382,7 +407,7 @@ class SiteServices
 
   def test_finders(url = nil)
     fr = FinderResults.new @site, site_finders
-    fr.collect_results url || @site.sampleURL
+    fr.collect_results url || @site.sample
     self.site_finders = fr.revise_interactively
     case get_input("Any finder to add ([yY]: yes, [qQ]: quit without saving)? ")
       when "y", "Y"
@@ -409,7 +434,7 @@ class SiteServices
       finder[k] = v.to_s
     end
     fr = FinderResults.new @site, [finder]
-    fr.collect_results @site.sampleURL
+    fr.collect_results @site.sample
     self.site_finders = (self.site_finders + fr.revise_interactively)
     @site.save
   end
@@ -424,10 +449,10 @@ class SiteServices
   end
 
   def scrape
-    extractions = extract_from_page(@site.sampleURL)
+    extractions = extract_from_page(@site.sample)
     puts "Site # #{@site.id.to_s}"
     puts "\tname: #{@site.name}"
-    puts "\thome: (#{@site.home_page})"
+    puts "\thome: (#{@site.home})"
     puts "\tsubsite: (#{@site.subsite})"
     puts "\tlogo: (#{@site.logo})"
     extractions.each { |k, v| puts "\t\t#{k.to_s}: #{v}" }
@@ -472,7 +497,7 @@ class SiteServices
       sought = sought+1
 
       # Probe the site's sample URL for validity or relocation
-      test_url = site.sampleURL
+      test_url = site.sample
       puts "Cracking "+test_url
       if !(testback = test_link(test_url))
         bogus_in << test_url
@@ -535,16 +560,15 @@ class SiteServices
     Site.all[100..110].each do |site|
       ss = self.new site
       puts "------------------------------------------------------------------------"
-      puts "site: "+site.oldsite
-      puts "home: "+site.home_page
-      puts "sample: "+site.sampleURL
-      if pagetags = fr.collect_results(site.sampleURL, [:URI, :Title, :Image], true, site)
+      puts "home: "+site.home
+      puts "sample: "+site.sample
+      if pagetags = fr.collect_results(site.sample, [:URI, :Title, :Image], true, site)
         puts ">>>>>>>>>>>>>>> Results >>>>>>>>>>>>>>>>>>"
         [:URI, :Title, :Image].each do |label|
           label = label.to_s
           result = (pagetags.result_for(label) || "** Nothing Found **")
           found_or_not = ""
-          if label=="URI" && result!=site.sampleURL
+          if label=="URI" && result!=site.sample
             found_or_not = "(NO MATCH!)"
           end
           puts label+found_or_not+": "+result
@@ -599,11 +623,11 @@ class SiteServices
   end
 
   def stab_at_sample summ = {}
-    puts "Processing Site #{@site.sampleURL}"
+    puts "Processing Site #{@site.sample}"
     begin
-      @nkdoc = Nokogiri::HTML(open @site.sampleURL)
+      @nkdoc = Nokogiri::HTML(open @site.sample)
     rescue
-      puts "Error: couldn't open page '#{@site.sampleURL}' for analysis."
+      puts "Error: couldn't open page '#{@site.sample}' for analysis."
       recipe = @site.recipes.first
       puts "Processing Recipe #{recipe.url}"
       begin
@@ -696,7 +720,7 @@ class SiteServices
   # Use the extant finders on a site, interactively querying their appropriateness and potentially assigning
   # results (either extractors or hard values) to the site
   def poll_extractions url=nil
-    url ||= site.sampleURL
+    url ||= site.sample
     finders = all_finders
     begin
       pagetags = PageTags.new(url, @site, finders, true, false)
@@ -820,7 +844,7 @@ class SiteServices
       name = site.name
       if (first_found ||= (site.id == id))
         puts "#{site_n}/#{nsites} >>>>>>>>>>>>>>>>>>>>>>"
-        puts site.sampleURL
+        puts site.sample
         puts "\tid: #{site.id}"
         puts "\tname: #{name}"
         puts "\tdescription: #{site.description}"

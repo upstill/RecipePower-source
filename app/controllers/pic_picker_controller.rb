@@ -3,8 +3,8 @@ class PicPickerController < ApplicationController
     # Expecting params as follows:
     partial = render_to_string partial: "pic_picker",
            locals: {
-               picurl: params[:picurl], # @site.logo,
-               pageurl: params[:pageurl], # @site.sampleURL,
+               picurl: params[:picurl], 
+               pageurl: params[:pageurl],
                golinkid: params[:golinkid]
            }
     respond_to do |format|
