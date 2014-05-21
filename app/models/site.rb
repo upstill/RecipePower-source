@@ -47,6 +47,9 @@ protected
   # When a site is first created, it needs to have a SiteReference built from its sample attribute
   def post_init
     unless id
+      self.sample = normalize_url sample # Normalize the sample
+      # Attach relevant references if they haven't been mass-assigned
+      self.home = sample if self.references.empty?
       # Give the site a provisional name, the host name minus 'www.', if any
       self.name = domain.sub(/www\./, '') if domain # Creates a corresponding referent
     end
@@ -54,28 +57,31 @@ protected
 
 public
 
-  def sample= url
-    # Attach relevant references if they haven't been mass-assigned
-    url = normalize_url url
-    if self.references.empty?
-      self.home = url
-    else
-      debugger
-      # Ensure that this url gets back to this site
-      canonical = SiteReference.canonical_url url
-      # Find the shortest sub-path of the url that doesn't collide with another site
-      until [nil, id].include? (refs = SiteReference.find_or_initialize( canonical, true)).first.affiliate_id
-        relative = url.sub(/#{canonical}/, '')
-        if (m = relative.match '^[^/]*/') && m[0]
-          canonical << m[0]
-        else
-          return nil
-        end
+  # Make sure that a url(s) map(s) to this site, returning true if any references were added
+  def attract_url url_or_urls
+    (url_or_urls.is_a?(String) ? [url_or_urls] : url_or_urls).any? do |url|
+      url = normalize_url url
+      if (other = SiteReference.lookup_site(url)) && (other != self)
+        # Reject urls that already reference another site
+        false
+      else
+        # Ensure that 1) this url gets back to this site, and 2) it has as a common subpath with the other references as possible
+        target_uri = URI(url)
+        target_path = target_uri.path
+        target_uri.path = references.map(&:url).inject("") { |memo, ref_url|
+          ref_path = URI(ref_url).path
+          memo = ((ref_path.length > memo.length) && target_path.match(/^#{ref_path}/)) ? ref_path : memo
+        }
+        # Add the new references to the site's
+        SiteReference.find_or_initialize(target_uri.to_s, true).any? { |candidate|
+          if references.any? { |existing| candidate.url == existing.url } # No redundancy, please
+            false
+          else
+            references << candidate
+          end
+        }
       end
-      # Add the new references to the site's
-      refs.each { |ref| references << ref unless ref.affiliate_id && (ref.affiliate_id == id)}
     end
-    write_attribute :sample, url
   end
 
   # Produce a Site for a given url whether or not one already exists

@@ -58,9 +58,8 @@ module Linkable
         has_one reference_association, -> { where type: ref_type, canonical: true }, foreign_key: "affiliate_id", class_name: ref_type
         has_many reference_association_pl, -> { where type: ref_type }, foreign_key: "affiliate_id", class_name: ref_type, dependent: :nullify
         after_save do
-          debugger
-          # Ensure that all the associated references have the same site
-          self.method(reference_association_pl).call.each { |reference| self.site.sample = reference.url }
+          # Ensure that all the associated references go to the same site
+          site.save if site.attract_url(self.method(reference_association_pl).call.map(&:url))
         end
       end
 
