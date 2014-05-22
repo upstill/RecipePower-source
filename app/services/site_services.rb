@@ -275,34 +275,6 @@ class SiteServices
     }
   end
 
-  # Merge another site into this one, optionally destroying the other
-  def merge other, nuke=true
-    # If the other has a Reference, that's a deal-breaker
-    # Merge corresponding referents
-    if other.referent
-      @site.referent ||= other.referent
-      if @site.referent != other.referent
-        @site.referent.merge other.referent
-        other.referent = nil
-      end
-    end
-    unless other.references.empty?
-      existing_urls = @site.references.map(&:url)
-      other.references.each { |candidate|
-        if existing_urls.all? { |url| url != candidate.url }
-          @site.references << candidate
-        else
-          debugger
-          x=2
-        end
-      }
-      other.references = []
-      other.reference = nil
-    end
-    other.destroy if nuke
-    @site.save
-  end
-
   def initialize site
     @site = site
     site_finders # Preload the finders
@@ -579,7 +551,7 @@ class SiteServices
 
   def self.extract_from_page(url, spec={})
     extractions = {}
-    if !url.blank? && (site = Site.by_link url) && (ss = SiteServices.new(site))
+    if !url.blank? && (site = Site.find_or_create url) && (ss = SiteServices.new(site))
       extractions = ss.extract_from_page url, spec
     end
     extractions

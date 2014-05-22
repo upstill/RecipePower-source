@@ -55,8 +55,12 @@ module Linkable
         belongs_to reference_association, class_name: ref_type
       else
         # References that define the location of their affiliates have a many-to-one relationship (i.e. many URLs can refer to the same entity)
-        has_one reference_association, -> { where type: ref_type, canonical: true }, foreign_key: "affiliate_id", class_name: ref_type
-        has_many reference_association_pl, -> { where type: ref_type }, foreign_key: "affiliate_id", class_name: ref_type, dependent: :nullify
+        has_one reference_association, -> { where type: ref_type, canonical: true }, foreign_key: "affiliate_id", class_name: ref_type, :dependent=>:restrict_with_exception
+        has_many reference_association_pl, -> { where type: ref_type },
+                 foreign_key: "affiliate_id",
+                 class_name: ref_type,
+                 after_add: :"#{reference_association_pl}_ensure_site",
+                 dependent: :restrict_with_exception
 =begin
         after_save do
           # Ensure that all the associated references go to the same site
@@ -75,6 +79,35 @@ module Linkable
       end
 
       self.instance_eval do
+
+        # Whenever a reference is added, we ensure that it gets to the same site
+        define_method "#{reference_association_pl}_ensure_site" do |reference|
+          debugger
+          site.include_url reference.url if (self.class != Site) && site && reference
+        end
+
+        # Ensure that all the linkable's references refer to the same site
+        define_method "#{reference_association_pl}_qa" do
+          self.method(:"#{reference_association_pl}").call.each { |other_ref|
+            case other_site = SiteReference.lookup_site(other_ref.url)
+              when nil
+                debugger
+                site.include_url other_ref.url
+              when site # If the other_ref maps to the same site, all is well
+              else
+                if anchor = site
+                  if other_ref.canonical  # Prefer to absorb a non-canonical site into a canonical one
+                    anchor, other_site = other_site, anchor
+                  end
+                  puts "#{self.class} has refs for sites #{anchor.id}(#{anchor.home}) and #{other_site.id}(#{other_site.home})"
+                  anchor.absorb other_site
+                else
+                  debugger
+                  x=2
+                end
+            end
+          }
+        end
 
         # Define singleton getter and setter methods for the URL by using a Reference object.
         # Once a URL is in use for an entity of a particular type (Recipe, site, image, etc.), it

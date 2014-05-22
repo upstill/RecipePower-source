@@ -76,7 +76,7 @@ class FeedServices
             site.feeds << feed 
           else
             puts "\tREJECTED #{url}...because\n\t"+feed.errors.collect { |k, v| k.to_s+" "+v }.join('\n\t...')
-            if (url =~ /rss|xml/) && (Site.by_link(url) == site) # Another page on the same site with rss in the url; maybe a page of links?
+            if (url =~ /rss|xml/) && (Site.find_or_create(url) == site) # Another page on the same site with rss in the url; maybe a page of links?
               unless queue.include?(url)
                 if queue.length < 10
                   puts "\tPUSHING #{url}"

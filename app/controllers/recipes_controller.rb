@@ -203,7 +203,7 @@ class RecipesController < ApplicationController
           uri = URI(url)
           if uri.host == current_domain.sub(/:\d*/,'') # Compare the host to the current domain (minus the port)
             render js: %Q{alert("Sorry, but RecipePower doesn't cookmark its own pages (does that even make sense?)") ; }
-          elsif !(@site = Site.by_link(url))
+          elsif !(@site = Site.find_or_create(url))
             # If we couldn't even get the site from the domain, we just bail entirely
             render js: %Q{alert(#{msg});}
           else

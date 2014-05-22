@@ -25,7 +25,7 @@ class Site < ActiveRecord::Base
   has_many :finders, :dependent=>:destroy
   accepts_nested_attributes_for :finders, :allow_destroy => true
   
-  has_many :feeds, :dependent=>:destroy
+  has_many :feeds, :dependent=>:restrict_with_exception
 
   # When creating a site, also create a corresponding site referent
   # before_create :ensure_referent
@@ -41,7 +41,7 @@ protected
   # If this is the last site associated with its referent, destroy the referent
   before_destroy do |site|
     sibling_sites = Site.where(referent_id: site.referent_id)
-    site.referent.destroy if (sibling_sites.count == 1) && (sibling_sites.first.id == site.id)
+    site.referent.destroy if site.referent && (sibling_sites.count == 1) && (sibling_sites.first.id == site.id)
   end
 
   # When a site is first created, it needs to have a SiteReference built from its sample attribute
@@ -62,9 +62,8 @@ public
     (url_or_urls.is_a?(String) ? [url_or_urls] : url_or_urls).any? do |url|
       url = normalize_url url
       # Reject urls that already reference a site
-      debugger
       unless SiteReference.lookup_site(url)
-        # Ensure that 1) this url gets back to this site, and 2) it has as a common subpath with the other references as possible
+        # Ensure that 1) this url gets back to this site, and 2) it has the longest possible subpath in common with the other references
         target_uri = URI(url)
         target_uri.query = target_uri.fragment = nil # Queries and fragments are ignored in site mappings
         target_path = target_uri.path
@@ -81,6 +80,32 @@ public
       end
     end
   end
+
+  # Merge another site into this one, optionally destroying the other
+  def absorb other, nuke=true
+    # If the other has a Reference, that's a deal-breaker
+    # Merge corresponding referents
+    if other.referent
+      self.referent ||= other.referent
+      if self.referent != other.referent
+        self.referent.merge other.referent
+        other.referent = nil
+      end
+    end
+    other.feeds.each { |other_feed|
+      other_feed.site = self
+      other_feed.save
+    }
+    other.references.each { |other_ref|
+      other_ref.site = self
+      other_ref.save
+    }
+    debugger
+    save
+    other.reload # To clear out the associations prior to destroying the victim
+    other.destroy if nuke
+  end
+
 
   # Produce a Site for a given url whether or not one already exists
   def self.find_or_create link_or_links
