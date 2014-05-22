@@ -73,9 +73,9 @@ class Recipe < ActiveRecord::Base
       extractions.each { |key, value| logger.debug "\t#{key}: #{value}" }
       params[:description] = extractions[:Description] if extractions[:Description]
       if extractions[:URI]
-        params[:url] = URI::encode extractions[:URI]
+        params[:url] = extractions[:URI]
       elsif extractions[:href]
-        params[:url] = URI::encode extractions[:href]
+        params[:url] = extractions[:href]
       end
       params[:picurl] = extractions[:Image] if extractions[:Image]
       params[:title] = extractions[:Title] if extractions[:Title]
