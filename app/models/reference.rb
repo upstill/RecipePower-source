@@ -381,7 +381,7 @@ class SiteReference < Reference
     urls = (url_or_urls.is_a?(String) ? [url_or_urls] : url_or_urls)
     urls = urls.map { |url| canonical_url url }.compact.uniq unless in_full
     urls.each { |url|
-      siterefs = self.lookup(url, true)
+      siterefs = self.lookup url # Lookup the site on the exact url
       return siterefs unless siterefs.empty?
     }
     super urls.first

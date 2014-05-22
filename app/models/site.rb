@@ -58,28 +58,26 @@ protected
 public
 
   # Make sure that a url(s) map(s) to this site, returning true if any references were added
-  def attract_url url_or_urls
+  def include_url url_or_urls
     (url_or_urls.is_a?(String) ? [url_or_urls] : url_or_urls).any? do |url|
       url = normalize_url url
-      if (other = SiteReference.lookup_site(url)) && (other != self)
-        # Reject urls that already reference another site
-        false
-      else
+      # Reject urls that already reference a site
+      debugger
+      unless SiteReference.lookup_site(url)
         # Ensure that 1) this url gets back to this site, and 2) it has as a common subpath with the other references as possible
         target_uri = URI(url)
+        target_uri.query = target_uri.fragment = nil # Queries and fragments are ignored in site mappings
         target_path = target_uri.path
-        target_uri.path = references.map(&:url).inject("") { |memo, ref_url|
+        existing_urls = references.map(&:url)
+        target_uri.path = existing_urls.inject("") { |memo, ref_url|
           ref_path = URI(ref_url).path
           memo = ((ref_path.length > memo.length) && target_path.match(/^#{ref_path}/)) ? ref_path : memo
         }
-        # Add the new references to the site's
-        SiteReference.find_or_initialize(target_uri.to_s, true).any? { |candidate|
-          if references.any? { |existing| candidate.url == existing.url } # No redundancy, please
-            false
-          else
-            references << candidate
-          end
-        }
+        # Add the new references to those of the site, eliminating redundant ones
+        new_refs = SiteReference.find_or_initialize(target_uri.to_s, true).keep_if { |candidate| existing_urls.all? { |url| url != candidate.url } }
+        unless new_refs.empty?
+          self.references = self.references + new_refs
+        end
       end
     end
   end

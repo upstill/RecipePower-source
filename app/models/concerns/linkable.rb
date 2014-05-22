@@ -57,10 +57,12 @@ module Linkable
         # References that define the location of their affiliates have a many-to-one relationship (i.e. many URLs can refer to the same entity)
         has_one reference_association, -> { where type: ref_type, canonical: true }, foreign_key: "affiliate_id", class_name: ref_type
         has_many reference_association_pl, -> { where type: ref_type }, foreign_key: "affiliate_id", class_name: ref_type, dependent: :nullify
+=begin
         after_save do
           # Ensure that all the associated references go to the same site
-          site.save if site.attract_url(self.method(reference_association_pl).call.map(&:url))
+          site.save if site.include_url(self.method(reference_association_pl).call.map(&:url))
         end
+=end
       end
 
       self.class_eval do

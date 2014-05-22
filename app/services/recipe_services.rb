@@ -21,8 +21,43 @@ class RecipeServices
       puts "  ...clashes with recipe ##{old_rcp.id} (url #{old_rcp.url})"
       self.new(rcp).merge_into old_rcp
       self.new(old_rcp).test_conversion
-      x=2
     }
+  end
+
+  def self.fix_references which=nil
+    # Examine each recipe for every reference mapping to the same site
+    eqclasses = {}
+    rcps = Set.new()
+    (which || Recipe.all).each { |rcp|
+      rcp.references.each { |other_ref|
+        case other_site = SiteReference.lookup_site(other_ref.url)
+          when nil
+            debugger
+            rcp.site.include_url other_ref.url
+          when rcp.site # If the other_ref maps to the same site, all is well
+          else
+            if anchor = rcp.site
+              if other_ref.canonical  # Prefer to absorb a non-canonical site into a canonical one
+                anchor, other_site = other_site, anchor
+              end
+              # unless eqclasses[anchor.id] && eqclasses[anchor.id].include?(other_site.id)
+                puts "Recipe has refs for sites #{anchor.id}(#{anchor.home}) and #{other_site.id}(#{other_site.home})"
+                debugger
+                SiteServices.new(anchor).merge other_site
+                s2 = SiteReference.lookup_site other_ref.url
+                x=2
+              # end
+            else
+              debugger
+              x=2
+            end
+
+        end
+      }
+    }
+    debugger
+    eqclasses.keys.each { |key| puts "Redundant to #{key}: "+eqclasses[key].to_a.to_s }
+    rcps
   end
 
   # Merge this recipe into another, optionally deleting it
