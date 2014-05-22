@@ -82,7 +82,7 @@ module Linkable
 
         # Whenever a reference is added, we ensure that it gets to the same site
         define_method "#{reference_association_pl}_ensure_site" do |reference|
-          debugger
+          # debugger
           site.include_url reference.url if (self.class != Site) && site && reference
         end
 
@@ -91,7 +91,7 @@ module Linkable
           self.method(:"#{reference_association_pl}").call.each { |other_ref|
             case other_site = SiteReference.lookup_site(other_ref.url)
               when nil
-                debugger
+                # debugger
                 site.include_url other_ref.url
               when site # If the other_ref maps to the same site, all is well
               else
@@ -102,7 +102,7 @@ module Linkable
                   puts "#{self.class} has refs for sites #{anchor.id}(#{anchor.home}) and #{other_site.id}(#{other_site.home})"
                   anchor.absorb other_site
                 else
-                  debugger
+                  # debugger
                   x=2
                 end
             end

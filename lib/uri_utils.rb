@@ -49,7 +49,7 @@ def safe_parse(url)
 end
 
 def sanitize_url url
-  url.strip.gsub(/\{/, '%7B').gsub(/\}/, '%7D')
+  url.strip.gsub(/\{/, '%7B').gsub(/\}/, '%7D').gsub(/\%23/, '#' )
 end
 
 # Return nil if anything is amiss, including nil or empty url

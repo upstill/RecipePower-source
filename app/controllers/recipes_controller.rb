@@ -197,7 +197,7 @@ class RecipesController < ApplicationController
         # We need a domain to pass as sourcehome, so the injected iframe can communicate with the browser.
         # This gets extracted from the href passed as a parameter
         response_service.is_injector
-        url = params[:recipe][:url]
+        url = URI::encode params[:recipe][:url]
         msg = %Q{"Sorry, but RecipePower can't make sense of the cookmark '#{url}'"}
         begin
           uri = URI(url)
@@ -211,7 +211,7 @@ class RecipesController < ApplicationController
             @url = capture_recipes_url response_service.redirect_params( params.slice(:recipe).merge sourcehome: @site.domain)
             render
           end
-        rescue
+        rescue Exception => e
           render js: %Q{alert(#{msg});}
         end
       }
