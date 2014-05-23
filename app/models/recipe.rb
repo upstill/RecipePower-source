@@ -17,7 +17,7 @@ class Recipe < ActiveRecord::Base
   picable :picurl, :picture
 
   attr_accessible :title, :ratings_attributes, :description, #, :comment, :tagpane, :status, :private, :alias, :picurl :href
-                  :misc_tag_tokens, :collection_tokens, :channel_tokens
+                  :misc_tag_tokens, :collection_tokens, :channel_tokens, :url
   after_save :save_ref
 
   validates :title, :presence => true
@@ -59,7 +59,7 @@ class Recipe < ActiveRecord::Base
     if params[:id]
       # Recipe exists and we're just touching it for the user
       rcp = Recipe.find params[:id]
-    else
+    elsif !(rcp = RecipeReference.lookup_recipe params[:url])
       if !extractions
         extractions = SiteServices.extract_from_page(params[:url])
         if extractions.empty?

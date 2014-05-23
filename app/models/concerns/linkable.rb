@@ -61,6 +61,7 @@ module Linkable
                  class_name: ref_type,
                  after_add: :"#{reference_association_pl}_ensure_site",
                  dependent: :restrict_with_exception
+        attr_accessible reference_association_pl
 =begin
         after_save do
           # Ensure that all the associated references go to the same site

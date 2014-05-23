@@ -326,6 +326,7 @@ ActiveRecord::Schema.define(version: 20140515015444) do
     t.datetime "invitation_created_at"
     t.string   "first_name"
     t.string   "last_name"
+    t.integer  "thumbnail_id"
   end
 
   add_index "users", ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true, using: :btree

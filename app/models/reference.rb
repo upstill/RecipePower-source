@@ -103,9 +103,9 @@ class Reference < ActiveRecord::Base
       case refs.count
         when 0
           # Need to create, if possible
-          if !(redirected = test_url url)
-            ref = self.new(params) # Initialize a record just to report the error
-            ref.errors.add :url, "\'#{url}\' doesn't seem to be a working URL. Can you use it as an address in your browser?"
+          if !(redirected = test_url normalized)
+            refs = [self.new(params)] # Initialize a record just to report the error
+            refs.first.errors.add :url, "\'#{url}\' doesn't seem to be a working URL. Can you use it as an address in your browser?"
           else
             # No reference to be found under the given (normalized) URL -> create one, and possibly its canonical reference as well
             # The goal is to ensure access through any given link that resolves to the same URL after normalization and any redirection.
