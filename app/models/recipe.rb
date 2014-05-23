@@ -42,7 +42,7 @@ class Recipe < ActiveRecord::Base
   # Writing the picture URL redirects to acquiring an image reference
   def picurl= pu
     pu = site_service.resolve(pu) if site
-    self.picture = ImageReference.find_or_initialize(pu)
+    self.picture = ImageReference.find_or_initialize(pu).first
   end
 
   def site_service
@@ -116,10 +116,10 @@ class Recipe < ActiveRecord::Base
   # Absorb another recipe, optionally deleting the other
   def absorb other, destroy=true
     # This recipe may be presenting a URL that redirects to the target => include that URL in the table
-    obj = RecipeReference.find_or_initialize other.url, affiliate: self
+    # RecipeReference.find_or_initialize other.url, affiliate: self
     # Apply thumbnail and comment, if any
     other.references.each { |other_ref|
-      other_ref.site = self
+      other_ref.recipe = self
       other_ref.save
     }
     unless other.picurl.blank? || !picurl.blank?

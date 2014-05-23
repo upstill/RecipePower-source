@@ -316,7 +316,7 @@ class ImageReference < Reference
   def self.find_or_initialize url, params={}
     candidates = super
     # Check all the candidates for a data: URL, and return the canonical one or the first one, if none is canonical
-    candidates.inject(candidates.first) { |memo, cand| cand.check_url; memo = cand if cand.canonical }
+    [candidates.inject(candidates.first) { |memo, cand| cand.check_url; memo = cand if cand.canonical }]
   end
 
   # Try to fetch the thumbnail data for the record, presuming a valid URL

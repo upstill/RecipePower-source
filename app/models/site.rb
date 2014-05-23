@@ -100,7 +100,6 @@ public
       other_ref.site = self
       other_ref.save
     }
-    debugger
     save
     other.reload # To clear out the associations prior to destroying the victim
     other.destroy if nuke

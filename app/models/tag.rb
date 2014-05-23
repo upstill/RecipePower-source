@@ -279,7 +279,7 @@ class Tag < ActiveRecord::Base
           typelist = (type.kind_of? Array) ? type.map(&:to_s).join(',') : type.to_s
           tags = Tag.where "normalized_name like ? AND tagtype IN (#{typelist})", "%#{fuzzyname}%"
         elsif type_x # Specific collection of types
-          typelist = (type.kind_of? Array) ? type.map(&:to_s).join(',') : type.to_s
+          typelist = (type_x.kind_of? Array) ? type_x.map(&:to_s).join(',') : type_x.to_s
           tags = Tag.where.not("tagtype IN (#{typelist})").where "normalized_name like ?", "%#{fuzzyname}%"
         else
           tags = Tag.where "normalized_name like ? ", "%#{fuzzyname}%"
