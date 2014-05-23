@@ -51,7 +51,8 @@ def safe_parse(url)
     spl = url.split('#')
     if (spl.size > 1) && ((refrag = URI::encode(spl[-1])) != spl[-1])
       begin
-        uri = URI.parse spl.join('#')+"#"+refrag
+        spl[-1] = refrag
+        uri = URI.parse spl.join('#')
       rescue Exception => e
         uri = nil
       end

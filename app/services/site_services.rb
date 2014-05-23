@@ -177,7 +177,7 @@ class PageTags
   private
 
   def initialize (url, site, finders, do_all=nil, verbose = true)
-    @nkdoc = Nokogiri::HTML(open url)
+    @nkdoc = Nokogiri::HTML(open normalize_url(url))
     @finderset = finders
     @results = {}
     SiteServices.data_choices().each { |label| @results[label] = [] }

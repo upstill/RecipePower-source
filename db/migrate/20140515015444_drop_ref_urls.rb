@@ -3,7 +3,6 @@ class DropRefUrls < ActiveRecord::Migration
 	remove_column :references, :reference_type
 	remove_column :taggings, :is_definition
 	remove_column :users, :image
-	remove_column :users, :thumbnail_id
 	drop_table :thumbnails
 	remove_column :recipes, :url
 	remove_column :recipes, :picurl

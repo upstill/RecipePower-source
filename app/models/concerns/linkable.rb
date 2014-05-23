@@ -142,7 +142,7 @@ module Linkable
         define_method(url_attribute) do
           # This will cause an exception for entities without a corresponding reference
           ((reference = self.method(reference_association).call) && reference.url) ||
-          (self.has_attribute?(url_attribute) && super())
+          (super() if self.has_attribute?(url_attribute))
         end
 
         unless options[:as]
