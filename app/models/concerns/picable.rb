@@ -21,9 +21,7 @@ module Picable
     # The image may have an associated thumbnail, but it doesn't count unless
     # the thumbnail reflects the image's current private_picurl
     def picdata data_only = false
-      if imageref = self.method(self.class.image_reference_name).call
-        imageref.thumbdata || imageref.url
-      end
+      (imageref = self.method(self.class.image_reference_name).call) && imageref.imgdata
     end
 
   end

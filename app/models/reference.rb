@@ -299,32 +299,24 @@ class ImageReference < Reference
     self.lookup_affiliates url, by_site
   end
 
-  def check_url
-    # Nominally, an ImageReference records a URL plus its expansion into a thumbnail.
-    # However, the URL may come in as data: already, which makes the indexer unhappy.
-    # In this case, we transfer the data to thumbdata and set the URL to a pseudo-random key (to satisfy the uniqueness constraint on References)
-    if url =~ /^data:/
-      self.thumbdata = url
-      randstr = (0...8).map { (65 + rand(26)).chr }.join
-      self.url = Time.new.to_s + randstr
-      false
-    else
-      true # Assume the url is valid
-    end
-  end
-
   def self.find_or_initialize url, params={}
     candidates = super
     # Check all the candidates for a data: URL, and return the canonical one or the first one, if none is canonical
-    [candidates.inject(candidates.first) { |memo, cand| cand.check_url; memo = cand if cand.canonical }]
+    [candidates.inject(candidates.first) { |memo, cand| cand.fetchable; memo = cand if cand.canonical }]
   end
 
-  # Try to fetch the thumbnail data for the record, presuming a valid URL
+  # Provide suitable content for an <img> element: preferably data, but possibly a url or even (if the data fetch fails) nil
+  def imgdata
+    url_usable = fetchable # fetchable may set the thumbdata
+    thumbdata || (url if url_usable)
+  end
+
+  # Try to fetch the thumbnail data for the record. Status code assigned in ImageReference#fetchable and Reference#fetch
   def perform
     unless thumbdata && (thumbdata =~ /^data:/)
       logger.info ">>>>>>>>>>>>>>>>>>>>>>>>>>>>> Acquiring Thumbnail data on url '#{url}' >>>>>>>>>>>>>>>>>>>>>>>>>"
       # If the URL is already data:, copy it over to the thumbdata and
-      if check_url && response_body = fetch # Attempt to get data at the other end of the URL
+      if fetchable && response_body = fetch # Attempt to get data at the other end of the URL
         begin
           img = Magick::Image::from_blob(response_body).first
           if img.columns > 200
@@ -337,11 +329,45 @@ class ImageReference < Reference
           quality = 20
           thumb.write("thumb#{id.to_s}-M#{quality.to_s}.jpg") { self.quality = quality } unless true # Rails.env.production?
           self.thumbdata = "data:image/jpeg;base64," + Base64.encode64(thumb.to_blob{self.quality = quality })
-          save
+        rescue Exception => e
+          self.status = -2 # Bad data
+          self.thumbdata = nil
+        end
+      end
+      save  # Save the status code, if nothing else
+    end
+    self
+  end
+
+  private
+
+  def fetchable
+    # Nominally, an ImageReference records a URL plus its expansion into a thumbnail.
+    # However, the URL may come in as data: already, which makes the indexer unhappy.
+    # In this case, we transfer the data to thumbdata and set the URL to a pseudo-random key (to satisfy the uniqueness constraint on References)
+    if url =~ /^data:/
+      self.thumbdata = url
+      randstr = (0...8).map { (65 + rand(26)).chr }.join
+      self.url = Time.new.to_s + randstr
+      save
+      false
+    else
+      # Check on the thumbdata, queuing it up for caching if not present
+      unless thumbdata && (thumbdata =~ /^data:/)
+        if [
+            # Don't retry on these status codes
+            -2, # Got unparseable data from the request
+            400, # Bad Request
+            403, # Forbidden
+            410, # Gone
+        ].include? status
+          false
+        else
+          Delayed::Job.enqueue(self)
+          true # Assume the url is valid
         end
       end
     end
-    self
   end
 
 end
