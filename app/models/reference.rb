@@ -188,7 +188,7 @@ class Reference < ActiveRecord::Base
           when Errno::ECONNRESET
             self.status = 401
           else
-            self.status = -1
+            self.status = -1  # Undifferentiated error during fetch, possibly a parsing problem
         end
       end
       response
@@ -315,8 +315,8 @@ class ImageReference < Reference
   def perform
     unless thumbdata && (thumbdata =~ /^data:/)
       logger.info ">>>>>>>>>>>>>>>>>>>>>>>>>>>>> Acquiring Thumbnail data on url '#{url}' >>>>>>>>>>>>>>>>>>>>>>>>>"
-      # If the URL is already data:, copy it over to the thumbdata and
-      if fetchable && response_body = fetch # Attempt to get data at the other end of the URL
+      self.thumbdata = nil
+      if fetchable(false) && response_body = fetch # Attempt to get data at the other end of the URL
         begin
           img = Magick::Image::from_blob(response_body).first
           if img.columns > 200
@@ -331,7 +331,6 @@ class ImageReference < Reference
           self.thumbdata = "data:image/jpeg;base64," + Base64.encode64(thumb.to_blob{self.quality = quality })
         rescue Exception => e
           self.status = -2 # Bad data
-          self.thumbdata = nil
         end
       end
       save  # Save the status code, if nothing else
@@ -341,7 +340,7 @@ class ImageReference < Reference
 
   private
 
-  def fetchable
+  def fetchable queue_up=true
     # Nominally, an ImageReference records a URL plus its expansion into a thumbnail.
     # However, the URL may come in as data: already, which makes the indexer unhappy.
     # In this case, we transfer the data to thumbdata and set the URL to a pseudo-random key (to satisfy the uniqueness constraint on References)
@@ -363,7 +362,7 @@ class ImageReference < Reference
         ].include? status
           false
         else
-          Delayed::Job.enqueue(self)
+          Delayed::Job.enqueue(self) if queue_up
           true # Assume the url is valid
         end
       end
