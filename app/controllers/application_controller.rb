@@ -100,6 +100,7 @@ class ApplicationController < ActionController::Base
     @browser = @user.browser params
     @user.save
     # Go back to page 1 when a new browser element is selected
+    logger.debug "Fetching #{klass}Seeker with session[:seeker]="+session[:seeker].to_s
     @seeker = "#{klass}Seeker".constantize.new @user, @browser, session[:seeker], params # Default; other controllers may set up different seekers
     @seeker.tagstxt = "" if options && options[:clear_tags]
     session[:seeker] = @seeker.store
