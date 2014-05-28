@@ -20,7 +20,7 @@
         </div>
     <% end %>
 <% else %>
-    <%= simple_form_for(resource, :as => resource_name, :url => session_path(resource_name),) do |f| %>
+    <%= simple_form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f| %>
         <%= form_errors_helper f %>
         <div class="row">
           <div class="col-md-6">
