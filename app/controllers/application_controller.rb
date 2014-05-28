@@ -105,7 +105,7 @@ class ApplicationController < ActionController::Base
     @seeker.tagstxt = "" if options && options[:clear_tags]
     session[:seeker] = @seeker.store
     session[:seeker_class] = klass
-    logger.debug "@seeker returning #{@seeker ? 'not ' : ''}nil.  "
+    logger.debug "@seeker returning #{@seeker ? 'not ' : ''}nil."
     @seeker
   end
   
