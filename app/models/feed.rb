@@ -30,7 +30,7 @@ class Feed < ActiveRecord::Base
       self.title = (@fetched.title || "").truncate(255)
       self.description = (@fetched.description || "").truncate(255)
       self.url = @fetched.feed_url unless @fetched.feed_url.blank?
-      self.site = Site.by_link (@fetched.url || url)
+      self.site = Site.find_or_create (@fetched.url || url)
     end
   end
     
@@ -125,7 +125,7 @@ class Feed < ActiveRecord::Base
         feedurl = fields[0]
         pageurl = fields[2].sub(/\)$/, '')
         if(pageurl != prevurl)
-          feedcount = (site = Site.by_link pageurl) ? site.feeds.count : 0
+          feedcount = (site = Site.find_or_create pageurl) ? site.feeds.count : 0
           prevurl = pageurl
         end
         outfile.puts line unless feedcount > 0

@@ -31,7 +31,7 @@ module PicPickerHelper
     link_id = "golink#{entity_id}"
     pic_picker_link = pic_preview_golink page_url, img_url, link_id, img_id, input_id
     pic_preview =
-      %Q{<img alt="Some Image Available"
+      %Q{<img alt="Image Link is Broken"
               id="#{img_id}"
               src="#{img_url}"
               style="width:100%; height: auto">
@@ -84,14 +84,14 @@ module PicPickerHelper
                 class: "fitPic",
                 id: idstr,
                 onload: 'doFitImage(event);',
-                alt: "Some Image Available",
+                alt: "Image Link is Broken",
 		data: { fallbackurl: placeholder_image })
     rescue
       image_tag(placeholder_image,
                 class: "fitPic",
                 id: idstr,
                 onload: 'doFitImage(event);',
-                alt: "Some Image Available")
+                alt: "Image Link is Broken")
     end
   end
 
@@ -100,20 +100,20 @@ module PicPickerHelper
     logger.debug "page_width_pic placing #{picurl.blank? ? placeholder_image : picurl.truncate(40)}"
     # Allowing for the possibility of a data URI
     #    if picurl.match(/^data:image/)
-    #      %Q{<img alt="Some Image Available" class="thumbnail200" id="#{idstr}" src="#{picurl}" >}.html_safe
+    #      %Q{<img alt="Image Link is Broken" class="thumbnail200" id="#{idstr}" src="#{picurl}" >}.html_safe
     #    else
     begin
       image_tag(picurl || "",
                 style: "width: 100%; height: auto",
                 id: idstr,
                 onload: "RP.validate_img(event);",
-                alt: "Some Image Available",
+                alt: "Image Link is Broken",
 		data: { fallbackurl: placeholder_image })
     rescue
       image_tag(placeholder_image,
                 style: "width: 100%; height: auto",
                 id: idstr,
-                alt: "Some Image Available")
+                alt: "Image Link is Broken")
     end
   end
 

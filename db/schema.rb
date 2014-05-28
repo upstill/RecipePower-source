@@ -167,14 +167,8 @@ ActiveRecord::Schema.define(version: 20140508005728) do
 
   create_table "recipes", force: true do |t|
     t.string   "title"
-    t.string   "url"
-    t.integer  "alias"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.text     "picurl"
-    t.text     "tagpane"
-    t.integer  "thumbnail_id"
-    t.text     "href"
     t.text     "description"
     t.integer  "picture_id"
   end
@@ -239,15 +233,8 @@ ActiveRecord::Schema.define(version: 20140508005728) do
   end
 
   create_table "sites", force: true do |t|
-    t.string   "oldsite"
     t.text     "sample"
-    t.string   "home"
-    t.string   "subsite"
-    t.string   "scheme"
-    t.string   "host"
-    t.string   "port"
     t.string   "oldname"
-    t.string   "logo"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "ttlcut"
@@ -269,9 +256,8 @@ ActiveRecord::Schema.define(version: 20140508005728) do
     t.integer  "tag_id"
     t.integer  "entity_id"
     t.string   "entity_type"
-    t.boolean  "is_definition", default: false
-    t.datetime "created_at",                    null: false
-    t.datetime "updated_at",                    null: false
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
   end
 
   add_index "taggings", ["user_id", "tag_id", "entity_id", "entity_type", "is_definition"], name: "tagging_unique", unique: true, using: :btree
@@ -288,18 +274,6 @@ ActiveRecord::Schema.define(version: 20140508005728) do
 
   add_index "tags", ["name", "tagtype"], name: "tag_name_type_unique", unique: true, using: :btree
   add_index "tags", ["normalized_name"], name: "tag_normalized_name_index", using: :btree
-
-  create_table "thumbnails", force: true do |t|
-    t.text     "url"
-    t.text     "thumbdata"
-    t.integer  "status"
-    t.string   "status_text"
-    t.integer  "thumbsize",   default: 200
-    t.datetime "created_at",                null: false
-    t.datetime "updated_at",                null: false
-  end
-
-  add_index "thumbnails", ["url"], name: "index_thumbnails_on_url", unique: true, using: :btree
 
   create_table "user_relations", force: true do |t|
     t.integer  "follower_id"
@@ -333,7 +307,6 @@ ActiveRecord::Schema.define(version: 20140508005728) do
     t.datetime "locked_at"
     t.integer  "role_id",                           default: 2
     t.string   "fullname",                          default: ""
-    t.string   "image",                             default: ""
     t.text     "about",                             default: ""
     t.string   "invitation_token",       limit: 66
     t.datetime "invitation_sent_at"

@@ -1,7 +1,6 @@
  <tr id="site<%= @site.id.to_s %>">
 	<td><b><%= @site.name || "Defaults" %></b><br>
-		<b>Site</b>: <%= @site.oldsite %><br>
-		<b>Home</b>: <%= @site.home_page %><br>
+		<b>Site</b>: <%= @site.home %><br>
 		<b><%= show_sample @site %></b><br>
 		<b>Logo</b>: <%= @site.logo %><br>
 		<b># Feeds:</b> <%= @site.feeds.size %> (<%= @site.feeds.where(approved: true).count %> approved for feedthrough)

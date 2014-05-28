@@ -177,7 +177,7 @@ class PageTags
   private
 
   def initialize (url, site, finders, do_all=nil, verbose = true)
-    @nkdoc = Nokogiri::HTML(open url)
+    @nkdoc = Nokogiri::HTML(open normalize_url(url))
     @finderset = finders
     @results = {}
     SiteServices.data_choices().each { |label| @results[label] = [] }
@@ -253,238 +253,25 @@ end
 class SiteServices
   attr_accessor :site
 
-  def self.time_lookup ix=1
-    site_urls = [
-        'http://umamimart.com',
-        'http://www.simplyrecipes.com',
-        'http://www.cookinglight.com',
-        'http://www.taste.com.au',
-        'http://www.therecipedetective.com',
-        'http://spoonful.com',
-        'http://www.momswhothink.com',
-        'http://ohmyveggies.com',
-        'http://blog.countrytrading.co.nz',
-        'http://paperandsalt.org',
-        'http://www.bhg.com',
-        'http://www.afar.com',
-        'http://blogs.kqed.org',
-        'http://mideastfood.about.com',
-        'http://www.cooks.com',
-        'http://scrapbook.lacolombe.com',
-        'http://www.kitchenkonfidence.com',
-        'http://sfc.smallfarmcentral.com',
-        'http://framework.latimes.com',
-        'http://www.e-tingfood.com',
-        'http://www.injennieskitchen.com',
-        'http://www.theyummylife.com',
-        'http://www.goodhousekeeping.com',
-        'http://www.sprinklebakes.com',
-        'http://crockpot365.blogspot.com',
-        'http://racheleats.wordpress.com',
-        'https://www.goodeggs.com',
-        'http://www.maangchi.com',
-        'http://www.today.com/',
-        'http://www.vietworldkitchen.com',
-        'http://blog.onemedical.com',
-        'http://www.buzzfeed.com',
-        'http://vegetarian.about.com',
-        'http://thaifood.about.com',
-        'http://blogs.plos.org',
-        'http://www.dukandiet.com',
-        'http://blog.eladgil.com',
-        'http://maine.craigslist.org',
-        'http://www.bestyummyrecipes.com',
-        'https://www.teacherspayteachers.com',
-        'http://sweetpaul.typepad.com',
-        'https://plus.google.com/+MeatheadGoldwyn',
-        'http://www.grubstreet.com',
-        'http://m.allrecipes.com',
-        'http://chezpim.com',
-        'http://www.rachelcooks.com',
-        'http://www.sweetmarias.com',
-        'http://www.coolhunting.com',
-        'http://www.maps.org',
-        'http://bruery.blogspot.com',
-        'http://www.pastemagazine.com',
-        'http://www.playingwithfireandwater.com',
-        'http://amazingribs.com',
-        'http://edibleevolution.blogspot.com',
-        'http://tampopopress.blogspot.com',
-        'http://www.budgetsavvydiva.com',
-        'http://nourishedkitchen.com',
-        'http://iwanttocookthat.wordpress.com',
-        'http://oaxacaculture.com',
-        'http://www.newstatesman.com',
-        'http://www.yumsugar.com',
-        'http://www.americastestkitchenfeed.com',
-        'http://davescupboard.blogspot.com',
-        'http://simplyrecipes.com',
-        'http://flamingobear.com',
-        'http://norecipes.com',
-        'http://www.youtube.com',
-        'http://seidhr.blogspot.com',
-        'http://www.telegraph.co.uk',
-        'http://www.brooklynfarmhouse.com',
-        'http://mexicocooks.typepad.com',
-        'http://rollybrook.com',
-        'http://www.fabulousfoods.com',
-        'http://www.empellon.com',
-        'http://www.localforage.com',
-        'http://lidiasitaly.com',
-        'http://ricette.giallozafferano.it',
-        'http://www.redtri.com',
-        'http://www.mariquita.com',
-        'http://www.cookingissues.com',
-        'http://www.answers.com',
-        'http://blog.junbelen.com',
-        'http://www.bonappetit.com',
-        'http://www.kingarthurflour.com',
-        'http://www.food.com',
-        'http://www.cookthink.com',
-        'http://www.foodista.com',
-        'http://www.pbs.org',
-        'http://www.imbibemagazine.com',
-        'http://www.thebittenword.com',
-        'http://en.wikipedia.org',
-        'https://www.evernote.com',
-        'http://si.wsj.net',
-        'http://www.tasteofhome.com',
-        'http://m.saveur.com',
-        'http://ashevillecooks-homeedition.blogspot.com',
-        'http://www.boston.com',
-        'http://gourmetfood.about.com',
-        'http://tasteofbeirut.wpengine.netdna-cdn.com',
-        'http://www.goodeggs.com',
-        'http://labellecuisine.com'
-    ]
-    label = ""
-    index_name = index_table = nil
-    time = Benchmark.measure do
-      case ix
-        when 1
-          label = "Reference via Site"
-          index_table = :references
-          index_name = "references_index_by_url_and_type"
-          site_urls.each { |url|
-            site = Site.by_link url
-            ref = site.home
-          }
-        when 2
-          label = "Site via Reference"
-          index_table = :references
-          index_name = "references_index_by_url_and_type"
-          site_urls.each { |url|
-            ref = SiteReference.by_link url
-            site = ref.site
-          }
-        else
-          return false
-      end
-    end
-    index_status = ActiveRecord::Base.connection.index_name_exists?(index_table, index_name, false) ? "indexed" : "unindexed"
-    File.open("db_timings", 'a') { |file|
-      file.write(label+" (#{Time.new} #{index_status}): "+time.to_s+"\n")
-    }
-    true
-  end
-
-  def self.convert_all_to_references n=-1
-
-    Site.find(3419).merge(Site.find(3418)) if Site.exists?(3418)
-    Site.find(3419).merge(Site.find(1292)) if Site.exists?(1292)
-    Site.find(2062).merge(Site.find(1996)) if Site.exists?(1996)
-    Site.find(2081).merge(Site.find(1377)) if Site.exists?(1377)   # Culinate
-    [3419,2112,2122,3447].each { |id|
-      s = Site.find id
-      s.home = host_url (s.home || s.oldsite)
-      s.save
-    }
-    bad = []
-    Site.all[0..n].each { |site|
-      bad << site unless self.new(site).convert_to_reference
-    }
-    puts "Bad sites: "
-    bad.each { |bs|
-      puts "Site ##{bs.id} (home #{bs.oldsite}#{bs.subsite}) collides with..."
-      ref = SiteReference.find_or_initialize "#{bs.oldsite}#{bs.subsite}"
-      extant = ref.site
-      puts "...site ##{extant.id} (home #{extant.oldsite}#{extant.subsite})"
-    }
+  def self.test_lookup n=-1
+    Site.all[0..n].map(&:id).each { |id| self.test_lookup_by_id id }
     nil
   end
 
-  def convert_to_reference
-    begin
-      # Start by doing QA on the site's attributes:
-      # -- :home
-      newhome = (@site.home || @site.oldsite)
-      newhome = valid_url(@site.subsite, newhome) unless @site.subsite.blank?
-      if newhome != (@site.home || @site.oldsite)
-        puts "Site ##{@site.id}"
-        puts "\toldsite: #{@site.oldsite}"
-        puts "\thome: #{@site.home}"
-        puts "\tsubsite: #{@site.subsite}"
-        puts "\t=> intended newhome: #{newhome}"
+  def self.test_lookup_by_id id
+    s1 = Site.find id
+    s1.recipes.each { |rcp|
+      s2 = rcp.site # SiteReference.lookup_site rcp.url
+      if s2 != s1
+        puts "Recipe ##{rcp.id} #{rcp.url}..."
+        puts "...from site ##{s1.id} (#{s1.reference.url}) finds another site:"
+        puts "\t... site ##{s2.id} (#{s2.reference.url})"
+        canon = SiteReference.canonical_url(rcp.url)
+        puts "\t... due to Reference(s) off of canonical link #{canon}:"
+        SiteReference.lookup(canon).each { |sr| puts "\t\t##{sr.id} with url #{sr.url}" }
         debugger
+        x=2
       end
-      @site.home = newhome # Creates and initializes the reference
-      @site.sample = @site.sampleURL
-      @site.save
-    rescue => exc
-      debugger
-=begin
-      ref = SiteReference.find_or_initialize "#{@site.oldsite}#{@site.subsite}"
-      puts "Site ##{@site.id} (home #{@site.oldsite}#{@site.subsite}) is colliding with existing..."
-      extant = ref.site
-      puts "...site ##{extant.id} (home #{extant.oldsite}#{extant.subsite})"
-=end
-      # extant.merge @site
-      nil
-    end
-  end
-
-  # Confirm that the site references correspond to legacy sites
-  def self.test_conversion
-    Site.all.each { |site|  self.new(site).test_conversion }
-    Recipe.all.each { |recipe|
-      site_ref = SiteReference.by_link recipe.url
-      rcpsite = recipe.site # Find by standard means
-      if !site_ref || (recipe.site != site_ref.site)
-        puts "Recipe's site ##{rcpsite.id} (home #{rcpsite.oldsite}#{rcpsite.subsite}) doesn't match SiteReference..."
-        if site_ref
-          puts "...##{site_ref.id} url #{site_ref.url}"
-          puts "...to site ##{site_ref.affiliate.id} (home #{site_ref.affiliate.oldsite}#{site_ref.affiliate.subsite})"
-        else
-          puts "(none found)"
-        end
-        debugger
-      end
-    }
-  end
-
-  def test_conversion
-    ref_path = "#{@site.home || @site.oldsite}#{@site.subsite}"
-    site_ref = SiteReference.by_link ref_path
-    if !site_ref || site_ref.site != @site
-      debugger
-      x=2
-    end
-  end
-
-  def self.test_creation n=-1
-    # Destroy that pesky free-floating AmazingRibs site
-    ids = Site.all.map(&:id)[0..n]
-    ids.delete(3419)
-    ids.unshift(3419).each { |sid|
-      site = Site.find sid
-      attribs = site.attributes.slice "sample", "home", "subsite", "oldname", "ttlcut"
-      attribs["home"] ||= site.oldsite
-      referent_id = site.referent_id
-      # attribs["url"] = (uri = URI.join( attribs["home"], attribs["sample"])) && uri.to_s
-      site.destroy
-      s2 = Site.new(attribs)
-      s2.referent_id = referent_id
-      s2.save
     }
   end
 
@@ -560,7 +347,7 @@ class SiteServices
   def resolve(candidate)
     return candidate if candidate.blank? || (candidate =~ /^\w*:/)
     begin
-      URI.join(@site.oldsite, candidate).to_s
+      URI.join(@site.home, candidate).to_s
     rescue
       candidate
     end
@@ -586,7 +373,7 @@ class SiteServices
 
   def test_finders(url = nil)
     fr = FinderResults.new @site, site_finders
-    fr.collect_results url || @site.sampleURL
+    fr.collect_results url || @site.sample
     self.site_finders = fr.revise_interactively
     case get_input("Any finder to add ([yY]: yes, [qQ]: quit without saving)? ")
       when "y", "Y"
@@ -613,7 +400,7 @@ class SiteServices
       finder[k] = v.to_s
     end
     fr = FinderResults.new @site, [finder]
-    fr.collect_results @site.sampleURL
+    fr.collect_results @site.sample
     self.site_finders = (self.site_finders + fr.revise_interactively)
     @site.save
   end
@@ -628,10 +415,10 @@ class SiteServices
   end
 
   def scrape
-    extractions = extract_from_page(@site.sampleURL)
+    extractions = extract_from_page(@site.sample)
     puts "Site # #{@site.id.to_s}"
     puts "\tname: #{@site.name}"
-    puts "\thome: (#{@site.home_page})"
+    puts "\thome: (#{@site.home})"
     puts "\tsubsite: (#{@site.subsite})"
     puts "\tlogo: (#{@site.logo})"
     extractions.each { |k, v| puts "\t\t#{k.to_s}: #{v}" }
@@ -676,7 +463,7 @@ class SiteServices
       sought = sought+1
 
       # Probe the site's sample URL for validity or relocation
-      test_url = site.sampleURL
+      test_url = site.sample
       puts "Cracking "+test_url
       if !(testback = test_link(test_url))
         bogus_in << test_url
@@ -739,16 +526,15 @@ class SiteServices
     Site.all[100..110].each do |site|
       ss = self.new site
       puts "------------------------------------------------------------------------"
-      puts "site: "+site.oldsite
-      puts "home: "+site.home_page
-      puts "sample: "+site.sampleURL
-      if pagetags = fr.collect_results(site.sampleURL, [:URI, :Title, :Image], true, site)
+      puts "home: "+site.home
+      puts "sample: "+site.sample
+      if pagetags = fr.collect_results(site.sample, [:URI, :Title, :Image], true, site)
         puts ">>>>>>>>>>>>>>> Results >>>>>>>>>>>>>>>>>>"
         [:URI, :Title, :Image].each do |label|
           label = label.to_s
           result = (pagetags.result_for(label) || "** Nothing Found **")
           found_or_not = ""
-          if label=="URI" && result!=site.sampleURL
+          if label=="URI" && result!=site.sample
             found_or_not = "(NO MATCH!)"
           end
           puts label+found_or_not+": "+result
@@ -765,7 +551,7 @@ class SiteServices
 
   def self.extract_from_page(url, spec={})
     extractions = {}
-    if !url.blank? && (site = Site.by_link url) && (ss = SiteServices.new(site))
+    if !url.blank? && (site = Site.find_or_create url) && (ss = SiteServices.new(site))
       extractions = ss.extract_from_page url, spec
     end
     extractions
@@ -803,11 +589,11 @@ class SiteServices
   end
 
   def stab_at_sample summ = {}
-    puts "Processing Site #{@site.sampleURL}"
+    puts "Processing Site #{@site.sample}"
     begin
-      @nkdoc = Nokogiri::HTML(open @site.sampleURL)
+      @nkdoc = Nokogiri::HTML(open @site.sample)
     rescue
-      puts "Error: couldn't open page '#{@site.sampleURL}' for analysis."
+      puts "Error: couldn't open page '#{@site.sample}' for analysis."
       recipe = @site.recipes.first
       puts "Processing Recipe #{recipe.url}"
       begin
@@ -900,7 +686,7 @@ class SiteServices
   # Use the extant finders on a site, interactively querying their appropriateness and potentially assigning
   # results (either extractors or hard values) to the site
   def poll_extractions url=nil
-    url ||= site.sampleURL
+    url ||= site.sample
     finders = all_finders
     begin
       pagetags = PageTags.new(url, @site, finders, true, false)
@@ -1024,7 +810,7 @@ class SiteServices
       name = site.name
       if (first_found ||= (site.id == id))
         puts "#{site_n}/#{nsites} >>>>>>>>>>>>>>>>>>>>>>"
-        puts site.sampleURL
+        puts site.sample
         puts "\tid: #{site.id}"
         puts "\tname: #{name}"
         puts "\tdescription: #{site.description}"

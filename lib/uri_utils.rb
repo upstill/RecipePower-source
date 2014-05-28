@@ -42,14 +42,38 @@ end
 
 def safe_parse(url)
   begin
-    URI.parse(url) if url
+    uri = url && URI.parse(url)
   rescue Exception => e
-    return nil
+    uri = nil
+  end
+
+  if url && !uri  # Failed with exception => Try to fix the fragment, which may have bad characters
+    spl = url.split('#')
+    if (spl.size > 1) && ((refrag = URI::encode(spl[-1])) != spl[-1])
+      begin
+        spl[-1] = refrag
+        uri = URI.parse spl.join('#')
+      rescue Exception => e
+        uri = nil
+      end
+    end
+  end
+  uri
+end
+
+# Since URI can't handle diacriticals in the fragment, encode them
+def fix_fragment url
+  spl = url.split('#')
+  if spl.size > 1
+    spl[-1] = URI::encode(spl[-1])
+    spl.join('#')
+  else
+    url
   end
 end
 
 def sanitize_url url
-  url.strip.gsub(/\{/, '%7B').gsub(/\}/, '%7D')
+  url.strip.gsub(/\{/, '%7B').gsub(/\}/, '%7D').gsub(/\%23/, '#' )
 end
 
 # Return nil if anything is amiss, including nil or empty url

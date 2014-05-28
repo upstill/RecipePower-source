@@ -35,7 +35,7 @@ module RecipesHelper
   end
 
   def recipe_grid_datablock recipe
-    grid_element = content_tag :p, link_to(recipe.trimmed_title, recipe.url, class: "tablink"), class: "rcp_grid_element_title"
+    grid_element = content_tag :p, link_to(recipe.title, recipe.url, class: "tablink"), class: "rcp_grid_element_title"
     source_element = content_tag :div, ("from "+link_to(recipe.sourcename, recipe.sourcehome, class: "tablink")).html_safe, class: "rcp_grid_element_source"
     content_tag :div, grid_element+source_element, class: "rcp_grid_datablock"
   end
