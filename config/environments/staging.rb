@@ -33,6 +33,9 @@ RP::Application.configure do
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   # config.force_ssl = true
 
+  config.logger = Logger.new(STDOUT)
+  config.logger.level = Logger::INFO # use logger.level, not log_level
+
   # See everything in the log (default is :info)
   config.log_level = :debug
 
