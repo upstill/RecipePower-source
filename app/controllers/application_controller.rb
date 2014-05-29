@@ -8,6 +8,7 @@ class ApplicationController < ActionController::Base
   
   before_filter :check_flash
   before_filter :report_cookie_string
+  after_filter :report_session
   # before_filter :detect_notification_token
   before_filter :setup_response_service
   before_filter :log_serve
@@ -85,6 +86,11 @@ class ApplicationController < ActionController::Base
     else
       logger.info "\t\t= NIL"
     end
+  end
+
+  def report_session
+    logger.info "SESSION INSPECT after controller:"
+    logger.info session.inspect
   end
   
   # Get the seeker from the session store (mainly used for streaming)
