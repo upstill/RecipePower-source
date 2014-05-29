@@ -4,7 +4,7 @@ ruby '1.9.3'
 gem 'rails', '~> 4.0' # '3.2.11' #
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
 # gem 'rails4_upgrade'
-gem 'rails_12factor', group: :production
+gem 'rails_12factor', :group => [ :production, :staging ]
 
 # add these gems to help with the transition:
 gem 'protected_attributes'
