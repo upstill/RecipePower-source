@@ -38,7 +38,7 @@ RP.dialog.get_and_go = (event, request, selector) ->
 # Before making a dialog request, see if the dialog is preloaded
 RP.dialog.beforeSend = (event, xhr, settings) ->
 	odlog = RP.dialog.target_modal event
-	xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))
+	# xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))
 	if $(this).hasClass 'loading'
 		return true; # Prevent submitting the link twice
 	if (selector = $(this).data 'selector') &&

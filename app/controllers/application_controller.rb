@@ -101,11 +101,6 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def handle_unverified_request
-    logger.debug "Unverified request resetting session"
-    super
-  end
-  
   def setup_seeker(klass, options=nil, params=nil)
     @user ||= current_user_or_guest
     params[:cur_page] = "1" if params && params[:selected]
