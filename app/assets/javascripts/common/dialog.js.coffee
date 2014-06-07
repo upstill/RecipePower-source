@@ -13,6 +13,7 @@ RP.dialog.arm_links = (dlog) ->
 	dlog ||= window.document
 	$('input.cancel', dlog).click RP.dialog.cancel
 	$('a.dialog-cancel-button', dlog).click RP.dialog.cancel
+	$('a.dialog-submit-button', dlog).click RP.dialog.close
 	$('a.question_section', dlog).click RP.showhide
 	$('a.preload').click()
 	if requires = $(dlog).data 'dialog-requires'
@@ -74,6 +75,16 @@ RP.dialog.error = (event, jqXHR, status, error) ->
 	$('.preload', this).removeClass('loading')
 	responseData = RP.post_error jqXHR
 	RP.process_response responseData, RP.dialog.target_modal(event)
+
+RP.dialog.close = (event) ->
+	if event
+		if dlog = RP.dialog.target_modal(event)
+			event.preventDefault()
+		else
+			return true # Do regular click-handling, presumably returning from whence we came
+	else
+		dlog = $('div.dialog')[0]
+	close_modal dlog, "close"
 
 RP.dialog.cancel = (event) ->
 	if event

@@ -40,7 +40,11 @@ RP.pic_picker.open = (dlog) ->
 			RP.notifications.post "Sorry, but that address doesn't lead to an image. If you point your browser at it, does the image load?", "flash-error"
 		else
 			$('a.dialog-submit-button', dlog).removeClass 'disabled'
-			RP.notifications.post "Click Save to use this image.", "flash-alert"
+			if $(this).hasClass 'empty'
+				prompt = "to leave the recipe without an image."
+			else
+				prompt = "to use this image."
+			RP.notifications.post "Click Save "+prompt, "flash-alert"
 
 	$('a.image_preview_button').click ->
 		previewImg('input.icon_picker', 'div.preview img', '')
