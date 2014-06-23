@@ -8,7 +8,7 @@ class ApplicationController < ActionController::Base
   
   before_filter :check_flash
   before_filter :report_cookie_string
-  # after_filter :report_session
+  after_filter :report_session
   # before_filter :detect_notification_token
   before_filter :setup_response_service
   before_filter :log_serve
