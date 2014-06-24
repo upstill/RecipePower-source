@@ -8,59 +8,6 @@ class RecipeServices
     @current_user = current_user
   end
 
-  def self.convert_all_to_references n=-1
-    bad = []
-    Recipe.all[0..n].each { |recipe|
-      recipe.picture_id = nil
-      begin
-        self.new(recipe).convert_to_reference
-      rescue => e
-        bad << recipe
-      end
-    }
-    puts "Ids of redundant recipes: "+bad.map(&:id).join(', ')
-  end
-
-  def convert_to_reference
-    if (@recipe.picurl = @recipe.picurl) &&
-        (pic = @recipe.picture) &&
-        (thumb = @recipe.thumbnail) &&
-        thumb.thumbdata
-      pic.thumbdata = thumb.thumbdata
-      pic.status = thumb.status
-      pic.save
-    end
-    @recipe.url = @recipe.url # @recipe.reference = RecipeReference.find_or_create @recipe.url, affiliate: @recipe
-    @recipe.save
-  end
-
-  def self.test_all_conversions
-    Recipe.all.each { |recipe| self.new(recipe).test_conversion }
-  end
-
-  def test_conversion
-    thumbnail = @recipe.thumbnail
-    picture = @recipe.picture
-    if thumbnail && (
-      (thumbnail.nil? != picture.nil?) ||
-      (thumbnail.url != picture.url) ||
-      (thumbnail.thumbdata != picture.thumbdata)
-    )
-      puts "Recipe ##{@recipe.id}: url #{@recipe.url} picurl #{@recipe.picurl}"
-      puts "\tThumbnail ##{thumbnail.id}: url #{thumbnail.url}, thumbdata #{(thumbnail.thumbdata||"")[0..50]}" if thumbnail
-      puts "\t Picture  #{picture.id}: url #{picture.url}, thumbdata #{(picture.thumbdata||"")[0..50]}" if picture
-      # debugger
-    end
-    siteref = SiteReference.by_link @recipe.url
-    if siteref.site != @recipe.site
-      puts "Recipe ##{@recipe.id}: url #{@recipe.url} picurl #{@recipe.picurl}"
-      puts "\tSite ##{@recipe.site.id}: oldsite #{@recipe.site.oldsite}, subsite: #{@recipe.site.subsite}"
-      puts "\tReference #{siteref.id}: url #{siteref.url}"
-      puts "\tRef. Affiliate Site ##{siteref.affiliate.id}: oldsite #{siteref.affiliate.oldsite}, subsite: #{siteref.affiliate.subsite}"
-      # debugger
-    end
-  end
-
   # Find all recipes that are redundant (ie., they have the same canonical url as another) and merge them into the one that already owns the URL.
   def self.fix_redundant
     redundant = []
@@ -68,68 +15,26 @@ class RecipeServices
     all_ids = Set.new Recipe.all.map(&:id)
     (all_ids - current_ids).each { |id|
       rcp = Recipe.find id
-      old_ref = RecipeReference.by_link(rcp.url) # Get the competitor
+      old_ref = RecipeReference.lookup rcp.url # Get the competitor
       old_rcp = old_ref.recipe
       puts "Recipe ##{rcp.id} (url #{rcp.url})..."
       puts "  ...clashes with recipe ##{old_rcp.id} (url #{old_rcp.url})"
-      self.new(rcp).merge_into old_rcp
+      old_rcp.absorb rcp
       self.new(old_rcp).test_conversion
-      rcp.destroy
     }
   end
 
-  # Merge this recipe into another, optionally deleting it
-  def merge_into rcp, destroy=false
-    # This recipe may be presenting a URL that redirects to the target => include that URL in the table
-    obj = RecipeReference.find_or_initialize @recipe.url, affiliate: rcp
-    # Apply thumbnail and comment, if any
-    unless @recipe.picurl.blank? || !rcp.picurl.blank?
-      rcp.picurl = @recipe.picurl
-    end
-    rcp.description = @recipe.description if rcp.description.blank?
-    unless @recipe.rcprefs.empty?
-      xfers = []
-      @recipe.rcprefs.each { |my_ref|
-        # Redirect each rcpref to the other, merging them when there's already one for a user
-        # comment, private, status, in_collection, edit_count
-        if other_ref = rcp.rcprefs.where(user_id: my_ref.user_id).first
-          # Transfer reference information
-          other_ref.private ||= my_ref.private
-          other_ref.comment = my_ref.comment if other_ref.comment.blank?
-          other_ref.in_collection ||= my_ref.in_collection
-          other_ref.edit_count += my_ref.edit_count
-          other_ref.save
-        else
-          # Simply redirect the ref, thus moving the owner from the old recipe to the new
-          # (Need to do this after iterating over the recipe's refs)
-          xfers << my_ref.clone
-        end
-      }
-      unless xfers.empty?
-        rcp.rcprefs = rcp.rcprefs + xfers
-      end
-    end
-    # Move taggings from the old recipe to the new
-    xfers =
-    @recipe.taggings.collect { |tagging|
-      tagging.clone unless rcp.taggings.exists?(tagging.attributes.slice :user_id, :tag_id)
-    }.compact
-    unless xfers.empty?
-      rcp.taggings = rcp.taggings + xfers
-    end
-    # Move feed_entries from the old recipe to the new
-    FeedEntry.where(:recipe_id => @recipe.id).each { |fe|
-      fe.recipe = rcp
-      fe.save
-    }
-    @recipe.save
-    rcp.save
+  def self.fix_references which=nil
+    # Examine each recipe for every reference mapping to the same site
+    eqclasses = {}
+    rcps = Set.new()
+    (which || Recipe.all).each { |rcp| rcp.references_qa }
   end
 
   def scrape
     extractions = SiteServices.extract_from_page(@recipe.url )
     puts "Recipe # #{@recipe.id}: #{@recipe.title}"
-    puts "\tsite: #{@recipe.site.name} (#{@recipe.site.home_page})"
+    puts "\tsite: #{@recipe.site.name} (#{@recipe.site.home})"
     puts "\turl: #{@recipe.url}"
     puts "\thref: #{@recipe.href}"
     puts "\tdescription: #{@recipe.description}"

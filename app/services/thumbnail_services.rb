@@ -30,7 +30,7 @@ class ThumbnailServices
 
     def self.test_conversion
       Recipe.all.each do |recipe|
-        if recipe.thumbnail.url != recipe.picture.url || recipe.thumbnail.thumbdata != recipe.picture.thumbdata
+        if recipe.thumbnail && recipe.picture && recipe.thumbnail.url != recipe.picture.url || recipe.thumbnail.thumbdata != recipe.picture.thumbdata
           debugger
           x=2
         end

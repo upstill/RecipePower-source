@@ -55,8 +55,19 @@ module Linkable
         belongs_to reference_association, class_name: ref_type
       else
         # References that define the location of their affiliates have a many-to-one relationship (i.e. many URLs can refer to the same entity)
-        has_many reference_association_pl, -> { where type: ref_type }, foreign_key: "affiliate_id", class_name: ref_type
-        has_one reference_association, -> { where type: ref_type, canonical: true }, foreign_key: "affiliate_id", class_name: ref_type
+        has_one reference_association, -> { where type: ref_type, canonical: true }, foreign_key: "affiliate_id", class_name: ref_type, :dependent=>:restrict_with_exception
+        has_many reference_association_pl, -> { where type: ref_type },
+                 foreign_key: "affiliate_id",
+                 class_name: ref_type,
+                 after_add: :"#{reference_association_pl}_ensure_site",
+                 dependent: :restrict_with_exception
+        attr_accessible reference_association_pl
+=begin
+        after_save do
+          # Ensure that all the associated references go to the same site
+          site.save if site.include_url(self.method(reference_association_pl).call.map(&:url))
+        end
+=end
       end
 
       self.class_eval do
@@ -65,38 +76,39 @@ module Linkable
           define_singleton_method :url_attribute_name do
             url_attribute
           end
-
-          # Critical method to ensure no two linkables of the same class [offset] have the same reference
-          define_singleton_method :find_or_initialize do |url, params = {}|
-            # URL may be passed as a parameter or in the params hash
-            url_attribute_name = self.url_attribute_name
-            if url.is_a? Hash
-              params = url
-              url = params[url_attribute_name]
-            else
-              params[url_attribute_name] = url
-            end
-            if url.blank? # Check for non-empty URL
-              obj = self.new params # Initialize a record just to report the error
-              obj.errors.add url_attribute_name, "can't be blank"
-            else
-              # Normalize the url for lookup
-              ref = Reference.find_or_initialize url, type: "#{self.to_s}Reference"
-              obj = ref.affiliate || self.new(params)
-              obj.method(:"#{reference_association}=").call ref
-            end
-            obj
-          end
-
-          define_singleton_method :find_or_create do |url, params={}|
-            obj = self.find_or_initialize url, params
-            obj.save unless obj.id || obj.errors.any?
-            obj
-          end
         end
       end
 
       self.instance_eval do
+
+        # Whenever a reference is added, we ensure that it gets to the same site
+        define_method "#{reference_association_pl}_ensure_site" do |reference|
+          # debugger
+          site.include_url reference.url if (self.class != Site) && site && reference
+        end
+
+        # Ensure that all the linkable's references refer to the same site
+        define_method "#{reference_association_pl}_qa" do
+          self.method(:"#{reference_association_pl}").call.each { |other_ref|
+            case other_site = SiteReference.lookup_site(other_ref.url)
+              when nil
+                # debugger
+                site.include_url other_ref.url
+              when site # If the other_ref maps to the same site, all is well
+              else
+                if anchor = site
+                  if other_ref.canonical  # Prefer to absorb a non-canonical site into a canonical one
+                    anchor, other_site = other_site, anchor
+                  end
+                  puts "#{self.class} has refs for sites #{anchor.id}(#{anchor.home}) and #{other_site.id}(#{other_site.home})"
+                  anchor.absorb other_site
+                else
+                  # debugger
+                  x=2
+                end
+            end
+          }
+        end
 
         # Define singleton getter and setter methods for the URL by using a Reference object.
         # Once a URL is in use for an entity of a particular type (Recipe, site, image, etc.), it
@@ -111,22 +123,15 @@ module Linkable
           # Get the existing reference
           if options[:as]
             # The reference is to another entity type: we just index by URL and assign the reference association
-            self.method(:"#{reference_association}=").call (pu.blank? ? nil : ref_type.constantize.find_or_initialize(pu))
+            self.method(:"#{reference_association}=").call (pu.blank? ? nil : ref_type.constantize.find_or_initialize(pu).first)
+          elsif pu.blank?
+            self.errors.add("#{url_attribute} can't be blank")
           else
-            # If the reference is to an identical type
-            self.errors.add("#{url_attribute} can't be blank") if pu.blank?
-            oldref = self.method(reference_association).call # Remember the existing reference, if any
-
-            # Create a new reference as necessary, raising an exception if one already exists that is assigned
-            # to another entity.
-            self.method(:"#{reference_association}=").call ref_type.constantize.find_or_initialize(pu, affiliate: self )
-            # The canonical reference for an entity is the one that is used for its reference association (as opposed
-            #  to its 'references' association of all the corresponding references)
-            if oldref && (oldref != self.method(reference_association).call)
-              oldref.canonical = false
-              oldref.affiliate_id = id  # XXX Why is this necessary? If the oldref exists, it should already be referring to us
-              oldref.save
-            end
+            # Create a new reference (or references, if there's a redirect involved) as necessary
+            refs = ref_type.constantize.find_or_initialize(pu)
+            # Give me the new references
+            self.method(:"#{reference_association}=").call refs.first
+            self.method(:"#{reference_association_pl}=").call refs
           end
           if self.has_attribute? url_attribute
             # Set the old url attribute--if it still exists
@@ -137,16 +142,14 @@ module Linkable
 
         define_method(url_attribute) do
           # This will cause an exception for entities without a corresponding reference
-          ((reference = self.method(reference_association).call) && reference.url) || super()
+          ((reference = self.method(reference_association).call) && reference.url) ||
+          (super() if self.has_attribute?(url_attribute))
         end
 
         unless options[:as]
           # The site for a referenced object
           define_method :site do
-            @site ||=
-                (url = self.method(url_attribute).call) &&
-                    (sr = SiteReference.by_link(url)) &&
-                    sr.site
+            @site ||= Site.find_or_create self.method(reference_association_pl).call.map(&:url)
           end
         end
 
@@ -167,7 +170,7 @@ module Linkable
 
   # Return the URL for the recipe's source's home page
   def sourcehome
-    site.home_page
+    site.home
   end
 
 end

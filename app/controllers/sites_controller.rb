@@ -110,7 +110,7 @@ class SitesController < ApplicationController
   
   def scrape
     url = params[:url]
-    if @site = Site.by_link(url)
+    if @site = Site.find_or_create(url)
       olist = @site.feeds.clone
       FeedServices.scrape_page @site, url
       @feeds = @site.feeds

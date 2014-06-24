@@ -18,7 +18,7 @@ class User < ActiveRecord::Base
 
   # Setup accessible (or protected) attributes for your model
   attr_accessible :id, :username, :first_name, :last_name, :fullname, :about, :login, :private, :skip_invitation,
-                :email, :password, :password_confirmation, :shared_recipe, :invitee_tokens, :channel_tokens, :image,
+                :email, :password, :password_confirmation, :shared_recipe, :invitee_tokens, :channel_tokens, # :image,
                 :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens, :subscription_tokens, :invitation_issuer
   attr_writer :browser
   attr_accessor :shared_recipe, :invitee_tokens, :channel_tokens, :raw_invitation_token

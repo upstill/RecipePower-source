@@ -60,7 +60,7 @@ module TagsHelper
     @tagserv ||= TagServices.new(@tag)
     recipes =
       @tagserv.recipes(true).uniq.collect { |rcp| 
-        content_tag :li, "#{link_to rcp.trimmed_title, rcp.url} #{recipe_info_icon rcp}".html_safe, class: "tog_info_rcp_title"
+        content_tag :li, "#{link_to rcp.title, rcp.url} #{recipe_info_icon rcp}".html_safe, class: "tog_info_rcp_title"
       }
     unless recipes.empty?
       ("#{header}<ul>"+recipes.join('<br>')+"</ul>").html_safe
