@@ -18,6 +18,13 @@ end
 
 class Site < ActiveRecord::Base
   include Taggable
+
+  include Linkable # Required by Picable
+  linkable :home, :reference
+
+  include Picable
+  picable :logo, :thumbnail
+
   # site: root of the domain (i.e., protocol + domain); suitable for pattern-matching on a reference URL to glean a set of matching Sites
   # subsite: a path relative to the domain which differentiates among Sites with the same domain (site attribute)
   # home: where the nominal site lives. This MAY be (site+subsite), but in cases of indirection, it may be an entirely
@@ -26,7 +33,7 @@ class Site < ActiveRecord::Base
   #      may alter the path
   # Also, in most cases, site==home (when the domain is home, i.e. subsite is empty); in others, (site+subsite)==home,
   #     and only rarely will home be different from either of those
-  attr_accessible :finders_attributes, :site, :home, :scheme, :subsite, :sample, :host, :name, :port, :logo, :ttlcut, :finders, :reviewed
+  attr_accessible :finders_attributes, :oldsite, :home, :scheme, :subsite, :sample, :host, :name, :port, :logo, :ttlcut, :finders, :reviewed, :description
 #   serialize :finders, Array
 
   belongs_to :referent # See before_destroy method, :dependent=>:destroy
@@ -54,7 +61,7 @@ protected
   end
 
   def post_init
-    unless self.site
+    unless self.oldsite
       # We need to initialize the fields of the record, starting with site, based on sample
       # Ignore the query for purposes of gleaning the site
       if link = self.sample
@@ -69,8 +76,8 @@ protected
           puts "Creating host matching #{urisq.host} for #{link} with subsite \'#{self.subsite||""}\'"
           puts "Link is '#{link}'; path is '#{urisq.path}'"
           # Define the site as the link minus the sample (sub)path
-          self.site = linksq.sub(/#{urisq.path}$/, "")
-          puts "...from which extracted site '#{self.site}'"
+          self.oldsite = linksq.sub(/#{urisq.path}$/, "")
+          puts "...from which extracted site '#{self.oldsite}'"
 
           # Reconstruct the sample from the link's path, query and fragment
           self.sample = urisq.path + (query || "")
@@ -86,9 +93,9 @@ protected
           self.errors << "Can't make sense of URI"
         end
       end
-      if !self.site
+      if !self.oldsite
         # "Empty" site (probably defaults)
-        self.site = ""
+        self.oldsite = ""
         self.subsite = ""
         self.name = "Anonymous"
       end
@@ -103,7 +110,7 @@ public
   end
 
   def sampleURL
-    self.site+(self.sample||"")
+    valid_url sample, oldsite
   end
 
   # By default the site's home page is (site+subsite), but that may be overridden (due to indirection) by
@@ -113,7 +120,7 @@ public
   end
   
   # Find and return the site wherein the named link is stored
-  def self.by_link (link, all=false)
+  def self.by_link link
     # Sanitize the URL
     link.strip!
     link.gsub!(/\{/, '%7B')
@@ -131,15 +138,46 @@ public
       # So: among matching hosts, find one whose 'site+subsite' is an initial substring of the link
       matching_subsites = []; matching_sites = []
       sites.each do |site|
-        unless site.site.empty?
-          matching_sites << site if link.index(site.site)
-          matching_subsites << site if !site.subsite.empty? && link.index(site.site+site.subsite)
+        unless site.oldsite.empty?
+          matching_sites << site if link.index(site.oldsite)
+          matching_subsites << site if !site.subsite.empty? && link.index(site.oldsite+site.subsite)
         end
       end
-      all ? (matching_sites+matching_subsites).uniq : (matching_subsites[0] || matching_sites[0] || Site.create(:sample=>link))
+      (matching_subsites[0] || matching_sites[0] || Site.create(:sample=>link))
     else
       puts "Ill-formed link: '#{link}'"
       nil
+    end
+  end
+
+  # Merge another site into this one, optionally destroying the other
+  def merge other, nuke=true
+    # If the other has a Reference, that's a deal-breaker
+    refs = other.references
+    # if other.reference
+      # raise "Can't nuke site which has an attached reference"
+    # end
+    # Merge corresponding referents
+    if other.referent
+      self.referent ||= other.referent
+      if self.referent != other.referent
+        self.referent.merge other.referent
+        other.referent = nil
+      end
+    end
+    # If these refer to the same external site, merge the other's feeds in
+    if SiteReference.canonical_url("#{oldsite}#{subsite}") == SiteReference.canonical_url("#{other.oldsite}#{other.subsite}")
+      self.feed_ids = (self.feed_ids + other.feed_ids).uniq
+    end
+    if nuke
+      other.destroy
+      refs.each { |ref|
+        if ref.affiliate_id
+          raise "Merged site's references still have affiliate"
+        else
+          ref.destroy
+        end
+      }
     end
   end
 

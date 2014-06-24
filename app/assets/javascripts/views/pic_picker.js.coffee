@@ -1,59 +1,78 @@
-RP.pic_picker = RP.pic_picker || {}
+RP.pic_picker ||= {}
 
-me = () ->
-	$('div.pic_picker')
+###
+RP.pic_picker.arm = (event) ->
 
-# Prepare the picture picker prior to opening it.
-RP.pic_picker.load = (callback) ->
-	dlog = me()
-	# Don't load twice
-	return if $(dlog).hasClass('loading')
-	url = $(dlog).data "url"
-	$(dlog).addClass('loading')
-	$(dlog).load url, (responseText, textStatus, XMLHttpRequest) ->
-		$(dlog).removeClass('loading')
-		if jQuery.type(callback) == 'function'
-			callback dlog
+	$(dlog).on 'preload', 'a.pic_picker_golink', ->
+###
+
+mylink = () ->
+	$('a.pic_picker_golink')
+
+mydlog = () ->
+	$('div.dialog.pic_picker')
+
+# Close with save
+RP.pic_picker.close = (dlog) ->
+	# Transfer the logo URL from the dialog's text input to the page text input
+
+	# The input field points to the originating golink
+	targetGolinkSelector = "a#"+$("input.icon_picker").data('golinkid')
+
+	# The golink points to the original image and/or input fields
+	if !$('div.preview img').hasClass 'bogus'
+		linkdata = $(targetGolinkSelector).data()
+		url = $("input.icon_picker").attr("value")
+		imagePreviewWidgetSet linkdata.imageid, linkdata.inputid, url
+
+	# Finally, clone the dialog and save the clone in the link for later
+	clone = dlog.cloneNode true
+	$(targetGolinkSelector).data 'preloaded', clone
 
 # Respond to a link by bringing up a dialog for picking among the image fields of a page
 # -- the pic_picker div is ready to be a diaog
 # -- the data of the link must contain urls for each image, separated by ';'
 # formerly PicPicker
-RP.pic_picker.open = (ttl) ->
-	if $('div.pic_picker > *').length > 0
-		dlog = me()
-		$(dlog).dialog # nee: iconpicker
-			modal: true,
-			width: 700,
-			zIndex: 1200,
-			title: (ttl || "Pick a Picture"),
-			buttons:
-				Okay: (event) ->
-					# Transfer the logo URL from the dialog's text input to the page text input
-					# THE PICPICKER MUST BE ARMED WITH NAMES IN ITS DATA
-					datavals = $(".pic_picker_golink").attr("data").split(';');
-					previewImg("input.icon_picker", datavals[1], "input#"+datavals[0]);
-					$(this).dialog('close');
-					# Copy the image to the window's thumbnail
-		$('a.image_preview_button').click ->
-			previewImg('input.icon_picker', 'div.preview img', '')
-		return true
-	else
-		return false
+RP.pic_picker.open = (dlog) ->
+	$('div.preview img').on 'ready', (event) ->
+		if $(this).hasClass 'bogus'
+			$('a.dialog-submit-button', dlog).addClass 'disabled'
+			RP.notifications.post "Sorry, but that address doesn't lead to an image. If you point your browser at it, does the image load?", "flash-error"
+		else
+			$('a.dialog-submit-button', dlog).removeClass 'disabled'
+			RP.notifications.post "Click Save to use this image.", "flash-alert"
 
-# When a new URL is typed, set the (hidden) field box
-# function newImageURL(inputsel, formsel, picid) {
-# 	var url = $(inputsel).attr("value")
-# 	var thePic = $("#"+picid)
-# 	var formField = $(formsel)
-# 	formField.attr("value", url);
-# 	thePic.attr("src", url)
-# 	return false;
-# }
+	$('a.image_preview_button').click ->
+		previewImg('input.icon_picker', 'div.preview img', '')
+		# imagePreviewWidgetSet($('input.icon_picker').attr("value"), 'div.preview img', '')
+
+	$('img.pic_pickee').click (event) ->
+		clickee = RP.event_target event
+		url = clickee.getAttribute 'src'
+		$('input.icon_picker').attr "value", url
+		previewImg 'input.icon_picker', 'div.preview img', ''
+
+	$('img.pic_pickee').load (evt) ->
+		check_image this
+
+	$('img.pic_pickee').each (index, img) ->
+		check_image img
+		true
+
+	# imagesLoaded fires when all the images are either loaded or fail
+	imagesLoaded 'img.pic_pickee', (instance) ->
+		# Just in case: when all images are loaded, check for qualifying images that are still hidden
+		$(':hidden', dlog).each (index, img) ->
+			check_image img
+	return true
+
+# Once an image is loaded, check that it's both complete (i.e., no errors) and of appropriate size and aspect ratio
+check_image = (img) ->
+	# We only allow images that are over 100 pixels in size, with a maximum A/R of 3
+	if (img.tagName == "IMG") && img.complete && (img.naturalWidth > 100 && img.naturalHeight > 100 && img.naturalHeight > (img.naturalWidth/3))
+		$(img).show()
 
 # Handle a click on a thumbnail image by passing the URL on to the
 # associated input field
 RP.pic_picker.make_selection = (url) ->
-	$('input.icon_picker').attr "value", url
-	previewImg 'input.icon_picker', 'div.preview img', ''
-
+	previewImg 'input.icon_picker', 'div.preview this', ''

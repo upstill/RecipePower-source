@@ -1,5 +1,5 @@
 def splitstr(str, ncols=80)
-	str = HTMLEntities.new.decode(str)
+  str = HTMLEntities.new.decode(str)
   out = []
   line = ""
   str.split(/\s+/).each do |word|
@@ -35,4 +35,28 @@ def liststrs(strs)
     last = strs.pop
     [strs.join(', '), last].join(' and ')
   end
+end
+
+# Two strings with space-separated words: merge them uniquely
+def merge_word_strings str1, str2
+  return str2||"" if str1.blank?
+  return str1 if str2.blank?
+  (str1.split(/\s+/) + str2.split(/\s+/)).uniq.join(' ')
+end
+
+# Convert a name (possibly with embedded '::') to a class
+def string_to_class string
+  chain = string.split "::"
+  i=0
+  res = chain.inject(Module) do |ans,obj|
+    break if ans.nil?
+    i+=1
+    klass = ans.const_get(obj)
+    # Make sure the current obj is a valid class
+    # Or it's a module but not the last element,
+    # as the last element should be a class
+    klass.is_a?(Class) || (klass.is_a?(Module) and i != chain.length) ? klass : nil
+  end
+rescue NameError
+  nil
 end

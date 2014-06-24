@@ -16,23 +16,22 @@ class Array
 end
 
 class BrowserElement
-  attr_accessor :npages, :visible, :handle # , :cur_page
-  attr_reader :level
-  @@page_length = 20
+  attr_accessor :visible, :handle
+  attr_reader :level, :classed_as
   # Persisters for all browser-element nodes; these may be augmented by a subclass by
   # setting @persisters BEFORE handing off init to superclass
-  @@persisters = [:selected, :handle, :userid] # , :cur_page]
-  
+  @@persisters = [:selected, :handle, :userid]
+
   # Initialize a new element, either from supplied arguments or defaults
   def initialize(level, args={})
     @persisters = (@@persisters + (@persisters || [])).uniq
     @level = level
     @persisters.each { |name| instance_variable_set("@#{name}", args[name]) if args[name] } if @persisters
     @selected = false unless @selected
-    # @cur_page = @cur_page || 1
+    @classed_as = :public
   end
-  
-  def handle
+
+  def handle extend=false
     @handle ||= "Mystery Element"
   end
   
@@ -76,7 +75,7 @@ class BrowserElement
   end
   
   def user
-    @user || User.find(@userid)
+    @user ||= User.find(@userid)
   end
   
   # Class method to return a hash sufficient to reconstruct the element
@@ -232,10 +231,14 @@ class BrowserComposite < BrowserElement
   def initialize(level, args)
     super
     @children = args[:children] ? 
-      args[:children].map do |childargs|
+      args[:children].collect { |childargs|
         # For each child, determine its class, then create a new one, supplying its arguments
-        childargs[:classname].constantize.new (level+1), childargs
-      end
+        begin
+          childargs[:classname].constantize.new (level+1), childargs
+        rescue
+          nil
+        end
+      }.compact
       : []
   end
   
@@ -314,7 +317,7 @@ class FeedBrowserElement < BrowserElement
     @feedid = args[:feedid]
   end
   
-  def handle
+  def handle extend=false
     @handle ||= Feed.find(@feedid).title
   end
   
@@ -476,9 +479,17 @@ class RcpBrowserElementFriend < BrowserElement
     super
     @friendid = args[:friendid]
   end
+
+  def classed_as
+    # Channels are public
+    user.channel? ? :public : :friends
+  end
   
-  def handle
+  def handle extend=false
     @handle ||= user.handle
+    extend ?
+        ((classed_as == :public) ? "The <strong>#{@handle}</strong> Collection" : "The Collected Cookmarks of <strong>#{@handle}</strong>").html_safe :
+        @handle
   end
   
   def sources
@@ -540,17 +551,33 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
   
   def initialize(level, args)
     super
-    @handle = "My Collection"
-    if @children.empty?
-      @children = [ MyConstants::Rcpstatus_rotation, 
+    @level = level
+    @handle = "All My Cookmarks"
+    @classed_as = :personal
+    if @children.empty?  # Default, in case never saved before, or rebuilding browser
+=begin
+      @children = [ MyConstants::Rcpstatus_rotation,
         MyConstants::Rcpstatus_favorites, 
         MyConstants::Rcpstatus_interesting].map do |status| 
         args[:status] = status
         RcpBrowserElementStatus.new(level+1, args)
       end
+=end
+      klass = Module.const_get("User")
+      if klass.is_a?(Class) # If User class is available (i.e., in Rails, as opposed to testing)
+        @children += user.collection_tags.map do |tag|
+          args[:tagid] = tag.id
+          RcpBrowserElementTaglist.new level+1, args
+        end
+      end
     end
   end
-  
+
+  # Add a collection by reference to a tag
+  def add_by_content tag
+    @children << RcpBrowserElementTaglist.new(@level+1, tagid: tag.id, userid: @userid) unless find_by_content(tag)
+  end
+
   def should_show(recipe)
     recipe.cookmarked(user.id)
   end
@@ -572,7 +599,11 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
     "<br>Or even, dare we say it, head off to the Wild World Web and cookmark some findings there? (...after installing the Cookmark Button of course...)"
   end
 
-private  
+  def add_path
+    "/collection/new?modal=true"
+  end
+
+private
   def candidates
     @candidates ||= user.recipe_ids_g # (status: MyConstants::Rcpstatus_misc, sort_by: :collected)
   end
@@ -617,7 +648,8 @@ class RcpBrowserCompositeFriends < RcpBrowserChannelsAndFriends
   def initialize(level, args)
     @is_channel = false
     super
-    @handle = "My Friends"
+    @handle = "All Friends' Cookmarks"
+    @classed_as = :friends
   end
   
   def content_name
@@ -644,7 +676,7 @@ class RcpBrowserCompositeChannels < RcpBrowserChannelsAndFriends
   def initialize(level, args)
     @is_channel = true
     super
-    @handle = "My Channels"
+    @handle = "All My Public Collections"
   end
   
   def content_name
@@ -682,7 +714,8 @@ class RcpBrowserElementRecent < RcpBrowserElement
   
   def initialize(level, args)
     super
-    @handle = "Recent"
+    @handle = "Recently Viewed"
+    @classed_as = :personal
   end
   
   def timestamp recipe
@@ -738,6 +771,11 @@ class RcpBrowserElementStatus < RcpBrowserElement
     @persisters = (@persisters || []) << :status
     super
     @handle = I18n.t MyConstants::Rcpstatus_names[@status]
+    @classed_as = :personal
+  end
+
+  def handle extend=false
+    extend ? "My <strong>#{@handle}</strong> Collection".html_safe : @handle
   end
   
   def should_show(recipe)
@@ -777,27 +815,12 @@ private
   
 end
 
-# Element for a recipe list due to a tag
-class RcpBrowserElementTaglist < RcpBrowserElement
-  
-  def initialize(level, args)
-    super
-    @tagid = args[:tagid]
-    @handle = "Tag #{@tagid.to_s}"
-  end
-  
-  def css_id
-    self.class.to_s+@tagid.to_s
-  end
-
-end
-
 # Element for a recipe list for all the recipes in the system
 class RcpBrowserElementAllRecipes < RcpBrowserElement
   
   def initialize(level, args)
     super
-    @handle = "The Big List"
+    @handle = "Every Cookmark There Is"
   end
   
   def sources
@@ -844,11 +867,11 @@ class ContentBrowser < BrowserComposite
         # Validate the new selection before setting it, so we don't wind up with a nil selection
         if self.find_by_id params[:selected]
           self.select_by_id params[:selected]
+          true # Browser has changed (=> maybe we want to save it?)
         else
           raise Exception, "Apparently that #{params[:selected][0..3]} is missing in action"
         end
       end
-      # self.cur_page = params[:cur_page].to_i if params[:cur_page]
     end
   end
     
@@ -877,11 +900,42 @@ class ContentBrowser < BrowserComposite
   def self.load(str)
     !str.blank? && self.new(YAML::load(str))
   end
-  
-  def node_list
-    @children.collect { |child| child.node_list true }.flatten
+
+  # Return the css_id for the composite of the given type
+  def id_for which
+    case which
+      when :personal
+        "RcpBrowserCompositeUser"
+      when :friends
+        "RcpBrowserCompositeFriends"
+      when :public
+        "RcpBrowserCompositeChannels"
+    end
   end
-  
+
+  def node_list which = nil
+    id = id_for which
+    parent = id ? find_by_id(id) : self
+    parent.children.collect { |child| child.node_list true }.flatten
+  end
+
+=begin
+  def selected_is_under which
+    id = id_for which
+    (selected.css_id == id) || (parent_of(selected).css_id == id) ||
+        (which == :personal) && (selected.css_id == "RcpBrowserElementRecent") ||
+        (which == :public) && (selected.css_id == "RcpBrowserElementAllRecipes")
+        case which
+          when :personal
+            selected.css_id == "RcpBrowserElementRecent"
+          when :friends
+            selected.css_id == "RcpBrowserElementRecent"
+          when :public
+            selected.css_id == "RcpBrowserElementAllRecipes"
+        end
+  end
+
+=end
   def convert_ids list
     selected.convert_ids list
   end
@@ -905,12 +959,7 @@ class ContentBrowser < BrowserComposite
   def refresh
     selected.refresh
   end
-  
-  # How many pages in the current result set?
-  def npages tags
-    selected.npages tags
-  end
-  
+
   # Are there any recipes waiting to come out of the query?
   def empty? tags
     selected.result_ids(tags).empty?
@@ -956,17 +1005,7 @@ class ContentBrowser < BrowserComposite
     sug ? report+"<br>You might try #{sug}." : report
     { sug: sug, report: report, hint: hint }
   end
-  
-=begin
-  def cur_page
-    selected.cur_page
-  end
-  
-  def cur_page=(pagenum)
-    selected.cur_page= pagenum
-  end
-=end
-  
+
   def list_type
     selected.list_type
   end
@@ -981,4 +1020,48 @@ class ContentBrowser < BrowserComposite
     end
     new_selection
   end
+end
+
+# Element for a recipe list due to a tag
+class RcpBrowserElementTaglist < RcpBrowserElement
+
+  def initialize(level, args)
+    super
+    @persisters << :tagid unless @persisters.include? :tagid
+    @level = level
+    @persisters.each { |name| instance_variable_set("@#{name}", args[name]) if args[name] } if @persisters
+    # @handle = "Tag #{@tagid.to_s}" # tag.name
+    @classed_as = :personal
+    tag # Will throw exception if tag doesn't exist
+  end
+
+  def css_id
+    self.class.to_s+@tagid.to_s
+  end
+
+  def tag
+    @tag ||= Tag.find(@tagid)
+  end
+
+  def find_by_content tag
+    self if tag.id == @tagid
+  end
+
+  def handle extended=false
+    extended ? "My <strong>#{tag.name}</strong> Collection".html_safe : tag.name
+  end
+
+  # Class method to return a hash sufficient to reconstruct the element
+  def save
+    result = Hash[@persisters.map { |name| instance_variable_get("@#{name.to_s}") && [name, instance_variable_get("@#{name.to_s}")] }.compact]
+    result[:classname] = self.class.name
+    result
+  end
+
+  private
+  # The candidates are a list of recipes by id
+  def candidates
+    @candidates ||= tag.recipe_ids(@userid)
+  end
+
 end

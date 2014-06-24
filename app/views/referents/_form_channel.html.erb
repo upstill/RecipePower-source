@@ -16,7 +16,7 @@
       </div>
     </div>
     <%= f.simple_fields_for :user do |builder| %>
-        <%= render "shared/pic_preview_field",
+        <%= render "pic_picker/pic_preview_field",
                    :f => builder,
                    :urlfield => :image %>
         <br>

@@ -7,57 +7,28 @@ require 'htmlentities'
 class Recipe < ActiveRecord::Base
   include Taggable
   include Referrable
+  include Voteable
+
   include Linkable
-  attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :picurl, :tagpane, :href, :description # , :picAR
+  # The url attribute is handled by a reference of type RecipeReference
+  linkable :url, :reference
+  # The picurl attribute is handled by the :picture reference of type ImageReference
+  include Picable
+  picable :picurl, :picture
+
+  attr_accessible :title, :alias, :ratings_attributes, :comment, :status, :private, :tagpane, :description, #, :picurl :href
+                  :misc_tag_tokens, :collection_tokens, :channel_tokens, :thumbnail
   after_save :save_ref
 
+  belongs_to :thumbnail
+
   validates :title, :presence=>true 
-#  validates :url,  :presence=>true, :gettableURL => true
-#  validates :picurl, :gettableURL => true
 # private
 
-  # Before saving the recipe, take the chance to generate a thumbnail (in background)
-  before_save :check_thumbnail
-
-private
-  
-  # Confirm that the thumbnail accurately reflects the recipe's image
-  def check_thumbnail
-    self.picurl = nil if self.picurl.blank? || (self.picurl == "/assets/NoPictureOnFile.png")
-    if self.picurl.nil? || self.picurl =~ /^data:/
-      # Shouldn't have a thumbnail
-      self.thumbnail = nil
-    elsif picurl_changed? || !thumbnail
-      # Make sure we've got the right thumbnail
-      self.thumbnail = Thumbnail.acquire( url, picurl )
-    end
-    true
-  end
-  
-public
-
-  # Return the image for the recipe, either as a URL or a data specifier
-  # The image may have an associated thumbnail, but it doesn't count unless 
-  # the thumbnail reflects the image's current picurl
-  def picdata
-    case
-    when !picurl || (picurl =~ /^data:/)
-      picurl
-    when thumbnail && thumbnail.thumbdata
-      thumbnail.thumbdata
-    else
-      picurl unless picurl.blank?
-    end
-  end
-  
-  belongs_to :thumbnail, :autosave => true
-  
   has_many :ratings, :dependent=>:destroy
   has_many :scales, :through=>:ratings, :autosave=>true
   # attr_reader :ratings_attributes
   accepts_nested_attributes_for :ratings, :reject_if => lambda { |a| a[:scale_val].nil? }, :allow_destroy=>true
-  
-  has_one :link, :as => :entity
 
   has_many :rcprefs, :dependent=>:destroy
   has_many :users, :through=>:rcprefs, :autosave=>true
@@ -66,6 +37,36 @@ public
   attr_reader :status
   
   @@coder = HTMLEntities.new
+
+  # Here lies the heart of enforcement, where we ensure that a recipe is uniquely linked to its url and vice versa
+=begin
+  def self.find_or_initialize params
+    rcp = super
+    ref = RecipeReference.find_or_initialize params[:url]
+    otherparams = params.clone.slice! :picurl, :title # Handle these separately
+    if rcp = ref.recipe
+      rcp.update_attributes otherparams
+    else
+      rcp = Recipe.new( otherparams )
+      rcp.reference = ref
+      ref.recipe = rcp
+    end
+    return rcp if rcp.errors.any?
+    if rcp.title.blank?
+      rcp.errors.add :title, "can't be blank"
+      return rcp
+    end
+
+    ss = SiteServices.new rcp.site
+    picurl = ss.resolve(params[:picurl])
+    picture = ImageReference.find_or_initialize(picurl) unless picurl.blank?
+    rcp.picture = picture unless picture.errors.any?
+    # rcp.picurl = ss.resolve rcp.picurl unless rcp.picurl.blank?
+    rcp.title = ss.trim_title rcp.title unless rcp.title.blank?
+    rcp
+  end
+=end
+
 
   # Either fetch an existing recipe record or make a new one, based on the
   # params. If the params have an :id, we find on that, otherwise we look
@@ -97,7 +98,7 @@ public
       end
       params[:picurl] = extractions[:Image] if extractions[:Image]
       params[:title] = extractions[:Title] if extractions[:Title]
-      params[:href] = extractions[:href] if extractions[:href]
+      # params[:href] = extractions[:href] if extractions[:href]
       if params.blank?
         rcp = self.new      
       elsif (id = params[:id].to_i) && (id > 0) # id of 0 means create a new recipe
@@ -109,14 +110,16 @@ public
         end
       else # No id: create based on url
         params.delete(:rcpref)
-        rcp = Recipe.find_or_initialize params
+        rcp = self.find_or_initialize params
         if rcp.url.match %r{^http://#{current_domain}} # Check we're not trying to link to a RecipePower page
           rcp.errors.add :base, "Sorry, can't cookmark pages from RecipePower. (Does that even make sense?)"
         end
+        if rcp.title.empty?
+          rcp.errors.add :title, "can't be blank"
+        end
         if rcp.errors.empty?
           ss = SiteServices.new rcp.site
-          rcp.picurl = ss.resolve rcp.picurl unless rcp.picurl.blank?
-          rcp.title = ss.trim_title rcp.title # = ((site.yield :Title, url)[:Title] || rcp.title).html_safe unless rcp.title
+          rcp.title = ss.trim_title rcp.title
           rcp.save
           RecipeServices.new(rcp).robotags = extractions
         end
@@ -129,12 +132,12 @@ public
     end
     rcp
   end
-  
+
   # Make the recipe title nice for display
   def trimmed_title
     ttl = self.title || ""
-    if st = self.url && Site.by_link(self.url)
-      ttl = SiteServices.new(st).trim_title ttl
+    if site
+      ttl = SiteServices.new(site).trim_title ttl
     end
     # Convert HTML entities
     @@coder.decode ttl
@@ -142,8 +145,8 @@ public
   
   # Before editing, try and fill in a blank title by cracking the url
   def check_title
-    if self.title.blank? && st = (url && Site.by_link(self.url))
-      self.title = (st.yield :Title, st.sampleURL)[:Title] || ""
+    if self.title.blank? && site
+      self.title = (site.yield :Title, site.sampleURL)[:Title] || ""
       self.title = self.trimmed_title
     else
       self.title
@@ -197,6 +200,59 @@ public
       ref.in_collection
     end
     # (ref = (uid.nil? ? current_ref : ref_for(uid, false))) && ref.in_collection
+  end
+
+  # We divide the tag fields of a recipe into collections, channels, and other tags
+
+  def misc_tags
+    tags tagtype_x: [11, 15]
+  end
+
+  def misc_tag_tokens
+    tag_tokens tagtype_x: [11, 15]
+  end
+
+  def misc_tag_tokens= tokenstr
+    self.tag_tokens = { tokenstr: tokenstr, tagtype_x: [11, 15] }
+  end
+
+  def misc_tag_data options={}
+    options[:tagtype_x] = [11, :Collection]
+    tag_data options
+  end
+
+  def collections
+    tags tagtype: 15
+  end
+
+  def collection_tokens
+    tag_tokens tagtype: 15
+  end
+
+  def collection_tokens= tokenstr
+    self.tag_tokens = { tokenstr: tokenstr, :tagtype => 15 }
+  end
+
+  def collection_data options={}
+    options[:tagtype] = :Collection
+    tag_data options
+  end
+
+  def channels
+    tags tagtype: 11
+  end
+
+  def channel_tokens
+    tag_tokens tagtype: 11
+  end
+
+  def channel_tokens= tokenstr
+    self.tag_tokens = { tokenstr: tokenstr, :tagtype => 11 }
+  end
+
+  def channel_data options={}
+    options[:tagtype] = 11
+    tag_data options
   end
 
   def add_to_collection uid

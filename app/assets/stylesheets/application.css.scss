@@ -1,5 +1,6 @@
 @import 'bootstrap_and_overrides';
 @import 'views/*';
+@import 'controllers/*';
 @import 'common/buttons';
 @import 'common/dialog';
 @import 'paginate';
@@ -17,6 +18,13 @@
 	font-weight: 150;
 	color: #999999;
 	# text-shadow: 0 1px 0 #888888;
+}
+
+.top_right_corner {
+  position: absolute;
+  z-index: 1000;
+  top: 0px;
+  right: 0px;
 }
 
 div.prompt {

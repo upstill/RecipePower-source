@@ -2,6 +2,12 @@ require "type_map.rb"
 require "rcp_browser.rb"
 class User < ActiveRecord::Base
   include Taggable
+  include Voteable
+  include Linkable # Required by Picable
+  include Picable
+  # Keep an avatar URL denoted by the :image attribute and kept as :thumbnail
+  picable :image, :thumbnail
+
   # Include default devise modules. Others available are:
   # :token_authenticatable, :encryptable, :confirmable, :timeoutable
   devise :invitable, :database_authenticatable, :registerable,
@@ -28,38 +34,41 @@ class User < ActiveRecord::Base
 
   has_many :followee_relations, :foreign_key => "follower_id", :dependent=>:destroy, :class_name => "UserRelation"
   has_many :followees, -> { uniq }, :through => :followee_relations, :source => :followee
-  
+
   # Channels are just another kind of user. This field (channel_referent_id, externally) denotes such.
   belongs_to :channel, :class_name => "Referent", :foreign_key => "channel_referent_id"
   
   has_and_belongs_to_many :feeds
+
+  # Private collections
+  has_many :private_subscriptions, -> { order "priority ASC" }, :dependent=>:destroy
+  has_many :collection_tags, :through => :private_subscriptions, :source => :tag, :class_name => "Tag"
   
   # login is a virtual attribute placeholding for [username or email]
   attr_accessor :login
-  
+
   def browser params=nil
     return @browser if @browser && !params
     # Try to get browser from serialized storage in the user record
-    # If something goes awry, we'll just create a new one.
+    # If something goes awry, we'll create a new one.
     begin
-      @browser = ContentBrowser.load browser_serialized
+      @browser ||= ContentBrowser.load browser_serialized
     rescue Exception => e
       @browser = nil
     end
     @browser ||= ContentBrowser.new id
     # Take heed of any query parameters that apply to the browser
-    @browser.apply_params(params) if params
+    save if @browser && @browser.apply_params(params)
     @browser
   end
-  
+
   # Bust the browser cache due to selections changing, optionally selecting an object
   def refresh_browser(obj = nil)
-    self.browser_serialized = nil
-    @browser = ContentBrowser.new(id)
+    @browser = ContentBrowser.new id
     @browser.select_by_content(obj) if obj
     save
   end
-  
+
   def serialize_browser
     self.browser_serialized = @browser.dump if @browser
   end
@@ -78,7 +87,7 @@ class User < ActiveRecord::Base
     if feeds.exists? id: feed.id
       browser.select_by_content feed
     else
-      self.feeds = feeds.unshift(feed)
+      self.feeds << feed
       refresh_browser feed
     end
   end
@@ -90,9 +99,30 @@ class User < ActiveRecord::Base
     save
   end
 
+  def add_collection tag, priority=nil
+    self.collection_tags << tag unless collection_tags.exists?(id: tag.id)
+    if priority # Can assign priority to subscription in the user's list
+      private_subscriptions.each do |ps|
+        if ps.tag.id == tag.id
+          ps.priority = priority
+          ps.save
+        end
+      end
+    end
+    browser.select_by_content(tag)
+    save
+  end
+
+  def delete_collection tag
+    browser.delete_selected if browser.select_by_content(tag)
+    self.collection_tags.delete tag
+    save
+  end
+
   def add_followee friend
     self.followees << friend unless followee_ids.include? friend.id
     refresh_browser friend
+    save
   end
 
   def delete_followee f
@@ -268,7 +298,14 @@ public
     end
     if oi = omniauth['info']
       mapping = @@AuthenticationMappings[omniauth['provider']]
-      [:email, :image, :username, :fullname, :first_name, :last_name].each do |attrname|
+      # Get the user's image, replacing it if possible
+      uiname = mapping[:image] || "image"
+      unless picdata || oi[uiname].blank? || ((image||"") == oi[uiname])
+        self.image = oi[uiname]
+        # While we're here, fetch the image data as a thumbnail
+        thumbnail.perform if thumbnail # Fetch the user's thumbnail data while the authorization is fresh
+      end
+      [:email, :username, :fullname, :first_name, :last_name].each do |attrname|
         uiname = mapping[attrname] || attrname.to_s
         write_attribute(attrname, oi[uiname]) if read_attribute(attrname).blank? unless oi[uiname].blank?
       end
@@ -304,7 +341,7 @@ public
   
   # ownership of tags restrict visible tags
   has_many :tag_owners
-  has_many :tags, :through=>:tag_owners
+  has_many :private_tags, :through=>:tag_owners, :source => :tag, :class_name => "Tag"
   
   validates :email, :presence => true
 

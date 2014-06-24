@@ -29,6 +29,7 @@ class RecipesController < ApplicationController
         ]
         replacements << [ "."+feed_list_element_class(@feed_entry) ] if @feed_entry
         @user = @recipe.current_user ? Recipe.find(@recipe.current_user) : current_user_or_guest
+        @browser = current_user.browser
         if current_user.browser.should_show(@recipe) && !destroyed
           replacements[0][1] = with_format("html") do render_to_string partial: "recipes/golink" end
           replacements[1][1] = with_format("html") do render_to_string partial: "shared/recipe_smallpic" end
@@ -224,17 +225,12 @@ class RecipesController < ApplicationController
     if @recipe && @recipe.errors.empty? # Success (recipe found)
       @Title = @recipe.title # Get title from the recipe
       @decorator = @recipe.decorate
-      if params[:pic_picker]
-        # Setting the pic_picker param requests a picture-editing dialog
-        render partial: "shared/pic_picker"
-      else
-        @nav_current = nil
-        # @_area = params[:_area]
-        # Now go forth and edit
-        # @_layout = params[:_layout]
-        # dialog_boilerplate('edit', 'at_left')
-        smartrender area: 'at_left'
-      end
+      @nav_current = nil
+      # @_area = params[:_area]
+      # Now go forth and edit
+      # @_layout = params[:_layout]
+      # dialog_boilerplate('edit', 'at_left')
+      smartrender # area: 'at_left'
     else
       @Title = "Cookmark a Recipe"
       @nav_current = :addcookmark
@@ -294,6 +290,28 @@ class RecipesController < ApplicationController
           @list_name = "mine"
           render 'shared/_recipe_smallpic.html.erb', :layout=>false 
       }
+    end
+  end
+
+  def untag
+    x=1
+    @recipe = Recipe.find params[:recipe_id]
+    tag_id = params[:id].to_i
+    tag_ids = @recipe.tag_ids owner_id: current_user.id
+    tag_ids = tag_ids.delete_if { |id| id == tag_id }
+    @recipe.tag_ids = { owner_id: current_user.id, tag_ids: tag_ids }
+    @recipe.save
+    @recipe.reload
+    tag_ids = @recipe.tag_ids owner_id: current_user.id
+    @jsondata = {
+        replacements: [
+            [ "div.rcpGridElmt"+@recipe.id.to_s, "" ]
+        ],
+        popup: "Fear not. '#{@recipe.title}' has been vanquished from this collection."
+    }
+    respond_to do |format|
+      format.json { render json: @jsondata }
+      format.js { render template: "shared/get_content" }
     end
   end
   

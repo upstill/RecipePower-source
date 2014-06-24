@@ -15,10 +15,11 @@ class Tag < ActiveRecord::Base
         Occasion: ["Occasion", 8], 
         PantrySection: ["Pantry Section", 9], 
         StoreSection: ["Store Section", 10], 
-        Channel: ["Channel", 11], 
+        Channel: ["Public Collection", 11],
         Tool: ["Tool", 12], 
-        Nutrient: ["Nutrient", 13], 
-        CulinaryTerm: ["Culinary Term", 14]
+        Nutrient: ["Nutrient", 13],
+        CulinaryTerm: ["Culinary Term", 14],
+        Collection: ["Private Collection", 15]
     )
     
     attr_accessible :name, :id, :tagtype, :isGlobal, :links, :recipes, :referents, :users, :owners, :primary_meaning
@@ -29,7 +30,10 @@ class Tag < ActiveRecord::Base
     # These are the "meanings" of a tag
     has_many :expressions
     has_many :referents, :through=>:expressions
-    
+
+    # When a tag is used as the basis for a personal collection, destroying the tag destroys the collection
+    has_many :private_subscriptions, :dependent=>:destroy
+
     # The primary meaning is the default meaning of a tag
     belongs_to :primary_meaning, :class_name => "Referent", :foreign_key => "referent_id"
     
@@ -246,97 +250,109 @@ class Tag < ActiveRecord::Base
    # tagtype: either a single value or an array, specifying key type(s) to search
    # assert: return a key of the given type matching the name, even if it has to be created anew
    # matchall: search only succeeds if it matches the whole string
-   # untypedOK: add type 0 to search to look for untyped tags
    # fold: reduce the set of candidate tags using lexical and semantic equivalence classes
    
    # If the :assert option is true, strmatch WILL return a tag on the given name, of the
    # given type, visible to the given user. This may not require making a new tag, but only opening 
    # an existing tag to the given user
-  def self.strmatch(name, opts = {} )
-    uid = opts[:userid]
-    # Convert to internal form
-    type = opts[:tagtype] && Tag.typenum(opts[:tagtype])
-    assert = opts[:assert]
-    name = name || ""  # nil matches anything
-    do_fold = opts[:fold]
-	# Case-insensitive lookup
-	fuzzyname = Tag.normalizeName name
-	if opts[:matchall] || assert
-    	if type
-        	tags = Tag.where normalized_name: fuzzyname, tagtype: type
-        else # Specific collection of types
-        	tags = Tag.where normalized_name: fuzzyname 
+    def self.strmatch(name, opts = {})
+      uid = opts[:userid]
+      # private_scope = uid ? Tag.find(TagOwner.where(user_id: uid).map(&:tag_id)) : nil
+      # Convert to internal form
+      type = opts[:tagtype] && Tag.typenum(opts[:tagtype])        # Restricted to types
+      type_x = opts[:tagtype_x] && Tag.typenum(opts[:tagtype_x])  # Types excluded
+      assert = opts[:assert]
+      name = name || "" # nil matches anything
+      do_fold = opts[:fold]
+      # Case-insensitive lookup
+      fuzzyname = Tag.normalizeName name
+      if opts[:matchall] || assert
+        if type
+          tags = Tag.where normalized_name: fuzzyname, tagtype: type
+        elsif type_x # Specific collection of types
+          tags = Tag.where.not(tagtype: type_x).where normalized_name: fuzzyname
+        else
+          tags = Tag.where normalized_name: fuzzyname
         end
-    else # Substring match
-    	if type
-    	    if type.kind_of?(Array)
-    	        # Sigh. Construct a query where the array of types is hardcoded
-        	    tags = Tag.where "normalized_name like ? AND tagtype IN "+type.to_s.sub(/^\[(.*)\]$/, "(\\1)"), "%#{fuzzyname}%"
-	        else
-        	    tags = Tag.where "normalized_name like ? AND tagtype = ?", "%#{fuzzyname}%", type
-    	    end
-        else # Specific collection of types
-        	tags = Tag.where "normalized_name like ? ", "%#{fuzzyname}%" 
+      else # Substring match
+        if type
+          typelist = (type.kind_of? Array) ? type.map(&:to_s).join(',') : type.to_s
+          tags = Tag.where "normalized_name like ? AND tagtype IN (#{typelist})", "%#{fuzzyname}%"
+        elsif type_x # Specific collection of types
+          typelist = (type.kind_of? Array) ? type.map(&:to_s).join(',') : type.to_s
+          tags = Tag.where.not("tagtype IN (#{typelist})").where "normalized_name like ?", "%#{fuzzyname}%"
+        else
+          tags = Tag.where "normalized_name like ? ", "%#{fuzzyname}%"
         end
-    end
-    tags = tags.limit(50)
-    # We now have a list of tags which match the input, perhaps fuzzily.
-    # If we don't need to assert the full string, we're done
-    if assert
+      end
+      tags = tags.limit(50)
+      # We now have a list of tags which match the input, perhaps fuzzily.
+      # If we don't need to assert the full string, we're done
+      if assert
         # The tag set will be those which totally match the input. If there are none such, we need to create one
         unless tags.empty?
-            # Since these match, we only need to make them visible to the user, if necessary
-            tags.each { |tag| tag.admit_user uid } if uid && (uid != User.super_id)
+          # Since these match, we only need to make them visible to the user, if necessary
+          tags.each { |tag| tag.admit_user uid } if uid && (uid != User.super_id)
         else
-            # We are to create a tag on the given string (after cleanup), and make it visible to the given user
-            name = Tag.tidyName name # Strip/collapse whitespace
-            return [] if name.blank?
-            tag = nil
-            if type.nil? # No type specified
-                tag = Tag.find_or_create_by_name name # It'll be a free tag, but if you don't care enough to specify...
+          # We are to create a tag on the given string (after cleanup), and make it visible to the given user
+          name = Tag.tidyName name # Strip/collapse whitespace
+          return [] if name.blank?
+          tag = nil
+          if type.nil? # No type specified
+            tag = Tag.find_or_create_by :name => name # It'll be a free tag, but if you don't care enough to specify...
+          else
+            if type.kind_of?(Array) # Look for the tag among the given types
+              type.find { |t| tag ||= Tag.find_by_name_and_tagtype(name, t) }
+              puts "Found tag #{tag.id} from array of types"
             else
-                if type.kind_of?(Array) # Look for the tag among the given types
-                    type.find { |t| tag ||= Tag.find_by_name_and_tagtype(name, t) }
-                    puts "Found tag #{tag.id} from array of types"
-                else
-                    tag = Tag.find_by_name_and_tagtype(name, type)
-                end
-                if tag.nil?
-                    type = type.first if type.kind_of?(Array)
-                    if tag = Tag.find_by_name_and_tagtype( name, 0 ) # Convert a free tag to the type, if avail.
-                        tag.tagtype = type
-                        tag.save
-                    else
-                        tag = Tag.create :name=>name, :tagtype=>type
-                    end
-                end
+              tag = Tag.find_by_name_and_tagtype(name, type)
             end
-            # If it's private, make it visible to this user
-            tag.admit_user uid
-            tags = [tag]
-        end
-    else
-        # Restrict the found set to any asserted user
-    	tags.keep_if { |tag| tag.isGlobal || tag.owners.exists?(uid) } if uid && (uid != User.super_id)
-    end
-    if do_fold
-      # Fold the set of tags to reduce redundancy as follows:
-      # -- at most one tag from the equivalence class of tags with the same normalized_name
-      # -- at most one tag from the equivalence class of tags sharing a referent, with the referent's canonical expression preferred
-      equivs = {}
-      tags.each { |tag|
-        accept = true
-        if prior = equivs[tag.normalized_name]
-          # Shootout between two lexically equivalent tags. Prefer the one whose match is earlier in the string,
-          # then prefer the one with a case match
-          case tag.name.index(/#{fuzzyname}/i) <=> prior.name.index(/#{fuzzyname}/i)
-            when -1 # Old tag wins => Move on
-              accept = false
-            when 0
-              accept = tag.name.match(fuzzyname)
+            if tag.nil?
+              type = type.first if type.kind_of?(Array)
+              if tag = Tag.find_by_name_and_tagtype(name, 0) # Convert a free tag to the type, if avail.
+                tag.tagtype = type
+                tag.save
+              else
+                tag = Tag.create :name => name, :tagtype => type
+              end
+            end
           end
+          # If it's private, make it visible to this user
+          tag.admit_user uid
+          tags = [tag]
         end
-        equivs[tag.normalized_name] = tag if accept
+      elsif uid && (uid != User.super_id)
+        # Restrict the found set to any asserted user
+        # user_tag_ids = TagOwner.where(user_id: uid).map(&:tag_id)
+        # tags.keep_if { |tag| tag.isGlobal || user_tag_ids.include?(tag.id) }
+        user_tag_id_list = TagOwner.where(user_id: uid).map(&:tag_id)
+        unless user_tag_id_list.empty?
+          user_tag_id_list = user_tag_id_list.collect { |id| id.to_s }.join ', '
+          tags = tags.where %Q{"tags"."isGlobal" = 't' or "tags"."id" in (#{user_tag_id_list}) }
+        else
+          tags = tags.where isGlobal: true
+        end
+      else # No user specified => only global tags allowed
+        tags = tags.where(isGlobal: true) unless uid == User.super_id
+      end
+      if do_fold
+        # Fold the set of tags to reduce redundancy as follows:
+        # -- at most one tag from the equivalence class of tags with the same normalized_name
+        # -- at most one tag from the equivalence class of tags sharing a referent, with the referent's canonical expression preferred
+        equivs = {}
+        tags.each { |tag|
+          accept = true
+          if prior = equivs[tag.normalized_name]
+            # Shootout between two lexically equivalent tags. Prefer the one whose match is earlier in the string,
+            # then prefer the one with a case match
+            case tag.name.index(/#{fuzzyname}/i) <=> prior.name.index(/#{fuzzyname}/i)
+              when -1 # Old tag wins => Move on
+                accept = false
+              when 0
+                accept = tag.name.match(fuzzyname)
+            end
+          end
+          equivs[tag.normalized_name] = tag if accept
 
 =begin Semantic folding didn't really work out. Necessary?
         tag.referent_ids.each { |rid|
@@ -346,26 +362,26 @@ class Tag < ActiveRecord::Base
               (referent.tag_id == prior.id)
         }
 =end
-      }
-      tags = equivs.values.uniq
-    end
-    # Prioritize the list for initial substring matches
-    if (!fuzzyname.blank?) && opts[:partition] && (tags.count > 1)
+        }
+        tags = equivs.values.uniq
+      end
+      # Prioritize the list for initial substring matches
+      if (!fuzzyname.blank?) && opts[:partition] && (tags.count > 1)
         firsttags = []
         lasttags = []
-        tags.each { |tag| 
-            if tag.normalized_name =~ /^#{fuzzyname}/
-                firsttags << tag
-            else
-                lasttags << tag
-            end
+        tags.each { |tag|
+          if tag.normalized_name =~ /^#{fuzzyname}/
+            firsttags << tag
+          else
+            lasttags << tag
+          end
         }
         tags = firsttags + lasttags
+      end
+      tags
     end
-    tags
-  end
-  
-  # Return a list of tags that "could be" a match for this one, as judged by losing the distinction
+
+    # Return a list of tags that "could be" a match for this one, as judged by losing the distinction
   # between singular and plural
   def aliases
       plural = self.name.pluralize

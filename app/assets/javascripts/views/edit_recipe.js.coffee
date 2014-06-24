@@ -3,8 +3,11 @@
 RP.edit_recipe = RP.edit_recipe || {}
 
 me = () ->
-	$('div.edit_recipe')
-tagger_selector = "div.edit_recipe #recipe_tag_tokens"
+	$('div.edit_recipe')[0]
+
+channel_tagger_selector = "div.edit_recipe #recipe_channel_tokens"
+collection_tagger_selector = "div.edit_recipe #recipe_collection_tokens"
+tagger_selector = "div.edit_recipe #recipe_misc_tag_tokens"
 
 # Open the edit-recipe dialog on the recipe represented by 'rcpdata'
 RP.edit_recipe.go = (evt, xhr, settings) ->
@@ -22,22 +25,39 @@ RP.edit_recipe.go = (evt, xhr, settings) ->
 		# statustarget = '<option value="'+rcpdata.rcpStatus+'"'
 		# statusrepl = statustarget + ' selected="selected"'
 		dlgsource = templ.string.
-		replace(/%%rcpID%%/g, rcpdata.rcpid).
+		replace(/%(25)?%(25)?rcpID%(25)?%(25)?/g, rcpdata.rcpid). # May have been URI encoded
 		replace(/%%rcpTitle%%/g, rcpdata.rcptitle).
 		replace(/%%rcpPicSafeURL%%/g, rcpdata.rcppicurl || "/assets/NoPictureOnFile.png" ).
 		replace(/%%rcpPicURL%%/g, rcpdata.rcppicurl || "" ).
+		replace(/%%rcpURL%%/g, rcpdata.rcpurl).
+		replace(/%25%25rcpPicSafeURL%25%25/g, encodeURIComponent(rcpdata.rcppicurl || "/assets/NoPictureOnFile.png" )).
+		replace(/%25%25rcpPicURL%25%25/g, encodeURIComponent(rcpdata.rcppicurl || "")).
+		replace(/%25%25rcpURL%25%25/g, encodeURIComponent(rcpdata.rcpurl)).
 		replace(/%%rcpPrivate%%/g, rcpdata.rcpprivate).
 		replace(/%%rcpComment%%/g, rcpdata.rcpcomment).
 		replace(/%%rcpStatus%%/g, rcpdata.rcpstatus).
 		replace(/%%authToken%%/g, rcpdata.authtoken) # .replace(statustarget, statusrepl)
 		$(template).html dlgsource # This nukes any lingering children as well as initializing the dialog
 	# The tag data is parsed and added to the tags field directly
-	rcpdata.rcptagdata.query = "tagtypes=[1,2,3,4,7,8,11,12,13,14]&showtype=true&verbose=true"
-	RP.tagger.init tagger_selector, rcpdata.rcptagdata # jQuery.parseJSON(rcpdata.rcptagdata)
+	# rcpdata.rcpcollectiondata.query = "tagtype=15&showtype=false&verbose=false"
+	RP.tagger.init collection_tagger_selector, rcpdata.rcpcollectiondata # jQuery.parseJSON(rcpdata.rcptagdata)
+	# rcpdata.rcpchanneldata.query = "tagtype=11&showtype=false&verbose=false"
+	RP.tagger.init channel_tagger_selector, rcpdata.rcpchanneldata # jQuery.parseJSON(rcpdata.rcptagdata)
+	# rcpdata.rcpmisctagdata.query = "tagtype_x=11,15&showtype=true&verbose=true"
+	RP.tagger.init tagger_selector, rcpdata.rcpmisctagdata # jQuery.parseJSON(rcpdata.rcptagdata)
 	$('textarea').autosize()
 		
 	# Hand it off to the dialog handler
 	RP.dialog.run me()
+	# When submitting the form, we abort if there's no change
+	# Stash the serialized form data for later comparison
+	# $('form.edit_recipe').data "before", recipedata $('form.edit_recipe').serializeArray()
+	dataBefore = recipedata $('form.edit_recipe', dlog).serializeArray()
+	$('form.edit_recipe', dlog).data "hooks", {
+		dataBefore: recipedata($('form.edit_recipe', dlog).serializeArray()),
+		beforesaveFcn: "RP.edit_recipe.submission_redundant"
+	}
+	RP.makeExpandingArea $('div.expandingArea', dlog)
 	false
 
 # When dialog is loaded, activate its functionality
@@ -45,35 +65,7 @@ RP.edit_recipe.onload = (dlog) ->
 	dlog = me()
 	# Only proceed if the dialog has children
 	if $('.edit_recipe > *').length > 0
-		
-		# Setup tokenInput on the tags field
-		if $('.pic_picker_golink', dlog).length > 0
-			# Get the picture picker in background
-			RP.pic_picker.load (picdlg) ->
-				$('.pic_picker_golink', dlog).removeClass('hide');
-			
-			# Arm the pic picker to open when clicked
-			$(".pic_picker_golink", dlog).click ->
-				event.preventDefault()
-				return RP.pic_picker.open "Pick a Picture for the Recipe"
-
-		# When submitting the form, we abort if there's no change
-		# Stash the serialized form data for later comparison
-		# $('form.edit_recipe').data "before", recipedata $('form.edit_recipe').serializeArray()
-		dataBefore = recipedata $('form.edit_recipe', dlog).serializeArray()
-		$('form.edit_recipe', dlog).data "hooks", {
-			dataBefore: recipedata($('form.edit_recipe', dlog).serializeArray()),
-			beforesaveFcn: "RP.edit_recipe.submission_redundant"
-		}
-		
-		RP.makeExpandingArea $('div.expandingArea', dlog)
-		
-#		$('input.save-tags-button.cancel', dlog).click RP.edit_recipe.oncancel 
-#		$('form.edit_recipe').on 'ajax:beforeSend', submission_redundant
-#		$('form.edit_recipe').on 'ajax:success', submission_success
-#		$('form#remove').on 'ajax:success', submission_success
-#		$('form#destroy').on 'ajax:success', submission_success
-		
+		# The pic picker is preloaded onto its link element. Unhide the link when loading is complete
 		rcpid = $('form.edit_recipe', dlog).attr("id").replace /\D*/g, ''
 		if touch_recipe = RP.named_function "RP.rcp_list.touch_recipe"
 			touch_recipe rcpid

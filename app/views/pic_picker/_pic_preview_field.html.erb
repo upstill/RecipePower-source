@@ -6,7 +6,7 @@
 -->
 <div class="row">
   <div class="col-md-4 preview">
-    <%= page_width_pic f.object.read_attribute(urlfield), urlfield, "NoPictureOnFile.png", "div.preview img" %>
+    <%= page_width_pic f.object.read_attribute(urlfield), urlfield %>
   </div>
   <div class="col-md-8">
     <%= f.input urlfield, label: "Image URL (when ready, click 'Preview')", input_html: {class: urlfield}, rel: "jpg,png,gif" %>

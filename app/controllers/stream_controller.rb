@@ -23,7 +23,9 @@ class StreamController < ApplicationController
     retrieve_seeker
     begin
       sse = Reloader::SSE.new(response.stream)
-       results = @seeker.results_paged
+      results = nil
+      time = Benchmark.measure { results = @seeker.results_paged }
+      File.open("db_timings", 'a') { |file| file.write("Seeker Page (#{Time.new} unindexed): "+time.to_s+"\n") }
       if results.empty?
         sse.write :stream_item,
                   view_context.element_item('.collection_list',

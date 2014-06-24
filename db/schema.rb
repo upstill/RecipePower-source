@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140305224516) do
+ActiveRecord::Schema.define(version: 20140508005728) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -103,24 +103,6 @@ ActiveRecord::Schema.define(version: 20140305224516) do
     t.datetime "updated_at"
   end
 
-  create_table "link_refs", force: true do |t|
-    t.integer  "link_id"
-    t.integer  "tag_id"
-    t.integer  "owner_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  create_table "links", force: true do |t|
-    t.string   "domain"
-    t.text     "uri"
-    t.integer  "resource_type"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.integer  "entity_id"
-    t.string   "entity_type"
-  end
-
   create_table "notifications", force: true do |t|
     t.integer  "source_id"
     t.integer  "target_id"
@@ -130,6 +112,14 @@ ActiveRecord::Schema.define(version: 20140305224516) do
     t.datetime "created_at",                        null: false
     t.datetime "updated_at",                        null: false
     t.boolean  "accepted",           default: true
+  end
+
+  create_table "private_subscriptions", force: true do |t|
+    t.integer  "user_id"
+    t.integer  "tag_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "priority",   default: 10
   end
 
   create_table "products", force: true do |t|
@@ -186,13 +176,19 @@ ActiveRecord::Schema.define(version: 20140305224516) do
     t.integer  "thumbnail_id"
     t.text     "href"
     t.text     "description"
+    t.integer  "picture_id"
   end
 
   create_table "references", force: true do |t|
-    t.datetime "created_at",     null: false
-    t.datetime "updated_at",     null: false
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
     t.integer  "reference_type"
-    t.string   "url"
+    t.text     "url"
+    t.integer  "affiliate_id"
+    t.string   "type",           default: "Reference"
+    t.text     "thumbdata"
+    t.integer  "status"
+    t.boolean  "canonical",      default: false
   end
 
   create_table "referent_relations", force: true do |t|
@@ -242,24 +238,8 @@ ActiveRecord::Schema.define(version: 20140305224516) do
     t.integer  "user_id"
   end
 
-  create_table "site_referents", force: true do |t|
-    t.string   "site"
-    t.string   "sample"
-    t.string   "home"
-    t.string   "subsite"
-    t.string   "scheme"
-    t.string   "host"
-    t.string   "port"
-    t.string   "logo"
-    t.text     "tags_serialized"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.string   "ttlcut"
-    t.string   "ttlrepl"
-  end
-
   create_table "sites", force: true do |t|
-    t.string   "site"
+    t.string   "oldsite"
     t.text     "sample"
     t.string   "home"
     t.string   "subsite"
@@ -272,8 +252,9 @@ ActiveRecord::Schema.define(version: 20140305224516) do
     t.datetime "updated_at"
     t.string   "ttlcut"
     t.integer  "referent_id"
-    t.boolean  "reviewed",    default: false
+    t.boolean  "reviewed",     default: false
     t.text     "description"
+    t.integer  "thumbnail_id"
   end
 
   create_table "tag_owners", force: true do |t|
@@ -368,6 +349,7 @@ ActiveRecord::Schema.define(version: 20140305224516) do
     t.datetime "invitation_created_at"
     t.string   "first_name"
     t.string   "last_name"
+    t.integer  "thumbnail_id"
   end
 
   add_index "users", ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true, using: :btree
@@ -380,6 +362,17 @@ ActiveRecord::Schema.define(version: 20140305224516) do
   create_table "visitors", force: true do |t|
     t.string   "email"
     t.string   "question"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "votes", force: true do |t|
+    t.integer  "user_id"
+    t.string   "entity_type"
+    t.integer  "entity_id"
+    t.string   "original_entity_type"
+    t.integer  "original_entity_id"
+    t.boolean  "up"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

@@ -93,7 +93,7 @@ class ResponseServices
   
   # Return relevant options for modal dialog
   def modal_options options_in = {}
-    klass = (options_in[:class] || "")+" modal-yield"
+    klass = (options_in[:class] || "") # +" modal-yield"
     options_in.merge class: klass
   end
   

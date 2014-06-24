@@ -11,6 +11,7 @@
 #= require_self
 #= require collection
 #= require_directory ../../../vendor/assets/javascripts/jquery
+#= require ../../../vendor/assets/javascripts/imagesloaded.pkgd.min
 #= require bootbox
 #= require history
 #= require masonry.pkgd

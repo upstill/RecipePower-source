@@ -110,7 +110,7 @@ class ApplicationController < ActionController::Base
   # All controllers displaying the collection need to have it setup 
   def setup_collection klass="Content", options={}
       @user ||= current_user_or_guest
-      @browser ||= @user.browser params
+      @browser = @user.browser params
       default_options = {}
       default_options[:clear_tags] = (params[:controller] != "collection") && (params[:controller] != "stream")
       setup_seeker klass, default_options.merge(options), params
@@ -146,14 +146,19 @@ class ApplicationController < ActionController::Base
           return { redirect: "/collection" }
         end
 
-        flash.now[:guide] = @seeker.guide
+        # flash.now[:guide] = @seeker.guide
         # If this is the first page, we replace the list altogether, wiring the list
         # to stream results. If it's a subsequent page, we just set up a stream to serve that page.
         if (@seeker.cur_page == 1)
-          { replacements: [
+          replacements = [
               view_context.flash_notifications_replacement,
               [ frame_selector, with_format("html") { render_to_string 'index', :layout=>false } ]
-          ]}
+          ]
+          unless @rp_old
+            replacements << [ '.collection-navtabs', with_format("html") { render_to_string partial: "collection/navtabs", :layout=>false } ]
+            replacements << [ '.collection-header', with_format("html") { render_to_string partial: "collection/header", :layout=>false } ]
+          end
+          { replacements: replacements }
         else
           {  streams: [ ['#seeker_results', {kind: @seeker.class.to_s, append: @seeker.cur_page.to_i>1}] ] }
         end
@@ -163,7 +168,7 @@ class ApplicationController < ActionController::Base
       format.html {
         params[:cur_page] = 1
         setup_collection klass, options
-        flash.now[:guide] = @seeker.guide
+        # flash.now[:guide] = @seeker.guide
         render :index
       }
       format.js do

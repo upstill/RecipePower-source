@@ -1,5 +1,6 @@
 <% logger.debug "Rendering recipe #{@recipe.id}" %>
 	<div class="collection-item <%= recipe_grid_element_class @recipe %>" >
+        <%= recipe_uncollect_button @recipe, @browser.selected %>
 		<%= recipe_image_div @recipe, "rcp_grid_pic_box" %>
         <%= recipe_grid_datablock @recipe %>
 		<div class="rcp_grid_element_footer">
@@ -8,9 +9,11 @@
 -->
           <div class="rcp_grid_element_icons" >
             <%= render "recipes/infolink" %>
+            <%= render partial: "votes/button", locals: { entity: @recipe, style: "h" } %>
           </div>
           <div class="rcp_grid_element_buttons" >
-            <%= render "recipes/golink" %><%= render "recipes/sharelink" %>
+            <%= render "recipes/golink" %>
+            <%= render "recipes/sharelink" %>
           </div>
 		</div>
 	</div>

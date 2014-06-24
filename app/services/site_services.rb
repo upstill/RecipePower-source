@@ -1,4 +1,5 @@
 require 'yaml'
+require 'reference.rb'
 
 class String
   def remove_non_ascii
@@ -252,6 +253,241 @@ end
 class SiteServices
   attr_accessor :site
 
+  def self.time_lookup ix=1
+    site_urls = [
+        'http://umamimart.com',
+        'http://www.simplyrecipes.com',
+        'http://www.cookinglight.com',
+        'http://www.taste.com.au',
+        'http://www.therecipedetective.com',
+        'http://spoonful.com',
+        'http://www.momswhothink.com',
+        'http://ohmyveggies.com',
+        'http://blog.countrytrading.co.nz',
+        'http://paperandsalt.org',
+        'http://www.bhg.com',
+        'http://www.afar.com',
+        'http://blogs.kqed.org',
+        'http://mideastfood.about.com',
+        'http://www.cooks.com',
+        'http://scrapbook.lacolombe.com',
+        'http://www.kitchenkonfidence.com',
+        'http://sfc.smallfarmcentral.com',
+        'http://framework.latimes.com',
+        'http://www.e-tingfood.com',
+        'http://www.injennieskitchen.com',
+        'http://www.theyummylife.com',
+        'http://www.goodhousekeeping.com',
+        'http://www.sprinklebakes.com',
+        'http://crockpot365.blogspot.com',
+        'http://racheleats.wordpress.com',
+        'https://www.goodeggs.com',
+        'http://www.maangchi.com',
+        'http://www.today.com/',
+        'http://www.vietworldkitchen.com',
+        'http://blog.onemedical.com',
+        'http://www.buzzfeed.com',
+        'http://vegetarian.about.com',
+        'http://thaifood.about.com',
+        'http://blogs.plos.org',
+        'http://www.dukandiet.com',
+        'http://blog.eladgil.com',
+        'http://maine.craigslist.org',
+        'http://www.bestyummyrecipes.com',
+        'https://www.teacherspayteachers.com',
+        'http://sweetpaul.typepad.com',
+        'https://plus.google.com/+MeatheadGoldwyn',
+        'http://www.grubstreet.com',
+        'http://m.allrecipes.com',
+        'http://chezpim.com',
+        'http://www.rachelcooks.com',
+        'http://www.sweetmarias.com',
+        'http://www.coolhunting.com',
+        'http://www.maps.org',
+        'http://bruery.blogspot.com',
+        'http://www.pastemagazine.com',
+        'http://www.playingwithfireandwater.com',
+        'http://amazingribs.com',
+        'http://edibleevolution.blogspot.com',
+        'http://tampopopress.blogspot.com',
+        'http://www.budgetsavvydiva.com',
+        'http://nourishedkitchen.com',
+        'http://iwanttocookthat.wordpress.com',
+        'http://oaxacaculture.com',
+        'http://www.newstatesman.com',
+        'http://www.yumsugar.com',
+        'http://www.americastestkitchenfeed.com',
+        'http://davescupboard.blogspot.com',
+        'http://simplyrecipes.com',
+        'http://flamingobear.com',
+        'http://norecipes.com',
+        'http://www.youtube.com',
+        'http://seidhr.blogspot.com',
+        'http://www.telegraph.co.uk',
+        'http://www.brooklynfarmhouse.com',
+        'http://mexicocooks.typepad.com',
+        'http://rollybrook.com',
+        'http://www.fabulousfoods.com',
+        'http://www.empellon.com',
+        'http://www.localforage.com',
+        'http://lidiasitaly.com',
+        'http://ricette.giallozafferano.it',
+        'http://www.redtri.com',
+        'http://www.mariquita.com',
+        'http://www.cookingissues.com',
+        'http://www.answers.com',
+        'http://blog.junbelen.com',
+        'http://www.bonappetit.com',
+        'http://www.kingarthurflour.com',
+        'http://www.food.com',
+        'http://www.cookthink.com',
+        'http://www.foodista.com',
+        'http://www.pbs.org',
+        'http://www.imbibemagazine.com',
+        'http://www.thebittenword.com',
+        'http://en.wikipedia.org',
+        'https://www.evernote.com',
+        'http://si.wsj.net',
+        'http://www.tasteofhome.com',
+        'http://m.saveur.com',
+        'http://ashevillecooks-homeedition.blogspot.com',
+        'http://www.boston.com',
+        'http://gourmetfood.about.com',
+        'http://tasteofbeirut.wpengine.netdna-cdn.com',
+        'http://www.goodeggs.com',
+        'http://labellecuisine.com'
+    ]
+    label = ""
+    index_name = index_table = nil
+    time = Benchmark.measure do
+      case ix
+        when 1
+          label = "Reference via Site"
+          index_table = :references
+          index_name = "references_index_by_url_and_type"
+          site_urls.each { |url|
+            site = Site.by_link url
+            ref = site.home
+          }
+        when 2
+          label = "Site via Reference"
+          index_table = :references
+          index_name = "references_index_by_url_and_type"
+          site_urls.each { |url|
+            ref = SiteReference.by_link url
+            site = ref.site
+          }
+        else
+          return false
+      end
+    end
+    index_status = ActiveRecord::Base.connection.index_name_exists?(index_table, index_name, false) ? "indexed" : "unindexed"
+    File.open("db_timings", 'a') { |file|
+      file.write(label+" (#{Time.new} #{index_status}): "+time.to_s+"\n")
+    }
+    true
+  end
+
+  def self.convert_all_to_references n=-1
+
+    Site.find(3419).merge(Site.find(3418)) if Site.exists?(3418)
+    Site.find(3419).merge(Site.find(1292)) if Site.exists?(1292)
+    Site.find(2062).merge(Site.find(1996)) if Site.exists?(1996)
+    Site.find(2081).merge(Site.find(1377)) if Site.exists?(1377)   # Culinate
+    [3419,2112,2122,3447].each { |id|
+      s = Site.find id
+      s.home = host_url (s.home || s.oldsite)
+      s.save
+    }
+    bad = []
+    Site.all[0..n].each { |site|
+      bad << site unless self.new(site).convert_to_reference
+    }
+    puts "Bad sites: "
+    bad.each { |bs|
+      puts "Site ##{bs.id} (home #{bs.oldsite}#{bs.subsite}) collides with..."
+      ref = SiteReference.find_or_initialize "#{bs.oldsite}#{bs.subsite}"
+      extant = ref.site
+      puts "...site ##{extant.id} (home #{extant.oldsite}#{extant.subsite})"
+    }
+    nil
+  end
+
+  def convert_to_reference
+    begin
+      # Start by doing QA on the site's attributes:
+      # -- :home
+      newhome = (@site.home || @site.oldsite)
+      newhome = valid_url(@site.subsite, newhome) unless @site.subsite.blank?
+      if newhome != (@site.home || @site.oldsite)
+        puts "Site ##{@site.id}"
+        puts "\toldsite: #{@site.oldsite}"
+        puts "\thome: #{@site.home}"
+        puts "\tsubsite: #{@site.subsite}"
+        puts "\t=> intended newhome: #{newhome}"
+        debugger
+      end
+      @site.home = newhome # Creates and initializes the reference
+      @site.sample = @site.sampleURL
+      @site.save
+    rescue => exc
+      debugger
+=begin
+      ref = SiteReference.find_or_initialize "#{@site.oldsite}#{@site.subsite}"
+      puts "Site ##{@site.id} (home #{@site.oldsite}#{@site.subsite}) is colliding with existing..."
+      extant = ref.site
+      puts "...site ##{extant.id} (home #{extant.oldsite}#{extant.subsite})"
+=end
+      # extant.merge @site
+      nil
+    end
+  end
+
+  # Confirm that the site references correspond to legacy sites
+  def self.test_conversion
+    Site.all.each { |site|  self.new(site).test_conversion }
+    Recipe.all.each { |recipe|
+      site_ref = SiteReference.by_link recipe.url
+      rcpsite = recipe.site # Find by standard means
+      if !site_ref || (recipe.site != site_ref.site)
+        puts "Recipe's site ##{rcpsite.id} (home #{rcpsite.oldsite}#{rcpsite.subsite}) doesn't match SiteReference..."
+        if site_ref
+          puts "...##{site_ref.id} url #{site_ref.url}"
+          puts "...to site ##{site_ref.affiliate.id} (home #{site_ref.affiliate.oldsite}#{site_ref.affiliate.subsite})"
+        else
+          puts "(none found)"
+        end
+        debugger
+      end
+    }
+  end
+
+  def test_conversion
+    ref_path = "#{@site.home || @site.oldsite}#{@site.subsite}"
+    site_ref = SiteReference.by_link ref_path
+    if !site_ref || site_ref.site != @site
+      debugger
+      x=2
+    end
+  end
+
+  def self.test_creation n=-1
+    # Destroy that pesky free-floating AmazingRibs site
+    ids = Site.all.map(&:id)[0..n]
+    ids.delete(3419)
+    ids.unshift(3419).each { |sid|
+      site = Site.find sid
+      attribs = site.attributes.slice "sample", "home", "subsite", "oldname", "ttlcut"
+      attribs["home"] ||= site.oldsite
+      referent_id = site.referent_id
+      # attribs["url"] = (uri = URI.join( attribs["home"], attribs["sample"])) && uri.to_s
+      site.destroy
+      s2 = Site.new(attribs)
+      s2.referent_id = referent_id
+      s2.save
+    }
+  end
+
   def initialize site
     @site = site
     site_finders # Preload the finders
@@ -324,7 +560,7 @@ class SiteServices
   def resolve(candidate)
     return candidate if candidate.blank? || (candidate =~ /^\w*:/)
     begin
-      URI.join(@site.site, candidate).to_s
+      URI.join(@site.oldsite, candidate).to_s
     rescue
       candidate
     end
@@ -339,7 +575,7 @@ class SiteServices
           ttl = md[1] || ttl.sub(re, '')
         end
       end
-      ttl.strip
+      ttl.gsub(/\s+/, ' ').strip
     end
   end
 
@@ -503,7 +739,7 @@ class SiteServices
     Site.all[100..110].each do |site|
       ss = self.new site
       puts "------------------------------------------------------------------------"
-      puts "site: "+site.site
+      puts "site: "+site.oldsite
       puts "home: "+site.home_page
       puts "sample: "+site.sampleURL
       if pagetags = fr.collect_results(site.sampleURL, [:URI, :Title, :Image], true, site)
@@ -748,7 +984,7 @@ class SiteServices
                       @site.save
                     when "Author Link"
                       # Add a reference to the author, if any
-                      @site.tags(User.super_id, tag_type: "Author").each { |author|
+                      @site.tags(User.super_id, tagtype: "Author").each { |author|
                         Reference.assert field_val, author, "Home Page"
                       }
                     when "Tags"

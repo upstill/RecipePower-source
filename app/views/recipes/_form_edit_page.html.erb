@@ -1,42 +1,44 @@
 <h3>Tag That Recipe!<%= recipe_popup @recipe %></h3>
 
 <%= form_for @recipe do |f| %>
-  <%= form_errors_helper f, @recipe %>
-  <%= pic_field @recipe, :picurl, f, true %>
-  <div class="recipe_fields_div">
-    <div class="recipe_tags_div" >
-       <%= f.label :tag_tokens, "Tags", :class=>"recipe_field_label" -%>
-       <%= f.text_field :tag_tokens, "data-pre" => @recipe.tags.map(&:attributes).to_json %>
+    <%= form_errors_helper f, @recipe %>
+    <div class="edit_recipe_field pic_picker_field">
+      <%= pic_field f, :picurl, :url %>
     </div>
-    <div class="recipe_comment_div" >
-       <%= f.label :comment, "Notes", :class=>"recipe_field_label" -%>
-       <br><%= f.text_area :comment, placeholder: "What are your thoughts about this recipe?" %>
+    <div class="recipe_fields_div">
+      <div class="recipe_tags_div">
+        <%= f.label :tag_tokens, "Tags", :class => "recipe_field_label" -%>
+        <%= f.text_field :tag_tokens, "data-pre" => @recipe.tags.map(&:attributes).to_json %>
+      </div>
+      <div class="recipe_comment_div">
+        <%= f.label :comment, "Notes", :class => "recipe_field_label" -%>
+        <br><%= f.text_area :comment, placeholder: "What are your thoughts about this recipe?" %>
+      </div>
+      <div class="recipe_url_div">
+        <%= f.label :url, "URL", :class => "recipe_field_label" -%>
+        <br><%= f.text_field :url %>
+      </div>
+      <div class="recipe_title_div">
+        <%= f.label :title, "Title", :class => "recipe_field_label" -%>
+        <% @recipe.check_title %>
+        <br><%= f.text_field :title %>
+      </div>
+      <div class="recipe_status_div">
+        <%= f.label :status, "Status: ", :class => "recipe_field_label" -%>
+        <%= f.select :status, Recipe.status_select %>
+        <%= f.check_box :private %>
+        <%= f.label :private, "Private (for my eyes only)" %>
+        <%# f.label :privacy, "Privacy: ",:class=>"recipe_field_label" -%>
+        <%# f.select :privacy, Recipe.privacy_select %>
+      </div>
+      <%= f.submit "Save", class: "btn btn-lg btn-success dialog-submit-button" %>
+      <%= f.submit "Cancel", class: "save-tags-button cancel" %>
     </div>
-    <div class="recipe_url_div" >
-       <%= f.label :url, "URL", :class=>"recipe_field_label" -%>
-       <br><%= f.text_field :url %>
-    </div>
-    <div class="recipe_title_div" >
-       <%= f.label :title, "Title", :class=>"recipe_field_label" -%>
-		<% @recipe.check_title %>
-       <br><%= f.text_field :title %>
-    </div>
-    <div class="recipe_status_div">
-       <%= f.label :status,  "Status: ",:class=>"recipe_field_label" -%>
-       <%= f.select :status,  Recipe.status_select %>
-	   <%= f.check_box :private %>
-	   <%= f.label :private, "Private (for my eyes only)" %>
-       <%# f.label :privacy, "Privacy: ",:class=>"recipe_field_label" -%>
-       <%# f.select :privacy, Recipe.privacy_select %>
-    </div>
-    <%= f.submit "Save", class: "btn btn-lg btn-success dialog-submit-button" %>
-    <%= f.submit "Cancel", class: "save-tags-button cancel" %>
-  </div>
 <% end %>
 <br class="clear">
 <% if permitted_to? :remove, @recipe %>
-  <%= button_to "Remove From My Collection", remove_recipe_path(@recipe), class: "save-tags-button" %>
+    <%= button_to "Remove From My Collection", remove_recipe_path(@recipe), class: "save-tags-button" %>
 <% end %>
 <% if permitted_to? :destroy, @recipe %>
-  <%= button_to "Destroy this Recipe", recipe_path(@recipe), :method => :delete, class: "save-tags-button", :confirm => "This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" %>
+    <%= button_to "Destroy this Recipe", recipe_path(@recipe), :method => :delete, class: "save-tags-button", :confirm => "This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" %>
 <% end %>
