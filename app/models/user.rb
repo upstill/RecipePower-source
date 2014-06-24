@@ -369,11 +369,7 @@ public
 
   # Make sure we have this particular user (who had better be in the seed list)
   def self.by_name (name)
-      begin
-          self.where("username = ?", name.to_s).first
-      rescue Exception => e
-          nil
-      end
+    self.where("username = ?", name.to_s).first
   end
   
   # Return a 2-array of 1) the list of possible roles, and 2) the current role,
