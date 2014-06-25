@@ -2,7 +2,8 @@ RP.state = RP.state || {}
 
 jQuery ->
 	# $(window).on 'window.onpopstate', RP.state.check_pop
-	window.onpopstate = RP.state.check_hash
+	# window.onpopstate = RP.state.check_hash
+	window.onload = RP.state.check_hash
 	$(window).on 'ajax:success', RP.state.onAJAXSuccess
 	if jQuery.browser.msie
 		window.onhashchange = RP.state.check_hash;

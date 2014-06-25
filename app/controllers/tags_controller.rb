@@ -7,13 +7,6 @@ class TagsController < ApplicationController
     @Title = "Tags"
     seeker_result Tag, 'div.tag_list' # , clear_tags: true
   end
-  
-=begin
-  def query
-    @Title = "Tags"
-    seeker_result Tag, 'div.tag_list'
-  end
-=end
 
   # POST /tags
   # POST /tags.xml
@@ -64,22 +57,19 @@ class TagsController < ApplicationController
   #           it can't be found, modulo normalization
   def match
       @Title = "Tags"
-      @tabindex = params[:tabindex].to_i # params[:tabindex] ? params[:tabindex].to_i : (session[:tabindex] || 0)
-      # session[:tabindex] = @tabindex
-      # Get tagtype directly from tagtype parameter, or indirectly from tabindex (or leave it nil)
-      tagtype = (params[:tagtype] && params[:tagtype].to_i) || 
-                (params[:tagtypes] && params[:tagtypes].split(',').collect{ |t| t.to_i} ) ||
-                (params[:tabindex] && @tabindex)
-      # If a tagtype is asserted AND type 0 is admissable, search on an array of types
-      tagtype = [0, tagtype].flatten if params[:untypedOK] && tagtype
       matchstr = params[:q] || params[:term] || ""
       matchopts = {
           userid: params[:user_id] || (current_user && current_user.id) || User.guest_id,
-          tagtype: tagtype,
           assert: (params[:makeormatch] == "true"),
           partition: true,
           fold: !params[:verbose]
       }
+      if params[:tagtype]
+        params[:tagtype] << ",0" if params[:untypedOK]
+        matchopts[:tagtype] = params[:tagtype].split(',').map(&:to_i)
+      elsif params[:tagtype_x]
+        matchopts[:tagtype_x] = params[:tagtype_x].split(',').map(&:to_i)
+      end
       @taglist = Tag.strmatch(matchstr, matchopts)
       # When searching over more than one type, we can disambiguate by showing the type of the resulting tag
       showtype = params[:showtype] # tagtype.nil? || (tagtype.is_a?(Array) && (tagtype.size>1))

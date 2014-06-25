@@ -24,7 +24,7 @@
           <p class="hide-if-empty"><%= present_field_wrapped "rcpDescription" %></p>
         </div>
         <div class="panel-body">
-          <%= show_tags ["Ingredient_tags", ["Role_tags", "Produces"], "Genre_tags", "Occasion_tags", "Channel_tags", "Process_tags", "Tool_tags", "Other Tag_tags"] %>
+          <%= show_tags ["Ingredient_tags", ["Role_tags", "Produces"], "Genre_tags", "Occasion_tags", "Process_tags", "Tool_tags", "Other Tag_tags", ["Collection_tags", "My Collection(s)"], ["Channel_tags", "Public Collection(s)"] ] %>
         </div>
       </div>
       <% if params[:accept_invitation_link] %>

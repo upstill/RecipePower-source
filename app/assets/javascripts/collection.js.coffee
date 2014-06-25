@@ -53,6 +53,15 @@ collection_onload = () ->
 	# checkForLoading ".stuffypic"
 	RP.rcp_list.onload()
 	RP.collection.justify()
+	$('a.collection_selection').click (event) ->
+		RP.collection.update { selected: this.id }
+		event.preventDefault()
+
+	# Arm the dropdown menus for selecting collection
+	$('ul.nav li.dropdown').hover ->
+		$(this).find('.dropdown-menu').stop(true, true).delay(200).fadeIn(500)
+	, ->
+		$(this).find('.dropdown-menu').stop(true, true).delay(200).fadeOut(500)
 
 RP.collection.tagchange = () ->
 	formitem = $('form.query_form')

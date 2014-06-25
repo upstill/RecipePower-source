@@ -4,7 +4,7 @@ ruby '1.9.3'
 gem 'rails', '~> 4.0' # '3.2.11' #
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
 # gem 'rails4_upgrade'
-gem 'rails_12factor', group: :production
+gem 'rails_12factor', :group => [ :production, :staging ]
 
 # add these gems to help with the transition:
 gem 'protected_attributes'
@@ -44,7 +44,7 @@ gem 'delayed_job_active_record' # , git: 'git://github.com/collectiveidea/delaye
 gem 'daemons'
 gem 'hirefire-resource'
 gem 'rspec-rails', :group => [:test, :development]
-#  gem 'debugger', :group => [:test, :development]
+# gem 'debugger', :group => [:test, :development]
 gem 'awesome_nested_set'
 gem 'redcarpet'
 gem 'content_for_in_controllers'

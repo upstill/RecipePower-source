@@ -1,0 +1,61 @@
+<% if true %>
+  <ul class="nav nav-tabs collection-navtabs">
+    <%= collection_dropdown :personal %>
+    <%= collection_dropdown :friends %>
+    <%= collection_dropdown :public %>
+  </ul>
+<% else %>
+    <ul class="nav nav-tabs">
+      <li class="dropdown active">
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#">            Personal<span class="caret"></span>          </a>
+        <ul class="dropdown-menu">
+          <li>
+            <a href="#">Now Cooking</a>
+          </li>
+          <li>
+            <a href="#">Keepers</a>
+          </li>
+          <li>
+            <a href="#">To Try</a>
+          </li>
+          <li>
+            <a href="#">Custom</a>
+          </li>
+          <li>
+            <a href="#">All My Cookmarks</a>
+          </li>
+          <li>
+            <a href="#">Recently Viewed</a>
+          </li>
+          <li>
+            <a href="#">New Collection...</a>
+          </li>
+        </ul>
+      </li>
+      <li class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#">            Friends<span class="caret"></span>          </a>
+        <ul class="dropdown-menu">
+          <li>
+            <a href="#">Friend1</a>
+          </li>
+          <li>
+            <a href="#">Make a Friend...</a>
+          </li>
+          <li>
+            <a href="#">All Friends' Recipes</a>
+          </li>
+        </ul>
+      </li>
+      <li class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#">            Public <span class="caret"></span>          </a>
+        <ul class="dropdown-menu">
+          <li>
+            <a href="#">Channel1</a>
+          </li>
+          <li>
+            <a href="#">Other...</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+<% end %>

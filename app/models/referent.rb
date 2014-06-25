@@ -49,7 +49,7 @@ class Referent < ActiveRecord::Base
     # before_save :ensure_expression
     after_save :ensure_tagtypes
 
-    def merge other
+    def merge other, nuke_it=true
       return false if type != other.type
       puts "Merging '"+name+"' (#{children.count} children) with '"+other.name+"' (#{other.children.count} children):"
       other.children.each { |child| children << child }
@@ -57,10 +57,15 @@ class Referent < ActiveRecord::Base
       other.expressions.each { |expr| self.express expr.tag }
       other.recipes.each { |rcp| self.recipes << rcp }
       other.references.each { |rfc| self.references << rfc }
-      self.description = other.description if self.description.blank?
+      other.channels.each { |channel| self.channels << channel }
+      if (self.is_a? ChannelReferent) && (other_user = other.associate)
+        # When merging channels, the mergee's user's data, including recipes, need to be associated with this channel's user
+        user.merge other_user
+      end
+      self.description = other.description if description.blank?
       self.save
-      other.destroy
-      Referent.find self.id
+      other.destroy if nuke_it
+      self.reload
     end
     
     # Callback before destroying this referent, to fix any tags that use it as primary meaning
@@ -421,7 +426,7 @@ class SourceReferent < Referent ;
 end  
 
 class ChannelReferent < Referent ; 
-  has_one :user    
+  has_one :user, :dependent => :destroy
   attr_accessible :user, :tag_token, :tag_tokens, :user_attributes
   accepts_nested_attributes_for :user
   
@@ -466,7 +471,9 @@ class ChannelReferent < Referent ;
   def notice_resource(resource)
     resource.kind_of?(Recipe) && user && (resource.touch(true, user.id))
   end
-  
+
+  # This is a pre-validation check on the tag selected for a channel. The user can either select an existing tag
+  # of any type (except Channel), or type a new tag, in which case a new tag of type Channel is created.
   # For a channel based on another class of referent, the tag must have an associated referent, or
   # at least have a type so that a referent can be created.
   # For a freestanding channel, the tag CANNOT have an existing type (other than 'unclassified')
@@ -479,30 +486,16 @@ class ChannelReferent < Referent ;
       # self.canonical_expression = self.expressions.first.tag unless self.canonical_expression || self.expressions.empty?
       # user.username = canonical_expression.name
       user.username = tag.name
-      if @dependent # We're saving from editing
-          if @dependent == "1"
-              # The tag needs to be a type OTHER than 'unclassified' or 'Channel'
-              if [0,11].include? tag.typenum
-                  errors.add(:tags, "If you want a channel based on another type, you need to give it a name from that type. #{tag.name} is a #{tag.typename}")
-              end
-          elsif [0,11].include? tag.typenum
-              # Since we're not dependent, we ensure we have a tag and make ourself our own channel
-              express tag
-              channels << self
-          else
-              # Error: channel is not dependent on another type
-              errors.add(:tags, "You're giving this channel a name that already exists for a #{tag.typename}. Either create the channel with a unique name, or make the channel Dependent.")
-          end
+      if [0,11].include? tag.typenum
+        express tag
+        channels << self
       end
   end
 
-  # after_save method to correct the channel's user's email address
+  # after_save method to direct the primary key's referent hither and correct the channel's user's email address
   def fix_user
     # Need to make sure the tag is linked to self
-    tag = self.canonical_expression
-    if @dependent == "1"
-      # We're coming out of editing. Now that we're saved, it's safe to
-      # add ourself to the channels of the (foreign) tag
+    if (tag = self.canonical_expression) && (tag.typenum != 11)
       ref = Referent.express tag, tag.typenum
       ref.channels << self
       ref.save

@@ -1,4 +1,5 @@
 require 'yaml'
+require 'reference.rb'
 
 class String
   def remove_non_ascii
@@ -176,7 +177,7 @@ class PageTags
   private
 
   def initialize (url, site, finders, do_all=nil, verbose = true)
-    @nkdoc = Nokogiri::HTML(open url)
+    @nkdoc = Nokogiri::HTML(open normalize_url(url))
     @finderset = finders
     @results = {}
     SiteServices.data_choices().each { |label| @results[label] = [] }
@@ -252,6 +253,26 @@ end
 class SiteServices
   attr_accessor :site
 
+  def self.test_lookup n=-1
+    Site.all[0..n].map(&:id).each { |id| self.test_lookup_by_id id }
+    nil
+  end
+
+  def self.test_lookup_by_id id
+    s1 = Site.find id
+    s1.recipes.each { |rcp|
+      s2 = rcp.site # SiteReference.lookup_site rcp.url
+      if s2 != s1
+        puts "Recipe ##{rcp.id} #{rcp.url}..."
+        puts "...from site ##{s1.id} (#{s1.reference.url}) finds another site:"
+        puts "\t... site ##{s2.id} (#{s2.reference.url})"
+        canon = SiteReference.canonical_url(rcp.url)
+        puts "\t... due to Reference(s) off of canonical link #{canon}:"
+        SiteReference.lookup(canon).each { |sr| puts "\t\t##{sr.id} with url #{sr.url}" }
+      end
+    }
+  end
+
   def initialize site
     @site = site
     site_finders # Preload the finders
@@ -324,7 +345,7 @@ class SiteServices
   def resolve(candidate)
     return candidate if candidate.blank? || (candidate =~ /^\w*:/)
     begin
-      URI.join(@site.site, candidate).to_s
+      URI.join(@site.home, candidate).to_s
     rescue
       candidate
     end
@@ -339,7 +360,7 @@ class SiteServices
           ttl = md[1] || ttl.sub(re, '')
         end
       end
-      ttl.strip
+      ttl.gsub(/\s+/, ' ').strip
     end
   end
 
@@ -350,7 +371,7 @@ class SiteServices
 
   def test_finders(url = nil)
     fr = FinderResults.new @site, site_finders
-    fr.collect_results url || @site.sampleURL
+    fr.collect_results url || @site.sample
     self.site_finders = fr.revise_interactively
     case get_input("Any finder to add ([yY]: yes, [qQ]: quit without saving)? ")
       when "y", "Y"
@@ -377,7 +398,7 @@ class SiteServices
       finder[k] = v.to_s
     end
     fr = FinderResults.new @site, [finder]
-    fr.collect_results @site.sampleURL
+    fr.collect_results @site.sample
     self.site_finders = (self.site_finders + fr.revise_interactively)
     @site.save
   end
@@ -392,10 +413,10 @@ class SiteServices
   end
 
   def scrape
-    extractions = extract_from_page(@site.sampleURL)
+    extractions = extract_from_page(@site.sample)
     puts "Site # #{@site.id.to_s}"
     puts "\tname: #{@site.name}"
-    puts "\thome: (#{@site.home_page})"
+    puts "\thome: (#{@site.home})"
     puts "\tsubsite: (#{@site.subsite})"
     puts "\tlogo: (#{@site.logo})"
     extractions.each { |k, v| puts "\t\t#{k.to_s}: #{v}" }
@@ -440,7 +461,7 @@ class SiteServices
       sought = sought+1
 
       # Probe the site's sample URL for validity or relocation
-      test_url = site.sampleURL
+      test_url = site.sample
       puts "Cracking "+test_url
       if !(testback = test_link(test_url))
         bogus_in << test_url
@@ -503,16 +524,15 @@ class SiteServices
     Site.all[100..110].each do |site|
       ss = self.new site
       puts "------------------------------------------------------------------------"
-      puts "site: "+site.site
-      puts "home: "+site.home_page
-      puts "sample: "+site.sampleURL
-      if pagetags = fr.collect_results(site.sampleURL, [:URI, :Title, :Image], true, site)
+      puts "home: "+site.home
+      puts "sample: "+site.sample
+      if pagetags = fr.collect_results(site.sample, [:URI, :Title, :Image], true, site)
         puts ">>>>>>>>>>>>>>> Results >>>>>>>>>>>>>>>>>>"
         [:URI, :Title, :Image].each do |label|
           label = label.to_s
           result = (pagetags.result_for(label) || "** Nothing Found **")
           found_or_not = ""
-          if label=="URI" && result!=site.sampleURL
+          if label=="URI" && result!=site.sample
             found_or_not = "(NO MATCH!)"
           end
           puts label+found_or_not+": "+result
@@ -529,7 +549,7 @@ class SiteServices
 
   def self.extract_from_page(url, spec={})
     extractions = {}
-    if !url.blank? && (site = Site.by_link url) && (ss = SiteServices.new(site))
+    if !url.blank? && (site = Site.find_or_create url) && (ss = SiteServices.new(site))
       extractions = ss.extract_from_page url, spec
     end
     extractions
@@ -567,11 +587,11 @@ class SiteServices
   end
 
   def stab_at_sample summ = {}
-    puts "Processing Site #{@site.sampleURL}"
+    puts "Processing Site #{@site.sample}"
     begin
-      @nkdoc = Nokogiri::HTML(open @site.sampleURL)
+      @nkdoc = Nokogiri::HTML(open @site.sample)
     rescue
-      puts "Error: couldn't open page '#{@site.sampleURL}' for analysis."
+      puts "Error: couldn't open page '#{@site.sample}' for analysis."
       recipe = @site.recipes.first
       puts "Processing Recipe #{recipe.url}"
       begin
@@ -664,7 +684,7 @@ class SiteServices
   # Use the extant finders on a site, interactively querying their appropriateness and potentially assigning
   # results (either extractors or hard values) to the site
   def poll_extractions url=nil
-    url ||= site.sampleURL
+    url ||= site.sample
     finders = all_finders
     begin
       pagetags = PageTags.new(url, @site, finders, true, false)
@@ -748,7 +768,7 @@ class SiteServices
                       @site.save
                     when "Author Link"
                       # Add a reference to the author, if any
-                      @site.tags(User.super_id, tag_type: "Author").each { |author|
+                      @site.tags(User.super_id, tagtype: "Author").each { |author|
                         Reference.assert field_val, author, "Home Page"
                       }
                     when "Tags"
@@ -788,7 +808,7 @@ class SiteServices
       name = site.name
       if (first_found ||= (site.id == id))
         puts "#{site_n}/#{nsites} >>>>>>>>>>>>>>>>>>>>>>"
-        puts site.sampleURL
+        puts site.sample
         puts "\tid: #{site.id}"
         puts "\tname: #{name}"
         puts "\tdescription: #{site.description}"

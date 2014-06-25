@@ -1,5 +1,6 @@
 require "Domain"
 require './lib/controller_utils.rb'
+require './lib/string_utils.rb'
 module ApplicationHelper
     include ActionView::Helpers::DateHelper
 
@@ -46,143 +47,6 @@ module ApplicationHelper
       link_to image_tag("preview.png", title:"Show the recipe in a popup window", class: "preview_button"), rcp.url, target: "_blank", class: "popup", id: "popup#{rcp.id.to_s}"        
   end
 
-  # Declare an image which gets resized to fit upon loading
-  # id -- used to define an id attribute for this picture (all fitpics will have class 'fitPic')
-  # float_ttl -- indicates how to handle an empty URL
-  # selector -- specifies an alternative selector for finding the picture for resizing
-  def page_fitPic(picurl, id = "")
-    idstr = "rcpPic"+id.to_s
-    picurl = "NoPictureOnFile.png" if picurl.blank?
-    # Allowing for the possibility of a data URI
-      begin
-    	  image_tag(picurl,
-          class: "fitPic",
-          id: idstr,
-          onload: 'doFitImage(event);',
-          alt: "Some Image Available")
-      rescue
-    	  image_tag("NoPictureOnFile.png",
-          class: "fitPic",
-          id: idstr,
-          onload: 'doFitImage(event);',
-          alt: "Some Image Available")
-      end
-#    end
-    end
-
-    # Same protocol, only image will be scaled to 100% of the width of its parent, with adjustable height
-    def page_width_pic(picurl, id = "", placeholder_image = "NoPictureOnFile.png", selector=nil)
-      logger.debug "page_width_pic placing #{picurl.blank? ? placeholder_image : picurl.truncate(40)}"
-      # "fitPic" class gets fit inside pic_box with Javascript and jQuery
-      idstr = "rcpPic"+id.to_s
-      selector = selector || "##{idstr}"
-      picurl = placeholder_image if picurl.blank?
-      # Allowing for the possibility of a data URI
-      #    if picurl.match(/^data:image/)
-      #      %Q{<img alt="Some Image Available" class="thumbnail200" id="#{idstr}" src="#{picurl}" >}.html_safe
-      #    else
-      begin
-        image_tag(picurl,
-                  style: "width: 100%; height: auto",
-                  id: idstr,
-                  alt: "Some Image Available")
-      rescue
-        image_tag(placeholder_image,
-                  style: "width: 100%; height: auto",
-                  id: idstr,
-                  alt: "Some Image Available")
-      end
-    end
-
-#  def pic_picker picurl, pageurl, id
-#    pic_picker_shell (pic_picker_contents picurl, pageurl, id)
-#  end
-
-  # Show an image that will resize to fit an enclosing div, possibly with a link to an editing dialog
-  # We'll need the id of the object, and the name of the field containing the picture's url
-  def pic_field(obj, attribute, form, is_local = true, fallback_img="NoPictureOnFile.png")
-    picurl = obj.send(attribute)
-    pic_area = is_local ?
-      page_width_pic(picurl, obj.id, fallback_img, "div.pic_preview img") :
-      page_fitPic(picurl, obj.id)
-    preview = content_tag(
-      :div, 
-      pic_area+form.text_field(attribute, rel: "jpg,png,gif", hidden: true, class: "hidden_text" ),
-      class: "pic_preview"
-    )
-    picker = is_local ?
-      content_tag(:div,
-            link_to( "Pick Picture", "/", :data=>"recipe_picurl;div.pic_preview img", :class => "pic_picker_golink hide")+
-            pic_picker_shell(obj), # pic_picker(obj.picurl, obj.url, obj.id), 
-            :class=>"pic_picker_link"
-            ) # Declare the picture-picking dialog
-    : ""
-    content_tag :div, preview + picker, class: "edit_recipe_field pic"
-  end
-  
-  # Declare the (empty) contents of the pic_picker dialog, embedding a url for the client to request the actual dialog data
-  def pic_picker_shell obj, contents=""
-    controller = params[:controller]
-    content_tag :div, 
-      contents, 
-      class: "pic_picker",
-      style: "display:none;",
-      "data-url" => "/#{controller}/#{obj.id}/edit?pic_picker=true"
-  end
-  
-  # Build a picture-selection dialog with the default url, url for a page containing candidate images, id, and name of input field to set
-  def pic_picker_contents
-    if @recipe
-      picurl = @recipe.picurl
-      pageurl = @recipe.url
-      id = @recipe.id
-    else 
-      picurl = @site.logo
-      pageurl = @site.sampleURL
-      id = @site.id
-    end
-    piclist = page_piclist pageurl
-    pictab = []
-    # divide piclist into rows of four pics apiece
-    picrows = ""
-    thumbNum = 0
-    # Divide the piclist of URLs into rows of four, accumulating HTML for each row
-    until piclist.empty?
-      picrows << "<tr><td>"+
-      piclist.slice(0..5).collect{ |url| 
-        idstr = "thumbnail"+(thumbNum = thumbNum+1).to_s
-        content_tag( :div,
-          image_tag(url, 
-            style: "width:100%; height: auto;", 
-            id: idstr, 
-            onclick: "RP.pic_picker.make_selection('#{url}')", class: "fitPic", onload: "doFitImage(event);",
-            alt: "No Image Available"),
-          class: "picCell")
-      }.join('</td><td>')+
-      "</td></tr>"
-      piclist = piclist.slice(6..-1) || [] # Returns nil when off the end of the array
-    end
-    picID = "rcpPic"+id.to_s
-    if picrows.empty?
-      tblstr = ""
-      prompt = "There are no pictures on the recipe's page, but you can paste a URL into the text box below."
-    else
-      tblstr = "<br><table>#{picrows}</table>"
-      prompt = "Pick one of the thumbnails, then click Okay.<br><br>Or, type or paste the URL of an image.".html_safe
-    end
-    content_tag( :div, 
-      page_width_pic( picurl, id, "NoPictureOnFile.png", "div.preview img" ),
-      class: "preview" )+
-    content_tag( :div, prompt, class: "prompt" )+
-    ( %Q{<br class="clear"> 
-        <input type="text" class="icon_picker" 
-        rel="jpg,png,gif" 
-        value="#{picurl}" />&nbsp;}+
-      link_to("Preview", "#", class: "image_preview_button" )+
-      tblstr      
-    ).html_safe      
-  end
-  
   def recipe_list_element_golink_class recipe
     "rcpListGotag"+@recipe.id.to_s    
   end
@@ -524,9 +388,13 @@ module ApplicationHelper
 
   # Set up a remote interaction via the submit javascript module
   def button_to_submit label, url, options={}
-    options[:class] = "btn btn-default btn-xs submit"
+    options[:class] = merge_word_strings options[:class], "btn btn-default btn-xs submit"
     options.merge! remote: true
-    link_to label, url, options
+    if options.delete :button_to
+      button_to label, url, options
+    else
+      link_to label, url, options
+    end
   end
 
   # Generic termination buttons for dialogs--or any other forms

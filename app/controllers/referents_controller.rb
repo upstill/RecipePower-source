@@ -52,7 +52,6 @@ class ReferentsController < ApplicationController
     @typeselections = Tag.type_selections
     @typeselections.shift
 
-    @is_channel = handlerclass==ChannelReferent # XXX Should be using a better signal
     respond_to do |format|
       # format.html { render (@tabindex==11 ? "new_channel.html.erb" : "new") }
       format.json { 
@@ -72,7 +71,6 @@ class ReferentsController < ApplicationController
       @referent_type = @referent.typenum
       @typeselections = Tag.type_selections
       @typeselections.shift
-      @is_channel = @referent.class==ChannelReferent
       smartrender
   end
 
@@ -88,18 +86,7 @@ class ReferentsController < ApplicationController
         handlerclass = "#{params[:type]}Referent".constantize # @@HandlersByIndex[@tabindex]
         param_key = ActiveModel::Naming.param_key(handlerclass)
         tagid = params[param_key][:tag_id]
-        if @is_channel = handlerclass == ChannelReferent
-            # This is a channel. It needs a referent to key off of.
-            if params[:dependent] == 1 
-                # We're not creating a free-standing channel, but piggy-backing
-                # on an existing referent.
-            else
-                # This is a channel that only gets events when its tag gets 
-                # applied to a recipe. In other words, it's a referent that 
-                # sends to itself.
-            end
-        end
-        params[param_key].delete :typenum
+        # params[param_key].delete :typenum
     end
     go = 0
     keyback = 0
@@ -145,25 +132,27 @@ class ReferentsController < ApplicationController
       @referent = handlerclass.new params[param_key]
     end
 
-    respond_to do |format|
-      if @referent && @referent.save
-        if @is_channel # Need to assign user's tags, but only after it has an id
-          @referent.user.update_attributes params[param_key][:user_attributes]
-        end
+    if @referent && @referent.save
+      if @referent.class==ChannelReferent # Need to assign user's tags, but only after it has an id
+        @referent.user.update_attributes params[param_key][:user_attributes]
+      end
+      respond_to do |format|
         format.html { redirect_to @referent.becomes(Referent), notice: 'Referent was successfully created/aliased.' }
-        format.json { 
+        format.json {
           if params[:tagid]
-            render json: [{ :title=>@referent.longname, :isLazy=>true, :key=>keyback, :isFolder=>false }], status: :created 
+            render json: [{:title => @referent.longname, :isLazy => true, :key => keyback, :isFolder => false}], status: :created
           else
-            render json: { done: true, notice: "Successfully created "+@referent.longname }, status: :created 
+            render json: {done: true, notice: "Successfully created "+@referent.longname}, status: :created
           end
         }
-      else
-        @typeselections = Tag.type_selections
-        @typeselections.shift
-        # format.html { render action: (@tabindex==11 ? "new_channel.html.erb" : "new") }
-        format.json { render json: @referent.errors, status: :unprocessable_entity }
       end
+    else
+      @typeselections = Tag.type_selections
+      @typeselections.shift
+      if name_error = @referent.errors["user.username"]
+        @referent.errors.add :tag_token, name_error[0]
+      end
+      smartrender :action => :new
     end
   end
   
@@ -186,10 +175,11 @@ class ReferentsController < ApplicationController
     # This is prepended to the string
     fix_expression_tokens params[param_key][:expressions_attributes], @referent.typenum
     respond_to do |format|
-      params[param_key].delete(:typenum)
+      # params[param_key].delete(:typenum)
       if @referent.update_attributes(params[param_key])
         format.html { redirect_to @referent.becomes(Referent), notice: 'Referent was successfully updated.' }
         format.json {
+          # The Channels table shows users (which are the outward face of channels)
           if @referent.class == ChannelReferent
             selector = "#listrow_#{@referent.user.id}"
             element = @referent.user
@@ -205,7 +195,6 @@ class ReferentsController < ApplicationController
         }
       else
         @referent.becomes(Referent)
-        @referent_type = @referent.typenum
         @typeselections = Tag.type_selections
         @typeselections.shift
         format.html { render action: "edit" }

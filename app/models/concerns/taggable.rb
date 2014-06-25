@@ -28,14 +28,17 @@ module Taggable
   end
   alias_method :"tagtxt=", :"tagstxt="
 
-  # Fetch the tags associated with the entity
-  def tags options = {}
-    if tt = options.delete(:tag_type)
+  # Fetch the tags associated with the entity, possibly with constraints of userid and type
+  def tags opts = {}
+    options = opts.clone # Don't muck with the options
+    if tt = options.delete(:tagtype)
       Tag.where id: tag_ids(options), tagtype: Tag.typenum(tt)
+    elsif nt = options.delete(:tagtype_x)
+      tags = Tag.where.not tagtype: Tag.typenum(nt)
+      tags.where( id: tag_ids(options))
     else
       Tag.where id: tag_ids(options)
     end
-
   end
   alias_method :tag, :tags
 
@@ -54,14 +57,20 @@ module Taggable
 
   # Set the tag ids associated with the current user
   def tag_ids= nids
+    if nids.is_a? Hash
+      owner = nids[:owner_id]
+      nids = nids[:tag_ids]
+    else
+      owner = tag_owner
+    end
     # Ensure that the user's tags are all and only those in nids
-    oids = tag_ids
+    oids = tag_ids owner_id: owner
     to_add = nids - oids
     to_remove = oids - nids
     # Add new tags as necessary
-    to_add.each { |tagid| Tagging.create(user_id: tag_owner, tag_id: tagid, entity_id: id, entity_type: self.class.name) }
+    to_add.each { |tagid| Tagging.create(user_id: owner, tag_id: tagid, entity_id: id, entity_type: self.class.name) }
     # Remove tags as nec.
-    to_remove.each { |tagid| Tagging.where(user_id: tag_owner, tag_id: tagid, entity_id: id, entity_type: self.class.name).map(&:destroy) } # each { |tg| tg.destroy } }
+    to_remove.each { |tagid| Tagging.where(user_id: owner, tag_id: tagid, entity_id: id, entity_type: self.class.name).map(&:destroy) } # each { |tg| tg.destroy } }
   end
   alias_method :"tag_id=", :"tag_ids="
 
@@ -72,35 +81,47 @@ module Taggable
   end
 
   # Write the virtual attribute tag_tokens (a list of ids) to
-  # update the real attribute tag_ids
-  def tag_tokens=(idstring)
-    self.tags =
-    TokenInput.parse_tokens(idstring) do |token| # parse_tokens analyzes each token in the list as either integer or string
+  # update the real attribute tag_ids. To apply constraints, the token string
+  # is passed as a member of a hash.
+  def tag_tokens= tokenstr
+    if tokenstr.is_a? Hash
+      constraints = tokenstr.clone
+      tokenstr = constraints.delete :tokenstr
+    else
+      constraints = {}
+    end
+    constraints[:userid] = tag_owner
+    constraints[:assert] = true
+    asserted =
+    TokenInput.parse_tokens(tokenstr) do |token| # parse_tokens analyzes each token in the list as either integer or string
       case token
       when Fixnum
         Tag.find token
       when String
-        Tag.strmatch(token, userid: tag_owner, assert: true)[0] # Match or assert the string
+        Tag.strmatch(token, constraints)[0] # Match or assert the string
       end
     end
-=begin
-This is the old functionality, now moved to token_input.rb
-    # The list may contain new terms, passed in single quotes
-    self.tags = idstring.split(",").map { |e| 
-      if(e=~/^\d*$/) # numbers (sans quotes) represent existing tags
-        Tag.find e.to_i
-      else
-        e.sub!(/^\'(.*)\'$/, '\1') # Strip out enclosing quotes
-        Tag.strmatch(token, userid: tag_owner, assert: true)[0] # Match or assert the string
-      end
-    }.compact.uniq
-=end
+    # If we're asserting tokens OF A PARTICULAR TYPE(S), we need to leave the other types untouched.
+    # We do this by augmenting the declared set appropriately
+    if constraints[:tagtype] # Restricting to certain types: don't touch the others
+      constraints[:tagtype_x] = constraints.delete :tagtype
+      self.tags = asserted + tags(constraints)
+    elsif constraints[:tagtype_x] # Excluding certain types => don't touch them
+      constraints[:tagtype] = constraints.delete :tagtype_x
+      self.tags = asserted + tags(constraints)
+    else
+      self.tags = asserted
+    end
   end
   alias_method :"tag_token=", :"tag_tokens="
 
   # Declare a data structure suitable for passing to RP.tagger.init
-  def tag_data typed=false
-    attribs = tags.collect { |tag| { id: tag.id, name: tag.typedname(typed) } }
-    { :pre => attribs, :hint => "Type your tag(s) for the recipe here" }.to_json
+  def tag_data options={}
+    data = { :hint => options.delete(:hint) || "Type your tag(s) here" }
+    data[:pre] = tags(options).collect { |tag| { id: tag.id, name: tag.typedname(options[:showtype]) } }
+    data[:query] = options.slice :verbose, :showtype
+    data[:query][:tagtype] = Tag.typenum(options[:tagtype]) if options[:tagtype]
+    data[:query][:tagtype_x] = Tag.typenum(options[:tagtype_x]) if options[:tagtype_x]
+    data.to_json
   end
 end

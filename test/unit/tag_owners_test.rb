@@ -61,6 +61,8 @@ class TagOwnershipTest < ActiveSupport::TestCase
         # Check that thing1 can see it
         t = Tag.strmatch(tagstr, userid: thing1id).first
         assert t, "Can't find co-owned local tag on creator"
+        # Check that unspecified user can't see it
+        assert_nil Tag.strmatch(tagstr).first, "Local tag should be invisible unless user specified"
         # Check that thing2 can't see it
         thing2id = users(:thing2).id
         assert_nil Tag.strmatch(tagstr, userid: thing2id).first, "New local tag should be invisible to other user"

@@ -56,7 +56,7 @@ class Thumbnail < ActiveRecord::Base
   # which may or may not match a previously cached one,
   # and may or may not have valid cached data
   def self.acquire(site, path)
-    if url = valid_url(site, path)
+    if url = valid_url(path, site)
       tn = Thumbnail.find_or_create_by url: url
       Delayed::Job.enqueue tn unless tn && tn.thumbdata
       tn

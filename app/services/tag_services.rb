@@ -114,4 +114,28 @@ class TagServices
     end
   end
 
+  def self.time_lookup ix=1
+    label = ""
+    index_name = index_table = nil
+    tag_ids = Tag.all.map(&:id)
+    time = Benchmark.measure do
+      case ix
+        when 1
+          label = "Tag via ID"
+          index_table = :tags
+          index_name = "tags_index_by_id"
+          tag_ids.each { |id|
+            name = Tag.find(id).name
+          }
+        else
+          return false
+      end
+    end
+    index_status = ActiveRecord::Base.connection.index_name_exists?( index_table, index_name, false) ? "indexed" : "unindexed"
+    File.open("db_timings", 'a') { |file|
+      file.write(label+" (#{Time.new} #{index_status}): "+time.to_s+"\n")
+    }
+    true
+  end
+
 end

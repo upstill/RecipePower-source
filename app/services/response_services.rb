@@ -93,7 +93,7 @@ class ResponseServices
   
   # Return relevant options for modal dialog
   def modal_options options_in = {}
-    klass = (options_in[:class] || "")+" modal-yield"
+    klass = (options_in[:class] || "") # +" modal-yield"
     options_in.merge class: klass
   end
   
@@ -183,8 +183,15 @@ class ResponseServices
         fullpath: URI::decode(@request.fullpath)
     }.merge elements
     dr[:format] = dr[:format].to_s
-    str = YAML::dump dr
-    @session[:deferred_request] = str
+    # str = YAML::dump dr
+    if dri = @session[:deferred_requests_id]
+      defreq = DeferredRequest.find dri
+      (defreq.requests << str).uniq!
+      defreq.save
+    else
+      @session[:deferred_requests_id] = DeferredRequest.create(:requests => [ dr ]).id
+    end
+    # @session[:deferred_request] = str
     dr
   end
 
@@ -243,12 +250,25 @@ class ResponseServices
   private
 
   def clear_pending_request
-    @session.delete :deferred_request
+    # @session.delete :deferred_request
+    if (dri = @session[:deferred_requests_id]) &&
+       (defreq = DeferredRequest.where(id: dri).first)
+      defreq.requests.pop
+      if defreq.requests.empty?
+        defreq.destroy
+        @session.delete :deferred_requests_id
+      else
+        defreq.save
+      end
+    end
   end
 
   def pending_request
-    if dr = @session[:deferred_request]
-      dr = YAML::load dr
+    # if dr = @session[:deferred_request]
+    if (dri = @session[:deferred_requests_id]) &&
+       (defreq = DeferredRequest.where(id: dri).first) &&
+       (dr = defreq.requests[-1])
+      # dr = YAML::load dr
       # Ensure that the target of the deferred request agrees with that of the present request
       dr[:fullpath] = assert_query URI::encode( dr[:fullpath]), :target => ('injector' if injector?)
       dr[:format] = dr[:format].to_sym

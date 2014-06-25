@@ -83,6 +83,12 @@ RP.getgo = (request, addr) ->
 			,"Cookmark", addr
 ###
 
+RP.event_target = (event) ->
+	if event && (typeof event.target == "object")
+		return event.target
+	else
+		return (event || window.event).currentTarget
+
 # get the function associated with a given string, even if the string refers to elements of nested structures.
 RP.named_function = (str) ->
 	if(str) 
@@ -103,6 +109,7 @@ RP.fire_triggers = ->
 	$('div.dialog.trigger').removeClass("trigger").each (ix, dlog) ->
 		RP.dialog.run dlog
 	$("a.trigger").removeClass("trigger").trigger "click"
+	$('a.preload').trigger "preload"
 
 # For the FAQ page: click on a question to show the associated answer
 RP.showhide = (event) ->
@@ -186,12 +193,8 @@ RP.post_error = ( jqXHR, dlog ) ->
 		catch e
 			# Not valid JSON. Maybe it's a page to go to?
 			if errtxt.match /^\s*<!DOCTYPE html>/ 
-				if newdlog = RP.dialog.extract_modal errtxt
-					parsage =
-						dlog: newdlog
-				else
-					parsage =  
-						page: errtxt 
+				parsage =
+					page: errtxt
 			else if errtxt.match /^\s*<form/ # Detect a form replacement
 				wrapper = document.createElement('div');
 				wrapper.innerHTML = errtxt;
@@ -235,13 +238,18 @@ RP.change = (event) ->
 		data.querydata[data.valueparam] = elmt.value
 	else
 		data.querydata.value = elmt.value
+	# Fire off an Ajax call notifying the server of the (re)classification
+	RP.submit.submit_and_process RP.build_request(data), "GET", data
+
+# Build a request string from a structure with attributes 'request' and 'querydata'
+RP.build_request = (data) ->
 	# Encode the querydata into the request string
 	str = []
 	for attrname,attrvalue of data.querydata
 		str.push(encodeURIComponent(attrname) + "=" + encodeURIComponent(attrvalue));
 	# Fire off an Ajax call notifying the server of the (re)classification
-	RP.submit.submit_and_process data.request+"?"+str.join("&"), "GET", data
-	
+	data.request+"?"+str.join("&")
+
 # Process response from a request. This will be an object supplied by a JSON request,
 # which may include code to be presented along with fields (how and area) telling how
 # to present it. The data may also consist of only 'code' if it results from an HTML request
@@ -257,7 +265,6 @@ RP.process_response = (responseData, dlog) ->
 			for replacement in replacements
 				$(replacement[0]).replaceWith replacement[1]
 				$(replacement[0]).trigger "load"
-			# RP.dialog.replace_modal dlog
 
 		if streams = responseData.streams
 			for stream in streams
@@ -274,14 +281,12 @@ RP.process_response = (responseData, dlog) ->
 
 		# 'dlog' gives a dialog DOM element to replace the extant one
 		if newdlog = responseData.dlog
-			if typeof newdlog == "string"
-				newdlog = RP.dialog.extract_modal newdlog # $(newdlog) # 
 			RP.dialog.replace_modal newdlog, dlog
 			supplanted = true
 
 		# 'code' gives HTML code, presumably for a dialog, possibly wrapped in a page
 		# If it's a page that includes a dialog, assert that, otherwise replace the page
-		if (code = responseData.code) && !supplanted = RP.dialog.supplant_modal dlog, code
+		if (code = responseData.code) && !supplanted = RP.dialog.replace_modal code, dlog
 				responseData.page ||= code
 			
 		if form = responseData.form

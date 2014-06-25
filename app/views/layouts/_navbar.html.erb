@@ -1,44 +1,75 @@
-<div class="navbar navbar-fixed-top navbar-inverse">
-  <div class="container">
-    <div class="navbar-header col-md-12">
-      <a href="#" class="navbar-brand">RecipePower</a>
-      <% if user_signed_in? %>
-          <div class="dropdown navbar-right pull-right" style="margin-top: 14px; margin-left:10px;">
-            <a class="dropdown-toggle navbar-inverse" data-toggle="dropdown" href="#">            <span class="handle text-on-black"><%= current_user.handle %>&nbsp;&or;</span>            </a>
-            <ul class="dropdown-menu">
-              <%= header_menu_items %>
-            </ul>
-          </div>
-      <% end %>
-      <div class="navbar-right" style="margin-top:15px;margin-right:10px;">
-        <div style="text-align: right;">
+<% unless @rp_old %>
+    <div class="navbar navbar-fixed-top navbar-inverse">
+      <div class="container">
+        <div class="navbar-header col-md-12">
+          <a href="#" class="navbar-brand">RecipePower:&nbsp;<span style="font-size:24px;color:#dddddd">Collections</span></a>
           <% if user_signed_in? %>
-              <% if params[:controller] == "collection" %>
-                  <%= link_to_modal "Add a Cookmark", new_recipe_path, class: "text-on-black" %>
+              <div class="dropdown navbar-right pull-right" style="margin-top: 14px; margin-left:10px;">
+                <a class="dropdown-toggle navbar-inverse" data-toggle="dropdown" href="#">            <span class="handle text-on-black"><%= current_user.handle %>&nbsp;&or;</span>            </a>
+                <ul class="dropdown-menu">
+                  <%= header_menu_items %>
+                </ul>
+              </div>
+          <% end %>
+          <div class="navbar-right" style="margin-top:15px;margin-right:10px;">
+            <div style="text-align: right;">
+              <% if user_signed_in? %>
+                  <% if params[:controller] == "collection" %>
+                      <%= link_to_modal "Add a Cookmark", new_recipe_path, class: "text-on-black" %>
+                  <% else %>
+                      <%= link_to "Collections", collection_path, class: "text-on-black" %>
+                  <% end %>
               <% else %>
-                  <%= link_to "Collections", collection_path, class: "text-on-black" %>
+                  <%= link_to_modal "Sign In", new_user_session_path, class: "text-on-black" %>
               <% end %>
-          <% else %>
-              <%= link_to_modal "Sign In", new_user_session_path, class: "text-on-black" %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+<% else %>
+    <div class="navbar navbar-fixed-top navbar-inverse">
+      <div class="container">
+        <div class="navbar-header col-md-12">
+          <a href="#" class="navbar-brand">RecipePower</a>
+          <% if user_signed_in? %>
+              <div class="dropdown navbar-right pull-right" style="margin-top: 14px; margin-left:10px;">
+                <a class="dropdown-toggle navbar-inverse" data-toggle="dropdown" href="#">            <span class="handle text-on-black"><%= current_user.handle %>&nbsp;&or;</span>            </a>
+                <ul class="dropdown-menu">
+                  <%= header_menu_items %>
+                </ul>
+              </div>
+          <% end %>
+          <div class="navbar-right" style="margin-top:15px;margin-right:10px;">
+            <div style="text-align: right;">
+              <% if user_signed_in? %>
+                  <% if params[:controller] == "collection" %>
+                      <%= link_to_modal "Add a Cookmark", new_recipe_path, class: "text-on-black" %>
+                  <% else %>
+                      <%= link_to "Collections", collection_path, class: "text-on-black" %>
+                  <% end %>
+              <% else %>
+                  <%= link_to_modal "Sign In", new_user_session_path, class: "text-on-black" %>
+              <% end %>
+            </div>
+          </div>
+          <% if @query_path %>
+              <form class="navbar-form navbar-left form-search query_form" action="<%= @query_path %>" data-format="<%= @query_format %>" >
+                <div class="search-query form-group collection_query_tokens tags">
+                  <%= token_input_field @seeker,
+                                        rows: 1,
+                                        placeholder: "Seek and ye shall find...",
+                                        autofocus: true,
+                  data: { :"on-add" => "RP.collection.tagchange",
+                          :"on-delete" => "RP.collection.tagchange",
+                          :hint => "", # "Search the collection by typing terms here",
+                          placeholder: "Seek and ye shall find...",
+                          :"no-results-text" => "No matching tag found; hit Enter to search with text" } %>
+                  <!--<input type="text" class="form-control" placeholder="Seek and Ye Shall Find">-->
+                </div>
+              </form>
           <% end %>
         </div>
       </div>
-      <% if @query_path %>
-          <form class="navbar-form navbar-left form-search query_form" action="<%= @query_path %>" data-format="<%= @query_format %>" >
-            <div class="search-query form-group collection_query_tokens tags">
-              <%= token_input_field @seeker,
-                                    rows: 1,
-                                    placeholder: "Seek and ye shall find...",
-                                    autofocus: true,
-              data: { :"on-add" => "RP.collection.tagchange",
-                      :"on-delete" => "RP.collection.tagchange",
-                      :hint => "", # "Search the collection by typing terms here",
-                      placeholder: "Seek and ye shall find...",
-                      :"no-results-text" => "No matching tag found; hit Enter to search with text" } %>
-              <!--<input type="text" class="form-control" placeholder="Seek and Ye Shall Find">-->
-            </div>
-          </form>
-      <% end %>
     </div>
-  </div>
-</div>
+<% end %>

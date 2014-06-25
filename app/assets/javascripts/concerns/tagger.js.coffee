@@ -19,7 +19,14 @@ RP.tagger.setup = (elmt) ->
 	data = $(elmt).data() || {}
 	request = data.request || "/tags/match.json"
 	if data.query
-		request += "?"+data.query # encodeURIComponent(data.query)
+		qstr = "?"
+		if typeof data.query == 'string'
+			qstr += data.query
+		else
+			for attrname, attrvalue of data.query
+				qstr += "&" unless qstr=="?"
+				qstr += encodeURIComponent(attrname) + "=" + encodeURIComponent(attrvalue)
+		request += qstr # encodeURIComponent(data.query)
 	options = 
 		crossDomain: false,
 		noResultsText: data.noResultsText || "No existing tag found; hit Enter to make it a new tag",

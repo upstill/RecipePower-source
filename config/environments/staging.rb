@@ -33,6 +33,9 @@ RP::Application.configure do
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   # config.force_ssl = true
 
+  # config.logger = Logger.new(STDOUT)
+  # config.logger.level = Logger::DEBUG # use logger.level, not log_level
+
   # See everything in the log (default is :info)
   config.log_level = :debug
 
@@ -53,7 +56,7 @@ RP::Application.configure do
   config.action_mailer.smtp_settings = {
     :address              => ENV['MAILGUN_SMTP_SERVER'],
     :port                 => ENV['MAILGUN_SMTP_PORT'],
-    :domain               => 'strong-galaxy-5765.herokuapp.com',
+    :domain               => 'strong-galaxy-5765-74.herokuapp.com',
     :user_name            => ENV['MAILGUN_SMTP_LOGIN'],
     :password             => ENV['MAILGUN_SMTP_PASSWORD'],
     :authentication       => 'plain',
@@ -74,7 +77,7 @@ RP::Application.configure do
   config.action_mailer.smtp_settings = {
     :address              => ENV['MAILGUN_SMTP_SERVER'],
     :port                 => ENV['MAILGUN_SMTP_PORT'],
-    :domain               => 'strong-galaxy-5765.herokuapp.com',
+    :domain               => 'strong-galaxy-5765-74.herokuapp.com',
     :user_name            => ENV['MAILGUN_SMTP_LOGIN'],
     :password             => ENV['MAILGUN_SMTP_PASSWORD'],
     :authentication       => 'plain',

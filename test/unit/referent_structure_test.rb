@@ -101,6 +101,14 @@ class ReferentStructureTest < ActiveSupport::TestCase
     assert_equal r2.references.first, rfc2, "Reference not added to referent"
     assert_equal rfc2.referents.first, r2, "Referent not added to reference"
 
+    crf1 = create :channel_referent, tag_token: "crf1"
+    crf2 = create :channel_referent, tag_token: "crf2"
+    crf3 = create :channel_referent, tag_token: "crf3"
+    r1.channels << crf1
+    r1.channels << crf2
+    r2.channels << crf2
+    r2.channels << crf3
+
     ######### Okay, we're all set up. Ready to make changes
 
     assert_equal "It's me, Cow Cheese!", r2.description, "Description didn't survive"
@@ -114,6 +122,22 @@ class ReferentStructureTest < ActiveSupport::TestCase
     assert_equal r1.recipes.last, rcp2, "Recipe didn't make it across merge"
     assert_equal r1.references.first, rfc1, "Reference didn't survive merge"
     assert_equal r1.references.last, rfc2, "Reference didn't make it across merge"
+    assert_equal 3, r1.channels.count, "Channels not copied correctly"
+    assert_equal crf3, r1.channels.last, "crf3 didn't make it over merge."
+
+  end
+
+  test "Merge happens correctly with channels" do
+    crf1 = create :channel_referent, tag_token: "crf1"
+    crf2 = create :channel_referent, tag_token: "crf2"
+    crf3 = create :channel_referent, tag_token: "crf3"
+
+    crf1.merge crf2, false
+    crf1.merge crf3, false
+    assert_equal 3, crf1.channels.count, "Merging channels didn't update channels"
+    crf2.destroy
+    crf3.destroy
+    assert_equal 1, crf1.channels.count, "Destroyed channels survive in merger channel"
   end
 
   test "Destroying a referent leaves components untouched" do
@@ -168,11 +192,11 @@ class ReferentStructureTest < ActiveSupport::TestCase
   end
 
   test "Destroying referent doesn't leave elements dangling" do
-
+    # Check that user of a channel referent is gone
   end
 
   test "Marge of two referents has the right channel(s)" do
-
+    # Check that user's recipes get copied over for channel referent
   end
 
   test "Merge of referents has the right reference(s)" do

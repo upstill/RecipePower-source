@@ -8,8 +8,7 @@ end
 
 # Try to make sense out of a given path in the context of another url.
 # Return either a valid URL or nil
-def valid_url(url, path=nil)
-  path ||= ""
+def valid_url(path, url)
   if validate_link(path) && good = test_link(path) # either the original URL or a replacement are good
     return (good.class == String) ? good : path
   elsif url
@@ -32,8 +31,9 @@ def header_result(link, resource=nil)
 
     req = Net::HTTP.new(url.host, url.port)
     partial = url.path + ((query = url.query) ? "?#{query}" : "")
-    code = req.request_head(partial).code
-    (code == "301") ? req.request_head(partial).header["location"] : code.to_i
+    code = req.request_head(partial).code.to_i
+    # Redirection codes
+    [301, 302].include?(code) ? req.request_head(partial).header["location"] : code
   rescue Exception => e
     # If the server doesn't want to talk, we assume that the URL is okay, at least
     return 401 if e.kind_of?(Errno::ECONNRESET) || url
@@ -42,25 +42,70 @@ end
 
 def safe_parse(url)
   begin
-    URI.parse(url) if url
+    uri = url && URI.parse(url)
   rescue Exception => e
-    return nil
+    uri = nil
+  end
+
+  if url && !uri  # Failed with exception => Try to fix the fragment, which may have bad characters
+    spl = url.split('#')
+    if (spl.size > 1) && ((refrag = URI::encode(spl[-1])) != spl[-1])
+      begin
+        spl[-1] = refrag
+        uri = URI.parse spl.join('#')
+      rescue Exception => e
+        uri = nil
+      end
+    end
+  end
+  uri
+end
+
+# Since URI can't handle diacriticals in the fragment, encode them
+def fix_fragment url
+  spl = url.split('#')
+  if spl.size > 1
+    spl[-1] = URI::encode(spl[-1])
+    spl.join('#')
+  else
+    url
   end
 end
 
-def normalize_url(url)
-  (uri = safe_parse(url)) && uri.normalize.to_s
+def sanitize_url url
+  url.strip.gsub(/\{/, '%7B').gsub(/\}/, '%7D').gsub(/\%23/, '#' )
+end
+
+# Return nil if anything is amiss, including nil or empty url
+def normalize_url url
+  ((uri = safe_parse(sanitize_url url)) && uri.normalize.to_s) unless url.blank?
+end
+
+# Parse the url and return the protocol, host and port portion
+def host_url url
+  if (uri = safe_parse(sanitize_url url)) && !uri.host.blank?
+    uri.path = ""
+    uri.query = uri.fragment = nil
+    uri.normalize.to_s
+  end
+end
+
+# Test that a (previously normalized) url works, possibly relative to a secondary href.
+def test_url normalized, href=nil
+  if !(valid_url = test_link(normalized) ||
+      ((normalized =~ /^https/) && test_link(normalized.sub! /^https/, 'http')))
+    # Try to construct a valid normalized by merging the href and the url
+    if (uri = safe_parse(href)) && (normalized = uri.normalize.merge(normalized).to_s)
+      valid_url = test_link(normalized) ||
+          ((normalized =~ /^https/) && test_link(normalized.sub! /^https/, 'http'))
+    end
+  end
+  ((valid_url.kind_of? String) ? valid_url : normalized) if valid_url
 end
 
 def normalize_and_test_url(url, href=nil)
   return nil unless normalized = normalize_url(url)
-  if !(valid_url = test_link(normalized))
-    # Try to construct a valid url by merging the href and the url
-    if (uri = safe_parse(href)) && (normalized = uri.normalize.merge(normalized).to_s)
-      valid_url = test_link normalized
-    end
-  end
-  ((valid_url.kind_of? String) ? valid_url : normalized) if valid_url
+  test_url normalized, href
 end
 
 # Confirm that a proposed URL (with an optional subpath) actually has content at the other end
@@ -83,7 +128,7 @@ def test_link(link, resource=nil)
 end
 
  # Return a list of image URLs for a given page
-def page_piclist(url)
+def page_piclist url
   begin 
     return [] unless (ou = open url) && (doc = Nokogiri::HTML(ou))
   rescue Exception => e

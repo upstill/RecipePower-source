@@ -1,0 +1,22 @@
+<%= form_for(@tag, :url => {:controller => "collection", :action => (@tag.id ? :update : :create), :id => @tag}) do |f| %>
+    <%= modal_body do %>
+        <% if @tag.errors.any? %>
+            <div id="error_explanation">
+              <h2><%= pluralize(@tag.errors.count, "error") %> prohibited this tag from being saved:</h2>
+              <ul>
+                <% @tag.errors.full_messages.each do |msg| %>
+                    <li><%= msg %></li>
+                <% end %>
+              </ul>
+            </div>
+        <% end %>
+        <div class="field">
+          <%= f.label :name %>
+          <br/>
+          <%= f.text_field :name %>
+        </div>
+    <% end %>
+    <%= modal_footer do %>
+        <%= form_actions f, submit_label: (@tag.id ? "Rename Collection" : "Create Collection"), class: "btn btn-success", style: "margin-top: 10px;" %>
+    <% end %>
+<% end %>

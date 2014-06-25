@@ -1,6 +1,12 @@
 FactoryGirl.define do
   factory :tag
 
+  factory :user do
+    username "foo"
+    password "foobar"
+    email { "#{username}@example.com" }
+  end
+
   factory :ingredient_tag, class: :tag do
     typenum 4
   end
@@ -27,11 +33,26 @@ FactoryGirl.define do
   end
 
   factory :recipe do
-    title "Some cool dish"
-    url "http://www.davidlebovitz.com/2008/11/rosy-poached-quince/"
+    # description "Some appropriate words"
+    sequence(:title) { |n| "dish#{n}" }
+    # title "#{description}"
+    sequence(:url) { |n| "http://www.davidlebovitz.com/2008/11/rosy-poached-quince/dish#{n}" }
   end
 
   factory :reference do
     url "http://www.foodandwine.com/chefs/adam-erace"
   end
+
+  sequence :rcptitle do |n|
+    "dish#{n}"
+  end
+
+  factory :channel_referent do
+    trait :name do
+      association :canonical_expression, factory: :ingredient_tag, name: "Some Channel Name"
+    end
+    description "This is a channel referent"
+    # association :canonical_expression, factory: :ingredient_tag, name: "#{name}"
+  end
+
 end

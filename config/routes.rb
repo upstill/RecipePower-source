@@ -5,6 +5,10 @@
 
 RP::Application.routes.draw do
 
+  resources :votes, :only => :create
+  post '/votes/recipes/:recipe_id' => 'votes#create', :as => "vote_recipe"
+  get 'pic_picker/new' => 'pic_picker#new'
+
   get "redirect/go"
   get '/auth/failure' => 'authentications#failure'
   # get '/authentications/new' => 'authentications#new'
@@ -93,7 +97,7 @@ RP::Application.routes.draw do
   get "collection/show", as: 'collection_show'
   get "collection/new"
   get "collection/edit"
-  get "collection/create"
+  post "collection/create"
   get "collection/relist"
 
   get "stream/stream"
@@ -111,6 +115,9 @@ RP::Application.routes.draw do
   resources :scales
 
   resources :recipes do
+    resources :tags do
+      member { post 'remove', :to => 'recipes#untag' }
+    end
     member do 
       get 'collect'
       get 'touch'
