@@ -459,7 +459,7 @@ class RecipeServices
           index_name = "references_index_by_url_and_type"
           index_table = :references
           recipe_urls.each { |url|
-            ref = RecipeReference.by_link url
+            ref = RecipeReference.lookup url
             recipe = ref.recipe
           }
         when 3

@@ -8,6 +8,7 @@ class ApplicationController < ActionController::Base
   
   before_filter :check_flash
   before_filter :report_cookie_string
+  after_filter :report_session
   # before_filter :detect_notification_token
   before_filter :setup_response_service
   before_filter :log_serve
@@ -86,6 +87,12 @@ class ApplicationController < ActionController::Base
       logger.info "\t\t= NIL"
     end
   end
+
+  def report_session
+    logger.info "COOKIES after controller:"
+    response.cookies.each { |k, v| logger.info "#{k}: #{v}" }
+    x=2
+  end
   
   # Get the seeker from the session store (mainly used for streaming)
   def retrieve_seeker
@@ -93,17 +100,19 @@ class ApplicationController < ActionController::Base
       setup_seeker klass
     end
   end
-  
+
   def setup_seeker(klass, options=nil, params=nil)
     @user ||= current_user_or_guest
     params[:cur_page] = "1" if params && params[:selected]
     @browser = @user.browser params
     @user.save
     # Go back to page 1 when a new browser element is selected
+    logger.debug "Fetching #{klass}Seeker with session[:seeker]="+session[:seeker].to_s
     @seeker = "#{klass}Seeker".constantize.new @user, @browser, session[:seeker], params # Default; other controllers may set up different seekers
     @seeker.tagstxt = "" if options && options[:clear_tags]
     session[:seeker] = @seeker.store
     session[:seeker_class] = klass
+    logger.debug "@seeker returning #{@seeker ? 'not ' : ''}nil."
     @seeker
   end
   

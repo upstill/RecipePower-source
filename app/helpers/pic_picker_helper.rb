@@ -13,7 +13,7 @@ module PicPickerHelper
     input_id = obj.class.to_s.downcase + "_" + pic_attribute.to_s
     img_id = "rcpPic#{obj.id}"
     link_id = "golink#{obj.id}"
-    pic_area = page_width_pic picurl, img_id, (options[:fallback_img] || "/assets/NoPictureOnFile.png")
+    pic_area = page_width_pic picurl, img_id, options[:fallback_img]
     preview = content_tag :div,
                           pic_area+form.hidden_field(pic_attribute, rel: "jpg,png,gif", class: "hidden_text"),
                           class: "pic_preview"
@@ -24,23 +24,23 @@ module PicPickerHelper
   end
 
   # Bare-metal version of the pic preview widget, for use in a template file
-  def pic_preview_widget page_url, img_url, entity_id, options={}
+  def pic_preview_widget page_url, img_url_display, img_url_value, entity_id, options={}
     input_id = "recipe_picurl"
     input_name = "recipe[picurl]"
     img_id = "rcpPic#{entity_id}"
     link_id = "golink#{entity_id}"
-    pic_picker_link = pic_preview_golink page_url, img_url, link_id, img_id, input_id
+    pic_picker_link = pic_preview_golink page_url, img_url_value, link_id, img_id, input_id
     pic_preview =
       %Q{<img alt="Image Link is Broken"
               id="#{img_id}"
-              src="#{img_url}"
+              src="#{img_url_display}"
               style="width:100%; height: auto">
          <input type="hidden"
                 id="#{input_id}"
                 name="#{input_name}"
                 rel="jpg,png,gif"
                 type="text"
-                value="#{img_url}">
+                value="#{img_url_value}">
         }.html_safe
     content_tag( :div, pic_preview, :class => :pic_preview)+
     content_tag( :div, pic_picker_link, :class => :pic_picker_link)
@@ -76,7 +76,7 @@ module PicPickerHelper
   # id -- used to define an id attribute for this picture (all fitpics will have class 'fitPic')
   # float_ttl -- indicates how to handle an empty URL
   # selector -- specifies an alternative selector for finding the picture for resizing
-  def page_fitPic(picurl, id = "", placeholder_image = "NoPictureOnFile.png")
+  def page_fitPic(picurl, id = "")
     idstr = "rcpPic"+id.to_s
     # Allowing for the possibility of a data URI
     begin
@@ -84,10 +84,9 @@ module PicPickerHelper
                 class: "fitPic",
                 id: idstr,
                 onload: 'doFitImage(event);',
-                alt: "Image Link is Broken",
-		data: { fallbackurl: placeholder_image })
+                alt: "Image Link is Broken" )
     rescue
-      image_tag(placeholder_image,
+      image_tag("/assets/NoPictureOnFile.png",
                 class: "fitPic",
                 id: idstr,
                 onload: 'doFitImage(event);',
@@ -96,21 +95,17 @@ module PicPickerHelper
   end
 
   # Same protocol, only image will be scaled to 100% of the width of its parent, with adjustable height
-  def page_width_pic(picurl, idstr="rcpPic", placeholder_image = "/assets/NoPictureOnFile.png")
-    logger.debug "page_width_pic placing #{picurl.blank? ? placeholder_image : picurl.truncate(40)}"
-    # Allowing for the possibility of a data URI
-    #    if picurl.match(/^data:image/)
-    #      %Q{<img alt="Image Link is Broken" class="thumbnail200" id="#{idstr}" src="#{picurl}" >}.html_safe
-    #    else
+  def page_width_pic(picurl, idstr="rcpPic", placeholder_image = nil)
     begin
+      data = placeholder_image ? { fallbackurl: placeholder_image } : {}
       image_tag(picurl || "",
                 style: "width: 100%; height: auto",
                 id: idstr,
                 onload: "RP.validate_img(event);",
                 alt: "Image Link is Broken",
-		data: { fallbackurl: placeholder_image })
+                data: data )
     rescue
-      image_tag(placeholder_image,
+      image_tag(placeholder_image || "/assets/NoPictureOnFile.png",
                 style: "width: 100%; height: auto",
                 id: idstr,
                 alt: "Image Link is Broken")

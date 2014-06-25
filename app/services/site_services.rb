@@ -269,8 +269,6 @@ class SiteServices
         canon = SiteReference.canonical_url(rcp.url)
         puts "\t... due to Reference(s) off of canonical link #{canon}:"
         SiteReference.lookup(canon).each { |sr| puts "\t\t##{sr.id} with url #{sr.url}" }
-        debugger
-        x=2
       end
     }
   end
