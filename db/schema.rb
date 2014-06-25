@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140501215723) do
+ActiveRecord::Schema.define(version: 20140610235011) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -131,9 +131,9 @@ ActiveRecord::Schema.define(version: 20140501215723) do
   create_table "private_subscriptions", force: true do |t|
     t.integer  "user_id"
     t.integer  "tag_id"
+    t.integer  "priority",   default: 10
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "priority",   default: 10
   end
 
   create_table "products", force: true do |t|
@@ -181,29 +181,29 @@ ActiveRecord::Schema.define(version: 20140501215723) do
 
   create_table "recipes", force: true do |t|
     t.string   "title"
-    t.string   "url"
-    t.integer  "alias"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.text     "picurl"
-    t.text     "tagpane"
-    t.integer  "thumbnail_id"
-    t.text     "href"
     t.text     "description"
     t.integer  "picture_id"
   end
 
+  add_index "recipes", ["id"], name: "recipes_index_by_id", unique: true, using: :btree
+  add_index "recipes", ["title"], name: "recipes_index_by_title", using: :btree
+
   create_table "references", force: true do |t|
-    t.datetime "created_at",                           null: false
-    t.datetime "updated_at",                           null: false
-    t.integer  "reference_type"
+    t.datetime "created_at",                                    null: false
+    t.datetime "updated_at",                                    null: false
     t.text     "url"
     t.integer  "affiliate_id"
-    t.string   "type",           default: "Reference"
+    t.string   "type",         limit: 25, default: "Reference"
     t.text     "thumbdata"
     t.integer  "status"
-    t.boolean  "canonical",      default: false
+    t.boolean  "canonical",               default: false
   end
+
+  add_index "references", ["affiliate_id", "type"], name: "references_index_by_affil_and_type", using: :btree
+  add_index "references", ["id"], name: "references_index_by_id", unique: true, using: :btree
+  add_index "references", ["url", "type"], name: "references_index_by_url_and_type", unique: true, using: :btree
 
   create_table "referent_relations", force: true do |t|
     t.integer  "parent_id"
@@ -253,15 +253,8 @@ ActiveRecord::Schema.define(version: 20140501215723) do
   end
 
   create_table "sites", force: true do |t|
-    t.string   "oldsite"
     t.text     "sample"
-    t.string   "home"
-    t.string   "subsite"
-    t.string   "scheme"
-    t.string   "host"
-    t.string   "port"
     t.string   "oldname"
-    t.string   "logo"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "ttlcut"
@@ -270,6 +263,8 @@ ActiveRecord::Schema.define(version: 20140501215723) do
     t.text     "description"
     t.integer  "thumbnail_id"
   end
+
+  add_index "sites", ["id"], name: "sites_index_by_id", unique: true, using: :btree
 
   create_table "tag_owners", force: true do |t|
     t.integer  "tag_id"
@@ -283,9 +278,8 @@ ActiveRecord::Schema.define(version: 20140501215723) do
     t.integer  "tag_id"
     t.integer  "entity_id"
     t.string   "entity_type"
-    t.boolean  "is_definition", default: false
-    t.datetime "created_at",                    null: false
-    t.datetime "updated_at",                    null: false
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
   end
 
   create_table "tags", force: true do |t|
@@ -298,20 +292,9 @@ ActiveRecord::Schema.define(version: 20140501215723) do
     t.integer  "referent_id"
   end
 
+  add_index "tags", ["id"], name: "tags_index_by_id", unique: true, using: :btree
   add_index "tags", ["name", "tagtype"], name: "tag_name_type_unique", unique: true, using: :btree
   add_index "tags", ["normalized_name"], name: "tag_normalized_name_index", using: :btree
-
-  create_table "thumbnails", force: true do |t|
-    t.text     "url"
-    t.text     "thumbdata"
-    t.integer  "status"
-    t.string   "status_text"
-    t.integer  "thumbsize",   default: 200
-    t.datetime "created_at",                null: false
-    t.datetime "updated_at",                null: false
-  end
-
-  add_index "thumbnails", ["url"], name: "index_thumbnails_on_url", unique: true, using: :btree
 
   create_table "user_relations", force: true do |t|
     t.integer  "follower_id"
@@ -345,7 +328,6 @@ ActiveRecord::Schema.define(version: 20140501215723) do
     t.datetime "locked_at"
     t.integer  "role_id",                           default: 2
     t.string   "fullname",                          default: ""
-    t.string   "image",                             default: ""
     t.text     "about",                             default: ""
     t.string   "invitation_token",       limit: 66
     t.datetime "invitation_sent_at"
