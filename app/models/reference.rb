@@ -338,8 +338,6 @@ class ImageReference < Reference
     self
   end
 
-  private
-
   def fetchable queue_up=true
     # Nominally, an ImageReference records a URL plus its expansion into a thumbnail.
     # However, the URL may come in as data: already, which makes the indexer unhappy.
