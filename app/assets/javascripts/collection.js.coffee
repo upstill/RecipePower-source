@@ -53,9 +53,9 @@ collection_onload = () ->
 	# checkForLoading ".stuffypic"
 	RP.rcp_list.onload()
 	RP.collection.justify()
-	$('a.collection_selection').click (event) ->
+	$('ul.collection-navtabs').on 'click', 'a.collection_selection', (event) -> # $('a.collection_selection').click (event) ->
 		RP.collection.update { selected: this.id }
-		event.preventDefault()
+		event.stopImmediatePropagation() # event.preventDefault()
 
 	# Arm the dropdown menus for selecting collection
 	$('ul.nav li.dropdown').hover ->
