@@ -2,7 +2,11 @@
     <div class="navbar navbar-fixed-top navbar-inverse">
       <div class="container">
         <div class="navbar-header col-md-12">
-          <a href="#" class="navbar-brand">RecipePower:&nbsp;<span style="font-size:24px;color:#dddddd">Collections</span></a>
+          <a href="#" class="navbar-brand">RecipePower
+            <% if @Title %>
+              |&nbsp;<span style="font-size:24px;color:#dddddd"><%= @Title %></span>
+            <% end %>
+          </a>
           <% if user_signed_in? %>
               <div class="dropdown navbar-right pull-right" style="margin-top: 14px; margin-left:10px;">
                 <a class="dropdown-toggle navbar-inverse" data-toggle="dropdown" href="#">            <span class="handle text-on-black"><%= current_user.handle %>&nbsp;&or;</span>            </a>

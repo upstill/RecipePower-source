@@ -76,7 +76,6 @@ class CollectionController < ApplicationController
       render :nothing => true, :status => :no_content
     else
       flash.now[:success] = "This feed is now up to date."
-      @Title = "Collections"
       seeker_result "Content", 'div.collection'
       # render :index, :layout=>false, :locals => { :feed => @feed }
     end
