@@ -1,9 +1,28 @@
 RP.rcp_list = RP.rcp_list || {}
 
-RP.rcp_list.onload = ->
-	$(document).off 'ajax:beforeSend', '.edit_recipe_link', RP.edit_recipe.go
-	$(document).on 'ajax:beforeSend', '.edit_recipe_link', RP.edit_recipe.go
-	$(".popup").click(RP.servePopup);
+# onload function is overloaded both for individual items and the list as a whole
+RP.rcp_list.onload = (item) ->
+	if item && (item = $(item)) # Provided when replacing a list element
+		if $(item).hasClass('collection-item')
+			if img = $('div.rcp_grid_pic_box img', item)[0]
+				srcstr = img.getAttribute('src')
+				contentstr = "<img src=\""+srcstr+"\" style=\"width: 100%; height: auto\">"
+			else
+				contentstr = ""
+			datablock = $('span.recipe-info-button', item)
+			tagstr = $(datablock).data "tags"
+			decoded = $('<div/>').html(tagstr).text();
+			description = $(datablock).data "description"
+			descripted = (description && $('<div/>').html(description).text()) || "";
+			$(datablock).popover
+				trigger: "hover",
+				placement: "auto right",
+				html: true,
+				content: descripted+contentstr+decoded
+	else
+		$(document).off 'ajax:beforeSend', '.edit_recipe_link', RP.edit_recipe.go
+		$(document).on 'ajax:beforeSend', '.edit_recipe_link', RP.edit_recipe.go
+		$(".popup").click(RP.servePopup);
 
 # Callback to update content in a recipe list due to JSON feedback
 RP.rcp_list.update = ( data ) ->
@@ -13,6 +32,7 @@ RP.rcp_list.update = ( data ) ->
 	else if replacements = data.replacements
 		for replacement in replacements
 			$(replacement[0]).replaceWith replacement[1]
+			RP.rcp_list.onload replacement[0]
 		data.replacements = [] # Prevent the normal processor from reloading the elements
 		if data.go_link_class 
 			$("."+data.go_link_class).replaceWith data.go_link_body

@@ -27,25 +27,11 @@ RP.stream.fire = (kind) ->
 			$('#seeker_results').append item
 			if $('#seeker_results').hasClass 'masonry-container'
 				$('#seeker_results.masonry-container').masonry 'appended', item
-				if img = $('div.rcp_grid_pic_box img', item)[0]
-					srcstr = img.getAttribute('src')
-					contentstr = "<img src=\""+srcstr+"\" style=\"width: 100%; height: auto\">"
-				else
-					contentstr = ""
 				# Any (hopefully few) pictures that are loaded from URL will resize the element
 				# when they appear.
 				$(item).on 'resize', (evt) ->
 					$('#seeker_results.masonry-container').masonry()
-				datablock = $('span.recipe-info-button', item)
-				tagstr = $(datablock).data "tags"
-				decoded = $('<div/>').html(tagstr).text();
-				description = $(datablock).data "description"
-				descripted = (description && $('<div/>').html(description).text()) || "";
-				$(datablock).popover
-					trigger: "hover",
-					placement: "auto right",
-					html: true,
-					content: descripted+contentstr+decoded
+				RP.rcp_list.onload $('div.collection-item',item)
 
 RP.stream.buffer_test = ->
 	source = new EventSource('/stream/buffer_test')
