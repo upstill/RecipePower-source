@@ -31,7 +31,6 @@ class UsersController < ApplicationController
   # GET /users.xml
   def index
     # 'index' page may be calling itself with filter parameters in the name and tagtype
-    @Title = "Users"
     seeker_result User, 'div.user_list' # , clear_tags: true
   end
   
@@ -73,7 +72,7 @@ class UsersController < ApplicationController
   
   def new
     @user = User.new
-    @Title = "Create RecipePower Account"
+    response_service.title = "Create RecipePower Account"
   end
   
   # DELETE /users/1
@@ -127,7 +126,7 @@ class UsersController < ApplicationController
       redirect_to edit_referent_path(@user.channel)
     else
       @section = params[:section] || "profile"
-      @Title = "Edit Profile"
+      response_service.title = "Edit Profile"
       smartrender area: "floating"
     end
   end
@@ -146,7 +145,7 @@ class UsersController < ApplicationController
       @authentications = @user.authentications
     end
     @section = params[:section] || "profile"
-    @Title = "My "+@section.capitalize
+    response_service.title = "My "+@section.capitalize
     # render :action => 'edit'
     smartrender action: "edit", area: "floating" 
   end
@@ -164,7 +163,7 @@ class UsersController < ApplicationController
     @user = User.find params[:id]
     if @user.update_attributes(params[:user])
       @user.refresh_browser # Assuming, perhaps incorrectly, that the browser contents have changed
-      @Title = "Cookmarks from Update"
+      response_service.title = "Cookmarks from Update"
       flash[:message] = (@user == current_user ? "Your profile" : @user.handle+"'s profile")+" has been updated."
       respond_to do |format|
         format.html { redirect_to collection_path }
@@ -182,7 +181,7 @@ class UsersController < ApplicationController
       end
     else
       @section = params[:user][:email] ? "profile" : "account"
-      @Title = "Edit #{@section}"
+      response_service.title = "Edit #{@section}"
       smartrender action: "edit", area: "floating" 
     end
   end

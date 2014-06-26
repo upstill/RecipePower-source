@@ -18,7 +18,7 @@ class SitesController < ApplicationController
     @user = current_user_or_guest
     @site = Site.find(params[:id])
     @decorator = @site.decorate
-    @Title = @site.name
+    response_service.title = @site.name
     
     # Setup to display the feeds for the site
     @feeds = @site.feeds
@@ -38,7 +38,7 @@ class SitesController < ApplicationController
   def new
       # return if need_login true, true
     @site = Site.new
-    @Title = "New Site"
+    response_service.title = "New Site"
 
     respond_to do |format|
       format.html # new.html.erb
@@ -50,7 +50,7 @@ class SitesController < ApplicationController
   def edit
     # return if need_login true, true
     @site = Site.find(params[:id].to_i)
-    @Title = @site.name
+    response_service.title = @site.name
     smartrender area: "floating"
   end
 

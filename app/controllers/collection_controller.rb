@@ -17,7 +17,7 @@ class CollectionController < ApplicationController
   end
   
   def index
-    @Title = "Collections"
+    response_service.title = "Collections"
     @rp_old = false
     seeker_result "Content", 'div.collection' # , clear_tags: true
   end
@@ -28,7 +28,7 @@ class CollectionController < ApplicationController
   # GET /collection/new
   # GET /collection/new.xml
   def new
-    @Title = "Tags"
+    response_service.title = "Tags"
     @tag = Tag.new
     smartrender
   end
@@ -39,7 +39,7 @@ class CollectionController < ApplicationController
   # POST /collection
   # POST /collection.xml
   def create
-      @Title = "New Collection"
+      response_service.title = "New Collection"
       respond_to do |format|
         if @tag = Tag.assert_tag(params[:tag][:name], userid: current_user.id)
           current_user.add_collection @tag

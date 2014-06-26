@@ -1,6 +1,4 @@
 <%# Fields for an edit-user dialog %>
-<%# modal_dialog :edit_user, @Title || "Edit Profile", area: @_area do %>
-<% @Title = (@user.channel? ? "Edit Channel" : "Edit User" ) %>
-<%= modal_dialog :edit_user, @Title, response_service.modal_options do %>
+<%= modal_dialog :edit_user, (@user.channel? ? "Edit Channel" : "Edit User" ), response_service.modal_options do %>
     <%= render @user.channel? ? "form_channel" : "form" %>
 <% end %>

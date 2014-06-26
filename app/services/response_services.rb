@@ -10,13 +10,14 @@
 
 class ResponseServices
 
-  attr_accessor :action
+  attr_accessor :action, :title
 
   def initialize params, session, request
     @request = request
     @session = session
     @response = params[:response]
     @controller = params[:controller]
+    @title = @controller.capitalize
     @action = params[:action]
     @invitation_token = params[:invitation_token]
     @notification_token = params[:notification_token]

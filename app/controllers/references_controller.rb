@@ -2,7 +2,6 @@ class ReferencesController < ApplicationController
   # GET /references
   # GET /references.json
   def index
-    @Title = "References"
     seeker_result Reference, 'div.reference_list' # , clear_tags: true
   end
   
@@ -10,7 +9,6 @@ class ReferencesController < ApplicationController
   # Query takes either a query string or a specification of page number
   # We return a recipe list IFF the :cached parameter is not set
   def query
-    @Title = "References"
     seeker_result Reference, 'div.reference_list'
   end
 =end

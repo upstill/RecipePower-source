@@ -3,8 +3,8 @@
       <div class="container">
         <div class="navbar-header col-md-12">
           <a href="#" class="navbar-brand">RecipePower
-            <% if @Title %>
-              |&nbsp;<span style="font-size:24px;color:#dddddd"><%= @Title %></span>
+            <% if response_service.title %>
+              |&nbsp;<span style="font-size:24px;color:#dddddd"><%= response_service.title %></span>
             <% end %>
           </a>
           <% if user_signed_in? %>

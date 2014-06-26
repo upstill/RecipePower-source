@@ -108,7 +108,7 @@ module ApplicationHelper
 
   def title ttl=nil
     # Any controller can override the default title of controller name
-    "RecipePower | #{ttl || @Title || params[:controller].capitalize}"
+    "RecipePower | #{ttl || response_service.title}"
   end
 
   def logo(small=false)
@@ -352,7 +352,7 @@ module ApplicationHelper
 
   # Render content, either for a page or a dialog
   def page_or_modal options={}, &block
-    title = options[:title] || @Title
+    title = options[:title] || response_service.title
     action = options[:action] || params[:action]
     options[:body_contents] = with_output_buffer(&block)
     if response_service.dialog?

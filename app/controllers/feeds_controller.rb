@@ -26,7 +26,7 @@ class FeedsController < ApplicationController
   def show
     begin
       @feed = Feed.find(params[:id])
-      @Title = "About #{@feed.title}"
+      response_service.title = "About #{@feed.title}"
       smartrender
     rescue
       render text: "Sorry, but there is no such feed. Whatever made you ask?"
@@ -37,7 +37,7 @@ class FeedsController < ApplicationController
   # GET /feeds/new.json
   def new
     @feed = Feed.new
-    @Title = "Subscribe to a Feed"
+    response_service.title = "Subscribe to a Feed"
     smartrender modal: true # how: 'modal'
   end
   

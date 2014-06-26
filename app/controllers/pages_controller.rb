@@ -10,26 +10,31 @@ class PagesController < ApplicationController
       redirect_to home_path
     end
   end
-  
+
+  def admin
+    # session.delete :on_tour # Tour's over!
+    response_service.title = "Admin"
+  end
+
   def home
     # session.delete :on_tour # Tour's over!
-    @Title = "Home"
+    response_service.title = "Home"
     @auth_context = :manage
     setup_collection
   end
 
   def contact
-  	@Title = "Contact"
+  	response_service.title = "Contact"
     smartrender
   end
 
   def about
-  	@Title = "About"
+  	response_service.title = "About"
     smartrender
   end
 
   def faq
-    @Title = "FAQ"
+    response_service.title = "FAQ"
     smartrender
   end
   

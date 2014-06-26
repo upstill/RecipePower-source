@@ -59,7 +59,7 @@ class RecipesController < ApplicationController
     user = current_user_or_guest
     @listowner = user.id
     @recipes = user.recipes 
-    @Title = "#{user.handle}\'s Cookmarks"
+    response_service.title = "#{user.handle}\'s Cookmarks"
     @nav_current = nil
 =end
   end
@@ -70,7 +70,7 @@ class RecipesController < ApplicationController
     @recipe.current_user = current_user_or_guest_id # session[:user_id]
     @recipe.touch false
     @decorator = @recipe.decorate
-    @Title = ""
+    response_service.title = ""
     @nav_current = nil
     smartrender
     # redirect_to @recipe.url
@@ -97,7 +97,7 @@ class RecipesController < ApplicationController
       report_recipe( collection_path, truncate( @recipe.title, :length => 100)+" now appearing in your collection.", formats)
     	# redirect_to edit_recipe_url(@recipe), :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br>You might want to confirm the title and picture, and/or tag it?".html_safe
     else
-        @Title = "Cookmark a Recipe"
+        response_service.title = "Cookmark a Recipe"
         @nav_current = :addcookmark
         @recipe ||= Recipe.new
         @recipe.current_user = current_user_or_guest_id # session[:user_id]
@@ -135,7 +135,7 @@ class RecipesController < ApplicationController
         formats )
 =end
     else # failure (not a valid recipe) => return to new
-       @Title = "Cookmark a Recipe"
+       response_service.title = "Cookmark a Recipe"
        @nav_current = :addcookmark
        # render :action => 'new'
        @recipe.current_user = current_user_or_guest_id # session[:user_id]
@@ -223,7 +223,7 @@ class RecipesController < ApplicationController
     # Fetch the recipe by id, if possible, and ensure that it's registered with the user
     @recipe = Recipe.ensure current_user_or_guest_id, params.slice(:id) # session[:user_id], params
     if @recipe && @recipe.errors.empty? # Success (recipe found)
-      @Title = @recipe.title # Get title from the recipe
+      response_service.title = @recipe.title # Get title from the recipe
       @decorator = @recipe.decorate
       @nav_current = nil
       # @_area = params[:_area]
@@ -232,7 +232,7 @@ class RecipesController < ApplicationController
       # dialog_boilerplate('edit', 'at_left')
       smartrender # area: 'at_left'
     else
-      @Title = "Cookmark a Recipe"
+      response_service.title = "Cookmark a Recipe"
       @nav_current = :addcookmark
     end
   end
@@ -261,7 +261,7 @@ class RecipesController < ApplicationController
         end
         report_recipe( collection_url, "Successfully updated #{@recipe.title || 'recipe'}.", formats )
       else
-        @Title = "Tag That Recipe (Try Again)!"
+        response_service.title = "Tag That Recipe (Try Again)!"
         @nav_current = nil
         # render :action => 'edit', :notice => "Huhh??!?"
         # @_area = "page" # params[:_area]
