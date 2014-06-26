@@ -18,6 +18,7 @@ jQuery ->
 #   If the popup gets blocked, return true so that the recipe is opened in a new
 #   window/tab.
 #   In either case, notify the server of the opening so it can touch the recipe
+### Disabled until it's proven that standard remote link doesn't work
 RP.servePopup = () -> 
 	regexp = new RegExp "popup", "g"
 	rcpid = this.getAttribute('id').replace regexp, ""
@@ -30,6 +31,7 @@ RP.servePopup = () ->
 	else
 		popUp.focus()
 		return false
+###
 
 # Cribbed from http://www.alistapart.com/articles/expanding-text-areas-made-elegant/
 RP.makeExpandingArea = (containers) ->

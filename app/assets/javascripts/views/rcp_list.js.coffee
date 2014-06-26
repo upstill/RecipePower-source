@@ -20,9 +20,10 @@ RP.rcp_list.onload = (item) ->
 				html: true,
 				content: descripted+contentstr+decoded
 	else
-		$(document).off 'ajax:beforeSend', '.edit_recipe_link', RP.edit_recipe.go
-		$(document).on 'ajax:beforeSend', '.edit_recipe_link', RP.edit_recipe.go
-		$(".popup").click(RP.servePopup);
+		$('div.collection_list').off 'ajax:beforeSend', '.edit_recipe_link', RP.edit_recipe.go
+		$('div.collection_list').on 'ajax:beforeSend', '.edit_recipe_link', RP.edit_recipe.go
+		# $('div.collection_list').off 'click', '.popup', RP.servePopup
+		# $('div.collection_list').on 'click', '.popup', RP.servePopup
 
 # Callback to update content in a recipe list due to JSON feedback
 RP.rcp_list.update = ( data ) ->
