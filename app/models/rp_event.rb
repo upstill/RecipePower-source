@@ -1,11 +1,4 @@
 class RpEvent < ActiveRecord::Base
-  attr_accessible :on_mobile, :serve_count, :verb, :source_id, :subject_id, :target_id, :data
-
-  serialize :data
-
-  belongs_to :source, class_name: "User"
-  belongs_to :subject, polymorphic: true
-  belongs_to :target, polymorphic: true
 
   include Typeable
 
@@ -16,7 +9,17 @@ class RpEvent < ActiveRecord::Base
             invitation_responded: ["Respond to Invitation", 3],
             invitation_accepted: ["Accepted Invitation", 4],
             invitation_diverted: ["Invitation Diverted", 5]
-     )
+  )
+
+=begin
+  attr_accessible :on_mobile, :serve_count, :source_id, :subject_id, :target_id, :data
+
+  serialize :data
+
+  # belongs_to :source, class_name: "User"
+  belongs_to :source, polymorphic: true
+  belongs_to :subject, polymorphic: true
+  belongs_to :target, polymorphic: true
 
   belongs_to :user
 
@@ -29,7 +32,7 @@ class RpEvent < ActiveRecord::Base
       {}
     end
   end
-  
+
   # Return the last event posted by the given user (if any) of a given type
   def self.last verb, who=nil
     rel = self.where(verb: self.typenum(verb))
@@ -75,4 +78,6 @@ private
   def self.events_of_type_during verb, begin_time, end_time
     RpEvent.where 'verb = ? AND created_at >= ? AND created_at < ?', typenum(verb), begin_time, end_time
   end
+=end
+
 end

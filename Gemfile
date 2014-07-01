@@ -22,7 +22,6 @@ gem 'closure_tree'
 gem 'htmlentities'
 gem 'nokogiri', "~> 1.5" # "~> 1.5.3"
 gem 'will_paginate', '~> 3.0'
-gem 'minitest', '~> 4.2'
 gem 'newrelic_rpm'
 gem 'devise', '~> 3.1.0'                       # auth, rails generate devise:install, rails generate devise MODEL
 gem 'devise_invitable', '~> 1.3.0' # git: 'git://github.com/scambra/devise_invitable.git'
@@ -65,6 +64,8 @@ end
 gem "masonry-rails"
 
 group :test do
+  gem 'minitest', '~> 4.2'
+  gem "minitest-reporters", '>= 0.5.0'
   # Pretty printed test output
   gem 'turn', :require => false
   gem 'webrat', '~> 0.7.3'
