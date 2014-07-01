@@ -5,6 +5,12 @@
 
 RP::Application.routes.draw do
 
+  get "new/create"
+  get "new/update"
+  get "new/edit"
+  get "new/destroy"
+  get "new/index"
+  get "new/show"
   resources :votes, :only => :create
   post '/votes/recipes/:recipe_id' => 'votes#create', :as => "vote_recipe"
   get 'pic_picker/new' => 'pic_picker#new'

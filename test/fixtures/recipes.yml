@@ -3,15 +3,15 @@ rcp:
 
 badpicrcp:
   title: Recipe with Bad Picture URL
-  url: htp://www.recipepower.com/rcp1
-  picurl: assets/MisingPicture.png
+  # url: htp://www.recipepower.com/rcp1
+  # picurl: assets/MisingPicture.png
 
 inaccessiblepicrcp:
   title: Recipe with inaccessible Picture
-  url: http://www.recipepower.com/rcp1
-  picurl: assets/MisingPicture.png
+  # url: http://www.recipepower.com/rcp1
+  # picurl: assets/MisingPicture.png
   
 goodpicrcp:
   title: Recipe with Good Picture
-  url: http://www.recipepower.com/rcp2
-  picurl: assets/MissingPicture.png
+  # url: http://www.recipepower.com/rcp2
+  # picurl: assets/MissingPicture.png

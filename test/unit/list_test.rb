@@ -15,8 +15,23 @@ class ListTest < ActiveSupport::TestCase
     # Do nothing
   end
 
-  test "create a list"  do
-    tst = List.new
+  test "create a list with an owner"  do
+    tagee = users(:thing3)
+    tst = List.new owner: tagee
+    assert_equal tagee, tst.owner, "List owner not stored"
+    tst.save
+    tst.reload
+    assert_equal tagee, tst.owner, "List owner not saved and restored"
+  end
+
+  test "create a list with items" do
+    tst = List.new items: []
+    items = tst.items
+    assert_equal Array, items.class, "List items should be array after initialization"
+    tst.save
+    tst.reload
+    items = tst.items
+    assert_equal Array, items.class,"List items should be array after save/restore"
   end
 
   # Fake test
