@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140630192433) do
+ActiveRecord::Schema.define(version: 20140610235011) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -105,6 +105,13 @@ ActiveRecord::Schema.define(version: 20140630192433) do
     t.string   "selector"
     t.string   "read_attrib"
     t.integer  "site_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lists", force: true do |t|
+    t.integer  "owner_id"
+    t.text     "items"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -231,7 +238,6 @@ ActiveRecord::Schema.define(version: 20140630192433) do
     t.text     "data"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "source_type",  default: "User"
   end
 
   create_table "scales", force: true do |t|

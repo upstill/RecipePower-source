@@ -156,7 +156,11 @@ class User < ActiveRecord::Base
       collection
     end
   end
-  
+
+  def recipes_collection_size
+    Rcpref.where(:user_id => id).count
+  end
+
   # This override means that all taggings are owned by super, visible to all users
   def tag_owner
     User.super_id
