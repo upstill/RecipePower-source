@@ -983,13 +983,22 @@ class ContentBrowser < BrowserComposite
     else
       sug = "removing a tag up there"
     end
-    if selected.class.to_s =~ /Composite/ 
+    case selected.class.to_s
+    when /CompositeUser/
+      if tags.empty?
+        # name = selected.content_name
+        report = selected.content_empty_report
+        sug = nil
+      else
+        report = "It looks like there isn't anything that matches your search in '#{selected.handle}'."
+      end
+    when /Composite/
       if selected.children.empty?
         verb = selected.content_name == "Friends" ? "picked" : "subscribed to"
         report = "There's no content here because you haven't #{verb} any #{selected.content_name}."
-        sug = " getting one by clicking the '+' sign over there to the left"
+        sug = " getting one by selecting 'Make a Friend...' from the 'Friends' tab"
       elsif tags.empty?
-        name = selected.content_name
+        # name = selected.content_name
         report = selected.content_empty_report
         sug = nil
       else

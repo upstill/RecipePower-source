@@ -252,8 +252,7 @@ class ResponseServices
 
   def clear_pending_request
     # @session.delete :deferred_request
-    if (dri = @session[:deferred_requests_id]) &&
-       (defreq = DeferredRequest.where(id: dri).first)
+    if (dri = @session[:deferred_requests_id]) && (defreq = DeferredRequest.where(id: dri).first)
       defreq.requests.pop
       if defreq.requests.empty?
         defreq.destroy
