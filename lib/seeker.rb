@@ -1,8 +1,6 @@
 require "candihash.rb"
 
 class Seeker < Object
-  
-  @@page_length = 10
 
   # Save the Seeker data into session store
   def store
@@ -12,15 +10,18 @@ class Seeker < Object
     savestr
   end
   
-private 
-  
+private
+
+  def page_length
+    25
+  end
+
   # class-specific data storage
   def datastore
     { 
       :tagstxt => (@tagstxt || ""), 
       :tagtype => @tagtype, 
-      :page => @cur_page || 1,
-      :items_per_page => @items_per_page
+      :page => @cur_page || 1 # , :items_per_page => @items_per_page
     }
   end
   
@@ -30,13 +31,14 @@ private
       @tagstxt = prior[:tagstxt] || ""
       @tagtype = prior[:tagtype]
       @cur_page = prior[:page] || 1
-      @items_per_page = prior[:items_per_page] ? prior[:items_per_page].to_i : @@page_length
+      # @items_per_page = prior[:items_per_page] ? prior[:items_per_page].to_i : @@page_length
     else
       @tagstxt = "" 
       @tagtype = nil
       @cur_page = 1
-      @items_per_page = @@page_length
+      # @items_per_page = @@page_length
     end
+    @items_per_page = page_length
     prior || {}
   end
   
@@ -241,7 +243,7 @@ public
 end
 
 class ContentSeeker < Seeker
-  
+
   delegate :convert_ids, :timestamp, :list_type, :to => :"@affiliate"
   
   def affiliate browser = nil, params = nil
@@ -268,10 +270,16 @@ class ContentSeeker < Seeker
     explanation = affiliate.explain_empty tags
     (explanation[:sug] ? explanation[:report]+"<br>You might try #{explanation[:sug]}." : explanation[:report])+"<br>#{explanation[:hint]}"
   end
+
+  private
+  def page_length
+    10
+  end
+
 end
 
 class UserSeeker < Seeker
-  
+
   def datastore
     super.merge is_channel: (@is_channel || false)
   end
@@ -291,6 +299,7 @@ class UserSeeker < Seeker
       end
       excluded_ids = @user.followee_ids + [@user.id, 4, 5] # Don't list guest, super, or the current user
       @affiliate = @affiliate.where("id not in (?) AND private != true", excluded_ids) unless [1, 3].include?(@user.id) # Show Max and Steve everything
+      # @affiliate = @affiliate.sort { |u1, u2| }
     end
     @affiliate
   end
@@ -350,7 +359,7 @@ class ReferenceSeeker < Seeker
 end
 
 class SiteSeeker < Seeker
-  
+
   # Get the results of the current query.
   def apply_tags(candihash)
     # Rank/purge for tag matches
@@ -365,7 +374,7 @@ class SiteSeeker < Seeker
 end
 
 class TagSeeker < Seeker
-  
+
   # Get the results of the current query.
   def result_ids
   	return @results if @results # Keeping a cache of results
