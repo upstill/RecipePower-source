@@ -83,8 +83,14 @@ public
     entity_name.capitalize.constantize
   end
   
-  def convert_ids list
-    model_class.where(id: list)
+  def convert_ids list, keep_ordering=false
+    records = model_class.find(list)
+    if keep_ordering
+      records = records.group_by(&:id)
+      list.map { |id| records[id].first }
+    else
+      records
+    end
   end
   
   def list_type
@@ -300,6 +306,9 @@ class UserSeeker < Seeker
       excluded_ids = @user.followee_ids + [@user.id, 4, 5] # Don't list guest, super, or the current user
       @affiliate = @affiliate.where("id not in (?) AND private != true", excluded_ids) unless [1, 3].include?(@user.id) # Show Max and Steve everything
       # @affiliate = @affiliate.sort { |u1, u2| }
+      @affiliate = @affiliate.collect { |u| [ u, u.recipes_collection_size ] }
+      @affiliate = @affiliate.sort { |u1, u2| u2.last <=> u1.last }
+      @affiliate = @affiliate.map(&:first)
     end
     @affiliate
   end
@@ -317,7 +326,8 @@ class UserSeeker < Seeker
   end
   
   def convert_ids list
-    User.where(id: list)
+    records = User.find(list).group_by(&:id)
+    list.map { |id| records[id].first }
   end
   
   # Get the results of the current query.
