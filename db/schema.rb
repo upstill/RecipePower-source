@@ -109,10 +109,9 @@ ActiveRecord::Schema.define(version: 20140610235011) do
     t.datetime "updated_at"
   end
 
-  create_table "link_refs", force: true do |t|
-    t.integer  "link_id"
-    t.integer  "tag_id"
+  create_table "lists", force: true do |t|
     t.integer  "owner_id"
+    t.text     "items"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

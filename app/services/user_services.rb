@@ -3,8 +3,8 @@ class UserServices
   
   attr_accessor :user
   
-  delegate :id, :username, :first_name, :last_name, :fullname, :about, :login, :private, :skip_invitation, :add_collection, :delete_collection,
-           :email, :password, :password_confirmation, :shared_recipe, :invitee_tokens, :channel_tokens, :image,
+  delegate :id, :username, :first_name, :last_name, :fullname, :about, :login, :private, :skip_invitation, :add_followee, :add_collection, :delete_collection,
+           :email, :password, :password_confirmation, :shared_recipe, :invitee_tokens, :channel_tokens, :image, :refresh_browser,
            :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens, :subscription_tokens, :invitation_issuer, :to => :user
   
   def initialize(user)
@@ -74,22 +74,23 @@ class UserServices
     ['Now Cooking', 'Keepers', 'To Try' ].each do |tagname|
       # Assert user's inclusion in tag
       # For each recipe of that status, apply appropriate tag
-      self.add_collection (tags[statusval] = Tag.assert_tag(tagname, userid: id)), statusval
+      add_collection (tags[statusval] = Tag.assert_tag(tagname, userid: id)), statusval
       statusval *= 2
     end
     Rcpref.where(status: [1,2,4], user_id: id).each do |rr|
       rr.recipe.tag_with tags[rr.status], id
     end
-    @user.refresh_browser
+    refresh_browser
   end
 
   # Called on signup to initialize the user
   def sign_up
     # Give the user a starting set of collections and friends
-    @user.add_collection Tag.assert_tag("Now Cooking", userid: @user.id)
-    @user.add_collection Tag.assert_tag("To Try", userid: @user.id)
-    @user.add_collection Tag.assert_tag("Keepers", userid: @user.id)
-    @user.add_followee User.find(1)
-    @user.add_followee User.find(3)
+    add_collection Tag.assert_tag("Now Cooking", userid: id)
+    add_collection Tag.assert_tag("To Try", userid: id)
+    add_collection Tag.assert_tag("Keepers", userid: id)
+    add_followee User.find(1)
+    add_followee User.find(3)
+    refresh_browser
   end
 end
