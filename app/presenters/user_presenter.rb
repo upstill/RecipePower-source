@@ -10,7 +10,9 @@ class UserPresenter < BasePresenter
   delegate :fullname, to: :user
 
   def avatar
-    site_link image_tag(user.image.if_empty("default-avatar-128.png"), class: "avatar" )# image_tag("avatars/#{avatar_name}", class: "avatar")
+    img = user.image
+    img = "default-avatar-128.png" if img.blank?
+    site_link image_tag(img, class: "avatar" )# image_tag("avatars/#{avatar_name}", class: "avatar")
   end
 
   def member_since
