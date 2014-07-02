@@ -305,10 +305,7 @@ class UserSeeker < Seeker
       end
       excluded_ids = @user.followee_ids + [@user.id, 4, 5] # Don't list guest, super, or the current user
       @affiliate = @affiliate.where("id not in (?) AND private != true", excluded_ids) unless [1, 3].include?(@user.id) # Show Max and Steve everything
-      # @affiliate = @affiliate.sort { |u1, u2| }
-      @affiliate = @affiliate.collect { |u| [ u, u.recipes_collection_size ] }
-      @affiliate = @affiliate.sort { |u1, u2| u2.last <=> u1.last }
-      @affiliate = @affiliate.map(&:first)
+      @affiliate = @affiliate.collect { |u| [ u, u.recipes_collection_size ] }.sort { |u1, u2| u2.last <=> u1.last }.map(&:first)
     end
     @affiliate
   end
@@ -324,7 +321,8 @@ class UserSeeker < Seeker
   def table_header
     @is_channel ? "Available Channels" : "Possible Friends"
   end
-  
+
+  # Convert ids into User records, preserving the order of the list
   def convert_ids list
     records = User.find(list).group_by(&:id)
     list.map { |id| records[id].first }

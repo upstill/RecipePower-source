@@ -82,4 +82,14 @@ class UserServices
     end
     @user.refresh_browser
   end
+
+  # Called on signup to initialize the user
+  def sign_up
+    # Give the user a starting set of collections and friends
+    @user.add_collection Tag.assert_tag("Now Cooking", userid: @user.id)
+    @user.add_collection Tag.assert_tag("To Try", userid: @user.id)
+    @user.add_collection Tag.assert_tag("Keepers", userid: @user.id)
+    @user.add_followee User.find(1)
+    @user.add_followee User.find(3)
+  end
 end
