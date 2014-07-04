@@ -24,14 +24,24 @@ class ListTest < ActiveSupport::TestCase
     assert_equal tagee, tst.owner, "List owner not saved and restored"
   end
 
-  test "create a list with items" do
-    tst = List.new items: []
-    items = tst.items
-    assert_equal Array, items.class, "List items should be array after initialization"
+  test "create a list with a tag" do
+    tagee = users(:thing3)
+    tag = Tag.assert_tag("Test Tag", userid: tagee.id, tagtype: :Collection)
+    tst = List.new owner: tagee, tag: tag
+    assert_equal tag, tst.tag, "Tag not stored in list"
     tst.save
     tst.reload
-    items = tst.items
-    assert_equal Array, items.class,"List items should be array after save/restore"
+    assert_equal tag, tst.tag, "Tag not saved and releaded with list"
+  end
+
+  test "create a list with orderings" do
+    tst = List.new orderings: []
+    orderings = tst.orderings
+    assert_equal Array, orderings.class, "List orderings should be array after initialization"
+    tst.save
+    tst.reload
+    orderings = tst.orderings
+    assert_equal Array, orderings.class,"List orderings should be array after save/restore"
   end
 
   # Fake test

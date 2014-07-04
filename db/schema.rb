@@ -111,7 +111,8 @@ ActiveRecord::Schema.define(version: 20140701172012) do
 
   create_table "lists", force: true do |t|
     t.integer  "owner_id"
-    t.text     "items"
+    t.integer  "tag_id"
+    t.text     "ordering"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

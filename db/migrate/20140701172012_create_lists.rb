@@ -2,7 +2,8 @@ class CreateLists < ActiveRecord::Migration
   def change
     create_table :lists do |t|
       t.integer :owner_id
-      t.text :items
+      t.integer :tag_id
+      t.text :ordering
 
       t.timestamps
     end
