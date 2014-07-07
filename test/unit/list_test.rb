@@ -24,14 +24,14 @@ class ListTest < ActiveSupport::TestCase
     assert_equal tagee, tst.owner, "List owner not saved and restored"
   end
 
-  test "create a list with a tag" do
+  test "create a list with a name tag" do
     tagee = users(:thing3)
     tag = Tag.assert_tag("Test Tag", userid: tagee.id, tagtype: :Collection)
-    tst = List.new owner: tagee, tag: tag
-    assert_equal tag, tst.tag, "Tag not stored in list"
+    tst = List.new owner: tagee, name_tag: tag
+    assert_equal tag, tst.name_tag, "Name tag not stored in list"
     tst.save
     tst.reload
-    assert_equal tag, tst.tag, "Tag not saved and releaded with list"
+    assert_equal tag, tst.name_tag, "Name tag not saved and releaded with list"
   end
 
   test "create a list with orderings" do
@@ -44,9 +44,30 @@ class ListTest < ActiveSupport::TestCase
     assert_equal Array, orderings.class,"List orderings should be array after save/restore"
   end
 
-  # Fake test
-  def test_fail
-
-    fail('Not implemented')
+  test "create a list with tags" do
+    tagee = users(:thing3)
+    lst = List.new orderings: []
+    tag1 = Tag.assert_tag "Tag 1", userid: tagee.id
+    tag2 = Tag.assert_tag "Tag 2", userid: tagee.id, tagtype: :Ingredient
+    lst.tags << tag1
+    lst.tags << tag2
+    assert_equal tag1, lst.tags.first, "First tag not attached to list after assignment"
+    assert_equal tag2, lst.tags.last, "Last tag not attached to list after assignment"
+    lst.save
+    lst.reload
+    assert_equal tag1, lst.tags.first, "First tag not attached to list after save and restore"
+    assert_equal tag2, lst.tags.last, "Last tag not attached to list after save and restore"
   end
+
+  test "create a list with notes" do
+    lst = List.new
+    assert_equal "", lst.notes, "Notes don't default to empty string"
+    note = "This should be a note"
+    lst.notes = note
+    assert_equal note, lst.notes, "Notes not stored"
+    lst.save
+    lst.reload
+    assert_equal note, lst.notes, "Notes not saved and restored"
+  end
+
 end
