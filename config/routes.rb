@@ -5,6 +5,13 @@
 
 RP::Application.routes.draw do
 
+  get "lists/index"
+  get "lists/create"
+  get "lists/show"
+  get "lists/update"
+  get "lists/destroy"
+  get "lists/new"
+  get "lists/edit"
   get "new/create"
   get "new/update"
   get "new/edit"
