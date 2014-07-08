@@ -6,6 +6,11 @@ class ListsController < ApplicationController
   end
 
   def create
+    puts "List#create params: "+params[:list].to_s+" for user '#{current_user.name}'"
+    @list = List.assert params[:list][:name], current_user
+    @list.save
+    puts "Created list '#{@list.name}', owner: #{@list.owner.name}"
+    redirect_to edit_list_path(@list)
   end
 
   def show
@@ -18,9 +23,12 @@ class ListsController < ApplicationController
   end
 
   def new
-    @list = List.new
+    puts "current_user: "+current_user.name
+    @list = List.new(owner_id: current_user.id)
   end
 
   def edit
+    puts "List#edit params: "+params.to_s+" for user '#{current_user.name}'"
+    @list = List.find params[:id]
   end
 end

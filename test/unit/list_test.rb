@@ -73,10 +73,10 @@ class ListTest < ActiveSupport::TestCase
   test "create a list with a name string" do
     tagee = users(:thing3)
     list_name = "Test List"
-    list = List.assert( list_name, user: tagee )
+    list = List.assert list_name, tagee
     list.save
     assert_equal list_name, list.name, "new list name not stored"
-    list2 = List.assert( list_name, user: tagee )
+    list2 = List.assert list_name, tagee
     assert_equal list, list2, "Re-using name tag created a different list"
   end
 
