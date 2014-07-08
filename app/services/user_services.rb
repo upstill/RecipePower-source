@@ -74,7 +74,7 @@ class UserServices
     ['Now Cooking', 'Keepers', 'To Try' ].each do |tagname|
       # Assert user's inclusion in tag
       # For each recipe of that status, apply appropriate tag
-      add_collection (tags[statusval] = Tag.assert_tag(tagname, userid: id)), statusval
+      add_collection (tags[statusval] = Tag.assert(tagname, userid: id)), statusval
       statusval *= 2
     end
     Rcpref.where(status: [1,2,4], user_id: id).each do |rr|
@@ -86,9 +86,9 @@ class UserServices
   # Called on signup to initialize the user
   def sign_up
     # Give the user a starting set of collections and friends
-    add_collection Tag.assert_tag("Now Cooking", userid: id)
-    add_collection Tag.assert_tag("To Try", userid: id)
-    add_collection Tag.assert_tag("Keepers", userid: id)
+    add_collection Tag.assert("Now Cooking", userid: id)
+    add_collection Tag.assert("To Try", userid: id)
+    add_collection Tag.assert("Keepers", userid: id)
     add_followee User.find(1)
     add_followee User.find(3)
     refresh_browser

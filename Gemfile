@@ -68,7 +68,7 @@ group :test do
   # Pretty printed test output
   gem 'turn', :require => false
   gem 'webrat', '~> 0.7.3'
-  # gem "capybara" # ...for simulating user interaction
+  gem "minitest-rails-capybara" # ...for simulating user interaction
   # gem "guard-rspec" # ...for auto-running tests on file save
   gem 'factory_girl_rails', "~> 4.0"
   gem "mocha"

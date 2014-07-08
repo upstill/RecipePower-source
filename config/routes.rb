@@ -5,19 +5,6 @@
 
 RP::Application.routes.draw do
 
-  get "lists/index"
-  get "lists/create"
-  get "lists/show"
-  get "lists/update"
-  get "lists/destroy"
-  get "lists/new"
-  get "lists/edit"
-  get "new/create"
-  get "new/update"
-  get "new/edit"
-  get "new/destroy"
-  get "new/index"
-  get "new/show"
   resources :votes, :only => :create
   post '/votes/recipes/:recipe_id' => 'votes#create', :as => "vote_recipe"
   get 'pic_picker/new' => 'pic_picker#new'
@@ -88,6 +75,10 @@ RP::Application.routes.draw do
     end
   end
   match 'feeds', :controller=>'feeds', :action=>'index', :via => [:get, :post]
+
+  resources :lists, except: [ :index, :create ]
+  post '/list' => 'lists#create', :as => 'create_list'
+  match 'lists', :controller=>'lists', :action=>'index', :via => [:get, :post]
 
   post '/tag' => 'tags#create', :as => 'create_tag'
   resources :tags, except: [ :index, :create ] do

@@ -72,19 +72,7 @@ class ApplicationController < ActionController::Base
   def report_cookie_string
     logger.info "COOKIE_STRING:"
     if cs = request.env["rack.request.cookie_string"]
-      cs.split('; ').each { |str| 
-        logger.info "\t"+str
-        if m = str.match( /_rp_session=(.*)$/ )
-          sess = Rack::Session::Cookie::Base64::Marshal.new.decode(m[1])
-          logger.info "\t\t"+sess.pretty_inspect
-        end
-      }
-    end
-    logger.info "SESSION STORE:"
-    if cook = env["action_dispatch.request.unsigned_session_cookie"]
-      logger.info "\t\t"+cook.pretty_inspect
-    else
-      logger.info "\t\t= NIL"
+      cs.split('; ').each { |str| logger.info "\t"+str}
     end
   end
 

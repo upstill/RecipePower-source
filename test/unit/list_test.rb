@@ -26,7 +26,7 @@ class ListTest < ActiveSupport::TestCase
 
   test "create a list with a name tag" do
     tagee = users(:thing3)
-    tag = Tag.assert_tag("Test Tag", userid: tagee.id, tagtype: :Collection)
+    tag = Tag.assert("Test Tag", userid: tagee.id, tagtype: :Collection)
     tst = List.new owner: tagee, name_tag: tag
     assert_equal tag, tst.name_tag, "Name tag not stored in list"
     tst.save
@@ -47,8 +47,8 @@ class ListTest < ActiveSupport::TestCase
   test "create a list with tags" do
     tagee = users(:thing3)
     lst = List.new orderings: []
-    tag1 = Tag.assert_tag "Tag 1", userid: tagee.id
-    tag2 = Tag.assert_tag "Tag 2", userid: tagee.id, tagtype: :Ingredient
+    tag1 = Tag.assert "Tag 1", userid: tagee.id
+    tag2 = Tag.assert "Tag 2", userid: tagee.id, tagtype: :Ingredient
     lst.tags << tag1
     lst.tags << tag2
     assert_equal tag1, lst.tags.first, "First tag not attached to list after assignment"
@@ -68,6 +68,16 @@ class ListTest < ActiveSupport::TestCase
     lst.save
     lst.reload
     assert_equal note, lst.notes, "Notes not saved and restored"
+  end
+
+  test "create a list with a name string" do
+    tagee = users(:thing3)
+    list_name = "Test List"
+    list = List.assert( list_name, user: tagee )
+    list.save
+    assert_equal list_name, list.name, "new list name not stored"
+    list2 = List.assert( list_name, user: tagee )
+    assert_equal list, list2, "Re-using name tag created a different list"
   end
 
 end

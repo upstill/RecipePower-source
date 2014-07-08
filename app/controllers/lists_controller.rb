@@ -1,4 +1,7 @@
+require './lib/controller_utils.rb'
+
 class ListsController < ApplicationController
+
   def index
   end
 
@@ -15,6 +18,7 @@ class ListsController < ApplicationController
   end
 
   def new
+    @list = List.new
   end
 
   def edit

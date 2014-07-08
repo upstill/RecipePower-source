@@ -41,7 +41,7 @@ class CollectionController < ApplicationController
   def create
       response_service.title = "New Collection"
       respond_to do |format|
-        if @tag = Tag.assert_tag(params[:tag][:name], userid: current_user.id)
+        if @tag = Tag.assert(params[:tag][:name], userid: current_user.id)
           current_user.add_collection @tag
           # Create the collection, private to user
           # Make the collection current in the browser
