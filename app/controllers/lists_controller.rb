@@ -9,9 +9,22 @@ class ListsController < ApplicationController
   def create
     puts "List#create params: "+params[:list].to_s+" for user '#{current_user.name}'"
     @list = List.assert params[:list][:name], current_user
-    @list.save
+    if @list.id
+      flash[:notice] = "#{@list.name} already exists"
+    else
+      @list.save
+    end
     puts "Created list '#{@list.name}', owner: #{@list.owner.name}"
-    redirect_to edit_list_path(@list)
+    notice = "Successfully created '#{@list.name}'."
+    respond_to do |format|
+      format.html { redirect_to edit_list_path(@list), :status => :see_other, notice: notice }
+      format.json {
+        render json: {
+          done: true,
+          dlog: with_format('html') { render_to_string partial: "lists/edit_modal" },
+          popup: notice }
+      }
+    end
   end
 
   def show
@@ -40,6 +53,16 @@ class ListsController < ApplicationController
   end
 
   def destroy
+    @list = List.find params[:id]
+    name = @list.name
+    @list.destroy
+    respond_to do |format|
+      format.html { render action: "index" }
+      format.json { render json: { deletions: ["tr#list#{@list.id}"], popup: "'#{name}' destroyed"} }
+      format.js {
+        render action: "destroy", locals: { selector: "tr#list#{@list.id}", name: name }
+      }
+    end
   end
 
   def new

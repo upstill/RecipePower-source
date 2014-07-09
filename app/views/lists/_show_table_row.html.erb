@@ -1,0 +1,25 @@
+<tr id="list<%= @list.id.to_s %>">
+	<td>
+      <%= @list.id.to_s %></td>
+	<td>
+        <%= link_to_modal @list.name.truncate(80), list_path(@list) %><br>
+	</td>
+	<td>
+      <%= taggable_list @list %>
+    </td>
+	<td>
+      <%= @list.notes.truncate(200) %>
+    </td>
+	<td>
+		<% permitted_to?(:edit, :lists) do %>
+			<%= button_to_modal 'Edit', edit_list_path(@list) %>
+		<% end %>
+		<% permitted_to?(:destroy, :lists) do %>
+			<%= link_to_submit 'Destroy',
+                              @list,
+                              :method => :delete,
+                              :class => "btn btn-default btn-xs btn-danger",
+                              confirm: "Are you sure you want to destroy '#{@list.name}'? There's no going back!" %>
+		<% end %>
+	</td>
+</tr>

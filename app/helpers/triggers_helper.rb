@@ -39,7 +39,7 @@ module TriggersHelper
 	  options[:remote] = true
   	options[:class] = "submit "+(options[:class] || "")
   	options[:data] = { :method => options[:method] } if options[:method]
-	  button_to label, path, options
+	  link_to label, path, options
   	# link_to_function label, "RP.submit(event, '#{path}');", options
   end
   
