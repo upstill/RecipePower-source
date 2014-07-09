@@ -3,6 +3,7 @@ require './lib/controller_utils.rb'
 class ListsController < ApplicationController
 
   def index
+    seeker_result List, 'div.list_list'
   end
 
   def create
@@ -14,6 +15,9 @@ class ListsController < ApplicationController
   end
 
   def show
+    @list = List.find(params[:id])
+    response_service.title = "About #{@list.name}"
+    smartrender
   end
 
   def update
@@ -30,5 +34,6 @@ class ListsController < ApplicationController
   def edit
     puts "List#edit params: "+params.to_s+" for user '#{current_user.name}'"
     @list = List.find params[:id]
+    smartrender # area: "floating"
   end
 end

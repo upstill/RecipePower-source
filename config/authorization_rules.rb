@@ -12,7 +12,8 @@ authorization do
     has_permission_on [:recipes], :to => [ :subscribe, :update, :delete, :piclist, :touch ]
     has_permission_on [:tags], :to => [:read]
     has_permission_on [:feeds], :to => [:index, :show, :subscribe]
-    
+    has_permission_on [:lists], :to => [:index, :show, :subscribe, :edit, :update]
+
     #has_permission_on [:accounts, :categories, :matches, :transactions], :to => :create
     #has_permission_on [:accounts, :categories, :matches, :transactions], :to => :manage do
     #  if_attribute :user => is { user }
@@ -25,8 +26,7 @@ authorization do
   
   role :editor do
       includes :moderator
-      has_permission_on [:tags], :to => [:manage]
-      has_permission_on [:referents], :to => [:manage]
+      has_permission_on [:tags, :referents, :lists], :to => [:manage]
   end
   
   role :admin do

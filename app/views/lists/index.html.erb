@@ -1,2 +1,6 @@
-<h1>Lists#index</h1>
-<p>Find me in app/views/lists/index.html.erb</p>
+<div class="list_list" >
+  <h3>Currently Available Lists</h3>
+  <p>You can search for a list using the search box above.
+  </p><p>You can create a new list by clicking <%= link_to_modal "Here", new_list_path, class: "btn" %>.</p>
+  <%= seeker_table nil, lists_path, [ "ID", "Name", "Tag(s)", "Notes", "Actions" ].compact %>
+</div>
