@@ -46,4 +46,4 @@
 
 #= require bootstrap
 
-window.RP = window.RP || {}
+window.RP ||= {}

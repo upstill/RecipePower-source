@@ -47,6 +47,8 @@ GEM
     ansi (1.4.3)
     arel (4.0.2)
     atomic (1.1.15)
+    autoprefixer-rails (2.1.0.20140628)
+      execjs
     awesome_nested_set (2.1.6)
       activerecord (>= 3.0.0)
     bcrypt (3.1.7)
@@ -57,7 +59,7 @@ GEM
       erubis (>= 2.6.6)
     binding_of_caller (0.7.2)
       debug_inspector (>= 0.0.1)
-    bootstrap-sass (3.1.1.0)
+    bootstrap-sass (3.2.0.0)
       sass (~> 3.2)
     builder (3.1.4)
     capybara (2.1.0)
@@ -66,6 +68,7 @@ GEM
       rack (>= 1.0.0)
       rack-test (>= 0.5.4)
       xpath (~> 2.0)
+    cliver (0.3.2)
     closure_tree (4.4.0)
       activerecord (>= 3.0.0)
       with_advisory_lock (>= 0.0.9)
@@ -201,6 +204,11 @@ GEM
       omniauth-oauth (~> 1.0)
     orm_adapter (0.5.0)
     pg (0.17.1)
+    poltergeist (1.5.1)
+      capybara (~> 2.1)
+      cliver (~> 0.3.1)
+      multi_json (~> 1.0)
+      websocket-driver (>= 0.2.0)
     polyglot (0.3.4)
     protected_attributes (1.0.5)
       activemodel (>= 4.0.1, < 5.0)
@@ -294,6 +302,7 @@ GEM
       nokogiri (>= 1.2.0)
       rack (>= 1.0)
       rack-test (>= 0.5.3)
+    websocket-driver (0.3.4)
     will_paginate (3.0.5)
     with_advisory_lock (1.0.0)
       activerecord (>= 3.0.0)
@@ -306,10 +315,11 @@ PLATFORMS
 
 DEPENDENCIES
   annotate (= 2.5.0)
+  autoprefixer-rails
   awesome_nested_set
   better_errors
   binding_of_caller
-  bootstrap-sass (~> 3.1.1)
+  bootstrap-sass (~> 3.2.0)
   builder (~> 3.1.0)
   closure_tree
   coffee-rails (~> 4.0.0)
@@ -332,6 +342,7 @@ DEPENDENCIES
   log_buddy
   masonry-rails
   minitest (~> 4.2)
+  minitest-rails (~> 1.0)
   minitest-rails-capybara
   mocha
   newrelic_rpm
@@ -342,6 +353,7 @@ DEPENDENCIES
   omniauth-openid
   omniauth-twitter
   pg
+  poltergeist
   protected_attributes
   rails (~> 4.0)
   rails-observers

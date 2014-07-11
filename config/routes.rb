@@ -3,6 +3,9 @@
 # whereas GETting from #index starts afresh. This overloading was necessitated by problems using
 # a second, POST, method (#query), which wasn't being POSTed to upon page reload.
 
+unless @RPRoutesLoaded
+  @RPRoutesLoaded = true
+
 RP::Application.routes.draw do
 
   resources :votes, :only => :create
@@ -54,6 +57,14 @@ RP::Application.routes.draw do
     end
   end
 
+  post '/list' => 'lists#create', :as => 'create_list'
+  resources :lists, except: [ :index, :create ] do
+    member do
+      get 'scrape'
+    end
+  end
+  match 'lists', :controller=>'lists', :action=>'index', :via => [:get, :post]
+
   post '/site' => 'sites#create', :as => 'create_site'
   resources :sites, except: [ :index, :create ] do
     member do
@@ -75,10 +86,6 @@ RP::Application.routes.draw do
     end
   end
   match 'feeds', :controller=>'feeds', :action=>'index', :via => [:get, :post]
-
-  resources :lists, except: [ :index, :create ]
-  post '/list' => 'lists#create', :as => 'create_list'
-  match 'lists', :controller=>'lists', :action=>'index', :via => [:get, :post]
 
   post '/tag' => 'tags#create', :as => 'create_tag'
   resources :tags, except: [ :index, :create ] do
@@ -122,7 +129,7 @@ RP::Application.routes.draw do
     resources :tags do
       member { post 'remove', :to => 'recipes#untag' }
     end
-    member do 
+    member do
       get 'collect'
       get 'touch'
       get 'piclist'
@@ -206,4 +213,5 @@ RP::Application.routes.draw do
   # This is a legacy wild controller route that's not recommended for RESTful applications.
   # Note: This route will make all actions in every controller accessible via GET requests.
   # get ':controller(/:action(/:id(.:format)))'
+end
 end

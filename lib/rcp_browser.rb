@@ -1,4 +1,4 @@
-# Class for a single selectable collection of recipes, whether physical or virtual
+# Class for a single selectable collection of entities, whether physical or virtual
 require 'my_constants.rb'
 require "candihash.rb"
 include ActionView::Helpers::DateHelper
@@ -1071,6 +1071,50 @@ class RcpBrowserElementTaglist < RcpBrowserElement
   # The candidates are a list of recipes by id
   def candidates
     @candidates ||= tag.recipe_ids(@userid)
+  end
+
+end
+
+# Element for a recipe list due to a tag
+class RcpBrowserElementlist < RcpBrowserElement
+
+  def initialize(level, args)
+    super
+    @persisters << :tagid unless @persisters.include? :tagid
+    @level = level
+    @persisters.each { |name| instance_variable_set("@#{name}", args[name]) if args[name] } if @persisters
+    # @handle = "Tag #{@tagid.to_s}" # tag.name
+    @classed_as = :personal
+    tag # Will throw exception if tag doesn't exist
+  end
+
+  def css_id
+    self.class.to_s+@tagid.to_s
+  end
+
+  def tag
+    @tag ||= Tag.find(@tagid)
+  end
+
+  def find_by_content tag
+    self if tag.id == @tagid
+  end
+
+  def handle extended=false
+    extended ? "My <strong>#{tag.name}</strong> Collection".html_safe : tag.name
+  end
+
+  # Class method to return a hash sufficient to reconstruct the element
+  def save
+    result = Hash[@persisters.map { |name| instance_variable_get("@#{name.to_s}") && [name, instance_variable_get("@#{name.to_s}")] }.compact]
+    result[:classname] = self.class.name
+    result
+  end
+
+  private
+  # The candidates are a list of recipes by id
+  def candidates
+    @candidates ||= list.recipe_ids(@userid)
   end
 
 end

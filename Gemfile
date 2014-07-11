@@ -22,7 +22,6 @@ gem 'closure_tree'
 gem 'htmlentities'
 gem 'nokogiri', "~> 1.5" # "~> 1.5.3"
 gem 'will_paginate', '~> 3.0'
-gem 'minitest', '~> 4.2'
 gem 'newrelic_rpm'
 gem 'devise', '~> 3.1.0'                       # auth, rails generate devise:install, rails generate devise MODEL
 gem 'devise_invitable', '~> 1.3.0' # git: 'git://github.com/scambra/devise_invitable.git'
@@ -43,7 +42,6 @@ gem 'delayed_job' # , git: 'git://github.com/collectiveidea/delayed_job.git'
 gem 'delayed_job_active_record' # , git: 'git://github.com/collectiveidea/delayed_job_active_record.git'
 gem 'daemons'
 gem 'hirefire-resource'
-gem 'rspec-rails', :group => [:test, :development]
 # gem 'debugger', :group => [:test, :development]
 gem 'awesome_nested_set'
 gem 'redcarpet'
@@ -53,6 +51,8 @@ gem 'youtube_addy'
 gem 'exception_notification', git: 'git://github.com/smartinez87/exception_notification.git'
 # gem 'exception_notification', '~> 4.0.1', :require => 'exception_notifier' # , git: 'git://github.com/alanjds/exception_notification.git' 
 group :development do
+  gem 'minitest', '~> 4.2'
+  gem 'rspec-rails'
   gem 'annotate', '2.5.0'
   gem "nifty-generators"
   gem 'log_buddy'
@@ -65,6 +65,8 @@ end
 gem "masonry-rails"
 
 group :test do
+  gem 'minitest-rails', "~> 1.0" # gem 'minitest', '~> 4.2'
+  gem 'rspec-rails'
   # Pretty printed test output
   gem 'turn', :require => false
   gem 'webrat', '~> 0.7.3'
@@ -72,14 +74,16 @@ group :test do
   # gem "guard-rspec" # ...for auto-running tests on file save
   gem 'factory_girl_rails', "~> 4.0"
   gem "mocha"
+  gem 'poltergeist'
 end
 
 gem 'coffee-rails', "~> 4.0.0"
 gem 'uglifier', '>= 1.3.0'
 # gem 'compass-rails'
 gem 'sass-rails', " ~> 4.0"
-gem 'bootstrap-sass', '~> 3.1.1'
+gem 'bootstrap-sass', '~> 3.2.0' # '~> 3.1.1'
 # gem 'bootstrap-sass', github: 'thomas-mcdonald/bootstrap-sass', branch: '3'
+gem 'autoprefixer-rails'
 
 gem 'jquery-rails'
 
