@@ -121,10 +121,11 @@ class RecipesController < ApplicationController
         format.json {
           @decorator = @recipe.decorate
           @data = { onget: [ "submit.submit_and_process", collection_url(layout: false) ] }
+          response_service.is_dialog
           render json: {
             dlog: with_format("html") { 
               render_to_string :edit, layout: false
-            }
+            }, popup: "'#{@recipe.title}' now appearing in your colleciton."
           }
         }
       end

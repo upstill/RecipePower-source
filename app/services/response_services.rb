@@ -55,8 +55,8 @@ class ResponseServices
     # @format = "dialog" if query_params[:how] && (query_params[:how] == "modal")
   end
   
-  def is_dialog
-    @modal = true
+  def is_dialog set=true
+    @modal = set
   end
   
   def dialog?

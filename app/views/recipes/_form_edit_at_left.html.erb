@@ -26,9 +26,11 @@
               </div>
               <div class="col-md-7">
                 <div class="control-group">
+                  <label class="string optional">Title</label>
                   <textarea id="recipe_title" name="recipe[title]" placeholder="Title" style="width:100%"><%= present_field "rcpTitle" %></textarea>
                 </div>
                 <div class="control-group">
+                  <label class="string optional">Personal Collection(s)</label>
                   <input type="text"
                          class="token-input-field-pending"
                          id="recipe_collection_tokens"
@@ -39,6 +41,7 @@
                          data-pre="<%= @recipe ? @recipe.collections.map(&:attributes).to_json : "" %>"/>
                 </div>
                 <div class="control-group">
+                  <label class="string optional">Public Collection(s)</label>
                   <input type="text"
                          class="token-input-field-pending"
                          id="recipe_channel_tokens"
@@ -49,6 +52,7 @@
                          data-pre="<%= @recipe ? @recipe.channels.map(&:attributes).to_json : "" %>"/>
                 </div>
                 <div class="control-group">
+                  <label class="string optional">Tag(s)</label>
                   <input type="text"
                          class="token-input-field-pending"
                          id="recipe_misc_tag_tokens"
@@ -58,7 +62,12 @@
                          placeholder="Tags"
                          data-pre="<%= @recipe ? @recipe.misc_tags.map(&:attributes).to_json : "" %>"/>
                 </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
                 <div class="control-group">
+                  <label class="string optional">Notes & Comments</label>
                   <textarea id="recipe_comment" name="recipe[comment]" placeholder="Recipe Notes" rows="3" style="width:100%"><%= present_field "rcpComment" %></textarea>
                 </div>
               </div>

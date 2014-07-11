@@ -12,4 +12,8 @@ public/assets/
 */*/*/.DS_Store
 eventmachine/
 
+<<<<<<< HEAD
 db_timings
+=======
+/db_timings
+>>>>>>> refs/heads/hotfixes
