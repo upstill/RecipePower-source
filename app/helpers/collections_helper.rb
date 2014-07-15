@@ -44,7 +44,8 @@ require "time_check"
         menu_css_id = "RcpBrowserCompositeUser"
         # menu_items << collection_selection( @browser.find_by_id menu_css_id)
         menu_items << collection_selection( @browser.find_by_id "RcpBrowserElementRecent"  )
-        menu_items << link_to( "New Personal Collection...", @browser.find_by_id("RcpBrowserCompositeUser").add_path )
+        menu_items << link_to_modal( "New Personal Collection...", @browser.find_by_id("RcpBrowserCompositeUser").add_path )
+        menu_items << link_to_modal( "New Personal List...", "/lists/new?modal=true" )
       when :friends  # Add "All Friends' Cookmarks" and "Make a Friend..." items
         menu_css_id = "RcpBrowserCompositeFriends"
         # menu_items << collection_selection( @browser.find_by_id menu_css_id )

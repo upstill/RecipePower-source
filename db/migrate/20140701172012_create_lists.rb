@@ -3,7 +3,7 @@ class CreateLists < ActiveRecord::Migration
     create_table :lists do |t|
       t.integer :owner_id
       t.integer :name_tag_id
-      t.text :ordering
+      t.text :ordering, default: ""
       t.text :notes, default: ""
 
       t.timestamps

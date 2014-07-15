@@ -1075,8 +1075,8 @@ class RcpBrowserElementTaglist < RcpBrowserElement
 
 end
 
-# Element for a recipe list due to a tag
-class RcpBrowserElementlist < RcpBrowserElement
+# Element for a content List. A List is uniquely identified by 1) its title tag, and 2) the user
+class RcpBrowserElementList < RcpBrowserElement
 
   def initialize(level, args)
     super
@@ -1092,8 +1092,16 @@ class RcpBrowserElementlist < RcpBrowserElement
     self.class.to_s+@tagid.to_s
   end
 
+  def add_path
+    "/lists/new?modal=true"
+  end
+
   def tag
     @tag ||= Tag.find(@tagid)
+  end
+
+  def list
+    @list ||= List.assert(tag.name, user, create: true)
   end
 
   def find_by_content tag
@@ -1101,7 +1109,7 @@ class RcpBrowserElementlist < RcpBrowserElement
   end
 
   def handle extended=false
-    extended ? "My <strong>#{tag.name}</strong> Collection".html_safe : tag.name
+    extended ? "My <strong>#{tag.name}</strong> List".html_safe : tag.name
   end
 
   # Class method to return a hash sufficient to reconstruct the element
@@ -1114,7 +1122,7 @@ class RcpBrowserElementlist < RcpBrowserElement
   private
   # The candidates are a list of recipes by id
   def candidates
-    @candidates ||= list.recipe_ids(@userid)
+    @candidates ||= list.recipe_ids
   end
 
 end

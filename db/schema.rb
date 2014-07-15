@@ -112,7 +112,7 @@ ActiveRecord::Schema.define(version: 20140701172012) do
   create_table "lists", force: true do |t|
     t.integer  "owner_id"
     t.integer  "name_tag_id"
-    t.text     "ordering"
+    t.text     "ordering",    default: ""
     t.text     "notes",       default: ""
     t.datetime "created_at"
     t.datetime "updated_at"
