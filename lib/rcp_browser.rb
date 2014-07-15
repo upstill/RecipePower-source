@@ -1112,7 +1112,7 @@ class RcpBrowserElementList < RcpBrowserElement
     extended ? "My <strong>#{tag.name}</strong> List".html_safe : tag.name
   end
 
-  # Class method to return a hash sufficient to reconstruct the element
+  # Return a hash sufficient to reconstruct the element
   def save
     result = Hash[@persisters.map { |name| instance_variable_get("@#{name.to_s}") && [name, instance_variable_get("@#{name.to_s}")] }.compact]
     result[:classname] = self.class.name

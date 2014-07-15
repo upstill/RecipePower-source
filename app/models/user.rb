@@ -166,30 +166,6 @@ class User < ActiveRecord::Base
     User.super_id
   end
 
-=begin
-  # Wrap the tags and tag_ids accessor methods to eliminate sensitivity to the userid, deferring to super
-  alias_method :original_tags, :tags
-  def tags(uid=nil)
-    original_tags User.super_id
-  end
-
-  # Wrap the tags and tag_ids methods to eliminate sensitivity to the userid, deferring to super
-  alias_method :original_tags=, :tags=
-  def tags=(vals, uid=nil)
-    original_tags= vals, User.super_id
-  end
-
-  alias_method :original_tag_ids, :tag_ids
-  def tag_ids(uid=nil)
-    original_tag_ids User.super_id
-  end
-
-  alias_method :original_tag_ids=, :tag_ids=
-  def tag_ids=(vals, uid=nil)
-    original_tag_ids= vals, User.super_id
-  end
-=end
-
 private
   @@leasts = {}
   def self.least_email(str)

@@ -303,6 +303,11 @@ class Recipe < ActiveRecord::Base
     end
   end
 
+  # Does the recipe/entity appear in the user's collection?
+  def collected_by? uid
+    (ref = ref_for(uid, false)) && ref.in_collection
+  end
+
   # Set the mod time of the recipe to now (so it sorts properly in Recent lists)
   # If a uid is provided, touch the associated rcpref instead
   def touch add_to_collection = true, user = nil

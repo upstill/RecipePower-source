@@ -95,6 +95,8 @@ class List < ActiveRecord::Base
   # 3) adding the entity to the owner's collection
   def include entity
     self.ordering << ListItem.new(entity: entity) unless include?(entity)
+    TaggingServices.new(entity).assert(name_tag, owner.id)
+    entity.add_to_collection owner.id
   end
 
   # Get all the entities from the list, in order, ignoring those which can't be fetched to cache
@@ -105,7 +107,7 @@ class List < ActiveRecord::Base
   # XXX Placeholder Alert! We should be talking about general entities
   def recipe_ids
     result = ordering.map(&:id) # ...should also be extracting entities from subtags
-    existing = Set.new ids
+    existing = Set.new result
     tags.each do |tag|
       unless (newids = tag.recipe_ids(owner)).empty?
         adding = Set.new(newids) - existing
@@ -113,6 +115,7 @@ class List < ActiveRecord::Base
         existing = existing + adding
       end
     end
+    result
   end
 
 end
