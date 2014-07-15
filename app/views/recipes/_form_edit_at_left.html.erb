@@ -29,6 +29,7 @@
                   <label class="string optional">Title</label>
                   <textarea id="recipe_title" name="recipe[title]" placeholder="Title" style="width:100%"><%= present_field "rcpTitle" %></textarea>
                 </div>
+<!--
                 <div class="control-group">
                   <label class="string optional">Personal Collection(s)</label>
                   <input type="text"
@@ -38,7 +39,7 @@
                          rows="2"
                          size="30"
                          placeholder="In My Collections"
-                         data-pre="<%= @recipe ? @recipe.collections.map(&:attributes).to_json : "" %>"/>
+                         data-pre="<%# @recipe ? @recipe.collections.map(&:attributes).to_json : "" %>"/>
                 </div>
                 <div class="control-group">
                   <label class="string optional">Public Collection(s)</label>
@@ -49,8 +50,9 @@
                          rows="2"
                          size="30"
                          placeholder="Channels"
-                         data-pre="<%= @recipe ? @recipe.channels.map(&:attributes).to_json : "" %>"/>
+                         data-pre="<%# @recipe ? @recipe.channels.map(&:attributes).to_json : "" %>"/>
                 </div>
+-->
                 <div class="control-group">
                   <label class="string optional">Tag(s)</label>
                   <input type="text"

@@ -20,6 +20,12 @@
 	# text-shadow: 0 1px 0 #888888;
 }
 
+.simple_form label {
+  float: left;
+  width: 150px;
+  margin: 4px 1px 10px;
+}
+
 .top_right_corner {
   position: absolute;
   z-index: 1000;

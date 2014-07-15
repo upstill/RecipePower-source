@@ -47,6 +47,7 @@ gem 'awesome_nested_set'
 gem 'redcarpet'
 gem 'content_for_in_controllers'
 gem 'youtube_addy'
+# gem 'active_model_serializers'
 
 gem 'exception_notification', git: 'git://github.com/smartinez87/exception_notification.git'
 # gem 'exception_notification', '~> 4.0.1', :require => 'exception_notifier' # , git: 'git://github.com/alanjds/exception_notification.git' 
