@@ -54,11 +54,19 @@ class List < ActiveRecord::Base
   include Commentable
   commentable :notes
   include Taggable
+  include Typeable
+
+  typeable( :availability,
+            public: ["Anyone (Public)", 0 ],
+            friends: ["Friends Only", 1],
+            private: ["Me only (Private)", 2]
+  )
 
   belongs_to :owner, class_name: "User"   # The creator and default editor
   belongs_to :name_tag, class_name: "Tag"
   has_and_belongs_to_many :tags
-  attr_accessible :owner, :ordering, :name, :name_tag, :tags, :notes, :owner_id
+  has_and_belongs_to_many :subscribers, class_name: "User"
+  attr_accessible :owner, :ordering, :name, :name_tag, :tags, :notes, :description, :availability, :owner_id
   serialize :ordering, ListSerializer
 
   # Using the name string, either find an existing list or create a new one FOR THE CURRENT USER

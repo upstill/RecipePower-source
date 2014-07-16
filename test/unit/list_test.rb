@@ -7,7 +7,8 @@ class ListTest < ActiveSupport::TestCase
   def setup
     @owner = users(:thing3)
     @lst_name = "Test List"
-    @lst = List.assert @lst_name, @owner
+    @description = "A list strictly for testing purposes"
+    @lst = List.assert @lst_name, @owner, description: @description
     # Get a recipe under a tag
     @lst.include (@included = FactoryGirl.create(:recipe))
   end
@@ -72,6 +73,15 @@ class ListTest < ActiveSupport::TestCase
     @lst.save
     @lst.reload
     assert_equal note, @lst.notes, "Notes not saved and restored"
+  end
+
+  test "create a list with a description" do
+    assert_equal "", @lst.description, "Description doesn't default to empty string"
+    @lst.description = @description
+    assert_equal @description, @lst.description, "Description not stored"
+    @lst.save
+    @lst.reload
+    assert_equal @description, @lst.description, "Description not saved and restored"
   end
 
   test "a list is created with an empty array of entities" do
