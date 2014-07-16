@@ -7,6 +7,7 @@ class ListsController < ApplicationController
   end
 
   def create
+    response_service.title = "New List"
     puts "List#create params: "+params[:list].to_s+" for user '#{current_user.name}'"
     @list = List.assert params[:list][:name], current_user
     if @list.id

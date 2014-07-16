@@ -125,6 +125,11 @@ ActiveRecord::Schema.define(version: 20140701172012) do
     t.datetime "updated_at"
   end
 
+  create_table "lists_users", force: true do |t|
+    t.integer "list_id"
+    t.integer "user_id"
+  end
+
   create_table "notifications", force: true do |t|
     t.integer  "source_id"
     t.integer  "target_id"

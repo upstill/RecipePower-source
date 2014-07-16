@@ -37,8 +37,9 @@ class User < ActiveRecord::Base
 
   # Channels are just another kind of user. This field (channel_referent_id, externally) denotes such.
   belongs_to :channel, :class_name => "Referent", :foreign_key => "channel_referent_id"
-  
+
   has_and_belongs_to_many :feeds
+  has_and_belongs_to_many :lists
 
   # Private collections
   has_many :private_subscriptions, -> { order "priority ASC" }, :dependent=>:destroy
@@ -96,6 +97,13 @@ class User < ActiveRecord::Base
     browser.select_by_content feed
     browser.delete_selected
     feeds.delete feed
+    save
+  end
+
+  def add_list l
+    l.save unless l.id
+    self.lists = lists+[l] # unless self.list_ids.include?(l.id)
+    browser.select_by_content l.name_tag
     save
   end
 

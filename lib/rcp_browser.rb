@@ -575,7 +575,14 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
 
   # Add a collection by reference to a tag
   def add_by_content tag
-    @children << RcpBrowserElementTaglist.new(@level+1, tagid: tag.id, userid: @userid) unless find_by_content(tag)
+    if found = find_by_content(tag)
+      return found
+    end
+    child = (tag.tagtype == 16) ?
+        RcpBrowserElementList.new(@level+1, tagid: tag.id, userid: @userid) :
+        RcpBrowserElementTaglist.new(@level+1, tagid: tag.id, userid: @userid)
+    @children << child
+    child
   end
 
   def should_show(recipe)

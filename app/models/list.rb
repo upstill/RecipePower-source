@@ -68,6 +68,7 @@ class List < ActiveRecord::Base
     puts "...asserted with id #{tag.id}"
     l = List.where(owner_id: user.id, name_tag_id: tag.id).first || List.new(owner: user, name_tag: tag)
     l.save if options[:create] && !l.id
+    user.add_list l # Ensure it appears in the browser
     l
   end
 
