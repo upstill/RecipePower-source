@@ -16,11 +16,11 @@
     <div class="form-group">
       <label class="text options">Available To</label>
       <div class="btn-group" data-toggle="buttons-checkbox" data-toggle-name="list[typenum]">
-        <button type="button" name="availability" class="btn btn-go" value="0" data-toggle="button">Just Me</button>
+        <button type="button" name="availability" class="btn btn-go" value="2" data-toggle="button">Everyone</button>
         <button type="button" name="availability" class="btn btn-caution" value="1" data-toggle="button">Friends Only</button>
-        <button type="button" name="availability" class="btn btn-stop" value="2" data-toggle="button">Everyone</button>
+        <button type="button" name="availability" class="btn btn-stop" value="0" data-toggle="button">Just Me</button>
       </div>
-      <input type="hidden" name="list[typenum]" value="<%= @list.typenum.to_s %>" data-toggle-default="8"/>
+      <input type="hidden" name="list[typenum]" value="<%= @list.typenum.to_s %>" data-toggle-default="2"/>
     </div>
     <%# token_input_field f %>
     <%# f.input :notes, placeholder: "Notes about the list", input_html: {cols: 125, rows: 2, "data-type" => "json"} %>

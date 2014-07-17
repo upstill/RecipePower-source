@@ -13,12 +13,11 @@ class ListsController < ApplicationController
     @list.description = params[:list][:description]
     @list.typenum = params[:list][:typenum]
     if @list.id
-      flash[:notice] = "#{@list.name} already exists"
+      notice = "Found list '#{@list.name}'."
     else
-      @list.save
+      notice = "Successfully created '#{@list.name}'."
     end
-    puts "Created list '#{@list.name}', owner: #{@list.owner.name}"
-    notice = "Successfully created '#{@list.name}'."
+    @list.save
     respond_to do |format|
       format.html { redirect_to edit_list_path(@list), :status => :see_other, notice: notice }
       format.json {

@@ -1,9 +1,6 @@
 <%# Form for taking a list locator and using it to create a list %>
 <%= simple_form_for @list, html: {class: "edit_list json", 'data-type' => :json} do |f| %>
     <%= form_errors_helper f %>
-    <% unless @list.description.blank? %>
-        <div class="row"><div class="md-12">"<%= @list.description %></div></div>
-    <% end %>
     <%# f.input :name, label: "Name", placeholder: "Your List Name Here", input_html: {cols: 125, rows: 1, "data-type" => "json"} %>
     <%= token_input_field f %>
     <%= f.input :notes, placeholder: "Notes about the list", input_html: {cols: 125, rows: 2, "data-type" => "json"} %>
