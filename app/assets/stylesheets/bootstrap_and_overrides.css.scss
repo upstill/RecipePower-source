@@ -68,6 +68,36 @@ body { padding-top: 60px; }
 	float: left;
 }
 
+.btn-group {
+  button.btn-go {
+    color: white;
+    background-color: #449d44;
+    border-color: #398439;
+    :hover {
+      background-color: #449d44;
+      border-color: #398439;
+    }
+  }
+  button.btn-caution {
+    color: white;
+    background-color: #ec971f;
+    border-color: #d58512;
+    :hover {
+      background-color: #ec971f;
+      border-color: #d58512;
+    }
+  }
+  button.btn-stop {
+    color: white;
+    background-color: #d9534f;
+    border-color: #d43f3a;
+    :hover {
+      background-color: #c9302c;
+      border-color: #ac2925;
+    }
+  }
+}
+
 .dialog-cancel-button {
 	float:right;
 	margin: 10px;

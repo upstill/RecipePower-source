@@ -10,6 +10,8 @@ class ListsController < ApplicationController
     response_service.title = "New List"
     puts "List#create params: "+params[:list].to_s+" for user '#{current_user.name}'"
     @list = List.assert params[:list][:name], current_user
+    @list.description = params[:list][:description]
+    @list.typenum = params[:list][:typenum]
     if @list.id
       flash[:notice] = "#{@list.name} already exists"
     else

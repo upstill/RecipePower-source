@@ -1,4 +1,5 @@
 <%# Fields for an edit-list dialog %>
-<%= modal_dialog :edit_list, "Edit List '#{@list.name}'" do %>
+<% header = @list.name; header << ": #{@list.description}" unless @list.description.blank? %>
+<%= modal_dialog :edit_list, header do %>
   <%= render "edit_form" %>
 <% end %>
