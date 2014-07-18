@@ -446,8 +446,6 @@ class ListSeeker < Seeker
   def apply_tags(candihash)
     # Rank/purge for tag matches
     tags.each { |tag|
-      semantic_list = Feed.where(site_id: Site.where(referent_id: tag.referent_ids).map(&:id)).map(&:id)
-      candihash.apply semantic_list
       # Get candidates by matching the tag's name against recipe titles and comments
       candihash.apply affiliate.where("description ILIKE ?", "%#{tag.name}%").map(&:id)
       candihash.apply affiliate.where("title ILIKE ?", "%#{tag.name}%").map(&:id)
