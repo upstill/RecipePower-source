@@ -10,7 +10,7 @@ RP::Application.routes.draw do
 
   if Rails.env.development? || Rails.env.test?
     # IntegersController is for testing streams
-    get "integers/index"
+    get "integers" => 'integers#index'
   end
   resources :votes, :only => :create
   post '/votes/recipes/:recipe_id' => 'votes#create', :as => "vote_recipe"
