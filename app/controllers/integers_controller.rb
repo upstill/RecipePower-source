@@ -1,11 +1,24 @@
+require 'reloader/sse'
+
 class IntegersController < ApplicationController
+  include ActionController::Live
+
   def index
     # StreamPresenter.new.render # Sets up stream content and stream footer
     @sp = StreamPresenter.new params
-    if @sp.stream_now?  # We're here to spew items into the stream
-
+    if @sp.stream?  # We're here to spew items into the stream
+      response.headers["Content-Type"] = "text/event-stream"
+      # retrieve_seeker
+      begin
+        sse = Reloader::SSE.new(response.stream)
+        while item = @sp.next_item do
+          sse.write :stream_item, with_format("html") { view_context.emit_stream_item item }
+        end
+      rescue IOError
+        logger.info "Stream closed"
+      ensure
+        sse.close more_to_come: !@sp.next_path.blank? # (@seeker.npages > @seeker.cur_page)
+      end
     end
-    @stream_contents = with_format("html") { render_to_string partial: "stream_contents" }.html_safe
-    @stream_footer = with_format("html") { render_to_string partial: "stream_footer" }.html_safe
   end
 end

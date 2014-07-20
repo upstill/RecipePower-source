@@ -157,7 +157,7 @@ class ApplicationController < ActionController::Base
           end
           { replacements: replacements }
         else
-          {  streams: [ ['#seeker_results', {kind: @seeker.class.to_s, append: @seeker.cur_page.to_i>1}] ] }
+          {  streams: [ ['#seeker_results', {path: "/stream/stream?kind=#{@seeker.class}", append: @seeker.cur_page.to_i>1}] ] }
         end
       end
     end

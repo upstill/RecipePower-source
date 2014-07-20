@@ -9,7 +9,12 @@ class Streamer
     @item_index if (@item_index < @limit)
   end
 
+  def next_path
+    "/integers?stream=12-20"
+  end
+
   def initialize offset, limit, params
+    limit = (offset+10) if limit > (offset+10)
     @offset, @limit = offset, limit
     @item_index = @offset-1
   end
@@ -17,6 +22,10 @@ class Streamer
   def items
     @items ||= setup
     @items
+  end
+
+  def done?
+    @item_index >= (@limit-1)
   end
 
 protected
@@ -47,13 +56,13 @@ end
 class StreamPresenter
   attr_accessor :streamer
 
-  delegate :items, :next_item, :to => :streamer
+  delegate :items, :next_item, :next_path, :"done?", :to => :streamer
 
   def initialize params={}
     # Format of stream parameter is <start>[:<end>]
     @params = params
     if params[:stream]
-      @offset, @limit = params[:stream].split(':').map(&:to_i)
+      @offset, @limit = params[:stream].split('-').map(&:to_i)
       @limit ||= @offset+10
     else
       @offset, @limit = 0, 1000000
@@ -71,8 +80,14 @@ class StreamPresenter
     # with_format("html") { render_to_string partial: "stream_footer" }
   end
 
-  def stream_now?
+  # Time to emit the stream? 'stream' parameter has item specs
+  def stream?
     @params[:stream]
+  end
+
+  # Should the items be dumped now?
+  def dump?
+    !@params.has_key?(:stream)
   end
 
 end

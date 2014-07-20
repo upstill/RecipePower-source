@@ -38,15 +38,12 @@ module SeekerHelper
 
   # Set up a DOM element to receive a stream of seeker results
 	def arm_seeker_stream enclosing_element, querypath, options={}
-    stream_link = link_to "Click to load", "#",
-	    # onload: 'RP.stream.go(event);',
-	    class: 'content-streamer hidden',
-	    data: { kind: @seeker.class.to_s } # , alert: ((current_user && (current_user.id == 3)) ? "Firing Stream" : "") }
+    link = stream_link "/stream/stream?kind=#{@seeker.class}", class: "content-streamer hidden"
     options[:data] ||= {}
     querypath = "/#{querypath}" unless querypath =~ /^\//
     options[:data][:"query-path"] = querypath
     options[:id] = "seeker_results"
-    content_tag enclosing_element, stream_link, options
+    content_tag enclosing_element, link, options
   end
 
   def element_item selector, elmt
