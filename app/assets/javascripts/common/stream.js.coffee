@@ -14,7 +14,9 @@ RP.stream.fire = (elmt) ->
 	source.addEventListener 'end_of_stream', (e) ->
 		jdata = JSON.parse e.data
 		source.close()
-		RP.collection.more_to_come jdata.more_to_come
+		if jdata.more_to_come
+			RP.collection.more_to_come jdata.more_to_come
+		RP.process_response jdata
 	source.addEventListener 'stream_item', (e) ->
 		jdata = JSON.parse e.data
 		# If the item specifies a handler, call that

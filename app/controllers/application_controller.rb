@@ -1,8 +1,10 @@
 require './lib/controller_authentication.rb'
 require './lib/seeker.rb'
 require 'rp_event'
+require 'reloader/sse'
 
 class ApplicationController < ActionController::Base
+  include ActionController::Live   # For streaming
   # layout :rs_layout # Declare in any controller to let response_service pick the layout
   protect_from_forgery with: :exception
   
@@ -173,6 +175,28 @@ class ApplicationController < ActionController::Base
         render template: "shared/get_content"
       end
       format.json { render json: jsondata(klass, frame_selector, options) }
+    end
+  end
+
+  # Take a stream presenter and drop items into a stream, if possible and called for.
+  # Otherwise, defer to normal rendering
+  def do_stream presenter
+    @sp = presenter
+    if @sp.stream?  # We're here to spew items into the stream
+      response.headers["Content-Type"] = "text/event-stream"
+      # retrieve_seeker
+      begin
+        sse = Reloader::SSE.new(response.stream)
+        while item = @sp.next_item do
+          sse.write :stream_item, with_format("html") { view_context.emit_stream_item item }
+        end
+      rescue IOError
+        logger.info "Stream closed"
+      ensure
+        footer = with_format("html") { render_to_string partial: "stream_footer" }
+        sse.close replacements: [ [ "#stream_footer", footer ] ] #more_to_come: !@sp.next_path.blank? # (@seeker.npages > @seeker.cur_page)
+      end
+      true
     end
   end
   

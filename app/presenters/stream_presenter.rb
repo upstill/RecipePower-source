@@ -5,18 +5,20 @@ class Streamer
   attr_accessor :items, :cache
 
   def next_item
-    @item_index = (@item_index ? (@item_index+1) : @offset)
-    @item_index if (@item_index < @limit)
+    result = @next_item_index if (@next_item_index < @limit)
+    @next_item_index = @next_item_index + 1
+    result
   end
 
   def next_path
-    "/integers?stream=12-20"
+    newlimit = @next_item_index+(@limit-@offset)
+    "/integers?stream=#{@next_item_index}-#{newlimit}"
   end
 
   def initialize offset, limit, params
     limit = (offset+10) if limit > (offset+10)
     @offset, @limit = offset, limit
-    @item_index = @offset-1
+    @next_item_index = @offset
   end
 
   def items
@@ -25,7 +27,7 @@ class Streamer
   end
 
   def done?
-    @item_index >= (@limit-1)
+    @item_index >= @limit
   end
 
 protected
@@ -44,11 +46,6 @@ class IntegersStreamer < Streamer
 
   def items
     (@offset...@limit).to_a
-  end
-
-  def next_item
-    @item_index = (@item_index ? (@item_index+1) : @offset)
-    @item_index if (@item_index < @limit)
   end
 
 end
