@@ -7,7 +7,8 @@ RP.stream.go = (evt) ->
 RP.stream.fire = (elmt) ->
 	elmt.innerHTML = "Recipes are on their way..."
 	querypath = $(elmt).data('path')
-	shell_selector = $(elmt).data('parent') || "#seeker_results"
+	container_selector = $(elmt).data('containerSelector') || ""
+	container_selector += " .stream_items_parent"
 	source = new EventSource querypath
 	source.onerror = (evt) ->
 		state = evt.target.readyState
@@ -26,9 +27,9 @@ RP.stream.fire = (elmt) ->
 			item = $(jdata.elmt)
 			# selector = jdata.selector || '.collection_list'
 			# $(selector).append item
-			$(shell_selector).append item
-			if $(shell_selector).hasClass 'masonry-container'
-				masonry_selector = shell_selector+'.masonry-container'
+			$(container_selector).append item
+			if $(container_selector).hasClass 'masonry-container'
+				masonry_selector = container_selector+'.masonry-container'
 				$(masonry_selector).masonry 'appended', item
 				# Any (hopefully few) pictures that are loaded from URL will resize the element
 				# when they appear.

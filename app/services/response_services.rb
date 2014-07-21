@@ -248,6 +248,14 @@ class ResponseServices
         end
   end
 
+  def container_selector
+    if dialog?
+      "div.dialog"
+    else
+      "div.container"
+    end
+  end
+
   private
 
   def clear_pending_request

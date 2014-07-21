@@ -58,11 +58,11 @@ class StreamPresenter
   def initialize params={}
     # Format of stream parameter is <start>[:<end>]
     @params = params
-    if params[:stream]
+    if params[:stream].blank?
+      @offset, @limit = 0, 1000000
+    else
       @offset, @limit = params[:stream].split('-').map(&:to_i)
       @limit ||= @offset+10
-    else
-      @offset, @limit = 0, 1000000
     end
 
     # Get a Streamer subclass for the controller and action
@@ -79,7 +79,7 @@ class StreamPresenter
 
   # Time to emit the stream? 'stream' parameter has item specs
   def stream?
-    @params[:stream]
+    !@params[:stream].blank?
   end
 
   # Should the items be dumped now?

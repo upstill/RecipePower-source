@@ -1,5 +1,5 @@
 <div class="row">
-  <div class="col-md-12" id="seeker_results">
+  <div class="col-md-12 stream_items_parent" id="seeker_results">
     <% if @sp.dump? %>
         <% while (@stream_item = @sp.next_item) do %>
             <%= render "stream_item" %>

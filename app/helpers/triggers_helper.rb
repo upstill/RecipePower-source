@@ -26,7 +26,8 @@ module TriggersHelper
 	  end
   	options.merge! remote: true
   	options[:class] = "dialog-run "+(options[:class] || "")
-  	path = assert_query path, modal: true # how: "modal" # , area: "floating"
+    query_options = options[:query] || {}
+  	path = assert_query path, query_options.merge(modal: true) # how: "modal" # , area: "floating"
   	link_to label, path, options
   end
 

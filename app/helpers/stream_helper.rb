@@ -4,6 +4,7 @@ module StreamHelper
     options[:onclick] = 'RP.stream.go(event);'
     options[:data] = {} unless options[:data]
     options[:data][:path] = path
+    options[:data][:container_selector] = response_service.container_selector
     link_to "Click to load", "#", options
   end
 
