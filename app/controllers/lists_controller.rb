@@ -3,7 +3,8 @@ require './lib/controller_utils.rb'
 class ListsController < ApplicationController
 
   def index
-    seeker_result List, 'div.list_list'
+    # seeker_result List, 'div.list_list'
+    smartrender unless do_stream StreamPresenter
   end
 
   def create

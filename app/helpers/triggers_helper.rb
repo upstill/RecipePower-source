@@ -37,8 +37,10 @@ module TriggersHelper
 	
 	# Hit a URL, with options for confirmation (:confirm-msg) and waiting (:wait-msg)
 	def link_to_submit(label, path, options={})
-	  options[:remote] = true
+	  options[:remote] = true unless options.has_key? :remote
   	options[:class] = "submit "+(options[:class] || "")
+    data = {}
+    data[:method]
   	options[:data] = { :method => options[:method] } if options[:method]
 	  link_to label, path, options
   	# link_to_function label, "RP.submit(event, '#{path}');", options

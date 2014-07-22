@@ -1,10 +1,12 @@
-<div class="row">
-  <div class="col-md-12 stream_items_parent" id="seeker_results">
-    <% if @sp.dump? %>
-        <% while (@stream_item = @sp.next_item) do %>
-            <%= render "stream_item" %>
-        <% end %>
-    <% end %>
+<div class="stream-shell">
+  <div class="row">
+    <div class="col-md-12 stream_items_parent" id="seeker_results">
+      <% if @sp.dump? %>
+          <% while (@stream_item = @sp.next_item) do %>
+              <%= render "stream_item" %>
+          <% end %>
+      <% end %>
+    </div>
   </div>
+  <%= render "stream_footer" if !@sp.dump? %>
 </div>
-<%= render "stream_footer" if !@sp.dump? %>

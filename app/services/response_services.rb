@@ -10,7 +10,7 @@
 
 class ResponseServices
 
-  attr_accessor :action, :title
+  attr_accessor :action, :title, :partial, :page_url
 
   def initialize params, session, request
     @request = request
@@ -32,6 +32,8 @@ class ResponseServices
     # @format = (params[:format] || "page")
     # @format = "dialog" if (params[:how] == "modal")
     @modal = params[:modal]
+    @partial = params[:partial] && (params[:partial] == "true")
+    @page_url = request.url
   end
 
   # Provide a URL that reproduces the current request
@@ -90,6 +92,10 @@ class ResponseServices
   # True if we're targetting mobile
   def mobile?
     @session[:mobile] && true
+  end
+
+  def partial?
+    partial
   end
   
   # Return relevant options for modal dialog

@@ -180,8 +180,8 @@ class ApplicationController < ActionController::Base
 
   # Take a stream presenter and drop items into a stream, if possible and called for.
   # Otherwise, defer to normal rendering
-  def do_stream presenter
-    @sp = presenter
+  def do_stream klass
+    @sp = klass.new params
     if @sp.stream?  # We're here to spew items into the stream
       response.headers["Content-Type"] = "text/event-stream"
       # retrieve_seeker
@@ -222,14 +222,18 @@ class ApplicationController < ActionController::Base
         end
       end
       format.json {
-        # Blithely assuming that we want a modal-dialog element if we're getting JSON
-        response_service.is_dialog
-        renderopts[:layout] = (@layout || false)
-        hresult = with_format("html") do
-          render_to_string response_service.action, renderopts # May have special iframe layout
+        if response_service.partial?
+          renderopts[:layout] = false
+        else
+          # Blithely assuming that we want a modal-dialog element if we're getting JSON and not a partial
+          response_service.is_dialog
+          renderopts[:layout] = (@layout || false)
+          hresult = with_format("html") do
+            render_to_string response_service.action, renderopts # May have special iframe layout
+          end
+          # renderopts[:json] = { code: hresult, area: response_service.format_class, how: "bootstrap" }
+          renderopts[:json] = {code: hresult, how: "bootstrap"}
         end
-        # renderopts[:json] = { code: hresult, area: response_service.format_class, how: "bootstrap" }
-        renderopts[:json] = { code: hresult, how: "bootstrap" }
         render renderopts
       }
       format.js {
