@@ -10,7 +10,7 @@
 
 class ResponseServices
 
-  attr_accessor :action, :title, :partial, :page_url
+  attr_accessor :action, :title, :partial, :page_url, :page_title
 
   def initialize params, session, request
     @request = request
@@ -18,6 +18,7 @@ class ResponseServices
     @response = params[:response]
     @controller = params[:controller]
     @title = @controller.capitalize
+    @page_title = "RecipePower | #{@title}"
     @action = params[:action]
     @invitation_token = params[:invitation_token]
     @notification_token = params[:notification_token]
@@ -33,12 +34,20 @@ class ResponseServices
     # @format = "dialog" if (params[:how] == "modal")
     @modal = params[:modal]
     @partial = params[:partial] && (params[:partial] == "true")
-    @page_url = request.url
+
+    # Save the parameters we might want to pass back
+    @meaningful_params = params.except(:controller, :action, :partial, :format)
   end
 
   # Provide a URL that reproduces the current request
   def originator
-    @request.url
+    unless @originator
+      uri = URI @request.url
+      uri.query = @meaningful_params.to_param
+      uri.path = uri.path.sub(/\..*/,'') # Remove any format indicator
+      @originator = uri.to_s
+    end
+    @originator
   end
 
   def omniauth_pending clear = false

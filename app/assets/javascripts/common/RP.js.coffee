@@ -278,7 +278,10 @@ RP.process_response = (responseData, dlog) ->
 
 		if redirect = responseData.redirect
 			window.location.assign redirect # "http://local.recipepower.com:3000/collection" #  href = href
-		
+
+		if state = responseData.pushState
+			window.history.pushState null, state[1], state[0]
+
 		if deletions = responseData.deletions
 			for deletion in deletions
 				$(deletion).remove()
@@ -292,7 +295,7 @@ RP.process_response = (responseData, dlog) ->
 		# If it's a page that includes a dialog, assert that, otherwise replace the page
 		if (code = responseData.code) && !supplanted = RP.dialog.replace_modal code, dlog
 				responseData.page ||= code
-			
+
 		if form = responseData.form
 			# Find the form to replace in error scenarios
 			action = form.getAttribute("action")
