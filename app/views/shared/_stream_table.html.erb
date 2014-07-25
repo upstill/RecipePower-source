@@ -1,0 +1,18 @@
+<!-- View for listing entities in a table -->
+<div class="stream-shell">
+  <table class="table table-striped ">
+    <thead>
+    <tr>
+      <%= headers.collect { |ttl| "<th>#{ttl}</th>" unless ttl.blank? }.compact.join("\n").html_safe %>
+    </tr>
+    </thead>
+    <tbody class="stream-items-parent">
+    <% if @sp.dump? %>
+        <% while (@stream_item = @sp.next_item) do %>
+            <%= render "stream_item" %>
+        <% end %>
+    <% end %>
+    </tbody>
+  </table>
+  <%= render "stream_footer" if !@sp.dump? %>
+</div>

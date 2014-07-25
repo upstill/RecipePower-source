@@ -1,5 +1,6 @@
 require 'test_helper'
 class StreamPresenterTest < ActiveSupport::TestCase
+  fixtures :sites
 
   test "ten items stream with single offset" do
     sp = StreamPresenter.new stream: "12"
@@ -32,5 +33,9 @@ class StreamPresenterTest < ActiveSupport::TestCase
     refute sp.stream?
     assert sp.dump?
     assert_nil sp.next_path
+  end
+
+  test "presenter parses existing tag" do
+    t = tags(:jal)
   end
 end

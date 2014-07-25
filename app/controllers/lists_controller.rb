@@ -1,6 +1,8 @@
 require './lib/controller_utils.rb'
+require './lib/querytags.rb'
 
 class ListsController < ApplicationController
+  include Querytags # Grab the query tags from params for filtering a list
 
   def index
     # seeker_result List, 'div.list_list'
@@ -69,8 +71,7 @@ class ListsController < ApplicationController
   end
 
   def new
-    puts "current_user: "+current_user.name
-    @list = List.new(owner_id: current_user.id)
+    @list = List.new(owner_id: params[:owner_id].to_i || current_user.id)
     smartrender
   end
 

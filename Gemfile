@@ -53,7 +53,7 @@ gem 'exception_notification', git: 'git://github.com/smartinez87/exception_notif
 # gem 'exception_notification', '~> 4.0.1', :require => 'exception_notifier' # , git: 'git://github.com/alanjds/exception_notification.git' 
 group :development do
   gem 'minitest', '~> 4.2'
-  gem 'rspec-rails'
+  # gem 'rspec-rails'
   gem 'annotate', '2.5.0'
   gem "nifty-generators"
   gem 'log_buddy'
@@ -67,7 +67,7 @@ gem "masonry-rails"
 
 group :test do
   gem 'minitest-rails', "~> 1.0" # gem 'minitest', '~> 4.2'
-  gem 'rspec-rails'
+  # gem 'rspec-rails'
   # Pretty printed test output
   gem 'turn', :require => false
   gem 'webrat', '~> 0.7.3'

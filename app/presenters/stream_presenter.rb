@@ -5,9 +5,12 @@ class Streamer
   attr_accessor :items, :cache
 
   def next_item
-    result = @next_item_index if (@next_item_index < @limit)
-    @next_item_index = @next_item_index + 1
-    result
+    next_index
+  end
+
+  # Must define a query to filter results
+  def query
+
   end
 
   def next_path
@@ -32,6 +35,12 @@ class Streamer
 
 protected
 
+  def next_index hold=false
+    result = @next_item_index if (@next_item_index < @limit)
+    @next_item_index = @next_item_index + 1 unless hold
+    result
+  end
+
   def setup
     (@offset...@limit).to_a
   end
@@ -50,12 +59,34 @@ class IntegersStreamer < Streamer
 
 end
 
+class ListsStreamer < Streamer
+
+  def items
+    @items ||= List.all
+  end
+
+  def next_item
+    items[next_index]
+  end
+
+  def next_path
+    newlimit = @next_item_index+(@limit-@offset)
+    "/lists?stream=#{@next_item_index}-#{newlimit}"
+  end
+
+  def query
+    "/lists"
+  end
+
+end
+
+
 class StreamPresenter
   attr_accessor :streamer
 
-  delegate :items, :next_item, :next_path, :"done?", :to => :streamer
+  delegate :items, :next_item, :next_path, :query, :"done?", :to => :streamer
 
-  def initialize params={}
+  def initialize querytags, params={}
     # Format of stream parameter is <start>[:<end>]
     @params = params
     if params[:stream].blank?
@@ -85,6 +116,11 @@ class StreamPresenter
   # Should the items be dumped now?
   def dump?
     !@params.has_key?(:stream)
+  end
+
+  # This is the chance to set what tag types the presenter allows to filter for
+  def tagtypes
+    nil
   end
 
 end

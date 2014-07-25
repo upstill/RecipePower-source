@@ -1,4 +1,16 @@
 module StreamHelper
+
+  def stream_filter_field presenter, options={}
+    options[:data] ||= {}
+    options[:data][:hint] ||= "Narrow down the list"
+    options[:data][:pre] ||= @querytags.map(&:attributes).to_json
+    # options[:data][:token_limit] = 1 unless is_plural
+    options[:data][:"min-chars"] ||= 2
+    options[:data][:query] = "tagtypes=#{presenter.tagtypes.map(&:to_s).join(',')}" if presenter.tagtypes
+    options[:class] = "token-input-field-pending #{options[:class]}" # The token-input-field-pending class triggers tokenInput
+    text_field_tag "querytags", @querytags.map(&:id).join(','), options
+  end
+
   # Leave a link for stream firing
   def stream_link path, options={}
     options[:onclick] = 'RP.stream.go(event);'

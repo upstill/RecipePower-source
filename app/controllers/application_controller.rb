@@ -105,8 +105,8 @@ class ApplicationController < ActionController::Base
     logger.debug "@seeker returning #{@seeker ? 'not ' : ''}nil."
     @seeker
   end
-  
-  # All controllers displaying the collection need to have it setup 
+
+  # All controllers displaying the collection need to have it setup
   def setup_collection klass="Content", options={}
       @user ||= current_user_or_guest
       @browser = @user.browser params
@@ -181,7 +181,7 @@ class ApplicationController < ActionController::Base
   # Take a stream presenter and drop items into a stream, if possible and called for.
   # Otherwise, defer to normal rendering
   def do_stream klass
-    @sp = klass.new params
+    @sp = klass.new querytags, params
     if @sp.stream?  # We're here to spew items into the stream
       response.headers["Content-Type"] = "text/event-stream"
       # retrieve_seeker
@@ -281,7 +281,7 @@ class ApplicationController < ActionController::Base
     @response_service.is_mobile if (params[:target] == "mobile")
     @response_service
   end
-  
+
   # This object directs conditional view code according to target device and context
   def response_service
     @response_service || setup_response_service

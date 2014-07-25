@@ -235,19 +235,20 @@ RP.detach = (node) ->
 RP.change = (event) ->
 	elmt = event.target
 	data = $(elmt).data()
+	query = data.querydata
 	# Stick the value of the element into the named parameter ('value' default)
 	if data.valueparam
-		data.querydata[data.valueparam] = elmt.value
+		query[data.valueparam] = elmt.value
 	else
-		data.querydata.value = elmt.value
+		query.value = elmt.value
 	# Fire off an Ajax call notifying the server of the (re)classification
-	RP.submit.submit_and_process RP.build_request(data), "GET", data
+	RP.submit.submit_and_process RP.build_request(data.request, query), "GET", data
 
 # Build a request string from a structure with attributes 'request' and 'querydata'
-RP.build_request = (data) ->
+RP.build_request = (request, query) ->
 	# Encode the querydata into the request string
 	str = []
-	for attrname,attrvalue of data.querydata
+	for attrname,attrvalue of query
 		str.push(encodeURIComponent(attrname) + "=" + encodeURIComponent(attrvalue));
 	# Fire off an Ajax call notifying the server of the (re)classification
 	data.request+"?"+str.join("&")

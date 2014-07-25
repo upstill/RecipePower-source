@@ -8,7 +8,7 @@ RP.stream.fire = (elmt) ->
 	elmt.innerHTML = "Recipes are on their way..."
 	querypath = $(elmt).data('path')
 	container_selector = $(elmt).data('containerSelector') || ""
-	container_selector += " .stream_items_parent"
+	container_selector += " .stream-items-parent"
 	source = new EventSource querypath
 	source.onerror = (evt) ->
 		state = evt.target.readyState
@@ -44,3 +44,14 @@ RP.stream.buffer_test = ->
 	source.addEventListener 'message', (e) ->
 		jdata = JSON.parse e.data
 		$('#seeker_results').append("<div>"+jdata.text+"</div>")
+
+RP.stream.tagchange = () ->
+	formitem = $('form.query_form')
+	if $(formitem).data("format") == "html"
+		formitem.submit()
+	else
+		data = $(formitem).serialize()
+		request = $(formitem).attr("action")+"?"+$(formitem).serialize()
+		RP.submit.submit_and_process request, "GET",
+			wait_msg: "Here goes nothin'..."
+		# RP.collection.update $(formitem).serialize(), $(formitem).attr("action")
