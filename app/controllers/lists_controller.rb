@@ -2,7 +2,6 @@ require './lib/controller_utils.rb'
 require './lib/querytags.rb'
 
 class ListsController < ApplicationController
-  include Querytags # Grab the query tags from params for filtering a list
 
   def index
     # seeker_result List, 'div.list_list'

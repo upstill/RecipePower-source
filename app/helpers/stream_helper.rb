@@ -3,7 +3,8 @@ module StreamHelper
   def stream_filter_field presenter, options={}
     options[:data] ||= {}
     options[:data][:hint] ||= "Narrow down the list"
-    options[:data][:pre] ||= @querytags.map(&:attributes).to_json
+    tag_arr = @querytags.map(&:attributes).collect { |attr| { id: attr["id"], name: attr["name"] } }
+    options[:data][:pre] ||= tag_arr.to_json
     # options[:data][:token_limit] = 1 unless is_plural
     options[:data][:"min-chars"] ||= 2
     options[:data][:query] = "tagtypes=#{presenter.tagtypes.map(&:to_s).join(',')}" if presenter.tagtypes
@@ -62,6 +63,50 @@ module StreamHelper
             '.collection_list'
         end
     package_stream_item selector, elmt
+  end
+
+  # Provide one element of a dropdown menu for a selection
+  def stream_menu_item label, path, id
+    link_to_submit label, path, id: id
+  end
+
+  # Declare the dropdown for a particular class of collection
+  def stream_dropdown which
+    menu_items = []
+    if current_user
+      menu_items =
+      case which
+        when :personal
+          current_user.lists.collect { |l| stream_menu_item(l.name, list_path(l), dom_id(l)) }
+        when :friends
+          current_user.followees.collect { |u| stream_menu_item(u.handle, user_friends_collection_path(u), dom_id(u)) }
+        when :public
+          current_user.private_subscriptions.collect { |l| stream_menu_item(l.name, list_path(l), dom_id(l)) }
+      end
+    end
+    menu_items << %q{<hr style="margin:5px">}
+    active = false # ?? XXX @browser.selected.classed_as == which
+    case which
+      when :personal  # Add "All My Cookmarks", "Recently Viewed" and "New Collection..." items
+        menu_css_id = "RcpBrowserCompositeUser"
+        collection_selection = stream_menu_item("My Collection", user_private_collection_path(current_user), dom_id(current_user_or_guest))
+        # menu_items << collection_selection( @browser.find_by_id "RcpBrowserElementRecent"  )
+        menu_items << link_to_modal( "New Personal List...", "/lists/new?modal=true" )
+      when :friends  # Add "All Friends' Cookmarks" and "Make a Friend..." items
+        menu_css_id = "RcpBrowserCompositeFriends"
+        menu_items << link_to("Make a Friend...", @browser.find_by_id("RcpBrowserCompositeFriends").add_path)
+      when :public   # Add "The Master Collection", and "Another Collection..." items
+        menu_css_id = "RcpBrowserElementAllRecipes"
+        # menu_items << collection_selection( @browser.find_by_id menu_css_id )
+        menu_items << link_to("Another Public Collection...", @browser.find_by_id("RcpBrowserCompositeChannels").add_path)
+    end
+    menu_list = "<li>" + menu_items.join('</li><li>') + "</li>"
+    menu_label = %Q{#{which.to_s.capitalize}<span class="caret"><span>}.html_safe
+    content_tag :li,
+                # link_to( menu_label, "#", class: "dropdown-toggle", data: {toggle: "dropdown"} )+
+                collection_selection(nil, menu_label, menu_css_id )+
+                    content_tag(:ul, menu_list.html_safe, class: "dropdown-menu"),
+                class: "dropdown"+(active ? " active" : "")
   end
 
 end

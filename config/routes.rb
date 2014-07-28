@@ -50,6 +50,7 @@ RP::Application.routes.draw do
   get 'users/profile' => 'users#profile'
   # Ask a user to identify him/herself by email address
   get 'users/identify' => 'users#identify'
+  get 'users/:id/:owned' => 'users#showowned'
   # get 'users/:id/show' => 'users#show'
   resources :users, :except => [ :index, :create ] do
     member do

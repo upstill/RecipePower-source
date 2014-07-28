@@ -1,106 +1,31 @@
-class Streamer
-  # The streamer class is defined to respond to a query with a series of items
-  # This is a brain-dead integer generator
-
-  attr_accessor :items, :cache
-
-  def next_item
-    next_index
-  end
-
-  # Must define a query to filter results
-  def query
-
-  end
-
-  def next_path
-    newlimit = @next_item_index+(@limit-@offset)
-    "/integers?stream=#{@next_item_index}-#{newlimit}"
-  end
-
-  def initialize offset, limit, params
-    limit = (offset+10) if limit > (offset+10)
-    @offset, @limit = offset, limit
-    @next_item_index = @offset
-  end
-
-  def items
-    @items ||= setup
-    @items
-  end
-
-  def done?
-    @item_index >= @limit
-  end
-
-protected
-
-  def next_index hold=false
-    result = @next_item_index if (@next_item_index < @limit)
-    @next_item_index = @next_item_index + 1 unless hold
-    result
-  end
-
-  def setup
-    (@offset...@limit).to_a
-  end
-
-end
-
-class IntegerStreamer < Streamer
-
-end
-
-class IntegersStreamer < Streamer
-
-  def items
-    (@offset...@limit).to_a
-  end
-
-end
-
-class ListsStreamer < Streamer
-
-  def items
-    @items ||= List.all
-  end
-
-  def next_item
-    items[next_index]
-  end
-
-  def next_path
-    newlimit = @next_item_index+(@limit-@offset)
-    "/lists?stream=#{@next_item_index}-#{newlimit}"
-  end
-
-  def query
-    "/lists"
-  end
-
-end
-
-
 class StreamPresenter
-  attr_accessor :streamer
+  attr_accessor :results
 
-  delegate :items, :next_item, :next_path, :query, :"done?", :to => :streamer
+  delegate :items, :next_item, :next_range, :query, :"done?", :window, :to => :results
 
-  def initialize querytags, params={}
+  def initialize session_id, querytags=[], params={}
+    if querytags.class == Hash
+      params, querytags = querytags, []
+    end
     # Format of stream parameter is <start>[:<end>]
+    stream_param = params.delete :stream
     @params = params
-    if params[:stream].blank?
+    if stream_param.blank?
       @offset, @limit = 0, 1000000
     else
-      @offset, @limit = params[:stream].split('-').map(&:to_i)
+      @offset, @limit = stream_param.split('-').map(&:to_i)
       @limit ||= @offset+10
     end
 
     # Get a Streamer subclass for the controller and action
+    @results = ResultsCache.retrieve_or_build session_id, querytags, params
+    @results.window = @offset..@limit
+=begin
     controller = (params[:controller] || "").capitalize
     controller = controller.pluralize if params[:action] && (params[:action] == "index")
     Object.const_defined?(name = controller+"Streamer") || (name = "Streamer")
     @streamer = name.constantize.new @offset, @limit, params
+=end
   end
 
   def render

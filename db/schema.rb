@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140701172012) do
+ActiveRecord::Schema.define(version: 20140726213513) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -243,6 +243,19 @@ ActiveRecord::Schema.define(version: 20140701172012) do
     t.datetime "created_at",   null: false
     t.datetime "updated_at",   null: false
   end
+
+  create_table "results_caches", id: false, force: true do |t|
+    t.string   "session_id"
+    t.text     "params"
+    t.text     "cache"
+    t.string   "type"
+    t.integer  "cur_position", default: 0
+    t.integer  "limit",        default: -1
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "results_caches", ["session_id"], name: "index_results_caches_on_session_id", using: :btree
 
   create_table "rp_events", force: true do |t|
     t.integer  "verb"
