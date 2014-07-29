@@ -1,5 +1,6 @@
 require './lib/controller_authentication.rb'
 require './lib/seeker.rb'
+require './lib/querytags.rb'
 require 'rp_event'
 require 'reloader/sse'
 
@@ -182,7 +183,7 @@ class ApplicationController < ActionController::Base
   # Take a stream presenter and drop items into a stream, if possible and called for.
   # Otherwise, defer to normal rendering
   def do_stream klass
-    @sp = klass.new querytags, params
+    @sp = klass.new session.id, request.fullpath, querytags, params
     if @sp.stream?  # We're here to spew items into the stream
       response.headers["Content-Type"] = "text/event-stream"
       # retrieve_seeker
@@ -195,7 +196,7 @@ class ApplicationController < ActionController::Base
         logger.info "Stream closed"
       ensure
         footer = with_format("html") { render_to_string partial: "stream_footer" }
-        sse.close replacements: [ [ "#stream_footer", footer ] ] #more_to_come: !@sp.next_path.blank? # (@seeker.npages > @seeker.cur_page)
+        sse.close replacements: [ [ "#stream-footer", footer ] ] #more_to_come: !@sp.next_path.blank? # (@seeker.npages > @seeker.cur_page)
       end
       true
     end

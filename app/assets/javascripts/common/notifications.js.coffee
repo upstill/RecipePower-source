@@ -93,5 +93,6 @@ bootbox_alert = (msg) ->
 			bootbox.alert msg
 		else
 			$('div.bootbox .modal-footer button').click() # $('div.bootbox').modal('hide') # $('div.bootbox.modal').modal 'hide'
+			$('div.modal').removeClass('modal').addClass('modal-pending')
 			$('div.modal-backdrop').remove()
 	available

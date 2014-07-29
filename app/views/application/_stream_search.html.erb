@@ -2,7 +2,7 @@
 <div class="stream-search">
   <% unless @sp.query.blank? %>
       <div class="form-group" style="display:inline-block">
-        <form class="form-search query_form" action="<%= @sp.query %>" data-format="html">
+        <form class="form-search query_form" action="<%= @sp.query partial: true %>" data-format="json">
           <div class="search-query form-group collection_query_tokens tags">
             <%= stream_filter_field @sp,
                                   rows: 1,
