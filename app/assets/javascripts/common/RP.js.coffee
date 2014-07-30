@@ -268,6 +268,10 @@ RP.process_response = (responseData, dlog) ->
 			for replacement in replacements
 				$(replacement[0]).replaceWith replacement[1]
 				$(replacement[0]).trigger "load"
+				# The third value may be a function name to call on the replaced elemnnt
+				if (loader = replacement[2]) && (loadFcn = RP.named_function(loader))
+					loadFcn($(replacement[0])[0])
+
 
     ###
 		if streams = responseData.streams

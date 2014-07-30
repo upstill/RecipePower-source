@@ -14,8 +14,14 @@ RP.tagger.onopen = (selector = '.token-input-field-pending') ->
 	$(selector).each ->
 		RP.tagger.setup this
 
+RP.tagger.onload = (event) ->
+	elmt = event.currentTarget
+	RP.tagger.setup elmt
+
 # Use data attached to the element to initiate tokenInput
 RP.tagger.setup = (elmt) ->
+	if ! $(elmt).hasClass 'token-input-field-pending'
+		elmt = $('.token-input-field-pending', elmt)
 	data = $(elmt).data() || {}
 	request = data.request || "/tags/match.json"
 	if data.query
