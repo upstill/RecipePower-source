@@ -91,8 +91,8 @@ bootbox_alert = (msg) ->
 	if available = (typeof bootbox != "undefined")
 		if msg && msg.length > 0
 			bootbox.alert msg
-		else
-			$('div.bootbox .modal-footer button').click() # $('div.bootbox').modal('hide') # $('div.bootbox.modal').modal 'hide'
-			$('div.modal').removeClass('modal').addClass('modal-pending')
+		else # bootstrap dialog
+			$('div.bootbox .bootbox-close-button').click() # $('div.bootbox').modal('hide') # $('div.bootbox.modal').modal 'hide'
+			$('div.bootbox-alert').remove()
 			$('div.modal-backdrop').remove()
 	available

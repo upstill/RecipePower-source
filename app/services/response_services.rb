@@ -43,7 +43,7 @@ class ResponseServices
   def originator
     unless @originator
       uri = URI @request.url
-      uri.query = @meaningful_params.to_param
+      uri.query = nil if (uri.query = @meaningful_params.to_param).blank?
       uri.path = uri.path.sub(/\..*/,'') # Remove any format indicator
       @originator = uri.to_s
     end

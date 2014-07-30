@@ -53,9 +53,11 @@ RP.stream.tagchange = () ->
 		data = $(formitem).serialize()
 		# Add the serialized form data to the action, accounting for existing query
 		request = $(formitem).attr("action")
-		delim = "?"
-		if request.match /\?/
-			delim = "&"
-		request = request + delim + $(formitem).serialize()
+		qt = $(formitem).serialize()
+		if qt.split('=')[1].length > 0
+			delim = "?"
+			if request.match /\?/
+				delim = "&"
+			request = request + delim + qt
 		RP.submit.submit_and_process request, "GET",
 			wait_msg: "Here goes nothin'..."
