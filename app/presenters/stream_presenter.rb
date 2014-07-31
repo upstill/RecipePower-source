@@ -12,14 +12,15 @@ class StreamPresenter
     @stream_param = params.delete :stream if params[:stream]
     # @params = params
     if @stream_param.blank?
-      @offset, @limit = 0, 1000000
+      @offset, @limit = 0, -1
     else
       @offset, @limit = @stream_param.split('-').map(&:to_i)
-      @limit ||= @offset+10
+      @limit ||= -1
     end
 
     # Get a Streamer subclass for the controller and action
     @results = ResultsCache.retrieve_or_build session_id, querytags, params
+    @limit = @offset + @results.window_size if @limit < 0
     @results.window = @offset..@limit
   end
 

@@ -74,6 +74,11 @@ class ResultsCache < ActiveRecord::Base
     end
   end
 
+  # Here's where we suggest the typical size of window
+  def window_size
+    10
+  end
+
   protected
 
   # Get the index of the next element, subject to the constraints of the current window,

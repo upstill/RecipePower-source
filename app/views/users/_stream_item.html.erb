@@ -1,0 +1,14 @@
+<% add_link = (current_user && !current_user.follows?(@stream_item)) ?
+        link_to((@stream_item.channel? ? 'Add to Channels' : 'Make Friend'), collect_user_path(@stream_item), :class => "btn btn-default btn-xs") : "" %>
+<tr id="<%= dom_id @stream_item %>">
+  <td><%= link_to_modal @stream_item.handle, user_path(@stream_item) %></td>
+  <td><%= @stream_item.about %></td>
+  <td><%= taggable_list @stream_item %></td>
+  <td><%= @stream_item.recipes_collection_size %></td>
+  <td><%= add_link %></td>
+  <% if permitted_to? :edit, @stream_item %>
+      <td><%= link_to_modal 'Edit', edit_user_path(@stream_item), :class => "btn btn-default btn-xs" %></td>
+      <td><%= link_to 'Hide', user_path(@stream_item, user: { private: true }), :class => "btn btn-default btn-xs", method: :put %></td>
+      <td><%= link_to 'Destroy', @stream_item, confirm: "Are you sure about deleting this user? It's a rather drastic step.", :class => "btn btn-default btn-xs btn-danger", method: :delete %></td>
+  <% end %>
+</tr>

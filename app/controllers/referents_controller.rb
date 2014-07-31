@@ -181,7 +181,7 @@ class ReferentsController < ApplicationController
         format.json {
           # The Channels table shows users (which are the outward face of channels)
           if @referent.class == ChannelReferent
-            selector = "#listrow_#{@referent.user.id}"
+            selector = dom_id(@referent.user) # "#listrow_#{@referent.user.id}"
             element = @referent.user
           else
             selector = "#Referent#{@referent.id}"

@@ -1,6 +1,6 @@
 <% add_link = (current_user && !current_user.follows?(@user)) ?
    link_to((@user.channel? ? 'Add to Channels' : 'Make Friend'), collect_user_path(@user), :class => "btn btn-default btn-xs") : "" %>
-<tr id="listrow_<%= @user.id.to_s %>">
+<tr id="<%= dom_id @user %>">
 	<td><%= link_to_modal @user.handle, user_path(@user) %></td>
 	<td><%= @user.about %></td>
 	<td><%= taggable_list @user %></td>

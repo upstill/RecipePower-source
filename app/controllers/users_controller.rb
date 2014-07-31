@@ -31,7 +31,8 @@ class UsersController < ApplicationController
   # GET /users.xml
   def index
     # 'index' page may be calling itself with filter parameters in the name and tagtype
-    seeker_result User, 'div.user_list' # , clear_tags: true
+    # seeker_result User, 'div.user_list' # , clear_tags: true
+    smartrender unless do_stream StreamPresenter
   end
   
 =begin
@@ -172,7 +173,7 @@ class UsersController < ApplicationController
           handleitem = %Q{<span class="handle text-on-black">#{@user.handle}&nbsp;&or;</span>}.html_safe
           render json: {
             done: true,
-            replacements: [ ["#listrow_"+@user.id.to_s, listitem],
+            replacements: [ [ view_context.dom_id(@user), listitem], # "#listrow_"+@user.id.to_s, listitem],
                             view_context.flash_notifications_replacement,
                             ['span.handle', handleitem ]
             ]

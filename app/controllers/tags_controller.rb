@@ -4,7 +4,8 @@ class TagsController < ApplicationController
   # GET /tags
   # GET /tags.xml
   def index
-    seeker_result Tag, 'div.tag_list' # , clear_tags: true
+    # seeker_result Tag, 'div.tag_list' # , clear_tags: true
+    smartrender unless do_stream StreamPresenter
   end
 
   # POST /tags
