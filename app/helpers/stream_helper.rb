@@ -37,10 +37,15 @@ module StreamHelper
       when Fixnum
         "<p>#{element}</p>"
       else
-        # Default is to set instance variable @<Klass> and render "<klass>s/<klass>"
-        ename = element.class.to_s.downcase
-        self.instance_variable_set("@"+ename, element)
-        render partial: "#{ename.pluralize}/show_table_row", locals: { ename.to_sym => element }
+        if element.is_a? Reference
+          @reference = element
+          render partial: "references/show_table_row", locals: { :reference => element }
+        else
+          # Default is to set instance variable @<Klass> and render "<klass>s/<klass>"
+          ename = element.class.to_s.downcase
+          self.instance_variable_set("@"+ename, element)
+          render partial: "#{ename.pluralize}/show_table_row", locals: { ename.to_sym => element }
+        end
     end
   end
 

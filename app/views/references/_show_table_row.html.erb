@@ -1,11 +1,11 @@
 <tr>
 	<td>
-		<%= @reference.typename %>
+		<%= @reference.type.sub 'Reference', '' %>
 	</td><td>
 		<%= link_to @reference.url, @reference.url %>
 		<%= reference_expressions @reference %>
 	</td><td>
-		<%= link_to_modal 'Show', @reference %>
+		<%= link_to_modal 'Show', reference_path(@reference) %>
 	</td>
 	<% if permitted_to? :edit, @reference %>
 		<td><%= link_to_modal 'Edit', edit_reference_path(@reference) %></td>

@@ -2,7 +2,8 @@ class ReferencesController < ApplicationController
   # GET /references
   # GET /references.json
   def index
-    seeker_result Reference, 'div.reference_list' # , clear_tags: true
+    # seeker_result Reference, 'div.reference_list' # , clear_tags: true
+    smartrender unless do_stream StreamPresenter
   end
   
 =begin

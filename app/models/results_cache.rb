@@ -31,7 +31,7 @@ class ResultsCache < ActiveRecord::Base
   
   def initialize params
     super # Let ActiveRecord take care of initializing attributes
-    self.limit = calc_limit # Figure the maximum extent of the results
+    self.limit = full_size # Figure the maximum extent of the results
   end
 
   # Provide the stream parameter for the "next page" link. Will be null if we've passed the window
@@ -71,8 +71,10 @@ class ResultsCache < ActiveRecord::Base
   def query
     raise 'Abstract Method'
   end
-  
-  def calc_limit
+
+  # Return the total number of items in the result. This doesn't have to be every possible item, just
+  # enough to stay ahead of the window.
+  def full_size
     -1 # Default is infinite scrolling
   end
 
@@ -121,7 +123,7 @@ class ListsCache < ResultsCache
     @items ||= List.all[@window]
   end
   
-  def calc_limit
+  def full_size
     List.count
   end
 
@@ -139,7 +141,7 @@ class FeedsCache < ResultsCache
     @items ||= Feed.all[@window]
   end
   
-  def calc_limit
+  def full_size
     Feed.count
   end
 
@@ -157,7 +159,7 @@ class UsersCache < ResultsCache
     @items ||= User.all[@window]
   end
 
-  def calc_limit
+  def full_size
     User.count
   end
 
@@ -197,7 +199,7 @@ class TagsCache < ResultsCache
     @items
   end
 
-  def calc_limit
+  def full_size
     Tag.count
   end
 
@@ -220,12 +222,20 @@ class SitesCache < ResultsCache
     @items ||= Site.all
   end
 
+  def full_size
+    Site.count
+  end
+
 end
 
 class ReferencesCache < ResultsCache
 
   def items
     @items ||= Reference.all
+  end
+
+  def full_size
+    Reference.count
   end
 
 end
