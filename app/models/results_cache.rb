@@ -28,6 +28,11 @@ class ResultsCache < ActiveRecord::Base
     Object.const_defined?(name = controller+"Cache") || (name = "ResultsCache")
     name.constantize
   end
+  
+  def initialize params
+    super # Let ActiveRecord take care of initializing attributes
+    self.limit = calc_limit # Figure the maximum extent of the results
+  end
 
   # Provide the stream parameter for the "next page" link. Will be null if we've passed the window
   def next_range
@@ -66,10 +71,14 @@ class ResultsCache < ActiveRecord::Base
   def query
     raise 'Abstract Method'
   end
+  
+  def calc_limit
+    -1 # Default is infinite scrolling
+  end
 
   # Return the next item, incrementing the cur_position
   def next_item
-    if i = next_index
+    if (i = next_index) && items # i is relative to the current window
       items[i]
     end
   end
@@ -102,14 +111,18 @@ class IntegersCache < ResultsCache
   def window= r
     super( (r.max-r.min) < 10 ? r : r.min...(r.min+10) )
   end
-
-  end
+  
+end
 
 # list of lists visible to current user (ListsStreamer)
 class ListsCache < ResultsCache
 
   def items
-    @items ||= List.all
+    @items ||= List.all[@window]
+  end
+  
+  def calc_limit
+    List.count
   end
 
 end
@@ -123,7 +136,11 @@ end
 class FeedsCache < ResultsCache
 
   def items
-    @items ||= Feed.all
+    @items ||= Feed.all[@window]
+  end
+  
+  def calc_limit
+    Feed.count
   end
 
 end
@@ -137,7 +154,11 @@ end
 class UsersCache < ResultsCache
 
   def items
-    @items ||= User.all
+    @items ||= User.all[@window]
+  end
+
+  def calc_limit
+    User.count
   end
 
 end
@@ -159,8 +180,32 @@ end
 
 class TagsCache < ResultsCache
 
+  def initialize attribs
+    super
+    @tagtype = attribs[:params][:tagtype] if attribs[:params]
+  end
+
   def items
-    @items ||= Tag.all
+    unless @items
+      if @tagtype
+        items = Tag.where(tagtype: @tagtype)
+      else
+        items = Tag.all
+      end
+      @items = items[@window]
+    end
+    @items
+  end
+
+  def calc_limit
+    Tag.count
+  end
+
+  def param sym
+    case sym
+      when :tagtype
+        @tagtype
+    end
   end
 
 end

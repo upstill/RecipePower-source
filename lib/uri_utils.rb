@@ -172,7 +172,8 @@ def assert_query url, newparams={}
       qparams.delete k.to_s
     end
   } # Assert the new params, poss. over the old
-  uri.query = qparams.collect { |k, v| "#{k.to_s}=#{CGI::escape v[0]}" unless v.empty? }.compact.join('&')
+  newq = qparams.collect { |k, v| "#{k.to_s}=#{CGI::escape v[0]}" unless v.empty? }.compact.join('&')
+  uri.query = newq.blank? ? nil : newq
   uri.to_s
 end
 

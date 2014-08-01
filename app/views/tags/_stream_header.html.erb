@@ -1,0 +1,27 @@
+<div class="stream-header">
+  <% unless @sp.query.blank? %>
+      <div class="form-group" style="display:inline-block">
+        <form class="form-search tagtype_form" action="<%= @sp.query partial: true %>" data-format="json">
+          <div class="search-query form-group collection_query_tokens tags">
+            <%= stream_filter_field @sp,
+                                    rows: 1,
+                                    placeholder: "Seek and ye shall find...",
+                                    autofocus: true,
+                                    data: {:"on-add" => "RP.stream.tagchange",
+                                           :"on-delete" => "RP.stream.tagchange",
+                                           :hint => "", # "Search the collection by typing terms here",
+                                           placeholder: "Seek and ye shall find...",
+                                           :"no-results-text" => "No matching tag found; hit Enter to search with text"} %>
+          </div>
+        </form>
+      </div>
+  <% end %>
+  <%= form_tag(assert_query(@sp.query, partial: true), :class => "form-search tagtype_form") do %>
+      <h3>Tags of type:
+        <%= select_tag :tagtype, options_from_collection_for_select(Tag.type_selections(true), :last, :first, @sp.param(:tagtype)) || 0,
+                       :include_blank => true,
+                       :onchange => %Q{RP.stream.tagchange( "form.tagtype_form" ); } %>
+      </h3>
+  <% end %>
+  <%= link_to_modal 'New Tag', new_tag_path %>
+</div>

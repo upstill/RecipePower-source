@@ -8,11 +8,11 @@
     </thead>
     <tbody class="stream-items-parent">
     <% if @sp.dump? %>
-        <% while (@stream_item = @sp.next_item) do %>
-            <%= render "stream_item" %>
+        <% while (item = @sp.next_item) do %>
+            <%= render_stream_item item %>
         <% end %>
     <% end %>
     </tbody>
   </table>
-  <%= render "stream_footer" if !@sp.dump? %>
+  <%= render "stream_footer" %>
 </div>

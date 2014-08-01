@@ -190,7 +190,7 @@ class ApplicationController < ActionController::Base
       begin
         sse = Reloader::SSE.new(response.stream)
         while item = @sp.next_item do
-          sse.write :stream_item, with_format("html") { view_context.emit_stream_item item }
+          sse.write :stream_item, with_format("html") { { elmt: view_context.render_stream_item(item) } }
         end
       rescue IOError
         logger.info "Stream closed"

@@ -44,28 +44,6 @@ module StreamHelper
     end
   end
 
-  def package_stream_item selector, elmt
-    { elmt: elmt, selector: selector }
-  end
-
-  # Package up a collection element for passing into a stream
-  def emit_stream_item element
-    elmt = render_stream_item element
-    return { elmt: elmt }
-    selector =
-        case element
-          when Recipe
-            '#masonry-container'
-          when FeedEntry
-            'ul.feed_entries'
-          when Tag
-            'tbody.collection_list'
-          else
-            '.collection_list'
-        end
-    package_stream_item selector, elmt
-  end
-
   # Provide one element of a dropdown menu for a selection
   def stream_menu_item label, path, id
     link_to_submit label, path, id: id

@@ -1,7 +1,7 @@
 class StreamPresenter
   attr_accessor :results
 
-  delegate :items, :next_item, :next_range, :"done?", :window, :to => :results
+  delegate :items, :next_item, :next_range, :"done?", :window, :param, :to => :results
 
   def initialize session_id, requestpath, querytags=[], params={}
     if querytags.class == Hash
@@ -9,19 +9,18 @@ class StreamPresenter
     end
     @thispath = requestpath # stash the path from this request
     # Format of stream parameter is <start>[-<end>]
-    @stream_param = params.delete :stream if params[:stream]
-    # @params = params
+    @stream_param = params.delete(:stream) || "" if params.has_key? :stream
     if @stream_param.blank?
-      @offset, @limit = 0, -1
+      offset, limit = 0, -1
     else
-      @offset, @limit = @stream_param.split('-').map(&:to_i)
-      @limit ||= -1
+      offset, limit = @stream_param.split('-').map(&:to_i)
+      limit ||= -1
     end
 
     # Get a Streamer subclass for the controller and action
     @results = ResultsCache.retrieve_or_build session_id, querytags, params
-    @limit = @offset + @results.window_size if @limit < 0
-    @results.window = @offset..@limit
+    limit = offset + @results.window_size if limit < 0
+    @results.window = offset..limit
   end
 
   def render

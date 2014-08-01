@@ -11,6 +11,7 @@ RP.stream.fire = (elmt) ->
 	container_selector += " .stream-items-parent"
 	source = new EventSource querypath
 	source.onerror = (evt) ->
+		source.close()
 		state = evt.target.readyState
 	source.addEventListener 'end_of_stream', (e) ->
 		jdata = JSON.parse e.data
@@ -45,19 +46,30 @@ RP.stream.buffer_test = ->
 		jdata = JSON.parse e.data
 		$('#seeker_results').append("<div>"+jdata.text+"</div>")
 
-RP.stream.tagchange = () ->
-	formitem = $('form.query_form')
+RP.stream.tagchange = (selector = 'form.query_form') ->
+	formitem = $(selector)
 	if $(formitem).data("format") == "html"
 		formitem.submit()
 	else
 		data = $(formitem).serialize()
 		# Add the serialized form data to the action, accounting for existing query
 		request = $(formitem).attr("action")
+		rsplit = request.split '?'
+		delim = '?'
+		if rsplit.length > 1
+			if rsplit[1].length == 0 # Empty query
+				request = rsplit[0]
+			else
+				delim = '&'
 		qt = $(formitem).serialize()
-		if qt.split('=')[1].length > 0
-			delim = "?"
-			if request.match /\?/
-				delim = "&"
-			request = request + delim + qt
+		queries = qt.split("&");
+
+		# Cycle through the elements of the query, eliminating those with an empty value
+		for qstr in qt.split('&')
+			temp = qstr.split('=');
+			if temp[1] && temp[1].length > 0
+				request = request + delim + qstr
+			delim = '&'
+
 		RP.submit.submit_and_process request, "GET",
 			wait_msg: "Here goes nothin'..."
