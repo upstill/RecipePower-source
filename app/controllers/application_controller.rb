@@ -30,6 +30,11 @@ class ApplicationController < ActionController::Base
     # helper_method :deferred_notification
     include ApplicationHelper
 
+  def index
+    # seeker_result Reference, 'div.reference_list' # , clear_tags: true
+    smartrender unless do_stream StreamPresenter
+  end
+
   # Track the session, saving session events when the session goes stale
   def log_serve
     logger.info %Q{RPEVENT\tServe\t#{current_user.id if current_user}\t#{params[:controller]}\t#{params[:action]}\t#{params[:id]}}

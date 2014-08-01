@@ -266,6 +266,10 @@ class Referent < ActiveRecord::Base
       tag_ids.uniq.delete_if{ |id| id == tag.id }.collect{ |id| Tag.find id }
     end
 
+    def self.type_to_class type
+      (type && (type > 0) && Tag.typesym(type) && (Tag.typesym(type).to_s+"Referent").constantize ) || Referent
+    end
+
     def typesym
         self.type && self.type.sub( /Referent/, '').to_sym
     end

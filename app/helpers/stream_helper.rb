@@ -40,6 +40,9 @@ module StreamHelper
         if element.is_a? Reference
           @reference = element
           render partial: "references/show_table_row", locals: { :reference => element }
+        elsif element.is_a? Referent
+          @referent = element
+          render partial: "referents/show_table_row", locals: { :referent => element }
         else
           # Default is to set instance variable @<Klass> and render "<klass>s/<klass>"
           ename = element.class.to_s.downcase
