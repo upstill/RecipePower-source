@@ -7,7 +7,7 @@ class Reference < ActiveRecord::Base
 
   validates_uniqueness_of :url, :scope => :type
   
-  typeable( :reference_type, 
+  typeable( :reference_type,
     Article: ["Article", 1],
     Newsitem: ["News Item", 2],
     Tip: ["Tip", 4],
