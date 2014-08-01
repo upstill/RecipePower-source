@@ -35,4 +35,39 @@ class ReferenceTest < ActiveSupport::TestCase
     assert ref.referents.first, "New ref didn't get referent"
     assert_equal ref.referents.first.id, rft.id, "Reference's referent doesn't match"
   end
+
+  test "References know their typenums" do
+    assert_equal 0, Reference.new.typenum
+    assert_equal 1, ArticleReference.new.typenum
+    assert_equal 2, NewsitemReference.new.typenum
+    assert_equal 4, TipReference.new.typenum
+    assert_equal 8, VideoReference.new.typenum
+    assert_equal 16, DefinitionReference.new.typenum
+    assert_equal 32, HomepageReference.new.typenum
+    assert_equal 64, ProductReference.new.typenum
+    assert_equal 128, OfferingReference.new.typenum
+    assert_equal 256, RecipeReference.new.typenum
+    assert_equal 512, ImageReference.new.typenum
+    assert_equal 1024, SiteReference.new.typenum
+    assert_equal 2048, EventReference.new.typenum
+  end
+
+  test "Reference types translate to classes" do
+    assert_equal Reference.type_to_class(0), Reference
+    assert_equal Reference.type_to_class(3), Reference
+    assert_equal Reference.type_to_class(-3), Reference
+    assert_equal Reference.type_to_class(12222), Reference
+    assert_equal Reference.type_to_class(1), ArticleReference
+    assert_equal Reference.type_to_class(2), NewsitemReference
+    assert_equal Reference.type_to_class(4), TipReference
+    assert_equal Reference.type_to_class(8), VideoReference
+    assert_equal Reference.type_to_class(16), DefinitionReference
+    assert_equal Reference.type_to_class(32), HomepageReference
+    assert_equal Reference.type_to_class(64), ProductReference
+    assert_equal Reference.type_to_class(128), OfferingReference
+    assert_equal Reference.type_to_class(256), RecipeReference
+    assert_equal Reference.type_to_class(512), ImageReference
+    assert_equal Reference.type_to_class(1024), SiteReference
+    assert_equal Reference.type_to_class(2048), EventReference
+  end
 end

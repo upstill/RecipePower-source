@@ -10,6 +10,8 @@ class ReferentsController < ApplicationController
   # GET /referents
   # GET /referents.json
   def index
+    smartrender unless do_stream StreamPresenter
+=begin
     @tabindex = session[:tabindex] || params[:tabindex] || 0
     handlerclass = @@HandlersByIndex[@tabindex]
     # We accept a query for chidren of a parent (or roots, if parentid == 0)
@@ -31,6 +33,7 @@ class ReferentsController < ApplicationController
       format.html # index.html.erb
       format.json { render json: @referents.map { |r| { :title=>r.longname, :isLazy=>true, :key=>r.id, :isFolder=>false }} }
     end
+=end
   end
 
   # GET /referents/1

@@ -219,7 +219,7 @@ end
 class SitesCache < ResultsCache
 
   def items
-    @items ||= Site.all
+    @items ||= Site.all[@window]
   end
 
   def full_size
@@ -230,12 +230,29 @@ end
 
 class ReferencesCache < ResultsCache
 
+  def initialize attribs
+    super
+    @type = 0
+    @type = attribs[:params][:type].to_i if attribs[:params] && attribs[:params][:type]
+  end
+
+  def klass
+    Reference.type_to_class @type
+  end
+
   def items
-    @items ||= Reference.all
+    @items ||= klass.paginate(:page => (window.min/(window.max-window.min))+1, :per_page => (window.max-window.min))
   end
 
   def full_size
-    Reference.count
+    klass.count
+  end
+
+  def param sym
+    case sym
+      when :type # Type stored as class
+        @type
+    end
   end
 
 end

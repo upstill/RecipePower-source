@@ -17,7 +17,7 @@ module Typeable
 =end
 
     end
-    
+
     # Get the type number, taking any of the accepted datatypes
     def typenum tt
         @tag_types.num tt
