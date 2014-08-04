@@ -132,6 +132,19 @@ end
 # list's content visible to current user (ListStreamer)
 class ListCache < ResultsCache
 
+  def initialize attribs
+    @list = List.find attribs[:params][:id].to_i
+    super
+  end
+
+  def items
+    @items ||= @list.entities
+  end
+
+  def full_size
+    @list.entity_count
+  end
+
 end
 
 # list of feeds
@@ -228,6 +241,10 @@ class SitesCache < ResultsCache
 
 end
 
+class SiteCache < ResultsCache
+
+end
+
 class ReferencesCache < ResultsCache
 
   def initialize attribs
@@ -262,7 +279,6 @@ class ReferenceCache < ResultsCache
 end
 
 class ReferentsCache < ResultsCache
-
 
   def initialize attribs
     super

@@ -6,7 +6,7 @@
         [
             ['.stream-header', with_format("html") { render partial: "stream_header" } ],
             ['span.title', with_format("html") { render partial: "layouts/title" } ],
-            ['.stream-nav', with_format("html") { render partial: "stream_nav" }],
+            ['.stream-nav', with_format("html") { render partial: "stream_navtabs" }],
             ['.stream-search', with_format("html") { render partial: "stream_search" }, "RP.tagger.setup"],
             ['.stream-shell', with_format("html") { render partial: "stream_shell" }]
         ]

@@ -187,7 +187,8 @@ class ApplicationController < ActionController::Base
 
   # Take a stream presenter and drop items into a stream, if possible and called for.
   # Otherwise, defer to normal rendering
-  def do_stream klass
+  def do_stream klass, itempartial=nil
+    itempartial ||= "#{params[:controller]}/show_table_row"
     @sp = klass.new session.id, request.fullpath, querytags, params
     if @sp.stream?  # We're here to spew items into the stream
       response.headers["Content-Type"] = "text/event-stream"
@@ -195,7 +196,7 @@ class ApplicationController < ActionController::Base
       begin
         sse = Reloader::SSE.new(response.stream)
         while item = @sp.next_item do
-          sse.write :stream_item, with_format("html") { { elmt: view_context.render_stream_item(item) } }
+          sse.write :stream_item, with_format("html") { { elmt: (is2 = view_context.render_stream_item(item, itempartial)) } }
         end
       rescue IOError
         logger.info "Stream closed"

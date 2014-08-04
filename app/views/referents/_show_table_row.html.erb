@@ -1,17 +1,16 @@
-<% x=2 %>
-<tr frame="below" id="Referent<%= referent.id.to_s %>">
+<tr frame="below" id="<%= dom_id item %>">
   <td valign="top">
     <hr>
-    <%= summarize_ref_name referent %>
-    <br><%= link_to_modal 'Show', referent.becomes(Referent) %>
-    <%= link_to_modal 'Edit', edit_referent_path(referent.becomes(Referent)) %>
-    <%# link_to 'Destroy', referent.becomes(Referent), confirm: 'Are you sure?', method: :delete %>
+    <%= summarize_ref_name item %>
+    <br><%= link_to_modal 'Show', item.becomes(Referent) %>
+    <%= link_to_modal 'Edit', edit_referent_path(item.becomes(Referent)) %>
+    <%# link_to 'Destroy', item.becomes(Referent), confirm: 'Are you sure?', method: :delete %>
   </td>
-  <td><%= referent.isCountable ? "C" : "NC" %><td>
+  <td><%= item.isCountable ? "C" : "NC" %><td>
   <td>
     <hr>
-    <%= list_expressions referent %><br>
-    <%= list_parents referent %><br>
-    <%= list_children referent %>
+    <%= list_expressions item %><br>
+    <%= list_parents item %><br>
+    <%= list_children item %>
   </td>
 </tr>

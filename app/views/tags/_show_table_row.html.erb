@@ -1,13 +1,13 @@
-<% @tagserv = TagServices.new @tag %>
-<tr id="tagrow_<%= @tag.id.to_s %>">
-	<td class="tag_type"><%= @tag.id.to_s %></td>
+<% @tagserv = TagServices.new item %>
+<tr id="<%= dom_id item %>">
+	<td class="tag_type"><%= item.id.to_s %></td>
 	<td><%= summarize_tag %></td>
-	<td><%= select_tag :tagtype, options_from_collection_for_select(Tag.type_selections(true), :last, :first, @tag.tagtype), 
+	<td><%= select_tag :tagtype, options_from_collection_for_select(Tag.type_selections(true), :last, :first, item.tagtype), 
 			class: "tag_type_selector",
 			onchange: "RP.change(event);",
             data: {request: "/tags/typify",
                    valueparam: "typenum",
-                   querydata: {tagid: @tag.id}} %></td>
+                   querydata: {tagid: item.id}} %></td>
   <td>
 		<%= summarize_tag_recipe_count %>
 		<%= summarize_tag_owner_count %>
@@ -21,15 +21,15 @@
 	</td><td>
 		<%= summarize_tag_synonyms "" %>
 	</td><td>
-		<% @tag.referents.each do |ref| %>
-      <%= link_to_modal ref.name, referent_path(ref) %><%= ", " unless ref == @tag.referents.last %>
+		<% item.referents.each do |ref| %>
+      <%= link_to_modal ref.name, referent_path(ref) %><%= ", " unless ref == item.referents.last %>
 		<% end %>
 	</td>
-	<% if permitted_to? :edit, @tag %>
+	<% if permitted_to? :edit, item %>
    	<td>
-			<%= link_to_modal 'Edit', edit_tag_path(@tag) %>
+			<%= link_to_modal 'Edit', edit_tag_path(item) %>
 		</td><td>
-			<%= link_to 'Destroy', @tag, confirm: 'Are you sure?', method: :delete %>
+			<%= link_to 'Destroy', item, confirm: 'Are you sure?', method: :delete %>
 		</td>
 	<% end %>
 </tr>

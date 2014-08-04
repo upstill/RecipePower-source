@@ -113,6 +113,10 @@ class List < ActiveRecord::Base
     ordering.map(&:entity).compact
   end
 
+  def entity_count
+    ordering.count
+  end
+
   # XXX Placeholder Alert! We should be talking about general entities
   def recipe_ids
     result = ordering.map(&:id) # ...should also be extracting entities from subtags
