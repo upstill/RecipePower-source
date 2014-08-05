@@ -25,7 +25,6 @@ class StreamPresenter
 
   def render
     render_to_string partial: "stream_contents"
-    # with_format("html") { render_to_string partial: "stream_footer" }
   end
 
   # Time to emit the stream? 'stream' parameter has item specs

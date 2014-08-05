@@ -182,8 +182,7 @@ class ApplicationController < ActionController::Base
 
   # Take a stream presenter and drop items into a stream, if possible and called for.
   # Otherwise, defer to normal rendering
-  def do_stream rc_class, itempartial=nil
-    itempartial ||= "show_table_row" # Defaults to showing a table row
+  def do_stream rc_class, itempartial="show_table_row"
     @sp = StreamPresenter.new session.id, request.fullpath, rc_class, querytags, params
     if @sp.stream?  # We're here to spew items into the stream
       response.headers["Content-Type"] = "text/event-stream"
@@ -196,7 +195,7 @@ class ApplicationController < ActionController::Base
       rescue IOError
         logger.info "Stream closed"
       ensure
-        footer = with_format("html") { render_to_string partial: "stream_footer" }
+        footer = with_format("html") { render_to_string partial: "shared/stream_footer" }
         sse.close replacements: [ [ "#stream-footer", footer ] ] #more_to_come: !@sp.next_path.blank? # (@seeker.npages > @seeker.cur_page)
       end
       true

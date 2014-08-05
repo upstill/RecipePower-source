@@ -32,6 +32,7 @@ class UsersController < ApplicationController
   def index
     # 'index' page may be calling itself with filter parameters in the name and tagtype
     # seeker_result User, 'div.user_list' # , clear_tags: true
+    @container = "container_collections"
     smartrender unless do_stream UsersCache
   end
   

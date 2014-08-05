@@ -2,8 +2,8 @@
 class IntegersController < ApplicationController
 
   def index
-    # The StreamPresenter is in charge of rendering out a stream, and
-    # do_stream (in ApplicationController) streams the content from the presenter, if appropriate
+    # IntegersCache doles out successive integers into divs
+    # do_stream (in ApplicationController) streams the content using StreamPresenter, if appropriate
     smartrender unless do_stream IntegersCache
   end
 end
