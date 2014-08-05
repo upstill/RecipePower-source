@@ -1,6 +1,5 @@
 require './lib/controller_utils.rb'
 require './lib/querytags.rb'
-require 'results_cache.rb'
 
 class ListsController < ApplicationController
 

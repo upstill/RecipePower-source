@@ -1,1 +1,6 @@
+<div class="stream-header">
+  <h3>Currently Available Lists</h3>
+  <p>You can search for a list using the search box above.</p>
+  <p>You can create a new list by clicking <%= link_to_modal "Here", new_list_path, class: "btn" %>.</p>
+</div>
 <%= render "shared/stream_table", headers: [ "Name", "Description" ] %>

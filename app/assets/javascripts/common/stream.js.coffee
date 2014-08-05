@@ -46,14 +46,17 @@ RP.stream.buffer_test = ->
 		jdata = JSON.parse e.data
 		$('#seeker_results').append("<div>"+jdata.text+"</div>")
 
-RP.stream.tagchange = (selector = 'form.query_form') ->
-	formitem = $(selector)
-	if $(formitem).data("format") == "html"
-		formitem.submit()
+RP.stream.tagchange = (selector) ->
+	# Find the enclosing parent
+	formelmt = this[0].parentNode
+	while formelmt.tagName != 'FORM'
+		formelmt = formelmt.parentNode
+	if $(formelmt).data("format") == "html"
+		$(formelmt).submit()
 	else
-		data = $(formitem).serialize()
+		data = $(formelmt).serialize()
 		# Add the serialized form data to the action, accounting for existing query
-		request = $(formitem).attr("action")
+		request = $(formelmt).attr("action")
 		rsplit = request.split '?'
 		delim = '?'
 		if rsplit.length > 1
@@ -61,7 +64,7 @@ RP.stream.tagchange = (selector = 'form.query_form') ->
 				request = rsplit[0]
 			else
 				delim = '&'
-		qt = $(formitem).serialize()
+		qt = $(formelmt).serialize()
 		queries = qt.split("&");
 
 		# Cycle through the elements of the query, eliminating those with an empty value

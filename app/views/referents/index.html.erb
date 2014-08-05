@@ -1,1 +1,14 @@
-<%= render "shared/stream_table", headers: [ "Referent", "", "", "" ] %>
+<div class="stream-header">
+  <% unless @sp.query.blank? %>
+      <div class="form-group" style="display:inline-block">
+        <form class="form-search type_form" action="<%= @sp.query partial: true %>" data-format="json">
+          <h3>Referents of type:
+            <%= select_tag :type, options_from_collection_for_select(Tag.type_selections(false), :last, :first, @sp.param(:type)) || 0,
+                           :include_blank => true,
+                           :onchange => %Q{RP.stream.tagchange( "form.type_form" ); } %>
+          </h3>
+        </form>
+      </div>
+  <% end %>
+  <%= link_to 'New Referent', new_referent_path %>
+</div><%= render "shared/stream_table", headers: [ "Referent", "", "", "" ] %>

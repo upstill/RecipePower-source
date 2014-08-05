@@ -10,6 +10,7 @@ class ReferentsController < ApplicationController
   # GET /referents
   # GET /referents.json
   def index
+    @container = "container_collections"
     smartrender unless do_stream ReferentsCache
 =begin
     @tabindex = session[:tabindex] || params[:tabindex] || 0

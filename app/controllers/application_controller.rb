@@ -3,6 +3,7 @@ require './lib/seeker.rb'
 require './lib/querytags.rb'
 require 'rp_event'
 require 'reloader/sse'
+require 'results_cache.rb'
 
 class ApplicationController < ActionController::Base
   include Querytags # Grab the query tags from params for filtering a list
