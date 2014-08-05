@@ -15,9 +15,9 @@ class ResultsCache < ActiveRecord::Base
     if querytags.class == Hash
       params, querytags = querytags, []
     end
-    ((rc = self.find_by session_id: session_id) && (rc.params == params)) ?
+    ((rc = self.find_by session_id: session_id) && (rc.class == self) && (rc.params == params)) ?
         rc :
-        self.type(params).new( session_id: session_id, querytags: querytags, params: params)
+        self.new( session_id: session_id, querytags: querytags, params: params)
   end
 
   # Derive the class of the appropriate cache handler from the controller, action and other parameters

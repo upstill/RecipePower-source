@@ -30,11 +30,6 @@ class ApplicationController < ActionController::Base
     # helper_method :deferred_notification
     include ApplicationHelper
 
-  def index
-    # seeker_result Reference, 'div.reference_list' # , clear_tags: true
-    smartrender unless do_stream StreamPresenter
-  end
-
   # Track the session, saving session events when the session goes stale
   def log_serve
     logger.info %Q{RPEVENT\tServe\t#{current_user.id if current_user}\t#{params[:controller]}\t#{params[:action]}\t#{params[:id]}}
@@ -65,9 +60,9 @@ class ApplicationController < ActionController::Base
   end
     
   # Get a presenter for the object fron within a controller
-  def present(object, klass = nil)
-    klass ||= "#{object.class}Presenter".constantize
-    klass.new(object, view_context)
+  def present(object, rc_class = nil)
+    rc_class ||= "#{object.class}Presenter".constantize
+    rc_class.new(object, view_context)
   end  
 
   def check_flash
@@ -93,33 +88,33 @@ class ApplicationController < ActionController::Base
   
   # Get the seeker from the session store (mainly used for streaming)
   def retrieve_seeker
-    if klass = session[:seeker_class]
-      setup_seeker klass
+    if rc_class = session[:seeker_class]
+      setup_seeker rc_class
     end
   end
 
-  def setup_seeker(klass, options=nil, params=nil)
+  def setup_seeker(rc_class, options=nil, params=nil)
     @user ||= current_user_or_guest
     params[:cur_page] = "1" if params && params[:selected]
     @browser = @user.browser params
     @user.save
     # Go back to page 1 when a new browser element is selected
-    logger.debug "Fetching #{klass}Seeker with session[:seeker]="+session[:seeker].to_s
-    @seeker = "#{klass}Seeker".constantize.new @user, @browser, session[:seeker], params # Default; other controllers may set up different seekers
+    logger.debug "Fetching #{rc_class}Seeker with session[:seeker]="+session[:seeker].to_s
+    @seeker = "#{rc_class}Seeker".constantize.new @user, @browser, session[:seeker], params # Default; other controllers may set up different seekers
     @seeker.tagstxt = "" if options && options[:clear_tags]
     session[:seeker] = @seeker.store
-    session[:seeker_class] = klass
+    session[:seeker_class] = rc_class
     logger.debug "@seeker returning #{@seeker ? 'not ' : ''}nil."
     @seeker
   end
 
   # All controllers displaying the collection need to have it setup
-  def setup_collection klass="Content", options={}
+  def setup_collection rc_class="Content", options={}
       @user ||= current_user_or_guest
       @browser = @user.browser params
       default_options = {}
       default_options[:clear_tags] = (params[:controller] != "collection") && (params[:controller] != "stream")
-      setup_seeker klass, default_options.merge(options), params
+      setup_seeker rc_class, default_options.merge(options), params
       if (params[:controller] == "pages")
         # The search box in generic pages redirects collections, either "The Big List" for guests or
         # the user's whole collection 
@@ -137,15 +132,15 @@ class ApplicationController < ActionController::Base
   # This is one-stop-shopping for a controller using the query to filter a list
   # See tags_controller for an example
   # Options: selector: CSS selector for the outermost container of the rendered index template
-  def seeker_result(klass, frame_selector, options={})
-    def jsondata(klass, frame_selector, options)
+  def seeker_result(rc_class, frame_selector, options={})
+    def jsondata(rc_class, frame_selector, options)
       # In a json response we just re-render the collection list for replacement
       # If we need to replace the page, we send back a link to do it with
       if params[:redirect]
         { redirect: assert_popup(nil, request.original_url) }
       else
         begin
-          setup_seeker(klass, options.slice(:clear_tags, :scope), params)
+          setup_seeker(rc_class, options.slice(:clear_tags, :scope), params)
         rescue Exception => e
           # Response to a setup error is to reload the collections page
           flash[:error] = e.to_s
@@ -173,23 +168,23 @@ class ApplicationController < ActionController::Base
     respond_to do |format|
       format.html {
         params[:cur_page] = 1
-        setup_collection klass, options
+        setup_collection rc_class, options
         # flash.now[:guide] = @seeker.guide
         render :index
       }
       format.js do
-        @jsondata = jsondata(klass, frame_selector, options)
+        @jsondata = jsondata(rc_class, frame_selector, options)
         render template: "shared/get_content"
       end
-      format.json { render json: jsondata(klass, frame_selector, options) }
+      format.json { render json: jsondata(rc_class, frame_selector, options) }
     end
   end
 
   # Take a stream presenter and drop items into a stream, if possible and called for.
   # Otherwise, defer to normal rendering
-  def do_stream klass, itempartial=nil
-    itempartial ||= "#{params[:controller]}/show_table_row"
-    @sp = klass.new session.id, request.fullpath, querytags, params
+  def do_stream rc_class, itempartial=nil
+    itempartial ||= "show_table_row" # Defaults to showing a table row
+    @sp = StreamPresenter.new session.id, request.fullpath, rc_class, querytags, params
     if @sp.stream?  # We're here to spew items into the stream
       response.headers["Content-Type"] = "text/event-stream"
       # retrieve_seeker

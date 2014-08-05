@@ -4,8 +4,9 @@ require './lib/querytags.rb'
 class ListsController < ApplicationController
 
   def index
-    # seeker_result List, 'div.list_list'
-    smartrender unless do_stream StreamPresenter
+    # seeker_result Reference, 'div.reference_list' # , clear_tags: true
+    @container = "container_collections"
+    smartrender unless do_stream ListsCache
   end
 
   def create
@@ -34,7 +35,7 @@ class ListsController < ApplicationController
   def show
     @list = List.find(params[:id])
     response_service.title = "About #{@list.name}"
-    smartrender
+    smartrender unless do_stream ListCache, "show_masonry_item"
   end
 
   def update

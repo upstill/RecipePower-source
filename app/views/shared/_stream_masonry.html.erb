@@ -1,0 +1,11 @@
+<!-- View for listing entities in a table -->
+<div class="stream-shell">
+  <div class="masonry-container stream-items-parent">
+    <% if @sp.dump? %>
+        <% while (item = @sp.next_item) do %>
+            <%= render_stream_item item, "show_masonry_item" %>
+        <% end %>
+    <% end %>
+  </div>
+  <%= render "stream_footer" %>
+</div>

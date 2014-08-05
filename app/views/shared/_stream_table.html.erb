@@ -9,8 +9,7 @@
     <tbody class="stream-items-parent">
     <% if @sp.dump? %>
         <% while (item = @sp.next_item) do %>
-            <%# render_stream_item item %>
-            <%= render partial: "show_table_row", locals: { :item => item } %>
+            <%= render_stream_item item, "show_table_row" %>
         <% end %>
     <% end %>
     </tbody>

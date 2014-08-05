@@ -4,13 +4,15 @@ class StreamPresenterTest < ActiveSupport::TestCase
 
   test "ten items stream with single offset" do
     sessionid = "wklejrkjovekj23kjkj3f"
-    sp = StreamPresenter.new sessionid, stream: "12"
-    assert_equal (12..21).to_a, sp.items
+    superklass = ResultsCache
+    sp = StreamPresenter.new sessionid, "", IntegersCache, stream: "12"
+    assert_equal (12..20).to_a, sp.items
   end
 
   test "three items stream according to offset" do
     sessionid = "wklejrkjovekj23kjkj3f"
-    sp = StreamPresenter.new sessionid, controller: "integers", action: "index", stream: "8-11"
+    superklass = ResultsCache
+    sp = StreamPresenter.new sessionid, "", IntegersCache, controller: "integers", action: "index", stream: "8-11"
     refute_nil sp.next_range
     assert_equal (8...11).to_a, sp.items
     assert_equal 8, sp.next_item
@@ -22,18 +24,19 @@ class StreamPresenterTest < ActiveSupport::TestCase
 
   test "presenter gets appropriate ResultsCache" do
     sessionid = "wklejrkjovekj23kjkj3f"
-    sp = StreamPresenter.new sessionid
-    assert_equal ResultsCache, sp.results.class
-    sp = StreamPresenter.new sessionid, controller: "integer", action: "index"
+    superklass = ResultsCache
+    sp = StreamPresenter.new sessionid, "", IntegersCache, controller: "integer", action: "index"
     assert_equal IntegersCache, sp.results.class
-    sp = StreamPresenter.new sessionid, controller: "list", action: "show"
+    list = List.create
+    sp = StreamPresenter.new sessionid, "", ListCache, controller: "list", action: "show", id: list.id
     assert_equal ListCache, sp.results.class
 
   end
 
   test "presenter responds correctly for dumping" do
     sessionid = "wklejrkjovekj23kjkj3f"
-    sp = StreamPresenter.new sessionid
+    superklass = ResultsCache
+    sp = StreamPresenter.new sessionid, "", IntegersCache
     refute sp.stream?
     assert sp.dump?
   end

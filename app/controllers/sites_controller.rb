@@ -3,7 +3,7 @@ class SitesController < ApplicationController
   # GET /sites.json
   def index
     # seeker_result Site, "div.site_list" # , clear_tags: true
-    smartrender unless do_stream StreamPresenter
+    smartrender unless do_stream SitesCache
   end
 
 =begin

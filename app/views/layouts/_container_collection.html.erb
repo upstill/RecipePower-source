@@ -1,0 +1,20 @@
+<div class="container">
+  <div class="row">
+    <% if params[:controller] == "collection" %>
+        <% if @rp_old %>
+            <%# The collection lays out as a control panel on the left and content on the right %>
+            <div class=" col-md-3 col-sm-4 col-xs-12">
+              <%= render 'layouts/frame_left' %>
+            </div>
+            <div class="content col-md-9 col-sm-8 col-xs-12 content-column">
+              <%= flash_notifications_div %>
+              <%= yield %>
+            </div>
+        <% else %>
+            <%= render "navtabs" %>
+            <%= render "header" %>
+            <%= yield %>
+        <% end %>
+  </div>
+  <!--! end of .row -->
+</div>
