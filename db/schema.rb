@@ -267,7 +267,6 @@ ActiveRecord::Schema.define(version: 20140726213513) do
     t.text     "data"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "source_type",  default: "User"
   end
 
   create_table "scales", force: true do |t|

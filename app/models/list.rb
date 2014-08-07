@@ -41,7 +41,7 @@ end
 class ListSerializer
 
   def self.load(list_string)
-    list_string ? list_string.split("\n").collect { |itemstr| ListItem::load itemstr } : []
+    list_string ? list_string.split('\n').collect { |itemstr| ListItem::load itemstr } : []
   end
 
   def self.dump(list)
@@ -104,6 +104,7 @@ class List < ActiveRecord::Base
   # 3) adding the entity to the owner's collection
   def include entity
     self.ordering << ListItem.new(entity: entity) unless include?(entity)
+    self.save
     TaggingServices.new(entity).assert(name_tag, owner.id)
     entity.add_to_collection owner.id
   end

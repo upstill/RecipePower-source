@@ -49,7 +49,9 @@ class Tag < ActiveRecord::Base
     def can_absorb other
         other.normalized_name == self.normalized_name && ((other.tagtype==0) || (other.tagtype == self.tagtype))    
     end
-    
+
+    # Get the recipes which the given user can see through this tag
+    # TODO: Migrate this to general taggables
     def recipes(uid=nil)
       Recipe.where id: recipe_ids(uid)
     end
