@@ -3,6 +3,6 @@
     replacements:
         [
             ['span.title', with_format("html") { render partial: "layouts/title" }],
-            ['div.stream-shell', with_format("html") { render partial: "stream_masonry" }]
+            ['div.stream-shell', with_format("html") { list_show }]
         ]
 }.to_json

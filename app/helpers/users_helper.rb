@@ -1,4 +1,9 @@
 module UsersHelper
+
+  def users_table
+    stream_table [ "Handle", "About", "Interest(s)", "# Recipes", "" ]
+  end
+
   def followees_list f, me, channels
     # followee_tokens is a virtual attribute, an array of booleans for checking and unchecking followees
     f.fields_for :followee_tokens do |builder|

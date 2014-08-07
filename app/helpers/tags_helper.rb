@@ -1,5 +1,9 @@
 module TagsHelper
-  
+
+  def tags_table
+    stream_table [ "ID", "Name", "Type", "", "Public?", "Similar", "Synonym(s)", "Meaning(s)", "", "" ]
+  end
+
   # Emit a link to a tag using the tag's name and, optionally, its type and id
   def tag_link tag, with_id=false
     link_to_modal( tag.name, tag )+(with_id ? "(#{tag.typename} #{tag.id.to_s})" : "")

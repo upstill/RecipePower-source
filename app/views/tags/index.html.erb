@@ -1,1 +1,15 @@
-<%= render "shared/stream_table", headers: [ "ID", "Name", "Type", "", "Public?", "Similar", "Synonym(s)", "Meaning(s)", "", "" ] %>
+<div class="stream-header">
+  <% unless @sp.query.blank? %>
+      <div class="form-group" style="display:inline-block">
+        <form class="form-search tagtype_form" action="<%= @sp.query partial: true %>" data-format="json">
+          <h3>Tags of type:
+            <%= select_tag :tagtype, options_from_collection_for_select(Tag.type_selections(true), :last, :first, @sp.param(:tagtype)) || 0,
+                           :include_blank => true,
+                           :onchange => %Q{RP.stream.tagchange( "form.tagtype_form" ); } %>
+          </h3>
+        </form>
+      </div>
+  <% end %>
+  <%= link_to_modal 'New Tag', new_tag_path %>
+</div>
+<%= tags_table %>

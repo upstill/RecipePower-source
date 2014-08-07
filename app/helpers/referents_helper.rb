@@ -1,5 +1,9 @@
 module ReferentsHelper
-  
+
+  def referents_table
+    stream_table [ "Referent", "", "", "" ]
+  end
+
   def list_expressions referent, do_tag=true
     ("Expressions: "+(referent.expressions.collect { |expr| 
       "<br>&nbsp;&nbsp;'"+

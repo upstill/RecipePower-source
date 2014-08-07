@@ -1,5 +1,13 @@
 module StreamHelper
 
+  def stream_table headers
+    render "shared/stream_table", headers: headers
+  end
+
+  def stream_masonry
+    render "shared/stream_masonry"
+  end
+
   def stream_filter_field presenter, options={}
     options[:data] ||= {}
     options[:data][:hint] ||= "Narrow down the list"
