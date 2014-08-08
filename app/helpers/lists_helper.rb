@@ -1,7 +1,7 @@
 module ListsHelper
 
   def lists_table
-    stream_table [ "Name", "Description" ]
+    stream_table [ "ID", "Name", "Description", "Included Tags" ]
   end
 
   def list_show

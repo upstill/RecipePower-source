@@ -1,0 +1,11 @@
+<!--Shell for streaming items in a div-->
+<div class="stream-shell">
+  <div class="stream-items-parent">
+    <% if @sp.dump? %>
+      <% while (item = @sp.next_item) do %>
+          <%= render_stream_item item, "stream_item" %>
+      <% end %>
+    <% end %>
+  </div>
+  <%= render "shared/stream_footer" %>
+</div>

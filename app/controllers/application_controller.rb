@@ -184,7 +184,7 @@ class ApplicationController < ActionController::Base
   # Take a stream presenter and drop items into a stream, if possible and called for.
   # Otherwise, defer to normal rendering
   def do_stream rc_class, itempartial="show_table_row"
-    @sp = StreamPresenter.new session.id, request.fullpath, rc_class, querytags, params
+    @sp = StreamPresenter.new session.id, request.fullpath, rc_class, current_user_or_guest_id, querytags, params
     if @sp.stream?  # We're here to spew items into the stream
       response.headers["Content-Type"] = "text/event-stream"
       # retrieve_seeker

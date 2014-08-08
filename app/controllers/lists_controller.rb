@@ -60,13 +60,12 @@ class ListsController < ApplicationController
   def destroy
     @list = List.find params[:id]
     name = @list.name
+    selector = "tr##{dom_id @list}"
     @list.destroy
     respond_to do |format|
       format.html { render action: "index" }
-      format.json { render json: { deletions: ["tr#list#{@list.id}"], popup: "'#{name}' destroyed"} }
-      format.js {
-        render action: "destroy", locals: { selector: "tr#list#{@list.id}", name: name }
-      }
+      format.json { render json: { deletions: [ selector ], popup: "'#{name}' destroyed"} }
+      format.js   { render action: "destroy", locals: { selector: selector, name: name } }
     end
   end
 

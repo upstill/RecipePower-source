@@ -8,6 +8,10 @@ module StreamHelper
     render "shared/stream_masonry"
   end
 
+  def stream_items
+    render "shared/stream_items"
+  end
+
   def stream_filter_field presenter, options={}
     options[:data] ||= {}
     options[:data][:hint] ||= "Narrow down the list"

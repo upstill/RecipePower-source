@@ -11,13 +11,13 @@ class ResultsCache < ActiveRecord::Base
 
   # Get the current results cache and return it if relevant. Otherwise,
   # create a new one
-  def self.retrieve_or_build session_id, querytags=[], params={}
+  def self.retrieve_or_build session_id, userid, querytags=[], params={}
     if querytags.class == Hash
       params, querytags = querytags, []
     end
     ((rc = self.find_by session_id: session_id) && (rc.class == self) && (rc.params == params)) ?
         rc :
-        self.new( session_id: session_id, querytags: querytags, params: params)
+        self.new( session_id: session_id, params: params.merge( { querytags: querytags, userid: userid } ) )
   end
 
   # Derive the class of the appropriate cache handler from the controller, action and other parameters
@@ -29,9 +29,13 @@ class ResultsCache < ActiveRecord::Base
     name.constantize
   end
   
-  def initialize params
+  def initialize attribs
     super # Let ActiveRecord take care of initializing attributes
     self.limit = full_size # Figure the maximum extent of the results
+    if attribs[:params]
+      @userid = attribs[:params][:userid]
+      @querytags = attribs[:params][:querytags]
+    end
   end
 
   # Provide the stream parameter for the "next page" link. Will be null if we've passed the window
@@ -61,15 +65,32 @@ class ResultsCache < ActiveRecord::Base
     @item_index >= window.max
   end
 
-  # This is the real interface, which returns items for display
-  # Return the collection of items in the current window
   def items
+    return @items if @items
+    is = itemscope
+    @items = (is.class == Array) ? is :
+        is.paginate(:page => (window.min/(window.max-window.min))+1, :per_page => (window.max-window.min))
+  end
+
+  # This is the real interface, which returns items for display
+  # Return a paginatable scope for the collection of items in the current window
+  def itemscope
     raise 'Abstract Method'
   end
 
   # Return the query that will be augmented with querytags to filter this stream
   def query
     raise 'Abstract Method'
+  end
+
+  # Strictly speaking, an abstract method, but returns nil if param doesn't exist
+  def param sym
+=begin
+    case sym
+      when :<symval>
+        @<symval>
+    end
+=end
   end
 
   # Return the total number of items in the result. This doesn't have to be every possible item, just
@@ -119,12 +140,36 @@ end
 # list of lists visible to current user (ListsStreamer)
 class ListsCache < ResultsCache
 
-  def items
-    @items ||= List.all[@window]
+  def initialize attribs
+    super
+
+    # The access parameter filters for private and public lists
+    @access = attribs[:params][:access] if attribs[:params]
+  end
+
+  # A listcache may define an itemscope to let the superclass#items method do pagination
+  def itemscope
+    case @access
+      when "private"
+        List.where owner_id: @userid
+      when "friends"
+        List.where availability: 1
+      when "public"
+        List.where owner_id: User.super_id
+      else
+        List.all
+    end
   end
   
   def full_size
-    List.count
+    itemscope.count
+  end
+
+  def param sym
+    case sym
+      when :access
+        @access
+    end
   end
 
 end
@@ -257,8 +302,8 @@ class ReferencesCache < ResultsCache
     Reference.type_to_class @type
   end
 
-  def items
-    @items ||= klass.paginate(:page => (window.min/(window.max-window.min))+1, :per_page => (window.max-window.min))
+  def itemscope
+    klass
   end
 
   def full_size

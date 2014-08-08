@@ -42,7 +42,6 @@ class ListServices
       user_list = [u]
     end
     list = nil
-    debugger
     channel_list.each { |user|
       list = List.assert user.channel.name, superu, create: true
       user.recipes.each { |rcp|
@@ -52,12 +51,14 @@ class ListServices
       list.save
     }
     user_list.each { |user|
-      user.collection_tags.each { |tag|
-        list = List.assert tag.name, user, create: true
-        tag.recipes(user.id).each { |rcp|
-          list.include(rcp) unless list.include?(rcp)
+      if user.id != User.super_id
+        user.collection_tags.each { |tag|
+          list = List.assert tag.name, user, create: true
+          tag.recipes(user.id).each { |rcp|
+            list.include(rcp) unless list.include?(rcp)
+          }
         }
-      }
+      end
     }
     list
   end

@@ -1,14 +1,15 @@
 <tr id="<%= dom_id item %>">
 	<td>
-      <%= item.id.to_s %></td>
+      <%= item.id.to_s %>
+    </td>
 	<td>
         <%= link_to_modal item.name.truncate(80), list_path(item) %><br>
 	</td>
 	<td>
-      <%= taggable_list item %>
+      <%= item.description.truncate(200) unless item.description.blank? %>
     </td>
-	<td>
-      <%= item.notes.truncate(200) %>
+    <td>
+      <%= taggable_list item %>
     </td>
 	<td>
 		<% permitted_to?(:edit, :lists) do %>
