@@ -48,15 +48,15 @@ module ApplicationHelper
   end
 
   def recipe_list_element_golink_class recipe
-    "rcpListGotag"+@recipe.id.to_s    
+    "rcpListGotag"+recipe.id.to_s
   end
   
   def recipe_list_element_class recipe
-    "rcpListElmt"+@recipe.id.to_s    
+    "rcpListElmt"+recipe.id.to_s
   end
   
   def recipe_grid_element_class recipe
-    "rcpGridElmt"+@recipe.id.to_s    
+    "rcpGridElmt"+recipe.id.to_s
   end
   
   def feed_list_element_class entry

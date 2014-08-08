@@ -35,8 +35,10 @@ module StreamHelper
   end
 
   # Render an element of a collection, depending on its class
+  # NB The view is derived from the class of the element, NOT from the current controller
   def render_stream_item element, partialname
-    render partial: partialname, locals: { :item => element }
+    view = element.class.to_s.pluralize.downcase
+    render partial: "#{view}/#{partialname}", locals: { :item => element }
 =begin
     case element
       when Recipe
@@ -70,7 +72,7 @@ module StreamHelper
 
   # Provide one element of a dropdown menu for a selection
   def stream_menu_item label, path, id
-    link_to_submit label, path, id: id
+    link_to label, path, id: id
   end
 
   # Declare the dropdown for a particular class of collection
