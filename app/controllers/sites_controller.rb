@@ -5,6 +5,7 @@ class SitesController < ApplicationController
   def index
     # seeker_result Site, "div.site_list" # , clear_tags: true
     @container = "container_collections"
+    @itempartial = "show_table_row"
     smartrender unless do_stream SitesCache
   end
 

@@ -12,6 +12,14 @@ module StreamHelper
     render "shared/stream_items"
   end
 
+  def stream_header_original headerpartial
+    content_tag :div, with_format("html") { render headerpartial }, class: 'stream-header'
+  end
+
+  def stream_header_replacement headerpartial
+    ['div.stream-header', stream_header_original(headerpartial) ]
+  end
+
   def stream_filter_field presenter, options={}
     options[:data] ||= {}
     options[:data][:hint] ||= "Narrow down the list"
@@ -72,7 +80,7 @@ module StreamHelper
 
   # Provide one element of a dropdown menu for a selection
   def stream_menu_item label, path, id
-    link_to label, path, id: id
+    link_to_submit label, assert_query(path, partial: true), id: id
   end
 
   # Declare the dropdown for a particular class of collection
@@ -83,7 +91,7 @@ module StreamHelper
       case which
         when :personal
           menu_path = "/users/#{current_user_or_guest_id}/collection"
-          current_user.lists.collect { |l| stream_menu_item(l.name, list_path(l), dom_id(l)) }
+          current_user.lists.collect { |l| stream_menu_item(l.name, list_path(l, format: :json), dom_id(l)) }
         when :friends
           current_user.followees.collect { |u| stream_menu_item(u.handle, user_friends_collection_path(u), dom_id(u)) }
         when :public

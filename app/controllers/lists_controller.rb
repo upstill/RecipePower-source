@@ -6,6 +6,7 @@ class ListsController < ApplicationController
   def index
     # seeker_result Reference, 'div.reference_list' # , clear_tags: true
     @container = "container_collections"
+    @itempartial = "show_table_row"
     smartrender unless do_stream ListsCache
   end
 
@@ -35,7 +36,9 @@ class ListsController < ApplicationController
   def show
     @list = List.find(params[:id])
     response_service.title = "About #{@list.name}"
-    smartrender unless do_stream ListCache, "show_masonry_item"
+    @container = "container_collections"
+    @itempartial = "show_masonry_item"
+    smartrender unless do_stream ListCache
   end
 
   def update

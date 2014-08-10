@@ -1,5 +1,4 @@
-<% logger.debug "Rendering recipe #{item.id}" %>
-<div class="collection-item <%= recipe_grid_element_class item %>">
+<div class="masonry-item <%= dom_id item %>" >
   <%# recipe_uncollect_button item, @browser.selected %>
   <%= recipe_image_div item, "rcp_grid_pic_box" %>
   <%= recipe_grid_datablock item %>

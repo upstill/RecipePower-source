@@ -29,8 +29,8 @@ RP.stream.fire = (elmt) ->
 			# selector = jdata.selector || '.collection_list'
 			# $(selector).append item
 			$(container_selector).append item
-			if $(container_selector).hasClass 'masonry-container'
-				masonry_selector = container_selector+'.masonry-container'
+			if $(container_selector).hasClass 'js-masonry'
+				masonry_selector = container_selector+'.js-masonry'
 				$(masonry_selector).masonry 'appended', item
 				# Any (hopefully few) pictures that are loaded from URL will resize the element
 				# when they appear.

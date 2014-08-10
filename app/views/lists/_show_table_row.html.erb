@@ -20,7 +20,7 @@
                               item,
                               :method => :delete,
                               :class => "btn btn-default btn-xs btn-danger",
-                              confirm: "Are you sure you want to destroy '#{item.name}'? There's no going back!" %>
+                              :data => { confirm: "Are you sure you want to destroy '#{item.name}'? There's no going back!" } %>
 		<% end %>
 	</td>
 </tr>

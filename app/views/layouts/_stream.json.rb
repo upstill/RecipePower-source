@@ -8,6 +8,6 @@
             ['span.title', with_format("html") { render partial: "layouts/title" } ],
             ['.stream-nav', with_format("html") { render partial: "collections_navtabs" }],
             ['.stream-search', with_format("html") { render partial: "shared/stream_search" }, "RP.tagger.setup"],
-            ['.stream-shell', with_format("html") { render partial: "stream_shell" }]
+            ['.stream-results', with_format("html") { render partial: "stream_shell" }]
         ]
 }.to_json
