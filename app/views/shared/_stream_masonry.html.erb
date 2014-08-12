@@ -1,5 +1,5 @@
 <!-- View for listing entities in a masonry container -->
-<div class="stream-results row">
+<div class="row">
   <div class="js-masonry stream-items-parent col-md-12"
        id="container"
        data-masonry-options='{ "columnWidth": 200, "itemSelector": ".masonry-item", "gutter": 20 }'>
@@ -9,5 +9,5 @@
         <% end %>
     <% end %>
   </div>
-  <%= render "shared/stream_footer" %>
+  <%= stream_element :footer %>
 </div>

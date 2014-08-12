@@ -3,8 +3,7 @@
     replacements:
         [
             ['span.title', with_format("html") { render partial: "layouts/title" }],
-            stream_header_replacement("show_stream_header"),
-            # ['div.stream-header', with_format("html") { list_header }],
-            ['div.stream-results', with_format("html") { list_show }]
+            stream_element_replacement( :header, "show_stream_header"),
+            stream_element_replacement( :results, "shared/stream_masonry") 
         ]
 }.to_json

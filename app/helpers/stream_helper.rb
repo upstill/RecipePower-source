@@ -4,18 +4,36 @@ module StreamHelper
     render "shared/stream_table", headers: headers
   end
 
-  def stream_masonry
-    render "shared/stream_masonry"
+  def stream_element_class etype
+    "stream-#{etype}"
   end
 
-  def stream_items
-    render "shared/stream_items"
+  # Use a partial to generate a stream header, and surround it with a 'stream-header' div
+  def stream_element etype, headerpartial=nil
+    # Define a default partial as needed
+    headerpartial ||= "shared/stream_#{etype}" unless block_given?
+    if headerpartial
+      content = with_format("html") { render headerpartial }
+    else # If no headerpartial provided, expect there to be a code block to produce the content
+      content = with_format("html") { yield }
+    end
+    content_tag :div, content, class: stream_element_class(etype)
   end
 
+  # Generate a JSON item for replacing the stream header
+  def stream_element_replacement etype, headerpartial=nil
+    content = block_given? ?
+      stream_element( etype, headerpartial) { yield } :
+      stream_element(etype, headerpartial)
+    ["."+stream_element_class(etype), content ]
+  end
+
+  # Use a partial to generate a stream header, and surround it with a 'stream-header' div
   def stream_header_original headerpartial
     content_tag :div, with_format("html") { render headerpartial }, class: 'stream-header'
   end
 
+  # Generate a JSON item for replacing the stream header
   def stream_header_replacement headerpartial
     ['div.stream-header', stream_header_original(headerpartial) ]
   end

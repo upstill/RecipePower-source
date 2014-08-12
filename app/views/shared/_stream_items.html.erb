@@ -1,5 +1,4 @@
 <!--Shell for streaming items in a div-->
-<div class="stream-results">
   <div class="stream-items-parent">
     <% if @sp.dump? %>
       <% while (item = @sp.next_item) do %>
@@ -7,5 +6,4 @@
       <% end %>
     <% end %>
   </div>
-  <%= render "shared/stream_footer" %>
-</div>
+  <%= stream_element :footer %>

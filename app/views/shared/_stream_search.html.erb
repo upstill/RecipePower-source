@@ -1,10 +1,9 @@
 <!--Component for filtering the current stream. Requires query to be provided in @sp.query-->
-<div class="stream-search">
-  <% unless @sp.query.blank? %>
-      <div class="form-group" style="display:inline-block">
-        <form class="form-search query_form" action="<%= @sp.query partial: true %>" data-format="json">
-          <div class="search-query form-group collection_query_tokens tags">
-            <%= stream_filter_field @sp,
+<% unless @sp.query.blank? %>
+    <div class="form-group" style="display:inline-block">
+      <form class="form-search query_form" action="<%= @sp.query partial: true %>" data-format="json">
+        <div class="search-query form-group collection_query_tokens tags">
+          <%= stream_filter_field @sp,
                                   rows: 1,
                                   placeholder: "Seek and ye shall find...",
                                   autofocus: true,
@@ -13,8 +12,7 @@
                                          :hint => "", # "Search the collection by typing terms here",
                                          placeholder: "Seek and ye shall find...",
                                          :"no-results-text" => "No matching tag found; hit Enter to search with text"} %>
-          </div>
-        </form>
-      </div>
-  <% end %>
-</div>
+        </div>
+      </form>
+    </div>
+<% end %>

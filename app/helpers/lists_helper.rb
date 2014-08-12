@@ -4,10 +4,7 @@ module ListsHelper
     stream_table [ "ID", "Name", "Description", "Included Tags" ]
   end
 
-  def list_show
-    stream_masonry
-  end
-
+=begin
   def lists_header
     render "index_stream_header"
   end
@@ -15,4 +12,5 @@ module ListsHelper
   def list_header
     render "show_stream_header"
   end
+=end
 end
