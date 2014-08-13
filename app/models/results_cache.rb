@@ -24,7 +24,6 @@ class ResultsCache < ActiveRecord::Base
   def self.type params
     controller = (params[:controller] || "").singularize.capitalize
     controller = controller.pluralize if params[:action] && (params[:action] == "index")
-    controller = controller + params[:owned].to_s.capitalize if params[:action] && (params[:action] == "showowned")
     Object.const_defined?(name = controller+"Cache") || (name = "ResultsCache")
     name.constantize
   end
@@ -65,11 +64,15 @@ class ResultsCache < ActiveRecord::Base
     @item_index >= window.max
   end
 
+  # Take a window of items from the scope
+  def item_window scope
+    scope.paginate(:page => (window.min/(window.max-window.min))+1, :per_page => (window.max-window.min))
+  end
+
   def items
     return @items if @items
     is = itemscope
-    @items = (is.class == Array) ? is :
-        is.paginate(:page => (window.min/(window.max-window.min))+1, :per_page => (window.max-window.min))
+    @items = (is.class == Array) ? is : item_window(is)
   end
 
   # This is the real interface, which returns items for display
@@ -223,18 +226,35 @@ class UsersCache < ResultsCache
 
 end
 
-# user's collection visible to current_user (UserCollectionStreamer)
+# Recently-viewed recipes of the given user
 class UserCollectionCache < ResultsCache
 
+  def initialize attribs
+    super
+    @user = User.where(id: attribs[:params][:id].to_i).first
+  end
+
+  def itemscope
+    @user && @user.collection_scope( :sortby => :collected)
+  end
+
+  def items
+    # The scope from rcprefs needs to be mapped to items after windowing
+    @items ||= (rcpref_items = item_window itemscope) && rcpref_items.map(&:recipe)
+  end
+
+end
+
+# user's collection visible to current_user (UserCollectionStreamer)
+class UserRecentCache < UserCollectionCache
+
+  def itemscope
+    @user && @user.collection_scope(all: true)
+  end
 end
 
 # user's lists visible to current_user (UserListsStreamer
 class UserListsCache < ResultsCache
-
-end
-
-# user's recently-viewed list
-class UserRecentCache < ResultsCache
 
 end
 

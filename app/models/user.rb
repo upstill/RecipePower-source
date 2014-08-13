@@ -165,6 +165,14 @@ class User < ActiveRecord::Base
     end
   end
 
+  def collection_scope options={}
+    constraints = {:user_id => id}
+    constraints[:in_collection] = true unless options[:all]
+    constraints[:private] = false if options[:public]
+    ordering = (options[:sort_by] == :collected) ? "created_at" : "updated_at"
+    Rcpref.where(constraints).order(ordering+" DESC")
+  end
+
   def recipes_collection_size
     Rcpref.where(:user_id => id).count
   end
@@ -533,27 +541,6 @@ public
       save
     end
   end
-
-=begin
-  # Return a list of username/id pairs suitable for popup selection
-  # owner: the id that should be hidden under "Choose Another"
-  # user: the id that should be excluded from the list
-  # :friends=>true to include friends
-  # :circles=>true to include cooking circles
-  # NB labels "guest" as "all recipes"
-  def self.selectionlist(*args)
-	owner_id = args[0][:owner_id]
-	user_id = args[0][:user_id]
-	# XXX Should be more discriminating :-)
-  	arr = self.find(:all).map { |user| [user.handle, user.id] }
-	# Remove entries for owner and user
-	exclusions = [  user_id, owner_id, self.super_id, self.guest_id ]
-	arr.delete_if { |entry| exclusions.include? entry[1] }
-
-	# Add back in the owner, under "Pick Another Collection"
-	arr.unshift ["Pick Another Collection", owner_id]
-  end
-=end
 
   private
 end

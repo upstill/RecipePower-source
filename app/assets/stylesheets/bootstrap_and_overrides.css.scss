@@ -19,6 +19,10 @@ $guideBorder:              darken(adjust-hue($guideBackground, -10), 7%) !defaul
   }
 }
 
+div#container {
+  height:auto;
+}
+
 label.control-label {
 	display: block;
 	margin-bottom: 5px;

@@ -9,3 +9,4 @@ RP.masonry.onload = (selector='.masonry-container') ->
 		columnWidth: $(selector).data('columnWidth') || 200,
 		gutter: $(selector).data('gutterWidth') || 20,
 		itemSelector: '.masonry-item'
+	RP.stream.check()

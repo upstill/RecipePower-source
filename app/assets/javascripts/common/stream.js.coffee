@@ -1,5 +1,15 @@
 RP.stream ||= {}
 
+jQuery ->
+	$(window).scroll () ->
+		RP.stream.check
+	RP.stream.check()
+
+RP.stream.check (elmt) ->
+	elmt ||= $('.stream-trigger')[0]
+	if elmt && ($(window).scrollTop() >= $(document).height() - $(window).height() - 10)
+		RP.stream.fire elmt
+
 # Event-driven interface, an onload handler
 RP.stream.go = (evt) ->
 	RP.stream.fire evt.target

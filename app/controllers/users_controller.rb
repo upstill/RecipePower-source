@@ -5,7 +5,7 @@ class UsersController < ApplicationController
   rescue_from ActiveRecord::RecordNotFound, :with => :not_found
   before_filter :login_required, :except => [:new, :create, :identify]
   before_filter :authenticate_user!, :except => [:new, :show, :index, :identify]
-  
+
   # Take a tokenInput query string and match the input against the given user's set of friends/channels
   def match_friends
     me = User.find params[:id]
@@ -93,7 +93,21 @@ class UsersController < ApplicationController
     @user = User.find params[:id]
     smartrender modal: true # :how => :modal
   end
-  
+
+  # Show the user's recently-viewed recipes
+  def recent
+    @container = "container_collections"
+    @itempartial = "show_masonry_item"
+    smartrender unless do_stream UserRecentCache
+  end
+
+  # Show the user's recently-viewed recipes
+  def collection
+    @container = "container_collections"
+    @itempartial = "show_masonry_item"
+    smartrender unless do_stream UserCollectionCache
+  end
+
   def not_found
     redirect_to root_path, :notice => "User not found", method: "get"
   end

@@ -11,31 +11,8 @@ class ReferentsController < ApplicationController
   # GET /referents.json
   def index
     @container = "container_collections"
-    @itempartial = "show_table_row"
+    @itempartial = "referents/show_table_row"
     smartrender unless do_stream ReferentsCache
-=begin
-    @tabindex = session[:tabindex] || params[:tabindex] || 0
-    handlerclass = @@HandlersByIndex[@tabindex]
-    # We accept a query for chidren of a parent (or roots, if parentid == 0)
-    if params[:key]
-        parentid = params[:key].to_i
-        # This is a JSON request for node data (re Dynatree)
-        if parentid > 0
-            @referents = [] # handlerclass.find(parentid).children
-        else
-            @referents = handlerclass.all # roots
-        end
-    else
-        @referents = handlerclass.scoped
-    end
-    @referents = @referents.order("id").page(params[:page] || 1).per_page(50)
-    # @referents.sort! { |r1, r2| r1.normalized_name <=> r2.normalized_name }
-
-    respond_to do |format|
-      format.html # index.html.erb
-      format.json { render json: @referents.map { |r| { :title=>r.longname, :isLazy=>true, :key=>r.id, :isFolder=>false }} }
-    end
-=end
   end
 
   # GET /referents/1

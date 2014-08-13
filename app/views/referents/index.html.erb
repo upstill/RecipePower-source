@@ -11,4 +11,5 @@
       </div>
   <% end %>
   <%= link_to 'New Referent', new_referent_path %>
-</div><%= referents_table %>
+</div>
+<%= stream_element(:results) { referents_table } %>
