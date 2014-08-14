@@ -41,16 +41,6 @@ module StreamHelper
     text_field_tag "querytags", @querytags.map(&:id).join(','), options
   end
 
-  # Leave a link for stream firing
-  def stream_link path, options={}
-    options[:onclick] = 'RP.stream.go(event);'
-    options[:class] = "#{options[:class]} stream-trigger"
-    options[:data] ||= {}
-    options[:data][:path] = path
-    options[:data][:container_selector] = response_service.container_selector
-    link_to "Click to load", "#", options
-  end
-
   # Render an element of a collection, depending on its class
   # NB The view is derived from the class of the element, NOT from the current controller
   def render_stream_item element, partialname

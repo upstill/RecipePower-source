@@ -192,13 +192,12 @@ class ApplicationController < ActionController::Base
       begin
         sse = Reloader::SSE.new(response.stream)
         while item = @sp.next_item do
-          sse.write :stream_item, with_format("html") { { elmt: (is2 = view_context.render_stream_item(item, @itempartial)) } }
+          sse.write :stream_item, with_format("html") { { elmt: view_context.render_stream_item(item, @itempartial) } }
         end
       rescue IOError
         logger.info "Stream closed"
       ensure
-        footer = with_format("html") { render_to_string partial: "shared/stream_footer" }
-        sse.close replacements: [ [ "#stream-footer", footer ] ] #more_to_come: !@sp.next_path.blank? # (@seeker.npages > @seeker.cur_page)
+        sse.close replacements: [ view_context.stream_element_replacement(:trigger) ]
       end
       true
     end

@@ -35,9 +35,19 @@ module SeekerHelper
 		  render partial: "#{ename.pluralize}/show_table_row", locals: { ename.to_sym => element }
 		end
   end
+ 
+  # Leave a link for stream firing
+  def stream_link path, options={}
+    options[:onclick] = 'RP.stream.go(event);'
+    options[:class] = "#{options[:class]} stream-trigger"
+    options[:data] ||= {}
+    options[:data][:path] = path
+    options[:data][:container_selector] = response_service.container_selector
+    link_to "Click to load", "#", options
+  end
 
   # Set up a DOM element to receive a stream of seeker results
-	def arm_seeker_stream enclosing_element, querypath, options={}
+  def arm_seeker_stream enclosing_element, querypath, options={}
     link = stream_link "/stream/stream?kind=#{@seeker.class}", class: "content-streamer hidden"
     options[:data] ||= {}
     querypath = "/#{querypath}" unless querypath =~ /^\//

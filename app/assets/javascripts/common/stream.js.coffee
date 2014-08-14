@@ -2,13 +2,14 @@ RP.stream ||= {}
 
 jQuery ->
 	$(window).scroll () ->
-		RP.stream.check
+		RP.stream.check()
 	RP.stream.check()
 
-RP.stream.check (elmt) ->
-	elmt ||= $('.stream-trigger')[0]
-	if elmt && ($(window).scrollTop() >= $(document).height() - $(window).height() - 10)
-		RP.stream.fire elmt
+RP.stream.check = (elmt) ->
+	if elmt ||= $('a.stream-trigger')[0]
+		rect = elmt.getBoundingClientRect()
+		if rect && (rect.bottom-rect.height) <= $(window).height()
+			RP.stream.fire elmt
 
 # Event-driven interface, an onload handler
 RP.stream.go = (evt) ->
@@ -18,6 +19,8 @@ RP.stream.fire = (elmt) ->
 	elmt.innerHTML = "Recipes are on their way..."
 	querypath = $(elmt).data('path')
 	container_selector = $(elmt).data('containerSelector') || ""
+	$(elmt).remove() # Remove the link element to forestall subsequent loads
+	# It will be replaced when the trigger div gets replaced
 	container_selector += " .stream-items-parent"
 	source = new EventSource querypath
 	source.onerror = (evt) ->

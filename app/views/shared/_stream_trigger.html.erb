@@ -1,0 +1,9 @@
+<% if @sp.next_path %>
+  <%= link_to "Click to load", "#",
+              onclick: 'RP.stream.go(event);',
+              class: "stream-trigger",
+              :"data-path" => @sp.next_path,
+              :"data-container_selector" => response_service.container_selector %>
+<% else %>
+  No mo' stuff.
+<% end %>
