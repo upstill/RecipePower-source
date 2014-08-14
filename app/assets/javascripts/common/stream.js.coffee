@@ -6,7 +6,7 @@ jQuery ->
 	RP.stream.check()
 
 RP.stream.check = (elmt) ->
-	if elmt ||= $('a.stream-trigger')[0]
+	if elmt = RP.findWithin( 'a.stream-trigger', elmt)
 		rect = elmt.getBoundingClientRect()
 		if rect && (rect.bottom-rect.height) <= $(window).height()
 			RP.stream.fire elmt
@@ -59,9 +59,15 @@ RP.stream.buffer_test = ->
 		jdata = JSON.parse e.data
 		$('#seeker_results').append("<div>"+jdata.text+"</div>")
 
-RP.stream.tagchange = (selector) ->
-	# Find the enclosing parent
-	formelmt = this[0].parentNode
+RP.stream.tagtypeselect = (selector) ->
+	tagfilter $(selector)
+
+RP.stream.tagchange = ->
+	tagfilter this
+
+tagfilter = (jq) ->
+	# Find the enclosing parent form
+	formelmt = jq[0]
 	while formelmt.tagName != 'FORM'
 		formelmt = formelmt.parentNode
 	if $(formelmt).data("format") == "html"

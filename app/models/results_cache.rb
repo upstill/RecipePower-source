@@ -265,20 +265,12 @@ class TagsCache < ResultsCache
     @tagtype = attribs[:params][:tagtype] if attribs[:params]
   end
 
-  def items
-    unless @items
-      if @tagtype
-        items = Tag.where(tagtype: @tagtype)
-      else
-        items = Tag.all
-      end
-      @items = items[@window]
-    end
-    @items
+  def itemscope
+    @tagtype ? Tag.where(tagtype: @tagtype) : Tag.all
   end
 
   def full_size
-    Tag.count
+    itemscope.count
   end
 
   def param sym

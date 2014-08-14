@@ -1,7 +1,6 @@
 RP.masonry = RP.masonry || {}
 
 jQuery ->
-	# RP.masonry.onload()
 
 RP.masonry.onload = (containerselector) ->
 	# Initialize Masonry handling for list items

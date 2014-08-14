@@ -106,6 +106,12 @@ RP.named_function = (str) ->
 			return obj
 	return null;
 
+RP.findWithin = (selector, elmt) ->
+	if elmt
+		$(selector, elmt)[0]
+	else
+		$(selector)[0]
+
 # Automatically open dialogs or click links that have 'trigger' class
 RP.fire_triggers = ->
 	$('div.dialog.trigger').removeClass("trigger").each (ix, dlog) ->

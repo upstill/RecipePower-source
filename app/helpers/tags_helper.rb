@@ -1,7 +1,7 @@
 module TagsHelper
 
   def tags_table
-    stream_table [ "ID", "Name", "Type", "", "Public?", "Similar", "Synonym(s)", "Meaning(s)", "", "" ]
+    stream_table [ "ID", "Name", "Type", "Usages", "Public?", "Similar", "Synonym(s)", "Meaning(s)", "", "" ]
   end
 
   # Emit a link to a tag using the tag's name and, optionally, its type and id
@@ -220,7 +220,7 @@ BLOCK_END
       tagidstr = tag.id.to_s
       content_tag :span,
         tag_link(tag) +
-        (absorb_btn ? link_to_submit("Absorb", "tags/#{@tag.id.to_s}/absorb?victim=#{tagidstr}", class: "absorb_button", id: "absorb_button_#{tagidstr}") : ""),
+        (absorb_btn ? link_to_submit("Absorb", "tags/#{tag.id.to_s}/absorb?victim=#{tagidstr}", class: "absorb_button", id: "absorb_button_#{tagidstr}") : ""),
         class: "absorb_"+tagidstr
   end
 
