@@ -28,6 +28,10 @@ module StreamHelper
     ["."+stream_element_class(etype), content ]
   end
 
+  def masonry_results_replacement
+    stream_element_replacement(:results, "shared/stream_results_masonry") << "RP.masonry.onload"
+  end
+
   def stream_filter_field presenter, options={}
     options[:data] ||= {}
     options[:data][:hint] ||= "Narrow down the list"

@@ -34,7 +34,7 @@ class StreamPresenter
 
   # Should the items be dumped now?
   def dump?
-    !instance_variable_defined?(:@stream_param)
+    false # !instance_variable_defined?(:@stream_param)
   end
 
   # This is the chance to set what tag types the presenter allows to filter for

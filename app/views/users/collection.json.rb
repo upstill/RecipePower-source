@@ -3,6 +3,6 @@
     replacements: [
         ['span.title', with_format("html") { render partial: "layouts/title" }],
         stream_element_replacement(:header, "collection_stream_header"),
-        stream_element_replacement(:results, "shared/stream_results_masonry") << "RP.masonry.onload"
+        masonry_results_replacement
     ]
 }.to_json

@@ -3,10 +3,14 @@ RP.masonry = RP.masonry || {}
 jQuery ->
 	# RP.masonry.onload()
 
-RP.masonry.onload = (selector='.masonry-container') ->
+RP.masonry.onload = (containerselector) ->
 	# Initialize Masonry handling for list items
-	$(selector).masonry
-		columnWidth: $(selector).data('columnWidth') || 200,
-		gutter: $(selector).data('gutterWidth') || 20,
+	if containerselector && (containerelement = $(containerselector)[0])
+		masonryelement = $('.js-masonry', containerelement)
+	else
+		masonryelement = $('.js-masonry')
+	$(masonryelement).masonry
+		columnWidth: $(masonryelement).data('columnWidth') || 200,
+		gutter: $(masonryelement).data('gutterWidth') || 20,
 		itemSelector: '.masonry-item'
 	RP.stream.check()
