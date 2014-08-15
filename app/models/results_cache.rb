@@ -261,8 +261,8 @@ end
 class TagsCache < ResultsCache
 
   def initialize attribs
-    super
     @tagtype = attribs[:params][:tagtype] if attribs[:params]
+    super
   end
 
   def itemscope

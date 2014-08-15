@@ -50,8 +50,11 @@ class StreamPresenter
   end
 
   # The query for applying querytags is the same as this one, without :stream or :querytags
-  def query params={}
-    assert_query @thispath, params.merge( stream: nil, querytags: nil )
+  def query format=nil, params={}
+    if format.is_a? Hash
+      params, format = format, nil
+    end
+    assert_query @thispath, format, params.merge( stream: nil, querytags: nil )
   end
 
 end

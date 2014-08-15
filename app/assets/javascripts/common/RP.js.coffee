@@ -112,6 +112,11 @@ RP.findWithin = (selector, elmt) ->
 	else
 		$(selector)[0]
 
+# Find an enclosing tag of a given name
+RP.findEnclosing = (tagname, formelmt) ->
+	while formelmt.tagName != tagname
+		formelmt = formelmt.parentNode
+
 # Automatically open dialogs or click links that have 'trigger' class
 RP.fire_triggers = ->
 	$('div.dialog.trigger').removeClass("trigger").each (ix, dlog) ->
