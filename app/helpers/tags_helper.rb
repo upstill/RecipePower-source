@@ -237,4 +237,8 @@ BLOCK_END
       render "tags/show_labelled", label: label, name: field
     }.join('').html_safe
   end
+
+  def tag_filter_header label
+    render "tags/tag_filter_header", ttl: label
+  end
 end
