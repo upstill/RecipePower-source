@@ -116,6 +116,7 @@ RP.findWithin = (selector, elmt) ->
 RP.findEnclosing = (tagname, formelmt) ->
 	while formelmt.tagName != tagname
 		formelmt = formelmt.parentNode
+	formelmt
 
 # Automatically open dialogs or click links that have 'trigger' class
 RP.fire_triggers = ->

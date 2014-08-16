@@ -32,16 +32,18 @@ module StreamHelper
     stream_element_replacement(:results, "shared/stream_results_masonry") << "RP.masonry.onload"
   end
 
+  # Provide a tokeninput field for specifying tags, with or without the ability to free-tag
+  # The options are those of the tokeninput plugin, with defaults
   def stream_filter_field presenter, options={}
-    options[:data] ||= {}
-    options[:data][:hint] ||= "Narrow down the list"
-    tag_arr = @querytags.map(&:attributes).collect { |attr| { id: attr["id"], name: attr["name"] } }
-    options[:data][:pre] ||= tag_arr.to_json
-    # options[:data][:token_limit] = 1 unless is_plural
-    options[:data][:"min-chars"] ||= 2
-    options[:data][:query] = "tagtypes=#{presenter.tagtypes.map(&:to_s).join(',')}" if presenter.tagtypes
+    data = options[:data] || {}
+    data[:hint] ||= "Narrow down the list"
+    data[:pre] ||= @querytags.map(&:attributes).collect { |attr| { id: attr["id"], name: attr["name"] } }.to_json
+    data[:"min-chars"] ||= 2
+    data[:query] = "tagtypes=#{presenter.tagtypes.map(&:to_s).join(',')}" if presenter.tagtypes
+
     options[:class] = "token-input-field-pending #{options[:class]}" # The token-input-field-pending class triggers tokenInput
     options[:onload] = "RP.tagger.onload(evt);"
+    options[:data] = data
     text_field_tag "querytags", @querytags.map(&:id).join(','), options
   end
 

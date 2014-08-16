@@ -148,8 +148,8 @@ poll_for_update = (url, ajax_options, processing_options) ->
 ###
 
 # Respond to a change of selection value by submitting the enclosing form
-RP.submit.onselect = (selector) ->
-	formelmt = RP.findEnclosing 'FORM', $(selector)[0]
+RP.submit.onselect = (event) ->
+	formelmt = RP.findEnclosing 'FORM', event.currentTarget
 	$(formelmt).submit()
 
 # Respond to a change of tokeninput field  by submitting the enclosing form
@@ -157,33 +157,3 @@ RP.submit.ontokenchange = ->
 	formelmt = RP.findEnclosing 'FORM', this[0]
 	$(formelmt).submit()
 
-###
-tagfilter = (jq) ->
-	# Find the enclosing parent form
-	formelmt = RP.findEnclosing 'FORM', jq[0]
-	if $(formelmt).data("format") == "html"
-		$(formelmt).submit()
-	else
-		data = $(formelmt).serialize()
-		# Add the serialized form data to the action, accounting for existing query
-		request = $(formelmt).attr("action")
-		rsplit = request.split '?'
-		delim = '?'
-		if rsplit.length > 1
-			if rsplit[1].length == 0 # Empty query
-				request = rsplit[0]
-			else
-				delim = '&'
-		qt = $(formelmt).serialize()
-		queries = qt.split("&");
-
-		# Cycle through the elements of the query, eliminating those with an empty value
-		for qstr in qt.split('&')
-			temp = qstr.split('=');
-			if temp[1] && temp[1].length > 0
-				request = request + delim + qstr
-			delim = '&'
-
-		RP.submit.submit_and_process request, "GET",
-			wait_msg: "Here goes nothin'..."
-###
