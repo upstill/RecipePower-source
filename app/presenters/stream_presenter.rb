@@ -1,5 +1,5 @@
 class StreamPresenter
-  attr_accessor :results
+  attr_accessor :results, :tagtype
 
   delegate :items, :next_item, :next_range, :"done?", :window, :param, :to => :results
 
@@ -10,6 +10,7 @@ class StreamPresenter
     @thispath = requestpath # stash the path from this request
     # Format of stream parameter is <start>[-<end>]
     @stream_param = params.delete(:stream) || "" if params.has_key? :stream
+    @tagtype = params[:tagtype]
     if @stream_param.blank?
       offset, limit = 0, -1
     else
@@ -35,11 +36,6 @@ class StreamPresenter
   # Should the items be dumped now?
   def dump?
     false # !instance_variable_defined?(:@stream_param)
-  end
-
-  # This is the chance to set what tag types the presenter allows to filter for
-  def tagtypes
-    nil
   end
 
   # This is the path that will go into the "more items" link

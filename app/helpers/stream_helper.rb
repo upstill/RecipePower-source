@@ -11,7 +11,8 @@ module StreamHelper
   # Use a partial to generate a stream header, and surround it with a 'stream-header' div
   def stream_element etype, headerpartial=nil
     # Define a default partial as needed
-    headerpartial ||= "shared/stream_#{etype}" unless block_given?
+    fname = etype.to_s.sub /-/, '_'
+    headerpartial ||= "shared/stream_#{fname}" unless block_given?
     if headerpartial
       content = with_format("html") { render headerpartial }
     else # If no headerpartial provided, expect there to be a code block to produce the content
@@ -39,7 +40,7 @@ module StreamHelper
     data[:hint] ||= "Narrow down the list"
     data[:pre] ||= @querytags.map(&:attributes).collect { |attr| { id: attr["id"], name: attr["name"] } }.to_json
     data[:"min-chars"] ||= 2
-    data[:query] = "tagtypes=#{presenter.tagtypes.map(&:to_s).join(',')}" if presenter.tagtypes
+    data[:query] = "tagtype=#{presenter.tagtype}" if presenter.tagtype
 
     options[:class] = "token-input-field-pending #{options[:class]}" # The token-input-field-pending class triggers tokenInput
     options[:onload] = "RP.tagger.onload(evt);"

@@ -7,16 +7,7 @@
                          :include_blank => false,
                          :onchange => %Q{RP.submit.onselect( event ); } %>
         </div>
-        <div style=" display:inline-block; vertical-align:bottom; margin-bottom:0px">
-          <%= stream_filter_field @sp,
-                                  rows: 1,
-                                  autofocus: true,
-                                  data: {:"on-add" => "RP.submit.ontokenchange",
-                                         :"on-delete" => "RP.submit.ontokenchange",
-                                         :hint => "", # "Search the collection by typing terms here",
-                                         placeholder: "Seek and ye shall find...",
-                                         :"no-results-text" => "No matching tag found; hit Enter to search with text"} %>
-        </div>
+        <%= stream_element :"filter-field" %>
       </div>
     </div>
 <% end %>

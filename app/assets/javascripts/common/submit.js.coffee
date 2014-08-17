@@ -150,6 +150,8 @@ poll_for_update = (url, ajax_options, processing_options) ->
 # Respond to a change of selection value by submitting the enclosing form
 RP.submit.onselect = (event) ->
 	formelmt = RP.findEnclosing 'FORM', event.currentTarget
+	# On selecting a tag type, clear the associated tokenInput, which may have tokens of diff. types
+	$('.token-input-field', formelmt).tokenInput 'clear'
 	$(formelmt).submit()
 
 # Respond to a change of tokeninput field  by submitting the enclosing form
