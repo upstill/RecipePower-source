@@ -1,6 +1,5 @@
 <div class="stream-header">
-  <h3>RecipePower Users</h3>
+  <%= tag_filter_header "RecipePower Users" %>
   <p>Add friends by clicking below.</p>
 </div>
-<%= stream_element(:header, "recent_stream_header") %>
 <%= stream_element(:results) { users_table } %>

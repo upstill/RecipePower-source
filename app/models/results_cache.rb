@@ -99,7 +99,11 @@ class ResultsCache < ActiveRecord::Base
   # Return the total number of items in the result. This doesn't have to be every possible item, just
   # enough to stay ahead of the window.
   def full_size
-    -1 # Default is infinite scrolling
+    begin
+      itemscope.count
+    rescue
+      -1 # Default is infinite scrolling
+    end
   end
 
   # Return the next item, incrementing the cur_position

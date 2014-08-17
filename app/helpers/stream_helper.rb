@@ -18,7 +18,8 @@ module StreamHelper
     else # If no headerpartial provided, expect there to be a code block to produce the content
       content = with_format("html") { yield }
     end
-    content_tag :div, content, class: stream_element_class(etype)
+    tag = (etype==:count) ? :span : :div
+    content_tag tag, content, class: stream_element_class(etype)
   end
 
   # Generate a JSON item for replacing the stream header

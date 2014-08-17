@@ -238,7 +238,7 @@ BLOCK_END
     }.join('').html_safe
   end
 
-  def tag_filter_header label
-    render "tags/tag_filter_header", ttl: label
+  def tag_filter_header label, type_selector=false
+    render "tags/tag_filter_header", ttl: label, type_selector: type_selector
   end
 end
