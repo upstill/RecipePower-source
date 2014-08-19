@@ -61,69 +61,6 @@ class RecipeServices
   def robotags
     @recipe.tags User.super_id
   end
-
-=begin
-  def supplant_x_tags
-    @recipe.current_user = @current_user
-    self.tags = @recipe.x_tags
-    @recipe.save
-  end
-  
-  # Migrate x_tags to tags
-  def self.supplant_x_tags
-    Tagging.all.each { |tg| tg.destroy }
-    Recipe.all.each do |recipe|
-      xtags = recipe.x_tags
-      recipe.users.each do |user|
-        rs = self.new recipe, user.id
-        rs.supplant_x_tags
-      end
-    end
-  end
-  
-  def show_x_tags(file=STDOUT)
-    file.puts @recipe.x_tags.sort { |t1, t2| t1.id <=> t2.id }.collect { |tag| "#{tag.id.to_s}: #{tag.name}" }.join "\n"
-  end
-  
-  def compare_tags(file=STDOUT, xfile=STDOUT)
-    file.puts "-------- Recipe ##{recipe.id.to_s}: '#{recipe.title}' for user ##{current_user.to_s} ------------"
-    xfile.puts "-------- Recipe ##{recipe.id.to_s}: '#{recipe.title}' for user ##{current_user.to_s} ------------"
-    show_tags file
-    show_x_tags xfile
-  end
-  
-  def self.sample_tags (n=5)
-    File.open("/tmp/sample_x_tags", 'w') do |xfile| 
-      File.open("/tmp/sample_tags", 'w') do |file| 
-        users = User.all
-        xfile.puts ">>>>>>>>>>>>>>>>>> Comparing random user/recipe combos: "
-        file.puts ">>>>>>>>>>>>>>>>>> Comparing random user/recipe combos: "
-        count = n
-        while (count >= 0)
-          # Pick a random user and a random recipe that they own
-          user = users[rand(users.count)]
-          rcpids = user.recipe_ids
-          next unless rcpids.count > 0
-          rcpid = rcpids[rand(rcpids.count)]
-          # Compare the x_tags with the user's tags
-          if recipe = Recipe.where(:id => rcpid).first
-            rs = self.new recipe, user.id
-            rs.compare_tags file, xfile
-          end
-          count = count-1
-        end
-        xfile.puts ">>>>>>>>>>>>>>>>>> Comparing all ownerships: "
-        file.puts ">>>>>>>>>>>>>>>>>> Comparing all ownerships: "
-        rcprefs = Rcpref.all.each do |rr|
-          if recipe = Recipe.where(:id => rr.recipe_id).first
-            rs = self.new recipe, rr.user_id
-            rs.compare_tags file, xfile
-          end
-        end
-      end
-    end
-  end
-=end
   
   def tags
     @recipe.tags(@current_user)

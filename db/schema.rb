@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140726213513) do
+ActiveRecord::Schema.define(version: 20140819172450) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -183,7 +183,7 @@ ActiveRecord::Schema.define(version: 20140726213513) do
   end
 
   create_table "rcprefs", force: true do |t|
-    t.integer  "recipe_id"
+    t.integer  "entity_id"
     t.integer  "user_id"
     t.text     "comment"
     t.datetime "created_at"
@@ -192,6 +192,7 @@ ActiveRecord::Schema.define(version: 20140726213513) do
     t.boolean  "private",       default: false
     t.boolean  "in_collection", default: true
     t.integer  "edit_count",    default: 0
+    t.string   "entity_type",   default: "Recipe"
   end
 
   create_table "recipes", force: true do |t|

@@ -227,7 +227,7 @@ class Recipe < ActiveRecord::Base
 
   # Return the number of times a recipe's been marked
   def num_cookmarks
-    Rcpref.where(["recipe_id = ? AND in_collection = ?", self.id, true]).count
+    Rcpref.where(["entity_id = ? AND in_collection = ?", self.id, true]).count
   end
 
   # Is the recipe cookmarked by the given user (or current_user if none given)?

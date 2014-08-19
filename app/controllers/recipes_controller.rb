@@ -256,7 +256,7 @@ class RecipesController < ApplicationController
     else
       @recipe.current_user = current_user_or_guest_id # session[:user_id]
       if saved_okay = @recipe.update_attributes(params[:recipe])
-        if ref = Rcpref.where( user_id: @recipe.current_user, recipe_id: @recipe.id ).first
+        if ref = Rcpref.where( user_id: @recipe.current_user, entity_id: @recipe.id ).first
           ref.edit_count += 1
           ref.save
         end
