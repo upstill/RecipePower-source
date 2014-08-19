@@ -41,7 +41,29 @@ class User < ActiveRecord::Base
   has_and_belongs_to_many :feeds
   has_and_belongs_to_many :lists
 
-  # Private collections
+  # Return a list of lists the user subscribes to, whether personal (:own) or public (:public)
+  def subscriptions kind
+    case kind
+      when :own
+        lists.where owner_id: id
+      when :public
+        lists.where 'owner_id != ?', id
+    end
+  end
+
+  # Subscribe a user to a list
+  def subscribe_to list, do_subscribe=true
+    if do_subscribe
+      self.lists = lists + [list]
+    else
+      lists.delete list
+    end
+  end
+
+  def subscribes_to list
+    lists.include? list
+  end
+
   has_many :private_subscriptions, -> { order "priority ASC" }, :dependent=>:destroy
   has_many :collection_tags, :through => :private_subscriptions, :source => :tag, :class_name => "Tag"
   

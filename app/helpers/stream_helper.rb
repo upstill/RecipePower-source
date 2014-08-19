@@ -70,11 +70,12 @@ module StreamHelper
       case which
         when :personal
           menu_path = "/users/#{current_user_or_guest_id}/collection.json?partial=true"
-          current_user.lists.collect { |l| stream_menu_item(l.name, list_path(l, format: :json), dom_id(l)) }
+          current_user.subscriptions(:own).collect { |l| stream_menu_item(l.name, list_path(l, format: :json), dom_id(l)) }
         when :friends
           current_user.followees.collect { |u| stream_menu_item(u.handle, user_friends_collection_path(u), dom_id(u)) }
         when :public
-          [] # current_user.private_subscriptions.collect { |l| stream_menu_item(l.name, list_path(l), dom_id(l)) }
+          menu_path = "/users/#{current_user_or_guest_id}/biglist.json?partial=true"
+          current_user.subscriptions(:public).collect { |l| stream_menu_item(l.name, list_path(l, format: :json), dom_id(l)) }
       end
     end
     menu_items << %q{<hr style="margin:5px">}

@@ -257,6 +257,14 @@ class UserRecentCache < UserCollectionCache
   end
 end
 
+# user's collection visible to current_user (UserCollectionStreamer)
+class UserBiglistCache < UserCollectionCache
+
+  def itemscope
+    @user ? Rcpref.where('private = false OR user_id = ?', @user.id ) : Rcpref.where( private: false )
+  end
+end
+
 # user's lists visible to current_user (UserListsStreamer
 class UserListsCache < ResultsCache
 

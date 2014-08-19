@@ -108,6 +108,13 @@ class UsersController < ApplicationController
     smartrender unless do_stream UserCollectionCache
   end
 
+  # Show the user's recently-viewed recipes
+  def biglist
+    @container = "container_collections"
+    @itempartial = "show_masonry_item"
+    smartrender unless do_stream UserBiglistCache
+  end
+
   def not_found
     redirect_to root_path, :notice => "User not found", method: "get"
   end

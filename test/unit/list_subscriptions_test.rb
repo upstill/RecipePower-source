@@ -28,6 +28,28 @@ class ListSubscriptionsTest < ActiveSupport::TestCase
     # Do nothing
   end
 
+  test "a user must explicitly subscribe to a public list" do
+    refute @owner.subscribes_to(@super_lst)
+    @owner.subscribe_to @super_lst
+    assert @owner.subscribes_to(@super_lst)
+  end
+
+  test "unsubscribing removes a list from subscriptions" do
+    assert @owner.subscribes_to @lst
+    @owner.subscribe_to @lst, false
+    refute @owner.subscribes_to @lst
+  end
+
+  test "a user can only subscribe to a list once" do
+    subcount = @owner.lists.count
+    refute @owner.subscribes_to(@super_lst)
+    @owner.subscribe_to @super_lst
+    assert @owner.subscribes_to(@super_lst)
+    assert_equal (subcount+1), @owner.lists.count
+    @owner.subscribe_to @super_lst
+    assert_equal (subcount+1), @owner.lists.count, "List got added to subscriptions twice"
+  end
+
   test "a user is automatically subscribed to a new list" do
     assert @lstsvc.subscribed_by?(@owner)
     assert ListServices.subscribed_by(@owner).include?(@lst)
