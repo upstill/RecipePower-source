@@ -244,7 +244,7 @@ class UserCollectionCache < ResultsCache
 
   def items
     # The scope from rcprefs needs to be mapped to items after windowing
-    @items ||= (rcpref_items = item_window itemscope) && rcpref_items.map(&:recipe)
+    @items ||= (rcpref_items = item_window itemscope) && rcpref_items.map(&:entity)
   end
 
 end

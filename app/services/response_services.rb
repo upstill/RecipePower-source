@@ -10,13 +10,14 @@
 
 class ResponseServices
 
-  attr_accessor :action, :title, :partial, :page_url, :page_title
+  attr_accessor :action, :title, :partial, :page_url, :page_title, :active_menu
 
   def initialize params, session, request
     @request = request
     @session = session
     @response = params[:response]
     @controller = params[:controller]
+    @active_menu = params[:am]
     @title = @controller.capitalize
     @page_title = "RecipePower | #{@title}"
     @action = params[:action]

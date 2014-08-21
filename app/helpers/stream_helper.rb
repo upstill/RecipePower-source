@@ -9,24 +9,38 @@ module StreamHelper
   end
 
   # Use a partial to generate a stream header, and surround it with a 'stream-header' div
-  def stream_element etype, headerpartial=nil
+  def stream_element etype, headerpartial=nil, locals={}
+    if headerpartial.is_a? Hash
+      headerpartial, locals = nil, headerpartial
+    end
     # Define a default partial as needed
     fname = etype.to_s.sub /-/, '_'
     headerpartial ||= "shared/stream_#{fname}" unless block_given?
     if headerpartial
-      content = with_format("html") { render headerpartial }
+      content = with_format("html") { render partial: headerpartial, locals: locals }
     else # If no headerpartial provided, expect there to be a code block to produce the content
       content = with_format("html") { yield }
     end
-    tag = (etype==:count) ? :span : :div
+    tag =
+        case etype.to_s
+          when "count"
+            :span
+          when /^nav/
+            :nav
+          else
+            :div
+        end
     content_tag tag, content, class: stream_element_class(etype)
   end
 
   # Generate a JSON item for replacing the stream header
-  def stream_element_replacement etype, headerpartial=nil
+  def stream_element_replacement etype, headerpartial=nil, locals={}
+    if headerpartial.is_a? Hash
+      headerpartial, locals = nil, headerpartial
+    end
     content = block_given? ?
       stream_element( etype, headerpartial) { yield } :
-      stream_element(etype, headerpartial)
+      stream_element(etype, headerpartial, locals)
     ["."+stream_element_class(etype), content ]
   end
 
@@ -46,6 +60,7 @@ module StreamHelper
     options[:class] = "token-input-field-pending #{options[:class]}" # The token-input-field-pending class triggers tokenInput
     options[:onload] = "RP.tagger.onload(evt);"
     options[:data] = data
+    # TODO: fix text in tokeninput dropdown (too large when embedded in header)
     text_field_tag "querytags", @querytags.map(&:id).join(','), options
   end
 
@@ -55,50 +70,6 @@ module StreamHelper
     # Prepend the partialname with the view directory name if it doesn't already have one
     partialname = "#{element.class.to_s.pluralize.downcase}/#{partialname}" unless partialname.match /\//
     render partial: partialname, locals: { :item => element }
-  end
-
-  # Provide one element of a dropdown menu for a selection
-  def stream_menu_item label, path, id
-    link_to_submit label, assert_query(path, partial: true), id: id
-  end
-
-  # Declare the dropdown for a particular class of collection
-  def stream_dropdown which
-    menu_items = []
-    if current_user
-      menu_items =
-      case which
-        when :personal
-          menu_path = "/users/#{current_user_or_guest_id}/collection.json?partial=true"
-          current_user.subscriptions(:own).collect { |l| stream_menu_item(l.name, list_path(l, format: :json), dom_id(l)) }
-        when :friends
-          current_user.followees.collect { |u| stream_menu_item(u.handle, user_friends_collection_path(u), dom_id(u)) }
-        when :public
-          menu_path = "/users/#{current_user_or_guest_id}/biglist.json?partial=true"
-          current_user.subscriptions(:public).collect { |l| stream_menu_item(l.name, list_path(l, format: :json), dom_id(l)) }
-      end
-    end
-    menu_items << %q{<hr style="margin:5px">}
-    active = false # ?? XXX @browser.selected.classed_as == which
-    case which
-      when :personal  # Add "All My Cookmarks", "Recently Viewed" and "New Collection..." items
-#        collection_selection = stream_menu_item("My Collection", user_private_collection_path(current_user), dom_id(current_user_or_guest))
-        menu_items << link_to_submit("Recently Viewed", "/users/#{current_user_or_guest_id}/recent.json?partial=true") # ( @browser.find_by_id "RcpBrowserElementRecent"  )
-        menu_items << link_to_modal("New Personal List...", new_list_path(modal: true))
-      when :friends  # Add "All Friends' Cookmarks" and "Make a Friend..." items
-        menu_items << link_to("Make a Friend...", @browser.find_by_id("RcpBrowserCompositeFriends").add_path)
-      when :public   # Add "The Master Collection", and "Another Collection..." items
-        # menu_items << collection_selection( @browser.find_by_id menu_css_id )
-        menu_items << link_to("New Public List...", new_list_path( modal: true ))
-    end
-    menu_list = "<li>" + menu_items.join('</li><li>') + "</li>"
-    menu_label = %Q{#{which.to_s.capitalize}<span class="caret"><span>}.html_safe
-    content_tag :li,
-                link_to_submit( menu_label, menu_path, class: "dropdown-toggle", data: { toggle: "dropdown" } )+
-                # collection_selection(nil, menu_label, menu_css_id )+
-                # link_to( menu_label, menu_path, class: "collection_selection", id: id ) +
-                    content_tag(:ul, menu_list.html_safe, class: "dropdown-menu"),
-                class: "dropdown"+(active ? " active" : "")
   end
 
 end

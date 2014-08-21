@@ -29,4 +29,5 @@ module UsersHelper
        (both ? " or " : "")+
        (user.email ? "your email '#{user.email}'" : "")).html_safe
    end
+
 end

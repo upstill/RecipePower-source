@@ -113,10 +113,10 @@ RP.findWithin = (selector, elmt) ->
 		$(selector)[0]
 
 # Find an enclosing tag of a given name
-RP.findEnclosing = (tagname, formelmt) ->
-	while formelmt.tagName != tagname
-		formelmt = formelmt.parentNode
-	formelmt
+RP.findEnclosing = (tagname, elmt) ->
+	while elmt && elmt.tagName != tagname
+		elmt = elmt.parentNode
+	elmt
 
 # Automatically open dialogs or click links that have 'trigger' class
 RP.fire_triggers = ->

@@ -169,7 +169,7 @@ def assert_query url, format=nil, newparams={}
   uri = URI(url)
   if format
     # Assert the format by stripping any terminating format string and appending the one specified
-    trunc = uri.path.sub /\.{json|ps|html}$/, ''
+    trunc = uri.path.sub /\.(json|ps|html)$/, ''
     uri.path = trunc + '.' + format
   end
   qparams = uri.query.blank? ? { } : CGI::parse(uri.query)

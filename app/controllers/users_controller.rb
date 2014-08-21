@@ -91,27 +91,34 @@ class UsersController < ApplicationController
   
   def show
     @user = User.find params[:id]
+    @active_menu = :home
     smartrender modal: true # :how => :modal
   end
 
   # Show the user's recently-viewed recipes
   def recent
+    @user = User.find params[:id]
     @container = "container_collections"
     @itempartial = "show_masonry_item"
+    @active_menu = :collection
     smartrender unless do_stream UserRecentCache
   end
 
-  # Show the user's recently-viewed recipes
+  # Show the user's entire collection
   def collection
+    @user = User.find params[:id]
     @container = "container_collections"
     @itempartial = "show_masonry_item"
+    @active_menu = :collection
     smartrender unless do_stream UserCollectionCache
   end
 
   # Show the user's recently-viewed recipes
   def biglist
+    @user = User.find params[:id]
     @container = "container_collections"
     @itempartial = "show_masonry_item"
+    @active_tab = :more
     smartrender unless do_stream UserBiglistCache
   end
 

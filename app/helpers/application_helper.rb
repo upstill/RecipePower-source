@@ -136,6 +136,25 @@ module ApplicationHelper
     content_tag :a, imgtag, href: bookmarklet_script, title: "Cookmark", class: "bookmarklet"
   end
 
+  # Render the appropriate menubar for the currently-selected tab
+=begin
+  def navbar_sub
+    @active_tab ||= :personal
+    @active_button ||= :collection
+    stream_element :"navbar_sub_#{@active_tab}", active_button: @active_button, user: @user
+  end
+
+  def navbar_sub_replacement
+    @active_tab ||= :personal
+    @active_button ||= :collection
+    stream_element_replacement :"navbar_sub_#{@active_tab}", active_button: @active_button, user: @user
+  end
+
+  def navbtn_class btnid
+    (@active_button && btnid==@active_button) ? "btn btn-default active" : "btn btn-default"
+  end
+=end
+
   def header_menu_items
 
     item_list = [
@@ -146,7 +165,7 @@ module ApplicationHelper
     ]
 
     item_list += [
-        "<hr>",
+        "<hr>".html_safe,
         link_to_modal( "Add Cookmark", new_recipe_path ),
         link_to( "Admin", admin_path),
         link_to( "Refresh Masonry", "#", onclick: "RP.collection.justify();" ),
@@ -156,20 +175,23 @@ module ApplicationHelper
         link_to_modal("Step 3", popup_path("starting_step3"))
     ] if permitted_to? :admin, :pages
 
-    ("<li>" + item_list.join("</li>\n<li>") + "</li>").html_safe
+    item_list
   end
   
-  def header_menu
+  def header_menu label=nil
+    label ||= current_user.handle
     
     return "" unless current_user
 
     header_link =
-    link_to (current_user.handle+'<b class="caret"></b>').html_safe, "#",
+    link_to (label+'<b class="caret"></b>').html_safe, "#",
       class: "dropdown-toggle", data: { toggle: "dropdown" }, role: "button"
+
+    items = ("<li>" + header_menu_items.join("</li>\n<li>") + "</li>").html_safe
 
     menu = 
     content_tag :ul, 
-      header_menu_items,
+      items,
       class: "dropdown-menu", # "nav navbar-nav", 
       role: "menu",
       :"aria-labelledby" => "userMenuLabel"
@@ -409,4 +431,95 @@ module ApplicationHelper
                 class: "form-group actions"
   end
 
+  # Define one element of the navbar. Could be a
+  # -- simple label (no go_path and no block given)
+  # -- link (valid go_path but no block)
+  # -- Full-bore dropdown menu (block given), with or without a link at the top (go_path given or not)
+  def navtab which, menu_label, go_path=nil, options={}
+    id = "#{which}-navtab" # id used for the menu item
+    style_options = {}
+    if which == (@active_menu || response_service.active_menu)
+      active = "active"
+    else
+      style_options[:style] = "color: #999;"
+    end
+
+      # The block should produce an array of menu items (links, etc.)
+    if block_given? && (menu_items = yield) && !menu_items.empty?
+      itemlist =
+          content_tag :ul,
+                      menu_items.collect { |item| content_tag :li, item }.join("\n").html_safe,
+                      class: "dropdown-menu"
+      menu_label << content_tag(:span, "", class: "caret")
+      dropdown = "dropdown"
+    end
+
+    link_options = { class: "dropdown-toggle", data: {toggle: "dropdown"} }
+    content =
+        if go_path.blank?
+          link_to menu_label, "#", link_options.merge(style_options)
+        else
+          case options[:as]
+            when :page
+              link_to menu_label, assert_query( go_path, "html"), style_options
+            when :dialog
+              link_to_submit menu_label, assert_query(go_path, "json", modal: true ), link_options.merge(style_options)
+            else # Default: submit a JSON request for page-modifying data
+              link_to_submit menu_label, assert_query(go_path, "json", partial: true ), link_options.merge(style_options)
+          end
+        end
+
+    content_tag :li,
+                "#{content} #{itemlist}".html_safe,
+                {
+                    id: id,
+                    class: "master-navtab #{dropdown} #{active}"
+                }
+  end
+
+=begin
+  # Provide one element of a dropdown menu for a selection
+  def stream_menu_item label, path, id
+    link_to_submit label, assert_query(path, partial: true), id: id
+  end
+
+  # Declare the dropdown for a particular class of collection
+  def stream_dropdown which
+    menu_items = []
+    if current_user
+      menu_items =
+          case which
+            when :collection
+              menu_path = "/users/#{current_user_or_guest_id}/collection.json?partial=true"
+              current_user.subscriptions(:own).collect { |l| stream_menu_item(l.name, list_path(l, format: :json), dom_id(l)) }
+            when :friends
+              current_user.followees.collect { |u| stream_menu_item(u.handle, "/users/#{u.id}/collection.json?partial=true", dom_id(u)) }
+            when :goody_bags
+              menu_path = "/users/#{current_user_or_guest_id}/biglist.json?partial=true"
+              current_user.subscriptions(:public).collect { |l| stream_menu_item(l.name, list_path(l, format: :json), dom_id(l)) }
+          end
+    end
+    menu_items << %q{<hr style="margin:5px">}
+    active = false # ?? XXX @browser.selected.classed_as == which
+    case which
+      when :collection  # Add "All My Cookmarks", "Recently Viewed" and "New Collection..." items
+#        collection_selection = stream_menu_item("My Collection", user_private_collection_path(current_user), dom_id(current_user_or_guest))
+        menu_items << link_to_submit("Recently Viewed", "/users/#{current_user_or_guest_id}/recent.json?partial=true") # ( @browser.find_by_id "RcpBrowserElementRecent"  )
+        menu_items << link_to_modal("New Personal List...", new_list_path(modal: true))
+      when :friends  # Add "All Friends' Cookmarks" and "Make a Friend..." items
+        menu_items << link_to("Make a Friend...", "/users")
+      when :more   # Add "The Master Collection", and "Another Collection..." items
+        # menu_items << collection_selection( @browser.find_by_id menu_css_id )
+        menu_items << link_to("New Public List...", new_list_path( modal: true ))
+    end
+    menu_list = "<li>" + menu_items.join('</li><li>') + "</li>"
+    menu_label = %Q{#{which.to_s.capitalize}<span class="caret"><span>}.html_safe
+    content_tag :li,
+                link_to_submit( menu_label, menu_path, class: "dropdown-toggle", data: { toggle: "dropdown" } )+
+                    # collection_selection(nil, menu_label, menu_css_id )+
+                    # link_to( menu_label, menu_path, class: "collection_selection", id: id ) +
+                    content_tag(:ul, menu_list.html_safe, class: "dropdown-menu"),
+                class: "dropdown"+(active ? " active" : "")
+  end
+=end
 end

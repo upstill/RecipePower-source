@@ -36,18 +36,18 @@ module TriggersHelper
   end
 	
 	# Hit a URL, with options for confirmation (:confirm-msg) and waiting (:wait-msg)
-	def link_to_submit(label, path, options={})
-    # Remote defaults to on; if options say false, remove it altogether
-	  options[:remote] = true unless options.has_key? :remote
-    options.delete :remote unless options[:remote]
+	def link_to_submit(label, path_or_options, html_options={})
+    # Remote defaults to on; if html_options say false, remove it altogether
+	  html_options[:remote] = true unless html_options.has_key? :remote
+    html_options.delete :remote unless html_options[:remote]
 
     # Has class "submit" to attract Javascript handling
-  	options[:class] = "submit "+(options[:class] || "")
+  	html_options[:class] = "submit "+(html_options[:class] || "")
 
     # Pass 'method' option as data
-  	options[:data] = { :method => options[:method] } if options[:method]
+  	html_options[:data] = { :method => html_options[:method] } if html_options[:method]
 
-	  link_to label, path, options
+	  link_to label, path_or_options, html_options
   end
   
   def link_to_redirect(label, url, options={} )

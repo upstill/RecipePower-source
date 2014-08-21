@@ -21,6 +21,17 @@ RP.submit.bind = (dlog) ->
 
 # Before making a dialog request, see if the dialog is preloaded
 RP.submit.beforeSend = (event, xhr, settings) ->
+
+	# If the submission is made from a top-level menu, make the menu active
+	menuElmt = event.currentTarget
+	while menuElmt && !$(menuElmt).hasClass "master-navtab"
+		menuElmt = RP.findEnclosing "LI", menuElmt
+	if menuElmt # Select this menu element exclusively
+		$('.master-navtab').removeClass "active"
+		$('.master-navtab a').css 'color','#999'
+		$(menuElmt).addClass "active"
+		$(event.currentTarget).css 'color','white'
+
 	if (confirm_msg = $(this).data 'confirm-msg') && !confirm(confirm_msg)
 		return false
 	if wait_msg = $(this).data('wait-msg')
