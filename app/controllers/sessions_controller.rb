@@ -1,5 +1,5 @@
 class SessionsController < Devise::SessionsController
-  after_filter :allow_iframe, only: :new
+  before_filter :allow_iframe, only: :new
 
   # GET /resource/sign_in
   def new
