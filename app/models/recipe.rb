@@ -28,7 +28,7 @@ class Recipe < ActiveRecord::Base
   # attr_reader :ratings_attributes
   accepts_nested_attributes_for :ratings, :reject_if => lambda { |a| a[:scale_val].nil? }, :allow_destroy => true
 
-  has_many :rcprefs, :dependent => :destroy
+  has_many :rcprefs, :dependent => :destroy, :as => :entity
   has_many :users, :through => :rcprefs, :autosave => true
 
   @@coder = HTMLEntities.new
