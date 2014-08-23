@@ -5,52 +5,14 @@ module TriggersHelper
   
   # Trigger a modal dialog via button
 	def button_to_modal(label, path, options={})
-	  options[:class] ||= "btn btn-default btn-xs"
+	  options[:class] = "btn btn-default btn-xs #{options[:class]}"
 	  link_to_modal label, path, options
 	end
-	
-	# Embed a link to javascript for running a dialog by reference to a URL
-	def link_to_modal(label, path_or_object, options={})
-    path = url_for(path_or_object)
-	  # We get the dialog with a JSON request
-	  if options[:data]
-	    options[:data].merge! type: "json"
-    else
-      options[:data] = { type: "json" }
-    end
-    # The selector optionally specifies an element to replace.
-    # Move it to the element's data
-	  if selector = options[:selector]
-  	  options.delete(:selector) 
-  	  options[:data].merge! selector: selector
-	  end
-  	options.merge! remote: true
-  	options[:class] = "dialog-run "+(options[:class] || "")
-    query_options = options[:query] || {}
-  	path = assert_query path, query_options.merge(modal: true) # how: "modal" # , area: "floating"
-  	link_to label, path, options
-  end
 
   def link_to_show object, label, options={}
     button_to "Show", object, remote: true, :method => :get, form: { "data-type" => "json", class: "dialog-run" }
   end
-	
-	# Hit a URL using the RP.submit javascript module, with options for confirmation (:confirm-msg) and waiting (:wait-msg)
-	def link_to_submit(label, path_or_options, html_options={})
-    # Remote defaults to on; if html_options say false, remove it altogether
-	  # html_options[:remote] = true unless html_options.has_key? :remote
-    html_options.delete :remote # unless html_options[:remote]
 
-    # Has class "submit" to attract Javascript handling
-  	html_options[:class] = "submit #{html_options[:class]}"
-
-    # Pass 'method' option as data
-    html_options[:data] ||= {}
-  	html_options[:data] = { :method => html_options.delete(:method) } if html_options[:method]
-
-	  link_to label, path_or_options, html_options
-  end
-  
   def link_to_redirect(label, url, options={} )
     # This requires Javascript to bind a click handler to the link
   	link_to label, "#", options.merge( id: "link_to_redirect", "data-url" => url )

@@ -223,10 +223,10 @@ module ApplicationHelper
     
   def footer_navlinks for_mobile=false
   	navlinks = []
-  	navlinks << link_to_modal("About", about_path) 
-  	navlinks << link_to_modal("Contact", contact_path) 
+  	navlinks << link_to_modal("About", about_path)
+  	navlinks << link_to_modal("Contact", contact_path)
   	navlinks << link_to("Home", home_path, class: "nav_link") 
-  	navlinks << link_to_modal("FAQ", faq_path) 
+  	navlinks << link_to_modal("FAQ", faq_path)
   	infolinks = 
   	  [ 
   	    link_to_modal("Need to Know", popup_path("need_to_know")),
@@ -458,11 +458,10 @@ module ApplicationHelper
   # -- Full-bore dropdown menu (block given), with or without a link at the top (go_path given or not)
   def navtab which, menu_label, go_path=nil, options={}
     id = "#{which}-navtab" # id used for the menu item
-    style_options = {}
     if which == (@active_menu || response_service.active_menu)
       active = "active"
     else
-      style_options[:style] = "color: #999;"
+      options[:style] = "color: #999;"
     end
 
       # The block should produce an array of menu items (links, etc.)
@@ -475,8 +474,7 @@ module ApplicationHelper
       dropdown = "dropdown"
     end
 
-    link_options = { class: "dropdown-toggle", data: {toggle: "dropdown"} }
-    content = navlink menu_label.html_safe, go_path, link_options.merge(options.slice(:as)), style_options
+    content = navlink menu_label.html_safe, go_path, true, options.merge(class: "dropdown-toggle", data: {toggle: "dropdown"})
 
     content_tag :li,
                 "#{content} #{itemlist}".html_safe,
@@ -487,20 +485,56 @@ module ApplicationHelper
   end
 
   # Declare one navlink with appropriate format and query parameters
-  def navlink label, go_path, link_options={}, style_options={}
-    if go_path.blank?
-      link_to label, "#", link_options.merge(style_options)
+  def navlink label, go_path, options={}
+    if is_menu_header.is_a? Hash
+      is_menu_header, options = false, is_menu_header
+    end
+     if go_path.blank?
+      link_to label, "#", options
     else
-      case link_options[:as]
+      case options.delete :as
         when :page
-          link_to label, go_path, style_options
+          link_to label, go_path, options
         when :dialog
-          # TODO Doesn't actually process a dialog request
-          link_to_submit label, assert_query(go_path, modal: true ), link_options.merge(style_options)
+          link_to_submit label, assert_query(go_path, modal: true ), options
         else # Default: submit a JSON request for page-modifying data
-          link_to_submit label, assert_query(go_path, partial: true ), link_options.merge(style_options)
+          link_to_submit label, assert_query(go_path, partial: true ), options
       end
     end
+  end
+
+  # Embed a link to javascript for running a dialog by reference to a URL
+  def link_to_modal(label, path_or_object, options={})
+    path = url_for(path_or_object)
+    # We get the dialog with a JSON request
+    (options[:data] ||= {}).merge! type: "json"
+    # The selector optionally specifies an element to replace.
+    # Move it to the element's data
+    if selector = options[:selector]
+      options.delete(:selector)
+      options[:data].merge! selector: selector
+    end
+    options.merge! remote: true
+    options[:class] = "dialog-run "+(options[:class] || "")
+    query_options = options[:query] || {}
+    path = assert_query path, query_options.merge(modal: true) # how: "modal" # , area: "floating"
+    link_to label, path, options
+  end
+
+  # Hit a URL using the RP.submit javascript module, with options for confirmation (:confirm-msg) and waiting (:wait-msg)
+  def link_to_submit(label, path_or_options, options={})
+    # Remote defaults to on; if options say false, remove it altogether
+    # options[:remote] = true unless options.has_key? :remote
+    options.delete :remote # unless options[:remote]
+
+    # Has class "submit" to attract Javascript handling
+    options[:class] = "submit #{options[:class]}"
+
+    # Pass 'method' option as data
+    options[:data] ||= {}
+    options[:data] = { :method => options.delete(:method) } if options[:method]
+
+    link_to label, path_or_options, options
   end
 
 =begin
@@ -531,7 +565,7 @@ module ApplicationHelper
       when :collection  # Add "All My Cookmarks", "Recently Viewed" and "New Collection..." items
 #        collection_selection = stream_menu_item("My Collection", user_private_collection_path(current_user), dom_id(current_user_or_guest))
         menu_items << link_to_submit("Recently Viewed", "/users/#{current_user_or_guest_id}/recent.json?partial=true") # ( @browser.find_by_id "RcpBrowserElementRecent"  )
-        menu_items << link_to_modal("New Personal List...", new_list_path(modal: true))
+        menu_items << navlink("New Personal List...", new_list_path(modal: true), :as => :dialog)
       when :friends  # Add "All Friends' Cookmarks" and "Make a Friend..." items
         menu_items << link_to("Make a Friend...", "/users")
       when :more   # Add "The Master Collection", and "Another Collection..." items

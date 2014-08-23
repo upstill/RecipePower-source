@@ -11,21 +11,6 @@ jQuery ->
 	collection_onload()
 
 	# $('div.loader').removeClass "loading"
-###
-	$("#tagstxt").tokenInput("/tags/match.json",
-		crossDomain: false,
-		hintText: "",
-		noResultsText: "No matching tag found; hit Enter to search with text",
-		prePopulate: $("#tagstxt").data("pre"),
-		theme: "facebook",
-		onAdd: collection_tagchange,
-		onDelete: collection_tagchange,
-		allowFreeTagging: true,
-		placeholder: "Seek and ye shall find...",
-		minChars: 2,
-		zindex: 1500
-	)
-###
 
 RP.collection.onload = (event) ->
 	collection_onload()

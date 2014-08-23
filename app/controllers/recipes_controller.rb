@@ -372,7 +372,6 @@ class RecipesController < ApplicationController
 	# :do => 'add', 'remove'
 	# :what => "Genre", "Technique", "Course"
 	# :name => string identifier (name of element)
-    # @navlinks = navlinks(@recipe, :revise)
     if(params[:do] == "remove") 
     	c = @recipe.tags
     	c.each { |g| c.delete(g) if g.name == params[:name] }
