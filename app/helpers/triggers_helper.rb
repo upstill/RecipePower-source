@@ -35,17 +35,18 @@ module TriggersHelper
     button_to "Show", object, remote: true, :method => :get, form: { "data-type" => "json", class: "dialog-run" }
   end
 	
-	# Hit a URL, with options for confirmation (:confirm-msg) and waiting (:wait-msg)
+	# Hit a URL using the RP.submit javascript module, with options for confirmation (:confirm-msg) and waiting (:wait-msg)
 	def link_to_submit(label, path_or_options, html_options={})
     # Remote defaults to on; if html_options say false, remove it altogether
-	  html_options[:remote] = true unless html_options.has_key? :remote
-    html_options.delete :remote unless html_options[:remote]
+	  # html_options[:remote] = true unless html_options.has_key? :remote
+    html_options.delete :remote # unless html_options[:remote]
 
     # Has class "submit" to attract Javascript handling
-  	html_options[:class] = "submit "+(html_options[:class] || "")
+  	html_options[:class] = "submit #{html_options[:class]}"
 
     # Pass 'method' option as data
-  	html_options[:data] = { :method => html_options[:method] } if html_options[:method]
+    html_options[:data] ||= {}
+  	html_options[:data] = { :method => html_options.delete(:method) } if html_options[:method]
 
 	  link_to label, path_or_options, html_options
   end

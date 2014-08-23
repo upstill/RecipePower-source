@@ -11,19 +11,9 @@
     <% if user_signed_in? %>
         <div class="collapse navbar-collapse navbar-left" id="RP-navbar-collapse">
           <ul class="nav navbar-nav">
-            <%= navtab :collection, "My Goodies", "/users/#{current_user_or_guest_id}/collection.json?partial=true" %>
-            <!--
-                menu_path = "/users/#{current_user_or_guest_id}/collection.json?partial=true"
-                current_user.subscriptions(:own).collect { |l| stream_menu_item(l.name, list_path(l, format: :json), dom_id(l)) }
-                menu_items << link_to_submit("Recently Viewed", "/users/#{current_user_or_guest_id}/recent.json?partial=true") # ( @browser.find_by_id "RcpBrowserElementRecent"  )
-                menu_items << link_to_modal("New Personal List...", new_list_path(modal: true))
-            -->
-            <%= navtab :friends, "Friends" %>
-            <!--
-                #        current_user.followees.collect { |u| stream_menu_item(u.handle, "/users/#{u.id}/collection.json?partial=true", dom_id(u)) }
-                #        menu_items << link_to("Make a Friend...", "/users")
-            -->
-            <%= navtab :goodies, "Goody Bags" %>
+            <%= navtab :collection, "Goodies", "/users/#{current_user_or_guest_id}/collection" do collection_menu_items end %>
+            <%= navtab :friends, "Friends" do friends_menu_items end %>
+            <%= navtab :goodies, "Goody Bags" do goody_bags_menu_items end %>
             <!-- current_user.subscriptions(:public).collect { |l| stream_menu_item(l.name, list_path(l, format: :json), dom_id(l)) }-->
             <%= navtab :feeds, "Feeds" %>
             <%= navtab :news, "News", "/users/#{current_user_or_guest_id}/news.json?partial=true" %>

@@ -154,14 +154,34 @@ module ApplicationHelper
     (@active_button && btnid==@active_button) ? "btn btn-default active" : "btn btn-default"
   end
 =end
+  def friends_menu_items
+    current_user.followees.collect { |u|
+      navlink u.handle, "/users/#{u.id}/collection", id: dom_id(u)
+    }.push navlink("Make a Friend...", users_path )
+  end
+
+  def collection_menu_items
+    [
+      navlink( "My Goodies", "/users/#{current_user_or_guest_id}/collection"),
+      navlink( "All the Goodies", "/users/#{current_user_or_guest_id}/biglist"),
+      navlink( "Recently Viewed", "/users/#{current_user_or_guest_id}/recent")
+    ]
+  end
+
+  def goody_bags_menu_items
+    result = current_user.subscriptions(:own).collect { |l|
+      navlink l.name, list_path(l), id: dom_id(l)
+    }
+    result + ["<hr>".html_safe, navlink("New Personal List...", new_list_path(modal: true), :as => :dialog)]
+  end
 
   def header_menu_items
 
     item_list = [
-        link_to_modal( "Profile", users_profile_path( section: "profile" )),
-        link_to_modal( "Sign-in Services", authentications_path),
-        link_to_modal( "Invite", new_user_invitation_path ),
-        link_to( "Sign Out", destroy_user_session_path, :method => "delete")
+        navlink( "Profile", users_profile_path( section: "profile" ), :as => :dialog),
+        navlink( "Sign-in Services", authentications_path, :as => :dialog),
+        navlink( "Invite", new_user_invitation_path, :as => :dialog ),
+        navlink( "Sign Out", destroy_user_session_path, :method => "delete", :as => :page)
     ]
 
     item_list += [
@@ -256,6 +276,7 @@ module ApplicationHelper
     }.join(' ')
   end
 
+=begin
    def pagination_link (text, pagenum, url)
      # "<span value='#{p.to_s}' class='pageclickr'>#{p.to_s}</span>"
      # We install the actual pagination handler in RPquery.js::queryTabOnLoad
@@ -316,7 +337,7 @@ module ApplicationHelper
      end
    end
 
-=begin Defunct: supplanted by page_or_modal
+  # Defunct: supplanted by page_or_modal
   # Helper for "standard" template which goes to either a page or a modal dialog,
   # depending on context. The content is found in <controller>/<action>_content,
   # and if robomodal is false, the modal dialog is in <controller>/<action>_modal
@@ -455,19 +476,7 @@ module ApplicationHelper
     end
 
     link_options = { class: "dropdown-toggle", data: {toggle: "dropdown"} }
-    content =
-        if go_path.blank?
-          link_to menu_label, "#", link_options.merge(style_options)
-        else
-          case options[:as]
-            when :page
-              link_to menu_label, assert_query( go_path, "html"), style_options
-            when :dialog
-              link_to_submit menu_label, assert_query(go_path, "json", modal: true ), link_options.merge(style_options)
-            else # Default: submit a JSON request for page-modifying data
-              link_to_submit menu_label, assert_query(go_path, "json", partial: true ), link_options.merge(style_options)
-          end
-        end
+    content = navlink menu_label.html_safe, go_path, link_options.merge(options.slice(:as)), style_options
 
     content_tag :li,
                 "#{content} #{itemlist}".html_safe,
@@ -475,6 +484,23 @@ module ApplicationHelper
                     id: id,
                     class: "master-navtab #{dropdown} #{active}"
                 }
+  end
+
+  # Declare one navlink with appropriate format and query parameters
+  def navlink label, go_path, link_options={}, style_options={}
+    if go_path.blank?
+      link_to label, "#", link_options.merge(style_options)
+    else
+      case link_options[:as]
+        when :page
+          link_to label, go_path, style_options
+        when :dialog
+          # TODO Doesn't actually process a dialog request
+          link_to_submit label, assert_query(go_path, modal: true ), link_options.merge(style_options)
+        else # Default: submit a JSON request for page-modifying data
+          link_to_submit label, assert_query(go_path, partial: true ), link_options.merge(style_options)
+      end
+    end
   end
 
 =begin

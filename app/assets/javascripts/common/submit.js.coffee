@@ -15,28 +15,36 @@ jQuery ->
 # Handle submission links
 RP.submit.bind = (dlog) ->
 	dlog ||= $('body') # window.document
-	$(dlog).on("ajax:beforeSend", '.submit', RP.submit.beforeSend )
-	$(dlog).on("ajax:success", '.submit', RP.submit.success )
-	$(dlog).on("ajax:error", '.submit', RP.submit.error )
+	# Set up processing for click events on links with a 'submit' class
+	$(dlog).on "click", '.submit', RP.submit.onClick
+	# Set up handling for remote processing
+	# $(dlog).on "ajax:beforeSend", '.submit', RP.submit.beforeSend
+	# $(dlog).on "ajax:success", '.submit', RP.submit.success
+	# $(dlog).on "ajax:error", '.submit', RP.submit.error
 
-# Before making a dialog request, see if the dialog is preloaded
-RP.submit.beforeSend = (event, xhr, settings) ->
 
-	# If the submission is made from a top-level menu, make the menu active
-	menuElmt = event.currentTarget
+handleEnclosingNavTab = (menuElmt) ->
 	while menuElmt && !$(menuElmt).hasClass "master-navtab"
 		menuElmt = RP.findEnclosing "LI", menuElmt
 	if menuElmt # Select this menu element exclusively
 		$('.master-navtab').removeClass "active"
 		$('.master-navtab a').css 'color','#999'
 		$(menuElmt).addClass "active"
-		$(event.currentTarget).css 'color','white'
+		$('>a', menuElmt).css 'color','white'
 
-	if (confirm_msg = $(this).data 'confirm-msg') && !confirm(confirm_msg)
-		return false
-	if wait_msg = $(this).data('wait-msg')
-		RP.notifications.wait wait_msg
-	true
+proceedWithConfirmation = (elmt) ->
+	!(confirm_msg = $(elmt).data 'confirm-msg') || confirm confirm_msg
+
+###
+# Before making a dialog request, see if the dialog is preloaded
+RP.submit.beforeSend = (event, xhr, settings) ->
+
+	elmt = event.currentTarget
+	# If the submission is made from a top-level menu, make the menu active
+	if proceedWithConfirmation elmt
+		handleEnclosingNavTab elmt
+		RP.notifications.wait $(this).data 'wait-msg'
+		true
 
 # Success handler for fetching dialog from server
 RP.submit.success = (event, responseData, status, xhr) ->
@@ -49,43 +57,35 @@ RP.submit.error = (event, jqXHR, status, error) ->
 	RP.notifications.done()
 	responseData = RP.post_error jqXHR
 	RP.process_response responseData, RP.dialog.target_modal(event)
+###
 
-# Respond to a click by optionally checking for a confirmation, firing a request at the server and appropriately handling the response
-RP.submit.go = (event, request) ->
-	elmt = event.toElement
-	attribs = elmt.attributes
-	if attribs.method 
-		method = attribs.method.value
-	else
-		method = "GET"
-	data = $(elmt).data();
-	if confirm_msg = attribs.confirm && attribs.confirm.value
-		bootbox.confirm confirm_msg, (result) ->
-			if result
-				RP.submit.submit_and_process request, method, data
-	else
-		RP.submit.submit_and_process request, method, data
+# Respond to a click on a '.submit' element by optionally checking for a confirmation, firing a request at the server and appropriately handling the response
+RP.submit.onClick = (event) ->
+	elmt = event.currentTarget # event.toElement
+	# If the submission is made from a top-level menu, make the menu active
+	if proceedWithConfirmation elmt
+		handleEnclosingNavTab elmt
+		attribs = elmt.attributes
+		RP.submit.submit_and_process attribs.href.value, $(elmt).data('method'), $(elmt).data()
 	false
 
-RP.submit.submit_and_process = ( request, method, assumptions ) ->
-	assumptions = assumptions || {} # No assumptions if absent
-	method ||= "GET"
-	RP.notifications.wait assumptions.wait_msg
+RP.submit.submit_and_process = ( request, method="GET", data={} ) ->
+	RP.notifications.wait data['wait-msg'] # If any
 	$.ajax
 		type: method,
 		dataType: "json",
 		url: request,
 		error: (jqXHR, textStatus, errorThrown) ->
-			$('span.source').text jqXHR.responseText
+			# $('span.source').text jqXHR.responseText
 			RP.notifications.done()
+			# TODO Not actually posting an error for the user
 			responseData = RP.post_error jqXHR
-			responseData.how = responseData.how || assumptions.how
 			RP.process_response responseData
 		success: (responseData, statusText, xhr) ->
-			# Pass any assumptions into the response data
+			# Pass any data into the response data
 			RP.notifications.done()
-			responseData.how = responseData.how || assumptions.how;
-			RP.post_success responseData
+			responseData.how ||= data.how;
+			RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
 			RP.process_response responseData
 
 ### The code below pertains to date-sensitive updates. It's not used and probably not useable

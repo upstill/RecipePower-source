@@ -114,6 +114,7 @@ RP.findWithin = (selector, elmt) ->
 
 # Find an enclosing tag of a given name
 RP.findEnclosing = (tagname, elmt) ->
+	elmt = elmt.parentNode
 	while elmt && elmt.tagName != tagname
 		elmt = elmt.parentNode
 	elmt
@@ -271,7 +272,7 @@ RP.build_request = (request, query) ->
 RP.process_response = (responseData, dlog) -> 
 	# 'dlog' is the dialog currently running, if any
 	# Wrapped in 'presentResponse', in the case where we're only presenting the results of the request
-	dlog ||= $('div.modal')[0]
+	dlog ||= $('div.dialog.modal')[0] # Hopefully there's only one currently-active dialog
 	supplanted = false
 	if responseData
 

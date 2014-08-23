@@ -227,6 +227,7 @@ class ApplicationController < ActionController::Base
       format.json {
         if response_service.partial?
           renderopts[:layout] = false
+          render renderopts
         else
           # Blithely assuming that we want a modal-dialog element if we're getting JSON and not a partial
           response_service.is_dialog
@@ -234,10 +235,8 @@ class ApplicationController < ActionController::Base
           hresult = with_format("html") do
             render_to_string response_service.action, renderopts # May have special iframe layout
           end
-          # renderopts[:json] = { code: hresult, area: response_service.format_class, how: "bootstrap" }
-          renderopts[:json] = {code: hresult, how: "bootstrap"}
+          render json: { code: hresult, how: "bootstrap" }
         end
-        render renderopts
       }
       format.js {
         # XXX??? Must have set @partial in preparation
