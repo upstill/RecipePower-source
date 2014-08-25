@@ -164,7 +164,7 @@ module ApplicationHelper
   def header_menu_items
 
     item_list = [
-        navlink( "Profile", users_profile_path( section: "profile" ), :as => :dialog),
+        # navlink( "Profile", users_profile_path( section: "profile" ), :as => :dialog),
         navlink( "Sign-in Services", authentications_path, :as => :dialog),
         navlink( "Invite", new_user_invitation_path, :as => :dialog ),
         navlink( "Sign Out", destroy_user_session_path, :method => "delete", :as => :page)
@@ -249,7 +249,7 @@ module ApplicationHelper
       options = response_service.signup_button_options
       label = options.delete :label
       path = options.delete :path
-      button_link label, path, :dialog, options
+      button_link label, path, :dialog, :default, :xl, options
     end
   end
 

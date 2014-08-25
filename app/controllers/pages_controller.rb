@@ -5,7 +5,7 @@ class PagesController < ApplicationController
   
   def root
     if current_user
-      redirect_to collection_path
+      redirect_to "/users/#{current_user.id}/collection" # collection_path
     else
       redirect_to home_path
     end

@@ -19,10 +19,10 @@
             <%= navtab :news, "News", "/users/#{current_user_or_guest_id}/news" %>
             <%= navtab :more, "More", "/users/#{current_user_or_guest_id}/biglist" %>
             <!-- menu_items << link_to("New Public List...", new_list_path( modal: true ))-->
-            <%= navtab :home, content_tag(:b, current_user.handle, class: "glyphicon glyphicon-home"), "/users/#{current_user_or_guest_id}" %>
-            <%= navtab :tools, content_tag(:b, "", class: "glyphicon glyphicon-cog") do
-              header_menu_items
-            end %>
+            <%= navtab :home,
+                       content_tag(:b, "&nbsp;#{current_user.handle}&nbsp;".html_safe, class: "glyphicon glyphicon-home")+
+                       content_tag(:b, "", class: "glyphicon glyphicon-cog"),
+                       user_path(current_user) do header_menu_items end %>
           </ul>
         </div>
     <% end %>
