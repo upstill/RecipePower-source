@@ -136,24 +136,6 @@ module ApplicationHelper
     content_tag :a, imgtag, href: bookmarklet_script, title: "Cookmark", class: "bookmarklet"
   end
 
-  # Render the appropriate menubar for the currently-selected tab
-=begin
-  def navbar_sub
-    @active_tab ||= :personal
-    @active_button ||= :collection
-    stream_element :"navbar_sub_#{@active_tab}", active_button: @active_button, user: @user
-  end
-
-  def navbar_sub_replacement
-    @active_tab ||= :personal
-    @active_button ||= :collection
-    stream_element_replacement :"navbar_sub_#{@active_tab}", active_button: @active_button, user: @user
-  end
-
-  def navbtn_class btnid
-    (@active_button && btnid==@active_button) ? "btn btn-default active" : "btn btn-default"
-  end
-=end
   def friends_menu_items
     current_user.followees.collect { |u|
       navlink u.handle, "/users/#{u.id}/collection", id: dom_id(u)
@@ -172,7 +154,11 @@ module ApplicationHelper
     result = current_user.subscriptions(:own).collect { |l|
       navlink l.name, list_path(l), id: dom_id(l)
     }
-    result + ["<hr>".html_safe, navlink("New Personal List...", new_list_path(modal: true), :as => :dialog)]
+    result + [
+        "<hr>".html_safe,
+        navlink("Browse for Goody Bags...", lists_path ),
+        navlink("Start a Goody Bag...", new_list_path, :as => :dialog)
+    ]
   end
 
   def header_menu_items
@@ -223,14 +209,14 @@ module ApplicationHelper
     
   def footer_navlinks for_mobile=false
   	navlinks = []
-  	navlinks << link_to_modal("About", about_path)
-  	navlinks << link_to_modal("Contact", contact_path)
+  	navlinks << navlink("About", about_path, :as => :dialog)
+  	navlinks << navlink("Contact", contact_path, :as => :dialog)
   	navlinks << link_to("Home", home_path, class: "nav_link") 
-  	navlinks << link_to_modal("FAQ", faq_path)
+  	navlinks << navlink("FAQ", faq_path, :as => :dialog)
   	infolinks = 
   	  [ 
-  	    link_to_modal("Need to Know", popup_path("need_to_know")),
-	      link_to_modal("Cookmark Button", popup_path("starting_step2") )
+  	    navlink("Need to Know", popup_path("need_to_know"), :as => :dialog),
+	      navlink("Cookmark Button", popup_path("starting_step2"), :as => :dialog )
 	    ]
   	# navlinks << feedback_link("Feedback")
   	if for_mobile 
@@ -256,13 +242,14 @@ module ApplicationHelper
 	    render partial: "registrations/new_modal"
 		end
 	end
-  
+
+  # Sign Me Up button for the home page, with contents varying according to, whether, e.g., a person is responding to an invitation
   def signup_button
     unless current_user
       options = response_service.signup_button_options
       label = options.delete :label
       path = options.delete :path
-      button_to_modal label, path, options
+      button_link label, path, :dialog, options
     end
   end
 
@@ -276,89 +263,6 @@ module ApplicationHelper
     }.join(' ')
   end
 
-=begin
-   def pagination_link (text, pagenum, url)
-     # "<span value='#{p.to_s}' class='pageclickr'>#{p.to_s}</span>"
-     # We install the actual pagination handler in RPquery.js::queryTabOnLoad
-     url = assert_query url, cur_page: pagenum
-     link_to text.html_safe, url, class: "pageclickr", remote: true, method: :POST, "data-type" => :JSON
-   end
-
-   def pagination_links(npages, cur_page, url )
-     if npages > 1
-       maxlinks = 11
-       halfwidth = (maxlinks-6)/2
-
-       cur_page = npages if cur_page > npages
-       blockleft = cur_page-1-halfwidth
-       blockright = cur_page-1 + halfwidth
-       shift = (3-blockleft)
-       if(shift > 0)
-           blockleft = blockleft + shift
-           blockright = blockright + shift
-       end
-       shift = blockright - (npages-4)
-       if(shift > 0)
-           blockright = blockright - shift
-           blockleft = blockleft - shift
-           blockleft = 3 if(blockleft < 3)
-       end
-
-       blockleft = 0 unless blockleft > 3
-       blockright = npages-1 unless blockright < (npages-4)
-       pages = (blockleft..blockright).map { |i| i+1 }
-       pages = [1,2,nil] + pages if(blockleft > 0)
-       pages << [ nil, (npages-1), npages] if(blockright < (npages-1))
-       links = pages.flatten.map do |p| 
-           case p
-           when nil
-               "<span class=\"disabled\">...</span>"
-           when cur_page
-               "<span class=\"current\">#{p.to_s}</span>"
-           else
-               pagination_link p.to_s, p, url
-           end
-       end
-       if cur_page > 1
-           links.unshift pagination_link("&#8592; Previous", cur_page-1, url)
-           links.unshift pagination_link("First ", 1, url)
-       else
-           links.unshift "<span class=\"disabled previous_page\">&#8592; Previous</span>"
-           links.unshift "<span class=\"disabled previous_page\">First </span>"
-       end
-       if cur_page < npages
-           links << pagination_link("Next &#8594;", cur_page+1, url)
-           links << pagination_link(" Last", npages, url)
-       else
-           links << "<span class=\"disabled next_page\">Next &#8594;</span>"
-           links << "<span class=\"disabled next_page\"> Last</span>"
-       end
-       links.join(' ').html_safe
-     end
-   end
-
-  # Defunct: supplanted by page_or_modal
-  # Helper for "standard" template which goes to either a page or a modal dialog,
-  # depending on context. The content is found in <controller>/<action>_content,
-  # and if robomodal is false, the modal dialog is in <controller>/<action>_modal
-  def simple_page ttl, robomodal = false
-    if response_service.dialog?
-      if robomodal
-        # The content is simple enough to render in a generic popup using the content
-        simple_modal params[:action], ttl, style: "margin: 0px 15px;" do
-        	render params[:action]+"_content"
-        end
-      else
-        render params[:action]+"_modal"
-      end
-    else
-      content_tag :div, 
-        content_tag(:h2, ttl, class: "med")+
-        render(params[:action]+"_content"),
-      class: "text_block"
-    end
-  end
-=end
 
   def popup_path(name)
     "/popup/#{name}"
@@ -429,17 +333,6 @@ module ApplicationHelper
                 class: "hide-if-empty"
   end
 
-  # Set up a remote interaction via the submit javascript module
-  def button_to_submit label, url, options={}
-    options[:class] = merge_word_strings options[:class], "btn btn-default btn-xs submit"
-    options.merge! remote: true
-    if options.delete :button_to
-      button_to label, url, options
-    else
-      link_to label, url, options
-    end
-  end
-
   # Generic termination buttons for dialogs--or any other forms
   def form_actions f, options = {}
     cancel_path = options[:cancel_path] || collection_path
@@ -456,7 +349,8 @@ module ApplicationHelper
   # -- simple label (no go_path and no block given)
   # -- link (valid go_path but no block)
   # -- Full-bore dropdown menu (block given), with or without a link at the top (go_path given or not)
-  def navtab which, menu_label, go_path=nil, options={}
+  def navtab which, menu_label, go_path=nil, as=nil
+    options={ as: as }
     id = "#{which}-navtab" # id used for the menu item
     if which == (@active_menu || response_service.active_menu)
       active = "active"
@@ -474,7 +368,7 @@ module ApplicationHelper
       dropdown = "dropdown"
     end
 
-    content = navlink menu_label.html_safe, go_path, true, options.merge(class: "dropdown-toggle", data: {toggle: "dropdown"})
+    content = navlink menu_label.html_safe, go_path, true, options
 
     content_tag :li,
                 "#{content} #{itemlist}".html_safe,
@@ -485,101 +379,17 @@ module ApplicationHelper
   end
 
   # Declare one navlink with appropriate format and query parameters
-  def navlink label, go_path, options={}
+  def navlink label, path_or_options, is_menu_header=false, options={}
     if is_menu_header.is_a? Hash
       is_menu_header, options = false, is_menu_header
     end
-     if go_path.blank?
-      link_to label, "#", options
-    else
-      case options.delete :as
-        when :page
-          link_to label, go_path, options
-        when :dialog
-          link_to_submit label, assert_query(go_path, modal: true ), options
-        else # Default: submit a JSON request for page-modifying data
-          link_to_submit label, assert_query(go_path, partial: true ), options
-      end
+    # The menu headers may or may not have links, but they do have dropdown menus
+    if is_menu_header
+      options[:class] = "dropdown-toggle #{options[:class]}"
+      options[:data] ||= {}
+      options[:data][:toggle] = "dropdown"
     end
+    flavored_link label, path_or_options, options.delete(:as), options
   end
 
-  # Embed a link to javascript for running a dialog by reference to a URL
-  def link_to_modal(label, path_or_object, options={})
-    path = url_for(path_or_object)
-    # We get the dialog with a JSON request
-    (options[:data] ||= {}).merge! type: "json"
-    # The selector optionally specifies an element to replace.
-    # Move it to the element's data
-    if selector = options[:selector]
-      options.delete(:selector)
-      options[:data].merge! selector: selector
-    end
-    options.merge! remote: true
-    options[:class] = "dialog-run "+(options[:class] || "")
-    query_options = options[:query] || {}
-    path = assert_query path, query_options.merge(modal: true) # how: "modal" # , area: "floating"
-    link_to label, path, options
-  end
-
-  # Hit a URL using the RP.submit javascript module, with options for confirmation (:confirm-msg) and waiting (:wait-msg)
-  def link_to_submit(label, path_or_options, options={})
-    # Remote defaults to on; if options say false, remove it altogether
-    # options[:remote] = true unless options.has_key? :remote
-    options.delete :remote # unless options[:remote]
-
-    # Has class "submit" to attract Javascript handling
-    options[:class] = "submit #{options[:class]}"
-
-    # Pass 'method' option as data
-    options[:data] ||= {}
-    options[:data] = { :method => options.delete(:method) } if options[:method]
-
-    link_to label, path_or_options, options
-  end
-
-=begin
-  # Provide one element of a dropdown menu for a selection
-  def stream_menu_item label, path, id
-    link_to_submit label, assert_query(path, partial: true), id: id
-  end
-
-  # Declare the dropdown for a particular class of collection
-  def stream_dropdown which
-    menu_items = []
-    if current_user
-      menu_items =
-          case which
-            when :collection
-              menu_path = "/users/#{current_user_or_guest_id}/collection.json?partial=true"
-              current_user.subscriptions(:own).collect { |l| stream_menu_item(l.name, list_path(l, format: :json), dom_id(l)) }
-            when :friends
-              current_user.followees.collect { |u| stream_menu_item(u.handle, "/users/#{u.id}/collection.json?partial=true", dom_id(u)) }
-            when :goody_bags
-              menu_path = "/users/#{current_user_or_guest_id}/biglist.json?partial=true"
-              current_user.subscriptions(:public).collect { |l| stream_menu_item(l.name, list_path(l, format: :json), dom_id(l)) }
-          end
-    end
-    menu_items << %q{<hr style="margin:5px">}
-    active = false # ?? XXX @browser.selected.classed_as == which
-    case which
-      when :collection  # Add "All My Cookmarks", "Recently Viewed" and "New Collection..." items
-#        collection_selection = stream_menu_item("My Collection", user_private_collection_path(current_user), dom_id(current_user_or_guest))
-        menu_items << link_to_submit("Recently Viewed", "/users/#{current_user_or_guest_id}/recent.json?partial=true") # ( @browser.find_by_id "RcpBrowserElementRecent"  )
-        menu_items << navlink("New Personal List...", new_list_path(modal: true), :as => :dialog)
-      when :friends  # Add "All Friends' Cookmarks" and "Make a Friend..." items
-        menu_items << link_to("Make a Friend...", "/users")
-      when :more   # Add "The Master Collection", and "Another Collection..." items
-        # menu_items << collection_selection( @browser.find_by_id menu_css_id )
-        menu_items << link_to("New Public List...", new_list_path( modal: true ))
-    end
-    menu_list = "<li>" + menu_items.join('</li><li>') + "</li>"
-    menu_label = %Q{#{which.to_s.capitalize}<span class="caret"><span>}.html_safe
-    content_tag :li,
-                link_to_submit( menu_label, menu_path, class: "dropdown-toggle", data: { toggle: "dropdown" } )+
-                    # collection_selection(nil, menu_label, menu_css_id )+
-                    # link_to( menu_label, menu_path, class: "collection_selection", id: id ) +
-                    content_tag(:ul, menu_list.html_safe, class: "dropdown-menu"),
-                class: "dropdown"+(active ? " active" : "")
-  end
-=end
 end

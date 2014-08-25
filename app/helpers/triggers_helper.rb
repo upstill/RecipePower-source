@@ -2,12 +2,6 @@
 require 'uri_utils'
 
 module TriggersHelper
-  
-  # Trigger a modal dialog via button
-	def button_to_modal(label, path, options={})
-	  options[:class] = "btn btn-default btn-xs #{options[:class]}"
-	  link_to_modal label, path, options
-	end
 
   def link_to_show object, label, options={}
     button_to "Show", object, remote: true, :method => :get, form: { "data-type" => "json", class: "dialog-run" }

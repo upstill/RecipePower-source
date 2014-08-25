@@ -18,7 +18,7 @@
 			<%= link_to 'Subscribe', collect_feed_path(item), class: "btn btn-default btn-xs", remote: true %>
 		<% end %>
 		<% permitted_to?(:edit, :feeds) do %>
-			<%= button_to_modal 'Edit', edit_feed_path(item) %>
+			<%= button_link 'Edit', edit_feed_path(item), :dialog %>
 		<% end %>
 		<% permitted_to?(:destroy, :feeds) do %>
 			<%= link_to('Destroy', item, :method => :delete, :class => "btn btn-default btn-xs btn-danger", confirm: 'Are you sure?') %>

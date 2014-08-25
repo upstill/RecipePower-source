@@ -7,6 +7,7 @@ class ListsController < ApplicationController
     # seeker_result Reference, 'div.reference_list' # , clear_tags: true
     @container = "container_collections"
     @itempartial = "show_table_row"
+    @active_menu = :goodies
     smartrender unless do_stream ListsCache
   end
 
@@ -38,6 +39,7 @@ class ListsController < ApplicationController
     response_service.title = "About #{@list.name}"
     @container = "container_collections"
     @itempartial = "show_masonry_item"
+    @active_menu = :goodies
     smartrender unless do_stream ListCache
   end
 

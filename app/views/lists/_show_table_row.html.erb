@@ -13,7 +13,7 @@
     </td>
 	<td>
 		<% permitted_to?(:edit, :lists) do %>
-			<%= button_to_modal 'Edit', edit_list_path(item) %>
+			<%= button_link 'Edit', edit_list_path(item), :dialog %>
 		<% end %>
 		<% permitted_to?(:destroy, :lists) do %>
 			<%= link_to_submit 'Destroy',

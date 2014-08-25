@@ -109,7 +109,7 @@ class UsersController < ApplicationController
     @user = User.find params[:id]
     @container = "container_collections"
     @itempartial = "show_masonry_item"
-    @active_menu = :collection
+    @active_menu = (@user.id == current_user_or_guest_id) ? :collection : :friends
     smartrender unless do_stream UserCollectionCache
   end
 
@@ -118,7 +118,7 @@ class UsersController < ApplicationController
     @user = User.find params[:id]
     @container = "container_collections"
     @itempartial = "show_masonry_item"
-    @active_tab = :more
+    @active_menu = :collection
     smartrender unless do_stream UserBiglistCache
   end
 
