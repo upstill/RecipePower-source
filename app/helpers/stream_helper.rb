@@ -60,7 +60,7 @@ module StreamHelper
     options[:class] = "token-input-field-pending #{options[:class]}" # The token-input-field-pending class triggers tokenInput
     options[:onload] = "RP.tagger.onload(evt);"
     options[:data] = data
-    # TODO: fix text in tokeninput dropdown (too large when embedded in header)
+
     text_field_tag "querytags", @querytags.map(&:id).join(','), options
   end
 
