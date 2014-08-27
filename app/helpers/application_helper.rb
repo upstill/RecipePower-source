@@ -137,7 +137,7 @@ module ApplicationHelper
   end
 
   def friends_menu_items
-    current_user.followees.collect { |u|
+    current_user.followees[0..6].collect { |u|
       navlink u.handle, "/users/#{u.id}/collection", id: dom_id(u)
     }.push navlink("Make a Friend...", users_path )
   end

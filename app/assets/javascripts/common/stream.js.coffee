@@ -37,8 +37,8 @@ RP.stream.fire = (elmt) ->
 		# If the item specifies a handler, call that
 		if handler = jdata.handler && fcn = RP.named_function
 			fcn.apply jdata
-		else # Standard handling: append to the seeker_table
-			item = $(jdata.elmt)
+		else if jdata.elmt
+			item = $(jdata.elmt) # Standard handling: append to the seeker_table
 			# selector = jdata.selector || '.collection_list'
 			# $(selector).append item
 			$(container_selector).append item
@@ -50,6 +50,8 @@ RP.stream.fire = (elmt) ->
 				$(item).on 'resize', (evt) ->
 					$(masonry_selector).masonry()
 				RP.rcp_list.onload $('div.collection-item',item)
+		else
+			RP.process_response jdata
 
 RP.stream.buffer_test = ->
 	source = new EventSource('/stream/buffer_test')

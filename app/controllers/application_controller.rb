@@ -191,6 +191,13 @@ class ApplicationController < ActionController::Base
       # retrieve_seeker
       begin
         sse = Reloader::SSE.new(response.stream)
+        # When the stream is request is for the first items, replace the results
+        if @sp.window.min == 0
+          # Controller may override the name of the results container partial
+          @results_partial ||= params[:action]+"_stream_results"
+          results_item = view_context.stream_results_item(@results_partial)
+          sse.write :stream_item, results_item
+        end
         while item = @sp.next_item do
           sse.write :stream_item, with_format("html") { { elmt: view_context.render_stream_item(item, @itempartial) } }
         end

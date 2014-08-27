@@ -1,9 +1,1 @@
-{
-    pushState: [ response_service.originator, response_service.page_title ],
-    replacements: [
-        ['span.title', with_format("html") { render partial: "layouts/title" }],
-        (stream_element_replacement(:"filter-field")) << "RP.tagger.setup",
-        stream_element_replacement( :header, "index_stream_header"),
-        stream_element_replacement(:results) { lists_table } << "RP.stream.check"
-    ]
-}.to_json
+pagelet_body_data "index_pagelet"
