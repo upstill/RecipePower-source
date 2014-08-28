@@ -6,8 +6,9 @@ class ListsController < ApplicationController
   def index
     # seeker_result Reference, 'div.reference_list' # , clear_tags: true
     @container = "container_collections"
-    @itempartial = "show_table_row"
     @active_menu = :goodies
+    @results_partial = "index_stream_results"
+    @itempartial = "show_table_row"
     smartrender unless do_stream ListsCache
   end
 

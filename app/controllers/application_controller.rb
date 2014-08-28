@@ -194,7 +194,7 @@ class ApplicationController < ActionController::Base
         # When the stream is request is for the first items, replace the results
         if @sp.window.min == 0
           # Controller may override the name of the results container partial
-          @results_partial ||= params[:action]+"_stream_results"
+          @results_partial ||= "shared/stream_results_masonry"
           replacement = with_format("html") do
             view_context.stream_element_replacement(:results, @results_partial)
           end

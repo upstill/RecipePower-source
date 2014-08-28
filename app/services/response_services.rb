@@ -10,7 +10,7 @@
 
 class ResponseServices
 
-  attr_accessor :action, :title, :partial, :page_url, :page_title, :active_menu
+  attr_accessor :action, :title, :partial, :page_url, :active_menu
 
   def initialize params, session, request
     @request = request
@@ -18,9 +18,8 @@ class ResponseServices
     @response = params[:response]
     @controller = params[:controller]
     @active_menu = params[:am]
-    @title = @controller.capitalize
-    @page_title = "RecipePower | #{@title}"
     @action = params[:action]
+    @title = @controller.capitalize+"#"+@action
     @invitation_token = params[:invitation_token]
     @notification_token = params[:notification_token]
     # @area = params[:area]
@@ -270,6 +269,10 @@ class ResponseServices
     else
       "div.container"
     end
+  end
+
+  def page_title
+    "RecipePower | #{@title}"
   end
 
   private

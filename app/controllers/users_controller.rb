@@ -101,7 +101,7 @@ class UsersController < ApplicationController
     @container = "container_collections"
     @itempartial = "show_masonry_item"
     @active_menu = :collection
-    @results_partial = "shared/stream_results_masonry"
+    response_service.title = "Recently Viewed"
     smartrender unless do_stream UserRecentCache
   end
 
@@ -111,6 +111,7 @@ class UsersController < ApplicationController
     @container = "container_collections"
     @itempartial = "show_masonry_item"
     @active_menu = (@user.id == current_user_or_guest_id) ? :collection : :friends
+    response_service.title = "All My Goodies"
     smartrender unless do_stream UserCollectionCache
   end
 
@@ -120,6 +121,7 @@ class UsersController < ApplicationController
     @container = "container_collections"
     @itempartial = "show_masonry_item"
     @active_menu = :collection
+    response_service.title = "The Big List"
     smartrender unless do_stream UserBiglistCache
   end
 

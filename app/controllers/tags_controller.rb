@@ -7,6 +7,7 @@ class TagsController < ApplicationController
     # seeker_result Tag, 'div.tag_list' # , clear_tags: true
     @container = "container_collections"
     @itempartial = "show_table_row"
+    @results_partial = "index_stream_results"
     # -1 stands for any type
     params.delete :tagtype if params[:tagtype] == "-1"
     smartrender unless do_stream TagsCache
