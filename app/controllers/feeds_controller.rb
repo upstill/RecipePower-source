@@ -18,7 +18,11 @@ class FeedsController < ApplicationController
   # GET /feeds
   # GET /feeds.json
   def index
-    seeker_result Feed, 'div.feed_list', all_feeds: permitted_to?(:approve, :feeds) # , clear_tags: true
+    @container = "container_collections"
+    @itempartial = "show_table_row"
+    @results_partial = "index_stream_results"
+    smartrender unless do_stream FeedsCache
+    # seeker_result Feed, 'div.feed_list', all_feeds: permitted_to?(:approve, :feeds) # , clear_tags: true
   end
 
   # GET /feeds/1

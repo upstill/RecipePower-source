@@ -9,10 +9,10 @@
 	<td><%= item.feedtypename %></td>
 	<td><%= link_to_modal item.site.name, site_path(item.site) %></td>
 	<% permitted_to?(:approve, :feeds) do %>
-		<td><%= feed_approval %></td>
+		<td><%= feed_approval item %></td>
 	<% end %>
 	<td>
-		<% if @user.feeds.include?(item) %>
+		<% if current_user.feeds.include?(item) %>
 			<%= link_to 'Unsubscribe', remove_feed_path(item), class: "btn btn-default btn-xs", method: :post %>
 		<% else %>
 			<%= link_to 'Subscribe', collect_feed_path(item), class: "btn btn-default btn-xs", remote: true %>

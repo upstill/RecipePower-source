@@ -60,8 +60,19 @@ module StreamHelper
   end
 =end
 
+  def pagelet_body body_partial=nil, locals={}
+    if body_partial.is_a? Hash
+      locals, body_partial = body_partial, nil
+    end
+    stream_element :body, (body_partial || "#{response_service.action}_pagelet"), locals
+  end
+
   # Return a JSON string passed to the client, for modifying the page of a stream
-  def pagelet_body_data body_partial, locals={}
+  def pagelet_body_replacement body_partial=nil, locals={}
+    if body_partial.is_a? Hash
+      locals, body_partial = body_partial, nil
+    end
+    body_partial ||= "#{response_service.action}_pagelet"
     default = {
         pushState: [ response_service.originator, response_service.page_title ],
         replacements:
@@ -78,10 +89,6 @@ module StreamHelper
     default.to_json
   end
 
-  def pagelet_body body_partial, locals={}
-    stream_element :body, body_partial, locals
-  end
-
   # A useful starting point for a pagelet, with just a searchable header and search results
   def simple_pagelet locals={}
     locals[:title] ||= response_service.title
@@ -90,7 +97,7 @@ module StreamHelper
 
   def simple_pagelet_data locals={}
     locals[:title] ||= response_service.title
-    pagelet_body_data "shared/simple_pagelet", locals
+    pagelet_body_replacement "shared/simple_pagelet", locals
   end
 
   # Provide a tokeninput field for specifying tags, with or without the ability to free-tag
