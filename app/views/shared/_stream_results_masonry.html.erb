@@ -2,6 +2,7 @@
 <div class="row">
   <div class="js-masonry stream-items-parent col-md-12"
        id="container"
+       onload="RP.masonry.onload(event)"
        data-masonry-options='{ "columnWidth": 200, "itemSelector": ".masonry-item", "gutter": 20 }'>
     <% if @sp.dump? %>
         <% while (item = @sp.next_item) do %>
@@ -10,4 +11,3 @@
     <% end %>
   </div>
 </div>
-<%= stream_element :trigger %>

@@ -101,6 +101,7 @@ class UsersController < ApplicationController
     @container = "container_collections"
     @itempartial = "show_masonry_item"
     @active_menu = :collection
+    @results_partial = "shared/stream_results_masonry"
     smartrender unless do_stream UserRecentCache
   end
 

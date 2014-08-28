@@ -1,3 +1,3 @@
 [
-    stream_element_replacement(:results) { lists_table } << "RP.stream.check"
+    stream_element_replacement(:results) { lists_table }
 ].to_json

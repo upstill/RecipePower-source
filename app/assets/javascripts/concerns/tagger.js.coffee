@@ -2,6 +2,23 @@
 
 RP.tagger = RP.tagger || {}
 
+jQuery ->
+	$('.token-input-field-pending').on "load", (event) ->
+		c=2
+		false
+	$('body').on "load", '.stream-body', (event) ->
+		c=3
+		false
+	$('body').on "load", '.token-input-field-pending', (event) ->
+		c=3
+		false
+	$('div.stream-body').on "load", (event) ->
+		c=3
+		false
+	$('div.stream-body').on "load", '.token-input-field-pending', (event) ->
+		c=3
+		false
+
 # Set up an input element for tagging by populating the data of the element as specified
 RP.tagger.init = (selector, data) ->
   $(selector).addClass "token-input-field-pending"

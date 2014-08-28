@@ -195,8 +195,10 @@ class ApplicationController < ActionController::Base
         if @sp.window.min == 0
           # Controller may override the name of the results container partial
           @results_partial ||= params[:action]+"_stream_results"
-          results_item = view_context.stream_results_item(@results_partial)
-          sse.write :stream_item, results_item
+          replacement = with_format("html") do
+            view_context.stream_element_replacement(:results, @results_partial)
+          end
+          sse.write :stream_item, with_format("html") { { replacements: [ replacement ] } }
         end
         while item = @sp.next_item do
           sse.write :stream_item, with_format("html") { { elmt: view_context.render_stream_item(item, @itempartial) } }

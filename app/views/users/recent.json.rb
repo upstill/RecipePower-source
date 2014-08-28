@@ -1,3 +1,5 @@
+pagelet_body_data "recent_pagelet"
+=begin
 {
     pushState: [ response_service.originator, response_service.page_title ],
     replacements: [
@@ -6,3 +8,4 @@
         masonry_results_replacement
     ]
 }.to_json
+=end

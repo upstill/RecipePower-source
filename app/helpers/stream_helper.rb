@@ -32,7 +32,7 @@ module StreamHelper
         end
     # We automatically include an empty trigger at the end of results, for later replacement
     trigger = (etype==:results) ? content_tag(:span, "", class: "stream-trigger") : ""
-    content_tag tag, content+trigger, class: stream_element_class(etype)
+    content_tag tag, content+trigger, class: stream_element_class(etype) 
   end
 
   # Generate a JSON item for replacing the stream header
@@ -43,20 +43,23 @@ module StreamHelper
     content = block_given? ?
       stream_element( etype, headerpartial) { yield } :
       stream_element(etype, headerpartial, locals)
-    ["."+stream_element_class(etype), content ]
+    replacement = ["."+stream_element_class(etype), content ]
+    replacement << "RP.stream.check" if etype==:trigger
+    replacement
   end
 
+=begin
   # This generates an item for initializing the results stream by replacing the results element with its
   # display shell
   def stream_results_item headerpartial
     data = ActiveSupport::JSON.decode with_format("json") { render partial: headerpartial }
-    # stream_element_replacement :results, headerpartial
     { replacements: data }
   end
 
   def masonry_results_replacement
     stream_element_replacement(:results, "shared/stream_results_masonry") << "RP.masonry.onload"
   end
+=end
 
   # Return a JSON string passed to the client, for modifying the page of a stream
   def pagelet_body_data body_partial
@@ -66,7 +69,6 @@ module StreamHelper
             [
                 ['span.title', with_format("html") { render partial: "layouts/title" }],
                 stream_element_replacement(:body, body_partial),
-                stream_element_replacement(:results, nil)
             ]
     }
     if block_given?
@@ -91,7 +93,7 @@ module StreamHelper
     data[:query] = "tagtype=#{presenter.tagtype}" if presenter.tagtype
 
     options[:class] = "token-input-field-pending #{options[:class]}" # The token-input-field-pending class triggers tokenInput
-    options[:onload] = "RP.tagger.onload(evt);"
+    options[:onload] = "RP.tagger.onload(event);"
     options[:data] = data
 
     text_field_tag "querytags", @querytags.map(&:id).join(','), options
