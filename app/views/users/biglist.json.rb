@@ -1,1 +1,1 @@
-simple_pagelet_data comment: "Every collectible in RecipePower."
+simple_pagelet_replacement comment: "Every collectible in RecipePower."

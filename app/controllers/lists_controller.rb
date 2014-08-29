@@ -7,8 +7,6 @@ class ListsController < ApplicationController
     # seeker_result Reference, 'div.reference_list' # , clear_tags: true
     @container = "container_collections"
     @active_menu = :goodies
-    @results_partial = "index_stream_results"
-    @itempartial = "show_table_row"
     smartrender unless do_stream ListsCache
   end
 
@@ -39,7 +37,6 @@ class ListsController < ApplicationController
     @list = List.find(params[:id])
     response_service.title = "About #{@list.name}"
     @container = "container_collections"
-    @itempartial = "show_masonry_item"
     @active_menu = :goodies
     smartrender unless do_stream ListCache
   end
@@ -51,7 +48,7 @@ class ListsController < ApplicationController
         format.html { redirect_to lists_url, :status => :see_other, notice: "'#{list.name}' was successfully updated." }
         format.json { render json: {
             done: true,
-            replacements: [ [ "#list"+@list.id.to_s, with_format("html") { render_to_string partial: "lists/show_table_row" } ] ],
+            replacements: [ [ "#list"+@list.id.to_s, with_format("html") { render_to_string partial: "lists/inde_table_row" } ] ],
             popup: "List saved" }
         }
       end

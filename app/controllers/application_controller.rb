@@ -184,7 +184,6 @@ class ApplicationController < ActionController::Base
   # Take a stream presenter and drop items into a stream, if possible and called for.
   # Otherwise, defer to normal rendering
   def do_stream rc_class
-    @itempartial ||= "show_table_row"
     @sp = StreamPresenter.new session.id, request.fullpath, rc_class, current_user_or_guest_id, querytags, params
     if @sp.stream?  # We're here to spew items into the stream
       response.headers["Content-Type"] = "text/event-stream"
@@ -194,14 +193,13 @@ class ApplicationController < ActionController::Base
         # When the stream is request is for the first items, replace the results
         if @sp.window.min == 0
           # Controller may override the name of the results container partial
-          @results_partial ||= "shared/stream_results_masonry"
           replacement = with_format("html") do
-            view_context.stream_element_replacement(:results, @results_partial)
+            view_context.stream_element_replacement(:results)
           end
           sse.write :stream_item, with_format("html") { { replacements: [ replacement ] } }
         end
         while item = @sp.next_item do
-          sse.write :stream_item, with_format("html") { { elmt: view_context.render_stream_item(item, @itempartial) } }
+          sse.write :stream_item, with_format("html") { { elmt: view_context.render_stream_item(item) } }
         end
       rescue IOError
         logger.info "Stream closed"

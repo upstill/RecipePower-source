@@ -11,8 +11,6 @@ class ReferentsController < ApplicationController
   # GET /referents.json
   def index
     @container = "container_collections"
-    @itempartial = "referents/show_table_row"
-    @results_partial = "index_stream_results"
     smartrender unless do_stream ReferentsCache
   end
 

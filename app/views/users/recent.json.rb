@@ -1,1 +1,1 @@
-simple_pagelet_data
+simple_pagelet_replacement

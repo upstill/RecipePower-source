@@ -14,8 +14,14 @@ module StreamHelper
       partial, locals = nil, partial
     end
     # Define a default partial as needed
-    fname = etype.to_s.sub /-/, '_'
-    partial ||= "shared/stream_#{fname}" unless block_given?
+    unless partial || block_given?
+      if etype == :results
+        partial = @sp.results_partial
+      else
+        fname = etype.to_s.sub /-/, '_'
+        partial = "shared/stream_#{fname}"
+      end
+    end
     if partial
       content = with_format("html") { render partial: partial, locals: locals }
     elsif block_given? # If no headerpartial provided, expect there to be a code block to produce the content
@@ -95,7 +101,7 @@ module StreamHelper
     stream_element :body, "shared/simple_pagelet", locals
   end
 
-  def simple_pagelet_data locals={}
+  def simple_pagelet_replacement locals={}
     locals[:title] ||= response_service.title
     pagelet_body_replacement "shared/simple_pagelet", locals
   end
@@ -118,8 +124,9 @@ module StreamHelper
 
   # Render an element of a collection, depending on its class
   # NB The view is derived from the class of the element, NOT from the current controller
-  def render_stream_item element, partialname
-    # Prepend the partialname with the view directory name if it doesn't already have one
+  def render_stream_item element, partialname=nil
+    partialname ||= @sp.item_partial || "show_masonry_item"
+    # Get the item-rendering partial from the model view
     partialname = "#{element.class.to_s.pluralize.downcase}/#{partialname}" unless partialname.match /\//
     render partial: partialname, locals: { :item => element }
   end

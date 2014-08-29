@@ -33,8 +33,6 @@ class UsersController < ApplicationController
     # 'index' page may be calling itself with filter parameters in the name and tagtype
     # seeker_result User, 'div.user_list' # , clear_tags: true
     @container = "container_collections"
-    @itempartial = "show_table_row"
-    @results_partial = "index_stream_results"
     smartrender unless do_stream UsersCache
   end
   
@@ -100,7 +98,6 @@ class UsersController < ApplicationController
   def recent
     @user = User.find params[:id]
     @container = "container_collections"
-    @itempartial = "show_masonry_item"
     @active_menu = :collection
     response_service.title = "Recently Viewed"
     smartrender unless do_stream UserRecentCache
@@ -110,9 +107,13 @@ class UsersController < ApplicationController
   def collection
     @user = User.find params[:id]
     @container = "container_collections"
-    @itempartial = "show_masonry_item"
-    @active_menu = (@user.id == current_user_or_guest_id) ? :collection : :friends
-    response_service.title = "All My Goodies"
+	  if (@user.id == current_user_or_guest_id)
+      response_service.title = "All My Goodies"
+      @active_menu = :collection
+    else
+      response_service.title = "#{@user.handle}'s Goodies"
+      @active_menu = :friends
+    end
     smartrender unless do_stream UserCollectionCache
   end
 
@@ -120,7 +121,6 @@ class UsersController < ApplicationController
   def biglist
     @user = User.find params[:id]
     @container = "container_collections"
-    @itempartial = "show_masonry_item"
     @active_menu = :collection
     response_service.title = "The Big List"
     smartrender unless do_stream UserBiglistCache
@@ -203,7 +203,7 @@ class UsersController < ApplicationController
       respond_to do |format|
         format.html { redirect_to collection_path }
         format.json  { 
-          listitem = with_format("html") { render_to_string( partial: "show_table_row") }
+          listitem = with_format("html") { render_to_string( partial: "index_table_row") }
           handleitem = %Q{<span class="handle text-on-black">#{@user.handle}&nbsp;&or;</span>}.html_safe
           render json: {
             done: true,

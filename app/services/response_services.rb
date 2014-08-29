@@ -10,7 +10,7 @@
 
 class ResponseServices
 
-  attr_accessor :action, :title, :partial, :page_url, :active_menu
+  attr_accessor :controller, :action, :title, :partial, :page_url, :active_menu
 
   def initialize params, session, request
     @request = request

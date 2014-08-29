@@ -42,15 +42,6 @@ module FeedsHelper
     msg.html_safe
   end
   
-=begin
-  def feeds_table
-    table_out @feeds, [ "ID", "Title/Description/URL", "Tag(s)", "Type", "Host Site", permitted_to?(:approve, :feeds) && "Approved", "Actions" ] do |feed|
-      @feed = feed
-      render "feeds/show_table_row"
-    end
-  end
-=end
-
   def feed_approval feed
 
     if feed.approved.nil?

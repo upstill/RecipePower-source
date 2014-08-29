@@ -19,8 +19,6 @@ class FeedsController < ApplicationController
   # GET /feeds.json
   def index
     @container = "container_collections"
-    @itempartial = "show_table_row"
-    @results_partial = "index_stream_results"
     smartrender unless do_stream FeedsCache
     # seeker_result Feed, 'div.feed_list', all_feeds: permitted_to?(:approve, :feeds) # , clear_tags: true
   end
@@ -136,7 +134,7 @@ class FeedsController < ApplicationController
         format.html { redirect_to feeds_url, :status => :see_other, notice: 'Feed was successfully updated.' }
         format.json { render json: { 
                         done: true, 
-                        replacements: [ [ "#feed"+@feed.id.to_s, with_format("html") { render_to_string partial: "feeds/show_table_row" } ] ],
+                        replacements: [ [ "#feed"+@feed.id.to_s, with_format("html") { render_to_string partial: "feeds/index_table_row" } ] ],
                         popup: "Feed saved" } 
                     }
       end
