@@ -207,12 +207,23 @@ class ApplicationController < ActionController::Base
       rescue IOError
         logger.info "Stream closed"
       ensure
-        sse.close replacements: [ view_context.stream_element_replacement(:trigger) ]
+        sse.close replacements: [ with_format("html") { view_context.stream_element_replacement(:trigger) } ]
       end
       true
     end
   end
-  
+
+  # Monkey-patch to adjudicate between streaming and render_to_stream per
+  # http://blog.sorah.jp/2013/07/28/render_to_string-in-ac-live
+  def render_to_string(*)
+    orig_stream = response.stream
+    super
+  ensure
+    if orig_stream
+      response.instance_variable_set(:@stream, orig_stream)
+    end
+  end
+
   # Generalized response for dialog for a particular area
   def smartrender(renderopts={})
     response_service.action = renderopts[:action] || params[:action]
@@ -232,21 +243,36 @@ class ApplicationController < ActionController::Base
           redirect_to_modal url
         else
           render response_service.action, renderopts
+          x=2
         end
       end
       format.json {
         if response_service.partial?
           renderopts[:layout] = false
-          render renderopts
+          if @sp
+            # If operating with a stream, package the content into a stream-body element, with stream trigger
+            renderopts[:action] = response_service.action
+            begin
+              view = with_format("html") { render_to_string renderopts } # May have special iframe layout
+              render json: {
+                pushState: [ response_service.originator, response_service.page_title ],
+                replacements: [ ['.stream-body', view ] ] }
+            rescue Exception => e
+              x=2
+            end
+          else
+            render renderopts
+          end
         else
           # Blithely assuming that we want a modal-dialog element if we're getting JSON and not a partial
           response_service.is_dialog
           renderopts[:layout] = (@layout || false)
           hresult = with_format("html") do
-            render_to_string response_service.action, renderopts # May have special iframe layout
+            render_to_string( response_service.action, renderopts) # May have special iframe layout
           end
           render json: { code: hresult, how: "bootstrap" }
         end
+        x=2
       }
       format.js {
         # XXX??? Must have set @partial in preparation

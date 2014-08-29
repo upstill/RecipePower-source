@@ -1,1 +1,0 @@
-simple_pagelet_replacement

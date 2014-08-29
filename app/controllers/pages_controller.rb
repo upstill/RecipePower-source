@@ -21,6 +21,8 @@ class PagesController < ApplicationController
     response_service.title = "Home"
     @auth_context = :manage
     setup_collection
+    render
+    x=2
   end
 
   def contact

@@ -1,1 +1,0 @@
-pagelet_body_replacement

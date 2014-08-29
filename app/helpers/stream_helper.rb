@@ -23,10 +23,14 @@ module StreamHelper
       end
     end
     if partial
-      content = with_format("html") { render partial: partial, locals: locals }
+      content = render partial: partial, locals: locals
     elsif block_given? # If no headerpartial provided, expect there to be a code block to produce the content
-      content = with_format("html") { yield }
+      content = yield
     end
+    stream_element_package etype, content
+  end
+
+  def stream_element_package etype, content
     tag =
         case etype.to_s
           when "count"
@@ -36,9 +40,9 @@ module StreamHelper
           else
             :div
         end
-    # We automatically include an empty trigger at the end of results, for later replacement
-    trigger = (etype==:results) ? content_tag(:span, "", class: "stream-trigger") : ""
-    content_tag tag, content+trigger, class: stream_element_class(etype) 
+    # We automatically include an empty trigger at the end of results, for later replacement in streaming
+    content << content_tag(:span, "", class: "stream-trigger") if etype==:results
+    content_tag tag, content, class: stream_element_class(etype)
   end
 
   # Generate a JSON item for replacing the stream header
@@ -66,7 +70,7 @@ module StreamHelper
   end
 =end
 
-  def pagelet_body body_partial=nil, locals={}
+  def pagelet_body
     if body_partial.is_a? Hash
       locals, body_partial = body_partial, nil
     end
@@ -83,7 +87,6 @@ module StreamHelper
         pushState: [ response_service.originator, response_service.page_title ],
         replacements:
             [
-                ['span.title', with_format("html") { render partial: "layouts/title" }],
                 stream_element_replacement(:body, body_partial, locals),
             ]
     }
@@ -101,10 +104,12 @@ module StreamHelper
     stream_element :body, "shared/simple_pagelet", locals
   end
 
+=begin
   def simple_pagelet_replacement locals={}
     locals[:title] ||= response_service.title
     pagelet_body_replacement "shared/simple_pagelet", locals
   end
+=end
 
   # Provide a tokeninput field for specifying tags, with or without the ability to free-tag
   # The options are those of the tokeninput plugin, with defaults
