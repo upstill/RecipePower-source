@@ -1,0 +1,5 @@
+<% publish_date = item.published_at ? "Published on: "+item.published_at.strftime("%B %d, %Y")+"<br />".html_safe : "" %>
+<p><a href='<%= item.url %>'><%= item.name %>
+</a><br />
+  <%= publish_date %>
+  <%= item.summary.html_safe %></p><hr>

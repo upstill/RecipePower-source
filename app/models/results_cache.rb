@@ -215,6 +215,15 @@ end
 # list of feed items
 class FeedCache < ResultsCache
 
+  def initialize attribs
+    super
+    @feed = Feed.where(id: attribs[:params][:id].to_i).first
+  end
+
+  def itemscope
+    FeedEntry.where(feed_id: @feed.id).order('published_at DESC')
+  end
+
 end
 
 # users: list of users visible to current_user (UsersStreamer)

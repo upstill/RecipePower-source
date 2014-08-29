@@ -1,7 +1,7 @@
 <tr id="<%= dom_id item %>">
 	<td><%= item.id.to_s %></td>
 	<td>
-		<%= link_to_modal item.title.truncate(80), feed_path(item) %><br>
+		<%= link_to_submit item.title.truncate(80), feed_path(item) %><br>
 		<%= item.description  %><br>
 		<%= link_to item.url.truncate(40), item.url %>
 	</td>

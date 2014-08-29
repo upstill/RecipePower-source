@@ -28,8 +28,11 @@ class FeedsController < ApplicationController
   def show
     begin
       @feed = Feed.find(params[:id])
-      response_service.title = "About #{@feed.title}"
-      smartrender
+      response_service.title = @feed.title
+      smartrender unless do_stream FeedCache do |sp|
+        sp.item_partial = "feed_entries/show_feed_entry"
+        sp.results_partial = "shared/stream_results_items"
+      end
     rescue
       render text: "Sorry, but there is no such feed. Whatever made you ask?"
     end

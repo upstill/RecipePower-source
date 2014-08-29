@@ -185,6 +185,9 @@ class ApplicationController < ActionController::Base
   # Otherwise, defer to normal rendering
   def do_stream rc_class
     @sp = StreamPresenter.new session.id, request.fullpath, rc_class, current_user_or_guest_id, querytags, params
+    if block_given?
+      yield @sp
+    end
     if @sp.stream?  # We're here to spew items into the stream
       response.headers["Content-Type"] = "text/event-stream"
       # retrieve_seeker

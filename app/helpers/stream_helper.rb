@@ -127,7 +127,10 @@ module StreamHelper
   def render_stream_item element, partialname=nil
     partialname ||= @sp.item_partial || "show_masonry_item"
     # Get the item-rendering partial from the model view
-    partialname = "#{element.class.to_s.pluralize.downcase}/#{partialname}" unless partialname.match /\//
+    unless partialname.match /\//
+      dir = element.class.to_s.pluralize.sub(/([a-z])([A-Z])/, '\1_\2').downcase
+      partialname = "#{dir}/#{partialname}"
+    end
     render partial: partialname, locals: { :item => element }
   end
 
