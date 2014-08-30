@@ -45,6 +45,11 @@ module StreamHelper
     content_tag tag, content, class: stream_element_class(etype)
   end
 
+  # This is kind of a cheater helper, to render a template for embedding in a replacement
+  def render_template controller, action
+    render template: "#{controller}/#{action}", layout: false, formats: [:html]
+  end
+
   # Generate a JSON item for replacing the stream header
   def stream_element_replacement etype, headerpartial=nil, locals={}
     if headerpartial.is_a? Hash
@@ -68,7 +73,6 @@ module StreamHelper
   def masonry_results_replacement
     stream_element_replacement(:results, "shared/stream_results_masonry") << "RP.masonry.onload"
   end
-=end
 
   def pagelet_body
     if body_partial.is_a? Hash
@@ -97,19 +101,13 @@ module StreamHelper
     end
     default.to_json
   end
+=end
 
   # A useful starting point for a pagelet, with just a searchable header and search results
   def simple_pagelet locals={}
     locals[:title] ||= response_service.title
     stream_element :body, "shared/simple_pagelet", locals
   end
-
-=begin
-  def simple_pagelet_replacement locals={}
-    locals[:title] ||= response_service.title
-    pagelet_body_replacement "shared/simple_pagelet", locals
-  end
-=end
 
   # Provide a tokeninput field for specifying tags, with or without the ability to free-tag
   # The options are those of the tokeninput plugin, with defaults

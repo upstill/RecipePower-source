@@ -207,6 +207,7 @@ class ApplicationController < ActionController::Base
       rescue IOError
         logger.info "Stream closed"
       ensure
+        # In closing, replace the trigger to make it active again
         sse.close replacements: [ with_format("html") { view_context.stream_element_replacement(:trigger) } ]
       end
       true
@@ -253,11 +254,8 @@ class ApplicationController < ActionController::Base
             # If operating with a stream, package the content into a stream-body element, with stream trigger
             renderopts[:action] = response_service.action
             begin
-              view = with_format("html") { render_to_string renderopts } # May have special iframe layout
-              render json: {
-                pushState: [ response_service.originator, response_service.page_title ],
-                replacements: [ ['.stream-body', view ] ] }
-            rescue Exception => e
+              render template: "shared/pagelet_body_replacement", layout: false
+           rescue Exception => e
               x=2
             end
           else
@@ -272,7 +270,6 @@ class ApplicationController < ActionController::Base
           end
           render json: { code: hresult, how: "bootstrap" }
         end
-        x=2
       }
       format.js {
         # XXX??? Must have set @partial in preparation
