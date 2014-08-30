@@ -5,8 +5,11 @@ jQuery ->
 		RP.stream.check()
 	RP.stream.check()
 
+RP.stream.onload = (event) ->
+	RP.stream.check event.target
+
 RP.stream.check = (elmt) ->
-	if elmt = RP.findWithin( 'a.stream-trigger', elmt)
+	if $(elmt).hasClass('stream-trigger') || elmt = $('a.stream-trigger')[0]
 		rect = elmt.getBoundingClientRect()
 		if rect && (rect.bottom-rect.height) <= $(window).height()
 			RP.stream.fire elmt

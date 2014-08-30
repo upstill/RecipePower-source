@@ -19,6 +19,7 @@ class FeedsController < ApplicationController
   # GET /feeds.json
   def index
     @container = "container_collections"
+    @active_menu = :feeds
     smartrender unless do_stream FeedsCache
     # seeker_result Feed, 'div.feed_list', all_feeds: permitted_to?(:approve, :feeds) # , clear_tags: true
   end
@@ -26,6 +27,7 @@ class FeedsController < ApplicationController
   # GET /feeds/1
   # GET /feeds/1.json
   def show
+    @active_menu = :feeds
     begin
       @feed = Feed.find(params[:id])
       response_service.title = @feed.title
