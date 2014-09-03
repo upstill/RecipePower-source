@@ -1,5 +1,9 @@
 module TagsHelper
-  
+
+  def tags_table
+    stream_table [ "ID", "Name", "Type", "Usages", "Public?", "Similar", "Synonym(s)", "Meaning(s)", "", "" ]
+  end
+
   # Emit a link to a tag using the tag's name and, optionally, its type and id
   def tag_link tag, with_id=false
     link_to_modal( tag.name, tag )+(with_id ? "(#{tag.typename} #{tag.id.to_s})" : "")
@@ -216,7 +220,7 @@ BLOCK_END
       tagidstr = tag.id.to_s
       content_tag :span,
         tag_link(tag) +
-        (absorb_btn ? link_to_submit("Absorb", "tags/#{@tag.id.to_s}/absorb?victim=#{tagidstr}", class: "absorb_button", id: "absorb_button_#{tagidstr}") : ""),
+        (absorb_btn ? link_to_submit("Absorb", "tags/#{tag.id.to_s}/absorb?victim=#{tagidstr}", class: "absorb_button", id: "absorb_button_#{tagidstr}") : ""),
         class: "absorb_"+tagidstr
   end
 
@@ -232,5 +236,10 @@ BLOCK_END
       end
       render "tags/show_labelled", label: label, name: field
     }.join('').html_safe
+  end
+
+  def tag_filter_header locals={}
+    locals[:type_selector] ||= false
+    render "tags/tag_filter_header", locals # ttl: label, type_selector: type_selector
   end
 end

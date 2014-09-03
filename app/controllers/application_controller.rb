@@ -1,8 +1,13 @@
 require './lib/controller_authentication.rb'
 require './lib/seeker.rb'
+require './lib/querytags.rb'
 require 'rp_event'
+require 'reloader/sse'
+require 'results_cache.rb'
 
 class ApplicationController < ActionController::Base
+  include Querytags # Grab the query tags from params for filtering a list
+  include ActionController::Live   # For streaming
   # layout :rs_layout # Declare in any controller to let response_service pick the layout
   protect_from_forgery with: :exception
   
@@ -56,9 +61,9 @@ class ApplicationController < ActionController::Base
   end
     
   # Get a presenter for the object fron within a controller
-  def present(object, klass = nil)
-    klass ||= "#{object.class}Presenter".constantize
-    klass.new(object, view_context)
+  def present(object, rc_class = nil)
+    rc_class ||= "#{object.class}Presenter".constantize
+    rc_class.new(object, view_context)
   end  
 
   def check_flash
@@ -72,19 +77,7 @@ class ApplicationController < ActionController::Base
   def report_cookie_string
     logger.info "COOKIE_STRING:"
     if cs = request.env["rack.request.cookie_string"]
-      cs.split('; ').each { |str| 
-        logger.info "\t"+str
-        if m = str.match( /_rp_session=(.*)$/ )
-          sess = Rack::Session::Cookie::Base64::Marshal.new.decode(m[1])
-          logger.info "\t\t"+sess.pretty_inspect
-        end
-      }
-    end
-    logger.info "SESSION STORE:"
-    if cook = env["action_dispatch.request.unsigned_session_cookie"]
-      logger.info "\t\t"+cook.pretty_inspect
-    else
-      logger.info "\t\t= NIL"
+      cs.split('; ').each { |str| logger.info "\t"+str}
     end
   end
 
@@ -96,33 +89,33 @@ class ApplicationController < ActionController::Base
   
   # Get the seeker from the session store (mainly used for streaming)
   def retrieve_seeker
-    if klass = session[:seeker_class]
-      setup_seeker klass
+    if rc_class = session[:seeker_class]
+      setup_seeker rc_class
     end
   end
 
-  def setup_seeker(klass, options=nil, params=nil)
+  def setup_seeker(rc_class, options=nil, params=nil)
     @user ||= current_user_or_guest
     params[:cur_page] = "1" if params && params[:selected]
     @browser = @user.browser params
     @user.save
     # Go back to page 1 when a new browser element is selected
-    logger.debug "Fetching #{klass}Seeker with session[:seeker]="+session[:seeker].to_s
-    @seeker = "#{klass}Seeker".constantize.new @user, @browser, session[:seeker], params # Default; other controllers may set up different seekers
+    logger.debug "Fetching #{rc_class}Seeker with session[:seeker]="+session[:seeker].to_s
+    @seeker = "#{rc_class}Seeker".constantize.new @user, @browser, session[:seeker], params # Default; other controllers may set up different seekers
     @seeker.tagstxt = "" if options && options[:clear_tags]
     session[:seeker] = @seeker.store
-    session[:seeker_class] = klass
+    session[:seeker_class] = rc_class
     logger.debug "@seeker returning #{@seeker ? 'not ' : ''}nil."
     @seeker
   end
-  
-  # All controllers displaying the collection need to have it setup 
-  def setup_collection klass="Content", options={}
+
+  # All controllers displaying the collection need to have it setup
+  def setup_collection rc_class="Content", options={}
       @user ||= current_user_or_guest
       @browser = @user.browser params
       default_options = {}
       default_options[:clear_tags] = (params[:controller] != "collection") && (params[:controller] != "stream")
-      setup_seeker klass, default_options.merge(options), params
+      setup_seeker rc_class, default_options.merge(options), params
       if (params[:controller] == "pages")
         # The search box in generic pages redirects collections, either "The Big List" for guests or
         # the user's whole collection 
@@ -140,15 +133,15 @@ class ApplicationController < ActionController::Base
   # This is one-stop-shopping for a controller using the query to filter a list
   # See tags_controller for an example
   # Options: selector: CSS selector for the outermost container of the rendered index template
-  def seeker_result(klass, frame_selector, options={})
-    def jsondata(klass, frame_selector, options)
+  def seeker_result(rc_class, frame_selector, options={})
+    def jsondata(rc_class, frame_selector, options)
       # In a json response we just re-render the collection list for replacement
       # If we need to replace the page, we send back a link to do it with
       if params[:redirect]
         { redirect: assert_popup(nil, request.original_url) }
       else
         begin
-          setup_seeker(klass, options.slice(:clear_tags, :scope), params)
+          setup_seeker(rc_class, options.slice(:clear_tags, :scope), params)
         rescue Exception => e
           # Response to a setup error is to reload the collections page
           flash[:error] = e.to_s
@@ -169,25 +162,69 @@ class ApplicationController < ActionController::Base
           end
           { replacements: replacements }
         else
-          {  streams: [ ['#seeker_results', {kind: @seeker.class.to_s, append: @seeker.cur_page.to_i>1}] ] }
+          {  streams: [ ['#seeker_results', {path: "/stream/stream?kind=#{@seeker.class}", append: @seeker.cur_page.to_i>1}] ] }
         end
       end
     end
     respond_to do |format|
       format.html {
         params[:cur_page] = 1
-        setup_collection klass, options
+        setup_collection rc_class, options
         # flash.now[:guide] = @seeker.guide
         render :index
       }
       format.js do
-        @jsondata = jsondata(klass, frame_selector, options)
+        @jsondata = jsondata(rc_class, frame_selector, options)
         render template: "shared/get_content"
       end
-      format.json { render json: jsondata(klass, frame_selector, options) }
+      format.json { render json: jsondata(rc_class, frame_selector, options) }
     end
   end
-  
+
+  # Take a stream presenter and drop items into a stream, if possible and called for.
+  # Otherwise, defer to normal rendering
+  def do_stream rc_class
+    @sp = StreamPresenter.new session.id, request.fullpath, rc_class, current_user_or_guest_id, querytags, params
+    if block_given?
+      yield @sp
+    end
+    if @sp.stream?  # We're here to spew items into the stream
+      response.headers["Content-Type"] = "text/event-stream"
+      # retrieve_seeker
+      begin
+        sse = Reloader::SSE.new(response.stream)
+        # When the stream is request is for the first items, replace the results
+        if @sp.window.min == 0
+          # Controller may override the name of the results container partial
+          replacement = with_format("html") do
+            view_context.stream_element_replacement(:results)
+          end
+          sse.write :stream_item, with_format("html") { { replacements: [ replacement ] } }
+        end
+        while item = @sp.next_item do
+          sse.write :stream_item, with_format("html") { { elmt: view_context.render_stream_item(item) } }
+        end
+      rescue IOError
+        logger.info "Stream closed"
+      ensure
+        # In closing, replace the trigger to make it active again
+        sse.close replacements: [ with_format("html") { view_context.stream_element_replacement(:trigger) } ]
+      end
+      true
+    end
+  end
+
+  # Monkey-patch to adjudicate between streaming and render_to_stream per
+  # http://blog.sorah.jp/2013/07/28/render_to_string-in-ac-live
+  def render_to_string(*)
+    orig_stream = response.stream
+    super
+  ensure
+    if orig_stream
+      response.instance_variable_set(:@stream, orig_stream)
+    end
+  end
+
   # Generalized response for dialog for a particular area
   def smartrender(renderopts={})
     response_service.action = renderopts[:action] || params[:action]
@@ -207,18 +244,32 @@ class ApplicationController < ActionController::Base
           redirect_to_modal url
         else
           render response_service.action, renderopts
+          x=2
         end
       end
       format.json {
-        # Blithely assuming that we want a modal-dialog element if we're getting JSON
-        response_service.is_dialog
-        renderopts[:layout] = (@layout || false)
-        hresult = with_format("html") do
-          render_to_string response_service.action, renderopts # May have special iframe layout
+        if response_service.partial?
+          renderopts[:layout] = false
+          if @sp
+            # If operating with a stream, package the content into a stream-body element, with stream trigger
+            renderopts[:action] = response_service.action
+            begin
+              render template: "shared/pagelet_body_replacement", layout: false
+           rescue Exception => e
+              x=2
+            end
+          else
+            render renderopts
+          end
+        else
+          # Blithely assuming that we want a modal-dialog element if we're getting JSON and not a partial
+          response_service.is_dialog
+          renderopts[:layout] = (@layout || false)
+          hresult = with_format("html") do
+            render_to_string( response_service.action, renderopts) # May have special iframe layout
+          end
+          render json: { code: hresult, how: "bootstrap" }
         end
-        # renderopts[:json] = { code: hresult, area: response_service.format_class, how: "bootstrap" }
-        renderopts[:json] = { code: hresult, how: "bootstrap" }
-        render renderopts
       }
       format.js {
         # XXX??? Must have set @partial in preparation
@@ -265,7 +316,7 @@ class ApplicationController < ActionController::Base
     @response_service.is_mobile if (params[:target] == "mobile")
     @response_service
   end
-  
+
   # This object directs conditional view code according to target device and context
   def response_service
     @response_service || setup_response_service

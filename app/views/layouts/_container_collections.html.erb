@@ -1,0 +1,12 @@
+<div class="container">
+  <div class="row">
+    <div class="content col-md-12 content-column">
+      <%= flash_notifications_div %>
+      <%= if defined?(@sp) # If a stream presenter, package the view into a body with results trigger
+            stream_element :body do yield end
+          else
+            yield
+          end %>
+    </div>
+  </div>
+</div>

@@ -20,6 +20,16 @@
 	# text-shadow: 0 1px 0 #888888;
 }
 
+.simple_form label {
+  float: left;
+  width: 150px;
+  margin: 4px 1px 10px;
+}
+
+div.token-input-dropdown-facebook {
+  font:14px arial,sans-serif;
+}
+
 .top_right_corner {
   position: absolute;
   z-index: 1000;
@@ -32,4 +42,15 @@ div.prompt {
   font-weight:bold;
   margin: 20px 0px 15px 10px;
   padding: 0px;
+}
+
+.hd1 {
+  font:22px arial,sans-serif;
+  font-weight:bold;
+}
+
+div.stream-filter-field {
+  display:inline-block;
+  vertical-align:bottom;
+  margin-bottom:0px
 }

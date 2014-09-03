@@ -138,4 +138,19 @@ class TagServices
     true
   end
 
+  # Study the Yummly dataset for correspondence with RecipePower's
+  def self.yumm
+    file = File.read "yumm.json"
+    # ingreds = JSON.parse file
+    results = ingreds.collect { |ingred|
+      tags = Tag.strmatch ingred["term"], matchall: true
+      (tags.empty? ? "No match on #{ingred["term"]}" : "Matched #{ingred["term"]}:")+
+          tags.collect { |tag| "\n\t#{tag.typename} #{tag.id}: #{tag.name}"}.join('')
+    }.sort { |line1, line2| line1 <=> line2 }
+    results.each { |line| puts line }
+    total = results.count
+    nmatched = results.keep_if { |result| result.match /^Matched/ }.compact.count
+    puts "Matched #{nmatched} of #{total}."
+  end
+
 end

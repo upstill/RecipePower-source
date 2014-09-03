@@ -1,4 +1,4 @@
-# Class for a single selectable collection of recipes, whether physical or virtual
+# Class for a single selectable collection of entities, whether physical or virtual
 require 'my_constants.rb'
 require "candihash.rb"
 include ActionView::Helpers::DateHelper
@@ -575,7 +575,14 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
 
   # Add a collection by reference to a tag
   def add_by_content tag
-    @children << RcpBrowserElementTaglist.new(@level+1, tagid: tag.id, userid: @userid) unless find_by_content(tag)
+    if found = find_by_content(tag)
+      return found
+    end
+    child = (tag.tagtype == 16) ?
+        RcpBrowserElementList.new(@level+1, tagid: tag.id, userid: @userid) :
+        RcpBrowserElementTaglist.new(@level+1, tagid: tag.id, userid: @userid)
+    @children << child
+    child
   end
 
   def should_show(recipe)
@@ -1071,6 +1078,58 @@ class RcpBrowserElementTaglist < RcpBrowserElement
   # The candidates are a list of recipes by id
   def candidates
     @candidates ||= tag.recipe_ids(@userid)
+  end
+
+end
+
+# Element for a content List. A List is uniquely identified by 1) its title tag, and 2) the user
+class RcpBrowserElementList < RcpBrowserElement
+
+  def initialize(level, args)
+    super
+    @persisters << :tagid unless @persisters.include? :tagid
+    @level = level
+    @persisters.each { |name| instance_variable_set("@#{name}", args[name]) if args[name] } if @persisters
+    # @handle = "Tag #{@tagid.to_s}" # tag.name
+    @classed_as = :personal
+    tag # Will throw exception if tag doesn't exist
+  end
+
+  def css_id
+    self.class.to_s+@tagid.to_s
+  end
+
+  def add_path
+    "/lists/new?modal=true"
+  end
+
+  def tag
+    @tag ||= Tag.find(@tagid)
+  end
+
+  def list
+    @list ||= List.assert(tag.name, user, create: true)
+  end
+
+  def find_by_content tag
+    self if tag.id == @tagid
+  end
+
+  def handle extended=false
+    extended ? "My <strong>#{tag.name}</strong> List".html_safe : tag.name
+  end
+
+  # Return a hash sufficient to reconstruct the element
+  def save
+    result = Hash[@persisters.map { |name| instance_variable_get("@#{name.to_s}") && [name, instance_variable_get("@#{name.to_s}")] }.compact]
+    result[:classname] = self.class.name
+    result
+  end
+
+  private
+  # The candidates are a list of recipes by id
+  def candidates
+    @candidates ||= list.recipe_ids
   end
 
 end

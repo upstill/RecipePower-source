@@ -3,41 +3,21 @@ require 'time_check'
 class Rcpref < ActiveRecord::Base
   include Voteable
 
-  belongs_to :recipe
+  belongs_to :entity, :polymorphic => true
   belongs_to :user
   # before_save :ensure_unique
-  attr_accessible :comment, :recipe_id, :user_id, :in_collection, :updated_at, :created_at
-
-  StatusRotationMask = 0x1
-  StatusFavoritesMask = 0x2
-  StatusInterestingMask = 0x4
-  StatusMiscMask = 0x8
-  StatusAny = StatusRotationMask | StatusFavoritesMask | StatusInterestingMask | StatusMiscMask
-  StatusRecentMask = 0x10
-
-  # Get the user-assigned status for a recipe as a hash of booleans
-  # :status_rotation
-  # :status_favorites
-  # :status_interesting
-  # :status_misc
-  def status_flags
-    status_bits_to_flags(self.status)
-  end
-
-  def status_flags=(flags)
-    self.status = status_flags_to_bits flags
-  end
+  attr_accessible :comment, :entity_id, :user_id, :in_collection, :updated_at, :created_at
 
   # Present the time-since-touched in a text format
   def self.touch_date(rid, uid)
-    if rr = Rcpref.where(recipe_id: rid, user_id: uid).first
+    if rr = Rcpref.where(entity_id: rid, user_id: uid).first
       rr.updated_at
     end
   end
 
   # When saving a "new" use, make sure it's unique
   def ensure_unique
-    puts "Ensuring uniqueness of user #{self.user_id.to_s} to recipe #{self.recipe_id.to_s}"
+    puts "Ensuring uniqueness of user #{self.user_id.to_s} to recipe #{self.entity_id.to_s}"
   end
 
   # get an array of recipe ids from a user, subject to permissions and status, with appropriate ordering
@@ -80,12 +60,12 @@ class Rcpref < ActiveRecord::Base
 
       # We apply the titlestr, if any
       if titlestr
-        titleset = refs.joins(:recipe).where('title ILIKE ?', "%#{titlestr}%").map &:recipe_id
+        titleset = refs.joins(:recipe).where('title ILIKE ?', "%#{titlestr}%").map &:entity_id
       end
 
       if commentstr
         # If there is a :comment parameter, use that in the query
-        commentset = refs.where("comment ILIKE ?", "%#{commentstr}%").map &:recipe_id
+        commentset = refs.where("comment ILIKE ?", "%#{commentstr}%").map &:entity_id
       end
 
       # We prefer recipes that match in both title and comment, 
@@ -93,9 +73,31 @@ class Rcpref < ActiveRecord::Base
       if commentset && titleset
         ((commentset & titleset) | titleset | commentset).uniq
       else
-        (titleset || commentset || refs.map(&:recipe_id)).uniq
+        (titleset || commentset || refs.map(&:entity_id)).uniq
       end
     end
+  end
+
+=begin
+
+  StatusRotationMask = 0x1
+  StatusFavoritesMask = 0x2
+  StatusInterestingMask = 0x4
+  StatusMiscMask = 0x8
+  StatusAny = StatusRotationMask | StatusFavoritesMask | StatusInterestingMask | StatusMiscMask
+  StatusRecentMask = 0x10
+
+  # Get the user-assigned status for a recipe as a hash of booleans
+  # :status_rotation
+  # :status_favorites
+  # :status_interesting
+  # :status_misc
+  def status_flags
+    status_bits_to_flags(self.status)
+  end
+
+  def status_flags=(flags)
+    self.status = status_flags_to_bits flags
   end
 
   def status_bits_to_flags(bits)
@@ -112,7 +114,6 @@ class Rcpref < ActiveRecord::Base
         (flags[:status_misc] ? StatusMiscMask : 0)
   end
 
-=begin
 
 PermissionPrivateMask = 0x1
 PermissionFriendsMask = 0x2

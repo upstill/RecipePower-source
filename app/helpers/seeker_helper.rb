@@ -32,21 +32,28 @@ module SeekerHelper
 		  # Default is to set instance variable @<Klass> and render "<klass>s/<klass>"
 		  ename = element.class.to_s.downcase
 		  self.instance_variable_set("@"+ename, element)
-		  render partial: "#{ename.pluralize}/show_table_row", locals: { ename.to_sym => element }
+		  render partial: "#{ename.pluralize}/index_table_row", locals: { ename.to_sym => element }
 		end
+  end
+ 
+  # Leave a link for stream firing
+  def stream_link path, options={}
+    options[:onclick] = 'RP.stream.go(event);'
+    options[:class] = "#{options[:class]} stream-trigger"
+    options[:data] ||= {}
+    options[:data][:path] = path
+    options[:data][:container_selector] = response_service.container_selector
+    link_to "Click to load", "#", options
   end
 
   # Set up a DOM element to receive a stream of seeker results
-	def arm_seeker_stream enclosing_element, querypath, options={}
-    stream_link = link_to "Click to load", "#",
-	    # onload: 'RP.stream.go(event);',
-	    class: 'content-streamer hidden',
-	    data: { kind: @seeker.class.to_s } # , alert: ((current_user && (current_user.id == 3)) ? "Firing Stream" : "") }
+  def arm_seeker_stream enclosing_element, querypath, options={}
+    link = stream_link "/stream/stream?kind=#{@seeker.class}", class: "content-streamer hidden"
     options[:data] ||= {}
     querypath = "/#{querypath}" unless querypath =~ /^\//
     options[:data][:"query-path"] = querypath
     options[:id] = "seeker_results"
-    content_tag enclosing_element, stream_link, options
+    content_tag enclosing_element, link, options
   end
 
   def element_item selector, elmt

@@ -16,7 +16,12 @@ RP.rcp_list.onload = (item) ->
 			descripted = (description && $('<div/>').html(description).text()) || "";
 			$(datablock).popover
 				trigger: "hover",
-				placement: "auto right",
+				placement: (context, source) ->
+					if source.getBoundingClientRect().left > 300
+						"left"
+					else
+						"right"
+				,
 				html: true,
 				content: descripted+contentstr+decoded
 	else

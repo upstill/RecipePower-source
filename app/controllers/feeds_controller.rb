@@ -18,16 +18,23 @@ class FeedsController < ApplicationController
   # GET /feeds
   # GET /feeds.json
   def index
-    seeker_result Feed, 'div.feed_list', all_feeds: permitted_to?(:approve, :feeds) # , clear_tags: true
+    @container = "container_collections"
+    @active_menu = :feeds
+    smartrender unless do_stream FeedsCache
+    # seeker_result Feed, 'div.feed_list', all_feeds: permitted_to?(:approve, :feeds) # , clear_tags: true
   end
 
   # GET /feeds/1
   # GET /feeds/1.json
   def show
+    @active_menu = :feeds
     begin
       @feed = Feed.find(params[:id])
-      response_service.title = "About #{@feed.title}"
-      smartrender
+      response_service.title = @feed.title
+      smartrender unless do_stream FeedCache do |sp|
+        sp.item_partial = "feed_entries/show_feed_entry"
+        sp.results_partial = "shared/stream_results_items"
+      end
     rescue
       render text: "Sorry, but there is no such feed. Whatever made you ask?"
     end
@@ -132,7 +139,7 @@ class FeedsController < ApplicationController
         format.html { redirect_to feeds_url, :status => :see_other, notice: 'Feed was successfully updated.' }
         format.json { render json: { 
                         done: true, 
-                        replacements: [ [ "#feed"+@feed.id.to_s, with_format("html") { render_to_string partial: "feeds/show_table_row" } ] ],
+                        replacements: [ [ "#feed"+@feed.id.to_s, with_format("html") { render_to_string partial: "feeds/index_table_row" } ] ],
                         popup: "Feed saved" } 
                     }
       end

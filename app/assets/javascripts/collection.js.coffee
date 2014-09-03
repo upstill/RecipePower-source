@@ -11,21 +11,6 @@ jQuery ->
 	collection_onload()
 
 	# $('div.loader').removeClass "loading"
-###
-	$("#tagstxt").tokenInput("/tags/match.json",
-		crossDomain: false,
-		hintText: "",
-		noResultsText: "No matching tag found; hit Enter to search with text",
-		prePopulate: $("#tagstxt").data("pre"),
-		theme: "facebook",
-		onAdd: collection_tagchange,
-		onDelete: collection_tagchange,
-		allowFreeTagging: true,
-		placeholder: "Seek and ye shall find...",
-		minChars: 2,
-		zindex: 1500
-	)
-###
 
 RP.collection.onload = (event) ->
 	collection_onload()
@@ -44,7 +29,7 @@ collection_onload = () ->
 	$('.content-streamer').each (ix, elmt) ->
 		if (alertstr = $(elmt).data('alert')) && (alertstr.length > 0)
 			alert alertstr
-		RP.stream.fire $(elmt).data('kind')
+		RP.stream.fire elmt
 		$(elmt).remove()
 	# Page buttons do a remote fetch which needs to replace the collection
 

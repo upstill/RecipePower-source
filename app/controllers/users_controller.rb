@@ -5,7 +5,7 @@ class UsersController < ApplicationController
   rescue_from ActiveRecord::RecordNotFound, :with => :not_found
   before_filter :login_required, :except => [:new, :create, :identify]
   before_filter :authenticate_user!, :except => [:new, :show, :index, :identify]
-  
+
   # Take a tokenInput query string and match the input against the given user's set of friends/channels
   def match_friends
     me = User.find params[:id]
@@ -31,7 +31,9 @@ class UsersController < ApplicationController
   # GET /users.xml
   def index
     # 'index' page may be calling itself with filter parameters in the name and tagtype
-    seeker_result User, 'div.user_list' # , clear_tags: true
+    # seeker_result User, 'div.user_list' # , clear_tags: true
+    @container = "container_collections"
+    smartrender unless do_stream UsersCache
   end
   
 =begin
@@ -88,9 +90,42 @@ class UsersController < ApplicationController
   
   def show
     @user = User.find params[:id]
+    @active_menu = :home
     smartrender modal: true # :how => :modal
   end
-  
+
+  # Show the user's recently-viewed recipes
+  def recent
+    @user = User.find params[:id]
+    @container = "container_collections"
+    @active_menu = :collection
+    response_service.title = "Recently Viewed"
+    smartrender unless do_stream UserRecentCache
+  end
+
+  # Show the user's entire collection
+  def collection
+    @user = User.find params[:id]
+    @container = "container_collections"
+	  if (@user.id == current_user_or_guest_id)
+      response_service.title = "All My Goodies"
+      @active_menu = :collection
+    else
+      response_service.title = "#{@user.handle}'s Goodies"
+      @active_menu = :friends
+    end
+    smartrender unless do_stream UserCollectionCache
+  end
+
+  # Show the user's recently-viewed recipes
+  def biglist
+    @user = User.find params[:id]
+    @container = "container_collections"
+    @active_menu = :collection
+    response_service.title = "The Big List"
+    smartrender unless do_stream UserBiglistCache
+  end
+
   def not_found
     redirect_to root_path, :notice => "User not found", method: "get"
   end
@@ -168,11 +203,11 @@ class UsersController < ApplicationController
       respond_to do |format|
         format.html { redirect_to collection_path }
         format.json  { 
-          listitem = with_format("html") { render_to_string( partial: "show_table_row") }
+          listitem = with_format("html") { render_to_string( partial: "index_table_row") }
           handleitem = %Q{<span class="handle text-on-black">#{@user.handle}&nbsp;&or;</span>}.html_safe
           render json: {
             done: true,
-            replacements: [ ["#listrow_"+@user.id.to_s, listitem],
+            replacements: [ [ view_context.dom_id(@user), listitem], # "#listrow_"+@user.id.to_s, listitem],
                             view_context.flash_notifications_replacement,
                             ['span.handle', handleitem ]
             ]

@@ -37,7 +37,6 @@ module Linkable
     # The latter type may be referenced by entities, e.g. for the logo of a site, or the profile picture of
     # a user, or the image associated with a recipe.
     # In this case, the type of reference being used is given by the :as option to linkable, viz :as => ImageReference
-    #
 
     # options[:as]: the class which the referent keeps as an affiliate
     def linkable(url_attribute, reference_association, options = {})

@@ -1,0 +1,12 @@
+ <tr id="<%= dom_id item %>">
+	<td><b><%= item.name || "Defaults" %></b><br>
+		<b>Site</b>: <%= item.home %><br>
+		<b><%= show_sample item %></b><br>
+		<b>Logo</b>: <%= item.logo %><br>
+		<b># Feeds:</b> <%= item.feeds.size %> (<%= item.feeds.where(approved: true).count %> approved for feedthrough)
+	</td>
+	<td><%= link_to_modal 'Show', item %><br>
+		<%= link_to_modal 'Edit', edit_site_path(item) %><br>
+		<%= link_to 'Destroy', item, confirm: 'Are you sure?', method: :delete %><br>
+	</td>
+</tr>

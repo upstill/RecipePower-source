@@ -28,7 +28,7 @@ class Recipe < ActiveRecord::Base
   # attr_reader :ratings_attributes
   accepts_nested_attributes_for :ratings, :reject_if => lambda { |a| a[:scale_val].nil? }, :allow_destroy => true
 
-  has_many :rcprefs, :dependent => :destroy
+  has_many :rcprefs, :dependent => :destroy, :as => :entity
   has_many :users, :through => :rcprefs, :autosave => true
 
   @@coder = HTMLEntities.new
@@ -227,7 +227,7 @@ class Recipe < ActiveRecord::Base
 
   # Return the number of times a recipe's been marked
   def num_cookmarks
-    Rcpref.where(["recipe_id = ? AND in_collection = ?", self.id, true]).count
+    Rcpref.where(["entity_id = ? AND in_collection = ?", self.id, true]).count
   end
 
   # Is the recipe cookmarked by the given user (or current_user if none given)?
@@ -301,6 +301,11 @@ class Recipe < ActiveRecord::Base
       ref.in_collection = false
       ref.save
     end
+  end
+
+  # Does the recipe/entity appear in the user's collection?
+  def collected_by? uid
+    (ref = ref_for(uid, false)) && ref.in_collection
   end
 
   # Set the mod time of the recipe to now (so it sorts properly in Recent lists)

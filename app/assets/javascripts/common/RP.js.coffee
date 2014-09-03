@@ -106,6 +106,19 @@ RP.named_function = (str) ->
 			return obj
 	return null;
 
+RP.findWithin = (selector, elmt) ->
+	if elmt
+		$(selector, elmt)[0]
+	else
+		$(selector)[0]
+
+# Find an enclosing tag of a given name
+RP.findEnclosing = (tagname, elmt) ->
+	elmt = elmt.parentNode
+	while elmt && elmt.tagName != tagname
+		elmt = elmt.parentNode
+	elmt
+
 # Automatically open dialogs or click links that have 'trigger' class
 RP.fire_triggers = ->
 	$('div.dialog.trigger').removeClass("trigger").each (ix, dlog) ->
@@ -235,19 +248,20 @@ RP.detach = (node) ->
 RP.change = (event) ->
 	elmt = event.target
 	data = $(elmt).data()
+	query = data.querydata
 	# Stick the value of the element into the named parameter ('value' default)
 	if data.valueparam
-		data.querydata[data.valueparam] = elmt.value
+		query[data.valueparam] = elmt.value
 	else
-		data.querydata.value = elmt.value
+		query.value = elmt.value
 	# Fire off an Ajax call notifying the server of the (re)classification
-	RP.submit.submit_and_process RP.build_request(data), "GET", data
+	RP.submit.submit_and_process RP.build_request(data.request, query), "GET", data
 
 # Build a request string from a structure with attributes 'request' and 'querydata'
-RP.build_request = (data) ->
+RP.build_request = (request, query) ->
 	# Encode the querydata into the request string
 	str = []
-	for attrname,attrvalue of data.querydata
+	for attrname,attrvalue of query
 		str.push(encodeURIComponent(attrname) + "=" + encodeURIComponent(attrvalue));
 	# Fire off an Ajax call notifying the server of the (re)classification
 	data.request+"?"+str.join("&")
@@ -258,7 +272,7 @@ RP.build_request = (data) ->
 RP.process_response = (responseData, dlog) -> 
 	# 'dlog' is the dialog currently running, if any
 	# Wrapped in 'presentResponse', in the case where we're only presenting the results of the request
-	dlog ||= $('div.modal')[0]
+	dlog ||= $('div.dialog.modal')[0] # Hopefully there's only one currently-active dialog
 	supplanted = false
 	if responseData
 
@@ -266,17 +280,27 @@ RP.process_response = (responseData, dlog) ->
 		if replacements = responseData.replacements
 			for replacement in replacements
 				$(replacement[0]).replaceWith replacement[1]
-				$(replacement[0]).trigger "load"
+				# $(replacement[0]).trigger "RP.replace"
+				if elmt = $(replacement[0])[0]
+					$('[onload]', elmt).trigger 'load'
+				# The third value may be a function name to call on the replaced elemnnt
+				if (loader = replacement[2]) && (loadFcn = RP.named_function(loader))
+					loadFcn($(replacement[0])[0])
 
+    ###
 		if streams = responseData.streams
 			for stream in streams
 				if !stream[1].append
 					$(stream[0]).empty()
 				RP.stream.fire stream[1].kind, stream[1].append
+    ###
 
 		if redirect = responseData.redirect
 			window.location.assign redirect # "http://local.recipepower.com:3000/collection" #  href = href
-		
+
+		if state = responseData.pushState
+			window.history.pushState null, state[1], state[0]
+
 		if deletions = responseData.deletions
 			for deletion in deletions
 				$(deletion).remove()
@@ -290,7 +314,7 @@ RP.process_response = (responseData, dlog) ->
 		# If it's a page that includes a dialog, assert that, otherwise replace the page
 		if (code = responseData.code) && !supplanted = RP.dialog.replace_modal code, dlog
 				responseData.page ||= code
-			
+
 		if form = responseData.form
 			# Find the form to replace in error scenarios
 			action = form.getAttribute("action")

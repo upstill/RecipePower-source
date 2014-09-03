@@ -3,15 +3,32 @@ class TaggingServices
   def initialize taggable_entity
     @taggable_entity = taggable_entity
   end
+
+  # Does a tagging exist for the given entity, tag and owner?
+  def exists? tag, owner_id
+    Tagging.exists?(
+        tag_id: tag.id,
+        user_id: owner_id,
+        entity_id: @taggable_entity.id,
+        entity_type: @taggable_entity.class)
+  end
+
+  def assert tag, owner_id
+    Tagging.find_or_create_by(
+        tag_id: tag.id,
+        user_id: owner_id,
+        entity_id: @taggable_entity.id,
+        entity_type: @taggable_entity.class.to_s)
+  end
   
   # Eliminate all references to one tag in favor of another
   def self.change_tag(fromid, toid)
     Tagging.where(tag_id: fromid).each do |tochange| 
       tochange.tag_id = toid
       if Tagging.exists?(
-          tag_id: tochange.tag_id, 
-          user_id: tochange.user_id, 
-          entity_id: tochange.entity_id, 
+          tag_id: tochange.tag_id,
+          user_id: tochange.user_id,
+          entity_id: tochange.entity_id,
           entity_type: tochange.entity_type) #,
           # is_definition: tochange.is_definition)
         tochange.destroy # Assuming that it failed validation because not unique

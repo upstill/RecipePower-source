@@ -92,6 +92,8 @@ module DialogsHelper
     contents << content_tag( :div, prompt, class: "prompt" ).html_safe if prompt = options.delete( :prompt )
     contents << ( options.delete(:body_contents) || capture(&block) )
     options[:class] = "modal-body #{options.delete :body_class}"
+    contents = content_tag(:div, contents.html_safe, class: "col-md-12")
+    contents = content_tag(:div, contents.html_safe, class: "row")
     content_tag(:div, contents.html_safe, options).html_safe
   end
   

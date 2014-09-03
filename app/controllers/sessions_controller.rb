@@ -1,5 +1,5 @@
 class SessionsController < Devise::SessionsController
-  after_filter :allow_iframe, only: :new
+  before_filter :allow_iframe, only: :new
 
   # GET /resource/sign_in
   def new
@@ -21,6 +21,7 @@ class SessionsController < Devise::SessionsController
   end
 
   def create
+    # TODO: failed login causing uncaught exception here
     resource = warden.authenticate!(:scope => resource_name, :recall => "#{controller_path}#new" ) # :failure)
     result = sign_in_and_redirect(resource_name, resource)
     return result

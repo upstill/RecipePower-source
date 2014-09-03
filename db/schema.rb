@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140630192433) do
+ActiveRecord::Schema.define(version: 20140819172450) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -111,9 +111,25 @@ ActiveRecord::Schema.define(version: 20140630192433) do
 
   create_table "lists", force: true do |t|
     t.integer  "owner_id"
-    t.text     "items"
+    t.integer  "name_tag_id"
+    t.integer  "availability", default: 0
+    t.text     "ordering",     default: ""
+    t.text     "description",  default: ""
+    t.text     "notes",        default: ""
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "lists_tags", force: true do |t|
+    t.integer  "tag_id"
+    t.integer  "list_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lists_users", force: true do |t|
+    t.integer "list_id"
+    t.integer "user_id"
   end
 
   create_table "notifications", force: true do |t|
@@ -167,7 +183,7 @@ ActiveRecord::Schema.define(version: 20140630192433) do
   end
 
   create_table "rcprefs", force: true do |t|
-    t.integer  "recipe_id"
+    t.integer  "entity_id"
     t.integer  "user_id"
     t.text     "comment"
     t.datetime "created_at"
@@ -176,6 +192,7 @@ ActiveRecord::Schema.define(version: 20140630192433) do
     t.boolean  "private",       default: false
     t.boolean  "in_collection", default: true
     t.integer  "edit_count",    default: 0
+    t.string   "entity_type",   default: "Recipe"
   end
 
   create_table "recipes", force: true do |t|
@@ -227,6 +244,19 @@ ActiveRecord::Schema.define(version: 20140630192433) do
     t.datetime "created_at",   null: false
     t.datetime "updated_at",   null: false
   end
+
+  create_table "results_caches", id: false, force: true do |t|
+    t.string   "session_id"
+    t.text     "params"
+    t.text     "cache"
+    t.string   "type"
+    t.integer  "cur_position", default: 0
+    t.integer  "limit",        default: -1
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "results_caches", ["session_id"], name: "index_results_caches_on_session_id", using: :btree
 
   create_table "rp_events", force: true do |t|
     t.integer  "verb"

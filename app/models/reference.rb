@@ -7,7 +7,7 @@ class Reference < ActiveRecord::Base
 
   validates_uniqueness_of :url, :scope => :type
   
-  typeable( :reference_type, 
+  typeable( :reference_type,
     Article: ["Article", 1],
     Newsitem: ["News Item", 2],
     Tip: ["Tip", 4],
@@ -23,6 +23,17 @@ class Reference < ActiveRecord::Base
   )
 
   public
+
+  # Convert back and forth between class and typenum (for heeding type selections)
+  def self.type_to_class typenum=0
+    return Reference if !typenum || typenum == 0
+    ((self.typesym(typenum) || "").to_s+"Reference").constantize
+  end
+
+  def typenum
+    return 0 if self.class == Reference
+    Reference.typenum self.class.to_s.sub( 'Reference', '' ).to_sym
+  end
 
   # Index a Reference by URL or URLs, assuming it exists (i.e., no initialization or creation)
   def self.lookup url_or_urls, partial=false
@@ -409,4 +420,8 @@ class SiteReference < Reference
     }
     super urls.first
   end
+end
+
+class EventReference < Reference
+
 end

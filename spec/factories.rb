@@ -1,0 +1,1 @@
+# See test/factories.rb

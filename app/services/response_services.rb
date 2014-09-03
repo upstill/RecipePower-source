@@ -10,15 +10,16 @@
 
 class ResponseServices
 
-  attr_accessor :action, :title
+  attr_accessor :controller, :action, :title, :partial, :page_url, :active_menu
 
   def initialize params, session, request
     @request = request
     @session = session
     @response = params[:response]
     @controller = params[:controller]
-    @title = @controller.capitalize
+    @active_menu = params[:am]
     @action = params[:action]
+    @title = @controller.capitalize+"#"+@action
     @invitation_token = params[:invitation_token]
     @notification_token = params[:notification_token]
     # @area = params[:area]
@@ -32,11 +33,21 @@ class ResponseServices
     # @format = (params[:format] || "page")
     # @format = "dialog" if (params[:how] == "modal")
     @modal = params[:modal]
+    @partial = params[:partial] && (params[:partial] == "true")
+
+    # Save the parameters we might want to pass back
+    @meaningful_params = params.except(:controller, :action, :partial, :format)
   end
 
   # Provide a URL that reproduces the current request
   def originator
-    @request.url
+    unless @originator
+      uri = URI @request.url
+      uri.query = nil if (uri.query = @meaningful_params.to_param).blank?
+      uri.path = uri.path.sub(/\..*/,'') # Remove any format indicator
+      @originator = uri.to_s
+    end
+    @originator
   end
 
   def omniauth_pending clear = false
@@ -55,8 +66,8 @@ class ResponseServices
     # @format = "dialog" if query_params[:how] && (query_params[:how] == "modal")
   end
   
-  def is_dialog
-    @modal = true
+  def is_dialog set=true
+    @modal = set
   end
   
   def dialog?
@@ -90,6 +101,10 @@ class ResponseServices
   # True if we're targetting mobile
   def mobile?
     @session[:mobile] && true
+  end
+
+  def partial?
+    partial
   end
   
   # Return relevant options for modal dialog
@@ -246,6 +261,18 @@ class ResponseServices
           else
             "page"
         end
+  end
+
+  def container_selector
+    if dialog?
+      "div.dialog"
+    else
+      "div.container"
+    end
+  end
+
+  def page_title
+    "RecipePower | #{@title}"
   end
 
   private

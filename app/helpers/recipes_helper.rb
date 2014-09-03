@@ -71,7 +71,7 @@ module RecipesHelper
       }.compact
     when :others
       header_text = "Comments of Others"
-      Rcpref.where(recipe_id: recipe.id).
+      Rcpref.where(entity_id: recipe.id).
         where("comment <> '' AND private <> TRUE").
         where("user_id not in (?)", user.followee_ids<<user.id).collect { |rref|
           { source: rref.user.handle, body: rref.comment }

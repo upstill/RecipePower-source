@@ -1,4 +1,9 @@
 module FeedsHelper
+
+  def feeds_table
+    stream_table [ "ID", "Title/Description/URL", "Tag(s)", "Type", "Host Site", ("Approved" if permitted_to?(:approve, :feeds)) , "Actions" ].compact
+  end
+
   def feedlist
     @feed.entries.collect { |entry|
       publish_date = entry.published_at ? "Published on: "+entry.published_at.strftime("%B %d, %Y")+"<br />" : ""
@@ -37,21 +42,14 @@ module FeedsHelper
     msg.html_safe
   end
   
-  def feeds_table
-    table_out @feeds, [ "ID", "Title/Description/URL", "Tag(s)", "Type", "Host Site", permitted_to?(:approve, :feeds) && "Approved", "Actions" ] do |feed|
-      @feed = feed
-      render "feeds/show_table_row"
-    end
-  end
-  
-  def feed_approval
+  def feed_approval feed
 
-    if @feed.approved.nil?
-      yes_btn = link_to 'Y', approve_feed_path(@feed, approve: "Y"), class: "btn btn-default btn-xs", remote: true, method: "POST"
-      no_btn = link_to 'N', approve_feed_path(@feed, approve: "N"), class: "btn btn-default btn-xs", remote: true, method: "POST"
+    if feed.approved.nil?
+      yes_btn = link_to 'Y', approve_feed_path(feed, approve: "Y"), class: "btn btn-default btn-xs", remote: true, method: "POST"
+      no_btn = link_to 'N', approve_feed_path(feed, approve: "N"), class: "btn btn-default btn-xs", remote: true, method: "POST"
   		(yes_btn+no_btn).html_safe
   	else
-  	  @feed.approved ? "Y" : "N"
+  	  feed.approved ? "Y" : "N"
 	  end
 	end
 	

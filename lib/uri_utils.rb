@@ -160,10 +160,18 @@ def build_query(params)
   end.flatten.join("&")
 end
 
-# Ensure that a hash of query parameters makes it into the given url
-def assert_query url, newparams={}
-  return url if newparams.empty?
+# Ensure that a hash of query parameters makes it into the given url. A format may also be asserted
+def assert_query url, format=nil, newparams={}
+  if format.is_a? Hash
+    newparams, format = format, nil
+  end
+  return url if newparams.empty? && (format.blank? || format=="html")
   uri = URI(url)
+  if format
+    # Assert the format by stripping any terminating format string and appending the one specified
+    trunc = uri.path.sub /\.(json|ps|html)$/, ''
+    uri.path = trunc + '.' + format
+  end
   qparams = uri.query.blank? ? { } : CGI::parse(uri.query)
 	newparams.each { |k, v|
     if v
@@ -172,7 +180,8 @@ def assert_query url, newparams={}
       qparams.delete k.to_s
     end
   } # Assert the new params, poss. over the old
-  uri.query = qparams.collect { |k, v| "#{k.to_s}=#{CGI::escape v[0]}" unless v.empty? }.compact.join('&')
+  newq = qparams.collect { |k, v| "#{k.to_s}=#{CGI::escape v[0]}" unless v.empty? }.compact.join('&')
+  uri.query = newq.blank? ? nil : newq
   uri.to_s
 end
 

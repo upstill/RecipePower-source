@@ -408,27 +408,44 @@ class TagSeeker < Seeker
 end
 
 class FeedSeeker < Seeker
-  
+
   def datastore
     super.merge all_feeds: (@all_feeds || false)
   end
-  
+
   def dataload datastr
     data = super
     @all_feeds = data[:all_feeds] || false
   end
-  
+
   def affiliate browser=nil, params=nil
     @all_feeds ||= params && params[:all_feeds]
     @affiliate ||= @all_feeds ? Feed.all : Feed.where(:approved => true)
   end
-  
+
   # Get the results of the current query.
   def apply_tags(candihash)
     # Rank/purge for tag matches
-    tags.each { |tag| 
+    tags.each { |tag|
       semantic_list = Feed.where(site_id: Site.where(referent_id: tag.referent_ids).map(&:id)).map(&:id)
       candihash.apply semantic_list
+      # Get candidates by matching the tag's name against recipe titles and comments
+      candihash.apply affiliate.where("description ILIKE ?", "%#{tag.name}%").map(&:id)
+      candihash.apply affiliate.where("title ILIKE ?", "%#{tag.name}%").map(&:id)
+    }
+  end
+end
+
+class ListSeeker < Seeker
+
+  def affiliate browser=nil, params=nil
+    @affiliate ||= List.all
+  end
+
+  # Get the results of the current query.
+  def apply_tags(candihash)
+    # Rank/purge for tag matches
+    tags.each { |tag|
       # Get candidates by matching the tag's name against recipe titles and comments
       candihash.apply affiliate.where("description ILIKE ?", "%#{tag.name}%").map(&:id)
       candihash.apply affiliate.where("title ILIKE ?", "%#{tag.name}%").map(&:id)

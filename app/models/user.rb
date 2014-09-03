@@ -37,10 +37,33 @@ class User < ActiveRecord::Base
 
   # Channels are just another kind of user. This field (channel_referent_id, externally) denotes such.
   belongs_to :channel, :class_name => "Referent", :foreign_key => "channel_referent_id"
-  
-  has_and_belongs_to_many :feeds
 
-  # Private collections
+  has_and_belongs_to_many :feeds
+  has_and_belongs_to_many :lists
+
+  # Return a list of lists the user subscribes to, whether personal (:own) or public (:public)
+  def subscriptions kind
+    case kind
+      when :own
+        lists.where owner_id: id
+      when :public
+        lists.where 'owner_id != ?', id
+    end
+  end
+
+  # Subscribe a user to a list
+  def subscribe_to list, do_subscribe=true
+    if do_subscribe
+      self.lists = lists + [list]
+    else
+      lists.delete list
+    end
+  end
+
+  def subscribes_to list
+    lists.include? list
+  end
+
   has_many :private_subscriptions, -> { order "priority ASC" }, :dependent=>:destroy
   has_many :collection_tags, :through => :private_subscriptions, :source => :tag, :class_name => "Tag"
   
@@ -96,6 +119,13 @@ class User < ActiveRecord::Base
     browser.select_by_content feed
     browser.delete_selected
     feeds.delete feed
+    save
+  end
+
+  def add_list l
+    l.save unless l.id
+    self.lists = lists+[l] # unless self.list_ids.include?(l.id)
+    browser.select_by_content l.name_tag
     save
   end
 
@@ -157,6 +187,14 @@ class User < ActiveRecord::Base
     end
   end
 
+  def collection_scope options={}
+    constraints = {:user_id => id}
+    constraints[:in_collection] = true unless options[:all]
+    constraints[:private] = false if options[:public]
+    ordering = (options[:sort_by] == :collected) ? "created_at" : "updated_at"
+    Rcpref.where(constraints).order(ordering+" DESC")
+  end
+
   def recipes_collection_size
     Rcpref.where(:user_id => id).count
   end
@@ -165,30 +203,6 @@ class User < ActiveRecord::Base
   def tag_owner
     User.super_id
   end
-
-=begin
-  # Wrap the tags and tag_ids accessor methods to eliminate sensitivity to the userid, deferring to super
-  alias_method :original_tags, :tags
-  def tags(uid=nil)
-    original_tags User.super_id
-  end
-
-  # Wrap the tags and tag_ids methods to eliminate sensitivity to the userid, deferring to super
-  alias_method :original_tags=, :tags=
-  def tags=(vals, uid=nil)
-    original_tags= vals, User.super_id
-  end
-
-  alias_method :original_tag_ids, :tag_ids
-  def tag_ids(uid=nil)
-    original_tag_ids User.super_id
-  end
-
-  alias_method :original_tag_ids=, :tag_ids=
-  def tag_ids=(vals, uid=nil)
-    original_tag_ids= vals, User.super_id
-  end
-=end
 
 private
   @@leasts = {}
@@ -549,27 +563,6 @@ public
       save
     end
   end
-
-=begin
-  # Return a list of username/id pairs suitable for popup selection
-  # owner: the id that should be hidden under "Choose Another"
-  # user: the id that should be excluded from the list
-  # :friends=>true to include friends
-  # :circles=>true to include cooking circles
-  # NB labels "guest" as "all recipes"
-  def self.selectionlist(*args)
-	owner_id = args[0][:owner_id]
-	user_id = args[0][:user_id]
-	# XXX Should be more discriminating :-)
-  	arr = self.find(:all).map { |user| [user.handle, user.id] }
-	# Remove entries for owner and user
-	exclusions = [  user_id, owner_id, self.super_id, self.guest_id ]
-	arr.delete_if { |entry| exclusions.include? entry[1] }
-
-	# Add back in the owner, under "Pick Another Collection"
-	arr.unshift ["Pick Another Collection", owner_id]
-  end
-=end
 
   private
 end

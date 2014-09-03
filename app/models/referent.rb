@@ -207,7 +207,7 @@ class Referent < ActiveRecord::Base
         if tag.class == Tag # Creating it if need be, and/or making it global 
           tagtype = tag.tagtype
         else
-          tag = Tag.assert_tag(tag, tagtype: tagtype) 
+          tag = Tag.assert(tag, tagtype: tagtype)
         end
         ref = tag.primary_meaning ||
               tag.referents.first ||
@@ -228,7 +228,7 @@ class Referent < ActiveRecord::Base
         # 1) specified by string or id, rather than a tag object
         # 2) of a different type, or 
         # 3) not already global
-        tag = Tag.assert_tag tag, tagtype: self.typenum 
+        tag = Tag.assert tag, tagtype: self.typenum
         
         # Promote the tag to the canonical expression on this referent if needed
         if (args[:form] == :generic) || !self.canonical_expression
@@ -264,6 +264,10 @@ class Referent < ActiveRecord::Base
        tag_ids = unique_referents.collect { |ref| ref.tag_id }
       tag_ids = tag_ids + tag.referents.collect { |ref| ref.tag_id } if doSynonyms
       tag_ids.uniq.delete_if{ |id| id == tag.id }.collect{ |id| Tag.find id }
+    end
+
+    def self.type_to_class type
+      (type && (type > 0) && Tag.typesym(type) && (Tag.typesym(type).to_s+"Referent").constantize ) || Referent
     end
 
     def typesym
@@ -460,7 +464,7 @@ class ChannelReferent < Referent ;
     if token = tokenlist.split(',').first
       token.strip!
       if token.sub!(/^\'(.*)\'$/, '\1') || (token.to_i == 0) # A quote-delimited string a la tokeninput
-        self.canonical_expression = Tag.assert_tag token, tagtype: self.typenum # Creating it if need be, and/or making it global 
+        self.canonical_expression = Tag.assert token, tagtype: self.typenum # Creating it if need be, and/or making it global
       else
         self.canonical_expression = Tag.find token.to_i # Existing tag
       end

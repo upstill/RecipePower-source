@@ -1,0 +1,10 @@
+<% unless query.blank? %>
+    <div class="form-group">
+      <form class="form-search query_form submit" action="<%= assert_query query, "json" %>" data-remote="true">
+        <input type="hidden" name="partial" value="true"/>
+        <div class="search-query form-group collection_query_tokens tags">
+          <%= contents %>
+        </div>
+      </form>
+    </div>
+<% end %>

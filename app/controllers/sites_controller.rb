@@ -1,15 +1,12 @@
+
 class SitesController < ApplicationController
   # GET /sites
   # GET /sites.json
   def index
-    seeker_result Site, "div.site_list" # , clear_tags: true
+    # seeker_result Site, "div.site_list" # , clear_tags: true
+    @container = "container_collections"
+    smartrender unless do_stream SitesCache
   end
-
-=begin
-  def query
-    seeker_result Site, "div.site_list"
-  end
-=end
 
   # GET /sites/1
   # GET /sites/1.json
@@ -84,7 +81,7 @@ class SitesController < ApplicationController
                          done: true, # Denotes recipe-editing is finished
                          popup: "#{@site.name} updated",
                          replacements: [
-                           ["tr#site#{@site.id.to_s}", with_format("html") { render_to_string partial: "sites/show_table_row" }]
+                           ["tr#site#{@site.id.to_s}", with_format("html") { render_to_string partial: "sites/index_table_row" }]
                          ]
                        } 
       }

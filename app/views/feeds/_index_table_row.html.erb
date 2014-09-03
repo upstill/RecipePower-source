@@ -1,0 +1,27 @@
+<tr id="<%= dom_id item %>">
+	<td><%= item.id.to_s %></td>
+	<td>
+		<%= link_to_submit item.title.truncate(80), feed_path(item) %><br>
+		<%= item.description  %><br>
+		<%= link_to item.url.truncate(40), item.url %>
+	</td>
+	<td><%= taggable_list item %></td>
+	<td><%= item.feedtypename %></td>
+	<td><%= link_to_modal item.site.name, site_path(item.site) %></td>
+	<% permitted_to?(:approve, :feeds) do %>
+		<td><%= feed_approval item %></td>
+	<% end %>
+	<td>
+		<% if current_user.feeds.include?(item) %>
+			<%= link_to 'Unsubscribe', remove_feed_path(item), class: "btn btn-default btn-xs", method: :post %>
+		<% else %>
+			<%= link_to 'Subscribe', collect_feed_path(item), class: "btn btn-default btn-xs", remote: true %>
+		<% end %>
+		<% permitted_to?(:edit, :feeds) do %>
+			<%= button_link 'Edit', edit_feed_path(item), :dialog %>
+		<% end %>
+		<% permitted_to?(:destroy, :feeds) do %>
+			<%= link_to('Destroy', item, :method => :delete, :class => "btn btn-default btn-xs btn-danger", confirm: 'Are you sure?') %>
+		<% end %>
+	</td>
+</tr>

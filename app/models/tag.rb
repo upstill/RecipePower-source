@@ -19,7 +19,8 @@ class Tag < ActiveRecord::Base
         Tool: ["Tool", 12], 
         Nutrient: ["Nutrient", 13],
         CulinaryTerm: ["Culinary Term", 14],
-        Collection: ["Private Collection", 15]
+        Collection: ["Private Collection", 15],
+        List: ["List", 16]
     )
     
     attr_accessible :name, :id, :tagtype, :isGlobal, :links, :recipes, :referents, :users, :owners, :primary_meaning
@@ -48,7 +49,9 @@ class Tag < ActiveRecord::Base
     def can_absorb other
         other.normalized_name == self.normalized_name && ((other.tagtype==0) || (other.tagtype == self.tagtype))    
     end
-    
+
+    # Get the recipes which the given user can see through this tag
+    # TODO: Migrate this to general taggables
     def recipes(uid=nil)
       Recipe.where id: recipe_ids(uid)
     end
@@ -184,7 +187,7 @@ class Tag < ActiveRecord::Base
    # Taking either a tag, a string or an id, make sure there's a corresponding tag
    #  of the given type that's available to the named user. NB: 't' may be a Tag, but
    #  not necessarily of the given type, or one available to the user.
-   def self.assert_tag(t, opts = {} )
+   def self.assert(t, opts = {} )
        # Convert tag type, if any, into internal form
        opts[:tagtype] = Tag.typenum(opts[:tagtype]) if opts[:tagtype]
        if t.class == Fixnum

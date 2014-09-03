@@ -3,8 +3,15 @@
 # whereas GETting from #index starts afresh. This overloading was necessitated by problems using
 # a second, POST, method (#query), which wasn't being POSTed to upon page reload.
 
+unless @RPRoutesLoaded
+  @RPRoutesLoaded = true
+
 RP::Application.routes.draw do
 
+  if Rails.env.development? || Rails.env.test?
+    # IntegersController is for testing streams
+    get "integers" => 'integers#index'
+  end
   resources :votes, :only => :create
   post '/votes/recipes/:recipe_id' => 'votes#create', :as => "vote_recipe"
   get 'pic_picker/new' => 'pic_picker#new'
@@ -43,6 +50,9 @@ RP::Application.routes.draw do
   get 'users/profile' => 'users#profile'
   # Ask a user to identify him/herself by email address
   get 'users/identify' => 'users#identify'
+  get 'users/:id/recent' => 'users#recent'
+  get 'users/:id/collection' => 'users#collection'
+  get 'users/:id/biglist' => 'users#biglist'
   # get 'users/:id/show' => 'users#show'
   resources :users, :except => [ :index, :create ] do
     member do
@@ -53,6 +63,14 @@ RP::Application.routes.draw do
       get 'acquire' # Acquire a recipe (etc.)
     end
   end
+
+  post '/list' => 'lists#create', :as => 'create_list'
+  resources :lists, except: [ :index, :create ] do
+    member do
+      get 'scrape'
+    end
+  end
+  match 'lists', :controller=>'lists', :action=>'index', :via => [:get, :post]
 
   post '/site' => 'sites#create', :as => 'create_site'
   resources :sites, except: [ :index, :create ] do
@@ -118,7 +136,7 @@ RP::Application.routes.draw do
     resources :tags do
       member { post 'remove', :to => 'recipes#untag' }
     end
-    member do 
+    member do
       get 'collect'
       get 'touch'
       get 'piclist'
@@ -202,4 +220,5 @@ RP::Application.routes.draw do
   # This is a legacy wild controller route that's not recommended for RESTful applications.
   # Note: This route will make all actions in every controller accessible via GET requests.
   # get ':controller(/:action(/:id(.:format)))'
+end
 end

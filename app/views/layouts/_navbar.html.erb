@@ -1,79 +1,35 @@
-<% unless @rp_old %>
-    <div class="navbar navbar-fixed-top navbar-inverse">
-      <div class="container">
-        <div class="navbar-header col-md-12">
-          <a href="#" class="navbar-brand">RecipePower
-            <% if response_service.title %>
-              |&nbsp;<span style="font-size:24px;color:#dddddd"><%= response_service.title %></span>
-            <% end %>
-          </a>
-          <% if user_signed_in? %>
-              <div class="dropdown navbar-right pull-right" style="margin-top: 14px; margin-left:10px;">
-                <a class="dropdown-toggle navbar-inverse" data-toggle="dropdown" href="#">            <span class="handle text-on-black"><%= current_user.handle %>&nbsp;&or;</span>            </a>
-                <ul class="dropdown-menu">
-                  <%= header_menu_items %>
-                </ul>
-              </div>
-          <% end %>
-          <div class="navbar-right" style="margin-top:15px;margin-right:10px;">
-            <div style="text-align: right;">
-              <% if user_signed_in? %>
-                  <% if params[:controller] == "collection" %>
-                      <%= link_to_modal "Add a Cookmark", new_recipe_path, class: "text-on-black" %>
-                  <% else %>
-                      <%= link_to "Collections", collection_path, class: "text-on-black" %>
-                  <% end %>
-              <% else %>
-                  <%= link_to_modal "Sign In", new_user_session_path, class: "text-on-black" %>
-              <% end %>
-            </div>
-          </div>
+<nav class="navbar navbar-fixed-top navbar-inverse" role="navigation">
+  <div class="navbar-header">
+    <button type="button" class="navbar-toggle" data-toggle="collapse"
+            data-target="#RP-navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="/">RecipePower</a>
+    <% if user_signed_in? %>
+        <div class="collapse navbar-collapse navbar-left" id="RP-navbar-collapse">
+          <ul class="nav navbar-nav">
+            <%= navtab :collection, "Goodies", "/users/#{current_user_or_guest_id}/collection" do collection_menu_items end %>
+            <%= navtab :friends, "Friends", users_path do friends_menu_items end %>
+            <%= navtab :goodies, "Goody Bags", lists_path do goody_bags_menu_items end %>
+            <!-- current_user.subscriptions(:public).collect { |l| stream_menu_item(l.name, list_path(l, format: :json), dom_id(l)) }-->
+            <%= navtab :feeds, "Feeds", feeds_path do feeds_menu_items end %>
+            <%= navtab :news, "News", "/users/#{current_user_or_guest_id}/news" %>
+            <%= navtab :more, "More", "/users/#{current_user_or_guest_id}/biglist" %>
+            <!-- menu_items << link_to("New Public List...", new_list_path( modal: true ))-->
+            <%= navtab :home,
+                       content_tag(:b, "&nbsp;#{current_user.handle}&nbsp;".html_safe, class: "glyphicon glyphicon-home")+
+                       content_tag(:b, "", class: "glyphicon glyphicon-cog"),
+                       user_path(current_user) do header_menu_items end %>
+          </ul>
         </div>
-      </div>
-    </div>
-<% else %>
-    <div class="navbar navbar-fixed-top navbar-inverse">
-      <div class="container">
-        <div class="navbar-header col-md-12">
-          <a href="#" class="navbar-brand">RecipePower</a>
-          <% if user_signed_in? %>
-              <div class="dropdown navbar-right pull-right" style="margin-top: 14px; margin-left:10px;">
-                <a class="dropdown-toggle navbar-inverse" data-toggle="dropdown" href="#">            <span class="handle text-on-black"><%= current_user.handle %>&nbsp;&or;</span>            </a>
-                <ul class="dropdown-menu">
-                  <%= header_menu_items %>
-                </ul>
-              </div>
-          <% end %>
-          <div class="navbar-right" style="margin-top:15px;margin-right:10px;">
-            <div style="text-align: right;">
-              <% if user_signed_in? %>
-                  <% if params[:controller] == "collection" %>
-                      <%= link_to_modal "Add a Cookmark", new_recipe_path, class: "text-on-black" %>
-                  <% else %>
-                      <%= link_to "Collections", collection_path, class: "text-on-black" %>
-                  <% end %>
-              <% else %>
-                  <%= link_to_modal "Sign In", new_user_session_path, class: "text-on-black" %>
-              <% end %>
-            </div>
-          </div>
-          <% if @query_path %>
-              <form class="navbar-form navbar-left form-search query_form" action="<%= @query_path %>" data-format="<%= @query_format %>" >
-                <div class="search-query form-group collection_query_tokens tags">
-                  <%= token_input_field @seeker,
-                                        rows: 1,
-                                        placeholder: "Seek and ye shall find...",
-                                        autofocus: true,
-                  data: { :"on-add" => "RP.collection.tagchange",
-                          :"on-delete" => "RP.collection.tagchange",
-                          :hint => "", # "Search the collection by typing terms here",
-                          placeholder: "Seek and ye shall find...",
-                          :"no-results-text" => "No matching tag found; hit Enter to search with text" } %>
-                  <!--<input type="text" class="form-control" placeholder="Seek and Ye Shall Find">-->
-                </div>
-              </form>
-          <% end %>
-        </div>
-      </div>
-    </div>
-<% end %>
+    <% end %>
+  </div>
+  <% unless user_signed_in? %>
+      <p class="navbar-text navbar-right active">
+        <%= link_to_modal "Sign In", new_user_session_path, class: "navbar-link", style: "color: white; margin-right:20px" %>
+      </p>
+  <% end %>
+</nav>

@@ -1,7 +1,7 @@
 require './lib/controller_utils.rb'
 
 class RecipesController < ApplicationController
-  after_filter :allow_iframe, only: :capture
+  before_filter :allow_iframe, only: :capture
 
   before_filter :login_required, :except => [:index, :show, :capture, :collect ]
   before_filter { @focus_selector = "#recipe_url" }
@@ -121,10 +121,11 @@ class RecipesController < ApplicationController
         format.json {
           @decorator = @recipe.decorate
           @data = { onget: [ "submit.submit_and_process", collection_url(layout: false) ] }
+          response_service.is_dialog
           render json: {
             dlog: with_format("html") { 
               render_to_string :edit, layout: false
-            }
+            }, popup: "'#{@recipe.title}' now appearing in your colleciton."
           }
         }
       end
@@ -255,7 +256,7 @@ class RecipesController < ApplicationController
     else
       @recipe.current_user = current_user_or_guest_id # session[:user_id]
       if saved_okay = @recipe.update_attributes(params[:recipe])
-        if ref = Rcpref.where( user_id: @recipe.current_user, recipe_id: @recipe.id ).first
+        if ref = Rcpref.where( user_id: @recipe.current_user, entity_id: @recipe.id ).first
           ref.edit_count += 1
           ref.save
         end
@@ -371,7 +372,6 @@ class RecipesController < ApplicationController
 	# :do => 'add', 'remove'
 	# :what => "Genre", "Technique", "Course"
 	# :name => string identifier (name of element)
-    # @navlinks = navlinks(@recipe, :revise)
     if(params[:do] == "remove") 
     	c = @recipe.tags
     	c.each { |g| c.delete(g) if g.name == params[:name] }

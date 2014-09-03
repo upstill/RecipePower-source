@@ -19,6 +19,10 @@ $guideBorder:              darken(adjust-hue($guideBackground, -10), 7%) !defaul
   }
 }
 
+div#container {
+  height:auto;
+}
+
 label.control-label {
 	display: block;
 	margin-bottom: 5px;
@@ -66,6 +70,36 @@ body { padding-top: 60px; }
 
 .navbar-form {
 	float: left;
+}
+
+.btn-group {
+  button.btn-go {
+    color: white;
+    background-color: #659C57;
+    border-color: #398439;
+  }
+  button.btn-go:hover, button.btn-go.active {
+    background-color: #21371B; // #ec971f;
+    border-color: #398439;
+  }
+  button.btn-caution {
+    color: white;
+    background-color: #D7B256; // #ec971f;
+    border-color: #d58512;
+  }
+  button.btn-caution:hover, button.btn-caution.active {
+    background-color: #382E15; // #ec971f;
+    border-color: #d58512;
+  }
+  button.btn-stop {
+    color: white;
+    background-color: #F50C46; // #d9534f;
+    border-color: #d43f3a;
+  }
+  button.btn-stop:hover, button.btn-stop.active {
+    background-color: #42050D; // #ec971f;
+    border-color: #ac2925;
+  }
 }
 
 .dialog-cancel-button {
@@ -142,7 +176,7 @@ div.content {
   padding-right: 5px;
 }
 
-.collection-item {
+.masonry-item {
 	width:200px;
 	margin-bottom:20px;
 }

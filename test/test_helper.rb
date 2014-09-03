@@ -1,7 +1,11 @@
 ENV["RAILS_ENV"] = "test"
 require File.expand_path('../../config/environment', __FILE__)
 require 'rails/test_help'
-gem 'minitest'
+require "minitest/rails/capybara"
+require "mocha/mini_test"
+# include Warden::Test::Helpers
+# Warden.test_mode!
+# gem 'minitest'
 # require 'warden_test_helper.rb'
 require 'minitest/reporters'
 MiniTest::Reporters.use!
@@ -17,6 +21,8 @@ class ActiveSupport::TestCase
   # Add more helper methods to be used by all tests here...
 end
 
+=begin
 class ApplicationController
   include Devise::TestHelpers
 end
+=end
