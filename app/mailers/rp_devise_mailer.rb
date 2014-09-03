@@ -10,8 +10,8 @@ class RPDeviseMailer < Devise::Mailer
     @sender = User.find record.invited_by_id
     # opts[:from] = "Ignatz from RecipePower <ignatz@recipepower.com>"
     # optional arguments introduced in Devise 2.2.0, remove check once support for < 2.2.0 is dropped.
-    @invitation_event = RpEvent.post :invitation_sent,
-                                     @sender,
+    @invitation_event = RpEvent.post @sender,
+                                     :invitation_sent,
                                      Recipe.find(@recipient.shared_recipe),
                                      @recipient
     if Gem::Version.new(Devise::VERSION.dup) < Gem::Version.new('2.2.0')

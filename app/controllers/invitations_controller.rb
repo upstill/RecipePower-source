@@ -28,7 +28,7 @@ class InvitationsController < Devise::InvitationsController
     if params[:invitation_token] &&
         (self.resource = resource_class.find_by_invitation_token(params[:invitation_token], false))
       resource.extend_fields # Default values for name, etc.
-      # RpEvent.post :invitation_responded, resource, nil, resource_class.find(resource.invited_by_id)
+      # RpEvent.post resource, :invitation_responded, nil, resource_class.find(resource.invited_by_id)
       if response_service.dialog? # Referred by on-site link => do dialog
         smartrender
       else
@@ -248,8 +248,8 @@ class InvitationsController < Devise::InvitationsController
     self.resource = resource_class.accept_invitation!(params[resource_name])
     resource.password = resource.email if resource.password.blank?
     if resource.errors.empty?
-      invitation_event = RpEvent.where( source_id: resource.invited_by_id, target_id: resource.id, target_type: resource.class.to_s ).first
-      RpEvent.post :invitation_accepted, resource, invitation_event, User.find(resource.invited_by_id )
+      invitation_event = RpEvent.where( subject_id: resource.invited_by_id, object2_id: resource.id, object2_type: resource.class.to_s ).first
+      RpEvent.post resource, :invitation_accepted, invitation_event, User.find(resource.invited_by_id )
       RpMailer.welcome_email(resource).deliver
       RpMailer.invitation_accepted_email(resource).deliver
       set_flash_message :notice, :updated
@@ -264,8 +264,9 @@ class InvitationsController < Devise::InvitationsController
   # When the user gets distracted by the recipe link in a sharing notice
   def divert
 =begin
-    RpEvent.post :invitation_diverted, 
+    RpEvent.post 
       resource_class.find(params[:recipient]), 
+	:invitation_diverted, 
       nil, 
       resource_class.find(params[:sender])
 =end

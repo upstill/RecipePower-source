@@ -50,7 +50,7 @@ class ApplicationController < ActionController::Base
         last_serve.save
       end
     end
-    last_serve = RpEvent.post :serve, current_user, nil, nil, :serve_count => 1
+    last_serve = RpEvent.post current_user, :serve, nil, nil, :serve_count => 1
     session[:serve_count] = 1
     session[:start_time] = session[:last_time] = last_serve.created_at
   end
