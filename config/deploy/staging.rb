@@ -15,7 +15,7 @@ role :db,  %w{upstill@recipepower.com}
 # server list. The second argument is a, or duck-types, Hash and is
 # used to set extended properties on the server.
 
-server '173.255.245.80', user: 'upstill', roles: %w{web app}, my_property: :my_value
+server '173.255.245.80', user: 'upstill', roles: %w{web app}, primary: true
 
 
 # Custom SSH Options

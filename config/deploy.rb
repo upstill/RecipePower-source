@@ -1,4 +1,3 @@
-# require "bundler/capistrano"  (rbates)
 # config valid only for Capistrano 3.1
 lock '3.2.1'
 
@@ -9,7 +8,7 @@ set :repo_url, 'git@github.com:upstill/RecipePower-source.git'
 set :branch, :staging # ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }.call
 
 # Default deploy_to directory is /var/www/my_app
-set :deploy_to, '/home/upstill/apps/#{application}'
+set :deploy_to, "/home/upstill/apps/#{application}"
 
 # Default value for :scm is :git
 # set :scm, :git
