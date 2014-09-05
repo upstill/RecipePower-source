@@ -42,14 +42,14 @@ namespace :deploy do
   %w[start stop restart].each do |command|
     desc "#{command} unicorn server"
     task command do
-      on roles: :app, except: {no_release: true} do |host|
+      on :app do |host| # roles: :app, except: {no_release: true} do |host|
         run "/etc/init.d/unicorn_#{application} #{command}"
       end
     end
   end
 
   task :setup_config do
-    on roles: :app do |task|
+    on :app do |task|
       sudo "ln -nfs #{current_path}/config/nginx.conf /etc/nginx/sites-enabled/#{application}"
       sudo "ln -nfs #{current_path}/config/unicorn_init.sh /etc/init.d/unicorn_#{application}"
       run "mkdir -p #{shared_path}/config"
@@ -60,7 +60,7 @@ namespace :deploy do
   # after "deploy:setup", "deploy:setup_config"
 
   task :symlink_config do
-    on roles: :app do
+    on :app do
       run "ln -nfs #{shared_path}/config/database.yml #{release_path}/config/database.yml"
     end
   end
@@ -68,7 +68,7 @@ namespace :deploy do
 
   desc "Make sure local git is in sync with remote."
   task :check_revision do
-    on( :web ) do |host|
+    on :web do |host|
       unless `git rev-parse HEAD` == `git rev-parse origin/staging`
         puts "WARNING: HEAD is not the same as origin/staging"
         puts "Run `git push` to sync changes."

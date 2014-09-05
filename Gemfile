@@ -87,4 +87,5 @@ gem 'unicorn-rails'
 
 # Deploy with Capistrano
 gem 'capistrano'
+gem 'capistrano-rails'
 
