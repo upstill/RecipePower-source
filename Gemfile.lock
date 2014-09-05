@@ -88,7 +88,6 @@ GEM
       execjs
     coffee-script-source (1.7.0)
     colorize (0.7.3)
-    content_for_in_controllers (0.0.2)
     curb (0.8.5)
     daemons (1.1.9)
     debug_inspector (0.0.2)
@@ -317,7 +316,6 @@ DEPENDENCIES
   capistrano-rvm
   closure_tree
   coffee-rails (~> 4.0.0)
-  content_for_in_controllers
   daemons
   declarative_authorization
   delayed_job
