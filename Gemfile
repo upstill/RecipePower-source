@@ -45,7 +45,7 @@ gem 'rspec-rails', :group => [:test, :development]
 # gem 'debugger', :group => [:test, :development]
 gem 'awesome_nested_set'
 gem 'redcarpet'
-gem 'content_for_in_controllers'
+## gem 'content_for_in_controllers'
 gem 'youtube_addy'
 
 gem 'exception_notification', git: 'git://github.com/smartinez87/exception_notification.git'
