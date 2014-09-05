@@ -35,3 +35,5 @@ set :deploy_to, "/home/upstill/apps/#{application}"
 
 # Default value for keep_releases is 5
 # set :keep_releases, 5
+
+set :rbenv_ruby, '1.9.3-p286'
