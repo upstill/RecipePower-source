@@ -32,8 +32,6 @@ gem 'omniauth-facebook' # , '~> 1.4.0'
 gem 'omniauth-google-oauth2'                     
 gem 'omniauth-openid'                     
 gem 'declarative_authorization'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
-gem 'unicorn' # 'thin'
-gem 'unicorn-rails'
 gem 'eventmachine', '~> 1.0.3'
 gem 'ruby_parser'
 gem "rmagick", "~> 2.13.2", :require => 'RMagick'
@@ -84,8 +82,9 @@ gem 'bootstrap-sass', '~> 3.1.1'
 gem 'jquery-rails'
 
 # Use unicorn as the web server
-# gem 'unicorn'
+gem 'unicorn'
+gem 'unicorn-rails'
 
 # Deploy with Capistrano
-# gem 'capistrano'
+gem 'capistrano'
 

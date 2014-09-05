@@ -13,3 +13,4 @@ public/assets/
 eventmachine/
 
 /db_timings
+/config/database.yml
