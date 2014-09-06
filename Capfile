@@ -28,7 +28,7 @@ after "deploy", "deploy:cleanup" # keep only the last 5 releases (rbates)
 application = "RP"
 current_path = "/home/upstill/apps/RP/current"
 shared_path = "/home/upstill/apps/RP/shared"
-release_path = "/home/upstill/apps/RP/current"
+# release_path = "/home/upstill/apps/RP/current"
 
 namespace :deploy do
   # Begin rbates
