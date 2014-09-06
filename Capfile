@@ -35,7 +35,7 @@ namespace :deploy do
   %w[start stop restart].each do |command|
     desc "#{command} unicorn server"
     task command do
-      on :app do |host| # roles: :app, except: {no_release: true} do |host|
+      on :app do # roles: :app, except: {no_release: true} do |host|
         run "/etc/init.d/unicorn_#{application} #{command}"
       end
     end
