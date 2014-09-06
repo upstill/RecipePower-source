@@ -36,7 +36,7 @@ namespace :deploy do
     desc "#{command} unicorn server"
     task command do
       on :app do # roles: :app, except: {no_release: true} do |host|
-        run do execute "/etc/init.d/unicorn_#{application} #{command}" end
+        execute "/etc/init.d/unicorn_#{application}", command
       end
     end
   end
