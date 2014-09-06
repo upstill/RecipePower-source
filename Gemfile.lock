@@ -88,7 +88,7 @@ GEM
       execjs
     coffee-script-source (1.7.0)
     colorize (0.7.3)
-    curb (0.8.5)
+    content_for_in_controllers (0.0.2)
     daemons (1.1.9)
     debug_inspector (0.0.2)
     declarative_authorization (0.5.7)
@@ -122,10 +122,6 @@ GEM
       railties (>= 3.0.0)
     faraday (0.9.0)
       multipart-post (>= 1.2, < 3)
-    feedzirra (0.7.1)
-      curb (~> 0.8.1)
-      loofah (~> 1.2.1)
-      sax-machine (~> 0.2.1)
     hashie (2.0.5)
     hike (1.2.3)
     hirefire-resource (0.2.2)
@@ -143,8 +139,6 @@ GEM
     letter_opener (1.2.0)
       launchy (~> 2.2)
     log_buddy (0.7.0)
-    loofah (1.2.1)
-      nokogiri (>= 1.4.4)
     mail (2.5.4)
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
@@ -252,8 +246,6 @@ GEM
       railties (>= 4.0.0, < 5.0)
       sass (>= 3.1.10)
       sprockets-rails (~> 2.0.0)
-    sax-machine (0.2.1)
-      nokogiri (~> 1.6.0)
     sexp_processor (4.4.1)
     sprockets (2.11.0)
       hike (~> 1.2)
@@ -297,6 +289,7 @@ GEM
     will_paginate (3.0.5)
     with_advisory_lock (1.0.0)
       activerecord (>= 3.0.0)
+    youtube_addy (1.0.2)
 
 PLATFORMS
   ruby
@@ -315,6 +308,7 @@ DEPENDENCIES
   capistrano-rvm
   closure_tree
   coffee-rails (~> 4.0.0)
+  content_for_in_controllers
   daemons
   declarative_authorization
   delayed_job
@@ -325,7 +319,6 @@ DEPENDENCIES
   eventmachine (~> 1.0.3)
   exception_notification!
   factory_girl_rails (~> 4.0)
-  feedzirra (~> 0.2)
   hirefire-resource
   htmlentities
   jquery-rails
@@ -360,3 +353,4 @@ DEPENDENCIES
   unicorn-rails
   webrat (~> 0.7.3)
   will_paginate (~> 3.0)
+  youtube_addy

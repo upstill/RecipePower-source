@@ -35,7 +35,7 @@ gem 'declarative_authorization'     # simple auth rules/roles, create config/aut
 gem 'eventmachine', '~> 1.0.3'
 gem 'ruby_parser'
 gem "rmagick", "~> 2.13.2", :require => 'RMagick'
-gem "feedzirra", "~> 0.2" # :git => 'git://github.com/pauldix/feedzirra.git'
+# gem "feedzirra", "~> 0.2" # :git => 'git://github.com/pauldix/feedzirra.git'
 gem "simple_form", :git => 'git://github.com/plataformatec/simple_form.git' # , '~> 3.0.0.beta1' 
 gem 'delayed_job' # , git: 'git://github.com/collectiveidea/delayed_job.git'
 gem 'delayed_job_active_record' # , git: 'git://github.com/collectiveidea/delayed_job_active_record.git'
@@ -45,8 +45,8 @@ gem 'rspec-rails', :group => [:test, :development]
 # gem 'debugger', :group => [:test, :development]
 gem 'awesome_nested_set'
 gem 'redcarpet'
-## gem 'content_for_in_controllers'
-## gem 'youtube_addy'
+gem 'content_for_in_controllers'
+gem 'youtube_addy'
 
 gem 'exception_notification', git: 'git://github.com/smartinez87/exception_notification.git'
 # gem 'exception_notification', '~> 4.0.1', :require => 'exception_notifier' # , git: 'git://github.com/alanjds/exception_notification.git' 
