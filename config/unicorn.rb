@@ -5,7 +5,7 @@ pid "#{root}/tmp/pids/unicorn.pid"
 stderr_path "#{root}/log/unicorn.log"
 stdout_path "#{root}/log/unicorn.log"
 
-listen "/tmp/unicorn.blog.sock"
+listen "/tmp/unicorn.RP.sock"
 worker_processes 2
 timeout 30
 =begin Heroku version
