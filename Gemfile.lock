@@ -89,6 +89,7 @@ GEM
     coffee-script-source (1.7.0)
     colorize (0.7.3)
     content_for_in_controllers (0.0.2)
+    curb (0.8.5)
     daemons (1.1.9)
     debug_inspector (0.0.2)
     declarative_authorization (0.5.7)
@@ -122,6 +123,10 @@ GEM
       railties (>= 3.0.0)
     faraday (0.9.0)
       multipart-post (>= 1.2, < 3)
+    feedzirra (0.7.1)
+      curb (~> 0.8.1)
+      loofah (~> 1.2.1)
+      sax-machine (~> 0.2.1)
     hashie (2.0.5)
     hike (1.2.3)
     hirefire-resource (0.2.2)
@@ -139,6 +144,8 @@ GEM
     letter_opener (1.2.0)
       launchy (~> 2.2)
     log_buddy (0.7.0)
+    loofah (1.2.1)
+      nokogiri (>= 1.4.4)
     mail (2.5.4)
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
@@ -246,6 +253,8 @@ GEM
       railties (>= 4.0.0, < 5.0)
       sass (>= 3.1.10)
       sprockets-rails (~> 2.0.0)
+    sax-machine (0.2.1)
+      nokogiri (~> 1.6.0)
     sexp_processor (4.4.1)
     sprockets (2.11.0)
       hike (~> 1.2)
@@ -319,6 +328,7 @@ DEPENDENCIES
   eventmachine (~> 1.0.3)
   exception_notification!
   factory_girl_rails (~> 4.0)
+  feedzirra (~> 0.2)
   hirefire-resource
   htmlentities
   jquery-rails
