@@ -34,7 +34,7 @@ gem 'omniauth-openid'
 gem 'declarative_authorization'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
 gem 'eventmachine', '~> 1.0.3'
 gem 'ruby_parser'
-## gem "rmagick", "~> 2.13.2", :require => 'RMagick'
+gem "rmagick", "~> 2.13.2", :require => 'RMagick'
 ## gem "feedzirra", "~> 0.2" # :git => 'git://github.com/pauldix/feedzirra.git'
 gem "simple_form", :git => 'git://github.com/plataformatec/simple_form.git' # , '~> 3.0.0.beta1' 
 gem 'delayed_job' # , git: 'git://github.com/collectiveidea/delayed_job.git'
