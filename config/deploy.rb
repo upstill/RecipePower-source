@@ -3,7 +3,9 @@ lock '3.2.1'
 
 set :application, 'RP'
 
-application = "RP"
+# application = "RP"
+
+set :user, "upstill"
 
 set :repo_url, 'git@github.com:upstill/RecipePower-source.git'
 
@@ -11,7 +13,9 @@ set :repo_url, 'git@github.com:upstill/RecipePower-source.git'
 set :branch, :staging # ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }.call
 
 # Default deploy_to directory is /var/www/my_app
-set :deploy_to, "/home/upstill/apps/#{application}"
+# set :deploy_to, "/home/upstill/apps/#{application}"
+set :deploy_to, "/home/upstill/apps/RP"
+puts "In deploy.rb, deploy_to is '#{deploy_to}'"
 
 # Default value for :scm is :git
 # set :scm, :git
@@ -20,7 +24,7 @@ set :deploy_to, "/home/upstill/apps/#{application}"
 # set :format, :pretty
 
 # Default value for :log_level is :debug
-# set :log_level, :debug
+set :log_level, :debug
 
 # Default value for :pty is false
 # set :pty, true
