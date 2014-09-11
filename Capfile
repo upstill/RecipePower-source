@@ -25,46 +25,44 @@ require 'capistrano/rails/migrations'
 Dir.glob('lib/capistrano/tasks/*.rake').each { |r| import r }
 
 after "deploy", "deploy:cleanup" # keep only the last 5 releases (rbates)
-application = "RP"
-# set :deploy_to, "/home/upstill/apps/RP"
-# deploy_to = "/home/upstill/apps/RP"
-puts "In Capfile, deploy_to is '#{deploy_to}'"
 
 namespace :deploy do
+
   # Begin rbates
   %w[start stop restart].each do |command|
     desc "#{command} unicorn server"
     task command do
-      on "173.255.245.80" do # roles: :app, except: {no_release: true} do |host|
+      on roles(:all) do # roles: :app, except: {no_release: true} do |host|
         execute "/etc/init.d/unicorn_#{application}", command
       end
     end
   end
 
+  # This task should be run after first
   task :setup_config do
-    on "173.255.245.80" do |task|
-      sudo "ln -nfs #{deploy_to}/current/config/nginx.conf /etc/nginx/sites-enabled/#{application}"
-      sudo "ln -nfs #{deploy_to}/current/config/unicorn_init.sh /etc/init.d/unicorn_#{application}"
+    on roles(:all) do |task|
+      sudo "ln -nfs #{deploy_to}/current/config/nginx.conf /etc/nginx/sites-enabled/#{fetch :application}"
+      sudo "ln -nfs #{deploy_to}/current/config/unicorn_init.sh /etc/init.d/unicorn_#{fetch :application}"
       execute "mkdir -p #{deploy_to}/shared/config"
       # put File.read("#{deploy_to}/current/config/database-example.yml"), "#{deploy_to}/shared/config/database.yml"
-      execute "cat #{deploy_to}/current/config/database-example.yml > #{deploy_to}/shared/config/database.yml"
+      execute "[ ! -e #{deploy_to}/shared/config/database.yml ] && cp #{deploy_to}/current/config/database-example.yml #{deploy_to}/shared/config/database.yml"
       puts "Now edit the config files in #{deploy_to}/shared."
     end
   end
-  after "deploy:setup", "deploy:setup_config"
+  # after "deploy:started", "deploy:setup_config"
 
   task :symlink_config do
     puts "In symlink_config, deploy_to is '#{deploy_to}'"
-    on "173.255.245.80" do
-      sudo "ln -nfs /user/upstill/apps/RP/shared/config/database.yml /user/upstill/apps/RP/current/config/database.yml"
+    on roles(:all) do |host|
+      puts "Symlinking database.yml file on #{host}"
+      sudo "ln -nfs #{deploy_to}/shared/config/database.yml #{deploy_to}/current/config/database.yml"
     end
   end
-  after "deploy:updated", "deploy:symlink_config"
+  after "deploy:published", "deploy:symlink_config"
 
-=begin
   desc "Make sure local git is in sync with remote."
   task :check_revision do
-    on "173.255.245.80" do |host|
+    on roles(:all) do |host|
       unless `git rev-parse HEAD` == `git rev-parse origin/staging`
         puts "WARNING: HEAD is not the same as origin/staging"
         puts "Run `git push` to sync changes."
@@ -72,8 +70,8 @@ namespace :deploy do
       end
     end
   end
-  before "deploy", "deploy:check_revision"
-=end
+  after "deploy:started", "deploy:check_revision"
+
   # End rbates
 
 =begin

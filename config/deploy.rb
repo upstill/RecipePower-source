@@ -14,8 +14,8 @@ set :branch, :staging # ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.ch
 
 # Default deploy_to directory is /var/www/my_app
 # set :deploy_to, "/home/upstill/apps/#{application}"
-set :deploy_to, "/home/upstill/apps/RP"
-puts "In deploy.rb, deploy_to is '#{deploy_to}'"
+# set :deploy_to, "/home/upstill/apps/RP"
+puts "In deploy.rb, deploy_to is '#{fetch :deploy_to}'"
 
 # Default value for :scm is :git
 # set :scm, :git
