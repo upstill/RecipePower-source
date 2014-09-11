@@ -45,20 +45,21 @@ namespace :deploy do
       sudo "ln -nfs #{deploy_to}/current/config/unicorn_init.sh /etc/init.d/unicorn_#{fetch :application}"
       execute "mkdir -p #{deploy_to}/shared/config"
       # put File.read("#{deploy_to}/current/config/database-example.yml"), "#{deploy_to}/shared/config/database.yml"
-      execute "[ ! -e #{deploy_to}/shared/config/database.yml ] && cp #{deploy_to}/current/config/database-example.yml #{deploy_to}/shared/config/database.yml"
+      unless test "[ -e #{deploy_to}/shared/config/database.yml ]"
+        execute :cp, "#{deploy_to}/current/config/database-example.yml", "#{deploy_to}/shared/config/database.yml"
+      end
       puts "Now edit the config files in #{deploy_to}/shared."
     end
   end
-  # after "deploy:started", "deploy:setup_config"
+  after "deploy:published", "deploy:setup_config"
 
   task :symlink_config do
-    puts "In symlink_config, deploy_to is '#{deploy_to}'"
     on roles(:all) do |host|
       puts "Symlinking database.yml file on #{host}"
       sudo "ln -nfs #{deploy_to}/shared/config/database.yml #{deploy_to}/current/config/database.yml"
     end
   end
-  after "deploy:published", "deploy:symlink_config"
+  after "deploy:symlink:shared", "deploy:symlink_config"
 
   desc "Make sure local git is in sync with remote."
   task :check_revision do
