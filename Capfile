@@ -51,7 +51,7 @@ namespace :deploy do
       puts "Now edit the config files in #{deploy_to}/shared."
     end
   end
-  after "deploy:published", "deploy:setup_config"
+  after "deploy:symlink:release", "deploy:setup_config"
 
   task :symlink_config do
     on roles(:all) do |host|
@@ -59,7 +59,7 @@ namespace :deploy do
       sudo "ln -nfs #{deploy_to}/shared/config/database.yml #{deploy_to}/current/config/database.yml"
     end
   end
-  after "deploy:symlink:shared", "deploy:symlink_config"
+  after "deploy:setup_config", "deploy:symlink_config"
 
   desc "Make sure local git is in sync with remote."
   task :check_revision do
