@@ -10,16 +10,12 @@ set :repo_url, 'git@github.com:upstill/RecipePower-source.git'
 # Default branch is :master
 set :branch, :staging # ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }.call
 
-set_default(:current_path, "#{deploy_to}/current")
-set_default(:shared_path, "#{deploy_to}/shared")
-
 # See Railscasts 337
 set :deploy_via, :remote_cache
 
 # Default deploy_to directory is /var/www/my_app
 # set :deploy_to, "/home/upstill/apps/#{application}"
 # set :deploy_to, "/home/upstill/apps/RP"
-puts "In deploy.rb, deploy_to is '#{fetch :deploy_to}'"
 
 # Default value for :scm is :git
 # set :scm, :git
