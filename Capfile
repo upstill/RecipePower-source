@@ -29,14 +29,6 @@ require 'capistrano/bundler'
 require 'capistrano/rails/assets'
 require 'capistrano/rails/migrations'
 
-require "./config/recipes/base"
-require "./config/recipes/nginx"
-require "./config/recipes/unicorn"
-require "./config/recipes/postgresql"
-require "./config/recipes/nodejs"
-require "./config/recipes/rbenv"
-require "./config/recipes/check"
-
 # Loads custom tasks from `lib/capistrano/tasks' if you have any defined.
 Dir.glob('lib/capistrano/tasks/*.rake').each { |r| import r }
 

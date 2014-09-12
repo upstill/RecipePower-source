@@ -1,6 +1,14 @@
 # config valid only for Capistrano 3.1
 lock '3.2.1'
 
+require "./config/recipes/base"
+require "./config/recipes/nginx"
+require "./config/recipes/unicorn"
+require "./config/recipes/postgresql"
+require "./config/recipes/nodejs"
+require "./config/recipes/rbenv"
+require "./config/recipes/check"
+
 set :application, 'RP'
 
 set :user, "upstill"
