@@ -1,7 +1,9 @@
 set :postgresql_host, "localhost"
 set :postgresql_user, "upstill"
 set :postgresql_password, ask("PostgreSQL Password: ", nil) # Capistrano::CLI.password_prompt("PostgreSQL Password: ")
-set :postgresql_database, "cookmarks_production" 
+set :postgresql_database, "cookmarks_production"
+set :heroku_app, "strong-galaxy-5765"
+set :postgresql_dburl, `heroku pgbackups:url --app #{fetch :heroku_app}`
 
 namespace :postgresql do
   desc "Install the latest stable release of PostgreSQL."
@@ -22,14 +24,18 @@ Couldn't figure out how to use sudo with another user
       sudo %Q{-u postgres psql -c "create user #{fetch :postgresql_user} with password '#{fetch :postgresql_password}';"}
       sudo %Q{-u postgres psql -c "create database #{fetch :postgresql_database} owner #{fetch :postgresql_user};"}
 =end
+      execute "curl -o /tmp/latest.dump #{fetch :postgresql_dburl}"
+      execute "pg_restore --verbose --clean --no-acl --no-owner -h #{fetch :postgresql_host} -U #{fetch :postgresql_user} -d #{fetch :postgresql_database} /tmp/latest.dump"
+=begin
       as "postgres" do # fetch(:postgresql_user) do
         execute %Q{psql -c "create user #{fetch :postgresql_user} with password '#{fetch :postgresql_password}';"}
         execute %Q{psql -c "create database #{fetch :postgresql_database} owner #{fetch :postgresql_user};"}
       end
+=end
     end
   end
   # after "deploy:setup", "postgresql:create_database"
-  after "deploy:published", "postgresql:create_database"
+  # after "deploy:published", "postgresql:create_database"
 
   desc "Generate the database.yml configuration file."
   task :setup do # , roles: :app do
