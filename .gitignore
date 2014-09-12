@@ -14,3 +14,4 @@ eventmachine/
 
 /db_timings
 /config/database.yml
+/config/recipes
