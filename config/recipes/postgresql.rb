@@ -22,8 +22,10 @@ Couldn't figure out how to use sudo with another user
       sudo %Q{-u postgres psql -c "create user #{fetch :postgresql_user} with password '#{fetch :postgresql_password}';"}
       sudo %Q{-u postgres psql -c "create database #{fetch :postgresql_database} owner #{fetch :postgresql_user};"}
 =end
-      sudo %Q{psql -c "create user #{fetch :postgresql_user} with password '#{fetch :postgresql_password}';"}
-      sudo %Q{psql -c "create database #{fetch :postgresql_database} owner #{fetch :postgresql_user};"}
+      as fetch(:postgresql_user) do
+        execute %Q{psql -c "create user #{fetch :postgresql_user} with password '#{fetch :postgresql_password}';"}
+        execute %Q{psql -c "create database #{fetch :postgresql_database} owner #{fetch :postgresql_user};"}
+      end
     end
   end
   # after "deploy:setup", "postgresql:create_database"
