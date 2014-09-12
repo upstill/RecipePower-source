@@ -37,9 +37,6 @@ require "./config/recipes/nodejs"
 require "./config/recipes/rbenv"
 require "./config/recipes/check"
 
-set_default(:current_path, "/var/www/RP/current")
-set_default(:shared_path, "/var/www/RP/shared")
-
 # Loads custom tasks from `lib/capistrano/tasks' if you have any defined.
 Dir.glob('lib/capistrano/tasks/*.rake').each { |r| import r }
 
