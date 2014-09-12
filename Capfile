@@ -34,6 +34,8 @@ Dir.glob('lib/capistrano/tasks/*.rake').each { |r| import r }
 
 after "deploy", "deploy:cleanup" # keep only the last 5 releases (rbates)
 
+set :application, 'RP'
+
 =begin
 namespace :deploy do
 

@@ -9,8 +9,6 @@ require "./config/recipes/nodejs"
 require "./config/recipes/rbenv"
 require "./config/recipes/check"
 
-set :application, 'RP'
-
 set :user, "upstill"
 
 set :repo_url, 'git@github.com:upstill/RecipePower-source.git'
