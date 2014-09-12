@@ -1,6 +1,7 @@
 def template(from, to)
   erb = File.read(File.expand_path("../templates/#{from}", __FILE__))
-  upload! ERB.new(erb).result(binding), to
+  erbstr = ERB.new(erb).result(binding)
+  upload! StringIO.new(erbstr), to
 end
 
 def set_default(name, *args, &block)
