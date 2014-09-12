@@ -17,8 +17,8 @@ namespace :postgresql do
   desc "Create a database for this application."
   task :create_database do # , roles: :db, only: {primary: true} do
     on roles(:db) do
-      sudo %Q{-u postgres psql -c "create user #{fetch :postgresql_user} with password '#{postgresql_password}';"}
-      sudo %Q{-u postgres psql -c "create database #{fetch :postgresql_database} owner #{postgresql_user};"}
+      sudo %Q{-u postgres psql -c "create user #{fetch :postgresql_user} with password '#{fetch :postgresql_password}';"}
+      sudo %Q{-u postgres psql -c "create database #{fetch :postgresql_database} owner #{fetch :postgresql_user};"}
     end
   end
   # after "deploy:setup", "postgresql:create_database"
