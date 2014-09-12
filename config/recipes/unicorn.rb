@@ -12,8 +12,8 @@ namespace :unicorn do
       template "unicorn.rb.erb", unicorn_config
       template "unicorn_init.erb", "/tmp/unicorn_init"
       execute "chmod +x /tmp/unicorn_init"
-      execute "#{sudo} mv /tmp/unicorn_init /etc/init.d/unicorn_#{fetch :application}"
-      execute "#{sudo} update-rc.d -f unicorn_#{fetch :application} defaults"
+      sudo "mv /tmp/unicorn_init /etc/init.d/unicorn_#{fetch :application}"
+      sudo "update-rc.d -f unicorn_#{fetch :application} defaults"
     end
   end
   # after "deploy:setup", "unicorn:setup"

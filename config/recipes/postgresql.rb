@@ -7,9 +7,9 @@ namespace :postgresql do
   desc "Install the latest stable release of PostgreSQL."
   task :install do # , roles: :db, only: {primary: true} do
     on roles(:db) do
-      execute "#{sudo} add-apt-repository ppa:pitti/postgresql"
-      execute "#{sudo} apt-get -y update"
-      execute "#{sudo} apt-get -y install postgresql libpq-dev"
+      sudo "add-apt-repository ppa:pitti/postgresql"
+      sudo "apt-get -y update"
+      sudo "apt-get -y install postgresql libpq-dev"
     end
   end
   after "deploy:install", "postgresql:install"
@@ -17,8 +17,8 @@ namespace :postgresql do
   desc "Create a database for this application."
   task :create_database do # , roles: :db, only: {primary: true} do
     on roles(:db) do
-      execute %Q{#{sudo} -u postgres psql -c "create user #{postgresql_user} with password '#{postgresql_password}';"}
-      execute %Q{#{sudo} -u postgres psql -c "create database #{postgresql_database} owner #{postgresql_user};"}
+      sudo %Q{-u postgres psql -c "create user #{postgresql_user} with password '#{postgresql_password}';"}
+      sudo %Q{-u postgres psql -c "create database #{postgresql_database} owner #{postgresql_user};"}
     end
   end
   # after "deploy:setup", "postgresql:create_database"
@@ -27,7 +27,7 @@ namespace :postgresql do
   desc "Generate the database.yml configuration file."
   task :setup do # , roles: :app do
     on roles(:app) do
-      execute "mkdir -p #{shared_path}/config"
+      sudo "mkdir -p #{shared_path}/config"
       template "postgresql.yml.erb", "#{shared_path}/config/database.yml"
     end
   end
@@ -37,7 +37,7 @@ namespace :postgresql do
   desc "Symlink the database.yml file into latest release"
   task :symlink do # , roles: :app do
     on roles(:app) do
-      execute "ln -nfs #{shared_path}/config/database.yml #{release_path}/config/database.yml"
+      sudo "ln -nfs #{shared_path}/config/database.yml #{release_path}/config/database.yml"
     end
   end
   # after "deploy:finalize_update", "postgresql:symlink"

@@ -2,9 +2,9 @@ namespace :nginx do
   desc "Install latest stable release of nginx"
   task :install do
     on roles(:web) do
-      execute "#{sudo} add-apt-repository ppa:nginx/stable"
-      execute "#{sudo} apt-get -y update"
-      execute "#{sudo} apt-get -y install nginx"
+      sudo "add-apt-repository ppa:nginx/stable"
+      sudo "apt-get -y update"
+      sudo "apt-get -y install nginx"
     end
   end
   after "deploy:install", "nginx:install"
@@ -15,7 +15,7 @@ namespace :nginx do
       template "nginx_unicorn.erb", "/tmp/nginx_conf"
       sudo "mv /tmp/nginx_conf /etc/nginx/sites-enabled/#{fetch :application}"
       sudo "rm -f /etc/nginx/sites-enabled/default"
-      restart
+      sudo "service nginx restart"
     end
   end
   # after "deploy:setup", "nginx:setup"
@@ -25,7 +25,7 @@ namespace :nginx do
     desc "#{command} nginx"
     task command do
       on roles(:web) do
-        execute "#{sudo} service nginx #{command}"
+        sudo "service nginx #{command}"
       end
     end
   end
