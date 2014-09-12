@@ -1,4 +1,4 @@
-set_default(:unicorn_user) { user }
+set_default(:unicorn_user) { fetch :user }
 set_default(:unicorn_pid) { "#{current_path}/tmp/pids/unicorn.pid" }
 set_default(:unicorn_config) { "#{shared_path}/config/unicorn.rb" }
 set_default(:unicorn_log) { "#{shared_path}/log/unicorn.log" }
