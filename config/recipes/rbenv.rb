@@ -5,8 +5,8 @@ namespace :rbenv do
   desc "Install rbenv, Ruby, and the Bundler gem"
   task :install do # , roles: :app do
     on roles(:app) do
-      run "#{sudo} apt-get -y install curl git-core"
-      run "curl -L https://raw.github.com/fesplugas/rbenv-installer/master/bin/rbenv-installer | bash"
+      execute "#{sudo} apt-get -y install curl git-core"
+      execute "curl -L https://raw.github.com/fesplugas/rbenv-installer/master/bin/rbenv-installer | bash"
       bashrc = <<-BASHRC
 if [ -d $HOME/.rbenv ]; then 
   export PATH="$HOME/.rbenv/bin:$PATH" 
@@ -14,15 +14,15 @@ if [ -d $HOME/.rbenv ]; then
 fi
 BASHRC
       put bashrc, "/tmp/rbenvrc"
-      run "cat /tmp/rbenvrc ~/.bashrc > ~/.bashrc.tmp"
-      run "mv ~/.bashrc.tmp ~/.bashrc"
-      run %q{export PATH="$HOME/.rbenv/bin:$PATH"}
-      run %q{eval "$(rbenv init -)"}
-      run "rbenv #{rbenv_bootstrap}"
-      run "rbenv install #{ruby_version}"
-      run "rbenv global #{ruby_version}"
-      run "gem install bundler --no-ri --no-rdoc"
-      run "rbenv rehash"
+      execute "cat /tmp/rbenvrc ~/.bashrc > ~/.bashrc.tmp"
+      execute "mv ~/.bashrc.tmp ~/.bashrc"
+      execute %q{export PATH="$HOME/.rbenv/bin:$PATH"}
+      execute %q{eval "$(rbenv init -)"}
+      execute "rbenv #{rbenv_bootstrap}"
+      execute "rbenv install #{ruby_version}"
+      execute "rbenv global #{ruby_version}"
+      execute "gem install bundler --no-ri --no-rdoc"
+      execute "rbenv rehash"
     end
   end
   after "deploy:install", "rbenv:install"

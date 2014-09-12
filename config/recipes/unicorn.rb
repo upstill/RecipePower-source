@@ -8,12 +8,12 @@ namespace :unicorn do
   desc "Setup Unicorn initializer and app configuration"
   task :setup do # , roles: :app do
     on roles(:app) do
-      run "mkdir -p #{shared_path}/config"
+      execute "mkdir -p #{shared_path}/config"
       template "unicorn.rb.erb", unicorn_config
       template "unicorn_init.erb", "/tmp/unicorn_init"
-      run "chmod +x /tmp/unicorn_init"
-      run "#{sudo} mv /tmp/unicorn_init /etc/init.d/unicorn_#{fetch :application}"
-      run "#{sudo} update-rc.d -f unicorn_#{fetch :application} defaults"
+      execute "chmod +x /tmp/unicorn_init"
+      execute "#{sudo} mv /tmp/unicorn_init /etc/init.d/unicorn_#{fetch :application}"
+      execute "#{sudo} update-rc.d -f unicorn_#{fetch :application} defaults"
     end
   end
   # after "deploy:setup", "unicorn:setup"
@@ -23,7 +23,7 @@ namespace :unicorn do
     desc "#{command} unicorn"
     task command do # , roles: :app do
       on roles(:app) do
-        run "service unicorn_#{fetch :application} #{command}"
+        execute "service unicorn_#{fetch :application} #{command}"
       end
     end
     after "nginx:#{command}", "unicorn:#{command}"
