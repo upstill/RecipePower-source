@@ -1,7 +1,7 @@
-set_default(:postgresql_host, "localhost")
-set_default(:postgresql_user) { "upstill" }
-set_default(:postgresql_password) { Capistrano::CLI.password_prompt "PostgreSQL Password: " }
-set_default(:postgresql_database) { "cookmarks_production" }
+set :postgresql_host, "localhost"
+set :postgresql_user), "upstill"
+set :postgresql_password, Capistrano::CLI.password_prompt("PostgreSQL Password: ")
+set :postgresql_database, "cookmarks_production" 
 
 namespace :postgresql do
   desc "Install the latest stable release of PostgreSQL."
