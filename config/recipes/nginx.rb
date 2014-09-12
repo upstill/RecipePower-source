@@ -14,7 +14,7 @@ namespace :nginx do
     on roles(:web) do
       template "nginx_unicorn.erb", "/tmp/nginx_conf"
       sudo "mv /tmp/nginx_conf /etc/nginx/sites-enabled/#{fetch :application}"
-      execute "rm -f /etc/nginx/sites-enabled/default"
+      sudo "rm -f /etc/nginx/sites-enabled/default"
       restart
     end
   end
