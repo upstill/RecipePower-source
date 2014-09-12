@@ -36,6 +36,8 @@ after "deploy", "deploy:cleanup" # keep only the last 5 releases (rbates)
 
 set :application, 'RP'
 
+set :user, "upstill"
+
 =begin
 namespace :deploy do
 
