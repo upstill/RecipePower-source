@@ -1,8 +1,8 @@
-set_default(:unicorn_user) { fetch :user }
-set_default(:unicorn_pid) { "#{current_path}/tmp/pids/unicorn.pid" }
-set_default(:unicorn_config) { "#{shared_path}/config/unicorn.rb" }
-set_default(:unicorn_log) { "#{shared_path}/log/unicorn.log" }
-set_default(:unicorn_workers, 2)
+set(:unicorn_user) { fetch :user }
+set(:unicorn_pid) { "#{current_path}/tmp/pids/unicorn.pid" }
+set(:unicorn_config) { "#{shared_path}/config/unicorn.rb" }
+set(:unicorn_log) { "#{shared_path}/log/unicorn.log" }
+set(:unicorn_workers, 2)
 
 namespace :unicorn do
   desc "Setup Unicorn initializer and app configuration"
