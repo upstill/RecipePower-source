@@ -16,7 +16,8 @@ namespace :unicorn do
       run "#{sudo} update-rc.d -f unicorn_#{application} defaults"
     end
   end
-  after "deploy:setup", "unicorn:setup"
+  # after "deploy:setup", "unicorn:setup"
+  after "deploy:published", "unicorn:setup"
 
   %w[start stop restart].each do |command|
     desc "#{command} unicorn"
@@ -25,6 +26,6 @@ namespace :unicorn do
         run "service unicorn_#{application} #{command}"
       end
     end
-    after "deploy:#{command}", "unicorn:#{command}"
+    after "nginx:#{command}", "unicorn:#{command}"
   end
 end

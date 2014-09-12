@@ -4,7 +4,7 @@ def template(from, to)
 end
 
 def set_default(name, *args, &block)
-  set(name, *args, &block) unless exists?(name)
+  set(name, *args, &block) unless defined?(name) # exists?(name)
 end
 
 namespace :deploy do

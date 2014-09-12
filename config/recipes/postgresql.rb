@@ -15,13 +15,14 @@ namespace :postgresql do
   after "deploy:install", "postgresql:install"
 
   desc "Create a database for this application."
-  task :create_databasedo do # , roles: :db, only: {primary: true} do
+  task :create_database do # , roles: :db, only: {primary: true} do
     on roles(:db) do
       run %Q{#{sudo} -u postgres psql -c "create user #{postgresql_user} with password '#{postgresql_password}';"}
       run %Q{#{sudo} -u postgres psql -c "create database #{postgresql_database} owner #{postgresql_user};"}
     end
   end
-  after "deploy:setup", "postgresql:create_database"
+  # after "deploy:setup", "postgresql:create_database"
+  after "deploy:published", "postgresql:create_database"
 
   desc "Generate the database.yml configuration file."
   task :setup do # , roles: :app do
@@ -30,7 +31,8 @@ namespace :postgresql do
       template "postgresql.yml.erb", "#{shared_path}/config/database.yml"
     end
   end
-  after "deploy:setup", "postgresql:setup"
+  # after "deploy:setup", "postgresql:setup"
+  after "deploy:published", "postgresql:setup"
 
   desc "Symlink the database.yml file into latest release"
   task :symlink do # , roles: :app do
@@ -38,5 +40,6 @@ namespace :postgresql do
       run "ln -nfs #{shared_path}/config/database.yml #{release_path}/config/database.yml"
     end
   end
-  after "deploy:finalize_update", "postgresql:symlink"
+  # after "deploy:finalize_update", "postgresql:symlink"
+  after "deploy:published", "postgresql:symlink"
 end
