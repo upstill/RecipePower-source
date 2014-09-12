@@ -12,8 +12,8 @@ namespace :unicorn do
       template "unicorn.rb.erb", unicorn_config
       template "unicorn_init.erb", "/tmp/unicorn_init"
       run "chmod +x /tmp/unicorn_init"
-      run "#{sudo} mv /tmp/unicorn_init /etc/init.d/unicorn_#{application}"
-      run "#{sudo} update-rc.d -f unicorn_#{application} defaults"
+      run "#{sudo} mv /tmp/unicorn_init /etc/init.d/unicorn_#{fetch :application}"
+      run "#{sudo} update-rc.d -f unicorn_#{fetch :application} defaults"
     end
   end
   # after "deploy:setup", "unicorn:setup"
@@ -23,7 +23,7 @@ namespace :unicorn do
     desc "#{command} unicorn"
     task command do # , roles: :app do
       on roles(:app) do
-        run "service unicorn_#{application} #{command}"
+        run "service unicorn_#{fetch :application} #{command}"
       end
     end
     after "nginx:#{command}", "unicorn:#{command}"
