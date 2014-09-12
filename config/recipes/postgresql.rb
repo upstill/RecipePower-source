@@ -1,5 +1,5 @@
 set :postgresql_host, "localhost"
-set :postgresql_user), "upstill"
+set :postgresql_user, "upstill"
 set :postgresql_password, Capistrano::CLI.password_prompt("PostgreSQL Password: ")
 set :postgresql_database, "cookmarks_production" 
 
