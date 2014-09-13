@@ -31,11 +31,9 @@ gem 'omniauth-facebook' # , '~> 1.4.0'
 gem 'omniauth-google-oauth2'                     
 gem 'omniauth-openid'                     
 gem 'declarative_authorization'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
-gem 'unicorn' # 'thin'
-gem 'unicorn-rails'
 gem 'eventmachine', '~> 1.0.3'
 gem 'ruby_parser'
-gem "rmagick", "~> 2.13.2", :require => 'RMagick'
+gem "rmagick", "~> 2.13.2"
 gem "feedzirra", "~> 0.2" # :git => 'git://github.com/pauldix/feedzirra.git'
 gem "simple_form", :git => 'git://github.com/plataformatec/simple_form.git' # , '~> 3.0.0.beta1' 
 gem 'delayed_job' # , git: 'git://github.com/collectiveidea/delayed_job.git'
@@ -90,8 +88,14 @@ gem 'autoprefixer-rails'
 gem 'jquery-rails'
 
 # Use unicorn as the web server
-# gem 'unicorn'
+gem 'unicorn'
+gem 'unicorn-rails'
 
 # Deploy with Capistrano
-# gem 'capistrano'
+gem 'sshkit', '~> 1.3.0'
+gem 'capistrano'
+gem 'capistrano-rails'
+gem 'capistrano-bundler'
+gem 'capistrano-rbenv'
+gem 'capistrano-rvm'
 

@@ -1,4 +1,14 @@
 # config/unicorn.rb
+root = "/var/www/RP/current"
+working_directory root
+pid "#{root}/tmp/pids/unicorn.pid"
+stderr_path "#{root}/log/unicorn.log"
+stdout_path "#{root}/log/unicorn.log"
+
+listen "/tmp/unicorn.RP.sock"
+worker_processes 2
+timeout 30
+=begin Heroku version
 worker_processes Integer(ENV["WEB_CONCURRENCY"] || 3)
 timeout 15
 preload_app true
@@ -21,3 +31,4 @@ after_fork do |server, worker|
   defined?(ActiveRecord::Base) and
     ActiveRecord::Base.establish_connection
 end
+=end
