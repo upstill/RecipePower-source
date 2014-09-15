@@ -97,5 +97,5 @@ gem 'capistrano'
 gem 'capistrano-rails'
 gem 'capistrano-bundler'
 gem 'capistrano-rbenv'
-gem 'capistrano-rvm'
+# gem 'capistrano-rvm'
 
