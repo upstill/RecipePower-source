@@ -1,5 +1,6 @@
 set :unicorn_user, fetch(:user)
-set :unicorn_pid, "#{current_path}/tmp/pids/unicorn.pid"
+set :unicorn_pids_dir, "#{current_path}/tmp/pids
+set :unicorn_pid, "#{fetch :unicorn_pids_dir}/unicorn.pid"
 set :unicorn_config, "#{shared_path}/config/unicorn.rb"
 set :unicorn_log, "#{shared_path}/log/unicorn.log"
 set :unicorn_workers, 2
@@ -9,6 +10,7 @@ namespace :unicorn do
   task :setup do # , roles: :app do
     on roles(:app) do
       sudo "mkdir -p #{shared_path}/config"
+      sudo "mkdir -p #{fetch :unicorn_pids_dir}"
       template "unicorn.rb.erb", fetch(:unicorn_config)
       template "unicorn_init.erb", "/tmp/unicorn_init"
       sudo "chmod +x /tmp/unicorn_init"
