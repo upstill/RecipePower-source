@@ -10,7 +10,7 @@ namespace :unicorn do
   task :setup do # , roles: :app do
     on roles(:app) do
       sudo "mkdir -p #{shared_path}/config"
-      sudo "mkdir -p #{fetch :unicorn_pids_dir}"
+      execute "mkdir -p #{fetch :unicorn_pids_dir}"
       template "unicorn.rb.erb", fetch(:unicorn_config)
       template "unicorn_init.erb", "/tmp/unicorn_init"
       sudo "chmod +x /tmp/unicorn_init"
