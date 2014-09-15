@@ -94,7 +94,7 @@ class ReferentsController < ApplicationController
         parent.save
         keyback = @referent.id
     when "child"
-        debugger
+        # debugger
     when "over"
         # "over" indicates to add the tag to the referent's expressions
         @referent = handlerclass.find params[:target].to_i

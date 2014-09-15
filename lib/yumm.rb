@@ -1,5 +1,5 @@
 def ingreds
-  debugger
+  # debugger
   file = File.read "yumm.json"
   data = JSON.parse file
   x=2
