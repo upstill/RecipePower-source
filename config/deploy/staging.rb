@@ -16,6 +16,8 @@
 
 server '173.255.245.80', user: 'upstill', roles: %w{web app db}, primary: true
 
+set :stage, "staging"
+
 # Custom SSH Options
 # ==================
 # You may pass any option but keep in mind that net/ssh understands a
