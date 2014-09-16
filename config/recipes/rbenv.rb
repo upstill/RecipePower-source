@@ -43,5 +43,5 @@ fi
       execute "rbenv rehash"
     end
   end
-  before "deploy:install", "rbenv:install"
+  before "rbenv:validate", "rbenv:install"
 end

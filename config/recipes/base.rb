@@ -11,21 +11,33 @@ end
 namespace :deploy do
   desc "Install everything onto the server"
   task :install do
-    sudo "apt-get -y update"
-    sudo "apt-get -y install python-software-properties"
+    on roles(:app) do |host|
+      sudo "apt-get -y update"
+      sudo "apt-get -y install python-software-properties"
+    end
   end
 
   desc "Ensure the deploy directory is setup"
   task :ensure_www do
-    if test "[ ! -d #{deploy_to} ]"
-      on roles(:app) do |host|
-        sudo "mkdir -p #{deploy_to}"
-        sudo "chown #{user}:#{user} #{deploy_to}"
-        execute "umask 0002"
+    on roles(:app) do |host|
+      if test "[ ! -d #{deploy_to} ]"
+        path = ""
+        deploy_to.split('/').each { |dir|
+          next if dir.length == 0
+          path << "/#{dir}"
+          if test "[ ! -d #{path} ]"
+            sudo "mkdir -p #{path}"
+            sudo "chown #{fetch :user}:#{fetch :user} #{path}"
+            execute "chmod 0770 #{path}"
+          end
+        }
         execute "chmod g+s #{deploy_to}"
         execute "mkdir #{deploy_to}/{releases,shared}"
-        execute "chown #{user} #{deploy_to}/{releases,shared}"
+        # execute "chmod 0770 #{deploy_to}/{releases,shared}"
+        execute "chown #{fetch :user} #{deploy_to}/{releases,shared}"
       end
     end
   end
+  # after "rbenv:install", "deploy:ensure_www"
+  after "deploy:install", "deploy:ensure_www"
 end

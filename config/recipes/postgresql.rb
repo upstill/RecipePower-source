@@ -11,7 +11,7 @@ namespace :postgresql do
   desc "Install the latest stable release of PostgreSQL."
   task :install do # , roles: :db, only: {primary: true} do
     on roles(:db) do
-      sudo "add-apt-repository ppa:pitti/postgresql"
+      sudo "add-apt-repository --yes ppa:pitti/postgresql"
       sudo "apt-get -y update"
       sudo "apt-get -y install postgresql libpq-dev"
     end
@@ -27,8 +27,8 @@ Couldn't figure out how to use sudo with another user
       sudo %Q{-u postgres psql -c "create database #{fetch :postgresql_database} owner #{fetch :postgresql_user};"}
 =end
       if test("[ ! -e #{fetch :postgresql_pgpass} ]") # Build the database only if there's no .pgpass file
-        execute %Q{psql -c "create user #{fetch :postgresql_user} with password '#{fetch :postgresql_password}';"}
-        execute %Q{psql -c "create database #{fetch :postgresql_database} owner #{fetch :postgresql_user};"}
+        execute %Q{psql -c "create user #{fetch :postgresql_user} with password '#{fetch :postgresql_password}';" ; true}
+        execute %Q{psql -c "create database #{fetch :postgresql_database} owner #{fetch :postgresql_user};" ; true}
         template "pgpass.erb", fetch(:postgresql_pgpass)
         sudo "chmod 0600 #{fetch :postgresql_pgpass}"
       end
