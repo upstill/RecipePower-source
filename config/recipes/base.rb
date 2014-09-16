@@ -13,7 +13,8 @@ namespace :deploy do
   task :install do
     on roles(:app) do |host|
       sudo "apt-get -y update"
-      sudo "apt-get -y install python-software-properties"
+      # Maybe libcurl3-dev ?
+      sudo "apt-get -y install graphicsmagick-libmagick-dev-compat zlib1g-dev build-essential libssl-dev libreadline-dev libyaml-dev libxml2-dev libxslt1-dev libcurl4-openssl-dev python-software-properties"
     end
   end
 
