@@ -14,7 +14,7 @@ namespace :deploy do
     on roles(:app) do |host|
       sudo "apt-get -y update"
       # Maybe libcurl3-dev ?
-      sudo "apt-get -y install ruby1.9.3-dev graphicsmagick-libmagick-dev-compat zlib1g-dev build-essential libssl-dev libreadline-dev libyaml-dev libxml2-dev libxslt1-dev libcurl4-openssl-dev python-software-properties"
+      sudo "apt-get -y install ruby1.9.1-dev graphicsmagick-libmagick-dev-compat zlib1g-dev build-essential libssl-dev libreadline-dev libyaml-dev libxml2-dev libxslt1-dev libcurl4-openssl-dev python-software-properties"
     end
   end
 
