@@ -35,7 +35,7 @@ Couldn't figure out how to use sudo with another user
     end
   end
   # after "deploy:setup", "postgresql:create_database"
-  after "postgresql:install", "postgresql:create_database"
+  after "deploy:updated", "postgresql:create_database"
 
   desc "Get the database from Heroku"
   task :fetch_database do # , roles: :db, only: {primary: true} do
@@ -49,12 +49,12 @@ Couldn't figure out how to use sudo with another user
   desc "Generate the database.yml configuration file."
   task :setup do # , roles: :app do
     on roles(:app) do
-      sudo "mkdir -p #{shared_path}/config"
+      execute "mkdir -p #{shared_path}/config"
       template "postgresql.yml.erb", "#{shared_path}/config/database.yml"
     end
   end
   # after "deploy:setup", "postgresql:setup"
-  after "deploy:published", "postgresql:setup"
+  after "postgresql:fetch_database", "postgresql:setup"
 
   desc "Symlink the database.yml file into latest release"
   task :symlink do # , roles: :app do
@@ -63,5 +63,5 @@ Couldn't figure out how to use sudo with another user
     end
   end
   # after "deploy:finalize_update", "postgresql:symlink"
-  after "deploy:published", "postgresql:symlink"
+  after "postgresql:setup", "postgresql:symlink"
 end
