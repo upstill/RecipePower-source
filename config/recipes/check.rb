@@ -11,5 +11,4 @@ namespace :check do
   end
   before "deploy", "check:revision"
   before "deploy:migrate", "check:revision"
-  before "deploy", "check:revision"
 end
