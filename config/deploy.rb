@@ -28,10 +28,11 @@ set :deploy_via, :remote_cache
 # set :format, :pretty
 
 # Default value for :log_level is :debug
-set :log_level, :debug
+# set :log_level, :debug
 
 # Default value for :pty is false
 set :pty, true
+set :use_sudo, true
 
 # Default value for :linked_files is []
 # set :linked_files, %w{config/database.yml}

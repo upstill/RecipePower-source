@@ -14,8 +14,7 @@
 # server list. The second argument is a, or duck-types, Hash and is
 # used to set extended properties on the server.
 
-server '192.155.84.190', user: 'upstill', roles: %w{web app db}, primary: true
-# server '173.255.245.80', user: 'upstill', roles: %w{web app db}, primary: true
+server '173.255.245.80', user: "#{fetch :user}", roles: %w{web app db}, primary: true
 
 # Custom SSH Options
 # ==================
