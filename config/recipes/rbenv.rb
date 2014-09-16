@@ -2,11 +2,19 @@ set :ruby_version, "1.9.3-p286"
 set :rbenv_bootstrap, "bootstrap-ubuntu-12-04"
 
 namespace :rbenv do
+  desc "Update apt-get"
+  task :preflight do
+    on roles(:app) do
+      sudo "apt-get -y update"
+      sudo "apt-get -y install curl git-core"
+      execute "curl -L https://raw.github.com/fesplugas/rbenv-installer/master/bin/rbenv-installer | bash"
+    end
+  end
+  before "rbenv:install", "rbenv:preflight"
+
   desc "Install rbenv, Ruby, and the Bundler gem"
   task :install do # , roles: :app do
     on roles(:app) do
-      sudo "apt-get -y install curl git-core"
-      execute "curl -L https://raw.github.com/fesplugas/rbenv-installer/master/bin/rbenv-installer | bash"
       bashrc = <<-BASHRC
 if [ -d $HOME/.rbenv ]; then 
   export PATH="$HOME/.rbenv/bin:$PATH" 
