@@ -325,6 +325,7 @@ PLATFORMS
 
 DEPENDENCIES
   annotate (= 2.5.0)
+  arel (~> 4.0)
   autoprefixer-rails
   awesome_nested_set
   better_errors

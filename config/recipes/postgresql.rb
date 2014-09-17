@@ -35,7 +35,7 @@ Couldn't figure out how to use sudo with another user
     end
   end
   # after "deploy:setup", "postgresql:create_database"
-  after "deploy:updated", "postgresql:create_database"
+  before "deploy:migrate", "postgresql:create_database"
 
   desc "Get the database from Heroku"
   task :fetch_database do # , roles: :db, only: {primary: true} do
