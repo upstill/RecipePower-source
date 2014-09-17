@@ -9,7 +9,7 @@ namespace :unicorn do
   desc "Setup Unicorn initializer and app configuration"
   task :setup do # , roles: :app do
     on roles(:app) do
-      sudo "mkdir -p #{shared_path}/config"
+      execute "mkdir -p #{shared_path}/{config,log}"
       execute "mkdir -p #{fetch :unicorn_pids_dir}"
       template "unicorn.rb.erb", fetch(:unicorn_config)
       template "unicorn_init.erb", "/tmp/unicorn_init"
