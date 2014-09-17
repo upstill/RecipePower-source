@@ -23,19 +23,20 @@ namespace :deploy do
     on roles(:app) do |host|
       if test "[ ! -d #{deploy_to} ]"
         path = ""
+        # Make sure that the directories on the deployment path exist and are owned by :user
         deploy_to.split('/').each { |dir|
           next if dir.length == 0
           path << "/#{dir}"
           if test "[ ! -d #{path} ]"
             sudo "mkdir -p #{path}"
             sudo "chown #{fetch :user}:#{fetch :user} #{path}"
-            execute "chmod 0770 #{path}"
+            # execute "chmod 0775 #{path}"
           end
         }
         execute "chmod g+s #{deploy_to}"
         execute "mkdir #{deploy_to}/{releases,shared}"
         # execute "chmod 0770 #{deploy_to}/{releases,shared}"
-        execute "chown #{fetch :user} #{deploy_to}/{releases,shared}"
+        # execute "chown #{fetch :user} #{deploy_to}/{releases,shared}"
       end
     end
   end

@@ -1,4 +1,4 @@
-set :ruby_version, "1.9.3-p286"
+set :ruby_version, "1.9.3-p547" # "2.0.0-p481" #
 set :rbenv_bootstrap, "bootstrap-ubuntu-12-04"
 
 namespace :rbenv do
