@@ -27,10 +27,10 @@ Couldn't figure out how to use sudo with another user
       sudo %Q{-u postgres psql -c "create database #{fetch :postgresql_database} owner #{fetch :postgresql_user};"}
 =end
       if test("[ ! -e #{fetch :postgresql_pgpass} ]") # Build the database only if there's no .pgpass file
-        execute %Q{psql -c "create user #{fetch :postgresql_user} with password '#{fetch :postgresql_password}';" ; true}
-        execute %Q{psql -c "create database #{fetch :postgresql_database} owner #{fetch :postgresql_user};" ; true}
+        sudo %Q{-u postgres psql -c "create user #{fetch :postgresql_user} with password '#{fetch :postgresql_password}';" ; true}
+        sudo %Q{-u postgres psql -c "create database #{fetch :postgresql_database} owner #{fetch :postgresql_user};" ; true}
         template "pgpass.erb", fetch(:postgresql_pgpass)
-        sudo "chmod 0600 #{fetch :postgresql_pgpass}"
+        execute "chmod 0600 #{fetch :postgresql_pgpass}"
       end
     end
   end
@@ -40,8 +40,9 @@ Couldn't figure out how to use sudo with another user
   desc "Get the database from Heroku"
   task :fetch_database do # , roles: :db, only: {primary: true} do
     on roles(:db) do
-      sudo "curl --silent -o /tmp/latest.dump '#{fetch :postgresql_dburl}'"
-      execute "pg_restore --no-password --verbose --clean --no-acl --no-owner -h #{fetch :postgresql_host} -U #{fetch :postgresql_user} -d #{fetch :postgresql_database} /tmp/latest.dump ; true"
+      # sudo "curl --silent -o /tmp/latest.dump '#{fetch :postgresql_dburl}'"
+      # execute "pg_restore --no-password --verbose --clean --no-acl --no-owner -h #{fetch :postgresql_host} -U #{fetch :postgresql_user} -d #{fetch :postgresql_database} /tmp/latest.dump ; true"
+      execute "curl --silent '#{fetch :postgresql_dburl}' | pg_restore --no-password --verbose --clean --no-acl --no-owner -h #{fetch :postgresql_host} -U #{fetch :postgresql_user} -d #{fetch :postgresql_database} ; true"
     end
   end
   after "postgresql:create_database", "postgresql:fetch_database"
@@ -59,7 +60,8 @@ Couldn't figure out how to use sudo with another user
   desc "Symlink the database.yml file into latest release"
   task :symlink do # , roles: :app do
     on roles(:app) do
-      sudo "ln -nfs #{shared_path}/config/database.yml #{release_path}/config/database.yml"
+      # Link the database config file to the most recent (i.e., current) release
+      execute "ln -nfs #{shared_path}/config/database.yml `ls -t -d -1 #{deploy_path}/releases/*/config | head -1`"
     end
   end
   # after "deploy:finalize_update", "postgresql:symlink"
