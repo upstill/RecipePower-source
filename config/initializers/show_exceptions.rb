@@ -8,7 +8,6 @@ module ActionDispatch
         log_error(exception)
         body
       rescue => e
-          debugger
         render_exception_without_template(env, exception)
       end
       
