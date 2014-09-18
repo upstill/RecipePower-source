@@ -64,6 +64,18 @@ group :development do
   # gem "json"
 end
 
+group :staging do
+  gem 'minitest', '~> 4.2'
+  # gem 'rspec-rails'
+  gem 'annotate', '2.5.0'
+  gem "nifty-generators"
+  gem 'log_buddy'
+  gem 'ruby-prof', '~> 0.13.0' # , :git => 'git://github.com/wycats/ruby-prof.git'
+  gem 'letter_opener'
+  gem "better_errors"
+  gem "binding_of_caller"
+end
+
 gem "masonry-rails"
 
 group :test do
