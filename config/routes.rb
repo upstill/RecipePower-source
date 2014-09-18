@@ -3,9 +3,6 @@
 # whereas GETting from #index starts afresh. This overloading was necessitated by problems using
 # a second, POST, method (#query), which wasn't being POSTed to upon page reload.
 
-unless @RPRoutesLoaded
-  @RPRoutesLoaded = true
-
 RP::Application.routes.draw do
 
   if Rails.env.development? || Rails.env.test?
@@ -21,14 +18,14 @@ RP::Application.routes.draw do
   # get '/authentications/new' => 'authentications#new'
   resources :authentications
 
-  devise_for :users, :skip => [ :registrations ], :controllers => {
+  devise_for :users, :skip => [:registrations], :controllers => {
       :sessions => 'sessions',
       :passwords => 'passwords',
       :invitations => 'invitations',
       # :registrations => 'registrations' # Had to elide this and use devise_scope to define /users/register instead of /users to create
   }
 
-  match 'users', :controller=>'users', :action=>'index', :via => [:get, :post]
+  match 'users', :controller => 'users', :action => 'index', :via => [:get, :post]
 
   devise_scope :user do
     post "/users/register" => "registrations#create", :as => "user_registration"
@@ -54,7 +51,7 @@ RP::Application.routes.draw do
   get 'users/:id/collection' => 'users#collection'
   get 'users/:id/biglist' => 'users#biglist'
   # get 'users/:id/show' => 'users#show'
-  resources :users, :except => [ :index, :create ] do
+  resources :users, :except => [:index, :create] do
     member do
       get 'collect'
       post 'remove'
@@ -65,37 +62,37 @@ RP::Application.routes.draw do
   end
 
   post '/list' => 'lists#create', :as => 'create_list'
-  resources :lists, except: [ :index, :create ] do
+  resources :lists, except: [:index, :create] do
     member do
       get 'scrape'
     end
   end
-  match 'lists', :controller=>'lists', :action=>'index', :via => [:get, :post]
+  match 'lists', :controller => 'lists', :action => 'index', :via => [:get, :post]
 
   post '/site' => 'sites#create', :as => 'create_site'
-  resources :sites, except: [ :index, :create ] do
+  resources :sites, except: [:index, :create] do
     member do
       get 'scrape'
     end
   end
-  match 'sites', :controller=>'sites', :action=>'index', :via => [:get, :post]
+  match 'sites', :controller => 'sites', :action => 'index', :via => [:get, :post]
 
   post '/reference' => 'references#create', :as => 'create_reference'
-  resources :references, :except => [ :index, :create ]
-  match 'references', :controller=>'references', :action=>'index', :via => [:get, :post]
+  resources :references, :except => [:index, :create]
+  match 'references', :controller => 'references', :action => 'index', :via => [:get, :post]
 
   post '/feed' => 'feeds#create', :as => 'create_feed'
-  resources :feeds, :except => [ :index, :create ] do
+  resources :feeds, :except => [:index, :create] do
     member do
       get 'collect' # Add the feed to the current user
       post 'remove' # Remove the feed from the current user's set
       post 'approve' # (Admin only) approve the feed for presentation
     end
   end
-  match 'feeds', :controller=>'feeds', :action=>'index', :via => [:get, :post]
+  match 'feeds', :controller => 'feeds', :action => 'index', :via => [:get, :post]
 
   post '/tag' => 'tags#create', :as => 'create_tag'
-  resources :tags, except: [ :index, :create ] do
+  resources :tags, except: [:index, :create] do
     member do
       post 'absorb'
     end
@@ -106,9 +103,9 @@ RP::Application.routes.draw do
       get 'match'
     end
   end
-  match 'tags', :controller=>'tags', :action=>'index', :via => [:get, :post]
+  match 'tags', :controller => 'tags', :action => 'index', :via => [:get, :post]
 
-  match 'collection', :controller=>'collection', :action=>'index', :via => [:get, :post]
+  match 'collection', :controller => 'collection', :action => 'index', :via => [:get, :post]
   post 'collection/update'
   get "collection/refresh"
   get "collection/feed"
@@ -159,9 +156,9 @@ RP::Application.routes.draw do
   get '/contact', :to => 'pages#contact'
   get '/about', :to => 'pages#about'
   get '/welcome', :to => 'pages#welcome'
-  get '/faq', :to=>"pages#faq"
-  get '/admin', :to=>"pages#admin"
-  get '/mobi', :to=>"pages#mobi"
+  get '/faq', :to => "pages#faq"
+  get '/admin', :to => "pages#admin"
+  get '/mobi', :to => "pages#mobi"
   root :to => 'pages#root'
 
   # The priority is based upon order of creation:
@@ -220,5 +217,4 @@ RP::Application.routes.draw do
   # This is a legacy wild controller route that's not recommended for RESTful applications.
   # Note: This route will make all actions in every controller accessible via GET requests.
   # get ':controller(/:action(/:id(.:format)))'
-end
 end
