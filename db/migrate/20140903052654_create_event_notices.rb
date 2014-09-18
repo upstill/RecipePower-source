@@ -6,6 +6,6 @@ class CreateEventNotices < ActiveRecord::Migration
       t.boolean :read, default: false
 
       t.timestamps
-    end
+    end unless ActiveRecord::Base.connection.table_exists?("event_notices")
   end
 end
