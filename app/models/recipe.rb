@@ -1,5 +1,6 @@
 require './lib/Domain.rb'
 require './lib/RPDOM.rb'
+require './lib/my_constants.rb'
 require 'open-uri'
 require 'nokogiri'
 require 'htmlentities'
@@ -186,7 +187,6 @@ class Recipe < ActiveRecord::Base
       self.title
     end
   end
-=end
 
   @@statuses = [
       [:recipe_status_high, MyConstants::Rcpstatus_rotation],
@@ -199,6 +199,7 @@ class Recipe < ActiveRecord::Base
   def self.status_select
     @@statuses
   end
+=end
 
   public
 

@@ -29,8 +29,8 @@ class RecipesController < ApplicationController
         ]
         replacements << [ "."+feed_list_element_class(@feed_entry) ] if @feed_entry
         @user = @recipe.current_user ? Recipe.find(@recipe.current_user) : current_user_or_guest
-        @browser = current_user.browser
-        if current_user.browser.should_show(@recipe) && !destroyed
+        # @browser = current_user.browser
+        if !destroyed # && current_user.browser.should_show(@recipe)
           replacements[0][1] = with_format("html") do render_to_string partial: "recipes/golink" end
           replacements[1][1] = with_format("html") do render_to_string partial: "shared/recipe_smallpic" end
           replacements[2][1] = with_format("html") do render_to_string partial: "shared/recipe_grid" end

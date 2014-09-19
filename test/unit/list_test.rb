@@ -105,8 +105,10 @@ class ListTest < ActiveSupport::TestCase
     assert_equal li.entity, li2.entity  # Entity loads
   end
 
+=begin
   test "a newly-added list appears in the user's browser" do
     assert @owner.browser.select_by_content(@lst.name_tag)
   end
+=end
 
 end

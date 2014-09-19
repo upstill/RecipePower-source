@@ -51,18 +51,19 @@ class UsersController < ApplicationController
     if user.follows? @friend
       notice = "You're already following '#{@friend.handle}'."
     else
-      user.add_followee @friend
+      user.followees << @friend
+      user.save
       notice = "You're now connected with '#{@friend.handle}'."
     end
     respond_to do |format|
       format.html { redirect_to collection_path, :notice => notice }
       format.json {
-        @browser = user.browser
-        @node = @browser.selected
+        # @browser = user.browser
+        # @node = @browser.selected
         render(
-          json: { 
-            processorFcn: "RP.content_browser.insert_or_select",
-            entity: with_format("html") { render_to_string partial: "collection/node" }, 
+          json: {
+            # processorFcn: "RP.content_browser.insert_or_select",
+            # entity: with_format("html") { render_to_string partial: "collection/node" },
             notice: view_context.flash_one(:notice, notice) 
           }, 
           status: :created, 
@@ -144,7 +145,7 @@ class UsersController < ApplicationController
       flash[:error] = "Couldn't find followee "+params[:id].to_s
     end
     if current_user && followee
-      current_user.delete_followee followee
+      current_user.followees.delete followee
       current_user.save
       flash[:notice] = "There you go! No longer following "+followee.handle
     else

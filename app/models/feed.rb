@@ -9,7 +9,7 @@ class Feed < ActiveRecord::Base
   before_validation { |feed| feed.follow_url if (new_record? || url_changed?) }
 
   before_destroy do |feed|
-    feed.users.each { |subscriber| subscriber.delete_feed feed }
+    feed.users.each { |subscriber| subscriber.feeds.delete feed ; subscriber.save }
   end
   
   belongs_to :site

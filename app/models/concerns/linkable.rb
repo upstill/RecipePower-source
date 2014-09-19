@@ -164,6 +164,8 @@ module Linkable
 
   # Return the human-readable name for the recipe's source
   def sourcename
+    ref = site.referent
+    name = ref.name
     site.name
   end
 

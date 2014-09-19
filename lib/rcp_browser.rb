@@ -1,3 +1,4 @@
+=begin
 # Class for a single selectable collection of entities, whether physical or virtual
 require 'my_constants.rb'
 require "candihash.rb"
@@ -555,14 +556,16 @@ class RcpBrowserCompositeUser < RcpBrowserComposite
     @handle = "All My Cookmarks"
     @classed_as = :personal
     if @children.empty?  # Default, in case never saved before, or rebuilding browser
-=begin
+begin
+
       @children = [ MyConstants::Rcpstatus_rotation,
         MyConstants::Rcpstatus_favorites, 
         MyConstants::Rcpstatus_interesting].map do |status| 
         args[:status] = status
         RcpBrowserElementStatus.new(level+1, args)
       end
-=end
+
+end
       klass = Module.const_get("User")
       if klass.is_a?(Class) # If User class is available (i.e., in Rails, as opposed to testing)
         @children += user.collection_tags.map do |tag|
@@ -926,7 +929,8 @@ class ContentBrowser < BrowserComposite
     parent.children.collect { |child| child.node_list true }.flatten
   end
 
-=begin
+begin
+
   def selected_is_under which
     id = id_for which
     (selected.css_id == id) || (parent_of(selected).css_id == id) ||
@@ -942,7 +946,8 @@ class ContentBrowser < BrowserComposite
         end
   end
 
-=end
+
+end
   def convert_ids list
     selected.convert_ids list
   end
@@ -1133,3 +1138,4 @@ class RcpBrowserElementList < RcpBrowserElement
   end
 
 end
+=end

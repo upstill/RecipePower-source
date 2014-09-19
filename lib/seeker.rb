@@ -1,3 +1,4 @@
+=begin
 require "candihash.rb"
 
 class Seeker < Object
@@ -265,11 +266,13 @@ class ContentSeeker < Seeker
     "/collection"
   end
   
-=begin
+begin
+
   def cur_page=(pagenum)
     affiliate.cur_page=( pagenum) if affiliate
   end
-=end
+
+end
   
   # If the entity has returned no results, suggest what the problem might have been
   def explain_empty
@@ -452,3 +455,4 @@ class ListSeeker < Seeker
     }
   end
 end
+=end

@@ -1,7 +1,8 @@
 class CollectionController < ApplicationController
+=begin
   layout :rs_layout # Let response_service pick the layout
-  before_filter :setup_collection # , except: [ :index ]
-  after_filter :save_browser
+  # before_filter :setup_collection # , except: [ :index ]
+  # after_filter :save_browser
   
   def save_browser
     @user.save if @user
@@ -80,4 +81,5 @@ class CollectionController < ApplicationController
       # render :index, :layout=>false, :locals => { :feed => @feed }
     end
   end
+=end
 end

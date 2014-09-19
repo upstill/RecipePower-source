@@ -10,7 +10,8 @@ class ListSubscriptionsTest < ActiveSupport::TestCase
     @owner = users(:thing1)
     @other = users(:thing2)
     @friend = users(:thing3)
-    @owner.add_followee @friend
+    @owner.followees << @friend unless @owner.followee_ids.include?(@friend.id)
+    @owner.save
 
     @lst_name = "Test List"
     @lst = List.assert @lst_name, @owner

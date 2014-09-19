@@ -1,5 +1,5 @@
 require './lib/controller_authentication.rb'
-require './lib/seeker.rb'
+# require './lib/seeker.rb'
 require './lib/querytags.rb'
 require 'rp_event'
 require 'reloader/sse'
@@ -34,6 +34,11 @@ class ApplicationController < ActionController::Base
   # Pseudo Routes helper for writing a path to :collection, :recent & :biglist (plus others as needed)
   def user_collection_path(user, which=:collection)
     "#{user_path user }/#{which}"
+  end
+
+  # This replaces the old collections path
+  def collection_path
+    current_user ? user_collection_path(current_user) : home_path
   end
 
   # Track the session, saving session events when the session goes stale
@@ -92,6 +97,7 @@ class ApplicationController < ActionController::Base
     x=2
   end
   
+=begin
   # Get the seeker from the session store (mainly used for streaming)
   def retrieve_seeker
     if rc_class = session[:seeker_class]
@@ -134,7 +140,7 @@ class ApplicationController < ActionController::Base
       end
     # end
   end
-  
+
   # This is one-stop-shopping for a controller using the query to filter a list
   # See tags_controller for an example
   # Options: selector: CSS selector for the outermost container of the rendered index template
@@ -185,6 +191,7 @@ class ApplicationController < ActionController::Base
       format.json { render json: jsondata(rc_class, frame_selector, options) }
     end
   end
+=end
 
   # Take a stream presenter and drop items into a stream, if possible and called for.
   # Otherwise, defer to normal rendering

@@ -60,9 +60,9 @@ class FeedsController < ApplicationController
       @feed.perform
       @notice = "Now feeding you with '#{@feed.title}'."
     end
-    user.add_feed @feed # Selects the feed whether previously subscribed or not
-    @browser = user.browser params
-    @node = @browser.selected
+    user.feeds << @feed # Selects the feed whether previously subscribed or not
+    # @browser = user.browser params
+    # @node = @browser.selected
     respond_to do |format|
       format.js { 
         flash[:notice] = @notice 
@@ -90,7 +90,7 @@ class FeedsController < ApplicationController
       flash[:error] = "Couldn't get feed "+params[:id].to_s
     end
     if current_user && feed
-      current_user.delete_feed feed
+      current_user.feeds.delete feed
       current_user.save
       flash[:notice] = "There you go! Unsubscribed"+(feed.title.empty? ? "..." : (" from "+feed.title))
     else

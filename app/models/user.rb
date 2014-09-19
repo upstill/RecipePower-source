@@ -1,5 +1,5 @@
 require "type_map.rb"
-require "rcp_browser.rb"
+
 class User < ActiveRecord::Base
   include Taggable
   include Voteable
@@ -14,13 +14,13 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable #, :validatable,
          :lockable # , :omniauthable
   after_invitation_accepted :initialize_friends
-  before_save :serialize_browser
+  # before_save :serialize_browser
 
   # Setup accessible (or protected) attributes for your model
   attr_accessible :id, :username, :first_name, :last_name, :fullname, :about, :login, :private, :skip_invitation,
                 :email, :password, :password_confirmation, :shared_recipe, :invitee_tokens, :channel_tokens, # :image,
                 :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens, :subscription_tokens, :invitation_issuer
-  attr_writer :browser
+  # attr_writer :browser
   attr_accessor :shared_recipe, :invitee_tokens, :channel_tokens, :raw_invitation_token
   
   has_many :rcprefs, :dependent => :destroy
@@ -84,6 +84,7 @@ class User < ActiveRecord::Base
     save if @browser && @browser.apply_params(params)
     @browser
   end
+=begin
 
   # Bust the browser cache due to selections changing, optionally selecting an object
   def refresh_browser(obj = nil)
@@ -95,7 +96,8 @@ class User < ActiveRecord::Base
   def serialize_browser
     self.browser_serialized = @browser.dump if @browser
   end
-  
+=end
+
   def self.find_first_by_auth_conditions(warden_conditions)
     conditions = warden_conditions.dup
     if login = conditions.delete(:login)
@@ -105,6 +107,7 @@ class User < ActiveRecord::Base
     end
   end
 
+=begin
   # Add the feed to the browser's ContentBrowser and select it
   def add_feed feed
     if feeds.exists? id: feed.id
@@ -160,7 +163,8 @@ class User < ActiveRecord::Base
     followees.delete f
     save
   end
-  
+=end
+
   def role
     self.role_symbols.first.to_s
   end

@@ -20,7 +20,7 @@ class PagesController < ApplicationController
     # session.delete :on_tour # Tour's over!
     response_service.title = "Home"
     @auth_context = :manage
-    setup_collection
+    # setup_collection
     render
     x=2
   end

@@ -105,6 +105,7 @@ RP::Application.routes.draw do
   end
   match 'tags', :controller => 'tags', :action => 'index', :via => [:get, :post]
 
+=begin
   match 'collection', :controller => 'collection', :action => 'index', :via => [:get, :post]
   post 'collection/update'
   get "collection/refresh"
@@ -117,6 +118,8 @@ RP::Application.routes.draw do
 
   get "stream/stream"
   get "stream/buffer_test"
+=end
+
   get "iframe/create"
   get "admin/data"
   get "admin/control"
