@@ -31,6 +31,11 @@ class ApplicationController < ActionController::Base
     # helper_method :deferred_notification
     include ApplicationHelper
 
+  # Pseudo Routes helper for writing a path to :collection, :recent & :biglist (plus others as needed)
+  def user_collection_path(user, which=:collection)
+    "#{user_path user }/#{which}"
+  end
+
   # Track the session, saving session events when the session goes stale
   def log_serve
     logger.info %Q{RPEVENT\tServe\t#{current_user.id if current_user}\t#{params[:controller]}\t#{params[:action]}\t#{params[:id]}}
@@ -369,7 +374,7 @@ class ApplicationController < ActionController::Base
     scope = Devise::Mapping.find_scope!(resource_or_scope)
     if scope && (scope==:user)
       # If on the site, login triggers a refresh of the collection
-      response_service.deferred_request || response_service.url_for_redirect(collection_path, :format => :html)
+      response_service.deferred_request || response_service.url_for_redirect(user_collection_path(current_user), :format => :html)
     end || super
   end
 

@@ -91,7 +91,6 @@ gem 'jquery-rails'
 
 # Use unicorn as the web server
 gem 'unicorn'
-gem 'unicorn-rails'
 
 # Deploy with Capistrano
 gem 'sshkit', '~> 1.3.0'
@@ -99,5 +98,4 @@ gem 'capistrano'
 gem 'capistrano-rails'
 gem 'capistrano-bundler'
 gem 'capistrano-rbenv'
-# gem 'capistrano-rvm'
 

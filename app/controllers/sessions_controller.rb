@@ -14,7 +14,8 @@ class SessionsController < Devise::SessionsController
         self.resource.fullname = u.fullname
         self.resource.login = u.username || u.email
       end
-      clean_up_passwords(resource)
+      r = resource
+      clean_up_passwords r
       resource.remember_me = 1
       smartrender :action => :new
     end
