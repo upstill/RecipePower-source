@@ -99,7 +99,7 @@ def edit_recipe_link( label, recipe, options={})
       rcpURL: recipe.url,
       rcpPrivate: recipe.private ? %q{checked="checked"} : "",
       rcpComment: recipe.comment,
-      rcpStatus: recipe.status,
+      # rcpStatus: recipe.status,
       authToken: form_authenticity_token
     }
     options[:class] = "edit_recipe_link "+(options[:class] || "")

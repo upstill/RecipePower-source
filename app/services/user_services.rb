@@ -63,6 +63,7 @@ class UserServices
     result
   end
 
+=begin
   def self.tagify_status
     User.all.each { |user| self.new(user).tagify_status }
   end
@@ -82,6 +83,7 @@ class UserServices
     end
     refresh_browser
   end
+=end
 
   # Called on signup to initialize the user
   def sign_up

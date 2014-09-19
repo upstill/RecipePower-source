@@ -373,6 +373,7 @@ class Recipe < ActiveRecord::Base
     ref_for(@current_user, true).private = (val != "0")
   end
 
+=begin
   def status uid=nil
     (ref = ref_for uid, false) ? ref.status : MyConstants::Rcpstatus_misc
   end
@@ -381,6 +382,7 @@ class Recipe < ActiveRecord::Base
   def status=(val)
     ref_for(@current_user, true).status = val.to_i
   end
+=end
 
 # Currently unused functionality for parsing and annotation
   @@DoSpans

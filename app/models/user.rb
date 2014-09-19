@@ -177,7 +177,7 @@ class User < ActiveRecord::Base
   def recipe_ids_g options={}
     constraints = {:user_id => id}
     constraints[:in_collection] = true unless options[:all]
-    constraints[:status] = 1..options[:status] if options[:status]
+    # constraints[:status] = 1..options[:status] if options[:status]
     constraints[:private] = false if options[:public]
     ordering = (options[:sort_by] == :collected) ? "created_at" : "updated_at"
     collection = Rcpref.where(constraints).order(ordering+" DESC").select("recipe_id").map(&:recipe_id)

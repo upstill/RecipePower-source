@@ -24,8 +24,8 @@
         <br><%= f.text_field :title %>
       </div>
       <div class="recipe_status_div">
-        <%= f.label :status, "Status: ", :class => "recipe_field_label" -%>
-        <%= f.select :status, Recipe.status_select %>
+        <%# f.label :status, "Status: ", :class => "recipe_field_label" -%>
+        <%# f.select :status, Recipe.status_select %>
         <%= f.check_box :private %>
         <%= f.label :private, "Private (for my eyes only)" %>
         <%# f.label :privacy, "Privacy: ",:class=>"recipe_field_label" -%>

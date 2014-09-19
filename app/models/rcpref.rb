@@ -31,15 +31,15 @@ class Rcpref < ActiveRecord::Base
     # :comment is text to match against the comment field
     # :title is text to match against the recipe's title
     # NB: If both are given, recipes are returned which match in either
-    # :status is the set of status flags to match
+    # :status is the set of status flags to match (XX Not anymore)
     # :sorted gives criterion for sorting (currently only sort by updated_at field)
     time_check_log("RcpRef with params #{params.to_s}") do
       args = params.first || {}
       commentstr = args[:comment]
       titlestr = args[:title]
       sortfield = args[:sorted]
-      statuses = args[:status] || StatusAny
-      sort_by_touched = args[:status] & StatusRecentMask
+      # statuses = args[:status] || StatusAny
+      # sort_by_touched = args[:status] & StatusRecentMask
       if owner_id.kind_of? Fixnum
         owner_is_super = (owner_id == User.super_id)
         owner_is_requestor = (owner_id == requestor_id)
@@ -52,7 +52,7 @@ class Rcpref < ActiveRecord::Base
         refs = owner_id.nil? ? Rcpref.scoped : Rcpref.where(user_id: owner_id) # NB: owner_id can be an array of ids
         refs = refs.where("NOT private") unless owner_is_requestor
         # Unless we're going for restricted status, just get 'em all
-        refs = refs.where("status <= ?", statuses) if statuses < StatusMiscMask
+        # refs = refs.where("status <= ?", statuses) if statuses < StatusMiscMask
       end
 
       refs = refs.order(sortfield) if sortfield
