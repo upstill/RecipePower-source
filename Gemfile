@@ -1,6 +1,7 @@
 source 'http://rubygems.org'
 
 ruby '1.9.3'
+# gem 'bundler', '~> 1.4'
 gem 'rails', '~> 4.0' # '3.2.11' #
 gem 'arel', '~> 4.0'
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
@@ -43,6 +44,7 @@ gem 'delayed_job_active_record' # , git: 'git://github.com/collectiveidea/delaye
 gem 'daemons'
 gem 'hirefire-resource'
 # gem 'debugger', :group => [:test, :development]
+# gem 'ruby-debug-base19x'
 gem 'awesome_nested_set'
 gem 'redcarpet'
 gem 'content_for_in_controllers'
