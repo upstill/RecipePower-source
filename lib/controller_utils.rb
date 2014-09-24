@@ -9,8 +9,8 @@ def with_format(format, &block)
   result
 end
 
-# Generalized response for dialog for a particular area
 =begin
+# Generalized response for dialog for a particular area
 def dialog_boilerplate(action, default_area=nil, renderopts={})
   flash.now[:notice] = params[:notice] unless flash[:notice] # ...should a flash message come in via params
   @_area = params[:_area]

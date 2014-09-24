@@ -252,7 +252,7 @@ class InvitationsController < Devise::InvitationsController
     self.resource = resource_class.accept_invitation!(params[resource_name])
     resource.password = resource.email if resource.password.blank?
     if resource.errors.empty?
-      invitation_event = RpEvent.where( subject_id: resource.invited_by_id, object2_id: resource.id, object2_type: resource.class.to_s ).first
+      invitation_event = RpEvent.where( subject_id: resource.invited_by_id, indirect_object_id: resource.id, indirect_object_type: resource.class.to_s ).first
       RpEvent.post resource, :invitation_accepted, invitation_event, User.find(resource.invited_by_id )
       RpMailer.welcome_email(resource).deliver
       RpMailer.invitation_accepted_email(resource).deliver

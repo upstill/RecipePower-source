@@ -277,9 +277,8 @@ class ApplicationController < ActionController::Base
           # Blithely assuming that we want a modal-dialog element if we're getting JSON and not a partial
           response_service.is_dialog
           renderopts[:layout] = (@layout || false)
-          hresult = with_format("html") do
-            render_to_string( response_service.action, renderopts) # May have special iframe layout
-          end
+          renderopts[:formats] = [:html]
+          hresult = render_to_string( response_service.action, renderopts) # May have special iframe layout
           render json: { code: hresult, how: "bootstrap" }
         end
       }

@@ -55,8 +55,8 @@ module DialogsHelper
     options[:body_contents] ||= with_output_buffer(&block)
     body = modal_body options.slice(:prompt, :body_contents, :noFlash, :body_class)
     options[:class] = 
-      [ "dialog", 
-        which.to_s, 
+      [ "dialog",
+        which.to_s,
         response_service.format_class,
         ("hide" unless options[:show]),
         ("modal-pending fade" unless response_service.injector? || options[:show]), 
@@ -80,9 +80,9 @@ module DialogsHelper
       content_tag( :div,         
         %Q{
           <button type="button" class="close" onclick="RP.dialog.cancel(event);" aria-hidden="true">&times;</button>
-          <h3>#{ttl}</h3>
+          <div class="col-md-12"><h3>#{ttl}</h3></div>
         }.html_safe,
-        class: "modal-header")
+        class: "modal-header row")
     content.html_safe
   end
   
@@ -99,7 +99,7 @@ module DialogsHelper
   
   def modal_footer(options={}, &block)
     ft = options[:body_contents] || with_output_buffer(&block)
-    content_tag :div, ft, class: "modal-footer #{options[:class]}"
+    content_tag :div, ft, class: "modal-footer row #{options[:class]}"
   end
   
   # Place the header for a dialog, including setting its Onload function.

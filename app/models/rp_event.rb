@@ -11,14 +11,14 @@ class RpEvent < ActiveRecord::Base
             invitation_diverted: ["Invitation Diverted", 5]
   )
 
-  attr_accessible :on_mobile, :serve_count, :subject_id, :object_id, :object2_id, :data
+  attr_accessible :on_mobile, :serve_count, :subject_id, :direct_object_id, :indirect_object_id, :data
 
   serialize :data
 
   # belongs_to :source, class_name: "User"
   belongs_to :subject, polymorphic: true
-  belongs_to :object, polymorphic: true
-  belongs_to :object2, polymorphic: true
+  belongs_to :direct_object, polymorphic: true
+  belongs_to :indirect_object, polymorphic: true
   has_many :event_notices
   has_many :users, :through => :event_notices
 
@@ -42,17 +42,17 @@ class RpEvent < ActiveRecord::Base
   end
 
 private
-  def self.assemble_attributes subject, verb, object, object2
+  def self.assemble_attributes subject, verb, direct_object, indirect_object
     h = { verb: typenum(verb) }
     h.merge!(subject_id: subject.id) if subject
-    h.merge!(object_type: object.class.to_s, object_id: object.id) if object
-    h.merge!(object2_type: object2.class.to_s, object2_id: object2.id) if object2
+    h.merge!(direct_object_type: direct_object.class.to_s, direct_object_id: direct_object.id) if direct_object
+    h.merge!(indirect_object_type: indirect_object.class.to_s, indirect_object_id: indirect_object.id) if indirect_object
     h
   end
 
   # post an event of the given type, avoiding duplicates
-  def self.post subject, verb, object, object2, data={}
-    posted = self.where(self.assemble_attributes(subject, verb, object, object2)).first_or_create
+  def self.post subject, verb, direct_object, indirect_object, data={}
+    posted = self.where(self.assemble_attributes(subject, verb, direct_object, indirect_object)).first_or_create
     if (posted.data != data)
       posted.data = data
       posted.save
@@ -61,8 +61,8 @@ private
   end
 
   # Provide a structure for embedding a trigger in a URL for automatically firing an event upon a click
-  def self.embed_trigger( subject, verb, object, object2, data = nil )
-    h = self.assemble_attributes(subject, verb, object, object2)
+  def self.embed_trigger( subject, verb, direct_object, indirect_object, data = nil )
+    h = self.assemble_attributes(subject, verb, direct_object, indirect_object)
     h.merge!( data: data ) if data
     h
   end
