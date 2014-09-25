@@ -26,9 +26,7 @@ class ApplicationController < ActionController::Base
     helper_method :response_service
     helper_method :orphantagid
     helper_method :stored_location_for
-    helper_method :deferred_capture
-    helper_method :deferred_collect
-    # helper_method :deferred_notification
+
     include ApplicationHelper
 
   # Pseudo Routes helper for writing a path to :collection, :recent & :biglist (plus others as needed)
@@ -267,7 +265,7 @@ class ApplicationController < ActionController::Base
             renderopts[:action] = response_service.action
             begin
               render template: "shared/pagelet_body_replacement", layout: false
-           rescue Exception => e
+            rescue Exception => e
               x=2
             end
           else
@@ -276,10 +274,8 @@ class ApplicationController < ActionController::Base
         else
           # Blithely assuming that we want a modal-dialog element if we're getting JSON and not a partial
           response_service.is_dialog
-          renderopts[:layout] = (@layout || false)
-          renderopts[:formats] = [:html]
-          hresult = render_to_string( response_service.action, renderopts) # May have special iframe layout
-          render json: { code: hresult, how: "bootstrap" }
+          dialog = render_to_string renderopts.merge(action: response_service.action, layout: (@layout || false), formats: ["html"])
+          render json: {code: dialog, how: "bootstrap"}.to_json, layout: false, :content_type => 'application/json'
         end
       }
       format.js {

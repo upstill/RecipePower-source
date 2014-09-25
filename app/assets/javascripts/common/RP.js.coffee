@@ -210,6 +210,9 @@ RP.post_error = ( jqXHR, dlog ) ->
 			if errtxt.match /^\s*<!DOCTYPE html>/ 
 				parsage =
 					page: errtxt
+			else if errtxt.match /^\s*<div/ # Detect a dialog
+				parsage =
+					code: errtxt
 			else if errtxt.match /^\s*<form/ # Detect a form replacement
 				wrapper = document.createElement('div');
 				wrapper.innerHTML = errtxt;

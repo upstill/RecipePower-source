@@ -80,9 +80,9 @@ module DialogsHelper
       content_tag( :div,         
         %Q{
           <button type="button" class="close" onclick="RP.dialog.cancel(event);" aria-hidden="true">&times;</button>
-          <div class="col-md-12"><h3>#{ttl}</h3></div>
+          <h3>#{ttl}</h3>
         }.html_safe,
-        class: "modal-header row")
+        class: "modal-header")
     content.html_safe
   end
   
