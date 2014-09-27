@@ -242,6 +242,7 @@ class ResponseServices
       options[:class] << " trigger"
     else
       options[:label] = "Sign Me Up"
+      options[:class] << " preload"
       options[:selector] = "div.dialog.signup"
       options[:path] = Rails.application.routes.url_helpers.new_user_registration_path()
     end

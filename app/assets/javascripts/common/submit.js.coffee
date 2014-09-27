@@ -17,23 +17,25 @@ RP.submit.bind = (dlog) ->
 	dlog ||= $('body') # window.document
 	# Set up processing for click events on links with a 'submit' class
 	$(dlog).on "click", '.submit', RP.submit.onClick
-	# Set up handling for remote processing
+	# Designate RP.submit.onLoad() to handle load events for '.preload' links
+	$(dlog).on "preload", 'a.preload', RP.submit.onLoad
+	# ...annnnnd FIRE!
+	$('.preload', dlog).trigger "preload"
 	# $(dlog).on "ajax:beforeSend", '.submit', RP.submit.beforeSend
 	# $(dlog).on "ajax:success", '.submit', RP.submit.success
 	# $(dlog).on "ajax:error", '.submit', RP.submit.error
 
+# Respond to a change of selection value by submitting the enclosing form
+RP.submit.onselect = (event) ->
+	formelmt = RP.findEnclosing 'FORM', event.currentTarget
+	# On selecting a tag type, clear the associated tokenInput, which may have tokens of diff. types
+	$('.token-input-field', formelmt).tokenInput 'clear'
+	$(formelmt).submit()
 
-handleEnclosingNavTab = (menuElmt) ->
-	while menuElmt && !$(menuElmt).hasClass "master-navtab"
-		menuElmt = RP.findEnclosing "LI", menuElmt
-	if menuElmt # Select this menu element exclusively
-		$('.master-navtab').removeClass "active"
-		$('.master-navtab a').css 'color','#999'
-		$(menuElmt).addClass "active"
-		$('>a', menuElmt).css 'color','white'
-
-proceedWithConfirmation = (elmt) ->
-	!(confirm_msg = $(elmt).data 'confirm-msg') || confirm confirm_msg
+# Respond to a change of tokeninput field  by submitting the enclosing form
+RP.submit.ontokenchange = ->
+	formelmt = RP.findEnclosing 'FORM', this[0]
+	$(formelmt).submit()
 
 ###
 # Before making a dialog request, see if the dialog is preloaded
@@ -65,28 +67,88 @@ RP.submit.onClick = (event) ->
 	# If the submission is made from a top-level menu, make the menu active
 	if proceedWithConfirmation elmt
 		handleEnclosingNavTab elmt
-		attribs = elmt.attributes
-		RP.submit.submit_and_process attribs.href.value, $(elmt).data('method'), $(elmt).data()
+		$(elmt).addClass('trigger') # Mark for immediate opening
+		RP.submit.submit_and_process elmt.attributes.href.value, elmt, $(elmt).data('method')
 	false
 
-RP.submit.submit_and_process = ( request, method="GET", data={} ) ->
+handleEnclosingNavTab = (menuElmt) ->
+	while menuElmt && !$(menuElmt).hasClass "master-navtab"
+		menuElmt = RP.findEnclosing "LI", menuElmt
+	if menuElmt # Select this menu element exclusively
+		$('.master-navtab').removeClass "active"
+		$('.master-navtab a').css 'color','#999'
+		$(menuElmt).addClass "active"
+		$('>a', menuElmt).css 'color','white'
+
+proceedWithConfirmation = (elmt) ->
+	!(confirm_msg = $(elmt).data 'confirm-msg') || confirm confirm_msg
+
+# Notify elmts to preload their query results
+RP.submit.onLoad = (event) ->
+	elmt = event.currentTarget # event.toElement
+	RP.submit.submit_and_process elmt.attributes.href.value, elmt, $(elmt).data('method')
+	false
+
+# Master function for submitting AJAX, perhaps in the context of a DOM element that triggered it
+# Elements may fire off requests by:
+# -- being clicked (click events get here by association with the 'submit' class
+# -- having a 'preload' class, which attaches the result of the request to the element pending a subsequent click
+RP.submit.submit_and_process = ( request, elmt, method="GET" ) ->
+	unless shortCircuit request, elmt
+		$.ajax
+			type: method,
+			dataType: "json",
+			url: request,
+			error: (jqXHR, statusText, errorThrown) ->
+				# TODO Not actually posting an error for the user
+				if responseData = RP.post_error(jqXHR) # Try to recover useable data from the error
+					handleResponse elmt, responseData, statusText, errorThrown
+			success: (responseData, statusText, xhr) ->
+				handleResponse elmt, responseData, statusText, xhr
+
+shortCircuit = (request, elmt) ->
+	if elmt && $(elmt).hasClass 'loading'# Prevent submitting the link twice
+		return true
+	data = (elmt && $(elmt).data()) || {}
+	# The dialog is deployed iff the element has class 'trigger'
+	immediate = !elmt || $(elmt).hasClass('trigger')
 	RP.notifications.wait data['wait-msg'] # If any
-	$.ajax
-		type: method,
-		dataType: "json",
-		url: request,
-		error: (jqXHR, textStatus, errorThrown) ->
-			# $('span.source').text jqXHR.responseText
-			RP.notifications.done()
-			# TODO Not actually posting an error for the user
-			responseData = RP.post_error jqXHR
-			RP.process_response responseData
-		success: (responseData, statusText, xhr) ->
-			# Pass any data into the response data
-			RP.notifications.done()
-			responseData.how ||= data.how;
-			RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
-			RP.process_response responseData
+	odlog = RP.dialog.enclosing_modal elmt
+	if data.selector && (ndlog = $(data.selector)[0]) # If dialog is already loaded, replace the responding dialog
+		if immediate
+			RP.dialog.replace_modal ndlog, odlog # Will close any existing open dialog
+			RP.state.postDialog ndlog, request, (elmt && elmt.innerText) # RP.state.onAJAXSuccess event
+		return true;
+	if elmt && $(elmt).hasClass("preload")
+		# The element will store either a 'response' object or a 'preloaded' dialog element
+		responseData = data.response
+		if ndlog = data.preloaded || (responseData && responseData.dlog)
+			if immediate
+				RP.dialog.push_modal ndlog, ndlog
+			return true;
+		else if responseData
+			if immediate
+				RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
+				RP.process_response responseData
+				RP.state.onAJAXSuccess event
+				$(elmt).data 'response', null
+			return true;
+		$(elmt).addClass 'loading'
+	false
+
+handleResponse = (elmt, responseData, status, xhr) ->
+	# Pass any data into the response data
+	RP.notifications.done()
+	$(elmt).removeClass 'loading'
+	# responseData.how ||= data.how;
+	# Elements that preload their query results stash it away, unless they also have the 'trigger' class
+	if elmt && !($(elmt).hasClass 'trigger')
+		# Save for later if not triggering now
+		$(elmt).data "response", responseData
+		$(elmt).addClass 'loaded'
+	else
+		RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
+		RP.process_response responseData, RP.dialog.enclosing_modal(elmt)
 
 ### The code below pertains to date-sensitive updates. It's not used and probably not useable
 
@@ -157,16 +219,3 @@ poll_for_update = (url, ajax_options, processing_options) ->
 	jQuery.ajax url, ajax_options # setTimeout jQuery.ajax(url, ajax_options), 1000
 
 ###
-
-# Respond to a change of selection value by submitting the enclosing form
-RP.submit.onselect = (event) ->
-	formelmt = RP.findEnclosing 'FORM', event.currentTarget
-	# On selecting a tag type, clear the associated tokenInput, which may have tokens of diff. types
-	$('.token-input-field', formelmt).tokenInput 'clear'
-	$(formelmt).submit()
-
-# Respond to a change of tokeninput field  by submitting the enclosing form
-RP.submit.ontokenchange = ->
-	formelmt = RP.findEnclosing 'FORM', this[0]
-	$(formelmt).submit()
-

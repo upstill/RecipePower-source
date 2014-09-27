@@ -178,7 +178,7 @@ class RecipesController < ApplicationController
         if current_user          
           @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe]||{}, true, params[:extractions] # session[:user_id], params
           if @recipe.id
-            @data = { onget: [ "submit.submit_and_process", collection_url(layout: false) ] } unless response_service.injector?
+            @data = { onget: [ "RP.submit.submit_and_process", collection_url(layout: false) ] } unless response_service.injector?
             # deferred_capture true # Delete the pending recipe
             codestr = with_format("html") { render_to_string :edit, layout: false }
           else

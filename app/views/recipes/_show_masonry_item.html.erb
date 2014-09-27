@@ -13,7 +13,7 @@
     <div class="rcp_grid_element_buttons">
       <%# render "recipes/golink" %>
       <span class="<%= recipe_list_element_golink_class item %>">
-	    <% if (item.current_user != User.guest_id) && item.cookmarked(item.current_user) %>
+	    <% if (item.current_user != User.guest_id) && item.cookmarked(current_user) %>
 		  <%= edit_recipe_link "Edit", item, class: "btn btn-default btn-xs" %>
 	    <% else %>
 		  <%= link_to_modal "Cookmark", collect_recipe_path(item), class: "btn btn-default btn-xs" %>

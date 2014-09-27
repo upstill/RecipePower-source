@@ -7,7 +7,7 @@ require 'results_cache.rb'
 
 class ApplicationController < ActionController::Base
   include Querytags # Grab the query tags from params for filtering a list
-  include ActionController::Live   # For streaming
+  # include ActionController::Live   # For streaming
   # layout :rs_layout # Declare in any controller to let response_service pick the layout
   protect_from_forgery with: :exception
   

@@ -3,39 +3,27 @@ RP.dialog = RP.dialog || {}
 
 # Handle 'dialog-run' remote links
 jQuery ->
-	$(document).on("ajax:beforeSend", '.dialog-run', RP.dialog.beforeSend)
-	$(document).on("ajax:success", '.dialog-run', RP.dialog.success)
-	$(document).on("ajax:error", '.dialog-run', RP.dialog.error)
+	# $(document).on("ajax:beforeSend", '.dialog-run', RP.dialog.beforeSend)
+	# $(document).on("ajax:success", '.dialog-run', RP.dialog.success)
+	# $(document).on("ajax:error", '.dialog-run', RP.dialog.error)
 	RP.dialog.arm_links()
 
 # Set up all ujs for the dialog and its requirements
 RP.dialog.arm_links = (dlog) ->
+	if dlog # The submit module has its own onload call, so we only call for new dialogs
+		RP.submit.bind dlog # Arm submission links and preload sub-dialogs
 	dlog ||= window.document
 	$('input.cancel', dlog).click RP.dialog.cancel
 	$('a.dialog-cancel-button', dlog).click RP.dialog.cancel
 	$('a.dialog-submit-button', dlog).click RP.dialog.close
 	$('a.question_section', dlog).click RP.showhide
-	$('a.preload').click()
 	if requires = $(dlog).data 'dialog-requires'
 		for requirement in requires
 			if fcn = RP.named_function "RP." + requirement + ".bind"
 				fcn.apply()
 
-# Hit the server for a dialog via JSON, and run the result
-# This function can be tied to a link with only a URL to a controller for generating a dialog.
-# We will get the div and run the associated dialog.
-RP.dialog.get_and_go = (event, request, selector) ->
-	# old_dlog is extracted from what triggered this call (if any)
-	if (!event) || RP.dialog.beforeSend event
-		$.ajax
-			type: "GET",
-			dataType: "json",
-			url: request,
-			error: (jqXHR, textStatus, errorThrown) ->
-				RP.dialog.error event, jqXHR, textStatus, errorThrown
-			success: (responseData, statusText, xhr) ->
-				RP.dialog.success event, responseData, statusText, xhr
 
+###  This is old dialog-submission functionality, now subsumed into RP.submit
 # Before making a dialog request, see if the dialog is preloaded
 RP.dialog.beforeSend = (event, xhr, settings) ->
 	odlog = RP.dialog.target_modal event
@@ -61,6 +49,21 @@ RP.dialog.beforeSend = (event, xhr, settings) ->
 		$(this).addClass 'loading'
 	return true; # Proceed normally
 
+# Hit the server for a dialog via JSON, and run the result
+# This function can be tied to a link with only a URL to a controller for generating a dialog.
+# We will get the div and run the associated dialog.
+RP.dialog.get_and_go = (request) ->
+	# old_dlog is extracted from what triggered this call (if any)
+	if RP.dialog.beforeSend event
+		$.ajax
+			type: "GET",
+			dataType: "json",
+			url: request,
+			error: (jqXHR, textStatus, errorThrown) ->
+				RP.dialog.error event, jqXHR, textStatus, errorThrown
+			success: (responseData, statusText, xhr) ->
+				RP.dialog.success event, responseData, statusText, xhr
+
 # Success handler for fetching dialog from server
 RP.dialog.success = (event, responseData, status, xhr) ->
 	if $(this).hasClass 'preload'
@@ -75,6 +78,7 @@ RP.dialog.error = (event, jqXHR, status, error) ->
 	$('.preload', this).removeClass('loading')
 	responseData = RP.post_error jqXHR
 	RP.process_response responseData, RP.dialog.target_modal(event)
+###
 
 RP.dialog.close = (event) ->
 	if event
@@ -103,12 +107,14 @@ RP.dialog.run = (dlog) ->
 
 # Insert a new modal dialog while saving its predecessor
 RP.dialog.push_modal = (newdlog, odlog) ->
+	odlog ||= RP.dialog.enclosing_modal()
 	newdlog = insert_modal newdlog, odlog # Insert the new dialog into the DOM
 	push_modal newdlog, odlog # Hide, detach and store the parent with the child
 	open_modal newdlog
 
 # Insert a new modal dialog, closing and replacing any predecessor
 RP.dialog.replace_modal = (newdlog, odlog) ->
+	odlog ||= RP.dialog.enclosing_modal()
 	newdlog = insert_modal newdlog, odlog
 	if odlog && newdlog && (odlog != newdlog) # We might be just reopening a retained dialog
 		close_modal odlog, "cancel"
@@ -174,9 +180,18 @@ insert_modal = (newdlog, odlog) ->
 # Return the dialog element for the current event target, correctly handling the event whether
 # it's a jQuery event or not
 RP.dialog.target_modal = (event) ->
-	elmt = RP.event_target event
-	if (odlog = $('div.dialog.modal')[0]) && $(elmt, odlog)[0]
-		return odlog
+	RP.dialog.enclosing_modal RP.event_target(event)
+
+# Return the dialog in which the given element may be found, or any old modal if no element
+RP.dialog.enclosing_modal = (elmt) ->
+	dlogs = $('div.dialog.modal')
+	if elmt
+		for dlog in dlogs
+			if $(elmt, dlog)[0]
+				return dlog
+		return null
+	else
+		return dlogs[0]
 
 open_modal = (dlog, omit_button) ->
 	if (onget = $(dlog).data "onget" ) && (fcn = RP.named_function "RP." + onget.shift() )

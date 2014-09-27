@@ -29,7 +29,9 @@
   </div>
   <% unless user_signed_in? %>
       <p class="navbar-text navbar-right active">
-        <%= link_to_modal "Sign In", new_user_session_path, class: "navbar-link", style: "color: white; margin-right:20px" %>
+        <%= link_to_modal "Sign In", new_user_session_path,
+                          class: "preload navbar-link",
+                          style: "color: white; margin-right:20px" %>
       </p>
   <% end %>
 </nav>

@@ -123,8 +123,6 @@ RP.findEnclosing = (tagname, elmt) ->
 RP.fire_triggers = ->
 	$('div.dialog.trigger').removeClass("trigger").each (ix, dlog) ->
 		RP.dialog.run dlog
-	$("a.trigger").removeClass("trigger").trigger "click"
-	$('a.preload').trigger "preload"
 
 # For the FAQ page: click on a question to show the associated answer
 RP.showhide = (event) ->
@@ -168,14 +166,6 @@ RP.get_page = (url) ->
 	$('body').load url, {}, (responseText, textStatus, XMLHttpRequest) ->
 		$('body').trigger('load')
 		window.history.replaceState { an: "object" }, 'Collection', url
-
-# Parse a url to either replace a dialog or reload the page
-RP.get_and_go = (data) ->
-	url = decodeURIComponent data.url
-	if url.match /modal=/
-		RP.dialog.get_and_go null, url
-	else
-		window.location = url # RP.get_page data.url
 
 # Handle successful return of a JSON request by running whatever success function
 #   obtains, and stashing any resulting code away for invocation after closing the
@@ -258,7 +248,7 @@ RP.change = (event) ->
 	else
 		query.value = elmt.value
 	# Fire off an Ajax call notifying the server of the (re)classification
-	RP.submit.submit_and_process RP.build_request(data.request, query), "GET", data
+	RP.submit.submit_and_process RP.build_request(data.request, query), elmt, "GET"
 
 # Build a request string from a structure with attributes 'request' and 'querydata'
 RP.build_request = (request, query) ->
@@ -272,10 +262,10 @@ RP.build_request = (request, query) ->
 # Process response from a request. This will be an object supplied by a JSON request,
 # which may include code to be presented along with fields (how and area) telling how
 # to present it. The data may also consist of only 'code' if it results from an HTML request
-RP.process_response = (responseData, dlog) -> 
-	# 'dlog' is the dialog currently running, if any
+RP.process_response = (responseData, odlog) ->
+	# 'odlog' is the dialog currently running, if any
 	# Wrapped in 'presentResponse', in the case where we're only presenting the results of the request
-	dlog ||= $('div.dialog.modal')[0] # Hopefully there's only one currently-active dialog
+	odlog ||= RP.dialog.enclosing_modal() # Hopefully there's only one currently-active dialog
 	supplanted = false
 	if responseData
 
@@ -308,14 +298,14 @@ RP.process_response = (responseData, dlog) ->
 			for deletion in deletions
 				$(deletion).remove()
 
-		# 'dlog' gives a dialog DOM element to replace the extant one
+		# 'odlog' gives a dialog DOM element to replace the extant one
 		if newdlog = responseData.dlog
-			RP.dialog.replace_modal newdlog, dlog
+			RP.dialog.replace_modal newdlog, odlog
 			supplanted = true
 
 		# 'code' gives HTML code, presumably for a dialog, possibly wrapped in a page
 		# If it's a page that includes a dialog, assert that, otherwise replace the page
-		if (code = responseData.code) && !supplanted = RP.dialog.replace_modal code, dlog
+		if (code = responseData.code) && !supplanted = RP.dialog.replace_modal code, odlog
 				responseData.page ||= code
 
 		if form = responseData.form
@@ -334,9 +324,9 @@ RP.process_response = (responseData, dlog) ->
 		# 'done', when true, simply means close the dialog, with an optional notice
 		if !supplanted
 			if responseData.done
-				RP.dialog.close_modal dlog, responseData.notice
-			else if responseData.replacements && dlog
-				RP.dialog.run dlog
+				RP.dialog.close_modal odlog, responseData.notice
+			else if responseData.replacements && odlog
+				RP.dialog.run odlog
 
 		# Handle any notifications in the response
 		RP.notifications.from_response responseData

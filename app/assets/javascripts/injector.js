@@ -39,7 +39,13 @@ function replaceImg(data) {
 
 // MESSAGE RESPONDER to take a URL and replace either the page or the current dialog
 function get_and_go(data) {
-    RP.get_and_go(data); // window.location = data.url;
+    // Parse a url to either replace a dialog or reload the page
+    url = decodeURIComponent(data.url);
+    if(url.match(/modal=/)) { // It's a dialog request
+        RP.submit.submit_and_process(url); 
+    } else {
+        window.location = url;
+    }
 }
 
 // Function for cracking param string

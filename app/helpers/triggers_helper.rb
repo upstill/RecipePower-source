@@ -3,9 +3,12 @@ require 'uri_utils'
 
 module TriggersHelper
 
+=begin
+  Currently unused; will need to use submit.js mechanism in future
   def link_to_show object, label, options={}
     button_to "Show", object, remote: true, :method => :get, form: { "data-type" => "json", class: "dialog-run" }
   end
+=end
 
   def link_to_redirect(label, url, options={} )
     # This requires Javascript to bind a click handler to the link
