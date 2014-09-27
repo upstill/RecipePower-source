@@ -2,6 +2,15 @@
 
 RP.edit_recipe = RP.edit_recipe || {}
 
+jQuery ->
+	RP.edit_recipe.bind()
+
+# Handle editing links
+RP.edit_recipe.bind = (dlog) ->
+	dlog ||= $('body') # window.document
+	# Set up processing for click events on links with a 'edit_recipe_link' class
+	$(dlog).on "click", '.edit_recipe_link', RP.edit_recipe.go
+
 me = () ->
 	$('div.edit_recipe')[0]
 

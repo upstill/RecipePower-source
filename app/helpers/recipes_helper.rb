@@ -103,7 +103,7 @@ def edit_recipe_link( label, recipe, options={})
       authToken: form_authenticity_token
     }
     options[:class] = "edit_recipe_link "+(options[:class] || "")
-    link_to label, "#", options.merge(remote: true, data: rcp_params)
+    link_to label, "#", options.merge(data: rcp_params)
 end
 
 # If the recipe doesn't belong to the current user's collection,
