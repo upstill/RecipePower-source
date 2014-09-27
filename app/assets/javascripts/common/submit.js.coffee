@@ -124,7 +124,7 @@ shortCircuit = (request, elmt) ->
 		responseData = data.response
 		if ndlog = data.preloaded || (responseData && responseData.dlog)
 			if immediate
-				RP.dialog.push_modal ndlog, ndlog
+				RP.dialog.push_modal ndlog, odlog
 			return true;
 		else if responseData
 			if immediate
