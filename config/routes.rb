@@ -5,6 +5,8 @@
 
 RP::Application.routes.draw do
 
+  resources :suggestions
+
   if Rails.env.development? || Rails.env.test?
     # IntegersController is for testing streams
     get "integers" => 'integers#index'

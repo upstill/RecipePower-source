@@ -1,0 +1,39 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Base type:</strong>
+  <%= @suggestion.base_type %>
+</p>
+
+<p>
+  <strong>Base:</strong>
+  <%= @suggestion.base_id %>
+</p>
+
+<p>
+  <strong>Viewer:</strong>
+  <%= @suggestion.viewer %>
+</p>
+
+<p>
+  <strong>Session:</strong>
+  <%= @suggestion.session %>
+</p>
+
+<p>
+  <strong>Filter:</strong>
+  <%= @suggestion.filter %>
+</p>
+
+<p>
+  <strong>Rc:</strong>
+  <%= @suggestion.rc %>
+</p>
+
+<p>
+  <strong>Results:</strong>
+  <%= @suggestion.results %>
+</p>
+
+<%= link_to 'Edit', edit_suggestion_path(@suggestion) %> |
+<%= link_to 'Back', suggestions_path %>

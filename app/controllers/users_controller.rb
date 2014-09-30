@@ -92,7 +92,7 @@ class UsersController < ApplicationController
   def show
     @user = User.find params[:id]
     @active_menu = :home
-    smartrender modal: true # :how => :modal
+    smartrender unless do_stream UserListsCache
   end
 
   # Show the user's recently-viewed recipes

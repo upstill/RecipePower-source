@@ -277,6 +277,14 @@ end
 # user's lists visible to current_user (UserListsStreamer
 class UserListsCache < ResultsCache
 
+  def items
+    @items ||= []
+  end
+
+  def full_size
+    0
+  end
+
 end
 
 class TagsCache < ResultsCache
