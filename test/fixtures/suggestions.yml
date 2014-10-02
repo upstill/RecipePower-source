@@ -1,19 +1,17 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  base_type: MyString
-  base_id: 1
-  viewer: 1
-  session: MyString
-  filter: MyText
-  rc: 1
-  results: MyText
-
-two:
-  base_type: MyString
-  base_id: 1
-  viewer: 1
-  session: MyString
-  filter: MyText
-  rc: 1
-  results: MyText
+#one:
+#  base_type: User
+#  base_id: 1
+#  viewer: 1
+#  session: MyString
+#  filter: MyText
+#  results: MyText
+#
+#two:
+#  base_type: User
+#  base_id: 1
+#  viewer: 1
+#  session: MyString
+#  filter: MyText
+#  results: MyText

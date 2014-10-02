@@ -18,7 +18,7 @@ class SuggestionsControllerTest < ActionController::TestCase
 
   test "should create suggestion" do
     assert_difference('Suggestion.count') do
-      post :create, suggestion: { base_id: @suggestion.base_id, base_type: @suggestion.base_type, filter: @suggestion.filter, rc: @suggestion.rc, results: @suggestion.results, session: @suggestion.session, viewer: @suggestion.viewer }
+      post :create, suggestion: { base_id: @suggestion.base_id, base_type: @suggestion.base_type, filter: @suggestion.filter, results_cache_id: @suggestion.results_cache_id, results: @suggestion.results, session: @suggestion.session, viewer: @suggestion.viewer }
     end
 
     assert_redirected_to suggestion_path(assigns(:suggestion))
@@ -35,7 +35,7 @@ class SuggestionsControllerTest < ActionController::TestCase
   end
 
   test "should update suggestion" do
-    patch :update, id: @suggestion, suggestion: { base_id: @suggestion.base_id, base_type: @suggestion.base_type, filter: @suggestion.filter, rc: @suggestion.rc, results: @suggestion.results, session: @suggestion.session, viewer: @suggestion.viewer }
+    patch :update, id: @suggestion, suggestion: { base_id: @suggestion.base_id, base_type: @suggestion.base_type, filter: @suggestion.filter, results_cache_id: @suggestion.results_cache_id, results: @suggestion.results, session: @suggestion.session, viewer: @suggestion.viewer }
     assert_redirected_to suggestion_path(assigns(:suggestion))
   end
 

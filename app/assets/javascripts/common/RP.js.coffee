@@ -121,6 +121,11 @@ RP.findEnclosing = (tagname, elmt) ->
 
 # Automatically open dialogs or click links that have 'trigger' class
 RP.fire_triggers = ->
+	# Links with class 'trigger' and 'submit' get fired
+	$('a.trigger').each (ix, elmt) ->
+		RP.submit.fromLink elmt
+
+	# Dialogs with class 'trigger' get autoloaded
 	$('div.dialog.trigger').removeClass("trigger").each (ix, dlog) ->
 		RP.dialog.run dlog
 

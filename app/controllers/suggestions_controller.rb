@@ -10,6 +10,11 @@ class SuggestionsController < ApplicationController
   def show
   end
 
+  # GET /suggestions/1/results
+  def results
+    smartrender
+  end
+
   # GET /suggestions/new
   def new
     @suggestion = Suggestion.new
@@ -53,6 +58,6 @@ class SuggestionsController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def suggestion_params
-      params.require(:suggestion).permit(:base_type, :base_id, :viewer, :session, :filter, :rc, :results)
+      params.require(:suggestion).permit(:base_type, :base_id, :viewer_id, :session, :filter, :results_cache_id, :results)
     end
 end

@@ -85,9 +85,11 @@ proceedWithConfirmation = (elmt) ->
 
 # Notify elmts to preload their query results
 RP.submit.onLoad = (event) ->
-	elmt = event.currentTarget # event.toElement
-	RP.submit.submit_and_process elmt.attributes.href.value, elmt, $(elmt).data('method')
+	RP.submit.fromLink event.currentTarget
 	false
+
+RP.submit.fromLink = (elmt) ->
+	RP.submit.submit_and_process elmt.attributes.href.value, elmt, $(elmt).data('method')
 
 # Master function for submitting AJAX, perhaps in the context of a DOM element that triggered it
 # Elements may fire off requests by:

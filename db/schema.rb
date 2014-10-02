@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140919193037) do
+ActiveRecord::Schema.define(version: 20140930202137) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -268,14 +268,14 @@ ActiveRecord::Schema.define(version: 20140919193037) do
   create_table "rp_events", force: true do |t|
     t.integer  "verb"
     t.integer  "subject_id"
-    t.string   "object_type"
-    t.integer  "object_id"
-    t.string   "object2_type"
-    t.integer  "object2_id"
+    t.string   "direct_object_type"
+    t.integer  "direct_object_id"
+    t.string   "indirect_object_type"
+    t.integer  "indirect_object_id"
     t.text     "data"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "subject_type", default: "User"
+    t.string   "subject_type",         default: "User"
   end
 
   create_table "scales", force: true do |t|
@@ -302,6 +302,19 @@ ActiveRecord::Schema.define(version: 20140919193037) do
   end
 
   add_index "sites", ["id"], name: "sites_index_by_id", unique: true, using: :btree
+
+  create_table "suggestions", force: true do |t|
+    t.string   "base_type"
+    t.integer  "base_id"
+    t.integer  "viewer_id"
+    t.string   "session"
+    t.text     "filter"
+    t.integer  "results_cache_id"
+    t.text     "results"
+    t.string   "type"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "tag_owners", force: true do |t|
     t.integer  "tag_id"

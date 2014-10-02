@@ -1,4 +1,5 @@
 require './lib/controller_utils.rb'
+require 'suggestion.rb'
 
 class UsersController < ApplicationController
   
@@ -92,7 +93,8 @@ class UsersController < ApplicationController
   def show
     @user = User.find params[:id]
     @active_menu = :home
-    smartrender unless do_stream UserListsCache
+    @suggestion = UserSuggestion.find_or_make(@user, current_user_or_guest, params[:queryparams], session.id)
+    smartrender(suggestion: @suggestion) unless do_stream UserListsCache
   end
 
   # Show the user's recently-viewed recipes

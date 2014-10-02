@@ -7,8 +7,8 @@ require "mocha/mini_test"
 # Warden.test_mode!
 # gem 'minitest'
 # require 'warden_test_helper.rb'
-require 'minitest/reporters'
-MiniTest::Reporters.use!
+# require 'minitest/reporters'
+# MiniTest::Reporters.use!
 
 class ActiveSupport::TestCase
   # Setup all fixtures in test/fixtures/*.(yml|csv) for all tests in alphabetical order.
