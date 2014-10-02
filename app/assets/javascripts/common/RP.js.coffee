@@ -120,13 +120,14 @@ RP.findEnclosing = (tagname, elmt) ->
 	elmt
 
 # Automatically open dialogs or click links that have 'trigger' class
-RP.fire_triggers = ->
+RP.fire_triggers = (context) ->
+	context ||= window.document
 	# Links with class 'trigger' and 'submit' get fired
-	$('a.trigger').each (ix, elmt) ->
+	$('a.trigger', context).each (ix, elmt) ->
 		RP.submit.fromLink elmt
 
 	# Dialogs with class 'trigger' get autoloaded
-	$('div.dialog.trigger').removeClass("trigger").each (ix, dlog) ->
+	$('div.dialog.trigger', context).removeClass("trigger").each (ix, dlog) ->
 		RP.dialog.run dlog
 
 # For the FAQ page: click on a question to show the associated answer
@@ -278,9 +279,9 @@ RP.process_response = (responseData, odlog) ->
 		if replacements = responseData.replacements
 			for replacement in replacements
 				$(replacement[0]).replaceWith replacement[1]
-				# $(replacement[0]).trigger "RP.replace"
 				if elmt = $(replacement[0])[0]
 					$('[onload]', elmt).trigger 'load'
+					RP.fire_triggers elmt # For unobtrusive triggers
 				# The third value may be a function name to call on the replaced elemnnt
 				if (loader = replacement[2]) && (loadFcn = RP.named_function(loader))
 					loadFcn($(replacement[0])[0])

@@ -3,7 +3,8 @@
     <ul class="media-list">
       <li class="media">
         <a class="pull-left" href="#">
-          <img class="media-object" src="<%= @user.image %>" alt="default-avatar-128.png">
+          <%= user_presenter.avatar %>
+<!-- <img class="media-object" src="<%# @user.image %>" alt="default-avatar-128.png"> -->
         </a>
         <div class="media-body">
           <h2 class="media-heading"><%= user_presenter.fullname %> <small><%= user_presenter.username %></small></h2>

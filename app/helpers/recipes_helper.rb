@@ -18,7 +18,7 @@ module RecipesHelper
         id: "RecipeImage"+recipe.id.to_s,
         style: "width:100%; height:auto;" }
       # options.merge!( class: "stuffypic", data: { fillmode: "width" } ) # unless url =~ /^data:/
-      content = image_tag(url, options)
+      content = image_with_error_recovery(url, options)
     rescue Exception => e
       if url
         url = "data URL" if url =~ /^data:/

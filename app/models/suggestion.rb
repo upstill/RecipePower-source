@@ -1,6 +1,6 @@
 class Suggestion < ActiveRecord::Base
 
-  attr_accessible :base, :viewer, :session, :filter, :results_cache, :results
+  attr_accessible :base, :viewer, :session, :filter, :results_cache, :results, :time_next
 
   belongs_to :base, :polymorphic => true
   belongs_to :viewer, :class_name => "User"

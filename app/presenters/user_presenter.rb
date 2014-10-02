@@ -11,7 +11,7 @@ class UserPresenter < BasePresenter
   def avatar
     img = user.image
     img = "default-avatar-128.png" if img.blank?
-    site_link image_tag(img, class: "avatar" )# image_tag("avatars/#{avatar_name}", class: "avatar")
+    site_link image_with_error_recovery(img, class: "avatar media-object", alt: "/assets/default-avatar-128.png" )# image_tag("avatars/#{avatar_name}", class: "avatar")
   end
 
   def member_since

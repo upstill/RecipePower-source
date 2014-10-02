@@ -4,12 +4,12 @@
       <% if @suggestion %>
           <%# Beachball %>
           <%# trigger for replacing this div with the actual content %>
-        <%= link_to_submit "Associations pending...", results_suggestion_path(@suggestion, partial: true), class: "trigger" %>
+        <%= link_to_submit "Associations pending (#{@suggestion.time_next})...", results_suggestion_path(@suggestion, partial: true), class: "trigger" %>
         <div style="height:128px; width:128px;">
           <%= image_tag "ajax-loader.gif", style: "margin: 32px 32px;" %>
         </div>
       <% else %>
-          <p>No Suggestions Here</p>
+          <p>Got no suggestions for ya...</p>
       <% end %>
   </div>
 </div>

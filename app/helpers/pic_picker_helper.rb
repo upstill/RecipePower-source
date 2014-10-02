@@ -62,7 +62,7 @@ module PicPickerHelper
     return "" if piclist.empty?
     thumbNum = 0
     pics = piclist.collect { |url|
-        image_tag(url,
+        image_with_error_recovery(url,
                   style: "width:120px; height: auto; margin:10px; display: none;",
                   class: "pic_pickee",
                   id: "thumbnail#{thumbNum += 1}",
@@ -80,7 +80,7 @@ module PicPickerHelper
     idstr = "rcpPic"+id.to_s
     # Allowing for the possibility of a data URI
     begin
-      image_tag(picurl || "",
+      image_with_error_recovery(picurl || "",
                 class: "fitPic",
                 id: idstr,
                 onload: 'doFitImage(event);',
@@ -98,7 +98,7 @@ module PicPickerHelper
   def page_width_pic(picurl, idstr="rcpPic", placeholder_image = nil)
     begin
       data = placeholder_image ? { fallbackurl: placeholder_image } : {}
-      image_tag(picurl || "",
+      image_with_error_recovery(picurl || "",
                 style: "width: 100%; height: auto",
                 id: idstr,
                 onload: "RP.validate_img(event);",

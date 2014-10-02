@@ -4,6 +4,10 @@ require './lib/string_utils.rb'
 module ApplicationHelper
   include ActionView::Helpers::DateHelper
 
+  def image_with_error_recovery url, options={}
+    image_tag url, options.merge( onError: "onImageError(this);")
+  end
+
   def present(object, klass = nil)
     klass ||= "#{object.class}Presenter".constantize
     presenter = klass.new(object, self)
