@@ -37,6 +37,7 @@ RP.tagger.onload = (event) ->
 
 # Use data attached to the element to initiate tokenInput
 RP.tagger.setup = (elmt) ->
+	# In case the token-input element is a child of elmt
 	if ! $(elmt).hasClass 'token-input-field-pending'
 		elmt = $('.token-input-field-pending', elmt)
 	data = $(elmt).data() || {}

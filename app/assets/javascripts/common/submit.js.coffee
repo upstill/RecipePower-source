@@ -16,14 +16,14 @@ jQuery ->
 RP.submit.bind = (dlog) ->
 	dlog ||= $('body') # window.document
 	# Set up processing for click events on links with a 'submit' class
-	$(dlog).on "click", '.submit', RP.submit.onClick
+	$(dlog).on "click", 'a.submit', RP.submit.onClick
 	# Designate RP.submit.onLoad() to handle load events for '.preload' links
 	$(dlog).on "preload", 'a.preload', RP.submit.onLoad
 	# ...annnnnd FIRE!
 	$('.preload', dlog).trigger "preload"
-	# $(dlog).on "ajax:beforeSend", '.submit', RP.submit.beforeSend
-	# $(dlog).on "ajax:success", '.submit', RP.submit.success
-	# $(dlog).on "ajax:error", '.submit', RP.submit.error
+	$(dlog).on "ajax:beforeSend", 'form.submit', RP.submit.beforeSend
+	$(dlog).on "ajax:success", 'form.submit', RP.submit.success
+	$(dlog).on "ajax:error", 'form.submit', RP.submit.error
 
 # Respond to a change of selection value by submitting the enclosing form
 RP.submit.onselect = (event) ->
@@ -36,30 +36,6 @@ RP.submit.onselect = (event) ->
 RP.submit.ontokenchange = ->
 	formelmt = RP.findEnclosing 'FORM', this[0]
 	$(formelmt).submit()
-
-###
-# Before making a dialog request, see if the dialog is preloaded
-RP.submit.beforeSend = (event, xhr, settings) ->
-
-	elmt = event.currentTarget
-	# If the submission is made from a top-level menu, make the menu active
-	if proceedWithConfirmation elmt
-		handleEnclosingNavTab elmt
-		RP.notifications.wait $(this).data 'wait-msg'
-		true
-
-# Success handler for fetching dialog from server
-RP.submit.success = (event, responseData, status, xhr) ->
-	RP.notifications.done()
-	# responseData.how = responseData.how || "modal"
-	RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
-	RP.process_response responseData, RP.dialog.target_modal(event)
-
-RP.submit.error = (event, jqXHR, status, error) ->
-	RP.notifications.done()
-	responseData = RP.post_error jqXHR
-	RP.process_response responseData, RP.dialog.target_modal(event)
-###
 
 # Respond to a click on a '.submit' element by optionally checking for a confirmation, firing a request at the server and appropriately handling the response
 RP.submit.onClick = (event) ->
@@ -151,6 +127,25 @@ handleResponse = (elmt, responseData, status, xhr) ->
 	else
 		RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
 		RP.process_response responseData, RP.dialog.enclosing_modal(elmt)
+
+# Before making a form submission, see if the dialog is preloaded
+RP.submit.beforeSend = (event, xhr, settings) ->
+	elmt = event.currentTarget
+	# If the submission is made from a top-level menu, make the menu active
+	if proceedWithConfirmation elmt
+		RP.notifications.wait $(elmt).data 'wait-msg'
+		true
+
+# Success handler for fetching dialog from server
+RP.submit.success = (event, responseData, statusText, xhr) ->
+	RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
+	RP.process_response responseData, RP.dialog.enclosing_modal(event.currentTarget)
+
+RP.submit.error = (event, jqXHR, statusText, errorThrown) ->
+	# TODO Not actually posting an error for the user
+	RP.notifications.done()
+	if responseData = RP.post_error(jqXHR) # Try to recover useable data from the error
+		RP.process_response responseData, RP.dialog.enclosing_modal(event.currentTarget)
 
 ### The code below pertains to date-sensitive updates. It's not used and probably not useable
 

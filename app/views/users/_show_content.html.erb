@@ -13,5 +13,18 @@
         </div>
       </li>
     </ul>
+    <% if lists = user_presenter.lists %>
+        <h3>Lists</h3>
+        <% lists.each do |list| %>
+            <p><%= link_to_submit list.name, list_path(list, partial: true) %></p>
+        <% end %>
+    <% end %>
+    <% if feeds = user_presenter.feeds %>
+        <h3>Feeds</h3>
+        <% feeds.each do |feed| %>
+            <p><%= link_to_submit feed.title, feed_path(feed) %></p>
+        <% end %>
+    <% end %>
+
 <% end %>
-<%= render "suggestions/results" %>
+<%# render "suggestions/results" %>

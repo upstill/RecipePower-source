@@ -254,7 +254,6 @@ class ApplicationController < ActionController::Base
           redirect_to_modal url
         else
           render response_service.action, renderopts
-          x=2
         end
       end
       format.json {

@@ -6,7 +6,7 @@ end
 
 class UserPresenter < BasePresenter
   presents :user
-  delegate :username, :fullname, :handle, to: :user
+  delegate :username, :fullname, :handle, :lists, :feeds, to: :user
 
   def avatar
     img = user.image
