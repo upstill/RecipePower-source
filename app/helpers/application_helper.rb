@@ -1,6 +1,8 @@
 require "Domain"
 require './lib/controller_utils.rb'
 require './lib/string_utils.rb'
+require 'suggestion_presenter'
+
 module ApplicationHelper
   include ActionView::Helpers::DateHelper
 

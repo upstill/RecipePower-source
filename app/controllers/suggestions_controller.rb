@@ -13,12 +13,7 @@ class SuggestionsController < ApplicationController
   # GET /suggestions/1/results
   def results
     @suggestion = Suggestion.find params[:id]
-    if @suggestion.time_next > 30
-      @suggestion = nil
-    else
-      @suggestion.time_next = @suggestion.time_next * 2
-      @suggestion.save
-    end
+    @suggestion.time_check params[:sugtime]
     smartrender
   end
 

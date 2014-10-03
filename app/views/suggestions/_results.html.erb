@@ -1,0 +1,21 @@
+<%# Visual placeholder for suggestion-coming-soon %>
+<div id="suggestions" class="row">
+  <div class="col-md-12">
+    <% if @suggestion %>
+        <% if @suggestion.ready? %>
+            <% present @suggestion do |suggestions_presenter| %>
+                <%= suggestions_presenter.present %>
+            <% end %>
+        <% elsif !@suggestion.timeout? %>
+            <%= link_to_submit "Associations pending (#{@suggestion.sugtime})...", results_suggestion_path(@suggestion, partial: true, sugtime: @suggestion.sugtime), class: "trigger" %>
+            <div style="height:128px; width:128px;">
+              <%= image_tag "ajax-loader.gif", style: "margin: 32px 32px;" %>
+            </div>
+        <% else %>
+            <p>Failed to get Suggestions</p>
+        <% end %>
+    <% else %>
+        <p>Got no suggestions for ya...</p>
+    <% end %>
+  </div>
+</div>

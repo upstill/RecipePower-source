@@ -1,4 +1,4 @@
-renderstr = with_format("html") { render partial: "slug", layout: false }
+renderstr = with_format("html") { render partial: "results", layout: false }
 {
     replacements: [
         [ 'div#suggestions', renderstr ]

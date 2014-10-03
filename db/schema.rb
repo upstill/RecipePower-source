@@ -312,7 +312,8 @@ ActiveRecord::Schema.define(version: 20140930202137) do
     t.integer  "results_cache_id"
     t.text     "results"
     t.string   "type"
-    t.integer  "time_next",        default: 1
+    t.boolean  "pending",          default: false
+    t.boolean  "ready",            default: false
     t.datetime "created_at"
     t.datetime "updated_at"
   end

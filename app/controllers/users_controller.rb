@@ -94,6 +94,7 @@ class UsersController < ApplicationController
     @user = User.find params[:id]
     @active_menu = :home
     @suggestion = UserSuggestion.find_or_make(@user, current_user_or_guest, params[:queryparams], session.id)
+    @suggestion.make_ready # Give it a try, whether newly made or not
     smartrender(suggestion: @suggestion) unless do_stream UserListsCache
   end
 
