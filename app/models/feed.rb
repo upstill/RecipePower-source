@@ -84,7 +84,7 @@ class Feed < ActiveRecord::Base
   end
 
   def enqueue_update later = false
-    Delayed::Job.enqueue self, run_at: (later ? (Time.new.beginning_of_week(:sunday)+1.week) : (Time.now+20))
+    Delayed::Job.enqueue self, priority: 10, run_at: (later ? (Time.new.beginning_of_week(:sunday)+1.week) : (Time.now+20))
   end
 
   def success(job)

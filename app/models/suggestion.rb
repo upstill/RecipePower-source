@@ -29,21 +29,24 @@ class Suggestion < ActiveRecord::Base
 
   # Take a shot at making the results. If it can't be done directly, throw it into background
   def make_ready
-    return true if ready? # Do nothing if it's ready
+    return true if ready # Do nothing if it's ready
 
     unless pending # Ready by default
-      self.results = { :Lists => "Some lists", "Friends" => "Some Friends" }
-      ready
+      if Rails.env.development?
+        perform
+      else
+        Delayed::Job.enqueue self, priority: 1
+        self.pending = true
+        save
+      end
     end
-
   end
 
-  def ready
-    @ready = true
-  end
-
-  def ready?
-    @ready
+  def perform
+    self.results = { :Lists => "Some lists", "Friends" => "Some Friends" }
+    self.ready = true
+    self.pending = false
+    save
   end
 
 end

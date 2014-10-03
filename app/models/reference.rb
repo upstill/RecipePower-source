@@ -371,7 +371,7 @@ class ImageReference < Reference
         ].include? status
           false
         else
-          Delayed::Job.enqueue(self) if queue_up
+          Delayed::Job.enqueue(self, priority: 5) if queue_up
           true # Assume the url is valid
         end
       end

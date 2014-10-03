@@ -58,7 +58,7 @@ class Thumbnail < ActiveRecord::Base
   def self.acquire(site, path)
     if url = valid_url(path, site)
       tn = Thumbnail.find_or_create_by url: url
-      Delayed::Job.enqueue tn unless tn && tn.thumbdata
+      Delayed::Job.enqueue(tn, priority: 3)  unless tn && tn.thumbdata
       tn
     end
   end

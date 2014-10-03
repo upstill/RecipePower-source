@@ -431,7 +431,7 @@ class SiteServices
   end
 
   def self.scrape_for_feeds(n=-1)
-    Site.all[0..n].each { |site| Delayed::Job.enqueue site }
+    Site.all[0..n].each { |site| Delayed::Job.enqueue site, priority:5 }
   end
 
   # Examine each site and confirm that its sample page URL matches a recipe
