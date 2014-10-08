@@ -1,4 +1,53 @@
+# Object to put a uniform interface on a set of results, whether they
+# exist as a scope (if there is no search) or an array of Rcprefs (with search)
+class Counts < Hash
+  def incr key, amt=1
+    if key.is_a? Array
+      key.each { |k| self.incr k, amt }
+    elsif self[key]
+      self[key] = self[key]+amt
+    else
+      self[key] = amt
+    end
+  end
+end
+
+class ResultsSorter < Object
+
+  def initialize sco, tags
+    if tags.empty?
+      @scope = sco
+    else
+      # Convert the sco relation into a hash on entity types
+      typeset = sco.select(:entity_type).distinct.order("entity_type DESC").map(&:entity_type)
+      typeset.each do |type|
+        subscope = sco.where('rcprefs.entity_type = ?', type)
+        tags.each do |tag|
+          # Winnow the scope by restricting the set to Rcprefs referring to recipes in which EITHER
+          # * The Rcpref's comment matches the tag's string, OR
+          # * The recipe's title matches the tag's string, OR
+          # * the recipe is tagged by the tag
+          matchstr = tag.normalized_name
+          # r1 = Recipe.joins(:rcprefs).where("recipes.title ILIKE ? and rcprefs.user_id = 3", "%#{matchstr}%")
+          # ids1 = subscope.joins("INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE '%salmon%' and rcprefs.user_id = 3")
+          # ids1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE '%#{matchstr}%' and rcprefs.user_id = 3})
+          # ids1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE '%#{matchstr}%'}).where("rcprefs.user_id = 3")
+          sss1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id}).where("recipes.title ILIKE ?", "%#{matchstr}%").where("rcprefs.user_id = 3")
+          sss2 = subscope.find_by_sql %Q{SELECT * FROM rcprefs where rcprefs.comment ILIKE '%#{matchstr}%'}
+          sss3 = subscope.joins("INNER JOIN taggings ON taggings.entity_type = rcprefs.entity_type and taggings.entity_id = rcprefs.entity_id and taggings.tag_id = 283")
+          this_round = sss1+sss2+sss3
+        end
+      end
+      # @querytags.each { |tag| apply_tag tag, source_set, candihash }
+      # Convert back to a list of results
+      # @results = candihash.results(@rankings).reverse
+      @scope = this_round
+    end
+  end
+end
+
 class ResultsCache < ActiveRecord::Base
+  include ActiveRecord::Sanitization
   # The ResultsCache class responds to a query with a series of items.
   # As a model, it saves intermediate results to the database
   self.primary_key = "session_id"
@@ -17,7 +66,7 @@ class ResultsCache < ActiveRecord::Base
     end
     ((rc = self.find_by session_id: session_id) && (rc.class == self) && (rc.params == params)) ?
         rc :
-        self.new( session_id: session_id, params: params.merge( { querytags: querytags, userid: userid } ) )
+        self.new(session_id: session_id, params: params.merge({querytags: querytags, userid: userid}))
   end
 
   # Derive the class of the appropriate cache handler from the controller, action and other parameters
@@ -27,7 +76,7 @@ class ResultsCache < ActiveRecord::Base
     Object.const_defined?(name = controller+"Cache") || (name = "ResultsCache")
     name.constantize
   end
-  
+
   def initialize attribs
     super # Let ActiveRecord take care of initializing attributes
     self.limit = full_size # Figure the maximum extent of the results
@@ -139,9 +188,9 @@ class IntegersCache < ResultsCache
   end
 
   def window= r
-    super( (r.max-r.min) < 10 ? r : r.min...(r.min+10) )
+    super((r.max-r.min) < 10 ? r : r.min...(r.min+10))
   end
-  
+
 end
 
 # list of lists visible to current user (ListsStreamer)
@@ -167,7 +216,7 @@ class ListsCache < ResultsCache
         List.all
     end
   end
-  
+
   def full_size
     itemscope.count
   end
@@ -205,7 +254,7 @@ class FeedsCache < ResultsCache
   def items
     @items ||= Feed.all[@window]
   end
-  
+
   def full_size
     Feed.count
   end
@@ -247,9 +296,32 @@ class UserCollectionCache < ResultsCache
     @user = User.where(id: attribs[:params][:id].to_i).first
   end
 
-  def itemscope
-    @user && @user.collection_scope( :sortby => :collected)
+  # The sources are a user, a list of users, or nil (for the master global list)
+  def sources
+    @user.id
   end
+
+  def itemscope
+    return nil unless @user
+    sco = @user.collection_scope(:sortby => :collected)
+    return sco if @querytags.empty?
+    winnow_scope sco, @querytags
+  end
+
+  # Filter a set of candidate ids using one tag
+  def apply_tag tag, source_set, candihash
+    # Default procedure, for recipes
+    candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
+    # Get candidates by matching the tag's name against recipe titles and comments
+    candihash.apply Rcpref.recipe_ids(source_set,
+                                      @userid,
+                                      :comment => tag.name)
+    # Get candidates that match specialtags in the title
+    candihash.apply Rcpref.recipe_ids(source_set,
+                                      @userid,
+                                      :title => tag.name)
+  end
+
 
   def items
     # The scope from rcprefs needs to be mapped to items after windowing
@@ -270,7 +342,7 @@ end
 class UserBiglistCache < UserCollectionCache
 
   def itemscope
-    @user ? Rcpref.where('private = false OR user_id = ?', @user.id ) : Rcpref.where( private: false )
+    @user ? Rcpref.where('private = false OR user_id = ?', @user.id) : Rcpref.where(private: false)
   end
 end
 

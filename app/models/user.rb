@@ -196,7 +196,7 @@ class User < ActiveRecord::Base
     constraints[:in_collection] = true unless options[:all]
     constraints[:private] = false if options[:public]
     ordering = (options[:sort_by] == :collected) ? "created_at" : "updated_at"
-    Rcpref.where(constraints).order(ordering+" DESC")
+    Rcpref.where(constraints) # .order(ordering+" DESC")
   end
 
   def recipes_collection_size

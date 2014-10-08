@@ -82,7 +82,7 @@ a.signup_button {
 	background-color:#e0e0e0;
 	margin-right:6px;
 	padding:6px;
-	# border:2px solid black
+	/* border:2px solid black */
 }
 .nukeable_X {
 	background-color:#f0f0f0;
@@ -92,11 +92,11 @@ a.signup_button {
 	width:90%;
 	padding:10px;
 	margin-top:10px;
-	# border:3px solid gray
+	/* border:3px solid gray */
 }
 #error_explanation {
 	width:500px;
-	# border:2px solid red;
+	/* border:2px solid red; */
 	padding:7px;
 	margin-bottom:20px;
 	background-color: #f0f0f0
@@ -150,7 +150,7 @@ a.signup_button {
 	font:12px arial,sans-serif;
 	// outline:#999 solid 1px
 }
-.recipe_field_label,recipe_field_label_centered {
+.recipe_field_label, .recipe_field_label_centered {
 	font:14px arial,sans-serif;
 	font-weight:bold;
 	width:100%
@@ -340,7 +340,7 @@ a.signup_button {
 .sig_box {
 	width:300px;
 	height:50px;
-	# border:3px solid red;
+	/* border:3px solid red; */
 	padding-bottom:0px;
 	float:left
 }
@@ -379,7 +379,7 @@ a.signup_button {
 	height:473px;
 	// 430px;
 	// float:left;
-	vertical-align:center;
+	vertical-align: center;
 	// outline:#999 solid 1px
 }
 .rcp_list_bigtext {
@@ -394,7 +394,7 @@ a.signup_button {
 	width:350px;
 	height:auto;
 	float:left;
-	vertical-align:center;
+	vertical-align: center;
 	// outline:#999 solid 1px
 }
 .taglist {
@@ -510,12 +510,12 @@ a.signup_button {
 		background:#2e6ab1;
 		color:white;
 		padding:0.4em 0.6em;
+        text-align: center ;
 		width:22em;
 		margin-bottom:0.3em;
-		text-align:center;
 		b {
 			color:#000033;
-			background:#2e6ab1+60;
+			background:#2e6ab1;
 			padding:0.1em 0.25em;
 		}
 	}
