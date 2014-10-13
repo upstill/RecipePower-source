@@ -4,15 +4,18 @@ class Counts < Hash
   def incr key, amt=1
     if key.is_a? Array
       key.each { |k| self.incr k, amt }
-    elsif self[key]
-      self[key] = self[key]+amt
     else
-      self[key] = amt
+      self[key] = self[key]+amt
     end
   end
+
+  def [](ix)
+    super(ix) || 0
+  end
+
 end
 
-class ResultsSorter < Object
+class RcprefsSorted < Object
 
   def initialize sco, tags
     if tags.empty?
@@ -20,6 +23,7 @@ class ResultsSorter < Object
     else
       # Convert the sco relation into a hash on entity types
       typeset = sco.select(:entity_type).distinct.order("entity_type DESC").map(&:entity_type)
+      counts = Count.new
       typeset.each do |type|
         subscope = sco.where('rcprefs.entity_type = ?', type)
         tags.each do |tag|
@@ -35,15 +39,127 @@ class ResultsSorter < Object
           sss1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id}).where("recipes.title ILIKE ?", "%#{matchstr}%").where("rcprefs.user_id = 3")
           sss2 = subscope.find_by_sql %Q{SELECT * FROM rcprefs where rcprefs.comment ILIKE '%#{matchstr}%'}
           sss3 = subscope.joins("INNER JOIN taggings ON taggings.entity_type = rcprefs.entity_type and taggings.entity_id = rcprefs.entity_id and taggings.tag_id = 283")
+          counts.incr sss1
+          counts.incr sss2
+          counts.incr sss3
           this_round = sss1+sss2+sss3
+          counts.incr this_round, 30
         end
       end
-      # @querytags.each { |tag| apply_tag tag, source_set, candihash }
-      # Convert back to a list of results
-      # @results = candihash.results(@rankings).reverse
       @scope = this_round
     end
   end
+
+  # Sort the results array by the counts for each
+  def sort_results counts
+
+  end
+end
+
+# A partition is an array of offsets within another array or a scope, denoting the boundaries of groups
+# for streaming.  
+class Partition < Array
+  attr_accessor :cur_position, :window, :max_window_size
+
+  def windowsize
+    window.max-window.min
+  end
+
+  def max_window_size
+    @max_window_size ||= 10
+  end
+
+  # Provide the stream parameter for the "next page" link. Will be null if we've passed the window
+  def next_range
+    self.window = cur_position..(cur_position+max_window_size)
+  end
+
+  # Clip a value to the bounds of the partition
+  def clip v, range=nil
+    if range ||= self[0]..self[-1]
+      return range.min if v < range.min
+      return range.max if v >= range.max
+      v
+    end
+  end
+
+  def window
+    self.window = self[0]..clip(self[0]+max_window_size, self[0]..self[1]) unless @window
+    @window
+  end
+
+  def cur_position
+    @cur_position ||= window.min
+  end
+
+  # Set the current window on the partition, confining it to an existing partition
+  def window= r
+    @window = nil
+    if (lb = clip r.min) && # Returns nil if the range is invalid
+      (pr = self.partition_range lb) && # Returns nil if lb is out of range
+      (ub = clip r.max, lb..clip(lb+max_window_size, pr))
+      self.cur_position = lb
+      @window = lb..ub
+    end
+  end
+
+  def done?
+    cur_position >= window.max
+  end
+
+  # Get the index of the next element, relative to the current window,
+  # optionally incrementing the current position
+  def next_index hold=false
+    if cur_position < window.max
+      this_position = cur_position
+      self.cur_position = cur_position + 1 unless hold
+      this_position - window.min # Relativize the index
+    end
+  end
+
+=begin
+  def pagenum
+    (window.min/(window.max-window.min))+1
+  end
+
+  def pagesize
+    (window.max-window.min)
+  end
+=end
+
+  # Return the range enclosing ix. Returns an empty range for ix above the partition
+  def partition_range ix
+    if px = partition_of(ix)
+      self[px]..self[px+1]
+    elsif ix >= self[-1]
+      self[-1]..self[-1]
+    end
+  end
+
+  # Find the index of the partition containing 'ix', or nil if outside the range
+  def partition_of ix
+    (self.find_index { |lower_bound| lower_bound > ix } - 1 ) unless (ix < self[0]) or (ix >= self[-1])
+  end
+
+=begin
+  def self.load str
+    unless str.blank?
+      # h = YAML.load str
+      # p = h[:arr]
+      # p.window = h[:window]
+      p = YAML.load str
+      p
+    end
+  end
+
+  def self.dump partition
+    if partition
+      str = YAML.dump arr: partition, window: partition.window
+      str = YAML.dump partition
+      str
+    end
+  end
+=end
 end
 
 class ResultsCache < ActiveRecord::Base
@@ -53,12 +169,14 @@ class ResultsCache < ActiveRecord::Base
   self.primary_key = "session_id"
 
   # scope :integers_cache, -> { where type: 'IntegersCache' }
-  attr_accessible :session_id, :params, :cache, :cur_position, :limit
+  attr_accessible :session_id, :params, :cache, :partition
   serialize :params
   serialize :cache
-  attr_accessor :items, :querytags, :window
+  serialize :partition # , Partition
+  attr_accessor :items, :querytags
+  delegate :next_range, :window, :next_index, :"done?", :to => :partition
 
-  # Get the current results cache and return it if relevant. Otherwise,
+      # Get the current results cache and return it if relevant. Otherwise,
   # create a new one
   def self.retrieve_or_build session_id, userid, querytags=[], params={}
     if querytags.class == Hash
@@ -77,51 +195,29 @@ class ResultsCache < ActiveRecord::Base
     name.constantize
   end
 
-  def initialize attribs
+  def initialize attribs={}
     super # Let ActiveRecord take care of initializing attributes
-    self.limit = full_size # Figure the maximum extent of the results
     if attribs[:params]
       @userid = attribs[:params][:userid]
       @querytags = attribs[:params][:querytags]
     end
   end
 
-  # Provide the stream parameter for the "next page" link. Will be null if we've passed the window
-  def next_range
-    newmax = cur_position+(window.max-window.min)
-    if limit < 0 # All indexes are valid
-      cur_position..newmax
-    elsif cur_position < limit
-      newmax = limit if newmax > limit
-      cur_position..newmax
-    end
-  end
-
-  def window= r
-    if limit >= 0
-      upper = (r.max < limit) ? r.max : limit
-      lower = (r.min < limit) ? r.min : (limit-1)
-      @window = lower..upper
-    else
-      @window = r
-    end
-    self.cur_position = r.min
-    @items = nil
-  end
-
-  def done?
-    @item_index >= window.max
-  end
-
-  # Take a window of items from the scope
-  def item_window scope
-    scope.paginate(:page => (window.min/(window.max-window.min))+1, :per_page => (window.max-window.min))
-  end
-
+  # Take a window of items from the scope or the results
   def items
-    return @items if @items
-    is = itemscope
-    @items = (is.class == Array) ? is : item_window(is)
+    return @cache[safe_partition.window] if cache_and_partition
+    begin
+      @items ||= itemscope.limit(safe_partition.windowsize).offset(safe_partition.window.min).all # :page => safe_partition.pagenum, :per_page => safe_partition.pagesize
+    rescue  # Fall back to an integer generator
+      (safe_partition.window.min...safe_partition.window.max).to_a
+    end
+  end
+
+  # Convert the scope to a cache of entries, as needed. In the default case, this is only
+  # necessary if there is a query. Otherwise, the cache remains empty and items are taken
+  # from the scope as partitioning dictates.
+  def cache_and_partition
+    @cache != nil # There is no cache => obtain items from the scope
   end
 
   # This is the real interface, which returns items for display
@@ -137,66 +233,45 @@ class ResultsCache < ActiveRecord::Base
 
   # Strictly speaking, an abstract method, but returns nil if param doesn't exist
   def param sym
-=begin
-    case sym
-      when :<symval>
-        @<symval>
-    end
-=end
   end
 
   # Return the total number of items in the result. This doesn't have to be every possible item, just
   # enough to stay ahead of the window.
   def full_size
+    return partition[-1] if partition  # Don't create if doesn't exist
+    return @cache.count if @cache
     begin
       itemscope.count
     rescue
-      -1 # Default is infinite scrolling
+      1000000
     end
   end
 
-  # Return the next item, incrementing the cur_position
+  # Return the next item relative to the current window, incrementing the cur_position
   def next_item
-    if (i = next_index) && items # i is relative to the current window
+    if (i = safe_partition.next_index) && items # i is relative to the current window
       items[i]
     end
   end
 
-  # Here's where we suggest the typical size of window
-  def window_size
-    10
-  end
-
   protected
 
-  # Get the index of the next element, subject to the constraints of the current window,
-  # optionally incrementing the current position
-  def next_index hold=false
-    if cur_position < window.max
-      this_position = cur_position
-      self.cur_position = cur_position + 1 unless hold
-      this_position - window.min # Relativize the index
-    end
+  # Return the existing partition, if any; otherwise, create one otherwise
+  def safe_partition
+    partition || (self.partition = Partition.new [0, full_size])
   end
 
 end
 
+# An IntegersCache presents the default ResultsCache behavior: no scope, no cache, degenerate partition producing successive integers
 class IntegersCache < ResultsCache
-  # This is a brain-dead integer generator
-  def items
-    @items ||= (window.min...window.max).to_a
-  end
-
-  def window= r
-    super((r.max-r.min) < 10 ? r : r.min...(r.min+10))
-  end
 
 end
 
 # list of lists visible to current user (ListsStreamer)
 class ListsCache < ResultsCache
 
-  def initialize attribs
+  def initialize attribs={}
     super
 
     # The access parameter filters for private and public lists
@@ -213,12 +288,8 @@ class ListsCache < ResultsCache
       when "public"
         List.where owner_id: User.super_id
       else
-        List.all
+        List.unscoped
     end
-  end
-
-  def full_size
-    itemscope.count
   end
 
   def param sym
@@ -233,17 +304,11 @@ end
 # list's content visible to current user (ListStreamer)
 class ListCache < ResultsCache
 
-  def initialize attribs
-    @list = List.find attribs[:params][:id].to_i
+  def initialize attribs={}
+    if list = List.find( attribs[:params][:id].to_i)
+      @cache = list.entities
+    end
     super
-  end
-
-  def items
-    @items ||= @list.entities
-  end
-
-  def full_size
-    @list.entity_count
   end
 
 end
@@ -251,12 +316,8 @@ end
 # list of feeds
 class FeedsCache < ResultsCache
 
-  def items
-    @items ||= Feed.all[@window]
-  end
-
-  def full_size
-    Feed.count
+  def itemscope
+    Feed.all
   end
 
 end
@@ -264,7 +325,7 @@ end
 # list of feed items
 class FeedCache < ResultsCache
 
-  def initialize attribs
+  def initialize attribs={}
     super
     @feed = Feed.where(id: attribs[:params][:id].to_i).first
   end
@@ -291,9 +352,14 @@ end
 # Recently-viewed recipes of the given user
 class UserCollectionCache < ResultsCache
 
-  def initialize attribs
+  def initialize attribs={}
     super
     @user = User.where(id: attribs[:params][:id].to_i).first
+  end
+
+  # Transform the item scope into a hash with Rcprefs the key, and values the quality of match of that Rcpref
+  def cache_and_partition
+    sorted = RcprefsSorted.new itemscope, @querytags
   end
 
   # The sources are a user, a list of users, or nil (for the master global list)
@@ -302,30 +368,7 @@ class UserCollectionCache < ResultsCache
   end
 
   def itemscope
-    return nil unless @user
-    sco = @user.collection_scope(:sortby => :collected)
-    return sco if @querytags.empty?
-    winnow_scope sco, @querytags
-  end
-
-  # Filter a set of candidate ids using one tag
-  def apply_tag tag, source_set, candihash
-    # Default procedure, for recipes
-    candihash.apply tag.recipe_ids if tag.id > 0 # A normal tag => get its recipe ids and apply them to the results
-    # Get candidates by matching the tag's name against recipe titles and comments
-    candihash.apply Rcpref.recipe_ids(source_set,
-                                      @userid,
-                                      :comment => tag.name)
-    # Get candidates that match specialtags in the title
-    candihash.apply Rcpref.recipe_ids(source_set,
-                                      @userid,
-                                      :title => tag.name)
-  end
-
-
-  def items
-    # The scope from rcprefs needs to be mapped to items after windowing
-    @items ||= (rcpref_items = item_window itemscope) && rcpref_items.map(&:entity)
+    @user.collection_scope(:sortby => :collected) if @user
   end
 
 end
@@ -334,7 +377,7 @@ end
 class UserRecentCache < UserCollectionCache
 
   def itemscope
-    @user && @user.collection_scope(all: true)
+    @user.collection_scope(all: true) if @user
   end
 end
 
@@ -361,7 +404,7 @@ end
 
 class TagsCache < ResultsCache
 
-  def initialize attribs
+  def initialize attribs={}
     @tagtype = attribs[:params][:tagtype] if attribs[:params]
     super
   end
@@ -405,7 +448,7 @@ end
 
 class ReferencesCache < ResultsCache
 
-  def initialize attribs
+  def initialize attribs={}
     super
     @type = 0
     @type = attribs[:params][:type].to_i if attribs[:params] && attribs[:params][:type]
@@ -438,7 +481,7 @@ end
 
 class ReferentsCache < ResultsCache
 
-  def initialize attribs
+  def initialize attribs={}
     super
     @type = 0
     @type = attribs[:params][:type].to_i if attribs[:params] && attribs[:params][:type]

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140930202137) do
+ActiveRecord::Schema.define(version: 20141010221654) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -257,10 +257,9 @@ ActiveRecord::Schema.define(version: 20140930202137) do
     t.text     "params"
     t.text     "cache"
     t.string   "type"
-    t.integer  "cur_position", default: 0
-    t.integer  "limit",        default: -1
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.text     "partition"
   end
 
   add_index "results_caches", ["session_id"], name: "index_results_caches_on_session_id", using: :btree
