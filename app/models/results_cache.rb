@@ -71,7 +71,8 @@ class Partition < Array
 
   # Provide the stream parameter for the "next page" link. Will be null if we've passed the window
   def next_range
-    valid_range cur_position..(cur_position+max_window_size)
+    range = valid_range cur_position..(cur_position+max_window_size)
+    range if range.max > range.min
   end
 
   # Clip a value to the bounds of the partition
@@ -81,11 +82,6 @@ class Partition < Array
       return range.max if v >= range.max
       v
     end
-  end
-
-  def window
-    self.window = self[0]..clip(self[0]+max_window_size, self[0]..self[1]) unless @window
-    @window
   end
 
   def cur_position
@@ -101,9 +97,15 @@ class Partition < Array
     end
   end
 
-    # Set the current window on the partition, confining it to an existing partition
+  # Set the current window on the partition, confining it to an existing partition
   def window= r
     self.cur_position = clip(cur_position, @window) if @window = valid_range(r)
+  end
+
+  def window
+    # Memoize @window by calling assignment to ensure that cur_position is in the new bound
+    self.window = self[0]..clip(self[0]+max_window_size, self[0]..self[1]) unless @window
+    @window
   end
 
   def done?
@@ -120,16 +122,6 @@ class Partition < Array
     end
   end
 
-=begin
-  def pagenum
-    (window.min/(window.max-window.min))+1
-  end
-
-  def pagesize
-    (window.max-window.min)
-  end
-=end
-
   # Return the range enclosing ix. Returns an empty range for ix above the partition
   def partition_range ix
     if px = partition_of(ix)
@@ -144,25 +136,6 @@ class Partition < Array
     (self.find_index { |lower_bound| lower_bound > ix } - 1 ) unless (ix < self[0]) or (ix >= self[-1])
   end
 
-=begin
-  def self.load str
-    unless str.blank?
-      # h = YAML.load str
-      # p = h[:arr]
-      # p.window = h[:window]
-      p = YAML.load str
-      p
-    end
-  end
-
-  def self.dump partition
-    if partition
-      str = YAML.dump arr: partition, window: partition.window
-      str = YAML.dump partition
-      str
-    end
-  end
-=end
 end
 
 class ResultsCache < ActiveRecord::Base
@@ -198,17 +171,22 @@ class ResultsCache < ActiveRecord::Base
         self.new(session_id: session_id, params: params.merge({querytags: querytags, userid: userid}))
   end
 
-  # Set the current window of attention
-  def window=r
+  # Set the current window of attention. Requires start as first parameter; second parameter for limit is optional
+  def window= arr
+    if arr.is_a? Array
+      start, limit = arr[0,1]
+    else
+      start = arr
+    end
     oldwindow = safe_partition.window
-    safe_partition.window = r
+    safe_partition.window = start..(limit || (start+max_window_size))
     # bust the items cache if the window changed
     @items = nil unless (safe_partition.window == oldwindow)
   end
 
   def max_window_size= n
     safe_partition.max_window_size = n
-    self.window = safe_partition.window.min..(safe_partition.window.min+n)
+    self.window = safe_partition.window.min
   end
 
   # Derive the class of the appropriate cache handler from the controller, action and other parameters
@@ -445,7 +423,7 @@ class ReferencesCache < ResultsCache
   end
 
   def typenum
-    @type ? @type.to_s : 0
+    @type ? @type.to_i : 0
   end
 
   def typeclass
@@ -453,7 +431,7 @@ class ReferencesCache < ResultsCache
   end
 
   def itemscope
-    Reference.where type: typeclass
+    (typeclass == Reference) ? Reference.unscoped : Reference.where(type: typeclass)
   end
 
 end
@@ -469,7 +447,7 @@ class ReferentsCache < ResultsCache
   end
 
   def typenum
-    @type ? @type.to_s : 0
+    @type ? @type.to_i : 0
   end
 
   def typeclass
@@ -477,7 +455,7 @@ class ReferentsCache < ResultsCache
   end
 
   def itemscope
-    Referent.where type: typeclass
+    (typeclass == Referent) ? Referent.unscoped : Referent.where(type: typeclass)
   end
 
 end

@@ -27,8 +27,8 @@ class StreamPresenter
 
     # Get a Streamer subclass for the controller and action
     @results = rc_class.retrieve_or_build session_id, userid, querytags, params
-    limit ||= offset + @results.max_window_size
-    @results.window = offset..limit
+    # limit ||= offset + @results.max_window_size
+    @results.window = offset, limit
   end
 
   def render

@@ -10,6 +10,6 @@
 	<% if permitted_to? :edit, item %>
 		<td><%= link_to_modal 'Edit', edit_user_path(item), :class => "btn btn-default btn-xs" %></td>
 		<td><%= link_to 'Hide', user_path(item, user: { private: true }), :class => "btn btn-default btn-xs", method: :put %></td>
-		<td><%= link_to 'Destroy', item, confirm: "Are you sure about deleting this user? It's a rather drastic step.", :class => "btn btn-default btn-xs btn-danger", method: :delete %></td>
+		<td><%= link_to 'Destroy', item, data: { confirm: "Are you sure about deleting this user? It's a rather drastic step." }, :class => "btn btn-default btn-xs btn-danger", method: :delete %></td>
 	<% end %>
 </tr>

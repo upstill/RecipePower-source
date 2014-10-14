@@ -1,7 +1,7 @@
 <tr id="<%= dom_id item %>">
 	<td><%= item.id.to_s %></td>
 	<td>
-		<%= link_to_submit item.title.truncate(80), feed_path(item) %><br>
+		<%= link_to_submit item.title.truncate(80), feed_path(item, partial: true) %><br>
 		<%= item.description  %><br>
 		<%= link_to item.url.truncate(40), item.url %>
 	</td>
@@ -21,7 +21,7 @@
 			<%= button_link 'Edit', edit_feed_path(item), :dialog %>
 		<% end %>
 		<% permitted_to?(:destroy, :feeds) do %>
-			<%= link_to('Destroy', item, :method => :delete, :class => "btn btn-default btn-xs btn-danger", confirm: 'Are you sure?') %>
+			<%= link_to 'Destroy', item, :method => :delete, :class => "btn btn-default btn-xs btn-danger", data: { confirm: 'Are you sure?' } %>
 		<% end %>
 	</td>
 </tr>

@@ -3,7 +3,7 @@
       <%= item.id.to_s %>
     </td>
 	<td>
-        <%= link_to_modal item.name.truncate(80), list_path(item) %><br>
+        <%= link_to_submit item.name.truncate(80), list_path(item, partial: true) %><br>
 	</td>
 	<td>
       <%= item.description.truncate(200) unless item.description.blank? %>
