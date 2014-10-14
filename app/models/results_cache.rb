@@ -71,7 +71,7 @@ class Partition < Array
 
   # Provide the stream parameter for the "next page" link. Will be null if we've passed the window
   def next_range
-    self.window = cur_position..(cur_position+max_window_size)
+    valid_range cur_position..(cur_position+max_window_size)
   end
 
   # Clip a value to the bounds of the partition
@@ -92,15 +92,18 @@ class Partition < Array
     @cur_position ||= window.min
   end
 
-  # Set the current window on the partition, confining it to an existing partition
-  def window= r
-    @window = nil
+  # Clip the given range to valid cells, with an appropriate maximum size
+  def valid_range r
     if (lb = clip r.min) && # Returns nil if the range is invalid
-      (pr = self.partition_range lb) && # Returns nil if lb is out of range
-      (ub = clip r.max, lb..clip(lb+max_window_size, pr))
-      self.cur_position = lb
-      @window = lb..ub
+        (pr = self.partition_range lb) && # Returns nil if lb is out of range
+        (ub = clip r.max, lb..clip(lb+max_window_size, pr))
+      lb..ub
     end
+  end
+
+    # Set the current window on the partition, confining it to an existing partition
+  def window= r
+    self.cur_position = @window.min if @window = valid_range(r)
   end
 
   def done?
@@ -176,6 +179,12 @@ class ResultsCache < ActiveRecord::Base
   attr_accessor :items, :querytags
   delegate :next_range, :window, :next_index, :"done?", :to => :partition
 
+  def window=r
+    oldwindow = safe_partition.window
+    safe_partition.window=r
+    # bust the items cache
+    @items = nil unless (safe_partition.window == oldwindow)
+  end
       # Get the current results cache and return it if relevant. Otherwise,
   # create a new one
   def self.retrieve_or_build session_id, userid, querytags=[], params={}
@@ -198,18 +207,25 @@ class ResultsCache < ActiveRecord::Base
   def initialize attribs={}
     super # Let ActiveRecord take care of initializing attributes
     if attribs[:params]
-      @userid = attribs[:params][:userid]
-      @querytags = attribs[:params][:querytags]
+      @params = attribs[:params].clone
+      @userid = @params[:userid]
+      @querytags = @params[:querytags]
     end
   end
 
   # Take a window of items from the scope or the results
   def items
-    return @cache[safe_partition.window] if cache_and_partition
+    return @items if @items
+    return (@items = @cache.slice( safe_partition.window.min, safe_partition.windowsize )) if cache_and_partition
     begin
-      @items ||= itemscope.limit(safe_partition.windowsize).offset(safe_partition.window.min).all # :page => safe_partition.pagenum, :per_page => safe_partition.pagesize
+      # It's possible that the itemscope is an array...
+      if itemscope.is_a? Array
+        @items = itemscope.slice( safe_partition.window.min, safe_partition.windowsize )
+      else
+        @items = itemscope.limit(safe_partition.windowsize).offset(safe_partition.window.min).all # :page => safe_partition.pagenum, :per_page => safe_partition.pagesize
+      end
     rescue  # Fall back to an integer generator
-      (safe_partition.window.min...safe_partition.window.max).to_a
+      @items = (safe_partition.window.min...safe_partition.window.max).to_a
     end
   end
 
@@ -221,7 +237,7 @@ class ResultsCache < ActiveRecord::Base
   end
 
   # This is the real interface, which returns items for display
-  # Return a paginatable scope for the collection of items in the current window
+  # Return a paginatable scope for entire collection of items
   def itemscope
     raise 'Abstract Method'
   end
@@ -304,11 +320,11 @@ end
 # list's content visible to current user (ListStreamer)
 class ListCache < ResultsCache
 
-  def initialize attribs={}
-    if list = List.find( attribs[:params][:id].to_i)
+  def itemscope
+    return @cache if @cache
+    if list = List.find( @params[:id])
       @cache = list.entities
     end
-    super
   end
 
 end
@@ -325,13 +341,8 @@ end
 # list of feed items
 class FeedCache < ResultsCache
 
-  def initialize attribs={}
-    super
-    @feed = Feed.where(id: attribs[:params][:id].to_i).first
-  end
-
   def itemscope
-    FeedEntry.where(feed_id: @feed.id).order('published_at DESC')
+    FeedEntry.where(feed_id: @params[:id]).order('published_at DESC')
   end
 
 end
@@ -339,12 +350,8 @@ end
 # users: list of users visible to current_user (UsersStreamer)
 class UsersCache < ResultsCache
 
-  def items
-    @items ||= User.all[@window]
-  end
-
-  def full_size
-    User.count
+  def itemscope
+    User.unscoped
   end
 
 end

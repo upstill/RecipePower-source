@@ -41,6 +41,7 @@ class PartitionTest < ActiveSupport::TestCase
     assert_equal 2, p.next_index
     assert p.done?
     assert_nil p.next_index
+    p.window = p.next_range
     assert_equal 3..13, p.next_range
     10.times do
       refute p.done?

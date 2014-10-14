@@ -52,9 +52,8 @@ class ResultsCacheTest < ActiveSupport::TestCase
   test "it creates an IntegersCache according to parameters" do
     sessionid = "wklejrkjovekj23kjkj3f"
     params = { controller: "integers", action: "index" }
-    rc = IntegersCache.retrieve_or_build( sessionid, controller: "integers", action: "index")
+    rc = IntegersCache.retrieve_or_build( sessionid, params)
     assert_equal IntegersCache, rc.class
-    assert_equal params, rc.params
     assert rc.save
     assert_equal 1, IntegersCache.where(session_id: sessionid).count
   end
@@ -63,32 +62,18 @@ class ResultsCacheTest < ActiveSupport::TestCase
     sessionid = "wklejrkjovekj23kjkj3f"
     superklass = ResultsCache
     rc = IntegersCache.retrieve_or_build( sessionid, controller: "integers", action: "index")
-    rc.limit = 7
 
     rc.window = 2..4
     assert_equal 2, rc.next_item
     assert_equal 3, rc.next_item
     assert_nil rc.next_item
-    assert_equal 4..6, rc.next_range
+    assert_equal 4..14, rc.next_range
 
+    rc.partition.max_window_size=2
     rc.window = rc.next_range
     assert_equal 4, rc.next_item
     assert_equal 5, rc.next_item
     assert_nil rc.next_item
-    assert_equal 6..7, rc.next_range
-
-    rc.window = 6..9
-    assert_equal 6, rc.next_item
-    assert_nil rc.next_item
-    assert_nil rc.next_range
-
-    rc.window = 3..5
-    assert_equal 3, rc.next_item
-    assert_equal 4, rc.next_item
-    assert_nil rc.next_item
-
-    rc.window = 8..10
-    assert_nil rc.next_item
-    assert_nil rc.next_range
+    assert_equal 6..8, rc.next_range
   end
 end
