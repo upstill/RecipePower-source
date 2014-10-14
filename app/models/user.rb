@@ -191,6 +191,7 @@ class User < ActiveRecord::Base
     end
   end
 
+  # Scope for the items in the user's collection
   def collection_scope options={}
     constraints = {:user_id => id}
     constraints[:in_collection] = true unless options[:all]

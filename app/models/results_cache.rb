@@ -179,13 +179,15 @@ class ResultsCache < ActiveRecord::Base
   attr_accessor :items, :querytags
   delegate :next_range, :window, :next_index, :"done?", :to => :partition
 
-  def window=r
-    oldwindow = safe_partition.window
-    safe_partition.window=r
-    # bust the items cache
-    @items = nil unless (safe_partition.window == oldwindow)
+  def initialize attribs={}
+    super # Let ActiveRecord take care of initializing attributes
+    # Transfer values from params to instance variables
+    (params_needed+[:userid, :id, :querytags]).each { |key|
+      self.instance_variable_set("@#{key}".to_sym, attribs[:params][key.to_sym])
+    } if attribs[:params]
   end
-      # Get the current results cache and return it if relevant. Otherwise,
+
+  # Get the current results cache and return it if relevant. Otherwise,
   # create a new one
   def self.retrieve_or_build session_id, userid, querytags=[], params={}
     if querytags.class == Hash
@@ -196,24 +198,23 @@ class ResultsCache < ActiveRecord::Base
         self.new(session_id: session_id, params: params.merge({querytags: querytags, userid: userid}))
   end
 
+  # Set the current window of attention
+  def window=r
+    oldwindow = safe_partition.window
+    safe_partition.window=r
+    # bust the items cache if the window is different
+    @items = nil unless (safe_partition.window == oldwindow)
+  end
+
   # Derive the class of the appropriate cache handler from the controller, action and other parameters
   def self.type params
     controller = (params[:controller] || "").singularize.capitalize
     controller = controller.pluralize if params[:action] && (params[:action] == "index")
-    Object.const_defined?(name = controller+"Cache") || (name = "ResultsCache")
-    name.constantize
+    name = "#{controller}Cache"
+    Object.const_defined?(name) ? name.constantize : ResultsCache
   end
 
-  def initialize attribs={}
-    super # Let ActiveRecord take care of initializing attributes
-    if attribs[:params]
-      @params = attribs[:params].clone
-      @userid = @params[:userid]
-      @querytags = @params[:querytags]
-    end
-  end
-
-  # Take a window of items from the scope or the results
+  # Take a window of items from the scope or the results cache
   def items
     return @items if @items
     return (@items = @cache.slice( safe_partition.window.min, safe_partition.windowsize )) if cache_and_partition
@@ -229,26 +230,11 @@ class ResultsCache < ActiveRecord::Base
     end
   end
 
-  # Convert the scope to a cache of entries, as needed. In the default case, this is only
-  # necessary if there is a query. Otherwise, the cache remains empty and items are taken
-  # from the scope as partitioning dictates.
-  def cache_and_partition
-    @cache != nil # There is no cache => obtain items from the scope
-  end
-
-  # This is the real interface, which returns items for display
-  # Return a paginatable scope for entire collection of items
-  def itemscope
-    raise 'Abstract Method'
-  end
-
-  # Return the query that will be augmented with querytags to filter this stream
-  def query
-    raise 'Abstract Method'
-  end
-
-  # Strictly speaking, an abstract method, but returns nil if param doesn't exist
-  def param sym
+  # Return the next item in the current window, incrementing the cur_position
+  def next_item
+    if (i = safe_partition.next_index) && items # i is relative to the current window
+      items[i]
+    end
   end
 
   # Return the total number of items in the result. This doesn't have to be every possible item, just
@@ -263,11 +249,34 @@ class ResultsCache < ActiveRecord::Base
     end
   end
 
-  # Return the next item relative to the current window, incrementing the cur_position
-  def next_item
-    if (i = safe_partition.next_index) && items # i is relative to the current window
-      items[i]
-    end
+  # Convert the scope to a cache of entries, as needed. In the default case, this is only
+  # necessary if there is a query. Otherwise, the cache remains empty and items are taken
+  # from the scope as partitioning dictates.
+  def cache_and_partition
+    @cache != nil # There is no cache => obtain items from the scope
+  end
+
+  # This is the real interface, which returns items for display
+  # Return a scope or array for the entire collection of items
+  def itemscope
+    raise 'Abstract Method'
+  end
+
+=begin
+  # Return the query that will be augmented with querytags to filter this stream
+  def query
+    raise 'Abstract Method'
+  end
+=end
+
+  # Opportunity for subclass to declare a list of parameters to save as instance variables
+  def params_needed
+    []
+  end
+
+  # Report a previously-saved parameter (or, in fact, any instance variable)
+  def param sym
+    self.instance_variable_get "@#{sym}".to_sym
   end
 
   protected
@@ -287,11 +296,9 @@ end
 # list of lists visible to current user (ListsStreamer)
 class ListsCache < ResultsCache
 
-  def initialize attribs={}
-    super
-
+  def params_needed
     # The access parameter filters for private and public lists
-    @access = attribs[:params][:access] if attribs[:params]
+    [:access]
   end
 
   # A listcache may define an itemscope to let the superclass#items method do pagination
@@ -308,13 +315,6 @@ class ListsCache < ResultsCache
     end
   end
 
-  def param sym
-    case sym
-      when :access
-        @access
-    end
-  end
-
 end
 
 # list's content visible to current user (ListStreamer)
@@ -322,7 +322,7 @@ class ListCache < ResultsCache
 
   def itemscope
     return @cache if @cache
-    if list = List.find( @params[:id])
+    if list = List.find(@id)
       @cache = list.entities
     end
   end
@@ -333,7 +333,7 @@ end
 class FeedsCache < ResultsCache
 
   def itemscope
-    Feed.all
+    Feed.unscoped
   end
 
 end
@@ -342,7 +342,7 @@ end
 class FeedCache < ResultsCache
 
   def itemscope
-    FeedEntry.where(feed_id: @params[:id]).order('published_at DESC')
+    FeedEntry.where(feed_id: @id).order('published_at DESC')
   end
 
 end
@@ -359,9 +359,8 @@ end
 # Recently-viewed recipes of the given user
 class UserCollectionCache < ResultsCache
 
-  def initialize attribs={}
-    super
-    @user = User.where(id: attribs[:params][:id].to_i).first
+  def user
+    @user ||= User.where(id: @id).first if @id
   end
 
   # Transform the item scope into a hash with Rcprefs the key, and values the quality of match of that Rcpref
@@ -371,11 +370,11 @@ class UserCollectionCache < ResultsCache
 
   # The sources are a user, a list of users, or nil (for the master global list)
   def sources
-    @user.id
+    user.id
   end
 
   def itemscope
-    @user.collection_scope(:sortby => :collected) if @user
+    user.collection_scope(:sortby => :collected) if user
   end
 
 end
@@ -384,7 +383,7 @@ end
 class UserRecentCache < UserCollectionCache
 
   def itemscope
-    @user.collection_scope(all: true) if @user
+    user.collection_scope(all: true) if user
   end
 end
 
@@ -392,43 +391,28 @@ end
 class UserBiglistCache < UserCollectionCache
 
   def itemscope
-    @user ? Rcpref.where('private = false OR user_id = ?', @user.id) : Rcpref.where(private: false)
+    user ? Rcpref.where('private = false OR user_id = ?', user.id) : Rcpref.where(private: false)
   end
+
 end
 
 # user's lists visible to current_user (UserListsStreamer
 class UserListsCache < ResultsCache
 
-  def items
-    @items ||= []
-  end
-
-  def full_size
-    0
+  def itemscope
+    user.lists.where( owner_id: id) if user
   end
 
 end
 
 class TagsCache < ResultsCache
 
-  def initialize attribs={}
-    @tagtype = attribs[:params][:tagtype] if attribs[:params]
-    super
+  def params_needed
+    [:tagtype]
   end
 
   def itemscope
-    @tagtype ? Tag.where(tagtype: @tagtype) : Tag.all
-  end
-
-  def full_size
-    itemscope.count
-  end
-
-  def param sym
-    case sym
-      when :tagtype
-        @tagtype
-    end
+    @tagtype ? Tag.where(tagtype: @tagtype) : Tag.unscoped
   end
 
 end
@@ -439,12 +423,8 @@ end
 
 class SitesCache < ResultsCache
 
-  def items
-    @items ||= Site.all[@window]
-  end
-
-  def full_size
-    Site.count
+  def itemscope
+    Site.unscoped
   end
 
 end
@@ -455,29 +435,20 @@ end
 
 class ReferencesCache < ResultsCache
 
-  def initialize attribs={}
-    super
-    @type = 0
-    @type = attribs[:params][:type].to_i if attribs[:params] && attribs[:params][:type]
+  def params_needed
+    [:type]
   end
 
-  def klass
-    Reference.type_to_class @type
+  def typenum
+    @type ? @type.to_s : 0
+  end
+
+  def typeclass
+    Reference.type_to_class(typenum).to_s
   end
 
   def itemscope
-    klass
-  end
-
-  def full_size
-    klass.count
-  end
-
-  def param sym
-    case sym
-      when :type # Type stored as class
-        @type
-    end
+    Reference.where type: typeclass
   end
 
 end
@@ -488,29 +459,20 @@ end
 
 class ReferentsCache < ResultsCache
 
-  def initialize attribs={}
-    super
-    @type = 0
-    @type = attribs[:params][:type].to_i if attribs[:params] && attribs[:params][:type]
+  def params_needed
+    [:type]
   end
 
-  def klass
-    Referent.type_to_class @type
+  def typenum
+    @type ? @type.to_s : 0
   end
 
-  def items
-    @items ||= klass.paginate(:page => (window.min/(window.max-window.min))+1, :per_page => (window.max-window.min))
+  def typeclass
+    Referent.type_to_class(typenum).to_s
   end
 
-  def full_size
-    klass.count
-  end
-
-  def param sym
-    case sym
-      when :type # Type stored as class
-        @type
-    end
+  def itemscope
+    Referent.where type: typeclass
   end
 
 end

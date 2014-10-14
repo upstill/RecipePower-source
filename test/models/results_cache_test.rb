@@ -24,4 +24,15 @@ class ResultsCacheTest < ActiveSupport::TestCase
     assert_equal (15...25).to_a, rc.items
     assert_equal 15, rc.next_item
   end
+
+  test "It saves and restores parameters" do
+    rc = ResultsCache.new params: { id: 10, userid: "name", random: "random" }
+    assert_equal 10, rc.param(:id)
+    assert_equal "name", rc.param(:userid)
+    assert_nil rc.param(:random)
+
+    rc = ListsCache.new params: { id: 10, access: "access" }
+    assert_equal 10, rc.param(:id)
+    assert_equal "access", rc.param(:access)
+  end
 end
