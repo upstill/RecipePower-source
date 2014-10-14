@@ -103,7 +103,7 @@ class Partition < Array
 
     # Set the current window on the partition, confining it to an existing partition
   def window= r
-    self.cur_position = @window.min if @window = valid_range(r)
+    self.cur_position = clip(cur_position, @window) if @window = valid_range(r)
   end
 
   def done?
@@ -177,7 +177,7 @@ class ResultsCache < ActiveRecord::Base
   serialize :cache
   serialize :partition # , Partition
   attr_accessor :items, :querytags
-  delegate :next_range, :window, :next_index, :"done?", :to => :partition
+  delegate :next_range, :window, :next_index, :"done?", :max_window_size, :to => :safe_partition
 
   def initialize attribs={}
     super # Let ActiveRecord take care of initializing attributes
@@ -201,9 +201,14 @@ class ResultsCache < ActiveRecord::Base
   # Set the current window of attention
   def window=r
     oldwindow = safe_partition.window
-    safe_partition.window=r
-    # bust the items cache if the window is different
+    safe_partition.window = r
+    # bust the items cache if the window changed
     @items = nil unless (safe_partition.window == oldwindow)
+  end
+
+  def max_window_size= n
+    safe_partition.max_window_size = n
+    self.window = safe_partition.window.min..(safe_partition.window.min+n)
   end
 
   # Derive the class of the appropriate cache handler from the controller, action and other parameters
@@ -223,7 +228,7 @@ class ResultsCache < ActiveRecord::Base
       if itemscope.is_a? Array
         @items = itemscope.slice( safe_partition.window.min, safe_partition.windowsize )
       else
-        @items = itemscope.limit(safe_partition.windowsize).offset(safe_partition.window.min).all # :page => safe_partition.pagenum, :per_page => safe_partition.pagesize
+        @items = itemscope.limit(safe_partition.windowsize).offset(safe_partition.window.min).to_a # :page => safe_partition.pagenum, :per_page => safe_partition.pagesize
       end
     rescue  # Fall back to an integer generator
       @items = (safe_partition.window.min...safe_partition.window.max).to_a

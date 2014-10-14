@@ -12,10 +12,9 @@ class StreamPresenter
     @stream_param = params.delete(:stream) || "" if params.has_key? :stream
     @tagtype = params[:tagtype]
     if @stream_param.blank?
-      offset, limit = 0, -1
+      offset = 0
     else
       offset, limit = @stream_param.split('-').map(&:to_i)
-      limit ||= -1
     end
 
     if params[:action] == "index"
@@ -28,7 +27,7 @@ class StreamPresenter
 
     # Get a Streamer subclass for the controller and action
     @results = rc_class.retrieve_or_build session_id, userid, querytags, params
-    limit = offset + @results.window_size if limit < 0
+    limit ||= offset + @results.max_window_size
     @results.window = offset..limit
   end
 
