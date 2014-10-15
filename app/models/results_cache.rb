@@ -142,9 +142,10 @@ class ResultsCache < ActiveRecord::Base
     if querytags.class == Hash
       params, querytags = querytags, []
     end
-    ((rc = self.find_by session_id: session_id) && (rc.class == self) && (rc.params == params)) ?
-        rc :
-        self.new(session_id: session_id, params: params.merge({querytags: querytags, userid: userid}))
+    rc = self.find_by session_id: session_id
+    params = params.clone.merge querytags: querytags, userid: userid
+    return rc if rc && (rc.class == self) && (rc.params == params)
+    self.new session_id: session_id, params: params
   end
 
   # Set the current window of attention. Requires start as first parameter; second parameter for limit is optional
@@ -194,7 +195,7 @@ class ResultsCache < ActiveRecord::Base
   # enough to stay ahead of the window.
   def full_size
     return partition[-1] if partition  # Don't create if doesn't exist
-    return @cache.count if @cache
+    return cache.count if cache
     begin
       itemscope.count
     rescue
@@ -206,7 +207,7 @@ class ResultsCache < ActiveRecord::Base
   # necessary if there is a query. Otherwise, the cache remains empty and items are taken
   # from the scope as partitioning dictates.
   def cache_and_partition
-    @cache != nil # There is no cache => obtain items from the scope
+    cache != nil # There is no cache => obtain items from the scope
   end
 
   # This is the real interface, which returns items for display
@@ -235,7 +236,7 @@ class ResultsCache < ActiveRecord::Base
   protected
 
   def slice_cache
-    @cache.slice( safe_partition.window.min, safe_partition.windowsize )
+    cache.slice( safe_partition.window.min, safe_partition.windowsize )
   end
 
   def slice_item_scope
@@ -270,7 +271,7 @@ class UserCollectionCache < ResultsCache
       # No cache required
       self.partition = Partition.new([0, itemscope.count ]) unless partition
       false
-    elsif !@cache
+    elsif !cache
       # Convert the itemscope relation into a hash on entity types
       typeset = itemscope.select(:entity_type).distinct.order("entity_type DESC").map(&:entity_type)
       counts = Counts.new
@@ -300,7 +301,7 @@ class UserCollectionCache < ResultsCache
       end
 
       # Sort the scope by number of hits, descending
-      @cache = counts.items
+      self.cache = counts.items
       bounds = (0...(@querytags.count)).to_a.map { |i| (@querytags.count-i)*30 }
       self.partition = counts.partition bounds
       true
@@ -351,9 +352,9 @@ end
 class ListCache < ResultsCache
 
   def itemscope
-    return @cache if @cache
+    return cache if cache
     if list = List.find(@id)
-      @cache = list.entities
+      self.cache = list.entities
     end
   end
 
