@@ -60,4 +60,14 @@ class StreamPresenter
     assert_query @thispath, format, params.merge( stream: nil, querytags: nil )
   end
 
+  # The stream is starting, so perform any prefatory tasks
+  def preface?
+    @results.window.min == 0
+  end
+
+  # Suspend the stream till later
+  def suspend
+    @results.save if @results
+  end
+
 end

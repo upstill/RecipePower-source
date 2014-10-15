@@ -13,47 +13,23 @@ class Counts < Hash
     super(ix) || 0
   end
 
-end
+  def items sorted=true
+    @items ||= self.keys
+    @items_sorted ||= self.keys.sort { |rr1, rr2| self[rr2] <=> self[rr1] } if sorted
+  end
 
-class RcprefsSorted < Object
-
-  def initialize sco, tags
-    if tags.empty?
-      @scope = sco
-    else
-      # Convert the sco relation into a hash on entity types
-      typeset = sco.select(:entity_type).distinct.order("entity_type DESC").map(&:entity_type)
-      counts = Count.new
-      typeset.each do |type|
-        subscope = sco.where('rcprefs.entity_type = ?', type)
-        tags.each do |tag|
-          # Winnow the scope by restricting the set to Rcprefs referring to recipes in which EITHER
-          # * The Rcpref's comment matches the tag's string, OR
-          # * The recipe's title matches the tag's string, OR
-          # * the recipe is tagged by the tag
-          matchstr = tag.normalized_name
-          # r1 = Recipe.joins(:rcprefs).where("recipes.title ILIKE ? and rcprefs.user_id = 3", "%#{matchstr}%")
-          # ids1 = subscope.joins("INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE '%salmon%' and rcprefs.user_id = 3")
-          # ids1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE '%#{matchstr}%' and rcprefs.user_id = 3})
-          # ids1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE '%#{matchstr}%'}).where("rcprefs.user_id = 3")
-          sss1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id}).where("recipes.title ILIKE ?", "%#{matchstr}%").where("rcprefs.user_id = 3")
-          sss2 = subscope.find_by_sql %Q{SELECT * FROM rcprefs where rcprefs.comment ILIKE '%#{matchstr}%'}
-          sss3 = subscope.joins("INNER JOIN taggings ON taggings.entity_type = rcprefs.entity_type and taggings.entity_id = rcprefs.entity_id and taggings.tag_id = 283")
-          counts.incr sss1
-          counts.incr sss2
-          counts.incr sss3
-          this_round = sss1+sss2+sss3
-          counts.incr this_round, 30
-        end
+  def partition bounds
+    partition = Partition.new [0]
+    # Counts has a complete, non-redundant set of Rcpref records for disparate entities, associated with the number of hits on @querytags
+    # We partition the results by the number of @querytags that it matched
+    bounds.each do |b|
+      if (bound = items.find_index { |v| self[v] < b }) && (bound > partition.last)
+        partition.push bound
       end
-      @scope = this_round
     end
+    partition.push items.count
   end
 
-  # Sort the results array by the counts for each
-  def sort_results counts
-
-  end
 end
 
 # A partition is an array of offsets within another array or a scope, denoting the boundaries of groups
@@ -200,14 +176,10 @@ class ResultsCache < ActiveRecord::Base
   # Take a window of items from the scope or the results cache
   def items
     return @items if @items
-    return (@items = @cache.slice( safe_partition.window.min, safe_partition.windowsize )) if cache_and_partition
+    return (@items = slice_cache) if cache_and_partition
     begin
       # It's possible that the itemscope is an array...
-      if itemscope.is_a? Array
-        @items = itemscope.slice( safe_partition.window.min, safe_partition.windowsize )
-      else
-        @items = itemscope.limit(safe_partition.windowsize).offset(safe_partition.window.min).to_a # :page => safe_partition.pagenum, :per_page => safe_partition.pagesize
-      end
+      @items = (itemscope.is_a? Array) ? slice_item_array : slice_item_scope
     rescue  # Fall back to an integer generator
       @items = (safe_partition.window.min...safe_partition.window.max).to_a
     end
@@ -215,9 +187,7 @@ class ResultsCache < ActiveRecord::Base
 
   # Return the next item in the current window, incrementing the cur_position
   def next_item
-    if (i = safe_partition.next_index) && items # i is relative to the current window
-      items[i]
-    end
+    items && (i = safe_partition.next_index) && items[i] # i is relative to the current window
   end
 
   # Return the total number of items in the result. This doesn't have to be every possible item, just
@@ -264,9 +234,86 @@ class ResultsCache < ActiveRecord::Base
 
   protected
 
+  def slice_cache
+    @cache.slice( safe_partition.window.min, safe_partition.windowsize )
+  end
+
+  def slice_item_scope
+    itemscope.limit(safe_partition.windowsize).offset(safe_partition.window.min).to_a
+  end
+
+  def slice_item_array
+    itemscope.slice( safe_partition.window.min, safe_partition.windowsize )
+  end
+
   # Return the existing partition, if any; otherwise, create one otherwise
   def safe_partition
-    partition || (self.partition = Partition.new [0, full_size])
+    if pt = partition
+      pt
+    else
+      self.partition = Partition.new [0, full_size]
+    end
+  end
+
+end
+
+# Recently-viewed recipes of the given user
+class UserCollectionCache < ResultsCache
+
+  def user
+    @user ||= User.where(id: @id).first if @id
+  end
+
+  # Transform the item scope into a hash with Rcprefs the key, and values the quality of match of that Rcpref
+  def cache_and_partition
+    if @querytags.count == 0
+      # No cache required
+      self.partition = Partition.new([0, itemscope.count ]) unless partition
+      false
+    elsif !@cache
+      # Convert the itemscope relation into a hash on entity types
+      typeset = itemscope.select(:entity_type).distinct.order("entity_type DESC").map(&:entity_type)
+      counts = Counts.new
+      typeset.each do |type|
+        subscope = itemscope.where('rcprefs.entity_type = ?', type)
+        @querytags.each do |tag|
+          # Winnow the scope by restricting the set to Rcprefs referring to recipes in which EITHER
+          # * The Rcpref's comment matches the tag's string, OR
+          # * The recipe's title matches the tag's string, OR
+          # * the recipe is tagged by the tag
+          matchstr = tag.normalized_name
+          # r1 = Recipe.joins(:rcprefs).where("recipes.title ILIKE ? and rcprefs.user_id = 3", "%#{matchstr}%")
+          # ids1 = subscope.joins("INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE '%salmon%' and rcprefs.user_id = 3")
+          # ids1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE '%#{matchstr}%' and rcprefs.user_id = 3})
+          # ids1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE '%#{matchstr}%'}).where("rcprefs.user_id = 3")
+          sss1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id}).where("recipes.title ILIKE ?", "%#{matchstr}%").where("rcprefs.user_id = 3")
+          sss2 = subscope.find_by_sql %Q{SELECT * FROM rcprefs where rcprefs.comment ILIKE '%#{matchstr}%'}
+          sss3 = subscope.joins("INNER JOIN taggings ON taggings.entity_type = rcprefs.entity_type and taggings.entity_id = rcprefs.entity_id and taggings.tag_id = 283")
+          sss1 = sss1.to_a.uniq
+          counts.incr sss1 # One extra point for matching in one field
+          counts.incr sss2
+          sss3 = sss3.to_a.uniq
+          counts.incr sss3
+          this_round = (sss1+sss2+sss3).uniq
+          counts.incr this_round, 30 # Thirty points for matching this tag
+        end
+      end
+
+      # Sort the scope by number of hits, descending
+      @cache = counts.items
+      bounds = (0...(@querytags.count)).to_a.map { |i| (@querytags.count-i)*30 }
+      self.partition = counts.partition bounds
+      true
+    end
+  end
+
+  # The sources are a user, a list of users, or nil (for the master global list)
+  def sources
+    user.id
+  end
+
+  def itemscope
+    user.collection_scope(:sortby => :collected) if user
   end
 
 end
@@ -335,29 +382,6 @@ class UsersCache < ResultsCache
 
   def itemscope
     User.unscoped
-  end
-
-end
-
-# Recently-viewed recipes of the given user
-class UserCollectionCache < ResultsCache
-
-  def user
-    @user ||= User.where(id: @id).first if @id
-  end
-
-  # Transform the item scope into a hash with Rcprefs the key, and values the quality of match of that Rcpref
-  def cache_and_partition
-    sorted = RcprefsSorted.new itemscope, @querytags
-  end
-
-  # The sources are a user, a list of users, or nil (for the master global list)
-  def sources
-    user.id
-  end
-
-  def itemscope
-    user.collection_scope(:sortby => :collected) if user
   end
 
 end

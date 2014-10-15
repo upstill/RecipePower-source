@@ -202,9 +202,9 @@ class ApplicationController < ActionController::Base
       response.headers["Content-Type"] = "text/event-stream"
       # retrieve_seeker
       begin
-        sse = Reloader::SSE.new(response.stream)
+        sse = Reloader::SSE.new response.stream
         # When the stream is request is for the first items, replace the results
-        if @sp.window.min == 0
+        if @sp.preface?
           # Controller may override the name of the results container partial
           replacement = with_format("html") do
             view_context.stream_element_replacement(:results)
@@ -220,6 +220,7 @@ class ApplicationController < ActionController::Base
         # In closing, replace the trigger to make it active again
         sse.close replacements: [ with_format("html") { view_context.stream_element_replacement(:trigger) } ]
       end
+      @sp.suspend
       true
     end
   end
