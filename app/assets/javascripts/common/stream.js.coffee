@@ -22,6 +22,8 @@ RP.stream.fire = (elmt) ->
 	elmt.innerHTML = "Recipes are on their way..."
 	querypath = $(elmt).data('path')
 	container_selector = $(elmt).data('containerSelector') || ""
+	parent = RP.findEnclosing '.stream-tail', elmt
+	$('.beachball', parent).removeClass "hide"
 	$(elmt).remove() # Remove the link element to forestall subsequent loads
 	# It will be replaced when the trigger div gets replaced
 	container_selector += " .stream-items-parent"

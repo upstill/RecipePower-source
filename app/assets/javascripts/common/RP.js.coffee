@@ -302,7 +302,11 @@ RP.process_response = (responseData, odlog) ->
 
 		if deletions = responseData.deletions
 			for deletion in deletions
-				$(deletion).remove()
+				item = $(deletion)[0]
+				if $(item).hasClass('masonry-item') && $(item.parentNode).hasClass 'js-masonry'
+					$(item.parentNode).masonry 'remove', item
+				else
+					$(deletion).remove()
 
 		# 'odlog' gives a dialog DOM element to replace the extant one
 		if newdlog = responseData.dlog

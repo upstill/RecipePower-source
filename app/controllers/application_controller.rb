@@ -206,19 +206,22 @@ class ApplicationController < ActionController::Base
         # When the stream is request is for the first items, replace the results
         if @sp.preface?
           # Controller may override the name of the results container partial
-          replacement = with_format("html") do
-            view_context.stream_element_replacement(:results)
-          end
-          sse.write :stream_item, with_format("html") { { replacements: [ replacement ] } }
+          sse.write :stream_item, with_format("html") { { replacements: [ view_context.stream_element_replacement(:results) ] } }
+        else
+          # Before the first item, remove the prior tail
+          sse.write :stream_item, deletions: [ '.stream-tail' ]
         end
         while item = @sp.next_item do
           sse.write :stream_item, with_format("html") { { elmt: view_context.render_stream_item(item) } }
         end
+        if @sp.next_path
+          sse.write :stream_item, with_format("html") { { elmt: view_context.render_stream_tail } }
+        end
       rescue IOError
         logger.info "Stream closed"
       ensure
-        # In closing, replace the trigger to make it active again
-        sse.close replacements: [ with_format("html") { view_context.stream_element_replacement(:trigger) } ]
+        # In closing, replace the trigger to make it active again--or not
+        sse.close # replacements: [ with_format("html") { view_context.stream_element_replacement(:tail) } ]
       end
       @sp.suspend
       true

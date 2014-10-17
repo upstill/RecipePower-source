@@ -120,6 +120,14 @@ class ResultsCache < ActiveRecord::Base
   # As a model, it saves intermediate results to the database
   self.primary_key = "session_id"
 
+  after_initialize do  |rc|
+    # Load needed instance variables from parameters
+    (rc.params_needed+[:userid, :id, :querytags]).each { |key|
+      self.instance_variable_set("@#{key}".to_sym, rc.params[key.to_sym])
+    } if rc.params
+    true
+  end
+
   # scope :integers_cache, -> { where type: 'IntegersCache' }
   attr_accessible :session_id, :params, :cache, :partition
   serialize :params
@@ -127,14 +135,6 @@ class ResultsCache < ActiveRecord::Base
   serialize :partition # , Partition
   attr_accessor :items, :querytags
   delegate :next_range, :window, :next_index, :"done?", :max_window_size, :to => :safe_partition
-
-  def initialize attribs={}
-    super # Let ActiveRecord take care of initializing attributes
-    # Transfer values from params to instance variables
-    (params_needed+[:userid, :id, :querytags]).each { |key|
-      self.instance_variable_set("@#{key}".to_sym, attribs[:params][key.to_sym])
-    } if attribs[:params]
-  end
 
   # Get the current results cache and return it if relevant. Otherwise,
   # create a new one
@@ -151,12 +151,13 @@ class ResultsCache < ActiveRecord::Base
   # Set the current window of attention. Requires start as first parameter; second parameter for limit is optional
   def window= arr
     if arr.is_a? Array
-      start, limit = arr[0,1]
+      start, limit = *arr
     else
       start = arr
     end
     oldwindow = safe_partition.window
     safe_partition.window = start..(limit || (start+max_window_size))
+    safe_partition.cur_position = start
     # bust the items cache if the window changed
     @items = nil unless (safe_partition.window == oldwindow)
   end
@@ -271,7 +272,9 @@ class UserCollectionCache < ResultsCache
       # No cache required
       self.partition = Partition.new([0, itemscope.count ]) unless partition
       false
-    elsif !cache
+    elsif cache
+      true
+    else
       # Convert the itemscope relation into a hash on entity types
       typeset = itemscope.select(:entity_type).distinct.order("entity_type DESC").map(&:entity_type)
       counts = Counts.new
@@ -303,7 +306,9 @@ class UserCollectionCache < ResultsCache
       # Sort the scope by number of hits, descending
       self.cache = counts.items
       bounds = (0...(@querytags.count)).to_a.map { |i| (@querytags.count-i)*30 }
+      wdw = partition.window if partition
       self.partition = counts.partition bounds
+      self.window = [wdw.min, wdw.max] if wdw
       true
     end
   end

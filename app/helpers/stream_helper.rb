@@ -41,7 +41,7 @@ module StreamHelper
             :div
         end
     # We automatically include an empty trigger at the end of results, for later replacement in streaming
-    content << content_tag(:span, "", class: "stream-trigger") if etype==:results
+    # content << content_tag(:span, "", class: "stream-trigger") if etype==:results
     content_tag tag, content, class: stream_element_class(etype)
   end
 
@@ -137,9 +137,13 @@ module StreamHelper
     render partial: partialname, locals: { :item => element }
   end
 
+  def render_stream_tail
+    render partial: @sp.tail_partial
+  end
+
   def stream_results_placeholder
     content_tag :div,
-                stream_element(:trigger),
+                stream_element(:tail),
                 class: "stream-results"
   end
 

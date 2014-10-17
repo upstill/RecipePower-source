@@ -1,5 +1,5 @@
 class StreamPresenter
-  attr_accessor :results, :tagtype, :results_partial, :item_partial
+  attr_accessor :results, :tagtype, :results_partial, :item_partial, :tail_partial
 
   delegate :items, :next_item, :next_range, :"done?", :window, :param, :full_size, :to => :results
 
@@ -20,9 +20,11 @@ class StreamPresenter
     if params[:action] == "index"
       @item_partial = "#{params[:controller]}/index_table_row"
       @results_partial = "#{params[:controller]}/index_stream_results"
+      @tail_partial = "stream/table_tail"
     else
       # In general we leave the item partial to the model
       @results_partial = "shared/stream_results_masonry"
+      @tail_partial = "stream/masonry_tail"
     end
 
     # Get a Streamer subclass for the controller and action

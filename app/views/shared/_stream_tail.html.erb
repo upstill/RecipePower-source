@@ -5,6 +5,8 @@
               class: "stream-trigger",
               :"data-path" => next_path,
               :"data-container_selector" => response_service.container_selector %>
+  <%= image_tag "ajax-loader.gif", style: "margin: 32px 32px;", class: "beachball hide" %>
 <% else %>
+  <% x=2 %>
   No mo' stuff.
 <% end %>
