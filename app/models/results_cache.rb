@@ -290,13 +290,17 @@ class UserCollectionCache < ResultsCache
           # ids1 = subscope.joins("INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE '%salmon%' and rcprefs.user_id = 3")
           # ids1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE '%#{matchstr}%' and rcprefs.user_id = 3})
           # ids1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE '%#{matchstr}%'}).where("rcprefs.user_id = 3")
-          sss1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id}).where("recipes.title ILIKE ?", "%#{matchstr}%").where("rcprefs.user_id = 3")
-          sss2 = subscope.find_by_sql %Q{SELECT * FROM rcprefs where rcprefs.comment ILIKE '%#{matchstr}%'}
-          sss3 = subscope.joins("INNER JOIN taggings ON taggings.entity_type = rcprefs.entity_type and taggings.entity_id = rcprefs.entity_id and taggings.tag_id = 283")
-          sss1 = sss1.to_a.uniq
+          sss1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id}).where("recipes.title ILIKE ?", "%#{matchstr}%")
+          sss1 = sss1.where("rcprefs.user_id = #{@id}") if @id
+          sss1 = sss1.to_a.uniq { |rr| "#{rr.entity_type}#{rr.entity_id}"}
+
+          sss2 = subscope.find_by_sql( %Q{SELECT * FROM rcprefs where rcprefs.comment ILIKE '%#{matchstr}%'} ).uniq { |rr| "#{rr.entity_type}#{rr.entity_id}"}
+
+          sss3 = subscope.joins("INNER JOIN taggings ON taggings.entity_type = rcprefs.entity_type and taggings.entity_id = rcprefs.entity_id and taggings.tag_id = #{tag.id}")
+          sss3 = sss3.to_a.uniq { |rr| "#{rr.entity_type}#{rr.entity_id}" }
+
           counts.incr sss1 # One extra point for matching in one field
           counts.incr sss2
-          sss3 = sss3.to_a.uniq
           counts.incr sss3
           this_round = (sss1+sss2+sss3).uniq
           counts.incr this_round, 30 # Thirty points for matching this tag
@@ -404,7 +408,7 @@ end
 class UserBiglistCache < UserCollectionCache
 
   def itemscope
-    user ? Rcpref.where('private = false OR user_id = ?', user.id) : Rcpref.where(private: false)
+    user ? Rcpref.where('private = false OR rcprefs.user_id = ?', user.id) : Rcpref.where(private: false)
   end
 
 end
