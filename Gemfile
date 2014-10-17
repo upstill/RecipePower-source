@@ -3,6 +3,7 @@ source 'http://rubygems.org'
 ruby '1.9.3'
 # gem 'bundler', '~> 1.4'
 gem 'rails', '~> 4.0' # '3.2.11' #
+gem 'composite_primary_keys', '~> 6.0.6'
 gem 'arel', '~> 4.0'
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
 # gem 'rails4_upgrade'

@@ -118,13 +118,13 @@ class ResultsCache < ActiveRecord::Base
   include ActiveRecord::Sanitization
   # The ResultsCache class responds to a query with a series of items.
   # As a model, it saves intermediate results to the database
-  self.primary_key = "session_id"
+  self.primary_keys = ["session_id","type"]
 
-  after_initialize do  |rc|
+  after_initialize do
     # Load needed instance variables from parameters
-    (rc.params_needed+[:userid, :id, :querytags]).each { |key|
-      self.instance_variable_set("@#{key}".to_sym, rc.params[key.to_sym])
-    } if rc.params
+    self.class.params_needed.each { |key|
+      instance_variable_set("@#{key}".to_sym, params[key.to_sym])
+    } if params
     true
   end
 
@@ -132,7 +132,7 @@ class ResultsCache < ActiveRecord::Base
   attr_accessible :session_id, :params, :cache, :partition
   serialize :params
   serialize :cache
-  serialize :partition # , Partition
+  serialize :partition
   attr_accessor :items, :querytags
   delegate :next_range, :window, :next_index, :"done?", :max_window_size, :to => :safe_partition
 
@@ -142,10 +142,21 @@ class ResultsCache < ActiveRecord::Base
     if querytags.class == Hash
       params, querytags = querytags, []
     end
-    rc = self.find_by session_id: session_id
-    params = params.clone.merge querytags: querytags, userid: userid
-    return rc if rc && (rc.class == self) && (rc.params == params)
-    self.new session_id: session_id, params: params
+    params = params.slice(*self.params_needed).merge querytags: querytags, userid: userid
+    rc = self.create_with(:params => params).find_or_initialize_by session_id: session_id, type: self.to_s
+    # unpack the parameters into instance variables
+    params.each { |key, val| rc.instance_variable_set "@#{key}".to_sym, val }
+    if rc.params != params
+      # Bust the cache if the params don't match
+      rc.cache = rc.partition = rc.items = nil
+      rc.params = params
+    end
+    rc
+  end
+
+  # Declare the parameters needed for this class
+  def self.params_needed
+    [:userid, :id, :querytags]
   end
 
   # Set the current window of attention. Requires start as first parameter; second parameter for limit is optional
@@ -223,11 +234,6 @@ class ResultsCache < ActiveRecord::Base
     raise 'Abstract Method'
   end
 =end
-
-  # Opportunity for subclass to declare a list of parameters to save as instance variables
-  def params_needed
-    []
-  end
 
   # Report a previously-saved parameter (or, in fact, any instance variable)
   def param sym
@@ -336,9 +342,9 @@ end
 # list of lists visible to current user (ListsStreamer)
 class ListsCache < ResultsCache
 
-  def params_needed
+  def self.params_needed
     # The access parameter filters for private and public lists
-    [:access]
+    super + [:access]
   end
 
   # A listcache may define an itemscope to let the superclass#items method do pagination
@@ -424,8 +430,8 @@ end
 
 class TagsCache < ResultsCache
 
-  def params_needed
-    [:tagtype]
+  def self.params_needed
+    super + [:tagtype]
   end
 
   def itemscope
@@ -452,8 +458,8 @@ end
 
 class ReferencesCache < ResultsCache
 
-  def params_needed
-    [:type]
+  def self.params_needed
+    super + [:type]
   end
 
   def typenum
@@ -476,8 +482,8 @@ end
 
 class ReferentsCache < ResultsCache
 
-  def params_needed
-    [:type]
+  def self.params_needed
+    super + [:type]
   end
 
   def typenum

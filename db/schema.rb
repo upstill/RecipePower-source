@@ -253,16 +253,16 @@ ActiveRecord::Schema.define(version: 20141010221654) do
   end
 
   create_table "results_caches", id: false, force: true do |t|
-    t.string   "session_id"
+    t.string   "session_id", null: false
     t.text     "params"
     t.text     "cache"
-    t.string   "type"
+    t.string   "type",       null: false
+    t.text     "partition"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.text     "partition"
   end
 
-  add_index "results_caches", ["session_id"], name: "index_results_caches_on_session_id", using: :btree
+  add_index "results_caches", ["session_id", "type"], name: "index_results_caches_on_session_id_and_type", unique: true, using: :btree
 
   create_table "rp_events", force: true do |t|
     t.integer  "verb"
