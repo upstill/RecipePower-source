@@ -43,7 +43,7 @@ RP.submit.onClick = (event) ->
 	# If the submission is made from a top-level menu, make the menu active
 	if proceedWithConfirmation elmt
 		handleEnclosingNavTab elmt
-		$(elmt).addClass('trigger') # Mark for immediate opening
+		# $(elmt).addClass('trigger') # Mark for immediate opening
 		RP.submit.submit_and_process elmt.attributes.href.value, elmt, $(elmt).data('method')
 	false
 
@@ -88,30 +88,26 @@ shortCircuit = (request, elmt) ->
 	if elmt && $(elmt).hasClass 'loading'# Prevent submitting the link twice
 		return true
 	data = (elmt && $(elmt).data()) || {}
-	# The dialog is deployed iff the element has class 'trigger'
-	immediate = !elmt || $(elmt).hasClass('trigger')
 	RP.notifications.wait data['wait-msg'] # If any
 	odlog = RP.dialog.enclosing_modal elmt
-	if data.selector && (ndlog = $(data.selector)[0]) # If dialog is already loaded, replace the responding dialog
-		if immediate
-			RP.dialog.replace_modal ndlog, odlog # Will close any existing open dialog
-			RP.state.postDialog ndlog, request, (elmt && elmt.innerText) # RP.state.onAJAXSuccess event
-		return true;
 	if elmt && $(elmt).hasClass("preload")
 		# The element will store either a 'response' object or a 'preloaded' dialog element
 		responseData = data.response
 		if ndlog = data.preloaded || (responseData && responseData.dlog)
-			if immediate
-				RP.dialog.push_modal ndlog, odlog
+			RP.dialog.push_modal ndlog, odlog
 			return true;
 		else if responseData
-			if immediate
-				RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
-				RP.process_response responseData
-				RP.state.onAJAXSuccess event
-				$(elmt).data 'response', null
+			RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
+			RP.process_response responseData
+			RP.state.onAJAXSuccess event
+			$(elmt).data 'response', null
 			return true;
 		$(elmt).addClass 'loading'
+	else if data.selector && (ndlog = $(data.selector)[0]) # If dialog is already loaded, replace the responding dialog
+		$(elmt).removeClass 'trigger'
+		RP.dialog.replace_modal ndlog, odlog # Will close any existing open dialog
+		RP.state.postDialog ndlog, request, (elmt && elmt.innerText) # RP.state.onAJAXSuccess event
+		return true;
 	false
 
 handleResponse = (elmt, responseData, status, xhr) ->
