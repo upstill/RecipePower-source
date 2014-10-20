@@ -9,7 +9,7 @@
 <p>
   You are now a member in good standing (but behave yourself!)
   of the RecipePower community, all signed in and everything.
-  Your collection awaits you at <%= link_to "www.recipepower.com", collection_url %>. Of
+  Your collection awaits you at <%= link_to root_url, root_url %>. Of
   course, it's fairly empty at the moment--but if you install our
   <%= link_to "Cookmark Button", popup_url+"/starting_step2" %>,
   you can add to your collection from anywhere on the Web.
@@ -24,7 +24,7 @@
 </ul>
 <p>If any of this (especially the password) doesn't suit, you can get to your
   Profile on the menu under your name--or
-  click <%= link_to "here", hash_to_modal(users_profile_path, collection_url) %></p>
+  click <%= link_to "here", users_profile_path %></p>
 <% if @inviter %>
     <p>Since <%= @inviter.handle %> invited you, you are Friends by default,
       so you will find their collection at "<%= @inviter.handle %>" when you click

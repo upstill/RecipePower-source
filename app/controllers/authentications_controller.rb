@@ -16,7 +16,6 @@ class AuthenticationsController < ApplicationController
     @authentications = current_user.authentications if current_user
     if current_user
       # flash[:notice] = "All signed in. Welcome back, #{current_user.handle}!"
-      # redirect_to collection_path(redirect: true)
       redirect_to after_sign_in_path_for(current_user), notice: "All signed in. Welcome back, #{current_user.handle}!"
     end
     @auth_delete = true
@@ -28,7 +27,6 @@ class AuthenticationsController < ApplicationController
     @authentications = current_user.authentications if current_user
     if current_user
       # flash[:notice] = "All signed in. Welcome back, #{current_user.handle}!"
-      # redirect_to collection_path(redirect: true)
       redirect_to after_sign_in_path_for(current_user), notice: "All signed in. Welcome back, #{current_user.handle}!"
     end
     @auth_delete = true

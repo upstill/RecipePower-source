@@ -131,6 +131,7 @@ class User < ActiveRecord::Base
     browser.select_by_content l.name_tag
     save
   end
+=end
 
   def add_collection tag, priority=nil
     self.collection_tags << tag unless collection_tags.exists?(id: tag.id)
@@ -142,28 +143,27 @@ class User < ActiveRecord::Base
         end
       end
     end
-    browser.select_by_content(tag)
+    # browser.select_by_content(tag)
     save
   end
 
   def delete_collection tag
-    browser.delete_selected if browser.select_by_content(tag)
+    # browser.delete_selected if browser.select_by_content(tag)
     self.collection_tags.delete tag
     save
   end
 
   def add_followee friend
     self.followees << friend unless followee_ids.include? friend.id
-    refresh_browser friend
+    # refresh_browser friend
     save
   end
 
   def delete_followee f
-    browser.delete_selected
+    # browser.delete_selected
     followees.delete f
     save
   end
-=end
 
   def role
     self.role_symbols.first.to_s

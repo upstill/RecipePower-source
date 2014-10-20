@@ -29,11 +29,6 @@ class ApplicationController < ActionController::Base
 
     include ApplicationHelper
 
-  # Pseudo Routes helper for writing a path to :collection, :recent & :biglist (plus others as needed)
-  def user_collection_path(user, which=:collection)
-    "#{user_path user }/#{which}"
-  end
-
   # This replaces the old collections path
   def collection_path
     current_user ? user_collection_path(current_user) : home_path
@@ -338,9 +333,15 @@ class ApplicationController < ActionController::Base
       
   include ControllerAuthentication
 
+  def page_with_trigger dialog, page=nil
+    triggerparam = assert_query(dialog, modal: true)
+    pt = assert_query((page || collection_path), trigger: %Q{"#{triggerparam}"})
+    pt
+  end
+
   # Enable a modal dialog to run by embedding its URL in the URL of a page, then redirecting to it
   def redirect_to_modal dialog, page=nil
-    redirect_to hash_to_modal(dialog, page)
+    redirect_to page_with_trigger(dialog, page )
   end
 
   # before_filter on controller that needs login to do anything
@@ -376,11 +377,7 @@ class ApplicationController < ActionController::Base
   def stored_location_for(resource_or_scope)
     # If user is logging in to complete some process, we return
     # the path to completing the capture/tagging process
-    scope = Devise::Mapping.find_scope!(resource_or_scope)
-    if scope && (scope==:user)
-      # If on the site, login triggers a refresh of the collection
-      response_service.deferred_request || response_service.url_for_redirect(user_collection_path(current_user), :format => :html)
-    end || super
+    response_service.deferred_request || super
   end
 
   # This is an override of the Devise method to determine where to go after login.
@@ -388,9 +385,10 @@ class ApplicationController < ActionController::Base
   # Otherwise, new users go to the welcome page and logged-in-before users to the queries page.
   def after_sign_in_path_for(resource_or_scope)
     # Process any pending notifications
-    notices = current_user.notifications_received.where(accepted: false).collect { |notification| notification.accept }.join('<br>'.html_safe)
-    flash[:success] = notices unless notices.blank?
-    stored_location_for(resource_or_scope) || super
+    view_context.issue_notifications current_user
+    path = stored_location_for(resource_or_scope) || super || collection_path
+    # If on the site, login triggers a refresh of the collection
+    response_service.url_for_redirect(path, :format => :html)
   end
 
   protected

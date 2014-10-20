@@ -269,6 +269,12 @@ module ApplicationHelper
     end
   end
 
+  # Pump pending notifications into flash notices
+  def issue_notifications user
+    notices = user.notifications_received.where(accepted: false).collect { |notification| notification.accept }.join('<br>'.html_safe)
+    flash[:success] = notices unless notices.blank?
+  end
+
   def debug_dump(params)
     "<div id=\"debug\">#{debug(params)}</div>".html_safe
   end

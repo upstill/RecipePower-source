@@ -111,10 +111,12 @@ class RegistrationsController < Devise::RegistrationsController
     # The path used after sign up. You need to overwrite this method
     # in your own RegistrationsController.
     def after_sign_up_path_for(resource)
-      asip = after_sign_in_path_for(resource) # Likely get a deferred request...
-      # ...then invoke a new one: the welcome dialog
-      response_service.defer_request fullpath: "/popup/starting_step2?context=signup", format: :json, layout: "application", controller: "collection"
-      asip
+      # Process any pending notifications
+      view_context.issue_notifications current_user
+      path = stored_location_for(resource) || collection_path
+      pt = page_with_trigger "/popup/starting_step2?context=signup", path # Likely get a deferred request...
+      # If on the site, login triggers a refresh of the collection
+      response_service.url_for_redirect(pt, :format => :html)
     end
     
     def user_root_path

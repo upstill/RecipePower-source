@@ -29,7 +29,7 @@ module TriggersHelper
   # THIS INCLUDES DIALOG REQUESTS EMBEDDED IN THE URL
   def trigger_pending_modal delete_after=true
     if trigger = response_service.pending_modal_trigger
-      link_to_modal "", trigger, class: "trigger"
+      link_to_modal "", trigger, class: "trigger hide"
     end
   end
 

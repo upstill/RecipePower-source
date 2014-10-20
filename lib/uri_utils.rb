@@ -184,12 +184,3 @@ def assert_query url, format=nil, newparams={}
   uri.query = newq.blank? ? nil : newq
   uri.to_s
 end
-
-# Generate a hashtag which triggers a modal dialog
-def hash_to_modal url, base_path=nil
-  base_path ||= "/collection"
-  uri = URI.parse(url)
-  index = url.index uri.path
-  relative_url = assert_query(url[index..-1], :modal => true)
-  "#{base_path}#dialog:#{CGI::escape relative_url}"
-end

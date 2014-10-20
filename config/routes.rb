@@ -53,9 +53,10 @@ RP::Application.routes.draw do
   get 'users/profile' => 'users#profile'
   # Ask a user to identify him/herself by email address
   get 'users/identify' => 'users#identify'
-  get 'users/:id/recent' => 'users#recent'
-  get 'users/:id/collection' => 'users#collection'
-  get 'users/:id/biglist' => 'users#biglist'
+  get 'users/:id/recent' => 'users#recent', :as => "user_recent"
+  get 'users/:id/recent' => 'users#recent', :as => "user_root"
+  get 'users/:id/collection' => 'users#collection', :as => "user_collection"
+  get 'users/:id/biglist' => 'users#biglist', :as => "user_biglist"
   # get 'users/:id/show' => 'users#show'
   resources :users, :except => [:index, :create] do
     member do

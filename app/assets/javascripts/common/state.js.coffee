@@ -25,9 +25,11 @@ RP.state.check_hash = (event) ->
 		hashtag = decodeURIComponent hashtag
 		if (match = hashtag.match(/#dialog:(.*)$/)) && (url = match[1])
 			RP.submit.submit_and_process url 
+###
 	else # No hashtag: make sure there's no dialog--allowing for preloaded dialogs pending
 		if (dlog = $('div.dialog')[0]) && $(dlog).modal && !$(dlog).hasClass('modal-pending')
 			RP.dialog.close_modal dlog
+###
 
 RP.state.onDialogOpen = (dlog) ->
 	dlog_title = dlog.title || dlog.innerText

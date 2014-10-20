@@ -41,7 +41,7 @@ RP.submit.ontokenchange = ->
 RP.submit.onClick = (event) ->
 	elmt = event.currentTarget # event.toElement
 	# If the submission is made from a top-level menu, make the menu active
-	if proceedWithConfirmation elmt
+	if !$(elmt).hasClass( "loading") && proceedWithConfirmation(elmt) # This may already be loading
 		handleEnclosingNavTab elmt
 		# $(elmt).addClass('trigger') # Mark for immediate opening
 		RP.submit.submit_and_process elmt.attributes.href.value, elmt, $(elmt).data('method')
@@ -72,24 +72,29 @@ RP.submit.fromLink = (elmt) ->
 # -- being clicked (click events get here by association with the 'submit' class
 # -- having a 'preload' class, which attaches the result of the request to the element pending a subsequent click
 RP.submit.submit_and_process = ( request, elmt, method="GET" ) ->
-	unless shortCircuit request, elmt
+	unless (elmt && $(elmt).hasClass 'loading') || shortCircuit(request, elmt)
+		$(elmt).addClass 'loading'
 		$.ajax
 			type: method,
 			dataType: "json",
 			url: request,
 			error: (jqXHR, statusText, errorThrown) ->
 				# TODO Not actually posting an error for the user
-				if responseData = RP.post_error(jqXHR) # Try to recover useable data from the error
-					handleResponse elmt, responseData, statusText, errorThrown
+				$(elmt).removeClass 'loading'
+				responseData = RP.post_error(jqXHR) # Try to recover useable data from the error
+				handleResponse elmt, responseData, statusText, errorThrown
 			success: (responseData, statusText, xhr) ->
+				$(elmt).removeClass 'loading'
 				handleResponse elmt, responseData, statusText, xhr
 
 shortCircuit = (request, elmt) ->
-	if elmt && $(elmt).hasClass 'loading'# Prevent submitting the link twice
-		return true
 	data = (elmt && $(elmt).data()) || {}
 	RP.notifications.wait data['wait-msg'] # If any
 	odlog = RP.dialog.enclosing_modal elmt
+	# Three ways to short-circuit a request:
+	# 1: a dialog has been preloaded into data.preloaded
+	# 2: the response has been preloaded into data.response
+	# 3: data.selector leads to a dialog somewhere in the DOM
 	if elmt && $(elmt).hasClass("preload")
 		# The element will store either a 'response' object or a 'preloaded' dialog element
 		responseData = data.response
@@ -102,7 +107,6 @@ shortCircuit = (request, elmt) ->
 			RP.state.onAJAXSuccess event
 			$(elmt).data 'response', null
 			return true;
-		$(elmt).addClass 'loading'
 	else if data.selector && (ndlog = $(data.selector)[0]) # If dialog is already loaded, replace the responding dialog
 		$(elmt).removeClass 'trigger'
 		RP.dialog.replace_modal ndlog, odlog # Will close any existing open dialog
@@ -113,14 +117,14 @@ shortCircuit = (request, elmt) ->
 handleResponse = (elmt, responseData, status, xhr) ->
 	# Pass any data into the response data
 	RP.notifications.done()
-	$(elmt).removeClass 'loading'
 	# responseData.how ||= data.how;
 	# Elements that preload their query results stash it away, unless they also have the 'trigger' class
-	if elmt && !($(elmt).hasClass 'trigger')
-		# Save for later if not triggering now
+	if elmt && ($(elmt).hasClass 'preload') && !($(elmt).hasClass 'trigger')
+		# Save for later if this is a preload that's not triggering now
 		$(elmt).data "response", responseData
 		$(elmt).addClass 'loaded'
 	else
+		$(elmt).removeClass 'trigger'
 		RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
 		RP.process_response responseData, RP.dialog.enclosing_modal(elmt)
 

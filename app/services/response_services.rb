@@ -19,6 +19,7 @@ class ResponseServices
     @controller = params[:controller]
     @active_menu = params[:am]
     @action = params[:action]
+    @trigger = params[:trigger].sub(/^"?([^"]*)"?/, '\\1') if params[:trigger]
     @title = @controller.capitalize+"#"+@action
     @invitation_token = params[:invitation_token]
     @notification_token = params[:notification_token]
@@ -186,7 +187,7 @@ class ResponseServices
     if (!options[:format]) || (options[:format].to_sym == @request.format.symbol)  # They already match
       url
     else
-      assert_query "/redirect/go", to: url
+      assert_query "/redirect/go", to: %Q{"#{url}"}
     end
   end
 
@@ -214,7 +215,9 @@ class ResponseServices
   # If there's a deferred request that can be expressed as a trigger, do so.
   def pending_modal_trigger
     trigger =
-    if  (dr = pending_request) &&
+    if @trigger # A modal dialog has been embedded in the USL as the trigger param
+      assert_query @trigger, modal: true
+    elsif  (dr = pending_request) &&
         (dr[:format] == :json) &&
         (!dr[:controller] || dr[:controller] == @controller) &&
         (!dr[:layout] || dr[:layout] == layout)

@@ -4,11 +4,7 @@ class PagesController < ApplicationController
   respond_to :html, :json
   
   def root
-    if current_user
-      redirect_to "/users/#{current_user.id}/collection" # collection_path
-    else
-      redirect_to home_path
-    end
+    redirect_to collection_path # ...but only if current user
   end
 
   def admin
