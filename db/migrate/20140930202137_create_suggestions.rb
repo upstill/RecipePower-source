@@ -13,6 +13,6 @@ class CreateSuggestions < ActiveRecord::Migration
       t.boolean :ready, default: false # Ready now, whether it was ever launched or not
 
       t.timestamps
-    end
+    end unless ActiveRecord::Base.connection.table_exists?("suggestions")
   end
 end
