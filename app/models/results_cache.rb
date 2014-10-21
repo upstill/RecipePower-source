@@ -120,14 +120,6 @@ class ResultsCache < ActiveRecord::Base
   # As a model, it saves intermediate results to the database
   self.primary_keys = ["session_id","type"]
 
-  after_initialize do
-    # Load needed instance variables from parameters
-    self.class.params_needed.each { |key|
-      instance_variable_set("@#{key}".to_sym, params[key.to_sym])
-    } if params
-    true
-  end
-
   # scope :integers_cache, -> { where type: 'IntegersCache' }
   attr_accessible :session_id, :params, :cache, :partition
   serialize :params
@@ -138,14 +130,21 @@ class ResultsCache < ActiveRecord::Base
 
   # Get the current results cache and return it if relevant. Otherwise,
   # create a new one
-  def self.retrieve_or_build session_id, userid, querytags=[], params={}
-    if querytags.class == Hash
-      params, querytags = querytags, []
+  def self.retrieve_or_build session_id, userid, parsed_querytags=[], queryparams={}
+    unless parsed_querytags.is_a? Array
+      queryparams, parsed_querytags = parsed_querytags, []
     end
-    params = params.slice(*self.params_needed).merge querytags: querytags, userid: userid
+    # Convert from ActionController params to hash
+    params = { userid: userid } # Keep the id of the viewing user
+    self.params_needed.each { |param| params[param] = queryparams[param] if queryparams[param] }
+
     rc = self.create_with(:params => params).find_or_initialize_by session_id: session_id, type: self.to_s
     # unpack the parameters into instance variables
     params.each { |key, val| rc.instance_variable_set "@#{key}".to_sym, val }
+    # A bit of subtlety: we USE the querytags passed in that parameter, NOT the unparsed string from the query params
+    # We STORE the unparsed string just because a synthesized tag (with negative ID) doesn't serialize properly
+    rc.querytags = parsed_querytags
+
     if rc.params != params
       # Bust the cache if the params don't match
       rc.cache = rc.partition = rc.items = nil
@@ -156,7 +155,7 @@ class ResultsCache < ActiveRecord::Base
 
   # Declare the parameters needed for this class
   def self.params_needed
-    [:userid, :id, :querytags]
+    [:id, :querytags]
   end
 
   # Set the current window of attention. Requires start as first parameter; second parameter for limit is optional
@@ -228,13 +227,6 @@ class ResultsCache < ActiveRecord::Base
     raise 'Abstract Method'
   end
 
-=begin
-  # Return the query that will be augmented with querytags to filter this stream
-  def query
-    raise 'Abstract Method'
-  end
-=end
-
   # Report a previously-saved parameter (or, in fact, any instance variable)
   def param sym
     self.instance_variable_get "@#{sym}".to_sym
@@ -291,7 +283,7 @@ class UserCollectionCache < ResultsCache
           # * The Rcpref's comment matches the tag's string, OR
           # * The recipe's title matches the tag's string, OR
           # * the recipe is tagged by the tag
-          matchstr = tag.normalized_name
+          matchstr = tag.normalized_name || Tag.normalizeName(tag.name)
           # r1 = Recipe.joins(:rcprefs).where("recipes.title ILIKE ? and rcprefs.user_id = 3", "%#{matchstr}%")
           # ids1 = subscope.joins("INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE '%salmon%' and rcprefs.user_id = 3")
           # ids1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE '%#{matchstr}%' and rcprefs.user_id = 3})

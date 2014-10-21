@@ -7,7 +7,7 @@ module Querytags
     newspecial = {}
     # Accumulate resulting tags here:
     @querytags = []
-    if querytext = params.delete(:querytags)
+    if querytext = params[:querytags]
       oldspecial = session[:querytags] || {}
       querytext.split(",").each do |e|
         e.strip!

@@ -384,7 +384,7 @@ class ApplicationController < ActionController::Base
   # Otherwise, new users go to the welcome page and logged-in-before users to the queries page.
   def after_sign_in_path_for(resource_or_scope, popup = nil)
     # Process any pending notifications
-    view_context.issue_notifications resource_or_scope
+    view_context.issue_notifications current_user
     path = stored_location_for(resource_or_scope) || collection_path
     path = page_with_trigger(popup, path) if popup # Trigger the intro popup
     # If on the site, login triggers a refresh of the collection
