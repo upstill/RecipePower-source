@@ -15,7 +15,9 @@ namespace :nginx do
       template "nginx_unicorn.erb", "/tmp/nginx_conf"
       sudo "mv /tmp/nginx_conf /etc/nginx/sites-enabled/#{fetch :application}"
       sudo "rm -f /etc/nginx/sites-enabled/default"
-      sudo "service nginx restart"
+      sudo "service nginx stop"
+      sudo "rm -f /tmp/unicorn.#{fetch :application}.sock"
+      sudo "service nginx start"
     end
   end
   # after "deploy:setup", "nginx:setup"
