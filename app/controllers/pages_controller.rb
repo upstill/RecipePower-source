@@ -18,7 +18,6 @@ class PagesController < ApplicationController
     @auth_context = :manage
     # setup_collection
     render
-    x=2
   end
 
   def contact

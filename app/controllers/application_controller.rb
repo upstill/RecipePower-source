@@ -31,7 +31,9 @@ class ApplicationController < ActionController::Base
 
   # This replaces the old collections path
   def collection_path
-    current_user ? user_collection_path(current_user) : home_path
+    cp = current_user ? user_collection_path(current_user) : home_path
+    logger.debug "collection_path with#{current_user ? "" : "out"} current user is #{cp}."
+    cp
   end
 
   # Track the session, saving session events when the session goes stale
@@ -89,102 +91,6 @@ class ApplicationController < ActionController::Base
     response.cookies.each { |k, v| logger.info "#{k}: #{v}" }
     x=2
   end
-  
-=begin
-  # Get the seeker from the session store (mainly used for streaming)
-  def retrieve_seeker
-    if rc_class = session[:seeker_class]
-      setup_seeker rc_class
-    end
-  end
-
-  def setup_seeker(rc_class, options=nil, params=nil)
-    @user ||= current_user_or_guest
-    params[:cur_page] = "1" if params && params[:selected]
-    @browser = @user.browser params
-    @user.save
-    # Go back to page 1 when a new browser element is selected
-    logger.debug "Fetching #{rc_class}Seeker with session[:seeker]="+session[:seeker].to_s
-    @seeker = "#{rc_class}Seeker".constantize.new @user, @browser, session[:seeker], params # Default; other controllers may set up different seekers
-    @seeker.tagstxt = "" if options && options[:clear_tags]
-    session[:seeker] = @seeker.store
-    session[:seeker_class] = rc_class
-    logger.debug "@seeker returning #{@seeker ? 'not ' : ''}nil."
-    @seeker
-  end
-
-  # All controllers displaying the collection need to have it setup
-  def setup_collection rc_class="Content", options={}
-      @user ||= current_user_or_guest
-      @browser = @user.browser params
-      default_options = {}
-      default_options[:clear_tags] = (params[:controller] != "collection") && (params[:controller] != "stream")
-      setup_seeker rc_class, default_options.merge(options), params
-      if (params[:controller] == "pages")
-        # The search box in generic pages redirects collections, either "The Big List" for guests or
-        # the user's whole collection 
-        @browser.select_by_id(@user.guest? ? "RcpBrowserElementAllRecipes" : "RcpBrowserCompositeUser")
-        @user.save
-        @query_format = "html"
-        @query_path = collection_path
-      else
-        @query_format = "json"
-        @query_path = @seeker.query_path
-      end
-    # end
-  end
-
-  # This is one-stop-shopping for a controller using the query to filter a list
-  # See tags_controller for an example
-  # Options: selector: CSS selector for the outermost container of the rendered index template
-  def seeker_result(rc_class, frame_selector, options={})
-    def jsondata(rc_class, frame_selector, options)
-      # In a json response we just re-render the collection list for replacement
-      # If we need to replace the page, we send back a link to do it with
-      if params[:redirect]
-        { redirect: assert_popup(nil, request.original_url) }
-      else
-        begin
-          setup_seeker(rc_class, options.slice(:clear_tags, :scope), params)
-        rescue Exception => e
-          # Response to a setup error is to reload the collections page
-          flash[:error] = e.to_s
-          return { redirect: "/collection" }
-        end
-
-        # flash.now[:guide] = @seeker.guide
-        # If this is the first page, we replace the list altogether, wiring the list
-        # to stream results. If it's a subsequent page, we just set up a stream to serve that page.
-        if (@seeker.cur_page == 1)
-          replacements = [
-              view_context.flash_notifications_replacement,
-              [ frame_selector, with_format("html") { render_to_string 'index', :layout=>false } ]
-          ]
-          unless @rp_old
-            replacements << [ '.collection-navtabs', with_format("html") { render_to_string partial: "collection/navtabs", :layout=>false } ]
-            replacements << [ '.collection-header', with_format("html") { render_to_string partial: "collection/header", :layout=>false } ]
-          end
-          { replacements: replacements }
-        else
-          {  streams: [ ['#seeker_results', {path: "/stream/stream?kind=#{@seeker.class}", append: @seeker.cur_page.to_i>1}] ] }
-        end
-      end
-    end
-    respond_to do |format|
-      format.html {
-        params[:cur_page] = 1
-        setup_collection rc_class, options
-        # flash.now[:guide] = @seeker.guide
-        render :index
-      }
-      format.js do
-        @jsondata = jsondata(rc_class, frame_selector, options)
-        render template: "shared/get_content"
-      end
-      format.json { render json: jsondata(rc_class, frame_selector, options) }
-    end
-  end
-=end
 
   # Take a stream presenter and drop items into a stream, if possible and called for.
   # Otherwise, defer to normal rendering
@@ -335,7 +241,9 @@ class ApplicationController < ActionController::Base
 
   def page_with_trigger dialog, page=nil
     triggerparam = assert_query(dialog, modal: true)
-    assert_query (page || collection_path), trigger: %Q{"#{triggerparam}"}
+    pt = assert_query (page || collection_path), trigger: %Q{"#{triggerparam}"}
+    logger.debug "page_with_trigger reporting #{pt} on default page '#{page}' and collection_path '#{collection_path}'."
+    pt
   end
 
   # Enable a modal dialog to run by embedding its URL in the URL of a page, then redirecting to it
