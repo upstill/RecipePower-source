@@ -335,8 +335,7 @@ class ApplicationController < ActionController::Base
 
   def page_with_trigger dialog, page=nil
     triggerparam = assert_query(dialog, modal: true)
-    pt = assert_query((page || collection_path), trigger: %Q{"#{triggerparam}"})
-    pt
+    assert_query (page || collection_path), trigger: %Q{"#{triggerparam}"}
   end
 
   # Enable a modal dialog to run by embedding its URL in the URL of a page, then redirecting to it
@@ -383,10 +382,11 @@ class ApplicationController < ActionController::Base
   # This is an override of the Devise method to determine where to go after login.
   # If there was a re-direct to the login page, we go back to the source of the re-direct.
   # Otherwise, new users go to the welcome page and logged-in-before users to the queries page.
-  def after_sign_in_path_for(resource_or_scope)
+  def after_sign_in_path_for(resource_or_scope, popup = nil)
     # Process any pending notifications
-    view_context.issue_notifications current_user
-    path = stored_location_for(resource_or_scope) || super || collection_path
+    view_context.issue_notifications resource_or_scope
+    path = stored_location_for(resource_or_scope) || collection_path
+    path = page_with_trigger(popup, path) if popup # Trigger the intro popup
     # If on the site, login triggers a refresh of the collection
     response_service.url_for_redirect(path, :format => :html)
   end

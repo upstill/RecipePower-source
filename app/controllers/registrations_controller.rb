@@ -112,11 +112,7 @@ class RegistrationsController < Devise::RegistrationsController
     # in your own RegistrationsController.
     def after_sign_up_path_for(resource)
       # Process any pending notifications
-      view_context.issue_notifications current_user
-      path = stored_location_for(resource) || collection_path
-      pt = page_with_trigger "/popup/starting_step2?context=signup", path # Likely get a deferred request...
-      # If on the site, login triggers a refresh of the collection
-      response_service.url_for_redirect(pt, :format => :html)
+      after_sign_in_path_for resource, "/popup/starting_step2?context=signup"
     end
     
     def user_root_path
