@@ -23,13 +23,12 @@ class RecipesController < ApplicationController
       }
       fmt.json { 
         replacements = [
-          [ "."+recipe_list_element_golink_class(@recipe) ], 
-          [ "."+recipe_list_element_class(@recipe) ], 
+          [ "."+recipe_list_element_golink_class(@recipe) ],
+          [ "."+recipe_list_element_class(@recipe) ],
           [ "."+recipe_grid_element_class(@recipe) ] 
         ]
         replacements << [ "."+feed_list_element_class(@feed_entry) ] if @feed_entry
         @user = @recipe.current_user ? Recipe.find(@recipe.current_user) : current_user_or_guest
-        # @browser = current_user.browser
         if !destroyed # && current_user.browser.should_show(@recipe)
           replacements[0][1] = with_format("html") do render_to_string partial: "recipes/golink" end
           replacements[1][1] = with_format("html") do render_to_string partial: "shared/recipe_smallpic" end
@@ -42,6 +41,7 @@ class RecipesController < ApplicationController
                        title: truncated, 
                        replacements: replacements,
                        action: params[:action],
+                       domID: view_context.dom_id(@recipe),
                        processorFcn: "RP.rcp_list.update"
                      } 
       }
@@ -52,16 +52,9 @@ class RecipesController < ApplicationController
   end
 
   def index
-    redirect_to collection_url
+    redirect_to collection_path
     # return if need_login true
     # Get the collected recipes for the user named in query
-=begin
-    user = current_user_or_guest
-    @listowner = user.id
-    @recipes = user.recipes 
-    response_service.title = "#{user.handle}\'s Cookmarks"
-    @nav_current = nil
-=end
   end
 
   def show
@@ -120,7 +113,7 @@ class RecipesController < ApplicationController
         }
         format.json {
           @decorator = @recipe.decorate
-          @data = { onget: [ "submit.submit_and_process", collection_url(layout: false) ] }
+          @data = { onget: [ "submit.submit_and_process", user_collection_url(current_user, layout: false) ] }
           response_service.is_dialog
           render json: {
             dlog: with_format("html") { 
@@ -178,7 +171,7 @@ class RecipesController < ApplicationController
         if current_user          
           @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe]||{}, true, params[:extractions] # session[:user_id], params
           if @recipe.id
-            @data = { onget: [ "RP.submit.submit_and_process", collection_url(layout: false) ] } unless response_service.injector?
+            @data = { onget: [ "RP.submit.submit_and_process", user_collection_url(current_user, layout: false) ] } unless response_service.injector?
             # deferred_capture true # Delete the pending recipe
             codestr = with_format("html") { render_to_string :edit, layout: false }
           else
@@ -252,7 +245,7 @@ class RecipesController < ApplicationController
     # return if need_login true
     @recipe = Recipe.find(params[:id])
     if params[:commit] == "Cancel"
-      report_recipe collection_url, "Recipe secure and unchanged.", formats
+      report_recipe user_collection_url(current_user), "Recipe secure and unchanged.", formats
     else
       @recipe.current_user = current_user_or_guest_id # session[:user_id]
       if saved_okay = @recipe.update_attributes(params[:recipe])
@@ -260,7 +253,7 @@ class RecipesController < ApplicationController
           ref.edit_count += 1
           ref.save
         end
-        report_recipe( collection_url, "Successfully updated #{@recipe.title || 'recipe'}.", formats )
+        report_recipe( user_collection_url(current_user), "Successfully updated #{@recipe.title || 'recipe'}.", formats )
       else
         response_service.title = "Tag That Recipe (Try Again)!"
         @nav_current = nil
@@ -352,7 +345,7 @@ class RecipesController < ApplicationController
     @recipe = Recipe.ensure current_user_or_guest_id, params.slice(:id), false
     @recipe.remove_from_collection current_user_or_guest_id
     truncated = truncate(@recipe.title, :length => 40)
-    report_recipe collection_url, 
+    report_recipe user_collection_url(current_user), 
       "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections.", 
       formats
   end
@@ -362,7 +355,7 @@ class RecipesController < ApplicationController
     @recipe = Recipe.find params[:id] 
     title = @recipe.title
     @recipe.destroy
-    report_recipe collection_url, "\"#{title}\" is gone for good.", formats, true
+    report_recipe user_collection_url(current_user), "\"#{title}\" is gone for good.", formats, true
   end
 
   def revise # modify current recipe to reflect a client-side change

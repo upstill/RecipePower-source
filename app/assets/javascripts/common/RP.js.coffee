@@ -119,6 +119,13 @@ RP.findEnclosing = (tagname, elmt) ->
 		elmt = elmt.parentNode
 	elmt
 
+# Find an enclosing tag of a given name
+RP.findEnclosingByClass = (classname, elmt) ->
+	elmt = elmt.parentNode
+	while elmt && !$(elmt).hasClass(classname)
+		elmt = elmt.parentNode
+	elmt
+
 # Automatically open dialogs or click links that have 'trigger' class
 RP.fire_triggers = (context) ->
 	context ||= window.document
@@ -278,10 +285,14 @@ RP.process_response = (responseData, odlog) ->
 		# 'replacements' specifies a set of DOM elements and code to replace them
 		if replacements = responseData.replacements
 			for replacement in replacements
-				$(replacement[0]).replaceWith replacement[1]
-				if elmt = $(replacement[0])[0]
-					$('[onload]', elmt).trigger 'load'
-					RP.fire_triggers elmt # For unobtrusive triggers
+				elmt = $(replacement[0])[0]
+				if replacement[1]
+					$(elmt).replaceWith replacement[1]
+					if elmt = $(replacement[0])[0]
+						$('[onload]', elmt).trigger 'load'
+						RP.fire_triggers elmt # For unobtrusive triggers
+				else
+					RP.masonry.removeItem elmt
 				# The third value may be a function name to call on the replaced elemnnt
 				if (loader = replacement[2]) && (loadFcn = RP.named_function(loader))
 					loadFcn($(replacement[0])[0])

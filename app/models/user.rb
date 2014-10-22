@@ -70,6 +70,7 @@ class User < ActiveRecord::Base
   # login is a virtual attribute placeholding for [username or email]
   attr_accessor :login
 
+=begin
   def browser params=nil
     return @browser if @browser && !params
     # Try to get browser from serialized storage in the user record
@@ -84,7 +85,6 @@ class User < ActiveRecord::Base
     save if @browser && @browser.apply_params(params)
     @browser
   end
-=begin
 
   # Bust the browser cache due to selections changing, optionally selecting an object
   def refresh_browser(obj = nil)
@@ -124,14 +124,13 @@ class User < ActiveRecord::Base
     feeds.delete feed
     save
   end
+=end
 
   def add_list l
     l.save unless l.id
     self.lists = lists+[l] # unless self.list_ids.include?(l.id)
-    browser.select_by_content l.name_tag
     save
   end
-=end
 
   def add_collection tag, priority=nil
     self.collection_tags << tag unless collection_tags.exists?(id: tag.id)

@@ -33,8 +33,8 @@ RP.rcp_list.onload = (item) ->
 # Callback to update content in a recipe list due to JSON feedback
 RP.rcp_list.update = ( data ) ->
 	if data.action == "remove" || data.action == "destroy"
-		$('.'+data.list_element_class).remove()
-		$('.'+data.grid_element_class).remove()
+		if data.domID && elmt = $('.'+data.domID)[0]
+			RP.masonry.removeItem elmt
 	else if replacements = data.replacements
 		for replacement in replacements
 			$(replacement[0]).replaceWith replacement[1]

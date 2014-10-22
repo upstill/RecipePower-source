@@ -61,8 +61,6 @@ class FeedsController < ApplicationController
       @notice = "Now feeding you with '#{@feed.title}'."
     end
     user.feeds << @feed # Selects the feed whether previously subscribed or not
-    # @browser = user.browser params
-    # @node = @browser.selected
     respond_to do |format|
       format.js { 
         flash[:notice] = @notice 
@@ -139,7 +137,7 @@ class FeedsController < ApplicationController
         format.html { redirect_to feeds_url, :status => :see_other, notice: 'Feed was successfully updated.' }
         format.json { render json: { 
                         done: true, 
-                        replacements: [ [ "#feed"+@feed.id.to_s, with_format("html") { render_to_string partial: "feeds/index_table_row" } ] ],
+                        replacements: [ [ "#feed"+@feed.id.to_s, with_format("html") { render_to_string partial: "feeds/index_table_row", locals: { item: @feed } } ] ],
                         popup: "Feed saved" } 
                     }
       end

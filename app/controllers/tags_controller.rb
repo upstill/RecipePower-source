@@ -149,7 +149,7 @@ class TagsController < ApplicationController
               "#tagrow_#{victimidstr}", "#tagrow_#{victimidstr}HR"
           ],
           replacements: [
-             [ "#tagrow_#{@tag.id.to_s}", with_format("html") { render_to_string partial: "tags/index_table_row" } ]
+             [ "#tagrow_#{@tag.id.to_s}", with_format("html") { render_to_string partial: "tags/index_table_row", locals: { item: @tag } } ]
           ]
       }
     else

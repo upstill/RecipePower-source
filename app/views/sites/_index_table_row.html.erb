@@ -1,4 +1,5 @@
- <tr id="<%= dom_id item %>">
+<% item ||= @site %>
+<tr id="<%= dom_id item %>">
 	<td><b><%= item.name || "Defaults" %></b><br>
 		<b>Site</b>: <%= item.home %><br>
 		<b><%= show_sample item %></b><br>

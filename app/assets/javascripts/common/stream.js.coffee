@@ -43,18 +43,8 @@ RP.stream.fire = (elmt) ->
 		if handler = jdata.handler && fcn = RP.named_function
 			fcn.apply jdata
 		else if jdata.elmt
-			item = $(jdata.elmt) # Standard handling: append to the seeker_table
-			# selector = jdata.selector || '.collection_list'
-			# $(selector).append item
-			$(container_selector).append item
-			if $(container_selector).hasClass 'js-masonry'
-				masonry_selector = container_selector+'.js-masonry'
-				$(masonry_selector).masonry 'appended', item
-				# Any (hopefully few) pictures that are loaded from URL will resize the element
-				# when they appear.
-				$(item).on 'resize', (evt) ->
-					$(masonry_selector).masonry()
-				RP.rcp_list.onload $('div.collection-item',item)
+			# Standard handling: convert text to HTML and append to list
+			RP.masonry.appendItem($(jdata.elmt), container_selector)
 		else
 			RP.process_response jdata
 

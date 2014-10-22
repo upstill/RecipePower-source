@@ -59,8 +59,6 @@ class UsersController < ApplicationController
     respond_to do |format|
       format.html { redirect_to collection_path, :notice => notice }
       format.json {
-        # @browser = user.browser
-        # @node = @browser.selected
         render(
           json: {
             # processorFcn: "RP.content_browser.insert_or_select",
@@ -208,7 +206,7 @@ class UsersController < ApplicationController
       respond_to do |format|
         format.html { redirect_to collection_path }
         format.json  { 
-          listitem = with_format("html") { render_to_string( partial: "index_table_row") }
+          listitem = with_format("html") { render_to_string( partial: "index_table_row", locals: { item: @user } ) }
           handleitem = %Q{<span class="handle text-on-black">#{@user.handle}&nbsp;&or;</span>}.html_safe
           render json: {
             done: true,

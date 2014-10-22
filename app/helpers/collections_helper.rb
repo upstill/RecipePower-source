@@ -17,6 +17,7 @@ require "time_check"
 	  end
   end
 
+=begin
   # The current browser entity
   def collection_header
     @browser.selected.handle(true) +
@@ -64,4 +65,5 @@ require "time_check"
       content_tag(:ul, menu_list.html_safe, class: "dropdown-menu"),
       class: "dropdown"+(active ? " active" : "")
   end
+=end
 end

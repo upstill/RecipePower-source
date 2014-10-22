@@ -46,9 +46,10 @@ class ListsController < ApplicationController
     if @list.update_attributes(params[:list])
       respond_to do |format|
         format.html { redirect_to lists_url, :status => :see_other, notice: "'#{list.name}' was successfully updated." }
-        format.json { render json: {
+        format.json {
+          render json: {
             done: true,
-            replacements: [ [ "#list"+@list.id.to_s, with_format("html") { render_to_string partial: "lists/inde_table_row" } ] ],
+            replacements: [ [ "#list"+@list.id.to_s, with_format("html") { render_to_string partial: "lists/index_table_row", locals: { item: @list }} ] ],
             popup: "List saved" }
         }
       end

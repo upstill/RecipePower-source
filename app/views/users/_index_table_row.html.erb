@@ -1,4 +1,4 @@
-<% x=2 %>
+<% item ||= @user %>
 <% add_link = (current_user && !current_user.follows?(item)) ?
    link_to((item.channel? ? 'Add to Channels' : 'Make Friend'), collect_user_path(item), :class => "btn btn-default btn-xs") : "" %>
 <tr id="<%= dom_id item %>">

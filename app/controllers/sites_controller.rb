@@ -81,7 +81,7 @@ class SitesController < ApplicationController
                          done: true, # Denotes recipe-editing is finished
                          popup: "#{@site.name} updated",
                          replacements: [
-                           ["tr#site#{@site.id.to_s}", with_format("html") { render_to_string partial: "sites/index_table_row" }]
+                           ["tr#site#{@site.id.to_s}", with_format("html") { render_to_string partial: "sites/index_table_row", locals: { item: @site } }]
                          ]
                        } 
       }

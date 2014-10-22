@@ -62,7 +62,7 @@ module ApplicationHelper
   end
 
   def recipe_grid_element_class recipe
-    "rcpGridElmt"+recipe.id.to_s
+    "recipe_#{recipe.id}"
   end
 
   def feed_list_element_class entry
@@ -157,7 +157,7 @@ module ApplicationHelper
   end
 
   def goody_bags_menu_items
-    result = current_user.subscriptions(:own)[0..6].collect { |l|
+    result = current_user.subscriptions(:own)[0..16].collect { |l|
       navlink l.name, list_path(l), id: dom_id(l)
     }
     result + [
