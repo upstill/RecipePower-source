@@ -182,7 +182,7 @@ end
   def cookmark_count(rcp)
      count = rcp.num_cookmarks
      result = count.to_s+" Cookmark"+((count>1)?"s":"")
-     if rcp.cookmarked session[:user_id]
+     if rcp.collected_by? session[:user_id]
         result << " (including mine)"
      else
         result << ": " + 

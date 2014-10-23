@@ -23,10 +23,6 @@ class User < ActiveRecord::Base
   # attr_writer :browser
   attr_accessor :shared_recipe, :invitee_tokens, :channel_tokens, :raw_invitation_token
   
-  has_many :rcprefs, :dependent => :destroy
-  has_many :recipes, :through=>:rcprefs, :source => :entity, :source_type => "Recipe", :autosave=>true
-  # has_many :entities, :through=>:rcprefs, :autosave=>true
-
   has_many :notifications_sent, :foreign_key => :source_id, :class_name => "Notification", :dependent => :destroy
   has_many :notifications_received, :foreign_key => :target_id, :class_name => "Notification", :dependent => :destroy
 
@@ -41,6 +37,43 @@ class User < ActiveRecord::Base
 
   has_and_belongs_to_many :feeds
   has_and_belongs_to_many :lists
+
+  has_many :rcprefs, :dependent => :destroy
+  # We allow users to collect users
+  has_many :users, :through=>:rcprefs, :source => :entity, :source_type => User, :autosave=>true
+  # has_many :recipes, :through=>:rcprefs, :source => :entity, :source_type => "Recipe", :autosave=>true
+  # Class method to define instance methods for the collectible entities: those of collectible_class
+  # This is invoked by the Collectible module when it is included in a collectible class
+  def self.collectible collectible_class
+
+    asoc_name = collectible_class.to_s.pluralize.underscore
+    has_many asoc_name.to_sym, :through=>:rcprefs, :source => :entity, :source_type => collectible_class, :autosave=>true
+  end
+
+  # The User class defines collectible-entity association methods here. The Collectible class is cocnsulted, and if it has
+  # a :rcprefs method (part of the Collectible module), then the methods get defined, otherwise we punt
+  # NB All the requisite methods will have been defined IF the collectible's class has been defined (thank you, Collectible)
+  # We're really only here to deal with the case where the User class (or a user model) has been accessed before the
+  # Collectible class has been defined. Thus, the method_defined? call on the collectible class is enough to ensure the loading
+  # of that class, and hence the defining of the access methods.
+  def method_missing(meth, *args, &block)
+    meth = meth.to_s
+    collectible_class = active_record_class_from_association_method_name meth
+    begin
+      proof_method = :rcprefs
+      # puts "Extracted collectible_class '#{collectible_class}'"
+      # puts "#{collectible_class} "+(collectible_class.method_defined?(proof_method) ? "has " : "does not have ")+"'#{proof_method}' method"
+      if collectible_class.method_defined?(proof_method) && User.method_defined?(meth)
+        self.method(meth).call *args, &block
+      else
+        # puts "Failed to define method '#{meth}'"
+        super
+      end
+    rescue Exception => e
+      # puts "D'OH! Couldn't create association between User and #{collectible_class}"
+      super
+    end
+  end
 
   # Return a list of lists the user subscribes to, whether personal (:own) or public (:public)
   def subscriptions kind

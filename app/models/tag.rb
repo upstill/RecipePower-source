@@ -53,9 +53,10 @@ class Tag < ActiveRecord::Base
     # Class method to define instance methods for the taggable entities: those of taggable_class
     # This is invoked by the Taggable module when it is included in a taggable
     def self.taggable taggable_class
-      puts "Making Taggable: #{taggable_class}"
+
       taggable_type = taggable_class.to_s.underscore
       ids_method_name = "#{taggable_type}_ids"
+
       define_method taggable_type.pluralize do |uid=nil|
         taggable_class.where id: self.method(ids_method_name).call(uid)
       end

@@ -60,3 +60,8 @@ def string_to_class string
 rescue NameError
   nil
 end
+
+def active_record_class_from_association_method_name methstr
+  methstr = methstr.to_s.sub( /[<=]*$/, '').sub(/_ids$/, '')
+  methstr.singularize.camelize.constantize
+end

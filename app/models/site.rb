@@ -3,6 +3,7 @@ require './lib/uri_utils.rb'
 
 class Site < ActiveRecord::Base
   include Taggable
+  include Collectible
 
   include Linkable # Required by Picable
   linkable :home, :reference

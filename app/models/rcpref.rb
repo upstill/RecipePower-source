@@ -20,6 +20,7 @@ class Rcpref < ActiveRecord::Base
     puts "Ensuring uniqueness of user #{self.user_id.to_s} to recipe #{self.entity_id.to_s}"
   end
 
+=begin
   # get an array of recipe ids from a user, subject to permissions and status, with appropriate ordering
   # owner_id can be:
   #   nil => all recipes in the world
@@ -78,7 +79,6 @@ class Rcpref < ActiveRecord::Base
     end
   end
 
-=begin
 
   StatusRotationMask = 0x1
   StatusFavoritesMask = 0x2

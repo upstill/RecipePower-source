@@ -31,11 +31,17 @@ class Referent < ActiveRecord::Base
     has_and_belongs_to_many :channels, -> { uniq }, :class_name => "Referent", :foreign_key => "channel_id", :join_table => "channels_referents"
     
     has_many :referments, :dependent => :destroy, :inverse_of => :referent
-    # What can we get to through the referments?
+    # What can we get to through the referments? Each class that includes the Referrable module should be in this list
     @@referment_associations = [:references, :recipes]
     @@referment_associations.each { |assoc|
       has_many assoc, :through => :referments, :source => :referee, :source_type => assoc.to_s.singularize.capitalize
     }
+
+=begin
+    def self.referrable klass
+      has_many klass.to_s.pluralize.underscore, :through => :referments, :source => :referee, :source_type => klass
+    end
+=end
 
     attr_accessible :tag, :type, :description, :isCountable, :dependent,
         :expressions_attributes, :add_expression, :tag_id,

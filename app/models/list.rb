@@ -55,6 +55,7 @@ class List < ActiveRecord::Base
   commentable :notes
   include Taggable
   include Typeable
+  include Collectible
 
   typeable( :availability,
             public: ["Anyone (Public)", 0 ],
