@@ -123,7 +123,8 @@ module Linkable
           # Get the existing reference
           if options[:as]
             # The reference is to another entity type: we just index by URL and assign the reference association
-            self.method(:"#{reference_association}=").call (pu.blank? ? nil : ref_type.constantize.find_or_initialize(pu).first)
+            ref = pu.blank? ? nil : ref_type.constantize.find_or_initialize(pu).first
+            self.method(:"#{reference_association}=").call ref
           elsif pu.blank?
             self.errors.add("#{url_attribute} can't be blank")
           else
@@ -142,7 +143,7 @@ module Linkable
 
         define_method(url_attribute) do
           # This will cause an exception for entities without a corresponding reference
-          ((reference = self.method(reference_association).call) && reference.url) ||
+          ((reference = self.method(reference_association).call) && reference.digested_reference) ||
           (super() if self.has_attribute?(url_attribute))
         end
 

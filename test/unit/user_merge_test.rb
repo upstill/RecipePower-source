@@ -12,6 +12,7 @@ class UserMergeTest < ActiveSupport::TestCase
     user2.about = "Some words about User2"
     user2.image = "data:kwljerkjk"
 
+    img = user2.image
     dish1 = create(:recipe)
     dish2 = create(:recipe)
     dish3 = create(:recipe)
@@ -21,8 +22,6 @@ class UserMergeTest < ActiveSupport::TestCase
 
     dish2.touch true, user2
     dish3.touch true, user2
-    # user2.recipes << dish2
-    # user2.recipes << dish3
 
     fr1 = create(:user, username: "Follower1")
     fr2 = create(:user, username: "Follower2")
@@ -40,8 +39,8 @@ class UserMergeTest < ActiveSupport::TestCase
     user2.followees << fe2
     user2.followees << fe3
 
-    assert_equal 2, user1.recipes.count, "# recipes of user1 not right"
-    assert_equal 2, user2.recipes.count, "# recipes of user2 not right"
+    assert_equal 2, user1.collection_size, "# recipes of user1 not right"
+    assert_equal 2, user2.collection_size, "# recipes of user2 not right"
     assert_equal 2, user1.followees.count, "# followees of user1 not right"
     assert_equal 2, user2.followees.count, "# followees of user2 not right"
     assert_equal 2, user1.followers.count, "# followers of user1 not right"
@@ -61,7 +60,7 @@ class UserMergeTest < ActiveSupport::TestCase
       assert_equal ActiveRecord::RecordNotFound, e.class, "Deleting channel didn't delete user"
     end
     user1.reload
-    assert_equal 3, user1.recipes.count, "After merge, # recipes of user1 not right"
+    assert_equal 3, user1.collection_size, "After merge, # recipes of user1 not right"
     assert_equal 3, user1.followers.count, "After merge, # followers of user1 not right"
     assert_equal 3, user1.followees.count, "After merge, # followees of user1 not right"
     assert_equal "Some words about User2", user1.about, "Merge copied about inappropriately"

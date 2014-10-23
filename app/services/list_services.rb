@@ -44,8 +44,8 @@ class ListServices
     list = nil
     channel_list.each { |user|
       list = List.assert user.channel.name, superu, create: true
-      user.recipes.each { |rcp|
-        list.include(rcp) unless list.include?(rcp)
+      user.entities.each { |entity|
+        list.include(entity) unless list.include?(entity)
       }
       list.tags = user.tags
       list.save
@@ -54,8 +54,8 @@ class ListServices
       if user.id != User.super_id
         user.collection_tags.each { |tag|
           list = List.assert tag.name, user, create: true
-          tag.recipes(user.id).each { |rcp|
-            list.include(rcp) unless list.include?(rcp)
+          tag.recipes(user.id).each { |entity|
+            list.include(entity) unless list.include?(entity)
           }
         }
       end

@@ -17,15 +17,16 @@ class User < ActiveRecord::Base
   # before_save :serialize_browser
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :id, :username, :first_name, :last_name, :fullname, :about, :login, :private, :skip_invitation,
+  attr_accessible :id, :username, :first_name, :last_name, :fullname, :about, :login, :private, :skip_invitation, :thumbnail_id,
                 :email, :password, :password_confirmation, :shared_recipe, :invitee_tokens, :channel_tokens, # :image,
                 :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens, :subscription_tokens, :invitation_issuer
   # attr_writer :browser
   attr_accessor :shared_recipe, :invitee_tokens, :channel_tokens, :raw_invitation_token
   
   has_many :rcprefs, :dependent => :destroy
-  has_many :recipes, :through=>:rcprefs, :autosave=>true
-  
+  has_many :recipes, :through=>:rcprefs, :source => :entity, :source_type => "Recipe", :autosave=>true
+  # has_many :entities, :through=>:rcprefs, :autosave=>true
+
   has_many :notifications_sent, :foreign_key => :source_id, :class_name => "Notification", :dependent => :destroy
   has_many :notifications_received, :foreign_key => :target_id, :class_name => "Notification", :dependent => :destroy
 
@@ -173,6 +174,7 @@ class User < ActiveRecord::Base
   # :sort_by = :collected => order recipes by when they were collected (as opposed to recently touched)
   # :status => Select for recipes with this status or lower
   # :public => Only public recipes
+=begin
   def recipe_ids_g options={}
     constraints = {:user_id => id}
     constraints[:in_collection] = true unless options[:all]
@@ -189,6 +191,7 @@ class User < ActiveRecord::Base
       collection
     end
   end
+=end
 
   # Scope for the items in the user's collection
   def collection_scope options={}
@@ -199,7 +202,7 @@ class User < ActiveRecord::Base
     Rcpref.where(constraints) # .order(ordering+" DESC")
   end
 
-  def recipes_collection_size
+  def collection_size
     Rcpref.where(:user_id => id).count
   end
 

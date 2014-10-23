@@ -23,7 +23,7 @@ class Tag < ActiveRecord::Base
         List: ["List", 16]
     )
     
-    attr_accessible :name, :id, :tagtype, :isGlobal, :links, :recipes, :referents, :users, :owners, :primary_meaning
+    attr_accessible :name, :id, :tagtype, :isGlobal, :links, :referents, :users, :owners, :primary_meaning # , :recipes
     
     has_many :taggings, :dependent => :destroy
     
@@ -50,28 +50,51 @@ class Tag < ActiveRecord::Base
         other.normalized_name == self.normalized_name && ((other.tagtype==0) || (other.tagtype == self.tagtype))    
     end
 
-    # Get the recipes which the given user can see through this tag
-    # TODO: Migrate this to general taggables
-    def recipes(uid=nil)
-      Recipe.where id: recipe_ids(uid)
+    # Class method to define instance methods for the taggable entities: those of taggable_class
+    # This is invoked by the Taggable module when it is included in a taggable
+    def self.taggable taggable_class
+      puts "Making Taggable: #{taggable_class}"
+      taggable_type = taggable_class.to_s.underscore
+      ids_method_name = "#{taggable_type}_ids"
+      define_method taggable_type.pluralize do |uid=nil|
+        taggable_class.where id: self.method(ids_method_name).call(uid)
+      end
+
+      define_method ids_method_name do |uid=nil|
+        scope = taggings.where entity_type: taggable_class
+        scope = scope.where(:user_id => uid) if uid
+        scope.map(&:entity_id).uniq
+      end
     end
-    
-    def recipe_ids(uid=nil)
-      constraints = { tag_id: id, entity_type: "Recipe" }
-      constraints[:user_id] = uid if uid
-      Tagging.where(constraints).map &:entity_id
+
+    # The Tag class defines taggable-entity association methods here. The Taggable class is cocnsulted, and if it has
+    # a :tag_with method (part of the Taggable module), then the methods get defined, otherwise we punt
+    # NB All the requisite methods will have been defined IF the taggable's class has been defined (thank you, Taggable)
+    # We're really only here to deal with the case where the Tag class (or a tag model) has been accessed before the
+    # taggable class has been defined. Thus, the method_defined? call on the taggable class is enough to ensure the loading
+    # of that class, and hence the defining of the access methods.
+    def method_missing(meth, *args, &block)
+      meth = meth.to_s
+      # methstr = meth
+      # methstr = ":#{methstr}" if meth.is_a? Symbol
+      # puts "Tag method '#{methstr}' missing"
+      taggable_class = ((match = meth.match(/(.+)_ids/)) ? match[1] : meth).singularize.camelize.constantize
+      begin
+        proof_method = :tag_with
+        # puts "Extracted taggable_class '#{taggable_class}'"
+        # puts "#{taggable_class} "+(taggable_class.method_defined?(proof_method) ? "has " : "does not have ")+"'#{proof_method}' method"
+        if taggable_class.method_defined?(proof_method) && Tag.method_defined?(meth)
+          self.method(meth).call *args, &block
+        else
+          # puts "Failed to define method '#{methstr}'"
+          super
+        end
+      rescue Exception => e
+        # puts "D'OH! Couldn't create association between Tag and #{taggable_class}"
+        super
+      end
     end
-    
-    def users(uid=nil)
-      User.where id: user_ids(uid)
-    end
-    
-    def user_ids(uid=nil)
-      constraints = { tag_id: id, entity_type: "User" }
-      constraints[:user_id] = uid if uid
-      Tagging.where(constraints).map &:entity_id
-    end
-    
+
     # When a tag is asserted into the database, we do have minimal sanitary standards:
     #  no leading or trailing whitespace
     #  all internal whitespace is replaced by a single space character

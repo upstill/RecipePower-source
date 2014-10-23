@@ -10,6 +10,8 @@ module Taggable
     has_many :taggers, :through => :taggings, :class_name => "User"
     attr_accessor :current_user
     attr_reader :tag_tokens
+
+    Tag.taggable self
   end
   
   # The tags will be owned by the declared user. Classes can override this method

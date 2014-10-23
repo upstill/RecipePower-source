@@ -5,7 +5,7 @@
 	<td><%= link_to_modal item.handle, user_path(item) %></td>
 	<td><%= item.about %></td>
 	<td><%= taggable_list item %></td>
-	<td><%= item.recipes_collection_size %></td>
+	<td><%= item.collection_size %></td>
 	<td><%= add_link %></td>
 	<% if permitted_to? :edit, item %>
 		<td><%= link_to_modal 'Edit', edit_user_path(item), :class => "btn btn-default btn-xs" %></td>

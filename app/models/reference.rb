@@ -3,7 +3,7 @@ class Reference < ActiveRecord::Base
   include Referrable
   include Typeable
 
-  attr_accessible :reference_type, :type, :url
+  attr_accessible :reference_type, :type, :url, :affiliate_id
 
   validates_uniqueness_of :url, :scope => :type
   
@@ -23,6 +23,11 @@ class Reference < ActiveRecord::Base
   )
 
   public
+
+  # By default, the reference gives up its url, but may want to use something else, like image data
+  def digested_reference
+    url
+  end
 
   # Convert back and forth between class and typenum (for heeding type selections)
   def self.type_to_class typenum=0
@@ -101,6 +106,9 @@ class Reference < ActiveRecord::Base
       params[:url] = url
     end
     # IMPORTANT! the type of reference is determined from the invoked class if not given specifically
+    if url.match(/^data:/)
+      return [ self.create_with(url: url, canonical: true).find_or_create_by( type: "ImageReference", thumbdata: url) ]
+    end
     params[:type] ||= self.to_s
 
     # Normalize the url for lookup
@@ -114,7 +122,7 @@ class Reference < ActiveRecord::Base
       case refs.count
         when 0
           # Need to create, if possible
-          if !(redirected = test_url normalized)
+          if !(redirected = test_url normalized) # Purports to be a url, but doesn't work
             refs = [self.new(params)] # Initialize a record just to report the error
             refs.first.errors.add :url, "\'#{url}\' doesn't seem to be a working URL. Can you use it as an address in your browser?"
           else
@@ -312,8 +320,9 @@ class ImageReference < Reference
 
   def self.find_or_initialize url, params={}
     candidates = super
+    candidates.map &:fetchable
     # Check all the candidates for a data: URL, and return the canonical one or the first one, if none is canonical
-    [candidates.inject(candidates.first) { |memo, cand| cand.fetchable; memo = cand if cand.canonical }]
+    [ (candidates.find &:canonical || candidates.first) ]
   end
 
   # Provide suitable content for an <img> element: preferably data, but possibly a url or even (if the data fetch fails) nil
@@ -321,6 +330,7 @@ class ImageReference < Reference
     url_usable = fetchable # fetchable may set the thumbdata
     thumbdata || (url if url_usable)
   end
+  alias_method :digested_reference, :imgdata
 
   # Try to fetch the thumbnail data for the record. Status code assigned in ImageReference#fetchable and Reference#fetch
   def perform

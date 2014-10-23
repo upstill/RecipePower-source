@@ -31,9 +31,12 @@ class Referent < ActiveRecord::Base
     has_and_belongs_to_many :channels, -> { uniq }, :class_name => "Referent", :foreign_key => "channel_id", :join_table => "channels_referents"
     
     has_many :referments, :dependent => :destroy, :inverse_of => :referent
-    has_many :references, :through => :referments, :source => :referee, :source_type => "Reference"
-    has_many :recipes, :through => :referments, :source => :referee, :source_type => "Recipe"
-    
+    # What can we get to through the referments?
+    @@referment_associations = [:references, :recipes]
+    @@referment_associations.each { |assoc|
+      has_many assoc, :through => :referments, :source => :referee, :source_type => assoc.to_s.singularize.capitalize
+    }
+
     attr_accessible :tag, :type, :description, :isCountable, :dependent,
         :expressions_attributes, :add_expression, :tag_id,
         :parents, :children, :parent_tokens, :child_tokens, :typeindex
@@ -55,8 +58,12 @@ class Referent < ActiveRecord::Base
       other.children.each { |child| children << child }
       other.parents.each { |parent| parents << parent }
       other.expressions.each { |expr| self.express expr.tag }
-      other.recipes.each { |rcp| self.recipes << rcp }
-      other.references.each { |rfc| self.references << rfc }
+      # Whatever entities can be reached through referments, copy those
+      @@referment_associations.each { |assoc|
+        collection_method = assoc.to_s.pluralize.to_sym
+        collection = self.method(collection_method).call
+        other.method(collection_method).call.each { |entity| collection << entity }
+      }
       other.channels.each { |channel| self.channels << channel }
       if (self.is_a? ChannelReferent) && (other_user = other.associate)
         # When merging channels, the mergee's user's data, including recipes, need to be associated with this channel's user
