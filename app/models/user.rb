@@ -98,6 +98,45 @@ class User < ActiveRecord::Base
     lists.include? list
   end
 
+  # Include the entity in the user's collection
+  def collect entity
+    touch entity, true
+  end
+
+  def collected? entity
+    rcprefs.exists? entity: entity, in_collection: true
+  end
+
+  def uncollect entity
+    if ref = (rcprefs.where entity: entity, in_collection: true).first
+      ref.in_collection = false
+      ref.save
+    end
+  end
+
+  # Remember that the user has (recently) touched the entity, optionally adding it to the collection
+  def touch entity=nil, collect=false
+    return super unless entity
+    ref = rcprefs.create_with(in_collection: collect).find_or_initialize_by entity_type: entity.class, entity_id: entity.id
+    if ref.created_at # Existed prior
+      if (Time.now - ref.created_at) > 5
+        ref.created_at = ref.updated_at = Time.now
+        ref.in_collection ||= collect
+        Rcpref.record_timestamps=false
+        ref.save
+        Rcpref.record_timestamps=true
+      elsif collect && !ref.in_collection # Just touch if previously saved
+        ref.in_collection = true
+        ref.save
+      else
+        ref.touch
+      end
+    else # Just save the reference
+      ref.save
+    end
+  end
+
+  # TODO: remove collections after they've been migrated to lists
   has_many :private_subscriptions, -> { order "priority ASC" }, :dependent=>:destroy
   has_many :collection_tags, :through => :private_subscriptions, :source => :tag, :class_name => "Tag"
   
@@ -160,6 +199,7 @@ class User < ActiveRecord::Base
   end
 =end
 
+  # TODO: This should be collect(l)
   def add_list l
     l.save unless l.id
     self.lists = lists+[l] # unless self.list_ids.include?(l.id)
@@ -426,10 +466,10 @@ public
   before_save :qa
 
   # Make sure we have this particular user (who had better be in the seed list)
-  def self.by_name (name)
-    self.where("username = ?", name.to_s).first
+  def self.by_name name
+    self.where(username: name.to_s).first
   end
-  
+
   # Return a 2-array of 1) the list of possible roles, and 2) the current role,
   # suitable for passing to options_for_select
   def role_select
@@ -598,7 +638,8 @@ public
       self.about = other_user.about if about.blank?
       other_user.followers.each { |follower| self.followers << follower }
       other_user.followees.each { |followee| self.followees << followee }
-      other_user.recipes.each { |recipe| recipe.touch true, self }
+      # Adopt all the collected entities of the other user
+      other_user.rcprefs.where(in_collection: true).each { |rr| collect rr.entity }
       other_user.feeds.each { |feed| self.feeds << feed }
       save
     end

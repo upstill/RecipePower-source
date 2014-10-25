@@ -1,11 +1,11 @@
 require 'reference.rb'
 
 class RecipeServices
-  attr_accessor :current_user, :recipe
+  attr_accessor :recipe # , :current_user
   
   def initialize(recipe, current_user=nil)
     @recipe = recipe
-    @current_user = current_user
+    # @current_user = current_user
   end
 
   # Find all recipes that are redundant (ie., they have the same canonical url as another) and merge them into the one that already owns the URL.

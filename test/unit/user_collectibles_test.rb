@@ -46,4 +46,33 @@ class UserCollectiblesTest < ActiveSupport::TestCase
     assert user.users.empty?
 
   end
+
+  test "User-side collection" do
+    user = users(:thing1)
+    rcp = recipes(:rcp)
+    assert user.recipes.empty?
+    user.touch rcp
+    # Touching the recipe shouldn't mean it's in the collection
+    refute user.rcprefs.first.in_collection
+
+    # ...though it will be among the rcprefs and the recipes
+    assert_equal 1, user.rcprefs.size
+    assert_equal rcp, user.recipes.first
+
+    user.collect rcp
+    # NOW it should be in the collection
+    assert user.rcprefs.first.in_collection
+    assert_equal 1, user.rcprefs.size
+    assert_equal 1, rcp.users.size
+    assert_equal 1, user.recipes.size
+
+    user.collect rcp  # Can only collect it once
+    assert_equal 1, user.rcprefs.size
+    assert_equal 1, rcp.users.size
+    assert_equal 1, user.recipes.size
+
+    # Uncollecting it still leaves it touched
+    user.uncollect rcp
+    refute user.rcprefs.first.in_collection
+  end
 end
