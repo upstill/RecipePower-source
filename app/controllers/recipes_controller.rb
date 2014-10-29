@@ -121,12 +121,6 @@ class RecipesController < ApplicationController
           }
         }
       end
-=begin
-      report_recipe(  
-        edit_recipe_url(@recipe), 
-        "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br> You might want to confirm the title and picture, and/or tag it?".html_safe,
-        formats )
-=end
     else # failure (not a valid recipe) => return to new
        response_service.title = "Cookmark a Recipe"
        @nav_current = :addcookmark
@@ -278,7 +272,7 @@ class RecipesController < ApplicationController
       list_element_body = render_to_string partial: "shared/recipe_smallpic"
       format.json { 
           render json: { touch_class: touch_date_class(@recipe), 
-                         touch_body: touch_date_elmt(@recipe), 
+                         touch_body: touch_date_elmt(@recipe, current_user_or_guest.id), 
                          list_element_class: recipe_list_element_class(@recipe),
                          list_element_body: list_element_body
                        } 
@@ -290,16 +284,10 @@ class RecipesController < ApplicationController
     end
   end
 
-  def untag
-    x=1
-    @recipe = Recipe.find params[:recipe_id]
-    tag_id = params[:id].to_i
-    tag_ids = @recipe.tag_ids owner_id: current_user.id
-    tag_ids = tag_ids.delete_if { |id| id == tag_id }
-    @recipe.tag_ids = { owner_id: current_user.id, tag_ids: tag_ids }
-    @recipe.save
-    @recipe.reload
-    tag_ids = @recipe.tag_ids owner_id: current_user.id
+  # Delete the recipe from the user's list
+  def uncollect
+    @recipe = Recipe.find params[:id]
+    @recipe.remove_from_collection current_user.id
     @jsondata = {
         replacements: [
             [ "div.rcpGridElmt"+@recipe.id.to_s, "" ]
@@ -311,7 +299,16 @@ class RecipesController < ApplicationController
       format.js { render template: "shared/get_content" }
     end
   end
-  
+
+  def remove
+    @recipe = Recipe.find params[:id]
+    current_user.uncollect @recipe
+    truncated = truncate(@recipe.title, :length => 40)
+    report_recipe user_collection_url(current_user),
+                  "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections.",
+                  formats
+  end
+
   # Add a recipe to the user's collection without going to edit tags. Full-page render is just collection page
   # GET recipes/:id/collect
   def collect
@@ -341,16 +338,6 @@ class RecipesController < ApplicationController
     else # Nobody logged in; defer the collection and render with login dialog
       login_required "You need to be logged in to collect recipes."
     end
-  end
-
-  # Delete the recipe from the user's list
-  def remove
-    @recipe = Recipe.find params[:id]
-    current_user.uncollect @recipe
-    truncated = truncate(@recipe.title, :length => 40)
-    report_recipe user_collection_url(current_user), 
-      "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections.", 
-      formats
   end
 
   # Remove the recipe from the system entirely

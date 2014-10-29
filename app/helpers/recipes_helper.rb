@@ -57,12 +57,12 @@ module RecipesHelper
   end
 
   def recipe_comments_div recipe, whose
-    user = User.find recipe.tag_owner
+    user = User.find recipe.collectible_user_id
     comments =
     case whose
     when :mine
       header_text = "My Comments"
-      (commstr = recipe.comment user.id) ? [ { body: commstr } ] : [] 
+      (commstr = recipe.collectible_comment) ? [ { body: commstr } ] : [] 
     when :friends
       header_text = "Comments of Friends"
       user.followee_ids.collect { |fid| 
@@ -71,7 +71,7 @@ module RecipesHelper
       }.compact
     when :others
       header_text = "Comments of Others"
-      Rcpref.where(entity_id: recipe.id).
+      Rcpref.where(entity: recipe).
         where("comment <> '' AND private <> TRUE").
         where("user_id not in (?)", user.followee_ids<<user.id).collect { |rref|
           { source: rref.user.handle, body: rref.comment }
@@ -97,9 +97,8 @@ def edit_recipe_link( label, recipe, options={})
       rcpChannelData: recipe.channel_data, # recipe.tags.map(&:attributes).to_json,
       rcpPicURL: recipe.picurl,
       rcpURL: recipe.url,
-      rcpPrivate: recipe.private ? %q{checked="checked"} : "",
-      rcpComment: recipe.comment,
-      # rcpStatus: recipe.status,
+      rcpPrivate: recipe.private(current_user_or_guest.id ? %q{checked="checked"} : ""),
+      rcpComment: recipe.comment(current_user_or_guest.id),
       authToken: form_authenticity_token
     }
     options[:class] = "edit_recipe_link "+(options[:class] || "")
@@ -182,7 +181,7 @@ end
   def cookmark_count(rcp)
      count = rcp.num_cookmarks
      result = count.to_s+" Cookmark"+((count>1)?"s":"")
-     if rcp.collected_by? session[:user_id]
+     if current_user_or_guest.collected? rcp
         result << " (including mine)"
      else
         result << ": " + 

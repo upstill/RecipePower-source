@@ -2,9 +2,6 @@ module TaggableHelper
   
   # Generalization of taggable_field for arbitrary attribute names (not just 'tags'--the default), and allowing
   #   for both form_for and simple_form fields as well as for raw objects
-  # Convention MUST BE HONORED! For a tag attribute named 'tag'('tags'):
-  #   1) tags can be set by 'tag_token='('tag_tokens=') -- this is the name of the field
-  #   2) the text for the field can be read from and written to 'tagtxt' ('tagstxt')
 
   def token_input_field f, tags_attribute_name="tags", options={}
     if tags_attribute_name.is_a? Hash

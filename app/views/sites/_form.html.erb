@@ -13,6 +13,14 @@
         </div>
         <div class="row">
           <div class="col-md-12">
+              <%= f.hidden_field :collectible_user_id %>
+              <%= f.input :collectible_comment, label: "Comment" %>
+              <%= f.check_box :collectible_private %>
+              <%= f.label :collectible_private, "Private (for my eyes only)" %>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
             <%# f.input :site %>
             <%= f.input :home %>
             <%# if params[:action] != "edit" %>
@@ -20,7 +28,8 @@
             <%# f.input :subsite %>
             <%= f.input :sample %>
             <%# f.input :logo %>
-            <%= token_input_field f %>
+            <%= f.hidden_field :tagging_user_id %>
+            <%= token_input_field f, :taggings %>
           </div>
         </div>
         <div class="row">

@@ -1,7 +1,7 @@
 require "Domain"
 require './lib/controller_utils.rb'
 require './lib/string_utils.rb'
-require 'suggestion_presenter'
+# require 'suggestion_presenter'
 
 module ApplicationHelper
   include ActionView::Helpers::DateHelper
@@ -75,15 +75,13 @@ module ApplicationHelper
   end
 
   # Present the date and time the recipe was last touched by its current user
-  def touch_date_elmt recipe
-    if params[:controller] == "collection"
-      stmt = @seeker.timestamp recipe
-    elsif td = recipe.touch_date
+  def touch_date_elmt entity, uid
+    if td = entity.touch_date( uid)
       stmt = "Last touched/viewed #{time_ago_in_words td} ago."
     else
       stmt = "Never touched or viewed"
     end
-    content_tag :span, stmt, class: touch_date_class(recipe)
+    content_tag :span, stmt, class: touch_date_class(entity)
   end
 
   # Create a popup selection list for adding a rating to the tags
@@ -98,7 +96,7 @@ module ApplicationHelper
       render("shared/" + association.to_s.singularize + "_fields_" + inex.to_s, :f => builder)
     end
     # Collect the options from the available ratings, each having
-    # value equal to the scale's id, with a title from the scale's name, so 
+    # value equal to the scale's id, with a title from the scale's name, so
     # that the javascript function can use it in the rating label(s)
     opcs = Scale.find(:all).collect { |s|
       # Only allow selection of scales that are unrated thus far
@@ -332,7 +330,7 @@ module ApplicationHelper
     end
   end
 
-  # Wrap a link in a link to invitations/diversion, so as to report 
+  # Wrap a link in a link to invitations/diversion, so as to report
   # the invitee getting diverted to the reference
   def invitation_diversion_link url, invitee
     divert_user_invitation_url(invitation_token: invitee.raw_invitation_token, url: CGI::escape(url))

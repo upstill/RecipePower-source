@@ -65,7 +65,7 @@ class VotesController < ApplicationController
       elmts = request.path.split('/')
       entity_type, entity_id = elmts[-2], elmts[-1]
       @vote = Vote.where(
-          entity_type: entity_type.singularize.capitalize,
+          entity_type: entity_type.singularize.camelize,
           entity_id: entity_id,
           user_id: current_user.id
       ).first_or_initialize

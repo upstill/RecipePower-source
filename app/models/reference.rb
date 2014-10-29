@@ -118,33 +118,28 @@ class Reference < ActiveRecord::Base
       ref.errors.add :url, "can't be blank"
       refs = [ref]
     else
-      refs = Reference.where type: params[:type], :url => normalized
-      case refs.count
-        when 0
-          # Need to create, if possible
-          if !(redirected = test_url normalized) # Purports to be a url, but doesn't work
-            refs = [self.new(params)] # Initialize a record just to report the error
-            refs.first.errors.add :url, "\'#{url}\' doesn't seem to be a working URL. Can you use it as an address in your browser?"
-          else
-            # No reference to be found under the given (normalized) URL -> create one, and possibly its canonical reference as well
-            # The goal is to ensure access through any given link that resolves to the same URL after normalization and any redirection.
-            # We achieve this by creating references, each pointing to the same affiliate, on at most two URLS:
-            #  1) the original URL (after normalization), so identical references wind up with the identical affiliate; and
-            #  2) the URL as redirected by the site in question (and again normalized), so that future URLS that redirect
-            #   to the same place get to the same affiliate.
-            # NB: It's true that we could simply use the redirected URL for looking up a reference, but that would require
-            #  hitting the site every time that URL was referenced. This way, we only have to take the redirection once, and
-            #  the Reference class remembers the mapping.
-            refs = Reference.where(type: params[:type], url: redirected).to_a
-            refs = [ Reference.new(type: params[:type], url: redirected) ] if refs.empty?
-            (canonical = refs.first).canonical = true # Make the redirected reference be canonical, and first
-            # Now we create a new reference, aliased to that of the canonical reference by making their affiliate id's the same
-            refs << Reference.new(type: params[:type], :url => normalized, affiliate_id: canonical.affiliate_id ) if normalized != redirected
-          end
-        when 1
+      refs = Reference.where( type: params[:type], :url => normalized).order "canonical DESC"
+      if refs.empty?
+        # Need to create, if possible
+        if !(redirected = test_url normalized) # Purports to be a url, but doesn't work
+          refs = [self.new(params)] # Initialize a record just to report the error
+          refs.first.errors.add :url, "\'#{url}\' doesn't seem to be a working URL. Can you use it as an address in your browser?"
         else
-          # > 1 found: make the canonical ref, if any, first
-          refs.sort! { |r1, r2| r1.canonical ? -1 : 1 }
+          # No reference to be found under the given (normalized) URL -> create one, and possibly its canonical reference as well
+          # The goal is to ensure access through any given link that resolves to the same URL after normalization and any redirection.
+          # We achieve this by creating references, each pointing to the same affiliate, on at most two URLS:
+          #  1) the original URL (after normalization), so identical references wind up with the identical affiliate; and
+          #  2) the URL as redirected by the site in question (and again normalized), so that future URLS that redirect
+          #   to the same place get to the same affiliate.
+          # NB: It's true that we could simply use the redirected URL for looking up a reference, but that would require
+          #  hitting the site every time that URL was referenced. This way, we only have to take the redirection once, and
+          #  the Reference class remembers the mapping.
+          refs = Reference.where(type: params[:type], url: redirected).to_a
+          refs = [ Reference.new(type: params[:type], url: redirected) ] if refs.empty?
+          (canonical = refs.first).canonical = true # Make the redirected reference be canonical, and first
+          # Now we create a new reference, aliased to that of the canonical reference by making their affiliate id's the same
+          refs << Reference.new(type: params[:type], :url => normalized, affiliate_id: canonical.affiliate_id ) if normalized != redirected
+        end
       end
     end
     refs

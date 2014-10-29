@@ -764,7 +764,7 @@ class SiteServices
                       @site.name = field_val
                       @site.save
                     when "Author Name"
-                      TaggingServices.new(@site).tag_with field_val, tagger: User.super_id, type: "Author"
+                      TaggingServices.new(@site).tag_with field_val, User.super_id, type: "Author"
                       @site.save
                     when "Author Link"
                       # Add a reference to the author, if any

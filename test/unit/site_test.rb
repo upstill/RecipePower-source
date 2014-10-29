@@ -64,7 +64,18 @@ class SiteTest < ActiveSupport::TestCase
     test "Home page has correct sample and site" do
       site = Site.by_link "http://bladebla.com/"
       assert_equal site.sample, "/", "Home page should have '/' as sample"
-      assert !(site.site =~ /\/$/), "Home page shouldn't produce site ending in '/'"
+      refute (site.site =~ /\/$/), "Home page shouldn't produce site ending in '/'"
     end
+
+  test "Home page established and maintained" do
+    site = Site.find_or_create "http://bladebla.com"
+    # Should now have two references, the canonical one without the slash, and a second one with
+    assert_equal "http://bladebla.com/", site.home
+    site.home = "http://bladebla.com"
+    assert_equal "http://bladebla.com/", site.home
+    site.home = "http://bladebla.com/"
+    assert_equal "http://bladebla.com/", site.home
+  end
+
 
 end

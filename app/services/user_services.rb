@@ -63,28 +63,6 @@ class UserServices
     result
   end
 
-=begin
-  def self.tagify_status
-    User.all.each { |user| self.new(user).tagify_status }
-  end
-
-  # Convert the status markers for recipes into a collection
-  def tagify_status
-    statusval = 1
-    tags = []
-    ['Now Cooking', 'Keepers', 'To Try' ].each do |tagname|
-      # Assert user's inclusion in tag
-      # For each recipe of that status, apply appropriate tag
-      add_collection (tags[statusval] = Tag.assert(tagname, userid: id)), statusval
-      statusval *= 2
-    end
-    Rcpref.where(status: [1,2,4], user_id: id).each do |rr|
-      rr.recipe.tag_with tags[rr.status], id
-    end
-    refresh_browser
-  end
-=end
-
   # Called on signup to initialize the user
   def sign_up
     # Give the user a starting set of collections and friends

@@ -7,8 +7,8 @@
     </div>
     <div class="recipe_fields_div">
       <div class="recipe_tags_div">
-        <%= f.label :tag_tokens, "Tags", :class => "recipe_field_label" -%>
-        <%= f.text_field :tag_tokens, "data-pre" => @recipe.tags.map(&:attributes).to_json %>
+        <%= f.label :tagging_tokens, "Tags", :class => "recipe_field_label" -%>
+        <%= f.text_field :tagging_tokens, "data-pre" => @recipe.tags.map(&:attributes).to_json %>
       </div>
       <div class="recipe_comment_div">
         <%= f.label :comment, "Notes", :class => "recipe_field_label" -%>

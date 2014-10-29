@@ -1,5 +1,8 @@
 
 class SitesController < ApplicationController
+  include CollectibleActions
+  include TaggableActions
+
   # GET /sites
   # GET /sites.json
   def index
@@ -15,28 +18,18 @@ class SitesController < ApplicationController
     @user = current_user_or_guest
     @site = Site.find(params[:id])
     @decorator = @site.decorate
+    @decorator.viewer_id = @user.id
     response_service.title = @site.name
     
-    # Setup to display the feeds for the site
-    @feeds = @site.feeds
-    @seeker = FeedSeeker.new @user, @feeds, session[:seeker] # Default; other controllers may set up different seekers
-
     smartrender modal: true # :how => :modal
-=begin
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @site }
-    end
-=end
   end
 
   # GET /sites/new
   # GET /sites/new.json
   def new
-      # return if need_login true, true
-    @site = Site.new
+    # return if need_login true, true
+    prep_params
     response_service.title = "New Site"
-
     respond_to do |format|
       format.html # new.html.erb
       format.json { render json: @site }
@@ -46,7 +39,7 @@ class SitesController < ApplicationController
   # GET /sites/1/edit
   def edit
     # return if need_login true, true
-    @site = Site.find(params[:id].to_i)
+    prep_params # Give collectible and taggable a chance to set up their parameters
     response_service.title = @site.name
     smartrender area: "floating"
   end
@@ -55,10 +48,9 @@ class SitesController < ApplicationController
   # POST /sites.json
   def create
       # return if need_login true, true
-    @site = Site.new(params[:site])
-
     respond_to do |format|
-      if @site.save
+      accept_params
+      if !@site.errors.any?
         format.html { redirect_to @site, notice: 'Site was successfully created.' }
         format.json { render json: @site, status: :created, location: @site }
       else
@@ -71,10 +63,9 @@ class SitesController < ApplicationController
   # PUT /sites/1
   # PUT /sites/1.json
   def update
-      # return if need_login true, true
-    @site = Site.find(params[:id])
+    accept_params
     respond_to do |format|
-      if @site.update_attributes(params[:site])
+      if !@site.errors.any?
         format.html { redirect_to @site, notice: 'Site was successfully updated.' }
         format.json { 
           render json: { 
@@ -95,10 +86,9 @@ class SitesController < ApplicationController
   # DELETE /sites/1
   # DELETE /sites/1.json
   def destroy
-      # return if need_login true, true
-    @site = Site.find(params[:id])
+    # return if need_login true, true
+    @site = Site.find params[:id]
     @site.destroy
-
     respond_to do |format|
       format.html { redirect_to sites_url }
       format.json { head :ok }
@@ -118,8 +108,6 @@ class SitesController < ApplicationController
       else
         @site.save
         @user = current_user
-        @seeker = FeedSeeker.new @user, @feeds, session[:seeker] # Default; other controllers may set up different seekers
-        flash.now[:notice] = view_context.list_feeds("Scraped", nlist)
         render action: :show
       end
     else

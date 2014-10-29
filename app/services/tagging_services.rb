@@ -53,8 +53,7 @@ class TaggingServices
 
   # Assert a tag associated with the given tagger. If a tag
   # given by name doesn't exist, make a new one
-  def tag_with tag_or_string, options={}
-    tagger_id = options[:tagger] || @taggable_entity.tag_owner
+  def tag_with tag_or_string, tagger_id, options={}
     if tag_or_string.is_a? String
       tags = Tag.strmatch tag_or_string, matchall: true, tagtype: options[:type], assert: true, userid: tagger_id
       tag = tags.first

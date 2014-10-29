@@ -8,16 +8,14 @@ class Rcpref < ActiveRecord::Base
   # before_save :ensure_unique
   attr_accessible :comment, :entity_id, :user_id, :in_collection, :updated_at, :created_at
 
-  # Present the time-since-touched in a text format
-  def self.touch_date(rid, uid)
-    if rr = Rcpref.where(entity_id: rid, user_id: uid).first
-      rr.updated_at
-    end
-  end
-
   # When saving a "new" use, make sure it's unique
   def ensure_unique
     puts "Ensuring uniqueness of user #{self.user_id.to_s} to recipe #{self.entity_id.to_s}"
+  end
+
+  def uncollect
+    self.in_collection = false
+    save
   end
 
 =begin

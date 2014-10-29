@@ -10,8 +10,6 @@ class RecipeDecorator < TaggableDecorator
     when /^rcp/
       attrname = fieldname.sub( /^rcp/, '').downcase
       case attrname
-      when "private"
-        object.private ? %q{checked="checked"} : ""
       when "picsafeurl"
         object.picurl.blank? ? "/assets/NoPictureOnFile.png" : object.picurl
       when "titlelink"

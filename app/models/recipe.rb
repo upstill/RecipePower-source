@@ -18,7 +18,7 @@ class Recipe < ActiveRecord::Base
   include Picable
   picable :picurl, :picture
 
-  attr_accessible :title, :ratings_attributes, :description, :comment, :private, #, :tagpane, :status, :alias, :picurl :href
+  attr_accessible :title, :ratings_attributes, :description, #, :comment, :private, :tagpane, :status, :alias, :picurl :href
                   :misc_tag_tokens, :collection_tokens, :channel_tokens, :url
 
   validates :title, :presence => true
@@ -53,7 +53,7 @@ class Recipe < ActiveRecord::Base
   # If a new recipe record needs to be created, we also do QA on the provided URL
   # and dig around for a title, description, etc.
   # Either way, we also make sure that the recipe is associated with the given user
-  def self.ensure(userid, params, add_to_collection = true, extractions = nil)
+  def self.ensure params, extractions = nil
     if params[:id]
       # Recipe exists and we're just touching it for the user
       rcp = Recipe.find params[:id]
@@ -98,14 +98,6 @@ class Recipe < ActiveRecord::Base
         else
           RecipeServices.new(rcp).robotags = extractions  # Set tags, etc., derived from page
         end
-      end
-    end
-    # If all is well, make sure it's on the user's list
-    if rcp.errors.empty?
-      rcp.save
-      if userid && rcp.id
-        rcp.current_user = userid # Default for subsequent operations
-        rcp.touch add_to_collection
       end
     end
     rcp
@@ -203,11 +195,11 @@ class Recipe < ActiveRecord::Base
   # We divide the tag fields of a recipe into collections, channels, and other tags
 
   def misc_tags
-    tags tagtype_x: [11, 15]
+    tags tagging_user_id, tagtype_x: [11, 15]
   end
 
   def misc_tag_tokens
-    tag_tokens tagtype_x: [11, 15]
+    tag_tokens tagging_user_id, tagtype_x: [11, 15]
   end
 
   def misc_tag_tokens= tokenstr
@@ -252,106 +244,5 @@ class Recipe < ActiveRecord::Base
     options[:tagtype] = 11
     tag_data options
   end
-
-=begin
-  def status uid=nil
-    (ref = rcpref uid, false) ? ref.status : MyConstants::Rcpstatus_misc
-  end
-
-  # Presented as an integer related to @@statuses
-  def status=(val)
-    rcpref(@current_user, true).status = val.to_i
-  end
-=end
-
-# Currently unused functionality for parsing and annotation
-  @@DoSpans
-
-  # This stores the edited tagpane for the recipe--or maybe not. The main
-  # purpose is to parse the HTML to extract any tags embedded therein, 
-  # particularly those available from the hRecipe format. These become
-  # the 'robo-tags' for the recipe.
-  def tagpane=(str)
-    ou = Nokogiri::HTML str
-    newtags = []
-    oldtags = self.tag_ids
-    ou.css(".name").each { |child|
-      str = child.content.to_s
-      # Look up the tag and/or create it
-      tag = Tag.strmatch(str, self.current_user || User.guest_id, :Food, true)
-      newtags << tag.id unless oldtags.include? tag.id
-      x=2
-    }
-    if newtags.length
-      self.tag_ids= oldtags + newtags
-      self.save
-    end
-    super
-  end
-
-  # Parse the given html for tags and other keys,
-  # guided by the specified class. Return a modified tree,
-  # marked with that class and <possibly> with embedded subclasses.
-  # NB: this is the entry point for turning HTML into a tagified 
-  # form, at all levels of the tree.
-  def self.parse(html, kind)
-    # We use Nokogiri to get the DOM tree
-    ou = Nokogiri::HTML html
-    # Possible symbols taken from Google's microformats spec.
-    if kind.to_sym == :hrecipe
-      # Try to parse the whole thing. Right now, we just:
-      # 1) look for the 'hrecipe' tag, returning that tree if it exists
-      # 2) clean up the tree, i.e., remove all tags
-      # except those which declare one of the parsing entities
-      html = RPDOM.DOMstrip (ou.css(".hrecipe").first || ou), 0
-      # Declare it preformatted to preserve EOLs
-      html = "<pre>#{html}</pre>"
-    elsif RPDOM.allowable kind.to_sym
-      html = RPDOM.DOMstrip ou, 0
-      html = "<span class=\"#{kind.to_s.html_safe}\">#{html}</span>"
-      # when :fn # Recipe title
-      # when :photo
-      # when :ingredients
-      # when :ingredient
-      # when :amount
-      # when :quantity
-      # when :unit
-      # when :conditions
-      # when :condition
-      # when :name
-      # else
-      # when :recipeType  e.g., appetizer, entree, dessert
-      # when :published  ISO Date Format: http://www.w3.org/QA/Tips/iso-date
-      # when :summary
-      # when :review  Can include nested review information http://support.google.com/webmasters/bin/answer.py?answer=146645
-
-      # See http://en.wikipedia.org/wiki/ISO_8601#Durations for ISO Duration Format
-      # when :prepTime
-      # when :cookTime
-      # when :totalTime
-
-      # when :nutrition
-      # "These elements are not explicitly part of the hRecipe microformat,
-      # but Google will recognize them."
-      # when :servingSize
-      # when :calories
-      # when :fat
-      # when :saturatedFat
-      # when :unsaturatedFat
-      # when :carbohydrates
-      # when :sugar
-      # when :fiber
-      # when :protein
-      # when :cholesterol
-      # when :instructions
-      # when :instruction
-      # when :yield
-      # when :author # Can include nested Person information
-    end
-    # Having modified the tree, we spell it out as HTML (assuming it's not
-    # already been so expressed)
-    html || ou.to_s
-  end
-
 
 end

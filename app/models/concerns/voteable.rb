@@ -22,7 +22,7 @@ module Voteable
     upvotes/nvotes if nvotes > 0
   end
 
-  def vote up, user=nil
+  def vote up, user
     Vote.vote self, up, user
   end
 

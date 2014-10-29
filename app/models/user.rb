@@ -104,20 +104,17 @@ class User < ActiveRecord::Base
   end
 
   def collected? entity
-    rcprefs.exists? entity: entity, in_collection: true
+    rcprefs.exists? user: self, entity: entity, in_collection: true
   end
 
   def uncollect entity
-    if ref = (rcprefs.where entity: entity, in_collection: true).first
-      ref.in_collection = false
-      ref.save
-    end
+    rcprefs.where(user: self, entity: entity, in_collection: true).map(&:uncollect)
   end
 
   # Remember that the user has (recently) touched the entity, optionally adding it to the collection
   def touch entity=nil, collect=false
     return super unless entity
-    ref = rcprefs.create_with(in_collection: collect).find_or_initialize_by entity_type: entity.class, entity_id: entity.id
+    ref = rcprefs.create_with(in_collection: collect).find_or_initialize_by user_id: id, entity_type: entity.class, entity_id: entity.id
     if ref.created_at # Existed prior
       if (Time.now - ref.created_at) > 5
         ref.created_at = ref.updated_at = Time.now
@@ -277,11 +274,6 @@ class User < ActiveRecord::Base
 
   def collection_size
     Rcpref.where(:user_id => id).count
-  end
-
-  # This override means that all taggings are owned by super, visible to all users
-  def tag_owner
-    User.super_id
   end
 
 private

@@ -110,14 +110,6 @@ class Referent < ActiveRecord::Base
         Referent.all.collect { |ref| ref.parents.empty? && (ref.typenum==tagtype) && ref }.each { |tl| tl.dump if tl }
     end
     
-    # Notify this referent of an association with some resource.
-    # Since there's no intrinsic connection between any referents and any resources,
-    # this one is strictly for overriding by subclasses
-    def notice_resource(resource)
-        # !!! This is where we pass a resource event to any associated channels !!!
-        channels.each { |ch| ch.notice_resource resource }
-    end
-    
     # Dump a specified referent with the given indent
     def dump indent = "", path = []
         if path.include? self.id
@@ -241,7 +233,12 @@ class Referent < ActiveRecord::Base
         # 1) specified by string or id, rather than a tag object
         # 2) of a different type, or 
         # 3) not already global
+        name = tag.is_a?(String) ? tag : tag.name
         tag = Tag.assert tag, tagtype: self.typenum
+        if tag.name != name
+          tag.name = name # We may be setting the name to something that matches an existing tag
+          tag.save
+        end
         
         # Promote the tag to the canonical expression on this referent if needed
         if (args[:form] == :generic) || !self.canonical_expression
@@ -274,7 +271,7 @@ class Referent < ActiveRecord::Base
       unique_referents = tag.referents.collect { |ref|
           [(ref.parents if doParents), (ref.children if doChildren)]
       }.flatten.compact.uniq - tag.referents
-       tag_ids = unique_referents.collect { |ref| ref.tag_id }
+      tag_ids = unique_referents.collect { |ref| ref.tag_id }
       tag_ids = tag_ids + tag.referents.collect { |ref| ref.tag_id } if doSynonyms
       tag_ids.uniq.delete_if{ |id| id == tag.id }.collect{ |id| Tag.find id }
     end
@@ -444,7 +441,7 @@ end
 
 class ChannelReferent < Referent ; 
   has_one :user, :dependent => :destroy
-  attr_accessible :user, :tag_token, :tag_tokens, :user_attributes
+  attr_accessible :user, :user_attributes
   accepts_nested_attributes_for :user
   
   before_validation :check_tag
@@ -482,11 +479,6 @@ class ChannelReferent < Referent ;
         self.canonical_expression = Tag.find token.to_i # Existing tag
       end
     end
-  end
-  
-  # When a resource is tagged with one of this referent's tags, add it to the collection of the channel user
-  def notice_resource(resource)
-    resource.kind_of?(Recipe) && user && (resource.touch(true, user.id))
   end
 
   # This is a pre-validation check on the tag selected for a channel. The user can either select an existing tag

@@ -79,8 +79,8 @@ class Tag < ActiveRecord::Base
       # methstr = meth
       # methstr = ":#{methstr}" if meth.is_a? Symbol
       # puts "Tag method '#{methstr}' missing"
-      taggable_class = ((match = meth.match(/(.+)_ids/)) ? match[1] : meth).singularize.camelize.constantize
       begin
+        taggable_class = ((match = meth.match(/(.+)_ids/)) ? match[1] : meth).singularize.camelize.constantize
         proof_method = :tag_with
         # puts "Extracted taggable_class '#{taggable_class}'"
         # puts "#{taggable_class} "+(taggable_class.method_defined?(proof_method) ? "has " : "does not have ")+"'#{proof_method}' method"

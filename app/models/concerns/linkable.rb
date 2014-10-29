@@ -126,7 +126,7 @@ module Linkable
             ref = pu.blank? ? nil : ref_type.constantize.find_or_initialize(pu).first
             self.method(:"#{reference_association}=").call ref
           elsif pu.blank?
-            self.errors.add("#{url_attribute} can't be blank")
+            self.errors.add(url_attribute, "can't be blank")
           else
             # Create a new reference (or references, if there's a redirect involved) as necessary
             refs = ref_type.constantize.find_or_initialize(pu)

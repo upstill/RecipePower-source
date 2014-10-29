@@ -141,7 +141,7 @@ RP::Application.routes.draw do
 
   resources :recipes do
     resources :tags do
-      member { post 'remove', :to => 'recipes#untag' }
+      member { post 'remove', :to => 'recipes#uncollect' }
     end
     member do
       get 'collect'

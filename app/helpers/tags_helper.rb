@@ -225,7 +225,8 @@ BLOCK_END
   end
 
   # Present a collection of tags, by type
-  def show_tags fields
+  def show_tags fields, viewer_id=nil
+    viewer_id ||= User.super_id
     fields.collect { |field|
       if field.is_a? Array
         field, label = field[0], field[1]
@@ -234,7 +235,7 @@ BLOCK_END
         extension = label.pluralize.sub label, ''
         label << "(#{extension})" unless extension.blank?
       end
-      render "tags/show_labelled", label: label, name: field
+      render "tags/show_labelled", label: label, name: field, viewer_id: viewer_id
     }.join('').html_safe
   end
 

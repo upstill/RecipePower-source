@@ -47,12 +47,12 @@ class RecipeServices
     ts = nil
     if author = extractions["Author Name"]
       ts ||= TaggingServices.new @recipe
-      ts.tag_with author, tagger: User.super_id, type: "Author"
+      ts.tag_with author, User.super_id, type: "Author"
     end
     if tagstring = extractions["Tags"]
       ts ||= TaggingServices.new @recipe
       tagstring.split(',').collect { |tagname| tagname.strip!; tagname if (tagname.length>0) }.compact.each { |tagname|
-        ts.tag_with tagname, tagger: User.super_id
+        ts.tag_with tagname, User.super_id
       }
     end
   end

@@ -4,118 +4,49 @@ module Taggable
   extend ActiveSupport::Concern
 
   included do
-    attr_accessible :tag_tokens
     has_many :taggings, :as => :entity, :dependent => :destroy
-    # has_many :tags, :through => :taggings
+    has_many :tags, :through => :taggings
     has_many :taggers, :through => :taggings, :class_name => "User"
-    attr_accessor :current_user
-    attr_reader :tag_tokens
+    attr_accessor :tagging_user_id, :tagging_tags, :tagging_tokens
+    attr_accessible :tagging_user_id, :tagging_tags, :tagging_tokens
 
     Tag.taggable self
   end
-  
-  # The tags will be owned by the declared user. Classes can override this method
-  # as desired
-  def tag_owner
-    current_user || User.super_id
+
+  # Define an editable field of taggings by the current user on the entity
+  def define_user_taggings user_id
+    self.tagging_user_id = user_id
+    self.tagging_tags = tags_by_user user_id
   end
 
-  def tagstxt
-    @tagstxt ||= ""
+  # Ensure that the user taggings get associated with the entity
+  # Interpret the set of tag tokens into a list of tags ready to turn into taggings
+  def accept_user_taggings
+    return unless tagging_user_id
+    asserted = # Map the elements of the token string to tags, whether existing or new
+        TokenInput.parse_tokens(tagging_tokens) do |token| # parse_tokens analyzes each token in the list as either integer or string
+          case token
+            when Fixnum
+              Tag.find token
+            when String
+              Tag.strmatch(token, userid: tagging_user_id, assert: true)[0] # Match or assert the string
+          end
+        end
+    set_tags tagging_user_id, asserted
   end
-  alias_method :tagtxt, :tagstxt
 
-  def tagstxt= tt
-    @tagstxt = tt
+  def tags_visible_to uid=nil, opts = {}
+    uid = uid.to_i if uid.is_a? String
+    uid, opts = nil, uid if uid.is_a? Hash
+    tags_by_user uid, opts
   end
-  alias_method :"tagtxt=", :"tagstxt="
-
-  # Fetch the tags associated with the entity, possibly with constraints of userid and type
-  def tags opts = {}
-    options = opts.clone # Don't muck with the options
-    if tt = options.delete(:tagtype)
-      Tag.where id: tag_ids(options), tagtype: Tag.typenum(tt)
-    elsif nt = options.delete(:tagtype_x)
-      tags = Tag.where.not tagtype: Tag.typenum(nt)
-      tags.where( id: tag_ids(options))
-    else
-      Tag.where id: tag_ids(options)
-    end
-  end
-  alias_method :tag, :tags
-
-  # Fetch the ids of the tags associated with the entity
-  def tag_ids options={}
-    taggings.where(:user_id => (options[:owner_id] || tag_owner)).map &:tag_id
-  end
-  alias_method :tag_id, :tag_ids
-
-  # Set the tags associated with the entity
-  def tags= tags
-    # Ensure that the user's tags are all and only those given
-    self.tag_ids=tags.map(&:id)
-  end
-  alias_method :"tag=", :"tags="
-
-  # Set the tag ids associated with the current user
-  def tag_ids= nids
-    if nids.is_a? Hash
-      owner = nids[:owner_id]
-      nids = nids[:tag_ids]
-    else
-      owner = tag_owner
-    end
-    # Ensure that the user's tags are all and only those in nids
-    oids = tag_ids owner_id: owner
-    to_add = nids - oids
-    to_remove = oids - nids
-    # Add new tags as necessary
-    to_add.each { |tagid| Tagging.create(user_id: owner, tag_id: tagid, entity_id: id, entity_type: self.class.name) }
-    # Remove tags as nec.
-    to_remove.each { |tagid| Tagging.where(user_id: owner, tag_id: tagid, entity_id: id, entity_type: self.class.name).map(&:destroy) } # each { |tg| tg.destroy } }
-  end
-  alias_method :"tag_id=", :"tag_ids="
 
   # Associate a tag with this entity in the domain of the given user (or the tag's current owner if not given)
-  def tag_with tag, who=nil
-    who ||= tag_owner
-    Tagging.create(user_id: who, tag_id: tag.id, entity_id: id, entity_type: self.class.name) unless tag_ids(owner_id: who).include? tag.id
-  end
-
-  # Write the virtual attribute tag_tokens (a list of ids) to
-  # update the real attribute tag_ids. To apply constraints, the token string
-  # is passed as a member of a hash.
-  def tag_tokens= tokenstr
-    if tokenstr.is_a? Hash
-      constraints = tokenstr.clone
-      tokenstr = constraints.delete :tokenstr
-    else
-      constraints = {}
-    end
-    constraints[:userid] = tag_owner
-    constraints[:assert] = true
-    asserted =
-    TokenInput.parse_tokens(tokenstr) do |token| # parse_tokens analyzes each token in the list as either integer or string
-      case token
-      when Fixnum
-        Tag.find token
-      when String
-        Tag.strmatch(token, constraints)[0] # Match or assert the string
-      end
-    end
-    # If we're asserting tokens OF A PARTICULAR TYPE(S), we need to leave the other types untouched.
-    # We do this by augmenting the declared set appropriately
-    if constraints[:tagtype] # Restricting to certain types: don't touch the others
-      constraints[:tagtype_x] = constraints.delete :tagtype
-      self.tags = asserted + tags(constraints)
-    elsif constraints[:tagtype_x] # Excluding certain types => don't touch them
-      constraints[:tagtype] = constraints.delete :tagtype_x
-      self.tags = asserted + tags(constraints)
-    else
-      self.tags = asserted
+  def tag_with tag, who
+    unless get_tag_ids(who).include? tag.id
+      Tagging.create(user_id: who, tag_id: tag.id, entity_id: id, entity_type: self.class.name)
     end
   end
-  alias_method :"tag_token=", :"tag_tokens="
 
   # Declare a data structure suitable for passing to RP.tagger.init
   def tag_data options={}
@@ -126,4 +57,49 @@ module Taggable
     data[:query][:tagtype_x] = Tag.typenum(options[:tagtype_x]) if options[:tagtype_x]
     data.to_json
   end
+
+protected
+
+  # Fetch the tags associated with the entity, possibly with constraints of userid and type
+  def tags_by_user uid, opts = {}
+    uid = uid.to_i if uid.is_a? String
+    uid, opts = nil, uid if uid.is_a? Hash
+    tagscope = Tag.unscoped
+    tagscope = tagscope.where(tagtype: Tag.typenum(opts[:tagtype])) if opts[:tagtype]
+    tagscope = tagscope.where.not(tagtype: Tag.typenum(opts[:tagtype_x])) if opts[:tagtype_x]
+    # Tag.where.not(tagtype: Tag.typenum(nt)).where id: get_tag_ids(uid, options)
+    tagging_constraints = { entity: self }
+    # tagging_constraints[:user_id] = uid if uid
+    tagscope.joins(:taggings).where taggings: tagging_constraints
+  end
+
+  # Set the tags associated with the entity
+  def set_tags uid, tags=nil
+    # May call without a uid, which defaults to super
+    uid = uid.to_i if uid.is_a? String
+    uid, tags = User.super_id, uid unless tags
+    # Ensure that the user's tags are all and only those given
+    set_tag_ids uid, tags.map(&:id)
+  end
+
+  # Set the tag ids associated with the given user
+  def set_tag_ids uid, nids
+    # Ensure that the user's tags are all and only those in nids
+    oids = get_tag_ids uid
+    to_add = nids - oids
+    to_remove = oids - nids
+    # Add new tags as necessary
+    to_add.each { |tagid| Tagging.create(user_id: uid, tag_id: tagid, entity_id: id, entity_type: self.class.name) }
+    # Remove tags as nec.
+    to_remove.each { |tagid| Tagging.where(user_id: uid, tag_id: tagid, entity_id: id, entity_type: self.class.name).map(&:destroy) } # each { |tg| tg.destroy } }
+  end
+
+  # Fetch the ids of the tags associated with the entity
+  def get_tag_ids uid, options={}
+    uid = uid.to_i if uid.is_a? String
+    uid, options = nil, uid if uid.is_a? Hash
+    scope = uid ? taggings : taggings.where(:user_id => uid)
+    scope.map &:tag_id
+  end
+
 end

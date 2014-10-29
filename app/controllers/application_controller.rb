@@ -26,14 +26,42 @@ class ApplicationController < ActionController::Base
     helper_method :response_service
     helper_method :orphantagid
     helper_method :stored_location_for
+    helper_method :collection_path
 
     include ApplicationHelper
 
-  # This replaces the old collections path
+  def accept_params
+    @user = current_user_or_guest
+    modelname = params[:controller].sub( /_controller$/, '').singularize
+    objclass = modelname.camelize.constantize
+    if params[:id]
+      entity = objclass.find params[:id]
+      entity.update_attributes params[modelname.to_sym]
+    else
+      entity = objclass.new params[modelname.to_sym]
+      entity.save
+    end
+    instance_variable_set :"@#{modelname}", entity
+    entity
+  end
+
+  # Set up a model for editing, whether new or fetched
+  def prep_params
+    @user = current_user_or_guest
+    modelname = params[:controller].sub( /_controller$/, '').singularize
+    objclass = modelname.camelize.constantize
+    if params[:id]
+      entity = objclass.find params[:id]
+    else
+      entity = objclass.new
+    end
+    instance_variable_set :"@#{modelname}", entity
+    entity
+  end
+
+  # This replaces the old collections path, providing a path to either the current user's collection or home
   def collection_path
-    cp = current_user ? user_collection_path(current_user) : home_path
-    logger.debug "collection_path with#{current_user ? "" : "out"} current user is #{cp}."
-    cp
+    current_user ? user_collection_path(current_user) : home_path
   end
 
   # Track the session, saving session events when the session goes stale
