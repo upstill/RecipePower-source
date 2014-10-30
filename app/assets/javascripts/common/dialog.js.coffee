@@ -22,64 +22,6 @@ RP.dialog.arm_links = (dlog) ->
 			if fcn = RP.named_function "RP." + requirement + ".bind"
 				fcn.apply()
 
-
-###  This is old dialog-submission functionality, now subsumed into RP.submit
-# Before making a dialog request, see if the dialog is preloaded
-RP.dialog.beforeSend = (event, xhr, settings) ->
-	odlog = RP.dialog.target_modal event
-	# xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))
-	if $(this).hasClass 'loading'
-		return true; # Prevent submitting the link twice
-	if (selector = $(this).data 'selector') &&
-		  (ndlog = $(selector)[0]) # If dialog is already loaded, replace the responding dialog
-		RP.dialog.replace_modal event.result = ndlog, odlog
-		RP.state.onAJAXSuccess event
-		return false;
-	if $(this).hasClass("preload")
-		responseData = $(this).data "response"
-		if ndlog = $(this).data("preloaded") || (responseData && responseData.dlog)
-			RP.dialog.push_modal( ndlog, odlog) # RP.dialog.replace_modal $(this), RP.dialog.target_modal(event)
-			return false;
-		else if responseData
-			RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
-			RP.process_response responseData, odlog
-			RP.state.onAJAXSuccess event
-			$(this).data 'response', null
-			return false;
-		$(this).addClass 'loading'
-	return true; # Proceed normally
-
-# Hit the server for a dialog via JSON, and run the result
-# This function can be tied to a link with only a URL to a controller for generating a dialog.
-# We will get the div and run the associated dialog.
-RP.dialog.get_and_go = (request) ->
-	# old_dlog is extracted from what triggered this call (if any)
-	if RP.dialog.beforeSend event
-		$.ajax
-			type: "GET",
-			dataType: "json",
-			url: request,
-			error: (jqXHR, textStatus, errorThrown) ->
-				RP.dialog.error event, jqXHR, textStatus, errorThrown
-			success: (responseData, statusText, xhr) ->
-				RP.dialog.success event, responseData, statusText, xhr
-
-# Success handler for fetching dialog from server
-RP.dialog.success = (event, responseData, status, xhr) ->
-	if $(this).hasClass 'preload'
-		$(this).data "response", responseData
-		$(this).removeClass('loading').addClass 'loaded'
-		false # i.e., we didn't close the parent dialog
-	else
-		RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
-		RP.process_response responseData, RP.dialog.target_modal(event)
-
-RP.dialog.error = (event, jqXHR, status, error) ->
-	$('.preload', this).removeClass('loading')
-	responseData = RP.post_error jqXHR
-	RP.process_response responseData, RP.dialog.target_modal(event)
-###
-
 RP.dialog.close = (event) ->
 	if event
 		if dlog = RP.dialog.target_modal(event)

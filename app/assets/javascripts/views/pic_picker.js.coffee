@@ -1,11 +1,5 @@
 RP.pic_picker ||= {}
 
-###
-RP.pic_picker.arm = (event) ->
-
-	$(dlog).on 'preload', 'a.pic_picker_golink', ->
-###
-
 mylink = () ->
 	$('a.pic_picker_golink')
 

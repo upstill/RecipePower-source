@@ -131,8 +131,7 @@ RP.fire_triggers = (context) ->
 	context ||= window.document
 	# Links with class 'trigger' and 'submit' get fired
 	$('a.trigger', context).each (ix, elmt) ->
-		RP.submit.fromLink elmt
-
+		RP.submit.onClick elmt
 	# Dialogs with class 'trigger' get autoloaded
 	$('div.dialog.trigger', context).removeClass("trigger").each (ix, dlog) ->
 		RP.dialog.run dlog
@@ -296,14 +295,6 @@ RP.process_response = (responseData, odlog) ->
 				# The third value may be a function name to call on the replaced elemnnt
 				if (loader = replacement[2]) && (loadFcn = RP.named_function(loader))
 					loadFcn($(replacement[0])[0])
-
-    ###
-		if streams = responseData.streams
-			for stream in streams
-				if !stream[1].append
-					$(stream[0]).empty()
-				RP.stream.fire stream[1].kind, stream[1].append
-    ###
 
 		if redirect = responseData.redirect
 			window.location.assign redirect # "http://local.recipepower.com:3000/collection" #  href = href

@@ -25,11 +25,6 @@ RP.state.check_hash = (event) ->
 		hashtag = decodeURIComponent hashtag
 		if (match = hashtag.match(/#dialog:(.*)$/)) && (url = match[1])
 			RP.submit.submit_and_process url 
-###
-	else # No hashtag: make sure there's no dialog--allowing for preloaded dialogs pending
-		if (dlog = $('div.dialog')[0]) && $(dlog).modal && !$(dlog).hasClass('modal-pending')
-			RP.dialog.close_modal dlog
-###
 
 RP.state.onDialogOpen = (dlog) ->
 	dlog_title = dlog.title || dlog.innerText
@@ -40,14 +35,6 @@ RP.state.onDialogOpen = (dlog) ->
 RP.state.onAJAXSuccess = (event, responseData, status, xhr) ->
 	if $(dlog = event.result).hasClass('dialog')
 		RP.state.postDialog dlog, event.target.href, (event.target && event.target.innerText)
-###
-		target_title = (event.target && event.target.innerText) || dlog.title || dlog.innerText
-		window_url = window.location.pathname+window.location.search+"#dialog:"+getEncodedPathFromURL(event.target.href)
-		#  if !$(event.result).hasClass 'historic'
-		RP.state.ignorePopEvent = true
-		history.replaceState (history.state || document.title), target_title, window_url
-		document.title = target_title
-###
 
 # Make the window title and history reflect an incoming dialog
 RP.state.postDialog = (dlog, href, target_title) ->

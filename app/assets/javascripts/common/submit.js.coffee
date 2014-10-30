@@ -17,10 +17,8 @@ RP.submit.bind = (dlog) ->
 	dlog ||= $('body') # window.document
 	# Set up processing for click events on links with a 'submit' class
 	$(dlog).on "click", 'a.submit', RP.submit.onClick
-	# Designate RP.submit.onLoad() to handle load events for '.preload' links
-	$(dlog).on "preload", 'a.preload', RP.submit.onLoad
-	# ...annnnnd FIRE!
-	$('.preload', dlog).trigger "preload"
+	$('.preload', dlog).each (ix, elmt) ->
+		fire elmt
 	$(dlog).on "ajax:beforeSend", 'form.submit', RP.submit.beforeSend
 	$(dlog).on "ajax:success", 'form.submit', RP.submit.success
 	$(dlog).on "ajax:error", 'form.submit', RP.submit.error
@@ -39,13 +37,16 @@ RP.submit.ontokenchange = ->
 
 # Respond to a click on a '.submit' element by optionally checking for a confirmation, firing a request at the server and appropriately handling the response
 RP.submit.onClick = (event) ->
-	elmt = event.currentTarget # event.toElement
-	# If the submission is made from a top-level menu, make the menu active
-	if !$(elmt).hasClass( "loading") && proceedWithConfirmation(elmt) # This may already be loading
-		handleEnclosingNavTab elmt
-		# $(elmt).addClass('trigger') # Mark for immediate opening
-		RP.submit.submit_and_process elmt.attributes.href.value, elmt, $(elmt).data('method')
+	fire event.currentTarget # event.toElement
 	false
+
+fire = (elmt) ->
+	if $(elmt).hasClass( "loading") # This may already be loading
+		$(elmt).addClass('trigger') # Mark for immediate opening
+	else if proceedWithConfirmation(elmt)
+		# If the submission is made from a top-level menu, make the menu active
+		handleEnclosingNavTab elmt
+		RP.submit.submit_and_process elmt.attributes.href.value, elmt, $(elmt).data('method')
 
 handleEnclosingNavTab = (menuElmt) ->
 	while menuElmt && !$(menuElmt).hasClass "master-navtab"
@@ -59,22 +60,19 @@ handleEnclosingNavTab = (menuElmt) ->
 proceedWithConfirmation = (elmt) ->
 	!(confirm_msg = $(elmt).data 'confirm-msg') || confirm confirm_msg
 
-# Notify elmts to preload their query results
-RP.submit.onLoad = (event) ->
-	RP.submit.fromLink event.currentTarget
-	false
-
-RP.submit.fromLink = (elmt) ->
-	RP.submit.submit_and_process elmt.attributes.href.value, elmt, $(elmt).data('method')
-
 # Master function for submitting AJAX, perhaps in the context of a DOM element that triggered it
 # Elements may fire off requests by:
 # -- being clicked (click events get here by association with the 'submit' class
 # -- having a 'preload' class, which attaches the result of the request to the element pending a subsequent click
 RP.submit.submit_and_process = ( request, elmt, method="GET" ) ->
+	if typeof(method) == "object"
+		data = method
+		method = "POST"
+	else
+		data = null
 	unless (elmt && $(elmt).hasClass 'loading') || shortCircuit(request, elmt)
 		$(elmt).addClass 'loading'
-		$.ajax
+		ajdata =
 			type: method,
 			dataType: "json",
 			url: request,
@@ -86,6 +84,9 @@ RP.submit.submit_and_process = ( request, elmt, method="GET" ) ->
 			success: (responseData, statusText, xhr) ->
 				$(elmt).removeClass 'loading'
 				handleResponse elmt, responseData, statusText, xhr
+		if data != null
+			ajdata.data = data
+		$.ajax ajdata
 
 shortCircuit = (request, elmt) ->
 	data = (elmt && $(elmt).data()) || {}
@@ -146,73 +147,3 @@ RP.submit.error = (event, jqXHR, statusText, errorThrown) ->
 	RP.notifications.done()
 	if responseData = RP.post_error(jqXHR) # Try to recover useable data from the error
 		RP.process_response responseData, RP.dialog.enclosing_modal(event.currentTarget)
-
-### The code below pertains to date-sensitive updates. It's not used and probably not useable
-
-# Linkable function to skin the get_content function. Associated link should have data values as above
-RP.submit.get_content = (url, link) ->
-	jQuery.ajax "/collection/update", { type: "POST" }
-	last_modified = $(link).data 'last_modified'
-	get_content url, last_modified,
-		hold_msg: $(link).data('hold_msg'),
-		msg_selector: $(link).data('msg_selector') || link,
-		dataType: $(link).data('dataType'),
-		type: $(link).data('type'),
-		refresh: $(link).data('refresh'),
-		contents_selector: $(link).data('contents_selector')
-
-# Asynchronous method to replace content via request from server.
-# A polling loop periodically checks for changes, replacing the whole element when
-# complete (for HTML requests) or replacing selected elements (for JSON)
-# Options determine:
-#   -- dataType and method of the request (default JSON GET)
-#   -- message to be displayed before completion (default "Updating...")
-#   -- CSS selector of element to receive updating message ("#notifications_panel")
-#   -- contents_selector: CSS selector of element to be replaced by HTML result
-#   -- update: boolean indicating that the requisite item should be updated
-get_content = (url, last_modified, options) ->
-	hold_msg = options.hold_msg || "Checking for updates..."
-	msg_selector = options.msg_selector || "#notifications-panel"
-
-	ajax_options =
-		dataType: options.dataType || "html",
-		type: options.type || "get",
-	# ajax_options.data = "refresh=true" if options.refresh
-
-	processing_options =
-		contents_selector: options.contents_selector || "div.content"
-
-	# Notify the user of the ongoing process by replacing the message selector with a bootstrap notification
-	$(msg_selector).replaceWith "<span>"+hold_msg+"</span>"
-
-	ajax_options.requestHeaders ||= {}
-	ajax_options.requestHeaders['If-Modified-Since'] = last_modified
-	# ajax_options.requestHeaders['X-CSRF-Token'] ||= $('meta[name="csrf-token"]').attr 'content'
-	# ajax_options.cache = false
-
-	poll_for_update url, ajax_options, processing_options
-
-
-poll_for_update = (url, ajax_options, processing_options) ->
-	ajax_options.success ||= (resp, succ, xhr) ->
-		if xhr.status == 204 # Use no-content status to indicate we're waiting for update
-			setTimeout (-> poll_for_update url, ajax_options, processing_options), 1000
-		else if xhr.status == 200
-			if ajax_options.dataType == "html"
-				$(processing_options.contents_selector).html xhr.responseText
-		else
-			RP.notifications.post "Sorry: got an error trying to update", "flash-error"
-
-	ajax_options.error ||= (jqXHR, textStatus, errorThrown) ->
-		# Threw an error.  We got either replacement HTML (because the controller couldn't produce JSON)
-		# or a simple message string (to be placed into the notifications panel)
-		dom = $(jqXHR.responseText)
-		if dom.length > 0
-			RP.notifications.post "Update complete!", "flash-alert"
-			$(processing_options.contents_selector).replaceWith dom
-		else
-			RP.notifications.post jqXHR.responseText, "flash-alert"
-
-	jQuery.ajax url, ajax_options # setTimeout jQuery.ajax(url, ajax_options), 1000
-
-###

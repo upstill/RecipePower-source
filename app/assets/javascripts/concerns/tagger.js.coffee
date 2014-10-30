@@ -86,9 +86,3 @@ RP.tagger.setup = (elmt) ->
 	$(elmt).removeClass "token-input-field-pending"
 	$(elmt).addClass "token-input-field"
 
-###
-# Set the types of tag the tokeninput field will look for
-# 'types' is a comma-separated string of type numbers
-RP.tagger.setTypes = (types, selector='.token-input-field') ->
-	$(elmt).data().settings.url = "/tags/match.json?tagtype="+types
-###
