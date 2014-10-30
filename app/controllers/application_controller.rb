@@ -30,6 +30,7 @@ class ApplicationController < ActionController::Base
 
     include ApplicationHelper
 
+  # Incorporate changes to temporary fields into the persisted model
   def accept_params entity = nil
     modelname = params[:controller].sub( /_controller$/, '').singularize
     modelsym = modelname.to_sym

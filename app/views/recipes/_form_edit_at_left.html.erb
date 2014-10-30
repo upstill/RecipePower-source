@@ -31,6 +31,7 @@
                 </div>
                 <div class="control-group">
                   <label class="string optional">Tag(s)</label>
+                  <input id="recipe_tagging_user_id" name="recipe[tagging_user_id]" type="hidden" value="<%= present_field "rcpTaggableUserId" %>">
                   <input type="text"
                          class="token-input-field-pending"
                          id="recipe_tagging_tokens"
@@ -45,8 +46,9 @@
             <div class="row">
               <div class="col-md-12">
                 <div class="control-group">
+                  <input id="recipe_collectible_user_id" name="recipe[collectible_user_id]" type="hidden" value="<%= present_field "rcpCollectibleUserId" %>">
                   <label class="string optional">Notes & Comments</label>
-                  <textarea id="recipe_comment" name="recipe[comment]" placeholder="Recipe Notes" rows="3" style="width:100%"><%= present_field "rcpComment" %></textarea>
+                  <textarea id="recipe_collectible_comment" name="recipe[collectible_comment]" placeholder="Recipe Notes" rows="3" style="width:100%"><%= present_field "rcpComment" %></textarea>
                 </div>
               </div>
             </div>
@@ -56,9 +58,9 @@
             <% if permitted_to? :admin, :pages %>
                 <input class="btn btn-danger pull-left" type="submit" data-action="/recipes/<%= present_field "rcpID" %>" data-method="delete" value="Destroy" data-confirm="This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?"/>
             <% end %>
-            <input name="recipe[private]" type="hidden" value="0"/>
-            <label for="recipe_private" class="checkbox">
-              <input <%= present_field "rcpPrivate" %> id="recipe_private" name="recipe[private]" type="checkbox" value="1"/>Private
+            <input name="recipe[collectible_private]" type="hidden" value="0"/>
+            <label for="recipe_collectible_private" class="checkbox">
+              <input <%= present_field "rcpPrivate" %> id="recipe_collectible_private" name="recipe[collectible_private]" type="checkbox" value="1"/>Private
               cookmark
             </label>
             <input class="cancel btn" data-dismiss="modal" name="commit" type="submit" value="Cancel"/>

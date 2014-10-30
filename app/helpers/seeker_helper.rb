@@ -23,7 +23,7 @@ module SeekerHelper
 			@recipe = element
 		  @recipe.current_user = @user.id
 		  content_tag( :div, 
-		    render("shared/recipe_grid"),
+		    render("recipes/show_masonry_item"),
 		    class: "masonry-item" )
 		when FeedEntry
 		  @feed_entry = element

@@ -71,12 +71,14 @@ module Collectible
 
   # After editing the model, save the collectible attributes in an Rcpref
   def accept_params
-    if ref = rcpref(collectible_user_id, false)
-      ref.comment = collectible_comment
-      ref.private = collectible_private
-      ref.save
-    else
-      rcprefs.create user_id: collectible_user_id, comment: collectible_comment, private: collectible_private
+    if collectible_user_id # It must have been set
+      if ref = rcpref(collectible_user_id, false)
+        ref.comment = collectible_comment
+        ref.private = collectible_private
+        ref.save
+      else
+        rcprefs.create user_id: collectible_user_id, comment: collectible_comment, private: collectible_private
+      end
     end
     # Work back up the hierarchy
     super if defined? super

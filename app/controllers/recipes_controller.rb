@@ -25,13 +25,13 @@ class RecipesController < ApplicationController
         replacements = [
           [ "."+recipe_list_element_golink_class(@recipe) ],
           [ "."+recipe_list_element_class(@recipe) ],
-          [ "."+recipe_grid_element_class(@recipe) ] 
+          [ ".masonry-item-contents."+view_context.dom_id(@recipe) ]
         ]
         replacements << [ "."+feed_list_element_class(@feed_entry) ] if @feed_entry
         if !destroyed # && current_user.browser.should_show(@recipe)
           replacements[0][1] = with_format("html") do render_to_string partial: "recipes/golink" end
           replacements[1][1] = with_format("html") do render_to_string partial: "shared/recipe_smallpic" end
-          replacements[2][1] = with_format("html") do render_to_string partial: "shared/recipe_grid" end
+          replacements[2][1] = with_format("html") do render_to_string partial: "recipes/show_masonry_item" end
           replacements[3][1] = with_format("html") do render_to_string partial: "shared/feed_entry" end if @feed_entry
         end
         render json: { 
@@ -243,7 +243,7 @@ class RecipesController < ApplicationController
       @recipe = Recipe.find params[:id]
       report_recipe user_collection_url(current_user), "Recipe secure and unchanged.", formats
     else
-      prep_params
+      accept_params
       if @recipe.errors.empty?
         if ref = Rcpref.where( user: @user, entity: @recipe ).first
           ref.edit_count += 1

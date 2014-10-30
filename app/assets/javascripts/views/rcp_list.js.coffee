@@ -3,7 +3,7 @@ RP.rcp_list = RP.rcp_list || {}
 # onload function is overloaded both for individual items and the list as a whole
 RP.rcp_list.onload = (item) ->
 	if item && (item = $(item)) # Provided when replacing a list element
-		if $(item).hasClass('collection-item')
+		if $(item).hasClass('grid-item')
 			if img = $('div.rcp_grid_pic_box img', item)[0]
 				srcstr = img.getAttribute('src')
 				contentstr = "<img src=\""+srcstr+"\" style=\"width: 100%; height: auto\">"
@@ -37,8 +37,10 @@ RP.rcp_list.update = ( data ) ->
 			RP.masonry.removeItem elmt
 	else if replacements = data.replacements
 		for replacement in replacements
-			$(replacement[0]).replaceWith replacement[1]
-			RP.rcp_list.onload replacement[0]
+			if elmt = $(replacement[0])[0]
+				if !RP.masonry.replaceItem elmt, replacement[1]
+					$(replacement[0]).replaceWith replacement[1]
+				RP.rcp_list.onload replacement[0]
 		data.replacements = [] # Prevent the normal processor from reloading the elements
 		if data.go_link_class 
 			$("."+data.go_link_class).replaceWith data.go_link_body

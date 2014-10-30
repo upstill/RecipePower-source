@@ -92,13 +92,15 @@ def edit_recipe_link( label, recipe, options={})
     rcp_params = {
       rcpID: recipe.id,
       rcpTitle: recipe.title,
+      rcpTaggableUserId: recipe.tagging_user_id,
       rcpTagData: recipe.tag_editing_data,
       # rcpCollectionData: recipe.collection_data, # recipe.tags.map(&:attributes).to_json,
       # rcpChannelData: recipe.channel_data, # recipe.tags.map(&:attributes).to_json,
       rcpPicURL: recipe.picurl,
       rcpURL: recipe.url,
-      rcpPrivate: recipe.private(recipe.collectible_user_id ? %q{checked="checked"} : ""),
-      rcpComment: recipe.comment(recipe.collectible_user_id),
+      rcpCollectibleUserId: recipe.collectible_user_id,
+      rcpPrivate: recipe.collectible_private,
+      rcpComment: recipe.collectible_comment,
       authToken: form_authenticity_token
     }
     options[:class] = "edit_recipe_link "+(options[:class] || "")
