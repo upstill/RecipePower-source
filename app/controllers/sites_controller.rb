@@ -1,7 +1,5 @@
 
 class SitesController < ApplicationController
-  include CollectibleActions
-  include TaggableActions
 
   # GET /sites
   # GET /sites.json
