@@ -30,32 +30,36 @@ class ApplicationController < ActionController::Base
 
     include ApplicationHelper
 
-  def accept_params
-    @user = current_user_or_guest
+  def accept_params entity = nil
     modelname = params[:controller].sub( /_controller$/, '').singularize
+    modelsym = modelname.to_sym
     objclass = modelname.camelize.constantize
     if params[:id]
-      entity = objclass.find params[:id]
-      entity.update_attributes params[modelname.to_sym]
+      entity ||= objclass.find params[:id]
+      entity.update_attributes params[modelsym] if params[modelsym]
     else
-      entity = objclass.new params[modelname.to_sym]
+      entity ||= objclass.new (params[modelsym] || {})
       entity.save
     end
+    entity.accept_params
     instance_variable_set :"@#{modelname}", entity
+    @decorator = entity.decorate unless entity.errors.any?
     entity
   end
 
   # Set up a model for editing, whether new or fetched
-  def prep_params
-    @user = current_user_or_guest
+  # Asserting an entity assumes that it is up to date
+  def prep_params entity = nil
     modelname = params[:controller].sub( /_controller$/, '').singularize
+    modelsym = modelname.to_sym
     objclass = modelname.camelize.constantize
-    if params[:id]
-      entity = objclass.find params[:id]
-    else
-      entity = objclass.new
+    unless entity
+      entity = params[:id] ? objclass.find(params[:id]) : objclass.new
+      entity.update_attributes(params[modelsym]) if params[modelsym]
     end
+    entity.prep_params @user.id
     instance_variable_set :"@#{modelname}", entity
+    @decorator = entity.decorate unless entity.errors.any?
     entity
   end
 
@@ -250,6 +254,7 @@ class ApplicationController < ActionController::Base
   # alias_method :rescue_action_locally, :rescue_action_in_public  
   
   def setup_response_service
+    @user = current_user_or_guest
     @response_service ||= ResponseServices.new params, session, request
     # Mobile is sticky: it stays on for the session once the "mobile" target parameter appears
     @response_service.is_mobile if (params[:target] == "mobile")

@@ -128,6 +128,7 @@ module StreamHelper
   # Render an element of a collection, depending on its class
   # NB The view is derived from the class of the element, NOT from the current controller
   def render_stream_item element, partialname=nil
+    element.prep_params @user.id if element.respond_to? :prep_params
     partialname ||= @sp.item_partial || "show_masonry_item"
     # Get the item-rendering partial from the model view
     unless partialname.match /\//

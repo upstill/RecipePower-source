@@ -19,7 +19,7 @@ class Recipe < ActiveRecord::Base
   picable :picurl, :picture
 
   attr_accessible :title, :ratings_attributes, :description, #, :comment, :private, :tagpane, :status, :alias, :picurl :href
-                  :misc_tag_tokens, :collection_tokens, :channel_tokens, :url
+                  :collection_tokens, :channel_tokens, :url
 
   validates :title, :presence => true
   # private
@@ -204,11 +204,6 @@ class Recipe < ActiveRecord::Base
 
   def misc_tag_tokens= tokenstr
     self.tag_tokens = {tokenstr: tokenstr, tagtype_x: [11, 15]}
-  end
-
-  def misc_tag_data options={}
-    options[:tagtype_x] = [11, :Collection]
-    tag_data options
   end
 
   def collections

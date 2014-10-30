@@ -1,7 +1,7 @@
 require 'reference.rb'
 
 class RecipeServices
-  attr_accessor :recipe # , :current_user
+  attr_accessor :recipe 
   
   def initialize(recipe, current_user=nil)
     @recipe = recipe
@@ -60,15 +60,6 @@ class RecipeServices
   # The robotags are those owned by super
   def robotags
     @recipe.tags User.super_id
-  end
-  
-  def tags
-    @recipe.tags(@current_user)
-  end
-  
-  def tags=(tags)
-    @recipe.current_user = @current_user
-    @recipe.tags = tags
   end
   
   def show_tags(file=STDOUT)

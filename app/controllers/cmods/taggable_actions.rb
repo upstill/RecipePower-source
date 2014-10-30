@@ -1,13 +1,13 @@
 module TaggableActions
-  def prep_params
+  def prep_params entity = nil
     taggable_entity = super
-    taggable_entity.define_user_taggings @user.id
+    taggable_entity.prep_params @user.id
     taggable_entity
   end
 
-  def accept_params
+  def accept_params entity = nil
     taggable_entity = super
-    taggable_entity.accept_user_taggings
+    taggable_entity.accept_params
     taggable_entity
   end
 end

@@ -14,31 +14,35 @@ module Taggable
   end
 
   # Define an editable field of taggings by the current user on the entity
-  def define_user_taggings user_id
+  def prep_params user_id
     self.tagging_user_id = user_id
-    self.tagging_tags = tags_by_user user_id
+    self.tagging_tags = filtered_tags user_id
+    super if defined? super
   end
 
   # Ensure that the user taggings get associated with the entity
   # Interpret the set of tag tokens into a list of tags ready to turn into taggings
-  def accept_user_taggings
-    return unless tagging_user_id
-    asserted = # Map the elements of the token string to tags, whether existing or new
-        TokenInput.parse_tokens(tagging_tokens) do |token| # parse_tokens analyzes each token in the list as either integer or string
-          case token
-            when Fixnum
-              Tag.find token
-            when String
-              Tag.strmatch(token, userid: tagging_user_id, assert: true)[0] # Match or assert the string
+  def accept_params
+    if tagging_user_id
+      asserted = # Map the elements of the token string to tags, whether existing or new
+          TokenInput.parse_tokens(tagging_tokens) do |token| # parse_tokens analyzes each token in the list as either integer or string
+            case token
+              when Fixnum
+                Tag.find token
+              when String
+                Tag.strmatch(token, userid: tagging_user_id, assert: true)[0] # Match or assert the string
+            end
           end
-        end
-    set_tags tagging_user_id, asserted
+      set_tags tagging_user_id, asserted
+    end
+    # Work back up the hierarchy
+    super if defined? super
   end
 
   def tags_visible_to uid=nil, opts = {}
     uid = uid.to_i if uid.is_a? String
     uid, opts = nil, uid if uid.is_a? Hash
-    tags_by_user uid, opts
+    filtered_tags nil, opts
   end
 
   # Associate a tag with this entity in the domain of the given user (or the tag's current owner if not given)
@@ -48,10 +52,15 @@ module Taggable
     end
   end
 
+  def tag_editing_data options={}
+    options[:tagtype_x] = [11, :Collection]
+    tag_data tagging_user_id, options
+  end
+
   # Declare a data structure suitable for passing to RP.tagger.init
-  def tag_data options={}
+  def tag_data uid, options={}
     data = { :hint => options.delete(:hint) || "Type your tag(s) here" }
-    data[:pre] = tags(options).collect { |tag| { id: tag.id, name: tag.typedname(options[:showtype]) } }
+    data[:pre] = filtered_tags(options).collect { |tag| { id: tag.id, name: tag.typedname(options[:showtype]) } }
     data[:query] = options.slice :verbose, :showtype
     data[:query][:tagtype] = Tag.typenum(options[:tagtype]) if options[:tagtype]
     data[:query][:tagtype_x] = Tag.typenum(options[:tagtype_x]) if options[:tagtype_x]
@@ -61,7 +70,7 @@ module Taggable
 protected
 
   # Fetch the tags associated with the entity, possibly with constraints of userid and type
-  def tags_by_user uid, opts = {}
+  def filtered_tags uid, opts = {}
     uid = uid.to_i if uid.is_a? String
     uid, opts = nil, uid if uid.is_a? Hash
     tagscope = Tag.unscoped
@@ -69,8 +78,8 @@ protected
     tagscope = tagscope.where.not(tagtype: Tag.typenum(opts[:tagtype_x])) if opts[:tagtype_x]
     # Tag.where.not(tagtype: Tag.typenum(nt)).where id: get_tag_ids(uid, options)
     tagging_constraints = { entity: self }
-    # tagging_constraints[:user_id] = uid if uid
-    tagscope.joins(:taggings).where taggings: tagging_constraints
+    tagging_constraints[:user_id] = uid if uid
+    tagscope.joins(:taggings).where( taggings: tagging_constraints).uniq
   end
 
   # Set the tags associated with the entity

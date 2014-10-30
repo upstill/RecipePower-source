@@ -17,7 +17,7 @@
 	     <%= summarize_alltags @recipe %>
       </div>
       <div class="rcp_list_element_twocents">
-	     <%= present_comments @recipe, @recipe.current_user  %>
+	     <%= present_comments @recipe  %>
       </div>
       <div class="rcp_list_element_golink">
 	    <%= render "recipes/golink" %>
@@ -27,7 +27,7 @@
       <div class="rcp_list_element_stats">
 	    <%= touch_date_elmt @recipe %>
       </div>
-	  <%# cookmark_count @recipe -%> 
+	  <%# cookmark_count @recipe, @user -%> 
     </div>
   </div>
   <hr>

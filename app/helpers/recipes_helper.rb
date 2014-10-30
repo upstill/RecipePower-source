@@ -92,13 +92,13 @@ def edit_recipe_link( label, recipe, options={})
     rcp_params = {
       rcpID: recipe.id,
       rcpTitle: recipe.title,
-      rcpMiscTagData: recipe.misc_tag_data, # recipe.tags.map(&:attributes).to_json,
-      rcpCollectionData: recipe.collection_data, # recipe.tags.map(&:attributes).to_json,
-      rcpChannelData: recipe.channel_data, # recipe.tags.map(&:attributes).to_json,
+      rcpTagData: recipe.tag_editing_data,
+      # rcpCollectionData: recipe.collection_data, # recipe.tags.map(&:attributes).to_json,
+      # rcpChannelData: recipe.channel_data, # recipe.tags.map(&:attributes).to_json,
       rcpPicURL: recipe.picurl,
       rcpURL: recipe.url,
-      rcpPrivate: recipe.private(current_user_or_guest.id ? %q{checked="checked"} : ""),
-      rcpComment: recipe.comment(current_user_or_guest.id),
+      rcpPrivate: recipe.private(recipe.collectible_user_id ? %q{checked="checked"} : ""),
+      rcpComment: recipe.comment(recipe.collectible_user_id),
       authToken: form_authenticity_token
     }
     options[:class] = "edit_recipe_link "+(options[:class] || "")
@@ -163,25 +163,17 @@ def summarize_alltags(rcp)
 end
 
 # Present the comments to this user. Now, all comments starting with his/hers, but ultimately those of his friends
-def present_comments (recipe, user_id)
-    out = (recipe.comment user_id) || ""
+def present_comments recipe
+    out = (recipe.collectible_comment) || ""
     out = "My two cents: '#{out}'<br>" unless out.empty?
-=begin
-    # Removed this to cut down on queries
-    recipe.users.each { |user| 
-        if (user.id != user_id) && (cmt=recipe.comment(user.id))
-            out << "#{user.handle} sez: '#{cmt}'<br>"  unless cmt.blank?
-        end
-    }
-=end
     out.html_safe
 end
 
   # Provide the cookmark-count line
-  def cookmark_count(rcp)
+  def cookmark_count(rcp, user)
      count = rcp.num_cookmarks
      result = count.to_s+" Cookmark"+((count>1)?"s":"")
-     if current_user_or_guest.collected? rcp
+     if rcp.collected_by?(user.id)
         result << " (including mine)"
      else
         result << ": " + 

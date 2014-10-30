@@ -75,8 +75,8 @@ module ApplicationHelper
   end
 
   # Present the date and time the recipe was last touched by its current user
-  def touch_date_elmt entity, uid
-    if td = entity.touch_date( uid)
+  def touch_date_elmt entity
+    if td = entity.touch_date( entity.collectible_user_id)
       stmt = "Last touched/viewed #{time_ago_in_words td} ago."
     else
       stmt = "Never touched or viewed"
@@ -141,21 +141,21 @@ module ApplicationHelper
   end
 
   def friends_menu_items
-    current_user.followees[0..6].collect { |u|
+    @user.followees[0..6].collect { |u|
       navlink u.handle, "/users/#{u.id}/collection", id: dom_id(u)
     }.push navlink("Make a Friend...", users_path)
   end
 
   def collection_menu_items
     [
-        navlink("My Goodies", "/users/#{current_user_or_guest_id}/collection"),
-        navlink("All the Goodies", "/users/#{current_user_or_guest_id}/biglist"),
-        navlink("Recently Viewed", "/users/#{current_user_or_guest_id}/recent")
+        navlink("My Goodies", "/users/#{@user.id}/collection"),
+        navlink("All the Goodies", "/users/#{@user.id}/biglist"),
+        navlink("Recently Viewed", "/users/#{@user.id}/recent")
     ]
   end
 
   def goody_bags_menu_items
-    result = current_user.subscriptions(:own)[0..16].collect { |l|
+    result = @user.subscriptions(:own)[0..16].collect { |l|
       navlink l.name, list_path(l), id: dom_id(l)
     }
     result + [
@@ -166,7 +166,7 @@ module ApplicationHelper
   end
 
   def feeds_menu_items
-    result = current_user.feeds[0..12].collect { |f|
+    result = @user.feeds[0..12].collect { |f|
       navlink truncate(f.title, length: 30), feed_path(f), id: dom_id(f)
     }
     result + [
@@ -199,9 +199,9 @@ module ApplicationHelper
   end
 
   def header_menu label=nil
-    label ||= current_user.handle
+    label ||= @user.handle
 
-    return "" unless current_user
+    return "" unless @user
 
     header_link =
         link_to (label+'<b class="caret"></b>').html_safe, "#",
@@ -250,7 +250,7 @@ module ApplicationHelper
   # If there are any tasks awaiting which need a login, set up the appropriate one.
   # Returning nil implies to preload the signup dialog
   def preloads
-    if current_user
+    if @user
       render partial: 'recipes/edit_template', recipe: nil
     else
       render partial: "registrations/new_modal"
@@ -259,7 +259,7 @@ module ApplicationHelper
 
   # Sign Me Up button for the home page, with contents varying according to, whether, e.g., a person is responding to an invitation
   def signup_button
-    unless current_user
+    unless @user
       options = response_service.signup_button_options
       label = options.delete :label
       path = options.delete :path

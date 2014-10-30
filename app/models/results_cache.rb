@@ -121,7 +121,7 @@ class ResultsCache < ActiveRecord::Base
   self.primary_keys = ["session_id","type"]
 
   # scope :integers_cache, -> { where type: 'IntegersCache' }
-  attr_accessible :session_id, :params, :cache, :partition
+  attr_accessible :session_id, :type, :params, :cache, :partition
   serialize :params
   serialize :cache
   serialize :partition

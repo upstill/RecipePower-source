@@ -56,7 +56,7 @@ module Collectible
   end
 
   # Prepare for editing the model by setting the collectible attributes
-  def define_collectible_attributes uid
+  def prep_params uid
     self.collectible_user_id = uid
     if ref = rcpref(uid, false) # Pre-existing collection object
       self.collectible_comment = ref.comment
@@ -65,10 +65,12 @@ module Collectible
       self.collectible_comment = ""
       self.collectible_private = false
     end
+    # Work back up the hierarchy
+    super if defined? super
   end
 
   # After editing the model, save the collectible attributes in an Rcpref
-  def accept_collectible_attributes
+  def accept_params
     if ref = rcpref(collectible_user_id, false)
       ref.comment = collectible_comment
       ref.private = collectible_private
@@ -76,6 +78,8 @@ module Collectible
     else
       rcprefs.create user_id: collectible_user_id, comment: collectible_comment, private: collectible_private
     end
+    # Work back up the hierarchy
+    super if defined? super
   end
 
   protected

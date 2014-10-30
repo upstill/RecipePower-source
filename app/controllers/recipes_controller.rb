@@ -28,7 +28,6 @@ class RecipesController < ApplicationController
           [ "."+recipe_grid_element_class(@recipe) ] 
         ]
         replacements << [ "."+feed_list_element_class(@feed_entry) ] if @feed_entry
-        @user = @recipe.current_user ? Recipe.find(@recipe.current_user) : current_user_or_guest
         if !destroyed # && current_user.browser.should_show(@recipe)
           replacements[0][1] = with_format("html") do render_to_string partial: "recipes/golink" end
           replacements[1][1] = with_format("html") do render_to_string partial: "shared/recipe_smallpic" end
@@ -78,7 +77,7 @@ class RecipesController < ApplicationController
       @feed_entry = FeedEntry.find params[:feed_entry].to_i
       params[:url] = @feed_entry.url
     end
-    if params[:url] && (@recipe = Recipe.ensure params.slice(:url)) && @recipe.id) # Mark of a fetched/successfully saved recipe: it has an id
+    if params[:url] && (@recipe = Recipe.ensure params.slice(:url)) && @recipe.id # Mark of a fetched/successfully saved recipe: it has an id
       current_user.collect @recipe if current_user # Add to the current user's collection
     	# re-direct to edit
     	if @feed_entry
@@ -102,7 +101,7 @@ class RecipesController < ApplicationController
   def create # Take a URL, then either lookup or create the recipe
     # return if need_login true
     # Find the recipe by URI (possibly correcting same), and bind it to the current user
-    @recipe = Recipe.ensure params[:recipe] # session[:user_id], params[:recipe]
+    prep_params Recipe.ensure(params[:recipe]) # session[:user_id], params[:recipe]
     if @recipe.errors.empty? # Success (valid recipe, either created or fetched)
       current_user.collect @recipe if current_user  # Add to collection
       respond_to do |format|
@@ -144,9 +143,10 @@ class RecipesController < ApplicationController
           # The injector (capture.js) calls for this to fill the iframe on the foreign page.
           # @_layout = "injector"
           if @recipe.id
-            current_user.collect @recipe
+            current_user.collect @recipe if current_user
             # deferred_capture true # Delete the pending recipe
             if response_service.injector?
+              prep_params @recipe
               smartrender :action => :edit # :_layout => (params[:_layout] || response_service.dialog?)
             else
               # If we're collecting a recipe outside the context of the iframe, redirect to
@@ -166,6 +166,7 @@ class RecipesController < ApplicationController
           @recipe = Recipe.ensure params[:recipe]||{}, params[:extractions] # session[:user_id], params
           if @recipe.id
             current_user.collect @recipe
+            prep_params @recipe
             @data = { onget: [ "RP.submit.submit_and_process", user_collection_url(current_user, layout: false) ] } unless response_service.injector?
             # deferred_capture true # Delete the pending recipe
             codestr = with_format("html") { render_to_string :edit, layout: false }
@@ -210,10 +211,10 @@ class RecipesController < ApplicationController
   def edit
     # return if need_login true
     # Fetch the recipe by id, if possible, and ensure that it's registered with the user
-    if (@recipe = Recipe.find params[:id]) && @recipe.errors.empty? # Success (recipe found)
-      current_user.collect @recipe
+    prep_params
+    if @recipe.errors.empty? # Success (recipe found)
+      current_user.collect @recipe if current_user
       response_service.title = @recipe.title # Get title from the recipe
-      @decorator = @recipe.decorate
       @nav_current = nil
       # @_area = params[:_area]
       # Now go forth and edit
@@ -238,13 +239,13 @@ class RecipesController < ApplicationController
   
   def update
     # return if need_login true
-    @recipe = Recipe.find(params[:id])
     if params[:commit] == "Cancel"
+      @recipe = Recipe.find params[:id]
       report_recipe user_collection_url(current_user), "Recipe secure and unchanged.", formats
     else
-      @recipe.current_user = current_user_or_guest_id # session[:user_id]
-      if saved_okay = @recipe.update_attributes(params[:recipe])
-        if ref = Rcpref.where( user_id: @recipe.current_user, entity_id: @recipe.id ).first
+      prep_params
+      if @recipe.errors.empty?
+        if ref = Rcpref.where( user: @user, entity: @recipe ).first
           ref.edit_count += 1
           ref.save
         end
@@ -265,14 +266,14 @@ class RecipesController < ApplicationController
   # Register that the recipe was touched by the current user--if they own it.
   # Since that recipe will now be at the head return a new first-recipe in the list.
   def touch
-    @recipe = Recipe.ensure params.slice(:id, :url) # session[:user_id], params
+    prep_params Recipe.ensure(params.slice(:id, :url)) # session[:user_id], params
     # If all is well, make sure it's on the user's list
     current_user.touch @recipe if current_user && @recipe.errors.empty? && @recipe.id
     respond_to do |format|
       list_element_body = render_to_string partial: "shared/recipe_smallpic"
       format.json { 
           render json: { touch_class: touch_date_class(@recipe), 
-                         touch_body: touch_date_elmt(@recipe, current_user_or_guest.id), 
+                         touch_body: touch_date_elmt(@recipe),
                          list_element_class: recipe_list_element_class(@recipe),
                          list_element_body: list_element_body
                        } 
@@ -286,8 +287,8 @@ class RecipesController < ApplicationController
 
   # Delete the recipe from the user's list
   def uncollect
-    @recipe = Recipe.find params[:id]
-    @recipe.remove_from_collection current_user.id
+    prep_params
+    @user.uncollect @recipe
     @jsondata = {
         replacements: [
             [ "div.rcpGridElmt"+@recipe.id.to_s, "" ]
@@ -301,10 +302,10 @@ class RecipesController < ApplicationController
   end
 
   def remove
-    @recipe = Recipe.find params[:id]
-    current_user.uncollect @recipe
+    prep_params
+    @user.uncollect @recipe
     truncated = truncate(@recipe.title, :length => 40)
-    report_recipe user_collection_url(current_user),
+    report_recipe user_collection_url(@user),
                   "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections.",
                   formats
   end
@@ -312,7 +313,7 @@ class RecipesController < ApplicationController
   # Add a recipe to the user's collection without going to edit tags. Full-page render is just collection page
   # GET recipes/:id/collect
   def collect
-    if current_user
+    if @user = current_user
       @recipe = Recipe.ensure params
       @list_name = "mine"
       # @_area = params[:_area]
