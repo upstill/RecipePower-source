@@ -1,11 +1,11 @@
 <% if next_path = @sp.next_path %>
+  <%= image_tag "ajax-loader.gif", class: "beachball hide" %>
   <%= link_to "Click to load", "#",
               onclick: 'RP.stream.go(event);',
               onload: 'RP.stream.onload(event);',
               class: "stream-trigger",
               :"data-path" => next_path,
               :"data-container_selector" => response_service.container_selector %>
-  <%= image_tag "ajax-loader.gif", style: "margin: 32px 32px;", class: "beachball hide" %>
 <% else %>
   <% x=2 %>
   No mo' stuff.
