@@ -193,7 +193,7 @@ ActiveRecord::Schema.define(version: 20141023215312) do
   create_table "rcprefs", force: true do |t|
     t.integer  "entity_id"
     t.integer  "user_id"
-    t.text     "comment"
+    t.text     "comment",       default: ""
     t.datetime "created_at"
     t.datetime "updated_at"
     t.boolean  "private",       default: false

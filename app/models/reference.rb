@@ -325,7 +325,7 @@ class ImageReference < Reference
     url_usable = fetchable # fetchable may set the thumbdata
     thumbdata || (url if url_usable)
   end
-  alias_method :digested_reference, :imgdata
+  # alias_method :digested_reference, :imgdata
 
   # Try to fetch the thumbnail data for the record. Status code assigned in ImageReference#fetchable and Reference#fetch
   def perform

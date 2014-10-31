@@ -59,7 +59,7 @@ module Collectible
   def prep_params uid
     self.collectible_user_id = uid
     if ref = rcpref(uid, false) # Pre-existing collection object
-      self.collectible_comment = ref.comment
+      self.collectible_comment = ref.comment || ""
       self.collectible_private = ref.private
     else
       self.collectible_comment = ""

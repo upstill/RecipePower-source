@@ -16,7 +16,6 @@ namespace :nginx do
       sudo "mv /tmp/nginx_conf /etc/nginx/sites-enabled/#{fetch :application}"
       sudo "rm -f /etc/nginx/sites-enabled/default"
       sudo "service nginx stop"
-      sudo "rm -f /tmp/unicorn.#{fetch :application}.sock"
       sudo "service nginx start"
     end
   end
@@ -28,6 +27,9 @@ namespace :nginx do
     task command do
       on roles(:web) do
         sudo "service nginx #{command}"
+        if command == "stop"
+          sudo "rm -f /tmp/unicorn.#{fetch :application}.sock"
+        end
       end
     end
   end

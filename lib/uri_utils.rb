@@ -130,7 +130,8 @@ end
  # Return a list of image URLs for a given page
 def page_piclist url
   begin 
-    return [] unless (ou = open url) && (doc = Nokogiri::HTML(ou))
+    (ou = open url) && (doc = Nokogiri::HTML(ou))
+    return [] unless doc
   rescue Exception => e
     return []
   end

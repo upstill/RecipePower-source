@@ -47,8 +47,8 @@ class RecipeDecorator < TaggableDecorator
 
 "rcpComment"
 "rcpID"
-"rcpPicSafeURL"
-"rcpPicURL"
+"rcpPicData"
+"rcpPicLink"
 "rcpPrivate"
 "rcpStatus"
 "rcpTitle"

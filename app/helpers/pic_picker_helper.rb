@@ -101,7 +101,7 @@ module PicPickerHelper
       image_with_error_recovery(picurl || "",
                 style: "width: 100%; height: auto",
                 id: idstr,
-                onload: "RP.validate_img(event);",
+                # onload: "RP.validate_img(event);",
                 alt: "Image Link is Broken",
                 data: data )
     rescue

@@ -89,14 +89,14 @@ module RecipesHelper
   end
 
 def edit_recipe_link( label, recipe, options={})
+    piclink = recipe.picurl
     rcp_params = {
       rcpID: recipe.id,
       rcpTitle: recipe.title,
       rcpTaggableUserId: recipe.tagging_user_id,
       rcpTagData: recipe.tag_editing_data,
-      # rcpCollectionData: recipe.collection_data, # recipe.tags.map(&:attributes).to_json,
-      # rcpChannelData: recipe.channel_data, # recipe.tags.map(&:attributes).to_json,
-      rcpPicURL: recipe.picurl,
+      rcpPicLink: recipe.picurl,
+      rcpPicData: recipe.picdata,
       rcpURL: recipe.url,
       rcpCollectibleUserId: recipe.collectible_user_id,
       rcpPrivate: recipe.collectible_private,

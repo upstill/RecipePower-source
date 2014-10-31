@@ -36,11 +36,11 @@ RP.edit_recipe.go = (evt, xhr, settings) ->
 		dlgsource = templ.string.
 		replace(/%(25)?%(25)?rcpID%(25)?%(25)?/g, rcpdata.rcpid). # May have been URI encoded
 		replace(/%%rcpTitle%%/g, rcpdata.rcptitle).
-		replace(/%%rcpPicSafeURL%%/g, rcpdata.rcppicurl || "/assets/NoPictureOnFile.png" ).
-		replace(/%%rcpPicURL%%/g, rcpdata.rcppicurl || "" ).
+		replace(/%%rcpPicData%%/g, rcpdata.rcppicdata || "/assets/NoPictureOnFile.png" ).
+		replace(/%25%25rcpPicData%25%25/g, encodeURIComponent(rcpdata.rcppicdata || "/assets/NoPictureOnFile.png" )).
+		replace(/%%rcpPicLink%%/g, rcpdata.rcppiclink || "" ).
+		replace(/%25%25rcpPicLink%25%25/g, encodeURIComponent(rcpdata.rcppiclink || "")).
 		replace(/%%rcpURL%%/g, rcpdata.rcpurl).
-		replace(/%25%25rcpPicSafeURL%25%25/g, encodeURIComponent(rcpdata.rcppicurl || "/assets/NoPictureOnFile.png" )).
-		replace(/%25%25rcpPicURL%25%25/g, encodeURIComponent(rcpdata.rcppicurl || "")).
 		replace(/%25%25rcpURL%25%25/g, encodeURIComponent(rcpdata.rcpurl)).
 		replace(/%%rcpCollectibleUserId%%/g, rcpdata.rcpcollectibleuserid).
 		replace(/%%rcpPrivate%%/g, rcpdata.rcpprivate).
