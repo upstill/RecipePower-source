@@ -374,6 +374,47 @@ class FeedsCache < ResultsCache
     Feed.unscoped
   end
 
+  def cache_and_partition
+    if @querytags.count == 0
+      # No cache required
+      self.partition = Partition.new([0, itemscope.count ]) unless partition
+      false
+    elsif cache
+      true
+    else
+      # Convert the itemscope relation into a hash on entity types
+      counts = Counts.new
+      @querytags.each do |tag|
+        matchstr = tag.normalized_name || Tag.normalizeName(tag.name)
+
+        sourcetags = Tag.where(tagtype: 6).where('normalized_name ILIKE ?', "%#{matchstr}%")
+        referent_ids = sourcetags.map(&:referent_id)
+        site_ids = Site.where(referent_id: referent_ids).map(&:id)
+        tagset = Feed.where(site_id: site_ids).map(&:id)
+
+        tagset = (tagset + tag.feeds.map(&:id)).uniq if tag.id > 0
+        matchset = Feed.where("title ILIKE ? or description ILIKE ?", "%#{matchstr}%", "%#{matchstr}%").map(&:id)
+        counts.incr tagset.uniq # One extra point for matching in one field
+        counts.incr matchset
+        this_round = (tagset+matchset).uniq
+        counts.incr this_round, 30 # Thirty points for matching this tag
+      end
+
+      # Sort the scope by number of hits, descending
+      self.cache = counts.items
+      bounds = (0...(@querytags.count)).to_a.map { |i| (@querytags.count-i)*30 }
+      wdw = partition.window if partition
+      self.partition = counts.partition bounds
+      self.window = [wdw.min, wdw.max] if wdw
+      true
+    end
+  end
+
+  # The cache is just item keys
+  def slice_cache
+    Feed.find cache.slice(safe_partition.window.min, safe_partition.windowsize)
+  end
+
 end
 
 # list of feed items
