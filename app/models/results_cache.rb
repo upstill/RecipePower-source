@@ -2,6 +2,7 @@
 # exist as a scope (if there is no search) or an array of Rcprefs (with search)
 class Counts < Hash
   def incr key, amt=1
+    key = key.to_a if key.is_a? ActiveRecord::Relation
     if key.is_a? Array
       key.each { |k| self.incr k, amt }
     else
@@ -218,7 +219,27 @@ class ResultsCache < ActiveRecord::Base
   # necessary if there is a query. Otherwise, the cache remains empty and items are taken
   # from the scope as partitioning dictates.
   def cache_and_partition
-    cache != nil # There is no cache => obtain items from the scope
+    # count_tag is the hook for applying a tag to the current counts
+    return (cache != nil) unless self.respond_to? :count_tag
+    if @querytags.count == 0
+      # No cache required
+      self.partition = Partition.new([0, itemscope.count ]) unless partition
+      false
+    elsif cache
+      true
+    else
+      # Convert the itemscope relation into a hash on entity types
+      counts = Counts.new
+      @querytags.each { |tag| count_tag tag, counts }
+
+      # Sort the scope by number of hits, descending
+      self.cache = counts.items
+      bounds = (0...(@querytags.count)).to_a.map { |i| (@querytags.count-i)*30 }
+      wdw = partition.window if partition
+      self.partition = counts.partition bounds
+      self.window = [wdw.min, wdw.max] if wdw
+      true
+    end
   end
 
   # This is the real interface, which returns items for display
@@ -264,54 +285,38 @@ class UserCollectionCache < ResultsCache
     @user ||= User.where(id: @id).first if @id
   end
 
-  # Transform the item scope into a hash with Rcprefs the key, and values the quality of match of that Rcpref
-  def cache_and_partition
-    if @querytags.count == 0
-      # No cache required
-      self.partition = Partition.new([0, itemscope.count ]) unless partition
-      false
-    elsif cache
-      true
-    else
-      # Convert the itemscope relation into a hash on entity types
-      typeset = itemscope.select(:entity_type).distinct.order("entity_type DESC").map(&:entity_type)
-      counts = Counts.new
-      typeset.each do |type|
-        subscope = itemscope.where('rcprefs.entity_type = ?', type)
-        @querytags.each do |tag|
-          # Winnow the scope by restricting the set to Rcprefs referring to recipes in which EITHER
-          # * The Rcpref's comment matches the tag's string, OR
-          # * The recipe's title matches the tag's string, OR
-          # * the recipe is tagged by the tag
-          matchstr = tag.normalized_name || Tag.normalizeName(tag.name)
-          # r1 = Recipe.joins(:rcprefs).where("recipes.title ILIKE ? and rcprefs.user_id = 3", "%#{matchstr}%")
-          # ids1 = subscope.joins("INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE '%salmon%' and rcprefs.user_id = 3")
-          # ids1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE '%#{matchstr}%' and rcprefs.user_id = 3})
-          # ids1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE '%#{matchstr}%'}).where("rcprefs.user_id = 3")
-          sss1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id}).where("recipes.title ILIKE ?", "%#{matchstr}%")
-          sss1 = sss1.where("rcprefs.user_id = #{@id}") if @id
-          sss1 = sss1.to_a.uniq { |rr| "#{rr.entity_type}#{rr.entity_id}"}
+  # Memoize a query to get all the currently-defined entity types
+  def typeset
+    @typeset ||= itemscope.select(:entity_type).distinct.order("entity_type DESC").map(&:entity_type)
+  end
 
-          sss2 = subscope.find_by_sql( %Q{SELECT * FROM rcprefs where rcprefs.comment ILIKE '%#{matchstr}%'} ).uniq { |rr| "#{rr.entity_type}#{rr.entity_id}"}
+  # Apply the tag to the current set of result counts
+  def count_tag tag, counts
+    typeset.each do |type|
+      subscope = itemscope.where('rcprefs.entity_type = ?', type)
+      # Winnow the scope by restricting the set to Rcprefs referring to recipes in which EITHER
+      # * The Rcpref's comment matches the tag's string, OR
+      # * The recipe's title matches the tag's string, OR
+      # * the recipe is tagged by the tag
+      matchstr = tag.normalized_name || Tag.normalizeName(tag.name)
+      # r1 = Recipe.joins(:rcprefs).where("recipes.title ILIKE ? and rcprefs.user_id = 3", "%#{matchstr}%")
+      # ids1 = subscope.joins("INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE '%salmon%' and rcprefs.user_id = 3")
+      # ids1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE '%#{matchstr}%' and rcprefs.user_id = 3})
+      # ids1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE '%#{matchstr}%'}).where("rcprefs.user_id = 3")
+      sss1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id}).where("recipes.title ILIKE ?", "%#{matchstr}%")
+      sss1 = sss1.where("rcprefs.user_id = #{@id}") if @id
+      sss1 = sss1.to_a.uniq { |rr| "#{rr.entity_type}#{rr.entity_id}"}
 
-          sss3 = subscope.joins("INNER JOIN taggings ON taggings.entity_type = rcprefs.entity_type and taggings.entity_id = rcprefs.entity_id and taggings.tag_id = #{tag.id}")
-          sss3 = sss3.to_a.uniq { |rr| "#{rr.entity_type}#{rr.entity_id}" }
+      sss2 = subscope.find_by_sql( %Q{SELECT * FROM rcprefs where rcprefs.comment ILIKE '%#{matchstr}%'} ).uniq { |rr| "#{rr.entity_type}#{rr.entity_id}"}
 
-          counts.incr sss1 # One extra point for matching in one field
-          counts.incr sss2
-          counts.incr sss3
-          this_round = (sss1+sss2+sss3).uniq
-          counts.incr this_round, 30 # Thirty points for matching this tag
-        end
-      end
+      sss3 = subscope.joins("INNER JOIN taggings ON taggings.entity_type = rcprefs.entity_type and taggings.entity_id = rcprefs.entity_id and taggings.tag_id = #{tag.id}")
+      sss3 = sss3.to_a.uniq { |rr| "#{rr.entity_type}#{rr.entity_id}" }
 
-      # Sort the scope by number of hits, descending
-      self.cache = counts.items
-      bounds = (0...(@querytags.count)).to_a.map { |i| (@querytags.count-i)*30 }
-      wdw = partition.window if partition
-      self.partition = counts.partition bounds
-      self.window = [wdw.min, wdw.max] if wdw
-      true
+      counts.incr sss1 # One extra point for matching in one field
+      counts.incr sss2
+      counts.incr sss3
+      this_round = (sss1+sss2+sss3).uniq
+      counts.incr this_round, 30 # Thirty points for matching this tag
     end
   end
 
@@ -374,40 +379,21 @@ class FeedsCache < ResultsCache
     Feed.unscoped
   end
 
-  def cache_and_partition
-    if @querytags.count == 0
-      # No cache required
-      self.partition = Partition.new([0, itemscope.count ]) unless partition
-      false
-    elsif cache
-      true
-    else
-      # Convert the itemscope relation into a hash on entity types
-      counts = Counts.new
-      @querytags.each do |tag|
-        matchstr = tag.normalized_name || Tag.normalizeName(tag.name)
+  def count_tag tag, counts
+    matchstr = tag.normalized_name || Tag.normalizeName(tag.name)
 
-        sourcetags = Tag.where(tagtype: 6).where('normalized_name ILIKE ?', "%#{matchstr}%")
-        referent_ids = sourcetags.map(&:referent_id)
-        site_ids = Site.where(referent_id: referent_ids).map(&:id)
-        tagset = Feed.where(site_id: site_ids).map(&:id)
+    sourcetags = Tag.where(tagtype: 6).where('normalized_name ILIKE ?', "%#{matchstr}%")
+    referent_ids = sourcetags.map(&:referent_id)
+    site_ids = Site.where(referent_id: referent_ids).map(&:id)
+    tagset = Feed.where(site_id: site_ids)
 
-        tagset = (tagset + tag.feeds.map(&:id)).uniq if tag.id > 0
-        matchset = Feed.where("title ILIKE ? or description ILIKE ?", "%#{matchstr}%", "%#{matchstr}%").map(&:id)
-        counts.incr tagset.uniq # One extra point for matching in one field
-        counts.incr matchset
-        this_round = (tagset+matchset).uniq
-        counts.incr this_round, 30 # Thirty points for matching this tag
-      end
-
-      # Sort the scope by number of hits, descending
-      self.cache = counts.items
-      bounds = (0...(@querytags.count)).to_a.map { |i| (@querytags.count-i)*30 }
-      wdw = partition.window if partition
-      self.partition = counts.partition bounds
-      self.window = [wdw.min, wdw.max] if wdw
-      true
-    end
+    tagset = tagset.map(&:id)
+    tagset = (tagset + tag.feeds.map(&:id)).uniq if tag.id > 0
+    matchset = Feed.where("title ILIKE ? or description ILIKE ?", "%#{matchstr}%", "%#{matchstr}%").map(&:id)
+    counts.incr tagset.uniq # One extra point for matching in one field
+    counts.incr matchset
+    this_round = (tagset+matchset).uniq
+    counts.incr this_round, 30 # Thirty points for matching this tag
   end
 
   # The cache is just item keys
@@ -422,6 +408,22 @@ class FeedCache < ResultsCache
 
   def itemscope
     FeedEntry.where(feed_id: @id).order('published_at DESC')
+  end
+
+  def count_tag tag, counts
+    matchstr = tag.normalized_name || Tag.normalizeName(tag.name)
+
+    sourcetags = Tag.where('normalized_name ILIKE ?', "%#{matchstr}%")
+    idlist = sourcetags.map(&:id).to_s
+    tagset = itemscope.joins(:taggings)
+      .where("feed_entries.id = taggings.entity_id
+          AND taggings.entity_type = 'FeedEntry'")
+      .where("taggings.tag_id" => idlist).to_a
+    matchset = itemscope.where("name ILIKE ? or summary ILIKE ?", "%#{matchstr}%", "%#{matchstr}%").to_a
+    counts.incr tagset # One extra point for matching in one field
+    counts.incr matchset
+    this_round = (tagset+matchset).uniq
+    counts.incr this_round, 30 # Thirty points for matching this tag
   end
 
 end
