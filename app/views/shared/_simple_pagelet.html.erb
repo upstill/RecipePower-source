@@ -1,3 +1,3 @@
 <!--The simplest pagelet, with a header (including a search box) and a results placeholder-->
 <%= tag_filter_header title: title, comment: ((defined? comment) ? comment : "") %>
-<%= stream_results_placeholder %>
+<%= render "shared/stream_results_placeholder" %>

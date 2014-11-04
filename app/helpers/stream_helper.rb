@@ -142,6 +142,7 @@ module StreamHelper
     render partial: @sp.tail_partial
   end
 
+  # Kind of redundant, since it just calls the like-named partial, but at least it obviates probs. with render_to_string
   def stream_results_placeholder
     with_format("html") { render partial: "shared/stream_results_placeholder" }
   end
