@@ -33,7 +33,6 @@ class UsersController < ApplicationController
   def index
     # 'index' page may be calling itself with filter parameters in the name and tagtype
     # seeker_result User, 'div.user_list' # , clear_tags: true
-    @container = "container_collections"
     smartrender unless do_stream UsersCache
   end
   
@@ -91,7 +90,6 @@ class UsersController < ApplicationController
   def show
     @user = User.find params[:id]
     @active_menu = :home
-    @container = "container_collections"
     # @suggestion = UserSuggestion.find_or_make(@user, current_user_or_guest, params[:queryparams], session.id)
     # @suggestion.make_ready # Give it a try, whether newly made or not
     smartrender unless do_stream UserListsCache
@@ -100,7 +98,6 @@ class UsersController < ApplicationController
   # Show the user's recently-viewed recipes
   def recent
     @user = User.find params[:id]
-    @container = "container_collections"
     @active_menu = :collection
     response_service.title = "Recently Viewed"
     smartrender unless do_stream UserRecentCache
@@ -109,7 +106,6 @@ class UsersController < ApplicationController
   # Show the user's entire collection
   def collection
     @user = User.find params[:id]
-    @container = "container_collections"
 	  if (@user.id == current_user_or_guest_id)
       response_service.title = "All My Goodies"
       @active_menu = :collection
@@ -123,7 +119,6 @@ class UsersController < ApplicationController
   # Show the user's recently-viewed recipes
   def biglist
     @user = User.find params[:id]
-    @container = "container_collections"
     @active_menu = :collection
     response_service.title = "The Big List"
     smartrender unless do_stream UserBiglistCache

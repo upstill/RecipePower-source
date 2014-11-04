@@ -5,15 +5,7 @@ module FeedsHelper
   end
 
   def feedlist
-    @feed.entries.collect { |entry|
-      publish_date = entry.published_at ? "Published on: "+entry.published_at.strftime("%B %d, %Y")+"<br />" : ""
-      %Q{
-        <p><a href='#{entry.url}'>#{entry.name}
-       </a><br />
-       #{publish_date}
-       #{entry.summary}</p><hr>
-      }
-    }.join.html_safe
+    @feed.entries.collect { |entry| render partial: "feed_entries/show_feed_entry", item: entry }.join.html_safe
   end
   
 =begin

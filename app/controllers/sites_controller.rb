@@ -5,7 +5,6 @@ class SitesController < ApplicationController
   # GET /sites.json
   def index
     # seeker_result Site, "div.site_list" # , clear_tags: true
-    @container = "container_collections"
     smartrender unless do_stream SitesCache
   end
 

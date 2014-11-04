@@ -18,7 +18,6 @@ class FeedsController < ApplicationController
   # GET /feeds
   # GET /feeds.json
   def index
-    @container = "container_collections"
     @active_menu = :feeds
     smartrender unless do_stream FeedsCache
     # seeker_result Feed, 'div.feed_list', all_feeds: permitted_to?(:approve, :feeds) # , clear_tags: true
@@ -35,7 +34,7 @@ class FeedsController < ApplicationController
         sp.item_partial = "feed_entries/show_feed_entry"
         sp.results_partial = "shared/stream_results_items"
       end
-    rescue
+    rescue Exception => e
       render text: "Sorry, but there is no such feed. Whatever made you ask?"
     end
   end

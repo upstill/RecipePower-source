@@ -4,7 +4,6 @@ class ReferencesController < ApplicationController
 
   def index
     # seeker_result Tag, 'div.tag_list' # , clear_tags: true
-    @container = "container_collections"
     smartrender unless do_stream ReferencesCache
   end
 

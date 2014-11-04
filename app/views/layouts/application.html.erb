@@ -36,12 +36,7 @@
 </head>
 <body>
 <%= render 'layouts/navbar' %>
-<%# The controller can specify a container partial in @container %>
-<% if @container %>
-    <%= render "layouts/"+@container %>
-<% else %>
-    <%= render (params[:controller] == "collection") ? "layouts/container_collection" : "layouts/container_standard" %>
-<% end %>
+<%= render "layouts/container" %>
 <%= preloads %>
 <div id='popup_notification' class='hide alert-notice'>
   <button class="close" data-dismiss="alert">&#215;</button>

@@ -143,9 +143,7 @@ module StreamHelper
   end
 
   def stream_results_placeholder
-    content_tag :div,
-                stream_element(:tail),
-                class: "stream-results"
+    with_format("html") { render partial: "shared/stream_results_placeholder" }
   end
 
 end

@@ -31,6 +31,4 @@
     <%= link_to_modal 'Edit', edit_feed_path(@feed), class: "btn" %>
 <% end %>
 <%= link_to 'Back to Feeds', feeds_path, class: "btn" %>
-
-<%= tag_filter_header title: "Entries" %>
-<%= stream_results_placeholder %>
+<%= stream_element :body, "show_entries" %>
