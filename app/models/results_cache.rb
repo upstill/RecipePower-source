@@ -389,7 +389,7 @@ end
 class FeedsCache < ResultsCache
 
   def itemscope
-    Feed.unscoped
+    Feed.where(approved: true)
   end
 
   def count_tag tag, counts

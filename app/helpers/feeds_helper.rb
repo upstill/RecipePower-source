@@ -1,7 +1,7 @@
 module FeedsHelper
 
   def feeds_table
-    stream_table [ "ID", "Title/Description/URL", "Tag(s)", "Type", "Host Site", ("Approved" if permitted_to?(:approve, :feeds)) , "Actions" ].compact
+    stream_table [ "Title/Description/URL", "Tag(s)", "Type", "Host Site", "Actions" ].compact
   end
 
   def feedlist
