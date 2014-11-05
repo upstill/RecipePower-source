@@ -207,7 +207,7 @@ class ApplicationController < ActionController::Base
             # If operating with a stream, package the content into a stream-body element, with stream trigger
             renderopts[:action] = response_service.action
             begin
-              replname = @sp.query ? "shared/stream_results_replacement" : "shared/pagelet_body_replacement"
+              replname = @sp.has_query? ? "shared/stream_results_replacement" : "shared/pagelet_body_replacement"
               render template: replname, layout: false
             rescue Exception => e
               x=2
