@@ -3,7 +3,7 @@ require './lib/controller_utils.rb'
 class FeedsController < ApplicationController
   
   def approve
-    @feed = Feed.find(params[:id])
+    @feed = Feed.find params[:id]
     @feed.approved = params[:approve] == 'Y'
     @feed.save
     if request.format == 'text/javascript'
@@ -28,11 +28,11 @@ class FeedsController < ApplicationController
   def show
     @active_menu = :feeds
     begin
-      @feed = Feed.find(params[:id])
+      @feed = Feed.find params[:id]
       response_service.title = @feed.title
       smartrender unless do_stream FeedCache do |sp|
         sp.item_partial = "feed_entries/show_feed_entry"
-        sp.results_partial = "shared/stream_results_items"
+        sp.results_partial = "stream_results_items"
       end
     rescue Exception => e
       render text: "Sorry, but there is no such feed. Whatever made you ask?"
@@ -82,7 +82,7 @@ class FeedsController < ApplicationController
   # Remove a feed from the current user's feeds
   def remove
     begin
-      feed = Feed.find(params[:id])
+      feed = Feed.find params[:id]
     rescue Exception => e
       flash[:error] = "Couldn't get feed "+params[:id].to_s
     end
@@ -98,7 +98,7 @@ class FeedsController < ApplicationController
 
   # GET /feeds/1/edit
   def edit
-    @feed = Feed.find(params[:id])
+    @feed = Feed.find params[:id]
     smartrender area: "floating" 
   end
 
@@ -129,7 +129,7 @@ class FeedsController < ApplicationController
   # PUT /feeds/1
   # PUT /feeds/1.json
   def update
-    @feed = Feed.find(params[:id])
+    @feed = Feed.find params[:id]
     @user = current_user
     if @feed.update_attributes(params[:feed])
       respond_to do |format|
@@ -148,10 +148,17 @@ class FeedsController < ApplicationController
     end
   end
 
+  def refresh
+    @feed = Feed.find params[:id]
+    @feed.enqueue_update if @feed.status == "ready"
+    url = feed_url(@feed, querytags: params[:querytags], partial: true)
+    redirect_to url
+  end
+
   # DELETE /feeds/1
   # DELETE /feeds/1.json
   def destroy
-    @feed = Feed.find(params[:id])
+    @feed = Feed.find params[:id]
     @feed.destroy
 
     respond_to do |format|

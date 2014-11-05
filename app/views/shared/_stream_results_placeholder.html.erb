@@ -1,4 +1,5 @@
 <div class="stream-results">
+  <%= yield :stream_results_preface if content_for? :stream_results_preface %>
   <div class="stream-tail">
     <% if next_path = @sp.next_path %>
         <%= image_tag "ajax-loader.gif", class: "beachball hide" %>

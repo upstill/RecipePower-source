@@ -5,6 +5,7 @@
 
 RP::Application.routes.draw do
 
+  get "feed_entries/collect"
   resources :suggestions do
     member do
       get 'results'
@@ -92,6 +93,7 @@ RP::Application.routes.draw do
   resources :feeds, :except => [:index, :create] do
     member do
       get 'collect' # Add the feed to the current user
+      get 'refresh' # Refresh the feed's entries
       post 'remove' # Remove the feed from the current user's set
       post 'approve' # (Admin only) approve the feed for presentation
     end

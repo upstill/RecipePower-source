@@ -1,5 +1,26 @@
 module FeedsHelper
 
+  def feed_status_report feed
+    tag_query = @querytags.collect { |tag| tag.id > 0 ? tag.id.to_s : tag.name }.join(',')
+    params = tag_query.blank? ? {} : { querytags: tag_query }
+    url = refresh_feed_path(feed, params)
+
+    if feed.status == "ready"
+      label = "Update Now"
+    else
+      status = "Update #{feed.status}. "
+      label = "Try Again"
+    end
+    link = link_to_submit label, url, class: "btn"
+    content_tag :span,
+                "Last updated #{time_ago_in_words feed.updated_at} ago. #{status}#{link}".html_safe,
+                class: "feed-status-report"
+  end
+
+  def feed_status_report_replacement feed
+    [ "span.feed-status-report", feed_status_report(feed) ]
+  end
+
   def feeds_table
     stream_table [ "Title/Description/URL", "Tag(s)", "Type", "Host Site", "Actions" ].compact
   end
@@ -8,14 +29,6 @@ module FeedsHelper
     @feed.entries.collect { |entry| render partial: "feed_entries/show_feed_entry", item: entry }.join.html_safe
   end
   
-=begin
-:name         => entry.title,
-:summary      => entry.summary,
-:url          => entry.url,
-:published_at => entry.published,
-:guid         => entry.id,
-:feed         => feed
-=end
   # Helper for showing @feed_entry to @user_id
   def show_feed_entry
     %Q{<p>

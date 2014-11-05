@@ -75,29 +75,6 @@ class Feed < ActiveRecord::Base
     Feed.where(:approved => true).each { |feed| feed.perform }
   end
 
-  def perform
-    logger.debug "[#{Time.now}] Updating feed #{to_s}; approved=#{approved ? 'Y' : 'N'}"
-    puts "[#{Time.now}] Updating feed "+to_s
-    if feed = Feed.where(id: id).first
-      FeedEntry.update_from_feed feed
-      feed.touch
-    end
-  end
-
-  def enqueue_update later = false
-    Delayed::Job.enqueue self, priority: 10, run_at: (later ? (Time.new.beginning_of_week(:sunday)+1.week) : (Time.now+20))
-  end
-
-  def success(job)
-    # When the feed is updated successfully, re-queue it for one week hence
-    feed = YAML::load(job.handler)
-    logger.debug "Updated feed ##{job.id}"
-    if feed = Feed.where(id: feed.id).first
-      feed.enqueue_update true
-      feed.touch
-    end
-  end
-
   def to_s
     title+" (#{url})"
   end
@@ -134,42 +111,6 @@ class Feed < ActiveRecord::Base
     end
   end
 
-=begin
-  # feed and entries accessors
-  feed.title          # => "Paul Dix Explains Nothing"
-  feed.url            # => "http://www.pauldix.net"
-  feed.feed_url       # => "http://feeds.feedburner.com/PaulDixExplainsNothing"
-  feed.etag           # => "GunxqnEP4NeYhrqq9TyVKTuDnh0"
-  feed.last_modified  # => Sat Jan 31 17:58:16 -0500 2009 # it's a Time object
-
-  entry = feed.entries.first
-  entry.title      # => "Ruby Http Client Library Performance"
-  entry.url        # => "http://www.pauldix.net/2009/01/ruby-http-client-library-performance.html"
-  entry.author     # => "Paul Dix"
-  entry.summary    # => "..."
-  entry.content    # => "..."
-  entry.published  # => Thu Jan 29 17:00:19 UTC 2009 # it's a Time object
-  entry.categories # => ["...", "..."]
-  
-  def items
-    unless @items
-      @items = []
-      feed = Feedzirra::Feed.fetch_and_parse(url)
-      @items = feed.entries
-    end
-    @items
-  end
-
-  def show
-    items.each do |entry|
-      puts "Item: <a href='#{entry.url}'>#{entry.title}</a>"
-      puts "Published on: #{entry.published}"
-      puts "#{entry.summary}"
-    end
-    nil
-  end
-=end
-  
   @@feedtypes = [
     [:Misc, 0], 
     [:Recipes, 1], 
@@ -189,6 +130,61 @@ class Feed < ActiveRecord::Base
   def feedtypename
     @@feedtypenames[feedtype]
   end
-  
+
+  def discreet_save
+    Feed.record_timestamps = false
+    save
+    Feed.record_timestamps = true
+  end
+
+  # Ensure that the entries for the feed are up to date
+  def refresh
+    FeedEntry.update_from_feed self
+    self.touch
+  end
+
+  # Callbacks for DelayedJob
+  def enqueue(job)
+    self.status = :pending
+    discreet_save
+  end
+
+  def before(job)
+    self.status = :running
+    discreet_save
+  end
+
+  def perform
+    logger.debug "[#{Time.now}] Updating feed #{id}; approved=#{approved ? 'Y' : 'N'}"
+    if feed = Feed.where(id: id).first
+      feed.refresh
+    end
+  end
+
+  def enqueue_update later = false
+    Delayed::Job.enqueue self, priority: 10, run_at: (later ? (Time.new.beginning_of_week(:sunday)+1.week) : Time.now)
+  end
+
+  def success(job)
+    # When the feed is updated successfully, re-queue it for one week hence
+    feed = YAML::load(job.handler)
+    logger.debug "Successfully updated feed ##{feed.id}"
+    if feed = Feed.where(id: feed.id).first
+      feed.enqueue_update true
+      logger.debug "Queued up feed ##{feed.id}"
+      feed.status = :ready
+      feed.discreet_save
+    end
+  end
+
+  def error(job, exception)
+    self.status = :failed
+    discreet_save
+  end
+
+  def failure(job)
+    self.status = :failed
+    discreet_save
+  end
 end
 

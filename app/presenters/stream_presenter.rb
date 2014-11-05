@@ -1,5 +1,6 @@
 class StreamPresenter
   attr_accessor :results, :tagtype, :results_partial, :item_partial, :tail_partial
+  attr_reader :querytags
 
   delegate :items, :next_item, :next_range, :"done?", :window, :param, :full_size, :"has_query?", :"ready?", :nmatches, :to => :results
 
