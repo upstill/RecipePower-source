@@ -203,6 +203,19 @@ class ResultsCache < ActiveRecord::Base
     items && (i = safe_partition.next_index) && items[i] # i is relative to the current window
   end
 
+  def has_query?
+    (@querytags.count > 0)
+  end
+
+  def ready? # Have the items been sorted out yet?
+    (@querytags.count == 0) || cache
+  end
+
+  def nmatches # Force the partition and report the first window
+    cache_and_partition
+    partition[1]
+  end
+
   # Return the total number of items in the result. This doesn't have to be every possible item, just
   # enough to stay ahead of the window.
   def full_size

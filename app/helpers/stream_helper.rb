@@ -23,7 +23,8 @@ module StreamHelper
       end
     end
     if partial
-      content = render partial: partial, locals: locals
+      renderparms = { partial: partial, locals: locals }
+      content = render renderparms
     elsif block_given? # If no headerpartial provided, expect there to be a code block to produce the content
       content = yield
     end
@@ -62,46 +63,28 @@ module StreamHelper
     replacement << "RP.stream.check" if etype==:trigger
     replacement
   end
-=begin
-  # This generates an item for initializing the results stream by replacing the results element with its
-  # display shell
-  def stream_results_item headerpartial
-    data = ActiveSupport::JSON.decode with_format("json") { render partial: headerpartial }
-    { replacements: data }
-  end
 
-  def masonry_results_replacement
-    stream_element_replacement(:results, "shared/stream_results_masonry") << "RP.masonry.onload"
-  end
-
-  def pagelet_body
-    if body_partial.is_a? Hash
-      locals, body_partial = body_partial, nil
+  def stream_count force=false
+    if @sp.has_query? && (@sp.ready? || force)
+      case nmatches = @sp.nmatches
+        when 0
+          "No matches found"
+        when 1
+          "1 match found"
+        else
+          "#{nmatches} found"
+      end
+    else
+      case nmatches = @sp.full_size
+        when 0
+          "Regrettably empty"
+        when 1
+          "Only one here"
+        else
+          "#{nmatches} altogether"
+      end
     end
-    stream_element :body, (body_partial || "#{response_service.action}_pagelet"), locals
   end
-
-  # Return a JSON string passed to the client, for modifying the page of a stream
-  def pagelet_body_replacement body_partial=nil, locals={}
-    if body_partial.is_a? Hash
-      locals, body_partial = body_partial, nil
-    end
-    body_partial ||= "#{response_service.action}_pagelet"
-    default = {
-        pushState: [ response_service.originator, response_service.page_title ],
-        replacements:
-            [
-                stream_element_replacement(:body, body_partial, locals),
-            ]
-    }
-    if block_given?
-      extras = yield
-      default[:replacements] = default[:replacements] + extras.delete(:replacements) if extras[:replacements]
-      default.merge! extras
-    end
-    default.to_json
-  end
-=end
 
   # A useful starting point for a pagelet, with just a searchable header and search results
   def simple_pagelet locals={}

@@ -1,7 +1,7 @@
 class StreamPresenter
   attr_accessor :results, :tagtype, :results_partial, :item_partial, :tail_partial
 
-  delegate :items, :next_item, :next_range, :"done?", :window, :param, :full_size, :to => :results
+  delegate :items, :next_item, :next_range, :"done?", :window, :param, :full_size, :"has_query?", :"ready?", :nmatches, :to => :results
 
   def initialize session_id, requestpath, rc_class, userid, querytags=[], params={}
     if querytags.class == Hash

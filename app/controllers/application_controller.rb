@@ -133,18 +133,24 @@ class ApplicationController < ActionController::Base
       yield @sp
     end
     if @sp.stream?  # We're here to spew items into the stream
+      # When the stream is request is for the first items, replace the results
+      if @sp.preface?
+        # Generally, start by restarting the results element and replacing the found count
+        header_item = with_format("html") {
+          { replacements: [
+              view_context.stream_element_replacement(:results),
+              view_context.stream_element_replacement(:count, final_count: true)
+          ] }
+        }
+      else
+        header_item = { deletions: [ '.stream-tail' ] }
+      end
       response.headers["Content-Type"] = "text/event-stream"
       # retrieve_seeker
       begin
         sse = Reloader::SSE.new response.stream
-        # When the stream is request is for the first items, replace the results
-        if @sp.preface?
-          # Controller may override the name of the results container partial
-          sse.write :stream_item, with_format("html") { { replacements: [ view_context.stream_element_replacement(:results) ] } }
-        else
-          # Before the first item, remove the prior tail
-          sse.write :stream_item, deletions: [ '.stream-tail' ]
-        end
+        sse.write :stream_item, header_item
+
         while item = @sp.next_item do
           sse.write :stream_item, with_format("html") { { elmt: view_context.render_stream_item(item) } }
         end
