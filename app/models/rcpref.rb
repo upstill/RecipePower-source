@@ -6,7 +6,7 @@ class Rcpref < ActiveRecord::Base
   belongs_to :entity, :polymorphic => true
   belongs_to :user
   # before_save :ensure_unique
-  attr_accessible :comment, :entity_id, :user_id, :in_collection, :updated_at, :created_at
+  attr_accessible :comment, :entity_type, :entity_id, :user_id, :in_collection, :updated_at, :created_at
 
   # When saving a "new" use, make sure it's unique
   def ensure_unique

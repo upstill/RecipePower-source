@@ -1,0 +1,47 @@
+<%= form_for @entity, :html => { style: 'width:auto;height:auto'} do |f| %>
+    <%= form_errors_helper f, @entity, false %>
+
+    <div class="left">
+      <div class="edit_recipe_field pic_picker_field">
+        <%= pic_field f, :picurl, nil, :fallback_img => "/assets/PickPicture.png", :nopicker => true %>
+      </div>
+      <% unless @entity.picurl.blank? %>
+          <p>Prefer another picture?<br/>Click one!</p>
+      <% end %>
+    </div>
+
+    <div class="middle">
+      <div class="edit_recipe_field" >
+        <%= f.label :title, "Title" -%>
+        <% @entity.title %>
+        <div class="edit_recipe_field_textarea">
+          <div class="expandingArea">
+            <pre><span></span><br></pre>
+            <%= f.text_area :title, rows: "2" -%>
+          </div>
+        </div>
+      </div>
+
+      <%= taggable_div f, "edit_recipe_field" %>
+
+      <div class="edit_recipe_field" >
+        <%= f.label :comment, "Notes" -%>
+        <div class="edit_recipe_field_textarea">
+          <div class="expandingArea">
+            <pre><span></span><br></pre>
+            <%= f.text_area :comment, placeholder: "What are your thoughts about this recipe?" -%>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="edit_recipe_field ">
+        <%= f.check_box :private %>
+        <%= f.label :private, "Private" %>
+      </div>
+      <%= f.submit "Save", class: "btn btn-success" %>
+      <%# button_to "Forget It", remove_recipe_path(@entity), class: "btn btn-sm btn-success" %>
+      <%= hidden_field_tag 'layout', 'injector' %>
+    </div>
+<% end %>

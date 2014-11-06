@@ -5,7 +5,12 @@
 
 RP::Application.routes.draw do
 
-  get "feed_entries/collect"
+  resources :feed_entries, :except => [:index, :create, :new, :show, :destroy] do
+    member do 
+      get "collect"
+    end
+  end
+
   resources :suggestions do
     member do
       get 'results'

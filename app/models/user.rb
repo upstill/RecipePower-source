@@ -114,7 +114,7 @@ class User < ActiveRecord::Base
   # Remember that the user has (recently) touched the entity, optionally adding it to the collection
   def touch entity=nil, collect=false
     return super unless entity
-    ref = rcprefs.create_with(in_collection: collect).find_or_initialize_by user_id: id, entity_type: entity.class, entity_id: entity.id
+    ref = rcprefs.create_with(in_collection: collect).find_or_initialize_by user_id: id, entity_type: entity.class.to_s, entity_id: entity.id
     if ref.created_at # Existed prior
       if (Time.now - ref.created_at) > 5
         ref.created_at = ref.updated_at = Time.now

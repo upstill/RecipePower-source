@@ -13,7 +13,8 @@ module Collectible
   end
   
   def add_to_collection uid
-    self.touch true, uid # Touch the entity and add it to the user's collection
+    User.find(uid).touch self, true
+    # self.touch true, uid # Touch the entity and add it to the user's collection
   end
 
   def remove_from_collection uid
