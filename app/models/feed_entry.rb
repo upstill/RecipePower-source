@@ -1,8 +1,12 @@
 class FeedEntry < ActiveRecord::Base
   include Taggable
   include Collectible
-  attr_accessible :guid, :name, :published_at, :summary, :url, :feed, :recipe
-  
+
+  attr_accessible :guid, :title, :published_at, :summary, :url, :feed, :recipe
+
+  include Picable
+  picable :picurl, :picture
+
   belongs_to :feed
   belongs_to :recipe
   
@@ -28,7 +32,7 @@ class FeedEntry < ActiveRecord::Base
       entry.published = Time.current unless entry.published
       unless exists? :guid => entry.id
         create!(
-          :name         => entry.title,
+          :title        => entry.title,
           :summary      => entry.summary,
           :url          => entry.url,
           :published_at => entry.published,

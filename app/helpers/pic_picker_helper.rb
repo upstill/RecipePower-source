@@ -24,7 +24,34 @@ module PicPickerHelper
   end
 
   # Bare-metal version of the pic preview widget, for use in a template file
-  def pic_preview_widget page_url, img_url_display, img_url_value, entity_id, options={}
+  def pic_preview_widget templateer, options={}
+    page_url = templateer.url
+    img_url_display = templateer.picdata
+    img_url_value = templateer.picurl,
+    entity_id = templateer.id
+    input_id = templateer.element_id(:picurl) # "recipe_picurl"
+    input_name = templateer.field_name(:picurl) # "recipe[picurl]"
+    img_id = "rcpPic#{entity_id}"
+    link_id = "golink#{entity_id}"
+    pic_picker_link = pic_preview_golink page_url, img_url_value, link_id, img_id, input_id
+    pic_preview =
+        %Q{<img alt="Image Link is Broken"
+              id="#{img_id}"
+              src="#{img_url_display}"
+              style="width:100%; height: auto">
+         <input type="hidden"
+                id="#{input_id}"
+                name="#{input_name}"
+                rel="jpg,png,gif"
+                type="text"
+                value="#{img_url_value}">
+        }.html_safe
+    content_tag( :div, pic_preview, :class => :pic_preview)+
+        content_tag( :div, pic_picker_link, :class => :pic_picker_link)
+  end
+
+  # Bare-metal version of the pic preview widget, for use in a template file
+  def old_pic_preview_widget page_url, img_url_display, img_url_value, entity_id, options={}
     input_id = "recipe_picurl"
     input_name = "recipe[picurl]"
     img_id = "rcpPic#{entity_id}"

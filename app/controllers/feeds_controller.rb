@@ -34,8 +34,8 @@ class FeedsController < ApplicationController
         sp.item_partial = "feed_entries/show_feed_entry"
         sp.results_partial = "stream_results_items"
       end
-    rescue Exception => e
-      render text: "Sorry, but there is no such feed. Whatever made you ask?"
+#    rescue Exception => e
+#      render text: "Sorry, but there is no such feed. Whatever made you ask?"
     end
   end
 

@@ -1,6 +1,3 @@
-class UserBrowserTest
-end
-
 require 'test_helper'
 class UserBrowserTest < ActiveSupport::TestCase
   fixtures :feeds

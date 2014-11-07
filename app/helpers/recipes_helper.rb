@@ -89,7 +89,6 @@ module RecipesHelper
   end
 
 def edit_recipe_link( label, recipe, options={})
-    piclink = recipe.picurl
     rcp_params = {
       rcpID: recipe.id,
       rcpTitle: recipe.title,

@@ -82,9 +82,9 @@ module FlashHelper
   end
 
   # Return the current flash text, suitable for popping up
-  def flash_popup
+  def flash_popup keep=false
     msg = flash.collect  { |type, message|
-      flash.delete type
+      flash.delete type unless keep
       message
     }.join.html_safe
     msg

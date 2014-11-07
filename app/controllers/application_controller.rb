@@ -1,6 +1,7 @@
 require './lib/controller_authentication.rb'
 # require './lib/seeker.rb'
 require './lib/querytags.rb'
+require './lib/templateer.rb'
 require 'rp_event'
 require 'reloader/sse'
 require 'results_cache.rb'
