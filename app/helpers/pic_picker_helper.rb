@@ -27,7 +27,7 @@ module PicPickerHelper
   def pic_preview_widget templateer, options={}
     page_url = templateer.url
     img_url_display = templateer.picdata
-    img_url_value = templateer.picurl,
+    img_url_value = templateer.picurl
     entity_id = templateer.id
     input_id = templateer.element_id(:picurl) # "recipe_picurl"
     input_name = templateer.field_name(:picurl) # "recipe[picurl]"

@@ -88,24 +88,6 @@ module RecipesHelper
   def grab_recipe_link label, recipe
   end
 
-def edit_recipe_link( label, recipe, options={})
-    rcp_params = {
-      rcpID: recipe.id,
-      rcpTitle: recipe.title,
-      rcpTaggableUserId: recipe.tagging_user_id,
-      rcpTagData: recipe.tag_editing_data,
-      rcpPicLink: recipe.picurl,
-      rcpPicData: recipe.picdata,
-      rcpURL: recipe.url,
-      rcpCollectibleUserId: recipe.collectible_user_id,
-      rcpPrivate: recipe.collectible_private,
-      rcpComment: recipe.collectible_comment,
-      authToken: form_authenticity_token
-    }
-    options[:class] = "edit_recipe_link "+(options[:class] || "")
-    link_to label, "#", options.merge(data: rcp_params)
-end
-
 # If the recipe doesn't belong to the current user's collection,
 #   provide a link to add it
 def ownership_status(rcp)

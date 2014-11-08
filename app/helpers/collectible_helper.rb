@@ -27,4 +27,20 @@ module CollectibleHelper
     [ "a.collect-collectible-link##{dom_id entity}", collect_or_edit_button(entity) ]
   end
 
+  def collectible_masonry_item entity
+    with_format("html") do render_to_string partial: "show_masonry_item" end
+  end
+
+  def collectible_masonry_item_replacement entity, destroyed=false
+    [ ".masonry-item-contents."+dom_id(entity), (collectible_masonry_item(entity) unless destroyed) ]
+  end
+
+  def collectible_smallpic entity
+    with_format("html") do render_to_string partial: "shared/recipe_smallpic" end
+  end
+
+  def collectible_smallpic_replacement entity, destroyed=false
+    [ "."+recipe_list_element_class(@recipe), (collectible_smallpic(entity) unless destroyed) ]
+  end
+
 end

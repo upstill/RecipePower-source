@@ -115,8 +115,9 @@ module StreamHelper
     partialname ||= @sp.item_partial || "show_masonry_item"
     # Get the item-rendering partial from the model view
     unless partialname.match /\//
+      # Use a partial specific to the entity if the file exists
       dir = element.class.to_s.pluralize.sub(/([a-z])([A-Z])/, '\1_\2').downcase
-      partialname = "#{dir}/#{partialname}"
+      partialname = "#{dir}/#{partialname}" if File.exists?(Rails.root.join("app", "views", dir, "_#{partialname}.html.erb"))
     end
     render partial: partialname, locals: { :item => element }
   end

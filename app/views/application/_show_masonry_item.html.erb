@@ -4,9 +4,6 @@
   <%= recipe_image_div item, "rcp_grid_pic_box" %>
   <%= recipe_grid_datablock item %>
   <div class="rcp_grid_element_footer">
-    <!--
-            <div class="rcp_grid_element_stats"><%# touch_date_elmt item %></div>
-    -->
     <div class="rcp_grid_element_icons">
       <%= recipe_info_icon item %>
       <%= render partial: "votes/button", locals: {entity: item, style: "h"} %>
@@ -14,13 +11,8 @@
     <div class="rcp_grid_element_buttons">
       <%# render "recipes/golink" %>
       <span class="<%= recipe_list_element_golink_class item %>">
-        <% if (current_user.id != User.guest_id) && item.collected_by?(current_user) %>
-          <%= edit_recipe_link "Edit", item, class: "btn btn-default btn-xs" %>
-        <% else %>
-          <%= link_to_modal "Cookmark", collect_recipe_path(item), class: "btn btn-default btn-xs" %>
-        <% end %>
+        <%= collect_or_edit_button item, false %>
       </span>
-
       <%# render "recipes/sharelink" %>
       <span class="<%= recipe_list_element_golink_class item %>">
         <%= link_to_modal "Share", new_user_invitation_path(recipe_id: item.id), class: "btn btn-default btn-xs" %>

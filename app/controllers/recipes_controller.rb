@@ -12,7 +12,6 @@ class RecipesController < ApplicationController
   
   # Render to html, json or js the results of a recipe manipulation
   def report_recipe( url, notice, formats, destroyed = false)
-    truncated = truncate @recipe.title, :length => 140
     respond_to do |fmt|
       fmt.html { 
         if response_service.injector? # (params[:_layout] && params[:_layout] == "injector")
@@ -21,28 +20,8 @@ class RecipesController < ApplicationController
           redirect_to url, :notice  => notice
         end
       }
-      fmt.json { 
-        replacements = [
-          [ "."+recipe_list_element_golink_class(@recipe) ],
-          [ "."+recipe_list_element_class(@recipe) ],
-          [ ".masonry-item-contents."+view_context.dom_id(@recipe) ]
-        ]
-        replacements << [ "."+feed_list_element_class(@feed_entry) ] if @feed_entry
-        if !destroyed # && current_user.browser.should_show(@recipe)
-          replacements[0][1] = with_format("html") do render_to_string partial: "recipes/golink" end
-          replacements[1][1] = with_format("html") do render_to_string partial: "shared/recipe_smallpic" end
-          replacements[2][1] = with_format("html") do render_to_string partial: "recipes/show_masonry_item" end
-          replacements[3][1] = with_format("html") do render_to_string partial: "shared/feed_entry" end if @feed_entry
-        end
-        render json: { 
-                       done: true, # Denotes recipe-editing is finished
-                       popup: notice,
-                       title: truncated, 
-                       replacements: replacements,
-                       action: params[:action],
-                       domID: view_context.dom_id(@recipe),
-                       processorFcn: "RP.rcp_list.update"
-                     } 
+      fmt.json {
+        render :update_collectible_item, locals: { destroyed: destroyed, notice: notice, entity: @recipe }
       }
       fmt.js { 
         render text: @recipe.title 
@@ -216,10 +195,7 @@ class RecipesController < ApplicationController
       current_user.collect @recipe if current_user
       response_service.title = @recipe.title # Get title from the recipe
       @nav_current = nil
-      # @_area = params[:_area]
-      # Now go forth and edit
-      # @_layout = params[:_layout]
-      # dialog_boilerplate('edit', 'at_left')
+      @templateer = Templateer.new @recipe, current_user.id
       smartrender # area: 'at_left'
     else
       response_service.title = "Cookmark a Recipe"
@@ -270,13 +246,8 @@ class RecipesController < ApplicationController
     # If all is well, make sure it's on the user's list
     current_user.touch @recipe if current_user && @recipe.errors.empty? && @recipe.id
     respond_to do |format|
-      list_element_body = render_to_string partial: "shared/recipe_smallpic"
-      format.json { 
-          render json: { touch_class: touch_date_class(@recipe), 
-                         touch_body: touch_date_elmt(@recipe),
-                         list_element_class: recipe_list_element_class(@recipe),
-                         list_element_body: list_element_body
-                       } 
+      format.json {
+          render json: { popup: "Snap! Collected #{@recipe.title}." }
       }
       format.html { 
           @list_name = "mine"
