@@ -29,33 +29,5 @@ class RecipeDecorator < TaggableDecorator
       h.link_to object.sourcename, object.sourcehome
     end
   end
-=begin
-"Channel_tags"
-"Genre_tags"
-"Ingredient_tags"
-"Occasion_tags"
-"Process_tags"
-"Role_tags"
-"Source_tags"
-"Tool_tags"
-"Author_tags"
 
-"Other_tags"
-
-"comments_mine"
-"comments_mine"
-
-"rcpComment"
-"rcpID"
-"rcpPicData"
-"rcpPicLink"
-"rcpPrivate"
-"rcpStatus"
-"rcpTitle"
-"rcpTitle"
-
-"site"
-~
-
-=end
 end

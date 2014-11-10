@@ -1,18 +1,14 @@
-class Templateer
+module Templateer
   attr_accessor :object, :klass
 
-  def initialize class_or_obj, uid=nil
+  def initialize class_or_obj, options={}
     if class_or_obj.class == Class
       self.klass = class_or_obj
     else
-      self.object = class_or_obj
-      class_or_obj.prep_params uid if uid
+      super
+      class_or_obj.prep_params options[:uid] if options[:uid]
       self.klass = class_or_obj.class
     end
-  end
-
-  def placeholder attribute
-    "%%#{attribute}%%".html_safe
   end
 
   # Return EITHER the value of an object attribute OR a placeholder for use in a template
@@ -78,6 +74,12 @@ class Templateer
 
   def edit_class
     "edit_#{object_type}"
+  end
+
+protected
+
+  def placeholder attribute
+    "%%#{attribute}%%".html_safe
   end
 
 end
