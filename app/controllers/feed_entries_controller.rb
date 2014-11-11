@@ -1,9 +1,7 @@
 class FeedEntriesController < ApplicationController
   def collect
-    @user = current_user
-    @feed_entry = FeedEntry.find params[:id]
-    @user.touch @feed_entry, true
-    @feed_entry.prep_params @user.id
+    update_and_decorate # Generate a FeedEntryDecorator as @feed_entry and prepares it for editing
+    current_user.collect @feed_entry if current_user
     redirect_to :edit
   end
 
@@ -13,11 +11,8 @@ class FeedEntriesController < ApplicationController
   end
 
   def update
-    fe = FeedEntry.find params[:id]
-    fe.update_attributes params[:feed_entry]
-    fe.accept_params
-    fe.save
-    if fe.errors.empty?
+    update_and_decorate nil, params[:feed_entry]
+    if fe.errors.empty? && fe.save
       @popup_msg = "Feed Entry is saved"
       render :ack_popup
     else

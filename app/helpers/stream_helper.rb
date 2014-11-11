@@ -111,15 +111,14 @@ module StreamHelper
   # Render an element of a collection, depending on its class
   # NB The view is derived from the class of the element, NOT from the current controller
   def render_stream_item element, partialname=nil
-    element.prep_params @user.id if element.respond_to? :prep_params
     partialname ||= @sp.item_partial || "show_masonry_item"
     # Get the item-rendering partial from the model view
     unless partialname.match /\//
       # Use a partial specific to the entity if the file exists
-      dir = element.class.to_s.pluralize.sub(/([a-z])([A-Z])/, '\1_\2').downcase
+      dir = element.class.to_s.underscore.pluralize
       partialname = "#{dir}/#{partialname}" if File.exists?(Rails.root.join("app", "views", dir, "_#{partialname}.html.erb"))
     end
-    render partial: partialname, locals: { :item => element }
+    render partial: partialname, locals: { :item => controller.update_and_decorate(element) }
   end
 
   def render_stream_tail

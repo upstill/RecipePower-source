@@ -25,7 +25,7 @@ class SitesController < ApplicationController
   # GET /sites/new.json
   def new
     # return if need_login true, true
-    prep_params
+    update_and_decorate
     response_service.title = "New Site"
     respond_to do |format|
       format.html # new.html.erb
@@ -36,7 +36,7 @@ class SitesController < ApplicationController
   # GET /sites/1/edit
   def edit
     # return if need_login true, true
-    prep_params # Give collectible and taggable a chance to set up their parameters
+    update_and_decorate # Give collectible and taggable a chance to set up their parameters
     response_service.title = @site.name
     smartrender area: "floating"
   end
@@ -44,9 +44,8 @@ class SitesController < ApplicationController
   # POST /sites
   # POST /sites.json
   def create
-      # return if need_login true, true
+    update_and_decorate nil, params[:site]
     respond_to do |format|
-      accept_params
       if !@site.errors.any?
         format.html { redirect_to @site, notice: 'Site was successfully created.' }
         format.json { render json: @site, status: :created, location: @site }
@@ -60,7 +59,7 @@ class SitesController < ApplicationController
   # PUT /sites/1
   # PUT /sites/1.json
   def update
-    accept_params
+    update_and_decorate
     respond_to do |format|
       if !@site.errors.any?
         format.html { redirect_to @site, notice: 'Site was successfully updated.' }

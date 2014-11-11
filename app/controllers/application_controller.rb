@@ -19,50 +19,39 @@ class ApplicationController < ActionController::Base
   before_filter :setup_response_service
   before_filter :log_serve
 
-    helper :all
-    rescue_from Timeout::Error, :with => :timeout_error # self defined exception
-    rescue_from OAuth::Unauthorized, :with => :timeout_error # self defined exception
-    rescue_from AbstractController::ActionNotFound, :with => :no_action_error
-    
-    helper_method :response_service
-    helper_method :orphantagid
-    helper_method :stored_location_for
-    helper_method :collection_path
+  helper :all
+  rescue_from Timeout::Error, :with => :timeout_error # self defined exception
+  rescue_from OAuth::Unauthorized, :with => :timeout_error # self defined exception
+  rescue_from AbstractController::ActionNotFound, :with => :no_action_error
 
-    include ApplicationHelper
+  helper_method :response_service
+  helper_method :orphantagid
+  helper_method :stored_location_for
+  helper_method :collection_path
 
-  # Incorporate changes to temporary fields into the persisted model
-  def accept_params entity = nil
-    modelname = params[:controller].sub( /_controller$/, '').singularize
-    modelsym = modelname.to_sym
-    objclass = modelname.camelize.constantize
-    if params[:id]
-      entity ||= objclass.find params[:id]
-      entity.update_attributes params[modelsym] if params[modelsym]
-    else
-      entity ||= objclass.new (params[modelsym] || {})
-      entity.save
-    end
-    entity.accept_params
-    instance_variable_set :"@#{modelname}", entity
-    @decorator = entity.decorate unless entity.errors.any?
-    entity
-  end
+  include ApplicationHelper
 
-  # Set up a model for editing, whether new or fetched
-  # Asserting an entity assumes that it is up to date
-  def prep_params entity = nil
-    modelname = params[:controller].sub( /_controller$/, '').singularize
-    modelsym = modelname.to_sym
-    objclass = modelname.camelize.constantize
-    unless entity
+  # Set up a model for editing or rendering. The parameters are orthogonal:
+  # If entity is nil, it is either fetched using params[:id] or created anew
+  # If attribute_params are non-nil, they are used to initialize(update) the created(fetched) entity
+  # We also setup an instance variable for the entity according to its class,
+  #  and also set up a decorator (@decorator) on the entity
+  def update_and_decorate entity=nil, attribute_params=nil
+    if entity
+      modelname = entity.class.to_s.underscore
+    else # If entity not provided, find/build it and update attributes
+      modelname = params[:controller].sub( /_controller$/, '').singularize
+      objclass = modelname.camelize.constantize
       entity = params[:id] ? objclass.find(params[:id]) : objclass.new
-      entity.update_attributes(params[modelsym]) if params[modelsym]
     end
-    entity.prep_params @user.id
-    instance_variable_set :"@#{modelname}", entity
-    @decorator = entity.decorate unless entity.errors.any?
-    entity
+    @decorator = entity.decorate
+    @decorator.prep_params current_user_or_guest_id if entity.respond_to? :prep_params
+    @decorator.accept_params if entity.errors.empty? && # No probs. so far
+                              entity.respond_to?(:accept_params) &&
+                              attribute_params       && # There are parameters to update
+                              current_user           &&  # Only the current user gets to modify a model
+                              entity.update_attributes(attribute_params)
+    instance_variable_set :"@#{modelname}", @decorator
   end
 
   # This replaces the old collections path, providing a path to either the current user's collection or home

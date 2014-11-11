@@ -1,6 +1,7 @@
 require 'string_utils.rb'
-
-class RecipeDecorator < TaggableDecorator
+require "templateer.rb"
+class RecipeDecorator < Draper::Decorator
+  include Templateer
 
   def extract fieldname
     case fieldname
