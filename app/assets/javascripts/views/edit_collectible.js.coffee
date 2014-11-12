@@ -12,14 +12,12 @@ RP.edit_collectible.bind = (dlog) ->
 	$(dlog).on "click", '.edit-collectible-link', RP.edit_collectible.go
 
 me = () ->
-	$('div.edit_collectible')[0]
+	$('div.edit-collectible')[0]
 
 tagger_selector = "div.edit-collectible #tagging_tokens"
 
 # Open the edit-recipe dialog on the recipe represented by 'rcpdata'
 RP.edit_collectible.go = (evt, xhr, settings) ->
-	rcpdata = $(this).data()
-	template = $('#recipePowerEditRecipeTemplate')
 	dlog = me()
 	# If it has children it's active, and should be put away, starting with hiding it.
 	if $('.edit-collectible > *').length > 0
@@ -27,29 +25,11 @@ RP.edit_collectible.go = (evt, xhr, settings) ->
 	# Parse the data for the recipe and insert into the dialog's template.
 	# The dialog has placeholders of the form %%rcp<fieldname>%% for each part of the recipe
 	# The status must be set by activating one of the options
-	if templ = $(template).data "template"
-		# ...but then again, the dialog may be complete without a template
-		# statustarget = '<option value="'+rcpdata.rcpStatus+'"'
-		# statusrepl = statustarget + ' selected="selected"'
-		dlgsource = templ.string.
-		replace(/%(25)?%(25)?id%(25)?%(25)?/g, rcpdata.id). # May have been URI encoded
-		replace(/%%tagging_user_id%%/g, rcpdata.tagging_user_id).
-		replace(/%%collectible_user_id%%/g, rcpdata.collectible_user_id).
-		replace(/%%title%%/g, rcpdata.title).
-		replace(/%%picdata%%/g, rcpdata.picdata || "/assets/NoPictureOnFile.png" ).
-		replace(/%25%25picdata%25%25/g, encodeURIComponent(rcpdata.picdata || "/assets/NoPictureOnFile.png" )).
-		replace(/%%picurl%%/g, rcpdata.picurl || "" ).
-		replace(/%25%25picurl%25%25/g, encodeURIComponent(rcpdata.picurl || "")).
-		replace(/%%url%%/g, rcpdata.url).
-		replace(/%25%25url%25%25/g, encodeURIComponent(rcpdata.url)).
-		replace(/%%collectible_user_id%%/g, rcpdata.collectible_user_id).
-		replace(/%%collectible_private%%/g, rcpdata.collectible_private).
-		replace(/%%collectible_comment%%/g, rcpdata.collectible_comment).
-		replace(/%%authToken%%/g, rcpdata.authtoken) # .replace(statustarget, statusrepl)
-		$(template).html dlgsource # This nukes any lingering children as well as initializing the dialog
+	rcpdata = $(this).data()
+	rcpdata.picdata ||= "/assets/NoPictureOnFile.png"  # Default
+	dlgsource = RP.templates.apply "edit-collectible", rcpdata
 	# The tag data is parsed and added to the tags field directly
-	# rcpdata.rcpmisctagdata.query = "tagtype_x=11,15&showtype=true&verbose=true"
-	RP.tagger.init tagger_selector, rcpdata.rcptagdata # jQuery.parseJSON(rcpdata.rcptagdata)
+	RP.tagger.init tagger_selector, rcpdata.taggingTagData
 	$('textarea').autosize()
 
 	# Hand it off to the dialog handler

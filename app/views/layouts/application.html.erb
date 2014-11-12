@@ -37,7 +37,11 @@
 <body>
 <%= render 'layouts/navbar' %>
 <%= render "layouts/container" %>
-<%= preloads %>
+<% if current_user  %>
+  <%= template_element "edit-collectible", "application/edit_modal" %>
+<% else %>
+  <%= render partial: "registrations/new_modal" %>
+<% end %>
 <div id='popup_notification' class='hide alert-notice'>
   <button class="close" data-dismiss="alert">&#215;</button>
   <span>Msg Goes Here</span>

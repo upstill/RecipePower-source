@@ -118,7 +118,8 @@ module StreamHelper
       dir = element.class.to_s.underscore.pluralize
       partialname = "#{dir}/#{partialname}" if File.exists?(Rails.root.join("app", "views", dir, "_#{partialname}.html.erb"))
     end
-    render partial: partialname, locals: { :item => controller.update_and_decorate(element) }
+    decorator = controller.update_and_decorate(element)
+    render partial: partialname, locals: { :item => decorator }
   end
 
   def render_stream_tail

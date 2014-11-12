@@ -1,4 +1,6 @@
+require "templateer.rb"
 class FeedEntryDecorator < Draper::Decorator
+  include Templateer
   delegate_all
 
   # Define presentation-specific methods here. Helpers are accessed through

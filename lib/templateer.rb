@@ -1,13 +1,14 @@
+require "string_utils.rb"
 module Templateer
   attr_accessor :object, :klass
 
-  def initialize class_or_obj, options={}
-    if class_or_obj.class == Class
-      self.klass = class_or_obj
-    else
+  def initialize class_or_obj=nil, options={}
+    if class_or_obj && (class_or_obj.class != Class)
       super
       class_or_obj.prep_params options[:uid] if options[:uid]
       self.klass = class_or_obj.class
+    else # For a class constant or nil, just record it
+      self.klass = class_or_obj
     end
   end
 
@@ -23,9 +24,18 @@ module Templateer
   # We assume certain field values; others may be defined by subclasses
   def data
     unless @data
-      @data = {}
+      @data = {
+          obj_type_singular: object_type,
+          obj_type_plural: object_type(true),
+          human_name: human_name(false, false),
+          human_name_capitalize: human_name(false, true),
+          human_name_plural: human_name(true, false),
+          human_name_plural_capitalize: human_name(true, true),
+          tagging_tag_data: tagdata
+      }
       if @object
-        @object.class.accessible_attributes.each { |key|
+        toget = @object.class.accessible_attributes + [:id]
+        toget.each { |key|
           key = key.to_sym
           @data[key] = @object.send(key) if @object.respond_to? key
         }
@@ -35,12 +45,21 @@ module Templateer
   end
 
   def object_type plural=false
-    type = klass.to_s
-    (plural ? type.pluralize : type).underscore
+    if klass
+      type = klass.to_s
+      (plural ? type.pluralize : type).underscore
+    else
+      placeholder plural ? "obj_type_plural" : "obj_type_singular"
+    end
   end
 
-  def human_name plural=false
-    object_type(plural).sub('_', ' ')
+  def human_name plural=false, capitalize=true
+    if klass
+      name = object_type(plural).sub('_', ' ')
+      capitalize ? name.split.map(&:capitalize)*' ' : name
+    else
+      placeholder %Q{human_name#{"_plural" if plural}#{"_capitalize" if capitalize}}
+    end
   end
 
   # Define presentation-specific methods here. Helpers are accessed through
@@ -79,7 +98,7 @@ module Templateer
 protected
 
   def placeholder attribute
-    "%%#{attribute}%%".html_safe
+    "%%#{attribute.to_s.camelize.uncapitalize}%%".html_safe
   end
 
 end

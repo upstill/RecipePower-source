@@ -189,9 +189,8 @@ class RecipesController < ApplicationController
     update_and_decorate nil, params[:recipe]
     if @recipe.errors.empty? # Success (recipe found)
       current_user.collect @recipe if current_user
-      response_service.title = @recipe.title # Get title from the recipe
+      response_service.title = @recipe.title.truncate(20) # Get title from the recipe
       @nav_current = nil
-      @templateer = Templateer.new @recipe, current_user.id
       smartrender # area: 'at_left'
     else
       response_service.title = "Cookmark a Recipe"
@@ -217,7 +216,7 @@ class RecipesController < ApplicationController
     else
       update_and_decorate
       if @recipe.errors.empty?
-        if ref = Rcpref.where( user: @user, entity: @recipe ).first
+        if ref = @recipe.rcprefs.where( user: current_user ).first
           ref.edit_count += 1
           ref.save
         end

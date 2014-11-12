@@ -20,9 +20,8 @@ class UserDecoratorTest < Draper::TestCase
   test "it generates correct human names" do
     user = users(:thing1)
     tt = UserDecorator.new user
-    assert_equal "user", tt.human_name
-    assert_equal "users", tt.human_name.pluralize
-    assert_equal "users", tt.human_name(true)
+    assert_equal "user", tt.human_name(false, false) # Not plural, not capitalized
+    assert_equal "users", tt.human_name(true, false)
     assert_equal "user_id", tt.element_id(:id)
     assert_equal "user[id]", tt.field_name(:id)
     assert_equal "/users/#{user.id}", tt.object_path

@@ -247,14 +247,14 @@ module ApplicationHelper
     ).html_safe
   end
 
-  # If there are any tasks awaiting which need a login, set up the appropriate one.
-  # Returning nil implies to preload the signup dialog
-  def preloads
-    if @user
-      render partial: 'recipes/edit_template', recipe: nil
-    else
-      render partial: "registrations/new_modal"
-    end
+  # A template element has embedded placeholders provided by the TemplateDecorator
+  def template_element id, partial
+    template = render(partial, entity: TemplateDecorator.new )
+    content_tag :div,
+                "",
+                class: "template",
+                id: id,
+                :"data-template" => { string: template }.to_json
   end
 
   # Sign Me Up button for the home page, with contents varying according to, whether, e.g., a person is responding to an invitation

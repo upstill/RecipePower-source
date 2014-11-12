@@ -128,11 +128,17 @@ RP.findEnclosingByClass = (classname, elmt) ->
 
 # Automatically open dialogs or click links that have 'trigger' class
 RP.fire_triggers = (context) ->
+	if context && $(context).hasClass 'trigger'
+		$(context).each (ix, elmt) ->
+			if elmt.tagName == "A"
+				$(elmt).trigger "click"
+			else if elmt.tagName == "DIV" && $(elmt).hasClass 'dialog'
+				$(elmt).removeClass "trigger"
+				RP.dialog.run elmt
 	context ||= window.document
-	# Links with class 'trigger' and 'submit' get fired
-	$('a.trigger', context).each (ix, elmt) ->
-		RP.submit.onClick elmt
-	# Dialogs with class 'trigger' get autoloaded
+	# Links with class 'trigger' get fired
+	$('a.trigger', context).trigger "click"
+	# Dialogs with class 'trigger' get autorun
 	$('div.dialog.trigger', context).removeClass("trigger").each (ix, dlog) ->
 		RP.dialog.run dlog
 
@@ -286,8 +292,9 @@ RP.process_response = (responseData, odlog) ->
 			for replacement in replacements
 				elmt = $(replacement[0])[0]
 				if replacement[1]
-					$(elmt).replaceWith replacement[1]
-					if elmt = $(replacement[0])[0]
+					if newElmt = $(replacement[1])
+						$(elmt).replaceWith newElmt
+						elmt = newElmt
 						$('[onload]', elmt).trigger 'load'
 						RP.fire_triggers elmt # For unobtrusive triggers
 				else

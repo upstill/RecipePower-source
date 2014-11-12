@@ -1,19 +1,17 @@
 <%# Default modal dialog for editing a (collectible, taggable) item. May be overwritten for other controllers  %>
-<%# @entity must be defined %>
-<% @templateer ||= Templateer.new %>
+<% entity ||= @decorator || TemplateDecorator.new # If no entity provided, assume this is for a template %>
 <%= content_tag(:div,
                 class: "dialog edit-collectible modal at_left hide",
-                style: "overflow:visible",
-                data: @templateer.data ) do %>
+                style: "overflow:visible") do %>
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
           <%# unless recipe %>
               <!--<input class="close cancel" data-dismiss="modal" name="commit" type="submit" value="x"/>-->
           <%# end %>
-          <h3>Tag That <%= @templateer.human_name.split.map(&:capitalize)*' ' %>!</h3>
+          <h3>Tag That <%= entity.human_name %>!</h3>
         </div>
-        <form accept-charset="UTF-8" action="<%= @templateer.object_path %>" class="form-inline edit-collectible" data-remote="true" data-type="json" id="edit_collectible_<%= @templateer.id %>">
+        <form accept-charset="UTF-8" action="<%= entity.object_path %>" class="form-inline edit-collectible" data-remote="true" data-type="json" id="edit_collectible_<%= entity.id %>">
           <input name="utf8" type="hidden" value="&#x2713;"/>
           <input name="_method" type="hidden" value="post"/>
           <input name="authenticity_token" type="hidden" value="<%= form_authenticity_token %>"/>
@@ -24,46 +22,46 @@
             <div class="row">
               <div class="col-md-5">
                 <div class="edit_collectible_field pic_picker_field">
-                  <%= pic_preview_widget @templateer %>
+                  <%= pic_preview_widget entity %>
                 </div>
               </div>
               <div class="col-md-7">
                 <div class="control-group">
                   <label class="string optional">Title</label>
-                  <textarea id="<%= @templateer.element_id :title %>" name="<%= @templateer.field_name :title %>" placeholder="Title" style="width:100%"><%= @templateer.title %></textarea>
+                  <textarea id="<%= entity.element_id :title %>" name="<%= entity.field_name :title %>" placeholder="Title" style="width:100%"><%= entity.title %></textarea>
                 </div>
                 <div class="control-group">
                   <label class="string optional">Tag(s)</label>
-                  <input id="<%= @templateer.element_id :tagging_user_id %>" name="<%= @templateer.field_name :tagging_user_id %>" type="hidden" value="<%= @templateer.tagging_user_id %>">
+                  <input id="<%= entity.element_id :tagging_user_id %>" name="<%= entity.field_name :tagging_user_id %>" type="hidden" value="<%= entity.tagging_user_id %>">
                   <input type="text"
                          class="token-input-field-pending"
                          id="tagging_tokens"
-                         name="<%= @templateer.field_name :tagging_tokens %>"
+                         name="<%= entity.field_name :tagging_tokens %>"
                          rows="2"
                          size="30"
                          placeholder="Tags"
-                         data-pre="<%= @templateer.tagdata %>"/>
+                         data-pre="<%= entity.tagdata %>"/>
                 </div>
               </div>
             </div>
             <div class="row">
               <div class="col-md-12">
                 <div class="control-group">
-                  <input id="<%= @templateer.element_id :collectible_user_id %>" name="<%= @templateer.field_name :collectible_user_id %>" type="hidden" value="<%= @templateer.collectible_user_id %>">
+                  <input id="<%= entity.element_id :collectible_user_id %>" name="<%= entity.field_name :collectible_user_id %>" type="hidden" value="<%= entity.collectible_user_id %>">
                   <label class="string optional">Notes & Comments</label>
-                  <textarea id="<%= @templateer.element_id :collectible_comment %>" name="<%= @templateer.field_name :collectible_comment %>" placeholder="<%= @templateer.human_name true %> Notes" rows="3" style="width:100%"><%= @templateer.collectible_comment %></textarea>
+                  <textarea id="<%= entity.element_id :collectible_comment %>" name="<%= entity.field_name :collectible_comment %>" placeholder="<%= entity.human_name true %> Notes" rows="3" style="width:100%"><%= entity.collectible_comment %></textarea>
                 </div>
               </div>
             </div>
           </div>
           <div class="modal-footer">
-            <input class="btn pull-left" type="submit" data-action="<%= @templateer.object_path %>/remove" value="Remove" data-method="post"/>
+            <input class="btn pull-left" type="submit" data-action="<%= entity.object_path %>/remove" value="Remove" data-method="post"/>
             <% if permitted_to? :admin, :pages %>
-                <input class="btn btn-danger pull-left" type="submit" data-action="<%= @templateer.object_path %>" data-method="delete" value="Destroy" data-confirm="This will remove the <%= @templateer.human_name %> from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?"/>
+                <input class="btn btn-danger pull-left" type="submit" data-action="<%= entity.object_path %>" data-method="delete" value="Destroy" data-confirm="This will remove the <%= entity.human_name %> from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?"/>
             <% end %>
-            <input name="<%= @templateer.field_name :collectible_private %>" type="hidden" value="0"/>
-            <label for="<%= @templateer.element_id :collectible_private %>" class="checkbox">
-              <input <%= @templateer.collectible_private %> id="<%= @templateer.element_id :collectible_private %>" name="<%= @templateer.field_name :collectible_private %>" type="checkbox" value="1"/>Private
+            <input name="<%= entity.field_name :collectible_private %>" type="hidden" value="0"/>
+            <label for="<%= entity.element_id :collectible_private %>" class="checkbox">
+              <input <%= entity.collectible_private %> id="<%= entity.element_id :collectible_private %>" name="<%= entity.field_name :collectible_private %>" type="checkbox" value="1"/>Private
               cookmark
             </label>
             <input class="cancel btn" data-dismiss="modal" name="commit" type="submit" value="Cancel"/>

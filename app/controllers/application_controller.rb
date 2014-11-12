@@ -44,14 +44,15 @@ class ApplicationController < ActionController::Base
       objclass = modelname.camelize.constantize
       entity = params[:id] ? objclass.find(params[:id]) : objclass.new
     end
-    @decorator = entity.decorate
-    @decorator.prep_params current_user_or_guest_id if entity.respond_to? :prep_params
-    @decorator.accept_params if entity.errors.empty? && # No probs. so far
+    entity.prep_params current_user_or_guest_id if entity.respond_to? :prep_params
+    entity.accept_params if entity.errors.empty? && # No probs. so far
                               entity.respond_to?(:accept_params) &&
                               attribute_params       && # There are parameters to update
                               current_user           &&  # Only the current user gets to modify a model
                               entity.update_attributes(attribute_params)
-    instance_variable_set :"@#{modelname}", @decorator
+    instance_variable_set :"@#{modelname}", entity
+    # We build a decorator if poss.
+    entity.respond_to?(:decorate) ? (@decorator = entity.decorate) : entity
   end
 
   # This replaces the old collections path, providing a path to either the current user's collection or home
