@@ -44,7 +44,7 @@ class FeedsController < ApplicationController
   def new
     @feed = Feed.new
     response_service.title = "Subscribe to a Feed"
-    smartrender modal: true # how: 'modal'
+    smartrender mode: :modal
   end
   
   # Add a feed to the feeds of the current user
@@ -118,7 +118,7 @@ class FeedsController < ApplicationController
       respond_to do |format|
         format.html { render action: "new", status: :unprocessable_entity }
         format.json { 
-          smartrender action: "new", status: :unprocessable_entity, modal: true # , how: "modal"
+          smartrender action: "new", status: :unprocessable_entity, mode: :modal 
         }
       end
     else

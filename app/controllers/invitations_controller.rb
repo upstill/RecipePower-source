@@ -231,8 +231,7 @@ class InvitationsController < Devise::InvitationsController
           current_inviter.save
           notice = "But #{id} is already on RecipePower! Oh happy day!! <br>(We've gone ahead and made them your friend.)".html_safe
         end
-        # dialog_boilerplate :new # redirect_to collection_path, :notice => notice
-        smartrender :action => :new # redirect_to collection_path, :notice => notice
+        smartrender :action => :new 
       else # There's a resource error on email, but not because the user exists: go back for correction
         render :new
       end

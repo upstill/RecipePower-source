@@ -5,11 +5,9 @@
     </div>
 <% end %>
 <br>
-<%= link_to @recipe.title, accept_invitation_link ?
-        recipe_url(@recipe,
-                   modal: true, # :how => :modal,
-                   :accept_invitation_link => accept_invitation_link) :
-        @recipe.url,
+<%= link_to @recipe.title, (accept_invitation_link ?
+        recipe_url(@recipe, mode: :modal, :accept_invitation_link => accept_invitation_link) :
+        @recipe.url),
             class: "share_recipe_title" %>
 <p>from&nbsp;
   <%= link_to @recipe.sourcename,

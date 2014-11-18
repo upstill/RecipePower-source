@@ -5,7 +5,6 @@ class SessionsController < Devise::SessionsController
   def new
     if current_user
       # flash[:notice] = "All signed in. Welcome back, #{current_user.handle}!"
-      # redirect_to collection_path(redirect: true)
       redirect_to after_sign_in_path_for(current_user), notice: "All signed in. Welcome back, #{current_user.handle}!"
     else
       self.resource = resource_class.new # build_resource(nil, :unsafe => true)

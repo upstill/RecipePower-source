@@ -1,4 +1,4 @@
-<%= page_or_modal response_service.modal_options.merge(action: :step3, title: "Step 3: There Is No Step 3", body_class: "red_body") do %>
+<%= page_or_modal action: :step3, title: "Step 3: There Is No Step 3", body_class: "red_body" do %>
     <div class="welcome-dialog">
       <p class="airy">
         That's it! You're ready to roll. Welcome to RecipePower, <%= current_user.handle %>!
@@ -13,6 +13,6 @@
         FYI: Just so you don't get lonely, we've provided you with a starter set of friends, feeds and channels you
         might enjoy. Tailor them to your liking (invite more friends!) any time.
       </p>
-      <%= link_to_modal "Start Me Up", popup_path("need_to_know"), class: "btn btn-lg btn-info btn-success dialog-submit-button" %>
+      <%= button_to_submit "Start Me Up", popup_path("need_to_know"), "success", "lg", :mode => :modal, class: "dialog-submit-button" %>
     </div>
 <% end %>

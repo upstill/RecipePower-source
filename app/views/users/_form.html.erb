@@ -48,7 +48,7 @@
         <%= f.input :role_id, label: "Role", collection: @user.role_select %>
     <% end %>
     <%= form_actions f, submit_label: "Update Details", cancel_path: users_path do
-      link_to_modal("Change Password", edit_user_registration_path, class: "btn btn-default")+
-              link_to_modal("Sign-in Services", authentications_path, class: "btn btn-default")
+      button_to_submit("Change Password", edit_user_registration_path, :mode => :modal)+
+      button_to_submit("Sign-in Services", authentications_path, :mode => :modal)
     end %>
 <% end %>

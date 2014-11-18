@@ -14,7 +14,7 @@ class RecipesController < ApplicationController
   def report_recipe( url, notice, formats, destroyed = false)
     respond_to do |fmt|
       fmt.html { 
-        if response_service.injector? # (params[:_layout] && params[:_layout] == "injector")
+        if response_service.injector? 
           render text: notice
         else
           redirect_to url, :notice  => notice
@@ -43,7 +43,6 @@ class RecipesController < ApplicationController
     response_service.title = ""
     @nav_current = nil
     smartrender
-    # redirect_to @recipe.url
   end
 
   def new # Collect URL, then re-direct to edit
@@ -90,7 +89,7 @@ class RecipesController < ApplicationController
         }
         format.json {
           @data = { onget: [ "submit.submit_and_process", user_collection_url(current_user, layout: false) ] }
-          response_service.is_dialog
+          response_service.mode = :modal
           render json: {
             dlog: with_format("html") { 
               render_to_string :edit, layout: false
@@ -101,11 +100,8 @@ class RecipesController < ApplicationController
     else # failure (not a valid recipe) => return to new
        response_service.title = "Cookmark a Recipe"
        @nav_current = :addcookmark
-       # render :action => 'new'
        @recipe.current_user = current_user_or_guest_id # session[:user_id]
-       # @_area = params[:_area]
-       # dialog_boilerplate 'new', 'modal'
-       smartrender :action => 'new', modal: true # , :how => :modal
+       smartrender :action => 'new', mode: :modal 
     end
   end
 
@@ -118,12 +114,10 @@ class RecipesController < ApplicationController
       format.html { # This is for capturing a new recipe and tagging it using a new page. 
         if current_user
           update_and_decorate Recipe.ensure(params[:recipe]||{}, params[:extractions])
-          # The injector (capture.js) calls for this to fill the iframe on the foreign page.
-          # @_layout = "injector"
           if @recipe.id
             current_user.collect @recipe if current_user
             if response_service.injector?
-              smartrender :action => :edit # :_layout => (params[:_layout] || response_service.dialog?)
+              smartrender :action => :edit 
             else
               # If we're collecting a recipe outside the context of the iframe, redirect to
               # the collection page with an embedded modal dialog invocation
@@ -186,12 +180,12 @@ class RecipesController < ApplicationController
   def edit
     # return if need_login true
     # Fetch the recipe by id, if possible, and ensure that it's registered with the user
-    update_and_decorate nil, params[:recipe]
+    update_and_decorate 
     if @recipe.errors.empty? # Success (recipe found)
       current_user.collect @recipe if current_user
       response_service.title = @recipe.title.truncate(20) # Get title from the recipe
       @nav_current = nil
-      smartrender # area: 'at_left'
+      smartrender 
     else
       response_service.title = "Cookmark a Recipe"
       @nav_current = :addcookmark
@@ -237,7 +231,7 @@ class RecipesController < ApplicationController
   # Register that the recipe was touched by the current user--if they own it.
   # Since that recipe will now be at the head return a new first-recipe in the list.
   def touch
-    update_and_decorate Recipe.ensure(params.slice(:id, :url)) # session[:user_id], params
+    update_and_decorate Recipe.ensure(params.slice(:id, :url)) 
     # If all is well, make sure it's on the user's list
     current_user.touch @recipe if current_user && @recipe.errors.empty? && @recipe.id
     respond_to do |format|

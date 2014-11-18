@@ -6,8 +6,8 @@
 		<b>Logo</b>: <%= item.logo %><br>
 		<b># Feeds:</b> <%= item.feeds.size %> (<%= item.feeds.where(approved: true).count %> approved for feedthrough)
 	</td>
-	<td><%= link_to_modal 'Show', item %><br>
-		<%= link_to_modal 'Edit', edit_site_path(item) %><br>
-		<%= link_to 'Destroy', item, confirm: 'Are you sure?', method: :delete %><br>
+	<td><%= link_to_submit 'Show', item, mode: :modal %><br>
+		<%= link_to_submit 'Edit', edit_site_path(item), mode: :modal %><br>
+		<%= link_to_submit 'Destroy', item, confirm: 'Are you sure?', method: :delete %><br>
 	</td>
 </tr>

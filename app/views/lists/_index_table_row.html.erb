@@ -4,7 +4,7 @@
       <%= item.id.to_s %>
     </td>
 	<td>
-        <%= link_to_submit item.name.truncate(80), list_path(item, partial: true) %><br>
+        <%= link_to_submit item.name.truncate(80), list_path(item), partial: true %><br>
 	</td>
 	<td>
       <%= item.description.truncate(200) unless item.description.blank? %>
@@ -14,13 +14,13 @@
     </td>
 	<td>
 		<% permitted_to?(:edit, :lists) do %>
-			<%= button_link 'Edit', edit_list_path(item), :dialog %>
+			<%= button_to_submit 'Edit', edit_list_path(item), mode: :modal %>
 		<% end %>
 		<% permitted_to?(:destroy, :lists) do %>
-			<%= link_to_submit 'Destroy',
+			<%= button_to_submit 'Destroy',
                               item,
+                              "danger",
                               :method => :delete,
-                              :class => "btn btn-default btn-xs btn-danger",
                               :data => { confirm: "Are you sure you want to destroy '#{item.name}'? There's no going back!" } %>
 		<% end %>
 	</td>

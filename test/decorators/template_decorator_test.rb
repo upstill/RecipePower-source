@@ -38,16 +38,16 @@ class TemplateDecoratorTest < Draper::TestCase
 
   test "it generates proper placeholders for nil type" do
     tt = TemplateDecorator.new
-    assert_equal "%%objTypeSingular%%", tt.data[:objTypeSingular]
-    assert_equal "%%objTypePlural%%", tt.data[:objTypePlural]
-    assert_equal "%%objTypeSingular%%_blah", tt.element_id(:blah)
-    assert_equal "%%objTypeSingular%%[blah]", tt.field_name(:blah)
-    assert_equal "/%%objTypePlural%%/%%id%%", tt.object_path
-    assert_equal "/%%objTypePlural%%/%%id%%/edit", tt.edit_path
-    assert_equal "edit_%%objTypeSingular%%", tt.edit_class
-    assert_equal "%%humanName%%", tt.data[:humanName]
-    assert_equal "%%humanNameCapitalize%%", tt.data[:humanNameCapitalize]
-    assert_equal "%%humanNamePlural%%", tt.data[:humanNamePlural]
-    assert_equal "%%humanNamePluralCapitalize%%", tt.data[:humanNamePluralCapitalize]
+    assert_equal "%%obj_type_singular%%", tt.data[:obj_type_singular]
+    assert_equal "%%obj_type_plural%%", tt.data[:obj_type_plural]
+    assert_equal "%%obj_type_singular%%_blah", tt.element_id(:blah)
+    assert_equal "%%obj_type_singular%%[blah]", tt.field_name(:blah)
+    assert_equal "/%%obj_type_plural%%/%%id%%", tt.object_path
+    assert_equal "/%%obj_type_plural%%/%%id%%/edit", tt.edit_path
+    assert_equal "edit_%%obj_type_singular%%", tt.edit_class
+    assert_equal "%%human_name%%", tt.data[:human_name]
+    assert_equal "%%human_name_capitalize%%", tt.data[:human_name_capitalize]
+    assert_equal "%%human_name_plural%%", tt.data[:human_name_plural]
+    assert_equal "%%human_name_plural_capitalize%%", tt.data[:human_name_plural_capitalize]
   end
 end

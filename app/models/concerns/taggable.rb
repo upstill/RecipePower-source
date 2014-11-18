@@ -24,6 +24,7 @@ module Taggable
   # Interpret the set of tag tokens into a list of tags ready to turn into taggings
   def accept_params
     if tagging_user_id
+      self.tagging_user_id = tagging_user_id.to_i # Better to have it as an integer
       asserted = # Map the elements of the token string to tags, whether existing or new
           TokenInput.parse_tokens(tagging_tokens) do |token| # parse_tokens analyzes each token in the list as either integer or string
             case token

@@ -15,7 +15,7 @@
                 <%= f.check_box :remember_me %> <%= f.label :remember_me %>
             <% end -%>
             <div style="width:100%;height:40px;"><%= f.submit "Sign In", class: "btn btn-success dialog-submit-button" %></div>
-            <div style="width:100%"><%= link_to_modal "Forgot Password", new_user_password_path(response_service.redirect_params), class: "get_password" %></div>
+            <div style="width:100%"><%= link_to_submit "Forgot Password", new_user_password_path(response_service.redirect_params), mode: :modal, class: "get_password" %></div>
           </div>
         </div>
     <% end %>
@@ -38,7 +38,7 @@
             <% end -%>
           </div>
           <div class="col-md-5">
-            <%= link_to_modal "Forgot Password", new_user_password_path %>
+            <%= link_to_submit "Forgot Password", new_user_password_path, mode: :modal %>
             <%= form_actions f, submit_label: "Sign In", cancel_path: home_path %>
           </div>
         </div>

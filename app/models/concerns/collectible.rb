@@ -73,6 +73,7 @@ module Collectible
   # After editing the model, save the collectible attributes in an Rcpref
   def accept_params
     if collectible_user_id # It must have been set
+      self.collectible_user_id = collectible_user_id.to_i # Better to have it as an integer
       if ref = rcpref(collectible_user_id, false)
         ref.comment = collectible_comment
         ref.private = collectible_private

@@ -148,7 +148,7 @@ class UsersController < ApplicationController
     else
       flash[:error] ||= ": No current user"
     end
-    redirect_to collection_path
+    redirect_to root_path
   end
 
   def edit

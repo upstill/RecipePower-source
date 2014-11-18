@@ -6,7 +6,7 @@ module TagsHelper
 
   # Emit a link to a tag using the tag's name and, optionally, its type and id
   def tag_link tag, with_id=false
-    link_to_modal( tag.name, tag )+(with_id ? "(#{tag.typename} #{tag.id.to_s})" : "")
+    link_to_submit( tag.name, tag, :mode => :modal )+(with_id ? "(#{tag.typename} #{tag.id.to_s})" : "")
   end
   
   def summarize_tag withtype = false, do_link = true, with_id=false

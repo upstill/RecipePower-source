@@ -88,7 +88,6 @@ RP.collection.update = (params, querypath) ->
 		error: (jqXHR, textStatus, errorThrown) ->
 			RP.notifications.done()
 			responseData = RP.post_error jqXHR
-			# responseData.how = responseData.how || assumptions.how
 			RP.process_response responseData
 		success: (resp, succ, xhr) ->
 			collection_update_success resp

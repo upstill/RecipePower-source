@@ -9,7 +9,6 @@ require 'results_cache.rb'
 class ApplicationController < ActionController::Base
   include Querytags # Grab the query tags from params for filtering a list
   # include ActionController::Live   # For streaming
-  # layout :rs_layout # Declare in any controller to let response_service pick the layout
   protect_from_forgery with: :exception
   
   before_filter :check_flash
@@ -36,13 +35,16 @@ class ApplicationController < ActionController::Base
   # If attribute_params are non-nil, they are used to initialize(update) the created(fetched) entity
   # We also setup an instance variable for the entity according to its class,
   #  and also set up a decorator (@decorator) on the entity
-  def update_and_decorate entity=nil, attribute_params=nil
+  def update_and_decorate entity=nil
+    attribute_params = nil
     if entity
+      # If the entity is provided, ignore parameters
       modelname = entity.class.to_s.underscore
     else # If entity not provided, find/build it and update attributes
       modelname = params[:controller].sub( /_controller$/, '').singularize
       objclass = modelname.camelize.constantize
       entity = params[:id] ? objclass.find(params[:id]) : objclass.new
+      attribute_params = params[modelname.to_sym]
     end
     entity.prep_params current_user_or_guest_id if entity.respond_to? :prep_params
     entity.accept_params if entity.errors.empty? && # No probs. so far
@@ -84,11 +86,6 @@ class ApplicationController < ActionController::Base
     session[:start_time] = session[:last_time] = last_serve.created_at
   end
 
-  # Use the layout stipulated by the response_service
-  def rs_layout
-    response_service.layout
-  end
-    
   # Get a presenter for the object fron within a controller
   def present(object, rc_class = nil)
     rc_class ||= "#{object.class}Presenter".constantize
@@ -171,20 +168,16 @@ class ApplicationController < ActionController::Base
   end
 
   # Generalized response for dialog for a particular area
-  def smartrender(renderopts={})
+  def smartrender renderopts={}
     response_service.action = renderopts[:action] || params[:action]
     url = renderopts[:url] || request.original_url
     # flash.now[:notice] = params[:notice] unless flash[:notice] # ...should a flash message come in via params
-    # @_area = params[:_area]
-    # @_layout = params[:_layout]
     # @_partial = !params[:_partial].blank?
     # Apply the default render params, honoring those passed in
     renderopts = response_service.render_params renderopts
     respond_to do |format|
       format.html do
-        if response_service.page? && renderopts[:redirect_to]
-          redirect_to renderopts[:redirect_to]
-        elsif response_service.dialog?
+        if response_service.mode == :modal
           # Run the request as a dialog within the collection page
           redirect_to_modal url
         else
@@ -192,7 +185,8 @@ class ApplicationController < ActionController::Base
         end
       end
       format.json {
-        if response_service.partial?
+        case response_service.mode
+        when :partial
           renderopts[:layout] = false
           if @sp
             # If operating with a stream, package the content into a stream-body element, with stream trigger
@@ -206,9 +200,7 @@ class ApplicationController < ActionController::Base
           else
             render renderopts
           end
-        else
-          # Blithely assuming that we want a modal-dialog element if we're getting JSON and not a partial
-          response_service.is_dialog
+        when :modal
           dialog = render_to_string renderopts.merge(action: response_service.action, layout: (@layout || false), formats: ["html"])
           render json: {code: dialog, how: "bootstrap"}.to_json, layout: false, :content_type => 'application/json'
         end
@@ -255,8 +247,6 @@ class ApplicationController < ActionController::Base
   def setup_response_service
     @user = current_user_or_guest
     @response_service ||= ResponseServices.new params, session, request
-    # Mobile is sticky: it stays on for the session once the "mobile" target parameter appears
-    @response_service.is_mobile if (params[:target] == "mobile")
     @response_service
   end
 
@@ -272,8 +262,8 @@ class ApplicationController < ActionController::Base
   include ControllerAuthentication
 
   def page_with_trigger dialog, page=nil
-    triggerparam = assert_query(dialog, modal: true)
-    pt = assert_query (page || collection_path), trigger: %Q{"#{triggerparam}"}
+    triggerparam = assert_query(dialog, mode: :modal)
+    pt = assert_query (page || root_path), trigger: %Q{"#{triggerparam}"}
     logger.debug "page_with_trigger reporting #{pt} on default page '#{page}' and collection_path '#{collection_path}'."
     pt
   end

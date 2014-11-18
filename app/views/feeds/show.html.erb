@@ -10,11 +10,13 @@
 <p>
   <b>Type:</b> <%= @feed.feedtypename %>
 </p>
+<% if @feed.site %>
 
-<p>
-  <b>From Site:</b>
-  <%= link_to_modal( @feed.site.name, site_path(@feed.site)) if @feed.site %>
-</p>
+  <p>
+    <b>From Site:</b>
+    <%= link_to_submit @feed.site.name, site_path(@feed.site), mode: :modal %>
+  </p>
+<% end %>
 
 <% permitted_to?(:approve, :feeds) do %>
     <p>
@@ -28,7 +30,7 @@
     <% end %>
 <% end %>
 <% permitted_to?(:edit, :feeds) do %>
-    <%= link_to_modal 'Edit', edit_feed_path(@feed), class: "btn" %>
+    <%= button_to_submit 'Edit', edit_feed_path(@feed), mode: :modal %>
 <% end %>
 <%= link_to 'Back to Feeds', feeds_path, class: "btn" %>
 <%= stream_element :body, "show_entries" %>

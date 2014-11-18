@@ -1,8 +1,9 @@
 RP.templates ||= {}
 
 # Apply the given data to the named (by DOM id) template
-RP.templates.apply = (name, data) ->
-	template = $('div.template#'+name)
+RP.templates.apply = (data) ->
+	template = $('div.template#'+data.templateId)
+	data = data.templateData
 	if (templateData = $(template).data "template") && (srcString = templateData.string)
 		# ...but then again, the dialog may be complete without a template
 		for own k, v of data

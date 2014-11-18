@@ -11,7 +11,7 @@ module FeedsHelper
       status = "Update #{feed.status}. "
       label = "Try Again"
     end
-    link = link_to_submit label, url, class: "btn"
+    link = button_to_submit label, url
     content_tag :span,
                 "Last updated #{time_ago_in_words feed.updated_at} ago. #{status}#{link}".html_safe,
                 class: "feed-status-report"

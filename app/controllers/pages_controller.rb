@@ -1,5 +1,4 @@
 class PagesController < ApplicationController
-  layout :rs_layout
   # filter_access_to :all
   respond_to :html, :json
   
@@ -35,22 +34,11 @@ class PagesController < ApplicationController
     smartrender
   end
   
-  # Serve mobile page using the jqm layout
-  def mobi
-    response_service.is_mobile !params[:off] # Persists across page requests
-    if current_user
-      redirect_to collection_path
-    else
-      redirect_to home_path
-    end
-  end
-
   # Generic action for displaying a popup by name
   def popup
     params[:name] = params[:name].sub(/pages\//, '') # Legacy thing...
-    response_service.is_dialog
     view_context.check_popup params[:name] # If we're serving the popup, remove it from the session
-    smartrender action: params[:name]
+    smartrender action: params[:name], mode: :modal
   end
 
 end

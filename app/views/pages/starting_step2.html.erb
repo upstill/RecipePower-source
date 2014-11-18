@@ -1,5 +1,5 @@
 <% title = (params[:context] == "signup" ? "Step 2: Install the Cookmark Button" : "Installing the 'Cookmark' Button") %>
-<%= page_or_modal response_service.modal_options(class: "trigger").merge( :action => :step2, :title => title, body_class: "red_body") do %>
+<%= page_or_modal class: "trigger", :action => :step2, :title => title, body_class: "red_body") do %>
     <div class="instructions_header">
 	  <p class="bm-pic"><%= bookmarklet %></p>
 		<p class="bm-text"> This is the <em>Cookmark</em> button, a bookmark with a special power: sending recipes to RecipePower.</p>
@@ -14,7 +14,7 @@
 	 <p class="cookmark-text">When you see a recipe you like, click the Cookmark button to stash it in RecipePower. You'll get a chance to select a picture or add a note and/or tags, then you can go about your business.</p>
 	<br>
 	<% if params[:context] == "signup" %>
-		<%= link_to_modal("Okay, All Set", popup_path("starting_step3"), class: "btn btn-lg btn-info", style: "float:right") %>
+		<%= button_to_submit("Okay, All Set", popup_path("starting_step3"), "info", "lg", :mode => :modal, style: "float:right") %>
 	<% else %>
 		<%= dialog_cancel_button("Okay, All Set", class: "btn btn-lg btn-info", style: "float:right") %>
 	<% end %>

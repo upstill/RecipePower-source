@@ -1,4 +1,4 @@
-<%= modal_dialog :sign_in, "Welcome Back! If you'll just sign in...", response_service.modal_options do %>
+<%= modal_dialog :sign_in, "Welcome Back! If you'll just sign in..." do %>
     <%= render partial: 'sessions/form' %>
     <hr>
     <%= render partial: 'authentications/possible', locals: {prompt: "You can also sign in using one of these fine services:"} %>

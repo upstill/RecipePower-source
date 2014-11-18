@@ -1,112 +1,75 @@
 module LinkHelper
 
-  # Set up a remote interaction via the submit javascript module
-  # TODO This method is almost certainly redundant and incorrect, since it uses :remote processing
-  def button_to_submit label, url, options={}
-    options[:class] = merge_word_strings options[:class], "btn btn-default btn-xs submit"
-    options.merge! remote: true
-    if options.delete :button_to
-      button_to label, url, options
-    else
-      link_to label, url, options
+  # A wrapper for flavored_link which asserts button options for Bootstrap
+  def button_to_submit label, path_or_options, kind="default", size="xs", options={}
+    if kind.kind_of? Hash
+      kind, size, options = :default, :xs, kind
+    elsif size.kind_of? Hash
+      size, options = :xs, size
     end
-  end
-
-  # Generalization of link_to to handle page, dialog and general submission requests
-  def flavored_link label, path_or_options, as=:submit, options={}
-    if path_or_options.blank?
-      link_to_nowhere label, options
-    else
-      case as
-        when :page
-          link_to_page label, path_or_options, options
-        when :dialog
-          options = options.clone
-          (options[:query] ||= {})[:modal] = true
-          link_to_submit label, path_or_options, options
-        else # Default: submit a JSON request for page-modifying data
-          options = options.clone
-          (options[:query] ||= {})[:partial] = true
-          link_to_submit label, path_or_options, options
-      end
-    end
-  end
-
-  def link_to_nowhere label, options={}
-    link_to label, "#", fix_options_for_link(options)
-  end
-
-  # Just a shortcut for flavored_link(... :dialog)
-  def link_to_modal label, path_or_object, options={}
     options = options.clone
-    (options[:query] ||= {})[:modal] = true
-    link_to_submit label, path_or_object, options
-
-    # path = url_for(path_or_object)
-    # options[:class] = "dialog-run #{options[:class]}"
-    # query_options = options[:query] || {}
-    # path = assert_query path, query_options.merge(modal: true)
-    # link_to label, path, options
-  end
-
-  def link_to_page label, path_or_options, options={}
-    # Interpret and revise the path according to the :query option
-    options = options.clone
-    linkpath = fix_path_for_query path_or_options, options.delete(:query)
-
-    # Move all options not relevant to link_to into :data
-    options = fix_options_for_link options
-
-    link_to label, linkpath, options
+    class_str = (options[:class] || "").gsub(/btn[-\w]*/i, '') # Purge the class of existing button classes
+    options[:class] =  class_str.assert_words %W{ btn btn-#{kind} btn-#{size} }
+    link_to_submit label, path_or_options, options
   end
 
   # Hit a URL using the RP.submit javascript module, with options for confirmation (:confirm-msg) and waiting (:wait-msg)
-  def link_to_submit(label, path_or_options, options={})
+  # NB: options are used as follows:
+  # mode can be one of:
+  #  == :page to deploy a standard link
+  #  == :modal to fetch a dialog via JSON
+  #  == :partial to get a container via JSON
+  #  == :injector to get a dialog for foreign sites via JSON
+  # :template, :trigger, :submit, and :preload are classes on the link for triggering submit behavior
+  # :id, :class, :style, :data, :onclick, :rel and :method are passed to link_to to create attributes
+  # ...all other options get folded into the data attribute of the link
+  def link_to_submit label, path_or_options, options={}
+    query_option_names = [ :mode ] # These get folded into the query UNLESS we're going to a page
+    class_option_names = [ :template, :trigger, :submit, :preload ]
+    attribute_names = [ :id, :class, :style, :data, :onclick, :method, :rel ]
     # We do NOT want a remote response: it asks for Javascript
     options = options.clone
-    options.delete :remote # unless options[:remote]
-
-    # Include query option(s) in the path
-    linkpath = fix_path_for_query path_or_options, options.delete(:query)
-
-    options = fix_options_for_link options
-
-    # Assert class "submit" to attract Javascript handling
-    options[:class] = "submit #{options[:class]}"
-
-    link_to label, linkpath, options
-  end
-
-  # A wrapper for flavored_link which asserts button options for Bootstrap
-  def button_link label, path_or_options, as=:submit, kind="default", size="xs", options={}
-    if as.kind_of? Hash
-      options, as = as, :submit
-    elsif kind.kind_of? Hash
-      options, kind = kind, :default
-    elsif size.kind_of? Hash
-      options, size = size, :xs
-    end
-    options = options.clone
-    options[:class] = "btn btn-#{kind} btn-#{size} #{options[:class]}"
-    flavored_link label, path_or_options, as, options
-  end
-
-  # Move all options not specific to a link into data
-  def fix_options_for_link options={}
-    keys_for_link_to = [:id, :class, :style, :data, :onclick, :method]
-    # Move options other than the above into :data
-    out = options.clone
-    data = out.slice! *keys_for_link_to
-    (out[:data] ||= {}).merge! data unless data.empty?
-    out
-  end
-
-  def fix_path_for_query path_or_options, query={}
-    if query && !query.empty?
-      assert_query url_for(path_or_options), query
+    options.delete :remote
+    query = options.delete(:query) || {} # Remove the query options from consideration and include them in the path
+    format = :json
+    mode = options[:mode]
+    if mode == :page
+      options.delete :mode # Page is assumed for HTML response
+      # The page is not interested in any class options or query options special to submit()
+      format = nil # default is :html
     else
-      path_or_options
+      # These options get included in the link's class
+      # Pull out all class options and assert class "submit" to attract Javascript handling
+      class_list = [:submit]
+      if class_options = options.slice(*class_option_names)
+        class_list += class_options.keep_if { |k, v| v }.keys
+      end
+      class_str = (options[:class] || "").assert_words class_list
+      options[:class] = class_str unless class_str.blank?
+
+      # Include the query options in the path's query
+
+      query.merge! options.slice(*query_option_names)
     end
+    linkpath = assert_query url_for(path_or_options), format, query
+
+    options.except! *(class_option_names+query_option_names)
+    # Now the options have had the class options and query options removed.
+    # The remaining options--except for those to be passed to link_to--will be merged into the data
+
+    # Sequester all options except HTML standard link options in the data attribute
+    link_options = options.slice *attribute_names
+    data = (options[:data] ||= {}).merge options.except(*attribute_names)
+    data.keys.each do |key|
+      # data with keys of the form 'data-.*' get folded in directly
+      if match = key.to_s.match(/^data-(.*$)/)
+        data[match[1]] = data.delete key
+      end
+    end
+    link_options[:data] = data unless data.empty?
+
+    link_to label, linkpath, link_options
   end
+
 
 end

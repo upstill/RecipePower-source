@@ -1,19 +1,18 @@
 # Class to govern production of pages and dialogs depending on context and params
-# Contexts:
-# => injector
-# => mobile
-# => desktop
 # Format:
 # => page
-# => modal (iff param[:modal] == true)
+# => injector (iff param[:mode] == :injector)
+# => modal (iff param[:mode] == :modal)
 
 
 class ResponseServices
 
-  attr_accessor :controller, :action, :title, :partial, :page_url, :active_menu
+  attr_accessor :controller, :action, :title, :page_url, :active_menu, :mode
+  attr_reader :format
 
   def initialize params, session, request
     @request = request
+    @format = @request.format.symbol
     @session = session
     @response = params[:response]
     @controller = params[:controller]
@@ -23,21 +22,16 @@ class ResponseServices
     @title = @controller.capitalize+"#"+@action
     @invitation_token = params[:invitation_token]
     @notification_token = params[:notification_token]
-    # @area = params[:area]
-    # @layout = params[:layout]
-    # @partial = !params[:partial].blank?
 
-    # Target is one of "desktop", "mobile" and "injector"
-    @target = (params[:target] || "desktop") unless @session[:mobile]
-
-    # Format dictates CSS style for the content (though not verbatim): within a dialog, or on a page
-    # @format = (params[:format] || "page")
-    # @format = "dialog" if (params[:how] == "modal")
-    @modal = params[:modal]
-    @partial = params[:partial] && (params[:partial] == "true")
+    # Mode will be either
+    # :modal for a dialog
+    # :injector for a dialog in the context of foreign collection
+    # :page for an html request
+    @mode = (params[:mode] ||
+        (@format == :html ? :page : :modal)).to_sym
 
     # Save the parameters we might want to pass back
-    @meaningful_params = params.except(:controller, :action, :partial, :format)
+    @meaningful_params = params.except(:controller, :action, :mode, :format)
   end
 
   # Provide a URL that reproduces the current request
@@ -61,63 +55,26 @@ class ResponseServices
     origin_url.sub! /^"?([^"]*)"?/, '\\1'  # Remove any enclosing quotes
     query_str = (match = origin_url.match /^[^?]*\?(.*)/ ) ? match[1] : ""
     query_params = query_str.empty? ? {} : Hash[ CGI.parse(query_str).map { |elmt| [elmt.first.to_sym, elmt.last.first] } ]
-    @target = query_params[:target] if query_params[:target] unless @session[:mobile]
     # Format refers to how to present the content: within a dialog, or on a page
-    @modal = query_params[:modal]
-    # @format = "dialog" if query_params[:how] && (query_params[:how] == "modal")
+    @mode = query_params[:mode]
   end
-  
-  def is_dialog set=true
-    @modal = set
-  end
-  
+
   def dialog?
-    !@modal.nil?
+    @mode == :modal || @mode == :injector
   end
   
   def is_injector
-    @target = "injector"
+    @mode = :injector
   end
   
   # Returns true if we're in the context of a foreign page
   def injector?
-    @target == "injector"
-  end
-  
-  # True if we are to render a whole page
-  def page?
-    @modal.nil? # @format == "page"
-  end
-  
-  def is_mobile(on=true)
-    if on
-      @session[:mobile] = true
-      @target = nil
-    else
-      @session.delete :mobile
-      @target = "desktop"
-    end
-  end
-  
-  # True if we're targetting mobile
-  def mobile?
-    @session[:mobile] && true
+    @mode == :injector
   end
 
-  def partial?
-    partial
-  end
-  
-  # Return relevant options for modal dialog
-  def modal_options options_in = {}
-    klass = (options_in[:class] || "") # +" modal-yield"
-    options_in.merge class: klass
-  end
-  
   # Forward the appropriate parameters to a subsequent request
   def redirect_params options = {}
-    options[:target] = @target # "injector" if injector?
-    options[:modal] = @modal # options[:how] = "modal" if dialog?
+    options[:mode] = @mode
     options
   end
 
@@ -126,37 +83,9 @@ class ResponseServices
     assert_query path, redirect_params( options )
   end
 
-  # What's the appropriate layout (in the Rails sense) for the current context?
-  def layout
-    case
-      when injector?
-        "injector"
-      when page?
-        "application"
-      when mobile?
-        "jqm"
-      else
-        false
-    end
-  end
-
-  # Return the class specifier for styling according to the target
-  def format_class
-    case
-      when injector?
-        "injector"
-      when dialog?
-        "floating"
-      when mobile?
-        "mobile"
-      else
-        "page"
-    end
-  end
-
   # Return appropriate parameters for a render call, asserting defaults as necessary
   def render_params defaults = {}
-    defaults.merge target: @target, layout: layout
+    defaults.merge layout: layout
   end
 
   # Recall an earlier, deferred, request that can be redirected to in the current context .
@@ -168,7 +97,7 @@ class ResponseServices
   def deferred_request
     request =
     if df = pending_request
-      if df[:format] == @request.format.symbol
+      if df[:format] == @format
         # We can handle this request directly because its format agrees with the current request
         clear_pending_request # Clear the pending request
         df[:fullpath]
@@ -184,7 +113,7 @@ class ResponseServices
   #  that the redirect will have the format and method of the current request. The
   #  options are used to assert a specific format, possibly different from the current one
   def url_for_redirect url, options={}
-    if (!options[:format]) || (options[:format].to_sym == @request.format.symbol)  # They already match
+    if (!options[:format]) || (options[:format].to_sym == @format)  # They already match
       url
     else
       assert_query "/redirect/go", to: %Q{"#{url}"}
@@ -196,10 +125,10 @@ class ResponseServices
   # overridden--or other data stored--by passing them in the elements hash
   def defer_request elements={}
     dr = {
-        format: @request.format.symbol,
+        format: @format,
         fullpath: URI::decode(@request.fullpath)
     }.merge elements
-    dr[:format] = dr[:format].to_s
+    dr[:format] = dr[:format].to_s  # In case elements merged in a symbol
     # str = YAML::dump dr
     if dri = @session[:deferred_requests_id]
       defreq = DeferredRequest.find dri
@@ -212,18 +141,88 @@ class ResponseServices
     dr
   end
 
+  private
+
+  # What's the appropriate layout (in the Rails sense) for the current context?
+  def layout
+    case @mode
+      when :injector
+        "injector"
+      when :page
+        "application"
+      else
+        false
+    end
+  end
+
+  def clear_pending_request
+    # @session.delete :deferred_request
+    if (dri = @session[:deferred_requests_id]) && (defreq = DeferredRequest.where(id: dri).first)
+      defreq.requests.pop
+      if defreq.requests.empty?
+        defreq.destroy
+        @session.delete :deferred_requests_id
+      else
+        defreq.save
+      end
+    end
+  end
+
+  def pending_request
+    # if dr = @session[:deferred_request]
+    if (dri = @session[:deferred_requests_id]) &&
+       (defreq = DeferredRequest.where(id: dri).first) &&
+       (dr = defreq.requests[-1])
+      # dr = YAML::load dr
+      dr[:fullpath] = assert_query URI::encode( dr[:fullpath]), :mode => @mode
+      dr[:format] = dr[:format].to_sym
+      dr
+    end
+  end
+
+public
+
+  # Return the class specifier for styling according to the mode
+  def format_class
+    @mode == :modal ? "floating" : @mode.to_s
+  end
+
+  # Used for targeting a stream to either the page or part of a dialog
+  def container_selector
+    @mode == :modal ? "div.dialog" : "div.container"
+  end
+
+  def page_title
+    "RecipePower | #{@title}"
+  end
+
+  # Used in templates for standard actions (e.g., new, edit, show) to choose a partial depending on
+  # whether the response is for the injector, a modal dialog, or a page
+  def select_render action=nil
+    # defaults to current action, though another may be specified, even a full path
+    "#{action || @action}_"+
+        case
+          when injector?
+            "injector"
+          when dialog?
+            "modal"
+          else
+            "page"
+        end
+  end
+
   # If there's a deferred request that can be expressed as a trigger, do so.
   def pending_modal_trigger
     trigger =
-    if @trigger # A modal dialog has been embedded in the USL as the trigger param
-      assert_query @trigger, modal: true
-    elsif  (dr = pending_request) &&
-        (dr[:format] == :json) &&
-        (!dr[:controller] || dr[:controller] == @controller) &&
-        (!dr[:layout] || dr[:layout] == layout)
-      clear_pending_request # Delete it 'cause we're using it
-      dr[:fullpath]
-    end
+        if @trigger # A modal dialog has been embedded in the USL as the trigger param
+          assert_query @trigger, mode: :modal
+        elsif  (dr = pending_request) &&
+            (dr[:format] == :json) &&
+            (!dr[:controller] || dr[:controller] == @controller) &&
+            (!dr[:layout] || dr[:layout] == layout)
+          clear_pending_request # Delete it 'cause we're using it
+          dr[:fullpath]
+        end
     trigger
   end
 
@@ -252,58 +251,4 @@ class ResponseServices
     options
   end
 
-  # Used in templates for standard actions (e.g., new, edit, show) to choose a partial depending on
-  # whether the response is for the injector, a modal dialog, or a page
-  def select_render action=nil
-    # defaults to current action, though another may be specified, even a full path
-    "#{action || @action}_"+
-        case
-          when injector?
-            "injector"
-          when dialog?
-            "modal"
-          else
-            "page"
-        end
-  end
-
-  def container_selector
-    if dialog?
-      "div.dialog"
-    else
-      "div.container"
-    end
-  end
-
-  def page_title
-    "RecipePower | #{@title}"
-  end
-
-  private
-
-  def clear_pending_request
-    # @session.delete :deferred_request
-    if (dri = @session[:deferred_requests_id]) && (defreq = DeferredRequest.where(id: dri).first)
-      defreq.requests.pop
-      if defreq.requests.empty?
-        defreq.destroy
-        @session.delete :deferred_requests_id
-      else
-        defreq.save
-      end
-    end
-  end
-
-  def pending_request
-    # if dr = @session[:deferred_request]
-    if (dri = @session[:deferred_requests_id]) &&
-       (defreq = DeferredRequest.where(id: dri).first) &&
-       (dr = defreq.requests[-1])
-      # dr = YAML::load dr
-      # Ensure that the target of the deferred request agrees with that of the present request
-      dr[:fullpath] = assert_query URI::encode( dr[:fullpath]), :target => ('injector' if injector?)
-      dr[:format] = dr[:format].to_sym
-      dr
-    end
-  end
 end

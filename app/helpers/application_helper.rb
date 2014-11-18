@@ -161,7 +161,7 @@ module ApplicationHelper
     result + [
         "<hr>".html_safe,
         navlink("Browse for Goody Bags...", lists_path),
-        navlink("Start a Goody Bag...", new_list_path, :as => :dialog)
+        navlink("Start a Goody Bag...", new_list_path, mode: :modal)
     ]
   end
 
@@ -178,21 +178,21 @@ module ApplicationHelper
   def header_menu_items
 
     item_list = [
-        # navlink( "Profile", users_profile_path( section: "profile" ), :as => :dialog),
-        navlink("Sign-in Services", authentications_path, :as => :dialog),
-        navlink("Invite", new_user_invitation_path, :as => :dialog),
-        navlink("Sign Out", destroy_user_session_path, :method => "delete", :as => :page)
+        # navlink( "Profile", users_profile_path( section: "profile" ), :mode => :modal),
+        navlink("Sign-in Services", authentications_path, :mode => :modal),
+        navlink("Invite", new_user_invitation_path, :mode => :modal),
+        navlink("Sign Out", destroy_user_session_path, :method => "delete")
     ]
 
     item_list += [
         "<hr>".html_safe,
-        link_to_modal("Add Cookmark", new_recipe_path),
+        link_to_submit("Add Cookmark", new_recipe_path, :mode => :modal),
         link_to("Admin", admin_path),
         link_to("Refresh Masonry", "#", onclick: "RP.collection.justify();"),
         link_to("Address Bar Magic", "#", onclick: "RP.getgo('#{home_path}', 'http://local.recipepower.com:3000/bar.html##{bookmarklet_script}')"),
         link_to("Bookmark Magic", "#", onclick: "RP.bm('Cookmark', '#{bookmarklet_script}')"),
         link_to("Stream Test", "#", onclick: "RP.stream.buffer_test();"),
-        link_to_modal("Step 3", popup_path("starting_step3"))
+        link_to_submit("Step 3", popup_path("starting_step3"), :mode => :modal)
     ] if permitted_to? :admin, :pages
 
     item_list
@@ -223,14 +223,14 @@ module ApplicationHelper
 
   def footer_navlinks for_mobile=false
     navlinks = []
-    navlinks << navlink("About", about_path, :as => :dialog)
-    navlinks << navlink("Contact", contact_path, :as => :dialog)
+    navlinks << navlink("About", about_path, :mode => :modal)
+    navlinks << navlink("Contact", contact_path, :mode => :modal)
     navlinks << link_to("Home", home_path, class: "nav_link")
-    navlinks << navlink("FAQ", faq_path, :as => :dialog)
+    navlinks << navlink("FAQ", faq_path, :mode => :modal)
     infolinks =
         [
-            navlink("Need to Know", popup_path("need_to_know"), :as => :dialog),
-            navlink("Cookmark Button", popup_path("starting_step2"), :as => :dialog)
+            navlink("Need to Know", popup_path("need_to_know"), :mode => :modal),
+            navlink("Cookmark Button", popup_path("starting_step2"), :mode => :modal)
         ]
     # navlinks << feedback_link("Feedback")
     if for_mobile
@@ -263,7 +263,7 @@ module ApplicationHelper
       options = response_service.signup_button_options
       label = options.delete :label
       path = options.delete :path
-      button_link label, path, :dialog, :default, :xl, options
+      button_to_submit label, path, :dialog, :default, :xl, options
     end
   end
 
@@ -369,8 +369,8 @@ module ApplicationHelper
   # -- simple label (no go_path and no block given)
   # -- link (valid go_path but no block)
   # -- Full-bore dropdown menu (block given), with or without a link at the top (go_path given or not)
-  def navtab which, menu_label, go_path=nil, as=nil
-    options={as: as}
+  def navtab which, menu_label, go_path=nil
+    options={}
     id = "#{which}-navtab" # id used for the menu item
     if which == (@active_menu || response_service.active_menu)
       active = "active"
@@ -409,7 +409,7 @@ module ApplicationHelper
       options[:data] ||= {}
       options[:data][:toggle] = "dropdown"
     end
-    flavored_link label, path_or_options, options.delete(:as), options
+    link_to_submit label, path_or_options, options
   end
 
 end

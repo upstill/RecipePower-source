@@ -2,6 +2,6 @@
 	<% if (current_user.id != User.guest_id) && @recipe.collected_by?(current_user.id) %>
 		<%= edit_recipe_link (@feed_entry ? "Tag" : "Edit"), @recipe, class: "btn btn-default btn-xs" %>
 	<% else %>
-		<%= link_to_modal (@feed_entry ? "Collect" : "Cookmark"), collect_recipe_path(@recipe), class: "btn btn-default btn-xs" %>
+		<%= button_to_submit (@feed_entry ? "Collect" : "Cookmark"), collect_recipe_path(@recipe), :mode => :modal %>
 	<% end %>
   </span>

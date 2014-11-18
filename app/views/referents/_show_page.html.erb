@@ -1,4 +1,4 @@
 <h3><%= summarize_ref_name @referent, true %></h3>
 <%= render "show" %>
-<%= link_to_modal 'Edit', edit_referent_path(@referent) %> |
+<%= link_to_submit 'Edit', edit_referent_path(@referent), mode: :modal %> |
 <%= link_to 'Referents List', referents_path %>

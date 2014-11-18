@@ -3,7 +3,7 @@ Expecting the following local variables:
     * picurl: the URL of the picture to be selected
     * pageurl: the URL of the page where the choices will be sourced
 -->
-<%= modal_dialog :pic_picker, "Pick an Applicable Picture Here", response_service.modal_options(dialog_class: "modal-lg") do %>
+<%= modal_dialog :pic_picker, "Pick an Applicable Picture Here", dialog_class: "modal-lg" do %>
     <% pic_select_list = pic_picker_select_list pageurl %>
     <div class="content">
       <div class="row">

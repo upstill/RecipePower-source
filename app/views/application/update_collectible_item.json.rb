@@ -1,7 +1,7 @@
 # Define response structure after editing a collectible
 replacements = [
-    # collect_or_edit_button_replacement( entity ),
-    # collectible_masonry_item_replacement( entity, destroyed ),
+#     collect_or_edit_button_replacement( entity ),
+     collectible_masonry_item_replacement( entity, destroyed )
     # collectible_smallpic_replacement( entity, destroyed )
 ]
 # replacements << [
@@ -9,7 +9,7 @@ replacements = [
     # with_format("html") { render_to_string partial: "shared/feed_entry" }
 # ] if @feed_entry
 {
-    done: true, # Denotes recipe-editing is finished
+    done: true, # i.e., editing is finished, close the dialog
     popup: notice,
     title: truncate( entity.title, :length => 60),
     replacements: replacements,

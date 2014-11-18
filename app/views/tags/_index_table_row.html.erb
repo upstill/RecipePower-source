@@ -27,7 +27,7 @@
   </td>
   <td>
     <% item.referents.each do |ref| %>
-        <%= link_to_modal ref.name, referent_path(ref) %><%= ", " unless ref == item.referents.last %>
+        <%= link_to_submit ref.name, referent_path(ref), mode: :modal %><%= ", " unless ref == item.referents.last %>
     <% end %>
   </td>
   <% if permitted_to? :edit, item %>

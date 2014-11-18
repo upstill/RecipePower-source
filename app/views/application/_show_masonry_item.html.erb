@@ -10,13 +10,11 @@
       <%= render partial: "votes/button", locals: {entity: item, style: "h"} %>
     </div>
     <div class="rcp_grid_element_buttons">
-      <%# render "recipes/golink" %>
       <span class="<%= recipe_list_element_golink_class item %>">
-        <%= collect_or_edit_button item, false %>
+        <%= collect_or_edit_button item, mode: :modal %>
       </span>
-      <%# render "recipes/sharelink" %>
       <span class="<%= recipe_list_element_golink_class item %>">
-        <%= link_to_modal "Share", new_user_invitation_path(recipe_id: item.id), class: "btn btn-default btn-xs" %>
+        <%= button_to_submit "Share", new_user_invitation_path(recipe_id: item.id), mode: :modal %>
       </span>
     </div>
   </div>

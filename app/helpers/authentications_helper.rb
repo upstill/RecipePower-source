@@ -23,7 +23,6 @@ module AuthenticationsHelper
       :"data-width" => 600, 
       :"data-height" => 300
     content_tag :div, link.html_safe, class: "col-md-2 auth #{svc_lower}"
-    # link_to_submit image_tag( (svc_lower+"_64.png"), :size => "64x64", :alt => service)+service, auth_url, class: css_class
   end
 
 end

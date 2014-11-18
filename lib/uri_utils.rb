@@ -166,9 +166,10 @@ def assert_query url, format=nil, newparams={}
   if format.is_a? Hash
     newparams, format = format, nil
   end
+  format = format.to_s
   return url if newparams.empty? && (format.blank? || format=="html")
   uri = URI(url)
-  if format
+  unless format.blank?
     # Assert the format by stripping any terminating format string and appending the one specified
     trunc = uri.path.sub /\.(json|ps|html)$/, ''
     uri.path = trunc + '.' + format

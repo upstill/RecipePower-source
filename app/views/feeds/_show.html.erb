@@ -12,7 +12,7 @@
 
     <p>
       <b>From Site:</b>
-      <%= link_to_modal( @feed.site.name, site_path(@feed.site)) if @feed.site %>
+      <%= link_to_submit( @feed.site.name, site_path(@feed.site), mode: :modal) if @feed.site %>
     </p>
 
     <% permitted_to?(:approve, :feeds) do %>
@@ -27,9 +27,9 @@
         <% end %>
     <% end %>
     <% permitted_to?(:edit, :feeds) do %>
-        <%= link_to_modal 'Edit', edit_feed_path(@feed), class: "btn" %>
+        <%= button_to_submit 'Edit', edit_feed_path(@feed), mode: :modal %>
     <% end %>
-    <%= link_to 'Back to Feeds', feeds_path, class: "btn" %>
+    <%= link_to 'Back to Feeds', feeds_path %>
 
     <h3>Feed Entries</h3>
     <%= feedlist %>

@@ -7,7 +7,7 @@
                 <%= suggestions_presenter.present %>
             <% end %>
         <% elsif !@suggestion.timeout? %>
-            <%= link_to_submit "Associations pending (#{@suggestion.sugtime})...", results_suggestion_path(@suggestion, partial: true, sugtime: @suggestion.sugtime), class: "trigger" %>
+            <%= link_to_submit "Associations pending (#{@suggestion.sugtime})...", results_suggestion_path(@suggestion, sugtime: @suggestion.sugtime), mode: :partial, trigger: true %>
             <div style="height:128px; width:128px;">
               <%= image_tag "ajax-loader.gif", style: "margin: 32px 32px;" %>
             </div>

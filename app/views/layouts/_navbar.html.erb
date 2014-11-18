@@ -18,7 +18,6 @@
             <%= navtab :feeds, "Feeds", feeds_path do feeds_menu_items end %>
             <%= navtab :news, "News", "/users/#{current_user_or_guest_id}/news" %>
             <%= navtab :more, "More", "/users/#{current_user_or_guest_id}/biglist" %>
-            <!-- menu_items << link_to("New Public List...", new_list_path( modal: true ))-->
             <%= navtab :home,
                        content_tag(:b, "&nbsp;#{current_user.handle}&nbsp;".html_safe, class: "glyphicon glyphicon-home")+
                        content_tag(:b, "", class: "glyphicon glyphicon-cog"),
@@ -29,8 +28,10 @@
   </div>
   <% unless user_signed_in? %>
       <p class="navbar-text navbar-right active">
-        <%= link_to_modal "Sign In", new_user_session_path,
-                          class: "preload navbar-link",
+        <%= link_to_submit "Sign In", new_user_session_path,
+                          class: "navbar-link", 
+			              preload: true,
+			              mode: :modal,
                           style: "color: white; margin-right:20px" %>
       </p>
   <% end %>

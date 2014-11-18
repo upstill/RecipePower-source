@@ -2,6 +2,7 @@ require 'test_helper'
 
 class LinkHelpersTest < ActionView::TestCase
   include ApplicationHelper
+  include LinkHelper
 
   def setup
     @big_bad_options = {
@@ -13,66 +14,95 @@ class LinkHelpersTest < ActionView::TestCase
     }
   end
 
-  test "options should get sorted" do
-    options = fix_options_for_link @big_bad_options
-    refute options[:pre]
-    assert_equal "Preloaded data", options[:data][:pre]
-    assert_equal "Some ID", options[:id]
-
-    @big_bad_options[:data] = { per: "More data" }
-    options = fix_options_for_link @big_bad_options
-    assert_equal "More data", options[:data][:per]
-    assert_equal "Preloaded data", options[:data][:pre]
-
-    @big_bad_options.delete :pre
-    options = fix_options_for_link @big_bad_options
-    assert_equal "More data", options[:data][:per]
-  end
-
-  test "query gets integrated" do
-    qpath = fix_path_for_query "users", @big_bad_options.delete(:query)
-    assert_equal "users?querytags=no+tags", URI.unescape(qpath)
-  end
-
-  test "null query doesn't affect path" do
-    assert_equal "silly path", fix_path_for_query("silly path")
-    assert_equal "silly path", fix_path_for_query("silly path", nil)
-  end
-
   test "link_to_page behaves properly" do
-    link = link_to_page "My link", "some/path", @big_bad_options
-    expected = "<a href='some/path?querytags=no+tags' class='oddclass' id='Some ID' data-remote='true' data-pre='Preloaded data'>My link</a>"
+    link = link_to_submit "My link", "some/path", mode: :page, query: { querytags: "no tags"}, class: "oddclass", id: "Some ID"
+    expected = "<a href='some/path?querytags=no+tags' class='oddclass' id='Some ID' >My link</a>"
     assert_dom_equal expected, link
   end
 
-  test "link_to_nowhere behaves properly" do
-    link = link_to_nowhere "My link", @big_bad_options
-    expected = "<a href='#' class='oddclass' id='Some ID' data-remote='true' data-pre='Preloaded data'>My link</a>"
-    assert_dom_equal expected, link
+  test "Destroy produces JSON request" do
+    link1 = link_to_submit  'Destroy', "expression", confirm: 'Are you sure?', method: :delete
+    link2 = link_to 'Destroy', "expression.json", data: { confirm: 'Are you sure?' }, method: :delete, class: "submit"
+    assert_dom_equal link1, link2
   end
 
-  test "link_to_modal behaves properly" do
-    link = link_to_modal "My link", "some/path", @big_bad_options
-    expected = "<a href='some/path?querytags=no+tags&amp;modal=true' class='submit oddclass' id='Some ID' data-pre='Preloaded data'>My link</a>"
-    assert_dom_equal expected, link
+  test "link_to_submit on page is indistinguishable from link_to" do
+    link1 = link_to_submit "My link", "some/path", mode: :page, :"some_data" => "Query goes here", class: "oddclass", id: "Some ID"
+    link2 = link_to "My link", "some/path", data: { some_data: "Query goes here" }, class: "oddclass", id: "Some ID"
+    assert_dom_equal link1, link2
+
+    link1 = link_to_submit("Refresh Masonry", "#", onclick: "RP.collection.justify();", mode: :page)
+    link2 = link_to("Refresh Masonry", "#", onclick: "RP.collection.justify();")
+    assert_dom_equal link1, link2
   end
 
-  test "button_link behaves properly" do
-    link = button_link "My link", "some/path", :submit, "default", "xs", @big_bad_options
-    expected = "<a href='some/path?querytags=no+tags&amp;partial=true' class='submit btn btn-default btn-xs oddclass' id='Some ID' data-pre='Preloaded data'>My link</a>"
-    assert_dom_equal expected, link
+  test "standard data options get folded into data" do
 
-    link = button_link "My link", "some/path", :submit, "default", @big_bad_options
-    expected = "<a href='some/path?querytags=no+tags&amp;partial=true' class='submit btn btn-default btn-xs oddclass' id='Some ID' data-pre='Preloaded data'>My link</a>"
-    assert_dom_equal expected, link
+    link1 = link_to_submit "X", "authentication_url",
+                           :method => :delete,
+                           :"data-confirm-msg" => "Yes, disconnect from provider_name+?",
+                           :"data-wait-msg" => "Hang on while we check with provider_name",
+                           :class => "remove"
+    link2 = link_to_submit "X", "authentication_url",
+                           :method => :delete,
+                           :"confirm-msg" => "Yes, disconnect from provider_name+?",
+                           :"wait-msg" => "Hang on while we check with provider_name",
+                           :class => "remove"
+    assert_dom_equal link1, link2
 
-    link = button_link "My link", "some/path", :submit, @big_bad_options
-    expected = "<a href='some/path?querytags=no+tags&amp;partial=true' class='submit btn btn-default btn-xs oddclass' id='Some ID' data-pre='Preloaded data'>My link</a>"
-    assert_dom_equal expected, link
-
-    link = button_link "My link", "some/path", @big_bad_options
-    expected = "<a href='some/path?querytags=no+tags&amp;partial=true' class='submit btn btn-default btn-xs oddclass' id='Some ID' data-pre='Preloaded data'>My link</a>"
-    assert_dom_equal expected, link
+    link2 = link_to "X", "authentication_url.json",
+                    :method => :delete,
+                    :"data-confirm-msg" => "Yes, disconnect from provider_name+?",
+                    :"data-wait-msg" => "Hang on while we check with provider_name",
+                    :class => "remove submit"
+    assert_dom_equal link1, link2
   end
+
+  test "link_to_submit behaves properly" do
+    actual = link_to_submit "My link", "some/path"
+    expected = "<a href='some/path.json' class='submit'>My link</a>"
+    assert_dom_equal expected, actual
+
+    actual = button_to_submit "My link", "some/path"
+    expected = "<a href='some/path.json' class='btn btn-default btn-xs submit'>My link</a>"
+    assert_dom_equal expected, actual
+
+    actual = link_to_submit "My link", "some/path", mode: :partial
+    expected = "<a href='some/path.json?mode=partial' class='submit'>My link</a>"
+    assert_dom_equal expected, actual
+
+    actual = link_to_submit "My link", "some/path", class: "linker", method: "delete"
+    expected = "<a href='some/path.json' class='linker submit' data-method='delete' rel='nofollow'>My link</a>"
+    assert_dom_equal expected, actual
+
+    actual = link_to_submit "My link", "some/path", class: "linker", method: "post"
+    expected = "<a href='some/path.json' class='linker submit' data-method='post' rel='nofollow'>My link</a>"
+    assert_dom_equal expected, actual
+
+    actual = link_to_submit "My link", "some/path", class: "someclass", id: "someid"
+    expected = "<a href='some/path.json' class='someclass submit' id='someid'>My link</a>"
+    assert_dom_equal expected, actual
+
+    actual = button_to_submit "My link", "some/path", class: "someclass", id: "someid"
+    expected = "<a href='some/path.json' class='someclass btn btn-default btn-xs submit' id='someid'>My link</a>"
+    assert_dom_equal expected, actual
+
+    actual = link_to_submit "My link", "some/path", mode: :modal, class: "someclass", id: "someid"
+    expected = "<a href='some/path.json?mode=modal' class='someclass submit' id='someid'>My link</a>"
+    assert_dom_equal expected, actual
+
+    actual = button_to_submit "My link", "some/path", mode: :partial, class: "someclass", id: "someid"
+    expected = "<a href='some/path.json?mode=partial' class='someclass btn btn-default btn-xs submit' id='someid'>My link</a>"
+    assert_dom_equal expected, actual
+
+    actual = link_to_submit "My link", "some/path", class: "linker", method: "delete", class: "someclass", id: "someid"
+    expected = "<a href='some/path.json' class='someclass submit' data-method='delete' id='someid' rel='nofollow'>My link</a>"
+    assert_dom_equal expected, actual
+
+    actual = link_to_submit "My link", "some/path", class: "linker", method: "post", class: "someclass", id: "someid"
+    expected = "<a href='some/path.json' class='someclass submit' data-method='post' id='someid' rel='nofollow'>My link</a>"
+    assert_dom_equal expected, actual
+  end
+
 
 end

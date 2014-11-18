@@ -9,7 +9,7 @@ jQuery ->
 RP.edit_collectible.bind = (dlog) ->
 	dlog ||= $('body') # window.document
 	# Set up processing for click events on links with a 'edit-collectible-link' class
-	$(dlog).on "click", '.edit-collectible-link', RP.edit_collectible.go
+	$(dlog).on "click", 'a.template.edit-collectible', RP.edit_collectible.go
 
 me = () ->
 	$('div.edit-collectible')[0]
@@ -26,8 +26,8 @@ RP.edit_collectible.go = (evt, xhr, settings) ->
 	# The dialog has placeholders of the form %%rcp<fieldname>%% for each part of the recipe
 	# The status must be set by activating one of the options
 	rcpdata = $(this).data()
-	rcpdata.picdata ||= "/assets/NoPictureOnFile.png"  # Default
-	dlgsource = RP.templates.apply "edit-collectible", rcpdata
+	rcpdata.templateData.picdata ||= "/assets/NoPictureOnFile.png"  # Default
+	dlgsource = RP.templates.apply rcpdata
 	# The tag data is parsed and added to the tags field directly
 	RP.tagger.init tagger_selector, rcpdata.taggingTagData
 	$('textarea').autosize()

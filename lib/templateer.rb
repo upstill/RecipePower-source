@@ -98,7 +98,7 @@ module Templateer
 protected
 
   def placeholder attribute
-    "%%#{attribute.to_s.camelize.uncapitalize}%%".html_safe
+    "%%#{attribute}%%".html_safe
   end
 
 end

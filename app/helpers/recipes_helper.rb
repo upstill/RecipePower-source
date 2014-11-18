@@ -47,7 +47,7 @@ module RecipesHelper
                 "",
                 class: "recipe-info-button btn btn-default btn-xs glyphicon glyphicon-open",
                 data: { title: recipe.title, tags: tags, description: recipe.description || "" }
-    link_to_modal span, recipe_path(recipe) # image_tag("magnifying_glass_12x12.png"), recipe_path(recipe)
+    link_to_submit span, recipe_path(recipe), :mode => :modal
   end
 
   def recipe_tags_div recipe

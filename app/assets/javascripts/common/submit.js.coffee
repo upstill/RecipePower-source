@@ -118,7 +118,6 @@ shortCircuit = (request, elmt) ->
 handleResponse = (elmt, responseData, status, xhr) ->
 	# Pass any data into the response data
 	RP.notifications.done()
-	# responseData.how ||= data.how;
 	# Elements that preload their query results stash it away, unless they also have the 'trigger' class
 	if elmt && ($(elmt).hasClass 'preload') && !($(elmt).hasClass 'trigger')
 		# Save for later if this is a preload that's not triggering now

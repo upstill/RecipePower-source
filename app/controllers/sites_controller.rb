@@ -18,7 +18,7 @@ class SitesController < ApplicationController
     @decorator.viewer_id = @user.id
     response_service.title = @site.name
     
-    smartrender modal: true # :how => :modal
+    smartrender mode: :modal 
   end
 
   # GET /sites/new
@@ -44,7 +44,7 @@ class SitesController < ApplicationController
   # POST /sites
   # POST /sites.json
   def create
-    update_and_decorate nil, params[:site]
+    update_and_decorate 
     respond_to do |format|
       if !@site.errors.any?
         format.html { redirect_to @site, notice: 'Site was successfully created.' }

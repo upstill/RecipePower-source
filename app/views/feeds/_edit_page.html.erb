@@ -6,8 +6,8 @@
   <%= link_to 'Destroy', @feed, :method => :delete, :class => "btn btn-default btn-xs btn-danger", data: { confirm: 'Are you sure?'} %>
 <% end %>
 
-<%= link_to_modal 'Show', @feed, class: "btn" %>
-<%= link_to 'Back', feeds_path, class: "btn" %>
+<%= button_to_submit 'Show', @feed, mode: :modal %>
+<%= button_to_submit 'Back', feeds_path %>
 <hr>
 <h3>Preview</h3>
 <br class="clear">

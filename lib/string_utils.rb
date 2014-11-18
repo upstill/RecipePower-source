@@ -2,6 +2,12 @@ class String
   def uncapitalize
     self[0, 1].downcase + self[1..-1]
   end
+
+  # Ensure that the space-separated string of words includes those listed in new
+  def assert_words new
+    wordlist = split + (new.is_a?(String) ? new.split : new.map(&:to_s))
+    wordlist.compact.uniq*' '
+  end
 end
 
 def splitstr(str, ncols=80)

@@ -79,6 +79,6 @@ class ListsController < ApplicationController
   def edit
     puts "List#edit params: "+params.to_s+" for user '#{current_user.name}'"
     @list = List.find params[:id]
-    smartrender # area: "floating"
+    smartrender 
   end
 end
