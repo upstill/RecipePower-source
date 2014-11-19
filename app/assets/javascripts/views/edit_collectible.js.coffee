@@ -18,18 +18,22 @@ tagger_selector = "div.edit-collectible #tagging_tokens"
 
 # Open the edit-recipe dialog on the recipe represented by 'rcpdata'
 RP.edit_collectible.go = (evt, xhr, settings) ->
+	RP.edit_collectible.apply_template this
+	false
+
+RP.edit_collectible.apply_template = (elmt) ->
 	dlog = me()
+	templateData = $(elmt).data "template"
 	# If it has children it's active, and should be put away, starting with hiding it.
 	if $('.edit-collectible > *').length > 0
 		$(dlog).hide()
 	# Parse the data for the recipe and insert into the dialog's template.
 	# The dialog has placeholders of the form %%rcp<fieldname>%% for each part of the recipe
 	# The status must be set by activating one of the options
-	rcpdata = $(this).data()
-	rcpdata.templateData.picdata ||= "/assets/NoPictureOnFile.png"  # Default
-	dlgsource = RP.templates.apply rcpdata
+	templateData.subs.picdata ||= templateData.subs.picurl || "/assets/NoPictureOnFile.png"  # Default
+	RP.templates.interpolate templateData
 	# The tag data is parsed and added to the tags field directly
-	RP.tagger.init tagger_selector, rcpdata.taggingTagData
+	RP.tagger.init tagger_selector, templateData.subs.taggingTagData
 	$('textarea').autosize()
 
 	# Hand it off to the dialog handler
@@ -40,10 +44,10 @@ RP.edit_collectible.go = (evt, xhr, settings) ->
 	dataBefore = recipedata $('form.edit-collectible', dlog).serializeArray()
 	$('form.edit-collectible', dlog).data "hooks", {
 		dataBefore: recipedata($('form.edit-collectible', dlog).serializeArray()),
-		beforesaveFcn: "RP.edit-collectible.submission_redundant"
+		beforesaveFcn: "RP.edit_collectible.submission_redundant"
 	}
 	RP.makeExpandingArea $('div.expandingArea', dlog)
-	false
+	dlog
 
 # When dialog is loaded, activate its functionality
 RP.edit_collectible.onload = (dlog) ->

@@ -26,7 +26,7 @@ module PicPickerHelper
   # Bare-metal version of the pic preview widget, for use in a template file
   def pic_preview_widget templateer, options={}
     page_url = templateer.url
-    img_url_display = templateer.picdata
+    img_url_display = templateer.picdata || "/assets/NoPictureOnFile.png"
     img_url_value = templateer.picurl
     entity_id = templateer.id
     input_id = templateer.element_id(:picurl) # "recipe_picurl"
@@ -77,11 +77,13 @@ module PicPickerHelper
   def pic_preview_golink page_url, img_url, link_id, img_id, input_id
     queryparams = { picurl: img_url, golinkid: link_id }
     queryparams[:pageurl] = page_url if page_url
-    link_to_submit  page_url ? "Pick Picture" : "Get Picture from Web",
+    button_to_submit  page_url ? "Pick Picture..." : "Get Picture from Web...",
                     pic_picker_new_path(queryparams),
+                    "default",
+                    "small",
                     id: link_id,
-		            preload: true,
-		            :mode => :modal,
+                    preload: true,
+                    :mode => :modal,
                     class: "pic_picker_golink",
                     data: { inputid: input_id, imageid: img_id }
   end

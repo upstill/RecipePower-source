@@ -25,7 +25,7 @@ module LinkHelper
   # ...all other options get folded into the data attribute of the link
   def link_to_submit label, path_or_options, options={}
     query_option_names = [ :mode ] # These get folded into the query UNLESS we're going to a page
-    class_option_names = [ :template, :trigger, :submit, :preload ]
+    class_option_names = [ :trigger, :submit, :preload ]
     attribute_names = [ :id, :class, :style, :data, :onclick, :method, :rel ]
     # We do NOT want a remote response: it asks for Javascript
     options = options.clone

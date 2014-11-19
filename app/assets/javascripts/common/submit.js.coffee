@@ -96,17 +96,26 @@ shortCircuit = (request, elmt) ->
 	# 1: a dialog has been preloaded into data.preloaded
 	# 2: the response has been preloaded into data.response
 	# 3: data.selector leads to a dialog somewhere in the DOM
-	if elmt && $(elmt).hasClass("preload")
-		# The element will store either a 'response' object or a 'preloaded' dialog element
-		responseData = data.response
-		if ndlog = data.preloaded || (responseData && responseData.dlog)
-			RP.dialog.push_modal ndlog, odlog
-			return true;
-		else if responseData
-			RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
-			RP.process_response responseData
-			RP.state.onAJAXSuccess event
-			$(elmt).data 'response', null
+	if elmt
+		if $(elmt).hasClass("preload")
+			# The element will store either a 'response' object or a 'preloaded' dialog element
+			responseData = data.response
+			if ndlog = data.preloaded || (responseData && responseData.dlog)
+				RP.dialog.push_modal ndlog, odlog
+				return true;
+			else if responseData
+				RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
+				RP.process_response responseData
+				RP.state.onAJAXSuccess event
+				$(elmt).data 'response', null
+				return true;
+		else if data = $(elmt).data "template"
+			# Look in the data to find the template handler
+			fcn =
+			((name = data.handler) && RP.named_function(name)) ||
+			((name = "RP." + data.id.replace(/-/g, '_') + ".apply_template") && RP.named_function(name))
+			ndlog = fcn.call null, elmt
+			# RP.dialog.push_modal ndlog, odlog
 			return true;
 	else if data.selector && (ndlog = $(data.selector)[0]) # If dialog is already loaded, replace the responding dialog
 		$(elmt).removeClass 'trigger'

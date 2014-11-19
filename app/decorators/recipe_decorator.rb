@@ -7,7 +7,7 @@ class RecipeDecorator < Draper::Decorator
     case fieldname
       when /_tags$/
       tagtype = fieldname.sub /_tags$/, ''
-      super(tagtype)
+      tags_of_type tagtype
     when /^rcp/
       attrname = fieldname.sub( /^rcp/, '').downcase
       case attrname

@@ -1,2 +1,2 @@
-class SiteDecorator < TaggableDecorator
+class SiteDecorator < Draper::Decorator
 end
