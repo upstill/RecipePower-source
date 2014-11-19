@@ -107,10 +107,10 @@ class UsersController < ApplicationController
   def collection
     @user = User.find params[:id]
 	  if (@user.id == current_user_or_guest_id)
-      response_service.title = "All My Goodies"
+      response_service.title = "My Whole Collection"
       @active_menu = :collection
     else
-      response_service.title = "#{@user.handle}'s Goodies"
+      response_service.title = "#{@user.handle}'s Collection"
       @active_menu = :friends
     end
     smartrender unless do_stream UserCollectionCache

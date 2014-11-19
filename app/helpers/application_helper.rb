@@ -143,25 +143,27 @@ module ApplicationHelper
   def friends_menu_items
     @user.followees[0..6].collect { |u|
       navlink u.handle, "/users/#{u.id}/collection", id: dom_id(u)
-    }.push navlink("Make a Friend...", users_path)
+    } + [
+        "<hr>".html_safe,
+        navlink("Make a Friend...", users_path(relevant: true))
+    ]
   end
 
   def collection_menu_items
     [
-        navlink("My Goodies", "/users/#{@user.id}/collection"),
-        navlink("All the Goodies", "/users/#{@user.id}/biglist"),
-        navlink("Recently Viewed", "/users/#{@user.id}/recent")
+      navlink("My Collection", "/users/#{@user.id}/collection"),
+      navlink("Recently Viewed", "/users/#{@user.id}/recent"),
+      navlink("Everything in RecipePower", "/users/#{@user.id}/biglist")
     ]
   end
 
-  def goody_bags_menu_items
-    result = @user.subscriptions(:own)[0..16].collect { |l|
+  def lists_menu_items
+    @user.subscriptions(:own)[0..16].collect { |l|
       navlink l.name, list_path(l), id: dom_id(l)
-    }
-    result + [
-        "<hr>".html_safe,
-        navlink("Browse for Goody Bags...", lists_path),
-        navlink("Start a Goody Bag...", new_list_path, mode: :modal)
+    } + [
+      "<hr>".html_safe,
+      navlink("Browse for Lists...", lists_path),
+      navlink("Start a List...", new_list_path, mode: :modal)
     ]
   end
 
@@ -409,7 +411,7 @@ module ApplicationHelper
       options[:data] ||= {}
       options[:data][:toggle] = "dropdown"
     end
-    link_to_submit label, path_or_options, options
+    link_to_submit label, path_or_options, { :mode => :partial}.merge( options )  # defaults to partial
   end
 
 end

@@ -444,8 +444,17 @@ end
 # users: list of users visible to current_user (UsersStreamer)
 class UsersCache < ResultsCache
 
+  def self.params_needed
+    # The access parameter filters for private and public lists
+    super + [:relevant]
+  end
+
   def itemscope
-    User.unscoped
+    scope = User.where(channel_referent_id: 0)
+    if @relevant
+      User.where('id > 0')
+    end
+    scope
   end
 
 end
