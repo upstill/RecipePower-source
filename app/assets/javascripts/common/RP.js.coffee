@@ -294,6 +294,7 @@ RP.process_response = (responseData, odlog) ->
 				if replacement[1]
 					if newElmt = $(replacement[1])
 						$(elmt).replaceWith newElmt
+						$(newElmt).trigger 'load'
 						elmt = newElmt
 						$('[onload]', elmt).trigger 'load'
 						RP.fire_triggers elmt # For unobtrusive triggers

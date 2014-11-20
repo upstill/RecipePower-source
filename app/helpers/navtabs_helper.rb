@@ -4,9 +4,8 @@ module NavtabsHelper
   # -- simple label (no go_path and no block given)
   # -- link (valid go_path but no block)
   # -- Full-bore dropdown menu (block given), with or without a link at the top (go_path given or not)
-  def navtab which, menu_label, go_path=nil
+  def navtab which, menu_label, go_path=nil, menu_only = false
     options={}
-    id = navtab_id which  # id used for the menu item
     class_str = "master-navtab"
     if which == (@active_menu || response_service.active_menu)
       class_str << " active"
@@ -19,16 +18,18 @@ module NavtabsHelper
       itemlist =
           content_tag :ul,
                       menu_items.collect { |item| content_tag :li, item }.join("\n").html_safe,
-                      class: "dropdown-menu"
+                      class: "dropdown-menu",
+                      id: navmenu_id(which)
       menu_label << content_tag(:span, "", class: "caret")
       class_str << " dropdown"
     end
 
-    content = navlink menu_label.html_safe, go_path, true, options
+    return itemlist if menu_only
 
+    content = navlink menu_label.html_safe, go_path, true, options
     content_tag :li,
                 "#{content} #{itemlist}".html_safe,
-                id: id,
+                id: navtab_id(which),
                 class: class_str
   end
 
@@ -46,8 +47,8 @@ module NavtabsHelper
     link_to_submit label, path_or_options, { :mode => :partial}.merge( options )  # defaults to partial
   end
 
-  def collections_navtab
-    navtab :collections, "Collections", "/users/#{current_user_or_guest_id}/collection" do
+  def collections_navtab menu_only = false
+    navtab :collections, "Collections", "/users/#{current_user_or_guest_id}/collection", menu_only do
       [
           navlink("My Collection", "/users/#{@user.id}/collection"),
           navlink("Recently Viewed", "/users/#{@user.id}/recent"),
@@ -56,8 +57,8 @@ module NavtabsHelper
     end
   end
 
-  def friends_navtab
-    navtab :friends, "Friends", users_path do
+  def friends_navtab menu_only = false
+    navtab :friends, "Friends", users_path, menu_only do
       @user.followees[0..6].collect { |u|
         navlink u.handle, "/users/#{u.id}/collection", id: dom_id(u)
       } + [
@@ -67,8 +68,8 @@ module NavtabsHelper
     end
   end
 
-  def lists_navtab
-    navtab :lists, "Lists", lists_path do
+  def lists_navtab menu_only = false
+    navtab :lists, "Lists", lists_path, menu_only do
       @user.subscriptions(:own)[0..16].collect { |l|
         navlink l.name, list_path(l), id: dom_id(l)
       } + [
@@ -79,8 +80,8 @@ module NavtabsHelper
     end
   end
 
-  def feeds_navtab
-    navtab :feeds, "Feeds", feeds_path do
+  def feeds_navtab menu_only = false
+    navtab :feeds, "Feeds", feeds_path, menu_only do
       result = @user.feeds[0..12].collect { |f|
         navlink truncate(f.title, length: 30), feed_path(f), id: dom_id(f)
       }
@@ -91,48 +92,65 @@ module NavtabsHelper
     end
   end
 
-  def news_navtab
-    navtab :news, "News", "/users/#{current_user_or_guest_id}/news"
+  def news_navtab menu_only = false
+    navtab :news, "News", "/users/#{current_user_or_guest_id}/news", menu_only
   end
   
-  def more_navtab
-    navtab :more, "More", "/users/#{current_user_or_guest_id}/biglist"
+  def more_navtab menu_only = false
+    navtab :more, "More", "/users/#{current_user_or_guest_id}/biglist", menu_only
   end
 
-  def home_navtab
+  def home_navtab menu_only = false
     navtab :home,
            content_tag(:b, "&nbsp;#{current_user.handle}&nbsp;".html_safe, class: "glyphicon glyphicon-home")+
                content_tag(:b, "", class: "glyphicon glyphicon-cog"),
-           user_path(current_user) do
+           user_path(current_user),
+           menu_only do
       item_list = [
           # navlink( "Profile", users_profile_path( section: "profile" ), :mode => :modal),
           navlink("Sign-in Services", authentications_path, :mode => :modal),
           navlink("Invite", new_user_invitation_path, :mode => :modal),
           navlink("Sign Out", destroy_user_session_path, :method => "delete")
       ]
-      item_list += [
-          "<hr class='menu'>".html_safe,
-          link_to_submit("Add Cookmark", new_recipe_path, :mode => :modal),
-          link_to("Admin", admin_path),
-          link_to("Refresh Masonry", "#", onclick: "RP.collection.justify();"),
-          link_to("Address Bar Magic", "#", onclick: "RP.getgo('#{home_path}', 'http://local.recipepower.com:3000/bar.html##{bookmarklet_script}')"),
-          link_to("Bookmark Magic", "#", onclick: "RP.bm('Cookmark', '#{bookmarklet_script}')"),
-          link_to("Stream Test", "#", onclick: "RP.stream.buffer_test();"),
-          link_to_submit("Step 3", popup_path("starting_step3"), :mode => :modal)
-      ] if permitted_to? :admin, :pages
+      if permitted_to? :admin, :pages
+        if response_service.admin_view?
+          item_list += [
+            "<hr class='menu'>".html_safe,
+            link_to_submit( "Admin View Off", admin_toggle_path(on: false), :mode => :partial),
+            link_to_submit("Add Cookmark", new_recipe_path, :mode => :modal),
+            link_to("Admin", admin_path),
+            link_to("Refresh Masonry", "#", onclick: "RP.collection.justify();"),
+            link_to("Address Bar Magic", "#", onclick: "RP.getgo('#{home_path}', 'http://local.recipepower.com:3000/bar.html##{bookmarklet_script}')"),
+            link_to("Bookmark Magic", "#", onclick: "RP.bm('Cookmark', '#{bookmarklet_script}')"),
+            link_to("Stream Test", "#", onclick: "RP.stream.buffer_test();"),
+            link_to_submit("Step 3", popup_path("starting_step3"), :mode => :modal)
+          ]
+        else
+          item_list += [
+              "<hr class='menu'>".html_safe,
+              link_to_submit("Admin View On", admin_toggle_path(on: true), :mode => :partial)
+          ]
+        end
+      end
       item_list
     end
   end
 
   # Package the navtab up to be replaced via AJAX
   def navtab_replacement which
-    [ "li#{navtab_id(which)}", method(:"#{which}_navtab").call ]
+    [ "ul##{navmenu_id(which)}", method(:"#{which}_navtab").call(true) ]
   end
 
   protected
+
   # The CSS ID of the navtab
   def navtab_id which
     "#{which}-navtab"
+  end
+
+  # The CSS ID of the navmenu
+  def navmenu_id which
+    "#{which}-navmenu"
   end
 end
 

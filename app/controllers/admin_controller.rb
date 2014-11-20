@@ -55,4 +55,9 @@ class AdminController < ApplicationController
 
   def control
   end
+
+  def toggle
+    session[:admin_view] = params[:on] == "true"
+    flash[:popup] = "Admin View is now #{session[:admin_view] ? 'On' : 'Off' }"
+  end
 end

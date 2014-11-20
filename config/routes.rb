@@ -5,6 +5,7 @@
 
 RP::Application.routes.draw do
 
+  get "admin/toggle"
   resources :feed_entries, :except => [:index, :create, :new, :show, :destroy] do
     member do 
       get "collect"

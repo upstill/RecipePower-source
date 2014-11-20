@@ -81,7 +81,7 @@ class RegistrationsController < Devise::RegistrationsController
         sign_in resource_name, resource, :bypass => true
         respond_with(resource) do |format|
           format.html { redirect_to after_update_path_for(resource) }
-          format.json { render :json => { done: true, popup: view_context.flash_popup } }
+          format.json { render :json => { done: true }.merge( view_context.flash_notify(true) ) }
         end
       else
         clean_up_passwords resource

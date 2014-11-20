@@ -81,12 +81,34 @@ module FlashHelper
     }.join.html_safe
   end
 
-  # Return the current flash text, suitable for popping up
-  def flash_popup keep=false
-    msg = flash.collect  { |type, message|
-      flash.delete type unless keep
-      message
-    }.join.html_safe
-    msg
+  # Provide a hash suitable for including in a JSON response for driving a flash notification
+  # 'all' true incorporates all extant messages in the popup
+  def flash_notify popup_only=false
+    if flash.empty?
+      return { "clear-flash" => true }
+    end
+    result = {}
+    if msg = flash[:alert]
+      result[:alert] = msg
+      flash.delete :alert
+    end
+    if popup_only
+      result[:popup] = flash.collect  { |type, message|
+        flash.delete type
+        message
+      }.join.html_safe
+    else # Keep all flashes in their intended form
+      if msg = flash[:popup]
+        result[:popup] = msg
+        flash.delete :popup
+      end
+      # Others get passed through for the flash panel
+      flash.each  { |type, message|
+        result["flash-#{type}"] = message
+        flash.delete type
+        message
+      }
+    end
+    result
   end
 end

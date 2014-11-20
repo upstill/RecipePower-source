@@ -141,6 +141,10 @@ class ResponseServices
     dr
   end
 
+  def admin_view?
+    @session[:admin_view]
+  end
+
   private
 
   # What's the appropriate layout (in the Rails sense) for the current context?

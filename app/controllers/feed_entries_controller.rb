@@ -12,7 +12,7 @@ class FeedEntriesController < ApplicationController
   def update
     update_and_decorate
     if @feed_entry.errors.empty? && @feed_entry.save
-      @popup_msg = "Feed Entry is saved"
+      flash[:popup] = "Feed Entry is saved"
       render :ack_popup
     else
       render :action => 'edit', :notice => "Huhh??!?"
