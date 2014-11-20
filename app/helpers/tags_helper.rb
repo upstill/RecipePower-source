@@ -1,9 +1,5 @@
 module TagsHelper
 
-  def tags_table
-    stream_table [ "ID", "Name", "Type", "Usages", "Public?", "Similar", "Synonym(s)", "Meaning(s)", "", "" ]
-  end
-
   # Emit a link to a tag using the tag's name and, optionally, its type and id
   def tag_link tag, with_id=false
     link_to_submit( tag.name, tag, :mode => :modal )+(with_id ? "(#{tag.typename} #{tag.id.to_s})" : "")

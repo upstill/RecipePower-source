@@ -1,9 +1,5 @@
 module StreamHelper
 
-  def stream_table headers
-    render "shared/stream_results_table", headers: headers
-  end
-
   def stream_element_class etype
     "stream-#{etype}"
   end

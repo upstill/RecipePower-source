@@ -25,6 +25,17 @@ def splitstr(str, ncols=80)
   out
 end
 
+def labelled_quantity count, label, empty_msg = nil
+  case count
+    when 0
+      empty_msg || "No #{label.pluralize}"
+    when 1
+      "1 #{label}"
+    else
+      "#{count} #{label.pluralize}"
+  end
+end
+
 # Return an enumeration of a series of strings, separated by ',' except for the last two separated by 'and'
 # RETURN BLANK STRING IF STRS ARE EMPTY
 def strjoin strs, before = "", after = "", joiner = ', '

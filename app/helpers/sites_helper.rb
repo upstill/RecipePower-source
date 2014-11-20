@@ -1,9 +1,5 @@
 module SitesHelper
 
-  def sites_table
-    stream_table [ "Info", "Links" ]
-  end
-
   def crack_sample
     
     extractions = SiteServices.new(@site).extract_from_page @site.sample, :label => [:Title, :URI]
@@ -24,9 +20,5 @@ module SitesHelper
   def show_sample(site)
     link_to "Sample", site.sample
   end
-  
-  def sites_table
-    stream_table [ "Info", "Links" ]
-  end
-  
+
 end

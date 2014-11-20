@@ -1,9 +1,5 @@
 module ReferencesHelper
 
-  def references_table
-    stream_table [ "Reference Type", "URL/Referees", "", "", "" ]
-  end
-  
   def reference_expressions(reference)
     reference.referents.collect { |rft| "<br>"+rft.expression.typename+": "+link_to(rft.expression.name, rft.expression) }.join.html_safe
   end

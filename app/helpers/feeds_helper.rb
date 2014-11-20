@@ -21,10 +21,6 @@ module FeedsHelper
     [ "span.feed-status-report", feed_status_report(feed) ]
   end
 
-  def feeds_table
-    stream_table [ "Title/Description/URL", "Tag(s)", "Type", "Host Site", "Actions" ].compact
-  end
-
   def feedlist
     @feed.entries.collect { |entry| render partial: "feed_entries/show_feed_entry", item: entry }.join.html_safe
   end
