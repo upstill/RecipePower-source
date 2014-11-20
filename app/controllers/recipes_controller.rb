@@ -66,11 +66,7 @@ class RecipesController < ApplicationController
     	# redirect_to edit_recipe_url(@recipe), :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br>You might want to confirm the title and picture, and/or tag it?".html_safe
     else
         response_service.title = "Cookmark a Recipe"
-        @nav_current = :addcookmark
-        @recipe ||= Recipe.new
-        @recipe.current_user = current_user_or_guest_id # session[:user_id]
-        # @_area = params[:_area]
-        # dialog_boilerplate 'new', 'modal'
+        update_and_decorate
         smartrender
     end
   end

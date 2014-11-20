@@ -75,7 +75,7 @@ module NavtabsHelper
       } + [
           "<hr class='menu'>".html_safe,
           navlink("Browse for Lists...", lists_path),
-          navlink("Start a List...", new_list_path, mode: :modal)
+          navlink("Start a List...", new_list_path, mode: :modal, class: "transient")
       ]
     end
   end
@@ -108,27 +108,27 @@ module NavtabsHelper
            menu_only do
       item_list = [
           # navlink( "Profile", users_profile_path( section: "profile" ), :mode => :modal),
-          navlink("Sign-in Services", authentications_path, :mode => :modal),
-          navlink("Invite", new_user_invitation_path, :mode => :modal),
+          navlink("Sign-in Services", authentications_path, :mode => :modal, class: "transient"),
+          navlink("Invite", new_user_invitation_path, :mode => :modal, class: "transient"),
           navlink("Sign Out", destroy_user_session_path, :method => "delete")
       ]
       if permitted_to? :admin, :pages
         if response_service.admin_view?
           item_list += [
             "<hr class='menu'>".html_safe,
-            link_to_submit( "Admin View Off", admin_toggle_path(on: false), :mode => :partial),
-            link_to_submit("Add Cookmark", new_recipe_path, :mode => :modal),
+            link_to_submit( "Admin View Off", admin_toggle_path(on: false), :mode => :partial, class: "transient"),
+            link_to_submit("Add Cookmark", new_recipe_path, :mode => :modal, class: "transient"),
             link_to("Admin", admin_path),
             link_to("Refresh Masonry", "#", onclick: "RP.collection.justify();"),
             link_to("Address Bar Magic", "#", onclick: "RP.getgo('#{home_path}', 'http://local.recipepower.com:3000/bar.html##{bookmarklet_script}')"),
             link_to("Bookmark Magic", "#", onclick: "RP.bm('Cookmark', '#{bookmarklet_script}')"),
             link_to("Stream Test", "#", onclick: "RP.stream.buffer_test();"),
-            link_to_submit("Step 3", popup_path("starting_step3"), :mode => :modal)
+            link_to_submit("Step 3", popup_path("starting_step3"), :mode => :modal, class: "transient")
           ]
         else
           item_list += [
               "<hr class='menu'>".html_safe,
-              link_to_submit("Admin View On", admin_toggle_path(on: true), :mode => :partial)
+              link_to_submit("Admin View On", admin_toggle_path(on: true), :mode => :partial, class: "transient")
           ]
         end
       end

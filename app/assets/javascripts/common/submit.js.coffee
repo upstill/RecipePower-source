@@ -49,13 +49,14 @@ fire = (elmt) ->
 		RP.submit.submit_and_process elmt.attributes.href.value, elmt, $(elmt).data('method')
 
 handleEnclosingNavTab = (menuElmt) ->
-	while menuElmt && !$(menuElmt).hasClass "master-navtab"
-		menuElmt = RP.findEnclosing "LI", menuElmt
-	if menuElmt # Select this menu element exclusively
-		$('.master-navtab').removeClass "active"
-		$('.master-navtab a').css 'color','#999'
-		$(menuElmt).addClass "active"
-		$('>a', menuElmt).css 'color','white'
+	if !$(menuElmt).hasClass "transient" # So marked if its selection will not affect what menu element is active
+		while menuElmt && !$(menuElmt).hasClass "master-navtab"
+			menuElmt = RP.findEnclosing "LI", menuElmt
+		if menuElmt # Select this menu element exclusively
+			$('.master-navtab').removeClass "active"
+			$('.master-navtab a').css 'color','#999'
+			$(menuElmt).addClass "active"
+			$('>a', menuElmt).css 'color','white'
 
 proceedWithConfirmation = (elmt) ->
 	!(confirm_msg = $(elmt).data 'confirm-msg') || confirm confirm_msg
