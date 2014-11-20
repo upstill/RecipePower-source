@@ -339,16 +339,16 @@ class UserCollectionCache < ResultsCache
       # * The Rcpref's comment matches the tag's string, OR
       # * The recipe's title matches the tag's string, OR
       # * the recipe is tagged by the tag
-      matchstr = tag.normalized_name || Tag.normalizeName(tag.name)
-      # r1 = Recipe.joins(:rcprefs).where("recipes.title ILIKE ? and rcprefs.user_id = 3", "%#{matchstr}%")
+      matchstr = "%#{tag.name}%"
+      # r1 = Recipe.joins(:rcprefs).where("recipes.title ILIKE ? and rcprefs.user_id = 3", matchstr)
       # ids1 = subscope.joins("INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE '%salmon%' and rcprefs.user_id = 3")
-      # ids1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE '%#{matchstr}%' and rcprefs.user_id = 3})
-      # ids1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE '%#{matchstr}%'}).where("rcprefs.user_id = 3")
-      sss1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id}).where("recipes.title ILIKE ?", "%#{matchstr}%")
+      # ids1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE matchstr and rcprefs.user_id = 3})
+      # ids1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE matchstr}).where("rcprefs.user_id = 3")
+      sss1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id}).where("recipes.title ILIKE ?", matchstr)
       sss1 = sss1.where("rcprefs.user_id = #{@id}") if @id
       sss1 = sss1.to_a.uniq { |rr| "#{rr.entity_type}#{rr.entity_id}"}
 
-      sss2 = subscope.find_by_sql( %Q{SELECT * FROM rcprefs where rcprefs.comment ILIKE '%#{matchstr}%'} ).uniq { |rr| "#{rr.entity_type}#{rr.entity_id}"}
+      sss2 = subscope.find_by_sql( %Q{SELECT * FROM rcprefs where rcprefs.comment ILIKE '#{matchstr}' } ).uniq { |rr| "#{rr.entity_type}#{rr.entity_id}"}
 
       sss3 = subscope.joins("INNER JOIN taggings ON taggings.entity_type = rcprefs.entity_type and taggings.entity_id = rcprefs.entity_id and taggings.tag_id = #{tag.id}")
       sss3 = sss3.to_a.uniq { |rr| "#{rr.entity_type}#{rr.entity_id}" }
@@ -430,7 +430,9 @@ class FeedsCache < ResultsCache
 
     tagset = tagset.map(&:id)
     tagset = (tagset + tag.feeds.map(&:id)).uniq if tag.id > 0
-    matchset = Feed.where("title ILIKE ? or description ILIKE ?", "%#{matchstr}%", "%#{matchstr}%").map(&:id)
+
+    matchstr = "%#{tag.name}%"
+    matchset = Feed.where("title ILIKE ? or description ILIKE ?", matchstr, matchstr).map(&:id)
     counts.incr tagset.uniq # One extra point for matching in one field
     counts.incr matchset
     this_round = (tagset+matchset).uniq
@@ -451,20 +453,9 @@ class FeedCache < ResultsCache
     FeedEntry.where(feed_id: @id).order('published_at DESC')
   end
 
-  def count_tag tag, counts
-    matchstr = tag.normalized_name || Tag.normalizeName(tag.name)
-
-    sourcetags = Tag.where('normalized_name ILIKE ?', "%#{matchstr}%")
-    idlist = sourcetags.map(&:id).to_s
-    tagset = itemscope.joins(:taggings)
-      .where("feed_entries.id = taggings.entity_id
-          AND taggings.entity_type = 'FeedEntry'")
-      .where("taggings.tag_id" => idlist).to_a
-    matchset = itemscope.where("name ILIKE ? or summary ILIKE ?", "%#{matchstr}%", "%#{matchstr}%").to_a
-    counts.incr tagset # One extra point for matching in one field
-    counts.incr matchset
-    this_round = (tagset+matchset).uniq
-    counts.incr this_round, 30 # Thirty points for matching this tag
+  def name_match tag
+    match = "%#{tag.name}%"
+    itemscope.where("title ILIKE ? or summary ILIKE ?", match, match).to_a
   end
 
 end
@@ -484,7 +475,7 @@ class UsersCache < ResultsCache
   end
 
   def name_match tag
-    match = "%#{tag.normalized_name || Tag.normalizeName(tag.name)}%"
+    match = "%#{tag.name}%"
     itemscope.where(
                     'username ILIKE ? or
                     fullname ILIKE ? or
