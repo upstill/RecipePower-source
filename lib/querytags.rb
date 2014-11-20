@@ -23,12 +23,14 @@ module Querytags
           name = e.gsub(/\'/, '').strip
           unless tag = Tag.strmatch(name, {matchall: true, uid: @userid}).first
             tag = Tag.new(name: name)
-            tag.id = -1
-            # Search for an unused id
-            while (newspecial[tag.id.to_s] || oldspecial[tag.id.to_s]) do
-              tag.id = tag.id - 1
+            unless oldspecial.find { |k, v| (newspecial[k] = v and tag.id = k.to_i) if v == name }
+              tag.id = -1
+              # Search for an unused id
+              while (newspecial[tag.id.to_s] || oldspecial[tag.id.to_s]) do
+                tag.id = tag.id - 1
+              end
+              newspecial[tag.id.to_s] = tag.name
             end
-            newspecial[tag.id.to_s] = tag.name
           end
           @querytags << tag
         end

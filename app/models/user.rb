@@ -273,7 +273,7 @@ class User < ActiveRecord::Base
   end
 
   def collection_size
-    Rcpref.where(:user_id => id).count
+    rcprefs.where(in_collection: true).count
   end
 
 private

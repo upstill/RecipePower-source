@@ -151,7 +151,7 @@ class FeedsController < ApplicationController
   def refresh
     @feed = Feed.find params[:id]
     @feed.enqueue_update if @feed.status == "ready"
-    url = feed_url(@feed, querytags: params[:querytags], partial: true)
+    url = feed_url(@feed, querytags: params[:querytags], :mode => :partial)
     redirect_to url
   end
 

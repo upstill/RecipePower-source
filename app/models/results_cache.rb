@@ -193,7 +193,7 @@ class ResultsCache < ActiveRecord::Base
     begin
       # It's possible that the itemscope is an array...
       @items = (itemscope.is_a? Array) ? slice_item_array : slice_item_scope
-    rescue  # Fall back to an integer generator
+    rescue Exception => e # Fall back to an integer generator
       @items = (safe_partition.window.min...safe_partition.window.max).to_a
     end
   end
@@ -253,6 +253,34 @@ class ResultsCache < ActiveRecord::Base
       self.window = [wdw.min, wdw.max] if wdw
       true
     end
+  end
+
+  # This is a prototypical count_tag method, which digests the itemscope in light of a tag,
+  # incrementing the counts appropriately
+  def count_tag tag, counts
+    tagset = tagging_match tag
+    if self.respond_to? :name_match
+      # Get an array of entities that are a string match for the tag
+      matchset = name_match tag
+      counts.incr tagset # One extra point for matching in one field
+      counts.incr matchset
+      counts.incr (tagset+matchset).uniq, 30  # Thirty points for matching this tag
+    end
+    counts.incr tagset, 30 # One extra point for matching in one field
+  end
+
+  # Apply a tag to the members of the (Taggable) obj_class, returning an array of entities for count_tag
+  def tagging_match tag
+    model_class = itemscope.model.to_s
+    assoc_name = model_class.underscore.pluralize
+    matchstr = tag.normalized_name || Tag.normalizeName(tag.name)
+    sourcetags = Tag.where('normalized_name ILIKE ?', "%#{matchstr}%")
+    scope = itemscope.joins(:taggings).where("#{assoc_name}.id = taggings.entity_id AND taggings.entity_type = '#{model_class}'")
+    unless sourcetags.empty?
+      idlist = sourcetags.map(&:id).map(&:to_s).join(", ") #comma-separated list
+      scope = scope.where("taggings.tag_id IN (#{idlist})" )
+    end
+    scope.to_a
   end
 
   # This is the real interface, which returns items for display
@@ -446,15 +474,25 @@ class UsersCache < ResultsCache
 
   def self.params_needed
     # The access parameter filters for private and public lists
-    super + [:relevant]
+    super + [:all]
   end
 
   def itemscope
-    scope = User.where(channel_referent_id: 0)
-    if @relevant
-      User.where('id > 0')
-    end
-    scope
+    @all ?
+        User.where(channel_referent_id: 0) :
+        User.where(channel_referent_id: 0).joins(:rcprefs).where("rcprefs.in_collection = TRUE").uniq
+  end
+
+  def name_match tag
+    match = "%#{tag.normalized_name || Tag.normalizeName(tag.name)}%"
+    itemscope.where(
+                    'username ILIKE ? or
+                    fullname ILIKE ? or
+                    email ILIKE ? or
+                    first_name ILIKE ? or
+                    last_name ILIKE ? or
+                    about ILIKE ?',
+                    match, match, match, match, match, match).to_a
   end
 
 end

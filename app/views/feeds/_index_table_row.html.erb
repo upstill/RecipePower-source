@@ -1,7 +1,7 @@
 <% item ||= @feed %>
 <tr id="<%= dom_id item %>">
 	<td>
-		<%= link_to_submit item.title.truncate(80), feed_path(item), partial: true %><br>
+		<%= link_to_submit item.title.truncate(80), feed_path(item), :mode => :partial %><br>
 		<%= item.description  %><br>
 	</td>
 	<td><%= taggable_list item %></td>
