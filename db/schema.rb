@@ -51,6 +51,14 @@ ActiveRecord::Schema.define(version: 20140610235011) do
 
   add_index "delayed_jobs", ["priority", "run_at"], name: "delayed_jobs_priority", using: :btree
 
+  create_table "event_notices", force: true do |t|
+    t.integer  "event_id"
+    t.integer  "user_id"
+    t.boolean  "read",       default: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "expressions", force: true do |t|
     t.integer  "tag_id"
     t.integer  "referent_id"
@@ -109,12 +117,27 @@ ActiveRecord::Schema.define(version: 20140610235011) do
     t.datetime "updated_at"
   end
 
-  create_table "link_refs", force: true do |t|
-    t.integer  "link_id"
-    t.integer  "tag_id"
+  create_table "lists", force: true do |t|
     t.integer  "owner_id"
+    t.integer  "name_tag_id"
+    t.integer  "availability", default: 0
+    t.text     "ordering",     default: ""
+    t.text     "description",  default: ""
+    t.text     "notes",        default: ""
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "lists_tags", force: true do |t|
+    t.integer  "tag_id"
+    t.integer  "list_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lists_users", force: true do |t|
+    t.integer "list_id"
+    t.integer "user_id"
   end
 
   create_table "notifications", force: true do |t|
@@ -229,6 +252,18 @@ ActiveRecord::Schema.define(version: 20140610235011) do
     t.datetime "updated_at",   null: false
   end
 
+  create_table "results_caches", id: false, force: true do |t|
+    t.string   "session_id", null: false
+    t.text     "params"
+    t.text     "cache"
+    t.string   "type",       null: false
+    t.text     "partition"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "results_caches", ["session_id", "type"], name: "index_results_caches_on_session_id_and_type", unique: true, using: :btree
+
   create_table "rp_events", force: true do |t|
     t.integer  "verb"
     t.integer  "source_id"
@@ -265,6 +300,21 @@ ActiveRecord::Schema.define(version: 20140610235011) do
   end
 
   add_index "sites", ["id"], name: "sites_index_by_id", unique: true, using: :btree
+
+  create_table "suggestions", force: true do |t|
+    t.string   "base_type"
+    t.integer  "base_id"
+    t.integer  "viewer_id"
+    t.string   "session"
+    t.text     "filter"
+    t.integer  "results_cache_id"
+    t.text     "results"
+    t.string   "type"
+    t.boolean  "pending",          default: false
+    t.boolean  "ready",            default: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "tag_owners", force: true do |t|
     t.integer  "tag_id"
