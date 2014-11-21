@@ -19,9 +19,9 @@ module TaggableHelper
     end
 
     if is_plural
-      tags_input_field << "s"
-      tags_attribute_name << 's'
-      label << 's'
+      tags_input_field = tags_input_field.pluralize
+      tags_attribute_name = tags_attribute_name.pluralize
+      label = label.pluralize
     end
     options[:label] ||= label
 

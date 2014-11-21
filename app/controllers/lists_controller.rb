@@ -40,16 +40,11 @@ class ListsController < ApplicationController
   end
 
   def update
-    @list = List.find params[:id]
-    if @list.update_attributes(params[:list])
+    update_and_decorate
+    if @list.errors.empty?
+      flash[:notice] = "'#{@list.name}' was saved."
       respond_to do |format|
-        format.html { redirect_to lists_url, :status => :see_other, notice: "'#{list.name}' was successfully updated." }
-        format.json {
-          render json: {
-            done: true,
-            replacements: [ [ "#list"+@list.id.to_s, with_format("html") { render_to_string partial: "lists/index_table_row", locals: { item: @list }} ] ],
-            popup: "List saved" }
-        }
+        format.html { redirect_to lists_url, :status => :see_other }
       end
     else
       respond_to do |format|

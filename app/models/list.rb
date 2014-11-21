@@ -67,7 +67,7 @@ class List < ActiveRecord::Base
   belongs_to :name_tag, class_name: "Tag"
   has_and_belongs_to_many :tags
   has_and_belongs_to_many :subscribers, class_name: "User"
-  attr_accessible :owner, :ordering, :name, :name_tag, :tags, :notes, :description, :availability, :owner_id
+  attr_accessible :owner, :ordering, :name, :name_tag, :tags, :tag_tokens, :notes, :description, :availability, :owner_id
   serialize :ordering, ListSerializer
 
   # Using the name string, either find an existing list or create a new one FOR THE CURRENT USER
@@ -134,4 +134,21 @@ class List < ActiveRecord::Base
     result
   end
 
+  def tag_tokens
+    tag_ids
+  end
+
+  # Write the virtual attribute tag_tokens (a list of ids) to
+  # update the real attribute tag_ids
+  def tag_tokens=(idstring)
+    self.tags =
+        TokenInput.parse_tokens(idstring) do |token| # parse_tokens analyzes each token in the list as either integer or string
+          case token
+            when Fixnum
+              Tag.find token
+            when String
+              Tag.strmatch(token, userid: tag_owner, assert: true)[0] # Match or assert the string
+          end
+        end
+  end
 end
