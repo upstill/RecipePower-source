@@ -35,8 +35,8 @@ class User < ActiveRecord::Base
   # Channels are just another kind of user. This field (channel_referent_id, externally) denotes such.
   belongs_to :channel, :class_name => "Referent", :foreign_key => "channel_referent_id"
 
-  has_and_belongs_to_many :feeds
-  has_and_belongs_to_many :lists
+  has_and_belongs_to_many :feed_subscriptions, :join_table => "feeds_users"
+  has_and_belongs_to_many :list_subscriptions, :join_table => "lists_users"
 
   has_many :rcprefs, :dependent => :destroy
   # We allow users to collect users
@@ -79,23 +79,23 @@ class User < ActiveRecord::Base
   def subscriptions kind
     case kind
       when :own
-        lists.where owner_id: id
+        list_subscriptions.where owner_id: id
       when :public
-        lists.where 'owner_id != ?', id
+        list_subscriptions.where 'owner_id != ?', id
     end
   end
 
   # Subscribe a user to a list
   def subscribe_to list, do_subscribe=true
     if do_subscribe
-      self.lists = lists + [list]
+      self.list_subscriptions = list_subscriptions + [list]
     else
-      lists.delete list
+      list_subscriptions.delete list
     end
   end
 
   def subscribes_to list
-    lists.include? list
+    list_subscriptions.include? list
   end
 
   # Include the entity in the user's collection
@@ -180,10 +180,10 @@ class User < ActiveRecord::Base
 =begin
   # Add the feed to the browser's ContentBrowser and select it
   def add_feed feed
-    if feeds.exists? id: feed.id
+    if feed_subscriptions.exists? id: feed.id
       browser.select_by_content feed
     else
-      self.feeds << feed
+      self.feed_subscriptions << feed
       refresh_browser feed
     end
   end
@@ -191,7 +191,7 @@ class User < ActiveRecord::Base
   def delete_feed feed
     browser.select_by_content feed
     browser.delete_selected
-    feeds.delete feed
+    feed_subscriptions.delete feed
     save
   end
 =end
@@ -199,7 +199,7 @@ class User < ActiveRecord::Base
   # TODO: This should be collect(l)
   def add_list l
     l.save unless l.id
-    self.lists = lists+[l] # unless self.list_ids.include?(l.id)
+    self.list_subscriptions = list_subscriptions+[l] # unless self.list_ids.include?(l.id)
     save
   end
 
@@ -632,7 +632,7 @@ public
       other_user.followees.each { |followee| self.followees << followee }
       # Adopt all the collected entities of the other user
       other_user.rcprefs.where(in_collection: true).each { |rr| collect rr.entity }
-      other_user.feeds.each { |feed| self.feeds << feed }
+      other_user.feed_subscriptions.each { |feed| self.feed_subscriptions << feed }
       save
     end
   end

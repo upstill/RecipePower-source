@@ -35,6 +35,7 @@ class ApplicationController < ActionController::Base
   # If attribute_params are non-nil, they are used to initialize(update) the created(fetched) entity
   # We also setup an instance variable for the entity according to its class,
   #  and also set up a decorator (@decorator) on the entity
+  # Return value: true if all is well
   def update_and_decorate entity=nil
     attribute_params = nil
     if entity
@@ -55,6 +56,7 @@ class ApplicationController < ActionController::Base
     instance_variable_set :"@#{modelname}", entity
     # We build a decorator if poss.
     entity.respond_to?(:decorate) ? (@decorator = entity.decorate) : entity
+    entity.errors.empty? # ...and report back status
   end
 
   # This replaces the old collections path, providing a path to either the current user's collection or home
