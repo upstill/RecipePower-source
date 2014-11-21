@@ -37,6 +37,10 @@ class ApplicationController < ActionController::Base
   #  and also set up a decorator (@decorator) on the entity
   # Return value: true if all is well
   def update_and_decorate entity=nil
+    if entity.is_a? Draper::Decorator
+      @decorator = entity
+      entity = entity.object
+    end
     attribute_params = nil
     if entity
       # If the entity is provided, ignore parameters
@@ -53,9 +57,12 @@ class ApplicationController < ActionController::Base
                               attribute_params       && # There are parameters to update
                               current_user           &&  # Only the current user gets to modify a model
                               entity.update_attributes(attribute_params)
+    # Having prep'ed the entity, set instance variables for the entity and decorator
     instance_variable_set :"@#{modelname}", entity
-    # We build a decorator if poss.
-    entity.respond_to?(:decorate) ? (@decorator = entity.decorate) : entity
+    # We build a decorator if necessary and possible
+    unless (@decorator && entity == @decorator.object) # Leave the current decorator alone if it will do
+      @decorator = entity.decorate if entity.respond_to? :decorate
+    end
     entity.errors.empty? # ...and report back status
   end
 

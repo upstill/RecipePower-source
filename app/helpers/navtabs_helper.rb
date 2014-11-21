@@ -69,7 +69,7 @@ module NavtabsHelper
   end
 
   def my_lists_navtab menu_only = false
-    navtab :my_lists, "My<br>Lists", lists_path, menu_only do
+    navtab :my_lists, "My Lists", lists_path, menu_only do
       @user.subscriptions(:own)[0..16].collect { |l|
         navlink l.name, list_path(l), id: dom_id(l)
       } + [
@@ -81,7 +81,7 @@ module NavtabsHelper
   end
 
   def other_lists_navtab menu_only = false
-    navtab :other_lists, "Other<br>Lists", lists_path, menu_only do
+    navtab :other_lists, "Other Lists", lists_path, menu_only do
       @user.subscriptions(:own)[0..16].collect { |l|
         navlink l.name, list_path(l), id: dom_id(l)
       } + [

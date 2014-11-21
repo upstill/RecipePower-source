@@ -35,8 +35,8 @@ class User < ActiveRecord::Base
   # Channels are just another kind of user. This field (channel_referent_id, externally) denotes such.
   belongs_to :channel, :class_name => "Referent", :foreign_key => "channel_referent_id"
 
-  has_and_belongs_to_many :feed_subscriptions, :join_table => "feeds_users"
-  has_and_belongs_to_many :list_subscriptions, :join_table => "lists_users"
+  has_and_belongs_to_many :feeds, :join_table => "feeds_users"
+  has_and_belongs_to_many :lists, :join_table => "lists_users"
 
   has_many :rcprefs, :dependent => :destroy
   # We allow users to collect users
@@ -79,23 +79,23 @@ class User < ActiveRecord::Base
   def subscriptions kind
     case kind
       when :own
-        list_subscriptions.where owner_id: id
+        lists.where owner_id: id
       when :public
-        list_subscriptions.where 'owner_id != ?', id
+        lists.where 'owner_id != ?', id
     end
   end
 
   # Subscribe a user to a list
   def subscribe_to list, do_subscribe=true
     if do_subscribe
-      self.list_subscriptions = list_subscriptions + [list]
+      self.lists = lists + [list]
     else
-      list_subscriptions.delete list
+      lists.delete list
     end
   end
 
   def subscribes_to list
-    list_subscriptions.include? list
+    lists.include? list
   end
 
   # Include the entity in the user's collection
@@ -180,10 +180,10 @@ class User < ActiveRecord::Base
 =begin
   # Add the feed to the browser's ContentBrowser and select it
   def add_feed feed
-    if feed_subscriptions.exists? id: feed.id
+    if feeds.exists? id: feed.id
       browser.select_by_content feed
     else
-      self.feed_subscriptions << feed
+      self.feeds << feed
       refresh_browser feed
     end
   end
@@ -191,7 +191,7 @@ class User < ActiveRecord::Base
   def delete_feed feed
     browser.select_by_content feed
     browser.delete_selected
-    feed_subscriptions.delete feed
+    feeds.delete feed
     save
   end
 =end
@@ -199,7 +199,7 @@ class User < ActiveRecord::Base
   # TODO: This should be collect(l)
   def add_list l
     l.save unless l.id
-    self.list_subscriptions = list_subscriptions+[l] # unless self.list_ids.include?(l.id)
+    self.lists = lists+[l] # unless self.list_ids.include?(l.id)
     save
   end
 
@@ -268,6 +268,8 @@ class User < ActiveRecord::Base
     constraints = {:user_id => id}
     constraints[:in_collection] = true unless options[:all]
     constraints[:private] = false if options[:public]
+    # TODO: temporarily excluding anything but recipes from exposure
+    constraints[:entity_type] = "Recipe"
     ordering = (options[:sort_by] == :collected) ? "created_at" : "updated_at"
     Rcpref.where(constraints) # .order(ordering+" DESC")
   end
@@ -632,7 +634,7 @@ public
       other_user.followees.each { |followee| self.followees << followee }
       # Adopt all the collected entities of the other user
       other_user.rcprefs.where(in_collection: true).each { |rr| collect rr.entity }
-      other_user.feed_subscriptions.each { |feed| self.feed_subscriptions << feed }
+      other_user.feeds.each { |feed| self.feeds << feed }
       save
     end
   end

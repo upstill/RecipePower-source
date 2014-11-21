@@ -1,7 +1,6 @@
 class AddPartitionToResultsCaches < ActiveRecord::Migration
   def up
-      drop_table :results_caches
-      create_table :results_caches, :id => false do |t|
+      create_table :results_caches, :force => true, :id => false do |t|
         t.string :session_id
         t.text :params
         t.text :cache
@@ -14,8 +13,7 @@ class AddPartitionToResultsCaches < ActiveRecord::Migration
       add_index :results_caches, ["session_id","type"], :unique => true
   end
   def down
-      drop_table :results_caches
-      create_table :results_caches, :id => false do |t|
+      create_table :results_caches, :force => true, :id => false do |t|
         t.string :session_id
         t.text :params
         t.text :cache

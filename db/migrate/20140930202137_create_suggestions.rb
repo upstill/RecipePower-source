@@ -1,6 +1,6 @@
 class CreateSuggestions < ActiveRecord::Migration
   def change
-    create_table :suggestions do |t|
+    create_table :suggestions, :force => true do |t|
       t.string :base_type
       t.integer :base_id
       t.integer :viewer_id
@@ -13,6 +13,6 @@ class CreateSuggestions < ActiveRecord::Migration
       t.boolean :ready, default: false # Ready now, whether it was ever launched or not
 
       t.timestamps
-    end unless ActiveRecord::Base.connection.table_exists?("suggestions")
+    end
   end
 end

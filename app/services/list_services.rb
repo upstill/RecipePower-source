@@ -42,12 +42,13 @@ class ListServices
       user_list = [u]
     end
     list = nil
-    channel_list.each { |user|
-      list = List.assert user.channel.name, superu, create: true
-      user.entities.each { |entity|
+    # For each user that's actually a channel, create a list
+    channel_list.each { |channel_user|
+      list = List.assert channel_user.channel.name, superu, create: true
+      channel_user.rcprefs.where(in_collection: true).map(&:entity).each { |entity|
         list.include(entity) unless list.include?(entity)
       }
-      list.tags = user.tags
+      list.tags = channel_user.tags
       list.save
     }
     user_list.each { |user|

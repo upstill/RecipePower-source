@@ -62,7 +62,7 @@ group :development do
   gem 'log_buddy'
   gem 'ruby-prof', '~> 0.13.0' # , :git => 'git://github.com/wycats/ruby-prof.git'
   gem 'letter_opener'
-  gem "better_errors"
+  # gem "better_errors" '~> 1.1'
   gem "binding_of_caller"
   # gem "json"
 end

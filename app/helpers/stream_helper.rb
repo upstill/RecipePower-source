@@ -114,7 +114,11 @@ module StreamHelper
       dir = element.class.to_s.underscore.pluralize
       partialname = "#{dir}/#{partialname}" if File.exists?(Rails.root.join("app", "views", dir, "_#{partialname}.html.erb"))
     end
-    controller.update_and_decorate(element)
+    # Prepare for rendering by decorating the item
+    controller.update_and_decorate element
+    @decorator = controller.instance_variable_get :"@decorator"
+    modelname = element.class.to_s.underscore
+    instance_variable_set :"@#{modelname}", element
     render partial: partialname, locals: { :item => @decorator }
   end
 

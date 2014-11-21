@@ -1,7 +1,6 @@
 class CreateResultsCaches < ActiveRecord::Migration
   def change
-    unless ActiveRecord::Base.connection.table_exists?("results_caches")
-      create_table :results_caches, :id => false do |t|
+      create_table :results_caches, :force => true, :id => false do |t|
         t.string :session_id
         t.text :params
         t.text :cache
@@ -12,6 +11,5 @@ class CreateResultsCaches < ActiveRecord::Migration
         t.timestamps
       end
       add_index :results_caches, :session_id
-    end
   end
 end

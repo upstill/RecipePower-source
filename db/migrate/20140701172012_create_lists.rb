@@ -1,6 +1,6 @@
 class CreateLists < ActiveRecord::Migration
   def up
-    create_table :lists do |t|
+    create_table :lists, :force => true do |t|
       t.integer :owner_id
       t.integer :name_tag_id
       t.integer :availability, default: 0
@@ -9,19 +9,19 @@ class CreateLists < ActiveRecord::Migration
       t.text :notes, default: ""
 
       t.timestamps
-    end unless ActiveRecord::Base.connection.table_exists?("lists")
+    end
 
-    create_table :lists_tags do |t|
+    create_table :lists_tags, :force => true do |t|
       t.integer :tag_id
       t.integer :list_id
 
       t.timestamps
-    end unless ActiveRecord::Base.connection.table_exists?("lists_tags")
+    end
 
-    create_table :lists_users do |t|
+    create_table :lists_users, :force => true do |t|
       t.integer :list_id
       t.integer :user_id
-    end unless ActiveRecord::Base.connection.table_exists?("lists_users")
+    end 
   end
 
   def down
