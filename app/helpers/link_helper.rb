@@ -30,6 +30,16 @@ module LinkHelper
     # We do NOT want a remote response: it asks for Javascript
     options = options.clone
     options.delete :remote
+
+    # Pull out burron options and set classes appropriately to express the link as a button
+    if options[:button_size] || options[:button_style] || options.delete(:button)
+      class_str = (options[:class] || "").gsub(/btn[-\w]*/i, '') # Purge the class of existing button classes
+      btn_size_class = "btn-#{options.delete(:button_size)}" if options[:button_size]
+      btn_style_class = "btn-#{options.delete(:button_style) || 'default'}"
+      btn_block_class = "btn-block" if options.delete(:button_block)
+      options[:class] = "#{class_str} btn #{btn_style_class} #{btn_size_class} #{btn_block_class}"
+    end
+
     query = options.delete(:query) || {} # Remove the query options from consideration and include them in the path
     format = :json
     mode = options[:mode]

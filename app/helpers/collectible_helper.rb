@@ -9,7 +9,7 @@ module CollectibleHelper
       url = polymorphic_path(entity)+"/collect"
       label = "Collect"
       options[:class] << " collect-collectible-link"
-      link_to_submit label, url, options
+      link_to_submit label, url, options.merge( button_size: "xs", id: dom_id(entity) )
     end
   end
 
