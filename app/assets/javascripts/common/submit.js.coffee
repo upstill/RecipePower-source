@@ -71,7 +71,7 @@ RP.submit.submit_and_process = ( request, elmt, method="GET" ) ->
 		method = "POST"
 	else
 		data = null
-	unless (elmt && $(elmt).hasClass 'loading') || shortCircuit(request, elmt)
+	unless elmt && ($(elmt).hasClass 'loading' || shortCircuit(request, elmt))
 		$(elmt).addClass 'loading'
 		ajdata =
 			type: method,

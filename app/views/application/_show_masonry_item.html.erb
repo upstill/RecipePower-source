@@ -1,4 +1,3 @@
-<% x=2 %>
 <% item ||= (@recipe || @decorator.object) %>
 <div class="masonry-item-contents grid-item <%= dom_id item %>" >
   <%# recipe_uncollect_button item, @browser.selected %>
@@ -14,7 +13,7 @@
         <%= collect_or_edit_button item, mode: :modal %>
       </span>
       <span class="<%= recipe_list_element_golink_class item %>">
-        <%= button_to_submit "Share", new_user_invitation_path(recipe_id: item.id), mode: :modal %>
+        <%= button_to_submit "Share", new_user_invitation_path(recipe_id: item.id), "default", "xs", mode: :modal %>
       </span>
     </div>
   </div>

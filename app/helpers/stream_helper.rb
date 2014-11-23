@@ -106,8 +106,9 @@ module StreamHelper
 
   # Render an element of a collection, depending on its class
   # NB The view is derived from the class of the element, NOT from the current controller
-  def render_stream_item element, partialname=nil
+  def render_stream_item element, partialname=nil, no_wrap = false
     partialname ||= @sp.item_partial || "show_masonry_item"
+    for_masonry = partialname.match /masonry/
     # Get the item-rendering partial from the model view
     unless partialname.match /\//
       # Use a partial specific to the entity if the file exists
@@ -119,7 +120,12 @@ module StreamHelper
     @decorator = controller.instance_variable_get :"@decorator"
     modelname = element.class.to_s.underscore
     instance_variable_set :"@#{modelname}", element
-    render partial: partialname, locals: { :item => @decorator }
+    # Wrap the element so that its contents can be replaced
+    item = render partial: partialname, locals: { :item => @decorator }
+    if for_masonry && !no_wrap
+      item = content_tag :div, item, class: "masonry-item"
+    end
+    item
   end
 
   def render_stream_tail

@@ -50,6 +50,9 @@ class ListServices
     ups = User.find 3
     superu.owned_lists.each { |l| ups.collect l }
     ups.save
+    gar = User.find 1
+    superu.owned_lists.each { |l| gar.collect l }
+    gar.save
     list
   end
 
