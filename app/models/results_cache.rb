@@ -367,7 +367,7 @@ class UserCollectionCache < ResultsCache
   end
 
   def itemscope
-    user.collection_scope(:sortby => :collected) if user
+    user.collection_scope(:sort_by => :collected) if user
   end
 
 end
@@ -492,7 +492,7 @@ end
 class UserRecentCache < UserCollectionCache
 
   def itemscope
-    user.collection_scope(all: true) if user
+    user.collection_scope if user
   end
 end
 
@@ -509,7 +509,7 @@ end
 class UserListsCache < ResultsCache
 
   def itemscope
-    user.lists.where( owner_id: id) if user
+    user.owned_lists if user
   end
 
 end

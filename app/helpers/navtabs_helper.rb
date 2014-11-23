@@ -70,31 +70,29 @@ module NavtabsHelper
 
   def my_lists_navtab menu_only = false
     navtab :my_lists, "My Lists", lists_path, menu_only do
-      @user.subscriptions(:own)[0..16].collect { |l|
+      @user.owned_lists[0..16].collect { |l|
         navlink l.name, list_path(l), id: dom_id(l)
       } + [
           "<hr class='menu'>".html_safe,
-          navlink("Browse for Lists...", lists_path),
           navlink("Start a List...", new_list_path, mode: :modal, class: "transient")
       ]
     end
   end
 
   def other_lists_navtab menu_only = false
-    navtab :other_lists, "Other Lists", lists_path, menu_only do
-      @user.subscriptions(:own)[0..16].collect { |l|
+    navtab :other_lists, "More Lists", lists_path, menu_only do
+      @user.collection_scope(entity_type: "List", limit: 16, sort_by: :viewed).map(&:entity).collect { |l|
         navlink l.name, list_path(l), id: dom_id(l)
       } + [
           "<hr class='menu'>".html_safe,
           navlink("Browse for Lists...", lists_path),
-          navlink("Start a List...", new_list_path, mode: :modal, class: "transient")
       ]
     end
   end
 
   def feeds_navtab menu_only = false
     navtab :feeds, "Feeds", feeds_path, menu_only do
-      result = @user.feeds[0..12].collect { |f|
+      result = @user.collection_scope(entity_type: "Feed", limit: 16, sort_by: :viewed).map(&:entity).collect { |f|
         navlink truncate(f.title, length: 30), feed_path(f), id: dom_id(f)
       }
       result + [

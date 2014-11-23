@@ -33,10 +33,13 @@ class User < ActiveRecord::Base
   has_many :followees, -> { uniq }, :through => :followee_relations, :source => :followee
 
   # Channels are just another kind of user. This field (channel_referent_id, externally) denotes such.
+  # TODO: delete channel_referent_id and tables feeds_users, lists_users and private_subscriptions
   belongs_to :channel, :class_name => "Referent", :foreign_key => "channel_referent_id"
 
-  has_and_belongs_to_many :feeds, :join_table => "feeds_users"
-  has_and_belongs_to_many :lists, :join_table => "lists_users"
+  has_and_belongs_to_many :feed_collections, :join_table => "feeds_users", class_name: "Feed"
+  has_and_belongs_to_many :list_collections, :join_table => "lists_users", class_name: "List"
+
+  has_many :owned_lists, :class_name => "List", :foreign_key => :owner_id
 
   has_many :rcprefs, :dependent => :destroy
   # We allow users to collect users
@@ -75,28 +78,30 @@ class User < ActiveRecord::Base
     end
   end
 
+=begin
   # Return a list of lists the user subscribes to, whether personal (:own) or public (:public)
   def subscriptions kind
     case kind
       when :own
-        lists.where owner_id: id
+        list_collections.where owner_id: id
       when :public
-        lists.where 'owner_id != ?', id
+        list_collections.where 'owner_id != ?', id
     end
   end
 
   # Subscribe a user to a list
   def subscribe_to list, do_subscribe=true
     if do_subscribe
-      self.lists = lists + [list]
+      self.list_collections = list_collections + [list]
     else
-      lists.delete list
+      list_collections.delete list
     end
   end
 
   def subscribes_to list
-    lists.include? list
+    list_collections.include? list
   end
+=end
 
   # Include the entity in the user's collection
   def collect entity
@@ -134,8 +139,8 @@ class User < ActiveRecord::Base
   end
 
   # TODO: remove collections after they've been migrated to lists
-  has_many :private_subscriptions, -> { order "priority ASC" }, :dependent=>:destroy
-  has_many :collection_tags, :through => :private_subscriptions, :source => :tag, :class_name => "Tag"
+#  has_many :private_subscriptions, -> { order "priority ASC" }, :dependent=>:destroy
+#  has_many :collection_tags, :through => :private_subscriptions, :source => :tag, :class_name => "Tag"
   
   # login is a virtual attribute placeholding for [username or email]
   attr_accessor :login
@@ -180,10 +185,10 @@ class User < ActiveRecord::Base
 =begin
   # Add the feed to the browser's ContentBrowser and select it
   def add_feed feed
-    if feeds.exists? id: feed.id
+    if feed_collections.exists? id: feed.id
       browser.select_by_content feed
     else
-      self.feeds << feed
+      self.feed_collections << feed
       refresh_browser feed
     end
   end
@@ -191,15 +196,16 @@ class User < ActiveRecord::Base
   def delete_feed feed
     browser.select_by_content feed
     browser.delete_selected
-    feeds.delete feed
+    feed_collections.delete feed
     save
   end
 =end
 
+=begin
   # TODO: This should be collect(l)
   def add_list l
     l.save unless l.id
-    self.lists = lists+[l] # unless self.list_ids.include?(l.id)
+    self.list_collections = list_collections+[l] # unless self.list_ids.include?(l.id)
     save
   end
 
@@ -222,6 +228,7 @@ class User < ActiveRecord::Base
     self.collection_tags.delete tag
     save
   end
+=end
 
   def add_followee friend
     self.followees << friend unless followee_ids.include? friend.id
@@ -238,7 +245,7 @@ class User < ActiveRecord::Base
   def role
     self.role_symbols.first.to_s
   end
-  
+
   # Return the list of recipes owned by the user, optionally including every recipe they've touched. Options:
   # :all => include touched recipes, not just those that have been collected
   # :sort_by = :collected => order recipes by when they were collected (as opposed to recently touched)
@@ -263,15 +270,37 @@ class User < ActiveRecord::Base
   end
 =end
 
-  # Scope for the items in the user's collection
+  # Scope for items from the user's collection. Options:
+  # :in_collection: whether they're collected or just viewed
+  # :private: limited to the user
+  # :limit, :offset slicing the selection
+  # :entity_type for a particular type of entity
+  # :order can name any field to sort by
+  # :sort_by either :collected or :viewed if :order not provided
+  # :direction passes through to SQL; can be ASC or DESC
   def collection_scope options={}
-    constraints = {:user_id => id}
-    constraints[:in_collection] = true unless options[:all]
-    constraints[:private] = false if options[:public]
     # TODO: temporarily excluding anything but recipes from exposure
-    constraints[:entity_type] = "Recipe"
-    ordering = (options[:sort_by] == :collected) ? "created_at" : "updated_at"
-    Rcpref.where(constraints) # .order(ordering+" DESC")
+    scope = Rcpref.where(
+        options.slice(
+            :in_collection, :private, :entity_type).
+            merge(
+                entity_type: (options[:entity_type] || "Recipe"),
+                user_id: id
+            )
+    )
+    # The order field can be specified directly with :order, or implicitly with :collected
+    unless ordering = options[:order]
+      case options[:sort_by]
+        when :collected
+          ordering = "created_at"
+        when :viewed
+          ordering = "updated_at"
+      end
+    end
+    scope = scope.order("#{ordering} #{options[:direction] || 'DESC'}") if ordering
+    scope = scope.limit(options[:limit]) if options[:limit]
+    scope = scope.offset(options[:offset]) if options[:offset]
+    scope
   end
 
   def collection_size
@@ -281,10 +310,10 @@ class User < ActiveRecord::Base
 private
   @@leasts = {}
   def self.least_email(str)
-      @@leasts[str] || 
+      @@leasts[str] ||
       (@@leasts[str] = User.where("email like ?", "%#{str}%").collect { |match| match.id }.min)
   end
-  
+
   # Start an invited user off with two friends: the person who invited them (if any) and 'guest'
   def initialize_friends
       # Give him friends
@@ -292,8 +321,8 @@ private
       f << self.invited_by_id if self.invited_by_id
       self.followee_ids = f
       self.save
-      
-      # Make the inviter follow the newbie. 
+
+      # Make the inviter follow the newbie.
       if self.invited_by_id
           begin
               invited_by = User.find(self.invited_by_id)
@@ -311,31 +340,33 @@ public
       self.followee_ids.include? user
     end
   end
-  
+
   # Presents a hash of IDs with a switch value for whether to include that followee
   def followee_tokens=(flist)
     newlist = []
-    flist.each_key do |key| 
+    flist.each_key do |key|
         newlist.push key.to_i if (flist[key] == "1")
     end
     self.followee_ids = newlist
   end
-  
+
+=begin
   # Presents a hash of IDs with a switch value for whether to include that followee
   def subscription_tokens=(flist)
     newlist = []
-    flist.each_key do |key| 
+    flist.each_key do |key|
         newlist.push key.to_i if (flist[key] == "1")
     end
     self.feed_ids = newlist
   end
-  
+=end
+
   # Is a user a channel, as opposed to a human user?
   def channel?
     self.channel_referent_id > 0
   end
 
-  # Who does this user follow? 
+  # Who does this user follow?
   # Return either friends or channels, depending on 'channel' parameter
   def follows channel=false
     self.followees.find_all { |user| (user.channel? == channel) }
@@ -343,35 +374,35 @@ public
 
   # Establish the relationship among role_id values, symbols and user-friendly names
   @@Roles = TypeMap.new( {
-      guest: ["Guest", 1], 
-      user: ["User", 2], 
-      moderator: ["Moderator", 3], 
-      editor: ["Editor", 4], 
+      guest: ["Guest", 1],
+      user: ["User", 2],
+      moderator: ["Moderator", 3],
+      editor: ["Editor", 4],
       admin: ["Admin", 5]
   }, "unclassified")
 
   def role_symbols
       [@@Roles.sym(role_id)]
   end
-  
+
   def qa
       # Ensure that everyone gets a role
       self.role_id = @@Roles.num(:user) unless self.role_id && (self.role_id > 0)
       # Handle the case where email addresses come in the form 'realworlname <email>' by
-      # stripping out the excess and sticking it in the Full Name field. This is important not 
+      # stripping out the excess and sticking it in the Full Name field. This is important not
       # only to capture that information, but to avoid email collisions in the case where the
       # email portions are the same and they differ only in the real name.
-      if self.email =~ /(.*)<(.*)>\s*$/ 
+      if self.email =~ /(.*)<(.*)>\s*$/
           uname = $1
           em = $2
           # If it's a valid email, use that for the email field
           if em =~ /^[-a-z0-9_+\.]+\@([-a-z0-9]+\.)+[a-z0-9]{2,4}$/i
-              self.email = em 
+              self.email = em
               self.fullname = uname.strip.titleize if self.fullname.blank?
           end
       end
   end
-  
+
   has_many :authentications, :dependent => :destroy
   # Pass info from an authentication onto a user as needed
   @@AuthenticationMappings = {
@@ -425,16 +456,16 @@ public
   def password_required?
     (self.channel_referent_id==0) && (authentications.empty? || !password.blank?) # && super
   end
-  
+
   # We don't require an email for users representing channels
   def email_changed?
       (self.channel_referent_id==0) && super
   end
-  
+
   # ownership of tags restrict visible tags
   has_many :tag_owners
   has_many :private_tags, :through=>:tag_owners, :source => :tag, :class_name => "Tag"
-  
+
   validates :email, :presence => true
 
   # validates_presence_of :username
@@ -475,34 +506,34 @@ public
   def self.super_id
       (@@Super_user || (@@Super_user = self.by_name(:super))).id
   end
-  
+
   # Class variable @@Guest_user saves the guest User
-  @@Guest_user = nil  
+  @@Guest_user = nil
   def self.guest
       @@Guest_user || (@@Guest_user = self.by_name(:guest))
   end
-      
+
   # Simply return the id of the guest
   def self.guest_id
       self.guest.id
   end
-  
+
   @@Special_ids = []
   # Approve a user id for visibility by the public
   def self.public? (id)
       @@Special_ids = [self.super_id] if @@Special_ids.empty?
       !@@Special_ids.include? id
   end
-  
+
   def self.isPrivate id
       @@Special_ids = [self.super_id] if @@Special_ids.empty?
       @@Special_ids << [id]
   end
-  
-  def guest? 
+
+  def guest?
     id == User.guest.id
   end
-  
+
   # Return the string by which this user is referred. Preferentially return (in order)
   # -- username
   # -- fullname
@@ -514,7 +545,7 @@ public
       ("#{first_name} #{last_name}" unless (first_name.blank? && last_name.blank?)) ||
       email.sub(/@.*/, '')
   end
-  
+
   def polite_name
     @polite_name ||=
         (fullname unless fullname.blank?) ||
@@ -528,15 +559,15 @@ public
     (fullname.split(/\b/).first unless fullname.blank?) ||
     username
   end
-  
+
   # 'name' is just an alias for handle, for use by Channel referents
   def name
     handle
   end
-  
+
   # Who is eligible to be
   def friend_candidates(for_channels)
-    User.all.keep_if { |other| 
+    User.all.keep_if { |other|
         (for_channels == other.channel?) && # Select for channels or regular users
          User.public?(other.id) && # Exclude invisible users
          (other.channel? || (other.sign_in_count && (other.sign_in_count > 0))) && # Excluded unconfirmed invites
@@ -548,9 +579,11 @@ public
     @invitee_tokens = tokenstr.blank? ? [] : TokenInput.parse_tokens(tokenstr)
   end
 
+=begin
   def channel_tokens=(tokenstr)
     @channel_tokens = tokenstr.blank? ? [] : TokenInput.parse_tokens(tokenstr)
   end
+=end
 
   # Return a list of my friends who match the input text
   def match_friends(txt, is_channel=nil)
@@ -567,24 +600,24 @@ public
     generate_invitation_token! unless @raw_invitation_token
     send_devise_notification(what, @raw_invitation_token, opts)
   end
-  
+
 =begin
   def send_devise_notification(notification, opts={})
     devise_mailer.send(notification, self, opts).deliver
   end
 =end
- 
+
   def headers_for(action)
     inviter = User.find invited_by_id
     case action
     when :invitation, :invitation_instructions
-      { 
+      {
         :subject => invitation_issuer+" wants to get you cooking.",
         :from => invitation_issuer+" on RecipePower <#{inviter.email}>",
         :reply_to => inviter.email
       }
     when :sharing_notice, :sharing_invitation_instructions
-      { 
+      {
         :subject => invitation_issuer+" has something tasty for you.",
         :from => invitation_issuer+" on RecipePower <#{inviter.email}>",
         :reply_to => inviter.email
@@ -592,8 +625,8 @@ public
     else
       {}
     end
-  end  
-  
+  end
+
   # Notify self of an event, possibly (if profile allows) sending email
   def notify( notification_type, source_user, options={})
     notification = post_notification(notification_type, source_user, options)
@@ -609,13 +642,13 @@ public
       end
     end
   end
-  
+
   # Post a notification event without sending email
   def post_notification( notification_type, from = nil, options={})
-    attributes = { 
-      :info => options, 
-      :source_id => from.id, 
-      :target_id => id, 
+    attributes = {
+      :info => options,
+      :source_id => from.id,
+      :target_id => id,
       :typenum => notification_type,
       :accepted => false
     }
@@ -634,7 +667,7 @@ public
       other_user.followees.each { |followee| self.followees << followee }
       # Adopt all the collected entities of the other user
       other_user.rcprefs.where(in_collection: true).each { |rr| collect rr.entity }
-      other_user.feeds.each { |feed| self.feeds << feed }
+      # other_user.feed_collections.each { |feed| self.feed_collections << feed }
       save
     end
   end

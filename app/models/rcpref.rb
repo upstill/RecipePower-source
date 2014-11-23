@@ -1,12 +1,15 @@
 require 'time_check'
 
+# Rcpref is the join table between users and entities, denoting that a user has either collected
+# the entity (:in_collection = true) or simply viewed it (:in_collection = false).
+# Rcprefs also allow the user to leave a comment, and to declare it private from others.
 class Rcpref < ActiveRecord::Base
   include Voteable
 
   belongs_to :entity, :polymorphic => true
   belongs_to :user
   # before_save :ensure_unique
-  attr_accessible :comment, :entity_type, :entity_id, :user_id, :in_collection, :updated_at, :created_at
+  attr_accessible :comment, :entity_type, :entity_id, :user_id, :in_collection, :updated_at, :created_at, :private
 
   # When saving a "new" use, make sure it's unique
   def ensure_unique

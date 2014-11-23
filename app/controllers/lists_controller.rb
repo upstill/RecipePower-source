@@ -44,11 +44,12 @@ class ListsController < ApplicationController
     if @list.errors.empty?
       flash[:notice] = "'#{@list.name}' was saved."
       respond_to do |format|
-        format.html { redirect_to lists_url, :status => :see_other }
+        format.html { redirect_to list_url(@list), :status => :see_other }
+        format.json { render :update }
       end
     else
       respond_to do |format|
-        format.html { render action: "edit" }
+        format.html { render :edit }
         format.json { render json: @list.errors[:all], status: :unprocessable_entity }
       end
     end

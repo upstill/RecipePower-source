@@ -2,23 +2,10 @@ class ListServices
 
   attr_accessor :list
 
-  delegate :owner, :ordering, :subscribers, :name, :name_tag, :tags, :notes, :availability, :owner_id, :to => :list
+  delegate :owner, :ordering, :name, :name_tag, :tags, :notes, :availability, :owner_id, :to => :list
 
   def initialize list
     self.list = list
-  end
-
-  # A list is visible to a user if:
-  def subscribed_by? user
-    user.list_ids.include? @list.id
-  end
-
-  def subscribe user
-    @list.subscribers = @list.subscribers+[user] unless @list.subscribers.include? user
-  end
-
-  def self.subscribed_by user
-    user.lists
   end
 
   def available_to? user
@@ -30,37 +17,39 @@ class ListServices
 
   # Move each of the user's collections into a list
   # TODO: remove all these after collections migrate to lists
-  def self.adopt_collections u=nil
+  def self.adopt_collections
     superu = User.find User.super_id
-    channel_list = user_list = []
-    if !u
-      channel_list = User.where('channel_referent_id > 0')
-      user_list = User.where('channel_referent_id = 0')
-    elsif u.channel?
-      channel_list = [u]
-    else
-      user_list = [u]
-    end
     list = nil
     # For each user that's actually a channel, create a list
-    channel_list.each { |channel_user|
+    User.where('channel_referent_id > 0').each { |channel_user|
       list = List.assert channel_user.channel.name, superu, create: true
       channel_user.rcprefs.where(in_collection: true).map(&:entity).each { |entity|
         list.include(entity) unless list.include?(entity)
       }
       list.tags = channel_user.tags
       list.save
+      channel_user.destroy
     }
-    user_list.each { |user|
-      if user.id != User.super_id
-        user.collection_tags.each { |tag|
-          list = List.assert tag.name, user, create: true
-          tag.recipes(user.id).each { |entity|
-            list.include(entity) unless list.include?(entity)
-          }
+    User.all.each { |user|
+      nlists = user.rcprefs.where("entity_type = 'List'").count
+      ncollections = PrivateSubscription.where("user_id = #{user.id}").count
+      puts "#{user.handle} has #{ncollections} collections and #{nlists} lists before."
+      subs = PrivateSubscription.where("user_id = #{user.id}")
+      subs.each { |sub|
+        tag = sub.tag
+        list = List.assert tag.name, user, create: true
+        tag.recipes(user.id).each { |entity|
+          list.include(entity) unless list.include?(entity)
         }
-      end
+        sub.destroy
+      }
+      nlists = user.rcprefs.where("entity_type = 'List'").count
+      ncollections = PrivateSubscription.where("user_id = #{user.id}").count
+      puts "#{user.handle} has #{ncollections} collections and #{nlists} list afterward."
     }
+    ups = User.find 3
+    superu.owned_lists.each { |l| ups.collect l }
+    ups.save
     list
   end
 

@@ -93,5 +93,17 @@ class FeedServices
     end
     rejects
   end
+
+  # Move all feeds from users' feeds list to their collection
+  # TODO delete
+  def self.collectify
+    User.all.each { |user|
+      user.feed_collections.each { |feed|
+        user.collect feed
+      }
+      user.feed_collection_ids = []
+      user.save
+    }
+  end
   
 end

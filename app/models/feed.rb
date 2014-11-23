@@ -9,16 +9,10 @@ class Feed < ActiveRecord::Base
   # fields (title, description...), and ensure it has an associated site
   before_validation { |feed| feed.follow_url if (new_record? || url_changed?) }
 
-  before_destroy do |feed|
-    feed.users.each { |subscriber| subscriber.feeds.delete feed ; subscriber.save }
-  end
-  
   belongs_to :site
   validates :site, :presence => true
   validates :url, :presence => true, :uniqueness => true
-  
-  has_and_belongs_to_many :users
-  
+
   has_many :feed_entries, -> { order 'published_at DESC' }, :dependent => :destroy
 
   # When a feed is built, the url may be valid for getting to a feed, but it may also

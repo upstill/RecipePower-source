@@ -65,9 +65,9 @@ class List < ActiveRecord::Base
 
   belongs_to :owner, class_name: "User"   # The creator and default editor
   belongs_to :name_tag, class_name: "Tag"
-  has_and_belongs_to_many :tags
-  has_and_belongs_to_many :subscribers, class_name: "User"
-  attr_accessible :owner, :ordering, :name, :name_tag, :tags, :tag_tokens, :notes, :description, :availability, :owner_id
+  has_and_belongs_to_many :included_tags, class_name: "Tag"
+#  has_and_belongs_to_many :subscribers, class_name: "User"
+  attr_accessible :owner, :ordering, :name, :name_tag, :tags, :included_tag_tokens, :notes, :description, :availability, :owner_id
   serialize :ordering, ListSerializer
 
   # Using the name string, either find an existing list or create a new one FOR THE CURRENT USER
@@ -77,8 +77,6 @@ class List < ActiveRecord::Base
     puts "...asserted with id #{tag.id}"
     l = List.where(owner_id: user.id, name_tag_id: tag.id).first || List.new(owner: user, name_tag: tag)
     l.save if options[:create] && !l.id
-    user.add_list l # Ensure it appears in the browser
-    user.save
     l
   end
 
@@ -122,9 +120,9 @@ class List < ActiveRecord::Base
 
   # XXX Placeholder Alert! We should be talking about general entities
   def recipe_ids
-    result = ordering.map(&:id) # ...should also be extracting entities from subtags
+    result = ordering.map(&:id)
     existing = Set.new result
-    tags.each do |tag|
+    included_tags.each do |tag|
       unless (newids = tag.recipe_ids(owner)).empty?
         adding = Set.new(newids) - existing
         adding.each { |newid| result << newid }
@@ -134,20 +132,20 @@ class List < ActiveRecord::Base
     result
   end
 
-  def tag_tokens
+  def included_tag_tokens
     tag_ids
   end
 
   # Write the virtual attribute tag_tokens (a list of ids) to
   # update the real attribute tag_ids
-  def tag_tokens=(idstring)
-    self.tags =
+  def included_tag_tokens=(idstring)
+    self.included_tags =
         TokenInput.parse_tokens(idstring) do |token| # parse_tokens analyzes each token in the list as either integer or string
           case token
             when Fixnum
               Tag.find token
             when String
-              Tag.strmatch(token, userid: tag_owner, assert: true)[0] # Match or assert the string
+              Tag.strmatch(token, userid: tagging_user_id, assert: true)[0] # Match or assert the string
           end
         end
   end

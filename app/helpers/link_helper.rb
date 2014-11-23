@@ -1,11 +1,11 @@
 module LinkHelper
 
   # A wrapper for flavored_link which asserts button options for Bootstrap
-  def button_to_submit label, path_or_options, kind="default", size="xs", options={}
+  def button_to_submit label, path_or_options, kind="default", size="small", options={}
     if kind.kind_of? Hash
-      kind, size, options = :default, :xs, kind
+      kind, size, options = :default, :small, kind
     elsif size.kind_of? Hash
-      size, options = :xs, size
+      size, options = :small, size
     end
     options = options.clone
     class_str = (options[:class] || "").gsub(/btn[-\w]*/i, '') # Purge the class of existing button classes
