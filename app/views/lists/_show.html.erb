@@ -2,7 +2,7 @@
       <%= @list.notes %>
     </p>
 
-    <% permitted_to?(:edit, :lists) do %>
+    <% if (@list.owner == current_user) || response_service.admin_view? do %>
         <%= button_to_submit 'Edit', edit_list_path(@list), mode: :modal %>
     <% end %>
     <%= button_to_submit 'Back to Lists', lists_path %>

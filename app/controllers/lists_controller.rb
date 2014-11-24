@@ -22,11 +22,11 @@ class ListsController < ApplicationController
     end
     @list.save
     respond_to do |format|
-      format.html { redirect_to edit_list_path(@list), :status => :see_other, notice: notice }
+      format.html { redirect_to tag_list_path(@list), :status => :see_other, notice: notice }
       format.json {
         render json: {
           done: true,
-          dlog: with_format('html') { render_to_string partial: "lists/edit_modal" },
+          dlog: with_format('html') { render_to_string partial: "lists/tag_modal" },
           popup: notice }
       }
     end

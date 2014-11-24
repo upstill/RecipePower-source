@@ -2,7 +2,7 @@ class FeedEntriesController < ApplicationController
   def collect
     update_and_decorate # Generate a FeedEntryDecorator as @feed_entry and prepares it for editing
     current_user.collect @feed_entry if current_user
-    redirect_to edit_feed_entry_url(@feed_entry, mode: :modal)
+    redirect_to tag_feed_entry_url(@feed_entry, mode: :modal)
   end
 
   def edit

@@ -155,13 +155,9 @@ class UsersController < ApplicationController
     if @user = ((params[:id] && User.find(params[:id])) || current_user)
         @authentications = @user.authentications
     end
-    if @user.channel
-      redirect_to edit_referent_path(@user.channel)
-    else
-      @section = params[:section] || "profile"
-      response_service.title = "Edit Profile"
-      smartrender area: "floating"
-    end
+    @section = params[:section] || "profile"
+    response_service.title = "Edit Profile"
+    smartrender area: "floating"
   end
   
   # Ask user for an email address for login purposes

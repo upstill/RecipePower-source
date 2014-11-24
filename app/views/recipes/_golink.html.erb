@@ -1,7 +1,0 @@
-  <span class="<%= recipe_list_element_golink_class @recipe %>"> 
-	<% if (current_user.id != User.guest_id) && @recipe.collected_by?(current_user.id) %>
-		<%= edit_recipe_link (@feed_entry ? "Tag" : "Edit"), @recipe, class: "btn btn-default btn-xs" %>
-	<% else %>
-		<%= button_to_submit (@feed_entry ? "Collect" : "Cookmark"), collect_recipe_path(@recipe), :mode => :modal %>
-	<% end %>
-  </span>

@@ -10,7 +10,7 @@
     </div>
     <div class="rcp_grid_element_buttons">
       <span class="<%= recipe_list_element_golink_class item %>">
-        <%= collect_or_edit_button item, mode: :modal %>
+        <%= collect_or_tag_button item, mode: :modal %>
       </span>
       <span class="<%= recipe_list_element_golink_class item %>">
         <%= link_to_submit "Share", new_user_invitation_path(recipe_id: item.id), button_size: "xs", mode: :modal %>

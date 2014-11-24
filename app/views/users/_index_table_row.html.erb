@@ -1,15 +1,14 @@
 <% item ||= @user %>
 <% add_link = (current_user && !current_user.follows?(item)) ?
-   button_to_submit((item.channel? ? 'Add to Channels' : 'Make Friend'), collect_user_path(item) ) : "" %>
+   button_to_submit('Make Friend', collect_user_path(item) ) : "" %>
 <tr id="<%= dom_id item %>">
 	<td><%= link_to_submit item.handle, user_path(item), mode: :modal %></td>
 	<td><%= item.about %></td>
 	<td><%= taggable_list item %></td>
 	<td><%= item.collection_size %></td>
 	<td><%= add_link %></td>
-	<% if permitted_to? :edit, item %>
-		<td><%= button_to_submit 'Edit', edit_user_path(item), mode: :modal %></td>
-		<td><%= link_to 'Hide', user_path(item, user: { private: true }), :class => "btn btn-default btn-xs", method: :put %></td>
-		<td><%= link_to 'Destroy', item, data: { confirm: "Are you sure about deleting this user? It's a rather drastic step." }, :class => "btn btn-default btn-xs btn-danger", method: :delete %></td>
-	<% end %>
+    <td><%= collectible_table_buttons item do %>
+        <%= link_to( 'Hide', user_path(item, user: { private: true }), :class => "btn btn-default btn-xs", method: :put) if response_service.admin_view? %>
+      <% end %>
+    </td>
 </tr>

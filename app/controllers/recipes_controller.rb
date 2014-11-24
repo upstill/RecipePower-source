@@ -63,7 +63,6 @@ class RecipesController < ApplicationController
     	  @feed_entry.save
   	  end
       report_recipe( collection_path, truncate( @recipe.title, :length => 100)+" now appearing in your collection.", formats)
-    	# redirect_to edit_recipe_url(@recipe), :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br>You might want to confirm the title and picture, and/or tag it?".html_safe
     else
         response_service.title = "Cookmark a Recipe"
         update_and_decorate
@@ -117,7 +116,7 @@ class RecipesController < ApplicationController
             else
               # If we're collecting a recipe outside the context of the iframe, redirect to
               # the collection page with an embedded modal dialog invocation
-              redirect_to_modal edit_recipe_path(@recipe)
+              redirect_to_modal tag_recipe_path(@recipe)
             end
           else
             @resource = @recipe

@@ -1,23 +1,19 @@
 <% item ||= @feed %>
 <tr id="<%= dom_id item %>">
-	<td>
-		<%= link_to_submit item.title.truncate(80), feed_path(item), :mode => :partial %><br>
-		<%= item.description  %><br>
-	</td>
-	<td><%= taggable_list item %></td>
-	<td><%= item.feedtypename %></td>
-	<td><%= link_to_submit item.site.name, site_path(item.site), mode: :modal %></td>
-	<td>
-		<% if current_user.feeds.include?(item) %>
-			<%= button_to_submit 'Unsubscribe', remove_feed_path(item), method: :post %>
-		<% else %>
-			<%= button_to_submit 'Subscribe', collect_feed_path(item) %>
-		<% end %>
-		<% permitted_to?(:edit, :feeds) do %>
-			<%= button_to_submit 'Edit', edit_feed_path(item), mode: :modal %>
-		<% end %>
-		<% permitted_to?(:destroy, :feeds) do %>
-			<%= button_to_submit 'Destroy', item, "danger", :method => :delete, data: { confirm: 'Are you sure?' } %>
-		<% end %>
-	</td>
+  <td>
+    <%= link_to_submit item.title.truncate(80), feed_path(item), :mode => :partial %><br>
+    <%= item.description %><br>
+  </td>
+  <td><%= taggable_list item %></td>
+  <td><%= item.feedtypename %></td>
+  <td><%= link_to_submit item.site.name, site_path(item.site), mode: :modal %></td>
+  <td>
+    <%= collectible_table_buttons item do %>
+        <% if current_user.feeds.include?(item) %>
+            <%= button_to_submit 'Unsubscribe', remove_feed_path(item), method: :post %>
+        <% else %>
+            <%= button_to_submit 'Subscribe', collect_feed_path(item) %>
+        <% end %>
+    <% end %>
+  </td>
 </tr>

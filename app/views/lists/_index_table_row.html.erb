@@ -18,15 +18,6 @@
     <%= labelled_quantity item.entity_count, "item" %>
   </td>
   <td>
-    <% permitted_to?(:edit, :lists) do %>
-        <%= button_to_submit 'Edit', edit_list_path(item), mode: :modal %>
-    <% end %>
-    <% permitted_to?(:destroy, :lists) do %>
-        <%= button_to_submit 'Destroy',
-                             item,
-                             "danger",
-                             :method => :delete,
-                             :data => {confirm: "Are you sure you want to destroy '#{item.name}'? There's no going back!"} %>
-    <% end %>
-  </td>
+    <%= collectible_table_buttons item %>
+   </td>
 </tr>

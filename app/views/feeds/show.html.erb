@@ -29,8 +29,6 @@
         <%= button_to "Approve feedthrough", "#{@feed.id}/approve?approve=Y"  %>
     <% end %>
 <% end %>
-<% permitted_to?(:edit, :feeds) do %>
-    <%= button_to_submit 'Edit', edit_feed_path(@feed), mode: :modal %>
-<% end %>
+<%= collect_or_tag_button @feed, mode: :modal %>
 <%= link_to 'Back to Feeds', feeds_path, class: "btn" %>
 <%= stream_element :body, "show_entries" %>

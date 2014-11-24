@@ -53,7 +53,7 @@ module RecipesHelper
   def recipe_tags_div recipe
     content_tag :div, 
       summarize_alltags(recipe) || 
-      %Q{<p>...a dish with no tags or ratings in RecipePower!?! Why not #{edit_recipe_link(%q{add some}, recipe)}?</p>}.html_safe
+      %Q{<p>...a dish with no tags or ratings in RecipePower!?! Why not #{tag_recipe_link(%q{add some}, recipe)}?</p>}.html_safe
   end
 
   def recipe_comments_div recipe, whose
