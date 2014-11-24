@@ -97,9 +97,9 @@ class FeedsController < ApplicationController
   end
 
   # GET /feeds/1/edit
-  def edit
-    @feed = Feed.find params[:id]
-    smartrender area: "floating" 
+  def tag
+    update_and_decorate
+    smartrender
   end
 
   # POST /feeds

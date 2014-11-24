@@ -232,9 +232,13 @@ class ApplicationController < ActionController::Base
     else
         params[:action]
     end
-    notice = "Sorry, but as a #{current_user_or_guest.role}, you're not allowed to #{action} #{params[:controller]}."
+    flash[:alert] = "Sorry, but as a #{current_user_or_guest.role}, you're not allowed to #{action} #{params[:controller]}."
     respond_to do |format|
-      format.html { redirect_to(:back, notice: notice) rescue redirect_to('/', notice: notice) }
+      format.html { redirect_to(:back) rescue redirect_to('/') }
+      format.json {
+        notif = view_context.flash_notify
+        render json: notif
+      }
       format.xml  { head :unauthorized }
       format.js   { head :unauthorized }
     end

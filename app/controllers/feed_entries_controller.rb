@@ -5,7 +5,7 @@ class FeedEntriesController < ApplicationController
     redirect_to tag_feed_entry_url(@feed_entry, mode: :modal)
   end
 
-  def edit
+  def tag
     update_and_decorate
   end
 

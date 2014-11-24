@@ -8,7 +8,7 @@ module TemplateHelper
       # Assert a :template datum without disturbing any existing :data options
       options[:template] = { id: template_id, subs: entity.data }
     end
-    link_to_submit label, polymorphic_path(entity)+"/edit", options
+    link_to_submit label, polymorphic_path(entity)+"/tag", options
   end
 
 end

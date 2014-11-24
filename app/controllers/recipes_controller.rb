@@ -172,7 +172,7 @@ class RecipesController < ApplicationController
     end
   end
 
-  def edit
+  def tag
     # return if need_login true
     # Fetch the recipe by id, if possible, and ensure that it's registered with the user
     update_and_decorate 

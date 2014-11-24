@@ -72,9 +72,8 @@ class ListsController < ApplicationController
     smartrender
   end
 
-  def edit
-    puts "List#edit params: "+params.to_s+" for user '#{current_user.name}'"
-    @list = List.find params[:id]
+  def tag
+    update_and_decorate
     smartrender 
   end
 end

@@ -34,11 +34,11 @@ class SitesController < ApplicationController
   end
 
   # GET /sites/1/edit
-  def edit
+  def tag
     # return if need_login true, true
     update_and_decorate # Give collectible and taggable a chance to set up their parameters
     response_service.title = @site.name
-    smartrender area: "floating"
+    smartrender
   end
 
   # POST /sites
