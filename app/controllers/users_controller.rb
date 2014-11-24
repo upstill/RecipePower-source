@@ -98,7 +98,7 @@ class UsersController < ApplicationController
   # Show the user's recently-viewed recipes
   def recent
     @user = User.find params[:id]
-    @active_menu = :collection
+    @active_menu = :collections
     response_service.title = "Recently Viewed"
     smartrender unless do_stream UserRecentCache
   end
@@ -108,7 +108,7 @@ class UsersController < ApplicationController
     @user = User.find params[:id]
 	  if (@user.id == current_user_or_guest_id)
       response_service.title = "My Whole Collection"
-      @active_menu = :collection
+      @active_menu = :collections
     else
       response_service.title = "#{@user.handle}'s Collection"
       @active_menu = :friends
@@ -119,7 +119,7 @@ class UsersController < ApplicationController
   # Show the user's recently-viewed recipes
   def biglist
     @user = User.find params[:id]
-    @active_menu = :collection
+    @active_menu = :collections
     response_service.title = "The Big List"
     smartrender unless do_stream UserBiglistCache
   end

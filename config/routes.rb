@@ -8,6 +8,7 @@ RP::Application.routes.draw do
   get "admin/toggle"
   resources :feed_entries, :except => [:index, :create, :new, :show, :destroy] do
     member do 
+      get 'tag' # Present the dialog for tagging, commenting and picture selection
       get "collect"
     end
   end
@@ -78,6 +79,7 @@ RP::Application.routes.draw do
   post '/list' => 'lists#create', :as => 'create_list'
   resources :lists, except: [:index, :create] do
     member do
+      get 'tag' # Present the dialog for tagging, commenting and picture selection
       get 'scrape'
     end
   end
@@ -86,6 +88,7 @@ RP::Application.routes.draw do
   post '/site' => 'sites#create', :as => 'create_site'
   resources :sites, except: [:index, :create] do
     member do
+      get 'tag' # Present the dialog for tagging, commenting and picture selection
       get 'scrape'
     end
   end
@@ -99,6 +102,7 @@ RP::Application.routes.draw do
   resources :feeds, :except => [:index, :create] do
     member do
       get 'collect' # Add the feed to the current user
+      get 'tag' # Present the dialog for tagging, commenting and picture selection
       get 'refresh' # Refresh the feed's entries
       post 'remove' # Remove the feed from the current user's set
       post 'approve' # (Admin only) approve the feed for presentation
@@ -153,6 +157,7 @@ RP::Application.routes.draw do
     end
     member do
       get 'collect'
+      get 'tag' # Present the dialog for tagging, commenting and picture selection
       get 'touch'
       get 'piclist'
       post 'remove'
