@@ -79,6 +79,7 @@ RP::Application.routes.draw do
   post '/list' => 'lists#create', :as => 'create_list'
   resources :lists, except: [:index, :create] do
     member do
+      get 'collect' # Add to the user's collection
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       get 'scrape'
     end
@@ -88,6 +89,7 @@ RP::Application.routes.draw do
   post '/site' => 'sites#create', :as => 'create_site'
   resources :sites, except: [:index, :create] do
     member do
+      get 'collect' # Add to the user's collection
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       get 'scrape'
     end

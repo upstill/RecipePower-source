@@ -19,7 +19,8 @@ $guideBorder:              darken(adjust-hue($guideBackground, -10), 7%) !defaul
   }
 }
 
-input#recipe_collectible_private {
+// input.collectible-private-checkbox {
+input#list_collectible_private {
   margin: 10px;
 }
 

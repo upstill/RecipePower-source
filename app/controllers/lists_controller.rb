@@ -33,7 +33,7 @@ class ListsController < ApplicationController
   end
 
   def show
-    @list = List.find(params[:id])
+    update_and_decorate
     response_service.title = "About #{@list.name}"
     @active_menu = (@list.owner == current_user) ? :my_lists : :other_lists
     smartrender unless do_stream ListCache
@@ -70,6 +70,11 @@ class ListsController < ApplicationController
   def new
     @list = List.new(owner_id: params[:owner_id].to_i || current_user.id)
     smartrender
+  end
+
+  def collect
+    update_and_decorate # Generate a FeedEntryDecorator as @feed_entry and prepares it for editing
+    current_user.collect @list if current_user
   end
 
   def tag

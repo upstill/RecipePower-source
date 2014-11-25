@@ -72,14 +72,6 @@ module CollectibleHelper
           button_to("Destroy", polymorphic_path(entity), :form_class => "submit", :class => "btn btn-danger", :method => :delete, :confirm => confirm_msg ),
           style: "display: inline-block"
         )
-=begin
-          link_to_submit(
-                'Destroy',
-                entity,
-                :button_style => "danger",
-                :method => :delete,
-                :confirm => 'Are you sure?')
-=end
     end
     result
     # button_to_submit 'Back to Lists', lists_path

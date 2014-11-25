@@ -56,6 +56,8 @@ class List < ActiveRecord::Base
   include Taggable
   include Typeable
   include Collectible
+  include Picable
+  picable :picurl, :thumbnail
 
   typeable( :availability,
             public: ["Anyone (Public)", 0 ],
@@ -67,7 +69,7 @@ class List < ActiveRecord::Base
   belongs_to :name_tag, class_name: "Tag"
   has_and_belongs_to_many :included_tags, class_name: "Tag"
 #  has_and_belongs_to_many :subscribers, class_name: "User"
-  attr_accessible :owner, :ordering, :name, :name_tag, :tags, :included_tag_tokens, :notes, :description, :availability, :owner_id
+  attr_accessible :owner, :ordering, :title, :name, :name_tag, :tags, :included_tag_tokens, :notes, :description, :availability, :owner_id
   serialize :ordering, ListSerializer
 
   # Using the name string, either find an existing list or create a new one FOR THE CURRENT USER
@@ -83,11 +85,13 @@ class List < ActiveRecord::Base
   def name
     (name_tag && name_tag.name) || ""
   end
+  alias_method :title, :name
 
   def name=(new_name)
     puts "Setting name '#{new_name}'"
     (self.name_tag = Tag.assert(new_name, tagtype: "List", userid: owner.id)).name
   end
+  alias_method :"title=", :"name="
 
   # Does the list include the entity?
   def include? entity

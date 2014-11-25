@@ -310,8 +310,9 @@ RP.process_response = (responseData, odlog) ->
 		if redirect = responseData.redirect
 			window.location.assign redirect # "http://local.recipepower.com:3000/collection" #  href = href
 
-		if responseData.followup # Submit a follow-up request
-			RP.submit.submit_and_process responseData.followup
+		if followup = responseData.followup # Submit a follow-up request
+			if !followup.target || $(followup.target)[0] # Either there is no target, or the target exists
+				RP.submit.submit_and_process followup.request
 
 		if responseData.reload
 			location.reload()

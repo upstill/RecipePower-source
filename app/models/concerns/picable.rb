@@ -11,6 +11,9 @@ module Picable
           define_singleton_method :image_reference_name do
             reference_name
           end
+          define_singleton_method :picable_attribute do
+            attribute
+          end
         end
       end
     end

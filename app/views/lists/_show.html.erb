@@ -1,6 +1,9 @@
-    <p>
-      <%= @list.notes %>
-    </p>
+<p>
+  <%= @list.description %>
+</p>
+<p>
+  <%= @list.notes %>
+</p>
 
-    <% collectible_action_buttons @list, :show, ((@list.owner == current_user) || response_service.admin_view?) %>
+<% collectible_action_buttons @list, :show, ((@list.owner == current_user) || response_service.admin_view?) %>
 
