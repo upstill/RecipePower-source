@@ -81,7 +81,10 @@ module NavtabsHelper
 
   def other_lists_navtab menu_only = false
     navtab :other_lists, "More Lists", lists_path, menu_only do
-      @user.collection_scope(entity_type: "List", limit: 16, sort_by: :viewed).map(&:entity).collect { |l|
+      @user.rcprefs.where(entity_type: "List").
+          joins("INNER JOIN lists ON lists.id = rcprefs.entity_id").where("lists.owner_id != #{@user.id}").
+          limit(16).
+          map(&:entity).collect { |l|
         navlink l.name, list_path(l), id: dom_id(l)
       } + [
           "<hr class='menu'>".html_safe,

@@ -61,8 +61,8 @@ class ListsController < ApplicationController
     selector = "tr##{dom_id @list}"
     @list.destroy
     respond_to do |format|
-      format.html { render action: "index" }
-      format.json { render json: { deletions: [ selector ], popup: "'#{name}' destroyed"} }
+      format.html { redirect_to root_path }
+      format.json { render json: { redirect: root_path, popup: "'#{name}' destroyed"} }
       format.js   { render action: "destroy", locals: { selector: selector, name: name } }
     end
   end

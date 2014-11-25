@@ -63,8 +63,27 @@ module CollectibleHelper
       url = polymorphic_path(entity)+"/edit"
       result << button_to_submit('Edit', url, mode: :modal)
     end
+    if response_service.admin_view?
+      typename = (entity.is_a?(Draper::Decorator) ? entity.object : entity).class.to_s.underscore.tr('_', ' ')
+      confirm_msg = "This will remove the #{typename} from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?"
+      result <<
+        content_tag(
+          :div,
+          button_to("Destroy", polymorphic_path(entity), :form_class => "submit", :class => "btn btn-danger", :method => :delete, :confirm => confirm_msg ),
+          style: "display: inline-block"
+        )
+=begin
+          link_to_submit(
+                'Destroy',
+                entity,
+                :button_style => "danger",
+                :method => :delete,
+                :confirm => 'Are you sure?')
+=end
+    end
     result
     # button_to_submit 'Back to Lists', lists_path
+    # <input class="btn btn-danger pull-left" type="submit" data-action="/recipes/1155" data-method="delete" value="Destroy" data-confirm="This will remove the Recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" clicked="true">
   end
 
 end
