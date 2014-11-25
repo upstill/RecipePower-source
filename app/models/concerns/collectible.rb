@@ -61,10 +61,10 @@ module Collectible
     self.collectible_user_id = uid
     if ref = rcpref(uid, false) # Pre-existing collection object
       self.collectible_comment = ref.comment || ""
-      self.collectible_private = ref.private
+      self.collectible_private = ref.private ? 1 : 0
     else
       self.collectible_comment = ""
-      self.collectible_private = false
+      self.collectible_private = 0
     end
     # Work back up the hierarchy
     super if defined? super
@@ -72,14 +72,15 @@ module Collectible
 
   # After editing the model, save the collectible attributes in an Rcpref
   def accept_params
+    boolean_private = collectible_private.to_i == 1
     if collectible_user_id # It must have been set
       self.collectible_user_id = collectible_user_id.to_i # Better to have it as an integer
       if ref = rcpref(collectible_user_id, false)
         ref.comment = collectible_comment
-        ref.private = collectible_private
+        ref.private = boolean_private
         ref.save
       else
-        rcprefs.create user_id: collectible_user_id, comment: collectible_comment, private: collectible_private
+        rcprefs.create user_id: collectible_user_id, comment: collectible_comment, private: boolean_private
       end
     end
     # Work back up the hierarchy

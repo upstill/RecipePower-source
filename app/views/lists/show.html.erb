@@ -8,9 +8,6 @@
   <%= @list.notes %>
 </p>
 
-<% permitted_to?(:edit, :lists) do %>
-    <%= button_to_submit 'Edit', edit_list_path(@list), :mode => :modal %>
-<% end %>
-<%= button_to_submit 'Back to Lists', lists_path %>
+<%= collectible_action_buttons @list, :show, ((@list.owner == current_user) || response_service.admin_view?) %>
 
 <%= render "shared/stream_results_placeholder" %>

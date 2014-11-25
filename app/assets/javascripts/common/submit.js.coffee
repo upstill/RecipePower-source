@@ -71,7 +71,7 @@ RP.submit.submit_and_process = ( request, elmt, method="GET" ) ->
 		method = "POST"
 	else
 		data = null
-	unless elmt && ($(elmt).hasClass 'loading' || shortCircuit(request, elmt))
+	unless elmt && ($(elmt).hasClass('loading') || shortCircuit(request, elmt))
 		$(elmt).addClass 'loading'
 		ajdata =
 			type: method,
@@ -110,15 +110,14 @@ shortCircuit = (request, elmt) ->
 				RP.state.onAJAXSuccess event
 				$(elmt).data 'response', null
 				return true;
-		else if data = $(elmt).data "template"
+		if templedata = data.template
 			# Look in the data to find the template handler
 			fcn =
-			((name = data.handler) && RP.named_function(name)) ||
-			((name = "RP." + data.id.replace(/-/g, '_') + ".apply_template") && RP.named_function(name))
-			ndlog = fcn.call null, elmt
-			# RP.dialog.push_modal ndlog, odlog
-			return true;
-	else if data.selector && (ndlog = $(data.selector)[0]) # If dialog is already loaded, replace the responding dialog
+			((name = templedata.handler) && RP.named_function(name)) ||
+			((name = "RP." + templedata.id.replace(/-/g, '_') + ".apply_template") && RP.named_function(name))
+			if ndlog = fcn.call null, elmt
+				return true;
+	if data.selector && (ndlog = $(data.selector)[0]) # If dialog is already loaded, replace the responding dialog
 		$(elmt).removeClass 'trigger'
 		RP.dialog.replace_modal ndlog, odlog # Will close any existing open dialog
 		RP.state.postDialog ndlog, request, (elmt && elmt.innerText) # RP.state.onAJAXSuccess event

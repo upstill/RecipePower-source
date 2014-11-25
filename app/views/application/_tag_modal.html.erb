@@ -1,17 +1,15 @@
 <%# Default modal dialog for editing a (collectible, taggable) item. May be overwritten for other controllers  %>
-<% entity ||= @decorator || TemplateDecorator.new # If no entity provided, assume this is for a template %>
+<% entity ||= @decorator || TemplateDecorator.new # If no entity provided, assume this is for a template  %>
 <%= content_tag(:div,
-                class: "dialog edit-collectible modal at_left hide",
+                class: "dialog tag-collectible modal at_left hide",
                 style: "overflow:visible") do %>
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <%# unless recipe %>
-              <!--<input class="close cancel" data-dismiss="modal" name="commit" type="submit" value="x"/>-->
-          <%# end %>
+          <button type="button" class="close" onclick="RP.dialog.cancel(event)" data-dismiss="modal" aria-hidden="true">×</button>          <%# unless recipe %>
           <h3>Tag That <%= entity.human_name %>!</h3>
         </div>
-        <form accept-charset="UTF-8" action="<%= entity.object_path %>" class="form-inline edit-collectible" data-remote="true" data-type="json" id="edit_collectible_<%= entity.id %>">
+        <form accept-charset="UTF-8" action="<%= entity.object_path %>" class="form-inline tag-collectible" data-remote="true" data-type="json" id="tag_collectible_<%= entity.id %>">
           <input name="utf8" type="hidden" value="&#x2713;"/>
           <input name="_method" type="hidden" value="post"/>
           <input name="authenticity_token" type="hidden" value="<%= form_authenticity_token %>"/>
@@ -21,7 +19,7 @@
             </div>
             <div class="row">
               <div class="col-md-5">
-                <div class="edit_collectible_field pic_picker_field">
+                <div class="tag_collectible_field pic_picker_field">
                   <%= pic_preview_widget entity %>
                 </div>
               </div>
@@ -42,28 +40,25 @@
                          placeholder="Tags"
                          data-pre="<%= entity.tagdata %>"/>
                 </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-12">
                 <div class="control-group">
                   <input id="<%= entity.element_id :collectible_user_id %>" name="<%= entity.field_name :collectible_user_id %>" type="hidden" value="<%= entity.collectible_user_id %>">
                   <label class="string optional">Notes & Comments</label>
-                  <textarea id="<%= entity.element_id :collectible_comment %>" name="<%= entity.field_name :collectible_comment %>" placeholder="<%= entity.human_name true %> Notes" rows="3" style="width:100%"><%= entity.collectible_comment %></textarea>
+                  <textarea id="<%= entity.element_id :collectible_comment %>" name="<%= entity.field_name :collectible_comment %>" placeholder="Anything you'd like to say about this <%= entity.human_name false, false %>" rows="3" style="width:100%"><%= entity.collectible_comment %></textarea>
+                </div>
+                <div class="control-group">
+                  <input name="<%= entity.field_name :collectible_private %>" type="hidden" value="0"/>
+                  <label for="<%= entity.element_id :collectible_private %>" class="checkbox pull-left">
+                    <input <%= entity.collectible_private %> id="<%= entity.element_id :collectible_private %>" name="<%= entity.field_name :collectible_private %>" type="checkbox" value="1"/>Private
+                  </label>
                 </div>
               </div>
             </div>
           </div>
           <div class="modal-footer">
-            <input class="btn pull-left" type="submit" data-action="<%= entity.object_path %>/remove" value="Remove" data-method="post"/>
-            <% if permitted_to? :admin, :pages %>
+            <input class="btn pull-left" type="submit" data-action="<%= entity.object_path %>/remove" value="Remove from collection" data-method="post"/>
+            <% if permitted_to?(:admin, :pages) && response_service.admin_view? %>
                 <input class="btn btn-danger pull-left" type="submit" data-action="<%= entity.object_path %>" data-method="delete" value="Destroy" data-confirm="This will remove the <%= entity.human_name %> from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?"/>
             <% end %>
-            <input name="<%= entity.field_name :collectible_private %>" type="hidden" value="0"/>
-            <label for="<%= entity.element_id :collectible_private %>" class="checkbox">
-              <input <%= entity.collectible_private %> id="<%= entity.element_id :collectible_private %>" name="<%= entity.field_name :collectible_private %>" type="checkbox" value="1"/>Private
-              cookmark
-            </label>
             <input class="cancel btn" data-dismiss="modal" name="commit" type="submit" value="Cancel"/>
             <input class="submit btn btn-primary" name="commit" type="submit" value="Save" data-method="put"/>
           </div>

@@ -1,5 +1,4 @@
-<% item ||= @site %>
-<tr id="<%= dom_id item %>">
+<tr id="<%= dom_id item.object %>">
 	<td><b><%= item.name || "Defaults" %></b><br>
 		<b>Site</b>: <%= item.home %><br>
 		<b><%= show_sample item %></b><br>
@@ -7,7 +6,8 @@
 		<b># Feeds:</b> <%= item.feeds.size %> (<%= item.feeds.where(approved: true).count %> approved for feedthrough)
 	</td>
 	<td>
-      <%= link_to_submit 'Show', item, mode: :modal %><br>
-      <%= collectible_table_buttons item %>
+      <%= collectible_table_buttons item, :button_size => "xs" do %>
+          <%= link_to_submit 'Show', item, :button_size => :xs, :mode => :modal %>
+      <% end %>
 	</td>
 </tr>

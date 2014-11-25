@@ -287,6 +287,9 @@ RP.process_response = (responseData, odlog) ->
 	supplanted = false
 	if responseData
 
+		# Handle any notifications in the response
+		RP.notifications.from_response responseData
+
 		# 'replacements' specifies a set of DOM elements and code to replace them
 		if replacements = responseData.replacements
 			for replacement in replacements
@@ -309,6 +312,9 @@ RP.process_response = (responseData, odlog) ->
 
 		if responseData.followup # Submit a follow-up request
 			RP.submit.submit_and_process responseData.followup
+
+		if responseData.reload
+			location.reload()
 
 		if state = responseData.pushState
 			window.history.pushState null, state[1], state[0]
@@ -350,8 +356,5 @@ RP.process_response = (responseData, odlog) ->
 				RP.dialog.close_modal odlog, responseData.notice
 			else if responseData.replacements && odlog
 				RP.dialog.run odlog
-
-		# Handle any notifications in the response
-		RP.notifications.from_response responseData
 
 	return supplanted

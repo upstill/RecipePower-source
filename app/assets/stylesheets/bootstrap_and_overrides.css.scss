@@ -19,6 +19,10 @@ $guideBorder:              darken(adjust-hue($guideBackground, -10), 7%) !defaul
   }
 }
 
+input#recipe_collectible_private {
+  margin: 10px;
+}
+
 div#container {
   height:auto;
 }

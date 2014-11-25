@@ -21,7 +21,7 @@ tagger_selector = "div.edit_recipe #recipe_tagging_tokens"
 # Open the edit-recipe dialog on the recipe represented by 'rcpdata'
 RP.edit_recipe.go = (evt, xhr, settings) ->
 	rcpdata = $(this).data()
-	template = $('div.template#edit-collectible')
+	template = $('div.template#tag-collectible')
 	dlog = me()
 	# If it has children it's active, and should be put away, starting with hiding it.
 	if $('.edit_recipe > *').length > 0
