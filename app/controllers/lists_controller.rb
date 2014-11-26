@@ -9,6 +9,11 @@ class ListsController < ApplicationController
     smartrender unless do_stream ListsCache
   end
 
+  def edit
+    update_and_decorate
+    smartrender
+  end
+
   def create
     response_service.title = "New List"
     puts "List#create params: "+params[:list].to_s+" for user '#{current_user.name}'"
@@ -40,9 +45,9 @@ class ListsController < ApplicationController
   end
 
   def update
-    update_and_decorate
+    @list.save if update_and_decorate
     if @list.errors.empty?
-      flash[:notice] = "'#{@list.name}' was saved."
+      flash[:popup] = "'#{@list.name}' all saved now"
       respond_to do |format|
         format.html { redirect_to list_url(@list), :status => :see_other }
         format.json { render :update }
@@ -68,7 +73,7 @@ class ListsController < ApplicationController
   end
 
   def new
-    @list = List.new(owner_id: params[:owner_id].to_i || current_user.id)
+    update_and_decorate List.new(owner_id: params[:owner_id].to_i || current_user.id)
     smartrender
   end
 
