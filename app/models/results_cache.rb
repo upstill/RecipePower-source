@@ -406,7 +406,8 @@ class ListCache < ResultsCache
 
   def itemscope
     if list = List.find(@id)
-      Tagging.where tag_id: (list.included_tag_ids + [list.name_tag_id]), user_id: list.owner_id
+      Tagging.where( tag_id: (list.included_tag_ids + [list.name_tag_id])).
+              where("(user_id = #{list.owner_id}) or (tag_id != #{list.name_tag_id})")
     end
   end
 
