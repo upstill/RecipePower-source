@@ -405,9 +405,8 @@ end
 class ListCache < ResultsCache
 
   def itemscope
-    return cache if cache
     if list = List.find(@id)
-      self.cache = list.name_tag.taggings
+      Tagging.where tag_id: (list.included_tag_ids + [list.name_tag_id]), user_id: list.owner_id
     end
   end
 
