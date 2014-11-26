@@ -72,8 +72,6 @@ class List < ActiveRecord::Base
   attr_accessible :owner, :ordering, :title, :name, :name_tag, :tags, :included_tag_tokens, :notes, :description, :availability, :owner_id
   serialize :ordering, ListSerializer
 
-  before_save :check_tags
-
   # Using the name string, either find an existing list or create a new one FOR THE CURRENT USER
   def self.assert name, user, options={}
     puts "Asserting tag '#{name}' for user ##{user.id} (#{user.name})"
@@ -101,19 +99,6 @@ class List < ActiveRecord::Base
       (held = item.entity(false)) ?
           (held == entity) :
           ((item.id == entity.id) && (item.klass == entity.class) && (item.entity = entity) && true)
-    }
-  end
-
-  # Ensure that all the entities under the included tags are also given our tag
-  def check_tags
-    tags_hash = {}
-    name_tag.taggings.each { |tagging| tags_hash["#{tagging.entity_type}-#{tagging.entity_id}"] = true}
-    included_tags.each { |tag|
-      tag.taggings.each { |tagging|
-        unless tags_hash["#{tagging.entity_type}-#{tagging.entity_id}"] # Tag already exists
-          TaggingServices.new(tagging.entity).assert(name_tag, owner.id)
-        end
-      }
     }
   end
 
