@@ -2,9 +2,11 @@ module VotesHelper
 
   # Link to submit a vote on the given entity. 'up' is true for an upvote
   def vote_link entity, up, style
+    return unless (path = polymorphic_path([:vote, entity]) rescue nil)
+    return unless respond_to?(path)
     query = { up: up }
     query[:style] = style if (style != "h") # h is the default style
-    assert_query polymorphic_path([:vote, entity]), query
+    assert_query path, query
     # { :controller => "votes", :action => "create" }
   end
 
@@ -37,14 +39,15 @@ module VotesHelper
 
   def vote_button entity, options={} # Style can be 'h', with more to come
     style = options[:style] || "h"
+    return "" unless (uplink = vote_link(entity, true, style)) && (downlink = vote_link(entity, false, style))
     up_button = link_to "",
-                        vote_link(entity, true, style),
+                        uplink,
                         method: "post",
                         remote: true,
                         title: "Vote this up",
                         class: vote_button_class(true, style)
     down_button = link_to "",
-                          vote_link(entity, false, style),
+                          downlink,
                           method: "post",
                           remote: true,
                           title: "Vote this down",

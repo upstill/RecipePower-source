@@ -1,13 +1,16 @@
-<%= tag_filter_header title: @list.name %>
+<div class="row">
+  <div class="col-md-12">
+    <%= tag_filter_header title: @list.name %>
 
-<p>
-  <%= @list.description %>
-</p>
+    <p>
+      <%= @list.description %>
+    </p>
 
-<p>
-  <%= @list.notes %>
-</p>
+    <p>
+      <%= @list.notes %>
+    </p>
 
-<%= collectible_action_buttons @list, :show, ((@list.owner == current_user) || response_service.admin_view?) %>
-
+    <%= collectible_action_buttons @list, :show, ((@list.owner == current_user) || response_service.admin_view?) %>
+  </div>
+</div>
 <%= render "shared/stream_results_placeholder" %>

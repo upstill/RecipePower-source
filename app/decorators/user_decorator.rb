@@ -3,6 +3,26 @@ class UserDecorator < Draper::Decorator
   include Templateer
   delegate_all
 
+  def title
+    object.handle
+  end
+
+  def url
+    ""
+  end
+
+  def sourcename
+    ""
+  end
+
+  def sourcehome
+    ""
+  end
+
+  def description
+    object.about
+  end
+
   # Define presentation-specific methods here. Helpers are accessed through
   # `helpers` (aka `h`). You can override attributes, for example:
   #

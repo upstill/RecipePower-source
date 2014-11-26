@@ -7,6 +7,7 @@ class User < ActiveRecord::Base
   include Picable
   # Keep an avatar URL denoted by the :image attribute and kept as :thumbnail
   picable :image, :thumbnail
+  include Collectible
 
   # Include default devise modules. Others available are:
   # :token_authenticatable, :encryptable, :confirmable, :timeoutable
