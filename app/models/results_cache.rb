@@ -142,6 +142,7 @@ class ResultsCache < ActiveRecord::Base
     rc = self.create_with(:params => params).find_or_initialize_by session_id: session_id, type: self.to_s
     # unpack the parameters into instance variables
     params.each { |key, val| rc.instance_variable_set "@#{key}".to_sym, val }
+    params.delete :id
     # A bit of subtlety: we USE the querytags passed in that parameter, NOT the unparsed string from the query params
     # We STORE the unparsed string just because a synthesized tag (with negative ID) doesn't serialize properly
     rc.querytags = parsed_querytags
