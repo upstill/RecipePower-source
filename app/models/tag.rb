@@ -2,7 +2,7 @@
 class Tag < ActiveRecord::Base
     # require 'iconv'
     include Typeable
-    
+    # TODO: eliminate Channel and Collection types
     typeable( :tagtype, 
         Untyped: ["Untyped", 0 ],
         Genre: ["Genre", 1], 

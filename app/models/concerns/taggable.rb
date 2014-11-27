@@ -16,7 +16,7 @@ module Taggable
   # Define an editable field of taggings by the current user on the entity
   def prep_params user_id
     self.tagging_user_id = user_id
-    self.tagging_tags = filtered_tags user_id
+    self.tagging_tags = filtered_tags user_id, :tagtype_x => [ 11, :Collection, :List ]
     super if defined? super
   end
 
@@ -48,13 +48,13 @@ module Taggable
 
   # Associate a tag with this entity in the domain of the given user (or the tag's current owner if not given)
   def tag_with tag, who
-    unless get_tag_ids(who).include? tag.id
+    unless filtered_tags(who).include? tag
       Tagging.create(user_id: who, tag_id: tag.id, entity_id: id, entity_type: self.class.name)
     end
   end
 
   def tag_editing_data options={}
-    options[:tagtype_x] = [11, :Collection]
+    options[:tagtype_x] = [11, :Collection, :List]
     tag_data tagging_user_id, options
   end
 
@@ -95,7 +95,7 @@ protected
   # Set the tag ids associated with the given user
   def set_tag_ids uid, nids
     # Ensure that the user's tags are all and only those in nids
-    oids = get_tag_ids uid
+    oids = filtered_tags(uid, tagtype_x: Tag.typenum([11, :Collection, :List])).map(&:id) # get_tag_ids uid
     to_add = nids - oids
     to_remove = oids - nids
     # Add new tags as necessary
@@ -104,13 +104,16 @@ protected
     to_remove.each { |tagid| Tagging.where(user_id: uid, tag_id: tagid, entity_id: id, entity_type: self.class.name).map(&:destroy) } # each { |tg| tg.destroy } }
   end
 
+=begin
   # Fetch the ids of the tags associated with the entity
   def get_tag_ids uid, options={}
     uid = uid.to_i if uid.is_a? String
     uid, options = nil, uid if uid.is_a? Hash
     scope = uid ? taggings : taggings.where(:user_id => uid)
+    scope = scope.where.not(tagtype: options[:tagtype_x]) if
     scope.map &:tag_id
   end
+=end
 
   # Provide tags of a particular type
   def tags_of_type tagtype=nil, viewer_id=nil
