@@ -7,7 +7,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" onclick="RP.dialog.cancel(event)" data-dismiss="modal" aria-hidden="true">×</button>          <%# unless recipe %>
-          <h3>Tag That <%= entity.human_name %>!</h3>
+          <h3><%= response_service.admin_view? ? "Tag That #{entity.human_name}!" : entity.title %></h3>
         </div>
         <form accept-charset="UTF-8" action="<%= entity.object_path %>" class="form-inline tag-collectible" data-remote="true" data-type="json" id="tag_collectible_<%= entity.id %>">
           <input name="utf8" type="hidden" value="&#x2713;"/>
@@ -24,10 +24,12 @@
                 </div>
               </div>
               <div class="col-md-7">
-                <div class="control-group">
-                  <label class="string optional">Title</label>
-                  <textarea id="<%= entity.element_id :title %>" name="<%= entity.field_name :title %>" placeholder="Title" style="width:100%"><%= entity.title %></textarea>
-                </div>
+                <% if response_service.admin_view? %>
+                    <div class="control-group">
+                      <label class="string optional">Title</label>
+                      <textarea id="<%= entity.element_id :title %>" name="<%= entity.field_name :title %>" placeholder="Title" style="width:100%"><%= entity.title %></textarea>
+                    </div>
+                <% end %>
                 <div class="control-group">
                   <label class="string optional">Tag(s)</label>
                   <input id="<%= entity.element_id :tagging_user_id %>" name="<%= entity.field_name :tagging_user_id %>" type="hidden" value="<%= entity.tagging_user_id %>">

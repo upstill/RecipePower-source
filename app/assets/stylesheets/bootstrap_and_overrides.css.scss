@@ -19,11 +19,6 @@ $guideBorder:              darken(adjust-hue($guideBackground, -10), 7%) !defaul
   }
 }
 
-// input.collectible-private-checkbox {
-input#list_collectible_private {
-  margin: 10px;
-}
-
 div#container {
   height:auto;
 }
@@ -40,8 +35,13 @@ div.control-group {
 @import "bootstrap";
 
 .modal-header h3 {
-	margin: 0;
-	line-height: 30px;
+  margin: 0;
+  line-height: 30px;
+}
+
+.modal-body h3 {
+  margin-top: 5px;
+  margin-bottom: 10px;
 }
 
 .badge > a {
@@ -155,6 +155,10 @@ div.dialog.modal {
     textarea {
         width: 100%;
     }
+}
+
+input[type=checkbox] {
+  margin: 10px;
 }
 
 label {
