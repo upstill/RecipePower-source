@@ -17,7 +17,19 @@ module Templateer
   # If there's an object, we delegate attribute read calls.
   # Otherwise we return the placeholder
   def method_missing(meth, *args, &block)
-    object ? object.send(meth, *args, &block) : placeholder(meth)
+    if object
+      begin
+        object.send(meth, *args, &block)
+      rescue
+        if meth.to_sym == :url
+          "/#{object.class.to_s.underscore.pluralize}/#{object.id}"
+        else
+          "No method #{meth} found for decorated #{object.class.to_s}"
+        end
+      end
+    else
+      placeholder(meth)
+    end
   end
 
   # Return a hash intended to be passed to the client for template substitution

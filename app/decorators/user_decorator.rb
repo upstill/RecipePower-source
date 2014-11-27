@@ -7,10 +7,6 @@ class UserDecorator < Draper::Decorator
     object.handle
   end
 
-  def url
-    ""
-  end
-
   def sourcename
     ""
   end
