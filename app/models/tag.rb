@@ -26,10 +26,12 @@ class Tag < ActiveRecord::Base
     attr_accessible :name, :id, :tagtype, :isGlobal, :links, :referents, :users, :owners, :primary_meaning # , :recipes
     
     has_many :taggings, :dependent => :destroy
+
+    has_many :dependent_lists, :class_name => "List", foreign_key: "name_tag_id"
     
     # expressions associate tags with the foods (roles, processes, etc.) they refer to
     # These are the "meanings" of a tag
-    has_many :expressions
+    has_many :expressions, :dependent=>:destroy
     has_many :referents, :through=>:expressions
 
     # When a tag is used as the basis for a personal collection, destroying the tag destroys the collection
@@ -39,11 +41,16 @@ class Tag < ActiveRecord::Base
     belongs_to :primary_meaning, :class_name => "Referent", :foreign_key => "referent_id"
     
     # ownership of tags restrict visible tags
-    has_many :tag_owners
+    has_many :tag_owners, :dependent=>:destroy
     has_many :owners, :through=>:tag_owners, :class_name => "User", :foreign_key => "user_id"
     
     validates_presence_of :name
     before_validation :tagqa
+
+    # Delete this tag only if it's safe to do so
+    def safe_destroy
+      destroy if taggings.empty? && expressions.empty? && dependent_lists.empty?
+    end
     
     # Pre-check to determine whether a tag can absorb another tag
     def can_absorb other

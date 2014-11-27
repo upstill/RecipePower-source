@@ -146,7 +146,7 @@ class ResultsCache < ActiveRecord::Base
     # We STORE the unparsed string just because a synthesized tag (with negative ID) doesn't serialize properly
     rc.querytags = parsed_querytags
 
-    if queryparams[:nocache] || (rc.params != params)
+    if queryparams.delete(:nocache) || (rc.params != params)
       # Bust the cache if the params don't match
       rc.cache = rc.partition = rc.items = nil
       rc.params = params

@@ -90,15 +90,17 @@ class List < ActiveRecord::Base
   def name=(new_name)
     puts "Setting name '#{new_name}'"
     oname = name_tag
-    self.name_tag = Tag.assert(new_name, tagtype: "List", userid: owner.id)
-    if oname != name_tag
+    newname = Tag.assert(new_name, tagtype: "List", userid: owner.id)
+    if oname != newname
+      oname.dependent_lists.delete self
+      self.name_tag = newname
       oname.taggings.where(user: owner).each { |tagging|
         unless name_tag.taggings.exists?(entity: tagging.entity, user: owner)
           name_tag.taggings.create tagging.attributes
         end
         oname.taggings.destroy tagging
       }
-      oname.save
+      oname.save unless oname.safe_destroy
       name_tag.save
       x=2
     end
