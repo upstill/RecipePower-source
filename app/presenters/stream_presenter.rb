@@ -8,7 +8,7 @@ class StreamPresenter
     if querytags.class == Hash
       params, querytags = querytags, []
     end
-    @thispath = assert_query requestpath, nocache: nil, id: nil # stash the path from this request
+    @thispath = assert_query requestpath # , nocache: nil, id: nil # stash the path from this request
     # Format of stream parameter is <start>[-<end>]
     @stream_param = params.delete(:stream) || "" if params.has_key? :stream
     @tagtype = params[:tagtype]

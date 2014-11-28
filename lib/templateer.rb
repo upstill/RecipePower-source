@@ -34,7 +34,7 @@ module Templateer
 
   # Return a hash intended to be passed to the client for template substitution
   # We assume certain field values; others may be defined by subclasses
-  def data
+  def data needed=nil
     unless @data
       @data = {
           obj_type_singular: object_type,
@@ -46,7 +46,7 @@ module Templateer
           tagging_tag_data: tagdata
       }
       if @object
-        toget = @object.class.accessible_attributes + [:id]
+        toget = needed || (@object.class.accessible_attributes + [:id])
         toget.each { |key|
           key = key.to_sym
           @data[key] = @object.send(key) if @object.respond_to? key

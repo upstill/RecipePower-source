@@ -31,7 +31,7 @@ class ResponseServices
         (@format == :html ? :page : :modal)).to_sym
 
     # Save the parameters we might want to pass back
-    @meaningful_params = params.except(:controller, :action, :mode, :format, :id, :nocache)
+    @meaningful_params = params.except(:controller, :action, :mode, :format) # , :id, :nocache)
   end
 
   # Provide a URL that reproduces the current request

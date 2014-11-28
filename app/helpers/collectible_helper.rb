@@ -5,7 +5,10 @@ module CollectibleHelper
     options[:button_size] ||= "xs"
     options[:id] = dom_id(entity)
     if entity.user_ids.include?(entity.collectible_user_id)
-      template_link entity, "tag-collectible", "Tag", options.merge( :mode => :modal )
+      attribs = %w( collectible_comment collectible_private collectible_user_id
+                    element_id field_name human_name id object_path
+                    tagdata tagging_user_id title )
+      template_link entity, "tag-collectible", "Tag", options.merge( :mode => :modal, :attribs => attribs )
     else
       url = polymorphic_path(entity)+"/collect"
       label = "Collect"

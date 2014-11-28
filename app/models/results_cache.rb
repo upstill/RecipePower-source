@@ -147,7 +147,7 @@ class ResultsCache < ActiveRecord::Base
     # We STORE the unparsed string just because a synthesized tag (with negative ID) doesn't serialize properly
     rc.querytags = parsed_querytags
 
-    if queryparams.delete(:nocache) || (rc.params != params)
+    if rc.params != params # TODO: Take :nocache into consideration
       # Bust the cache if the params don't match
       rc.cache = rc.partition = rc.items = nil
       rc.params = params
@@ -201,7 +201,11 @@ class ResultsCache < ActiveRecord::Base
 
   # Return the next item in the current window, incrementing the cur_position
   def next_item
-    items && (i = safe_partition.next_index) && items[i] # i is relative to the current window
+    if items
+      if i = safe_partition.next_index
+        @items[i] # i is relative to the current window
+      end
+    end
   end
 
   def has_query?
@@ -407,8 +411,11 @@ class ListCache < ResultsCache
 
   def itemscope
     if list = List.find(@id)
-      Tagging.where( tag_id: (list.included_tag_ids + [list.name_tag_id])).
+      # We get everything tagged either directly by the list tag, or indirectly via
+      # the included tags, EXCEPT for other users' tags using the list's tag
+      scope = Tagging.where( tag_id: (list.included_tag_ids + [list.name_tag_id])).
               where("(user_id = #{list.owner_id}) or (tag_id != #{list.name_tag_id})")
+      scope
     end
   end
 

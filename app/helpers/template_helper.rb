@@ -6,7 +6,7 @@ module TemplateHelper
   def template_link entity, template_id, label, options={}
     if entity.is_a? Templateer
       # Assert a :template datum without disturbing any existing :data options
-      options[:template] = { id: template_id, subs: entity.data }
+      options[:template] = { id: template_id, subs: entity.data(options.delete(:attribs)) }
     end
     link_to_submit label, polymorphic_path(entity)+"/tag", options
   end
