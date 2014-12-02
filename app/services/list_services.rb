@@ -35,7 +35,7 @@ class ListServices
       channel_user.rcprefs.where(in_collection: true).map(&:entity).each { |entity|
         list.include(entity) unless list.include?(entity)
       }
-      list.tags = channel_user.tags
+      list.included_tags = channel_user.tags
       list.save
       channel_user.destroy
     }

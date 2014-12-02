@@ -239,4 +239,15 @@ BLOCK_END
     locals[:type_selector] ||= false
     render "tags/tag_filter_header", locals # ttl: label, type_selector: type_selector
   end
+
+  def tag_list tags
+    names = tags.collect { |tag|
+      link_to_submit tag.name, tag_path(tag), :mode => :modal
+    }
+    if names.count > 1
+      (names[0..-3] << "#{names[-2]} and #{names[-1]}").join(', ').html_safe
+    else
+      names[0]
+    end
+  end
 end

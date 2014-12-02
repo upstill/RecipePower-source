@@ -11,6 +11,12 @@
       <%= @list.notes %>
     </p>
 
+    <% if enum = tag_list( @list.included_tags) %>
+        <p>
+          This list includes everything tagged with <%= enum %>.
+        </p>
+    <% end %>
+
     <%= collectible_action_buttons @list, :show, ((@list.owner == current_user) || response_service.admin_view?) %>
   </div>
 </div>

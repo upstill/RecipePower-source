@@ -12,10 +12,13 @@
     <%= item.description.truncate(200) unless item.description.blank? %>
   </td>
   <td>
-    <%= taggable_list item %>
+    <% item.included_tags.each do |tag| %>
+        <span><%= link_to_submit tag.typedname(true), tag_path(tag), :mode => :modal %></span><br>
+    <% end %>
   </td>
   <td>
-    <%= labelled_quantity item.entity_count, "item" %>
+    <%# labelled_quantity item.entity_count, "item" %>
+    <%= labelled_quantity ListServices.new(item).tagging_scope(current_user_or_guest_id).count, "item" %>
   </td>
   <td>
     <%= collectible_table_buttons item %>
