@@ -1,6 +1,7 @@
 <div class="row">
   <div class="col-md-12">
-    <%= tag_filter_header title: @list.name %>
+    <% title = (@list.owner == current_user) ? @list.name : "#{@list.owner.handle}'s '#{@list.name}' list" %>
+    <%= tag_filter_header title: title %>
 
     <p>
       <%= @list.description %>

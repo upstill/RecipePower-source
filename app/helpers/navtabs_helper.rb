@@ -117,7 +117,7 @@ module NavtabsHelper
     navtab :home,
            content_tag(:b, "&nbsp;#{current_user.handle}&nbsp;".html_safe, class: "glyphicon glyphicon-home")+
                content_tag(:b, "", class: "glyphicon glyphicon-cog"),
-           user_path(current_user),
+           user_path(current_user, :mode => :partial),
            menu_only do
       item_list = [
           # navlink( "Profile", users_profile_path( section: "profile" ), :mode => :modal),

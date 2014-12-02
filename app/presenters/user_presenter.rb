@@ -22,6 +22,29 @@ class UserPresenter < BasePresenter
     site_link(user.fullname.present? ? user.fullname : user.username)
   end
 
+  def aspect which
+    label = which.to_s.capitalize.tr('_', ' ') # split('_').map(&:capitalize).join
+    contents = nil
+    case which
+      when :member_since
+        contents = member_since
+      when :collected_lists, :owned_lists
+        if which == :owned_lists
+          lists = user.owned_lists
+          label = "Owns the lists"
+        else
+          lists = user.collected_lists
+          label = "Has collected lists"
+        end
+        unless lists.empty?
+          contents = lists.collect { |list|
+            link_to_submit( list.name, list_path(list), :mode => :partial).html_safe
+          }.join(', ').html_safe
+        end
+    end
+    content_tag(:h4, "#{label}: #{content_tag :small, contents}".html_safe) if contents
+  end
+
 =begin
   def website
     handle_none user.url do
