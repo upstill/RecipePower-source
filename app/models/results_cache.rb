@@ -136,21 +136,20 @@ class ResultsCache < ActiveRecord::Base
       queryparams, parsed_querytags = parsed_querytags, []
     end
     # Convert from ActionController params to hash
-    params = { userid: userid } # Keep the id of the viewing user
-    self.params_needed.each { |param| params[param] = queryparams[param] if queryparams[param] }
+    relevant_params = { userid: userid } # Keep the id of the viewing user
+    self.params_needed.each { |param| relevant_params[param] = queryparams[param] if queryparams[param] }
 
-    rc = self.create_with(:params => params).find_or_initialize_by session_id: session_id, type: self.to_s
+    rc = self.create_with(:params => relevant_params).find_or_initialize_by session_id: session_id, type: self.to_s
     # unpack the parameters into instance variables
-    params.each { |key, val| rc.instance_variable_set "@#{key}".to_sym, val }
-    params.delete :id
+    relevant_params.each { |key, val| rc.instance_variable_set "@#{key}".to_sym, val }
     # A bit of subtlety: we USE the querytags passed in that parameter, NOT the unparsed string from the query params
     # We STORE the unparsed string just because a synthesized tag (with negative ID) doesn't serialize properly
     rc.querytags = parsed_querytags
 
-    if rc.params != params # TODO: Take :nocache into consideration
+    if rc.params != relevant_params # TODO: Take :nocache into consideration
       # Bust the cache if the params don't match
       rc.cache = rc.partition = rc.items = nil
-      rc.params = params
+      rc.params = relevant_params
     end
     rc
   end
@@ -422,7 +421,7 @@ class ListCache < ResultsCache
     tagset = tagscope.to_a
     counts.incr tagset # One extra point for matching in one field
 
-    matchset = TaggingServices.match tag.name, itemscope # Returns an array of Tagging objects
+    matchset = TaggingServices.match tag.name, itemscope # Returns an array of agging objects
     counts.incr matchset
 
     this_round = (tagset+matchset).uniq
