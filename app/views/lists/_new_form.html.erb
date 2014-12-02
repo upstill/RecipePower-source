@@ -3,16 +3,6 @@
     <%= form_errors_helper f %>
     <%= f.input :name, label: "Name", input_html: {cols: 125, rows: 1, "data-type" => "json"} %>
     <%= f.input :description, label: "Tagline", placeholder: "A quick description of the list", input_html: {cols: 125, rows: 1, "data-type" => "json"} %>
-    <%# f.input :typenum, label: 'Make list available to:',
-                collection: List.type_selections(true),
-                as: :radio_buttons %>
-    <!--
-        <div class="btn-group">
-          <button type="button" class="btn btn-default">Left</button>
-          <button type="button" class="btn btn-default">Middle</button>
-          <button type="button" class="btn btn-default">Right</button>
-        </div>
-    -->
     <div class="form-group">
       <label class="text options">Available To</label>
       <div class="btn-group" data-toggle="buttons-checkbox" data-toggle-name="list[typenum]">

@@ -17,24 +17,11 @@ class ListsController < ApplicationController
   def create
     response_service.title = "New List"
     puts "List#create params: "+params[:list].to_s+" for user '#{current_user.name}'"
-    @list = List.assert params[:list][:name], current_user
-    @list.description = params[:list][:description]
-    @list.typenum = params[:list][:typenum]
-    if @list.id
-      notice = "Found list '#{@list.name}'."
-    else
-      notice = "Successfully created '#{@list.name}'."
-    end
+    update_and_decorate List.assert( params[:list][:name], current_user)
+    flash[:popup] = @list.id ? "Found list '#{@list.name}'." : "Successfully created '#{@list.name}'."
     @list.save
-    respond_to do |format|
-      format.html { redirect_to tag_list_path(@list), :status => :see_other, notice: notice }
-      format.json {
-        render json: {
-          done: true,
-          dlog: with_format('html') { render_to_string partial: "application/tag_modal" },
-          popup: notice }
-      }
-    end
+    # respond_to do |format|
+      # format.html { redirect_to tag_list_path(@list), :status => :see_other, notice: notice }
   end
 
   def show

@@ -1,9 +1,0 @@
-<%# Form for taking a list locator and using it to create a list %>
-<%= simple_form_for @list, html: {class: "edit_list json", 'data-type' => :json} do |f| %>
-    <%= form_errors_helper f %>
-    <%= f.input :name, label: "Title", placeholder: "List's title here", input_html: {cols: 125, rows: 1, "data-type" => "json"} %>
-    <%= f.input :description, label: "Subtitle", placeholder: "The briefest of summaries", input_html: {cols: 125, rows: 1, "data-type" => "json"} %>
-    <%= token_input_field f, :included_tags, label: "Include items tagged with:" %>
-    <%= f.input :notes, placeholder: "More verbose notes about the list", input_html: {cols: 125, rows: 2, "data-type" => "json"} %>
-    <%= form_actions f, submit_label: "Save List", cancel_path: lists_path %>
-<% end %>
