@@ -34,10 +34,11 @@ module RecipesHelper
       class: div_class
   end
 
-  def recipe_grid_datablock recipe
-    label = recipe.recipe.is_a?(Recipe) ? "" : (recipe.klass.to_s rescue recipe.class.to_s)+": "
-    grid_element = content_tag :p, (label+link_to(recipe.title, recipe.url, class: "tablink")).html_safe, class: "rcp_grid_element_title"
-    source_element = content_tag :div, ("from "+link_to(recipe.sourcename, recipe.sourcehome, class: "tablink")).html_safe, class: "rcp_grid_element_source"
+  def recipe_grid_datablock entity
+    klass = (entity.klass rescue entity.class).to_s
+    label = (klass == "Recipe") ? "" : "#{klass}: "
+    grid_element = content_tag :p, (label+link_to(entity.title, entity.url, class: "tablink")).html_safe, class: "rcp_grid_element_title"
+    source_element = content_tag :div, ("from "+link_to(entity.sourcename, entity.sourcehome, class: "tablink")).html_safe, class: "rcp_grid_element_source"
     content_tag :div, grid_element+source_element, class: "rcp_grid_datablock"
   end
 

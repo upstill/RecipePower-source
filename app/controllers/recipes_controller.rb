@@ -269,7 +269,7 @@ class RecipesController < ApplicationController
   # GET recipes/:id/collect
   def collect
     if @user = current_user
-      @recipe = Recipe.ensure params
+      update_and_decorate( Recipe.ensure params )
       @list_name = "mine"
       # @_area = params[:_area]
       if @recipe.errors.empty?

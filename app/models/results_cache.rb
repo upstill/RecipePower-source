@@ -509,7 +509,7 @@ end
 class UserRecentCache < UserCollectionCache
 
   def itemscope
-    user.collection_scope if user
+    user.collection_scope(:sort_by => :viewed) if user
   end
 end
 
