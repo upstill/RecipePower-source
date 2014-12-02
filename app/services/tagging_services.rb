@@ -63,4 +63,49 @@ class TaggingServices
     @taggable_entity.tag_with tag, tagger_id
   end
 
+  # Find matches for the given string among entities of the given type, in the context of an optional scope
+  # Result is an array of Taggings
+  def self.match matchstr, scope=nil, type_or_types=nil
+    unless scope.is_a? ActiveRecord::Relation
+      type_or_types, scope = scope, nil
+    end
+    scope ||= Tagging.unscoped
+    # type_or_types can be nil (for all extant types), an array of types, or a single type
+    if type_or_types
+      types = type_or_types.is_a?(Array) ? type_or_types : [type_or_types]
+    else
+      types = scope.select(:entity_type).distinct.map(&:entity_type)
+    end
+    matchstr = "%#{matchstr}%" # Prep for substring matches
+
+    types.collect do |type|
+      typed_scope = (scope || Tagging.unscoped).where('taggings.entity_type = ?', type)
+      # Different search for each taggable type
+      case type
+        when "Recipe"
+          typed_scope.joins(%Q{INNER JOIN recipes ON recipes.id = taggings.entity_id}).where("recipes.title ILIKE ?", matchstr).to_a
+        when "User"
+          typed_scope.joins(%Q{INNER JOIN users ON users.id = taggings.entity_id}).where(
+              'username ILIKE ? or
+                    fullname ILIKE ? or
+                    email ILIKE ? or
+                    first_name ILIKE ? or
+                    last_name ILIKE ? or
+                    about ILIKE ?',
+              matchstr, matchstr, matchstr, matchstr, matchstr, matchstr).to_a
+        when "List"
+          ( typed_scope.where("notes ILIKE ? or description ILIKE ?", matchstr, matchstr).to_a +
+            typed_scope.joins(%Q{INNER JOIN lists ON lists.id = taggings.entity_id}).
+                        joins(:tags).where('name ILIKE ?', matchstr).to_a ).uniq
+        when "Site"
+          # TODO: site needs to search on name
+          typed_scope.where("description ILIKE ?", matchstr).to_a
+        when "Feed"
+          typed_scope.where("title ILIKE ? or description ILIKE ?", matchstr, matchstr).to_a
+        when "FeedEntry"
+          typed_scope.where("title ILIKE ? or summary ILIKE ?", matchstr, matchstr).to_a
+      end
+    end
+  end
+
 end

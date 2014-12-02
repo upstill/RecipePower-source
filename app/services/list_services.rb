@@ -15,6 +15,15 @@ class ListServices
     ((@list.typesym == :friends) && (@list.owner.follows? user)) # available to friends
   end
 
+  # Return a scope on the Tagging table for the unfiltered contents of the list
+  def tagging_scope userid=nil
+    # We get everything tagged either directly by the list tag, or indirectly via
+    # the included tags, EXCEPT for other users' tags using the list's tag
+    scope = Tagging.where( tag_id: (@list.included_tag_ids + [@list.name_tag_id])).
+        where("(user_id = #{@list.owner_id}) or (tag_id != #{@list.name_tag_id})")
+    scope
+  end
+
   # Move each of the user's collections into a list
   # TODO: remove all these after collections migrate to lists
   def self.adopt_collections

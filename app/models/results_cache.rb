@@ -411,12 +411,22 @@ class ListCache < ResultsCache
 
   def itemscope
     if list = List.find(@id)
-      # We get everything tagged either directly by the list tag, or indirectly via
-      # the included tags, EXCEPT for other users' tags using the list's tag
-      scope = Tagging.where( tag_id: (list.included_tag_ids + [list.name_tag_id])).
-              where("(user_id = #{list.owner_id}) or (tag_id != #{list.name_tag_id})")
-      scope
+      ListServices.new(list).tagging_scope @userid
     end
+  end
+
+  # Apply the tag to the current set of result counts
+  def count_tag tag, counts
+    # Intersect the scope with the set of entities tagged with tags similar to the given tag
+    tagscope = itemscope.where tag_id: TagServices.new(tag).lexical_similars.map(&:id)
+    tagset = tagscope.to_a
+    counts.incr tagset # One extra point for matching in one field
+
+    matchset = TaggingServices.match tag.name, itemscope # Returns an array of Tagging objects
+    counts.incr matchset
+
+    this_round = (tagset+matchset).uniq
+    counts.incr this_round, 30 # Thirty points for matching this tag
   end
 
 end

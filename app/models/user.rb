@@ -117,6 +117,11 @@ class User < ActiveRecord::Base
     rcprefs.where(user: self, entity: entity, in_collection: true).map(&:uncollect)
   end
 
+  # Return the set of lists the user has collected, optionally excluding those they own
+  def collected_lists
+    lists.where.not(owner_id: id)
+  end
+
   # Remember that the user has (recently) touched the entity, optionally adding it to the collection
   def touch entity=nil, collect=false
     return super unless entity

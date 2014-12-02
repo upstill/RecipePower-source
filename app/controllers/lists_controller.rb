@@ -31,7 +31,7 @@ class ListsController < ApplicationController
       format.json {
         render json: {
           done: true,
-          dlog: with_format('html') { render_to_string partial: "lists/tag_modal" },
+          dlog: with_format('html') { render_to_string partial: "application/tag_modal" },
           popup: notice }
       }
     end
@@ -80,6 +80,21 @@ class ListsController < ApplicationController
   def collect
     update_and_decorate # Generate a FeedEntryDecorator as @feed_entry and prepares it for editing
     current_user.collect @list if current_user
+  end
+
+  def pin
+    update_and_decorate
+    if @list.owner != current_user
+      flash[:alert] = "Sorry, you can't pin to someone else's board"
+    else
+      begin
+        @list.include params[:entity_type].singularize.camelize.constantize.find(params[:entity_id])
+        @list.save
+        flash[:popup] = "Now appearing in #{@list.name}" if @list.errors.empty?
+      rescue
+        flash[:alert] = "Can't pin #{params[:entity_type]} ##{params[:entity_id]}"
+      end
+    end
   end
 
   def tag

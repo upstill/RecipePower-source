@@ -79,6 +79,7 @@ RP::Application.routes.draw do
   post '/list' => 'lists#create', :as => 'create_list'
   resources :lists, except: [:index, :create] do
     member do
+      post 'pin' # Add an entity to a list
       get 'collect' # Add to the user's collection
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       get 'scrape'

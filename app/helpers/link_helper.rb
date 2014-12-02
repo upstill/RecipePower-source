@@ -44,7 +44,7 @@ module LinkHelper
     format = :json
     mode = options[:mode]
     if mode == :page
-      options.delete :mode # Page is assumed for HTML response
+      options.delete :mode # Page is assumed in an HTML response
       # The page is not interested in any class options or query options special to submit()
       format = nil # default is :html
     else
@@ -78,8 +78,12 @@ module LinkHelper
     end
     link_options[:data] = data unless data.empty?
 
-    link_to label, linkpath, link_options
-  end
+    # if options[:method] && (options[:method].to_s != "get") # Other submit methods require a verified form
+      # button_to label, linkpath, link_options
+    # else
+      link_to label, linkpath, link_options
+    # end
 
+  end
 
 end
