@@ -1,9 +1,11 @@
 <% item ||= @list %>
 <tr id="<%= dom_id item %>">
-  <td>
-    <%= link_to_submit item.owner.handle, user_path(item.owner), :mode => :modal %>
-    <br>
-  </td>
+  <% if params[:access] != "owned" %>
+      <td>
+        <%= link_to_submit item.owner.handle, user_path(item.owner), :mode => :modal %>
+        <br>
+      </td>
+  <% end %>
   <td>
     <%= link_to_submit item.name.truncate(80), list_path(item), :mode => :partial %>
     <br>

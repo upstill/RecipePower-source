@@ -69,7 +69,7 @@ module NavtabsHelper
   end
 
   def my_lists_navtab menu_only = false
-    navtab :my_lists, "My Lists", lists_path, menu_only do
+    navtab :my_lists, "My Lists", lists_path(access: "owned"), menu_only do
       @user.owned_lists[0..16].collect { |l|
         navlink l.name, list_path(l), id: dom_id(l)
       } + [
@@ -80,7 +80,7 @@ module NavtabsHelper
   end
 
   def other_lists_navtab menu_only = false
-    navtab :other_lists, "More Lists", lists_path, menu_only do
+    navtab :other_lists, "More Lists", lists_path(access: "collected"), menu_only do
       @user.rcprefs.where(entity_type: "List").
           joins("INNER JOIN lists ON lists.id = rcprefs.entity_id").where("lists.owner_id != #{@user.id}").
           limit(16).

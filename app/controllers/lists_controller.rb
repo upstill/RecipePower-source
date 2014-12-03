@@ -6,6 +6,18 @@ class ListsController < ApplicationController
   def index
     # seeker_result Reference, 'div.reference_list' # , clear_tags: true
     @active_menu = :other_lists
+    response_service.title =
+    case params[:access]
+      when "owned"
+        @active_menu = :my_lists
+        "My Lists"
+      when "collected"
+        "More Lists"
+      when "all"
+        "Every List There Is"
+      else
+        "Available Lists"
+    end
     smartrender unless do_stream ListsCache
   end
 

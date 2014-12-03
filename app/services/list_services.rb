@@ -36,6 +36,7 @@ class ListServices
         list.include(entity) unless list.include?(entity)
       }
       list.included_tags = channel_user.tags
+      list.availability = 1
       list.save
       channel_user.destroy
     }
@@ -47,20 +48,26 @@ class ListServices
       subs.each { |sub|
         tag = sub.tag
         list = List.assert tag.name, user, create: true
+        list.availability = 1
         tag.recipes(user.id).each { |entity|
           list.include(entity) unless list.include?(entity)
         }
+        list.save
         sub.destroy
       }
       nlists = user.rcprefs.where("entity_type = 'List'").count
       ncollections = PrivateSubscription.where("user_id = #{user.id}").count
       puts "#{user.handle} has #{ncollections} collections and #{nlists} list afterward."
     }
+    List.all.each { |l| l.availability = 1; l.save }
     ups = User.find 3
-    superu.owned_lists.each { |l| ups.collect l }
-    ups.save
     gar = User.find 1
-    superu.owned_lists.each { |l| gar.collect l }
+    superu.owned_lists.each { |l|
+      ups.collect l
+      gar.collect l
+      l.save
+    }
+    ups.save
     gar.save
     list
   end

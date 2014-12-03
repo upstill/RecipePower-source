@@ -392,15 +392,17 @@ class ListsCache < ResultsCache
   # A listcache may define an itemscope to let the superclass#items method do pagination
   def itemscope
     case @access
-      when "private"
-        List.where owner_id: @userid
-      when "friends"
-        List.where availability: 1
-      when "public"
-        List.where owner_id: User.super_id
-      else
-        List.unscoped
+      when "owned"
+        scope = List.where owner_id: @userid
+      when "collected"
+        scope = User.find(@userid).lists
+      when "all"
+        scope = List.unscoped
+      else # By default, we only see lists belonging to our friends and Super that are not private, and all those that are public
+        friend_ids = (User.find(@userid).followee_ids + [User.super_id]).map(&:to_s).join(',')
+        scope = List.where "(owner_id != #{@userid}) and (availability = 0 or (availability = 1 and owner_id in (#{friend_ids})))"
     end
+    scope
   end
 
 end
