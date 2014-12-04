@@ -6,7 +6,7 @@
 		<b># Feeds:</b> <%= item.feeds.size %> (<%= item.feeds.where(approved: true).count %> approved for feedthrough)
 	</td>
 	<td>
-      <%= collectible_table_buttons item, :button_size => "xs" do %>
+      <%= collectible_buttons item, :button_size => "xs" do %>
           <%= link_to_submit 'Show', item, :button_size => :xs, :mode => :modal %>
       <% end %>
 	</td>

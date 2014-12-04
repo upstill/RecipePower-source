@@ -21,23 +21,22 @@ class FeedsController < ApplicationController
   # GET /feeds/1.json
   def show
     @active_menu = :feeds
-    begin
-      update_and_decorate
-      response_service.title = @feed.title
+    @feed.refresh if update_and_decorate && !params[:stream] && @feed.updated_at < 7.days.ago
+    if post_resource_errors @feed
+      render :errors
+    else
       smartrender unless do_stream FeedCache do |sp|
         sp.item_partial = "feed_entries/show_feed_entry"
         sp.results_partial = "stream_results_items"
       end
-#    rescue Exception => e
-#      render text: "Sorry, but there is no such feed. Whatever made you ask?"
     end
   end
 
   # GET /feeds/new
   # GET /feeds/new.json
   def new
-    @feed = Feed.new
-    response_service.title = "Subscribe to a Feed"
+    update_and_decorate
+    response_service.title = "Open a feed"
     smartrender mode: :modal
   end
   
@@ -45,17 +44,16 @@ class FeedsController < ApplicationController
   def collect
     if current_user
       update_and_decorate
-      if current_user.collected? @feed
+      if @feed.collected_by? current_user_or_guest_id
         flash[:alert] = "You're already subscribed to '#{@feed.title}'."
         render :errors
       else
-        current_user.collect @feed # Selects the feed whether previously subscribed or not
-        current_user.save
-        if current_user.errors.empty?
-          flash[:notice] = "Now feeding you with '#{@feed.title}'."
-        else
-          post_resource_errors current_user
+        @feed.add_to_collection current_user_or_guest_id # Selects the feed whether previously subscribed or not
+        @feed.save
+        if post_resource_errors @feed
           render :errors
+        else
+          flash[:popup] = "Now feeding you with '#{@feed.title}'."
         end
       end
     else
@@ -68,10 +66,14 @@ class FeedsController < ApplicationController
   def remove
     update_and_decorate
     if current_user && @feed
-      current_user.uncollect @feed
-      current_user.save
-      flash[:popup] = "Unsubscribed"+(@feed.title.empty? ? "..." : (" from "+@feed.title))
-      render :collect
+      @feed.remove_from_collection current_user.id
+      @feed.save
+      if post_resource_errors @feed
+        render :errors
+      else
+        flash[:popup] = "Now feeding you with '#{@feed.title}'."
+        render :collect
+      end
     else
       flash[:error] ||= ": No current user"
       render :errors
@@ -94,8 +96,7 @@ class FeedsController < ApplicationController
     if @feed.errors.any?
       @feed = (Feed.where url: @feed.url)[0] || @feed
     end
-    if @feed.errors.any?
-      post_resource_errors @feed
+    if post_resource_errors @feed
       render :new, status: :unprocessable_entity, mode: :modal
     else
       redirect_to collect_feed_path
@@ -108,7 +109,7 @@ class FeedsController < ApplicationController
     if update_and_decorate
       respond_to do |format|
         format.html {
-          redirect_to feeds_url, :status => :see_other, notice: 'Feed '#{@feed.title}' was successfully updated.'
+          redirect_to feeds_url, :status => :see_other, notice: "Feed '#{@feed.title}' was successfully updated."
         }
         format.json {
           flash[:popup] = "#{@feed.title} updated"
@@ -124,33 +125,38 @@ class FeedsController < ApplicationController
   def refresh
     update_and_decorate
     if @feed.status == "ready"
-      if Rails.env.development?
+      # if Rails.env.development? # Immediate refresh
         n_entries = @feed.feed_entries.size
         @feed.refresh
         n_new = @feed.feed_entries.size - n_entries
-        flash[:popup] = labelled_quantity(n_new, "New entry")+" found"
-        render :refresh, locals: { :followup => (n_new > 0) }
+        if post_resource_errors(@feed)
+          render :errors
+        else
+          flash[:popup] = labelled_quantity(n_new, "New entry")+" found"
+          render :refresh, locals: { :followup => (n_new > 0) }
+        end
+=begin
       else
         @feed.enqueue_update
         flash[:popup] = "Feed update starting..."
         render :errors
       end
+=end
     else
       flash[:popup] = "Feed update is still in process"
       render :errors
     end
-    post_resource_errors @feed
   end
 
   # DELETE /feeds/1
   # DELETE /feeds/1.json
   def destroy
-    @feed = Feed.find params[:id]
-    @feed.destroy
-
-    respond_to do |format|
-      format.html { redirect_to feeds_url }
-      format.json { head :no_content }
+    if update_and_decorate
+      @feed.destroy
+      render :errors if post_resource_errors( @feed )
+    else
+      flash[:alert] = "Can't locate Feed ##{params[:id] || '<unknown>'}"
+      render :errors
     end
   end
 end

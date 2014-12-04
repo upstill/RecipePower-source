@@ -7,7 +7,7 @@
 	<td><%= taggable_list item %></td>
 	<td><%= item.collection_size %></td>
 	<td><%= add_link %></td>
-    <td><%= collectible_table_buttons item do %>
+    <td><%= collectible_buttons item do %>
         <%= link_to( 'Hide', user_path(item, user: { private: true }), :class => "btn btn-default btn-xs", method: :put) if response_service.admin_view? %>
       <% end %>
     </td>

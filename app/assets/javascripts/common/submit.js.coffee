@@ -59,7 +59,7 @@ handleEnclosingNavTab = (menuElmt) ->
 			$('>a', menuElmt).css 'color','white'
 
 proceedWithConfirmation = (elmt) ->
-	!(confirm_msg = $(elmt).data 'confirm-msg') || confirm confirm_msg
+	!(confirm_msg = $(elmt).data 'confirmMsg') || confirm confirm_msg
 
 # Master function for submitting AJAX, perhaps in the context of a DOM element that triggered it
 # Elements may fire off requests by:
@@ -91,7 +91,7 @@ RP.submit.submit_and_process = ( request, elmt, method="GET" ) ->
 
 shortCircuit = (request, elmt) ->
 	data = (elmt && $(elmt).data()) || {}
-	RP.notifications.wait data['wait-msg'] # If any
+	RP.notifications.wait data.waitMsg # If any
 	odlog = RP.dialog.enclosing_modal elmt
 	# Three ways to short-circuit a request:
 	# 1: a dialog has been preloaded into data.preloaded
@@ -142,7 +142,7 @@ RP.submit.beforeSend = (event, xhr, settings) ->
 	elmt = event.currentTarget
 	# If the submission is made from a top-level menu, make the menu active
 	if proceedWithConfirmation elmt
-		RP.notifications.wait $(elmt).data 'wait-msg'
+		RP.notifications.wait $(elmt).data 'waitMsg'
 		true
 
 # Success handler for fetching dialog from server

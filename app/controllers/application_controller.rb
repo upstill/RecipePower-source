@@ -61,8 +61,9 @@ class ApplicationController < ActionController::Base
     instance_variable_set :"@#{modelname}", entity
     # We build a decorator if necessary and possible
     unless (@decorator && entity == @decorator.object) # Leave the current decorator alone if it will do
-      @decorator = entity.decorate if entity.respond_to? :decorate
+      @decorator = (entity.decorate if entity.respond_to? :decorate)
     end
+    response_service.title = (@decorator.title || "").truncate(20) if @decorator
     entity.errors.empty? # ...and report back status
   end
 

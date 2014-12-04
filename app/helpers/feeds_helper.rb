@@ -28,7 +28,8 @@ module FeedsHelper
       else
         "#{nmatches}&nbsp;entries"
     end
-    "#{entry_report}/<br>#{time_ago_in_words feed.updated_at} ago".html_safe
+    update_button = link_to_submit "Update", refresh_feed_path(feed), :button_size => "xs", "wait-msg" => "Hang on, this could take a few seconds"
+    "#{entry_report}/<br>#{time_ago_in_words feed.updated_at} ago #{update_button}".html_safe
   end
 
   def feed_status_report_replacement feed
@@ -58,7 +59,7 @@ module FeedsHelper
   end
 
   def feed_subscribe_button item, options={}
-    if current_user.collected? item
+    if item.collected_by? current_user_or_guest_id
       link_to_submit 'Unsubscribe', remove_feed_path(item), { method: :post, button_size: "sm" }.merge(options)
     else
       link_to_submit 'Subscribe', collect_feed_path(item), { button_size: "sm"}.merge(options)
@@ -66,10 +67,12 @@ module FeedsHelper
   end
 
   def feed_buttons item, options={}
-    subscribe_button = feed_subscribe_button item, options
-    ct_button = (current_user.collected? item) ? collect_or_tag_button( item, true, { button_size: "sm"}.merge(options) ) : ""
+    # ct_button = current_user.collected? item) ?
+    buttons = collectible_buttons item, :tag_only, { button_size: "sm"}.merge(options) do
+      feed_subscribe_button item, options
+    end
     content_tag :span,
-                (subscribe_button + ct_button).html_safe,
+                buttons,
                 class: "feed-button-span",
                 id: dom_id(item)
   end
@@ -109,4 +112,7 @@ module FeedsHelper
     [ "tr##{dom_id feed}", feed_table_row(feed) ]
   end
 
+  def feed_table_row_nuker feed
+    [ "tr##{dom_id feed}" ]
+  end
 end

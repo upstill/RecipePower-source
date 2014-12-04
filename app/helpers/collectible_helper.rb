@@ -1,23 +1,25 @@
 module CollectibleHelper
 
   # Declare a button which either collects or edits an entity.
-  def collect_or_tag_button entity, tag_only=false, options={}
-    if tag_only.is_a?(Hash)
-      tag_only, options = false, tag_only
+  def collect_or_tag_button entity, collect_or_tag=:both, options={}
+    if collect_or_tag.is_a?(Hash)
+      collect_or_tag, options = :both, collect_or_tag
     end
     options[:button_size] ||= "xs"
     options[:id] = dom_id(entity)
-    return unless current_user
+    return "" unless current_user
     if entity.collected_by?(current_user.id)
       attribs = %w( collectible_comment collectible_private collectible_user_id
                     element_id field_name human_name id object_path
                     tagdata tagging_user_id title )
       template_link entity, "tag-collectible", "Tag", options.merge( :mode => :modal, :attribs => attribs )
-    elsif !tag_only # Either provide the Tag button or none
+    elsif (collect_or_tag != :tag_only) # Either provide the Tag button or none
       url = polymorphic_path(entity)+"/collect"
       label = "Collect"
       options[:class] = "#{options[:class] || ''} collect-collectible-link"
       link_to_submit label, url, options
+    else
+      ""
     end
   end
 
@@ -41,9 +43,10 @@ module CollectibleHelper
     [ "."+recipe_list_element_class(@recipe), (collectible_smallpic(entity) unless destroyed) ]
   end
 
-  def collectible_table_buttons entity, collect_or_tag=true, options={}
+  # Provide the standard buttons for a collectible entity: Collect/Tag and (for admins) Destroy
+  def collectible_buttons entity, collect_or_tag=:both, options={}
     if collect_or_tag.is_a? Hash
-      collect_or_tag, options = true, collect_or_tag
+      collect_or_tag, options = :both, collect_or_tag
     end
     typename = (entity.is_a?(Draper::Decorator) ? entity.object : entity).class.to_s.underscore
     typesym = typename.pluralize.to_sym
@@ -52,16 +55,10 @@ module CollectibleHelper
       btns << yield
     end
     permitted_to?(:tag, typesym) do
-      btns << (
-          tag(:br)+
-          collect_or_tag_button(entity, options)
-      ).html_safe
-    end if collect_or_tag
+      btns << collect_or_tag_button(entity, collect_or_tag, options)
+    end if :collect_or_tag && (:collect_or_tag != :neither)
     if response_service.admin_view? && permitted_to?(:destroy, typesym)
-      btns << (
-          tag(:br)+
-          link_to_submit('Destroy', entity, options.merge(:button_style => "danger", :method => :delete, :confirm => 'Are you sure?'))
-      ).html_safe
+      btns << link_to_submit('Destroy', entity, options.merge(:button_style => "danger", :method => :delete, :confirm => 'Are you sure?'))
     end
     btns.html_safe
   end

@@ -210,9 +210,9 @@ filter_submit = (eventdata) ->
 		RP.process_response shortcircuit
 	else
 		# Okay to submit
-		if (confirm_msg = $(clicked).data 'confirm-msg') && !confirm(confirm_msg)
+		if (confirm_msg = $(clicked).data 'confirmMsg') && !confirm(confirm_msg)
 			return false
-		if wait_msg = $(clicked).data('wait-msg')
+		if wait_msg = $(clicked).data('waitMsg')
 			RP.notifications.wait wait_msg
 		# To sort out errors from subsequent dialogs, we submit the form synchronously
 		#  and use the result to determine whether to do normal forms processing.

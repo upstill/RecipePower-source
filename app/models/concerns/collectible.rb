@@ -13,8 +13,11 @@ module Collectible
   end
   
   def add_to_collection uid
-    User.find(uid).touch self, true
-    # self.touch true, uid # Touch the entity and add it to the user's collection
+    ref = rcpref(uid, true)
+    unless ref.in_collection
+      ref.in_collection = true
+      ref.save
+    end
   end
 
   def remove_from_collection uid

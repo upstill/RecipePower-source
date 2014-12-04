@@ -134,6 +134,7 @@ class Feed < ActiveRecord::Base
   # Ensure that the entries for the feed are up to date
   def refresh
     FeedEntry.update_from_feed self
+    self.reload # To ensure associations are updated
     self.touch
   end
 
