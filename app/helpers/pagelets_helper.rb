@@ -17,4 +17,8 @@ module PageletsHelper
     entity ||= @decorator
     entity ? dom_id(entity) : "pagelet-body"
   end
+
+  def pagelet_body_selector entity=nil
+    "div.pagelet-body##{pagelet_body_id(entity)}"
+  end
 end

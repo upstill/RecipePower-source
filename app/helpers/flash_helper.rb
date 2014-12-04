@@ -20,21 +20,13 @@ module FlashHelper
     unless resource.errors.empty?
       if resource.errors[:base].empty?
         # We accept both ActionView form builders and simple_form builders, but only the latter has error notification
-        (f && f.respond_to?(:error_notification)) ? f.error_notification : resource_errors_helper(resource)
+        (f && f.respond_to?(:error_notification)) ? f.error_notification : post_resource_errors(resource)
       else 
         base_errors_helper resource, for_bootstrap
       end
     end
   end
-  
-  # Report the current errors on a record in a nice alert div, suitable for interpolation within the
-  # form whose failure generated the error
-  def resource_errors_helper obj, options={}
-    unless obj.errors.empty?
-      flash_one :error, express_resource_errors(obj, options )
-    end
-  end
-  
+
   # Augments error display for record attributes (a la simple_form) with base-level errors
   def base_errors_helper resource, for_bootstrap = true
     flash_one :error, express_base_errors(resource), for_bootstrap

@@ -1,15 +1,19 @@
 module CollectibleHelper
 
   # Declare a button which either collects or edits an entity.
-  def collect_or_tag_button entity, options={}
+  def collect_or_tag_button entity, tag_only=false, options={}
+    if tag_only.is_a?(Hash)
+      tag_only, options = false, tag_only
+    end
     options[:button_size] ||= "xs"
     options[:id] = dom_id(entity)
-    if entity.user_ids.include?(entity.collectible_user_id)
+    return unless current_user
+    if entity.collected_by?(current_user.id)
       attribs = %w( collectible_comment collectible_private collectible_user_id
                     element_id field_name human_name id object_path
                     tagdata tagging_user_id title )
       template_link entity, "tag-collectible", "Tag", options.merge( :mode => :modal, :attribs => attribs )
-    else
+    elsif !tag_only # Either provide the Tag button or none
       url = polymorphic_path(entity)+"/collect"
       label = "Collect"
       options[:class] = "#{options[:class] || ''} collect-collectible-link"
@@ -17,7 +21,7 @@ module CollectibleHelper
     end
   end
 
-  def collect_or_edit_button_replacement entity, options={}
+  def collect_or_tag_button_replacement entity, options={}
     [ "a.collect-collectible-link##{dom_id entity}", collect_or_tag_button(entity, options) ]
   end
 
@@ -37,7 +41,10 @@ module CollectibleHelper
     [ "."+recipe_list_element_class(@recipe), (collectible_smallpic(entity) unless destroyed) ]
   end
 
-  def collectible_table_buttons entity, options={}
+  def collectible_table_buttons entity, collect_or_tag=true, options={}
+    if collect_or_tag.is_a? Hash
+      collect_or_tag, options = true, collect_or_tag
+    end
     typename = (entity.is_a?(Draper::Decorator) ? entity.object : entity).class.to_s.underscore
     typesym = typename.pluralize.to_sym
     btns = ""
@@ -49,7 +56,7 @@ module CollectibleHelper
           tag(:br)+
           collect_or_tag_button(entity, options)
       ).html_safe
-    end
+    end if collect_or_tag
     if response_service.admin_view? && permitted_to?(:destroy, typesym)
       btns << (
           tag(:br)+

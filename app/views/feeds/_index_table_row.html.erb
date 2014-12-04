@@ -5,15 +5,15 @@
     <%= item.description %><br>
   </td>
   <td><%= taggable_list item %></td>
-  <td><%= item.feedtypename %></td>
-  <td><%= link_to_submit item.site.name, site_path(item.site), mode: :modal %></td>
+  <td><%= item.feedtypename unless item.feedtypename == "Misc" %></td>
+  <td><%= link_to_submit item.site.name, site_path(item.site), mode: :partial %></td>
+  <td><%= feed_status_summary item %></td>
+  <% if response_service.admin_view? %>
+      <td><%= feed_approval @feed %></td>
+  <% end %>
   <td>
-    <%= collectible_table_buttons item do %>
-        <% if current_user.feeds.include?(item) %>
-            <%= button_to_submit 'Unsubscribe', remove_feed_path(item), method: :post %>
-        <% else %>
-            <%= button_to_submit 'Subscribe', collect_feed_path(item) %>
-        <% end %>
-    <% end %>
+  <%= collectible_table_buttons item, false do %>
+    <%= feed_buttons @feed, button_size: "sm" %>
+  <% end %>
   </td>
 </tr>

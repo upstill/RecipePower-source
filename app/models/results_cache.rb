@@ -435,8 +435,23 @@ end
 # list of feeds
 class FeedsCache < ResultsCache
 
+  def self.params_needed
+    # The access parameter filters for private and public lists
+    super + [:access]
+  end
+
   def itemscope
-    Feed.where(approved: true)
+    case @access
+      when "collected" # Feeds actually collected by user and friends
+        persons_of_interest = [@userid, 1, 3, 5].map(&:to_s).join(',')
+        Feed.joins(:rcprefs).where("rcprefs.user_id in (#{persons_of_interest})").order("rcprefs.user_id DESC")
+      when "all" # For admins only: every feed in the world
+        Feed.order('approved DESC')
+      when "approved" # Default: normal user view for shopping for feeds (only approved feeds)
+        Feed.where(approved: true)
+      else
+        Feed.where(approved: true)
+    end
   end
 
   def count_tag tag, counts

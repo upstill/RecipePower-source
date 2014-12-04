@@ -4,31 +4,19 @@
 </p>
 
 <p>
-  <b>Url:</b> <%= @feed.url %>
-</p>
-
-<p>
   <b>Type:</b> <%= @feed.feedtypename %>
 </p>
 <% if @feed.site %>
-
   <p>
     <b>From Site:</b>
     <%= link_to_submit @feed.site.name, site_path(@feed.site), mode: :modal %>
   </p>
 <% end %>
-
 <% permitted_to?(:approve, :feeds) do %>
     <p>
-      Feedthrough <%= @feed.approved ? "Approved" : (@feed.approved.nil? ? "Not Approved" : "Blocked") %>
+      Feed <%= feed_approval @feed %>
     </p>
-    <% if @feed.approved || @feed.approved.nil? %>
-        <%= button_to "Block feedthrough", "#{@feed.id}/approve?approve=N"  %>
-    <% end %>
-    <% if !@feed.approved %>
-        <%= button_to "Approve feedthrough", "#{@feed.id}/approve?approve=Y"  %>
-    <% end %>
 <% end %>
-<%= collect_or_tag_button @feed, mode: :modal %>
-<%= link_to 'Back to Feeds', feeds_path, class: "btn" %>
+<%= feed_buttons @feed, button_size: "sm" %>
+<%= link_to_submit 'Back to Feeds', feeds_path, button_size: "sm", mode: :partial %>
 <%= stream_element :body, "show_entries" %>

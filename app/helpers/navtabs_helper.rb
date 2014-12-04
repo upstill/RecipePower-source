@@ -94,13 +94,13 @@ module NavtabsHelper
   end
 
   def feeds_navtab menu_only = false
-    navtab :feeds, "Feeds", feeds_path, menu_only do
+    navtab :feeds, "Feeds", feeds_path(access: "collected"), menu_only do
       result = @user.collection_scope(entity_type: "Feed", limit: 16, sort_by: :viewed).map(&:entity).collect { |f|
         navlink truncate(f.title, length: 30), feed_path(f), id: dom_id(f)
       }
       result + [
           "<hr class='menu'>".html_safe,
-          navlink("Browse for More Feeds...", feeds_path)
+          navlink("Browse for More Feeds...", feeds_path(access: (response_service.admin_view? ? "all" : "approved")))
       ]
     end
   end
