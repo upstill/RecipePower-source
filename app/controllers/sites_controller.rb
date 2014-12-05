@@ -11,14 +11,8 @@ class SitesController < ApplicationController
   # GET /sites/1
   # GET /sites/1.json
   def show
-    # return if need_login true, true
-    @user = current_user_or_guest
-    @site = Site.find(params[:id])
-    @decorator = @site.decorate
-    @decorator.viewer_id = @user.id
-    response_service.title = @site.name
-    
-    smartrender mode: :modal 
+    update_and_decorate
+    smartrender
   end
 
   # GET /sites/new

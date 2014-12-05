@@ -124,6 +124,10 @@ public
     referent.name
   end
 
+  def handle
+    ttlcut.blank? ? name : ttlcut
+  end
+
   def name=(str)
     if referent
       referent.express(str, :tagtype => :Source, :form => :generic )

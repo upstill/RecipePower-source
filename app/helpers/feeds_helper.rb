@@ -28,8 +28,10 @@ module FeedsHelper
       else
         "#{nmatches}&nbsp;entries"
     end
-    update_button = link_to_submit "Update", refresh_feed_path(feed), :button_size => "xs", "wait-msg" => "Hang on, this could take a few seconds"
-    "#{entry_report}/<br>#{time_ago_in_words feed.updated_at} ago #{update_button}".html_safe
+    time_report = (feed.updated_at.today?) ? "Today" : "#{time_ago_in_words feed.updated_at} ago"
+    wait_msg = "Hang on, we're contacting #{feed.site.handle} for updates. This could take a few seconds."
+    update_button = link_to_submit "Update", refresh_feed_path(feed), :button_size => "xs", "wait-msg" => wait_msg
+    "#{entry_report}/<br>#{time_report} #{update_button}".html_safe
   end
 
   def feed_status_report_replacement feed
