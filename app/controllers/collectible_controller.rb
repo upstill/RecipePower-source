@@ -14,4 +14,18 @@ class CollectibleController < ApplicationController
       render :errors
     end
   end
+
+  def tag
+    update_and_decorate
+  end
+
+  def update
+    update_and_decorate
+    if post_resource_errors @decorator.object
+      render :edit
+    else
+      flash[:popup] = "#{@decorator.human_name} is saved"
+      render :ack_popup
+    end
+  end
 end

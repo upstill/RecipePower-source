@@ -1,7 +1,7 @@
 require './lib/controller_utils.rb'
 require 'suggestion.rb'
 
-class UsersController < ApplicationController
+class UsersController < CollectibleController
   
   rescue_from ActiveRecord::RecordNotFound, :with => :not_found
   before_filter :login_required, :except => [:new, :create, :identify]
