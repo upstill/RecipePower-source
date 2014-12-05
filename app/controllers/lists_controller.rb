@@ -1,7 +1,7 @@
 require './lib/controller_utils.rb'
 require './lib/querytags.rb'
 
-class ListsController < ApplicationController
+class ListsController < CollectibleController
 
   def index
     # seeker_result Reference, 'div.reference_list' # , clear_tags: true
@@ -74,11 +74,6 @@ class ListsController < ApplicationController
   def new
     update_and_decorate List.new(owner_id: params[:owner_id].to_i || current_user.id)
     smartrender
-  end
-
-  def collect
-    update_and_decorate # Generate a FeedEntryDecorator as @feed_entry and prepares it for editing
-    current_user.collect @list if current_user
   end
 
   def pin

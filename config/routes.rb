@@ -9,7 +9,7 @@ RP::Application.routes.draw do
   resources :feed_entries, :except => [:index, :create, :new, :show, :destroy] do
     member do 
       get 'tag' # Present the dialog for tagging, commenting and picture selection
-      get "collect"
+      post "collect"
     end
   end
 
@@ -68,8 +68,7 @@ RP::Application.routes.draw do
   # get 'users/:id/show' => 'users#show'
   resources :users, :except => [:index, :create] do
     member do
-      get 'collect'
-      post 'remove'
+      post 'collect'
       get 'match_friends'
       get 'notify'
       get 'acquire' # Acquire a recipe (etc.)
@@ -104,10 +103,9 @@ RP::Application.routes.draw do
   post '/feed' => 'feeds#create', :as => 'create_feed'
   resources :feeds, :except => [:index, :create] do
     member do
-      get 'collect' # Add the feed to the current user
+      post  "collect"  # Add the feed to the current user
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       get 'refresh' # Refresh the feed's entries
-      post 'remove' # Remove the feed from the current user's set
       post 'approve' # (Admin only) approve the feed for presentation
     end
   end
@@ -159,7 +157,7 @@ RP::Application.routes.draw do
       member { post 'remove', :to => 'recipes#uncollect' }
     end
     member do
-      get 'collect'
+      get  "collect"
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       get 'touch'
       get 'piclist'

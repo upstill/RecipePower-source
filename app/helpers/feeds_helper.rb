@@ -18,7 +18,7 @@ module FeedsHelper
   end
 
   def feed_wait_msg feed, force=false
-    wait_msg = "Hang on, we're contacting #{feed.site.handle} for updates. This could take a few seconds." if force || feed.due_for_update
+    wait_msg = "Hang on, we're contacting #{feed.site.name} for updates. This could take a few seconds." if force || feed.due_for_update
     wait_msg ? { "wait-msg" => wait_msg } : {}
   end
 
@@ -70,10 +70,11 @@ module FeedsHelper
 
   def feed_subscribe_button item, options={}
     if item.collected_by? current_user_or_guest_id
-      link_to_submit 'Unsubscribe', remove_feed_path(item), { method: :post, button_size: "sm" }.merge(options)
+      label, path = "Unsubscribe", collect_feed_path(item, oust: true)
     else
-      link_to_submit 'Subscribe', collect_feed_path(item), { button_size: "sm"}.merge(options)
+      label, path = "Subscribe", collect_feed_path(item)
     end
+    link_to_submit label, path, { method: :post, button_size: "sm" }.merge(options)
   end
 
   def feed_buttons item, options={}

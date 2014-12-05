@@ -1,5 +1,5 @@
 
-class SitesController < ApplicationController
+class SitesController < CollectibleController
 
   # GET /sites
   # GET /sites.json

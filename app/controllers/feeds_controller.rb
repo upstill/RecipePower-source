@@ -39,46 +39,6 @@ class FeedsController < ApplicationController
     response_service.title = "Open a feed"
     smartrender mode: :modal
   end
-  
-  # Add a feed to the feeds of the current user
-  def collect
-    if current_user
-      update_and_decorate
-      if @feed.collected_by? current_user_or_guest_id
-        flash[:alert] = "You're already subscribed to '#{@feed.title}'."
-        render :errors
-      else
-        @feed.add_to_collection current_user_or_guest_id # Selects the feed whether previously subscribed or not
-        @feed.save
-        if post_resource_errors @feed
-          render :errors
-        else
-          flash[:popup] = "Now feeding you with '#{@feed.title}'."
-        end
-      end
-    else
-      flash[:error] = "Sorry, but you can only subscribe to a feed when you're logged in."
-      render :errors
-    end
-  end
-  
-  # Remove a feed from the current user's feeds
-  def remove
-    update_and_decorate
-    if current_user && @feed
-      @feed.remove_from_collection current_user.id
-      @feed.save
-      if post_resource_errors @feed
-        render :errors
-      else
-        flash[:popup] = "Now feeding you with '#{@feed.title}'."
-        render :collect
-      end
-    else
-      flash[:error] ||= ": No current user"
-      render :errors
-    end
-  end
 
   # GET /feeds/1/edit
   def tag

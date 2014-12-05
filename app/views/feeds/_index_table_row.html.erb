@@ -6,7 +6,7 @@
   </td>
   <td><%= taggable_list item %></td>
   <td><%= item.feedtypename unless item.feedtypename == "Misc" %></td>
-  <td><%= link_to_submit item.site.handle, site_path(item.site), mode: :partial %></td>
+  <td><%= link_to_submit item.site.name, site_path(item.site), mode: :partial %></td>
   <td><%= feed_status_summary item %></td>
   <% if response_service.admin_view? %>
       <td><%= feed_approval @feed %></td>
