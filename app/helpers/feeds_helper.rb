@@ -11,10 +11,19 @@ module FeedsHelper
       status = "Update #{feed.status}. "
       label = "Try Again"
     end
-    link = link_to_submit label, url, button_size: ""
+    link = link_to_submit label, url, feed_wait_msg(feed, true).merge(button_size: "sm")
     content_tag :span,
                 "Last updated #{time_ago_in_words feed.updated_at} ago. #{status}#{link}".html_safe,
                 class: "feed-status-report"
+  end
+
+  def feed_wait_msg feed, force=false
+    wait_msg = "Hang on, we're contacting #{feed.site.handle} for updates. This could take a few seconds." if force || feed.due_for_update
+    wait_msg ? { "wait-msg" => wait_msg } : {}
+  end
+
+  def feed_update_button feed
+    link_to_submit "Update", refresh_feed_path(feed), feed_wait_msg(feed).merge(:button_size => "xs")
   end
 
   # Summarize the number of entries/latest entry for a feed
@@ -29,8 +38,7 @@ module FeedsHelper
         "#{nmatches}&nbsp;entries"
     end
     time_report = (feed.updated_at.today?) ? "Today" : "#{time_ago_in_words feed.updated_at} ago"
-    wait_msg = "Hang on, we're contacting #{feed.site.handle} for updates. This could take a few seconds."
-    update_button = link_to_submit "Update", refresh_feed_path(feed), :button_size => "xs", "wait-msg" => wait_msg
+    update_button = feed_update_button feed
     "#{entry_report}/<br>#{time_report} #{update_button}".html_safe
   end
 

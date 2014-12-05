@@ -138,6 +138,11 @@ class Feed < ActiveRecord::Base
     self.touch
   end
 
+  # Is the feed stale?
+  def due_for_update
+    updated_at < 7.days.ago
+  end
+
   # Callbacks for DelayedJob
   def enqueue(job)
     self.status = :pending

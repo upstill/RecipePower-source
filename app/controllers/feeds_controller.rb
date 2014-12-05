@@ -21,7 +21,7 @@ class FeedsController < ApplicationController
   # GET /feeds/1.json
   def show
     @active_menu = :feeds
-    @feed.refresh if update_and_decorate && !params[:stream] && @feed.updated_at < 7.days.ago
+    @feed.refresh if update_and_decorate && !params[:stream] && @feed.due_for_update
     if post_resource_errors @feed
       render :errors
     else
