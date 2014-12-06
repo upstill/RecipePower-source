@@ -29,7 +29,7 @@ module CollectibleHelper
   end
 
   def collectible_masonry_item entity
-    with_format("html") do render "show_masonry_item" end
+    with_format("html") do render "show_masonry_item", item: @decorator end
   end
 
   def collectible_masonry_item_replacement entity, destroyed=false

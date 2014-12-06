@@ -1,4 +1,5 @@
-<% item ||= (@recipe || @decorator.object) %>
+
+<% item ||= (@recipe || @decorator) %>
 <div class="masonry-item-contents grid-item <%= dom_id item %>" >
   <%# recipe_uncollect_button item, @browser.selected %>
   <%= recipe_image_div item, "rcp_grid_pic_box" %>

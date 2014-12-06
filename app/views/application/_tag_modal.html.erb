@@ -57,7 +57,7 @@
             </div>
           </div>
           <div class="modal-footer">
-            <input class="btn pull-left" type="submit" data-action="<%= entity.object_path %>/remove" value="Remove from collection" data-method="post"/>
+            <input class="btn pull-left" type="submit" data-action="<%= entity.object_path %>/collect?oust=true" value="Remove from collection" data-method="post"/>
             <% if permitted_to?(:admin, :pages) && response_service.admin_view? %>
                 <input class="btn btn-danger pull-left" type="submit" data-action="<%= entity.object_path %>" data-method="delete" value="Destroy" data-confirm="This will remove the <%= entity.human_name %> from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?"/>
             <% end %>

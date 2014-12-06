@@ -6,9 +6,10 @@ class FeedEntry < ActiveRecord::Base
 
   attr_accessible :guid, :title, :published_at, :summary, :url, :feed, :recipe
 
-  belongs_to :feed
   belongs_to :recipe
-  
+  belongs_to :feed
+  delegate :site, :to => :feed
+
   def self.update_from_feed(feed)
     feedz = Feedzirra::Feed.fetch_and_parse(feed.url)
     add_entries(feedz.entries, feed) if feedz.respond_to? :entries
@@ -23,7 +24,7 @@ class FeedEntry < ActiveRecord::Base
       add_entries(feedz.new_entries, feed) if feedz.updated?
     end
   end
-  
+
   private
   
   def self.add_entries(entries, feed)

@@ -6,7 +6,7 @@
 RP::Application.routes.draw do
 
   get "admin/toggle"
-  resources :feed_entries, :except => [:index, :create, :new, :show, :destroy] do
+  resources :feed_entries, :except => [:index, :create, :new] do
     member do 
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       post 'tag'
