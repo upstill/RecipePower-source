@@ -1,6 +1,6 @@
 require './lib/controller_utils.rb'
 
-class FeedsController < ApplicationController
+class FeedsController < CollectibleController
   
   def approve
     update_and_decorate
@@ -40,12 +40,6 @@ class FeedsController < ApplicationController
     smartrender mode: :modal
   end
 
-  # GET /feeds/1/edit
-  def tag
-    update_and_decorate
-    smartrender
-  end
-
   # POST /feeds
   # POST /feeds.json
   def create
@@ -63,25 +57,6 @@ class FeedsController < ApplicationController
     end
   end
 
-  # PUT /feeds/1
-  # PUT /feeds/1.json
-  def update
-    if update_and_decorate
-      respond_to do |format|
-        format.html {
-          redirect_to feeds_url, :status => :see_other, notice: "Feed '#{@feed.title}' was successfully updated."
-        }
-        format.json {
-          flash[:popup] = "#{@feed.title} updated"
-          render :update
-        }
-      end
-    else
-      post_resource_errors @feed
-      render :edit
-    end
-  end
-
   def refresh
     update_and_decorate
     if @feed.status == "ready"
@@ -93,30 +68,12 @@ class FeedsController < ApplicationController
           render :errors
         else
           flash[:popup] = labelled_quantity(n_new, "New entry")+" found"
-          render :refresh, locals: { :followup => (n_new > 0) }
+          render :update
         end
-=begin
-      else
-        @feed.enqueue_update
-        flash[:popup] = "Feed update starting..."
-        render :errors
-      end
-=end
     else
       flash[:popup] = "Feed update is still in process"
       render :errors
     end
   end
 
-  # DELETE /feeds/1
-  # DELETE /feeds/1.json
-  def destroy
-    if update_and_decorate
-      @feed.destroy
-      render :errors if post_resource_errors( @feed )
-    else
-      flash[:alert] = "Can't locate Feed ##{params[:id] || '<unknown>'}"
-      render :errors
-    end
-  end
 end

@@ -91,8 +91,4 @@ class ListsController < CollectibleController
     end
   end
 
-  def tag
-    update_and_decorate
-    smartrender 
-  end
 end

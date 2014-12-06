@@ -9,6 +9,7 @@ RP::Application.routes.draw do
   resources :feed_entries, :except => [:index, :create, :new, :show, :destroy] do
     member do 
       get 'tag' # Present the dialog for tagging, commenting and picture selection
+      post 'tag'
       post "collect"
     end
   end
@@ -81,6 +82,7 @@ RP::Application.routes.draw do
       post 'pin' # Add an entity to a list
       get 'collect' # Add to the user's collection
       get 'tag' # Present the dialog for tagging, commenting and picture selection
+      post 'tag' # For saving the tags
       get 'scrape'
     end
   end
@@ -91,6 +93,7 @@ RP::Application.routes.draw do
     member do
       get 'collect' # Add to the user's collection
       get 'tag' # Present the dialog for tagging, commenting and picture selection
+      post 'tag'
       get 'scrape'
     end
   end
@@ -105,6 +108,7 @@ RP::Application.routes.draw do
     member do
       post  "collect"  # Add the feed to the current user
       get 'tag' # Present the dialog for tagging, commenting and picture selection
+      post 'tag'
       get 'refresh' # Refresh the feed's entries
       post 'approve' # (Admin only) approve the feed for presentation
     end
@@ -159,6 +163,7 @@ RP::Application.routes.draw do
     member do
       get  "collect"
       get 'tag' # Present the dialog for tagging, commenting and picture selection
+      post 'tag'
       get 'touch'
       get 'piclist'
       post 'remove'

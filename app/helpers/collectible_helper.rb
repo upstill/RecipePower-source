@@ -10,13 +10,14 @@ module CollectibleHelper
     return "" unless current_user
     if entity.collected_by?(current_user.id)
       attribs = %w( collectible_comment collectible_private collectible_user_id
-                    element_id field_name human_name id object_path
+                    element_id field_name human_name id object_path tag_path
                     tagdata tagging_user_id title )
       template_link entity, "tag-collectible", "Tag", options.merge( :mode => :modal, :attribs => attribs )
     elsif (collect_or_tag != :tag_only) # Either provide the Tag button or none
       url = polymorphic_path(entity)+"/collect"
       label = "Collect"
       options[:class] = "#{options[:class] || ''} collect-collectible-link"
+      options[:method] = "POST"
       link_to_submit label, url, options
     else
       ""
@@ -28,15 +29,34 @@ module CollectibleHelper
   end
 
   def collectible_masonry_item entity
-    with_format("html") do render partial: "show_masonry_item" end
+    with_format("html") do render "show_masonry_item" end
   end
 
   def collectible_masonry_item_replacement entity, destroyed=false
     [ ".masonry-item-contents."+dom_id(entity), (collectible_masonry_item(entity) unless destroyed) ]
   end
 
+  def collectible_table_row entity
+    entity = entity.object if entity.is_a? Draper::Decorator
+    dir = entity.class.to_s.underscore.pluralize
+    with_format("html") do render "#{dir}/index_table_row", item: entity end
+  end
+
+  def collectible_table_row_replacement entity, destroyed=false
+    [ "tr##{dom_id entity}", (collectible_table_row(entity) unless destroyed) ]
+  end
+
+  # Return the followup after updating or destroying an entity: replace its pagelet with either an update, or the list of such entities
+  def collectible_pagelet_followup entity, destroyed=false
+    entity = entity.object if entity.is_a? Draper::Decorator
+    {
+        request: polymorphic_path((destroyed ? entity.class : entity), :mode => :partial),
+        target: pagelet_body_selector(entity)
+    }
+  end
+
   def collectible_smallpic entity
-    with_format("html") do render_to_string partial: "shared/recipe_smallpic" end
+    with_format("html") do render "shared/recipe_smallpic" end
   end
 
   def collectible_smallpic_replacement entity, destroyed=false
@@ -84,5 +104,4 @@ module CollectibleHelper
     # button_to_submit 'Back to Lists', lists_path
     # <input class="btn btn-danger pull-left" type="submit" data-action="/recipes/1155" data-method="delete" value="Destroy" data-confirm="This will remove the Recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" clicked="true">
   end
-
 end

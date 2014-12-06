@@ -18,7 +18,7 @@ module FeedsHelper
   end
 
   def feed_wait_msg feed, force=false
-    wait_msg = "Hang on, we're contacting #{feed.site.name} for updates. This could take a few seconds." if force || feed.due_for_update
+    wait_msg = "Hang on, we're contacting #{feed.site.name} for updates. This could take a minute." if force || feed.due_for_update
     wait_msg ? { "wait-msg" => wait_msg } : {}
   end
 
@@ -115,15 +115,4 @@ module FeedsHelper
     render "shared/stream_results_table", headers: headers
   end
 
-  def feed_table_row feed
-    with_format("html") { render "feeds/index_table_row", item: feed }
-  end
-
-  def feed_table_row_replacement feed
-    [ "tr##{dom_id feed}", feed_table_row(feed) ]
-  end
-
-  def feed_table_row_nuker feed
-    [ "tr##{dom_id feed}" ]
-  end
 end

@@ -9,7 +9,7 @@
           <button type="button" class="close" onclick="RP.dialog.cancel(event)" data-dismiss="modal" aria-hidden="true">×</button>          <%# unless recipe %>
           <h3><%= response_service.admin_view? ? "Tag That #{entity.human_name}!" : entity.title %></h3>
         </div>
-        <form accept-charset="UTF-8" action="<%= entity.object_path %>" class="form-inline tag-collectible" data-remote="true" data-type="json" id="tag_collectible_<%= entity.id %>">
+        <form accept-charset="UTF-8" action="<%= entity.tag_path %>" class="form-inline tag-collectible" data-remote="true" data-type="json" id="tag_collectible_<%= entity.id %>">
           <input name="utf8" type="hidden" value="&#x2713;"/>
           <input name="_method" type="hidden" value="post"/>
           <input name="authenticity_token" type="hidden" value="<%= form_authenticity_token %>"/>
@@ -62,7 +62,7 @@
                 <input class="btn btn-danger pull-left" type="submit" data-action="<%= entity.object_path %>" data-method="delete" value="Destroy" data-confirm="This will remove the <%= entity.human_name %> from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?"/>
             <% end %>
             <input class="cancel btn" data-dismiss="modal" name="commit" type="submit" value="Cancel"/>
-            <input class="submit btn btn-primary" name="commit" type="submit" value="Save" data-method="put"/>
+            <input class="submit btn btn-primary" name="commit" type="submit" value="Save" data-method="post"/>
           </div>
         </form>
       </div>

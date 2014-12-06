@@ -1,6 +1,6 @@
 require './lib/controller_utils.rb'
 
-class RecipesController < ApplicationController
+class RecipesController < CollectibleController
   before_filter :allow_iframe, only: :capture
 
   before_filter :login_required, :except => [:index, :show, :capture, :collect ]
@@ -172,21 +172,6 @@ class RecipesController < ApplicationController
     end
   end
 
-  def tag
-    # return if need_login true
-    # Fetch the recipe by id, if possible, and ensure that it's registered with the user
-    update_and_decorate 
-    if @recipe.errors.empty? # Success (recipe found)
-      current_user.collect @recipe if current_user
-      response_service.title = @recipe.title.truncate(20) # Get title from the recipe
-      @nav_current = nil
-      smartrender 
-    else
-      response_service.title = "Cookmark a Recipe"
-      @nav_current = :addcookmark
-    end
-  end
-  
   # Respond to a request from the recipe editor for a list of pictures
   def piclist
       @recipe = Recipe.find(params[:id])

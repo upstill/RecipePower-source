@@ -460,7 +460,7 @@ public
   end
 
   def password_required?
-    (self.channel_referent_id==0) && (authentications.empty? || !password.blank?) # && super
+    (self.channel_referent_id==0) && (authentications.empty? || !password.blank?)
   end
 
   # We don't require an email for users representing channels
@@ -510,7 +510,7 @@ public
   # Class variable @@Super_user saves the super User
   @@Super_user = nil
   def self.super_id
-      (@@Super_user || (@@Super_user = self.by_name(:super))).id
+      (@@Super_user || (@@Super_user = (self.by_name(:super) || self.by_name("RecipePower")))).id
   end
 
   # Class variable @@Guest_user saves the guest User

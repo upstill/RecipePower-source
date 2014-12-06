@@ -1,11 +1,10 @@
 class FeedEntry < ActiveRecord::Base
   include Taggable
   include Collectible
-
-  attr_accessible :guid, :title, :published_at, :summary, :url, :feed, :recipe
-
   include Picable
   picable :picurl, :picture
+
+  attr_accessible :guid, :title, :published_at, :summary, :url, :feed, :recipe
 
   belongs_to :feed
   belongs_to :recipe

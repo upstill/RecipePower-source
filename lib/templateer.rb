@@ -95,6 +95,10 @@ module Templateer
     "/#{object_type true}/#{self.id}"
   end
 
+  def tag_path
+    object_path+"/tag"
+  end
+
   def edit_path
     object_path+"/edit"
   end
