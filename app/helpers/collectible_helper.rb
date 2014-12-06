@@ -7,6 +7,7 @@ module CollectibleHelper
     end
     options[:button_size] ||= "xs"
     options[:id] = dom_id(entity)
+    options[:class] = "#{options[:class] || ''} collect-collectible-link"
     return "" unless current_user
     if entity.collected_by?(current_user.id)
       attribs = %w( collectible_comment collectible_private collectible_user_id
@@ -16,7 +17,6 @@ module CollectibleHelper
     elsif (collect_or_tag != :tag_only) # Either provide the Tag button or none
       url = polymorphic_path(entity)+"/collect"
       label = "Collect"
-      options[:class] = "#{options[:class] || ''} collect-collectible-link"
       options[:method] = "POST"
       link_to_submit label, url, options
     else

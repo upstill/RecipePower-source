@@ -15,6 +15,7 @@ class CollectibleController < ApplicationController
         render :errors
       else
         flash[:popup] = msg
+        render :collect
       end
     else
       flash[:alert] = "Sorry, you need to be logged in to collect something."
