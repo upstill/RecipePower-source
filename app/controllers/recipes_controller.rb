@@ -225,62 +225,6 @@ class RecipesController < CollectibleController
     end
   end
 
-  # Delete the recipe from the user's list
-  def uncollect
-    update_and_decorate
-    current_user.uncollect @recipe if current_user && @recipe.errors.empty?
-    @jsondata = {
-        replacements: [
-            [ "div.rcpGridElmt"+@recipe.id.to_s, "" ]
-        ],
-        popup: "Fear not. '#{@recipe.title}' has been vanquished from this collection."
-    }
-    respond_to do |format|
-      format.json { render json: @jsondata }
-      format.js { render template: "shared/get_content" }
-    end
-  end
-
-  def remove
-    update_and_decorate
-    current_user.uncollect @recipe if current_user && @recipe.errors.empty?
-    truncated = truncate(@recipe.title, :length => 40)
-    report_recipe user_collection_url(@user),
-                  "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections.",
-                  formats
-  end
-
-  # Add a recipe to the user's collection without going to edit tags. Full-page render is just collection page
-  # GET recipes/:id/collect
-  def collect
-    if @user = current_user
-      update_and_decorate( Recipe.ensure params )
-      @list_name = "mine"
-      # @_area = params[:_area]
-      if @recipe.errors.empty?
-        current_user.collect @recipe
-        notice = truncate( @recipe.title, :length => 100)+" now appearing in your collection."
-        if params[:uid]
-          flash[:notice] = notice
-          respond_to do |format|
-            format.html { redirect_to collection_path }
-            format.json { render json: { redirect: collection_path } }
-          end
-        else
-          report_recipe( collection_path, notice, formats)
-        end
-      else
-        respond_to do |format|
-          format.html { render nothing: true }
-          format.json { render json: { type: :error, popup: @recipe.errors.messages.first.last.last } }
-          format.js { render :text => e.message, :status => 403 }
-        end
-      end
-    else # Nobody logged in; defer the collection and render with login dialog
-      login_required "You need to be logged in to collect recipes."
-    end
-  end
-
   # Remove the recipe from the system entirely
   def destroy
     @recipe = Recipe.find params[:id] 

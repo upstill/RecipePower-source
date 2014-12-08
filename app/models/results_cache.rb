@@ -371,7 +371,7 @@ class UserCollectionCache < ResultsCache
   end
 
   def itemscope
-    user.collection_scope(:sort_by => :collected) if user
+    user.collection_scope(:in_collection => true, :sort_by => :collected) if user
   end
 
 end

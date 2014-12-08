@@ -80,7 +80,7 @@ RP::Application.routes.draw do
   resources :lists, except: [:index, :create] do
     member do
       post 'pin' # Add an entity to a list
-      get 'collect' # Add to the user's collection
+      post 'collect' # Add to the user's collection
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       post 'tag' # For saving the tags
       get 'scrape'
@@ -91,7 +91,7 @@ RP::Application.routes.draw do
   post '/site' => 'sites#create', :as => 'create_site'
   resources :sites, except: [:index, :create] do
     member do
-      get 'collect' # Add to the user's collection
+      post 'collect' # Add to the user's collection
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       post 'tag'
       get 'scrape'
@@ -157,16 +157,12 @@ RP::Application.routes.draw do
   resources :scales
 
   resources :recipes do
-    resources :tags do
-      member { post 'remove', :to => 'recipes#uncollect' }
-    end
     member do
-      get  "collect"
+      post  "collect"
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       post 'tag'
       get 'touch'
       get 'piclist'
-      post 'remove'
     end
     collection do
       get 'capture'
