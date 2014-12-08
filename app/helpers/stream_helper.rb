@@ -1,7 +1,11 @@
 module StreamHelper
 
   def stream_element_class etype
-    "stream-#{etype}"
+    "stream-#{etype} #{response_service.controller}-#{response_service.action}"
+  end
+
+  def stream_element_selector etype
+    ".stream-#{etype}"
   end
 
   # Use a partial to generate a stream header, and surround it with a 'stream-header' div
@@ -54,8 +58,8 @@ module StreamHelper
     end
     content = block_given? ?
       stream_element( etype, headerpartial, locals) { yield } :
-      stream_element(etype, headerpartial, locals)
-    replacement = ["."+stream_element_class(etype), content ]
+      stream_element( etype, headerpartial, locals)
+    replacement = [ stream_element_selector(etype), content ]
     replacement << "RP.stream.check" if etype==:trigger
     replacement
   end
@@ -123,7 +127,8 @@ module StreamHelper
     # Wrap the element so that its contents can be replaced
     item = render partial: partialname, locals: { :item => @decorator }
     if for_masonry && !no_wrap
-      item = content_tag :div, item, class: "masonry-item"
+      # Wrap the item in another layer so that the item can be replaced w/o disrupting Masonry
+      item = content_tag :div, item, class: "masonry-item", id: dom_id(@decorator)
     end
     item
   end

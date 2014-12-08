@@ -26,25 +26,28 @@ Expecting the following local variables:
             <% end %>
             </span>
           <% if pageurl && pic_select_list.empty? %>
-              <br>(Alternatively, you can visit the recipe's webpage, hit the Cookmark button, and pick a picture from there.)
+              <br>(Alternatively, you can visit the recipe's webpage, hit the Cookmark button, and pick a picture from
+              there.)
           <% end %>
         </div>
         <div class="row">
-        <div class="col-xs-12 col-sm-12 col-md-12">
+          <div class="col-xs-12 col-sm-12 col-md-12">
             <input type="text"
                    rel="jpg,png,gif"
                    value="<%= picurl %>"
                    class="icon_picker"
                    style="width: 100%"
                    data-golinkid="<%= golinkid %>"/>
+          </div>
         </div>
-      </div>
-      <div class="row">
+        <div class="row">
           <%= link_to "Preview", "#", class: "btn btn-info image_preview_button" %>
+        </div>
+        <%= pic_select_list.html_safe %>
+        <%= modal_footer do %>
+            <%= link_to "Save", "#", class: "btn btn-lg btn-success pic_picker_okay dialog-submit-button" %>
+            <%= dialog_cancel_button "Cancel" %>
+        <% end %>
       </div>
-      <%= pic_select_list.html_safe %>
-  <%= modal_footer do %>
-    <%= link_to "Save", "#", class: "btn btn-lg btn-success pic_picker_okay dialog-submit-button" %>
-    <%= dialog_cancel_button "Cancel" %>
-  <% end %>
+    </div>
 <% end %>

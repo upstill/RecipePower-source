@@ -7,8 +7,8 @@ class RecipesController < CollectibleController
   before_filter { @focus_selector = "#recipe_url" }
     
   filter_access_to :all
-  include ApplicationHelper
-  include ActionView::Helpers::TextHelper
+  # include ApplicationHelper
+  # include ActionView::Helpers::TextHelper
   
   # Render to html, json or js the results of a recipe manipulation
   def report_recipe( url, notice, formats, destroyed = false)
