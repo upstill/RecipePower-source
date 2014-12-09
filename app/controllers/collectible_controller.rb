@@ -82,7 +82,7 @@ class CollectibleController < ApplicationController
   def touch
     update_and_decorate
     # If all is well, make sure it's on the user's list
-    current_user.touch @decorator if current_user && @decorator.errors.empty? && @decorator.id
+    current_user.touch @decorator.object if current_user && @decorator.errors.empty? && @decorator.id
     flash[:popup] = "Snap! Touched #{@decorator.human_name} #{@decorator.title}."
   end
 end

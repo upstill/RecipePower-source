@@ -288,11 +288,7 @@ class User < ActiveRecord::Base
     # TODO: temporarily excluding anything but recipes from exposure
     scope = Rcpref.where(
         options.slice(
-            :in_collection, :private, :entity_type).
-            merge(
-                entity_type: (options[:entity_type] || "Recipe"),
-                user_id: id
-            )
+            :in_collection, :private, :entity_type).merge( user_id: id )
     )
     # The order field can be specified directly with :order, or implicitly with :collected
     unless ordering = options[:order]

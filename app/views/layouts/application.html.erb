@@ -38,7 +38,7 @@
 <%= render 'layouts/navbar' %>
 <%= render "layouts/container" %>
 <% if current_user  %>
-  <%= template_element "tag-collectible", "application/tag_modal" %>
+  <%= template_element "tag-collectible", "tag_modal" %>
 <% else %>
   <%= render partial: "registrations/new_modal" %>
 <% end %>
