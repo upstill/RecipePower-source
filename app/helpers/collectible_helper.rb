@@ -40,7 +40,7 @@ module CollectibleHelper
   def collectible_table_row entity
     entity = entity.object if entity.is_a? Draper::Decorator
     dir = entity.class.to_s.underscore.pluralize
-    with_format("html") do render "#{dir}/index_table_row", item: entity end
+    with_format("html") do render "index_table_row", item: entity end
   end
 
   def collectible_table_row_replacement entity, destroyed=false
@@ -56,6 +56,7 @@ module CollectibleHelper
     }
   end
 
+=begin
   def collectible_smallpic entity
     with_format("html") do render "shared/recipe_smallpic" end
   end
@@ -63,6 +64,7 @@ module CollectibleHelper
   def collectible_smallpic_replacement entity, destroyed=false
     [ "."+recipe_list_element_class(@recipe), (collectible_smallpic(entity) unless destroyed) ]
   end
+=end
 
   # Provide the standard buttons for a collectible entity: Collect/Tag and (for admins) Destroy
   def collectible_buttons entity, collect_or_tag=:both, options={}
