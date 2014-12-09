@@ -26,7 +26,12 @@ module Picable
     def picdata data_only = false
       if imageref = self.method(self.class.image_reference_name).call
         imageref.imgdata
-      end
+      end  # Default
+
     end
+
+  def picdata_with_fallback data_only = false
+    picdata(data_only) || "/assets/NoPictureOnFile.png"
+  end
 
   end

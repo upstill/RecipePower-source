@@ -45,6 +45,8 @@ module Templateer
           human_name_plural_capitalize: human_name(true, true),
           tagging_tag_data: tagdata
       }
+      # templateData.subs.picdata ||= templateData.subs.picurl || "/assets/NoPictureOnFile.png"  # Default
+
       if @object
         toget = needed || (@object.class.accessible_attributes + [:id])
         toget.each { |key|

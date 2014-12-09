@@ -38,7 +38,7 @@ class CollectibleController < ApplicationController
       else
         if (request.method == "POST")
           flash[:popup] = "#{@decorator.human_name} saved"
-          render :update # Present JSON instructions for updating the item
+          render "collectible/update.json"
         else
           response_service.title = @decorator.title.truncate(20) # Get title (or name, etc.) from the entity
           smartrender

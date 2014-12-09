@@ -71,7 +71,7 @@ RP.submit.submit_and_process = ( request, elmt, method="GET" ) ->
 		method = "POST"
 	else
 		data = null
-	unless elmt && ($(elmt).hasClass('loading') || shortCircuit(request, elmt))
+	unless elmt && ($(elmt).hasClass('loading') || (preload = shortCircuit(request, elmt)))
 		$(elmt).addClass 'loading'
 		ajdata =
 			type: method,
@@ -88,6 +88,14 @@ RP.submit.submit_and_process = ( request, elmt, method="GET" ) ->
 		if data != null
 			ajdata.data = data
 		$.ajax ajdata
+	if preload
+		# The preloaded data is either a DOM element for a dialog, a source string for the dialog, or a responseData structure
+		if typeof(preload) == "string"
+			RP.dialog.push_modal preload, RP.dialog.enclosing_modal(elmt)
+		else if preload.done || preload.dlog || preload.code || preload.replacements
+			handleResponse elmt, preload
+		else if ndlog = $(preload)[0] # It's a DOM element
+			RP.dialog.push_modal ndlog, RP.dialog.enclosing_modal(elmt)
 
 shortCircuit = (request, elmt) ->
 	data = (elmt && $(elmt).data()) || {}
@@ -100,28 +108,24 @@ shortCircuit = (request, elmt) ->
 	if elmt
 		if $(elmt).hasClass("preload")
 			# The element will store either a 'response' object or a 'preloaded' dialog element
-			responseData = data.response
-			if ndlog = data.preloaded || (responseData && responseData.dlog)
-				RP.dialog.push_modal ndlog, odlog
-				return true;
+			if ndlog = data.preloaded || ((responseData = data.response) && responseData.dlog)
+				# RP.dialog.push_modal ndlog, odlog
+				return ndlog;
 			else if responseData
-				RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
-				RP.process_response responseData
-				RP.state.onAJAXSuccess event
+				# RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
+				# RP.process_response responseData
+				# RP.state.onAJAXSuccess event
 				$(elmt).data 'response', null
-				return true;
-		if templedata = data.template
-			# Look in the data to find the template handler
-			fcn =
-			((name = templedata.handler) && RP.named_function(name)) ||
-			((name = "RP." + templedata.id.replace(/-/g, '_') + ".apply_template") && RP.named_function(name))
-			if ndlog = fcn.call null, elmt
-				return true;
+				return responseData
+		if (templateData = data.template) && templateData.subs
+			if interpolated = RP.templates.find_and_interpolate(templateData)
+				return interpolated
 	if data.selector && (ndlog = $(data.selector)[0]) # If dialog is already loaded, replace the responding dialog
 		$(elmt).removeClass 'trigger'
-		RP.dialog.replace_modal ndlog, odlog # Will close any existing open dialog
-		RP.state.postDialog ndlog, request, (elmt && elmt.innerText) # RP.state.onAJAXSuccess event
-		return true;
+		return ndlog
+		# RP.dialog.replace_modal ndlog, odlog # Will close any existing open dialog
+		# RP.state.postDialog ndlog, request, (elmt && elmt.innerText) # RP.state.onAJAXSuccess event
+		# return true;
 	false
 
 handleResponse = (elmt, responseData, status, xhr) ->

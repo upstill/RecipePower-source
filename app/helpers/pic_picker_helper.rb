@@ -26,7 +26,7 @@ module PicPickerHelper
   # Bare-metal version of the pic preview widget, for use in a template file
   def pic_preview_widget templateer, options={}
     page_url = templateer.url rescue nil
-    img_url_display = templateer.picdata || "/assets/NoPictureOnFile.png"
+    img_url_display = templateer.picdata_with_fallback
     img_url_value = templateer.picurl
     entity_id = templateer.id
     input_id = templateer.element_id(:picurl) # "recipe_picurl"

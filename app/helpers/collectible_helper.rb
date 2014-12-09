@@ -12,7 +12,7 @@ module CollectibleHelper
     if entity.collected_by?(current_user.id)
       attribs = %w( collectible_comment collectible_private collectible_user_id
                     element_id field_name human_name id object_path tag_path
-                    tagdata tagging_user_id title )
+                    tagdata tagging_user_id title picdata_with_fallback )
       template_link entity, "tag-collectible", "Tag", options.merge( :mode => :modal, :attribs => attribs )
     elsif (collect_or_tag != :tag_only) # Either provide the Tag button or none
       url = polymorphic_path(entity)+"/collect"
