@@ -243,9 +243,14 @@ manager_of = (dlog) ->
 		if mgr_name = $(dlog).data 'manager'
 			return RP[mgr_name]
 		if classname = $(dlog).attr 'class'
-			classList = classname.split /\s+/
+			classList = classname.
+			replace(/\b(modal|dialog)\b/g, ''). # Ignore 'modal', etc.
+			replace(/^\s*/,'').  # Eliminate whitespace fore and aft
+			replace(/\s*$/,'').
+			replace(/-/g, '_'). # Translate hyphen for a legitimate function name
+			split /\s+/
 			for mgr_name in classList
-				if mgr_name != "dialog" && RP[mgr_name]
+				if RP[mgr_name]
 					return RP[mgr_name]
 	return null
 

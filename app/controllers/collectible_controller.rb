@@ -76,4 +76,13 @@ class CollectibleController < ApplicationController
       render :errors
     end
   end
+
+  # Register that the entity was touched by the current user--if they own it.
+  # Since that recipe will now be at the head return a new first-recipe in the list.
+  def touch
+    update_and_decorate
+    # If all is well, make sure it's on the user's list
+    current_user.touch @decorator if current_user && @decorator.errors.empty? && @decorator.id
+    flash[:popup] = "Snap! Touched #{@decorator.human_name} #{@decorator.title}."
+  end
 end

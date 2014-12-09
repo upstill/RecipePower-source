@@ -42,8 +42,7 @@ module Templateer
           human_name: human_name(false, false),
           human_name_capitalize: human_name(false, true),
           human_name_plural: human_name(true, false),
-          human_name_plural_capitalize: human_name(true, true),
-          tagging_tag_data: tagdata
+          human_name_plural_capitalize: human_name(true, true)
       }
       # templateData.subs.picdata ||= templateData.subs.picurl || "/assets/NoPictureOnFile.png"  # Default
 
@@ -103,10 +102,6 @@ module Templateer
 
   def edit_path
     object_path+"/edit"
-  end
-
-  def tagdata
-    object ? object.tagging_tags.map(&:attributes).to_json : ""
   end
 
   def edit_class

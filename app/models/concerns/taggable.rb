@@ -68,6 +68,10 @@ module Taggable
     data.to_json
   end
 
+  def tagging_tag_data
+    tagging_tags.map(&:attributes).to_json
+  end
+
 protected
 
   # Fetch the tags associated with the entity, possibly with constraints of userid and type

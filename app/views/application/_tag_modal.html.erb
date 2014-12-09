@@ -9,7 +9,7 @@
           <button type="button" class="close" onclick="RP.dialog.cancel(event)" data-dismiss="modal" aria-hidden="true">×</button>          <%# unless recipe %>
           <h3><%= response_service.admin_view? ? "Tag That #{entity.human_name}!" : entity.title %></h3>
         </div>
-        <form accept-charset="UTF-8" action="<%= entity.tag_path %>" class="form-inline tag-collectible" data-remote="true" data-type="json" id="tag_collectible_<%= entity.id %>">
+        <form accept-charset="UTF-8" action="<%= entity.tag_path %>" class="form-inline tag-collectible" data-remote="true" data-type="json" id="tag_collectible_<%= entity.id %>" >
           <input name="utf8" type="hidden" value="&#x2713;"/>
           <input name="_method" type="hidden" value="post"/>
           <input name="authenticity_token" type="hidden" value="<%= form_authenticity_token %>"/>
@@ -40,7 +40,7 @@
                          rows="2"
                          size="30"
                          placeholder="Tags"
-                         data-pre="<%= entity.tagdata %>"/>
+                         data-pre="<%= entity.tagging_tag_data %>"/>
                 </div>
                 <div class="control-group">
                   <input id="<%= entity.element_id :collectible_user_id %>" name="<%= entity.field_name :collectible_user_id %>" type="hidden" value="<%= entity.collectible_user_id %>">

@@ -7,9 +7,11 @@ RP::Application.routes.draw do
 
   get "admin/toggle"
   resources :feed_entries, :except => [:index, :create, :new] do
-    member do 
+    member do
+      # Routes for collectibles
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       post 'tag'
+      get 'touch'
       post "collect"
     end
   end
@@ -69,10 +71,14 @@ RP::Application.routes.draw do
   # get 'users/:id/show' => 'users#show'
   resources :users, :except => [:index, :create] do
     member do
-      post 'collect'
       get 'match_friends'
       get 'notify'
       get 'acquire' # Acquire a recipe (etc.)
+      # Routes for collectibles
+      get 'tag'
+      post 'tag'
+      get 'touch'
+      post 'collect'
     end
   end
 
@@ -80,10 +86,12 @@ RP::Application.routes.draw do
   resources :lists, except: [:index, :create] do
     member do
       post 'pin' # Add an entity to a list
+      get 'scrape'
+      # Routes for collectibles
       post 'collect' # Add to the user's collection
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       post 'tag' # For saving the tags
-      get 'scrape'
+      get 'touch'
     end
   end
   match 'lists', :controller => 'lists', :action => 'index', :via => [:get, :post]
@@ -91,10 +99,12 @@ RP::Application.routes.draw do
   post '/site' => 'sites#create', :as => 'create_site'
   resources :sites, except: [:index, :create] do
     member do
+      get 'scrape'
+      # Routes for collectibles
       post 'collect' # Add to the user's collection
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       post 'tag'
-      get 'scrape'
+      get 'touch'
     end
   end
   match 'sites', :controller => 'sites', :action => 'index', :via => [:get, :post]
@@ -106,11 +116,13 @@ RP::Application.routes.draw do
   post '/feed' => 'feeds#create', :as => 'create_feed'
   resources :feeds, :except => [:index, :create] do
     member do
+      get 'refresh' # Refresh the feed's entries
+      post 'approve' # (Admin only) approve the feed for presentation
+      # Routes for collectibles
       post  "collect"  # Add the feed to the current user
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       post 'tag'
-      get 'refresh' # Refresh the feed's entries
-      post 'approve' # (Admin only) approve the feed for presentation
+      get 'touch'
     end
   end
   match 'feeds', :controller => 'feeds', :action => 'index', :via => [:get, :post]
@@ -158,11 +170,12 @@ RP::Application.routes.draw do
 
   resources :recipes do
     member do
+      get 'piclist'
+      # Routes for collectibles
       post  "collect"
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       post 'tag'
       get 'touch'
-      get 'piclist'
     end
     collection do
       get 'capture'

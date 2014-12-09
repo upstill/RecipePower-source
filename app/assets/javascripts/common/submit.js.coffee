@@ -90,12 +90,10 @@ RP.submit.submit_and_process = ( request, elmt, method="GET" ) ->
 		$.ajax ajdata
 	if preload
 		# The preloaded data is either a DOM element for a dialog, a source string for the dialog, or a responseData structure
-		if typeof(preload) == "string"
-			RP.dialog.push_modal preload, RP.dialog.enclosing_modal(elmt)
+		if typeof(ndlog = preload) == "string" || (ndlog = $(preload)[0]) # Got a string or a DOM element => run dialog
+			RP.dialog.push_modal ndlog, RP.dialog.enclosing_modal(elmt)
 		else if preload.done || preload.dlog || preload.code || preload.replacements
 			handleResponse elmt, preload
-		else if ndlog = $(preload)[0] # It's a DOM element
-			RP.dialog.push_modal ndlog, RP.dialog.enclosing_modal(elmt)
 
 shortCircuit = (request, elmt) ->
 	data = (elmt && $(elmt).data()) || {}
@@ -117,9 +115,8 @@ shortCircuit = (request, elmt) ->
 				# RP.state.onAJAXSuccess event
 				$(elmt).data 'response', null
 				return responseData
-		if (templateData = data.template) && templateData.subs
-			if interpolated = RP.templates.find_and_interpolate(templateData)
-				return interpolated
+		if (templateData = data.template) && templateData.subs && (interpolated = RP.templates.find_and_interpolate(templateData))
+			return interpolated
 	if data.selector && (ndlog = $(data.selector)[0]) # If dialog is already loaded, replace the responding dialog
 		$(elmt).removeClass 'trigger'
 		return ndlog
