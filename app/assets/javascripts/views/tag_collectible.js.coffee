@@ -32,9 +32,6 @@ RP.tag_collectible.apply_template = (elmt) ->
 	# Parse the data for the recipe and insert into the dialog's template.
 	# The dialog has placeholders of the form %%rcp<fieldname>%% for each part of the recipe
 	# The status must be set by activating one of the options
-	templateData.subs.picdata ||= templateData.subs.picurl || "/assets/NoPictureOnFile.png"  # Default
-	unless srcString = RP.templates.find_and_interpolate templateData
-		return null
 	# The tag data is parsed and added to the tags field directly
 	RP.tagger.init tagger_selector, templateData.subs.taggingTagData
 	$('textarea').autosize()
