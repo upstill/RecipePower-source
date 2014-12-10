@@ -285,11 +285,11 @@ class User < ActiveRecord::Base
   # :sort_by either :collected or :viewed if :order not provided
   # :direction passes through to SQL; can be ASC or DESC
   def collection_scope options={}
-    # TODO: temporarily excluding anything but recipes from exposure
     scope = Rcpref.where(
         options.slice(
             :in_collection, :private, :entity_type).merge( user_id: id )
     )
+    scope = scope.where.not(entity_type: ["List", "Feed"]) unless options[:entity_type] # Exclude Feeds and Lists b/c we have a
     # The order field can be specified directly with :order, or implicitly with :collected
     unless ordering = options[:order]
       case options[:sort_by]
