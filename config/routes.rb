@@ -55,6 +55,7 @@ RP::Application.routes.draw do
     patch "/users" => "registrations#update"
 
     get "/users/invitation/divert" => "invitations#divert", :as => "divert_user_invitation"
+
   end
 
   get '/auth/:provider/callback' => 'authentications#create'
@@ -75,6 +76,7 @@ RP::Application.routes.draw do
       get 'notify'
       get 'acquire' # Acquire a recipe (etc.)
       # Routes for collectibles
+      get 'getpic'
       get 'tag'
       post 'tag'
       get 'touch'

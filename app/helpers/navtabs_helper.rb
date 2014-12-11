@@ -122,6 +122,7 @@ module NavtabsHelper
       item_list = [
           # navlink( "Profile", users_profile_path( section: "profile" ), :mode => :modal),
           navlink("Sign-in Services", authentications_path, :mode => :modal, class: "transient"),
+          navlink("Profile", users_profile_path, :mode => :page),
           navlink("Invite", new_user_invitation_path, :mode => :modal, class: "transient"),
           navlink("Sign Out", destroy_user_session_path, :method => "delete")
       ]
@@ -132,6 +133,7 @@ module NavtabsHelper
             link_to_submit( "Admin View Off", admin_toggle_path(on: false), :mode => :partial, class: "transient"),
             link_to_submit("Add Cookmark", new_recipe_path, :mode => :modal, class: "transient"),
             link_to("Admin", admin_path),
+            link_to("Upload Picture", getpic_user_path(current_user)),
             link_to("Refresh Masonry", "#", onclick: "RP.collection.justify();"),
             link_to("Address Bar Magic", "#", onclick: "RP.getgo('#{home_path}', 'http://local.recipepower.com:3000/bar.html##{bookmarklet_script}')"),
             link_to("Bookmark Magic", "#", onclick: "RP.bm('Cookmark', '#{bookmarklet_script}')"),
