@@ -1,0 +1,8 @@
+<% uploader_data = { form_data: @s3_direct_post.fields, url: @s3_direct_post.url.to_s, url_host: @s3_direct_post.url.host } %>
+<%= form_for(@user, html: { class: "directUpload", data: { direct_upload: uploader_data } } ) do |f| %>
+    <div class="field">
+      <%= f.label :avatar_url %><br>
+      <%= f.file_field :avatar_url, class: 'directUpload', data: { direct_upload: uploader_data } %>
+    </div>
+    <%= form_actions f, submit_label: "Update Details", cancel_path: users_path %>
+<% end %>

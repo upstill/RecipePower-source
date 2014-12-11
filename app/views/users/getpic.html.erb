@@ -1,7 +1,1 @@
-<%= form_for(@user, html: { class: "directUpload" }) do |f| %>
-    <div class="field">
-      <%= f.label :avatar_url %><br>
-      <%= f.file_field :avatar_url %>
-    </div>
-    <%= form_actions f, submit_label: "Update Details", cancel_path: users_path %>
-<% end %>
+<%= render response_service.select_render %>

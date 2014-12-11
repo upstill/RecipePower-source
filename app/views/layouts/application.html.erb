@@ -38,6 +38,7 @@
               console.log(fileInput);
           });
       });
+  <% if defined?( @s3_direct_post) && false %>
       $(function () {
           $('.directUpload').find("input:file").each(function (i, elem) {
               var fileInput = $(elem);
@@ -90,6 +91,7 @@
               });
           });
       });
+    <% end %>
   </script>
 </head>
 <body>

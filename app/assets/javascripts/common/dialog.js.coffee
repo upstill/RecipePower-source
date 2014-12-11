@@ -147,6 +147,7 @@ open_modal = (dlog, omit_button) ->
 		$('div.modal-header', dlog).prepend buttoncode
 	if $(dlog).modal
 		$(dlog).modal()
+	uploader_unpack()
 	notify "open", dlog
 	notify_injector "open", dlog
 	$('.token-input-field-pending', dlog).each ->
