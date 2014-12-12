@@ -15,6 +15,7 @@
 #= require ../../../vendor/assets/javascripts/JavaScript-Load-Image/load-image.all.min.js
 #= require_directory ../../../vendor/assets/javascripts/jquery/fileupload
 #= require ../../../vendor/assets/javascripts/imagesloaded.pkgd.min
+#= require ../../../vendor/assets/javascripts/bootstrap-filestyle.min
 #= require bootbox
 #= require history
 #= require masonry.pkgd

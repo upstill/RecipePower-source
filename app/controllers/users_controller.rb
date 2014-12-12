@@ -179,7 +179,6 @@ class UsersController < CollectibleController
 
   def getpic
     update_and_decorate
-    @s3_direct_post = S3_BUCKET.presigned_post(key: "uploads/#{@decorator.object.class.to_s.underscore}/#{@decorator.id}/${filename}", success_action_status: 201, acl: :public_read)
   end
 
   def update

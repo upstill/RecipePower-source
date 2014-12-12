@@ -1,5 +1,17 @@
 module PicPickerHelper
 
+  def pic_preview_img_id templateer
+    "rcpPic#{templateer.id}"
+  end
+
+  def pic_preview_input_id obj, fieldname
+    if obj.is_a? Templateer
+      obj.element_id(fieldname)
+    else
+      (obj.is_a? Draper::Decorator ? obj.object : obj).class.to_s.downcase + "_" + fieldname.to_s
+    end
+  end
+
   # Show an image that will resize to fit an enclosing div, possibly with a link to an editing dialog
   # We'll need the id of the object, and the name of the field containing the picture's url
   def pic_field(form, pic_attribute, page_attribute=nil, options={})
@@ -10,8 +22,8 @@ module PicPickerHelper
       picurl = valid_url(picurl, home) unless picurl.blank?
       pageurl = valid_url(pageurl, home) if pageurl
     end
-    input_id = obj.class.to_s.downcase + "_" + pic_attribute.to_s
-    img_id = "rcpPic#{obj.id}"
+    input_id = pic_preview_input_id(obj, pic_attribute)
+    img_id = pic_preview_img_id(obj)
     link_id = "golink#{obj.id}"
     pic_area = page_width_pic picurl, img_id, options[:fallback_img]
     preview = content_tag :div,
@@ -29,36 +41,13 @@ module PicPickerHelper
     img_url_display = templateer.picdata_with_fallback
     img_url_value = templateer.picurl
     entity_id = templateer.id
-    input_id = templateer.element_id(:picurl) # "recipe_picurl"
+    input_id = pic_preview_input_id(templateer, :picurl) # "recipe_picurl"
     input_name = templateer.field_name(:picurl) # "recipe[picurl]"
-    img_id = "rcpPic#{entity_id}"
+    img_id = pic_preview_img_id(templateer)
     link_id = "golink#{entity_id}"
     pic_picker_link = pic_preview_golink page_url, img_url_value, link_id, img_id, input_id
     pic_preview =
         %Q{<img alt="Image Link is Broken"
-              id="#{img_id}"
-              src="#{img_url_display}"
-              style="width:100%; height: auto">
-         <input type="hidden"
-                id="#{input_id}"
-                name="#{input_name}"
-                rel="jpg,png,gif"
-                type="text"
-                value="#{img_url_value}">
-        }.html_safe
-    content_tag( :div, pic_preview, :class => :pic_preview)+
-        content_tag( :div, pic_picker_link, :class => :pic_picker_link)
-  end
-
-  # Bare-metal version of the pic preview widget, for use in a template file
-  def old_pic_preview_widget page_url, img_url_display, img_url_value, entity_id, options={}
-    input_id = "recipe_picurl"
-    input_name = "recipe[picurl]"
-    img_id = "rcpPic#{entity_id}"
-    link_id = "golink#{entity_id}"
-    pic_picker_link = pic_preview_golink page_url, img_url_value, link_id, img_id, input_id
-    pic_preview =
-      %Q{<img alt="Image Link is Broken"
               id="#{img_id}"
               src="#{img_url_display}"
               style="width:100%; height: auto">

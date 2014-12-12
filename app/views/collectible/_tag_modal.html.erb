@@ -1,5 +1,5 @@
 <%# Default modal dialog for editing a (collectible, taggable) item. May be overwritten for other controllers  %>
-<% entity ||= @decorator || TemplateDecorator.new # If no entity provided, assume this is for a template  %>
+<% entity ||= @decorator || TemplateDecorator.new # If no entity provided, assume this is for a template   %>
 <%= content_tag(:div,
                 class: "dialog tag-collectible modal at_left hide",
                 style: "overflow:visible") do %>
@@ -9,7 +9,7 @@
           <button type="button" class="close" onclick="RP.dialog.cancel(event)" data-dismiss="modal" aria-hidden="true">×</button>          <%# unless recipe %>
           <h3><%= response_service.admin_view? ? "Tag That #{entity.human_name}!" : entity.title %></h3>
         </div>
-        <form accept-charset="UTF-8" action="<%= entity.tag_path %>" class="form-inline tag-collectible" data-remote="true" data-type="json" id="tag_collectible_<%= entity.id %>" >
+        <form accept-charset="UTF-8" action="<%= entity.tag_path %>" class="form-inline tag-collectible" data-remote="true" data-type="json" id="tag_collectible_<%= entity.id %>">
           <input name="utf8" type="hidden" value="&#x2713;"/>
           <input name="_method" type="hidden" value="post"/>
           <input name="authenticity_token" type="hidden" value="<%= form_authenticity_token %>"/>
@@ -21,6 +21,7 @@
               <div class="col-md-5">
                 <div class="tag_collectible_field pic_picker_field">
                   <%= pic_preview_widget entity %>
+                  <%= uploader_field :picable_url %>
                 </div>
               </div>
               <div class="col-md-7">
