@@ -22,7 +22,7 @@ function uploader_init(elem) {
             type: 'POST',
             disableImageResize: !resizeImage,
             imageMaxWidth: 200,
-            autoUpload: true,
+            autoUpload: false, // true,
             formData: formData,
             paramName: 'file', // S3 does not like nested name fields i.e. name="user[avatar_url]"
             dataType: 'XML',  // S3 returns XML if success_action_status is set to 201
@@ -80,8 +80,20 @@ function readURL(input) {
 
         reader.onload = function (e) {
             image.onerror = function () {
-
+               // Abort!
+                var x=2;
             }
+            $(image).load (function() {
+                // Successful image load
+                $(input).fileupload('add', {
+                    autoUpload: true,
+                    disableImageResize: false,
+                    imageMaxWidth: 200,
+                    imageMaxHeight: 200,
+                    files: input.files
+                });
+                x=2;
+            })
             $(image).attr('src', e.target.result);
         }
         var alt = $(input).val()
