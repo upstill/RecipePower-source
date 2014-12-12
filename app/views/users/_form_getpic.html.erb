@@ -1,6 +1,12 @@
 <% uploader_data = { form_data: @s3_direct_post.fields, url: @s3_direct_post.url.to_s, url_host: @s3_direct_post.url.host } %>
 <%= form_for(@user, html: { class: "directUpload", data: { direct_upload: uploader_data } } ) do |f| %>
-    <div class="field">
+    <div class="col-md-5">
+      <img alt="Image Link is Broken"
+           id="image_id"
+           src="/assets/NoPictureOnFile.png"
+           style="width:100%; height: auto">
+    </div>
+    <div class="col-md-5 field">
       <%= f.label :avatar_url %><br>
       <%= f.file_field :avatar_url, class: 'directUpload', data: { direct_upload: uploader_data } %>
     </div>
