@@ -11,13 +11,13 @@
 @import 'collection';
 
 .brand {
-	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-	line-height: 20px;
-	text-decoration: none;
-	font-size: 20px;
-	font-weight: 150;
-	color: #999999;
-	# text-shadow: 0 1px 0 #888888;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  line-height: 20px;
+  text-decoration: none;
+  font-size: 20px;
+  font-weight: 150;
+  color: #999999;
+# text-shadow:0 1 px 0 #888888;
 }
 
 .simple_form label {
@@ -26,7 +26,7 @@
 }
 
 div.token-input-dropdown-facebook {
-  font:14px arial,sans-serif;
+  font: 14px arial, sans-serif;
 }
 
 .top_right_corner {
@@ -37,15 +37,15 @@ div.token-input-dropdown-facebook {
 }
 
 div.prompt {
-  font:18px arial,sans-serif;
-  font-weight:bold;
+  font: 18px arial, sans-serif;
+  font-weight: bold;
   margin: 20px 0px 15px 10px;
   padding: 0px;
 }
 
 .hd1 {
-  font:22px arial,sans-serif;
-  font-weight:bold;
+  font: 22px arial, sans-serif;
+  font-weight: bold;
 }
 
 div.stream-results {
@@ -53,9 +53,9 @@ div.stream-results {
 }
 
 div.stream-filter-field {
-  display:inline-block;
-  vertical-align:bottom;
-  margin-bottom:0px
+  display: inline-block;
+  vertical-align: bottom;
+  margin-bottom: 0px
 }
 
 div.masonry-item {

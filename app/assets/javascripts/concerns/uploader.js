@@ -1,18 +1,43 @@
 $(function () {
 });
 
-function abort_upload(params) {
-    // Copy the original input value back to the image
-    var url = $("input#" + params.input_id).attr("value")
+function resettle(uploadElmt) {
+    var form = $($(uploadElmt).parents('form:first'));
+    var submitButton = form.find('input[type="submit"]');
+    uploadElmt.value = "";
+    submitButton.prop('disabled', false);
+    $('div.progress').hide();
+}
+
+function abort_upload(uploadElmt, msg) {
+    var params = $(uploadElmt).data('directUpload');
+    var inputSelector = "input#" + params.input_id;
+    var imageSelector = "img#" + params.img_id;
+
+    msg = msg || "Upload failed!"
+    // Copy the original input value back to the image from its associated input element
+    var url = $(inputSelector).attr("value")
     if (!url || url === "") {
         url = "/assets/NoPictureOnFile.png";
     }
-    $("img#" + params.img_id).attr("src", url);
+    $(imageSelector).attr("src", url);
+    RP.notifications.post(msg, "alert");
+    $('div.bootstrap-filestyle input.form-control').css({"background-color": "#b94a48", "color": "white"})
+
+    resettle(uploadElmt);
 }
 
-function finalize_upload(params, url) {
-    $("input#" + params.input_id).attr("value", url);
-    $("img#" + params.img_id).attr("src", url);
+function finalize_upload(uploadElmt, url) {
+    var params = $(uploadElmt).data('directUpload');
+    var inputSelector = "input#" + params.input_id;
+    var imageSelector = "img#" + params.img_id;
+
+    $(inputSelector).attr("value", url);
+    $(imageSelector).attr("src", url);
+    RP.notifications.post("Picture is uploaded and ready to go", "popup");
+    $('div.bootstrap-filestyle input.form-control').css({"background-color": "#006600", "color": "white"})
+
+    resettle(uploadElmt);
 }
 
 function uploader_init(elem) {
@@ -56,22 +81,18 @@ function uploader_init(elem) {
                     text("Loading...");
             },
             done: function (e, data) {
-                submitButton.prop('disabled', false);
                 progressBar.text("Uploading done");
-                $('div.progress').hide();
-
                 // extract key and generate URL from response
                 var key = $(data.jqXHR.responseXML).find("Key").text();
                 var url = '//' + url_host + '/' + key;
-                finalize_upload(upload_params, "http:" + url);
+                finalize_upload(elem, "http:" + url);
                 // create hidden field
                 // var input = $("<input />", {type: 'hidden', name: fileInput.attr('name'), value: url})
                 // form.append(input);
                 // $('img#image_id')[0].src = "http:"+url
             },
             fail: function (e, data) {
-                submitButton.prop('disabled', false);
-                abort_upload(upload_params);
+                abort_upload(elem);
                 progressBar.
                     css("background", "red").
                     text("Failed");
@@ -94,18 +115,20 @@ function uploader_unpack() {
                     image.onerror = function () {
                         // Abort! Copy the input value back to the image
                         var x = 2;
-                        abort_upload(params);
+                        abort_upload(elem, "That file isn't a picture!");
                     }
                     var passOn = function () {
                         // Successful image load => go ahead and upload it
                         $(image).off("load", passOn);
-                        $(input).fileupload('add', {
-                            autoUpload: true,
-                            disableImageResize: false,
-                            imageMaxWidth: 200,
-                            imageMaxHeight: 200,
-                            files: input.files
-                        });
+                        if (input.files.length > 0) {
+                            $(input).fileupload('add', {
+                                autoUpload: true,
+                                disableImageResize: false,
+                                imageMaxWidth: 200,
+                                imageMaxHeight: 200,
+                                files: input.files
+                            });
+                        }
                     };
                     $(image).on("load", passOn);
                     $(image).attr('src', e.target.result);
