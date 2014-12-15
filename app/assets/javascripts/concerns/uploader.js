@@ -61,7 +61,6 @@ function uploader_init(elem) {
             type: 'POST',
             disableImageResize: !resizeImage,
             imageMaxWidth: 200,
-            imageMaxHeight: 200,
             autoUpload: false, // true,
             formData: formData,
             paramName: 'file', // S3 does not like nested name fields i.e. name="user[avatar_url]"
@@ -128,7 +127,6 @@ function uploader_unpack() {
                                 autoUpload: true,
                                 disableImageResize: false,
                                 imageMaxWidth: 200,
-                                imageMaxHeight: 200,
                                 files: input.files
                             });
                         }
