@@ -72,8 +72,13 @@ def fix_fragment url
   end
 end
 
+# Fix errant characters without re-escaping '%'
 def sanitize_url url
-  url.strip.gsub(/\{/, '%7B').gsub(/\}/, '%7D').gsub(/\%23/, '#' )
+  url.strip.
+      gsub(/\{/, '%7B').
+      gsub(/\}/, '%7D').
+      gsub(/ /, '%20').
+      gsub(/\%23/, '#' )
 end
 
 # Return nil if anything is amiss, including nil or empty url

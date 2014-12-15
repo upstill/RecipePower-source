@@ -84,7 +84,10 @@ function uploader_init(elem) {
                 progressBar.text("Uploading done");
                 // extract key and generate URL from response
                 var key = $(data.jqXHR.responseXML).find("Key").text();
-                var url = '//' + url_host + '/' + key;
+                // Make the key safe for subsequent use as a URL by escaping funky filename characters
+                var path = key.split('/');
+                path.push(encodeURIComponent(path.pop()));
+                var url = '//' + url_host + '/' + path.join('/');
                 finalize_upload(elem, "http:" + url);
                 // create hidden field
                 // var input = $("<input />", {type: 'hidden', name: fileInput.attr('name'), value: url})
