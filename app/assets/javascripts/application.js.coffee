@@ -11,9 +11,13 @@
 #= require_self
 #= require collection
 #= require_directory ../../../vendor/assets/javascripts/jquery
-#= require ../../../vendor/assets/javascripts/JavaScript-Canvas-to-Blob/canvas-to-blob.min.js
 #= require ../../../vendor/assets/javascripts/JavaScript-Load-Image/load-image.all.min.js
-#= require_directory ../../../vendor/assets/javascripts/jquery/fileupload
+#= require ../../../vendor/assets/javascripts/JavaScript-Canvas-to-Blob/canvas-to-blob.min.js
+#= require ../../../vendor/assets/javascripts/jquery/fileupload/jquery.iframe-transport.js
+#= require ../../../vendor/assets/javascripts/jquery/fileupload/jquery.fileupload.js
+#= require ../../../vendor/assets/javascripts/jquery/fileupload/jquery.fileupload-process.js
+#= require ../../../vendor/assets/javascripts/jquery/fileupload/jquery.fileupload-image.js
+
 #= require ../../../vendor/assets/javascripts/imagesloaded.pkgd.min
 #= require ../../../vendor/assets/javascripts/bootstrap-filestyle.min
 #= require bootbox
