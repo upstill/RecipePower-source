@@ -122,7 +122,7 @@ module NavtabsHelper
       item_list = [
           # navlink( "Profile", users_profile_path( section: "profile" ), :mode => :modal),
           navlink("Sign-in Services", authentications_path, :mode => :modal, class: "transient"),
-          navlink("Profile", users_profile_path, :mode => :page),
+          navlink("Profile", users_profile_path, :mode => :modal),
           navlink("Invite", new_user_invitation_path, :mode => :modal, class: "transient"),
           navlink("Sign Out", destroy_user_session_path, :method => "delete")
       ]

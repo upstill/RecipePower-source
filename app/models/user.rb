@@ -116,12 +116,27 @@ class User < ActiveRecord::Base
   end
 
   def uncollect entity
-    rcprefs.where(user: self, entity: entity, in_collection: true).map(&:uncollect)
+    rcprefs.where(entity: entity, in_collection: true).map(&:uncollect)
   end
 
-  # Return the set of lists the user has collected, optionally excluding those they own
-  def collected_lists
-    lists.where.not(owner_id: id)
+  # Return the set of entities of a given type that the user has collected, as visible to some other
+  def collected_entities entity_type, viewer=nil
+    entity_type = entity_type.to_s
+    if viewer == self
+      assoc = entity_type.to_s
+      scope = self.method(assoc).call
+      scope = scope.where.not(owner_id: id) if entity_type == "List"
+      scope
+    else
+      arr = rcprefs.where(entity_type: entity_type, private: false).map(&:entity)
+      arr = arr.keep_if { |l| l.owner != self } if entity_type == "List"
+      arr
+    end
+  end
+
+  # Return the set of lists visible to the given other (or public lists otherwise)
+  def visible_lists other=nil
+    owned_lists.where availability: ((other && other.follows?(self)) ? [0,1] : 0)
   end
 
   # Remember that the user has (recently) touched the entity, optionally adding it to the collection
@@ -262,7 +277,7 @@ public
   # Who does this user follow?
   # Return either friends or channels, depending on 'channel' parameter
   def follows channel=false
-    self.followees.find_all { |user| (user.channel? == channel) }
+    followees.find_all { |user| (user.channel? == channel) }
   end
 
   # Establish the relationship among role_id values, symbols and user-friendly names

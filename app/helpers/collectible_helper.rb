@@ -37,14 +37,14 @@ module CollectibleHelper
     [ ".masonry-item-contents."+dom_id(entity), (collectible_masonry_item(entity) unless destroyed) ]
   end
 
-  def collectible_table_row entity
-    entity = entity.object if entity.is_a? Draper::Decorator
+  def collectible_table_row decorator
+    entity = decorator.object
     dir = entity.class.to_s.underscore.pluralize
-    with_format("html") do render "index_table_row", item: entity end
+    with_format("html") do render "index_table_row", item: entity, decorator: decorator end
   end
 
-  def collectible_table_row_replacement entity, destroyed=false
-    [ "tr##{dom_id entity}", (collectible_table_row(entity) unless destroyed) ]
+  def collectible_table_row_replacement decorator, destroyed=false
+    [ "tr##{decorator.dom_id}", (collectible_table_row(decorator) unless destroyed) ]
   end
 
   # Return the followup after updating or destroying an entity: replace its pagelet with either an update, or the list of such entities
@@ -109,13 +109,13 @@ module CollectibleHelper
   end
 
   # Sort out a suitable URL to stuff into an image thumbnail for a recipe
-  def safe_image_div entity, div_options = {}
+  def safe_image_div decorator, options = {}
     begin
-      return if (url = entity.picdata).blank?
+      return if (url = decorator.picdata).blank?
       # options.merge!( class: "stuffypic", data: { fillmode: "width" } ) # unless url =~ /^data:/
       content = image_with_error_recovery url,
                                           alt: "Image Not Accessible",
-                                          id: entity.dom_id,
+                                          id: decorator.dom_id,
                                           style: "width:100%; height:auto;"
     rescue Exception => e
       if url
@@ -124,10 +124,10 @@ module CollectibleHelper
         url = "nil URL"
       end
       content =
-          "Error rendering image #{url.truncate(255)} from "+ (entity ? "#{entity.human_name} #{entity.id}: '#{entity.title}'" : "null #{entity.human_name}")
+          "Error rendering image #{url.truncate(255)} from "+ (decorator ? "#{decorator.human_name} #{decorator.id}: '#{decorator.title}'" : "null #{decorator.human_name}")
       ExceptionNotification::Notifier.exception_notification(request.env, e, data: { message: content}).deliver
     end
-    content_tag :div, link_to(content, entity.url), div_options
+    content_tag :div, link_to(content, decorator.url), options
   end
 
 end

@@ -1,5 +1,5 @@
 module UploaderHelper
-  def uploader_data pic_field_name=:picurl, pic_field_description="avatar"
+  def uploader_data pic_field_name, pic_field_description="avatar"
     s3_direct_post = S3_BUCKET.presigned_post(key: "uploads/#{@decorator.object.class.to_s.underscore}/#{@decorator.id}/${filename}",
                                               success_action_status: 201,
                                               acl: :public_read)
@@ -12,14 +12,15 @@ module UploaderHelper
     }
   end
 
-  def uploader_field fieldname
+  def uploader_field pic_field_name
+    uld = uploader_data pic_field_name
     content_tag :input, "",
         class: "directUpload",
         id: "user_avatar_url",
         label: "Upload picture...",
-        name: fieldname, # @decorator.field_name(fieldname),
+        name: pic_field_name,
         type: "file",
-        data: { direct_upload: uploader_data }
+        data: { direct_upload: uld }
   end
 
 end

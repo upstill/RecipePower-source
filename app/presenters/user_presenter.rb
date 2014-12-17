@@ -22,7 +22,7 @@ class UserPresenter < BasePresenter
     site_link(user.fullname.present? ? user.fullname : user.username)
   end
 
-  def aspect which
+  def aspect which, viewer=nil
     label = which.to_s.capitalize.tr('_', ' ') # split('_').map(&:capitalize).join
     contents = nil
     case which
@@ -30,10 +30,10 @@ class UserPresenter < BasePresenter
         contents = member_since
       when :collected_lists, :owned_lists
         if which == :owned_lists
-          lists = user.owned_lists
+          lists = user.visible_lists viewer
           label = "Owns the lists"
         else
-          lists = user.collected_lists
+          lists = user.collected_entities List, viewer
           label = "Has collected lists"
         end
         unless lists.empty?

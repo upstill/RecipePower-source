@@ -141,12 +141,11 @@ class UsersController < CollectibleController
   end
 
   def edit
-    if @user = ((params[:id] && User.find(params[:id])) || current_user)
-        @authentications = @user.authentications
-    end
+    update_and_decorate
+    @authentications = @user.authentications if @decorator.id
     @section = params[:section] || "profile"
     response_service.title = "Edit Profile"
-    smartrender area: "floating"
+    smartrender
   end
   
   # Ask user for an email address for login purposes
@@ -159,13 +158,12 @@ class UsersController < CollectibleController
   end
   
   def profile
-    if @user = current_user
-      @authentications = @user.authentications
-    end
+    params[:id] = current_user.id if current_user
+    update_and_decorate
+    @authentications = @user.authentications if @decorator.id
     @section = params[:section] || "profile"
     response_service.title = "My "+@section.capitalize
-    # render :action => 'edit'
-    smartrender action: "edit", area: "floating" 
+    smartrender action: "edit"
   end
 
   def getpic

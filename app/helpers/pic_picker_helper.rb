@@ -8,7 +8,7 @@ module PicPickerHelper
     if obj.is_a? Templateer
       obj.element_id(fieldname)
     else
-      (obj.is_a? Draper::Decorator ? obj.object : obj).class.to_s.downcase + "_" + fieldname.to_s
+      ((obj.is_a? Draper::Decorator) ? obj.object : obj).class.to_s.downcase + "_" + fieldname.to_s
     end
   end
 

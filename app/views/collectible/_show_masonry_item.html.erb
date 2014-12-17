@@ -1,8 +1,5 @@
-
-<% item ||= (@recipe || @decorator) %>
-<div class="masonry-item-contents grid-item <%= dom_id item %>" >
-  <%# recipe_uncollect_button item, @browser.selected %>
-  <%= safe_image_div item, class: "rcp_grid_pic_box" %>
+<div class="masonry-item-contents grid-item <%= dom_id decorator %>" >
+  <%= safe_image_div decorator, class: "rcp_grid_pic_box" %>
   <%= recipe_grid_datablock item %>
   <div class="rcp_grid_element_footer">
     <div class="rcp_grid_element_icons">
