@@ -95,6 +95,7 @@ function uploader_init(elem) {
             },
             fail: function (e, data) {
                 abort_upload(elem);
+                console.debug( upload_params );
                 progressBar.
                     css("background", "red").
                     text("Failed");

@@ -22,6 +22,7 @@ class User < ActiveRecord::Base
                 :email, :password, :password_confirmation, :shared_recipe, :invitee_tokens, :channel_tokens, :avatar_url, # :image,
                 :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens, :subscription_tokens, :invitation_issuer
   # attr_writer :browser
+  attr_readonly :count_of_collecteds
   attr_accessor :shared_recipe, :invitee_tokens, :channel_tokens, :raw_invitation_token, :avatar_url
   
   has_many :notifications_sent, :foreign_key => :source_id, :class_name => "Notification", :dependent => :destroy
@@ -40,6 +41,7 @@ class User < ActiveRecord::Base
   has_and_belongs_to_many :feed_collections, :join_table => "feeds_users", class_name: "Feed"
   has_and_belongs_to_many :list_collections, :join_table => "lists_users", class_name: "List"
 
+  # NB: this stays; it represents a user's ownership of lists
   has_many :owned_lists, :class_name => "List", :foreign_key => :owner_id
 
   has_many :rcprefs, :dependent => :destroy
@@ -151,34 +153,6 @@ class User < ActiveRecord::Base
   # login is a virtual attribute placeholding for [username or email]
   attr_accessor :login
 
-=begin
-  def browser params=nil
-    return @browser if @browser && !params
-    # Try to get browser from serialized storage in the user record
-    # If something goes awry, we'll create a new one.
-    begin
-      @browser ||= ContentBrowser.load browser_serialized
-    rescue Exception => e
-      @browser = nil
-    end
-    @browser ||= ContentBrowser.new id
-    # Take heed of any query parameters that apply to the browser
-    save if @browser && @browser.apply_params(params)
-    @browser
-  end
-
-  # Bust the browser cache due to selections changing, optionally selecting an object
-  def refresh_browser(obj = nil)
-    @browser = ContentBrowser.new id
-    @browser.select_by_content(obj) if obj
-    save
-  end
-
-  def serialize_browser
-    self.browser_serialized = @browser.dump if @browser
-  end
-=end
-
   def self.find_first_by_auth_conditions(warden_conditions)
     conditions = warden_conditions.dup
     if login = conditions.delete(:login)
@@ -187,54 +161,6 @@ class User < ActiveRecord::Base
       where(conditions).first
     end
   end
-
-=begin
-  # Add the feed to the browser's ContentBrowser and select it
-  def add_feed feed
-    if feed_collections.exists? id: feed.id
-      browser.select_by_content feed
-    else
-      self.feed_collections << feed
-      refresh_browser feed
-    end
-  end
-
-  def delete_feed feed
-    browser.select_by_content feed
-    browser.delete_selected
-    feed_collections.delete feed
-    save
-  end
-=end
-
-=begin
-  # TODO: This should be collect(l)
-  def add_list l
-    l.save unless l.id
-    self.list_collections = list_collections+[l] # unless self.list_ids.include?(l.id)
-    save
-  end
-
-  def add_collection tag, priority=nil
-    self.collection_tags << tag unless collection_tags.exists?(id: tag.id)
-    if priority # Can assign priority to subscription in the user's list
-      private_subscriptions.each do |ps|
-        if ps.tag.id == tag.id
-          ps.priority = priority
-          ps.save
-        end
-      end
-    end
-    # browser.select_by_content(tag)
-    save
-  end
-
-  def delete_collection tag
-    # browser.delete_selected if browser.select_by_content(tag)
-    self.collection_tags.delete tag
-    save
-  end
-=end
 
   def add_followee friend
     self.followees << friend unless followee_ids.include? friend.id
@@ -251,30 +177,6 @@ class User < ActiveRecord::Base
   def role
     self.role_symbols.first.to_s
   end
-
-  # Return the list of recipes owned by the user, optionally including every recipe they've touched. Options:
-  # :all => include touched recipes, not just those that have been collected
-  # :sort_by = :collected => order recipes by when they were collected (as opposed to recently touched)
-  # :status => Select for recipes with this status or lower
-  # :public => Only public recipes
-=begin
-  def recipe_ids_g options={}
-    constraints = {:user_id => id}
-    constraints[:in_collection] = true unless options[:all]
-    # constraints[:status] = 1..options[:status] if options[:status]
-    constraints[:private] = false if options[:public]
-    ordering = (options[:sort_by] == :collected) ? "created_at" : "updated_at"
-    collection = Rcpref.where(constraints).order(ordering+" DESC").select("recipe_id").map(&:recipe_id)
-    if channel?
-      collection << tags.collect { |tag| # For a channel, we merge all the recipes from all the associated tags
-        tag.taggings.where(entity_type: "Recipe").map(&:entity_id)
-      }
-      collection.flatten.uniq
-    else
-      collection
-    end
-  end
-=end
 
   # Scope for items from the user's collection. Options:
   # :in_collection: whether they're collected or just viewed
@@ -306,7 +208,7 @@ class User < ActiveRecord::Base
   end
 
   def collection_size
-    rcprefs.where(in_collection: true).count
+    count_of_collecteds
   end
 
 private
@@ -351,17 +253,6 @@ public
     end
     self.followee_ids = newlist
   end
-
-=begin
-  # Presents a hash of IDs with a switch value for whether to include that followee
-  def subscription_tokens=(flist)
-    newlist = []
-    flist.each_key do |key|
-        newlist.push key.to_i if (flist[key] == "1")
-    end
-    self.feed_ids = newlist
-  end
-=end
 
   # Is a user a channel, as opposed to a human user?
   def channel?
@@ -581,12 +472,6 @@ public
     @invitee_tokens = tokenstr.blank? ? [] : TokenInput.parse_tokens(tokenstr)
   end
 
-=begin
-  def channel_tokens=(tokenstr)
-    @channel_tokens = tokenstr.blank? ? [] : TokenInput.parse_tokens(tokenstr)
-  end
-=end
-
   # Return a list of my friends who match the input text
   def match_friends(txt, is_channel=nil)
     re = Regexp.new(txt, Regexp::IGNORECASE) # Match any embedded text, independent of case
@@ -602,12 +487,6 @@ public
     generate_invitation_token! unless @raw_invitation_token
     send_devise_notification(what, @raw_invitation_token, opts)
   end
-
-=begin
-  def send_devise_notification(notification, opts={})
-    devise_mailer.send(notification, self, opts).deliver
-  end
-=end
 
   def headers_for(action)
     inviter = User.find invited_by_id

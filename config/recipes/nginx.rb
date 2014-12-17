@@ -26,7 +26,8 @@ namespace :nginx do
     desc "#{command} nginx"
     task command do
       on roles(:web) do
-        sudo "service nginx #{command}"
+        # test("env | grep S3_BUCKET")
+        # test("env | grep AWS_ACCESS_KEY_ID")
         if command == "stop"
           sudo "rm -f /tmp/unicorn.#{fetch :application}.sock"
         end

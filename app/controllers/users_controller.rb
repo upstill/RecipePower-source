@@ -32,45 +32,36 @@ class UsersController < CollectibleController
   # GET /users.xml
   def index
     # 'index' page may be calling itself with filter parameters in the name and tagtype
-    # seeker_result User, 'div.user_list' # , clear_tags: true
+    @select = params[:select]
+    response_service.title = (@select=="followees") ? "Friends" : "People"
     smartrender unless do_stream UsersCache
   end
-  
-=begin
-  # Query takes either a query string or a specification of page number
-  # We return a recipe list IFF the :cached parameter is not set
-  def query
-    seeker_result User, 'div.user_list'
-  end
-=end
-  
+
   # Add a user or channel to the friends of the current user
   def collect
-    @friend = User.find params[:id]
-    user = current_user_or_guest
-    if user.follows? @friend
-      notice = "You're already following '#{@friend.handle}'."
+    if current_user
+      update_and_decorate # Generate a FeedEntryDecorator as @feed_entry and prepares it for editing
+      if current_user.follows? @user
+        current_user_or_guest.followees.delete @user
+        msg = "You've just been unplugged from'#{@user.handle}'."
+      else
+        current_user_or_guest.followees << @user
+        msg = "You're now connected with '#{@user.handle}'."
+      end
+      current_user.save
+      @user.save
+      if post_resource_errors(current_user)
+        render :errors
+      else
+        flash[:popup] = msg
+        render :update
+      end
     else
-      user.followees << @friend
-      user.save
-      notice = "You're now connected with '#{@friend.handle}'."
-    end
-    respond_to do |format|
-      format.html { redirect_to collection_path, :notice => notice }
-      format.json {
-        render(
-          json: {
-            # processorFcn: "RP.content_browser.insert_or_select",
-            # entity: with_format("html") { render_to_string partial: "collection/node" },
-            notice: view_context.flash_one(:notice, notice) 
-          }, 
-          status: :created, 
-          location: @friend 
-        )
-      }
+      flash[:alert] = "Sorry, you need to be logged in to follow someone."
+      render :errors
     end
   end
-  
+
   def new
     @user = User.new
     response_service.title = "Create RecipePower Account"
@@ -182,38 +173,13 @@ class UsersController < CollectibleController
   end
 
   def update
-=begin
-    account_update_params = devise_parameter_sanitizer.sanitize(:account_update)
-    # required for settings form to submit when password is left blank
-    if account_update_params[:password].blank?
-      account_update_params.delete("password")
-      account_update_params.delete("password_confirmation")
-    end
-=end
-
-    @user = User.find params[:id]
-    if @user.update_attributes(params[:user])
-      @user.refresh_browser # Assuming, perhaps incorrectly, that the browser contents have changed
+    if update_and_decorate
       response_service.title = "Cookmarks from Update"
       flash[:message] = (@user == current_user ? "Your profile" : @user.handle+"'s profile")+" has been updated."
-      respond_to do |format|
-        format.html { redirect_to collection_path }
-        format.json  { 
-          listitem = with_format("html") { render_to_string( partial: "index_table_row", locals: { item: @user } ) }
-          handleitem = %Q{<span class="handle text-on-black">#{@user.handle}&nbsp;&or;</span>}.html_safe
-          render json: {
-            done: true,
-            replacements: [ [ view_context.dom_id(@user), listitem], # "#listrow_"+@user.id.to_s, listitem],
-                            view_context.flash_notifications_replacement,
-                            ['span.handle', handleitem ]
-            ]
-          }
-        }
-      end
     else
       @section = params[:user][:email] ? "profile" : "account"
       response_service.title = "Edit #{@section}"
-      smartrender action: "edit", area: "floating" 
+      smartrender action: "edit", mode: "modal"
     end
   end
 

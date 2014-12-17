@@ -8,6 +8,11 @@ class Rcpref < ActiveRecord::Base
 
   belongs_to :entity, :polymorphic => true
   belongs_to :user
+  counter_culture :user,
+                  :column_name => Proc.new {|model| model.in_collection ? 'count_of_collecteds' : nil },
+                  :column_names => {
+                      ["rcprefs.in_collection = true"] => 'count_of_collecteds'
+                  }
   # before_save :ensure_unique
   attr_accessible :comment, :entity_type, :entity_id, :user_id, :in_collection, :updated_at, :created_at, :private
 

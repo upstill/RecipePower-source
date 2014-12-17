@@ -4,7 +4,7 @@ class StreamPresenter
 
   delegate :items, :next_item, :next_range, :"done?", :window, :param, :full_size, :"has_query?", :"ready?", :nmatches, :to => :results
 
-  def initialize session_id, requestpath, rc_class, userid, querytags=[], params={}
+  def initialize session_id, requestpath, rc_class, userid, as_admin, querytags=[], params={}
     if querytags.class == Hash
       params, querytags = querytags, []
     end
@@ -29,7 +29,7 @@ class StreamPresenter
     end
 
     # Get a Streamer subclass for the controller and action
-    @results = rc_class.retrieve_or_build session_id, userid, querytags, params
+    @results = rc_class.retrieve_or_build session_id, userid, as_admin, querytags, params
     # limit ||= offset + @results.max_window_size
     @results.window = offset, limit
   end

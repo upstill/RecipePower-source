@@ -126,7 +126,7 @@ class ApplicationController < ActionController::Base
   # Take a stream presenter and drop items into a stream, if possible and called for.
   # Otherwise, defer to normal rendering
   def do_stream rc_class
-    @sp = StreamPresenter.new session.id, request.fullpath, rc_class, current_user_or_guest_id, querytags, params
+    @sp = StreamPresenter.new session.id, request.fullpath, rc_class, current_user_or_guest_id, response_service.admin_view?, querytags, params
     if block_given?
       yield @sp
     end

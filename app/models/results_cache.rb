@@ -131,13 +131,13 @@ class ResultsCache < ActiveRecord::Base
 
   # Get the current results cache and return it if relevant. Otherwise,
   # create a new one
-  def self.retrieve_or_build session_id, userid, parsed_querytags=[], queryparams={}
+  def self.retrieve_or_build session_id, userid, as_admin, parsed_querytags=[], queryparams={}
     unless parsed_querytags.is_a? Array
       queryparams, parsed_querytags = parsed_querytags, []
     end
     # Convert from ActionController params to hash
-    relevant_params = { userid: userid } # Keep the id of the viewing user
-    self.params_needed.each { |param| relevant_params[param] = queryparams[param] if queryparams[param] }
+    relevant_params = { userid: userid, as_admin: as_admin } # Keep the id of the viewing user
+    self.params_needed.uniq.each { |param| relevant_params[param] = queryparams[param] if queryparams[param] }
 
     rc = self.create_with(:params => relevant_params).find_or_initialize_by session_id: session_id, type: self.to_s
     # unpack the parameters into instance variables
@@ -499,13 +499,20 @@ class UsersCache < ResultsCache
 
   def self.params_needed
     # The access parameter filters for private and public lists
-    super + [:all]
+    super + [:select]
   end
 
   def itemscope
-    @all ?
-        User.where(channel_referent_id: 0) :
-        User.where(channel_referent_id: 0).joins(:rcprefs).where("rcprefs.in_collection = TRUE").uniq
+    scope = @as_admin ?
+        User.unscoped :
+        User.where(channel_referent_id: 0, private: false).where.not(id: [4, 5])
+    case @select
+      when "followees"
+        scope = User.find(@userid).followees
+      when "relevant"
+        scope = scope.where("count_of_collecteds > 0").order('count_of_collecteds DESC')
+    end
+    scope
   end
 
   def name_match tag

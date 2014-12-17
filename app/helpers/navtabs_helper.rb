@@ -58,12 +58,12 @@ module NavtabsHelper
   end
 
   def friends_navtab menu_only = false
-    navtab :friends, "Friends", users_path, menu_only do
-      @user.followees[0..6].collect { |u|
-        navlink u.handle, "/users/#{u.id}/collection", id: dom_id(u)
+    navtab :friends, "Friends", users_path(:select => :followees), menu_only do
+      @user.followees[0..10].collect { |u|
+        navlink u.handle, user_path(u), id: dom_id(u)
       } + [
           "<hr class='menu'>".html_safe,
-          navlink("Make a Friend...", users_path(relevant: true))
+          navlink("Make a Friend...", users_path(:select => :relevant))
       ]
     end
   end

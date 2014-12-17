@@ -52,6 +52,7 @@ gem 'content_for_in_controllers'
 gem 'youtube_addy'
 # gem 'active_model_serializers'
 gem 'aws-sdk'
+gem 'counter_culture', '~> 0.1.23'
 
 gem 'exception_notification', git: 'git://github.com/smartinez87/exception_notification.git'
 # gem 'exception_notification', '~> 4.0.1', :require => 'exception_notifier' # , git: 'git://github.com/alanjds/exception_notification.git' 

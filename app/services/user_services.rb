@@ -4,7 +4,7 @@ class UserServices
   attr_accessor :user
   
   delegate :id, :username, :first_name, :last_name, :fullname, :about, :login, :private, :skip_invitation, :add_collection, :delete_collection, :add_followee,
-           :email, :password, :password_confirmation, :shared_recipe, :invitee_tokens, :channel_tokens, :image, :refresh_browser,
+           :email, :password, :password_confirmation, :shared_recipe, :invitee_tokens, :channel_tokens, :image
            :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens, :subscription_tokens, :invitation_issuer, :to => :user
   
   def initialize(user)
@@ -71,6 +71,5 @@ class UserServices
     add_collection Tag.assert("Keepers", userid: id)
     add_followee User.find(1)
     add_followee User.find(3)
-    # refresh_browser
   end
 end

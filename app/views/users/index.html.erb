@@ -1,3 +1,8 @@
-<%= tag_filter_header title: "People on RecipePower" %>
-<p>Add friends by clicking below.</p>
+<% if @select == "followees" %>
+    <%= tag_filter_header title: "Persons of Interest" %>
+    <p>Everyone you're following.</p>
+<% else %>
+    <%= tag_filter_header title: "The People of RecipePower" %>
+    <p>Add friends by clicking below.</p>
+<% end %>
 <%= render "shared/stream_results_placeholder" %>
