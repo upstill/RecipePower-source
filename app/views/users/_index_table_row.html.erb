@@ -1,11 +1,19 @@
-<% item ||= @user %>
-<tr id="<%= dom_id item %>">
-	<td><%= link_to_submit item.handle, user_path(item), mode: :modal %></td>
+<tr id="<%= item.dom_id %>">
+	<td>
+      <%= safe_image_div item, style: "width: 100px; height: auto" %>
+      <%= link_to_submit item.handle, user_path(item), mode: :modal %>
+    </td>
 	<td><%= item.about %></td>
 	<td><%= taggable_list item %></td>
-	<td><%= item.collection_size %></td>
+	<td>
+      <%= count_report item.collection_size, "cookmarks", "<b>Has collected</b>", "<br>" %>
+      <%= count_report item.followees.count, "other", "<b>Following</b>", "<br>" %>
+      <%= count_report item.followers.count, "other", "<b>Followed by</b>", "<br>" %>
+      <%= count_report item.collection_size(Feed), "feed", "<b>Taking</b>", "<br>" %>
+      <%= count_report item.owned_lists.count, "list", "<b>Owns</b>", "<br>" %>
+    </td>
     <td>
-      <%= button_to_submit((current_user.follows?(@user) ? "Stop Following" : 'Follow'), collect_user_path(item), method: :post ) if current_user %>
+      <%= follow_button(item.object) if current_user && (current_user.id != item.id) %>
       <%= button_to_submit( (item.private? ? 'Show' : 'Hide'), user_path(item, user: { private: (item.private? ? 0 : 1) }), method: :put) if response_service.admin_view? %>
     </td>
 </tr>

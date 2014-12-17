@@ -503,14 +503,17 @@ class UsersCache < ResultsCache
   end
 
   def itemscope
-    scope = @as_admin ?
-        User.unscoped :
-        User.where(channel_referent_id: 0, private: false).where.not(id: [4, 5])
+    return User.unscoped if @as_admin  # See everyone in admin view
+    scope = User.where(channel_referent_id: 0, private: false).where.not(id: [4, 5])
     case @select
       when "followees"
         scope = User.find(@userid).followees
       when "relevant"
-        scope = scope.where("count_of_collecteds > 0").order('count_of_collecteds DESC')
+        # Exclude the viewer and all their friends
+        scope = scope.
+            where("count_of_collecteds > 0").
+            where.not(id: User.find(@userid).followee_ids+[@userid]).
+            order('count_of_collecteds DESC')
     end
     scope
   end

@@ -93,7 +93,7 @@ module Templateer
   end
 
   def object_path
-    "/#{object_type true}/#{self.id}"
+    "/#{object_type true}/#{id}"
   end
 
   def tag_path
@@ -106,6 +106,10 @@ module Templateer
 
   def edit_class
     "edit_#{object_type}"
+  end
+
+  def dom_id
+    "#{object_type}_#{id}"
   end
 
 protected

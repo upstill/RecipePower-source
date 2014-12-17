@@ -107,4 +107,27 @@ module CollectibleHelper
     # button_to_submit 'Back to Lists', lists_path
     # <input class="btn btn-danger pull-left" type="submit" data-action="/recipes/1155" data-method="delete" value="Destroy" data-confirm="This will remove the Recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" clicked="true">
   end
+
+  # Sort out a suitable URL to stuff into an image thumbnail for a recipe
+  def safe_image_div entity, div_options = {}
+    begin
+      return if (url = entity.picdata).blank?
+      # options.merge!( class: "stuffypic", data: { fillmode: "width" } ) # unless url =~ /^data:/
+      content = image_with_error_recovery url,
+                                          alt: "Image Not Accessible",
+                                          id: entity.dom_id,
+                                          style: "width:100%; height:auto;"
+    rescue Exception => e
+      if url
+        url = "data URL" if url =~ /^data:/
+      else
+        url = "nil URL"
+      end
+      content =
+          "Error rendering image #{url.truncate(255)} from "+ (entity ? "#{entity.human_name} #{entity.id}: '#{entity.title}'" : "null #{entity.human_name}")
+      ExceptionNotification::Notifier.exception_notification(request.env, e, data: { message: content}).deliver
+    end
+    content_tag :div, link_to(content, entity.url), div_options
+  end
+
 end

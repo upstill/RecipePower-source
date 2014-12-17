@@ -38,7 +38,7 @@ class UsersController < CollectibleController
   end
 
   # Add a user or channel to the friends of the current user
-  def collect
+  def follow
     if current_user
       update_and_decorate # Generate a FeedEntryDecorator as @feed_entry and prepares it for editing
       if current_user.follows? @user
@@ -54,7 +54,7 @@ class UsersController < CollectibleController
         render :errors
       else
         flash[:popup] = msg
-        render :update
+        render :follow
       end
     else
       flash[:alert] = "Sorry, you need to be logged in to follow someone."

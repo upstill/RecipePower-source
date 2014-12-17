@@ -75,6 +75,7 @@ RP::Application.routes.draw do
       get 'match_friends'
       get 'notify'
       get 'acquire' # Acquire a recipe (etc.)
+      post 'follow'
       # Routes for collectibles
       get 'getpic'
       get 'tag'

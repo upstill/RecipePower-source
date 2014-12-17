@@ -207,8 +207,8 @@ class User < ActiveRecord::Base
     scope
   end
 
-  def collection_size
-    count_of_collecteds
+  def collection_size entity_type=nil
+    entity_type ? rcprefs.where(entity_type: entity_type.to_s, in_collection: true, private: false).size : count_of_collecteds
   end
 
 private

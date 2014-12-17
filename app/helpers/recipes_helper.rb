@@ -9,30 +9,6 @@ module RecipesHelper
     "<div><h3>#{recipe.title}</h3></div>".html_safe
   end
   
-  # Sort out a suitable URL to stuff into an image thumbnail for a recipe
-  def recipe_image_div(recipe, div_class="recipe_image_div")
-    begin
-      return if (url = recipe.picdata).blank?
-      options = { 
-        alt: "Image Not Accessible", 
-        id: "RecipeImage"+recipe.id.to_s,
-        style: "width:100%; height:auto;" }
-      # options.merge!( class: "stuffypic", data: { fillmode: "width" } ) # unless url =~ /^data:/
-      content = image_with_error_recovery(url, options)
-    rescue Exception => e
-      if url
-        url = "data URL" if url =~ /^data:/
-      else
-        url = "nil URL"
-      end
-      content = 
-        "Error rendering image #{url.truncate(255)} from "+ (recipe ? "recipe #{recipe.id}: '#{recipe.title}'" : "null recipe")
-      ExceptionNotification::Notifier.exception_notification(request.env, e, data: { message: content}).deliver
-    end
-    content_tag :div, 
-      link_to(content, recipe.url), 
-      class: div_class
-  end
 
   def recipe_grid_datablock entity
     klass = (entity.klass rescue entity.class).to_s

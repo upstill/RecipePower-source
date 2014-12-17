@@ -10,6 +10,24 @@ module ApplicationHelper
     image_tag url, options.merge( onError: "onImageError(this);")
   end
 
+  # Nicely format a report of some quantity
+  def count_report number, name, preface="", postscript="", threshold=1
+    if !preface.is_a? String
+      threshold, preface = preface, ""
+    elsif !postscript.is_a? String
+      threshold, postscript = postscript, ""
+    end
+    return "" if number<threshold
+    if number == 0
+      numstr = preface.blank? ? "No" : "no"
+      name = name.strip.pluralize
+    else
+      numstr = number.to_s
+      name = name.strip.pluralize if number > 1
+    end
+    "#{preface} #{numstr} #{name} #{postscript}".strip.gsub(/\s+/, ' ').html_safe
+  end
+
   def present(object, klass = nil)
     klass ||= "#{object.class}Presenter".constantize
     presenter = klass.new(object, self)
