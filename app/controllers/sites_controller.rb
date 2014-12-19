@@ -15,16 +15,19 @@ class SitesController < CollectibleController
     smartrender
   end
 
+  def edit
+    update_and_decorate
+    response_service.title = "Edit Site"
+    smartrender
+  end
+
   # GET /sites/new
   # GET /sites/new.json
   def new
     # return if need_login true, true
     update_and_decorate
     response_service.title = "New Site"
-    respond_to do |format|
-      format.html # new.html.erb
-      format.json { render json: @site }
-    end
+    render :edit
   end
 
   # POST /sites
@@ -45,23 +48,21 @@ class SitesController < CollectibleController
   # PUT /sites/1
   # PUT /sites/1.json
   def update
-    update_and_decorate
-    respond_to do |format|
-      if !@site.errors.any?
-        format.html { redirect_to @site, notice: 'Site was successfully updated.' }
-        format.json { 
-          render json: { 
-                         done: true, # Denotes recipe-editing is finished
-                         popup: "#{@site.name} updated",
-                         replacements: [
-                           ["tr#site#{@site.id.to_s}", with_format("html") { render_to_string partial: "sites/index_table_row", locals: { item: @site } }]
-                         ]
-                       } 
-      }
-      else
-        format.html { render action: "edit" }
-        format.json { render json: @site.errors, status: :unprocessable_entity }
+    if update_and_decorate
+      respond_to do |format|
+        format.html { redirect_to @site, notice: 'Site #{@site.name} was successfully updated.' }
+        format.json {
+          flash[:popup] = "#{@site.name} updated"
+          render :update
+        }
       end
+    else
+      if @site
+        post_resource_errors @site
+      else
+        flash[:alert] = "Couldn't fetch site"
+      end
+      render :edit, status: :unprocessable_entity
     end
   end
 

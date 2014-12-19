@@ -1,15 +1,15 @@
-<div class="masonry-item-contents grid-item <%= dom_id decorator %>" >
+<div class="masonry-item-contents grid-item <%= dom_id item %>" >
   <%= safe_image_div decorator, class: "rcp_grid_pic_box" %>
-  <%= recipe_grid_datablock item %>
+  <%= recipe_grid_datablock decorator %>
   <div class="rcp_grid_element_footer">
     <div class="rcp_grid_element_icons">
-      <%= recipe_info_icon item %>
+      <%= collectible_info_icon decorator %>
       <%= render partial: "votes/button", locals: {entity: item, style: "h"} %>
     </div>
     <div class="rcp_grid_element_buttons">
       <%= pin_menu item, current_user %>
       <span class="<%= recipe_list_element_golink_class item %>">
-        <%= collect_or_tag_button item, mode: :modal %>
+        <%= collect_or_tag_button decorator, mode: :modal %>
       </span>
       <span class="<%= recipe_list_element_golink_class item %>">
         <%= link_to_submit "Share", new_user_invitation_path(recipe_id: item.id), button_size: "xs", mode: :modal %>

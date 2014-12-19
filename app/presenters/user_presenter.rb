@@ -28,6 +28,8 @@ class UserPresenter < BasePresenter
     case which
       when :member_since
         contents = member_since
+      when :about
+        contents = user.about
       when :collected_lists, :owned_lists
         if which == :owned_lists
           lists = user.visible_lists viewer
@@ -44,20 +46,6 @@ class UserPresenter < BasePresenter
     end
     content_tag(:h4, "#{label}: #{content_tag :small, contents}".html_safe) if contents
   end
-
-=begin
-  def website
-    handle_none user.url do
-      h.link_to(user.url, user.url)
-    end
-  end
-
-  def twitter
-    handle_none user.twitter_name do
-      h.link_to user.twitter_name, "http://twitter.com/#{user.twitter_name}"
-    end
-  end
-=end
 
   def about
     handle_none user.about do

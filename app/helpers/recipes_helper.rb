@@ -10,22 +10,24 @@ module RecipesHelper
   end
   
 
-  def recipe_grid_datablock entity
-    klass = (entity.klass rescue entity.class).to_s
+  def recipe_grid_datablock decorator
+    entity = decorator.object
+    klass = entity.class.to_s
     label = (klass == "Recipe") ? "" : "#{klass}: "
-    grid_element = content_tag :p, (label+link_to(entity.title, entity.url, class: "tablink")).html_safe, class: "rcp_grid_element_title"
-    source_element = content_tag :div, ("from "+link_to(entity.sourcename, entity.sourcehome, class: "tablink")).html_safe, class: "rcp_grid_element_source"
+    grid_element = content_tag :p, (label+link_to(decorator.title, decorator.url, class: "tablink")).html_safe, class: "rcp_grid_element_title"
+    source_element = content_tag :div, ("from "+link_to(decorator.sourcename, decorator.sourcehome, class: "tablink")).html_safe, class: "rcp_grid_element_source"
     content_tag :div, grid_element+source_element, class: "rcp_grid_datablock"
   end
 
-  def recipe_info_icon recipe
-    alltags = summarize_alltags(recipe) || ""
+  def collectible_info_icon decorator
+    entity = decorator.object
+    alltags = summarize_alltags(entity) || ""
     tags = CGI::escapeHTML alltags
     span = content_tag :span,
                 "",
                 class: "recipe-info-button btn btn-default btn-xs glyphicon glyphicon-open",
-                data: { title: recipe.title, tags: tags, description: recipe.description || "" }
-    link_to_submit span, recipe_path(recipe), :mode => :modal
+                data: { title: decorator.title, tags: tags, description: decorator.description || "" }
+    link_to_submit span, polymorphic_path(entity), :mode => :modal
   end
 
   def recipe_tags_div recipe
@@ -88,10 +90,10 @@ def tagjoin tags, enquote = false, before = "", after = "", joiner = ','
 end
 
 # Provide an English-language summary of the tags for a recipe.
-def summarize_alltags(rcp)
+def summarize_alltags(taggable_entity)
 
     tags = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
-    rcp.tags.each { |tag| tags[tag.tagtype] << tag }
+    taggable_entity.tags.each { |tag| tags[tag.tagtype] << tag }
     return if tags.flatten.compact.empty?
     
     genrestr = tagjoin tags[1], false, "", " "
@@ -131,10 +133,10 @@ def present_comments recipe
 end
 
   # Provide the cookmark-count line
-  def cookmark_count(rcp, user)
-     count = rcp.num_cookmarks
+  def cookmark_count(collectible_entity, user)
+     count = collectible_entity.num_cookmarks
      result = count.to_s+" Cookmark"+((count>1)?"s":"")
-     if rcp.collected_by?(user.id)
+     if collectible_entity.collected_by?(user.id)
         result << " (including mine)"
      else
         result << ": " + 
@@ -142,7 +144,7 @@ end
 		  		 :url => {:action => "cmcount"},
 				 :update => "response5")
      end
-     "<span class=\"cmcount\" id=\"cmcount#{rcp.id}\">#{result}</span>".html_safe
+     "<span class=\"cmcount\" id=\"cmcount#{collectible_entity.id}\">#{result}</span>".html_safe
   end
 
 end

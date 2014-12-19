@@ -64,7 +64,7 @@ module Collectible
     self.collectible_user_id = uid
     if ref = rcpref(uid, false) # Pre-existing collection object
       self.collectible_comment = ref.comment || ""
-      self.collectible_private = ref.private ? 1 : 0
+      self.collectible_private = ref.private? ? 1 : 0
     else
       self.collectible_comment = ""
       self.collectible_private = 0

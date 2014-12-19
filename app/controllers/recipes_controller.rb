@@ -209,20 +209,10 @@ class RecipesController < CollectibleController
   end
   
   # Register that the recipe was touched by the current user--if they own it.
-  # Since that recipe will now be at the head return a new first-recipe in the list.
   def touch
-    update_and_decorate Recipe.ensure(params.slice(:id, :url)) 
-    # If all is well, make sure it's on the user's list
-    current_user.touch @recipe if current_user && @recipe.errors.empty? && @recipe.id
-    respond_to do |format|
-      format.json {
-          render json: { popup: "Snap! Collected #{@recipe.title}." }
-      }
-      format.html { 
-          @list_name = "mine"
-          render 'shared/_recipe_smallpic.html.erb', :layout=>false 
-      }
-    end
+    # This is a generic #touch action except for the manner in which the recipe is fetched
+    @entity = Recipe.ensure(params.slice(:id, :url))
+    super
   end
 
   # Remove the recipe from the system entirely

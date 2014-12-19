@@ -405,6 +405,7 @@ class ListsCache < ResultsCache
     scope
   end
 
+  # TODO Currently, there's no search for lists
 end
 
 # list's content visible to current user (ListStreamer)

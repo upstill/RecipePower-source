@@ -17,6 +17,6 @@
       Feed <%= feed_approval @feed %>
     </p>
 <% end %>
-<%= feed_buttons @feed, button_size: "sm" %>
+<%= feed_buttons @decorator, button_size: "sm" %>
 <%= link_to_submit 'Back to Feeds', (response_service.admin_view? ? feeds_path(:access => :all) : feeds_path), button_size: "sm", mode: :partial %>
 <%= stream_element :body, "show_entries" %>

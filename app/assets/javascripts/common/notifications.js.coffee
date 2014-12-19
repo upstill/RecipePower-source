@@ -98,7 +98,7 @@ bootbox_alert = (msg) ->
 		if msg && msg.length > 0
 			bootbox.alert msg
 		else # bootstrap dialog
-			$('div.bootbox .bootbox-close-button').click() # $('div.bootbox').modal('hide') # $('div.bootbox.modal').modal 'hide'
+			# $('div.bootbox .bootbox-close-button').trigger "click" # $('div.bootbox').modal('hide') # $('div.bootbox.modal').modal 'hide'
 			$('div.bootbox-alert').remove()
 			$('div.modal-backdrop').remove()
 	available

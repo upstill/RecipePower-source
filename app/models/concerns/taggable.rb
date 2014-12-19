@@ -7,8 +7,8 @@ module Taggable
     has_many :taggings, :as => :entity, :dependent => :destroy
     has_many :tags, :through => :taggings
     has_many :taggers, :through => :taggings, :class_name => "User"
-    attr_accessor :tagging_user_id, :tagging_tags, :tagging_tokens
-    attr_accessible :tagging_user_id, :tagging_tags, :tagging_tokens
+    attr_accessor :tagging_user_id, :tagging_tags, :tagging_tag_tokens
+    attr_accessible :tagging_user_id, :tagging_tags, :tagging_tag_tokens
 
     Tag.taggable self
   end
@@ -23,10 +23,10 @@ module Taggable
   # Ensure that the user taggings get associated with the entity
   # Interpret the set of tag tokens into a list of tags ready to turn into taggings
   def accept_params
-    if tagging_user_id && tagging_tokens # May not actually be editing tags
+    if tagging_user_id && tagging_tag_tokens # May not actually be editing tags
       self.tagging_user_id = tagging_user_id.to_i # Better to have it as an integer
       asserted = # Map the elements of the token string to tags, whether existing or new
-          TokenInput.parse_tokens(tagging_tokens) do |token| # parse_tokens analyzes each token in the list as either integer or string
+          TokenInput.parse_tokens(tagging_tag_tokens) do |token| # parse_tokens analyzes each token in the list as either integer or string
             case token
               when Fixnum
                 Tag.find token

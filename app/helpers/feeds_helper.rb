@@ -77,9 +77,10 @@ module FeedsHelper
     link_to_submit label, path, { method: :post, button_size: "sm" }.merge(options)
   end
 
-  def feed_buttons item, options={}
-    # ct_button = current_user.collected? item) ?
-    buttons = collectible_buttons item, :tag_only, { button_size: "sm"}.merge(options) do
+  def feed_buttons decorator, options={}
+    # ct_button = current_user.collected? decorator) ?
+    item = decorator.object
+    buttons = collectible_buttons decorator, :tag_only, { button_size: "sm"}.merge(options) do
       feed_subscribe_button item, options
     end
     content_tag :span,
@@ -88,8 +89,8 @@ module FeedsHelper
                 id: dom_id(item)
   end
 
-  def feed_buttons_replacement item, options={}
-    [ "span.feed-button-span##{dom_id item}", feed_buttons(item, options) ]
+  def feed_buttons_replacement decorator, options={}
+    [ "span.feed-button-span##{dom_id decorator}", feed_buttons(decorator, options) ]
   end
 
   def feed_approval feed

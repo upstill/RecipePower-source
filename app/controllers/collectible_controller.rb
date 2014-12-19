@@ -68,7 +68,7 @@ class CollectibleController < ApplicationController
       if post_resource_errors(@decorator)
         render :errors
       else
-        flash[:popup]
+        flash[:popup] = "#{@decorator.human_name} is no more."
         render :update
       end
     else
@@ -77,12 +77,19 @@ class CollectibleController < ApplicationController
     end
   end
 
-  # Register that the entity was touched by the current user--if they own it.
-  # Since that recipe will now be at the head return a new first-recipe in the list.
+  # Register that the entity was touched by the current user.
+  # Since that entity will now be at the head return a new first item in the list.
   def touch
-    update_and_decorate
     # If all is well, make sure it's on the user's list
-    current_user.touch @decorator.object if current_user && @decorator.errors.empty? && @decorator.id
-    flash[:popup] = "Snap! Touched #{@decorator.human_name} #{@decorator.title}."
+    if update_and_decorate(@entity) # May be defined by a subclass before calling up the chain
+      if current_user
+        current_user.touch @decorator.object
+        flash[:popup] = "Snap! Touched #{@decorator.human_name} #{@decorator.title}." unless params[:silent]
+      else
+        flash[:alert] = "Sorry, you need to be logged in to touch a #{@decorator.human_name}" unless params[:silent]
+      end
+    end
+    post_resource_errors(@decorator.object) if @decorator
+    render :errors # This won't be invoked directly by a user, so there's nothing else to render
   end
 end

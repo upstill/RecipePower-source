@@ -283,4 +283,20 @@ module ApplicationHelper
                 class: "form-group actions"
   end
 
+  def inline_checkbox f, attribute, label
+    object = f.object
+
+    # If it's a boolean field we need to access it with the predicate method
+    boolval = (object.respond_to? :"#{attribute}?") ?
+        object.send(:"#{attribute}?") :
+        (object.send(attribute)!=0)
+    cu = object.class.to_s.underscore
+    name = "#{cu}[#{attribute}]"
+    id = "#{cu}_#{attribute}"
+    hidden_cb = "<input name='#{name}' type='hidden' value='0'>"
+    visible_cb = check_box_tag( attribute, 1, boolval, id: id, name: name, class: "boolean optional" ).html_safe
+    label = content_tag :label, "#{visible_cb}&nbsp;#{label}".html_safe
+    (hidden_cb+label.html_safe).html_safe
+  end
+
 end
