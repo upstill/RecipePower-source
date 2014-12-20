@@ -1,6 +1,8 @@
-<h3>Site <%= link_to @site.name, @site.home %></h3>
-<%= render "show_site" %>
-<%= link_to_submit 'Edit Site', edit_site_path(@site), mode: :modal %> |
-<%= link_to 'Sites List', sites_path %>
+<%= render "collectible/summary_card", entity: @site %>
+<% if response_service.admin_view? %>
+    <%= link_to_submit 'Edit Site', edit_site_path(@site), mode: :modal, button: true %> |
+<% end %>
+<%= collect_or_tag_button @decorator, mode: :modal, button_size: "sm" %>
+<%= link_to_submit 'Sites List', sites_path, mode: :partial, button_size: "sm" %>
 <hr>
 <%= render "show_feeds" %>

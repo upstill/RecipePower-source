@@ -231,7 +231,7 @@ BLOCK_END
         extension = label.pluralize.sub label, ''
         label << "(#{extension})" unless extension.blank?
       end
-      render "tags/show_labelled", label: label, name: field, viewer_id: viewer_id
+      render "shared/show_labelled", label: label, content: present_field_wrapped(field)
     }.join('').html_safe
   end
 
@@ -241,6 +241,7 @@ BLOCK_END
   end
 
   def tag_list tags
+=begin
     names = tags.collect { |tag|
       link_to_submit tag.name, tag_path(tag), :mode => :modal
     }
@@ -249,5 +250,9 @@ BLOCK_END
     else
       names[0]
     end
+=end
+    strjoin( tags.collect { |tag|
+      link_to_submit tag.name, tag_path(tag), :mode => :modal
+    }).html_safe
   end
 end

@@ -7,7 +7,10 @@ class RecipeDecorator < Draper::Decorator
     case fieldname
       when /_tags$/
       tagtype = fieldname.sub /_tags$/, ''
-      tags_of_type tagtype
+      tagtype = [ "Culinary Term", "Untyped" ] if tagtype=="Other"
+      strjoin tags_visible_to(object.collectible_user_id, :tagtype => tagtype).collect { |tag|
+        h.link_to_submit tag.name, tag, :mode => :modal, class: "rcp_list_element_tag"
+      }
     when /^rcp/
       attrname = fieldname.sub( /^rcp/, '').downcase
       case attrname

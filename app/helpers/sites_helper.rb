@@ -1,8 +1,8 @@
 module SitesHelper
 
-  def crack_sample
+  def crack_sample site
     
-    extractions = SiteServices.new(@site).extract_from_page @site.sample, :label => [:Title, :URI]
+    extractions = SiteServices.new(site).extract_from_page site.sample, :label => [:Title, :URI]
     if extractions[:Title] && extractions[:URI]
       link_to extractions[:Title], extractions[:URI]
     else

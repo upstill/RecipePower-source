@@ -40,12 +40,6 @@ module Taggable
     super if defined? super
   end
 
-  def tags_visible_to uid=nil, opts = {}
-    uid = uid.to_i if uid.is_a? String
-    uid, opts = nil, uid if uid.is_a? Hash
-    filtered_tags nil, opts
-  end
-
   # Associate a tag with this entity in the domain of the given user (or the tag's current owner if not given)
   def tag_with tag, who
     unless filtered_tags(who).include? tag
@@ -72,9 +66,25 @@ module Taggable
     tagging_tags.map(&:attributes).to_json
   end
 
+  # Anything that's taggable can appear in a list
+  def lists
+
+  end
+
+  # Allow the given user to see tags applied by themselves and super
+  def tags_visible_to uid, options={}
+    uid = uid.to_i if uid.is_a? String
+    others = [ User.super_id ]
+    filtered_tags options.merge(user_id: (others << uid).flatten) # Allowing for an array of uids
+  end
+
 protected
 
   # Fetch the tags associated with the entity, possibly with constraints of userid and type
+  # Options:
+  # :tagtype: one or more types to be applied
+  # :tagtype_x: one or more types to be ignored
+  # :user_id: one or more users to whose taggings the results will be restricted
   def filtered_tags uid, opts = {}
     uid = uid.to_i if uid.is_a? String
     uid, opts = nil, uid if uid.is_a? Hash
@@ -106,35 +116,6 @@ protected
     to_add.each { |tagid| Tagging.create(user_id: uid, tag_id: tagid, entity_id: id, entity_type: self.class.name) }
     # Remove tags as nec.
     to_remove.each { |tagid| Tagging.where(user_id: uid, tag_id: tagid, entity_id: id, entity_type: self.class.name).map(&:destroy) } # each { |tg| tg.destroy } }
-  end
-
-=begin
-  # Fetch the ids of the tags associated with the entity
-  def get_tag_ids uid, options={}
-    uid = uid.to_i if uid.is_a? String
-    uid, options = nil, uid if uid.is_a? Hash
-    scope = uid ? taggings : taggings.where(:user_id => uid)
-    scope = scope.where.not(tagtype: options[:tagtype_x]) if
-    scope.map &:tag_id
-  end
-=end
-
-  # Provide tags of a particular type
-  def tags_of_type tagtype=nil, viewer_id=nil
-    matching_types =
-      case tagtype
-        when "Other"
-          [Tag.typenum("Culinary Term"), Tag.typenum("Untyped")]
-        when nil
-          nil
-        else
-          [Tag.typenum(tagtype)]
-      end
-    strjoin tags_visible_to(viewer_id).uniq.select { |tag|
-      matching_types.nil? || (matching_types.include? tag.tagtype)
-    }.collect { |tag|
-      h.link_to_submit tag.name, tag, :mode => :modal, class: "rcp_list_element_tag"
-    }
   end
 
 end
