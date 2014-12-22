@@ -1,13 +1,19 @@
 <tr id="<%= dom_id item %>">
-	<td><b><%= item.name || "Defaults" %></b><br>
-		<b>Site</b>: <%= item.home %><br>
-		<b><%= show_sample item %></b><br>
-		<b>Logo</b>: <%= item.logo %><br>
-		<b># Feeds:</b> <%= item.feeds.size %> (<%= item.feeds.where(approved: true).count %> approved for feedthrough)
-	</td>
-	<td>
-      <%= collectible_buttons @decorator, :button_size => "xs" do %>
-          <%= link_to_submit 'Show', item, :button_size => :xs, :mode => :modal %>
-      <% end %>
-	</td>
+  <td>
+    <%= safe_image_div decorator, style: "width: 100px; height: auto" %>
+    <%= link_to_submit item.name, site_path(item), mode: :modal %>
+  </td>
+  <td>
+    <b>Home</b>: <%= link_to item.home, item.home %><br>
+    <b><%= show_sample item %></b><br>
+    <b># Feeds:</b> <%= item.feeds.size %> (<%= item.feeds.where(approved: true).count %> approved for feedthrough)
+  </td>
+  <td>
+    <%= item.description %>
+  </td>
+  <td>
+    <%= collectible_buttons @decorator, :button_size => "xs" do %>
+        <%= link_to_submit "Edit", edit_site_path(item), mode: :modal if response_service.admin_view? %>
+    <% end %>
+  </td>
 </tr>

@@ -14,7 +14,6 @@ class FeedsController < CollectibleController
   def index
     @active_menu = :feeds
     smartrender unless do_stream FeedsCache
-    # seeker_result Feed, 'div.feed_list', all_feeds: permitted_to?(:approve, :feeds) # , clear_tags: true
   end
 
   # GET /feeds/1
@@ -43,17 +42,30 @@ class FeedsController < CollectibleController
   # POST /feeds
   # POST /feeds.json
   def create
-    update_and_decorate
-    # URLs uniquely identify feeds, so we may have clashed with an existing one.
-    # If so, simply adopt that one.
-    # NB If so, we merrily ignore the other attributes being provided as parameters--if any
-    if @feed.errors.any?
-      @feed = (Feed.where url: @feed.url)[0] || @feed
-    end
-    if post_resource_errors @feed
-      render :new, status: :unprocessable_entity, mode: :modal
+    if current_user
+      update_and_decorate
+      # URLs uniquely identify feeds, so we may have clashed with an existing one.
+      # If so, simply adopt that one.
+      # NB If so, we merrily ignore the other attributes being provided as parameters--if any
+      if @feed.errors.any?
+        update_and_decorate( (Feed.where url: @feed.url)[0] || @feed )
+      end
+      if post_resource_errors @feed
+        render :new, status: :unprocessable_entity, mode: :modal
+      else
+        # No problems. Collect the feed now.
+        @feed.add_to_collection current_user.id
+        @feed.save
+        if post_resource_errors(@feed)
+          render :errors
+        else
+          flash[:popup] = "'#{@feed.title.truncate(50)}' now appearing in your collection."
+          redirect_to feeds_path(access: "collected", mode: :partial)
+        end
+      end
     else
-      redirect_to collect_feed_path
+      flash[:alert] = "Sorry, you need to be logged in to get a feed."
+      render :errors
     end
   end
 

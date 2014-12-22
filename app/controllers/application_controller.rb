@@ -181,9 +181,6 @@ class ApplicationController < ActionController::Base
   def smartrender renderopts={}
     response_service.action = renderopts[:action] || params[:action]
     url = renderopts[:url] || request.original_url
-    # flash.now[:notice] = params[:notice] unless flash[:notice] # ...should a flash message come in via params
-    # @_partial = !params[:_partial].blank?
-    # Apply the default render params, honoring those passed in
     renderopts = response_service.render_params renderopts
     respond_to do |format|
       format.html do
