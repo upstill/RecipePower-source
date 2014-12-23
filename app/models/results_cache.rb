@@ -581,6 +581,19 @@ class SitesCache < ResultsCache
     Site.unscoped
   end
 
+  def name_match tag
+    match = "%#{tag.name}%"
+    # Get a list of SourceReferents with matching name tags
+    reflist = Referent.joins("LEFT OUTER JOIN tags on tags.id = referents.tag_id and referents.type = 'SourceReferent'").
+        where("tags.name ILIKE ?", match).map(&:id)
+    if reflist.empty?
+      itemscope.where('description ILIKE ?', match)
+    else
+      idlist = reflist.map(&:to_s).join ','
+      itemscope.where("referent_id in (#{idlist}) or description ILIKE ?", match)
+    end
+  end
+
 end
 
 class SiteCache < ResultsCache
