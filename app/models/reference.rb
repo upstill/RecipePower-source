@@ -74,24 +74,6 @@ class Reference < ActiveRecord::Base
       end
     end
   end
-=begin
-
-  # Find all references for which the given substring matches url (useful for sites).
-  # NB: NO CREATION OPTION, AND NO REDIRECTION
-  def self.lookup_all url
-    if self.affiliate_class
-      normalized = normalize_url url
-      unless normalized.blank? # Check for non-empty URL
-        Reference.where("type = '#{self.to_s}' and url = ?", "%#{normalized}")
-      end
-    end
-  end
-
-  # Get the affiliate at the other end of a url
-  def self.lookup_affiliate url
-    (ref = self.lookup(url)) && ref.affiliate
-  end
-=end
 
   # Return a (perhaps unsaved) reference for the given url
   # params containts attribute name-value pairs for initializing the reference

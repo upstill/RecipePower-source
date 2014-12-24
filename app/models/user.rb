@@ -22,8 +22,8 @@ class User < ActiveRecord::Base
                 :email, :password, :password_confirmation, :shared_recipe, :invitee_tokens, :channel_tokens, :avatar_url, # :image,
                 :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens, :subscription_tokens, :invitation_issuer
   # attr_writer :browser
-  attr_readonly :count_of_collecteds
-  attr_accessor :shared_recipe, :invitee_tokens, :channel_tokens, :raw_invitation_token, :avatar_url
+  attr_readonly :count_of_collection_pointers
+  attr_accessor :username, :shared_recipe, :invitee_tokens, :channel_tokens, :raw_invitation_token, :avatar_url
   
   has_many :notifications_sent, :foreign_key => :source_id, :class_name => "Notification", :dependent => :destroy
   has_many :notifications_received, :foreign_key => :target_id, :class_name => "Notification", :dependent => :destroy
@@ -44,20 +44,22 @@ class User < ActiveRecord::Base
   # NB: this stays; it represents a user's ownership of lists
   has_many :owned_lists, :class_name => "List", :foreign_key => :owner_id
 
-  has_many :rcprefs, :dependent => :destroy
-  # We allow users to collect users
-  has_many :users, :through=>:rcprefs, :source => :entity, :source_type => User, :autosave=>true
-  # has_many :recipes, :through=>:rcprefs, :source => :entity, :source_type => "Recipe", :autosave=>true
+  has_many :votings, :class_name => "Vote"
+
+  has_many :collection_pointers, :dependent => :destroy, :class_name => "Rcpref"
+  # We allow users to collect users, but the collectible class method can't be used on self, so we define the association directly
+  has_many :users, :through=>:collection_pointers, :source => :entity, :source_type => User, :autosave=>true
+  # has_many :recipes, :through=>:collection_pointers, :source => :entity, :source_type => "Recipe", :autosave=>true
   # Class method to define instance methods for the collectible entities: those of collectible_class
   # This is invoked by the Collectible module when it is included in a collectible class
   def self.collectible collectible_class
 
     asoc_name = collectible_class.to_s.pluralize.underscore
-    has_many asoc_name.to_sym, :through=>:rcprefs, :source => :entity, :source_type => collectible_class, :autosave=>true
+    has_many asoc_name.to_sym, :through=>:collection_pointers, :source => :entity, :source_type => collectible_class, :autosave=>true
   end
 
   # The User class defines collectible-entity association methods here. The Collectible class is cocnsulted, and if it has
-  # a :rcprefs method (part of the Collectible module), then the methods get defined, otherwise we punt
+  # a :user_pointers method (part of the Collectible module), then the methods get defined, otherwise we punt
   # NB All the requisite methods will have been defined IF the collectible's class has been defined (thank you, Collectible)
   # We're really only here to deal with the case where the User class (or a user model) has been accessed before the
   # Collectible class has been defined. Thus, the method_defined? call on the collectible class is enough to ensure the loading
@@ -66,10 +68,7 @@ class User < ActiveRecord::Base
     meth = meth.to_s
     collectible_class = active_record_class_from_association_method_name meth
     begin
-      proof_method = :rcprefs
-      # puts "Extracted collectible_class '#{collectible_class}'"
-      # puts "#{collectible_class} "+(collectible_class.method_defined?(proof_method) ? "has " : "does not have ")+"'#{proof_method}' method"
-      if collectible_class.method_defined?(proof_method) && User.method_defined?(meth)
+      if collectible_class.method_defined?(:user_pointers) && User.method_defined?(meth)
         self.method(meth).call *args, &block
       else
         # puts "Failed to define method '#{meth}'"
@@ -81,30 +80,9 @@ class User < ActiveRecord::Base
     end
   end
 
-=begin
-  # Return a list of lists the user subscribes to, whether personal (:own) or public (:public)
-  def subscriptions kind
-    case kind
-      when :own
-        list_collections.where owner_id: id
-      when :public
-        list_collections.where 'owner_id != ?', id
-    end
+  def vote entity, up=true
+    Vote.vote entity, up, self
   end
-
-  # Subscribe a user to a list
-  def subscribe_to list, do_subscribe=true
-    if do_subscribe
-      self.list_collections = list_collections + [list]
-    else
-      list_collections.delete list
-    end
-  end
-
-  def subscribes_to list
-    list_collections.include? list
-  end
-=end
 
   # Include the entity in the user's collection
   def collect entity
@@ -112,11 +90,11 @@ class User < ActiveRecord::Base
   end
 
   def collected? entity
-    rcprefs.exists? user: self, entity: entity, in_collection: true
+    collection_pointers.exists? user: self, entity: entity, in_collection: true
   end
 
   def uncollect entity
-    rcprefs.where(entity: entity, in_collection: true).map(&:uncollect)
+    collection_pointers.where(entity: entity, in_collection: true).map(&:uncollect)
   end
 
   # Return the set of entities of a given type that the user has collected, as visible to some other
@@ -128,7 +106,7 @@ class User < ActiveRecord::Base
       scope = scope.where.not(owner_id: id) if entity_type == "List"
       scope
     else
-      arr = rcprefs.where(entity_type: entity_type, private: false).map(&:entity)
+      arr = collection_pointers.where(entity_type: entity_type, private: false).map(&:entity)
       arr = arr.keep_if { |l| l.owner != self } if entity_type == "List"
       arr
     end
@@ -142,7 +120,7 @@ class User < ActiveRecord::Base
   # Remember that the user has (recently) touched the entity, optionally adding it to the collection
   def touch entity=nil, collect=false
     return super unless entity
-    ref = rcprefs.create_with(in_collection: collect).find_or_initialize_by user_id: id, entity_type: entity.class.to_s, entity_id: entity.id
+    ref = collection_pointers.create_with(in_collection: collect).find_or_initialize_by user_id: id, entity_type: entity.class.to_s, entity_id: entity.id
     if ref.created_at # Existed prior
       if (Time.now - ref.created_at) > 5
         ref.created_at = ref.updated_at = Time.now
@@ -222,8 +200,9 @@ class User < ActiveRecord::Base
     scope
   end
 
+  # Get the number of entities of a given type (or all types) in self's collection
   def collection_size entity_type=nil
-    entity_type ? rcprefs.where(entity_type: entity_type.to_s, in_collection: true, private: false).size : count_of_collecteds
+    entity_type ? collection_pointers.where(entity_type: entity_type.to_s, in_collection: true, private: false).size : self.count_of_collection_pointers
   end
 
 private
@@ -269,11 +248,13 @@ public
     self.followee_ids = newlist
   end
 
+  # TODO: eliminate channel? method
   # Is a user a channel, as opposed to a human user?
   def channel?
     self.channel_referent_id > 0
   end
 
+  # TODO: replace follows method with straight followees
   # Who does this user follow?
   # Return either friends or channels, depending on 'channel' parameter
   def follows channel=false
@@ -554,18 +535,14 @@ public
     notification
   end
 
-  # Users can be merged if their channels merge
-  def merge other_user
-    if channel? && other_user.channel?
-      self.image = other_user.image if image.blank?
-      self.about = other_user.about if about.blank?
-      other_user.followers.each { |follower| self.followers << follower }
-      other_user.followees.each { |followee| self.followees << followee }
-      # Adopt all the collected entities of the other user
-      other_user.rcprefs.where(in_collection: true).each { |rr| collect rr.entity }
-      # other_user.feed_collections.each { |feed| self.feed_collections << feed }
-      save
-    end
+  # Absorb another user into self
+  def absorb other
+    self.about = other.about if self.about.blank?
+    other.collection_pointers.each { |ref| touch ref.entity, ref.in_collection }
+    other.followees.each { |followee| self.add_followee followee }
+    other.followers.each { |follower| follower.add_followee self }
+    other.votings.each { |voting| vote(voting.entity, voting.up) } # Transfer all the other's votes
+    super(other) if defined? super
   end
 
   private

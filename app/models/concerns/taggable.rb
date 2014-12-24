@@ -40,6 +40,11 @@ module Taggable
     super if defined? super
   end
 
+  # One collectible is being merged into another => transfer taggings
+  def absorb other
+
+  end
+
   # Associate a tag with this entity in the domain of the given user (or the tag's current owner if not given)
   def tag_with tag, who
     unless filtered_tags(who).include? tag

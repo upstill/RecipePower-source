@@ -32,7 +32,7 @@ class ListServices
     # For each user that's actually a channel, create a list
     User.where('channel_referent_id > 0').each { |channel_user|
       list = List.assert channel_user.channel.name, superu, create: true
-      channel_user.rcprefs.where(in_collection: true).map(&:entity).each { |entity|
+      channel_user.collection_pointers.where(in_collection: true).map(&:entity).each { |entity|
         list.include(entity) unless list.include?(entity)
       }
       list.included_tags = channel_user.tags
@@ -41,7 +41,7 @@ class ListServices
       channel_user.destroy
     }
     User.all.each { |user|
-      nlists = user.rcprefs.where("entity_type = 'List'").count
+      nlists = user.collection_pointers.where("entity_type = 'List'").count
       ncollections = PrivateSubscription.where("user_id = #{user.id}").count
       puts "#{user.handle} has #{ncollections} collections and #{nlists} lists before."
       subs = PrivateSubscription.where("user_id = #{user.id}")
@@ -55,7 +55,7 @@ class ListServices
         list.save
         sub.destroy
       }
-      nlists = user.rcprefs.where("entity_type = 'List'").count
+      nlists = user.collection_pointers.where("entity_type = 'List'").count
       ncollections = PrivateSubscription.where("user_id = #{user.id}").count
       puts "#{user.handle} has #{ncollections} collections and #{nlists} list afterward."
     }

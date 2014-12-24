@@ -190,7 +190,7 @@ class RecipesController < CollectibleController
     else
       update_and_decorate
       if @recipe.errors.empty?
-        if ref = @recipe.rcprefs.where( user: current_user ).first
+        if ref = @recipe.user_pointers.where( user: current_user ).first
           ref.edit_count += 1
           ref.save
         end

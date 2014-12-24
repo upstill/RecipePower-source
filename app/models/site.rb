@@ -84,23 +84,28 @@ public
 
   # Merge another site into this one, optionally destroying the other
   def absorb other, nuke=true
-    # If the other has a Reference, that's a deal-breaker
     # Merge corresponding referents
     if other.referent
-      self.referent ||= other.referent
-      if self.referent != other.referent
-        self.referent.merge other.referent
-        other.referent = nil
+      if referent
+        referent.absorb other.referent
+      else
+        self.referent = other.referent
       end
+      other.referent = nil
     end
+    # Steal feeds
     other.feeds.each { |other_feed|
       other_feed.site = self
       other_feed.save
     }
+    # Steal references
     other.references.each { |other_ref|
       other_ref.site = self
+      other_ref.canonical = false
       other_ref.save
     }
+    # Let the taggable, collectible, etc. modules do their work
+    super(other) if defined? super
     save
     other.reload # To clear out the associations prior to destroying the victim
     other.destroy if nuke

@@ -262,7 +262,7 @@ class ReferentTest < ActiveSupport::TestCase
     r1 = GenreReferent.create tag_id: tags(:cake).id
     r2 = IngredientReferent.create tag_id: tags(:jal2).id
     r2id = r2.id
-    assert_not r1.merge(r2), "Bad referent merge returned successfully"
+    assert_not r1.absorb(r2), "Bad referent merge returned successfully"
   end
 
   test "Successfully created goat milk tag" do

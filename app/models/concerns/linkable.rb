@@ -176,4 +176,9 @@ module Linkable
     site.home
   end
 
+  # One linkable is being merged into another => transfer references
+  def absorb other
+    super(other) if defined? super
+  end
+
 end

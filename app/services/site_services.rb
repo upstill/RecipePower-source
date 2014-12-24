@@ -850,4 +850,17 @@ class SiteServices
     end
   end
 
+  # Find sites that are candidates for merging, i.e. those with the same domain
+  def similars
+    uri = URI(site.home)
+    if match = uri.host.match( /\b\w*\.\w*$/)
+      Site.joins(:reference).
+          where("type = 'SiteReference' and url ILIKE ?", "%#{match[0]}%").
+          uniq.
+          keep_if { |other| other.id != site.id }
+    else
+      []
+    end
+  end
+
 end

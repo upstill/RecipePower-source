@@ -32,7 +32,7 @@ class ReferentStructureTest < ActiveSupport::TestCase
     assert_equal 4, r2.typenum, "r2 not typed correctly"
     assert_equal "feta", r2.name, "r2 not named correctly"
 
-    assert_not r1.merge(r2), "Successful merge of two referents of different types"
+    assert_not r1.absorb(r2), "Successful merge of two referents of different types"
   end
 
   test "Tags test" do
@@ -112,7 +112,7 @@ class ReferentStructureTest < ActiveSupport::TestCase
     ######### Okay, we're all set up. Ready to make changes
 
     assert_equal "It's me, Cow Cheese!", r2.description, "Description didn't survive"
-    r1 = r1.merge(r2)
+    r1 = r1.absorb(r2)
     assert r1, "Merge failed"
     assert_equal 5, r1.children.count, "wrong # children after merge"
     assert_equal 3, r1.parents.count, "wrong # parents after merge"
@@ -132,8 +132,8 @@ class ReferentStructureTest < ActiveSupport::TestCase
     crf2 = create :channel_referent, tag_token: "crf2"
     crf3 = create :channel_referent, tag_token: "crf3"
 
-    crf1.merge crf2, false
-    crf1.merge crf3, false
+    crf1.absorb crf2, false
+    crf1.absorb crf3, false
     assert_equal 3, crf1.channels.count, "Merging channels didn't update channels"
     crf2.destroy
     crf3.destroy

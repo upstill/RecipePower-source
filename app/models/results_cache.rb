@@ -344,7 +344,7 @@ class UserCollectionCache < ResultsCache
       # * The recipe's title matches the tag's string, OR
       # * the recipe is tagged by the tag
       matchstr = "%#{tag.name}%"
-      # r1 = Recipe.joins(:rcprefs).where("recipes.title ILIKE ? and rcprefs.user_id = 3", matchstr)
+      # r1 = Recipe.joins(:user_pointers).where("recipes.title ILIKE ? and rcprefs.user_id = 3", matchstr)
       # ids1 = subscope.joins("INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE '%salmon%' and rcprefs.user_id = 3")
       # ids1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE matchstr and rcprefs.user_id = 3})
       # ids1 = subscope.joins(%Q{INNER JOIN recipes ON recipes.id = rcprefs.entity_id and recipes.title ILIKE matchstr}).where("rcprefs.user_id = 3")
@@ -445,7 +445,7 @@ class FeedsCache < ResultsCache
     case @access
       when "collected" # Feeds actually collected by user and friends
         persons_of_interest = [@userid, 1, 3, 5].map(&:to_s).join(',')
-        Feed.joins(:rcprefs).where("rcprefs.user_id in (#{persons_of_interest})").order("rcprefs.user_id DESC")
+        Feed.joins(:user_pointers).where("rcprefs.user_id in (#{persons_of_interest})").order("rcprefs.user_id DESC")
       when "all" # For admins only: every feed in the world
         Feed.order('approved DESC')
       when "approved" # Default: normal user view for shopping for feeds (only approved feeds)
