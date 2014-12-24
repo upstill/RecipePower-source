@@ -44,7 +44,7 @@ class User < ActiveRecord::Base
   # NB: this stays; it represents a user's ownership of lists
   has_many :owned_lists, :class_name => "List", :foreign_key => :owner_id
 
-  has_many :votings, :class_name => "Vote"
+  has_many :votings, :class_name => "Vote", dependent: :destroy
 
   has_many :collection_pointers, :dependent => :destroy, :class_name => "Rcpref"
   # We allow users to collect users, but the collectible class method can't be used on self, so we define the association directly
