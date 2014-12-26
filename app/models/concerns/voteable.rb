@@ -25,8 +25,8 @@ module Voteable
   # Absorb the votes from another into self
   def absorb other
     my_voter_ids = self.voter_ids
-    other.votes.each { |vote| vote.user.vote(vote.entity, vote.up) unless my_voter_ids.include?(vote.user_id)  }
-    super(other) if defined? super
+    other.votes.each { |vote| vote.voter.vote(self, vote.up) unless my_voter_ids.include?(vote.user_id)  }
+    super if defined? super
   end
 
 end

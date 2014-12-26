@@ -102,7 +102,7 @@ class Recipe < ActiveRecord::Base
     rcp
   end
 
-  # Absorb another recipe, optionally deleting the other
+  # Absorb another recipe
   def absorb other, destroy=true
     # This recipe may be presenting a URL that redirects to the target => include that URL in the table
     # RecipeReference.find_or_initialize other.url, affiliate: self
@@ -136,14 +136,6 @@ class Recipe < ActiveRecord::Base
       unless xfers.empty?
         self.rcprefs = self.rcprefs + xfers
       end
-    end
-    # Move taggings from the old recipe to the new
-    xfers =
-        other.taggings.collect { |tagging|
-          tagging.clone unless self.taggings.exists?(tagging.attributes.slice :user_id, :tag_id)
-        }.compact
-    unless xfers.empty?
-      self.taggings = self.taggings + xfers
     end
     # Move feed_entries from the old recipe to the new
     FeedEntry.where(:recipe_id => other.id).each { |fe|

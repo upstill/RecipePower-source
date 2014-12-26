@@ -91,10 +91,8 @@ module Collectible
 
   # One collectible is being merged into another, so add the new one to the collectors of the old one
   def absorb other
-    other.user_pointers.each { |ref|
-      ref.user.touch self, ref.in_collection
-    }
-    super(other) if defined? super
+    other.user_pointers.each { |ref| ref.user.touch self, ref.in_collection }
+    super if defined? super
   end
 
   protected

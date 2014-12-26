@@ -220,6 +220,16 @@ class Reference < ActiveRecord::Base
     end
   end
 
+  # Point the references affiliated with one entity to another, presumably b/c the old one is going away.
+  # It is an error if they aren't of the same type
+  def self.redirect old_affiliate, new_affiliate
+    Reference.where(affiliate: old_affiliate).each { |ref|
+      ref.affiliate_id = nil
+      ref.affiliate = new_affiliate
+      ref.save
+    }
+  end
+
   protected
 
   # Extract the affiliated object, according to the type of reference

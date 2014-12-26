@@ -5,8 +5,8 @@ module Taggable
 
   included do
     has_many :taggings, :as => :entity, :dependent => :destroy
-    has_many :tags, :through => :taggings
-    has_many :taggers, :through => :taggings, :class_name => "User"
+    has_many :tags, -> { uniq }, :through => :taggings
+    has_many :taggers, -> { uniq }, :through => :taggings, :class_name => "User"
     attr_accessor :tagging_user_id, :tagging_tags, :tagging_tag_tokens
     attr_accessible :tagging_user_id, :tagging_tags, :tagging_tag_tokens
 
@@ -42,14 +42,14 @@ module Taggable
 
   # One collectible is being merged into another => transfer taggings
   def absorb other
-
+    # Take taggings from the other taggable
+    other.taggings.map { |tagging| tag_with tagging.tag, tagging.user_id }
+    super if defined? super
   end
 
   # Associate a tag with this entity in the domain of the given user (or the tag's current owner if not given)
-  def tag_with tag, who
-    unless filtered_tags(who).include? tag
-      Tagging.create(user_id: who, tag_id: tag.id, entity_id: id, entity_type: self.class.name)
-    end
+  def tag_with tag, uid
+    Tagging.find_or_create_by user_id: uid, tag_id: tag.id, entity: self
   end
 
   def tag_editing_data options={}

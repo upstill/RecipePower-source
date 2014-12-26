@@ -139,7 +139,7 @@ class TagsController < ApplicationController
   def absorb
     absorber = Tag.find params[:id].to_i
     victim = Tag.find params[:victim].to_i
-    survivor = victim.disappear_into absorber 
+    survivor = absorber.absorb victim
     if survivor.errors.empty?
       victimidstr = ((survivor == victim) ? absorber : victim).id.to_s
       @tag = survivor

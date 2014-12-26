@@ -62,12 +62,6 @@ module Linkable
                  after_add: :"#{reference_association_pl}_ensure_site",
                  dependent: :destroy
         attr_accessible reference_association_pl
-=begin
-        after_save do
-          # Ensure that all the associated references go to the same site
-          site.save if site.include_url(self.method(reference_association_pl).call.map(&:url))
-        end
-=end
       end
 
       self.class_eval do
@@ -178,7 +172,15 @@ module Linkable
 
   # One linkable is being merged into another => transfer references
   def absorb other
-    super(other) if defined? super
+    # Steal references
+    if other.respond_to? :references
+      other.references.each { |other_ref|
+        other_ref.site = self
+        other_ref.canonical = false
+        other_ref.save
+      }
+    end
+    super if defined? super
   end
 
 end

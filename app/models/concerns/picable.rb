@@ -41,8 +41,8 @@ module Picable
       if imageref = other.method(other.class.image_reference_name).call
         self.method(:"#{self.class.image_reference_name}=").call imageref
       end
-      super(other) if defined? super
     end
+    super if defined? super
   end
 
 end

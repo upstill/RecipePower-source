@@ -542,7 +542,7 @@ public
     other.followees.each { |followee| self.add_followee followee }
     other.followers.each { |follower| follower.add_followee self }
     other.votings.each { |voting| vote(voting.entity, voting.up) } # Transfer all the other's votes
-    super(other) if defined? super
+    super
   end
 
   private

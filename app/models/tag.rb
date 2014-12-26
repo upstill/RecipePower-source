@@ -142,38 +142,37 @@ class Tag < ActiveRecord::Base
     #  or the original tag, with errors
     def disappear
       if target = clashing_tag
-        ((target.tagtype == 0) && (tagtype != 0)) ? target.disappear_into(self) : disappear_into(target)
+        ((target.tagtype == 0) && (tagtype != 0)) ? absorb(target) : target.absorb(self)
       else
         save
         self
       end
     end
     
-    # Make self disappear by absorbing it into the target
-    def disappear_into target
+    def absorb other
       # Normal procedure: 
-      TaggingServices.change_tag(id, target.id)
-      ReferentServices.change_tag(id, target.id) # Change the canonical expression of any referent which uses us
-      # Merge the general uses of self as an expression into those of the target
-      target.referent_ids = (referent_ids+target.referent_ids).uniq
-      target.primary_meaning ||= primary_meaning
+      TaggingServices.change_tag(other.id, self.id)
+      ReferentServices.change_tag(other.id, self.id) # Change the canonical expression of any referent which uses us
+      # Merge the general uses of other as an expression into those of the target
+      self.referent_ids = (other.referent_ids+self.referent_ids).uniq
+      self.primary_meaning ||= other.primary_meaning
       
       # Take on all owners of the absorbee unless one of them is global
-      if target.isGlobal ||= isGlobal
-        target.owners.clear
+      if self.isGlobal ||= other.isGlobal
+        self.owners.clear
       else
-        target.owner_ids = (owner_ids + target.owner_ids).uniq
+        self.owner_ids = (other.owner_ids + self.owner_ids).uniq
       end
-      if target.errors.any?
+      if self.errors.any?
         # Failure: copy errors into the original record and return it
-        target.errors.each { |k, v| self.errors[k] = v }
-        self
+        self.errors.each { |k, v| other.errors[k] = v }
+        other
       else
         Tag.transaction do
-          self.destroy
-          target.save
+          other.destroy
+          self.save
         end
-        target
+        self
       end
     end
     
