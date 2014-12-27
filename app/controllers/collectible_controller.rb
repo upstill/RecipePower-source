@@ -92,4 +92,15 @@ class CollectibleController < ApplicationController
     post_resource_errors(@decorator.object) if @decorator
     render :errors # This won't be invoked directly by a user, so there's nothing else to render
   end
+
+  # Absorb another collectible of the same type, denoted by params[:other_id]
+  # NB: obviously, this only works if the specific collectible has an absorb method
+  def absorb
+    if update_and_decorate && params[:other_id] && (other = @decorator.object.class.find(params[:other_id].to_i))
+      @absorbee = other.decorate
+      @decorator.absorb other
+      ResultsCache.bust session.id
+      other.destroy
+    end
+  end
 end

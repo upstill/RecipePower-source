@@ -154,6 +154,10 @@ class ResultsCache < ActiveRecord::Base
     rc
   end
 
+  def self.bust session_id
+    self.where(session_id: session_id).each { |rc| rc.destroy }
+  end
+
   # Declare the parameters needed for this class
   def self.params_needed
     [:id, :querytags]

@@ -27,8 +27,8 @@ class Feed < ActiveRecord::Base
       self.title = (@fetched.title || "").truncate(255)
       self.description = (@fetched.description || "").truncate(255)
       self.url = @fetched.feed_url unless @fetched.feed_url.blank?
-      s = Site.find_or_create (@fetched.url || url)
-      self.site = s
+      # s = Site.find_or_create (@fetched.url || url)
+      # self.site = s
     end
   end
     

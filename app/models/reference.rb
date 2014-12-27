@@ -6,7 +6,7 @@ class Reference < ActiveRecord::Base
   attr_accessible :reference_type, :type, :url, :affiliate_id
 
   validates_uniqueness_of :url, :scope => :type
-  
+
   typeable( :reference_type,
     Article: ["Article", 1],
     Newsitem: ["News Item", 2],
@@ -223,11 +223,7 @@ class Reference < ActiveRecord::Base
   # Point the references affiliated with one entity to another, presumably b/c the old one is going away.
   # It is an error if they aren't of the same type
   def self.redirect old_affiliate, new_affiliate
-    Reference.where(affiliate: old_affiliate).each { |ref|
-      ref.affiliate_id = nil
-      ref.affiliate = new_affiliate
-      ref.save
-    }
+
   end
 
   protected
@@ -381,6 +377,7 @@ end
 # (specifically, the protocol, domain and host, plus any path used to distinguish different sites with the same host).
 class SiteReference < Reference
   belongs_to :site, foreign_key: "affiliate_id"
+  before_save :fix_host
 
   # Return the definitive url for a given url. NB: This will only be the site portion of the URL
   def self.canonical_url url
@@ -417,6 +414,22 @@ class SiteReference < Reference
     }
     super urls.first
   end
+
+  protected
+
+  # Before saving, save the host from the url
+  def fix_host
+    if host.blank?
+      begin
+        uri = URI(url)
+        logger.debug (self.host = uri.host.match(/\w*\.\w*$/)[0])
+      rescue
+        return false
+      end
+    end
+    true
+  end
+
 end
 
 class EventReference < Reference

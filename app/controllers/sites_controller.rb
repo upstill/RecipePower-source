@@ -5,6 +5,7 @@ class SitesController < CollectibleController
   # GET /sites.json
   def index
     # seeker_result Site, "div.site_list" # , clear_tags: true
+    response_service.title = "Sites"
     smartrender unless do_stream SitesCache
   end
 
@@ -79,22 +80,15 @@ class SitesController < CollectibleController
   end
   
   def scrape
-    url = params[:url]
-    if @site = Site.find_or_create(url)
-      olist = @site.feeds.clone
-      FeedServices.scrape_page @site, url
-      @feeds = @site.feeds
-      nlist = @feeds - olist
-      if nlist.empty?
-        codicil = olist.empty? ? ". " : view_context.list_feeds(", though the site already has", olist)
-        redirect_to "/feeds/new", notice: "No new feeds found in page#{codicil}If you want more, you might try copy-and-paste-ing RSS URLs individually."
-      else
-        @site.save
-        @user = current_user
-        render action: :show
+    if update_and_decorate
+      url = params[:url] || @site.sample || @site.home
+      if (@candidate_feeds = FeedServices.scrape_page @site, url).empty?
+        flash[:popup] = "Couldn't find any feeds."
+        render :errors
       end
     else
-      redirect_to "/feeds/new", notice: "Couldn't make sense of URL"
+      flash[:popup] = "Couldn't make sense of URL"
+      render :errors
     end
   end
 end

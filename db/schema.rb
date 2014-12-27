@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141224001846) do
+ActiveRecord::Schema.define(version: 20141226224128) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -227,6 +227,7 @@ ActiveRecord::Schema.define(version: 20141224001846) do
     t.text     "thumbdata"
     t.integer  "status"
     t.boolean  "canonical",               default: false
+    t.string   "host"
   end
 
   add_index "references", ["affiliate_id", "type"], name: "references_index_by_affil_and_type", using: :btree

@@ -102,8 +102,9 @@ RP::Application.routes.draw do
   post '/site' => 'sites#create', :as => 'create_site'
   resources :sites, except: [:index, :create] do
     member do
-      get 'scrape'
+      post 'scrape'
       # Routes for collectibles
+      post 'absorb'
       post 'collect' # Add to the user's collection
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       post 'tag'
