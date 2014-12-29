@@ -101,8 +101,8 @@ public
       other_feed.site = self
       other_feed.save
     }
-    # Let the taggable, collectible, etc. modules do their work
-    super
+    super # Let the taggable, collectible, etc. modules do their work
+    other.reload # Refreshes, e.g., feeds list prior to deletion
   end
 
 

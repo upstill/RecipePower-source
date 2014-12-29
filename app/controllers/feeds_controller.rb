@@ -60,7 +60,11 @@ class FeedsController < CollectibleController
           render :errors
         else
           flash[:popup] = "'#{@feed.title.truncate(50)}' now appearing in your collection."
-          redirect_to feeds_path(access: "collected", mode: :partial)
+          if params[:to_feeds]
+            redirect_to feeds_path(access: "collected", mode: :partial)
+          else
+            render :errors
+          end
         end
       end
     else

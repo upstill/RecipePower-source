@@ -1,8 +1,13 @@
 <%= modal_dialog :scrape_site, "Site #{link_to @site.name, @site.home}" do %>
-    <% @candidate_feeds.each do |candidate| %>
-        <h3><%= candidate.title %><br></h3>
-        <%= candidate.description %><br>
-        <%= link_to candidate.url, candidate.url, :target => "_blank" %><br>
-        <%= link_to_submit "Accept", create_feed_path(candidate), method: :post, :button_size => "sm", :mode => :partial %>
+    <% if @candidate_feeds %>
+        <% @candidate_feeds.each do |candidate| candidate.site = @site ; candidate.approved = true %>
+            <h3><%= candidate.title %><br></h3>
+            <%= candidate.description %><br>
+            <%= link_to candidate.url, candidate.url, :target => "_blank" %><br>
+            <%= button_to "Create Feed", create_feed_path(candidate, :mode => :partial, feed: candidate.attributes.slice("url", "site_id", "approved")) %>
+            <hr>
+        <% end %>
+    <% else %>
+        <%= render "scrape_form" %>
     <% end %>
 <% end %>

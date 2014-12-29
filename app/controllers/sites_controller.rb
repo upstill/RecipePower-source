@@ -81,10 +81,14 @@ class SitesController < CollectibleController
   
   def scrape
     if update_and_decorate
-      url = params[:url] || @site.sample || @site.home
-      if (@candidate_feeds = FeedServices.scrape_page @site, url).empty?
-        flash[:popup] = "Couldn't find any feeds."
-        render :errors
+      if url = params[:url]
+        if (@candidate_feeds = FeedServices.scrape_page @site, url).empty?
+          flash[:popup] = "Couldn't find any feeds."
+          render :errors
+        end
+      else
+        @url = @site.sample
+        @url = @site.home + @url unless URI(@url) # Preface the url with the site if the sample doesn't parse
       end
     else
       flash[:popup] = "Couldn't make sense of URL"

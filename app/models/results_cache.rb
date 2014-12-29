@@ -449,7 +449,10 @@ class FeedsCache < ResultsCache
     case @access
       when "collected" # Feeds actually collected by user and friends
         persons_of_interest = [@userid, 1, 3, 5].map(&:to_s).join(',')
-        Feed.joins(:user_pointers).where("rcprefs.user_id in (#{persons_of_interest})").order("rcprefs.user_id DESC")
+        Feed.joins(:user_pointers).
+            where("rcprefs.user_id in (#{persons_of_interest})").
+            order("rcprefs.user_id DESC").   # User's own feeds first
+            order("rcprefs.updated_at DESC") # Most recent first (within user)
       when "all" # For admins only: every feed in the world
         Feed.order('approved DESC')
       when "approved" # Default: normal user view for shopping for feeds (only approved feeds)
