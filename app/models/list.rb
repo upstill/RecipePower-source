@@ -168,4 +168,8 @@ class List < ActiveRecord::Base
           end
         end
   end
+
+  def pulled_tags
+    taggings.where(user_id: owner_id).map(&:tag)
+  end
 end

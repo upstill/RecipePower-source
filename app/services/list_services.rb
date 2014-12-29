@@ -19,7 +19,11 @@ class ListServices
   def tagging_scope userid=nil
     # We get everything tagged either directly by the list tag, or indirectly via
     # the included tags, EXCEPT for other users' tags using the list's tag
-    scope = Tagging.where( tag_id: (@list.included_tag_ids + [@list.name_tag_id])).
+    tag_ids = [ @list.name_tag_id ]
+    # If the pullin flag is on, we also include material tagged with the tags applied to the list itself
+    # BY ITS OWNER
+    tag_ids += @list.taggings.where(user_id: @list.owner_id).map(&:tag_id) if @list.pullin
+    scope = Tagging.where( tag_id: (tag_ids.count>1 ? tag_ids : tag_ids.first)).
         where("(user_id = #{@list.owner_id}) or (tag_id != #{@list.name_tag_id})")
     scope
   end
