@@ -3,10 +3,36 @@
     <%= form_errors_helper f %>
     <%= f.input :name, label: "Title", placeholder: "List's title here", input_html: {cols: 125, rows: 1, "data-type" => "json"} %>
     <%= f.input :description, label: "Subtitle", placeholder: "The briefest of summaries (250 chars. max)", input_html: {cols: 125, rows: 1, "data-type" => "json"} %>
-    <%= token_input_field f, :included_tags, label: "Include items tagged with:" %>
-    <%= f.input :typenum, label: 'Make list available to:',
+    <%# f.input :typenum, label: false,
                 collection: List.type_selections(true),
                 as: :radio_buttons %>
+    <label class="text options" style="margin: 0">Available to:</label><br>
+    <div class="form-group radio_buttons optional list_typenum" style="margin-left: 20px; margin-bottom: 0">
+      <span class="radio" style="display: inline-block; margin-left: 10px">
+        <label for="list_typenum_0" id="list_typenum_0" name="list[typenum]">
+          <input <%= "checked='checked'" if @list.typenum == 0 %> class="radio_buttons optional" style="margin-top: 0" id="list_typenum_0" name="list[typenum]" type="radio" value="0">
+          Anyone (Public)
+        </label>
+      </span>
+      <span class="radio" style="display: inline-block; margin-left: 10px">
+        <label for="list_typenum_1" id="list_typenum_1" name="list[typenum]">
+          <input <%= "checked='checked'" if @list.typenum == 1 %> class="radio_buttons optional" style="margin-top: 0" id="list_typenum_1" name="list[typenum]" type="radio" value="1">
+          Friends only
+        </label>
+      </span>
+      <span class="radio" style="display: inline-block; margin-left: 10px">
+        <label for="list_typenum_2" id="list_typenum_2" name="list[typenum]">
+          <input <%= "checked='checked'" if @list.typenum == 2 %> class="radio_buttons optional" style="margin-top: 0" id="list_typenum_2" name="list[typenum]" type="radio" value="2">
+          Just me (Private)
+        </label>
+      </span>
+    </div>
+    <div style="margin-bottom: 10px">
+      <%= token_input_field f, :tagging_tags, label: "Tags", style: "margin-bottom: 0" %>
+      <div class="form-group checkbox list_pullin" style="margin-left: 30px">
+        <%= inline_checkbox f, :pullin, "Use tags to find content" %>
+      </div>
+    </div>
     <%= f.input :notes, placeholder: "Your elaboration about the list for all the world to see", input_html: {cols: 125, rows: 2, "data-type" => "json"} %>
     <%= form_actions f, submit_label: (@list.id ? "Save List" : "Create List"), cancel_path: lists_path %>
 <% end %>

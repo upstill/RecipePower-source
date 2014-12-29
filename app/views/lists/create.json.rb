@@ -1,6 +1,6 @@
 {
   done: true,
-  dlog: with_format('html') { render "application/tag_modal" },
+  dlog: with_format('html') { render "tag_modal" },
   replacements: [
      navtab_replacement(:my_lists)
   ]

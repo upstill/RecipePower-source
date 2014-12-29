@@ -14,10 +14,10 @@ module CollectibleHelper
                     id title url picurl picdata_with_fallback
                     element_id field_name human_name object_path tag_path
                     tagging_tag_data tagging_user_id )
-      template_link decorator, "tag-collectible", "Tag", options.merge( :mode => :modal, :attribs => decorator.data(attribs) )
+      template_link decorator, "tag-collectible", "Tag it", options.merge( :mode => :modal, :attribs => decorator.data(attribs) )
     elsif (collect_or_tag != :tag_only) # Either provide the Tag button or none
       url = polymorphic_path(decorator.object)+"/collect"
-      label = "Collect"
+      label = "Grab it"
       options[:method] = "POST"
       link_to_submit label, url, options
     else
