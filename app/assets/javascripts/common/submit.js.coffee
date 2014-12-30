@@ -90,9 +90,10 @@ RP.submit.submit_and_process = ( request, elmt, method="GET" ) ->
 		$.ajax ajdata
 	if preload
 		# The preloaded data is either a DOM element for a dialog, a source string for the dialog, or a responseData structure
-		if typeof(ndlog = preload) == "string" || (ndlog = $(preload)[0]) # Got a string or a DOM element => run dialog
+		if typeof(ndlog = preload) == "string" # || (ndlog = $(preload)[0]) # Got a string or a DOM element => run dialog
 			RP.dialog.push_modal ndlog, RP.dialog.enclosing_modal(elmt)
 		else if preload.done || preload.dlog || preload.code || preload.replacements
+			$(elmt).addClass 'trigger' # Set it off
 			handleResponse elmt, preload
 
 shortCircuit = (request, elmt) ->
