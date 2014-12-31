@@ -6,6 +6,11 @@ jQuery ->
 	# $(document).on("ajax:beforeSend", '.dialog-run', RP.dialog.beforeSend)
 	# $(document).on("ajax:success", '.dialog-run', RP.dialog.success)
 	# $(document).on("ajax:error", '.dialog-run', RP.dialog.error)
+	$(document).on 'shown.bs.modal', (event) ->
+		# When a dialog is invoked, focus on the first autofocus item, or a string item or a text item
+		$('[autofocus]:first', event.target).focus()[0] ||
+		$('input.string', event.target).focus()[0] ||
+		$('input.text', event.target).focus()[0]
 	RP.dialog.arm_links()
 
 # Set up all ujs for the dialog and its requirements
@@ -152,10 +157,6 @@ open_modal = (dlog, omit_button) ->
 	notify_injector "open", dlog
 	$('.token-input-field-pending', dlog).each ->
 		RP.tagger.setup this
-	# Set text focus as appropriate
-	$('[autofocus]:first').focus();
-	#if (focus_sel = $(dlog).data("focus")) && (focus_elmt = $(focus_sel, dlog)[0])
-	#	focus_elmt.focus()
 	RP.dialog.arm_links dlog
 	RP.fire_triggers()
 	dlog
