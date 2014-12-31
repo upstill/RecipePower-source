@@ -18,7 +18,7 @@ RP.submit.bind = (dlog) ->
 	# Set up processing for click events on links with a 'submit' class
 	$(dlog).on "click", 'a.submit', RP.submit.onClick
 	$('.preload', dlog).each (ix, elmt) ->
-		fire elmt
+		preload elmt
 	$(dlog).on "ajax:beforeSend", 'form.submit', RP.submit.beforeSend
 	$(dlog).on "ajax:success", 'form.submit', RP.submit.success
 	$(dlog).on "ajax:error", 'form.submit', RP.submit.error
@@ -40,8 +40,40 @@ RP.submit.onClick = (event) ->
 	fire event.currentTarget # event.toElement
 	false
 
+# preload ensures that the results of the query are available
+preload = (elmt) ->
+	if $(elmt).hasClass 'loading'
+		return;
+	data = $(elmt).data() || {}
+	# Four ways to short-circuit a request (and to satisfy the preload items):
+	# 1: a dialog has been preloaded into data.preloaded
+	# 2: the response has been preloaded into data.response
+	# 3: data.template leads to a dialog template (selector and subs fields
+	# 4: data.selector finds a DOM element for direct (untemplated) use
+	# The element will store either a 'response' object or a 'preloaded' dialog element
+	if data.preloaded
+		return # data.preloaded
+	if responseData = data.response
+		return # responseData.dlog || responseData
+	if (templateData = data.template) && templateData.subs
+		return # interpolated
+	if data.selector && (ndlog = $(data.selector)[0]) # If dialog is already loaded as a DOM entity, return it
+		return # ndlog
+	# Finally, there is no preloaded recourse, so we submit the request
+	$(elmt).addClass 'loading'
+	$.ajax
+		type: "GET",
+		dataType: "json",
+		url: elmt.attributes.href.value,
+		error: (jqXHR, statusText, errorThrown) ->
+			responseData = RP.post_error(jqXHR) # Try to recover useable data from the error
+			handleResponse elmt, responseData, statusText, errorThrown
+		success: (responseData, statusText, xhr) ->
+			handleResponse elmt, responseData, statusText, xhr
+
 fire = (elmt) ->
 	if $(elmt).hasClass( "loading") # This may already be loading
+		handleEnclosingNavTab elmt
 		$(elmt).addClass('trigger') # Mark for immediate opening
 	else if proceedWithConfirmation(elmt)
 		# If the submission is made from a top-level menu, make the menu active
@@ -71,7 +103,8 @@ RP.submit.submit_and_process = ( request, elmt, method="GET" ) ->
 		method = "POST"
 	else
 		data = null
-	unless elmt && ($(elmt).hasClass('loading') || (preload = shortCircuit(request, elmt)))
+	$(elmt).addClass 'trigger'
+	unless elmt && ($(elmt).hasClass('loading') || (preload = shortCircuit elmt))
 		$(elmt).addClass 'loading'
 		ajdata =
 			type: method,
@@ -79,58 +112,49 @@ RP.submit.submit_and_process = ( request, elmt, method="GET" ) ->
 			url: request,
 			error: (jqXHR, statusText, errorThrown) ->
 				# TODO Not actually posting an error for the user
-				$(elmt).removeClass 'loading'
 				responseData = RP.post_error(jqXHR) # Try to recover useable data from the error
 				handleResponse elmt, responseData, statusText, errorThrown
 			success: (responseData, statusText, xhr) ->
-				$(elmt).removeClass 'loading'
 				handleResponse elmt, responseData, statusText, xhr
 		if data != null
 			ajdata.data = data
 		$.ajax ajdata
 	if preload
 		# The preloaded data is either a DOM element for a dialog, a source string for the dialog, or a responseData structure
-		if typeof(ndlog = preload) == "string" # || (ndlog = $(preload)[0]) # Got a string or a DOM element => run dialog
-			RP.dialog.push_modal ndlog, RP.dialog.enclosing_modal(elmt)
-		else if preload.done || preload.dlog || preload.code || preload.replacements
-			$(elmt).addClass 'trigger' # Set it off
+		if preload.done || preload.dlog || preload.code || preload.replacements
 			handleResponse elmt, preload
+		else if typeof(ndlog = preload) == "string" || (ndlog = $(preload)[0]) # Got a string or a DOM element => run dialog
+			$(elmt).removeClass 'trigger'
+			RP.dialog.push_modal ndlog, RP.dialog.enclosing_modal(elmt)
 
-shortCircuit = (request, elmt) ->
+shortCircuit = (elmt) ->
 	data = (elmt && $(elmt).data()) || {}
 	RP.notifications.wait data.waitMsg # If any
-	odlog = RP.dialog.enclosing_modal elmt
-	# Three ways to short-circuit a request:
+	# Four ways to short-circuit a request (and to satisfy the preload items):
 	# 1: a dialog has been preloaded into data.preloaded
 	# 2: the response has been preloaded into data.response
-	# 3: data.selector leads to a dialog somewhere in the DOM
+	# 3: data.template leads to a dialog template (selector and subs fields
+	# 4: data.selector finds a DOM element for direct (untemplated) use
 	if elmt
-		if $(elmt).hasClass("preload")
-			# The element will store either a 'response' object or a 'preloaded' dialog element
-			if ndlog = data.preloaded || ((responseData = data.response) && responseData.dlog)
-				# RP.dialog.push_modal ndlog, odlog
-				return ndlog;
-			else if responseData
-				# RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
-				# RP.process_response responseData
-				# RP.state.onAJAXSuccess event
-				$(elmt).data 'response', null
-				return responseData
+		# The element will store either a 'response' object or a 'preloaded' dialog element
+		if ndlog = data.preloaded || ((responseData = data.response) && responseData.dlog)
+			return ndlog;
+		else if responseData
+			return responseData
 		if (templateData = data.template) && templateData.subs && (interpolated = RP.templates.find_and_interpolate(templateData))
 			return interpolated
-	if data.selector && (ndlog = $(data.selector)[0]) # If dialog is already loaded, replace the responding dialog
-		$(elmt).removeClass 'trigger'
+	if data.selector && (ndlog = $(data.selector)[0]) # If dialog is already loaded as a DOM element, return it
 		return ndlog
-		# RP.dialog.replace_modal ndlog, odlog # Will close any existing open dialog
-		# RP.state.postDialog ndlog, request, (elmt && elmt.innerText) # RP.state.onAJAXSuccess event
-		# return true;
 	false
 
+# Apply a response to the element's request, whether preloaded or freshly arrived, or even whether the element exists or not
 handleResponse = (elmt, responseData, status, xhr) ->
-	# Pass any data into the response data
 	RP.notifications.done()
-	# Elements that preload their query results stash it away, unless they also have the 'trigger' class
-	if elmt && ($(elmt).hasClass 'preload') && !($(elmt).hasClass 'trigger')
+	# A response has come in, so the element is no longer loading
+	$(elmt).removeClass 'loading'
+	# Elements that preload their query results stash them away, unless they also have the 'trigger' class
+	immediate = $(elmt).hasClass 'trigger'
+	if elmt && !immediate
 		# Save for later if this is a preload that's not triggering now
 		$(elmt).data "response", responseData
 		$(elmt).addClass 'loaded'

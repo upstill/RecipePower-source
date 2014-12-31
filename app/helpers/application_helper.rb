@@ -177,12 +177,10 @@ module ApplicationHelper
 
   # Sign Me Up button for the home page, with contents varying according to, whether, e.g., a person is responding to an invitation
   def signup_button
-    unless @user
-      options = response_service.signup_button_options
-      label = options.delete :label
-      path = options.delete :path
-      button_to_submit label, path, :dialog, :default, :xl, options
-    end
+    options = response_service.signup_button_options
+    label = options.delete :label
+    path = options.delete :path
+    link_to_submit label, path, options.merge(:button_size => :lg, :button_style => :success)
   end
 
   # Pump pending notifications into flash notices
