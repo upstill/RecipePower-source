@@ -202,7 +202,10 @@ class User < ActiveRecord::Base
 
   # Get the number of entities of a given type (or all types) in self's collection
   def collection_size entity_type=nil
-    entity_type ? collection_pointers.where(entity_type: entity_type.to_s, in_collection: true, private: false).size : self.count_of_collection_pointers
+    constraints = {  }
+    entity_type ?
+        collection_pointers.where(entity_type: entity_type.to_s, in_collection: true, private: false).size :
+        self.count_of_collecteds
   end
 
 private
