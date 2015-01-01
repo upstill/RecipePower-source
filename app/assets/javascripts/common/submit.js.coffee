@@ -19,6 +19,8 @@ RP.submit.bind = (dlog) ->
 	$(dlog).on "click", 'a.submit', RP.submit.onClick
 	$('.preload', dlog).each (ix, elmt) ->
 		preload elmt
+	$('.trigger', dlog).each (ix, elmt) ->
+		fire elmt
 	$(dlog).on "ajax:beforeSend", 'form.submit', RP.submit.beforeSend
 	$(dlog).on "ajax:success", 'form.submit', RP.submit.success
 	$(dlog).on "ajax:error", 'form.submit', RP.submit.error

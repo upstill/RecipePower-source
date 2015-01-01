@@ -191,3 +191,4 @@ def assert_query url, format=nil, newparams={}
   uri.query = newq.blank? ? nil : newq
   uri.to_s
 end
+

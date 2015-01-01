@@ -59,11 +59,11 @@ module NavtabsHelper
 
   def friends_navtab menu_only = false
     navtab :friends, "Friends", users_path(:select => :followees), menu_only do
-      @user.followees[0..10].collect { |u|
+      current_user.followees[0..10].collect { |u|
         navlink u.handle, user_path(u), id: dom_id(u)
       } + [
           "<hr class='menu'>".html_safe,
-          navlink("Make a Friend...", users_path(:select => :relevant))
+          navlink("Get another friend...", users_path(:select => :relevant))
       ]
     end
   end
@@ -81,10 +81,21 @@ module NavtabsHelper
 
   def other_lists_navtab menu_only = false
     navtab :other_lists, "More Lists", lists_path(access: "collected"), menu_only do
-      @user.collection_pointers.where(entity_type: "List").
+      list_set = @user.collection_pointers.where(entity_type: "List").
           joins("INNER JOIN lists ON lists.id = rcprefs.entity_id").where("lists.owner_id != #{@user.id}").
           limit(16).
-          map(&:entity).collect { |l|
+          map(&:entity)
+      if list_set.count < 16
+        # Try adding the lists owned by friends
+        @user.followees.each { |friend|
+          list_set = (list_set +
+              friend.owned_lists.where.not(availability: 2).
+                  keep_if { |l| l.name != "Keepers" && l.name != "To Try" && l.name != "Now Cooking" }
+          ).uniq
+          break if list_set.count >= 16
+        }
+      end
+      list_set.collect { |l|
         navlink l.name, list_path(l), id: dom_id(l)
       } + [
           "<hr class='menu'>".html_safe,
@@ -95,7 +106,15 @@ module NavtabsHelper
 
   def feeds_navtab menu_only = false
     navtab :feeds, "Feeds", feeds_path(access: "collected"), menu_only do
-      result = @user.collection_scope(entity_type: "Feed", limit: 16, sort_by: :viewed).map(&:entity).collect { |f|
+      feed_set = @user.collection_scope(entity_type: "Feed", limit: 16, sort_by: :viewed).map(&:entity)
+      if feed_set.count < 16
+        # Try adding the lists owned by friends
+        @user.followees.each { |friend|
+          feed_set = (feed_set + friend.feeds).uniq
+          break if feed_set.count >= 16
+        }
+      end
+      result = feed_set.collect { |f|
         navlink truncate(f.title, length: 30), feed_path(f), id: dom_id(f)
       }
       result + [

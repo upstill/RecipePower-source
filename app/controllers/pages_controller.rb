@@ -36,9 +36,18 @@ class PagesController < ApplicationController
   
   # Generic action for displaying a popup by name
   def popup
-    params[:name] = params[:name].sub(/pages\//, '') # Legacy thing...
-    view_context.check_popup params[:name] # If we're serving the popup, remove it from the session
-    smartrender action: params[:name], mode: :modal
+    # params[:name] = params[:name].sub(/pages\//, '') # Legacy thing...
+    if params[:name]
+      view_context.check_popup params[:name] # If we're serving the popup, remove it from the session
+      smartrender action: params[:name], mode: :modal
+    else
+      # Either present the triggered dialog directly (JSON response) or via the home page
+      dialog = response_service.pending_modal_trigger
+      respond_to do |format|
+        format.html { redirect_to view_context.page_with_trigger(home_path, dialog) }
+        format.json { redirect_to dialog }
+      end
+    end
   end
 
 end

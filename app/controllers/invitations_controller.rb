@@ -25,6 +25,8 @@ class InvitationsController < Devise::InvitationsController
 
   # GET /resource/invitation/accept?invitation_token=abcdef
   def edit
+    x=2
+    logger.debug "Entering InvitationsController#edit"
     if params[:invitation_token] &&
         (self.resource = resource_class.find_by_invitation_token(params[:invitation_token], false))
       resource.extend_fields # Default values for name, etc.
@@ -245,6 +247,9 @@ class InvitationsController < Devise::InvitationsController
     self.resource = resource_class.accept_invitation!(params[resource_name])
     resource.password = resource.email if resource.password.blank?
     if resource.errors.empty?
+      if resource.password == resource.email
+        flash[:alert] = "You didn't provide a password, so we've set it to be the same as your email address. You might want to consider changing that in your Profile"
+      end
       invitation_event = RpEvent.where( subject_id: resource.invited_by_id, indirect_object_id: resource.id, indirect_object_type: resource.class.to_s ).first
       RpEvent.post resource, :invitation_accepted, invitation_event, User.find(resource.invited_by_id )
       RpMailer.welcome_email(resource).deliver
@@ -271,6 +276,7 @@ class InvitationsController < Devise::InvitationsController
   end
 
   def after_accept_path_for resource
-    assert_popup "starting_step2?context=signup", after_sign_in_path_for(resource) # welcome_path
+    after_sign_in_path_for resource, "/popup/starting_step2?context=signup"
+    # assert_popup "starting_step2?context=signup", after_sign_in_path_for(resource) # welcome_path
   end
 end

@@ -14,16 +14,17 @@ class User < ActiveRecord::Base
   devise :invitable, :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable #, :validatable,
          :lockable # , :omniauthable
-  after_invitation_accepted :initialize_friends
+  after_invitation_accepted :initial_setup
   # before_save :serialize_browser
 
   # Setup accessible (or protected) attributes for your model
   attr_accessible :id, :username, :first_name, :last_name, :fullname, :about, :login, :private, :skip_invitation, :thumbnail_id,
                 :email, :password, :password_confirmation, :shared_recipe, :invitee_tokens, :channel_tokens, :avatar_url, # :image,
-                :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens, :subscription_tokens, :invitation_issuer
+                :invitation_token, :invitation_message, :invitation_issuer,
+                :remember_me, :role_id, :sign_in_count, :followee_tokens, :subscription_tokens
   # attr_writer :browser
   attr_readonly :count_of_collection_pointers
-  attr_accessor :username, :shared_recipe, :invitee_tokens, :channel_tokens, :raw_invitation_token, :avatar_url
+  attr_accessor :shared_recipe, :invitee_tokens, :channel_tokens, :raw_invitation_token, :avatar_url
   
   has_many :notifications_sent, :foreign_key => :source_id, :class_name => "Notification", :dependent => :destroy
   has_many :notifications_received, :foreign_key => :target_id, :class_name => "Notification", :dependent => :destroy
@@ -216,11 +217,17 @@ private
   end
 
   # Start an invited user off with two friends: the person who invited them (if any) and 'guest'
-  def initialize_friends
+  def initial_setup
       # Give him friends
-      f = [User.guest_id, User.least_email("upstill"), User.least_email("arrone") ]
+      f = [User.least_email("upstill"), User.least_email("arrone"), User.super_id ]
       f << self.invited_by_id if self.invited_by_id
       self.followee_ids = f
+
+      # Give him some lists  "Keepers", "To Try", "Now Cooking"
+      List.assert "Keepers", self, create: true
+      List.assert "To Try", self, create: true
+      List.assert "Now Cooking", self, create: true
+
       self.save
 
       # Make the inviter follow the newbie.

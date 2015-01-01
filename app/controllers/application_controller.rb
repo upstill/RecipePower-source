@@ -272,16 +272,9 @@ class ApplicationController < ActionController::Base
       
   include ControllerAuthentication
 
-  def page_with_trigger dialog, page=nil
-    triggerparam = assert_query(dialog, mode: :modal)
-    pt = assert_query (page || root_path), trigger: %Q{"#{triggerparam}"}
-    logger.debug "page_with_trigger reporting #{pt} on default page '#{page}' and collection_path '#{collection_path}'."
-    pt
-  end
-
   # Enable a modal dialog to run by embedding its URL in the URL of a page, then redirecting to it
   def redirect_to_modal dialog, page=nil
-    redirect_to page_with_trigger(dialog, page )
+    redirect_to view_context.page_with_trigger(page, dialog)
   end
 
   # before_filter on controller that needs login to do anything
@@ -327,7 +320,7 @@ class ApplicationController < ActionController::Base
     # Process any pending notifications
     view_context.issue_notifications current_user
     path = stored_location_for(resource_or_scope) || collection_path
-    path = page_with_trigger(popup, path) if popup # Trigger the intro popup
+    path = view_context.page_with_trigger(path, popup) if popup # Trigger the intro popup
     # If on the site, login triggers a refresh of the collection
     response_service.url_for_redirect(path, :format => :html)
   end

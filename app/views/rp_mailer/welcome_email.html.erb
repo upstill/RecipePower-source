@@ -11,7 +11,7 @@
   of the RecipePower community, all signed in and everything.
   Your collection awaits you at <%= link_to root_url, root_url %>. Of
   course, it's fairly empty at the moment--but if you install our
-  <%= link_to "Cookmark Button", popup_url+"/starting_step2" %>,
+  <%= link_to "Cookmark Button", page_with_trigger("/popup/starting_step2") %>,
   you can add to your collection from anywhere on the Web.
 </p>
 
@@ -20,19 +20,16 @@
   <li><strong>Username: </strong><%= @user.username %></li>
   <li><strong>Polite name: </strong><%= @user.polite_name %></li>
   <li><strong>Email: </strong><%= @user.email %></li>
-  <li><strong>Password: </strong>unless you've changed it, same as your email.</li>
+  <li><strong>Password: </strong>unless you provided one, same as your email.</li>
 </ul>
 <p>If any of this (especially the password) doesn't suit, you can get to your
   Profile on the menu under your name--or
-  click <%= link_to "here", users_profile_path %></p>
+  click <%= link_to "here", page_with_trigger(users_profile_path) %></p>
 <% if @inviter %>
     <p>Since <%= @inviter.handle %> invited you, you are Friends by default,
-      so you will find their collection at "<%= @inviter.handle %>" when you click
-      the <strong>My Friends</strong> label. If this
-      doesn't suit, just click the 'X' next to their name there.
-
-    <p>
-
+      so you will find their collection at "<%= @inviter.handle %>" under
+      the <strong>Friends</strong> menu. You can change this at any time by
+      clicking the Friends menu, finding them in the list that comes up, and clicking Unfollow.
     </p>
 <% end %>
 </p><p>We've worked hard to keep RecipePower simple, but if you get confused, hit the <strong>Help</strong>

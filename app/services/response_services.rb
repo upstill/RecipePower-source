@@ -239,13 +239,13 @@ public
       user = User.find_by_invitation_token(@invitation_token, false)
       notifications = user.notifications_received.where(accepted: false)
       options[:label] = notifications.empty? ? "Accept Invitation" : "Take Share"
-      options[:class] << " trigger"
+      options[:class] << " preload trigger"
       options[:path] = Rails.application.routes.url_helpers.accept_user_invitation_path(invitation_token: @invitation_token)
     elsif @notification_token
       user = Notification.find_by_notification_token(@notification_token).target
       options[:label] = "Take Share"
       options[:path] = Rails.application.routes.url_helpers.new_user_session_path(user: {id: user.id, username: user.username})
-      options[:class] << " trigger"
+      options[:class] << " preload trigger"
     else
       options[:label] = "Sign Me Up"
       options[:class] << " preload"

@@ -199,7 +199,7 @@ module ApplicationHelper
     }.join(' ')
   end
 
-
+=begin
   def popup_path(name)
     "/popup/#{name}"
   end
@@ -228,6 +228,7 @@ module ApplicationHelper
     session[:popup] = popup_request
     uri.to_s
   end
+=end
 
   def check_popup name
     session.delete(:popup) if session[:popup] && (session[:popup] =~ /^#{name}\b/)
