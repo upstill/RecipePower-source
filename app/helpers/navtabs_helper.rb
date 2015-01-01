@@ -48,18 +48,18 @@ module NavtabsHelper
   end
 
   def collections_navtab menu_only = false
-    navtab :collections, "Collections", "/users/#{current_user_or_guest_id}/collection", menu_only do
+    navtab :collections, "Collections", user_collection_path(current_user_or_guest), menu_only do
       [
-          navlink("My Collection", "/users/#{@user.id}/collection"),
-          navlink("Recently Viewed", "/users/#{@user.id}/recent"),
-          navlink("Everything in RecipePower", "/users/#{@user.id}/biglist")
+          navlink("My Collection", user_collection_path(current_user_or_guest)),
+          navlink("Recently Viewed", user_recent_path(current_user_or_guest_id)),
+          navlink("Everything in RecipePower", user_biglist_path(current_user_or_guest))
       ]
     end
   end
 
   def friends_navtab menu_only = false
     navtab :friends, "Friends", users_path(:select => :followees), menu_only do
-      current_user.followees[0..10].collect { |u|
+      current_user_or_guest.followees[0..10].collect { |u|
         navlink u.handle, user_path(u), id: dom_id(u)
       } + [
           "<hr class='menu'>".html_safe,
@@ -70,7 +70,7 @@ module NavtabsHelper
 
   def my_lists_navtab menu_only = false
     navtab :my_lists, "My Lists", lists_path(access: "owned"), menu_only do
-      @user.owned_lists[0..16].collect { |l|
+      current_user_or_guest.owned_lists[0..16].collect { |l|
         navlink l.name, list_path(l), id: dom_id(l)
       } + [
           "<hr class='menu'>".html_safe,
@@ -81,13 +81,13 @@ module NavtabsHelper
 
   def other_lists_navtab menu_only = false
     navtab :other_lists, "More Lists", lists_path(access: "collected"), menu_only do
-      list_set = @user.collection_pointers.where(entity_type: "List").
-          joins("INNER JOIN lists ON lists.id = rcprefs.entity_id").where("lists.owner_id != #{@user.id}").
+      list_set = current_user_or_guest.collection_pointers.where(entity_type: "List").
+          joins("INNER JOIN lists ON lists.id = rcprefs.entity_id").where("lists.owner_id != #{current_user_or_guest.id}").
           limit(16).
           map(&:entity)
       if list_set.count < 16
         # Try adding the lists owned by friends
-        @user.followees.each { |friend|
+        current_user_or_guest.followees.each { |friend|
           list_set = (list_set +
               friend.owned_lists.where.not(availability: 2).
                   keep_if { |l| l.name != "Keepers" && l.name != "To Try" && l.name != "Now Cooking" }
@@ -106,10 +106,10 @@ module NavtabsHelper
 
   def feeds_navtab menu_only = false
     navtab :feeds, "Feeds", feeds_path(access: "collected"), menu_only do
-      feed_set = @user.collection_scope(entity_type: "Feed", limit: 16, sort_by: :viewed).map(&:entity)
+      feed_set = current_user_or_guest.collection_scope(entity_type: "Feed", limit: 16, sort_by: :viewed).map(&:entity)
       if feed_set.count < 16
         # Try adding the lists owned by friends
-        @user.followees.each { |friend|
+        current_user_or_guest.followees.each { |friend|
           feed_set = (feed_set + friend.feeds).uniq
           break if feed_set.count >= 16
         }

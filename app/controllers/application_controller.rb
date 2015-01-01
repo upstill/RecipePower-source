@@ -19,6 +19,7 @@ class ApplicationController < ActionController::Base
   before_filter :log_serve
 
   helper :all
+  helper_method :current_user_or_guest
   rescue_from Timeout::Error, :with => :timeout_error # self defined exception
   rescue_from OAuth::Unauthorized, :with => :timeout_error # self defined exception
   rescue_from AbstractController::ActionNotFound, :with => :no_action_error
