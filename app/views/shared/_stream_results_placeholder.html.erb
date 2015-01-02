@@ -10,8 +10,7 @@
                     :"data-path" => next_path,
                     :"data-container_selector" => response_service.container_selector %>
     <% else %>
-        <% x=2 %>
-        No mo' stuff.
+        <%= @empty_msg %>
     <% end %>
   </div>
 </div>

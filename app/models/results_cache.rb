@@ -230,10 +230,15 @@ class ResultsCache < ActiveRecord::Base
     return partition[-1] if partition  # Don't create if doesn't exist
     return cache.count if cache
     begin
-      itemscope.count
+      scope_count
     rescue
       1000000
     end
+  end
+
+  # This method exists to be over-ridden by sub-classes with a more refined idea of the full size
+  def scope_count
+    itemscope.size
   end
 
   # Convert the scope to a cache of entries, as needed. In the default case, this is only
@@ -327,12 +332,8 @@ class ResultsCache < ActiveRecord::Base
 
 end
 
-# Recently-viewed recipes of the given user
-class UserCollectionCache < ResultsCache
-
-  def user
-    @user ||= User.where(id: @id).first if @id
-  end
+# RcprefCache is a results cache based on Rcpref (i.e., collection) records
+class RcprefCache < ResultsCache
 
   # Memoize a query to get all the currently-defined entity types
   def typeset
@@ -367,6 +368,15 @@ class UserCollectionCache < ResultsCache
       this_round = (sss1+sss2+sss3).uniq
       counts.incr this_round, 30 # Thirty points for matching this tag
     end
+  end
+
+end
+
+# Recently-viewed recipes of the given user
+class UserCollectionCache < RcprefCache
+
+  def user
+    @user ||= User.where(id: @id).first if @id
   end
 
   # The sources are a user, a list of users, or nil (for the master global list)
@@ -553,6 +563,21 @@ class UserBiglistCache < UserCollectionCache
 
   def itemscope
     user ? Rcpref.where('private = false OR rcprefs.user_id = ?', user.id) : Rcpref.where(private: false)
+    # scope = Rcpref.select([:entity_type, :entity_id]).group(" entity_type, entity_id")
+  end
+
+  def slice_item_scope
+    itemscope.select("DISTINCT ON (entity_type, entity_id) *").limit(safe_partition.windowsize).offset(safe_partition.window.min).includes(:entity).to_a
+    # itemscope.limit(safe_partition.windowsize).offset(safe_partition.window.min).includes(:entity).to_a
+  end
+
+  def slice_item_array
+    itemscope.slice( safe_partition.window.min, safe_partition.windowsize )
+  end
+
+  def scope_count
+    rel = itemscope.select("DISTINCT ON (entity_type, entity_id) *").load
+    rel.size
   end
 
 end

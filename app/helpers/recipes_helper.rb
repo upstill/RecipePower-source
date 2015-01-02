@@ -8,14 +8,19 @@ module RecipesHelper
   def recipe_title_div recipe
     "<div><h3>#{recipe.title}</h3></div>".html_safe
   end
-  
+
 
   def recipe_grid_datablock decorator
     entity = decorator.object
     klass = entity.class.to_s
-    label = (klass == "Recipe") ? "" : "#{klass}: "
+    label = ((klass == "Recipe") || (klass == "List")) ? "" : "#{klass}: "
     grid_element = content_tag :p, (label+link_to(decorator.title, decorator.url, class: "tablink")).html_safe, class: "rcp_grid_element_title"
-    source_element = content_tag :div, ("from "+link_to(decorator.sourcename, decorator.sourcehome, class: "tablink")).html_safe, class: "rcp_grid_element_source"
+    case klass
+      when "List"
+        source_element = content_tag :div, ("a list by "+link_to_submit(decorator.owner.handle, user_path(decorator.owner, :mode => :modal))).html_safe, class: "rcp_grid_element_source"
+      else
+        source_element = content_tag :div, ("from "+link_to(decorator.sourcename, decorator.sourcehome, class: "tablink")).html_safe, class: "rcp_grid_element_source"
+    end
     content_tag :div, grid_element+source_element, class: "rcp_grid_datablock"
   end
 
