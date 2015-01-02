@@ -1,5 +1,14 @@
 module StreamHelper
 
+  def stream_loadlink next_path, container_selector
+    link_to "Click to load", "#",
+            onclick: 'RP.stream.go(event);',
+            onload: 'RP.stream.onload(event);',
+            class: "stream-trigger",
+            :"data-path" => next_path,
+            :"data-container_selector" => container_selector
+  end
+
   def stream_element_class etype
     "stream-#{etype} #{response_service.controller}-#{response_service.action}"
   end

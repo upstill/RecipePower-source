@@ -3,12 +3,7 @@
   <div class="stream-tail">
     <% if next_path = @sp.next_path %>
         <%= image_tag "ajax-loader.gif", class: "beachball hide" %>
-        <%= link_to "Click to load", "#",
-                    onclick: 'RP.stream.go(event);',
-                    onload: 'RP.stream.onload(event);',
-                    class: "stream-trigger",
-                    :"data-path" => next_path,
-                    :"data-container_selector" => response_service.container_selector %>
+        <%= stream_loadlink next_path, response_service.container_selector %>
     <% else %>
         <%= @empty_msg %>
     <% end %>
