@@ -562,7 +562,8 @@ end
 class UserBiglistCache < UserCollectionCache
 
   def itemscope
-    user ? Rcpref.where('private = false OR rcprefs.user_id = ?', user.id) : Rcpref.where(private: false)
+    scope = user ? Rcpref.where('private = false OR rcprefs.user_id = ?', user.id) : Rcpref.where(private: false)
+    scope.where.not(entity_type: ["Feed", "User", "List"])
     # scope = Rcpref.select([:entity_type, :entity_id]).group(" entity_type, entity_id")
   end
 
@@ -576,8 +577,11 @@ class UserBiglistCache < UserCollectionCache
   end
 
   def scope_count
-    rel = itemscope.select("DISTINCT ON (entity_type, entity_id) *").load
-    rel.size
+    # To avoid loading the relation, we construct a count query from the scope query
+    scope_query = itemscope.select("DISTINCT ON (entity_type, entity_id) *").to_sql
+    sql = %Q{ SELECT COUNT(*) from (#{scope_query}) as internalQuery }
+    res = ActiveRecord::Base.connection.execute sql
+    res.first["count"].to_i
   end
 
 end
