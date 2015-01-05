@@ -39,6 +39,7 @@ class ListsController < CollectibleController
   def show
     update_and_decorate
     response_service.title = "About #{@list.name}"
+    @empty_msg = "This list is empty now, but you can add any item that has an 'Add to...' button"
     @active_menu = (@list.owner == current_user) ? :my_lists : :other_lists
     smartrender unless do_stream ListCache
   end

@@ -413,8 +413,7 @@ class ListsCache < ResultsCache
       when "all"
         scope = List.unscoped
       else # By default, we only see lists belonging to our friends and Super that are not private, and all those that are public
-        friend_ids = (User.find(@userid).followee_ids + [User.super_id]).map(&:to_s).join(',')
-        scope = List.where "(owner_id != #{@userid}) and (availability = 0 or (availability = 1 and owner_id in (#{friend_ids})))"
+        scope = ListServices.find_visible_to @user_id
     end
     scope
   end

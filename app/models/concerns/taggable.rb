@@ -71,11 +71,6 @@ module Taggable
     tagging_tags.map(&:attributes).to_json
   end
 
-  # Anything that's taggable can appear in a list
-  def lists
-
-  end
-
   # Allow the given user to see tags applied by themselves and super
   def tags_visible_to uid, options={}
     uid = uid.to_i if uid.is_a? String

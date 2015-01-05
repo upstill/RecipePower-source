@@ -37,9 +37,8 @@ class RecipesController < CollectibleController
 
   def show
     # return if need_login true
-    @recipe = Recipe.find(params[:id])
+    update_and_decorate
     current_user.touch @recipe if current_user
-    @decorator = @recipe.decorate
     response_service.title = ""
     @nav_current = nil
     smartrender

@@ -10,6 +10,12 @@ module ApplicationHelper
     image_tag url, options.merge( onError: "onImageError(this);")
   end
 
+  def empty_msg
+    unless @empty_msg.blank?
+      content_tag :h4, @empty_msg
+    end
+  end
+
   # Nicely format a report of some quantity
   def count_report number, name, preface="", postscript="", threshold=1
     if !preface.is_a? String

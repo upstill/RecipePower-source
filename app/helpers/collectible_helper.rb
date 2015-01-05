@@ -79,11 +79,12 @@ module CollectibleHelper
 
   # Produce the standard buttons for display when showing the entity
   def collectible_action_buttons decorator, context, editable=false
-    result = collect_or_tag_button decorator, button_size: "small"
     entity = decorator.object
     if editable
       url = polymorphic_path(entity)+"/edit"
-      result << button_to_submit('Edit', url, mode: :modal)
+      result = button_to_submit('Edit', url, mode: :modal)
+    else
+      result = collect_or_tag_button decorator, button_size: "small"
     end
     if response_service.admin_view?
       typename = entity.class.to_s.underscore.tr('_', ' ')

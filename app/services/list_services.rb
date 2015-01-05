@@ -8,6 +8,25 @@ class ListServices
     self.list = list
   end
 
+  # Return the set of lists containing the entity (either directly or indrectly) that are visible to the given user
+  def self.find_by_listee taggable_entity
+    uid = taggable_entity.tagging_user_id || User.super_id
+    list_scope = self.find_visible_to uid, true
+
+    list_tags = taggable_entity.tags_visible_to( taggable_entity.tagging_user_id, tagtype: "List" )
+    list_tags.empty? ? List.none : List.where(name_tag_id: list_tags.map(&:id))
+  end
+
+  def self.find_visible_to uid, with_owned=false
+    friend_ids = (User.find(uid).followee_ids + [User.super_id]).map(&:to_s).join(',')
+    if with_owned
+      owner_clause = "(owner_id == #{uid}) or "
+    else
+      owner_clause = "(owner_id != #{uid}) and "
+    end
+    List.where "#{owner_clause}(availability = 0 or (availability = 1 and owner_id in (#{friend_ids})))"
+  end
+
   def available_to? user
     (user.id == @list.owner.id) || # always available to owner
     (user.name == "super") || # always available to super

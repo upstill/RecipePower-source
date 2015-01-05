@@ -88,6 +88,7 @@ class UsersController < CollectibleController
   def recent
     @user = User.find params[:id]
     @active_menu = :collections
+    @empty_msg = "As you check out things in RecipePower, they will be remembered here."
     response_service.title = "Recently Viewed"
     smartrender unless do_stream UserRecentCache
   end
@@ -97,9 +98,11 @@ class UsersController < CollectibleController
     @user = User.find params[:id]
 	  if (@user.id == current_user_or_guest_id)
       response_service.title = "My Whole Collection"
+      @empty_msg = "Nothing here yet...but that's what the #{view_context.link_to_submit 'Cookmark Button', '/popup/starting_step2'} is for!".html_safe
       @active_menu = :collections
     else
       response_service.title = "#{@user.handle}'s Collection"
+      @empty_msg = "They haven't collected anything?!? Why not Share something with them?"
       @active_menu = :friends
     end
     smartrender unless do_stream UserCollectionCache

@@ -10,4 +10,8 @@ class ListsDecorator < Draper::Decorator
   #     end
   #   end
 
+  def collected_by? uid
+    object.owner.id == uid
+  end
+
 end
