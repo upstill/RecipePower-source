@@ -94,9 +94,9 @@ class TaggingServices
                     about ILIKE ?',
               matchstr, matchstr, matchstr, matchstr, matchstr, matchstr).to_a
         when "List"
-          ( typed_scope.where("notes ILIKE ? or description ILIKE ?", matchstr, matchstr).to_a +
+          ( typed_scope.joins(%Q{INNER JOIN lists ON lists.id = taggings.entity_id}).where("lists.notes ILIKE ? or lists.description ILIKE ?", matchstr, matchstr).to_a +
             typed_scope.joins(%Q{INNER JOIN lists ON lists.id = taggings.entity_id}).
-                        joins(:tags).where('name ILIKE ?', matchstr).to_a ).uniq
+                        joins(:tag).where('name ILIKE ?', matchstr).to_a ).uniq
         when "Site"
           # TODO: site needs to search on name
           typed_scope.where("description ILIKE ?", matchstr).to_a

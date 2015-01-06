@@ -12,19 +12,49 @@ class ListServices
   def self.find_by_listee taggable_entity
     uid = taggable_entity.tagging_user_id || User.super_id
     list_scope = self.find_visible_to uid, true
+    friend_ids = User.find(uid).followee_ids + [taggable_entity.tagging_user_id, User.super_id]
+    tag_ids = taggable_entity.taggings.where(user_id: friend_ids).pluck(:tag_id)
+    list_tag_ids = Tag.where(id: tag_ids, tagtype: 16).pluck :id
+    tag_id_str = tag_ids.map(&:to_s).join ','
 
-    list_tags = taggable_entity.tags_visible_to( taggable_entity.tagging_user_id, tagtype: "List" )
-    list_tags.empty? ? List.none : List.where(name_tag_id: list_tags.map(&:id))
+
+    indirect = tag_ids.blank? ? [] : list_scope.where(pullin: true).joins(:taggings).where("taggings.tag_id in (#{tag_id_str})").to_a
+    # Get lists in which the owner has tagged the entity directly
+=begin
+    This doesn't work because of cross-talk between taggings among all users. There seems to be no
+    way to use a join for the purpose. But the number of taggings ought to be small, so iteration isn't too bad
+    direct = list_tag_ids_str.blank? ?
+        [] :
+        List.joins( %Q{ INNER JOIN taggings on taggings.tag_id = lists.name_tag_id
+              where taggings.user_id in (#{friend_ids_str}) and
+                    taggings.entity_type = '#{eclass}' and
+                    taggings.entity_id = #{eid} and
+                    lists.name_tag_id IN (#{list_tag_ids_str}) and
+                    ( (lists.owner_id = #{uid}) or
+                      (lists.availability = 0 or
+                      (lists.availability = 1 and lists.owner_id in (#{friend_ids_str}))))
+      }).to_a
+=end
+    # Collect all the lists whose owners included the entity in the list directly
+    direct = Tagging.where(user_id: friend_ids, entity: taggable_entity, tag_id: list_tag_ids).collect { |tagging|
+      list_scope.find_by owner_id: tagging.user_id, name_tag_id: tagging.tag_id
+    }.compact
+    (direct+indirect).uniq(&:id)
   end
 
   def self.find_visible_to uid, with_owned=false
     friend_ids = (User.find(uid).followee_ids + [User.super_id]).map(&:to_s).join(',')
     if with_owned
-      owner_clause = "(owner_id == #{uid}) or "
+      owner_clause = "(owner_id = #{uid}) or "
     else
       owner_clause = "(owner_id != #{uid}) and "
     end
     List.where "#{owner_clause}(availability = 0 or (availability = 1 and owner_id in (#{friend_ids})))"
+=begin
+    List.joins("INNER JOIN taggings as t1 on t1.entity_type = 'List' and t1.entity_id = 631 INNER JOIN taggings as t2 on t2.entity_id = 4 and t2.entity_type = 'Recipe' and t1.tag_id = t2.tag_id")
+    Tagging.where(entity: l).joins("INNER JOIN taggings as t2 on taggings.tag_id = t2.tag_id").where("t2.entity_type = 'Recipe' and t2.entity_id = 4")
+    Tagging Load (73.5ms)  SELECT "taggings".* FROM "taggings" INNER JOIN taggings as t2 on taggings.tag_id = t2.tag_id WHERE "taggings"."entity_type" = 'List' AND "taggings"."entity_id" = 631 AND (t2.entity_type = 'Recipe' and t2.entity_id = 4)
+=end
   end
 
   def available_to? user

@@ -33,7 +33,13 @@ class RecipeDecorator < Draper::Decorator
         h.link_to object.sourcename, object.sourcehome
       when "list", "lists"
         strjoin ListServices.find_by_listee(object).collect { |list|
-                  h.link_to_submit list.name, list, :mode => :modal, class: "rcp_list_element_tag"
+                  llink = h.link_to_submit list.name, list, mode: :partial, class: "rcp_list_element_tag"
+                  if list.owner_id == object.tagging_user_id
+                    llink
+                  else
+                    ulink = h.link_to list.owner.handle, list.owner, mode: :partial, class: "rcp_list_element_tag"
+                    "#{llink} (#{ulink})".html_safe
+                  end
                 }
     end
   end

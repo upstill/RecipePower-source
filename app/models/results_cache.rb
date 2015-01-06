@@ -437,7 +437,7 @@ class ListCache < ResultsCache
     tagset = tagscope.to_a
     counts.incr tagset # One extra point for matching in one field
 
-    matchset = TaggingServices.match tag.name, itemscope # Returns an array of agging objects
+    matchset = TaggingServices.match tag.name, itemscope # Returns an array of Tagging objects
     counts.incr matchset
 
     this_round = (tagset+matchset).uniq
