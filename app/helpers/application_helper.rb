@@ -266,8 +266,24 @@ module ApplicationHelper
     end
   end
 
+  def field_count what
+    @decorator && @decorator.respond_to?(:arity) && @decorator.arity(what)
+  end
+
   def present_field what=nil
     field_value(what) || %Q{%%#{(what || "").to_s}%%}.html_safe
+  end
+
+  def present_field_label what
+    label = what.sub "_tags", ''
+    case field_count(what)
+      when nil, false
+        "%%#{what}_label_plural%%"+"%%#{what}_label_singular%%"
+      when 1
+        label.singularize
+      else
+        label.pluralize
+    end
   end
 
   def present_field_wrapped what=nil

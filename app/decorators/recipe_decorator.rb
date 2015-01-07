@@ -3,6 +3,17 @@ require "templateer.rb"
 class RecipeDecorator < Draper::Decorator
   include Templateer
 
+  def arity fieldname
+    case fieldname.downcase
+      when /_tags$/
+        tagtype = fieldname.sub /_tags$/, ''
+        tagtype = ["Culinary Term", "Untyped"] if tagtype=="Other"
+        tags_visible_to(object.collectible_user_id, :tagtype => tagtype).count
+      when "list", "lists"
+        ListServices.find_by_listee(object).count
+    end
+  end
+
   def extract fieldname
     case fieldname.downcase
       when /_tags$/

@@ -220,6 +220,7 @@ BLOCK_END
         class: "absorb_"+tagidstr
   end
 
+
   # Present a collection of tags, by type
   def show_tags fields, viewer_id=nil
     viewer_id ||= User.super_id
@@ -227,9 +228,7 @@ BLOCK_END
       if field.is_a? Array
         field, label = field[0], field[1]
       else
-        label = field.sub "_tags", ''
-        extension = label.pluralize.sub label, ''
-        label << "(#{extension})" unless extension.blank?
+        label = present_field_label field
       end
       render "shared/show_labelled", label: label, content: present_field_wrapped(field)
     }.join('').html_safe
