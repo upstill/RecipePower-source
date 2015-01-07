@@ -115,6 +115,45 @@ class Partition < Array
 
 end
 
+module Uniquify
+  # Allowing for the possibility of redundant items that are nonetheless significant for searching,
+  # the redundant itemscope may need to be retained (e.g., in the case of searching tagging-based scopes)
+  # while the final presentation (and initial count) are without redundancy.
+  # NB This happens to work for both collections (based on Rcpref) and taggings b/c both have
+  # polymorphic 'entity' associations
+  def uniqueitemscope
+    itemscope.select("DISTINCT ON (entity_type, entity_id) *")
+  end
+
+  def scope_count
+    # To avoid loading the relation, we construct a count query from the scope query
+    scope_query = uniqueitemscope.to_sql
+    sql = %Q{ SELECT COUNT(*) from (#{scope_query}) as internalQuery }
+    res = ActiveRecord::Base.connection.execute sql
+    res.first["count"].to_i
+  end
+
+end
+
+module TaggingMethods
+  include Uniquify
+
+  # Apply the tag to the current set of result counts
+  def count_tag tag, counts
+    # Intersect the scope with the set of entities tagged with tags similar to the given tag
+    tagscope = itemscope.where tag_id: TagServices.new(tag).lexical_similars.map(&:id)
+    tagset = tagscope.to_a
+    counts.incr tagset # One extra point for matching in one field
+
+    matchset = TaggingServices.match tag.name, itemscope # Returns an array of Tagging objects
+    counts.incr matchset
+
+    this_round = (tagset+matchset).uniq
+    counts.incr this_round, 30 # Thirty points for matching this tag
+  end
+
+end
+
 class ResultsCache < ActiveRecord::Base
   include ActiveRecord::Sanitization
   # The ResultsCache class responds to a query with a series of items.
@@ -427,41 +466,9 @@ class ListsCache < ResultsCache
   # TODO Currently, there's no search for lists
 end
 
-class TaggingCache < ResultsCache
-
-  # Allowing for the possibility of redundant items that are nonetheless significant for searching,
-  # the redundant itemscope may need be retained (e.g., in the case of searching tagging-based scopes)
-  # This method may be overridden to
-  def uniqueitemscope
-    itemscope.select("DISTINCT ON (entity_type, entity_id) *")
-  end
-
-  def scope_count
-    # To avoid loading the relation, we construct a count query from the scope query
-    scope_query = uniqueitemscope.to_sql
-    sql = %Q{ SELECT COUNT(*) from (#{scope_query}) as internalQuery }
-    res = ActiveRecord::Base.connection.execute sql
-    res.first["count"].to_i
-  end
-
-  # Apply the tag to the current set of result counts
-  def count_tag tag, counts
-    # Intersect the scope with the set of entities tagged with tags similar to the given tag
-    tagscope = itemscope.where tag_id: TagServices.new(tag).lexical_similars.map(&:id)
-    tagset = tagscope.to_a
-    counts.incr tagset # One extra point for matching in one field
-
-    matchset = TaggingServices.match tag.name, itemscope # Returns an array of Tagging objects
-    counts.incr matchset
-
-    this_round = (tagset+matchset).uniq
-    counts.incr this_round, 30 # Thirty points for matching this tag
-  end
-
-end
-
 # list's content visible to current user (ListStreamer)
-class ListCache < TaggingCache
+class ListCache < ResultsCache
+  include TaggingMethods
 
   # The itemscope is the initial query for all possible items, subject to subqueries via count_tag
   def itemscope
@@ -585,28 +592,13 @@ end
 
 # user's collection visible to current_user (UserCollectionStreamer)
 class UserBiglistCache < UserCollectionCache
+  include TaggingMethods
 
   def itemscope
     scope = user ? Rcpref.where('private = false OR rcprefs.user_id = ?', user.id) : Rcpref.where(private: false)
     scope.where.not(entity_type: ["Feed", "User", "List"])
     # scope = Rcpref.select([:entity_type, :entity_id]).group(" entity_type, entity_id")
   end
-
-  # Allowing for the possibility of redundant items that are nonetheless significant for searching,
-  # the redundant itemscope may need be retained (e.g., in the case of searching tagging-based scopes)
-  # This method may be overridden to
-  def uniqueitemscope
-    itemscope.select("DISTINCT ON (entity_type, entity_id) *")
-  end
-
-  def scope_count
-    # To avoid loading the relation, we construct a count query from the scope query
-    scope_query = uniqueitemscope.to_sql
-    sql = %Q{ SELECT COUNT(*) from (#{scope_query}) as internalQuery }
-    res = ActiveRecord::Base.connection.execute sql
-    res.first["count"].to_i
-  end
-
 end
 
 # user's lists visible to current_user (UserListsStreamer

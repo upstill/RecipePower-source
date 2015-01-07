@@ -71,9 +71,12 @@ class ListServices
     tag_ids = [ @list.name_tag_id ]
     # If the pullin flag is on, we also include material tagged with the tags applied to the list itself
     # BY ITS OWNER
-    tag_ids += @list.taggings.where(user_id: @list.owner_id).map(&:tag_id) if @list.pullin
-    scope = Tagging.where( tag_id: (tag_ids.count>1 ? tag_ids : tag_ids.first)).
-        where("(user_id = #{@list.owner_id}) or (tag_id != #{@list.name_tag_id})")
+    whereclause = "(user_id = #{@list.owner_id}) or (tag_id != #{@list.name_tag_id})"
+    if @list.pullin
+      tag_ids += @list.taggings.where(user_id: @list.owner_id).pluck(:tag_id)
+      whereclause = "(#{whereclause}) and not (entity_type = 'List' and entity_id = #{@list.id})"
+    end
+    scope = Tagging.where( tag_id: (tag_ids.count>1 ? tag_ids : tag_ids.first)).where whereclause
     scope
   end
 

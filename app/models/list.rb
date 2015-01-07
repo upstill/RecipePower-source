@@ -100,7 +100,6 @@ class List < ActiveRecord::Base
       }
       oname.save unless oname.safe_destroy
       name_tag.save
-      x=2
     end
 
   end
