@@ -106,7 +106,7 @@ RP.submit.submit_and_process = ( request, elmt, method="GET" ) ->
 	else
 		data = null
 	$(elmt).addClass 'trigger'
-	unless elmt && ($(elmt).hasClass('loading') || (preload = shortCircuit elmt))
+	unless elmt && ($(elmt).hasClass('loading') || (preloaded = shortCircuit elmt))
 		$(elmt).addClass 'loading'
 		ajdata =
 			type: method,
@@ -121,18 +121,18 @@ RP.submit.submit_and_process = ( request, elmt, method="GET" ) ->
 		if data != null
 			ajdata.data = data
 		$.ajax ajdata
-	if preload
+	if preloaded
 		# The preloaded data is either a DOM element for a dialog, a source string for the dialog, or a responseData structure
-		if preload.done || preload.dlog || preload.code || preload.replacements
-			handleResponse elmt, preload
-		else if typeof(ndlog = preload) == "string" || (ndlog = $(preload)[0]) # Got a string or a DOM element => run dialog
+		if preloaded.done || preloaded.dlog || preloaded.code || preloaded.replacements
+			handleResponse elmt, preloaded
+		else if typeof(ndlog = preloaded) == "string" || (ndlog = $(preloaded)[0]) # Got a string or a DOM element => run dialog
 			$(elmt).removeClass 'trigger'
 			RP.dialog.push_modal ndlog, RP.dialog.enclosing_modal(elmt)
 
 shortCircuit = (elmt) ->
 	data = (elmt && $(elmt).data()) || {}
 	RP.notifications.wait data.waitMsg # If any
-	# Four ways to short-circuit a request (and to satisfy the preload items):
+	# Four ways to short-circuit a request (and to satisfy the preloaded items):
 	# 1: a dialog has been preloaded into data.preloaded
 	# 2: the response has been preloaded into data.response
 	# 3: data.template leads to a dialog template (selector and subs fields
