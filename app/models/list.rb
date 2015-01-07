@@ -94,10 +94,8 @@ class List < ActiveRecord::Base
     if oname != newname
       oname.dependent_lists.delete self
       self.name_tag = newname
-      oname.taggings.where(user: owner).each { |tagging|
-        unless name_tag.taggings.exists?(entity: tagging.entity, user: owner)
-          name_tag.taggings.create tagging.attributes
-        end
+      oname.taggings.where(user_id: owner.id).each { |tagging|
+        name_tag.taggings.create tagging.attributes unless name_tag.taggings.exists? entity: tagging.entity, user_id: owner.id
         oname.taggings.destroy tagging
       }
       oname.save unless oname.safe_destroy
