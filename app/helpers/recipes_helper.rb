@@ -14,7 +14,13 @@ module RecipesHelper
     entity = decorator.object
     klass = entity.class.to_s
     label = ((klass == "Recipe") || (klass == "List")) ? "" : "#{klass}: "
-    grid_element = content_tag :p, (label+link_to(decorator.title, decorator.url, class: "tablink")).html_safe, class: "rcp_grid_element_title"
+    itemlink = case klass
+                 when "Recipe"
+                   link_to decorator.title, decorator.url, class: "tablink" # ...to open up a new tab
+                 else # Other internal entities get opened up in a new partial
+                   link_to_submit decorator.title, decorator.url, mode: :partial
+               end
+    grid_element = content_tag :p, (label+itemlink).html_safe, class: "rcp_grid_element_title"
     case klass
       when "List"
         source_element = content_tag :div, ("a list by "+link_to_submit(decorator.owner.handle, user_path(decorator.owner, :mode => :modal))).html_safe, class: "rcp_grid_element_source"
