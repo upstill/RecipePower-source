@@ -16,7 +16,7 @@ module RecipesHelper
     label = ((klass == "Recipe") || (klass == "List")) ? "" : "#{klass}: "
     itemlink = case klass
                  when "Recipe"
-                   link_to decorator.title, decorator.url, class: "tablink" # ...to open up a new tab
+                   link_to decorator.title, decorator.url, class: "tablink", data: { report: touch_recipe_path(entity) } # ...to open up a new tab
                  else # Other internal entities get opened up in a new partial
                    link_to_submit decorator.title, decorator.url, mode: :partial
                end

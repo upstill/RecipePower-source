@@ -4,6 +4,7 @@ window.RP = window.RP || {}
 jQuery ->
 	$('body').on "click", 'a.tablink', (event) ->
 		window.open this.href,'_blank'
+		RP.reporting.report this
 		event.preventDefault()
 
 	# Adjust the pading on the window contents to accomodate the navbar, on load and wheneer the navbar resizes
