@@ -7,7 +7,7 @@
       <%= render partial: "votes/button", locals: {entity: item, style: "h"} %>
     </div>
     <div class="rcp_grid_element_buttons">
-      <%= pin_menu item, current_user %>
+      <%= pin_menu decorator, current_user %>
       <span class="<%= recipe_list_element_golink_class item %>">
         <%= collect_or_tag_button decorator, mode: :modal %>
       </span>

@@ -25,8 +25,15 @@ module ListsHelper
 
   end
 
-  def pin_menu entity, user
-    hover_menu "Add to <span class='caret'></span>" do
+  # Offer to let the user save the item in their collection and any list they own, plus a new list
+  def pin_menu decorator, user
+    entity = decorator.object
+    hover_menu "Keep <span class='caret'></span>" do
+      already_collected = entity.collected_by? current_user_or_guest_id
+      options = { class: "checkbox-menu-item" }
+      options[:oust] = true if already_collected
+      cl = collection_link( decorator, checkbox_menu_item_label("Collection", already_collected), already_collected, options)
+      [ cl ] +
       user.owned_lists.collect { |l|
         link_to_submit l.name.truncate(20),
                        pin_list_path(l),

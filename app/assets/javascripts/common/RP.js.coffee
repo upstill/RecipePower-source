@@ -6,6 +6,8 @@ jQuery ->
 		window.open this.href,'_blank'
 		RP.reporting.report this
 		event.preventDefault()
+	$('body').on "click", 'a.checkbox-menu-item', (event) ->
+		$('input', event.target)[0].checked = !$('input', event.target)[0].checked
 
 	# Adjust the pading on the window contents to accomodate the navbar, on load and wheneer the navbar resizes
 	if navbar = $('div.navbar')[0]

@@ -1,5 +1,20 @@
 module CollectibleHelper
 
+  def tag_link decorator, options
+    attribs = %w( collectible_comment collectible_private collectible_user_id
+                    id title url picurl picdata_with_fallback
+                    element_id field_name human_name object_path tag_path
+                    tagging_tag_data tagging_user_id )
+    template_link decorator, "tag-collectible", "Tag it", options.merge( :mode => :modal, :attribs => decorator.data(attribs) )
+  end
+
+  def collection_link decorator, label, already_collected, options={}
+    url = polymorphic_path(decorator.object)+"/collect"
+    url = assert_query(url, oust: true) if already_collected
+    options[:method] = "POST"
+    link_to_submit label, url, options
+  end
+
   # Declare a button which either collects or edits an entity.
   def collect_or_tag_button decorator, collect_or_tag=:both, options={}
     if collect_or_tag.is_a?(Hash)
@@ -16,10 +31,7 @@ module CollectibleHelper
                     tagging_tag_data tagging_user_id )
       template_link decorator, "tag-collectible", "Tag it", options.merge( :mode => :modal, :attribs => decorator.data(attribs) )
     elsif (collect_or_tag != :tag_only) # Either provide the Tag button or none
-      url = polymorphic_path(decorator.object)+"/collect"
-      label = "Grab it"
-      options[:method] = "POST"
-      link_to_submit label, url, options
+      collection_link decorator, "Grab It", false, options
     else
       ""
     end

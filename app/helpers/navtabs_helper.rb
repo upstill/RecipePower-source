@@ -186,6 +186,11 @@ module NavtabsHelper
   def navmenu_id which
     "#{which}-navmenu"
   end
-end
+
+  def checkbox_menu_item_label label, check=false
+    content_tag :label, "<input type='checkbox' #{'checked=true' if check}>&nbsp;#{label}".html_safe
+  end
+
+  end
 
 
