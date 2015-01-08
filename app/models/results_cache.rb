@@ -215,10 +215,15 @@ class ResultsCache < ActiveRecord::Base
       start = arr
     end
     oldwindow = safe_partition.window
-    safe_partition.window = start..(limit || (start+max_window_size))
+    if !limit
+      self.cache = self.partition = self.items = nil
+      limit = start + max_window_size
+    end
+    safe_partition.window = start..limit
     safe_partition.cur_position = start
     # bust the items cache if the window changed
     @items = nil unless (safe_partition.window == oldwindow)
+    save
   end
 
   def max_window_size= n
