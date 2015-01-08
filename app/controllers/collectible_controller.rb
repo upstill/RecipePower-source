@@ -30,7 +30,10 @@ class CollectibleController < ApplicationController
       update_and_decorate
       unless @decorator.errors.any? || @decorator.collected_by?(current_user.id)
         @decorator.add_to_collection current_user.id
-        @decorator.save unless request.method == "POST"
+        unless request.method == "POST"
+          @decorator.save
+          flash.now[:notice] = "'#{@decorator.title.truncate(50)}' has been added to your collection for tagging" # if @decorator.object.errors.empty?
+        end
       end
       @decorator.save if @decorator.errors.empty? && (request.method == "POST")
       if post_resource_errors @decorator
@@ -45,7 +48,7 @@ class CollectibleController < ApplicationController
         end
       end
     else
-      flash[:error] = "You have to be logged in to tag things"
+      flash[:error] = "You have to be logged in to tag anything"
       render :errors
     end
   end

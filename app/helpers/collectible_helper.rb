@@ -15,6 +15,17 @@ module CollectibleHelper
     link_to_submit label, url, options
   end
 
+  def collectible_tag_button decorator, options
+    options[:button_size] ||= "xs"
+    options[:id] = dom_id(decorator)
+    return "" unless current_user
+    attribs = %w( collectible_comment collectible_private collectible_user_id
+                    id title url picurl picdata_with_fallback
+                    element_id field_name human_name object_path tag_path
+                    tagging_tag_data tagging_user_id )
+    template_link decorator, "tag-collectible", "Tag", options.merge( :mode => :modal, :attribs => decorator.data(attribs) )
+  end
+
   # Declare a button which either collects or edits an entity.
   def collect_or_tag_button decorator, collect_or_tag=:both, options={}
     if collect_or_tag.is_a?(Hash)
@@ -25,16 +36,20 @@ module CollectibleHelper
     options[:class] = "#{options[:class] || ''} collect-collectible-link"
     return "" unless current_user
     if decorator.collected_by?(current_user.id)
-      attribs = %w( collectible_comment collectible_private collectible_user_id
-                    id title url picurl picdata_with_fallback
-                    element_id field_name human_name object_path tag_path
-                    tagging_tag_data tagging_user_id )
-      template_link decorator, "tag-collectible", "Tag it", options.merge( :mode => :modal, :attribs => decorator.data(attribs) )
+      collectible_tag_button decorator, options
     elsif (collect_or_tag != :tag_only) # Either provide the Tag button or none
       collection_link decorator, "Grab It", false, options
     else
       ""
     end
+  end
+
+  def collectible_buttons_panel decorator, options={}
+    render "show_collectible_buttons", options.merge( decorator: decorator, item: decorator.object )
+  end
+
+  def collectible_buttons_panel_replacement decorator, options={}
+    [ "div.collectible-buttons##{dom_id decorator}", collectible_buttons_panel(decorator, options) ]
   end
 
   def collect_or_tag_button_replacement decorator, options={}

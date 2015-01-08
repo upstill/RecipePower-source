@@ -1,0 +1,9 @@
+<div class="collectible-buttons" id="<%= dom_id decorator %>">
+  <%= pin_menu decorator, current_user %>
+  <span class="<%= recipe_list_element_golink_class item %>">
+    <%= collectible_tag_button decorator, button_size: button_size %>
+  </span>
+  <span class="<%= recipe_list_element_golink_class item %>">
+    <%= link_to_submit "Share", new_user_invitation_path(recipe_id: item.id), button_size: button_size, mode: :modal %>
+  </span>
+</div>
