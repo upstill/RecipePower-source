@@ -1,3 +1,5 @@
-<%= modal_dialog "show_recipe", present_field("rcpTitleLink"), title: present_field("rcpTitle"), class: "historic", dialog_class: "modal-xl" do %>
-    <%= render "show" %>
+<% wide = (field_value "rcpVideo") || !(field_value "rcpPicURL").blank? %>
+<% dlgopts = wide ? {dialog_class: "modal-xl" } : {} %>
+<%= modal_dialog "show_recipe", present_field("rcpTitleLink"), dlgopts.merge(title: present_field("rcpTitle"), class: "historic") do %>
+    <%= render "show", wide: wide %>
 <% end %>
