@@ -7,12 +7,13 @@ class ListsController < CollectibleController
     # seeker_result Reference, 'div.reference_list' # , clear_tags: true
     @active_menu = :other_lists
     response_service.title =
-    case params[:access]
+    case @access = params[:access]
       when "owned"
         @active_menu = :my_lists
         "My Lists"
       when "collected"
-        "More Lists"
+        @empty_msg = "As you add other people's lists to your collection, they will appear here."
+        "Collected Lists"
       when "all"
         "Every List There Is"
       else

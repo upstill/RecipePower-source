@@ -133,6 +133,11 @@ module Uniquify
     res.first["count"].to_i
   end
 
+  # When taking a slice out of the taggings/rcprefs, load the associated entities meanwhile
+  def slice_item_scope
+    uniqueitemscope.limit(safe_partition.windowsize).offset(safe_partition.window.min).includes(:entity).to_a
+  end
+
 end
 
 module TaggingMethods
@@ -141,7 +146,7 @@ module TaggingMethods
   # Apply the tag to the current set of result counts
   def count_tag tag, counts
     # Intersect the scope with the set of entities tagged with tags similar to the given tag
-    tagscope = itemscope.where tag_id: TagServices.new(tag).lexical_similars.map(&:id)
+    tagscope = itemscope.where tag_id: TagServices.new(tag).lexical_similars.pluck(:id)
     tagset = tagscope.to_a
     counts.incr tagset # One extra point for matching in one field
 
@@ -233,12 +238,8 @@ class ResultsCache < ActiveRecord::Base
   def items
     return @items if @items
     return (@items = slice_cache) if cache_and_partition
-    begin
-      # It's possible that the itemscope is an array...
-      @items = (itemscope.is_a? Array) ? slice_item_array : slice_item_scope
-    rescue Exception => e # Fall back to an integer generator
-      @items = (safe_partition.window.min...safe_partition.window.max).to_a
-    end
+    # It's possible that the itemscope is an array...
+    @items = (itemscope.is_a? Array) ? slice_item_array : slice_item_scope
   end
 
   # Return the next item in the current window, incrementing the cur_position
@@ -359,7 +360,7 @@ class ResultsCache < ActiveRecord::Base
   end
 
   def slice_item_scope
-    uniqueitemscope.limit(safe_partition.windowsize).offset(safe_partition.window.min).includes(:entity).to_a
+    uniqueitemscope.limit(safe_partition.windowsize).offset(safe_partition.window.min).to_a
   end
 
   def slice_item_array
@@ -458,7 +459,7 @@ class ListsCache < ResultsCache
       when "all"
         scope = List.unscoped
       else # By default, we only see lists belonging to our friends and Super that are not private, and all those that are public
-        scope = ListServices.find_visible_to @user_id
+        scope = ListServices.find_visible_to @userid
     end
     scope
   end
