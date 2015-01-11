@@ -2,7 +2,7 @@
 <li class="<%= feed_list_element_class @feed_entry %>">
 	<h5 class="feed_list_element_title" id="FeedListElement"+<%= @feed_entry.id.to_s %>>
 		<%= link_to @feed_entry.name, @feed_entry.url %>
-        <%= collect_or_tag_button @decorator %>
+        <%= collectible_buttons_panel @decorator, :button_size => "xs" %>
 	</h5>
 	<div class="feed_list_element_source">
 		<%= @feed_entry.feed.title.empty? ? "" : ("from <strong>"+@feed_entry.feed.title+"</strong>").html_safe %>

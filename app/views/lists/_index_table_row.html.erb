@@ -23,6 +23,6 @@
     <%= labelled_quantity ListServices.new(item).tagging_scope(current_user_or_guest_id).count, "item" %>
   </td>
   <td>
-    <%= collectible_buttons decorator %>
+    <%= collectible_buttons_panel decorator, button_size: "xs" %>
    </td>
 </tr>

@@ -5,5 +5,5 @@
   <%= @list.notes %>
 </p>
 
-<% collectible_action_buttons @decorator, :show, ((@list.owner == current_user) || response_service.admin_view?) %>
+<% collectible_buttons_panel @decorator, :edit_button => (@list.owner == current_user) %>
 

@@ -17,7 +17,7 @@
         </p>
     <% end %>
 
-    <%= collectible_action_buttons @decorator, :show, ((@list.owner == current_user) || response_service.admin_view?) %>
+    <%= collectible_buttons_panel @decorator, :edit_button => (@list.owner == current_user) %>
   </div>
 </div>
 <%= render "shared/stream_results_placeholder" %>

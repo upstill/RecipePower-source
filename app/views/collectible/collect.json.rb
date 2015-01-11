@@ -2,7 +2,7 @@ flash[:popup] ||= "Done! #{@decorator.human_name} '#{@decorator.title.truncate(2
 {
   done: true,
   replacements: [
-      collect_or_tag_button_replacement(@decorator, :button_size => "xs", mode: :partial),
+      collectible_buttons_panel_replacement(@decorator, mode: :partial),
       ([ "div.stream-body.users-collection ##{dom_id @decorator}"] if params[:oust])
   ].compact
 }.merge(flash_notify).to_json

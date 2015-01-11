@@ -1,9 +1,22 @@
-<div class="collectible-buttons" id="<%= dom_id decorator %>">
-  <%= pin_menu decorator, current_user %>
-  <span class="<%= recipe_list_element_golink_class item %>">
+<% button_size = 'sm' unless defined?( button_size) && button_size %>
+<% edit_button = false unless defined?(edit_button) %>
+<% list_button = false unless defined?(list_button) %>
+<% vote_button = false unless defined?(vote_button) %>
+<%= collectible_edit_button decorator.object, button_size: button_size if edit_button || response_service.admin_view? %>
+<%= pin_menu decorator, current_user, button_size: button_size %>
+<span class="<%= recipe_list_element_golink_class item %>">
     <%= collectible_tag_button decorator, button_size: button_size %>
+</span>
+<span class="<%= recipe_list_element_golink_class item %>">
+  <%= collectible_share_button decorator, button_size: button_size %>
+</span>
+<% if vote_button %>
+    <span class="<%= recipe_list_element_golink_class item %>">
+    <%= collectible_vote_button decorator.object, button_size: button_size %>
   </span>
-  <span class="<%= recipe_list_element_golink_class item %>">
-    <%= link_to_submit "Share", new_user_invitation_path(recipe_id: item.id), button_size: button_size, mode: :modal %>
+<% end %>
+<% if list_button %>
+    <span class="<%= recipe_list_element_golink_class item %>">
+    <%= collectible_list_button decorator, button_size: button_size %>
   </span>
-</div>
+<% end %>

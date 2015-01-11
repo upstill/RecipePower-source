@@ -1,8 +1,4 @@
 <%= render "collectible/summary_card", entity: @site %>
-<% if response_service.admin_view? %>
-    <%= link_to_submit 'Edit Site', edit_site_path(@site), mode: :modal, button: true %> |
-<% end %>
-<%= collect_or_tag_button @decorator, mode: :modal, button_size: "sm" %>
-<%= link_to_submit 'Sites List', sites_path, mode: :partial, button_size: "sm" %>
+<%= site_collectible_buttons @decorator, button_size: "sm", :list_button => true %>
 <hr>
 <%= render "show_feeds" %>

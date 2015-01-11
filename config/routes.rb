@@ -28,6 +28,7 @@ RP::Application.routes.draw do
   end
   resources :votes, :only => :create
   post '/votes/recipes/:recipe_id' => 'votes#create', :as => "vote_recipe"
+  post '/votes/feeds/:recipe_id' => 'votes#create', :as => "vote_feed"
   get 'pic_picker/new' => 'pic_picker#new'
 
   get "redirect/go"

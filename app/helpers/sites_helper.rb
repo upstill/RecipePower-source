@@ -27,4 +27,15 @@ module SitesHelper
     }.compact.join.html_safe
   end
 
+  def site_collectible_buttons decorator, options={}
+    scrape_link = options.delete :scrape_link
+    collectible_buttons_panel @decorator, options do
+      link_to_submit "Scrape for feeds", scrape_site_path(@site), options.merge(:method => :post) if scrape_link || response_service.admin_view?
+    end
+  end
+
+  def site_collectible_buttons_replacement decorator, options={}
+    [ "div.collectible-buttons##{dom_id decorator}", site_collectible_buttons(decorator, options) ]
+  end
+
 end

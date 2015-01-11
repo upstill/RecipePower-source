@@ -34,7 +34,7 @@ class VotesController < ApplicationController
     respond_to do |format|
       # We're only responding to the vote link remotely => return javascript that just updates the button and feeds back a notice
       format.js do
-        button_replacement = view_context.vote_button_replacer(@vote.entity, params[:style] || "h")
+        button_replacement = view_context.vote_button_replacement(@vote.entity, params[:style] || "h")
         @jsondata = {
             replacements: [ button_replacement ],
             popup: notice

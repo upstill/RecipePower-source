@@ -12,11 +12,8 @@
     <%= item.description %>
   </td>
   <td>
-    <%= collectible_buttons @decorator, :button_size => "xs" do %>
-        <%= link_to_submit "Edit", edit_site_path(item), mode: :modal if response_service.admin_view? %>
-    <% end %>
+    <%= site_collectible_buttons decorator, scrape_link: true %>
     <br>
     <%= site_similars item if response_service.admin_view? %><br>
-    <%= link_to_submit "Scrape for feeds", scrape_site_path(item), :method => :post if response_service.admin_view? %>
   </td>
 </tr>
