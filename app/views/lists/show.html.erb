@@ -11,7 +11,7 @@
       <%= @list.notes %>
     </p>
 
-    <% unless (enum = tag_list @list.pulled_tags).blank? %>
+    <% unless (enum = tag_list ListServices.new(@list).pulled_tags).blank? %>
         <p>
           This list includes everything tagged with <%= enum %>.
         </p>

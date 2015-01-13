@@ -63,13 +63,13 @@ class ListTagTest < ActiveSupport::TestCase
   end
 
   test "a list includes only its direct (explicit) tags" do
-    refute @lst.include?(@tagged), "List falsely says it includes recipe"
-    assert @lst.include?(@included), "List doesn't say it includes"
+    refute ListServices.new(@lst).include?(@tagged), "List falsely says it includes recipe"
+    assert ListServices.new(@lst).include?(@included), "List doesn't say it includes"
   end
 
   test "fetched entities include indirect entities (from subtags)" do
-    assert @lst.recipe_ids.include?(@included.id), "Recipes don't include one directly included"
-    assert @lst.recipe_ids.include?(@tagged.id), "Recipes don't include one indirectly included"
+    assert @lst.stores?(@included), "Recipes don't include one directly included"
+    assert @lst.stores?(@tagged), "Recipes don't include one indirectly included"
   end
 
   test "a list's entities are collected by its owner" do

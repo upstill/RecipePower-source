@@ -5,12 +5,25 @@ class TaggingServices
   end
 
   # Does a tagging exist for the given entity, tag and owner?
-  def exists? tag, owner_id
-    Tagging.exists?(
-        tag_id: tag.id,
-        user_id: owner_id,
-        entity_id: @taggable_entity.id,
-        entity_type: @taggable_entity.class)
+  # Sets of each are allowed, whether id numbers or objects
+  # The latter may also be nil, to find taggings by anyone
+  def exists? tag_or_tags_or_id_or_ids, owners_or_ids=nil
+    tag_ids = (tag_or_tags_or_id_or_ids.is_a?(Array) ? tag_or_tags_or_id_or_ids : [ tag_or_tags_or_id_or_ids ] ).collect { |tag_or_id|
+      tag_or_id.is_a?(Fixnum) ? tag_or_id : tag_or_id.id
+    }
+    return false if tag_ids.empty? # Empty in, empty out
+    tag_ids = tag_ids.first if tag_ids.count == 1
+    query = { tag_id: tag_ids,
+              entity_id: @taggable_entity.id,
+              entity_type: @taggable_entity.class }
+
+    if owners_or_ids
+      owner_ids = (owners_or_ids.is_a?(Array) ? owners_or_ids : [ owners_or_ids ] ).collect { |owner_or_id|
+        owner_or_id.is_a?(Fixnum) ? owner_or_id : owner_or_id.id
+      }
+      query[:user_id] = ((owner_ids.count == 1) ? owner_ids.first : owner_ids) unless owner_ids.empty?
+    end
+    Tagging.where(query).any?
   end
 
   def assert tag, owner_id
@@ -19,6 +32,16 @@ class TaggingServices
         user_id: owner_id,
         entity_id: @taggable_entity.id,
         entity_type: @taggable_entity.class.to_s)
+  end
+
+  def refute tag, owner_id
+    if tagging = Tagging.find_by(
+        tag_id: tag.id,
+        user_id: owner_id,
+        entity_id: @taggable_entity.id,
+        entity_type: @taggable_entity.class.to_s)
+      tagging.destroy
+    end
   end
   
   # Eliminate all references to one tag in favor of another

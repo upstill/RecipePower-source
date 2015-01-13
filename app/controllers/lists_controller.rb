@@ -80,16 +80,22 @@ class ListsController < CollectibleController
 
   def pin
     update_and_decorate
-    if @list.owner != current_user
-      flash[:alert] = "Sorry, you can't pin to someone else's board"
-    else
+    if current_user
       begin
-        @list.include params[:entity_type].singularize.camelize.constantize.find(params[:entity_id])
-        @list.save
-        flash[:popup] = "Now appearing in #{@list.name}" if @list.errors.empty?
+        ls = ListServices.new @list
+        @entity = params[:entity_type].singularize.camelize.constantize.find params[:entity_id]
+        if params[:oust] && params[:oust] == "true"
+          ls.exclude @entity, current_user.id
+          flash[:popup] = "Now gone from #{@list.name}" if @list.errors.empty?
+        else
+          ls.include @entity, current_user.id
+          flash[:popup] = "Now appearing in #{@list.name}" if @list.errors.empty?
+        end
       rescue
         flash[:alert] = "Can't pin #{params[:entity_type]} ##{params[:entity_id]}"
       end
+    else
+      flash[:alert] = "Sorry, you need to be logged in to add to a list"
     end
   end
 

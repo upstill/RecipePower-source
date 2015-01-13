@@ -36,6 +36,12 @@ class ListItem
     @entity = newe
   end
 
+  # Does the item in the list correspond to the given entity?
+  def stores? other
+    (entity(false) == other) ||
+    (id==other.id && klass==other.class)
+  end
+
 end
 
 class ListSerializer
@@ -67,7 +73,7 @@ class List < ActiveRecord::Base
   belongs_to :name_tag, class_name: "Tag"
   has_and_belongs_to_many :included_tags, class_name: "Tag"
 #  has_and_belongs_to_many :subscribers, class_name: "User"
-  attr_accessible :owner, :ordering, :title, :name, :name_tag, :tags, :included_tag_tokens, :pullin, :notes, :description, :availability, :owner_id
+  attr_accessible :owner, :ordering, :title, :name, :name_tag_id, :name_tag, :tags, :included_tag_tokens, :pullin, :notes, :description, :availability, :owner_id
   serialize :ordering, ListSerializer
 
   # Using the name string, either find an existing list or create a new one FOR THE CURRENT USER
@@ -103,26 +109,6 @@ class List < ActiveRecord::Base
   end
   alias_method :"title=", :"name="
 
-  # Does the list include the entity?
-  def include? entity
-    ordering.any? { |item|
-      (held = item.entity(false)) ?
-          (held == entity) :
-          ((item.id == entity.id) && (item.klass == entity.class) && (item.entity = entity) && true)
-    }
-  end
-
-  # Append an entity to the list, which involves:
-  # 1) ensuring that the entity appears (last) in the ordering
-  # 2) tagging the entity with the list's tag
-  # 3) adding the entity to the owner's collection
-  def include entity
-    self.ordering << ListItem.new(entity: entity) unless include?(entity)
-    self.save
-    TaggingServices.new(entity).assert(name_tag, owner.id)
-    # owner.touch entity
-  end
-
   # Get all the entities from the list, in order, ignoring those which can't be fetched to cache
   def entities
     ordering.map(&:entity).compact
@@ -132,20 +118,27 @@ class List < ActiveRecord::Base
     ordering.count
   end
 
-  # XXX Placeholder Alert! We should be talking about general entities
-  def recipe_ids
-    result = ordering.map(&:id)
-    existing = Set.new result
-    included_tags.each do |tag|
-      unless (newids = tag.recipe_ids(owner)).empty?
-        adding = Set.new(newids) - existing
-        adding.each { |newid| result << newid }
-        existing = existing + adding
-      end
-    end
-    result
+  # Does the list of items include the given entity?
+  def stores? entity
+    ordering.any? { |item| item.stores? entity }
   end
 
+  # Ensure that the list ordering includes the given entity
+  def store entity
+    unless stores? entity
+      ordering << ListItem.new(entity: entity)
+      save
+    end
+  end
+
+  def remove entity
+    ordering.delete_if { |item| item.stores? entity }
+    save
+  end
+
+=begin
+  # This functionality allowed lists to have included tags. Now that 'pullin' gets included tags from the list's tags,
+  # we don't need included tags. This may change, however
   def included_tag_tokens
     tag_ids
   end
@@ -163,8 +156,6 @@ class List < ActiveRecord::Base
           end
         end
   end
+=end
 
-  def pulled_tags
-    taggings.where(user_id: owner_id).map(&:tag)
-  end
 end

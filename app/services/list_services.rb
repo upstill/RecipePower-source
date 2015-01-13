@@ -8,6 +8,60 @@ class ListServices
     self.list = list
   end
 
+  # A list "includes" an item if
+  # 1) it is stored directly in the list, or
+  # 2) the list "pulls in" entities using its tags AND the entity is tagged by the list's tags
+  def include? entity, user_or_id
+    # Trivial accept if the entity is physically in among the list items
+    return true if @list.stores? entity
+    uid = user_or_id.is_a?(Fixnum) ? user_or_id : user_or_id.id
+    ts = TaggingServices.new entity
+    # It's included if the owner or this user has tagged it with the name tag
+    return true if ts.exists? @list.name_tag_id, (uid == @list.owner_id ? uid : [ uid, @list.owner_id ])
+    # If not directly tagged, it's included if it's tagged with any of the list's tags, BY ANYONE (?)
+    ts.exists? pulled_tag_ids
+  end
+
+  # Append an entity to the list, which involves:
+  # 1) ensuring that the entity appears in the ordering, appending it to the end if not (list owner only)
+  # 2) tagging the entity with the list's tag as the given user
+  # 3) adding the entity to the owner's collection
+  def include entity, user_or_id
+    uid = (user_or_id.is_a?(Fixnum) ? user_or_id : user_or_id.id)
+    @list.store entity if uid==owner_id
+    TaggingServices.new(entity).assert @list.name_tag, uid # Tag with the list's name tag anyway
+    # owner.touch entity
+  end
+
+  # Add an entity to the list based on parameters
+  def include_by entity_type, entity_id, user_id
+    if entity = entity_type.singularize.camelize.constantize.find(entity_id)
+      include entity, user_id
+    end
+  end
+
+  def exclude entity, user_or_id
+    uid = (user_or_id.is_a?(Fixnum) ? user_or_id : user_or_id.id)
+    @list.remove entity if uid == owner_id
+    TaggingServices.new(entity).refute @list.name_tag, uid # Tag with the list's name tag anyway
+  end
+
+  # Remove an entity from the list based on parameters
+  def exclude_by entity_type, entity_id, user_id
+    if entity = entity_type.singularize.camelize.constantize.find(entity_id)
+      exclude entity, user_id
+    end
+  end
+
+  # Get the official list of tags that pull in entities: those which were applied by the list owner
+  def pulled_tags
+    @list.pullin ? @list.taggings.where(user_id: @list.owner_id).includes(:tag).map(&:tag) : []
+  end
+
+  def pulled_tag_ids
+    @list.pullin ? @list.taggings.where(user_id: @list.owner_id).map(&:tag_id) : []
+  end
+
   # Return the set of lists containing the entity (either directly or indrectly) that are visible to the given user
   def self.find_by_listee taggable_entity
     uid = taggable_entity.tagging_user_id || User.super_id
@@ -88,8 +142,9 @@ class ListServices
     # For each user that's actually a channel, create a list
     User.where('channel_referent_id > 0').each { |channel_user|
       list = List.assert channel_user.channel.name, superu, create: true
+      ls = ListServices.new list
       channel_user.collection_pointers.where(in_collection: true).map(&:entity).each { |entity|
-        list.include(entity) unless list.include?(entity)
+        ls.include(entity, User.super_id) unless ls.include?(entity, User.super_id)
       }
       list.included_tags = channel_user.tags
       list.availability = 1
@@ -105,8 +160,9 @@ class ListServices
         tag = sub.tag
         list = List.assert tag.name, user, create: true
         list.availability = 1
+        ls = ListServices.new list
         tag.recipes(user.id).each { |entity|
-          list.include(entity) unless list.include?(entity)
+          ls.include(entity, user.id) unless ls.include?(entity, user.id)
         }
         list.save
         sub.destroy

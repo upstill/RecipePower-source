@@ -35,21 +35,26 @@ module ListsHelper
                            already_collected,
                            styling,
                            :class => "checkbox-menu-item"
-      [cl] +
-          user.owned_lists.collect { |l|
-            oust = true # l.includes? entity
-            link_to_submit l.name.truncate(20),
-                           pin_list_path(l,
-                                         entity_type: (entity.klass.to_s rescue entity.class.to_s),
-                                         entity_id: entity.id,
-                                         oust: oust,
-                                         styling: styling),
-                           method: "POST",
-                           id: dom_id(l),
-                           mode: :partial,
-                           class: "checkbox-menu-item"
-          }
+      [cl] + user.owned_lists.collect { |l| list_menu_item l, entity, styling }
     end
+  end
+
+  def list_menu_item l, entity, styling
+    already_collected = ListServices.new(l).include? entity, current_user_or_guest_id
+    link_to_submit checkbox_menu_item_label(l.name.truncate(20), already_collected),
+                   pin_list_path(l,
+                                 entity_type: (entity.klass.to_s rescue entity.class.to_s),
+                                 entity_id: entity.id,
+                                 oust: already_collected,
+                                 styling: styling),
+                   method: "POST",
+                   id: dom_id(l),
+                   mode: :partial,
+                   class: "checkbox-menu-item"
+  end
+
+  def list_menu_item_replacement list, entity, styling
+    [ "div.collectible-buttons##{dom_id entity} a.checkbox-menu-item##{dom_id list}", list_menu_item(list, entity, styling) ]
   end
 
   def hover_menu label, options={}
