@@ -27,17 +27,17 @@ module CollectibleHelper
                     id title url picurl picdata_with_fallback
                     element_id field_name human_name object_path tag_path
                     tagging_tag_data tagging_user_id )
-    template_link decorator, "tag-collectible", "Tag", styling, options.merge(:mode => :modal, :attribs => decorator.data(attribs))
+    template_link decorator, "tag-collectible", "", styling, options.merge(class: "glyphicon glyphicon-tags", :mode => :modal, :attribs => decorator.data(attribs))
   end
 
   def collectible_edit_button entity, styling={}
     # Include the styling options in the link path as one parameter, then pass them to the button function
     url = polymorphic_path [:edit, entity], styling: styling
-    button_to_submit 'Edit', url, styling.merge(mode: :modal)
+    button_to_submit '', url, styling.merge(class: "glyphicon glyphicon-edit", mode: :modal)
   end
 
   def collectible_share_button entity, options={}
-    button_to_submit "Share", new_user_invitation_path(recipe_id: entity.id), options.merge(mode: :modal)
+    button_to_submit "", new_user_invitation_path(recipe_id: entity.id), options.merge(class: "glyphicon glyphicon-share", mode: :modal)
   end
 
   def collectible_list_button decorator, styling, options={}
@@ -68,14 +68,10 @@ module CollectibleHelper
   def collectible_buttons_panel decorator, styling={}, &block
     styling = params[:styling].merge styling if params[:styling]
     styling[:button_size] ||= "sm"  # Unless otherwise specified
-    output = with_format("html") do
-      render("collectible/show_collectible_buttons", styling: styling, decorator: decorator, item: decorator.object)
+    extras = block_given? ? with_output_buffer(&block) : ""
+    with_format("html") do
+      render("collectible/show_collectible_buttons", extras: extras, styling: styling, decorator: decorator, item: decorator.object)
     end
-    output = with_output_buffer(&block) + output if block_given?
-    content_tag :div, output.html_safe,
-                class: "collectible-buttons",
-                style: "display: inline-block",
-                id: dom_id(decorator)
   end
 
   def collectible_buttons_panel_replacement decorator

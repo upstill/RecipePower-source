@@ -28,7 +28,7 @@ module ListsHelper
   # Offer to let the user save the item in their collection and any list they own, plus a new list
   def pin_menu decorator, user, styling, options={}
     entity = decorator.object
-    hover_menu "Keep <span class='caret'></span>", styling do
+    hover_menu "", styling do
       already_collected = entity.collected_by? current_user_or_guest_id
       cl = collection_link decorator,
                            checkbox_menu_item_label("Collection", already_collected),
@@ -70,8 +70,8 @@ module ListsHelper
       content_tag :button,
        label.html_safe,
        type: "button",
-       class: "btn btn-default btn-#{options[:button_size] || 'xs'} dropdown-toggle",
-       data: {toggle: "dropdown"},
+       class: "btn btn-default btn-#{options[:button_size] || 'xs'} dropdown-toggle glyphicon glyphicon-pushpin",
+       data: { toggle: "dropdown" },
        :"aria-expanded" => "false"
     list_items = yield.join.html_safe
     list_tag = content_tag :ul, list_items, class: "dropdown-menu", role: "menu"
