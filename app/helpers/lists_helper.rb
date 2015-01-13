@@ -26,22 +26,29 @@ module ListsHelper
   end
 
   # Offer to let the user save the item in their collection and any list they own, plus a new list
-  def pin_menu decorator, user, options={}
+  def pin_menu decorator, user, styling, options={}
     entity = decorator.object
-    hover_menu "Keep <span class='caret'></span>", options do
+    hover_menu "Keep <span class='caret'></span>", styling do
       already_collected = entity.collected_by? current_user_or_guest_id
-      options = { class: "checkbox-menu-item" }
-      options[:oust] = true if already_collected
-      cl = collection_link( decorator, checkbox_menu_item_label("Collection", already_collected), already_collected, options)
-      [ cl ] +
-      user.owned_lists.collect { |l|
-        link_to_submit l.name.truncate(20),
-                       pin_list_path(l),
-                       method: "POST",
-                       id: dom_id(l),
-                       query: { entity_type: (entity.klass.to_s rescue entity.class.to_s), entity_id: entity.id },
-                       :mode => :partial
-      }
+      cl = collection_link decorator,
+                           checkbox_menu_item_label("Collection", already_collected),
+                           already_collected,
+                           styling,
+                           :class => "checkbox-menu-item"
+      [cl] +
+          user.owned_lists.collect { |l|
+            oust = true # l.includes? entity
+            link_to_submit l.name.truncate(20),
+                           pin_list_path(l,
+                                         entity_type: (entity.klass.to_s rescue entity.class.to_s),
+                                         entity_id: entity.id,
+                                         oust: oust,
+                                         styling: styling),
+                           method: "POST",
+                           id: dom_id(l),
+                           mode: :partial,
+                           class: "checkbox-menu-item"
+          }
     end
   end
 

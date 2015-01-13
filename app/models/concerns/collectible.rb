@@ -1,5 +1,8 @@
 module Collectible
   extend ActiveSupport::Concern
+  include Taggable
+  include Voteable
+  include Picable
 
   included do
     has_many :user_pointers, :dependent => :destroy, :as => :entity, :class_name => "Rcpref"

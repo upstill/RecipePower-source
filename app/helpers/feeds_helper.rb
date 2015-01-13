@@ -74,11 +74,11 @@ module FeedsHelper
     else
       label, path = "Subscribe", collect_feed_path(item)
     end
-    link_to_submit label, path, { method: :post, button_size: "sm" }.merge(options)
+    link_to_submit label, path, { method: :post }.merge(options)
   end
 
   def feed_collectible_buttons decorator, options={}
-    collectible_buttons_panel @decorator, options do
+    collectible_buttons_panel @decorator, options do 
       feed_subscribe_button @feed, options
     end
   end

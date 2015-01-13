@@ -1,13 +1,9 @@
 require "type_map.rb"
 
 class User < ActiveRecord::Base
-  include Taggable
-  include Voteable
-  include Linkable # Required by Picable
-  include Picable
+  include Collectible
   # Keep an avatar URL denoted by the :image attribute and kept as :thumbnail
   picable :image, :thumbnail
-  include Collectible
 
   # Include default devise modules. Others available are:
   # :token_authenticatable, :encryptable, :confirmable, :timeoutable

@@ -53,10 +53,8 @@ end
 class List < ActiveRecord::Base
   include Commentable
   commentable :notes
-  include Taggable
   include Typeable
   include Collectible
-  include Picable
   picable :picurl, :thumbnail
 
   typeable( :availability,

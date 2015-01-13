@@ -1,10 +1,7 @@
 require 'feedzirra'
 
 class Feed < ActiveRecord::Base
-  include Taggable
   include Collectible
-  include Voteable
-  include Picable
   picable :picurl, :picture
   attr_accessible :title, :description, :site_id, :feedtype, :approved, :url
   

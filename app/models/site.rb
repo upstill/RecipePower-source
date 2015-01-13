@@ -2,16 +2,9 @@
 require './lib/uri_utils.rb'
 
 class Site < ActiveRecord::Base
-  include Taggable
   include Collectible
-
-  include Linkable
-  linkable :home, :reference
-
-  include Picable
   picable :logo, :thumbnail
-
-  include Voteable
+  linkable :home, :reference
 
   # site: root of the domain (i.e., protocol + domain); suitable for pattern-matching on a reference URL to glean a set of matching Sites
   # subsite: a path relative to the domain which differentiates among Sites with the same domain (site attribute)

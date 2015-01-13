@@ -6,16 +6,11 @@ require 'nokogiri'
 require 'htmlentities'
 
 class Recipe < ActiveRecord::Base
-  include Taggable
-  include Referrable
-  include Voteable
-
-  include Linkable
   include Collectible
+  include Referrable
   # The url attribute is handled by a reference of type RecipeReference
   linkable :url, :reference
   # The picurl attribute is handled by the :picture reference of type ImageReference
-  include Picable
   picable :picurl, :picture
 
   attr_accessible :title, :ratings_attributes, :description, :url #, :comment, :private, :tagpane, :status, :alias, :picurl :href, :collection_tokens, :channel_tokens
