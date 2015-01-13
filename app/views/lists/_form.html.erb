@@ -3,6 +3,10 @@
     <%= form_errors_helper f %>
     <%= f.input :name, label: "Title", placeholder: "List's title here", input_html: {cols: 125, rows: 1, "data-type" => "json"} %>
     <%= f.input :description, label: "Subtitle", placeholder: "The briefest of summaries (250 chars. max)", input_html: {cols: 125, rows: 1, "data-type" => "json"} %>
+    <% if @first_entity %>
+        <%= hidden_field_tag "entity_type", @first_entity.class.to_s %>
+        <%= hidden_field_tag "entity_id", @first_entity.id %>
+    <% end %>
     <%# f.input :typenum, label: false,
                 collection: List.type_selections(true),
                 as: :radio_buttons %>

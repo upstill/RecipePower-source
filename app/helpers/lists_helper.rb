@@ -35,7 +35,15 @@ module ListsHelper
                            already_collected,
                            styling,
                            :class => "checkbox-menu-item"
-      [cl] + user.owned_lists.collect { |l| list_menu_item l, entity, styling }
+      [ content_tag(:li, cl),
+        user.owned_lists.collect { |l| content_tag :li, (list_menu_item l, entity, styling) },
+        "<hr class='menu'>".html_safe,
+        content_tag(:li,
+                    link_to_submit("Start a List...",
+                                   new_list_path(entity_type: entity.class.to_s, entity_id: entity.id),
+                                   mode: :modal,
+                                   class: "transient"))
+      ].flatten
     end
   end
 
@@ -65,7 +73,7 @@ module ListsHelper
        class: "btn btn-default btn-#{options[:button_size] || 'xs'} dropdown-toggle",
        data: {toggle: "dropdown"},
        :"aria-expanded" => "false"
-    list_items = yield.collect { |link| content_tag :li, link.html_safe }.join.html_safe
+    list_items = yield.join.html_safe
     list_tag = content_tag :ul, list_items, class: "dropdown-menu", role: "menu"
     content_tag :div, button+list_tag, class: "btn-group"
   end

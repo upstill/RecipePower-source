@@ -28,11 +28,18 @@ class ListsController < CollectibleController
   end
 
   def create
+    @first_entity = params[:entity_type].singularize.camelize.constantize.find(params[:entity_id]) rescue nil
     response_service.title = "New List"
     puts "List#create params: "+params[:list].to_s+" for user '#{current_user.name}'"
     update_and_decorate List.assert( params[:list][:name], current_user)
-    flash[:popup] = @list.id ? "Found list '#{@list.name}'." : "Successfully created '#{@list.name}'."
-    @list.save
+
+    if @list.id
+      flash[:popup] = "Found list '#{@list.name}'."
+      @list.save
+    else
+      flash[:popup] ="Successfully created '#{@list.name}'."
+      ListServices.new(@list).include @first_entity, current_user.id if @first_entity
+    end
     # respond_to do |format|
       # format.html { redirect_to tag_list_path(@list), :status => :see_other, notice: notice }
   end
@@ -74,6 +81,7 @@ class ListsController < CollectibleController
   end
 
   def new
+    @first_entity = params[:entity_type].singularize.camelize.constantize.find(params[:entity_id]) rescue nil
     update_and_decorate List.new(owner_id: params[:owner_id].to_i || current_user.id)
     smartrender
   end
