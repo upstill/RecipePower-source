@@ -24,23 +24,19 @@ class VotesController < ApplicationController
   # POST /votes
   def create
     # Get from first_or_initialize implicitly # @vote = Vote.new(vote_params)
-    if @vote.up != (up = params[:up] == 'true')
-      @vote.up = up
-      @vote.save
-      notice = "Your vote has been counted."
-    else
-      notice = %Q{You've already voted this #{up ? "up" : "down"}.}
-    end
-    respond_to do |format|
-      # We're only responding to the vote link remotely => return javascript that just updates the button and feeds back a notice
-      format.js do
-        button_replacement = view_context.vote_buttons_replacement @vote.entity
-        @jsondata = {
-            replacements: [ button_replacement ],
-            popup: notice
-        }
-        render template: "shared/get_content"  # Send the jsondata and process it.
+    if current_user
+      @vote = Vote.find_or_initialize_by entity_type: params[:entity_type], entity_id: params[:id], user_id: current_user.id
+      update_and_decorate @vote.entity
+      unless @vote.up == (up = params[:up] == 'true') && @vote.id
+        @vote.up = up
+        @vote.save
+        flash[:popup] = "Your vote has been counted."
+      else
+        flash[:popup] = %Q{You've already voted this #{up ? "up" : "down"}.}
       end
+    else
+      flash[:alert] = "Sorry, but you need to be logged in to vote on anything."
+      render :errors
     end
   end
 

@@ -27,8 +27,13 @@ RP::Application.routes.draw do
     get "integers" => 'integers#index'
   end
   resources :votes, :only => :create
-  post '/votes/recipes/:recipe_id' => 'votes#create', :as => "vote_recipe"
-  post '/votes/feeds/:recipe_id' => 'votes#create', :as => "vote_feed"
+  post '/votes/recipes/:id' => 'votes#create', :as => "vote_recipe"
+  post '/votes/feeds/:id' => 'votes#create', :as => "vote_feed"
+  post '/votes/feed_entries/:id' => 'votes#create', :as => "vote_feed_entry"
+  post '/votes/lists/:id' => 'votes#create', :as => "vote_list"
+  post '/votes/products/:id' => 'votes#create', :as => "vote_product"
+  post '/votes/sites/:id' => 'votes#create', :as => "vote_site"
+  post '/votes/users/:id' => 'votes#create', :as => "vote_user"
   get 'pic_picker/new' => 'pic_picker#new'
 
   get "redirect/go"
