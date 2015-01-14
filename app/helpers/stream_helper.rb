@@ -37,10 +37,11 @@ module StreamHelper
     elsif block_given? # If no headerpartial provided, expect there to be a code block to produce the content
       content = yield
     end
-    stream_element_package etype, content
+    stream_element_package etype, content, locals[:pkg_attributes]
   end
 
-  def stream_element_package etype, content
+  def stream_element_package etype, content, pkg_attributes=nil
+    pkg_attributes ||= {}
     tag =
         case etype.to_s
           when "count"
@@ -52,7 +53,8 @@ module StreamHelper
         end
     # We automatically include an empty trigger at the end of results, for later replacement in streaming
     # content << content_tag(:span, "", class: "stream-trigger") if etype==:results
-    content_tag tag, content, class: stream_element_class(etype)
+    pkg_attributes[:class] = stream_element_class(etype)
+    content_tag tag, content, pkg_attributes
   end
 
   # This is kind of a cheater helper, to render a template for embedding in a replacement
@@ -137,7 +139,7 @@ module StreamHelper
     item = render partial: partialname, locals: { :item => element, :decorator => @decorator }
     if for_masonry && !no_wrap
       # Wrap the item in another layer so that the item can be replaced w/o disrupting Masonry
-      item = content_tag :div, item, class: "masonry-item", id: dom_id(@decorator)
+      item = content_tag :div, item, class: "masonry-item stream-item", id: dom_id(@decorator)
     end
     item
   end

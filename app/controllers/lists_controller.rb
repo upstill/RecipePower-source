@@ -92,7 +92,7 @@ class ListsController < CollectibleController
       begin
         ls = ListServices.new @list
         @entity = params[:entity_type].singularize.camelize.constantize.find params[:entity_id]
-        if params[:oust] && params[:oust] == "true"
+        if @deleted = (params[:oust] && params[:oust] == "true")
           ls.exclude @entity, current_user.id
           flash[:popup] = "Now gone from #{@list.name}" if @list.errors.empty?
         else

@@ -78,4 +78,9 @@ module ListsHelper
     content_tag :div, button+list_tag, class: "btn-group"
   end
 
+  # Provide a replacement item for removing the item from a list
+  def list_stream_item_deleter list, entity
+    collectible_stream_item_deleter dom_id(list), entity
+  end
+
 end

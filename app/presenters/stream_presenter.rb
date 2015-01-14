@@ -73,4 +73,8 @@ class StreamPresenter
     @results.save if @results
   end
 
+  def stream_id
+    results.stream_id
+  end
+
 end

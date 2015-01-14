@@ -137,7 +137,7 @@ class ApplicationController < ActionController::Base
         # Generally, start by restarting the results element and replacing the found count
         header_item = with_format("html") {
           { replacements: [
-              view_context.stream_element_replacement(:results),
+              view_context.stream_element_replacement(:results, pkg_attributes: { id: @sp.stream_id } ),
               view_context.stream_element_replacement(:count, final_count: true)
           ] }
         }

@@ -1,5 +1,9 @@
 RP.rcp_list = RP.rcp_list || {}
 
+jQuery ->
+	# Enable recipe-preview popup
+	RP.rcp_list.onload()
+
 # onload function is overloaded both for individual items and the list as a whole
 RP.rcp_list.onload = (item) ->
 	if item && (item = $(item)) # Provided when replacing a list element
@@ -30,29 +34,6 @@ RP.rcp_list.onload = (item) ->
 		# $('div.collection_list').off 'click', '.popup', RP.servePopup
 		# $('div.collection_list').on 'click', '.popup', RP.servePopup
 
-# Callback to update content in a recipe list due to JSON feedback
-RP.rcp_list.update = ( data ) ->
-	if data.action == "remove" || data.action == "destroy"
-		if data.domID && elmt = $('.'+data.domID)[0]
-			RP.masonry.removeItem elmt
-	else if replacements = data.replacements
-		for replacement in replacements
-			if elmt = $(replacement[0])[0]
-				if !RP.masonry.replaceItem elmt, replacement[1]
-					$(replacement[0]).replaceWith replacement[1]
-				RP.rcp_list.onload replacement[0]
-		data.replacements = [] # Prevent the normal processor from reloading the elements
-		if data.go_link_class 
-			$("."+data.go_link_class).replaceWith data.go_link_body
-		if data.list_element_class
-			$('.'+data.list_element_class).replaceWith data.list_element_body
-			# RP.rcp_list.boostInRecent data.list_element_class, data.list_element_body, 3 # Put it at the top of My Cookmarks
-			# RP.rcp_list.boostInRecent data.list_element_class, data.list_element_body, 4 # Put it at the top of the Recent tab
-		if data.grid_element_class
-			$('.'+data.grid_element_class).replaceWith data.grid_element_body
-		# checkForLoading ".stuffypic"
-		RP.rcp_list.onload()
-
 RP.rcp_list.boostInRecent = (list_element_class, list_element_body, targettab) ->
 	# Insert the resulting element at the top of the All Cookmarks tab, if open
 	tabid = $("#rcpquery_tabset").tabs("option", "active");
@@ -71,7 +52,3 @@ RP.rcp_list.touch_recipe = (id) ->		# Formerly rcpTouch from oldRP.js
 					$("."+body.touch_class).replaceWith(body.touch_body);
 					# boostInTablist(body.list_element_class, body.list_element_body, 4)
 			, "json" )
-
-jQuery ->
-	# Enable recipe-preview popup
-	RP.rcp_list.onload()

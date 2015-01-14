@@ -135,4 +135,9 @@ module CollectibleHelper
     content_tag :div, link_to(content, decorator.url), options
   end
 
+  # Provide a replacement item for removing the item from a list
+  def collectible_stream_item_deleter results_id, entity
+      [ "div.stream-results##{results_id} div.stream-item##{dom_id entity}" ]
+  end
+
 end

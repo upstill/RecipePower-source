@@ -358,6 +358,10 @@ class ResultsCache < ActiveRecord::Base
     self.instance_variable_get "@#{sym}".to_sym
   end
 
+  def stream_id
+    "#{self.class.to_s}_#{@id}"
+  end
+
   protected
 
   def slice_cache
@@ -439,6 +443,10 @@ class UserCollectionCache < RcprefCache
     user.collection_scope(:in_collection => true, :sort_by => :collected) if user
   end
 
+  def stream_id
+    "user_collection"
+  end
+
 end
 
 # An IntegersCache presents the default ResultsCache behavior: no scope, no cache, degenerate partition producing successive integers
@@ -481,6 +489,10 @@ class ListCache < ResultsCache
     if list = List.find(@id)
       ListServices.new(list).tagging_scope @userid
     end
+  end
+
+  def stream_id
+    "list_#{@id}"
   end
 
 end
