@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141229200821) do
+ActiveRecord::Schema.define(version: 20141226224128) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -127,10 +127,10 @@ ActiveRecord::Schema.define(version: 20141229200821) do
     t.text     "ordering",     default: ""
     t.text     "description",  default: ""
     t.text     "notes",        default: ""
+    t.boolean  "pullin",       default: true
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "picture_id"
-    t.boolean  "pullin",       default: true
   end
 
   create_table "lists_tags", force: true do |t|

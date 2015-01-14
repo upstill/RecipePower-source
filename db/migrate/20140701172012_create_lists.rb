@@ -7,6 +7,7 @@ class CreateLists < ActiveRecord::Migration
       t.text :ordering, default: ""
       t.text :description, default: ""
       t.text :notes, default: ""
+      t.boolean :pullin, default: true
 
       t.timestamps
     end
