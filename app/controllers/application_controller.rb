@@ -315,8 +315,8 @@ class ApplicationController < ActionController::Base
   end
 
   # This is an override of the Devise method to determine where to go after login.
-  # If there was a re-direct to the login page, we go back to the source of the re-direct.
-  # Otherwise, new users go to the welcome page and logged-in-before users to the queries page.
+  # If there was a redirect to the login page, we go back to the source of the redirect.
+  # Otherwise, new users go to the welcome page and previously-logged-in users to the queries page.
   def after_sign_in_path_for(resource_or_scope, popup = nil)
     # Process any pending notifications
     view_context.issue_notifications current_user

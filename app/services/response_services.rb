@@ -113,7 +113,7 @@ class ResponseServices
   #  that the redirect will have the format and method of the current request. The
   #  options are used to assert a specific format, possibly different from the current one
   def url_for_redirect url, options={}
-    if (!options[:format]) || (options[:format].to_sym == @format)  # They already match
+    if (!options[:format]) || (options[:format].to_sym == @format) || url.match("/redirect/go") # They already match
       url
     else
       assert_query "/redirect/go", to: %Q{"#{url}"}
@@ -129,15 +129,12 @@ class ResponseServices
         fullpath: URI::decode(@request.fullpath)
     }.merge elements
     dr[:format] = dr[:format].to_s  # In case elements merged in a symbol
-    # str = YAML::dump dr
-    if dri = @session[:deferred_requests_id]
-      defreq = DeferredRequest.find dri
+    if (dri = @session[:deferred_requests_id]) && (defreq = DeferredRequest.where(id: dri).first)
       (defreq.requests << str).uniq!
       defreq.save
     else
       @session[:deferred_requests_id] = DeferredRequest.create(:requests => [ dr ]).id
     end
-    # @session[:deferred_request] = str
     dr
   end
 
