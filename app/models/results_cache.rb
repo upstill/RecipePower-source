@@ -440,7 +440,7 @@ class UserCollectionCache < RcprefCache
   end
 
   def itemscope
-    user.collection_scope(:in_collection => true, :sort_by => :collected) if user
+    user.collection_scope(:in_collection => true) if user
   end
 
   def stream_id
