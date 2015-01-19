@@ -1,3 +1,4 @@
+<% @entity = @decorator.object %>
 <%= form_for @entity, :html => { style: 'width:auto;height:auto'} do |f| %>
     <%= form_errors_helper f, @entity, false %>
 
@@ -5,7 +6,9 @@
       <div class="edit_recipe_field pic_picker_field">
         <%= pic_field f, :picurl, nil, :fallback_img => "/assets/PickPicture.png", :nopicker => true %>
       </div>
-      <% unless @entity.picurl.blank? %>
+      <% if @entity.picurl.blank? %>
+          <p>Click a picture to file it with the recipe.</p>
+      <% else %>
           <p>Prefer another picture?<br/>Click one!</p>
       <% end %>
     </div>
@@ -22,7 +25,7 @@
         </div>
       </div>
 
-      <%= taggable_div f, "edit_recipe_field" %>
+      <%= taggable_div f, "edit_recipe_field", :attribute_name => :tagging_tags %>
 
       <div class="edit_recipe_field" >
         <%= f.label :comment, "Notes" -%>

@@ -13,54 +13,54 @@
 */
 
 body {
-	background: transparent;
+  background: transparent;
 }
 
 div.dialog.injector {
-	width:790px;
-	font:14px arial,sans-serif;
-	font-weight:bold;
-	height:auto;
-	position:fixed;
-	top:0;
-	left:0;
-	// margin:3px;
-	padding-left:5px;
-	padding-bottom:5px;
-	background-color:#EEE;
-	border:solid 3px #900;
-	z-index: 9000001;
-    h4 {
-      margin-top: 3px;
-      margin-bottom: 1px;
-    }
-	&.new_password {
-		width:500px;
-	}
-    .auth_poss {
-      float: left; // display: inline-block;
-      font:16px arial,sans-serif;
-      width:370px; // auto;
-      margin:0.5em .1em ;
-      // border-right:1px solid black;
-      .auth_provider {
-        display: inline-block;
-        text-decoration:none;
-        text-align:center;
-        margin-bottom:10px;
-        width:55px;
-        height:auto;
-        margin:0;
-        font-size:12px;
-        img {
-          width:48px;
-          height:48px;
-          margin-left:auto;
-          margin-right:auto;
-          display:block
-        }
+  width: 790px;
+  font: 14px arial, sans-serif;
+  font-weight: bold;
+  height: auto;
+  position: fixed;
+  top: 0;
+  left: 0;
+  // margin:3px;
+  padding-left: 5px;
+  padding-bottom: 5px;
+  background-color: #EEE;
+  border: solid 3px #900;
+  z-index: 9000001;
+  h4 {
+    margin-top: 3px;
+    margin-bottom: 1px;
+  }
+  &.new_password {
+    width: 500px;
+  }
+  .auth_poss {
+    float: left; // display: inline-block;
+    font: 16px arial, sans-serif;
+    width: 370px; // auto;
+    margin: 0.5em .1em;
+    // border-right:1px solid black;
+    .auth_provider {
+      display: inline-block;
+      text-decoration: none;
+      text-align: center;
+      margin-bottom: 10px;
+      width: 55px;
+      height: auto;
+      margin: 0;
+      font-size: 12px;
+      img {
+        width: 48px;
+        height: 48px;
+        margin-left: auto;
+        margin-right: auto;
+        display: block
       }
     }
+  }
   .or {
     width: 30px;
     height: 80px;
@@ -71,24 +71,24 @@ div.dialog.injector {
     margin-top: 10px;
     padding: 0px 10px;
     padding-top: 40px;
-    font-size:18px;
+    font-size: 18px;
     float: left; // display: inline-block; vertical-align: top;
   }
   &.new_registration {
-    width:840px;
-    font:12px arial,sans-serif;
-    font-weight:bold;
-    height:auto;
+    width: 840px;
+    font: 12px arial, sans-serif;
+    font-weight: bold;
+    height: auto;
     form {
       float: left; // display: inline-block; vertical-align: top;
       width: 330px;
     }
     .signin {
-      margin:0px 5px;
-      padding:7px;
+      margin: 0px 5px;
+      padding: 7px;
       float: left; // display: inline-block;
-      font:16px arial,sans-serif;
-      width:auto;
+      font: 16px arial, sans-serif;
+      width: auto;
       // border-left:1px solid black;
       vertical-align: top;
       .signin_credentials {
@@ -109,25 +109,25 @@ div.dialog.injector {
       vertical-align: top;
       input.btn {
         margin: 10px 5px 0px;
-        font:16px arial,sans-serif;
+        font: 16px arial, sans-serif;
         color: #FFFFFF;
         background: #51a351;
       }
     }
     .get_password {
-      margin:0px;
-      padding:7px 7px 0px;
+      margin: 0px;
+      padding: 7px 7px 0px;
       display: block;
-      font:16px arial,sans-serif;
-      width:auto;
+      font: 16px arial, sans-serif;
+      width: auto;
       vertical-align: top;
     }
   }
   &.sign_in {
-    width:840px;
-    font:12px arial,sans-serif;
-    font-weight:bold;
-    height:auto;
+    width: 840px;
+    font: 12px arial, sans-serif;
+    font-weight: bold;
+    height: auto;
     form {
       float: left; // display: inline-block; vertical-align: top;
       width: auto;
@@ -140,15 +140,15 @@ div.dialog.injector {
       margin: 0px;
       margin-top: 5px;
       padding: 20px 10px;
-      font-size:18px;
+      font-size: 18px;
       float: left; // display: inline-block; vertical-align: top;
     }
     .signin {
-      margin:0px 5px;
-      padding:7px;
+      margin: 0px 5px;
+      padding: 7px;
       display: inline-block;
-      font:16px arial,sans-serif;
-      width:auto;
+      font: 16px arial, sans-serif;
+      width: auto;
       // border-left:1px solid black;
       vertical-align: top;
       .signin_credentials {
@@ -169,319 +169,322 @@ div.dialog.injector {
       vertical-align: top;
       input.btn {
         margin: 10px 5px 0px;
-        font:16px arial,sans-serif;
+        font: 16px arial, sans-serif;
         color: #FFFFFF;
         background: #51a351;
       }
     }
     .get_password {
-      margin:0px;
-      padding:7px 7px 0px;
+      margin: 0px;
+      padding: 7px 7px 0px;
       display: block;
-      font:14px arial,sans-serif;
-      width:auto;
+      font: 14px arial, sans-serif;
+      width: auto;
       vertical-align: top;
     }
   }
-	&.edit_recipe {
-		width:810px;
-		div.left {
-			float:left;
-			width:150px;
-			height:auto;
-			// border:1px solid red
-			p {
-				display:block;
-				font:12px arial,sans-serif;
-				font-weight:bold;
-				text-align:center;
-				margin:3px
-			}
-		}
-		div.middle {
-			float:left;
-			width:530px;
-			height:auto;
-			// border:1px solid green
-		}
-		div.right {
-			float:left;
-			width:100px;
-			height:auto;
-			// border:1px solid blue
-		}
-		div.edit_recipe_element {
-			height:40px;
-			padding-bottom:0.2em
-		}
-		div.edit_recipe_field_textarea {
-			display:inline-block;
-			vertical-align:top;
-			width:460px
-		}
-		div.edit_recipe_field {
-			width:90%;
-            margin-left: auto;
-            margin-right: auto;
-			label {
-				display:inline-block;
-				vertical-align:top;
-				width:50px;
-				margin-top:5px
-			}
-			textarea {
-				display:inline-block;
-				vertical-align:top;
-				resize: none;
-				width:460px
-			}
-			ul {
-				display:inline-block;
-				vertical-align:top;
-				width:463px;
-				clear:none
-			}
-			input {
-				display:inline-block;
-				margin:5px
-			}
-			&.tags {
-				textarea {
-					width: 430px;
-				}
-				ul {
-					width: 430px;
-				}
-			}
-			&.pic {
-				width:90px;
-				height:90px;
-				margin-left:auto;
-				margin-right:auto;
-				outline:#999 solid 1px;
-				div.pic_preview {
-					width:90px;
-					height:90px;
-					margin-left:auto;
-					margin-right:auto;
-					text-align: center;
-					input {
-						display:none
-					}
-					p {
-						font:12px arial,sans-serif;
-						font-weight:bold;
-						text-align:center;
-						margin:3px
-					}
-				}
-			}
-		}
-		// Cribbed from http://www.alistapart.com/articles/expanding-text-areas-made-elegant/
-		textarea, 
-		pre {
-		  margin: 0;
-		  padding: 0;
-		  outline: 0;
-		  border: 0;
-		}
-		.expandingArea {
-		  position: relative;
-		  border: 1px solid #888;
-		  background: #fff;
-		}
-		.expandingArea > textarea,
-		.expandingArea > pre {
-		  padding: 5px;
-		  background: transparent;
-		  font: 400 13px/16px arial, sans-serif;
-		  /* Make the text soft-wrap */
-		  white-space: pre-wrap;
-		  word-wrap: break-word;
-		}
-		.expandingArea > textarea {
-		  /* The border-box box model is used to allow
-		   * padding whilst still keeping the overall width
-		   * at exactly that of the containing element.
-		   */
-		  -webkit-box-sizing: border-box;
-		     -moz-box-sizing: border-box;
-		      -ms-box-sizing: border-box;
-		          box-sizing: border-box;
-		  width: 100%;
-		  /* This height is used when JS is disabled */
-		  // height: 100px;
-		}
-		.expandingArea.active > textarea {
-		  /* Hide any scrollbars */
-		  overflow: hidden;
-		  position: absolute;
-		  top: 0;
-		  left: 0;
-		  height: 100%;
-		  /* Remove WebKit user-resize widget */
-		  resize: none;
-		}
-		.expandingArea > pre {
-		  display: none;
-		}
-		.expandingArea.active > pre {
-		  display: block;
-		  /* Hide the text; just using it for sizing */
-		  visibility: hidden;
-		}	
-	}
-	input.btn {
-		margin: 10px;
-		font:16px arial,sans-serif;
-		color: #FFFFFF;
-		background: #51a351;
-		float: right;
-	}
-	a.btn {
-		float: right;
-	  display: inline-block;
-	  *display: inline;
-	  /* IE7 inline-block hack */
-	  *zoom: 1;
-	  padding: 4px 12px;
-	  margin-bottom: 0;
-	  font-size: 14px;
-	  line-height: 20px;
-	  text-align: center;
-	  vertical-align: middle;
-	  cursor: pointer;
-	  color: #333333;
-	  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
-	  background-color: whitesmoke;
-	  background-image: -moz-linear-gradient(top, white, #e6e6e6);
-	  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(white), to(#e6e6e6));
-	  background-image: -webkit-linear-gradient(top, white, #e6e6e6);
-	  background-image: -o-linear-gradient(top, white, #e6e6e6);
-	  background-image: linear-gradient(to bottom, #ffffff, #e6e6e6);
-	  background-repeat: repeat-x;
-	  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FFFFFFFF', endColorstr='#FFE6E6E6', GradientType=0);
-	  border-color: #e6e6e6 #e6e6e6 #bfbfbf;
-	  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
-	  *background-color: #e6e6e6;
-	  /* Darken IE7 buttons by default so they stand out more given they won't have borders */
-	  filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
-	  border: 1px solid #bbbbbb;
-	  *border: 0;
-	  border-bottom-color: #a2a2a2;
-	  -webkit-border-radius: 4px;
-	  -moz-border-radius: 4px;
-	  border-radius: 4px;
-	  *margin-left: .3em;
-	  -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
-	  -moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
-	  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
-		&.btn-lg {
-			padding: 11px 19px;
-			font-size: 17.5px;
-			-webkit-border-radius: 6px;
-			-moz-border-radius: 6px;
-			border-radius: 6px;
-		}
-		&.btn-success {
-		  color: white;
-		  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
-		  background-color: #5bb65b;
-		  background-image: -moz-linear-gradient(top, #62c462, #51a351);
-		  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#62c462), to(#51a351));
-		  background-image: -webkit-linear-gradient(top, #62c462, #51a351);
-		  background-image: -o-linear-gradient(top, #62c462, #51a351);
-		  background-image: linear-gradient(to bottom, #62c462, #51a351);
-		  background-repeat: repeat-x;
-		  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FF62C462', endColorstr='#FF51A351', GradientType=0);
-		  border-color: #51a351 #51a351 #387038;
-		  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
-		  *background-color: #51a351;
-		  /* Darken IE7 buttons by default so they stand out more given they won't have borders */
-		  filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
-		}
-	}
-	.control-group.error {
-		color: #b94a48;
-	}
-	.alert {
-	  padding: 5px;
-      margin: 0;
-      width: 100%;
-	  margin-bottom: 5px;
-	  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
-	  // background-color: #fcf8e3;
-	  // border: 1px solid #fbeed5;
-	  -webkit-border-radius: 4px;
-	  -moz-border-radius: 4px;
-	  border-radius: 4px;
-      color: #b94a48;
-      background-color: #d9edf7;
-      border-color: #bce8f1;
-      button.close {
-        display: none;
+  &.tag_collectible {
+    width: 810px;
+    div.left {
+      float: left;
+      width: 150px;
+      height: auto;
+      // border:1px solid red
+      p {
+        display: block;
+        font: 12px arial, sans-serif;
+        font-weight: bold;
+        text-align: center;
+        margin: 3px
       }
-	}
-	&.generic_alert { // Default, in the absence of bootstrap
-		display: block;
-		background-color:#fcf8e3;
-		border: 1px solid #f9f6dc;
-		padding:3px; border:3px;
-		font:18px arial,sans-serif;
-		.error_box {
-			background-color: #fcf8e3; // bootstrap warning color
-			margin: 8px;
-			padding: 8px;
-		}
-		.error_cancel {
-			display: block;
-			float: right;
-			margin: 3px 20px;
-			padding: 3px 20px;
-		}
-		button.cancel {
-			font:18px arial,sans-serif;				
-		}
-	}
-	.recipePowerCancelDiv { // The close box at upper right
-		float:right;
-		width:auto;
-		height:auto;
-		text-decoration:none;
-		color:#5E4A18;
-		font-size:14px;
-		padding:2px;
-		background-color:#E6DAA1;
-		border-radius:2px;
-		border-color:hsl(0,0%,55%);
-		border-width:2px;
-		border-style: solid
-	}
-	.injector-header {
-		position:relative;
-		height:24px;
-		width:auto;
-		margin:0.5em;
-		padding:0;
-		.injector-header-content {
-			float:left;
-			position: absolute;
-	    bottom: 0;
-			left: 150px;
-		}
-	}
-	.injector-body {
-		margin: 0.5em;
-	}
-	.injector-footer {
-		margin: 10px;
-	}
-	div.small_logo {
-		float: left;
-		vertical-align: bottom;
-	}
-	img.small_logo {
-		width:144px;
-		height:24px;
-	}
+    }
+    div.middle {
+      float: left;
+      width: 530px;
+      height: auto;
+      // border:1px solid green
+    }
+    div.right {
+      float: left;
+      width: 100px;
+      height: auto;
+      // border:1px solid blue
+    }
+    div.edit_recipe_element {
+      height: 40px;
+      padding-bottom: 0.2em
+    }
+    div.edit_recipe_field_textarea {
+      display: inline-block;
+      vertical-align: top;
+      width: 460px
+    }
+    div.edit_recipe_field {
+      width: 90%;
+      margin-left: auto;
+      margin-right: auto;
+      label {
+        display: inline-block;
+        vertical-align: top;
+        width: 50px;
+        margin-top: 5px
+      }
+      textarea {
+        display: inline-block;
+        vertical-align: top;
+        resize: none;
+        width: 460px
+      }
+      ul {
+        display: inline-block;
+        vertical-align: top;
+        width: 463px;
+        clear: none
+      }
+      input {
+        display: inline-block;
+        margin: 5px
+      }
+      &.tags {
+        textarea {
+          width: 430px;
+        }
+        ul {
+          width: 430px;
+        }
+      }
+      &.pic {
+        width: 90px;
+        height: 90px;
+        margin-left: auto;
+        margin-right: auto;
+        outline: #999 solid 1px;
+        div.pic_preview {
+          width: 90px;
+          height: 90px;
+          margin-left: auto;
+          margin-right: auto;
+          text-align: center;
+          input {
+            display: none
+          }
+          p {
+            font: 12px arial, sans-serif;
+            font-weight: bold;
+            text-align: center;
+            margin: 3px
+          }
+        }
+      }
+    }
+    // Cribbed from http://www.alistapart.com/articles/expanding-text-areas-made-elegant/
+    textarea,
+    pre {
+      margin: 0;
+      padding: 0;
+      outline: 0;
+      border: 0;
+    }
+    .expandingArea {
+      position: relative;
+      border: 1px solid #888;
+      background: #fff;
+    }
+    .expandingArea > textarea,
+    .expandingArea > pre {
+      padding: 5px;
+      background: transparent;
+      font: 400 13px/16px arial, sans-serif;
+      /* Make the text soft-wrap */
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .expandingArea > textarea {
+      /* The border-box box model is used to allow
+       * padding whilst still keeping the overall width
+       * at exactly that of the containing element.
+       */
+      -webkit-box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      -ms-box-sizing: border-box;
+      box-sizing: border-box;
+      width: 100%;
+      /* This height is used when JS is disabled */
+      // height: 100px;
+    }
+    .expandingArea.active > textarea {
+      /* Hide any scrollbars */
+      overflow: hidden;
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      /* Remove WebKit user-resize widget */
+      resize: none;
+    }
+    .expandingArea > pre {
+      display: none;
+    }
+    .expandingArea.active > pre {
+      display: block;
+      /* Hide the text; just using it for sizing */
+      visibility: hidden;
+    }
+  }
+  input.btn {
+    margin: 10px;
+    font: 16px arial, sans-serif;
+    color: #FFFFFF;
+    background: #51a351;
+    float: right;
+  }
+  a.btn {
+    float: right;
+    display: inline-block;
+    *display: inline;
+    /* IE7 inline-block hack */
+    *zoom: 1;
+    padding: 4px 12px;
+    margin-bottom: 0;
+    font-size: 14px;
+    line-height: 20px;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    color: #333333;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
+    background-color: whitesmoke;
+    background-image: -moz-linear-gradient(top, white, #e6e6e6);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(white), to(#e6e6e6));
+    background-image: -webkit-linear-gradient(top, white, #e6e6e6);
+    background-image: -o-linear-gradient(top, white, #e6e6e6);
+    background-image: linear-gradient(to bottom, #ffffff, #e6e6e6);
+    background-repeat: repeat-x;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FFFFFFFF', endColorstr='#FFE6E6E6', GradientType=0);
+    border-color: #e6e6e6 #e6e6e6 #bfbfbf;
+    border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+    *background-color: #e6e6e6;
+    /* Darken IE7 buttons by default so they stand out more given they won't have borders */
+    filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+    border: 1px solid #bbbbbb;
+    *border: 0;
+    border-bottom-color: #a2a2a2;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    *margin-left: .3em;
+    -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+    -moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+    &.btn-lg {
+      padding: 11px 19px;
+      font-size: 17.5px;
+      -webkit-border-radius: 6px;
+      -moz-border-radius: 6px;
+      border-radius: 6px;
+    }
+    &.btn-success {
+      color: white;
+      text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+      background-color: #5bb65b;
+      background-image: -moz-linear-gradient(top, #62c462, #51a351);
+      background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#62c462), to(#51a351));
+      background-image: -webkit-linear-gradient(top, #62c462, #51a351);
+      background-image: -o-linear-gradient(top, #62c462, #51a351);
+      background-image: linear-gradient(to bottom, #62c462, #51a351);
+      background-repeat: repeat-x;
+      filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FF62C462', endColorstr='#FF51A351', GradientType=0);
+      border-color: #51a351 #51a351 #387038;
+      border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+      *background-color: #51a351;
+      /* Darken IE7 buttons by default so they stand out more given they won't have borders */
+      filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+    }
+  }
+  .control-group.error {
+    color: #b94a48;
+  }
+  .alert {
+    padding: 5px;
+    margin: 0;
+    width: 100%;
+    margin-bottom: 5px;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    // background-color: #fcf8e3;
+    // border: 1px solid #fbeed5;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    color: #b94a48;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+    button.close {
+      display: none;
+    }
+  }
+  &.generic_alert {
+    // Default, in the absence of bootstrap
+    display: block;
+    background-color: #fcf8e3;
+    border: 1px solid #f9f6dc;
+    padding: 3px;
+    border: 3px;
+    font: 18px arial, sans-serif;
+    .error_box {
+      background-color: #fcf8e3; // bootstrap warning color
+      margin: 8px;
+      padding: 8px;
+    }
+    .error_cancel {
+      display: block;
+      float: right;
+      margin: 3px 20px;
+      padding: 3px 20px;
+    }
+    button.cancel {
+      font: 18px arial, sans-serif;
+    }
+  }
+  .recipePowerCancelDiv {
+    // The close box at upper right
+    float: right;
+    width: auto;
+    height: auto;
+    text-decoration: none;
+    color: #5E4A18;
+    font-size: 14px;
+    padding: 2px;
+    background-color: #E6DAA1;
+    border-radius: 2px;
+    border-color: hsl(0, 0%, 55%);
+    border-width: 2px;
+    border-style: solid
+  }
+  .injector-header {
+    position: relative;
+    height: 24px;
+    width: auto;
+    margin: 0.5em;
+    padding: 0;
+    .injector-header-content {
+      float: left;
+      position: absolute;
+      bottom: 0;
+      left: 150px;
+    }
+  }
+  .injector-body {
+    margin: 0.5em;
+  }
+  .injector-footer {
+    margin: 10px;
+  }
+  div.small_logo {
+    float: left;
+    vertical-align: bottom;
+  }
+  img.small_logo {
+    width: 144px;
+    height: 24px;
+  }
 }

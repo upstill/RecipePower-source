@@ -1,5 +1,5 @@
 <% prompt = "has added this to your collection. Tag it here if you like. (Or " %>
 <% prompt << link_to("not", "#", id: "retire_iframe", remote: true) %>
-<%= injector_dialog :edit_recipe, (prompt+")").html_safe, noflash: true, dismiss_button: false do %>
+<%= injector_dialog :tag_collectible, (prompt+")").html_safe, noflash: true, dismiss_button: false do %>
     <%= render "form_tag_injector" %>
 <% end %>

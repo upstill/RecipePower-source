@@ -15,7 +15,7 @@ jQuery ->
 
 # Set up all ujs for the dialog and its requirements
 RP.dialog.arm_links = (dlog) ->
-	if dlog # The submit module has its own onload call, so we only call for new dialogs
+	if dlog && (typeof RP.submit != 'undefined') # The submit module has its own onload call, so we only call for new dialogs
 		RP.submit.bind dlog # Arm submission links and preload sub-dialogs
 	dlog ||= window.document
 	$('input.cancel', dlog).click RP.dialog.cancel
@@ -152,7 +152,8 @@ open_modal = (dlog, omit_button) ->
 		$('div.modal-header', dlog).prepend buttoncode
 	if $(dlog).modal
 		$(dlog).modal()
-	uploader_unpack()
+	if $('input:file.directUpload')[0]
+		uploader_unpack()
 	notify "open", dlog
 	notify_injector "open", dlog
 	$('.token-input-field-pending', dlog).each ->

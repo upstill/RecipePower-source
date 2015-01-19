@@ -111,7 +111,7 @@ class RecipesController < CollectibleController
           if @recipe.id
             current_user.collect @recipe if current_user
             if response_service.injector?
-              smartrender :action => :edit 
+              smartrender :action => :tag
             else
               # If we're collecting a recipe outside the context of the iframe, redirect to
               # the collection page with an embedded modal dialog invocation
