@@ -16,6 +16,12 @@ class FeedsController < CollectibleController
     smartrender unless do_stream FeedsCache
   end
 
+  def edit
+    @active_menu = :feeds
+    update_and_decorate
+    smartrender
+  end
+
   # GET /feeds/1
   # GET /feeds/1.json
   def show

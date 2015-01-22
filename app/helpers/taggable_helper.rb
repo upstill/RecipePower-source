@@ -3,10 +3,11 @@ module TaggableHelper
   # Generalization of taggable_field for arbitrary attribute names (not just 'tags'--the default), and allowing
   #   for both form_for and simple_form fields as well as for raw objects
 
-  def token_input_field f, tags_attribute_name="tags", options={}
+  def token_input_field f, tags_attribute_name=nil, options={}
     if tags_attribute_name.is_a? Hash
-      tags_attribute_name, options = "tags", tags_attribute_name
+      tags_attribute_name, options = nil, tags_attribute_name
     end
+    tags_attribute_name ||= "tagging_tags" # Assert the default
     attribute_name = tags_attribute_name.to_s.singularize
     is_plural = attribute_name != tags_attribute_name.to_s
     attribute_name << "_tag" unless attribute_name.match /tag$/
@@ -46,6 +47,7 @@ module TaggableHelper
 
   def taggable_div(f, classname="", options={})
     options[:rows] ||= "1"
+    options[:label] ||= "Tags"
     content_tag :div, 
       token_input_field( f, options.delete(:attribute_name), options),
       { class: classname+" tags" },
