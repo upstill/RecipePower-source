@@ -59,7 +59,8 @@ module PicPickerHelper
                 value="#{img_url_value}">
         }.html_safe
     content_tag( :div, pic_preview, :class => :pic_preview)+
-    content_tag( :div, pic_picker_link, :class => :pic_picker_link)
+    content_tag( :div, pic_picker_link, :class => :pic_picker_link)+
+    uploader_field( templateer, :picurl )
   end
 
   # The link to the picture-picking dialog preloads the dialog, extracting picture links from the recipe's page
