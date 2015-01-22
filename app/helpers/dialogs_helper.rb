@@ -142,5 +142,5 @@ module DialogsHelper
     options[:class] = "#{options[:class]} btn btn-lg btn-info dialog-cancel-button"
     link_to name, "#", options
   end
-    
-end
+
+  end

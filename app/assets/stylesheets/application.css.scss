@@ -17,12 +17,25 @@
   font-size: 20px;
   font-weight: 150;
   color: #999999;
-# text-shadow:0 1 px 0 #888888;
 }
 
-.simple_form label {
-  float: left;
-  margin: 8px 0 5px;
+// .simple_form label {
+  // float: left;
+  // margin: 8px 0 5px;
+// }
+
+// Cozies up to the tags selector above it
+div.form-group {
+  &.boolean {
+    margin-left: 30px;
+    &.list_pullin {
+      margin-top: 5px;
+    }
+  }
+  &.radio_buttons {
+    margin-left: 10px;
+    margin-bottom: 10px;
+  }
 }
 
 div.token-input-dropdown-facebook {

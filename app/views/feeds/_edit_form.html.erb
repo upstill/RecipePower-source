@@ -3,9 +3,9 @@
   <%= form_errors_helper f %>
   <%= f.input :title %>
   <%= f.input :description, input_html: { cols: 125, rows: 1 } %>
-  <%= taggable_div f %>
+  <%# taggable_div f %>
   <%= f.input :url, input_html: { cols: 125, rows: 1 } %>
-  <%= f.input :approved, :as => :boolean, :label => false, :inline_label => true %>
+  <%= inline_checkbox f, :approved, "Visible (approved for feedthrough)" %>
   <%= f.input :feedtype, collection: Feed.feedtype_selection %>
 	<%# f.button :submit, "Save" %>
     <%= form_actions f, cancel_path: feeds_path %>

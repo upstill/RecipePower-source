@@ -319,7 +319,9 @@ module ApplicationHelper
     label = content_tag :label,
                         "#{visible_cb}&nbsp;#{label}".html_safe,
                         class: "checkbox pull-left"
-    (hidden_cb+label.html_safe).html_safe
+    content_tag :div,
+                (hidden_cb+label.html_safe).html_safe,
+                class: "form-group checkbox #{f.object.class.to_s.downcase}_#{attribute}"
   end
 
 end
