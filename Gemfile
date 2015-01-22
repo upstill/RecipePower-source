@@ -54,6 +54,7 @@ gem 'youtube_addy'
 gem 'aws-sdk'
 gem 'counter_culture', '~> 0.1.23'
 gem 'letter_opener', :group => [ :development, :staging ]
+gem 'letter_opener_web', '~> 1.2.0', :group => :staging
 
 gem 'exception_notification', git: 'git://github.com/smartinez87/exception_notification.git'
 # gem 'exception_notification', '~> 4.0.1', :require => 'exception_notifier' # , git: 'git://github.com/alanjds/exception_notification.git' 
