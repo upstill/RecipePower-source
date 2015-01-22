@@ -2,26 +2,7 @@
 	<%= simple_form_for resource, :as => resource_name, :url => invitation_path(resource_name), :html => {:method => :post} do |f| %>
 		  <%# devise_error_messages! %>
           <%= form_errors_helper f %>
-          <div><h3 style="margin-top:0">Pick Channel(s) to send the recipe to:</h3></div>
-        <%= f.input :channel_tokens,
-                    :label => false,
-                    :input_html => {
-                            :class => "token-input-field-pending",
-                            :autofocus => true,
-                            :data => {
-                                    :pre => (resource.channel_tokens || []).collect { |token|
-                                      token.kind_of?(Fixnum) ?
-                                              { "id" => token.to_s, "name" => User.find(token).handle } :
-                                              { "id" => token, "name" => token }
-                                    }.to_json,
-                                    :no_results_text => "No matching channel",
-                                    :hint => "List channels here",
-                                    :free_tagging => false,
-                                    :enabler => "input.dialog-submit-button",
-                                    :request => match_friends_user_path(current_user.id, channel: true) # "/users/#{current_user.id}/match_friends.json?channel=true"
-                            }
-                    } %>
-          <hr><div><h3>Pick a RecipePower friend, or provide an email address.</h3></div>
+          <div><h4>Pick a RecipePower friend or provide any email address and we'll take care of the rest.</h4></div>
 			<%= f.input :invitee_tokens,
 									:label => false,
 									:input_html => {
@@ -40,7 +21,6 @@
 											:request => match_friends_user_path(current_user.id) # "/users/#{current_user.id}/match_friends.json"
 										}
 									} %>
-		  <%# f.input :email %></p>
 			<%= f.input :invitation_issuer, label: "How to identify you in the message" %>
 		  <%= f.input :invitation_message, label: "Invitation Message (optional)", :input_html => { :rows=>"4" } %></p>
       <%= f.hidden_field(:shared_recipe) if resource.shared_recipe %>
