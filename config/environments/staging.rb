@@ -53,6 +53,7 @@ RP::Application.configure do
   config.action_mailer.raise_delivery_errors = true
   config.action_mailer.default_url_options = { :host => 'www.recipepower.com' }
   
+=begin
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
     :address              => ENV['MAILGUN_SMTP_SERVER'],
@@ -63,6 +64,7 @@ RP::Application.configure do
     :authentication       => 'plain',
     :enable_starttls_auto => true  
   }
+=end
 =begin
   ActionMailer::Base.smtp_settings = {
     :address        => ENV['MAILGUN_SMTP_SERVER'],
@@ -74,6 +76,7 @@ RP::Application.configure do
   }
 =end
 
+=begin
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
     :address              => ENV['MAILGUN_SMTP_SERVER'],
@@ -84,6 +87,7 @@ RP::Application.configure do
     :authentication       => 'plain',
     :enable_starttls_auto => true  
   }
+=end
 =begin
   ActionMailer::Base.smtp_settings = {
     :address        => ENV['MAILGUN_SMTP_SERVER'],
@@ -121,5 +125,5 @@ RP::Application.configure do
     :ignore_exceptions => ExceptionNotification.default_ignore_exceptions # + [RunTimeError]
 =end
 
-  ActionMailer::Base.delivery_method = :smtp
+  ActionMailer::Base.delivery_method = :letter_opener
 end

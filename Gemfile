@@ -53,6 +53,7 @@ gem 'youtube_addy'
 # gem 'active_model_serializers'
 gem 'aws-sdk'
 gem 'counter_culture', '~> 0.1.23'
+gem 'letter_opener', :group => [ :development, :staging ]
 
 gem 'exception_notification', git: 'git://github.com/smartinez87/exception_notification.git'
 # gem 'exception_notification', '~> 4.0.1', :require => 'exception_notifier' # , git: 'git://github.com/alanjds/exception_notification.git' 
@@ -63,7 +64,6 @@ group :development do
   gem "nifty-generators"
   gem 'log_buddy'
   gem 'ruby-prof', '~> 0.13.0' # , :git => 'git://github.com/wycats/ruby-prof.git'
-  gem 'letter_opener'
   # gem "better_errors" '~> 1.1'
   gem "binding_of_caller"
   # gem "json"
