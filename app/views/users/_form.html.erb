@@ -29,26 +29,11 @@
         </div>
       </div>
     </div>
-    <div class="row">
+    <div class="row bottom">
       <div class="col-md-12">
         <%= f.input :about, label: "About Me", placeholder: "Tell the world about yourself. Who Are You? What Do You Eat?", input_html: {cols: 125, rows: 4} %>
-      </div>
-    </div>
-<!--
-    <div class="row">
-      <div class="col-md-12">
-        <%# taggable_div f, "control-group", label: "Interests (tags that apply to you)" %>
-      </div>
-    </div>
--->
-    <div class="row">
-      <div class="col-md-12">
         <%= f.input :email, input_html: {cols: 125, rows: 1} %>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-11 col-md-offset-1">
-        <%= inline_checkbox f, :private, "Cloak of Invisibility (don't suggest as Friend)" %>
+        <%= f.input :private, :as => :boolean, :label => "Cloak of Invisibility (don't suggest as Friend)" %>
         <% if response_service.admin_view? && permitted_to?(:manage, @user) %>
             <%= f.input :role_id, label: "Role", collection: @user.role_select %>
         <% end %>

@@ -1,13 +1,38 @@
-<%= simple_form_for @feed, html: { class: "new_feed json", 'data-type' => :json } do |f| %>
-  <%# flash_all %>
-  <%= form_errors_helper f %>
-  <%= f.input :title %>
-  <%= f.input :description, input_html: { cols: 125, rows: 1 } %>
-  <%# taggable_div f %>
-  <%= f.input :url, input_html: { cols: 125, rows: 1 } %>
-  <%= inline_checkbox f, :approved, "Visible (approved for feedthrough)" %>
-  <%= f.input :feedtype, collection: Feed.feedtype_selection %>
-	<%# f.button :submit, "Save" %>
+<%= simple_form_for @feed, html: {class: "new_feed json", 'data-type' => :json} do |f| %>
+    <%# flash_all %>
+    <%= form_errors_helper f %>
+    <div class="row">
+      <div class="col-md-4">
+        <div class="pic_picker_field">
+          <%= pic_preview_widget @decorator %>
+          <%= uploader_field @decorator, :image %>
+        </div>
+      </div>
+      <div class="col-md-8">
+        <div class="row">
+          <div class="col-md-12">
+            <%= f.input :title %>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <%= f.input :description, input_html: { rows: 3 } %>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <%= f.input :approved, :as => :boolean, label: "Visible (approved for feedthrough)" %>
+            <%= f.input :feedtype, collection: Feed.feedtype_selection %>
+          </div>
+        </div>
+      </div>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-md-12">
+        <%= f.input :url, input_html: {cols: 125, rows: 1} %>
+      </div>
+    </div>
+    <%# f.button :submit, "Save" %>
     <%= form_actions f, cancel_path: feeds_path %>
-
 <% end %>
