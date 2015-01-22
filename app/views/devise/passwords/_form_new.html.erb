@@ -1,0 +1,10 @@
+<p>Tell us who you are, and we'll email you a link for resetting your password.</p>
+<%= simple_form_for resource, :as => resource_name, :url => password_path(resource_name), html: { class: "password_reset json", 'data-type' => :json } do |f| %>
+    <%# form_errors_helper f %>
+    <%= modal_body do %>
+        <%= f.input :login, label: "Username or Email (your choice)" %>
+    <% end %>
+    <%= modal_footer do %>
+        <%= f.submit "Email instructions to reset password", class: "btn btn-lg btn-success dialog-submit-button"%>
+    <% end %>
+<% end %>

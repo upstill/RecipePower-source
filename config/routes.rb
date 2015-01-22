@@ -37,6 +37,7 @@ RP::Application.routes.draw do
   get 'pic_picker/new' => 'pic_picker#new'
 
   get "redirect/go"
+  put "redirect/go"
   get '/auth/failure' => 'authentications#failure'
   # get '/authentications/new' => 'authentications#new'
   resources :authentications
@@ -51,6 +52,7 @@ RP::Application.routes.draw do
   match 'users', :controller => 'users', :action => 'index', :via => [:get, :post]
 
   devise_scope :user do
+    put "/users/password/new" => 'passwords#new' # To handle redirects from edit
     post "/users/register" => "registrations#create", :as => "user_registration"
     get "/users/sign_up" => "registrations#new", :as => "new_user_registration"
     get "/users/edit" => "registrations#edit", :as => "edit_user_registration"

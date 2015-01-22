@@ -15,6 +15,7 @@
 //= require common/notifications
 //= require common/hider
 //= require common/state
+//= require common/submit
 //= require views/edit_recipe
 //= require concerns/tagger
 //= require jquery/jquery.form
@@ -142,7 +143,9 @@ function open_dialog(dlog) {
 
 // Called when the dialog is closed
 function close_dialog(dlog) {
-	retire_iframe();
+    if(!$('div.dialog')[0]) {
+        retire_iframe();
+    }
 }
 
 // Service the click on a link to, say, login with Facebook by loading that URL. The link should contain data for the

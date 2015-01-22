@@ -54,7 +54,7 @@ end
 # form whose failure generated the error
 def post_resource_errors obj, options={}
   unless obj.errors.empty?
-    view_context.flash_one :error, express_resource_errors(obj, options)
+    flash_one :error, express_resource_errors(obj, options)
   end
 end
 

@@ -20,19 +20,19 @@
         <div class="edit_recipe_field_textarea">
           <div class="expandingArea">
             <pre><span></span><br></pre>
-            <%= f.text_area :title, rows: "2" -%>
+            <%= f.text_area :title, rows: "1" -%>
           </div>
         </div>
       </div>
 
-      <%= taggable_div f, "edit_recipe_field", :attribute_name => :tagging_tags %>
+      <%= taggable_div f, "edit_recipe_field", :attribute_name => :tagging_tags, :label => "Tag(s)" %>
 
       <div class="edit_recipe_field" >
         <%= f.label :comment, "Notes" -%>
         <div class="edit_recipe_field_textarea">
           <div class="expandingArea">
             <pre><span></span><br></pre>
-            <%= f.text_area :comment, placeholder: "What are your thoughts about this recipe?" -%>
+            <%= f.text_area :comment, rows: "1", placeholder: "What are your thoughts about this recipe?" -%>
           </div>
         </div>
       </div>

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141226224128) do
+ActiveRecord::Schema.define(version: 20150120173712) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -29,11 +29,14 @@ ActiveRecord::Schema.define(version: 20141226224128) do
     t.integer "referent_id"
   end
 
-  create_table "deferred_requests", force: true do |t|
-    t.text     "requests"
+  create_table "deferred_requests", id: false, force: true do |t|
+    t.string   "session_id",                      null: false
+    t.text     "requests",   default: "--- []\n"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  add_index "deferred_requests", ["session_id"], name: "index_deferred_requests", unique: true, using: :btree
 
   create_table "delayed_jobs", force: true do |t|
     t.integer  "priority",   default: 0

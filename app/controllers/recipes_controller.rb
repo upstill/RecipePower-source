@@ -21,7 +21,12 @@ class RecipesController < CollectibleController
         end
       }
       fmt.json {
-        render :update_collectible_item, locals: { destroyed: destroyed, notice: notice, entity: @recipe }
+        if response_service.injector?
+          flash[:notice] = notice
+          render :errors
+        else
+          render :update, locals: { destroyed: destroyed, notice: notice, entity: @recipe }
+        end
       }
       fmt.js { 
         render text: @recipe.title 
@@ -109,7 +114,7 @@ class RecipesController < CollectibleController
         if current_user
           update_and_decorate Recipe.ensure(params[:recipe]||{}, params[:extractions])
           if @recipe.id
-            current_user.collect @recipe if current_user
+            current_user.collect @recipe
             if response_service.injector?
               smartrender :action => :tag
             else
@@ -122,7 +127,10 @@ class RecipesController < CollectibleController
             render "pages/resource_errors", response_service.render_params
           end
         else
-          login_required nil # format: :html, params: params.slice(:recipe, :extractions, :sourcehome )
+          login_required nil, :format => :json # format: :html, params: params.slice(:recipe, :extractions, :sourcehome )
+          # Revise deferred_request for JSON
+          # @recipe = Recipe.preload(params[:recipe]||{}, params[:extractions])
+          # login_required nil, after_path: tag_recipe_path(@recipe)
         end
       }
       format.json {

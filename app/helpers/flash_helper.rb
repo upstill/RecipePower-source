@@ -73,6 +73,19 @@ module FlashHelper
     }.join.html_safe
   end
 
+  # Collect the flash messages in a hash
+  def flash_hash
+    fh = {}
+    flash.each { |type, message| fh[type] = message }
+    fh
+  end
+
+  # For passing through a redirect, enclose the collected flash messages in a hash
+  def flash_param
+    fh = flash_hash
+    fh.count > 0 ? { flash: fh } : {}
+  end
+
   # Provide a hash suitable for including in a JSON response for driving a flash notification
   # 'all' true incorporates all extant messages in the popup
   def flash_notify popup_only=false

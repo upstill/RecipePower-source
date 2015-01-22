@@ -66,9 +66,9 @@ class UserServices
   # Called on signup to initialize the user
   def sign_up
     # Give the user a starting set of collections and friends
-    add_collection Tag.assert("Now Cooking", userid: id)
-    add_collection Tag.assert("To Try", userid: id)
-    add_collection Tag.assert("Keepers", userid: id)
+    List.assert "Now Cooking", @user
+    List.assert "To Try", @user
+    List.assert "Keepers", @user
     add_followee User.find(1)
     add_followee User.find(3)
   end

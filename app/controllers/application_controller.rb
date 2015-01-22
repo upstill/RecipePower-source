@@ -104,10 +104,14 @@ class ApplicationController < ActionController::Base
   end  
 
   def check_flash
+    flash.now[:notice] = params[:notice] if params[:notice]
+    flash.now[:error] = params[:error] if params[:error]
+    if params[:flash]
+      params[:flash].each { |k, v| flash.now[k.to_sym] = v }
+    end
     logger.debug "FLASH messages extant for #{params[:controller]}##{params[:action]} (check_flash):"
-    logger.debug "    notice: "+flash[:notice] if flash[:notice]
-    logger.debug "    error: "+flash[:error] if flash[:error]
-		session[:on_tour] = true if params[:on_tour]
+    view_context.flash_hash.each { |k, v| logger.debug "   #{k}: #{v}" }
+    session[:on_tour] = true if params[:on_tour]
 		session[:on_tour] = false if current_user
   end
   
@@ -208,7 +212,7 @@ class ApplicationController < ActionController::Base
           else
             render renderopts
           end
-        when :modal
+        when :modal, :injector
           dialog = render_to_string renderopts.merge(action: response_service.action, layout: (@layout || false), formats: ["html"])
           render json: {code: dialog, how: "bootstrap"}.to_json, layout: false, :content_type => 'application/json'
         end
@@ -275,7 +279,10 @@ class ApplicationController < ActionController::Base
 
   # Enable a modal dialog to run by embedding its URL in the URL of a page, then redirecting to it
   def redirect_to_modal dialog, page=nil
-    redirect_to view_context.page_with_trigger(page, dialog)
+    # Transfer the contents of the flash to the trigger
+    options = { mode: :modal }
+    flash.each { |type, message| options["flash[#{type}]"] = message } if defined?(flash)
+    redirect_to view_context.page_with_trigger(page, assert_query(dialog, options))
   end
 
   # before_filter on controller that needs login to do anything

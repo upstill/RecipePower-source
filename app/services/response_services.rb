@@ -88,27 +88,6 @@ class ResponseServices
     defaults.merge layout: layout
   end
 
-  # Recall an earlier, deferred, request that can be redirected to in the current context .
-  # This isn't as easy as it sounds: if the prior request was for a format different than the current one,
-  #  we have to redirect to a request that will serve this one, as follows:
-  # -- if the current request is for JSON and the earlier one was for a page, we send back JSON instructing that page load
-  # -- if the current request is for a page and the earlier one was for JSON, we can send back a page that spring-loads
-  #!  the JSON request
-  def deferred_request
-    request =
-    if df = pending_request
-      if df[:format] == @format
-        # We can handle this request directly because its format agrees with the current request
-        clear_pending_request # Clear the pending request
-        df[:fullpath]
-      elsif df[:format] == :html
-        clear_pending_request
-        assert_query "/redirect/go", to: df[:fullpath]
-      end
-    end
-    request
-  end
-
   # Take a url and return a version of that url that's good for a redirect, given
   #  that the redirect will have the format and method of the current request. The
   #  options are used to assert a specific format, possibly different from the current one
@@ -120,26 +99,37 @@ class ResponseServices
     end
   end
 
+  def admin_view?
+    @session[:admin_view]
+  end
+
   # Save the current request pending (presumably) a login, such that deferred_request and deferred_trigger
   # can reproduce it after login. Any of the current request parameters may be
   # overridden--or other data stored--by passing them in the elements hash
   def defer_request elements={}
-    dr = {
-        format: @format,
-        fullpath: URI::decode(@request.fullpath)
-    }.merge elements
-    dr[:format] = dr[:format].to_s  # In case elements merged in a symbol
-    if (dri = @session[:deferred_requests_id]) && (defreq = DeferredRequest.where(id: dri).first)
-      (defreq.requests << str).uniq!
-      defreq.save
-    else
-      @session[:deferred_requests_id] = DeferredRequest.create(:requests => [ dr ]).id
-    end
-    dr
+    DeferredRequest.push @session.id,
+                         pack_request({ format: @format, fullpath: @request.fullpath }.merge elements)
   end
 
-  def admin_view?
-    @session[:admin_view]
+  # Recall an earlier, deferred, request that can be redirected to in the current context .
+  # This isn't as easy as it sounds: if the prior request was for a format different than the current one,
+  #  we have to redirect to a request that will serve this one, as follows:
+  # -- if the current request is for JSON and the earlier one was for a page, we send back JSON instructing that page load
+  # -- if the current request is for a page and the earlier one was for JSON, we can send back a page that spring-loads
+  #!  the JSON request
+  def deferred_request
+    request =
+        if df = pending_request
+          if df[:format] == @format
+            # We can handle this request directly because its format agrees with the current request
+            clear_pending_request # Clear the pending request
+            df[:fullpath]
+          elsif df[:format] == :html
+            clear_pending_request
+            assert_query "/redirect/go", to: df[:fullpath]
+          end
+        end
+    request
   end
 
   private
@@ -156,32 +146,34 @@ class ResponseServices
     end
   end
 
+  protected
+
   def clear_pending_request
-    # @session.delete :deferred_request
-    if (dri = @session[:deferred_requests_id]) && (defreq = DeferredRequest.where(id: dri).first)
-      defreq.requests.pop
-      if defreq.requests.empty?
-        defreq.destroy
-        @session.delete :deferred_requests_id
-      else
-        defreq.save
-      end
-    end
+    DeferredRequest.pop @session.id
   end
 
+  # Get the currently-pending deferred request, fixing it for the current mode
   def pending_request
-    # if dr = @session[:deferred_request]
-    if (dri = @session[:deferred_requests_id]) &&
-       (defreq = DeferredRequest.where(id: dri).first) &&
-       (dr = defreq.requests[-1])
-      # dr = YAML::load dr
-      dr[:fullpath] = assert_query URI::encode( dr[:fullpath]), :mode => @mode
+    unpack_request DeferredRequest.pending(@session.id)
+  end
+
+  # Prepare a deferred request for serialization
+  def pack_request dr
+    dr[:format] = dr[:format].to_s  # In case elements merged in a symbol
+    dr[:fullpath] = URI::decode(dr[:fullpath])
+    dr
+  end
+
+  # Restore a deferred request after deserialization
+  def unpack_request dr
+    if dr
+      dr[:fullpath] = assert_query URI::encode(dr[:fullpath]), :mode => @mode
       dr[:format] = dr[:format].to_sym
       dr
     end
   end
 
-public
+  public
 
   # Return the class specifier for styling according to the mode
   def format_class
@@ -217,12 +209,14 @@ public
     trigger =
         if @trigger # A modal dialog has been embedded in the USL as the trigger param
           assert_query @trigger, mode: :modal
+=begin
         elsif  (dr = pending_request) &&
             (dr[:format] == :json) &&
             (!dr[:controller] || dr[:controller] == @controller) &&
             (!dr[:layout] || dr[:layout] == layout)
           clear_pending_request # Delete it 'cause we're using it
           dr[:fullpath]
+=end
         end
     trigger
   end

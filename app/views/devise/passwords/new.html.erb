@@ -1,17 +1,1 @@
-<% if response_service.injector? %>
-	<%= injector_dialog :new_password, "will reset your password if you're a member.", noflash: true, dismiss_button: false do %>
-		<%= render "new_password_injector" %>
-	<% end %>
-<% else %>
-	<%= modal_dialog :password_reset, "Forgot your password?" do %>
-		<%= simple_form_for resource, :as => resource_name, :url => password_path(resource_name), html: { class: "password_reset json", 'data-type' => :json } do |f| %>
-			<%= form_errors_helper f %>
-			<%= modal_body do %>
-			  <%= f.input :login, label: "Username or Email (your choice)" %>
-			<% end %>
-			<%= modal_footer do %>
-				<%= f.submit "Email instructions to reset password", class: "btn btn-lg btn-success dialog-submit-button"%>
-			<% end %>
-		<% end %>
-	<% end %>
-<% end %>
+<%= render response_service.select_render %>
