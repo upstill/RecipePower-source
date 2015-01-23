@@ -262,7 +262,7 @@ module ApplicationHelper
   def field_value what=nil
     return form_authenticity_token if what && (what == "authToken")
     if val = @decorator && @decorator.extract(what)
-      val.html_safe
+      "#{val}".html_safe
     end
   end
 

@@ -140,4 +140,14 @@ module CollectibleHelper
       [ "div.stream-results##{results_id} div.stream-item##{dom_id entity}" ]
   end
 
+  # The field-vals array consists of label/value pairs for display
+  def collectible_field_block decorator, field_vals=[], &block
+    header_fields = field_vals.compact.collect { |fv|
+      label, field = fv.first, fv.last
+      render "shared/show_labelled", label: label, content: present_field_wrapped(field)
+    }.join.html_safe
+    buttons_list = with_output_buffer(&block) if block_given?
+    render "collectible/show_panel", header_fields: header_fields, buttons_list: buttons_list
+  end
+
 end

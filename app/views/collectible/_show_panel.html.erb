@@ -1,0 +1,15 @@
+<div class="panel pull-left panel-default hide-if-empty" style="width:100%">
+  <div class="panel-heading">
+    <p class="hide-if-empty">A
+      <span class="hide-if-empty"> <%= present_field_wrapped "typename" %></span>
+      <span class="hide-if-empty"> <%= present_field_wrapped "classname_lower" %></span>
+      <span class="hide-if-empty"> by <%= present_field_wrapped "Author_tags" %></span>
+      <span class="hide-if-empty"> in <%= present_field_wrapped "Source_tags" %></span>
+      <span class="hide-if-empty"> from <%= present_field_wrapped "site" %></span>.</p>
+  </div>
+  <div class="panel-body">
+    <% tagfields = [['Lists', "Listed In"], "Ingredient_tags", ["Role_tags", "Produces"], "Genre_tags", "Occasion_tags", "Process_tags", "Tool_tags", "Other Tag_tags" ] unless defined?( tagfields ) && tagfields %>
+    <%= show_tags tagfields %>
+    <%= (defined?(buttons_list) && buttons_list) ? buttons_list : collectible_buttons_panel(@decorator) %>
+  </div>
+</div>
