@@ -1,5 +1,5 @@
 require "templateer.rb"
-class SiteDecorator < Draper::Decorator
+class SiteDecorator < CollectibleDecorator
   include Templateer
   delegate_all
 

@@ -4,12 +4,12 @@
     <%= link_to_submit item.name, site_path(item), mode: :modal %>
   </td>
   <td>
+    <%= item.description %>
+  </td>
+  <td>
     <b>Home</b>: <%= link_to item.home, item.home %><br>
     <b><%= show_sample item %></b><br>
     <b># Feeds:</b> <%= item.feeds.size %> (<%= item.feeds.where(approved: true).count %> approved for feedthrough)
-  </td>
-  <td>
-    <%= item.description %>
   </td>
   <td>
     <%= site_collectible_buttons decorator, scrape_link: true %>

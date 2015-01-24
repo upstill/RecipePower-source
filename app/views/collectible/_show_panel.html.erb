@@ -8,8 +8,7 @@
       <span class="hide-if-empty"> from <%= present_field_wrapped "site" %></span>.</p>
   </div>
   <div class="panel-body">
-    <% tagfields = [['Lists', "Listed In"], "Ingredient_tags", ["Role_tags", "Produces"], "Genre_tags", "Occasion_tags", "Process_tags", "Tool_tags", "Other Tag_tags" ] unless defined?( tagfields ) && tagfields %>
-    <%= show_tags tagfields %>
-    <%= (defined?(buttons_list) && buttons_list) ? buttons_list : collectible_buttons_panel(@decorator) %>
+    <%= show_tags presenter.tagfields %>
+    <%= presenter.buttons %>
   </div>
 </div>

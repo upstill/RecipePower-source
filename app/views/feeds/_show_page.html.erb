@@ -1,4 +1,4 @@
-<%= render "collectible/show_card", buttons_list: (buttons_list if defined?(buttons_list)) %>
+<%= render "collectible/show_card", fallback_pic: (fallback_pic if defined?(fallback_pic)), buttons_list: (buttons_list if defined?(buttons_list)) %>
 <% permitted_to?(:approve, :feeds) do %>
     <p>
       Feed <%= feed_approval @feed %>

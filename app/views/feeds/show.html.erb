@@ -1,1 +1,2 @@
-<%= render response_service.select_render, buttons_list: feed_collectible_buttons( @decorator, list_button: true, vote_button: true) %>
+
+<%= render response_service.select_render, fallback_pic: @decorator.site.picdata, buttons_list: feed_collectible_buttons( @decorator, list_button: true, vote_button: true) %>

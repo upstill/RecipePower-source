@@ -13,6 +13,7 @@ class SitesController < CollectibleController
   # GET /sites/1.json
   def show
     update_and_decorate
+    @presenter = CollectiblePresenter.new @decorator, view_context
     smartrender
   end
 

@@ -1,6 +1,8 @@
-<% if @feeds.blank? %>
+<% if (feedlist = @site.feeds.where(approved: true)).blank? %>
     ...site has no feeds.
 <% else %>
     <h4>Associated Feeds</h4>
-    <%= render "feeds/index_stream_results" %>
+    <% feedlist.each do |feed| %>
+        <p><%= link_to_submit feed.title, feed_path(feed), mode: :page  %></p>
+    <% end %>
 <% end %>

@@ -66,4 +66,7 @@ class CollectibleDecorator < Draper::Decorator
     end
   end
 
+  def picdata site_fallback=false
+    object.picdata || (site_fallback && (object.site.picdata rescue nil))
+  end
 end

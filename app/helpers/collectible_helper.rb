@@ -114,9 +114,12 @@ module CollectibleHelper
   end
 
   # Sort out a suitable URL to stuff into an image thumbnail for a recipe
-  def safe_image_div decorator, options = {}
+  def safe_image_div decorator, fallback=nil, options = {}
+    if fallback.is_a? Hash
+      fallback, options = nil, fallback
+    end
     begin
-      return if (url = decorator.picdata).blank?
+      return if (url = decorator.picdata || fallback).blank?
       # options.merge!( class: "stuffypic", data: { fillmode: "width" } ) # unless url =~ /^data:/
       content = image_with_error_recovery url,
                                           alt: "Image Not Accessible",

@@ -1,16 +1,10 @@
 <div class="row">
-  <% unless @decorator.picdata.blank? %>
-      <div class="col-lg-2 col-md-3 col-sm-3">
-        <%= safe_image_div @decorator, class: "resource-element pic" %>
-      </div>
-      <div class="col-lg-5 col-md-6 col-sm-7">
-  <% else %>
-      <div class="col-lg-5 col-md-7 col-sm-12">
-  <% end %>
-        <div class="resource-element info">
-          <p class="resource-element title"><%= @decorator.title %></p>
-          <p class="resource-element subtitle"><%= @decorator.description %></p>
-          <%= render "collectible/show_panel", buttons_list: (buttons_list if defined? buttons_list) %>
-        </div>
-      </div>
+  <%= presenter.picdiv %>
+  <div class="<%= presenter.divclass %>">
+    <div class="resource-element info">
+      <% presenter.title %>
+      <% presenter.description %>
+      <%= render "collectible/show_panel", presenter: presenter %>
+    </div>
+  </div>
 </div>
