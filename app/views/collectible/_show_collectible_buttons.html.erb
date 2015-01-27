@@ -1,6 +1,6 @@
 <div class="collectible-buttons" style="display: inline-block" id="dom_id(decorator">
   <% extras %>
-  <% if styling[:edit_button] || response_service.admin_view? %>
+  <% if (styling[:edit_button] || response_service.admin_view?) && !decorator.read_only %>
       <%= collectible_edit_button decorator.object, styling %>
   <% end %>
 

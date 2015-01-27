@@ -16,4 +16,9 @@ class FeedEntryDecorator < Draper::Decorator
   #     end
   #   end
 
+  # Feed entries can't be modified
+  def read_only
+    true
+  end
+
 end

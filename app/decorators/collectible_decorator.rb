@@ -69,4 +69,10 @@ class CollectibleDecorator < Draper::Decorator
   def picdata site_fallback=false
     object.picdata || (site_fallback && (object.site.picdata rescue nil))
   end
+
+  # Collectibles are editable by default
+  def read_only
+    false
+  end
+
 end
