@@ -64,7 +64,10 @@ class ApplicationController < ActionController::Base
     unless (@decorator && entity == @decorator.object) # Leave the current decorator alone if it will do
       @decorator = (entity.decorate if entity.respond_to? :decorate)
     end
-    response_service.title = (@decorator.title || "").truncate(20) if @decorator
+    if @decorator
+      response_service.title = (@decorator.title || "").truncate(20)
+      @presenter = CollectiblePresenter.new @decorator, view_context
+    end
     entity.errors.empty? # ...and report back status
   end
 

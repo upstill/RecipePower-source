@@ -48,7 +48,7 @@ class CollectibleDecorator < Draper::Decorator
           when "others"
         end
       when "site"
-        h.link_to object.sourcename, object.sourcehome
+        h.link_to object.sourcename, object.sourcehome, class: "tablink"
       when "list", "lists"
         strjoin ListServices.find_by_listee(object).collect { |list|
                   llink = h.link_to_submit list.name, list, mode: :partial, class: "rcp_list_element_tag"

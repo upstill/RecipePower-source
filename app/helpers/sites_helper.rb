@@ -38,10 +38,4 @@ module SitesHelper
     [ "div.collectible-buttons##{dom_id decorator}", site_collectible_buttons(decorator, options) ]
   end
 
-  def show_site_with_presenter
-    @presenter.buttons = site_collectible_buttons @decorator, button_size: "sm", :list_button => true
-    @presenter.modal = response_service.dialog?
-    render response_service.select_render, presenter: @presenter
-  end
-
 end

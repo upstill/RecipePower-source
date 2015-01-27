@@ -153,4 +153,12 @@ module CollectibleHelper
     render "collectible/show_panel", header_fields: header_fields, buttons_list: buttons_list
   end
 
+  # Apply a presenter to a collectible
+  def render_collectible_with_presenter presenter=nil, &block
+    presenter ||= @presenter # If previously defined
+    yield(presenter) if block_given? # Give the caller a chance to futz with the presenter
+    presenter.modal = response_service.dialog?
+    render response_service.select_render, presenter: presenter
+  end
+
 end

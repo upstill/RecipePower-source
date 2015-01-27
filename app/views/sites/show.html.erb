@@ -1,1 +1,3 @@
-<%= show_site_with_presenter %>
+<%= render_collectible_with_presenter do |presenter| %>
+    <% presenter.buttons = site_collectible_buttons @decorator, button_size: "sm", :list_button => true %>
+<% end %>

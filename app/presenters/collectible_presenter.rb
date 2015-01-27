@@ -58,7 +58,11 @@ class CollectiblePresenter
   end
 
   def buttons
-    @buttons || collectible_buttons_panel(@decorator)
+    @buttons || h.collectible_buttons_panel(@decorator)
+  end
+
+  def picfallback
+    @picfallback ||= (site = (@decorator.site rescue nil)) ? site.picdata : nil
   end
 
 end
