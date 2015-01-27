@@ -123,10 +123,16 @@ class ListServices
     # We get everything tagged either directly by the list tag, or indirectly via
     # the included tags, EXCEPT for other users' tags using the list's tag
     tag_ids = [ @list.name_tag_id ]
-    tagger_id_or_ids = userid ? [@list.owner_id, userid] : @list.owner_id
+    if userid
+      tagger_id_or_ids = [@list.owner_id, userid]
+      whereclause = "(user_id in (#{userid},#{@list.owner_id}))"
+    else
+      tagger_id_or_ids = @list.owner_id
+      whereclause = "(user_id = #{@list.owner_id})"
+    end
+    whereclause << " or (tag_id != #{@list.name_tag_id})"
     # If the pullin flag is on, we also include material tagged with the tags applied to the list itself
     # BY ITS OWNER
-    whereclause = "(user_id = #{@list.owner_id}) or (tag_id != #{@list.name_tag_id})"
     if @list.pullin
       @list.taggings.where(user_id: tagger_id_or_ids).each do |tagging|
         tag_ids << tagging.tag_id
