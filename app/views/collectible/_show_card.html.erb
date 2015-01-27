@@ -2,8 +2,8 @@
   <%= presenter.picdiv %>
   <div class="<%= presenter.divclass %>">
     <div class="resource-element info">
-      <% presenter.title %>
-      <% presenter.description %>
+      <%= presenter.title %>
+      <%= presenter.description %>
       <%= render "collectible/show_panel", presenter: presenter %>
     </div>
   </div>
