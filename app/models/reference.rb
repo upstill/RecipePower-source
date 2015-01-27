@@ -381,7 +381,7 @@ class SiteReference < Reference
 
   # Return the definitive url for a given url. NB: This will only be the site portion of the URL
   def self.canonical_url url
-    normalized_link = normalize_url(url)
+    normalized_link = normalize_url(url).sub(/\/$/,'')
     if host_url = host_url(normalized_link)
       # Candidates are all sites with a matching host
       matches = Reference.where(type: "SiteReference").where('url ILIKE ?', "#{host_url}%")
@@ -409,7 +409,7 @@ class SiteReference < Reference
     urls = (url_or_urls.is_a?(String) ? [url_or_urls] : url_or_urls)
     urls = urls.map { |url| canonical_url url }.compact.uniq unless in_full
     urls.each { |url|
-      siterefs = self.lookup url # Lookup the site on the exact url
+      siterefs = self.where url: url # Lookup the site on the exact url
       return siterefs unless siterefs.empty?
     }
     super urls.first

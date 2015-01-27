@@ -146,7 +146,7 @@ module TaggingMethods
   # Apply the tag to the current set of result counts
   def count_tag tag, counts
     # Intersect the scope with the set of entities tagged with tags similar to the given tag
-    tagscope = itemscope.where tag_id: TagServices.new(tag).lexical_similars.pluck(:id)
+    tagscope = itemscope.where tag_id: TagServices.new(tag).similar_ids
     tagset = tagscope.to_a
     counts.incr tagset # One extra point for matching in one field
 
@@ -610,7 +610,6 @@ end
 
 # user's collection visible to current_user (UserCollectionStreamer)
 class UserBiglistCache < UserCollectionCache
-  include TaggingMethods
 
   def itemscope
     scope = user ? Rcpref.where('private = false OR rcprefs.user_id = ?', user.id) : Rcpref.where(private: false)

@@ -91,7 +91,7 @@ def host_url url
   if (uri = safe_parse(sanitize_url url)) && !uri.host.blank?
     uri.path = ""
     uri.query = uri.fragment = nil
-    uri.normalize.to_s
+    uri.normalize.to_s.sub(/\/$/,'') # Remove trailing slash from normalized form
   end
 end
 

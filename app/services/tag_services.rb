@@ -82,8 +82,10 @@ class TagServices
     results
   end
   
-  def lexical_similars
-    Tag.strmatch(tag.name).delete_if { |other| other.id == id }
+  def similar_ids
+    relation_or_array = Tag.strmatch tag.name
+    ids = relation_or_array.is_a?(Array) ? relation_or_array.map(&:id) : relation_or_array.pluck(:id)
+    ids.keep_if { |candidate| candidate != id }
   end
       
 # -----------------------------------------------      

@@ -7,7 +7,7 @@
     <%= item.description %>
   </td>
   <td>
-    <b>Home</b>: <%= link_to item.home, item.home %><br>
+    <b>Home</b>: <%= link_to item.home, item.home, class: "tablink" %><br>
     <b><%= show_sample item %></b><br>
     <b># Feeds:</b> <%= item.feeds.size %> (<%= item.feeds.where(approved: true).count %> approved for feedthrough)
   </td>

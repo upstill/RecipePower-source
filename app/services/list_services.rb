@@ -123,11 +123,16 @@ class ListServices
     # We get everything tagged either directly by the list tag, or indirectly via
     # the included tags, EXCEPT for other users' tags using the list's tag
     tag_ids = [ @list.name_tag_id ]
+    tagger_id_or_ids = userid ? [@list.owner_id, userid] : @list.owner_id
     # If the pullin flag is on, we also include material tagged with the tags applied to the list itself
     # BY ITS OWNER
     whereclause = "(user_id = #{@list.owner_id}) or (tag_id != #{@list.name_tag_id})"
     if @list.pullin
-      tag_ids += @list.taggings.where(user_id: @list.owner_id).pluck(:tag_id)
+      @list.taggings.where(user_id: tagger_id_or_ids).each do |tagging|
+        tag_ids << tagging.tag_id
+        tag_ids += TagServices.new(tagging.tag).similar_ids
+      end
+      tag_ids.uniq!
       whereclause = "(#{whereclause}) and not (entity_type = 'List' and entity_id = #{@list.id})"
     end
     scope = Tagging.where( tag_id: (tag_ids.count>1 ? tag_ids : tag_ids.first)).where whereclause
