@@ -70,4 +70,15 @@ class CollectiblePresenter
     h.list_fields @tagfields
   end
 
+  def label_field name, new_label
+    @tagfields.map! { |v|
+      if v.is_a? Array
+        v[1] = new_label if v[0] == name
+      else
+        v = [v, new_label] if v == name
+      end
+      v
+    }
+  end
+
 end
