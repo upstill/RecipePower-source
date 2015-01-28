@@ -1,6 +1,11 @@
 class SitePresenter < CollectiblePresenter
-  presents :site
+  attr_accessible :site
   delegate :name, :fullname, :lists, :feeds, to: :site
+
+  def initialize decorator, template
+    super
+    @site = decorator.object
+  end
 
   def avatar
     img = site.logo
@@ -45,6 +50,7 @@ class SitePresenter < CollectiblePresenter
     [ :author, :description, :tags, :title ].collect { |this| aspect(this) }.compact.join.html_safe
   end
 
+=begin
   def about
     handle_none user.about do
       markdown(user.about)
@@ -54,6 +60,7 @@ class SitePresenter < CollectiblePresenter
   def tags
     user.tags.collect { |tag| tag.name }.join(', ')
   end
+=end
 
   private
 
