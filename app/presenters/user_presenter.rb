@@ -11,7 +11,7 @@ class UserPresenter < BasePresenter
   def avatar
     img = user.image
     img = "default-avatar-128.png" if img.blank?
-    site_link image_with_error_recovery(img, class: "avatar media-object", alt: "/assets/default-avatar-128.png" )# image_tag("avatars/#{avatar_name}", class: "avatar")
+    site_link image_with_error_recovery(img, class: "avatar media-object", alt: "/assets/default-avatar-128.png") # image_tag("avatars/#{avatar_name}", class: "avatar")
   end
 
   def member_since
@@ -30,18 +30,24 @@ class UserPresenter < BasePresenter
         contents = member_since
       when :about
         contents = user.about
+      when :collected_feeds
+        label = "Following the feeds"
+        contents = strjoin(feeds.collect { |feed|
+                            link_to_submit feed.title, feed_path(feed), :mode => :partial
+                          }).html_safe
       when :collected_lists, :owned_lists
         if which == :owned_lists
           lists = user.visible_lists viewer
-          label = "Owns the lists"
+          label = "Created the lists"
         else
           lists = user.collected_entities List, viewer
-          label = "Has collected lists"
+          label = "Following the lists"
         end
         unless lists.empty?
-          contents = lists.collect { |list|
-            link_to_submit( list.name, list_path(list), :mode => :partial).html_safe
-          }.join(', ').html_safe
+          contents = strjoin(
+              lists.collect { |list|
+                link_to_submit list.name, list_path(list), :mode => :partial
+              }).html_safe
         end
     end
     content_tag(:h4, "#{label}: #{content_tag :small, contents}".html_safe) if contents
@@ -52,12 +58,12 @@ class UserPresenter < BasePresenter
       markdown(user.about)
     end
   end
-  
+
   def tags
     user.tags.collect { |tag| tag.name }.join(', ')
   end
 
-private
+  private
 
   def handle_none(value)
     if value.present?

@@ -9,9 +9,10 @@
         <div class="media-body">
           <h2 class="media-heading"><%= user_presenter.fullname %> <small><%= user_presenter.username %></small></h2>
           <%= user_presenter.aspect :member_since %>
+          <%= user_presenter.aspect :about %>
           <%= user_presenter.aspect :owned_lists %>
           <%= user_presenter.aspect :collected_lists %>
-          <%= user_presenter.aspect :about %>
+          <%= user_presenter.aspect :collected_feeds %>
         </div>
       </li>
     </ul>
