@@ -220,9 +220,8 @@ BLOCK_END
         class: "absorb_"+tagidstr
   end
 
-
-  # Present a collection of tags, by type
-  def show_tags fields, viewer_id=nil
+  # Present a collection of labelled fields, by type
+  def list_fields fields, viewer_id=nil
     viewer_id ||= User.super_id
     fields.collect { |field|
       if field.is_a? Array
@@ -230,8 +229,8 @@ BLOCK_END
       else
         label = present_field_label field
       end
-      render "shared/show_labelled", label: label, content: present_field_wrapped(field)
-    }.join('').html_safe
+      [ label, present_field(field) ]
+    }
   end
 
   def tag_filter_header locals={}

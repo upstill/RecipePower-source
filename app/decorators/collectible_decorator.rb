@@ -59,6 +59,12 @@ class CollectibleDecorator < Draper::Decorator
                     "#{llink} (#{ulink})".html_safe
                   end
                 }
+      when "collections"
+        strjoin CollectibleServices.new(object).collectors.collect { |user|
+          h.link_to_submit( user.handle, h.user_path(user), :mode => :modal) unless user.id == object.tagging_user_id
+        }.compact
+      when "feeds"
+        strjoin(object.feeds.where(approved: true).collect { |feed| h.link_to_submit feed.title, h.feed_path(feed), :mode => :partial },"","",',', '<br>').html_safe
       when "classname_lower"
         object.class.to_s.downcase
       else

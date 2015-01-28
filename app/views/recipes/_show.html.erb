@@ -25,7 +25,9 @@
           <p class="hide-if-empty"><%= present_field_wrapped "rcpDescription" %></p>
         </div>
         <div class="panel-body">
-          <%= show_tags [['Lists', "Listed In"], "Ingredient_tags", ["Role_tags", "Produces"], "Genre_tags", "Occasion_tags", "Process_tags", "Tool_tags", "Other Tag_tags" ] %>
+          <% presenter.fields_list.each do |nv| %>
+              <%= render "shared/show_labelled", label: nv.first, content: nv.last %>
+          <% end %>
         </div>
       </div>
       <% if params[:accept_invitation_link] %>

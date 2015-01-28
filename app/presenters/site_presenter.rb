@@ -1,4 +1,4 @@
-class SitePresenter < BasePresenter
+class SitePresenter < CollectiblePresenter
   presents :site
   delegate :name, :fullname, :lists, :feeds, to: :site
 

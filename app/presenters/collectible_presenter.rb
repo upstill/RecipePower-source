@@ -7,14 +7,15 @@ class CollectiblePresenter
     @template = template
     @decorator = decorator
     @tagfields = [
-        ['Lists', "Listed In"],
         "Ingredient_tags",
         ["Role_tags", "Produces"],
         "Genre_tags",
         "Occasion_tags",
         "Process_tags",
         "Tool_tags",
-        "Other Tag_tags"
+        "Other Tag_tags",
+        ['Lists', "Listed in"],
+        ['Collections', "Collected by"]
     ]
   end
 
@@ -42,8 +43,8 @@ class CollectiblePresenter
   def picdiv
     unless picdata.blank?
       h.content_tag :div,
-                  h.safe_image_div(@decorator, picdata, class: "resource-element pic"),
-                  class: pic_class
+                    h.safe_image_div(@decorator, picdata, class: "resource-element pic"),
+                    class: pic_class
     end
   end
 
@@ -63,6 +64,10 @@ class CollectiblePresenter
 
   def picfallback
     @picfallback ||= (site = (@decorator.site rescue nil)) ? site.picdata : nil
+  end
+
+  def fields_list
+    h.list_fields @tagfields
   end
 
 end

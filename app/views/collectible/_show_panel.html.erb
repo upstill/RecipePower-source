@@ -8,7 +8,9 @@
       <span class="hide-if-empty"> from <%= present_field_wrapped "site" %></span>.</p>
   </div>
   <div class="panel-body">
-    <%= show_tags presenter.tagfields %>
+    <% presenter.fields_list.each do |nv| %>
+      <%= render( "shared/show_labelled", label: nv.first, content: nv.last) unless nv.last.blank? %>
+    <% end %>
     <%= presenter.buttons %>
   </div>
 </div>

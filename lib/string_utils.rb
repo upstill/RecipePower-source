@@ -38,11 +38,11 @@ end
 
 # Return an enumeration of a series of strings, separated by ',' except for the last two separated by 'and'
 # RETURN BLANK STRING IF STRS ARE EMPTY
-def strjoin strs, before = "", after = "", joiner = ', '
+def strjoin strs, before = "", after = "", joiner = ',', line_end=' '
   if strs.keep_if { |str| !str.blank? }.size > 0
     last = strs.pop
-    liststr = strs.join joiner
-    liststr += " and " unless liststr.blank?
+    liststr = strs.join (joiner+line_end)
+    liststr += " and#{line_end}" unless liststr.blank?
     before+liststr+last+after
   else
     ""
