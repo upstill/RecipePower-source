@@ -1,21 +1,30 @@
 <!-- TODO: Confirm avatar, include link to get new one (download?) -->
 <% present @user do |user_presenter| %>
-    <ul class="media-list">
-      <li class="media">
-        <a class="pull-left" href="#">
-          <%= user_presenter.avatar %>
-<!-- <img class="media-object" src="<%# @user.image %>" alt="default-avatar-128.png"> -->
-        </a>
-        <div class="media-body">
-          <h2 class="media-heading"><%= user_presenter.fullname %> <small><%= user_presenter.username %></small></h2>
-          <%= user_presenter.aspect :member_since %>
-          <%= user_presenter.aspect :about %>
-          <%= user_presenter.aspect :owned_lists %>
-          <%= user_presenter.aspect :collected_lists %>
-          <%= user_presenter.aspect :collected_feeds %>
-        </div>
-      </li>
-    </ul>
+    <div class="row">
+      <div class="col-sm-12 col-md-8 col-lg-6 card">
+        <ul class="media-list">
+          <li class="media">
+            <a class="pull-left" href="#">
+              <%= user_presenter.avatar %>
+              <!-- <img class="media-object" src="<%# @user.image %>" alt="default-avatar-128.png"> -->
+            </a>
+
+            <div class="media-body">
+              <h2 class="media-heading"><%= user_presenter.fullname %>
+                <small><%= user_presenter.username %></small>
+              </h2>
+              <table>
+                <%= user_presenter.aspect :member_since %>
+                <%= user_presenter.aspect :about %>
+                <%= user_presenter.aspect :owned_lists %>
+                <%= user_presenter.aspect :collected_lists %>
+                <%= user_presenter.aspect :collected_feeds %>
+              </table>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
 
 <% end %>
 <%# render "suggestions/results" %>
