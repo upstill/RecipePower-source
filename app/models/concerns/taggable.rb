@@ -4,39 +4,36 @@ module Taggable
   extend ActiveSupport::Concern
 
   included do
+    # When the record is saved, save its affiliated tagging info
+    before_save do
+      if @tagging_user_id && tagging_tag_tokens # May not actually be editing tags
+        @tagging_user_id = @tagging_user_id.to_i # Better to have it as an integer
+        asserted = # Map the elements of the token string to tags, whether existing or new
+            TokenInput.parse_tokens(tagging_tag_tokens) do |token| # parse_tokens analyzes each token in the list as either integer or string
+              case token
+                when Fixnum
+                  Tag.find token
+                when String
+                  Tag.strmatch(token, userid: @tagging_user_id, assert: true)[0] # Match or assert the string
+              end
+            end
+        set_tags @tagging_user_id, asserted
+      end
+    end
+
     has_many :taggings, :as => :entity, :dependent => :destroy
     has_many :tags, -> { uniq }, :through => :taggings
     has_many :taggers, -> { uniq }, :through => :taggings, :class_name => "User"
-    attr_accessor :tagging_user_id, :tagging_tags, :tagging_tag_tokens
-    attr_accessible :tagging_user_id, :tagging_tags, :tagging_tag_tokens
+    attr_accessor :tagging_tag_tokens
+    attr_accessible :tagging_tag_tokens
 
     Tag.taggable self
   end
 
   # Define an editable field of taggings by the current user on the entity
-  def prep_params user_id
-    self.tagging_user_id = user_id
-    self.tagging_tags = filtered_tags user_id, :tagtype_x => [ 11, :Collection, :List ]
-    super if defined? super
-  end
-
-  # Ensure that the user taggings get associated with the entity
-  # Interpret the set of tag tokens into a list of tags ready to turn into taggings
-  def accept_params
-    if tagging_user_id && tagging_tag_tokens # May not actually be editing tags
-      self.tagging_user_id = tagging_user_id.to_i # Better to have it as an integer
-      asserted = # Map the elements of the token string to tags, whether existing or new
-          TokenInput.parse_tokens(tagging_tag_tokens) do |token| # parse_tokens analyzes each token in the list as either integer or string
-            case token
-              when Fixnum
-                Tag.find token
-              when String
-                Tag.strmatch(token, userid: tagging_user_id, assert: true)[0] # Match or assert the string
-            end
-          end
-      set_tags tagging_user_id, asserted
-    end
-    # Work back up the hierarchy
+  def uid= user_id
+    @tagging_user_id = user_id
+    @tagging_tags = filtered_tags user_id, :tagtype_x => [ 11, :Collection, :List ]
     super if defined? super
   end
 
@@ -52,12 +49,18 @@ module Taggable
     Tagging.find_or_create_by user_id: uid, tag_id: tag.id, entity: self
   end
 
+  # Declare a data structure suitable for passing to RP.tagger.init
   def tag_editing_data options={}
     options[:tagtype_x] = [11, :Collection, :List]
-    tag_data tagging_user_id, options
+    data = { :hint => options.delete(:hint) || "Type your tag(s) here" }
+    data[:pre] = filtered_tags(options).collect { |tag| { id: tag.id, name: tag.typedname(options[:showtype]) } }
+    data[:query] = options.slice :verbose, :showtype
+    data[:query][:tagtype] = Tag.typenum(options[:tagtype]) if options[:tagtype]
+    data[:query][:tagtype_x] = Tag.typenum(options[:tagtype_x]) if options[:tagtype_x]
+    data.to_json
   end
 
-  # Declare a data structure suitable for passing to RP.tagger.init
+=begin Possibly called procedurally?
   def tag_data uid, options={}
     data = { :hint => options.delete(:hint) || "Type your tag(s) here" }
     data[:pre] = filtered_tags(options).collect { |tag| { id: tag.id, name: tag.typedname(options[:showtype]) } }
@@ -66,6 +69,7 @@ module Taggable
     data[:query][:tagtype_x] = Tag.typenum(options[:tagtype_x]) if options[:tagtype_x]
     data.to_json
   end
+=end
 
   def tagging_tag_data
     tagging_tags.map(&:attributes).to_json

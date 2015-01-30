@@ -50,7 +50,10 @@ class UserPresenter < BasePresenter
               }).html_safe
         end
     end
-    content_tag(:h4, "#{label}: #{content_tag :small, contents}".html_safe) if contents
+    content_tag( :tr,
+      content_tag( :td, content_tag( :h4, label), style:"padding-right: 10px; vertical-align:top; text-align: right" )+
+      content_tag( :td, contents, style: "vertical-align:top; padding-top:11px" )
+    ) unless contents.blank?
   end
 
   def about
