@@ -147,7 +147,7 @@ end
   def cookmark_count(collectible_entity, user)
      count = collectible_entity.num_cookmarks
      result = count.to_s+" Cookmark"+((count>1)?"s":"")
-     if collectible_entity.collected_by?(user.id)
+     if collectible_entity.collected?(user.id)
         result << " (including mine)"
      else
         result << ": " + 

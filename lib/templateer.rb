@@ -5,7 +5,7 @@ module Templateer
   def initialize class_or_obj=nil, options={}
     if class_or_obj && (class_or_obj.class != Class)
       super
-      class_or_obj.prep_params options[:uid] if options[:uid]
+      class_or_obj.uid = options[:uid] if options[:uid]
       self.klass = class_or_obj.class
     else # For a class constant or nil, just record it
       self.klass = class_or_obj

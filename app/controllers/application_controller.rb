@@ -52,12 +52,12 @@ class ApplicationController < ActionController::Base
       entity = params[:id] ? objclass.find(params[:id]) : objclass.new
       attribute_params = params[modelname.to_sym]
     end
-    entity.prep_params current_user_or_guest_id if entity.respond_to? :prep_params
-    entity.accept_params if entity.errors.empty? && # No probs. so far
-                              entity.respond_to?(:accept_params) &&
-                              attribute_params       && # There are parameters to update
-                              current_user           &&  # Only the current user gets to modify a model
-                              entity.update_attributes(attribute_params)
+    entity.uid = current_user_or_guest_id if entity.respond_to? :"uid="
+    if entity.errors.empty? && # No probs. so far
+        attribute_params && # There are parameters to update
+        current_user # Only the current user gets to modify a model
+      entity.update_attributes attribute_params
+    end
     # Having prep'ed the entity, set instance variables for the entity and decorator
     instance_variable_set :"@#{modelname}", entity
     # We build a decorator if necessary and possible

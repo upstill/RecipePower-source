@@ -4,7 +4,7 @@ class CollectibleController < ApplicationController
     if current_user
       update_and_decorate # Generate a FeedEntryDecorator as @feed_entry and prepares it for editing
       if params[:oust]
-        @decorator.remove_from_collection current_user.id
+        @decorator.collect false
         msg = "'#{@decorator.title.truncate(50)}' has been vanquished from your collection (though you may see it in others)."
       else
         @decorator.add_to_collection current_user.id
@@ -28,8 +28,8 @@ class CollectibleController < ApplicationController
   def tag
     if current_user
       update_and_decorate
-      unless @decorator.errors.any? || @decorator.collected_by?(current_user.id)
-        @decorator.add_to_collection current_user.id
+      unless @decorator.errors.any? || @decorator.collected?
+        @decorator.collect
         unless request.method == "POST"
           @decorator.save
           flash.now[:notice] = "'#{@decorator.title.truncate(50)}' has been added to your collection for tagging" # if @decorator.object.errors.empty?

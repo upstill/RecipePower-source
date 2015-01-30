@@ -6,7 +6,7 @@ class RecipeUserTest < ActiveSupport::TestCase
     
     test "doing first cookmark" do
       assert_equal 0, recipes(:rcp).num_cookmarks, "Should wake up with no cookmarks"
-      assert !(recipes(:rcp).collected_by? users(:thing1).id), "Should wake up with no cookmark for user"
+      assert !(recipes(:rcp).collected? users(:thing1).id), "Should wake up with no cookmark for user"
       recipes(:rcp).current_user = users(:thing1).id
       recipes(:rcp).touch
       assert_equal 1, recipes(:rcp).num_cookmarks, "User should get cookmarked"
@@ -14,7 +14,7 @@ class RecipeUserTest < ActiveSupport::TestCase
       
       recipes(:rcp).touch false
       assert_equal 1, recipes(:rcp).num_cookmarks, "Cookmark count shouldn't change when touching without collecting"
-      assert !recipes(:rcp).collected_by?, "User shouldn't get cookmarked when touched without collecting"
+      assert !recipes(:rcp).collected?, "User shouldn't get cookmarked when touched without collecting"
 
       td1 = recipes(:rcp).touch_date
       cd1 = recipes(:rcp).collection_date
@@ -24,7 +24,7 @@ class RecipeUserTest < ActiveSupport::TestCase
       
       recipes(:rcp).touch
       assert_equal 2, recipes(:rcp).num_cookmarks, "Recipe's cookmark count should advance when cookmarked for current user"
-      assert recipes(:rcp).collected_by?, "Recipe should get cookmarked for current user"
+      assert recipes(:rcp).collected?, "Recipe should get cookmarked for current user"
     end
     
     test "getting fields with no current user" do

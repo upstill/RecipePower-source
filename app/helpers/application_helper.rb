@@ -100,7 +100,7 @@ module ApplicationHelper
 
   # Present the date and time the recipe was last touched by its current user
   def touch_date_elmt entity
-    if td = entity.touch_date( entity.collectible_user_id)
+    if td = entity.touch_date
       stmt = "Last touched/viewed #{time_ago_in_words td} ago."
     else
       stmt = "Never touched or viewed"

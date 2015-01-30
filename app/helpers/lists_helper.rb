@@ -29,7 +29,7 @@ module ListsHelper
   def pin_menu decorator, user, styling, options={}
     entity = decorator.object
     hover_menu "", styling do
-      already_collected = entity.collected_by? current_user_or_guest_id
+      already_collected = entity.collected? current_user_or_guest_id
       cl = collection_link decorator,
                            checkbox_menu_item_label("Collection", already_collected),
                            already_collected,
