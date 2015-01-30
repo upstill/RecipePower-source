@@ -28,7 +28,7 @@ class CollectibleController < ApplicationController
   def tag
     if current_user
       update_and_decorate
-      unless @decorator.errors.any? || @decorator.collected?
+      unless @decorator.errors.any? || @decorator.collected? # Ensure that it's collected before editing
         @decorator.collect
         unless request.method == "POST"
           @decorator.save

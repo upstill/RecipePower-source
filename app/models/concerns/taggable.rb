@@ -6,35 +6,49 @@ module Taggable
   included do
     # When the record is saved, save its affiliated tagging info
     before_save do
-      if @tagging_user_id && tagging_tag_tokens # May not actually be editing tags
-        @tagging_user_id = @tagging_user_id.to_i # Better to have it as an integer
-        asserted = # Map the elements of the token string to tags, whether existing or new
-            TokenInput.parse_tokens(tagging_tag_tokens) do |token| # parse_tokens analyzes each token in the list as either integer or string
-              case token
-                when Fixnum
-                  Tag.find token
-                when String
-                  Tag.strmatch(token, userid: @tagging_user_id, assert: true)[0] # Match or assert the string
-              end
-            end
-        set_tags @tagging_user_id, asserted
+      if @tagging_user_id && @tagging_tag_tokens # May not actually be editing tags
+        # Map the elements of the token string to tags, whether existing or new
+        set_tag_ids TokenInput.parse_tokens(@tagging_tag_tokens) { |token| # parse_tokens analyzes each token in the list as either integer or string
+                      token.is_a?(Fixnum) ? token : Tag.strmatch(token, userid: @tagging_user_id, assert: true)[0].id # Match or assert the string
+                    }
       end
     end
 
     has_many :taggings, :as => :entity, :dependent => :destroy
     has_many :tags, -> { uniq }, :through => :taggings
     has_many :taggers, -> { uniq }, :through => :taggings, :class_name => "User"
-    attr_accessor :tagging_tag_tokens
-    attr_accessible :tagging_tag_tokens
+    attr_accessor :tagging_user_id, :tagging_tag_tokens # Only gets written externally; internally accessed with instance variable
+    attr_accessible :tagging_user_id, :tagging_tag_tokens # For the benefit of update_attributes
 
     Tag.taggable self
   end
 
   # Define an editable field of taggings by the current user on the entity
   def uid= user_id
-    @tagging_user_id = user_id
-    @tagging_tags = filtered_tags user_id, :tagtype_x => [ 11, :Collection, :List ]
+    @tagging_user_id = user_id.to_i
     super if defined? super
+  end
+
+  # Allow the given user to see tags applied by themselves and super
+  def visible_tags options={}
+    taggers = [ User.super_id ]
+    taggers << @taggable_user_id if @taggable_user_id
+    filtered_tags options.merge(user_id: taggers) # Allowing for an array of uids
+  end
+
+  # Return the editable tags, i.e. not channels, collections, or lists
+  def editing_tags
+    filtered_tags( :tagtype_x => [ 11, :Collection, :List ])
+  end
+
+  # Provide the tags of appropriate types for the user identified by @tagging_user_id
+  def tagging_tag_data
+    editing_tags.map(&:attributes).to_json
+  end
+
+  # Associate a tag with this entity in the domain of the given user (or the tag's current owner if not given)
+  def tag_with tag, uid
+    Tagging.find_or_create_by user_id: uid, tag_id: tag.id, entity: self
   end
 
   # One collectible is being merged into another => transfer taggings
@@ -44,11 +58,7 @@ module Taggable
     super if defined? super
   end
 
-  # Associate a tag with this entity in the domain of the given user (or the tag's current owner if not given)
-  def tag_with tag, uid
-    Tagging.find_or_create_by user_id: uid, tag_id: tag.id, entity: self
-  end
-
+=begin Possibly called procedurally?
   # Declare a data structure suitable for passing to RP.tagger.init
   def tag_editing_data options={}
     options[:tagtype_x] = [11, :Collection, :List]
@@ -60,7 +70,6 @@ module Taggable
     data.to_json
   end
 
-=begin Possibly called procedurally?
   def tag_data uid, options={}
     data = { :hint => options.delete(:hint) || "Type your tag(s) here" }
     data[:pre] = filtered_tags(options).collect { |tag| { id: tag.id, name: tag.typedname(options[:showtype]) } }
@@ -71,55 +80,32 @@ module Taggable
   end
 =end
 
-  def tagging_tag_data
-    tagging_tags.map(&:attributes).to_json
-  end
-
-  # Allow the given user to see tags applied by themselves and super
-  def tags_visible_to uid, options={}
-    uid = uid.to_i if uid.is_a? String
-    others = [ User.super_id ]
-    filtered_tags options.merge(user_id: (others << uid).flatten) # Allowing for an array of uids
-  end
-
 protected
 
-  # Fetch the tags associated with the entity, possibly with constraints of userid and type
+  # Fetch the tags associated with the entity, with various optional constraints (including userid via @taggable_user_id)
   # Options:
   # :tagtype: one or more types to be applied
   # :tagtype_x: one or more types to be ignored
   # :user_id: one or more users to whose taggings the results will be restricted
-  def filtered_tags uid, opts = {}
-    uid = uid.to_i if uid.is_a? String
-    uid, opts = nil, uid if uid.is_a? Hash
+  def filtered_tags opts = {}
     tagscope = Tag.unscoped
     tagscope = tagscope.where(tagtype: Tag.typenum(opts[:tagtype])) if opts[:tagtype]
     tagscope = tagscope.where.not(tagtype: Tag.typenum(opts[:tagtype_x])) if opts[:tagtype_x]
-    # Tag.where.not(tagtype: Tag.typenum(nt)).where id: get_tag_ids(uid, options)
     tagging_constraints = { entity: self }
-    tagging_constraints[:user_id] = uid if uid
+    tagging_constraints[:user_id] = @taggable_user_id if @taggable_user_id
     tagscope.joins(:taggings).where( taggings: tagging_constraints).uniq
   end
 
-  # Set the tags associated with the entity
-  def set_tags uid, tags=nil
-    # May call without a uid, which defaults to super
-    uid = uid.to_i if uid.is_a? String
-    uid, tags = User.super_id, uid unless tags
-    # Ensure that the user's tags are all and only those given
-    set_tag_ids uid, tags.map(&:id)
-  end
-
   # Set the tag ids associated with the given user
-  def set_tag_ids uid, nids
+  def set_tag_ids nids
     # Ensure that the user's tags are all and only those in nids
-    oids = filtered_tags(uid, tagtype_x: Tag.typenum([11, :Collection, :List])).map(&:id) # get_tag_ids uid
-    to_add = nids - oids
-    to_remove = oids - nids
+    oids = editing_tags.pluck :id
+
     # Add new tags as necessary
-    to_add.each { |tagid| Tagging.create(user_id: uid, tag_id: tagid, entity_id: id, entity_type: self.class.name) }
+    (nids - oids).each { |tagid| Tagging.create(user_id: @tagging_user_id, tag_id: tagid, entity_id: id, entity_type: self.class.name) }
+
     # Remove tags as nec.
-    to_remove.each { |tagid| Tagging.where(user_id: uid, tag_id: tagid, entity_id: id, entity_type: self.class.name).map(&:destroy) } # each { |tg| tg.destroy } }
+    (oids - nids).each { |tagid| Tagging.where(user_id: @tagging_user_id, tag_id: tagid, entity_id: id, entity_type: self.class.name).map(&:destroy) } # each { |tg| tg.destroy } }
   end
 
 end

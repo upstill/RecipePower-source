@@ -15,7 +15,7 @@ class CollectibleDecorator < Draper::Decorator
       when /_tags$/
         tagtype = fieldname.sub /_tags$/, ''
         tagtype = ["Culinary Term", "Untyped"] if tagtype=="Other"
-        tags_visible_to(object.collectible_user_id, :tagtype => tagtype).count
+        visible_tags(:tagtype => tagtype).count
       when "list", "lists"
         ListServices.find_by_listee(object).count
     end
@@ -26,7 +26,7 @@ class CollectibleDecorator < Draper::Decorator
       when /_tags$/
         tagtype = fieldname.sub /_tags$/, ''
         tagtype = ["Culinary Term", "Untyped"] if tagtype=="Other"
-        strjoin tags_visible_to(object.collectible_user_id, :tagtype => tagtype).collect { |tag|
+        strjoin visible_tags(:tagtype => tagtype).collect { |tag|
                   h.link_to_submit tag.name, tag, :mode => :modal, class: "rcp_list_element_tag"
                 }
       when /^rcp/

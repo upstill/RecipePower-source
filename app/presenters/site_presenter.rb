@@ -23,22 +23,21 @@ class SitePresenter < CollectiblePresenter
     end
     label = which.to_s.capitalize.tr('_', ' ') # split('_').map(&:capitalize).join
     contents = nil
-    uid = site.collectible_user_id
     case which
       when :description
         contents = site.description
       when :author
-        tags = site.tags_visible_to uid, :tagtype => :Author
+        tags = site.visible_tags :tagtype => :Author
         label = label.pluralize unless tags.empty?
         contents = tag_list tags
       when :tags
-        tags = site.tags_visible_to uid, :tagtype => [:Genre, :Role, :Ingredient, :Source, :Occasion, :Tool]
+        tags = site.visible_tags :tagtype => [:Genre, :Role, :Ingredient, :Source, :Occasion, :Tool]
         label = label.pluralize unless tags.empty?
         contents = tag_list tags
       when :lists # Lists it appears under
         # TODO Shoud be including option of indirect linkage i.e. being tagged with a list's tag
         label = "Seen on list(s)"
-        content = strjoin(site.tags_visible_to(uid, tagtype: :List).collect { |list_tag|
+        content = strjoin(site.visible_tags(tagtype: :List).collect { |list_tag|
           link_to_submit(list.name, list_path(list), :mode => :partial)
         }).html_safe
     end
