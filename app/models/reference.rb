@@ -35,9 +35,13 @@ class Reference < ActiveRecord::Base
     ((self.typesym(typenum) || "").to_s+"Reference").constantize
   end
 
+  def typesym
+    self.class.to_s.sub( 'Reference', '' ).to_sym
+  end
+
   def typenum
     return 0 if self.class == Reference
-    Reference.typenum self.class.to_s.sub( 'Reference', '' ).to_sym
+    Reference.typenum typesym
   end
 
   # Index a Reference by URL or URLs, assuming it exists (i.e., no initialization or creation)
@@ -412,7 +416,7 @@ class SiteReference < Reference
       siterefs = self.where url: url # Lookup the site on the exact url
       return siterefs unless siterefs.empty?
     }
-    super urls.first
+    super urls.first unless urls.empty?
   end
 
   protected

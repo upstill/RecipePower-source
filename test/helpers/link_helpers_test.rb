@@ -64,7 +64,7 @@ class LinkHelpersTest < ActionView::TestCase
     assert_dom_equal expected, actual
 
     actual = button_to_submit "My link", "some/path"
-    expected = "<a href='some/path.json' class='btn btn-default btn-xs submit'>My link</a>"
+    expected = "<a href='some/path.json' class='btn btn-default btn-small submit'>My link</a>"
     assert_dom_equal expected, actual
 
     actual = link_to_submit "My link", "some/path", mode: :partial
@@ -84,7 +84,7 @@ class LinkHelpersTest < ActionView::TestCase
     assert_dom_equal expected, actual
 
     actual = button_to_submit "My link", "some/path", class: "someclass", id: "someid"
-    expected = "<a href='some/path.json' class='someclass btn btn-default btn-xs submit' id='someid'>My link</a>"
+    expected = "<a href='some/path.json' class='someclass btn btn-default btn-small submit' id='someid'>My link</a>"
     assert_dom_equal expected, actual
 
     actual = link_to_submit "My link", "some/path", mode: :modal, class: "someclass", id: "someid"
@@ -92,7 +92,7 @@ class LinkHelpersTest < ActionView::TestCase
     assert_dom_equal expected, actual
 
     actual = button_to_submit "My link", "some/path", mode: :partial, class: "someclass", id: "someid"
-    expected = "<a href='some/path.json?mode=partial' class='someclass btn btn-default btn-xs submit' id='someid'>My link</a>"
+    expected = "<a href='some/path.json?mode=partial' class='someclass btn btn-default btn-small submit' id='someid'>My link</a>"
     assert_dom_equal expected, actual
 
     actual = link_to_submit "My link", "some/path", class: "linker", method: "delete", class: "someclass", id: "someid"

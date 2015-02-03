@@ -19,10 +19,25 @@ class ActiveSupport::TestCase
   fixtures :all
 
   # Add more helper methods to be used by all tests here...
+
 end
 
 =begin
 class ApplicationController
   include Devise::TestHelpers
+end
+=end
+class ActionDispatch::IntegrationTest
+  # For devise authentication helpers
+  include Warden::Test::Helpers
+  Warden.test_mode!
+end
+
+=begin
+class ActionController::TestCase
+  include Devise::TestHelpers
+  # For devise authentication helpers
+  # include Warden::Test::Helpers
+  # Warden.test_mode!
 end
 =end

@@ -8,14 +8,15 @@ end
 
 # Try to make sense out of a given path in the context of another url.
 # Return either a valid URL or nil
-def valid_url(path, url)
+def valid_url path, url
+  path ||= ""  # Could happen
   if validate_link(path) && good = test_link(path) # either the original URL or a replacement are good
     return (good.class == String) ? good : path
   elsif url
     # The path may be relative. In fact, it may have backup characters
     begin
       uri = URI.join( url, path ).to_s
-      return validate_link(uri) && uri
+      uri if validate_link(uri)
     rescue Exception => e
       return nil
     end

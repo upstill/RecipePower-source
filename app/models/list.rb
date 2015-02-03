@@ -128,6 +128,7 @@ class List < ActiveRecord::Base
     unless stores? entity
       ordering << ListItem.new(entity: entity)
       save
+      owner.collect entity
     end
   end
 

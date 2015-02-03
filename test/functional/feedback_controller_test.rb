@@ -1,19 +1,22 @@
 require File.dirname(__FILE__) + '/../test_helper'
+# require File.dirname(__FILE__) + '/../warden_test_helper'
 
 class FeedbackControllerTest < ActionController::TestCase
   include Devise::TestHelpers
+  include Warden::Test::Helpers
+  Warden.test_mode!
+  # include Warden::Test::ControllerHelpers
 
   def setup
-    debugger
     sign_in User.first
     @controller = FeedbackController.new
     @controller.request = @request = ActionController::TestRequest.new
     @response   = ActionController::TestResponse.new
   end
 
-
   def test_should_have_minimal_feedback_form
-  	debugger
+    warden
+    @request.env["devise.mapping"] = Devise.mappings[:user]
     get :new
     assert_select "form#feedback_form", true do
       assert_select "[action=?]", "/feedbacks"
@@ -23,7 +26,6 @@ class FeedbackControllerTest < ActionController::TestCase
   end
 
   def test_should_post_create
-  	debugger
     post :create, :feedback => {:comment => "Great website!"}
     assert :success # Doesn't test much
     assert_nil @error_message
@@ -31,11 +33,9 @@ class FeedbackControllerTest < ActionController::TestCase
 
 
   def test_should_set_error_message_when_not_valid
-  	debugger
     post :create, :feedback => {:comment => ""}
     assert !assigns(:error_message).blank?
   end
-
 
   protected
 

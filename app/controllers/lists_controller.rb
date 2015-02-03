@@ -35,11 +35,11 @@ class ListsController < CollectibleController
 
     if @list.id
       flash[:popup] = "Found list '#{@list.name}'."
-      @list.save
     else
       flash[:popup] ="Successfully created '#{@list.name}'."
-      ListServices.new(@list).include @first_entity, current_user.id if @first_entity
     end
+    @list.save
+    ListServices.new(@list).include @first_entity, current_user.id if @first_entity
     # respond_to do |format|
       # format.html { redirect_to tag_list_path(@list), :status => :see_other, notice: notice }
   end

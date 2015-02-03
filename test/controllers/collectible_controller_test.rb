@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'warden_test_helper'
 
 class CollectibleControllerTest < ActionController::TestCase
   test "should get collect" do

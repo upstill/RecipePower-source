@@ -1,6 +1,6 @@
 # encoding: UTF-8
 require 'test_helper'
-# require 'warden_test_helper'
+require 'warden_test_helper'
 
 class ListsControllerTest < ActionController::TestCase
   test "should collect querytags" do

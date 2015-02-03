@@ -25,18 +25,19 @@ RP::Application.routes.draw do
     end
   end
 
-    if Rails.env.development? || Rails.env.test?
+  if Rails.env.development? || Rails.env.test?
     # IntegersController is for testing streams
     get "integers" => 'integers#index'
   end
-  resources :votes, :only => :create
-  post '/votes/recipes/:id' => 'votes#create', :as => "vote_recipe"
-  post '/votes/feeds/:id' => 'votes#create', :as => "vote_feed"
-  post '/votes/feed_entries/:id' => 'votes#create', :as => "vote_feed_entry"
-  post '/votes/lists/:id' => 'votes#create', :as => "vote_list"
-  post '/votes/products/:id' => 'votes#create', :as => "vote_product"
-  post '/votes/sites/:id' => 'votes#create', :as => "vote_site"
-  post '/votes/users/:id' => 'votes#create', :as => "vote_user"
+
+    post '/votes/recipes/:id' => 'votes#create' # , :as => "vote_recipe"
+    post '/votes/feeds/:id' => 'votes#create' # , :as => "vote_feed"
+    post '/votes/feed_entries/:id' => 'votes#create' # , :as => "vote_feed_entry"
+    post '/votes/lists/:id' => 'votes#create' # , :as => "vote_list"
+    post '/votes/products/:id' => 'votes#create' # , :as => "vote_product"
+    post '/votes/sites/:id' => 'votes#create' # , :as => "vote_site"
+    post '/votes/users/:id' => 'votes#create' # , :as => "vote_user"
+
   get 'pic_picker/new' => 'pic_picker#new'
 
   get "redirect/go"

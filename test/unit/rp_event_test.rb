@@ -27,10 +27,4 @@ class EventTest < # Test::Unit::TestCase
     assert_equal evt.typesym, :session
   end
 
-  # Fake test
-  test "fail" do
-
-    # To change this template use File | Settings | File Templates.
-    fail('Not implemented')
-  end
 end

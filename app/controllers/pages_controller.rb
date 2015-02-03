@@ -12,7 +12,6 @@ class PagesController < ApplicationController
   end
 
   def home
-    # session.delete :on_tour # Tour's over!
     response_service.title = "Home"
     @auth_context = :manage
     # setup_collection

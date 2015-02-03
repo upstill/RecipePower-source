@@ -59,8 +59,8 @@ gem 'letter_opener_web', '~> 1.2.0', :group => :staging
 gem 'exception_notification', git: 'git://github.com/smartinez87/exception_notification.git'
 # gem 'exception_notification', '~> 4.0.1', :require => 'exception_notifier' # , git: 'git://github.com/alanjds/exception_notification.git' 
 group :development do
-  gem 'minitest', '~> 4.2'
-  # gem 'rspec-rails'
+  # gem 'minitest', '~> 4.2'
+  gem 'rspec-rails', '2.99' # ~> 3.1'
   gem 'annotate', '2.5.0'
   gem "nifty-generators"
   gem 'log_buddy'
@@ -73,13 +73,13 @@ end
 gem "masonry-rails"
 
 group :test do
-  gem 'minitest-rails', "~> 1.0" # gem 'minitest', '~> 4.2'
-  # gem 'rspec-rails'
+  # gem 'minitest-rails', "~> 1.0" # gem 'minitest', '~> 4.2'
+  # gem "minitest-rails-capybara" # ...for simulating user interaction
+  gem 'rspec-rails', '2.99' # ~> 3.1'
   # Pretty printed test output
   gem 'turn', :require => false
   gem 'webrat', '~> 0.7.3'
-  gem "minitest-rails-capybara" # ...for simulating user interaction
-  # gem "guard-rspec" # ...for auto-running tests on file save
+  ## gem "guard-rspec" # ...for auto-running tests on file save
   gem 'factory_girl_rails', "~> 4.0"
   gem "mocha"
   gem 'poltergeist'

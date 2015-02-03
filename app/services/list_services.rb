@@ -10,8 +10,9 @@ class ListServices
 
   # A list "includes" an item if
   # 1) it is stored directly in the list, or
-  # 2) the list "pulls in" entities using its tags AND the entity is tagged by the list's tags
-  def include? entity, user_or_id
+  # 2) it is tagged by the list's tag
+  # 3) the list "pulls in" entities using its tags AND the entity is tagged by the list's tags
+  def include? entity, user_or_id, with_pullins=true
     # Trivial accept if the entity is physically in among the list items
     return true if @list.stores? entity
     uid = user_or_id.is_a?(Fixnum) ? user_or_id : user_or_id.id
@@ -19,6 +20,7 @@ class ListServices
     # It's included if the owner or this user has tagged it with the name tag
     return true if ts.exists? @list.name_tag_id, (uid == @list.owner_id ? uid : [ uid, @list.owner_id ])
     # If not directly tagged, it's included if it's tagged with any of the list's tags, BY ANYONE (?)
+    return false unless with_pullins && @list.pullin
     ts.exists? pulled_tag_ids
   end
 

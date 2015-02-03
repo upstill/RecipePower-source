@@ -1,6 +1,7 @@
 require 'yaml'
 require 'reference.rb'
 
+=begin
 class String
   def remove_non_ascii
     require 'iconv'
@@ -13,6 +14,7 @@ class String
     self.strip.force_encoding('ASCII-8BIT').remove_non_ascii.encode('UTF-8').gsub(/ ,/, ',') unless self.nil?
   end
 end
+=end
 
 class Result
 
@@ -25,7 +27,9 @@ class Result
 
   # Extract the data from a node under the given label
   def push (str, uri=nil)
-    str = str.cleanup.remove_non_ascii
+    str = str.
+        encode( 'ASCII-8BIT', 'binary', :invalid => :replace, :undef => :replace).
+        encode('UTF-8').gsub(/ ,/, ',') unless str.nil? # str.cleanup.remove_non_ascii
     unless str.blank?
       # Add to result
       str << '\t'+uri unless uri.blank?

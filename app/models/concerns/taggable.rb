@@ -30,25 +30,33 @@ module Taggable
   end
 
   # Allow the given user to see tags applied by themselves and super
-  def visible_tags options={}
-    taggers = [ User.super_id ]
-    taggers << @taggable_user_id if @taggable_user_id
+  def visible_tags user_id = nil, options={}
+    if user_id.is_a?(Hash)
+      user_id, options = nil, user_id
+    end
+    user_id ||= @tagging_user_id
+    taggers = [User.super_id]
+    taggers << user_id if user_id
     filtered_tags options.merge(user_id: taggers) # Allowing for an array of uids
   end
 
   # Return the editable tags, i.e. not channels, collections, or lists
-  def editing_tags
-    filtered_tags( :tagtype_x => [ 11, :Collection, :List ])
+  def tagging_tags
+    filtered_tags(:tagtype_x => [11, :Collection, :List])
   end
 
   # Provide the tags of appropriate types for the user identified by @tagging_user_id
   def tagging_tag_data
-    editing_tags.map(&:attributes).to_json
+    tagging_tags.map(&:attributes).to_json
   end
 
   # Associate a tag with this entity in the domain of the given user (or the tag's current owner if not given)
-  def tag_with tag, uid
-    Tagging.find_or_create_by user_id: uid, tag_id: tag.id, entity: self
+  def tag_with tag_or_id, uid=nil
+    assert_tagging tag_or_id, (uid || @tagging_user_id)
+  end
+
+  def shed_tag tag_or_id, uid=nil
+    refute_tagging tag_or_id, (uid || @tagging_user_id)
   end
 
   # One collectible is being merged into another => transfer taggings
@@ -80,7 +88,7 @@ module Taggable
   end
 =end
 
-protected
+  protected
 
   # Fetch the tags associated with the entity, with various optional constraints (including userid via @taggable_user_id)
   # Options:
@@ -91,21 +99,32 @@ protected
     tagscope = Tag.unscoped
     tagscope = tagscope.where(tagtype: Tag.typenum(opts[:tagtype])) if opts[:tagtype]
     tagscope = tagscope.where.not(tagtype: Tag.typenum(opts[:tagtype_x])) if opts[:tagtype_x]
-    tagging_constraints = { entity: self }
-    tagging_constraints[:user_id] = @taggable_user_id if @taggable_user_id
-    tagscope.joins(:taggings).where( taggings: tagging_constraints).uniq
+    tagging_constraints = opts.slice(:user_id).merge entity: self
+    tagging_constraints[:user_id] ||= @taggable_user_id if @taggable_user_id
+    tagscope.joins(:taggings).where(taggings: tagging_constraints).uniq
   end
 
   # Set the tag ids associated with the given user
   def set_tag_ids nids
     # Ensure that the user's tags are all and only those in nids
-    oids = editing_tags.pluck :id
+    oids = tagging_tags.pluck :id
 
     # Add new tags as necessary
-    (nids - oids).each { |tagid| Tagging.create(user_id: @tagging_user_id, tag_id: tagid, entity_id: id, entity_type: self.class.name) }
+    (nids - oids).each { |tagid| assert_tagging tagid, @tagging_user_id }
 
     # Remove tags as nec.
-    (oids - nids).each { |tagid| Tagging.where(user_id: @tagging_user_id, tag_id: tagid, entity_id: id, entity_type: self.class.name).map(&:destroy) } # each { |tg| tg.destroy } }
+    (oids - nids).each { |tagid| refute_tagging tagid, @tagging_user_id }
   end
 
+  def assert_tagging tag_or_id, uid
+    Tagging.find_or_create_by user_id: uid,
+                              tag_id: (tag_or_id.is_a?(Fixnum) ? tag_or_id : tag_or_id.id),
+                              entity: self
+  end
+
+  def refute_tagging tag_or_id, uid
+    Tagging.where(user_id: uid,
+                  tag_id: (tag_or_id.is_a?(Fixnum) ? tag_or_id : tag_or_id.id),
+                  entity: self).map(&:destroy)
+  end
 end

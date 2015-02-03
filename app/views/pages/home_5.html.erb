@@ -10,7 +10,7 @@
 <div class="centerblock">
   <% if current_user %>
       <%= link_to("To My Collections!!", user_collection_path(current_user), class: "btn btn-lg btn-info") %>
-      <%# link_to("Show Me First", collection_path(popup: "pages/need_to_know_modal", :on_tour => true), class: "btn btn-lg btn-info") %>
+      <%# link_to("Show Me First", collection_path(popup: "pages/need_to_know_modal"), class: "btn btn-lg btn-info") %>
   <% else %>
       <%= signup_button %>
   <% end %>

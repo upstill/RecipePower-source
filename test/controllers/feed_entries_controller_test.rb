@@ -1,8 +1,8 @@
 require 'test_helper'
 
 class FeedEntriesControllerTest < ActionController::TestCase
-  test "should get collect" do
-    get :collect
+  test "should post collect" do
+    post :collect
     assert_response :success
   end
 

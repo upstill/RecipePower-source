@@ -90,7 +90,7 @@ class TagOwnershipTest < ActiveSupport::TestCase
         assert !Tag.assert("thing1 tag", userid: thing1id).isGlobal
         assert_nil Tag.strmatch("thing1 tag", userid: thing2id, matchall: true).first
         assert Tag.strmatch("thing1 tag", userid: superid).first
-        assert Tag.strmatch("thing1 tag").first
+        refute Tag.strmatch("thing1 tag").first # No dice unless the tag is global
     end
     
     test "Admitting super-user for non-global tag makes it global" do

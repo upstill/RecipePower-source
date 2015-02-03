@@ -10,7 +10,7 @@ class ListTest < ActiveSupport::TestCase
     @description = "A list strictly for testing purposes"
     @lst = List.assert @lst_name, @owner, description: @description
     # Get a recipe under a tag
-    @lst.include (@included = FactoryGirl.create(:recipe))
+    @lst.store (@included = FactoryGirl.create(:recipe))
   end
 
   # Called after every test method runs. Can be used to tear
@@ -23,7 +23,7 @@ class ListTest < ActiveSupport::TestCase
   test "a list is initialized with empty ordering" do
     lst = List.new
     assert_equal [], lst.ordering, "List doesn't initialize with an empty array"
-    assert_equal [], lst.entities, "New list doesn't have empty set of enities"
+    assert_equal [], lst.entities, "New list doesn't have empty set of entities"
   end
 
   test "a list creates, saves and restores the ordering" do

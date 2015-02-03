@@ -66,12 +66,15 @@ class TagServices
   def self.parent_ids(ids)
     ExpressionServices.parent_ids_of_tags(ids)
   end
-  
+
   def parents
-    parent_ids.collect { |parent_set| Tag.where id: parent_set }
+    ExpressionServices.parent_tags_of_tags id
+    # Tag.where id: parent_ids
+    # pi.collect { |parent_set| Tag.where id: parent_set }
     # Tag.where id: parent_ids
   end
-# -----------------------------------------------    
+
+# -----------------------------------------------
   # Return tags that match any of the given tags lexically, regardless of type
   def self.lexical_similars(tags)
     results = tags

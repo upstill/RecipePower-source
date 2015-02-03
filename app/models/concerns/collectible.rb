@@ -64,20 +64,20 @@ module Collectible
   # Get THIS USER's comment on an entity
   def comment uid=nil
     ref = ref_if_any uid
-    return @collectible_comment if ref == @current_ref
+    return @collectible_comment if @current_ref && ref == @current_ref
     (ref && ref.comment) || ""
   end
 
   def private uid=nil
     ref = ref_if_any uid
-    return (@collectible_private == 1) if ref == @current_ref
+    return (@collectible_private == 1) if @current_ref && ref == @current_ref
     (ref && ref.private) ? true : false
   end
 
   # Does the entity appear in the user's collection?
   def collected? uid=nil
     ref = ref_if_any uid
-    return @collectible_in_collection if ref == @current_ref
+    return @collectible_in_collection if @current_ref && ref == @current_ref
     ref && ref.in_collection
   end
 
@@ -96,7 +96,8 @@ module Collectible
 
   # Check for the existence of a reference and return it, but don't create one
   def ref_if_any uid=nil
-    return @current_ref if @current_ref && (!uid || @current_ref.user_id == uid) # May already be cached as the current ref
+    uid ||= @collectible_user_id
+    return @current_ref if @current_ref && (@current_ref.user_id == uid) # May already be cached as the current ref
     # So it's not cached
     (uid==@collectible_user_id) ? # If it's the current id, we capture the ref
         cached_ref(false) :

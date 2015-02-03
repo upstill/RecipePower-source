@@ -1,18 +1,23 @@
 require 'test_helper'
 class StreamPresenterTest < ActiveSupport::TestCase
   fixtures :sites
+  fixtures :users
+
+  def setup
+    @user = users(:thing1)
+  end
 
   test "ten items stream with single offset" do
     sessionid = "wklejrkjovekj23kjkj3f"
     superklass = ResultsCache
-    sp = StreamPresenter.new sessionid, "", IntegersCache, stream: "12"
-    assert_equal (12..20).to_a, sp.items
+    sp = StreamPresenter.new sessionid, "", IntegersCache, @user.id, false, stream: "12"
+    assert_equal (12..21).to_a, sp.items
   end
 
   test "three items stream according to offset" do
     sessionid = "wklejrkjovekj23kjkj3f"
     superklass = ResultsCache
-    sp = StreamPresenter.new sessionid, "", IntegersCache, controller: "integers", action: "index", stream: "8-11"
+    sp = StreamPresenter.new sessionid, "", IntegersCache, @user.id, false, controller: "integers", action: "index", stream: "8-11"
     refute_nil sp.next_range
     assert_equal (8...11).to_a, sp.items
     assert_equal 8, sp.next_item
@@ -25,20 +30,16 @@ class StreamPresenterTest < ActiveSupport::TestCase
   test "presenter gets appropriate ResultsCache" do
     sessionid = "wklejrkjovekj23kjkj3f"
     superklass = ResultsCache
-    sp = StreamPresenter.new sessionid, "", IntegersCache, controller: "integer", action: "index"
+    sp = StreamPresenter.new sessionid, "", IntegersCache, @user.id, false, controller: "integer", action: "index"
     assert_equal IntegersCache, sp.results.class
-    list = List.create
-    sp = StreamPresenter.new sessionid, "", ListCache, controller: "list", action: "show", id: list.id
-    assert_equal ListCache, sp.results.class
-
   end
 
   test "presenter responds correctly for dumping" do
     sessionid = "wklejrkjovekj23kjkj3f"
     superklass = ResultsCache
-    sp = StreamPresenter.new sessionid, "", IntegersCache
+    sp = StreamPresenter.new sessionid, "", IntegersCache, @user.id, false
     refute sp.stream?
-    assert sp.dump?
+    refute sp.dump?
   end
 
   test "presenter parses existing tag" do

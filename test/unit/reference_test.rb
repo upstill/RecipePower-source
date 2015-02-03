@@ -8,6 +8,7 @@ class ReferenceTest < ActiveSupport::TestCase
     jal = tags(:jal)
     uri = "http://www.foodandwine.com/chefs/adam-erace"
     ref = Reference.assert uri, jal
+    ref.reload
     rft = jal.primary_meaning
     refid = rft.id
     assert ref.referents.exists?(id: refid), "Referent wasn't added properly"
@@ -19,8 +20,7 @@ class ReferenceTest < ActiveSupport::TestCase
     ref = Reference.assert uri, jal, :Tip
     assert_equal :Tip, ref.typesym, "Reference didn't get type"
     ref2 = Reference.assert uri, jal, :Video
-    assert_equal :Video, ref2.typesym, "Reference didn't change type"
-    assert_equal ref.id, ref2.id, "Asserting same uri and tag produced different references"
+    assert_equal :Video, ref2.typesym, "New reference on same url didn't get new type"
     assert_equal 1, ref2.referents.size, "Reference should have one referent"
   end
   

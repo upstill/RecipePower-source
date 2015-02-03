@@ -114,8 +114,6 @@ class ApplicationController < ActionController::Base
     end
     logger.debug "FLASH messages extant for #{params[:controller]}##{params[:action]} (check_flash):"
     view_context.flash_hash.each { |k, v| logger.debug "   #{k}: #{v}" }
-    session[:on_tour] = true if params[:on_tour]
-		session[:on_tour] = false if current_user
   end
   
   def report_cookie_string

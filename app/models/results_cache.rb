@@ -171,7 +171,7 @@ class ResultsCache < ActiveRecord::Base
   serialize :cache
   serialize :partition
   attr_accessor :items, :querytags
-  delegate :next_range, :window, :next_index, :"done?", :max_window_size, :to => :safe_partition
+  delegate :window, :next_index, :"done?", :max_window_size, :to => :safe_partition
 
   # Get the current results cache and return it if relevant. Otherwise,
   # create a new one
@@ -205,6 +205,14 @@ class ResultsCache < ActiveRecord::Base
   # Declare the parameters needed for this class
   def self.params_needed
     [:id, :querytags]
+  end
+
+  # Return the following range, for triggering purposes, and optionally pre-advance the window
+  def next_range force=false
+    if (range = safe_partition && safe_partition.next_range) && force
+      self.window = [range.min, range.max]
+    end
+    range
   end
 
   # Set the current window of attention. Requires start as first parameter; second parameter for limit is optional
@@ -257,11 +265,11 @@ class ResultsCache < ActiveRecord::Base
   end
 
   def has_query?
-    (@querytags.count > 0)
+    (@querytags ||= []).count > 0
   end
 
   def ready? # Have the items been sorted out yet?
-    (@querytags.count == 0) || cache
+    ((@querytags ||= []).count == 0) || cache
   end
 
   def nmatches # Force the partition and report the first window
@@ -298,7 +306,7 @@ class ResultsCache < ActiveRecord::Base
   def cache_and_partition
     # count_tag is the hook for applying a tag to the current counts
     return (cache != nil) unless self.respond_to? :count_tag
-    if @querytags.count == 0
+    if (@querytags ||= []).count == 0
       # Straight passthrough of the itemscope => no cache required
       self.partition ||= Partition.new([0, scope_count ])
       false
@@ -451,7 +459,9 @@ end
 
 # An IntegersCache presents the default ResultsCache behavior: no scope, no cache, degenerate partition producing successive integers
 class IntegersCache < ResultsCache
-
+  def itemscope
+    (0..30).to_a
+  end
 end
 
 # list of lists visible to current user (ListsStreamer)

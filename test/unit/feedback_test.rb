@@ -1,6 +1,10 @@
-require File.dirname(__FILE__) + '/../test_helper'
+# require File.dirname(__FILE__) + '/../test_helper'
+require 'test/unit'
+require 'test_helper'
 
-class FeedbackTest < Test::Unit::TestCase
+class FeedbackTest
+  ActiveSupport::TestCase
+
   def test_should_require_comment
     assert !create_comment(:comment => " ").valid?
   end

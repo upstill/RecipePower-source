@@ -1,8 +1,7 @@
 require 'spec_helper'
 
 describe List do
-  fixtures :all
-  pending "add some examples to (or delete) #{__FILE__}"
+  # fixtures :all
 
   it "should create a list with a name string" do
     tagee = FactoryGirl.create(:user)
