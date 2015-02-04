@@ -1,10 +1,10 @@
 source 'http://rubygems.org'
 
-ruby '1.9.3'
+# ruby 2.0.0
 # gem 'bundler', '~> 1.4'
-gem 'rails', '~> 4.0' # '3.2.11' #
-gem 'composite_primary_keys', '~> 6.0.6'
-gem 'arel', '~> 4.0'
+gem 'rails', '~> 4.2' # '3.2.11' #
+gem 'composite_primary_keys', '~> 8.0'
+gem 'arel', '~> 6.0'
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
 # gem 'rails4_upgrade'
 gem 'rails_12factor', :group => [ :production, :staging ]
@@ -23,25 +23,25 @@ gem 'builder', '~> 3.1.0'
 gem 'draper', '~> 1.3'
 gem 'closure_tree'
 gem 'htmlentities'
-gem 'nokogiri', "~> 1.5" # "~> 1.5.3"
+gem 'nokogiri', "~> 1.6.6" # "~> 1.5.3"
 gem 'will_paginate', '~> 3.0'
 gem 'newrelic_rpm'
 # Sugg. on StackOverflow to use master right-aws: gem 'right_aws', :git => 'git://github.com/rightscale/right_aws.git'
-gem 'devise', '~> 3.1.0'                       # auth, rails generate devise:install, rails generate devise MODEL
+gem 'devise', '~> 3.4.0'                       # auth, rails generate devise:install, rails generate devise MODEL
 gem 'devise_invitable', '~> 1.3.0' # git: 'git://github.com/scambra/devise_invitable.git'
 gem 'ruby-openid'
 gem 'omniauth-twitter'                      
 gem 'omniauth-facebook' # , '~> 1.4.0'
 gem 'omniauth-google-oauth2'                     
 gem 'omniauth-openid'                     
-gem 'declarative_authorization'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
+gem 'declarative_authorization', '~> 0.5.7'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
 gem 'eventmachine', '~> 1.0.3'
 gem 'ruby_parser'
 gem "rmagick", "~> 2.13.2"
-gem "feedzirra", "~> 0.2" # :git => 'git://github.com/pauldix/feedzirra.git'
-gem "simple_form", :git => 'git://github.com/plataformatec/simple_form.git' # , '~> 3.0.0.beta1' 
-gem 'delayed_job' # , git: 'git://github.com/collectiveidea/delayed_job.git'
-gem 'delayed_job_active_record' # , git: 'git://github.com/collectiveidea/delayed_job_active_record.git'
+gem "feedjira", '~> 1.6' #:git => 'git://github.com/pauldix/feedzirra.git'
+gem "simple_form", '~> 3.1' # , :git => 'git://github.com/plataformatec/simple_form.git' # 
+gem 'delayed_job', git: 'git://github.com/collectiveidea/delayed_job.git'
+gem 'delayed_job_active_record', git: 'git://github.com/collectiveidea/delayed_job_active_record.git'
 gem 'daemons'
 gem 'hirefire-resource'
 # gem 'debugger', :group => [:test, :development]

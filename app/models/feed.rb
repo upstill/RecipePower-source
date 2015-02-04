@@ -1,4 +1,4 @@
-require 'feedzirra'
+require 'feedjira'
 
 class Feed < ActiveRecord::Base
   include Collectible
@@ -81,7 +81,7 @@ class Feed < ActiveRecord::Base
   def fetch
     return @fetched if @fetched
     begin
-      @fetched = Feedzirra::Feed.fetch_and_parse(url)
+      @fetched = Feedjira::Feed.fetch_and_parse(url)
       @fetched = nil if @fetched.class == Fixnum
     rescue Exception => e
       @fetched = nil

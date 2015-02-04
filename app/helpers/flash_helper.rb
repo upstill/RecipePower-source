@@ -69,7 +69,7 @@ module FlashHelper
   def flash_all for_bootstrap=true
     flash.collect { |type, message|
       flash.delete type
-      flash_one type, message, for_bootstrap
+      flash_one type.to_sym, message, for_bootstrap
     }.join.html_safe
   end
 
