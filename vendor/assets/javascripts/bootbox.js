@@ -1,10 +1,29 @@
 /**
- * bootbox.js [v4.1.0]
+ * bootbox.js [v4.3.0]
  *
  * http://bootboxjs.com/license.txt
  */
-// @see https://github.com/makeusabrew/bootbox/issues/71
-window.bootbox = window.bootbox || (function init($, undefined) {
+
+// @see https://github.com/makeusabrew/bootbox/issues/180
+// @see https://github.com/makeusabrew/bootbox/issues/186
+(function (root, factory) {
+
+  "use strict";
+  if (typeof define === "function" && define.amd) {
+    // AMD. Register as an anonymous module.
+    define(["jquery"], factory);
+  } else if (typeof exports === "object") {
+    // Node. Does not work with strict CommonJS, but
+    // only CommonJS-like environments that support module.exports,
+    // like Node.
+    module.exports = factory(require("jquery"));
+  } else {
+    // Browser globals (root is window)
+    root.bootbox = factory(root.jQuery);
+  }
+
+}(this, function init($, undefined) {
+
   "use strict";
 
   // the base DOM structure needed to create a modal
@@ -24,23 +43,30 @@ window.bootbox = window.bootbox || (function init($, undefined) {
     footer:
       "<div class='modal-footer'></div>",
     closeButton:
-      "<button type='button' class='bootbox-close-button close'>&times;</button>",
+      "<button type='button' class='bootbox-close-button close' data-dismiss='modal' aria-hidden='true'>&times;</button>",
     form:
       "<form class='bootbox-form'></form>",
     inputs: {
       text:
         "<input class='bootbox-input bootbox-input-text form-control' autocomplete=off type=text />",
+      textarea:
+        "<textarea class='bootbox-input bootbox-input-textarea form-control'></textarea>",
       email:
         "<input class='bootbox-input bootbox-input-email form-control' autocomplete='off' type='email' />",
       select:
         "<select class='bootbox-input bootbox-input-select form-control'></select>",
       checkbox:
-        "<div class='checkbox'><label><input class='bootbox-input bootbox-input-checkbox' type='checkbox' /></label></div>"
+        "<div class='checkbox'><label><input class='bootbox-input bootbox-input-checkbox' type='checkbox' /></label></div>",
+      date:
+        "<input class='bootbox-input bootbox-input-date form-control' autocomplete=off type='date' />",
+      time:
+        "<input class='bootbox-input bootbox-input-time form-control' autocomplete=off type='time' />",
+      number:
+        "<input class='bootbox-input bootbox-input-number form-control' autocomplete=off type='number' />",
+      password:
+        "<input class='bootbox-input bootbox-input-password form-control' autocomplete='off' type='password' />"
     }
   };
-
-  // cache a reference to the jQueryfied body element
-  var appendTo = $("body");
 
   var defaults = {
     // default language
@@ -54,7 +80,9 @@ window.bootbox = window.bootbox || (function init($, undefined) {
     // whether or not to include a close button
     closeButton: true,
     // show the dialog immediately by default
-    show: true
+    show: true,
+    // dialog container
+    container: "body"
   };
 
   // our public object; augmented after our private API
@@ -69,6 +97,7 @@ window.bootbox = window.bootbox || (function init($, undefined) {
   }
 
   function processCallback(e, dialog, callback) {
+    e.stopPropagation();
     e.preventDefault();
 
     // by default we assume a callback will get rid of the dialog,
@@ -366,8 +395,13 @@ window.bootbox = window.bootbox || (function init($, undefined) {
 
       switch (options.inputType) {
         case "text":
+        case "textarea":
         case "email":
         case "select":
+        case "date":
+        case "time":
+        case "number":
+        case "password":
           value = input.val();
           break;
 
@@ -407,7 +441,12 @@ window.bootbox = window.bootbox || (function init($, undefined) {
 
     switch (options.inputType) {
       case "text":
+      case "textarea":
       case "email":
+      case "date":
+      case "time":
+      case "number":
+      case "password":
         input.val(options.value);
         break;
 
@@ -490,11 +529,17 @@ window.bootbox = window.bootbox || (function init($, undefined) {
       input.attr("placeholder", options.placeholder);
     }
 
+    if(options.pattern){
+      input.attr("pattern", options.pattern);
+    }
+
     // now place it in our form
     form.append(input);
 
     form.on("submit", function(e) {
       e.preventDefault();
+      // Fix for SammyJS (or similar JS routing library) hijacking the form post.
+      e.stopPropagation();
       // @TODO can we actually click *the* button object instead?
       // e.g. buttons.confirm.click() or similar
       dialog.find(".btn-primary").click();
@@ -521,6 +566,7 @@ window.bootbox = window.bootbox || (function init($, undefined) {
     options = sanitize(options);
 
     var dialog = $(templates.dialog);
+    var innerDialog = dialog.find(".modal-dialog");
     var body = dialog.find(".modal-body");
     var buttons = options.buttons;
     var buttonStr = "";
@@ -545,6 +591,14 @@ window.bootbox = window.bootbox || (function init($, undefined) {
 
     if (options.className) {
       dialog.addClass(options.className);
+    }
+
+    if (options.size === "large") {
+      innerDialog.addClass("modal-lg");
+    }
+
+    if (options.size === "small") {
+      innerDialog.addClass("modal-sm");
     }
 
     if (options.title) {
@@ -643,7 +697,7 @@ window.bootbox = window.bootbox || (function init($, undefined) {
     // functionality and then giving the resulting object back
     // to our caller
 
-    appendTo.append(dialog);
+    $(options.container).append(dialog);
 
     dialog.modal({
       backdrop: options.backdrop,
@@ -695,6 +749,8 @@ window.bootbox = window.bootbox || (function init($, undefined) {
 
   exports.hideAll = function() {
     $(".bootbox").modal("hide");
+
+    return exports;
   };
 
 
@@ -708,6 +764,11 @@ window.bootbox = window.bootbox || (function init($, undefined) {
       CANCEL  : "Cancelar",
       CONFIRM : "Sim"
     },
+    cs : {
+      OK      : "OK",
+      CANCEL  : "Zrušit",
+      CONFIRM : "Potvrdit"
+    },
     da : {
       OK      : "OK",
       CANCEL  : "Annuller",
@@ -717,6 +778,11 @@ window.bootbox = window.bootbox || (function init($, undefined) {
       OK      : "OK",
       CANCEL  : "Abbrechen",
       CONFIRM : "Akzeptieren"
+    },
+    el : {
+      OK      : "Εντάξει",
+      CANCEL  : "Ακύρωση",
+      CONFIRM : "Επιβεβαίωση"
     },
     en : {
       OK      : "OK",
@@ -728,6 +794,11 @@ window.bootbox = window.bootbox || (function init($, undefined) {
       CANCEL  : "Cancelar",
       CONFIRM : "Aceptar"
     },
+    et : {
+      OK      : "OK",
+      CANCEL  : "Katkesta",
+      CONFIRM : "OK"
+    },
     fi : {
       OK      : "OK",
       CANCEL  : "Peruuta",
@@ -738,10 +809,35 @@ window.bootbox = window.bootbox || (function init($, undefined) {
       CANCEL  : "Annuler",
       CONFIRM : "D'accord"
     },
+    he : {
+      OK      : "אישור",
+      CANCEL  : "ביטול",
+      CONFIRM : "אישור"
+    },
+    id : {
+      OK      : "OK",
+      CANCEL  : "Batal",
+      CONFIRM : "OK"
+    },
     it : {
       OK      : "OK",
       CANCEL  : "Annulla",
       CONFIRM : "Conferma"
+    },
+    ja : {
+      OK      : "OK",
+      CANCEL  : "キャンセル",
+      CONFIRM : "確認"
+    },
+    lt : {
+      OK      : "Gerai",
+      CANCEL  : "Atšaukti",
+      CONFIRM : "Patvirtinti"
+    },
+    lv : {
+      OK      : "Labi",
+      CANCEL  : "Atcelt",
+      CONFIRM : "Apstiprināt"
     },
     nl : {
       OK      : "OK",
@@ -758,10 +854,25 @@ window.bootbox = window.bootbox || (function init($, undefined) {
       CANCEL  : "Anuluj",
       CONFIRM : "Potwierdź"
     },
+    pt : {
+      OK      : "OK",
+      CANCEL  : "Cancelar",
+      CONFIRM : "Confirmar"
+    },
     ru : {
       OK      : "OK",
       CANCEL  : "Отмена",
       CONFIRM : "Применить"
+    },
+    sv : {
+      OK      : "OK",
+      CANCEL  : "Avbryt",
+      CONFIRM : "OK"
+    },
+    tr : {
+      OK      : "Tamam",
+      CANCEL  : "İptal",
+      CONFIRM : "Onayla"
     },
     zh_CN : {
       OK      : "OK",
@@ -776,9 +887,8 @@ window.bootbox = window.bootbox || (function init($, undefined) {
   };
 
   exports.init = function(_$) {
-    window.bootbox = init(_$ || $);
+    return init(_$ || $);
   };
 
   return exports;
-
-}(window.jQuery));
+}));

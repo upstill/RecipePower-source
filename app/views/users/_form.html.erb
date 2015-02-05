@@ -5,7 +5,6 @@
       <div class="col-md-4">
         <div class="pic_picker_field">
           <%= pic_field f, :image %>
-          <%= uploader_field @decorator, :image %>
         </div>
       </div>
       <div class="col-md-8">
@@ -31,6 +30,7 @@
     </div>
     <div class="row bottom">
       <div class="col-md-12">
+        <div class="form-group user_image"><%= uploader_field @decorator, :image %></div>
         <%= f.input :about, label: "About Me", placeholder: "Tell the world about yourself. Who Are You? What Do You Eat?", input_html: {cols: 125, rows: 4} %>
         <%= f.input :email, input_html: {cols: 125, rows: 1} %>
         <%= f.input :private, :as => :boolean, :label => "Cloak of Invisibility (don't suggest as Friend)" %>

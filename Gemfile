@@ -55,12 +55,12 @@ gem 'aws-sdk'
 gem 'counter_culture', '~> 0.1.23'
 gem 'letter_opener', :group => [ :development, :staging ]
 gem 'letter_opener_web', '~> 1.2.0', :group => :staging
+gem 'rspec-rails', '2.99', :group => [ :development, :test ] # ~> 3.1'
 
 gem 'exception_notification', git: 'git://github.com/smartinez87/exception_notification.git'
 # gem 'exception_notification', '~> 4.0.1', :require => 'exception_notifier' # , git: 'git://github.com/alanjds/exception_notification.git' 
 group :development do
   # gem 'minitest', '~> 4.2'
-  gem 'rspec-rails', '2.99' # ~> 3.1'
   gem 'annotate', '2.5.0'
   gem "nifty-generators"
   gem 'log_buddy'
@@ -75,7 +75,6 @@ gem "masonry-rails"
 group :test do
   # gem 'minitest-rails', "~> 1.0" # gem 'minitest', '~> 4.2'
   # gem "minitest-rails-capybara" # ...for simulating user interaction
-  gem 'rspec-rails', '2.99' # ~> 3.1'
   # Pretty printed test output
   gem 'turn', :require => false
   gem 'webrat', '~> 0.7.3'
@@ -102,8 +101,8 @@ gem 'unicorn-rails'
 
 # Deploy with Capistrano
 gem 'sshkit', '~> 1.3.0'
-gem 'capistrano'
-gem 'capistrano-rails'
-gem 'capistrano-bundler'
-gem 'capistrano-rbenv'
+gem 'capistrano', '~> 3.3.5'
+gem 'capistrano-rails', '~> 1.1.2'
+gem 'capistrano-bundler', '~> 1.1.4'
+gem 'capistrano-rbenv', '~> 2.0.3'
 

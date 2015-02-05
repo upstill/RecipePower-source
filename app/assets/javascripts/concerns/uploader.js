@@ -118,7 +118,9 @@ function uploader_unpack() {
                     image.onerror = function () {
                         // Abort! Copy the input value back to the image
                         var x = 2;
-                        abort_upload(elem, "That file isn't a picture!");
+                        if (!$('div.bootbox-alert')[0]) {
+                            abort_upload(elem, "That file isn't a picture!");
+                        }
                     }
                     var passOn = function () {
                         // Successful image load => go ahead and upload it
