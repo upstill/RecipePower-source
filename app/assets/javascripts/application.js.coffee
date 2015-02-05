@@ -7,26 +7,29 @@
 # Place your application-specific JavaScript functions and classes here
 # This file is automatically included by javascript_include_tag :defaults
 
-# require jquery-1.7.1
+#= require jquery
+#= require jquery_ujs
+#= require jquery.ui.all
 #= require_self
-#= require collection
+#= require arch/collection.js.coffee
 #= require_directory ../../../vendor/assets/javascripts/jquery
-#= require ../../../vendor/assets/javascripts/JavaScript-Load-Image/load-image.all.min.js
-#= require ../../../vendor/assets/javascripts/JavaScript-Canvas-to-Blob/canvas-to-blob.min.js
-#= require ../../../vendor/assets/javascripts/jquery/fileupload/jquery.iframe-transport.js
-#= require ../../../vendor/assets/javascripts/jquery/fileupload/jquery.fileupload.js
-#= require ../../../vendor/assets/javascripts/jquery/fileupload/jquery.fileupload-process.js
-#= require ../../../vendor/assets/javascripts/jquery/fileupload/jquery.fileupload-image.js
+#= require JavaScript-Load-Image/load-image.all.min.js
+#= require JavaScript-Canvas-to-Blob/canvas-to-blob.min.js
 
-#= require ../../../vendor/assets/javascripts/imagesloaded.pkgd.min
-#= require ../../../vendor/assets/javascripts/bootstrap-filestyle.min
+# NB: This ordering is significant for some reason
+#= require jquery/fileupload/jquery.iframe-transport.js
+#= require jquery/fileupload/jquery.fileupload.js
+#= require jquery/fileupload/jquery.fileupload-process.js
+#= require jquery/fileupload/jquery.fileupload-image.js
+
+#= require imagesloaded.pkgd.min
+#= require bootstrap-filestyle
 #= require bootbox
 #= require history
 #= require masonry.pkgd
-#= require jquery_ujs
 
 #= require authentication
-#= require messaging
+# require messaging
 
 # require_directory ./controllers
 # require bm
@@ -52,6 +55,6 @@
 # require RPfields
 # require RPquery
 
-#= require bootstrap
+# require bootstrap
 
 window.RP ||= {}

@@ -11,6 +11,9 @@ RP.submit = RP.submit || {}
 
 jQuery ->
 	RP.submit.bind()
+	$(document).on "ajax:beforeSend", 'form.submit', RP.submit.beforeSend
+	$(document).on "ajax:success", 'form.submit', RP.submit.success
+	$(document).on "ajax:error", 'form.submit', RP.submit.error
 
 # Handle submission links
 RP.submit.bind = (dlog) ->
@@ -21,9 +24,6 @@ RP.submit.bind = (dlog) ->
 		preload elmt
 	$('.trigger', dlog).each (ix, elmt) ->
 		fire elmt
-	$(dlog).on "ajax:beforeSend", 'form.submit', RP.submit.beforeSend
-	$(dlog).on "ajax:success", 'form.submit', RP.submit.success
-	$(dlog).on "ajax:error", 'form.submit', RP.submit.error
 
 # Respond to a change of selection value by submitting the enclosing form
 RP.submit.onselect = (event) ->

@@ -4,10 +4,10 @@ jQuery ->
 	# $(window).on 'window.onpopstate', RP.state.check_pop
 	# window.onpopstate = RP.state.check_hash
 	window.onload = RP.state.check_hash
-	$(window).on 'ajax:success', RP.state.onAJAXSuccess
-	if jQuery.browser.msie
-		window.onhashchange = RP.state.check_hash;
-		RP.state.check_hash()
+	$(document).on 'ajax:success', RP.state.onAJAXSuccess
+	# if jQuery.browser.msie TODO: $.browser is removed from jQuery 1.9. Use modernizr (http://modernizr.com/) to check environment
+		# window.onhashchange = RP.state.check_hash;
+		# RP.state.check_hash()
 
 getEncodedPathFromURL = (url) ->
 	a = $('<a>', { href:url } )[0];

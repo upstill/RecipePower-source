@@ -3,6 +3,7 @@
 RP.tagger = RP.tagger || {}
 
 jQuery ->
+	RP.tagger.onopen()
 	$('.token-input-field-pending').on "load", (event) ->
 		c=2
 		false

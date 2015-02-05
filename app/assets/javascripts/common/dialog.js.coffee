@@ -297,6 +297,7 @@ notify = (what, dlog, entity) ->
 				$('textarea', dlog).focus()
 			# Forms submissions that expect JSON structured data will be handled here:
 			$('form', dlog).submit dlog, filter_submit
+			# Turn a Bootstrap button group into radio buttons
 			$("form input[type=submit]").click ->
 				# Here is where we enable multiple submissions buttons with different routes
 				# The form gets 'data-action', 'data-method' and 'data-operation' fields to divert
@@ -304,32 +305,33 @@ notify = (what, dlog, entity) ->
 				# of the submit for, e.g., pre-save checks)
 				$("input[type=submit]", dlog).removeAttr "clicked"
 				$(this).attr "clicked", "true"
-
-			# Turn a Bootstrap button group into radio buttons
-			$('div.btn-group[data-toggle-name=*]').each ->
+			$('div.btn-group').each ->
 				group = $(this);
-				form = group.parents('form').eq(0);
-				name = group.attr 'data-toggle-name'
-				hidden = $('input[name="' + name + '"]', form);
-				$('button', group).each ->
-					button = $(this);
-					if button.val() == hidden.val()
-						button.addClass 'active'
-					button.live 'click', ->
-						if $(this).hasClass "active"
-							hidden.val $(hidden).data("toggle-default")
-							$(this).removeClass "active"
-						else
-							hidden.val $(this).val()
-							$('button', group).each ->
+				if name = group.attr 'data-toggle-name'
+					form = group.parents('form').eq(0);
+					hidden = $('input[name="' + name + '"]', form);
+					$('button', group).each ->
+						button = $(this);
+						if button.val() == hidden.val()
+							button.addClass 'active'
+						button.live 'click', ->
+							if $(this).hasClass "active"
+								hidden.val $(hidden).data("toggle-default")
 								$(this).removeClass "active"
-							$(this).addClass "active"
+							else
+								hidden.val $(this).val()
+								$('button', group).each ->
+									$(this).removeClass "active"
+								$(this).addClass "active"
+	return
+###
 	#	when "load", "onload"
 	# when "beforesave"
 	# when "save", "onsave"
 	# when "cancel", "oncancel"
 	# when "close", "onclose"
 	return
+###
 
 # Special handler for dialogs imbedded in an iframe. See 'injector.js'
 notify_injector = (what, dlog) ->

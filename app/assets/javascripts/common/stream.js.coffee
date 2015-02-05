@@ -33,8 +33,6 @@ RP.stream.fire = (elmt) ->
 	source.addEventListener 'end_of_stream', (e) ->
 		jdata = JSON.parse e.data
 		source.close()
-		if jdata.more_to_come
-			RP.collection.more_to_come jdata.more_to_come
 		RP.process_response jdata
 		RP.stream.check() # If the stream link is visible, go for more
 	source.addEventListener 'stream_item', (e) ->
