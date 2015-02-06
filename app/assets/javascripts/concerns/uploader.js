@@ -82,7 +82,7 @@ function uploader_init(elem) {
             done: function (e, data) {
                 progressBar.text("Uploading done");
                 // extract key and generate URL from response
-                var key = $(data.jqXHR.responseXML).find("Key").text();
+                var key = $(data.jqXHR.responseText).find("key").text(); // $(data.jqXHR.responseXML).find("Key").text();
                 // Make the key safe for subsequent use as a URL by escaping funky filename characters
                 var path = key.split('/');
                 path.push(encodeURIComponent(path.pop()));
