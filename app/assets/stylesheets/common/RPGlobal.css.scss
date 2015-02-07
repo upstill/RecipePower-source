@@ -4,14 +4,12 @@ body {
 	width:100%;
 	margin:0px;
 	font:12px arial,sans-serif;
-	# border:1px solid blue;
 	outline:1px solid green
 }
 header {
 	margin:0px;
 	height:55px;
 	width:100%;
-	# outline:1px solid blue;
 	background-color:#FDECCF;
 	// DCE8DC
 }
@@ -142,7 +140,6 @@ img.thumbnail200 {
 
 #logo_div {
 	float:left;
-	# outline:1px solid green;
 	width:288px;
 	height:40px;
 	margin:10px;
@@ -167,7 +164,6 @@ img.thumbnail200 {
 #logo_img {
 	width:288px;
 	height:40px;
-	# border:1px solid red
 }
 #logo_img:hover {
 	outline:#EDDCBF solid thick;
@@ -183,7 +179,6 @@ div.header_nav_links {
 	margin-top:20px;
 	margin-right:15px;
 	font:14px arial,sans-serif,bold;
-	# border:3px solid green
 }
 div.footer_nav_links {
 	font:14px arial,sans-serif,bold;
