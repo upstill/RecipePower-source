@@ -38,11 +38,14 @@ Couldn't figure out how to use sudo with another user
   before "deploy:migrate", "postgresql:create_database"
 
   desc "Get the database from Heroku"
+  dburl = fetch :postgresql_dburl
+  puts "DBURL = "+dburl
   task :fetch_database do # , roles: :db, only: {primary: true} do
     on roles(:db) do
       # sudo "curl --silent -o /tmp/latest.dump '#{fetch :postgresql_dburl}'"
       # execute "pg_restore --no-password --verbose --clean --no-acl --no-owner -h #{fetch :postgresql_host} -U #{fetch :postgresql_user} -d #{fetch :postgresql_database} /tmp/latest.dump ; true"
-      execute "curl --silent '#{fetch :postgresql_dburl}' | pg_restore --no-password --verbose --clean --no-acl --no-owner -h #{fetch :postgresql_host} -U #{fetch :postgresql_user} -d #{fetch :postgresql_database} ; true"
+      dburl = fetch :postgresql_dburl
+      execute "curl --silent '#{dburl}' | pg_restore --no-password --verbose --clean --no-acl --no-owner -h #{fetch :postgresql_host} -U #{fetch :postgresql_user} -d #{fetch :postgresql_database} ; true"
     end
   end
   after "postgresql:create_database", "postgresql:fetch_database"
