@@ -38,14 +38,25 @@ Couldn't figure out how to use sudo with another user
   before "deploy:migrate", "postgresql:create_database"
 
   desc "Get the database from Heroku"
-  dburl = fetch :postgresql_dburl
-  puts "DBURL = "+dburl
   task :fetch_database do # , roles: :db, only: {primary: true} do
     on roles(:db) do
+      def run_and_show str
+        output =  `#{str}`.chomp
+        info "'#{str}'\n\t=> (#{$?.to_s})\n\t'#{output}'"
+        output
+      end
       # sudo "curl --silent -o /tmp/latest.dump '#{fetch :postgresql_dburl}'"
       # execute "pg_restore --no-password --verbose --clean --no-acl --no-owner -h #{fetch :postgresql_host} -U #{fetch :postgresql_user} -d #{fetch :postgresql_database} /tmp/latest.dump ; true"
-      dburl = fetch :postgresql_dburl
-      execute "curl --silent '#{dburl}' | pg_restore --no-password --verbose --clean --no-acl --no-owner -h #{fetch :postgresql_host} -U #{fetch :postgresql_user} -d #{fetch :postgresql_database} ; true"
+      run_and_show 'whoami'
+      run_and_show '/usr/bin/heroku --version'
+      run_and_show 'echo $AWS_ACCESS_KEY_ID'
+      dburl = run_and_show "heroku pgbackups:url --app strong-galaxy-5765"
+      # NB: since the Heroku toolbelt doesn't work in this context, it's necessary to provide the backup url
+      # in dburl, eg., run the command elsewhere and set the result here
+      # As it stands, the database will NOT be replaced unless dburl is set explicitly
+      if dburl.length > 0
+        execute "curl --silent '#{dburl}' | pg_restore --no-password --verbose --clean --no-acl --no-owner -h #{fetch :postgresql_host} -U #{fetch :postgresql_user} -d #{fetch :postgresql_database} ; true"
+      end
     end
   end
   after "postgresql:create_database", "postgresql:fetch_database"

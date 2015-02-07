@@ -1,5 +1,5 @@
 class SitePresenter < CollectiblePresenter
-  attr_accessible :site
+  attr_accessor :site
   delegate :name, :fullname, :lists, :feeds, to: :site
 
   def initialize decorator, template
