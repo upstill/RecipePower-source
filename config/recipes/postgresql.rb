@@ -42,10 +42,6 @@ Couldn't figure out how to use sudo with another user
     on roles(:db) do
       # sudo "curl --silent -o /tmp/latest.dump '#{fetch :postgresql_dburl}'"
       # execute "pg_restore --no-password --verbose --clean --no-acl --no-owner -h #{fetch :postgresql_host} -U #{fetch :postgresql_user} -d #{fetch :postgresql_database} /tmp/latest.dump ; true"
-      dburl = fetch :postgresql_dburl
-      desc "DB_URL: "+dburl
-      dburl = `heroku pgbackups:url --app #{fetch :heroku_app}`.chomp if dburl.blank?
-      desc "DB_URL: "+dburl
       execute "curl --silent '#{fetch :postgresql_dburl}' | pg_restore --no-password --verbose --clean --no-acl --no-owner -h #{fetch :postgresql_host} -U #{fetch :postgresql_user} -d #{fetch :postgresql_database} ; true"
     end
   end
