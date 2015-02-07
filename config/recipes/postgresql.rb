@@ -5,7 +5,7 @@ set :postgresql_pgpass, "/home/#{fetch :postgresql_user}/.pgpass"
 set :postgresql_password, ask("PostgreSQL Password: ", nil) # Capistrano::CLI.password_prompt("PostgreSQL Password: ")
 set :postgresql_database, "cookmarks_production"
 set :heroku_app, "strong-galaxy-5765"
-set :postgresql_dburl, `heroku pgbackups:url --app #{fetch :heroku_app}`.chomp
+set :postgresql_dburl, "https://s3.amazonaws.com/hkpgbackups/app2983673@heroku.com/b022.dump?AWSAccessKeyId=AKIAIZQSARK42O65SXRA&Expires=1423271654&Signature=ttXOpIUhfxW1Utw1hpBvfz7wvKU%3D" # `heroku pgbackups:url --app #{fetch :heroku_app}`.chomp
 
 namespace :postgresql do
   desc "Install the latest stable release of PostgreSQL."
