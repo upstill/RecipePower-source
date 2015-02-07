@@ -280,7 +280,7 @@ GEM
     request_store (1.1.0)
     responders (2.1.0)
       railties (>= 4.2.0, < 5)
-    rmagick (2.13.4)
+    rmagick (2.13.2)
     rspec-collection_matchers (1.1.2)
       rspec-expectations (>= 2.99.0.beta1)
     rspec-core (2.99.2)
