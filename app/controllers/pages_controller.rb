@@ -1,54 +1,52 @@
 class PagesController < ApplicationController
-  layout :rs_layout
   # filter_access_to :all
   respond_to :html, :json
   
   def root
-    if current_user
-      redirect_to collection_path
-    else
-      redirect_to home_path
-    end
+    redirect_to collection_path # ...but only if current user
   end
-  
-  def home
+
+  def admin
     # session.delete :on_tour # Tour's over!
-    @Title = "Home"
+    response_service.title = "Admin"
+  end
+
+  def home
+    response_service.title = "Home"
     @auth_context = :manage
-    setup_collection
+    # setup_collection
+    render
   end
 
   def contact
-  	@Title = "Contact"
+  	response_service.title = "Contact"
     smartrender
   end
 
   def about
-  	@Title = "About"
+  	response_service.title = "About"
     smartrender
   end
 
   def faq
-    @Title = "FAQ"
+    response_service.title = "FAQ"
     smartrender
   end
   
-  # Serve mobile page using the jqm layout
-  def mobi
-    response_service.is_mobile !params[:off] # Persists across page requests
-    if current_user
-      redirect_to collection_path
-    else
-      redirect_to home_path
-    end
-  end
-
   # Generic action for displaying a popup by name
   def popup
-    params[:name] = params[:name].sub(/pages\//, '') # Legacy thing...
-    response_service.is_dialog
-    view_context.check_popup params[:name] # If we're serving the popup, remove it from the session
-    smartrender action: params[:name]
+    # params[:name] = params[:name].sub(/pages\//, '') # Legacy thing...
+    if params[:name]
+      view_context.check_popup params[:name] # If we're serving the popup, remove it from the session
+      smartrender action: params[:name], mode: :modal
+    else
+      # Either present the triggered dialog directly (JSON response) or via the home page
+      dialog = response_service.pending_modal_trigger
+      respond_to do |format|
+        format.html { redirect_to view_context.page_with_trigger(home_path, dialog) }
+        format.json { redirect_to dialog }
+      end
+    end
   end
 
 end

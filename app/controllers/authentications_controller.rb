@@ -2,7 +2,7 @@ require './lib/controller_utils.rb'
 require 'uri'
 
 class AuthenticationsController < ApplicationController
-  after_filter :allow_iframe, only: :new
+  before_filter :allow_iframe, only: :new
 
   def index
     @authentications = current_user.authentications if current_user
@@ -16,7 +16,6 @@ class AuthenticationsController < ApplicationController
     @authentications = current_user.authentications if current_user
     if current_user
       # flash[:notice] = "All signed in. Welcome back, #{current_user.handle}!"
-      # redirect_to collection_path(redirect: true)
       redirect_to after_sign_in_path_for(current_user), notice: "All signed in. Welcome back, #{current_user.handle}!"
     end
     @auth_delete = true
@@ -28,7 +27,6 @@ class AuthenticationsController < ApplicationController
     @authentications = current_user.authentications if current_user
     if current_user
       # flash[:notice] = "All signed in. Welcome back, #{current_user.handle}!"
-      # redirect_to collection_path(redirect: true)
       redirect_to after_sign_in_path_for(current_user), notice: "All signed in. Welcome back, #{current_user.handle}!"
     end
     @auth_delete = true
@@ -64,7 +62,7 @@ class AuthenticationsController < ApplicationController
     intention = env['omniauth.params']['intention'] # If intention is 'signup', don't accept existing authentications
     if intention == "signup"
       if @authentication || user # This authentication method already in use
-        flash[:notice] = "That #{@authentication.provider_name} login is already in use on RecipePower.<br>Perhaps you just need to sign in?"
+        flash[:notice] = "That #{omniauth.provider.capitalize} login is already in use on RecipePower.<br>Perhaps you just need to sign in?"
         response_service.amend originator
         url_to = originator
       else  # No user and no authentication: perfect

@@ -1,7 +1,9 @@
 class RpMailer < ActionMailer::Base
   # default from: "rpm@recipepower.com"
   add_template_helper(UsersHelper)
-  
+  # add_template_helper(TriggersHelper)
+  helper TriggersHelper
+
   def feedback(feedback)
     recipients  = 'recipepowerfeedback@gmail.com'
     subject     = "#{feedback.subject} ##{feedback.id}"
@@ -13,7 +15,7 @@ class RpMailer < ActionMailer::Base
   def welcome_email(user)
     @inviter = User.where(id: user.invited_by).first
     @user = user
-    @profile_url = "http://www.recipepower.com/users/profile"
+    # @profile_url = view_context.page_with_trigger(users_profile_path) # "http://www.recipepower.com/users/profile"
     @login_url  = "http://recipepower.com/login"
     mail :to => @user.email, :from => "support@recipepower.com", :subject => "Welcome to RecipePower"
   end

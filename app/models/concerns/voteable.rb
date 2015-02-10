@@ -22,8 +22,11 @@ module Voteable
     upvotes/nvotes if nvotes > 0
   end
 
-  def vote up, user=nil
-    Vote.vote self, up, user
+  # Absorb the votes from another into self
+  def absorb other
+    my_voter_ids = self.voter_ids
+    other.votes.each { |vote| vote.voter.vote(self, vote.up) unless my_voter_ids.include?(vote.user_id)  }
+    super if defined? super
   end
 
 end

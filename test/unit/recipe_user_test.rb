@@ -4,45 +4,34 @@ class RecipeUserTest < ActiveSupport::TestCase
     fixtures :users
     fixtures :recipes
     
+    def setup
+      @rcp = recipes(:rcp)
+      @thing1 = users(:thing1)
+      @thing2 = users(:thing2)
+    end
+    
     test "doing first cookmark" do
-      assert_equal 0, recipes(:rcp).num_cookmarks, "Should wake up with no cookmarks"
-      assert !(recipes(:rcp).cookmarked users(:thing1).id), "Should wake up with no cookmark for user"
-      recipes(:rcp).current_user = users(:thing1).id
-      recipes(:rcp).touch
-      assert_equal 1, recipes(:rcp).num_cookmarks, "User should get cookmarked"
-      recipes(:rcp).current_user = users(:thing2).id
-      
-      recipes(:rcp).touch false
-      assert_equal 1, recipes(:rcp).num_cookmarks, "Cookmark count shouldn't change when touching without collecting"
-      assert !recipes(:rcp).cookmarked, "User shouldn't get cookmarked when touched without collecting"
+      assert_equal 0, @rcp.num_cookmarks, "Should wake up with no cookmarks"
+      assert !(@rcp.collected? @thing1.id), "Should wake up with no cookmark for user"
+      @thing1.touch @rcp, true
+      assert_equal 1, @rcp.num_cookmarks, "Recipe should get cookmarked when user touches it"
 
-      td1 = recipes(:rcp).touch_date
-      cd1 = recipes(:rcp).collection_date
-      recipes(:rcp).touch false
-      assert (td1 < recipes(:rcp).touch_date), "Touching should advance touch date"
-      assert_equal cd1, recipes(:rcp).collection_date, "Touching shouldn't advance collection date"
-      
-      recipes(:rcp).touch
-      assert_equal 2, recipes(:rcp).num_cookmarks, "Recipe's cookmark count should advance when cookmarked for current user"
-      assert recipes(:rcp).cookmarked, "Recipe should get cookmarked for current user"
+      @thing2.touch @rcp
+      assert_equal 1, @rcp.num_cookmarks, "Cookmark count shouldn't change when touching without collecting"
+      assert !@rcp.collected?(@thing2.id), "User shouldn't get cookmarked when touched without collecting"
+
+      td1 = @rcp.touch_date @thing1.id
+      sleep 6 # We can only touch things once in five seconds
+      @thing1.touch @rcp
+      assert_operator td1, :<, @rcp.touch_date(@thing1.id), "Touching should advance touch date"
+
+      @thing2.touch @rcp, true
+      assert_equal 2, @rcp.num_cookmarks, "Recipe's cookmark count should advance when cookmarked for second user"
+      @rcp.uid = @thing2.id
+      assert @rcp.collected?, "Recipe should get cookmarked for current user"
     end
     
     test "getting fields with no current user" do
-      assert_equal "", recipes(:rcp).comment(users(:thing1).id)
-    end
-    
-    test "setting fields with no current user" do
-    end
-    
-    test "accumulating reference before save" do 
-    end
-    
-    test "cookmarking indicators before touching" do
-    end
-    
-    test "cookmarking indicators after touching without collection" do
-    end
-    
-    test "cookmarking indicators after collecting" do
+      assert_equal "", @rcp.comment(@thing1.id)
     end
 end

@@ -28,27 +28,21 @@
         </div>
       </div>
     </div>
-    <div class="row">
+    <div class="row bottom">
       <div class="col-md-12">
-        <%= f.input :about, label: "About Me", placeholder: "Who Are You? What Do You Eat?", input_html: {cols: 125, rows: 4} %>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-12">
-        <%= taggable_div f, "control-group", label: "Interests (tags that apply to you)" %>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-12">
+        <div class="form-group user_image">
+          <%= uploader_field @decorator, :image %>
+        </div>
+        <%= f.input :about, label: "About Me", placeholder: "Tell the world about yourself. Who Are You? What Do You Eat?", input_html: {cols: 125, rows: 4} %>
         <%= f.input :email, input_html: {cols: 125, rows: 1} %>
+        <%= f.input :private, :as => :boolean, :label => "Cloak of Invisibility (don't suggest as Friend)" %>
+        <% if response_service.admin_view? && permitted_to?(:manage, @user) %>
+            <%= f.input :role_id, label: "Role", collection: @user.role_select %>
+        <% end %>
       </div>
     </div>
-    <%= f.input :private, :as => :boolean, :label => false, :inline_label => "Cloak of Invisibility (i.e., not listed as possible Friend)" %>
-    <% if permitted_to? :manage, @user %>
-        <%= f.input :role_id, label: "Role", collection: @user.role_select %>
-    <% end %>
     <%= form_actions f, submit_label: "Update Details", cancel_path: users_path do
-      link_to_modal("Change Password", edit_user_registration_path, class: "btn btn-default")+
-              link_to_modal("Sign-in Services", authentications_path, class: "btn btn-default")
+      button_to_submit("Change Password", edit_user_registration_path, :mode => :modal)+
+      button_to_submit("Sign-in Services", authentications_path, :mode => :modal)
     end %>
 <% end %>

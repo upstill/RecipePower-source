@@ -18,7 +18,7 @@ def current_domain
   when Rails.env.development?, Rails.env.test?
     "local.recipepower.com:3000" 
   when Rails.env.staging?
-    "strong-galaxy-5765-74.herokuapp.com"
+    "staging.herokuapp.com"
   end
 end
 

@@ -4,6 +4,16 @@ function doFitImage(evt) {
     fitImage(evt.target)
 }
 
+function onImageError(image) {
+    image.onerror = "";
+    if (image.alt && (image.alt.match(/\.(jpg|tif|tiff|gif|png)$/) != null)) {
+        image.src = image.alt
+    } else {
+        image.src = "/assets/BadPicURL.png";
+    }
+    return true;
+}
+
 function fitImage(img) {
 
     if (!img) return false;
@@ -46,8 +56,6 @@ function fitImage(img) {
         }
     }
     $(img).addClass("loaded")
-    var fcn = RP.named_function("RP.collection.rejustify")
-    if (fcn) fcn();
     return true;
 }
 

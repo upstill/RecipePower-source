@@ -8,7 +8,7 @@ RP::Application.configure do
   config.cache_classes = true
 
   # Configure static asset server for tests with Cache-Control for performance
-  config.serve_static_assets = true
+  config.serve_static_files = true
   config.static_cache_control = "public, max-age=3600"
 
   # Log error messages when you accidentally call methods on nil
@@ -41,4 +41,8 @@ RP::Application.configure do
   config.assets.allow_debugging = true
   
   config.eager_load = false # New in Rails 4: 
+
+  # New settings for Rails 5
+  config.active_support.test_order = :sorted
+  config.active_record.raise_in_transactional_callbacks = true
 end

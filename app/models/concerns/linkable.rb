@@ -1,5 +1,6 @@
 require './lib/uri_utils.rb'
 require 'reference.rb'
+require 'referent.rb'
 
 # Manage a URL associated with a model such that the URL is unique across the model's class
 
@@ -37,7 +38,6 @@ module Linkable
     # The latter type may be referenced by entities, e.g. for the logo of a site, or the profile picture of
     # a user, or the image associated with a recipe.
     # In this case, the type of reference being used is given by the :as option to linkable, viz :as => ImageReference
-    #
 
     # options[:as]: the class which the referent keeps as an affiliate
     def linkable(url_attribute, reference_association, options = {})
@@ -55,19 +55,13 @@ module Linkable
         belongs_to reference_association, class_name: ref_type
       else
         # References that define the location of their affiliates have a many-to-one relationship (i.e. many URLs can refer to the same entity)
-        has_one reference_association, -> { where type: ref_type, canonical: true }, foreign_key: "affiliate_id", class_name: ref_type, :dependent=>:restrict_with_exception
+        has_one reference_association, -> { where type: ref_type, canonical: true }, foreign_key: "affiliate_id", class_name: ref_type, :dependent=>:destroy
         has_many reference_association_pl, -> { where type: ref_type },
                  foreign_key: "affiliate_id",
                  class_name: ref_type,
                  after_add: :"#{reference_association_pl}_ensure_site",
-                 dependent: :restrict_with_exception
+                 dependent: :destroy
         attr_accessible reference_association_pl
-=begin
-        after_save do
-          # Ensure that all the associated references go to the same site
-          site.save if site.include_url(self.method(reference_association_pl).call.map(&:url))
-        end
-=end
       end
 
       self.class_eval do
@@ -123,9 +117,10 @@ module Linkable
           # Get the existing reference
           if options[:as]
             # The reference is to another entity type: we just index by URL and assign the reference association
-            self.method(:"#{reference_association}=").call (pu.blank? ? nil : ref_type.constantize.find_or_initialize(pu).first)
+            ref = pu.blank? ? nil : ref_type.constantize.find_or_initialize(pu).first
+            self.method(:"#{reference_association}=").call ref
           elsif pu.blank?
-            self.errors.add("#{url_attribute} can't be blank")
+            self.errors.add(url_attribute, "can't be blank")
           else
             # Create a new reference (or references, if there's a redirect involved) as necessary
             refs = ref_type.constantize.find_or_initialize(pu)
@@ -142,7 +137,7 @@ module Linkable
 
         define_method(url_attribute) do
           # This will cause an exception for entities without a corresponding reference
-          ((reference = self.method(reference_association).call) && reference.url) ||
+          ((reference = self.method(reference_association).call) && reference.digested_reference) ||
           (super() if self.has_attribute?(url_attribute))
         end
 
@@ -165,12 +160,27 @@ module Linkable
 
   # Return the human-readable name for the recipe's source
   def sourcename
+    ref = site.referent
+    name = ref.name
     site.name
   end
 
   # Return the URL for the recipe's source's home page
   def sourcehome
     site.home
+  end
+
+  # One linkable is being merged into another => transfer references
+  def absorb other
+    # Steal references
+    if other.respond_to? :references
+      other.references.each { |other_ref|
+        other_ref.site = self
+        other_ref.canonical = false
+        other_ref.save
+      }
+    end
+    super if defined? super
   end
 
 end

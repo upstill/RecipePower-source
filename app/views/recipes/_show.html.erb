@@ -1,7 +1,7 @@
 <div class="container-fluid">
   <div class="row">
-    <div class="col-md-6">
-      <% if (vid = field_value("rcpVideo")) %>
+      <% if (vid = field_value "rcpVideo") %>
+        <div class="col-md-6">
           <div id="vidbox">
             <div id="vbdummy">
               <div id="vbelement">
@@ -9,22 +9,25 @@
               </div>
             </div>
           </div>
-      <% else %>
-          <img src="<%= present_field "rcpPicSafeURL" %>" class="recipe-preview pull-right" width="100%">
+        </div>
+      <% elsif !(field_value "rcpPicURL").blank? %>
+        <div class="col-md-6">
+          <img src="<%= present_field "rcpPicURL" %>" class="recipe-preview pull-right" width="100%">
+        </div>
       <% end %>
-    </div>
-    <div class="col-md-6">
+    <div class="col-md-<%= wide ? '6' : '12'%>">
       <div class="panel pull-left panel-default hide-if-empty" style="width:100%">
         <div class="panel-heading">
           <p class="hide-if-empty">A recipe
             <span class="hide-if-empty"> by <%= present_field_wrapped "Author_tags" %></span>
             <span class="hide-if-empty"> in <%= present_field_wrapped "Source_tags" %></span>
             <span class="hide-if-empty"> from <%= present_field_wrapped "site" %></span>.</p>
-
           <p class="hide-if-empty"><%= present_field_wrapped "rcpDescription" %></p>
         </div>
         <div class="panel-body">
-          <%= show_tags ["Ingredient_tags", ["Role_tags", "Produces"], "Genre_tags", "Occasion_tags", "Process_tags", "Tool_tags", "Other Tag_tags", ["Collection_tags", "My Collection(s)"], ["Channel_tags", "Public Collection(s)"] ] %>
+          <% presenter.fields_list.each do |nv| %>
+              <%= render "shared/show_labelled", label: nv.first, content: nv.last %>
+          <% end %>
         </div>
       </div>
       <% if params[:accept_invitation_link] %>

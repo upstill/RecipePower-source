@@ -1,0 +1,15 @@
+<!-- View for listing entities in a table -->
+  <table class="table table-striped ">
+    <thead>
+    <tr>
+      <%= headers.collect { |ttl| "<th>#{ttl}</th>" unless ttl.blank? }.compact.join("\n").html_safe %>
+    </tr>
+    </thead>
+    <tbody class="stream-items-parent">
+    <% if @sp.dump? %>
+        <% while (item = @sp.next_item) do %>
+            <%= render_stream_item item  %>
+        <% end %>
+    <% end %>
+    </tbody>
+  </table>

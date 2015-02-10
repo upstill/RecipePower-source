@@ -1,17 +1,15 @@
 # encoding: UTF-8
 require 'test_helper'
 class UserMergeTest < ActiveSupport::TestCase
+  fixtures :users
 
   test "Successfully creating users" do
-    # user1 = create(:user, username: "user1")
-    channel1 = create(:channel_referent, tag_token: "user1s channel")
-    user1 = channel1.user
-    # user2 = create(:user, username: "user2", about: "Some words about User2", image: "data:kwljerkjk")
-    channel2 = create(:channel_referent, tag_token: "user2s channel")
-    user2 = channel2.user
+    user1 = users(:thing1)
+    user2 = users(:thing2)
     user2.about = "Some words about User2"
     user2.image = "data:kwljerkjk"
 
+    img = user2.image
     dish1 = create(:recipe)
     dish2 = create(:recipe)
     dish3 = create(:recipe)
@@ -19,10 +17,10 @@ class UserMergeTest < ActiveSupport::TestCase
     user1.recipes << dish2
     user1.save
 
-    dish2.touch true, user2
-    dish3.touch true, user2
-    # user2.recipes << dish2
-    # user2.recipes << dish3
+    user2.touch dish2, true
+    user2.touch dish3, true
+    user2.touch user1, true
+    user2.save
 
     fr1 = create(:user, username: "Follower1")
     fr2 = create(:user, username: "Follower2")
@@ -31,6 +29,14 @@ class UserMergeTest < ActiveSupport::TestCase
     user1.followers << fr2
     user2.followers << fr2
     user2.followers << fr3
+
+    assert_equal 0, user1.votings.size, "Users should be born with no votes"
+    assert_equal 0, user2.votings.size, "Users should be born with no votes"
+    user2.vote dish1
+    user2.reload
+    assert_equal 0, user1.votings.size, "Wrong user got to vote"
+    assert_equal 1, dish1.upvotes, "dish1 not voted on by user2"
+    assert_equal 1, user2.votings.size, "user2 doesn't have voting for dish1"
 
     fe1 = create(:user, username: "Followee1")
     fe2 = create(:user, username: "Followee2")
@@ -42,30 +48,28 @@ class UserMergeTest < ActiveSupport::TestCase
 
     assert_equal 2, user1.recipes.count, "# recipes of user1 not right"
     assert_equal 2, user2.recipes.count, "# recipes of user2 not right"
+    assert_equal 1, user2.users.count, "# users collected by user2 not right"
     assert_equal 2, user1.followees.count, "# followees of user1 not right"
     assert_equal 2, user2.followees.count, "# followees of user2 not right"
     assert_equal 2, user1.followers.count, "# followers of user1 not right"
     assert_equal 2, user2.followers.count, "# followers of user2 not right"
 
-    user1.merge user2
-    assert_equal "Some words about User2", user1.about, "Merge didn't copy about"
-    assert_equal "data:kwljerkjk", user1.image, "Merge didn't copy image"
-    user2.about = "About which shouldn't be copied"
-    user2.image = "image which shouldn't be copied"
-    user1.merge user2
-    channel2.destroy
-    begin
-      user2.reload
-      assert_equal 1, 2, "Deleting channel didn't delete user"
-    rescue Exception => e
-      assert_equal ActiveRecord::RecordNotFound, e.class, "Deleting channel didn't delete user"
-    end
+    user1.absorb user2
+    user1.save
     user1.reload
+    assert_equal 1, user1.votings.size, "Vote for dish1 didn't transfer from user2 to user1"
+    assert_equal 2, dish1.upvotes, "dish1 should have two votes now."
+    assert_equal "Some words about User2", user1.about, "Merge didn't copy about"
+    assert_equal user2.image, user1.image, "Merge didn't copy image"
     assert_equal 3, user1.recipes.count, "After merge, # recipes of user1 not right"
     assert_equal 3, user1.followers.count, "After merge, # followers of user1 not right"
     assert_equal 3, user1.followees.count, "After merge, # followees of user1 not right"
-    assert_equal "Some words about User2", user1.about, "Merge copied about inappropriately"
-    assert_equal "data:kwljerkjk", user1.image, "Merge copied image inappropriately"
+    user2.destroy
+    assert_equal 1, dish1.upvotes, "dish1 should have one vote after destroying user."
+    dish1.destroy
+    assert_equal 2, user1.recipes.count, "After merge, # recipes of user1 not right"
+    assert_equal 0, user1.votings.size, "user1 didn't lose a voting when dish1 was destroyed."
+
   end
 
 end

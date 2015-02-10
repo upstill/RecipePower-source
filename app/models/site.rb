@@ -2,13 +2,9 @@
 require './lib/uri_utils.rb'
 
 class Site < ActiveRecord::Base
-  include Taggable
-
-  include Linkable # Required by Picable
-  linkable :home, :reference
-
-  include Picable
+  include Collectible
   picable :logo, :thumbnail
+  linkable :home, :reference
 
   # site: root of the domain (i.e., protocol + domain); suitable for pattern-matching on a reference URL to glean a set of matching Sites
   # subsite: a path relative to the domain which differentiates among Sites with the same domain (site attribute)
@@ -18,7 +14,7 @@ class Site < ActiveRecord::Base
   #      may alter the path
   # Also, in most cases, site==home (when the domain is home, i.e. subsite is empty); in others, (site+subsite)==home,
   #     and only rarely will home be different from either of those
-  attr_accessible :finders_attributes, :sample, :oldname, :ttlcut, :finders, :reviewed, :description, :reference, :references # , :subsite, :home, :logo, :oldsite, :scheme, :host, :port
+  attr_accessible :finders_attributes, :sample, :oldname, :ttlcut, :finders, :reviewed, :description, :reference, :references, :name
 
   belongs_to :referent # See before_destroy method, :dependent=>:destroy
 
@@ -82,31 +78,28 @@ public
   end
 
   # Merge another site into this one, optionally destroying the other
-  def absorb other, nuke=true
-    # If the other has a Reference, that's a deal-breaker
+  def absorb other
     # Merge corresponding referents
+    self.description = other.description if description.blank?
     if other.referent
-      self.referent ||= other.referent
-      if self.referent != other.referent
-        self.referent.merge other.referent
-        other.referent = nil
+      if referent
+        referent.absorb other.referent
+      else
+        self.referent = other.referent
       end
+      other.referent = nil
     end
+    # Steal feeds
     other.feeds.each { |other_feed|
       other_feed.site = self
       other_feed.save
     }
-    other.references.each { |other_ref|
-      other_ref.site = self
-      other_ref.save
-    }
-    save
-    other.reload # To clear out the associations prior to destroying the victim
-    other.destroy if nuke
+    super # Let the taggable, collectible, etc. modules do their work
+    other.reload # Refreshes, e.g., feeds list prior to deletion
   end
 
 
-  # Produce a Site for a given url whether or not one already exists
+  # Produce a Site for a given url whether one already exists or not
   def self.find_or_create link_or_links
     links = link_or_links.is_a?(String) ? [link_or_links] : link_or_links
     refs = SiteReference.find_or_initialize links

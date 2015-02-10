@@ -1,11 +1,10 @@
 class SessionsController < Devise::SessionsController
-  after_filter :allow_iframe, only: :new
+  before_filter :allow_iframe, only: :new
 
   # GET /resource/sign_in
   def new
     if current_user
       # flash[:notice] = "All signed in. Welcome back, #{current_user.handle}!"
-      # redirect_to collection_path(redirect: true)
       redirect_to after_sign_in_path_for(current_user), notice: "All signed in. Welcome back, #{current_user.handle}!"
     else
       self.resource = resource_class.new # build_resource(nil, :unsafe => true)
@@ -14,21 +13,33 @@ class SessionsController < Devise::SessionsController
         self.resource.fullname = u.fullname
         self.resource.login = u.username || u.email
       end
-      clean_up_passwords(resource)
+      r = resource
+      clean_up_passwords r
       resource.remember_me = 1
       smartrender :action => :new
     end
   end
 
   def create
+    # TODO: failed login causing uncaught exception here
     resource = warden.authenticate!(:scope => resource_name, :recall => "#{controller_path}#new" ) # :failure)
     result = sign_in_and_redirect(resource_name, resource)
     return result
   end
   
   def destroy
-    super
+    redirect_path = after_sign_out_path_for(resource_name)
+    signed_out = (Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name))
+    set_flash_message :notice, :signed_out if signed_out && is_navigational_format?
     flash[:notice] = flash[:notice].sub("uhandle", resource.handle) if flash[:notice] && resource
+
+    # We actually need to hardcode this as Rails default responder doesn't
+    # support returning empty response on GET request
+    respond_to do |format|
+      format.all { head :no_content }
+      format.json { render :redirect, locals: { path: redirect_path } }
+      format.any(*navigational_formats) { redirect_to redirect_path, :method => "GET" }
+    end
   end
   
   def sign_in_and_redirect(resource_or_scope, resource=nil)
@@ -52,6 +63,6 @@ class SessionsController < Devise::SessionsController
   end
  
   def failure
-    return render:json => {:success => false, :errors => ["Login failed."]}
+    return render :json => {:success => false, :errors => ["Login failed."]}
   end
 end

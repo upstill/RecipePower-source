@@ -1,6 +1,1 @@
-<h3>Site <%= link_to @site.name, @site.home %></h3>
-<%= render "show_site" %>
-<%= link_to_modal 'Edit Site', edit_site_path(@site) %> |
-<%= link_to 'Sites List', sites_path %>
-<hr>
-<%= render "show_feeds" %>
+<%= render "collectible/show_card", presenter: presenter %>

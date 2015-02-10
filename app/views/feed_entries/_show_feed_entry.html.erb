@@ -1,0 +1,12 @@
+<div class="feed-entry" id="<%= dom_id item %>">
+  <h3><a href='<%= item.url %>' class="tablink"><%= item.title %></a><%= collectible_buttons_panel decorator, :button_size => "xs" %></h3>
+
+  <p>
+    <%= item.published_at ? %Q{<p>Published on: #{item.published_at.strftime("%B %d, %Y")}</p>}.html_safe : "" %>
+  </p>
+
+  <p>
+    <%= (item.summary || "").html_safe %>
+  </p>
+  <hr>
+</div>

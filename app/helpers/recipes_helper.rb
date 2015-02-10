@@ -8,62 +8,52 @@ module RecipesHelper
   def recipe_title_div recipe
     "<div><h3>#{recipe.title}</h3></div>".html_safe
   end
-  
-  # Sort out a suitable URL to stuff into an image thumbnail for a recipe
-  def recipe_image_div(recipe, div_class="recipe_image_div")
-    begin
-      return if (url = recipe.picdata).blank?
-      options = { 
-        alt: "Image Not Accessible", 
-        id: "RecipeImage"+recipe.id.to_s,
-        style: "width:100%; height:auto;" }
-      # options.merge!( class: "stuffypic", data: { fillmode: "width" } ) # unless url =~ /^data:/
-      content = image_tag(url, options)
-    rescue Exception => e
-      if url
-        url = "data URL" if url =~ /^data:/
-      else
-        url = "nil URL"
-      end
-      content = 
-        "Error rendering image #{url.truncate(255)} from "+ (recipe ? "recipe #{recipe.id}: '#{recipe.title}'" : "null recipe")
-      ExceptionNotification::Notifier.exception_notification(request.env, e, data: { message: content}).deliver
-    end
-    content_tag :div, 
-      link_to(content, recipe.url), 
-      class: div_class
-  end
 
-  def recipe_grid_datablock recipe
-    grid_element = content_tag :p, link_to(recipe.title, recipe.url, class: "tablink"), class: "rcp_grid_element_title"
-    source_element = content_tag :div, ("from "+link_to(recipe.sourcename, recipe.sourcehome, class: "tablink")).html_safe, class: "rcp_grid_element_source"
+
+  def recipe_grid_datablock decorator
+    entity = decorator.object
+    klass = entity.class.to_s
+    label = ((klass == "Recipe") || (klass == "List")) ? "" : "#{klass}: "
+    itemlink = case klass
+                 when "Recipe", "Site"
+                   link_to decorator.title, decorator.url, class: "tablink", data: { report: polymorphic_path([:touch, entity]) } # ...to open up a new tab
+                 else # Other internal entities get opened up in a new partial
+                   link_to_submit decorator.title, decorator.url, mode: :partial
+               end
+    grid_element = content_tag :p, (label+itemlink).html_safe, class: "rcp_grid_element_title"
+    case klass
+      when "List"
+        source_element = content_tag :div, ("a list by "+link_to_submit(decorator.owner.handle, user_path(decorator.owner, :mode => :modal))).html_safe, class: "rcp_grid_element_source"
+      else
+        source_element = content_tag :div, ("from "+link_to(decorator.sourcename, decorator.sourcehome, class: "tablink")).html_safe, class: "rcp_grid_element_source"
+    end
     content_tag :div, grid_element+source_element, class: "rcp_grid_datablock"
   end
 
-  def recipe_info_icon recipe
-    alltags = summarize_alltags(recipe) || ""
+  def collectible_info_icon decorator
+    entity = decorator.object
+    alltags = summarize_alltags(entity) || ""
     tags = CGI::escapeHTML alltags
-    modal_link = link_to_modal "", recipe_path(recipe) # image_tag("magnifying_glass_12x12.png"), recipe_path(recipe)
-    # modal_link = link_to_show recipe, image_tag("magnifying_glass_12x12.png")
-    content_tag :span,
-                modal_link.html_safe,
+    span = content_tag :span,
+                "",
                 class: "recipe-info-button btn btn-default btn-xs glyphicon glyphicon-open",
-                data: { title: recipe.title, tags: tags, description: recipe.description || "" }
+                data: { title: decorator.title, tags: tags, description: decorator.description || "" }
+    link_to_submit span, polymorphic_path(entity), :mode => :modal
   end
 
   def recipe_tags_div recipe
     content_tag :div, 
       summarize_alltags(recipe) || 
-      %Q{<p>...a dish with no tags or ratings in RecipePower!?! Why not #{edit_recipe_link(%q{add some}, recipe)}?</p>}.html_safe
+      %Q{<p>...a dish with no tags or ratings in RecipePower!?! Why not #{tag_recipe_link(%q{add some}, recipe)}?</p>}.html_safe
   end
 
   def recipe_comments_div recipe, whose
-    user = User.find recipe.tag_owner
+    user = User.find recipe.collectible_user_id
     comments =
     case whose
     when :mine
       header_text = "My Comments"
-      (commstr = recipe.comment user.id) ? [ { body: commstr } ] : [] 
+      (commstr = recipe.collectible_comment) ? [ { body: commstr } ] : [] 
     when :friends
       header_text = "Comments of Friends"
       user.followee_ids.collect { |fid| 
@@ -72,7 +62,7 @@ module RecipesHelper
       }.compact
     when :others
       header_text = "Comments of Others"
-      Rcpref.where(recipe_id: recipe.id).
+      Rcpref.where(entity: recipe).
         where("comment <> '' AND private <> TRUE").
         where("user_id not in (?)", user.followee_ids<<user.id).collect { |rref|
           { source: rref.user.handle, body: rref.comment }
@@ -88,24 +78,6 @@ module RecipesHelper
   
   def grab_recipe_link label, recipe
   end
-
-def edit_recipe_link( label, recipe, options={})
-    rcp_params = {
-      rcpID: recipe.id,
-      rcpTitle: recipe.title,
-      rcpMiscTagData: recipe.misc_tag_data, # recipe.tags.map(&:attributes).to_json,
-      rcpCollectionData: recipe.collection_data, # recipe.tags.map(&:attributes).to_json,
-      rcpChannelData: recipe.channel_data, # recipe.tags.map(&:attributes).to_json,
-      rcpPicURL: recipe.picurl,
-      rcpURL: recipe.url,
-      rcpPrivate: recipe.private ? %q{checked="checked"} : "",
-      rcpComment: recipe.comment,
-      rcpStatus: recipe.status,
-      authToken: form_authenticity_token
-    }
-    options[:class] = "edit_recipe_link "+(options[:class] || "")
-    link_to label, "#", options.merge(remote: true, data: rcp_params)
-end
 
 # If the recipe doesn't belong to the current user's collection,
 #   provide a link to add it
@@ -129,10 +101,10 @@ def tagjoin tags, enquote = false, before = "", after = "", joiner = ','
 end
 
 # Provide an English-language summary of the tags for a recipe.
-def summarize_alltags(rcp)
+def summarize_alltags(taggable_entity)
 
     tags = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
-    rcp.tags.each { |tag| tags[tag.tagtype] << tag }
+    taggable_entity.tags.each { |tag| tags[tag.tagtype] << tag }
     return if tags.flatten.compact.empty?
     
     genrestr = tagjoin tags[1], false, "", " "
@@ -165,25 +137,17 @@ def summarize_alltags(rcp)
 end
 
 # Present the comments to this user. Now, all comments starting with his/hers, but ultimately those of his friends
-def present_comments (recipe, user_id)
-    out = (recipe.comment user_id) || ""
+def present_comments recipe
+    out = (recipe.collectible_comment) || ""
     out = "My two cents: '#{out}'<br>" unless out.empty?
-=begin
-    # Removed this to cut down on queries
-    recipe.users.each { |user| 
-        if (user.id != user_id) && (cmt=recipe.comment(user.id))
-            out << "#{user.handle} sez: '#{cmt}'<br>"  unless cmt.blank?
-        end
-    }
-=end
     out.html_safe
 end
 
   # Provide the cookmark-count line
-  def cookmark_count(rcp)
-     count = rcp.num_cookmarks
+  def cookmark_count(collectible_entity, user)
+     count = collectible_entity.num_cookmarks
      result = count.to_s+" Cookmark"+((count>1)?"s":"")
-     if rcp.cookmarked session[:user_id]
+     if collectible_entity.collected?(user.id)
         result << " (including mine)"
      else
         result << ": " + 
@@ -191,7 +155,7 @@ end
 		  		 :url => {:action => "cmcount"},
 				 :update => "response5")
      end
-     "<span class=\"cmcount\" id=\"cmcount#{rcp.id}\">#{result}</span>".html_safe
+     "<span class=\"cmcount\" id=\"cmcount#{collectible_entity.id}\">#{result}</span>".html_safe
   end
 
 end

@@ -1,8 +1,8 @@
 module TagsHelper
-  
+
   # Emit a link to a tag using the tag's name and, optionally, its type and id
   def tag_link tag, with_id=false
-    link_to_modal( tag.name, tag )+(with_id ? "(#{tag.typename} #{tag.id.to_s})" : "")
+    link_to_submit( tag.name, tag, :mode => :modal )+(with_id ? "(#{tag.typename} #{tag.id.to_s})" : "")
   end
   
   def summarize_tag withtype = false, do_link = true, with_id=false
@@ -60,7 +60,7 @@ module TagsHelper
     @tagserv ||= TagServices.new(@tag)
     recipes =
       @tagserv.recipes(true).uniq.collect { |rcp| 
-        content_tag :li, "#{link_to rcp.title, rcp.url} #{recipe_info_icon rcp}".html_safe, class: "tog_info_rcp_title"
+        content_tag :li, "#{link_to rcp.title, rcp.url} #{collectible_info_icon rcp.decorate}".html_safe, class: "tog_info_rcp_title"
       }
     unless recipes.empty?
       ("#{header}<ul>"+recipes.join('<br>')+"</ul>").html_safe
@@ -216,21 +216,41 @@ BLOCK_END
       tagidstr = tag.id.to_s
       content_tag :span,
         tag_link(tag) +
-        (absorb_btn ? link_to_submit("Absorb", "tags/#{@tag.id.to_s}/absorb?victim=#{tagidstr}", class: "absorb_button", id: "absorb_button_#{tagidstr}") : ""),
+        (absorb_btn ? link_to_submit("Absorb", "tags/#{tag.id.to_s}/absorb?victim=#{tagidstr}", class: "absorb_button", id: "absorb_button_#{tagidstr}") : ""),
         class: "absorb_"+tagidstr
   end
 
-  # Present a collection of tags, by type
-  def show_tags fields
+  # Present a collection of labelled fields, by type
+  def list_fields fields, viewer_id=nil
+    viewer_id ||= User.super_id
     fields.collect { |field|
       if field.is_a? Array
         field, label = field[0], field[1]
       else
-        label = field.sub "_tags", ''
-        extension = label.pluralize.sub label, ''
-        label << "(#{extension})" unless extension.blank?
+        label = present_field_label field
       end
-      render "tags/show_labelled", label: label, name: field
-    }.join('').html_safe
+      [ label, present_field(field) ]
+    }
+  end
+
+  def tag_filter_header locals={}
+    locals[:type_selector] ||= false
+    render "tags/tag_filter_header", locals # ttl: label, type_selector: type_selector
+  end
+
+  def tag_list tags
+=begin
+    names = tags.collect { |tag|
+      link_to_submit tag.name, tag_path(tag), :mode => :modal
+    }
+    if names.count > 1
+      (names[0..-3] << "#{names[-2]} and #{names[-1]}").join(', ').html_safe
+    else
+      names[0]
+    end
+=end
+    strjoin( tags.collect { |tag|
+      link_to_submit tag.name, tag_path(tag), :mode => :modal
+    }).html_safe
   end
 end

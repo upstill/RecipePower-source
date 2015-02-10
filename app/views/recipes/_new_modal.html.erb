@@ -1,5 +1,4 @@
-<%# modal_dialog :new_recipe, "Add a Cookmark the Hard Way", area: @_area, data: { focus: "form #recipe_url" } do %>
-<%= modal_dialog :new_recipe, "Add a Cookmark the Hard Way", response_service.modal_options( data: { focus: "input#recipe_url" }) do %>
+<%= modal_dialog :new_recipe, "Add a Cookmark the Hard Way",  data: { focus: "input#recipe_url" } do %>
     <%= render "new_form" %>
 <% end %>
 

@@ -39,13 +39,13 @@ class AnalyticsServices
     @data = {}
 
     # Calculate # active users and sessions per active user
-    sessions = RpEvent.events_of_type_during(:session, begin_time, end_time).map(&:source_id)
+    sessions = RpEvent.events_of_type_during(:session, begin_time, end_time).map(&:subject_id)
     active_user_ids = sessions.uniq
     @data[:sessions_per_active_user] = divide sessions.count, (@data[:active_users] = active_user_ids.count)
 
     # Get # of dropouts in prior interval
     @data[:dropouts] = if prior_begin
-                         prior_active = RpEvent.events_of_type_during(:session, prior_begin, begin_time).map(&:source_id).uniq
+                         prior_active = RpEvent.events_of_type_during(:session, prior_begin, begin_time).map(&:subject_id).uniq
                          (prior_active - active_user_ids).count
                        else
                          "n/a"
@@ -71,11 +71,11 @@ class AnalyticsServices
     @data[:invitation_click_rate] = divide @data[:invitations_clicked], @data[:invitations_issued]
     @data[:invitation_response_conversion_rate] = divide @data[:invitations_converted], @data[:invitations_clicked]
 
-    shares_issued_by_id = RpEvent.events_of_type_during(:invitation_sent, begin_time, end_time).where('subject_id IS NOT NULL').map(&:id)
+    shares_issued_by_id = RpEvent.events_of_type_during(:invitation_sent, begin_time, end_time).where('object_id IS NOT NULL').map(&:id)
     @data[:shares_issued] = shares_issued_by_id.count
-    @data[:shares_clicked] = RpEvent.events_of_type_during(:invitation_responded, begin_time, end_time).where(subject_type: "RpEvent", subject_id: shares_issued_by_id).count
-    @data[:shares_converted] = RpEvent.events_of_type_during(:invitation_accepted, begin_time, end_time).where(subject_type: "RpEvent", subject_id: shares_issued_by_id).count
-    @data[:shares_diverted] = RpEvent.events_of_type_during(:invitation_diverted, begin_time, end_time).where(subject_type: "RpEvent", subject_id: shares_issued_by_id).count
+    @data[:shares_clicked] = RpEvent.events_of_type_during(:invitation_responded, begin_time, end_time).where(object_type: "RpEvent", object_id: shares_issued_by_id).count
+    @data[:shares_converted] = RpEvent.events_of_type_during(:invitation_accepted, begin_time, end_time).where(object_type: "RpEvent", object_id: shares_issued_by_id).count
+    @data[:shares_diverted] = RpEvent.events_of_type_during(:invitation_diverted, begin_time, end_time).where(object_type: "RpEvent", object_id: shares_issued_by_id).count
 
     @data[:share_conversion_rate] = divide @data[:shares_converted], @data[:shares_issued]
     @data[:share_click_rate] = divide @data[:shares_clicked], @data[:shares_issued]

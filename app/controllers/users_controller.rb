@@ -1,11 +1,12 @@
 require './lib/controller_utils.rb'
+require 'suggestion.rb'
 
-class UsersController < ApplicationController
+class UsersController < CollectibleController
   
   rescue_from ActiveRecord::RecordNotFound, :with => :not_found
   before_filter :login_required, :except => [:new, :create, :identify]
   before_filter :authenticate_user!, :except => [:new, :show, :index, :identify]
-  
+
   # Take a tokenInput query string and match the input against the given user's set of friends/channels
   def match_friends
     me = User.find params[:id]
@@ -31,49 +32,39 @@ class UsersController < ApplicationController
   # GET /users.xml
   def index
     # 'index' page may be calling itself with filter parameters in the name and tagtype
-    @Title = "Users"
-    seeker_result User, 'div.user_list' # , clear_tags: true
+    @select = params[:select]
+    response_service.title = (@select=="followees") ? "Friends" : "People"
+    smartrender unless do_stream UsersCache
   end
-  
-=begin
-  # Query takes either a query string or a specification of page number
-  # We return a recipe list IFF the :cached parameter is not set
-  def query
-    seeker_result User, 'div.user_list'
-  end
-=end
-  
+
   # Add a user or channel to the friends of the current user
-  def collect
-    @friend = User.find params[:id]
-    user = current_user_or_guest
-    if user.follows? @friend
-      notice = "You're already following '#{@friend.handle}'."
+  def follow
+    if current_user
+      update_and_decorate # Generate a FeedEntryDecorator as @feed_entry and prepares it for editing
+      if current_user.follows? @user
+        current_user_or_guest.followees.delete @user
+        msg = "You've just been unplugged from'#{@user.handle}'."
+      else
+        current_user_or_guest.followees << @user
+        msg = "You're now connected with '#{@user.handle}'."
+      end
+      current_user.save
+      @user.save
+      if post_resource_errors(current_user)
+        render :errors
+      else
+        flash[:popup] = msg
+        render :follow
+      end
     else
-      user.add_followee @friend
-      notice = "You're now connected with '#{@friend.handle}'."
-    end
-    respond_to do |format|
-      format.html { redirect_to collection_path, :notice => notice }
-      format.json {
-        @browser = user.browser
-        @node = @browser.selected
-        render(
-          json: { 
-            processorFcn: "RP.content_browser.insert_or_select",
-            entity: with_format("html") { render_to_string partial: "collection/node" }, 
-            notice: view_context.flash_one(:notice, notice) 
-          }, 
-          status: :created, 
-          location: @friend 
-        )
-      }
+      flash[:alert] = "Sorry, you need to be logged in to follow someone."
+      render :errors
     end
   end
-  
+
   def new
     @user = User.new
-    @Title = "Create RecipePower Account"
+    response_service.title = "Create RecipePower Account"
   end
   
   # DELETE /users/1
@@ -88,10 +79,43 @@ class UsersController < ApplicationController
   end
   
   def show
-    @user = User.find params[:id]
-    smartrender modal: true # :how => :modal
+    @active_menu = :home
+    update_and_decorate
+    smartrender unless do_stream UserListsCache
   end
-  
+
+  # Show the user's recently-viewed recipes
+  def recent
+    @user = User.find params[:id]
+    @active_menu = :collections
+    @empty_msg = "As you check out things in RecipePower, they will be remembered here."
+    response_service.title = "Recently Viewed"
+    smartrender unless do_stream UserRecentCache
+  end
+
+  # Show the user's entire collection
+  def collection
+    @user = User.find params[:id]
+	  if (@user.id == current_user_or_guest_id)
+      response_service.title = "My Whole Collection"
+      @empty_msg = "Nothing here yet...but that's what the #{view_context.link_to_submit 'Cookmark Button', '/popup/starting_step2'} is for!".html_safe
+      @active_menu = :collections
+    else
+      response_service.title = "#{@user.handle}'s Collection"
+      @empty_msg = "They haven't collected anything?!? Why not Share something with them?"
+      @active_menu = :friends
+    end
+    smartrender unless do_stream UserCollectionCache
+  end
+
+  # Show the user's recently-viewed recipes
+  def biglist
+    @user = User.find params[:id]
+    @active_menu = :collections
+    response_service.title = "The Big List"
+    smartrender unless do_stream UserBiglistCache
+  end
+
   def not_found
     redirect_to root_path, :notice => "User not found", method: "get"
   end
@@ -110,26 +134,21 @@ class UsersController < ApplicationController
       flash[:error] = "Couldn't find followee "+params[:id].to_s
     end
     if current_user && followee
-      current_user.delete_followee followee
+      current_user.followees.delete followee
       current_user.save
       flash[:notice] = "There you go! No longer following "+followee.handle
     else
       flash[:error] ||= ": No current user"
     end
-    redirect_to collection_path
+    redirect_to root_path
   end
 
   def edit
-    if @user = ((params[:id] && User.find(params[:id])) || current_user)
-        @authentications = @user.authentications
-    end
-    if @user.channel
-      redirect_to edit_referent_path(@user.channel)
-    else
-      @section = params[:section] || "profile"
-      @Title = "Edit Profile"
-      smartrender area: "floating"
-    end
+    update_and_decorate
+    @authentications = @user.authentications if @decorator.id
+    @section = params[:section] || "profile"
+    response_service.title = "Edit Profile"
+    smartrender
   end
   
   # Ask user for an email address for login purposes
@@ -142,48 +161,26 @@ class UsersController < ApplicationController
   end
   
   def profile
-    if @user = current_user
-      @authentications = @user.authentications
-    end
+    params[:id] = current_user.id if current_user
+    update_and_decorate
+    @authentications = @user.authentications if @decorator.id
     @section = params[:section] || "profile"
-    @Title = "My "+@section.capitalize
-    # render :action => 'edit'
-    smartrender action: "edit", area: "floating" 
+    response_service.title = "My "+@section.capitalize
+    smartrender action: "edit"
+  end
+
+  def getpic
+    update_and_decorate
   end
 
   def update
-=begin
-    account_update_params = devise_parameter_sanitizer.sanitize(:account_update)
-    # required for settings form to submit when password is left blank
-    if account_update_params[:password].blank?
-      account_update_params.delete("password")
-      account_update_params.delete("password_confirmation")
-    end
-=end
-
-    @user = User.find params[:id]
-    if @user.update_attributes(params[:user])
-      @user.refresh_browser # Assuming, perhaps incorrectly, that the browser contents have changed
-      @Title = "Cookmarks from Update"
+    if update_and_decorate
+      response_service.title = "Cookmarks from Update"
       flash[:message] = (@user == current_user ? "Your profile" : @user.handle+"'s profile")+" has been updated."
-      respond_to do |format|
-        format.html { redirect_to collection_path }
-        format.json  { 
-          listitem = with_format("html") { render_to_string( partial: "show_table_row") }
-          handleitem = %Q{<span class="handle text-on-black">#{@user.handle}&nbsp;&or;</span>}.html_safe
-          render json: {
-            done: true,
-            replacements: [ ["#listrow_"+@user.id.to_s, listitem],
-                            view_context.flash_notifications_replacement,
-                            ['span.handle', handleitem ]
-            ]
-          }
-        }
-      end
     else
       @section = params[:user][:email] ? "profile" : "account"
-      @Title = "Edit #{@section}"
-      smartrender action: "edit", area: "floating" 
+      response_service.title = "Edit #{@section}"
+      smartrender action: "edit", mode: "modal"
     end
   end
 

@@ -4,26 +4,59 @@
 # a second, POST, method (#query), which wasn't being POSTed to upon page reload.
 
 RP::Application.routes.draw do
+  if Rails.env.staging?
+    mount LetterOpenerWeb::Engine, at: "/letter_opener"
+  end
 
-  resources :votes, :only => :create
-  post '/votes/recipes/:recipe_id' => 'votes#create', :as => "vote_recipe"
+  get "admin/toggle"
+  resources :feed_entries, :except => [:index, :create, :new] do
+    member do
+      # Routes for collectibles
+      get 'tag' # Present the dialog for tagging, commenting and picture selection
+      post 'tag'
+      get 'touch'
+      post "collect"
+    end
+  end
+
+  resources :suggestions do
+    member do
+      get 'results'
+    end
+  end
+
+  if Rails.env.development? || Rails.env.test?
+    # IntegersController is for testing streams
+    get "integers" => 'integers#index'
+  end
+
+    post '/votes/recipes/:id' => 'votes#create' # , :as => "vote_recipe"
+    post '/votes/feeds/:id' => 'votes#create' # , :as => "vote_feed"
+    post '/votes/feed_entries/:id' => 'votes#create' # , :as => "vote_feed_entry"
+    post '/votes/lists/:id' => 'votes#create' # , :as => "vote_list"
+    post '/votes/products/:id' => 'votes#create' # , :as => "vote_product"
+    post '/votes/sites/:id' => 'votes#create' # , :as => "vote_site"
+    post '/votes/users/:id' => 'votes#create' # , :as => "vote_user"
+
   get 'pic_picker/new' => 'pic_picker#new'
 
   get "redirect/go"
+  put "redirect/go"
   get '/auth/failure' => 'authentications#failure'
   # get '/authentications/new' => 'authentications#new'
   resources :authentications
 
-  devise_for :users, :skip => [ :registrations ], :controllers => {
+  devise_for :users, :skip => [:registrations], :controllers => {
       :sessions => 'sessions',
       :passwords => 'passwords',
       :invitations => 'invitations',
       # :registrations => 'registrations' # Had to elide this and use devise_scope to define /users/register instead of /users to create
   }
 
-  match 'users', :controller=>'users', :action=>'index', :via => [:get, :post]
+  match 'users', :controller => 'users', :action => 'index', :via => [:get, :post]
 
   devise_scope :user do
+    put "/users/password/new" => 'passwords#new' # To handle redirects from edit
     post "/users/register" => "registrations#create", :as => "user_registration"
     get "/users/sign_up" => "registrations#new", :as => "new_user_registration"
     get "/users/edit" => "registrations#edit", :as => "edit_user_registration"
@@ -34,6 +67,7 @@ RP::Application.routes.draw do
     patch "/users" => "registrations#update"
 
     get "/users/invitation/divert" => "invitations#divert", :as => "divert_user_invitation"
+
   end
 
   get '/auth/:provider/callback' => 'authentications#create'
@@ -43,41 +77,74 @@ RP::Application.routes.draw do
   get 'users/profile' => 'users#profile'
   # Ask a user to identify him/herself by email address
   get 'users/identify' => 'users#identify'
+  get 'users/:id/recent' => 'users#recent', :as => "user_recent"
+  get 'users/:id/recent' => 'users#recent', :as => "user_root"
+  get 'users/:id/collection' => 'users#collection', :as => "user_collection"
+  get 'users/:id/biglist' => 'users#biglist', :as => "user_biglist"
   # get 'users/:id/show' => 'users#show'
-  resources :users, :except => [ :index, :create ] do
+  resources :users, :except => [:index, :create] do
     member do
-      get 'collect'
-      post 'remove'
       get 'match_friends'
       get 'notify'
       get 'acquire' # Acquire a recipe (etc.)
+      post 'follow'
+      # Routes for collectibles
+      get 'getpic'
+      get 'tag'
+      post 'tag'
+      get 'touch'
+      post 'collect'
     end
   end
+
+  post '/list' => 'lists#create', :as => 'create_list'
+  resources :lists, except: [:index, :create] do
+    member do
+      post 'pin' # Add an entity to a list
+      get 'scrape'
+      # Routes for collectibles
+      post 'collect' # Add to the user's collection
+      get 'tag' # Present the dialog for tagging, commenting and picture selection
+      post 'tag' # For saving the tags
+      get 'touch'
+    end
+  end
+  match 'lists', :controller => 'lists', :action => 'index', :via => [:get, :post]
 
   post '/site' => 'sites#create', :as => 'create_site'
-  resources :sites, except: [ :index, :create ] do
+  resources :sites, except: [:index, :create] do
     member do
-      get 'scrape'
+      post 'scrape'
+      # Routes for collectibles
+      post 'absorb'
+      post 'collect' # Add to the user's collection
+      get 'tag' # Present the dialog for tagging, commenting and picture selection
+      post 'tag'
+      get 'touch'
     end
   end
-  match 'sites', :controller=>'sites', :action=>'index', :via => [:get, :post]
+  match 'sites', :controller => 'sites', :action => 'index', :via => [:get, :post]
 
   post '/reference' => 'references#create', :as => 'create_reference'
-  resources :references, :except => [ :index, :create ]
-  match 'references', :controller=>'references', :action=>'index', :via => [:get, :post]
+  resources :references, :except => [:index, :create]
+  match 'references', :controller => 'references', :action => 'index', :via => [:get, :post]
 
   post '/feed' => 'feeds#create', :as => 'create_feed'
-  resources :feeds, :except => [ :index, :create ] do
+  resources :feeds, :except => [:index, :create] do
     member do
-      get 'collect' # Add the feed to the current user
-      post 'remove' # Remove the feed from the current user's set
+      get 'refresh' # Refresh the feed's entries
       post 'approve' # (Admin only) approve the feed for presentation
+      # Routes for collectibles
+      post  "collect"  # Add the feed to the current user
+      get 'tag' # Present the dialog for tagging, commenting and picture selection
+      post 'tag'
+      get 'touch'
     end
   end
-  match 'feeds', :controller=>'feeds', :action=>'index', :via => [:get, :post]
+  match 'feeds', :controller => 'feeds', :action => 'index', :via => [:get, :post]
 
   post '/tag' => 'tags#create', :as => 'create_tag'
-  resources :tags, except: [ :index, :create ] do
+  resources :tags, except: [:index, :create] do
     member do
       post 'absorb'
     end
@@ -88,9 +155,10 @@ RP::Application.routes.draw do
       get 'match'
     end
   end
-  match 'tags', :controller=>'tags', :action=>'index', :via => [:get, :post]
+  match 'tags', :controller => 'tags', :action => 'index', :via => [:get, :post]
 
-  match 'collection', :controller=>'collection', :action=>'index', :via => [:get, :post]
+=begin
+  match 'collection', :controller => 'collection', :action => 'index', :via => [:get, :post]
   post 'collection/update'
   get "collection/refresh"
   get "collection/feed"
@@ -102,6 +170,8 @@ RP::Application.routes.draw do
 
   get "stream/stream"
   get "stream/buffer_test"
+=end
+
   get "iframe/create"
   get "admin/data"
   get "admin/control"
@@ -115,14 +185,13 @@ RP::Application.routes.draw do
   resources :scales
 
   resources :recipes do
-    resources :tags do
-      member { post 'remove', :to => 'recipes#untag' }
-    end
-    member do 
-      get 'collect'
-      get 'touch'
+    member do
       get 'piclist'
-      post 'remove'
+      # Routes for collectibles
+      post  "collect"
+      get 'tag' # Present the dialog for tagging, commenting and picture selection
+      post 'tag'
+      get 'touch'
     end
     collection do
       get 'capture'
@@ -141,9 +210,8 @@ RP::Application.routes.draw do
   get '/contact', :to => 'pages#contact'
   get '/about', :to => 'pages#about'
   get '/welcome', :to => 'pages#welcome'
-  get '/faq', :to=>"pages#faq"
-  get '/admin', :to=>"pages#admin"
-  get '/mobi', :to=>"pages#mobi"
+  get '/faq', :to => "pages#faq"
+  get '/admin', :to => "pages#admin"
   root :to => 'pages#root'
 
   # The priority is based upon order of creation:

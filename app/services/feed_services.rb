@@ -1,34 +1,8 @@
 class FeedServices
   
-# Scour all sites for feeds. Summarize the found sets.
-  def self.scrape_all(n = -1)
-    count = skunked = added = feedcount = 0
-    rejects = []
-    Site.all.each { |site|
-      count = count+1
-      next if site.feeds.count > 0
-      added = added - site.feeds.count
-      rejects = rejects + self.scrape_page(site)
-      added = added + site.feeds.count
-      if site.feeds.count == 0
-        skunked = skunked+1 
-      else
-        feedcount = feedcount + site.feeds.count
-      end
-      n=n-1
-      break if n==0
-    }
-    puts count.to_s+" sites examined"
-    puts (count-skunked).to_s+" sites with at least one feed"
-    puts feedcount.to_s+" nominal feeds captured"
-    puts added.to_s+" feeds added this go-round"
-    puts "Rejected #{rejects.count.to_s} potential feeds:"
-    puts "\t"+rejects.join("\n")
-  end
-  
-  # Examine the sample page of a site (or a given other page) for RSS feeds
+  # Examine a page from a site (or a given other page) for RSS feeds and return a set of possible feeds
   def self.scrape_page(site, page_url=nil)
-    rejects = []
+    keepers = []
     queue = page_url ? [page_url] : [site.sample]
     visited = {}
     while (page_url = queue.shift) && (visited.length < 10)
@@ -70,12 +44,15 @@ class FeedServices
         end 
         next if url.blank? || visited[url]
         visited[url] = true
-        unless url.blank? || Feed.exists?(url: url) || !(feed = Feed.new( url: url, description: content))
-          if feed.save
+        unless url.blank? ||
+            Feed.exists?(url: url) ||
+            keepers.find { |f| f.url == url } ||
+            !(feed = Feed.new( url: url, description: content))
+          if feed.follow_url # save
             puts "\tCAPTURED feed #{url}"
-            site.feeds << feed 
+            keepers << feed # site.feeds << feed
           else
-            puts "\tREJECTED #{url}...because\n\t"+feed.errors.collect { |k, v| k.to_s+" "+v }.join('\n\t...')
+            # puts "\tREJECTED #{url}...because\n\t"+feed.errors.collect { |k, v| k.to_s+" "+v }.join('\n\t...')
             if (url =~ /rss|xml/) && (Site.find_or_create(url) == site) # Another page on the same site with rss in the url; maybe a page of links?
               unless queue.include?(url)
                 if queue.length < 10
@@ -91,7 +68,19 @@ class FeedServices
       end
       visited[page_url] = true
     end
-    rejects
+    keepers
+  end
+
+  # Move all feeds from users' feeds list to their collection
+  # TODO delete
+  def self.collectify
+    User.all.each { |user|
+      user.feed_collections.each { |feed|
+        user.collect feed
+      }
+      user.feed_collection_ids = []
+      user.save
+    }
   end
   
 end

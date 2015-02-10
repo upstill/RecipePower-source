@@ -1,0 +1,2 @@
+class FeedEntriesController < CollectibleController
+end

@@ -64,7 +64,8 @@
     p_receiveMessage,
     
     // I couldn't get window.postMessage to actually work in Opera 9.64!
-    has_postMessage = window[postMessage] && !$.browser.opera;
+  // TODO: Get browser-detection functionality
+    has_postMessage = window[postMessage] // && !$.browser.opera; ...and I am watching $.browser gone in 1.9
   
   // Method: jQuery.postMessage
   // 

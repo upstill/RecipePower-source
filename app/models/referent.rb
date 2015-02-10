@@ -31,9 +31,18 @@ class Referent < ActiveRecord::Base
     has_and_belongs_to_many :channels, -> { uniq }, :class_name => "Referent", :foreign_key => "channel_id", :join_table => "channels_referents"
     
     has_many :referments, :dependent => :destroy, :inverse_of => :referent
-    has_many :references, :through => :referments, :source => :referee, :source_type => "Reference"
-    has_many :recipes, :through => :referments, :source => :referee, :source_type => "Recipe"
-    
+    # What can we get to through the referments? Each class that includes the Referrable module should be in this list
+    @@referment_associations = [:references, :recipes]
+    @@referment_associations.each { |assoc|
+      has_many assoc, :through => :referments, :source => :referee, :source_type => assoc.to_s.singularize.capitalize
+    }
+
+=begin
+    def self.referrable klass
+      has_many klass.to_s.pluralize.underscore, :through => :referments, :source => :referee, :source_type => klass
+    end
+=end
+
     attr_accessible :tag, :type, :description, :isCountable, :dependent,
         :expressions_attributes, :add_expression, :tag_id,
         :parents, :children, :parent_tokens, :child_tokens, :typeindex
@@ -49,18 +58,22 @@ class Referent < ActiveRecord::Base
     # before_save :ensure_expression
     after_save :ensure_tagtypes
 
-    def merge other, nuke_it=true
+    def absorb other, nuke_it=true
       return false if type != other.type
       puts "Merging '"+name+"' (#{children.count} children) with '"+other.name+"' (#{other.children.count} children):"
       other.children.each { |child| children << child }
       other.parents.each { |parent| parents << parent }
       other.expressions.each { |expr| self.express expr.tag }
-      other.recipes.each { |rcp| self.recipes << rcp }
-      other.references.each { |rfc| self.references << rfc }
+      # Whatever entities can be reached through referments, copy those
+      @@referment_associations.each { |assoc|
+        collection_method = assoc.to_s.pluralize.to_sym
+        collection = self.method(collection_method).call
+        other.method(collection_method).call.each { |entity| collection << entity }
+      }
       other.channels.each { |channel| self.channels << channel }
       if (self.is_a? ChannelReferent) && (other_user = other.associate)
         # When merging channels, the mergee's user's data, including recipes, need to be associated with this channel's user
-        user.merge other_user
+        user.absorb other_user
       end
       self.description = other.description if description.blank?
       self.save
@@ -95,14 +108,6 @@ class Referent < ActiveRecord::Base
     # Dump the contents of the database to stdout
     def self.dump tagtype=4
         Referent.all.collect { |ref| ref.parents.empty? && (ref.typenum==tagtype) && ref }.each { |tl| tl.dump if tl }
-    end
-    
-    # Notify this referent of an association with some resource.
-    # Since there's no intrinsic connection between any referents and any resources,
-    # this one is strictly for overriding by subclasses
-    def notice_resource(resource)
-        # !!! This is where we pass a resource event to any associated channels !!!
-        channels.each { |ch| ch.notice_resource resource }
     end
     
     # Dump a specified referent with the given indent
@@ -207,7 +212,7 @@ class Referent < ActiveRecord::Base
         if tag.class == Tag # Creating it if need be, and/or making it global 
           tagtype = tag.tagtype
         else
-          tag = Tag.assert_tag(tag, tagtype: tagtype) 
+          tag = Tag.assert(tag, tagtype: tagtype)
         end
         ref = tag.primary_meaning ||
               tag.referents.first ||
@@ -228,7 +233,12 @@ class Referent < ActiveRecord::Base
         # 1) specified by string or id, rather than a tag object
         # 2) of a different type, or 
         # 3) not already global
-        tag = Tag.assert_tag tag, tagtype: self.typenum 
+        name = tag.is_a?(String) ? tag : tag.name
+        tag = Tag.assert tag, tagtype: self.typenum
+        if tag.name != name
+          tag.name = name # We may be setting the name to something that matches an existing tag
+          tag.save
+        end
         
         # Promote the tag to the canonical expression on this referent if needed
         if (args[:form] == :generic) || !self.canonical_expression
@@ -261,9 +271,13 @@ class Referent < ActiveRecord::Base
       unique_referents = tag.referents.collect { |ref|
           [(ref.parents if doParents), (ref.children if doChildren)]
       }.flatten.compact.uniq - tag.referents
-       tag_ids = unique_referents.collect { |ref| ref.tag_id }
+      tag_ids = unique_referents.collect { |ref| ref.tag_id }
       tag_ids = tag_ids + tag.referents.collect { |ref| ref.tag_id } if doSynonyms
       tag_ids.uniq.delete_if{ |id| id == tag.id }.collect{ |id| Tag.find id }
+    end
+
+    def self.type_to_class type
+      (type && (type > 0) && Tag.typesym(type) && (Tag.typesym(type).to_s+"Referent").constantize ) || Referent
     end
 
     def typesym
@@ -427,7 +441,7 @@ end
 
 class ChannelReferent < Referent ; 
   has_one :user, :dependent => :destroy
-  attr_accessible :user, :tag_token, :tag_tokens, :user_attributes
+  attr_accessible :user, :user_attributes
   accepts_nested_attributes_for :user
   
   before_validation :check_tag
@@ -460,16 +474,11 @@ class ChannelReferent < Referent ;
     if token = tokenlist.split(',').first
       token.strip!
       if token.sub!(/^\'(.*)\'$/, '\1') || (token.to_i == 0) # A quote-delimited string a la tokeninput
-        self.canonical_expression = Tag.assert_tag token, tagtype: self.typenum # Creating it if need be, and/or making it global 
+        self.canonical_expression = Tag.assert token, tagtype: self.typenum # Creating it if need be, and/or making it global
       else
         self.canonical_expression = Tag.find token.to_i # Existing tag
       end
     end
-  end
-  
-  # When a resource is tagged with one of this referent's tags, add it to the collection of the channel user
-  def notice_resource(resource)
-    resource.kind_of?(Recipe) && user && (resource.touch(true, user.id))
   end
 
   # This is a pre-validation check on the tag selected for a channel. The user can either select an existing tag

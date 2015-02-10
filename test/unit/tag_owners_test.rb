@@ -7,12 +7,12 @@ class TagOwnershipTest < ActiveSupport::TestCase
     test "Admitting user for global tag is redundant" do
         superid = users(:super).id
         thing2id = users(:thing2).id
-        t = Tag.assert_tag("global tag", userid: superid)
+        t = Tag.assert("global tag", userid: superid)
         assert t.isGlobal, "Tag asserted by super isn't global"
-        assert_equal t, Tag.assert_tag(t, userid: thing2id ), "Reasserting tag for new user makes new tag"
+        assert_equal t, Tag.assert(t, userid: thing2id ), "Reasserting tag for new user makes new tag"
         assert t.isGlobal, "Tag asserted by thing2 is no longer global"
         assert ! t.owner_ids.include?(thing2id), "User asserted for global tag added to list"
-        assert_equal t, Tag.assert_tag(t, userid: -1 ), "Reasserting tag for invalid user makes new tag"
+        assert_equal t, Tag.assert(t, userid: -1 ), "Reasserting tag for invalid user makes new tag"
         assert t.isGlobal, "Tag asserted by invalid user is no longer global"
         assert ! t.owner_ids.include?(-1), "Invalid user asserted for global tag added to list"
     end
@@ -20,10 +20,10 @@ class TagOwnershipTest < ActiveSupport::TestCase
     # Admitting invalid user for non-global tag fails
     test "Admitting invalid user for local tag has no effect" do
         thing1id = users(:thing1).id
-        t = Tag.assert_tag("local tag", userid: thing1id)
+        t = Tag.assert("local tag", userid: thing1id)
         assert_nil t.isGlobal, "Local tag for specific user turned up global"
         assert_equal [thing1id], t.owner_ids, "Owner ids for local tag is wrong"
-        assert_equal t, Tag.assert_tag(t, userid: -1 ), "Reasserting tag for invalid user makes new tag"
+        assert_equal t, Tag.assert(t, userid: -1 ), "Reasserting tag for invalid user makes new tag"
         assert_equal [thing1id], t.owner_ids, "Asserting invalid user on tag changes owners"
         assert_nil t.isGlobal, "Asserting invalid owner on local tag made it global"
     end
@@ -34,7 +34,7 @@ class TagOwnershipTest < ActiveSupport::TestCase
         tagstr = "co-owned local tag"
         assert_nil Tag.strmatch(tagstr, userid: thing1id).first, "Co-owned local tag shouldn't match before asserting"
         # Asserting local tag, owned by thing1
-        t = Tag.assert_tag(tagstr, userid: thing1id)
+        t = Tag.assert(tagstr, userid: thing1id)
         # Check that it's indeed local
         assert_nil t.isGlobal, "co-owned local tag for specific user turned up global"
         # Check that thing1 can see it
@@ -43,7 +43,7 @@ class TagOwnershipTest < ActiveSupport::TestCase
         thing2id = users(:thing2).id
         assert_nil Tag.strmatch(tagstr, userid: thing2id).first, "New local tag should be invisible to other user"
         # Now assert it for thing2
-        assert_equal t, Tag.assert_tag(t, userid: thing2id ), "Reasserting local tag for new, valid user makes new tag"
+        assert_equal t, Tag.assert(t, userid: thing2id ), "Reasserting local tag for new, valid user makes new tag"
         # Make sure thing2 appears among tag owners
         assert t.owner_ids.include?(thing2id), "New user for local tag doesn't appear"
         # Make sure thing2 can now see it
@@ -55,7 +55,7 @@ class TagOwnershipTest < ActiveSupport::TestCase
         tagstr = "co-owned local tag"
         assert_nil Tag.strmatch(tagstr, userid: thing1id).first, "Co-owned local tag shouldn't match before asserting"
         # Asserting local tag, owned by thing1
-        t = Tag.assert_tag(tagstr, userid: thing1id)
+        t = Tag.assert(tagstr, userid: thing1id)
         # Check that it's indeed local
         assert_nil t.isGlobal, "co-owned local tag for specific user turned up global"
         # Check that thing1 can see it
@@ -78,7 +78,7 @@ class TagOwnershipTest < ActiveSupport::TestCase
     test "super-user makes global tags" do
         superid = users(:super).id
         thing2id = users(:thing2).id
-        assert Tag.assert_tag("random tag", userid: superid).isGlobal
+        assert Tag.assert("random tag", userid: superid).isGlobal
         assert Tag.strmatch("random tag", userid: thing2id ).first
     end
     
@@ -87,10 +87,10 @@ class TagOwnershipTest < ActiveSupport::TestCase
         superid = users(:super).id
         thing1id = users(:thing1).id
         thing2id = users(:thing2).id
-        assert !Tag.assert_tag("thing1 tag", userid: thing1id).isGlobal
+        assert !Tag.assert("thing1 tag", userid: thing1id).isGlobal
         assert_nil Tag.strmatch("thing1 tag", userid: thing2id, matchall: true).first
         assert Tag.strmatch("thing1 tag", userid: superid).first
-        assert Tag.strmatch("thing1 tag").first
+        refute Tag.strmatch("thing1 tag").first # No dice unless the tag is global
     end
     
     test "Admitting super-user for non-global tag makes it global" do
@@ -98,7 +98,7 @@ class TagOwnershipTest < ActiveSupport::TestCase
         tagstr = "soon-to-be-global tag"
         assert_nil Tag.strmatch(tagstr, userid: thing1id).first, tagstr+" shouldn't match before asserting"
         # Asserting local tag, owned by thing1
-        t = Tag.assert_tag(tagstr, userid: thing1id)
+        t = Tag.assert(tagstr, userid: thing1id)
         # Check that it's indeed local
         assert_nil t.isGlobal, tagstr+" for specific user turned up global"
         # Check that thing1 can see it
@@ -119,7 +119,7 @@ class TagOwnershipTest < ActiveSupport::TestCase
         tagstr = "soon-to-be-global-by-nil tag"
         assert_nil Tag.strmatch(tagstr, userid: thing1id).first, tagstr+" shouldn't match before asserting"
         # Asserting local tag, owned by thing1
-        t = Tag.assert_tag(tagstr, userid: thing1id)
+        t = Tag.assert(tagstr, userid: thing1id)
         # Check that it's indeed local
         assert_nil t.isGlobal, tagstr+" for specific user turned up global"
         # Check that thing1 can see it

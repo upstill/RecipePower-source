@@ -15,10 +15,9 @@
 	      <th></th>
 		<% end %>
 	  </tr>
-
 		<% @taglist.each do |tag| %>
 			<% @tag = tag %>
-			<%= render 'show_table_row' %>
+			<%= render 'index_table_row' %>
 		<% end %>
 	</table>
   <% else %>

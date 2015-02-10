@@ -1,5 +1,4 @@
-<%= modal_dialog :show_site, "Site #{link_to @site.name, @site.home}", dialog_class: "modal-xl" do %>
-    <%= render "show_site" %>
-    <hr>
-    <%= render "show_feeds" %>
+<%= modal_dialog :show_site, "Site #{link_to @site.name, @site.home}" do %>
+    <% presenter.modal = true %>
+    <%= render "collectible/show_card", presenter: presenter %>
 <% end %>

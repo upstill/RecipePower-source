@@ -1,49 +1,32 @@
 require './lib/controller_utils.rb'
 
-class RecipesController < ApplicationController
-  after_filter :allow_iframe, only: :capture
+class RecipesController < CollectibleController
+  before_filter :allow_iframe, only: :capture
 
   before_filter :login_required, :except => [:index, :show, :capture, :collect ]
   before_filter { @focus_selector = "#recipe_url" }
     
   filter_access_to :all
-  include ApplicationHelper
-  include ActionView::Helpers::TextHelper
+  # include ApplicationHelper
+  # include ActionView::Helpers::TextHelper
   
   # Render to html, json or js the results of a recipe manipulation
   def report_recipe( url, notice, formats, destroyed = false)
-    truncated = truncate @recipe.title, :length => 140
     respond_to do |fmt|
       fmt.html { 
-        if response_service.injector? # (params[:_layout] && params[:_layout] == "injector")
+        if response_service.injector? 
           render text: notice
         else
           redirect_to url, :notice  => notice
         end
       }
-      fmt.json { 
-        replacements = [
-          [ "."+recipe_list_element_golink_class(@recipe) ], 
-          [ "."+recipe_list_element_class(@recipe) ], 
-          [ "."+recipe_grid_element_class(@recipe) ] 
-        ]
-        replacements << [ "."+feed_list_element_class(@feed_entry) ] if @feed_entry
-        @user = @recipe.current_user ? Recipe.find(@recipe.current_user) : current_user_or_guest
-        @browser = current_user.browser
-        if current_user.browser.should_show(@recipe) && !destroyed
-          replacements[0][1] = with_format("html") do render_to_string partial: "recipes/golink" end
-          replacements[1][1] = with_format("html") do render_to_string partial: "shared/recipe_smallpic" end
-          replacements[2][1] = with_format("html") do render_to_string partial: "shared/recipe_grid" end
-          replacements[3][1] = with_format("html") do render_to_string partial: "shared/feed_entry" end if @feed_entry
+      fmt.json {
+        if response_service.injector?
+          flash[:notice] = notice
+          render :errors
+        else
+          render :update, locals: { destroyed: destroyed, notice: notice, entity: @recipe }
         end
-        render json: { 
-                       done: true, # Denotes recipe-editing is finished
-                       popup: notice,
-                       title: truncated, 
-                       replacements: replacements,
-                       action: params[:action],
-                       processorFcn: "RP.rcp_list.update"
-                     } 
       }
       fmt.js { 
         render text: @recipe.title 
@@ -52,28 +35,18 @@ class RecipesController < ApplicationController
   end
 
   def index
-    redirect_to collection_url
+    redirect_to collection_path
     # return if need_login true
     # Get the collected recipes for the user named in query
-=begin
-    user = current_user_or_guest
-    @listowner = user.id
-    @recipes = user.recipes 
-    @Title = "#{user.handle}\'s Cookmarks"
-    @nav_current = nil
-=end
   end
 
   def show
     # return if need_login true
-    @recipe = Recipe.find(params[:id])
-    @recipe.current_user = current_user_or_guest_id # session[:user_id]
-    @recipe.touch false
-    @decorator = @recipe.decorate
-    @Title = ""
+    update_and_decorate
+    current_user.touch @recipe if current_user
+    response_service.title = ""
     @nav_current = nil
     smartrender
-    # redirect_to @recipe.url
   end
 
   def new # Collect URL, then re-direct to edit
@@ -86,23 +59,17 @@ class RecipesController < ApplicationController
       @feed_entry = FeedEntry.find params[:feed_entry].to_i
       params[:url] = @feed_entry.url
     end
-    if (params[:url] &&
-        (@recipe = Recipe.ensure current_user_or_guest_id, params.slice(:url)) && 
-        @recipe.id) # Mark of a fetched/successfully saved recipe: it has an id
+    if params[:url] && (@recipe = Recipe.ensure params.slice(:url)) && @recipe.id # Mark of a fetched/successfully saved recipe: it has an id
+      current_user.collect @recipe if current_user # Add to the current user's collection
     	# re-direct to edit
     	if @feed_entry
     	  @feed_entry.recipe = @recipe
     	  @feed_entry.save
   	  end
       report_recipe( collection_path, truncate( @recipe.title, :length => 100)+" now appearing in your collection.", formats)
-    	# redirect_to edit_recipe_url(@recipe), :notice  => "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br>You might want to confirm the title and picture, and/or tag it?".html_safe
     else
-        @Title = "Cookmark a Recipe"
-        @nav_current = :addcookmark
-        @recipe ||= Recipe.new
-        @recipe.current_user = current_user_or_guest_id # session[:user_id]
-        # @_area = params[:_area]
-        # dialog_boilerplate 'new', 'modal'
+        response_service.title = "Cookmark a Recipe"
+        update_and_decorate
         smartrender
     end
   end
@@ -111,37 +78,29 @@ class RecipesController < ApplicationController
   def create # Take a URL, then either lookup or create the recipe
     # return if need_login true
     # Find the recipe by URI (possibly correcting same), and bind it to the current user
-    @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe] # session[:user_id], params[:recipe]
+    update_and_decorate Recipe.ensure(params[:recipe]) # session[:user_id], params[:recipe]
     if @recipe.errors.empty? # Success (valid recipe, either created or fetched)
+      current_user.collect @recipe if current_user  # Add to collection
       respond_to do |format|
         format.html { # This is for capturing a new recipe and tagging it using a new page. 
           session[:recipe_pending] = @recipe.id
           redirect_to collection_path
         }
         format.json {
-          @decorator = @recipe.decorate
-          @data = { onget: [ "submit.submit_and_process", collection_url(layout: false) ] }
+          @data = { onget: [ "submit.submit_and_process", user_collection_url(current_user, layout: false) ] }
+          response_service.mode = :modal
           render json: {
             dlog: with_format("html") { 
               render_to_string :edit, layout: false
-            }
+            }, popup: "'#{@recipe.title}' now appearing in your colleciton."
           }
         }
       end
-=begin
-      report_recipe(  
-        edit_recipe_url(@recipe), 
-        "\'#{@recipe.title || 'Recipe'}\' has been cookmarked for you.<br> You might want to confirm the title and picture, and/or tag it?".html_safe,
-        formats )
-=end
     else # failure (not a valid recipe) => return to new
-       @Title = "Cookmark a Recipe"
+       response_service.title = "Cookmark a Recipe"
        @nav_current = :addcookmark
-       # render :action => 'new'
        @recipe.current_user = current_user_or_guest_id # session[:user_id]
-       # @_area = params[:_area]
-       # dialog_boilerplate 'new', 'modal'
-       smartrender :action => 'new', modal: true # , :how => :modal
+       smartrender :action => 'new', mode: :modal 
     end
   end
 
@@ -153,31 +112,33 @@ class RecipesController < ApplicationController
     respond_to do |format|
       format.html { # This is for capturing a new recipe and tagging it using a new page. 
         if current_user
-          @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe]||{}, true, params[:extractions] # session[:user_id], params
-          # The injector (capture.js) calls for this to fill the iframe on the foreign page.
-          # @_layout = "injector"
+          update_and_decorate Recipe.ensure(params[:recipe]||{}, params[:extractions])
           if @recipe.id
-            # deferred_capture true # Delete the pending recipe
+            current_user.collect @recipe
             if response_service.injector?
-              smartrender :action => :edit # :_layout => (params[:_layout] || response_service.dialog?)
+              smartrender :action => :tag
             else
               # If we're collecting a recipe outside the context of the iframe, redirect to
               # the collection page with an embedded modal dialog invocation
-              redirect_to_modal edit_recipe_path(@recipe)
+              redirect_to_modal tag_recipe_path(@recipe)
             end
           else
             @resource = @recipe
             render "pages/resource_errors", response_service.render_params
           end
         else
-          login_required nil # format: :html, params: params.slice(:recipe, :extractions, :sourcehome )
+          login_required nil, :format => :json # format: :html, params: params.slice(:recipe, :extractions, :sourcehome )
+          # Revise deferred_request for JSON
+          # @recipe = Recipe.preload(params[:recipe]||{}, params[:extractions])
+          # login_required nil, after_path: tag_recipe_path(@recipe)
         end
       }
       format.json {
         if current_user          
-          @recipe = Recipe.ensure current_user_or_guest_id, params[:recipe]||{}, true, params[:extractions] # session[:user_id], params
+          update_and_decorate Recipe.ensure(params[:recipe]||{}, params[:extractions])
           if @recipe.id
-            @data = { onget: [ "submit.submit_and_process", collection_url(layout: false) ] } unless response_service.injector?
+            current_user.collect @recipe
+            @data = { onget: [ "submit.submit_and_process", user_collection_url(current_user, layout: false) ] } unless response_service.injector?
             # deferred_capture true # Delete the pending recipe
             codestr = with_format("html") { render_to_string :edit, layout: false }
           else
@@ -218,25 +179,6 @@ class RecipesController < ApplicationController
     end
   end
 
-  def edit
-    # return if need_login true
-    # Fetch the recipe by id, if possible, and ensure that it's registered with the user
-    @recipe = Recipe.ensure current_user_or_guest_id, params.slice(:id) # session[:user_id], params
-    if @recipe && @recipe.errors.empty? # Success (recipe found)
-      @Title = @recipe.title # Get title from the recipe
-      @decorator = @recipe.decorate
-      @nav_current = nil
-      # @_area = params[:_area]
-      # Now go forth and edit
-      # @_layout = params[:_layout]
-      # dialog_boilerplate('edit', 'at_left')
-      smartrender # area: 'at_left'
-    else
-      @Title = "Cookmark a Recipe"
-      @nav_current = :addcookmark
-    end
-  end
-  
   # Respond to a request from the recipe editor for a list of pictures
   def piclist
       @recipe = Recipe.find(params[:id])
@@ -249,19 +191,19 @@ class RecipesController < ApplicationController
   
   def update
     # return if need_login true
-    @recipe = Recipe.find(params[:id])
     if params[:commit] == "Cancel"
-      report_recipe collection_url, "Recipe secure and unchanged.", formats
+      @recipe = Recipe.find params[:id]
+      report_recipe user_collection_url(current_user), "Recipe secure and unchanged.", formats
     else
-      @recipe.current_user = current_user_or_guest_id # session[:user_id]
-      if saved_okay = @recipe.update_attributes(params[:recipe])
-        if ref = Rcpref.where( user_id: @recipe.current_user, recipe_id: @recipe.id ).first
+      update_and_decorate
+      if @recipe.errors.empty?
+        if ref = @recipe.user_pointers.where( user: current_user ).first
           ref.edit_count += 1
           ref.save
         end
-        report_recipe( collection_url, "Successfully updated #{@recipe.title || 'recipe'}.", formats )
+        report_recipe( user_collection_url(current_user), "Successfully updated #{@recipe.title || 'recipe'}.", formats )
       else
-        @Title = "Tag That Recipe (Try Again)!"
+        response_service.title = "Tag That Recipe (Try Again)!"
         @nav_current = nil
         # render :action => 'edit', :notice => "Huhh??!?"
         # @_area = "page" # params[:_area]
@@ -274,86 +216,10 @@ class RecipesController < ApplicationController
   end
   
   # Register that the recipe was touched by the current user--if they own it.
-  # Since that recipe will now be at the head return a new first-recipe in the list.
   def touch
-    @recipe = Recipe.ensure current_user_or_guest_id, params.slice(:id, :url), false # session[:user_id], params
-    respond_to do |format|
-      list_element_body = render_to_string partial: "shared/recipe_smallpic"
-      format.json { 
-          render json: { touch_class: touch_date_class(@recipe), 
-                         touch_body: touch_date_elmt(@recipe), 
-                         list_element_class: recipe_list_element_class(@recipe),
-                         list_element_body: list_element_body
-                       } 
-      }
-      format.html { 
-          @list_name = "mine"
-          render 'shared/_recipe_smallpic.html.erb', :layout=>false 
-      }
-    end
-  end
-
-  def untag
-    x=1
-    @recipe = Recipe.find params[:recipe_id]
-    tag_id = params[:id].to_i
-    tag_ids = @recipe.tag_ids owner_id: current_user.id
-    tag_ids = tag_ids.delete_if { |id| id == tag_id }
-    @recipe.tag_ids = { owner_id: current_user.id, tag_ids: tag_ids }
-    @recipe.save
-    @recipe.reload
-    tag_ids = @recipe.tag_ids owner_id: current_user.id
-    @jsondata = {
-        replacements: [
-            [ "div.rcpGridElmt"+@recipe.id.to_s, "" ]
-        ],
-        popup: "Fear not. '#{@recipe.title}' has been vanquished from this collection."
-    }
-    respond_to do |format|
-      format.json { render json: @jsondata }
-      format.js { render template: "shared/get_content" }
-    end
-  end
-  
-  # Add a recipe to the user's collection without going to edit tags. Full-page render is just collection page
-  # GET recipes/:id/collect
-  def collect
-    if current_user
-      @recipe = Recipe.ensure current_user_or_guest_id, params, true
-      @list_name = "mine"
-      # @_area = params[:_area]
-      if @recipe.errors.empty?
-        notice = truncate( @recipe.title, :length => 100)+" now appearing in your collection."
-        if params[:uid]
-          flash[:notice] = notice
-          respond_to do |format|
-            format.html { redirect_to collection_path }
-            format.json { render json: { redirect: collection_path } }
-          end
-        else
-          report_recipe( collection_path, notice, formats)
-        end
-      else
-        respond_to do |format|
-          format.html { render nothing: true }
-          format.json { render json: { type: :error, popup: @recipe.errors.messages.first.last.last } }
-          format.js { render :text => e.message, :status => 403 }
-        end
-      end
-    else # Nobody logged in; defer the collection and render with login dialog
-      login_required "You need to be logged in to collect recipes."
-    end
-  end
-
-  # Delete the recipe from the user's list
-  def remove
-    # return if need_login true
-    @recipe = Recipe.ensure current_user_or_guest_id, params.slice(:id), false
-    @recipe.remove_from_collection current_user_or_guest_id
-    truncated = truncate(@recipe.title, :length => 40)
-    report_recipe collection_url, 
-      "Fear not. \"#{truncated}\" has been vanquished from your cookmarks--though you may see it in other collections.", 
-      formats
+    # This is a generic #touch action except for the manner in which the recipe is fetched
+    @entity = Recipe.ensure(params.slice(:id, :url))
+    super
   end
 
   # Remove the recipe from the system entirely
@@ -361,7 +227,7 @@ class RecipesController < ApplicationController
     @recipe = Recipe.find params[:id] 
     title = @recipe.title
     @recipe.destroy
-    report_recipe collection_url, "\"#{title}\" is gone for good.", formats, true
+    report_recipe user_collection_url(current_user), "\"#{title}\" is gone for good.", formats, true
   end
 
   def revise # modify current recipe to reflect a client-side change
@@ -371,7 +237,6 @@ class RecipesController < ApplicationController
 	# :do => 'add', 'remove'
 	# :what => "Genre", "Technique", "Course"
 	# :name => string identifier (name of element)
-    # @navlinks = navlinks(@recipe, :revise)
     if(params[:do] == "remove") 
     	c = @recipe.tags
     	c.each { |g| c.delete(g) if g.name == params[:name] }

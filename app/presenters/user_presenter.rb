@@ -6,11 +6,12 @@ end
 
 class UserPresenter < BasePresenter
   presents :user
-  delegate :username, to: :user
-  delegate :fullname, to: :user
+  delegate :username, :fullname, :handle, :lists, :feeds, to: :user
 
   def avatar
-    site_link image_tag(user.image.if_empty("default-avatar-128.png"), class: "avatar" )# image_tag("avatars/#{avatar_name}", class: "avatar")
+    img = user.image
+    img = "default-avatar-128.png" if img.blank?
+    site_link image_with_error_recovery(img, class: "avatar media-object", alt: "/assets/default-avatar-128.png") # image_tag("avatars/#{avatar_name}", class: "avatar")
   end
 
   def member_since
@@ -21,31 +22,51 @@ class UserPresenter < BasePresenter
     site_link(user.fullname.present? ? user.fullname : user.username)
   end
 
-=begin
-  def website
-    handle_none user.url do
-      h.link_to(user.url, user.url)
+  def aspect which, viewer=nil
+    label = which.to_s.capitalize.tr('_', ' ') # split('_').map(&:capitalize).join
+    contents = nil
+    case which
+      when :member_since
+        contents = member_since
+      when :about
+        contents = user.about
+      when :collected_feeds
+        label = "Following the feeds"
+        contents = strjoin(feeds.collect { |feed|
+                            link_to_submit feed.title, feed_path(feed), :mode => :partial
+                          }).html_safe
+      when :collected_lists, :owned_lists
+        if which == :owned_lists
+          lists = user.visible_lists viewer
+          label = "Created the lists"
+        else
+          lists = user.collected_entities List, viewer
+          label = "Following the lists"
+        end
+        unless lists.empty?
+          contents = strjoin(
+              lists.collect { |list|
+                link_to_submit list.name, list_path(list), :mode => :partial
+              }).html_safe
+        end
     end
+    content_tag( :tr,
+      content_tag( :td, content_tag( :h4, label), style:"padding-right: 10px; vertical-align:top; text-align: right" )+
+      content_tag( :td, contents, style: "vertical-align:top; padding-top:11px" )
+    ) unless contents.blank?
   end
-
-  def twitter
-    handle_none user.twitter_name do
-      h.link_to user.twitter_name, "http://twitter.com/#{user.twitter_name}"
-    end
-  end
-=end
 
   def about
     handle_none user.about do
       markdown(user.about)
     end
   end
-  
+
   def tags
     user.tags.collect { |tag| tag.name }.join(', ')
   end
 
-private
+  private
 
   def handle_none(value)
     if value.present?

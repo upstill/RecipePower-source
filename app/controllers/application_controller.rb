@@ -1,9 +1,14 @@
 require './lib/controller_authentication.rb'
-require './lib/seeker.rb'
+# require './lib/seeker.rb'
+require './lib/querytags.rb'
+require './lib/templateer.rb'
 require 'rp_event'
+require 'reloader/sse'
+require 'results_cache.rb'
 
 class ApplicationController < ActionController::Base
-  # layout :rs_layout # Declare in any controller to let response_service pick the layout
+  include Querytags # Grab the query tags from params for filtering a list
+  # include ActionController::Live   # For streaming
   protect_from_forgery with: :exception
   
   before_filter :check_flash
@@ -13,18 +18,63 @@ class ApplicationController < ActionController::Base
   before_filter :setup_response_service
   before_filter :log_serve
 
-    helper :all
-    rescue_from Timeout::Error, :with => :timeout_error # self defined exception
-    rescue_from OAuth::Unauthorized, :with => :timeout_error # self defined exception
-    rescue_from AbstractController::ActionNotFound, :with => :no_action_error
-    
-    helper_method :response_service
-    helper_method :orphantagid
-    helper_method :stored_location_for
-    helper_method :deferred_capture
-    helper_method :deferred_collect
-    # helper_method :deferred_notification
-    include ApplicationHelper
+  helper :all
+  helper_method :current_user_or_guest
+  rescue_from Timeout::Error, :with => :timeout_error # self defined exception
+  rescue_from OAuth::Unauthorized, :with => :timeout_error # self defined exception
+  rescue_from AbstractController::ActionNotFound, :with => :no_action_error
+
+  helper_method :response_service
+  helper_method :orphantagid
+  helper_method :stored_location_for
+  helper_method :collection_path
+
+  include ApplicationHelper
+
+  # Set up a model for editing or rendering. The parameters are orthogonal:
+  # If entity is nil, it is either fetched using params[:id] or created anew
+  # If attribute_params are non-nil, they are used to initialize(update) the created(fetched) entity
+  # We also setup an instance variable for the entity according to its class,
+  #  and also set up a decorator (@decorator) on the entity
+  # Return value: true if all is well
+  def update_and_decorate entity=nil
+    if entity.is_a? Draper::Decorator
+      @decorator = entity
+      entity = entity.object
+    end
+    attribute_params = nil
+    if entity
+      # If the entity is provided, ignore parameters
+      modelname = entity.class.to_s.underscore
+    else # If entity not provided, find/build it and update attributes
+      modelname = params[:controller].sub( /_controller$/, '').singularize
+      objclass = modelname.camelize.constantize
+      entity = params[:id] ? objclass.find(params[:id]) : objclass.new
+      attribute_params = params[modelname.to_sym]
+    end
+    entity.uid = current_user_or_guest_id if entity.respond_to? :"uid="
+    if entity.errors.empty? && # No probs. so far
+        attribute_params && # There are parameters to update
+        current_user # Only the current user gets to modify a model
+      entity.update_attributes attribute_params
+    end
+    # Having prep'ed the entity, set instance variables for the entity and decorator
+    instance_variable_set :"@#{modelname}", entity
+    # We build a decorator if necessary and possible
+    unless (@decorator && entity == @decorator.object) # Leave the current decorator alone if it will do
+      @decorator = (entity.decorate if entity.respond_to? :decorate)
+    end
+    if @decorator
+      response_service.title = (@decorator.title || "").truncate(20)
+      @presenter = CollectiblePresenter.new @decorator, view_context
+    end
+    entity.errors.empty? # ...and report back status
+  end
+
+  # This replaces the old collections path, providing a path to either the current user's collection or home
+  def collection_path
+    current_user ? user_collection_path(current_user) : home_path
+  end
 
   # Track the session, saving session events when the session goes stale
   def log_serve
@@ -45,46 +95,31 @@ class ApplicationController < ActionController::Base
         last_serve.save
       end
     end
-    last_serve = RpEvent.post :serve, current_user, nil, nil, :serve_count => 1
+    last_serve = RpEvent.post current_user, :serve, nil, nil, :serve_count => 1
     session[:serve_count] = 1
     session[:start_time] = session[:last_time] = last_serve.created_at
   end
 
-  # Use the layout stipulated by the response_service
-  def rs_layout
-    response_service.layout
-  end
-    
   # Get a presenter for the object fron within a controller
-  def present(object, klass = nil)
-    klass ||= "#{object.class}Presenter".constantize
-    klass.new(object, view_context)
+  def present(object, rc_class = nil)
+    rc_class ||= "#{object.class}Presenter".constantize
+    rc_class.new(object, view_context)
   end  
 
   def check_flash
+    flash.now[:notice] = params[:notice] if params[:notice]
+    flash.now[:error] = params[:error] if params[:error]
+    if params[:flash]
+      params[:flash].each { |k, v| flash.now[k.to_sym] = v }
+    end
     logger.debug "FLASH messages extant for #{params[:controller]}##{params[:action]} (check_flash):"
-    logger.debug "    notice: "+flash[:notice] if flash[:notice]
-    logger.debug "    error: "+flash[:error] if flash[:error]
-		session[:on_tour] = true if params[:on_tour]
-		session[:on_tour] = false if current_user
+    view_context.flash_hash.each { |k, v| logger.debug "   #{k}: #{v}" }
   end
   
   def report_cookie_string
     logger.info "COOKIE_STRING:"
     if cs = request.env["rack.request.cookie_string"]
-      cs.split('; ').each { |str| 
-        logger.info "\t"+str
-        if m = str.match( /_rp_session=(.*)$/ )
-          sess = Rack::Session::Cookie::Base64::Marshal.new.decode(m[1])
-          logger.info "\t\t"+sess.pretty_inspect
-        end
-      }
-    end
-    logger.info "SESSION STORE:"
-    if cook = env["action_dispatch.request.unsigned_session_cookie"]
-      logger.info "\t\t"+cook.pretty_inspect
-    else
-      logger.info "\t\t= NIL"
+      cs.split('; ').each { |str| logger.info "\t"+str}
     end
   end
 
@@ -93,116 +128,69 @@ class ApplicationController < ActionController::Base
     response.cookies.each { |k, v| logger.info "#{k}: #{v}" }
     x=2
   end
-  
-  # Get the seeker from the session store (mainly used for streaming)
-  def retrieve_seeker
-    if klass = session[:seeker_class]
-      setup_seeker klass
+
+  # Take a stream presenter and drop items into a stream, if possible and called for.
+  # Otherwise, defer to normal rendering
+  def do_stream rc_class
+    @sp = StreamPresenter.new session.id, request.fullpath, rc_class, current_user_or_guest_id, response_service.admin_view?, querytags, params
+    if block_given?
+      yield @sp
+    end
+    if @sp.stream?  # We're here to spew items into the stream
+      # When the stream is request is for the first items, replace the results
+      if @sp.preface?
+        # Generally, start by restarting the results element and replacing the found count
+        header_item = with_format("html") {
+          { replacements: [
+              view_context.stream_element_replacement(:results, pkg_attributes: { id: @sp.stream_id } ),
+              view_context.stream_element_replacement(:count, final_count: true)
+          ] }
+        }
+      else
+        header_item = { deletions: [ '.stream-tail' ] }
+      end
+      response.headers["Content-Type"] = "text/event-stream"
+      # retrieve_seeker
+      begin
+        sse = Reloader::SSE.new response.stream
+        sse.write :stream_item, header_item
+
+        while item = @sp.next_item do
+          sse.write :stream_item, with_format("html") { { elmt: view_context.render_stream_item(item) } }
+        end
+        if @sp.next_path
+          sse.write :stream_item, with_format("html") { { elmt: view_context.render_stream_tail } }
+        end
+      rescue IOError
+        logger.info "Stream closed"
+      ensure
+        # In closing, replace the trigger to make it active again--or not
+        sse.close # replacements: [ with_format("html") { view_context.stream_element_replacement(:tail) } ]
+      end
+      @sp.suspend
+      true
     end
   end
 
-  def setup_seeker(klass, options=nil, params=nil)
-    @user ||= current_user_or_guest
-    params[:cur_page] = "1" if params && params[:selected]
-    @browser = @user.browser params
-    @user.save
-    # Go back to page 1 when a new browser element is selected
-    logger.debug "Fetching #{klass}Seeker with session[:seeker]="+session[:seeker].to_s
-    @seeker = "#{klass}Seeker".constantize.new @user, @browser, session[:seeker], params # Default; other controllers may set up different seekers
-    @seeker.tagstxt = "" if options && options[:clear_tags]
-    session[:seeker] = @seeker.store
-    session[:seeker_class] = klass
-    logger.debug "@seeker returning #{@seeker ? 'not ' : ''}nil."
-    @seeker
+  # Monkey-patch to adjudicate between streaming and render_to_stream per
+  # http://blog.sorah.jp/2013/07/28/render_to_string-in-ac-live
+  def render_to_string(*)
+    orig_stream = response.stream
+    super
+  ensure
+    if orig_stream
+      response.instance_variable_set(:@stream, orig_stream)
+    end
   end
-  
-  # All controllers displaying the collection need to have it setup 
-  def setup_collection klass="Content", options={}
-      @user ||= current_user_or_guest
-      @browser = @user.browser params
-      default_options = {}
-      default_options[:clear_tags] = (params[:controller] != "collection") && (params[:controller] != "stream")
-      setup_seeker klass, default_options.merge(options), params
-      if (params[:controller] == "pages")
-        # The search box in generic pages redirects collections, either "The Big List" for guests or
-        # the user's whole collection 
-        @browser.select_by_id(@user.guest? ? "RcpBrowserElementAllRecipes" : "RcpBrowserCompositeUser")
-        @user.save
-        @query_format = "html"
-        @query_path = collection_path
-      else
-        @query_format = "json"
-        @query_path = @seeker.query_path
-      end
-    # end
-  end
-  
-  # This is one-stop-shopping for a controller using the query to filter a list
-  # See tags_controller for an example
-  # Options: selector: CSS selector for the outermost container of the rendered index template
-  def seeker_result(klass, frame_selector, options={})
-    def jsondata(klass, frame_selector, options)
-      # In a json response we just re-render the collection list for replacement
-      # If we need to replace the page, we send back a link to do it with
-      if params[:redirect]
-        { redirect: assert_popup(nil, request.original_url) }
-      else
-        begin
-          setup_seeker(klass, options.slice(:clear_tags, :scope), params)
-        rescue Exception => e
-          # Response to a setup error is to reload the collections page
-          flash[:error] = e.to_s
-          return { redirect: "/collection" }
-        end
 
-        # flash.now[:guide] = @seeker.guide
-        # If this is the first page, we replace the list altogether, wiring the list
-        # to stream results. If it's a subsequent page, we just set up a stream to serve that page.
-        if (@seeker.cur_page == 1)
-          replacements = [
-              view_context.flash_notifications_replacement,
-              [ frame_selector, with_format("html") { render_to_string 'index', :layout=>false } ]
-          ]
-          unless @rp_old
-            replacements << [ '.collection-navtabs', with_format("html") { render_to_string partial: "collection/navtabs", :layout=>false } ]
-            replacements << [ '.collection-header', with_format("html") { render_to_string partial: "collection/header", :layout=>false } ]
-          end
-          { replacements: replacements }
-        else
-          {  streams: [ ['#seeker_results', {kind: @seeker.class.to_s, append: @seeker.cur_page.to_i>1}] ] }
-        end
-      end
-    end
-    respond_to do |format|
-      format.html {
-        params[:cur_page] = 1
-        setup_collection klass, options
-        # flash.now[:guide] = @seeker.guide
-        render :index
-      }
-      format.js do
-        @jsondata = jsondata(klass, frame_selector, options)
-        render template: "shared/get_content"
-      end
-      format.json { render json: jsondata(klass, frame_selector, options) }
-    end
-  end
-  
   # Generalized response for dialog for a particular area
-  def smartrender(renderopts={})
+  def smartrender renderopts={}
     response_service.action = renderopts[:action] || params[:action]
     url = renderopts[:url] || request.original_url
-    # flash.now[:notice] = params[:notice] unless flash[:notice] # ...should a flash message come in via params
-    # @_area = params[:_area]
-    # @_layout = params[:_layout]
-    # @_partial = !params[:_partial].blank?
-    # Apply the default render params, honoring those passed in
     renderopts = response_service.render_params renderopts
     respond_to do |format|
       format.html do
-        if response_service.page? && renderopts[:redirect_to]
-          redirect_to renderopts[:redirect_to]
-        elsif response_service.dialog?
+        if response_service.mode == :modal
           # Run the request as a dialog within the collection page
           redirect_to_modal url
         else
@@ -210,15 +198,25 @@ class ApplicationController < ActionController::Base
         end
       end
       format.json {
-        # Blithely assuming that we want a modal-dialog element if we're getting JSON
-        response_service.is_dialog
-        renderopts[:layout] = (@layout || false)
-        hresult = with_format("html") do
-          render_to_string response_service.action, renderopts # May have special iframe layout
+        case response_service.mode
+        when :partial
+          renderopts[:layout] = false
+          if @sp
+            # If operating with a stream, package the content into a stream-body element, with stream trigger
+            renderopts[:action] = response_service.action
+            begin
+              replname = @sp.has_query? ? "shared/stream_results_replacement" : "shared/pagelet_body_replacement"
+              render template: replname, layout: false
+            rescue Exception => e
+              x=2
+            end
+          else
+            render renderopts
+          end
+        when :modal, :injector
+          dialog = render_to_string renderopts.merge(action: response_service.action, layout: (@layout || false), formats: ["html"])
+          render json: {code: dialog, how: "bootstrap"}.to_json, layout: false, :content_type => 'application/json'
         end
-        # renderopts[:json] = { code: hresult, area: response_service.format_class, how: "bootstrap" }
-        renderopts[:json] = { code: hresult, how: "bootstrap" }
-        render renderopts
       }
       format.js {
         # XXX??? Must have set @partial in preparation
@@ -238,9 +236,13 @@ class ApplicationController < ActionController::Base
     else
         params[:action]
     end
-    notice = "Sorry, but as a #{current_user_or_guest.role}, you're not allowed to #{action} #{params[:controller]}."
+    flash[:alert] = "Sorry, but as a #{current_user_or_guest.role}, you're not allowed to #{action} #{params[:controller]}."
     respond_to do |format|
-      format.html { redirect_to(:back, notice: notice) rescue redirect_to('/', notice: notice) }
+      format.html { redirect_to(:back) rescue redirect_to('/') }
+      format.json {
+        notif = view_context.flash_notify
+        render json: notif
+      }
       format.xml  { head :unauthorized }
       format.js   { head :unauthorized }
     end
@@ -260,12 +262,11 @@ class ApplicationController < ActionController::Base
   # alias_method :rescue_action_locally, :rescue_action_in_public  
   
   def setup_response_service
+    @user = current_user_or_guest
     @response_service ||= ResponseServices.new params, session, request
-    # Mobile is sticky: it stays on for the session once the "mobile" target parameter appears
-    @response_service.is_mobile if (params[:target] == "mobile")
     @response_service
   end
-  
+
   # This object directs conditional view code according to target device and context
   def response_service
     @response_service || setup_response_service
@@ -279,7 +280,10 @@ class ApplicationController < ActionController::Base
 
   # Enable a modal dialog to run by embedding its URL in the URL of a page, then redirecting to it
   def redirect_to_modal dialog, page=nil
-    redirect_to hash_to_modal(dialog, page)
+    # Transfer the contents of the flash to the trigger
+    options = { mode: :modal }
+    flash.each { |type, message| options["flash[#{type}]"] = message } if defined?(flash)
+    redirect_to view_context.page_with_trigger(page, assert_query(dialog, options))
   end
 
   # before_filter on controller that needs login to do anything
@@ -315,21 +319,19 @@ class ApplicationController < ActionController::Base
   def stored_location_for(resource_or_scope)
     # If user is logging in to complete some process, we return
     # the path to completing the capture/tagging process
-    scope = Devise::Mapping.find_scope!(resource_or_scope)
-    if scope && (scope==:user)
-      # If on the site, login triggers a refresh of the collection
-      response_service.deferred_request || response_service.url_for_redirect(collection_path, :format => :html)
-    end || super
+    response_service.deferred_request || super
   end
 
   # This is an override of the Devise method to determine where to go after login.
-  # If there was a re-direct to the login page, we go back to the source of the re-direct.
-  # Otherwise, new users go to the welcome page and logged-in-before users to the queries page.
-  def after_sign_in_path_for(resource_or_scope)
+  # If there was a redirect to the login page, we go back to the source of the redirect.
+  # Otherwise, new users go to the welcome page and previously-logged-in users to the queries page.
+  def after_sign_in_path_for(resource_or_scope, popup = nil)
     # Process any pending notifications
-    notices = current_user.notifications_received.where(accepted: false).collect { |notification| notification.accept }.join('<br>'.html_safe)
-    flash[:success] = notices unless notices.blank?
-    stored_location_for(resource_or_scope) || super
+    view_context.issue_notifications current_user
+    path = stored_location_for(resource_or_scope) || collection_path
+    path = view_context.page_with_trigger(path, popup) if popup # Trigger the intro popup
+    # If on the site, login triggers a refresh of the collection
+    response_service.url_for_redirect(path, :format => :html)
   end
 
   protected

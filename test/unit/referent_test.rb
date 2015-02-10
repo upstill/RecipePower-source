@@ -236,11 +236,6 @@ class ReferentTest < ActiveSupport::TestCase
     assert_equal :StoreSection, ref.typesym, "Bad Type Symbol"
     assert_equal 10, ref.typenum, "Bad Type Number"
 
-    ref = ChannelReferent.new
-    assert_equal "Channel", ref.typename, "Bad Type Name"
-    assert_equal :Channel, ref.typesym, "Bad Type Symbol"
-    assert_equal 11, ref.typenum, "Bad Type Number"
-
     ref = ToolReferent.new
     assert_equal "Tool", ref.typename, "Bad Type Name"
     assert_equal :Tool, ref.typesym, "Bad Type Symbol"
@@ -262,14 +257,7 @@ class ReferentTest < ActiveSupport::TestCase
     r1 = GenreReferent.create tag_id: tags(:cake).id
     r2 = IngredientReferent.create tag_id: tags(:jal2).id
     r2id = r2.id
-    assert_not r1.merge(r2), "Bad referent merge returned successfully"
-  end
-
-  test "Successfully created goat milk tag" do
-    goat_milk_tag = create :goat_milk_tag
-    assert_not_nil goat_milk_tag "Goat Milk Tag not created"
-    assert_equal 3, goat_milk_tag.type, "Goat milk tag wrong type"
-    assert_equal "goat", goat_milk_tag.name, "Goat milk tag wrong name"
+    assert_not r1.absorb(r2), "Bad referent merge returned successfully"
   end
 
   test "Merge of two referents with overlapping parents has the right parents" do

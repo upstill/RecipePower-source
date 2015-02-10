@@ -2,7 +2,7 @@
 <% inviter_name = @resource.invitation_issuer %>
 <% accept_str = link_to("accept the invitation", 
 		accept_user_invitation_url(
-                :rpevent => RpEvent.embed_trigger(:invitation_responded, @resource, @invitation_event, @resource.invited_by),
+                :rpevent => RpEvent.embed_trigger(@resource, :invitation_responded, @invitation_event, @resource.invited_by),
                 :invitation_token => @resource.raw_invitation_token
         )) %>
 		
@@ -17,7 +17,10 @@
   <% end %>
 <% end %>
 --<br>
-<%= link_to "RecipePower", root_url %> makes sure you never forget a recipe again, lets you find them again quickly, and clues you in to your friends' discoveries too!  Join <%= inviter_name || "us" %> and you'll get cooking like never before. Getting started takes just a few seconds, then you'll be snagging the best recipes from the Web--for good. So <%= accept_str %> already!
+<%= link_to "RecipePower", root_url %> is the place to save your cooking inspirations from
+across the Web and share them with others. Join <%= inviter_name || "us" %> and keep your
+kitchen brain sharp and keen. Getting started takes just a few seconds, then
+you'll find what an amazing cooking tool the Web can be.
 <p>
 --<br>
 Max and Steve

@@ -66,12 +66,15 @@ class TagServices
   def self.parent_ids(ids)
     ExpressionServices.parent_ids_of_tags(ids)
   end
-  
+
   def parents
-    parent_ids.collect { |parent_set| Tag.where id: parent_set }
+    ExpressionServices.parent_tags_of_tags id
+    # Tag.where id: parent_ids
+    # pi.collect { |parent_set| Tag.where id: parent_set }
     # Tag.where id: parent_ids
   end
-# -----------------------------------------------    
+
+# -----------------------------------------------
   # Return tags that match any of the given tags lexically, regardless of type
   def self.lexical_similars(tags)
     results = tags
@@ -82,8 +85,10 @@ class TagServices
     results
   end
   
-  def lexical_similars
-    Tag.strmatch(tag.name).delete_if { |other| other.id == id }
+  def similar_ids
+    relation_or_array = Tag.strmatch tag.name
+    ids = relation_or_array.is_a?(Array) ? relation_or_array.map(&:id) : relation_or_array.pluck(:id)
+    ids.keep_if { |candidate| candidate != id }
   end
       
 # -----------------------------------------------      
@@ -136,6 +141,21 @@ class TagServices
       file.write(label+" (#{Time.new} #{index_status}): "+time.to_s+"\n")
     }
     true
+  end
+
+  # Study the Yummly dataset for correspondence with RecipePower's
+  def self.yumm
+    file = File.read "yumm.json"
+    # ingreds = JSON.parse file
+    results = ingreds.collect { |ingred|
+      tags = Tag.strmatch ingred["term"], matchall: true
+      (tags.empty? ? "No match on #{ingred["term"]}" : "Matched #{ingred["term"]}:")+
+          tags.collect { |tag| "\n\t#{tag.typename} #{tag.id}: #{tag.name}"}.join('')
+    }.sort { |line1, line2| line1 <=> line2 }
+    results.each { |line| puts line }
+    total = results.count
+    nmatched = results.keep_if { |result| result.match /^Matched/ }.compact.count
+    puts "Matched #{nmatched} of #{total}."
   end
 
 end

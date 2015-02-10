@@ -2,7 +2,7 @@
 class Tag < ActiveRecord::Base
     # require 'iconv'
     include Typeable
-    
+    # TODO: eliminate Channel and Collection types
     typeable( :tagtype, 
         Untyped: ["Untyped", 0 ],
         Genre: ["Genre", 1], 
@@ -19,16 +19,19 @@ class Tag < ActiveRecord::Base
         Tool: ["Tool", 12], 
         Nutrient: ["Nutrient", 13],
         CulinaryTerm: ["Culinary Term", 14],
-        Collection: ["Private Collection", 15]
+        Collection: ["Private Collection", 15],
+        List: ["List", 16]
     )
     
-    attr_accessible :name, :id, :tagtype, :isGlobal, :links, :recipes, :referents, :users, :owners, :primary_meaning
+    attr_accessible :name, :id, :tagtype, :isGlobal, :links, :referents, :users, :owners, :primary_meaning # , :recipes
     
     has_many :taggings, :dependent => :destroy
+
+    has_many :dependent_lists, :class_name => "List", foreign_key: "name_tag_id"
     
     # expressions associate tags with the foods (roles, processes, etc.) they refer to
     # These are the "meanings" of a tag
-    has_many :expressions
+    has_many :expressions, :dependent=>:destroy
     has_many :referents, :through=>:expressions
 
     # When a tag is used as the basis for a personal collection, destroying the tag destroys the collection
@@ -38,37 +41,68 @@ class Tag < ActiveRecord::Base
     belongs_to :primary_meaning, :class_name => "Referent", :foreign_key => "referent_id"
     
     # ownership of tags restrict visible tags
-    has_many :tag_owners
+    has_many :tag_owners, :dependent=>:destroy
     has_many :owners, :through=>:tag_owners, :class_name => "User", :foreign_key => "user_id"
     
     validates_presence_of :name
     before_validation :tagqa
+
+    # Delete this tag only if it's safe to do so
+    def safe_destroy
+      destroy if taggings.empty? && expressions.empty? && dependent_lists.empty?
+    end
     
     # Pre-check to determine whether a tag can absorb another tag
     def can_absorb other
         other.normalized_name == self.normalized_name && ((other.tagtype==0) || (other.tagtype == self.tagtype))    
     end
-    
-    def recipes(uid=nil)
-      Recipe.where id: recipe_ids(uid)
+
+    # Class method to define instance methods for the taggable entities: those of taggable_class
+    # This is invoked by the Taggable module when it is included in a taggable
+    def self.taggable taggable_class
+
+      taggable_type = taggable_class.to_s.underscore
+      ids_method_name = "#{taggable_type}_ids"
+
+      define_method taggable_type.pluralize do |uid=nil|
+        taggable_class.where id: self.method(ids_method_name).call(uid)
+      end
+
+      define_method ids_method_name do |uid=nil|
+        scope = taggings.where entity_type: taggable_class
+        scope = scope.where(:user_id => uid) if uid
+        scope.map(&:entity_id).uniq
+      end
     end
-    
-    def recipe_ids(uid=nil)
-      constraints = { tag_id: id, entity_type: "Recipe" }
-      constraints[:user_id] = uid if uid
-      Tagging.where(constraints).map &:entity_id
+
+    # The Tag class defines taggable-entity association methods here. The Taggable class is cocnsulted, and if it has
+    # a :tag_with method (part of the Taggable module), then the methods get defined, otherwise we punt
+    # NB All the requisite methods will have been defined IF the taggable's class has been defined (thank you, Taggable)
+    # We're really only here to deal with the case where the Tag class (or a tag model) has been accessed before the
+    # taggable class has been defined. Thus, the method_defined? call on the taggable class is enough to ensure the loading
+    # of that class, and hence the defining of the access methods.
+    def method_missing(meth, *args, &block)
+      meth = meth.to_s
+      # methstr = meth
+      # methstr = ":#{methstr}" if meth.is_a? Symbol
+      # puts "Tag method '#{methstr}' missing"
+      begin
+        taggable_class = ((match = meth.match(/(.+)_ids/)) ? match[1] : meth).singularize.camelize.constantize
+        proof_method = :tag_with
+        # puts "Extracted taggable_class '#{taggable_class}'"
+        # puts "#{taggable_class} "+(taggable_class.method_defined?(proof_method) ? "has " : "does not have ")+"'#{proof_method}' method"
+        if taggable_class.method_defined?(proof_method) && Tag.method_defined?(meth)
+          self.method(meth).call *args, &block
+        else
+          # puts "Failed to define method '#{methstr}'"
+          super
+        end
+      rescue Exception => e
+        # puts "D'OH! Couldn't create association between Tag and #{taggable_class}"
+        super
+      end
     end
-    
-    def users(uid=nil)
-      User.where id: user_ids(uid)
-    end
-    
-    def user_ids(uid=nil)
-      constraints = { tag_id: id, entity_type: "User" }
-      constraints[:user_id] = uid if uid
-      Tagging.where(constraints).map &:entity_id
-    end
-    
+
     # When a tag is asserted into the database, we do have minimal sanitary standards:
     #  no leading or trailing whitespace
     #  all internal whitespace is replaced by a single space character
@@ -108,38 +142,37 @@ class Tag < ActiveRecord::Base
     #  or the original tag, with errors
     def disappear
       if target = clashing_tag
-        ((target.tagtype == 0) && (tagtype != 0)) ? target.disappear_into(self) : disappear_into(target)
+        ((target.tagtype == 0) && (tagtype != 0)) ? absorb(target) : target.absorb(self)
       else
         save
         self
       end
     end
     
-    # Make self disappear by absorbing it into the target
-    def disappear_into target
+    def absorb other
       # Normal procedure: 
-      TaggingServices.change_tag(id, target.id)
-      ReferentServices.change_tag(id, target.id) # Change the canonical expression of any referent which uses us
-      # Merge the general uses of self as an expression into those of the target
-      target.referent_ids = (referent_ids+target.referent_ids).uniq
-      target.primary_meaning ||= primary_meaning
+      TaggingServices.change_tag(other.id, self.id)
+      ReferentServices.change_tag(other.id, self.id) # Change the canonical expression of any referent which uses us
+      # Merge the general uses of other as an expression into those of the target
+      self.referent_ids = (other.referent_ids+self.referent_ids).uniq
+      self.primary_meaning ||= other.primary_meaning
       
       # Take on all owners of the absorbee unless one of them is global
-      if target.isGlobal ||= isGlobal
-        target.owners.clear
+      if self.isGlobal ||= other.isGlobal
+        self.owners.clear
       else
-        target.owner_ids = (owner_ids + target.owner_ids).uniq
+        self.owner_ids = (other.owner_ids + self.owner_ids).uniq
       end
-      if target.errors.any?
+      if self.errors.any?
         # Failure: copy errors into the original record and return it
-        target.errors.each { |k, v| self.errors[k] = v }
-        self
+        self.errors.each { |k, v| other.errors[k] = v }
+        other
       else
         Tag.transaction do
-          self.destroy
-          target.save
+          other.destroy
+          self.save
         end
-        target
+        self
       end
     end
     
@@ -184,7 +217,7 @@ class Tag < ActiveRecord::Base
    # Taking either a tag, a string or an id, make sure there's a corresponding tag
    #  of the given type that's available to the named user. NB: 't' may be a Tag, but
    #  not necessarily of the given type, or one available to the user.
-   def self.assert_tag(t, opts = {} )
+   def self.assert(t, opts = {} )
        # Convert tag type, if any, into internal form
        opts[:tagtype] = Tag.typenum(opts[:tagtype]) if opts[:tagtype]
        if t.class == Fixnum

@@ -1,6 +1,5 @@
 <% prompt = "needs you to sign in to collect this cookmark. Not a member? " %>
-<%# prompt << link_to_redirect("Sign up!", hash_to_modal( new_user_registration_url, home_url )) %>
-<% prompt << link_to_modal("Sign up!", new_registration_path(@user, target: "injector")) %>
+<% prompt << link_to_submit("Sign up!", new_registration_path(@user), mode: :injector) %>
 <%= injector_dialog :sign_in, prompt.html_safe, :noflash => true, dismiss_button: false do %>
     <%= render 'authentications/possible', prompt: "You can sign in with one of these fine services:" %>
     <div class="or"><h4>OR</h4></div>

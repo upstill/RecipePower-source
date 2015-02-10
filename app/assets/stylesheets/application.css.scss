@@ -5,31 +5,119 @@
 @import 'common/dialog';
 @import 'paginate';
 @import "jquery/jNotify.jquery";
-@import 'jquery/jquery-ui-1.8.17.custom';
+@import "jquery.ui.all";
+// @import 'jquery/jquery-ui-1.8.17.custom';
 @import 'jquery/token-input-bootstrappy';
 @import 'feedback';
 @import 'collection';
 
 .brand {
-	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-	line-height: 20px;
-	text-decoration: none;
-	font-size: 20px;
-	font-weight: 150;
-	color: #999999;
-	# text-shadow: 0 1px 0 #888888;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  line-height: 20px;
+  text-decoration: none;
+  font-size: 20px;
+  font-weight: 150;
+  color: #999999;
 }
 
-.top_right_corner {
-  position: absolute;
-  z-index: 1000;
-  top: 0px;
-  right: 0px;
+div.card {
+  background-color: white;
+  border: 2px darkgray;
+  margin-top: 10px;
+  padding-top: 10px
 }
 
-div.prompt {
-  font:18px arial,sans-serif;
-  font-weight:bold;
-  margin: 20px 0px 15px 10px;
-  padding: 0px;
+// .simple_form label {
+  // float: left;
+  // margin: 8px 0 5px;
+// }
+
+.resource-element {
+  margin-top: 10px;
+  &.pic {
+    display: inline-block;
+    vertical-align: top;
+  }
+
+  &.info {
+    display: inline-block;
+    vertical-align: top;
+    margin: 10px;
+  }
+
+  &.title {
+    margin-bottom: 10px;
+    font-size: 24px;
+    font-weight: bold;
+  }
+
+  &.subtitle {
+    margin-bottom: 10px;
+    font-size: 18px;
+    font-weight: normal;
+  }
 }
+
+  // Cozies up to the tags selector above it
+  div.form-group {
+    &.boolean {
+      margin-left: 30px;
+      &.list_pullin {
+        margin-top: 5px;
+      }
+    }
+    &.radio_buttons {
+      margin-left: 10px;
+      margin-bottom: 10px;
+    }
+  }
+
+  form.edit_user {
+    div.row.bottom {
+      margin-top: 10px;
+    }
+  }
+
+  div.token-input-dropdown-facebook {
+    font: 14px arial, sans-serif;
+  }
+
+  .top_right_corner {
+    position: absolute;
+    z-index: 1000;
+    top: 0px;
+    right: 0px;
+  }
+
+  div.prompt {
+    font: 18px arial, sans-serif;
+    font-weight: bold;
+    margin: 20px 0px 15px 10px;
+    padding: 0px;
+  }
+
+  .hd1 {
+    font: 22px arial, sans-serif;
+    font-weight: bold;
+  }
+
+  div.stream-results {
+    margin-top: 20px;
+  }
+
+  div.stream-filter-field {
+    display: inline-block;
+    vertical-align: bottom;
+    margin-bottom: 0px
+  }
+
+  div.masonry-item {
+    img.beachball {
+      margin: 50px 96px;
+    }
+  }
+
+  hr.menu {
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }

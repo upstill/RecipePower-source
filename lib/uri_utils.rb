@@ -8,14 +8,15 @@ end
 
 # Try to make sense out of a given path in the context of another url.
 # Return either a valid URL or nil
-def valid_url(path, url)
+def valid_url path, url
+  path ||= ""  # Could happen
   if validate_link(path) && good = test_link(path) # either the original URL or a replacement are good
     return (good.class == String) ? good : path
   elsif url
     # The path may be relative. In fact, it may have backup characters
     begin
       uri = URI.join( url, path ).to_s
-      return validate_link(uri) && uri
+      uri if validate_link(uri)
     rescue Exception => e
       return nil
     end
@@ -72,8 +73,13 @@ def fix_fragment url
   end
 end
 
+# Fix errant characters without re-escaping '%'
 def sanitize_url url
-  url.strip.gsub(/\{/, '%7B').gsub(/\}/, '%7D').gsub(/\%23/, '#' )
+  url.strip.
+      gsub(/\{/, '%7B').
+      gsub(/\}/, '%7D').
+      gsub(/ /, '%20').
+      gsub(/\%23/, '#' )
 end
 
 # Return nil if anything is amiss, including nil or empty url
@@ -86,7 +92,7 @@ def host_url url
   if (uri = safe_parse(sanitize_url url)) && !uri.host.blank?
     uri.path = ""
     uri.query = uri.fragment = nil
-    uri.normalize.to_s
+    uri.normalize.to_s.sub(/\/$/,'') # Remove trailing slash from normalized form
   end
 end
 
@@ -130,7 +136,8 @@ end
  # Return a list of image URLs for a given page
 def page_piclist url
   begin 
-    return [] unless (ou = open url) && (doc = Nokogiri::HTML(ou))
+    (ou = open url) && (doc = Nokogiri::HTML(ou))
+    return [] unless doc
   rescue Exception => e
     return []
   end
@@ -160,10 +167,19 @@ def build_query(params)
   end.flatten.join("&")
 end
 
-# Ensure that a hash of query parameters makes it into the given url
-def assert_query url, newparams={}
-  return url if newparams.empty?
+# Ensure that a hash of query parameters makes it into the given url. A format may also be asserted
+def assert_query url, format=nil, newparams={}
+  if format.is_a? Hash
+    newparams, format = format, nil
+  end
+  format = format.to_s
+  return url if newparams.empty? && (format.blank? || format=="html")
   uri = URI(url)
+  unless format.blank?
+    # Assert the format by stripping any terminating format string and appending the one specified
+    trunc = uri.path.sub /\.(json|ps|html)$/, ''
+    uri.path = trunc + '.' + format
+  end
   qparams = uri.query.blank? ? { } : CGI::parse(uri.query)
 	newparams.each { |k, v|
     if v
@@ -172,15 +188,8 @@ def assert_query url, newparams={}
       qparams.delete k.to_s
     end
   } # Assert the new params, poss. over the old
-  uri.query = qparams.collect { |k, v| "#{k.to_s}=#{CGI::escape v[0]}" unless v.empty? }.compact.join('&')
+  newq = qparams.collect { |k, v| "#{k.to_s}=#{CGI::escape v[0]}" unless v.empty? }.compact.join('&')
+  uri.query = newq.blank? ? nil : newq
   uri.to_s
 end
 
-# Generate a hashtag which triggers a modal dialog
-def hash_to_modal url, base_path=nil
-  base_path ||= "/collection"
-  uri = URI.parse(url)
-  index = url.index uri.path
-  relative_url = assert_query(url[index..-1], :modal => true)
-  "#{base_path}#dialog:#{CGI::escape relative_url}"
-end

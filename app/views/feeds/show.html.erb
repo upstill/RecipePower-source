@@ -1,0 +1,4 @@
+<%= render_collectible_with_presenter do |presenter| %>
+    <% presenter.label_field 'Collections', "Followed by" %>
+    <% feed_collectible_buttons( @decorator, list_button: true, vote_button: true) %>
+<% end %>

@@ -3,7 +3,7 @@ module AdminHelper
   def single_user_table_row row, field
     case field
       when :handle
-        link_to_modal row[:handle], user_path(row[:user])
+        link_to_submit row[:handle], user_path(row[:user]), mode: :modal
       when :add_time, :last_visit
         row[field] ? time_ago_in_words(row[field]) : ""
       when :invites

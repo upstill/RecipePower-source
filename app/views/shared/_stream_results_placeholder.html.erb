@@ -1,0 +1,11 @@
+<div class="<%= stream_element_class :results %>" id="<%= @sp.stream_id %>">
+  <%= yield :stream_results_preface if content_for? :stream_results_preface %>
+  <div class="stream-tail">
+    <% if next_path = @sp.next_path %>
+        <%= image_tag "ajax-loader.gif", class: "beachball hide" %>
+        <%= stream_loadlink next_path, response_service.container_selector %>
+    <% else %>
+        <%= empty_msg %>
+    <% end %>
+  </div>
+</div>

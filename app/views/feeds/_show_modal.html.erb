@@ -1,3 +1,8 @@
 <%= modal_dialog :show_feed, "Feed #{@feed.title}" do %>
-    <%= render "show" %>
+    <%= render "collectible/show_card", presenter: presenter %>
+    <% permitted_to?(:approve, :feeds) do %>
+        <p>
+          Feed <%= feed_approval @feed %>
+        </p>
+    <% end %>
 <% end %>

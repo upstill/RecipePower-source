@@ -1,2 +1,2 @@
-$("tr#feed<%= @feed.id.to_s %>").replaceWith('<%= escape_javascript render(partial: @feed) %>');
+$("tr#<%= dom_id @feed %>").replaceWith('<%= escape_javascript render(partial: @feed) %>');
 RP.notifications.post( '<%= escape_javascript @notice %>', 'popup');

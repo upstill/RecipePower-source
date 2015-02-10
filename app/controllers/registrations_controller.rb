@@ -29,7 +29,7 @@ class RegistrationsController < Devise::RegistrationsController
             if resource.active_for_authentication?
               # set_flash_message :notice, :signed_up if is_navigational_format?
               sign_up(resource_name, resource)
-              RpMailer.welcome_email(resource).deliver
+              RpMailer.welcome_email(resource).deliver unless Rails.env.staging?
               redirect_to after_sign_up_path_for(resource)
             else
               set_flash_message :notice, :"signed_up_but_#{resource.inactive_message}" if is_navigational_format?
@@ -81,7 +81,7 @@ class RegistrationsController < Devise::RegistrationsController
         sign_in resource_name, resource, :bypass => true
         respond_with(resource) do |format|
           format.html { redirect_to after_update_path_for(resource) }
-          format.json { render :json => { done: true, popup: view_context.flash_popup } }
+          format.json { render :json => { done: true }.merge( view_context.flash_notify(true) ) }
         end
       else
         clean_up_passwords resource
@@ -91,6 +91,13 @@ class RegistrationsController < Devise::RegistrationsController
     end
 
     private
+
+    # Signs in a user on sign up. You can overwrite this method in your own
+    # RegistrationsController.
+    def sign_up(resource_name, resource)
+      super
+      (resource.class.to_s+"Services").constantize.new(resource).sign_up
+    end
 
     def build_resource(*args)
       super
@@ -104,10 +111,8 @@ class RegistrationsController < Devise::RegistrationsController
     # The path used after sign up. You need to overwrite this method
     # in your own RegistrationsController.
     def after_sign_up_path_for(resource)
-      asip = after_sign_in_path_for(resource) # Likely get a deferred request...
-      # ...then invoke a new one: the welcome dialog
-      response_service.defer_request fullpath: "/popup/starting_step2?context=signup", format: :json, layout: "application", controller: "collection"
-      asip
+      # Process any pending notifications
+      after_sign_in_path_for resource, "/popup/starting_step2?context=signup"
     end
     
     def user_root_path

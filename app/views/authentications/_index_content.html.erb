@@ -3,7 +3,8 @@ Here's where you connect and disconnect RecipePower from your outside accounts.
 <%= render 'current' %>
 <% prompt = (@authentications.empty? ? "Click on a" : "Click another")+" service to link it to your account" %>
 <%= render 'authentications/possible', prompt: prompt, origin: authentications_path %>
-<hr style="margin:13px;">
-  <%= link_to_modal "Profile", users_profile_path( section: "profile" ), class: "btn btn-default" %>
-  <%= link_to_modal "Change Password", edit_user_registration_path, class: "btn btn-default" %>
-<%# render partial: 'sidebar' %>
+<div class="form-group actions">
+  <%= button_to_submit "Profile", users_profile_path( section: "profile" ), mode: :modal %>
+  <%= button_to_submit "Change Password", edit_user_registration_path, mode: :modal %>
+  <%= dialog_cancel_button "Done" %>
+</div>

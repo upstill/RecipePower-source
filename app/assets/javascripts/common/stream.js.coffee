@@ -1,51 +1,50 @@
 RP.stream ||= {}
 
+jQuery ->
+	$(window).scroll () ->
+		RP.stream.check()
+	RP.stream.check()
+
+RP.stream.onload = (event) ->
+	RP.stream.check event.target
+
+RP.stream.check = (elmt) ->
+	if $(elmt).hasClass('stream-trigger') || elmt = $('a.stream-trigger')[0]
+		rect = elmt.getBoundingClientRect()
+		if rect && (rect.bottom-rect.height) <= $(window).height()
+			RP.stream.fire elmt
+
 # Event-driven interface, an onload handler
 RP.stream.go = (evt) ->
-	elmt = evt.target
-	RP.stream.fire $(elmt).data('kind')
+	RP.stream.fire evt.target
 
-# jQuery-driven interface
-RP.stream.fire = (kind) ->
-	# Check with the stream generator for content
-	source = new EventSource "/stream/stream?kind="+kind
+RP.stream.fire = (elmt) ->
+	querypath = $(elmt).data('path')
+	container_selector = $(elmt).data('containerSelector') || ""
+	parent = RP.findEnclosing '.stream-tail', elmt
+	$('.beachball', parent).removeClass "hide"
+	$(elmt).remove() # Remove the link element to forestall subsequent loads
+	# It will be replaced when the trigger div gets replaced, IFF there's more material to come
+	container_selector += " .stream-items-parent"
+	source = new EventSource querypath
 	source.onerror = (evt) ->
+		source.close()
 		state = evt.target.readyState
 	source.addEventListener 'end_of_stream', (e) ->
 		jdata = JSON.parse e.data
 		source.close()
-		RP.collection.more_to_come jdata.more_to_come
+		RP.process_response jdata
+		RP.stream.check() # If the stream link is visible, go for more
 	source.addEventListener 'stream_item', (e) ->
 		jdata = JSON.parse e.data
 		# If the item specifies a handler, call that
 		if handler = jdata.handler && fcn = RP.named_function
 			fcn.apply jdata
-		else # Standard handling: append to the seeker_table
-			item = $(jdata.elmt)
-			# selector = jdata.selector || '.collection_list'
-			# $(selector).append item
-			$('#seeker_results').append item
-			if $('#seeker_results').hasClass 'masonry-container'
-				$('#seeker_results.masonry-container').masonry 'appended', item
-				if img = $('div.rcp_grid_pic_box img', item)[0]
-					srcstr = img.getAttribute('src')
-					contentstr = "<img src=\""+srcstr+"\" style=\"width: 100%; height: auto\">"
-				else
-					contentstr = ""
-				# Any (hopefully few) pictures that are loaded from URL will resize the element
-				# when they appear.
-				$(item).on 'resize', (evt) ->
-					$('#seeker_results.masonry-container').masonry()
-				datablock = $('span.recipe-info-button', item)
-				tagstr = $(datablock).data "tags"
-				decoded = $('<div/>').html(tagstr).text();
-				description = $(datablock).data "description"
-				descripted = (description && $('<div/>').html(description).text()) || "";
-				$(datablock).popover
-					trigger: "hover",
-					placement: "auto right",
-					html: true,
-					content: descripted+contentstr+decoded
+		else if jdata.elmt
+			# Standard handling: convert text to HTML and append to list
+			RP.masonry.appendItem($(jdata.elmt), container_selector)
+		else
+			RP.process_response jdata
 
 RP.stream.buffer_test = ->
 	source = new EventSource('/stream/buffer_test')
@@ -54,4 +53,3 @@ RP.stream.buffer_test = ->
 	source.addEventListener 'message', (e) ->
 		jdata = JSON.parse e.data
 		$('#seeker_results').append("<div>"+jdata.text+"</div>")
-

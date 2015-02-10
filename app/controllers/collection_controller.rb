@@ -1,7 +1,8 @@
 class CollectionController < ApplicationController
+=begin
   layout :rs_layout # Let response_service pick the layout
-  before_filter :setup_collection # , except: [ :index ]
-  after_filter :save_browser
+  # before_filter :setup_collection # , except: [ :index ]
+  # after_filter :save_browser
   
   def save_browser
     @user.save if @user
@@ -17,7 +18,7 @@ class CollectionController < ApplicationController
   end
   
   def index
-    @Title = "Collections"
+    response_service.title = "Collections"
     @rp_old = false
     seeker_result "Content", 'div.collection' # , clear_tags: true
   end
@@ -28,7 +29,7 @@ class CollectionController < ApplicationController
   # GET /collection/new
   # GET /collection/new.xml
   def new
-    @Title = "Tags"
+    response_service.title = "Tags"
     @tag = Tag.new
     smartrender
   end
@@ -39,9 +40,9 @@ class CollectionController < ApplicationController
   # POST /collection
   # POST /collection.xml
   def create
-      @Title = "New Collection"
+      response_service.title = "New Collection"
       respond_to do |format|
-        if @tag = Tag.assert_tag(params[:tag][:name], userid: current_user.id)
+        if @tag = Tag.assert(params[:tag][:name], userid: current_user.id)
           current_user.add_collection @tag
           # Create the collection, private to user
           # Make the collection current in the browser
@@ -76,9 +77,9 @@ class CollectionController < ApplicationController
       render :nothing => true, :status => :no_content
     else
       flash.now[:success] = "This feed is now up to date."
-      @Title = "Collections"
       seeker_result "Content", 'div.collection'
       # render :index, :layout=>false, :locals => { :feed => @feed }
     end
   end
+=end
 end

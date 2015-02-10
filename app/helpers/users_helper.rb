@@ -1,4 +1,5 @@
 module UsersHelper
+
   def followees_list f, me, channels
     # followee_tokens is a virtual attribute, an array of booleans for checking and unchecking followees
     f.fields_for :followee_tokens do |builder|
@@ -24,4 +25,16 @@ module UsersHelper
        (both ? " or " : "")+
        (user.email ? "your email '#{user.email}'" : "")).html_safe
    end
+
+  def follow_button user, options={}
+    button_to_submit((current_user.follows?(user) ? "Stop Following" : 'Follow'),
+                     follow_user_path(user), options.merge(
+                     class: "follow-button",
+                     id: dom_id(user),
+                     method: :post ))
+  end
+
+  def follow_button_replacement user, options={}
+    [ "a.follow-button##{dom_id user}", follow_button(user, options) ]
+  end
 end

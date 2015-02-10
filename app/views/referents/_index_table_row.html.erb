@@ -1,0 +1,17 @@
+<% item ||= @referent %>
+<tr frame="below" id="<%= dom_id item %>">
+  <td valign="top">
+    <hr>
+    <%= summarize_ref_name item %>
+    <br><%= link_to_submit 'Show', item.becomes(Referent), mode: :modal %>
+    <%= link_to_submit 'Edit', edit_referent_path(item.becomes(Referent)), mode: :modal %>
+    <%# link_to_submit 'Destroy', item.becomes(Referent), confirm: 'Are you sure?', method: :delete %>
+  </td>
+  <td><%= item.isCountable ? "C" : "NC" %><td>
+  <td>
+    <hr>
+    <%= list_expressions item %><br>
+    <%= list_parents item %><br>
+    <%= list_children item %>
+  </td>
+</tr>

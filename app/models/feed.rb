@@ -1,23 +1,18 @@
-require 'feedzirra'
+require 'feedjira'
 
 class Feed < ActiveRecord::Base
-  include Taggable
+  include Collectible
+  picable :picurl, :picture
   attr_accessible :title, :description, :site_id, :feedtype, :approved, :url
   
   # Setup a feed properly: do a reality check on the url, populate the information
   # fields (title, description...), and ensure it has an associated site
   before_validation { |feed| feed.follow_url if (new_record? || url_changed?) }
 
-  before_destroy do |feed|
-    feed.users.each { |subscriber| subscriber.delete_feed feed }
-  end
-  
   belongs_to :site
   validates :site, :presence => true
   validates :url, :presence => true, :uniqueness => true
-  
-  has_and_belongs_to_many :users
-  
+
   has_many :feed_entries, -> { order 'published_at DESC' }, :dependent => :destroy
 
   # When a feed is built, the url may be valid for getting to a feed, but it may also
@@ -29,8 +24,13 @@ class Feed < ActiveRecord::Base
     if fetch
       self.title = (@fetched.title || "").truncate(255)
       self.description = (@fetched.description || "").truncate(255)
-      self.url = @fetched.feed_url unless @fetched.feed_url.blank?
-      self.site = Site.find_or_create (@fetched.url || url)
+      self.site ||= Site.find_or_create url
+      unless @fetched.feed_url.blank? || (url == @fetched.feed_url)
+        # When the URL changes, clear and update the feed entries
+        self.url = @fetched.feed_url
+        feed_entries.clear
+        FeedEntry.update_from_feed self
+      end
     end
   end
     
@@ -74,29 +74,6 @@ class Feed < ActiveRecord::Base
     Feed.where(:approved => true).each { |feed| feed.perform }
   end
 
-  def perform
-    logger.debug "[#{Time.now}] Updating feed #{to_s}; approved=#{approved ? 'Y' : 'N'}"
-    puts "[#{Time.now}] Updating feed "+to_s
-    if feed = Feed.where(id: id).first
-      FeedEntry.update_from_feed feed
-      feed.touch
-    end
-  end
-
-  def enqueue_update later = false
-    Delayed::Job.enqueue self, run_at: (later ? (Time.new.beginning_of_week(:sunday)+1.week) : (Time.now+20))
-  end
-
-  def success(job)
-    # When the feed is updated successfully, re-queue it for one week hence
-    feed = YAML::load(job.handler)
-    logger.debug "Updated feed ##{job.id}"
-    if feed = Feed.where(id: feed.id).first
-      feed.enqueue_update true
-      feed.touch
-    end
-  end
-
   def to_s
     title+" (#{url})"
   end
@@ -105,7 +82,7 @@ class Feed < ActiveRecord::Base
   def fetch
     return @fetched if @fetched
     begin
-      @fetched = Feedzirra::Feed.fetch_and_parse(url)
+      @fetched = Feedjira::Feed.fetch_and_parse(url)
       @fetched = nil if @fetched.class == Fixnum
     rescue Exception => e
       @fetched = nil
@@ -133,42 +110,6 @@ class Feed < ActiveRecord::Base
     end
   end
 
-=begin
-  # feed and entries accessors
-  feed.title          # => "Paul Dix Explains Nothing"
-  feed.url            # => "http://www.pauldix.net"
-  feed.feed_url       # => "http://feeds.feedburner.com/PaulDixExplainsNothing"
-  feed.etag           # => "GunxqnEP4NeYhrqq9TyVKTuDnh0"
-  feed.last_modified  # => Sat Jan 31 17:58:16 -0500 2009 # it's a Time object
-
-  entry = feed.entries.first
-  entry.title      # => "Ruby Http Client Library Performance"
-  entry.url        # => "http://www.pauldix.net/2009/01/ruby-http-client-library-performance.html"
-  entry.author     # => "Paul Dix"
-  entry.summary    # => "..."
-  entry.content    # => "..."
-  entry.published  # => Thu Jan 29 17:00:19 UTC 2009 # it's a Time object
-  entry.categories # => ["...", "..."]
-  
-  def items
-    unless @items
-      @items = []
-      feed = Feedzirra::Feed.fetch_and_parse(url)
-      @items = feed.entries
-    end
-    @items
-  end
-
-  def show
-    items.each do |entry|
-      puts "Item: <a href='#{entry.url}'>#{entry.title}</a>"
-      puts "Published on: #{entry.published}"
-      puts "#{entry.summary}"
-    end
-    nil
-  end
-=end
-  
   @@feedtypes = [
     [:Misc, 0], 
     [:Recipes, 1], 
@@ -188,6 +129,67 @@ class Feed < ActiveRecord::Base
   def feedtypename
     @@feedtypenames[feedtype]
   end
-  
+
+  def discreet_save
+    Feed.record_timestamps = false
+    save
+    Feed.record_timestamps = true
+  end
+
+  # Ensure that the entries for the feed are up to date
+  def refresh
+    FeedEntry.update_from_feed self
+    self.reload # To ensure associations are updated
+    self.touch
+  end
+
+  # Is the feed stale?
+  def due_for_update
+    updated_at < 7.days.ago
+  end
+
+  # Callbacks for DelayedJob
+  def enqueue(job)
+    self.status = :pending
+    discreet_save
+  end
+
+  def before(job)
+    self.status = :running
+    discreet_save
+  end
+
+  def perform
+    logger.debug "[#{Time.now}] Updating feed #{id}; approved=#{approved ? 'Y' : 'N'}"
+    if feed = Feed.where(id: id).first
+      feed.refresh
+    end
+  end
+
+  def enqueue_update later = false
+    Delayed::Job.enqueue self, priority: 10, run_at: (later ? (Time.new.beginning_of_week(:sunday)+1.week) : Time.now)
+  end
+
+  def success(job)
+    # When the feed is updated successfully, re-queue it for one week hence
+    feed = YAML::load(job.handler)
+    logger.debug "Successfully updated feed ##{feed.id}"
+    if feed = Feed.where(id: feed.id).first
+      feed.enqueue_update true
+      logger.debug "Queued up feed ##{feed.id}"
+      feed.status = :ready
+      feed.discreet_save
+    end
+  end
+
+  def error(job, exception)
+    self.status = :failed
+    discreet_save
+  end
+
+  def failure(job)
+    self.status = :failed
+    discreet_save
+  end
 end
 

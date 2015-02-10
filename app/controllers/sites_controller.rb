@@ -1,67 +1,42 @@
-class SitesController < ApplicationController
+
+class SitesController < CollectibleController
+
   # GET /sites
   # GET /sites.json
   def index
-    seeker_result Site, "div.site_list" # , clear_tags: true
+    # seeker_result Site, "div.site_list" # , clear_tags: true
+    response_service.title = "Sites"
+    smartrender unless do_stream SitesCache
   end
-
-=begin
-  def query
-    seeker_result Site, "div.site_list"
-  end
-=end
 
   # GET /sites/1
   # GET /sites/1.json
   def show
-    # return if need_login true, true
-    @user = current_user_or_guest
-    @site = Site.find(params[:id])
-    @decorator = @site.decorate
-    @Title = @site.name
-    
-    # Setup to display the feeds for the site
-    @feeds = @site.feeds
-    @seeker = FeedSeeker.new @user, @feeds, session[:seeker] # Default; other controllers may set up different seekers
+    update_and_decorate
+    smartrender
+  end
 
-    smartrender modal: true # :how => :modal
-=begin
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @site }
-    end
-=end
+  def edit
+    update_and_decorate
+    response_service.title = "Edit Site"
+    smartrender
   end
 
   # GET /sites/new
   # GET /sites/new.json
   def new
-      # return if need_login true, true
-    @site = Site.new
-    @Title = "New Site"
-
-    respond_to do |format|
-      format.html # new.html.erb
-      format.json { render json: @site }
-    end
-  end
-
-  # GET /sites/1/edit
-  def edit
     # return if need_login true, true
-    @site = Site.find(params[:id].to_i)
-    @Title = @site.name
-    smartrender area: "floating"
+    update_and_decorate
+    response_service.title = "New Site"
+    render :edit
   end
 
   # POST /sites
   # POST /sites.json
   def create
-      # return if need_login true, true
-    @site = Site.new(params[:site])
-
+    update_and_decorate 
     respond_to do |format|
-      if @site.save
+      if !@site.errors.any?
         format.html { redirect_to @site, notice: 'Site was successfully created.' }
         format.json { render json: @site, status: :created, location: @site }
       else
@@ -74,34 +49,30 @@ class SitesController < ApplicationController
   # PUT /sites/1
   # PUT /sites/1.json
   def update
-      # return if need_login true, true
-    @site = Site.find(params[:id])
-    respond_to do |format|
-      if @site.update_attributes(params[:site])
-        format.html { redirect_to @site, notice: 'Site was successfully updated.' }
-        format.json { 
-          render json: { 
-                         done: true, # Denotes recipe-editing is finished
-                         popup: "#{@site.name} updated",
-                         replacements: [
-                           ["tr#site#{@site.id.to_s}", with_format("html") { render_to_string partial: "sites/show_table_row" }]
-                         ]
-                       } 
-      }
-      else
-        format.html { render action: "edit" }
-        format.json { render json: @site.errors, status: :unprocessable_entity }
+    if update_and_decorate
+      respond_to do |format|
+        format.html { redirect_to @site, notice: 'Site #{@site.name} was successfully updated.' }
+        format.json {
+          flash[:popup] = "#{@site.name} updated"
+          render :update
+        }
       end
+    else
+      if @site
+        post_resource_errors @site
+      else
+        flash[:alert] = "Couldn't fetch site"
+      end
+      render :edit, status: :unprocessable_entity
     end
   end
 
   # DELETE /sites/1
   # DELETE /sites/1.json
   def destroy
-      # return if need_login true, true
-    @site = Site.find(params[:id])
+    # return if need_login true, true
+    @site = Site.find params[:id]
     @site.destroy
-
     respond_to do |format|
       format.html { redirect_to sites_url }
       format.json { head :ok }
@@ -109,24 +80,19 @@ class SitesController < ApplicationController
   end
   
   def scrape
-    url = params[:url]
-    if @site = Site.find_or_create(url)
-      olist = @site.feeds.clone
-      FeedServices.scrape_page @site, url
-      @feeds = @site.feeds
-      nlist = @feeds - olist
-      if nlist.empty?
-        codicil = olist.empty? ? ". " : view_context.list_feeds(", though the site already has", olist)
-        redirect_to "/feeds/new", notice: "No new feeds found in page#{codicil}If you want more, you might try copy-and-paste-ing RSS URLs individually."
+    if update_and_decorate
+      if url = params[:url]
+        if (@candidate_feeds = FeedServices.scrape_page @site, url).empty?
+          flash[:popup] = "Couldn't find any feeds."
+          render :errors
+        end
       else
-        @site.save
-        @user = current_user
-        @seeker = FeedSeeker.new @user, @feeds, session[:seeker] # Default; other controllers may set up different seekers
-        flash.now[:notice] = view_context.list_feeds("Scraped", nlist)
-        render action: :show
+        @url = @site.sample
+        @url = @site.home + @url unless URI(@url) # Preface the url with the site if the sample doesn't parse
       end
     else
-      redirect_to "/feeds/new", notice: "Couldn't make sense of URL"
+      flash[:popup] = "Couldn't make sense of URL"
+      render :errors
     end
   end
 end

@@ -18,7 +18,7 @@
       <% end %>
       <td class="collection_item_comment" width="20%"><%= recipe.comment @rcpquery.owner_id %></td>
       <td class="collection_item_tags" width="30%">
-		<%= summarize_alltags recipe %><%= link_to "(Tag it)", edit_recipe_path(recipe) %>
+		<%= summarize_alltags recipe %><%= link_to "(Tag it)", tag_recipe_path(recipe) %>
 	  </td>
     </tr>
   <% end %>

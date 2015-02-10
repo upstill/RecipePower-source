@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140610235011) do
+ActiveRecord::Schema.define(version: 20150201004623) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -29,11 +29,14 @@ ActiveRecord::Schema.define(version: 20140610235011) do
     t.integer "referent_id"
   end
 
-  create_table "deferred_requests", force: true do |t|
-    t.text     "requests"
+  create_table "deferred_requests", id: false, force: true do |t|
+    t.string   "session_id",                      null: false
+    t.text     "requests",   default: "--- []\n"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  add_index "deferred_requests", ["session_id"], name: "index_deferred_requests", unique: true, using: :btree
 
   create_table "delayed_jobs", force: true do |t|
     t.integer  "priority",   default: 0
@@ -69,7 +72,7 @@ ActiveRecord::Schema.define(version: 20140610235011) do
   end
 
   create_table "feed_entries", force: true do |t|
-    t.string   "name"
+    t.string   "title"
     t.text     "summary"
     t.text     "url"
     t.datetime "published_at"
@@ -78,6 +81,7 @@ ActiveRecord::Schema.define(version: 20140610235011) do
     t.datetime "updated_at",   null: false
     t.integer  "feed_id"
     t.integer  "recipe_id"
+    t.integer  "picture_id"
   end
 
   create_table "feedbacks", force: true do |t|
@@ -98,9 +102,11 @@ ActiveRecord::Schema.define(version: 20140610235011) do
     t.string   "description"
     t.integer  "site_id"
     t.boolean  "approved"
-    t.datetime "created_at",              null: false
-    t.datetime "updated_at",              null: false
+    t.datetime "created_at",                    null: false
+    t.datetime "updated_at",                    null: false
     t.string   "title"
+    t.string   "status",      default: "ready"
+    t.integer  "picture_id"
   end
 
   create_table "feeds_users", force: true do |t|
@@ -124,8 +130,25 @@ ActiveRecord::Schema.define(version: 20140610235011) do
     t.text     "ordering",     default: ""
     t.text     "description",  default: ""
     t.text     "notes",        default: ""
+<<<<<<< HEAD
+=======
+    t.boolean  "pullin",       default: true
+>>>>>>> refs/heads/Rails41
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "picture_id"
+  end
+
+  create_table "lists_tags", force: true do |t|
+    t.integer  "tag_id"
+    t.integer  "list_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lists_users", force: true do |t|
+    t.integer "list_id"
+    t.integer "user_id"
   end
 
   create_table "lists_tags", force: true do |t|
@@ -162,6 +185,7 @@ ActiveRecord::Schema.define(version: 20140610235011) do
   create_table "products", force: true do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer  "picture_id"
   end
 
   create_table "ratings", force: true do |t|
@@ -191,15 +215,15 @@ ActiveRecord::Schema.define(version: 20140610235011) do
   end
 
   create_table "rcprefs", force: true do |t|
-    t.integer  "recipe_id"
+    t.integer  "entity_id"
     t.integer  "user_id"
-    t.text     "comment"
+    t.text     "comment",       default: ""
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "status",        default: 8
     t.boolean  "private",       default: false
-    t.boolean  "in_collection", default: true
+    t.boolean  "in_collection", default: false
     t.integer  "edit_count",    default: 0
+    t.string   "entity_type",   default: "Recipe"
   end
 
   create_table "recipes", force: true do |t|
@@ -222,6 +246,7 @@ ActiveRecord::Schema.define(version: 20140610235011) do
     t.text     "thumbdata"
     t.integer  "status"
     t.boolean  "canonical",               default: false
+    t.string   "host"
   end
 
   add_index "references", ["affiliate_id", "type"], name: "references_index_by_affil_and_type", using: :btree
@@ -253,10 +278,17 @@ ActiveRecord::Schema.define(version: 20140610235011) do
   end
 
   create_table "results_caches", id: false, force: true do |t|
+<<<<<<< HEAD
     t.string   "session_id", null: false
     t.text     "params"
     t.text     "cache"
     t.string   "type",       null: false
+=======
+    t.string   "session_id",              null: false
+    t.text     "params"
+    t.text     "cache"
+    t.string   "type",       default: "", null: false
+>>>>>>> refs/heads/Rails41
     t.text     "partition"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -266,14 +298,15 @@ ActiveRecord::Schema.define(version: 20140610235011) do
 
   create_table "rp_events", force: true do |t|
     t.integer  "verb"
-    t.integer  "source_id"
-    t.string   "subject_type"
     t.integer  "subject_id"
-    t.string   "target_type"
-    t.integer  "target_id"
+    t.string   "direct_object_type"
+    t.integer  "direct_object_id"
+    t.string   "indirect_object_type"
+    t.integer  "indirect_object_id"
     t.text     "data"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "subject_type",         default: "User"
   end
 
   create_table "scales", force: true do |t|
@@ -394,6 +427,7 @@ ActiveRecord::Schema.define(version: 20140610235011) do
     t.string   "first_name"
     t.string   "last_name"
     t.integer  "thumbnail_id"
+    t.integer  "count_of_collecteds",               default: 0,     null: false
   end
 
   add_index "users", ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true, using: :btree
@@ -410,15 +444,15 @@ ActiveRecord::Schema.define(version: 20140610235011) do
     t.datetime "updated_at"
   end
 
-  create_table "votes", force: true do |t|
+  create_table "votes", id: false, force: true do |t|
     t.integer  "user_id"
     t.string   "entity_type"
     t.integer  "entity_id"
-    t.string   "original_entity_type"
-    t.integer  "original_entity_id"
     t.boolean  "up"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  add_index "votes", ["user_id", "entity_type", "entity_id"], name: "index_votes_on_user_id_and_entity_type_and_entity_id", unique: true, using: :btree
 
 end

@@ -1,0 +1,39 @@
+<h1>Listing suggestions</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Base type</th>
+      <th>Base</th>
+      <th>Viewer</th>
+      <th>Session</th>
+      <th>Filter</th>
+      <th>Rc</th>
+      <th>Results</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @suggestions.each do |suggestion| %>
+      <tr>
+        <td><%= suggestion.base_type %></td>
+        <td><%= suggestion.base_id %></td>
+        <td><%= suggestion.viewer_id %></td>
+        <td><%= suggestion.session %></td>
+        <td><%= suggestion.filter %></td>
+        <td><%= suggestion.results_cache_id %></td>
+        <td><%= suggestion.results %></td>
+        <td><%= link_to 'Show', suggestion %></td>
+        <td><%= link_to 'Edit', edit_suggestion_path(suggestion) %></td>
+        <td><%= link_to 'Destroy', suggestion, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Suggestion', new_suggestion_path %>

@@ -1,25 +1,28 @@
 class FeedEntry < ActiveRecord::Base
-  include Taggable
-  attr_accessible :guid, :name, :published_at, :summary, :url, :feed, :recipe
-  
-  belongs_to :feed
+  include Collectible
+  picable :picurl, :picture
+
+  attr_accessible :guid, :title, :published_at, :summary, :url, :feed, :recipe
+
   belongs_to :recipe
-  
+  belongs_to :feed
+  delegate :site, :to => :feed
+
   def self.update_from_feed(feed)
-    feedz = Feedzirra::Feed.fetch_and_parse(feed.url)
+    feedz = Feedjira::Feed.fetch_and_parse(feed.url)
     add_entries(feedz.entries, feed) if feedz.respond_to? :entries
   end
   
   def self.update_from_feed_continuously(feed, delay_interval = 1.day)
-    feedz = Feedzirra::Feed.fetch_and_parse(feed.url)
+    feedz = Feedjira::Feed.fetch_and_parse(feed.url)
     add_entries(feedz.entries, feed)
     loop do
       sleep delay_interval
-      feedz = Feedzirra::Feed.update(feedz)
+      feedz = Feedjira::Feed.update(feedz)
       add_entries(feedz.new_entries, feed) if feedz.updated?
     end
   end
-  
+
   private
   
   def self.add_entries(entries, feed)
@@ -27,7 +30,7 @@ class FeedEntry < ActiveRecord::Base
       entry.published = Time.current unless entry.published
       unless exists? :guid => entry.id
         create!(
-          :name         => entry.title,
+          :title        => entry.title,
           :summary      => entry.summary,
           :url          => entry.url,
           :published_at => entry.published,

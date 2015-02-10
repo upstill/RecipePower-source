@@ -1,2 +1,7 @@
-<h3>Feed <%= @feed.title %></h3>
-<%= render "show" %>
+<%= render "collectible/show_card", presenter: presenter %>
+<% permitted_to?(:approve, :feeds) do %>
+    <p>
+      Feed <%= feed_approval @feed %>
+    </p>
+<% end %>
+<%= stream_element :body, "show_entries" %>

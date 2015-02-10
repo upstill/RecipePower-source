@@ -1,0 +1,17 @@
+<% item ||= @feed %>
+<tr id="<%= dom_id item %>">
+  <td>
+    <%= link_to_submit item.title.truncate(80), feed_path(item), feed_wait_msg(item).merge(:mode => :partial) %><br>
+    <%= item.description %><br>
+  </td>
+  <td><%= taggable_list item %></td>
+  <td><%= item.feedtypename unless item.feedtypename == "Misc" %></td>
+  <td><%= link_to_submit item.site.name, site_path(item.site), mode: :modal %></td>
+  <td><%= feed_status_summary item %></td>
+  <% if response_service.admin_view? %>
+      <td><%= feed_approval @feed %></td>
+  <% end %>
+  <td>
+    <%= feed_collectible_buttons @decorator, button_size: "xs", vote_button: true %>
+  </td>
+</tr>

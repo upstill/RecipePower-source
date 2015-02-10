@@ -20,7 +20,7 @@ inputs.each do |input_type|
     end
   end
  
-  Object.const_set(input_type, new_class)
+  # Object.const_set(input_type, new_class)
 end
  
 # Use this setup block to configure all options available in SimpleForm.

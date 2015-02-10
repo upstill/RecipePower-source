@@ -1,7 +1,0 @@
-MVP ----------------------
-- RcpRef.recipe_ids should filter list for relationship betw. list owner and requestor
-- Recipes are public by default
-Performance --------------
-- Minimize jscript load for hard-coded pages
-ASAP ---------------------
-Keep in Mind -------------

@@ -10,27 +10,7 @@ class ReferentsController < ApplicationController
   # GET /referents
   # GET /referents.json
   def index
-    @tabindex = session[:tabindex] || params[:tabindex] || 0
-    handlerclass = @@HandlersByIndex[@tabindex]
-    # We accept a query for chidren of a parent (or roots, if parentid == 0)
-    if params[:key]
-        parentid = params[:key].to_i
-        # This is a JSON request for node data (re Dynatree)
-        if parentid > 0
-            @referents = [] # handlerclass.find(parentid).children
-        else
-            @referents = handlerclass.all # roots
-        end
-    else
-        @referents = handlerclass.scoped
-    end
-    @referents = @referents.order("id").page(params[:page] || 1).per_page(50)
-    # @referents.sort! { |r1, r2| r1.normalized_name <=> r2.normalized_name }
-
-    respond_to do |format|
-      format.html # index.html.erb
-      format.json { render json: @referents.map { |r| { :title=>r.longname, :isLazy=>true, :key=>r.id, :isFolder=>false }} }
-    end
+    smartrender unless do_stream ReferentsCache
   end
 
   # GET /referents/1
@@ -113,7 +93,7 @@ class ReferentsController < ApplicationController
         parent.save
         keyback = @referent.id
     when "child"
-        debugger
+        # debugger
     when "over"
         # "over" indicates to add the tag to the referent's expressions
         @referent = handlerclass.find params[:target].to_i
@@ -181,7 +161,7 @@ class ReferentsController < ApplicationController
         format.json {
           # The Channels table shows users (which are the outward face of channels)
           if @referent.class == ChannelReferent
-            selector = "#listrow_#{@referent.user.id}"
+            selector = dom_id(@referent.user) # "#listrow_#{@referent.user.id}"
             element = @referent.user
           else
             selector = "#Referent#{@referent.id}"

@@ -20,21 +20,13 @@ module FlashHelper
     unless resource.errors.empty?
       if resource.errors[:base].empty?
         # We accept both ActionView form builders and simple_form builders, but only the latter has error notification
-        (f && f.respond_to?(:error_notification)) ? f.error_notification : resource_errors_helper(resource)
+        (f && f.respond_to?(:error_notification)) ? f.error_notification : post_resource_errors(resource)
       else 
         base_errors_helper resource, for_bootstrap
       end
     end
   end
-  
-  # Report the current errors on a record in a nice alert div, suitable for interpolation within the
-  # form whose failure generated the error
-  def resource_errors_helper obj, options={}
-    unless obj.errors.empty?
-      flash_one :error, express_resource_errors(obj, options )
-    end
-  end
-  
+
   # Augments error display for record attributes (a la simple_form) with base-level errors
   def base_errors_helper resource, for_bootstrap = true
     flash_one :error, express_base_errors(resource), for_bootstrap
@@ -77,16 +69,51 @@ module FlashHelper
   def flash_all for_bootstrap=true
     flash.collect { |type, message|
       flash.delete type
-      flash_one type, message, for_bootstrap
+      flash_one type.to_sym, message, for_bootstrap
     }.join.html_safe
   end
 
-  # Return the current flash text, suitable for popping up
-  def flash_popup
-    msg = flash.collect  { |type, message|
-      flash.delete type
-      message
-    }.join.html_safe
-    msg
+  # Collect the flash messages in a hash
+  def flash_hash
+    fh = {}
+    flash.each { |type, message| fh[type] = message }
+    fh
+  end
+
+  # For passing through a redirect, enclose the collected flash messages in a hash
+  def flash_param
+    fh = flash_hash
+    fh.count > 0 ? { flash: fh } : {}
+  end
+
+  # Provide a hash suitable for including in a JSON response for driving a flash notification
+  # 'all' true incorporates all extant messages in the popup
+  def flash_notify popup_only=false
+    if flash.empty?
+      return { "clear-flash" => true }
+    end
+    result = {}
+    if msg = flash[:alert]
+      result[:alert] = msg
+      flash.delete :alert
+    end
+    if popup_only
+      result[:popup] = flash.collect  { |type, message|
+        flash.delete type
+        message
+      }.join.html_safe
+    else # Keep all flashes in their intended form
+      if msg = flash[:popup]
+        result[:popup] = msg
+        flash.delete :popup
+      end
+      # Others get passed through for the flash panel
+      flash.each  { |type, message|
+        result["flash-#{type}"] = message
+        flash.delete type
+        message
+      }
+    end
+    result
   end
 end

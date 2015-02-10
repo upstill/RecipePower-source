@@ -12,7 +12,7 @@ FactoryGirl.define do
   end
 
   factory :process_referent do
-    ignore do
+    transient do
       name "Herve"
     end
     after(:build) do |ref, evaluator|
@@ -22,7 +22,7 @@ FactoryGirl.define do
   end
 
   factory :ingredient_referent do
-    ignore do
+    transient do
       name "Herve"
     end
     after(:build) do |ref, evaluator|
@@ -33,10 +33,10 @@ FactoryGirl.define do
   end
 
   factory :recipe do
+    sequence(:url) { |n| "http://www.davidlebovitz.com/2008/11/rosy-poached-quince/dish#{n}" }
     # description "Some appropriate words"
     sequence(:title) { |n| "dish#{n}" }
     # title "#{description}"
-    sequence(:url) { |n| "http://www.davidlebovitz.com/2008/11/rosy-poached-quince/dish#{n}" }
   end
 
   factory :reference do

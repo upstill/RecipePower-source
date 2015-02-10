@@ -11,7 +11,7 @@ module RP
     # -- all .rb files in that directory are automatically loaded.
 
     # Custom directories with classes and modules you want to be autoloadable.
-    config.autoload_paths += %W(#{config.root}/app/models/concerns #{config.root}/app/services)
+    config.autoload_paths += %W(#{config.root}/app/models/concerns #{config.root}/app/services #{config.root}/app/controllers/cmods )
 
     # Only load the plugins named here, in the order given (default is alphabetical).
     # :all can be used as a placeholder for all plugins not explicitly named.
@@ -27,6 +27,7 @@ module RP
     # The default locale is :en and all translations from config/locales/*.rb,yml are auto loaded.
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
     # config.i18n.default_locale = :de
+    config.i18n.enforce_available_locales = false
 
     # Configure the default encoding used in templates for Ruby 1.9.
     config.encoding = "utf-8"
@@ -46,6 +47,6 @@ module RP
     config.assets.initialize_on_precompile = false
     # On config/application.rb forcing your application to not access the DB
     # or load models when precompiling your assets.
-    
+
   end
 end

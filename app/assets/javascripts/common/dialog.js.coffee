@@ -3,78 +3,29 @@ RP.dialog = RP.dialog || {}
 
 # Handle 'dialog-run' remote links
 jQuery ->
-	$(document).on("ajax:beforeSend", '.dialog-run', RP.dialog.beforeSend)
-	$(document).on("ajax:success", '.dialog-run', RP.dialog.success)
-	$(document).on("ajax:error", '.dialog-run', RP.dialog.error)
+	# $(document).on("ajax:beforeSend", '.dialog-run', RP.dialog.beforeSend)
+	# $(document).on("ajax:success", '.dialog-run', RP.dialog.success)
+	# $(document).on("ajax:error", '.dialog-run', RP.dialog.error)
+	$(document).on 'shown.bs.modal', (event) ->
+		# When a dialog is invoked, focus on the first autofocus item, or a string item or a text item
+		$('[autofocus]:first', event.target).focus()[0] ||
+		$('input.string', event.target).focus()[0] ||
+		$('input.text', event.target).focus()[0]
 	RP.dialog.arm_links()
 
 # Set up all ujs for the dialog and its requirements
 RP.dialog.arm_links = (dlog) ->
+	if dlog && (typeof RP.submit != 'undefined') # The submit module has its own onload call, so we only call for new dialogs
+		RP.submit.bind dlog # Arm submission links and preload sub-dialogs
 	dlog ||= window.document
 	$('input.cancel', dlog).click RP.dialog.cancel
 	$('a.dialog-cancel-button', dlog).click RP.dialog.cancel
 	$('a.dialog-submit-button', dlog).click RP.dialog.close
 	$('a.question_section', dlog).click RP.showhide
-	$('a.preload').click()
 	if requires = $(dlog).data 'dialog-requires'
 		for requirement in requires
 			if fcn = RP.named_function "RP." + requirement + ".bind"
 				fcn.apply()
-
-# Hit the server for a dialog via JSON, and run the result
-# This function can be tied to a link with only a URL to a controller for generating a dialog.
-# We will get the div and run the associated dialog.
-RP.dialog.get_and_go = (event, request, selector) ->
-	# old_dlog is extracted from what triggered this call (if any)
-	if (!event) || RP.dialog.beforeSend event
-		$.ajax
-			type: "GET",
-			dataType: "json",
-			url: request,
-			error: (jqXHR, textStatus, errorThrown) ->
-				RP.dialog.error event, jqXHR, textStatus, errorThrown
-			success: (responseData, statusText, xhr) ->
-				RP.dialog.success event, responseData, statusText, xhr
-
-# Before making a dialog request, see if the dialog is preloaded
-RP.dialog.beforeSend = (event, xhr, settings) ->
-	odlog = RP.dialog.target_modal event
-	# xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))
-	if $(this).hasClass 'loading'
-		return true; # Prevent submitting the link twice
-	if (selector = $(this).data 'selector') &&
-		  (ndlog = $(selector)[0]) # If dialog is already loaded, replace the responding dialog
-		RP.dialog.replace_modal event.result = ndlog, odlog
-		RP.state.onAJAXSuccess event
-		return false;
-	if $(this).hasClass("preload")
-		responseData = $(this).data "response"
-		if ndlog = $(this).data("preloaded") || (responseData && responseData.dlog)
-			RP.dialog.push_modal( ndlog, odlog) # RP.dialog.replace_modal $(this), RP.dialog.target_modal(event)
-			return false;
-		else if responseData
-			RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
-			RP.process_response responseData, odlog
-			RP.state.onAJAXSuccess event
-			$(this).data 'response', null
-			return false;
-		$(this).addClass 'loading'
-	return true; # Proceed normally
-
-# Success handler for fetching dialog from server
-RP.dialog.success = (event, responseData, status, xhr) ->
-	if $(this).hasClass 'preload'
-		$(this).data "response", responseData
-		$(this).removeClass('loading').addClass 'loaded'
-		false # i.e., we didn't close the parent dialog
-	else
-		RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
-		RP.process_response responseData, RP.dialog.target_modal(event)
-
-RP.dialog.error = (event, jqXHR, status, error) ->
-	$('.preload', this).removeClass('loading')
-	responseData = RP.post_error jqXHR
-	RP.process_response responseData, RP.dialog.target_modal(event)
 
 RP.dialog.close = (event) ->
 	if event
@@ -103,12 +54,14 @@ RP.dialog.run = (dlog) ->
 
 # Insert a new modal dialog while saving its predecessor
 RP.dialog.push_modal = (newdlog, odlog) ->
+	odlog ||= RP.dialog.enclosing_modal()
 	newdlog = insert_modal newdlog, odlog # Insert the new dialog into the DOM
 	push_modal newdlog, odlog # Hide, detach and store the parent with the child
 	open_modal newdlog
 
 # Insert a new modal dialog, closing and replacing any predecessor
 RP.dialog.replace_modal = (newdlog, odlog) ->
+	odlog ||= RP.dialog.enclosing_modal()
 	newdlog = insert_modal newdlog, odlog
 	if odlog && newdlog && (odlog != newdlog) # We might be just reopening a retained dialog
 		close_modal odlog, "cancel"
@@ -174,9 +127,18 @@ insert_modal = (newdlog, odlog) ->
 # Return the dialog element for the current event target, correctly handling the event whether
 # it's a jQuery event or not
 RP.dialog.target_modal = (event) ->
-	elmt = RP.event_target event
-	if (odlog = $('div.dialog.modal')[0]) && $(elmt, odlog)[0]
-		return odlog
+	RP.dialog.enclosing_modal RP.event_target(event)
+
+# Return the dialog in which the given element may be found, or any old modal if no element
+RP.dialog.enclosing_modal = (elmt) ->
+	dlogs = $('div.dialog.modal')
+	if elmt
+		for dlog in dlogs
+			if $(elmt, dlog)[0]
+				return dlog
+		return null
+	else
+		return dlogs[0]
 
 open_modal = (dlog, omit_button) ->
 	if (onget = $(dlog).data "onget" ) && (fcn = RP.named_function "RP." + onget.shift() )
@@ -190,14 +152,12 @@ open_modal = (dlog, omit_button) ->
 		$('div.modal-header', dlog).prepend buttoncode
 	if $(dlog).modal
 		$(dlog).modal()
+	if $('input:file.directUpload')[0]
+		uploader_unpack()
 	notify "open", dlog
 	notify_injector "open", dlog
 	$('.token-input-field-pending', dlog).each ->
 		RP.tagger.setup this
-	# Set text focus as appropriate
-	$('[autofocus]:first').focus();
-	#if (focus_sel = $(dlog).data("focus")) && (focus_elmt = $(focus_sel, dlog)[0])
-	#	focus_elmt.focus()
 	RP.dialog.arm_links dlog
 	RP.fire_triggers()
 	dlog
@@ -253,9 +213,9 @@ filter_submit = (eventdata) ->
 		RP.process_response shortcircuit
 	else
 		# Okay to submit
-		if (confirm_msg = $(clicked).data 'confirm-msg') && !confirm(confirm_msg)
+		if (confirm_msg = $(clicked).data 'confirmMsg') && !confirm(confirm_msg)
 			return false
-		if wait_msg = $(clicked).data('wait-msg')
+		if wait_msg = $(clicked).data('waitMsg')
 			RP.notifications.wait wait_msg
 		# To sort out errors from subsequent dialogs, we submit the form synchronously
 		#  and use the result to determine whether to do normal forms processing.
@@ -286,9 +246,14 @@ manager_of = (dlog) ->
 		if mgr_name = $(dlog).data 'manager'
 			return RP[mgr_name]
 		if classname = $(dlog).attr 'class'
-			classList = classname.split /\s+/
+			classList = classname.
+			replace(/\b(modal|dialog)\b/g, ''). # Ignore 'modal', etc.
+			replace(/^\s*/,'').  # Eliminate whitespace fore and aft
+			replace(/\s*$/,'').
+			replace(/-/g, '_'). # Translate hyphen for a legitimate function name
+			split /\s+/
 			for mgr_name in classList
-				if mgr_name != "dialog" && RP[mgr_name]
+				if RP[mgr_name]
 					return RP[mgr_name]
 	return null
 
@@ -332,6 +297,7 @@ notify = (what, dlog, entity) ->
 				$('textarea', dlog).focus()
 			# Forms submissions that expect JSON structured data will be handled here:
 			$('form', dlog).submit dlog, filter_submit
+			# Turn a Bootstrap button group into radio buttons
 			$("form input[type=submit]").click ->
 				# Here is where we enable multiple submissions buttons with different routes
 				# The form gets 'data-action', 'data-method' and 'data-operation' fields to divert
@@ -339,32 +305,33 @@ notify = (what, dlog, entity) ->
 				# of the submit for, e.g., pre-save checks)
 				$("input[type=submit]", dlog).removeAttr "clicked"
 				$(this).attr "clicked", "true"
-
-			# Turn a Bootstrap button group into radio buttons
-			$('div.btn-group[data-toggle-name=*]').each ->
+			$('div.btn-group').each ->
 				group = $(this);
-				form = group.parents('form').eq(0);
-				name = group.attr 'data-toggle-name'
-				hidden = $('input[name="' + name + '"]', form);
-				$('button', group).each ->
-					button = $(this);
-					if button.val() == hidden.val()
-						button.addClass 'active'
-					button.live 'click', ->
-						if $(this).hasClass "active"
-							hidden.val $(hidden).data("toggle-default")
-							$(this).removeClass "active"
-						else
-							hidden.val $(this).val()
-							$('button', group).each ->
+				if name = group.attr 'data-toggle-name'
+					form = group.parents('form').eq(0);
+					hidden = $('input[name="' + name + '"]', form);
+					$('button', group).each ->
+						button = $(this);
+						if button.val() == hidden.val()
+							button.addClass 'active'
+						button.live 'click', ->
+							if $(this).hasClass "active"
+								hidden.val $(hidden).data("toggle-default")
 								$(this).removeClass "active"
-							$(this).addClass "active"
+							else
+								hidden.val $(this).val()
+								$('button', group).each ->
+									$(this).removeClass "active"
+								$(this).addClass "active"
+	return
+###
 	#	when "load", "onload"
 	# when "beforesave"
 	# when "save", "onsave"
 	# when "cancel", "oncancel"
 	# when "close", "onclose"
 	return
+###
 
 # Special handler for dialogs imbedded in an iframe. See 'injector.js'
 notify_injector = (what, dlog) ->

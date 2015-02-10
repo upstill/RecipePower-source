@@ -6,10 +6,19 @@ module Typeable
   module ClassMethods
     
     def typeable(attribute, list)
+      attr_accessible attribute, :typenum, :typename, :typesym
       @tag_types = TypeMap.new(list, "unclassified")
       @attrib_name = attribute
+=begin
+      self.class_eval do
+        define_method("#{attribute}=") do |val|
+          instance_variable_set "@#{self.class.attrib_name}", self.class.typenum(val)
+        end
+      end
+=end
+
     end
-    
+
     # Get the type number, taking any of the accepted datatypes
     def typenum tt
         @tag_types.num tt
@@ -26,9 +35,11 @@ module Typeable
     end
     
     # Return a list of name/type pairs, suitable for making a selection list
-    def type_selections(withnull=false)
+    def type_selections(withnull=false, withall=false)
       range = withnull ? 0..-1 : 1..-1
-      @tag_types.list.compact[range]
+      items = @tag_types.list.compact[range]
+      items.unshift ['All Types', -1] if withall
+      items
     end
     
     def attrib_name

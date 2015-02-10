@@ -1,3 +1,15 @@
+class String
+  def uncapitalize
+    self[0, 1].downcase + self[1..-1]
+  end
+
+  # Ensure that the space-separated string of words includes those listed in new
+  def assert_words new
+    wordlist = split + (new.is_a?(String) ? new.split : new.map(&:to_s))
+    wordlist.compact.uniq*' '
+  end
+end
+
 def splitstr(str, ncols=80)
   str = HTMLEntities.new.decode(str)
   out = []
@@ -13,13 +25,24 @@ def splitstr(str, ncols=80)
   out
 end
 
+def labelled_quantity count, label, empty_msg = nil
+  case count
+    when 0
+      empty_msg || "No #{label.pluralize}"
+    when 1
+      "1 #{label}"
+    else
+      "#{count} #{label.pluralize}"
+  end
+end
+
 # Return an enumeration of a series of strings, separated by ',' except for the last two separated by 'and'
 # RETURN BLANK STRING IF STRS ARE EMPTY
-def strjoin strs, before = "", after = "", joiner = ', '
+def strjoin strs, before = "", after = "", joiner = ',', line_end=' '
   if strs.keep_if { |str| !str.blank? }.size > 0
     last = strs.pop
-    liststr = strs.join joiner
-    liststr += " and " unless liststr.blank?
+    liststr = strs.join (joiner+line_end)
+    liststr += " and#{line_end}" unless liststr.blank?
     before+liststr+last+after
   else
     ""
@@ -59,4 +82,9 @@ def string_to_class string
   end
 rescue NameError
   nil
+end
+
+def active_record_class_from_association_method_name methstr
+  methstr = methstr.to_s.sub( /[<=]*$/, '').sub(/_ids$/, '')
+  methstr.singularize.camelize.constantize
 end

@@ -1,0 +1,9 @@
+<p>
+  <%= @list.description %>
+</p>
+<p>
+  <%= @list.notes %>
+</p>
+
+<% collectible_buttons_panel @decorator, :edit_button => (@list.owner == current_user) %>
+

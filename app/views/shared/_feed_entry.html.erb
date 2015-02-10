@@ -2,13 +2,7 @@
 <li class="<%= feed_list_element_class @feed_entry %>">
 	<h5 class="feed_list_element_title" id="FeedListElement"+<%= @feed_entry.id.to_s %>>
 		<%= link_to @feed_entry.name, @feed_entry.url %>
-		<% if @recipe = @feed_entry.recipe %>
-		  <% @recipe.current_user = @user.id %>
-		  <%= render "recipes/golink" %>
-		<% else %>
-		  <% @recipe = Recipe.new(url: @feed_entry.url) %>
-			<%= link_to_modal "Collect", new_recipe_path(@recipe, params: {feed_entry: @feed_entry.id }), class: "btn btn-default btn-xs" %>
-		<% end %>
+        <%= collectible_buttons_panel @decorator, :button_size => "xs" %>
 	</h5>
 	<div class="feed_list_element_source">
 		<%= @feed_entry.feed.title.empty? ? "" : ("from <strong>"+@feed_entry.feed.title+"</strong>").html_safe %>

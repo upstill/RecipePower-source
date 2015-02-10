@@ -29,13 +29,14 @@ RP.notifications.post = (msg, how) ->
 
 # Let the user know that something's happening during an ajax request
 RP.notifications.wait = (msg) ->
-	if elmt = $('div.ajax-loader')[0]
-		parent = elmt.parentElement
-		elmt.style.width = ($(window).width()-parent.offsetLeft).toString()+"px"
-		elmt.style.height = ($(window).height()-parent.offsetTop).toString()+"px"
-		$(elmt).addClass "loading"
-	else
-		bootbox_alert msg
+	if msg && (msg != "")
+		if elmt = $('div.ajax-loader')[0]
+			parent = elmt.parentElement
+			elmt.style.width = ($(window).width()-parent.offsetLeft).toString()+"px"
+			elmt.style.height = ($(window).height()-parent.offsetTop).toString()+"px"
+			$(elmt).addClass "loading"
+		else
+			bootbox_alert msg
 
 # Finished with wait process (msg optional)
 RP.notifications.done = (msg) ->
@@ -53,6 +54,7 @@ RP.notifications.html = (msg) ->
 # data.error gives error message
 # data.notice gives non-alarming informational message
 RP.notifications.from_response = (data) ->
+	clear_flash()
 	RP.notifications.post data["flash-success"], "flash-success"
 	RP.notifications.post data["flash-error"], "flash-error"
 	RP.notifications.post data["flash-alert"], "flash-alert"
@@ -64,6 +66,7 @@ jnotify_popup = (msg) ->
 	if available = (typeof jNotify != "undefined")
 		jNotify msg, { HorizontalPosition: 'center', VerticalPosition: 'top', TimeShown: 2000 }
 	available
+
 
 # Post a flash notification into the 'div.flash_notifications' element
 insert_flash = (message, level) ->
@@ -86,12 +89,16 @@ insert_flash = (message, level) ->
 		$('div.flash_notifications').html html
 	available
 
+clear_flash = () ->
+	$('div.flash_notifications').html ""
+
 # Simple popup to notify the user of a process
 bootbox_alert = (msg) ->
 	if available = (typeof bootbox != "undefined")
 		if msg && msg.length > 0
 			bootbox.alert msg
-		else
-			$('div.bootbox .modal-footer button').click() # $('div.bootbox').modal('hide') # $('div.bootbox.modal').modal 'hide'
+		else # bootstrap dialog
+			# $('div.bootbox .bootbox-close-button').trigger "click" # $('div.bootbox').modal('hide') # $('div.bootbox.modal').modal 'hide'
+			$('div.bootbox-alert').remove()
 			$('div.modal-backdrop').remove()
 	available

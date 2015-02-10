@@ -1,6 +1,5 @@
 <% if response_service.injector? %>
-	<%# dialogHeader :heads_up, @title || express_error_context(@resource), area: @_area, class: "generic_alert" %>
-	<%= dialogHeader :heads_up, @title || express_error_context(@resource), response_service.modal_options( class: "generic_alert") %>
+	<%= dialogHeader :heads_up, @title || express_error_context(@resource), class: "generic_alert" %>
 		<h3><%= @title || express_error_context(@resource) %></h3>
 		<div class="error_box">
 			<%= express_resource_errors @resource, preface: (@title ? express_error_context(@resource) : "") %>
@@ -10,8 +9,7 @@
 		</div>
 	<%= dialogFooter %>
 <% else %>
-	<%# modal_dialog :heads_up, @title || express_error_context(@resource), area: @_area do %>
-	<%= modal_dialog :heads_up, @title || express_error_context(@resource), response_service.modal_options do %>
+	<%= modal_dialog :heads_up, @title || express_error_context(@resource) do %>
 		<%= modal_body do %>
 			<%= express_resource_errors @resource, preface: (@title ? express_error_context(@resource) : "") %>
 		<% end %>

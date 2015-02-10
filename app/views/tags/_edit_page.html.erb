@@ -1,5 +1,5 @@
 <h3>Edit Tag</h3>
 <%= render 'form' %>
 <hr>
-<%= link_to_modal 'Tag Info', @tag %> |
-<%= link_to 'Tags List', tags_path %>
+<%= link_to_submit 'Tag Info', @tag, mode: :modal %> |
+<%= link_to_submit 'Tags List', tags_path %>

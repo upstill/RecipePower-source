@@ -8,7 +8,7 @@
 # This file is automatically included by javascript_include_tag :defaults
 
 #= require_self
-#= require collection
+#= require arch/collection.js.coffee
 # require ../../../vendor/assets/javascripts/jquery
 #= require jquery/jquery.tokeninput
 #= require bootbox
@@ -26,6 +26,6 @@
 
 #= require_directory ./views
 #= require_directory ./concerns
-#= require bootstrap
+# require bootstrap
 
 window.RP = window.RP || {}

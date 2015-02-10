@@ -4,8 +4,10 @@ class TagsController < ApplicationController
   # GET /tags
   # GET /tags.xml
   def index
-    @Title = "Tags"
-    seeker_result Tag, 'div.tag_list' # , clear_tags: true
+    # seeker_result Tag, 'div.tag_list' # , clear_tags: true
+    # -1 stands for any type
+    params.delete :tagtype if params[:tagtype] == "-1"
+    smartrender unless do_stream TagsCache
   end
 
   # POST /tags
@@ -19,7 +21,6 @@ class TagsController < ApplicationController
     if params[:commit] =~ /Filter/
       redirect_to controller: "tags", action: "index", tag: params[:tag]
     else
-      @Title = "Tags"
       @tag = Tag.new(params[:tag])
       respond_to do |format|
         if @tag.save
@@ -56,7 +57,6 @@ class TagsController < ApplicationController
   #    :makeormatch - Boolean indicating that this tag should be created if 
   #           it can't be found, modulo normalization
   def match
-      @Title = "Tags"
       matchstr = params[:q] || params[:term] || ""
       matchopts = {
           userid: params[:user_id] || (current_user && current_user.id) || User.guest_id,
@@ -99,14 +99,12 @@ class TagsController < ApplicationController
   # GET /tags/new
   # GET /tags/new.xml
   def new
-    @Title = "Tags"
     @tag = Tag.new
     smartrender
   end
 
   # GET /tags/1/edit
   def edit
-    @Title = "Tags"
     @tag = Tag.find(params[:id])
     smartrender
   end
@@ -115,7 +113,6 @@ class TagsController < ApplicationController
   # GET /tags/1.xml
   def show
     # return if need_login true, true
-    @Title = "Tags"
     begin
       @tag = Tag.find(params[:id])
       session[:tabindex] = @tabindex
@@ -130,10 +127,9 @@ class TagsController < ApplicationController
   # Return HTML for the editor for classifying tags
   def editor
     # return if need_login true, true
-    @Title = "Tags"
     @tabindex = params[:tabindex] ? params[:tabindex].to_i : (session[:tabindex] || 0)
     # The list of orphan tags gets all tags of this type which aren't linked to a table
-    @taglist = Tag.strmatch("", userid: session[:user_id], tagtype: Tag.index_to_type(@tabindex) )
+    @taglist = Tag.strmatch("", userid: current_user_id, tagtype: Tag.index_to_type(@tabindex) )
     session[:tabindex] = @tabindex
     render partial: "editor"
   end
@@ -143,7 +139,7 @@ class TagsController < ApplicationController
   def absorb
     absorber = Tag.find params[:id].to_i
     victim = Tag.find params[:victim].to_i
-    survivor = victim.disappear_into absorber 
+    survivor = absorber.absorb victim
     if survivor.errors.empty?
       victimidstr = ((survivor == victim) ? absorber : victim).id.to_s
       @tag = survivor
@@ -152,7 +148,7 @@ class TagsController < ApplicationController
               "#tagrow_#{victimidstr}", "#tagrow_#{victimidstr}HR"
           ],
           replacements: [
-             [ "#tagrow_#{@tag.id.to_s}", with_format("html") { render_to_string partial: "tags/show_table_row" } ]
+             [ "#tagrow_#{@tag.id.to_s}", with_format("html") { render_to_string partial: "tags/index_table_row", locals: { item: @tag } } ]
           ]
       }
     else
@@ -196,7 +192,6 @@ class TagsController < ApplicationController
   # PUT /tags/1
   # PUT /tags/1.xml
   def update
-    @Title = "Tags"
     @tag = Tag.find(params[:id])
     respond_to do |format|
 puts "Tag controller converting "+params[:tag][:tagtype].to_s
@@ -218,7 +213,6 @@ puts "...to "+params[:tag][:tagtype].to_s
   # DELETE /tags/1
   # DELETE /tags/1.xml
   def destroy
-    @Title = "Tags"
     @tag = Tag.find(params[:id])
     @tag.destroy
 

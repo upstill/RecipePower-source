@@ -9,9 +9,7 @@
 
    If the request DOES return JSON, there are several possibilities:
    -- any "page" attribute is treated as HTML, exactly as above
-   -- any "dialog" attribute is run on this page. The div containing the dialog may have classes
-			'at_left' or 'at_top', in which case they are run non-modally inside a div
-			Otherwise, run the dialog modally.
+   -- any "dialog" attribute is run on this page.
    -- any "replacements" attribute is assumed to be a series of selector-value pairs, where the 
 		selectors stipulate elements to be replaced with the corresponding value
    -- any "notification" attribute is used as the text for a notifier of success

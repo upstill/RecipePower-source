@@ -2,5 +2,5 @@
 
 <%= render 'form' %>
 <hr>
-<%= link_to_modal 'Show This Expression', @expression %> |
+<%= link_to_submit 'Show This Expression', @expression, mode: :modal %> |
 <%= link_to 'Expressions List', expressions_path %>

@@ -1,4 +1,3 @@
-<div class="reference_list">
-  <%= link_to 'New Reference', new_reference_path %>
-  <%= seeker_table nil, references_path, [ "Reference Type", "URL/Referees", "", "", "" ] %>
-</div>
+<%= tag_filter_header title: "References" %>
+<%= link_to 'New Reference', new_reference_path %>
+<%= render "shared/stream_results_placeholder" %>

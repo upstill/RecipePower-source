@@ -1,8 +1,7 @@
+=begin
 require "candihash.rb"
 
 class Seeker < Object
-  
-  @@page_length = 10
 
   # Save the Seeker data into session store
   def store
@@ -12,15 +11,18 @@ class Seeker < Object
     savestr
   end
   
-private 
-  
+private
+
+  def page_length
+    25
+  end
+
   # class-specific data storage
   def datastore
     { 
       :tagstxt => (@tagstxt || ""), 
       :tagtype => @tagtype, 
-      :page => @cur_page || 1,
-      :items_per_page => @items_per_page
+      :page => @cur_page || 1 # , :items_per_page => @items_per_page
     }
   end
   
@@ -30,13 +32,14 @@ private
       @tagstxt = prior[:tagstxt] || ""
       @tagtype = prior[:tagtype]
       @cur_page = prior[:page] || 1
-      @items_per_page = prior[:items_per_page] ? prior[:items_per_page].to_i : @@page_length
+      # @items_per_page = prior[:items_per_page] ? prior[:items_per_page].to_i : @@page_length
     else
       @tagstxt = "" 
       @tagtype = nil
       @cur_page = 1
-      @items_per_page = @@page_length
+      # @items_per_page = @@page_length
     end
+    @items_per_page = page_length
     prior || {}
   end
   
@@ -81,8 +84,14 @@ public
     entity_name.capitalize.constantize
   end
   
-  def convert_ids list
-    model_class.where(id: list)
+  def convert_ids list, keep_ordering=false
+    records = model_class.find(list)
+    if keep_ordering
+      records = records.group_by(&:id)
+      list.map { |id| records[id].first }
+    else
+      records
+    end
   end
   
   def list_type
@@ -241,7 +250,7 @@ public
 end
 
 class ContentSeeker < Seeker
-  
+
   delegate :convert_ids, :timestamp, :list_type, :to => :"@affiliate"
   
   def affiliate browser = nil, params = nil
@@ -257,21 +266,29 @@ class ContentSeeker < Seeker
     "/collection"
   end
   
-=begin
+begin
+
   def cur_page=(pagenum)
     affiliate.cur_page=( pagenum) if affiliate
   end
-=end
+
+end
   
   # If the entity has returned no results, suggest what the problem might have been
   def explain_empty
     explanation = affiliate.explain_empty tags
     (explanation[:sug] ? explanation[:report]+"<br>You might try #{explanation[:sug]}." : explanation[:report])+"<br>#{explanation[:hint]}"
   end
+
+  private
+  def page_length
+    10
+  end
+
 end
 
 class UserSeeker < Seeker
-  
+
   def datastore
     super.merge is_channel: (@is_channel || false)
   end
@@ -291,6 +308,7 @@ class UserSeeker < Seeker
       end
       excluded_ids = @user.followee_ids + [@user.id, 4, 5] # Don't list guest, super, or the current user
       @affiliate = @affiliate.where("id not in (?) AND private != true", excluded_ids) unless [1, 3].include?(@user.id) # Show Max and Steve everything
+      @affiliate = @affiliate.collect { |u| [ u, u.recipes_collection_size ] }.sort { |u1, u2| u2.last <=> u1.last }.map(&:first)
     end
     @affiliate
   end
@@ -306,9 +324,11 @@ class UserSeeker < Seeker
   def table_header
     @is_channel ? "Available Channels" : "Possible Friends"
   end
-  
+
+  # Convert ids into User records, preserving the order of the list
   def convert_ids list
-    User.where(id: list)
+    records = User.find(list).group_by(&:id)
+    list.map { |id| records[id].first }
   end
   
   # Get the results of the current query.
@@ -350,7 +370,7 @@ class ReferenceSeeker < Seeker
 end
 
 class SiteSeeker < Seeker
-  
+
   # Get the results of the current query.
   def apply_tags(candihash)
     # Rank/purge for tag matches
@@ -365,7 +385,7 @@ class SiteSeeker < Seeker
 end
 
 class TagSeeker < Seeker
-  
+
   # Get the results of the current query.
   def result_ids
   	return @results if @results # Keeping a cache of results
@@ -391,25 +411,25 @@ class TagSeeker < Seeker
 end
 
 class FeedSeeker < Seeker
-  
+
   def datastore
     super.merge all_feeds: (@all_feeds || false)
   end
-  
+
   def dataload datastr
     data = super
     @all_feeds = data[:all_feeds] || false
   end
-  
+
   def affiliate browser=nil, params=nil
     @all_feeds ||= params && params[:all_feeds]
     @affiliate ||= @all_feeds ? Feed.all : Feed.where(:approved => true)
   end
-  
+
   # Get the results of the current query.
   def apply_tags(candihash)
     # Rank/purge for tag matches
-    tags.each { |tag| 
+    tags.each { |tag|
       semantic_list = Feed.where(site_id: Site.where(referent_id: tag.referent_ids).map(&:id)).map(&:id)
       candihash.apply semantic_list
       # Get candidates by matching the tag's name against recipe titles and comments
@@ -418,3 +438,21 @@ class FeedSeeker < Seeker
     }
   end
 end
+
+class ListSeeker < Seeker
+
+  def affiliate browser=nil, params=nil
+    @affiliate ||= List.all
+  end
+
+  # Get the results of the current query.
+  def apply_tags(candihash)
+    # Rank/purge for tag matches
+    tags.each { |tag|
+      # Get candidates by matching the tag's name against recipe titles and comments
+      candihash.apply affiliate.where("description ILIKE ?", "%#{tag.name}%").map(&:id)
+      candihash.apply affiliate.where("title ILIKE ?", "%#{tag.name}%").map(&:id)
+    }
+  end
+end
+=end

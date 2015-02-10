@@ -1,0 +1,15 @@
+<% item ||= @reference %>
+<tr>
+	<td>
+		<%= item.type.sub 'Reference', '' %>
+	</td><td>
+		<%= link_to item.url, item.url %>
+		<%= reference_expressions item %>
+	</td><td>
+		<%= link_to_submit 'Show', reference_path(item), mode: :modal %>
+	</td>
+	<% if permitted_to? :edit, item %>
+		<td><%= link_to_submit 'Edit', edit_reference_path(item), mode: :modal %></td>
+		<td><%= link_to_submit 'Destroy', item, method: :delete, confirm: 'Are you sure?' %></td>
+	<% end %>
+</tr>
