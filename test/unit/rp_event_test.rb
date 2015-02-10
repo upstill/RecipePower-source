@@ -1,4 +1,4 @@
-require 'test/unit'
+# require 'test/unit'
 require 'test_helper'
 class EventTest < # Test::Unit::TestCase
   ActiveSupport::TestCase

@@ -1,5 +1,6 @@
-require 'test/unit'
+# require 'test/unit'
 require 'test_helper'
+require 'list'
 class ListTest < ActiveSupport::TestCase
 
   # Called before every test method runs. Can be used
@@ -91,14 +92,14 @@ class ListTest < ActiveSupport::TestCase
   end
 
   test "list serializer returns empty string as empty array" do
-    assert_equal [], List::ListSerializer.load("")
-    assert_equal [], List::ListSerializer.load(nil)
+    assert_equal [], ListSerializer.load("")
+    assert_equal [], ListSerializer.load(nil)
   end
 
   test "a list item dumps and loads self without entity" do
-    li = List::ListItem.new entity: FactoryGirl.create(:recipe)
-    str = List::ListItem.dump li
-    li2 = List::ListItem.load str
+    li = ListItem.new entity: FactoryGirl.create(:recipe)
+    str = ListItem.dump li
+    li2 = ListItem.load str
     assert_equal li.id, li2.id
     assert_equal li.klass, li2.klass
     assert_nil li2.entity(false) # Entity not present a priori

@@ -29,7 +29,7 @@ class ResultsCacheTest < ActiveSupport::TestCase
     rc2 = IntegersCache.retrieve_or_build sessionid, @userid+1, false, [], controller: "integers"
     assert rc2.save
     assert_equal rc1.id, rc2.id
-    rc = ResultsCache.find sessionid, IntegersCache
+    rc = ResultsCache.find [sessionid, "IntegersCache"]
     assert_equal IntegersCache, rc.class
     assert_equal rc2, rc
   end

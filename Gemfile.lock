@@ -160,6 +160,7 @@ GEM
     hirefire-resource (0.3.4)
     htmlentities (4.3.3)
     i18n (0.7.0)
+    jquery-migrate-rails (1.2.1)
     jquery-rails (2.2.2)
       railties (>= 3.0, < 5.0)
       thor (>= 0.14, < 2.0)
@@ -395,6 +396,7 @@ DEPENDENCIES
   feedjira (~> 1.6)
   hirefire-resource
   htmlentities
+  jquery-migrate-rails
   jquery-rails (~> 2.2.1)
   jquery-ui-rails (~> 3.0)
   letter_opener

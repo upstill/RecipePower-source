@@ -24,6 +24,7 @@ class Feed < ActiveRecord::Base
     if fetch
       self.title = (@fetched.title || "").truncate(255)
       self.description = (@fetched.description || "").truncate(255)
+      self.site ||= Site.find_or_create url
       unless @fetched.feed_url.blank? || (url == @fetched.feed_url)
         # When the URL changes, clear and update the feed entries
         self.url = @fetched.feed_url

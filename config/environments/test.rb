@@ -41,4 +41,8 @@ RP::Application.configure do
   config.assets.allow_debugging = true
   
   config.eager_load = false # New in Rails 4: 
+
+  # New settings for Rails 5
+  config.active_support.test_order = :sorted
+  config.active_record.raise_in_transactional_callbacks = true
 end

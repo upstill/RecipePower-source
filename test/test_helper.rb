@@ -1,8 +1,8 @@
 ENV["RAILS_ENV"] = "test"
 require File.expand_path('../../config/environment', __FILE__)
 require 'rails/test_help'
-require "minitest/rails/capybara"
-require "mocha/mini_test"
+# require "minitest/rails/capybara"
+# require "mocha/mini_test"
 # include Warden::Test::Helpers
 # Warden.test_mode!
 # gem 'minitest'

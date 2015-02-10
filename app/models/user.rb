@@ -43,7 +43,8 @@ class User < ActiveRecord::Base
 
   has_many :votings, :class_name => "Vote", dependent: :destroy
 
-  has_many :collection_pointers, :dependent => :destroy, :class_name => "Rcpref"
+  has_many :collection_pointers, -> { where(in_collection: true) }, :dependent => :destroy, :class_name => "Rcpref"
+  has_many :touched_pointers, :dependent => :destroy, :class_name => "Rcpref"
   # We allow users to collect users, but the collectible class method can't be used on self, so we define the association directly
   has_many :users, :through=>:collection_pointers, :source => :entity, :source_type => User, :autosave=>true
   # has_many :recipes, :through=>:collection_pointers, :source => :entity, :source_type => "Recipe", :autosave=>true
@@ -53,6 +54,7 @@ class User < ActiveRecord::Base
 
     asoc_name = collectible_class.to_s.pluralize.underscore
     has_many asoc_name.to_sym, :through=>:collection_pointers, :source => :entity, :source_type => collectible_class, :autosave=>true
+    has_many ("touched_"+asoc_name).to_sym, :through=>:touched_pointers, :source => :entity, :source_type => collectible_class, :autosave=>true
   end
 
   # The User class defines collectible-entity association methods here. The Collectible class is cocnsulted, and if it has
@@ -87,11 +89,11 @@ class User < ActiveRecord::Base
   end
 
   def collected? entity
-    collection_pointers.exists? user: self, entity: entity, in_collection: true
+    collection_pointers.exists? user: self, entity: entity
   end
 
   def uncollect entity
-    collection_pointers.where(entity: entity, in_collection: true).map(&:uncollect)
+    collection_pointers.where(entity: entity).map(&:uncollect)
   end
 
   # Return the set of entities of a given type that the user has collected, as visible to some other
@@ -117,7 +119,7 @@ class User < ActiveRecord::Base
   # Remember that the user has (recently) touched the entity, optionally adding it to the collection
   def touch entity=nil, collect=false
     return super unless entity
-    ref = collection_pointers.create_with(in_collection: collect).find_or_initialize_by user_id: id, entity_type: entity.class.to_s, entity_id: entity.id
+    ref = touched_pointers.create_with(in_collection: collect).find_or_initialize_by user_id: id, entity_type: entity.class.to_s, entity_id: entity.id
     if ref.created_at # Existed prior
       if (Time.now - ref.created_at) > 5
         ref.created_at = ref.updated_at = Time.now
@@ -201,7 +203,7 @@ class User < ActiveRecord::Base
   def collection_size entity_type=nil
     constraints = {  }
     entity_type ?
-        collection_pointers.where(entity_type: entity_type.to_s, in_collection: true, private: false).size :
+        collection_pointers.where(entity_type: entity_type.to_s, private: false).size :
         self.count_of_collecteds
   end
 
@@ -544,7 +546,7 @@ public
   # Absorb another user into self
   def absorb other
     self.about = other.about if self.about.blank?
-    other.collection_pointers.each { |ref| touch ref.entity, ref.in_collection }
+    other.touched_pointers.each { |ref| touch ref.entity, ref.in_collection }
     other.followees.each { |followee| self.add_followee followee }
     other.followers.each { |follower| follower.add_followee self }
     other.votings.each { |voting| vote(voting.entity, voting.up) } # Transfer all the other's votes

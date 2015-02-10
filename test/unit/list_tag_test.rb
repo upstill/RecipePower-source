@@ -1,4 +1,4 @@
-require 'test/unit'
+# require 'test/unit'
 require 'test_helper'
 
 # Tests of tag support in lists

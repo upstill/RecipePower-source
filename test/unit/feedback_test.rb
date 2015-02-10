@@ -1,5 +1,5 @@
 # require File.dirname(__FILE__) + '/../test_helper'
-require 'test/unit'
+# require 'test/unit'
 require 'test_helper'
 
 class FeedbackTest

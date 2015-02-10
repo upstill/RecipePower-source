@@ -18,7 +18,8 @@ class UserCollectiblesTest < ActiveSupport::TestCase
     user.recipes<<rcp
     assert_equal 1, user.recipes.size
     refute user.recipes.empty?
-    user.recipes.delete(rcp)
+    user.uncollect rcp
+    user.reload
     assert user.recipes.empty?
 
     site = sites(:nyt)
@@ -26,7 +27,8 @@ class UserCollectiblesTest < ActiveSupport::TestCase
     user.sites<<site
     assert_equal 1, user.sites.size
     refute user.sites.empty?
-    user.sites.delete(site)
+    user.uncollect site
+    user.reload
     assert user.sites.empty?
 
     feed = feeds(:feed1)
@@ -34,7 +36,8 @@ class UserCollectiblesTest < ActiveSupport::TestCase
     user.feeds<<feed
     assert_equal 1, user.feeds.size
     refute user.feeds.empty?
-    user.feeds.delete(feed)
+    user.uncollect feed
+    user.reload
     assert user.feeds.empty?
 
     collected_user = users(:thing2)
@@ -42,7 +45,8 @@ class UserCollectiblesTest < ActiveSupport::TestCase
     user.users<<collected_user
     assert_equal 1, user.users.size
     refute user.users.empty?
-    user.users.delete(collected_user)
+    user.uncollect collected_user
+    user.reload
     assert user.users.empty?
 
   end
@@ -53,26 +57,35 @@ class UserCollectiblesTest < ActiveSupport::TestCase
     assert user.recipes.empty?
     user.touch rcp
     # Touching the recipe shouldn't mean it's in the collection
-    refute user.collection_pointers.first.in_collection
-
-    # ...though it will be among the collection_pointers and the recipes
-    assert_equal 1, user.collection_pointers.size
-    assert_equal rcp, user.recipes.first
+    assert user.collection_pointers.empty?
+    assert user.recipes.empty?
+    refute user.touched_pointers.empty?
+    refute user.touched_pointers.first.in_collection
+    assert rcp.users.empty?
 
     user.collect rcp
-    # NOW it should be in the collection
-    assert user.collection_pointers.first.in_collection
+    user.reload
+    # ...though it will be among the collection_pointers and the recipes
     assert_equal 1, user.collection_pointers.size
+    assert_equal 1, user.touched_pointers.size
+    assert_equal rcp, user.recipes.first
     assert_equal 1, rcp.users.size
     assert_equal 1, user.recipes.size
 
     user.collect rcp  # Can only collect it once
+    user.reload
     assert_equal 1, user.collection_pointers.size
-    assert_equal 1, rcp.users.size
+    assert_equal 1, user.touched_pointers.size
+    assert_equal rcp, user.recipes.first
     assert_equal 1, user.recipes.size
+    assert_equal 1, rcp.users.size
 
     # Uncollecting it still leaves it touched
     user.uncollect rcp
-    refute user.collection_pointers.first.in_collection
+    assert user.collection_pointers.empty?
+    assert user.recipes.empty?
+    assert_equal 1, user.touched_pointers.size
+    assert_equal 1, user.touched_recipes.size
+    assert rcp.users.empty?
   end
 end

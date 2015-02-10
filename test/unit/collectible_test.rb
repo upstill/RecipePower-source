@@ -1,4 +1,4 @@
-require 'test/unit'
+# require 'test/unit'
 require 'test_helper'
 require 'results_cache'
 
@@ -50,7 +50,7 @@ class CollectibleTest < ActiveSupport::TestCase
     assert_equal 0, recipe.num_cookmarks
     refute recipe.collected?(user.id)
     recipe.uid = user.id
-    recipe.touch false  # Touch but don't collect
+    user.touch recipe, false  # Touch but don't collect
     refute recipe.collected?(user.id)
     recipe.reload
     assert_equal 0, recipe.num_cookmarks # Should have been remembered as viewed, but not cookmarked

@@ -12,7 +12,7 @@ FactoryGirl.define do
   end
 
   factory :process_referent do
-    ignore do
+    transient do
       name "Herve"
     end
     after(:build) do |ref, evaluator|
@@ -22,7 +22,7 @@ FactoryGirl.define do
   end
 
   factory :ingredient_referent do
-    ignore do
+    transient do
       name "Herve"
     end
     after(:build) do |ref, evaluator|

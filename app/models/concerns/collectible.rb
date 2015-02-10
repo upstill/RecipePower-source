@@ -15,13 +15,19 @@ module Collectible
           ref.in_collection = @collectible_in_collection
           ref.save
         else
-          user_pointers.create user_id: @collectible_user_id, comment: @collectible_comment, private: boolean_private
+          viewer_pointers.create user_id: @collectible_user_id, comment: @collectible_comment, private: boolean_private
         end
       end
     end
 
-    has_many :user_pointers, :dependent => :destroy, :as => :entity, :class_name => "Rcpref"
+    # User_pointers refers to users who have the entity in their collection
+    has_many :user_pointers, -> { where(in_collection: true) }, :dependent => :destroy, :as => :entity, :class_name => "Rcpref"
     has_many :users, :through => :user_pointers, :autosave => true
+
+    # Viewer_points refers to all users who have viewed it, whether it's collected or not
+    has_many :toucher_pointers, :dependent => :destroy, :as => :entity, :class_name => "Rcpref"
+    has_many :touchers, :through => :toucher_pointers, :autosave => true
+
     User.collectible self unless self == User # Provides an association to users for each type of collectible (users collecting users are handled specially)
     # attr_accessor :collectible_userid, :collectible_comment, :collectible_private # Virtual attributes for editing
     # attr_accessible :collectible_userid, :collectible_comment, :collectible_private # Virtual attributes for editing
@@ -83,12 +89,12 @@ module Collectible
 
   # Return the number of times a recipe's been marked
   def num_cookmarks
-    user_pointers.where(in_collection: true).count
+    user_pointers.count
   end
 
   # One collectible is being merged into another, so add the new one to the collectors of the old one
   def absorb other
-    other.user_pointers.each { |ref| ref.user.touch self, ref.in_collection }
+    other.toucher_pointers.each { |ref| ref.user.touch self, ref.in_collection }
     super if defined? super
   end
 
@@ -101,7 +107,7 @@ module Collectible
     # So it's not cached
     (uid==@collectible_user_id) ? # If it's the current id, we capture the ref
         cached_ref(false) :
-        user_pointers.where(user_id: uid, entity: self).first
+        toucher_pointers.where(user_id: uid, entity: self).first
   end
 
   # Return the reference for the given user and this entity, creating a new one as necessary
@@ -110,8 +116,8 @@ module Collectible
     unless @current_ref && (@current_ref.user_id == @collectible_user_id)
       # A user is specified, but the currently-cached ref doesn't match
       if @current_ref = (force ?
-        user_pointers.find_or_initialize_by(user_id: @collectible_user_id, entity_type: self.class.to_s, entity_id: self.id) :
-        user_pointers.where(user_id: @collectible_user_id, entity: self).first)
+        toucher_pointers.find_or_initialize_by(user_id: @collectible_user_id, entity_type: self.class.to_s, entity_id: self.id) :
+          toucher_pointers.where(user_id: @collectible_user_id, entity: self).first)
         @collectible_comment = @current_ref.comment || ""
         @collectible_private = @current_ref.private? ? 1 : 0
         @collectible_in_collection = @current_ref.in_collection

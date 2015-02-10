@@ -56,6 +56,7 @@ gem 'counter_culture', '~> 0.1.23'
 gem 'letter_opener', :group => [ :development, :staging ]
 gem 'letter_opener_web', '~> 1.2.0', :group => :staging
 gem 'rspec-rails', '2.99', :group => [ :development, :test ] # ~> 3.1'
+gem 'jquery-migrate-rails', :group => [ :development, :test ]
 
 gem 'exception_notification', git: 'git://github.com/smartinez87/exception_notification.git'
 # gem 'exception_notification', '~> 4.0.1', :require => 'exception_notifier' # , git: 'git://github.com/alanjds/exception_notification.git' 
