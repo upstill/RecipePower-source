@@ -161,6 +161,10 @@ end
 
 class ResultsCache < ActiveRecord::Base
   include ActiveRecord::Sanitization
+
+  before_save do
+    session_id != nil
+  end
   # The ResultsCache class responds to a query with a series of items.
   # As a model, it saves intermediate results to the database
   self.primary_keys = ["session_id","type"]

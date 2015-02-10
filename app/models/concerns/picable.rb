@@ -27,7 +27,6 @@ module Picable
     if imageref = self.method(self.class.image_reference_name).call
       imageref.imgdata
     end # Default
-
   end
 
   def picdata_with_fallback data_only = false
