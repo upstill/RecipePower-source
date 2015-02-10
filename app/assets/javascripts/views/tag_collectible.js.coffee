@@ -9,7 +9,6 @@ jQuery ->
 RP.tag_collectible.bind = (dlog) ->
 	dlog ||= $('body') # window.document
 	# Set up processing for click events on links with a 'tag-collectible-link' class
-	$(dlog).on "click", 'a.template.tag-collectible', RP.tag_collectible.go
 
 me = () ->
 	$('div.tag-collectible')[0]
