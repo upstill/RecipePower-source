@@ -89,11 +89,8 @@ class RecipesController < CollectibleController
         format.json {
           @data = { onget: [ "submit.submit_and_process", user_collection_url(current_user, layout: false) ] }
           response_service.mode = :modal
-          render json: {
-            dlog: with_format("html") { 
-              render_to_string :edit, layout: false
-            }, popup: "'#{@recipe.title}' now appearing in your colleciton."
-          }
+          flash[:popup] = "'#{@recipe.title}' now appearing in your colleciton."
+          render :action => 'tag', :mode => :modal
         }
       end
     else # failure (not a valid recipe) => return to new

@@ -27,23 +27,27 @@ module ListsHelper
 
   # Offer to let the user save the item in their collection and any list they own, plus a new list
   def pin_menu decorator, user, styling, options={}
-    entity = decorator.object
-    hover_menu "", styling do
-      already_collected = entity.collected? current_user_or_guest_id
-      cl = collection_link decorator,
-                           checkbox_menu_item_label("Collection", already_collected),
-                           already_collected,
-                           styling,
-                           :class => "checkbox-menu-item"
-      [ content_tag(:li, cl),
-        user.owned_lists.collect { |l| content_tag :li, (list_menu_item l, entity, styling) },
-        "<hr class='menu'>".html_safe,
-        content_tag(:li,
-                    link_to_submit("Start a List...",
-                                   new_list_path(entity_type: entity.class.to_s, entity_id: entity.id),
-                                   mode: :modal,
-                                   class: "transient"))
-      ].flatten
+    if user
+      entity = decorator.object
+      hover_menu "", styling do
+        already_collected = entity.collected? current_user_or_guest_id
+        cl = collection_link decorator,
+                             checkbox_menu_item_label("Collection", already_collected),
+                             already_collected,
+                             styling,
+                             :class => "checkbox-menu-item"
+        [ content_tag(:li, cl),
+          user.owned_lists.collect { |l| content_tag :li, (list_menu_item l, entity, styling) },
+          "<hr class='menu'>".html_safe,
+          content_tag(:li,
+                      link_to_submit("Start a List...",
+                                     new_list_path(entity_type: entity.class.to_s, entity_id: entity.id),
+                                     mode: :modal,
+                                     class: "transient"))
+        ].flatten
+      end
+    else
+      x=2 # TODO: Give user a chance to set up an account
     end
   end
 
