@@ -2,6 +2,7 @@ require './lib/controller_utils.rb'
 
 class RecipesController < CollectibleController
   before_filter :allow_iframe, only: :capture
+  protect_from_forgery except: :capture
 
   before_filter :login_required, :except => [:index, :show, :capture, :collect ]
   before_filter { @focus_selector = "#recipe_url" }

@@ -7,14 +7,16 @@ class DeferredRequest < ActiveRecord::Base
   # can reproduce it after login. Any of the current request parameters may be
   # overridden--or other data stored--by passing them in the elements hash
   def self.push sessid, dr
-    defreq = self.find_or_create_by session_id: sessid
-    (defreq.requests << YAML::dump(dr)).uniq!
-    defreq.save
-    dr
+    if sessid
+      defreq = self.find_or_create_by session_id: sessid
+      (defreq.requests << YAML::dump(dr)).uniq!
+      defreq.save
+      dr
+    end
   end
 
   def self.pop sessid
-    if defreq = self.find_by(session_id: sessid)
+    if sessid && (defreq = self.find_by(session_id: sessid))
       popped = defreq.requests.pop
       if defreq.requests.count > 0
         defreq.save

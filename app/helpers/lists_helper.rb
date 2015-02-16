@@ -47,7 +47,7 @@ module ListsHelper
         ].flatten
       end
     else
-      x=2 # TODO: Give user a chance to set up an account
+      nil # TODO: Give user a chance to set up an account
     end
   end
 
