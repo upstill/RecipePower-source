@@ -1,4 +1,3 @@
-require './lib/controller_authentication.rb'
 # require './lib/seeker.rb'
 require './lib/querytags.rb'
 require './lib/templateer.rb'
@@ -10,7 +9,7 @@ class ApplicationController < ActionController::Base
   include Querytags # Grab the query tags from params for filtering a list
   # include ActionController::Live   # For streaming
   protect_from_forgery with: :exception
-  
+
   before_filter :check_flash
   before_filter :report_cookie_string
   after_filter :report_session
@@ -28,6 +27,8 @@ class ApplicationController < ActionController::Base
   helper_method :orphantagid
   helper_method :stored_location_for
   helper_method :collection_path
+  # Supplied by ControllerDeference
+  helper_method :page_with_trigger, :pending_modal_trigger
 
   include ApplicationHelper
 
@@ -47,7 +48,7 @@ class ApplicationController < ActionController::Base
       # If the entity is provided, ignore parameters
       modelname = entity.class.to_s.underscore
     else # If entity not provided, find/build it and update attributes
-      modelname = params[:controller].sub( /_controller$/, '').singularize
+      modelname = params[:controller].sub(/_controller$/, '').singularize
       objclass = modelname.camelize.constantize
       entity = params[:id] ? objclass.find(params[:id]) : objclass.new
       attribute_params = params[modelname.to_sym]
@@ -79,7 +80,8 @@ class ApplicationController < ActionController::Base
   # Track the session, saving session events when the session goes stale
   def log_serve
     logger.info %Q{RPEVENT\tServe\t#{current_user.id if current_user}\t#{params[:controller]}\t#{params[:action]}\t#{params[:id]}}
-    RpEvent.fire_trigger(params[:rpevent]) if params[:rpevent]
+    # Call RpEvent to heed the passback data for an event trigger
+    RpEvent.trigger_event(params[:rpevent]) if params[:rpevent]
     return unless current_user
     if session[:start_time] && session[:last_time]
       time_now = Time.now
@@ -90,7 +92,7 @@ class ApplicationController < ActionController::Base
         return
       elsif last_serve = RpEvent.last(:serve, current_user)
         # Close out and update the previous session to record serve count and last time
-        last_serve.data = { serve_count: session[:serve_count] }
+        last_serve.data = {serve_count: session[:serve_count]}
         last_serve.updated_at = session[:last_time]
         last_serve.save
       end
@@ -104,7 +106,7 @@ class ApplicationController < ActionController::Base
   def present(object, rc_class = nil)
     rc_class ||= "#{object.class}Presenter".constantize
     rc_class.new(object, view_context)
-  end  
+  end
 
   def check_flash
     flash.now[:notice] = params[:notice] if params[:notice]
@@ -115,18 +117,17 @@ class ApplicationController < ActionController::Base
     logger.debug "FLASH messages extant for #{params[:controller]}##{params[:action]} (check_flash):"
     view_context.flash_hash.each { |k, v| logger.debug "   #{k}: #{v}" }
   end
-  
+
   def report_cookie_string
     logger.info "COOKIE_STRING:"
     if cs = request.env["rack.request.cookie_string"]
-      cs.split('; ').each { |str| logger.info "\t"+str}
+      cs.split('; ').each { |str| logger.info "\t"+str }
     end
   end
 
   def report_session
     logger.info "COOKIES after controller:"
     response.cookies.each { |k, v| logger.info "#{k}: #{v}" }
-    x=2
   end
 
   # Take a stream presenter and drop items into a stream, if possible and called for.
@@ -136,18 +137,18 @@ class ApplicationController < ActionController::Base
     if block_given?
       yield @sp
     end
-    if @sp.stream?  # We're here to spew items into the stream
+    if @sp.stream? # We're here to spew items into the stream
       # When the stream is request is for the first items, replace the results
       if @sp.preface?
         # Generally, start by restarting the results element and replacing the found count
         header_item = with_format("html") {
-          { replacements: [
-              view_context.stream_element_replacement(:results, pkg_attributes: { id: @sp.stream_id } ),
+          {replacements: [
+              view_context.stream_element_replacement(:results, pkg_attributes: {id: @sp.stream_id}),
               view_context.stream_element_replacement(:count, final_count: true)
-          ] }
+          ]}
         }
       else
-        header_item = { deletions: [ '.stream-tail' ] }
+        header_item = {deletions: ['.stream-tail']}
       end
       response.headers["Content-Type"] = "text/event-stream"
       # retrieve_seeker
@@ -156,10 +157,10 @@ class ApplicationController < ActionController::Base
         sse.write :stream_item, header_item
 
         while item = @sp.next_item do
-          sse.write :stream_item, with_format("html") { { elmt: view_context.render_stream_item(item) } }
+          sse.write :stream_item, with_format("html") { {elmt: view_context.render_stream_item(item)} }
         end
         if @sp.next_path
-          sse.write :stream_item, with_format("html") { { elmt: view_context.render_stream_tail } }
+          sse.write :stream_item, with_format("html") { {elmt: view_context.render_stream_tail} }
         end
       rescue IOError
         logger.info "Stream closed"
@@ -199,43 +200,43 @@ class ApplicationController < ActionController::Base
       end
       format.json {
         case response_service.mode
-        when :partial
-          renderopts[:layout] = false
-          if @sp
-            # If operating with a stream, package the content into a stream-body element, with stream trigger
-            renderopts[:action] = response_service.action
-            begin
-              replname = @sp.has_query? ? "shared/stream_results_replacement" : "shared/pagelet_body_replacement"
-              render template: replname, layout: false
-            rescue Exception => e
-              x=2
+          when :partial
+            renderopts[:layout] = false
+            if @sp
+              # If operating with a stream, package the content into a stream-body element, with stream trigger
+              renderopts[:action] = response_service.action
+              begin
+                replname = @sp.has_query? ? "shared/stream_results_replacement" : "shared/pagelet_body_replacement"
+                render template: replname, layout: false
+              rescue Exception => e
+                x=2
+              end
+            else
+              render renderopts
             end
-          else
-            render renderopts
-          end
-        when :modal, :injector
-          dialog = render_to_string renderopts.merge(action: response_service.action, layout: (@layout || false), formats: ["html"])
-          render json: {code: dialog, how: "bootstrap"}.to_json, layout: false, :content_type => 'application/json'
+          when :modal, :injector
+            dialog = render_to_string renderopts.merge(action: response_service.action, layout: (@layout || false), formats: ["html"])
+            render json: {code: dialog, how: "bootstrap"}.to_json, layout: false, :content_type => 'application/json'
         end
       }
       format.js {
         # XXX??? Must have set @partial in preparation
-        render renderopts.merge( action: "capture" )
+        render renderopts.merge(action: "capture")
       }
     end
   end
-  
+
   def permission_denied
     action = case params[:action]
-    when "index"
-        "see the list of all"
-    when "show"
-        "examine"
-    when "new"
-        params[:controller] == "recipes" ? "cookmark" : "create new"
-    else
-        params[:action]
-    end
+               when "index"
+                 "see the list of all"
+               when "show"
+                 "examine"
+               when "new"
+                 params[:controller] == "recipes" ? "cookmark" : "create new"
+               else
+                 params[:action]
+             end
     flash[:alert] = "Sorry, but as a #{current_user_or_guest.role}, you're not allowed to #{action} #{params[:controller]}."
     respond_to do |format|
       format.html { redirect_to(:back) rescue redirect_to('/') }
@@ -243,24 +244,25 @@ class ApplicationController < ActionController::Base
         notif = view_context.flash_notify
         render json: notif
       }
-      format.xml  { head :unauthorized }
-      format.js   { head :unauthorized }
+      format.xml { head :unauthorized }
+      format.js { head :unauthorized }
     end
   end
 
   def no_action_error
-      redirect_to home_path, :notice => "Sorry, action not found"
+    redirect_to home_path, :notice => "Sorry, action not found"
   end
-  
+
   def timeout_error
-      redirect_to authentications_path, :notice => "Sorry, access to that page took too long."
+    redirect_to authentications_path, :notice => "Sorry, access to that page took too long."
   end
-  
+
   def rescue_action_in_public
-      x=2
+    x=2
   end
-  # alias_method :rescue_action_locally, :rescue_action_in_public  
-  
+
+  # alias_method :rescue_action_locally, :rescue_action_in_public
+
   def setup_response_service
     @user = current_user_or_guest
     @response_service ||= ResponseServices.new params, session, request
@@ -270,46 +272,50 @@ class ApplicationController < ActionController::Base
   # This object directs conditional view code according to target device and context
   def response_service
     @response_service || setup_response_service
-  end  
-  
-  def orphantagid(tagid)
-      "orphantag_"+tagid.to_s
   end
-      
+
+  def orphantagid(tagid)
+    "orphantag_"+tagid.to_s
+  end
+
   include ControllerAuthentication
 
   # Enable a modal dialog to run by embedding its URL in the URL of a page, then redirecting to it
   def redirect_to_modal dialog, page=nil
     # Transfer the contents of the flash to the trigger
-    options = { mode: :modal }
+    options = {mode: :modal}
     flash.each { |type, message| options["flash[#{type}]"] = message } if defined?(flash)
-    redirect_to view_context.page_with_trigger(page, assert_query(dialog, options))
+    redirect_to page_with_trigger(page, assert_query(dialog, options))
   end
 
   # before_filter on controller that needs login to do anything
-  def login_required alert = "Let's get you logged in so we can do this properly.", elements={}
+  def login_required format=nil
     unless logged_in?
-      elements = response_service.defer_request elements
-      flash[:alert] = alert if alert
-      if elements[:format] == :json
-        redirect_to new_authentication_url(recipe_service.params params.slice(:sourcehome) )
+      summary = action_summary params[:controller], params[:action]
+      alert = "You need to be logged in to an account on RecipePower to #{summary}."
+      defer_request format
+      if response_service.format == :json
+        flash[:alert] = alert
+        redir = new_user_registration_url(response_service.redirect_params params.slice(:sourcehome))
       else
-        redirect_to new_user_session_url( response_service.redirect_params params.slice(:sourcehome) )
+        # Redirect to the home page with a login popup trigger
+        redir = page_with_trigger home_path, new_user_registration_url(header: "Sorry, members only", flash: { alert: alert })
       end
+      redirect_to redir
     end
   end
 
   # This overrides the method for returning to a request after logging in. Formerly, session[:return_to]
   # handled this recovery
   def redirect_to_target_or_default(default, *args)
-    redirect_to( response_service.deferred_request || default, *args)
+    redirect_to(deferred_request || default, *args)
   end
 
   def build_resource(*args)
     super
     if omniauth = session[:omniauth]
       @user.apply_omniauth(omniauth)
-      @user.authentications.build(omniauth.slice('provider','uid'))
+      @user.authentications.build(omniauth.slice('provider', 'uid'))
       @user.valid?
     end
   end
@@ -319,7 +325,7 @@ class ApplicationController < ActionController::Base
   def stored_location_for(resource_or_scope)
     # If user is logging in to complete some process, we return
     # the path to completing the capture/tagging process
-    response_service.deferred_request || super
+    deferred_request(false) || super
   end
 
   # This is an override of the Devise method to determine where to go after login.
@@ -328,23 +334,27 @@ class ApplicationController < ActionController::Base
   def after_sign_in_path_for(resource_or_scope, popup = nil)
     # Process any pending notifications
     view_context.issue_notifications current_user
-    path = stored_location_for(resource_or_scope) || collection_path
-    path = view_context.page_with_trigger(path, popup) if popup # Trigger the intro popup
-    # If on the site, login triggers a refresh of the collection
-    response_service.url_for_redirect(path, :format => :html)
+    path =
+        popup ? # Trigger the intro popup for new users on the collections page
+            page_with_trigger(collection_path, popup) :
+            (stored_location_for(resource_or_scope) || collection_path)
+    reconcile_format path
   end
 
   protected
-    def render_optional_error_file(status_code)
-      logger.info "Logger sez: Error 500"
-      render :template => "errors/500", :status => 500, :layout => 'application'
-    end
+
+  include ControllerDeference
+
+  def render_optional_error_file(status_code)
+    logger.info "Logger sez: Error 500"
+    render :template => "errors/500", :status => 500, :layout => 'application'
+  end
 
   private
 
   # The capture action should be embeddable in the iframe
   def allow_iframe
     # response.headers.except! 'X-Frame-Options'
-  	response.header['X-Frame-Options'] = "ALLOWALL"
+    response.header['X-Frame-Options'] = "ALLOWALL"
   end
 end

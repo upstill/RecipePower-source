@@ -9,6 +9,18 @@ def with_format(format, &block)
   result
 end
 
+# Craft a string for describing an action
+def action_summary controller, action
+  case controller
+    when "users"
+      case action
+        when "collection"
+          return "view someone's collection"
+      end
+  end
+  "#{action} #{controller}"
+end
+
 =begin
 # Generalized response for dialog for a particular area
 def dialog_boilerplate(action, default_area=nil, renderopts={})

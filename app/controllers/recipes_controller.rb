@@ -125,7 +125,7 @@ class RecipesController < CollectibleController
             render "pages/resource_errors", response_service.render_params
           end
         else
-          login_required nil, :format => :json # format: :html, params: params.slice(:recipe, :extractions, :sourcehome )
+          login_required :json # format: :html, params: params.slice(:recipe, :extractions, :sourcehome )
           # Revise deferred_request for JSON
           # @recipe = Recipe.preload(params[:recipe]||{}, params[:extractions])
           # login_required nil, after_path: tag_recipe_path(@recipe)
@@ -147,7 +147,7 @@ class RecipesController < CollectibleController
         else
           # Nobody logged in => 
           response_service.is_injector
-          login_required nil # :format => :json, :params => params.slice(:recipe, :extractions, :sourcehome )
+          login_required # :format => :json, :params => params.slice(:recipe, :extractions, :sourcehome )
         end
       }
       format.js { 

@@ -1,2 +1,2 @@
 <!-- Redundant wrt application/new to prevent devise from responding -->
-<%= render response_service.select_render %>
+<%= render response_service.select_render, header: (defined?(header) ? header : "Step 1: Sign Up") %>

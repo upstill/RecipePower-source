@@ -41,9 +41,9 @@ class PagesController < ApplicationController
       smartrender action: params[:name], mode: :modal
     else
       # Either present the triggered dialog directly (JSON response) or via the home page
-      dialog = response_service.pending_modal_trigger
+      dialog = pending_modal_trigger
       respond_to do |format|
-        format.html { redirect_to view_context.page_with_trigger(home_path, dialog) }
+        format.html { redirect_to page_with_trigger(home_path, dialog) }
         format.json { redirect_to dialog }
       end
     end

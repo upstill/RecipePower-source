@@ -56,7 +56,7 @@ class RegistrationsController < Devise::RegistrationsController
     def new
       response_service.omniauth_pending(params[:clear_omniauth])
       build_resource({})
-      smartrender action: "new"
+      smartrender action: "new", locals: { header: params[:header] }
     end
 
     # PUT /resource

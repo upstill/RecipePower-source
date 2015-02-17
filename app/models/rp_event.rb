@@ -61,14 +61,14 @@ private
   end
 
   # Provide a structure for embedding a trigger in a URL for automatically firing an event upon a click
-  def self.embed_trigger( subject, verb, direct_object, indirect_object, data = nil )
+  def self.event_trigger_data( subject, verb, direct_object, indirect_object, data = nil )
     h = self.assemble_attributes(subject, verb, direct_object, indirect_object)
     h.merge!( data: data ) if data
     h
   end
 
   # In response to a trigger in a URL, post an event
-  def self.fire_trigger params
+  def self.trigger_event params
     self.where(params).first_or_create
   end
 

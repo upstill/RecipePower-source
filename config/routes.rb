@@ -40,7 +40,7 @@ RP::Application.routes.draw do
 
   get 'pic_picker/new' => 'pic_picker#new'
 
-  get "redirect/go"
+  get "redirect/go", :as => "goto"
   put "redirect/go"
   get '/auth/failure' => 'authentications#failure'
   # get '/authentications/new' => 'authentications#new'

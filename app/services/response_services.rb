@@ -8,7 +8,7 @@
 class ResponseServices
 
   attr_accessor :controller, :action, :title, :page_url, :active_menu, :mode
-  attr_reader :format
+  attr_reader :format, :trigger
 
   def initialize params, session, request
     @request = request
@@ -18,6 +18,7 @@ class ResponseServices
     @controller = params[:controller]
     @active_menu = params[:am]
     @action = params[:action]
+    # A trigger is a request for a popup, embedded in the query string
     @trigger = params[:trigger].sub(/^"?([^"]*)"?/, '\\1') if params[:trigger]
     @title = @controller.capitalize+"#"+@action
     @invitation_token = params[:invitation_token]
@@ -88,48 +89,8 @@ class ResponseServices
     defaults.merge layout: layout
   end
 
-  # Take a url and return a version of that url that's good for a redirect, given
-  #  that the redirect will have the format and method of the current request. The
-  #  options are used to assert a specific format, possibly different from the current one
-  def url_for_redirect url, options={}
-    if (!options[:format]) || (options[:format].to_sym == @format) || url.match("/redirect/go") # They already match
-      url
-    else
-      assert_query "/redirect/go", to: %Q{"#{url}"}
-    end
-  end
-
   def admin_view?
     @session[:admin_view]
-  end
-
-  # Save the current request pending (presumably) a login, such that deferred_request and deferred_trigger
-  # can reproduce it after login. Any of the current request parameters may be
-  # overridden--or other data stored--by passing them in the elements hash
-  def defer_request elements={}
-    DeferredRequest.push @session.id,
-                         pack_request({ format: @format, fullpath: @request.fullpath }.merge elements)
-  end
-
-  # Recall an earlier, deferred, request that can be redirected to in the current context .
-  # This isn't as easy as it sounds: if the prior request was for a format different than the current one,
-  #  we have to redirect to a request that will serve this one, as follows:
-  # -- if the current request is for JSON and the earlier one was for a page, we send back JSON instructing that page load
-  # -- if the current request is for a page and the earlier one was for JSON, we can send back a page that spring-loads
-  #!  the JSON request
-  def deferred_request
-    request =
-        if df = pending_request
-          if df[:format] == @format
-            # We can handle this request directly because its format agrees with the current request
-            clear_pending_request # Clear the pending request
-            df[:fullpath]
-          elsif df[:format] == :html
-            clear_pending_request
-            assert_query "/redirect/go", to: df[:fullpath]
-          end
-        end
-    request
   end
 
   private
@@ -143,33 +104,6 @@ class ResponseServices
         "application"
       else
         false
-    end
-  end
-
-  protected
-
-  def clear_pending_request
-    DeferredRequest.pop @session.id
-  end
-
-  # Get the currently-pending deferred request, fixing it for the current mode
-  def pending_request
-    unpack_request DeferredRequest.pending(@session.id)
-  end
-
-  # Prepare a deferred request for serialization
-  def pack_request dr
-    dr[:format] = dr[:format].to_s  # In case elements merged in a symbol
-    dr[:fullpath] = URI::decode(dr[:fullpath])
-    dr
-  end
-
-  # Restore a deferred request after deserialization
-  def unpack_request dr
-    if dr
-      dr[:fullpath] = assert_query URI::encode(dr[:fullpath]), :mode => @mode
-      dr[:format] = dr[:format].to_sym
-      dr
     end
   end
 
@@ -202,23 +136,6 @@ class ResponseServices
           else
             "page"
         end
-  end
-
-  # If there's a deferred request that can be expressed as a trigger, do so.
-  def pending_modal_trigger
-    trigger =
-        if @trigger # A modal dialog has been embedded in the USL as the trigger param
-          assert_query @trigger, mode: :modal
-=begin
-        elsif  (dr = pending_request) &&
-            (dr[:format] == :json) &&
-            (!dr[:controller] || dr[:controller] == @controller) &&
-            (!dr[:layout] || dr[:layout] == layout)
-          clear_pending_request # Delete it 'cause we're using it
-          dr[:fullpath]
-=end
-        end
-    trigger
   end
 
   # The signup button on the home page responds differently (and may or may not be a trigger)
