@@ -294,14 +294,16 @@ class ApplicationController < ActionController::Base
       summary = action_summary params[:controller], params[:action]
       alert = "You need to be logged in to an account on RecipePower to #{summary}."
       defer_request format
-      if response_service.format == :json
-        flash[:alert] = alert
-        redir = new_user_registration_url(response_service.redirect_params params.slice(:sourcehome))
-      else
-        # Redirect to the home page with a login popup trigger
-        redir = view_context.page_with_trigger home_path, new_user_registration_url(header: "Sorry, members only", flash: { alert: alert })
-      end
-      redirect_to redir
+      redir = if (response_service.format == :json)
+                flash[:alert] = alert
+                new_user_registration_url(response_service.redirect_params params.slice(:sourcehome))
+              elsif response_service.mode == :injector
+                new_user_session_url(response_service.redirect_params params.slice(:sourcehome))
+              else
+                # Redirect to the home page with a login popup trigger
+                view_context.page_with_trigger home_path, new_user_registration_url(header: "Sorry, members only", flash: {alert: alert})
+              end
+      redirect_to redir if redir
     end
   end
 

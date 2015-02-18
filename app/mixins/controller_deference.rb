@@ -40,6 +40,7 @@ module ControllerDeference
     else
       # Not immediate => we just make the request consistent with the desired format
       uri.path = uri.path.sub(/\.[^.]*$/, '') + ".#{target_format}"
+      uri.to_s
     end
   end
 
