@@ -24,7 +24,7 @@ class RecipesController < CollectibleController
       fmt.json {
         if response_service.injector?
           flash[:notice] = notice
-          render :errors
+          render :errors, locals: { entity: @recipe }
         else
           render :update, locals: { destroyed: destroyed, notice: notice, entity: @recipe }
         end
@@ -125,7 +125,7 @@ class RecipesController < CollectibleController
             render "pages/resource_errors", response_service.render_params
           end
         else
-          login_required :json # format: :html, params: params.slice(:recipe, :extractions, :sourcehome )
+          login_required nil, :format => :json # format: :html, params: params.slice(:recipe, :extractions, :sourcehome )
           # Revise deferred_request for JSON
           # @recipe = Recipe.preload(params[:recipe]||{}, params[:extractions])
           # login_required nil, after_path: tag_recipe_path(@recipe)
@@ -134,20 +134,15 @@ class RecipesController < CollectibleController
       format.json {
         if current_user          
           update_and_decorate Recipe.ensure(params[:recipe]||{}, params[:extractions])
-          if @recipe.id
+          if @recipe.id && @recipe.errors.empty?
             current_user.collect @recipe
-            @data = { onget: [ "submit.submit_and_process", user_collection_url(current_user, layout: false) ] } unless response_service.injector?
-            # deferred_capture true # Delete the pending recipe
-            codestr = with_format("html") { render_to_string :edit, layout: false }
+            # Recipe all captured and everything. Let's go tag it.
+            render :tag
           else
-            @resource = @recipe
-            codestr = with_format("html") { render_to_string "pages/resource_errors", layout: false } 
+            render :errors, locals: { entity: @recipe }
           end
-          render json: { dlog: codestr }
         else
-          # Nobody logged in => 
-          response_service.is_injector
-          login_required # :format => :json, :params => params.slice(:recipe, :extractions, :sourcehome )
+          login_required
         end
       }
       format.js { 
