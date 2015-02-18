@@ -35,7 +35,7 @@ module ControllerDeference
       if target_format == "json"
         goto_url(to: %Q{"#{url}"})  # the redirect#go JSON response will provide for getting the page
       else
-        page_with_trigger root_path, url # Send them to either the current user's collection page or the home page (if no-one logged in)
+        view_context.page_with_trigger root_path, url # Send them to either the current user's collection page or the home page (if no-one logged in)
       end
     else
       # Not immediate => we just make the request consistent with the desired format
@@ -47,16 +47,6 @@ module ControllerDeference
   def pending_modal_trigger
      # A modal dialog has been embedded in the USL as the trigger param
     assert_query(response_service.trigger, mode: :modal) if response_service.trigger
-  end
-
-  # Provide a link to a full page with a builtin trigger to a certain dialog
-  def page_with_trigger page, dialog=nil
-    page, dialog = nil, page if dialog.nil? # If only one argument, assume it's the dialog
-    page ||= popup_url # The popup controller knows how to handle a page request for a dialog
-    options = { mode: :modal }
-    triggerparam = assert_query(dialog, options )
-    pt = assert_query page, trigger: %Q{"#{triggerparam}"}
-    pt
   end
 
   # Save the current request pending (presumably) a login, such that deferred_request and deferred_trigger

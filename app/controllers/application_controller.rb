@@ -28,7 +28,7 @@ class ApplicationController < ActionController::Base
   helper_method :stored_location_for
   helper_method :collection_path
   # Supplied by ControllerDeference
-  helper_method :page_with_trigger, :pending_modal_trigger
+  helper_method :pending_modal_trigger
 
   include ApplicationHelper
 
@@ -285,7 +285,7 @@ class ApplicationController < ActionController::Base
     # Transfer the contents of the flash to the trigger
     options = {mode: :modal}
     flash.each { |type, message| options["flash[#{type}]"] = message } if defined?(flash)
-    redirect_to page_with_trigger(page, assert_query(dialog, options))
+    redirect_to view_context.page_with_trigger(page, assert_query(dialog, options))
   end
 
   # before_filter on controller that needs login to do anything
@@ -299,7 +299,7 @@ class ApplicationController < ActionController::Base
         redir = new_user_registration_url(response_service.redirect_params params.slice(:sourcehome))
       else
         # Redirect to the home page with a login popup trigger
-        redir = page_with_trigger home_path, new_user_registration_url(header: "Sorry, members only", flash: { alert: alert })
+        redir = view_context.page_with_trigger home_path, new_user_registration_url(header: "Sorry, members only", flash: { alert: alert })
       end
       redirect_to redir
     end
@@ -336,7 +336,7 @@ class ApplicationController < ActionController::Base
     view_context.issue_notifications current_user
     path =
         popup ? # Trigger the intro popup for new users on the collections page
-            page_with_trigger(collection_path, popup) :
+            view_context.page_with_trigger(collection_path, popup) :
             (stored_location_for(resource_or_scope) || collection_path)
     reconcile_format path
   end

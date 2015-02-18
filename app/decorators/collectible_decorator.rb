@@ -37,7 +37,10 @@ class CollectibleDecorator < Draper::Decorator
           when "titlelink"
             h.link_to object.title, object.url
           when "video"
-            (vid = YouTubeAddy.extract_video_id(object.url)) && "http://www.youtube.com/embed/#{vid}"
+            (uri = URI(object.url)) &&
+            uri.host.match(/\.youtube.com/) &&
+            (vid = YouTubeAddy.extract_video_id(object.url)) &&
+            "http://www.youtube.com/embed/#{vid}"
           else
             object.send(attrname.to_sym).to_s if object.respond_to? attrname
         end

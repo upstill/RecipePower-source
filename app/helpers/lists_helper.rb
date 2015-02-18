@@ -47,7 +47,10 @@ module ListsHelper
         ].flatten
       end
     else
-      nil # TODO: Give user a chance to set up an account
+      link_to_submit "",
+                     new_user_registration_path(flash: { alert: "You can collect things and make lists once you're logged in"},
+                                                header: "Join RecipePower"),
+                     styling.merge( class: "glyphicon glyphicon-pushpin" )
     end
   end
 

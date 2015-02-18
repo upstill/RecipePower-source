@@ -4,8 +4,8 @@ require 'suggestion.rb'
 class UsersController < CollectibleController
   
   rescue_from ActiveRecord::RecordNotFound, :with => :not_found
-  before_filter :login_required, :except => [:new, :create, :identify]
-  before_filter :authenticate_user!, :except => [:new, :show, :index, :identify]
+  before_filter :login_required, :except => [:create, :new, :show, :index, :identify, :collection, :profile ]
+  before_filter :authenticate_user!, :except => [:new, :show, :index, :identify, :collection, :profile]
 
   # Take a tokenInput query string and match the input against the given user's set of friends/channels
   def match_friends

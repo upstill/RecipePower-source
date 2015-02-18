@@ -17,6 +17,11 @@ def action_summary controller, action
         when "collection"
           return "view someone's collection"
       end
+    when "invitations"
+      case action
+        when "new"
+          return "invite someone else"
+      end
   end
   "#{action} #{controller}"
 end
