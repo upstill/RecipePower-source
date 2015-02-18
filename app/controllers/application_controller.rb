@@ -294,16 +294,16 @@ class ApplicationController < ActionController::Base
       summary = action_summary params[:controller], params[:action]
       alert = "You need to be logged in to an account on RecipePower to #{summary}."
       defer_request format
-      redir = if (response_service.format == :json)
-                flash[:alert] = alert
-                new_user_registration_url(response_service.redirect_params params.slice(:sourcehome))
-              elsif response_service.mode == :injector
-                new_user_session_url(response_service.redirect_params params.slice(:sourcehome))
-              else
-                # Redirect to the home page with a login popup trigger
-                view_context.page_with_trigger home_path, new_user_registration_url(header: "Sorry, members only", flash: {alert: alert})
-              end
-      redirect_to redir if redir
+      redirect_to(if (response_service.format == :json)
+                    flash[:alert] = alert
+                    new_user_registration_url(response_service.redirect_params params.slice(:sourcehome))
+                  elsif response_service.mode == :injector
+                    new_user_session_url(response_service.redirect_params params.slice(:sourcehome))
+                  else
+                    # Redirect to the home page with a login popup trigger
+                    view_context.page_with_trigger home_path, new_user_registration_url(header: "Sorry, members only", flash: {alert: alert})
+                  end
+      )
     end
   end
 
@@ -340,7 +340,7 @@ class ApplicationController < ActionController::Base
         popup ? # Trigger the intro popup for new users on the collections page
             view_context.page_with_trigger(collection_path, popup) :
             (stored_location_for(resource_or_scope) || collection_path)
-    reconcile_format path
+    reconcile_request(path)
   end
 
   protected

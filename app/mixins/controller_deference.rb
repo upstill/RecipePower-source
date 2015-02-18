@@ -9,38 +9,59 @@ module ControllerDeference
   #!  the JSON request
   def deferred_request reconcile=true
     if df = pending_request
-      clear_pending_request
       # We can defer the reconciliation till later (see usage hereabouts)
-      reconcile ? (reconcile_format df[:fullpath], response_service.format) : df[:fullpath]
+      clear_pending_request if ready = reconcile ? reconcile_request(df[:fullpath]) : df[:fullpath]
+      ready
     end
+  end
+
+  def query_to_hash qstr
+    result = {}
+    qstr.split('&').each { |assign|
+      key, val = assign.split('=')
+      result[key.to_sym] = val
+    }
+    result
   end
 
   # Take a url and return a version of that url that's good for a redirect, given
   #  that the redirect will have the format, method and mode of the current request.
   # 'target_format' may be used to assert a format different from the current request
   #  (for expressing a preference upon deferral)
-  # If 'immediate' is true, couch the url in an appropriate forwarding request.
-  def reconcile_format url, target_format=nil, immediate=true
-    if target_format == true || target_format == false
-      immediate, target_format = target_format, nil
-    end
-    target_format = (target_format || response_service.format).to_s
+  # If not deferred, couch the url in an appropriate forwarding request for immediate response.
+  def reconcile_request url, options={}
+    target_format = (options[:target_format] || response_service.format).to_s
     uri = URI url
     if format_match = uri.path.match(/\.([^.]*)$/)
       source_format = format_match[1]
     end
     source_format = "html" if source_format.blank?
-    return url if source_format == target_format
-    if immediate
-      if target_format == "json"
-        goto_url(to: %Q{"#{url}"})  # the redirect#go JSON response will provide for getting the page
+
+    target_mode = response_service.mode.to_sym
+    source_mode = query_to_hash(uri.query)[:mode].to_sym
+    if (source_mode==:injector) != (target_mode==:injector)
+      # If we're crossing between the injector context and the local context,
+      # reject this request UNLESS we can convert it to a local modal
+      if source_mode == :injector && target_mode == :modal
+        # We're in a modal context, dealing with an injector request => convert from injector to modal
+        uri.query = uri.query.sub(/mode=injector/, 'mode=modal')
       else
-        view_context.page_with_trigger root_path, url # Send them to either the current user's collection page or the home page (if no-one logged in)
+        return nil
       end
-    else
-      # Not immediate => we just make the request consistent with the desired format
+    end
+    if source_format == target_format
+      url
+    elsif options[:deferred] # Return a redirecting url for in the stipulated format
+      # Not immediate => we just make the request consistent with the desired format.
+      # Presumably it will be saved as a deferred request and reconciled to the format under which it is restored.
       uri.path = uri.path.sub(/\.[^.]*$/, '') + ".#{target_format}"
       uri.to_s
+    elsif target_format == "json"
+      goto_url(to: %Q{"#{url}"}) # the redirect#go JSON response will provide for getting the client to request page
+    else
+      # Send them to a page that contains a trigger for the JSON
+      # It will be either the current user's collection page or the home page (if no-one logged in)
+      view_context.page_with_trigger root_path, url
     end
   end
 
@@ -70,7 +91,7 @@ module ControllerDeference
   def pack_request path, format=nil
     # Ensure that the saved request reflects the current mode and (over-rideable) format
     path = assert_query path, :mode => response_service.mode
-    path = reconcile_format path, format, false # Don't embed it in a forwarding reference
+    path = reconcile_request path, target_format: format, deferred: true # Don't embed it in a forwarding reference
     { fullpath: URI::decode(path), format: (format || response_service.format) }
   end
 
