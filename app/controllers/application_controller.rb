@@ -340,7 +340,7 @@ class ApplicationController < ActionController::Base
         popup ? # Trigger the intro popup for new users on the collections page
             view_context.page_with_trigger(collection_path, popup) :
             (stored_location_for(resource_or_scope) || collection_path)
-    reconcile_request(path)
+    reconcile_request(path, in_page: collection_path)
   end
 
   protected

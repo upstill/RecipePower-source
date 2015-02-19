@@ -26,9 +26,9 @@ module ControllerDeference
 
   # Take a url and return a version of that url that's good for a redirect, given
   #  that the redirect will have the format, method and mode of the current request.
-  # 'target_format' may be used to assert a format different from the current request
+  # options[:target_format] may be used to assert a format different from the current request
   #  (for expressing a preference upon deferral)
-  # If not deferred, couch the url in an appropriate forwarding request for immediate response.
+  # If not deferred (options[:deferred]), couch the url in an appropriate forwarding request for immediate response.
   def reconcile_request url, options={}
     target_format = (options[:target_format] || response_service.format).to_s
     uri = URI url
@@ -45,9 +45,16 @@ module ControllerDeference
       if source_mode == :injector && target_mode == :modal
         # We're in a modal context, dealing with an injector request => convert from injector to modal
         uri.query = uri.query.sub(/mode=injector/, 'mode=modal')
+        source_mode = :modal
+        url = uri.to_s
       else
         return nil
       end
+    end
+    if (page_url = options[:in_page]) && (source_mode == :modal)
+      url = view_context.page_with_trigger page_url, url
+      source_mode = :page
+      source_format = "html"
     end
     if source_format == target_format
       url
@@ -57,7 +64,7 @@ module ControllerDeference
       uri.path = uri.path.sub(/\.[^.]*$/, '') + ".#{target_format}"
       uri.to_s
     elsif target_format == "json"
-      goto_url(to: %Q{"#{url}"}) # the redirect#go JSON response will provide for getting the client to request page
+      goto_url(to: %Q{"#{url}"}) # the redirect#go JSON response will get the client to request page
     else
       # Send them to a page that contains a trigger for the JSON
       # It will be either the current user's collection page or the home page (if no-one logged in)
@@ -91,7 +98,9 @@ module ControllerDeference
   def pack_request path, format=nil
     # Ensure that the saved request reflects the current mode and (over-rideable) format
     path = assert_query path, :mode => response_service.mode
-    path = reconcile_request path, target_format: format, deferred: true # Don't embed it in a forwarding reference
+    reconciliation_options = { deferred: true }
+    reconciliation_options[:target_format] = format if format
+    path = reconcile_request path, reconciliation_options # Don't embed it in a forwarding reference
     { fullpath: URI::decode(path), format: (format || response_service.format) }
   end
 
