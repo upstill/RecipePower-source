@@ -193,3 +193,13 @@ def assert_query url, format=nil, newparams={}
   uri.to_s
 end
 
+# Crack a query string into a key/value hash
+# TODO: only handles top-level keys; should be supplying a subhash for nested keys
+def query_to_hash qstr
+  result = {}
+  qstr.split('&').each { |assign|
+    key, val = assign.split('=')
+    result[key.to_sym] = val
+  }
+  result
+end

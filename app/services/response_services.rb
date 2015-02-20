@@ -7,7 +7,7 @@
 
 class ResponseServices
 
-  attr_accessor :controller, :action, :title, :page_url, :active_menu, :mode
+  attr_accessor :controller, :action, :title, :page_url, :active_menu, :mode, :specs
   attr_reader :format, :trigger
 
   def initialize params, session, request

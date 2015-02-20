@@ -27,6 +27,22 @@ class DeferredRequest < ActiveRecord::Base
     end
   end
 
+  # Get, delete and return a request matching the specs, if any, or the topmost request otherwise
+  def self.pull sessid, specs=nil
+    if specs.blank?
+      self.pop sessid
+    elsif sessid &&
+        (defreqs = self.find_by(session_id: sessid)) &&
+        (ix = defreqs.requests.rindex { |req|
+          req = YAML::load(req)
+          [:format, :mode].all? { |key| !specs[key] || (req[key] == specs[key]) }
+        })
+      req = YAML::load(defreqs.requests.delete_at ix)
+      defreqs.destroy if defreqs.requests.empty?
+      req
+    end
+  end
+
   # What's the next deferred request for this session?
   def self.pending sessid
     if defreq = self.find_by(session_id: sessid)

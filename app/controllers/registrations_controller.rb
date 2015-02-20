@@ -111,8 +111,9 @@ class RegistrationsController < Devise::RegistrationsController
     # The path used after sign up. You need to overwrite this method
     # in your own RegistrationsController.
     def after_sign_up_path_for(resource)
+      defer_welcome_dialogs
       # Process any pending notifications
-      after_sign_in_path_for resource, "/popup/starting_step2?context=signup"
+      after_sign_in_path_for resource
     end
     
     def user_root_path

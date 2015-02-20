@@ -25,7 +25,6 @@ class ApplicationController < ActionController::Base
 
   helper_method :response_service
   helper_method :orphantagid
-  helper_method :stored_location_for
   helper_method :collection_path
   # Supplied by ControllerDeference
   helper_method :pending_modal_trigger
@@ -293,7 +292,7 @@ class ApplicationController < ActionController::Base
     unless logged_in?
       summary = action_summary params[:controller], params[:action]
       alert = "You need to be logged in to an account on RecipePower to #{summary}."
-      defer_request format
+      defer_request path: request.fullpath, format: format||request.format.symbol
       redirect_to(if (response_service.format == :json)
                     flash[:alert] = alert
                     new_user_registration_url(response_service.redirect_params params.slice(:sourcehome))
@@ -305,12 +304,6 @@ class ApplicationController < ActionController::Base
                   end
       )
     end
-  end
-
-  # This overrides the method for returning to a request after logging in. Formerly, session[:return_to]
-  # handled this recovery
-  def redirect_to_target_or_default(default, *args)
-    redirect_to(deferred_request || default, *args)
   end
 
   def build_resource(*args)
@@ -327,20 +320,29 @@ class ApplicationController < ActionController::Base
   def stored_location_for(resource_or_scope)
     # If user is logging in to complete some process, we return
     # the path to completing the capture/tagging process
-    deferred_request(false) || super
+    deferred_request( path: user_collection_path(current_user) ) || super
   end
 
   # This is an override of the Devise method to determine where to go after login.
   # If there was a redirect to the login page, we go back to the source of the redirect.
   # Otherwise, new users go to the welcome page and previously-logged-in users to the queries page.
-  def after_sign_in_path_for(resource_or_scope, popup = nil)
+  def after_sign_in_path_for resource_or_scope
     # Process any pending notifications
     view_context.issue_notifications current_user
-    path =
-        popup ? # Trigger the intro popup for new users on the collections page
-            view_context.page_with_trigger(collection_path, popup) :
-            (stored_location_for(resource_or_scope) || collection_path)
-    reconcile_request(path, in_page: collection_path)
+    stored_location_for(resource_or_scope)
+  end
+
+  # This overrides the method for returning to a request after logging in. Formerly, session[:return_to]
+  # handled this recovery
+  def redirect_to_target_or_default(default, *args)
+    redirect_to deferred_request(path: default)
+  end
+
+  # When a user signs up or accepts an invitation, they'll see these dialogs, in reverse order
+  def defer_welcome_dialogs
+    defer_request path: "/popup/need_to_know_content?context=signup", :mode => :modal, :format => :json
+    defer_request path: "/popup/starting_step3?context=signup", :mode => :modal, :format => :json
+    defer_request path: "/popup/starting_step2?context=signup", :mode => :modal, :format => :json
   end
 
   protected
