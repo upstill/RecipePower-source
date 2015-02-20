@@ -45,7 +45,20 @@ module ControllerDeference
         end
     return synthesized if synthesized
     # Failed to reconcile the waiting requests with the provided spec, so if the provided spec suits, return it
-    (express_specs(specs) if request_specs[:mode] == specs[:mode] && request_specs[:format] == specs[:format])
+    spec_out = express_specs specs
+    # Now we just find a way to answer the request with the provided request
+    if request_specs[:mode] == specs[:mode] # && request_specs[:format] == specs[:format]
+      # The provided spec will do nicely, thank you
+      spec_out
+    elsif request_specs[:format] == :html
+      # Need a page but it's not a page
+      page_with_trigger nil, spec_out
+    elsif request_specs[:format] == :json
+      # Need JSON but not JSON
+      goto_url to: %Q{"#{spec_out}"} # the redirect#go JSON response will get the client to request page
+    else
+      x=2
+    end
   end
 
   # If there's a deferred request that can be expressed as a trigger, do so.
@@ -148,17 +161,23 @@ module ControllerDeference
     return specs if specs[:path].blank? # Nothing to see here
 
     uri = URI specs[:path]
-    if mode_match = uri.query.match(/mode=([^&]*)(\&?)/)
+
+    # Attend to the format as necessary
+    specs[:format] ||= (format_match = uri.path.match(/\.([^.]*)$/)) ? format_match[1].to_sym : :html
+    # Elide the format
+    uri.path.sub! /\.[^.]*$/, ''
+
+    # Attend to the mode (in the query)
+    if uri.query && mode_match = uri.query.match(/mode=([^&]*)(\&?)/)
       specs[:mode] ||= mode_match[1].to_sym
       # Elide the mode declaration from the query
       uri.query.sub! /mode=[^&]*\&?/, ''
       uri.query.sub! /\&$/, '' # Remove ampersand that may have been left behind
       uri.query = nil if uri.query.blank?
+    else
+      specs[:mode] ||= (specs[:format] == :html ? :page : :modal)
     end
 
-    specs[:format] ||= (format_match = uri.path.match(/\.([^.]*)$/)) ?  format_match[1].to_sym : :html
-    # Elide the format
-    uri.path.sub! /\.[^.]*$/, ''
     specs[:path] = uri.to_s
     specs
   end
@@ -167,10 +186,10 @@ module ControllerDeference
   def express_specs specs 
     if path = specs[:path]
       uri = URI path
-      if specs[:format]
+      if specs[:format] && (specs[:format] != :html)
         uri.path = uri.path + ".#{specs[:format]}"
       end
-      if specs[:mode]
+      if specs[:mode] && (specs[:mode] != :page)
         mode = "mode=#{specs[:mode]}"
         uri.query = uri.query.blank? ? mode : "#{mode}&#{uri.query}"
       end
