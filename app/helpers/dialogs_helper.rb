@@ -141,10 +141,10 @@ module DialogsHelper
     if name.is_a? Hash
       options, name = name, nil
     end
-    options = bootstrap_button_options({button_style: "primary"}.merge(options))
+    options = bootstrap_button_options({button_style: "success"}.merge(options))
     str =
         tag :input,
-            class: "#{options[:class]} submit",
+            class: "#{options[:class]} submit dialog-submit-button dialog-form-button",
             name: "commit",
             type: "submit",
             value: name||"Save",
@@ -161,7 +161,7 @@ module DialogsHelper
     # options[:class] = "#{options[:class]} close dialog-cancel-button"
     #link_to name, "#", options
     str = tag :input,
-              class: "#{options[:class]} cancel dialog-cancel-button",
+              class: "#{options[:class]} cancel dialog-cancel-button dialog-form-button",
               data: {dismiss: "modal"},
               name: "commit",
               type: "submit",

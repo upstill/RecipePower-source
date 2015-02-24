@@ -24,20 +24,10 @@ div.dialog {
     }
     padding-left: 1%;
     padding-right: 1%;
-  }
-  &.at__left {
-    // font:18px arial,sans-serif;
-    // font-weight:bold;
-    width: auto;
-    position: absolute;
-    // font-size:80%;
-    padding-left: 1%;
-    padding-right: 1%;
-    margin-left: 0;
-    margin-right: 0;
-    z-index: 2000;
-    top: 0;
-    left: 0
+    .dialog-form-button {
+	float: right;
+  	margin: 10px;
+    }
   }
   .red_body {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;

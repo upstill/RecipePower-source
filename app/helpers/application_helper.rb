@@ -298,9 +298,8 @@ module ApplicationHelper
     submit_label = options[:submit_label] || "Save"
     content_tag :div,
                 ((block_given? ? yield : "") +
-                    f.submit(submit_label, class: "dialog-submit-button btn btn-success") +
+                    dialog_submit_button(submit_label) +
                     dialog_cancel_button
-                    # link_to("Cancel", cancel_path, class: "dialog-cancel-button btn btn-info")
                 ).html_safe,
                 class: "form-group actions"
   end

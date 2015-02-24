@@ -4,7 +4,7 @@ class CollectibleController < ApplicationController
     if current_user
       update_and_decorate # Generate a FeedEntryDecorator as @feed_entry and prepares it for editing
       if params[:oust]
-        @decorator.collect false
+        @decorator.be_collected false
         msg = "'#{@decorator.title.truncate(50)}' has been vanquished from your collection (though you may see it in others)."
       else
         @decorator.add_to_collection current_user.id
@@ -30,7 +30,7 @@ class CollectibleController < ApplicationController
       params.delete :recipe unless request.method == "POST" # We're not saving anything otherwise
       update_and_decorate
       unless @decorator.errors.any? || @decorator.collected? # Ensure that it's collected before editing
-        @decorator.collect
+        @decorator.be_collected
         @decorator.save
         flash.now[:notice] = "'#{@decorator.title.truncate(50)}' has been added to your collection for tagging" # if @decorator.object.errors.empty?
       end

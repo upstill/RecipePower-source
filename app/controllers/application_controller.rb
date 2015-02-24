@@ -323,7 +323,12 @@ class ApplicationController < ActionController::Base
   def stored_location_for(resource_or_scope)
     # If user is logging in to complete some process, we return
     # the path to completing the capture/tagging process
-    deferred_request( path: user_collection_path(current_user), :format => :html ) || super
+    flash = {success: "Welcome to RecipePower, #{current_user.handle}. This is your collection page, which you can always reach from the Collections menu above."}
+    if response_service.injector?
+      deferred_request
+    else
+      deferred_request(path: user_collection_path(current_user, flash: flash), :format => :html)
+    end || super
   end
 
   # This is an override of the Devise method to determine where to go after login.

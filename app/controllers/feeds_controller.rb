@@ -70,7 +70,7 @@ class FeedsController < CollectibleController
         render :new, status: :unprocessable_entity, mode: :modal
       else
         # No problems. Collect the feed now.
-        @feed.collect
+        @feed.be_collected
         @feed.save
         if post_resource_errors(@feed)
           render :errors

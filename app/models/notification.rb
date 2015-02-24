@@ -20,7 +20,7 @@ class Notification < ActiveRecord::Base
     when :share_recipe
       recipe = Recipe.find(info[:what])
       recipe.uid = target_id
-      recipe.collect
+      recipe.be_collected
       msg = "'#{recipe.title}' now appearing in your collection"
     when :make_friend
     end
