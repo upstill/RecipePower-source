@@ -158,7 +158,6 @@ module NavtabsHelper
             link_to("Address Bar Magic", "#", onclick: "RP.getgo('#{home_path}', 'http://local.recipepower.com:3000/bar.html##{bookmarklet_script}')"),
             link_to("Bookmark Magic", "#", onclick: "RP.bm('Cookmark', '#{bookmarklet_script}')"),
             link_to("Stream Test", "#", onclick: "RP.stream.buffer_test();"),
-            link_to_submit("Step 3", popup_path("starting_step3"), :mode => :modal, class: "transient")
           ]
         else
           item_list += [

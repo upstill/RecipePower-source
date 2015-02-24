@@ -11,21 +11,6 @@ jQuery ->
 		$('[autofocus]:first', event.target).focus()[0] ||
 		$('input.string', event.target).focus()[0] ||
 		$('input.text', event.target).focus()[0]
-	RP.dialog.arm_links()
-
-# Set up all ujs for the dialog and its requirements
-RP.dialog.arm_links = (dlog) ->
-	if dlog && (typeof RP.submit != 'undefined') # The submit module has its own onload call, so we only call for new dialogs
-		RP.submit.bind dlog # Arm submission links and preload sub-dialogs
-	dlog ||= window.document
-	$('input.cancel', dlog).click RP.dialog.cancel
-	$('a.dialog-cancel-button', dlog).click RP.dialog.cancel
-	$('a.dialog-submit-button', dlog).click RP.dialog.close
-	$('a.question_section', dlog).click RP.showhide
-	if requires = $(dlog).data 'dialog-requires'
-		for requirement in requires
-			if fcn = RP.named_function "RP." + requirement + ".bind"
-				fcn.apply()
 
 RP.dialog.close = (event) ->
 	if event
@@ -37,8 +22,11 @@ RP.dialog.close = (event) ->
 		dlog = $('div.dialog')[0]
 	close_modal dlog, "close"
 
-RP.dialog.cancel = (event) ->
-	if event
+###
+  RP.dialog.cancel = (event) ->
+      # Ask the server for any subsequent popups or a Done flag to close
+      RP.submit.submit_and_process "http://local.recipepower.com:3000/popup"
+  	if event
 		if dlog = RP.dialog.target_modal(event)
 			event.preventDefault()
 		else
@@ -47,6 +35,7 @@ RP.dialog.cancel = (event) ->
 		dlog = $('div.dialog')[0]
 	# RP.dialog.close_modal dlog
 	close_modal dlog, "cancel"
+###
 
 # Take over a previously-loaded dialog and run it
 RP.dialog.run = (dlog) ->
@@ -148,7 +137,7 @@ open_modal = (dlog, omit_button) ->
 	notify "load", dlog
 	RP.state.onDialogOpen dlog
 	if !(omit_button || $('button.close', dlog)[0])
-		buttoncode = '<button type=\"button\" class=\"close\" onclick=\"RP.dialog.cancel(event)\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>'
+		buttoncode = '<button type=\"button\" class=\"close dialog-x-box dialog-cancel-button\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>'
 		$('div.modal-header', dlog).prepend buttoncode
 	if $(dlog).modal
 		$(dlog).modal()
@@ -158,7 +147,21 @@ open_modal = (dlog, omit_button) ->
 	notify_injector "open", dlog
 	$('.token-input-field-pending', dlog).each ->
 		RP.tagger.setup this
-	RP.dialog.arm_links dlog
+	# Arm event responders for the dialog
+	if typeof RP.submit != 'undefined' # The submit module has its own onload call, so we only call for new dialogs
+		RP.submit.bind dlog # Arm submission links and preload sub-dialogs
+	$('.dialog-cancel-button', dlog).click (event) ->
+		# When canceling, check for pending dialog/page, following instructions in the response
+		dlog = event.target
+		if !$(dlog).hasClass "cancelled"
+			$(dlog).addClass "cancelled"
+			RP.submit.submit_and_process "/popup"
+		event.preventDefault()
+	$('a.question_section', dlog).click RP.showhide
+	if requires = $(dlog).data 'dialog-requires'
+		for requirement in requires
+			if fcn = RP.named_function "RP." + requirement + ".bind"
+				fcn.apply()
 	RP.fire_triggers()
 	dlog
 

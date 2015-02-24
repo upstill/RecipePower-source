@@ -6,16 +6,16 @@ module Collectible
 
   included do
     before_save do
-      boolean_private = @collectible_private.to_i == 1
       if @collectible_user_id # It must have been set
         @collectible_user_id = @collectible_user_id.to_i # Better to have it as an integer
-        if ref = cached_ref
-          ref.comment = @collectible_comment
-          ref.private = boolean_private
-          ref.in_collection = @collectible_in_collection
-          ref.save
+        if (@current_ref && (@current_ref.user_id == @collectible_user_id)) ||
+            (@current_ref = toucher_pointers.find_by(user_id: @collectible_user_id))
+          @current_ref.comment = @collectible_comment
+          @current_ref.private = @collectible_private
+          @current_ref.in_collection = @collectible_in_collection
+          @current_ref.save
         else
-          viewer_pointers.create user_id: @collectible_user_id, comment: @collectible_comment, private: boolean_private
+          @current_ref = viewer_pointers.create user_id: @collectible_user_id, comment: @collectible_comment, private: boolean_private
         end
       end
     end
@@ -31,27 +31,37 @@ module Collectible
     User.collectible self unless self == User # Provides an association to users for each type of collectible (users collecting users are handled specially)
     # attr_accessor :collectible_userid, :collectible_comment, :collectible_private # Virtual attributes for editing
     # attr_accessible :collectible_userid, :collectible_comment, :collectible_private # Virtual attributes for editing
-    attr_accessor :collectible_user_id, :collectible_comment, :collectible_private # For editng purposes: the cached_ref for the current user (collection required)
+    attr_accessor :collectible_user_id, :collectible_comment # For editng purposes: the cached_ref for the current user (collection required)
+    attr_reader :collectible_private
     attr_accessible :collectible_user_id, :collectible_comment, :collectible_private
   end
 
   # Prepare for editing the model by setting the collectible attributes
   def uid= uid
     @collectible_user_id = uid
-    if !@current_ref || (@current_ref.user_id != uid) # Bust the cache
-      @current_ref = nil
-      # These are the default values for the associated rcpref. If accessed they will be replaced by the values from the ref
-      @collectible_comment = ""
-      @collectible_private = 0
-      @collectible_in_collection = false
-    end
+    cached_ref  # Bust the cache but update the collectible attributes to reflect the ref assoc'd with this id
     # Work back up the hierarchy
     super if defined? super
   end
 
   def private= priv
     cached_ref
-    @collectible_private = priv ? 1 : 0
+    self.collectible_private = priv
+  end
+
+  # Gatekeeper for the privacy value to interpret strings from checkbox fields
+  def collectible_private= newval
+    # Boolean may be coming in as string or integer
+    case newval
+      when Fixnum
+        @collectible_private = (newval == 1)
+      when String
+        @collectible_private = (newval == "1")
+      when nil
+        @collectible_private = false
+      else
+        @collectible_private = newval
+    end
   end
 
   def collect going_in=true
@@ -76,15 +86,15 @@ module Collectible
 
   def private uid=nil
     ref = ref_if_any uid
-    return (@collectible_private == 1) if @current_ref && ref == @current_ref
-    (ref && ref.private) ? true : false
+    return collectible_private if @current_ref && ref == @current_ref
+    ref.private if ref
   end
 
   # Does the entity appear in the user's collection?
   def collected? uid=nil
     ref = ref_if_any uid
     return @collectible_in_collection if @current_ref && ref == @current_ref
-    ref && ref.in_collection
+    ref.in_collection if ref
   end
 
   # Return the number of times a recipe's been marked
@@ -116,10 +126,10 @@ module Collectible
     unless @current_ref && (@current_ref.user_id == @collectible_user_id)
       # A user is specified, but the currently-cached ref doesn't match
       if @current_ref = (force ?
-        toucher_pointers.find_or_initialize_by(user_id: @collectible_user_id, entity_type: self.class.to_s, entity_id: self.id) :
-          toucher_pointers.where(user_id: @collectible_user_id, entity: self).first)
+          toucher_pointers.find_or_initialize_by(user_id: @collectible_user_id) :
+          toucher_pointers.where(user_id: @collectible_user_id).first)
         @collectible_comment = @current_ref.comment || ""
-        @collectible_private = @current_ref.private? ? 1 : 0
+        @collectible_private = @current_ref.private
         @collectible_in_collection = @current_ref.in_collection
       end
     end

@@ -12,7 +12,8 @@ class ApplicationController < ActionController::Base
 
   before_filter :check_flash
   before_filter :report_cookie_string
-  after_filter :report_session
+  before_filter { logger.info "Before controller:"; report_session }
+  after_filter { logger.info "After controller:"; report_session }
   # before_filter :detect_notification_token
   before_filter :setup_response_service
   before_filter :log_serve
@@ -125,14 +126,16 @@ class ApplicationController < ActionController::Base
   end
 
   def report_session
-    logger.info "COOKIES after controller:"
+    logger.info "COOKIES:"
     response.cookies.each { |k, v| logger.info "#{k}: #{v}" }
+    logger.info "SESSION id: #{session.id}"
+    logger.info "UUID: #{rp_uuid}"
   end
 
   # Take a stream presenter and drop items into a stream, if possible and called for.
   # Otherwise, defer to normal rendering
   def do_stream rc_class
-    @sp = StreamPresenter.new session.id, request.fullpath, rc_class, current_user_or_guest_id, response_service.admin_view?, querytags, params
+    @sp = StreamPresenter.new rp_uuid, request.fullpath, rc_class, current_user_or_guest_id, response_service.admin_view?, querytags, params
     if block_given?
       yield @sp
     end
@@ -320,7 +323,7 @@ class ApplicationController < ActionController::Base
   def stored_location_for(resource_or_scope)
     # If user is logging in to complete some process, we return
     # the path to completing the capture/tagging process
-    deferred_request( path: user_collection_path(current_user) ) || super
+    deferred_request( path: user_collection_path(current_user), :format => :html ) || super
   end
 
   # This is an override of the Devise method to determine where to go after login.
@@ -335,14 +338,19 @@ class ApplicationController < ActionController::Base
   # This overrides the method for returning to a request after logging in. Formerly, session[:return_to]
   # handled this recovery
   def redirect_to_target_or_default(default, *args)
-    redirect_to deferred_request(path: default)
+    redirect_to deferred_request path: default, :mode => :page
   end
 
   # When a user signs up or accepts an invitation, they'll see these dialogs, in reverse order
   def defer_welcome_dialogs
-    defer_request path: "/popup/need_to_know_content?context=signup", :mode => :modal, :format => :json
+    defer_request path: "/popup/need_to_know?context=signup", :mode => :modal, :format => :json
     defer_request path: "/popup/starting_step3?context=signup", :mode => :modal, :format => :json
     defer_request path: "/popup/starting_step2?context=signup", :mode => :modal, :format => :json
+  end
+
+  # This is a unique identifier for a computer, implemented as a cookie to persist across sessions
+  def rp_uuid
+    @uuid ||= cookies[:rp_uuid] || (cookies[:rp_uuid] = session.id)
   end
 
   protected

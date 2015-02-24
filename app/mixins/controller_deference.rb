@@ -5,7 +5,7 @@ module ControllerDeference
   # can reproduce it after login. Any of the current request parameters may be
   # overridden--or other data stored--by passing them in the elements hash
   def defer_request spec={}
-    DeferredRequest.push session.id, settle_specs(spec) # pack_request(spec)
+    DeferredRequest.push rp_uuid, unpack_path(spec) # pack_request(spec)
   end
 
   # Recall an earlier, deferred, request that can be redirected to in the current context .
@@ -15,27 +15,29 @@ module ControllerDeference
   # -- if the current request is for a page and the earlier one was for JSON, we can send back a page that spring-loads
   #!  the JSON request
   def deferred_request specs={}
-    request_specs = settle_specs path: request.fullpath, format: request.format.symbol
-    if direct = request_matching( request_specs.slice(:format, :mode) )
-      return direct
+    # The input specs denote a default path that CAN help with this one, but may be replaced from deferred requests
+    needed = unpack_path specs # Derive format and mode from the 'needed' spec, if not already specified
+    requested = unpack_path path: request.fullpath, format: request.format.symbol
+    if pending = request_matching( requested.slice(:format) )
+      defer_request needed
+      return pending # needed[:path] = pending[:path]
     end
-    # The input specs denote a default request that CAN help with this one, but isn't needed
-    settle_specs specs # Derive format and mode from the spec
+=begin
     # If there's a way to serve a deferred request directly, go for it
     # The provided specs don't match the request
     synthesized =
-        case request_specs[:mode]
+        case requested[:mode]
           # What are we looking for here?
           when :injector
             # Merrily assuming that a deferred :injector request is modal
             request_matching :mode => :injector
           when :page
-            case specs[:mode]
+            case needed[:mode]
               when :injector, :modal
-                page_with_trigger request_matching(:mode => :page), express_specs(specs)
+                page_with_trigger request_matching(:mode => :page), pack_path(needed)
               when :partial
-                specs[:mode] = :page # A partial has a whole-page version
-                page = express_specs specs
+                needed[:mode] = :page # A partial has a whole-page version
+                page = pack_path needed
                 (dialog = request_matching(:mode => :modal)) ? page_with_trigger(page, dialog) : page
             end
           when :partial # Doesn't really apply
@@ -45,40 +47,44 @@ module ControllerDeference
         end
     return synthesized if synthesized
     # Failed to reconcile the waiting requests with the provided spec, so if the provided spec suits, return it
-    spec_out = express_specs specs
+=end
+    out_path = pack_path needed
     # Now we just find a way to answer the request with the provided request
-    if request_specs[:mode] == specs[:mode] # && request_specs[:format] == specs[:format]
-      # The provided spec will do nicely, thank you
-      spec_out
-    elsif request_specs[:format] == :html
-      # Need a page but it's not a page
-      page_with_trigger nil, spec_out
-    elsif request_specs[:format] == :json
-      # Need JSON but not JSON
-      goto_url to: %Q{"#{spec_out}"} # the redirect#go JSON response will get the client to request page
-    else
-      x=2
+    case requested[:format]
+      when needed[:format] # && requested[:format] == needed[:format]
+        # The provided spec will do nicely, thank you
+        out_path
+      when :html
+        # Need a page but it's not a page
+        page_with_trigger out_path
+      when :json
+        # Need JSON but not JSON
+        goto_url to: %Q{"#{out_path}"} # the redirect#go JSON response will get the client to request page
+      else
+        x=2
     end
   end
 
   # If there's a deferred request that can be expressed as a trigger, do so.
   def pending_modal_trigger
     # A modal dialog has been embedded in the USL as the trigger param
-    response_service.trigger ?
-        assert_query(response_service.trigger, mode: :modal) :
-        request_matching(:format => :json, :mode => :modal)
+    if req = response_service.trigger || current_user &&
+        (request_matching(:format => :json, :mode => :modal) ||
+        request_matching(:format => :json, :mode => :injector))
+      assert_query req, mode: :modal
+    end
   end
 
   private
 
   # Get a spec from deferred requests that matches the format and mode, if any
   def specs_matching specs
-    (req = DeferredRequest.pull( session.id, specs)) && unpack_request(req)
+    (req = DeferredRequest.pull( rp_uuid, specs)) && unpack_request(req)
   end
 
   # If there is a deferred request, fetch it as a spec and return it as a request path
   def request_matching specs
-    (specs = specs_matching specs) && (express_specs specs)
+    (specs = specs_matching specs) && (pack_path specs)
   end
 
 =begin
@@ -155,35 +161,35 @@ module ControllerDeference
   end
 
   # For a spec hash which includes :path, :format, and :mode, strip the path, defining :format and :mode if not defined already
-  def settle_specs specs
+  def unpack_path specs
     # specs can be either a url string or hash
-    specs = { path: specs } if specs.is_a? String
-    return specs if specs[:path].blank? # Nothing to see here
+    unpacked = specs.is_a?(String) ? { path: specs } : specs.clone
+    return unpacked if unpacked[:path].blank? # Nothing to see here
 
-    uri = URI specs[:path]
+    uri = URI unpacked[:path]
 
     # Attend to the format as necessary
-    specs[:format] ||= (format_match = uri.path.match(/\.([^.]*)$/)) ? format_match[1].to_sym : :html
+    unpacked[:format] ||= (format_match = uri.path.match(/\.([^.]*)$/)) ? format_match[1].to_sym : :html
     # Elide the format
     uri.path.sub! /\.[^.]*$/, ''
 
     # Attend to the mode (in the query)
     if uri.query && mode_match = uri.query.match(/mode=([^&]*)(\&?)/)
-      specs[:mode] ||= mode_match[1].to_sym
+      unpacked[:mode] ||= mode_match[1].to_sym
       # Elide the mode declaration from the query
       uri.query.sub! /mode=[^&]*\&?/, ''
       uri.query.sub! /\&$/, '' # Remove ampersand that may have been left behind
       uri.query = nil if uri.query.blank?
     else
-      specs[:mode] ||= (specs[:format] == :html ? :page : :modal)
+      unpacked[:mode] ||= (unpacked[:format] == :html ? :page : :modal)
     end
 
-    specs[:path] = uri.to_s
-    specs
+    unpacked[:path] = uri.to_s
+    unpacked
   end
 
   # For a spec hash as above, incorporate the :format and :mode constraints into the returned path
-  def express_specs specs 
+  def pack_path specs
     if path = specs[:path]
       uri = URI path
       if specs[:format] && (specs[:format] != :html)

@@ -38,7 +38,7 @@ class DeferredRequest < ActiveRecord::Base
           [:format, :mode].all? { |key| !specs[key] || (req[key] == specs[key]) }
         })
       req = YAML::load(defreqs.requests.delete_at ix)
-      defreqs.destroy if defreqs.requests.empty?
+      defreqs.requests.empty? ? defreqs.destroy : defreqs.save
       req
     end
   end

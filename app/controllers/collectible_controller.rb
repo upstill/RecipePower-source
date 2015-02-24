@@ -27,15 +27,13 @@ class CollectibleController < ApplicationController
   # PATCH tag
   def tag
     if current_user
+      params.delete :recipe unless request.method == "POST" # We're not saving anything otherwise
       update_and_decorate
       unless @decorator.errors.any? || @decorator.collected? # Ensure that it's collected before editing
         @decorator.collect
-        unless request.method == "POST"
-          @decorator.save
-          flash.now[:notice] = "'#{@decorator.title.truncate(50)}' has been added to your collection for tagging" # if @decorator.object.errors.empty?
-        end
+        @decorator.save
+        flash.now[:notice] = "'#{@decorator.title.truncate(50)}' has been added to your collection for tagging" # if @decorator.object.errors.empty?
       end
-      @decorator.save if @decorator.errors.empty? && (request.method == "POST")
       if post_resource_errors @decorator
         render :errors
       else
@@ -102,7 +100,7 @@ class CollectibleController < ApplicationController
     if update_and_decorate && params[:other_id] && (other = @decorator.object.class.find(params[:other_id].to_i))
       @absorbee = other.decorate
       @decorator.absorb other
-      ResultsCache.bust session.id
+      ResultsCache.bust rp_uuid
       other.destroy
     end
   end

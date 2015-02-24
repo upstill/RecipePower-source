@@ -271,6 +271,5 @@ class InvitationsController < Devise::InvitationsController
   def after_accept_path_for resource
     defer_welcome_dialogs
     after_sign_in_path_for resource
-    # assert_popup "starting_step2?context=signup", after_sign_in_path_for(resource) # welcome_path
   end
 end

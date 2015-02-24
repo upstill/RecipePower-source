@@ -135,7 +135,7 @@ class RecipesController < CollectibleController
           if @recipe.id && @recipe.errors.empty?
             current_user.collect @recipe
             # Recipe all captured and everything. Let's go tag it.
-            render :tag
+            smartrender :action => :tag
           else
             render :errors, locals: { entity: @recipe }
           end
