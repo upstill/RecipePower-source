@@ -69,8 +69,8 @@
             <% if permitted_to?(:admin, :pages) && response_service.admin_view? %>
                 <input class="btn btn-danger pull-left" type="submit" data-action="<%= decorator.object_path %>" data-method="delete" value="Destroy" data-confirm="This will remove the <%= decorator.human_name %> from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?"/>
             <% end %>
-            <%= dialog_cancel_button %>
             <%= dialog_submit_button %>
+            <%= dialog_cancel_button %>
           </div>
         </form>
       </div>
