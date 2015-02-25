@@ -26,14 +26,21 @@ class Result
   end
 
   # Extract the data from a node under the given label
-  def push (str, uri=nil)
-    str = str.
-        encode( 'ASCII-8BIT', 'binary', :invalid => :replace, :undef => :replace).
-        encode('UTF-8').gsub(/ ,/, ',') unless str.nil? # str.cleanup.remove_non_ascii
-    unless str.blank?
+  def push (str_in, uri=nil)
+    unless str_in.nil?
+      begin
+        str_out = str_in.
+            # encode('ASCII-8BIT', 'binary', :invalid => :replace, :undef => :replace).
+            encode('UTF-8').gsub(/ ,/, ',')
+      rescue Exception => e
+        logger.debug "STRING ENCODING ERROR on #{str_in}"
+        str_out = str_in.encode('ASCII-8BIT', 'binary', :invalid => :replace, :undef => :replace)
+      end
+    end
+    unless str_out.blank?
       # Add to result
-      str << '\t'+uri unless uri.blank?
-      self.out << str # Add to the list of results
+      str_out << '\t'+uri unless uri.blank?
+      self.out << str_out # Add to the list of results
     end
   end
 
@@ -630,7 +637,7 @@ class SiteServices
     end
     begin
       pagetags = PageTags.new(url, @site, finders, spec[:all], false)
-    rescue
+    rescue Exception => e
       puts "Error: couldn't open page '#{url}' for analysis."
       return {}
     end

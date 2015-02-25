@@ -61,7 +61,7 @@ module NavtabsHelper
 
   def friends_navtab menu_only = false
     navtab :friends, "Friends", users_path(:select => :followees), menu_only do
-      current_user_or_guest.followees[0..10].collect { |u|
+      current_user_or_guest.followees[0..20].collect { |u|
         navlink u.handle, user_path(u), id: dom_id(u)
       } + [
           "<hr class='menu'>".html_safe,
