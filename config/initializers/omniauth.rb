@@ -12,7 +12,7 @@ Rails.application.config.middleware.use OmniAuth::Builder do
 end
 
 OmniAuth.config.on_failure = Proc.new { |env|
-  Rails.logger.error("OmniAuth Failure (#{error_type}): #{exception.inspect}")
+  Rails.logger.error("OmniAuth Failure: #{env['omniauth.error.type']}")
   OmniAuth::FailureEndpoint.new(env).redirect_to_failure
 }
 
