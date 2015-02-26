@@ -295,17 +295,21 @@ class ApplicationController < ActionController::Base
     unless logged_in?
       summary = action_summary params[:controller], params[:action]
       alert = "You need to be logged in to an account on RecipePower to #{summary}."
-      defer_request path: request.fullpath, format: format||request.format.symbol
-      redirect_to(if (response_service.format == :json)
-                    flash[:alert] = alert
-                    new_user_registration_url(response_service.redirect_params params.slice(:sourcehome))
-                  elsif response_service.mode == :injector
-                    new_user_session_url(response_service.redirect_params params.slice(:sourcehome))
-                  else
-                    # Redirect to the home page with a login popup trigger
-                    view_context.page_with_trigger home_path, new_user_registration_url(header: "Sorry, members only", flash: {alert: alert})
-                  end
-      )
+      if session.id
+        defer_request path: request.fullpath, format: format||request.format.symbol
+        redirect_to(if (response_service.format == :json)
+                      flash[:alert] = alert
+                      new_user_registration_url(response_service.redirect_params params.slice(:sourcehome))
+                    elsif response_service.mode == :injector
+                      new_user_session_url(response_service.redirect_params params.slice(:sourcehome))
+                    else
+                      # Redirect to the home page with a login popup trigger
+                      view_context.page_with_trigger home_path, new_user_registration_url(header: "Sorry, members only", flash: {alert: alert})
+                    end
+        )
+      else
+        render :file => "public/401.html", :layout => false, :status => :unauthorized
+      end
     end
   end
 
