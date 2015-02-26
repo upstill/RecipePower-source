@@ -61,7 +61,7 @@ class List < ActiveRecord::Base
   commentable :notes
   include Typeable
   include Collectible
-  picable :picurl, :thumbnail
+  picable :picurl, :picture
 
   typeable( :availability,
             public: ["Anyone (Public)", 0 ],

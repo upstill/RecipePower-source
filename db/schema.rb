@@ -130,10 +130,7 @@ ActiveRecord::Schema.define(version: 20150201004623) do
     t.text     "ordering",     default: ""
     t.text     "description",  default: ""
     t.text     "notes",        default: ""
-<<<<<<< HEAD
-=======
     t.boolean  "pullin",       default: true
->>>>>>> refs/heads/Rails41
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "picture_id"
@@ -278,17 +275,10 @@ ActiveRecord::Schema.define(version: 20150201004623) do
   end
 
   create_table "results_caches", id: false, force: true do |t|
-<<<<<<< HEAD
-    t.string   "session_id", null: false
-    t.text     "params"
-    t.text     "cache"
-    t.string   "type",       null: false
-=======
     t.string   "session_id",              null: false
     t.text     "params"
     t.text     "cache"
     t.string   "type",       default: "", null: false
->>>>>>> refs/heads/Rails41
     t.text     "partition"
     t.datetime "created_at"
     t.datetime "updated_at"
