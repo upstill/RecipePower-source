@@ -1,7 +1,7 @@
 <% @recipe = @recipe || Recipe.find(@recipient.shared_recipe) %>
 <% if url = @recipe.picdata %>
     <div class="share_recipe_pic_box">
-      <%= image_with_error_recovery url %>
+      <%= image_tag url %>
     </div>
 <% end %>
 <br>

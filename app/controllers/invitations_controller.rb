@@ -13,6 +13,7 @@ class InvitationsController < Devise::InvitationsController
   # GET /resource/invitation/new
   def new
     self.resource = resource_class.new(invitation_message: "Here's a recipe that I'm really into right now. Take a look and tell me what you think.")
+    # TODO: NOT JUST RECIPES!!! (Everything gets a share button)
     resource.shared_recipe = params[:recipe_id]
     @recipe = resource.shared_recipe && Recipe.find(resource.shared_recipe)
     self.resource.invitation_issuer = current_user.polite_name

@@ -16,3 +16,5 @@ eventmachine/
 /config/database.yml
 
 /log/trimmed_pl
+
+/log/logout
