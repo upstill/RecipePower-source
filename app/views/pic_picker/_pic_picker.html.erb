@@ -26,17 +26,15 @@ Expecting the following local variables:
             <% else %>
               Click on a thumbnail to grab it.<br><br>Or, type or paste the web address of an image below and click Preview.
             <% end %>
-            </span>
+          </span>
           <% if pageurl && pic_select_list.empty? %>
-              <br>(Alternatively, you can visit the recipe's webpage, hit the Cookmark button, and pick a picture from
-              there.)
+              <br>(Or, you can visit the recipe's webpage, hit the Cookmark button, and pick a picture from there.)
           <% end %>
         </div>
         <div class="row">
           <div class="col-xs-12 col-sm-12 col-md-12">
             <input type="text"
                    rel="jpg,png,gif"
-                   value="<%= picurl %>"
                    class="icon_picker"
                    autofocus="autofocus"
                    style="width: 100%"
@@ -48,7 +46,7 @@ Expecting the following local variables:
         </div>
         <%= pic_select_list.html_safe %>
         <%= modal_footer do %>
-            <%= dialog_submit_button :class => "pic_picker_okay #{'disabled' if picurl.blank?}" %>
+            <%= dialog_submit_button :class => "pic_picker_okay disabled" %>
             <%= dialog_cancel_button "Cancel" %>
         <% end %>
       </div>

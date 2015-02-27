@@ -18,7 +18,6 @@ RP.pic_picker.close = (dlog) ->
 # -- the data of the link must contain urls for each image, separated by ';'
 # formerly PicPicker
 RP.pic_picker.open = (dlog) ->
-	# RP.dialog.open dlog
 	$('div.preview img').on 'ready', (event) ->
 		if $(this).hasClass 'bogus'
 			$('.dialog-submit-button', dlog).addClass 'disabled'

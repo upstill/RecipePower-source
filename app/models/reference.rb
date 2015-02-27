@@ -306,10 +306,19 @@ class ImageReference < Reference
   end
 
   def self.find_or_initialize url, params={}
-    candidates = super
-    candidates.map &:fetchable
-    # Check all the candidates for a data: URL, and return the canonical one or the first one, if none is canonical
-    [ (candidates.find &:canonical || candidates.first) ]
+    [
+        case url
+          when /^\d\d\d\d-/
+            self.find_by url: url # Fake url previously defined
+          when /^data:/
+            self.find_by(thumbdata: url) || self.new(url: fake_url, thumbdata: url)
+          else
+            candidates = super
+            candidates.map &:fetchable
+            # Check all the candidates for a data: URL, and return the canonical one or the first one, if none is canonical
+            candidates.find &:canonical || candidates.first
+        end
+    ]
   end
 
   # Provide suitable content for an <img> element: preferably data, but possibly a url or even (if the data fetch fails) nil
@@ -352,15 +361,16 @@ class ImageReference < Reference
     # Nominally, an ImageReference records a URL plus its expansion into a thumbnail.
     # However, the URL may come in as data: already, which makes the indexer unhappy.
     # In this case, we transfer the data to thumbdata and set the URL to a pseudo-random key (to satisfy the uniqueness constraint on References)
-    if url =~ /^data:/
-      self.thumbdata = url
-      randstr = (0...8).map { (65 + rand(26)).chr }.join
-      self.url = Time.new.to_s + randstr
-      save
-      false
-    else
-      # Check on the thumbdata, queuing it up for caching if not present
-      unless thumbdata && (thumbdata =~ /^data:/)
+    case url
+      when /^data:/
+        self.thumbdata = url
+        self.url = fake_url
+        save
+        return false
+      when /^\d\d\d\d-/
+        return false # Ignore data-marker URLs
+      else
+        return false if thumbdata && (thumbdata =~ /^data:/) # Once good, always good
         if [
             # Don't retry on these status codes
             -2, # Got unparseable data from the request
@@ -368,13 +378,19 @@ class ImageReference < Reference
             403, # Forbidden
             410, # Gone
         ].include? status
-          false
+          return false
         else
           Delayed::Job.enqueue(self, priority: 5) if queue_up
-          true # Assume the url is valid
+          return true # Assume the url is valid
         end
-      end
     end
+  end
+
+  private
+
+  def fake_url
+    randstr = (0...8).map { (65 + rand(26)).chr }.join
+    Time.new.to_s + randstr
   end
 
 end

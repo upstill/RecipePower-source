@@ -11,10 +11,10 @@ jQuery ->
 		RP.dialog.focus event.target
 
 RP.dialog.focus = (dlog) ->
-	$('[autofocus]:first',dlog).focus()[0] ||
-	$('input.string', dlog).focus()[0] ||
-	$('input.text', dlog).focus()[0] ||
-	$('textarea', dlog).focus()[0]
+	$('[autofocus]:first',dlog).focus()[0] #  ||
+	# $('input.string', dlog).focus()[0] ||
+	# $('input.text', dlog).focus()[0] ||
+	# $('textarea', dlog).focus()[0]
 
 
 RP.dialog.close = (event) ->
