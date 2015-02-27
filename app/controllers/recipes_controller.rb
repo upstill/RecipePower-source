@@ -1,5 +1,3 @@
-require './lib/controller_utils.rb'
-
 class RecipesController < CollectibleController
   before_filter :allow_iframe, only: :capture
   protect_from_forgery except: :capture

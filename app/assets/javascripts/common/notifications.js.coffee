@@ -70,7 +70,7 @@ jnotify_popup = (msg) ->
 
 # Post a flash notification into the 'div.flash_notifications' element
 insert_flash = (message, level) ->
-	if available = $('div.flash_notifications')[0]
+	if target = $('div.dialog div.flash_notifications')[0] || $('div.flash_notifications')[0]
 		switch level # Map flash types to bootstrap classes
 			when "notice"
 				bootstrap_class = "alert-info"
@@ -86,8 +86,8 @@ insert_flash = (message, level) ->
 		      <button class=\"close\" data-dismiss=\"alert\">&#215;</button>"+
 	    message+
 	    "</div>"
-		$('div.flash_notifications').html html
-	available
+		$(target).html html
+	target
 
 clear_flash = () ->
 	$('div.flash_notifications').html ""

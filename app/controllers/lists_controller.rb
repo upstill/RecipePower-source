@@ -1,4 +1,3 @@
-require './lib/controller_utils.rb'
 require './lib/querytags.rb'
 
 class ListsController < CollectibleController

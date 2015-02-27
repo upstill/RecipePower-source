@@ -1,4 +1,3 @@
-require './lib/controller_utils.rb'
 require 'uri'
 
 class AuthenticationsController < ApplicationController

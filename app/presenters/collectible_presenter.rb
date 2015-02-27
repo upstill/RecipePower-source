@@ -1,6 +1,6 @@
 class CollectiblePresenter
 
-  attr_accessor :picfallback, :modal, :tagfields
+  attr_accessor :modal, :tagfields
   attr_writer :buttons
 
   def initialize decorator, template
@@ -23,11 +23,6 @@ class CollectiblePresenter
     @template
   end
 
-  def picdata
-    pd = @decorator.picdata
-    pd.blank? ? picfallback : pd
-  end
-
   def pic_class
     modal ? "col-md-4 col-sm-6" : "col-lg-2 col-md-3 col-sm-3"
   end
@@ -41,9 +36,9 @@ class CollectiblePresenter
   end
 
   def picdiv
-    unless picdata.blank?
+    unless imgdata.blank?
       h.content_tag :div,
-                    h.safe_image_div(@decorator, picdata, class: "resource-element pic"),
+                    h.safe_image_div(@decorator, :card, class: "resource-element pic"),
                     class: pic_class
     end
   end
@@ -60,10 +55,6 @@ class CollectiblePresenter
 
   def buttons
     @buttons || h.collectible_buttons_panel(@decorator)
-  end
-
-  def picfallback
-    @picfallback ||= (site = (@decorator.site rescue nil)) ? site.picdata : nil
   end
 
   def fields_list

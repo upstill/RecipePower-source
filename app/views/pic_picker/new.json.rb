@@ -1,4 +1,10 @@
-{ dlog: with_format("html") {
-    render( "pic_picker", picurl: params[:picurl], pageurl: params[:pageurl], golinkid: params[:golinkid] )
-}
+{
+    dlog: with_format("html") {
+      render("pic_picker",
+             picdata: @picdata,
+             picurl: @picurl,
+             pageurl: @pageurl,
+             fallback_img: @fallback_img,
+             golinkid: @golinkid)
+    }
 }.to_json

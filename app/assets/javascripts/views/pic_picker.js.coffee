@@ -8,19 +8,9 @@ mydlog = () ->
 
 # Close with save
 RP.pic_picker.close = (dlog) ->
-	# Transfer the logo URL from the dialog's text input to the page text input
-
-	# The input field points to the originating golink
-	targetGolinkSelector = "a#"+$("input.icon_picker").data('golinkid')
-
-	# The golink points to the original image and/or input fields
-	if !$('div.preview img').hasClass 'bogus'
-		linkdata = $(targetGolinkSelector).data()
-		url = $("input.icon_picker").attr("value")
-		imagePreviewWidgetSet linkdata.imageid, linkdata.inputid, url
-
-	# Finally, clone the dialog and save the clone in the link for later
+	# Clone the dialog and save the clone in the link for later
 	clone = dlog.cloneNode true
+	targetGolinkSelector = "a#"+$("input.icon_picker").data 'golinkid'
 	$(targetGolinkSelector).data 'preloaded', clone
 
 # Respond to a link by bringing up a dialog for picking among the image fields of a page
@@ -28,23 +18,32 @@ RP.pic_picker.close = (dlog) ->
 # -- the data of the link must contain urls for each image, separated by ';'
 # formerly PicPicker
 RP.pic_picker.open = (dlog) ->
+	# RP.dialog.open dlog
 	$('div.preview img').on 'ready', (event) ->
 		if $(this).hasClass 'bogus'
-			$('a.dialog-submit-button', dlog).addClass 'disabled'
+			$('.dialog-submit-button', dlog).addClass 'disabled'
 			RP.notifications.post "Sorry, but that address doesn't lead to an image. If you point your browser at it, does the image load?", "flash-error"
 		else
-			$('a.dialog-submit-button', dlog).removeClass 'disabled'
+			$('.dialog-submit-button', dlog).removeClass 'disabled'
 			if $(this).hasClass 'empty'
 				prompt = "to leave the recipe without an image."
 			else
 				prompt = "to use this image."
 			RP.notifications.post "Click Save "+prompt, "flash-alert"
 
-	$('a.image_preview_button').click ->
+	$(dlog).on 'click','a.image_preview_button', (event) ->
 		previewImg('input.icon_picker', 'div.preview img', '')
 		# imagePreviewWidgetSet($('input.icon_picker').attr("value"), 'div.preview img', '')
 
-	$('img.pic_pickee').click (event) ->
+	$(dlog).on 'click','.dialog-submit-button', (event) ->
+		targetGolinkSelector = "a#"+$("input.icon_picker").data 'golinkid'
+		url = $("input.icon_picker").attr("value")
+		RP.dialog.close event # Move on to tidying up
+		# The input field points to the originating golink
+		linkdata = $(targetGolinkSelector).data()
+		imagePreviewWidgetSet linkdata.imageid, linkdata.inputid, url
+
+	$(dlog).on 'click','img.pic_pickee', (event) ->
 		clickee = RP.event_target event
 		url = clickee.getAttribute 'src'
 		$('input.icon_picker').attr "value", url

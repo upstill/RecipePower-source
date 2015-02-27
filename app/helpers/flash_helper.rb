@@ -88,7 +88,13 @@ module FlashHelper
 
   # Provide a hash suitable for including in a JSON response for driving a flash notification
   # 'all' true incorporates all extant messages in the popup
-  def flash_notify popup_only=false
+  def flash_notify resource=nil, popup_only=false
+    # Collect any errors from the resource
+    if resource==true || resource==false
+      resource, popup_only = nil, resource
+    elsif resource.respond_to?( :errors) && resource.errors.any?
+      resource_errors_to_flash resource
+    end
     if flash.empty?
       return { "clear-flash" => true }
     end

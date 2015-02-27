@@ -1,6 +1,6 @@
 require "RMagick"
-require './lib/controller_utils.rb'
 require "Domain"
+# TODO: remove this defunct model, with controllers and views
 class Thumbnail < ActiveRecord::Base
   attr_accessible :thumbsize, :thumbdata, :url, :site # , :picAR
   # before_save :update_thumb

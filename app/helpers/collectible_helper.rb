@@ -42,7 +42,7 @@ module CollectibleHelper
 
   def tag_link decorator, styling, options
     attribs = %w( collectible_comment collectible_private collectible_user_id
-                    id title url picurl picdata_with_fallback
+                    id title url picuri imgdata
                     element_id field_name human_name object_path tag_path
                     tagging_tag_data tagging_user_id )
     template_link decorator, "tag-collectible", "Tag it", styling, options.merge(:mode => :modal, :attribs => decorator.data(attribs))
@@ -60,7 +60,7 @@ module CollectibleHelper
     options[:id] = dom_id(decorator)
     return "" unless current_user
     attribs = %w( collectible_comment collectible_private collectible_user_id
-                    id title url picurl picdata_with_fallback
+                    id title url picuri imgdata
                     element_id field_name human_name object_path tag_path
                     tagging_tag_data tagging_user_id )
     template_link decorator, "tag-collectible", "", styling, options.merge(class: "glyphicon glyphicon-tags", :mode => :modal, :attribs => decorator.data(attribs))
@@ -114,12 +114,12 @@ module CollectibleHelper
   end
 
   # Sort out a suitable URL to stuff into an image thumbnail for a recipe
-  def safe_image_div decorator, fallback=nil, options = {}
+  def safe_image_div decorator, fallback=:site, options = {}
     if fallback.is_a? Hash
-      fallback, options = nil, fallback
+      fallback, options = :site, fallback
     end
     begin
-      return if (url = decorator.picdata || fallback).blank?
+      return if (url = decorator.imgdata(fallback)).blank?
       # options.merge!( class: "stuffypic", data: { fillmode: "width" } ) # unless url =~ /^data:/
       content = image_with_error_recovery url,
                                           alt: "Image Not Accessible",

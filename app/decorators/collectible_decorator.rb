@@ -33,7 +33,7 @@ class CollectibleDecorator < Draper::Decorator
         attrname = fieldname.sub(/^rcp/, '').downcase
         case attrname
           when "picsafeurl"
-            object.picurl.blank? ? "/assets/NoPictureOnFile.png" : object.picurl
+            object.imgdata(true)
           when "titlelink"
             h.link_to object.title, object.url
           when "video"
@@ -75,8 +75,15 @@ class CollectibleDecorator < Draper::Decorator
     end
   end
 
-  def picdata site_fallback=false
-    object.picdata || (site_fallback && (object.site.picdata rescue nil))
+  def imgdata fallback=:none
+    object.imgdata ||
+        case fallback
+          when :site
+            object.site.imgdata rescue nil
+          when :card
+            object.imgdata true
+          when :none
+        end
   end
 
   # Collectibles are editable by default

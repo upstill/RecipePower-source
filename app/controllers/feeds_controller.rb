@@ -1,5 +1,3 @@
-require './lib/controller_utils.rb'
-
 class FeedsController < CollectibleController
   
   def approve

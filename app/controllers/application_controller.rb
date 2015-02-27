@@ -6,6 +6,7 @@ require 'reloader/sse'
 require 'results_cache.rb'
 
 class ApplicationController < ActionController::Base
+  include ControllerUtils
   include Querytags # Grab the query tags from params for filtering a list
   # include ActionController::Live   # For streaming
   protect_from_forgery with: :exception
@@ -29,6 +30,12 @@ class ApplicationController < ActionController::Base
   helper_method :collection_path
   # Supplied by ControllerDeference
   helper_method :pending_modal_trigger
+
+  # From ControllerUtils
+  helper_method :express_error_context
+  helper_method :resource_errors_to_flash
+  helper_method :resource_errors_to_flash_now
+  helper_method :with_format
 
   include ApplicationHelper
 

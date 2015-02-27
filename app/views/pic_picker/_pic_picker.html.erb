@@ -1,6 +1,8 @@
 <!--
 Expecting the following local variables:
-    * picurl: the URL of the picture to be selected
+    * picurl: the current URL value of the picture to be selected, suitable for setting the url
+    * picrefid: the picture reference being addressed. Yields picture data; if not present, picurl is used
+    * imgdata: data suitable for filling the href field of an image
     * pageurl: the URL of the page where the choices will be sourced
 -->
 <%= modal_dialog :pic_picker, "Pick an Applicable Picture Here", dialog_class: "modal-lg" do %>
@@ -9,7 +11,7 @@ Expecting the following local variables:
       <div class="row">
         <div class="col-xs-12 col-sm-6 col-md-5">
           <div class="preview">
-            <%= page_width_pic picurl %>
+            <%= page_width_pic picdata %>
           </div>
         </div>
         <div class="col-xs-12 col-sm-6 col-md-7">
@@ -36,6 +38,7 @@ Expecting the following local variables:
                    rel="jpg,png,gif"
                    value="<%= picurl %>"
                    class="icon_picker"
+                   autofocus="autofocus"
                    style="width: 100%"
                    data-golinkid="<%= golinkid %>"/>
           </div>
@@ -45,7 +48,7 @@ Expecting the following local variables:
         </div>
         <%= pic_select_list.html_safe %>
         <%= modal_footer do %>
-            <%= link_to "Save", "#", class: "btn btn-lg btn-success pic_picker_okay dialog-submit-button" %>
+            <%= dialog_submit_button :class => "pic_picker_okay #{'disabled' if picurl.blank?}" %>
             <%= dialog_cancel_button "Cancel" %>
         <% end %>
       </div>

@@ -320,7 +320,7 @@ public
       mapping = @@AuthenticationMappings[omniauth['provider']]
       # Get the user's image, replacing it if possible
       uiname = mapping[:image] || "image"
-      unless picdata || oi[uiname].blank? || ((image||"") == oi[uiname])
+      unless imgdata || oi[uiname].blank? || ((image||"") == oi[uiname])
         self.image = oi[uiname]
         # While we're here, fetch the image data as a thumbnail
         thumbnail.perform if thumbnail # Fetch the user's thumbnail data while the authorization is fresh

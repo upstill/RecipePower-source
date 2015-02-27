@@ -1,8 +1,8 @@
 <!--TODO: @recipe -> @collectible -->
 <% @recipe = @recipe || Recipe.find(@recipient.shared_recipe) %>
-<% if url = @recipe.picdata %>
+<% if href = @recipe.imgdata %>
     <div class="share_recipe_pic_box">
-      <%= image_tag url %>
+      <%= image_tag href %>
     </div>
 <% end %>
 <br>

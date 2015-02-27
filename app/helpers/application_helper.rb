@@ -1,5 +1,4 @@
 require "Domain"
-require './lib/controller_utils.rb'
 require './lib/string_utils.rb'
 # require 'suggestion_presenter'
 
@@ -108,32 +107,6 @@ module ApplicationHelper
     content_tag :span, stmt, class: touch_date_class(entity)
   end
 
-  # Create a popup selection list for adding a rating to the tags
-  def select_to_add_rating(name, f, association, ratings, inex)
-    # Derive 'fields', the information needed by the 'add_rating' javascript
-    new_object = Rating.new # f.object.class.reflect_on_association(association).klass.new
-    fields = f.fields_for(association, new_object, :child_index => "new_#{association}") do |builder|
-      render("shared/" + association.to_s.singularize + "_fields_" + inex.to_s, :f => builder)
-    end
-    new_object = {:scale_id => 2}
-    fields2 = f.fields_for(association, new_object, :child_index => "new_#{association}") do |builder|
-      render("shared/" + association.to_s.singularize + "_fields_" + inex.to_s, :f => builder)
-    end
-    # Collect the options from the available ratings, each having
-    # value equal to the scale's id, with a title from the scale's name, so
-    # that the javascript function can use it in the rating label(s)
-    opcs = Scale.find(:all).collect { |s|
-      # Only allow selection of scales that are unrated thus far
-      ratings.index { |r| r.scale_id == s.id } ? "" : "<option value=\"#{s.id}\" title=\"#{s.minlabel} to #{s.maxlabel} \" >#{s.name}</option>"
-    }.join('')
-    prompt = opcs.empty? ? "No More Ratings to Add" : "Add a Rating"
-    opcs = ("<option value=\"0\" >#{prompt}</option>"+opcs).html_safe
-    select_tag('Add Rating',
-               opcs,
-               :prompt => "Pick a Rating to Add",
-               onchange: h("add_rating(this, '#{association}', '#{escape_javascript(fields)}')"))
-  end
-
   def title ttl=nil
     # Any controller can override the default title of controller name
     "RecipePower | #{ttl || response_service.title}"
@@ -204,37 +177,6 @@ module ApplicationHelper
       key.to_s+": ["+(hsh[key] ? hsh[key].to_s : "nil")+"]"
     }.join(' ')
   end
-
-=begin
-  def popup_path(name)
-    "/popup/#{name}"
-  end
-
-  # Ensure that the popup includes a hashtag for showing the given popup upon page load
-  def assert_popup popup_request, url
-    popup_request ||= session[:popup]
-    return url if popup_request.blank?
-    fragment = CGI::escape("#dialog:popup/#{popup_request}")
-    uri = URI(url)
-    if uri.path == "/redirect/go"
-      # The fragment needs to be inserted into the target of the redirect, inside quotes for precedent's sake
-      q = uri.query
-      q.split('&').each { |param|
-        key, value = param.split '='
-        if key == 'to'
-          unquoted = value.sub /^"?([^"]*)"?/, '\\1' # Remove any enclosing quotes
-          # uri.query = q.sub value, %Q{"#{unquoted+fragment}"}
-          url = assert_query uri.to_s, to: %Q{"#{unquoted+fragment}"}
-          return url
-        end
-      }
-    else
-      uri.fragment = fragment
-    end
-    session[:popup] = popup_request
-    uri.to_s
-  end
-=end
 
   def check_popup name
     session.delete(:popup) if session[:popup] && (session[:popup] =~ /^#{name}\b/)

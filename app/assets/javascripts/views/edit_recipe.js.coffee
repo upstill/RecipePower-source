@@ -36,8 +36,8 @@ RP.edit_recipe.go = (evt, xhr, settings) ->
 		dlgsource = templ.string.
 		replace(/%(25)?%(25)?rcpID%(25)?%(25)?/g, rcpdata.rcpid). # May have been URI encoded
 		replace(/%%rcpTitle%%/g, rcpdata.rcptitle).
-		replace(/%%rcpPicData%%/g, rcpdata.rcppicdata || "/assets/NoPictureOnFile.png" ).
-		replace(/%25%25rcpPicData%25%25/g, encodeURIComponent(rcpdata.rcppicdata || "/assets/NoPictureOnFile.png" )).
+		replace(/%%rcpImgData%%/g, rcpdata.rcpimgdata ).
+		replace(/%25%25rcpImgData%25%25/g, encodeURIComponent(rcpdata.rcpimgdata)).
 		replace(/%%rcpPicURL%%/g, rcpdata.rcppicurl || "" ).
 		replace(/%25%25rcpPicURL%25%25/g, encodeURIComponent(rcpdata.rcppicurl || "")).
 		replace(/%%rcpURL%%/g, rcpdata.rcpurl).

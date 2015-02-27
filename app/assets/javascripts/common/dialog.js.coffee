@@ -8,9 +8,14 @@ jQuery ->
 	# $(document).on("ajax:error", '.dialog-run', RP.dialog.error)
 	$(document).on 'shown.bs.modal', (event) ->
 		# When a dialog is invoked, focus on the first autofocus item, or a string item or a text item
-		$('[autofocus]:first', event.target).focus()[0] ||
-		$('input.string', event.target).focus()[0] ||
-		$('input.text', event.target).focus()[0]
+		RP.dialog.focus event.target
+
+RP.dialog.focus = (dlog) ->
+	$('[autofocus]:first',dlog).focus()[0] ||
+	$('input.string', dlog).focus()[0] ||
+	$('input.text', dlog).focus()[0] ||
+	$('textarea', dlog).focus()[0]
+
 
 RP.dialog.close = (event) ->
 	if event

@@ -315,7 +315,7 @@ class ImageReference < Reference
   # Provide suitable content for an <img> element: preferably data, but possibly a url or even (if the data fetch fails) nil
   def imgdata
     url_usable = fetchable # fetchable may set the thumbdata
-    thumbdata || (url if url_usable)
+    thumbdata || url # (url if url_usable)
   end
   # alias_method :digested_reference, :imgdata
 
@@ -324,6 +324,7 @@ class ImageReference < Reference
     unless thumbdata && (thumbdata =~ /^data:/)
       logger.info ">>>>>>>>>>>>>>>>>>>>>>>>>>>>> Acquiring Thumbnail data on url '#{url}' >>>>>>>>>>>>>>>>>>>>>>>>>"
       self.thumbdata = nil
+      self.status = 0 if self.status == -2
       if fetchable(false) && response_body = fetch # Attempt to get data at the other end of the URL
         begin
           img = Magick::Image::from_blob(response_body).first
@@ -338,6 +339,7 @@ class ImageReference < Reference
           thumb.write("thumb#{id.to_s}-M#{quality.to_s}.jpg") { self.quality = quality } unless true # Rails.env.production?
           self.thumbdata = "data:image/jpeg;base64," + Base64.encode64(thumb.to_blob{self.quality = quality })
         rescue Exception => e
+          logger.debug "Failed to parse image data for ImageReference#{id}: #{url} (#{e})"
           self.status = -2 # Bad data
         end
       end

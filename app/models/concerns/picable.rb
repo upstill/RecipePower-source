@@ -20,25 +20,45 @@ module Picable
 
   public
 
+  def picref
+    @picref ||= self.method(self.class.image_reference_name).call
+  end
+
+  def picrefid
+    picref.id if picref
+  end
+
+  # Return the thumbnail data for the entity
+  def picdata
+    picref.thumbdata if picref
+  end
+
+  # Return the image for the entity as a url
+  # NB: This isn't necessarily a valid URL: Conventionally, if an image comes
+  # in as a data URL, the data is moved into thumbdata and the url becomes a
+  # unique string not otherwise useful.
+  def picuri
+    picref.url if picref
+  end
+
   # Return the image for the entity, either as a URL or a data specifier
   # The image may have an associated thumbnail, but it doesn't count unless
   # the thumbnail reflects the image's current private_picurl
-  def picdata data_only = false
-    if imageref = self.method(self.class.image_reference_name).call
-      imageref.imgdata
+  def imgdata fallback_to_card=false
+    if picref
+      (href = picref.imgdata) && (return href)
+      "/assets/BadPicURL.png" if fallback_to_card
+    else
+      "/assets/NoPictureOnFile.png" if fallback_to_card
     end # Default
-  end
-
-  def picdata_with_fallback data_only = false
-    picdata(data_only) || "/assets/NoPictureOnFile.png"
   end
 
   # One picable is being merged into another => transfer image
   def absorb other
     # Act only if there's not already an image in the absorber
-    unless self.method(self.class.image_reference_name).call
-      if imageref = other.method(other.class.image_reference_name).call
-        self.method(:"#{self.class.image_reference_name}=").call imageref
+    unless picref
+      if otherpic = other.method(other.class.image_reference_name).call
+        self.method(:"#{self.class.image_reference_name}=").call otherpic
       end
     end
     super if defined? super

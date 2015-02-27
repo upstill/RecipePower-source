@@ -25,12 +25,25 @@ module PicPickerHelper
     input_id = pic_preview_input_id(obj, pic_attribute)
     img_id = pic_preview_img_id(obj)
     link_id = "golink#{obj.id}"
-    pic_area = page_width_pic picurl, img_id, options[:fallback_img]
+
+    picdata = obj.imgdata || options[:fallback_img] || obj.imgdata(true)
+    pic_area = page_width_pic picdata, img_id, options[:fallback_img]
     preview = content_tag :div,
                           pic_area+form.hidden_field(pic_attribute, rel: "jpg,png,gif", class: "hidden_text"),
                           class: "pic_preview"
+
+    golink_attribs =
+        options.slice(:fallback_img).
+        merge(pageurl: pageurl,
+              picurl: picurl,
+              golinkid: link_id,
+              imageid: img_id,
+              inputid: input_id,
+              picrefid: obj.picrefid
+            ).compact
+
     preview << content_tag(:div,
-                           pic_preview_golink(pageurl, picurl, link_id, img_id, input_id),
+                           pic_preview_golink(golink_attribs),
                            class: "pic_picker_link") unless options[:nopicker]
     preview
   end
@@ -38,14 +51,13 @@ module PicPickerHelper
   # Bare-metal version of the pic preview widget, for use in a template file
   def pic_preview_widget templateer, options={}
     page_url = templateer.url rescue nil
-    img_url_display = templateer.picdata_with_fallback
-    img_url_value = templateer.picurl
+    img_url_display = templateer.imgdata :card # Include explanatory card
+    img_url_value = templateer.picuri
     entity_id = templateer.id
     input_id = pic_preview_input_id(templateer, :picurl) # "recipe_picurl"
     input_name = templateer.field_name(:picurl) # "recipe[picurl]"
     img_id = pic_preview_img_id(templateer)
     link_id = "golink#{entity_id}"
-    pic_picker_link = pic_preview_golink page_url, img_url_value, link_id, img_id, input_id
     pic_preview =
         %Q{<img alt="Image Link is Broken"
               id="#{img_id}"
@@ -58,23 +70,32 @@ module PicPickerHelper
                 type="text"
                 value="#{img_url_value}">
         }.html_safe
-    content_tag( :div, pic_preview, :class => :pic_preview)+
-    content_tag( :div, pic_picker_link, :class => :pic_picker_link)
+
+    # The golink fires off a request for the pic picker, so it needs a fair few parameters
+    pic_preview_attribs = {
+        pageurl: page_url,
+        picurl: img_url_value,
+        golinkid: link_id,
+        imageid: img_id,
+        inputid: input_id,
+        picrefid: templateer.picrefid
+    }.compact
+
+    content_tag(:div, pic_preview, :class => :pic_preview)+
+        content_tag(:div, pic_preview_golink(pic_preview_attribs), :class => :pic_picker_link)
   end
 
   # The link to the picture-picking dialog preloads the dialog, extracting picture links from the recipe's page
-  def pic_preview_golink page_url, img_url, link_id, img_id, input_id
-    queryparams = { picurl: img_url, golinkid: link_id }
-    queryparams[:pageurl] = page_url if page_url
-    button_to_submit  page_url ? "Pick Picture..." : "Get Picture from Web...",
-                    pic_picker_new_path(queryparams),
+  def pic_preview_golink attribs
+    button_to_submit attribs[:pageurl] ? "Pick Picture..." : "Get Picture from Web...",
+                    pic_picker_new_path(attribs.slice :picurl, :golinkid, :pageurl, :picrefid, :fallback_img),
                     "default",
                     "small",
-                    id: link_id,
+                    id: attribs[:golinkid],
                     preload: true,
                     :mode => :modal,
                     class: "pic_picker_golink",
-                    data: { inputid: input_id, imageid: img_id }
+                    data: attribs.slice(:inputid, :imageid)
   end
 
   def pic_picker_select_list pageurl
@@ -97,39 +118,22 @@ module PicPickerHelper
   # float_ttl -- indicates how to handle an empty URL
   # selector -- specifies an alternative selector for finding the picture for resizing
   def page_fitPic(picurl, id = "")
-    idstr = "rcpPic"+id.to_s
-    # Allowing for the possibility of a data URI
-    begin
-      image_with_error_recovery(picurl || "",
-                class: "fitPic",
-                id: idstr,
-                onload: 'doFitImage(event);',
-                alt: "Image Link is Broken" )
-    rescue
-      image_tag("/assets/NoPictureOnFile.png",
-                class: "fitPic",
-                id: idstr,
-                onload: 'doFitImage(event);',
-                alt: "Image Link is Broken")
-    end
+    image_with_error_recovery(picurl || "",
+                              class: "fitPic",
+                              id: "rcpPic"+id.to_s,
+                              onload: 'doFitImage(event);',
+                              alt: "Image Link is Broken")
   end
 
   # Same protocol, only image will be scaled to 100% of the width of its parent, with adjustable height
-  def page_width_pic(picurl, idstr="rcpPic", placeholder_image = nil)
-    begin
-      data = placeholder_image ? { fallbackurl: placeholder_image } : {}
-      image_with_error_recovery(picurl || "",
-                style: "width: 100%; height: auto",
-                id: idstr,
-                # onload: "RP.validate_img(event);",
-                alt: "Image Link is Broken",
-                data: data )
-    rescue
-      image_tag(placeholder_image || "/assets/NoPictureOnFile.png",
-                style: "width: 100%; height: auto",
-                id: idstr,
-                alt: "Image Link is Broken")
-    end
+  def page_width_pic(picurl, idstr="rcpPic", report_bad_image = false)
+    data = report_bad_image ? { fallbackurl: "/assets/BadPicURL.png" } : {}
+    image_with_error_recovery(picurl || "",
+                              style: "width: 100%; height: auto",
+                              id: idstr,
+                              # onload: "RP.validate_img(event);",
+                              alt: "Image Link is Broken",
+                              data: data)
   end
 
 end
