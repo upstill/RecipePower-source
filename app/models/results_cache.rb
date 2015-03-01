@@ -1,3 +1,4 @@
+require "rcpref.rb"
 # Object to put a uniform interface on a set of results, whether they
 # exist as a scope (if there is no search) or an array of Rcprefs (with search)
 class Counts < Hash
@@ -228,7 +229,9 @@ class ResultsCache < ActiveRecord::Base
     end
     oldwindow = safe_partition.window
     if !limit
-      self.cache = self.partition = self.items = nil
+      self.cache = nil
+      self.partition = nil
+      self.items = nil
       limit = start + max_window_size
     end
     safe_partition.window = start..limit

@@ -62,7 +62,10 @@ module PicPickerHelper
         %Q{<img alt="Image Link is Broken"
               id="#{img_id}"
               src="#{img_url_display}"
-              style="width:100%; height: auto">
+              style="width:100%; height: auto"
+              onerror="onImageError(this);"
+              data-emptyurlfallback="/assets/NoPictureOnFile.png"
+              data-bogusurlfallback="/assets/BadPicURL.png">
          <input type="hidden"
                 id="#{input_id}"
                 name="#{input_name}"
@@ -127,7 +130,10 @@ module PicPickerHelper
 
   # Same protocol, only image will be scaled to 100% of the width of its parent, with adjustable height
   def page_width_pic(picurl, idstr="rcpPic", report_bad_image = false)
-    data = report_bad_image ? { fallbackurl: "/assets/BadPicURL.png" } : {}
+    unless idstr.is_a? String
+      idstr, report_bad_image = "rcpPic", idstr
+    end
+    data = report_bad_image ? { bogusurlfallback: "/assets/BadPicURL.png", emptyurlfallback: "/assets/NoPictureOnFile.png" } : {}
     image_with_error_recovery(picurl || "",
                               style: "width: 100%; height: auto",
                               id: idstr,

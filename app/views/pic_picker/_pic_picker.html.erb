@@ -11,7 +11,12 @@ Expecting the following local variables:
       <div class="row">
         <div class="col-xs-12 col-sm-6 col-md-5">
           <div class="preview">
-            <%= page_width_pic picdata %>
+            <%= page_width_pic picdata, true %>
+            <input type="hidden"
+                   id="pic-picker-url"
+                   rel="jpg,png,gif"
+                   type="text"
+                   value="<%= picurl %>">
           </div>
         </div>
         <div class="col-xs-12 col-sm-6 col-md-7">
@@ -31,24 +36,24 @@ Expecting the following local variables:
               <br>(Or, you can visit the recipe's webpage, hit the Cookmark button, and pick a picture from there.)
           <% end %>
         </div>
-        <div class="row">
-          <div class="col-xs-12 col-sm-12 col-md-12">
-            <input type="text"
-                   rel="jpg,png,gif"
-                   class="icon_picker"
-                   autofocus="autofocus"
-                   style="width: 100%"
-                   data-golinkid="<%= golinkid %>"/>
-          </div>
-        </div>
-        <div class="row">
-          <%= link_to "Preview", "#", class: "btn btn-info image_preview_button" %>
-        </div>
-        <%= pic_select_list.html_safe %>
-        <%= modal_footer do %>
-            <%= dialog_submit_button :class => "pic_picker_okay disabled" %>
-            <%= dialog_cancel_button "Cancel" %>
-        <% end %>
       </div>
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12">
+          <input type="text"
+                 rel="jpg,png,gif"
+                 class="icon_picker"
+                 autofocus="autofocus"
+                 style="width: 100%"
+                 data-golinkid="<%= golinkid %>"/>
+        </div>
+      </div>
+      <div class="row">
+        <%= link_to "Preview", "#", class: "btn btn-info image_preview_button" %>
+      </div>
+      <%= pic_select_list.html_safe %>
+      <%= modal_footer do %>
+          <%= dialog_submit_button "Save", :class => "disabled" %>
+          <%= dialog_cancel_button "Cancel" %>
+      <% end %>
     </div>
 <% end %>

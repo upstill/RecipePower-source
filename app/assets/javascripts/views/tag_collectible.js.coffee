@@ -51,6 +51,9 @@ recipedata = (arr) ->
 
 # Don't submit if nothing has changed
 RP.tag_collectible.submission_redundant = (dlog) ->
+	# If the image is not data, write anyway, in order to trigger an attempt to set the thumbnail data
+	if $('form.tag-collectible', dlog).data "always_submit"
+		return false
 	# If the before and after states don't differ, we just close the dialog without submitting
 	hooks = $('form.tag-collectible', dlog).data "hooks"
 	if hooks.dataBefore == $('form.tag-collectible', dlog).serialize()

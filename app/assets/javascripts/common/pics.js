@@ -4,12 +4,19 @@ function doFitImage(evt) {
     fitImage(evt.target)
 }
 
+function onImageErrorEvent(event) {
+    var image = event.currentTarget;
+    return onImageError(image);
+}
+
 function onImageError(image) {
-    image.onerror = "";
-    if (image.alt && (image.alt.match(/\.(jpg|tif|tiff|gif|png)$/) != null)) {
-        image.src = image.alt
-    } else {
-        image.src = "/assets/BadPicURL.png";
+    if (!$(image).hasClass('empty')) { // Failure on original load
+        $(image).addClass('bogus').addClass('empty');
+        if (image.alt && (image.alt.match(/\.(jpg|tif|tiff|gif|png)$/) != null)) {
+            image.src = image.alt
+        } else {
+            image.src = $(image).data("bogusurlfallback") || "";
+        }
     }
     return true;
 }
@@ -62,24 +69,25 @@ function fitImage(img) {
 // Set the source for the preview image, only loading the form field when the image is successfully loaded
 // NB: an empty image url is valid, and substituted in the image (but not in the form) with a fallback url
 function set_image_safely(imageElmt, url, formsel) {
-    var url_shown = url;
+    $(formsel).attr('value', url || "")
     if (url.length < 1) {  // Substitute empty url with placeholder for display purposes only
-        url_shown = $(imageElmt).data('fallbackurl') || "/assets/NoPictureOnFile.png"
+        url = $(imageElmt).data('emptyurlfallback') || ""
         $(imageElmt).addClass('empty')
+    } else {
+        $(imageElmt).removeClass('empty')
     }
     $(imageElmt).removeClass('bogus') // Pending load attempt
     // Apply the display url to the preview, and save the form selector and actual URL pending successful load
-    $(imageElmt).removeClass("loaded").attr("src", url_shown).data("formsel", formsel).data("url_actual", url)
+    $(imageElmt).removeClass("loaded").attr("src", url).data("formsel", formsel)
     imgLoad = imagesLoaded(imageElmt);
     imgLoad.on('progress', function (instance, image) {
-        var img = image.img
+        var img = image.img;
+        var fallback;
         if (image.isLoaded) {
-            var formsel = $(img).data("formsel")
             $(img).addClass("loaded")
-            $(formsel).attr("value", $(img).data("url_actual"))
         } else {
-            $(img).addClass("bogus").removeClass("loaded")
-            img.src = "/assets/BadPicURL.png"
+            $(img).addClass("bogus").removeClass("loaded");
+            img.src = $(img).data("bogusurlfallback") || "";
         }
         $(image.img).trigger('ready')
     })
@@ -108,22 +116,10 @@ function imagePreviewWidgetSet(imgID, inputID, url) {
 // onload handler to validate image (since we can't use imagesLoaded for hardwired URLs)
 RP.validate_img = function (event) {
     var img = event.target;
-    if (img.complete) {
-        // Normally this is the end of it, but we may have an image with no url,
-        // in which case we want to report thus.
-        if($(img).attr('src').length < 1) {
-            // Empty URL: not a bad URL but still needs standin
-            img.src = $(img).data('fallbackurl') || "/assets/NoPictureOnFile.png"
-            $(img).addClass('bogus')
-        }
-    } else { // Loaded but not complete => error
+    if (!img.complete) { // Loaded but not complete => error
         if(!$(img).hasClass("bogus")) {   // Replace url with invalid-image url if this is the first try
-            $(img).addClass("bogus")
-            if($(img).attr('src').length < 1) {
-                // Empty URL: not a bad URL but still needs standin
-                img.src = $(img).data('fallbackurl') || "/assets/NoPictureOnFile.png"
-            } else // non-empty URL didn't load: report bad URL
-                img.src = "/assets/BadPicURL.png";
+            $(img).addClass("bogus").addClass('empty');
+            img.src = $(img).data('bogusurlfallback') || "";
         }
     }
 }

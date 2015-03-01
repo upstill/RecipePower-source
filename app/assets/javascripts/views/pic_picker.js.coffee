@@ -31,12 +31,12 @@ RP.pic_picker.open = (dlog) ->
 			RP.notifications.post "Click Save "+prompt, "flash-alert"
 
 	$(dlog).on 'click','a.image_preview_button', (event) ->
-		previewImg('input.icon_picker', 'div.preview img', '')
+		previewImg('input.icon_picker', 'div.preview img', 'input#pic-picker-url')
 		# imagePreviewWidgetSet($('input.icon_picker').attr("value"), 'div.preview img', '')
 
 	$(dlog).on 'click','.dialog-submit-button', (event) ->
 		targetGolinkSelector = "a#"+$("input.icon_picker").data 'golinkid'
-		url = $("input.icon_picker").attr("value")
+		url = $("input#pic-picker-url").attr("value")
 		RP.dialog.close event # Move on to tidying up
 		# The input field points to the originating golink
 		linkdata = $(targetGolinkSelector).data()
@@ -46,7 +46,7 @@ RP.pic_picker.open = (dlog) ->
 		clickee = RP.event_target event
 		url = clickee.getAttribute 'src'
 		$('input.icon_picker').attr "value", url
-		previewImg 'input.icon_picker', 'div.preview img', ''
+		previewImg 'input.icon_picker', 'div.preview img', 'input#pic-picker-url'
 
 	$('img.pic_pickee').load (evt) ->
 		check_image this
@@ -71,4 +71,4 @@ check_image = (img) ->
 # Handle a click on a thumbnail image by passing the URL on to the
 # associated input field
 RP.pic_picker.make_selection = (url) ->
-	previewImg 'input.icon_picker', 'div.preview this', ''
+	previewImg 'input.icon_picker', 'div.preview this', 'input#pic-picker-url'

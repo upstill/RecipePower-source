@@ -172,12 +172,12 @@ class Reference < ActiveRecord::Base
     def get_response url
       self.status = response = nil
       begin
-        uri = URI.parse(url)
+        uri = URI.parse url
         if uri.host &&
             uri.port &&
             (http = Net::HTTP.new(uri.host, uri.port)) &&
             (request = Net::HTTP::Get.new(uri.request_uri))
-          response = http.request(request)
+          response = http.request request
           self.status = response.code.to_i
         else # Invalid URL
           self.status = 400
@@ -305,16 +305,33 @@ class ImageReference < Reference
     self.lookup_affiliates url, by_site
   end
 
+  # Since the URL is never written once established, this method uniquely handles both
+  # data URLs (for images with data only and no URL) and fake URLS (which are left in place for the latter)
+  # NB: Implicit in here is the strategy for maintainng the data: since we only fetch refrence
+  # records by URL when assigning a URL to an entity, we only go off to update the data when
+  # the URL is assigned
   def self.find_or_initialize url, params={}
     [
         case url
           when /^\d\d\d\d-/
             self.find_by url: url # Fake url previously defined
           when /^data:/
-            self.find_by(thumbdata: url) || self.new(url: fake_url, thumbdata: url)
+            self.find_by(thumbdata: url) || self.new(url: self.fake_url, thumbdata: url)
+          when nil
+          when ""
           else
-            candidates = super
-            candidates.map &:fetchable
+            candidates = super # Find by the url
+            candidates.map { |candidate|
+              # Queue the ref up to get data for the url as necessary and appropriate
+              unless candidate.thumbdata || !candidate.valid_url
+                candidate.save unless candidate.id
+                if Rails.env.production?
+                  Delayed::Job.enqueue(candidate, priority: 5)
+                else
+                  candidate.perform  # Go get it right now.
+                end
+              end
+            }
             # Check all the candidates for a data: URL, and return the canonical one or the first one, if none is canonical
             candidates.find &:canonical || candidates.first
         end
@@ -323,8 +340,7 @@ class ImageReference < Reference
 
   # Provide suitable content for an <img> element: preferably data, but possibly a url or even (if the data fetch fails) nil
   def imgdata
-    url_usable = fetchable # fetchable may set the thumbdata
-    thumbdata || url # (url if url_usable)
+    thumbdata || valid_url
   end
   # alias_method :digested_reference, :imgdata
 
@@ -334,7 +350,7 @@ class ImageReference < Reference
       logger.info ">>>>>>>>>>>>>>>>>>>>>>>>>>>>> Acquiring Thumbnail data on url '#{url}' >>>>>>>>>>>>>>>>>>>>>>>>>"
       self.thumbdata = nil
       self.status = 0 if self.status == -2
-      if fetchable(false) && response_body = fetch # Attempt to get data at the other end of the URL
+      if response_body = fetch # Attempt to get data at the other end of the URL
         begin
           img = Magick::Image::from_blob(response_body).first
           if img.columns > 200
@@ -357,40 +373,20 @@ class ImageReference < Reference
     self
   end
 
-  def fetchable queue_up=true
-    # Nominally, an ImageReference records a URL plus its expansion into a thumbnail.
-    # However, the URL may come in as data: already, which makes the indexer unhappy.
-    # In this case, we transfer the data to thumbdata and set the URL to a pseudo-random key (to satisfy the uniqueness constraint on References)
-    case url
-      when /^data:/
-        self.thumbdata = url
-        self.url = fake_url
-        save
-        return false
-      when /^\d\d\d\d-/
-        return false # Ignore data-marker URLs
-      else
-        return false if thumbdata && (thumbdata =~ /^data:/) # Once good, always good
-        if [
-            # Don't retry on these status codes
-            -2, # Got unparseable data from the request
-            400, # Bad Request
-            403, # Forbidden
-            410, # Gone
-        ].include? status
-          return false
-        else
-          Delayed::Job.enqueue(self, priority: 5) if queue_up
-          return true # Assume the url is valid
-        end
-    end
-  end
-
-  private
-
-  def fake_url
+  # Provide the phony (but unique) URL that's used for a data-only image
+  def self.fake_url
     randstr = (0...8).map { (65 + rand(26)).chr }.join
     Time.new.to_s + randstr
+  end
+
+  # Return the URL if it passes a sanity check
+  def valid_url
+    url unless url.blank? || (url =~ /\d\d\d\d-/)
+  end
+
+  # A url has had problems
+  def url_problem
+    valid_url && status && (status != 0)
   end
 
 end
