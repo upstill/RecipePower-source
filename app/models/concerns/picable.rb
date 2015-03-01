@@ -41,6 +41,10 @@ module Picable
     picref.url if picref
   end
 
+  def picuri_problem
+    picref && picref.url_problem
+  end
+
   # Return the image for the entity, either as a URL or a data specifier
   # The image may have an associated thumbnail, but it doesn't count unless
   # the thumbnail reflects the image's current private_picurl

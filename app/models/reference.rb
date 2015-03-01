@@ -386,7 +386,7 @@ class ImageReference < Reference
 
   # A url has had problems
   def url_problem
-    valid_url && status && (status != 0)
+    (url.blank? || (url =~ /\d\d\d\d-/)) ? false : (status && (status != 200))
   end
 
 end
