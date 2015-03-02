@@ -66,6 +66,7 @@ preload = (elmt) ->
 	$.ajax
 		type: "GET",
 		dataType: "json",
+		contentType: "application/json",
 		url: elmt.attributes.href.value,
 		error: (jqXHR, statusText, errorThrown) ->
 			responseData = RP.post_error(jqXHR) # Try to recover useable data from the error
@@ -111,6 +112,7 @@ RP.submit.submit_and_process = ( request, elmt, method="GET" ) ->
 		ajdata =
 			type: method,
 			dataType: "json",
+			contentType: "application/json",
 			url: request,
 			error: (jqXHR, statusText, errorThrown) ->
 				# TODO Not actually posting an error for the user

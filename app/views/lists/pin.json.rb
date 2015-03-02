@@ -8,4 +8,6 @@ h2 = { replacements: hsh[:replacements].collect { |hr| [ hr[0].encode("ASCII-8BI
 }
 json1 = hsh.to_json
 str = json1.gsub(/\\u([0-9a-z]{4})/) {|s| [$1.to_i(16)].pack("U")}
-str.encode("ASCII-8BIT")
+logger.debug "JSON response is (Unicode)"+ str
+logger.debug "JSON response is (AsciI)"+ str.encode("ASCII-8BIT")
+str

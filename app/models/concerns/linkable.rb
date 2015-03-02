@@ -160,14 +160,19 @@ module Linkable
 
   # Return the human-readable name for the recipe's source
   def sourcename
-    ref = site.referent
-    name = ref.name
-    site.name
+    if site
+      ref = site.referent
+      name = ref.name
+      site.name
+    else
+      "Entity #{self.class.to_s} ##{id} has no site"
+    end
+
   end
 
   # Return the URL for the recipe's source's home page
   def sourcehome
-    site.home
+    site ? site.home : "#"
   end
 
   # One linkable is being merged into another => transfer references
