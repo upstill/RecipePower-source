@@ -323,7 +323,7 @@ class ImageReference < Reference
             candidates = super # Find by the url
             candidates.map { |candidate|
               # Queue the ref up to get data for the url as necessary and appropriate
-              unless candidate.thumbdata || !candidate.valid_url
+              if !candidate.thumbdata && candidate.usable_url(true)
                 candidate.save unless candidate.id
                 if Rails.env.production?
                   Delayed::Job.enqueue(candidate, priority: 5)
@@ -340,7 +340,7 @@ class ImageReference < Reference
 
   # Provide suitable content for an <img> element: preferably data, but possibly a url or even (if the data fetch fails) nil
   def imgdata
-    thumbdata || valid_url
+    thumbdata || usable_url
   end
   # alias_method :digested_reference, :imgdata
 
@@ -380,13 +380,10 @@ class ImageReference < Reference
   end
 
   # Return the URL if it passes a sanity check
-  def valid_url
-    url unless url_problem
-  end
-
-  # A url has had problems
-  def url_problem
-    (url.blank? || (url =~ /^\d\d\d\d-/)) ? false : (status && (status != 200))
+  def usable_url ignore_status=false
+    unless url.blank? || (url =~ /^\d\d\d\d-/)
+      url if ignore_status || !status || (status==200)
+    end
   end
 
 end

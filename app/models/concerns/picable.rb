@@ -42,7 +42,7 @@ module Picable
   end
 
   def picuri_problem
-    picref && picref.url_problem
+    picref && !picref.usable_url
   end
 
   # Return the image for the entity, either as a URL or a data specifier
