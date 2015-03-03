@@ -83,7 +83,8 @@ fire = (elmt) ->
 	else if proceedWithConfirmation(elmt)
 		# If the submission is made from a top-level menu, make the menu active
 		handleEnclosingNavTab elmt
-		RP.submit.submit_and_process elmt.attributes.href.value, elmt, $(elmt).data('method')
+		if elmt.attributes.href
+			RP.submit.submit_and_process elmt.attributes.href.value, elmt, $(elmt).data('method')
 
 handleEnclosingNavTab = (menuElmt) ->
 	if !$(menuElmt).hasClass "transient" # So marked if its selection will not affect what menu element is active

@@ -334,11 +334,15 @@ class ApplicationController < ActionController::Base
   def stored_location_for(resource_or_scope)
     # If user is logging in to complete some process, we return
     # the path to completing the capture/tagging process
-    flash = {success: "Welcome to RecipePower, #{current_user.handle}. This is your collection page, which you can always reach from the Collections menu above."}
     if response_service.injector?
       deferred_request
     else
-      deferred_request(path: user_collection_path(current_user, flash: flash), :format => :html)
+      if current_user.sign_in_count < 2
+        flash = {success: "Welcome to RecipePower, #{current_user.handle}. This is your collection page, which you can always reach from the Collections menu above."}
+        deferred_request(path: user_collection_path(current_user, flash: flash), :format => :html)
+      else
+        deferred_request(path: user_collection_path(current_user), :format => :html)
+      end
     end || super
   end
 

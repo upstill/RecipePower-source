@@ -144,7 +144,7 @@ module DialogsHelper
     options = bootstrap_button_options({button_style: "success"}.merge(options))
     str =
         tag :input,
-            class: "#{options[:class]} submit dialog-submit-button dialog-form-button",
+            class: "#{options[:class]} dialog-submit-button dialog-form-button",
             name: "commit",
             type: "submit",
             value: name||"Save",
