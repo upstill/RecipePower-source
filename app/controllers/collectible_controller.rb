@@ -3,13 +3,11 @@ class CollectibleController < ApplicationController
   def collect
     if current_user
       update_and_decorate # Generate a FeedEntryDecorator as @feed_entry and prepares it for editing
-      if params[:oust]
-        @decorator.be_collected false
-        msg = "'#{@decorator.title.truncate(50)}' has been vanquished from your collection (though you may see it in others)."
-      else
-        @decorator.add_to_collection current_user.id
-        msg = "'#{@decorator.title.truncate(50)}' now appearing in your collection."
-      end
+      @decorator.be_collected !params[:oust]
+      msg = "'#{@decorator.title.truncate(50)}' "
+      msg << (@decorator.collected? ?
+          "now appearing in your collection." :
+          "has been vanquished from your collection (though you may see it in others).")
       @decorator.object.save
       if post_resource_errors(@decorator.object)
         render :errors

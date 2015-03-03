@@ -11,6 +11,8 @@ RP.submit = RP.submit || {}
 
 jQuery ->
 	RP.submit.bind()
+	# Set up processing for click events on links with a 'submit' class
+	$(document).on "click", '.submit', RP.submit.onClick
 	$(document).on "ajax:beforeSend", 'form.submit', RP.submit.beforeSend
 	$(document).on "ajax:success", 'form.submit', RP.submit.success
 	$(document).on "ajax:error", 'form.submit', RP.submit.error
@@ -18,8 +20,6 @@ jQuery ->
 # Handle submission links
 RP.submit.bind = (dlog) ->
 	dlog ||= $('body') # window.document
-	# Set up processing for click events on links with a 'submit' class
-	$(dlog).on "click", 'a.submit', RP.submit.onClick
 	$('.preload', dlog).each (ix, elmt) ->
 		preload elmt
 	$('.trigger', dlog).each (ix, elmt) ->
@@ -39,7 +39,9 @@ RP.submit.ontokenchange = ->
 
 # Respond to a click on a '.submit' element by optionally checking for a confirmation, firing a request at the server and appropriately handling the response
 RP.submit.onClick = (event) ->
-	fire event.currentTarget # event.toElement
+	# We can enclose an <input> element (like a checkbox) in a link that handles the actual click
+	if event.currentTarget.href
+		fire event.currentTarget
 	false
 
 # preload ensures that the results of the query are available

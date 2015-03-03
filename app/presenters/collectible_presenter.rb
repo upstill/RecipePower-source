@@ -28,7 +28,7 @@ class CollectiblePresenter
   end
 
   def divclass
-    if picdata.blank?
+    if @decorator.imgdata(false).blank?
       modal ? "col-md-8 col-sm-6" : "col-lg-5 col-md-6 col-sm-7"
     else
       modal ? "col-md-12 col-sm-12" : "col-lg-5 col-md-7 col-sm-12"
@@ -36,7 +36,7 @@ class CollectiblePresenter
   end
 
   def picdiv
-    unless imgdata.blank?
+    unless @decorator.imgdata(false).blank?
       h.content_tag :div,
                     h.safe_image_div(@decorator, :card, class: "resource-element pic"),
                     class: pic_class

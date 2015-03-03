@@ -29,15 +29,15 @@ module ListsHelper
   def pin_menu decorator, user, styling, options={}
     if user
       entity = decorator.object
-      hover_menu "", styling do
+      hover_menu "", styling.merge(class: dom_id(decorator)) do
         already_collected = entity.collected? current_user_or_guest_id
         cl = collection_link decorator,
                              checkbox_menu_item_label("Collection", already_collected),
                              already_collected,
                              styling,
-                             :class => "checkbox-menu-item"
+                             :class => "checkbox-menu-item collection"
         [ content_tag(:li, cl),
-          user.owned_lists.collect { |l| content_tag :li, (list_menu_item l, entity, styling) },
+          user.owned_lists.collect { |l| content_tag :li, (list_menu_item l, entity, styling.merge(class: dom_id(l))) },
           "<hr class='menu'>".html_safe,
           content_tag(:li,
                       link_to_submit("Start a List...",
@@ -63,13 +63,12 @@ module ListsHelper
                         oust: already_collected,
                         styling: styling),
                    method: "POST",
-                   id: dom_id(l),
                    mode: :partial,
-                   class: "checkbox-menu-item"
+                   class: "checkbox-menu-item #{dom_id(l)}"
   end
 
   def list_menu_item_replacement list, entity, styling
-    [ "div.collectible-buttons##{dom_id entity} a.checkbox-menu-item##{dom_id list}", list_menu_item(list, entity, styling) ]
+    [ "ul.#{dom_id entity} a.checkbox-menu-item.#{dom_id list}", list_menu_item(list, entity, styling) ]
   end
 
   def hover_menu label, options={}
@@ -81,7 +80,7 @@ module ListsHelper
        data: { toggle: "dropdown" },
        :"aria-expanded" => "false"
     list_items = yield.join.html_safe
-    list_tag = content_tag :ul, list_items, class: "dropdown-menu", role: "menu"
+    list_tag = content_tag :ul, list_items, class: "dropdown-menu #{options[:class]}", role: "menu"
     content_tag :div, button+list_tag, class: "btn-group"
   end
 

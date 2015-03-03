@@ -7,7 +7,11 @@ jQuery ->
 		RP.reporting.report this
 		event.preventDefault()
 	$('body').on "click", 'a.checkbox-menu-item', (event) ->
-		$('input', event.target)[0].checked = !$('input', event.target)[0].checked
+		# The input element is either the target, or it is enclosed in the target
+		# if !$(event.target).prop('tagName') == 'INPUT'
+		# 	$('input', event.target).prop 'checked', !$('input', event.target).prop('checked')
+		RP.submit.onClick event
+		false
 
 	# Adjust the pading on the window contents to accomodate the navbar, on load and wheneer the navbar resizes
 	if navbar = $('div.navbar')[0]
