@@ -40,8 +40,8 @@ RP.submit.ontokenchange = ->
 # Respond to a click on a '.submit' element by optionally checking for a confirmation, firing a request at the server and appropriately handling the response
 RP.submit.onClick = (event) ->
 	# We can enclose an <input> element (like a checkbox) in a link that handles the actual click
-	if event.currentTarget.href
-		fire event.currentTarget
+	# if event.currentTarget.href
+	fire event.currentTarget
 	false
 
 # preload ensures that the results of the query are available

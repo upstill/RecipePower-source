@@ -381,12 +381,12 @@ class ImageReference < Reference
 
   # Return the URL if it passes a sanity check
   def valid_url
-    url unless url.blank? || (url =~ /\d\d\d\d-/)
+    url unless url_problem
   end
 
   # A url has had problems
   def url_problem
-    (url.blank? || (url =~ /\d\d\d\d-/)) ? false : (status && (status != 200))
+    (url.blank? || (url =~ /^\d\d\d\d-/)) ? false : (status && (status != 200))
   end
 
 end
