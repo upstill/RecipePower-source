@@ -70,14 +70,10 @@ module LinkHelper
         data[match[1]] = data.delete key
       end
     end
-    link_options[:data] = data unless data.empty?
+    data[:href] = linkpath
+    link_options[:data] = data # unless data.empty?
 
-    # if options[:method] && (options[:method].to_s != "get") # Other submit methods require a verified form
-      # button_to label, linkpath, link_options
-    # else
-      link_to label, linkpath, link_options
-    # end
-
+    link_to label, 'javascript:void(0);', link_options
   end
 
 end

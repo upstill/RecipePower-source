@@ -37,11 +37,16 @@ RP.submit.ontokenchange = ->
 	formelmt = RP.findEnclosing 'FORM', this[0]
 	$(formelmt).submit()
 
+RP.submit.why = (event) ->
+	false
+
 # Respond to a click on a '.submit' element by optionally checking for a confirmation, firing a request at the server and appropriately handling the response
 RP.submit.onClick = (event) ->
 	# We can enclose an <input> element (like a checkbox) in a link that handles the actual click
-	# if event.currentTarget.href
-	fire event.currentTarget
+	try
+		fire event.currentTarget
+	catch err # Must ensure we return false to prevent handling by others
+	  console.log "Click handling on submit link barfed: "+err
 	false
 
 # preload ensures that the results of the query are available
@@ -64,17 +69,18 @@ preload = (elmt) ->
 	if data.selector && (ndlog = $(data.selector)[0]) # If dialog is already loaded as a DOM entity, return it
 		return # ndlog
 	# Finally, there is no preloaded recourse, so we submit the request
-	$(elmt).addClass 'loading'
-	$.ajax
-		type: "GET",
-		dataType: "json",
-		contentType: "application/json",
-		url: elmt.attributes.href.value,
-		error: (jqXHR, statusText, errorThrown) ->
-			responseData = RP.post_error(jqXHR) # Try to recover useable data from the error
-			handleResponse elmt, responseData, statusText, errorThrown
-		success: (responseData, statusText, xhr) ->
-			handleResponse elmt, responseData, statusText, xhr
+	if href = $(elmt).data('href') || (elmt.attributes.href && elmt.attributes.href.value)
+		$(elmt).addClass 'loading'
+		$.ajax
+			type: "GET",
+			dataType: "json",
+			contentType: "application/json",
+			url: href,
+			error: (jqXHR, statusText, errorThrown) ->
+				responseData = RP.post_error(jqXHR) # Try to recover useable data from the error
+				handleResponse elmt, responseData, statusText, errorThrown
+			success: (responseData, statusText, xhr) ->
+				handleResponse elmt, responseData, statusText, xhr
 
 fire = (elmt) ->
 	if $(elmt).hasClass( "loading") # This may already be loading
@@ -83,8 +89,8 @@ fire = (elmt) ->
 	else if proceedWithConfirmation(elmt)
 		# If the submission is made from a top-level menu, make the menu active
 		handleEnclosingNavTab elmt
-		if elmt.attributes.href
-			RP.submit.submit_and_process elmt.attributes.href.value, elmt, $(elmt).data('method')
+		if href = $(elmt).data('href') || (elmt.attributes.href && elmt.attributes.href.value)
+			RP.submit.submit_and_process href, elmt, $(elmt).data('method')
 
 handleEnclosingNavTab = (menuElmt) ->
 	if !$(menuElmt).hasClass "transient" # So marked if its selection will not affect what menu element is active

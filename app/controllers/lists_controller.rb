@@ -68,9 +68,9 @@ class ListsController < CollectibleController
   end
 
   def destroy
-    @list = List.find params[:id]
+    update_and_decorate
     name = @list.name
-    selector = "tr##{dom_id @list}"
+    selector = "tr##{@decorator.dom_id}"
     @list.destroy
     respond_to do |format|
       format.html { redirect_to root_path }
