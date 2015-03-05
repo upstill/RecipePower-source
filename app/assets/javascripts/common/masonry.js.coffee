@@ -39,6 +39,17 @@ appendItemToMasonry = (item, masonry_selector) ->
 		$(masonry_selector).masonry()
 	RP.rcp_list.onload $('div.collection-item',item)
 
+prependItemToMasonry = (item, masonry_selector) ->
+	$(masonry_selector).addClass 'layout-pending'
+	$(masonry_selector).prepend item
+	$(masonry_selector).masonry 'prepended', item
+	# Any (hopefully few) pictures that are loaded from URL will resize the element
+	# when they appear.
+	$(item).on 'resize', (evt) ->
+		$(masonry_selector).masonry()
+	RP.rcp_list.onload $('div.collection-item',item)
+	RP.loadElmt item
+
 RP.masonry.appendItem = (item, container_selector) ->
 	if $(container_selector).hasClass 'js-masonry'
 		masonry_selector = container_selector+'.js-masonry'
@@ -52,6 +63,15 @@ RP.masonry.removeItem = (item) ->
 		$(item.parentNode).masonry 'remove', item
 	else
 		$(item).remove()
+
+RP.masonry.prependItem = (item, container_selector) ->
+	if $(container_selector).hasClass 'js-masonry'
+		prependItemToMasonry item, container_selector
+		# masonry_selector = container_selector+'.js-masonry'
+		# enqueue item, masonry_selector # Put the item in line to be appended as soon as layout is complete
+	else
+		$(container_selector).prepend item
+		RP.loadElmt item
 
 RP.masonry.replaceItem = (item, replacement) ->
 	if $(item).hasClass('masonry-item-contents') &&

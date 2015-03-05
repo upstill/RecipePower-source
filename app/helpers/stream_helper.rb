@@ -135,12 +135,9 @@ module StreamHelper
     @decorator = controller.instance_variable_get :"@decorator"
     modelname = element.class.to_s.underscore
     instance_variable_set :"@#{modelname}", element
-    # Wrap the element so that its contents can be replaced
     item = render partial: partialname, locals: { :item => element, :decorator => @decorator }
-    if for_masonry && !no_wrap
-      # Wrap the item in another layer so that the item can be replaced w/o disrupting Masonry
-      item = content_tag :div, item, class: "masonry-item stream-item", id: dom_id(@decorator)
-    end
+    # Wrap the element so that its contents can be replaced
+    item = wrap_masonry_item item, @decorator if for_masonry && !no_wrap
     item
   end
 

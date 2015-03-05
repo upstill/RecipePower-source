@@ -448,7 +448,7 @@ end
 class UserCollectionCache < RcprefCache
 
   def user
-    @user ||= User.where(id: @id).first if @id
+    @user ||= User.find_by(id: @id) if @id
   end
 
   # The sources are a user, a list of users, or nil (for the master global list)
@@ -461,7 +461,7 @@ class UserCollectionCache < RcprefCache
   end
 
   def stream_id
-    "user_collection"
+    "user_#{@id}_contents"
   end
 
 end
@@ -511,7 +511,7 @@ class ListCache < ResultsCache
   end
 
   def stream_id
-    "list_#{@id}"
+    "list_#{@id}_contents"
   end
 
 end

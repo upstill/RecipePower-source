@@ -2,7 +2,7 @@
 # provide a suitable replacement (deletion item)
 hsh = {
     replacements: [list_menu_item_replacement(@list, @entity, params[:styling]),
-                   (list_stream_item_deleter(@list, @entity) if @deleted)].compact
+                   (collectible_masonry_item_deleter(@entity, @list) if @deleted)].compact
 }.merge(flash_notify(@list))
 json1 = hsh.to_json
 str = json1.gsub(/\\u([0-9a-z]{4})/) {|s| [$1.to_i(16)].pack("U")}

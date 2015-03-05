@@ -68,7 +68,7 @@ class RecipesController < CollectibleController
       report_recipe( collection_path, truncate( @recipe.title, :length => 100)+" now appearing in your collection.", formats)
     else
         response_service.title = "Cookmark a Recipe"
-        update_and_decorate
+        update_and_decorate (@recipe || Recipe.new)
         smartrender
     end
   end
@@ -88,8 +88,8 @@ class RecipesController < CollectibleController
         format.json {
           @data = { onget: [ "submit.submit_and_process", user_collection_url(current_user, layout: false) ] }
           response_service.mode = :modal
-          flash[:popup] = "'#{@recipe.title}' now appearing in your colleciton."
-          render :action => 'tag', :mode => :modal
+          flash[:popup] = "'#{@recipe.title}' now appearing in your collection."
+          render :action => 'collect_and_tag', :mode => :modal
         }
       end
     else # failure (not a valid recipe) => return to new

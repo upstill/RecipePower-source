@@ -3,7 +3,7 @@
 replacements = [
     collectible_buttons_panel_replacement(@decorator),
     collectible_masonry_item_replacement(@decorator),
-    collectible_masonry_item_replacement(@absorbee, true),
+    collectible_masonry_item_deleter(@absorbee),
     collectible_table_row_replacement(@decorator),
     collectible_table_row_replacement(@absorbee, true)
 ]

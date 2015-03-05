@@ -2,7 +2,7 @@
 nukeit = (defined?(delete) && delete) || @decorator.destroyed?
 replacements = [
     feed_entry_replacement(@decorator, nukeit),
-    collectible_masonry_item_replacement(@decorator, nukeit)
+    (nukeit ? collectible_masonry_item_deleter(@decorator) : collectible_masonry_item_replacement(@decorator))
 ]
 {
     done: true, # i.e., editing is finished, close the dialog

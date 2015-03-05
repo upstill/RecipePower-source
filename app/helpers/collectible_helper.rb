@@ -14,14 +14,29 @@ module CollectibleHelper
     ["div.collectible-buttons##{dom_id decorator}", collectible_buttons_panel(decorator)]
   end
 
-  def collectible_masonry_item decorator
-    with_format("html") do
+  # Deliver the masonry item (tile) for a collectible, optionally wrapped as above
+  def collectible_masonry_item decorator, wrap=false
+    item = with_format("html") do
       render "show_masonry_item", item: decorator.object, decorator: decorator
     end
+    wrap ? wrap_masonry_item( item, decorator) : item
   end
 
-  def collectible_masonry_item_replacement decorator, destroyed=false
-    [".masonry-item-contents."+dom_id(decorator), (collectible_masonry_item(decorator) unless destroyed)]
+  # Delete the item wherever it might seen (in a masonry list)
+  def collectible_masonry_item_deleter decorator, entity_or_string=nil
+    [ masonry_wrapper_selector(decorator, entity_or_string) ]
+  end
+
+  # Replace the item wherever it might seen (in a masonry list)
+  def collectible_masonry_item_replacement decorator, entity_or_string=nil
+    # [".masonry-item-contents."+dom_id(decorator), collectible_masonry_item(decorator)]
+    [ masonry_item_selector(decorator, entity_or_string), collectible_masonry_item(decorator)]
+  end
+
+  def collectible_masonry_item_insertion decorator, entity_or_string=nil
+    [ masonry_wrapper_selector(decorator, entity_or_string),
+      collectible_masonry_item(decorator, true),
+      masonry_container_selector(entity_or_string) ]
   end
 
   def collectible_table_row decorator
@@ -136,11 +151,6 @@ module CollectibleHelper
       ExceptionNotification::Notifier.exception_notification(request.env, e, data: {message: content}).deliver
     end
     content_tag :div, link_to(content, decorator.url), options
-  end
-
-  # Provide a replacement item for removing the item from a list
-  def collectible_stream_item_deleter results_id, entity
-      [ "div.stream-results##{results_id} div.stream-item##{dom_id entity}" ]
   end
 
   # The field-vals array consists of label/value pairs for display

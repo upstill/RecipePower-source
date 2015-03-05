@@ -284,6 +284,12 @@ RP.build_request = (request, query) ->
 	# Fire off an Ajax call notifying the server of the (re)classification
 	data.request+"?"+str.join("&")
 
+# Ensure that a newly-loaded element is properly attended to
+RP.loadElmt = (elmt) ->
+	$(elmt).trigger 'load'
+	$('[onload]', elmt).trigger 'load'
+	RP.fire_triggers elmt # For unobtrusive triggers
+
 # Process response from a request. This will be an object supplied by a JSON request,
 # which may include code to be presented along with fields (how and area) telling how
 # to present it. The data may also consist of only 'code' if it results from an HTML request
@@ -304,15 +310,19 @@ RP.process_response = (responseData, odlog) ->
 				if replacement[1]
 					if newElmt = $(replacement[1])
 						$(elmt).replaceWith newElmt
-						$(newElmt).trigger 'load'
-						elmt = newElmt
-						$('[onload]', elmt).trigger 'load'
-						RP.fire_triggers elmt # For unobtrusive triggers
+						RP.loadElmt newElmt
 				else
 					RP.masonry.removeItem elmt
 				# The third value may be a function name to call on the replaced elemnnt
 				if (loader = replacement[2]) && (loadFcn = RP.named_function(loader))
 					loadFcn($(replacement[0])[0])
+
+		if insertions = responseData.insertions # [ item_selector, item_data, composite_selector
+			for insertion in insertions
+				if elmt = $(insertion[0])[0]
+					RP.masonry.removeItem elmt
+				newElmt = $(insertion[1])[0]
+				RP.masonry.prependItem newElmt, insertion[2]
 
 		if redirect = responseData.redirect
 			window.location.assign redirect # "http://local.recipepower.com:3000/collection" #  href = href
