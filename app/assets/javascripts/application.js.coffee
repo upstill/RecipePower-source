@@ -25,6 +25,7 @@
 
 #= require imagesloaded.pkgd.min
 #= require bootstrap-filestyle
+#= require eventsource.js
 #= require bootbox
 #= require history
 #= require masonry.pkgd
