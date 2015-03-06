@@ -13,7 +13,7 @@ RP::Application.routes.draw do
     member do
       # Routes for collectibles
       get 'tag' # Present the dialog for tagging, commenting and picture selection
-      post 'tag'
+      patch 'tag'
       get 'touch'
       post "collect"
     end
@@ -91,7 +91,7 @@ RP::Application.routes.draw do
       # Routes for collectibles
       get 'getpic'
       get 'tag'
-      post 'tag'
+      patch 'tag'
       get 'touch'
       post 'collect'
     end
@@ -105,7 +105,7 @@ RP::Application.routes.draw do
       # Routes for collectibles
       post 'collect' # Add to the user's collection
       get 'tag' # Present the dialog for tagging, commenting and picture selection
-      post 'tag' # For saving the tags
+      patch 'tag' # For saving the tags
       get 'touch'
     end
   end
@@ -119,7 +119,7 @@ RP::Application.routes.draw do
       post 'absorb'
       post 'collect' # Add to the user's collection
       get 'tag' # Present the dialog for tagging, commenting and picture selection
-      post 'tag'
+      patch 'tag'
       get 'touch'
     end
   end
@@ -137,7 +137,7 @@ RP::Application.routes.draw do
       # Routes for collectibles
       post  "collect"  # Add the feed to the current user
       get 'tag' # Present the dialog for tagging, commenting and picture selection
-      post 'tag'
+      patch 'tag'
       get 'touch'
     end
   end
@@ -190,7 +190,7 @@ RP::Application.routes.draw do
       # Routes for collectibles
       post  "collect"
       get 'tag' # Present the dialog for tagging, commenting and picture selection
-      post 'tag'
+      patch 'tag'
       get 'touch'
     end
     collection do

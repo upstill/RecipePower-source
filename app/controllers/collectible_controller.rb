@@ -9,7 +9,7 @@ class CollectibleController < ApplicationController
           "now appearing in your collection." :
           "has been vanquished from your collection (though you may see it elsewhere).")
       @decorator.object.save
-      if post_resource_errors(@decorator.object)
+      if resource_errors_to_flash(@decorator.object)
         render :errors
       else
         flash[:popup] = msg
@@ -25,17 +25,17 @@ class CollectibleController < ApplicationController
   # PATCH tag
   def tag
     if current_user
-      params.delete :recipe unless request.method == "POST" # We're not saving anything otherwise
+      params.delete :recipe if request.method == "GET" # We're not saving anything otherwise
       update_and_decorate
       unless @decorator.errors.any? || @decorator.collected? # Ensure that it's collected before editing
         @decorator.be_collected
         @decorator.save
         flash.now[:notice] = "'#{@decorator.title.truncate(50)}' has been added to your collection for tagging" # if @decorator.object.errors.empty?
       end
-      if post_resource_errors @decorator
+      if resource_errors_to_flash @decorator, preface: "Couldn't save."
         render :errors
       else
-        if (request.method == "POST")
+        unless (request.method == "GET")
           flash[:popup] = "#{@decorator.human_name} saved"
           render "collectible/update.json"
         else
@@ -51,7 +51,7 @@ class CollectibleController < ApplicationController
 
   def update
     update_and_decorate
-    if post_resource_errors @decorator.object
+    if resource_errors_to_flash @decorator.object
       render :edit
     else
       flash[:popup] = "#{@decorator.human_name} is saved"
@@ -64,7 +64,7 @@ class CollectibleController < ApplicationController
   def destroy
     if update_and_decorate
       @decorator.destroy
-      if post_resource_errors(@decorator)
+      if resource_errors_to_flash(@decorator)
         render :errors
       else
         flash[:popup] = "#{@decorator.human_name} is no more."
@@ -88,7 +88,7 @@ class CollectibleController < ApplicationController
         flash[:alert] = "Sorry, you need to be logged in to touch a #{@decorator.human_name}" unless params[:silent]
       end
     end
-    post_resource_errors(@decorator.object) if @decorator
+    resource_errors_to_flash(@decorator.object) if @decorator
     render :errors # This won't be invoked directly by a user, so there's nothing else to render
   end
 

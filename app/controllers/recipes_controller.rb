@@ -177,6 +177,7 @@ class RecipesController < CollectibleController
       end
   end
   
+=begin
   def update
     # return if need_login true
     if params[:commit] == "Cancel"
@@ -202,7 +203,8 @@ class RecipesController < CollectibleController
       end
     end
   end
-  
+=end
+
   # Register that the recipe was touched by the current user--if they own it.
   def touch
     # This is a generic #touch action except for the manner in which the recipe is fetched

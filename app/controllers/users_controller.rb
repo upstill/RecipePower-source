@@ -49,7 +49,7 @@ class UsersController < CollectibleController
       end
       current_user.save
       @user.save
-      if post_resource_errors(current_user)
+      if resource_errors_to_flash(current_user)
         render :errors
       else
         flash[:popup] = msg

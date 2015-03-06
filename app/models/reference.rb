@@ -1,3 +1,5 @@
+require 'RMagick' unless Rails.env.development?
+
 class Reference < ActiveRecord::Base
 
   include Referrable
@@ -346,6 +348,7 @@ class ImageReference < Reference
 
   # Try to fetch the thumbnail data for the record. Status code assigned in ImageReference#fetchable and Reference#fetch
   def perform
+    # include Magick
     unless thumbdata && (thumbdata =~ /^data:/)
       logger.info ">>>>>>>>>>>>>>>>>>>>>>>>>>>>> Acquiring Thumbnail data on url '#{url}' >>>>>>>>>>>>>>>>>>>>>>>>>"
       self.thumbdata = nil

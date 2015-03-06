@@ -26,14 +26,6 @@ module ControllerUtils
     "#{action} #{controller}"
   end
 
-# Report the current errors on a record in a nice alert div, suitable for interpolation within the
-# form whose failure generated the error
-  def post_resource_errors obj, options={}
-    unless obj.errors.empty?
-      flash_one :error, express_resource_errors(obj, options)
-    end
-  end
-
 # Default broad-level error report based on controller and action
   def express_error_context resource
     "Couldn't #{params[:action]} the #{resource.class.to_s.downcase}"
@@ -41,7 +33,7 @@ module ControllerUtils
 
 # Stick ActiveRecord errors into the flash for presentation at the next action
   def resource_errors_to_flash resource, options={}
-    flash[:error] = view_context.express_resource_errors resource, options
+    flash[:error] = view_context.express_resource_errors(resource, options) if resource.errors.any?
   end
 
 # Stick ActiveRecord errors into the flash for presentation now

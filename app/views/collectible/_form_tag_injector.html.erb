@@ -1,5 +1,5 @@
 <% @entity = @decorator.object %>
-<%= form_for @entity, :html => { style: 'width:auto;height:auto'} do |f| %>
+<%= form_for @entity, :url => polymorphic_path([:tag, @entity], :mode => :injector), :html => { style: 'width:auto;height:auto'} do |f| %>
     <%= form_errors_helper f, @entity, false %>
 
     <div class="left">
@@ -14,6 +14,9 @@
     </div>
 
     <div class="middle">
+      <div class="notifications-panel">
+        <%= flash_notifications_div "flash_notifications", false %>
+      </div>
       <div class="edit_recipe_field" >
         <%= f.label :title, "Title" -%>
         <% @entity.title %>
@@ -32,7 +35,7 @@
         <div class="edit_recipe_field_textarea">
           <div class="expandingArea">
             <pre><span></span><br></pre>
-            <%= f.text_area :comment, rows: "1", placeholder: "What are your thoughts about this recipe?" -%>
+            <%= f.text_area :collectible_comment, rows: "1", placeholder: "What are your thoughts about this recipe?" -%>
           </div>
         </div>
       </div>
@@ -40,8 +43,8 @@
 
     <div class="right">
       <div class="edit_recipe_field ">
-        <%= f.check_box :private %>
-        <%= f.label :private, "Private" %>
+        <%= f.check_box :collectible_private %>
+        <%= f.label :collectible_private, "Private" %>
       </div>
       <%= f.submit "Save", class: "btn btn-success" %>
       <%# button_to "Forget It", remove_recipe_path(@entity), class: "btn btn-sm btn-success" %>

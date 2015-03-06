@@ -59,7 +59,7 @@ class SitesController < CollectibleController
       end
     else
       if @site
-        post_resource_errors @site
+        resource_errors_to_flash @site
       else
         flash[:alert] = "Couldn't fetch site"
       end

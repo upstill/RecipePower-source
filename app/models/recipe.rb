@@ -15,7 +15,7 @@ class Recipe < ActiveRecord::Base
 
   attr_accessible :title, :ratings_attributes, :description, :url #, :comment, :private, :tagpane, :status, :alias, :picurl :href, :collection_tokens, :channel_tokens
 
-  validates :title, :presence => true
+  validates :title, length: { minimum: 2 }
   # private
 
   # has_many :ratings, :dependent => :destroy

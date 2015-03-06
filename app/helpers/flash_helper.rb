@@ -20,7 +20,7 @@ module FlashHelper
     unless resource.errors.empty?
       if resource.errors[:base].empty?
         # We accept both ActionView form builders and simple_form builders, but only the latter has error notification
-        (f && f.respond_to?(:error_notification)) ? f.error_notification : post_resource_errors(resource)
+        (f && f.respond_to?(:error_notification)) ? f.error_notification : resource_errors_to_flash(resource)
       else 
         base_errors_helper resource, for_bootstrap
       end

@@ -22,7 +22,7 @@ class FeedsController < CollectibleController
 
   def update
     update_and_decorate
-    if post_resource_errors @decorator.object
+    if resource_errors_to_flash @decorator.object
       render :edit
     else
       flash[:popup] = "#{@decorator.human_name} is saved"
@@ -35,7 +35,7 @@ class FeedsController < CollectibleController
   def show
     @active_menu = :feeds
     @feed.refresh if update_and_decorate && !params[:stream] && @feed.due_for_update
-    if post_resource_errors @feed
+    if resource_errors_to_flash @feed
       render :errors
     else
       smartrender unless do_stream FeedCache do |sp|
@@ -64,13 +64,13 @@ class FeedsController < CollectibleController
       if @feed.errors.any?
         update_and_decorate( (Feed.where url: @feed.url)[0] || @feed )
       end
-      if post_resource_errors @feed
+      if resource_errors_to_flash @feed
         render :new, status: :unprocessable_entity, mode: :modal
       else
         # No problems. Collect the feed now.
         @feed.be_collected
         @feed.save
-        if post_resource_errors(@feed)
+        if resource_errors_to_flash(@feed)
           render :errors
         else
           flash[:popup] = "'#{@feed.title.truncate(50)}' now appearing in your collection."
@@ -94,7 +94,7 @@ class FeedsController < CollectibleController
         n_entries = @feed.feed_entries.size
         @feed.refresh
         n_new = @feed.feed_entries.size - n_entries
-        if post_resource_errors(@feed)
+        if resource_errors_to_flash(@feed)
           render :errors
         else
           flash[:popup] = labelled_quantity(n_new, "New entry")+" found"
