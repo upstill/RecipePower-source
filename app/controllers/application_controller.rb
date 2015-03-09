@@ -315,6 +315,7 @@ class ApplicationController < ActionController::Base
                     end
         )
       else
+        raise alert
         render :file => "public/401.html", :layout => false, :status => :unauthorized
       end
     end
