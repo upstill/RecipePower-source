@@ -315,6 +315,8 @@ class ApplicationController < ActionController::Base
                     end
         )
       else
+        report_cookie_string
+        report_session
         raise alert
         render :file => "public/401.html", :layout => false, :status => :unauthorized
       end
