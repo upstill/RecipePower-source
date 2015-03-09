@@ -15,7 +15,7 @@ RP::Application.routes.draw do
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       patch 'tag'
       get 'touch'
-      post "collect"
+      patch 'collect'
     end
   end
 
@@ -93,7 +93,7 @@ RP::Application.routes.draw do
       get 'tag'
       patch 'tag'
       get 'touch'
-      post 'collect'
+      patch 'collect'
     end
   end
 
@@ -103,7 +103,7 @@ RP::Application.routes.draw do
       post 'pin' # Add an entity to a list
       get 'scrape'
       # Routes for collectibles
-      post 'collect' # Add to the user's collection
+      patch 'collect' # Add to the user's collection
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       patch 'tag' # For saving the tags
       get 'touch'
@@ -117,7 +117,7 @@ RP::Application.routes.draw do
       post 'scrape'
       # Routes for collectibles
       post 'absorb'
-      post 'collect' # Add to the user's collection
+      patch 'collect' # Add to the user's collection
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       patch 'tag'
       get 'touch'
@@ -135,7 +135,7 @@ RP::Application.routes.draw do
       get 'refresh' # Refresh the feed's entries
       post 'approve' # (Admin only) approve the feed for presentation
       # Routes for collectibles
-      post  "collect"  # Add the feed to the current user
+      patch 'collect'  # Add the feed to the current user
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       patch 'tag'
       get 'touch'
@@ -188,7 +188,7 @@ RP::Application.routes.draw do
     member do
       get 'piclist'
       # Routes for collectibles
-      post  "collect"
+      patch 'collect'
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       patch 'tag'
       get 'touch'

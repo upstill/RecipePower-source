@@ -7,7 +7,7 @@ class CollectibleController < ApplicationController
       msg = "'#{@decorator.title.truncate(50)}' "
       msg << (@decorator.collected? ?
           "now appearing in your collection." :
-          "has been vanquished from your collection (though you may see it elsewhere).")
+          "has been ousted from your collection (though you may see it elsewhere).")
       @decorator.object.save
       if resource_errors_to_flash(@decorator.object)
         render :errors

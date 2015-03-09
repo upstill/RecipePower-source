@@ -67,7 +67,7 @@ module CollectibleHelper
     query_options = { :styling => styling }
     query_options.merge! oust: true if already_collected
     url = polymorphic_path [:collect, decorator.object], query_options
-    options[:method] = "POST"
+    options[:method] = "PATCH"
     link_to_submit label, url, options
   end
 

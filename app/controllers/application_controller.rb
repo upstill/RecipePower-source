@@ -147,7 +147,7 @@ class ApplicationController < ActionController::Base
       yield @sp
     end
     if @sp.stream? # We're here to spew items into the stream
-      # When the stream is request is for the first items, replace the results
+      # When the stream request is for the first items, replace the results
       if @sp.preface?
         # Generally, start by restarting the results element and replacing the found count
         header_item = with_format("html") {
