@@ -7,11 +7,12 @@
 
 class ResponseServices
 
-  attr_accessor :controller, :action, :title, :page_url, :active_menu, :mode, :specs
+  attr_accessor :controller, :action, :title, :page_url, :active_menu, :mode, :specs, :requestpath
   attr_reader :format, :trigger
 
   def initialize params, session, request
     @request = request
+    @requestpath = request.fullpath
     @format = @request.format.symbol
     @session = session
     @response = params[:response]

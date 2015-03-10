@@ -1,4 +1,5 @@
 require 'suggestion.rb'
+require 'filtered_presenter.rb'
 
 class UsersController < CollectibleController
   
@@ -33,7 +34,7 @@ class UsersController < CollectibleController
     # 'index' page may be calling itself with filter parameters in the name and tagtype
     @select = params[:select]
     response_service.title = (@select=="followees") ? "Friends" : "People"
-    smartrender unless do_stream UsersCache
+    smartrender FilteredPresenter.build(response_service, params, querytags, @decorator) # unless do_stream UsersCache
   end
 
   # Add a user or channel to the friends of the current user
@@ -78,23 +79,23 @@ class UsersController < CollectibleController
   end
   
   def show
-    @active_menu = :home
+    @active_menu = params[:id].to_s == current_user_or_guest_id ? :home : :friends
     update_and_decorate
-    smartrender unless do_stream UserListsCache
+    smartrender FilteredPresenter.build(response_service, params, querytags, @decorator)
   end
 
   # Show the user's recently-viewed recipes
   def recent
-    @user = User.find params[:id]
-    @active_menu = :collections
+    @active_menu = params[:id].to_s == current_user_or_guest_id ? :home : :collections
+    update_and_decorate # @user = User.find params[:id]
     @empty_msg = "As you check out things in RecipePower, they will be remembered here."
     response_service.title = "Recently Viewed"
-    smartrender unless do_stream UserRecentCache
+    smartrender FilteredPresenter.build(response_service, params, querytags, @decorator) # unless do_stream UserRecentCache
   end
 
   # Show the user's entire collection
   def collection
-    @user = User.find params[:id]
+    update_and_decorate # @user = User.find params[:id]
 	  if (@user.id == current_user_or_guest_id)
       response_service.title = "My Whole Collection"
       @empty_msg = "Nothing here yet...but that's what the #{view_context.link_to_submit 'Cookmark Button', '/popup/starting_step2'} is for!".html_safe
@@ -104,15 +105,15 @@ class UsersController < CollectibleController
       @empty_msg = "They haven't collected anything?!? Why not Share something with them?"
       @active_menu = :friends
     end
-    smartrender unless do_stream UserCollectionCache
+    smartrender FilteredPresenter.build(response_service, params, querytags, @decorator) # unless do_stream UserCollectionCache
   end
 
   # Show the user's recently-viewed recipes
   def biglist
-    @user = User.find params[:id]
+    update_and_decorate # @user = User.find params[:id]
     @active_menu = :collections
     response_service.title = "The Big List"
-    smartrender unless do_stream UserBiglistCache
+    smartrender FilteredPresenter.build(response_service, params, querytags, @decorator) # unless do_stream UserBiglistCache
   end
 
   def not_found

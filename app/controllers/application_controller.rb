@@ -4,6 +4,7 @@ require './lib/templateer.rb'
 require 'rp_event'
 require 'reloader/sse'
 require 'results_cache.rb'
+require 'filtered_presenter.rb'
 
 class ApplicationController < ActionController::Base
   include ControllerUtils
@@ -194,44 +195,67 @@ class ApplicationController < ActionController::Base
   end
 
   # Generalized response for dialog for a particular area
-  def smartrender renderopts={}
+  def smartrender presenter=nil, renderopts={}
+    if presenter.is_a? Hash
+      renderopts, presenter = presenter, nil
+    end
     response_service.action = renderopts[:action] || params[:action]
     url = renderopts[:url] || request.original_url
     renderopts = response_service.render_params renderopts
-    respond_to do |format|
-      format.html do
-        if response_service.mode == :modal
-          # Run the request as a dialog within the collection page
-          redirect_to_modal url
-        else
-          render response_service.action, renderopts
-        end
+    if @master_presenter = presenter
+      @decorator = @master_presenter.decorator
+      @entity = @master_presenter.entity
+      case @master_presenter.content_mode
+        when :container  # Handle the overall layout
+          render "pagelets/"+@master_presenter.pagelet
+        when :entity # Summarize the focused entity
+          # Do a conventional #show, i.e., render the stream's entity's show template
+          render :show, locals: { partial: "show_content" } # The #show template will expect @decorator to be defined
+        when :results # The frame for the items. This may be recursive on other frameworks
+          # Do a conventional #index, i.e. render the stream container
+          render template: "filtered_presenter/results"
+        when :modal
+          # Render the stream's entity in a modal dialog
+          render :show, locals: { partial: "show_modal" }
+        when :items # Stream items into the stream's container
+          do_stream @master_presenter.results_class
       end
-      format.json {
-        case response_service.mode
-          when :partial
-            renderopts[:layout] = false
-            if @sp
-              # If operating with a stream, package the content into a stream-body element, with stream trigger
-              renderopts[:action] = response_service.action
-              begin
-                replname = @sp.has_query? ? "shared/stream_results_replacement" : "shared/pagelet_body_replacement"
-                render template: replname, layout: false
-              rescue Exception => e
-                x=2
-              end
-            else
-              render renderopts
-            end
-          when :modal, :injector
-            dialog = render_to_string renderopts.merge(action: response_service.action, layout: (@layout || false), formats: ["html"])
-            render json: {code: dialog, how: "bootstrap"}.to_json, layout: false, :content_type => 'application/json'
+    else
+      respond_to do |format|
+        format.html do
+          if response_service.mode == :modal
+            # Run the request as a dialog within the collection page
+            redirect_to_modal url
+          else
+            render response_service.action, renderopts
+          end
         end
-      }
-      format.js {
-        # XXX??? Must have set @partial in preparation
-        render renderopts.merge(action: "capture")
-      }
+        format.json {
+          case response_service.mode
+            when :partial
+              renderopts[:layout] = false
+              if @sp
+                # If operating with a stream, package the content into a stream-body element, with stream trigger
+                renderopts[:action] = response_service.action
+                begin
+                  replname = @sp.has_query? ? "shared/stream_results_replacement" : "shared/pagelet_body_replacement"
+                  render template: replname, layout: false
+                rescue Exception => e
+                  x=2
+                end
+              else
+                render renderopts
+              end
+            when :modal, :injector
+              dialog = render_to_string renderopts.merge(action: response_service.action, layout: (@layout || false), formats: ["html"])
+              render json: {code: dialog, how: "bootstrap"}.to_json, layout: false, :content_type => 'application/json'
+          end
+        }
+        format.js {
+          # XXX??? Must have set @partial in preparation
+          render renderopts.merge(action: "capture")
+        }
+      end
     end
   end
 

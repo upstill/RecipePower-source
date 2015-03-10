@@ -1,0 +1,20 @@
+<%= triggered_form(@master_presenter.filter_query) do %>
+    <h2><span class="tag-filter-title"><%= (defined? title) ? title : response_service.title %></span> <small><%# stream_element :count %></small>
+      <% if @master_presenter.filter_type_selector %>
+          <div style="display:inline-block; vertical-align:bottom; margin:5px 10px">
+            <%= select_tag :tagtype, options_from_collection_for_select(Tag.type_selections(true, true), :last, :first, @master_presenter.tagtype),
+                           :include_blank => false,
+                           :onchange => %Q{RP.submit.onselect( event ); } %>
+          </div>
+      <% end %>
+      <%= stream_filter_field @master_presenter,
+                              rows: 1,
+                              autofocus: true,
+                              data: {:"on-add" => "RP.submit.ontokenchange",
+                                     :"on-delete" => "RP.submit.ontokenchange",
+                                     :hint => "", # "Search the collection by typing terms here",
+                                     placeholder: "Seek and ye shall find...",
+                                     :"no-results-text" => "No matching tag found; hit Enter to search with text"} %>
+    </h2>
+    <p><%= defined?(comment) ? comment : "" %></p>
+<% end %>

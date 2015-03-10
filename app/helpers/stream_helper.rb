@@ -108,7 +108,7 @@ module StreamHelper
   def stream_filter_field presenter, options={}
     data = options[:data] || {}
     data[:hint] ||= "Narrow down the list"
-    data[:pre] ||= @querytags.collect { |tag| { id: tag.id, name: tag.name } }.to_json
+    data[:pre] ||= presenter.querytags.collect { |tag| { id: tag.id, name: tag.name } }.to_json
     data[:"min-chars"] ||= 2
     data[:query] = "tagtype=#{presenter.tagtype}" if presenter.tagtype
 

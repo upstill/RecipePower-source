@@ -1,2 +1,2 @@
 <%# Generic #show template that optionally deploys content in a dialog  %>
-<%= render response_service.select_render %>
+<%= render defined?(partial) ? partial : response_service.select_render %>

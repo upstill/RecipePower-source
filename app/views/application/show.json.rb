@@ -1,1 +1,1 @@
-render response_service.select_render
+render defined?(partial) ? partial : response_service.select_render
