@@ -1,3 +1,5 @@
-<div class="filtered_results">
-    <%= render @master_presenter.results_partial %>
-</div>
+<% @master_presenter.results_set.each do |renderer| %>
+  <div class="filtered_results <%= renderer.results_class %>">
+    <%= render renderer.results_partial %>
+  </div>
+<% end %>

@@ -1,1 +1,10 @@
-<h3>What do you know? A table partial</h3>
+<!-- View for listing entities in a table -->
+<table class="table table-striped ">
+  <thead>
+  <tr>
+    <%= @master_presenter.table_headers.collect { |ttl| "<th>#{ttl}</th>" unless ttl.blank? }.compact.join("\n").html_safe %>
+  </tr>
+  </thead>
+  <tbody class="stream-items-parent">
+  </tbody>
+</table>

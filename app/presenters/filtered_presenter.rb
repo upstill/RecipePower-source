@@ -42,14 +42,27 @@ class FilteredPresenter
     "#{@entity.class.to_s.pluralize.underscore}/show_header" if @entity
   end
 
+  # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
+  def results_set
+    [ self ]
+  end
+
+  # This is the class of the results container
+  def results_class
+    self.class.to_s
+  end
+
+  # This is the name of the partial used to render me
   def results_partial
     "filtered_presenter/results_#{@list_mode}"
   end
 
+  # This is the name of the partial used for the header, presumably including the search box
   def header_partial
     "filtered_presenter/filter_header"
   end
 
+  # What types of tag are suggested in the search
   def tagtype
     @tagtype || 0
   end
@@ -58,7 +71,7 @@ class FilteredPresenter
     false
   end
 
-  # Provide the query for getting back to this state
+  # Provide the query for revising the results
   def filter_query format=nil, params={}
     if format.is_a? Hash
       params, format = format, nil
@@ -71,19 +84,6 @@ class FilteredPresenter
     "filtered_presenter"
   end
 
-  # Render the entire frame, within a layout
-  def render_container
-
-  end
-
-  # Render the frame for a stream of items
-  def render_stream_container
-
-  end
-
-  def render_stream_items
-
-  end
 end
 
 class UsersIndexPresenter < FilteredPresenter
@@ -91,6 +91,10 @@ class UsersIndexPresenter < FilteredPresenter
   def initialize
     super
     @results_class = UsersCache
+  end
+
+  def table_headers
+    [ "", "About Me", "Interest(s)", "", "" ]
   end
 end
 
