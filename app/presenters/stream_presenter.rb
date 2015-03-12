@@ -1,8 +1,8 @@
 class StreamPresenter
   attr_accessor :results, :tagtype, :results_partial, :item_partial, :tail_partial
-  attr_reader :querytags
+  # attr_reader :querytags
 
-  delegate :items, :next_item, :next_range, :"done?", :window, :param, :full_size, :"has_query?", :"ready?", :nmatches, :to => :results
+  delegate :items, :next_item, :next_range, :"done?", :window, :param, :full_size, :"has_query?", :"ready?", :querytags, :nmatches, :to => :results
 
   def initialize session_id, requestpath, rc_class, userid, as_admin, querytags=[], params={}
     if querytags.class == Hash
@@ -27,6 +27,7 @@ class StreamPresenter
       @results_partial = "shared/stream_results_masonry"
       @tail_partial = "stream/masonry_tail"
     end
+    @tail_partial = "stream/#{params[:list_mode]}_tail" if params[:list_mode]
 
     # Get a Streamer subclass for the controller and action
     @results = rc_class.retrieve_or_build session_id, userid, as_admin, querytags, params

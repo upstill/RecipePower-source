@@ -1,10 +1,9 @@
-<h3>Well Looky here: a <%= @master_presenter.class.to_s %></h3>
 <%= render @master_presenter.header_partial, title: title, comment: ((defined? comment) ? comment : "") %>
 <% if ep = @master_presenter.entity_partial %>
-  <div class="entity_header">
-    <%= render ep %>
-  </div>
+    <div class="entity_header">
+      <%= render ep %>
+    </div>
 <% end %>
-<div class="filtered_results">
-  <%= render @master_presenter.results_partial %>
-</div>
+<% @master_presenter.results_set do |path, klass| %>
+    <%= trigger_pending_results path, class: klass %>
+<% end %>

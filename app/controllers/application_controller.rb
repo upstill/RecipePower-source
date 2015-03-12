@@ -140,15 +140,25 @@ class ApplicationController < ActionController::Base
     logger.info "UUID: #{rp_uuid}"
   end
 
+  def stream_presenter rc_class_or_presenter
+    # The specifier can either be the relevant presenter class, or a previously-defined presenter
+    if rc_class_or_presenter.class == Class
+      StreamPresenter.new rp_uuid, request.fullpath, rc_class_or_presenter, current_user_or_guest_id, response_service.admin_view?, querytags, params
+    else
+      rc_class_or_presenter
+    end
+  end
+
   # Take a stream presenter and drop items into a stream, if possible and called for.
   # Otherwise, defer to normal rendering
-  def do_stream rc_class
-    @sp = StreamPresenter.new rp_uuid, request.fullpath, rc_class, current_user_or_guest_id, response_service.admin_view?, querytags, params
+  def do_stream rc_class_or_presenter
+    @sp = stream_presenter rc_class_or_presenter
     if block_given?
       yield @sp
     end
     if @sp.stream? # We're here to spew items into the stream
       # When the stream request is for the first items, replace the results
+=begin
       if @sp.preface?
         # Generally, start by restarting the results element and replacing the found count
         header_item = with_format("html") {
@@ -160,11 +170,12 @@ class ApplicationController < ActionController::Base
       else
         header_item = {deletions: ['.stream-tail']}
       end
+=end
       response.headers["Content-Type"] = "text/event-stream"
       # retrieve_seeker
       begin
         sse = Reloader::SSE.new response.stream
-        sse.write :stream_item, header_item
+        sse.write :stream_item, { deletions: [".stream-tail.#{@sp.stream_id}"] }
 
         while item = @sp.next_item do
           sse.write :stream_item, with_format("html") { {elmt: view_context.render_stream_item(item)} }
@@ -202,7 +213,11 @@ class ApplicationController < ActionController::Base
     response_service.action = renderopts[:action] || params[:action]
     url = renderopts[:url] || request.original_url
     renderopts = response_service.render_params renderopts
+    # Give the stream a crack at it
     if @master_presenter = presenter
+      # do_stream handles feeding items into the stream
+      @sp = stream_presenter presenter.results_class
+      # do_stream at least initializes @sp, the stream presenter
       @decorator = @master_presenter.decorator
       @entity = @master_presenter.entity
       case @master_presenter.content_mode
@@ -214,11 +229,12 @@ class ApplicationController < ActionController::Base
         when :results # The frame for the items. This may be recursive on other frameworks
           # Do a conventional #index, i.e. render the stream container
           render template: "filtered_presenter/results"
+          # view_context.stream_element( :results, pkg_attributes: { id: @sp.stream_id} )
         when :modal
           # Render the stream's entity in a modal dialog
           render :show, locals: { partial: "show_modal" }
         when :items # Stream items into the stream's container
-          do_stream @master_presenter.results_class
+          do_stream @sp
       end
     else
       respond_to do |format|

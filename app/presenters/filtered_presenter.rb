@@ -29,7 +29,7 @@ class FilteredPresenter
     end
 =end
     @thispath = response_service.requestpath
-    @list_mode = (params[:list_mode] || :masonry).to_sym
+    @list_mode ||= (params[:list_mode] || :strip).to_sym
     @content_mode = (params[:content_mode] || :container).to_sym
     @content_mode = :entity if response_service.action == "show"
     @content_mode = :modal if params[:mode] && params[:mode] == "modal"
@@ -43,18 +43,23 @@ class FilteredPresenter
   end
 
   # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
-  def results_set
-    [ self ]
+  def results_set &block
+    block.call results_path, results_cssclass
   end
 
   # This is the class of the results container
-  def results_class
-    self.class.to_s
+  def results_cssclass
+    @results_class || self.class
   end
 
   # This is the name of the partial used to render me
   def results_partial
     "filtered_presenter/results_#{@list_mode}"
+  end
+
+  # Specify a path for fetching the results partial
+  def results_path
+    assert_query @thispath, content_mode: "results"
   end
 
   # This is the name of the partial used for the header, presumably including the search box
@@ -69,6 +74,17 @@ class FilteredPresenter
 
   def filter_type_selector
     false
+  end
+
+  # This is the path that will go into the "more items" link
+  def next_path
+    if r == 0..10 # @results.next_range
+      assert_query @thispath, stream: "#{r.min}-#{r.max}"
+    end
+  end
+
+  def stream_id
+    "#{self.class.to_s}_#{@id}" # TODO: should be deferring to @sp
   end
 
   # Provide the query for revising the results
@@ -90,11 +106,16 @@ class UsersIndexPresenter < FilteredPresenter
 
   def initialize
     super
+    @list_mode = :table
     @results_class = UsersCache
   end
 
   def table_headers
     [ "", "About Me", "Interest(s)", "", "" ]
+  end
+
+  def pagelet
+    super
   end
 end
 
@@ -106,7 +127,32 @@ class UsersShowPresenter < FilteredPresenter
   end
 end
 
-class UsersRecentPresenter < FilteredPresenter
+# Present a list of items for a user
+class UserContentPresenter < FilteredPresenter
+  attr_reader :entity_type
+
+  def setup response_service, params, querytags, decorator=nil
+    super
+    @entity_type = params[:entity_type]
+  end
+
+  # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
+  def results_set &block
+    if @entity_type
+      block.call results_path, results_cssclass
+    else
+      ["recipes", "lists", "friends", "feeds" ].each do |et|
+         block.call assert_query(results_path, entity_type: et), et
+      end
+    end
+  end
+
+  def results_cssclass
+    @entity_type || self.class.to_s
+  end
+end
+
+class UsersRecentPresenter < UserContentPresenter
 
   def initialize
     super
@@ -114,7 +160,7 @@ class UsersRecentPresenter < FilteredPresenter
   end
 end
 
-class UsersCollectionPresenter < FilteredPresenter
+class UsersCollectionPresenter < UserContentPresenter
 
   def initialize
     super
@@ -122,7 +168,7 @@ class UsersCollectionPresenter < FilteredPresenter
   end
 end
 
-class UsersBiglistPresenter < FilteredPresenter
+class UsersBiglistPresenter < UserContentPresenter
 
   def initialize
     super

@@ -447,6 +447,11 @@ end
 # Recently-viewed recipes of the given user
 class UserCollectionCache < RcprefCache
 
+  def self.params_needed
+    # The access parameter filters for private and public lists
+    super + [:entity_type]
+  end
+
   def user
     @user ||= User.find_by(id: @id) if @id
   end
@@ -457,7 +462,13 @@ class UserCollectionCache < RcprefCache
   end
 
   def itemscope
-    user.collection_scope(:sort_by => :viewed, :in_collection => true) if user
+    if user
+      constraints = { :sort_by => :viewed, :in_collection => true }
+      if @entity_type
+        constraints[:entity_type] = @entity_type.singularize.camelize
+      end
+      user.collection_scope constraints
+    end
   end
 
   def stream_id

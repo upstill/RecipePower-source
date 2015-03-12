@@ -5,6 +5,7 @@
     <%= @master_presenter.table_headers.collect { |ttl| "<th>#{ttl}</th>" unless ttl.blank? }.compact.join("\n").html_safe %>
   </tr>
   </thead>
-  <tbody class="stream-items-parent">
+  <tbody class="stream-items-parent <%= @sp.stream_id %>">
+    <%= render_stream_tail %>
   </tbody>
 </table>
