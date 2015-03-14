@@ -9,8 +9,28 @@ module RecipesHelper
     "<div><h3>#{recipe.title}</h3></div>".html_safe
   end
 
+  def collectible_slider_datablock decorator, cssclass="rcp_grid_datablock", &block
+    entity = decorator.object
+    klass = entity.class.to_s
+    label = ((klass == "Recipe") || (klass == "List")) ? "" : "#{klass}: "
+    itemlink = case klass
+                 when "Recipe", "Site"
+                   link_to decorator.title, decorator.url, class: "tablink", data: { report: polymorphic_path([:touch, entity]) } # ...to open up a new tab
+                 else # Other internal entities get opened up in a new partial
+                   link_to_submit decorator.title, decorator.url, mode: :partial
+               end
+    grid_element = content_tag :p, (label+itemlink).html_safe, class: "rcp_grid_element_title"
+    case klass
+      when "List"
+        source_element = content_tag :div, ("a list by "+link_to_submit(decorator.owner.handle, user_path(decorator.owner, :mode => :modal))).html_safe, class: "rcp_grid_element_source"
+      else
+        source_element = content_tag :div, ("from "+link_to(decorator.sourcename, decorator.sourcehome, class: "tablink")).html_safe, class: "rcp_grid_element_source"
+    end
+    buttons_element = with_output_buffer(&block) if block_given?
+    content_tag :div, "#{grid_element}#{source_element}#{buttons_element}", class: cssclass
+  end
 
-  def recipe_grid_datablock decorator
+  def collectible_masonry_datablock decorator
     entity = decorator.object
     klass = entity.class.to_s
     label = ((klass == "Recipe") || (klass == "List")) ? "" : "#{klass}: "

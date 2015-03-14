@@ -122,7 +122,7 @@ module StreamHelper
   # Render an element of a collection, depending on its class
   # NB The view is derived from the class of the element, NOT from the current controller
   def render_stream_item element, partialname=nil, no_wrap = false
-    partialname ||= @sp.item_partial || "show_masonry_item"
+    partialname ||= @sp.item_partial
     for_masonry = partialname.match /masonry/
     # Get the item-rendering partial from the model view
     unless partialname.match /\//

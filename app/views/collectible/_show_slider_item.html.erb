@@ -1,0 +1,13 @@
+<div class="slider-item <%= dom_id item %>">
+  <%= safe_image_div decorator, :site, class: "pic-box" %>
+  <%= collectible_slider_datablock decorator, "datablock" do %>
+      <div class="footer">
+        <div class="icons">
+          <%# collectible_info_icon decorator %>
+        </div>
+        <div class="buttons">
+          <%= collectible_buttons_panel decorator, button_size: "xs" %>
+        </div>
+      </div>
+  <% end %>
+</div>

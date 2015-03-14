@@ -20,12 +20,10 @@ RP.stream.go = (evt) ->
 
 RP.stream.fire = (elmt) ->
 	querypath = $(elmt).data('path')
-	container_selector = $(elmt).data('containerSelector') || ""
-	parent = RP.findEnclosing '.stream-tail', elmt
+	parent = RP.findEnclosingByClass 'stream-items-parent', elmt
 	$('.beachball', parent).removeClass "hide"
 	$(elmt).remove() # Remove the link element to forestall subsequent loads
 	# It will be replaced when the trigger div gets replaced, IFF there's more material to come
-	container_selector += " .stream-items-parent"
 	source = new EventSource querypath
 	source.onerror = (evt) ->
 		source.close()
@@ -42,7 +40,7 @@ RP.stream.fire = (elmt) ->
 			fcn.apply jdata
 		else if jdata.elmt
 			# Standard handling: convert text to HTML and append to list
-			RP.masonry.appendItem($(jdata.elmt), container_selector)
+			RP.appendElmt($(jdata.elmt), parent)
 		else
 			RP.process_response jdata
 

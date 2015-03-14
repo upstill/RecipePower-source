@@ -21,14 +21,8 @@ class FilteredPresenter
     end
     @stream_param = params[:stream] || "" if params.has_key? :stream
     @tagtype = params[:tagtype]
-=begin
-    if @stream_param.blank?
-      offset = 0
-    else
-      offset, limit = @stream_param.split('-').map(&:to_i)
-    end
-=end
     @thispath = response_service.requestpath
+
     @list_mode ||= (params[:list_mode] || :strip).to_sym
     @content_mode = (params[:content_mode] || :container).to_sym
     @content_mode = :entity if response_service.action == "show"

@@ -45,6 +45,72 @@ div.centerblock {
 	background-color: #0088cc;
 }
 
+div.slider-item {
+  height: 200px;
+  div.pic-box {
+    height: 100%;
+    width: auto; // 220px;
+    display: -webkit-box;
+    display: -moz-box;
+    display: box;
+
+    -webkit-box-orient: vertical;
+    -moz-box-orient: vertical;
+    box-orient: vertical;
+
+    -webkit-box-align: center;
+    -moz-box-align: center;
+    box-align: center;
+
+    -webkit-box-pack: center;
+    -moz-box-pack: center;
+    box-pack: center;
+  }
+
+  .datablock {
+    padding: 0px 8px;
+    height: auto; // 4.6em;
+  }
+
+  .footer {
+    height: 28px;
+    align: right;
+    position: relative;
+
+    display: -webkit-box;
+    // display: -moz-box;
+    display: box;
+
+    -webkit-box-align: center;
+    -moz-box-align: center;
+    box-align: center;
+
+    -webkit-box-pack: center;
+    -moz-box-pack: center;
+    box-pack: center;
+
+    padding: 4px 4px 4px 12px;
+    margin: 2px -4px -4px;
+    border-top: 1px solid #ddd;
+    border-radius: 0 0 4px 4px;
+    background-color: #fafafa;
+    background-image: -webkit-linear-gradient(top, #ffffff, #f2f2f2);
+    background-image: -moz-linear-gradient(top, #ffffff, #f2f2f2);
+    background-image: linear-gradient(to bottom, #ffffff, #f2f2f2);
+
+    .icons {
+      position: absolute;
+      left: 2px;
+    }
+
+    .buttons {
+      position: absolute;
+      right: 2px;
+    }
+  }
+
+}
+
 .rcp_grid_pic_box {
 	width: 100%;
 	height: auto; // 220px;

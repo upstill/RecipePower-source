@@ -61,37 +61,6 @@ RP.makeExpandingArea = (containers) ->
 	# Enable extra CSS
 	containers.addClass 'active'
 
-###
-# Add a bookmark for the current page
-RP.bm = (title, addr) ->
-	if window.sidebar # Mozilla Firefox Bookmark
-		window.sidebar.addPanel location.href, document.title, ""
-	else if false # IE Favorite
-		window.external.AddFavorite location.href, document.title 
-	else if window.opera && window.print # Opera Hotlist
-		this.title = document.title;
-		return true;
-	else # webkit - safari/chrome
-		alert 'Press ' + ((navigator.userAgent.toLowerCase().indexOf('mac') != - 1) ? 'Command/Cmd' : 'CTRL') + ' + D to bookmark this page.'
-
-# Go to a page and push a special state
-RP.getgo = (request, addr) ->
-	$.ajax
-		type: "GET",
-		dataType: "html",
-		url: request,
-		error: (jqXHR, textStatus, errorThrown) ->
-			debugger
-		success: (response, statusText, xhr) ->
-			# Pass any assumptions into the response data
-			document.getElementsByTagName("html")[0].innerHTML = response;
-			document.title = "Cookmark";
-			window.history.pushState
-				html: response,
-				pageTitle: "Cookmark"
-			,"Cookmark", addr
-###
-
 RP.event_target = (event) ->
 	if event && (typeof event.target == "object")
 		return event.target
@@ -288,6 +257,9 @@ RP.build_request = (request, query) ->
 RP.loadElmt = (elmt) ->
 	$(elmt).trigger 'load'
 	$('[onload]', elmt).trigger 'load'
+	for toSetup in $('[data-setup]', elmt)
+		if fcn = RP.named_function $(toSetup).data "setup"
+			fcn toSetup
 	RP.fire_triggers elmt # For unobtrusive triggers
 
 # Process response from a request. This will be an object supplied by a JSON request,
@@ -309,10 +281,9 @@ RP.process_response = (responseData, odlog) ->
 				elmt = $(replacement[0])[0]
 				if replacement[1]
 					if newElmt = $(replacement[1])
-						$(elmt).replaceWith newElmt
-						RP.loadElmt newElmt
+						RP.replaceElmt elmt, newElmt
 				else
-					RP.masonry.removeItem elmt
+					RP.removeElmt elmt
 				# The third value may be a function name to call on the replaced elemnnt
 				if (loader = replacement[2]) && (loadFcn = RP.named_function(loader))
 					loadFcn($(replacement[0])[0])
@@ -320,9 +291,9 @@ RP.process_response = (responseData, odlog) ->
 		if insertions = responseData.insertions # [ item_selector, item_data, composite_selector
 			for insertion in insertions
 				if elmt = $(insertion[0])[0]
-					RP.masonry.removeItem elmt
+					RP.removeElmt elmt
 				newElmt = $(insertion[1])[0]
-				RP.masonry.prependItem newElmt, insertion[2]
+				RP.prependElmt newElmt, insertion[2]
 
 		if redirect = responseData.redirect
 			window.location.assign redirect # "http://local.recipepower.com:3000/collection" #  href = href
@@ -376,3 +347,21 @@ RP.process_response = (responseData, odlog) ->
 				RP.dialog.run odlog
 
 	return supplanted
+
+RP.replaceElmt = (oldElmt, newElmt) ->
+	if !RP.masonry.replaceItem oldElmt, newElmt
+		$(oldElmt).replaceWith newElmt
+	RP.loadElmt newElmt
+
+RP.removeElmt = (elmt) ->
+	RP.masonry.removeItem(elmt) || $(elmt).remove()
+
+# Prepend the element at the top of the list given by 'selector' (which can be a parent node)
+RP.prependElmt = (elmt, parent) ->
+	if !RP.masonry.prependItem(elmt, parent)
+		$(parent).prepend elmt
+	RP.loadElmt elmt
+
+RP.appendElmt = (item, parent) ->
+	if !RP.masonry.appendItem item, parent
+		$(parent).append item

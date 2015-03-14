@@ -1,5 +1,5 @@
 class StreamPresenter
-  attr_accessor :results, :tagtype, :results_partial, :item_partial, :tail_partial
+  attr_accessor :results, :tagtype, :results_partial, :item_partial, :tail_partial, :list_mode
   # attr_reader :querytags
 
   delegate :items, :next_item, :next_range, :"done?", :window, :param, :full_size, :"has_query?", :"ready?", :querytags, :nmatches, :to => :results
@@ -18,16 +18,22 @@ class StreamPresenter
       offset, limit = @stream_param.split('-').map(&:to_i)
     end
 
-    if params[:action] == "index"
-      @item_partial = "#{params[:controller]}/index_table_row"
-      @results_partial = "#{params[:controller]}/index_stream_results"
-      @tail_partial = "stream/table_tail"
+    if params[:list_mode]
+      @list_mode = params[:list_mode].to_sym # :masonry, :table, or :slider
+    elsif params[:action] == "index"
+      @list_mode = :table
     else
       # In general we leave the item partial to the model
-      @results_partial = "shared/stream_results_masonry"
-      @tail_partial = "stream/masonry_tail"
+      @list_mode = :slider
     end
-    @tail_partial = "stream/#{params[:list_mode]}_tail" if params[:list_mode]
+    if (@list_mode == :table)
+      @results_partial ="#{params[:controller]}/index_stream_results"
+      @item_partial = "#{params[:controller]}/index_table_row"
+    else
+      @results_partial ="shared/stream_results_#{@list_mode}"
+      @item_partial = "show_#{@list_mode}_item"
+    end
+    @tail_partial = "stream/#{@list_mode}_tail"
 
     # Get a Streamer subclass for the controller and action
     @results = rc_class.retrieve_or_build session_id, userid, as_admin, querytags, params
@@ -52,7 +58,7 @@ class StreamPresenter
   # This is the path that will go into the "more items" link
   def next_path
     if r = @results.next_range
-      assert_query @thispath, stream: "#{r.min}-#{r.max}"
+      assert_query @thispath, { stream: "#{r.min}-#{r.max}", list_mode: @list_mode }.compact
     end
   end
 
