@@ -32,7 +32,6 @@ RP.stream.fire = (elmt) ->
 		jdata = JSON.parse e.data
 		source.close()
 		RP.process_response jdata
-		RP.stream.check() # If the stream link is visible, go for more
 	source.addEventListener 'stream_item', (e) ->
 		jdata = JSON.parse e.data
 		# If the item specifies a handler, call that

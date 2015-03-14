@@ -16,9 +16,9 @@
 
     margin: 0;
     padding: 0;
-    border: 0;
+    border: 2px solid #0000ff;
 
-    width: 20000px;
+    width: 600px; // Just to start; the slider will expand as items are loaded
   }
   .left, .right {
     position: absolute;

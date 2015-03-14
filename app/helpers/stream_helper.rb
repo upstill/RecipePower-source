@@ -5,8 +5,7 @@ module StreamHelper
             onclick: 'RP.stream.go(event);',
             onload: 'RP.stream.onload(event);',
             class: "stream-trigger",
-            :"data-path" => next_path,
-            :"data-container_selector" => container_selector
+            :"data-path" => next_path
   end
 
   def stream_element_class etype
