@@ -135,7 +135,8 @@ class UserContentPresenter < FilteredPresenter
     if @entity_type
       block.call results_path, results_cssclass
     else
-      ["recipes", "lists", "friends", "feeds" ].each do |et|
+      # ["recipes", "lists", "friends", "feeds" ].each do |et|
+      ["recipes"].each do |et|
          block.call assert_query(results_path, entity_type: et), et
       end
     end

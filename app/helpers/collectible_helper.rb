@@ -133,13 +133,13 @@ module CollectibleHelper
     if fallback.is_a? Hash
       fallback, options = :site, fallback
     end
+    fill_mode = options.delete(:fill_mode) || "fixed-width"
     begin
       return if (url = decorator.imgdata(fallback)).blank?
-      # options.merge!( class: "stuffypic", data: { fillmode: "width" } ) # unless url =~ /^data:/
       content = image_with_error_recovery url,
                                           alt: "Image Not Accessible",
                                           id: (dom_id decorator),
-                                          style: "width:100%; height:auto;"
+                                          class: fill_mode
     rescue Exception => e
       if url
         url = "data URL" if url =~ /^data:/

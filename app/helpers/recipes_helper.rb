@@ -19,15 +19,15 @@ module RecipesHelper
                  else # Other internal entities get opened up in a new partial
                    link_to_submit decorator.title, decorator.url, mode: :partial
                end
-    grid_element = content_tag :p, (label+itemlink).html_safe, class: "rcp_grid_element_title"
+    grid_element = content_tag :p, (label+itemlink).html_safe, class: "title"
     case klass
       when "List"
         source_element = content_tag :div, ("a list by "+link_to_submit(decorator.owner.handle, user_path(decorator.owner, :mode => :modal))).html_safe, class: "rcp_grid_element_source"
       else
         source_element = content_tag :div, ("from "+link_to(decorator.sourcename, decorator.sourcehome, class: "tablink")).html_safe, class: "rcp_grid_element_source"
     end
-    buttons_element = with_output_buffer(&block) if block_given?
-    content_tag :div, "#{grid_element}#{source_element}#{buttons_element}", class: cssclass
+    buttons_element = block_given? ? with_output_buffer(&block) : ""
+    content_tag :div, grid_element.html_safe+source_element.html_safe, class: cssclass
   end
 
   def collectible_masonry_datablock decorator
