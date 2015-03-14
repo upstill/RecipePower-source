@@ -1,9 +1,1 @@
-<%= render @master_presenter.header_partial, title: title, comment: ((defined? comment) ? comment : "") %>
-<% if ep = @master_presenter.entity_partial %>
-    <div class="entity_header">
-      <%= render ep %>
-    </div>
-<% end %>
-<% @master_presenter.results_set do |path, klass| %>
-    <%= trigger_pending_results path, class: klass %>
-<% end %>
+<%= render "pagelets/filtered_presenter" %>
