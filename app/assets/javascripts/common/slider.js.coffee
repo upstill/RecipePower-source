@@ -4,24 +4,35 @@ jQuery ->
 
 RP.slider.setup = (button_elmt) ->
 	$(button_elmt).hover RP.slider.hoverin, RP.slider.hoverout
-	RP.slider.check_trigger button_elmt
+	$(button_elmt).click RP.slider.click
+	button_check button_elmt
+
+RP.slider.click = (event) ->
+	button_elmt = event.currentTarget
+	slide_by button_elmt, parseInt(button_elmt.parentNode.css "width")
 
 RP.slider.bump = (button_elmt) ->
+	slide_by button_elmt, 5
+
+slide_by = (button_elmt, incr) ->
+	if $(button_elmt).hasClass "right"
+		incr = -incr
 	track = $('.track', button_elmt.parentNode)[0]
-	if $(button_elmt).hasClass "left"
-		incr = 5
-	else
-		incr = -5
 	place = parseInt $(track).css('left')
 	$(track).css 'left', place+incr
-	RP.slider.check_trigger button_elmt
+	button_check button_elmt
 
-RP.slider.check_trigger = (button_elmt) ->
+button_check = (button_elmt) ->
 	if stream_trigger = $('.stream-trigger', button_elmt.parentNode)[0]
 		button_rect = button_elmt.getBoundingClientRect()
 		trigger_rect = stream_trigger.getBoundingClientRect()
 		if button_rect && trigger_rect && (trigger_rect.left-button_rect.right) < 200
 			RP.stream.fire stream_trigger
+
+RP.slider.trigger_check = (trigger_elmt) ->
+	parent = RP.findEnclosingByClass 'slider', trigger_elmt
+	$('.right', parent).each (index) ->
+		button_check this
 
 RP.slider.hoverin = (event) ->
 	button_elmt = event.currentTarget

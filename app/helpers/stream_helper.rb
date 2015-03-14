@@ -1,11 +1,13 @@
 module StreamHelper
 
-  def stream_loadlink next_path, container_selector
+  def stream_loadlink next_path, container_selector, check_fcn = nil
+    data = { path: next_path }
+    data[:"trigger-check"] = check_fcn if check_fcn
     link_to "Click to load", "#",
             onclick: 'RP.stream.go(event);',
             onload: 'RP.stream.onload(event);',
             class: "stream-trigger",
-            :"data-path" => next_path
+            data: data
   end
 
   def stream_element_class etype

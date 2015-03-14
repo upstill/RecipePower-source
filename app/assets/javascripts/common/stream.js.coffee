@@ -2,14 +2,22 @@ RP.stream ||= {}
 
 jQuery ->
 	$(window).scroll () ->
-		RP.stream.check()
-	RP.stream.check()
+		$('div.stream-items-parent .stream-trigger').each (index) ->
+			RP.stream.check this
 
 RP.stream.onload = (event) ->
 	RP.stream.check event.target
 
 RP.stream.check = (elmt) ->
-	if $(elmt).hasClass('stream-trigger') || elmt = $('a.stream-trigger')[0]
+	# We can be called with the trigger-item's parent or any child thereof
+	if !$(elmt).hasClass 'stream-trigger'
+		parent = elmt
+		if !$(parent).hasClass 'stream-items-parent'
+			parent = RP.findEnclosingByClass parent, 'stream-items-parent'
+		elmt = $('.stream-trigger', parent)[0]
+	if (trigger_check_name = $(elmt).data('trigger-check')) && (trigger_check_fcn = RP.named_function trigger_check_name)
+		trigger_check_fcn elmt
+	else
 		rect = elmt.getBoundingClientRect()
 		if rect && (rect.bottom-rect.height) <= $(window).height()
 			RP.stream.fire elmt

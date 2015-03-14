@@ -1,6 +1,6 @@
 <% if next_path = @sp.next_path %>
   <%= image_tag "ajax-loader.gif", class: "beachball hide" %>
-  <%= stream_loadlink next_path, @sp.stream_id %>
+  <%= stream_loadlink next_path, @sp.stream_id, (trigger_check if defined?(trigger_check))  %>
 <% else %>
   <%= empty_msg  %>
 <% end %>
