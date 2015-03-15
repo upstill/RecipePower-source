@@ -9,7 +9,24 @@ RP.slider.setup = (button_elmt) ->
 
 RP.slider.click = (event) ->
 	button_elmt = event.currentTarget
-	slide_by button_elmt, parseInt(button_elmt.parentNode.css "width")
+	left_button = $('.left', button_elmt.parentNode)[0]
+	fudge = 2
+	if left_button == button_elmt
+		fudge = -fudge
+	left_edge = left_button.getBoundingClientRect().left+fudge
+	# Do a linear search for the item that overlaps the left-side of the scrolling panel
+	$('.slider-item', button_elmt.parentNode).each (index) ->
+		itemrect = this.getBoundingClientRect()
+		if itemrect.right > left_edge
+			if $(button_elmt).hasClass 'right'
+				new_left = itemrect.right
+			else
+				new_left = itemrect.left
+			slide_by left_button, left_edge-fudge-parseInt(new_left)
+			if RP.slider.current
+				clearTimeout RP.slider.current
+				RP.slider.current = null
+			return false
 
 RP.slider.bump = (button_elmt) ->
 	slide_by button_elmt, 5
@@ -37,7 +54,7 @@ RP.slider.trigger_check = (trigger_elmt) ->
 RP.slider.hoverin = (event) ->
 	button_elmt = event.currentTarget
 	RP.slider.current = setInterval ->
-		RP.slider.bump(button_elmt)
+		RP.slider.bump button_elmt
 	, 20
 
 RP.slider.hoverout = (event) ->
