@@ -1,5 +1,6 @@
 # If the item is being removed from the current list/collection we have to
 # provide a suitable replacement (deletion item)
+# TODO: Port this to ItemHelper
 hsh = {
     replacements: [list_menu_item_replacement(@list, @entity, params[:styling]),
                    (collectible_masonry_item_deleter(@entity, @list) if @deleted)].compact

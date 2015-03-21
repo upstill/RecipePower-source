@@ -34,7 +34,7 @@ class UsersController < CollectibleController
     # 'index' page may be calling itself with filter parameters in the name and tagtype
     @select = params[:select]
     response_service.title = (@select=="followees") ? "Friends" : "People"
-    smartrender FilteredPresenter.build(response_service, params, querytags, @decorator) # unless do_stream UsersCache
+    smartrender UsersCache
   end
 
   # Add a user or channel to the friends of the current user
@@ -81,7 +81,7 @@ class UsersController < CollectibleController
   def show
     @active_menu = params[:id].to_s == current_user_or_guest_id ? :home : :friends
     update_and_decorate
-    smartrender FilteredPresenter.build(response_service, params, querytags, @decorator)
+    smartrender # FilteredPresenter.build(response_service, params, querytags, @decorator)
   end
 
   # Show the user's recently-viewed recipes
@@ -90,7 +90,7 @@ class UsersController < CollectibleController
     update_and_decorate # @user = User.find params[:id]
     @empty_msg = "As you check out things in RecipePower, they will be remembered here."
     response_service.title = "Recently Viewed"
-    smartrender FilteredPresenter.build(response_service, params, querytags, @decorator) # unless do_stream UserRecentCache
+    smartrender UserRecentCache
   end
 
   # Show the user's entire collection
@@ -105,7 +105,7 @@ class UsersController < CollectibleController
       @empty_msg = "They haven't collected anything?!? Why not Share something with them?"
       @active_menu = :friends
     end
-    smartrender FilteredPresenter.build(response_service, params, querytags, @decorator) # unless do_stream UserCollectionCache
+    smartrender UserCollectionCache
   end
 
   # Show the user's recently-viewed recipes
@@ -113,7 +113,7 @@ class UsersController < CollectibleController
     update_and_decorate # @user = User.find params[:id]
     @active_menu = :collections
     response_service.title = "The Big List"
-    smartrender FilteredPresenter.build(response_service, params, querytags, @decorator) # unless do_stream UserBiglistCache
+    smartrender UserBiglistCache
   end
 
   def not_found

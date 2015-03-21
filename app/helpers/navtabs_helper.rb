@@ -44,7 +44,7 @@ module NavtabsHelper
       options[:data] ||= {}
       options[:data][:toggle] = "dropdown"
     end
-    link_to_submit label, path_or_options, { :mode => :partial}.merge( options )  # defaults to partial
+    link_to_submit label, path_or_options, options  # defaults to partial
   end
 
   def collections_navtab menu_only = false
@@ -146,7 +146,7 @@ module NavtabsHelper
           navlink("Profile", users_profile_path, :mode => :modal),
           navlink("Invite", new_user_invitation_path, :mode => :modal, class: "transient"),
           navlink("Sign Out", destroy_user_session_path, :method => "delete")
-      ]
+      ].compact
       if permitted_to? :admin, :pages
         if response_service.admin_view?
           item_list += [
@@ -158,7 +158,9 @@ module NavtabsHelper
             link_to("Address Bar Magic", "#", onclick: "RP.getgo('#{home_path}', 'http://local.recipepower.com:3000/bar.html##{bookmarklet_script}')"),
             link_to("Bookmark Magic", "#", onclick: "RP.bm('Cookmark', '#{bookmarklet_script}')"),
             link_to("Stream Test", "#", onclick: "RP.stream.buffer_test();"),
-          ]
+            (link_to("Page", current_user, :format => :json) if current_user),
+            (link_to("Modal", current_user, :format => :json, :mode => :modal) if current_user),
+          ].compact
         else
           item_list += [
               "<hr class='menu'>".html_safe,

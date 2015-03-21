@@ -220,19 +220,6 @@ BLOCK_END
         class: "absorb_"+tagidstr
   end
 
-  # Present a collection of labelled fields, by type
-  def list_fields fields, viewer_id=nil
-    viewer_id ||= User.super_id
-    fields.collect { |field|
-      if field.is_a? Array
-        field, label = field[0], field[1]
-      else
-        label = present_field_label field
-      end
-      [ label, present_field(field) ]
-    }
-  end
-
   def tag_filter_header locals={}
     locals[:type_selector] ||= false
     render "tags/tag_filter_header", locals # ttl: label, type_selector: type_selector

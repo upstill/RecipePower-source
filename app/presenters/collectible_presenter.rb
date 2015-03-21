@@ -58,7 +58,20 @@ class CollectiblePresenter
   end
 
   def fields_list
-    h.list_fields @tagfields
+    list_fields @tagfields
+  end
+
+  # Present a collection of labelled fields, by type
+  def list_fields fields, viewer_id=nil
+    viewer_id ||= User.super_id
+    fields.collect { |field|
+      if field.is_a? Array
+        field, label = field[0], field[1]
+      else
+        label = present_field_label field
+      end
+      [ label, present_field(field) ]
+    }
   end
 
   def label_field name, new_label
@@ -70,6 +83,39 @@ class CollectiblePresenter
       end
       v
     }
+  end
+
+  def present_field_wrapped what=nil
+    h.content_tag :span,
+                  present_field(what),
+                  class: "hide-if-empty"
+  end
+
+  def field_value what=nil
+    return form_authenticity_token if what && (what == "authToken")
+    if val = @decorator && @decorator.extract(what)
+      "#{val}".html_safe
+    end
+  end
+
+  def present_field what=nil
+    field_value(what) || %Q{%%#{(what || "").to_s}%%}.html_safe
+  end
+
+  def field_count what
+    @decorator && @decorator.respond_to?(:arity) && @decorator.arity(what)
+  end
+
+  def present_field_label what
+    label = what.sub "_tags", ''
+    case field_count(what)
+      when nil, false
+        "%%#{what}_label_plural%%"+"%%#{what}_label_singular%%"
+      when 1
+        label.singularize
+      else
+        label.pluralize
+    end
   end
 
 end

@@ -13,6 +13,7 @@ module MasonryHelper
   end
 
   # Masonry items (the DOM element) are wrapped in another div for manipulating the masonry collection
+  # TODO: Fold these last methods into ItemHelper
   def wrap_masonry_item item, decorator
     # Wrap the item in another layer so that the item can be replaced w/o disrupting Masonry
     content_tag :div, item, class: "#{masonry_wrapper_class} stream-item #{dom_id decorator}"

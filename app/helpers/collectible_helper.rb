@@ -6,7 +6,7 @@ module CollectibleHelper
     styling[:button_size] ||= "sm"  # Unless otherwise specified
     extras = block_given? ? with_output_buffer(&block) : ""
     with_format("html") do
-      render("collectible/show_collectible_buttons", extras: extras, styling: styling, decorator: decorator, item: decorator.object)
+      render("collectible/collectible_buttons", extras: extras, styling: styling, decorator: decorator, item: decorator.object)
     end
   end
 
@@ -15,6 +15,7 @@ module CollectibleHelper
   end
 
   # Deliver the masonry item (tile) for a collectible, optionally wrapped as above
+  # TODO Fold the next six methods into ItemHelper methods
   def collectible_masonry_item decorator, wrap=false
     item = with_format("html") do
       render "show_masonry_item", item: decorator.object, decorator: decorator
@@ -43,7 +44,7 @@ module CollectibleHelper
     entity = decorator.object
     dir = entity.class.to_s.underscore.pluralize
     with_format("html") do
-      render "index_table_row", item: entity, decorator: decorator
+      render "show_table_item", item: entity, decorator: decorator
     end
   end
 
@@ -151,24 +152,6 @@ module CollectibleHelper
       ExceptionNotification::Notifier.exception_notification(request.env, e, data: {message: content}).deliver
     end
     content_tag :div, link_to(content, decorator.url), options
-  end
-
-  # The field-vals array consists of label/value pairs for display
-  def collectible_field_block decorator, field_vals=[], &block
-    header_fields = field_vals.compact.collect { |fv|
-      label, field = fv.first, fv.last
-      render "shared/show_labelled", label: label, content: present_field_wrapped(field)
-    }.join.html_safe
-    buttons_list = with_output_buffer(&block) if block_given?
-    render "collectible/show_panel", header_fields: header_fields, buttons_list: buttons_list
-  end
-
-  # Apply a presenter to a collectible
-  def render_collectible_with_presenter presenter=nil, &block
-    presenter ||= @presenter # If previously defined
-    yield(presenter) if block_given? # Give the caller a chance to futz with the presenter
-    presenter.modal = response_service.dialog?
-    render response_service.select_render, presenter: presenter
   end
 
 end

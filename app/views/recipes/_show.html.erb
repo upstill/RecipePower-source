@@ -1,6 +1,6 @@
 <div class="container-fluid">
   <div class="row">
-      <% if (vid = field_value "rcpVideo") %>
+      <% if (vid = presenter.field_value "rcpVideo") %>
         <div class="col-md-6">
           <div id="vidbox">
             <div id="vbdummy">
@@ -10,20 +10,20 @@
             </div>
           </div>
         </div>
-      <% elsif !(field_value "rcpPicURL").blank? %>
+      <% elsif !(presenter.field_value "rcpPicURL").blank? %>
         <div class="col-md-6">
-          <img src="<%= present_field "rcpPicURL" %>" class="recipe-preview pull-right" width="100%">
+          <img src="<%= presenter.present_field "rcpPicURL" %>" class="recipe-preview pull-right" width="100%">
         </div>
       <% end %>
     <div class="col-md-<%= (defined?(wide) && wide) ? '6' : '12' %>">
-      <h3><%= field_value "title" %></h3>
+      <h3><%= presenter.field_value "title" %></h3>
       <div class="panel pull-left panel-default hide-if-empty" style="width:100%">
         <div class="panel-heading">
           <p class="hide-if-empty">A recipe
-            <span class="hide-if-empty"> by <%= present_field_wrapped "Author_tags" %></span>
-            <span class="hide-if-empty"> in <%= present_field_wrapped "Source_tags" %></span>
-            <span class="hide-if-empty"> from <%= present_field_wrapped "site" %></span>.</p>
-          <p class="hide-if-empty"><%= present_field_wrapped "rcpDescription" %></p>
+            <span class="hide-if-empty"> by <%= presenter.present_field_wrapped "Author_tags" %></span>
+            <span class="hide-if-empty"> in <%= presenter.present_field_wrapped "Source_tags" %></span>
+            <span class="hide-if-empty"> from <%= presenter.present_field_wrapped "site" %></span>.</p>
+          <p class="hide-if-empty"><%= presenter.present_field_wrapped "rcpDescription" %></p>
         </div>
         <div class="panel-body">
           <% presenter.fields_list.each do |nv| %>
@@ -45,7 +45,7 @@
     </div>
     <div class="row">
       <div class="col-sm-4 col-md-2"></div>
-      <div class="col-sm-8 col-md-8"><%= present_field_wrapped "comments_mine" %></div>
+      <div class="col-sm-8 col-md-8"><%= presenter.present_field_wrapped "comments_mine" %></div>
     </div>
   </div>
 </div>

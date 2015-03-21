@@ -178,7 +178,7 @@ class ApplicationController < ActionController::Base
         sse.write :stream_item, { deletions: [".stream-tail.#{@sp.stream_id}"] }
 
         while item = @sp.next_item do
-          sse.write :stream_item, with_format("html") { {elmt: view_context.render_stream_item(item)} }
+          sse.write :stream_item, with_format("html") { {elmt: view_context.render_item(item)} }
         end
         if @sp.next_path
           sse.write :stream_item, with_format("html") { {elmt: view_context.render_stream_tail} }
@@ -206,37 +206,35 @@ class ApplicationController < ActionController::Base
   end
 
   # Generalized response for dialog for a particular area
-  def smartrender presenter=nil, renderopts={}
-    if presenter.is_a? Hash
-      renderopts, presenter = presenter, nil
+  def smartrender rc_class=nil, renderopts={}
+    if rc_class.is_a? Hash
+      renderopts, rc_class = rc_class, nil
     end
     response_service.action = renderopts[:action] || params[:action]
     url = renderopts[:url] || request.original_url
     renderopts = response_service.render_params renderopts
     # Give the stream a crack at it
-    if @master_presenter = presenter
-      # do_stream handles feeding items into the stream
-      @sp = stream_presenter presenter.results_class
-      # do_stream at least initializes @sp, the stream presenter
-      @decorator = @master_presenter.decorator
-      @entity = @master_presenter.entity
-      case @master_presenter.content_mode
+    if @filtered_presenter = FilteredPresenter.build(response_service, params, querytags, @decorator)
+      @sp = stream_presenter @filtered_presenter.results_class
+      @decorator = @filtered_presenter.decorator
+      @entity = @filtered_presenter.entity
+      case @filtered_presenter.content_mode
         when :container  # Handle the overall layout
-          render "pagelets/"+@master_presenter.pagelet
+          render "pagelets/"+@filtered_presenter.pagelet
         when :entity # Summarize the focused entity
           # Do a conventional #show, i.e., render the stream's entity's show template
-          render :show, locals: { partial: "show_content" } # The #show template will expect @decorator to be defined
+          render :show  # The #show template will expect @decorator to be defined
         when :results # The frame for the items. This may be recursive on other frameworks
           # Do a conventional #index, i.e. render the stream container
           render template: "filtered_presenter/results"
           # view_context.stream_element( :results, pkg_attributes: { id: @sp.stream_id} )
         when :modal
           # Render the stream's entity in a modal dialog
-          render :show, locals: { partial: "show_modal" }
+          render :show
         when :items # Stream items into the stream's container
           do_stream @sp
       end
-    else
+    elsif !(rc_class && (do_stream rc_class)) # Give the streamer a chance to take over
       respond_to do |format|
         format.html do
           if response_service.mode == :modal
@@ -248,9 +246,13 @@ class ApplicationController < ActionController::Base
         end
         format.json {
           case response_service.mode
+            when :page
+              # Asking for JSON but wanting a whole page?
+              # Render a replacement for the pagelet partial, as if it were rendered on the page
+              render partial: "layouts/container" # Respond with JSON instructions to replace the pagelet appropriately
             when :partial
               renderopts[:layout] = false
-              if @sp
+              if @sp # do_stream initialized the stream presenter but didn't actually generate elements
                 # If operating with a stream, package the content into a stream-body element, with stream trigger
                 renderopts[:action] = response_service.action
                 begin
@@ -315,6 +317,7 @@ class ApplicationController < ActionController::Base
   def setup_response_service
     @user = current_user_or_guest
     @response_service ||= ResponseServices.new params, session, request
+    @response_service.controller_instance = self
     @response_service
   end
 

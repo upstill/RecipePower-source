@@ -1,5 +1,5 @@
 class StreamPresenter
-  attr_accessor :results, :tagtype, :results_partial, :item_partial, :tail_partial, :list_mode
+  attr_accessor :results, :tagtype, :results_partial, :tail_partial, :list_mode
   # attr_reader :querytags
 
   delegate :items, :next_item, :next_range, :"done?", :window, :param, :full_size, :"has_query?", :"ready?", :querytags, :nmatches, :to => :results
@@ -28,10 +28,8 @@ class StreamPresenter
     end
     if (@list_mode == :table)
       @results_partial ="#{params[:controller]}/index_stream_results"
-      @item_partial = "#{params[:controller]}/index_table_row"
     else
       @results_partial ="shared/stream_results_#{@list_mode}"
-      @item_partial = "show_#{@list_mode}_item"
     end
     @tail_partial = "stream/#{@list_mode}_tail"
 

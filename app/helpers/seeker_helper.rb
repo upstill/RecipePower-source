@@ -32,7 +32,7 @@ module SeekerHelper
 		  # Default is to set instance variable @<Klass> and render "<klass>s/<klass>"
 		  ename = element.class.to_s.downcase
 		  self.instance_variable_set("@"+ename, element)
-		  render partial: "#{ename.pluralize}/index_table_row", locals: { ename.to_sym => element }
+		  render partial: "#{ename.pluralize}/show_table_item", locals: { ename.to_sym => element }
 		end
   end
  

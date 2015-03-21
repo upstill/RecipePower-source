@@ -6,7 +6,7 @@ class SitesController < CollectibleController
   def index
     # seeker_result Site, "div.site_list" # , clear_tags: true
     response_service.title = "Sites"
-    smartrender unless do_stream SitesCache
+    smartrender SitesCache
   end
 
   # GET /sites/1

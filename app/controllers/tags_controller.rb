@@ -7,7 +7,7 @@ class TagsController < ApplicationController
     # seeker_result Tag, 'div.tag_list' # , clear_tags: true
     # -1 stands for any type
     params.delete :tagtype if params[:tagtype] == "-1"
-    smartrender unless do_stream TagsCache
+    smartrender TagsCache
   end
 
   # POST /tags
@@ -148,7 +148,7 @@ class TagsController < ApplicationController
               "#tagrow_#{victimidstr}", "#tagrow_#{victimidstr}HR"
           ],
           replacements: [
-             [ "#tagrow_#{@tag.id.to_s}", with_format("html") { render_to_string partial: "tags/index_table_row", locals: { item: @tag } } ]
+             [ "#tagrow_#{@tag.id.to_s}", with_format("html") { render_to_string partial: "tags/show_table_item", locals: { item: @tag } } ]
           ]
       }
     else

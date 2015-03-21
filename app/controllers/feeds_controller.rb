@@ -11,7 +11,24 @@ class FeedsController < CollectibleController
   # GET /feeds.json
   def index
     @active_menu = :feeds
-    smartrender unless do_stream FeedsCache
+    smartrender FeedsCache
+  end
+
+  def entries
+    update_and_decorate
+    smartrender FeedCache
+  end
+
+  # GET /feeds/1
+  # GET /feeds/1.json
+  def show
+    @active_menu = :feeds
+    @feed.refresh if update_and_decorate && !params[:stream] && @feed.due_for_update
+    if resource_errors_to_flash @feed
+      render :errors
+    else
+      smartrender
+    end
   end
 
   def edit
@@ -27,21 +44,6 @@ class FeedsController < CollectibleController
     else
       flash[:popup] = "#{@decorator.human_name} is saved"
       render :update
-    end
-  end
-
-  # GET /feeds/1
-  # GET /feeds/1.json
-  def show
-    @active_menu = :feeds
-    @feed.refresh if update_and_decorate && !params[:stream] && @feed.due_for_update
-    if resource_errors_to_flash @feed
-      render :errors
-    else
-      smartrender unless do_stream FeedCache do |sp|
-        sp.item_partial = "feed_entries/show_feed_entry"
-        sp.results_partial = "stream_results_items"
-      end
     end
   end
 

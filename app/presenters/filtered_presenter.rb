@@ -2,38 +2,44 @@ class FilteredPresenter
 
   attr_reader :decorator, :entity, :querytags,
               :results_class, # Class of the ResultsCache for fetching results
-              :list_class, # Class of the presented entity (i.e., users for lists)
+              # :list_class, Class of the presented entity (i.e., users for lists)
               :content_mode, # What page element to render? :container, :entity, :results, :modal, :items
-              :list_mode # How composites are presented: :table, :strip, :masonry
+              :item_mode # How composites are presented: :table, :strip, :masonry, :feed_item
 
   # Build an instance of the appropriate subclass, given the entity, controller and action
   def self.build response_service, params, querytags, decorator=nil
     classname = response_service.controller.capitalize + response_service.action.capitalize + "Presenter"
-    p = classname.constantize.new
-    p.setup response_service, params, querytags, decorator
-    p
+    begin
+      p = classname.constantize.new response_service
+      p.setup response_service, params, querytags, decorator
+      p
+    rescue
+      nil
+    end
+  end
+
+  def initialize response_service
+    @item_mode = response_service.item_mode # Provisionally accept list mode imposed by param
   end
 
   def setup response_service, params, querytags, decorator=nil
     if @decorator = decorator
       @entity = decorator.object
-      @list_class = @entity.class.to_s.pluralize.underscore
+      # @list_class = @entity.class.to_s.pluralize.underscore
     end
     @stream_param = params[:stream] || "" if params.has_key? :stream
     @tagtype = params[:tagtype]
     @thispath = response_service.requestpath
 
-    @list_mode ||= (params[:list_mode] || :strip).to_sym
+    # May have been set by subclass, may have been inherited from params
+    @item_mode ||= response_service.action == "index" ? :table : :page
+    response_service.item_mode = @item_mode
+    
     @content_mode = (params[:content_mode] || :container).to_sym
     @content_mode = :entity if response_service.action == "show"
     @content_mode = :modal if params[:mode] && params[:mode] == "modal"
     @content_mode = :items if params.has_key? :stream
     @querytags = querytags
-  end
-
-  # Render the header card for the entity
-  def entity_partial
-    "#{@entity.class.to_s.pluralize.underscore}/show_header" if @entity
   end
 
   # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
@@ -48,12 +54,12 @@ class FilteredPresenter
 
   # This is the name of the partial used to render me
   def results_partial
-    "filtered_presenter/results_#{@list_mode}"
+    "filtered_presenter/results_#{@item_mode}"
   end
 
   # Specify a path for fetching the results partial
   def results_path
-    assert_query @thispath, content_mode: "results"
+    assert_query @thispath, content_mode: "results", item_mode: @item_mode
   end
 
   # This is the name of the partial used for the header, presumably including the search box
@@ -98,9 +104,9 @@ end
 
 class UsersIndexPresenter < FilteredPresenter
 
-  def initialize
+  def initialize response_service
+    @item_mode = :table
     super
-    @list_mode = :table
     @results_class = UsersCache
   end
 
@@ -115,7 +121,7 @@ end
 
 class UsersShowPresenter < FilteredPresenter
 
-  def initialize
+  def initialize response_service
     super
     @results_class = UserCollectionCache
   end
@@ -135,9 +141,8 @@ class UserContentPresenter < FilteredPresenter
     if @entity_type
       block.call results_path, results_cssclass
     else
-      # ["recipes", "lists", "friends", "feeds" ].each do |et|
-      ["recipes"].each do |et|
-         block.call assert_query(results_path, entity_type: et), et
+      ["recipes", "lists", "friends", "feeds" ].each do |et|
+         block.call assert_query(results_path, entity_type: et, item_mode: :slider), et
       end
     end
   end
@@ -149,7 +154,7 @@ end
 
 class UsersRecentPresenter < UserContentPresenter
 
-  def initialize
+  def initialize response_service
     super
     @results_class = UserRecentCache
   end
@@ -157,7 +162,7 @@ end
 
 class UsersCollectionPresenter < UserContentPresenter
 
-  def initialize
+  def initialize response_service
     super
     @results_class = UserCollectionCache
   end
@@ -165,8 +170,34 @@ end
 
 class UsersBiglistPresenter < UserContentPresenter
 
-  def initialize
+  def initialize response_service
     super
     @results_class = UserBiglistCache
   end
 end
+
+# Present a list of feeds for a user
+class FeedsIndexPresenter < FilteredPresenter
+
+  def setup response_service, params, querytags, decorator=nil
+    super
+    @entity_type = :feed_entries
+  end
+
+  # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
+  def results_set &block
+    block.call assert_query(results_path, entity_type: :feed_entries), :feed_entries
+  end
+
+end
+
+# Present the entries associated with a feed
+class FeedsEntriesPresenter < FilteredPresenter
+
+end
+
+# Present the entries associated with a list
+class ListsContentsPresenter < FilteredPresenter
+
+end
+

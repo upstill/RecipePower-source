@@ -7,7 +7,7 @@
 
 class ResponseServices
 
-  attr_accessor :controller, :action, :title, :page_url, :active_menu, :mode, :specs, :requestpath
+  attr_accessor :controller, :action, :title, :page_url, :active_menu, :mode, :specs, :requestpath, :item_mode, :controller_instance
   attr_reader :format, :trigger
 
   def initialize params, session, request
@@ -25,12 +25,16 @@ class ResponseServices
     @invitation_token = params[:invitation_token]
     @notification_token = params[:notification_token]
 
+    # How composites are presented: :table, :strip, :masonry, :feed_entry
+    # ...thus governing how individuals are presented
+    @item_mode = params[:item_mode].to_sym if params[:item_mode]
+
     # Mode will be either
     # :modal for a dialog
     # :injector for a dialog in the context of foreign collection
-    # :page for an html request
-    @mode = (params[:mode] ||
-        (@format == :html ? :page : :modal)).to_sym
+    # :page to render the whole page (for an html request) or just a replacement for the pagelet (JSON)
+    @mode = (params[:mode] || :page).to_sym
+        # (@format == :html ? :page : :modal)).to_sym
 
     # Save the parameters we might want to pass back
     @meaningful_params = params.except(:controller, :action, :mode, :format) # , :id, :nocache)
@@ -92,6 +96,21 @@ class ResponseServices
 
   def admin_view?
     @session[:admin_view]
+  end
+
+  # Return the appropriate template for the current controller and action, suitable for render :template
+  # OR, start with a controller class and filename, looking for that file in the class hierarchy
+  # NB The reason that this exists is to go through the standard search path
+  def find_view ctrl_class=nil, file=nil
+    ctrl_class ||= controller_instance.class
+    file ||= action.to_s
+    ctrl_class.ancestors.each { |anc|
+      if path = anc.instance_variable_get(:@controller_path)
+        return "#{path}/#{file}" if File.exists?(Rails.root.join("app", "views", path, "#{file}.html.erb"))
+        break if path == "application"
+      end
+    }
+    "#{controller_instance.class.ancestors[0].controller_path}/#{action}" # This will crash, but oh well...
   end
 
   private

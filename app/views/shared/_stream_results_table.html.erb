@@ -8,7 +8,8 @@
     <tbody class="stream-items-parent">
     <% if @sp.dump? %>
         <% while (item = @sp.next_item) do %>
-            <%= render_stream_item item  %>
+            <%# render_stream_item item  %>
+            <%= render_item item  %>
         <% end %>
     <% end %>
     </tbody>

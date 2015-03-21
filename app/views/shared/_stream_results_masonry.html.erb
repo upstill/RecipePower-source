@@ -6,7 +6,8 @@
        data-masonry-options='{ "columnWidth": 200, "itemSelector": ".masonry-item", "gutter": 20 }'>
     <% if @sp.dump? %>
         <% while (item = @sp.next_item) do %>
-            <%= render_stream_item item  %>
+            <%# render_stream_item item %>
+            <%= render_item item %>
         <% end %>
     <% end %>
   </div>

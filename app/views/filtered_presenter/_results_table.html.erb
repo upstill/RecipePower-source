@@ -2,7 +2,7 @@
 <table class="table table-striped ">
   <thead>
   <tr>
-    <%= @master_presenter.table_headers.collect { |ttl| "<th>#{ttl}</th>" unless ttl.blank? }.compact.join("\n").html_safe %>
+    <%= @filtered_presenter.table_headers.collect { |ttl| "<th>#{ttl}</th>" unless ttl.blank? }.compact.join("\n").html_safe %>
   </tr>
   </thead>
   <tbody class="stream-items-parent <%= @sp.stream_id %>">

@@ -120,10 +120,11 @@ module StreamHelper
     text_field_tag "querytags", @querytags.map(&:id).join(','), options
   end
 
+=begin
   # Render an element of a collection, depending on its class
   # NB The view is derived from the class of the element, NOT from the current controller
   def render_stream_item element, partialname=nil, no_wrap = false
-    partialname ||= @sp.item_partial
+    partialname ||= @sp.list_mode
     for_masonry = partialname.match /masonry/
     # Get the item-rendering partial from the model view
     unless partialname.match /\//
@@ -141,6 +142,7 @@ module StreamHelper
     item = wrap_masonry_item item, @decorator if for_masonry && !no_wrap
     item
   end
+=end
 
   def render_stream_tail
     render partial: @sp.tail_partial

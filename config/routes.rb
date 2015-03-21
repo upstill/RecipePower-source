@@ -107,6 +107,7 @@ RP::Application.routes.draw do
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       patch 'tag' # For saving the tags
       get 'touch'
+      get 'contents'
     end
   end
   match 'lists', :controller => 'lists', :action => 'index', :via => [:get, :post]
@@ -139,6 +140,7 @@ RP::Application.routes.draw do
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       patch 'tag'
       get 'touch'
+      get 'entries'
     end
   end
   match 'feeds', :controller => 'feeds', :action => 'index', :via => [:get, :post]
