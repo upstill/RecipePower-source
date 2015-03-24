@@ -2,11 +2,7 @@
 # Generic JSON response for updating an @decorator and replacing it wherever it might go
 replacements = [
     collectible_buttons_panel_replacement(@decorator),
-    collectible_masonry_item_replacement(@decorator),
-    collectible_masonry_item_deleter(@absorbee),
-    collectible_table_row_replacement(@decorator),
-    collectible_table_row_replacement(@absorbee, true)
-]
+] + item_replacements(@decorator) + item_deleters(@absorbee)
 {
     done: true, # i.e., editing is finished, close the dialog
     replacements: replacements,

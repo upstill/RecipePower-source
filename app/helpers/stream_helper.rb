@@ -120,30 +120,6 @@ module StreamHelper
     text_field_tag "querytags", @querytags.map(&:id).join(','), options
   end
 
-=begin
-  # Render an element of a collection, depending on its class
-  # NB The view is derived from the class of the element, NOT from the current controller
-  def render_stream_item element, partialname=nil, no_wrap = false
-    partialname ||= @sp.list_mode
-    for_masonry = partialname.match /masonry/
-    # Get the item-rendering partial from the model view
-    unless partialname.match /\//
-      # Use a partial specific to the entity if the file exists
-      dir = element.class.to_s.underscore.pluralize
-      partialname = "#{dir}/#{partialname}" if File.exists?(Rails.root.join("app", "views", dir, "_#{partialname}.html.erb"))
-    end
-    # Prepare for rendering by decorating the item
-    controller.update_and_decorate element
-    @decorator = controller.instance_variable_get :"@decorator"
-    modelname = element.class.to_s.underscore
-    instance_variable_set :"@#{modelname}", element
-    item = render partial: partialname, locals: { :item => element, :decorator => @decorator }
-    # Wrap the element so that its contents can be replaced
-    item = wrap_masonry_item item, @decorator if for_masonry && !no_wrap
-    item
-  end
-=end
-
   def render_stream_tail
     render partial: @sp.tail_partial
   end

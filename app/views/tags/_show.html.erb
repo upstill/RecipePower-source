@@ -1,3 +1,4 @@
+<%# TODO: move this stuff into a presenter %>
 <div class="container">
   <%= summarize_tag_synonyms %>
   <%= summarize_meaning %>
@@ -14,4 +15,4 @@
 <% if response_service.admin_view? && permitted_to?(:edit, @tag) %>
     <%= link_to_submit 'Edit', edit_tag_path(@tag), :mode => :modal %>
 <% end %>
-<%# link_to 'All Tags', tags_path # ...with suitable permissions %>
+<%= link_to_submit 'All Tags', tags_path, mode: "partial", item_mode: "table" # ...with suitable permissions %>

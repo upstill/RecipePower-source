@@ -119,3 +119,7 @@ class CollectiblePresenter
   end
 
 end
+
+class ListPresenter < CollectiblePresenter
+
+end

@@ -1,19 +1,18 @@
-<tr id="<%= dom_id item %>">
+<% site = decorator.object %>
   <td>
     <%= safe_image_div decorator, :none, style: "width: 100px; height: auto" %>
-    <%= link_to_submit item.name, site_path(item), mode: :modal %>
+    <%= link_to_submit site.name, site_path(site), mode: :modal %>
   </td>
   <td>
-    <%= item.description %>
+    <%= site.description %>
   </td>
   <td>
-    <b>Home</b>: <%= link_to item.home, item.home, class: "tablink" %><br>
-    <b><%= show_sample item %></b><br>
-    <b># Feeds:</b> <%= item.feeds.size %> (<%= item.feeds.where(approved: true).count %> approved for feedthrough)
+    <b>Home</b>: <%= link_to site.home, site.home, class: "tablink" %><br>
+    <b><%= show_sample site %></b><br>
+    <b># Feeds:</b> <%= site.feeds.size %> (<%= site.feeds.where(approved: true).count %> approved for feedthrough)
   </td>
   <td>
     <%= site_collectible_buttons decorator, scrape_link: true %>
     <br>
-    <%= site_similars item if response_service.admin_view? %><br>
+    <%= site_similars site if response_service.admin_view? %><br>
   </td>
-</tr>

@@ -1,5 +1,7 @@
+<% present decorator.object do |presenter| %>
 <% wide = (presenter.field_value "rcpVideo") || !(presenter.field_value "rcpPicURL").blank? %>
 <% dlgopts = wide ? {dialog_class: "modal-xl" } : {} %>
 <%= modal_dialog "show_recipe", presenter.present_field("rcpTitleLink"), dlgopts.merge(title: presenter.present_field("rcpTitle"), class: "historic") do %>
     <%= render "show", wide: wide, presenter: presenter %>
+<% end %>
 <% end %>

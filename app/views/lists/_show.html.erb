@@ -1,18 +1,19 @@
-    <h3><%= @list.title %></h3>
+<% list = decorator.object %>
+    <h3><%= list.name %></h3>
 
     <p>
-      <%= @list.description %>
+      <%= list.description %>
     </p>
 
     <p>
-      <%= @list.notes %>
+      <%= list.notes %>
     </p>
 
-    <% unless (enum = tag_list ListServices.new(@list).pulled_tags).blank? %>
+    <% unless (enum = tag_list ListServices.new(list).pulled_tags).blank? %>
         <p>
           This list includes everything tagged with <%= enum %>.
         </p>
     <% end %>
 
-    <%= collectible_buttons_panel @decorator, :edit_button => (@list.owner == current_user) %>
+    <%= collectible_buttons_panel decorator, :edit_button => (list.owner == current_user) %>
 

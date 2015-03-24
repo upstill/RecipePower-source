@@ -3,7 +3,7 @@
 # TODO: Port this to ItemHelper
 hsh = {
     replacements: [list_menu_item_replacement(@list, @entity, params[:styling]),
-                   (collectible_masonry_item_deleter(@entity, @list) if @deleted)].compact
+                   (item_deleters(@entity, @list) if @deleted)].compact
 }.merge(flash_notify(@list))
 json1 = hsh.to_json
 str = json1.gsub(/\\u([0-9a-z]{4})/) {|s| [$1.to_i(16)].pack("U")}

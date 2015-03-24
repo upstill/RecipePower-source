@@ -177,11 +177,11 @@ class UsersBiglistPresenter < UserContentPresenter
 end
 
 # Present a list of feeds for a user
-class FeedsIndexPresenter < FilteredPresenter
+class FeedsShowPresenter < FilteredPresenter
 
   def setup response_service, params, querytags, decorator=nil
     super
-    @entity_type = :feed_entries
+    @entity_type = :page
   end
 
   # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
@@ -192,12 +192,41 @@ class FeedsIndexPresenter < FilteredPresenter
 end
 
 # Present the entries associated with a feed
-class FeedsEntriesPresenter < FilteredPresenter
+class FeedsIndexPresenter < FilteredPresenter
+
+  def setup response_service, params, querytags, decorator=nil
+    @item_mode = :table
+    super
+  end
+
+  # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
+  def results_set &block
+    block.call assert_query(results_path), :table
+  end
 
 end
 
 # Present the entries associated with a list
-class ListsContentsPresenter < FilteredPresenter
+class ListsShowPresenter < FilteredPresenter
+
+  def initialize response_service
+    @item_mode = :masonry
+    super
+    @results_class = ListCache
+  end
 
 end
 
+# Present the entries associated with a list
+class ListsIndexPresenter < FilteredPresenter
+
+  def initialize response_service
+    @item_mode = :table
+    super
+    @results_class = ListsCache
+  end
+
+  def table_headers
+    %w{ Owner	Name	Description	Included Tags	Size }
+  end
+end

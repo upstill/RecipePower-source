@@ -1,5 +1,5 @@
 <%= render @filtered_presenter.header_partial, title: title, comment: ((defined? comment) ? comment : "") %>
-<%= render_item :panel %>
+<%= render_item :page %>
 <% @filtered_presenter.results_set do |path, klass| %>
     <%= trigger_pending_results path, class: klass %>
 <% end %>

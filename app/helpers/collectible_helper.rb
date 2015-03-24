@@ -14,44 +14,6 @@ module CollectibleHelper
     ["div.collectible-buttons##{dom_id decorator}", collectible_buttons_panel(decorator)]
   end
 
-  # Deliver the masonry item (tile) for a collectible, optionally wrapped as above
-  # TODO Fold the next six methods into ItemHelper methods
-  def collectible_masonry_item decorator, wrap=false
-    item = with_format("html") do
-      render "show_masonry_item", item: decorator.object, decorator: decorator
-    end
-    wrap ? wrap_masonry_item( item, decorator) : item
-  end
-
-  # Delete the item wherever it might seen (in a masonry list)
-  def collectible_masonry_item_deleter decorator, entity_or_string=nil
-    [ masonry_wrapper_selector(decorator, entity_or_string) ]
-  end
-
-  # Replace the item wherever it might seen (in a masonry list)
-  def collectible_masonry_item_replacement decorator, entity_or_string=nil
-    # [".masonry-item-contents."+dom_id(decorator), collectible_masonry_item(decorator)]
-    [ masonry_item_selector(decorator, entity_or_string), collectible_masonry_item(decorator)]
-  end
-
-  def collectible_masonry_item_insertion decorator, entity_or_string=nil
-    [ masonry_wrapper_selector(decorator, entity_or_string),
-      collectible_masonry_item(decorator, true),
-      masonry_container_selector(entity_or_string) ]
-  end
-
-  def collectible_table_row decorator
-    entity = decorator.object
-    dir = entity.class.to_s.underscore.pluralize
-    with_format("html") do
-      render "show_table_item", item: entity, decorator: decorator
-    end
-  end
-
-  def collectible_table_row_replacement decorator, destroyed=false
-    ["tr##{decorator.dom_id}", (collectible_table_row(decorator) unless destroyed)]
-  end
-
   def button_styling styling, options={}
     styling.slice( :button_size ).merge options
   end

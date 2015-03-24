@@ -101,7 +101,7 @@ module NavtabsHelper
         navlink l.name, list_path(l), id: dom_id(l)
       } + [
           "<hr class='menu'>".html_safe,
-          navlink("Browse for Lists...", lists_path),
+          navlink("Browse for Lists...", lists_path(item_mode: 'table')),
       ]
     end
   end
@@ -121,7 +121,7 @@ module NavtabsHelper
       }
       result + [
           "<hr class='menu'>".html_safe,
-          navlink("Browse for More Feeds...", feeds_path(access: (response_service.admin_view? ? "all" : "approved")))
+          navlink("Browse for More Feeds...", feeds_path(item_mode: 'table', access: (response_service.admin_view? ? "all" : "approved")))
       ]
     end
   end
@@ -158,8 +158,8 @@ module NavtabsHelper
             link_to("Address Bar Magic", "#", onclick: "RP.getgo('#{home_path}', 'http://local.recipepower.com:3000/bar.html##{bookmarklet_script}')"),
             link_to("Bookmark Magic", "#", onclick: "RP.bm('Cookmark', '#{bookmarklet_script}')"),
             link_to("Stream Test", "#", onclick: "RP.stream.buffer_test();"),
-            (link_to("Page", current_user, :format => :json) if current_user),
-            (link_to("Modal", current_user, :format => :json, :mode => :modal) if current_user),
+            (link_to_submit("Page", current_user, :format => :json) if current_user),
+            (link_to_submit("Modal", current_user, :format => :json, :mode => :modal) if current_user),
           ].compact
         else
           item_list += [

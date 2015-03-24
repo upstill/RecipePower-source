@@ -1,71 +1,124 @@
 module ItemHelper
 
-  def item_partial_selector item=nil, item_mode=nil
-    item, item_mode = item_preflight item, item_mode
-    tagname = item_mode==:table ? "td" : "div"
-    "#{tagname}.#{item_mode}-item.#{dom_id @decorator.object}"
+  # Prep for rendering an item in a particular mode: sort out the parameters and initialize @decorator
+  def item_preflight item_or_decorator=nil, item_mode=nil
+    if item_or_decorator.is_a? Symbol
+      item_or_decorator, item_mode = nil, item_or_decorator
+    end
+    if item = (item_or_decorator.is_a?(Draper::Decorator) ? item_or_decorator.object : item_or_decorator) || (@decorator.object if @decorator)
+      unless @decorator && @decorator.object == item
+        controller.update_and_decorate item
+        @decorator = controller.instance_variable_get :"@decorator"
+        instance_variable_set :"@#{item.class.to_s.underscore}", item
+      end
+    end
+    item_mode ||= response_service.item_mode # (response_service.dialog? ? :modal : response_service.item_mode)
+    [ item, item_mode ]
   end
 
-  # Prep for rendering an item in a particular mode: sort out the parameters and initialize @decorator
-  def item_preflight item=nil, item_mode=nil
-    if item.is_a? Symbol
-      item, item_mode = nil, item
-    end
-    item ||= @decorator.object if @decorator
-    item_mode ||= response_service.item_mode
-    unless @decorator && @decorator.object == item
-      controller.update_and_decorate item
-      @decorator = controller.instance_variable_get :"@decorator"
-      instance_variable_set :"@#{item.class.to_s.underscore}", item
-    end
-    [ item, item_mode ]
+  def item_partial_class item_mode
+    "#{item_mode}-item" + (@decorator ? " #{@decorator.dom_id}" : "")
+  end
+
+  def item_partial_selector item_or_decorator=nil, item_mode=nil, context=nil
+    item, item_mode = item_preflight item_or_decorator, item_mode
+    (item_mode==:table ? "td." : "div.") + item_partial_class(item_mode).gsub(' ','.')
+  end
+
+  # container_selector and wrapper_selector are adopted from masonry_helper.rb and are currently only for masonry lists
+  # TODO: generalize these for all items
+  def item_container_selector entity_or_string=nil, context=nil
+    entity_or_string ||= current_user_or_guest
+    masonry_id = entity_or_string.is_a?(String) ? entity_or_string : "#{dom_id entity_or_string}_contents"
+    masonry_id = "div#"+masonry_id unless masonry_id.blank?  # Prepend the id selector
+    "#{masonry_id} div.js-masonry"
+  end
+
+  # Provide a selector that finds the wrapper for a specific masonry item (given by entity_or_string)
+  def item_wrapper_selector decorator, context=nil
+    "#{item_container_selector entity_or_string, context} div.masonry-item.#{decorator.dom_id}"
   end
 
   # The item partial depends on the item rendering mode (:table, :page, :modal, :masonry, :slider),
   # defaulting to just "_show"
-  def item_partial_name item=nil, item_mode=nil
-    item, item_mode = item_preflight item, item_mode
-    tail = item_mode ? "_show_#{item_mode}" : "_show"
-    ctrl_class = (item.class.to_s.pluralize+"Controller").constantize
-    response_service.find_view(ctrl_class, tail).sub('/_', '/')
+  def item_partial_name item_or_decorator=nil, item_mode=nil
+    item, item_mode = item_preflight item_or_decorator, item_mode
+    tail = item_or_decorator ? "show" : "index"
+    tail << "_#{item_mode}" if item_mode
+    if item
+      item_class = item.class.to_s.pluralize
+      ctrl_class = (item_class+"Controller").constantize rescue nil
+      view = ctrl_class ? response_service.find_view(ctrl_class, '_'+tail) : "#{item_class.underscore}/_#{tail}"
+      view.sub('/_', '/')
+    else
+      tail
+    end
   end
 
   # Define a :replacements item to replace a particular item under an item mode (defaulting to the item_mode parameter)
-  def item_replacement item=nil, item_mode=nil
-    item, item_mode = item_preflight item, item_mode
+  def item_replacement item_or_decorator=nil, item_mode=nil
+    item, item_mode = item_preflight item_or_decorator, item_mode
     [ item_partial_selector(item, item_mode), render_item(item, item_mode) ]
   end
 
+  # Generate replacements for all versions of the item
+  def item_replacements item_or_decorator
+    [:table, :page, :modal, :masonry, :slider].collect { |item_mode|
+      item_replacement item_or_decorator, item_mode
+    }.compact
+  end
+
   # Define a :replacements item to delete the item node for @decorator
-  def item_deleter item=nil, item_mode=nil
-    item, item_mode = item_preflight item, item_mode
-    [ item_partial_selector(item, item_mode) ]
+  def item_deleter item_or_decorator=nil, item_mode=nil, context=nil
+    item, item_mode = item_preflight item_or_decorator, item_mode
+    [ item_partial_selector(item, item_mode, context) ]
   end
 
-  def render_item_unwrapped item=nil, item_mode=nil
-    item, item_mode = item_preflight item, item_mode
-    with_format("html") { render item_partial_name(item, item_mode), presenter: @presenter }
+  # Generate deleters for all versions of an item
+  def item_deleters item_or_decorator, context=nil
+    [:table, :page, :modal, :masonry, :slider].collect { |item_mode|
+      item_deleter item_or_decorator, item_mode, context
+    }.compact
   end
 
-  def render_item item=nil, item_mode=nil
-    item, item_mode = item_preflight item, item_mode
-    rendering = render_item_unwrapped item, item_mode
+  def item_insertion decorator, context=nil
+    [ item_wrapper_selector(decorator, context),
+      render_item(decorator, :masonry),
+      item_container_selector(decorator, context) ]
+  end
+
+  # TODO: should apply to other aggregates, not just :masonry (i.e., :table and :slider)
+  def item_insertions decorator, context=nil
+    [ item_insertion(decorator, context) ]
+  end
+
+  def render_item_unwrapped item_or_decorator=nil, item_mode=nil
+    item, item_mode = item_preflight item_or_decorator, item_mode
+    with_format("html") { render item_partial_name(item, item_mode), decorator: @decorator }
+  end
+
+  def render_item item_or_decorator=nil, item_mode=nil
+    rendering = render_item_unwrapped item_or_decorator, item_mode
+    item, item_mode = item_preflight item_or_decorator, item_mode
+    container_class = item_partial_class item_mode
     # Encapsulate the rendering in the standard shell for the item mode
     case item_mode
+      when :masonry
+        rendering
       when :page
         content_tag(:div,
                     content_tag(:div, rendering, class: "col-md-12"),
-                    class: "page-item row #{@decorator.dom_id.to_s}").html_safe
+                    class: "row "+container_class).html_safe
       when :modal
-        modal_dialog :"#{response_service.action}_#{response_service.controller.singularize}", response_service.title do
-          rendering
-        end
+        modal_dialog :"#{response_service.action}_#{response_service.controller.singularize}",
+                     response_service.title,
+                     :body_contents => rendering.html_safe
       when :slider
-        content_tag :div, rendering, class: "slider-item #{dom_id @decorator.dom_id}"
+        content_tag :div, rendering, class: container_class
       when :table
         content_tag(:tr,
                     rendering,
-                    class: "table-item #{@decorator.dom_id.to_s}").html_safe
+                    class: container_class).html_safe
     end
   end
 

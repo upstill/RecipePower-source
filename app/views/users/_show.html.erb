@@ -1,10 +1,11 @@
 <!-- TODO: Confirm avatar, include link to get new one (download?) -->
-<% present @user do |presenter| %>
+<% user = decorator.object %>
+<% present user do |presenter| %>
     <ul class="media-list">
       <li class="media">
         <a class="pull-left" href="#">
           <%= presenter.avatar %>
-          <!-- <img class="media-object" src="<%# @user.image %>" alt="default-avatar-128.png"> -->
+          <!-- <img class="media-object" src="<%# user.image %>" alt="default-avatar-128.png"> -->
         </a>
 
         <div class="media-body">
@@ -22,4 +23,3 @@
       </li>
     </ul>
 <% end %>
-<%# render "suggestions/results" %>

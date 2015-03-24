@@ -60,21 +60,4 @@ module SeekerHelper
     { elmt: elmt, selector: selector }
   end
 
-  # Package up a collection element for passing into a stream
-  def seeker_stream_item element
-    elmt = render_seeker_item element
-    return { elmt: elmt }
-    selector = 
-    case element
-    when Recipe
-      '#masonry-container'
-    when FeedEntry
-      'ul.feed_entries'
-    when Tag
-      'tbody.collection_list'
-    else
-      '.collection_list'
-    end
-    element_item selector, elmt
-  end
 end
