@@ -1,5 +1,5 @@
 <% unless query.blank? %>
-    <div class="form-group">
+    <div class="form-group triggered-form">
       <form class="form-search query_form submit" action="<%= assert_query query, "json" %>" data-remote="true">
         <input type="hidden" name="mode" value="partial"/>
         <div class="search-query form-group collection_query_tokens tags">

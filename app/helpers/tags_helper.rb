@@ -2,9 +2,10 @@ module TagsHelper
 
   # Emit a link to a tag using the tag's name and, optionally, its type and id
   def tag_link tag, with_id=false
-    link_to_submit( tag.name, tag, :mode => :modal )+(with_id ? "(#{tag.typename} #{tag.id.to_s})" : "")
+    link_to_submit( tag.name, tag_taggees_path(tag), :mode => :partial )+(with_id ? "(#{tag.typename} #{tag.id.to_s})" : "")
   end
-  
+
+  # TODO: These should be part of the tag presenter
   def summarize_tag withtype = false, do_link = true, with_id=false
     @tagserv ||= TagServices.new(@tag)
     ((withtype ? "<i>#{@tagserv.typename}</i> " : "" )+
@@ -29,7 +30,8 @@ module TagsHelper
   # They match in the normalized_name field
   def summarize_tag_similars args={} 
     @tagserv ||= TagServices.new(@tag)
-    others = Tag.where(normalized_name: @tagserv.normalized_name).delete_if { |other| other.id == @tagserv.id } #  @tagserv.lexical_similars
+    # TODO: The elimination should be done in the query
+    others = Tag.where(normalized_name: @tagserv.normalized_name).to_a.delete_if { |other| other.id == @tagserv.id } #  @tagserv.lexical_similars
     label= args[:label] || "Similar tags: "
     joiner = args[:joiner] || " " #  ", "
     ("<span>#{label}"+
@@ -51,7 +53,7 @@ module TagsHelper
   def summarize_tag_referents
     @tagserv ||= TagServices.new(@tag)
     tag_info_section(
-      @tagserv.referents.keep_if { |ref| ref != @tagserv.primary_meaning }.each { |ref|
+      @tagserv.referents.to_a.keep_if { |ref| ref != @tagserv.primary_meaning }.each { |ref|
       	summarize_referent ref, "Other Meaning(s)"
       }, label: "Referents: ")
   end

@@ -670,7 +670,11 @@ class TagsCache < ResultsCache
 end
 
 class TagCache < ResultsCache
-
+  def itemscope
+    if tag = Tag.find(@id)
+      tag.taggings
+    end
+  end
 end
 
 class SitesCache < ResultsCache

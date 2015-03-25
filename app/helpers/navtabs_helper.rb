@@ -160,6 +160,8 @@ module NavtabsHelper
             link_to("Stream Test", "#", onclick: "RP.stream.buffer_test();"),
             (link_to_submit("Page", current_user, :format => :json) if current_user),
             (link_to_submit("Modal", current_user, :format => :json, :mode => :modal) if current_user),
+            link_to_submit("Sites", sites_path, :format => :json),
+            link_to_submit("Tags", tags_path, :format => :json)
           ].compact
         else
           item_list += [

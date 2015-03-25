@@ -5,7 +5,7 @@
     <%= @filtered_presenter.table_headers.collect { |ttl| "<th>#{ttl}</th>" unless ttl.blank? }.compact.join("\n").html_safe %>
   </tr>
   </thead>
-  <tbody class="stream-items-parent <%= @sp.stream_id %>">
-    <%= render_stream_tail %>
+  <tbody class="stream-items-parent <%= @filtered_presenter.stream_id %>">
+    <%= render @filtered_presenter.tail_partial %>
   </tbody>
 </table>

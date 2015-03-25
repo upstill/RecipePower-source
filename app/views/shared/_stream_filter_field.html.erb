@@ -1,5 +1,4 @@
-  <%= stream_filter_field @sp,
-                          rows: 1,
+  <%= @filtered_presenter.filter_field rows: 1,
                           autofocus: true,
                           data: {:"on-add" => "RP.submit.ontokenchange",
                                  :"on-delete" => "RP.submit.ontokenchange",

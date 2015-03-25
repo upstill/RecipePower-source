@@ -25,12 +25,8 @@ module StreamHelper
     end
     # Define a default partial as needed
     unless partial || block_given?
-      if etype == :results
-        partial = @sp.results_partial
-      else
-        fname = etype.to_s.sub /-/, '_'
-        partial = "shared/stream_#{fname}"
-      end
+      fname = etype.to_s.sub /-/, '_'
+      partial = "shared/stream_#{fname}"
     end
     if partial
       renderparms = { partial: partial, locals: locals }
@@ -76,57 +72,10 @@ module StreamHelper
     replacement
   end
 
-  def stream_count force=false
-    if @sp.has_query? && (@sp.ready? || force)
-      case nmatches = @sp.nmatches
-        when 0
-          "No matches found"
-        when 1
-          "1 match found"
-        else
-          "#{nmatches} found"
-      end
-    else
-      case nmatches = @sp.full_size
-        when 0
-          "Regrettably empty"
-        when 1
-          "Only one here"
-        else
-          "#{nmatches} altogether"
-      end
-    end
-  end
-
   # A useful starting point for a pagelet, with just a searchable header and search results
   def simple_pagelet locals={}
     locals[:title] ||= response_service.title
     stream_element :body, "shared/simple_pagelet", locals
-  end
-
-  # Provide a tokeninput field for specifying tags, with or without the ability to free-tag
-  # The options are those of the tokeninput plugin, with defaults
-  def stream_filter_field presenter, options={}
-    data = options[:data] || {}
-    data[:hint] ||= "Narrow down the list"
-    data[:pre] ||= presenter.querytags.collect { |tag| { id: tag.id, name: tag.name } }.to_json
-    data[:"min-chars"] ||= 2
-    data[:query] = "tagtype=#{presenter.tagtype}" if presenter.tagtype
-
-    options[:class] = "token-input-field-pending #{options[:class]}" # The token-input-field-pending class triggers tokenInput
-    options[:onload] = "RP.tagger.onload(event);"
-    options[:data] = data
-
-    text_field_tag "querytags", @querytags.map(&:id).join(','), options
-  end
-
-  def render_stream_tail
-    render partial: @sp.tail_partial
-  end
-
-  # Kind of redundant, since it just calls the like-named partial, but at least it obviates probs. with render_to_string
-  def stream_results_placeholder
-    with_format("html") { render partial: "shared/stream_results_placeholder" }
   end
 
 end

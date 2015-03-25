@@ -1,6 +1,6 @@
-<div class="<%= stream_element_class :results %>" id="<%= @sp.stream_id %>">
+<div class="<%= stream_element_class :results %>" id="<%= @filtered_presenter.stream_id %>">
   <div class="stream-tail">
-    <% if next_path = @sp.next_path %>
+    <% if next_path = @filtered_presenter.next_path %>
         <%= image_tag "ajax-loader.gif", class: "beachball hide" %>
         <%= stream_loadlink next_path, response_service.container_selector %>
     <% else %>

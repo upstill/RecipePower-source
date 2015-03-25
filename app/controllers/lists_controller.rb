@@ -18,7 +18,7 @@ class ListsController < CollectibleController
       else
         "Available Lists"
     end
-    smartrender ListsCache
+    smartrender 
   end
 
   def edit
@@ -48,7 +48,7 @@ class ListsController < CollectibleController
     response_service.title = "About #{@list.name}"
     @empty_msg = "This list is empty now, but you can add any item that has an 'Add to...' button"
     @active_menu = (@list.owner == current_user) ? :my_lists : :other_lists
-    smartrender ListCache
+    smartrender 
   end
 
   def show

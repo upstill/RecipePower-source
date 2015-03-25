@@ -11,12 +11,13 @@ class FeedsController < CollectibleController
   # GET /feeds.json
   def index
     @active_menu = :feeds
-    smartrender FeedsCache
+    response_service.title = (params[:access] == "collected") ? "My Feeds" : "Available Feeds"
+    smartrender 
   end
 
   def entries
     update_and_decorate
-    smartrender FeedCache
+    smartrender 
   end
 
   # GET /feeds/1

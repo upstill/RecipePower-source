@@ -10,7 +10,7 @@ class ReferentsController < ApplicationController
   # GET /referents
   # GET /referents.json
   def index
-    smartrender ReferentsCache
+    smartrender 
   end
 
   # GET /referents/1

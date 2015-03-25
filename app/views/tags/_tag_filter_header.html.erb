@@ -1,8 +1,8 @@
-<%= triggered_form(@sp.query) do %>
+<%= triggered_form(@filtered_presenter.query) do %>
   <h2><span class="tag-filter-title"><%= (defined? title) ? title : response_service.title %></span> <small><%= stream_element :count %></small>
     <% if type_selector %>
         <div style="display:inline-block; vertical-align:bottom; margin:5px 10px">
-          <%= select_tag :tagtype, options_from_collection_for_select(Tag.type_selections(true, true), :last, :first, @sp.param(:tagtype)) || 0,
+          <%= select_tag :tagtype, options_from_collection_for_select(Tag.type_selections(true, true), :last, :first, @filtered_presenter.param(:tagtype)) || 0,
                          :include_blank => false,
                          :onchange => %Q{RP.submit.onselect( event ); } %>
         </div>

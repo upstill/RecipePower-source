@@ -104,7 +104,7 @@ module ItemHelper
     # Encapsulate the rendering in the standard shell for the item mode
     case item_mode
       when :masonry
-        rendering
+        content_tag :div, rendering, class: container_class+" stream-item"
       when :page
         content_tag(:div,
                     content_tag(:div, rendering, class: "col-md-12"),

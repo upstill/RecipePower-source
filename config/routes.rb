@@ -146,9 +146,11 @@ RP::Application.routes.draw do
   match 'feeds', :controller => 'feeds', :action => 'index', :via => [:get, :post]
 
   post '/tag' => 'tags#create', :as => 'create_tag'
+  get 'tags/:id/taggees' => 'tags#taggees', :as => "tag_taggees"
   resources :tags, except: [:index, :create] do
     member do
       post 'absorb'
+      get 'taggees'
     end
     collection do
       get 'editor'

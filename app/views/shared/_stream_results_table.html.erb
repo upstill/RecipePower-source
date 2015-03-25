@@ -6,9 +6,8 @@
     </tr>
     </thead>
     <tbody class="stream-items-parent">
-    <% if @sp.dump? %>
-        <% while (item = @sp.next_item) do %>
-            <%# render_stream_item item  %>
+    <% if @filtered_presenter.dump? %>
+        <% while (item = @filtered_presenter.next_item) do %>
             <%= render_item item  %>
         <% end %>
     <% end %>

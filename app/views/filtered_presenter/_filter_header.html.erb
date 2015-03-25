@@ -1,20 +1,21 @@
 <%= triggered_form(@filtered_presenter.filter_query) do %>
-    <h2><span class="tag-filter-title"><%= (defined? title) ? title : response_service.title %></span> <small><%# stream_element :count %></small>
-      <% if @filtered_presenter.filter_type_selector %>
-          <div style="display:inline-block; vertical-align:bottom; margin:5px 10px">
-            <%= select_tag :tagtype, options_from_collection_for_select(Tag.type_selections(true, true), :last, :first, @filtered_presenter.tagtype),
-                           :include_blank => false,
-                           :onchange => %Q{RP.submit.onselect( event ); } %>
-          </div>
-      <% end %>
-      <%= stream_filter_field @filtered_presenter,
+    <h2 class="filter-element"><%= @filtered_presenter.title %></h2>
+    <% if @filtered_presenter.filter_type_selector %>
+        <div class="filter-element" style="margin-bottom: 10px;">
+          <%= select_tag :tagtype, options_from_collection_for_select(Tag.type_selections(true, true), :last, :first, @filtered_presenter.tagtype),
+                         :include_blank => false,
+                         :onchange => %Q{RP.submit.onselect( event ); } %>
+        </div>
+    <% end %>
+    <div class="filter-element">
+      <%= @filtered_presenter.filter_field( 
                               rows: 1,
                               autofocus: true,
                               data: {:"on-add" => "RP.submit.ontokenchange",
                                      :"on-delete" => "RP.submit.ontokenchange",
                                      :hint => "", # "Search the collection by typing terms here",
                                      placeholder: "Seek and ye shall find...",
-                                     :"no-results-text" => "No matching tag found; hit Enter to search with text"} %>
-    </h2>
+                                     :"no-results-text" => "No matching tag found; hit Enter to search with text"} ) %>
+    </div>
     <p><%= defined?(comment) ? comment : "" %></p>
 <% end %>

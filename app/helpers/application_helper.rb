@@ -33,9 +33,8 @@ module ApplicationHelper
     "#{preface} #{numstr} #{name} #{postscript}".strip.gsub(/\s+/, ' ').html_safe
   end
 
-  def present(object, klass = nil)
-    klass ||= "#{object.class}Presenter".constantize
-    presenter = klass.new(object, self)
+  def present object
+    presenter = "#{object.class}Presenter".constantize.new(object, self)
     yield presenter if block_given?
     presenter
   end

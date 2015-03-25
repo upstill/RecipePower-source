@@ -110,10 +110,9 @@ class ApplicationController < ActionController::Base
     session[:start_time] = session[:last_time] = last_serve.created_at
   end
 
-  # Get a presenter for the object fron within a controller
-  def present(object, rc_class = nil)
-    rc_class ||= "#{object.class}Presenter".constantize
-    rc_class.new(object, view_context)
+  # Get a presenter for the object fronm within a controller
+  def present object
+    "#{object.class}Presenter".constantize.new object, view_context
   end
 
   def check_flash
@@ -140,22 +139,10 @@ class ApplicationController < ActionController::Base
     logger.info "UUID: #{rp_uuid}"
   end
 
-  def stream_presenter rc_class_or_presenter
-    # The specifier can either be the relevant presenter class, or a previously-defined presenter
-    if rc_class_or_presenter.class == Class
-      StreamPresenter.new rp_uuid, request.fullpath, rc_class_or_presenter, current_user_or_guest_id, response_service.admin_view?, querytags, params
-    else
-      rc_class_or_presenter
-    end
-  end
-
   # Take a stream presenter and drop items into a stream, if possible and called for.
   # Otherwise, defer to normal rendering
-  def do_stream rc_class_or_presenter
-    @sp = stream_presenter rc_class_or_presenter
-    if block_given?
-      yield @sp
-    end
+  def do_stream stream_presenter
+    @sp = stream_presenter
     if @sp.stream? # We're here to spew items into the stream
       # When the stream request is for the first items, replace the results
 =begin
@@ -180,14 +167,13 @@ class ApplicationController < ActionController::Base
         while item = @sp.next_item do
           sse.write :stream_item, with_format("html") { {elmt: view_context.render_item(item)} }
         end
-        if @sp.next_path
+        if @sp.next_path && false
           sse.write :stream_item, with_format("html") { {elmt: view_context.render_stream_tail} }
         end
       rescue IOError
         logger.info "Stream closed"
       ensure
-        # In closing, replace the trigger to make it active again--or not
-        sse.close # replacements: [ with_format("html") { view_context.stream_element_replacement(:tail) } ]
+        sse.close
       end
       @sp.suspend
       true
@@ -206,35 +192,14 @@ class ApplicationController < ActionController::Base
   end
 
   # Generalized response for dialog for a particular area
-  def smartrender rc_class=nil, renderopts={}
-    if rc_class.is_a? Hash
-      renderopts, rc_class = rc_class, nil
-    end
+  def smartrender renderopts={}
     response_service.action = renderopts[:action] || params[:action]
     url = renderopts[:url] || request.original_url
     renderopts = response_service.render_params renderopts
     # Give the stream a crack at it
-    if @filtered_presenter = FilteredPresenter.build(response_service, params, querytags, @decorator)
-      @sp = stream_presenter @filtered_presenter.results_class
-      @decorator = @filtered_presenter.decorator
-      @entity = @filtered_presenter.entity
-      case @filtered_presenter.content_mode
-        when :container  # Handle the overall layout
-          render "pagelets/"+@filtered_presenter.pagelet
-        when :entity # Summarize the focused entity
-          # Do a conventional #show, i.e., render the stream's entity's show template
-          render :show  # The #show template will expect @decorator to be defined
-        when :results # The frame for the items. This may be recursive on other frameworks
-          # Do a conventional #index, i.e. render the stream container
-          render template: "filtered_presenter/results"
-          # view_context.stream_element( :results, pkg_attributes: { id: @sp.stream_id} )
-        when :modal
-          # Render the stream's entity in a modal dialog
-          render :show
-        when :items # Stream items into the stream's container
-          do_stream @sp
-      end
-    elsif !(rc_class && (do_stream rc_class)) # Give the streamer a chance to take over
+    if fp = FilteredPresenter.build(view_context, rp_uuid, request.fullpath, current_user_or_guest_id, response_service, params, querytags, @decorator)
+      render_fp fp
+    else
       respond_to do |format|
         format.html do
           if response_service.mode == :modal
@@ -251,19 +216,7 @@ class ApplicationController < ActionController::Base
               # Render a replacement for the pagelet partial, as if it were rendered on the page
               render partial: "layouts/container" # Respond with JSON instructions to replace the pagelet appropriately
             when :partial
-              renderopts[:layout] = false
-              if @sp # do_stream initialized the stream presenter but didn't actually generate elements
-                # If operating with a stream, package the content into a stream-body element, with stream trigger
-                renderopts[:action] = response_service.action
-                begin
-                  replname = @sp.has_query? ? "shared/stream_results_replacement" : "shared/pagelet_body_replacement"
-                  render template: replname, layout: false
-                rescue Exception => e
-                  x=2
-                end
-              else
-                render renderopts
-              end
+              render renderopts.merge(:layout => false)
             when :modal, :injector
               dialog = render_to_string renderopts.merge(action: response_service.action, layout: (@layout || false), formats: ["html"])
               render json: {code: dialog, how: "bootstrap"}.to_json, layout: false, :content_type => 'application/json'
@@ -274,6 +227,52 @@ class ApplicationController < ActionController::Base
           render renderopts.merge(action: "capture")
         }
       end
+    end
+  end
+
+  def render_fp fp
+    @filtered_presenter = fp
+    @decorator = fp.decorator
+    @entity = fp.entity
+    case fp.content_mode
+      when :container  # Handle the overall layout
+        render "pagelets/"+fp.pagelet
+      when :entity # Summarize the focused entity
+        # Do a conventional #show, i.e., render the stream's entity's show template
+        render :show  # The #show template will expect @decorator to be defined
+      when :results # The frame for the items. This may be recursive on other frameworks
+        # Do a conventional #index, i.e. render the stream container
+        render template: "filtered_presenter/results"
+      when :modal
+        # Render the stream's entity in a modal dialog
+        render :show
+      when :items # Stream items into the stream's container
+=begin
+        do_stream fp.stream_presenter
+=end
+        response.headers["Content-Type"] = "text/event-stream"
+        # retrieve_seeker
+        begin
+          sp = fp.stream_presenter
+          sse = Reloader::SSE.new response.stream
+          sse.write :stream_item, deletions: [".stream-tail.#{sp.stream_id}"]
+
+          while item = sp.next_item do
+            rendering = with_format("html") { view_context.render_item(item) }
+            sse.write :stream_item, elmt: rendering
+          end
+          if sp.next_path
+            tail_item = with_format("html") { render_to_string partial: sp.tail_partial }
+            sse.write :stream_item, elmt: tail_item
+          end
+        rescue IOError
+          logger.info "Stream closed"
+        ensure
+          # In closing, replace the trigger to make it active again--or not
+          sse.close
+        end
+        sp.suspend
+        true
     end
   end
 

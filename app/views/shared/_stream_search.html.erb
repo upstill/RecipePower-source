@@ -1,7 +1,6 @@
-<!--Component for filtering the current stream. Requires query to be provided in @sp.query-->
-<%= triggered_form(@sp.query) do %>
-    <%= stream_filter_field @sp,
-                            rows: 1,
+<!--Component for filtering the current stream. Requires query to be provided in @filtered_presenter.query-->
+<%= triggered_form(@filtered_presenter.query) do %>
+    <%= @filtered_presenter.filter_field rows: 1,
                             placeholder: "Seek and ye shall find...",
                             autofocus: true,
                             data: {:"on-add" => "RP.submit.ontokenchange",

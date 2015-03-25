@@ -32,7 +32,7 @@
   </td>
   <% if permitted_to? :edit, item %>
       <td>
-        <%= link_to_modal 'Edit', edit_tag_path(item) %>
+        <%= link_to_submit 'Edit', edit_tag_path(item), mode: "modal" %>
       </td>
       <td>
         <%= link_to 'Destroy', item, data: { confirm: 'Are you sure?'}, method: :delete %>

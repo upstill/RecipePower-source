@@ -4,7 +4,7 @@ class ReferencesController < ApplicationController
 
   def index
     # seeker_result Tag, 'div.tag_list' # , clear_tags: true
-    smartrender ReferencesCache
+    smartrender 
   end
 
   # GET /references/1
