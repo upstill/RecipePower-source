@@ -75,7 +75,7 @@ class Tag < ActiveRecord::Base
       end
     end
 
-    # The Tag class defines taggable-entity association methods here. The Taggable class is cocnsulted, and if it has
+    # The Tag class defines taggable-entity association methods here. The Taggable class is consulted, and if it has
     # a :tag_with method (part of the Taggable module), then the methods get defined, otherwise we punt
     # NB All the requisite methods will have been defined IF the taggable's class has been defined (thank you, Taggable)
     # We're really only here to deal with the case where the Tag class (or a tag model) has been accessed before the

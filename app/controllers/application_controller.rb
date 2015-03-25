@@ -139,47 +139,6 @@ class ApplicationController < ActionController::Base
     logger.info "UUID: #{rp_uuid}"
   end
 
-  # Take a stream presenter and drop items into a stream, if possible and called for.
-  # Otherwise, defer to normal rendering
-  def do_stream stream_presenter
-    @sp = stream_presenter
-    if @sp.stream? # We're here to spew items into the stream
-      # When the stream request is for the first items, replace the results
-=begin
-      if @sp.preface?
-        # Generally, start by restarting the results element and replacing the found count
-        header_item = with_format("html") {
-          {replacements: [
-              view_context.stream_element_replacement(:results, pkg_attributes: {id: @sp.stream_id}),
-              view_context.stream_element_replacement(:count, final_count: true)
-          ]}
-        }
-      else
-        header_item = {deletions: ['.stream-tail']}
-      end
-=end
-      response.headers["Content-Type"] = "text/event-stream"
-      # retrieve_seeker
-      begin
-        sse = Reloader::SSE.new response.stream
-        sse.write :stream_item, { deletions: [".stream-tail.#{@sp.stream_id}"] }
-
-        while item = @sp.next_item do
-          sse.write :stream_item, with_format("html") { {elmt: view_context.render_item(item)} }
-        end
-        if @sp.next_path && false
-          sse.write :stream_item, with_format("html") { {elmt: view_context.render_stream_tail} }
-        end
-      rescue IOError
-        logger.info "Stream closed"
-      ensure
-        sse.close
-      end
-      @sp.suspend
-      true
-    end
-  end
-
   # Monkey-patch to adjudicate between streaming and render_to_stream per
   # http://blog.sorah.jp/2013/07/28/render_to_string-in-ac-live
   def render_to_string(*)
@@ -247,9 +206,6 @@ class ApplicationController < ActionController::Base
         # Render the stream's entity in a modal dialog
         render :show
       when :items # Stream items into the stream's container
-=begin
-        do_stream fp.stream_presenter
-=end
         response.headers["Content-Type"] = "text/event-stream"
         # retrieve_seeker
         begin

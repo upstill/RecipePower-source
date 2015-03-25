@@ -42,7 +42,7 @@ module TagsHelper
   
   def summarize_tag_parents label = "Categorized Under: "
     @tagserv ||= TagServices.new(@tag)
-    tag_info_section @tagserv.parents.collect { |parent_list| parent_list.collect { |parent| tag_link parent }.join('/&#8201')}, label: label
+    tag_info_section @tagserv.parents.collect { |parent| tag_link parent }, label: label
   end
 	
   def summarize_tag_children label = "Examples: "
