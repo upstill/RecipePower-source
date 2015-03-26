@@ -15,12 +15,13 @@ class User < ActiveRecord::Base
 
   # Setup accessible (or protected) attributes for your model
   attr_accessible :id, :username, :first_name, :last_name, :fullname, :about, :login, :private, :skip_invitation, :thumbnail_id,
-                :email, :password, :password_confirmation, :shared_recipe, :invitee_tokens, :channel_tokens, :avatar_url, # :image,
+                :email, :password, :password_confirmation, :invitee_tokens, :channel_tokens, :avatar_url, # :image,
                 :invitation_token, :invitation_message, :invitation_issuer,
                 :remember_me, :role_id, :sign_in_count, :followee_tokens, :subscription_tokens
   # attr_writer :browser
   attr_readonly :count_of_collection_pointers
-  attr_accessor :shared_recipe, :invitee_tokens, :channel_tokens, :raw_invitation_token, :avatar_url
+  attr_accessor :invitee_tokens, :channel_tokens, :raw_invitation_token, :avatar_url,
+                :shared_type, :shared_id # Kept temporarily during sharing operations
   
   has_many :notifications_sent, :foreign_key => :source_id, :class_name => "Notification", :dependent => :destroy
   has_many :notifications_received, :foreign_key => :target_id, :class_name => "Notification", :dependent => :destroy
@@ -518,8 +519,8 @@ public
     if true # XXX User's profile approves
       # Mapping from notification types to email types
       case notification_type
-      when :share_recipe
-        self.shared_recipe = options[:what]
+      when :share
+        self.shared = options[:what]
         msg = RpMailer.sharing_notice(notification)
         msg.deliver
       when :make_friend
@@ -551,6 +552,17 @@ public
     other.followers.each { |follower| follower.add_followee self }
     other.votings.each { |voting| vote(voting.entity, voting.up) } # Transfer all the other's votes
     super
+  end
+
+  # Provide the resource being shared, stored (but not saved) as a polymorphic object description
+  def shared
+    if @shared_type && @shared_id
+      @shared_type.constantize.find( @shared_id.to_i) rescue nil
+    end
+  end
+
+  def shared= entity
+    @shared_type, @shared_id = entity ? [ entity.class.to_s, entity.id ] : []
   end
 
   private

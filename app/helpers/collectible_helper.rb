@@ -88,7 +88,7 @@ module CollectibleHelper
   end
 
   def collectible_share_button entity, options={}
-    button_to_submit "", new_user_invitation_path(recipe_id: entity.id), options.merge(class: "glyphicon glyphicon-share", mode: :modal)
+    button_to_submit "", new_user_invitation_path(entity_type: entity.class.to_s, entity_id: entity.id), options.merge(class: "glyphicon glyphicon-share", mode: :modal)
   end
 
   def collectible_list_button decorator, styling, options={}
