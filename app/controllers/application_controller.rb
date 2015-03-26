@@ -189,6 +189,7 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  # Use the filtered_presenter to render various aspects of a page--including streaming items
   def render_fp fp
     @filtered_presenter = fp
     @decorator = fp.decorator
@@ -209,16 +210,15 @@ class ApplicationController < ActionController::Base
         response.headers["Content-Type"] = "text/event-stream"
         # retrieve_seeker
         begin
-          sp = fp.stream_presenter
           sse = Reloader::SSE.new response.stream
-          sse.write :stream_item, deletions: [".stream-tail.#{sp.stream_id}"]
+          sse.write :stream_item, deletions: [".stream-tail.#{fp.stream_id}"]
 
-          while item = sp.next_item do
+          while item = fp.next_item do
             rendering = with_format("html") { view_context.render_item(item) }
             sse.write :stream_item, elmt: rendering
           end
-          if sp.next_path
-            tail_item = with_format("html") { render_to_string partial: sp.tail_partial }
+          if fp.next_path
+            tail_item = with_format("html") { render_to_string partial: fp.tail_partial }
             sse.write :stream_item, elmt: tail_item
           end
         rescue IOError
@@ -227,7 +227,7 @@ class ApplicationController < ActionController::Base
           # In closing, replace the trigger to make it active again--or not
           sse.close
         end
-        sp.suspend
+        fp.suspend
         true
     end
   end

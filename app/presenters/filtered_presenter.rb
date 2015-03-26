@@ -2,52 +2,64 @@ class FilteredPresenter
 
   attr_accessor :title, :h
 
-  attr_reader :decorator, :entity, :querytags,
+  attr_reader :decorator, :entity,
               :results_class, # Class of the ResultsCache for fetching results
-              :stream_presenter, # The ResultsCache that produces items based on the query
-              # :list_class, Class of the presented entity (i.e., users for lists)
+              :stream_presenter, # Manages the ResultsCache that produces items based on the query
               :content_mode, # What page element to render? :container, :entity, :results, :modal, :items
               :item_mode # How composites are presented: :table, :strip, :masonry, :feed_item
 
-  delegate :tail_partial, :stream_id, :next_item, :next_path, :full_size, :"dump?", :query, :param, :to => :stream_presenter
+  delegate :tail_partial, :querytags, :stream_id,
+           :suspend, :next_item, :this_path,
+           :full_size, :query, :param,
+           :to => :stream_presenter
 
   # Build an instance of the appropriate subclass, given the entity, controller and action
   def self.build view_context, sessid, request_path, user_id, response_service, params, querytags, decorator=nil
     classname = response_service.controller.capitalize + response_service.action.capitalize + "Presenter"
-    begin
-      p = classname.constantize.new response_service
-      p.setup view_context, sessid, request_path, user_id, response_service, params, querytags, decorator
-      p
-    rescue
-      nil
+    if Object.const_defined? classname # If we have a FilteredPresenter subclass available
+      classname.constantize.new view_context, sessid, request_path, user_id, response_service, params, querytags, decorator
     end
   end
 
-  def initialize response_service
-    @item_mode = response_service.item_mode # Provisionally accept list mode imposed by param
+  # Declare the parameters that we adopt as instance variables. subclasses would add to this list
+  def params_needed
+    [ :tagtype, [:stream, ""], [ :content_mode, :container ] ]
   end
 
-  def setup view_context, sessid, request_path, user_id, response_service, params, querytags, decorator=nil
+  def initialize view_context, sessid, request_path, user_id, response_service, params, querytags, decorator=nil
     if @decorator = decorator
       @entity = decorator.object
-      # @list_class = @entity.class.to_s.pluralize.underscore
     end
-    @stream_param = params[:stream] || "" if params.has_key? :stream
-    @tagtype = params[:tagtype]
-    @thispath = response_service.requestpath
+    params_needed.each { |pspec|
+      key, val = (pspec.is_a? Array) ? pspec : [pspec]
+      val = params[key] if params[key]
+      self.instance_variable_set "@#{key}".to_sym, val
+    }
+    # @stream_param = params[:stream] || "" if params.has_key? :stream
+    # @tagtype = params[:tagtype]
     @h = view_context
 
     # May have been set by subclass, may have been inherited from params
-    @item_mode ||= response_service.action == "index" ? :table : :page
+    @item_mode =
+            response_service.item_mode || # Provisionally accept item mode imposed by param
+            (self.class.instance_variable_get(:"@item_mode") rescue nil) ||
+            (response_service.action == "index" ? :table : :page)
     response_service.item_mode = @item_mode
-    
-    @content_mode = (params[:content_mode] || :container).to_sym
-    @content_mode = :entity if response_service.action == "show"
-    @content_mode = :modal if params[:mode] && params[:mode] == "modal"
-    @content_mode = :items if params.has_key? :stream
+
+    @content_mode =
+    if params.has_key? :stream  # The query is for items from the stream
+      :items
+    elsif params[:mode] && params[:mode] == "modal" # The query is for a modal dialog
+      :modal
+    elsif response_service.action == "show" # The query is to show the item
+      :entity
+    else
+      @content_mode.to_sym # Either specified, or :container by default
+    end
+
     @title = response_service.title
-    @querytags = querytags
-    @stream_presenter = StreamPresenter.new sessid, request_path, results_class, user_id, response_service.admin_view?, querytags, params
+    @results_class = self.class.instance_variable_get(:"@results_class_name").constantize
+    @stream_presenter = StreamPresenter.new sessid, request_path, @results_class, user_id, response_service.admin_view?, querytags, params
   end
 
   # Provide a tokeninput field for specifying tags, with or without the ability to free-tag
@@ -55,7 +67,7 @@ class FilteredPresenter
   def filter_field options={}
     data = options[:data] || {}
     data[:hint] ||= "Narrow down the list"
-    data[:pre] ||= stream_presenter.querytags.collect { |tag| { id: tag.id, name: tag.name } }.to_json
+    data[:pre] ||= querytags.collect { |tag| { id: tag.id, name: tag.name } }.to_json
     data[:"min-chars"] ||= 2
     data[:query] = "tagtype=#{stream_presenter.tagtype}" if stream_presenter.tagtype
 
@@ -63,7 +75,7 @@ class FilteredPresenter
     options[:onload] = "RP.tagger.onload(event);"
     options[:data] = data
 
-    h.text_field_tag "querytags", @querytags.map(&:id).join(','), options
+    h.text_field_tag "querytags", querytags.map(&:id).join(','), options
   end
 
   # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
@@ -81,9 +93,13 @@ class FilteredPresenter
     "filtered_presenter/results_#{@item_mode}"
   end
 
+  def tail_partial
+    "filtered_presenter/tail_#{@item_mode}"
+  end
+
   # Specify a path for fetching the results partial
   def results_path
-    assert_query @thispath, content_mode: "results", item_mode: @item_mode
+    assert_query this_path, content_mode: "results", item_mode: @item_mode
   end
 
   # This is the name of the partial used for the header, presumably including the search box
@@ -100,21 +116,24 @@ class FilteredPresenter
     false
   end
 
-=begin
-  # This is the path that will go into the "more items" link
-  def next_path
-    if r == 0..10 # @results.next_range
-      assert_query @thispath, stream: "#{r.min}-#{r.max}"
-    end
+  # Should the items be dumped now?
+  def dump?
+    false # !instance_variable_defined?(:@stream_param)
   end
-=end
+
+  # This is the path that will go into the "more items" link to fetch the next set
+  # Rather than straight delegation, we may want to assert our own parameters here
+  def next_path
+    @stream_presenter.next_path
+  end
 
   # Provide the query for revising the results
   def filter_query format=nil, params={}
     if format.is_a? Hash
       params, format = format, nil
     end
-    assert_query @thispath, format, params.merge( stream: nil, querytags: nil )
+    # NB: here is where we can assert our own parameters for the query
+    @stream_presenter.query format, params
   end
 
   # Return the name of the pagelet template
@@ -146,12 +165,8 @@ class FilteredPresenter
 end
 
 class UsersIndexPresenter < FilteredPresenter
-
-  def initialize response_service
-    @item_mode = :table
-    super
-    @results_class = UsersCache
-  end
+  @item_mode = :table
+  @results_class_name = 'UsersCache'
 
   def table_headers
     [ "", "About Me", "Interest(s)", "", "" ]
@@ -163,20 +178,16 @@ class UsersIndexPresenter < FilteredPresenter
 end
 
 class UsersShowPresenter < FilteredPresenter
+  @results_class_name = 'UserCollectionCache'
 
-  def initialize response_service
-    super
-    @results_class = UserCollectionCache
-  end
 end
 
 # Present a list of items for a user
 class UserContentPresenter < FilteredPresenter
   attr_reader :entity_type
 
-  def setup response_service, params, querytags, decorator=nil
-    super
-    @entity_type = params[:entity_type]
+  def params_needed
+    super << :entity_type
   end
 
   # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
@@ -196,48 +207,32 @@ class UserContentPresenter < FilteredPresenter
 end
 
 class UsersRecentPresenter < UserContentPresenter
+  @results_class_name = 'UserRecentCache'
 
-  def initialize response_service
-    super
-    @results_class = UserRecentCache
-  end
 end
 
 class UsersCollectionPresenter < UserContentPresenter
+  @item_mode = :slider
+  @results_class_name = 'UserCollectionCache'
 
-  def initialize response_service
-    super
-    @results_class = UserCollectionCache
-  end
 end
 
 class UsersBiglistPresenter < UserContentPresenter
+  @results_class_name = 'UserBiglistCache'
 
-  def initialize response_service
-    super
-    @results_class = UserBiglistCache
-  end
 end
 
 # Present a list of feeds for a user
 class FeedsShowPresenter < FilteredPresenter
-
-  def setup response_service, params, querytags, decorator=nil
-    @entity_type = :page
-    super
-    @results_class = FeedCache
-  end
+  @item_mode = :page
+  @results_class_name = 'FeedCache'
 
 end
 
 # Present the entries associated with a feed
 class FeedsIndexPresenter < FilteredPresenter
-
-  def setup response_service, params, querytags, decorator=nil
-    @item_mode = :table
-    super
-    @results_class = FeedsCache
-  end
+  @item_mode = :table
+  @results_class_name = 'FeedsCache'
 
   def table_headers
     [ 'Title/Description/URL',
@@ -254,34 +249,22 @@ end
 
 # Present the entries associated with a feed
 class FeedsEntriesPresenter < FilteredPresenter
-
-  def setup response_service, params, querytags, decorator=nil
-    @item_mode = :page
-    super
-    @results_class = FeedCache
-  end
+  @item_mode = :page
+  @results_class_name = 'FeedCache'
 
 end
 
 # Present the entries associated with a list
 class ListsContentsPresenter < FilteredPresenter
-
-  def initialize response_service
-    @item_mode = :masonry
-    super
-    @results_class = ListCache
-  end
+  @item_mode = :masonry
+  @results_class_name = 'ListCache'
 
 end
 
 # Present the entries associated with a list
 class ListsIndexPresenter < FilteredPresenter
-
-  def initialize response_service
-    @item_mode = :table
-    super
-    @results_class = ListsCache
-  end
+  @item_mode = :table
+  @results_class_name = 'ListsCache'
 
   def table_headers
     %w{ Owner	Name	Description	Included Tags	Size }
@@ -290,12 +273,8 @@ end
 
 # Present the entries associated with a list
 class ReferencesIndexPresenter < FilteredPresenter
-
-  def initialize response_service
-    @item_mode = :table
-    super
-    @results_class = ReferencesCache
-  end
+  @item_mode = :table
+  @results_class_name = 'ReferencesCache'
 
   def table_headers
     [ "Reference Type", "URL/Referees", "", "", "" ]
@@ -304,12 +283,8 @@ end
 
 # Present the entries associated with a list
 class ReferentsIndexPresenter < FilteredPresenter
-
-  def initialize response_service
-    @item_mode = :table
-    super
-    @results_class = ReferentsCache
-  end
+  @item_mode = :table
+  @results_class_name = 'ReferentsCache'
 
   def table_headers
     [ "Referent", "", "", "" ]
@@ -317,12 +292,8 @@ class ReferentsIndexPresenter < FilteredPresenter
 end
 
 class SitesIndexPresenter < FilteredPresenter
-
-  def initialize response_service
-    @item_mode = :table
-    super
-    @results_class = SitesCache
-  end
+  @item_mode = :table
+  @results_class_name = 'SitesCache'
 
   def table_headers
     %W{ Site Description Further\ Info Actions }
@@ -331,19 +302,8 @@ class SitesIndexPresenter < FilteredPresenter
 end
 
 class TagsIndexPresenter < FilteredPresenter
-
-  def initialize response_service
-    @item_mode = :table
-    super
-    @results_class = TagsCache
-  end
-
-  # This is the name of the partial used for the header, presumably including the search box
-=begin
-  def header_partial
-    "tags/index_filter_header"
-  end
-=end
+  @item_mode = :table
+  @results_class_name = 'TagsCache'
 
   def table_headers
     [ "ID", "Name", "Type", "Usages", "Public?", "Similar", "Synonym(s)", "Meaning(s)", "", "" ]
@@ -357,12 +317,8 @@ end
 
 # Present the entries associated with a list
 class TagsTaggeesPresenter < FilteredPresenter
-
-  def initialize response_service
-    @item_mode = :masonry
-    super
-    @results_class = TagCache
-  end
+  @item_mode = :masonry
+  @results_class_name = 'TagCache'
 
   # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
   def results_set &block
