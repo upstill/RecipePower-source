@@ -91,4 +91,9 @@ class CollectibleDecorator < Draper::Decorator
     false
   end
 
+  # Build an entity and its decorator based on type and ID of an existing object
+  def self.build entity_type, entity_id
+    entity_type.constantize.find(entity_id).decorate rescue nil
+  end
+
 end

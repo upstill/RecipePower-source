@@ -4,10 +4,7 @@
 <%= inviter_name || "Someone" %> is inviting you to join them on RecipePower (<%= accept_url %> )<%= @resource.invitation_message.blank? ? "." : ", saying" %>
 
 <% unless @resource.invitation_message.blank? %>
-	<% require 'iconv' %>
-	<%# msg = Iconv.conv('ascii//translit//ignore', 'UTF-8', @resource.invitation_message).to_s %>
-	<%= raw splitstr( @resource.invitation_message, 72).join("\n\t") %>
-
+	<%= raw splitstr( @resource.invitation_message.encode('ASCII'), 72).join("\n\t") %>
 <% end %>
 RecipePower (<%= root_url %> ) is the place to keep your cooking inspirations from
 across the Web and share them with others. Join <%= inviter_name || "us" %> and keep your

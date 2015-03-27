@@ -4,7 +4,7 @@ require 'uri_utils.rb'
 
 class InvitationsController < Devise::InvitationsController
   # skip_before_filter :verify_authenticity_token
-  prepend_before_filter :login_required # No invitations unless logged in!
+  prepend_before_filter :login_required, :except => [ :edit, :update ] # No invitations unless logged in!
 
   def after_invite_path_for(resource)
     collection_path
@@ -12,13 +12,13 @@ class InvitationsController < Devise::InvitationsController
 
   # GET /resource/invitation/new
   def new
-    self.resource = resource_class.new(invitation_message: "Here's a recipe that I'm really into right now. Take a look and tell me what you think.")
-    # TODO: NOT JUST RECIPES!!! (Everything gets a share button)
-    resource.shared_recipe = params[:recipe_id]
-    @recipe = resource.shared_recipe && Recipe.find(resource.shared_recipe)
+    self.resource = resource_class.new(invitation_message: "Here's a little something I found on RecipePower. Have a look and tell me what you think.")
+    resource.shared_type = params[:shared_type]
+    resource.shared_id = params[:shared_id]
+    @shared = resource.shared
     self.resource.invitation_issuer = current_user.polite_name
-    # dialog_boilerplate(@recipe ? :share : :new)
-    if @recipe
+    # dialog_boilerplate(@shared ? :share : :new)
+    if @shared
       smartrender :action => :share
     else
       smartrender
@@ -27,8 +27,6 @@ class InvitationsController < Devise::InvitationsController
 
   # GET /resource/invitation/accept?invitation_token=abcdef
   def edit
-    x=2
-    logger.debug "Entering InvitationsController#edit"
     if params[:invitation_token] &&
         (self.resource = resource_class.find_by_invitation_token(params[:invitation_token], false))
       resource.extend_fields # Default values for name, etc.
@@ -60,7 +58,7 @@ class InvitationsController < Devise::InvitationsController
         params[resource_name][:email].split(',').collect { |email| %Q{'#{email.downcase.strip}'} }.join(',')
     # Check email addresses in the tokenlist for validity
     @staged = User.new params[resource_name] # invite_resource
-    for_sharing = @staged.shared_recipe && true
+    for_sharing = @staged.shared
 
     # It is an error to provide a bogus email address
     err_address =
@@ -95,7 +93,7 @@ class InvitationsController < Devise::InvitationsController
         @resource = self.resource = resource_class.invite!(pr, current_inviter)
         @resource.invitation_sent_at = Time.now.utc
         if for_sharing
-          @notification = @resource.post_notification(:share_recipe, current_inviter, what: params[resource_name][:shared_recipe])
+          @notification = @resource.post_notification(:share, current_inviter, what: resource.shared)
           @resource.save(validate: false) # ...because the invitee doesn't have a handle yet
           @resource.issue_instructions(:sharing_invitation_instructions,
                                        notification_token: @notification.notification_token,
@@ -132,7 +130,7 @@ class InvitationsController < Devise::InvitationsController
         # Cook Me Later: add to collection
         sharee.invitation_message = params[:user][:invitation_message]
         sharee.save
-        sharee.notify(:share_recipe, current_user, what: params[resource_name][:shared_recipe])
+        sharee.notify(:share_recipe, current_user, what: sharee.share)
         breakdown[:invited] << sharee
       end
       popups << breakdown.report(:redundancies, :salutation) { |names, count| %Q{#{names} #{count > 1 ? "have" : "has" } been notified on your behalf.} }
@@ -149,7 +147,7 @@ class InvitationsController < Devise::InvitationsController
           }
       ]
     end
-    @recipe = for_sharing && Recipe.find(@staged.shared_recipe)
+    @shared = for_sharing && @staged.shared
     respond_to { |format|
       format.json {
         response = {done: true}
@@ -187,7 +185,6 @@ class InvitationsController < Devise::InvitationsController
         pr[:skip_invitation] = true
         @resource = self.resource = resource_class.invite!(pr, current_inviter)
         @resource.invitation_sent_at = Time.now.utc
-        @resource.shared_recipe = Recipe.first.id
         @resource.save(validate: false) # ...because the invitee doesn't have a handle yet
         @resource.issue_instructions(:share_instructions)
       rescue Exception => e

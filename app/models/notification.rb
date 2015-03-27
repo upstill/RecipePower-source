@@ -9,7 +9,7 @@ class Notification < ActiveRecord::Base
   include Typeable
   typeable( :notification_type, 
       Untyped: ["Untyped", 0 ],
-      :share_recipe => ["Share Recipe", 1], # Shared a recipe with
+      :share => ["Share", 1], # Shared a collectible with
       :make_friend => ["Friended", 2] # Source added target as friend
   )
   
@@ -17,9 +17,9 @@ class Notification < ActiveRecord::Base
   def accept
     msg = ""
     case typesym
-    when :share_recipe
-      recipe = Recipe.find(info[:what])
-      recipe.uid = target_id
+    when :share
+      recipe = info[:what]
+      recipe.collectible_user_id = target_id
       recipe.be_collected
       msg = "'#{recipe.title}' now appearing in your collection"
     when :make_friend

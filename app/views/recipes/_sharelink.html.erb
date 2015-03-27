@@ -1,3 +1,3 @@
-<span class="<%= recipe_list_element_golink_class @recipe %>">
-	<%= button_to_submit "Share", new_user_invitation_path(recipe_id: @recipe.id), :mode => :modal %>
+<span class="<%= recipe_list_element_golink_class @decorator.object %>">
+	<%= button_to_submit "Share", new_user_invitation_path(entity_type: @decorator.object.class.to_s, entity_id: @decorator.object.id), :mode => :modal %>
  </span>

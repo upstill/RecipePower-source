@@ -1,4 +1,5 @@
-<%= modal_dialog :share_recipe, "Share '#{@recipe.title.truncate(80)}'" do %>
+<% @decorator ||= @shared.decorate if @shared %>
+<%= modal_dialog :share_collectible, "Share '#{@decorator.title.truncate(80)}'" do %>
 	<%= simple_form_for resource, :as => resource_name, :url => invitation_path(resource_name), :html => {:method => :post} do |f| %>
 		  <%# devise_error_messages! %>
           <%= form_errors_helper f %>
@@ -23,7 +24,8 @@
 									} %>
 			<%= f.input :invitation_issuer, label: "How to identify you in the message" %>
 		  <%= f.input :invitation_message, label: "Invitation Message (optional)", :input_html => { :rows=>"4" } %></p>
-      <%= f.hidden_field(:shared_recipe) if resource.shared_recipe %>
+      <%= f.hidden_field(:shared_type) if resource.shared_type %>
+      <%= f.hidden_field(:shared_id) if resource.shared_id %>
 		<%= modal_footer do %>
 	  	<%= f.submit "Share the Love", class: "btn btn-lg btn-success dialog-submit-button", disabled: true %>
 		<% end %>
