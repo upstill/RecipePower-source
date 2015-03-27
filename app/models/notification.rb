@@ -18,10 +18,10 @@ class Notification < ActiveRecord::Base
     msg = ""
     case typesym
     when :share
-      recipe = info[:what]
-      recipe.collectible_user_id = target_id
-      recipe.be_collected
-      msg = "'#{recipe.title}' now appearing in your collection"
+      shared = info[:what]
+      shared.collectible_user_id = target_id
+      shared.be_collected
+      msg = "'#{shared.decorate.title}' now appearing in your collection"
     when :make_friend
     end
     self.accepted = true
