@@ -4,7 +4,7 @@ require 'uri_utils.rb'
 
 class InvitationsController < Devise::InvitationsController
   # skip_before_filter :verify_authenticity_token
-  prepend_before_filter :login_required # No invitations unless logged in!
+  prepend_before_filter :login_required, :except => [ :edit, :update ] # No invitations unless logged in!
 
   def after_invite_path_for(resource)
     collection_path
@@ -12,8 +12,7 @@ class InvitationsController < Devise::InvitationsController
 
   # GET /resource/invitation/new
   def new
-    self.resource = resource_class.new(invitation_message: "Here's a recipe that I'm really into right now. Take a look and tell me what you think.")
-    # TODO: NOT JUST RECIPES!!! (Everything gets a share button)
+    self.resource = resource_class.new(invitation_message: "Here's a little something I found on RecipePower. Have a look and tell me what you think.")
     resource.shared_type = params[:shared_type]
     resource.shared_id = params[:shared_id]
     @shared = resource.shared
@@ -28,8 +27,6 @@ class InvitationsController < Devise::InvitationsController
 
   # GET /resource/invitation/accept?invitation_token=abcdef
   def edit
-    x=2
-    logger.debug "Entering InvitationsController#edit"
     if params[:invitation_token] &&
         (self.resource = resource_class.find_by_invitation_token(params[:invitation_token], false))
       resource.extend_fields # Default values for name, etc.
@@ -150,7 +147,7 @@ class InvitationsController < Devise::InvitationsController
           }
       ]
     end
-    @shared = for_sharing && staged.shared
+    @shared = for_sharing && @staged.shared
     respond_to { |format|
       format.json {
         response = {done: true}

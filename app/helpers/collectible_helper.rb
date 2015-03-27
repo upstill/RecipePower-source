@@ -88,7 +88,8 @@ module CollectibleHelper
   end
 
   def collectible_share_button entity, options={}
-    button_to_submit "", new_user_invitation_path(entity_type: entity.class.to_s, entity_id: entity.id), options.merge(class: "glyphicon glyphicon-share", mode: :modal)
+    entity = entity.object if entity.is_a? Draper::Decorator
+    button_to_submit "", new_user_invitation_path(shared_type: entity.class.to_s, shared_id: entity.id), options.merge(class: "glyphicon glyphicon-share", mode: :modal)
   end
 
   def collectible_list_button decorator, styling, options={}

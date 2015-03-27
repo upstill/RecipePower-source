@@ -14,7 +14,7 @@
   <%= link_to @decorator.sourcename,
               divert_user_invitation_url(
                       rpevent: RpEvent.event_trigger_data(@recipient, :invitation_diverted, @invitation_event, @sender),
-                      url: CGI::escape(decorator.sourcehome),
+                      url: CGI::escape(@decorator.sourcehome),
                       sender: @sender.id,
                       recipient: @recipient.id),
               class: "share_recipe_source" %></p>

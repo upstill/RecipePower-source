@@ -16,7 +16,7 @@ class User < ActiveRecord::Base
   # Setup accessible (or protected) attributes for your model
   attr_accessible :id, :username, :first_name, :last_name, :fullname, :about, :login, :private, :skip_invitation, :thumbnail_id,
                 :email, :password, :password_confirmation, :invitee_tokens, :channel_tokens, :avatar_url, # :image,
-                :invitation_token, :invitation_message, :invitation_issuer,
+                :invitation_token, :invitation_message, :invitation_issuer, :shared_type, :shared_id,
                 :remember_me, :role_id, :sign_in_count, :followee_tokens, :subscription_tokens
   # attr_writer :browser
   attr_readonly :count_of_collection_pointers
@@ -556,7 +556,7 @@ public
 
   # Provide the resource being shared, stored (but not saved) as a polymorphic object description
   def shared
-    if @shared_type && @shared_id
+    if !@shared_type.blank? && @shared_id
       @shared_type.constantize.find( @shared_id.to_i) rescue nil
     end
   end
