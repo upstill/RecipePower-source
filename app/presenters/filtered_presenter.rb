@@ -15,7 +15,7 @@ class FilteredPresenter
 
   # Build an instance of the appropriate subclass, given the entity, controller and action
   def self.build view_context, sessid, request_path, user_id, response_service, params, querytags, decorator=nil
-    classname = response_service.controller.capitalize + response_service.action.capitalize + "Presenter"
+    classname = "#{response_service.controller.capitalize}#{response_service.action.capitalize}Presenter"
     if Object.const_defined? classname # If we have a FilteredPresenter subclass available
       classname.constantize.new view_context, sessid, request_path, user_id, response_service, params, querytags, decorator
     end
@@ -76,6 +76,12 @@ class FilteredPresenter
     options[:data] = data
 
     h.text_field_tag "querytags", querytags.map(&:id).join(','), options
+  end
+
+  def panel_partials &block
+    ["recipes", "lists", "friends", "feeds" ].each do |et|
+      block.call et, assert_query(results_path, entity_type: et, item_mode: :slider)
+    end
   end
 
   # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set

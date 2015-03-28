@@ -1,5 +1,8 @@
 <%= render @filtered_presenter.header_partial, title: title, comment: ((defined? comment) ? comment : "") %>
 <%= render_item :page %>
+<% @filtered_presenter.panel_partials do |entity_type, path| %>
+  <%= render "shared/panel", type: entity_type, path: path %>
+<% end %>
 <% @filtered_presenter.results_set do |path, klass| %>
-    <%= trigger_pending_results path, class: klass %>
+    <%# trigger_pending_results path, class: klass %>
 <% end %>

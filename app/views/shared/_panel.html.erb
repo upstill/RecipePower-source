@@ -1,0 +1,13 @@
+<div class="results-panel <%= type %>" data-query="<%= path %>">
+  <div class="results-menu">
+    <div class="org-by">Org buttons go here</div>
+    <div class="show-all">Show-all button goes here</div>
+    <div class="suggest">Sug button goes here</div>
+  </div>
+  <div class="results-content">
+    <div class="results-label"><%= image_tag "#{type}_panel_label.png", class: "results-img" %></div>
+    <div class="results-box">
+      <%= trigger_pending_results path, class: type %>
+    </div>
+  </div>
+</div>

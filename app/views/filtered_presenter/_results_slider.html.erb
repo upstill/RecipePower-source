@@ -1,11 +1,8 @@
-<h3>What do you know? A strip partial for <%= @filtered_presenter.entity_type %>: <%= @filtered_presenter.full_size %> in all.</h3>
 <!-- View for listing entities in a masonry container -->
-<div class="row">
-  <div class="slider">
-    <div class="left" data-setup="RP.slider.setup">&lt;</div>
-    <div class="right" data-setup="RP.slider.setup">&gt;</div>
-    <div class="track swell stream-items-parent col-md-12 <%= @filtered_presenter.stream_id %>">
-      <%= render @filtered_presenter.tail_partial %>
-    </div>
+<div class="slider" style="background-color: inherit;">
+  <div class="left" data-setup="RP.slider.setup">&lt;</div>
+  <div class="right" data-setup="RP.slider.setup">&gt;</div>
+  <div class="track swell stream-items-parent <%= @filtered_presenter.stream_id %>">
+    <%= render @filtered_presenter.tail_partial %>
   </div>
 </div>

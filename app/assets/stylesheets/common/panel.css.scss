@@ -1,0 +1,86 @@
+/*
+<div class="results-panel recipes" data-query="<%= path %>">
+<div class="results-label"><%= image_tag "recipes_panel_label.png" %></div>
+<div class="results-content">
+<div class="org-by">Org buttons go here</div>
+<div class="show-all">Show-all button goes here</div>
+<div class="suggest">Sug button goes here</div>
+<div class="results-place">Here are the results</div>
+</div>
+</div>
+*/
+
+div.results-panel {
+  width: 95%;
+  margin: 30px;
+  &.recipes {
+    background-color: #B8C8CD;
+  }
+  &.friends {
+    background-color: #DFD9B6;
+  }
+  &.feeds {
+    background-color: #E3CBB1;
+  }
+  &.lists {
+    background-color: #C0D0C2;
+  }
+  .results-menu {
+    width: 100%;
+    height: auto;
+    margin: 5px;
+    padding: 5px;
+    .org-by {
+      display: inline-block;
+      width: 150px;
+      float: left;
+    }
+    .show-all {
+      display: inline-block;
+      width: 200px;
+      float: right;
+    }
+    .suggest {
+      display: inline-block;
+      width: 150px;
+      float: right;
+    }
+  }
+  .results-content {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    // border: 1px solid red;
+    .results-label {
+      position: absolute;
+      left: 5px;
+      top: 0;
+      width: 80px;
+      height: 200px;
+      margin-top: 30px;
+      display: inline-block;
+      .results-img {
+        width: 70px;
+        height: auto;
+        margin-top: auto;
+        margin-bottom: auto;
+      }
+      // border: 1px solid green;
+    }
+    .results-box {
+      position: absolute;
+      left: 0;
+      top: 0;
+      padding: 10px;
+      padding-left: 90px;
+      width: 100%;
+      height: auto;
+      // border: 1px solid blue;
+      .results-results {
+        width: 100%;
+        height: auto;
+        // border: 1px solid yellow;
+      }
+    }
+  }
+}
