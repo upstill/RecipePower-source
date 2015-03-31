@@ -1,9 +1,7 @@
 <!-- View for listing entities in a masonry container -->
-<div class="row">
-  <div class="js-masonry stream-items-parent col-md-12 <%= @filtered_presenter.stream_id %> "
+  <div class="results <%= @filtered_presenter.results_cssclass %> js-masonry stream-items-parent <%= @filtered_presenter.stream_id %> "
        id="container"
        onload="RP.masonry.onload(event)"
        data-masonry-options='{ "columnWidth": 200, "itemSelector": ".masonry-item", "gutter": 20 }'>
     <%= render @filtered_presenter.tail_partial %>
   </div>
-</div>

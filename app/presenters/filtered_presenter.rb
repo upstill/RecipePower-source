@@ -79,7 +79,8 @@ class FilteredPresenter
   end
 
   def panel_partials &block
-    ["recipes", "lists", "friends", "feeds" ].each do |et|
+    # ["recipes", "lists", "friends", "feeds" ]
+    ["recipes"].each do |et|
       block.call et, assert_query(results_path, entity_type: et, item_mode: :slider)
     end
   end

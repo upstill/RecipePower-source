@@ -1,5 +1,5 @@
 <!-- View for listing entities in a table -->
-<table class="table table-striped ">
+<table class="results <%= @filtered_presenter.results_cssclass %> table table-striped ">
   <thead>
   <tr>
     <%= @filtered_presenter.table_headers.collect { |ttl| "<th>#{ttl}</th>" unless ttl.blank? }.compact.join("\n").html_safe %>

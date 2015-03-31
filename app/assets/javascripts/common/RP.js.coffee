@@ -251,7 +251,7 @@ RP.build_request = (request, query) ->
 	for attrname,attrvalue of query
 		str.push(encodeURIComponent(attrname) + "=" + encodeURIComponent(attrvalue));
 	# Fire off an Ajax call notifying the server of the (re)classification
-	data.request+"?"+str.join("&")
+	request+"?"+str.join("&")
 
 # Ensure that a newly-loaded element is properly attended to
 RP.loadElmt = (elmt) ->

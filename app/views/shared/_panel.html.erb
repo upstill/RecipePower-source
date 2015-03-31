@@ -1,13 +1,16 @@
-<div class="results-panel <%= type %>" data-query="<%= path %>">
-  <div class="results-menu">
-    <div class="org-by">Org buttons go here</div>
-    <div class="show-all">Show-all button goes here</div>
-    <div class="suggest">Sug button goes here</div>
-  </div>
-  <div class="results-content">
-    <div class="results-label"><%= image_tag "#{type}_panel_label.png", class: "results-img" %></div>
-    <div class="results-box">
-      <%= trigger_pending_results path, class: type %>
+<%= content_tag :div,
+                class: "results-panel querify-supe #{type}",
+                data: analyze_request(url),
+                onload: 'RP.querify.onload(event);' do %>
+    <div class="results-menu">
+      <span class="org-by">Org buttons go here</span>
+      <%= panel_collapse_button :down %>
+      <span class="suggest">Sug button goes here</span>
     </div>
-  </div>
-</div>
+    <div class="results-content">
+      <div class="results-label"><%= image_tag "#{type}_panel_label.png", class: "results-img" %></div>
+      <div class="results-box">
+        <div class="results <%= type %> placeholder"></div>
+      </div>
+    </div>
+<% end %>
