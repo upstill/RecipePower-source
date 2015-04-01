@@ -5,7 +5,7 @@ class StreamPresenter
   delegate :items, :next_item, :next_range,
            :"done?", :window, :param,
            :full_size, :"has_query?", :"ready?",
-           :querytags, :nmatches,
+           :querytags, :nmatches, :org,
            :to => :results
 
   def initialize session_id, requestpath, rc_class, userid, as_admin, querytags=[], params={}

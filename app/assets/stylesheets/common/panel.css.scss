@@ -35,8 +35,17 @@ div.results-panel {
     }
     .org-by {
       // display: inline-block;
-      width: 150px;
+      // width: auto;
       float: left;
+      .label {
+        font-size: 1.5em;
+      }
+      .link {
+        margin: 5px;
+        &.selected {
+          font-size: 2.0em;
+        }
+      }
     }
     .collapse-button {
       // display: inline-block;
@@ -45,7 +54,7 @@ div.results-panel {
     }
     .suggest {
       // display: inline-block;
-      width: 150px;
+      width: 30px;
       float: right;
     }
   }

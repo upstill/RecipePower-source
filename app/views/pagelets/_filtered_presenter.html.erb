@@ -3,6 +3,3 @@
 <% @filtered_presenter.panel_partials do |entity_type, url| %>
   <%= render "shared/panel", type: entity_type, url: url %>
 <% end %>
-<% @filtered_presenter.results_set do |path, klass| %>
-    <%# trigger_pending_results path, class: klass %>
-<% end %>

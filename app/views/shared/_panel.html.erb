@@ -3,14 +3,14 @@
                 data: analyze_request(url),
                 onload: 'RP.querify.onload(event);' do %>
     <div class="results-menu">
-      <span class="org-by">Org buttons go here</span>
-      <%= panel_collapse_button :down %>
-      <span class="suggest">Sug button goes here</span>
+      <%= panel_org_button type, :newest %>
+      <%= panel_collapse_button type, :slider %>
+      <%= panel_suggestion_button type %>
     </div>
     <div class="results-content">
       <div class="results-label"><%= image_tag "#{type}_panel_label.png", class: "results-img" %></div>
       <div class="results-box">
-        <div class="results <%= type %> placeholder"></div>
+        <%= panel_results_placeholder type %>
       </div>
     </div>
 <% end %>

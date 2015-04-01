@@ -6,7 +6,8 @@ class FilteredPresenter
               :results_class, # Class of the ResultsCache for fetching results
               :stream_presenter, # Manages the ResultsCache that produces items based on the query
               :content_mode, # What page element to render? :container, :entity, :results, :modal, :items
-              :item_mode # How composites are presented: :table, :strip, :masonry, :feed_item
+              :item_mode, # How composites are presented: :table, :strip, :masonry, :feed_item
+              :org # How to organize the results: :ratings, :popularity, :newest, :random
 
   delegate :tail_partial, :querytags, :stream_id,
            :suspend, :next_item, :this_path,
@@ -23,7 +24,7 @@ class FilteredPresenter
 
   # Declare the parameters that we adopt as instance variables. subclasses would add to this list
   def params_needed
-    [ :tagtype, [:stream, ""], [ :content_mode, :container ] ]
+    [ :tagtype, [:stream, ""], [ :content_mode, :container ], [ :org, :newest ] ]
   end
 
   def initialize view_context, sessid, request_path, user_id, response_service, params, querytags, decorator=nil
@@ -33,7 +34,13 @@ class FilteredPresenter
     params_needed.each { |pspec|
       key, val = (pspec.is_a? Array) ? pspec : [pspec]
       val = params[key] if params[key]
-      self.instance_variable_set "@#{key}".to_sym, val
+      setter = "#{key}="
+      if self.respond_to? setter, true
+        self.method(setter).call val
+      else
+        self.instance_variable_set "@#{key}".to_sym, val
+      end
+
     }
     # @stream_param = params[:stream] || "" if params.has_key? :stream
     # @tagtype = params[:tagtype]
@@ -41,21 +48,21 @@ class FilteredPresenter
 
     # May have been set by subclass, may have been inherited from params
     @item_mode =
-            response_service.item_mode || # Provisionally accept item mode imposed by param
+        response_service.item_mode || # Provisionally accept item mode imposed by param
             (self.class.instance_variable_get(:"@item_mode") rescue nil) ||
             (response_service.action == "index" ? :table : :page)
     response_service.item_mode = @item_mode
 
     @content_mode =
-    if params.has_key? :stream  # The query is for items from the stream
-      :items
-    elsif params[:mode] && params[:mode] == "modal" # The query is for a modal dialog
-      :modal
-    elsif response_service.action == "show" # The query is to show the item
-      :entity
-    else
-      @content_mode.to_sym # Either specified, or :container by default
-    end
+        if params.has_key? :stream # The query is for items from the stream
+          :items
+        elsif params[:mode] && params[:mode] == "modal" # The query is for a modal dialog
+          :modal
+        elsif response_service.action == "show" # The query is to show the item
+          :entity
+        else
+          @content_mode.to_sym # Either specified, or :container by default
+        end
 
     @title = response_service.title
     @results_class = self.class.instance_variable_get(:"@results_class_name").constantize
@@ -81,7 +88,7 @@ class FilteredPresenter
   def panel_partials &block
     # ["recipes", "lists", "friends", "feeds" ]
     ["recipes"].each do |et|
-      block.call et, assert_query(results_path, entity_type: et, item_mode: :slider)
+      block.call et, assert_query(results_path, entity_type: et, :item_mode => :slider, :org => :newest)
     end
   end
 
@@ -169,6 +176,13 @@ class FilteredPresenter
       end
     end
   end
+
+private
+
+  def org= val
+    @org = val.to_sym
+  end
+
 end
 
 class UsersIndexPresenter < FilteredPresenter
