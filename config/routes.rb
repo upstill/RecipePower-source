@@ -4,6 +4,8 @@
 # a second, POST, method (#query), which wasn't being POSTed to upon page reload.
 
 RP::Application.routes.draw do
+  resources :answers
+
   if Rails.env.staging?
     mount LetterOpenerWeb::Engine, at: "/letter_opener"
   end

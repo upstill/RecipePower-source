@@ -32,6 +32,9 @@ class User < ActiveRecord::Base
   has_many :followee_relations, :foreign_key => "follower_id", :dependent=>:destroy, :class_name => "UserRelation"
   has_many :followees, -> { uniq }, :through => :followee_relations, :source => :followee
 
+  has_many :answers
+  has_many :questions, :through => :answers
+
   # Channels are just another kind of user. This field (channel_referent_id, externally) denotes such.
   # TODO: delete channel_referent_id and tables feeds_users, lists_users and private_subscriptions
   belongs_to :channel, :class_name => "Referent", :foreign_key => "channel_referent_id"
