@@ -4,6 +4,8 @@
 # a second, POST, method (#query), which wasn't being POSTed to upon page reload.
 
 RP::Application.routes.draw do
+  resources :tagsets
+
   resources :answers
 
   if Rails.env.staging?

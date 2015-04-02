@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150402174552) do
+ActiveRecord::Schema.define(version: 20150402175847) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -344,6 +344,18 @@ ActiveRecord::Schema.define(version: 20150402174552) do
     t.datetime "updated_at"
   end
 
+  create_table "tag_selections", force: :cascade do |t|
+    t.integer  "tagset_id"
+    t.integer  "user_id"
+    t.integer  "tag_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "tag_selections", ["tag_id"], name: "index_tag_selections_on_tag_id", using: :btree
+  add_index "tag_selections", ["tagset_id"], name: "index_tag_selections_on_tagset_id", using: :btree
+  add_index "tag_selections", ["user_id"], name: "index_tag_selections_on_user_id", using: :btree
+
   create_table "taggings", force: :cascade do |t|
     t.integer  "user_id"
     t.integer  "tag_id"
@@ -352,17 +364,6 @@ ActiveRecord::Schema.define(version: 20150402174552) do
     t.datetime "created_at",              null: false
     t.datetime "updated_at",              null: false
   end
-
-  create_table "tagrefs", force: :cascade do |t|
-    t.boolean  "primary"
-    t.integer  "tag_id"
-    t.integer  "tagset_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  add_index "tagrefs", ["tag_id"], name: "index_tagrefs_on_tag_id", using: :btree
-  add_index "tagrefs", ["tagset_id"], name: "index_tagrefs_on_tagset_id", using: :btree
 
   create_table "tags", force: :cascade do |t|
     t.string   "name",            limit: 255
@@ -379,7 +380,8 @@ ActiveRecord::Schema.define(version: 20150402174552) do
   add_index "tags", ["normalized_name"], name: "tag_normalized_name_index", using: :btree
 
   create_table "tagsets", force: :cascade do |t|
-    t.string   "label"
+    t.string   "title"
+    t.integer  "tagtype"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -461,6 +463,7 @@ ActiveRecord::Schema.define(version: 20150402174552) do
   add_index "votes", ["user_id", "entity_type", "entity_id"], name: "index_votes_on_user_id_and_entity_type_and_entity_id", unique: true, using: :btree
 
   add_foreign_key "answers", "users"
-  add_foreign_key "tagrefs", "tags"
-  add_foreign_key "tagrefs", "tagsets"
+  add_foreign_key "tag_selections", "tags"
+  add_foreign_key "tag_selections", "tagsets"
+  add_foreign_key "tag_selections", "users"
 end

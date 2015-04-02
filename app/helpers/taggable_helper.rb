@@ -45,7 +45,10 @@ module TaggableHelper
     end
   end
 
-  def taggable_div(f, classname="", options={})
+  def taggable_div(f, classname="edit_recipe_field", options={})
+    if classname.is_a? Hash
+      classname, options = "edit_recipe_field", classname
+    end
     options[:rows] ||= "1"
     options[:label] ||= "Tags"
     content_tag :div, 

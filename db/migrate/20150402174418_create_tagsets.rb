@@ -1,7 +1,8 @@
 class CreateTagsets < ActiveRecord::Migration
   def change
     create_table :tagsets do |t|
-      t.string :label
+      t.string :title
+      t.integer :tagtype
 
       t.timestamps null: false
     end

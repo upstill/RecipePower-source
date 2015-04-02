@@ -37,6 +37,9 @@ class User < ActiveRecord::Base
   accepts_nested_attributes_for :answers, allow_destroy: true
   has_many :questions, :through => :answers
 
+  has_many :tag_selections
+  accepts_nested_attributes_for :tag_selections, allow_destroy: true
+
   # Channels are just another kind of user. This field (channel_referent_id, externally) denotes such.
   # TODO: delete channel_referent_id and tables feeds_users, lists_users and private_subscriptions
   belongs_to :channel, :class_name => "Referent", :foreign_key => "channel_referent_id"
