@@ -15,11 +15,11 @@ class Tag < ActiveRecord::Base
         Occasion: ["Occasion", 8], 
         PantrySection: ["Pantry Section", 9], 
         StoreSection: ["Store Section", 10], 
-        Question: ["Question", 11],
+        Channel: ["Channel", 11],
         Tool: ["Tool", 12], 
         Nutrient: ["Nutrient", 13],
         CulinaryTerm: ["Culinary Term", 14],
-        Collection: ["Private Collection", 15],
+        Question: ["Question", 15],
         List: ["List", 16]
     )
     

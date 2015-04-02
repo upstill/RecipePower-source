@@ -8,5 +8,8 @@ class CreateAnswers < ActiveRecord::Migration
       t.timestamps null: false
     end
     add_foreign_key :answers, :users
+    Tag.where(tagtype: 15).each { |tag| tag.destroy }
+    Tag.create(tagtype: 15, isGlobal: true, name: "What's the best thing you've eaten lately?")
+    Tag.create(tagtype: 15, isGlobal: true, name: "What are you all about cooking right now?")
   end
 end

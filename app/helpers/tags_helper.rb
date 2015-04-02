@@ -186,15 +186,15 @@ BLOCK_END
    end
 
   # Provide a Bootstrap selection menu of a set of tags
-  def tag_select tags
-    klass = "question-selector"
-    klass << " hide" if tags.empty?
-    options = tags.collect { |tag|
-      content_tag :option, tag.name, value: tag.id
+  def tag_select alltags, curtags
+    menu_options = { class: "question-selector" }
+    menu_options[:style] = "display: none;" if (alltags-curtags).empty?
+    options = alltags.collect { |tag|
+      content_tag :option, tag.name, { value: tag.id, style: ("display: none;" if curtags.include?(tag)) }.compact
     }.unshift(
-      content_tag :option, "Pick Another Question"
+      content_tag :option, "Pick #{curtags.empty? ? 'a' : 'Another'} Question", value: 0
     ).join.html_safe
-    content_tag :select, options, name: "Pick a Question", class: klass # , class: "selectpicker"
+    content_tag :select, options, menu_options # , class: "selectpicker"
   end
   
   # Present one section of the tag info using a label, a (possibly empty) collection
