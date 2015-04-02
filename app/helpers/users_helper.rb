@@ -37,4 +37,15 @@ module UsersHelper
   def follow_button_replacement user, options={}
     [ "a.follow-button##{dom_id user}", follow_button(user, options) ]
   end
+
+  def di_select
+    menu_options = { class: "di-selector" }
+    menu_options[:style] = "display: none;" if (alltags-curtags).empty?
+    options = alltags.collect { |tag|
+      content_tag :option, tag.name, { value: tag.id, style: ("display: none;" if curtags.include?(tag)) }.compact
+    }.unshift(
+        content_tag :option, "Pick #{curtags.empty? ? 'a' : 'Another'} Question", value: 0
+    ).join.html_safe
+    content_tag :select, options, menu_options # , class: "selectpicker"
+  end
 end

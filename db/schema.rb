@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150401192839) do
+ActiveRecord::Schema.define(version: 20150402174552) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -353,6 +353,17 @@ ActiveRecord::Schema.define(version: 20150401192839) do
     t.datetime "updated_at",              null: false
   end
 
+  create_table "tagrefs", force: :cascade do |t|
+    t.boolean  "primary"
+    t.integer  "tag_id"
+    t.integer  "tagset_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "tagrefs", ["tag_id"], name: "index_tagrefs_on_tag_id", using: :btree
+  add_index "tagrefs", ["tagset_id"], name: "index_tagrefs_on_tagset_id", using: :btree
+
   create_table "tags", force: :cascade do |t|
     t.string   "name",            limit: 255
     t.datetime "created_at"
@@ -366,6 +377,12 @@ ActiveRecord::Schema.define(version: 20150401192839) do
   add_index "tags", ["id"], name: "tags_index_by_id", unique: true, using: :btree
   add_index "tags", ["name", "tagtype"], name: "tag_name_type_unique", unique: true, using: :btree
   add_index "tags", ["normalized_name"], name: "tag_normalized_name_index", using: :btree
+
+  create_table "tagsets", force: :cascade do |t|
+    t.string   "label"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "user_relations", force: :cascade do |t|
     t.integer  "follower_id"
@@ -444,4 +461,6 @@ ActiveRecord::Schema.define(version: 20150401192839) do
   add_index "votes", ["user_id", "entity_type", "entity_id"], name: "index_votes_on_user_id_and_entity_type_and_entity_id", unique: true, using: :btree
 
   add_foreign_key "answers", "users"
+  add_foreign_key "tagrefs", "tags"
+  add_foreign_key "tagrefs", "tagsets"
 end

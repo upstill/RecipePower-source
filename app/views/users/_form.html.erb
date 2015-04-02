@@ -43,11 +43,22 @@
     </div>
     <div class="row">
       <div class="col-md-12">
+        <h3>Personal Questions</h3>
+        <%= tag_select Tag.where(tagtype: 15).to_a, @user.questions %>
         <%= f.fields_for :answers do |builder| %>
             <%= render "answer_fields", f: builder %>
         <% end %>
         <%= link_to_add_fields "Add Question", f, :answers %>
-        <%= tag_select Tag.where(tagtype: 15).to_a, @user.questions %>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <h3>Desert-island Selections</h3>
+        <%= di_select %>
+        <%# f.fields_for :answers do |builder| %>
+            <%# render "desert_island_fields", f: builder %>
+        <%# end %>
+        <%# link_to_add_fields "Add Question", f, :answers %>
       </div>
     </div>
     <%= form_actions f, submit_label: "Update Details", cancel_path: users_path do
