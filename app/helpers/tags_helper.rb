@@ -184,6 +184,18 @@ BLOCK_END
            options_for_select(Tag.type_selections, val )
        end
    end
+
+  # Provide a Bootstrap selection menu of a set of tags
+  def tag_select tags
+    klass = "question-selector"
+    klass << " hide" if tags.empty?
+    options = tags.collect { |tag|
+      content_tag :option, tag.name, value: tag.id
+    }.unshift(
+      content_tag :option, "Pick Another Question"
+    ).join.html_safe
+    content_tag :select, options, name: "Pick a Question", class: klass # , class: "selectpicker"
+  end
   
   # Present one section of the tag info using a label, a (possibly empty) collection
   # of descriptive strings, and a classname for a span summarizing the section (presumably

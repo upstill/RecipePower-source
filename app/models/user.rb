@@ -17,7 +17,8 @@ class User < ActiveRecord::Base
   attr_accessible :id, :username, :first_name, :last_name, :fullname, :about, :login, :private, :skip_invitation, :thumbnail_id,
                 :email, :password, :password_confirmation, :invitee_tokens, :channel_tokens, :avatar_url, # :image,
                 :invitation_token, :invitation_message, :invitation_issuer, :shared_type, :shared_id,
-                :remember_me, :role_id, :sign_in_count, :followee_tokens, :subscription_tokens
+                :remember_me, :role_id, :sign_in_count, :followee_tokens, :subscription_tokens,
+                :answers_attributes
   # attr_writer :browser
   attr_readonly :count_of_collection_pointers
   attr_accessor :invitee_tokens, :channel_tokens, :raw_invitation_token, :avatar_url,
@@ -33,6 +34,7 @@ class User < ActiveRecord::Base
   has_many :followees, -> { uniq }, :through => :followee_relations, :source => :followee
 
   has_many :answers
+  accepts_nested_attributes_for :answers, allow_destroy: true
   has_many :questions, :through => :answers
 
   # Channels are just another kind of user. This field (channel_referent_id, externally) denotes such.

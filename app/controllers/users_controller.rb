@@ -177,6 +177,7 @@ class UsersController < CollectibleController
     if update_and_decorate
       response_service.title = "Cookmarks from Update"
       flash[:message] = (@user == current_user ? "Your profile" : @user.handle+"'s profile")+" has been updated."
+      redirect_to action: "collection"
     else
       @section = params[:user][:email] ? "profile" : "account"
       response_service.title = "Edit #{@section}"

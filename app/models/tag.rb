@@ -15,7 +15,7 @@ class Tag < ActiveRecord::Base
         Occasion: ["Occasion", 8], 
         PantrySection: ["Pantry Section", 9], 
         StoreSection: ["Store Section", 10], 
-        Channel: ["Public Collection", 11],
+        Question: ["Question", 11],
         Tool: ["Tool", 12], 
         Nutrient: ["Nutrient", 13],
         CulinaryTerm: ["Culinary Term", 14],
