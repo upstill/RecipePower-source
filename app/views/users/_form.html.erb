@@ -54,11 +54,11 @@
     <div class="row">
       <div class="col-md-12">
         <h3>Desert-island Selections</h3>
-        <%= di_select %>
-        <%# f.fields_for :answers do |builder| %>
-            <%# render "desert_island_fields", f: builder %>
-        <%# end %>
-        <%# link_to_add_fields "Add Question", f, :answers %>
+        <%# di_select %>
+        <%= f.fields_for :tag_selections do |builder| %>
+            <%= render "tag_selection_fields", f: builder %>
+        <% end %>
+        <%# link_to_add_fields "Add Desert Island Selection", f, :tag_selections %>
       </div>
     </div>
     <%= form_actions f, submit_label: "Update Details", cancel_path: users_path do

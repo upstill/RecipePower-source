@@ -18,7 +18,7 @@ class User < ActiveRecord::Base
                 :email, :password, :password_confirmation, :invitee_tokens, :channel_tokens, :avatar_url, # :image,
                 :invitation_token, :invitation_message, :invitation_issuer, :shared_type, :shared_id,
                 :remember_me, :role_id, :sign_in_count, :followee_tokens, :subscription_tokens,
-                :answers_attributes
+                :answers_attributes, :tag_selections_attributes
   # attr_writer :browser
   attr_readonly :count_of_collection_pointers
   attr_accessor :invitee_tokens, :channel_tokens, :raw_invitation_token, :avatar_url,
