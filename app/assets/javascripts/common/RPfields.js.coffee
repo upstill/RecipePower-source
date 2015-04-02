@@ -50,5 +50,5 @@ jQuery ->
 			$(this).hide()
 		else
 			$('option[value=0]', this).text "Pick Another Question"
-		$(this).val 0 # Reset the menu to the label
+		this.value = 0 # $(this).val 0 # Reset the menu to the label
 
