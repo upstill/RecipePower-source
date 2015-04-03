@@ -54,7 +54,7 @@
     <div class="row">
       <div class="col-md-12">
         <h3>Desert-island Selections</h3>
-        <%# di_select %>
+        <%= na_menu f, "tag-selection-menu", @user.tag_selections %>
         <%= f.fields_for :tag_selections do |builder| %>
             <%= render "tag_selection_fields", f: builder %>
         <% end %>

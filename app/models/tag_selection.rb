@@ -4,7 +4,7 @@ class TagSelection < ActiveRecord::Base
   belongs_to :tag
   delegate :title, :to => :tagset
   attr_reader :tag_token
-  attr_accessible :tag_token, :user, :tagset, :tag
+  attr_accessible :tag_token, :user, :tagset, :tag, :tagset_id
 
   def tag_token= t
     token = TokenInput.parse_tokens(t).first # parse_tokens analyzes each token in the list as either integer or string

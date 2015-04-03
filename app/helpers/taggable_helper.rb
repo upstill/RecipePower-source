@@ -29,7 +29,7 @@ module TaggableHelper
     initrs = options[:attrval] || object.send(attribute_name)
     initrs = initrs.to_a if initrs.is_a? ActiveRecord::Relation
     initrs = [initrs] unless initrs.is_a? Array # Could be singular record, but #map expects an array
-    options[:data][:pre] ||= initrs.map(&:attributes).to_json
+    options[:data][:pre] ||= initrs.compact.map(&:attributes).to_json
     options[:data][:token_limit] = 1 unless is_plural
     options[:data][:"min-chars"] ||= 2
     if type = options[:data][:type]

@@ -1,6 +1,6 @@
 jQuery ->
 	$('body').on 'click', 'a.remove_fields', (event) ->
-		$(this).prev('input[type=hidden]').val('1')
+		$(this).next('input[type=hidden]').val('1')
 		fields = $(this).closest('fieldset')
 		$(fields).hide()
 		qid = $('input.question-id', fields)[0].value
