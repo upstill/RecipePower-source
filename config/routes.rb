@@ -4,6 +4,7 @@
 # a second, POST, method (#query), which wasn't being POSTed to upon page reload.
 
 RP::Application.routes.draw do
+
   resources :tagsets
 
   resources :answers
@@ -148,6 +149,8 @@ RP::Application.routes.draw do
     end
   end
   match 'feeds', :controller => 'feeds', :action => 'index', :via => [:get, :post]
+
+  resources :tag_selections
 
   post '/tag' => 'tags#create', :as => 'create_tag'
   get 'tags/:id/taggees' => 'tags#taggees', :as => "tag_taggees"

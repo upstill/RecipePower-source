@@ -1,0 +1,10 @@
+<%= simple_form_for tagset do |f| %>
+  <div style="width: auto; display: inline-block;">
+    <%= token_input_field f, "tag", label: "" %>
+  </div>
+  <%= f.hidden_field :tagset_id %>
+  <%= f.hidden_field :user_id %>
+  <div style="width: auto; display: inline-block; vertical-align: top; margin-top: 9px;">
+    <%= f.submit "Save", class: "btn btn-xs btn-success" %>
+  </div>
+<% end %>

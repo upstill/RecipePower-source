@@ -38,7 +38,7 @@ class UserPresenter < BasePresenter
       when :collected_lists, :owned_lists
         if which == :owned_lists
           lists = user.visible_lists viewer
-          label = "Created the lists"
+          label = "Author of the lists"
         else
           lists = user.collected_entities List, viewer
           label = "Following the lists"
@@ -49,10 +49,22 @@ class UserPresenter < BasePresenter
                 link_to_submit list.name, list_path(list), :mode => :partial
               }).html_safe
         end
+      when :desert_island
+        # Pick a desert-island selection for querying, one that the user hasn't filled in before if poss.
+        unless ts = user.tag_selections.where(tag_id: nil).to_a.sample
+          if tsid = (Tagset.pluck(:id)-user.tag_selections.pluck(:tagset_id)).sample
+            ts = TagSelection.new user: user, tagset_id: tsid
+          else
+            ts = user.tag_selections.to_a.sample
+          end
+        end
+        label = "My desert-island #{ts.title}"
+        contents = with_format("html") { render "tag_selections/form", tagset: ts }
+      when :question
     end
     content_tag( :tr,
       content_tag( :td, content_tag( :h4, label), style:"padding-right: 10px; vertical-align:top; text-align: right" )+
-      content_tag( :td, contents, style: "vertical-align:top; padding-top:11px" )
+      content_tag( :td, contents.html_safe, style: "vertical-align:top; padding-top:11px" )
     ) unless contents.blank?
   end
 
