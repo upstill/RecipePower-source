@@ -9,7 +9,7 @@ require 'filtered_presenter.rb'
 class ApplicationController < ActionController::Base
   include ControllerUtils
   include Querytags # Grab the query tags from params for filtering a list
-  # include ActionController::Live   # For streaming
+  include ActionController::Live   # For streaming
   protect_from_forgery with: :exception
 
   before_filter :check_flash
