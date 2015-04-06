@@ -34,9 +34,27 @@ module ApplicationHelper
   end
 
   def present object
-    presenter = "#{object.class}Presenter".constantize.new(object, self)
-    yield presenter if block_given?
-    presenter
+    if presentable_class = object.class.ancestors.detect { |anc|
+      return if anc == ActiveRecord::Base
+      Object.const_defined? "#{anc}Presenter"
+    }
+      presenter = "#{presentable_class}Presenter".constantize.new(object, self)
+      yield presenter if block_given?
+      presenter
+    end
+  end
+
+  # Get the presenter associated with the decorator's object
+  def present_decorated decorator
+    object = decorator.object
+    if presentable_class = object.class.ancestors.detect { |anc|
+      return if anc == ActiveRecord::Base
+      Object.const_defined? "#{anc}Presenter"
+    }
+      presenter = "#{presentable_class}Presenter".constantize.new(decorator, self)
+      yield presenter if block_given?
+      presenter
+    end
   end
 
   def resource_name

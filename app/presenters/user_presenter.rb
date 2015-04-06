@@ -61,6 +61,14 @@ class UserPresenter < BasePresenter
         label = "My desert-island #{ts.title}"
         contents = with_format("html") { render "tag_selections/form", tagset: ts }
       when :question
+        # Pick a question and include a form for answering
+        # Choose a question at random, preferring one that's as yet unanswered
+        all_qids = Tag.where(tagtype:15).pluck(:id)
+        qid = (all_qids - user.questions.where.not(name: "").pluck(:question_id)).sample ||
+            all_qids.sample
+        answer = user.answers.find_or_initialize_by(question_id: qid)
+        label = answer.question.name
+        contents = with_format("html") { render "answers/form", answer: answer }
     end
     content_tag( :tr,
       content_tag( :td, content_tag( :h4, label), style:"padding-right: 10px; vertical-align:top; text-align: right" )+

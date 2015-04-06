@@ -1,13 +1,15 @@
-<%= simple_form_for(@answer) do |f| %>
+<% answer = @answer unless defined? answer %>
+<%= form_for answer, remote: true, data: { type: 'json' } do |f| %>
   <%= form_errors_helper f %>
 
   <div class="form-inputs">
-    <%= f.input :answer %>
-    <%= f.association :user %>
-    <%= f.input :question_id %>
+    <%= f.text_field :answer, label: false %>
+    <%= f.hidden_field :user_id %>
+    <%= f.hidden_field :question_id %>
   </div>
 
   <div class="form-actions">
-    <%= f.button :submit %>
+    <%# f.button :submit %>
+    <%= dialog_submit_button button_size: "sm" %>
   </div>
 <% end %>

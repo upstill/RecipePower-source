@@ -110,7 +110,7 @@ class ApplicationController < ActionController::Base
     session[:start_time] = session[:last_time] = last_serve.created_at
   end
 
-  # Get a presenter for the object fronm within a controller
+  # Get a presenter for the object from within a controller
   def present object
     "#{object.class}Presenter".constantize.new object, view_context
   end

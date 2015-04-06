@@ -5,6 +5,9 @@ class CreateTagsets < ActiveRecord::Migration
       t.integer :tagtype
 
       t.timestamps null: false
+      Tagset.create title: "Cookbook"
+      Tagset.create title: "Cocktail"
+      Tagset.create title: "Tool"
     end
   end
 end

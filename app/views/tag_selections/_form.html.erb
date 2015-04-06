@@ -1,4 +1,5 @@
-<%= simple_form_for tagset do |f| %>
+<% tagset = @tagset unless defined? tagset %>
+<%= simple_form_for tagset, :html => {class: "submit", 'data-type' => :json} do |f| %>
   <div style="width: auto; display: inline-block;">
     <%= token_input_field f, "tag", label: "" %>
   </div>
