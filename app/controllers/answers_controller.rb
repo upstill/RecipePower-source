@@ -21,10 +21,12 @@ class AnswersController < ApplicationController
 
   # POST /answers
   def create
-    @answer = Answer.new(answer_params)
-
-    if @answer.save
-      redirect_to @answer, notice: 'Answer was successfully created.'
+    ts = Answer.find_or_create_by params[:answer].slice(:user_id, :question_id)
+    ts.update_attributes params[:answer]
+    ts.save
+    update_and_decorate ts
+    if update_and_decorate
+      flash[:popup] = 'Answer duly noted.'
     else
       render :new
     end
@@ -32,8 +34,9 @@ class AnswersController < ApplicationController
 
   # PATCH/PUT /answers/1
   def update
-    if @answer.update(answer_params)
-      redirect_to @answer, notice: 'Answer was successfully updated.'
+    if update_and_decorate
+      flash[:popup] = 'Answer duly noted.'
+      render :create
     else
       render :edit
     end

@@ -73,9 +73,10 @@ class ApplicationController < ActionController::Base
     unless (@decorator && entity == @decorator.object) # Leave the current decorator alone if it will do
       @decorator = (entity.decorate if entity.respond_to? :decorate)
     end
-    if @decorator
+    if entity.respond_to? :title
+      response_service.title = (entity.title || "").truncate(20)
+    elsif @decorator && @decorator.respond_to?(:title)
       response_service.title = (@decorator.title || "").truncate(20)
-      @presenter = CollectiblePresenter.new @decorator, view_context
     end
     entity.errors.empty? # ...and report back status
   end
@@ -135,7 +136,15 @@ class ApplicationController < ActionController::Base
   def report_session
     logger.info "COOKIES:"
     response.cookies.each { |k, v| logger.info "#{k}: #{v}" }
-    logger.info "SESSION id: #{session.id}"
+    begin
+      if session
+        sessid = session.is_a?(Hash) ? session[:id] : (session.id if session.respond_to?(:id))
+      end
+      sessid = "<NO SESSION>" if sessid.blank?
+      logger.info "SESSION id: #{sessid}"
+    rescue Exception => e
+      x=1
+    end
     logger.info "UUID: #{rp_uuid}"
   end
 

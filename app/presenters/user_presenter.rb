@@ -51,15 +51,15 @@ class UserPresenter < BasePresenter
         end
       when :desert_island
         # Pick a desert-island selection for querying, one that the user hasn't filled in before if poss.
-        unless ts = user.tag_selections.where(tag_id: nil).to_a.sample
+        unless tag_selection = user.tag_selections.where(tag_id: nil).to_a.sample
           if tsid = (Tagset.pluck(:id)-user.tag_selections.pluck(:tagset_id)).sample
-            ts = TagSelection.new user: user, tagset_id: tsid
+            tag_selection = TagSelection.new user: user, tagset_id: tsid
           else
-            ts = user.tag_selections.to_a.sample
+            tag_selection = user.tag_selections.to_a.sample
           end
         end
-        label = "My desert-island #{ts.title}"
-        contents = with_format("html") { render "tag_selections/form", tagset: ts }
+        label = "My desert-island #{tag_selection.title}"
+        contents = with_format("html") { render "tag_selections/form", tag_selection: tag_selection }
       when :question
         # Pick a question and include a form for answering
         # Choose a question at random, preferring one that's as yet unanswered

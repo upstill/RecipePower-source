@@ -1,15 +1,12 @@
 <% answer = @answer unless defined? answer %>
-<%= form_for answer, remote: true, data: { type: 'json' } do |f| %>
-  <%= form_errors_helper f %>
+<%= form_for answer, remote: true, html: { onload: "RP.submit.form_onload(event);" }, data: {type: 'json'} do |f| %>
+    <%= form_errors_helper f %>
 
-  <div class="form-inputs">
-    <%= f.text_field :answer, label: false %>
-    <%= f.hidden_field :user_id %>
-    <%= f.hidden_field :question_id %>
-  </div>
+    <div class="form-inputs inline-text-field">
+      <%= f.text_field :answer, label: false %>
+      <%= f.hidden_field :user_id %>
+      <%= f.hidden_field :question_id %>
+    </div>
 
-  <div class="form-actions">
-    <%# f.button :submit %>
-    <%= dialog_submit_button button_size: "sm" %>
-  </div>
+    <%= dialog_submit_button button_size: "xs" %>
 <% end %>

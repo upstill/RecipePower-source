@@ -195,13 +195,19 @@ RP.submit.error = (event, jqXHR, statusText, errorThrown) ->
 	if responseData = RP.post_error(jqXHR) # Try to recover useable data from the error
 		RP.process_response responseData, RP.dialog.enclosing_modal(event.currentTarget)
 
+RP.submit.form_onload = (event) ->
+	RP.submit.form_prep event.target
+
 # Make a form ready for our special handling
 RP.submit.form_prep = (context) ->
 	context ||= document
 	# Forms submissions that expect JSON structured data will be handled here:
-	$('form', context).submit RP.submit.filter_submit
+	if context.tagName == "FORM"
+		$(context).submit RP.submit.filter_submit
+	else
+		$('form', context).submit RP.submit.filter_submit
 	# Turn a Bootstrap button group into radio buttons
-	$("form input[type=submit]").click ->
+	$("input[type=submit]", context).click ->
 		# Here is where we enable multiple submissions buttons with different routes
 		# The form gets 'data-action', 'data-method' and 'data-operation' fields to divert
 		# forms submission to a different URL and method. (data-operation declares the purpose
@@ -209,7 +215,7 @@ RP.submit.form_prep = (context) ->
 		form = $(this).closest('form')
 		$("input[type=submit]", form).removeAttr "clicked"
 		$(this).attr "clicked", "true"
-	$('div.btn-group').each ->
+	$('div.btn-group', context).each ->
 		group = $(this);
 		if name = group.attr 'data-toggle-name'
 			form = group.parents('form').eq(0);
@@ -231,7 +237,7 @@ RP.submit.form_prep = (context) ->
 # Filter for submit events, ala javascript. Must return a flag for processing the event normally
 RP.submit.filter_submit = (eventdata) ->
 	context = this
-	dlog = $(this).closest('div.dialog')[0] # eventdata.data
+	dlog = $(this).closest('div.dialog')[0] # enclosing dialog, if any
 	clicked = $("input[type=submit][clicked=true]")
 	# return true;
 	if ($(clicked).attr("value") == "Save") && (shortcircuit = RP.notify "beforesave", eventdata.currentTarget)

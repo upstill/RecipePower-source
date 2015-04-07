@@ -126,3 +126,15 @@ div.card {
     margin-top: 5px;
     margin-bottom: 5px;
   }
+
+  div.inline-text-field {
+    width: auto;
+    display: inline-block;
+  }
+
+  div.inline-submit-button {
+    width: auto;
+    display: inline-block;
+    vertical-align: top;
+    margin-top: 9px;
+  }

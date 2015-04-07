@@ -37,17 +37,17 @@ module TaggableHelper
       options[:data][:query] = "tagtypes=#{type.map(&:to_s).join(',')}"
     end
     options[:class] = "token-input-field-pending #{options[:class]}" # The token-input-field-pending class triggers tokenInput
+    options[:onload] = "RP.tagger.onload(event);"
     if f==object # Not in the context of a form
       text_field_name = attribute_name+"txt"
       text_field_tag text_field_name, "#{object.send(text_field_name)}", options
     elsif f.class.to_s.match /SimpleForm/
       options[:input_html] ||= {}
-      # Pass the :data and :class options to the input field via input_html
-      options[:input_html][:data] = options.delete :data
-      options[:input_html][:class] = options.delete :class
-      f.input field_name, options
+      # Pass the :data, :onload and :class options to the input field via input_html
+      options[:input_html].merge! options.slice(:data, :class, :onload)
+      f.input field_name, options.slice!(:data, :class, :onload)
     else
-      options[:html_options] = options.slice :class
+      options[:html_options] = options.slice :class, :onload
       label_if_any = options[:label] ? f.label(field_name.to_sym, options[:label]) : ""
       label_if_any + f.text_field(field_name, options)
     end
