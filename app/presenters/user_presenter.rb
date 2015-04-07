@@ -63,9 +63,8 @@ class UserPresenter < BasePresenter
       when :question
         # Pick a question and include a form for answering
         # Choose a question at random, preferring one that's as yet unanswered
-        all_qids = Tag.where(tagtype:15).pluck(:id)
-        qid = (all_qids - user.questions.where.not(name: "").pluck(:question_id)).sample ||
-            all_qids.sample
+        all_qids = Tag.where(tagtype:15).pluck(:id) # IDs of all questions
+        qid = (all_qids - user.answers.where.not(answer: "").pluck(:question_id)).sample || all_qids.sample
         answer = user.answers.find_or_initialize_by(question_id: qid)
         label = answer.question.name
         contents = with_format("html") { render "answers/form", answer: answer }

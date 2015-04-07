@@ -1,6 +1,10 @@
 require "Domain"
 require './lib/string_utils.rb'
+require 'class_utils.rb'
 # require 'suggestion_presenter'
+# require 'user_presenter.rb'
+# Ensure all presenters are available
+Dir[Rails.root.join('app', 'presenters', "*.rb")].each {|l| require l }
 
 module ApplicationHelper
   include ActionView::Helpers::DateHelper
@@ -33,25 +37,10 @@ module ApplicationHelper
     "#{preface} #{numstr} #{name} #{postscript}".strip.gsub(/\s+/, ' ').html_safe
   end
 
-  def present object
-    if presentable_class = object.class.ancestors.detect { |anc|
-      return if anc == ActiveRecord::Base
-      Object.const_defined? "#{anc}Presenter"
-    }
-      presenter = "#{presentable_class}Presenter".constantize.new(object, self)
-      yield presenter if block_given?
-      presenter
-    end
-  end
-
-  # Get the presenter associated with the decorator's object
-  def present_decorated decorator
-    object = decorator.object
-    if presentable_class = object.class.ancestors.detect { |anc|
-      return if anc == ActiveRecord::Base
-      Object.const_defined? "#{anc}Presenter"
-    }
-      presenter = "#{presentable_class}Presenter".constantize.new(decorator, self)
+  def present to_present
+    object = to_present.is_a?(Draper::Decorator) ? to_present.object : to_present
+    if const = const_for(object, "Presenter")
+      presenter = const.new to_present, self
       yield presenter if block_given?
       presenter
     end

@@ -172,7 +172,7 @@ RP.post_success = (jsonResponse, dlog, entity) ->
 
 	# Call the dialog's response function
 	if(dlog != undefined) || (entity != undefined)
-		RP.dialog.onsave dlog, entity
+		RP.notify 'save', (entity || dlog)
 
 	# Stash the result for later processing
 	# if dlog != undefined
@@ -367,3 +367,20 @@ RP.appendElmt = (item, parent) ->
 		$(parent).append item
 		if $(parent).hasClass "swell"
 			$(parent).css "width", (parseInt($(parent).css('width')) + parseInt($(item).css 'width'))
+
+RP.notify = (what, entity) ->
+	# If the entity or the dialog have hooks declared, use them
+	if dlog = $(entity).closest('div.dialog')[0]
+		RP.dialog.notify what, dlog
+	else
+		RP.apply_hooks what, entity
+
+RP.apply_hooks = (what, entity) ->
+	fcn_name = what + "Fcn";
+	msg_name = what + "Msg";
+	if hooks = $(entity).data "hooks"
+		if hooks.hasOwnProperty msg_name
+			RP.notifications.post hooks[msg_name], "popup"
+		if hooks.hasOwnProperty fcn_name
+			fcn = RP.named_function hooks[fcn_name]
+			return fcn entity # We want an error if the function doesn't exist

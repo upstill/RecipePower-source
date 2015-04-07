@@ -11,7 +11,13 @@ module RP
     # -- all .rb files in that directory are automatically loaded.
 
     # Custom directories with classes and modules you want to be autoloadable.
-    config.autoload_paths += %W(#{config.root}/app/models/concerns #{config.root}/app/services #{config.root}/app/mixins #{config.root}/app/controllers/cmods )
+    config.autoload_paths += %W(
+      #{config.root}/app/models/concerns
+      #{config.root}/app/services
+      #{config.root}/app/presenters
+      #{config.root}/app/mixins
+      #{config.root}/app/controllers/cmods
+    )
     # require class extensions right now
     Dir[Rails.root.join('app', 'extensions', "*.rb")].each {|l| require l }
 
