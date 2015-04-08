@@ -8,9 +8,32 @@ class CreateAnswers < ActiveRecord::Migration
       t.timestamps null: false
     end
     add_foreign_key :answers, :users
-    Tag.where(tagtype: 15).each { |tag| tag.destroy }
-    ["What's the best thing you've eaten lately?", "What are you all about cooking right now?", "Who's your most beloved purveyor?", "What's the sharpest tool in your kitchen?", "Fantasy dinner guest?", "Find me shopping at:", "What's the best part about cooking a nice meal?", "What's your hottest recent culinary discovery?", "What's your favorite kind of cooking?", "Who's your current culinary crush?"].each { |name| 
-	Tag.create(tagtype: 15, isGlobal: true, name: name) 
-    }
+    Tag.where(tagtype: [15,17]).each { |tag| tag.destroy }
+    ["What's the best thing you've eaten lately?",
+	"What are you all about cooking right now?",
+	"Who's your most beloved purveyor?",
+	"What's the sharpest tool in your kitchen?",
+	"Fantasy dinner guest?",
+	"Find me shopping at:",
+	"Where are you at (location)?",
+	"Give me an unlimited budget and send me to:",
+	"Favorite funky place to eat?",
+	"Best kitchen secret?",
+	"What's the best part about cooking a nice meal?",
+	"What's your hottest recent culinary discovery?",
+	"What's your favorite kind of cooking?",
+	"What food do you really, really hate?",
+	"Who's your current culinary crush?"
+     ].each { |name| Tag.create(tagtype: 15, isGlobal: true, name: name) }
+     [ "Best Baker",
+	"Griller",
+	"BBQer",
+	"Kid-friendly Cook",
+	"Conceptual Chef",
+	"Roaster with the Moster",
+	"Sandwich Builder",
+	"Pastry Chef",
+	"Not just about Toast"
+     ].each { |name| Tag.create(tagtype: 17, isGlobal: true, name: name) }
   end
 end

@@ -68,6 +68,16 @@ class UserPresenter < BasePresenter
         answer = user.answers.find_or_initialize_by(question_id: qid)
         label = answer.question.name
         contents = with_format("html") { render "answers/form", answer: answer }
+      when :latest_recipe
+        if latest = user.collection_pointers.where(:entity_type => "Recipe", :in_collection => true).order(created_at: :desc).first.entity
+          label = "Latest Recipe"
+          contents = link_to_submit latest.title, recipe_path(latest), :mode => :partial
+        end
+      when :latest_list
+        if latest = user.owned_lists.order(updated_at: :desc).first
+          label = "Latest List"
+          contents = link_to_submit latest.name, list_path(latest), :mode => :partial
+        end
     end
     content_tag( :tr,
       content_tag( :td, content_tag( :h4, label), style:"padding-right: 10px; vertical-align:top; text-align: right" )+

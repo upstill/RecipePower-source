@@ -20,7 +20,8 @@ class Tag < ActiveRecord::Base
         Nutrient: ["Nutrient", 13],
         CulinaryTerm: ["Culinary Term", 14],
         Question: ["Question", 15],
-        List: ["List", 16]
+        List: ["List", 16],
+        Epitaph: ["Epitaph", 17]
     )
     
     attr_accessible :name, :id, :tagtype, :isGlobal, :links, :referents, :users, :owners, :primary_meaning # , :recipes
