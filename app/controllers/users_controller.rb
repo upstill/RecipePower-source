@@ -175,9 +175,14 @@ class UsersController < CollectibleController
 
   def update
     if update_and_decorate
-      response_service.title = "Cookmarks from Update"
-      flash[:message] = (@user == current_user ? "Your profile" : @user.handle+"'s profile")+" has been updated."
-      redirect_to action: "collection"
+      if params[:form]
+        flash[:popup] = "Thanks for the update!"
+        render "form_#{params[:form]}"
+      else
+        response_service.title = "Cookmarks from Update"
+        flash[:message] = (@user == current_user ? "Your profile" : @user.handle+"'s profile")+" has been updated."
+        redirect_to action: "collection"
+      end
     else
       @section = params[:user][:email] ? "profile" : "account"
       response_service.title = "Edit #{@section}"

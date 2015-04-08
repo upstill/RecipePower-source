@@ -1,0 +1,12 @@
+<% answer = @answer unless defined? answer %>
+<%= form_for answer, remote: true, html: { onload: "RP.submit.form_onload(event);" }, data: {type: 'json'} do |f| %>
+    <%= form_errors_helper f %>
+
+    <div class="form-inputs inline-text-field">
+      <%= f.text_field :answer, label: false %>
+      <%= f.hidden_field :user_id %>
+      <%= f.hidden_field :question_id %>
+    </div>
+
+    <%= dialog_submit_button button_size: "xs" %>
+<% end %>

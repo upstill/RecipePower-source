@@ -1,0 +1,9 @@
+<%= form_for user, remote: true, method: :patch, html: { class: "user_about", onload: "RP.submit.form_onload(event);" }, data: {type: 'json'} do |f| %>
+
+    <div class="form-inputs inline-text-area">
+      <%= f.text_area :about, label: false %>
+      <%= hidden_field_tag :form, "about" %>
+    </div>
+
+    <%= dialog_submit_button button_size: "xs" %>
+<% end %>

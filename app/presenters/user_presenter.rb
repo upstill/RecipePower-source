@@ -29,7 +29,7 @@ class UserPresenter < BasePresenter
       when :member_since
         contents = member_since
       when :about
-        contents = user.about
+        contents = with_format("html") { render "form_about", user: user }
       when :collected_feeds
         label = "Following the feeds"
         contents = strjoin(feeds.collect { |feed|
@@ -59,7 +59,7 @@ class UserPresenter < BasePresenter
           end
         end
         label = "My desert-island #{tag_selection.title}"
-        contents = with_format("html") { render "tag_selections/form", tag_selection: tag_selection }
+        contents = with_format("html") { render "form_tag_selections", tag_selection: tag_selection }
       when :question
         # Pick a question and include a form for answering
         # Choose a question at random, preferring one that's as yet unanswered
@@ -67,7 +67,7 @@ class UserPresenter < BasePresenter
         qid = (all_qids - user.answers.where.not(answer: "").pluck(:question_id)).sample || all_qids.sample
         answer = user.answers.find_or_initialize_by(question_id: qid)
         label = answer.question.name
-        contents = with_format("html") { render "answers/form", answer: answer }
+        contents = with_format("html") { render "form_answers", answer: answer }
       when :latest_recipe
         if latest = user.collection_pointers.where(:entity_type => "Recipe", :in_collection => true).order(created_at: :desc).first.entity
           label = "Latest Recipe"

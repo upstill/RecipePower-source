@@ -127,6 +127,14 @@ div.card {
     margin-bottom: 5px;
   }
 
+  div.inline-text-area {
+    width: 300px;
+    display: inline-block;
+    textarea {
+	width: 100%;
+    }
+  }
+
   div.inline-text-field {
     width: auto;
     display: inline-block;
