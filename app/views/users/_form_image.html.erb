@@ -1,4 +1,4 @@
-<%= form_for user, remote: true, method: :patch, html: {class: "user_image", onload: "RP.submit.form_onload(event);"}, data: {type: 'json'} do |f| %>
+<%= form_for @decorator, remote: true, method: :patch, html: {class: "user_image", onload: "RP.submit.form_onload(event);"}, data: {type: 'json'} do |f| %>
     <div class="avatar media-object" style="width: 200px; height: auto;">
       <%= pic_field f,
                     :image,
@@ -6,23 +6,7 @@
                     :submit_on_change => true,
                     :fallback_img => "/assets/default-avatar-128.png"
       %>
-    </div>
-    <%# img = user.image %>
-    <%# img = "default-avatar-128.png" if img.blank? %>
-    <%# image_with_error_recovery(img, class: "avatar media-object", alt: "/assets/default-avatar-128.png") # image_tag("avatars/#{avatar_name}", class: "avatar") %>
-    <div class="form-inputs inline-text-area">
-      <%# image_with_error_recovery (user.image.blank? ? "default-avatar-128.png" : user.image),
-                                    class: "avatar media-object",
-                                    id: pic_preview_img_id(@decorator),
-                                    alt: "/assets/default-avatar-128.png" %>
-      <%# f.file_field :image,
-                       class: 'directUpload',
-                       onload: "uploader_onload(event);",
-                       onchange: "uploader_submit(event);",
-                       data: { direct_upload: uploader_data(@decorator, :image) } %>
-      <%= uploader_field user, :image %>
+      <%= uploader_field @decorator, :image %>
       <%= hidden_field_tag :form, "image" %>
     </div>
-
-    <%# dialog_submit_button button_size: "xs" %>
 <% end %>

@@ -19,7 +19,7 @@ jQuery ->
 	$('div.navbar').on "resize", (event) ->
 		$('body')[0].style.paddingTop = ($('div.navbar')[0].offsetHeight+7).toString()+"px"
 
-	RP.fire_triggers()
+	RP.loadElmt $('body') # RP.fire_triggers()
 
 # Respond to the preview-recipe button by opening a popup loaded with its URL.
 #   If the popup gets blocked, return true so that the recipe is opened in a new
@@ -261,6 +261,9 @@ RP.loadElmt = (elmt) ->
 		if fcn = RP.named_function $(toSetup).data "setup"
 			fcn toSetup
 	RP.fire_triggers elmt # For unobtrusive triggers
+
+RP.onload = (event) ->
+	x=2
 
 # Process response from a request. This will be an object supplied by a JSON request,
 # which may include code to be presented along with fields (how and area) telling how
