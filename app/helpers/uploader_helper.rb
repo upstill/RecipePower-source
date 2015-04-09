@@ -18,6 +18,7 @@ module UploaderHelper
         class: "directUpload",
         id: "user_avatar_url",
         label: "Upload picture...",
+        onload: "uploader_onload(event);",
         name: pic_field_name,
         type: "file",
         data: { direct_upload: uld }

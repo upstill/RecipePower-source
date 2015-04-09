@@ -9,9 +9,12 @@ class UserPresenter < BasePresenter
   delegate :username, :fullname, :handle, :lists, :feeds, to: :user
 
   def avatar
+=begin
     img = user.image
     img = "default-avatar-128.png" if img.blank?
-    site_link image_with_error_recovery(img, class: "avatar media-object", alt: "/assets/default-avatar-128.png") # image_tag("avatars/#{avatar_name}", class: "avatar")
+    image_with_error_recovery(img, class: "avatar media-object", alt: "/assets/default-avatar-128.png") # image_tag("avatars/#{avatar_name}", class: "avatar")
+=end
+    with_format("html") { render "form_image", user: user }
   end
 
   def member_since

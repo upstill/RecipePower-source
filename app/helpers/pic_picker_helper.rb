@@ -14,7 +14,10 @@ module PicPickerHelper
 
   # Show an image that will resize to fit an enclosing div, possibly with a link to an editing dialog
   # We'll need the id of the object, and the name of the field containing the picture's url
-  def pic_field(form, pic_attribute, page_attribute=nil, options={})
+  def pic_field form, pic_attribute, page_attribute=nil, options={}
+    if page_attribute.is_a? Hash
+      page_attribute, options = nil, page_attribute
+    end
     obj = form.object
     picurl = obj.send(pic_attribute)
     pageurl = page_attribute && obj.send(page_attribute)
@@ -28,8 +31,13 @@ module PicPickerHelper
 
     picdata = obj.imgdata || options[:fallback_img] || obj.imgdata(true)
     pic_area = page_width_pic picdata, img_id, options[:fallback_img]
+    field_options = {
+        rel: "jpg,png,gif",
+        class: "hidden_text",
+        onchange: ("RP.submit.enclosing_form(event);" if options[:submit_on_change])
+    }
     preview = content_tag :div,
-                          pic_area+form.hidden_field(pic_attribute, rel: "jpg,png,gif", class: "hidden_text"),
+                          pic_area+form.hidden_field(pic_attribute, field_options.compact),
                           class: "pic_preview"
 
     golink_attribs =

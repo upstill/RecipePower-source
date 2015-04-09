@@ -272,3 +272,8 @@ RP.submit.filter_submit = (eventdata) ->
 					# Equivalent to an error, so just return
 					return sorted
 	return false
+
+RP.submit.enclosing_form = (event) ->
+	elmt = event.target
+	$(elmt).closest('form').submit()
+
