@@ -1,8 +1,12 @@
 class BasePresenter
   require 'redcarpet'
-  def initialize(object, template)
+
+  attr_accessor :viewer_id
+
+  def initialize(object, template, viewer_id = nil)
     @object = object
     @template = template
+    @viewer_id = viewer_id
   end
 
 private
