@@ -112,10 +112,6 @@ function uploader_onload(event) {
     uploader_unpack(event.target);
 }
 
-function uploader_submit(event) {
-    RP.submit.enclosing_form(event.target);
-}
-
 function uploader_unpack(uploader) {
     uploader = uploader || 'input:file.directUpload'
     $(uploader).each(function (i, elem) {

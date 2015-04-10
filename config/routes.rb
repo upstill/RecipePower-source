@@ -5,6 +5,8 @@
 
 RP::Application.routes.draw do
 
+  get 'search/index'
+
   resources :tagsets
 
   resources :answers
@@ -168,8 +170,8 @@ RP::Application.routes.draw do
   end
   match 'tags', :controller => 'tags', :action => 'index', :via => [:get, :post]
 
+  match 'search', :controller => 'search', :action => 'index', :via => :get
 =begin
-  match 'collection', :controller => 'collection', :action => 'index', :via => [:get, :post]
   post 'collection/update'
   get "collection/refresh"
   get "collection/feed"

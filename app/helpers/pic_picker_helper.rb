@@ -34,7 +34,7 @@ module PicPickerHelper
     field_options = {
         rel: "jpg,png,gif",
         class: "hidden_text",
-        onchange: ("RP.submit.enclosing_form(event);" if options[:submit_on_change])
+        onchange: ("RP.submit.enclosing_form" if options[:submit_on_change])
     }
     preview = content_tag :div,
                           pic_area+form.hidden_field(pic_attribute, field_options.compact),

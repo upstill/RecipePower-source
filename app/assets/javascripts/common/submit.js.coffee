@@ -37,6 +37,10 @@ RP.submit.ontokenchange = ->
 	formelmt = RP.findEnclosing 'FORM', this[0]
 	$(formelmt).submit()
 
+RP.submit.enclosing_form = ->
+	# elmt = event.target
+	$(this).closest('form').submit()
+
 RP.submit.why = (event) ->
 	false
 
@@ -272,8 +276,4 @@ RP.submit.filter_submit = (eventdata) ->
 					# Equivalent to an error, so just return
 					return sorted
 	return false
-
-RP.submit.enclosing_form = (event) ->
-	elmt = event.target
-	$(elmt).closest('form').submit()
 

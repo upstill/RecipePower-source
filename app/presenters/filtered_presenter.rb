@@ -86,8 +86,8 @@ class FilteredPresenter
   end
 
   def panel_partials &block
-    # ["recipes", "lists", "friends", "feeds" ]
-    ["recipes"].each do |et|
+    ["recipes", "lists", "friends", "feeds" ].each do |et|
+    # ["recipes"].each do |et|
       block.call et, assert_query(results_path, entity_type: et, :item_mode => :slider, :org => :newest)
     end
   end
@@ -185,16 +185,24 @@ private
 
 end
 
+class SearchIndexPresenter < FilteredPresenter
+  @results_class_name = 'SearchCache'
+
+  def panel_partials &block
+    # ["recipes", "lists", "friends", "feeds" ].each do |et|
+    ["recipes"].each do |et|
+      block.call et, assert_query(results_path, entity_type: et, :item_mode => :slider, :org => :newest)
+    end
+  end
+
+end
+
 class UsersIndexPresenter < FilteredPresenter
   @item_mode = :table
   @results_class_name = 'UsersCache'
 
   def table_headers
     [ "", "About Me", "Interest(s)", "", "" ]
-  end
-
-  def pagelet
-    super
   end
 end
 

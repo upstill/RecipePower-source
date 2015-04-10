@@ -1,5 +1,10 @@
 module PanelHelper
 
+  def panel_querify url, type, &block
+    body_content = with_output_buffer &block
+    querify_supe :div, url, {type: type}, class: "results_panel"
+  end
+
   # Declare a link which changes the panel state and triggers an update
   def panel_querify_link label, qparams={}
     if label.is_a? Hash

@@ -1,7 +1,4 @@
-<%= content_tag :div,
-                class: "results-panel querify-supe #{type}",
-                data: analyze_request(url),
-                onload: 'RP.querify.onload(event);' do %>
+<%= querify_supe url, class: "results-panel #{type}" do %>
     <div class="results-menu">
       <%= panel_org_button type, :newest %>
       <%= panel_collapse_button type, :slider %>

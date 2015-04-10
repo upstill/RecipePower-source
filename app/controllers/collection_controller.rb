@@ -82,4 +82,7 @@ class CollectionController < ApplicationController
     end
   end
 =end
+  def index
+    smartrender
+  end
 end

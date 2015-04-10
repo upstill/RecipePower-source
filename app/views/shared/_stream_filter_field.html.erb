@@ -1,7 +1,7 @@
   <%= @filtered_presenter.filter_field rows: 1,
                           autofocus: true,
-                          data: {:"on-add" => "RP.submit.ontokenchange",
-                                 :"on-delete" => "RP.submit.ontokenchange",
+                          data: {:"on-add" => "RP.submit.enclosing_form",
+                                 :"on-delete" => "RP.submit.enclosing_form",
                                  :hint => "", # "Search the collection by typing terms here",
                                  placeholder: "Seek and ye shall find...",
                                  :"no-results-text" => "No matching tag found; hit Enter to search with text"} %>
