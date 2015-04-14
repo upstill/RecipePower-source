@@ -244,6 +244,7 @@ RP.change = (event) ->
 	# Fire off an Ajax call notifying the server of the (re)classification
 	RP.submit.submit_and_process RP.build_request(data.request, query), elmt, "GET"
 
+# Crack the query string (if any) to produce an object
 parse_query = (query) ->
 	rtnval = {}
 	if query
@@ -255,19 +256,22 @@ parse_query = (query) ->
 			rtnval[decode match[1]] = decode match[2]
 	rtnval
 
-# Build a request string from a structure with attributes 'request' and 'querydata'
+# Rebuild a request string using values from the object 'assert'
 RP.build_request = (request, assert) ->
-	path = request.replace /\?.*/, ''
-	query = parse_query request.replace(path,'').replace("?", '')
-	# replace values in the existing query according to the imposed query
-	for attrname,attrvalue of assert
-		query[attrname] = attrvalue
-	str = []
-	for attrname,attrvalue of query
-		str.push(encodeURIComponent(attrname) + "=" + encodeURIComponent(attrvalue));
-	if str.length > 0
-		path += "?" + str.join("&")
-	path
+	if assert
+		path = request.replace /\?.*/, ''
+		query = parse_query request.replace(path,'').replace("?", '')
+		# replace values in the existing query according to the imposed query
+		for attrname,attrvalue of assert
+			query[attrname] = attrvalue
+		str = []
+		for attrname,attrvalue of query
+			str.push(encodeURIComponent(attrname) + "=" + encodeURIComponent(attrvalue));
+		if str.length > 0
+			path += "?" + str.join("&")
+		path
+	else
+		request
 
 # Ensure that a newly-loaded element is properly attended to
 RP.loadElmt = (elmt) ->

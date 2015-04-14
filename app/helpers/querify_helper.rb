@@ -10,7 +10,7 @@ module QuerifyHelper
     end
     tag = options.delete(:tag) || :div
     options = options.merge class: "#{options[:class]} querify querify-supe #{'querify-exec' if url}"
-    options.merge!( data: { querypath: url }) if url
+    options.merge!( data: { href: url }) if url
     options[:onload] = 'RP.querify.onload(event);' if options.delete(:autoload)
     body_content = with_output_buffer &block
     content_tag tag, body_content, options

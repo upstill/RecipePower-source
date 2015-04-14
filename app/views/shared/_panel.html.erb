@@ -1,6 +1,6 @@
 <%= querify_block url, class: "results-panel #{type}", autoload: true do %>
     <div class="results-menu">
-      <%= panel_org_button type, :newest %>
+      <%= panel_org_menu url, type, :newest %>
       <%= panel_collapse_button type, :slider %>
       <%= panel_suggestion_button url, type %>
     </div>

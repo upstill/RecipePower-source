@@ -17,24 +17,22 @@ module PanelHelper
     ["a.collapse-button.#{type}", panel_collapse_button(type, item_mode)]
   end
 
-  def panel_org_button type, cur_org
+  def panel_org_menu url, type, cur_org
     links = [ [:rating, "my rating" ], :popularity, :newest, [ :random, "hit me" ] ].collect { |org|
       org, label = org.is_a?(Array) ? org : [ org, org.to_s ]
-      klass = "link"
       if org==cur_org
-        klass << " selected"
-        content_tag :span, label, class: "#{klass} selected"
+        content_tag :span, label, class: "link selected"
       else
         # Provide a button to change the org state
-        querify_button :org, org, class: klass
+        querify_link label, assert_query(url, org: org), class: "link"
       end
     }.join.html_safe
     label = content_tag :span, "Organize by:", class: "label"
     content_tag :div, (label+links).html_safe, class: "org-by #{type}"
   end
 
-  def panel_org_button_replacement type, org
-    ["div.org-by.#{type}", panel_org_button(type, org) ]
+  def panel_org_menu_replacement url, type, org
+    ["div.org-by.#{type}", panel_org_menu(url, type, org) ]
   end
 
   def panel_suggestion_button url, type

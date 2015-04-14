@@ -1,5 +1,5 @@
 <%= render_item :page %>
-<%= querify_block @filtered_presenter.this_path, class: "results-enclosure" do %>
+<%= querify_block class: "results-enclosure" do %>
   <%# render @filtered_presenter.header_partial, title: title, comment: ((defined? comment) ? comment : "") %>
   <%= @filtered_presenter.filter_field(
               rows: 1,
