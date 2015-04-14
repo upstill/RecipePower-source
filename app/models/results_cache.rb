@@ -407,9 +407,8 @@ class RcprefCache < ResultsCache
 
   # Memoize a query to get all the currently-defined entity types
   def typeset
-    if user
-      @typeset ||= user.collection_scope(:in_collection => true).select(:entity_type).distinct.order("entity_type DESC").pluck :entity_type
-    end
+    @typeset ||=
+        (user ? user.collection_scope(:in_collection => true) : Rcpref).select(:entity_type).distinct.order("entity_type DESC").pluck :entity_type
   end
 
   # Apply the tag to the current set of result counts

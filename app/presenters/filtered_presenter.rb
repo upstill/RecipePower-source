@@ -187,10 +187,19 @@ end
 
 class SearchIndexPresenter < FilteredPresenter
   @results_class_name = 'SearchCache'
+  attr_reader :entity_type
+
+  def params_needed
+    super << :entity_type
+  end
+
+  def results_cssclass
+    @entity_type || self.class.to_s
+  end
 
   def panel_partials &block
-    ["recipes", "lists", "friends", "feeds" ].each do |et|
-    # ["recipes"].each do |et|
+    # ["recipes", "lists", "friends", "feeds" ].each do |et|
+    ["recipes"].each do |et|
       block.call et, assert_query(results_path, entity_type: et, :item_mode => :slider, :org => :newest)
     end
   end
