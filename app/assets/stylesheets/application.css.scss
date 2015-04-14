@@ -63,6 +63,14 @@ div.card {
   }
 }
 
+div.results-enclosure {
+  width: 100%;
+  height: auto;
+  margin: 10px;
+  padding: 10px;
+  background-color: #DDDDDD;
+}
+
   // Cozies up to the tags selector above it
   div.form-group {
     &.boolean {

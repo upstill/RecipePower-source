@@ -1,5 +1,15 @@
-<%= render @filtered_presenter.header_partial, title: title, comment: ((defined? comment) ? comment : "") %>
 <%= render_item :page %>
-<% @filtered_presenter.panel_partials do |entity_type, url| %>
-  <%= render "shared/panel", type: entity_type, url: url %>
+<%= querify_block @filtered_presenter.this_path, class: "results-enclosure" do %>
+  <%# render @filtered_presenter.header_partial, title: title, comment: ((defined? comment) ? comment : "") %>
+  <%= @filtered_presenter.filter_field(
+              rows: 1,
+              autofocus: true,
+              data: {:"on-add" => "RP.tagger.querify",
+                     :"on-delete" => "RP.tagger.querify",
+                     :hint => "", # "Search the collection by typing terms here",
+                     placeholder: "Seek and ye shall find...",
+                     :"no-results-text" => "No matching tag found; hit Enter to search with text"} ) %>
+  <% @filtered_presenter.panel_partials do |entity_type, url| %>
+      <%= render "shared/panel", type: entity_type, url: url %>
+    <% end %>
 <% end %>

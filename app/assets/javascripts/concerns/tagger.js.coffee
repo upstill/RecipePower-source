@@ -36,6 +36,9 @@ RP.tagger.onload = (event) ->
 	elmt = event.target
 	RP.tagger.setup elmt
 
+RP.tagger.querify = ->
+	RP.querify.hit this, { queryparams: $(this)[0].value }
+
 # Use data attached to the element to initiate tokenInput
 RP.tagger.setup = (elmt) ->
 	# In case the token-input element is a child of elmt

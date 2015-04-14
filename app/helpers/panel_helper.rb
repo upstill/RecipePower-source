@@ -1,23 +1,5 @@
 module PanelHelper
 
-  def panel_querify url, type, &block
-    body_content = with_output_buffer &block
-    querify_supe :div, url, {type: type}, class: "results_panel"
-  end
-
-  # Declare a link which changes the panel state and triggers an update
-  def panel_querify_link label, qparams={}
-    if label.is_a? Hash
-      label, qparams = "", label
-    end
-    klass = qparams.delete :class
-    link_to_submit label,
-                   "#",
-                   class: klass,
-                   onclick: "RP.querify.onclick(event);",
-                   querify: qparams
-  end
-
   # The collapse button will be to collapse down (for masonry display) or up (for slider)
   def panel_collapse_button type, item_mode
     case item_mode
@@ -26,7 +8,8 @@ module PanelHelper
       when :slider
         to_state, to_mode = :down, :masonry
     end
-    panel_querify_link item_mode: to_mode,
+    querify_button :item_mode,
+                   to_mode,
                    class: "collapse-button #{type} glyphicon glyphicon-collapse-#{to_state}"
   end
 
@@ -40,12 +23,11 @@ module PanelHelper
       klass = "link"
       if org==cur_org
         klass << " selected"
-        link = label
+        content_tag :span, label, class: "#{klass} selected"
       else
-        # Provide a link to change the org state
-        link = panel_querify_link label, org: org
+        # Provide a button to change the org state
+        querify_button :org, org, class: klass
       end
-      content_tag :span, link, class: klass
     }.join.html_safe
     label = content_tag :span, "Organize by:", class: "label"
     content_tag :div, (label+links).html_safe, class: "org-by #{type}"
@@ -55,12 +37,12 @@ module PanelHelper
     ["div.org-by.#{type}", panel_org_button(type, org) ]
   end
 
-  def panel_suggestion_button type
-    panel_querify_link content_tag(:i, "", class: "suggest #{type} icon-large icon-lightbulb")
+  def panel_suggestion_button url, type
+    querify_link "", url, class: "suggest #{type} icon-large icon-lightbulb"
   end
 
-  def panel_suggestion_button_replacement type
-    [ "a.suggest.#{type}", panel_suggestion_button(type) ]
+  def panel_suggestion_button_replacement url, type
+    [ "a.suggest.#{type}", panel_suggestion_button(url, type) ]
   end
   
   def panel_results_placeholder type

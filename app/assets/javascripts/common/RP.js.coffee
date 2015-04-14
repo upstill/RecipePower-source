@@ -244,14 +244,30 @@ RP.change = (event) ->
 	# Fire off an Ajax call notifying the server of the (re)classification
 	RP.submit.submit_and_process RP.build_request(data.request, query), elmt, "GET"
 
+parse_query = (query) ->
+	rtnval = {}
+	if query
+		pl     = /\+/g  # Regex for replacing addition symbol with a space
+		search = /([^&=]+)=?([^&]*)/g
+		decode = (s) ->
+			decodeURIComponent s.replace(pl, " ")
+		while (match = search.exec(query))
+			rtnval[decode match[1]] = decode match[2]
+	rtnval
+
 # Build a request string from a structure with attributes 'request' and 'querydata'
-RP.build_request = (request, query) ->
-	# Encode the querydata into the request string
+RP.build_request = (request, assert) ->
+	path = request.replace /\?.*/, ''
+	query = parse_query request.replace(path,'').replace("?", '')
+	# replace values in the existing query according to the imposed query
+	for attrname,attrvalue of assert
+		query[attrname] = attrvalue
 	str = []
 	for attrname,attrvalue of query
 		str.push(encodeURIComponent(attrname) + "=" + encodeURIComponent(attrvalue));
-	# Fire off an Ajax call notifying the server of the (re)classification
-	request+"?"+str.join("&")
+	if str.length > 0
+		path += "?" + str.join("&")
+	path
 
 # Ensure that a newly-loaded element is properly attended to
 RP.loadElmt = (elmt) ->
