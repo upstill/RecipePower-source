@@ -25,98 +25,6 @@ jQuery ->
 		RP.submit.submit_and_process $(this).attr('action'), this
 		false
 
-# Handle submission links
-RP.submit.bind = (dlog) ->
-	dlog ||= $('body') # window.document
-	$('.preload', dlog).each (ix, elmt) ->
-		preload elmt
-	$('.trigger', dlog).each (ix, elmt) ->
-		fire elmt
-
-# Respond to a change of selection value by submitting the enclosing form
-RP.submit.onselect = (event) ->
-	formelmt = RP.findEnclosing 'FORM', event.currentTarget
-	# On selecting a tag type, clear the associated tokenInput, which may have tokens of diff. types
-	$('.token-input-field', formelmt).tokenInput 'clear'
-	$(formelmt).submit()
-
-# Respond to a change of tokeninput field  by submitting the enclosing form
-RP.submit.ontokenchange = ->
-	formelmt = RP.findEnclosing 'FORM', this[0]
-	$(formelmt).submit()
-
-RP.submit.enclosing_form = ->
-	# elmt = event.target
-	$(this).closest('form').submit()
-
-RP.submit.why = (event) ->
-	false
-
-# Respond to a click on a '.submit' element by optionally checking for a confirmation, firing a request at the server and appropriately handling the response
-RP.submit.onClick = (event) ->
-	# We can enclose an <input> element (like a checkbox) in a link that handles the actual click
-	try
-		fire event.currentTarget
-	catch err # Must ensure we return false to prevent handling by others
-	  console.log "Click handling on submit link barfed: "+err
-	false
-
-# preload ensures that the results of the query are available
-preload = (elmt) ->
-	if $(elmt).hasClass 'loading'
-		return;
-	data = $(elmt).data() || {}
-	# Four ways to short-circuit a request (and to satisfy the preload items):
-	# 1: a dialog has been preloaded into data.preloaded
-	# 2: the response has been preloaded into data.response
-	# 3: data.template leads to a dialog template (selector and subs fields
-	# 4: data.selector finds a DOM element for direct (untemplated) use
-	# The element will store either a 'response' object or a 'preloaded' dialog element
-	if data.preloaded
-		return # data.preloaded
-	if responseData = data.response
-		return # responseData.dlog || responseData
-	if (templateData = data.template) && templateData.subs
-		return # interpolated
-	if data.selector && (ndlog = $(data.selector)[0]) # If dialog is already loaded as a DOM entity, return it
-		return # ndlog
-	# Finally, there is no preloaded recourse, so we submit the request
-	if href = $(elmt).data('href') || (elmt.attributes.href && elmt.attributes.href.value)
-		$(elmt).addClass 'loading'
-		$.ajax
-			type: "GET",
-			dataType: "json",
-			contentType: "application/json",
-			url: href,
-			error: (jqXHR, statusText, errorThrown) ->
-				responseData = RP.post_error(jqXHR) # Try to recover useable data from the error
-				handleResponse elmt, responseData, statusText, errorThrown
-			success: (responseData, statusText, xhr) ->
-				handleResponse elmt, responseData, statusText, xhr
-
-fire = (elmt) ->
-	if $(elmt).hasClass( "loading") # This may already be loading
-		handleEnclosingNavTab elmt
-		$(elmt).addClass('trigger') # Mark for immediate opening
-	else if proceedWithConfirmation(elmt)
-		# If the submission is made from a top-level menu, make the menu active
-		handleEnclosingNavTab elmt
-		if href = $(elmt).data('href') || (elmt.attributes.href && elmt.attributes.href.value)
-			RP.submit.submit_and_process href, elmt
-
-handleEnclosingNavTab = (menuElmt) ->
-	if !$(menuElmt).hasClass "transient" # So marked if its selection will not affect what menu element is active
-		while menuElmt && !$(menuElmt).hasClass "master-navtab"
-			menuElmt = RP.findEnclosing "LI", menuElmt
-		if menuElmt # Select this menu element exclusively
-			$('.master-navtab').removeClass "active"
-			$('.master-navtab a').css 'color','#999'
-			$(menuElmt).addClass "active"
-			$('>a', menuElmt).css 'color','white'
-
-proceedWithConfirmation = (elmt) ->
-	!(confirm_msg = $(elmt).data 'confirmMsg') || confirm confirm_msg
-
 # Master function for submitting AJAX, perhaps in the context of a DOM element that triggered it
 # Elements may fire off requests by:
 # -- being clicked (click events get here by association with the 'submit' class
@@ -151,61 +59,6 @@ RP.submit.submit_and_process = ( request, elmt ) ->
 		else if typeof(ndlog = preloaded) == "string" || (ndlog = $(preloaded)[0]) # Got a string or a DOM element => run dialog
 			$(elmt).removeClass 'trigger'
 			RP.dialog.push_modal ndlog, RP.dialog.enclosing_modal(elmt)
-
-shortCircuit = (elmt) ->
-	data = (elmt && $(elmt).data()) || {}
-	RP.notifications.wait data.waitMsg # If any
-	# Four ways to short-circuit a request (and to satisfy the preloaded items):
-	# 1: a dialog has been preloaded into data.preloaded
-	# 2: the response has been preloaded into data.response
-	# 3: data.template leads to a dialog template (selector and subs fields
-	# 4: data.selector finds a DOM element for direct (untemplated) use
-	if elmt
-		# The element will store either a 'response' object or a 'preloaded' dialog element
-		if ndlog = data.preloaded || ((responseData = data.response) && responseData.dlog)
-			return ndlog;
-		else if responseData
-			return responseData
-		if (templateData = data.template) && templateData.subs && (interpolated = RP.templates.find_and_interpolate(templateData))
-			return interpolated
-	if data.selector && (ndlog = $(data.selector)[0]) # If dialog is already loaded as a DOM element, return it
-		return ndlog
-	false
-
-# Apply a response to the element's request, whether preloaded or freshly arrived, or even whether the element exists or not
-handleResponse = (elmt, responseData, status, xhr) ->
-	RP.notifications.done()
-	# A response has come in, so the element is no longer loading
-	$(elmt).removeClass 'loading'
-	# Elements that preload their query results stash them away, unless they also have the 'trigger' class
-	immediate = $(elmt).hasClass 'trigger'
-	if elmt && !immediate
-		# Save for later if this is a preload that's not triggering now
-		$(elmt).data "response", responseData
-		$(elmt).addClass 'loaded'
-	else
-		$(elmt).removeClass 'trigger'
-		RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
-		RP.process_response responseData, RP.dialog.enclosing_modal(elmt)
-
-# Before making a form submission, see if the dialog is preloaded
-RP.submit.beforeSend = (event, xhr, settings) ->
-	elmt = event.currentTarget
-	# If the submission is made from a top-level menu, make the menu active
-	if proceedWithConfirmation elmt
-		RP.notifications.wait $(elmt).data 'waitMsg'
-		true
-
-# Success handler for fetching dialog from server
-RP.submit.success = (event, responseData, statusText, xhr) ->
-	RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
-	RP.process_response responseData, RP.dialog.enclosing_modal(event.currentTarget)
-
-RP.submit.error = (event, jqXHR, statusText, errorThrown) ->
-	# TODO Not actually posting an error for the user
-	RP.notifications.done()
-	if responseData = RP.post_error(jqXHR) # Try to recover useable data from the error
-		RP.process_response responseData, RP.dialog.enclosing_modal(event.currentTarget)
 
 RP.submit.form_onload = (event) ->
 	RP.submit.form_prep event.target
@@ -284,4 +137,151 @@ RP.submit.filter_submit = (eventdata) ->
 					# Equivalent to an error, so just return
 					return sorted
 	return false
+
+# preload ensures that the results of the query are available
+preload = (elmt) ->
+	if $(elmt).hasClass 'loading'
+		return;
+	data = $(elmt).data() || {}
+	# Four ways to short-circuit a request (and to satisfy the preload items):
+	# 1: a dialog has been preloaded into data.preloaded
+	# 2: the response has been preloaded into data.response
+	# 3: data.template leads to a dialog template (selector and subs fields
+	# 4: data.selector finds a DOM element for direct (untemplated) use
+	# The element will store either a 'response' object or a 'preloaded' dialog element
+	if data.preloaded
+		return # data.preloaded
+	if responseData = data.response
+		return # responseData.dlog || responseData
+	if (templateData = data.template) && templateData.subs
+		return # interpolated
+	if data.selector && (ndlog = $(data.selector)[0]) # If dialog is already loaded as a DOM entity, return it
+		return # ndlog
+	# Finally, there is no preloaded recourse, so we submit the request
+	if href = $(elmt).data('href') || (elmt.attributes.href && elmt.attributes.href.value)
+		$(elmt).addClass 'loading'
+		$.ajax
+			type: "GET",
+			dataType: "json",
+			contentType: "application/json",
+			url: href,
+			error: (jqXHR, statusText, errorThrown) ->
+				responseData = RP.post_error(jqXHR) # Try to recover useable data from the error
+				handleResponse elmt, responseData, statusText, errorThrown
+			success: (responseData, statusText, xhr) ->
+				handleResponse elmt, responseData, statusText, xhr
+
+# Handle submission links
+RP.submit.bind = (dlog) ->
+	dlog ||= $('body') # window.document
+	$('.preload', dlog).each (ix, elmt) ->
+		preload elmt
+	$('.trigger', dlog).each (ix, elmt) ->
+		fire elmt
+
+# Respond to a change of selection value by submitting the enclosing form
+RP.submit.onselect = (event) ->
+	formelmt = RP.findEnclosing 'FORM', event.currentTarget
+	# On selecting a tag type, clear the associated tokenInput, which may have tokens of diff. types
+	$('.token-input-field', formelmt).tokenInput 'clear'
+	$(formelmt).submit()
+
+# Respond to a change of tokeninput field  by submitting the enclosing form
+RP.submit.ontokenchange = ->
+	formelmt = RP.findEnclosing 'FORM', this[0]
+	$(formelmt).submit()
+
+RP.submit.enclosing_form = ->
+	# elmt = event.target
+	$(this).closest('form').submit()
+
+RP.submit.why = (event) ->
+	false
+
+# Respond to a click on a '.submit' element by optionally checking for a confirmation, firing a request at the server and appropriately handling the response
+RP.submit.onClick = (event) ->
+	# We can enclose an <input> element (like a checkbox) in a link that handles the actual click
+	try
+		fire event.currentTarget
+	catch err # Must ensure we return false to prevent handling by others
+	  console.log "Click handling on submit link barfed: "+err
+	false
+
+fire = (elmt) ->
+	if $(elmt).hasClass( "loading") # This may already be loading
+		handleEnclosingNavTab elmt
+		$(elmt).addClass('trigger') # Mark for immediate opening
+	else if proceedWithConfirmation(elmt)
+		# If the submission is made from a top-level menu, make the menu active
+		handleEnclosingNavTab elmt
+		if href = $(elmt).data('href') || (elmt.attributes.href && elmt.attributes.href.value)
+			RP.submit.submit_and_process href, elmt
+
+handleEnclosingNavTab = (menuElmt) ->
+	if !$(menuElmt).hasClass "transient" # So marked if its selection will not affect what menu element is active
+		while menuElmt && !$(menuElmt).hasClass "master-navtab"
+			menuElmt = RP.findEnclosing "LI", menuElmt
+		if menuElmt # Select this menu element exclusively
+			$('.master-navtab').removeClass "active"
+			$('.master-navtab a').css 'color','#999'
+			$(menuElmt).addClass "active"
+			$('>a', menuElmt).css 'color','white'
+
+proceedWithConfirmation = (elmt) ->
+	!(confirm_msg = $(elmt).data 'confirmMsg') || confirm confirm_msg
+
+shortCircuit = (elmt) ->
+	data = (elmt && $(elmt).data()) || {}
+	RP.notifications.wait data.waitMsg # If any
+	# Four ways to short-circuit a request (and to satisfy the preloaded items):
+	# 1: a dialog has been preloaded into data.preloaded
+	# 2: the response has been preloaded into data.response
+	# 3: data.template leads to a dialog template (selector and subs fields
+	# 4: data.selector finds a DOM element for direct (untemplated) use
+	if elmt
+		# The element will store either a 'response' object or a 'preloaded' dialog element
+		if ndlog = data.preloaded || ((responseData = data.response) && responseData.dlog)
+			return ndlog;
+		else if responseData
+			return responseData
+		if (templateData = data.template) && templateData.subs && (interpolated = RP.templates.find_and_interpolate(templateData))
+			return interpolated
+	if data.selector && (ndlog = $(data.selector)[0]) # If dialog is already loaded as a DOM element, return it
+		return ndlog
+	false
+
+# Apply a response to the element's request, whether preloaded or freshly arrived, or even whether the element exists or not
+handleResponse = (elmt, responseData, status, xhr) ->
+	RP.notifications.done()
+	# A response has come in, so the element is no longer loading
+	$(elmt).removeClass 'loading'
+	# Elements that preload their query results stash them away, unless they also have the 'trigger' class
+	immediate = $(elmt).hasClass 'trigger'
+	if elmt && !immediate
+		# Save for later if this is a preload that's not triggering now
+		$(elmt).data "response", responseData
+		$(elmt).addClass 'loaded'
+	else
+		$(elmt).removeClass 'trigger'
+		RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
+		RP.process_response responseData, RP.dialog.enclosing_modal(elmt)
+
+# Before making a form submission, see if the dialog is preloaded
+RP.submit.beforeSend = (event, xhr, settings) ->
+	elmt = event.currentTarget
+	# If the submission is made from a top-level menu, make the menu active
+	if proceedWithConfirmation elmt
+		RP.notifications.wait $(elmt).data 'waitMsg'
+		true
+
+# Success handler for fetching dialog from server
+RP.submit.success = (event, responseData, statusText, xhr) ->
+	RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
+	RP.process_response responseData, RP.dialog.enclosing_modal(event.currentTarget)
+
+RP.submit.error = (event, jqXHR, statusText, errorThrown) ->
+	# TODO Not actually posting an error for the user
+	RP.notifications.done()
+	if responseData = RP.post_error(jqXHR) # Try to recover useable data from the error
+		RP.process_response responseData, RP.dialog.enclosing_modal(event.currentTarget)
 
