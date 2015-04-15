@@ -242,7 +242,7 @@ RP.change = (event) ->
 	else
 		query.value = elmt.value
 	# Fire off an Ajax call notifying the server of the (re)classification
-	RP.submit.submit_and_process RP.build_request(data.request, query), elmt, "GET"
+	RP.submit.submit_and_process RP.build_request(data.request, query), elmt
 
 # Crack the query string (if any) to produce an object
 parse_query = (query) ->

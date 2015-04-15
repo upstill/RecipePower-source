@@ -16,6 +16,14 @@ jQuery ->
 	$(document).on "ajax:beforeSend", 'form.submit', RP.submit.beforeSend
 	$(document).on "ajax:success", 'form.submit', RP.submit.success
 	$(document).on "ajax:error", 'form.submit', RP.submit.error
+	# We shunt form submission through RP.submit.submit_and_process so we can:
+	# -- handle JSON responses properly,
+	# -- short-circuit redundant forms requests
+	# -- provide for keep-alive, popup and confirmation interaction
+	# -- deal with errors
+	$(document).on "submit", 'form.submit', (event) ->
+		RP.submit.submit_and_process $(this).attr('action'), this
+		false
 
 # Handle submission links
 RP.submit.bind = (dlog) ->
@@ -94,7 +102,7 @@ fire = (elmt) ->
 		# If the submission is made from a top-level menu, make the menu active
 		handleEnclosingNavTab elmt
 		if href = $(elmt).data('href') || (elmt.attributes.href && elmt.attributes.href.value)
-			RP.submit.submit_and_process href, elmt, $(elmt).data('method')
+			RP.submit.submit_and_process href, elmt
 
 handleEnclosingNavTab = (menuElmt) ->
 	if !$(menuElmt).hasClass "transient" # So marked if its selection will not affect what menu element is active
@@ -113,17 +121,11 @@ proceedWithConfirmation = (elmt) ->
 # Elements may fire off requests by:
 # -- being clicked (click events get here by association with the 'submit' class
 # -- having a 'preload' class, which attaches the result of the request to the element pending a subsequent click
-RP.submit.submit_and_process = ( request, elmt, method="GET" ) ->
-	if typeof(method) == "object"
-		data = method
-		method = "POST"
-	else
-		data = null
+RP.submit.submit_and_process = ( request, elmt ) ->
 	$(elmt).addClass 'trigger'
 	unless elmt && ($(elmt).hasClass('loading') || (preloaded = shortCircuit elmt))
 		$(elmt).addClass 'loading'
 		ajdata =
-			type: method,
 			dataType: "json",
 			contentType: "application/json",
 			url: request,
@@ -133,8 +135,14 @@ RP.submit.submit_and_process = ( request, elmt, method="GET" ) ->
 				handleResponse elmt, responseData, statusText, errorThrown
 			success: (responseData, statusText, xhr) ->
 				handleResponse elmt, responseData, statusText, xhr
-		if data != null
-			ajdata.data = data
+		if $(elmt).prop("tagName") == "FORM"
+			ajdata.url ||= $(elmt).attr('action')
+			method = $(elmt).attr('method')
+			ajdata.data = $(elmt).serialize()
+		else
+			method = $(elmt).data('method')
+		if method
+			ajdata.type = method
 		$.ajax ajdata
 	if preloaded
 		# The preloaded data is either a DOM element for a dialog, a source string for the dialog, or a responseData structure
