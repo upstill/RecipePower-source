@@ -1,17 +1,16 @@
 <!-- TODO: Confirm avatar, include link to get new one (download?) -->
 <% present decorator, current_user_or_guest.id do |presenter| %>
-    <ul class="media-list">
+    <ul class="media-list" id="<%= decorator.dom_id %>">
       <li class="media">
         <a class="pull-left" href="#">
           <%= presenter.avatar %>
         </a>
 
         <div class="media-body">
-          <h2 class="media-heading"><%= presenter.fullname %>
-            <small><%= presenter.username %></small>
-          </h2>
+          <%= presenter.user_names %>
           <table>
             <%# presenter.aspect :member_since %>
+            <%= presenter.aspect :name_form %>
             <%= presenter.aspect :about %>
             <%= presenter.aspect :owned_lists %>
             <%= presenter.aspect :latest_recipe %>

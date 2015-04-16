@@ -30,16 +30,25 @@ class UserPresenter < BasePresenter
     site_link(user.fullname.present? ? user.fullname : user.username)
   end
 
+  def user_names
+    content_tag :h2,
+                (fullname + "&nbsp;" + content_tag(:small, username)).html_safe,
+                class: "media-heading"
+  end
+
   def aspect which, viewer=nil
     label = which.to_s.capitalize.tr('_', ' ') # split('_').map(&:capitalize).join
     contents = nil
     case which
+      when :name_form
+        if is_viewer? && user.fullname.blank?
+          label = "Human Name"
+          contents = with_format("html") { render "form_fullname", user: user }
+        end
       when :member_since
         contents = member_since
       when :about
-        contents = is_viewer? ?
-            with_format("html") { render "form_about", user: user } :
-            (user.about unless user.about.blank?)
+        contents = show_or_edit which, user.about
       when :collected_feeds
         label = "Following the feeds"
         contents = strjoin(feeds.collect { |feed|
@@ -87,20 +96,63 @@ class UserPresenter < BasePresenter
         end
         label = answer.question.name if answer
       when :latest_recipe
-        if latest = user.collection_pointers.where(:entity_type => "Recipe", :in_collection => true).order(created_at: :desc).first.entity
-          label = "Latest Recipe"
+        label = "Latest Recipe"
+        if latestrr = user.collection_pointers.where(:entity_type => "Recipe", :in_collection => true).order(created_at: :desc).first
+          latest = latestrr.entity
           contents = link_to_submit latest.title, recipe_path(latest), :mode => :partial
+        else
+          contents = "No recipes yet—so install the #{link_to_submit 'Cookmark Button', '/popup/starting_step2', :mode => :modal} and go get some!"
         end
       when :latest_list
+        label = "Latest List"
         if latest = user.owned_lists.order(updated_at: :desc).first
-          label = "Latest List"
           contents = link_to_submit latest.name, list_path(latest), :mode => :partial
+        else
+          contents = "To create your first list, click #{link_to_submit "here", new_list_path, :mode => :modal}."
         end
     end
+    aspect_enclosure which, contents, label
+  end
+
+  def aspect_enclosure which, contents, label=nil
+    label ||= which.to_s.capitalize
     content_tag( :tr,
-      content_tag( :td, content_tag( :h4, label), style:"padding-right: 10px; vertical-align:top; text-align: right" )+
-      content_tag( :td, contents.html_safe, style: "vertical-align:top; padding-top:11px" )
+                 content_tag( :td, content_tag( :h4, label), style:"padding-right: 10px; vertical-align:top; text-align: right" )+
+                     content_tag( :td, contents.html_safe, style: "vertical-align:top; padding-top:11px" ),
+                 class: which.to_s
     ) unless contents.blank?
+  end
+
+  def aspect_selector which
+    "tr.#{which}"
+  end
+
+  def aspect_replacement which, viewer=nil
+    if repl = self.aspect(which, viewer)
+      [ aspect_selector(which), repl ]
+    end
+  end
+
+  def aspect_editor which
+    aspect_enclosure which, with_format("html") { render "form_#{which}", user: user }
+  end
+
+  def aspect_editor_replacement which
+    if repl = self.aspect_editor(which)
+      [ aspect_selector(which), repl ]
+    end
+  end
+
+  def show_or_edit which, val
+    if is_viewer?
+      if val.present?
+        user.about + link_to_submit("Edit", edit_user_path(section: which), button_size: "xs")
+      else
+        aspect_editor which
+      end
+    else
+      val if val.present?
+    end
   end
 
   def about

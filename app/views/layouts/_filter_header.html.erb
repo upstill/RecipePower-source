@@ -1,6 +1,6 @@
 <%= triggered_form search_path do %>
     <h2 class="filter-element">Search the whole magilla:</h2>
-    <% if @filtered_presenter.filter_type_selector %>
+    <% if @filtered_header && @filtered_presenter.filter_type_selector %>
         <%= select_tag :tagtype, options_from_collection_for_select(Tag.type_selections(true, true), :last, :first, @filtered_presenter.tagtype),
                        :include_blank => false,
                        :onchange => %Q{RP.submit.onselect( event ); } %>

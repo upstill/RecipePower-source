@@ -85,7 +85,7 @@ module DialogsHelper
 
   def modal_body(options={}, &block)
     contents = ""
-    contents << flash_notifications_div("notifications-panel") unless options.delete(:noFlash)
+    contents << flash_notifications_div unless options.delete(:noFlash)
     contents << content_tag(:div, prompt, class: "prompt").html_safe if prompt = options.delete(:prompt)
     contents << (options.delete(:body_contents) || capture(&block))
     options[:class] = "modal-body #{options.delete :body_class}"

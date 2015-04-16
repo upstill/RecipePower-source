@@ -10,13 +10,14 @@ class CreateAnswers < ActiveRecord::Migration
     add_foreign_key :answers, :users
     Tag.where(tagtype: [15,17]).each { |tag| tag.destroy }
     ["What's the best thing you've eaten lately?",
+	"For my last meal, serve me:",
 	"What are you all about cooking right now?",
 	"Who's your most beloved purveyor?",
-	"What's the sharpest tool in your kitchen?",
+	"What tool will we have to pry from your cold, dead hands?",
 	"Fantasy dinner guest?",
 	"Find me shopping at:",
-	"Where are you at (location)?",
-	"Give me an unlimited budget and send me to:",
+	"Location:",
+	"Give me an unlimited budget and send me shopping at:",
 	"Favorite funky place to eat?",
 	"Best kitchen secret?",
 	"What's the best part about cooking a nice meal?",

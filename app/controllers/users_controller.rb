@@ -98,7 +98,7 @@ class UsersController < CollectibleController
     update_and_decorate # @user = User.find params[:id]
 	  if (@user.id == current_user_or_guest_id)
       response_service.title = "My Whole Collection"
-      @empty_msg = "Nothing here yet...but that's what the #{view_context.link_to_submit 'Cookmark Button', '/popup/starting_step2'} is for!".html_safe
+      @empty_msg = "Nothing here yet. Click the Suggest button above to get some ideas.".html_safe
       @active_menu = :collections
     else
       response_service.title = "#{@user.handle}'s Collection"
@@ -148,7 +148,11 @@ class UsersController < CollectibleController
     @authentications = @user.authentications if @decorator.id
     @section = params[:section] || "profile"
     response_service.title = "Edit Profile"
-    smartrender
+    if [ :about ].include? @section.to_sym
+      render "edit_aspect", locals: { aspect: @section.to_sym }
+    else
+      smartrender
+    end
   end
   
   # Ask user for an email address for login purposes
@@ -175,9 +179,8 @@ class UsersController < CollectibleController
 
   def update
     if update_and_decorate
-      if params[:form]
+      if @updated = params[:form]
         flash[:popup] = "Thanks for the update!"
-        render "form_#{params[:form]}"
       else
         response_service.title = "Cookmarks from Update"
         flash[:message] = (@user == current_user ? "Your profile" : @user.handle+"'s profile")+" has been updated."
