@@ -18,10 +18,10 @@ class User < ActiveRecord::Base
                 :email, :password, :password_confirmation, :invitee_tokens, :channel_tokens, :avatar_url, # :image,
                 :invitation_token, :invitation_message, :invitation_issuer, :shared_type, :shared_id,
                 :remember_me, :role_id, :sign_in_count, :followee_tokens, :subscription_tokens,
-                :answers_attributes, :tag_selections_attributes
+                :answers_attributes, :tag_selections_attributes, :mail_subject, :mail_body
   # attr_writer :browser
   attr_readonly :count_of_collection_pointers
-  attr_accessor :invitee_tokens, :channel_tokens, :raw_invitation_token, :avatar_url,
+  attr_accessor :invitee_tokens, :channel_tokens, :raw_invitation_token, :avatar_url, :mail_subject, :mail_body,
                 :shared_type, :shared_id # Kept temporarily during sharing operations
   
   has_many :notifications_sent, :foreign_key => :source_id, :class_name => "Notification", :dependent => :destroy

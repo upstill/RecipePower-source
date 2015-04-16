@@ -1,0 +1,25 @@
+<%= simple_form_for @user, :url => sendmail_user_path, method: "PATCH" do |f| %>
+    <%= flash_notifications_div %>
+    <%= hidden_field_tag "confirmed", @confirmed || "0" %>
+    <div class="row">
+      <div class="col-md-12">
+        <h4>Subject</h4>
+        <%= f.text_field :mail_subject, style: "width: 100%", autofocus: true %>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <br>
+        <h4>Message</h4>
+        <%= f.text_area :mail_body, rows: 3 %>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <p style="text-align:right">
+          <%= dialog_submit_button "Send" %>
+          <%= dialog_cancel_button %>
+        </p>
+      </div>
+    </div>
+<% end %>

@@ -101,6 +101,8 @@ RP::Application.routes.draw do
       patch 'tag'
       get 'touch'
       patch 'collect'
+      patch 'sendmail'
+      get 'sendmail', :as => "mailto"
     end
   end
 

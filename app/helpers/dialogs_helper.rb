@@ -137,37 +137,30 @@ module DialogsHelper
                 class: "recipePowerCancelDiv")
   end
 
-  def dialog_submit_button name = nil, options={}
-    if name.is_a? Hash
-      options, name = name, nil
+  def dialog_submit_button label = nil, options={}
+    if label.is_a? Hash
+      options, label = label, nil
     end
     options = bootstrap_button_options({button_style: "success"}.merge(options))
-    str =
-        tag :input,
-            class: "#{options[:class]} dialog-submit-button dialog-form-button",
-            name: "commit",
-            type: "submit",
-            value: name||"Save",
-            data: { method: "post" }
-    # <input class="submit btn btn-primary" name="commit" type="submit" value="Save" data-method="post"/>
-    str
+    tag :input,
+        class: "#{options[:class]} dialog-submit-button dialog-form-button",
+        name: "commit",
+        type: "submit",
+        value: label||"Save",
+        data: { method: options[:method] || "post" }
   end
 
-  def dialog_cancel_button name = nil, options={}
-    if name.is_a? Hash
-      options, name = name, nil
+  def dialog_cancel_button label = nil, options={}
+    if label.is_a? Hash
+      options, label = label, nil
     end
     options = bootstrap_button_options({button_style: "info"}.merge(options))
-    # options[:class] = "#{options[:class]} close dialog-cancel-button"
-    #link_to name, "#", options
-    str = tag :input,
-              class: "#{options[:class]} cancel dialog-cancel-button dialog-form-button",
-              data: {dismiss: "modal"},
-              name: "commit",
-              type: "submit",
-              value: name||"Cancel"
-    # <input class="cancel btn dialog-cancel-button" data-dismiss="modal" name="commit" type="submit" value="Cancel"/>
-    str
+    tag :input,
+        class: "#{options[:class]} cancel dialog-cancel-button dialog-form-button",
+        data: {dismiss: "modal"},
+        name: "commit",
+        type: "submit",
+        value: label||"Cancel"
   end
 
 end

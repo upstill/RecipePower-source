@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content='text/html; charset=UTF-8' http-equiv='Content-Type'/>
+  <%# stylesheet_link_tag "sharemail", :media => "all" %>
+  <style type="text/css">
+      body {
+          font: 16px arial, sans-serif;
+      }
+
+      div.header_content {
+          margin: 20px 50px;
+          display: block;
+          overflow: auto;
+      }
+
+      div.message_banner {
+          font-size: 18px;
+          margin: 10px 0px 10px 10px;
+      }
+
+      div.message_content {
+          font-size: 18px;
+          margin: 10px 0px 10px 50px;
+      }
+  </style>
+</head>
+<body>
+<div class="header_content">
+  <div class="message_banner">
+    <strong>A message for you from <%= @sender.polite_name %></strong> via
+    <%= link_to "RecipePower", root_url, class: "brand", style: "font-size:18px;" %>:
+  </div>
+  <div class="message_content">
+    <blockquote><%= @recipient.mail_body %></blockquote>
+  </div>
+</div>
+</body>
+</html>

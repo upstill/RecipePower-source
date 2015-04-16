@@ -31,8 +31,9 @@ class UserPresenter < BasePresenter
   end
 
   def user_names
+    mail_link = link_to_submit("Send email", mailto_user_path(user, mode: :modal), button_size: "xs") unless is_viewer?
     content_tag :h2,
-                (fullname + "&nbsp;" + content_tag(:small, username)).html_safe,
+                ("#{fullname}&nbsp;#{content_tag(:small, username)}&nbsp;#{mail_link}").html_safe,
                 class: "media-heading"
   end
 

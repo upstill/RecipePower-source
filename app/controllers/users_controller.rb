@@ -193,4 +193,26 @@ class UsersController < CollectibleController
     end
   end
 
+  def sendmail
+    if update_and_decorate
+      case request.method
+      when "PATCH", "POST" # "GET" request opens the dialog, "PATCH" submits it
+        if @user.mail_subject.blank? && !(params[:confirmed] && (params[:confirmed] == "1"))
+          # Go again
+          flash[:alert] = "No subject?!? If that's really what you want, send again."
+          @confirmed = "1"
+        elsif @user.mail_body.blank?
+          flash.now[:error] = "No message?!? Don't want to bother someone with an empty email!"
+          render :errors
+        else
+          RpMailer.user_to_user(current_user, @user).deliver_now
+          flash[:popup] = "Mail is on its way!"
+          render :done
+        end
+      when "GET"
+        smartrender
+      end
+    end
+  end
+
 end

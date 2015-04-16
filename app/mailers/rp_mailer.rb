@@ -16,7 +16,7 @@ class RpMailer < ActionMailer::Base
     @inviter = User.where(id: user.invited_by).first
     @user = user
     # @profile_url = page_with_trigger(users_profile_path) # "http://www.recipepower.com/users/profile"
-    @login_url  = "http://recipepower.com/login"
+    @login_url  = "http://www.recipepower.com/login"
     mail :to => @user.email, :from => "support@recipepower.com", :subject => "Welcome to RecipePower"
   end
     
@@ -37,4 +37,14 @@ class RpMailer < ActionMailer::Base
       from: @sender.polite_name+" on RecipePower <#{@sender.email}>",
       subject: @sender.polite_name+" has something tasty for you"
   end
+
+  def user_to_user(from, to)
+    @sender = from
+    @recipient = to
+    @body = to.mail_body
+    mail to: @recipient.email,
+         from: @sender.polite_name+" on RecipePower <#{@sender.email}>",
+         subject: to.mail_subject
+  end
+
 end
