@@ -1,0 +1,8 @@
+<!-- View for listing entities in a slider container -->
+<div class="suggestions <%= @filtered_presenter.results_cssclass %> slider" style="background-color: inherit;">
+  <div class="left" data-setup="RP.slider.setup">&lt;</div>
+  <div class="right" data-setup="RP.slider.setup">&gt;</div>
+  <div class="track swell stream-items-parent <%= @filtered_presenter.stream_id %>">
+    <%= render @filtered_presenter.tail_partial %>
+  </div>
+</div>

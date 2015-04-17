@@ -46,12 +46,24 @@ module PanelHelper
   def panel_results_placeholder type
     content_tag :div, "", class: "results #{type} placeholder"
   end
-  
+
   def panel_results partial
     with_format("html") { render partial }
   end
-  
+
   def panel_results_replacement type, partial
     [ ".results.#{type}", panel_results(partial) ]
+  end
+
+  def panel_suggestions_placeholder type
+    content_tag :div, "", class: "suggestions #{type} placeholder" # Placeholder for the suggestions panel
+  end
+
+  def panel_suggestions partial
+    with_format("html") { render partial }
+  end
+
+  def panel_suggestions_replacement type, partial=nil
+    [ ".suggestions.#{type}", (partial ? panel_suggestions(partial) : panel_suggestions_placeholder(type)) ]
   end
 end
