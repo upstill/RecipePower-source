@@ -28,13 +28,8 @@ module SearchNode
     @member = nil
     @associates = []
     @attenuation = attenuation # Attenuation is the compounded weights in descending to this associate
-    ensure_associates @weight = weight
-    if @associates[0]
-      @member, @value = @associates[0].member, (@associates[0].value * @weight)
-      @threshold = @associates[-1].value
-    else
-      @member, @value = nil, weight
-    end
+    @weight = weight
+    @member, @value = nil, weight
   end
 
   # Get the next member of value t or greater, if any
@@ -45,13 +40,13 @@ module SearchNode
       return m
     end
     acc_bar = (t <= weight) ? (t / weight) : 1.01 # The target value as seen by associates
-    ensure_associates acc_bar
+    ensure_associates acc_bar, true
     while (first_assoc = @associates[0]) && (first_assoc.value >= acc_bar)
       # The first associate meets the threshold, which only means that it's worth
       # checking further: it may not have a current member, and generating the actual member
       # may reduce the associate's value, which may invalidate the sort order of the associates.
       pv = first_assoc.value # Save for comparison
-      mem = first_assoc.member_of_at_least acc_bar, false # Force the appearance of member
+      first_assoc.member_of_at_least acc_bar, false # Force the appearance of member
       if first_assoc.value == 0 # The foremost associate did NOT produce a member and CANNOT produce more
         @associates.shift
       # If the value of the first associate doesn't change--either b/c no member was generated or
@@ -60,23 +55,32 @@ module SearchNode
         # If the value of the first associate HAS declined, the sort order may have changed
         ensure_associates first_assoc.value # Make sure we have all associates relevant to the new value
         # Adjust the sort order as nec.
-        np = 1
-        while (np < @associates.count) && (@associates[0].value < @associates[np].value)
-          np += 1
-        end
-        if (np -= 1) > 0
-          @associates[0], @associates[np] = @associates[np], @associates[0]
-        end
+        sort_first # Bubblesort because 1) the only thing that's changed is the leader, and 2) we're betting that the new place for the leader is near the front
+      else
+        break
       end
     end
     # Now we have a member IFF the first associate produced one of the stipulated value
-    if mem
-      @member, @value = mem, (pv * @weight)
-      @associates[0].member = nil if clear # Bubble the member up the tree
+    if first_assoc
+      mem = first_assoc.member
+      first_assoc.member = nil # Bubble the member up the tree
+      @member, @value = (mem unless clear), (pv * @weight)
+      mem
     end
   end
 
   protected
+
+  def sort_first
+    if @associates[0].value < @associates[1].value
+      associate = @associates.shift
+      np = 1
+      while (np < @associates.count) && (associate.value < @associates[np].value)
+          np += 1
+      end
+      @associates.insert np, associate
+    end
+  end
 
   def member= memval
     @member = memval

@@ -10,19 +10,20 @@ class SearchTestNode
     @member = @value
   end
 
-  def ensure_associates value
+  def ensure_associates threshold_value, minimal = false
     cv, cw = @associates.present? ?
         [@associates[-1].value, @associates[-1].weight] :
         [1.0, 0.9]
-    while cv > value
+    while cv > threshold_value
       @associates.push (na = SearchTestNode.new(@attenuation*@weight, cw))
-      cv = na.value
+      break if ((cv = na.value)>threshold_value) && minimal
       cw = cw - 0.1
     end
   end
 
   def to_s level=0
-    "#{'\t'*level}Weight: #{@weight}\nValue: #{@value}\n"+@associates.collect{ |as| as.to_s level+1}.join('\n')
+    indent = "\n"+('   '*level)
+    "#{indent}Attenuation: #{@attenuation}#{indent}Weight: #{@weight}#{indent}Value: #{@value}#{indent}Member:#{@member}"+@associates.collect{ |as| as.to_s level+1}.join
   end
 end
 
@@ -36,8 +37,15 @@ class SearchTest < ActiveSupport::TestCase
 
   test "First value out" do
     sn = SearchTestNode.new
-    puts sn
+    puts "------------------------------------#{sn}"
     assert_equal 1.0, sn.member_of_at_least(0)
-    assert_equal 0.9, sn.member_of_at_least(0)
+
+    expected = sn.member_of_at_least(0)
+    puts "------------------------------------#{sn}"
+    assert_equal 0.9, expected
+
+    expected = sn.member_of_at_least(0)
+    puts "------------------------------------#{sn}"
+    assert_equal (0.9*0.9), expected
   end
 end
