@@ -1,92 +1,85 @@
-
 =begin
 This class implements a tree that searches for relevance-weighted items in order.
 Each node in the tree has a weight, and a sorted list of other such nodes (its ASSOCIATES). 
 
 The associates are an open-ended queue, where only those relevant to the search are present
-at any one time, because they are generated in importance order and a queue of only the most important
-ones is maintained.
+at any one time, because they are generated in value order and a queue of only the most important
+ones is maintained, where "important" means "able to meet a threshold". The threshold
+that no non-resident associate will exceed is @threshold.
 
 Each associate is responsible for generating a list of MEMBERS, each of which has its own 
-importance. The members also appear in order of importance. 
+value. The members also appear in order of value.
 
-The current importance of an associate is the importance of its last generated member, and the importance
-of a node is the maximum current importance of all its associates.
+The current value of an associate is the value of its last generated member, adjusted by the
+associate's weight.
 =end
-class SearchNode
+module SearchNode
   
-  attr_accessor :weight, :member, :entity, :max_val
-  
-  def initialize entity
-    @entity = entity
-    @member = nil
-    @threshold = @max_val = 1
-    initialize_associates
-  end
+  attr_accessor :value
+  attr_reader :weight
 
-  # Provide the most relevant member across all associates
-  def member
-    return @member if @member
-    if la = lead_associate
-      @max_val = la.max_val # All subsequent members are guaranteed to have an equal or lower value
-      @member = la.consume_member
+  # A search node has a weight denoting its relative importance vis-a-vis its owner.
+  # It gets a procedure for generating new associates, which takes the list of existing
+  # associates and a value, promising that the returned list of associates will include all
+  # entities of that weight or greater
+  # The idea is that as we go down the tree, the value of subtrees diminishes, so that the "next item"
+  # search may be terminated when the net importance drops below the value of a member thus
+  # far found.
+  def init_search weight
+    @member = nil
+    @associates = []
+    ensure_associates @weight = weight
+    if @associates[0]
+      @member, @value = @associates[0].member, (@associates[0].value * @weight)
+      @threshold = @associates[-1].value
+    else
+      @member, @value = nil, weight
     end
   end
-  
-  # Bubble the member up the tree
-  def consume_member
-    m = member
-    @member = nil
-    m
-  end
-  
-private 
-  
-  def lead_associate
-    while true do
-      if @associates.empty?
-        return nil unless get_next_associate
-      else
-        # Force a member to bubble up, and thus the first associate's max value to be set accurately
-        if @associates[0].member
-          # When the lead associate drops below our minimum prospective value, there
-          # may be an associate in the queue which comes in ahead of the lead.
-          if @associates[0].max_val < @threshold
-            get_next_associate
-          else
-            # Check the ordering of associates
-            if @associates[1] && (@associates[1].max_val > @associates[0].max_val)
-              # Need to start over after sorting b/c new lead may not have a member
-              @associates.sort! { |a1, a2| a1.max_val <=> a2.max_val }
-            else
-              return @associates[0]
-            end
-          end
-        else
-          # Dispose of the associate and repeat
-          @associates.shift
+
+  # Get the next member of value t or greater, if any
+  def member_of_at_least t, clear=true
+    if @member && (@value >= t) # Member is already cached
+      m = @member
+      @member = nil if clear
+      return m
+    end
+    acc_bar = (t <= weight) ? (t / weight) : 1.01 # The target value as seen by associates
+    ensure_associates acc_bar
+    while (first_assoc = @associates[0]) && (first_assoc.value >= acc_bar)
+      # The first associate meets the threshold, which only means that it's worth
+      # checking further: it may not have a current member, and generating the actual member
+      # may reduce the associate's value, which may invalidate the sort order of the associates.
+      pv = first_assoc.value # Save for comparison
+      mem = first_assoc.member_of_at_least acc_bar, false # Force the appearance of member
+      if first_assoc.value == 0 # The foremost associate did NOT produce a member and CANNOT produce more
+        @associates.shift
+      # If the value of the first associate doesn't change--either b/c no member was generated or
+      # the value of the new associate is the same as the old--then everything is secure
+      elsif first_assoc.value < pv
+        # If the value of the first associate HAS declined, the sort order may have changed
+        ensure_associates first_assoc.value # Make sure we have all associates relevant to the new value
+        # Adjust the sort order as nec.
+        np = 1
+        while (np < @associates.count) && (@associates[0].value < @associates[np].value)
+          np += 1
+        end
+        if (np -= 1) > 0
+          @associates[0], @associates[np] = @associates[np], @associates[0]
         end
       end
     end
-  end
-
-  def get_next_associate
-    nil
-  end
-
-  # Setup the associates array based on the associated entity
-  def initialize_associates
-    @associates = []
-    case @entity_type
-      when "Tag"
-      when "User"
-      when "List"
-      when "Feed"
-      when "Site"
-      when "Recipe"
-    end
-    if @associates[0]
-      @threshold = @associates[0].max_val
+    # Now we have a member IFF the first associate produced one of the stipulated value
+    if mem
+      @member, @value = mem, (pv * @weight)
+      @associates[0].member = nil if clear # Bubble the member up the tree
     end
   end
+
+  protected
+
+  def member= memval
+    @member = memval
+  end
+
 end
