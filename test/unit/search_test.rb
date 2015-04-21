@@ -5,8 +5,8 @@ require './lib/search_node.rb'
 class SearchTestNode
   include SearchNode
 
-  def initialize attenuation=1
-    init_search attenuation
+  def initialize attenuation=1, weight=1
+    init_search attenuation, weight
     @member = @value
   end
 
@@ -15,7 +15,7 @@ class SearchTestNode
         [@associates[-1].value, @associates[-1].weight] :
         [1.0, 0.9]
     while cv > value
-      @associates.push (na = SearchTestNode.new(cw))
+      @associates.push (na = SearchTestNode.new(@attenuation*@weight, cw))
       cv = na.value
       cw = cw - 0.1
     end

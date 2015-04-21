@@ -15,8 +15,7 @@ associate's weight.
 =end
 module SearchNode
   
-  attr_accessor :value
-  attr_reader :weight
+  attr_reader :value, :member, :weight, :attenuation
 
   # A search node has a weight denoting its relative importance vis-a-vis its owner.
   # It gets a procedure for generating new associates, which takes the list of existing
@@ -25,9 +24,10 @@ module SearchNode
   # The idea is that as we go down the tree, the value of subtrees diminishes, so that the "next item"
   # search may be terminated when the net importance drops below the value of a member thus
   # far found.
-  def init_search weight
+  def init_search attenuation, weight
     @member = nil
     @associates = []
+    @attenuation = attenuation # Attenuation is the compounded weights in descending to this associate
     ensure_associates @weight = weight
     if @associates[0]
       @member, @value = @associates[0].member, (@associates[0].value * @weight)
