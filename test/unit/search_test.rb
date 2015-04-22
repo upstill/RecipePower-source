@@ -6,18 +6,18 @@ class SearchTestNode
   include SearchNode
 
   def initialize attenuation=1, weight=1
+    @@tree ||= self
     init_search attenuation, weight
     @member = @value
+    @more_associates = 9
   end
 
-  def ensure_associates threshold_value, minimal = false
-    cv, cw = @associates.present? ?
-        [@associates[-1].value, @associates[-1].weight] :
-        [1.0, 0.9]
-    while cv > threshold_value
-      @associates.push (na = SearchTestNode.new(@attenuation*@weight, cw))
-      break if ((cv = na.value)>threshold_value) && minimal
-      cw = cw - 0.1
+  def ensure_associates satisfaction_value, minimal = false
+    cv = @associates.present? ? @associates[-1].value : 1.0
+    while (cv > satisfaction_value) && (@more_associates > 0)
+      @associates.push (na = SearchTestNode.new(@attenuation*@weight, (@more_associates*0.1)))
+      @more_associates -= 1
+      break if ((cv = na.value)>satisfaction_value) && minimal
     end
   end
 
@@ -37,15 +37,28 @@ class SearchTest < ActiveSupport::TestCase
 
   test "First value out" do
     sn = SearchTestNode.new
+    sn.member_of_at_least(0)
     puts "------------------------------------#{sn}"
-    assert_equal 1.0, sn.member_of_at_least(0)
+    assert_equal 1.0, sn.value
 
-    expected = sn.member_of_at_least(0)
+    sn.member_of_at_least(0)
     puts "------------------------------------#{sn}"
-    assert_equal 0.9, expected
+    assert_equal 0.9, sn.value
 
-    expected = sn.member_of_at_least(0)
+    sn.member_of_at_least(0)
     puts "------------------------------------#{sn}"
-    assert_equal (0.9*0.9), expected
+    assert_equal (0.9*0.9), sn.value
+
+    sn.member_of_at_least(0)
+    puts "------------------------------------#{sn}"
+    assert_equal 0.8, sn.value
+
+    sn.member_of_at_least(0)
+    puts "------------------------------------#{sn}"
+    assert_equal (0.9*0.9*0.9), sn.value
+
+    sn.member_of_at_least(0)
+    puts "------------------------------------#{sn}"
+    assert_equal (0.9*0.8), sn.value
   end
 end

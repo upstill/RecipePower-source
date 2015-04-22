@@ -27,9 +27,11 @@ module SearchNode
   def init_search attenuation, weight
     @member = nil
     @associates = []
-    @attenuation = attenuation # Attenuation is the compounded weights in descending to this associate
-    @weight = weight
-    @member, @value = nil, weight
+    # Attenuation is the compounded weights in descending to this associate (The global-to-local xform)
+    # Weight is the weighting of THIS node. Thus, attenuation*weight is 1) the attenuation of any children,
+    # and thus 2) the greatest value that any child can achieve
+    @attenuation = attenuation
+    @member, @value = nil, (@weight = weight)
   end
 
   # Get the next member of value t or greater, if any
