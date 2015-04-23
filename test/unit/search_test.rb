@@ -5,21 +5,22 @@ require './lib/search_node.rb'
 class SearchTestNode
   include SearchNode
 
-  def initialize attenuation=1, weight=1, cutoff = 0.0
-    init_search attenuation, weight
+  def initialize attenuation=1, weight=1, cutoff=0
+    # init_search is defined by the SearchNode module to initialize this node as a search associate
+    init_search attenuation, weight, cutoff
     @member = @value
     @cur_assoc_index = 9
-    # Don't produce any associates that will produce any values < cutoff
-    @cutoff = cutoff
   end
 
-  def next_associate
-    local_to_global = @attenuation*@weight
-    local_val = (@cur_assoc_index/10.0)
+  # Method required of associates in the search tree to create the next associate
+  # It will return nil if no more associates can be provided with a value greater than minval
+  def new_child attenuation, minval
+    # The local weight of the node is determined by the class
+    weight = (@cur_assoc_index/10.0)
     # We disallow any nodes whose global value would be less than the cutoff
-    if (@cur_assoc_index > 0) && (local_val*local_to_global >= @cutoff)
-      newnode = SearchTestNode.new local_to_global, local_val, @cutoff
-      @associates.push newnode
+    if  (@cur_assoc_index > 0) &&
+        ((weight*attenuation) >= minval) &&
+        (newnode = SearchTestNode.new attenuation, weight, minval)
       @cur_assoc_index -= 1
       newnode
     end

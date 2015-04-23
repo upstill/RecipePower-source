@@ -24,13 +24,14 @@ module SearchNode
   # The idea is that as we go down the tree, the value of subtrees diminishes, so that the "next item"
   # search may be terminated when the net importance drops below the value of a member thus
   # far found.
-  def init_search attenuation, weight
+  def init_search attenuation=1, weight = 1, cutoff = 0
     @member = nil
     @associates = []
     # Attenuation is the compounded weights in descending to this associate (The global-to-local xform)
     # Weight is the weighting of THIS node. Thus, attenuation*weight is 1) the attenuation of any children,
     # and thus 2) the greatest value that any child can achieve
     @attenuation = attenuation
+    @cutoff = cutoff
     @member, @value = nil, (@weight = weight)
   end
 
@@ -74,6 +75,16 @@ module SearchNode
   end
 
   protected
+
+  def next_associate
+    local_to_global = @attenuation*@weight
+    # We disallow any nodes whose global value would be less than the cutoff
+    if  (local_to_global >= @cutoff) &&
+        (newnode = new_child local_to_global, @cutoff)
+      @associates.push newnode
+      newnode
+    end
+  end
 
   def emplace_leader
     leader = @associates[newplace = 0]
