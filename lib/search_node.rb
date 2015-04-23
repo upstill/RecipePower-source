@@ -14,7 +14,7 @@ The current value of an associate is the value of its last generated member, adj
 associate's weight.
 =end
 module SearchNode
-  
+
   attr_reader :value, :member, :weight, :attenuation
 
   # A search node has a weight denoting its relative importance vis-a-vis its owner.
@@ -35,52 +35,62 @@ module SearchNode
   end
 
   # Get the next member of value t or greater, if any
-  def member_of_at_least t, clear=true
-    if @member && (@value >= t) # Member is already cached
+  def first_member clear=true
+    if @member # Member is already cached
       m = @member
       @member = nil if clear
       return m
     end
-    acc_bar = (t <= weight) ? (t / weight) : 1.01 # The target value as seen by associates
-    ensure_associates acc_bar, true
-    while (first_assoc = @associates[0]) && (first_assoc.value >= acc_bar)
+    while first_assoc = @associates[0] || next_associate
       # The first associate meets the threshold, which only means that it's worth
       # checking further: it may not have a current member, and generating the actual member
       # may reduce the associate's value, which may invalidate the sort order of the associates.
       pv = first_assoc.value # Save for comparison
-      first_assoc.member_of_at_least acc_bar, false # Force the appearance of member
-      if first_assoc.value == 0 # The foremost associate did NOT produce a member and CANNOT produce more
-        @associates.shift
-      # If the value of the first associate doesn't change--either b/c no member was generated or
-      # the value of the new associate is the same as the old--then everything is secure
-      elsif first_assoc.value < pv
-        # If the value of the first associate HAS declined, the sort order may have changed
-        ensure_associates first_assoc.value # Make sure we have all associates relevant to the new value
-        # Adjust the sort order as nec.
-        sort_first # Bubblesort because 1) the only thing that's changed is the leader, and 2) we're betting that the new place for the leader is near the front
-      else
-        break
+      first_assoc.first_member false # Force the appearance of member but don't consume it
+      case first_assoc.value
+        when 0.0  # The foremost associate did NOT produce a member and CANNOT produce more
+          @associates.shift # Dispose of it and carry on
+        when pv
+          # If the value of the first associate doesn't change--either b/c no member was generated or
+          # the value of the new associate is the same as the old--then everything is secure
+          break
+        else
+          # If the value of the first associate HAS declined as a result of getting its next member
+          # (it should NEVER increase), then sort order of associates may need to change.
+          # We may even need to bring in more associates to find a place for the current leader.
+          emplace_leader
       end
+      # Loop back to check up on the new leader
     end
     # Now we have a member IFF the first associate produced one of the stipulated value
     if first_assoc
-      mem = first_assoc.member
-      first_assoc.member = nil # Bubble the member up the tree
-      @member, @value = (mem unless clear), (pv * @weight)
+      mem = first_assoc.first_member # Bubble the member up the tree
+      @member, @value = (mem unless clear), (first_assoc.value * @weight)
       mem
+    else
+      @value = 0.0
+      @member = nil
     end
   end
 
   protected
 
-  def sort_first
-    if @associates[0].value < @associates[1].value
-      associate = @associates.shift
-      np = 1
-      while (np < @associates.count) && (associate.value < @associates[np].value)
-          np += 1
+  def emplace_leader
+    leader = @associates[newplace = 0]
+    if (@associates.count == 1) || (leader.value < @associates[-1].value)
+      # The leader belongs beyond the current end of the array. But where?
+      while na = next_associate
+        # Keep going until there are no more associates OR one appears that will be before the current leader
+        break if leader.value >= na.value
       end
-      @associates.insert np, associate
+      newplace = @associates.count - (na ? 2 : 1)
+    else # There's > 1 associate AND the leader's value is >= the last associate's value
+      newplace = 0
+      newplace += 1 while leader.value < @associates[newplace+1].value
+    end
+    if newplace != 0
+      ass = @associates.shift
+      @associates.insert newplace, ass
     end
   end
 
