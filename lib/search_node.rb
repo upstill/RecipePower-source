@@ -15,7 +15,7 @@ associate's weight.
 =end
 module SearchNode
 
-  attr_reader :value, :member, :weight, :attenuation
+  attr_reader :sn_value, :sn_current_result, :sn_assoc_weight, :sn_global_to_local
 
   # A search node has a weight denoting its relative importance vis-a-vis its owner.
   # It gets a procedure for generating new associates, which takes the list of existing
@@ -25,32 +25,32 @@ module SearchNode
   # search may be terminated when the net importance drops below the value of a member thus
   # far found.
   def init_search attenuation=1, weight = 1, cutoff = 0
-    @member = nil
-    @associates = []
+    @sn_current_result = nil
+    @sn_associates = []
     # Attenuation is the compounded weights in descending to this associate (The global-to-local xform)
     # Weight is the weighting of THIS node. Thus, attenuation*weight is 1) the attenuation of any children,
     # and thus 2) the greatest value that any child can achieve
-    @attenuation = attenuation
     @cutoff = cutoff
-    @member, @value = nil, (@weight = weight)
+    @sn_global_to_local = attenuation
+    @sn_current_result, @sn_value = nil, (@sn_assoc_weight = weight)
   end
 
-  # Get the next member of value t or greater, if any
+  # Get the next result from the tree, if any
   def first_member clear=true
-    if @member # Member is already cached
-      m = @member
-      @member = nil if clear
+    if @sn_current_result # Member is already cached
+      m = @sn_current_result
+      @sn_current_result = nil if clear
       return m
     end
-    while first_assoc = @associates[0] || next_associate
+    while first_assoc = @sn_associates[0] || next_associate
       # The first associate meets the threshold, which only means that it's worth
       # checking further: it may not have a current member, and generating the actual member
       # may reduce the associate's value, which may invalidate the sort order of the associates.
-      pv = first_assoc.value # Save for comparison
+      pv = first_assoc.sn_value # Save for comparison
       first_assoc.first_member false # Force the appearance of member but don't consume it
-      case first_assoc.value
+      case first_assoc.sn_value
         when 0.0  # The foremost associate did NOT produce a member and CANNOT produce more
-          @associates.shift # Dispose of it and carry on
+          @sn_associates.shift # Dispose of it and carry on
         when pv
           # If the value of the first associate doesn't change--either b/c no member was generated or
           # the value of the new associate is the same as the old--then everything is secure
@@ -66,47 +66,52 @@ module SearchNode
     # Now we have a member IFF the first associate produced one of the stipulated value
     if first_assoc
       mem = first_assoc.first_member # Bubble the member up the tree
-      @member, @value = (mem unless clear), (first_assoc.value * @weight)
+      @sn_current_result, @sn_value = (mem unless clear), (first_assoc.sn_value * @sn_assoc_weight)
       mem
     else
-      @value = 0.0
-      @member = nil
+      @sn_value = 0.0
+      @sn_current_result = nil
     end
+  end
+
+  def to_s level=0
+    indent = "\n"+('   '*level)
+    "#{indent}Attenuation: #{@sn_global_to_local}#{indent}Weight: #{@sn_assoc_weight}#{indent}Value: #{@sn_value}#{indent}Member:#{@sn_current_result}"+@sn_associates.collect{ |as| as.to_s level+1}.join
   end
 
   protected
 
   def next_associate
-    local_to_global = @attenuation*@weight
+    local_to_global = @sn_global_to_local*@sn_assoc_weight
     # We disallow any nodes whose global value would be less than the cutoff
     if  (local_to_global >= @cutoff) &&
         (newnode = new_child local_to_global, @cutoff)
-      @associates.push newnode
+      @sn_associates.push newnode
       newnode
     end
   end
 
   def emplace_leader
-    leader = @associates[newplace = 0]
-    if (@associates.count == 1) || (leader.value < @associates[-1].value)
+    leader = @sn_associates[newplace = 0]
+    if (@sn_associates.count == 1) || (leader.sn_value < @sn_associates[-1].sn_value)
       # The leader belongs beyond the current end of the array. But where?
       while na = next_associate
         # Keep going until there are no more associates OR one appears that will be before the current leader
-        break if leader.value >= na.value
+        break if leader.sn_value >= na.sn_value
       end
-      newplace = @associates.count - (na ? 2 : 1)
+      newplace = @sn_associates.count - (na ? 2 : 1)
     else # There's > 1 associate AND the leader's value is >= the last associate's value
       newplace = 0
-      newplace += 1 while leader.value < @associates[newplace+1].value
+      newplace += 1 while leader.sn_value < @sn_associates[newplace+1].sn_value
     end
     if newplace != 0
-      ass = @associates.shift
-      @associates.insert newplace, ass
+      ass = @sn_associates.shift
+      @sn_associates.insert newplace, ass
     end
   end
 
-  def member= memval
-    @member = memval
+  def sn_current_result= memval
+    @sn_current_result = memval
   end
 
 end
