@@ -50,7 +50,7 @@ RP.querify.onchange = (event) ->
 # When an element gets hit that's enclosed by a querify target, hit it with the params
 RP.querify.onclick = (event) ->
 	elmt = event.target
-	param = { }
+	param = { altClicked: event.altKey }
 	param[elmt.name] = elmt.value
 	RP.querify.propagate elmt, param
 	event.preventDefault()
