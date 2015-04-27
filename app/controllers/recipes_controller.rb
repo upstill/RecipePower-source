@@ -215,7 +215,8 @@ class RecipesController < CollectibleController
 
   # Remove the recipe from the system entirely
   def destroy
-    @recipe = Recipe.find params[:id] 
+    # @recipe = Recipe.find params[:id]
+    update_and_decorate
     title = @recipe.title
     @recipe.destroy
     report_recipe user_collection_url(current_user), "\"#{title}\" is gone for good.", formats, true
