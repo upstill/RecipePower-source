@@ -95,7 +95,6 @@ class RecipesController < CollectibleController
     else # failure (not a valid recipe) => return to new
        response_service.title = "Cookmark a Recipe"
        @nav_current = :addcookmark
-       @recipe.url = params[:recipe][:url]
        smartrender :action => 'new', mode: :modal
     end
   end

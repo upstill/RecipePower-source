@@ -55,7 +55,7 @@ class Recipe < ActiveRecord::Base
       if !extractions
         extractions = SiteServices.extract_from_page(params[:url])
         if extractions.empty?
-          rcp = self.new
+          rcp = self.new params
           rcp.errors[:url] = "Doesn't appear to be a working URL: we can't open it for analysis"
           return rcp
         end
