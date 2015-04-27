@@ -17,7 +17,7 @@ External interface:
 
   new_child is a method that including classes may define to create new associates
 
-  init_search cutoff = nil, weight=1.0   # Initialize an associate
+  init_search weight = nil, cutoff = nil   # Initialize an associate
   init_child_search child, weight # Hook a child into a parent
   first_member clear=true # Get the next result from the (sub)tree, destructively if clear is true
   child_attenuation # The prospective attenuation that will be assigned to any children (before their weight)
@@ -43,20 +43,22 @@ module SearchNode
 
   # Initialize a search associate of a specific weight. There is no local-to-global scale factor at this
   # juncture; if adding nodes to the tree, the parent uses its init_child_search method
-  def init_search cutoff = nil, weight=1.0
-    @search_result = nil
-    @sn_associates = []
+  def init_search weight=nil, cutoff = nil
     # Attenuation is the compounded weights in descending to this associate (The global-to-local xform)
     # Weight is the weighting of THIS node. Thus, attenuation*weight is 1) the attenuation of any children,
     # and thus 2) the greatest value that any child can achieve
     @sn_cutoff = cutoff || 0.0
+    @sn_associates = []
     @sn_local_to_global = 1.0
     @search_result = nil
-    @search_node_value = (@search_node_weight = weight)
+    @search_node_weight = weight if weight
+    @search_node_weight ||= 1.0 # Assert default if weight hasn't been set by other means
+    @search_node_value = @search_node_weight
   end
 
-  def init_child_search child, weight = 1.0
-    child.init_search @sn_cutoff, weight
+  # Accept a child of a given weight
+  def init_child_search child, weight=nil
+    child.init_search weight, @sn_cutoff
     # The attenuation for a child is the attenuation of the parent times the weight of the parent
     child.sn_local_to_global = child_attenuation
     @sn_associates.push child

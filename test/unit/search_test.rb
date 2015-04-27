@@ -7,11 +7,10 @@ class SearchTestNode
 
   # A new search node EITHER gets a global cutoff value (for a root node) OR a declared parent
   def initialize parent_or_cutoff=nil, weight=1.0
-    parent_or_cutoff ||= 0.0
     if parent_or_cutoff.is_a? SearchTestNode
       parent_or_cutoff.init_child_search self, weight
     else
-      init_search parent_or_cutoff, weight
+      init_search weight, parent_or_cutoff
     end
     self.search_result = search_node_value
     @cur_assoc_index = 9
