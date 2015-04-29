@@ -72,14 +72,11 @@ GEM
       json
     awesome_nested_set (3.0.2)
       activerecord (>= 4.0.0, < 5)
-    aws-sdk (2.0.41)
-      aws-sdk-resources (= 2.0.41)
-    aws-sdk-core (2.0.41)
-      builder (~> 3.0)
-      jmespath (~> 1.0)
-      multi_json (~> 1.0)
-    aws-sdk-resources (2.0.41)
-      aws-sdk-core (= 2.0.41)
+    aws-sdk (1.64.0)
+      aws-sdk-v1 (= 1.64.0)
+    aws-sdk-v1 (1.64.0)
+      json (~> 1.4)
+      nokogiri (>= 1.4.4)
     bcrypt (3.1.10)
     binding_of_caller (0.7.2)
       debug_inspector (>= 0.0.1)
@@ -166,8 +163,6 @@ GEM
     hirefire-resource (0.3.6)
     htmlentities (4.3.3)
     i18n (0.7.0)
-    jmespath (1.0.2)
-      multi_json (~> 1.0)
     jquery-migrate-rails (1.2.1)
     jquery-rails (2.2.2)
       railties (>= 3.0, < 5.0)
@@ -376,7 +371,7 @@ DEPENDENCIES
   arel (~> 6.0)
   autoprefixer-rails
   awesome_nested_set
-  aws-sdk
+  aws-sdk (~> 1)
   binding_of_caller
   bootstrap-sass (~> 3.2.0)
   builder (~> 3.1.0)
