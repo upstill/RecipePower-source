@@ -9,6 +9,8 @@ gem 'arel', '~> 6.0'
 # gem 'rails4_upgrade'
 gem 'rails_12factor', :group => [ :production, :staging ]
 
+gem 'thin'
+
 # add these gems to help with the transition:
 gem 'protected_attributes'
 gem 'rails-observers'
