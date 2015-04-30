@@ -4,7 +4,7 @@ require File.expand_path('../application', __FILE__)
 # Initialize the rails application
 RP::Application.initialize!
 
-require 'will_paginate'
+# require 'will_paginate'
 
 # Get the encryption key files
 # Sentry::AsymmetricSentry.default_public_key_file = "config/publ.key"
