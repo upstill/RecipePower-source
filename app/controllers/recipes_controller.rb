@@ -148,10 +148,9 @@ class RecipesController < CollectibleController
         # This gets extracted from the href passed as a parameter
         response_service.is_injector
         url = URI::encode params[:recipe][:url]
-        msg = %Q{"Sorry, but RecipePower can't make sense of the cookmark '#{url}'"}
+        msg = %Q{"Sorry, but RecipePower won't make sense of the cookmark '#{url}'"}
         begin
-          uri = URI(url)
-          if uri.host == current_domain.sub(/:\d*/,'') # Compare the host to the current domain (minus the port)
+          if host_forbidden url # Compare the host to the current domain (minus the port)
             render js: %Q{alert("Sorry, but RecipePower doesn't cookmark its own pages (does that even make sense?)") ; }
           elsif !(@site = Site.find_or_create(url))
             # If we couldn't even get the site from the domain, we just bail entirely

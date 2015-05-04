@@ -198,7 +198,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		ns.postMessage(
 			{ url: this.src,
 				call: "replaceImg"
-			}, "http://<%= current_domain %>", iframe.contentWindow);
+			}, "<%= root_link %>", iframe.contentWindow);
 		event.preventDefault();
 		event.stopPropagation();
 	},
@@ -212,7 +212,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 			ns.postMessage(
 				{ url: childImgs[i].src,
 					call: "replaceImg"
-				}, "http://<%= current_domain %>", iframe.contentWindow);
+				}, "<%= root_link %>", iframe.contentWindow);
 		event.preventDefault();
 		event.stopPropagation();
 	},
@@ -385,7 +385,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	callback += ns.encodeExtractions(extractions);
 	
 	var goer = document.createElement('a');
-	goer.href = "http://<%= current_domain %>/collection"
+	goer.href = "<%= root_link %>/collection"
 	goer.id = 'recipePower-golink';
 	goer.style.display = 'none';
 	document.body.appendChild(goer);
@@ -525,7 +525,7 @@ function unwrapWithoutCloning() {
         // unbinding.
         rm_callback = function(e) {
             if ( typeof source_origin === 'string' ) {
-                console.log("receiveMessage(528): message from "+source_origin+" on "+ e.origin);
+                console.log("receiveMessage(528): message from '"+source_origin+"' on '"+ e.origin+"'");
             }
           if ( ( typeof source_origin === 'string' && e.origin !== source_origin )
              || ( (typeof source_origin === 'function') && source_origin( e.origin ) === FALSE ) ) {
@@ -583,4 +583,4 @@ window.recipePower_namespace.receiveMessage( function(evt) {
 			namespace[call](data);
 		}
 	}
-}, "http://<%= current_domain %>" );
+}, "<%= root_link %>" );
