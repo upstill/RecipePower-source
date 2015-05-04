@@ -14,7 +14,7 @@ class CreateAnswers < ActiveRecord::Migration
 	"What are you all about cooking right now?",
 	"Who's your most beloved purveyor?",
 	"What tool will we have to pry from your cold, dead hands?",
-	"Fantasy dinner guest?",
+	"Who's your #1 fantasy dinner guest?",
 	"Find me shopping at:",
 	"Location:",
 	"Give me an unlimited budget and send me shopping at:",
