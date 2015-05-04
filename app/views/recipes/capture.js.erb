@@ -72,7 +72,8 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		var mgn = height+"px 0px 0px 0px";
 		capsule.style.margin=mgn;
 		*/
-		var ifr = document.getElementById("recipePower-iframe");
+        console.log("In execute_resize");
+        var ifr = document.getElementById("recipePower-iframe");
 		ifr.style.width = width.toString() + "px";
 		ifr.style.height = height.toString() + "px";
 		ifr.style.top = "0";
@@ -510,6 +511,7 @@ function unwrapWithoutCloning() {
   };
   
   $.receiveMessage = p_receiveMessage = function( callback, source_origin, delay ) {
+    console.log("Received message");
     if ( has_postMessage ) {
       // Since the browser supports window.postMessage, the callback will be
       // bound to the actual event associated with window.postMessage.

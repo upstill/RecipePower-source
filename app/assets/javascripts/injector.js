@@ -93,8 +93,10 @@ function launch_interaction(sourcehome) {
 		if (onloadFcn && (typeof window[onloadFcn] === 'function'))
 			window[onloadFcn](dlog);
 	}
-       
+
+    console.log( "Before dialog.run");
 	RP.dialog.run(dlog); // Hand off submit-handling to the dialog manager
+    console.log( "After dialog.run");
 	// $('form', dlog).submit( dlog, submitDialog );
 	// Set the dialog's resize function to adjust size of the iframe
 
@@ -121,6 +123,7 @@ function resize_dialog(e) {
     if (dropdown && (dropdown.style.display != "none")) {
         h = dropdown.offsetHeight;
     }
+    console.log( "Before execute_resize");
     if (dlog.offsetWidth > 0 && dlog.offsetHeight > 0) {
         $.postMessage({ call: "execute_resize", width: dlog.offsetWidth, height: dlog.offsetHeight + h }, RP.embedding_url);
     }
@@ -130,12 +133,15 @@ function resize_dialog(e) {
 function open_dialog(dlog) {
 	/// Cancel will remove the dialog and confirm null effect to user
 	var cancelBtn = document.getElementById("recipePowerCancelBtn");
-	if(cancelBtn) 
+    console.log( "Entering dialog.run");
+	if(cancelBtn)
 		cancelBtn.onclick = retire_iframe;
     // Adjust the enclosing iframe whenever the dialog's size changes
     $(dlog).resize( resize_dialog )
+    console.log( "After resize_dialog the first");
     // Ensure a good fit on open
     resize_dialog()
+    console.log( "After resize_dialog the second");
 	// Report the window dimensions to the enclosing iframe
 	$('#retire_iframe').click( retire_iframe )
 	$('#link_to_redirect').click( redirect_to )
