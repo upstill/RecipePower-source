@@ -16,7 +16,7 @@ def root_link
     when Rails.env.production?
       "https://www.recipepower.com"
     when Rails.env.development?, Rails.env.test?
-      "http://local.recipepower.com:3000"
+      "https://local.recipepower.com:3000"
     when Rails.env.staging?
       "http://staging.herokuapp.com"
   end
