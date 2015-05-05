@@ -72,7 +72,8 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		var mgn = height+"px 0px 0px 0px";
 		capsule.style.margin=mgn;
 		*/
-		var ifr = document.getElementById("recipePower-iframe");
+        console.log("execute_resize(75)");
+        var ifr = document.getElementById("recipePower-iframe");
 		ifr.style.width = width.toString() + "px";
 		ifr.style.height = height.toString() + "px";
 		ifr.style.top = "0";
@@ -197,7 +198,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		ns.postMessage(
 			{ url: this.src,
 				call: "replaceImg"
-			}, "http://<%= current_domain %>", iframe.contentWindow);
+			}, "<%= root_link %>", iframe.contentWindow);
 		event.preventDefault();
 		event.stopPropagation();
 	},
@@ -211,7 +212,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 			ns.postMessage(
 				{ url: childImgs[i].src,
 					call: "replaceImg"
-				}, "http://<%= current_domain %>", iframe.contentWindow);
+				}, "<%= root_link %>", iframe.contentWindow);
 		event.preventDefault();
 		event.stopPropagation();
 	},
@@ -384,7 +385,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	callback += ns.encodeExtractions(extractions);
 	
 	var goer = document.createElement('a');
-	goer.href = "http://<%= current_domain %>/collection"
+	goer.href = "<%= root_link %>/collection"
 	goer.id = 'recipePower-golink';
 	goer.style.display = 'none';
 	document.body.appendChild(goer);
@@ -486,6 +487,7 @@ function unwrapWithoutCloning() {
 	
   $.postMessage = function( message, target_url, target ) {
     if ( !target_url ) { return; }
+  console.log("postMessage(490): to "+target_url);
     
     // Serialize the message if not a string. Note that this is the only real
     // jQuery dependency for this script. If removed, this script could be
@@ -510,6 +512,7 @@ function unwrapWithoutCloning() {
   };
   
   $.receiveMessage = p_receiveMessage = function( callback, source_origin, delay ) {
+    console.log("receiveMessage(515): Receiving a message");
     if ( has_postMessage ) {
       // Since the browser supports window.postMessage, the callback will be
       // bound to the actual event associated with window.postMessage.
@@ -521,6 +524,9 @@ function unwrapWithoutCloning() {
         // Bind the callback. A reference to the callback is stored for ease of
         // unbinding.
         rm_callback = function(e) {
+            if ( typeof source_origin === 'string' ) {
+                console.log("receiveMessage(528): message from '"+source_origin+"' on '"+ e.origin+"'");
+            }
           if ( ( typeof source_origin === 'string' && e.origin !== source_origin )
              || ( (typeof source_origin === 'function') && source_origin( e.origin ) === FALSE ) ) {
             return FALSE;
@@ -577,4 +583,4 @@ window.recipePower_namespace.receiveMessage( function(evt) {
 			namespace[call](data);
 		}
 	}
-}, "http://<%= current_domain %>" );
+}, "<%= root_link %>" );

@@ -9,6 +9,8 @@ gem 'arel', '~> 6.0'
 # gem 'rails4_upgrade'
 gem 'rails_12factor', :group => [ :production, :staging ]
 
+gem 'thin'
+
 # add these gems to help with the transition:
 gem 'protected_attributes'
 gem 'rails-observers'
@@ -51,7 +53,7 @@ gem 'redcarpet'
 gem 'content_for_in_controllers'
 gem 'youtube_addy'
 # gem 'active_model_serializers'
-gem 'aws-sdk'
+gem 'aws-sdk', '~> 1'
 gem 'counter_culture', '~> 0.1.23'
 gem 'letter_opener', :group => [ :development, :staging ]
 gem 'letter_opener_web', '~> 1.2.0', :group => :staging

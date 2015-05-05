@@ -95,6 +95,7 @@ class RecipesController < CollectibleController
     else # failure (not a valid recipe) => return to new
        response_service.title = "Cookmark a Recipe"
        @nav_current = :addcookmark
+       @recipe.url = params[:recipe][:url]
        smartrender :action => 'new', mode: :modal
     end
   end
@@ -147,10 +148,9 @@ class RecipesController < CollectibleController
         # This gets extracted from the href passed as a parameter
         response_service.is_injector
         url = URI::encode params[:recipe][:url]
-        msg = %Q{"Sorry, but RecipePower can't make sense of the cookmark '#{url}'"}
+        msg = %Q{"Sorry, but RecipePower won't make sense of the cookmark '#{url}'"}
         begin
-          uri = URI(url)
-          if uri.host == current_domain.sub(/:\d*/,'') # Compare the host to the current domain (minus the port)
+          if host_forbidden url # Compare the host to the current domain (minus the port)
             render js: %Q{alert("Sorry, but RecipePower doesn't cookmark its own pages (does that even make sense?)") ; }
           elsif !(@site = Site.find_or_create(url))
             # If we couldn't even get the site from the domain, we just bail entirely
@@ -214,7 +214,8 @@ class RecipesController < CollectibleController
 
   # Remove the recipe from the system entirely
   def destroy
-    @recipe = Recipe.find params[:id] 
+    # @recipe = Recipe.find params[:id]
+    update_and_decorate
     title = @recipe.title
     @recipe.destroy
     report_recipe user_collection_url(current_user), "\"#{title}\" is gone for good.", formats, true

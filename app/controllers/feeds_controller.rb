@@ -51,7 +51,8 @@ class FeedsController < CollectibleController
   # GET /feeds/new
   # GET /feeds/new.json
   def new
-    update_and_decorate
+    @feed = Feed.new
+    # update_and_decorate
     response_service.title = "Open a feed"
     smartrender mode: :modal
   end

@@ -7,7 +7,9 @@ class Feed < ActiveRecord::Base
   
   # Setup a feed properly: do a reality check on the url, populate the information
   # fields (title, description...), and ensure it has an associated site
-  before_validation { |feed| feed.follow_url if (new_record? || url_changed?) }
+  before_validation { |feed|
+    feed.follow_url if ((feed.new_record? && feed.url.present?) || feed.url_changed?)
+  }
 
   belongs_to :site
   validates :site, :presence => true
@@ -82,8 +84,8 @@ class Feed < ActiveRecord::Base
   def fetch
     return @fetched if @fetched
     begin
-      @fetched = Feedjira::Feed.fetch_and_parse(url)
-      @fetched = nil if @fetched.class == Fixnum
+      @fetched = Feedjira::Feed.fetch_and_parse url, :on_failure => Proc.new { raise "Feedjira error: Can't open feed" }
+      @fetched = nil if [Fixnum, Hash].include?(@fetched.class) # || !@fetched.is_a?(Feedjira::Feed)
     rescue Exception => e
       @fetched = nil
     end

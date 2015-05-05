@@ -11,14 +11,36 @@ def path_from_url(url)
 	result = url.sub(/https*:\/\/[^\/]*/, '') # Eliminate http[s]:// and beyond to first slash
 end
 
-def current_domain
+def root_link
   case
-  when Rails.env.production?
-    "www.recipepower.com"
-  when Rails.env.development?, Rails.env.test?
-    "local.recipepower.com:3000" 
-  when Rails.env.staging?
-    "staging.herokuapp.com"
+    when Rails.env.production?
+      "https://www.recipepower.com"
+    when Rails.env.development?, Rails.env.test?
+      "http://local.recipepower.com:3000"
+    when Rails.env.staging?
+      "http://staging.herokuapp.com"
   end
 end
+
+# We don't record urls from any of our hosts
+def host_forbidden url
+  uri = URI url
+  [ "recipepower.com",
+    "www.recipepower.com",
+    "local.recipepower.com",
+    "staging.herokuapp.com" ].include? uri.host
+end
+
+=begin
+def current_domain
+  case
+    when Rails.env.production?
+      "www.recipepower.com"
+    when Rails.env.development?, Rails.env.test?
+      "local.recipepower.com:3000"
+    when Rails.env.staging?
+      "staging.herokuapp.com"
+  end
+end
+=end
 
