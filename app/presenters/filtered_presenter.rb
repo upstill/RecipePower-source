@@ -220,6 +220,12 @@ class UsersShowPresenter < FilteredPresenter
 
 end
 
+=begin
+class RecipesShowPresenter < FilteredPresenter
+
+end
+=end
+
 # Present a list of items for a user
 class UserContentPresenter < FilteredPresenter
   attr_reader :entity_type

@@ -17,7 +17,9 @@ module ItemHelper
   end
 
   def item_partial_class item_mode
-    "#{item_mode}-item" + (@decorator ? " #{@decorator.dom_id}" : "")
+    itemclass = "#{item_mode}-item" if item_mode
+    domid = "#{@decorator.dom_id}" if @decorator
+    "#{itemclass} #{domid}"
   end
 
   def item_partial_selector item_or_decorator=nil, item_mode=nil, context=nil
@@ -119,6 +121,8 @@ module ItemHelper
         content_tag(:tr,
                     rendering,
                     class: container_class).html_safe
+      else
+        rendering
     end
   end
 
