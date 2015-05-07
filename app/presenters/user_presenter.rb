@@ -30,11 +30,27 @@ class UserPresenter < BasePresenter
     site_link(user.fullname.present? ? user.fullname : user.username)
   end
 
-  def user_names
+  def panel_header
     mail_link = link_to_submit("Send email", mailto_user_path(user, mode: :modal), button_size: "xs") unless is_viewer?
     content_tag :h2,
                 ("#{fullname}&nbsp;#{content_tag(:small, username)}&nbsp;#{mail_link}").html_safe,
                 class: "media-heading"
+  end
+
+  # Provide a list of aspects for display in the entity's panel, suitable for passing to aspect
+  def panel_aspects
+    [
+        # :member_since,
+        :name_form,
+        :about,
+        :owned_lists,
+        :latest_recipe,
+        :latest_list,
+        :desert_island,
+        :question,
+        # :collected_lists,
+        # :collected_feeds
+    ]
   end
 
   def aspect which, viewer=nil

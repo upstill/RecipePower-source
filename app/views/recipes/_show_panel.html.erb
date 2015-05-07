@@ -16,7 +16,7 @@
               <img src="<%= presenter.present_field "rcpPicURL" %>" class="recipe-preview pull-right" width="100%">
             </div>
         <% end %>
-        <div class="col-md-6 <%# (defined?(wide) && wide) ? '6' : '12' %>">
+        <div class="col-md-6 <%= (defined?(wide) && wide) ? '6' : '12' %>">
           <h3><%= presenter.field_value "title" %></h3>
 
           <div class="panel pull-left panel-default hide-if-empty" style="width:100%">

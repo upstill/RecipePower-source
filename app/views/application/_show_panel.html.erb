@@ -2,4 +2,21 @@
 This is the default for summarizing an item in a panel: use the standard page rendering, without title.
 It can be over-ridden with an identically-named view in the item's view folder
 -->
-<%= render "show", decorator: decorator %>
+<%# render "show", decorator: decorator %>
+<%= present decorator, current_user_or_guest.id do |presenter| %>
+    <ul class="media-list" id="<%= decorator.dom_id %>">
+      <li class="media">
+        <a class="pull-left" href="#">
+          <%= presenter.avatar %>
+        </a>
+        <div class="media-body">
+          <%= presenter.panel_header %>
+          <table>
+            <% presenter.panel_aspects.each do |aspect | %>
+                <%= presenter.aspect aspect %>
+            <% end %>
+          </table>
+        </div>
+      </li>
+    </ul>
+<% end %>
