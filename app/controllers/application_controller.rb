@@ -37,6 +37,7 @@ class ApplicationController < ActionController::Base
   helper_method :resource_errors_to_flash
   helper_method :resource_errors_to_flash_now
   helper_method :with_format
+  helper_method :"permitted_to?"
 
   include ApplicationHelper
 

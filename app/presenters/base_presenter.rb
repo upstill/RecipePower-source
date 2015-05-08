@@ -60,7 +60,10 @@ class CardPresenter < BasePresenter
   end
 
   def card_header
-    content_tag :h2, card_header_content, class: "media-heading"
+    editlink = collectible_buttons_panel @decorator,
+                                         :button_size => "xs",
+                                         :edit_button => response_service.admin_view?
+    content_tag :h2, "#{card_header_content}&nbsp;#{editlink}".html_safe, class: "media-heading"
   end
 
   def card_header_content

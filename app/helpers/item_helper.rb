@@ -24,7 +24,16 @@ module ItemHelper
 
   def item_partial_selector item_or_decorator=nil, item_mode=nil, context=nil
     item, item_mode = item_preflight item_or_decorator, item_mode
-    (item_mode==:table ? "td." : "div.") + item_partial_class(item_mode).gsub(' ','.')
+    tag =
+    case item_mode
+      when :table
+        "td"
+      when :card
+        "ul"
+      else
+        "div"
+    end
+    "#{tag}." + item_partial_class(item_mode).gsub(' ','.')
   end
 
   # container_selector and wrapper_selector are adopted from masonry_helper.rb and are currently only for masonry lists
@@ -65,7 +74,7 @@ module ItemHelper
 
   # Generate replacements for all versions of the item
   def item_replacements item_or_decorator
-    [:table, :page, :modal, :masonry, :slider].collect { |item_mode|
+    [:table, :page, :modal, :masonry, :slider, :card].collect { |item_mode|
       item_replacement item_or_decorator, item_mode
     }.compact
   end
@@ -78,7 +87,7 @@ module ItemHelper
 
   # Generate deleters for all versions of an item
   def item_deleters item_or_decorator, context=nil
-    [:table, :page, :modal, :masonry, :slider].collect { |item_mode|
+    [:table, :page, :modal, :masonry, :slider, :card].collect { |item_mode|
       item_deleter item_or_decorator, item_mode, context
     }.compact
   end

@@ -1,6 +1,6 @@
 <%# render "show", decorator: decorator %>
 <%= present decorator, current_user_or_guest do |presenter| %>
-    <ul class="card media-list" id="<%= decorator.dom_id %>">
+    <ul class="card-item media-list <%= decorator.dom_id %>">
       <li class="media">
         <a class="pull-left" href="#">
           <div class="avatar"><%= presenter.card_avatar %></div>

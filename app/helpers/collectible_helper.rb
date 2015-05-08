@@ -4,7 +4,7 @@ module CollectibleHelper
   def collectible_buttons_panel decorator, styling={}, &block
     styling = params[:styling].merge styling if params[:styling]
     styling[:button_size] ||= "sm"  # Unless otherwise specified
-    extras = block_given? ? with_output_buffer(&block) : ""
+    extras = block_given? ? yield : ""
     with_format("html") do
       render("collectible/collectible_buttons", extras: extras, styling: styling, decorator: decorator, item: decorator.object)
     end
@@ -46,8 +46,10 @@ module CollectibleHelper
 
   def collectible_edit_button entity, styling={}
     # Include the styling options in the link path as one parameter, then pass them to the button function
-    url = polymorphic_path [:edit, entity], styling: styling
-    button_to_submit '', url, styling.merge(class: "glyphicon glyphicon-pencil", mode: :modal)
+    if permitted_to? :update, entity
+      url = polymorphic_path entity, :action => :edit, styling: styling
+      button_to_submit '', url, styling.merge(class: "glyphicon glyphicon-pencil", mode: :modal)
+    end
   end
 
   def collectible_share_button entity, options={}
