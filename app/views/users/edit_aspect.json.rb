@@ -1,5 +1,5 @@
-if presenter = present(@decorator, current_user_or_guest.id)
-  repl = presenter.aspect_editor_replacement aspect
+if presenter = present(@decorator, current_user_or_guest)
+  repl = presenter.card_aspect_editor_replacement aspect
 end
 {
     replacements: [ repl ].compact

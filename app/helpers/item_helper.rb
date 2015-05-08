@@ -95,7 +95,7 @@ module ItemHelper
   end
 
   def render_item_unwrapped item_or_decorator=nil, item_mode=nil
-    item, item_mode = item_preflight item_or_decorator, item_mode
+    item, item_mode = item_preflight item_or_decorator, (item_mode || :card)
     with_format("html") { render item_partial_name(item, item_mode), decorator: @decorator }
   end
 

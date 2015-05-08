@@ -1,4 +1,4 @@
-<% present decorator.object do |presenter| %>
+<%= present decorator.object, current_user_or_guest do |presenter| %>
 <%= presenter.picdiv %>
 <div class="<%= presenter.divclass %>" onload="RP.hide_all_empty();">
   <div class="resource-element info">

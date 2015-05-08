@@ -4,17 +4,19 @@ class String
   end
 end
 
-class UserPresenter < BasePresenter
+class UserPresenter < CardPresenter
   presents :user
   delegate :username, :fullname, :handle, :lists, :feeds, to: :user
 
-  def avatar
+  def card_avatar_fallback
+    "default-avatar-128.png"
+  end
+
+  def card_avatar
     if is_viewer?
       with_format("html") { render "form_image", user: user }
     else
-      img = user.image
-      img = "/assets/default-avatar-128.png" if img.blank?
-      image_with_error_recovery(img, class: "avatar media-object", alt: "/assets/default-avatar-128.png") # image_tag("avatars/#{avatar_name}", class: "avatar")
+      super
     end
   end
 
@@ -23,22 +25,20 @@ class UserPresenter < BasePresenter
   end
 
   def is_viewer?
-    @viewer_id && (@viewer_id == user.id)
+    @viewer && (@viewer.id == user.id)
   end
 
   def linked_name
-    site_link(user.fullname.present? ? user.fullname : user.username)
+    card_object_link(user.fullname.present? ? user.fullname : user.username)
   end
 
-  def panel_header
+  def card_header_content
     mail_link = link_to_submit("Send email", mailto_user_path(user, mode: :modal), button_size: "xs") unless is_viewer?
-    content_tag :h2,
-                ("#{fullname}&nbsp;#{content_tag(:small, username)}&nbsp;#{mail_link}").html_safe,
-                class: "media-heading"
+    ("#{fullname}&nbsp;#{content_tag(:small, username)}&nbsp;#{mail_link}").html_safe
   end
 
   # Provide a list of aspects for display in the entity's panel, suitable for passing to aspect
-  def panel_aspects
+  def card_aspects
     [
         # :member_since,
         :name_form,
@@ -53,9 +53,8 @@ class UserPresenter < BasePresenter
     ]
   end
 
-  def aspect which, viewer=nil
-    label = which.to_s.capitalize.tr('_', ' ') # split('_').map(&:capitalize).join
-    contents = nil
+  def card_aspect which
+    label = contents = nil
     case which
       when :name_form
         if is_viewer? && user.fullname.blank?
@@ -73,10 +72,10 @@ class UserPresenter < BasePresenter
                           }).html_safe
       when :collected_lists, :owned_lists
         if which == :owned_lists
-          lists = user.visible_lists viewer
+          lists = user.visible_lists @viewer
           label = "Author of the lists"
         else
-          lists = user.collected_entities List, viewer
+          lists = user.collected_entities List, @viewer
           label = "Following the lists"
         end
         unless lists.empty?
@@ -128,36 +127,7 @@ class UserPresenter < BasePresenter
           contents = "To create your first list, click #{link_to_submit "here", new_list_path, :mode => :modal}."
         end
     end
-    aspect_enclosure which, contents, label
-  end
-
-  def aspect_enclosure which, contents, label=nil
-    label ||= which.to_s.capitalize
-    content_tag( :tr,
-                 content_tag( :td, content_tag( :h4, label), style:"padding-right: 10px; vertical-align:top; text-align: right" )+
-                     content_tag( :td, contents.html_safe, style: "vertical-align:top; padding-top:11px" ),
-                 class: which.to_s
-    ) unless contents.blank?
-  end
-
-  def aspect_selector which
-    "tr.#{which}"
-  end
-
-  def aspect_replacement which, viewer=nil
-    if repl = self.aspect(which, viewer)
-      [ aspect_selector(which), repl ]
-    end
-  end
-
-  def aspect_editor which
-    aspect_enclosure which, with_format("html") { render "form_#{which}", user: user }
-  end
-
-  def aspect_editor_replacement which
-    if repl = self.aspect_editor(which)
-      [ aspect_selector(which), repl ]
-    end
+    [ label, contents ]
   end
 
   def show_or_edit which, val
@@ -192,15 +162,4 @@ class UserPresenter < BasePresenter
     end
   end
 
-  def site_link(content)
-    content # h.link_to_if(user.url.present?, content, user.url)
-  end
-
-  def avatar_name
-    if user.avatar_image_name.present?
-      user.avatar_image_name
-    else
-      "default.png"
-    end
-  end
 end

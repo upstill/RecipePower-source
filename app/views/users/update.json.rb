@@ -4,8 +4,8 @@ case @updated.to_sym
     selector = "ul.media-list##{dom_id @user}" # Replace the whole panel
     partial = "show"
   else
-    if presenter = present(@decorator, current_user_or_guest.id)
-      repl = presenter.aspect_replacement @updated.to_sym
+    if presenter = present(@decorator, current_user_or_guest)
+      repl = presenter.card_aspect_replacement @updated.to_sym
     end
 end
 {

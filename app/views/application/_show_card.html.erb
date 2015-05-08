@@ -1,0 +1,18 @@
+<%# render "show", decorator: decorator %>
+<%= present decorator, current_user_or_guest do |presenter| %>
+    <ul class="card media-list" id="<%= decorator.dom_id %>">
+      <li class="media">
+        <a class="pull-left" href="#">
+          <div class="avatar"><%= presenter.card_avatar %></div>
+        </a>
+        <div class="media-body">
+          <%= presenter.card_header %>
+          <table>
+            <% presenter.card_aspects.each do |aspect | %>
+                <%= presenter.card_aspect_rendered aspect %>
+            <% end %>
+          </table>
+        </div>
+      </li>
+    </ul>
+<% end %>

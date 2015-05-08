@@ -1,11 +1,10 @@
-class CollectiblePresenter
+class CollectiblePresenter < CardPresenter
 
   attr_accessor :modal, :tagfields
   attr_writer :buttons
 
-  def initialize decorator, template
-    @template = template
-    @decorator = decorator
+  def initialize decorator_or_object, template, viewer
+    super
     @tagfields = [
         "Ingredient_tags",
         ["Role_tags", "Produces"],
@@ -62,8 +61,7 @@ class CollectiblePresenter
   end
 
   # Present a collection of labelled fields, by type
-  def list_fields fields, viewer_id=nil
-    viewer_id ||= User.super_id
+  def list_fields fields
     fields.collect { |field|
       if field.is_a? Array
         field, label = field[0], field[1]

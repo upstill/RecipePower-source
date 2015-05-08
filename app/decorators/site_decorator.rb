@@ -19,4 +19,8 @@ class SiteDecorator < CollectibleDecorator
     object.home
   end
 
+  def imglink
+    object.logo
+  end
+
 end

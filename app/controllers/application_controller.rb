@@ -223,7 +223,7 @@ class ApplicationController < ActionController::Base
           sse.write :stream_item, deletions: [".stream-tail.#{fp.stream_id}"]
 
           while item = fp.next_item do
-            rendering = with_format("html") { view_context.render_item(item) }
+            rendering = with_format("html") { view_context.render_item item, fp.item_mode }
             sse.write :stream_item, elmt: rendering
           end
           if fp.next_path

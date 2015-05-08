@@ -1,8 +1,8 @@
-<% present entity do |presenter| %>
+<% present entity, current_user_or_guest do |presenter| %>
     <ul class="media-list">
       <li class="media">
         <a class="pull-left" href="#">
-          <%= presenter.avatar %>
+          <%= presenter.card_avatar %>
         </a>
         <div class="media-body">
           <h2 class="media-heading"><%= presenter.header %></h2>

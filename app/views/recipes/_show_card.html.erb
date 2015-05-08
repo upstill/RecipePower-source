@@ -1,4 +1,4 @@
-<%= present decorator do |presenter| %>
+<%= present decorator, current_user_or_guest do |presenter| %>
     <div class="container-fluid">
       <div class="row">
         <% if (vid = presenter.field_value "rcpVideo") %>
