@@ -11,10 +11,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
+
 ActiveRecord::Schema.define(version: 20150402175847) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
 
   create_table "answers", force: :cascade do |t|
     t.string   "answer",      default: ""
@@ -344,6 +346,7 @@ ActiveRecord::Schema.define(version: 20150402175847) do
     t.datetime "updated_at"
   end
 
+
   create_table "tag_selections", force: :cascade do |t|
     t.integer  "tagset_id"
     t.integer  "user_id"
@@ -378,6 +381,7 @@ ActiveRecord::Schema.define(version: 20150402175847) do
   add_index "tags", ["id"], name: "tags_index_by_id", unique: true, using: :btree
   add_index "tags", ["name", "tagtype"], name: "tag_name_type_unique", unique: true, using: :btree
   add_index "tags", ["normalized_name"], name: "tag_normalized_name_index", using: :btree
+
 
   create_table "tagsets", force: :cascade do |t|
     t.string   "title"
