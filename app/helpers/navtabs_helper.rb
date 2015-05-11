@@ -136,8 +136,6 @@ module NavtabsHelper
 
   def home_navtab menu_only = false
     navtab :home,
-           content_tag(:b, "#{current_user.handle}&nbsp;".html_safe)+
-               content_tag(:b, "", class: "glyphicon glyphicon-cog"),
            user_path(current_user, :mode => :partial),
            menu_only do
       item_list = [
