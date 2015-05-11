@@ -1,4 +1,4 @@
-<%= render "collectible/show_page", decorator: decorator %>
+<%= render "show_page", decorator: decorator %>
 <% permitted_to?(:approve, :feeds) do %>
     <p>
       Feed <%= feed_approval decorator.object %>

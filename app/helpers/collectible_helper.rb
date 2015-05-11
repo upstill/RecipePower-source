@@ -85,15 +85,6 @@ module CollectibleHelper
     [ "div.#{vote_div_class styling[:style]}#"+dom_id(entity), collectible_vote_buttons(entity, styling) ]
   end
 
-  # Return the followup after updating or destroying an entity: replace its pagelet with either an update, or the list of such entities
-  def collectible_pagelet_followup entity, destroyed=false
-    entity = entity.object if entity.is_a? Draper::Decorator
-    {
-        request: polymorphic_path((destroyed ? entity.class : entity), :mode => :partial),
-        target: pagelet_body_selector(entity)
-    }
-  end
-
   # Sort out a suitable URL to stuff into an image thumbnail for a recipe
   def safe_image_div decorator, fallback=:site, options = {}
     if fallback.is_a? Hash

@@ -26,4 +26,17 @@ module PageletsHelper
   def pagelet_body_selector entity=nil
     "div.pagelet-body##{pagelet_body_id(entity)}"
   end
+
+  # Return the followup after updating or destroying an entity: replace its pagelet with either an update, or the list of such entities
+  def pagelet_followup entity, destroyed=false
+    entity = entity.object if entity.is_a? Draper::Decorator
+    request =
+        destroyed ?
+            user_collection_path(current_user_or_guest, :mode => :page) :
+            polymorphic_path(entity, :mode => :page, :nocache => true)
+    {
+        request: request,
+        target: pagelet_body_selector(entity)
+    }
+  end
 end

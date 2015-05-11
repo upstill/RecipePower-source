@@ -7,6 +7,7 @@
         </a>
         <div class="media-body">
           <%= presenter.card_header %>
+          <%= presenter.card_subhead %>
           <table>
             <% presenter.card_aspects.each do |aspect | %>
                 <%= presenter.card_aspect_rendered aspect %>

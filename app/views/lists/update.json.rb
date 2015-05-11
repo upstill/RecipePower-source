@@ -1,6 +1,6 @@
 {
     done: true,
-    followup: { request: list_url(@list, :mode => :partial, :nocache => true ), target: "div.pagelet-body#"+pagelet_body_id(@list) },
+    followup: pagelet_followup(@decorator),
     replacements: [
         # [ "#list"+@list.id.to_s, with_format("html") { render "lists/show_table_item", locals: { item: @list }} ],
         navtab_replacement(:my_lists),

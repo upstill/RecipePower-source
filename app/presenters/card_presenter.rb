@@ -1,42 +1,3 @@
-class BasePresenter
-  require 'redcarpet'
-
-  attr_reader :viewer, :decorator
-
-  def initialize decorator_or_object, template, viewer
-    if decorator_or_object.is_a?(Draper::Decorator)
-      @decorator, @object = decorator_or_object, decorator_or_object.object
-    else
-      @object = decorator_or_object
-      @decorator = (decorator_or_object.decorate if decorator_or_object.respond_to? :decorate)
-    end
-    @template = template
-    @viewer = viewer
-  end
-
-private
-
-  def self.presents(name)
-    define_method(name) do
-      @object
-    end
-  end
-
-  def h
-    @template
-  end
-
-  def markdown(text)
-    renderer = Redcarpet::Render::HTML.new(:hard_wrap => true, :filter_html => true, :autolink => true)
-    markdown = Redcarpet::Markdown.new(renderer)
-    markdown.render(text).html_safe
-  end
-  
-  def method_missing(*args, &block)
-    @template.send(*args, &block)
-  end
-end
-
 class CardPresenter < BasePresenter
 
   def card_avatar
@@ -120,7 +81,7 @@ class CardPresenter < BasePresenter
 
   # Provide a list of aspects for display in the entity's panel, suitable for passing to card_aspect
   def card_aspects
-  [ ]
+    [ ]
   end
 
 end

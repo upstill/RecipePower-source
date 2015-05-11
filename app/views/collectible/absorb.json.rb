@@ -6,5 +6,5 @@ replacements = [
 {
     done: true, # i.e., editing is finished, close the dialog
     replacements: replacements,
-    followup: collectible_pagelet_followup(@decorator)
+    followup: pagelet_followup(@decorator)
 }.merge(flash_notify).to_json
