@@ -138,7 +138,7 @@ module NavtabsHelper
     navtab :home,
            content_tag(:b, "#{current_user.handle}&nbsp;".html_safe)+
                content_tag(:b, "", class: "glyphicon glyphicon-cog"),
-           user_path(current_user, :mode => :partial),
+           user_path(current_user),
            menu_only do
       item_list = [
           # navlink( "Profile", users_profile_path( section: "profile" ), :mode => :modal),
@@ -151,7 +151,7 @@ module NavtabsHelper
         if response_service.admin_view?
           item_list += [
             "<hr class='menu'>".html_safe,
-            link_to_submit( "Admin View Off", admin_toggle_path(on: false), :mode => :partial, class: "transient"),
+            link_to_submit( "Admin View Off", admin_toggle_path(on: false), class: "transient"),
             link_to_submit("Add Cookmark", new_recipe_path, :mode => :modal, class: "transient"),
             link_to("Admin", admin_path),
             link_to_submit("Upload Picture", getpic_user_path(current_user), :mode => :modal),
@@ -166,7 +166,7 @@ module NavtabsHelper
         else
           item_list += [
               "<hr class='menu'>".html_safe,
-              link_to_submit("Admin View On", admin_toggle_path(on: true), :mode => :partial, class: "transient")
+              link_to_submit("Admin View On", admin_toggle_path(on: true), class: "transient")
           ]
         end
       end

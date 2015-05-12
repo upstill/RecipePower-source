@@ -4,7 +4,7 @@
             <h3><%= candidate.title %><br></h3>
             <%= candidate.description %><br>
             <%= link_to candidate.url, candidate.url, :target => "_blank" %><br>
-            <%= button_to "Create Feed", create_feed_path(candidate, :mode => :partial, feed: candidate.attributes.slice("url", "site_id", "approved")) %>
+            <%= button_to "Create Feed", create_feed_path(candidate, feed: candidate.attributes.slice("url", "site_id", "approved")) %>
             <hr>
         <% end %>
     <% else %>

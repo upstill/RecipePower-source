@@ -68,7 +68,7 @@ class UserPresenter < CardPresenter
       when :collected_feeds
         label = "Following the feeds"
         contents = strjoin(feeds.collect { |feed|
-                            link_to_submit feed.title, feed_path(feed), :mode => :page
+                            link_to_submit feed.title, feed_path(feed)
                           }).html_safe
       when :collected_lists, :owned_lists
         if which == :owned_lists
@@ -81,7 +81,7 @@ class UserPresenter < CardPresenter
         unless lists.empty?
           contents = strjoin(
               lists.collect { |list|
-                link_to_submit list.name, list_path(list), :mode => :page
+                link_to_submit list.name, list_path(list)
               }).html_safe
         end
       when :desert_island
@@ -115,14 +115,14 @@ class UserPresenter < CardPresenter
         label = "Latest Recipe"
         if latestrr = user.collection_pointers.where(:entity_type => "Recipe", :in_collection => true).order(created_at: :desc).first
           latest = latestrr.entity
-          contents = link_to_submit latest.title, recipe_path(latest), :mode => :page
+          contents = link_to_submit latest.title, recipe_path(latest)
         else
           contents = "No recipes yet—so install the #{link_to_submit 'Cookmark Button', '/popup/starting_step2', :mode => :modal} and go get some!"
         end
       when :latest_list
         label = "Latest List"
         if latest = user.owned_lists.order(updated_at: :desc).first
-          contents = link_to_submit latest.name, list_path(latest, :mode => :page)
+          contents = link_to_submit latest.name, list_path(latest)
         else
           contents = "To create your first list, click #{link_to_submit "here", new_list_path, :mode => :modal}."
         end

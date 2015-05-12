@@ -6,7 +6,7 @@ class RegistrationsController < Devise::RegistrationsController
     
     def edit
       @user = (params[:id] && User.find(params[:id])) || current_user
-      smartrender area: "floating"
+      smartrender 
     end
     
     def create
@@ -86,7 +86,7 @@ class RegistrationsController < Devise::RegistrationsController
       else
         clean_up_passwords resource
         @user = resource
-        smartrender :action => "edit", area: "floating"
+        smartrender :action => "edit"
       end
     end
 

@@ -15,10 +15,9 @@ module LinkHelper
 
   # Hit a URL using the RP.submit javascript module, with options for confirmation (:confirm-msg) and waiting (:wait-msg)
   # NB: options are used as follows:
+  # format may be stipulated as :html to get a normal link; otherwise, the link will submit for JSON
   # mode can be one of:
-  #  == :page to deploy a standard link
   #  == :modal to fetch a dialog via JSON
-  #  == :partial to get a container via JSON
   #  == :injector to get a dialog for foreign sites via JSON
   # :template, :trigger, :submit, and :preload are classes on the link for triggering submit behavior
   # :id, :class, :style, :data, :onclick, :rel and :method are passed to link_to to create attributes
@@ -35,12 +34,10 @@ module LinkHelper
     bootstrap_button_options options
 
     query = options.delete(:query) || {} # Remove the query options from consideration and include them in the path
-    format = :json
-    mode = options[:mode]
-    if mode == :page
+    format = options.delete(:format) || :json # Submitting for JSON unless otherwise stipulated
+
+    if format == :html
       options.delete :mode # Page is assumed in an HTML response
-      # The page is not interested in any class options or query options special to submit()
-      format = nil # default is :html
     else
       # These options get included in the link's class
       # Pull out all class options and assert class "submit" to attract Javascript handling
@@ -70,10 +67,14 @@ module LinkHelper
         data[match[1]] = data.delete key
       end
     end
-    data[:href] = linkpath
-    link_options[:data] = data # unless data.empty?
-
-    link_to label, 'javascript:void(0);', link_options
+    if format == :html
+      link_options[:data] = data unless data.empty?
+      link_to label, linkpath, link_options
+    else
+      data[:href] = linkpath
+      link_options[:data] = data
+      link_to label, 'javascript:void(0);', link_options
+    end
   end
 
 end

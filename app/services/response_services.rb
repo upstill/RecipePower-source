@@ -25,19 +25,19 @@ class ResponseServices
     @invitation_token = params[:invitation_token]
     @notification_token = params[:notification_token]
 
-    # How composites are presented: :table, :strip, :masonry, :feed_entry
+    # How composites are presented: :table, :strip, :masonry, :feed_entry, :card
     # ...thus governing how individuals are presented
     @item_mode = params[:item_mode].to_sym if params[:item_mode]
 
     # Mode will be either
     # :modal for a dialog
     # :injector for a dialog in the context of foreign collection
-    # :page to render the whole page (for an html request) or just a replacement for the pagelet (JSON)
+    # :page to render the whole page (for an html request)
     @mode = (params[:mode] || :page).to_sym
         # (@format == :html ? :page : :modal)).to_sym
 
     # Save the parameters we might want to pass back
-    @meaningful_params = params.except(:controller, :action, :mode, :format) # , :id, :nocache)
+    @meaningful_params = params.except :controller, :action, :mode, :format # , :id, :nocache
   end
 
   # Provide a URL that reproduces the current request
@@ -80,7 +80,7 @@ class ResponseServices
 
   # Forward the appropriate parameters to a subsequent request
   def redirect_params options = {}
-    options[:mode] = @mode
+    options[:mode] = @mode unless @mode == :page
     options
   end
 
@@ -91,7 +91,15 @@ class ResponseServices
 
   # Return appropriate parameters for a render call, asserting defaults as necessary
   def render_params defaults = {}
-    defaults.merge layout: layout
+    defaults.merge layout:
+                       case @mode
+                         when :injector
+                           "injector"
+                         when :page
+                           "application"
+                         else
+                           false
+                       end
   end
 
   def admin_view?
@@ -111,20 +119,6 @@ class ResponseServices
       end
     }
     "#{controller_instance.class.ancestors[0].controller_path}/#{action}" # This will crash, but oh well...
-  end
-
-  private
-
-  # What's the appropriate layout (in the Rails sense) for the current context?
-  def layout
-    case @mode
-      when :injector
-        "injector"
-      when :page
-        "application"
-      else
-        false
-    end
   end
 
   public

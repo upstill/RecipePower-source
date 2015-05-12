@@ -10,7 +10,7 @@ module TriggersHelper
 
   def trigger_pending_results path, options={}
     options[:class] = "#{options[:class]} hide"
-    link_to_submit "", path, options.merge( :mode => :partial, trigger: true )
+    link_to_submit "", path, options.merge(trigger: true )
   end
 
   # If there's a deferred request that can be expressed as a trigger, do so by inserting a trigger link      .

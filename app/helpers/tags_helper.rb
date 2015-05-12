@@ -2,7 +2,7 @@ module TagsHelper
 
   # Emit a link to a tag using the tag's name and, optionally, its type and id
   def tag_link tag, with_id=false
-    link_to_submit( tag.name, tag_taggees_path(tag), :mode => :partial )+(with_id ? "(#{tag.typename} #{tag.id.to_s})" : "")
+    link_to_submit(tag.name, tag_taggees_path(tag))+(with_id ? "(#{tag.typename} #{tag.id.to_s})" : "")
   end
 
   # TODO: These should be part of the tag presenter

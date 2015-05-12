@@ -50,7 +50,7 @@ module ItemHelper
     "#{item_container_selector entity_or_string, context} div.masonry-item.#{decorator.dom_id}"
   end
 
-  # The item partial depends on the item rendering mode (:table, :page, :modal, :masonry, :slider),
+  # The item partial depends on the item mode (:table, :modal, :masonry, :slider),
   # defaulting to just "_show"
   def item_partial_name item_or_decorator=nil, item_mode=nil
     item, item_mode = item_preflight item_or_decorator, item_mode
@@ -74,7 +74,7 @@ module ItemHelper
 
   # Generate replacements for all versions of the item
   def item_replacements item_or_decorator
-    [:table, :page, :modal, :masonry, :slider, :card].collect { |item_mode|
+    [:table, :modal, :masonry, :slider, :card].collect { |item_mode|
       item_replacement item_or_decorator, item_mode
     }.compact
   end
@@ -87,7 +87,7 @@ module ItemHelper
 
   # Generate deleters for all versions of an item
   def item_deleters item_or_decorator, context=nil
-    [:table, :page, :modal, :masonry, :slider, :card].collect { |item_mode|
+    [:table, :modal, :masonry, :slider, :card].collect { |item_mode|
       item_deleter item_or_decorator, item_mode, context
     }.compact
   end
@@ -116,10 +116,12 @@ module ItemHelper
     case item_mode
       when :masonry
         content_tag :div, rendering, class: container_class+" stream-item"
-      when :page
+=begin
+      when :partial
         content_tag(:div,
                     content_tag(:div, rendering, class: "col-md-12"),
                     class: "row "+container_class).html_safe
+=end
       when :modal
         modal_dialog :"#{response_service.action}_#{response_service.controller.singularize}",
                      response_service.title,
@@ -130,6 +132,8 @@ module ItemHelper
         content_tag(:tr,
                     rendering,
                     class: container_class).html_safe
+      when :card
+        rendering
       else
         rendering
     end

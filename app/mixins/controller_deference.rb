@@ -93,7 +93,7 @@ module ControllerDeference
       uri.query.sub! /\&$/, '' # Remove ampersand that may have been left behind
       uri.query = nil if uri.query.blank?
     else
-      unpacked[:mode] ||= (unpacked[:format] == :html ? :page : :modal)
+      unpacked[:mode] ||= :modal unless unpacked[:format] == :html
     end
 
     unpacked[:path] = uri.to_s
@@ -107,7 +107,7 @@ module ControllerDeference
       if specs[:format] && (specs[:format] != :html)
         uri.path = uri.path + ".#{specs[:format]}"
       end
-      if specs[:mode] && (specs[:mode] != :page)
+      if specs[:mode]
         mode = "mode=#{specs[:mode]}"
         uri.query = uri.query.blank? ? mode : "#{mode}&#{uri.query}"
       end

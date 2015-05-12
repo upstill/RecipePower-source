@@ -172,7 +172,7 @@ class ApplicationController < ActionController::Base
       respond_to do |format|
         format.html do
           if response_service.mode == :modal
-            # Run the request as a dialog within the collection page
+            # Run the request as a dialog within the home or collection page
             redirect_to_modal url
           else
             render response_service.action, renderopts
@@ -180,15 +180,12 @@ class ApplicationController < ActionController::Base
         end
         format.json {
           case response_service.mode
-            when :page
-              # Asking for JSON but wanting a whole page?
-              # Render a replacement for the pagelet partial, as if it were rendered on the page
-              render partial: "layouts/container" # Respond with JSON instructions to replace the pagelet appropriately
-            when :partial
-              render renderopts.merge(:layout => false)
             when :modal, :injector
               dialog = render_to_string renderopts.merge(action: response_service.action, layout: (@layout || false), formats: ["html"])
               render json: {code: dialog, how: "bootstrap"}.to_json, layout: false, :content_type => 'application/json'
+            else
+              # Render a replacement for the pagelet partial, as if it were rendered on the page
+              render partial: "layouts/container" # Respond with JSON instructions to replace the pagelet appropriately
           end
         }
         format.js {
@@ -369,7 +366,7 @@ class ApplicationController < ActionController::Base
   # This overrides the method for returning to a request after logging in. Formerly, session[:return_to]
   # handled this recovery
   def redirect_to_target_or_default(default, *args)
-    redirect_to deferred_request path: default, :mode => :page
+    redirect_to deferred_request path: default
   end
 
   # When a user signs up or accepts an invitation, they'll see these dialogs, in reverse order

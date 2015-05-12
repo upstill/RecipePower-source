@@ -54,11 +54,11 @@ class CollectibleDecorator < Draper::Decorator
         h.link_to object.sourcename, object.sourcehome, class: "tablink"
       when "list", "lists"
         strjoin ListServices.find_by_listee(object).collect { |list|
-                  llink = h.link_to_submit list.name, list, mode: :partial, class: "rcp_list_element_tag"
+                  llink = h.link_to_submit list.name, list, class: "rcp_list_element_tag"
                   if list.owner_id == object.tagging_user_id
                     llink
                   else
-                    ulink = h.link_to list.owner.handle, list.owner, mode: :partial, class: "rcp_list_element_tag"
+                    ulink = h.link_to list.owner.handle, list.owner, class: "rcp_list_element_tag"
                     "#{llink} (#{ulink})".html_safe
                   end
                 }
@@ -67,7 +67,7 @@ class CollectibleDecorator < Draper::Decorator
           h.link_to_submit( user.handle, h.user_path(user), :mode => :modal) unless user.id == object.tagging_user_id
         }.compact
       when "feeds"
-        strjoin(object.feeds.where(approved: true).collect { |feed| h.link_to_submit feed.title, h.feed_path(feed), :mode => :partial },"","",',', '<br>').html_safe
+        strjoin(object.feeds.where(approved: true).collect { |feed| h.link_to_submit feed.title, h.feed_path(feed) },"","",',', '<br>').html_safe
       when "classname_lower"
         object.class.to_s.downcase
       else

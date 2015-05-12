@@ -50,7 +50,7 @@ class FilteredPresenter
     @item_mode =
         response_service.item_mode || # Provisionally accept item mode imposed by param
             (self.class.instance_variable_get(:"@item_mode") rescue nil) ||
-            (response_service.action == "index" ? :table : :page)
+            (:table if response_service.action == "index")
     response_service.item_mode = @item_mode
 
     @content_mode =
@@ -268,7 +268,6 @@ end
 
 # Present a list of feeds for a user
 class FeedsShowPresenter < FilteredPresenter
-  @item_mode = :page
   @results_class_name = 'FeedCache'
 
 end
@@ -293,7 +292,6 @@ end
 
 # Present the entries associated with a feed
 class FeedsEntriesPresenter < FilteredPresenter
-  @item_mode = :page
   @results_class_name = 'FeedCache'
 
 end

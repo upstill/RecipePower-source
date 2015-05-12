@@ -32,7 +32,7 @@ class SitePresenter < CollectiblePresenter
         # TODO Shoud be including option of indirect linkage i.e. being tagged with a list's tag
         label = "Seen on list(s)"
         contents = strjoin(site.visible_tags(tagtype: :List).collect { |list_tag|
-          link_to_submit(list.name, list_path(list), :mode => :partial)
+          link_to_submit list.name, list_path(list)
         }).html_safe
     end
     [ label, contents ]

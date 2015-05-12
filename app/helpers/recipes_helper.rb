@@ -17,7 +17,7 @@ module RecipesHelper
                  when "Recipe", "Site"
                    link_to decorator.title, decorator.url, class: "tablink", data: { report: polymorphic_path([:touch, entity]) } # ...to open up a new tab
                  else # Other internal entities get opened up in a new partial
-                   link_to_submit decorator.title, decorator.url, mode: :partial
+                   link_to_submit decorator.title, decorator.url
                end
     grid_element = content_tag :p, (label+itemlink).html_safe, class: "title"
     case klass
@@ -38,7 +38,7 @@ module RecipesHelper
                  when "Recipe", "Site"
                    link_to decorator.title, decorator.url, class: "tablink", data: { report: polymorphic_path([:touch, entity]) } # ...to open up a new tab
                  else # Other internal entities get opened up in a new partial
-                   link_to_submit decorator.title, decorator.url, mode: :partial
+                   link_to_submit decorator.title, decorator.url
                end
     grid_element = content_tag :p, (label+itemlink).html_safe, class: "rcp_grid_element_title"
     case klass

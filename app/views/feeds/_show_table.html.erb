@@ -1,6 +1,6 @@
 <% feed = decorator.object %>
   <td>
-    <%= link_to_submit feed.title.truncate(80), feed_path(feed), feed_wait_msg(feed).merge(:mode => :partial) %><br>
+    <%= link_to_submit feed.title.truncate(80), feed_path(feed), feed_wait_msg(feed) %><br>
     <%= feed.description %><br>
   </td>
   <td><%= taggable_list feed %></td>
