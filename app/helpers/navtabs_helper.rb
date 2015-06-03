@@ -60,9 +60,9 @@ module NavtabsHelper
   end
 
   def friends_navtab menu_only = false
-    navtab :friends, "Friends", users_path(:select => :followees), menu_only do
-      current_user_or_guest.followees[0..20].collect { |u|
-        navlink u.handle, user_collection_path(u), id: dom_id(u)
+    navtab :friends, "Cookmates", users_path(:select => :followees), menu_only do
+      current_user_or_guest.followees[0..10].collect { |u|
+        navlink u.handle, user_path(u), id: dom_id(u)
       } + [
           "<hr class='menu'>".html_safe,
           navlink("Get another friend...", users_path(:select => :relevant))
@@ -136,9 +136,9 @@ module NavtabsHelper
 
   def home_navtab menu_only = false
     navtab :home,
-           content_tag(:b, "#{current_user.handle}&nbsp;".html_safe)+
-               content_tag(:b, "", class: "glyphicon glyphicon-cog"),
-           user_path(current_user),
+           content_tag(:b, "#{current_user.handle}&nbsp;".html_safe, class: "user-name")+
+            content_tag(:b, "", class: "glyphicon glyphicon-cog"),
+           user_path(current_user, :mode => :partial),
            menu_only do
       item_list = [
           # navlink( "Profile", users_profile_path( section: "profile" ), :mode => :modal),

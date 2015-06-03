@@ -16,6 +16,9 @@
 @import 'bootstrap.icon-large.min';
 @import 'collection';
 
+body{
+  background-color: #f1f1f0;
+}
 .brand {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   line-height: 20px;
@@ -25,11 +28,212 @@
   color: #999999;
 }
 
+//html and all panel divs for home page scroll
+html {
+  //height: 100%;
+  //margin: 0;
+  //padding:0;
+  //font-size: 30px; /*1rem=30px*/
+}
+body, pagelet-body{
+  background-color: #f1f1f0;
+  height: 100%;
+  margin: 0;
+  padding:0;
+  font-size: 30px; /*1rem=30px*/
+}
+.panels{
+  height: 100vh;
+  section {
+    overflow: hidden;
+    width: 100%;
+    position: relative;
+    font-family: Oswald, sans-serif;
+  }
+  .panel-one { 
+    background-image: url(rp-homepage-2.jpg);
+    background-position: center center;
+    background-repeat: no-repeat;
+    //background-attachment: fixed;
+    background-size: cover;
+    height: 100vh;
+  }
+  .panel-two{
+    background-color: #7c966a;
+    height: 100vh;
+  }
+  .panel-three{
+    background-color: #4c7c99;
+    height: 100vh;
+  }
+  .panel-four{
+    background-color: #dbc046;
+    height: 100vh;
+  }
+  p{
+    &.panel-title{
+      top: 10%;
+      font-size: 230px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.32);
+      margin: 0 30px;
+      line-height: 1;
+    }
+    &.panel-subtitle{
+      font-size: 50px;
+      color: rgba(255, 255, 255, 0.32);
+      letter-spacing: 2px;
+      margin: 0 40px;
+      line-height: 1;
+    }
+    &.panel-description{
+      font-size: 27px;
+      color: rgba(255, 255, 255, 1);
+      font-weight: 400;
+      letter-spacing: 2px;
+      margin: -105px 0 0 350px;
+      position: absolute;
+      line-height: 1;
+    }
+    &.panel-description-long{
+      font-size: 27px;
+      color: rgba(255, 255, 255, 1);
+      font-weight: 400;
+      letter-spacing: 2px;
+      margin: -160px 0 0 600px;
+      position: absolute;
+      line-height: 1;
+    }
+  }
+}
+
+.navbar{
+  background-color: transparent;
+  background-image: none;
+  background-repeat: none;
+  margin-bottom: 0;
+}
+
 div.card {
   background-color: white;
   border: 2px darkgray;
   margin-top: 10px;
   padding-top: 10px
+}
+
+//ay navigation changes
+.navbar-fixed-top, .navbar-header{
+  //height: 120px; 
+}
+nav.navbar-inverse{
+  background-color: transparent;
+  background-image: none;
+  background-repaet: none;
+  border: 0;
+}
+
+a.navbar-brand{
+  padding-top: 0;
+}
+
+ul.nav.navbar-nav{
+  display: block;
+  max-width: 100%;
+  height: auto;
+  }
+
+li#collections-navtab{
+  background-color: #d8dde0;
+  color: #4c7c99;
+  margin: 0 7px;  
+  padding-top:80px;
+  text-shadow: none;
+}
+
+li#friends-navtab{
+  background-color: #e4e0cf;
+  color: #dbc046;
+  margin: 0 7px; 
+  padding:80px 8px 0;
+  text-shadow: none;
+}
+
+li#my_lists-navtab{
+  background-color: #dbe0dd;
+  color: #1d6a2b;
+  margin: 0 7px;
+  padding: 80px 18px 0;
+  text-shadow: none;
+}
+
+li#feeds-navtab{
+  background-color: #e7dfd6;
+  color: #de8822;
+  margin: 0 7px;
+  padding: 80px 34px 0;
+  text-shadow: none;
+}
+
+li#home-navtab{
+  background-color: #ff9583;
+  margin: 0 7px;
+}
+
+.navbar-nav>li>a.dropdown-toggle{
+  padding-bottom: 10px;
+  font-family: Oswald, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-size: 21px;
+}
+
+.open > .dropdown-toggle{
+  background-color: #fff;
+}
+
+div.card {
+  background-color: white;
+  border: 2px darkgray;
+  margin-top: 10px;
+  padding-top: 10px
+}
+.navbar-inverse .navbar-nav>.active>a, 
+.navbar-inverse .navbar-nav>.active>a:focus, 
+.navbar-inverse .navbar-nav>.active>a:hover {
+  //color: #fff;
+  //background-color: transparent;
+}
+
+.navbar-inverse .navbar-nav>li#friends-navtab>a {
+  background-color: trasnparent;
+  color: #de8822;
+}
+
+span.caret {
+  display: none;
+}
+
+.glyphicon.glyphicon-cog{
+  content: url("rp-measuring-spoons.png");
+}
+
+.user-name{
+  font-size: 15px;
+  color: #fadfdb;
+  text-shadow: none;
+  text-transform: lowercase;
+}
+
+//contents of pages
+.container{
+  margin-top:200px;
+}
+
+.tag-filter-title{
+  font-family: Oswald, sans-serif;
+  text-transform: lowercase;
+
 }
 
 // .simple_form label {
@@ -154,3 +358,4 @@ div.results-enclosure {
     vertical-align: top;
     margin-top: 9px;
   }
+
