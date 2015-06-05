@@ -51,7 +51,7 @@ body, pagelet-body{
     font-family: Oswald, sans-serif;
   }
   .panel-one { 
-    background-image: url(rp-homepage-2.jpg);
+    background-image: image-url("rp-homepage-2.jpg");
     background-position: center center;
     background-repeat: no-repeat;
     //background-attachment: fixed;
@@ -206,7 +206,7 @@ div.card {
 }
 
 .navbar-inverse .navbar-nav>li#friends-navtab>a {
-  background-color: trasnparent;
+  background-color: transparent;
   color: #de8822;
 }
 
@@ -215,7 +215,7 @@ span.caret {
 }
 
 .glyphicon.glyphicon-cog{
-  content: url("rp-measuring-spoons.png");
+  content: image-url("rp-measuring-spoons.png");
 }
 
 .user-name{
