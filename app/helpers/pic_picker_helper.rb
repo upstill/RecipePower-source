@@ -141,7 +141,7 @@ module PicPickerHelper
     unless idstr.is_a? String
       idstr, report_bad_image = "rcpPic", idstr
     end
-    data = report_bad_image ? { bogusurlfallback: "/assets/BadPicURL.png", emptyurlfallback: "/assets/NoPictureOnFile.png" } : {}
+    data = report_bad_image ? { bogusurlfallback: image_path("BadPicURL.png"), emptyurlfallback: image_path("NoPictureOnFile.png") } : {}
     image_with_error_recovery(picurl || "",
                               style: "width: 100%; height: auto",
                               id: idstr,

@@ -3,7 +3,7 @@ class CardPresenter < BasePresenter
   def card_avatar
     img = card_avatar_link
     img = card_avatar_fallback if img.blank?
-    card_object_link image_with_error_recovery(img, class: "media-object fixed-width", alt: path_to_asset(card_avatar_fallback) )
+    card_object_link image_with_error_recovery(img, class: "media-object fixed-width", alt: card_avatar_fallback )
   end
 
   # Take the opportunity to wrap the content in a link to the presented object

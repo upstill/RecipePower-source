@@ -7,7 +7,7 @@ class SitePresenter < CollectiblePresenter
   end
 
   def card_avatar_fallback
-    "MissingLogo.png"
+    image_path "MissingLogo.png"
   end
 
   def card_header_content

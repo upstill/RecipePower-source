@@ -306,7 +306,7 @@ div.ajax-loader {
     height: 	  inherited; // 100%;
     width:      inherited; // 100%;
     background: rgba( 255, 255, 255, .8 ) 
-                url('/assets/ajax-loader.gif') 
+                image-url('ajax-loader.gif')
                 50% 50% 
                 no-repeat;
     &.loading {

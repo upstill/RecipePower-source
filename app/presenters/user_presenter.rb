@@ -9,7 +9,7 @@ class UserPresenter < CardPresenter
   delegate :username, :fullname, :handle, :lists, :feeds, to: :user
 
   def card_avatar_fallback
-    "default-avatar-128.png"
+    image_path "default-avatar-128.png"
   end
 
   def card_avatar
