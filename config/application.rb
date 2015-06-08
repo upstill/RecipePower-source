@@ -60,6 +60,7 @@ module RP
 
     # Handle jquery through a CDN (optionally)
     config.assets.precompile += ["jquery.min.js"]
+    config.use_jquery2 = true
     config.bootstrap_version = "3.3.2" # NB  FOR FALLBACK PURPOSES, THERE MUST BE A vendor/javascripts/bootstrap/bootstrap-#{version}.js FILE
   end
 end

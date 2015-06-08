@@ -233,10 +233,17 @@ module ApplicationHelper
                 class: "form-group actions"
   end
 
-  def jquery_include_tag(version = nil)
-    version ||= Jquery::Rails::JQUERY_VERSION
+  # Get jQuery from the Google CDN, falling back to the version in jquery-rails if unavailable
+  def jquery_include_tag use_jq2=false
+    if use_jq2
+      localfile = 'jquery2'
+      version = Jquery::Rails::JQUERY_2_VERSION
+    else
+      localfile = 'jquery'
+      version = Jquery::Rails::JQUERY_VERSION
+    end
     [ javascript_include_tag("//ajax.googleapis.com/ajax/libs/jquery/#{version}/jquery.min.js"),
-      javascript_tag("window.jQuery || document.write(unescape('#{javascript_include_tag('jquery.min').gsub('<','%3C')}'))")
+      javascript_tag("window.jQuery || document.write(unescape('#{javascript_include_tag(localfile).gsub('<','%3C')}'))")
     ].join("\n").html_safe
   end
 
