@@ -10,7 +10,7 @@
 #= require_self
 #= require arch/collection.js.coffee
 # require ../../../vendor/assets/javascripts/jquery
-#= require jquery/jquery.tokeninput
+#= require jquery_addons/jquery.tokeninput
 #= require bootbox
 #= require history
 #= require masonry.pkgd

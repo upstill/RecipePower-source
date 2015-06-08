@@ -9,18 +9,18 @@
 
 #= require jquery-migrate
 #= require jquery_ujs
-#= require jquery.ui.all
+# require jquery.ui.all Removed because it was bolloxing bootstrap
 #= require_self
 #= require arch/collection.js.coffee
-#= require_directory ../../../vendor/assets/javascripts/jquery
+#= require_directory ../../../vendor/assets/javascripts/jquery_addons
 #= require JavaScript-Load-Image/load-image.all.min.js
 #= require JavaScript-Canvas-to-Blob/canvas-to-blob.min.js
 
 # NB: This ordering is significant for some reason
-#= require jquery/fileupload/jquery.iframe-transport.js
-#= require jquery/fileupload/jquery.fileupload.js
-#= require jquery/fileupload/jquery.fileupload-process.js
-#= require jquery/fileupload/jquery.fileupload-image.js
+#= require jquery_addons/fileupload/jquery.iframe-transport.js
+#= require jquery_addons/fileupload/jquery.fileupload.js
+#= require jquery_addons/fileupload/jquery.fileupload-process.js
+#= require jquery_addons/fileupload/jquery.fileupload-image.js
 
 #= require imagesloaded.pkgd.min
 #= require bootstrap-filestyle
@@ -55,7 +55,5 @@
 # require RPDialogTest
 # require RPfields
 # require RPquery
-
-# require bootstrap
 
 window.RP ||= {}

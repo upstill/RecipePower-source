@@ -96,6 +96,7 @@ gem 'bootstrap-sass', '~> 3.2.0' # '~> 3.1.1'
 gem 'autoprefixer-rails'
 
 gem 'jquery-rails', '~> 2.2.1'
+gem 'jquery-rails-google-cdn'
 gem 'jquery-ui-rails', '~> 3.0'
 
 # Use unicorn as the web server

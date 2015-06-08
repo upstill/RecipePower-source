@@ -77,31 +77,15 @@ RP.dialog.close_modal = (dlog, epilog) ->
 insert_modal = (newdlog, odlog) ->
 	if typeof newdlog == 'string'
 		# Assuming the code is a fragment for the dialog...
-		wrapper = document.createElement('div');
-		wrapper.innerHTML = newdlog;
-		newdlog = wrapper.firstElementChild
-		if $(newdlog).hasClass('dialog')
-			wrapper.removeChild newdlog
-		else
-			# ...It may also be a 'modal-yield' dialog embedded in a page
-			# dom = $(newdlog)
-			# if newdlog = $('div.dialog', dom)[0]
-			# return $(newdlog, dom).detach()[0]
-			# else if $(dom).hasClass "dialog"
-			# $(dom).removeClass('modal-pending').addClass('modal')
-			# return dom[0]
-			doc = document.implementation.createHTMLDocument("Temp Page")
-			doc.open()
-			doc.write newdlog
-			doc.close()
-			# We extract dialogs that are meant to be opened instead of the whole page
-			newdlog = $('div.dialog.modal-yield', doc.body).removeClass("modal-yield").addClass("modal-pending").detach()[0]
+		newdlog = $(newdlog)[0]
+	else
+		newdlog = ($(newdlog).detach())[0]
 	# Now the dialog is a detached DOM elmt: attach it relative to the parent
 	if odlog && (odlog != newdlog) && odlog.parentNode # We might be just reopening a retained dialog
 		odlog.parentNode.insertBefore newdlog, odlog
 		newdlog = odlog.previousSibling
 	# Add the new dialog at the end of the page body if necessary
-	if !newdlog.parentNode
+	else
 		newdlog = document.getElementsByTagName("body")[0].appendChild newdlog
 	newdlog
 

@@ -233,4 +233,23 @@ module ApplicationHelper
                 class: "form-group actions"
   end
 
+  def jquery_include_tag(version = nil)
+    version ||= Jquery::Rails::JQUERY_VERSION
+    [ javascript_include_tag("//ajax.googleapis.com/ajax/libs/jquery/#{version}/jquery.min.js"),
+      javascript_tag("window.jQuery || document.write(unescape('#{javascript_include_tag('jquery.min').gsub('<','%3C')}'))")
+    ].join("\n").html_safe
+  end
+
+  def bootstrap_include_tag version
+    fallback = javascript_include_tag("bootstrap/bootstrap-#{version}").gsub('<','%3C')
+    [
+      javascript_include_tag("//maxcdn.bootstrapcdn.com/bootstrap/#{version}/js/bootstrap.js"),
+      javascript_tag(%Q{
+        if(typeof $().emulateTransitionEnd != 'function') {
+          document.write(unescape('#{fallback}'));
+        }
+      })
+    ].join("\n").html_safe
+  end
+
 end
