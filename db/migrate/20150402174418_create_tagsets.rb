@@ -1,5 +1,6 @@
 class CreateTagsets < ActiveRecord::Migration
   def change
+    drop_table :tagsets if ActiveRecord::Base.connection.table_exists?("tagsets")
     create_table :tagsets do |t|
       t.string :title
       t.integer :tagtype
