@@ -1,5 +1,6 @@
 class CreateAnswers < ActiveRecord::Migration
   def change
+=begin
     create_table :answers do |t|
       t.string :answer, default: ""
       t.references :user, index: true
@@ -8,6 +9,7 @@ class CreateAnswers < ActiveRecord::Migration
       t.timestamps null: false
     end
     add_foreign_key :answers, :users
+=end
     Tag.where(tagtype: [15,17]).each { |tag| tag.destroy }
     ["What's the best thing you've eaten lately?",
 	"For my last meal, serve me:",
