@@ -185,7 +185,7 @@ class ApplicationController < ActionController::Base
               render json: {code: dialog, how: "bootstrap"}.to_json, layout: false, :content_type => 'application/json'
             else
               # Render a replacement for the pagelet partial, as if it were rendered on the page
-              render partial: "layouts/container" # Respond with JSON instructions to replace the pagelet appropriately
+              render partial: "layouts/pagelet" # Respond with JSON instructions to replace the pagelet appropriately
           end
         }
         format.js {

@@ -130,7 +130,7 @@ class ResponseServices
 
   # Used for targeting a stream to either the page or part of a dialog
   def container_selector
-    @mode == :modal ? "div.dialog" : "div.container"
+    @mode == :modal ? "div.dialog" : "div.pagelet"
   end
 
   def page_title
