@@ -97,7 +97,7 @@ gem 'autoprefixer-rails'
 
 gem 'jquery-rails', '~> 4.0.3' # '2.2.1' to get jQuery 1.9.1
 # gem 'jquery-rails-google-cdn'
-# gem 'jquery-ui-rails', '~> 3.0'
+gem 'jquery-ui-rails', '~> 3.0'
 
 # Use unicorn as the web server
 gem 'unicorn'

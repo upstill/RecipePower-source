@@ -9,7 +9,7 @@
 
 #= require jquery-migrate
 #= require jquery_ujs
-# require jquery.ui.all Removed because it was bolloxing bootstrap
+#= require jquery.ui.widget
 #= require_self
 #= require arch/collection.js.coffee
 #= require_directory ../../../vendor/assets/javascripts/jquery_addons
