@@ -15,9 +15,9 @@ GIT
 
 GIT
   remote: git://github.com/smartinez87/exception_notification.git
-  revision: 535aa76045762cca644bd26dd4d2e8144f6ecffe
+  revision: b4149bf8311426396772a1ed9603d5d48a14ac4f
   specs:
-    exception_notification (4.1.0)
+    exception_notification (4.1.1)
       actionmailer (>= 3.0.4)
       activesupport (>= 3.0.4)
 
@@ -80,8 +80,9 @@ GEM
     bcrypt (3.1.10)
     binding_of_caller (0.7.2)
       debug_inspector (>= 0.0.1)
-    bootstrap-sass (3.2.0.2)
-      sass (~> 3.2)
+    bootstrap-sass (3.3.4.1)
+      autoprefixer-rails (>= 5.0.0.1)
+      sass (>= 3.2.19)
     builder (3.1.4)
     capistrano (3.3.5)
       capistrano-stats (~> 1.1.0)
@@ -168,7 +169,6 @@ GEM
       rails-dom-testing (~> 1.0)
       railties (>= 4.2.0)
       thor (>= 0.14, < 2.0)
-    jquery-rails-google-cdn (0.0.5)
     json (1.8.3)
     jwt (1.5.0)
     kgio (2.9.3)
@@ -376,7 +376,7 @@ DEPENDENCIES
   awesome_nested_set
   aws-sdk (~> 1)
   binding_of_caller
-  bootstrap-sass (~> 3.2.0)
+  bootstrap-sass (~> 3.3.4)
   builder (~> 3.1.0)
   capistrano (~> 3.3.5)
   capistrano-bundler (~> 1.1.4)
@@ -402,7 +402,6 @@ DEPENDENCIES
   htmlentities
   jquery-migrate-rails
   jquery-rails (~> 4.0.3)
-  jquery-rails-google-cdn
   letter_opener
   letter_opener_web (~> 1.2.0)
   log_buddy

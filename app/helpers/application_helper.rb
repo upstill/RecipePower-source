@@ -247,10 +247,19 @@ module ApplicationHelper
     ].join("\n").html_safe
   end
 
-  def bootstrap_include_tag version
-    fallback = javascript_include_tag("bootstrap/bootstrap-#{version}").gsub('<','%3C')
+  # The Bootstrap version is that provided by bootstrap-sass
+  def bootstrap_include_tag
+    # The version may include a maintenance release number
+    version = Bootstrap::VERSION.split('.')[0..2].join('.')
+    fallback = (
+        javascript_include_tag("bootstrap.js") +
+        stylesheet_link_tag("bootstrap_import.css")
+    ).gsub('<','%3C')
     [
-      javascript_include_tag("//maxcdn.bootstrapcdn.com/bootstrap/#{version}/js/bootstrap.js"),
+      javascript_include_tag("//maxcdn.bootstrapcdn.com/bootstrap/#{version}/js/bootstrap.min.js"),
+      stylesheet_link_tag("bootstrap_preface"),
+      stylesheet_link_tag("//maxcdn.bootstrapcdn.com/bootstrap/#{version}/css/bootstrap.min.css"),
+      stylesheet_link_tag("//maxcdn.bootstrapcdn.com/bootstrap/#{version}/css/bootstrap-theme.min.css"),
       javascript_tag(%Q{
         if(typeof $().emulateTransitionEnd != 'function') {
           document.write(unescape('#{fallback}'));

@@ -8,7 +8,6 @@
   <script src="http://html5shim.googlecode.com/svn/trunk/html5.js" type="text/javascript"></script>
   <![endif]-->
   <%= favicon_link_tag %>
-  <%= stylesheet_link_tag "application", :media => "all" %>
 
   <!-- Include Bootstrap from CDN per getbootstrap.com -->
   <!-- Latest compiled and minified JavaScript -->
@@ -33,9 +32,10 @@
   <%# end %>
 -->
   <%= jquery_include_tag Rails.application.config.use_jquery2 %>
-  <!--See config/application.rb-->
-  <%= bootstrap_include_tag Rails.application.config.bootstrap_version %>
+  <!-- From bootstrap-sass -->
+  <%= bootstrap_include_tag %>
   <%# jquery_ui_include_tag Rails.application.config.jquery_ui_version %>
+  <%= stylesheet_link_tag "application", :media => "all" %>
   <%= javascript_include_tag "application" %>
   <%= csrf_meta_tag %>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
