@@ -1,12 +1,12 @@
 class CreateTagsets < ActiveRecord::Migration
   def change
-    drop_table :tagsets if ActiveRecord::Base.connection.table_exists?("tagsets")
-    create_table :tagsets do |t|
-      t.string :title
-      t.integer :tagtype
+    unless ActiveRecord::Base.connection.table_exists?("tagsets")
+      create_table :tagsets do |t|
+        t.string :title
+        t.integer :tagtype
 
-      t.timestamps null: false
-    end
+        t.timestamps null: false
+      end
       Tagset.create title: "Cookbook"
       Tagset.create title: "Cocktail"
       Tagset.create title: "Quick Dinner"
@@ -16,5 +16,6 @@ class CreateTagsets < ActiveRecord::Migration
       Tagset.create title: "Fancy Spread"
       Tagset.create title: "Kidfood"
       Tagset.create title: "Tool"
+    end
   end
 end
