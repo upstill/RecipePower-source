@@ -1,19 +1,20 @@
 <%# render "show", decorator: decorator %>
 <%= present decorator, current_user_or_guest do |presenter| %>
-    <ul class="card-item media-list <%= decorator.dom_id %>">
-      <li class="media">
-        <a class="pull-left" href="#">
-          <div class="avatar"><%= presenter.card_avatar %></div>
-        </a>
-        <div class="media-body">
-          <%= presenter.card_header %>
-          <%= presenter.card_subhead %>
-          <table>
-            <% presenter.card_aspects.each do |aspect | %>
-                <%= presenter.card_aspect_rendered aspect %>
-            <% end %>
-          </table>
+    <div class="card-item row card-large <%= presenter.card_kind %> <%= decorator.dom_id %>">
+      <div class="col-md-4">
+        <%= presenter.card_avatar %>
+      </div>
+      <div class="col-md-8">
+        <% ch = presenter.card_header %>
+        <%= presenter.card_header %>
+        <%# presenter.card_subhead %>
+        <div class="row">
+          <div class="col-md-12">
+              <% presenter.card_aspects.each do |aspect | %>
+                  <%= presenter.card_aspect_rendered aspect %>
+              <% end %>
+          </div>
         </div>
-      </li>
-    </ul>
+      </div>
+    </div>
 <% end %>

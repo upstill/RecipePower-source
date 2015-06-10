@@ -1,9 +1,13 @@
 class CardPresenter < BasePresenter
 
+  def card_kind
+    "user-card"
+  end
+
   def card_avatar
     img = card_avatar_link
     img = card_avatar_fallback if img.blank?
-    card_object_link image_with_error_recovery(img, class: "media-object fixed-width", alt: card_avatar_fallback )
+    card_object_link image_with_error_recovery(img, class: "col-md-4", alt: card_avatar_fallback )
   end
 
   # Take the opportunity to wrap the content in a link to the presented object
@@ -24,11 +28,12 @@ class CardPresenter < BasePresenter
     editlink = collectible_buttons_panel @decorator,
                                          :button_size => "xs",
                                          :edit_button => response_service.admin_view?
-    content_tag :h2, "#{card_header_content}&nbsp;#{editlink}".html_safe, class: "media-heading"
+    # content_tag :p, "#{card_header_content}&nbsp;#{editlink}".html_safe, class: "card-aspect-label header"
+    content_tag :p, (card_header_content + editlink).html_safe, class: "card-aspect-label header"
   end
 
   def card_header_content
-    @decorator.title
+    @decorator.title.downcase
   end
 
   def card_subhead
@@ -42,11 +47,10 @@ class CardPresenter < BasePresenter
 
   def card_aspect_enclosure which, contents, label=nil
     label ||= which.to_s.capitalize.tr('_', ' ') # split('_').map(&:capitalize).join
-    content_tag( :tr,
-                 content_tag( :td, content_tag( :h4, label), style:"padding-right: 10px; vertical-align:top; text-align: right" )+
-                     content_tag( :td, contents.html_safe, style: "vertical-align:top; padding-top:11px" ),
-                 class: which.to_s
-    ) unless contents.blank?
+    (
+      content_tag(:p, label.upcase, class: "card-aspect-label #{which}") +
+      content_tag(:p, contents, class: "card-aspect-contents #{which}")
+    ).html_safe if contents.present?
   end
 
   def card_aspect_editor which

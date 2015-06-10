@@ -34,7 +34,7 @@ class UserPresenter < CardPresenter
 
   def card_header_content
     mail_link = link_to_submit("Send email", mailto_user_path(user, mode: :modal), button_size: "xs") unless is_viewer?
-    ("#{fullname}&nbsp;#{content_tag(:small, username)}&nbsp;#{mail_link}").html_safe
+    ("#{fullname.downcase}&nbsp;#{content_tag(:small, username)}&nbsp;#{mail_link}").html_safe
   end
 
   # Provide a list of aspects for display in the entity's panel, suitable for passing to aspect
