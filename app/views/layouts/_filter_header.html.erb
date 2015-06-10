@@ -1,17 +1,16 @@
 <%= triggered_form search_path do %>
-    <h2 class="filter-element">Search the whole magilla:</h2>
     <% if @filtered_header && @filtered_presenter.filter_type_selector %>
         <%= select_tag :tagtype, options_from_collection_for_select(Tag.type_selections(true, true), :last, :first, @filtered_presenter.tagtype),
                        :include_blank => false,
                        :onchange => %Q{RP.submit.onselect( event ); } %>
     <% end %>
-    <div class="filter-element">
+    <div class="filter-element" style="position: fixed; margin-top: -75px; margin-left: 240px;">
       <%= token_input_query rows: 1,
                             autofocus: true,
                             data: {:"on-add" => "RP.submit.enclosing_form",
                                    :"on-delete" => "RP.submit.enclosing_form",
-                                   :hint => "", # "Search the collection by typing terms here",
-                                   placeholder: "Seek and ye shall find...",
+                                   :hint => "Type terms to look for",
+                                   placeholder: "Let's cook up something...",
                                    :"no-results-text" => "No matching tag found; hit Enter to search with text"} %>
     </div>
 <% end %>

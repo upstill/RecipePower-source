@@ -228,13 +228,23 @@ span.caret {
 
 //contents of pages
 .container{
-  margin-top:200px;
+  margin-top:220px;
+}
+
+div.filter-element {
+  width: 500px;
+  z-index: 1030;
+  input#token-input-querytags {
+    font-family: Oswald-Light, sans-serif;
+    font-style: italic;
+    font-size: 20px;
+    width: 500px;
+  }
 }
 
 .tag-filter-title{
   font-family: Oswald, sans-serif;
   text-transform: lowercase;
-
 }
 
 // .simple_form label {

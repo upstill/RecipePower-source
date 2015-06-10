@@ -16,7 +16,7 @@
             <%= collections_navtab %>
             <%= friends_navtab %>
             <%= my_lists_navtab %>
-            <%= other_lists_navtab %>
+            <%# other_lists_navtab %>
             <%= feeds_navtab %>
             <%# news_navtab %>
             <%# more_navtab %>
@@ -35,3 +35,4 @@
       </p>
   <% end %>
 </nav>
+<%= render 'layouts/filter_header', with_nav: true %>

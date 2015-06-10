@@ -62,7 +62,6 @@
 </head>
 <body>
 <%= render 'layouts/navbar' %>
-<%= render 'layouts/filter_header' %>
 <% layout = (response_service.controller == "pages" && response_service.action == "home") ? "pagelet" : "container" %>
 <%= render "layouts/#{layout}" %>
 <% if current_user %>
