@@ -7,9 +7,39 @@ label.question-text {
   font-weight: 200;
 }
 
-.card-item {
-  .avatar {
-    width: 150px;
-    height: auto;
+div.card-item {
+  &.user-card {
+    background-color: $user-color;
   }
+  .card-aspect-label {
+    margin-bottom: 0;
+    color: white;
+    letter-spacing: 2px;
+    font-size: 16px;
+    &.header {
+      font-size: 36px;
+      letter-spacing: 3px;
+      margin-bottom: 10px;
+    }
+  }
+  p.card-aspect-contents {
+    margin-top: 0;
+    color: #8D8F90;
+  }
+}
+
+div.pic-inset {
+  width: auto;
+  margin: 15px 5px;
+}
+
+div.pic_preview {
+  div.bootstrap-filestyle {
+    margin: 20px;
+  }
+}
+
+.bootstrap-filestyle {
+  margin-top: 20px;
+  text-align: center;
 }

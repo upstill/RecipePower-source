@@ -14,16 +14,16 @@ div.results-panel {
   width: 95%;
   margin: 30px;
   &.recipes {
-    background-color: #B8C8CD;
+    background-color: $recipe-color;
   }
   &.friends {
-    background-color: #DFD9B6;
+    background-color: $friend-color;
   }
   &.feeds {
-    background-color: #E3CBB1;
+    background-color: $feed-color;
   }
   &.lists {
-    background-color: #C0D0C2;
+    background-color: $list-color;
   }
   .results-menu {
     width: 100%;

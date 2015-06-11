@@ -1,19 +1,18 @@
 <%# render "show", decorator: decorator %>
 <%= present decorator, current_user_or_guest do |presenter| %>
     <div class="card-item row card-large <%= presenter.card_kind %> <%= decorator.dom_id %>">
-      <div class="col-md-4">
-        <%= presenter.card_avatar %>
+      <div class="col-md-3" >
+        <div class="pic-inset">
+            <%= presenter.card_avatar %>
+        </div>
       </div>
-      <div class="col-md-8">
-        <% ch = presenter.card_header %>
+      <div class="col-md-9">
         <%= presenter.card_header %>
         <%# presenter.card_subhead %>
         <div class="row">
-          <div class="col-md-12">
-              <% presenter.card_aspects.each do |aspect | %>
-                  <%= presenter.card_aspect_rendered aspect %>
-              <% end %>
-          </div>
+          <%= presenter.column1 %>
+          <%= presenter.column2 %>
+          <%= presenter.column3 %>
         </div>
       </div>
     </div>

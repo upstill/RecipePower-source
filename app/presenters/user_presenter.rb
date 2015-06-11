@@ -53,6 +53,35 @@ class UserPresenter < CardPresenter
     ]
   end
 
+  def card_ncolumns
+    3
+  end
+
+  def card_aspects1
+    [
+        # :member_since,
+        :name_form,
+        :owned_lists,
+        :latest_list,
+        :desert_island,
+        :question,
+        # :collected_lists,
+        # :collected_feeds
+    ]
+  end
+
+  def card_aspects2
+    [
+        :latest_recipe
+    ]
+  end
+
+  def card_aspects3
+    [
+        :about
+    ]
+  end
+
   def card_aspect which
     label = contents = nil
     case which
@@ -115,7 +144,8 @@ class UserPresenter < CardPresenter
         label = "Latest Recipe"
         if latestrr = user.collection_pointers.where(:entity_type => "Recipe", :in_collection => true).order(created_at: :desc).first
           latest = latestrr.entity
-          contents = link_to_submit latest.title, recipe_path(latest)
+          contents = with_format("html") { render "show_masonry", decorator: latest.decorate }
+          # contents = link_to_submit latest.title, recipe_path(latest)
         else
           contents = "No recipes yet—so install the #{link_to_submit 'Cookmark Button', '/popup/starting_step2', :mode => :modal} and go get some!"
         end
@@ -133,7 +163,7 @@ class UserPresenter < CardPresenter
   def show_or_edit which, val
     if is_viewer?
       if val.present?
-        user.about + link_to_submit("Edit", edit_user_path(section: which), button_size: "xs")
+        (user.about + link_to_submit("Edit", edit_user_path(section: which), button_size: "xs")).html_safe
       else
         aspect_editor which
       end

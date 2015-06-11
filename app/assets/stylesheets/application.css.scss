@@ -1,3 +1,13 @@
+$font-stack:    Oswald, sans-serif;
+$page-background-color: #F1F1F0;
+$content-background-color: #F2F1F0;
+// Color for the user card and panels
+$user-color:  #EDDAD7;
+$recipe-color:  #C8D6DE;
+$friend-color: #E3E9C2;
+$feed-color: #EED8C1;
+$list-color: #D0DBD2;
+
 @import 'bootstrap_amendments';
 @import 'views/*';
 @import 'controllers/*';
@@ -17,32 +27,16 @@
 @import 'bootstrap.icon-large.min';
 @import 'collection';
 
-body{
-  background-color: #f1f1f0;
-}
-.brand {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  line-height: 20px;
-  text-decoration: none;
-  font-size: 20px;
-  font-weight: 150;
-  color: #999999;
-}
-
-//html and all panel divs for home page scroll
-html {
-  //height: 100%;
-  //margin: 0;
-  //padding:0;
-  //font-size: 30px; /*1rem=30px*/
-}
-body, pagelet-body{
-  background-color: #f1f1f0;
+body {
+  font-family: $font-stack;
+  background-color: $page-background-color;
   height: 100%;
   margin: 0;
   padding:0;
-  font-size: 30px; /*1rem=30px*/
+  font-size: 18px; /*1rem=30px*/
+  letter-spacing: 1px;
 }
+
 .panels{
   height: 100vh;
   section {
@@ -237,7 +231,7 @@ div#menuback {
   top: 0;
   width: 100%;
   height: 210px;
-  background-color: lightgray;
+  background-color: $page-background-color;
 }
 
 div.filter-element {
@@ -290,9 +284,6 @@ div.filter-element {
 div.results-enclosure {
   width: 100%;
   height: auto;
-  margin: 10px;
-  padding: 10px;
-  background-color: #DDDDDD;
 }
 
   // Cozies up to the tags selector above it

@@ -25,11 +25,11 @@ class CardPresenter < BasePresenter
   end
 
   def card_header
-    editlink = collectible_buttons_panel @decorator,
+    content = card_header_content + collectible_buttons_panel(@decorator,
                                          :button_size => "xs",
-                                         :edit_button => response_service.admin_view?
+                                         :edit_button => response_service.admin_view?)
     # content_tag :p, "#{card_header_content}&nbsp;#{editlink}".html_safe, class: "card-aspect-label header"
-    content_tag :p, (card_header_content + editlink).html_safe, class: "card-aspect-label header"
+    content_tag :div, content.html_safe, class: "card-aspect-label header"
   end
 
   def card_header_content
@@ -87,5 +87,25 @@ class CardPresenter < BasePresenter
   def card_aspects
     [ ]
   end
+
+  def card_ncolumns
+    3
+  end
+
+  def column1
+    return unless (content = card_aspects1.collect { |aspect| card_aspect_rendered aspect }.join("\n")).present?
+    content_tag :div, content.html_safe, class: "col-md-#{12/card_ncolumns}"
+  end
+
+  def column2
+    return unless (content = card_aspects2.collect { |aspect| card_aspect_rendered aspect }.join("\n")).present?
+    content_tag :div, content.html_safe, class: "col-md-#{12/card_ncolumns}"
+  end
+
+  def column3
+    return unless (content = card_aspects3.collect { |aspect| card_aspect_rendered aspect }.join("\n")).present?
+    content_tag :div, content.html_safe, class: "col-md-#{12/card_ncolumns}"
+  end
+
 
 end
