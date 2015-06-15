@@ -1,13 +1,33 @@
 $font-stack:    Oswald, sans-serif;
 $page-background-color: #F1F1F0;
 $content-background-color: #F2F1F0;
+
+$user-background-color: #ecdad7;
+$user-text-color: #e6ccc8;
+
+$recipes-background-color: #d8dde0;
+$recipes-menu-color: #4c7c99;
+$recipes-text-color: #e5ebef;
+
+$friends-background-color: #e4e0cf;
+$friends-menu-color: #dbc046;
+$friends-text-color: #f3f2ea;
+
+$lists-background-color: #dbe0dd;
+$lists-menu-color: #1d6a2b;
+$lists-text-color: #e9eeea;
+
+$feeds-background-color: #e7dfd6;
+$feeds-menu-color: #de8822;
+$feeds-text-color: #f5f2ee;
+
+$utensils-background-color: #dcdbdc;
+$utensils-menu-color: #816887;
+
 // Color for the user card and panels
 $user-color:  #EDDAD7;
-$recipe-color:  #C8D6DE;
-$friend-color: #E3E9C2;
-$feed-color: #EED8C1;
-$list-color: #D0DBD2;
 
+@import url(https://fonts.googleapis.com/css?family=Archivo+Narrow:700,400);
 @import 'bootstrap_amendments';
 @import 'views/*';
 @import 'controllers/*';
@@ -17,6 +37,7 @@ $list-color: #D0DBD2;
 @import 'common/filtered_presenter';
 @import 'common/panel';
 @import 'common/card';
+@import 'common/cardlet';
 @import 'paginate';
 @import "jquery/jNotify.jquery";
 // @import "jquery.ui.all";
@@ -139,35 +160,43 @@ ul.nav.navbar-nav{
   }
 
 li#collections-navtab{
-  background-color: #d8dde0;
-  color: #4c7c99;
-  margin: 0 7px;  
+  background-color: $recipes-background-color;
+  margin: 0 7px;
   padding-top:80px;
   text-shadow: none;
+  a.dropdown-toggle {
+    color: $recipes-menu-color;
+  }
 }
 
 li#friends-navtab{
-  background-color: #e4e0cf;
-  color: #dbc046;
-  margin: 0 7px; 
+  background-color: $friends-background-color;
+  margin: 0 7px;
   padding:80px 8px 0;
   text-shadow: none;
+  a.dropdown-toggle {
+    color: $friends-menu-color;
+  }
 }
 
 li#my_lists-navtab{
-  background-color: #dbe0dd;
-  color: #1d6a2b;
+  background-color: $lists-background-color;
   margin: 0 7px;
   padding: 80px 18px 0;
   text-shadow: none;
+  a.dropdown-toggle {
+    color: $lists-menu-color;
+  }
 }
 
 li#feeds-navtab{
-  background-color: #e7dfd6;
-  color: #de8822;
+  background-color: $feeds-background-color;
   margin: 0 7px;
   padding: 80px 34px 0;
   text-shadow: none;
+  a.dropdown-toggle {
+    color: $feeds-menu-color;
+  }
 }
 
 li#home-navtab{

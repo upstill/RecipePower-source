@@ -13,11 +13,11 @@
       <%= collectible_share_button decorator, styling %>
   </span>
 
-  <%# if styling[:vote_button] %>
+  <% if styling[:vote_button] && false %>
       <span class="<%= recipe_list_element_golink_class item %>">
         <%= collectible_vote_buttons decorator.object, styling %>
       </span>
-  <%# end %>
+  <% end %>
 
   <% if styling[:list_button] %>
       <span class="<%= recipe_list_element_golink_class item %>">

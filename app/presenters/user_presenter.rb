@@ -54,10 +54,11 @@ class UserPresenter < CardPresenter
   end
 
   def card_ncolumns
-    3
+    1
   end
 
   def card_aspects1
+    [] ||
     [
         # :member_since,
         :name_form,
@@ -77,6 +78,7 @@ class UserPresenter < CardPresenter
   end
 
   def card_aspects3
+    [] ||
     [
         :about
     ]
@@ -144,7 +146,7 @@ class UserPresenter < CardPresenter
         label = "Latest Recipe"
         if latestrr = user.collection_pointers.where(:entity_type => "Recipe", :in_collection => true).order(created_at: :desc).first
           latest = latestrr.entity
-          contents = with_format("html") { render "show_masonry", decorator: latest.decorate }
+          contents = with_format("html") { render "collectible/show_cardlet", decorator: latest.decorate }
           # contents = link_to_submit latest.title, recipe_path(latest)
         else
           contents = "No recipes yet—so install the #{link_to_submit 'Cookmark Button', '/popup/starting_step2', :mode => :modal} and go get some!"

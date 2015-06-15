@@ -1,0 +1,13 @@
+<div class="cardlet-item <%= decorator.dom_id %>">
+  <%= safe_image_div decorator, :site, class: "pic-box", fill_mode: "fixed-height" %>
+  <%= collectible_cardlet_datablock decorator do %>
+      <%= collectible_taglist decorator %>
+      <div class="icons">
+        <%= collectible_info_icon decorator %>
+      </div>
+      <div class="buttons">
+        <%= collectible_buttons_panel decorator, button_size: "xs" %>
+      </div>
+  <% end %>
+  <%= collectible_vote_buttons decorator.object, {style: "bold"} %>
+</div>

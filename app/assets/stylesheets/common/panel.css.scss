@@ -14,16 +14,20 @@ div.results-panel {
   width: 95%;
   margin: 30px;
   &.recipes {
-    background-color: $recipe-color;
+    background-color: $recipes-background-color;
+    color: $recipes-text-color;
   }
   &.friends {
-    background-color: $friend-color;
+    background-color: $friends-background-color;
+    color: $friends-text-color;
   }
   &.feeds {
-    background-color: $feed-color;
+    background-color: $feeds-background-color;
+    color: $feeds-text-color;
   }
   &.lists {
-    background-color: $list-color;
+    background-color: $lists-background-color;
+    color: $lists-text-color;
   }
   .results-menu {
     width: 100%;

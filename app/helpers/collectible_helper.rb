@@ -10,6 +10,15 @@ module CollectibleHelper
     end
   end
 
+  def collectible_taglist decorator
+    taglist = decorator.object.tags.collect { |tag|
+      link_to_submit(tag.name.downcase, tag, :mode => :modal, :class => "taglink" )
+    }.join('&nbsp;<span class="tagsep">|</span> ')
+    # <span class="<%= recipe_list_element_golink_class item %>">
+    button = content_tag :div, collectible_tag_button(decorator, {}), class: "inline-glyphicon"
+    (taglist+"&nbsp;"+button).html_safe
+  end
+
   def collectible_buttons_panel_replacement decorator
     ["div.collectible-buttons##{dom_id decorator}", collectible_buttons_panel(decorator)]
   end
@@ -65,18 +74,27 @@ module CollectibleHelper
   end
 
   # Declare the voting buttons for a collectible
-  def collectible_vote_buttons entity, styling={} # Style can be 'h', with more to come
+  def collectible_vote_buttons entity, styling={} # Style can be 'h' or 'bold', with more to come
     styling[:style] ||= "h"
-    return "" unless
-        (uplink = vote_link(entity, true, styling: styling)) &&
-        (downlink = vote_link(entity, false, styling: styling))
+    uplink = vote_link(entity, true, styling: styling)
+    downlink = vote_link(entity, false, styling: styling)
     button_options = button_styling styling, method: "post", remote: true
     vote_state = Vote.current entity
     up_button = link_to_submit "", uplink, button_options.merge(class: vote_button_class(:up, vote_state, styling[:style]))
     down_button = link_to_submit "", downlink, button_options.merge(class: vote_button_class(:down, vote_state, styling[:style]))
     vote_counter = (entity.upvotes > 0 && entity.upvotes.to_s) || ""
     count = content_tag :span, vote_counter, class: vote_count_class(styling[:style])
-    content_tag :div, (up_button+count+down_button).html_safe, class: vote_div_class(styling[:style]), id: dom_id(entity)
+    upcount =
+        content_tag(:span,
+                    "#{entity.upvotes.to_s}<br>",
+                    class: vote_count_class(styling[:style])) if entity.upvotes > 0
+    downcount =
+        content_tag(:span,
+                    "#{entity.downvotes.to_s}<br>",
+                    class: vote_count_class(styling[:style])) if entity.downvotes > 0
+    left = content_tag :div, "#{upcount}#{up_button}".html_safe, class: "vote-div"
+    right = content_tag :div, "#{down_button}#{downcount}".html_safe, class: "vote-div"
+    content_tag :div, (left+right).html_safe, class: vote_div_class(styling[:style]), id: dom_id(entity)
   end
 
   def vote_buttons_replacement entity

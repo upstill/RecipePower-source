@@ -9,8 +9,6 @@ module NavtabsHelper
     class_str = "master-navtab"
     if which == (@active_menu || response_service.active_menu)
       class_str << " active"
-    else
-      options[:style] = "color: #999;"
     end
 
     # The block should produce an array of menu items (links, etc.)

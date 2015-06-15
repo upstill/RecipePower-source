@@ -1,0 +1,146 @@
+div.cardlet-item {
+  height: 200px;
+  width: auto;
+  float: left;
+  background-color: #f9f8f4;
+  margin: 5px;
+  border-bottom: 3px solid lightgrey;
+  border-right: 2px solid lightgrey;
+  position: relative;
+  .pic-box {
+    display: inline-block;
+    float: left;
+    height: 100%;
+    width: auto; // 220px;
+    display: -webkit-box;
+    display: -moz-box;
+    display: box;
+
+    -webkit-box-orient: vertical;
+    -moz-box-orient: vertical;
+    box-orient: vertical;
+
+    -webkit-box-align: center;
+    -moz-box-align: center;
+    box-align: center;
+
+    -webkit-box-pack: center;
+    -moz-box-pack: center;
+    box-pack: center;
+
+    img.fixed-height {
+      height:100%;
+      width:auto;
+    }
+  }
+
+  .datablock {
+    font-family: Archivo Narrow, Helvetica, Arial, sans-serif;
+    height: 100%; // auto; // 4.6em;
+    width: auto;
+    display: inline-block;
+    float: left;
+    .title-block {
+      padding-left: 10px;
+      border-bottom: 3px solid #b95454;
+      .title {
+        margin-top: 2px;
+        // letter-spacing: 2px;
+        margin-bottom: 10px;
+        width: 250px;
+        font-weight: 700;
+        a.title-link {
+          color: #4f4d4a;
+          display: block;
+          overflow: hidden;
+          max-height: 2.8em;
+        }
+      }
+      .cardlet_source {
+        font-size: 10px;
+        color: #999;
+        a.tablink {
+          color: #77a2be;
+          letter-spacing: 1px;
+        }
+      }
+    }
+    .footer-block {
+      height: auto;
+      font-size: 14px;
+      padding: 0px 10px 0px 5px;
+      div.inline-glyphicon {
+        display: inline-block;
+        position: relative;
+        top: 3px;
+      }
+      a.taglink {
+        color: #a2a2a2;
+      }
+      span.tagsep {
+        color: #8ac5d2;
+      }
+    }
+    .footer {
+      height: 28px;
+      align: right;
+      position: relative;
+
+      display: -webkit-box;
+      // display: -moz-box;
+      display: box;
+
+      -webkit-box-align: center;
+      -moz-box-align: center;
+      box-align: center;
+
+      -webkit-box-pack: center;
+      -moz-box-pack: center;
+      box-pack: center;
+
+      padding: 4px 4px 4px 12px;
+      margin: 2px -4px -4px;
+      border-top: 1px solid #ddd;
+      border-radius: 0 0 4px 4px;
+      background-color: #fafafa;
+      background-image: -webkit-linear-gradient(top, #ffffff, #f2f2f2);
+      background-image: -moz-linear-gradient(top, #ffffff, #f2f2f2);
+      background-image: linear-gradient(to bottom, #ffffff, #f2f2f2);
+
+      .icons {
+        position: absolute;
+        left: 2px;
+      }
+
+      .buttons {
+        position: absolute;
+        right: 2px;
+      }
+    }
+
+  }
+
+  .vote-div-bold {
+    width: auto;
+    height: auto;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    div.vote-div {
+      text-align: center;
+      display: inline-block;
+      .vote-count-bold {
+        font-family: Oswald;
+        letter-spacing: 2px;
+        font-size: 18px;
+        color: #dbc046;
+      }
+      a.vote-button {
+        color: #ece6cd;
+        font-size: 36px;
+        font-weight: lighter;
+      }
+    }
+  }
+
+}
