@@ -1,4 +1,8 @@
-$font-stack:    Oswald, sans-serif;
+$font-stack:    Oswald, "Helvetica Neue", Helvetica, Arial, sans-serif;
+$oswald: Oswald, "Helvetica Neue", Helvetica, Arial, sans-serif;
+$oswald-light: Oswald-Light, Oswald, "Helvetica Neue", Helvetica, Arial, sans-serif;
+$oswald-bold: Oswald-Bold, Oswald, "Helvetica Neue", Helvetica, Arial, sans-serif;
+$archivo: 'Archivo-Narrow', 'Archivo Narrow', "Helvetica Neue", Helvetica, Arial, sans-serif;
 $page-background-color: #F1F1F0;
 $content-background-color: #F2F1F0;
 
@@ -399,3 +403,73 @@ div.results-enclosure {
     margin-top: 9px;
   }
 
+.rotate {
+  /* Safari */
+  -webkit-transform: rotate(-90deg);
+
+  /* Firefox */
+  -moz-transform: rotate(-90deg);
+
+  /* IE */
+  -ms-transform: rotate(-90deg);
+
+  /* Opera */
+  -o-transform: rotate(-90deg);
+
+  /* Internet Explorer */
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+
+  transform: rotate(-90deg);
+
+}
+
+.oswald {
+  font-family: $oswald;
+  font-size: 24pt;
+  &.bold {
+    font-weight: bold;
+  }
+  &.light {
+    font-weight: lighter;
+  }
+}
+.ow-light {
+  font-family: $oswald-light;
+  font-size: 24pt;
+  &.bold {
+    font-weight: bold;
+  }
+  &.light {
+    font-weight: lighter;
+  }
+}
+.ow-bold {
+  font-family: $oswald-bold;
+  font-size: 24pt;
+  &.light {
+    font-weight: bold;
+  }
+  &.bold {
+    font-weight: lighter;
+  }
+}
+.archivo {
+  font-family: $archivo;
+  font-size: 24pt;
+  &.bold {
+    font-weight: 700;
+  }
+  &.light {
+    font-weight: 400;
+  }
+}
+.arch-bold {
+  font-family: $archivo;
+  font-size: 24pt;
+  &.light {
+    font-weight: 400;
+  }
+  &.bold {
+    font-weight: 700;
+  }
+}

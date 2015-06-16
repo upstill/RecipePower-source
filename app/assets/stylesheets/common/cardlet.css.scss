@@ -35,7 +35,7 @@ div.cardlet-item {
   }
 
   .datablock {
-    font-family: Archivo Narrow, Helvetica, Arial, sans-serif;
+    font-family: $archivo;
     height: 100%; // auto; // 4.6em;
     width: auto;
     display: inline-block;

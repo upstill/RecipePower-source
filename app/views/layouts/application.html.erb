@@ -69,6 +69,34 @@
 <% else %>
     <%# render partial: "registrations/new_modal" %>
 <% end %>
+<% if Rails.env.development? && false %>
+    <p>
+      Archivo:
+      <span class="archivo">default</span>&nbsp;
+      <span class="archivo light">light</span>&nbsp;
+      <span class="archivo bold">bold</span><br>
+      Archivo-Light:
+      <span class="arch-light">default</span>&nbsp;
+      <span class="arch-light light">light</span>&nbsp;
+      <span class="arch-light bold">bold</span><br>
+      Archivo-Bold:
+      <span class="arch-bold">default</span>&nbsp;
+      <span class="arch-bold light">light</span>&nbsp;
+      <span class="arch-bold bold">bold</span><br>
+      Oswald:
+      <span class="oswald">default</span>&nbsp;
+      <span class="oswald light">light</span>&nbsp;
+      <span class="oswald bold">bold</span><br>
+      Oswald-Light:
+      <span class="ow-light">default</span>&nbsp;
+      <span class="ow-light light">light</span>&nbsp;
+      <span class="ow-light bold">bold</span><br>
+      Oswald-Bold:
+      <span class="ow-bold">default</span>&nbsp;
+      <span class="ow-bold light">light</span>&nbsp;
+      <span class="ow-bold bold">bold</span><br>
+    </p>
+<% end %>
 <div id='popup_notification' class='hide alert-notice'>
   <button class="close" data-dismiss="alert">&#215;</button>
   <span>Msg Goes Here</span>

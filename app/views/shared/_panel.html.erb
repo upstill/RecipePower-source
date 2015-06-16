@@ -5,7 +5,7 @@
       <%= panel_suggestion_button url, type %>
     </div>
     <div class="results-content">
-      <div class="results-label"><%= image_tag "#{type}_panel_label.png", class: "results-img" %></div>
+      <div class="results-label <%= type %> rotate"><%= type.downcase %></div>
       <div class="results-box">
         <%= panel_results_placeholder type %>
     	<%= panel_suggestions_placeholder type %>

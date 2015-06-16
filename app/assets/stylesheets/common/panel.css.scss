@@ -69,12 +69,26 @@ div.results-panel {
     // border: 1px solid red;
     .results-label {
       position: absolute;
-      left: 5px;
-      top: 0;
-      width: 80px;
-      height: 200px;
-      margin-top: 30px;
-      display: inline-block;
+      left: -70px;
+      top: 100px;
+      width: 200px;
+      height: 60px;
+      font-size: 64px;
+      font-family: $oswald-light;
+      font-weight: 400;
+      text-align: right;
+      &.recipes {
+        color: #e5ebef;
+      }
+      &.feeds {
+        color: $feeds-text-color;
+      }
+      &.friends {
+        color: $friends-text-color;
+      }
+      &.lists {
+        color: $lists-text-color;
+      }
       .results-img {
         width: 70px;
         height: auto;
