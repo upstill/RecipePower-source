@@ -31,9 +31,7 @@ div.results-panel {
   }
   .results-menu {
     width: 100%;
-    height: 40px;
-    margin: 5px;
-    padding: 5px;
+    height: 45px;
     .glyphicon {
       font-size: 2.0em;
     }
@@ -41,13 +39,25 @@ div.results-panel {
       // display: inline-block;
       // width: auto;
       float: left;
+      margin-bottom: 5px;
+      font-family: $oswald-light;
       .label {
-        font-size: 1.5em;
+        font-size: 0.9em;
+        letter-spacing: 1.5px;
+        color: inherit;
       }
-      .link {
+      div.link-button {
+        display: inline-block;
         margin: 5px;
-        &.selected {
-          font-size: 2.0em;
+        padding: 3px 10px;
+        background-color: #e6ebee;
+        color: #c3d8d9;
+        border-radius: 4px;
+        a {
+          color: inherit;
+          &.selected {
+            color: #628e8f;
+          }
         }
       }
     }
@@ -69,10 +79,10 @@ div.results-panel {
     // border: 1px solid red;
     .results-label {
       position: absolute;
-      left: -70px;
-      top: 100px;
+      left: -85px;
+      top: 80px;
       width: 200px;
-      height: 60px;
+      height: 70px;
       font-size: 64px;
       font-family: $oswald-light;
       font-weight: 400;

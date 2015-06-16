@@ -20,14 +20,11 @@ module PanelHelper
   def panel_org_menu url, type, cur_org
     links = [ [:rating, "my rating" ], :popularity, :newest, [ :random, "hit me" ] ].collect { |org|
       org, label = org.is_a?(Array) ? org : [ org, org.to_s ]
-      if org==cur_org
-        content_tag :span, label, class: "link selected"
-      else
-        # Provide a button to change the org state
-        querify_link label, assert_query(url, org: org), class: "link"
-      end
+      # Provide a button to change the org state
+      link = querify_link label, assert_query(url, org: org), class: "link #{'selected' if org==cur_org}"
+      content_tag :div, link, class: "link-button"
     }.join.html_safe
-    label = content_tag :span, "Organize by:", class: "label"
+    label = content_tag :span, "organize by:", class: "label"
     content_tag :div, (label+links).html_safe, class: "org-by #{type}"
   end
 
