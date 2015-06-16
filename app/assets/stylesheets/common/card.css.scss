@@ -11,6 +11,67 @@ div.card-item {
   &.user-card {
     background-color: $user-background-color;
   }
+  &.recipe-card {
+    background-color: #f9f8f4;
+    font-family: $archivo;
+  }
+  div.recipe-pic {
+    margin-top: 10px;
+  }
+  div.title-bar {
+    border-bottom: 2px solid #b95454;
+    div.left-matter {
+      min-height: 80px;
+      position: relative;
+      div.title {
+        font-size: 28px;
+        font-weight: 500;
+        width: 100%;
+        a.title-link {
+          color: #4f4d4a;
+        }
+      }
+      div.source {
+        font-size: 14px;
+        color: #999;
+        width: 100%;
+        position: absolute;
+        bottom: 0;
+        a.source-link {
+          color: #77a2be;
+          letter-spacing: 1px;
+        }
+      }
+    }
+    div.right-matter {
+      min-height: 80px;
+      position: relative;
+      div.vote-div-h {
+        position: absolute;
+        bottom: 15px;
+        right: 0px;
+        div.vote-div {
+          width: auto;
+          display: inline-block;
+          text-align: center;
+          .vote-count-bold {
+            font-family: Oswald;
+            letter-spacing: 2px;
+            font-size: 18px;
+            color: #dbc046;
+          }
+          a.vote-button {
+            color: #ece6cd;
+            font-size: 36px;
+            font-weight: lighter;
+            -ms-transform: scale(0.8,1);
+            -webkit-transform: scale(0.8,1);
+            transform: scale(0.8,1);
+          }
+        }
+      }
+    }
+  }
   .card-aspect-label {
     margin-bottom: 0;
     color: white;

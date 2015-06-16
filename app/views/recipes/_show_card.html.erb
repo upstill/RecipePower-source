@@ -1,8 +1,21 @@
 <%= present decorator, current_user_or_guest do |presenter| %>
-    <div class="container-fluid">
+    <div class="container-fluid card-item recipe-card">
+      <div class="row title-bar">
+        <div class="col-md-6 col-sm-8 left-matter">
+          <div class="title">
+            <%= link_to decorator.title, decorator.url, class: "title-link", data: { report: polymorphic_path([:touch, decorator.object]) } %>
+          </div>
+          <div class="source">
+            from <%= link_to decorator.sourcename, decorator.sourcehome, class: "source-link" %>
+          </div>
+        </div>
+        <div class="col-md-6 right-matter">
+          <%= collectible_vote_buttons decorator.object %>
+        </div>
+      </div>
       <div class="row">
         <% if (vid = presenter.field_value "rcpVideo") %>
-            <div class="col-md-6">
+            <div class="recipe-pic col-md-6">
               <div id="vidbox">
                 <div id="vbdummy">
                   <div id="vbelement">
@@ -12,12 +25,12 @@
               </div>
             </div>
         <% elsif !(presenter.field_value "rcpPicURL").blank? %>
-            <div class="col-md-6">
+            <div class="recipe-pic col-md-6">
               <img src="<%= presenter.present_field "rcpPicURL" %>" class="recipe-preview pull-right" width="100%">
             </div>
         <% end %>
         <div class="col-md-6 <%= (defined?(wide) && wide) ? '6' : '12' %>">
-          <h3><%= presenter.field_value "title" %></h3>
+          <!--<h3><%# presenter.field_value "title" %></h3>-->
 
           <div class="panel pull-left panel-default hide-if-empty" style="width:100%">
             <div class="panel-heading">
