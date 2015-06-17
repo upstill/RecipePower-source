@@ -43,16 +43,13 @@
           <% end %>
         </div>
       </div>
-      <div class="hide-if-empty">
-        <div class="row">
-          <div class="col-sm-12"><h3>My Two Cents</h3></div>
-        </div>
-        <div class="row">
-          <div class="col-sm-4 col-md-2"></div>
-          <div class="col-sm-8 col-md-8">
-            <%= presenter.present_field_wrapped "comments_mine" %>
-          </div>
-        </div>
+    </div>
+    <div class="container-fluid card-item comments-card">
+      <div class="row title-bar">
+        COMMENTS
+      </div>
+      <div class="row contents">
+         <%= show_comments decorator %>
       </div>
     </div>
 <% end %>

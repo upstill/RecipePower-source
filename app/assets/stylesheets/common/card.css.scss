@@ -11,72 +11,83 @@ div.card-item {
   -webkit-box-shadow: 5px 6px 10px -5px rgba(0,0,0,0.75);
   -moz-box-shadow: 5px 6px 10px -5px rgba(0,0,0,0.75);
   box-shadow: 5px 6px 10px -5px rgba(0,0,0,0.75);
+  background-color: #f9f8f4;
+  font-family: $archivo;
+  margin-top: 20px;
+  padding-bottom: 15px;
+  &.recipe-card {
+    div.title-bar {
+      border-bottom: 2px solid #b95454;
+      padding-top: 3px;
+      div.left-matter {
+        min-height: 80px;
+        position: relative;
+        div.title {
+          font-family: $oswald;
+          font-size: 24px;
+          letter-spacing: 1.5px;
+          width: 100%;
+          a.title-link {
+            color: #4f4d4a;
+          }
+        }
+        div.source {
+          font-family: $oswald-light;
+          font-size: 14px;
+          color: #999;
+          width: 100%;
+          position: absolute;
+          bottom: 0;
+          a.source-link {
+            color: #77a2be;
+            letter-spacing: 1px;
+          }
+        }
+      }
+      div.right-matter {
+        min-height: 80px;
+        position: relative;
+        div.vote-div-h {
+          position: absolute;
+          bottom: 15px;
+          right: 0px;
+          div.vote-div {
+            width: auto;
+            display: inline-block;
+            text-align: center;
+            .vote-count-bold {
+              font-family: Oswald;
+              letter-spacing: 2px;
+              font-size: 18px;
+              color: #dbc046;
+            }
+            a.vote-button {
+              color: #ece6cd;
+              font-size: 36px;
+              font-weight: lighter;
+              -ms-transform: scale(0.8,1);
+              -webkit-transform: scale(0.8,1);
+              transform: scale(0.7,1.1);
+            }
+          }
+        }
+      }
+    }
+  }
+  &.comments-card {
+    padding-left: 35px;
+    padding-right: 10px;
+    padding-top: 5px;
+    div.title-bar {
+      font-family: $oswald-bold;
+      font-size: 24pt;
+    }
+  }
   &.user-card {
     background-color: $user-background-color;
   }
-  &.recipe-card {
-    background-color: #f9f8f4;
-    font-family: $archivo;
-  }
   div.recipe-pic {
     margin-top: 10px;
-  }
-  div.title-bar {
-    border-bottom: 2px solid #b95454;
-    padding-top: 3px;
-    div.left-matter {
-      min-height: 80px;
-      position: relative;
-      div.title {
-        font-family: $oswald;
-        font-size: 24px;
-        letter-spacing: 1.5px;
-        width: 100%;
-        a.title-link {
-          color: #4f4d4a;
-        }
-      }
-      div.source {
-        font-family: $oswald-light;
-        font-size: 14px;
-        color: #999;
-        width: 100%;
-        position: absolute;
-        bottom: 0;
-        a.source-link {
-          color: #77a2be;
-          letter-spacing: 1px;
-        }
-      }
-    }
-    div.right-matter {
-      min-height: 80px;
-      position: relative;
-      div.vote-div-h {
-        position: absolute;
-        bottom: 15px;
-        right: 0px;
-        div.vote-div {
-          width: auto;
-          display: inline-block;
-          text-align: center;
-          .vote-count-bold {
-            font-family: Oswald;
-            letter-spacing: 2px;
-            font-size: 18px;
-            color: #dbc046;
-          }
-          a.vote-button {
-            color: #ece6cd;
-            font-size: 36px;
-            font-weight: lighter;
-            -ms-transform: scale(0.8,1);
-            -webkit-transform: scale(0.8,1);
-            transform: scale(0.7,1.1);
-          }
-        }
-      }
-    }
   }
   div.tags {
     color: #a2a2a2;

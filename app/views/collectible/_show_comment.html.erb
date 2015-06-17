@@ -1,0 +1,10 @@
+<div class="comment">
+  <div class="avatar">
+    <% image = rcpref.user.thumbnail ? rcpref.user.thumbnail.imgdata : image_path("default-avatar-128.png") %>
+    <%= page_width_pic(image, idstr="rcpPic", report_bad_image = false) %>
+    <%= link_to_submit rcpref.user.polite_name, rcpref.user, :mode => :partial %>
+  </div>
+  <div class="content">
+     <%= rcpref.comment %>
+  </div>
+</div>
