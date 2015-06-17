@@ -6,7 +6,7 @@
             <%= link_to decorator.title, decorator.url, class: "title-link", data: { report: polymorphic_path([:touch, decorator.object]) } %>
           </div>
           <div class="source">
-            from <%= link_to decorator.sourcename, decorator.sourcehome, class: "source-link" %>
+            source: <%= link_to decorator.sourcename, decorator.sourcehome, class: "source-link" %>
           </div>
         </div>
         <div class="col-md-6 right-matter">
@@ -31,22 +31,10 @@
         <% end %>
         <div class="col-md-6 <%= (defined?(wide) && wide) ? '6' : '12' %>">
           <!--<h3><%# presenter.field_value "title" %></h3>-->
-
-          <div class="panel pull-left panel-default hide-if-empty" style="width:100%">
-            <div class="panel-heading">
-              <p class="hide-if-empty">A recipe
-                <span class="hide-if-empty"> by <%= presenter.present_field_wrapped "Author_tags" %></span>
-                <span class="hide-if-empty"> in <%= presenter.present_field_wrapped "Source_tags" %></span>
-                <span class="hide-if-empty"> from <%= presenter.present_field_wrapped "site" %></span>.</p>
-
-              <p class="hide-if-empty"><%= presenter.present_field_wrapped "rcpDescription" %></p>
-            </div>
-            <div class="panel-body">
-              <% presenter.fields_list.each do |nv| %>
-                  <%= render "shared/show_labelled", label: nv.first, content: nv.last %>
-              <% end %>
-            </div>
+          <div class="tags">
+            <%= presenter.present_field_wrapped "tags" %>
           </div>
+          <p class="hide-if-empty"><%= presenter.present_field_wrapped "rcpDescription" %></p>
           <% if params[:accept_invitation_link] %>
               <div style="width: 400px; margin: 0 auto;">
                 <%= link_to "Save on RecipePower", params[:accept_invitation_link], class: "btn btn-lg btn-success", style: "margin-right:40px; margin-top:30px" %>

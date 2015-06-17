@@ -24,14 +24,16 @@ div.card-item {
       min-height: 80px;
       position: relative;
       div.title {
-        font-size: 28px;
-        font-weight: 500;
+        font-family: $oswald;
+        font-size: 24px;
+        letter-spacing: 1.5px;
         width: 100%;
         a.title-link {
           color: #4f4d4a;
         }
       }
       div.source {
+        font-family: $oswald-light;
         font-size: 14px;
         color: #999;
         width: 100%;
@@ -66,10 +68,18 @@ div.card-item {
             font-weight: lighter;
             -ms-transform: scale(0.8,1);
             -webkit-transform: scale(0.8,1);
-            transform: scale(0.8,1);
+            transform: scale(0.7,1.1);
           }
         }
       }
+    }
+  }
+  div.tags {
+    color: #a2a2a2;
+    a.taglink {
+      font-size: 24px;
+      font-weight: 400;
+      color: #a2a2a2;
     }
   }
   .card-aspect-label {
