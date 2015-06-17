@@ -8,6 +8,9 @@ label.question-text {
 }
 
 div.card-item {
+  -webkit-box-shadow: 5px 6px 10px -5px rgba(0,0,0,0.75);
+  -moz-box-shadow: 5px 6px 10px -5px rgba(0,0,0,0.75);
+  box-shadow: 5px 6px 10px -5px rgba(0,0,0,0.75);
   &.user-card {
     background-color: $user-background-color;
   }
