@@ -54,7 +54,6 @@ $user-color:  #EDDAD7;
 
 body {
   font-family: $font-stack;
-  background-color: $page-background-color;
   height: 100%;
   margin: 0;
   padding:0;
@@ -254,18 +253,33 @@ span.caret {
 }
 
 //contents of pages
-.container{
-  margin-top:225px;
+.container {
+  margin-top:200px;
+  padding-top: 10px;
+  background-color: $page-background-color;
+  &.top {
+    padding-bottom: 200px;
+    > div.row {
+      margin-left: 15px;
+      margin-right: 15px;
+      -webkit-box-shadow: 5px 6px 10px -5px rgba(0,0,0,0.75);
+      -moz-box-shadow: 5px 6px 10px -5px rgba(0,0,0,0.75);
+      box-shadow: 5px 6px 10px -5px rgba(0,0,0,0.75);
+    }
+  }
+  &.menuback {
+    z-index: 1020;
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    margin-top: 0;
+    margin-right: auto;
+    margin-left: auto;
+    height: 200px;
+  }
 }
 
-div#menuback {
-  z-index: 1020;
-  position: fixed;
-  top: 0;
-  width: 100%;
-  height: 210px;
-  background-color: $page-background-color;
-}
 
 div.filter-element {
   width: 500px;
