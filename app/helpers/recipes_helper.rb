@@ -9,68 +9,50 @@ module RecipesHelper
     "<div><h3>#{recipe.title}</h3></div>".html_safe
   end
 
-  def collectible_cardlet_datablock decorator, &block
+  def collectible_title_link decorator, pclass="title"
     entity = decorator.object
-    klass = entity.class.to_s
-    label = ((klass == "Recipe") || (klass == "List")) ? "" : "#{klass}: "
-    itemlink = case klass
-                 when "Recipe", "Site"
-                   link_to decorator.title, decorator.url, class: "title-link", data: { report: polymorphic_path([:touch, entity]) } # ...to open up a new tab
-                 else # Other internal entities get opened up in a new partial
-                   link_to_submit decorator.title, decorator.url, class: "title-link"
-               end
-    grid_element = content_tag :p, (label+itemlink).html_safe, class: "title"
-    case klass
-      when "List"
-        source_element = content_tag :div, ("a list by "+link_to_submit(decorator.owner.handle, user_path(decorator.owner, :mode => :modal))).html_safe, class: "cardlet_source"
-      else
-        source_element = content_tag :div, ("from "+link_to(decorator.sourcename, decorator.sourcehome, class: "tablink")).html_safe, class: "cardlet_source"
+    case entity
+      when Recipe, Site
+        label = ""
+        itemlink = link_to decorator.title, decorator.url, class: "tablink", data: {report: polymorphic_path([:touch, entity])} # ...to open up a new tab
+      else # Other internal entities get opened up in a new partial
+        label = "#{entity.class.to_s}: "
+        itemlink = link_to_submit decorator.title, decorator.url, class: "tablink"
     end
+    content_tag :p, "#{label}#{itemlink}".html_safe, class: pclass
+  end
+
+  def collectible_source_link decorator
+    if decorator.object.class == List
+      label = "a list by "
+      link = link_to_submit decorator.owner.handle, user_path(decorator.owner, :mode => :modal)
+    else
+      label = "from "
+      link = link_to decorator.sourcename, decorator.sourcehome, class: "tablink"
+    end
+    content_tag :div, (label+link).html_safe, class: "rcp_grid_element_source"
+  end
+
+  def collectible_cardlet_datablock decorator, &block
+    title_link = collectible_title_link decorator
+    source_element = collectible_source_link decorator
     lower_content = block_given? ? with_output_buffer(&block) : ""
-    title_block = content_tag :div, grid_element.html_safe+source_element.html_safe, class: "title-block"
+    title_block = content_tag :div, (title_link+source_element).html_safe, class: "title-block"
     footer_block = content_tag :div, lower_content, class: "footer-block"
     content_tag :div, (title_block + footer_block).html_safe, class: "datablock"
   end
 
   def collectible_slider_datablock decorator, cssclass="rcp_grid_datablock", &block
-    entity = decorator.object
-    klass = entity.class.to_s
-    label = ((klass == "Recipe") || (klass == "List")) ? "" : "#{klass}: "
-    itemlink = case klass
-                 when "Recipe", "Site"
-                   link_to decorator.title, decorator.url, class: "tablink", data: { report: polymorphic_path([:touch, entity]) } # ...to open up a new tab
-                 else # Other internal entities get opened up in a new partial
-                   link_to_submit decorator.title, decorator.url
-               end
-    grid_element = content_tag :p, (label+itemlink).html_safe, class: "title"
-    case klass
-      when "List"
-        source_element = content_tag :div, ("a list by "+link_to_submit(decorator.owner.handle, user_path(decorator.owner, :mode => :modal))).html_safe, class: "rcp_grid_element_source"
-      else
-        source_element = content_tag :div, ("from "+link_to(decorator.sourcename, decorator.sourcehome, class: "tablink")).html_safe, class: "rcp_grid_element_source"
-    end
+    title_link = collectible_title_link decorator
+    source_element = collectible_source_link decorator
     buttons_element = block_given? ? with_output_buffer(&block) : ""
-    content_tag :div, grid_element.html_safe+source_element.html_safe, class: cssclass
+    content_tag :div, (title_link+source_element).html_safe, class: cssclass
   end
 
   def collectible_masonry_datablock decorator
-    entity = decorator.object
-    klass = entity.class.to_s
-    label = ((klass == "Recipe") || (klass == "List")) ? "" : "#{klass}: "
-    itemlink = case klass
-                 when "Recipe", "Site"
-                   link_to decorator.title, decorator.url, class: "tablink", data: { report: polymorphic_path([:touch, entity]) } # ...to open up a new tab
-                 else # Other internal entities get opened up in a new partial
-                   link_to_submit decorator.title, decorator.url
-               end
-    grid_element = content_tag :p, (label+itemlink).html_safe, class: "rcp_grid_element_title"
-    case klass
-      when "List"
-        source_element = content_tag :div, ("a list by "+link_to_submit(decorator.owner.handle, user_path(decorator.owner, :mode => :modal))).html_safe, class: "rcp_grid_element_source"
-      else
-        source_element = content_tag :div, ("from "+link_to(decorator.sourcename, decorator.sourcehome, class: "tablink")).html_safe, class: "rcp_grid_element_source"
-    end
-    content_tag :div, grid_element+source_element, class: "rcp_grid_datablock"
+    title_link = collectible_title_link decorator, "rcp_grid_element_title"
+    source_element = collectible_source_link decorator
+    content_tag :div, (title_link+source_element).html_safe, class: "rcp_grid_datablock"
   end
 
   def collectible_info_icon decorator
