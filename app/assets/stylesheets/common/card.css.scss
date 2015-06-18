@@ -16,6 +16,12 @@ div.panels-label {
   &.recipe {
     color: #dfdfdf;
   }
+  &.user {
+    color: $user-background-color;
+  }
+  &.friend {
+    color: $friends-background-color;
+  }
 }
 
 div.card-item {

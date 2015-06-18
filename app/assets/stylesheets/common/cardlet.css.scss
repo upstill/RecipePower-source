@@ -1,6 +1,6 @@
 div.cardlet-item {
-  height: 200px;
-  width: auto;
+  height: auto;
+  width: 200px;
   float: left;
   background-color: #f9f8f4;
   margin: 5px;
@@ -28,9 +28,9 @@ div.cardlet-item {
     -moz-box-pack: center;
     box-pack: center;
 
-    img.fixed-height {
-      height:100%;
-      width:auto;
+    img.fixed-width {
+      width:100%;
+      height:auto;
     }
   }
 
