@@ -8,9 +8,9 @@ label.question-text {
 }
 
 div.card-item {
-  -webkit-box-shadow: 5px 6px 10px -5px rgba(0,0,0,0.75);
-  -moz-box-shadow: 5px 6px 10px -5px rgba(0,0,0,0.75);
-  box-shadow: 5px 6px 10px -5px rgba(0,0,0,0.75);
+  -webkit-box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
+  box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
   background-color: #f9f8f4;
   font-family: $archivo;
   margin-top: 20px;
@@ -65,9 +65,9 @@ div.card-item {
               color: #ece6cd;
               font-size: 36px;
               font-weight: lighter;
-              -ms-transform: scale(0.8,1);
-              -webkit-transform: scale(0.8,1);
-              transform: scale(0.7,1.1);
+              -ms-transform: scale(0.8, 1);
+              -webkit-transform: scale(0.8, 1);
+              transform: scale(0.7, 1.1);
             }
           }
         }
@@ -96,6 +96,9 @@ div.card-item {
       font-weight: 400;
       color: #a2a2a2;
     }
+  }
+  td.content-strip {
+    padding: 5px;
   }
   .card-aspect-label {
     margin-bottom: 0;

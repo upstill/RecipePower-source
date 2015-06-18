@@ -3,7 +3,7 @@
       <div class="row title-bar">
         <div class="col-md-6 col-sm-8 left-matter">
           <div class="title">
-            <%= link_to decorator.title, decorator.url, class: "title-link", data: { report: polymorphic_path([:touch, decorator.object]) } %>
+            <%= link_to decorator.title, decorator.url, class: "title-link", data: {report: polymorphic_path([:touch, decorator.object])} %>
           </div>
           <div class="source">
             source: <%= link_to decorator.sourcename, decorator.sourcehome, class: "source-link" %>
@@ -13,43 +13,49 @@
           <%= collectible_vote_buttons decorator.object %>
         </div>
       </div>
-      <div class="row">
-        <% if (vid = presenter.field_value "rcpVideo") %>
-            <div class="recipe-pic col-md-6">
-              <div id="vidbox">
-                <div id="vbdummy">
-                  <div id="vbelement">
-                    <iframe width="100%" height="100%" src="<%= vid %>" frameborder="0"></iframe>
+      <table style="width: 100%">
+        <tr>
+          <td rowspan="2" style="width: 40%;">
+            <div class="recipe-pic" style="width: 100%;">
+              <% if (vid = presenter.field_value "rcpVideo") %>
+                  <div id="vidbox">
+                    <div id="vbdummy">
+                      <div id="vbelement">
+                        <iframe width="100%" height="100%" src="<%= vid %>" frameborder="0"></iframe>
+                      </div>
+                    </div>
                   </div>
+              <% elsif !(presenter.field_value "rcpPicURL").blank? %>
+                  <img src="<%= presenter.present_field "rcpPicURL" %>" class="recipe-preview pull-right" width="100%">
+              <% end %>
+            </div>
+          </td>
+          <td valign="top" class="content-strip">
+            <div class="tags">
+              <%= presenter.present_field_wrapped "tags" %>
+            </div>
+            <p class="hide-if-empty"><%= presenter.present_field_wrapped "rcpDescription" %></p>
+            <% if params[:accept_invitation_link] %>
+                <div style="width: 400px; margin: 0 auto;">
+                  <%= link_to "Save on RecipePower", params[:accept_invitation_link], class: "btn btn-lg btn-success", style: "margin-right:40px; margin-top:30px" %>
+                  <%= link_to "Go to Recipe", decorator.url, class: "btn btn-lg btn-info", style: "margin-top: 30px" %>
                 </div>
-              </div>
-            </div>
-        <% elsif !(presenter.field_value "rcpPicURL").blank? %>
-            <div class="recipe-pic col-md-6">
-              <img src="<%= presenter.present_field "rcpPicURL" %>" class="recipe-preview pull-right" width="100%">
-            </div>
-        <% end %>
-        <div class="col-md-6 <%= (defined?(wide) && wide) ? '6' : '12' %>">
-          <!--<h3><%# presenter.field_value "title" %></h3>-->
-          <div class="tags">
-            <%= presenter.present_field_wrapped "tags" %>
-          </div>
-          <p class="hide-if-empty"><%= presenter.present_field_wrapped "rcpDescription" %></p>
-          <% if params[:accept_invitation_link] %>
-              <div style="width: 400px; margin: 0 auto;">
-                <%= link_to "Save on RecipePower", params[:accept_invitation_link], class: "btn btn-lg btn-success", style: "margin-right:40px; margin-top:30px" %>
-                <%= link_to "Go to Recipe", decorator.url, class: "btn btn-lg btn-info", style: "margin-top: 30px" %>
-              </div>
-          <% end %>
-        </div>
-      </div>
+            <% end %>
+          </td>
+        </tr>
+        <tr>
+          <td valign="bottom" class="content-strip">
+              <%= collectible_share_button decorator %>
+          </td>
+        </tr>
+      </table>
     </div>
     <div class="container-fluid card-item comments-card">
       <div class="row title-bar">
         COMMENTS
       </div>
       <div class="row contents">
-         <%= show_comments decorator %>
+        <%= show_comments decorator %>
       </div>
     </div>
 <% end %>
