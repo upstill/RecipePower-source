@@ -23,6 +23,17 @@ module CollectibleHelper
     ["div.collectible-buttons##{dom_id decorator}", collectible_buttons_panel(decorator)]
   end
 
+  def collectible_collect_icon decorator, options={}
+    options[:class] = "#{options[:class]} glyphicon glyphicon-"
+    if current_user_or_guest.collected?(decorator.object)
+      options[:class] << "ok"
+      content_tag :span, "", options
+    else
+      options[:class] << "plus"
+      link_to_submit "", polymorphic_path([:collect, decorator.object]), options
+    end
+  end
+
   def button_styling styling, options={}
     styling.slice( :button_size ).merge options
   end

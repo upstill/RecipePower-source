@@ -4,6 +4,7 @@
         <div class="col-md-6 col-sm-8 left-matter">
           <div class="title">
             <%= link_to decorator.title, decorator.url, class: "title-link", data: {report: polymorphic_path([:touch, decorator.object])} %>
+            <%= collectible_collect_icon decorator %>
           </div>
           <div class="source">
             source: <%= link_to decorator.sourcename, decorator.sourcehome, class: "source-link" %>
@@ -50,13 +51,7 @@
         </tr>
       </table>
     </div>
-    <div class="container-fluid card-item comments-card">
-      <div class="row title-bar">
-        COMMENTS
-      </div>
-      <div class="row contents">
-        <%= show_comments decorator %>
-      </div>
-    </div>
+    <%= render "collectible/show_comments", decorator: decorator %>
+    <div class="panels-label recipe">related</div>
 <% end %>
 
