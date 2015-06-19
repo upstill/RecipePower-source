@@ -7,32 +7,49 @@ $page-background-color: #F1F1F0;
 $content-background-color: #F2F1F0;
 
 // For material relating to the current user
-$viewer-background-color: #ecdad7;
-$viewer-text-color: #e6ccc8;
+$viewer-card-background-color: #ecdad7;
+$viewer-panels-label-text-color: #e6ccc8;
+$viewer-panels-label-button-color: #efc5bd;
 
-// For material relating to friends of the current user
-$friends-background-color: #e4e0cf;
-$friends-menu-color: #dbc046;
-$friends-text-color: #f3f2ea;
+// For material relating to lists of the current user
+
+$friends-navtab-background-color: #e4e0cf;
+$friends-navtab-text-color: #dbc046;
+
+$friends-card-background-color: #e9e4ca;
+$friends-panels-label-text-color: #e9e4ca;
+$friends-panels-label-button-color: #dbd3ab;
+$friends-panel-background-color: #e9e4ca;
+$friends-panel-label-color: #f3f2ea;
 
 // For displaying other users
-$user-background-color: #ffffff;
-$user-text-color: #222222;
+$user-card-background-color: #ffffff;
+$user-panels-label-text-color: #222222;
+$user-panels-label-button-color: #ffffff;
 
-$recipes-background-color: #d8dde0;
-$recipes-menu-color: #4c7c99;
-$recipes-text-color: #e5ebef;
+$recipes-navtab-background-color: #d8dde0;
+$recipes-navtab-text-color: #4c7c99;
+$recipes-card-background-color: #f9f8f4;
+$recipes-panels-label-text-color: #dfdfdf;
+$recipes-panels-label-button-color: #dfdfdf;
+$recipes-panel-background-color: #d8dde0;
+$recipes-panel-label-color: #e5ebef;
 
-$lists-background-color: #dbe0dd;
-$lists-menu-color: #1d6a2b;
-$lists-text-color: #e9eeea;
+$lists-navtab-background-color: #dbe0dd;
+$lists-navtab-text-color: #1d6a2b;
+$lists-card-background-color: #d0dbd2;
+$lists-panels-label-text-color: #e9e4ca;
+$lists-panels-label-button-color: #94b79a;
+$lists-panel-background-color: #dbe0dd;
+$lists-panel-label-color: #e9eeea;
 
-$feeds-background-color: #e7dfd6;
-$feeds-menu-color: #de8822;
-$feeds-text-color: #f5f2ee;
+$feeds-navtab-background-color: #e7dfd6;
+$feeds-navtab-text-color: #de8822;
+$feeds-panel-background-color: #e7dfd6;
+$feeds-panel-label-color: #f5f2ee;
 
-$utensils-background-color: #dcdbdc;
-$utensils-menu-color: #816887;
+$utensils-navtab-background-color: #dcdbdc;
+$utensils-navtab-text-color: #816887;
 
 // Color for the user card and panels
 $user-color:  #EDDAD7;
@@ -147,6 +164,13 @@ div.card {
   padding-top: 10px
 }
 
+.soft-button {
+  color: $page-background-color;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+}
+
 //ay navigation changes
 .navbar-fixed-top, .navbar-header{
   //height: 120px; 
@@ -169,42 +193,42 @@ ul.nav.navbar-nav{
   }
 
 li#collections-navtab{
-  background-color: $recipes-background-color;
+  background-color: $recipes-navtab-background-color;
   margin: 0 7px;
   padding-top:80px;
   text-shadow: none;
   a.dropdown-toggle {
-    color: $recipes-menu-color;
+    color: $recipes-navtab-text-color;
   }
 }
 
 li#friends-navtab{
-  background-color: $friends-background-color;
+  background-color: $friends-navtab-background-color;
   margin: 0 7px;
   padding:80px 8px 0;
   text-shadow: none;
   a.dropdown-toggle {
-    color: $friends-menu-color;
+    color: $friends-navtab-text-color;
   }
 }
 
 li#my_lists-navtab{
-  background-color: $lists-background-color;
+  background-color: $lists-navtab-background-color;
   margin: 0 7px;
   padding: 80px 18px 0;
   text-shadow: none;
   a.dropdown-toggle {
-    color: $lists-menu-color;
+    color: $lists-navtab-text-color;
   }
 }
 
 li#feeds-navtab{
-  background-color: $feeds-background-color;
+  background-color: $feeds-navtab-background-color;
   margin: 0 7px;
   padding: 80px 34px 0;
   text-shadow: none;
   a.dropdown-toggle {
-    color: $feeds-menu-color;
+    color: $feeds-navtab-text-color;
   }
 }
 
@@ -329,11 +353,6 @@ div.filter-element {
     font-size: 18px;
     font-weight: normal;
   }
-}
-
-div.results-enclosure {
-  width: 100%;
-  height: auto;
 }
 
   // Cozies up to the tags selector above it

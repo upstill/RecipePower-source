@@ -12,22 +12,23 @@
 
 div.results-panel {
   width: 95%;
-  margin: 30px;
+  margin-left: 30px;
+  margin-top: 15px;
   &.recipes {
-    background-color: $recipes-background-color;
-    color: $recipes-text-color;
+    background-color: $recipes-panel-background-color;
+    color: $recipes-panel-label-color;
   }
   &.friends {
-    background-color: $friends-background-color;
-    color: $friends-text-color;
+    background-color: $friends-panel-background-color;
+    color: $friends-panel-label-color;
   }
   &.feeds {
-    background-color: $feeds-background-color;
-    color: $feeds-text-color;
+    background-color: $feeds-panel-background-color;
+    color: $feeds-panel-label-color;
   }
   &.lists {
-    background-color: $lists-background-color;
-    color: $lists-text-color;
+    background-color: $lists-panel-background-color;
+    color: $lists-panel-label-color;
   }
   .results-menu {
     width: 100%;
@@ -88,16 +89,16 @@ div.results-panel {
       font-weight: 400;
       text-align: right;
       &.recipes {
-        color: #e5ebef;
+        color: $recipes-panel-label-color;
       }
       &.feeds {
-        color: $feeds-text-color;
+        color: $feeds-panel-label-color;
       }
       &.friends {
-        color: $friends-text-color;
+        color: $friends-panel-label-color;
       }
       &.lists {
-        color: $lists-text-color;
+        color: $lists-panel-label-color;
       }
       .results-img {
         width: 70px;

@@ -5,3 +5,51 @@ div.triggered-form {
     margin:5px 10px
   }
 }
+
+div.results-enclosure {
+  width: 100%;
+  height: auto;
+  div.panels-query {
+    margin-top: 15px;
+    div.panels-label {
+      font-family: $oswald;
+      font-size: 72px;
+      letter-spacing: 1.5px;
+      padding-left: 20px;
+      &.recipe-label {
+        color: $recipes-panels-label-text-color;
+      }
+      &.viewer-label {
+        color: $viewer-panels-label-text-color;
+      }
+      &.user-label {
+        color: $user-panels-label-text-color;
+      }
+      &.friend-label {
+        color: $friends-panels-label-text-color;
+      }
+    }
+    div.panels-search {
+      margin-top: 10px;
+      div.panels-buttons {
+        margin: 20px;
+        a.panels-button {
+          margin: 10px;
+          &.recipe-button {
+            background-color: $recipes-panels-label-button-color;
+          }
+          &.viewer-button {
+            background-color: $viewer-panels-label-button-color;
+          }
+          &.user-button {
+            background-color: $user-panels-label-button-color;
+          }
+          &.friend-button {
+            background-color: $friends-panels-label-button-color;
+          }
+        }
+      }
+    }
+  }
+}
+

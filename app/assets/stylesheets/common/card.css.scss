@@ -7,35 +7,17 @@ label.question-text {
   font-weight: 200;
 }
 
-div.panels-label {
-  font-family: $oswald;
-  font-size: 72px;
-  letter-spacing: 1.5px;
-  width: 100%;
-  padding-left: 20px;
-  &.recipe-label {
-    color: #dfdfdf;
-  }
-  &.viewer-label {
-    color: $viewer-background-color;
-  }
-  &.user-label {
-    color: $user-background-color;
-  }
-  &.friend-label {
-    color: $friends-background-color;
-  }
-}
 
 div.card-item {
   -webkit-box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
   -moz-box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
   box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
-  background-color: #f9f8f4;
+  background-color: $recipes-card-background-color;
   font-family: $archivo;
   margin-top: 20px;
   padding-bottom: 15px;
   &.recipe-card {
+    background-color: $recipes-card-background-color;
     div.title-bar {
       border-bottom: 2px solid #b95454;
       padding-top: 3px;
@@ -104,13 +86,13 @@ div.card-item {
     }
   }
   &.viewer-card {
-    background-color: $viewer-background-color;
+    background-color: $viewer-card-background-color;
   }
   &.friend-card {
-    background-color: $friends-background-color;
+    background-color: $friends-card-background-color;
   }
   &.user-card {
-    background-color: $user-background-color;
+    background-color: $user-card-background-color;
   }
   div.recipe-pic {
     margin-top: 10px;

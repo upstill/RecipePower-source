@@ -177,6 +177,10 @@ class FilteredPresenter
     end
   end
 
+  def panel_button_class
+    "#{h.object_display_class decorator.object}-button"
+  end
+
   def panel_label_class
     "#{h.object_display_class decorator.object}-label"
   end
