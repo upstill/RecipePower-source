@@ -8,6 +8,16 @@ class UserPresenter < CardPresenter
   presents :user
   delegate :username, :fullname, :handle, :lists, :feeds, to: :user
 
+  def card_class
+    if decorator.object == @viewer
+      "viewer-card"
+    elsif @viewer.follows? decorator.object
+      "friend-card"
+    else
+      "user-card"
+    end
+  end
+
   def card_avatar_fallback
     image_path "default-avatar-128.png"
   end
@@ -53,17 +63,11 @@ class UserPresenter < CardPresenter
     ]
   end
 
-  def card_ncolumns
-    1
-  end
-
   def card_aspects1
-    [] ||
     [
         # :member_since,
         :name_form,
         :owned_lists,
-        :latest_list,
         :desert_island,
         :question,
         # :collected_lists,
@@ -73,12 +77,12 @@ class UserPresenter < CardPresenter
 
   def card_aspects2
     [
-        :latest_recipe
+        :latest_recipe,
+        :latest_list
     ]
   end
 
   def card_aspects3
-    [] ||
     [
         :about
     ]
@@ -146,8 +150,7 @@ class UserPresenter < CardPresenter
         label = "Latest Recipe"
         if latestrr = user.collection_pointers.where(:entity_type => "Recipe", :in_collection => true).order(created_at: :desc).first
           latest = latestrr.entity
-          contents = with_format("html") { render "collectible/show_cardlet", decorator: latest.decorate }
-          # contents = link_to_submit latest.title, recipe_path(latest)
+          contents = collectible_show_cardlet latest.decorate
         else
           contents = "No recipes yet—so install the #{link_to_submit 'Cookmark Button', '/popup/starting_step2', :mode => :modal} and go get some!"
         end

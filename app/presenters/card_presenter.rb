@@ -1,7 +1,7 @@
 class CardPresenter < BasePresenter
 
   def card_kind
-    "user-card"
+    "recipe-card"
   end
 
   def card_avatar

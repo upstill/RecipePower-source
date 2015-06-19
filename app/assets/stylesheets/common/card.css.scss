@@ -16,6 +16,9 @@ div.panels-label {
   &.recipe {
     color: #dfdfdf;
   }
+  &.viewer {
+    color: $viewer-background-color;
+  }
   &.user {
     color: $user-background-color;
   }
@@ -99,6 +102,12 @@ div.card-item {
       font-family: $oswald-bold;
       font-size: 24pt;
     }
+  }
+  &.viewer-card {
+    background-color: $viewer-background-color;
+  }
+  &.friend-card {
+    background-color: $friends-background-color;
   }
   &.user-card {
     background-color: $user-background-color;

@@ -1,6 +1,6 @@
 <%# render "show", decorator: decorator %>
 <%= present decorator, current_user_or_guest do |presenter| %>
-    <div class="card-item row card-large <%= presenter.card_kind %> <%= decorator.dom_id %>">
+    <div class="card-item row card-large <%= presenter.card_class %> <%= decorator.dom_id %>">
       <div class="col-md-3" >
         <div class="pic-inset">
             <%= presenter.card_avatar %>

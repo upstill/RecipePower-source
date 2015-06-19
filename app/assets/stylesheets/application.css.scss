@@ -6,16 +6,22 @@ $archivo: 'Archivo-Narrow', 'Archivo Narrow', "Helvetica Neue", Helvetica, Arial
 $page-background-color: #F1F1F0;
 $content-background-color: #F2F1F0;
 
-$user-background-color: #ecdad7;
-$user-text-color: #e6ccc8;
+// For material relating to the current user
+$viewer-background-color: #ecdad7;
+$viewer-text-color: #e6ccc8;
+
+// For material relating to friends of the current user
+$friends-background-color: #e4e0cf;
+$friends-menu-color: #dbc046;
+$friends-text-color: #f3f2ea;
+
+// For displaying other users
+$user-background-color: #ffffff;
+$user-text-color: #222222;
 
 $recipes-background-color: #d8dde0;
 $recipes-menu-color: #4c7c99;
 $recipes-text-color: #e5ebef;
-
-$friends-background-color: #e4e0cf;
-$friends-menu-color: #dbc046;
-$friends-text-color: #f3f2ea;
 
 $lists-background-color: #dbe0dd;
 $lists-menu-color: #1d6a2b;

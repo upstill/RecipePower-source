@@ -33,6 +33,12 @@ module RecipesHelper
     content_tag :div, (label+link).html_safe, class: "rcp_grid_element_source"
   end
 
+  def collectible_show_cardlet decorator
+    image = safe_image_div decorator, :site, class: "pic-box", fill_mode: "fixed-width"
+    title = collectible_title_link decorator
+    content_tag :div, "#{image}#{title}".html_safe, class: "cardlet-item #{decorator.dom_id}"
+  end
+
   def collectible_cardlet_datablock decorator, &block
     title_link = collectible_title_link decorator
     source_element = collectible_source_link decorator
