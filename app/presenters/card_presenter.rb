@@ -1,7 +1,7 @@
 class CardPresenter < BasePresenter
 
-  def card_kind
-    "recipe-card"
+  def card_class
+    "#{h.object_display_class decorator.object}-card"
   end
 
   def card_avatar

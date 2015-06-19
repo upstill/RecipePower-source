@@ -1,6 +1,8 @@
 <%= render_item :card %>
+<%= render_item :comments %>
 <%= querify_block class: "results-enclosure" do %>
   <%# render @filtered_presenter.header_partial, title: title, comment: ((defined? comment) ? comment : "") %>
+  <div class="panels-label <%= @filtered_presenter.panel_label_class %>"><%= @filtered_presenter.panel_label %></div>
   <%= @filtered_presenter.filter_field(
               rows: 1,
               autofocus: true,

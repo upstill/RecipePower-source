@@ -177,6 +177,21 @@ class FilteredPresenter
     end
   end
 
+  def panel_label_class
+    "#{h.object_display_class decorator.object}-label"
+  end
+
+  def panel_label
+    case h.object_display_class(decorator.object)
+      when "viewer"
+        "my collection"
+      when "friend", "user"
+        "collection"
+      when "recipe"
+        "related"
+    end
+  end
+
 private
 
   def org= val

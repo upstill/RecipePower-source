@@ -8,16 +8,6 @@ class UserPresenter < CardPresenter
   presents :user
   delegate :username, :fullname, :handle, :lists, :feeds, to: :user
 
-  def card_class
-    if decorator.object == @viewer
-      "viewer-card"
-    elsif @viewer.follows? decorator.object
-      "friend-card"
-    else
-      "user-card"
-    end
-  end
-
   def card_avatar_fallback
     image_path "default-avatar-128.png"
   end

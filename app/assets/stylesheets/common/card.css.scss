@@ -13,16 +13,16 @@ div.panels-label {
   letter-spacing: 1.5px;
   width: 100%;
   padding-left: 20px;
-  &.recipe {
+  &.recipe-label {
     color: #dfdfdf;
   }
-  &.viewer {
+  &.viewer-label {
     color: $viewer-background-color;
   }
-  &.user {
+  &.user-label {
     color: $user-background-color;
   }
-  &.friend {
+  &.friend-label {
     color: $friends-background-color;
   }
 }

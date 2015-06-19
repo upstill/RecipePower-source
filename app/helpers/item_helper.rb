@@ -54,15 +54,19 @@ module ItemHelper
   # defaulting to just "_show"
   def item_partial_name item_or_decorator=nil, item_mode=nil
     item, item_mode = item_preflight item_or_decorator, item_mode
-    tail = item_or_decorator ? "show" : "index"
-    tail << "_#{item_mode}" if item_mode
-    if item
-      item_class = item.class.to_s.pluralize
-      ctrl_class = (item_class+"Controller").constantize rescue nil
-      view = ctrl_class ? response_service.find_view(ctrl_class, '_'+tail) : "#{item_class.underscore}/_#{tail}"
-      view.sub('/_', '/')
+    if item_mode == :comments
+      "show_comments" if [Recipe, List].include?(item.class)
     else
-      tail
+      tail = item_or_decorator ? "show" : "index"
+      tail << "_#{item_mode}" if item_mode
+      if item
+        item_class = item.class.to_s.pluralize
+        ctrl_class = (item_class+"Controller").constantize rescue nil
+        view = ctrl_class ? response_service.find_view(ctrl_class, '_'+tail) : "#{item_class.underscore}/_#{tail}"
+        view.sub('/_', '/')
+      else
+        tail
+      end
     end
   end
 
@@ -105,23 +109,19 @@ module ItemHelper
 
   def render_item_unwrapped item_or_decorator=nil, item_mode=nil
     item, item_mode = item_preflight item_or_decorator, (item_mode || :card)
-    with_format("html") { render item_partial_name(item, item_mode), decorator: @decorator }
+    if partial = item_partial_name(item, item_mode)
+      with_format("html") { render partial, decorator: @decorator }
+    end
   end
 
   def render_item item_or_decorator=nil, item_mode=nil
-    rendering = render_item_unwrapped item_or_decorator, item_mode
+    return "" unless (rendering = render_item_unwrapped(item_or_decorator, item_mode)).present?
     item, item_mode = item_preflight item_or_decorator, item_mode
     container_class = item_partial_class item_mode
     # Encapsulate the rendering in the standard shell for the item mode
     case item_mode
       when :masonry
         content_tag :div, rendering, class: container_class+" stream-item"
-=begin
-      when :partial
-        content_tag(:div,
-                    content_tag(:div, rendering, class: "col-md-12"),
-                    class: "row "+container_class).html_safe
-=end
       when :modal
         modal_dialog :"#{response_service.action}_#{response_service.controller.singularize}",
                      response_service.title,
@@ -132,11 +132,7 @@ module ItemHelper
         content_tag(:tr,
                     rendering,
                     class: container_class).html_safe
-      when :card
-        rendering
-      else
-        rendering
-    end
+    end || rendering
   end
 
 end
