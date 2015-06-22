@@ -65,6 +65,7 @@ $user-color:  #EDDAD7;
 @import 'common/panel';
 @import 'common/card';
 @import 'common/cardlet';
+@import 'common/navbar';
 @import 'paginate';
 @import "jquery/jNotify.jquery";
 // @import "jquery.ui.all";
@@ -80,7 +81,7 @@ body {
   height: 100%;
   margin: 0;
   padding:0;
-  font-size: 18px; /*1rem=30px*/
+  font-size: 150%;
   letter-spacing: 1px;
 }
 
@@ -150,13 +151,6 @@ body {
   }
 }
 
-.navbar{
-  background-color: transparent;
-  background-image: none;
-  background-repeat: none;
-  margin-bottom: 0;
-}
-
 div.card {
   background-color: white;
   border: 2px darkgray;
@@ -171,80 +165,6 @@ div.card {
   border-radius: 8px;
 }
 
-//ay navigation changes
-.navbar-fixed-top, .navbar-header{
-  //height: 120px; 
-}
-nav.navbar-inverse{
-  background-color: transparent;
-  background-image: none;
-  background-repaet: none;
-  border: 0;
-}
-
-a.navbar-brand{
-  padding-top: 0;
-}
-
-ul.nav.navbar-nav{
-  display: block;
-  max-width: 100%;
-  height: auto;
-  }
-
-li#collections-navtab{
-  background-color: $recipes-navtab-background-color;
-  margin: 0 7px;
-  padding-top:80px;
-  text-shadow: none;
-  a.dropdown-toggle {
-    color: $recipes-navtab-text-color;
-  }
-}
-
-li#friends-navtab{
-  background-color: $friends-navtab-background-color;
-  margin: 0 7px;
-  padding:80px 8px 0;
-  text-shadow: none;
-  a.dropdown-toggle {
-    color: $friends-navtab-text-color;
-  }
-}
-
-li#my_lists-navtab{
-  background-color: $lists-navtab-background-color;
-  margin: 0 7px;
-  padding: 80px 18px 0;
-  text-shadow: none;
-  a.dropdown-toggle {
-    color: $lists-navtab-text-color;
-  }
-}
-
-li#feeds-navtab{
-  background-color: $feeds-navtab-background-color;
-  margin: 0 7px;
-  padding: 80px 34px 0;
-  text-shadow: none;
-  a.dropdown-toggle {
-    color: $feeds-navtab-text-color;
-  }
-}
-
-li#home-navtab{
-  background-color: #ff9583;
-  margin: 0 7px;
-}
-
-.navbar-nav>li>a.dropdown-toggle{
-  padding-bottom: 10px;
-  font-family: Oswald, sans-serif;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  font-size: 21px;
-}
-
 .open > .dropdown-toggle{
   background-color: #fff;
 }
@@ -255,17 +175,6 @@ div.card {
   margin-top: 10px;
   padding-top: 10px
 }
-.navbar-inverse .navbar-nav>.active>a, 
-.navbar-inverse .navbar-nav>.active>a:focus, 
-.navbar-inverse .navbar-nav>.active>a:hover {
-  //color: #fff;
-  //background-color: transparent;
-}
-
-.navbar-inverse .navbar-nav>li#friends-navtab>a {
-  background-color: transparent;
-  color: #de8822;
-}
 
 span.caret {
   display: none;
@@ -275,13 +184,6 @@ span.caret {
   content: image-url("rp-measuring-spoons.png");
 }
 
-.user-name{
-  font-size: 15px;
-  color: #fadfdb;
-  text-shadow: none;
-  text-transform: lowercase;
-}
-
 //contents of pages
 .container {
   margin-top:200px;
@@ -289,13 +191,14 @@ span.caret {
   background-color: $page-background-color;
   &.top {
     padding-bottom: 200px;
+    z-index: 990;
     > div.row {
       margin-left: 15px;
       margin-right: 15px;
     }
   }
   &.menuback {
-    z-index: 1020;
+    z-index: 991;
     position: fixed;
     top: 0;
     right: 0;
@@ -310,7 +213,7 @@ span.caret {
 
 div.filter-element {
   width: 500px;
-  z-index: 1030;
+  z-index: 998;
   input#token-input-querytags {
     font-family: Oswald-Light, sans-serif;
     font-style: italic;
