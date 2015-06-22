@@ -58,15 +58,16 @@ class FilteredPresenter
           :items
         elsif params[:mode] && params[:mode] == "modal" # The query is for a modal dialog
           :modal
-        elsif response_service.action == "show" # The query is to show the item
-          :entity
         else
           @content_mode.to_sym # Either specified, or :container by default
         end
 
     @title = response_service.title
-    @results_class = self.class.instance_variable_get(:"@results_class_name").constantize
-    @stream_presenter = StreamPresenter.new sessid, request_path, @results_class, user_id, response_service.admin_view?, querytags, params
+    # FilteredPresenters don't always have results panels
+    if rcn = self.class.instance_variable_get(:"@results_class_name")
+      @results_class = rcn.constantize
+      @stream_presenter = StreamPresenter.new sessid, request_path, @results_class, user_id, response_service.admin_view?, querytags, params
+    end
   end
 
   # Provide a tokeninput field for specifying tags, with or without the ability to free-tag
@@ -239,11 +240,9 @@ class UsersShowPresenter < FilteredPresenter
 
 end
 
-=begin
 class RecipesShowPresenter < FilteredPresenter
 
 end
-=end
 
 # Present a list of items for a user
 class UserContentPresenter < FilteredPresenter

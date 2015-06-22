@@ -7,7 +7,6 @@ label.question-text {
   font-weight: 200;
 }
 
-
 div.card-item {
   -webkit-box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
   -moz-box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
@@ -26,7 +25,7 @@ div.card-item {
         position: relative;
         div.title {
           font-family: $oswald;
-          font-size: 24px;
+          font-size: 1.6em;
           letter-spacing: 1.5px;
           width: 100%;
           a.title-link {
@@ -35,7 +34,7 @@ div.card-item {
         }
         div.source {
           font-family: $oswald-light;
-          font-size: 14px;
+          font-size: 1em;
           color: #999;
           width: 100%;
           position: absolute;
@@ -60,12 +59,12 @@ div.card-item {
             .vote-count-bold {
               font-family: Oswald;
               letter-spacing: 2px;
-              font-size: 18px;
+              font-size: 1.5em;
               color: #dbc046;
             }
             a.vote-button {
               color: #ece6cd;
-              font-size: 36px;
+              font-size: 2.5em;
               font-weight: lighter;
               -ms-transform: scale(0.8, 1);
               -webkit-transform: scale(0.8, 1);

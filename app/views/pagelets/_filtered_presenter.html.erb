@@ -24,4 +24,4 @@
   <% @filtered_presenter.panel_partials do |entity_type, url| %>
       <%= render "shared/panel", type: entity_type, url: url %>
     <% end %>
-<% end %>
+<% end if @filtered_presenter.results_class %>
