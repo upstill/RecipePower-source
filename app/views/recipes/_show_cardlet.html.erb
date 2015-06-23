@@ -2,6 +2,11 @@
     <div class="card-item cardlet-item recipe-card" style="width: 300px;">
       <table class="cardlet-table">
         <tr class="title-row">
+          <% if defined?(pic_mode) && pic_mode %>
+              <td rowspan="2" class="<%= pic_mode %>;">
+                <%= safe_image_div decorator, :site, class: "pic-box", fill_mode: pic_mode %><%# pic_mode = "fixed_width" or "fixed_height" %>
+              </td>
+          <% end %>
           <td valign="top">
             <div class="title-glyph top-right">
               <%= collectible_collect_icon decorator %>

@@ -107,6 +107,12 @@ div.card-item {
   &.user-card {
     background-color: $user-card-background-color;
   }
+  div.pic-200w {
+    width: 200px;
+  }
+  div.pic-200h {
+    height: 200px;
+  }
   div.recipe-pic {
     margin-top: 10px;
   }
