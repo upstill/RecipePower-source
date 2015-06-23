@@ -7,6 +7,12 @@ label.question-text {
   font-weight: 200;
 }
 
+a.tablink {
+  font-family: $archivo;
+  font-weight: bold;
+  color: #2c7191;
+}
+
 div.card-item {
   -webkit-box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
   -moz-box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
@@ -15,20 +21,31 @@ div.card-item {
   font-family: $archivo;
   margin-top: 20px;
   padding-bottom: 15px;
+  &.cardlet-item {
+    min-width: 200px;
+    height: 200px;
+    background-color: $recipes-card-background-color;
+    font-family: $archivo;
+    margin-top: 10px;
+    padding-bottom: 5px;
+    font-size: 50%;
+  }
   &.recipe-card {
     background-color: $recipes-card-background-color;
     div.title-bar {
-      border-bottom: 2px solid #b95454;
-      padding-top: 3px;
+      border-bottom: 0.3em solid #b95454;
+      padding-top: 0.25em;
       div.left-matter {
-        min-height: 80px;
         position: relative;
         div.title {
-          font-family: $oswald;
-          font-size: 1.6em;
-          letter-spacing: 1.5px;
-          width: 100%;
+          min-height: 3.6em;
+          margin-bottom: 1.8em;
           a.title-link {
+            font-family: $archivo;
+            font-weight: 700;
+            font-size: 2.1em;
+            letter-spacing: 0.9px;
+            line-height: 1.2em;
             color: #4f4d4a;
           }
         }
@@ -36,9 +53,10 @@ div.card-item {
           font-family: $oswald-light;
           font-size: 1em;
           color: #999;
-          width: 100%;
           position: absolute;
           bottom: 0;
+          width: 100%;
+          overflow: hidden;
           a.source-link {
             color: #77a2be;
             letter-spacing: 1px;
@@ -46,12 +64,12 @@ div.card-item {
         }
       }
       div.right-matter {
-        min-height: 80px;
-        position: relative;
+        height: 80px;
         div.vote-div-h {
-          position: absolute;
-          bottom: 15px;
-          right: 0px;
+          position: relative;
+          top: 50%;
+          transform: translateY(-50%);
+          float: right;
           div.vote-div {
             width: auto;
             display: inline-block;
@@ -97,15 +115,28 @@ div.card-item {
     margin-top: 10px;
   }
   div.tags {
-    color: #a2a2a2;
-    a.taglink {
-      font-size: 24px;
+    min-height: 8em;
+    .taglink {
+      vertical-align: bottom;
+      font-size: 1.6em;
       font-weight: 400;
-      color: #a2a2a2;
+      color: #909090;
+    }
+    div.tagger-link {
+      font-size: 2em;
+      display: inline-block;
+      margin-top: 0.3em;
     }
   }
   td.content-strip {
     padding: 5px;
+  }
+  span.tagsep {
+    color: #8ac5d2;
+    font-family: Helvetica, sans-serif;
+    font-weight: 200;
+    font-size: 2em;
+    vertical-align: sub;
   }
   .card-aspect-label {
     margin-bottom: 0;

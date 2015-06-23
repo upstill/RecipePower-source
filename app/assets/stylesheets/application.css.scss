@@ -64,7 +64,6 @@ $user-color:  #EDDAD7;
 @import 'common/filtered_presenter';
 @import 'common/panel';
 @import 'common/card';
-@import 'common/cardlet';
 @import 'common/navbar';
 @import 'paginate';
 @import "jquery/jNotify.jquery";
@@ -360,13 +359,6 @@ div.filter-element {
 
   transform: rotate(-90deg);
 
-}
-
-span.tagsep {
-  color: #8ac5d2;
-  font-family: Helvetica, sans-serif;
-  font-weight: 200;
-  font-size: 30px;
 }
 
 .oswald {

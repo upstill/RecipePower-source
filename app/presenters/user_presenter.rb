@@ -140,7 +140,7 @@ class UserPresenter < CardPresenter
         label = "Latest Recipe"
         if latestrr = user.collection_pointers.where(:entity_type => "Recipe", :in_collection => true).order(created_at: :desc).first
           latest = latestrr.entity
-          contents = collectible_show_cardlet latest.decorate
+          contents = collectible_show_thumbnail latest.decorate
         else
           contents = "No recipes yet—so install the #{link_to_submit 'Cookmark Button', '/popup/starting_step2', :mode => :modal} and go get some!"
         end

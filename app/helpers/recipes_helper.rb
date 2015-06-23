@@ -33,26 +33,10 @@ module RecipesHelper
     content_tag :div, (label+link).html_safe, class: "rcp_grid_element_source"
   end
 
-  def collectible_show_cardlet decorator
+  def collectible_show_thumbnail decorator
     image = safe_image_div decorator, :site, class: "pic-box", fill_mode: "fixed-width"
     title = collectible_title_link decorator
     content_tag :div, "#{image}#{title}".html_safe, class: "cardlet-item #{decorator.dom_id}"
-  end
-
-  def collectible_cardlet_datablock decorator, &block
-    title_link = collectible_title_link decorator
-    source_element = collectible_source_link decorator
-    lower_content = block_given? ? with_output_buffer(&block) : ""
-    title_block = content_tag :div, (title_link+source_element).html_safe, class: "title-block"
-    footer_block = content_tag :div, lower_content, class: "footer-block"
-    content_tag :div, (title_block + footer_block).html_safe, class: "datablock"
-  end
-
-  def collectible_slider_datablock decorator, cssclass="rcp_grid_datablock", &block
-    title_link = collectible_title_link decorator
-    source_element = collectible_source_link decorator
-    buttons_element = block_given? ? with_output_buffer(&block) : ""
-    content_tag :div, (title_link+source_element).html_safe, class: cssclass
   end
 
   def collectible_masonry_datablock decorator
