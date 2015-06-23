@@ -22,74 +22,70 @@ div.card-item {
   margin-top: 20px;
   padding-bottom: 15px;
   &.cardlet-item {
+    position: relative;
     min-width: 200px;
+    padding: 0.5em 1em 1em 1em;
     height: 200px;
     background-color: $recipes-card-background-color;
     font-family: $archivo;
-    margin-top: 10px;
-    padding-bottom: 5px;
+    margin-top: 0;
     font-size: 50%;
+    div.source {
+      border-bottom: 0.3em solid #b95454;
+    }
   }
   &.recipe-card {
     background-color: $recipes-card-background-color;
-    div.title-bar {
-      border-bottom: 0.3em solid #b95454;
-      padding-top: 0.25em;
-      div.left-matter {
-        position: relative;
-        div.title {
-          min-height: 3.6em;
-          margin-bottom: 1.8em;
-          a.title-link {
-            font-family: $archivo;
-            font-weight: 700;
-            font-size: 2.1em;
-            letter-spacing: 0.9px;
-            line-height: 1.2em;
-            color: #4f4d4a;
-          }
-        }
-        div.source {
-          font-family: $oswald-light;
-          font-size: 1em;
-          color: #999;
-          position: absolute;
-          bottom: 0;
-          width: 100%;
-          overflow: hidden;
-          a.source-link {
-            color: #77a2be;
-            letter-spacing: 1px;
-          }
-        }
+    .description {
+      font-size: 1.6em;
+      color: #a2a2a2;
+    }
+    td.content-strip {
+      padding: 0.5em 0.5em 0.5em 1em;
+    }
+    div.title-glyph {
+      font-size: 2em;
+      color: #ea8a7a;
+      &.top-right {
+        position: absolute;
+        top: 0.2em;
+        right: 0.3em;
       }
-      div.right-matter {
-        height: 80px;
-        div.vote-div-h {
-          position: relative;
-          top: 50%;
-          transform: translateY(-50%);
-          float: right;
-          div.vote-div {
-            width: auto;
-            display: inline-block;
-            text-align: center;
-            .vote-count-bold {
-              font-family: Oswald;
-              letter-spacing: 2px;
-              font-size: 1.5em;
-              color: #dbc046;
-            }
-            a.vote-button {
-              color: #ece6cd;
-              font-size: 2.5em;
-              font-weight: lighter;
-              -ms-transform: scale(0.8, 1);
-              -webkit-transform: scale(0.8, 1);
-              transform: scale(0.7, 1.1);
-            }
-          }
-        }
+      &.in-flow {
+        display: inline-block;
+      }
+    }
+    .title-bar {
+      border-bottom: 0.3em solid #b95454;
+      .left-matter {
+        position: relative;
+      }
+    }
+    div.title-box {
+      margin-right: 2em;
+    }
+    div.title {
+      // min-height: 3.6em;
+      // margin-bottom: 1em;
+      margin-top: 0.5em;
+    }
+    a.title-link {
+      font-family: $archivo;
+      font-weight: 700;
+      font-size: 2.1em;
+      letter-spacing: 0.9px;
+      line-height: 1.2em;
+      color: #4f4d4a;
+    }
+    div.source {
+      font-family: $oswald-light;
+      font-size: 1em;
+      padding: 0.6em 1em 0.2em 1.2em;
+      color: #999;
+      margin: 0em -1em;
+      a.source-link {
+        color: #77a2be;
+        letter-spacing: 1px;
       }
     }
   }
@@ -115,7 +111,6 @@ div.card-item {
     margin-top: 10px;
   }
   div.tags {
-    min-height: 8em;
     .taglink {
       vertical-align: bottom;
       font-size: 1.6em;
@@ -127,9 +122,6 @@ div.card-item {
       display: inline-block;
       margin-top: 0.3em;
     }
-  }
-  td.content-strip {
-    padding: 5px;
   }
   span.tagsep {
     color: #8ac5d2;
@@ -152,6 +144,47 @@ div.card-item {
   p.card-aspect-contents {
     margin-top: 0;
     color: #8D8F90;
+  }
+}
+
+div.vote-buttons-container {
+  height: 80px;
+}
+
+table.cardlet-table {
+  width: 100%;
+  height: 100%;
+}
+
+
+div.vote-div-h {
+  float: right;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+div.vote-div-br {
+  float: right;
+}
+
+div.vote-div {
+  width: auto;
+  display: inline-block;
+  text-align: center;
+  .vote-count-bold {
+    font-family: Oswald;
+    letter-spacing: 2px;
+    font-size: 1.5em;
+    color: #dbc046;
+  }
+  a.vote-button {
+    color: #ece6cd;
+    font-size: 2.5em;
+    font-weight: lighter;
+    -ms-transform: scale(0.8, 1);
+    -webkit-transform: scale(0.8, 1);
+    transform: scale(0.7, 1.1);
   }
 }
 

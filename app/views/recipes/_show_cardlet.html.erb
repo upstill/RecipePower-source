@@ -1,30 +1,38 @@
 <%= present decorator, current_user_or_guest do |presenter| %>
-    <div class="container-fluid card-item cardlet-item recipe-card" style="width: 300px;">
-      <div class="row title-bar">
-        <div class="col-md-10 left-matter">
-          <div class="title">
-            <%= link_to decorator.title, decorator.url, class: "title-link", data: {report: polymorphic_path([:touch, decorator.object])} %>
-          </div>
-          <div class="source">
-            source: <%= link_to decorator.sourcename, decorator.sourcehome, class: "source-link" %>
-          </div>
-        </div>
-        <div class="col-md-2">
-          <%= collectible_collect_icon decorator %>
-          <%# collectible_vote_buttons decorator.object %>
-        </div>
-      </div>
-      <div class="tags">
-        <%= presenter.present_field "tags" %>
-      </div>
-      <p class="hide-if-empty"><%= presenter.present_field_wrapped "rcpDescription" %></p>
-      <% if params[:accept_invitation_link] %>
-          <div style="width: 400px; margin: 0 auto;">
-            <%= link_to "Save on RecipePower", params[:accept_invitation_link], class: "btn btn-lg btn-success", style: "margin-right:40px; margin-top:30px" %>
-            <%= link_to "Go to Recipe", decorator.url, class: "btn btn-lg btn-info", style: "margin-top: 30px" %>
-          </div>
-      <% end %>
-      <%= collectible_share_button decorator %>
+    <div class="card-item cardlet-item recipe-card" style="width: 300px;">
+      <table class="cardlet-table">
+        <tr class="title-row">
+          <td valign="top">
+            <div class="title-glyph top-right">
+              <%= collectible_collect_icon decorator %>
+            </div>
+            <div class="title-box">
+              <%= link_to decorator.title, decorator.url, class: "title-link", data: {report: polymorphic_path([:touch, decorator.object])} %>
+            </div>
+            <div class="source">
+              source: <%= link_to decorator.sourcename, decorator.sourcehome, class: "source-link" %>
+            </div>
+            <div class="tags">
+              <%= presenter.present_field "tags" %>
+            </div>
+            <p class="description">
+              <%= presenter.present_field "rcpDescription" %>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td valign="bottom" class="content-strip">
+            <% if params[:accept_invitation_link] %>
+                <div style="width: 400px; margin: 0 auto;">
+                  <%= link_to "Save on RecipePower", params[:accept_invitation_link], class: "btn btn-lg btn-success", style: "margin-right:40px; margin-top:30px" %>
+                  <%= link_to "Go to Recipe", decorator.url, class: "btn btn-lg btn-info", style: "margin-top: 30px" %>
+                </div>
+            <% end %>
+            <%= collectible_share_button decorator %>
+            <%= collectible_vote_buttons decorator.object, style: "br" %>
+          </td>
+        </tr>
+      </table>
     </div>
 <% end %>
 
