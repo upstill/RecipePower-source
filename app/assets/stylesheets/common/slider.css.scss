@@ -38,6 +38,7 @@
     margin-right: 15px;
     background-color: inherit;
     position: relative;
+    overflow: hidden;
     div.slider-pic {
       height: 12em;
     }
@@ -45,12 +46,22 @@
       overflow: hidden;
       background-color: inherit;
       position: absolute;
+      width: 1000px;
       height: 1.3em;
       bottom: 0;
       padding-left: 0.4em;
       font-family: $archivo;
       font-size: 1em;
       color: #777777;
+      z-index: 1000;
+    }
+    div.slider-fader {
+      position: absolute;
+      width: 3em;
+      height: 2em;
+      bottom: 0;
+      right: 0;
+      z-index: 1001;  // $recipes-panel-background-color: #d8dde0;
     }
     .pic-box {
       display: inline-block;
@@ -137,6 +148,59 @@
 
   }
 }
+
+div.results-panel.recipes div.slider-fader {
+  background: -moz-linear-gradient(left, $recipes-panel-background-transparent, $recipes-panel-background-color);
+  // background: -webkit-linear-gradient(left, rgba(216,224,226,0), #d8dde0);
+  background: rgb(216, 221, 224); /* Old browsers */
+  background: -moz-linear-gradient(left, $recipes-panel-background-transparent, $recipes-panel-background-color); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, right top, color-stop(0%, $recipes-panel-background-color), color-stop(100%, $recipes-panel-background-color)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(left, $recipes-panel-background-transparent, $recipes-panel-background-color); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(left, $recipes-panel-background-transparent, $recipes-panel-background-color); /* Opera 11.10+ */
+  background: -ms-linear-gradient(left, $recipes-panel-background-transparent, $recipes-panel-background-color); /* IE10+ */
+  background: linear-gradient(to right, $recipes-panel-background-transparent, $recipes-panel-background-color); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#d8dde0', endColorstr='#d8dde0', GradientType=1); /* IE6-9 */
+}
+
+div.results-panel.friends div.slider-fader {
+  background: -moz-linear-gradient(left, $friends-panel-background-transparent, $friends-panel-background-color);
+  // background: -webkit-linear-gradient(left, rgba(216,224,226,0), #d8dde0);
+  background: rgb(216, 221, 224); /* Old browsers */
+  background: -moz-linear-gradient(left, $friends-panel-background-transparent, $friends-panel-background-color); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, right top, color-stop(0%, $friends-panel-background-color), color-stop(100%, $friends-panel-background-color)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(left, $friends-panel-background-transparent, $friends-panel-background-color); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(left, $friends-panel-background-transparent, $friends-panel-background-color); /* Opera 11.10+ */
+  background: -ms-linear-gradient(left, $friends-panel-background-transparent, $friends-panel-background-color); /* IE10+ */
+  background: linear-gradient(to right, $friends-panel-background-transparent, $friends-panel-background-color); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#d8dde0', endColorstr='#d8dde0', GradientType=1); /* IE6-9 */
+}
+
+div.results-panel.lists div.slider-fader {
+  background: -moz-linear-gradient(left, $lists-panel-background-transparent, $lists-panel-background-color);
+  // background: -webkit-linear-gradient(left, rgba(216,224,226,0), #d8dde0);
+  background: rgb(216, 221, 224); /* Old browsers */
+  background: -moz-linear-gradient(left, $lists-panel-background-transparent, $lists-panel-background-color); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, right top, color-stop(0%, $lists-panel-background-color), color-stop(100%, $lists-panel-background-color)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(left, $lists-panel-background-transparent, $lists-panel-background-color); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(left, $lists-panel-background-transparent, $lists-panel-background-color); /* Opera 11.10+ */
+  background: -ms-linear-gradient(left, $lists-panel-background-transparent, $lists-panel-background-color); /* IE10+ */
+  background: linear-gradient(to right, $lists-panel-background-transparent, $lists-panel-background-color); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#d8dde0', endColorstr='#d8dde0', GradientType=1); /* IE6-9 */
+}
+
+div.results-panel.feeds div.slider-fader {
+  background: -moz-linear-gradient(left, $feeds-panel-background-transparent, $feeds-panel-background-color);
+  // background: -webkit-linear-gradient(left, rgba(216,224,226,0), #d8dde0);
+  background: rgb(216, 221, 224); /* Old browsers */
+  background: -moz-linear-gradient(left, $feeds-panel-background-transparent, $feeds-panel-background-color); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, right top, color-stop(0%, $feeds-panel-background-color), color-stop(100%, $feeds-panel-background-color)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(left, $feeds-panel-background-transparent, $feeds-panel-background-color); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(left, $feeds-panel-background-transparent, $feeds-panel-background-color); /* Opera 11.10+ */
+  background: -ms-linear-gradient(left, $feeds-panel-background-transparent, $feeds-panel-background-color); /* IE10+ */
+  background: linear-gradient(to right, $feeds-panel-background-transparent, $feeds-panel-background-color); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#d8dde0', endColorstr='#d8dde0', GradientType=1); /* IE6-9 */
+}
+
 .book {
   float: left;
 
