@@ -99,7 +99,7 @@ RP.collection.rejustify = () ->
 RP.collection.justify = () ->
 	# Initialize Masonry handling for list items
 	$('#seeker_results.masonry-container').masonry
-		columnWidth: 200,
+		columnWidth: 300,
 		gutter: 20,
 		itemSelector: '.masonry-item'
 

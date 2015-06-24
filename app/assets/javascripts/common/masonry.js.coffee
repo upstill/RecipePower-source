@@ -9,7 +9,7 @@ RP.masonry.onload = (event) ->
 	elmt = event.target
 	# Initialize Masonry handling for list items
 	$(elmt).masonry
-		columnWidth: $(elmt).data('columnWidth') || 200,
+		columnWidth: $(elmt).data('columnWidth') || 300,
 		gutter: $(elmt).data('gutterWidth') || 20,
 		itemSelector: '.masonry-item'
 	$(elmt).masonry 'on', 'layoutComplete', ( msnryInstance, laidOutItems ) ->

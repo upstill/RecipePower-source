@@ -79,7 +79,7 @@ module CollectibleHelper
   end
 
   def collectible_list_button decorator, styling, options={}
-    query = { }
+    query = {}
     query[:access] = :all if response_service.admin_view?
     meth = method(decorator.klass.to_s.underscore.pluralize+"_path")
     button_to_submit "#{decorator.klass.to_s.pluralize} List", meth.call(query), button_styling(styling, options)
@@ -115,7 +115,9 @@ module CollectibleHelper
     [ "div.#{vote_div_class styling[:style]}#"+dom_id(entity), collectible_vote_buttons(entity, styling) ]
   end
 
-  # Sort out a suitable URL to stuff into an image thumbnail for a recipe
+  # Sort out a suitable URL to stuff into an image thumbnail for a recipe, enclosing it in a div
+  # of the class given in options. The image will stretch either horizontally (fill_mode: "fixed-height")
+  # or vertically (fill_mode: "fixed-width") within the dimensions given by the enclosing div.
   def safe_image_div decorator, fallback=:site, options = {}
     if fallback.is_a? Hash
       fallback, options = :site, fallback
@@ -137,6 +139,14 @@ module CollectibleHelper
           "Error rendering image #{url.truncate(255)} from "+ (decorator ? "#{decorator.human_name} #{decorator.id}: '#{decorator.title}'" : "null #{decorator.human_name}")
       ExceptionNotification::Notifier.exception_notification(request.env, e, data: {message: content}).deliver
     end
+
+    style = case fill_mode
+              when "fixed-width"
+                "width: 100%; height: auto;"
+              when "fixed-height"
+                "width: auto; height: 100%;"
+            end
+    options[:style] = style if style
     content_tag :div, link_to(content, decorator.url), options
   end
 

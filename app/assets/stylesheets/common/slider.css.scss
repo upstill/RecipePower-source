@@ -36,11 +36,23 @@
     width: auto;
     float: left;
     margin-right: 15px;
+    background-color: inherit;
+    div.slider-pic {
+      height: 220px;
+      // width: auto;
+    }
+    p.slider-title {
+      // margin-top: 0.2em;
+      // margin-left: 0.4em;
+      // width: 100%;
+      // overflow: hidden;
+      font-family: $archivo;
+      font-size: 1em;
+      color: #777777;
+    }
     .pic-box {
       display: inline-block;
       float: left;
-      height: 100%;
-      width: auto; // 220px;
       display: -webkit-box;
       display: -moz-box;
       display: box;
