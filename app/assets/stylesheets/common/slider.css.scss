@@ -32,20 +32,22 @@
     right: 0;
   }
   .slider-item {
-    height: 200px;
+    height: 14em;
     width: auto;
     float: left;
     margin-right: 15px;
     background-color: inherit;
+    position: relative;
     div.slider-pic {
-      height: 220px;
-      // width: auto;
+      height: 12em;
     }
     p.slider-title {
-      // margin-top: 0.2em;
-      // margin-left: 0.4em;
-      // width: 100%;
-      // overflow: hidden;
+      overflow: hidden;
+      background-color: inherit;
+      position: absolute;
+      height: 1.3em;
+      bottom: 0;
+      padding-left: 0.4em;
       font-family: $archivo;
       font-size: 1em;
       color: #777777;
