@@ -1,5 +1,5 @@
 <%= present decorator, current_user_or_guest do |presenter| %>
-    <div class="card-item cardlet-item recipe-card" style="width: 300px;">
+    <div class="card-item cardlet-item recipe-card">
       <table class="cardlet-table">
         <tr>
           <% if defined?(pic_mode) && pic_mode %>
@@ -8,21 +8,23 @@
               </td>
           <% end %>
           <td valign="top">
-            <div class="title-glyph top-right">
-              <%= collectible_collect_icon decorator %>
+            <div class="cardlet-table-top">
+              <div class="title-glyph top-right">
+                <%= collectible_collect_icon decorator %>
+              </div>
+              <div class="title-box">
+                <%= link_to decorator.title, decorator.url, class: "title-link", data: {report: polymorphic_path([:touch, decorator.object])} %>
+              </div>
+              <div class="source">
+                source: <%= link_to decorator.sourcename, decorator.sourcehome, class: "source-link" %>
+              </div>
+              <div class="tags">
+                <%= presenter.present_field "tags" %>
+              </div>
+              <p class="description">
+                <%= presenter.present_field "rcpDescription" %>
+              </p>
             </div>
-            <div class="title-box">
-              <%= link_to decorator.title, decorator.url, class: "title-link", data: {report: polymorphic_path([:touch, decorator.object])} %>
-            </div>
-            <div class="source">
-              source: <%= link_to decorator.sourcename, decorator.sourcehome, class: "source-link" %>
-            </div>
-            <div class="tags">
-              <%= presenter.present_field "tags" %>
-            </div>
-            <p class="description">
-              <%= presenter.present_field "rcpDescription" %>
-            </p>
           </td>
         </tr>
         <tr>

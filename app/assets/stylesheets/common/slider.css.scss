@@ -41,6 +41,18 @@
     overflow: hidden;
     div.slider-pic {
       height: 12em;
+      display: inline-block;
+      float: left;
+    }
+    div.cardlet-item {
+      width: 200px;
+      height: 24em;
+      display: inline-block;
+      float: left;
+      .cardlet-table-top {
+        max-height: 20em;
+        overflow: hidden;
+      }
     }
     p.slider-title {
       overflow: hidden;
@@ -49,7 +61,7 @@
       width: 1000px;
       height: 1.3em;
       bottom: 0;
-      padding-left: 0.4em;
+      padding-left: 0.2em;
       font-family: $archivo;
       font-size: 1em;
       color: #777777;
