@@ -23,6 +23,10 @@ class PagesController < ApplicationController
     smartrender
   end
 
+  def sprites
+    render layout: "naked"
+  end
+
   def about
   	response_service.title = "About"
     smartrender

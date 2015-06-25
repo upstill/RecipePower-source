@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Naked Page</title>
+  <%= favicon_link_tag %>
+  <%# jquery_include_tag Rails.application.config.use_jquery2 %>
+  <!-- From bootstrap-sass -->
+  <%# bootstrap_include_tag %>
+  <%# stylesheet_link_tag "application", :media => "all" %>
+  <%# javascript_include_tag "application" %>
+  <%# csrf_meta_tag %>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <%= yield %>
+</body>
+</html>

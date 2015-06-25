@@ -227,6 +227,7 @@ RP::Application.routes.draw do
   get '/welcome', :to => 'pages#welcome'
   get '/faq', :to => "pages#faq"
   get '/admin', :to => "pages#admin"
+  get '/sprites', :to => "pages#sprites"
   root :to => 'pages#root'
 
   # The priority is based upon order of creation:
