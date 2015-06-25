@@ -26,7 +26,7 @@
             <td >
               <% x, y = offsets[index] %>
               <% box = [x, y, 500, 500].map(&:to_s).join ' ' %>
-              <svg width="75" height="75" viewBox="<%= box %>" style="margin: 1px; color: <%= color %>; border: 1px solid black">
+              <svg width="75" height="75" viewBox="<%= box %>" style="margin: 1px; color: <%= color %>; fill: <%= color %>; border: 1px solid black">
                 <use xlink:href='recipe-power-sprite.svg#<%= icon %>' />
               </svg>
 <!--
