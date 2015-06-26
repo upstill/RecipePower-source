@@ -24,6 +24,7 @@
 
 #= require imagesloaded.pkgd.min
 #= require bootstrap-filestyle
+#= require svg4everybody.min.js
 #= require eventsource.js
 #= require bootbox
 #= require history

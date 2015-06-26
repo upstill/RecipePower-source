@@ -24,7 +24,7 @@ class PagesController < ApplicationController
   end
 
   def sprites
-    render layout: "naked"
+    render # layout: "naked"
   end
 
   def about
