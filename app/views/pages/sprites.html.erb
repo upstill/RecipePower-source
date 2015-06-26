@@ -26,8 +26,9 @@
               <% ar = y==600 ? 0.75 : 1 %>
               <% box = [x, y, 500*ar, 500].map(&:to_s).join ' ' %>
               <% color = natural_colors[index] %>
+              <% ip = image_path "recipe-power-sprite.svg##{icon}" %>
               <svg width="<%= 75*ar %>" height="75" viewBox="<%= box %>" style="background: #cccccc; margin: 1px; color: <%= color %>; fill: <%= color %>; border: 1px solid black">
-                <use xlink:href='recipe-power-sprite.svg#<%= icon %>'/>
+                <use xlink:href='<%= ip %>'/>
               </svg>
               <!--
                             <svg class="twitter-icon" width="100" height="100">
@@ -49,8 +50,9 @@
             <td>
               <% x, y = offsets[index] %>
               <% box = [x, y, 500, 500].map(&:to_s).join ' ' %>
+              <% ip = image_path "recipe-power-sprite.svg##{icon}" %>
               <svg width="75" height="75" viewBox="<%= box %>" style="background: #cccccc; margin: 1px; color: <%= color %>; fill: <%= color %>; border: 1px solid black">
-                <use xlink:href='recipe-power-sprite.svg#<%= icon %>'/>
+                <use xlink:href='<%= ip %>'/>
               </svg>
               <!--
                             <svg class="twitter-icon" width="100" height="100">
