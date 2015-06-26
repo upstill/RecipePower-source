@@ -1,9 +1,9 @@
 <% colors = %w{#e6ccc8 #e9e4ca #222222 #dfdfdf #e9e4ca #f5f2ee #816887 } %>
-<% natural_colors = %w{ #FF9583 #FF9583 #DFCA6A #ECDAD7 #9DBFAA #FF9583 #DFCA6A #CC8475 #FF9583 #A0A0A0 #CC8475 #A0A0A0 #A0A0A0 #ECE6CD #DFCA6A #CCC } %>
-<% icons = %w{ plus check chef list-viewer list-list list-add heart-friend heart-heart heart-add edit-gray edit-red tag upload vote-down share send-left } %>
+<% natural_colors = %w{ #FF9583 #FF9583 #DFCA6A #ECDAD7 #9DBFAA #FF9583 #DFCA6A #CC8475 #FF9583 #A0A0A0 #CC8475 #A0A0A0 #ECE6CD #A0A0A0 #ECE6CD #DFCA6A #CCC } %>
+<% icons = %w{ plus check chef list-viewer list-list list-add heart-friend heart-heart heart-add edit-gray edit-red tag vote-up upload vote-down share send-left } %>
 <% offsets = []; xoff=500; yoff=600 %>
-<% [0, 600, 1240, 1870, 2500, 3100].each { |y| (0..2).to_a.each { |xindex| offsets << [xindex*xoff, y] } } %>
-<% offsets.delete_at(12); offsets.delete_at(12); offsets[12][0] -= 45 %>
+<% [0, 600, 1240, 1870, 2505, 3105].each { |y| (0..2).to_a.each { |xindex| offsets << [xindex*xoff, y] } } %>
+<% offsets.delete_at(13); offsets[13][0] -= 45 %>
 <h3>Icons</h3>
 <table>
   <thead>
@@ -18,27 +18,30 @@
   </thead>
   <tbody>
   <tr>
-    <td>no</td>
-        <% index=0 %>
-        <% icons.each do |icon| %>
-            <td>
-              <% x, y = offsets[index] %>
-              <% ar = y==600 ? 0.75 : 1 %>
-              <% box = [x, y, 500*ar, 500].map(&:to_s).join ' ' %>
-              <% color = natural_colors[index] %>
-              <% ip = image_path "recipe-power-sprite.svg##{icon}" %>
-              <svg width="<%= 75*ar %>" height="75" viewBox="<%= box %>" style="background: #cccccc; margin: 1px; color: <%= color %>; fill: <%= color %>; border: 1px solid black">
-                <use xlink:href='<%= ip %>'/>
-              </svg>
-              <!--
-                            <svg class="twitter-icon" width="100" height="100">
-                              <use xlink:href="recipe-power-sprite.svg"></use>
-                            </svg>
-              -->
-              <!--<object type="image/svg+xml" width="100" height="100" data="recipe-power-sprite.svg"></object>-->
-            </td>
-            <% index = index+1 %>
-        <% end %>
+    <td>helped</td>
+    <% index=0 %>
+    <% icons.each do |icon| %>
+        <td><%= sprite icon %></td>
+        <% color = natural_colors[index] %>
+        <% index = index+1 %>
+    <% end %>
+  </tr>
+  <tr>
+    <td>direct</td>
+    <% index=0 %>
+    <% icons.each do |icon| %>
+        <td><%= sprite icon %>
+          <% x, y = offsets[index] %>
+          <% ar = (icon.match('list-') || icon.match('vote-')) ? 0.75 : 1 %>
+          <% box = [x, y, 500*ar, 500].map(&:to_s).join ' ' %>
+          <% color = natural_colors[index] %>
+          <% ip = image_path "recipe-power-sprite.svg##{icon}" %>
+          <svg width="<%= 75*ar %>" height="75" viewBox="<%= box %>" style="color: <%= color %>; fill: <%= color %>">
+            <use xlink:href='<%= ip %>'/>
+          </svg>
+        </td>
+        <% index = index+1 %>
+    <% end %>
   </tr>
   <% colors.each do |color| %>
       <tr>
@@ -54,12 +57,6 @@
               <svg width="75" height="75" viewBox="<%= box %>" style="background: #cccccc; margin: 1px; color: <%= color %>; fill: <%= color %>; border: 1px solid black">
                 <use xlink:href='<%= ip %>'/>
               </svg>
-              <!--
-                            <svg class="twitter-icon" width="100" height="100">
-                              <use xlink:href="recipe-power-sprite.svg"></use>
-                            </svg>
-              -->
-              <!--<object type="image/svg+xml" width="100" height="100" data="recipe-power-sprite.svg"></object>-->
             </td>
             <% index = index+1 %>
         <% end %>
