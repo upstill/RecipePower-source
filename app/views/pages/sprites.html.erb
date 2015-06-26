@@ -2,7 +2,7 @@
 <% natural_colors = %w{ #FF9583 #FF9583 #DFCA6A #ECDAD7 #9DBFAA #FF9583 #DFCA6A #CC8475 #FF9583 #A0A0A0 #CC8475 #A0A0A0 #A0A0A0 #ECE6CD #DFCA6A #CCC } %>
 <% icons = %w{ plus check chef list-viewer list-list list-add heart-friend heart-heart heart-add edit-gray edit-red tag upload vote-down share send-left } %>
 <% offsets = []; xoff=500; yoff=600 %>
-<% [0, 600, 1200, 1850, 2500, 3100].each { |y| (0..2).to_a.each { |xindex| offsets << [xindex*xoff, y] } } %>
+<% [0, 600, 1240, 1870, 2500, 3100].each { |y| (0..2).to_a.each { |xindex| offsets << [xindex*xoff, y] } } %>
 <% offsets.delete_at(12); offsets.delete_at(12); offsets[12][0] -= 45 %>
 <h3>Icons</h3>
 <table>
@@ -23,9 +23,10 @@
         <% icons.each do |icon| %>
             <td>
               <% x, y = offsets[index] %>
-              <% box = [x, y, 500, 500].map(&:to_s).join ' ' %>
+              <% ar = y==600 ? 0.75 : 1 %>
+              <% box = [x, y, 500*ar, 500].map(&:to_s).join ' ' %>
               <% color = natural_colors[index] %>
-              <svg width="75" height="75" viewBox="<%= box %>" style="background: #cccccc; margin: 1px; color: <%= color %>; fill: <%= color %>; border: 1px solid black">
+              <svg width="<%= 75*ar %>" height="75" viewBox="<%= box %>" style="background: #cccccc; margin: 1px; color: <%= color %>; fill: <%= color %>; border: 1px solid black">
                 <use xlink:href='recipe-power-sprite.svg#<%= icon %>'/>
               </svg>
               <!--
