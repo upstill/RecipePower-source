@@ -42,10 +42,11 @@ module SpritesHelper
     wid, height = vb.split(' ')[2..3].map(&:to_i)
     content_tag :svg,
                 "<use xlink:href='#{ip}'/>".html_safe,
+                id: what,
                 width: 75*wid/height,
                 height: 75,
-                viewBox: vb,
-                style: "color: #{color}; fill: #{color}"
+                viewBox: vb
+                # style: "color: #{color}; fill: #{color}"
   end
 
 end
