@@ -49,9 +49,13 @@
       height: 24em;
       display: inline-block;
       float: left;
-      .cardlet-table-top {
-        max-height: 20em;
-        overflow: hidden;
+      div.bottom-strip {
+        position: absolute;
+        bottom: 0;
+        height: 3em;
+        width: 100%;
+        font-size: 1.8em;
+        background: $recipes-panel-background-color;
       }
     }
     p.slider-title {
