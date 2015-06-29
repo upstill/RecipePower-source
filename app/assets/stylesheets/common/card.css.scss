@@ -33,6 +33,9 @@ div.card-item {
     div.source {
       border-bottom: 0.3em solid #b95454;
     }
+    .content-strip {
+      font-size: 1.8em;
+    }
   }
   &.recipe-card {
     background-color: $recipes-card-background-color;
@@ -41,11 +44,12 @@ div.card-item {
       color: #a2a2a2;
     }
     td.content-strip {
+      font-size: 1.8em;
       padding: 0.5em 0.5em 0.5em 1em;
     }
     div.title-glyph {
       color: #ea8a7a;
-      height: 1.2em;
+      height: 2em;
       &.top-right {
         position: absolute;
         top: 0.8em;

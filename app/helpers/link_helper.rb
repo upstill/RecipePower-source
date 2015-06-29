@@ -1,16 +1,21 @@
 module LinkHelper
 
-  # A wrapper for flavored_link which asserts button options for Bootstrap
-  def button_to_submit label, path_or_options, kind="default", size="small", options={}
+  # A wrapper for flavored_link which asserts either 1) button options for Bootstrap, or 2) glyphs via sprites
+  def button_to_submit label, path_or_options, kind="default", size=nil, options={}
     if kind.kind_of? Hash
-      kind, size, options = :default, :small, kind
+      kind, size, options = :default, nil, kind
     elsif size.kind_of? Hash
-      size, options = :small, size
+      size, options = nil, size
     end
     options = options.clone
     class_str = (options[:class] || "").gsub(/btn[-\w]*/i, '') # Purge the class of existing button classes
-    options[:class] =  class_str.assert_words %W{ btn btn-#{kind} btn-#{size} }
-    link_to_submit label, path_or_options, options
+    if kind.match /^glyph-/ # 'kind' starting with 'glyph' denotes sprite
+      label = sprite_glyph (kind.to_s.sub /^glyph-/, ''), "inline", size
+    else # Otherwise, we use a Bootstrap button
+      class_str << " btn btn-#{kind}"
+      class_str << " btn-#{size}" if size
+    end
+    link_to_submit ("glyph "+label).html_safe, path_or_options, options.merge(class: class_str)
   end
 
   # Hit a URL using the RP.submit javascript module, with options for confirmation (:confirm-msg) and waiting (:wait-msg)

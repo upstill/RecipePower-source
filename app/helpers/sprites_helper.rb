@@ -39,6 +39,8 @@ module SpritesHelper
             "500 3105 500 500"
           when :"send-left"
             "1000 3105 500 500"
+          else
+            return nil
         end
     ip = image_path "recipe-power-sprite.svg##{what}"
     wid, height = vb.split(' ')[2..3].map(&:to_f)
@@ -72,7 +74,7 @@ module SpritesHelper
     end
     options[:class] = "#{options[:class]} sprite-glyph #{type}"
     options[:class] << " sprite-glyph-#{size}" if size
-    content_tag :div, sprite(what, height: "100%"), options
+    content_tag :div, sprite(what), options
   end
 
 end

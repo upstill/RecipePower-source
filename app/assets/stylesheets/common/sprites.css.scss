@@ -1,19 +1,20 @@
 div.sprite-glyph {
-  height: 1.8em;
+  height: 1.2em;
   &.sprite-glyph-xs {
-    height: 1.2em;
+    height: 0.8em;
   }
   &.sprite-glyph-sm {
-    height: 1.4em;
+    height: 1em;
   }
   &.sprite-glyph-lg {
-    height: 2.4em;
+    height: 1.4em;
   }
   &.sprite-glyph-xl {
-    height: 3em;
+    height: 1.8em;
   }
   &.inline {
     display: inline-block;
+    vertical-align: bottom;
   }
   &.float-right {
     float: right;

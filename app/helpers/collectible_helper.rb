@@ -58,7 +58,7 @@ module CollectibleHelper
                     id title url picuri imgdata
                     element_id field_name human_name object_path tag_path
                     tagging_tag_data tagging_user_id )
-    button = template_link decorator, "tag-collectible", "", styling, options.merge(class: "glyphicon glyphicon-tags", :mode => :modal, :attribs => decorator.data(attribs))
+    button = template_link decorator, "tag-collectible", sprite_glyph(:tag, :inline), styling, options.merge(:mode => :modal, :attribs => decorator.data(attribs))
     content_tag :div, button.html_safe, class: "tagger-link"
   end
 
@@ -66,13 +66,13 @@ module CollectibleHelper
     # Include the styling options in the link path as one parameter, then pass them to the button function
     if permitted_to? :update, entity
       url = polymorphic_path entity, :action => :edit, styling: styling
-      button_to_submit '', url, styling.merge(class: "glyphicon glyphicon-pencil", mode: :modal)
+      button_to_submit sprite_glyph("edit-red", :inline), url, styling.merge(mode: :modal)
     end
   end
 
   def collectible_share_button entity, options={}
     entity = entity.object if entity.is_a? Draper::Decorator
-    button_to_submit "", new_user_invitation_path(shared_type: entity.class.to_s, shared_id: entity.id), "default", "xs", options.merge(class: "glyphicon glyphicon-share", mode: :modal)
+    button_to_submit "", new_user_invitation_path(shared_type: entity.class.to_s, shared_id: entity.id), "glyph-share", "xl", options.merge(mode: :modal)
   end
 
   def collectible_list_button decorator, styling, options={}
