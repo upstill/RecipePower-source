@@ -72,7 +72,8 @@ module CollectibleHelper
 
   def collectible_share_button entity, options={}
     entity = entity.object if entity.is_a? Draper::Decorator
-    button_to_submit "", new_user_invitation_path(shared_type: entity.class.to_s, shared_id: entity.id), "glyph-share", "xl", options.merge(mode: :modal)
+    button = button_to_submit "", new_user_invitation_path(shared_type: entity.class.to_s, shared_id: entity.id), "glyph-share", "xl", options.merge(mode: :modal)
+    content_tag :div, button, class: "share-button"
   end
 
   def collectible_list_button decorator, styling, options={}
@@ -87,10 +88,10 @@ module CollectibleHelper
     styling[:style] ||= "h"
     uplink = vote_link(entity, true, styling: styling)
     downlink = vote_link(entity, false, styling: styling)
-    button_options = button_styling styling, method: "post", remote: true
+    button_options = button_styling styling, method: "post", remote: true, class: "vote-button"
     vote_state = Vote.current entity
-    up_button = link_to_submit "", uplink, button_options.merge(class: vote_button_class(:up, vote_state, styling[:style]))
-    down_button = link_to_submit "", downlink, button_options.merge(class: vote_button_class(:down, vote_state, styling[:style]))
+    up_button = button_to_submit "", uplink, "glyph-vote-up", "sm", button_options
+    down_button = button_to_submit "", downlink, "glyph-vote-down", "sm", button_options
     vote_counter = (entity.upvotes > 0 && entity.upvotes.to_s) || ""
     count = content_tag :span, vote_counter, class: vote_count_class(styling[:style])
     upcount =

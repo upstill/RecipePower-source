@@ -15,7 +15,7 @@ module LinkHelper
       class_str << " btn btn-#{kind}"
       class_str << " btn-#{size}" if size
     end
-    link_to_submit ("glyph "+label).html_safe, path_or_options, options.merge(class: class_str)
+    link_to_submit label, path_or_options, options.merge(class: class_str)
   end
 
   # Hit a URL using the RP.submit javascript module, with options for confirmation (:confirm-msg) and waiting (:wait-msg)
