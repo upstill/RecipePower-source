@@ -45,11 +45,13 @@ module SpritesHelper
     ar = wid/height
     if options[:width] || options[:height]
       # dim_scale won't scale percentages or 'auto', returning nil and thus preventing
-      options[:width] ||= dim_scale((options[:height] || "2em"), ar)
-      options[:height] ||= dim_scale((options[:width] || "2em"), 1/ar)
+      options[:width] ||= dim_scale(options[:height], ar)
+      options[:height] ||= dim_scale(options[:width], 1/ar)
+    else
+      options[:height] = "100%" # Fit into enclosing div
     end
     content_tag :svg,
-                tag(:use, :"xlink:href" => ip, width: wid, height: height),
+                tag(:use, :"xlink:href" => ip),
                 options.slice(:width, :height).merge(id: what, viewBox: vb).compact
   end
 

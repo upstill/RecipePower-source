@@ -25,9 +25,9 @@ module CollectibleHelper
 
   def collectible_collect_icon decorator, options={}
     if current_user_or_guest.collected?(decorator.object)
-      sprite_glyph :check, "abs-top-right", style: "margin: '1em'"
+      sprite :check
     else
-      link_to_submit sprite_glyph(:plus, "abs-top-right"), polymorphic_path([:collect, decorator.object]), options
+      link_to_submit sprite(:plus), polymorphic_path([:collect, decorator.object]), options
     end
   end
 
