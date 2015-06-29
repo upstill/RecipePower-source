@@ -24,13 +24,10 @@ module CollectibleHelper
   end
 
   def collectible_collect_icon decorator, options={}
-    options[:class] = "#{options[:class]} glyphicon glyphicon-"
     if current_user_or_guest.collected?(decorator.object)
-      options[:class] << "ok"
-      content_tag :span, "", options
+      content_tag :span, sprite(:check), options
     else
-      options[:class] << "plus"
-      link_to_submit "", polymorphic_path([:collect, decorator.object]), options
+      link_to_submit sprite(:plus), polymorphic_path([:collect, decorator.object]), options
     end
   end
 

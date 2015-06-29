@@ -5,6 +5,12 @@
 <% [0, 600, 1240, 1870, 2505, 3105].each { |y| (0..2).to_a.each { |xindex| offsets << [xindex*xoff, y] } } %>
 <% offsets.delete_at(13); offsets[13][0] -= 45 %>
 <h3>Icons</h3>
+<p>100w <%= sprite :"vote-down", width: 100 %></p>
+<p>100h <%= sprite :"vote-down", height: 100 %></p>
+<p>100x100 <%= sprite :"vote-down", width: 100, height: 100 %>30x30 <%= sprite :"vote-down", width: 30, height: 30 %></p>
+<p>200x100 <%= sprite :"vote-down", width: 200, height: 100 %></p>
+<p>100x200 <%= sprite :"vote-down", width: 100, height: 200 %></p>
+<p>natural <%= sprite :"vote-down" %></p>
 <table>
   <thead>
   <tr>
