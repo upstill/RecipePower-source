@@ -53,4 +53,24 @@ module SpritesHelper
                 options.slice(:width, :height).merge(id: what, viewBox: vb).compact
   end
 
+  # Insert a sprite glyph
+  # what: one of the symbols taken by sprite()
+  # type: how to display, viz.
+  #    "inline" -> treat as a character
+  #    "float-right"
+  #    "float-left"
+  #    "abs-top-right"
+  #    "abs-top-left"
+  #    "abs-bottom-right"
+  #    "abs-bottom-left"
+  # size: "xs", "sm", "lg", "xl"
+  def sprite_glyph what, type, size=nil, options={}
+    if size.is_a? Hash
+      size, options = nil, size
+    end
+    options[:class] = "#{options[:class]} sprite-glyph #{type}"
+    options[:class] << " sprite-glyph-#{size}" if size
+    content_tag :div, sprite(what, height: "100%"), options
+  end
+
 end
