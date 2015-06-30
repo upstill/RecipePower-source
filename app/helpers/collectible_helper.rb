@@ -62,18 +62,25 @@ module CollectibleHelper
     content_tag :div, button.html_safe, class: "tagger-link"
   end
 
-  def collectible_edit_button entity, styling={}
+  def collectible_edit_button entity, div_class=nil, styling={}
     # Include the styling options in the link path as one parameter, then pass them to the button function
-    if permitted_to? :update, entity
-      url = polymorphic_path entity, :action => :edit, styling: styling
-      button_to_submit sprite_glyph("edit-red", :inline), url, styling.merge(mode: :modal)
+    return unless permitted_to? :update, entity
+    if div_class.is_a? Hash
+      div_class, options = nil, div_class
     end
+    url = polymorphic_path entity, :action => :edit, styling: styling
+    button = button_to_submit sprite_glyph("edit-red", :inline), url, styling.merge(mode: :modal)
+    div_class ? content_tag(:div, button, class: div_class) : button
   end
 
-  def collectible_share_button entity, options={}
+  # Define and return a share button for the collectible. If div_class is provided, enclose it in a div of that class
+  def collectible_share_button entity, div_class=nil, options={}
+    if div_class.is_a? Hash
+      div_class, options = nil, div_class
+    end
     entity = entity.object if entity.is_a? Draper::Decorator
     button = button_to_submit "", new_user_invitation_path(shared_type: entity.class.to_s, shared_id: entity.id), "glyph-share", "xl", options.merge(mode: :modal)
-    content_tag :div, button, class: "share-button"
+    div_class ? content_tag(:div, button, class: div_class) : button
   end
 
   def collectible_list_button decorator, styling, options={}
