@@ -20,7 +20,18 @@ div.card-item {
   background-color: $recipes-card-background-color;
   font-family: $archivo;
   margin-top: 20px;
-  padding-bottom: 15px;
+  padding-bottom: 0.5em;
+  div.vote-buttons {
+    font-size: 1.2em;
+    float: right;
+    padding-top: 0.5em;
+    a.vote-button {
+      font-size: 1.4em;
+    }
+  }
+  div.share-button {
+    font-size: 2em;
+  }
   &.cardlet-item {
     position: relative;
     min-width: 200px;
@@ -33,19 +44,23 @@ div.card-item {
     div.source {
       border-bottom: 0.3em solid #b95454;
     }
-    .content-strip {
-      font-size: 1.8em;
-    }
   }
   &.recipe-card {
     background-color: $recipes-card-background-color;
     .description {
-      font-size: 1.6em;
+      font-size: 1.2em;
       color: #a2a2a2;
     }
-    td.content-strip {
-      font-size: 1.8em;
-      padding: 0.5em 0.5em 0.5em 1em;
+    td.upper-content {
+      padding-left: 1em;
+    }
+    td.lower-content {
+      padding-left: 0.5em;
+      vertical-align: bottom;
+      div.share-button {
+        font-size: 2em;
+        float: right;
+      }
     }
     div.title-glyph {
       color: #ea8a7a;
@@ -71,15 +86,17 @@ div.card-item {
     div.title {
       // min-height: 3.6em;
       // margin-bottom: 1em;
-      margin-top: 0.5em;
-    }
-    a.title-link {
+      margin-top: 0.2em;
+      font-size: 2.1em;
       font-family: $archivo;
       font-weight: 700;
-      font-size: 2.1em;
       letter-spacing: 0.9px;
       line-height: 1.2em;
-      color: #4f4d4a;
+      div.sprite-glyph {
+      }
+      a.title-link {
+        color: #4f4d4a;
+      }
     }
     div.source {
       font-family: $oswald-light;
@@ -121,24 +138,18 @@ div.card-item {
     margin-top: 10px;
   }
   div.tags {
-    .taglink {
-      vertical-align: bottom;
-      font-size: 1.6em;
-      font-weight: 400;
-      color: #909090;
+    font-size: 1.6em;
+    font-weight: 400;
+    color: #909090;
+    a.taglink {
+      color: inherit;
     }
-    div.tagger-link {
-      font-size: 2em;
-      display: inline-block;
-      margin-top: 0.3em;
+    span.tagsep {
+      color: #8ac5d2;
+      font-family: Helvetica, sans-serif;
+      font-weight: 200;
+      font-size: 1.2em;
     }
-  }
-  span.tagsep {
-    color: #8ac5d2;
-    font-family: Helvetica, sans-serif;
-    font-weight: 200;
-    font-size: 2em;
-    vertical-align: sub;
   }
   .card-aspect-label {
     margin-bottom: 0;
@@ -160,15 +171,6 @@ div.card-item {
 table.cardlet-table {
   width: 100%;
   height: 100%;
-}
-
-div.vote-div {
-  width: auto;
-  display: inline-block;
-  text-align: center;
-  font-family: Oswald;
-  letter-spacing: 2px;
-  color: #dbc046;
 }
 
 div.pic-inset {

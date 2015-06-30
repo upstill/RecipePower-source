@@ -10,7 +10,7 @@ module LinkHelper
     options = options.clone
     class_str = (options[:class] || "").gsub(/btn[-\w]*/i, '') # Purge the class of existing button classes
     if kind.match /^glyph-/ # 'kind' starting with 'glyph' denotes sprite
-      label = sprite_glyph (kind.to_s.sub /^glyph-/, ''), "inline", size
+      label = sprite_glyph (kind.to_s.sub /^glyph-/, ''), size
     else # Otherwise, we use a Bootstrap button
       class_str << " btn btn-#{kind}"
       class_str << " btn-#{size}" if size

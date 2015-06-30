@@ -1,46 +1,20 @@
 div.sprite-glyph {
-  height: 1.2em;
+  height: 0.8em;
+  // margin-bottom: 0.2em;
+  display: inline-block;
+  // vertical-align: baseline;
   &.sprite-glyph-xs {
-    height: 0.8em;
+    height: 0.5em;
   }
   &.sprite-glyph-sm {
-    height: 1em;
+    height: 0.6em;
   }
   &.sprite-glyph-lg {
-    height: 1.4em;
+    height: 1em;
   }
   &.sprite-glyph-xl {
-    height: 1.8em;
-  }
-  &.inline {
-    display: inline-block;
-    vertical-align: bottom;
-  }
-  &.float-right {
-    float: right;
-  }
-  &.float-left {
-    float: left;
-  }
-  &.abs-top-left {
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
-  &.abs-top-right {
-    position: absolute;
-    top: 0;
-    right: 0;
-  }
-  &.abs-bottom-left {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-  }
-  &.abs-bottom-right {
-    position: absolute;
-    bottom: 0;
-    right: 0;
+    height: 1.2em;
+    vertical-align: sub;
   }
 }
 

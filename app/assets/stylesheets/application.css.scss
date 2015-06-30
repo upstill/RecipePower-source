@@ -1,4 +1,4 @@
-$font-stack:    Oswald, "Helvetica Neue", Helvetica, Arial, sans-serif;
+$font-stack: Oswald, "Helvetica Neue", Helvetica, Arial, sans-serif;
 $oswald: Oswald, "Helvetica Neue", Helvetica, Arial, sans-serif;
 $oswald-light: Oswald-Light, Oswald, "Helvetica Neue", Helvetica, Arial, sans-serif;
 $oswald-bold: Oswald-Bold, Oswald, "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -20,7 +20,7 @@ $friends-card-background-color: #e9e4ca;
 $friends-panels-label-text-color: #e9e4ca;
 $friends-panels-label-button-color: #dbd3ab;
 $friends-panel-background-color: #e9e4ca;
-$friends-panel-background-transparent: rgba(233,228,202,0);
+$friends-panel-background-transparent: rgba(233, 228, 202, 0);
 $friends-panel-label-color: #f3f2ea;
 
 // For displaying other users
@@ -34,7 +34,7 @@ $recipes-card-background-color: #f9f8f4;
 $recipes-panels-label-text-color: #dfdfdf;
 $recipes-panels-label-button-color: #dfdfdf;
 $recipes-panel-background-color: #d8dde0;
-$recipes-panel-background-transparent: rgba(216,221,224,0);
+$recipes-panel-background-transparent: rgba(216, 221, 224, 0);
 $recipes-panel-label-color: #e5ebef;
 
 $lists-navtab-background-color: #dbe0dd;
@@ -43,20 +43,20 @@ $lists-card-background-color: #d0dbd2;
 $lists-panels-label-text-color: #e9e4ca;
 $lists-panels-label-button-color: #94b79a;
 $lists-panel-background-color: #dbe0dd;
-$lists-panel-background-transparent: rgba(219,224,221,0);
+$lists-panel-background-transparent: rgba(219, 224, 221, 0);
 $lists-panel-label-color: #e9eeea;
 
 $feeds-navtab-background-color: #e7dfd6;
 $feeds-navtab-text-color: #de8822;
 $feeds-panel-background-color: #e7dfd6;
-$feeds-panel-background-transparent: rgba(247,223,214,0);
+$feeds-panel-background-transparent: rgba(247, 223, 214, 0);
 $feeds-panel-label-color: #f5f2ee;
 
 $utensils-navtab-background-color: #dcdbdc;
 $utensils-navtab-text-color: #816887;
 
 // Color for the user card and panels
-$user-color:  #EDDAD7;
+$user-color: #EDDAD7;
 
 @import url(https://fonts.googleapis.com/css?family=Archivo+Narrow:700,400);
 @import 'bootstrap_amendments';
@@ -84,12 +84,12 @@ body {
   font-family: $font-stack;
   height: 100%;
   margin: 0;
-  padding:0;
+  padding: 0;
   font-size: 150%;
   letter-spacing: 1px;
 }
 
-.panels{
+.panels {
   height: 100vh;
   section {
     overflow: hidden;
@@ -97,7 +97,7 @@ body {
     position: relative;
     font-family: Oswald, sans-serif;
   }
-  .panel-one { 
+  .panel-one {
     background-image: image-url("rp-homepage-2.jpg");
     background-position: center center;
     background-repeat: no-repeat;
@@ -105,20 +105,20 @@ body {
     background-size: cover;
     height: 100vh;
   }
-  .panel-two{
+  .panel-two {
     background-color: #7c966a;
     height: 100vh;
   }
-  .panel-three{
+  .panel-three {
     background-color: #4c7c99;
     height: 100vh;
   }
-  .panel-four{
+  .panel-four {
     background-color: #dbc046;
     height: 100vh;
   }
-  p{
-    &.panel-title{
+  p {
+    &.panel-title {
       top: 10%;
       font-size: 230px;
       text-transform: uppercase;
@@ -127,14 +127,14 @@ body {
       margin: 0 30px;
       line-height: 1;
     }
-    &.panel-subtitle{
+    &.panel-subtitle {
       font-size: 50px;
       color: rgba(255, 255, 255, 0.32);
       letter-spacing: 2px;
       margin: 0 40px;
       line-height: 1;
     }
-    &.panel-description{
+    &.panel-description {
       font-size: 27px;
       color: rgba(255, 255, 255, 1);
       font-weight: 400;
@@ -143,7 +143,7 @@ body {
       position: absolute;
       line-height: 1;
     }
-    &.panel-description-long{
+    &.panel-description-long {
       font-size: 27px;
       color: rgba(255, 255, 255, 1);
       font-weight: 400;
@@ -169,7 +169,7 @@ div.card {
   border-radius: 8px;
 }
 
-.open > .dropdown-toggle{
+.open > .dropdown-toggle {
   background-color: #fff;
 }
 
@@ -184,13 +184,13 @@ span.caret {
   display: none;
 }
 
-.glyphicon.glyphicon-cog{
+.glyphicon.glyphicon-cog {
   content: image-url("rp-measuring-spoons.png");
 }
 
 //contents of pages
 .container {
-  margin-top:200px;
+  margin-top: 200px;
   padding-top: 10px;
   background-color: $page-background-color;
   &.top {
@@ -214,7 +214,6 @@ span.caret {
   }
 }
 
-
 div.filter-element {
   width: 500px;
   z-index: 998;
@@ -226,14 +225,14 @@ div.filter-element {
   }
 }
 
-.tag-filter-title{
+.tag-filter-title {
   font-family: Oswald, sans-serif;
   text-transform: lowercase;
 }
 
 // .simple_form label {
-  // float: left;
-  // margin: 8px 0 5px;
+// float: left;
+// margin: 8px 0 5px;
 // }
 
 .resource-element {
@@ -262,89 +261,98 @@ div.filter-element {
   }
 }
 
-  // Cozies up to the tags selector above it
-  div.form-group {
-    &.boolean {
-      margin-left: 30px;
-      &.list_pullin {
-        margin-top: 5px;
-      }
-    }
-    &.radio_buttons {
-      margin-left: 10px;
-      margin-bottom: 10px;
+// Cozies up to the tags selector above it
+div.form-group {
+  &.boolean {
+    margin-left: 30px;
+    &.list_pullin {
+      margin-top: 5px;
     }
   }
-
-  form.edit_user {
-    div.row.bottom {
-      margin-top: 10px;
-    }
+  &.radio_buttons {
+    margin-left: 10px;
+    margin-bottom: 10px;
   }
+}
 
-  div.token-input-dropdown-facebook {
-    font: 14px arial, sans-serif;
+form.edit_user {
+  div.row.bottom {
+    margin-top: 10px;
   }
+}
 
-  .top_right_corner {
-    position: absolute;
-    z-index: 1000;
-    top: 0px;
-    right: 0px;
-  }
+div.token-input-dropdown-facebook {
+  font: 14px arial, sans-serif;
+}
 
-  div.prompt {
-    font: 18px arial, sans-serif;
-    font-weight: bold;
-    margin: 20px 0px 15px 10px;
-    padding: 0px;
-  }
+.top_right_corner {
+  position: absolute;
+  z-index: 1000;
+  top: 0px;
+  right: 0px;
+}
 
-  .hd1 {
-    font: 22px arial, sans-serif;
-    font-weight: bold;
-  }
+div.prompt {
+  font: 18px arial, sans-serif;
+  font-weight: bold;
+  margin: 20px 0px 15px 10px;
+  padding: 0px;
+}
 
-  div.stream-results {
-    margin-top: 20px;
-  }
+.hd1 {
+  font: 22px arial, sans-serif;
+  font-weight: bold;
+}
 
-  div.stream-filter-field {
-    display: inline-block;
-    vertical-align: bottom;
-    margin-bottom: 0px
-  }
+div.stream-results {
+  margin-top: 20px;
+}
 
-  div.masonry-item {
-    img.beachball {
-      margin: 50px 96px;
-    }
-  }
+div.stream-filter-field {
+  display: inline-block;
+  vertical-align: bottom;
+  margin-bottom: 0px
+}
 
-  hr.menu {
-    margin-top: 5px;
-    margin-bottom: 5px;
+div.masonry-item {
+  img.beachball {
+    margin: 50px 96px;
   }
+}
 
-  div.inline-text-area {
-    width: 300px;
-    display: inline-block;
-    textarea {
-	width: 100%;
-    }
-  }
+hr.menu {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
 
-  div.inline-text-field {
-    width: auto;
-    display: inline-block;
+div.inline-text-area {
+  width: 300px;
+  display: inline-block;
+  textarea {
+    width: 100%;
   }
+}
 
-  div.inline-submit-button {
-    width: auto;
-    display: inline-block;
-    vertical-align: top;
-    margin-top: 9px;
-  }
+div.inline-text-field {
+  width: auto;
+  display: inline-block;
+}
+
+div.inline-submit-button {
+  width: auto;
+  display: inline-block;
+  vertical-align: top;
+  margin-top: 9px;
+}
+
+div.vote-div {
+  width: auto;
+  display: inline-block;
+  text-align: center;
+  font-family: Oswald;
+  letter-spacing: 2px;
+  color: #dbc046;
+}
 
 .rotate {
   /* Safari */
@@ -376,6 +384,7 @@ div.filter-element {
     font-weight: lighter;
   }
 }
+
 .ow-light {
   font-family: $oswald-light;
   font-size: 24pt;
@@ -386,6 +395,7 @@ div.filter-element {
     font-weight: lighter;
   }
 }
+
 .ow-bold {
   font-family: $oswald-bold;
   font-size: 24pt;
@@ -396,6 +406,7 @@ div.filter-element {
     font-weight: lighter;
   }
 }
+
 .archivo {
   font-family: $archivo;
   font-size: 24pt;
@@ -406,6 +417,7 @@ div.filter-element {
     font-weight: 400;
   }
 }
+
 .arch-bold {
   font-family: $archivo;
   font-size: 24pt;

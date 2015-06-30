@@ -4,15 +4,13 @@
         <div class="col-md-6 col-sm-8 left-matter">
           <div class="title">
             <%= link_to decorator.title, decorator.url, class: "title-link", data: {report: polymorphic_path([:touch, decorator.object])} %>
-            <div class="title-glyph in-flow">
-              <%= collectible_collect_icon decorator %>
-            </div>
+            <%= collectible_collect_icon decorator, "lg" %>
           </div>
           <div class="source">
             source: <%= link_to decorator.sourcename, decorator.sourcehome, class: "source-link" %>
           </div>
         </div>
-        <div class="col-md-6>
+        <div class="col-md-6">
           <%= collectible_vote_buttons decorator.object %>
         </div>
       </div>
@@ -33,7 +31,7 @@
               <% end %>
             </div>
           </td>
-          <td valign="top" class="content-strip">
+          <td valign="top" class="upper-content">
             <div class="tags">
               <%= presenter.present_field_wrapped "tags" %>
             </div>
@@ -47,8 +45,8 @@
           </td>
         </tr>
         <tr>
-          <td valign="bottom" class="content-strip">
-            <%= collectible_share_button decorator %>
+          <td valign="bottom" class="lower-content">
+            <%= collectible_share_button decorator, "xl" %>
           </td>
         </tr>
       </table>

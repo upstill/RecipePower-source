@@ -23,11 +23,14 @@ module CollectibleHelper
     ["div.collectible-buttons##{dom_id decorator}", collectible_buttons_panel(decorator)]
   end
 
-  def collectible_collect_icon decorator, options={}
+  def collectible_collect_icon decorator, size = nil, options={}
+    if size.is_a? Hash
+      size, options = nil, size
+    end
     if current_user_or_guest.collected?(decorator.object)
-      sprite :check
+      sprite_glyph :check, size
     else
-      link_to_submit sprite(:plus), polymorphic_path([:collect, decorator.object]), options
+      link_to_submit sprite_glyph(:plus, size), polymorphic_path([:collect, decorator.object]), options
     end
   end
 
@@ -58,22 +61,23 @@ module CollectibleHelper
                     id title url picuri imgdata
                     element_id field_name human_name object_path tag_path
                     tagging_tag_data tagging_user_id )
-    button = template_link decorator, "tag-collectible", sprite_glyph(:tag, :inline), styling, options.merge(:mode => :modal, :attribs => decorator.data(attribs))
-    content_tag :div, button.html_safe, class: "tagger-link"
+    template_link decorator, "tag-collectible", sprite_glyph(:tag, "xl"), styling, options.merge(:mode => :modal, :attribs => decorator.data(attribs))
   end
 
   def collectible_edit_button entity, styling={}
-    # Include the styling options in the link path as one parameter, then pass them to the button function
     return unless permitted_to? :update, entity
     url = polymorphic_path entity, :action => :edit, styling: styling
-    button = button_to_submit sprite_glyph("edit-red", :inline), url, styling.merge(mode: :modal)
-    content_tag :div, button, class: "share-button"
+    button = button_to_submit sprite_glyph("edit-red"), url, styling.merge(mode: :modal)
+    content_tag :div, button, class: "edit-button"
   end
 
   # Define and return a share button for the collectible
-  def collectible_share_button entity, options={}
+  def collectible_share_button entity, size=nil, options={}
+    if size.is_a? Hash
+      size, options = nil, size
+    end
     entity = entity.object if entity.is_a? Draper::Decorator
-    button = button_to_submit "", new_user_invitation_path(shared_type: entity.class.to_s, shared_id: entity.id), "glyph-share", options.merge(mode: :modal)
+    button = button_to_submit "", new_user_invitation_path(shared_type: entity.class.to_s, shared_id: entity.id), "glyph-share", size, options.merge(mode: :modal)
     content_tag :div, button, class: "share-button"
   end
 
@@ -85,15 +89,14 @@ module CollectibleHelper
   end
 
   # Declare the voting buttons for a collectible
-  def collectible_vote_buttons entity # Style can be 'h' or 'bold', with more to come
+  def collectible_vote_buttons entity
     uplink = vote_link(entity, true)
     downlink = vote_link(entity, false)
     button_options = { method: "post", remote: true, class: "vote-button" }
     vote_state = Vote.current entity
-    up_button = button_to_submit "", uplink, "glyph-vote-up", "lg", button_options
-    down_button = button_to_submit "", downlink, "glyph-vote-down", "lg", button_options
+    up_button = button_to_submit "", uplink, "glyph-vote-up", "xl", button_options
+    down_button = button_to_submit "", downlink, "glyph-vote-down", "xl", button_options
     vote_counter = (entity.upvotes > 0 && entity.upvotes.to_s) || ""
-    count = content_tag :span, vote_counter, class: "vote-count"
     upcount =
         content_tag(:span,
                     "#{entity.upvotes.to_s}<br>".html_safe,
