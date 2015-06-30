@@ -62,63 +62,53 @@ module CollectibleHelper
     content_tag :div, button.html_safe, class: "tagger-link"
   end
 
-  def collectible_edit_button entity, div_class=nil, styling={}
+  def collectible_edit_button entity, styling={}
     # Include the styling options in the link path as one parameter, then pass them to the button function
     return unless permitted_to? :update, entity
-    if div_class.is_a? Hash
-      div_class, options = nil, div_class
-    end
     url = polymorphic_path entity, :action => :edit, styling: styling
     button = button_to_submit sprite_glyph("edit-red", :inline), url, styling.merge(mode: :modal)
-    div_class ? content_tag(:div, button, class: div_class) : button
+    content_tag :div, button, class: "share-button"
   end
 
-  # Define and return a share button for the collectible. If div_class is provided, enclose it in a div of that class
-  def collectible_share_button entity, div_class=nil, options={}
-    if div_class.is_a? Hash
-      div_class, options = nil, div_class
-    end
+  # Define and return a share button for the collectible
+  def collectible_share_button entity, options={}
     entity = entity.object if entity.is_a? Draper::Decorator
-    button = button_to_submit "", new_user_invitation_path(shared_type: entity.class.to_s, shared_id: entity.id), "glyph-share", "xl", options.merge(mode: :modal)
-    div_class ? content_tag(:div, button, class: div_class) : button
+    button = button_to_submit "", new_user_invitation_path(shared_type: entity.class.to_s, shared_id: entity.id), "glyph-share", options.merge(mode: :modal)
+    content_tag :div, button, class: "share-button"
   end
 
-  def collectible_list_button decorator, styling, options={}
+  def collectible_list_button decorator, options={}
     query = {}
     query[:access] = :all if response_service.admin_view?
     meth = method(decorator.klass.to_s.underscore.pluralize+"_path")
-    button_options = styling.slice(:button_size).merge options
-    button_to_submit "#{decorator.klass.to_s.pluralize} List", meth.call(query), button_options
+    button_to_submit "#{decorator.klass.to_s.pluralize} List", meth.call(query), options
   end
 
   # Declare the voting buttons for a collectible
-  def collectible_vote_buttons entity, styling={} # Style can be 'h' or 'bold', with more to come
-    styling[:style] ||= "h"
-    uplink = vote_link(entity, true, styling: styling)
-    downlink = vote_link(entity, false, styling: styling)
-    button_options = styling.slice(:button_size, :div_class).merge method: "post", remote: true, class: "vote-button"
+  def collectible_vote_buttons entity # Style can be 'h' or 'bold', with more to come
+    uplink = vote_link(entity, true)
+    downlink = vote_link(entity, false)
+    button_options = { method: "post", remote: true, class: "vote-button" }
     vote_state = Vote.current entity
     up_button = button_to_submit "", uplink, "glyph-vote-up", "lg", button_options
     down_button = button_to_submit "", downlink, "glyph-vote-down", "lg", button_options
     vote_counter = (entity.upvotes > 0 && entity.upvotes.to_s) || ""
-    count = content_tag :span, vote_counter, class: vote_count_class(styling[:style])
+    count = content_tag :span, vote_counter, class: "vote-count"
     upcount =
         content_tag(:span,
                     "#{entity.upvotes.to_s}<br>".html_safe,
-                    class: vote_count_class(styling[:style])) # if entity.upvotes > 0
+                    class: "vote-count") # if entity.upvotes > 0
     downcount =
         content_tag(:span,
                     "<br>#{entity.downvotes.to_s}".html_safe,
-                    class: vote_count_class(styling[:style])) # if entity.downvotes > 0
+                    class: "vote-count") # if entity.downvotes > 0
     left = content_tag :div, "#{upcount}#{up_button}".html_safe, class: "vote-div"
     right = content_tag :div, "#{down_button}#{downcount}".html_safe, class: "vote-div"
-    content_tag :div, (left+right).html_safe, class: vote_div_class(styling), id: dom_id(entity)
+    content_tag :div, (left+right).html_safe, class: "vote-buttons", id: dom_id(entity)
   end
 
   def vote_buttons_replacement entity
-    styling = params[:styling] || {}
-    styling[:style] ||= "h"
-    [ "div.#{vote_div_class styling.slice(:style)}#"+dom_id(entity), collectible_vote_buttons(entity, styling) ]
+    [ "div.vote-buttons#"+dom_id(entity), collectible_vote_buttons(entity) ]
   end
 
   # Sort out a suitable URL to stuff into an image thumbnail for a recipe, enclosing it in a div

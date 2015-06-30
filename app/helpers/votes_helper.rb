@@ -9,18 +9,18 @@ module VotesHelper
     { entity_type: entity.class.to_s.downcase, entity_id: entity.id, up: up }
   end
 
+=begin
   def vote_count_class style
     "vote-count" # "vote-count-"+style
   end
 
-=begin
   def vote_button_class state_to, state_now, style
     "vote-button glyphicon glyphicon-arrow-#{state_to} #{'active' if state_now && state_now==state_to}"
   end
-=end
 
   def vote_div_class styling
     styling[:div_class] # "vote-div-#{styling[:style]} #{styling[:div_class]}"
   end
+=end
 
 end
