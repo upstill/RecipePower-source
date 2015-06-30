@@ -52,19 +52,20 @@
       div.bottom-strip {
         position: absolute;
         bottom: 0;
+        left: 0;
+        right: 0;
         height: 3em;
-        width: 100%;
         font-size: 1.8em;
-        background: $recipes-panel-background-color;
+        background: $recipes-card-background-color;
         div.share-button {
           position: absolute;
-          margin: 3px;
+          margin: 0.4em;
           bottom: 0;
           left: 0;
         }
         div.vote-buttons {
           position: absolute;
-          margin: 3px;
+          margin: 0.4em;
           bottom: 0;
           right: 0;
           span.vote-count {
