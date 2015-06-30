@@ -66,7 +66,10 @@
           position: absolute;
           margin: 3px;
           bottom: 0;
-          left: 0;
+          right: 0;
+          span.vote-count {
+            font-size: 0.8em;
+          }
         }
       }
     }
