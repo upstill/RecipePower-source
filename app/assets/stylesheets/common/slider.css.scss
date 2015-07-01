@@ -59,13 +59,12 @@
         background: $recipes-card-background-color;
         div.share-button {
           position: absolute;
-          margin: 5px;
-          bottom: 0;
-          left: 0;
-          font-size: 1.5em;
+          bottom: 0em;
+          left: 0.3em;
+          font-size: 2em;
         }
         div.vote-buttons {
-          font-size: 1em;
+          font-size: 0.8em;
           position: absolute;
           margin: 0.4em;
           bottom: 0;

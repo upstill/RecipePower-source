@@ -32,6 +32,27 @@ div.card-item {
   div.share-button {
     font-size: 2em;
   }
+  div.title-glyph {
+    color: #ea8a7a;
+    height: 2em;
+    &.top-right {
+      font-size: 2.5em;
+      position: absolute;
+      top: 0.2em;
+      right: 0.2em;
+    }
+  }
+  div.source {
+    font-family: $oswald-light;
+    font-size: 1em;
+    padding: 0.6em 1em 0.2em 1.2em;
+    color: #999;
+    margin: 0em -1em;
+    a.source-link {
+      color: #77a2be;
+      letter-spacing: 1px;
+    }
+  }
   &.cardlet-item {
     position: relative;
     min-width: 200px;
@@ -43,6 +64,21 @@ div.card-item {
     font-size: 50%;
     div.source {
       border-bottom: 0.3em solid #b95454;
+      margin-bottom: 0.5em;
+    }
+    div.title-box {
+      // min-height: 3.6em;
+      // margin-bottom: 1em;
+      margin-top: 0.2em;
+      margin-right: 0.6em;
+      font-size: 2.1em;
+      font-family: $archivo;
+      font-weight: 700;
+      letter-spacing: 0.9px;
+      line-height: 1.2em;
+      a.title-link {
+        color: #4f4d4a;
+      }
     }
   }
   &.recipe-card {
@@ -62,26 +98,11 @@ div.card-item {
         float: right;
       }
     }
-    div.title-glyph {
-      color: #ea8a7a;
-      height: 2em;
-      &.top-right {
-        position: absolute;
-        top: 0.8em;
-        right: 0.5em;
-      }
-      &.in-flow {
-        display: inline-block;
-      }
-    }
     .title-bar {
       border-bottom: 0.3em solid #b95454;
       .left-matter {
         position: relative;
       }
-    }
-    div.title-box {
-      margin-right: 2em;
     }
     div.title {
       // min-height: 3.6em;
@@ -96,17 +117,6 @@ div.card-item {
       }
       a.title-link {
         color: #4f4d4a;
-      }
-    }
-    div.source {
-      font-family: $oswald-light;
-      font-size: 1em;
-      padding: 0.6em 1em 0.2em 1.2em;
-      color: #999;
-      margin: 0em -1em;
-      a.source-link {
-        color: #77a2be;
-        letter-spacing: 1px;
       }
     }
   }
