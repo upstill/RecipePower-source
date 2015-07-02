@@ -1,5 +1,2 @@
-<!--
-This is the default for summarizing an item in a panel: use the standard page rendering, without title.
-It can be over-ridden with an identically-named view in the item's view folder
--->
-<%= render "show_card", decorator: decorator %>
+<!--Standard page-rendering is to render the card for the item-->
+<%= render_item decorator, :card %>

@@ -247,6 +247,10 @@ end
 class ListsShowPresenter < FilteredPresenter
   @results_class_name = 'ListCache'
 
+  def results_cssclass
+    "recipes" # @entity_type || self.class.to_s
+  end
+
   def params_needed
     super << :entity_type
   end

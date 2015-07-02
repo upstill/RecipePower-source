@@ -1,0 +1,39 @@
+<!--The default contents for an entity is rendered with a @filtered_presenter-->
+<% if !defined?(@filtered_presenter) %>
+    <div style="visibility: hidden">
+      application/_show_contents: No filtered_presenter for <%= @decorator.dom_id %>.
+    </div>
+<% elsif !@filtered_presenter.results_class %>
+    <div style="visibility: hidden">
+      application/_show_contents: No results_class for filtered_presenter on <%= @decorator.dom_id %>.
+    </div>
+<% else %>
+    <%= querify_block class: "results-enclosure" do %>
+        <%# render @filtered_presenter.header_partial, title: title, comment: ((defined? comment) ? comment : "") %>
+        <div class="panels-query">
+          <div class="panels-label <%= @filtered_presenter.panel_label_class %>">
+            <div class="">RECIPES IN LIST<%# @filtered_presenter.panel_label %></div>
+          </div>
+          <div class="col-md-6 panels-search">
+            <%= @filtered_presenter.filter_field(
+                        rows: 1,
+                        autofocus: true,
+                        data: {:"on-add" => "RP.tagger.querify",
+                               :"on-delete" => "RP.tagger.querify",
+                               :hint => "", # "Search the collection by typing terms here",
+                               placeholder: "Seek and ye shall find...",
+                               :"no-results-text" => "No matching tag found; hit Enter to search with text"}) %>
+            <div class="panels-buttons">
+              <%= link_to_submit "RECENTLY VIEWED", "#", class: "panels-button soft-button #{@filtered_presenter.panel_button_class}" %>
+              <%= link_to_submit "EVERYTHING", "#", class: "panels-button soft-button #{@filtered_presenter.panel_button_class}" %>
+            </div>
+          </div>
+        </div>
+<!--
+        <%# @filtered_presenter.panel_partials do |entity_type, url| %>
+            <%# render "shared/panel", type: entity_type, url: url %>
+        <%# end %>
+-->
+        <%= render "shared/owned", type: @filtered_presenter.results_cssclass, url: assert_query(@filtered_presenter.results_path, entity_type: @filtered_presenter.results_cssclass, :item_mode => :masonry, :org => :newest) %>
+    <% end %>
+<% end %>
