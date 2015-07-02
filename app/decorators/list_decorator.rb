@@ -1,5 +1,5 @@
 require "templateer.rb"
-class ListDecorator < Draper::Decorator
+class ListDecorator < CollectibleDecorator
   include Templateer
   delegate_all
 
@@ -9,6 +9,35 @@ class ListDecorator < Draper::Decorator
 
   def sourcehome
     ""
+  end
+
+  def url
+    ""
+  end
+
+  def description fallback=false
+    @object.description.or_fallback {
+      case @object.name_tag.name
+        when "Keepers"
+          "Recipes that are clearly worthwhile."
+        when "Favorites"
+          "The best in my collection."
+        when "Now Cooking"
+          "Recipes in active rotation."
+      end
+    }
+  end
+
+  def notes fallback=false
+    @object.notes
+  end
+
+  def extract fieldname
+    case fieldname.downcase
+      when "url"
+        ""
+    end
+    super
   end
 
   # Define presentation-specific methods here. Helpers are accessed through

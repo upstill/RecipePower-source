@@ -244,6 +244,33 @@ class RecipesShowPresenter < FilteredPresenter
 
 end
 
+class ListsShowPresenter < FilteredPresenter
+  @results_class_name = 'ListCache'
+
+  def params_needed
+    super << :entity_type
+  end
+
+  def panel_partials &block
+    # ["recipes", "lists", "friends", "feeds" ].each do |et|
+    ["recipes"].each do |et|
+      block.call et, assert_query(results_path, entity_type: et, :item_mode => :slider, :org => :newest)
+    end
+  end
+
+  # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
+  def results_set &block
+    if @entity_type
+      block.call results_path, results_cssclass
+    else
+      ["recipes" ].each do |et|  # , "friends"
+        block.call assert_query(results_path, entity_type: et, item_mode: :masonry), et
+      end
+    end
+  end
+
+end
+
 # Present a list of items for a user
 class UserContentPresenter < FilteredPresenter
   attr_reader :entity_type

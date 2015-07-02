@@ -242,7 +242,7 @@ module ApplicationHelper
       localfile = 'jquery'
       version = Jquery::Rails::JQUERY_VERSION
     end
-    [ javascript_include_tag("//ajax.googleapis.com/ajax/libs/jquery/#{version}/jquery.min.js"),
+    [ # javascript_include_tag("//ajax.googleapis.com/ajax/libs/jquery/#{version}/jquery.min.js"),
       javascript_tag("window.jQuery || document.write(unescape('#{javascript_include_tag(localfile).gsub('<','%3C')}'))")
     ].join("\n").html_safe
   end

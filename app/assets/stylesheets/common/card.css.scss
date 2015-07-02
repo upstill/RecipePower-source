@@ -19,7 +19,7 @@ div.card-item {
   box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
   background-color: $recipes-card-background-color;
   font-family: $archivo;
-  margin-top: 20px;
+  margin-bottom: 2em;
   padding-bottom: 0.5em;
   div.vote-buttons {
     font-size: 1.2em;
@@ -107,16 +107,14 @@ div.card-item {
     div.title {
       // min-height: 3.6em;
       // margin-bottom: 1em;
-      margin-top: 0.2em;
+      font-family: Oswald, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      margin-top: 0.4em;
       font-size: 2.1em;
-      font-family: $archivo;
-      font-weight: 700;
-      letter-spacing: 0.9px;
+      font-weight: 200;
+      letter-spacing: 2px;
       line-height: 1.2em;
-      div.sprite-glyph {
-      }
       a.title-link {
-        color: #4f4d4a;
+        color: white;
       }
     }
   }
@@ -137,6 +135,43 @@ div.card-item {
   }
   &.user-card {
     background-color: $user-card-background-color;
+  }
+  &.list-card {
+    background-color: $lists-card-background-color;
+    color: #909090;
+    div.vote-buttons {
+      position: absolute;
+      top: 0;
+      right: 0.2em;
+    }
+    div.pic-inset {
+      margin: 2em;
+    }
+    span.owner-name {
+      font-size: 1.4em;
+    }
+    div.owner-pic {
+      width: 100%; // 8em;
+      // margin: 1em;
+    }
+    h3 {
+      color: white;
+      margin-top: 0.5em;
+      margin-bottom: 0em;
+    }
+    div.title {
+      // min-height: 3.6em;
+      // margin-bottom: 1em;
+      margin-top: 0.4em;
+      font-size: 3em;
+      font-family: $archivo;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      line-height: 1.2em;
+      a.title-link {
+        color: white;
+      }
+    }
   }
   div.pic-200w {
     width: 200px;
