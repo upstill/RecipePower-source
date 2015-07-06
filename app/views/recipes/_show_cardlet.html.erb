@@ -1,13 +1,13 @@
 <%= present decorator, current_user_or_guest do |presenter| %>
-    <div class="card-item cardlet-item <%= card_type if defined?(card_type) %>recipe-card">
+    <div class="card-item cardlet-item <%= "#{card_type}-card " if defined?(card_type) %>recipe-card">
       <table class="cardlet-table">
         <tr>
           <% if defined?(pic_mode) && pic_mode %>
-              <td class="pic-box">
-                <%= safe_image_div decorator, :site, class: "pic-box", fill_mode: pic_mode %>
-              </td>
+            <% if it = resizing_image_tag(decorator, :fallback => :site, class: "pic-box", fill_mode: pic_mode) %>
+              <td class="pic-box"><%= it %></td>
+            <% end %>
           <% end %>
-          <td valign="top" style="height: 100%;">
+          <td valign="top" style="position: relative; height: 100%;">
             <div class="title-glyph top-right">
               <%= collectible_collect_icon decorator %>
             </div>

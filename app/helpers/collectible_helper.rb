@@ -114,20 +114,18 @@ module CollectibleHelper
     [ "div.vote-buttons#"+dom_id(entity), collectible_vote_buttons(entity) ]
   end
 
-  # Sort out a suitable URL to stuff into an image thumbnail for a recipe, enclosing it in a div
-  # of the class given in options. The image will stretch either horizontally (fill_mode: "fixed-height")
-  # or vertically (fill_mode: "fixed-width") within the dimensions given by the enclosing div.
-  def safe_image_div decorator, fallback=:site, options = {}
-    if fallback.is_a? Hash
-      fallback, options = :site, fallback
-    end
-    fill_mode = options.delete(:fill_mode) || "fixed-width"
+  # Provide an image tag that resizes according to options[:fill_mode],
+  #   using a fallback as specified in options[:fallback] (normally :site)
+  # We give the tag an id according to the decorator, and an alt;
+  # Both of those may be explicitly provided with the options
+  def resizing_image_tag decorator, options={}
     begin
-      return if (url = decorator.imgdata(fallback)).blank?
-      content = image_with_error_recovery url,
-                                          alt: "Image Not Accessible",
-                                          id: (dom_id decorator),
-                                          class: fill_mode
+      if (url = decorator.imgdata(options[:fallback])).present?
+        options = { alt: "Image Not Accessible",
+                    id: (dom_id decorator),
+                    class: "#{options[:class]} #{options[:fill_mode] || 'fixed-width'}"}.merge(options.slice :id, :alt)
+        image_with_error_recovery url, options
+      end
     rescue Exception => e
       if url
         url = "data URL" if url =~ /^data:/
@@ -137,16 +135,28 @@ module CollectibleHelper
       content =
           "Error rendering image #{url.truncate(255)} from "+ (decorator ? "#{decorator.human_name} #{decorator.id}: '#{decorator.title}'" : "null #{decorator.human_name}")
       ExceptionNotification::Notifier.exception_notification(request.env, e, data: {message: content}).deliver
+      content
     end
+  end
 
-    style = case fill_mode
-              when "fixed-width"
-                "width: 100%; height: auto;"
-              when "fixed-height"
-                "width: auto; height: 100%;"
-            end
-    options[:style] = style if style
-    content_tag :div, link_to(content, decorator.url), options
+  # Sort out a suitable URL to stuff into an image thumbnail for a recipe, enclosing it in a div
+  # of the class given in options. The image will stretch either horizontally (fill_mode: "fixed-height")
+  # or vertically (fill_mode: "fixed-width") within the dimensions given by the enclosing div.
+  def safe_image_div decorator, fallback=:site, options = {}
+    if fallback.is_a? Hash
+      fallback, options = :site, fallback
+    end
+    fill_mode = options.delete(:fill_mode) || "fixed-width"
+    if image = resizing_image_tag(decorator, fallback: fallback, fill_mode: fill_mode)
+      style = case fill_mode
+                when "fixed-width"
+                  "width: 100%; height: auto;"
+                when "fixed-height"
+                  "width: auto; height: 100%;"
+              end
+      options[:style] = style if style
+      content_tag :div, link_to(image, decorator.url), options
+    end
   end
 
 end
