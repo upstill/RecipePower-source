@@ -24,6 +24,7 @@ div.card-item {
   box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
   background-color: $recipes-card-background-color;
   font-family: $archivo;
+  position: relative;
   &.row {
     margin: 0.5em;
   }
@@ -61,7 +62,6 @@ div.card-item {
     }
   }
   &.cardlet-item {
-    position: relative;
     min-width: 200px;
     padding: 1em;
     // height: 200px;

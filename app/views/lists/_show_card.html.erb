@@ -29,13 +29,13 @@
                       <h3>TAGS</h3>
                   <% end %>
                   <%= presenter.present_field_wrapped "tags" %>
-                    <h3>DESCRIPTION</h3>
-                    <p><%= decorator.description %></p>
-                    <% if (notes = decorator.notes(false)).present? %>
-                      <h3>NOTES</h3>
-                      <p><%= notes %></p>
-                    <% end %>
                 </div>
+                <h3>DESCRIPTION</h3>
+                <p><%= decorator.description %></p>
+                <% if (notes = decorator.notes(false)).present? %>
+                    <h3>NOTES</h3>
+                    <p><%= notes %></p>
+                <% end %>
               </div>
             </div>
           </td>
