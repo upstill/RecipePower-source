@@ -4,10 +4,10 @@
         <tr>
           <% if defined?(pic_mode) && pic_mode %>
             <% if it = resizing_image_tag(decorator, :fallback => :site, class: "pic-box", fill_mode: pic_mode) %>
-              <td class="pic-box"><%= it %></td>
+              <td class="pic-box" valign="top"><%= it %></td>
             <% end %>
           <% end %>
-          <td valign="top" style="position: relative; height: 100%;">
+          <td valign="top" style="position: relative; padding-bottom: 3em;">
             <div class="title-glyph top-right">
               <%= collectible_collect_icon decorator %>
             </div>
