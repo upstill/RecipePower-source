@@ -8,10 +8,10 @@
       application/_show_contents: No results_class for filtered_presenter on <%= @decorator.dom_id %>.
     </div>
 <% else %>
-    <%= querify_block class: "results-enclosure" do %>
+    <%= querify_block class: "results-enclosure card-item list-card" do %>
         <%# render @filtered_presenter.header_partial, title: title, comment: ((defined? comment) ? comment : "") %>
-        <div class="panels-query">
-          <div class="panels-label <%= @filtered_presenter.panel_label_class %>">
+        <div class="panels-query row">
+          <div class="panels-label col-md-6 <%= @filtered_presenter.panel_label_class %>">
             <div class="">RECIPES IN LIST<%# @filtered_presenter.panel_label %></div>
           </div>
           <div class="col-md-6 panels-search">

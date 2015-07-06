@@ -13,13 +13,20 @@ a.tablink {
   color: #2c7191;
 }
 
+div.results-card {
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
 div.card-item {
   -webkit-box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
   -moz-box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
   box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
   background-color: $recipes-card-background-color;
   font-family: $archivo;
-  margin-bottom: 2em;
+  &.row {
+    margin: 0.5em;
+  }
   padding-bottom: 0.5em;
   div.vote-buttons {
     font-size: 1.2em;
@@ -107,7 +114,7 @@ div.card-item {
       width: 150px;
     }
     &.masonry-card {
-      height: 150px;
+      // height: 150px;
       td.pic-box {
         width: 145px;
         padding-right: 5px;
@@ -189,6 +196,7 @@ div.card-item {
     }
     h3 {
       color: white;
+      font-size: 1.5em;
       margin-top: 0.5em;
       margin-bottom: 0em;
     }
