@@ -80,6 +80,16 @@ div.card-item {
         color: #4f4d4a;
       }
     }
+    td.pic-box {
+      width: 150px;
+    }
+    &.masonry-card {
+      height: 150px;
+      td.pic-box {
+        width: 140px;
+        margin: 5px;
+      }
+    }
   }
   &.recipe-card {
     background-color: $recipes-card-background-color;
