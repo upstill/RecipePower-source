@@ -1,4 +1,4 @@
-<% if @filtered_presenter.entity_type %>
+<% if @filtered_presenter.respond_to?(:entity_type) && @filtered_presenter.entity_type %>
     <%= render_item :collection %>
 <% else %>
     <%= render_item :card %>

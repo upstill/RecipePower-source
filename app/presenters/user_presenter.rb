@@ -17,7 +17,7 @@ class UserPresenter < CardPresenter
     if is_viewer? and with_form
       with_format("html") { render "form_image", user: user }
     else
-      super
+      super()
     end
   end
 
