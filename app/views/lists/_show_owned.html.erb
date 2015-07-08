@@ -34,6 +34,6 @@
             <%# render "shared/panel", type: entity_type, url: url %>
         <%# end %>
 -->
-        <%= render "shared/owned", type: @filtered_presenter.results_cssclass, url: assert_query(@filtered_presenter.results_path, entity_type: @filtered_presenter.results_cssclass, :item_mode => :masonry, :org => :newest) %>
+        <%= render "shared/owned", type: @filtered_presenter.results_type, url: assert_query(@filtered_presenter.results_path, entity_type: @filtered_presenter.results_type, :item_mode => :masonry, :org => :newest) %>
     <% end %>
 <% end %>

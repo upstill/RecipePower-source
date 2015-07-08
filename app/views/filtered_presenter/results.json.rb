@@ -1,4 +1,4 @@
-type = @filtered_presenter.results_cssclass
+type = @filtered_presenter.results_type
 item_mode = @filtered_presenter.item_mode
 {
     replacements: [

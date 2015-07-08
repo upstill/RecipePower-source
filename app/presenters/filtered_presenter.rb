@@ -286,7 +286,7 @@ class UserContentPresenter < FilteredPresenter
   # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
   def results_set &block
     if @entity_type
-      block.call results_path, results_cssclass
+      block.call results_path, @entity_type
     else
       ["recipes", "lists", "friends", "feeds" ].each do |et|
          block.call assert_query(results_path, entity_type: et, item_mode: :slider), et
@@ -294,7 +294,7 @@ class UserContentPresenter < FilteredPresenter
     end
   end
 
-  def results_cssclass
+  def results_type
     (@entity_type || self.class.to_s) # .extensions_to_classes
   end
 
