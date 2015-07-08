@@ -1,5 +1,5 @@
 <% if @filtered_presenter.respond_to?(:entity_type) && @filtered_presenter.entity_type %>
-    <%= render_item :collection %>
+    <%= render_item :owned %>
 <% else %>
     <%= render_item :card %>
     <%= render_item :comments %>
