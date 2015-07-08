@@ -1,0 +1,160 @@
+div.collection-header {
+  div.collection-nav {
+    padding: 0.5em;
+    margin: 0.8em;
+    &.recipes {
+      background: $recipes-panel-background-color;
+    }
+    &.cookmates {
+      background: #e9e3c9; // $friends-panel-background-color;
+    }
+    &.lists {
+      background: #D0DbD2; // $lists-panel-background-color;
+    }
+    &.feeds {
+      background: $feeds-panel-background-color;
+    }
+    div.navlink {
+      color: #979693;
+      fill: #979693;
+      font-family: $oswald-light;
+      font-size: 1.5em;
+      font-weight: 700;
+    }
+    div.collection-label {
+      font-family: $oswald;
+      letter-spacing: 2px;
+      font-size: 2em;
+      font-weight: 200;
+      margin-top: 0.4em;
+      margin-bottom: 0.4em;
+      &.recipes {
+        color: $recipes-navtab-text-color;
+      }
+      &.lists {
+        color: #1d6a2b; // $lists-navtab-text-color;
+      }
+      &.cookmates {
+        color: #dfc96a; // $friends-navtab-text-color; // #dfca6a;
+      }
+      &.feeds {
+        color: $feeds-navtab-text-color;
+      }
+    }
+    div.or-see {
+
+    }
+    div.search {
+
+    }
+    div.filters {
+
+    }
+  }
+  div.user-nav {
+    min-height: 8em;
+    margin-top: 0.8em;
+    margin-bottom: 0.8em;
+    background: $friends-card-background-color;
+    &.viewer-card {
+      background-color: $viewer-card-background-color;
+    }
+    &.friend-card {
+      background-color: $friends-card-background-color;
+    }
+    div.avatar {
+      width: 150px;
+      height: auto;
+      // margin: 0.5em;
+      padding: 0.5em;
+      border: 1px solid green;
+    }
+    div.right-matter {
+      border: 1px solid green;
+      div.nav-top {
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+        margin-left: auto;
+        margin-right: auto;
+        border: 1px solid red;
+      }
+      div.nav-bottom {
+        position: relative;
+        margin-left: auto;
+        margin-right: auto;
+        width: 11em;
+        height: 5em;
+        .result-link {
+          font-size: 1.2em;
+          &.collection {
+            font-size: 1.1em;
+            color: #d0d0d0;
+          }
+          &.recipes {
+            color: $recipes-navtab-text-color;
+          }
+          &.lists {
+            color: $lists-navtab-text-color;
+          }
+          &.cookmates {
+            color: $friends-navtab-text-color; // #dfca6a;
+          }
+          &.feeds {
+            color: $feeds-navtab-text-color;
+          }
+        }
+        div.ul {
+          position: absolute;
+          right: 40%;
+          bottom: 50%;
+          padding-right: 0.3em;
+          padding-bottom: 0.2em;
+          // margin-top: -0.5em;
+          // margin-left: -0.5em;
+          // border-right: 1px solid black;
+          // border-bottom: 1px solid black;
+        }
+        div.bl {
+          position: absolute;
+          right: 40%;
+          top: 50%;
+          padding-right: 0.3em;
+          padding-top: 0.2em;
+          // margin-bottom: -0.5em;
+          // border-right: 1px solid black;
+        }
+        div.ur {
+          position: absolute;
+          left: 60%;
+          bottom: 50%;
+          padding-left: 0.3em;
+          padding-bottom: 0.2em;
+          // margin-right: -0.5em;
+          // border-bottom: 1px solid black;
+        }
+        div.br {
+          position: absolute;
+          left: 60%;
+          top: 50%;
+          padding-left: 0.3em;
+          padding-top: 0.2em;
+        }
+        div.half-width {
+          position: absolute;
+          top: 20%;
+          bottom: 20%;
+          width: 60%;
+          border-right: 2px solid white;
+        }
+        div.half-height {
+          position: absolute;
+          left: 5%;
+          right: 5%;
+          top: 0;
+          height: 50%;
+          border-bottom: 2px solid white;
+        }
+      }
+    }
+  }
+}

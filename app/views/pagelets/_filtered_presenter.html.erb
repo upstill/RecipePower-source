@@ -1,3 +1,7 @@
-<%= render_item :card %>
-<%= render_item :comments %>
-<%= render_item :owned %>
+<% if @filtered_presenter.entity_type %>
+    <%= render_item :collection %>
+<% else %>
+    <%= render_item :card %>
+    <%= render_item :comments %>
+    <%= render_item :owned %>
+<% end %>

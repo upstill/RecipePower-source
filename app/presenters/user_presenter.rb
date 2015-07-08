@@ -12,8 +12,9 @@ class UserPresenter < CardPresenter
     image_path "default-avatar-128.png"
   end
 
-  def card_avatar
-    if is_viewer?
+  # Present the user's avatar, optionally with a form for uploading the image (if they're the viewer)
+  def card_avatar with_form=false
+    if is_viewer? and with_form
       with_format("html") { render "form_image", user: user }
     else
       super

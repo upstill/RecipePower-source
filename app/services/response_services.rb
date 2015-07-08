@@ -85,7 +85,12 @@ class ResponseServices
   end
 
   # Modify a path to match the current request, asserting other options as provided
-  def decorate_path path, options={}
+  # If path is not provided, resort to the current path
+  def decorate_path path=nil, options={}
+    if path.is_a? Hash
+      path, options = nil, path
+    end
+    path ||= @request.url
     assert_query path, redirect_params( options )
   end
 

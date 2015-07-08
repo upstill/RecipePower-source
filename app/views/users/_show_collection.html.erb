@@ -1,0 +1,48 @@
+<div class="row collection-header">
+  <div class="col-md-7 collection-nav <%= @filtered_presenter.entity_type %>">
+    <div class="row">
+      <div class="col-md-12 navlink">
+        <%= sprite_glyph :"send-left", "lg" %>&nbsp;[last page]
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 collection-label <%= @filtered_presenter.entity_type %>">
+        <%= "#{@user.polite_name}'s #{@filtered_presenter.entity_type}".downcase %>
+      </div>
+      <div class="col-md-6 or-see">
+        OR-SEE buttons go here
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 search">
+        search box goes here
+      </div>
+      <div class="col-md-6 filters">
+        filters go here
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 user-nav <%= object_display_class @user %>-card">
+    <div class="row">
+      <div class="col-md-5 avatar">
+        <%= safe_image_div @decorator %>
+      </div>
+      <div class="col-md-7 right-matter">
+        <div class="nav-top">
+          User nav buttons go here
+        </div>
+        <div class="nav-bottom">
+          <div class="half-height"></div>
+          <div class="half-width"></div>
+          <div class="ul"><%= link_to_submit "COLLECTION", response_service.decorate_path(entity_type: nil), class: "result-link collection" %> </div>
+          <% divs = %w{ bl ur br } %>
+          <% (%w{ cookmates recipes lists feeds } - [@filtered_presenter.entity_type]).each do |what| %>
+              <div class="<%= divs.shift %>">
+                <%= link_to_submit what.upcase, response_service.decorate_path(entity_type: what), class: "result-link #{what}" %>
+              </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
