@@ -1,4 +1,4 @@
-<%= querify_block url, class: "results-card #{type}", autoload: true do %>
+<%= querify_block url, class: "results-card #{type.extensions_to_classes}", autoload: true do %>
     <div class="results-content">
       <div class="results-box">
         <%= panel_results_placeholder type %>

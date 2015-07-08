@@ -57,6 +57,14 @@
             </div>
           </div>
         </div>
-        <%= render "shared/owned", type: @filtered_presenter.results_cssclass, url: assert_query(@filtered_presenter.results_path, entity_type: @filtered_presenter.results_cssclass, :item_mode => :masonry, :org => :newest) %>
+        <% %w{ owned collected contributed }.each do |subtype| %>
+            <% @filtered_presenter.subtype = subtype %>
+            <%= render "shared/owned",
+                       type: @filtered_presenter.entity_type,
+                       url: assert_query(@filtered_presenter.results_path,
+                                         entity_type: @filtered_presenter.entity_type,
+                                         :item_mode => :masonry,
+                                         :org => :newest) %>
+        <% end %>
     <% end %>
 <% end %>

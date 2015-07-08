@@ -295,7 +295,16 @@ class UserContentPresenter < FilteredPresenter
   end
 
   def results_cssclass
-    @entity_type || self.class.to_s
+    (@entity_type || self.class.to_s) # .extensions_to_classes
+  end
+
+  # The subtype comes in, and is stored, as an extension on the type
+  def subtype= st
+    @entity_type = @entity_type.sub(/\..*$/, '') + ".#{st}"
+  end
+
+  def subtype
+    (md = @entity_type.match(/\.(.*)$/)) && md[1]
   end
 end
 
