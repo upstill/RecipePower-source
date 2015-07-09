@@ -476,6 +476,11 @@ class UserCollectionCache < RcprefCache
 
 end
 
+# Provides the collected entities of the given @entity_type
+class UserAssociatedEntitiesCache < UserCollectionCache
+
+end
+
 # An IntegersCache presents the default ResultsCache behavior: no scope, no cache, degenerate partition producing successive integers
 class IntegersCache < ResultsCache
   def itemscope

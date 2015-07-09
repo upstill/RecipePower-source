@@ -64,10 +64,18 @@ class FilteredPresenter
 
     @title = response_service.title
     # FilteredPresenters don't always have results panels
-    if rcn = self.class.instance_variable_get(:"@results_class_name")
-      @results_class = rcn.constantize
-      @stream_presenter = StreamPresenter.new sessid, request_path, @results_class, user_id, response_service.admin_view?, querytags, params
+    if results_class
+      @stream_presenter = StreamPresenter.new sessid, request_path, results_class, user_id, response_service.admin_view?, querytags, params
     end
+  end
+
+  def results_class
+    @results_class ||= (rcn = self.class.instance_variable_get :"@results_class_name") && rcn.constantize
+  end
+
+  # These elements go into the standard page for a presenter
+  def page_elements
+    [ :card, :comments, :owned ]
   end
 
   # Provide a tokeninput field for specifying tags, with or without the ability to free-tag
@@ -95,11 +103,11 @@ class FilteredPresenter
 
   # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
   def results_set &block
-    block.call results_path, results_cssclass
+    block.call results_path, results_type
   end
 
   # This is the class of the results container
-  def results_cssclass
+  def results_type
     @results_class || self.class
   end
 
@@ -213,7 +221,7 @@ class SearchIndexPresenter < FilteredPresenter
     super << :entity_type
   end
 
-  def results_cssclass
+  def results_type
     @entity_type || self.class.to_s
   end
 
@@ -247,7 +255,7 @@ end
 class ListsShowPresenter < FilteredPresenter
   @results_class_name = 'ListCache'
 
-  def results_cssclass
+  def results_type
     "recipes" # @entity_type || self.class.to_s
   end
 
@@ -265,7 +273,7 @@ class ListsShowPresenter < FilteredPresenter
   # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
   def results_set &block
     if @entity_type
-      block.call results_path, results_cssclass
+      block.call results_path, results_type
     else
       ["recipes" ].each do |et|  # , "friends"
         block.call assert_query(results_path, entity_type: et, item_mode: :masonry), et
@@ -295,7 +303,64 @@ class UserContentPresenter < FilteredPresenter
   end
 
   def results_type
-    (@entity_type || self.class.to_s) # .extensions_to_classes
+    (@entity_type || self.class.to_s)
+  end
+end
+
+class UsersAssociatedPresenter < UserContentPresenter
+
+  # The page for elements associated with a user has its own view
+  def page_elements
+    [ :associated ]
+  end
+
+  def results_class
+    rcname = "UserAssociatedEntitiesCache" ||
+        case @entity_type
+          when "recipes"
+          when "lists"
+            %w{ owned collected contributed }
+          when "friends"
+          when "feeds"
+        end
+    rcname && rcname.constantize
+  end
+
+  # Define the URL for each subtype (if any) vectoring off of this @result_type
+  def results_set &block
+    if subtypes =
+        case @entity_type
+          when "recipes"
+          when "lists"
+            # %w{ owned collected contributed }
+          when "friends"
+          when "feeds"
+          when nil
+            %w{ recipes lists friends feeds }
+        end
+      subtypes = subtypes.collect { |st| "#{@entity_type}.#{st}" } if @entity_type
+    else
+      subtypes = [ @entity_type ]
+    end
+    subtypes.each do |subtype|
+      block.call assert_query(results_path, entity_type: subtype, item_mode: :masonry), subtype
+    end
+  end
+
+  def title_for subtype
+    subtype.gsub('.', ' ') + ' ' +
+        case subtype
+          when "recipes"
+            "collected by "
+          when "lists.contributed"
+            "to by "
+          when "friends"
+            "of "
+          when "feeds"
+            "followed by "
+          else
+            "by "
+        end + @stream_presenter.results.user.salutation
   end
 
   # The subtype comes in, and is stored, as an extension on the type
@@ -422,7 +487,7 @@ class TagsTaggeesPresenter < FilteredPresenter
 
   # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
   def results_set &block
-    block.call results_path, results_cssclass
+    block.call results_path, results_type
   end
 
 end

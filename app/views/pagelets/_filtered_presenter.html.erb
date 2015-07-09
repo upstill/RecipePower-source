@@ -1,7 +1,3 @@
-<% if @filtered_presenter.respond_to?(:entity_type) && @filtered_presenter.entity_type %>
-    <%= render_item :owned %>
-<% else %>
-    <%= render_item :card %>
-    <%= render_item :comments %>
-    <%= render_item :owned %>
+<% @filtered_presenter.page_elements.each do |element| %>
+    <%= render_item element %>
 <% end %>

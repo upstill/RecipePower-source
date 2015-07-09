@@ -87,6 +87,7 @@ RP::Application.routes.draw do
   get 'users/:id/recent' => 'users#recent', :as => "user_recent"
   get 'users/:id/recent' => 'users#recent', :as => "user_root"
   get 'users/:id/collection' => 'users#collection', :as => "user_collection"
+  get 'users/:id/associated' => 'users#associated', :as => "user_associated"
   get 'users/:id/biglist' => 'users#biglist', :as => "user_biglist"
   # get 'users/:id/show' => 'users#show'
   resources :users, :except => [:index, :create] do

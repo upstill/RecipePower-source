@@ -57,14 +57,12 @@
             </div>
           </div>
         </div>
-        <% %w{ owned collected contributed }.each do |subtype| %>
-            <% @filtered_presenter.subtype = subtype %>
-            <%= render "shared/owned",
-                       type: @filtered_presenter.entity_type,
-                       url: assert_query(@filtered_presenter.results_path,
-                                         entity_type: @filtered_presenter.entity_type,
-                                         :item_mode => :masonry,
-                                         :org => :newest) %>
+        <% @filtered_presenter.results_set do |url, subtype| %>
+            <%# render "shared/panel", type: subtype, url: url %>
+            <%= render "shared/associated",
+                       title: @filtered_presenter.title_for(subtype),
+                       type: subtype,
+                       url: assert_query(url, :item_mode => :masonry, :org => :newest) %>
         <% end %>
     <% end %>
 <% end %>

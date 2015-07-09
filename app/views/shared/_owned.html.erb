@@ -1,4 +1,7 @@
 <%= querify_block url, class: "results-card #{type.extensions_to_classes}", autoload: true do %>
+    <% if defined?(title) %>
+        <div class="results-title <%= type.extensions_to_classes %>"><%= title %></div>
+    <% end %>
     <div class="results-content">
       <div class="results-box">
         <%= panel_results_placeholder type %>
