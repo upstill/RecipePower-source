@@ -21,9 +21,13 @@ div.results-card {
 div.associated-card {
   .associated-title {
     font-size: 2em;
+    margin: 0.5em;
     &.lists {
       color: #66996f;
     }
+  }
+  div.results-box {
+    padding: 0.3em;
   }
 }
 
