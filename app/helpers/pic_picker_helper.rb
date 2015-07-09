@@ -72,8 +72,8 @@ module PicPickerHelper
               src="#{img_url_display}"
               style="width:100%; height: auto"
               onerror="onImageError(this);"
-              data-emptyurlfallback="/assets/NoPictureOnFile.png"
-              data-bogusurlfallback="/assets/BadPicURL.png">
+              data-emptyurlfallback="#{ image_path 'NoPictureOnFile.png'}"
+              data-bogusurlfallback="#{ image_path 'BadPicURL.png'}">
          <input type="hidden"
                 id="#{input_id}"
                 name="#{input_name}"

@@ -2,7 +2,7 @@
 <% inviter_name = @resource.invitation_issuer %>
 <% @decorator = @resource.shared.decorate %>
 
-<%= (inviter_name || "Someone").split(/s/).first %> says: Look what I found on RecipePower (http://www.recipepower.com)
+<%= (inviter_name || "Someone").split(/s/).first %> says: Look what I found on RecipePower (<% rp_url %>)
 
 <% splitstr(@resource.invitation_message, 72).each do |line| %>
     <%= strip_tags line %>

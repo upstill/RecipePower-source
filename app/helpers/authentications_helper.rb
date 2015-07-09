@@ -9,7 +9,7 @@ module AuthenticationsHelper
     if origin
       query_params[:origin] = '"' + URI::encode( response_service.decorate_path( origin )) + '"'
     end
-    auth_url = assert_query "#{root_link}/auth/"+svc_lower, query_params
+    auth_url = assert_query "#{rp_url '/auth/'+svc_lower}", query_params
 
     css_class = "auth_provider"
     css_class += " small" if response_service.injector?

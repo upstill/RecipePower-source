@@ -15,15 +15,14 @@ class RpMailer < ActionMailer::Base
   def welcome_email(user)
     @inviter = User.where(id: user.invited_by).first
     @user = user
-    # @profile_url = page_with_trigger(users_profile_path) # "http://www.recipepower.com/users/profile"
-    @login_url  = "http://www.recipepower.com/login"
+    @login_url  = rp_url "/login"
     mail :to => @user.email, :from => "support@recipepower.com", :subject => "Welcome to RecipePower"
   end
     
   def invitation_accepted_email(invitee)
     return unless @user = User.where(id: invitee.invited_by).first
     @invitee = invitee
-    @profile_url = "http://www.recipepower.com/users/profile"
+    @profile_url = rp_url "/users/profile"
     mail to: @user.email, :from => "support@recipepower.com", :subject => "Your invitation was accepted"
   end
   

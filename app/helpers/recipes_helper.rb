@@ -1,6 +1,5 @@
 require 'open-uri'
 require 'json'
-require './lib/Domain.rb'
 require 'string_utils'
 
 module RecipesHelper
