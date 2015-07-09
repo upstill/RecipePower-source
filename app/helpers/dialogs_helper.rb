@@ -12,7 +12,7 @@ module DialogsHelper
     end
     pic =
         content_tag :div,
-                    image_tag(rp_url(image_path('RPlogo.png')), class: "small_logo", :alt => "RecipePower"),
+                    image_tag(rp_url(image_path 'RPlogo.png' ), class: "small_logo", :alt => "RecipePower"),
                     class: "small_logo"
     body_content = with_output_buffer(&block)
     alert = options[:noflash] ? "" : (content_tag(:div, "", class: "notifications-panel").html_safe+flash_all(false))
