@@ -3,7 +3,7 @@ require "type_map.rb"
 class User < ActiveRecord::Base
   include Collectible
   # Keep an avatar URL denoted by the :image attribute and kept as :thumbnail
-  picable :image, :thumbnail
+  picable :image, :thumbnail, "default-avatar-128.png"
 
   # Include default devise modules. Others available are:
   # :token_authenticatable, :encryptable, :confirmable, :timeoutable

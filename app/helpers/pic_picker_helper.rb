@@ -29,8 +29,7 @@ module PicPickerHelper
     img_id = pic_preview_img_id(obj)
     link_id = "golink#{obj.id}"
 
-    picdata = obj.imgdata || options[:fallback_img] || obj.imgdata(true)
-    pic_area = page_width_pic picdata, img_id, options[:fallback_img]
+    pic_area = page_width_pic obj.imgdata(true), img_id
     field_options = {
         rel: "jpg,png,gif",
         class: "hidden_text",
@@ -41,14 +40,15 @@ module PicPickerHelper
                           class: "pic_preview"
 
     golink_attribs =
-        options.slice(:fallback_img).
-        merge(pageurl: pageurl,
-              picurl: picurl,
-              golinkid: link_id,
-              imageid: img_id,
-              inputid: input_id,
-              picrefid: obj.picrefid
-            ).compact
+        {
+            pageurl: pageurl,
+            picurl: picurl,
+            golinkid: link_id,
+            imageid: img_id,
+            inputid: input_id,
+            picrefid: obj.picrefid,
+            fallback_img: obj.fallback_imgdata
+        }.compact
 
     preview << content_tag(:div,
                            pic_preview_golink(golink_attribs),
