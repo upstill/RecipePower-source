@@ -1,6 +1,6 @@
 <div class="masonry-item-contents grid-item <%= decorator.dom_id %>">
-  <% if false %>
-      <%= safe_image_div decorator, class: "rcp_grid_pic_box" %>
+  <% if true %>
+      <%= safe_image_div decorator, true, class: "rcp_grid_pic_box" %>
       <%= collectible_masonry_datablock decorator %>
       <div class="rcp_grid_element_footer">
         <div class="rcp_grid_element_icons">
@@ -11,6 +11,6 @@
         </div>
       </div>
   <% else %>
-      <%= render "recipes/show_cardlet", decorator: decorator, pic_mode: "fixed-width", card_type: 'masonry' %>
+      <%# render "recipes/show_cardlet", decorator: decorator, pic_mode: "fixed-width", card_type: 'masonry' %>
   <% end %>
 </div>

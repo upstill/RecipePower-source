@@ -117,9 +117,12 @@ module CollectibleHelper
   # Provide an image tag that resizes according to options[:fill_mode].
   # We give the tag an id according to the decorator, and an alt;
   # Both of those may be explicitly provided with the options
-  def resizing_image_tag decorator, options={}
+  def resizing_image_tag decorator, fallback=false, options={}
+    if fallback.is_a?(Hash)
+      fallback, options = false, fallback
+    end
     begin
-      if (url = decorator.imgdata).present?
+      if (url = decorator.imgdata(fallback)).present?
         options = { alt: "Image Not Accessible",
                     id: (dom_id decorator),
                     class: "#{options[:class]} #{options[:fill_mode] || 'fixed-width'}"}.merge(options.slice :id, :alt)
@@ -138,12 +141,15 @@ module CollectibleHelper
     end
   end
 
-  # Sort out a suitable URL to stuff into an image thumbnail for a recipe, enclosing it in a div
+  # Sort out a suitable URL to stuff into an image thumbnail, enclosing it in a div
   # of the class given in options. The image will stretch either horizontally (fill_mode: "fixed-height")
   # or vertically (fill_mode: "fixed-width") within the dimensions given by the enclosing div.
-  def safe_image_div decorator, options = {}
+  def safe_image_div decorator, fallback=false, options = {}
+    if fallback.is_a?(Hash)
+      fallback, options = false, fallback
+    end
     fill_mode = options.delete(:fill_mode) || "fixed-width"
-    if image = resizing_image_tag(decorator, fill_mode: fill_mode)
+    if image = resizing_image_tag(decorator, fallback, fill_mode: fill_mode)
       style = case fill_mode
                 when "fixed-width"
                   "width: 100%; height: auto;"
