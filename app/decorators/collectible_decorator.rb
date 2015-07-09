@@ -82,22 +82,6 @@ class CollectibleDecorator < Draper::Decorator
     end
   end
 
-  def imgdata fallback=:none
-    object.imgdata ||
-        case fallback
-          when :site
-            object.site.imgdata rescue nil
-          when :card
-            object.imgdata true
-          when :none
-        end
-  end
-
-  # Let subclasses define the image-link attribute
-  def imglink
-    nil
-  end
-
   # Collectibles are editable by default
   def read_only
     false

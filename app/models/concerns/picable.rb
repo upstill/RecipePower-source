@@ -14,9 +14,10 @@ module Picable
         define_singleton_method :picable_attribute do
           attribute
         end
-        define_method(:fallback_imgdata) do
+        define_method :fallback_imgdata do
           fallback_img_file
         end
+        alias_method :imglink, attribute
       end
     end
   end

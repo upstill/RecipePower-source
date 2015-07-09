@@ -5,23 +5,12 @@ class CardPresenter < BasePresenter
   end
 
   def card_avatar
-    img = card_avatar_link
-    img = card_avatar_fallback if img.blank?
-    card_object_link image_with_error_recovery(img, class: "fitPic", onload: 'doFitImage(event);', alt: card_avatar_fallback)
+    card_object_link image_with_error_recovery(decorator.imgdata(true), class: "fitPic", onload: 'doFitImage(event);', alt: decorator.fallback_imgdata)
   end
 
   # Take the opportunity to wrap the content in a link to the presented object
   def card_object_link content
     content # h.link_to_if(user.url.present?, content, user.url)
-  end
-
-  def card_avatar_link
-    decorator.imglink if decorator.respond_to?(:imglink)
-  end
-
-  # Image to be shown in the absence of an avater
-  def card_avatar_fallback
-    "NoPictureOnFile.png"
   end
 
   def card_header

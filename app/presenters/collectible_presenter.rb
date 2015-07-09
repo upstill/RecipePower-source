@@ -34,14 +34,6 @@ class CollectiblePresenter < CardPresenter
     end
   end
 
-  def picdiv
-    unless @decorator.imgdata(false).blank?
-      h.content_tag :div,
-                    h.safe_image_div(@decorator, :card, class: "resource-element pic"),
-                    class: pic_class
-    end
-  end
-
   def title
     unless modal
       h.content_tag :p, @decorator.title, class: "resource-element title"

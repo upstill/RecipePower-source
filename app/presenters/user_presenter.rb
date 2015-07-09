@@ -8,10 +8,6 @@ class UserPresenter < CardPresenter
   presents :user
   delegate :username, :fullname, :handle, :lists, :feeds, to: :user
 
-  def card_avatar_fallback
-    image_path "default-avatar-128.png"
-  end
-
   # Present the user's avatar, optionally with a form for uploading the image (if they're the viewer)
   def card_avatar with_form=false
     if is_viewer? and with_form

@@ -34,7 +34,7 @@ module RecipesHelper
   end
 
   def collectible_show_thumbnail decorator
-    image = safe_image_div decorator, :site, class: "pic-box", fill_mode: "fixed-width"
+    image = safe_image_div decorator, class: "pic-box", fill_mode: "fixed-width"
     title = collectible_title_link decorator
     content_tag :div, "#{image}#{title}".html_safe, class: "cardlet-item #{decorator.dom_id}"
   end

@@ -3,7 +3,7 @@
       <table class="cardlet-table">
         <tr>
           <% if defined?(pic_mode) && pic_mode %>
-            <% if it = resizing_image_tag(decorator, :fallback => :site, class: "pic-box", fill_mode: pic_mode) %>
+            <% if it = resizing_image_tag(decorator, class: "pic-box", fill_mode: pic_mode) %>
               <td class="pic-box" valign="top"><%= it %></td>
             <% end %>
           <% end %>
