@@ -21,6 +21,15 @@ module RecipesHelper
     content_tag :p, "#{label}#{itemlink}".html_safe, class: pclass
   end
 
+  def collectible_tablink decorator
+    case decorator.object
+      when Recipe, Site
+        link_to decorator.title, decorator.url, class: "tablink", data: {report: polymorphic_path([:touch, decorator.object])} # ...to open up a new tab
+      else # Internal entities get opened up in a new partial
+        link_to_submit decorator.title, decorator.url, class: "tablink"
+    end
+  end
+
   def collectible_source_link decorator
     if decorator.object.class == List
       label = "a list by "

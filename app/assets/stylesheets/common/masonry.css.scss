@@ -1,0 +1,40 @@
+
+div.masonry-item-contents.grid-item {
+  &.lists {
+    background: $lists-card-background-color;
+  }
+  .pic_box {
+    width: 100%;
+    height: auto; // 220px;
+    display: -webkit-box;
+    display: -moz-box;
+    display: box;
+
+    -webkit-box-orient: vertical;
+    -moz-box-orient: vertical;
+    box-orient: vertical;
+
+    -webkit-box-align: center;
+    -moz-box-align: center;
+    box-align: center;
+
+    -webkit-box-pack: center;
+    -moz-box-pack: center;
+    box-pack: center;
+  }
+
+  .datablock {
+    padding: 0 0 0.6em 0.6em;
+    height: auto; // 4.6em;
+    .title {
+      margin-top: 7px;
+      font-weight: bold;
+      a.tablink {
+        display: block;
+        overflow: hidden;
+        max-height: 2.8em;
+      }
+    }
+  }
+
+}

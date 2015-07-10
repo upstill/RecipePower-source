@@ -3,7 +3,7 @@
   <div class="js-masonry stream-items-parent col-md-12"
        id="container"
        onload="RP.masonry.onload(event)"
-       data-masonry-options='{ "columnWidth": 300, "itemSelector": ".masonry-item", "gutter": 20 }'>
+       data-masonry-options='{ "columnWidth": 200, "itemSelector": ".masonry-item", "gutter": 20 }'>
     <% if @filtered_presenter.dump? %>
         <% while (item = @filtered_presenter.next_item) do %>
             <%= render_item item %>
