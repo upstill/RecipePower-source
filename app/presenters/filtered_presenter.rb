@@ -315,13 +315,10 @@ class UsersAssociatedPresenter < UserContentPresenter
   end
 
   def results_class
-    rcname = "UserAssociatedEntitiesCache" ||
+    rcname = "UserCollectionCache" # ... by default
         case @entity_type
-          when "recipes"
-          when "lists"
-            %w{ owned collected contributed }
-          when "friends"
-          when "feeds"
+          when "lists.owned"
+            rcname = "UserOwnedListsCache"
         end
     rcname && rcname.constantize
   end
@@ -332,7 +329,7 @@ class UsersAssociatedPresenter < UserContentPresenter
         case @entity_type
           when "recipes"
           when "lists"
-            # %w{ owned collected contributed }
+            %w{ owned collected }
           when "friends"
           when "feeds"
           when nil
@@ -348,29 +345,23 @@ class UsersAssociatedPresenter < UserContentPresenter
   end
 
   def title_for subtype
-    subtype.gsub('.', ' ') + ' ' +
-        case subtype
-          when "recipes"
-            "collected by "
-          when "lists.contributed"
-            "to by "
-          when "friends"
-            "of "
-          when "feeds"
-            "followed by "
-          else
-            "by "
-        end + @stream_presenter.results.user.salutation
+    salutation = @stream_presenter.results.user.salutation.downcase
+    case subtype
+      when "recipes"
+        "recipes collected by #{salutation}"
+      when "lists.owned"
+        "#{salutation}'s own lists"
+      when "lists.collected"
+        "lists collected by #{salutation}"
+      when "friends"
+        "friends of #{salutation}"
+      when "feeds"
+        "feeds followed by #{salutation}"
+      else
+        "#{subtype.gsub('.', '')} by #{salutation}"
+    end
   end
 
-  # The subtype comes in, and is stored, as an extension on the type
-  def subtype= st
-    @entity_type = @entity_type.sub(/\..*$/, '') + ".#{st}"
-  end
-
-  def subtype
-    (md = @entity_type.match(/\.(.*)$/)) && md[1]
-  end
 end
 
 class UsersRecentPresenter < UserContentPresenter

@@ -460,11 +460,16 @@ class UserCollectionCache < RcprefCache
     user.id
   end
 
+  # Return the entity type sans extensions
+  def entity_type_root
+    @etr ||= (@entity_type.sub(/\..*/, '') if @entity_type.present?)
+  end
+
   def itemscope
     if user
       constraints = { :sort_by => :viewed, :in_collection => true }
-      if @entity_type
-        constraints[:entity_type] = @entity_type.singularize.camelize
+      if entity_type_root
+        constraints[:entity_type] = entity_type_root.singularize.camelize
       end
       user.collection_scope constraints
     end
@@ -476,9 +481,18 @@ class UserCollectionCache < RcprefCache
 
 end
 
-# Provides the collected entities of the given @entity_type
-class UserAssociatedEntitiesCache < UserCollectionCache
+# Provide the set of lists the user has collected
+class UserCollectedListsCache < UserCollectionCache
+  def itemscope
+    super
+  end
+end
 
+# Provide the set of lists the user has collected
+class UserOwnedListsCache < UserCollectionCache
+  def itemscope
+    user.owned_lists if user
+  end
 end
 
 # An IntegersCache presents the default ResultsCache behavior: no scope, no cache, degenerate partition producing successive integers
