@@ -3,6 +3,9 @@ div.masonry-item-contents.grid-item {
   &.lists {
     background: $lists-card-background-color;
   }
+  &.feeds {
+    background: $feeds-card-background-color;
+  }
   .pic_box {
     width: 100%;
     height: auto; // 220px;
@@ -27,7 +30,10 @@ div.masonry-item-contents.grid-item {
     padding: 0 0 0.6em 0.6em;
     height: auto; // 4.6em;
     .title {
-      margin-top: 7px;
+      a {
+        color: #332f32;
+      }
+      margin-top: 0.2em;
       font-weight: bold;
       a.tablink {
         display: block;
