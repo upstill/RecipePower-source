@@ -535,7 +535,7 @@ class ListCache < ResultsCache
   # The itemscope is the initial query for all possible items, subject to subqueries via count_tag
   def itemscope
     if list = List.find(@id)
-      ListServices.new(list).tagging_scope @userid
+      ListServices.new(list).tagging_scope # @userid
     end
   end
 

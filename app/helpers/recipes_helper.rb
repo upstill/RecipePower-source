@@ -26,7 +26,7 @@ module RecipesHelper
       when Recipe, Site
         link_to decorator.title, decorator.url, class: "tablink", data: {report: polymorphic_path([:touch, decorator.object])} # ...to open up a new tab
       else # Internal entities get opened up in a new partial
-        link_to_submit decorator.title, decorator.url, class: "tablink"
+        link_to_submit decorator.title, decorator.object # , class: "tablink"
     end
   end
 
