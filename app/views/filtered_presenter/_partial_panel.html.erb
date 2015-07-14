@@ -1,6 +1,6 @@
 <%= querify_block url, class: "results-panel #{type}", autoload: true do %>
     <div class="results-content">
-      <div class="results-label <%= type %> rotate"><%= type.downcase %></div>
+      <div class="results-label <%= type %> rotate"><%= title %></div>
       <div class="results-box">
         <%= panel_results_placeholder type %>
     	<%= panel_suggestions_placeholder type %>

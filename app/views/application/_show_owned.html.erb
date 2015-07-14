@@ -29,7 +29,7 @@
             </div>
           </div>
         </div>
-        <% @filtered_presenter.results_partials do |name, title, entity_type, url| %>
+        <% @filtered_presenter.partials do |name, title, entity_type, url| %>
             <%= render name, title: title, type: entity_type, url: url %>
         <% end %>
     <% end %>

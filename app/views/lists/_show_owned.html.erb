@@ -29,11 +29,9 @@
             </div>
           </div>
         </div>
-<!--
-        <%# @filtered_presenter.panel_partials do |entity_type, url| %>
-            <%# render "shared/panel", type: entity_type, url: url %>
-        <%# end %>
--->
-        <%= render "shared/owned", type: @filtered_presenter.results_type, url: assert_query(@filtered_presenter.results_path, entity_type: @filtered_presenter.results_type, :item_mode => :masonry, :org => :newest) %>
+        <% @filtered_presenter.partials do |name, title, entity_type, url| %>
+            <%= render name, title: title, type: entity_type, url: url %>
+        <% end %>
+        <%# render "filtered_presenter/results_owned", type: @filtered_presenter.results_type, url: assert_query(@filtered_presenter.results_path, entity_type: @filtered_presenter.results_type, :item_mode => :masonry, :org => :newest) %>
     <% end %>
 <% end %>

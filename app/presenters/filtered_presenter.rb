@@ -94,9 +94,13 @@ class FilteredPresenter
     h.text_field_tag "querytags", querytags.map(&:id).join(','), options
   end
 
-  def results_partials &block
-    block.call "shared/null_results",
-               "No #results_partials defined for #{entity_type}. Modify #{self.class} to provide some",
+  def title_for subtype
+    "No title defined for #{subtype}. Modify #{self.class} to provide one."
+  end
+
+  def partials &block
+    block.call "filtered_presenter/partial_null",
+               "No #partials defined for #{entity_type}. Modify #{self.class} to provide some",
                entity_type,
                results_path
   end
@@ -251,13 +255,13 @@ class ListsShowPresenter < FilteredPresenter
     super << :entity_type
   end
 
-  def results_partials &block
+  def partials &block
     types = @entity_type ? [ results_type ] : ["recipes"]
     if @entity_type
-      block.call "shared/owned", title_for(results_type), results_type, results_path
+      block.call "filtered_presenter/partial_owned", title_for(results_type), results_type, results_path
     else
       types.each { |type|
-        block.call "shared/owned",
+        block.call "filtered_presenter/partial_owned",
                    title_for(type),
                    type,
                    assert_query(results_path, entity_type: type, :item_mode => :masonry, :org => :newest)
@@ -275,14 +279,18 @@ class UserContentPresenter < FilteredPresenter
     super << :entity_type
   end
 
+  def title_for type
+    type.downcase
+  end
+
   # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
-  def results_partials &block
+  def partials &block
     types = @entity_type ? [ @entity_type ] : [ "recipes", "lists", "friends", "feeds" ]
     if @entity_type
-      block.call "shared/associated", title_for(@entity_type), @entity_type, results_path
+      block.call "filtered_presenter/partial_panel", title_for(@entity_type), @entity_type, results_path
     else
       types.each do |type|
-         block.call "shared/associated",
+         block.call "filtered_presenter/partial_panel",
                     title_for(type),
                     type,
                     assert_query(results_path, entity_type: type, item_mode: :slider, :org => :newest)
@@ -312,7 +320,7 @@ class UsersAssociatedPresenter < UserContentPresenter
   end
 
   # Define the URL for each subtype (if any) vectoring off of this @result_type
-  def results_partials &block
+  def partials &block
     if subtypes =
         case @entity_type
           when "recipes"
@@ -328,7 +336,7 @@ class UsersAssociatedPresenter < UserContentPresenter
       subtypes = [ @entity_type ]
     end
     subtypes.each do |subtype|
-      block.call "shared/associated", title_for(subtype), subtype, assert_query(results_path, entity_type: subtype, item_mode: :masonry)
+      block.call "filtered_presenter/partial_associated", title_for(subtype), subtype, assert_query(results_path, entity_type: subtype, item_mode: :masonry)
     end
   end
 
