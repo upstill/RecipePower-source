@@ -4,7 +4,7 @@ class CardPresenter < BasePresenter
     "#{h.object_display_class decorator.object}-card"
   end
 
-  def card_avatar
+  def card_avatar with_form=false
     card_object_link image_with_error_recovery(decorator.imgdata(true), class: "fitPic", onload: 'doFitImage(event);', alt: decorator.fallback_imgdata)
   end
 
@@ -67,34 +67,20 @@ class CardPresenter < BasePresenter
     card_aspect_enclosure which, contents, label
   end
 
-  # This method is overridden by subclasses to define elements of the display as a label/content pair
-  def card_aspect which
-
+  # How many columns does the card have (next to the avatar)
+  def card_ncolumns
+    0
   end
 
-  # Provide a list of aspects for display in the entity's panel, suitable for passing to card_aspect
-  def card_aspects
+  # Render the n-th column (limited by card_ncolumns)
+  def column which_column
+    return unless (content = card_aspects(which_column).collect { |aspect| card_aspect_rendered aspect }.join("\n")).present?
+    content_tag :div, content.html_safe, class: "col-md-#{12/card_ncolumns}"
+  end
+
+  # Enumerate the aspects for a given column
+  def card_aspects for_column
     [ ]
   end
-
-  def card_ncolumns
-    3
-  end
-
-  def column1
-    return unless (content = card_aspects1.collect { |aspect| card_aspect_rendered aspect }.join("\n")).present?
-    content_tag :div, content.html_safe, class: "col-md-#{12/card_ncolumns}"
-  end
-
-  def column2
-    return unless (content = card_aspects2.collect { |aspect| card_aspect_rendered aspect }.join("\n")).present?
-    content_tag :div, content.html_safe, class: "col-md-#{12/card_ncolumns}"
-  end
-
-  def column3
-    return unless (content = card_aspects3.collect { |aspect| card_aspect_rendered aspect }.join("\n")).present?
-    content_tag :div, content.html_safe, class: "col-md-#{12/card_ncolumns}"
-  end
-
 
 end

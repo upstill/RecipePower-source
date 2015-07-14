@@ -34,45 +34,26 @@ class UserPresenter < CardPresenter
     ("#{fullname.downcase}&nbsp;#{content_tag(:small, username)}&nbsp;#{mail_link}").html_safe
   end
 
-  # Provide a list of aspects for display in the entity's panel, suitable for passing to aspect
-  def card_aspects
+  def card_aspects which_column
     [
-        # :member_since,
-        :name_form,
-        :about,
-        :owned_lists,
-        :latest_recipe,
-        :latest_list,
-        :desert_island,
-        :question,
-        # :collected_lists,
-        # :collected_feeds
-    ]
-  end
+        [
+            # :member_since,
+            :name_form,
+            :owned_lists,
+            :desert_island,
+            :question,
+            # :collected_lists,
+            # :collected_feeds
+        ],
+        [
+            :latest_recipe,
+            :latest_list
+        ],
+        [
+            :about
+        ]
 
-  def card_aspects1
-    [
-        # :member_since,
-        :name_form,
-        :owned_lists,
-        :desert_island,
-        :question,
-        # :collected_lists,
-        # :collected_feeds
-    ]
-  end
-
-  def card_aspects2
-    [
-        :latest_recipe,
-        :latest_list
-    ]
-  end
-
-  def card_aspects3
-    [
-        :about
-    ]
+    ][which_column]
   end
 
   def card_aspect which

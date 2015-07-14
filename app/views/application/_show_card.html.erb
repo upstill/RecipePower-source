@@ -10,9 +10,9 @@
         <%= presenter.card_header %>
         <%# presenter.card_subhead %>
         <div class="row">
-          <%= presenter.column1 %>
-          <%= presenter.column2 %>
-          <%= presenter.column3 %>
+          <% (0...(presenter.card_ncolumns)).each do |column| %>
+            <%= presenter.column column %>
+          <% end %>
         </div>
       </div>
     </div>
