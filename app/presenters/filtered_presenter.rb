@@ -99,9 +99,10 @@ class FilteredPresenter
   end
 
   def partials &block
+    et = respond_to?(:entity_type) && entity_type
     block.call "filtered_presenter/partial_null",
-               "No #partials defined for #{entity_type}. Modify #{self.class} to provide some",
-               entity_type,
+               "No partials defined#{(' for '+et) if et}. Define #{self.class}#partials to provide some",
+               et,
                results_path
   end
 
@@ -339,20 +340,21 @@ class UsersAssociatedPresenter < UserContentPresenter
   end
 
   def title_for subtype
+    is_me = @stream_presenter.results.user.id == h.current_user_or_guest_id
     salutation = @stream_presenter.results.user.salutation.downcase
     case subtype
       when "recipes"
-        "recipes collected by #{salutation}"
+        is_me ? "recipes I've collected" : "recipes collected by #{salutation}"
       when "lists.owned"
-        "#{salutation}'s own lists"
+        is_me ? "my own lists" : "#{salutation}'s own lists"
       when "lists.collected"
-        "lists collected by #{salutation}"
+        is_me ? "lists I've collected" : "lists collected by #{salutation}"
       when "friends"
-        "friends of #{salutation}"
+        is_me ? "people I'm following" : "friends of #{salutation}"
       when "feeds"
-        "feeds followed by #{salutation}"
+        is_me ? "feeds I'm following" : "feeds followed by #{salutation}"
       else
-        "#{subtype.gsub('.', '')} by #{salutation}"
+        "#{subtype.gsub('.', '')} by #{is_me ? "me" : salutation}"
     end
   end
 
@@ -375,7 +377,7 @@ class UsersBiglistPresenter < UserContentPresenter
 end
 
 # Present a list of feeds for a user
-class FeedsShowPresenter < FilteredPresenter
+class FeedsOwnedPresenter < FilteredPresenter
   @results_class_name = 'FeedCache'
 
   def panel_label
@@ -388,6 +390,10 @@ class FeedsShowPresenter < FilteredPresenter
 
   def results_type
     "feed_entries"
+  end
+
+  def partials &block
+    block.call "filtered_presenter/partial_spew", "feeds", "feed_entries", assert_query(results_path, item_mode: "page" )
   end
 
 end
@@ -407,12 +413,6 @@ Last Updated',
       "Approved",
       "Actions" ]
   end
-
-end
-
-# Present the entries associated with a feed
-class FeedsEntriesPresenter < FilteredPresenter
-  @results_class_name = 'FeedCache'
 
 end
 

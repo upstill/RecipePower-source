@@ -15,14 +15,15 @@ class FeedsController < CollectibleController
     smartrender 
   end
 
-  def entries
-    update_and_decorate
-    smartrender 
-  end
-
   # GET /feeds/1
   # GET /feeds/1.json
   def show
+    @active_menu = :feeds
+    update_and_decorate
+    smartrender
+  end
+
+  def owned
     @active_menu = :feeds
     @feed.refresh if update_and_decorate && !params[:stream] && @feed.due_for_update
     if resource_errors_to_flash @feed

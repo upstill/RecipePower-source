@@ -141,6 +141,7 @@ RP::Application.routes.draw do
   match 'references', :controller => 'references', :action => 'index', :via => [:get, :post]
 
   post '/feed' => 'feeds#create', :as => 'create_feed'
+  get 'feeds/:id/owned' => 'feeds#owned', :as => "feed_owned"
   resources :feeds, :except => [:index, :create] do
     member do
       get 'refresh' # Refresh the feed's entries
@@ -150,7 +151,6 @@ RP::Application.routes.draw do
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       patch 'tag'
       get 'touch'
-      get 'entries'
     end
   end
   match 'feeds', :controller => 'feeds', :action => 'index', :via => [:get, :post]
