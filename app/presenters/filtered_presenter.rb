@@ -94,21 +94,16 @@ class FilteredPresenter
     h.text_field_tag "querytags", querytags.map(&:id).join(','), options
   end
 
-  def panel_partials &block
-    # ["recipes", "lists", "friends", "feeds" ].each do |et|
-    ["recipes"].each do |et|
-      block.call et, assert_query(results_path, entity_type: et, :item_mode => :slider, :org => :newest)
-    end
-  end
-
-  # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
-  def results_set &block
-    block.call results_path, results_type
+  def results_partials &block
+    block.call "shared/null_results",
+               "No #results_partials defined for #{entity_type}. Modify #{self.class} to provide some",
+               entity_type,
+               results_path
   end
 
   # This is the class of the results container
   def results_type
-    @results_class || self.class
+    (@results_class || self.class).to_s
   end
 
   # This is the name of the partial used to render me
@@ -225,13 +220,6 @@ class SearchIndexPresenter < FilteredPresenter
     @entity_type || self.class.to_s
   end
 
-  def panel_partials &block
-    # ["recipes", "lists", "friends", "feeds" ].each do |et|
-    ["recipes"].each do |et|
-      block.call et, assert_query(results_path, entity_type: et, :item_mode => :slider, :org => :newest)
-    end
-  end
-
 end
 
 class UsersIndexPresenter < FilteredPresenter
@@ -263,21 +251,17 @@ class ListsShowPresenter < FilteredPresenter
     super << :entity_type
   end
 
-  def panel_partials &block
-    # ["recipes", "lists", "friends", "feeds" ].each do |et|
-    ["recipes"].each do |et|
-      block.call et, assert_query(results_path, entity_type: et, :item_mode => :slider, :org => :newest)
-    end
-  end
-
-  # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
-  def results_set &block
+  def results_partials &block
+    types = @entity_type ? [ results_type ] : ["recipes"]
     if @entity_type
-      block.call results_path, results_type
+      block.call "shared/owned", title_for(results_type), results_type, results_path
     else
-      ["recipes" ].each do |et|  # , "friends"
-        block.call assert_query(results_path, entity_type: et, item_mode: :masonry), et
-      end
+      types.each { |type|
+        block.call "shared/owned",
+                   title_for(type),
+                   type,
+                   assert_query(results_path, entity_type: type, :item_mode => :masonry, :org => :newest)
+      }
     end
   end
 
@@ -292,12 +276,16 @@ class UserContentPresenter < FilteredPresenter
   end
 
   # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
-  def results_set &block
+  def results_partials &block
+    types = @entity_type ? [ @entity_type ] : [ "recipes", "lists", "friends", "feeds" ]
     if @entity_type
-      block.call results_path, @entity_type
+      block.call "shared/associated", title_for(@entity_type), @entity_type, results_path
     else
-      ["recipes", "lists", "friends", "feeds" ].each do |et|
-         block.call assert_query(results_path, entity_type: et, item_mode: :slider), et
+      types.each do |type|
+         block.call "shared/associated",
+                    title_for(type),
+                    type,
+                    assert_query(results_path, entity_type: type, item_mode: :slider, :org => :newest)
       end
     end
   end
@@ -324,7 +312,7 @@ class UsersAssociatedPresenter < UserContentPresenter
   end
 
   # Define the URL for each subtype (if any) vectoring off of this @result_type
-  def results_set &block
+  def results_partials &block
     if subtypes =
         case @entity_type
           when "recipes"
@@ -340,7 +328,7 @@ class UsersAssociatedPresenter < UserContentPresenter
       subtypes = [ @entity_type ]
     end
     subtypes.each do |subtype|
-      block.call assert_query(results_path, entity_type: subtype, item_mode: :masonry), subtype
+      block.call "shared/associated", title_for(subtype), subtype, assert_query(results_path, entity_type: subtype, item_mode: :masonry)
     end
   end
 
@@ -383,6 +371,18 @@ end
 # Present a list of feeds for a user
 class FeedsShowPresenter < FilteredPresenter
   @results_class_name = 'FeedCache'
+
+  def panel_label
+    ""
+  end
+
+  def panel_label_class
+    "feed-entries"
+  end
+
+  def results_type
+    "feed_entries"
+  end
 
 end
 
@@ -475,10 +475,5 @@ end
 class TagsTaggeesPresenter < FilteredPresenter
   @item_mode = :masonry
   @results_class_name = 'TagCache'
-
-  # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
-  def results_set &block
-    block.call results_path, results_type
-  end
 
 end

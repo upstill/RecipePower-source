@@ -57,12 +57,8 @@
             </div>
           </div>
         </div>
-        <% @filtered_presenter.results_set do |url, subtype| %>
-            <%# render "shared/panel", type: subtype, url: url %>
-            <%= render "shared/associated",
-                       title: @filtered_presenter.title_for(subtype),
-                       type: subtype,
-                       url: assert_query(url, :item_mode => :masonry, :org => :newest) %>
+        <% @filtered_presenter.results_partials do |partial, title, type, url| %>
+            <%= render partial, title: title, type: type, url: url %>
         <% end %>
     <% end %>
 <% end %>

@@ -12,7 +12,7 @@
         <%# render @filtered_presenter.header_partial, title: title, comment: ((defined? comment) ? comment : "") %>
         <div class="row panels-query">
           <div class="col-md-6 panels-label <%= @filtered_presenter.panel_label_class %>">
-            <div class=""><%= @filtered_presenter.panel_label %></div>
+            <%= @filtered_presenter.panel_label %>
           </div>
           <div class="col-md-6 panels-search">
             <%= @filtered_presenter.filter_field(
@@ -29,8 +29,8 @@
             </div>
           </div>
         </div>
-        <% @filtered_presenter.panel_partials do |entity_type, url| %>
-            <%= render "shared/panel", type: entity_type, url: url %>
+        <% @filtered_presenter.results_partials do |name, title, entity_type, url| %>
+            <%= render name, title: title, type: entity_type, url: url %>
         <% end %>
     <% end %>
 <% end %>
