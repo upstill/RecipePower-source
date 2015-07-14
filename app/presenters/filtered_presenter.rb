@@ -323,20 +323,18 @@ class UsersAssociatedPresenter < UserContentPresenter
   def partials &block
     if subtypes =
         case @entity_type
-          when "recipes"
           when "lists"
-            %w{ owned collected }
-          when "friends"
-          when "feeds"
+            %w{ lists.owned lists.collected }
           when nil
             %w{ recipes lists friends feeds }
         end
-      subtypes = subtypes.collect { |st| "#{@entity_type}.#{st}" } if @entity_type
-    else
-      subtypes = [ @entity_type ]
     end
-    subtypes.each do |subtype|
-      block.call "filtered_presenter/partial_associated", title_for(subtype), subtype, assert_query(results_path, entity_type: subtype, item_mode: :masonry)
+    if subtypes.blank?
+      block.call "filtered_presenter/partial_spew", title_for(@entity_type), @entity_type, assert_query(results_path, entity_type: @entity_type, item_mode: :masonry)
+    else
+      subtypes.each do |subtype|
+        block.call "filtered_presenter/partial_associated", title_for(subtype), subtype, assert_query(results_path, entity_type: subtype, item_mode: :masonry)
+      end
     end
   end
 

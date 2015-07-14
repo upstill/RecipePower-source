@@ -8,10 +8,12 @@ jQuery ->
 RP.masonry.onload = (event) ->
 	elmt = event.target
 	# Initialize Masonry handling for list items
-	$(elmt).masonry
-		columnWidth: $(elmt).data('columnWidth') || 200,
-		gutter: $(elmt).data('gutterWidth') || 20,
-		itemSelector: '.masonry-item'
+	options = $(elmt).data('masonryOptions') || { }
+	# Assert defaults for Masonry options
+	options.columnWidth ||= 90 # In fact, masonry will use the width of the first item for columnWidth
+	options.gutter ||= 10
+	options.itemSelector ||= '.masonry-item'
+	$(elmt).masonry options
 	$(elmt).masonry 'on', 'layoutComplete', ( msnryInstance, laidOutItems ) ->
 		$(elmt).removeClass 'layout-pending'
 		dequeue elmt
