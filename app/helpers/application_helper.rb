@@ -10,7 +10,11 @@ module ApplicationHelper
   include ActionView::Helpers::DateHelper
 
   def image_with_error_recovery url, options={}
-    image_tag url, options.merge( onError: "onImageError(this);")
+    options[:data] = {
+        emptyurlfallback: image_path('NoPictureOnFile.png'),
+        bogusurlfallback: image_path('BadPicURL.png')
+    }.merge options[:data] || {}
+    image_tag url, { alt: "Image Link is Broken" }.merge(options).merge( onError: "onImageError(this);")
   end
 
   def empty_msg
