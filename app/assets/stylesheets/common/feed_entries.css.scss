@@ -1,0 +1,21 @@
+// Place all the styles related to the FeedEntries controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+div.feed-entry {
+  div.headline {
+    font-size: 1.8em;
+    font-weight: bold;
+    div.share-button {
+      display: inline-block;
+    }
+  }
+  div.published {
+    margin-top: 0.3em;
+    font-size: 1.1em;
+  }
+  div.summary {
+    font-family: $archivo;
+    font-size: 1.1em;
+  }
+}
