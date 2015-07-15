@@ -47,7 +47,7 @@ module ItemHelper
 
   # Provide a selector that finds the wrapper for a specific masonry item (given by entity_or_string)
   def item_wrapper_selector decorator, context=nil
-    "#{item_container_selector entity_or_string, context} div.masonry-item.#{decorator.dom_id}"
+    "#{item_container_selector decorator, context} div.masonry-item.#{decorator.dom_id}"
   end
 
   # The item partial depends on the item mode (:table, :modal, :masonry, :slider),

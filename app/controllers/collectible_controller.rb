@@ -102,4 +102,10 @@ class CollectibleController < ApplicationController
       other.destroy
     end
   end
+
+  def show
+    update_and_decorate
+    smartrender
+  end
+
 end

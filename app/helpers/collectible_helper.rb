@@ -23,7 +23,12 @@ module CollectibleHelper
     ["div.collectible-buttons##{dom_id decorator}", collectible_buttons_panel(decorator)]
   end
 
+  def collectible_collect_icon_replacement decorator
+    ["a.collectible-collect-icon.#{dom_id decorator}", collectible_collect_icon(decorator)]
+  end
+
   def collectible_collect_icon decorator, size = nil, options={}
+    options[:class] = "#{options[:class]} collectible-collect-icon #{dom_id decorator}"
     if size.is_a? Hash
       size, options = nil, size
     end

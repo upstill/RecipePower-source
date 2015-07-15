@@ -22,7 +22,7 @@ RP::Application.routes.draw do
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       patch 'tag'
       get 'touch'
-      patch 'collect'
+      get 'collect'
     end
   end
 
