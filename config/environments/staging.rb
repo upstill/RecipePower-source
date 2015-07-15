@@ -25,7 +25,7 @@ RP::Application.configure do
   # config.assets.manifest = YOUR_PATH
 
   # Precompile additional assets (application.js, application.css, and all non-JS/CSS are already added)
-  config.assets.precompile += %w( collection.css collection.js injector.css injector.js )
+  config.assets.precompile += %w( jquery2 bootstrap_preface.css collection.css collection.js injector.css injector.js )
 
   # Specifies the header that your server uses for sending files
   # config.action_dispatch.x_sendfile_header = "X-Sendfile" # for apache
