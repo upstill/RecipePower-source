@@ -77,7 +77,9 @@ RP.dialog.close_modal = (dlog, epilog) ->
 insert_modal = (newdlog, odlog) ->
 	if typeof newdlog == 'string'
 		# Assuming the code is a fragment for the dialog...
-		newdlog = $(newdlog)[0]
+		dlogs = jQuery.grep $(newdlog), (elmt) ->
+			$(elmt).is 'div.dialog'
+		newdlog = dlogs[0]
 	else
 		newdlog = ($(newdlog).detach())[0]
 	# Now the dialog is a detached DOM elmt: attach it relative to the parent
