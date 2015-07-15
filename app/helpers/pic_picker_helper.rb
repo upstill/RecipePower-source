@@ -29,7 +29,8 @@ module PicPickerHelper
     img_id = pic_preview_img_id(obj)
     link_id = "golink#{obj.id}"
 
-    pic_area = page_width_pic obj.imgdata(true), img_id
+    # pic_area = page_width_pic obj.imgdata(true), img_id
+    pic_area = image_with_error_recovery obj.imgdata(true), id: img_id, leave_blank: true
     field_options = {
         rel: "jpg,png,gif",
         class: "hidden_text",
@@ -111,30 +112,6 @@ module PicPickerHelper
     }.join(' ').html_safe
     %q{<div class="row"><div class="col-md-12">}.html_safe + pics + "</div></div>".html_safe
     # content_tag(:div, pics, id: "masonry-pic-pickees")
-  end
-
-  # Declare an image which gets resized to fit upon loading
-  # id -- used to define an id attribute for this picture (all fitpics will have class 'fitPic')
-  # float_ttl -- indicates how to handle an empty URL
-  # selector -- specifies an alternative selector for finding the picture for resizing
-  def page_fitPic(picurl, id = "")
-    image_with_error_recovery(picurl || "",
-                              class: "fitPic",
-                              id: "rcpPic"+id.to_s,
-                              onload: 'doFitImage(event);')
-  end
-
-  # Same protocol, only image will be scaled to 100% of the width of its parent, with adjustable height
-  def page_width_pic(picurl, idstr="rcpPic", report_bad_image = false)
-    unless idstr.is_a? String
-      idstr, report_bad_image = "rcpPic", idstr
-    end
-    data = report_bad_image ? {bogusurlfallback: image_path("BadPicURL.png"), emptyurlfallback: image_path("NoPictureOnFile.png")} : {}
-    image_with_error_recovery(picurl || "",
-                              style: "width: 100%; height: auto",
-                              id: idstr,
-                              # onload: "RP.validate_img(event);",
-                              data: data)
   end
 
 end

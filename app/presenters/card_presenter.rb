@@ -5,7 +5,12 @@ class CardPresenter < BasePresenter
   end
 
   def card_avatar with_form=false
-    card_object_link image_with_error_recovery(decorator.imgdata(true), class: "fitPic", onload: 'doFitImage(event);', alt: decorator.fallback_imgdata)
+    card_object_link image_with_error_recovery(decorator.imgdata(true),
+                                               class: "fitPic",
+                                               onload: 'doFitImage(event);',
+                                               alt: decorator.fallback_imgdata,
+                                               data: { fillmode: "width" }
+                     )
   end
 
   # Take the opportunity to wrap the content in a link to the presented object
@@ -14,11 +19,7 @@ class CardPresenter < BasePresenter
   end
 
   def card_header
-    content = card_header_content + collectible_buttons_panel(@decorator,
-                                         :button_size => "xs",
-                                         :edit_button => response_service.admin_view?)
-    # content_tag :p, "#{card_header_content}&nbsp;#{editlink}".html_safe, class: "card-aspect-label header"
-    content_tag :div, content.html_safe, class: "card-aspect-label header"
+    content_tag :div, card_header_content, class: "card-aspect-label header"
   end
 
   def card_header_content

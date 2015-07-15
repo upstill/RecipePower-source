@@ -9,14 +9,6 @@ Dir[Rails.root.join('app', 'presenters', "*.rb")].each {|l| require l }
 module ApplicationHelper
   include ActionView::Helpers::DateHelper
 
-  def image_with_error_recovery url, options={}
-    options[:data] = {
-        emptyurlfallback: image_path('NoPictureOnFile.png'),
-        bogusurlfallback: image_path('BadPicURL.png')
-    }.merge options[:data] || {}
-    image_tag url, { alt: "Image Link is Broken" }.merge(options).merge( onError: "onImageError(this);")
-  end
-
   def empty_msg
     unless @empty_msg.blank?
       content_tag :h4, @empty_msg

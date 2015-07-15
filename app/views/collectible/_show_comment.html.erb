@@ -1,6 +1,10 @@
 <div class="comment">
   <div class="avatar">
-    <%= page_width_pic rcpref.user.imgdata(true) %>
+    <%# page_width_pic rcpref.user.imgdata(true) %>
+    <%= image_with_error_recovery rcpref.user.imgdata(true),
+                                  id: "rcpPic",
+                                  style: "width: 100%; height: auto",
+                                  leave_blank: true %>
     <%= link_to_submit rcpref.user.polite_name, rcpref.user, :mode => :partial %>
   </div>
   <div class="content">

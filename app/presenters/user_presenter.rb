@@ -31,7 +31,12 @@ class UserPresenter < CardPresenter
 
   def card_header_content
     mail_link = link_to_submit("Send email", mailto_user_path(user, mode: :modal), button_size: "xs") unless is_viewer?
-    ("#{fullname.downcase}&nbsp;#{content_tag(:small, username)}&nbsp;#{mail_link}").html_safe
+    uhandle = content_tag :span, "(aka #{username})", class: "user-handle"
+    ("#{fullname.downcase}&nbsp;#{uhandle}&nbsp;#{mail_link}").html_safe
+  end
+
+  def card_ncolumns
+    3
   end
 
   def card_aspects which_column

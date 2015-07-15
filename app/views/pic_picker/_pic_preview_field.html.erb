@@ -6,7 +6,11 @@
 -->
 <div class="row">
   <div class="col-md-4 preview">
-    <%= page_width_pic f.object.imgdata(true), urlfield %>
+    <%# page_width_pic f.object.imgdata(true), urlfield %>
+    <%= image_with_error_recovery f.object.imgdata(true),
+                                  id: urlfield,
+                                  style: "width: 100%; height: auto",
+                                  leave_blank: true %>
   </div>
   <div class="col-md-8">
     <%= f.input urlfield, label: "Image URL (when ready, click 'Preview')", input_html: {class: urlfield}, rel: "jpg,png,gif" %>
