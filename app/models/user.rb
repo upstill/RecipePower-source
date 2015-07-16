@@ -1,6 +1,11 @@
 require "type_map.rb"
 
 class User < ActiveRecord::Base
+  # Class variable @@Guest_user saves the guest User
+  @@Guest_user = nil
+  @@Guest_user_id = 4
+  @@Super_user_id = 5
+
   include Collectible
   # Keep an avatar URL denoted by the :image attribute and kept as :thumbnail
   picable :image, :thumbnail, "default-avatar-128.png"
@@ -407,16 +412,13 @@ public
     @@Roles.list
   end
 
-  # Class variable @@Super_user saves the super User
-  @@Super_user = nil
   def self.super_id
-      (@@Super_user || (@@Super_user = (self.by_name(:super) || self.by_name("RecipePower")))).id
+    @@Super_user_id
+    # (@@Super_user || (@@Super_user = self.find(@@Super_user_id)) # (self.by_name(:super) || self.by_name("RecipePower")))).id
   end
 
-  # Class variable @@Guest_user saves the guest User
-  @@Guest_user = nil
   def self.guest
-      @@Guest_user || (@@Guest_user = self.by_name(:guest))
+      @@Guest_user || (@@Guest_user = self.find(@@Guest_user_id)) # by_name(:guest))
   end
 
   # Simply return the id of the guest

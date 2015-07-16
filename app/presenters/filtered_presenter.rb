@@ -64,8 +64,8 @@ class FilteredPresenter
 
     @title = response_service.title
     # FilteredPresenters don't always have results panels
-    if results_class
-      @stream_presenter = StreamPresenter.new sessid, request_path, results_class, user_id, response_service.admin_view?, querytags, params
+    if rc_class = results_class
+      @stream_presenter = StreamPresenter.new sessid, request_path, rc_class, user_id, response_service.admin_view?, querytags, params
     end
   end
 
@@ -286,7 +286,7 @@ class UserContentPresenter < FilteredPresenter
 
   # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
   def partials &block
-    types = @entity_type ? [ @entity_type ] : [ "recipes", "lists", "friends", "feeds" ]
+    types = @entity_type ? [ @entity_type ] : [ "friends" ] # [ "recipes", "lists", "friends", "feeds" ]
     if @entity_type
       block.call "filtered_presenter/partial_panel", title_for(@entity_type), @entity_type, results_path
     else
@@ -368,6 +368,11 @@ end
 class UsersCollectionPresenter < UserContentPresenter
   @item_mode = :slider
   @results_class_name = 'UserCollectionCache'
+
+  def results_class
+    rc_class = (@entity_type == 'friends') ? "UserFriendsCache" : "UserCollectionCache"
+    rc_class.constantize
+  end
 
 end
 

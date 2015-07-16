@@ -1,4 +1,4 @@
-class CardPresenter < BasePresenter
+module CardPresentation
 
   def card_class
     "#{h.object_display_class decorator.object}-card"
@@ -38,8 +38,8 @@ class CardPresenter < BasePresenter
   def card_aspect_enclosure which, contents, label=nil
     label ||= which.to_s.capitalize.tr('_', ' ') # split('_').map(&:capitalize).join
     (
-      content_tag(:p, label.upcase, class: "card-aspect-label #{which}") +
-      content_tag(:p, contents, class: "card-aspect-contents #{which}")
+    content_tag(:p, label.upcase, class: "card-aspect-label #{which}") +
+        content_tag(:p, contents, class: "card-aspect-contents #{which}")
     ).html_safe if contents.present?
   end
 
@@ -82,6 +82,39 @@ class CardPresenter < BasePresenter
   # Enumerate the aspects for a given column
   def card_aspects for_column
     [ ]
+  end
+
+  def present_field_wrapped what=nil
+    h.content_tag :span,
+                  present_field(what),
+                  class: "hide-if-empty"
+  end
+
+  def field_value what=nil
+    return form_authenticity_token if what && (what == "authToken")
+    if val = @decorator && @decorator.extract(what)
+      "#{val}".html_safe
+    end
+  end
+
+  def present_field what=nil
+    field_value(what) || %Q{%%#{(what || "").to_s}%%}.html_safe
+  end
+
+  def field_count what
+    @decorator && @decorator.respond_to?(:arity) && @decorator.arity(what)
+  end
+
+  def present_field_label what
+    label = what.sub "_tags", ''
+    case field_count(what)
+      when nil, false
+        "%%#{what}_label_plural%%"+"%%#{what}_label_singular%%"
+      when 1
+        label.singularize
+      else
+        label.pluralize
+    end
   end
 
 end

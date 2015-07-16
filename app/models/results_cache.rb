@@ -476,7 +476,7 @@ class UserCollectionCache < RcprefCache
   end
 
   def stream_id
-    "user_#{@id}_contents"
+    [ :user, @id, @entity_type.gsub(/\./,'-') ].join('-')
   end
 
 end
@@ -646,6 +646,12 @@ class UsersCache < ResultsCache
                     match, match, match, match, match, match).to_a
   end
 
+end
+
+class UserFriendsCache < UserCollectionCache
+  def itemscope
+    user.followees if user
+  end
 end
 
 # user's collection visible to current_user (UserCollectionStreamer)

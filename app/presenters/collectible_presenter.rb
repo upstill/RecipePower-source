@@ -1,22 +1,8 @@
-class CollectiblePresenter < CardPresenter
+class CollectiblePresenter < BasePresenter
+  include CardPresentation
 
-  attr_accessor :modal, :tagfields
+  attr_accessor :modal
   attr_writer :buttons
-
-  def initialize decorator_or_object, template, viewer
-    super
-    @tagfields = [
-        "Ingredient_tags",
-        ["Role_tags", "Produces"],
-        "Genre_tags",
-        "Occasion_tags",
-        "Process_tags",
-        "Tool_tags",
-        "Other Tag_tags",
-        ['Lists', "Listed in"],
-        ['Collections', "Collected by"]
-    ]
-  end
 
   def h
     @template
@@ -46,33 +32,6 @@ class CollectiblePresenter < CardPresenter
 
   def buttons
     @buttons || h.collectible_buttons_panel(@decorator)
-  end
-
-  def fields_list
-    list_fields @tagfields
-  end
-
-  # Present a collection of labelled fields, by type
-  def list_fields fields
-    fields.collect { |field|
-      if field.is_a? Array
-        field, label = field[0], field[1]
-      else
-        label = present_field_label field
-      end
-      [ label, present_field(field) ]
-    }
-  end
-
-  def label_field name, new_label
-    @tagfields.map! { |v|
-      if v.is_a? Array
-        v[1] = new_label if v[0] == name
-      else
-        v = [v, new_label] if v == name
-      end
-      v
-    }
   end
 
   def present_field_wrapped what=nil
