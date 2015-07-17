@@ -1,7 +1,8 @@
 
-.slider {
+div.slider {
   position: relative;
-  background-color: #ccc;
+  // background-color: #ccc;
+  background-color: inherit;
   height: 220px;
   overflow: hidden;
   margin-left: 80px;
@@ -13,8 +14,10 @@
     margin: 0;
     padding: 0;
     // border: 2px solid #0000ff;
-
-    width: auto; // 600px; // Just to start; the slider will expand as items are loaded
+    overflow: auto;
+    white-space: nowrap;
+    height: 16em;
+    // width: auto; // 600px; // Just to start; the slider will expand as items are loaded
   }
   .left, .right {
     position: absolute;
@@ -34,21 +37,14 @@
   .slider-item {
     height: 14em;
     width: auto;
-    float: left;
-    margin-right: 15px;
+    // float: left;
+    margin-right: 25px;
     background-color: inherit;
     position: relative;
-    overflow: hidden;
+    // overflow: hidden;
+    display: inline-block;
     &.highlighted {
       border: 1px solid red;
-    }
-    div.slider-foreground {
-      visibility: hidden;
-    }
-    div.slider-background {
-      position: absolute;
-      left: 0;
-      width: 100%;
     }
     div.slider-left {
     }
