@@ -14,7 +14,7 @@
     padding: 0;
     // border: 2px solid #0000ff;
 
-    width: 600px; // Just to start; the slider will expand as items are loaded
+    width: auto; // 600px; // Just to start; the slider will expand as items are loaded
   }
   .left, .right {
     position: absolute;
@@ -23,7 +23,7 @@
     top: 57px;
 
     cursor: pointer;
-    z-index: 1;
+    z-index: 1200; // In front of all content
   }
   .left {
     left: 0;
@@ -39,21 +39,41 @@
     background-color: inherit;
     position: relative;
     overflow: hidden;
+    &.highlighted {
+      border: 1px solid red;
+    }
+    div.slider-foreground {
+      visibility: hidden;
+    }
+    div.slider-background {
+      position: absolute;
+      left: 0;
+      width: 100%;
+    }
+    div.slider-left {
+    }
+    div.slider-right {
+      // visibility: hidden;
+      position: absolute;
+      left: 0;
+      top: 0;
+      z-index: 1100;
+    }
     div.slider-pic {
       height: 12em;
       display: inline-block;
       float: left;
     }
     div.cardlet-item {
-      width: 200px;
-      height: 24em;
+      width: 250px;
+      height: 27em;
       display: inline-block;
       float: left;
       div.bottom-strip {
         position: absolute;
         bottom: 0;
         left: 0;
-        right: 0;
+        right: 0.8em;
         height: 3em;
         font-size: 1.8em;
         background: $recipes-card-background-color;

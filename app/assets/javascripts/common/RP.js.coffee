@@ -388,8 +388,6 @@ RP.prependElmt = (elmt, parent) ->
 RP.appendElmt = (item, parent) ->
 	if !RP.masonry.appendItem item, parent
 		$(parent).append item
-		if $(parent).hasClass "swell"
-			$(parent).css "width", (parseInt($(parent).css('width')) + parseInt($(item).css 'width'))
 
 RP.notify = (what, entity) ->
 	# If the entity or the dialog have hooks declared, use them

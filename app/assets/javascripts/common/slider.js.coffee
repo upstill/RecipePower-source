@@ -1,6 +1,16 @@
 RP.slider ||= {}
 
 jQuery ->
+	$(document).on 'mouseenter', 'div.slider-item', (event) ->
+		console.log "entering item of class " + event.target.attributes.class
+		elmt = $(event.target).closest 'div.slider-item'
+		if !$('div.slider-right', elmt).hasClass 'always-on'
+			$('div.slider-right', elmt).fadeIn()
+	$(document).on 'mouseleave', 'div.slider-item', (event) ->
+		console.log "leaving item of class " + event.target.attributes.class
+		elmt = $(event.target).closest 'div.slider-item'
+		if !$('div.slider-right', elmt).hasClass 'always-on'
+			$('div.slider-right', elmt).fadeOut()
 
 RP.slider.setup = (button_elmt) ->
 	$(button_elmt).hover RP.slider.hoverin, RP.slider.hoverout

@@ -3,9 +3,9 @@
       <table class="cardlet-table">
         <tr>
           <% if defined?(pic_mode) && pic_mode %>
-            <% if it = resizing_image_tag(decorator, class: "pic-box", fill_mode: pic_mode) %>
-              <td class="pic-box" valign="top"><%= it %></td>
-            <% end %>
+              <% if it = resizing_image_tag(decorator, class: "pic-box", fill_mode: pic_mode) %>
+                  <td class="pic-box" valign="top"><%= it %></td>
+              <% end %>
           <% end %>
           <td valign="top" style="position: relative; padding-bottom: 3em;">
             <div class="title-glyph top-right">
@@ -23,6 +23,10 @@
             <p class="description">
               <%= presenter.present_field "rcpDescription" %>
             </p>
+          </td>
+        </tr>
+        <tr>
+          <td>
             <div class="bottom-strip">
               <% if params[:accept_invitation_link] %>
                   <div style="width: 400px; margin: 0 auto;">
@@ -34,8 +38,6 @@
               <%= collectible_vote_buttons decorator.object %>
             </div>
           </td>
-        </tr>
-        <tr>
         </tr>
       </table>
     </div>

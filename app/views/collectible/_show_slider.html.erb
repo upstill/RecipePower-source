@@ -1,9 +1,19 @@
-<div class="slider-pic">
-  <%= safe_image_div decorator, true, class: "pic-box", fill_mode: "fixed-height" %>
+<div class="slider-left">
+  <div class="slider-pic">
+    <%= safe_image_div decorator, true, class: "pic-box", fill_mode: "fixed-height" %>
+  </div>
+  <p class="slider-title">
+    <%= decorator.title %>
+  </p>
+  <div class="slider-fader">
+  </div>
 </div>
-<%= render_item decorator, :cardlet %>
-<p class="slider-title">
-  <%= decorator.title %>
-</p>
-<div class="slider-fader">
-</div>
+<% if decorator.imgdata.present? %>
+    <div class="slider-right" style="display: none;">
+      <%= render_item decorator, :cardlet %>
+    </div>
+<% else %>
+    <div class="slider-right always-on">
+      <%= render_item decorator, :cardlet %>
+    </div>
+<% end %>
