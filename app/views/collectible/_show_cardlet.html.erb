@@ -12,7 +12,7 @@
               <%= collectible_collect_icon decorator %>
             </div>
             <div class="title-box">
-              <%= link_to decorator.title, decorator.url, class: "title-link", data: {report: polymorphic_path([:touch, decorator.object])} %>
+              <%= presenter.external_link class: "title-link" %>
             </div>
             <div class="source">
               source: <%= link_to decorator.sourcename, decorator.sourcehome, class: "source-link" %>

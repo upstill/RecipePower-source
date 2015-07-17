@@ -26,6 +26,12 @@ class CollectiblePresenter < BasePresenter
     end
   end
 
+  def external_link options={}
+    (data = (options[:data] || {}))[:report] = h.polymorphic_path [:touch, @decorator.object]
+    # link_to @decorator.title, @decorator.url, options.merge(data: data)
+    link_to_submit @decorator.title, @decorator.object, options.merge(:mode => :partial, :data => data)
+  end
+
   def description
     h.content_tag :p, @decorator.description, class: "resource-element subtitle"
   end
