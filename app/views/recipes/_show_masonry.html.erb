@@ -1,2 +1,48 @@
-<%= render "recipes/show_cardlet", decorator: decorator, pic_mode: "fixed-width", card_type: 'masonry' %>
+<%# render "recipes/show_cardlet", decorator: decorator, pic_mode: "fixed-width", card_type: 'masonry' %>
+<%= present decorator, current_user_or_guest do |presenter| %>
+    <div class="card-item cardlet-item <%= "#{card_type}-card " if defined?(card_type) %>recipe-card">
+      <table class="cardlet-table">
+        <tr>
+          <% if defined?(pic_mode) && pic_mode %>
+              <% if it = resizing_image_tag(decorator, class: "pic-box", fill_mode: pic_mode) %>
+                  <td class="pic-box" valign="top"><%= it %></td>
+              <% end %>
+          <% end %>
+          <td valign="top" style="position: relative; padding-bottom: 3em;">
+            <div class="title-glyph top-right">
+              <%= collectible_collect_icon decorator %>
+            </div>
+            <div class="title-box">
+              <%= presenter.external_link class: "title-link" %>
+            </div>
+            <div class="source">
+              source: <%= link_to decorator.sourcename, decorator.sourcehome, class: "source-link" %>
+            </div>
+            <div class="tags">
+              <%= presenter.present_field "tags" %>
+            </div>
+            <p class="description">
+              <%= presenter.present_field "rcpDescription" %>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="bottom-strip">
+              <% if params[:accept_invitation_link] %>
+                  <div style="width: 400px; margin: 0 auto;">
+                    <%= link_to "Save on RecipePower", params[:accept_invitation_link], class: "btn btn-lg btn-success", style: "margin-right:40px; margin-top:30px" %>
+                    <%= link_to "Go to Recipe", decorator.url, class: "btn btn-lg btn-info", style: "margin-top: 30px" %>
+                  </div>
+              <% end %>
+              <%= collectible_share_button decorator %>
+              <%= collectible_vote_buttons decorator.object %>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+<% end %>
+
+
 
