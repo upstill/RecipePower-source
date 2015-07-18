@@ -38,102 +38,111 @@ div.slider {
     height: 14em;
     width: auto;
     // float: left;
-    margin-right: 25px;
+    margin-right: 15px;
     background-color: inherit;
     position: relative;
     // overflow: hidden;
     display: inline-block;
-    &.highlighted {
-      border: 1px solid red;
-    }
+    white-space: normal;
     div.slider-left {
+      div.slider-pic {
+        height: 12em;
+        display: inline-block;
+        float: left;
+        .pic-box {
+          display: inline-block;
+          float: left;
+          display: -webkit-box;
+          display: -moz-box;
+          display: box;
+
+          -webkit-box-orient: vertical;
+          -moz-box-orient: vertical;
+          box-orient: vertical;
+
+          -webkit-box-align: center;
+          -moz-box-align: center;
+          box-align: center;
+
+          -webkit-box-pack: center;
+          -moz-box-pack: center;
+          box-pack: center;
+
+          img.fixed-height {
+            height: 100%;
+            width: auto;
+          }
+        }
+      }
+      p.slider-title {
+        overflow: hidden;
+        background-color: inherit;
+        position: absolute;
+        width: 1000px;
+        height: 1.3em;
+        bottom: 0;
+        padding-left: 0.2em;
+        font-family: $archivo;
+        font-size: 1em;
+        color: #777777;
+        z-index: 1000;
+      }
+      div.slider-fader {
+        position: absolute;
+        width: 3em;
+        height: 2em;
+        bottom: 0;
+        right: 0;
+        z-index: 1001; // $recipes-panel-background-color: #d8dde0;
+      }
     }
     div.slider-right {
       // visibility: hidden;
       position: absolute;
       left: 0;
       top: 0;
+      right: 0;
+      bottom: 0;
       z-index: 1100;
-    }
-    div.slider-pic {
-      height: 12em;
-      display: inline-block;
-      float: left;
-    }
-    div.cardlet-item {
-      width: 250px;
-      height: 27em;
-      display: inline-block;
-      float: left;
-      div.bottom-strip {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0.8em;
-        height: 3em;
-        font-size: 1.8em;
-        background: $recipes-card-background-color;
+      div.cardlet-item {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        div.title-glyph.top-right {
+          font-size: 2.5em;
+          position: absolute;
+          top: 0.1em;
+          right: 0.2em;
+        }
+        div.top-matter {
+          height: 25em;
+          padding-left: 1em;
+          padding-right: 1em;
+          padding-top: 0.5em;
+          .source {
+            margin-left: -1em;
+            margin-right: -1em;
+          }
+          p.description {
+            font-size: 0.8em
+          }
+        }
         div.share-button {
           position: absolute;
           bottom: 0em;
-          left: 0.3em;
-          font-size: 2em;
+          left: 0.2em;
+          height: 1.2em;
+          font-size: 3em;
         }
         div.vote-buttons {
-          font-size: 0.8em;
+          font-size: 1.3em;
           position: absolute;
-          margin: 0.4em;
+          margin: 0em;
           bottom: 0;
-          right: 0;
+          right: 0.3em;
         }
       }
     }
-    p.slider-title {
-      overflow: hidden;
-      background-color: inherit;
-      position: absolute;
-      width: 1000px;
-      height: 1.3em;
-      bottom: 0;
-      padding-left: 0.2em;
-      font-family: $archivo;
-      font-size: 1em;
-      color: #777777;
-      z-index: 1000;
-    }
-    div.slider-fader {
-      position: absolute;
-      width: 3em;
-      height: 2em;
-      bottom: 0;
-      right: 0;
-      z-index: 1001;  // $recipes-panel-background-color: #d8dde0;
-    }
-    .pic-box {
-      display: inline-block;
-      float: left;
-      display: -webkit-box;
-      display: -moz-box;
-      display: box;
-
-      -webkit-box-orient: vertical;
-      -moz-box-orient: vertical;
-      box-orient: vertical;
-
-      -webkit-box-align: center;
-      -moz-box-align: center;
-      box-align: center;
-
-      -webkit-box-pack: center;
-      -moz-box-pack: center;
-      box-pack: center;
-
-      img.fixed-height {
-        height:100%;
-        width:auto;
-      }
-    }
-
     .datablock {
       padding: 0px 8px;
       height: 100%; // auto; // 4.6em;
@@ -190,7 +199,6 @@ div.slider {
       }
 
     }
-
 
   }
 }
@@ -264,27 +272,35 @@ div.results-panel.feeds div.slider-fader {
   -o-transition: opacity 0.2s;
   -webkit-transition: opacity 0.2s;
 }
+
 .book:hover {
-    opacity: 0.5;
+  opacity: 0.5;
 }
+
 .book:nth-child(1) {
-    background-color: #ff0000;
+  background-color: #ff0000;
 }
+
 .book:nth-child(2) {
-    background-color: #ffaa00;
+  background-color: #ffaa00;
 }
+
 .book:nth-child(3) {
-    background-color: #ffff00;
+  background-color: #ffff00;
 }
+
 .book:nth-child(4) {
-    background-color: #00ff00;
+  background-color: #00ff00;
 }
+
 .book:nth-child(5) {
-    background-color: #0000ff;
+  background-color: #0000ff;
 }
+
 .book:nth-child(6) {
-    background-color: #aa00ff;
+  background-color: #aa00ff;
 }
+
 .book:nth-child(7) {
-    background-color: #ff00ff;
+  background-color: #ff00ff;
 }

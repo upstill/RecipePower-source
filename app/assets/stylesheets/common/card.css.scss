@@ -63,12 +63,6 @@ div.card-item {
   div.title-glyph {
     color: #ea8a7a;
     height: 2em;
-    &.top-right {
-      font-size: 2.5em;
-      position: absolute;
-      top: -0.3em;
-      right: -0.2em;
-    }
   }
   div.source {
     font-family: $oswald-light;
@@ -97,20 +91,6 @@ div.card-item {
       height: 3em;
       font-size: 1.8em;
       background: $recipes-card-background-color;
-      div.share-button {
-        position: absolute;
-        bottom: 0em;
-        left: 0.2em;
-        height: 1.2em;
-        font-size: 2em;
-      }
-      div.vote-buttons {
-        font-size: 0.8em;
-        position: absolute;
-        margin: 0em;
-        bottom: 0;
-        right: 0;
-      }
     }
     div.source {
       border-bottom: 0.3em solid #b95454;
@@ -120,7 +100,7 @@ div.card-item {
       // min-height: 3.6em;
       // margin-bottom: 1em;
       // margin-top: 0.2em;
-      margin-right: 1.5em;
+      margin-right: 1em;
       font-size: 2.1em;
       font-family: $archivo;
       font-weight: 700;
