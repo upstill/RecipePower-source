@@ -35,5 +35,7 @@
       </p>
   <% end %>
 </nav>
-<div class="container menuback" ></div>
+<% if user_signed_in? %>
+    <div class="container menuback" ></div>
+<% end %>
 <%= render 'layouts/filter_header', with_nav: true %>
