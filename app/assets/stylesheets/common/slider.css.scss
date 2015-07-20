@@ -14,7 +14,8 @@ div.slider {
     margin: 0;
     padding: 0;
     // border: 2px solid #0000ff;
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
     white-space: nowrap;
     height: 16em;
     // width: auto; // 600px; // Just to start; the slider will expand as items are loaded
