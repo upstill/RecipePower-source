@@ -26,10 +26,6 @@ class UserPresenter < BasePresenter
     @viewer && (@viewer.id == user.id)
   end
 
-  def linked_name
-    card_object_link(user.fullname.present? ? user.fullname : user.username)
-  end
-
   def card_header_content
     mail_link = link_to_submit("Send email", mailto_user_path(user, mode: :modal), button_size: "xs") unless is_viewer?
     uhandle = content_tag :span, "(aka #{username})", class: "user-handle"

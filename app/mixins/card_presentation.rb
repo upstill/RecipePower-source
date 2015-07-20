@@ -5,17 +5,18 @@ module CardPresentation
   end
 
   def card_avatar with_form=false
-    card_object_link image_with_error_recovery(decorator.imgdata(true),
-                                               class: "fitPic",
-                                               onload: 'doFitImage(event);',
-                                               alt: decorator.fallback_imgdata,
-                                               data: { fillmode: "width" }
-                     )
+    image_with_error_recovery decorator.imgdata(true),
+                              class: "fitPic",
+                              onload: 'doFitImage(event);',
+                              alt: decorator.fallback_imgdata,
+                              data: {fillmode: "width"}
   end
 
-  # Take the opportunity to wrap the content in a link to the presented object
-  def card_object_link content
-    content # h.link_to_if(user.url.present?, content, user.url)
+  # Provide the card's title with a link to the entity involved
+  # NB This is meant to be overridden by entities (recipes, sites...) that link externally
+  def card_homelink options={}
+    (data = (options[:data] || {}))[:report] = h.polymorphic_path [:touch, decorator.object]
+    link_to_submit decorator.title, decorator.object, options.merge(:mode => :partial, :data => data)
   end
 
   def card_header
@@ -49,7 +50,7 @@ module CardPresentation
 
   def card_aspect_editor_replacement which
     if repl = self.aspect_editor(which)
-      [ card_aspect_selector(which), repl ]
+      [card_aspect_selector(which), repl]
     end
   end
 
@@ -59,7 +60,7 @@ module CardPresentation
 
   def card_aspect_replacement which
     if repl = aspect(which)
-      [ card_aspect_selector(which), repl ]
+      [card_aspect_selector(which), repl]
     end
   end
 
@@ -81,7 +82,7 @@ module CardPresentation
 
   # Enumerate the aspects for a given column
   def card_aspects for_column
-    [ ]
+    []
   end
 
   def present_field_wrapped what=nil

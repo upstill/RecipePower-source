@@ -4,7 +4,7 @@ class UserDecorator < CollectibleDecorator
   # delegate_all
 
   def title
-    object.handle
+    object.fullname.present? ? object.fullname : object.username
   end
 
   def sourcename
