@@ -10,7 +10,7 @@ RP.masonry.onload = (event) ->
 	# Initialize Masonry handling for list items
 	options = $(elmt).data('masonryOptions') || { }
 	# Assert defaults for Masonry options
-	options.columnWidth ||= 90 # In fact, masonry will use the width of the first item for columnWidth
+	options.columnWidth ||= 80 # In fact, masonry will use the width of the first item for columnWidth
 	options.gutter ||= 10
 	options.itemSelector ||= '.masonry-item'
 	$(elmt).masonry options
