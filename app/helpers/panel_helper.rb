@@ -17,6 +17,10 @@ module PanelHelper
     ["a.collapse-button.#{type.extensions_to_selector}", panel_collapse_button(type, item_mode)]
   end
 
+  def panel_expand_link url, type
+    link_to_submit "SEE ALL", assert_query(url, entity_type: type), :mode => :partial, class: "expand-link"
+  end
+
   def panel_org_menu url, type, cur_org
     links = [ [:rating, "my rating" ], :popularity, :newest, [ :random, "hit me" ] ].collect { |org|
       org, label = org.is_a?(Array) ? org : [ org, org.to_s ]

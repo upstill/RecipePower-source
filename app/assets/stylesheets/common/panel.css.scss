@@ -63,9 +63,12 @@ div.results-panel {
       }
     }
     .collapse-button {
-      // display: inline-block;
-      // width: 200px;
       float: right;
+    }
+    .expand-link {
+      float: right;
+      margin: 0.3em;
+      font-size: 1.3em;
     }
     .suggest {
       // display: inline-block;
