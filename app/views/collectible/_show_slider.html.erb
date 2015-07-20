@@ -1,19 +1,16 @@
-<div class="slider-left">
-  <div class="slider-pic">
-    <%= safe_image_div decorator, true, class: "pic-box", fill_mode: "fixed-height" %>
-  </div>
-  <p class="slider-title">
-    <%= decorator.title %>
-  </p>
-  <div class="slider-fader">
-  </div>
-</div>
-<% if decorator.imgdata.present? %>
-    <div class="slider-right" style="display: none;">
-      <%= render_item decorator, :cardlet %>
+<%= present decorator, current_user_or_guest do |presenter| %>
+    <div class="slider-left">
+      <div class="slider-pic">
+        <%= safe_image_div decorator, true, class: "pic-box", fill_mode: "fixed-height" %>
+      </div>
+      <p class="slider-title">
+        <%= decorator.title %>
+      </p>
+      <!--A slider fader sits over the right side of a title and fades too-long titles -->
+      <div class="slider-fader">
+      </div>
     </div>
-<% else %>
-    <div class="slider-right always-on">
+    <div class="slider-right <%= 'pop-cardlet' if presenter.card_show_avatar %>">
       <%= render_item decorator, :cardlet %>
     </div>
 <% end %>

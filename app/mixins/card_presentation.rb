@@ -12,6 +12,11 @@ module CardPresentation
                               data: {fillmode: "width"}
   end
 
+  # By default, show the card if there's an avatar OR a backup avatar
+  def card_show_avatar
+    decorator.imgdata(true).present?
+  end
+
   # Provide the card's title with a link to the entity involved
   # NB This is meant to be overridden by entities (recipes, sites...) that link externally
   def card_homelink options={}
