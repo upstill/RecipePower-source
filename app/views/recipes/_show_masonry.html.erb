@@ -3,10 +3,8 @@
     <div class="card-item cardlet-item <%= "#{card_type}-card " if defined?(card_type) %>recipe-card">
       <table class="cardlet-table">
         <tr>
-          <% if defined?(pic_mode) && pic_mode %>
-              <% if it = resizing_image_tag(decorator, class: "pic-box", fill_mode: pic_mode) %>
-                  <td class="pic-box" valign="top"><%= it %></td>
-              <% end %>
+          <% if it = resizing_image_tag(decorator, class: "pic-box", fill_mode: "fixed-width") %>
+              <td rowspan="2" class="pic-box" valign="top"><%= it %></td>
           <% end %>
           <td valign="top" style="position: relative; padding-bottom: 3em;">
             <div class="title-glyph top-right">
@@ -27,17 +25,15 @@
           </td>
         </tr>
         <tr>
-          <td>
-            <div class="bottom-strip">
-              <% if params[:accept_invitation_link] %>
-                  <div style="width: 400px; margin: 0 auto;">
-                    <%= link_to "Save on RecipePower", params[:accept_invitation_link], class: "btn btn-lg btn-success", style: "margin-right:40px; margin-top:30px" %>
-                    <%= link_to "Go to Recipe", decorator.url, class: "btn btn-lg btn-info", style: "margin-top: 30px" %>
-                  </div>
-              <% end %>
-              <%= collectible_share_button decorator %>
-              <%= collectible_vote_buttons decorator.object %>
-            </div>
+          <td class="bottom">
+            <% if params[:accept_invitation_link] %>
+                <div style="width: 400px; margin: 0 auto;">
+                  <%= link_to "Save on RecipePower", params[:accept_invitation_link], class: "btn btn-lg btn-success", style: "margin-right:40px; margin-top:30px" %>
+                  <%= link_to "Go to Recipe", decorator.url, class: "btn btn-lg btn-info", style: "margin-top: 30px" %>
+                </div>
+            <% end %>
+            <%= collectible_share_button decorator %>
+            <%= collectible_vote_buttons decorator.object %>
           </td>
         </tr>
       </table>

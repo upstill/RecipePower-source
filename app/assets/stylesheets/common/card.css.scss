@@ -34,7 +34,7 @@ div.associated-card {
 }
 
 div.masonry-item {
-  width: 185px;
+  width: 350px;
   margin-bottom: 10px;
 }
 
@@ -49,20 +49,15 @@ div.card-item {
     margin: 0.5em;
   }
   padding-bottom: 0.5em;
-  div.vote-buttons {
-    font-size: 1.2em;
-    float: right;
-    padding-top: 0.5em;
-    a.vote-button {
-      font-size: 1.4em;
-    }
-  }
-  div.share-button {
-    font-size: 2em;
-  }
   div.title-glyph {
     color: #ea8a7a;
     height: 2em;
+    &.top-right {
+      font-size: 2.5em;
+      position: absolute;
+      top: 0.1em;
+      right: 0.2em;
+    }
   }
   div.source {
     font-family: $oswald-light;
@@ -77,8 +72,7 @@ div.card-item {
   }
   &.cardlet-item {
     min-width: 200px;
-    padding: 1em;
-    // height: 200px;
+    padding: 1em 1em 0 1em;
     background-color: $recipes-card-background-color;
     font-family: $archivo;
     margin-top: 0;

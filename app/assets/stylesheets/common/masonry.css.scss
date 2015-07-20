@@ -44,3 +44,35 @@ div.masonry-item-contents.grid-item {
   }
 
 }
+
+div.masonry-item {
+  table.cardlet-table {
+    div.title-glyph {
+      &.top-right {
+        font-size: 2.5em;
+        position: absolute;
+        top: -0.3em;
+        right: -0.2em;
+      }
+    }
+    td.pic-box {
+      padding-bottom: 0.5em;
+    }
+    td.bottom {
+      font-size: 1.4em;
+      div.vote-buttons {
+        font-size: 0.8em;
+        float: right;
+        margin-right: -0.5em;
+        margin-bottom: 0.5em;
+        a.vote-button {
+          font-size: 1.4em;
+        }
+      }
+      div.share-button {
+        float: left;
+        font-size: 2em;
+      }
+    }
+  }
+}
