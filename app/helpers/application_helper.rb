@@ -230,7 +230,7 @@ module ApplicationHelper
   end
 
   # Get jQuery from the Google CDN, falling back to the version in jquery-rails if unavailable
-  def jquery_include_tag use_jq2=false
+  def jquery_include_tag no_cdn=false, use_jq2=false
     if use_jq2
       localfile = 'jquery2'
       version = Jquery::Rails::JQUERY_2_VERSION
@@ -238,7 +238,7 @@ module ApplicationHelper
       localfile = 'jquery'
       version = Jquery::Rails::JQUERY_VERSION
     end
-    [ # javascript_include_tag("//ajax.googleapis.com/ajax/libs/jquery/#{version}/jquery.min.js"),
+    [ (javascript_include_tag("//ajax.googleapis.com/ajax/libs/jquery/#{version}/jquery.min.js") unless no_cdn),
       javascript_tag("window.jQuery || document.write(unescape('#{javascript_include_tag(localfile).gsub('<','%3C')}'))")
     ].join("\n").html_safe
   end
