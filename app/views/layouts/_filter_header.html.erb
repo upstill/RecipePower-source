@@ -4,7 +4,7 @@
                        :include_blank => false,
                        :onchange => %Q{RP.submit.onselect( event ); } %>
     <% end %>
-    <div class="filter-element" style="position: fixed; margin-top: -65px; margin-left: 240px;">
+    <div class="filter-element">
       <%= token_input_query rows: 1,
                             autofocus: true,
                             data: {:"on-add" => "RP.submit.enclosing_form",

@@ -191,35 +191,85 @@ span.caret {
   content: image-url("rp-measuring-spoons.png");
 }
 
+nav.navbar-fixed-top {
+  // background-color: $page-background-color;
+  // padding-bottom: 50px;
+}
+
 //contents of pages
 .container {
-  margin-top: 200px;
-  padding-top: 10px;
   background-color: $page-background-color;
+  z-index: 990;
+  &.med {
+    padding-top: 200px;
+  }
   &.top {
+    margin-top: 200px;
+    padding-top: 10px;
     padding-bottom: 200px;
-    z-index: 990;
     > div.row {
       margin-left: 15px;
       margin-right: 15px;
     }
   }
-  &.menuback {
-    z-index: 991;
+}
+
+div.menuback {
+  z-index: 1029;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  margin-top: 0;
+  margin-right: auto;
+  margin-left: auto;
+  height: 200px;
+  background-color: $page-background-color;
+  div.triggered-form {
+    position: absolute;
+    top: 135px;
+    left: 220px;
+  }
+}
+
+div.generic-top {
+  width: 100%;
+  position: absolute;
+  z-index: 991;
+  div {
+    display: inline-block;
+    float: left;
+    &.logo {
+      margin-left: 30px;
+    }
+    &.search-top {
+      margin-left: 10px;
+    }
+  }
+}
+
+div.signin-link {
+  z-index: 992;
+  &.full-page {
+    position: absolute;
+    right: 0.5em;
+    top: 0.5em;
+    a {
+      color: white;
+    }
+  }
+  &.margin {
     position: fixed;
-    top: 0;
-    right: 0;
-    left: 0;
-    margin-top: 0;
-    margin-right: auto;
-    margin-left: auto;
-    height: 200px;
+    right: 0.5em;
+    top: 0.5em;
+    a {
+      color: #aaa;
+    }
   }
 }
 
 div.filter-element {
   width: 500px;
-  z-index: 998;
   input#token-input-querytags {
     font-family: Oswald-Light, sans-serif;
     font-style: italic;

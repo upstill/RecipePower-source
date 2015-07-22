@@ -3,10 +3,10 @@ module CardsHelper
     if object.class == User
       if object == current_user
         "viewer"
-      elsif current_user.follows? object
+      elsif current_user && (current_user.follows? object)
         "friend"
       else
-        "user"
+        "friend" # "user"
       end
     else
       object.class.to_s.underscore

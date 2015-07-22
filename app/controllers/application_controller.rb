@@ -100,7 +100,7 @@ class ApplicationController < ActionController::Base
         session[:last_time] = time_now
         session[:serve_count] += 1
         return
-      elsif false && (last_serve = RpEvent.last(:serve, current_user))
+      elsif last_serve = RpEvent.last(:serve, current_user)
         # Close out and update the previous session to record serve count and last time
         last_serve.data = {serve_count: session[:serve_count]}
         last_serve.updated_at = session[:last_time]

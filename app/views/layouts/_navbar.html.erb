@@ -8,34 +8,20 @@
       <span class="icon-bar"></span>
     </button>
     <a class="navbar-brand" href="/">
-    <%= image_tag 'rp-logo.png' %>
+      <%= image_tag 'rp-logo.png' %>
     </a>
-    <% if user_signed_in? %>
-        <div class="collapse navbar-collapse navbar-left" id="RP-navbar-collapse">
-          <ul class="nav navbar-nav">
-            <%= collections_navtab %>
-            <%= friends_navtab %>
-            <%= my_lists_navtab %>
-            <%# other_lists_navtab %>
-            <%= feeds_navtab %>
-            <%# news_navtab %>
-            <%# more_navtab %>
-            <%= home_navtab %>
-         </ul>
-        </div>
-    <% end %>
+
+    <div class="collapse navbar-collapse navbar-left" id="RP-navbar-collapse">
+      <ul class="nav navbar-nav">
+        <%= collections_navtab %>
+        <%= friends_navtab %>
+        <%= my_lists_navtab %>
+        <%# other_lists_navtab %>
+        <%= feeds_navtab %>
+        <%# news_navtab %>
+        <%# more_navtab %>
+        <%= home_navtab %>
+      </ul>
+    </div>
   </div>
-  <% unless user_signed_in? %>
-      <p class="navbar-text navbar-right active">
-        <%= link_to_submit "Sign In", new_user_session_path,
-                          class: "navbar-link", 
-			              preload: true,
-			              mode: :modal,
-                          style: "color: white; margin-right:20px" %>
-      </p>
-  <% end %>
 </nav>
-<% if user_signed_in? %>
-    <div class="container menuback" ></div>
-<% end %>
-<%= render 'layouts/filter_header', with_nav: true %>
