@@ -125,9 +125,18 @@ div.slider {
           .source {
             margin-left: -1em;
             margin-right: -1em;
+            font-size: 1.2em;
           }
           p.description {
-            font-size: 0.8em
+            margin-top: 0.5em;
+            margin-bottom: 0.1em;
+            font-size: 1.3em;
+            color: #bbb;
+          }
+          p.comment {
+            margin-top: 0.5em;
+            font-style: italic;
+            font-size: 0.8em;
           }
         }
         div.share-button {

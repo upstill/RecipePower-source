@@ -7,24 +7,33 @@
         <div class="title-box">
           <%= presenter.card_homelink class: "title-link" %>
         </div>
-        <div class="source">
-          source: <%= link_to decorator.sourcename, decorator.sourcehome, class: "source-link" %>
-        </div>
-        <div class="tags">
-          <%= presenter.present_field "tags" %>
-          <p class="description">
-            <%= presenter.present_field "rcpDescription" %>
-          </p>
-        </div>
-      </div>
-        <% if params[:accept_invitation_link] %>
-            <div style="width: 400px; margin: 0 auto;">
-              <%= link_to "Save on RecipePower", params[:accept_invitation_link], class: "btn btn-lg btn-success", style: "margin-right:40px; margin-top:30px" %>
-              <%= link_to "Go to Recipe", decorator.url, class: "btn btn-lg btn-info", style: "margin-top: 30px" %>
+        <% if decorator.description.present? %>
+            <p class="description">
+              <%= decorator.description %>
+            </p>
+        <% end %>
+        <% if decorator.sourcehome.present? %>
+            <div class="source">
+              source: <%= link_to decorator.sourcename, decorator.sourcehome, class: "source-link" %>
             </div>
         <% end %>
-        <%= collectible_share_button decorator %>
-        <%= collectible_vote_buttons decorator.object %>
+        <div class="tags">
+          <%= presenter.present_field "tags" %>
+          <% if defined?(comment) && comment.present? %>
+              <p class="comment">
+                <%= comment %>
+              </p>
+          <% end %>
+        </div>
+      </div>
+      <% if params[:accept_invitation_link] %>
+          <div style="width: 400px; margin: 0 auto;">
+            <%= link_to "Save on RecipePower", params[:accept_invitation_link], class: "btn btn-lg btn-success", style: "margin-right:40px; margin-top:30px" %>
+            <%= link_to "Go to Recipe", decorator.url, class: "btn btn-lg btn-info", style: "margin-top: 30px" %>
+          </div>
+      <% end %>
+      <%= collectible_share_button decorator %>
+      <%= collectible_vote_buttons decorator.object %>
     </div>
 <% end %>
 

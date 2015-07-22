@@ -78,7 +78,7 @@ class CollectibleDecorator < Draper::Decorator
       when "classname_lower"
         object.class.to_s.downcase
       else
-        method(fieldname.to_sym).call rescue nil
+        (method(fieldname.to_sym).call rescue nil) || ""
     end
   end
 

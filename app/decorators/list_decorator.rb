@@ -24,6 +24,8 @@ class ListDecorator < CollectibleDecorator
           "The best in my collection."
         when "Now Cooking"
           "Recipes in active rotation."
+        when "To Try"
+          "Earmarked for later."
       end
     }
   end

@@ -107,15 +107,15 @@ module ItemHelper
     [ item_insertion(decorator, context) ]
   end
 
-  def render_item_unwrapped item_or_decorator=nil, item_mode=nil
+  def render_item_unwrapped item_or_decorator=nil, item_mode=nil, locals={}
     item, item_mode = item_preflight item_or_decorator, (item_mode || :card)
     if partial = item_partial_name(item, item_mode)
-      with_format("html") { render partial, decorator: @decorator }
+      with_format("html") { render partial, locals.merge( decorator: @decorator ) }
     end
   end
 
-  def render_item item_or_decorator=nil, item_mode=nil
-    return "" unless (rendering = render_item_unwrapped(item_or_decorator, item_mode)).present?
+  def render_item item_or_decorator=nil, item_mode=nil, locals={}
+    return "" unless (rendering = render_item_unwrapped(item_or_decorator, item_mode, locals)).present?
     item, item_mode = item_preflight item_or_decorator, item_mode
     container_class = item_partial_class item_mode
     # Encapsulate the rendering in the standard shell for the item mode

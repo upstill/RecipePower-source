@@ -11,6 +11,6 @@
       </div>
     </div>
     <div class="slider-right <%= 'pop-cardlet' if presenter.card_show_avatar %>">
-      <%= render_item decorator, :cardlet %>
+      <%= render_item decorator, :cardlet, comment: (defined?(comment) && comment) %>
     </div>
 <% end %>

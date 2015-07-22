@@ -36,7 +36,7 @@
             <div class="tags">
               <%= presenter.present_field_wrapped "tags" %>
             </div>
-            <p class="hide-if-empty"><%= presenter.present_field_wrapped "rcpDescription" %></p>
+            <p class="hide-if-empty"><%= presenter.present_field_wrapped "description" %></p>
             <% if params[:accept_invitation_link] %>
                 <div style="width: 400px; margin: 0 auto;">
                   <%= link_to "Save on RecipePower", params[:accept_invitation_link], class: "btn btn-lg btn-success", style: "margin-right:40px; margin-top:30px" %>

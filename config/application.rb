@@ -12,14 +12,14 @@ module RP
 
     # Custom directories with classes and modules you want to be autoloadable.
     config.autoload_paths += %W(
-      #{config.root}/app/models/concerns
+    #{config.root}/app/models/concerns
       #{config.root}/app/services
       #{config.root}/app/presenters
       #{config.root}/app/mixins
       #{config.root}/app/controllers/cmods
     )
     # require class extensions right now
-    Dir[Rails.root.join('app', 'extensions', "*.rb")].each {|l| require l }
+    Dir[Rails.root.join('app', 'extensions', "*.rb")].each { |l| require l }
 
     # Only load the plugins named here, in the order given (default is alphabetical).
     # :all can be used as a placeholder for all plugins not explicitly named.
@@ -51,7 +51,7 @@ module RP
     # Version of your assets, change this if you want to expire all your assets
     config.assets.enabled = true
     config.assets.version = '1.0'
-    
+
     # Devise suggests the following
     # If you are deploying Rails 3.1 on Heroku, you may want to set:
     config.assets.initialize_on_precompile = false
@@ -61,5 +61,9 @@ module RP
     # Handle jquery through a CDN (optionally)
     # config.assets.precompile += ["jquery.min.js"]
     config.use_jquery2 = true
+
+    config.after_initialize do
+      ResultsCache.delete_all
+    end
   end
 end

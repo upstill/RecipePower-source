@@ -286,7 +286,7 @@ class UserContentPresenter < FilteredPresenter
 
   # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
   def partials &block
-    types = @entity_type ? [ @entity_type ] : %w{ recipes lists friends feeds } # [ "recipes", "lists", "friends", "feeds" ]
+    types = @entity_type ? [ @entity_type ] : %w{ recipes } # %w{ recipes lists friends feeds }
     if @entity_type
       block.call "filtered_presenter/partial_panel", title_for(@entity_type), @entity_type, results_path
     else
