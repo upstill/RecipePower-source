@@ -108,18 +108,38 @@ module ItemHelper
   end
 
   def render_item_unwrapped item_or_decorator=nil, item_mode=nil, locals={}
+    if item_mode.is_a? Hash
+      item_mode, locals = nil, item_mode
+    end
     item, item_mode = item_preflight item_or_decorator, (item_mode || :card)
     if partial = item_partial_name(item, item_mode)
       with_format("html") { render partial, locals.merge( decorator: @decorator ) }
     end
   end
 
+
   def render_item item_or_decorator=nil, item_mode=nil, locals={}
-    return "" unless (rendering = render_item_unwrapped(item_or_decorator, item_mode, locals)).present?
-    item, item_mode = item_preflight item_or_decorator, item_mode
+    # item_or_decorator is defined recursively: if it's an array, we recur on each member of the array, joining the
+    # results
+    if item_mode.is_a? Hash
+      item_mode, locals = nil, item_mode
+    end
+    if item_or_decorator.is_a? Array
+      rendering = item_or_decorator.collect { |spec| render_item *spec }.join('').html_safe
+    else
+      rendering = render_item_unwrapped item_or_decorator, item_mode, locals # locals are the local bindings for the item
+      item, item_mode = item_preflight item_or_decorator, item_mode
+    end
+    return "" unless rendering.present?
     container_class = item_partial_class item_mode
     # Encapsulate the rendering in the standard shell for the item mode
     case item_mode
+      when :querify
+        querify_block locals.delete(:url), rendering, locals # Locals are the options for querify_block
+      when :partial
+        # Enclose the rendering in a partial named by locals[:partial_name]
+        partial_name = locals.delete(:partial_name)
+        with_format("html") { render partial_name, locals.merge(content: rendering) }
       when :masonry
         content_tag :div, rendering, class: container_class+" stream-item"
       when :modal
@@ -133,6 +153,11 @@ module ItemHelper
                     rendering,
                     class: container_class).html_safe
     end || rendering
+  end
+
+  # Syntactic sugar to package up the parameters to render_item for recursive description
+  def item_to_render *args
+    args
   end
 
 end

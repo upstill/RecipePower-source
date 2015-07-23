@@ -171,7 +171,9 @@ class FilteredPresenter
   def do_page_elements &block
     block.call :card
     block.call :comments
-    block.call :owned
+    block.call [[
+                 [ :panel, { title: title, type: type, url: url } ]
+                ], :querify, {class: "results-enclosure"} ]
   end
 
   def partials &block
@@ -283,6 +285,29 @@ class UserContentPresenter < FilteredPresenter
 
   def title_for type
     type.downcase
+  end
+
+  # These elements go into the partial being presented
+  def do_page_elements &block
+    block.call :card
+    types = @entity_type ? [@entity_type] : %w{ recipes } # %w{ recipes lists friends feeds }
+    panel_list =
+        if @entity_type
+          [
+              h.item_to_render(:panel,
+                         title: title_for(@entity_type),
+                         type: @entity_type,
+                         url: results_path)
+          ]
+        else
+          types.collect { |type|
+            h.item_to_render :panel,
+                       title: title_for(type),
+                       type: type,
+                       url: assert_query(results_path, entity_type: type, item_mode: :slider, :org => :newest)
+          }
+        end
+    block.call panel_list, :querify, class: "results-enclosure"
   end
 
   # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
