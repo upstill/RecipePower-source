@@ -2,7 +2,7 @@ class FilteredPresenter
 
   attr_accessor :title, :h
 
-  attr_reader :decorator, :entity,
+  attr_reader :decorator, :entity, :pagelet,
               :results_class, # Class of the ResultsCache for fetching results
               :stream_presenter, # Manages the ResultsCache that produces items based on the query
               :content_mode, # What page element to render? :container, :entity, :results, :modal, :items
@@ -10,7 +10,7 @@ class FilteredPresenter
               :org # How to organize the results: :ratings, :popularity, :newest, :random
 
   delegate :tail_partial, :querytags, :stream_id,
-           :suspend, :next_item, :this_path,
+           :suspend, :next_item, :this_path, :next_path,
            :full_size, :query, :param,
            :to => :stream_presenter
 
@@ -20,11 +20,6 @@ class FilteredPresenter
     if Object.const_defined? classname # If we have a FilteredPresenter subclass available
       classname.constantize.new view_context, sessid, request_path, user_id, response_service, params, querytags, decorator
     end
-  end
-
-  # Declare the parameters that we adopt as instance variables. subclasses would add to this list
-  def params_needed
-    [ :tagtype, [:stream, ""], [ :content_mode, :container ], [ :org, :newest ] ]
   end
 
   def initialize view_context, sessid, request_path, user_id, response_service, params, querytags, decorator=nil
@@ -63,20 +58,31 @@ class FilteredPresenter
         end
 
     @title = response_service.title
+    @pagelet = "filtered_presenter"
     # FilteredPresenters don't always have results panels
     if rc_class = results_class
       @stream_presenter = StreamPresenter.new sessid, request_path, rc_class, user_id, response_service.admin_view?, querytags, params
     end
   end
 
+  # Declare the parameters that we adopt as instance variables. subclasses would add to this list
+  def params_needed
+    [ :tagtype, [:stream, ""], [ :content_mode, :container ], [ :org, :newest ] ]
+  end
+
   def results_class
     @results_class ||= (rcn = self.class.instance_variable_get :"@results_class_name") && rcn.constantize
   end
 
-  # These elements go into the standard page for a presenter
-  def page_elements
-    [ :card, :comments, :owned ]
+  def title_for subtype
+    "No title defined for #{subtype}. Modify #{self.class} to provide one."
   end
+
+  def filter_type_selector
+    false
+  end
+
+  ### Methods not overridden
 
   # Provide a tokeninput field for specifying tags, with or without the ability to free-tag
   # The options are those of the tokeninput plugin, with defaults
@@ -94,60 +100,14 @@ class FilteredPresenter
     h.text_field_tag "querytags", querytags.map(&:id).join(','), options
   end
 
-  def title_for subtype
-    "No title defined for #{subtype}. Modify #{self.class} to provide one."
-  end
-
-  def partials &block
-    et = respond_to?(:entity_type) && entity_type
-    block.call "filtered_presenter/partial_null",
-               "No partials defined#{(' for '+et) if et}. Define #{self.class}#partials to provide some",
-               et,
-               results_path
-  end
-
-  # This is the class of the results container
-  def results_type
-    (@results_class || self.class).to_s
-  end
-
-  # This is the name of the partial used to render me
-  def results_partial
-    "filtered_presenter/results_#{@item_mode}"
-  end
-
-  def tail_partial
-    "filtered_presenter/tail_#{@item_mode}"
-  end
-
-  # Specify a path for fetching the results partial
-  def results_path
-    assert_query this_path, content_mode: "results", item_mode: @item_mode
-  end
-
-  # This is the name of the partial used for the header, presumably including the search box
-  def header_partial
-    "filtered_presenter/filter_header"
-  end
-
   # What types of tag are suggested in the search
   def tagtype
     @tagtype || 0
   end
 
-  def filter_type_selector
-    false
-  end
-
   # Should the items be dumped now?
   def dump?
     false # !instance_variable_defined?(:@stream_param)
-  end
-
-  # This is the path that will go into the "more items" link to fetch the next set
-  # Rather than straight delegation, we may want to assert our own parameters here
-  def next_path
-    @stream_presenter.next_path
   end
 
   # Provide the query for revising the results
@@ -159,9 +119,23 @@ class FilteredPresenter
     @stream_presenter.query format, params
   end
 
-  # Return the name of the pagelet template
-  def pagelet
-    "filtered_presenter"
+  def panel_button_class
+    "#{h.object_display_class decorator.object}-button"
+  end
+
+  def panel_label_class
+    "#{h.object_display_class decorator.object}-label"
+  end
+
+  def panel_label
+    case h.object_display_class(decorator.object)
+      when "viewer"
+        "my collection"
+      when "friend", "user"
+        "collection"
+      when "recipe"
+        "related"
+    end
   end
 
   def stream_count force=false
@@ -186,23 +160,50 @@ class FilteredPresenter
     end
   end
 
-  def panel_button_class
-    "#{h.object_display_class decorator.object}-button"
+  ### The remaining public methods pertain to the page presentation
+
+  # These elements go into the standard page for a presenter
+  def page_elements &block
+    [ :card, :comments, :owned ]
   end
 
-  def panel_label_class
-    "#{h.object_display_class decorator.object}-label"
+  # These elements go into the partial being presented
+  def do_page_elements &block
+    block.call :card
+    block.call :comments
+    block.call :owned
   end
 
-  def panel_label
-    case h.object_display_class(decorator.object)
-      when "viewer"
-        "my collection"
-      when "friend", "user"
-        "collection"
-      when "recipe"
-        "related"
-    end
+  def partials &block
+    et = respond_to?(:entity_type) && entity_type
+    block.call "filtered_presenter/partial_null",
+               "No partials defined#{(' for '+et) if et}. Define #{self.class}#partials to provide some",
+               et,
+               results_path
+  end
+
+  # This is the class of the results container
+  def results_type
+    (@results_class || self.class).to_s
+  end
+
+  # This is the name of the partial used for the header, presumably including the search box
+  def header_partial
+    "filtered_presenter/filter_header"
+  end
+
+  # Specify a path for fetching the results partial
+  def results_path
+    assert_query this_path, content_mode: "results", item_mode: @item_mode
+  end
+
+  # This is the name of the partial used to render me
+  def results_partial
+    "filtered_presenter/results_#{@item_mode}"
+  end
+
+  def tail_partial
+    "filtered_presenter/tail_#{@item_mode}"
   end
 
 private
@@ -311,6 +312,10 @@ class UsersAssociatedPresenter < UserContentPresenter
     [ :associated ]
   end
 
+  def do_page_elements &block
+    block.call :associated
+  end
+
   def results_class
     rcname = "UserCollectionCache" # ... by default
         case @entity_type
@@ -381,17 +386,13 @@ class UsersBiglistPresenter < UserContentPresenter
 
 end
 
+class SearchIndexPresenter < FilteredPresenter
+  @results_class_name = 'SearchAllCache'
+end
+
 # Present a list of feeds for a user
 class FeedsOwnedPresenter < FilteredPresenter
   @results_class_name = 'FeedCache'
-
-  def panel_label
-    ""
-  end
-
-  def panel_label_class
-    "feed-entries"
-  end
 
   def results_type
     "feed_entries"

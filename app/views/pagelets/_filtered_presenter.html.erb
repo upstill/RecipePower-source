@@ -1,3 +1,3 @@
-<% @filtered_presenter.page_elements.each do |element| %>
-    <%= render_item element %>
+<% @filtered_presenter.do_page_elements do |element, locals=nil| %>
+    <%= render_item element, (locals || {}) %>
 <% end %>
