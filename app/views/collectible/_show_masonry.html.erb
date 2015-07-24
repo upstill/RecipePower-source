@@ -1,4 +1,4 @@
-<div class="masonry-item-contents grid-item  <%= defined?(results_type) && results_type.extensions_to_classes %> <%= decorator.dom_id %>">
+<div class="masonry-item-contents grid-item <%= decorator.object.class.to_s.underscore %>-item <%= defined?(results_type) && results_type.extensions_to_classes %> <%= decorator.dom_id %>">
   <%= safe_image_div decorator, true, class: "pic_box" %>
   <div class="datablock">
     <p class="title">

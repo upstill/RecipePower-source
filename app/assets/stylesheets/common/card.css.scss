@@ -33,11 +33,6 @@ div.associated-card {
   }
 }
 
-div.masonry-item {
-  width: 350px;
-  margin-bottom: 10px;
-}
-
 div.card-item {
   -webkit-box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
   -moz-box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
@@ -113,6 +108,7 @@ div.card-item {
     }
   }
   &.recipe-card {
+    width: 350px;
     background-color: $recipes-card-background-color;
     .description {
       font-size: 1.2em;
