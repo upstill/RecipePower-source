@@ -178,14 +178,6 @@ class FilteredPresenter
                 ], :querify, {class: "results-enclosure"} ]
   end
 
-  def partials &block
-    et = respond_to?(:entity_type) && entity_type
-    block.call "filtered_presenter/partial_null",
-               "No partials defined#{(' for '+et) if et}. Define #{self.class}#partials to provide some",
-               et,
-               results_path
-  end
-
   # This is the class of the results container
   def results_type
     (@results_class || self.class).to_s
@@ -257,7 +249,6 @@ class ListsShowPresenter < FilteredPresenter
   end
 
   def partials &block
-    types = @entity_type ? [ results_type ] : ["recipes"]
     if @entity_type
       block.call "filtered_presenter/partial_owned", title_for(results_type), results_type, results_path
     else
@@ -268,6 +259,29 @@ class ListsShowPresenter < FilteredPresenter
                    assert_query(results_path, entity_type: type, :item_mode => :masonry, :org => :newest)
       }
     end
+  end
+
+  # These elements go into the partial being presented
+  def do_page_elements &block
+    block.call :card
+
+    block.call :comments
+    types = @entity_type ? [ @entity_type ] : %w{ recipes }
+    partial_name = (types.count == 1) ? "filtered_presenter/partial_spew" : "filtered_presenter/partial_associated"
+    partial_list = types.collect { |subtype|
+      h.item_to_render [], :partial,
+                       partial_name: partial_name,
+                       title: title_for(subtype),
+                       type: subtype,
+                       url: assert_query(results_path, entity_type: subtype, item_mode: :masonry)
+    }
+    block.call partial_list, :partial, partial_name: "owned_partial"
+=begin
+    block.call [h.item_to_render(partial_list, :partial, partial_name: "owned_partial")],
+               :querify,
+               class: "results-enclosure",
+               url: results_path
+=end
   end
 
 end
@@ -287,7 +301,7 @@ class UserContentPresenter < FilteredPresenter
   # These elements go into the partial being presented
   def do_page_elements &block
     block.call :card
-    types = @entity_type ? [@entity_type] : %w{ recipes } # %w{ recipes lists friends feeds }
+    types = @entity_type ? [@entity_type] : %w{ recipes lists friends feeds } # %w{ recipes lists friends feeds }
     panel_list =
         if @entity_type
           [
@@ -306,22 +320,8 @@ class UserContentPresenter < FilteredPresenter
         end
     block.call [h.item_to_render(panel_list, :partial, partial_name: "owned_partial")],
                :querify,
-               class: "results-enclosure"
-  end
-
-  # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
-  def partials &block
-    types = @entity_type ? [ @entity_type ] : %w{ recipes } # %w{ recipes lists friends feeds }
-    if @entity_type
-      block.call "filtered_presenter/partial_panel", title_for(@entity_type), @entity_type, results_path
-    else
-      types.each do |type|
-         block.call "filtered_presenter/partial_panel",
-                    title_for(type),
-                    type,
-                    assert_query(results_path, entity_type: type, item_mode: :slider, :org => :newest)
-      end
-    end
+               class: "results-enclosure",
+               url: results_path
   end
 
   def results_type
@@ -352,7 +352,8 @@ class UsersAssociatedPresenter < UserContentPresenter
 
     block.call [h.item_to_render(panel_list, :partial, partial_name: "associated_partial" )],
                :querify,
-               class: "results-enclosure"
+               class: "results-enclosure",
+               url: results_path
   end
 
   def results_class
@@ -367,25 +368,6 @@ class UsersAssociatedPresenter < UserContentPresenter
   # The page for elements associated with a user has its own view
   def page_elements
     [:associated]
-  end
-
-  # Define the URL for each subtype (if any) vectoring off of this @result_type
-  def partials &block
-    if subtypes =
-        case @entity_type
-          when "lists"
-            %w{ lists.owned lists.collected }
-          when nil
-            %w{ recipes lists friends feeds }
-        end
-    end
-    if subtypes.blank?
-      block.call "filtered_presenter/partial_spew", title_for(@entity_type), @entity_type, assert_query(results_path, entity_type: @entity_type, item_mode: :masonry)
-    else
-      subtypes.each do |subtype|
-        block.call "filtered_presenter/partial_associated", title_for(subtype), subtype, assert_query(results_path, entity_type: subtype, item_mode: :masonry)
-      end
-    end
   end
 
   def title_for subtype
