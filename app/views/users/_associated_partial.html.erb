@@ -1,0 +1,61 @@
+<% user_display_class = object_display_class @user %>
+<% possessive = (user_display_class=="viewer") ? "my" : "#{@user.polite_name}'s" %>
+<% decorator ||= @filtered_presenter.decorator %>
+<%= present decorator, current_user_or_guest do |presenter| %>
+    <div class="row collection-header">
+      <div class="col-md-7 collection-nav <%= @filtered_presenter.entity_type %>">
+        <div class="row">
+          <div class="col-md-12 navlink">
+            <%= link_to_submit "#{sprite_glyph :'send-left', 'lg'}&nbsp;[last page]".html_safe, user_collection_path(decorator.object) %>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 collection-label <%= @filtered_presenter.entity_type %>">
+            <%= "#{possessive} #{@filtered_presenter.entity_type}".downcase %>
+          </div>
+          <div class="col-md-6 or-see">
+            OR-SEE buttons go here
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 search">
+            <%= @filtered_presenter.filter_field(
+                        rows: 1,
+                        autofocus: true,
+                        data: {:"on-add" => "RP.tagger.querify",
+                               :"on-delete" => "RP.tagger.querify",
+                               :hint => "", # "Search the collection by typing terms here",
+                               placeholder: "Search #{possessive} #{@filtered_presenter.entity_type}",
+                               :"no-results-text" => "No matching tag found; hit Enter to search with text"}) %>
+          </div>
+          <div class="col-md-6 filters">
+            filters go here
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 user-nav <%= user_display_class %>-card">
+        <div class="row">
+          <div class="col-md-5 avatar">
+            <%= presenter.card_avatar %>
+          </div>
+          <div class="col-md-7 right-matter">
+            <div class="nav-top">
+              User nav buttons go here
+            </div>
+            <div class="nav-bottom">
+              <div class="half-height"></div>
+              <div class="half-width"></div>
+              <div class="ul"><%= link_to_submit "COLLECTION", response_service.decorate_path(entity_type: nil), class: "result-link collection" %> </div>
+              <% divs = %w{ bl ur br } %>
+              <% (%w{ cookmates recipes lists feeds } - [@filtered_presenter.entity_type]).each do |what| %>
+                  <div class="<%= divs.shift %>">
+                    <%= link_to_submit what.upcase, response_service.decorate_path(entity_type: what), class: "result-link #{what}" %>
+                  </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <%= content if defined?(content) %>
+<% end %>

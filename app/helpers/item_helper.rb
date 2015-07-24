@@ -1,11 +1,11 @@
 module ItemHelper
 
   # Prep for rendering an item in a particular mode: sort out the parameters and initialize @decorator
-  def item_preflight item_or_decorator=nil, item_mode=nil
-    if item_or_decorator.is_a? Symbol
-      item_or_decorator, item_mode = nil, item_or_decorator
+  def item_preflight item_or_decorator_or_specs=nil, item_mode=nil
+    if item_or_decorator_or_specs.is_a? Symbol
+      item_or_decorator_or_specs, item_mode = nil, item_or_decorator_or_specs
     end
-    if item = (item_or_decorator.is_a?(Draper::Decorator) ? item_or_decorator.object : item_or_decorator) || (@decorator.object if @decorator)
+    if item = (item_or_decorator_or_specs.is_a?(Draper::Decorator) ? item_or_decorator_or_specs.object : item_or_decorator_or_specs) || (@decorator.object if @decorator)
       unless @decorator && @decorator.object == item
         controller.update_and_decorate item
         @decorator = controller.instance_variable_get :"@decorator"
@@ -22,8 +22,8 @@ module ItemHelper
     "#{itemclass} #{domid}"
   end
 
-  def item_partial_selector item_or_decorator=nil, item_mode=nil, context=nil
-    item, item_mode = item_preflight item_or_decorator, item_mode
+  def item_partial_selector item_or_decorator_or_specs=nil, item_mode=nil, context=nil
+    item, item_mode = item_preflight item_or_decorator_or_specs, item_mode
     tag =
     case item_mode
       when :table
@@ -52,12 +52,12 @@ module ItemHelper
 
   # The item partial depends on the item mode (:table, :modal, :masonry, :slider),
   # defaulting to just "_show"
-  def item_partial_name item_or_decorator=nil, item_mode=nil
-    item, item_mode = item_preflight item_or_decorator, item_mode
+  def item_partial_name item_or_decorator_or_specs=nil, item_mode=nil
+    item, item_mode = item_preflight item_or_decorator_or_specs, item_mode
     if item_mode == :comments
       "show_comments" if [Recipe, List].include?(item.class)
     else
-      tail = item_or_decorator ? "show" : "index"
+      tail = item_or_decorator_or_specs ? "show" : "index"
       tail << "_#{item_mode}" if item_mode
       if item
         item_class = item.class.to_s.pluralize
@@ -71,28 +71,28 @@ module ItemHelper
   end
 
   # Define a :replacements item to replace a particular item under an item mode (defaulting to the item_mode parameter)
-  def item_replacement item_or_decorator=nil, item_mode=nil
-    item, item_mode = item_preflight item_or_decorator, item_mode
+  def item_replacement item_or_decorator_or_specs=nil, item_mode=nil
+    item, item_mode = item_preflight item_or_decorator_or_specs, item_mode
     [ item_partial_selector(item, item_mode), render_item(item, item_mode) ]
   end
 
   # Generate replacements for all versions of the item
-  def item_replacements item_or_decorator
+  def item_replacements item_or_decorator_or_specs
     [:table, :modal, :masonry, :slider, :card].collect { |item_mode|
-      item_replacement item_or_decorator, item_mode
+      item_replacement item_or_decorator_or_specs, item_mode
     }.compact
   end
 
   # Define a :replacements item to delete the item node for @decorator
-  def item_deleter item_or_decorator=nil, item_mode=nil, context=nil
-    item, item_mode = item_preflight item_or_decorator, item_mode
+  def item_deleter item_or_decorator_or_specs=nil, item_mode=nil, context=nil
+    item, item_mode = item_preflight item_or_decorator_or_specs, item_mode
     [ item_partial_selector(item, item_mode, context) ]
   end
 
   # Generate deleters for all versions of an item
-  def item_deleters item_or_decorator, context=nil
+  def item_deleters item_or_decorator_or_specs, context=nil
     [:table, :modal, :masonry, :slider, :card].collect { |item_mode|
-      item_deleter item_or_decorator, item_mode, context
+      item_deleter item_or_decorator_or_specs, item_mode, context
     }.compact
   end
 
@@ -107,39 +107,42 @@ module ItemHelper
     [ item_insertion(decorator, context) ]
   end
 
-  def render_item_unwrapped item_or_decorator=nil, item_mode=nil, locals={}
+  def render_item_unwrapped item_or_decorator_or_specs=nil, item_mode=nil, locals={}
     if item_mode.is_a? Hash
       item_mode, locals = nil, item_mode
     end
-    item, item_mode = item_preflight item_or_decorator, (item_mode || :card)
+    item, item_mode = item_preflight item_or_decorator_or_specs, (item_mode || :card)
     if partial = item_partial_name(item, item_mode)
       with_format("html") { render partial, locals.merge( decorator: @decorator ) }
     end
   end
 
 
-  def render_item item_or_decorator=nil, item_mode=nil, locals={}
-    # item_or_decorator is defined recursively: if it's an array, we recur on each member of the array, joining the
-    # results
+  def render_item item_or_decorator_or_specs=nil, item_mode=nil, locals={}
     if item_mode.is_a? Hash
       item_mode, locals = nil, item_mode
     end
-    if item_or_decorator.is_a? Array
-      rendering = item_or_decorator.collect { |spec| render_item *spec }.join('').html_safe
+    # item_or_decorator_or_specs is defined recursively: if it's an array, we recur on each member of the array, joining the
+    # results
+    if item_or_decorator_or_specs.is_a? Array
+      rendering = item_or_decorator_or_specs.collect { |spec| 
+        render_item *spec 
+      }.join('').html_safe
     else
-      rendering = render_item_unwrapped item_or_decorator, item_mode, locals # locals are the local bindings for the item
-      item, item_mode = item_preflight item_or_decorator, item_mode
+      rendering = render_item_unwrapped item_or_decorator_or_specs, item_mode, locals # locals are the local bindings for the item
+      return "" unless rendering.present?
+      item, item_mode = item_preflight item_or_decorator_or_specs, item_mode
     end
-    return "" unless rendering.present?
     container_class = item_partial_class item_mode
     # Encapsulate the rendering in the standard shell for the item mode
     case item_mode
       when :querify
         querify_block locals.delete(:url), rendering, locals # Locals are the options for querify_block
       when :partial
-        # Enclose the rendering in a partial named by locals[:partial_name]
-        partial_name = locals.delete(:partial_name)
-        with_format("html") { render partial_name, locals.merge(content: rendering) }
+        # Enclose the rendering in a partial named by locals[:partial_name] or implied by :partial and the controller action
+        if partial_name = locals.delete(:partial_name) || item_partial_name(item, item_mode)
+          with_format("html") { render partial_name, locals.merge(content: rendering) }
+        end
       when :masonry
         content_tag :div, rendering, class: container_class+" stream-item"
       when :modal

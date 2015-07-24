@@ -2,7 +2,7 @@ class FilteredPresenter
 
   attr_accessor :title, :h
 
-  attr_reader :decorator, :entity, :pagelet,
+  attr_reader :decorator, :entity, :pagelet, # :header_partial,
               :results_class, # Class of the ResultsCache for fetching results
               :stream_presenter, # Manages the ResultsCache that produces items based on the query
               :content_mode, # What page element to render? :container, :entity, :results, :modal, :items
@@ -59,6 +59,8 @@ class FilteredPresenter
 
     @title = response_service.title
     @pagelet = "filtered_presenter"
+    # This is the name of the partial used for the header, presumably including the search box
+    # @header_partial = "filtered_presenter/filter_header"
     # FilteredPresenters don't always have results panels
     if rc_class = results_class
       @stream_presenter = StreamPresenter.new sessid, request_path, rc_class, user_id, response_service.admin_view?, querytags, params
@@ -189,11 +191,6 @@ class FilteredPresenter
     (@results_class || self.class).to_s
   end
 
-  # This is the name of the partial used for the header, presumably including the search box
-  def header_partial
-    "filtered_presenter/filter_header"
-  end
-
   # Specify a path for fetching the results partial
   def results_path
     assert_query this_path, content_mode: "results", item_mode: @item_mode
@@ -307,7 +304,9 @@ class UserContentPresenter < FilteredPresenter
                        url: assert_query(results_path, entity_type: type, item_mode: :slider, :org => :newest)
           }
         end
-    block.call panel_list, :querify, class: "results-enclosure"
+    block.call [h.item_to_render(panel_list, :partial, partial_name: "owned_partial")],
+               :querify,
+               class: "results-enclosure"
   end
 
   # A filtered presenter may have a collection of other presenters to render in its stead, so we allow for a set
@@ -332,22 +331,42 @@ end
 
 class UsersAssociatedPresenter < UserContentPresenter
 
-  # The page for elements associated with a user has its own view
-  def page_elements
-    [ :associated ]
-  end
-
   def do_page_elements &block
-    block.call :associated
+    subtypes =
+        case @entity_type
+          when "lists"
+            %w{ lists.owned lists.collected }
+          when nil
+            %w{ recipes lists friends feeds }
+          else
+            [@entity_type]
+        end
+    partial_name = (subtypes.count == 1) ? "filtered_presenter/partial_spew" : "filtered_presenter/partial_associated"
+    panel_list = subtypes.collect { |subtype|
+      h.item_to_render [], :partial,
+                     partial_name: partial_name,
+                     title: title_for(subtype),
+                     type: subtype,
+                     url: assert_query(results_path, entity_type: subtype, item_mode: :masonry)
+    }
+
+    block.call [h.item_to_render(panel_list, :partial, partial_name: "associated_partial" )],
+               :querify,
+               class: "results-enclosure"
   end
 
   def results_class
     rcname = "UserCollectionCache" # ... by default
-        case @entity_type
-          when "lists.owned"
-            rcname = "UserOwnedListsCache"
-        end
+    case @entity_type
+      when "lists.owned"
+        rcname = "UserOwnedListsCache"
+    end
     rcname && rcname.constantize
+  end
+
+  # The page for elements associated with a user has its own view
+  def page_elements
+    [:associated]
   end
 
   # Define the URL for each subtype (if any) vectoring off of this @result_type
