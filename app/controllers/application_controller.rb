@@ -203,7 +203,7 @@ class ApplicationController < ActionController::Base
     @entity = fp.entity
     case fp.content_mode
       when :container  # Handle the overall layout
-        render "pagelets/"+fp.pagelet
+        render "pagelets/filtered_presenter"
       when :entity # Summarize the focused entity
         # Do a conventional #show, i.e., render the stream's entity's show template
         render :show  # The #show template will expect @decorator to be defined
