@@ -511,11 +511,28 @@ class FeedsOwnedPresenter < FilteredPresenter
     "feed_entries"
   end
 
+  def pagelet_partial &block
+    block.call
+  end
+
   def pagelet &block
+=begin
+    <% @filtered_presenter.partials do |partial, title, type, url| %>
+            <%= render partial, title: title, type: type, url: url %>
+    <% end %>
+=end
     block.call(
+        with_format('html') {
+          view_context.render "filtered_presenter/partial_spew",
+                      title: "feeds",
+                      type: "feed_entries",
+                      url: assert_query(results_path, item_mode: "page" )
+             }
+=begin
         h.querify_block( assert_query(results_path, item_mode: "page"), class: 'feeds', autoload: true) do
           h.panel_results_placeholder 'feed_entries'
         end
+=end
     )
   end
 

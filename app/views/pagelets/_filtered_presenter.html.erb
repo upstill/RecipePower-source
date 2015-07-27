@@ -2,9 +2,13 @@
     <% @filtered_presenter.do_page_elements do |element, item_mode=nil, locals=nil| %>
         <%= render_item element, item_mode, (locals || {}) %>
     <% end %>
-<% else %>
-    <% @filtered_presenter.pagelet do |buf| %>
+<% elsif false %>
+    <% @filtered_presenter.pagelet(self) do |buf| %>
         <%= buf %>
+    <% end %>
+<% else %>
+    <% @filtered_presenter.pagelet_partial do |name, locals| %>
+        <%= render name, locals %>
     <% end %>
 <% end %>
 
