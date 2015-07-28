@@ -188,7 +188,28 @@ class FilteredPresenter
     "filtered_presenter/tail_#{@item_mode}"
   end
 
-private
+protected
+
+  # Invoke a partial for a collection of types
+  def apply_partial partial_name, types, block, qparams={}
+    if @entity_type
+      block.call partial_name,
+                 title: title_for(results_type),
+                 type: results_type,
+                 url: results_path
+    else
+      types.each { |type|
+        block.call partial_name,
+                   title: title_for(type),
+                   type: type,
+                   url: assert_query(results_path, qparams.merge(entity_type: type))
+      }
+    end
+
+  end
+
+
+  private
 
   def org= val
     @org = val.to_sym
@@ -242,22 +263,10 @@ class ListsShowPresenter < FilteredPresenter
   def presentation_partials &block
     block.call :card
     block.call :comments
-    block.call 'owned_partial'
+    block.call 'owned_results_header'
     types = @entity_type ? [@entity_type] : %w{ recipes }
     partial_name = (types.count == 1) ? "filtered_presenter/partial_spew" : "filtered_presenter/partial_associated"
-    if @entity_type
-      block.call partial_name,
-                 title: title_for(results_type),
-                 type: results_type,
-                 url: results_path
-    else
-      types.each { |type|
-        block.call partial_name,
-                   title: title_for(type),
-                   type: type,
-                   url: assert_query(results_path, entity_type: type, :item_mode => :masonry, :org => :newest)
-      }
-    end
+    apply_partial partial_name, types, block, :item_mode => :masonry, :org => :newest
   end
 
 end
@@ -276,14 +285,9 @@ class UserContentPresenter < FilteredPresenter
 
   def presentation_partials &block
     block.call :card
-    block.call "owned_partial"
+    block.call "owned_results_header"
     types = @entity_type ? [@entity_type] : %w{ recipes lists friends feeds } # %w{ recipes lists friends feeds }
-    types.each { |type|
-      block.call :panel,
-                 title: title_for(type),
-                 type: type,
-                 url: assert_query(results_path, entity_type: type, item_mode: :slider, :org => :newest)
-    }
+    apply_partial :panel, types, block, :item_mode => :slider, :org => :newest
   end
 
   def results_type
@@ -301,17 +305,11 @@ class UsersAssociatedPresenter < UserContentPresenter
           when nil
             %w{ recipes lists friends feeds }
           else
-            [@entity_type]
+            [ @entity_type ]
         end
     block.call 'associated_partial'
     partial_name = (subtypes.count == 1) ? "filtered_presenter/partial_spew" : "filtered_presenter/partial_associated"
-    subtypes.each { |subtype|
-      block.call partial_name,
-                 title: title_for(subtype),
-                 type: subtype,
-                 url: assert_query(results_path, entity_type: subtype, item_mode: :masonry)
-    }
-
+    apply_partial partial_name, subtypes, block, :item_mode => :masonry, :org => :newest
   end
 
   def results_class
@@ -367,6 +365,10 @@ end
 
 class SearchIndexPresenter < FilteredPresenter
   @results_class_name = 'SearchAllCache'
+
+  def presentation_partials &block
+
+  end
 end
 
 # Present a list of feeds for a user
