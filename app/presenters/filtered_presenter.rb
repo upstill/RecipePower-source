@@ -17,6 +17,7 @@ class FilteredPresenter
   # Build an instance of the appropriate subclass, given the entity, controller and action
   def self.build view_context, sessid, request_path, user_id, response_service, params, querytags, decorator=nil
     classname = "#{response_service.controller.capitalize}#{response_service.action.capitalize}Presenter"
+
     if Object.const_defined? classname # If we have a FilteredPresenter subclass available
       classname.constantize.new view_context, sessid, request_path, user_id, response_service, params, querytags, decorator
     end
@@ -77,7 +78,7 @@ class FilteredPresenter
   end
 
   def title_for subtype
-    "No title defined for #{subtype}. Modify #{self.class} to provide one."
+    subtype.downcase
   end
 
   def filter_type_selector
@@ -91,15 +92,16 @@ class FilteredPresenter
   def filter_field options={}
     data = options[:data] || {}
     data[:hint] ||= "Narrow down the list"
-    data[:pre] ||= querytags.collect { |tag| { id: tag.id, name: tag.name } }.to_json
+    qt = stream_presenter ? stream_presenter.querytags : []
+    data[:pre] ||= qt.collect { |tag| { id: tag.id, name: tag.name } }.to_json
+    data[:query] = "tagtype=#{stream_presenter.tagtype}" if stream_presenter && stream_presenter.tagtype
     data[:"min-chars"] ||= 2
-    data[:query] = "tagtype=#{stream_presenter.tagtype}" if stream_presenter.tagtype
 
     options[:class] = "token-input-field-pending #{options[:class]}" # The token-input-field-pending class triggers tokenInput
     options[:onload] = "RP.tagger.onload(event);"
     options[:data] = data
 
-    h.text_field_tag "querytags", querytags.map(&:id).join(','), options
+    h.text_field_tag "querytags", qt.map(&:id).join(','), options
   end
 
   # What types of tag are suggested in the search
@@ -121,16 +123,20 @@ class FilteredPresenter
     @stream_presenter.query format, params
   end
 
+  def display_class
+    h.object_display_class decorator.object
+  end
+
   def panel_button_class
-    "#{h.object_display_class decorator.object}-button"
+    "#{display_class}-button"
   end
 
   def panel_label_class
-    "#{h.object_display_class decorator.object}-label"
+    "#{display_class}-label"
   end
 
   def panel_label
-    case h.object_display_class(decorator.object)
+    case display_class
       when "viewer"
         "my collection"
       when "friend", "user"
@@ -218,7 +224,7 @@ protected
 end
 
 class SearchIndexPresenter < FilteredPresenter
-  @results_class_name = 'SearchCache'
+  @results_class_name = 'SearchAllCache'
   attr_reader :entity_type
 
   def params_needed
@@ -227,6 +233,16 @@ class SearchIndexPresenter < FilteredPresenter
 
   def results_type
     @entity_type || self.class.to_s
+  end
+
+  def display_class
+    "search"
+  end
+
+  def presentation_partials &block
+    block.call 'filtered_presenter/associated_results_header'
+    types = @entity_type ? [@entity_type] : %w{ recipes lists friends feeds } # %w{ recipes lists friends feeds }
+    apply_partial :panel, types, block, :item_mode => :slider, :org => :newest
   end
 
 end
@@ -245,11 +261,12 @@ class UsersShowPresenter < FilteredPresenter
 
 end
 
-class RecipesShowPresenter < FilteredPresenter
+class RecipesAssociatedPresenter < FilteredPresenter
 
   def presentation_partials &block
     block.call :card
     block.call :comments
+    block.call 'filtered_presenter/associated_results_header'
   end
 
 end
@@ -268,7 +285,7 @@ class ListsShowPresenter < FilteredPresenter
   def presentation_partials &block
     block.call :card
     block.call :comments
-    block.call 'owned_results_header'
+    block.call 'owned_results_header', title: "Contents"
     types = @entity_type ? [@entity_type] : %w{ recipes }
     partial_name = (types.count == 1) ? "filtered_presenter/partial_spew" : "filtered_presenter/partial_associated"
     apply_partial partial_name, types, block, :item_mode => :masonry, :org => :newest
@@ -290,7 +307,7 @@ class UserContentPresenter < FilteredPresenter
 
   def presentation_partials &block
     block.call :card
-    block.call "owned_results_header"
+    block.call 'owned_results_header'
     types = @entity_type ? [@entity_type] : %w{ recipes lists friends feeds } # %w{ recipes lists friends feeds }
     apply_partial :panel, types, block, :item_mode => :slider, :org => :newest
   end
@@ -366,14 +383,6 @@ end
 class UsersBiglistPresenter < UserContentPresenter
   @results_class_name = 'UserBiglistCache'
 
-end
-
-class SearchIndexPresenter < FilteredPresenter
-  @results_class_name = 'SearchAllCache'
-
-  def presentation_partials &block
-
-  end
 end
 
 # Present a list of feeds for a user

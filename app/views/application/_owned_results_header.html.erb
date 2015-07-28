@@ -1,7 +1,6 @@
-    <% if false && defined?(title) %>
-        <div class="results-title <%# type.extensions_to_classes %>"><%# title %></div>
+    <% if defined?(title) %>
+        <div class="results-title <%= type.extensions_to_classes %>"><%= title %></div>
     <% end %>
-    <%= content if defined?(content) %>
 <!--
     <div class="results-content">
       <div class="results-box">

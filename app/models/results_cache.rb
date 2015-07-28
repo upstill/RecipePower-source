@@ -405,6 +405,10 @@ end
 # RcprefCache is a results cache based on Rcpref (i.e., collection) records
 class RcprefCache < ResultsCache
 
+  def user
+    nil
+  end
+
   # Memoize a query to get all the currently-defined entity types
   def typeset
     @typeset ||=

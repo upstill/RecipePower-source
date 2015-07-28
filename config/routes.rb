@@ -208,6 +208,7 @@ RP::Application.routes.draw do
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       patch 'tag'
       get 'touch'
+      get 'associated'
     end
     collection do
       get 'capture'

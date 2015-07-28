@@ -2,7 +2,7 @@ class RecipesController < CollectibleController
   before_filter :allow_iframe, only: :capture
   protect_from_forgery except: :capture
 
-  before_filter :login_required, :except => [:index, :show, :capture, :collect ]
+  before_filter :login_required, :except => [:index, :show, :associated, :capture, :collect ]
   before_filter { @focus_selector = "#recipe_url" }
     
   filter_access_to :all
@@ -43,9 +43,13 @@ class RecipesController < CollectibleController
     # return if need_login true
     update_and_decorate
     current_user.touch @recipe if current_user
-    response_service.title = ""
+    response_service.title = @recipe && @recipe.title.truncate(20)
     @nav_current = nil
     smartrender
+  end
+
+  def associated
+    show
   end
 
   def new # Collect URL, then re-direct to edit
