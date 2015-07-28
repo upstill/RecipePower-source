@@ -1,17 +1,16 @@
 <%= present decorator, current_user_or_guest do |presenter| %>
     <div class="container-fluid card-item recipe-card">
       <div class="row title-bar">
-        <div class="col-md-6 col-sm-8 left-matter">
+        <div class="col-md-8 col-sm-9 left-matter">
           <div class="title">
             <%# link_to decorator.title, decorator.url, class: "title-link", data: {report: polymorphic_path([:touch, decorator.object])} %>
-            <%= presenter.card_homelink class: "title-link" %>
-            <%= collectible_collect_icon decorator, "lg" %>
+            <%= presenter.card_homelink class: "title-link" %>&nbsp;<%= collectible_collect_icon decorator, "lg" %>
           </div>
           <div class="source">
             source: <%= link_to decorator.sourcename, decorator.sourcehome, class: "source-link" %>
           </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4 col-sm-3">
           <%= collectible_vote_buttons decorator.object %>
         </div>
       </div>

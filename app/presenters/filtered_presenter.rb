@@ -58,6 +58,7 @@ class FilteredPresenter
         end
 
     @title = response_service.title
+    @request_path = request_path
     # This is the name of the partial used for the header, presumably including the search box
     # @header_partial = "filtered_presenter/filter_header"
     # FilteredPresenters don't always have results panels
@@ -166,7 +167,6 @@ class FilteredPresenter
   def presentation_partials &block
     block.call :card
     block.call :comments
-    block.call :panel, title: title, type: type, url: url
   end
 
   # This is the class of the results container
@@ -176,7 +176,7 @@ class FilteredPresenter
 
   # Specify a path for fetching the results partial
   def results_path
-    assert_query this_path, content_mode: "results", item_mode: @item_mode
+    assert_query (@stream_presenter ? this_path : @request_path), content_mode: "results", item_mode: @item_mode
   end
 
   # This is the name of the partial used to render me
@@ -246,6 +246,11 @@ class UsersShowPresenter < FilteredPresenter
 end
 
 class RecipesShowPresenter < FilteredPresenter
+
+  def presentation_partials &block
+    block.call :card
+    block.call :comments
+  end
 
 end
 
