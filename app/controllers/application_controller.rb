@@ -203,13 +203,13 @@ class ApplicationController < ActionController::Base
     @entity = fp.entity
     case fp.content_mode
       when :container  # Handle the overall layout
-        render "pagelets/filtered_presenter"
+        render 'filtered_presenter/presentation'
       when :entity # Summarize the focused entity
         # Do a conventional #show, i.e., render the stream's entity's show template
         render :show  # The #show template will expect @decorator to be defined
       when :results # The frame for the items. This may be recursive on other frameworks
         # Do a conventional #index, i.e. render the stream container
-        render template: "filtered_presenter/results"
+        render template: 'filtered_presenter/results'
       when :modal
         # Render the stream's entity in a modal dialog
         render :show

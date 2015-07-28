@@ -163,33 +163,10 @@ class FilteredPresenter
 
   ### The remaining public methods pertain to the page presentation
 
-  # These elements go into the standard page for a presenter
-  def page_elements &block
-    [ :card, :comments, :owned ]
-  end
-
-  def pagelet &block
-=begin
-    @filtered_presenter.do_page_elements do |element, item_mode=nil, locals=nil|
-      render_item element, item_mode, (locals || {})
-    end
-=end
-    block.call( render_item :card )
-    block.call( render_item :comments )
-    block.call(
-        h.querify_block(url, class: "results-enclosure") do # Locals are the options for querify_block
-          render_item :panel, title: title, type: type, url: url
-        end
-    )
-  end
-
-  # These elements go into the partial being presented
-  def do_page_elements &block
+  def presentation_partials &block
     block.call :card
     block.call :comments
-    block.call [[
-                 [ :panel, { title: title, type: type, url: url } ]
-                ], :querify, {class: "results-enclosure"} ]
+    block.call :panel, title: title, type: type, url: url
   end
 
   # This is the class of the results container
@@ -262,61 +239,25 @@ class ListsShowPresenter < FilteredPresenter
     super << :entity_type
   end
 
-  def partials &block
-    if @entity_type
-      block.call "filtered_presenter/partial_owned", title_for(results_type), results_type, results_path
-    else
-      types.each { |type|
-        block.call "filtered_presenter/partial_owned",
-                   title_for(type),
-                   type,
-                   assert_query(results_path, entity_type: type, :item_mode => :masonry, :org => :newest)
-      }
-    end
-  end
-
-  def pagelet &block
-    block.call(render_item :card)
-    block.call(render_item :comments)
-    block.call with_format("html") { render "owned_partial" }
+  def presentation_partials &block
+    block.call :card
+    block.call :comments
+    block.call 'owned_partial'
     types = @entity_type ? [@entity_type] : %w{ recipes }
     partial_name = (types.count == 1) ? "filtered_presenter/partial_spew" : "filtered_presenter/partial_associated"
-    types.each { |subtype|
-      block.call with_format("html") {
-                   render partial_name,
-                          title: title_for(subtype),
-                          type: subtype,
-                          url: assert_query(results_path, entity_type: subtype, item_mode: :masonry)
-                 }
-    }
-=begin
-    @filtered_presenter.do_page_elements do |element, item_mode=nil, locals=nil|
-      render_item element, item_mode, (locals || {})
+    if @entity_type
+      block.call partial_name,
+                 title: title_for(results_type),
+                 type: results_type,
+                 url: results_path
+    else
+      types.each { |type|
+        block.call partial_name,
+                   title: title_for(type),
+                   type: type,
+                   url: assert_query(results_path, entity_type: type, :item_mode => :masonry, :org => :newest)
+      }
     end
-=end
-  end
-
-  # These elements go into the partial being presented
-  def do_page_elements &block
-    block.call :card
-
-    block.call :comments
-    types = @entity_type ? [ @entity_type ] : %w{ recipes }
-    partial_name = (types.count == 1) ? "filtered_presenter/partial_spew" : "filtered_presenter/partial_associated"
-    partial_list = types.collect { |subtype|
-      h.item_to_render [], :partial,
-                       partial_name: partial_name,
-                       title: title_for(subtype),
-                       type: subtype,
-                       url: assert_query(results_path, entity_type: subtype, item_mode: :masonry)
-    }
-    block.call partial_list, :partial, partial_name: "owned_partial"
-=begin
-    block.call [h.item_to_render(partial_list, :partial, partial_name: "owned_partial")],
-               :querify,
-               class: "results-enclosure",
-               url: results_path
-=end
   end
 
 end
@@ -333,51 +274,16 @@ class UserContentPresenter < FilteredPresenter
     type.downcase
   end
 
-  def pagelet &block
-    block.call(render_item :card)
-    block.call with_format('html') { render "owned_partial" }
-    types = @entity_type ? [@entity_type] : %w{ recipes lists friends feeds } # %w{ recipes lists friends feeds }
-    block.call(
-        h.querify_block( results_path, class: "results-enclosure") do
-          types.collect { |type|
-            render_item :panel,
-                        title: title_for(type),
-                        type: type,
-                        url: assert_query(results_path, entity_type: type, item_mode: :slider, :org => :newest)
-          }.join.html_safe
-        end
-    )
-=begin
-    @filtered_presenter.do_page_elements do |element, item_mode=nil, locals=nil|
-      render_item element, item_mode, (locals || {})
-    end
-=end
-  end
-
-  # These elements go into the partial being presented
-  def do_page_elements &block
+  def presentation_partials &block
     block.call :card
+    block.call "owned_partial"
     types = @entity_type ? [@entity_type] : %w{ recipes lists friends feeds } # %w{ recipes lists friends feeds }
-    panel_list =
-        if @entity_type
-          [
-              h.item_to_render(:panel,
-                         title: title_for(@entity_type),
-                         type: @entity_type,
-                         url: results_path)
-          ]
-        else
-          types.collect { |type|
-            h.item_to_render :panel,
-                       title: title_for(type),
-                       type: type,
-                       url: assert_query(results_path, entity_type: type, item_mode: :slider, :org => :newest)
-          }
-        end
-    block.call [h.item_to_render(panel_list, :partial, partial_name: "owned_partial")],
-               :querify,
-               class: "results-enclosure",
-               url: results_path
+    types.each { |type|
+      block.call :panel,
+                 title: title_for(type),
+                 type: type,
+                 url: assert_query(results_path, entity_type: type, item_mode: :slider, :org => :newest)
+    }
   end
 
   def results_type
@@ -387,12 +293,7 @@ end
 
 class UsersAssociatedPresenter < UserContentPresenter
 
-  def pagelet &block
-=begin
-    @filtered_presenter.do_page_elements do |element, item_mode=nil, locals=nil|
-      render_item element, item_mode, (locals || {})
-    end
-=end
+  def presentation_partials &block
     subtypes =
         case @entity_type
           when "lists"
@@ -402,45 +303,15 @@ class UsersAssociatedPresenter < UserContentPresenter
           else
             [@entity_type]
         end
+    block.call 'associated_partial'
     partial_name = (subtypes.count == 1) ? "filtered_presenter/partial_spew" : "filtered_presenter/partial_associated"
-    block.call(
-        h.querify_block( results_path, class: "results-enclosure") do
-          (with_format('html') { render 'associated_partial' } +
-              subtypes.collect { |subtype|
-                with_format('html') {
-                  render partial_name,
-                         title: title_for(subtype),
-                         type: subtype,
-                         url: assert_query(results_path, entity_type: subtype, item_mode: :masonry)
-                }
-              }).join.html_safe
-        end
-    )
-  end
-
-  def do_page_elements &block
-    subtypes =
-        case @entity_type
-          when "lists"
-            %w{ lists.owned lists.collected }
-          when nil
-            %w{ recipes lists friends feeds }
-          else
-            [@entity_type]
-        end
-    partial_name = (subtypes.count == 1) ? "filtered_presenter/partial_spew" : "filtered_presenter/partial_associated"
-    panel_list = subtypes.collect { |subtype|
-      h.item_to_render [], :partial,
-                     partial_name: partial_name,
-                     title: title_for(subtype),
-                     type: subtype,
-                     url: assert_query(results_path, entity_type: subtype, item_mode: :masonry)
+    subtypes.each { |subtype|
+      block.call partial_name,
+                 title: title_for(subtype),
+                 type: subtype,
+                 url: assert_query(results_path, entity_type: subtype, item_mode: :masonry)
     }
 
-    block.call [h.item_to_render(panel_list, :partial, partial_name: "associated_partial" )],
-               :querify,
-               class: "results-enclosure",
-               url: results_path
   end
 
   def results_class
@@ -450,11 +321,6 @@ class UsersAssociatedPresenter < UserContentPresenter
         rcname = "UserOwnedListsCache"
     end
     rcname && rcname.constantize
-  end
-
-  # The page for elements associated with a user has its own view
-  def page_elements
-    [:associated]
   end
 
   def title_for subtype
@@ -511,33 +377,13 @@ class FeedsOwnedPresenter < FilteredPresenter
     "feed_entries"
   end
 
-  def pagelet_partial &block
-    block.call
-  end
-
-  def pagelet &block
-=begin
-    <% @filtered_presenter.partials do |partial, title, type, url| %>
-            <%= render partial, title: title, type: type, url: url %>
-    <% end %>
-=end
-    block.call(
-        with_format('html') {
-          view_context.render "filtered_presenter/partial_spew",
-                      title: "feeds",
-                      type: "feed_entries",
-                      url: assert_query(results_path, item_mode: "page" )
-             }
-=begin
-        h.querify_block( assert_query(results_path, item_mode: "page"), class: 'feeds', autoload: true) do
-          h.panel_results_placeholder 'feed_entries'
-        end
-=end
-    )
-  end
-
-  def partials &block
-    block.call "filtered_presenter/partial_spew", "feeds", "feed_entries", assert_query(results_path, item_mode: "page" )
+  def presentation_partials &block
+    block.call :card
+    block.call :comments
+    block.call "filtered_presenter/partial_spew",
+               title: "feeds",
+               type: "feed_entries",
+               url: assert_query(results_path, item_mode: "page")
   end
 
 end
