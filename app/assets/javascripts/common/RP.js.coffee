@@ -305,6 +305,8 @@ RP.process_response = (responseData, odlog) ->
 				if replacement[1]
 					if newElmt = $(replacement[1])
 						RP.replaceElmt elmt, newElmt
+						if $(newElmt).hasClass 'pagelet-body'
+							window.scrollTo 0, 0
 				else
 					RP.removeElmt elmt
 				# The third value may be a function name to call on the replaced elemnnt
