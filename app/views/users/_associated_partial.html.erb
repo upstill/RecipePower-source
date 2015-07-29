@@ -20,13 +20,8 @@
         <div class="row">
           <div class="col-md-6 search">
             <%= @filtered_presenter.filter_field(
-                        rows: 1,
-                        autofocus: true,
-                        data: {:"on-add" => "RP.tagger.querify",
-                               :"on-delete" => "RP.tagger.querify",
-                               :hint => "", # "Search the collection by typing terms here",
-                               placeholder: "Search #{possessive} #{@filtered_presenter.entity_type}",
-                               :"no-results-text" => "No matching tag found; hit Enter to search with text"}) %>
+                    handler: 'RP.tagger.querify',
+                    placeholder: "Search #{possessive} #{@filtered_presenter.entity_type}") %>
           </div>
           <div class="col-md-6 filters">
             filters go here

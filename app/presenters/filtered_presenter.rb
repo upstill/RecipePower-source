@@ -9,7 +9,7 @@ class FilteredPresenter
               :item_mode, # How composites are presented: :table, :strip, :masonry, :feed_item
               :org # How to organize the results: :ratings, :popularity, :newest, :random
 
-  delegate :tail_partial, :querytags, :stream_id,
+  delegate :tail_partial, :stream_id,
            :suspend, :next_item, :this_path, :next_path,
            :full_size, :query, :param,
            :to => :stream_presenter
@@ -39,7 +39,6 @@ class FilteredPresenter
 
     }
     # @stream_param = params[:stream] || "" if params.has_key? :stream
-    # @tagtype = params[:tagtype]
     @h = view_context
 
     # May have been set by subclass, may have been inherited from params
@@ -89,24 +88,30 @@ class FilteredPresenter
 
   # Provide a tokeninput field for specifying tags, with or without the ability to free-tag
   # The options are those of the tokeninput plugin, with defaults
-  def filter_field options={}
-    data = options[:data] || {}
-    data[:hint] ||= "Narrow down the list"
-    qt = stream_presenter ? stream_presenter.querytags : []
-    data[:pre] ||= qt.collect { |tag| { id: tag.id, name: tag.name } }.to_json
-    data[:query] = "tagtype=#{stream_presenter.tagtype}" if stream_presenter && stream_presenter.tagtype
+  def filter_field opt_param={}
+    options = opt_param.dup
+    data = options.slice! :hint, :placeholder, :'no-results-text', :'min-chars' # options[:data] || {}
+
+    # Assert defaults for data fields
+    data[:hint] ||= 'Narrow down the list'
+    data[:placeholder] ||= "Seek and ye shall find..."
     data[:"min-chars"] ||= 2
+    # JS for how to invoke the search on tag completion:
+    # RP.tagger.querify for standard tag handling;
+    # RP.submit.enclosing_form for results enclosures (which maintain and accumulate query data)
+    data[:'on-add'] = options[:handler] || 'RP.submit.enclosing_form'
+    data[:'on-delete'] = options[:handler] || 'RP.submit.enclosing_form'
 
+    # Set up the tokeninput data
+    data[:query] = "tagtype=#{tagtype}" if tagtype
+    data[:pre] ||= querytags.collect { |tag| { id: tag.id, name: tag.name } }.to_json
+    options[:onload] = 'RP.tagger.onload(event);'
     options[:class] = "token-input-field-pending #{options[:class]}" # The token-input-field-pending class triggers tokenInput
-    options[:onload] = "RP.tagger.onload(event);"
-    options[:data] = data
 
-    h.text_field_tag "querytags", qt.map(&:id).join(','), options
-  end
+    options[:row] ||= 1
+    options[:autofocus] = true unless options[:autofocus] == false
 
-  # What types of tag are suggested in the search
-  def tagtype
-    @tagtype || 0
+    h.text_field_tag 'querytags', querytags.map(&:id).join(','), options.except(:handler).merge(data: data)
   end
 
   # Should the items be dumped now?
@@ -168,6 +173,11 @@ class FilteredPresenter
     end
   end
 
+  # The types of tag to which the query is restricted
+  def tagtype
+    stream_presenter && stream_presenter.tagtype
+  end
+
   ### The remaining public methods pertain to the page presentation
 
   def presentation_partials &block
@@ -216,6 +226,10 @@ protected
 
 
   private
+
+  def querytags
+    stream_presenter ? stream_presenter.querytags : []
+  end
 
   def org= val
     @org = val.to_sym

@@ -4,14 +4,7 @@
     <%= @filtered_presenter.panel_label %>
   </div>
   <div class="col-md-6 panels-search">
-    <%= @filtered_presenter.filter_field(
-                rows: 1,
-                autofocus: true,
-                data: {:"on-add" => "RP.tagger.querify",
-                       :"on-delete" => "RP.tagger.querify",
-                       :hint => "", # "Search the collection by typing terms here",
-                       placeholder: "Seek and ye shall find...",
-                       :"no-results-text" => "No matching tag found; hit Enter to search with text"}) %>
+    <%= @filtered_presenter.filter_field handler: 'RP.tagger.querify' %>
     <div class="panels-buttons">
       <%= link_to_submit "RECENTLY VIEWED", "#", class: "panels-button soft-button #{@filtered_presenter.panel_button_class}" %>
       <%= link_to_submit "EVERYTHING", "#", class: "panels-button soft-button #{@filtered_presenter.panel_button_class}" %>
