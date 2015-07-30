@@ -63,11 +63,12 @@
 <body>
 <% if user_signed_in? %>
     <%= render 'layouts/navbar' %>
-    <div class="container menuback">
-      <%= render 'layouts/filter_header', with_nav: true %>
-    </div>
 <% else %>
-    <%= render "layouts/generic_top" %>
+    <div class="generic-top">
+      <div class="logo">
+        <%= image_tag 'rp-logo.png' %>
+      </div>
+    </div>
 <% end %>
 <%= render "layouts/pagelet" %>
 <% if Rails.env.development? %>

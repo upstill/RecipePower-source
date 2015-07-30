@@ -11,7 +11,7 @@ class FilteredPresenter
 
   delegate :tail_partial, :stream_id,
            :suspend, :next_item, :this_path, :next_path,
-           :full_size, :query, :param,
+           :full_size, :query, :param, :querytags,
            :to => :stream_presenter
 
   # Build an instance of the appropriate subclass, given the entity, controller and action
@@ -82,6 +82,11 @@ class FilteredPresenter
 
   def filter_type_selector
     false
+  end
+
+  # This method will be over-ridden by any class that takes its querytags from the global query box
+  def global_querytags
+    []
   end
 
   ### Methods not overridden
@@ -258,6 +263,11 @@ class SearchIndexPresenter < FilteredPresenter
   def presentation_partials &block
     block.call 'filtered_presenter/associated_results_header'
     apply_partial 'filtered_presenter/partial_spew', entity_type, block, :item_mode => :masonry, :org => :newest
+  end
+
+  # The global query will be maintained
+  def global_querytags
+    querytags
   end
 
 end
