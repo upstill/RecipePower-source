@@ -15,7 +15,7 @@ module PageletsHelper
     end
     [ 'div.pagelet-body',
       content_tag(:div,
-                  pagelet_signin_links+content,
+                  "#{pagelet_signin_links}#{content}".html_safe,
                   class: pagelet_class,
                   id: body_id) ]
   end
