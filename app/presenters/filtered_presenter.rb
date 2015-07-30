@@ -339,7 +339,7 @@ class UserContentPresenter < FilteredPresenter
   def presentation_partials &block
     block.call :card
     block.call 'owned_results_header'
-    types = @entity_type ? [@entity_type] : %w{ feeds } # %w{ recipes lists friends feeds }
+    types = @entity_type ? [@entity_type] : %w{ friends } # %w{ recipes lists friends feeds }
     apply_partial :panel, types, block, :item_mode => :slider, :org => :newest
   end
 

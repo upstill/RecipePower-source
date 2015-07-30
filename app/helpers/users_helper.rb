@@ -48,4 +48,9 @@ module UsersHelper
     ).join.html_safe
     content_tag :select, options, menu_options # , class: "selectpicker"
   end
+
+  # Account for the difference between the id for an entity type and its label
+  def user_associated_label entity_type
+    (entity_type=='friends') ? 'cookmates' : entity_type
+  end
 end

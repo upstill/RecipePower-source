@@ -18,6 +18,11 @@ class UserPresenter < BasePresenter
     end
   end
 
+  def card_homelink options={}
+    (data = (options[:data] || {}))[:report] = h.polymorphic_path [:touch, @decorator.object]
+    link_to @decorator.title, h.polymorphic_path([:collection, @decorator.object]), options.merge(data: data)
+  end
+
   def member_since
     user.created_at.strftime("%B %e, %Y")
   end

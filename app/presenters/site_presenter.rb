@@ -38,6 +38,18 @@ class SitePresenter < CollectiblePresenter
     [ :author, :description, :tags, :title ]
   end
 
+  def card_homelink options={}
+    (data = (options[:data] || {}))[:report] = h.polymorphic_path [:touch, @decorator.object]
+    link_to( @decorator.title,
+             @decorator.url,
+             options.merge(data: data)) + '&nbsp;'.html_safe +
+        link_to( "",
+                 @decorator.url,
+                 class: 'glyphicon glyphicon-play-circle',
+                 style: 'color: #aaa',
+                 :target => '_blank')
+  end
+
 =begin
   def aspects
     card_aspects.collect { |this| aspect(this) }.compact.join.html_safe
