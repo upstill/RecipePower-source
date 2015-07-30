@@ -338,6 +338,7 @@ RP.process_response = (responseData, odlog) ->
 				item = $(deletion)[0]
 				if $(item).hasClass('masonry-item') && $(item.parentNode).hasClass 'js-masonry'
 					$(item.parentNode).masonry 'remove', item
+					$(item.parentNode).masonry 'layout'
 				else
 					$(deletion).remove()
 
