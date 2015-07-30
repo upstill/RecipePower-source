@@ -10,7 +10,7 @@ module PanelHelper
     end
     querify_button :item_mode,
                    to_mode,
-                   class: "collapse-button #{type.extensions_to_classes} glyphicon glyphicon-collapse-#{to_state}"
+                   class: "collapse-button #{type.to_s.extensions_to_classes} glyphicon glyphicon-collapse-#{to_state}"
   end
 
   def panel_collapse_button_replacement type, item_mode
@@ -29,7 +29,7 @@ module PanelHelper
       content_tag :div, link, class: "link-button"
     }.join.html_safe
     label = content_tag :span, "organize by:", class: "label"
-    content_tag :div, (label+links).html_safe, class: "org-by #{type.extensions_to_classes}"
+    content_tag :div, (label+links).html_safe, class: "org-by #{type.to_s.extensions_to_classes}"
   end
 
   def panel_org_menu_replacement url, type, org
@@ -37,7 +37,7 @@ module PanelHelper
   end
 
   def panel_suggestion_button url, type
-    querify_link "", url, class: "suggest #{type.extensions_to_classes} icon-large icon-lightbulb"
+    querify_link "", url, class: "suggest #{type.to_s.extensions_to_classes} icon-large icon-lightbulb"
   end
 
   def panel_suggestion_button_replacement url, type
@@ -45,7 +45,7 @@ module PanelHelper
   end
   
   def panel_results_placeholder type
-    content_tag :div, "", class: "results #{type.extensions_to_classes} placeholder"
+    content_tag :div, "", class: "results #{type.to_s.extensions_to_classes} placeholder"
   end
 
   def panel_results partial
@@ -57,7 +57,7 @@ module PanelHelper
   end
 
   def panel_suggestions_placeholder type
-    content_tag :div, "", class: "suggestions #{type.extensions_to_classes} placeholder" # Placeholder for the suggestions panel
+    content_tag :div, "", class: "suggestions #{type.to_s.extensions_to_classes} placeholder" # Placeholder for the suggestions panel
   end
 
   def panel_suggestions partial

@@ -1,12 +1,9 @@
-<div class="row panels-query">
-  <div class="col-md-6 panels-label <%= @filtered_presenter.panel_label_class %>">
-    <%= @filtered_presenter.panel_label %>
-  </div>
-  <div class="col-md-6 panels-search">
-    <%= @filtered_presenter.filter_field handler: 'RP.tagger.querify' %>
-    <div class="panels-buttons">
-      <%= link_to_submit "RECENTLY VIEWED", "#", class: "panels-button soft-button #{@filtered_presenter.panel_button_class}" %>
-      <%= link_to_submit "EVERYTHING", "#", class: "panels-button soft-button #{@filtered_presenter.panel_button_class}" %>
-    </div>
+<div class="row">
+  <div class="selector-element">
+    <% what = @filtered_presenter.entity_type %>
+    <%= link_to_submit what.upcase, response_service.decorate_path(entity_type: what), class: "result-link #{what} lead" %>
+    <% (%w{ cookmates recipes lists feeds } - [what]).each do |what| %>
+        <span class="divider">|</span>&nbsp;<%= link_to_submit what.upcase, assert_query(search_path, entity_type: what), class: "result-link #{what}" %>
+    <% end %>
   </div>
 </div>

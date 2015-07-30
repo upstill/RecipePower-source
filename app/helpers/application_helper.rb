@@ -264,9 +264,4 @@ module ApplicationHelper
     ].join("\n").html_safe
   end
 
-  # We have special behavior for the landing page
-  def landing_page?
-    response_service.controller == "pages" && response_service.action == "home"
-  end
-
 end

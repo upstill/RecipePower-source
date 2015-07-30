@@ -92,6 +92,28 @@ body {
   letter-spacing: 1px;
 }
 
+// The signin link behaves differently depending on whether we're on the landing page (no container)
+div.signin-link {
+  z-index: 992;
+  position: absolute;
+  right: 0.5em;
+  top: 0.5em;
+  a {
+    color: white;
+  }
+}
+
+div.container.pagelet-body {
+  div.signin-link {
+    position: fixed;
+    right: 0.5em;
+    top: 0.5em;
+    a {
+      color: #aaa;
+    }
+  }
+}
+
 .panels {
   height: 100vh;
   section {
@@ -248,26 +270,6 @@ div.generic-top {
   }
 }
 
-div.signin-link {
-  z-index: 992;
-  &.full-page {
-    position: absolute;
-    right: 0.5em;
-    top: 0.5em;
-    a {
-      color: white;
-    }
-  }
-  &.margin {
-    position: fixed;
-    right: 0.5em;
-    top: 0.5em;
-    a {
-      color: #aaa;
-    }
-  }
-}
-
 div.filter-element {
   width: 500px;
   input#token-input-querytags {
@@ -275,6 +277,35 @@ div.filter-element {
     font-style: italic;
     font-size: 20px;
     width: 500px;
+  }
+}
+
+div.selector-element {
+  display: inline-block;
+  margin-top: 2em;
+  margin-bottom: 2em;
+  margin-left: 5em;
+  a.result-link {
+    font-size: 1.5em;
+          &.recipes {
+            color: $recipes-navtab-text-color;
+          }
+          &.lists {
+            color: $lists-navtab-text-color;
+          }
+          &.cookmates {
+            color: $friends-navtab-text-color; // #dfca6a;
+          }
+          &.feeds {
+            color: $feeds-navtab-text-color;
+          }
+    &.lead {
+      font-size: 3em;
+    }
+  }
+  span.divider {
+    font-size: 2em;
+    color: white;
   }
 }
 

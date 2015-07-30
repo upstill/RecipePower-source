@@ -2,8 +2,8 @@
     replacements: [
         ['div.pagelet-body',
          content_tag(:div,
-                     with_format('html') { render template: response_service.find_view },
-                     class: "pagelet-body",
+                     pagelet_signin_links+with_format('html') { render template: response_service.find_view },
+                     class: pagelet_class,
                      id: pagelet_body_id)
         ]
     ]

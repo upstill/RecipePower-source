@@ -68,22 +68,8 @@
     </div>
 <% else %>
     <%= render "layouts/generic_top" %>
-    <div class="signin-link <%= landing_page? ? 'full-page' : 'margin' %>">
-      <%= link_to_submit "Sign Up", new_user_registration_path,
-                         preload: true,
-                         mode: :modal %>
-      <br><%= link_to_submit "Sign In", new_user_session_path,
-                             preload: true,
-                             mode: :modal %>
-    </div>
 <% end %>
-<% if landing_page? %>
-    <%= render "layouts/pagelet" %>
-<% else %>
-    <div class="container <%= user_signed_in? ? 'top' : 'med' %>">
-      <%= render "layouts/pagelet" %>
-    </div>
-<% end %>
+<%= render "layouts/pagelet" %>
 <% if Rails.env.development? %>
     <p>
       Archivo:

@@ -89,13 +89,16 @@ class FilteredPresenter
   # Provide a tokeninput field for specifying tags, with or without the ability to free-tag
   # The options are those of the tokeninput plugin, with defaults
   def filter_field opt_param={}
+    h.token_input_query opt_param.merge(tagtype: tagtype, querytags: querytags)
+=begin
     options = opt_param.dup
-    data = options.slice! :hint, :placeholder, :'no-results-text', :'min-chars' # options[:data] || {}
+    data = options.slice! :hint, :placeholder, :'no-results-text', :'min-chars'
 
     # Assert defaults for data fields
     data[:hint] ||= 'Narrow down the list'
     data[:placeholder] ||= "Seek and ye shall find..."
     data[:"min-chars"] ||= 2
+    data[:"no-results-text"] ||= "No matching tag found; hit Enter to search with text"
     # JS for how to invoke the search on tag completion:
     # RP.tagger.querify for standard tag handling;
     # RP.submit.enclosing_form for results enclosures (which maintain and accumulate query data)
@@ -104,7 +107,7 @@ class FilteredPresenter
 
     # Set up the tokeninput data
     data[:query] = "tagtype=#{tagtype}" if tagtype
-    data[:pre] ||= querytags.collect { |tag| { id: tag.id, name: tag.name } }.to_json
+    data[:pre] = querytags.collect { |tag| { id: tag.id, name: tag.name } }.to_json
     options[:onload] = 'RP.tagger.onload(event);'
     options[:class] = "token-input-field-pending #{options[:class]}" # The token-input-field-pending class triggers tokenInput
 
@@ -112,6 +115,7 @@ class FilteredPresenter
     options[:autofocus] = true unless options[:autofocus] == false
 
     h.text_field_tag 'querytags', querytags.map(&:id).join(','), options.except(:handler).merge(data: data)
+=end
   end
 
   # Should the items be dumped now?
@@ -192,38 +196,33 @@ class FilteredPresenter
 
   # Specify a path for fetching the results partial
   def results_path
-    assert_query (@stream_presenter ? this_path : @request_path), content_mode: "results", item_mode: @item_mode
+    assert_query (@stream_presenter ? this_path : @request_path), content_mode: "results", item_mode: item_mode
   end
 
   # This is the name of the partial used to render me
   def results_partial
-    "filtered_presenter/results_#{@item_mode}"
+    "filtered_presenter/results_#{item_mode}"
   end
 
   def tail_partial
-    "filtered_presenter/tail_#{@item_mode}"
+    "filtered_presenter/tail_#{item_mode}"
+  end
+
+  def item_mode
+    @item_mode || :masonry
   end
 
 protected
 
-  # Invoke a partial for a collection of types
-  def apply_partial partial_name, types, block, qparams={}
-    if @entity_type
-      block.call partial_name,
-                 title: title_for(results_type),
-                 type: results_type,
-                 url: results_path
-    else
-      types.each { |type|
+  # Invoke a partial for one or more types
+  def apply_partial partial_name, type_or_types, block, qparams={}
+      [type_or_types].flatten.each { |type|
         block.call partial_name,
                    title: title_for(type),
                    type: type,
                    url: assert_query(results_path, qparams.merge(entity_type: type))
       }
-    end
-
   end
-
 
   private
 
@@ -239,14 +238,17 @@ end
 
 class SearchIndexPresenter < FilteredPresenter
   @results_class_name = 'SearchAllCache'
-  attr_reader :entity_type
+
+  def entity_type
+    @entity_type ||= 'recipes'
+  end
 
   def params_needed
     super << :entity_type
   end
 
   def results_type
-    @entity_type || self.class.to_s
+    entity_type || self.class.to_s
   end
 
   def display_class
@@ -255,8 +257,7 @@ class SearchIndexPresenter < FilteredPresenter
 
   def presentation_partials &block
     block.call 'filtered_presenter/associated_results_header'
-    types = @entity_type ? [@entity_type] : %w{ recipes lists friends feeds } # %w{ recipes lists friends feeds }
-    apply_partial :panel, types, block, :item_mode => :slider, :org => :newest
+    apply_partial 'filtered_presenter/partial_spew', entity_type, block, :item_mode => :masonry, :org => :newest
   end
 
 end
@@ -288,8 +289,12 @@ end
 class ListsShowPresenter < FilteredPresenter
   @results_class_name = 'ListCache'
 
+  def entity_type
+    @entity_type ||= 'recipes'
+  end
+
   def results_type
-    "recipes" # @entity_type || self.class.to_s
+    "recipes"
   end
 
   def params_needed
@@ -300,9 +305,11 @@ class ListsShowPresenter < FilteredPresenter
     block.call :card
     block.call :comments
     block.call 'owned_results_header', title: "Contents"
-    types = @entity_type ? [@entity_type] : %w{ recipes }
-    partial_name = (types.count == 1) ? "filtered_presenter/partial_spew" : "filtered_presenter/partial_associated"
-    apply_partial partial_name, types, block, :item_mode => :masonry, :org => :newest
+    apply_partial "filtered_presenter/partial_spew",
+                  entity_type,
+                  block,
+                  :item_mode => :masonry,
+                  :org => :newest
   end
 
 end
@@ -332,6 +339,7 @@ class UserContentPresenter < FilteredPresenter
 end
 
 class UsersAssociatedPresenter < UserContentPresenter
+  @item_mode = :masonry
 
   def presentation_partials &block
     subtypes =
