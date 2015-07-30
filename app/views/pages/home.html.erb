@@ -42,7 +42,7 @@
 <div class="centerblock">
 <% end %>
   <% if current_user %>
-      <%= link_to("To My Collections!!", user_collection_path(current_user), class: "btn btn-lg btn-info") %>
+      <%= link_to("To My Collections!!", collection_user_path(current_user), class: "btn btn-lg btn-info") %>
   <% else %>
       <%= signup_button %>
   <% end %>

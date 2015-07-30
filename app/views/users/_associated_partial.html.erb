@@ -6,7 +6,7 @@
       <div class="col-md-7 collection-nav <%= @filtered_presenter.entity_type %>">
         <div class="row">
           <div class="col-md-12 navlink">
-            <%= link_to_submit "#{sprite_glyph :'send-left', 'lg'}&nbsp;[last page]".html_safe, user_collection_path(decorator.object) %>
+            <%= link_to_submit "#{sprite_glyph :'send-left', 'lg'}&nbsp;[last page]".html_safe, collection_user_path(decorator.object) %>
           </div>
         </div>
         <div class="row">

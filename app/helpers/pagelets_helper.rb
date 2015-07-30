@@ -64,7 +64,7 @@ module PageletsHelper
     entity = entity.object if entity.is_a? Draper::Decorator
     request =
         destroyed ?
-            user_collection_path(current_user) :
+            collection_user_path(current_user) :
             polymorphic_path(entity, :nocache => true)
     {
         request: request,

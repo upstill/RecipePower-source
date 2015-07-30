@@ -339,7 +339,7 @@ class UserContentPresenter < FilteredPresenter
   def presentation_partials &block
     block.call :card
     block.call 'owned_results_header'
-    types = @entity_type ? [@entity_type] : %w{ recipes lists friends feeds } # %w{ recipes lists friends feeds }
+    types = @entity_type ? [@entity_type] : %w{ feeds } # %w{ recipes lists friends feeds }
     apply_partial :panel, types, block, :item_mode => :slider, :org => :newest
   end
 
@@ -450,6 +450,17 @@ class FeedsIndexPresenter < FilteredPresenter
 Last Updated',
       "Approved",
       "Actions" ]
+  end
+
+  def presentation_partials &block
+    # block.call :card
+    # block.call :comments
+    block.call "filtered_presenter/results_table"
+=begin
+               title: "feeds",
+               type: "feed_entries",
+               url: assert_query(results_path, item_mode: "page")
+=end
   end
 
 end

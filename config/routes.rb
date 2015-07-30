@@ -86,8 +86,8 @@ RP::Application.routes.draw do
   get 'users/identify' => 'users#identify'
   get 'users/:id/recent' => 'users#recent', :as => "user_recent"
   get 'users/:id/recent' => 'users#recent', :as => "user_root"
-  get 'users/:id/collection' => 'users#collection', :as => "user_collection"
-  get 'users/:id/associated' => 'users#associated', :as => "user_associated"
+  get 'users/:id/collection' => 'users#collection', :as => "collection_user/"
+  get 'users/:id/associated' => 'users#associated', :as => "associated_user"
   get 'users/:id/biglist' => 'users#biglist', :as => "user_biglist"
   # get 'users/:id/show' => 'users#show'
   resources :users, :except => [:index, :create] do
@@ -141,7 +141,7 @@ RP::Application.routes.draw do
   match 'references', :controller => 'references', :action => 'index', :via => [:get, :post]
 
   post '/feed' => 'feeds#create', :as => 'create_feed'
-  get 'feeds/:id/owned' => 'feeds#owned', :as => "feed_owned"
+  get 'feeds/:id/owned' => 'feeds#owned', :as => "owned_feed"
   resources :feeds, :except => [:index, :create] do
     member do
       get 'refresh' # Refresh the feed's entries

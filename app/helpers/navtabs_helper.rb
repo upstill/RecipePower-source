@@ -46,9 +46,9 @@ module NavtabsHelper
   end
 
   def collections_navtab menu_only = false
-    navtab :collections, "Collections", user_collection_path(current_user_or_guest), menu_only do
+    navtab :collections, "Collections", collection_user_path(current_user_or_guest), menu_only do
       [
-          navlink("My Collection", user_collection_path(current_user_or_guest)),
+          navlink("My Collection", collection_user_path(current_user_or_guest)),
           navlink("Recently Viewed", user_recent_path(current_user_or_guest_id)),
           navlink("Everything in RecipePower", user_biglist_path(current_user_or_guest)),
           "<hr class='menu'>".html_safe,

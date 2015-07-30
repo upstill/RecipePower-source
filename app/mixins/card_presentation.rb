@@ -21,7 +21,9 @@ module CardPresentation
   # NB This is meant to be overridden by entities (recipes, sites...) that link externally
   def card_homelink options={}
     (data = (options[:data] || {}))[:report] = h.polymorphic_path [:touch, decorator.object]
-    link_to_submit decorator.title, decorator.object, options.merge(:mode => :partial, :data => data)
+    homelink = h.polymorphic_path([:associated, decorator.object]) rescue nil
+    homelink ||= h.polymorphic_path([:owned, decorator.object]) rescue nil
+    link_to_submit decorator.title, (homelink || decorator.object), options.merge(:mode => :partial, :data => data)
   end
 
   def card_header

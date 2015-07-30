@@ -90,7 +90,7 @@ class RecipesController < CollectibleController
           redirect_to collection_path
         }
         format.json {
-          @data = { onget: [ "submit.submit_and_process", user_collection_url(current_user, layout: false) ] }
+          @data = { onget: [ "submit.submit_and_process", collection_user_url(current_user, layout: false) ] }
           response_service.mode = :modal
           flash[:popup] = "'#{@recipe.title}' now appearing in your collection."
           render :action => 'collect_and_tag', :mode => :modal
@@ -186,7 +186,7 @@ class RecipesController < CollectibleController
     # return if need_login true
     if params[:commit] == "Cancel"
       @recipe = Recipe.find params[:id]
-      report_recipe user_collection_url(current_user), "Recipe secure and unchanged.", formats
+      report_recipe collection_user_url(current_user), "Recipe secure and unchanged.", formats
     else
       update_and_decorate
       if @recipe.errors.empty?
@@ -194,7 +194,7 @@ class RecipesController < CollectibleController
           ref.edit_count += 1
           ref.save
         end
-        report_recipe( user_collection_url(current_user), "Successfully updated #{@recipe.title || 'recipe'}.", formats )
+        report_recipe( collection_user_url(current_user), "Successfully updated #{@recipe.title || 'recipe'}.", formats )
       else
         response_service.title = "Tag That Recipe (Try Again)!"
         @nav_current = nil
@@ -222,7 +222,7 @@ class RecipesController < CollectibleController
     update_and_decorate
     title = @recipe.title
     @recipe.destroy
-    report_recipe user_collection_url(current_user), "\"#{title}\" is gone for good.", formats, true
+    report_recipe collection_user_url(current_user), "\"#{title}\" is gone for good.", formats, true
   end
 
   def revise # modify current recipe to reflect a client-side change
