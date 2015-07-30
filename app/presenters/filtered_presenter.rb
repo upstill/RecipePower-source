@@ -367,11 +367,13 @@ class UsersAssociatedPresenter < UserContentPresenter
   end
 
   def results_class
-    rcname = "UserCollectionCache" # ... by default
+    rcname =  # ... by default
     case @entity_type
-      when "lists.owned"
-        rcname = "UserOwnedListsCache"
-    end
+      when 'lists.owned'
+        'UserOwnedListsCache'
+      when 'friends'
+        'UserFriendsCache'
+    end || 'UserCollectionCache'
     rcname && rcname.constantize
   end
 

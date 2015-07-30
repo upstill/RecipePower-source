@@ -3,6 +3,9 @@ div.masonry-item {
   margin-bottom: 10px;
   div.masonry-item-contents {
     width: 350px;
+    &.user-item {
+      width: 160px;
+    }
     &.list-item {
       width: 160px;
     }

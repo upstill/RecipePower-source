@@ -10,20 +10,20 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-md-6 collection-label <%= @filtered_presenter.entity_type %>">
+          <div class="col-md-8 collection-label <%= @filtered_presenter.entity_type %>">
             <%= "#{possessive} #{user_associated_label @filtered_presenter.entity_type}".downcase %>
           </div>
-          <div class="col-md-6 or-see">
+          <div class="col-md-4 or-see">
             OR-SEE buttons go here
           </div>
         </div>
         <div class="row">
-          <div class="col-md-6 search">
+          <div class="col-md-8 search">
             <%= @filtered_presenter.filter_field(
                     handler: 'RP.tagger.querify',
                     placeholder: "Search #{possessive} #{@filtered_presenter.entity_type}") %>
           </div>
-          <div class="col-md-6 filters">
+          <div class="col-md-4 filters">
             filters go here
           </div>
         </div>
