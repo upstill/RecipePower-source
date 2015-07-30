@@ -42,11 +42,13 @@ class FilteredPresenter
     @h = view_context
 
     # May have been set by subclass, may have been inherited from params
+    # Set the instance variable, possibly in consultation with the class
     @item_mode =
         response_service.item_mode || # Provisionally accept item mode imposed by param
             (self.class.instance_variable_get(:"@item_mode") rescue nil) ||
             (:table if response_service.action == "index")
-    response_service.item_mode = @item_mode
+    # Allow the class to define the item mode on its own
+    response_service.item_mode = item_mode
 
     @content_mode =
         if params.has_key? :stream # The query is for items from the stream
@@ -333,7 +335,7 @@ class UserContentPresenter < FilteredPresenter
   end
 
   def title_for type
-    type.downcase
+    h.user_associated_label.downcase
   end
 
   def presentation_partials &block
@@ -374,7 +376,7 @@ class UsersAssociatedPresenter < UserContentPresenter
       when 'friends'
         'UserFriendsCache'
     end || 'UserCollectionCache'
-    rcname && rcname.constantize
+    rcname.constantize
   end
 
   def title_for subtype
@@ -404,12 +406,72 @@ class UsersRecentPresenter < UserContentPresenter
 end
 
 class UsersCollectionPresenter < UserContentPresenter
-  @item_mode = :slider
-  @results_class_name = 'UserCollectionCache'
+  # @results_class_name = 'UserCollectionCache'
+  # @item_mode = :slider
+  # @item_mode = :masonry
 
+  def item_mode
+    @item_mode = :slider unless @entity_type
+    @item_mode
+  end
+
+=begin
   def results_class
     rc_class = (@entity_type == 'friends') ? "UserFriendsCache" : "UserCollectionCache"
     rc_class.constantize
+  end
+=end
+
+  def results_class
+    rcname =  # ... by default
+        case @entity_type
+          when 'lists.owned'
+            'UserOwnedListsCache'
+          when 'friends'
+            'UserFriendsCache'
+        end || 'UserCollectionCache'
+    rcname.constantize
+  end
+
+  def presentation_partials &block
+    if @entity_type
+      subtypes =
+          case @entity_type
+            when "lists"
+              %w{ lists.owned lists.collected }
+            else
+              [ @entity_type ]
+          end
+      block.call 'associated_partial'
+      partial_name = (subtypes.count == 1) ? "filtered_presenter/partial_spew" : "filtered_presenter/partial_associated"
+      apply_partial partial_name, subtypes, block, :item_mode => :masonry, :org => :newest
+    else
+      super
+    end
+  end
+
+  def title_for subtype
+    if item_mode == :slider
+      h.user_associated_label subtype
+    else
+      is_me = @stream_presenter.results.user.id == h.current_user_or_guest_id
+      salutation = @stream_presenter.results.user.salutation.downcase
+      case subtype
+        when "recipes"
+          is_me ? "recipes I've collected" : "recipes collected by #{salutation}"
+        when "lists.owned"
+          is_me ? "my own lists" : "#{salutation}'s own lists"
+        when "lists.collected"
+          is_me ? "lists I've collected" : "lists collected by #{salutation}"
+        when "friends"
+          is_me ? "people I'm following" : "friends of #{salutation}"
+        when "feeds"
+          is_me ? "feeds I'm following" : "feeds followed by #{salutation}"
+        else
+          "#{subtype.gsub('.', '')} by #{is_me ? "me" : salutation}"
+      end
+    end
+
   end
 
 end
