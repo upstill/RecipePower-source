@@ -1,8 +1,8 @@
 div.triggered-form {
   .filter-element {
-    display:inline-block;
-    vertical-align:bottom;
-    margin:5px 10px
+    display: inline-block;
+    vertical-align: bottom;
+    margin: 5px 10px
   }
 }
 
@@ -40,18 +40,37 @@ div.results-enclosure {
           margin: 10px;
           &.recipe-button {
             background-color: $recipes-panels-label-button-color;
+            &.disabled {
+              background-color: rgba($recipes-panels-label-button-color, 0.5);
+            }
           }
           &.viewer-button {
             background-color: $viewer-panels-label-button-color;
+            &.disabled {
+              background-color: rgba($viewer-panels-label-button-color, 0.5);
+            }
           }
           &.user-button {
             background-color: $user-panels-label-button-color;
+            &.disabled {
+              background-color: rgba($user-panels-label-button-color, 0.5);
+            }
           }
           &.feed-button {
             background-color: $feeds-navtab-text-color;
+            &.disabled {
+              background-color: rgba($feeds-navtab-text-color, 0.5);
+            }
           }
           &.friend-button {
             background-color: $friends-panels-label-button-color;
+            &.disabled {
+              background-color: rgba($friends-panels-label-button-color, 0.5);
+            }
+          }
+          &.disabled {
+            pointer-events: none;
+            cursor: default;
           }
         }
       }

@@ -451,8 +451,10 @@ Last Updated',
   end
 
   def header_buttons &block
-    block.call "Most recent first"
-    block.call "approved"
+    current_mode = stream_presenter.results.params[:access]
+    current_path = (@stream_presenter ? this_path : @request_path)
+    block.call "newest first", (assert_query(current_path, access: 'newest') if current_mode != 'newest')
+    block.call "oldest first", (assert_query(current_path, access: 'oldest') if current_mode != 'oldest')
   end
 
 end
