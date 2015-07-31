@@ -72,7 +72,7 @@ module CollectibleHelper
     return unless permitted_to? :update, entity
     url = polymorphic_path entity, :action => :edit, styling: styling
     button = button_to_submit '', url, 'glyph-edit-red', styling.merge(mode: :modal)
-    content_tag :div, button, class: "edit-button"
+    content_tag :div, button, class: "edit-button glyph-button"
   end
 
   # Define and return a share button for the collectible
@@ -82,7 +82,7 @@ module CollectibleHelper
     end
     entity = entity.object if entity.is_a? Draper::Decorator
     button = button_to_submit "", new_user_invitation_path(shared_type: entity.class.to_s, shared_id: entity.id), "glyph-share", size, options.merge(mode: :modal)
-    content_tag :div, button, class: "share-button"
+    content_tag :div, button, class: "share-button glyph-button"
   end
 
   def collectible_list_button decorator, options={}
