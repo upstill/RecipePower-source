@@ -3,7 +3,6 @@ module CollectibleHelper
   # Render the set of collectible buttons
   def collectible_buttons_panel decorator, styling={}, &block
     styling = params[:styling].merge styling if params[:styling]
-    styling[:button_size] ||= "sm"  # Unless otherwise specified
     extras = block_given? ? yield : ""
     with_format("html") do
       render("collectible/collectible_buttons", extras: extras, styling: styling, decorator: decorator, item: decorator.object)
@@ -72,7 +71,7 @@ module CollectibleHelper
   def collectible_edit_button entity, styling={}
     return unless permitted_to? :update, entity
     url = polymorphic_path entity, :action => :edit, styling: styling
-    button = button_to_submit sprite_glyph("edit-red"), url, styling.merge(mode: :modal)
+    button = button_to_submit '', url, 'glyph-edit-red', styling.merge(mode: :modal)
     content_tag :div, button, class: "edit-button"
   end
 

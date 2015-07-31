@@ -11,5 +11,5 @@
       <td><%= feed_approval feed %></td>
   <% end %>
   <td>
-    <%= feed_collectible_buttons decorator, button_size: "xs", vote_button: true %>
+    <%= feed_collectible_buttons decorator, vote_button: true, edit_button: response_service.admin_view? %>
   </td>

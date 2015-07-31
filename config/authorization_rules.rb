@@ -27,7 +27,7 @@ authorization do
   
   role :editor do
       includes :moderator
-      has_permission_on [:tags, :referents, :lists], :to => [:manage]
+      has_permission_on [:tags, :referents, :lists, :feeds], :to => [:manage]
   end
   
   role :admin do
@@ -35,7 +35,7 @@ authorization do
     # :sessions, :users
     has_permission_on [:pages], :to => [:admin]
     has_permission_on [:tags, :lists, :recipes], :to => [:destroy]
-    has_permission_on [:feeds, :sites, :finders], :to => [:edit, :approve, :destroy]
+    has_permission_on [:feeds, :sites, :finders], :to => [:approve, :destroy]
     has_permission_on [:users, :expressions, :links, :pages, :ratings, :rcpqueries, :recipes, :referents, :scales, :sites], :to => :manage
   end
 end

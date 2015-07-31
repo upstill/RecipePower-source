@@ -27,7 +27,7 @@ module ItemHelper
     tag =
     case item_mode
       when :table
-        "td"
+        "tr"
       when :card
         "ul"
       else
