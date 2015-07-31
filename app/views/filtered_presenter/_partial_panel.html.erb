@@ -9,7 +9,7 @@
     <div class="results-menu">
       <%= panel_org_menu url, type, :newest %>
       <%# panel_collapse_button type, :slider %>
-      <%= panel_expand_link associated_user_path(@decorator.object), type %>
+      <%= panel_expand_link collection_user_path(@decorator.object), type %>
       <%= panel_suggestion_button url, type %>
     </div>
 <% end %>

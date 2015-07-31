@@ -97,32 +97,6 @@ class FilteredPresenter
   # The options are those of the tokeninput plugin, with defaults
   def filter_field opt_param={}
     h.token_input_query opt_param.merge(tagtype: tagtype, querytags: querytags)
-=begin
-    options = opt_param.dup
-    data = options.slice! :hint, :placeholder, :'no-results-text', :'min-chars'
-
-    # Assert defaults for data fields
-    data[:hint] ||= 'Narrow down the list'
-    data[:placeholder] ||= "Seek and ye shall find..."
-    data[:"min-chars"] ||= 2
-    data[:"no-results-text"] ||= "No matching tag found; hit Enter to search with text"
-    # JS for how to invoke the search on tag completion:
-    # RP.tagger.querify for standard tag handling;
-    # RP.submit.enclosing_form for results enclosures (which maintain and accumulate query data)
-    data[:'on-add'] = options[:handler] || 'RP.submit.enclosing_form'
-    data[:'on-delete'] = options[:handler] || 'RP.submit.enclosing_form'
-
-    # Set up the tokeninput data
-    data[:query] = "tagtype=#{tagtype}" if tagtype
-    data[:pre] = querytags.collect { |tag| { id: tag.id, name: tag.name } }.to_json
-    options[:onload] = 'RP.tagger.onload(event);'
-    options[:class] = "token-input-field-pending #{options[:class]}" # The token-input-field-pending class triggers tokenInput
-
-    options[:row] ||= 1
-    options[:autofocus] = true unless options[:autofocus] == false
-
-    h.text_field_tag 'querytags', querytags.map(&:id).join(','), options.except(:handler).merge(data: data)
-=end
   end
 
   # Should the items be dumped now?
@@ -206,7 +180,7 @@ class FilteredPresenter
     assert_query (@stream_presenter ? this_path : @request_path), content_mode: "results", item_mode: item_mode
   end
 
-  # This is the name of the partial used to render me
+  # This is the name of the partial used to render my results
   def results_partial
     "filtered_presenter/results_#{item_mode}"
   end
@@ -350,56 +324,6 @@ class UserContentPresenter < FilteredPresenter
   end
 end
 
-class UsersAssociatedPresenter < UserContentPresenter
-  @item_mode = :masonry
-
-  def presentation_partials &block
-    subtypes =
-        case @entity_type
-          when "lists"
-            %w{ lists.owned lists.collected }
-          when nil
-            %w{ recipes lists friends feeds }
-          else
-            [ @entity_type ]
-        end
-    block.call 'associated_partial'
-    partial_name = (subtypes.count == 1) ? "filtered_presenter/partial_spew" : "filtered_presenter/partial_associated"
-    apply_partial partial_name, subtypes, block, :item_mode => :masonry, :org => :newest
-  end
-
-  def results_class
-    rcname =  # ... by default
-    case @entity_type
-      when 'lists.owned'
-        'UserOwnedListsCache'
-      when 'friends'
-        'UserFriendsCache'
-    end || 'UserCollectionCache'
-    rcname.constantize
-  end
-
-  def title_for subtype
-    is_me = @stream_presenter.results.user.id == h.current_user_or_guest_id
-    salutation = @stream_presenter.results.user.salutation.downcase
-    case subtype
-      when "recipes"
-        is_me ? "recipes I've collected" : "recipes collected by #{salutation}"
-      when "lists.owned"
-        is_me ? "my own lists" : "#{salutation}'s own lists"
-      when "lists.collected"
-        is_me ? "lists I've collected" : "lists collected by #{salutation}"
-      when "friends"
-        is_me ? "people I'm following" : "friends of #{salutation}"
-      when "feeds"
-        is_me ? "feeds I'm following" : "feeds followed by #{salutation}"
-      else
-        "#{subtype.gsub('.', '')} by #{is_me ? "me" : salutation}"
-    end
-  end
-
-end
-
 class UsersRecentPresenter < UserContentPresenter
   @results_class_name = 'UserRecentCache'
 
@@ -414,13 +338,6 @@ class UsersCollectionPresenter < UserContentPresenter
     @item_mode = :slider unless @entity_type
     @item_mode
   end
-
-=begin
-  def results_class
-    rc_class = (@entity_type == 'friends') ? "UserFriendsCache" : "UserCollectionCache"
-    rc_class.constantize
-  end
-=end
 
   def results_class
     rcname =  # ... by default

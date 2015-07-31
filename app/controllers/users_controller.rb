@@ -110,10 +110,6 @@ class UsersController < CollectibleController
     smartrender 
   end
 
-  def associated
-    collection
-  end
-
   # Show the user's recently-viewed recipes
   def biglist
     update_and_decorate # @user = User.find params[:id]
