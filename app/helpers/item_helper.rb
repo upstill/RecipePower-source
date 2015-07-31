@@ -117,7 +117,6 @@ module ItemHelper
     end
   end
 
-
   def render_item item_or_decorator_or_specs=nil, item_mode=nil, locals={}
     if item_mode.is_a? Hash
       item_mode, locals = nil, item_mode

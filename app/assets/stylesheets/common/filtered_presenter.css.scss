@@ -25,6 +25,9 @@ div.results-enclosure {
       &.user-label {
         color: $user-panels-label-text-color;
       }
+      &.feed-label {
+        color: $feeds-navtab-text-color;
+      }
       &.friend-label {
         color: $friends-panels-label-text-color;
       }
@@ -43,6 +46,9 @@ div.results-enclosure {
           }
           &.user-button {
             background-color: $user-panels-label-button-color;
+          }
+          &.feed-button {
+            background-color: $feeds-navtab-text-color;
           }
           &.friend-button {
             background-color: $friends-panels-label-button-color;

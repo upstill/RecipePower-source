@@ -114,7 +114,7 @@ class FilteredPresenter
   end
 
   def display_class
-    h.object_display_class decorator.object
+    decorator ? h.object_display_class(decorator.object) : self.class.to_s.underscore.sub(/_.*/,'').singularize
   end
 
   def panel_button_class
@@ -133,6 +133,10 @@ class FilteredPresenter
         "collection"
       when "recipe"
         "related"
+      when "feed"
+        "entries"
+      else
+        display_class
     end
   end
 
@@ -166,8 +170,18 @@ class FilteredPresenter
   ### The remaining public methods pertain to the page presentation
 
   def presentation_partials &block
-    block.call :card
-    block.call :comments
+    if item_mode == :table
+      block.call "filtered_presenter/generic_results_header"
+      block.call "filtered_presenter/results_table"
+    else
+      block.call :card
+      block.call :comments
+    end
+  end
+
+  # Define buttons used in the search/redirect header above the presenter's results
+  def header_buttons &block
+    # block.call "RECENTLY VIEWED", "#"
   end
 
   # This is the class of the results container
@@ -290,7 +304,7 @@ class ListsShowPresenter < FilteredPresenter
   def presentation_partials &block
     block.call :card
     block.call :comments
-    block.call 'owned_results_header', title: "Contents"
+    block.call 'filtered_presenter/associations_header', title: "Contents"
     apply_partial "filtered_presenter/partial_spew",
                   entity_type,
                   block,
@@ -308,15 +322,58 @@ class UserContentPresenter < FilteredPresenter
     super << :entity_type
   end
 
+  def item_mode
+    @item_mode = :slider unless @entity_type
+    @item_mode
+  end
+
   def title_for type
-    h.user_associated_label.downcase
+    if item_mode == :slider
+      h.user_associated_label(type).downcase
+    else
+      is_me = @stream_presenter.results.user.id == h.current_user_or_guest_id
+      salutation = @stream_presenter.results.user.salutation.downcase
+      case type
+        when "recipes"
+          is_me ? "recipes I've collected" : "recipes collected by #{salutation}"
+        when "lists.owned"
+          is_me ? "my own lists" : "#{salutation}'s own lists"
+        when "lists.collected"
+          is_me ? "lists I've collected" : "lists collected by #{salutation}"
+        when "friends"
+          is_me ? "people I'm following" : "friends of #{salutation}"
+        when "feeds"
+          is_me ? "feeds I'm following" : "feeds followed by #{salutation}"
+        else
+          "#{type.gsub('.', '')} by #{is_me ? "me" : salutation}"
+      end
+    end
   end
 
   def presentation_partials &block
-    block.call :card
-    block.call 'owned_results_header'
-    types = @entity_type ? [@entity_type] : %w{ friends } # %w{ recipes lists friends feeds }
-    apply_partial :panel, types, block, :item_mode => :slider, :org => :newest
+    if @entity_type
+      subtypes =
+          case @entity_type
+            when "lists"
+              %w{ lists.owned lists.collected }
+            else
+              [ @entity_type ]
+          end
+      block.call 'filtered_presenter/collection_entity_header'
+      partial_name = (subtypes.count == 1) ? "filtered_presenter/partial_spew" : "filtered_presenter/partial_associated"
+      apply_partial partial_name, subtypes, block, :item_mode => :masonry, :org => :newest
+    else
+      block.call :card
+      block.call 'filtered_presenter/generic_results_header'
+      types = @entity_type ? [@entity_type] : %w{ feeds friends } # %w{ recipes lists friends feeds }
+      apply_partial :panel, types, block, :item_mode => :slider, :org => :newest
+    end
+  end
+
+  # Define buttons used in the search/redirect header above the presenter's results
+  def header_buttons &block
+    block.call "RECENTLY VIEWED", "#"
+    block.call "EVERYTHING", "#"
   end
 
   def results_type
@@ -324,20 +381,10 @@ class UserContentPresenter < FilteredPresenter
   end
 end
 
-class UsersRecentPresenter < UserContentPresenter
-  @results_class_name = 'UserRecentCache'
-
-end
-
 class UsersCollectionPresenter < UserContentPresenter
   # @results_class_name = 'UserCollectionCache'
   # @item_mode = :slider
   # @item_mode = :masonry
-
-  def item_mode
-    @item_mode = :slider unless @entity_type
-    @item_mode
-  end
 
   def results_class
     rcname =  # ... by default
@@ -350,48 +397,13 @@ class UsersCollectionPresenter < UserContentPresenter
     rcname.constantize
   end
 
-  def presentation_partials &block
-    if @entity_type
-      subtypes =
-          case @entity_type
-            when "lists"
-              %w{ lists.owned lists.collected }
-            else
-              [ @entity_type ]
-          end
-      block.call 'associated_partial'
-      partial_name = (subtypes.count == 1) ? "filtered_presenter/partial_spew" : "filtered_presenter/partial_associated"
-      apply_partial partial_name, subtypes, block, :item_mode => :masonry, :org => :newest
-    else
-      super
-    end
-  end
+end
 
-  def title_for subtype
-    if item_mode == :slider
-      h.user_associated_label subtype
-    else
-      is_me = @stream_presenter.results.user.id == h.current_user_or_guest_id
-      salutation = @stream_presenter.results.user.salutation.downcase
-      case subtype
-        when "recipes"
-          is_me ? "recipes I've collected" : "recipes collected by #{salutation}"
-        when "lists.owned"
-          is_me ? "my own lists" : "#{salutation}'s own lists"
-        when "lists.collected"
-          is_me ? "lists I've collected" : "lists collected by #{salutation}"
-        when "friends"
-          is_me ? "people I'm following" : "friends of #{salutation}"
-        when "feeds"
-          is_me ? "feeds I'm following" : "feeds followed by #{salutation}"
-        else
-          "#{subtype.gsub('.', '')} by #{is_me ? "me" : salutation}"
-      end
-    end
-
-  end
+class UsersRecentPresenter < UserContentPresenter
+  @results_class_name = 'UserRecentCache'
 
 end
+
 
 class UsersBiglistPresenter < UserContentPresenter
   @results_class_name = 'UserBiglistCache'
@@ -409,6 +421,7 @@ class FeedsOwnedPresenter < FilteredPresenter
   def presentation_partials &block
     block.call :card
     block.call :comments
+    block.call 'filtered_presenter/generic_results_header'
     block.call "filtered_presenter/partial_spew",
                title: "feeds",
                type: "feed_entries",
@@ -433,15 +446,13 @@ Last Updated',
       "Actions" ]
   end
 
-  def presentation_partials &block
-    # block.call :card
-    # block.call :comments
-    block.call "filtered_presenter/results_table"
-=begin
-               title: "feeds",
-               type: "feed_entries",
-               url: assert_query(results_path, item_mode: "page")
-=end
+  def panel_label
+    "feeds"
+  end
+
+  def header_buttons &block
+    block.call "Most recent first"
+    block.call "approved"
   end
 
 end
