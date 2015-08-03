@@ -172,6 +172,10 @@ class FilteredPresenter
 
   ### The remaining public methods pertain to the page presentation
 
+  def results_list
+    entity_type || results_type
+  end
+
   # The default presentation is different for tables and for objects, which in turn
   # may define multiple results panels
   def presentation_partials &block
@@ -185,7 +189,7 @@ class FilteredPresenter
       end
       block.call 'filtered_presenter/generic_results_header', title: panel_label
       apply_partial 'filtered_presenter/partial_spew',
-                    entity_type || results_type,
+                    results_list,
                     block,
                     :item_mode => item_mode,
                     :org => org
@@ -224,7 +228,7 @@ protected
 
   # Invoke a partial for one or more types
   def apply_partial partial_name, type_or_types, block, qparams={}
-      [type_or_types].flatten.each { |type|
+      [type_or_types].flatten.compact.each { |type|
         block.call partial_name,
                    title: title_for(type),
                    type: type,
@@ -287,10 +291,9 @@ end
 
 class RecipesAssociatedPresenter < FilteredPresenter
 
-  def presentation_partials &block
-    block.call :card
-    block.call :comments
-    block.call 'filtered_presenter/associated_results_header'
+  # No results associated with recipes as yet
+  def results_list
+
   end
 
 end
