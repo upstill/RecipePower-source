@@ -38,22 +38,22 @@ class FilteredPresenter
       end
 
     }
-    # @stream_param = params[:stream] || "" if params.has_key? :stream
+    # @stream_param = params[:stream] || '' if params.has_key? :stream
     @h = view_context
 
     # May have been set by subclass, may have been inherited from params
     # Set the instance variable, possibly in consultation with the class
     @item_mode =
         response_service.item_mode || # Provisionally accept item mode imposed by param
-            (self.class.instance_variable_get(:"@item_mode") rescue nil) ||
-            (:table if response_service.action == "index")
+            (self.class.instance_variable_get(:'@item_mode') rescue nil) ||
+            (:table if response_service.action == 'index')
     # Allow the class to define the item mode on its own
     response_service.item_mode = item_mode
 
     @content_mode =
         if params.has_key? :stream # The query is for items from the stream
           :items
-        elsif params[:mode] && params[:mode] == "modal" # The query is for a modal dialog
+        elsif params[:mode] && params[:mode] == 'modal' # The query is for a modal dialog
           :modal
         else
           @content_mode.to_sym # Either specified, or :container by default
@@ -62,7 +62,7 @@ class FilteredPresenter
     @title = response_service.title
     @request_path = request_path
     # This is the name of the partial used for the header, presumably including the search box
-    # @header_partial = "filtered_presenter/filter_header"
+    # @header_partial = 'filtered_presenter/filter_header'
     # FilteredPresenters don't always have results panels
     if rc_class = results_class
       @stream_presenter = StreamPresenter.new sessid, request_path, rc_class, user_id, response_service.admin_view?, querytags, params
@@ -71,11 +71,11 @@ class FilteredPresenter
 
   # Declare the parameters that we adopt as instance variables. subclasses would add to this list
   def params_needed
-    [ :tagtype, [:stream, ""], [ :content_mode, :container ], [ :org, :newest ] ]
+    [ :tagtype, [:stream, ''], [ :content_mode, :container ], [ :org, :newest ] ]
   end
 
   def results_class
-    @results_class ||= (rcn = self.class.instance_variable_get :"@results_class_name") && rcn.constantize
+    @results_class ||= (rcn = self.class.instance_variable_get :'@results_class_name') && rcn.constantize
   end
 
   def title_for subtype
@@ -146,18 +146,18 @@ class FilteredPresenter
     if stream_presenter.has_query? && (stream_presenter.ready? || force)
       case nmatches = stream_presenter.nmatches
         when 0
-          "No matches found"
+          'No matches found'
         when 1
-          "1 match found"
+          '1 match found'
         else
           "#{nmatches} found"
       end
     else
       case nmatches = stream_presenter.full_size
         when 0
-          "Regrettably empty"
+          'Regrettably empty'
         when 1
-          "Only one here"
+          'Only one here'
         else
           "#{nmatches} altogether"
       end
@@ -173,8 +173,8 @@ class FilteredPresenter
 
   def presentation_partials &block
     if item_mode == :table
-      block.call "filtered_presenter/generic_results_header"
-      block.call "filtered_presenter/results_table"
+      block.call 'filtered_presenter/generic_results_header'
+      block.call 'filtered_presenter/results_table'
     else
       block.call :card
       block.call :comments
@@ -183,7 +183,7 @@ class FilteredPresenter
 
   # Define buttons used in the search/redirect header above the presenter's results
   def header_buttons &block
-    # block.call "RECENTLY VIEWED", "#"
+    # block.call 'RECENTLY VIEWED', '#'
   end
 
   # This is the class of the results container
@@ -193,7 +193,7 @@ class FilteredPresenter
 
   # Specify a path for fetching the results partial
   def results_path
-    assert_query (@stream_presenter ? this_path : @request_path), content_mode: "results", item_mode: item_mode
+    assert_query (@stream_presenter ? this_path : @request_path), content_mode: 'results', item_mode: item_mode
   end
 
   # This is the name of the partial used to render my results
@@ -249,7 +249,7 @@ class SearchIndexPresenter < FilteredPresenter
   end
 
   def display_class
-    "search"
+    'search'
   end
 
   def presentation_partials &block
@@ -269,7 +269,7 @@ class UsersIndexPresenter < FilteredPresenter
   @results_class_name = 'UsersCache'
 
   def table_headers
-    [ "", "About Me", "Interest(s)", "", "" ]
+    [ '', 'About Me', 'Interest(s)', '', '' ]
   end
 end
 
@@ -296,7 +296,7 @@ class ListsShowPresenter < FilteredPresenter
   end
 
   def results_type
-    "recipes"
+    'recipes'
   end
 
   def params_needed
@@ -306,8 +306,8 @@ class ListsShowPresenter < FilteredPresenter
   def presentation_partials &block
     block.call :card
     block.call :comments
-    block.call 'filtered_presenter/generic_results_header', title: "Contents"
-    apply_partial "filtered_presenter/partial_spew",
+    block.call 'filtered_presenter/generic_results_header', title: 'Contents'
+    apply_partial 'filtered_presenter/partial_spew',
                   entity_type,
                   block,
                   :item_mode => :masonry,
@@ -336,18 +336,18 @@ class UserContentPresenter < FilteredPresenter
       is_me = @stream_presenter.results.user.id == h.current_user_or_guest_id
       salutation = @stream_presenter.results.user.salutation.downcase
       case type
-        when "recipes"
-          is_me ? "recipes I've collected" : "recipes collected by #{salutation}"
-        when "lists.owned"
-          is_me ? "my own lists" : "#{salutation}'s own lists"
-        when "lists.collected"
-          is_me ? "lists I've collected" : "lists collected by #{salutation}"
-        when "friends"
-          is_me ? "people I'm following" : "friends of #{salutation}"
-        when "feeds"
-          is_me ? "feeds I'm following" : "feeds followed by #{salutation}"
+        when 'recipes'
+          is_me ? 'recipes I\'ve collected' : "recipes collected by #{salutation}"
+        when 'lists.owned'
+          is_me ? 'my own lists' : "#{salutation}'s own lists"
+        when 'lists.collected'
+          is_me ? 'lists I\'ve collected' : "lists collected by #{salutation}"
+        when 'friends'
+          is_me ? 'people I\'m following' : "friends of #{salutation}"
+        when 'feeds'
+          is_me ? 'feeds I\'m following' : "feeds followed by #{salutation}"
         else
-          "#{type.gsub('.', '')} by #{is_me ? "me" : salutation}"
+          "#{type.gsub('.', '')} by #{is_me ? 'me' : salutation}"
       end
     end
   end
@@ -356,13 +356,13 @@ class UserContentPresenter < FilteredPresenter
     if @entity_type
       subtypes =
           case @entity_type
-            when "lists"
+            when 'lists'
               %w{ lists.owned lists.collected }
             else
               [ @entity_type ]
           end
       block.call 'filtered_presenter/collection_entity_header'
-      partial_name = (subtypes.count == 1) ? "filtered_presenter/partial_spew" : "filtered_presenter/partial_associated"
+      partial_name = (subtypes.count == 1) ? 'filtered_presenter/partial_spew' : 'filtered_presenter/partial_associated'
       apply_partial partial_name, subtypes, block, :item_mode => :masonry, :org => :newest
     else
       block.call :card
@@ -374,8 +374,8 @@ class UserContentPresenter < FilteredPresenter
 
   # Define buttons used in the search/redirect header above the presenter's results
   def header_buttons &block
-    block.call "RECENTLY VIEWED", "#"
-    block.call "EVERYTHING", "#"
+    block.call 'RECENTLY VIEWED', '#'
+    block.call 'EVERYTHING', '#'
   end
 
   def results_type
@@ -417,17 +417,17 @@ class FeedsOwnedPresenter < FilteredPresenter
   @results_class_name = 'FeedCache'
 
   def results_type
-    "feed_entries"
+    'feed_entries'
   end
 
   def presentation_partials &block
     block.call :card
     block.call :comments
     block.call 'filtered_presenter/generic_results_header'
-    block.call "filtered_presenter/partial_spew",
-               title: "feeds",
-               type: "feed_entries",
-               url: assert_query(results_path, item_mode: "page")
+    block.call 'filtered_presenter/partial_spew',
+               title: 'feeds',
+               type: 'feed_entries',
+               url: assert_query(results_path, item_mode: 'page')
   end
 
 end
@@ -444,19 +444,19 @@ class FeedsIndexPresenter < FilteredPresenter
       'Host Site',
       '# Entries/
 Last Updated',
-      "Approved",
-      "Actions" ]
+      'Approved',
+      'Actions' ]
   end
 
   def panel_label
-    "feeds"
+    'feeds'
   end
 
   def header_buttons &block
     current_mode = stream_presenter.results.params[:access]
     current_path = (@stream_presenter ? this_path : @request_path)
-    block.call "newest first", (assert_query(current_path, access: 'newest') if current_mode != 'newest')
-    block.call "oldest first", (assert_query(current_path, access: 'oldest') if current_mode != 'oldest')
+    block.call 'newest first', (assert_query(current_path, access: 'newest') if current_mode != 'newest')
+    block.call 'oldest first', (assert_query(current_path, access: 'oldest') if current_mode != 'oldest')
   end
 
 end
@@ -478,7 +478,7 @@ class ListsIndexPresenter < FilteredPresenter
   end
 
   def panel_label
-    "lists"
+    'lists'
   end
 end
 
@@ -488,7 +488,7 @@ class ReferencesIndexPresenter < FilteredPresenter
   @results_class_name = 'ReferencesCache'
 
   def table_headers
-    [ "Reference Type", "URL/Referees", "", "", "" ]
+    [ 'Reference Type', 'URL/Referees', '', '', '' ]
   end
 end
 
@@ -498,7 +498,7 @@ class ReferentsIndexPresenter < FilteredPresenter
   @results_class_name = 'ReferentsCache'
 
   def table_headers
-    [ "Referent", "", "", "" ]
+    [ 'Referent', '', '', '' ]
   end
 end
 
@@ -517,7 +517,7 @@ class TagsIndexPresenter < FilteredPresenter
   @results_class_name = 'TagsCache'
 
   def table_headers
-    [ "ID", "Name", "Type", "Usages", "Public?", "Similar", "Synonym(s)", "Meaning(s)", "", "" ]
+    [ 'ID', 'Name', 'Type', 'Usages', 'Public?', 'Similar', 'Synonym(s)', 'Meaning(s)', '', '' ]
   end
 
   def filter_type_selector
