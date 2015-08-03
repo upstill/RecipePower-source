@@ -2,7 +2,8 @@ class FilteredPresenter
 
   attr_accessor :title, :h
 
-  attr_reader :decorator, :entity, # :header_partial,
+  attr_reader :decorator, :entity,
+              :entity_type, :results_type, # :header_partial,
               :results_class, # Class of the ResultsCache for fetching results
               :stream_presenter, # Manages the ResultsCache that produces items based on the query
               :content_mode, # What page element to render? :container, :entity, :results, :modal, :items
@@ -71,7 +72,7 @@ class FilteredPresenter
 
   # Declare the parameters that we adopt as instance variables. subclasses would add to this list
   def params_needed
-    [ :tagtype, [:stream, ''], [ :content_mode, :container ], [ :org, :newest ] ]
+    [ :tagtype, :entity_type, [:stream, ''], [ :content_mode, :container ], [ :org, :newest ] ]
   end
 
   def results_class
@@ -171,13 +172,23 @@ class FilteredPresenter
 
   ### The remaining public methods pertain to the page presentation
 
+  # The default presentation is different for tables and for objects, which in turn
+  # may define multiple results panels
   def presentation_partials &block
     if item_mode == :table
       block.call 'filtered_presenter/generic_results_header'
       block.call 'filtered_presenter/results_table'
     else
-      block.call :card
-      block.call :comments
+      if @decorator && @decorator.object && @decorator.object.is_a?(Collectible)
+        block.call :card
+        block.call :comments
+      end
+      block.call 'filtered_presenter/generic_results_header', title: panel_label
+      apply_partial 'filtered_presenter/partial_spew',
+                    entity_type || results_type,
+                    block,
+                    :item_mode => item_mode,
+                    :org => org
     end
   end
 
@@ -240,10 +251,6 @@ class SearchIndexPresenter < FilteredPresenter
     @entity_type ||= 'recipes'
   end
 
-  def params_needed
-    super << :entity_type
-  end
-
   def results_type
     entity_type || self.class.to_s
   end
@@ -299,30 +306,10 @@ class ListsShowPresenter < FilteredPresenter
     'recipes'
   end
 
-  def params_needed
-    super << :entity_type
-  end
-
-  def presentation_partials &block
-    block.call :card
-    block.call :comments
-    block.call 'filtered_presenter/generic_results_header', title: 'Contents'
-    apply_partial 'filtered_presenter/partial_spew',
-                  entity_type,
-                  block,
-                  :item_mode => :masonry,
-                  :org => :newest
-  end
-
 end
 
 # Present a list of items for a user
 class UserContentPresenter < FilteredPresenter
-  attr_reader :entity_type
-
-  def params_needed
-    super << :entity_type
-  end
 
   def item_mode
     @item_mode = :slider unless @entity_type
@@ -420,14 +407,8 @@ class FeedsOwnedPresenter < FilteredPresenter
     'feed_entries'
   end
 
-  def presentation_partials &block
-    block.call :card
-    block.call :comments
-    block.call 'filtered_presenter/generic_results_header'
-    block.call 'filtered_presenter/partial_spew',
-               title: 'feeds',
-               type: 'feed_entries',
-               url: assert_query(results_path, item_mode: 'page')
+  def item_mode
+    :page
   end
 
 end

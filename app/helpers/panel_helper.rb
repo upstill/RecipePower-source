@@ -37,7 +37,7 @@ module PanelHelper
   end
 
   def panel_suggestion_button url, type
-    querify_link "", url, class: "suggest #{type.to_s.extensions_to_classes} icon-large icon-lightbulb"
+    querify_link '', url, class: "suggest #{type.to_s.extensions_to_classes} icon-large icon-lightbulb"
   end
 
   def panel_suggestion_button_replacement url, type
@@ -45,11 +45,11 @@ module PanelHelper
   end
   
   def panel_results_placeholder type
-    content_tag :div, "", class: "results #{type.to_s.extensions_to_classes} placeholder"
+    content_tag :div, '', class: "results #{type.to_s.extensions_to_classes} placeholder"
   end
 
   def panel_results partial
-    with_format("html") { render partial }
+    with_format('html') { render partial }
   end
 
   def panel_results_replacement type, partial
@@ -57,11 +57,11 @@ module PanelHelper
   end
 
   def panel_suggestions_placeholder type
-    content_tag :div, "", class: "suggestions #{type.to_s.extensions_to_classes} placeholder" # Placeholder for the suggestions panel
+    content_tag :div, '', class: "suggestions #{type.to_s.extensions_to_classes} placeholder" # Placeholder for the suggestions panel
   end
 
   def panel_suggestions partial
-    with_format("html") { render partial }
+    with_format('html') { render partial }
   end
 
   def panel_suggestions_replacement type, partial=nil
