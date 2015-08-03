@@ -1,5 +1,5 @@
     <% if defined?(title) %>
-        <div class="results-title <%= type.extensions_to_classes %>"><%= title %></div>
+        <div class="results-title <%= @filtered_presenter.results_type.extensions_to_classes %>"><%= title %></div>
     <% end %>
 <!--
     <div class="results-content">

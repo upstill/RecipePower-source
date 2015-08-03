@@ -29,7 +29,10 @@ div.results-enclosure {
         color: $feeds-navtab-text-color;
       }
       &.friend-label {
-        color: $friends-panels-label-text-color;
+        color: $friends-navtab-text-color;
+      }
+      &.list-label {
+        color: rgba($lists-navtab-text-color, 0.6);
       }
     }
     div.panels-search {

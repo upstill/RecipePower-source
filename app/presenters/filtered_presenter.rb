@@ -127,14 +127,16 @@ class FilteredPresenter
 
   def panel_label
     case display_class
-      when "viewer"
-        "my collection"
-      when "friend", "user"
-        "collection"
-      when "recipe"
-        "related"
-      when "feed"
-        "entries"
+      when 'viewer'
+        'my collection'
+      when 'friend', 'user'
+        'collection'
+      when 'recipe'
+        'related'
+      when 'feed'
+        'entries'
+      when 'list'
+        'contents'
       else
         display_class
     end
@@ -304,7 +306,7 @@ class ListsShowPresenter < FilteredPresenter
   def presentation_partials &block
     block.call :card
     block.call :comments
-    block.call 'filtered_presenter/associations_header', title: "Contents"
+    block.call 'filtered_presenter/generic_results_header', title: "Contents"
     apply_partial "filtered_presenter/partial_spew",
                   entity_type,
                   block,
@@ -410,7 +412,7 @@ class UsersBiglistPresenter < UserContentPresenter
 
 end
 
-# Present a list of feeds for a user
+# Present the entries associated with a feed
 class FeedsOwnedPresenter < FilteredPresenter
   @results_class_name = 'FeedCache'
 
@@ -430,7 +432,7 @@ class FeedsOwnedPresenter < FilteredPresenter
 
 end
 
-# Present the entries associated with a feed
+# Present a list of feeds for a user
 class FeedsIndexPresenter < FilteredPresenter
   @item_mode = :table
   @results_class_name = 'FeedsCache'
@@ -472,7 +474,11 @@ class ListsIndexPresenter < FilteredPresenter
   @results_class_name = 'ListsCache'
 
   def table_headers
-    %w{ Owner	Name	Description	Included Tags	Size }
+    %w{ Owner	Name	Description Tags	Size }
+  end
+
+  def panel_label
+    "lists"
   end
 end
 
