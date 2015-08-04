@@ -1,5 +1,10 @@
 module TagsHelper
 
+  def tag_homelink tag, options={}
+    action = options.extract!(:action)[:action] || :associated
+    link_to_submit tag.name, polymorphic_path([action, tag]), {:mode => :modal}.merge(options)
+  end
+
   # Emit a link to a tag using the tag's name and, optionally, its type and id
   def tag_link tag, with_id=false
     link_to_submit(tag.name, tag_taggees_path(tag))+(with_id ? "(#{tag.typename} #{tag.id.to_s})" : "")

@@ -53,4 +53,23 @@ module UsersHelper
   def user_associated_label entity_type
     (entity_type=='friends') ? 'cookmates' : entity_type
   end
+
+  def user_linktitle user
+    user.fullname.present? ? user.fullname : user.username
+  end
+
+  def user_homelink user, options={}
+    (data = (options[:data] || {}))[:report] = polymorphic_path [:touch, user]
+    if user.id == current_user_or_guest_id
+      subclass = 'viewer'
+    else
+      subclass = 'friend'
+    end
+    klass = "#{options[:class]} entity user #{subclass}"
+    # Default submission is partial
+    action = options[:action] || :collection
+    link_to_submit user_linktitle(user),
+                   polymorphic_path([action, user]),
+                   {mode: :partial}.merge(options).merge(data: data, class: klass).except(:action)
+  end
 end

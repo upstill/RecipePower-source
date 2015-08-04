@@ -1,12 +1,12 @@
 <% list = decorator.object %>
   <% if params[:access] != "owned" %>
       <td>
-        <%= link_to_submit list.owner.handle, user_path(list.owner), :mode => :modal %>
+        <%= user_homelink list.owner, :mode => :partial, :action => :collection %>
         <br>
       </td>
   <% end %>
   <td>
-    <%= link_to_submit list.name.truncate(80), list_path(list) %>
+    <%= list_homelink list, truncate: 80 %>
     <br>
   </td>
   <td>
@@ -14,7 +14,7 @@
   </td>
   <td>
     <% list.included_tags.each do |tag| %>
-        <span><%= link_to_submit tag.typedname(true), tag_path(tag), :mode => :modal %></span><br>
+        <span><%= tag_homelink tag, :mode => :modal %></span><br>
     <% end %>
   </td>
   <td>

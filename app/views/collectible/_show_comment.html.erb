@@ -5,7 +5,7 @@
                                   id: "rcpPic",
                                   style: "width: 100%; height: auto",
                                   leave_blank: true %>
-    <%= link_to_submit rcpref.user.polite_name, rcpref.user, :mode => :partial %>
+    <%= user_homelink rcpref.user %>
   </div>
   <div class="content">
      <%= rcpref.comment %>

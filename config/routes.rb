@@ -162,6 +162,8 @@ RP::Application.routes.draw do
     member do
       post 'absorb'
       get 'taggees'
+      get 'associated'
+      get 'owned'
     end
     collection do
       get 'editor'

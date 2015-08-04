@@ -213,7 +213,7 @@ class FilteredPresenter
 
   # This is the class of the results container
   def results_type
-    (@results_class || self.class).to_s
+    entity_type || (@results_class || self.class).to_s
   end
 
   # Specify a path for fetching the results partial
@@ -364,10 +364,6 @@ class UserContentPresenter < FilteredPresenter
     block.call 'RECENTLY VIEWED', '#'
     block.call 'EVERYTHING', '#'
   end
-
-  def results_type
-    (@entity_type || self.class.to_s)
-  end
 end
 
 class UsersCollectionPresenter < UserContentPresenter
@@ -446,6 +442,10 @@ end
 class ListsIndexPresenter < FilteredPresenter
   @item_mode = :table
   @results_class_name = 'ListsCache'
+
+  def entity_type
+    @entity_type ||= 'lists'
+  end
 
   def table_headers
     %w{ Owner	Name	Description Tags	Size }

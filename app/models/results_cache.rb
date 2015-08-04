@@ -566,7 +566,7 @@ class ListsCache < ResultsCache
 
   def name_match tag
     matchstr = tag.normalized_name || Tag.normalizeName(tag.name)
-    # itemscope.joins(:name_tag).where('tags.normalized_name LIKE ?', "%#{matchstr}%").to_a
+    itemscope.joins(:name_tag).where('tags.normalized_name LIKE ?', "%#{matchstr}%").to_a +
     itemscope.joins(:included_tags).where('tags.normalized_name LIKE ?', "%#{matchstr}%").to_a
   end
 end

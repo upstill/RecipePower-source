@@ -187,6 +187,31 @@ div.card {
   padding-top: 10px
 }
 
+table.results {
+  &.lists {
+    th {
+      color: $lists-navtab-text-color;
+    }
+  }
+}
+
+a.entity {
+  &.list {
+    color: $lists-navtab-text-color;
+  }
+  &.user {
+    &.viewer {
+      color: $viewer-panels-label-text-color;
+    }
+    &.friend {
+      color: $friends-navtab-text-color;
+    }
+    &.other {
+      color: $user-panels-label-text-color;
+    }
+  }
+}
+
 .soft-button {
   color: $page-background-color;
   border: none;
