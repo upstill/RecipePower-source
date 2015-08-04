@@ -173,22 +173,31 @@ class FilteredPresenter
   ### The remaining public methods pertain to the page presentation
 
   def results_list
-    entity_type || results_type
+    [entity_type || results_type]
+  end
+
+  def header_partial
+    'filtered_presenter/generic_results_header'
+  end
+
+  def contents_partial
+    (results_list.count == 1) ? 'filtered_presenter/partial_spew' : 'filtered_presenter/partial_associated'
   end
 
   # The default presentation is different for tables and for objects, which in turn
   # may define multiple results panels
   def presentation_partials &block
     if item_mode == :table
-      block.call 'filtered_presenter/generic_results_header'
+      block.call header_partial
       block.call 'filtered_presenter/results_table'
     else
       if @decorator && @decorator.object && @decorator.object.is_a?(Collectible)
         block.call :card
         block.call :comments
       end
-      block.call 'filtered_presenter/generic_results_header', title: panel_label
-      apply_partial 'filtered_presenter/partial_spew',
+      block.call header_partial, title: panel_label
+      return unless results_list.present?
+      apply_partial contents_partial,
                     results_list,
                     block,
                     :item_mode => item_mode,
@@ -263,9 +272,8 @@ class SearchIndexPresenter < FilteredPresenter
     'search'
   end
 
-  def presentation_partials &block
-    block.call 'filtered_presenter/associated_results_header'
-    apply_partial 'filtered_presenter/partial_spew', entity_type, block, :item_mode => :masonry, :org => :newest
+  def header_partial
+    'filtered_presenter/associated_results_header'
   end
 
   # The global query will be maintained
@@ -293,20 +301,6 @@ class RecipesAssociatedPresenter < FilteredPresenter
 
   # No results associated with recipes as yet
   def results_list
-
-  end
-
-end
-
-class ListsShowPresenter < FilteredPresenter
-  @results_class_name = 'ListCache'
-
-  def entity_type
-    @entity_type ||= 'recipes'
-  end
-
-  def results_type
-    'recipes'
   end
 
 end
@@ -342,23 +336,25 @@ class UserContentPresenter < FilteredPresenter
     end
   end
 
+  def results_list
+    case @entity_type
+      when 'lists'
+        %w{ lists.owned lists.collected }
+      when nil
+        %w{ recipes feeds friends lists }
+      else
+        [ @entity_type ]
+    end
+  end
+
   def presentation_partials &block
     if @entity_type
-      subtypes =
-          case @entity_type
-            when 'lists'
-              %w{ lists.owned lists.collected }
-            else
-              [ @entity_type ]
-          end
       block.call 'filtered_presenter/collection_entity_header'
-      partial_name = (subtypes.count == 1) ? 'filtered_presenter/partial_spew' : 'filtered_presenter/partial_associated'
-      apply_partial partial_name, subtypes, block, :item_mode => :masonry, :org => :newest
+      apply_partial contents_partial, results_list, block, :item_mode => :masonry, :org => :newest
     else
       block.call :card
       block.call 'filtered_presenter/generic_results_header'
-      types = @entity_type ? [@entity_type] : %w{ feeds friends } # %w{ recipes lists friends feeds }
-      apply_partial :panel, types, block, :item_mode => :slider, :org => :newest
+      apply_partial :panel, results_list, block, :item_mode => :slider, :org => :newest
     end
   end
 
@@ -446,13 +442,6 @@ Last Updated',
 end
 
 # Present the entries associated with a list
-class ListsContentsPresenter < FilteredPresenter
-  @item_mode = :masonry
-  @results_class_name = 'ListCache'
-
-end
-
-# Present the entries associated with a list
 class ListsIndexPresenter < FilteredPresenter
   @item_mode = :table
   @results_class_name = 'ListsCache'
@@ -462,8 +451,32 @@ class ListsIndexPresenter < FilteredPresenter
   end
 
   def panel_label
-    'lists'
+    'all the lists'
   end
+end
+
+class ListsShowPresenter < FilteredPresenter
+  @results_class_name = 'ListCache'
+
+  def entity_type
+    @entity_type ||= 'recipes'
+  end
+
+  def results_type
+    'recipes'
+  end
+
+end
+
+# Present the entries associated with a list
+class ListsContentsPresenter < FilteredPresenter
+  @item_mode = :masonry
+  @results_class_name = 'ListCache'
+
+end
+
+class ListsAssociatedPresenter < FilteredPresenter
+
 end
 
 # Present the entries associated with a list
