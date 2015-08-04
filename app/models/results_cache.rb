@@ -550,7 +550,12 @@ class ListsCache < ResultsCache
     scope
   end
 
-  # TODO Currently, there's no search for lists
+  def name_match tag
+    model_class = itemscope.model.to_s
+    assoc_name = model_class.underscore.pluralize
+    matchstr = tag.normalized_name || Tag.normalizeName(tag.name)
+    itemscope.joins(:name_tag).where('tags.normalized_name LIKE ?', "%#{matchstr}%").to_a
+  end
 end
 
 # list's content visible to current user (ListStreamer)
