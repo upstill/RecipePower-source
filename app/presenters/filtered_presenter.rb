@@ -1,3 +1,4 @@
+require './app/models/results_cache.rb'
 class FilteredPresenter
 
   attr_accessor :title, :h
