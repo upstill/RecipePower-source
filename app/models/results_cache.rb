@@ -550,11 +550,24 @@ class ListsCache < ResultsCache
     scope
   end
 
-  def name_match tag
+  # Apply a tag to the members of the (Taggable) obj_class, returning an array of entities for count_tag
+  def tagging_match tag
     model_class = itemscope.model.to_s
     assoc_name = model_class.underscore.pluralize
     matchstr = tag.normalized_name || Tag.normalizeName(tag.name)
-    itemscope.joins(:name_tag).where('tags.normalized_name LIKE ?', "%#{matchstr}%").to_a
+    sourcetags = Tag.where('normalized_name ILIKE ?', "%#{matchstr}%")
+    scope = itemscope.joins(:taggings).where("#{assoc_name}.id = taggings.entity_id AND taggings.entity_type = '#{model_class}'")
+    unless sourcetags.empty?
+      idlist = sourcetags.map(&:id).map(&:to_s).join(", ") #comma-separated list
+      scope = scope.where("taggings.tag_id IN (#{idlist})" )
+    end
+    scope.to_a
+  end
+
+  def name_match tag
+    matchstr = tag.normalized_name || Tag.normalizeName(tag.name)
+    # itemscope.joins(:name_tag).where('tags.normalized_name LIKE ?', "%#{matchstr}%").to_a
+    itemscope.joins(:included_tags).where('tags.normalized_name LIKE ?', "%#{matchstr}%").to_a
   end
 end
 

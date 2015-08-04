@@ -2,7 +2,7 @@
     done: true,
     followup: pagelet_followup(@decorator),
     replacements: [
-        # [ "#list"+@list.id.to_s, with_format("html") { render "lists/show_table_item", locals: { item: @list }} ],
+        item_replacement(@decorator, :table),
         navtab_replacement(:my_lists),
         navtab_replacement(:other_lists)
     ],

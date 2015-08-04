@@ -22,5 +22,5 @@
     <%= labelled_quantity ListServices.new(list).tagging_scope(current_user_or_guest_id).count, "item" %>
   </td>
   <td>
-    <%= collectible_buttons_panel decorator, button_size: "xs" %>
+    <%= collectible_buttons_panel decorator, edit_button: response_service.admin_view? %>
    </td>
