@@ -9,6 +9,9 @@ jQuery ->
 	$(document).on 'shown.bs.modal', (event) ->
 		# When a dialog is invoked, focus on the first autofocus item, or a string item or a text item
 		RP.dialog.focus event.target
+	# On hiding a modal, we wait until it's actually hidden to muck with its classes
+	$(document).on 'hidden.bs.modal', (event) ->
+		$(event.target).addClass('hide').removeClass("modal").addClass 'modal-pending'
 
 RP.dialog.focus = (dlog) ->
 	$('[autofocus]:first',dlog).focus()[0] #  ||
@@ -173,9 +176,6 @@ open_modal = (dlog, omit_button) ->
 hide_modal = (dlog) ->
 	if $(dlog).modal
 		$(dlog).modal 'hide'
-	else
-		$(dlog)
-	$(dlog).addClass('hide').removeClass("modal").addClass 'modal-pending'
 
 show_modal = (dlog) ->
 	$(dlog).removeClass('hide').addClass('modal').removeClass 'modal-pending'
