@@ -197,6 +197,17 @@ div.card-item {
       margin-top: 0.5em;
       margin-bottom: 0em;
     }
+    td.lower-content {
+      padding-left: 0.5em;
+      vertical-align: bottom;
+      div.share-button {
+        font-size: 2em;
+        float: right;
+        position: relative;
+        left: 10px;
+        bottom: 8px;
+      }
+    }
     div.title {
       // min-height: 3.6em;
       // margin-bottom: 1em;
@@ -208,6 +219,14 @@ div.card-item {
       line-height: 1.2em;
       a.title-link {
         color: white;
+      }
+    }
+    div.vote-buttons {
+      font-size: 1.2em;
+      float: right;
+      margin-top: 0.3em;
+      a.vote-button {
+        font-size: 1.4em;
       }
     }
   }
