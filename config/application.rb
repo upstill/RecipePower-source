@@ -62,8 +62,5 @@ module RP
     # config.assets.precompile += ["jquery.min.js"]
     config.use_jquery2 = true
 
-    config.after_initialize do
-      ResultsCache.delete_all
-    end
   end
 end
