@@ -2,6 +2,8 @@ upstream unicorn {
   server unix:/tmp/unicorn.<%= fetch :application %>.sock fail_timeout=0;
 }
 
+error_log /var/www/<%= fetch :application %>/shared/log/nginx.log debug;
+
 server {
   listen 80 default deferred;
   # server_name example.com;

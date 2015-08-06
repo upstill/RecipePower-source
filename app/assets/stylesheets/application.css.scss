@@ -289,10 +289,14 @@ div.generic-top {
     &.logo {
       margin-left: 30px;
     }
-    &.search-top {
-      margin-left: 10px;
-    }
   }
+}
+
+div.global-search.searchtop {
+  position: absolute;
+  left: 240px;
+  top: 10px;
+  z-index: 992;
 }
 
 div.filter-element {
