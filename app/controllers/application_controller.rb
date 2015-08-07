@@ -214,18 +214,26 @@ class ApplicationController < ActionController::Base
         # Render the stream's entity in a modal dialog
         render :show
       when :items # Stream items into the stream's container
+        renderings = []
+        while item = fp.next_item do
+          renderings << with_format("html") { view_context.render_item item, fp.item_mode }
+        end
+        tail_item = with_format("html") { render_to_string partial: fp.tail_partial } if fp.next_path
+
         response.headers["Content-Type"] = "text/event-stream"
+        response.headers["Cache-Control"] = "no-cache"
         # retrieve_seeker
         begin
           sse = Reloader::SSE.new response.stream
           sse.write :stream_item, deletions: [".stream-tail.#{fp.stream_id}"]
-
-          while item = fp.next_item do
-            rendering = with_format("html") { view_context.render_item item, fp.item_mode }
-            sse.write :stream_item, elmt: rendering
+          renderings.each do |rendering|
+              sse.write :stream_item, elmt: rendering
           end
-          if fp.next_path
-            tail_item = with_format("html") { render_to_string partial: fp.tail_partial }
+          # while item = fp.next_item do
+          #   rendering = with_format("html") { view_context.render_item item, fp.item_mode }
+          #   sse.write :stream_item, elmt: rendering
+          # end
+          if tail_item
             sse.write :stream_item, elmt: tail_item
           end
         rescue IOError
