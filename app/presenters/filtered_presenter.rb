@@ -260,6 +260,7 @@ end
 
 class SearchIndexPresenter < FilteredPresenter
   @results_class_name = 'SearchAllCache'
+  @item_mode = :masonry
 
   def entity_type
     @entity_type ||= 'recipes'
