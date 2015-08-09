@@ -99,6 +99,5 @@ bootbox_alert = (msg) ->
 			bootbox.alert msg
 		else # bootstrap dialog
 			# $('div.bootbox .bootbox-close-button').trigger "click" # $('div.bootbox').modal('hide') # $('div.bootbox.modal').modal 'hide'
-			$('div.bootbox-alert').remove()
-			$('div.modal-backdrop').remove()
+			RP.dialog.close_modal $('div.bootbox-alert')[0]
 	available

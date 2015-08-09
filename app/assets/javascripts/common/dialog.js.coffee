@@ -11,7 +11,11 @@ jQuery ->
 		RP.dialog.focus event.target
 	# On hiding a modal, we wait until it's actually hidden to muck with its classes
 	$(document).on 'hidden.bs.modal', (event) ->
-		$(event.target).addClass('hide')
+		dlog = event.target
+		$(dlog).addClass 'hide'
+		# Hiding is the first step to removing, but that has to wait until the dialog has finished processing the hide
+		if !$(dlog).hasClass 'keeparound'
+			$(dlog).remove()
 
 RP.dialog.focus = (dlog) ->
 	$('[autofocus]:first',dlog).focus()[0] #  ||
@@ -114,7 +118,7 @@ open_modal = (dlog, omit_button) ->
 	if (onget = $(dlog).data "onget" ) && (fcn = RP.named_function "RP." + onget.shift() )
 		fcn.apply null, onget
 	RP.hide_all_empty()
-	show_modal dlog # $(dlog).removeClass('modal-pending').removeClass('hide').addClass('modal')
+	show_modal dlog
 	RP.dialog.notify "load", dlog
 	RP.state.onDialogOpen dlog
 	if !(omit_button || $('button.close', dlog)[0])
@@ -172,14 +176,11 @@ pop_modal = (dlog, action) ->
 		show_modal parent
 	else
 		RP.dialog.notify action, dlog
-		$('div.modal-backdrop').remove()
 
 close_modal = (dlog, action) ->
 	if dlog
 		pop_modal dlog, (action || "close") # Modal can either be closed or cancelled
 		RP.state.onCloseDialog dlog
-		if !$(dlog).hasClass 'keeparound'
-			$(dlog).remove()
 		notify_injector "close", dlog
 
 manager_of = (dlog) ->
