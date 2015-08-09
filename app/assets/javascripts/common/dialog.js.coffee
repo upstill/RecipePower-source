@@ -11,7 +11,7 @@ jQuery ->
 		RP.dialog.focus event.target
 	# On hiding a modal, we wait until it's actually hidden to muck with its classes
 	$(document).on 'hidden.bs.modal', (event) ->
-		$(event.target).addClass('hide').removeClass("modal").addClass 'modal-pending'
+		$(event.target).addClass('hide')
 
 RP.dialog.focus = (dlog) ->
 	$('[autofocus]:first',dlog).focus()[0] #  ||
