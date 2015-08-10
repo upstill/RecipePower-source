@@ -1,3 +1,4 @@
+$dialog-depth: 1050;
 div.bootbox.modal {
     div.modal-dialog {
       z-index: $dialog-depth; // Need to be closer than the backdrop, but bootstrap no longer sets this depth
