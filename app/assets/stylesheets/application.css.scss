@@ -59,6 +59,18 @@ $utensils-navtab-text-color: #816887;
 // Color for the user card and panels
 $user-color: #EDDAD7;
 
+// Define depths of various elements
+$menuback-depth: 1029;
+$container-depth: 990;
+$signin-link-depth: 992;
+$top_right_corner-depth: 1000;
+$dialog-depth: 1050;
+$footer_nav_links-depth: 11;
+$slider-scroller-depth: 1001; // from slider.css.scss
+$slider-title-depth: 1000; // from slider.css.scss
+$slider-fader-depth: 1002; // from slider.css.scss
+$slider-right-depth: 1003; // from slider.css.scss
+
 @import url(https://fonts.googleapis.com/css?family=Archivo+Narrow:700,400);
 @import 'bootstrap_amendments';
 @import 'views/*';
@@ -94,7 +106,7 @@ body {
 
 // The signin link behaves differently depending on whether we're on the landing page (no container)
 div.signin-link {
-  z-index: 992;
+  z-index: $signin-link-depth;
   position: absolute;
   right: 0.5em;
   top: 0.5em;
@@ -246,7 +258,7 @@ nav.navbar-fixed-top {
 //contents of pages
 .container {
   background-color: $page-background-color;
-  z-index: 990;
+  z-index: $container-depth;
   &.med {
     padding-top: 200px;
   }
@@ -262,7 +274,7 @@ nav.navbar-fixed-top {
 }
 
 div.menuback {
-  z-index: 1029;
+  z-index: $menuback-depth;
   position: fixed;
   top: 0;
   right: 0;
@@ -282,7 +294,7 @@ div.menuback {
 div.generic-top {
   width: 100%;
   position: absolute;
-  z-index: 991;
+  z-index: $menuback-depth;
   div {
     display: inline-block;
     float: left;
@@ -296,7 +308,7 @@ div.global-search.searchtop {
   position: absolute;
   left: 240px;
   top: 10px;
-  z-index: 992;
+  // z-index: 992;
 }
 
 div.filter-element {
@@ -405,7 +417,7 @@ div.token-input-dropdown-facebook {
 
 .top_right_corner {
   position: absolute;
-  z-index: 1000;
+  z-index: $top_right_corner-depth;
   top: 0px;
   right: 0px;
 }

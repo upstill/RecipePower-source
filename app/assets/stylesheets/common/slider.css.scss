@@ -27,7 +27,7 @@ div.slider {
     top: 57px;
 
     cursor: pointer;
-    z-index: 1200; // In front of all content
+    z-index: $slider-scroller-depth; // In front of all content
   }
   .left {
     left: 0;
@@ -90,7 +90,7 @@ div.slider {
         font-family: $archivo;
         font-size: 1em;
         color: #777777;
-        z-index: 1000;
+        z-index: $slider-title-depth;
       }
       div.slider-fader {
         position: absolute;
@@ -98,7 +98,7 @@ div.slider {
         height: 2em;
         bottom: 0;
         right: 0;
-        z-index: 1001; // $recipes-panel-background-color: #d8dde0;
+        z-index: $slider-fader-depth; // $recipes-panel-background-color: #d8dde0;
       }
     }
     div.slider-right {
@@ -109,7 +109,7 @@ div.slider {
       bottom: 0.4em;
       width: 100%;
       min-width: 250px;
-      z-index: 1100;
+      z-index: $slider-right-depth;
       &.pop-cardlet {
         display: none;
       }

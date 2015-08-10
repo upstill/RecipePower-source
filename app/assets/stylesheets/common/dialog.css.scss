@@ -1,6 +1,6 @@
 div.bootbox.modal {
     div.modal-dialog {
-      z-index: 1050; // Need to be closer than the backdrop, but bootstrap no longer sets this depth
+      z-index: $dialog-depth; // Need to be closer than the backdrop, but bootstrap no longer sets this depth
     }
 }
 
@@ -14,7 +14,7 @@ div.dialog {
   }
   &.modal {
     div.modal-dialog {
-      z-index: 1050; // Need to be closer than the backdrop, but bootstrap no longer sets this depth
+      z-index: $dialog-depth; // Need to be closer than the backdrop, but bootstrap no longer sets this depth
     }
     div.prompt {
       font: 18px arial, sans-serif;
