@@ -1,0 +1,38 @@
+<%= present decorator, current_user_or_guest do |presenter| %>
+    <div class="container-fluid card-item list-card">
+      <%= collectible_vote_buttons decorator.object %>
+      <table style="width: 100%">
+        <tr>
+          <td rowspan="2" style="width: 25%;">
+            <div class="pic-inset">
+              <%= presenter.card_avatar %>
+            </div>
+          </td>
+          <td valign="top" class="upper-content">
+            <div class="title">
+              <%= presenter.card_homelink class: "title-link" %>
+              <%= collectible_collect_icon decorator, "lg" %>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="tags">
+                  <% if decorator.tags.present? %>
+                      <h3>TAGS</h3>
+                  <% end %>
+                  <%= presenter.present_field_wrapped "tags" %>
+                </div>
+                <h3>DESCRIPTION</h3>
+                <p><%= decorator.description %></p>
+               </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td valign="bottom" class="lower-content">
+            <%= collectible_share_button decorator, "xl" %>
+          </td>
+        </tr>
+      </table>
+    </div>
+<% end %>
+
