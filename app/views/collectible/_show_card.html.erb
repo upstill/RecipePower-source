@@ -21,7 +21,6 @@
                   <% end %>
                   <%= presenter.present_field_wrapped "tags" %>
                 </div>
-                <h3>DESCRIPTION</h3>
                 <p><%= decorator.description %></p>
                </div>
             </div>
@@ -29,6 +28,8 @@
         </tr>
         <tr>
           <td valign="bottom" class="lower-content">
+            <%= collectible_upload_button decorator, "xl" %>
+            <%= collectible_edit_button decorator, "xl" %>
             <%= collectible_share_button decorator, "xl" %>
           </td>
         </tr>

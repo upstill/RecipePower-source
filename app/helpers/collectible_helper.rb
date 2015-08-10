@@ -68,11 +68,27 @@ module CollectibleHelper
     template_link decorator, "tag-collectible", sprite_glyph(:tag), styling, options.merge(:mode => :modal, :attribs => decorator.data(attribs))
   end
 
-  def collectible_edit_button entity, styling={}
+  def collectible_edit_button entity, size=nil, styling={}
+    entity = entity.object if entity.is_a? Draper::Decorator
     return unless permitted_to? :update, entity
+    if size.is_a? Hash
+      size, options = nil, size
+    end
     url = polymorphic_path entity, :action => :edit, styling: styling
-    button = button_to_submit '', url, 'glyph-edit-red', styling.merge(mode: :modal)
+    button = button_to_submit '', url, 'glyph-edit-red', size, styling.merge(mode: :modal)
     content_tag :div, button, class: "edit-button glyph-button"
+  end
+
+  # Provide the button for uploading an image
+  def collectible_upload_button entity, size=nil, styling={}
+    entity = entity.object if entity.is_a? Draper::Decorator
+    return unless permitted_to? :update, entity
+    if size.is_a? Hash
+      size, options = nil, size
+    end
+    url = "#" # polymorphic_path entity, :action => :edit, styling: styling
+    button = button_to_submit '', url, 'glyph-upload', size, styling.merge(mode: :modal)
+    content_tag :div, button, class: "upload-button glyph-button"
   end
 
   # Define and return a share button for the collectible
