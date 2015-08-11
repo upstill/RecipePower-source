@@ -31,7 +31,7 @@ RP.pic_picker.open = (dlog) ->
 			RP.notifications.post "Click Save "+prompt, "flash-alert"
 
 	$(dlog).on 'click','a.image_preview_button', (event) ->
-		previewImg('input.icon_picker', 'div.preview img', 'input#pic-picker-url')
+		previewImg 'input.icon_picker', 'div.preview img', 'input#pic-picker-url'
 		# imagePreviewWidgetSet($('input.icon_picker').attr("value"), 'div.preview img', '')
 
 	$(dlog).on 'click','.dialog-submit-button', (event) ->

@@ -116,7 +116,7 @@ end
             method: "POST",
             remote: true,
             title: "Remove from this collection",
-            class: "top_right_corner btn btn-default btn-xs"
+            class: "top-right-corner btn btn-default btn-xs"
   end
 
 def tagjoin tags, enquote = false, before = "", after = "", joiner = ','

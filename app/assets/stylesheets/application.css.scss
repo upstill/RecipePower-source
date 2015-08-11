@@ -62,8 +62,7 @@ $user-color: #EDDAD7;
 // Define depths of various elements
 $menuback-depth: 1029;
 $container-depth: 990;
-$signin-link-depth: 992;
-$top_right_corner-depth: 1000;
+$top-right-corner-depth: 1000;
 $dialog-depth: 1050;
 $footer_nav_links-depth: 11;
 $slider-scroller-depth: 1001; // from slider.css.scss
@@ -106,7 +105,7 @@ body {
 
 // The signin link behaves differently depending on whether we're on the landing page (no container)
 div.signin-link {
-  z-index: $signin-link-depth;
+  z-index: $menuback-depth;
   position: absolute;
   right: 0.5em;
   top: 0.5em;
@@ -305,6 +304,7 @@ div.generic-top {
 }
 
 div.global-search.searchtop {
+  z-index: $menuback-depth;
   position: absolute;
   left: 240px;
   top: 10px;
@@ -415,9 +415,9 @@ div.token-input-dropdown-facebook {
   font: 14px arial, sans-serif;
 }
 
-.top_right_corner {
+.top-right-corner {
   position: absolute;
-  z-index: $top_right_corner-depth;
+  z-index: $top-right-corner-depth;
   top: 0px;
   right: 0px;
 }
