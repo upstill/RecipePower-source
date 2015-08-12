@@ -18,11 +18,8 @@ jQuery ->
 			$(dlog).remove()
 
 RP.dialog.focus = (dlog) ->
-	$('[autofocus]:first',dlog).focus()[0] #  ||
-	# $('input.string', dlog).focus()[0] ||
-	# $('input.text', dlog).focus()[0] ||
-	# $('textarea', dlog).focus()[0]
-
+	$('input.autofocus', dlog)[0] ||
+	$("input[type='text']", dlog).focus()
 
 RP.dialog.close = (event) ->
 	if event

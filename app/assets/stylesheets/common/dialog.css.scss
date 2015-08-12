@@ -52,6 +52,7 @@ div.dialog {
   width: auto
 }
 
+// In development: new geometry for dialogs. See also color schemes following
 div.dialog.new-style {
   &.injector {
     font: 16px arial, sans-serif;
@@ -69,8 +70,11 @@ div.dialog.new-style {
     font-family: $oswald; // $archivo;
     font-size: 20px;
     letter-spacing: 3px;
-    &.dialog-sm {
+    &.dialog-xs {
       width: 370px;
+    }
+    &.dialog-sm {
+      width: 470px;
     }
     div.modal-content {
       div.modal-header {
@@ -78,7 +82,7 @@ div.dialog.new-style {
         padding-bottom: 5px;
         border-bottom: unset;
         h3 {
-          padding-top: 10px;
+          padding-top: 30px;
         }
         button.dialog-x-box {
           position: absolute;
@@ -90,6 +94,11 @@ div.dialog.new-style {
         padding-top: 5px;
         div.form-group {
           margin-top: 10px;
+        }
+        p {
+          font-family: $archivo; // $oswald-light; // $archivo;
+          letter-spacing: 3px;
+          line-height: 1.4em;
         }
       }
       div.modal-footer {
@@ -106,7 +115,7 @@ div.dialog.new-style {
         padding: 15px;
         border-radius: 20px;
       }
-      input.dialog-submit-button {
+      .dialog-submit-button {
         font-size: 1.8em;
         letter-spacing: 4px;
         border-radius: 5px;

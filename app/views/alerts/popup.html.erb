@@ -3,7 +3,7 @@
 		<%= render "alerts/injector_popup" %>
 	<% end %>
 <% else %>
-	<%= modal_dialog "popup new-style purple", "HELP IS ON ITS WAY" do %>
+	<%= modal_dialog "popup new-style purple", "HELP IS ON ITS WAY", dialog_class: 'dialog-sm' do %>
 		<%= render "alerts/popup" %>
 	<% end %>
 <% end %>
