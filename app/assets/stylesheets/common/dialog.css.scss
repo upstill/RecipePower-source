@@ -1,8 +1,8 @@
 $dialog-depth: 1050;
 div.bootbox.modal {
-    div.modal-dialog {
-      z-index: $dialog-depth; // Need to be closer than the backdrop, but bootstrap no longer sets this depth
-    }
+  div.modal-dialog {
+    z-index: $dialog-depth; // Need to be closer than the backdrop, but bootstrap no longer sets this depth
+  }
 }
 
 // Default styling for dialogs
@@ -52,3 +52,82 @@ div.dialog {
   width: auto
 }
 
+div.dialog.new-style {
+  &.injector {
+    font: 16px arial, sans-serif;
+    font-weight: bold;
+    width: 600px;
+    height: auto;
+    form {
+      margin: 10px;
+      display: inline-block;
+      width: auto;
+      vertical-align: top;
+    }
+  }
+  div.modal-dialog {
+    font-family: $oswald; // $archivo;
+    font-size: 20px;
+    letter-spacing: 3px;
+    &.dialog-sm {
+      width: 370px;
+    }
+    div.modal-content {
+      div.modal-header {
+        text-align: center;
+        padding-bottom: 5px;
+        border-bottom: unset;
+        h3 {
+          padding-top: 10px;
+        }
+        button.dialog-x-box {
+          position: absolute;
+          top: 6px;
+          right: 0
+        }
+      }
+      div.modal-body {
+        padding-top: 5px;
+        div.form-group {
+          margin-top: 10px;
+        }
+      }
+      div.modal-footer {
+        text-align: center;
+        border-top: unset;
+      }
+      .prompt {
+        margin: 5px 0px;
+        // font:20px arial,sans-serif;
+        // font-weight:bold
+      }
+      input[type='text'] {
+        height: 2em;
+        padding: 15px;
+        border-radius: 20px;
+      }
+      input.dialog-submit-button {
+        font-size: 1.8em;
+        letter-spacing: 4px;
+        border-radius: 5px;
+        padding: 5px 10px;
+      }
+    }
+  }
+}
+
+div.dialog.new-style.purple div.modal-dialog div.modal-content {
+  background-color: #7D6D89;
+  color: #E8D6D6;
+  input[type='text'] {
+    font-style: oblique;
+    background-color: #D2CCD6;
+    color: #8F9092;
+  }
+  input.dialog-submit-button {
+    background-color: #E1E0E4;
+    background-image: unset;
+    color: #541D78;
+    border-color: #541D78;
+  }
+}

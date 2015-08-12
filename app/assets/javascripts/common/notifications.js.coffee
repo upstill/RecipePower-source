@@ -97,7 +97,6 @@ bootbox_alert = (msg) ->
 	if available = (typeof bootbox != "undefined")
 		if msg && msg.length > 0
 			bootbox.alert msg
-		else # bootstrap dialog
-			# $('div.bootbox .bootbox-close-button').trigger "click" # $('div.bootbox').modal('hide') # $('div.bootbox.modal').modal 'hide'
-			RP.dialog.close_modal $('div.bootbox-alert')[0]
+		else if bd = $('div.bootbox-alert')[0]
+			RP.dialog.close_modal bd
 	available
