@@ -1,9 +1,1 @@
-<% if response_service.injector? %>
-	<%= injector_dialog :alert, "has heard your command, and obeys.", dismiss_button: "Ack" do %>
-		<%= render "alerts/injector_popup" %>
-	<% end %>
-<% else %>
-	<%= modal_dialog "popup new-style purple", "HELP IS ON ITS WAY", dialog_class: 'dialog-sm' do %>
-		<%= render "alerts/popup" %>
-	<% end %>
-<% end %>
+<%= render "alerts/popup_#{response_service.injector? ? :injector : :modal}" %>

@@ -1,0 +1,9 @@
+<%= modal_dialog "popup new-style purple", "HELP IS ON ITS WAY", dialog_class: 'dialog-sm', :noFlash => true do %>
+    <%# render "alerts/popup" %>
+    <div class="modal-body">
+      <p><%= defined?(alert_msg) ? alert_msg : flash_usurp %></p>
+    </div>
+    <div class="modal-footer">
+      <%= button_to_submit "GOT IT", "#", class: "dialog-cancel-button", data: { :dismiss => "modal" } %>
+    </div>
+<% end %>

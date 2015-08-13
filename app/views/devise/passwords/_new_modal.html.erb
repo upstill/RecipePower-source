@@ -1,3 +1,6 @@
-<%= modal_dialog "password-reset new-style purple", "FORGOT YOUR PASSWORD?", dialog_class: 'dialog-xs' do %>
+<%= modal_dialog "password-reset new-style purple",
+                 "FORGOT YOUR PASSWORD?",
+                 dialog_class: 'dialog-xs',
+                 :noFlash => true do %>
     <%= render 'form_new' %>
 <% end %>

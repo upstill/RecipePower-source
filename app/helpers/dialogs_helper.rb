@@ -64,7 +64,7 @@ module DialogsHelper
         ].compact.join(' ')
     # The :requires option specifies JS modules that this dialog uses
     options[:data] = {:"dialog-requires" => options[:requires]} if options[:requires]
-    options = options.slice! :show, :noflash, :body_contents, :body_class, :requires
+    options = options.slice! :show, :noflash, :body_contents, :body_class, :requires, :dialog_class
     options[:title] ||= ttl if ttl
     content_tag(:div, # Outer block: dialog
                 content_tag(:div, # modal-dialog
