@@ -126,10 +126,12 @@ div.dialog.new-style {
         // font:20px arial,sans-serif;
         // font-weight:bold
       }
-      input[type='text'] {
+      input[type='text'], input[type='password'], input[type='email'] {
         height: 2em;
         padding: 15px;
         border-radius: 20px;
+        margin-bottom: 10px;
+        font-style: oblique;
       }
       .center-button {
         letter-spacing: 4px;
@@ -152,8 +154,7 @@ div.dialog.new-style {
 div.dialog.new-style.purple div.modal-dialog div.modal-content {
   background-color: #7D6D89;
   color: #E8D6D6;
-  input[type='text'] {
-    font-style: oblique;
+  input[type='text'], input[type='password'], input[type='email'] {
     background-color: #D2CCD6;
     color: #8F9092;
   }
@@ -162,5 +163,20 @@ div.dialog.new-style.purple div.modal-dialog div.modal-content {
     background-image: unset;
     color: #541D78;
     border-color: #541D78;
+  }
+}
+
+div.dialog.new-style.green div.modal-dialog div.modal-content {
+  background-color: #4B815B;
+  color: #9AB3A0;
+  input[type='text'], input[type='password'], input[type='email'] {
+    background-color: #C1D3C7;
+    color: #849688;
+  }
+  .center-button {
+    background-color: #D8E5DC;
+    background-image: unset;
+    color: #385E44;
+    border-color: #385E44;
   }
 }

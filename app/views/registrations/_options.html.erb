@@ -4,8 +4,9 @@
       <%= button_to_submit( "Forget #{response_service.omniauth_pending}", new_user_registration_path(clear_omniauth: true), :mode => :modal) if response_service.omniauth_pending %>
     </div>
 <% else %>
-    <%= render 'authentications/possible', originator: new_user_registration_path(:mode => :modal), intention: 'signup', prompt: "Sign up using one of these fine services..." %>
-    <hr>
-    <div class="prompt">...or with just an email address:</div>
+    <%= render "registrations/form" %>
+    <%= render 'authentications/possible',
+               originator: new_user_registration_path(:mode => :modal),
+               intention: 'signup',
+               prompt: "Sign up using one of these fine services..." %>
 <% end %>
-<%= render "registrations/form" %>

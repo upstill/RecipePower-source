@@ -1,3 +1,7 @@
-<%= modal_dialog( :signup, ((defined?(header) && !header.blank?) ? header : "Step 1: Sign Up"), class: "keeparound", data: { focus: "input#user_username" } ) do %>
+<%= modal_dialog :signup,
+                 "",
+                 dialog_class: 'dialog-xs',
+                 class: "keeparound new-style green",
+                 data: { focus: "input#user_username" } do %>
   <%= render 'registrations/options' %>
 <% end %>
