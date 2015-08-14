@@ -5,8 +5,9 @@
     </div>
 <% else %>
     <%= render "registrations/form" %>
+    <hr>
     <%= render 'authentications/possible',
                originator: new_user_registration_path(:mode => :modal),
                intention: 'signup',
-               prompt: "Sign up using one of these fine services..." %>
+               prompt: '' %>
 <% end %>
