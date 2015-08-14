@@ -116,11 +116,6 @@ body {
   }
 }
 
-.dialog-x-box {
-  float: right;
-  margin: 10px;
-}
-
 div.form-group.actions {
   margin-top: 5px;
   height: 20px;
@@ -142,21 +137,6 @@ select.tag_type_selector {
 
 div.dialog.modal {
   div.modal-dialog {
-    &.modal-xl {
-      width: 100%; // responsive width
-      margin-left: 0%; // width/2)
-    }
-    &.modal-lg {
-      width: 60%; // responsive width
-      margin-left: 20%; // width/2)
-    }
-  }
-  input.string,
-  input.password {
-    width: 100%;
-  }
-  textarea {
-    width: 100%;
   }
 }
 

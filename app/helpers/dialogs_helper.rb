@@ -141,9 +141,11 @@ module DialogsHelper
     if label.is_a? Hash
       options, label = label, nil
     end
-    options = bootstrap_button_options({button_style: "success"}.merge(options))
+    options = bootstrap_button_options({ button_style: "success",
+                                         class: "#{options[:class]} #{options[:style] || "form-button"}"
+                                       }.merge(options))
     tag :input,
-        class: "#{options[:class]} dialog-submit-button dialog-form-button",
+        class: "#{options[:class]} dialog-submit-button",
         name: "commit",
         type: "submit",
         value: label||"Save",
@@ -154,13 +156,14 @@ module DialogsHelper
     if label.is_a? Hash
       options, label = label, nil
     end
-    options = bootstrap_button_options({button_style: "info"}.merge(options))
+    options = bootstrap_button_options({ button_style: "success",
+                                         class: "#{options[:class]} #{options[:style] || "form-button"}"
+                                       }.merge(options))
     tag :input,
-        class: "#{options[:class]} cancel dialog-cancel-button dialog-form-button",
+        class: "#{options[:class]} cancel dialog-cancel-button",
         data: {dismiss: "modal"},
         name: "commit",
         type: "submit",
         value: label||"Cancel"
   end
-
 end

@@ -4,5 +4,5 @@
                     html: { class: "password-reset json", 'data-type' => :json } do |f| %>
     <p><%= defined?(alert_msg) ? alert_msg : flash_usurp %></p>
     <%= f.input :login, label: false, autofocus: true, placeholder: "Username or Email (your choice)" %>
-    <%= f.submit "ENTER", class: "btn btn-xl dialog-submit-button free" %>
+    <%= f.submit "ENTER", class: "btn btn-xl dialog-submit-button center-button free" %>
 <% end %>

@@ -25,7 +25,7 @@ div.dialog {
     }
     padding-left: 1%;
     padding-right: 1%;
-    .dialog-form-button {
+    .form-button {
 	float: right;
   	margin: 10px;
     }
@@ -70,11 +70,25 @@ div.dialog.new-style {
     font-family: $oswald; // $archivo;
     font-size: 20px;
     letter-spacing: 3px;
+    &.modal-xl {
+      width: 100%; // responsive width
+      margin-left: 0%; // width/2)
+    }
+    &.modal-lg {
+      width: 60%; // responsive width
+      margin-left: 20%; // width/2)
+    }
     &.dialog-xs {
       width: 370px;
     }
     &.dialog-sm {
       width: 470px;
+    }
+    input.string,
+    input.password,
+    textarea {
+      width: 86%;
+      margin-left: 7%;
     }
     div.modal-content {
       div.modal-header {
@@ -86,8 +100,10 @@ div.dialog.new-style {
         }
         button.dialog-x-box {
           position: absolute;
-          top: 6px;
-          right: 0
+          top: -14px;
+          right: 10px;
+          font-size: 3em;
+          font-weight: 700;
         }
       }
       div.modal-body {
@@ -115,7 +131,7 @@ div.dialog.new-style {
         padding: 15px;
         border-radius: 20px;
       }
-      .dialog-submit-button {
+      .center-button {
         letter-spacing: 4px;
         // border-radius: 5px;
         padding: 5px 10px;
@@ -141,7 +157,7 @@ div.dialog.new-style.purple div.modal-dialog div.modal-content {
     background-color: #D2CCD6;
     color: #8F9092;
   }
-  input.dialog-submit-button {
+  .center-button {
     background-color: #E1E0E4;
     background-image: unset;
     color: #541D78;

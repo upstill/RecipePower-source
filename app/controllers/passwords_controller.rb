@@ -48,12 +48,16 @@ class PasswordsController < Devise::PasswordsController
           # This is for capturing a new recipe. The injector (capture.js) calls for this
           redirect_to root_path
         }
-        format.json { render 'alerts/popup' }
+        format.json { render 'alerts/popup', locals: { alert_hdr: 'HELP IS ON ITS WAY' } }
       end
     else
-      error = "Hmm, we don't seem to have any user by that name (or email). Could you try again?"
-      redirect_to new_user_password_path(:mode => response_service.mode, user: { login: params[:user][:login] }),
-                  { :flash => { :error => error } }
+      flash[:error] = "Hmm, we don't seem to have any user by that name (or email). Could you try again?"
+      respond_to do |format|
+        format.html {
+          redirect_to new_user_password_path(user: { login: params[:user][:login] })
+        }
+        format.json { render 'alerts/popup', locals: { method: :push, alert_hdr: "HOW'S THAT AGAIN?" } }
+      end
     end
   end
 end

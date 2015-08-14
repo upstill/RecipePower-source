@@ -347,6 +347,11 @@ RP.process_response = (responseData, odlog) ->
 			RP.dialog.replace_modal newdlog, odlog
 			supplanted = true
 
+		# 'odlog' gives a dialog DOM element to replace the extant one
+		if newdlog = responseData.push
+			RP.dialog.push_modal newdlog, odlog
+			supplanted = true
+
 		# 'code' gives HTML code, presumably for a dialog, possibly wrapped in a page
 		# If it's a page that includes a dialog, assert that, otherwise replace the page
 		if (code = responseData.code) && !supplanted = RP.dialog.replace_modal code, odlog

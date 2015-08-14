@@ -3,9 +3,6 @@ RP.dialog = RP.dialog || {}
 
 # Handle 'dialog-run' remote links
 jQuery ->
-	# $(document).on("ajax:beforeSend", '.dialog-run', RP.dialog.beforeSend)
-	# $(document).on("ajax:success", '.dialog-run', RP.dialog.success)
-	# $(document).on("ajax:error", '.dialog-run', RP.dialog.error)
 	$(document).on 'shown.bs.modal', (event) ->
 		# When a dialog is invoked, focus on the first autofocus item, or a string item or a text item
 		RP.dialog.focus event.target
@@ -134,11 +131,9 @@ open_modal = (dlog, omit_button) ->
 		RP.submit.bind dlog # Arm submission links and preload sub-dialogs
 	$('.dialog-cancel-button', dlog).click (event) ->
 		# When canceling, check for pending dialog/page, following instructions in the response
-		dlog = event.target
-		if !$(dlog).hasClass "cancelled"
-			$(dlog).addClass "cancelled"
-			RP.submit.submit_and_process "/popup"
+		close_modal RP.dialog.enclosing_modal(event.target), 'close'
 		event.preventDefault()
+		event.isDefaultPrevented()
 	$('a.question_section', dlog).click RP.showhide
 	if requires = $(dlog).data 'dialog-requires'
 		for requirement in requires
@@ -167,7 +162,7 @@ push_modal = (dlog, parent) ->
 # The parent was stored in the child's data
 pop_modal = (dlog, action) ->
 	hide_modal dlog
-	if parent = $(dlog).data "parent"
+	if action && action != 'cancel' && parent = $(dlog).data "parent"
 		insert_modal parent, dlog
 		RP.dialog.notify action, dlog
 		show_modal parent
