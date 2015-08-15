@@ -133,6 +133,9 @@ div.dialog.new-style {
         margin-bottom: 10px;
         font-style: oblique;
       }
+      label.checkbox {
+        margin-bottom: 0;
+      }
       .center-button {
         letter-spacing: 4px;
         border-radius: 8px;
@@ -164,6 +167,9 @@ div.dialog.new-style.purple div.modal-dialog div.modal-content {
     color: #541D78;
     border-color: #541D78;
   }
+  form div a {
+    color: #E8D6D6;
+  }
 }
 
 div.dialog.new-style.green div.modal-dialog div.modal-content {
@@ -179,4 +185,12 @@ div.dialog.new-style.green div.modal-dialog div.modal-content {
     color: #385E44;
     border-color: #385E44;
   }
+  a {
+    font-size: 0.7em;
+    color: #9AB3A0;
+  }
+}
+
+div.form-group.user_remember_me {
+  margin-bottom: 0;
 }

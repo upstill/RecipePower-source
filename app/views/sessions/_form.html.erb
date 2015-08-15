@@ -23,26 +23,23 @@
     <%# logger.debug "(in sessions form) CSRF tag: #{form_authenticity_token}" %>
     <%= simple_form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f| %>
         <%= form_errors_helper f %>
-        <div class="row">
-          <div class="col-md-6">
-            <%= f.input :login, label: "Username or Email", autofocus: resource.login.blank? %>
-          </div>
-          <div class="col-md-6">
-            <%= f.input :password, label: "Password", autofocus: !resource.login.blank? %></p>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-6 col-md-offset-1">
-            <% if devise_mapping.rememberable? -%>
-                <%= f.input :remember_me, :as => :boolean, :label => false, :inline_label => true, value: 1, input_html: {value: '1'} %>
-            <% end -%>
-          </div>
-          <div class="col-md-5">
-            <div style="margin-top: 6px; margin-bottom: 20px">
-              <%= link_to_submit "Forgot Password", new_user_password_path, mode: :modal %>
-            </div>
-            <%= form_actions f, submit_label: "Sign In", cancel_path: home_path %>
-          </div>
-        </div>
+        <%= f.input :login, label: 'Username <b>or</b> Email'.html_safe, autofocus: resource.login.blank? %>
+        <%= f.input :password, label: "Password", autofocus: !resource.login.blank? %></p>
+        <%# if false && devise_mapping.rememberable? -%>
+            <%# f.input :remember_me,
+                        :as => :boolean,
+                        :label => false,
+                        :inline_label => true,
+                        value: 1,
+                        input_html: {value: '1'} %>
+        <%# end -%>
+        <%= f.submit 'SIGN IN', class: 'dialog-submit-button btn btn-xl center-button free' %>
+        <p style="text-align: right; margin-bottom: 0px; margin-top: 10px;">
+          <%= link_to_submit 'Forgot Password', new_user_password_path, mode: :modal %>
+        </p>
+        <%# form_actions f,
+                         submit_label: "SIGN IN",
+                         cancel_path: home_path,
+                         class: 'dialog-submit-button btn btn-xl center-button free' %>
     <% end %>
 <% end %>
