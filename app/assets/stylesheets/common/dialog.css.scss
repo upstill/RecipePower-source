@@ -191,6 +191,44 @@ div.dialog.new-style.green div.modal-dialog div.modal-content {
   }
 }
 
+div.dialog.new-style.salmon div.modal-dialog div.modal-content {
+  background-color: #CF6361;
+  color: #E8d6d6;
+  input[type='text'], input[type='password'], input[type='email'] {
+    background-color: #F3DFDE;
+    color: #CF2F27;
+  }
+  .center-button {
+    background-color: #F3DFDE;
+    background-image: unset;
+    color: #CF2F27;
+    border-color: #CF2F27;
+  }
+  a {
+    font-size: 0.7em;
+    color: #E0A09E;
+  }
+}
+
+div.dialog.new-style.blue div.modal-dialog div.modal-content {
+  background-color: #5090A9;
+  color: #E6D7A3;
+  input[type='text'], input[type='password'], input[type='email'] {
+    background-color: #C2D9E1;
+    color: #7E9796;
+  }
+  .center-button {
+    background-color: #C2D9E1;
+    background-image: unset;
+    color: #205D72;
+    border-color: #205D72;
+  }
+  a {
+    font-size: 0.7em;
+    color: #A0B6C2;
+  }
+}
+
 div.form-group.user_remember_me {
   margin-bottom: 0;
 }
