@@ -1,4 +1,6 @@
 $dialog-depth: 1050;
+$oswald: Oswald, "Helvetica Neue", Helvetica, Arial, sans-serif;
+$archivo: 'Archivo-Narrow', 'Archivo Narrow', "Helvetica Neue", Helvetica, Arial, sans-serif;
 div.bootbox.modal {
   div.modal-dialog {
     z-index: $dialog-depth; // Need to be closer than the backdrop, but bootstrap no longer sets this depth
