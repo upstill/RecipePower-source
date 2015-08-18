@@ -145,6 +145,8 @@ open_modal = (dlog, omit_button) ->
 hide_modal = (dlog) ->
 	if $(dlog).modal
 		$(dlog).modal 'hide'
+	else
+		$(dlog).hide()
 
 show_modal = (dlog) ->
 	$(dlog).removeClass('hide').addClass('modal').removeClass 'modal-pending'

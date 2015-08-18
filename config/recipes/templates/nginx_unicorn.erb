@@ -5,6 +5,15 @@ upstream unicorn {
 error_log /var/www/<%= fetch :application %>/shared/log/nginx.log debug;
 
 server {
+      listen 173.255.245.80:80;
+      server_name staging.recipepower.com;
+
+      location / {
+          rewrite ^ https://$server_name$request_uri permanent;
+      }
+}
+
+server {
   listen 443 ssl;
   ssl_certificate      /srv/ssl/nginx.pem;
   ssl_certificate_key  /srv/ssl/nginx.key;
