@@ -33,13 +33,15 @@ module QueryHelper
                   select_tag(:tagtype,
                              options_from_collection_for_select(Tag.type_selections(true, true), :last, :first, options[:tagtype]) || 0,
                              :include_blank => false,
-                             :onchange => 'RP.submit.onselect( event );'),
+                             :onchange => 'RP.tagger.select_type(event);'), # RP.submit.onselect( event );'),
                   style: 'display:inline-block; vertical-align:bottom; margin:5px 10px'
     else
       ''.html_safe
     end +
-        text_field_tag("querytags",
-                       querytags.map(&:id).join(','),
-                       options.except(:handler, :querytags, :tagtype).merge(data: data))
+        content_tag(:div,
+                    text_field_tag("querytags",
+                                   querytags.map(&:id).join(','),
+                                   options.except(:handler, :querytags, :tagtype, :type_selector).merge(data: data)),
+                    style: 'display: inline-block; width:300px;')
   end
 end

@@ -2,19 +2,15 @@ module TagsHelper
 
   def tag_homelink tag, options={}
     action = options.extract!(:action)[:action] || :associated
-    link_to_submit tag.name, polymorphic_path([action, tag]), {:mode => :modal}.merge(options)
-  end
-
-  # Emit a link to a tag using the tag's name and, optionally, its type and id
-  def tag_link tag, with_id=false
-    link_to_submit(tag.name, tag_taggees_path(tag))+(with_id ? "(#{tag.typename} #{tag.id.to_s})" : "")
+    option_defaults = { :mode => :partial }
+    link_to_submit tag.name, polymorphic_path([action, tag]), option_defaults.merge(options)
   end
 
   # TODO: These should be part of the tag presenter
   def summarize_tag withtype = false, do_link = true, with_id=false
     @tagserv ||= TagServices.new(@tag)
     ((withtype ? "<i>#{@tagserv.typename}</i> " : "" )+
-      "'<strong>#{do_link ? tag_link(@tagserv.tag, with_id) : @tagserv.name}</strong>'").html_safe
+      "'<strong>#{do_link ? tag_homelink(@tagserv.tag) : @tagserv.name}</strong>'").html_safe
   end
   
   def summarize_meaning
@@ -47,12 +43,12 @@ module TagsHelper
   
   def summarize_tag_parents label = "Categorized Under: "
     @tagserv ||= TagServices.new(@tag)
-    tag_info_section @tagserv.parents.collect { |parent| tag_link parent }, label: label
+    tag_info_section @tagserv.parents.collect { |parent| tag_homelink parent }, label: label
   end
 	
   def summarize_tag_children label = "Examples: "
     @tagserv ||= TagServices.new(@tag)
-    tag_info_section @tagserv.children.collect { |child| tag_link child }, label: label
+    tag_info_section @tagserv.children.collect { |child| tag_homelink child }, label: label
   end
   
   def summarize_tag_referents
@@ -107,7 +103,7 @@ module TagsHelper
     @tagserv ||= TagServices.new(@tag)
     # The synonyms are the other expressions of this tag's referents
     return if (syns = @tagserv.synonyms).empty?
-    synstrs = syns.collect { |tag| tag_link tag }
+    synstrs = syns.collect { |tag| tag_homelink tag }
     tag_info_section synstrs, label: label, joinstr: "<br>"
   end
 
@@ -234,7 +230,7 @@ BLOCK_END
   def summarize_tag_similar tag, absorb_btn = false
       tagidstr = tag.id.to_s
       content_tag :span,
-        tag_link(tag) +
+        tag_homelink(tag) +
         (absorb_btn ? link_to_submit("Absorb", "tags/#{tag.id.to_s}/absorb?victim=#{tagidstr}", class: "absorb_button", id: "absorb_button_#{tagidstr}") : ""),
         class: "absorb_"+tagidstr
   end

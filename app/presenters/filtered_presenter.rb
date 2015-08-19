@@ -184,6 +184,10 @@ class FilteredPresenter
     (results_list.count == 1) ? 'filtered_presenter/partial_spew' : 'filtered_presenter/partial_associated'
   end
 
+  def show_card?
+    @decorator && @decorator.object && @decorator.object.is_a?(Collectible)
+  end
+
   # The default presentation is different for tables and for objects, which in turn
   # may define multiple results panels
   def presentation_partials &block
@@ -191,10 +195,8 @@ class FilteredPresenter
       block.call header_partial
       block.call 'filtered_presenter/results_table'
     else
-      if @decorator && @decorator.object && @decorator.object.is_a?(Collectible)
-        block.call :card
-        block.call :comments
-      end
+      block.call :card if show_card?
+      block.call :comments if @decorator && @decorator.object && @decorator.object.is_a?(Commentable)
       block.call header_partial, title: panel_label
       return unless results_list.present?
       apply_partial contents_partial,
@@ -528,8 +530,12 @@ class TagsIndexPresenter < FilteredPresenter
 end
 
 # Present the entries associated with a list
-class TagsTaggeesPresenter < FilteredPresenter
+class TagsAssociatedPresenter < FilteredPresenter
   @item_mode = :masonry
   @results_class_name = 'TagCache'
+
+  def show_card?
+    true
+  end
 
 end

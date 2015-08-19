@@ -123,7 +123,7 @@ class TagsController < ApplicationController
     end
   end
 
-  def taggees
+  def associated
     update_and_decorate
     response_service.title = @tag.name
     smartrender

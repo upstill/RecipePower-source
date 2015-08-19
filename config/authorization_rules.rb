@@ -4,7 +4,7 @@ authorization do
     has_permission_on [:visitors], :to => [:create]
     has_permission_on [:rcpqueries], :to => [:create, :read, :update, :tablist, :relist]
     has_permission_on [:recipes], :to => [:read, :create, :collect, :capture, :uncollect]
-    has_permission_on [:tags], :to => [:show, :match, :query, :taggees ]
+    has_permission_on [:tags], :to => [:show, :match, :query, :associated ]
   end
   
   role :user do

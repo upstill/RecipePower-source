@@ -33,11 +33,13 @@ RP.tagger.onopen = (selector = '.token-input-field-pending') ->
 		RP.tagger.setup this
 
 RP.tagger.onload = (event) ->
-	elmt = event.target
-	RP.tagger.setup elmt
+	RP.tagger.setup event.target
 
 RP.tagger.querify = ->
 	RP.querify.propagate this, { querytags: $(this)[0].value }
+
+RP.tagger.select_type = (event) ->
+	RP.querify.propagate event.target, { tagtype: event.target.value }
 
 # Use data attached to the element to initiate tokenInput
 RP.tagger.setup = (elmt) ->
