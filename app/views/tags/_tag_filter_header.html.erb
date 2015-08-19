@@ -7,6 +7,7 @@
                          :onchange => %Q{RP.submit.onselect( event ); } %>
         </div>
     <% end %>
+    <%# @filtered_presenter.filter_field %>
     <%= stream_element :"filter-field" %>
   </h2>
   <p><%= defined?(comment) ? comment : "" %></p>

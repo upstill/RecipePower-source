@@ -63,8 +63,6 @@ class FilteredPresenter
 
     @title = response_service.title
     @request_path = request_path
-    # This is the name of the partial used for the header, presumably including the search box
-    # @header_partial = 'filtered_presenter/filter_header'
     # FilteredPresenters don't always have results panels
     if rc_class = results_class
       @stream_presenter = StreamPresenter.new sessid, request_path, rc_class, user_id, response_service.admin_view?, querytags, params
@@ -84,6 +82,7 @@ class FilteredPresenter
     subtype.downcase
   end
 
+  # Include a (tag) type selector in the query field?
   def filter_type_selector
     false
   end
@@ -98,7 +97,7 @@ class FilteredPresenter
   # Provide a tokeninput field for specifying tags, with or without the ability to free-tag
   # The options are those of the tokeninput plugin, with defaults
   def filter_field opt_param={}
-    h.token_input_query opt_param.merge(tagtype: tagtype, querytags: querytags)
+    h.token_input_query opt_param.merge(tagtype: tagtype, querytags: querytags, type_selector: filter_type_selector)
   end
 
   # Should the items be dumped now?
@@ -523,6 +522,9 @@ class TagsIndexPresenter < FilteredPresenter
     true
   end
 
+  def panel_label
+    "TAGS"
+  end
 end
 
 # Present the entries associated with a list

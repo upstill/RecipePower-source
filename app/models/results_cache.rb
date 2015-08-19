@@ -738,6 +738,15 @@ class TagsCache < ResultsCache
     super + [:tagtype]
   end
 
+  # Tags don't go through Taggings, so we just use/count them directly
+  def count_tag tag, counts
+    # tagset = tagging_match tag
+    matchstr = tag.normalized_name || Tag.normalizeName(tag.name)
+    scope = itemscope
+    counts.incr scope.where('normalized_name ILIKE ?', "%#{matchstr}%")
+    counts.incr scope.where(normalized_name: matchstr), 30
+  end
+
   def itemscope
     @tagtype ? Tag.where(tagtype: @tagtype) : Tag.unscoped
   end
