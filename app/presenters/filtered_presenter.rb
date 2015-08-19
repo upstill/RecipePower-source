@@ -538,4 +538,8 @@ class TagsAssociatedPresenter < FilteredPresenter
     true
   end
 
+  def panel_label
+    "TAGGEES"
+  end
+
 end

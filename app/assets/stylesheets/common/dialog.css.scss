@@ -191,21 +191,21 @@ div.dialog.new-style.green div.modal-dialog div.modal-content {
 }
 
 div.dialog.new-style.salmon div.modal-dialog div.modal-content {
-  background-color: #CF6361;
-  color: #E8d6d6;
+  background-color: $salmon-background-color;
+  color: $salmon-text-color;
   input[type='text'], input[type='password'], input[type='email'] {
-    background-color: #F3DFDE;
-    color: #CF2F27;
+    background-color: $salmon-field-background-color;
+    color: $salmon-button-color;
   }
   .center-button {
-    background-color: #F3DFDE;
+    background-color: $salmon-field-background-color;
     background-image: unset;
-    color: #CF2F27;
-    border-color: #CF2F27;
+    color: $salmon-button-color;
+    border-color: $salmon-button-color;
   }
   a {
     font-size: 0.7em;
-    color: #E0A09E;
+    color: $salmon-link-color;
   }
 }
 

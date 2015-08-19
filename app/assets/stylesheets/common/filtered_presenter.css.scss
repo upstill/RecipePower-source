@@ -34,6 +34,9 @@ div.results-enclosure {
       &.list-label {
         color: rgba($lists-navtab-text-color, 0.6);
       }
+      &.tag-label {
+        color: rgba($salmon-text-color, 0.8);
+      }
     }
     div.panels-search {
       margin-top: 10px;
