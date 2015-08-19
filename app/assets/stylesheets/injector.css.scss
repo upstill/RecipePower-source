@@ -1,17 +1,12 @@
-/*
- * This is a manifest file that'll automatically include all the stylesheets available in this directory
- * and any sub-directories. You're free to add application-wide styles to this file and they'll appear at
- * the top of the compiled file, but it's generally better to create a new file per style scope.
- *= require common/variables
- *= require common/RPGlobal
- *= require jquery/token-input-bootstrappy
- *= require jquery/jNotify.jquery
- *= require common/dialog
- *= require common/buttons
- *= require views/edit_recipe
- *= require views/sign_in
- *= require views/password_reset
-*/
+@import 'common/RPGlobal';
+@import 'jquery/token-input-bootstrappy';
+@import 'jquery/jNotify.jquery';
+@import 'common/dialog';
+@import 'common/buttons';
+@import 'views/edit_recipe';
+@import 'views/sign_in';
+@import 'views/password_reset';
+
 $injector-depth: 9000001;
 
 body {
