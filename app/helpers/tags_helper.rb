@@ -31,7 +31,6 @@ module TagsHelper
   # They match in the normalized_name field
   def summarize_tag_similars args={} 
     @tagserv ||= TagServices.new(@tag)
-    # TODO: The elimination should be done in the query
     others = Tag.where(normalized_name: @tagserv.normalized_name).to_a.delete_if { |other| other.id == @tagserv.id } #  @tagserv.lexical_similars
     label= args[:label] || "Similar tags: "
     joiner = args[:joiner] || " " #  ", "

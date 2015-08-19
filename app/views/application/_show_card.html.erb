@@ -1,17 +1,19 @@
 <%# render "show", decorator: decorator %>
 <%= present decorator, current_user_or_guest do |presenter| %>
     <div class="card-item row card-large <%= presenter.card_class %> <%= decorator.dom_id %>">
-      <div class="col-md-3" >
-        <div class="pic-inset">
-            <%= presenter.card_avatar true %>
-        </div>
-      </div>
-      <div class="col-md-9">
+      <% if presenter.card_avatar? %>
+          <div class="col-md-3">
+            <div class="pic-inset">
+              <%= presenter.card_avatar true %>
+            </div>
+          </div>
+      <% end %>
+      <div class="col-md-<%= presenter.card_avatar? ? '9' : '12' %> ">
         <%= presenter.card_header %>
         <%# presenter.card_subhead %>
         <div class="row">
           <% (0...(presenter.card_ncolumns)).each do |column| %>
-            <%= presenter.column column %>
+              <%= presenter.column column %>
           <% end %>
         </div>
       </div>

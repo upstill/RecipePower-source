@@ -14,6 +14,11 @@ class BasePresenter
     @viewer = viewer
   end
 
+  # Does this presenter have an avatar to present on cards, etc?
+  def card_avatar?
+    true
+  end
+
 private
 
   def self.presents(name)
