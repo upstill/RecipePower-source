@@ -73,4 +73,4 @@ hit = (elmt, params) ->
 	if $(elmt).hasClass 'querify-exec'
 		request = RP.build_request ($(elmt).data 'href'), params
 		$(elmt).data 'href', request # Save for later
-		RP.submit.submit_and_process request
+		RP.submit.enqueue request, elmt

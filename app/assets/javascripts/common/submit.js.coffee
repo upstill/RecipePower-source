@@ -25,6 +25,19 @@ jQuery ->
 		RP.submit.submit_and_process $(this).attr('action'), this
 		false
 
+# Make a request from an element, but only if one is not already loading
+RP.submit.enqueue = (request, elmt) ->
+	if $('.loading')[0] # Only one request at a time please
+		$(elmt).data 'href', request # Save for later
+		$(elmt).addClass 'queued'
+	else
+		RP.submit.submit_and_process request, elmt
+
+RP.submit.dequeue = ->
+	if next = $('.queued')[0]
+		$(next).removeClass 'queued'
+		fire next
+
 # Master function for submitting AJAX, perhaps in the context of a DOM element that triggered it
 # Elements may fire off requests by:
 # -- being clicked (click events get here by association with the 'submit' class
@@ -208,14 +221,14 @@ RP.submit.onClick = (event) ->
 	false
 
 fire = (elmt) ->
-	if $(elmt).hasClass( "loading") # This may already be loading
+	if $(elmt).hasClass( 'loading') # This may already be loading
 		handleEnclosingNavTab elmt
 		$(elmt).addClass('trigger') # Mark for immediate opening
 	else if proceedWithConfirmation(elmt)
 		# If the submission is made from a top-level menu, make the menu active
 		handleEnclosingNavTab elmt
 		if href = $(elmt).data('href') || (elmt.attributes.href && elmt.attributes.href.value)
-			RP.submit.submit_and_process href, elmt
+			RP.submit.enqueue href, elmt
 
 handleEnclosingNavTab = (menuElmt) ->
 	if !$(menuElmt).hasClass "transient" # So marked if its selection will not affect what menu element is active
@@ -265,6 +278,8 @@ handleResponse = (elmt, responseData, status, xhr) ->
 		$(elmt).removeClass 'trigger'
 		RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
 		RP.process_response responseData, RP.dialog.enclosing_modal(elmt)
+	# Check for pending requests
+	RP.submit.dequeue()
 
 # Before making a form submission, see if the dialog is preloaded
 RP.submit.beforeSend = (event, xhr, settings) ->
