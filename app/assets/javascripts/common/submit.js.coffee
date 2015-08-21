@@ -30,6 +30,8 @@ RP.submit.enqueue = (request, elmt) ->
 	if $('.loading')[0] # Only one request at a time please
 		$(elmt).data 'href', request # Save for later
 		$(elmt).addClass 'queued'
+	else if typeof(request) == 'function'
+		request elmt
 	else
 		RP.submit.submit_and_process request, elmt
 
@@ -38,14 +40,24 @@ RP.submit.dequeue = ->
 		$(next).removeClass 'queued'
 		fire next
 
+RP.submit.block_on = (elmt) ->
+	$(elmt).addClass 'loading'
+
+RP.submit.block_off = (elmt) ->
+	$(elmt).removeClass 'loading'
+	RP.submit.dequeue()
+
+RP.submit.blocking_on = (elmt) ->
+	$(elmt).hasClass 'loading'
+
 # Master function for submitting AJAX, perhaps in the context of a DOM element that triggered it
 # Elements may fire off requests by:
 # -- being clicked (click events get here by association with the 'submit' class
 # -- having a 'preload' class, which attaches the result of the request to the element pending a subsequent click
 RP.submit.submit_and_process = ( request, elmt ) ->
 	$(elmt).addClass 'trigger'
-	unless elmt && ($(elmt).hasClass('loading') || (preloaded = shortCircuit elmt))
-		$(elmt).addClass 'loading'
+	unless elmt && (RP.submit.blocking_on(elmt) || (preloaded = shortCircuit elmt))
+		RP.submit.block_on elmt
 		ajdata =
 			dataType: "json",
 			contentType: "application/json",
@@ -153,7 +165,7 @@ RP.submit.filter_submit = (eventdata) ->
 
 # preload ensures that the results of the query are available
 preload = (elmt) ->
-	if $(elmt).hasClass 'loading'
+	if RP.submit.blocking_on elmt
 		return;
 	data = $(elmt).data() || {}
 	# Four ways to short-circuit a request (and to satisfy the preload items):
@@ -172,7 +184,7 @@ preload = (elmt) ->
 		return # ndlog
 	# Finally, there is no preloaded recourse, so we submit the request
 	if href = $(elmt).data('href') || (elmt.attributes.href && elmt.attributes.href.value)
-		$(elmt).addClass 'loading'
+		RP.submit.block_on elmt
 		$.ajax
 			type: "GET",
 			dataType: "json",
@@ -221,7 +233,7 @@ RP.submit.onClick = (event) ->
 	false
 
 fire = (elmt) ->
-	if $(elmt).hasClass( 'loading') # This may already be loading
+	if RP.submit.blocking_on elmt # This may already be loading
 		handleEnclosingNavTab elmt
 		$(elmt).addClass('trigger') # Mark for immediate opening
 	else if proceedWithConfirmation(elmt)
@@ -267,7 +279,7 @@ shortCircuit = (elmt) ->
 handleResponse = (elmt, responseData, status, xhr) ->
 	RP.notifications.done()
 	# A response has come in, so the element is no longer loading
-	$(elmt).removeClass 'loading'
+	RP.submit.block_off elmt
 	# Elements that preload their query results stash them away, unless they also have the 'trigger' class
 	immediate = $(elmt).hasClass 'trigger'
 	if elmt && !immediate

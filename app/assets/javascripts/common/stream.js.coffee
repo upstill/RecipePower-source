@@ -24,11 +24,15 @@ RP.stream.check = (elmt) ->
 
 # Event-driven interface, an onload handler
 RP.stream.go = (evt) ->
-	RP.stream.fire evt.target
+	RP.submit.enqueue stream_fire, evt.target
 
 RP.stream.fire = (elmt) ->
+	RP.submit.enqueue stream_fire, elmt
+
+stream_fire = (elmt) ->
 	querypath = $(elmt).data('path')
 	parent = RP.findEnclosingByClass 'stream-items-parent', elmt
+	RP.submit.block_on parent
 	$('.beachball', parent).removeClass "hide"
 	$(elmt).remove() # Remove the link element to forestall subsequent loads
 	# It will be replaced when the trigger div gets replaced, IFF there's more material to come
@@ -36,10 +40,12 @@ RP.stream.fire = (elmt) ->
 	source.onerror = (evt) ->
 		source.close()
 		state = evt.target.readyState
+		RP.submit.block_off parent
 	source.addEventListener 'end_of_stream', (e) ->
 		jdata = JSON.parse e.data
 		source.close()
 		RP.process_response jdata
+		RP.submit.block_off parent
 	source.addEventListener 'stream_item', (e) ->
 		jdata = JSON.parse e.data
 		# If the item specifies a handler, call that
