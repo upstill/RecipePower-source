@@ -191,13 +191,18 @@ nav.navbar-fixed-top {
     padding-top: 200px;
   }
   &.top {
-    margin-top: 200px;
+    margin-top: 125px;
     padding-top: 10px;
     padding-bottom: 200px;
     > div.row {
       margin-left: 15px;
       margin-right: 15px;
     }
+  }
+  div.triggered-form {
+    position: relative;
+    z-index: $container-depth;
+    left: 110px;
   }
 }
 
@@ -210,13 +215,8 @@ div.menuback {
   margin-top: 0;
   margin-right: auto;
   margin-left: auto;
-  height: 200px;
+  height: 140px;
   background-color: $page-background-color;
-  div.triggered-form {
-    position: absolute;
-    top: 135px;
-    left: 155px;
-  }
 }
 
 div.generic-top {
