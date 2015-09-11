@@ -97,6 +97,7 @@ RP::Application.routes.draw do
       post 'follow'
       # Routes for collectibles
       get 'getpic'
+      get 'editpic' # Open dialog to acquire an image from various sources
       get 'tag'
       patch 'tag'
       get 'touch'
@@ -113,6 +114,7 @@ RP::Application.routes.draw do
       get 'scrape'
       # Routes for collectibles
       patch 'collect' # Add to the user's collection
+      get 'editpic' # Open dialog to acquire an image from various sources
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       patch 'tag' # For saving the tags
       get 'touch'
@@ -128,6 +130,7 @@ RP::Application.routes.draw do
       # Routes for collectibles
       post 'absorb'
       patch 'collect' # Add to the user's collection
+      get 'editpic' # Open dialog to acquire an image from various sources
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       patch 'tag'
       get 'touch'
@@ -148,6 +151,7 @@ RP::Application.routes.draw do
       # Routes for collectibles
       patch 'collect'  # Add the feed to the current user
       get 'tag' # Present the dialog for tagging, commenting and picture selection
+      get 'editpic' # Open dialog to acquire an image from various sources
       patch 'tag'
       get 'touch'
     end
@@ -205,6 +209,7 @@ RP::Application.routes.draw do
       get 'piclist'
       # Routes for collectibles
       patch 'collect'
+      get 'editpic' # Open dialog to acquire an image from various sources
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       patch 'tag'
       get 'touch'

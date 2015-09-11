@@ -181,34 +181,6 @@ class RecipesController < CollectibleController
       end
   end
   
-=begin
-  def update
-    # return if need_login true
-    if params[:commit] == "Cancel"
-      @recipe = Recipe.find params[:id]
-      report_recipe collection_user_url(current_user), "Recipe secure and unchanged.", formats
-    else
-      update_and_decorate
-      if @recipe.errors.empty?
-        if ref = @recipe.user_pointers.where( user: current_user ).first
-          ref.edit_count += 1
-          ref.save
-        end
-        report_recipe( collection_user_url(current_user), "Successfully updated #{@recipe.title || 'recipe'}.", formats )
-      else
-        response_service.title = "Tag That Recipe (Try Again)!"
-        @nav_current = nil
-        # render :action => 'edit', :notice => "Huhh??!?"
-        # @_area = "page" # params[:_area]
-        # Now go forth and edit
-        # @_layout = nil # params[:_layout]
-        # dialog_boilerplate('edit', 'at_left')
-        smartrender :action => 'edit', area: 'at_left'
-      end
-    end
-  end
-=end
-
   # Register that the recipe was touched by the current user--if they own it.
   def touch
     # This is a generic #touch action except for the manner in which the recipe is fetched

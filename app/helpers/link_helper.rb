@@ -30,7 +30,7 @@ module LinkHelper
   def link_to_submit label, path_or_options, options={}
     query_option_names = [ :mode ] # These get folded into the query UNLESS we're going to a page
     class_option_names = [ :trigger, :submit, :preload ]
-    attribute_names = [ :id, :class, :style, :data, :onclick, :method, :rel ]
+    attribute_names = [ :id, :class, :style, :data, :onclick, :method, :rel, :title ]
     # We do NOT want a remote response: it asks for Javascript
     options = options.clone
     options.delete :remote
@@ -65,6 +65,7 @@ module LinkHelper
 
     # Sequester all options except HTML standard link options in the data attribute
     link_options = options.slice *attribute_names
+    link_options[:title] ||= "Your Tooltip Here"
     data = (options[:data] ||= {}).merge options.except(*attribute_names)
     data.keys.each do |key|
       # data with keys of the form 'data-.*' get folded in directly

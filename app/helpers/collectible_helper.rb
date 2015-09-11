@@ -34,7 +34,7 @@ module CollectibleHelper
     if current_user_or_guest.collected?(decorator.object)
       sprite_glyph :check, size
     else
-      link_to_submit sprite_glyph(:plus, size), polymorphic_path([:collect, decorator.object]), options
+      link_to_submit sprite_glyph(:plus, size), polymorphic_path([:collect, decorator.object]), options.merge(title: 'Add to My Collection')
     end
   end
 
@@ -55,7 +55,7 @@ module CollectibleHelper
     query_options.merge! oust: true if already_collected
     url = polymorphic_path [:collect, decorator.object], query_options
     options[:method] = "PATCH"
-    link_to_submit label, url, options
+    link_to_submit label, url, options.merge(title: 'Add to My Collection')
   end
 
   def collectible_tag_button decorator, styling, options={}
@@ -65,7 +65,7 @@ module CollectibleHelper
                     id title url picuri imgdata
                     element_id field_name human_name object_path tag_path
                     tagging_tag_data tagging_user_id )
-    template_link decorator, "tag-collectible", sprite_glyph(:tag), styling, options.merge(:mode => :modal, :attribs => decorator.data(attribs))
+    template_link decorator, "tag-collectible", sprite_glyph(:tag), styling, options.merge(:mode => :modal, :title => 'Tag Me', :attribs => decorator.data(attribs))
   end
 
   def collectible_edit_button entity, size=nil, styling={}
@@ -75,7 +75,7 @@ module CollectibleHelper
       size, options = nil, size
     end
     url = polymorphic_path entity, :action => :edit, styling: styling
-    button = button_to_submit '', url, 'glyph-edit-red', size, styling.merge(mode: :modal)
+    button = button_to_submit '', url, 'glyph-edit-red', size, styling.merge(mode: :modal, title: 'Edit Me')
     content_tag :div, button, class: "edit-button glyph-button"
   end
 
@@ -86,8 +86,8 @@ module CollectibleHelper
     if size.is_a? Hash
       size, options = nil, size
     end
-    url = "#" # polymorphic_path entity, :action => :edit, styling: styling
-    button = button_to_submit '', url, 'glyph-upload', size, styling.merge(mode: :modal)
+    url = polymorphic_path entity, :action => :editpic, styling: styling
+    button = button_to_submit '', url, 'glyph-upload', size, styling.merge(mode: :modal, title: 'Get Picture')
     content_tag :div, button, class: "upload-button glyph-button"
   end
 
@@ -97,7 +97,11 @@ module CollectibleHelper
       size, options = nil, size
     end
     entity = entity.object if entity.is_a? Draper::Decorator
-    button = button_to_submit "", new_user_invitation_path(shared_type: entity.class.to_s, shared_id: entity.id), "glyph-share", size, options.merge(mode: :modal)
+    button = button_to_submit "",
+                              new_user_invitation_path(shared_type: entity.class.to_s, shared_id: entity.id),
+                              "glyph-share",
+                              size,
+                              options.merge(mode: :modal, title: 'Share This')
     content_tag :div, button, class: "share-button glyph-button"
   end
 
@@ -114,8 +118,8 @@ module CollectibleHelper
     downlink = vote_link(entity, false)
     button_options = { method: "post", remote: true, class: "vote-button" }
     vote_state = Vote.current entity
-    up_button = button_to_submit "", uplink, "glyph-vote-up", "xl", button_options
-    down_button = button_to_submit "", downlink, "glyph-vote-down", "xl", button_options
+    up_button = button_to_submit "", uplink, "glyph-vote-up", "xl", button_options.merge(title: 'Vote Up')
+    down_button = button_to_submit "", downlink, "glyph-vote-down", "xl", button_options.merge(title: 'Vote Down')
     vote_counter = (entity.upvotes > 0 && entity.upvotes.to_s) || ""
     upcount =
         content_tag(:span,
