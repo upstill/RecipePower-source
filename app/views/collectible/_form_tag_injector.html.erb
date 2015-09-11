@@ -4,7 +4,10 @@
 
     <div class="left">
       <div class="edit_recipe_field pic_picker_field">
-        <%= pic_field f, :picurl, nil, :fallback_img => image_path("PickPicture.png"), :nopicker => true %>
+        <%= pic_field f,
+                      :decorator => @decorator,
+                      :fallback_img => image_path("PickPicture.png"),
+                      :nopicker => true %>
       </div>
       <% if @entity.picurl.blank? %>
           <p>Click a picture to file it with the recipe.</p>

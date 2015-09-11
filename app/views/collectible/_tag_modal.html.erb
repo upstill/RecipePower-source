@@ -1,7 +1,7 @@
 <%# Default modal dialog for editing a (collectible, taggable) item. May be overwritten for other controllers  %>
 <% decorator ||= @decorator || TemplateDecorator.new # If no decorator provided, assume this is for a template   %>
 <%= content_tag(:div,
-                class: "dialog tag-collectible modal at_left hide",
+                class: "dialog tag-collectible modal hide",
                 style: "overflow:visible") do %>
     <div class="modal-dialog">
       <div class="modal-content">
@@ -65,7 +65,7 @@
             <div class="row">
               <div class="col-md-12">
                 <div class="form-group recipe_picurl">
-                  <%= uploader_field decorator, :picurl %>
+                  <%= uploader_field decorator %>
                 </div>
               </div>
             </div>

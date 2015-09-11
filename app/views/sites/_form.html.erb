@@ -3,7 +3,7 @@
         <div class="row">
           <div class="col-md-4">
             <div class="pic_picker_field">
-              <%= pic_field f, :logo, :sample, home: @site.home %>
+              <%= pic_field f, decorator: @decorator %>
             </div>
           </div>
           <div class="col-md-8">
@@ -14,7 +14,7 @@
         <div class="row">
           <div class="col-md-12">
             <div class="form-group site_logo">
-              <%= uploader_field @decorator, :logo %>
+              <%= uploader_field @decorator %>
             </div>
           </div>
         </div>
