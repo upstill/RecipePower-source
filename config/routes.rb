@@ -5,6 +5,12 @@
 
 RP::Application.routes.draw do
 
+  concern :picable do
+    member do
+      get 'editpic' # Open dialog to acquire an image from various sources
+    end
+  end
+
   get 'search/index'
 
   resources :tagsets
@@ -44,8 +50,6 @@ RP::Application.routes.draw do
     post '/votes/products/:id' => 'votes#create' # , :as => "vote_product"
     post '/votes/sites/:id' => 'votes#create' # , :as => "vote_site"
     post '/votes/users/:id' => 'votes#create' # , :as => "vote_user"
-
-  get 'pic_picker/new' => 'pic_picker#new'
 
   get "redirect/go", :as => "goto"
   put "redirect/go"
@@ -89,7 +93,7 @@ RP::Application.routes.draw do
   get 'users/:id/collection' => 'users#collection', :as => "collection_user"
   get 'users/:id/biglist' => 'users#biglist', :as => "user_biglist"
   # get 'users/:id/show' => 'users#show'
-  resources :users, :except => [:index, :create] do
+  resources :users, :except => [:index, :create], :concerns => :picable do
     member do
       get 'match_friends'
       get 'notify'
@@ -97,7 +101,6 @@ RP::Application.routes.draw do
       post 'follow'
       # Routes for collectibles
       get 'getpic'
-      get 'editpic' # Open dialog to acquire an image from various sources
       get 'tag'
       patch 'tag'
       get 'touch'
@@ -108,13 +111,12 @@ RP::Application.routes.draw do
   end
 
   post '/list' => 'lists#create', :as => 'create_list'
-  resources :lists, except: [:index, :create] do
+  resources :lists, except: [:index, :create], :concerns => :picable do
     member do
       post 'pin' # Add an entity to a list
       get 'scrape'
       # Routes for collectibles
       patch 'collect' # Add to the user's collection
-      get 'editpic' # Open dialog to acquire an image from various sources
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       patch 'tag' # For saving the tags
       get 'touch'
@@ -124,13 +126,12 @@ RP::Application.routes.draw do
   match 'lists', :controller => 'lists', :action => 'index', :via => [:get, :post]
 
   post '/site' => 'sites#create', :as => 'create_site'
-  resources :sites, except: [:index, :create] do
+  resources :sites, except: [:index, :create], :concerns => :picable do
     member do
       post 'scrape'
       # Routes for collectibles
       post 'absorb'
       patch 'collect' # Add to the user's collection
-      get 'editpic' # Open dialog to acquire an image from various sources
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       patch 'tag'
       get 'touch'
@@ -144,14 +145,13 @@ RP::Application.routes.draw do
 
   post '/feed' => 'feeds#create', :as => 'create_feed'
   get 'feeds/:id/owned' => 'feeds#owned', :as => "owned_feed"
-  resources :feeds, :except => [:index, :create] do
+  resources :feeds, :except => [:index, :create], :concerns => :picable do
     member do
       get 'refresh' # Refresh the feed's entries
       post 'approve' # (Admin only) approve the feed for presentation
       # Routes for collectibles
       patch 'collect'  # Add the feed to the current user
       get 'tag' # Present the dialog for tagging, commenting and picture selection
-      get 'editpic' # Open dialog to acquire an image from various sources
       patch 'tag'
       get 'touch'
     end
@@ -204,12 +204,11 @@ RP::Application.routes.draw do
   resources :ratings
   resources :scales
 
-  resources :recipes do
+  resources :recipes, :concerns => :picable do
     member do
       get 'piclist'
       # Routes for collectibles
       patch 'collect'
-      get 'editpic' # Open dialog to acquire an image from various sources
       get 'tag' # Present the dialog for tagging, commenting and picture selection
       patch 'tag'
       get 'touch'

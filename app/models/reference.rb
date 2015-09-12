@@ -1,4 +1,5 @@
 require 'RMagick' unless Rails.env.development?
+require 'open-uri'
 
 class Reference < ActiveRecord::Base
 
@@ -178,7 +179,8 @@ class Reference < ActiveRecord::Base
         if uri.host &&
             uri.port &&
             (http = Net::HTTP.new(uri.host, uri.port)) &&
-            (request = Net::HTTP::Get.new(uri.request_uri))
+            (uri.scheme != 'https' || (http.use_ssl = true && http.verify_mode = OpenSSL::SSL::VERIFY_NONE)) # read into this
+            (request = Net::HTTP::Get.new(uri.request_uri, 'upgrade-insecure-requests' => '1'))
           response = http.request request
           self.status = response.code.to_i
         else # Invalid URL
@@ -385,6 +387,7 @@ class ImageReference < Reference
   # Return the URL if it passes a sanity check
   def usable_url ignore_status=false
     unless url.blank? || (url =~ /^\d\d\d\d-/)
+      perform unless ignore_status || status # Not previously tested
       url if ignore_status || !status || (status==200)
     end
   end
