@@ -23,12 +23,8 @@ class CollectibleController < ApplicationController
 
   def editpic
     update_and_decorate
-    pic_attribs = @decorator.pic_attribs
-    @picdata =
-    @picurl = pic_attribs[:picurl]
-    @pageurl = pic_attribs[:pageurl]
-    @fallback_img = pic_attribs[:fallback_img]
-    @golinkid
+    @golinkid = params[:golinkid]
+    @fallback_img = params[:fallback_img]
   end
 
   # GET tag

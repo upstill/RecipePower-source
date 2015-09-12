@@ -92,26 +92,6 @@ class CollectibleDecorator < Draper::Decorator
     entity_type.constantize.find(entity_id).decorate rescue nil
   end
 
-=begin
-  # Provide a hash of parameters for image editing
-  def pic_attribs home
-    picurl = imglink # Defined by Picable
-    # If the object is Linkable, it has a method to get the name of the url attribute (its associated page)
-    pageurl = object.respond_to?(:url_attribute_name) && object.send(object.url_attribute_name)
-    if home
-      picurl = valid_url(picurl, home) unless picurl.blank?
-      pageurl = valid_url(pageurl, home) if pageurl
-    end
-    {
-        picurl: picurl,
-        pageurl: pageurl,
-        picdata: (picdata || picurl || fallback_img || "NoPictureOnFile.png"),
-        picrefid: picrefid,
-        fallback_img: fallback_img
-    }.compact
-  end
-=end
-
   # sample_page is a full URL somewhere on the associated site so we can absolutize links
   def sample_page
 
@@ -119,10 +99,6 @@ class CollectibleDecorator < Draper::Decorator
 
   def fallback_img
     object.fallback_imgdata if object.respond_to?(:fallback_imgdata)
-  end
-
-  def picdata
-    object.picdata || picurl || fallback_img || "NoPictureOnFile.png"
   end
 
   def picurl

@@ -86,7 +86,7 @@ module CollectibleHelper
     if size.is_a? Hash
       size, options = nil, size
     end
-    url = polymorphic_path entity, :action => :editpic, styling: styling
+    url = polymorphic_path [:editpic, entity], styling: styling
     button = button_to_submit '', url, 'glyph-upload', size, styling.merge(mode: :modal, title: 'Get Picture')
     content_tag :div, button, class: "upload-button glyph-button"
   end

@@ -52,11 +52,9 @@ module PicPickerHelper
 
   # The link to the picture-picking dialog preloads the dialog, extracting picture links from the recipe's page
   def pic_picker_go_button decorator, picker_fallback_img=nil
-    golink = pic_picker_new_path picurl: decorator.picurl,
-                                 golinkid: pic_picker_golinkid(decorator),
-                                 pageurl: decorator.pageurl,
-                                 picrefid: decorator.picrefid,
-                                 fallback_img: (picker_fallback_img || decorator.fallback_img)
+    golink = polymorphic_path [:editpic, decorator.object],
+                              golinkid: pic_picker_golinkid(decorator),
+                              fallback_img: (picker_fallback_img || decorator.fallback_img)
     button_to_submit decorator.pageurl ? "Pick Picture..." : "Get Picture from Web...",
                      golink,
                      "default",

@@ -28,15 +28,6 @@ module Picable
     @picref ||= self.method(self.class.image_reference_name).call
   end
 
-  def picrefid
-    picref.id if picref
-  end
-
-  # Return the thumbnail data for the entity
-  def picdata
-    picref.thumbdata if picref
-  end
-
   # Return the image for the entity as a url
   # NB: This isn't necessarily a valid URL: Conventionally, if an image comes
   # in as a data URL, the data is moved into thumbdata and the url becomes a
