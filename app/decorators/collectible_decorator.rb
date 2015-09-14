@@ -107,8 +107,8 @@ class CollectibleDecorator < Draper::Decorator
   end
 
   def pageurl
-    if object.class.respond_to?(:url_attribute_name)
-      pageurl = object.send(object.class.url_attribute_name)
+    if object.respond_to?(:url_attribute)
+      pageurl = object.url_attribute
       (pageurl.present? && sample_page) ? valid_url(pageurl, sample_page) : pageurl
     end
   end

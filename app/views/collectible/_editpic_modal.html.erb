@@ -22,6 +22,7 @@ Expecting the following local variables:
         </div>
         <div class="col-xs-12 col-sm-6 col-md-7">
           <%= flash_notifications_div %>
+          <%= pic_select_list.html_safe %>
           <span class="prompt">
             <% if pic_select_list.empty? %>
                 <% if @decorator.pageurl %>
@@ -40,6 +41,7 @@ Expecting the following local variables:
       </div>
       <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12">
+          <span class="prompt">If you have the URL of an image to use, type or paste it here and click Preview.</span>
           <input type="text"
                  rel="jpg,png,gif"
                  class="icon_picker"
@@ -49,9 +51,28 @@ Expecting the following local variables:
         </div>
       </div>
       <div class="row">
-        <%= link_to "Preview", "#", class: "btn btn-info image_preview_button" %>
+        <%= link_to "Preview", "#", class: "btn btn-info image_preview_button float-right-button" %>
       </div>
-      <%= pic_select_list.html_safe %>
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12">
+          <span class="prompt">To pick an image from any web page, type or paste the page's URL here and click Extract Images.</span>
+          <input type="text"
+                 rel="jpg,png,gif"
+                 class="url_picker"
+                 autofocus="autofocus"
+                 style="width: 100%"
+                 data-golinkid="<%= @golinkid %>"/>
+        </div>
+      </div>
+      <div class="row">
+        <%= link_to "Extract Images", "#", class: "btn btn-info url_extract_button float-right-button" %>
+      </div>
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12">
+          <span class="prompt">To upload an image from your disk, .</span>
+          <%= render 'users/form_image' %>
+        </div>
+      </div>
       <%= modal_footer do %>
           <%= dialog_submit_button "Save", :class => "disabled" %>
           <%= dialog_cancel_button "Cancel" %>

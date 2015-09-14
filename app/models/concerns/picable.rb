@@ -24,6 +24,10 @@ module Picable
 
   public
 
+  def picable_attribute
+    self.class.picable_attribute
+  end
+
   def picref
     @picref ||= self.method(self.class.image_reference_name).call
   end

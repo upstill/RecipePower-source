@@ -67,7 +67,7 @@ module Linkable
       self.class_eval do
         unless options[:as]
           # For the one attribute used to index the entity, provide access to its name for use in class and instance methods
-          define_singleton_method :url_attribute_name do
+          define_singleton_method :url_attribute do
             url_attribute
           end
         end
@@ -157,6 +157,10 @@ module Linkable
   end
 
   public
+
+  def url_attribute
+    self.class.url_attribute if self.class.respond_to? :url_attribute
+  end
 
   # Return the human-readable name for the recipe's source
   def sourcename
