@@ -88,7 +88,7 @@ function uploader_init(elem) {
                 var path = key.split('/');
                 path.push(encodeURIComponent(path.pop()));
                 var url = '//' + url_host + '/' + path.join('/');
-                finalize_upload(elem, "http:" + url);
+                finalize_upload(elem, "https:" + url);
                 // create hidden field
                 // var input = $("<input />", {type: 'hidden', name: fileInput.attr('name'), value: url})
                 // form.append(input);

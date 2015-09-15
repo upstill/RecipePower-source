@@ -6,8 +6,7 @@ Expecting the following local variables:
 -->
 <%= modal_dialog :pic_picker,
                  "Pick an Applicable Picture Here",
-                 dialog_class: "modal-lg",
-                 noflash: true do %>
+                 dialog_class: "modal-lg" do %>
     <div class="content">
       <div class="row">
         <div class="col-xs-12 col-sm-6 col-md-5">
@@ -21,6 +20,7 @@ Expecting the following local variables:
                    type="text"
                    value="<%= @decorator.picurl %>">
           </div>
+          <%= uploader_field @decorator, input_id: 'pic-picker-url', img_id: 'rcpPic' %>
         </div>
         <div class="col-xs-12 col-sm-6 col-md-7">
           <span class="prompt">
@@ -45,7 +45,6 @@ Expecting the following local variables:
         </div>
         <%= link_to "Preview", "#", class: "btn btn-info image_preview_button float-right-button" %>
       </div>
-      <%= flash_notifications_div %>
       <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12">
           <span class="prompt">To pick an image from any web page, type or paste the page's URL here and click Extract Images.</span>
@@ -61,13 +60,6 @@ Expecting the following local variables:
                            class: "btn btn-info url-extract-button float-right-button",
                            mode: :modal
         %>
-      </div>
-
-      <div class="row">
-        <div class="col-xs-12 col-sm-12 col-md-12">
-          <span class="prompt">To upload an image from your disk, click the button.</span>
-          <%= render 'collectible/form_image' %>
-        </div>
       </div>
 
       <% if @decorator.pageurl && @pic_select_list.empty? %>

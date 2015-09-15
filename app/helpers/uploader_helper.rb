@@ -12,8 +12,8 @@ module UploaderHelper
     }
   end
 
-  def uploader_field decorator
-    uld = uploader_data decorator
+  def uploader_field decorator, options={}
+    uld = uploader_data(decorator).merge options
     content_tag :input, "",
         class: "directUpload",
         id: "user_avatar_url",
