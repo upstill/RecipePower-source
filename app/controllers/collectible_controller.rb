@@ -25,6 +25,12 @@ class CollectibleController < ApplicationController
     update_and_decorate
     @golinkid = params[:golinkid]
     @fallback_img = params[:fallback_img]
+    @pageurl = params[:url]
+    @pic_select_list = view_context.pic_picker_select_list (@pageurl || @decorator.pageurl)
+    if @pageurl && @pic_select_list.blank?
+      flash.now[:error] = "Sorry, we couldn't get any images from there."
+      render :errors
+    end
   end
 
   # GET tag

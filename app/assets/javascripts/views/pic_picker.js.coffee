@@ -25,6 +25,14 @@ set_picker_input = (url) ->
 load_picked_image = () ->
 	previewImg 'input.icon_picker', 'div.preview img', 'input#pic-picker-url'
 
+# Replace the dialog by with one generated from a different page
+extract_from_page = (event) ->
+	# Fire the url-extract-button's URL, with the addition of the given URL
+	elmt = event.currentTarget
+	request = RP.build_request $(elmt).data('href'), { url: $('input.url_picker').attr('value') }
+	RP.submit.enqueue request, elmt
+	event.preventDefault()
+
 # The pic_picker dialog itself
 mydlog = () ->
 	$('div.dialog.pic_picker')
@@ -52,6 +60,9 @@ RP.pic_picker.open = (dlog) ->
 
 	$(dlog).on 'click','a.image_preview_button', (event) ->
 		load_picked_image()
+
+	$(dlog).on 'click','a.url-extract-button', (event) ->
+		extract_from_page(event)
 
 	$(dlog).on 'click','.dialog-submit-button', (event) ->
 		url = url_result()

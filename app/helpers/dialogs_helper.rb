@@ -53,7 +53,7 @@ module DialogsHelper
     dialog_class = options[:dialog_class]
     header = modal_header ttl
     options[:body_contents] ||= with_output_buffer(&block)
-    body = modal_body options.slice(:prompt, :body_contents, :noFlash, :body_class)
+    body = modal_body options.slice(:prompt, :body_contents, :noflash, :body_class)
     options[:class] =
         ["dialog",
          which.to_s,
@@ -85,7 +85,7 @@ module DialogsHelper
 
   def modal_body(options={}, &block)
     contents = ""
-    contents << flash_notifications_div unless options.delete(:noFlash)
+    contents << flash_notifications_div unless options.delete(:noflash)
     contents << content_tag(:div, prompt, class: "prompt").html_safe if prompt = options.delete(:prompt)
     contents << (options.delete(:body_contents) || capture(&block))
     options[:class] = "modal-body #{options.delete :body_class}"
@@ -141,9 +141,10 @@ module DialogsHelper
     if label.is_a? Hash
       options, label = label, nil
     end
-    options = bootstrap_button_options({ button_style: "success",
-                                         class: "#{options[:class]} #{options[:style] || "form-button"}"
-                                       }.merge(options))
+    options = bootstrap_button_options options.merge(
+                                           button_style: (options[:button_style] || "success"),
+                                           class: "#{options[:class]} #{options[:style] || 'form-button'}"
+                                       )
     tag :input,
         class: "#{options[:class]} dialog-submit-button",
         name: "commit",
@@ -156,9 +157,10 @@ module DialogsHelper
     if label.is_a? Hash
       options, label = label, nil
     end
-    options = bootstrap_button_options({ button_style: "success",
-                                         class: "#{options[:class]} #{options[:style] || "form-button"}"
-                                       }.merge(options))
+    options = bootstrap_button_options options.merge(
+                                           button_style: (options[:button_style] || "info"),
+                                           class: "#{options[:class]} #{options[:style] || 'form-button'}"
+                                       )
     tag :input,
         class: "#{options[:class]} cancel dialog-cancel-button",
         data: {dismiss: "modal"},

@@ -4,8 +4,10 @@ Expecting the following local variables:
     * imgdata: data suitable for filling the href field of an image
     * pageurl: the URL of the page where the choices will be sourced
 -->
-<%= modal_dialog :pic_picker, "Pick an Applicable Picture Here", dialog_class: "modal-lg" do %>
-    <% pic_select_list = pic_picker_select_list @decorator.pageurl %>
+<%= modal_dialog :pic_picker,
+                 "Pick an Applicable Picture Here",
+                 dialog_class: "modal-lg",
+                 noflash: true do %>
     <div class="content">
       <div class="row">
         <div class="col-xs-12 col-sm-6 col-md-5">
@@ -21,22 +23,14 @@ Expecting the following local variables:
           </div>
         </div>
         <div class="col-xs-12 col-sm-6 col-md-7">
-          <%= flash_notifications_div %>
-          <%= pic_select_list.html_safe %>
           <span class="prompt">
-            <% if pic_select_list.empty? %>
-                <% if @decorator.pageurl %>
-                    It doesn't look like we can extract pictures, but you can paste a web address into the text box below.
-                <% else %>
-                    Type or paste the web address of an image below and click Preview.
-                <% end %>
+            <% if @pic_select_list.present? %>
+                Click on an image to grab it. If none suit, see below for other options.
+                <%= @pic_select_list.html_safe %>
             <% else %>
-              Click on a thumbnail to grab it.<br><br>Or, type or paste the web address of an image below and click Preview.
+                There are no obvious choices for an appropriate image.<br>For other options, see below.
             <% end %>
           </span>
-          <% if @decorator.pageurl && pic_select_list.empty? %>
-              <br>(Or, you can visit the recipe's webpage, hit the Cookmark button, and pick a picture from there.)
-          <% end %>
         </div>
       </div>
       <div class="row">
@@ -49,10 +43,9 @@ Expecting the following local variables:
                  style="width: 100%"
                  data-golinkid="<%= @golinkid %>"/>
         </div>
-      </div>
-      <div class="row">
         <%= link_to "Preview", "#", class: "btn btn-info image_preview_button float-right-button" %>
       </div>
+      <%= flash_notifications_div %>
       <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12">
           <span class="prompt">To pick an image from any web page, type or paste the page's URL here and click Extract Images.</span>
@@ -63,16 +56,28 @@ Expecting the following local variables:
                  style="width: 100%"
                  data-golinkid="<%= @golinkid %>"/>
         </div>
+        <%= link_to_submit "Extract Images",
+                           polymorphic_path([:editpic, @decorator]),
+                           class: "btn btn-info url-extract-button float-right-button",
+                           mode: :modal
+        %>
       </div>
-      <div class="row">
-        <%= link_to "Extract Images", "#", class: "btn btn-info url_extract_button float-right-button" %>
-      </div>
+
       <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12">
           <span class="prompt">To upload an image from your disk, click the button.</span>
           <%= render 'collectible/form_image' %>
         </div>
       </div>
+
+      <% if @decorator.pageurl && @pic_select_list.empty? %>
+        <div class="row">
+          <div class="col-xs-12 col-sm-12 col-md-12">
+          ...or, you can visit the recipe's webpage, hit the Cookmark button, and pick a picture from there.
+          </div>
+        </div>
+      <% end %>
+
       <%= modal_footer do %>
           <%= dialog_submit_button "Save", :class => "disabled" %>
           <%= dialog_cancel_button "Cancel" %>
