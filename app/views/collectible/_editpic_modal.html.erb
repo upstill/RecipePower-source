@@ -14,11 +14,13 @@ Expecting the following local variables:
             <%= image_with_error_recovery @decorator.imgdata(false)||@fallback_img||"",
                                           id: "rcpPic",
                                           style: "width: 100%; height: auto" %>
+<!--
             <input type="hidden"
                    id="pic-picker-url"
                    rel="jpg,png,gif"
                    type="text"
-                   value="<%= @decorator.picurl %>">
+                   value="<%# @decorator.picurl %>">
+-->
           </div>
           <%= uploader_field @decorator, input_id: 'pic-picker-url', img_id: 'rcpPic' %>
         </div>
@@ -27,52 +29,55 @@ Expecting the following local variables:
             <% if @pic_select_list.present? %>
                 Click on an image to grab it. If none suit, see below for other options.
                 <%= @pic_select_list.html_safe %>
-            <% else %>
-                There are no obvious choices for an appropriate image.<br>For other options, see below.
             <% end %>
           </span>
+
+          <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12">
+              <span class="prompt">If you have the web address (URL) of an image, type or paste it here and click Preview.</span>
+              <input type="text"
+                     rel="jpg,png,gif"
+                     class="icon_picker"
+                     autofocus="autofocus"
+                     style="width: 100%"
+                     data-golinkid="<%= @golinkid %>"/>
+            </div>
+            <%= link_to "Preview", "#", class: "btn btn-info image_preview_button float-right-button" %>
+          </div>
+          <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12">
+              <span class="prompt">To pick an image from any web page, type or paste the page's web address (URL) here and click Extract Images.</span>
+              <input type="text"
+                     rel="jpg,png,gif"
+                     class="url_picker"
+                     autofocus="autofocus"
+                     style="width: 100%"
+                     data-golinkid="<%= @golinkid %>"/>
+            </div>
+            <%= link_to_submit "Extract Images",
+                               polymorphic_path([:editpic, @decorator]),
+                               class: "btn btn-info url-extract-button float-right-button",
+                               mode: :modal
+            %>
+          </div>
         </div>
-      </div>
-      <div class="row">
-        <div class="col-xs-12 col-sm-12 col-md-12">
-          <span class="prompt">If you have the URL of an image to use, type or paste it here and click Preview.</span>
-          <input type="text"
-                 rel="jpg,png,gif"
-                 class="icon_picker"
-                 autofocus="autofocus"
-                 style="width: 100%"
-                 data-golinkid="<%= @golinkid %>"/>
-        </div>
-        <%= link_to "Preview", "#", class: "btn btn-info image_preview_button float-right-button" %>
-      </div>
-      <div class="row">
-        <div class="col-xs-12 col-sm-12 col-md-12">
-          <span class="prompt">To pick an image from any web page, type or paste the page's URL here and click Extract Images.</span>
-          <input type="text"
-                 rel="jpg,png,gif"
-                 class="url_picker"
-                 autofocus="autofocus"
-                 style="width: 100%"
-                 data-golinkid="<%= @golinkid %>"/>
-        </div>
-        <%= link_to_submit "Extract Images",
-                           polymorphic_path([:editpic, @decorator]),
-                           class: "btn btn-info url-extract-button float-right-button",
-                           mode: :modal
-        %>
       </div>
 
       <% if @decorator.pageurl && @pic_select_list.empty? %>
-        <div class="row">
-          <div class="col-xs-12 col-sm-12 col-md-12">
-          ...or, you can visit the recipe's webpage, hit the Cookmark button, and pick a picture from there.
+          <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12">
+              ...or, you can visit the recipe's webpage, hit the Cookmark button, and pick a picture from there.
+            </div>
           </div>
-        </div>
       <% end %>
 
       <%= modal_footer do %>
-          <%= dialog_submit_button "Save", :class => "disabled" %>
-          <%= dialog_cancel_button "Cancel" %>
+          <%= form_for @decorator.object, :method => :patch, data: {type: 'json'} do |f| %>
+              <%= f.hidden_field @decorator.picable_attribute, id: "pic-picker-url" %>
+              <%# f.submit "Save" %>
+              <%= form_actions f %>
+          <% end %>
+          <%# dialog_cancel_button "Cancel" %>
       <% end %>
     </div>
 <% end %>

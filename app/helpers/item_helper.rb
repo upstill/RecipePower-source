@@ -24,15 +24,7 @@ module ItemHelper
 
   def item_partial_selector item_or_decorator_or_specs=nil, item_mode=nil, context=nil
     item, item_mode = item_preflight item_or_decorator_or_specs, item_mode
-    tag =
-    case item_mode
-      when :table
-        "tr"
-      when :card
-        "ul"
-      else
-        "div"
-    end
+    tag = (item_mode == :table) ? 'tr' : 'div'
     "#{tag}." + item_partial_class(item_mode).gsub(' ','.')
   end
 

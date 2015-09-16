@@ -31,10 +31,19 @@ function finalize_upload(uploadElmt, url) {
     var params = $(uploadElmt).data('directUpload');
     var inputSelector = "input#" + params.input_id;
     var imageSelector = "img#" + params.img_id;
+    var formSelector;
 
+    if(params.form_id) {
+        formSelector = 'form#' + params.form_id;
+    } else {
+        formSelector = null;
+    }
     $(inputSelector).attr("value", url);
-    $(inputSelector).trigger("change");
-    $(imageSelector).attr("src", url);
+    previewImg(inputSelector, imageSelector, formSelector);
+/*
+        $(inputSelector).trigger("change");
+        $(imageSelector).attr("src", url);
+*/
     RP.notifications.post("Picture is uploaded and ready to go", "popup");
     $('div.bootstrap-filestyle input.form-control').css({"background-color": "#006600", "color": "white"})
 

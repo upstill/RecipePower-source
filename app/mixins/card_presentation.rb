@@ -6,7 +6,7 @@ module CardPresentation
 
   def card_avatar with_form=false
     image_with_error_recovery decorator.imgdata(true),
-                              class: "fitPic",
+                              class: "fitPic #{decorator.image_class}",
                               onload: 'doFitImage(event);',
                               alt: decorator.fallback_imgdata,
                               data: {fillmode: "width"}

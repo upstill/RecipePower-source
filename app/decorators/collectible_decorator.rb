@@ -106,6 +106,10 @@ class CollectibleDecorator < Draper::Decorator
     (picurl.present? && sample_page) ? valid_url(picurl, sample_page) : picurl
   end
 
+  def image_class
+    dom_id + '_pic'
+  end
+
   def pageurl
     if object.respond_to?(:url_attribute)
       pageurl = object.url_attribute

@@ -66,15 +66,19 @@ RP.pic_picker.open = (dlog) ->
 
 	$(dlog).on 'click','.dialog-submit-button', (event) ->
 		url = url_result()
-		targetGolinkSelector = originating_golink_selector()
-		RP.dialog.close event # Move on to tidying up
-		# The input field points to the originating golink
-		if linkdata = $(targetGolinkSelector).data()
-			imagePreviewWidgetSet linkdata.imageid, linkdata.inputid, url
+		if targetGolinkSelector = originating_golink_selector()
+			RP.dialog.close event # Move on to tidying up
+			# The input field points to the originating golink
+			if linkdata = $(targetGolinkSelector).data()
+				imagePreviewWidgetSet linkdata.imageid, linkdata.inputid, url
 
 	$(dlog).on 'click','img.pic_pickee', (event) ->
 		clickee = RP.event_target event
 		set_picker_input (clickee.getAttribute 'src')
+
+	$(dlog).on 'change', 'input.pic-picker-url', (event) ->
+		clickee = RP.event_target event
+		set_picker_input clickee.getAttribute('value')
 
 	$('img.pic_pickee').load (evt) ->
 		check_image this
