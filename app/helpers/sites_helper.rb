@@ -38,4 +38,18 @@ module SitesHelper
     [ "div.collectible-buttons##{dom_id decorator}", site_collectible_buttons(decorator, options) ]
   end
 
+  def site_homelink site_decorator, options={}
+    site_decorator = site_decorator.decorate unless site_decorator.is_a?(Draper::Decorator)
+    (data = (options[:data] || {}))[:report] = polymorphic_path [:touch, site_decorator.object]
+    link_to_submit( site_decorator.title,
+                    site_decorator.object,
+                    options.merge(data: data)) + '&nbsp;'.html_safe +
+        link_to( "",
+                 site_decorator.url,
+                 class: 'glyphicon glyphicon-play-circle',
+                 style: 'color: #aaa',
+                 :target => '_blank')
+
+  end
+
 end
