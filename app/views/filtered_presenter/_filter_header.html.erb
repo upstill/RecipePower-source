@@ -2,7 +2,11 @@
     <h2 class="filter-element"><%= @filtered_presenter.title %></h2>
     <% if @filtered_presenter.filter_type_selector %>
         <div class="filter-element" style="margin-bottom: 10px;">
-          <%= select_tag :tagtype, options_from_collection_for_select(Tag.type_selections(true, true), :last, :first, @filtered_presenter.tagtype),
+          <%= select_tag :tagtype, 
+			             options_from_collection_for_select(Tag.type_selections(true, true),
+                                                            :last,
+                                                            :first,
+                                                            @filtered_presenter.tagtype),
                          :include_blank => false,
                          :onchange => %Q{RP.submit.onselect( event ); } %>
         </div>

@@ -20,18 +20,6 @@ module PageletsHelper
                   id: body_id) ]
   end
 
-=begin
-  def pagelet_filter_replacement querytags=[]
-    [ 'div.global-search', pagelet_filter_header(querytags) ]
-  end
-
-  def pagelet_filter_header querytags=[]
-    content_tag :div,
-                with_format('html') { render 'layouts/filter_header', querytags: querytags },
-                class: 'global-search '+(user_signed_in? ? 'container menuback' : 'searchtop')
-  end
-=end
-
   # The class of the pagelet body, which depends on
   def pagelet_class
     if response_service.controller == "pages" && response_service.action == "home"

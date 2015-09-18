@@ -1,5 +1,6 @@
-<%# pagelet_filter_header %>
-<div class="global-search <%= user_signed_in? ? 'container menuback' : 'searchtop' %>"></div>
+<% if user_signed_in? %>
+    <div class="container menuback"></div>
+<% end %>
 <div class="<%= pagelet_class %>" id="<%= pagelet_body_id %>">
   <%= render 'layouts/filter_header' %>
   <%= pagelet_signin_links %>
