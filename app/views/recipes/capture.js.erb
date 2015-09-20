@@ -337,7 +337,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	encodeExtractions: function(extrs) {
 		var result = "";
 		for(field in extrs)
-			result += "&amp;extractions["+field+"]="+encodeURIComponent(extrs[field]);
+			result += "&extractions["+field+"]="+encodeURIComponent(extrs[field]);
 		return result;
 	}
 	
