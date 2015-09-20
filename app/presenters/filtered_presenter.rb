@@ -1,6 +1,5 @@
-require './app/models/results_cache.rb'
 class FilteredPresenter
-
+  require './app/models/results_cache.rb'
   attr_accessor :title, :h
 
   attr_reader :decorator, :entity,
