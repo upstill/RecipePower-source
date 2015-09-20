@@ -47,18 +47,29 @@ class Reference < ActiveRecord::Base
     Reference.typenum typesym
   end
 
+  # Use a normalized URL to find a matching reference of the given type.
+  # The 'partial' flag indicates that it's sufficient for the URL to match a substring of the target record
+  def self.lookup_by_url type, normalized_url, partial=false
+    typescope = Reference.where type: type
+    sans_protocol = normalized_url.sub /^http[^\/]*\/\//, '' # Remove the protocol from consideration
+    if partial
+      typescope.where 'url ILIKE ?', '%://' + sans_protocol + '%'
+      # Reference.where "type = '#{type}' and url ILIKE ?", normalized_url+"%"
+    else
+      typescope.where url: ['http://'+sans_protocol, 'https://'+sans_protocol]
+      # Reference.where type: type, url: normalized_url
+    end
+  end
+
   # Index a Reference by URL or URLs, assuming it exists (i.e., no initialization or creation)
   def self.lookup url_or_urls, partial=false
     if self.affiliate_class
-      (url_or_urls.is_a?(Array) ? url_or_urls : [url_or_urls]).map { |url| normalize_url url }.uniq.collect { |url|
-        unless (normalized = normalize_url url).blank? # Check for non-empty URL
-          if partial
-            list = Reference.where "type = '#{self.to_s}' and url LIKE ?", normalized+"%"
-          else
-            list = Reference.where type: self.to_s, url: normalized # Check for non-empty URL
-          end
-          list
-        end
+      (url_or_urls.is_a?(Array) ? url_or_urls : [url_or_urls]).map { |url|
+        normalize_url url
+      }.keep_if { |normalized_url|
+        normalized_url.present?
+      }.uniq.collect { |normalized_url|
+        Reference.lookup_by_url(self.to_s, normalized_url, partial).to_a
       }.flatten.compact.uniq
     end
   end
@@ -107,7 +118,8 @@ class Reference < ActiveRecord::Base
       ref.errors.add :url, "can't be blank"
       refs = [ref]
     else
-      refs = Reference.where( type: params[:type], :url => normalized).order "canonical DESC"
+      refs = self.lookup_by_url(params[:type], normalized).order "canonical DESC"
+      # refs = Reference.where( type: params[:type], :url => normalized).order "canonical DESC"
       if refs.empty?
         # Need to create, if possible
         if !(redirected = test_url normalized) # Purports to be a url, but doesn't work
@@ -123,7 +135,8 @@ class Reference < ActiveRecord::Base
           # NB: It's true that we could simply use the redirected URL for looking up a reference, but that would require
           #  hitting the site every time that URL was referenced. This way, we only have to take the redirection once, and
           #  the Reference class remembers the mapping.
-          refs = Reference.where(type: params[:type], url: redirected).to_a
+          refs = Reference.lookup_by_url(params[:type], redirected).to_a
+          # refs = Reference.where(type: params[:type], url: redirected).to_a
           refs = [ Reference.new(type: params[:type], url: redirected) ] if refs.empty?
           (canonical = refs.first).canonical = true # Make the redirected reference be canonical, and first
           # Now we create a new reference, aliased to that of the canonical reference by making their affiliate id's the same
@@ -366,7 +379,7 @@ class ImageReference < Reference
           end
           thumb.format = "JPEG"
           quality = 80
-          # thumb.write("thumb#{id.to_s}-M#{quality.to_s}.jpg") { self.quality = quality }  Rails.env.production?
+          # thumb.write("thumb#{id.to_s}-M#{quality.to_s}.jpg") { self.quality = quality } unless Rails.env.production?
           self.thumbdata = "data:image/jpeg;base64," + Base64.encode64(thumb.to_blob{self.quality = quality })
         rescue Exception => e
           logger.debug "Failed to parse image data for ImageReference#{id}: #{url} (#{e})"
@@ -405,7 +418,8 @@ class SiteReference < Reference
     normalized_link = normalize_url(url).sub(/\/$/,'')
     if host_url = host_url(normalized_link)
       # Candidates are all sites with a matching host
-      matches = Reference.where(type: "SiteReference").where('url ILIKE ?', "#{host_url}%")
+      matches = Reference.lookup_by_url 'SiteReference', host_url, true
+      # matches = Reference.where(type: "SiteReference").where('url ILIKE ?', "#{host_url}%")
       matches.map(&:url).inject(nil) { |result, this|
         # If more than one match, seek the longest
         result = this if normalized_link.start_with?(this) && (!result || (result.length < this.length))
@@ -430,7 +444,8 @@ class SiteReference < Reference
     urls = (url_or_urls.is_a?(String) ? [url_or_urls] : url_or_urls)
     urls = urls.map { |url| canonical_url url }.compact.uniq unless in_full
     urls.each { |url|
-      siterefs = self.where url: url # Lookup the site on the exact url
+      siterefs = Reference.lookup_by_url 'SiteReference', url
+      # siterefs = self.where url: url # Lookup the site on the exact url
       return siterefs unless siterefs.empty?
     }
     super urls.first unless urls.empty?
