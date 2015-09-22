@@ -13,13 +13,8 @@ class FeedDecorator < CollectibleDecorator
     (name = object.feedtypename) == :Misc ? nil : name.downcase
   end
 
-  def imgdata use_fallback=false
-    if img = @object.imgdata
-      return img
-    elsif use_fallback
-      # The default fallback is to use an image from the underlying site
-      @object.site.imgdata(true)
-    end
+  def imgdata
+    (img = @object.imgdata).present? ? img : @object.site.imgdata
   end
 
 end

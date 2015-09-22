@@ -47,11 +47,9 @@ module Picable
   # Return the image for the entity, either as a URL or a data specifier
   # The image may have an associated thumbnail, but it doesn't count unless
   # the thumbnail reflects the image's current private_picurl
-  def imgdata fallback_to_card=false
+  def imgdata
     if picref && (href = picref.imgdata || picref.url).present?
-      return href
-    elsif fallback_to_card
-      fallback_imgdata
+      href
     end
   end
 

@@ -16,7 +16,10 @@ module PicPickerHelper
     # The form may be working with an object, not its decorator
     decorator = decorator.decorate unless decorator.is_a?(Draper::Decorator)
 
-    pic_area = image_with_error_recovery decorator.imgdata(true), id: pic_preview_img_id(decorator), leave_blank: true
+    pic_area = image_with_error_recovery decorator.imgdata,
+                                         id: pic_preview_img_id(decorator),
+                                         alt: image_path(decorator.fallback_imgdata),
+                                         leave_blank: true
     field_options = {
         rel: "jpg,png,gif",
         class: "hidden_text",
@@ -34,7 +37,10 @@ module PicPickerHelper
   # Bare-metal version of the pic preview widget, for use in a template file
   def pic_preview_widget decorator, options={}
     pic_preview =
-      image_with_error_recovery(decorator.imgdata(true), id: pic_preview_img_id(decorator), style: "width:100%; height: auto") +
+      image_with_error_recovery(decorator.imgdata,
+                                id: pic_preview_img_id(decorator),
+                                style: "width:100%; height: auto",
+                                alt: image_path(decorator.fallback_imgdata)) +
       hidden_field_tag( decorator.field_name(:picurl),
                         decorator.picuri,
                         id: pic_preview_input_id(decorator),
@@ -54,7 +60,7 @@ module PicPickerHelper
   def pic_picker_go_button decorator, picker_fallback_img=nil
     golink = polymorphic_path [:editpic, decorator.object],
                               golinkid: pic_picker_golinkid(decorator),
-                              fallback_img: (picker_fallback_img || decorator.fallback_img)
+                              fallback_img: (picker_fallback_img || "NoPictureOnFile.png")
     button_to_submit decorator.pageurl ? "Pick Picture..." : "Get Picture from Web...",
                      golink,
                      "default",

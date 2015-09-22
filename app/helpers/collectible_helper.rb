@@ -146,7 +146,7 @@ module CollectibleHelper
       fallback, options = false, fallback
     end
     begin
-      if (url = decorator.imgdata(fallback)).present?
+      if (url = decorator.imgdata).present? || (fallback && (url = image_path(decorator.fallback_imgdata)).present?)
         options = { alt: "Image Not Accessible",
                     id: (dom_id decorator),
                     class: "#{options[:class]} #{options[:fill_mode] || 'fixed-width'}"}.merge(options.slice :id, :alt)

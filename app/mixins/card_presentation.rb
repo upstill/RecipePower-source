@@ -5,16 +5,16 @@ module CardPresentation
   end
 
   def card_avatar with_form=false
-    image_with_error_recovery decorator.imgdata(true),
+    image_with_error_recovery decorator.imgdata,
                               class: "fitPic #{decorator.image_class}",
                               onload: 'doFitImage(event);',
-                              alt: decorator.fallback_imgdata,
+                              alt: image_path(decorator.fallback_imgdata),
                               data: {fillmode: "width"}
   end
 
   # By default, show the card if there's an avatar OR a backup avatar
   def card_show_avatar
-    decorator.imgdata(true).present?
+    (href = decorator.imgdata).present? ? href : h.image_path(decorator.fallback_imgdata)
   end
 
   # Provide the card's title with a link to the entity involved

@@ -40,7 +40,7 @@ class CollectibleDecorator < Draper::Decorator
         attrname = fieldname.sub(/^rcp/, '').downcase
         case attrname
           when "picsafeurl"
-            object.imgdata(true)
+            object.imgdata
           when "titlelink"
             h.link_to object.title, object.url
           when "video"
@@ -95,10 +95,6 @@ class CollectibleDecorator < Draper::Decorator
   # sample_page is a full URL somewhere on the associated site so we can absolutize links
   def sample_page
 
-  end
-
-  def fallback_img
-    object.fallback_imgdata if object.respond_to?(:fallback_imgdata)
   end
 
   def picurl
