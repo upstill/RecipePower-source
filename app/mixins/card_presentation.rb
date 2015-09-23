@@ -5,11 +5,9 @@ module CardPresentation
   end
 
   def card_avatar with_form=false
-    image_with_error_recovery decorator.imgdata,
-                              class: "fitPic #{decorator.image_class}",
-                              onload: 'doFitImage(event);',
-                              alt: image_path(decorator.fallback_imgdata),
-                              data: {fillmode: "width"}
+    image_with_error_recovery decorator.object,
+                              class: decorator.image_class,
+                              fill_mode: 'fixed-width'
   end
 
   # By default, show the card if there's an avatar OR a backup avatar

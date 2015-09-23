@@ -1,17 +1,26 @@
 <% title = (params[:context] == "signup" ? "Step 2: Install the Cookmark Button" : "Installing the 'Cookmark' Button") %>
 <%= page_or_modal class: "trigger", :action => :step2, :title => title, body_class: "red_body" do %>
     <div class="instructions_header">
-	  <p class="bm-pic"><%= bookmarklet %></p>
-		<p class="bm-text"> This is the <em>Cookmark</em> button, a bookmark with a special power: sending recipes to RecipePower.</p>
-	</div>
-	 <p class="drag-text">Drag the Cookmark button onto your browser's bookmarks bar.
-	 <br><span class="small">(If the bookmarks bar isn't visible, you can find it under "View" in the top menus)</span></p>
-	 <div class="instructions_step">
-		<%= image_with_resize "drag_pic.png", id: "rcpPic_step2" %>
-	 </div><div class="instructions_step">
-	   <%= image_with_resize "click_cookmark.png", id: "rcpPic_step3" %>
-	</div>
-	 <p class="cookmark-text">When you see a recipe you like, click the Cookmark button to stash it in RecipePower. You'll get a chance to select a picture or add a note and/or tags, then you can go about your business.</p>
-	<br>
-	<%= dialog_cancel_button "Okay, All Set" %>
+      <p class="bm-pic"><%= bookmarklet %></p>
+
+      <p class="bm-text"> This is the <em>Cookmark</em> button, a bookmark with a special power: sending recipes to
+        RecipePower.</p>
+    </div>
+    <p class="drag-text">Drag the Cookmark button onto your browser's bookmarks bar.
+      <br><span class="small">(If the bookmarks bar isn't visible, you can find it under "View" in the top menus)</span>
+    </p>
+    <div class="instructions_step">
+      <%= image_with_error_recovery image_path('drag_pic.png'),
+                                    fill_mode: 'fixed-width',
+                                    id: 'rcpPic_step2' %>
+    </div>
+    <div class="instructions_step">
+      <%= image_with_error_recovery image_path('click_cookmark.png'),
+                                    fill_mode: 'fixed-width',
+                                    id: 'rcpPic_step3' %>
+    </div>
+    <p class="cookmark-text">When you see a recipe you like, click the Cookmark button to stash it in RecipePower.
+      You'll get a chance to select a picture or add a note and/or tags, then you can go about your business.</p>
+    <br>
+    <%= dialog_cancel_button 'Okay, All Set' %>
 <% end %>

@@ -1,7 +1,7 @@
 <%= present decorator, current_user_or_guest do |presenter| %>
     <div class="slider-left">
       <div class="slider-pic">
-        <%= safe_image_div decorator, true, class: "pic-box", fill_mode: "fixed-height" %>
+        <%= image_enclosure decorator, class: "pic-box", fill_mode: "fixed-height", fallback_img: true %>
       </div>
       <p class="slider-title">
         <%= decorator.title %>

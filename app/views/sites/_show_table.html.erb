@@ -1,6 +1,6 @@
 <% site = decorator.object %>
   <td>
-    <%= safe_image_div decorator, style: "width: 100px; height: auto" %>
+    <%= image_enclosure decorator, fill_mode: 'fixed-width' %>
     <%= link_to_submit site.name, site_path(site), mode: :modal %>
   </td>
   <td>

@@ -16,10 +16,8 @@ module PicPickerHelper
     # The form may be working with an object, not its decorator
     decorator = decorator.decorate unless decorator.is_a?(Draper::Decorator)
 
-    pic_area = image_with_error_recovery decorator.imgdata,
-                                         id: pic_preview_img_id(decorator),
-                                         alt: image_path(decorator.fallback_imgdata),
-                                         leave_blank: true
+    pic_area = image_with_error_recovery decorator,
+                                         id: pic_preview_img_id(decorator)
     field_options = {
         rel: "jpg,png,gif",
         class: "hidden_text",
@@ -37,10 +35,9 @@ module PicPickerHelper
   # Bare-metal version of the pic preview widget, for use in a template file
   def pic_preview_widget decorator, options={}
     pic_preview =
-      image_with_error_recovery(decorator.imgdata,
+      image_with_error_recovery(decorator.object,
                                 id: pic_preview_img_id(decorator),
-                                style: "width:100%; height: auto",
-                                alt: image_path(decorator.fallback_imgdata)) +
+                                fill_mode: 'fixed-width') +
       hidden_field_tag( decorator.field_name(:picurl),
                         decorator.picuri,
                         id: pic_preview_input_id(decorator),

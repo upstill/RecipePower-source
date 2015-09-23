@@ -3,7 +3,9 @@
 <% for recipe in @recipes %>
   <div class="rcp_list_element" >
     <div class="rcp_list_pic_box">
-	<%= image_with_resize recipe.imgdata, id: "rcpPic#{recipe.id}" %>
+	<%= image_with_error_recovery recipe,
+                                  fill_mode: 'fixed-width',
+                                  id: "rcpPic#{recipe.id}" %>
     </div>
     <div class="rcp_list_text">
       <div class="rcp_list_element_title">

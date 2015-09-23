@@ -1,10 +1,8 @@
 <div class="comment">
   <div class="avatar">
-    <%= image_with_error_recovery rcpref.user.imgdata,
-                                  id: "rcpPic",
-                                  style: "width: 100%; height: auto",
-				  alt: image_path(rcpref.user.fallback_imgdata),
-                                  leave_blank: true %>
+    <%= image_with_error_recovery rcpref.user,
+                                  id: 'rcpPic',
+                                  fill_mode: 'fixed-width' %>
     <%= user_homelink rcpref.user %>
   </div>
   <div class="content">

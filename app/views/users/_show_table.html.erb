@@ -1,5 +1,5 @@
 <td>
-  <%= safe_image_div decorator, style: "width: 100px; height: auto" %>
+  <%= image_enclosure decorator, fill_mode: 'fixed-width' %>
   <%= link_to_submit decorator.handle, user_path(decorator), mode: :modal %>
 </td>
 <td><%= decorator.about %></td>
