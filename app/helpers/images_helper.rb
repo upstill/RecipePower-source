@@ -10,19 +10,21 @@ module ImagesHelper
   #   -- otherwise, it's fetched from url_or_object
   def image_with_error_recovery url_or_object, opts_in={}
     options = opts_in.clone
-    fallback_img = opts_in.delete(:fallback_img)
+    fallback_img = options.delete :fallback_img
     if url_or_object.is_a? String
       url = url_or_object
+    else
       # Extract the url from the object
       url = url_or_object.imgdata
-      fallback_img = url_or_object.respond_to?(:fallback_imgdata) && image_path(url_or_object.fallback_imgdata) if fallback_img.is_a?(Boolean)
+      fallback_img = url_or_object.respond_to?(:fallback_imgdata) && image_path(url_or_object.fallback_imgdata) unless !fallback_img || fallback_img.is_a?(String)
     end
-    options[:alt] ||= fallback_img if fallback_img  # Had better be a string if the url was a string
+    options[:alt] ||= fallback_img if fallback_img.is_a?(String) && fallback_image.present?  # Had better be a string if the url was a string
 
     # The :fill_mode option requests the image be resized to fit its container
     if fill_mode = options.delete(:fill_mode)
-      options[:class] = "#{options[:class]} fitPic #{fill_mode}" # Add fitPic class and mode indicator
-      options[:onload] = 'doFitImage(event);'  # Fit the image onload
+      options[:class] = "#{options[:class]} #{fill_mode}" # Add fill-mode indicator to class
+      # options[:class] = "#{options[:class]} fitPic #{fill_mode}" # Add fitPic class and mode indicator
+      # options[:onload] = 'doFitImage(event);'  # Fit the image onload
     end
 
     if options.delete :explain

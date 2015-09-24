@@ -7,6 +7,7 @@ module CardPresentation
   def card_avatar with_form=false
     image_with_error_recovery decorator.object,
                               class: decorator.image_class,
+                              fallback_img: true,
                               fill_mode: 'fixed-width'
   end
 
