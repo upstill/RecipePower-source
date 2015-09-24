@@ -43,9 +43,13 @@ div.slider {
     margin-right: 15px;
     background-color: inherit;
     position: relative; // So components can get absolute coordinates
+    vertical-align: top;
     // overflow: hidden;
     display: inline-block;
     white-space: normal;
+    &.nopic {
+      width: 260px;
+    }
     div.slider-left {
       div.slider-pic {
         height: 12em;
@@ -112,6 +116,9 @@ div.slider {
       z-index: $slider-right-depth;
       &.pop-cardlet {
         display: none;
+      }
+      &.vis-cardlet {
+        position: static;
       }
       div.cardlet-item {
         width: 100%;
