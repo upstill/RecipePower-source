@@ -18,7 +18,7 @@ module ImagesHelper
       url = url_or_object.imgdata
       fallback_img = url_or_object.respond_to?(:fallback_imgdata) && image_path(url_or_object.fallback_imgdata) unless !fallback_img || fallback_img.is_a?(String)
     end
-    options[:alt] ||= fallback_img if fallback_img.is_a?(String) && fallback_image.present?  # Had better be a string if the url was a string
+    options[:alt] ||= fallback_img if fallback_img.is_a?(String) && fallback_img.present?  # Had better be a string if the url was a string
 
     # The :fill_mode option requests the image be resized to fit its container
     if fill_mode = options.delete(:fill_mode)
@@ -27,19 +27,21 @@ module ImagesHelper
       # options[:onload] = 'doFitImage(event);'  # Fit the image onload
     end
 
+    options[:data] ||= {}
     if options.delete :explain
       url = fallback_img if url.blank? && fallback_img.is_a?(String)
       options[:data] = {
           emptyurlfallback: (options.delete(:emptyurlfallback) || image_path('NoPictureOnFile.png')),
           bogusurlfallback: (options.delete(:bogusurlfallback) || image_path('BadPicURL.png'))
-      }.merge(options[:data] || {})
+      }.merge options[:data]
     end
+    options[:data][:handle_empty] = options.delete(:handle_empty) if options[:handle_empty]
 
-    if url.present? || fallback_img
+    # if url.present? || fallback_img
       options[:alt] ||= 'Image Not Accessible'
       options[:onError] ||= 'onImageError(this);'
       image_tag ((url.present? && url) || (fallback_img.is_a?(String) && fallback_img) || ''), options
-    end
+    # end
   end
 
   # Define a div or other content tag for enclosing an image.
@@ -50,7 +52,7 @@ module ImagesHelper
       tag, opts_in = :div, tag
     end
     image_options = opts_in.clone
-    enclosure_options = image_options.slice! :fill_mode, :explain, :fallback_img
+    enclosure_options = image_options.slice! :fill_mode, :explain, :fallback_img, :handle_empty
     fill_mode = (image_options[:fill_mode] ||= 'fixed-width')
     if image = image_with_error_recovery(decorator, image_options )
       style = case fill_mode

@@ -371,9 +371,9 @@ class UsersCollectionPresenter < UserContentPresenter
   # @results_class_name = 'UserCollectionCache'
   # @item_mode = :slider
   # @item_mode = :masonry
-  require './app/models/results_cache.rb'
 
   def results_class
+    require_relative '../models/results_cache.rb'
     rcname =  # ... by default
         case @entity_type
           when 'lists.owned'

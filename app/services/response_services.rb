@@ -9,6 +9,7 @@ class ResponseServices
 
   attr_accessor :controller, :action, :title, :page_url, :active_menu, :mode, :specs, :item_mode, :controller_instance
   attr_reader :format, :trigger
+  attr_writer :user
 
   def initialize params, session, request
     @request = request
@@ -38,6 +39,10 @@ class ResponseServices
 
     # Save the parameters we might want to pass back
     @meaningful_params = params.except :controller, :action, :mode, :format # , :id, :nocache
+  end
+
+  def user
+    @user ||= current_user_or_guest
   end
 
   # Provide a URL that reproduces the current request

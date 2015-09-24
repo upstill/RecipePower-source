@@ -11,6 +11,13 @@ jQuery ->
 		elmt = $(event.target).closest 'div.slider-item'
 		if $('div.slider-right', elmt).hasClass 'pop-cardlet'
 			$('div.slider-right', elmt).fadeOut()
+	$(document).on 'image:empty', 'div.slider-pic img.empty', (event) ->
+		image = event.currentTarget
+		enclosure = $(image).closest 'div.slider-left'
+		$(enclosure).hide()
+		cardlet = $(enclosure).next 'div.slider-right'
+		$(cardlet).hide()
+		# $(cardlet).css 'position', 'static'
 
 RP.slider.setup = (button_elmt) ->
 	$(button_elmt).hover RP.slider.hoverin, RP.slider.hoverout

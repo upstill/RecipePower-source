@@ -17,6 +17,9 @@ function onImageError(image) {
         } else {
             image.src = $(image).data("bogusurlfallback") || "";
         }
+        if( $(image).attr('src').length == 0) {
+            $(image).trigger('image:empty')
+        }
     }
     return true;
 }
