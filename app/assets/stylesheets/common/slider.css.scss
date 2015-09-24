@@ -61,6 +61,8 @@ div.slider {
           display: -webkit-box;
           display: -moz-box;
           display: box;
+          max-width: 300px;
+          overflow: hidden;
 
           -webkit-box-orient: vertical;
           -moz-box-orient: vertical;
@@ -74,9 +76,20 @@ div.slider {
           -moz-box-pack: center;
           box-pack: center;
 
-          img.fixed-height {
-            height: 100%;
-            width: auto;
+          a {
+            img {
+              display: block;
+              margin-right: auto;
+              margin-left: auto;
+              &.fixed-width {
+                width: 100%;
+                height: auto;
+              }
+              &.fixed-height {
+                height: 100%;
+                width: auto;
+              }
+            }
           }
         }
       }

@@ -1,9 +1,9 @@
 <%= present decorator, current_user_or_guest do |presenter| %>
-    <div class="slider-left">
-      <div class="slider-pic">
+    <div class='slider-left'>
+      <div class='slider-pic'>
         <%= image_enclosure decorator,
-                            class: "pic-box",
-                            fill_mode: "fixed-height",
+                            class: 'pic-box',
+                            fill_mode: 'fixed-height',
                             fallback_img: decorator.object.is_a?(User) %>
       </div>
       <p class="slider-title">
