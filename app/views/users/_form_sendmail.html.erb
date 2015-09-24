@@ -1,4 +1,4 @@
-<%= simple_form_for @user, :url => sendmail_user_path, method: "PATCH" do |f| %>
+<%= simple_form_for response_service.user, :url => sendmail_user_path, method: "PATCH" do |f| %>
     <%= flash_notifications_div %>
     <%= hidden_field_tag "confirmed", @confirmed || "0" %>
     <div class="row">

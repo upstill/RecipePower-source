@@ -41,15 +41,15 @@ class UsersController < CollectibleController
   def follow
     if current_user
       update_and_decorate # Generate a FeedEntryDecorator as @feed_entry and prepares it for editing
-      if current_user.follows? @user
-        current_user_or_guest.followees.delete @user
-        msg = "You've just been unplugged from'#{@user.handle}'."
+      if current_user.follows? response_service.user
+        current_user_or_guest.followees.delete response_service.user
+        msg = "You've just been unplugged from'#{response_service.user.handle}'."
       else
-        current_user_or_guest.followees << @user
-        msg = "You're now connected with '#{@user.handle}'."
+        current_user_or_guest.followees << response_service.user
+        msg = "You're now connected with '#{response_service.user.handle}'."
       end
       current_user.save
-      @user.save
+      response_service.user.save
       if resource_errors_to_flash(current_user)
         render :errors
       else
@@ -63,15 +63,15 @@ class UsersController < CollectibleController
   end
 
   def new
-    @user = User.new
+    response_service.user = User.new
     response_service.title = "Create RecipePower Account"
   end
   
   # DELETE /users/1
   # DELETE /users/1.xml
   def destroy
-    @user = User.find(params[:id])
-    @user.destroy
+    response_service.user = User.find(params[:id])
+    response_service.user.destroy
     respond_to do |format|
       format.html { redirect_to(users_url) }
       format.xml  { head :ok }
@@ -87,7 +87,7 @@ class UsersController < CollectibleController
   # Show the user's recently-viewed recipes
   def recent
     @active_menu = params[:id].to_s == current_user_or_guest_id ? :home : :collections
-    update_and_decorate # @user = User.find params[:id]
+    update_and_decorate # response_service.user = User.find params[:id]
     @empty_msg = "As you check out things in RecipePower, they will be remembered here."
     response_service.title = "Recently Viewed"
     smartrender 
@@ -95,15 +95,15 @@ class UsersController < CollectibleController
 
   # Show the user's entire collection
   def collection
-    update_and_decorate # @user = User.find params[:id]
+    update_and_decorate # response_service.user = User.find params[:id]
     entity_type = params[:entity_type]
     entity_type = entity_type ? entity_type.capitalize : "Collection"
-    if (@user.id == current_user_or_guest_id)
+    if (response_service.user.id == current_user_or_guest_id)
       response_service.title = "My #{entity_type}"
       @empty_msg = "Nothing here yet. Click the Suggest button above to get some ideas.".html_safe
       @active_menu = :collections
     else
-      response_service.title = "#{@user.handle}'s #{entity_type}"
+      response_service.title = "#{response_service.user.handle}'s #{entity_type}"
       @empty_msg = "They haven't collected anything?!? Why not Share something with them?"
       @active_menu = :friends
     end
@@ -112,7 +112,7 @@ class UsersController < CollectibleController
 
   # Show the user's recently-viewed recipes
   def biglist
-    update_and_decorate # @user = User.find params[:id]
+    update_and_decorate # response_service.user = User.find params[:id]
     @active_menu = :collections
     response_service.title = "The Big List"
     smartrender 
@@ -147,7 +147,7 @@ class UsersController < CollectibleController
 
   def edit
     update_and_decorate
-    @authentications = @user.authentications if @decorator.id
+    @authentications = response_service.user.authentications if @decorator.id
     @section = params[:section] || "profile"
     response_service.title = "Edit Profile"
     if [ :about ].include? @section.to_sym
@@ -159,17 +159,17 @@ class UsersController < CollectibleController
   
   # Ask user for an email address for login purposes
   def identify
-    @user = User.new
+    response_service.user = User.new
     if omniauth = session[:omniauth]
       @provider = omniauth.provider.capitalize
-      @user.apply_omniauth(omniauth)
+      response_service.user.apply_omniauth(omniauth)
     end
   end
   
   def profile
     params[:id] = current_user.id if current_user
     update_and_decorate
-    @authentications = @user.authentications if @decorator.id
+    @authentications = response_service.user.authentications if @decorator.id
     @section = params[:section] || "profile"
     response_service.title = "My "+@section.capitalize
     smartrender action: "edit"
@@ -185,7 +185,7 @@ class UsersController < CollectibleController
         flash[:popup] = "Thanks for the update!"
       else
         response_service.title = 'Cookmarks from Update'
-        flash[:message] = (@user == current_user ? 'Your profile' : @user.handle+"'s profile")+' has been updated.'
+        flash[:message] = (response_service.user == current_user ? 'Your profile' : response_service.user.handle+"'s profile")+' has been updated.'
         # redirect_to action: "collection"
         render 'collectible/update'
       end
@@ -200,15 +200,15 @@ class UsersController < CollectibleController
     if update_and_decorate
       case request.method
       when "PATCH", "POST" # "GET" request opens the dialog, "PATCH" submits it
-        if @user.mail_subject.blank? && !(params[:confirmed] && (params[:confirmed] == "1"))
+        if response_service.user.mail_subject.blank? && !(params[:confirmed] && (params[:confirmed] == "1"))
           # Go again
           flash[:alert] = "No subject?!? If that's really what you want, send again."
           @confirmed = "1"
-        elsif @user.mail_body.blank?
+        elsif response_service.user.mail_body.blank?
           flash.now[:error] = "No message?!? Don't want to bother someone with an empty email!"
           render :errors
         else
-          RpMailer.user_to_user(current_user, @user).deliver_now
+          RpMailer.user_to_user(current_user, response_service.user).deliver_now
           flash[:popup] = "Mail is on its way!"
           render :done
         end

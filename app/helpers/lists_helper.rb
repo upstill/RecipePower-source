@@ -24,7 +24,7 @@ module ListsHelper
 
   def pin_navmenu entity
     navtab :pin, "+", users_path do
-      @user.owned_lists[0..10].collect { |l|
+      response_service.user.owned_lists[0..10].collect { |l|
         navlink "Add to '#{l.name.truncate(20)}'", pin_list_path(l), id: dom_id(l)
       }
     end

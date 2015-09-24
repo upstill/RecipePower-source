@@ -5,20 +5,20 @@ class RegistrationsController < Devise::RegistrationsController
     respond_to :html, :json
     
     def edit
-      @user = (params[:id] && User.find(params[:id])) || current_user
+      response_service.user = (params[:id] && User.find(params[:id])) || current_user
       smartrender 
     end
     
     def create
       # We can be coming from users#identify on the 'existing user' form
       if params[:commit] == "Go"
-          if @user = User.find_by_email(params[:user][:email])
+          if response_service.user = User.find_by_email(params[:user][:email])
               if omniauth = session[:omniauth]
-                @user.apply_omniauth(omniauth)
-                @user.authentications.build(omniauth.slice('provider','uid'))
-                @user.valid?
+                response_service.user.apply_omniauth(omniauth)
+                response_service.user.authentications.build(omniauth.slice('provider','uid'))
+                response_service.user.valid?
               end
-              sign_in_and_redirect(:user, @user)
+              sign_in_and_redirect(:user, response_service.user)
           else # No such user found
               redirect_to users_identify_url, :notice => "Sorry, we don't have any records of an '#{params[:user][:email]}'."
           end
@@ -49,7 +49,7 @@ class RegistrationsController < Devise::RegistrationsController
               }
             end
           end
-        session[:omniauth] = nil unless @user.new_record?
+        session[:omniauth] = nil unless response_service.user.new_record?
       end
     end
 
@@ -85,7 +85,7 @@ class RegistrationsController < Devise::RegistrationsController
         end
       else
         clean_up_passwords resource
-        @user = resource
+        response_service.user = resource
         smartrender :action => "edit"
       end
     end
@@ -102,9 +102,9 @@ class RegistrationsController < Devise::RegistrationsController
     def build_resource(*args)
       super
       if omniauth = session[:omniauth]
-        @user.apply_omniauth(omniauth)
-        @user.authentications.build(omniauth.slice('provider','uid'))
-        @user.valid?
+        response_service.user.apply_omniauth(omniauth)
+        response_service.user.authentications.build(omniauth.slice('provider','uid'))
+        response_service.user.valid?
       end
     end
 

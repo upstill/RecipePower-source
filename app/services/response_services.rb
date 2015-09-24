@@ -42,7 +42,7 @@ class ResponseServices
   end
 
   def user
-    @user ||= current_user_or_guest
+    @user ||= @controller_instance.current_user_or_guest
   end
 
   # Provide a URL that reproduces the current request

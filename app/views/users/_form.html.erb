@@ -1,4 +1,4 @@
-<%= simple_form_for @user, html: {class: "edit_user json", 'data-type' => :json} do |f| %>
+<%= simple_form_for response_service.user, html: {class: "edit_user json", 'data-type' => :json} do |f| %>
     <%# modal_body do %>
     <%= form_errors_helper f %>
     <div class="row">
@@ -36,15 +36,15 @@
         <%= f.input :about, label: "About Me", placeholder: "Tell the world about yourself. Who Are You? What Do You Eat?", input_html: {cols: 125, rows: 4} %>
         <%= f.input :email, input_html: {cols: 125, rows: 1} %>
         <%= f.input :private, :as => :boolean, :label => "Cloak of Invisibility (don't suggest as Friend)" %>
-        <% if response_service.admin_view? && permitted_to?(:manage, @user) %>
-            <%= f.input :role_id, label: "Role", collection: @user.role_select %>
+        <% if response_service.admin_view? && permitted_to?(:manage, response_service.user) %>
+            <%= f.input :role_id, label: "Role", collection: response_service.user.role_select %>
         <% end %>
       </div>
     </div>
     <div class="row">
       <div class="col-md-12">
         <h3>Personal Questions</h3>
-        <%= tag_select Tag.where(tagtype: 15).to_a, @user.questions %>
+        <%= tag_select Tag.where(tagtype: 15).to_a, response_service.user.questions %>
         <%= f.fields_for :answers do |builder| %>
             <%= render "answer_fields", f: builder %>
         <% end %>
@@ -54,7 +54,7 @@
     <div class="row">
       <div class="col-md-12">
         <h3>Desert-island Selections</h3>
-        <%= na_menu f, "tag-selection-menu", @user.tag_selections %>
+        <%= na_menu f, "tag-selection-menu", response_service.user.tag_selections %>
         <%= f.fields_for :tag_selections do |builder| %>
             <%= render "tag_selection_fields", f: builder %>
         <% end %>

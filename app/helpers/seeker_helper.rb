@@ -21,7 +21,7 @@ module SeekerHelper
 		case element
 		when Recipe
 			@recipe = element
-		  @recipe.current_user = @user.id
+		  @recipe.current_user = response_service.user.id
 		  content_tag( :div, 
 		    render("show_masonry_item"),
 		    class: "masonry-item" )

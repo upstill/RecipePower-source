@@ -15,10 +15,10 @@ class ApplicationController < ActionController::Base
   before_filter :check_flash
   before_filter :report_cookie_string
   before_filter { logger.info "Before controller:"; report_session }
+  # after_filter :log_serve
   after_filter { logger.info "After controller:"; report_session }
   # before_filter :detect_notification_token
   before_filter :setup_response_service
-  before_filter :log_serve
 
   helper :all
   helper_method :current_user_or_guest
@@ -285,7 +285,7 @@ class ApplicationController < ActionController::Base
   # alias_method :rescue_action_locally, :rescue_action_in_public
 
   def setup_response_service
-    @user = current_user_or_guest
+    # @user = current_user_or_guest
     @response_service ||= ResponseServices.new params, session, request
     @response_service.controller_instance = self
     @response_service
@@ -339,9 +339,9 @@ class ApplicationController < ActionController::Base
   def build_resource(*args)
     super
     if omniauth = session[:omniauth]
-      @user.apply_omniauth(omniauth)
-      @user.authentications.build(omniauth.slice('provider', 'uid'))
-      @user.valid?
+      response_service.user.apply_omniauth(omniauth)
+      response_service.user.authentications.build(omniauth.slice('provider', 'uid'))
+      response_service.user.valid?
     end
   end
 

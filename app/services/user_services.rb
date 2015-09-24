@@ -29,7 +29,7 @@ class UserServices
       new_friends:  [], # Newly-added friends (member's share notice sent)
       to_invite:  []
     }
-    @user.invitee_tokens.each do |invitee|
+    response_service.user.invitee_tokens.each do |invitee|
       u = 
       case invitee
       when Fixnum # ID of existing friend
@@ -66,9 +66,9 @@ class UserServices
   # Called on signup to initialize the user
   def sign_up
     # Give the user a starting set of collections and friends
-    List.assert "Now Cooking", @user
-    List.assert "To Try", @user
-    List.assert "Keepers", @user
+    List.assert "Now Cooking", response_service.user
+    List.assert "To Try", response_service.user
+    List.assert "Keepers", response_service.user
     add_followee User.find(1)
     add_followee User.find(3)
   end

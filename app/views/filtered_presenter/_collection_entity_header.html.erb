@@ -1,5 +1,5 @@
-<% user_display_class = object_display_class @user %>
-<% possessive = (user_display_class=="viewer") ? "my" : "#{@user.polite_name}'s" %>
+<% user_display_class = object_display_class response_service.user %>
+<% possessive = (user_display_class=="viewer") ? "my" : "#{response_service.user.polite_name}'s" %>
 <% decorator ||= @filtered_presenter.decorator %>
 <%= present decorator, current_user_or_guest do |presenter| %>
     <div class="row collection-header">
