@@ -13,14 +13,8 @@ Expecting the following local variables:
           <div class="preview">
             <%= image_with_error_recovery @decorator,
                                           id: 'rcpPic',
+                                          fallback_img: true,
                                           fill_mode: 'fixed-width' %>
-<!--
-            <input type="hidden"
-                   id="pic-picker-url"
-                   rel="jpg,png,gif"
-                   type="text"
-                   value="<%# @decorator.picurl %>">
--->
           </div>
           <%= uploader_field @decorator, input_id: 'pic-picker-url', img_id: 'rcpPic' %>
         </div>

@@ -8,6 +8,7 @@
   <div class="col-md-4 preview">
     <%= image_with_error_recovery f.object,
                                   id: urlfield,
+                                  fallback_img: true,
                                   fill_mode: 'fixed-width' %>
   </div>
   <div class="col-md-8">
