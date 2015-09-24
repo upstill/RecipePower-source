@@ -2,11 +2,11 @@ module VotesHelper
 
   # Link to submit a vote on the given entity. 'up' is true for an upvote
   def vote_link entity, up, options={}
-    assert_query "/votes/#{entity.class.to_s}/#{entity.id}", options.merge(entity_type: entity.class.to_s, up: up)
+    assert_query "/votes/#{entity.class.to_s.underscore}/#{entity.id}", options.merge(entity_type: entity.class.to_s, up: up)
   end
 
   def vote_params entity, up
-    { entity_type: entity.class.to_s.downcase, entity_id: entity.id, up: up }
+    { entity_type: entity.class.to_s.underscore, entity_id: entity.id, up: up }
   end
 
 =begin
