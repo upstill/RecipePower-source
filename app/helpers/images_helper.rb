@@ -53,15 +53,12 @@ module ImagesHelper
     end
     image_options = opts_in.clone
     enclosure_options = image_options.slice! :fill_mode, :explain, :fallback_img, :handle_empty
-    fill_mode = (image_options[:fill_mode] ||= 'fixed-width')
+
     if image = image_with_error_recovery(decorator, image_options )
-      style = case fill_mode
-                when "fixed-width"
-                  "width: 100%; height: auto;"
-                when "fixed-height"
-                  "width: auto; height: 100%;"
-              end if tag.to_sym == :div
-      enclosure_options[:style] = style if style
+      if tag.to_sym == :div
+        enclosure_options[:style] = "#{enclosure_options[:style]}" +
+            (image_options[:fill_mode] || '') == 'fixed-height' ? 'width: auto; height: 100%;' : 'width: 100%; height: auto;'
+      end
       content_tag tag, link_to(image, decorator.url), enclosure_options
     end
   end
