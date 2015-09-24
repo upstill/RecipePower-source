@@ -65,6 +65,12 @@ div.card-item {
       letter-spacing: 1px;
     }
   }
+  td.pic-box {
+    width: 25%;
+    &.empty {
+      display: none;
+    }
+  }
   &.cardlet-item {
     // min-width: 200px;
     width: 350px;
