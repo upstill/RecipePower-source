@@ -65,7 +65,7 @@ module CollectibleHelper
                     id title url picuri imgdata
                     element_id field_name human_name object_path tag_path
                     tagging_tag_data tagging_user_id )
-    template_link decorator, "tag-collectible", sprite_glyph(:tag), styling, options.merge(:mode => :modal, :title => 'Tag Me', :attribs => decorator.data(attribs))
+    template_link decorator, "tag-collectible", sprite_glyph(:tag, 'xl'), styling, options.merge(:mode => :modal, :title => 'Tag Me', :attribs => decorator.data(attribs))
   end
 
   def collectible_edit_button entity, size=nil, styling={}
