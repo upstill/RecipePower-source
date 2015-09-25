@@ -117,9 +117,11 @@ function uploader_init(elem) {
     return upload_params;
 }
 
+/*
 function uploader_onload(event) {
     uploader_unpack(event.target);
 }
+*/
 
 function uploader_unpack(uploader) {
     uploader = uploader || 'input:file.directUpload'

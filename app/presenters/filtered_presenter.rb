@@ -373,15 +373,16 @@ class UsersCollectionPresenter < UserContentPresenter
   # @item_mode = :masonry
 
   def results_class
-    require_relative '../models/results_cache.rb'
-    rcname =  # ... by default
-        case @entity_type
-          when 'lists.owned'
-            'UserOwnedListsCache'
-          when 'friends'
-            'UserFriendsCache'
-        end || 'UserCollectionCache'
-    rcname.constantize
+    # Memoized constants
+    unless defined?(@@constants)
+      'ResultsCache'.constantize
+      @@constants = {
+          'lists.owned' => UserOwnedListsCache,
+          'friends' => UserFriendsCache
+      }
+      @@ucc = UserCollectionCache
+    end
+    @@constants[@entity_type] || @@ucc
   end
 
 end

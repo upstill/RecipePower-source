@@ -50,13 +50,13 @@ RP::Application.routes.draw do
     get "integers" => 'integers#index'
   end
 
-    post '/votes/recipe/:id' => 'votes#create' # , :as => "vote_recipe"
-    post '/votes/feed/:id' => 'votes#create' # , :as => "vote_feed"
-    post '/votes/feed_entry/:id' => 'votes#create' # , :as => "vote_feed_entry"
-    post '/votes/list/:id' => 'votes#create' # , :as => "vote_list"
-    post '/votes/product/:id' => 'votes#create' # , :as => "vote_product"
-    post '/votes/site/:id' => 'votes#create' # , :as => "vote_site"
-    post '/votes/user/:id' => 'votes#create' # , :as => "vote_user"
+    post '/votes/recipe/:id' => 'votes#create'
+    post '/votes/feed/:id' => 'votes#create'
+    post '/votes/feed_entry/:id' => 'votes#create'
+    post '/votes/list/:id' => 'votes#create'
+    post '/votes/product/:id' => 'votes#create'
+    post '/votes/site/:id' => 'votes#create'
+    post '/votes/user/:id' => 'votes#create'
 
   get "redirect/go", :as => "goto"
   put "redirect/go"
