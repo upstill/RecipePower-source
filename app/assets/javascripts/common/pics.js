@@ -11,13 +11,14 @@ function onImageErrorEvent(event) {
 
 function onImageError(image) {
     if (!$(image).hasClass('empty')) { // Failure on original load
-        $(image).addClass('bogus').addClass('empty');
         if (image.alt && (image.alt.match(/\.(jpg|tif|tiff|gif|png)$/) != null)) {
             image.src = image.alt
+            image.alt = ""
         } else {
             image.src = $(image).data("bogusurlfallback") || "";
         }
         if( $(image).attr('src').length == 0) {
+            $(image).addClass('bogus').addClass('empty');
             $(image).trigger('image:empty')
         }
     }

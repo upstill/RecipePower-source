@@ -61,6 +61,7 @@ RP.notifications.from_response = (data) ->
 	RP.notifications.post data["flash-notice"], "flash-notice"
 	RP.notifications.post data.alert, "alert"
 	RP.notifications.post data.popup, "popup"
+	RP.notifications.post data.errortext, "alert"
 
 jnotify_popup = (msg) ->
 	if available = (typeof jNotify != "undefined")

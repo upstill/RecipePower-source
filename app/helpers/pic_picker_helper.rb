@@ -17,7 +17,8 @@ module PicPickerHelper
     decorator = decorator.decorate unless decorator.is_a?(Draper::Decorator)
 
     pic_area = image_with_error_recovery decorator,
-                                         id: pic_preview_img_id(decorator)
+                                         id: pic_preview_img_id(decorator),
+                                         fallback_img: options[:fallback_img] || true
     field_options = {
         rel: "jpg,png,gif",
         class: "hidden_text",
