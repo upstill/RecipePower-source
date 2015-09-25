@@ -1,6 +1,6 @@
 <%= present decorator, current_user_or_guest do |presenter| %>
     <div class="container-fluid card-item list-card <%= decorator.dom_id %>">
-      <%= collectible_vote_buttons decorator.object %>
+      <%= collectible_vote_buttons decorator.object unless decorator.object == response_service.user %>
       <table style="width: 100%">
         <tr>
           <td rowspan="2" class="pic-box">
@@ -11,7 +11,7 @@
           <td valign="top" class="upper-content">
             <div class="title">
               <%= presenter.card_homelink class: "title-link" %>
-              <%= collectible_collect_icon decorator, "lg" %>
+              <%= collectible_collect_icon( decorator, "lg") unless decorator.object == response_service.user %>
             </div>
             <div class="row">
               <div class="col-md-12">
@@ -21,16 +21,16 @@
                   <% end %>
                   <%= presenter.present_field_wrapped "tags" %>
                 </div>
-                <p><%= decorator.description %></p>
+                <p class="description"><%= decorator.description %></p>
                </div>
             </div>
           </td>
         </tr>
         <tr>
           <td valign="bottom" class="lower-content">
-            <%= collectible_upload_button decorator, "xl" %>
-            <%= collectible_edit_button decorator, "xl" %>
-            <%= collectible_share_button decorator, "xl" %>
+            <%= collectible_upload_button decorator, 'lg' %>
+            <%= collectible_edit_button decorator, 'lg' %>
+            <%= collectible_share_button decorator, 'lg' unless decorator.object == response_service.user %>
           </td>
         </tr>
       </table>

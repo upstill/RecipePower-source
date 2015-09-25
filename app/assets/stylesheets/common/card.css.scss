@@ -125,10 +125,11 @@ div.card-item {
       padding-left: 1em;
     }
     td.lower-content {
-      padding-left: 0.5em;
+      // padding-left: 0.5em;
+      padding-bottom: 0.3em;
       vertical-align: bottom;
+      font-size: 2em;
       div.share-button {
-        font-size: 2em;
         float: right;
       }
     }
@@ -204,10 +205,11 @@ div.card-item {
       margin-bottom: 0em;
     }
     td.lower-content {
-      padding-left: 0.5em;
+      padding-bottom: 0.3em;
+      // padding-left: 0.5em;
       vertical-align: bottom;
+      font-size: 2em;
       div.share-button {
-        font-size: 2em;
         float: right;
         position: relative;
         left: 10px;
@@ -245,8 +247,11 @@ div.card-item {
   div.recipe-pic {
     margin-top: 10px;
   }
+  p.description {
+    font-size: 1.3em;
+  }
   div.tags {
-    font-size: 1.6em;
+    font-size: 2em;
     font-weight: 400;
     color: #909090;
     a.taglink {
