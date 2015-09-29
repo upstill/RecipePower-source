@@ -1,0 +1,5 @@
+<div class="slider pano">
+  <% ((defined?(list) && list.entities) || []).each do |member| %>
+      <%= render_item member, :slider %>
+  <% end %>
+</div>

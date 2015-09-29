@@ -5,7 +5,21 @@ div.slider {
   background-color: inherit;
   height: 220px;
   overflow: hidden;
-  margin-left: 80px;
+  &.labelled {
+    margin-left: 80px;
+    color: #777777;
+  }
+  &.pano {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    z-index: 999;
+    height: 220px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    font-size: 16px;
+    color: #EEEEEE;
+  }
   .track {
     position: absolute;
     top: 10px;
@@ -106,7 +120,7 @@ div.slider {
         padding-left: 0.2em;
         font-family: $archivo;
         font-size: 1em;
-        color: #777777;
+        color: inherit;
         z-index: $slider-title-depth;
       }
       div.slider-fader {
