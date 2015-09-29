@@ -114,6 +114,17 @@ div.card-item {
       padding-right: 8px;
     }
   }
+  &.card-large {
+    div.vote-buttons {
+      font-size: 1.2em;
+      float: right;
+      margin-right: -0.5em;
+      margin-bottom: 0.5em;
+      a.vote-button {
+        font-size: 1.4em;
+      }
+    }
+  }
   &.recipe-card {
     // width: 350px;
     background-color: $recipes-card-background-color;

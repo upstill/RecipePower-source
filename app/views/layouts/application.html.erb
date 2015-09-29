@@ -56,7 +56,7 @@
   </script>
   <script type="text/javascript">
       jQuery(function ($) {
-          $('body').panelSnap();
+          $('body').panelSnap( { panelSelector: 'section.snap-panel' }) ;
       });
   </script>
 </head>
@@ -71,7 +71,7 @@
     </div>
 <% end %>
 <%= render 'layouts/pagelet' %>
-<% if Rails.env.development? %>
+<% if false && Rails.env.development? %>
     <p>
       Archivo:
       <span class="archivo">default</span>&nbsp;
