@@ -7,11 +7,13 @@
 
 class ResponseServices
 
-  attr_accessor :controller, :action, :title, :page_url, :active_menu, :mode, :specs
+  attr_accessor :controller, :action, :title, :page_url, :active_menu, :mode, :specs, :item_mode, :controller_instance
   attr_reader :format, :trigger
+  attr_writer :user
 
   def initialize params, session, request
     @request = request
+    # @requestpath = request.fullpath
     @format = @request.format.symbol
     @session = session
     @response = params[:response]
@@ -24,15 +26,23 @@ class ResponseServices
     @invitation_token = params[:invitation_token]
     @notification_token = params[:notification_token]
 
+    # How composites are presented: :table, :strip, :masonry, :feed_entry, :card
+    # ...thus governing how individuals are presented
+    @item_mode = params[:item_mode].to_sym if params[:item_mode]
+
     # Mode will be either
     # :modal for a dialog
     # :injector for a dialog in the context of foreign collection
-    # :page for an html request
-    @mode = (params[:mode] ||
-        (@format == :html ? :page : :modal)).to_sym
+    # :page to render the whole page (for an html request)
+    @mode = (params[:mode] || :page).to_sym
+        # (@format == :html ? :page : :modal)).to_sym
 
     # Save the parameters we might want to pass back
-    @meaningful_params = params.except(:controller, :action, :mode, :format) # , :id, :nocache)
+    @meaningful_params = params.except :controller, :action, :mode, :format # , :id, :nocache
+  end
+
+  def user
+    @user ||= @controller_instance.current_user_or_guest
   end
 
   # Provide a URL that reproduces the current request
@@ -75,36 +85,50 @@ class ResponseServices
 
   # Forward the appropriate parameters to a subsequent request
   def redirect_params options = {}
-    options[:mode] = @mode
+    options[:mode] = @mode unless @mode == :page
     options
   end
 
   # Modify a path to match the current request, asserting other options as provided
-  def decorate_path path, options={}
+  # If path is not provided, resort to the current path
+  def decorate_path path=nil, options={}
+    if path.is_a? Hash
+      path, options = nil, path
+    end
+    path ||= @request.url
     assert_query path, redirect_params( options )
   end
 
   # Return appropriate parameters for a render call, asserting defaults as necessary
   def render_params defaults = {}
-    defaults.merge layout: layout
+    defaults.merge layout:
+                       case @mode
+                         when :injector
+                           "injector"
+                         when :page
+                           "application"
+                         else
+                           false
+                       end
   end
 
   def admin_view?
     @session[:admin_view]
   end
 
-  private
-
-  # What's the appropriate layout (in the Rails sense) for the current context?
-  def layout
-    case @mode
-      when :injector
-        "injector"
-      when :page
-        "application"
-      else
-        false
-    end
+  # Return the appropriate template for the current controller and action, suitable for render :template
+  # OR, start with a controller class and filename, looking for that file in the class hierarchy
+  # NB The reason that this exists is to go through the standard search path
+  def find_view ctrl_class=nil, file=nil
+    ctrl_class ||= controller_instance.class
+    file ||= action.to_s
+    ctrl_class.ancestors.each { |anc|
+      if path = anc.instance_variable_get(:@controller_path)
+        return "#{path}/#{file}" if File.exists?(Rails.root.join("app", "views", path, "#{file}.html.erb"))
+        break if path == "application"
+      end
+    }
+    "#{controller_instance.class.ancestors[0].controller_path}/#{action}" # This will crash, but oh well...
   end
 
   public
@@ -116,7 +140,7 @@ class ResponseServices
 
   # Used for targeting a stream to either the page or part of a dialog
   def container_selector
-    @mode == :modal ? "div.dialog" : "div.container"
+    @mode == :modal ? "div.dialog" : "div.pagelet"
   end
 
   def page_title

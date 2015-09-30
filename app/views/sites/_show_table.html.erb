@@ -1,0 +1,18 @@
+<% site = decorator.object %>
+  <td>
+    <%= image_enclosure decorator, fill_mode: 'fixed-width' %>
+    <%= link_to_submit site.name, site_path(site), mode: :modal %>
+  </td>
+  <td>
+    <%= site.description %>
+  </td>
+  <td>
+    <b>Home</b>: <%= link_to site.home, site.home, class: "tablink" %><br>
+    <b><%= show_sample site %></b><br>
+    <b># Feeds:</b> <%= site.feeds.size %> (<%= site.feeds.where(approved: true).count %> approved for feedthrough)
+  </td>
+  <td>
+    <%= site_collectible_buttons decorator, scrape_link: true %>
+    <br>
+    <%= site_similars site if response_service.admin_view? %><br>
+  </td>

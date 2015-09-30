@@ -4,20 +4,40 @@
 # a second, POST, method (#query), which wasn't being POSTed to upon page reload.
 
 RP::Application.routes.draw do
+
+  concern :picable do
+    member do
+      get 'editpic' # Open dialog to acquire an image from various sources
+    end
+  end
+
+  concern :collectible do
+    member do
+      get 'touch'
+      patch 'collect'
+    end
+  end
+
+  concern :taggable do
+    member do
+      # Routes for taggables
+      get 'tag' # Present the dialog for tagging, commenting and picture selection
+      patch 'tag'
+    end
+  end
+
+  get 'search/index'
+
+  resources :tagsets
+
+  resources :answers
+
   if Rails.env.staging?
     mount LetterOpenerWeb::Engine, at: "/letter_opener"
   end
 
   get "admin/toggle"
-  resources :feed_entries, :except => [:index, :create, :new] do
-    member do
-      # Routes for collectibles
-      get 'tag' # Present the dialog for tagging, commenting and picture selection
-      patch 'tag'
-      get 'touch'
-      patch 'collect'
-    end
-  end
+  resources :feed_entries, :except => [:index, :create, :new], :concerns => [:taggable, :collectible]
 
   resources :suggestions do
     member do
@@ -30,15 +50,13 @@ RP::Application.routes.draw do
     get "integers" => 'integers#index'
   end
 
-    post '/votes/recipes/:id' => 'votes#create' # , :as => "vote_recipe"
-    post '/votes/feeds/:id' => 'votes#create' # , :as => "vote_feed"
-    post '/votes/feed_entries/:id' => 'votes#create' # , :as => "vote_feed_entry"
-    post '/votes/lists/:id' => 'votes#create' # , :as => "vote_list"
-    post '/votes/products/:id' => 'votes#create' # , :as => "vote_product"
-    post '/votes/sites/:id' => 'votes#create' # , :as => "vote_site"
-    post '/votes/users/:id' => 'votes#create' # , :as => "vote_user"
-
-  get 'pic_picker/new' => 'pic_picker#new'
+    post '/votes/recipe/:id' => 'votes#create'
+    post '/votes/feed/:id' => 'votes#create'
+    post '/votes/feed_entry/:id' => 'votes#create'
+    post '/votes/list/:id' => 'votes#create'
+    post '/votes/product/:id' => 'votes#create'
+    post '/votes/site/:id' => 'votes#create'
+    post '/votes/user/:id' => 'votes#create'
 
   get "redirect/go", :as => "goto"
   put "redirect/go"
@@ -79,48 +97,37 @@ RP::Application.routes.draw do
   get 'users/identify' => 'users#identify'
   get 'users/:id/recent' => 'users#recent', :as => "user_recent"
   get 'users/:id/recent' => 'users#recent', :as => "user_root"
-  get 'users/:id/collection' => 'users#collection', :as => "user_collection"
+  get 'users/:id/collection' => 'users#collection', :as => "collection_user"
   get 'users/:id/biglist' => 'users#biglist', :as => "user_biglist"
   # get 'users/:id/show' => 'users#show'
-  resources :users, :except => [:index, :create] do
+  resources :users, :except => [:index, :create], :concerns => [ :picable, :taggable, :collectible] do
     member do
       get 'match_friends'
       get 'notify'
       get 'acquire' # Acquire a recipe (etc.)
       post 'follow'
-      # Routes for collectibles
       get 'getpic'
-      get 'tag'
-      patch 'tag'
-      get 'touch'
-      patch 'collect'
+      patch 'sendmail'
+      get 'sendmail', :as => "mailto"
     end
   end
 
   post '/list' => 'lists#create', :as => 'create_list'
-  resources :lists, except: [:index, :create] do
+  resources :lists, except: [:index, :create], :concerns => [:picable, :taggable, :collectible] do
     member do
       post 'pin' # Add an entity to a list
       get 'scrape'
-      # Routes for collectibles
-      patch 'collect' # Add to the user's collection
-      get 'tag' # Present the dialog for tagging, commenting and picture selection
-      patch 'tag' # For saving the tags
-      get 'touch'
+      get 'contents'
     end
   end
   match 'lists', :controller => 'lists', :action => 'index', :via => [:get, :post]
 
   post '/site' => 'sites#create', :as => 'create_site'
-  resources :sites, except: [:index, :create] do
+  resources :sites, except: [:index, :create], :concerns => [:picable, :collectible, :taggable] do
     member do
       post 'scrape'
       # Routes for collectibles
       post 'absorb'
-      patch 'collect' # Add to the user's collection
-      get 'tag' # Present the dialog for tagging, commenting and picture selection
-      patch 'tag'
-      get 'touch'
     end
   end
   match 'sites', :controller => 'sites', :action => 'index', :via => [:get, :post]
@@ -130,23 +137,24 @@ RP::Application.routes.draw do
   match 'references', :controller => 'references', :action => 'index', :via => [:get, :post]
 
   post '/feed' => 'feeds#create', :as => 'create_feed'
-  resources :feeds, :except => [:index, :create] do
+  get 'feeds/:id/owned' => 'feeds#owned', :as => "owned_feed"
+  resources :feeds, :except => [:index, :create], :concerns => [:picable, :collectible, :taggable] do
     member do
       get 'refresh' # Refresh the feed's entries
       post 'approve' # (Admin only) approve the feed for presentation
-      # Routes for collectibles
-      patch 'collect'  # Add the feed to the current user
-      get 'tag' # Present the dialog for tagging, commenting and picture selection
-      patch 'tag'
-      get 'touch'
     end
   end
   match 'feeds', :controller => 'feeds', :action => 'index', :via => [:get, :post]
 
+  resources :tag_selections
+
   post '/tag' => 'tags#create', :as => 'create_tag'
+  get 'tags/:id/associated' => 'tags#associated', :as => "tag_associated"
   resources :tags, except: [:index, :create] do
     member do
       post 'absorb'
+      get 'associated'
+      get 'owned'
     end
     collection do
       get 'editor'
@@ -157,8 +165,8 @@ RP::Application.routes.draw do
   end
   match 'tags', :controller => 'tags', :action => 'index', :via => [:get, :post]
 
+  match 'search', :controller => 'search', :action => 'index', :via => :get
 =begin
-  match 'collection', :controller => 'collection', :action => 'index', :via => [:get, :post]
   post 'collection/update'
   get "collection/refresh"
   get "collection/feed"
@@ -184,14 +192,10 @@ RP::Application.routes.draw do
   resources :ratings
   resources :scales
 
-  resources :recipes do
+  resources :recipes, :concerns => [:picable, :collectible, :taggable] do
     member do
       get 'piclist'
-      # Routes for collectibles
-      patch 'collect'
-      get 'tag' # Present the dialog for tagging, commenting and picture selection
-      patch 'tag'
-      get 'touch'
+      get 'associated'
     end
     collection do
       get 'capture'
@@ -212,6 +216,7 @@ RP::Application.routes.draw do
   get '/welcome', :to => 'pages#welcome'
   get '/faq', :to => "pages#faq"
   get '/admin', :to => "pages#admin"
+  get '/sprites', :to => "pages#sprites"
   root :to => 'pages#root'
 
   # The priority is based upon order of creation:

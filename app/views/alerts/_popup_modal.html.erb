@@ -1,0 +1,15 @@
+<%= modal_dialog "popup new-style purple", (defined?(alert_hdr) && alert_hdr) || '', dialog_class: 'dialog-sm', :noflash => true do %>
+    <div class="modal-body">
+      <p><%= msg = defined?(alert_msg) ? alert_msg : flash_usurp %></p>
+    </div>
+    <div class="modal-footer">
+      <%= dialog_cancel_button "GOT IT", style: "center-button" %>
+<!--
+      <input class="btn cancel center-button dialog-cancel-button"
+             data-dismiss="modal"
+             name="commit"
+             type="submit"
+             value="GOT IT">
+-->
+    </div>
+<% end %>

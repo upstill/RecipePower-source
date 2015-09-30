@@ -8,6 +8,11 @@ module TriggersHelper
   	link_to label, "#", options.merge( id: "link_to_redirect", "data-url" => url )
   end
 
+  def trigger_pending_results path, options={}
+    options[:class] = "#{options[:class]} hide"
+    link_to_submit "", path, options.merge(trigger: true )
+  end
+
   # If there's a deferred request that can be expressed as a trigger, do so by inserting a trigger link      .
   # THIS INCLUDES DIALOG REQUESTS EMBEDDED IN THE URL
   def trigger_pending_modal delete_after=true

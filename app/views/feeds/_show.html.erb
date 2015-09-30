@@ -1,33 +1,31 @@
+<% feed = decorator.object %>
     <p>
-      <%= @feed.description %>
+      <%= feed.description %>
     </p>
 
     <p>
-      <b>Url:</b> <%= @feed.url %>
+      <b>Url:</b> <%= feed.url %>
     </p>
 
     <p>
-      <b>Type:</b> <%= @feed.feedtypename %>
+      <b>Type:</b> <%= feed.feedtypename %>
     </p>
 
     <p>
       <b>From Site:</b>
-      <%= link_to_submit( @feed.site.name, site_path(@feed.site), mode: :modal) if @feed.site %>
+      <%= link_to_submit( feed.site.name, site_path(feed.site), mode: :modal) if feed.site %>
     </p>
 
     <% permitted_to?(:approve, :feeds) do %>
         <p>
-          Feedthrough <%= @feed.approved ? "Approved" : (@feed.approved.nil? ? "Not Approved" : "Blocked") %>
+          Feedthrough <%= feed.approved ? "Approved" : (feed.approved.nil? ? "Not Approved" : "Blocked") %>
         </p>
-        <% if @feed.approved || @feed.approved.nil? %>
-            <%= button_to "Block feedthrough", "#{@feed.id}/approve?approve=N"  %>
+        <% if feed.approved || feed.approved.nil? %>
+            <%= button_to "Block feedthrough", "#{feed.id}/approve?approve=N"  %>
         <% end %>
-        <% if !@feed.approved %>
-            <%= button_to "Approve feedthrough", "#{@feed.id}/approve?approve=Y"  %>
+        <% if !feed.approved %>
+            <%= button_to "Approve feedthrough", "#{feed.id}/approve?approve=Y"  %>
         <% end %>
     <% end %>
-    <%= collectible_buttons_panel @decorator, vote_button: true, button_size: "sm" %>
-    <%= link_to 'Back to Feeds', feeds_path %>
-
-    <h3>Feed Entries</h3>
-    <%= feedlist %>
+    <%= collectible_buttons_panel decorator, vote_button: true, button_size: "sm" %>
+    <%= link_to 'Back to Feeds', feeds_path(mode: "partial", item_mode: "table") %>

@@ -98,10 +98,7 @@ RP.collection.rejustify = () ->
 	
 RP.collection.justify = () ->
 	# Initialize Masonry handling for list items
-	$('#seeker_results.masonry-container').masonry
-		columnWidth: 200,
-		gutter: 20,
-		itemSelector: '.masonry-item'
+	$('#seeker_results.masonry-container').masonry()
 
 # Callback when the query tag set changes
 # queryChange = (hi, li) ->

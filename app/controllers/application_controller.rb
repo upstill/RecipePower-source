@@ -4,20 +4,21 @@ require './lib/templateer.rb'
 require 'rp_event'
 require 'reloader/sse'
 require 'results_cache.rb'
+require 'filtered_presenter.rb'
 
 class ApplicationController < ActionController::Base
   include ControllerUtils
   include Querytags # Grab the query tags from params for filtering a list
-  # include ActionController::Live   # For streaming
+  include ActionController::Live   # For streaming
   protect_from_forgery with: :exception
 
   before_filter :check_flash
   before_filter :report_cookie_string
   before_filter { logger.info "Before controller:"; report_session }
+  # after_filter :log_serve
   after_filter { logger.info "After controller:"; report_session }
   # before_filter :detect_notification_token
   before_filter :setup_response_service
-  before_filter :log_serve
 
   helper :all
   helper_method :current_user_or_guest
@@ -36,6 +37,7 @@ class ApplicationController < ActionController::Base
   helper_method :resource_errors_to_flash
   helper_method :resource_errors_to_flash_now
   helper_method :with_format
+  helper_method :"permitted_to?"
 
   include ApplicationHelper
 
@@ -72,16 +74,17 @@ class ApplicationController < ActionController::Base
     unless (@decorator && entity == @decorator.object) # Leave the current decorator alone if it will do
       @decorator = (entity.decorate if entity.respond_to? :decorate)
     end
-    if @decorator
+    if entity.respond_to? :title
+      response_service.title = (entity.title || "").truncate(20)
+    elsif @decorator && @decorator.respond_to?(:title)
       response_service.title = (@decorator.title || "").truncate(20)
-      @presenter = CollectiblePresenter.new @decorator, view_context
     end
     entity.errors.empty? # ...and report back status
   end
 
   # This replaces the old collections path, providing a path to either the current user's collection or home
   def collection_path
-    current_user ? user_collection_path(current_user) : home_path
+    current_user ? collection_user_path(current_user) : home_path
   end
 
   # Track the session, saving session events when the session goes stale
@@ -109,10 +112,9 @@ class ApplicationController < ActionController::Base
     session[:start_time] = session[:last_time] = last_serve.created_at
   end
 
-  # Get a presenter for the object fron within a controller
-  def present(object, rc_class = nil)
-    rc_class ||= "#{object.class}Presenter".constantize
-    rc_class.new(object, view_context)
+  # Get a presenter for the object from within a controller
+  def present object
+    "#{object.class}Presenter".constantize.new object, view_context
   end
 
   def check_flash
@@ -135,51 +137,16 @@ class ApplicationController < ActionController::Base
   def report_session
     logger.info "COOKIES:"
     response.cookies.each { |k, v| logger.info "#{k}: #{v}" }
-    logger.info "SESSION id: #{session.id}"
+    begin
+      if session
+        sessid = session.is_a?(Hash) ? session[:id] : (session.id if session.respond_to?(:id))
+      end
+      sessid = "<NO SESSION>" if sessid.blank?
+      logger.info "SESSION id: #{sessid}"
+    rescue Exception => e
+      x=1
+    end
     logger.info "UUID: #{rp_uuid}"
-  end
-
-  # Take a stream presenter and drop items into a stream, if possible and called for.
-  # Otherwise, defer to normal rendering
-  def do_stream rc_class
-    @sp = StreamPresenter.new rp_uuid, request.fullpath, rc_class, current_user_or_guest_id, response_service.admin_view?, querytags, params
-    if block_given?
-      yield @sp
-    end
-    if @sp.stream? # We're here to spew items into the stream
-      # When the stream request is for the first items, replace the results
-      if @sp.preface?
-        # Generally, start by restarting the results element and replacing the found count
-        header_item = with_format("html") {
-          {replacements: [
-              view_context.stream_element_replacement(:results, pkg_attributes: {id: @sp.stream_id}),
-              view_context.stream_element_replacement(:count, final_count: true)
-          ]}
-        }
-      else
-        header_item = {deletions: ['.stream-tail']}
-      end
-      response.headers["Content-Type"] = "text/event-stream"
-      # retrieve_seeker
-      begin
-        sse = Reloader::SSE.new response.stream
-        sse.write :stream_item, header_item
-
-        while item = @sp.next_item do
-          sse.write :stream_item, with_format("html") { {elmt: view_context.render_stream_item(item)} }
-        end
-        if @sp.next_path
-          sse.write :stream_item, with_format("html") { {elmt: view_context.render_stream_tail} }
-        end
-      rescue IOError
-        logger.info "Stream closed"
-      ensure
-        # In closing, replace the trigger to make it active again--or not
-        sse.close # replacements: [ with_format("html") { view_context.stream_element_replacement(:tail) } ]
-      end
-      @sp.suspend
-      true
-    end
   end
 
   # Monkey-patch to adjudicate between streaming and render_to_stream per
@@ -198,40 +165,85 @@ class ApplicationController < ActionController::Base
     response_service.action = renderopts[:action] || params[:action]
     url = renderopts[:url] || request.original_url
     renderopts = response_service.render_params renderopts
-    respond_to do |format|
-      format.html do
-        if response_service.mode == :modal
-          # Run the request as a dialog within the collection page
-          redirect_to_modal url
-        else
-          render response_service.action, renderopts
+    # Give the stream a crack at it
+    if fp = FilteredPresenter.build(view_context, rp_uuid, request.fullpath, current_user_or_guest_id, response_service, params, querytags, @decorator)
+      render_fp fp
+    else
+      respond_to do |format|
+        format.html do
+          if response_service.mode == :modal
+            # Run the request as a dialog within the home or collection page
+            redirect_to_modal url
+          else
+            render response_service.action, renderopts
+          end
         end
-      end
-      format.json {
-        case response_service.mode
-          when :partial
-            renderopts[:layout] = false
-            if @sp
-              # If operating with a stream, package the content into a stream-body element, with stream trigger
-              renderopts[:action] = response_service.action
-              begin
-                replname = @sp.has_query? ? "shared/stream_results_replacement" : "shared/pagelet_body_replacement"
-                render template: replname, layout: false
-              rescue Exception => e
-                x=2
-              end
+        format.json {
+          case response_service.mode
+            when :modal, :injector
+              dialog = render_to_string renderopts.merge(action: response_service.action, layout: (@layout || false), formats: ["html"])
+              render json: {code: dialog, how: "bootstrap"}.to_json, layout: false, :content_type => 'application/json'
             else
-              render renderopts
-            end
-          when :modal, :injector
-            dialog = render_to_string renderopts.merge(action: response_service.action, layout: (@layout || false), formats: ["html"])
-            render json: {code: dialog, how: "bootstrap"}.to_json, layout: false, :content_type => 'application/json'
+              # Render a replacement for the pagelet partial, as if it were rendered on the page
+              render partial: "layouts/pagelet" # Respond with JSON instructions to replace the pagelet appropriately
+          end
+        }
+        format.js {
+          # XXX??? Must have set @partial in preparation
+          render renderopts.merge(action: "capture")
+        }
+      end
+    end
+  end
+
+  # Use the filtered_presenter to render various aspects of a page--including streaming items
+  def render_fp fp
+    @filtered_presenter = fp
+    @decorator = fp.decorator
+    @entity = fp.entity
+    case fp.content_mode
+      when :container  # Handle the overall layout
+        render 'filtered_presenter/presentation'
+      when :entity # Summarize the focused entity
+        # Do a conventional #show, i.e., render the stream's entity's show template
+        render :show  # The #show template will expect @decorator to be defined
+      when :results # The frame for the items. This may be recursive on other frameworks
+        # Do a conventional #index, i.e. render the stream container
+        render template: 'filtered_presenter/results'
+      when :modal
+        # Render the stream's entity in a modal dialog
+        render :show
+      when :items # Stream items into the stream's container
+        renderings = []
+        while item = fp.next_item do
+          renderings << with_format("html") { view_context.render_item item, fp.item_mode }
         end
-      }
-      format.js {
-        # XXX??? Must have set @partial in preparation
-        render renderopts.merge(action: "capture")
-      }
+        tail_item = with_format("html") { render_to_string partial: fp.tail_partial } if fp.next_path
+
+        response.headers["Content-Type"] = "text/event-stream"
+        response.headers["Cache-Control"] = "no-cache"
+        # retrieve_seeker
+        begin
+          sse = Reloader::SSE.new response.stream
+          sse.write :stream_item, deletions: [".stream-tail.#{fp.stream_id}"]
+          renderings.each do |rendering|
+              sse.write :stream_item, elmt: rendering
+          end
+          # while item = fp.next_item do
+          #   rendering = with_format("html") { view_context.render_item item, fp.item_mode }
+          #   sse.write :stream_item, elmt: rendering
+          # end
+          if tail_item
+            sse.write :stream_item, elmt: tail_item
+          end
+        rescue IOError
+          logger.info "Stream closed"
+        ensure
+          # In closing, replace the trigger to make it active again--or not
+          sse.close
+        end
+        fp.suspend
+        true
     end
   end
 
@@ -273,8 +285,9 @@ class ApplicationController < ActionController::Base
   # alias_method :rescue_action_locally, :rescue_action_in_public
 
   def setup_response_service
-    @user = current_user_or_guest
+    # @user = current_user_or_guest
     @response_service ||= ResponseServices.new params, session, request
+    @response_service.controller_instance = self
     @response_service
   end
 
@@ -326,9 +339,9 @@ class ApplicationController < ActionController::Base
   def build_resource(*args)
     super
     if omniauth = session[:omniauth]
-      @user.apply_omniauth(omniauth)
-      @user.authentications.build(omniauth.slice('provider', 'uid'))
-      @user.valid?
+      response_service.user.apply_omniauth(omniauth)
+      response_service.user.authentications.build(omniauth.slice('provider', 'uid'))
+      response_service.user.valid?
     end
   end
 
@@ -342,9 +355,9 @@ class ApplicationController < ActionController::Base
     else
       if current_user.sign_in_count < 2
         flash = {success: "Welcome to RecipePower, #{current_user.handle}. This is your collection page, which you can always reach from the Collections menu above."}
-        deferred_request(path: user_collection_path(current_user, flash: flash), :format => :html)
+        deferred_request(path: collection_user_path(current_user, flash: flash), :format => :html)
       else
-        deferred_request(path: user_collection_path(current_user), :format => :html)
+        deferred_request(path: collection_user_path(current_user), :format => :html)
       end
     end || super
   end
@@ -361,7 +374,7 @@ class ApplicationController < ActionController::Base
   # This overrides the method for returning to a request after logging in. Formerly, session[:return_to]
   # handled this recovery
   def redirect_to_target_or_default(default, *args)
-    redirect_to deferred_request path: default, :mode => :page
+    redirect_to deferred_request path: default
   end
 
   # When a user signs up or accepts an invitation, they'll see these dialogs, in reverse order

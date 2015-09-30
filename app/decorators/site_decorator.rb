@@ -19,4 +19,8 @@ class SiteDecorator < CollectibleDecorator
     object.home
   end
 
+  def sample_page
+    object.home
+  end
+
 end

@@ -8,7 +8,7 @@
     <li>Click the button.</li>
   </ul>
 </div>
-<%= simple_form_for @recipe, html: { class: "new_recipe json" } do |f| %>
+<%= simple_form_for @recipe, url: "/recipes?mode=#{response_service.mode}", html: { class: "new_recipe json" } do |f| %>
     <%= form_errors_helper f, @recipe %>
     <%= f.input :url, label: "Paste URL here and click 'Add Cookmark'", autofocus: true %>
     <%= form_actions f, submit_label: "Add Cookmark" %>

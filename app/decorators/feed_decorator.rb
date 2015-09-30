@@ -13,4 +13,8 @@ class FeedDecorator < CollectibleDecorator
     (name = object.feedtypename) == :Misc ? nil : name.downcase
   end
 
+  def imgdata
+    (img = @object.imgdata).present? ? img : @object.site.imgdata
+  end
+
 end

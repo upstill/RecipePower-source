@@ -1,0 +1,93 @@
+
+div.masonry-item {
+  margin-bottom: 10px;
+  div.masonry-item-contents {
+    width: 350px;
+    &.user-item {
+      width: 160px;
+    }
+    &.list-item {
+      width: 160px;
+    }
+    &.feed-item {
+      width: 160px;
+    }
+    &.grid-item {
+      &.lists {
+        background: $lists-card-background-color;
+      }
+      &.feeds {
+        background: $feeds-card-background-color;
+      }
+      .pic-box {
+        width: 100%;
+        height: auto; // 220px;
+        display: -webkit-box;
+        display: -moz-box;
+        display: box;
+
+        -webkit-box-orient: vertical;
+        -moz-box-orient: vertical;
+        box-orient: vertical;
+
+        -webkit-box-align: center;
+        -moz-box-align: center;
+        box-align: center;
+
+        -webkit-box-pack: center;
+        -moz-box-pack: center;
+        box-pack: center;
+      }
+
+      .datablock {
+        padding: 0 0 0.6em 0.6em;
+        height: auto; // 4.6em;
+        .title {
+          a {
+            color: #332f32;
+          }
+          margin-top: 0.2em;
+          font-weight: bold;
+          a.tablink {
+            display: block;
+            overflow: hidden;
+            max-height: 2.8em;
+          }
+        }
+      }
+
+    }
+  }
+}
+
+div.masonry-item {
+  table.cardlet-table {
+    div.title-glyph {
+      &.top-right {
+        font-size: 2.5em;
+        position: absolute;
+        // top: -0.3em;
+        // right: -0.2em;
+      }
+    }
+    td.pic-box {
+      padding-bottom: 0.5em;
+    }
+    td.bottom {
+      font-size: 1.4em;
+      div.vote-buttons {
+        font-size: 0.8em;
+        float: right;
+        margin-right: -0.5em;
+        margin-bottom: 0.5em;
+        a.vote-button {
+          font-size: 1.4em;
+        }
+      }
+      div.share-button {
+        float: left;
+        font-size: 2em;
+      }
+    }
+  }
+}

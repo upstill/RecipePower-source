@@ -1,7 +1,6 @@
 <%= injector_dialog :new_password, "will reset your password if you're a member.", noflash: true, dismiss_button: false do %>
     <p>Not a member? <u><%= link_to_submit "Sign up!", new_registration_path(resource), mode: "injector" %></u></p>
-    <%= simple_form_for resource, :as => resource_name, :url => password_path(resource_name, response_service.redirect_params ), html: { class: "password_reset json", 'data-type' => :json } do |f| %>
-<%# form_for(resource, :as => resource_name, :url => password_path(resource_name), mode: "injector", :html => { class: "password_reset json", 'data-type' => 'json'} ) do |f| %>
+    <%= simple_form_for resource, :as => resource_name, :url => password_path(resource_name, response_service.redirect_params ), html: { class: "password-reset json", 'data-type' => :json } do |f| %>
         <div class="get_password">
           <%# flash_all false %>
           <%# form_errors_helper f %>

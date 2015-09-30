@@ -1,0 +1,11 @@
+<div class="comment">
+  <div class="avatar">
+    <%= image_with_error_recovery rcpref.user,
+                                  id: 'rcpPic',
+                                  fill_mode: 'fixed-width' %>
+    <%= user_homelink rcpref.user %>
+  </div>
+  <div class="content">
+     <%= rcpref.comment %>
+  </div>
+</div>

@@ -1,0 +1,352 @@
+
+div.slider {
+  position: relative;
+  // background-color: #ccc;
+  background-color: inherit;
+  height: 220px;
+  overflow: hidden;
+  &.labelled {
+    margin-left: 80px;
+    color: #777777;
+  }
+  &.pano {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    z-index: 999;
+    height: 220px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    font-size: 16px;
+    color: #EEEEEE;
+  }
+  .track {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+
+    margin: 0;
+    padding: 0;
+    // border: 2px solid #0000ff;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    height: 16em;
+    // width: auto; // 600px; // Just to start; the slider will expand as items are loaded
+  }
+  .left, .right {
+    position: absolute;
+    color: white;
+    font-size: 48px;
+    top: 57px;
+
+    cursor: pointer;
+    z-index: $slider-scroller-depth; // In front of all content
+  }
+  .left {
+    left: 0;
+  }
+  .right {
+    right: 0;
+  }
+  .slider-item {
+    height: 14em;
+    width: auto;
+    min-width: 160px;
+    // float: left;
+    margin-right: 15px;
+    background-color: inherit;
+    position: relative; // So components can get absolute coordinates
+    vertical-align: top;
+    // overflow: hidden;
+    display: inline-block;
+    white-space: normal;
+    &.nopic {
+      width: 260px;
+    }
+    div.slider-left {
+      div.slider-pic {
+        height: 12em;
+        display: inline-block;
+        float: left;
+        .pic-box {
+          display: inline-block;
+          float: left;
+          display: -webkit-box;
+          display: -moz-box;
+          display: box;
+          max-width: 300px;
+          overflow: hidden;
+
+          -webkit-box-orient: vertical;
+          -moz-box-orient: vertical;
+          box-orient: vertical;
+
+          -webkit-box-align: center;
+          -moz-box-align: center;
+          box-align: center;
+
+          -webkit-box-pack: center;
+          -moz-box-pack: center;
+          box-pack: center;
+
+          a {
+            img {
+              display: block;
+              margin-right: auto;
+              margin-left: auto;
+              &.fixed-width {
+                width: 100%;
+                height: auto;
+              }
+              &.fixed-height {
+                height: 100%;
+                width: auto;
+              }
+            }
+          }
+        }
+      }
+      p.slider-title {
+        overflow: hidden;
+        background-color: inherit;
+        position: absolute;
+        // width: 1000px;
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        height: 1.3em;
+        bottom: 0;
+        padding-left: 0.2em;
+        font-family: $archivo;
+        font-size: 1em;
+        color: inherit;
+        z-index: $slider-title-depth;
+      }
+      div.slider-fader {
+        position: absolute;
+        width: 3em;
+        height: 2em;
+        bottom: 0;
+        right: 0;
+        z-index: $slider-fader-depth; // $recipes-panel-background-color: #d8dde0;
+      }
+    }
+    div.slider-right {
+      // visibility: hidden;
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0.4em;
+      width: 100%;
+      min-width: 250px;
+      z-index: $slider-right-depth;
+      &.pop-cardlet {
+        display: none;
+      }
+      &.vis-cardlet {
+        position: static;
+      }
+      div.cardlet-item {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        div.top-matter {
+          height: 25em;
+          padding-left: 1em;
+          padding-right: 1em;
+          padding-top: 0.5em;
+          .source {
+            margin-left: -1em;
+            margin-right: -1em;
+            font-size: 1.2em;
+          }
+          p.description {
+            margin-top: 0.5em;
+            margin-bottom: 0.1em;
+            font-size: 1.3em;
+            color: #bbb;
+          }
+          p.comment {
+            margin-top: 0.5em;
+            font-style: italic;
+            font-size: 0.8em;
+          }
+        }
+        div.share-button {
+          position: absolute;
+          bottom: 0em;
+          left: 0.2em;
+          height: 1.2em;
+          font-size: 3em;
+        }
+        div.vote-buttons {
+          font-size: 1.3em;
+          position: absolute;
+          margin: 0em;
+          bottom: 0;
+          right: 0.3em;
+        }
+      }
+    }
+    .datablock {
+      padding: 0px 8px;
+      height: 100%; // auto; // 4.6em;
+      width: auto;
+      display: inline-block;
+      float: left;
+
+      .title {
+        margin-top: 7px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        width: 250px;
+        a {
+          display: block;
+          overflow: hidden;
+          max-height: 2.8em;
+        }
+      }
+      .footer {
+        height: 28px;
+        align: right;
+        position: relative;
+
+        display: -webkit-box;
+        // display: -moz-box;
+        display: box;
+
+        -webkit-box-align: center;
+        -moz-box-align: center;
+        box-align: center;
+
+        -webkit-box-pack: center;
+        -moz-box-pack: center;
+        box-pack: center;
+
+        padding: 4px 4px 4px 12px;
+        margin: 2px -4px -4px;
+        border-top: 1px solid #ddd;
+        border-radius: 0 0 4px 4px;
+        background-color: #fafafa;
+        background-image: -webkit-linear-gradient(top, #ffffff, #f2f2f2);
+        background-image: -moz-linear-gradient(top, #ffffff, #f2f2f2);
+        background-image: linear-gradient(to bottom, #ffffff, #f2f2f2);
+
+        .icons {
+          position: absolute;
+          left: 2px;
+        }
+
+        .buttons {
+          position: absolute;
+          right: 2px;
+        }
+      }
+
+    }
+
+  }
+}
+
+div.results-panel.recipes div.slider-fader {
+  background: -moz-linear-gradient(left, $recipes-panel-background-transparent, $recipes-panel-background-color);
+  // background: -webkit-linear-gradient(left, rgba(216,224,226,0), #d8dde0);
+  background: rgb(216, 221, 224); /* Old browsers */
+  background: -moz-linear-gradient(left, $recipes-panel-background-transparent, $recipes-panel-background-color); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, right top, color-stop(0%, $recipes-panel-background-color), color-stop(100%, $recipes-panel-background-color)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(left, $recipes-panel-background-transparent, $recipes-panel-background-color); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(left, $recipes-panel-background-transparent, $recipes-panel-background-color); /* Opera 11.10+ */
+  background: -ms-linear-gradient(left, $recipes-panel-background-transparent, $recipes-panel-background-color); /* IE10+ */
+  background: linear-gradient(to right, $recipes-panel-background-transparent, $recipes-panel-background-color); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#d8dde0', endColorstr='#d8dde0', GradientType=1); /* IE6-9 */
+}
+
+div.results-panel.friends div.slider-fader {
+  background: -moz-linear-gradient(left, $friends-panel-background-transparent, $friends-panel-background-color);
+  // background: -webkit-linear-gradient(left, rgba(216,224,226,0), #d8dde0);
+  background: rgb(216, 221, 224); /* Old browsers */
+  background: -moz-linear-gradient(left, $friends-panel-background-transparent, $friends-panel-background-color); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, right top, color-stop(0%, $friends-panel-background-color), color-stop(100%, $friends-panel-background-color)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(left, $friends-panel-background-transparent, $friends-panel-background-color); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(left, $friends-panel-background-transparent, $friends-panel-background-color); /* Opera 11.10+ */
+  background: -ms-linear-gradient(left, $friends-panel-background-transparent, $friends-panel-background-color); /* IE10+ */
+  background: linear-gradient(to right, $friends-panel-background-transparent, $friends-panel-background-color); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#d8dde0', endColorstr='#d8dde0', GradientType=1); /* IE6-9 */
+}
+
+div.results-panel.lists div.slider-fader {
+  background: -moz-linear-gradient(left, $lists-panel-background-transparent, $lists-panel-background-color);
+  // background: -webkit-linear-gradient(left, rgba(216,224,226,0), #d8dde0);
+  background: rgb(216, 221, 224); /* Old browsers */
+  background: -moz-linear-gradient(left, $lists-panel-background-transparent, $lists-panel-background-color); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, right top, color-stop(0%, $lists-panel-background-color), color-stop(100%, $lists-panel-background-color)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(left, $lists-panel-background-transparent, $lists-panel-background-color); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(left, $lists-panel-background-transparent, $lists-panel-background-color); /* Opera 11.10+ */
+  background: -ms-linear-gradient(left, $lists-panel-background-transparent, $lists-panel-background-color); /* IE10+ */
+  background: linear-gradient(to right, $lists-panel-background-transparent, $lists-panel-background-color); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#d8dde0', endColorstr='#d8dde0', GradientType=1); /* IE6-9 */
+}
+
+div.results-panel.feeds div.slider-fader {
+  background: -moz-linear-gradient(left, $feeds-panel-background-transparent, $feeds-panel-background-color);
+  // background: -webkit-linear-gradient(left, rgba(216,224,226,0), #d8dde0);
+  background: rgb(216, 221, 224); /* Old browsers */
+  background: -moz-linear-gradient(left, $feeds-panel-background-transparent, $feeds-panel-background-color); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, right top, color-stop(0%, $feeds-panel-background-color), color-stop(100%, $feeds-panel-background-color)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(left, $feeds-panel-background-transparent, $feeds-panel-background-color); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(left, $feeds-panel-background-transparent, $feeds-panel-background-color); /* Opera 11.10+ */
+  background: -ms-linear-gradient(left, $feeds-panel-background-transparent, $feeds-panel-background-color); /* IE10+ */
+  background: linear-gradient(to right, $feeds-panel-background-transparent, $feeds-panel-background-color); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#d8dde0', endColorstr='#d8dde0', GradientType=1); /* IE6-9 */
+}
+
+.book {
+  float: left;
+
+  margin: 0;
+  margin-right: 10px;
+  padding: 0;
+  border: 0;
+
+  width: 150px;
+  height: 150px;
+
+  -webkit-transition: opacity 0.2s;
+  -moz-transition: opacity 0.2s;
+  -ms-transition: opacity 0.2s;
+  -o-transition: opacity 0.2s;
+  -webkit-transition: opacity 0.2s;
+}
+
+.book:hover {
+  opacity: 0.5;
+}
+
+.book:nth-child(1) {
+  background-color: #ff0000;
+}
+
+.book:nth-child(2) {
+  background-color: #ffaa00;
+}
+
+.book:nth-child(3) {
+  background-color: #ffff00;
+}
+
+.book:nth-child(4) {
+  background-color: #00ff00;
+}
+
+.book:nth-child(5) {
+  background-color: #0000ff;
+}
+
+.book:nth-child(6) {
+  background-color: #aa00ff;
+}
+
+.book:nth-child(7) {
+  background-color: #ff00ff;
+}

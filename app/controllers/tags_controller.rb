@@ -4,10 +4,11 @@ class TagsController < ApplicationController
   # GET /tags
   # GET /tags.xml
   def index
+    response_service.title = "Tags"
     # seeker_result Tag, 'div.tag_list' # , clear_tags: true
     # -1 stands for any type
     params.delete :tagtype if params[:tagtype] == "-1"
-    smartrender unless do_stream TagsCache
+    smartrender 
   end
 
   # POST /tags
@@ -120,7 +121,12 @@ class TagsController < ApplicationController
     rescue
       render text: "There is no tag #{params[:id]}. Where did you get that idea?"
     end
+  end
 
+  def associated
+    update_and_decorate
+    response_service.title = @tag.name
+    smartrender
   end
 
   # GET /tags/editor?tabindex=index
@@ -148,7 +154,7 @@ class TagsController < ApplicationController
               "#tagrow_#{victimidstr}", "#tagrow_#{victimidstr}HR"
           ],
           replacements: [
-             [ "#tagrow_#{@tag.id.to_s}", with_format("html") { render_to_string partial: "tags/index_table_row", locals: { item: @tag } } ]
+             [ "#tagrow_#{@tag.id.to_s}", with_format("html") { render_to_string partial: "tags/show_table_item", locals: { item: @tag } } ]
           ]
       }
     else

@@ -1,8 +1,8 @@
-<%= form_for(@user, html: { class: "directUpload" } ) do |f| %>
+<%= form_for(response_service.user, html: { class: "directUpload" } ) do |f| %>
     <div class="col-md-5">
       <img alt="Image Link is Broken"
            id="image_id"
-           src="/assets/NoPictureOnFile.png"
+           src="<%= image_path 'NoPictureOnFile.png' %>"
            style="width:100%; height: auto">
     </div>
     <div class="col-md-5 field">

@@ -203,3 +203,14 @@ def query_to_hash qstr
   }
   result
 end
+
+# Break a request into path and query components.
+# Return a hash whose :path member is the path and :query is the query hash
+# 'imposed_query' may be specified to modify the query
+def analyze_request url, imposed_query={}
+  uri = URI(url)
+  qparams = (uri.query.blank? ? { } : CGI::parse(uri.query))
+  uri.query = nil
+  path = uri.to_s
+  { path: path, query: qparams.merge(imposed_query) }
+end

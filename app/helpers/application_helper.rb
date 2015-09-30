@@ -1,13 +1,13 @@
 require "Domain"
 require './lib/string_utils.rb'
+require 'class_utils.rb'
 # require 'suggestion_presenter'
+# require 'user_presenter.rb'
+# Ensure all presenters are available
+Dir[Rails.root.join('app', 'presenters', "*.rb")].each {|l| require l }
 
 module ApplicationHelper
   include ActionView::Helpers::DateHelper
-
-  def image_with_error_recovery url, options={}
-    image_tag url, options.merge( onError: "onImageError(this);")
-  end
 
   def empty_msg
     unless @empty_msg.blank?
@@ -33,11 +33,16 @@ module ApplicationHelper
     "#{preface} #{numstr} #{name} #{postscript}".strip.gsub(/\s+/, ' ').html_safe
   end
 
-  def present(object, klass = nil)
-    klass ||= "#{object.class}Presenter".constantize
-    presenter = klass.new(object, self)
-    yield presenter if block_given?
-    presenter
+  def present to_present, viewer, &block
+    object = to_present.is_a?(Draper::Decorator) ? to_present.object : to_present
+    if const = const_for(object, "Presenter")
+      presenter = const.new to_present, self, viewer
+      if block_given?
+        with_output_buffer { yield presenter }
+      else
+        presenter
+      end
+    end
   end
 
   def resource_name
@@ -64,12 +69,21 @@ module ApplicationHelper
   end
 
   def link_to_add_fields(name, f, association, *initializers)
+    data = data_to_add_fields f, association, *initializers
+    link_to name,
+            '#',
+            style: "display:none",
+            class: "add_fields",
+            data: data
+  end
+
+  def data_to_add_fields f, association, *initializers
     new_object = f.object.send(association).klass.new *initializers
     id = new_object.object_id
     fields = f.simple_fields_for(association, new_object, child_index: id) do |builder|
-      render(association.to_s.singularize + "_fields", f: builder)
+      render association.to_s.singularize + "_fields", f: builder
     end
-    link_to(name, '#', style: "display:none", class: "add_fields", data: {id: id, fields: fields.gsub("\n", "")})
+    { id: id, fields: fields.gsub("\n", "") }
   end
 
   def recipe_popup(rcp)
@@ -129,7 +143,7 @@ module ApplicationHelper
   end
 
   def bookmarklet_script
-    "javascript:(function%20()%20{var%20s%20=%20document.createElement(%27script%27);s.setAttribute(%27language%27,%27javascript%27);s.setAttribute(%27id%27,%20%27recipePower-injector%27);s.setAttribute(%27src%27,%27https://#{current_domain}/recipes/capture.js?recipe[url]=%27+encodeURIComponent(window.location.href)+%27&recipe[title]=%27+encodeURIComponent(document.title)+%27&recipe[rcpref][comment]=%27+encodeURIComponent(%27%27+(window.getSelection?window.getSelection():document.getSelection?document.getSelection():document.selection.createRange().text))+%27&v=6&jump=yes%27);document.body.appendChild(s);}())"
+    "javascript:(function%20()%20{var%20s%20=%20document.createElement(%27script%27);s.setAttribute(%27language%27,%27javascript%27);s.setAttribute(%27id%27,%20%27recipePower-injector%27);s.setAttribute(%27src%27,%27#{rp_url}/recipes/capture.js?recipe[url]=%27+encodeURIComponent(window.location.href)+%27&recipe[title]=%27+encodeURIComponent(document.title)+%27&recipe[rcpref][comment]=%27+encodeURIComponent(%27%27+(window.getSelection?window.getSelection():document.getSelection?document.getSelection():document.selection.createRange().text))+%27&v=6&jump=yes%27);document.body.appendChild(s);}())"
   end
 
   def bookmarklet
@@ -164,7 +178,9 @@ module ApplicationHelper
 
   # Pump pending notifications into flash notices
   def issue_notifications user
-    notices = user.notifications_received.where(accepted: false).collect { |notification| notification.accept }.join('<br>'.html_safe)
+    notices = user.notifications_received.where(accepted: false).collect { |notification|
+      notification.accept
+    }.join('<br>'.html_safe)
     flash[:success] = notices unless notices.blank?
   end
 
@@ -201,39 +217,6 @@ module ApplicationHelper
     divert_user_invitation_url(invitation_token: invitee.raw_invitation_token, url: CGI::escape(url))
   end
 
-  def field_value what=nil
-    return form_authenticity_token if what && (what == "authToken")
-    if val = @decorator && @decorator.extract(what)
-      "#{val}".html_safe
-    end
-  end
-
-  def field_count what
-    @decorator && @decorator.respond_to?(:arity) && @decorator.arity(what)
-  end
-
-  def present_field what=nil
-    field_value(what) || %Q{%%#{(what || "").to_s}%%}.html_safe
-  end
-
-  def present_field_label what
-    label = what.sub "_tags", ''
-    case field_count(what)
-      when nil, false
-        "%%#{what}_label_plural%%"+"%%#{what}_label_singular%%"
-      when 1
-        label.singularize
-      else
-        label.pluralize
-    end
-  end
-
-  def present_field_wrapped what=nil
-    content_tag :span,
-                present_field(what),
-                class: "hide-if-empty"
-  end
-
   # Generic termination buttons for dialogs--or any other forms
   def form_actions f, options = {}
     cancel_path = options[:cancel_path] || collection_path
@@ -244,6 +227,41 @@ module ApplicationHelper
                     dialog_cancel_button
                 ).html_safe,
                 class: "form-group actions"
+  end
+
+  # Get jQuery from the Google CDN, falling back to the version in jquery-rails if unavailable
+  def jquery_include_tag no_cdn=false, use_jq2=false
+    if use_jq2
+      localfile = 'jquery2'
+      version = Jquery::Rails::JQUERY_2_VERSION
+    else
+      localfile = 'jquery'
+      version = Jquery::Rails::JQUERY_VERSION
+    end
+    [ (javascript_include_tag("//ajax.googleapis.com/ajax/libs/jquery/#{version}/jquery.min.js") unless no_cdn),
+      javascript_tag("window.jQuery || document.write(unescape('#{javascript_include_tag(localfile).gsub('<','%3C')}'))")
+    ].join("\n").html_safe
+  end
+
+  # The Bootstrap version is that provided by bootstrap-sass
+  def bootstrap_include_tag
+    # The version may include a maintenance release number
+    version = Bootstrap::VERSION.split('.')[0..2].join('.')
+    fallback = (
+        javascript_include_tag("bootstrap.js") +
+        stylesheet_link_tag("bootstrap_import.css")
+    ).gsub('<','%3C')
+    [
+      javascript_include_tag("//maxcdn.bootstrapcdn.com/bootstrap/#{version}/js/bootstrap.min.js"),
+      stylesheet_link_tag("bootstrap_preface"),
+      stylesheet_link_tag("//maxcdn.bootstrapcdn.com/bootstrap/#{version}/css/bootstrap.min.css"),
+      stylesheet_link_tag("//maxcdn.bootstrapcdn.com/bootstrap/#{version}/css/bootstrap-theme.min.css"),
+      javascript_tag(%Q{
+        if(typeof $().emulateTransitionEnd != 'function') {
+          document.write(unescape('#{fallback}'));
+        }
+      })
+    ].join("\n").html_safe
   end
 
 end

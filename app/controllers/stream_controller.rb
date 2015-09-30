@@ -1,7 +1,6 @@
 require 'reloader/sse'
 
 class StreamController < ApplicationController
-=begin
   include ActionController::Live
   
   def buffer_test
@@ -43,6 +42,5 @@ class StreamController < ApplicationController
       sse.close done: true # more_to_come: (@seeker.npages > @seeker.cur_page)
     end
   end
-=end
 
 end

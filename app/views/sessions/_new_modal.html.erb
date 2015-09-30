@@ -1,5 +1,9 @@
-<%= modal_dialog :sign_in, "Welcome Back! If you'll just sign in..." do %>
+<%= modal_dialog :sign_in,
+                 '',
+                 dialog_class: 'dialog-xs',
+                 class: "keeparound new-style green",
+                 data: { focus: "input#user_username" } do %>
     <%= render partial: 'sessions/form' %>
-    <hr>
-    <%= render partial: 'authentications/possible', locals: {prompt: "You can also sign in using one of these fine services:"} %>
+    <hr style="margin-top: 5px;">
+    <%= render partial: 'authentications/possible', locals: { prompt: "OR SIGN IN VIA:" } %>
 <% end %>

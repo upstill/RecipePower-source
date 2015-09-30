@@ -21,7 +21,7 @@ module SeekerHelper
 		case element
 		when Recipe
 			@recipe = element
-		  @recipe.current_user = @user.id
+		  @recipe.current_user = response_service.user.id
 		  content_tag( :div, 
 		    render("show_masonry_item"),
 		    class: "masonry-item" )
@@ -32,7 +32,7 @@ module SeekerHelper
 		  # Default is to set instance variable @<Klass> and render "<klass>s/<klass>"
 		  ename = element.class.to_s.downcase
 		  self.instance_variable_set("@"+ename, element)
-		  render partial: "#{ename.pluralize}/index_table_row", locals: { ename.to_sym => element }
+		  render partial: "#{ename.pluralize}/show_table_item", locals: { ename.to_sym => element }
 		end
   end
  
@@ -60,21 +60,4 @@ module SeekerHelper
     { elmt: elmt, selector: selector }
   end
 
-  # Package up a collection element for passing into a stream
-  def seeker_stream_item element
-    elmt = render_seeker_item element
-    return { elmt: elmt }
-    selector = 
-    case element
-    when Recipe
-      '#masonry-container'
-    when FeedEntry
-      'ul.feed_entries'
-    when Tag
-      'tbody.collection_list'
-    else
-      '.collection_list'
-    end
-    element_item selector, elmt
-  end
 end

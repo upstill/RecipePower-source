@@ -1,0 +1,74 @@
+<% colors = %w{#e6ccc8 #e9e4ca #222222 #dfdfdf #e9e4ca #f5f2ee #816887 } %>
+<% natural_colors = %w{ #FF9583 #FF9583 #DFCA6A #ECDAD7 #9DBFAA #FF9583 #DFCA6A #CC8475 #FF9583 #A0A0A0 #CC8475 #A0A0A0 #ECE6CD #A0A0A0 #ECE6CD #DFCA6A #CCC } %>
+<% icons = %w{ plus check chef list-viewer list-list list-add heart-friend heart-heart heart-add edit-gray edit-red tag vote-up upload vote-down share send-left } %>
+<% offsets = []; xoff=500; yoff=600 %>
+<% [0, 600, 1240, 1870, 2505, 3105].each { |y| (0..2).to_a.each { |xindex| offsets << [xindex*xoff, y] } } %>
+<% offsets.delete_at(13); offsets[13][0] -= 45 %>
+<h3>Icons</h3>
+<!--
+<p>100w <%# sprite :chef, width: 100 %></p>
+<p>100h <%# sprite :chef, height: 100 %></p>
+<p>100x100 <%# sprite :chef, width: 100, height: 100 %>30x30 <%# sprite :chef, width: 30, height: 30 %></p>
+<p>200x100 <%# sprite :chef, width: 200, height: 100 %></p>
+<p>100x200 <%# sprite :chef, width: 100, height: 200 %></p>
+<p>natural <%# sprite :chef %></p>
+-->
+<table>
+  <thead>
+  <tr>
+    <th>color</th>
+    <% icons.each do |icon| %>
+        <th>
+          id="<%= icon %>"
+        </th>
+    <% end %>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td>helped</td>
+    <% index=0 %>
+    <% icons.each do |icon| %>
+        <td><%= sprite icon %></td>
+        <% color = natural_colors[index] %>
+        <% index = index+1 %>
+    <% end %>
+  </tr>
+  <tr>
+    <td>direct</td>
+    <% index=0 %>
+    <% icons.each do |icon| %>
+        <td><%= sprite icon %>
+          <% x, y = offsets[index] %>
+          <% ar = (icon.match('list-') || icon.match('vote-')) ? 0.75 : 1 %>
+          <% box = [x, y, 500*ar, 500].map(&:to_s).join ' ' %>
+          <% color = natural_colors[index] %>
+          <% ip = image_path "recipe-power-sprite.svg##{icon}" %>
+          <svg width="<%= 75*ar %>" height="75" viewBox="<%= box %>" style="color: <%= color %>; fill: <%= color %>">
+            <use xlink:href='<%= ip %>'/>
+          </svg>
+        </td>
+        <% index = index+1 %>
+    <% end %>
+  </tr>
+  <% colors.each do |color| %>
+      <tr>
+        <td style="color: <%= color %>; width: 100px; height: 100px;">
+          <%= color %>
+        </td>
+        <% index=0 %>
+        <% icons.each do |icon| %>
+            <td>
+              <% x, y = offsets[index] %>
+              <% box = [x, y, 500, 500].map(&:to_s).join ' ' %>
+              <% ip = image_path "recipe-power-sprite.svg##{icon}" %>
+              <svg width="75" height="75" viewBox="<%= box %>" style="background: #cccccc; margin: 1px; color: <%= color %>; fill: <%= color %>; border: 1px solid black">
+                <use xlink:href='<%= ip %>'/>
+              </svg>
+            </td>
+            <% index = index+1 %>
+        <% end %>
+      </tr>
+  <% end %>
+  </tbody>
+</table>

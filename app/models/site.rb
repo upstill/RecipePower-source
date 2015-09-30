@@ -3,7 +3,7 @@ require './lib/uri_utils.rb'
 
 class Site < ActiveRecord::Base
   include Collectible
-  picable :logo, :thumbnail
+  picable :logo, :thumbnail, "MissingLogo.png"
   linkable :home, :reference
 
   # site: root of the domain (i.e., protocol + domain); suitable for pattern-matching on a reference URL to glean a set of matching Sites

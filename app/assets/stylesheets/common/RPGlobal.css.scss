@@ -1,4 +1,10 @@
 // Style declarations for all contexts,including dialogs and injections
+html{
+	height:100%;
+  	margin: 0;
+  	padding:0;
+  	font-size: 30px; /*1rem=30px*/
+}
 body {
 	background:#FDECCF;
 	width:100%;
@@ -71,7 +77,8 @@ nav {
 	float:right;
 	background-color:white;
 	padding:0 0.7em;
-	white-space:nowrap
+	white-space:nowrap;
+	background-image: none;
 }
 nav ul {
 	margin:0;
@@ -105,16 +112,6 @@ footer nav {
 }
 .clear {
 	clear:both
-}
-div.notice-div {
-	width:"auto";
-	height:"auto";
-	z-index:1000;
-	position:"fixed";
-	top:"200";
-	left:"200";
-	padding:"1em";
-	margin:"auto"
 }
 
 // Space for a recipe picture to be fit into

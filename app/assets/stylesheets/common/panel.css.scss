@@ -1,0 +1,129 @@
+/*
+<div class="results-panel recipes" data-query="<%= path %>">
+<div class="results-label"><%= image_tag "recipes_panel_label.png" %></div>
+<div class="results-content">
+<div class="org-by">Org buttons go here</div>
+<div class="show-all">Show-all button goes here</div>
+<div class="suggest">Sug button goes here</div>
+<div class="results-place">Here are the results</div>
+</div>
+</div>
+*/
+
+div.results-panel {
+  width: 100%;
+  margin-left: 1em;
+  margin-top: 15px;
+  &.recipes {
+    background-color: $recipes-panel-background-color;
+    color: $recipes-panel-label-color;
+  }
+  &.friends {
+    background-color: $friends-panel-background-color;
+    color: $friends-panel-label-color;
+  }
+  &.feeds {
+    background-color: $feeds-panel-background-color;
+    color: $feeds-panel-label-color;
+  }
+  &.lists {
+    background-color: $lists-panel-background-color;
+    color: $lists-panel-label-color;
+  }
+  .results-menu {
+    width: 100%;
+    height: 45px;
+    .glyphicon {
+      font-size: 2.0em;
+    }
+    .org-by {
+      // display: inline-block;
+      // width: auto;
+      float: left;
+      margin-bottom: 5px;
+      font-family: $oswald-light;
+      .label {
+        font-size: 0.9em;
+        letter-spacing: 1.5px;
+        color: inherit;
+      }
+      div.link-button {
+        display: inline-block;
+        margin: 5px;
+        padding: 3px 10px;
+        background-color: #e6ebee;
+        color: #c3d8d9;
+        border-radius: 4px;
+        a {
+          color: inherit;
+          &.selected {
+            color: #628e8f;
+          }
+        }
+      }
+    }
+    .collapse-button {
+      float: right;
+    }
+    .expand-link {
+      float: right;
+      margin: 0.3em;
+      font-size: 1.3em;
+    }
+    .suggest {
+      // display: inline-block;
+      width: 30px;
+      float: right;
+    }
+  }
+  .results-content {
+    position: relative;
+    width: 100%;
+    height: auto; // 300px;
+    // border: 1px solid red;
+    .results-label {
+      position: absolute;
+      left: -85px;
+      top: 110px;
+      width: 200px;
+      height: 70px;
+      font-size: 64px;
+      font-family: $oswald-light;
+      font-weight: 400;
+      text-align: right;
+      &.recipes {
+        color: $recipes-panel-label-color;
+      }
+      &.feeds {
+        color: $feeds-panel-label-color;
+      }
+      &.friends {
+        color: $friends-panel-label-color;
+      }
+      &.lists {
+        color: $lists-panel-label-color;
+      }
+      .results-img {
+        width: 70px;
+        height: auto;
+        margin-top: auto;
+        margin-bottom: auto;
+      }
+      // border: 1px solid green;
+    }
+    .results-box {
+      // position: absolute;
+      // left: 0;
+      // top: 0;
+      padding: 10px;
+      width: 100%;
+      height: auto;
+      // border: 1px solid blue;
+      .results.placeholder {
+        width: 100%;
+        height: 230px;
+        // border: 1px solid yellow;
+      }
+    }
+  }
+}

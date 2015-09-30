@@ -1,0 +1,52 @@
+<%= present decorator, current_user_or_guest do |presenter| %>
+    <div class="container-fluid card-item list-card">
+      <%= collectible_vote_buttons decorator.object %>
+      <table style="width: 100%">
+        <tr>
+          <td rowspan="2" style="width: 25%;">
+            <div class="pic-inset">
+              <%= presenter.card_avatar %>
+            </div>
+          </td>
+          <td valign="top" class="upper-content">
+            <div class="title">
+              <%= presenter.card_homelink class: "title-link" %>
+              <%= collectible_collect_icon decorator, "lg" %>
+            </div>
+            <div class="row">
+              <div class="col-md-3">
+                <h3>AS COMPILED BY</h3>
+                <span class="owner-name"><%= decorator.owner.polite_name %><br></span>
+                <div class="owner-pic">
+                  <%= present decorator.owner, nil do |up| %>
+                      <%= up.card_avatar %>
+                  <% end %>
+                </div>
+              </div>
+              <div class="col-md-9">
+                <div class="tags">
+                  <% if decorator.tags.present? %>
+                      <h3>TAGS</h3>
+                  <% end %>
+                  <%= presenter.present_field_wrapped "tags" %>
+                </div>
+                <p><%= decorator.description %></p>
+                <% if (notes = decorator.notes(false)).present? %>
+                    <h3>NOTES</h3>
+                    <p><%= notes %></p>
+                <% end %>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td valign="bottom" class="lower-content">
+            <%= collectible_upload_button decorator, "xl" %>
+            <%= collectible_edit_button decorator, "xl" %>
+            <%= collectible_share_button decorator, "xl" %>
+          </td>
+        </tr>
+      </table>
+    </div>
+<% end %>
+

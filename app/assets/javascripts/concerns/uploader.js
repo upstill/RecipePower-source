@@ -31,9 +31,19 @@ function finalize_upload(uploadElmt, url) {
     var params = $(uploadElmt).data('directUpload');
     var inputSelector = "input#" + params.input_id;
     var imageSelector = "img#" + params.img_id;
+    var formSelector;
 
+    if(params.form_id) {
+        formSelector = 'form#' + params.form_id;
+    } else {
+        formSelector = null;
+    }
     $(inputSelector).attr("value", url);
-    $(imageSelector).attr("src", url);
+    previewImg(inputSelector, imageSelector, formSelector);
+/*
+        $(inputSelector).trigger("change");
+        $(imageSelector).attr("src", url);
+*/
     RP.notifications.post("Picture is uploaded and ready to go", "popup");
     $('div.bootstrap-filestyle input.form-control').css({"background-color": "#006600", "color": "white"})
 
@@ -87,7 +97,7 @@ function uploader_init(elem) {
                 var path = key.split('/');
                 path.push(encodeURIComponent(path.pop()));
                 var url = '//' + url_host + '/' + path.join('/');
-                finalize_upload(elem, "http:" + url);
+                finalize_upload(elem, "https:" + url);
                 // create hidden field
                 // var input = $("<input />", {type: 'hidden', name: fileInput.attr('name'), value: url})
                 // form.append(input);
@@ -101,13 +111,21 @@ function uploader_init(elem) {
                     text("Failed");
             }
         });
+        $('div.bootstrap-filestyle input.form-control').hide()
         $('div.progress').hide();
     }
     return upload_params;
 }
 
-function uploader_unpack() {
-    $('input:file.directUpload').each(function (i, elem) {
+/*
+function uploader_onload(event) {
+    uploader_unpack(event.target);
+}
+*/
+
+function uploader_unpack(uploader) {
+    uploader = uploader || 'input:file.directUpload'
+    $(uploader).each(function (i, elem) {
         var params = uploader_init(elem);
         $(elem).change(function () {
             var input = this;
@@ -117,7 +135,6 @@ function uploader_unpack() {
                 reader.onload = function (e) {
                     image.onerror = function () {
                         // Abort! Copy the input value back to the image
-                        var x = 2;
                         if (!$('div.bootbox-alert')[0]) {
                             abort_upload(elem, "That file isn't a picture!");
                         }

@@ -16,12 +16,20 @@ module TaggableHelper
       attribute_name = attribute_name.pluralize
       field_name = field_name.pluralize
     end
-    options[:label] ||= attribute_name.tr('_', ' ').capitalize
+    # Label may be specified in :label option; if blank, use no label
+    if options[:label]
+      options[:label] = false if options[:label].blank?
+    else
+      options[:label] ||= attribute_name.tr('_', ' ').capitalize
+    end
 
     object = (f.class.to_s.match /FormBuilder/) ? f.object : f
     options[:data] ||= {}
     options[:data][:hint] ||= "Type your tag(s) for the #{object.class.to_s.downcase} here"
-    options[:data][:pre] ||= (options[:attrval] || object.send(attribute_name)).map(&:attributes).to_json
+    initrs = options[:attrval] || object.send(attribute_name)
+    initrs = initrs.to_a if initrs.is_a? ActiveRecord::Relation
+    initrs = [initrs] unless initrs.is_a? Array # Could be singular record, but #map expects an array
+    options[:data][:pre] ||= initrs.compact.map(&:attributes).to_json
     options[:data][:token_limit] = 1 unless is_plural
     options[:data][:"min-chars"] ||= 2
     if type = options[:data][:type]
@@ -29,23 +37,26 @@ module TaggableHelper
       options[:data][:query] = "tagtypes=#{type.map(&:to_s).join(',')}"
     end
     options[:class] = "token-input-field-pending #{options[:class]}" # The token-input-field-pending class triggers tokenInput
+    options[:onload] = "RP.tagger.onload(event);"
     if f==object # Not in the context of a form
       text_field_name = attribute_name+"txt"
       text_field_tag text_field_name, "#{object.send(text_field_name)}", options
     elsif f.class.to_s.match /SimpleForm/
       options[:input_html] ||= {}
-      # Pass the :data and :class options to the input field via input_html
-      options[:input_html][:data] = options.delete :data
-      options[:input_html][:class] = options.delete :class
-      f.input field_name, options
+      # Pass the :data, :onload and :class options to the input field via input_html
+      options[:input_html].merge! options.slice(:data, :class, :onload)
+      f.input field_name, options.slice!(:data, :class, :onload)
     else
-      options[:html_options] = options.slice :class
-      f.label(field_name.to_sym, options[:label]) +
-      f.text_field(field_name, options)
+      options[:html_options] = options.slice :class, :onload
+      label_if_any = options[:label] ? f.label(field_name.to_sym, options[:label]) : ""
+      label_if_any + f.text_field(field_name, options)
     end
   end
 
-  def taggable_div(f, classname="", options={})
+  def taggable_div(f, classname="edit_recipe_field", options={})
+    if classname.is_a? Hash
+      classname, options = "edit_recipe_field", classname
+    end
     options[:rows] ||= "1"
     options[:label] ||= "Tags"
     content_tag :div, 

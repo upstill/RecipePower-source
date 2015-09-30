@@ -1,12 +1,13 @@
 module StreamHelper
 
-  def stream_loadlink next_path, container_selector
+  def stream_loadlink next_path, container_selector, check_fcn = nil
+    data = { path: next_path }
+    data[:"trigger-check"] = check_fcn if check_fcn
     link_to "Click to load", "#",
             onclick: 'RP.stream.go(event);',
             onload: 'RP.stream.onload(event);',
             class: "stream-trigger",
-            :"data-path" => next_path,
-            :"data-container_selector" => container_selector
+            data: data
   end
 
   def stream_element_class etype
@@ -24,12 +25,8 @@ module StreamHelper
     end
     # Define a default partial as needed
     unless partial || block_given?
-      if etype == :results
-        partial = @sp.results_partial
-      else
-        fname = etype.to_s.sub /-/, '_'
-        partial = "shared/stream_#{fname}"
-      end
+      fname = etype.to_s.sub /-/, '_'
+      partial = "shared/stream_#{fname}"
     end
     if partial
       renderparms = { partial: partial, locals: locals }
@@ -75,79 +72,10 @@ module StreamHelper
     replacement
   end
 
-  def stream_count force=false
-    if @sp.has_query? && (@sp.ready? || force)
-      case nmatches = @sp.nmatches
-        when 0
-          "No matches found"
-        when 1
-          "1 match found"
-        else
-          "#{nmatches} found"
-      end
-    else
-      case nmatches = @sp.full_size
-        when 0
-          "Regrettably empty"
-        when 1
-          "Only one here"
-        else
-          "#{nmatches} altogether"
-      end
-    end
-  end
-
   # A useful starting point for a pagelet, with just a searchable header and search results
   def simple_pagelet locals={}
     locals[:title] ||= response_service.title
     stream_element :body, "shared/simple_pagelet", locals
-  end
-
-  # Provide a tokeninput field for specifying tags, with or without the ability to free-tag
-  # The options are those of the tokeninput plugin, with defaults
-  def stream_filter_field presenter, options={}
-    data = options[:data] || {}
-    data[:hint] ||= "Narrow down the list"
-    data[:pre] ||= @querytags.collect { |tag| { id: tag.id, name: tag.name } }.to_json
-    data[:"min-chars"] ||= 2
-    data[:query] = "tagtype=#{presenter.tagtype}" if presenter.tagtype
-
-    options[:class] = "token-input-field-pending #{options[:class]}" # The token-input-field-pending class triggers tokenInput
-    options[:onload] = "RP.tagger.onload(event);"
-    options[:data] = data
-
-    text_field_tag "querytags", @querytags.map(&:id).join(','), options
-  end
-
-  # Render an element of a collection, depending on its class
-  # NB The view is derived from the class of the element, NOT from the current controller
-  def render_stream_item element, partialname=nil, no_wrap = false
-    partialname ||= @sp.item_partial || "show_masonry_item"
-    for_masonry = partialname.match /masonry/
-    # Get the item-rendering partial from the model view
-    unless partialname.match /\//
-      # Use a partial specific to the entity if the file exists
-      dir = element.class.to_s.underscore.pluralize
-      partialname = "#{dir}/#{partialname}" if File.exists?(Rails.root.join("app", "views", dir, "_#{partialname}.html.erb"))
-    end
-    # Prepare for rendering by decorating the item
-    controller.update_and_decorate element
-    @decorator = controller.instance_variable_get :"@decorator"
-    modelname = element.class.to_s.underscore
-    instance_variable_set :"@#{modelname}", element
-    item = render partial: partialname, locals: { :item => element, :decorator => @decorator }
-    # Wrap the element so that its contents can be replaced
-    item = wrap_masonry_item item, @decorator if for_masonry && !no_wrap
-    item
-  end
-
-  def render_stream_tail
-    render partial: @sp.tail_partial
-  end
-
-  # Kind of redundant, since it just calls the like-named partial, but at least it obviates probs. with render_to_string
-  def stream_results_placeholder
-    with_format("html") { render partial: "shared/stream_results_placeholder" }
   end
 
 end

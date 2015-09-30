@@ -1,7 +1,6 @@
-<%= render "collectible/show_card", presenter: presenter %>
+<%= render "show_page", decorator: decorator %>
 <% permitted_to?(:approve, :feeds) do %>
     <p>
-      Feed <%= feed_approval @feed %>
+      Feed <%= feed_approval decorator.object %>
     </p>
 <% end %>
-<%= stream_element :body, "show_entries" %>

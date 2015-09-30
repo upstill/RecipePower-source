@@ -1,0 +1,39 @@
+<%= present decorator, current_user_or_guest do |presenter| %>
+    <div class="card-item cardlet-item <%= "#{card_type}-card " if defined?(card_type) %>">
+      <div class="top-matter">
+        <div class="title-glyph top-right">
+          <%= collectible_collect_icon decorator %>
+        </div>
+        <div class="title-box">
+          <%= presenter.card_homelink class: "title-link" %>
+        </div>
+        <% if decorator.description.present? %>
+            <p class="description">
+              <%= decorator.description %>
+            </p>
+        <% end %>
+        <% if (decorator.object.respond_to?(:site) && decorator.site) %>
+            <div class="source">
+              source: <%= site_homelink decorator.site, class: "source-link" %><%# link_to decorator.sourcename, decorator.sourcehome, class: "source-link" %>
+            </div>
+        <% end %>
+        <div class="tags">
+          <%= presenter.present_field "tags" %>
+          <% if defined?(comment) && comment.present? %>
+              <p class="comment">
+                <%= comment %>
+              </p>
+          <% end %>
+        </div>
+      </div>
+      <% if params[:accept_invitation_link] %>
+          <div style="width: 400px; margin: 0 auto;">
+            <%= link_to "Save on RecipePower", params[:accept_invitation_link], class: "btn btn-lg btn-success", style: "margin-right:40px; margin-top:30px" %>
+            <%= link_to "Go to Recipe", decorator.url, class: "btn btn-lg btn-info", style: "margin-top: 30px" %>
+          </div>
+      <% end %>
+      <%= collectible_share_button decorator %>
+      <%= collectible_vote_buttons decorator.object %>
+    </div>
+<% end %>
+

@@ -67,7 +67,7 @@ module Linkable
       self.class_eval do
         unless options[:as]
           # For the one attribute used to index the entity, provide access to its name for use in class and instance methods
-          define_singleton_method :url_attribute_name do
+          define_singleton_method :url_attribute do
             url_attribute
           end
         end
@@ -158,9 +158,13 @@ module Linkable
 
   public
 
+  def url_attribute
+    self.class.url_attribute if self.class.respond_to? :url_attribute
+  end
+
   # Return the human-readable name for the recipe's source
   def sourcename
-    if site
+    if respond_to?(:site) && site
       ref = site.referent
       name = ref.name
       site.name
@@ -172,7 +176,7 @@ module Linkable
 
   # Return the URL for the recipe's source's home page
   def sourcehome
-    site ? site.home : "#"
+    (respond_to?(:site) && site) ? site.home : "#"
   end
 
   # One linkable is being merged into another => transfer references

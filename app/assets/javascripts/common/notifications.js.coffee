@@ -61,6 +61,7 @@ RP.notifications.from_response = (data) ->
 	RP.notifications.post data["flash-notice"], "flash-notice"
 	RP.notifications.post data.alert, "alert"
 	RP.notifications.post data.popup, "popup"
+	RP.notifications.post data.errortext, "alert"
 
 jnotify_popup = (msg) ->
 	if available = (typeof jNotify != "undefined")
@@ -70,7 +71,7 @@ jnotify_popup = (msg) ->
 
 # Post a flash notification into the 'div.flash_notifications' element
 insert_flash = (message, level) ->
-	if target = $('div.dialog div.flash_notifications')[0] || $('div.flash_notifications')[0]
+	if target = $('div.dialog:not(.hide) div.flash_notifications')[0] || $('div.flash_notifications')[0]
 		switch level # Map flash types to bootstrap classes
 			when "notice"
 				bootstrap_class = "alert-info"
@@ -97,8 +98,6 @@ bootbox_alert = (msg) ->
 	if available = (typeof bootbox != "undefined")
 		if msg && msg.length > 0
 			bootbox.alert msg
-		else # bootstrap dialog
-			# $('div.bootbox .bootbox-close-button').trigger "click" # $('div.bootbox').modal('hide') # $('div.bootbox.modal').modal 'hide'
-			$('div.bootbox-alert').remove()
-			$('div.modal-backdrop').remove()
+		else if bd = $('div.bootbox-alert')[0]
+			RP.dialog.close_modal bd
 	available

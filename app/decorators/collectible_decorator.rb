@@ -29,18 +29,25 @@ class CollectibleDecorator < Draper::Decorator
         strjoin visible_tags(:tagtype => tagtype).collect { |tag|
                   h.link_to_submit tag.name, tag, :mode => :modal, class: "rcp_list_element_tag"
                 }
+      when /^tags$/
+        taglist = visible_tags.collect { |tag|
+          h.link_to_submit(tag.name.downcase, tag, :mode => :modal, :class => "taglink" )
+        }.join('&nbsp;<span class="tagsep">|</span> ')
+        # <span class="<%= recipe_list_element_golink_class item %>">
+        button = h.collectible_tag_button self, {}
+        (taglist+"&nbsp; "+button).html_safe
       when /^rcp/
         attrname = fieldname.sub(/^rcp/, '').downcase
         case attrname
           when "picsafeurl"
-            object.imgdata(true)
+            object.imgdata
           when "titlelink"
             h.link_to object.title, object.url
           when "video"
             (uri = URI(object.url)) &&
             uri.host.match(/\.youtube.com/) &&
             (vid = YouTubeAddy.extract_video_id(object.url)) &&
-            "http://www.youtube.com/embed/#{vid}"
+            "https://www.youtube.com/embed/#{vid}"
           else
             object.send(attrname.to_sym).to_s if object.respond_to? attrname
         end
@@ -54,11 +61,11 @@ class CollectibleDecorator < Draper::Decorator
         h.link_to object.sourcename, object.sourcehome, class: "tablink"
       when "list", "lists"
         strjoin ListServices.find_by_listee(object).collect { |list|
-                  llink = h.link_to_submit list.name, list, mode: :partial, class: "rcp_list_element_tag"
+                  llink = h.link_to_submit list.name, list, class: "rcp_list_element_tag"
                   if list.owner_id == object.tagging_user_id
                     llink
                   else
-                    ulink = h.link_to list.owner.handle, list.owner, mode: :partial, class: "rcp_list_element_tag"
+                    ulink = h.link_to list.owner.handle, list.owner, class: "rcp_list_element_tag"
                     "#{llink} (#{ulink})".html_safe
                   end
                 }
@@ -67,28 +74,43 @@ class CollectibleDecorator < Draper::Decorator
           h.link_to_submit( user.handle, h.user_path(user), :mode => :modal) unless user.id == object.tagging_user_id
         }.compact
       when "feeds"
-        strjoin(object.feeds.where(approved: true).collect { |feed| h.link_to_submit feed.title, h.feed_path(feed), :mode => :partial },"","",',', '<br>').html_safe
+        strjoin(object.feeds.where(approved: true).collect { |feed| h.link_to_submit feed.title, h.feed_path(feed) },"","",',', '<br>').html_safe
       when "classname_lower"
         object.class.to_s.downcase
       else
-        method(fieldname.to_sym).call rescue nil
+        (method(fieldname.to_sym).call rescue nil) || ""
     end
-  end
-
-  def imgdata fallback=:none
-    object.imgdata ||
-        case fallback
-          when :site
-            object.site.imgdata rescue nil
-          when :card
-            object.imgdata true
-          when :none
-        end
   end
 
   # Collectibles are editable by default
   def read_only
     false
+  end
+
+  # Build an entity and its decorator based on type and ID of an existing object
+  def self.build entity_type, entity_id
+    entity_type.constantize.find(entity_id).decorate rescue nil
+  end
+
+  # sample_page is a full URL somewhere on the associated site so we can absolutize links
+  def sample_page
+
+  end
+
+  def picurl
+    picurl = object.imglink
+    (picurl.present? && sample_page) ? valid_url(picurl, sample_page) : picurl
+  end
+
+  def image_class
+    dom_id + '_pic'
+  end
+
+  def pageurl
+    if object.respond_to?(:url_attribute)
+      pageurl = object.url_attribute
+      (pageurl.present? && sample_page) ? valid_url(pageurl, sample_page) : pageurl
+    end
   end
 
 end

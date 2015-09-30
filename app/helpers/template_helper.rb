@@ -8,7 +8,8 @@ module TemplateHelper
       # Assert a :template datum without disturbing any existing :data options
       options[:template] = { id: template_id, subs: entity.data(options.delete(:attribs)) }
     end
-    link_to_submit label, polymorphic_path([:tag, entity], styling: styling), button_styling(styling, options)
+    button_options = styling.slice(:button_size).merge options
+    link_to_submit label, polymorphic_path([:tag, entity], styling: styling), button_options
   end
 
 end

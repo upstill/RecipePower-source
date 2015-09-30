@@ -1,5 +1,7 @@
-<% wide = (field_value "rcpVideo") || !(field_value "rcpPicURL").blank? %>
-<% dlgopts = wide ? {dialog_class: "modal-xl" } : {} %>
-<%= modal_dialog "show_recipe", present_field("rcpTitleLink"), dlgopts.merge(title: present_field("rcpTitle"), class: "historic") do %>
-    <%= render "show", wide: wide, presenter: presenter %>
+<%= present decorator, current_user_or_guest do |presenter| %>
+    <% wide = (presenter.field_value "rcpVideo") || !(presenter.field_value "rcpPicURL").blank? %>
+    <% dlgopts = wide ? {dialog_class: "modal-xl"} : {} %>
+    <%= modal_dialog "show_recipe", presenter.present_field("rcpTitleLink"), dlgopts.merge(title: presenter.present_field("rcpTitle"), class: "historic") do %>
+        <%= render "show_card", wide: wide, decorator: decorator, presenter: presenter %>
+    <% end %>
 <% end %>

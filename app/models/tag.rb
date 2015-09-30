@@ -15,12 +15,13 @@ class Tag < ActiveRecord::Base
         Occasion: ["Occasion", 8], 
         PantrySection: ["Pantry Section", 9], 
         StoreSection: ["Store Section", 10], 
-        Channel: ["Public Collection", 11],
+        Channel: ["Channel", 11],
         Tool: ["Tool", 12], 
         Nutrient: ["Nutrient", 13],
         CulinaryTerm: ["Culinary Term", 14],
-        Collection: ["Private Collection", 15],
-        List: ["List", 16]
+        Question: ["Question", 15],
+        List: ["List", 16],
+        Epitaph: ["Epitaph", 17]
     )
     
     attr_accessible :name, :id, :tagtype, :isGlobal, :links, :referents, :users, :owners, :primary_meaning # , :recipes
@@ -75,7 +76,7 @@ class Tag < ActiveRecord::Base
       end
     end
 
-    # The Tag class defines taggable-entity association methods here. The Taggable class is cocnsulted, and if it has
+    # The Tag class defines taggable-entity association methods here. The Taggable class is consulted, and if it has
     # a :tag_with method (part of the Taggable module), then the methods get defined, otherwise we punt
     # NB All the requisite methods will have been defined IF the taggable's class has been defined (thank you, Taggable)
     # We're really only here to deal with the case where the Tag class (or a tag model) has been accessed before the

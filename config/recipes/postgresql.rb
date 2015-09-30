@@ -5,7 +5,7 @@ set :postgresql_pgpass, "/home/#{fetch :postgresql_user}/.pgpass"
 set :postgresql_password, ask("PostgreSQL Password: ", nil) # Capistrano::CLI.password_prompt("PostgreSQL Password: ")
 set :postgresql_database, "cookmarks_production"
 set :heroku_app, "strong-galaxy-5765"
-set :postgresql_dburl, `heroku pgbackups:url --app #{fetch :heroku_app}`.chomp
+set :postgresql_dburl, `heroku pg:backups public-url --app #{fetch :heroku_app}`.chomp
 
 namespace :postgresql do
   desc "Install the latest stable release of PostgreSQL."
@@ -50,7 +50,7 @@ Couldn't figure out how to use sudo with another user
       run_and_show 'whoami'
       run_and_show '/usr/bin/heroku --version'
       run_and_show 'echo $AWS_ACCESS_KEY_ID'
-      dburl = run_and_show "heroku pgbackups:url --app strong-galaxy-5765"
+      dburl = run_and_show "heroku pg:backups public-url --app strong-galaxy-5765"
       # NB: since the Heroku toolbelt doesn't work in this context, it's necessary to provide the backup url
       # in dburl, eg., run the command elsewhere and set the result here
       # As it stands, the database will NOT be replaced unless dburl is set explicitly

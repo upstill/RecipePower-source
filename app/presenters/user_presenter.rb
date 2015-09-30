@@ -5,55 +5,150 @@ class String
 end
 
 class UserPresenter < BasePresenter
+  include CardPresentation
   presents :user
   delegate :username, :fullname, :handle, :lists, :feeds, to: :user
 
-  def avatar
-    img = user.image
-    img = "default-avatar-128.png" if img.blank?
-    site_link image_with_error_recovery(img, class: "avatar media-object", alt: "/assets/default-avatar-128.png") # image_tag("avatars/#{avatar_name}", class: "avatar")
+  # Present the user's avatar, optionally with a form for uploading the image (if they're the viewer)
+  def card_avatar with_form=false
+    if is_viewer? and with_form
+      with_format("html") { render 'form_avatar', user: user }
+    else
+      super()
+    end
+  end
+
+  def card_homelink options={}
+    user_homelink @decorator.object, options
   end
 
   def member_since
     user.created_at.strftime("%B %e, %Y")
   end
 
-  def linked_name
-    site_link(user.fullname.present? ? user.fullname : user.username)
+  def is_viewer?
+    @viewer && (@viewer.id == user.id)
   end
 
-  def aspect which, viewer=nil
-    label = which.to_s.capitalize.tr('_', ' ') # split('_').map(&:capitalize).join
-    contents = nil
+  def card_header_content
+    mail_link = link_to_submit("Send email", mailto_user_path(user, mode: :modal), button_size: "xs") unless is_viewer?
+    uhandle = content_tag :span, "(aka #{username})", class: "user-handle"
+    ("#{fullname.downcase}&nbsp;#{uhandle}&nbsp;#{mail_link}").html_safe
+  end
+
+  def card_ncolumns
+    3
+  end
+
+  def card_aspects which_column
+    [
+        [
+            # :member_since,
+            :name_form,
+            :owned_lists,
+            :desert_island,
+            :question,
+            # :collected_lists,
+            # :collected_feeds
+        ],
+        [
+            :latest_recipe,
+            :latest_list
+        ],
+        [
+            :about
+        ]
+
+    ][which_column]
+  end
+
+  def card_aspect which
+    label = contents = nil
     case which
+      when :name_form
+        if is_viewer? && user.fullname.blank?
+          label = "Human Name"
+          contents = with_format("html") { render "form_fullname", user: user }
+        end
       when :member_since
         contents = member_since
       when :about
-        contents = user.about
+        contents = show_or_edit which, user.about
       when :collected_feeds
         label = "Following the feeds"
         contents = strjoin(feeds.collect { |feed|
-                            link_to_submit feed.title, feed_path(feed), :mode => :partial
+                            link_to_submit feed.title, feed_path(feed)
                           }).html_safe
       when :collected_lists, :owned_lists
         if which == :owned_lists
-          lists = user.visible_lists viewer
-          label = "Created the lists"
+          lists = user.visible_lists @viewer
+          label = "Author of the lists"
         else
-          lists = user.collected_entities List, viewer
+          lists = user.collected_entities List, @viewer
           label = "Following the lists"
         end
         unless lists.empty?
           contents = strjoin(
               lists.collect { |list|
-                link_to_submit list.name, list_path(list), :mode => :partial
+                link_to_submit list.name, list_path(list)
               }).html_safe
         end
+      when :desert_island
+        if is_viewer?
+          # Pick a desert-island selection for querying, one that the user hasn't filled in before if poss.
+          unless tag_selection = user.tag_selections.where(tag_id: nil).to_a.sample
+            if tsid = (Tagset.pluck(:id)-user.tag_selections.pluck(:tagset_id)).sample
+              tag_selection = TagSelection.new user: user, tagset_id: tsid
+            else
+              tag_selection = user.tag_selections.to_a.sample
+            end
+          end
+          contents = with_format("html") { render "form_tag_selections", tag_selection: tag_selection }
+        elsif tag_selection = user.tag_selections.where.not(tag_id: nil).to_a.sample
+          contents = tag_selection.tag.name
+        end
+        label = "My desert-island #{tag_selection.title}" if contents
+      when :question
+        # Pick a question and include a form for answering
+        # Choose a question at random, preferring one that's as yet unanswered
+        if is_viewer?
+          all_qids = Tag.where(tagtype:15).pluck(:id) # IDs of all questions
+          qid = (all_qids - user.answers.where.not(answer: "").pluck(:question_id)).sample || all_qids.sample
+          answer = user.answers.find_or_initialize_by(question_id: qid)
+          contents = with_format("html") { render "form_answers", answer: answer }
+        elsif answer = user.answers.where.not(answer: "").to_a.sample
+          contents = answer.answer
+        end
+        label = answer.question.name if answer
+      when :latest_recipe
+        label = "Latest Recipe"
+        if latestrr = user.collection_pointers.where(:entity_type => "Recipe", :in_collection => true).order(created_at: :desc).first
+          latest = latestrr.entity
+          contents = collectible_show_thumbnail latest.decorate
+        else
+          contents = "No recipes yet—so install the #{link_to_submit 'Cookmark Button', '/popup/starting_step2', :mode => :modal} and go get some!"
+        end
+      when :latest_list
+        label = "Latest List"
+        if latest = user.owned_lists.order(updated_at: :desc).first
+          contents = link_to_submit latest.name, list_path(latest)
+        else
+          contents = "To create your first list, click #{link_to_submit "here", new_list_path, :mode => :modal}."
+        end
     end
-    content_tag( :tr,
-      content_tag( :td, content_tag( :h4, label), style:"padding-right: 10px; vertical-align:top; text-align: right" )+
-      content_tag( :td, contents, style: "vertical-align:top; padding-top:11px" )
-    ) unless contents.blank?
+    [ label, contents ]
+  end
+
+  def show_or_edit which, val
+    if is_viewer?
+      if val.present?
+        (user.about + link_to_submit("Edit", edit_user_path(section: which), button_size: "xs")).html_safe
+      else
+        aspect_editor which
+      end
+    else
+      val if val.present?
+    end
   end
 
   def about
@@ -76,15 +171,4 @@ class UserPresenter < BasePresenter
     end
   end
 
-  def site_link(content)
-    content # h.link_to_if(user.url.present?, content, user.url)
-  end
-
-  def avatar_name
-    if user.avatar_image_name.present?
-      user.avatar_image_name
-    else
-      "default.png"
-    end
-  end
 end

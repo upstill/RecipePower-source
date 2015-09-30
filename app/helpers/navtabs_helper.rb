@@ -9,8 +9,6 @@ module NavtabsHelper
     class_str = "master-navtab"
     if which == (@active_menu || response_service.active_menu)
       class_str << " active"
-    else
-      options[:style] = "color: #999;"
     end
 
     # The block should produce an array of menu items (links, etc.)
@@ -44,13 +42,13 @@ module NavtabsHelper
       options[:data] ||= {}
       options[:data][:toggle] = "dropdown"
     end
-    link_to_submit label, path_or_options, { :mode => :partial}.merge( options )  # defaults to partial
+    link_to_submit label, path_or_options, options  # defaults to partial
   end
 
   def collections_navtab menu_only = false
-    navtab :collections, "Collections", user_collection_path(current_user_or_guest), menu_only do
+    navtab :collections, "Collections", collection_user_path(current_user_or_guest), menu_only do
       [
-          navlink("My Collection", user_collection_path(current_user_or_guest)),
+          navlink("My Collection", collection_user_path(current_user_or_guest)),
           navlink("Recently Viewed", user_recent_path(current_user_or_guest_id)),
           navlink("Everything in RecipePower", user_biglist_path(current_user_or_guest)),
           "<hr class='menu'>".html_safe,
@@ -60,8 +58,8 @@ module NavtabsHelper
   end
 
   def friends_navtab menu_only = false
-    navtab :friends, "Friends", users_path(:select => :followees), menu_only do
-      current_user_or_guest.followees[0..20].collect { |u|
+    navtab :friends, "Cookmates", users_path(:select => :followees), menu_only do
+      current_user_or_guest.followees[0..10].collect { |u|
         navlink u.handle, user_path(u), id: dom_id(u)
       } + [
           "<hr class='menu'>".html_safe,
@@ -101,7 +99,7 @@ module NavtabsHelper
         navlink l.name, list_path(l), id: dom_id(l)
       } + [
           "<hr class='menu'>".html_safe,
-          navlink("Browse for Lists...", lists_path),
+          navlink("Browse for Lists...", lists_path(item_mode: 'table')),
       ]
     end
   end
@@ -121,7 +119,7 @@ module NavtabsHelper
       }
       result + [
           "<hr class='menu'>".html_safe,
-          navlink("Browse for More Feeds...", feeds_path(access: (response_service.admin_view? ? "all" : "approved")))
+          navlink("Browse for More Feeds...", feeds_path(item_mode: 'table', access: (response_service.admin_view? ? "all" : "approved")))
       ]
     end
   end
@@ -136,8 +134,8 @@ module NavtabsHelper
 
   def home_navtab menu_only = false
     navtab :home,
-           content_tag(:b, "#{current_user.handle}&nbsp;".html_safe)+
-               content_tag(:b, "", class: "glyphicon glyphicon-cog"),
+           content_tag(:span, "#{current_user.handle}&nbsp;".html_safe, class: "user-name")+
+            content_tag(:span, "", class: "glyphicon glyphicon-cog"),
            user_path(current_user, :mode => :partial),
            menu_only do
       item_list = [
@@ -146,23 +144,27 @@ module NavtabsHelper
           navlink("Profile", users_profile_path, :mode => :modal),
           navlink("Invite", new_user_invitation_path, :mode => :modal, class: "transient"),
           navlink("Sign Out", destroy_user_session_path, :method => "delete")
-      ]
+      ].compact
       if permitted_to? :admin, :pages
         if response_service.admin_view?
           item_list += [
             "<hr class='menu'>".html_safe,
-            link_to_submit( "Admin View Off", admin_toggle_path(on: false), :mode => :partial, class: "transient"),
+            link_to_submit( "Admin View Off", admin_toggle_path(on: false), class: "transient"),
             link_to_submit("Add Cookmark", new_recipe_path, :mode => :modal, class: "transient"),
             link_to("Admin", admin_path),
             link_to_submit("Upload Picture", getpic_user_path(current_user), :mode => :modal),
             link_to("Address Bar Magic", "#", onclick: "RP.getgo('#{home_path}', 'http://local.recipepower.com:3000/bar.html##{bookmarklet_script}')"),
             link_to("Bookmark Magic", "#", onclick: "RP.bm('Cookmark', '#{bookmarklet_script}')"),
             link_to("Stream Test", "#", onclick: "RP.stream.buffer_test();"),
-          ]
+            (link_to_submit("Page", current_user, :format => :json) if current_user),
+            (link_to_submit("Modal", current_user, :format => :json, :mode => :modal) if current_user),
+            link_to_submit("Sites", sites_path, :format => :json),
+            link_to_submit("Tags", tags_path, :format => :json)
+          ].compact
         else
           item_list += [
               "<hr class='menu'>".html_safe,
-              link_to_submit("Admin View On", admin_toggle_path(on: true), :mode => :partial, class: "transient")
+              link_to_submit("Admin View On", admin_toggle_path(on: true), class: "transient")
           ]
         end
       end
