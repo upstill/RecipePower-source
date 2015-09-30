@@ -55,11 +55,14 @@ slide_by = (button_elmt, incr) ->
 			return
 	else
 		incr = Math.min incr, (button_rect.left - track_rect.left)
+	slide_track track_item, incr
+	if incr < 0
+		button_check button_elmt
+
+slide_track = (track_item, incr) ->
 	if incr != 0
 		place = parseInt $(track_item).css('left')
 		$(track_item).css 'left', place+incr
-		if incr < 0
-			button_check button_elmt
 
 button_check = (button_elmt) ->
 	parent = button_elmt.parentNode
@@ -85,3 +88,24 @@ RP.slider.hoverout = (event) ->
 	if RP.slider.current
 		clearTimeout RP.slider.current
 		RP.slider.current = null
+
+RP.slider.scroll = (event) ->
+	tracker = event.target
+	if $(':first', tracker)[0]
+		width = tracker.getBoundingClientRect().width
+		setInterval ->
+			incr = -3
+			leftmost = tracker.children[0]
+			rightmost = tracker.children[tracker.children.length - 1]
+			# Ensure we don't run past the end of the items by moving the first item to the end
+			if rightmost.getBoundingClientRect().right < tracker.parentNode.getBoundingClientRect().right
+				if tracker.children[1]
+					incr += tracker.children[1].getBoundingClientRect().left - leftmost.getBoundingClientRect().left
+				else
+					incr += leftmost.getBoundingClientRect().width
+				$(tracker).append $(leftmost).detach()
+			else
+				if tracker.getBoundingClientRect().left < -width
+					incr += width
+			slide_track tracker, incr
+		, 20
