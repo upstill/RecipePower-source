@@ -1,7 +1,7 @@
 <%= tag_filter_header title: (params[:access] == "collected" ? "My Feeds" : "Available Feeds") %>
 <% if params[:access] == "collected" %>
     <p>These are all the feeds you're subscribed to. To find more, click
-      <%= link_to_submit "Here", feeds_path(access: :all), :mode => :partial, :button_size => "xs" %>
+      <%= link_to_submit "Here", feeds_path(access: :all), :button_size => "xs" %>
     </p>
 <% else %>
     <p>This is a long list. You can narrow it down by using the search box above to type in words and terms

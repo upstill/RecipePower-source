@@ -55,7 +55,7 @@ class Recipe < ActiveRecord::Base
       if !extractions
         extractions = SiteServices.extract_from_page(params[:url])
         if extractions.empty?
-          rcp = self.new
+          rcp = self.new params
           rcp.errors[:url] = "Doesn't appear to be a working URL: we can't open it for analysis"
           return rcp
         end
@@ -87,7 +87,7 @@ class Recipe < ActiveRecord::Base
         # Assigning title and picurl must wait until the url (and hence the reference) is set
         rcp = Recipe.new params.slice! :title, :picurl
         rcp.update_attributes params # Now set the title
-        if rcp.url.match %r{^#{root_link}} # Check we're not trying to link to a RecipePower page
+        if rcp.url.match %r{^#{rp_url}} # Check we're not trying to link to a RecipePower page
           rcp.errors.add :base, "Sorry, can't cookmark pages from RecipePower. (Does that even make sense?)"
         else
           RecipeServices.new(rcp).robotags = extractions  # Set tags, etc., derived from page

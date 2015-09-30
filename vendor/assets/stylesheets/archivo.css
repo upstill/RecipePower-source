@@ -1,0 +1,18 @@
+@font-face {
+    font-family: 'Archivo';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Archivo'), local('Archivo'), url(https://fonts.googleapis.com/css?family=Archivo+Narrow:400) format('truetype');
+}
+@font-face {
+    font-family: 'Archivo-Light';
+    font-style: normal;
+    font-weight: 300;
+    src: local('Archivo Light'), local('Archivo-Light'), url(https://fonts.googleapis.com/css?family=Archivo+Narrow:300) format('truetype');
+}
+@font-face {
+    font-family: 'Archivo-Bold';
+    font-style: normal;
+    font-weight: 700;
+    src: local('Archivo Bold'), local('Archivo-Bold'), url(https://fonts.googleapis.com/css?family=Archivo+Narrow:700) format('truetype');
+}

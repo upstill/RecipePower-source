@@ -18,7 +18,7 @@ class ListsController < CollectibleController
       else
         "Available Lists"
     end
-    smartrender unless do_stream ListsCache
+    smartrender 
   end
 
   def edit
@@ -43,12 +43,19 @@ class ListsController < CollectibleController
       # format.html { redirect_to tag_list_path(@list), :status => :see_other, notice: notice }
   end
 
-  def show
+  def contents
     update_and_decorate
     response_service.title = "About #{@list.name}"
     @empty_msg = "This list is empty now, but you can add any item that has an 'Add to...' button"
     @active_menu = (@list.owner == current_user) ? :my_lists : :other_lists
-    smartrender unless do_stream ListCache
+    smartrender 
+  end
+
+  def show
+    update_and_decorate
+    response_service.title = "About #{@list.name}"
+    @active_menu = (@list.owner == current_user) ? :my_lists : :other_lists
+    smartrender
   end
 
   def update

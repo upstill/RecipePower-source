@@ -1,0 +1,78 @@
+div.results-enclosure {
+  width: 100%;
+  height: auto;
+  div.panels-query {
+    margin-top: 15px;
+    div.panels-label {
+      font-family: $oswald;
+      font-size: 500%;
+      letter-spacing: 1.5px;
+      padding-left: 20px;
+      &.recipe-label {
+        color: $recipes-panels-label-text-color;
+      }
+      &.viewer-label {
+        color: $viewer-panels-label-text-color;
+      }
+      &.user-label {
+        color: $user-panels-label-text-color;
+      }
+      &.feed-label {
+        color: $feeds-navtab-text-color;
+      }
+      &.friend-label {
+        color: $friends-navtab-text-color;
+      }
+      &.list-label {
+        color: rgba($lists-navtab-text-color, 0.6);
+      }
+      &.tag-label {
+        color: rgba($salmon-text-color, 0.8);
+      }
+    }
+    div.panels-search {
+      margin-top: 10px;
+      div.panels-buttons {
+        margin: 20px;
+        a.panels-button {
+          margin: 10px;
+          &.recipe-button {
+            background-color: $recipes-panels-label-button-color;
+            &.disabled {
+              background-color: rgba($recipes-panels-label-button-color, 0.5);
+            }
+          }
+          &.viewer-button {
+            background-color: $viewer-panels-label-button-color;
+            &.disabled {
+              background-color: rgba($viewer-panels-label-button-color, 0.5);
+            }
+          }
+          &.user-button {
+            background-color: $user-panels-label-button-color;
+            &.disabled {
+              background-color: rgba($user-panels-label-button-color, 0.5);
+            }
+          }
+          &.feed-button {
+            background-color: $feeds-navtab-text-color;
+            &.disabled {
+              background-color: rgba($feeds-navtab-text-color, 0.5);
+            }
+          }
+          &.friend-button {
+            background-color: $friends-panels-label-button-color;
+            &.disabled {
+              background-color: rgba($friends-panels-label-button-color, 0.5);
+            }
+          }
+          &.disabled {
+            pointer-events: none;
+            cursor: default;
+          }
+        }
+      }
+    }
+  }
+}
+

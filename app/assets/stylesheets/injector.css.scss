@@ -1,16 +1,13 @@
-/*
- * This is a manifest file that'll automatically include all the stylesheets available in this directory
- * and any sub-directories. You're free to add application-wide styles to this file and they'll appear at
- * the top of the compiled file, but it's generally better to create a new file per style scope.
- *= require common/RPGlobal
- *= require jquery/token-input-bootstrappy
- *= require jquery/jNotify.jquery
- *= require common/dialog
- *= require common/buttons
- *= require views/edit_recipe
- *= require views/sign_in
- *= require views/password_reset
-*/
+@import 'common/RPGlobal';
+@import 'jquery/token-input-bootstrappy';
+@import 'jquery/jNotify.jquery';
+@import 'common/dialog';
+@import 'common/buttons';
+@import 'views/edit_recipe';
+@import 'views/sign_in';
+@import 'views/password_reset';
+
+$injector-depth: 9000001;
 
 body {
   background: transparent;
@@ -29,7 +26,7 @@ div.dialog.injector {
   padding-bottom: 5px;
   background-color: #EEE;
   border: solid 3px #900;
-  z-index: 9000001;
+  z-index: $injector-depth; // in injector.css.scss
   h4 {
     margin-top: 3px;
     margin-bottom: 1px;
@@ -253,18 +250,20 @@ div.dialog.injector {
           width: 430px;
         }
       }
-      &.pic {
-        width: 90px;
-        height: 90px;
-        margin-left: auto;
-        margin-right: auto;
-        outline: #999 solid 1px;
         div.pic_preview {
           width: 90px;
           height: 90px;
           margin-left: auto;
           margin-right: auto;
           text-align: center;
+	  img {
+	    // width: 100%;
+	    // height: 100%;
+	    width:auto;
+	    height:auto;
+	    max-width:100%;
+	    max-height:100%;
+	  }
           input {
             display: none
           }
@@ -275,7 +274,6 @@ div.dialog.injector {
             margin: 3px
           }
         }
-      }
     }
     // Cribbed from http://www.alistapart.com/articles/expanding-text-areas-made-elegant/
     textarea,

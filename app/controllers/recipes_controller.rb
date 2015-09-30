@@ -2,7 +2,7 @@ class RecipesController < CollectibleController
   before_filter :allow_iframe, only: :capture
   protect_from_forgery except: :capture
 
-  before_filter :login_required, :except => [:index, :show, :capture, :collect ]
+  before_filter :login_required, :except => [:index, :show, :associated, :capture, :collect ]
   before_filter { @focus_selector = "#recipe_url" }
     
   filter_access_to :all
@@ -43,9 +43,13 @@ class RecipesController < CollectibleController
     # return if need_login true
     update_and_decorate
     current_user.touch @recipe if current_user
-    response_service.title = ""
+    response_service.title = @recipe && @recipe.title.truncate(20)
     @nav_current = nil
     smartrender
+  end
+
+  def associated
+    show
   end
 
   def new # Collect URL, then re-direct to edit
@@ -86,7 +90,7 @@ class RecipesController < CollectibleController
           redirect_to collection_path
         }
         format.json {
-          @data = { onget: [ "submit.submit_and_process", user_collection_url(current_user, layout: false) ] }
+          @data = { onget: [ "submit.submit_and_process", collection_user_url(current_user, layout: false) ] }
           response_service.mode = :modal
           flash[:popup] = "'#{@recipe.title}' now appearing in your collection."
           render :action => 'collect_and_tag', :mode => :modal
@@ -177,34 +181,6 @@ class RecipesController < CollectibleController
       end
   end
   
-=begin
-  def update
-    # return if need_login true
-    if params[:commit] == "Cancel"
-      @recipe = Recipe.find params[:id]
-      report_recipe user_collection_url(current_user), "Recipe secure and unchanged.", formats
-    else
-      update_and_decorate
-      if @recipe.errors.empty?
-        if ref = @recipe.user_pointers.where( user: current_user ).first
-          ref.edit_count += 1
-          ref.save
-        end
-        report_recipe( user_collection_url(current_user), "Successfully updated #{@recipe.title || 'recipe'}.", formats )
-      else
-        response_service.title = "Tag That Recipe (Try Again)!"
-        @nav_current = nil
-        # render :action => 'edit', :notice => "Huhh??!?"
-        # @_area = "page" # params[:_area]
-        # Now go forth and edit
-        # @_layout = nil # params[:_layout]
-        # dialog_boilerplate('edit', 'at_left')
-        smartrender :action => 'edit', area: 'at_left'
-      end
-    end
-  end
-=end
-
   # Register that the recipe was touched by the current user--if they own it.
   def touch
     # This is a generic #touch action except for the manner in which the recipe is fetched
@@ -218,7 +194,7 @@ class RecipesController < CollectibleController
     update_and_decorate
     title = @recipe.title
     @recipe.destroy
-    report_recipe user_collection_url(current_user), "\"#{title}\" is gone for good.", formats, true
+    report_recipe collection_user_url(current_user), "\"#{title}\" is gone for good.", formats, true
   end
 
   def revise # modify current recipe to reflect a client-side change

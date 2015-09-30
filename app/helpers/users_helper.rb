@@ -37,4 +37,39 @@ module UsersHelper
   def follow_button_replacement user, options={}
     [ "a.follow-button##{dom_id user}", follow_button(user, options) ]
   end
+
+  def di_select
+    menu_options = { class: "di-selector" }
+    menu_options[:style] = "display: none;" if (alltags-curtags).empty?
+    options = alltags.collect { |tag|
+      content_tag :option, tag.name, { value: tag.id, style: ("display: none;" if curtags.include?(tag)) }.compact
+    }.unshift(
+        content_tag :option, "Pick #{curtags.empty? ? 'a' : 'Another'} Question", value: 0
+    ).join.html_safe
+    content_tag :select, options, menu_options # , class: "selectpicker"
+  end
+
+  # Account for the difference between the id for an entity type and its label
+  def user_associated_label entity_type
+    (entity_type=='friends') ? 'cookmates' : entity_type
+  end
+
+  def user_linktitle user
+    user.fullname.present? ? user.fullname : user.username
+  end
+
+  def user_homelink user, options={}
+    (data = (options[:data] || {}))[:report] = polymorphic_path [:touch, user]
+    if user.id == current_user_or_guest_id
+      subclass = 'viewer'
+    else
+      subclass = 'friend'
+    end
+    klass = "#{options[:class]} entity user #{subclass}"
+    # Default submission is partial
+    action = options[:action] || :collection
+    link_to_submit user_linktitle(user),
+                   polymorphic_path([action, user]),
+                   {mode: :partial}.merge(options).merge(data: data, class: klass).except(:action)
+  end
 end

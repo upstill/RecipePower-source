@@ -1,0 +1,27 @@
+div.comment {
+  margin: 10px;
+  padding: 0;
+  display: inline-block;
+  width: 300px;
+  font-family: $archivo;
+  font-size: 12px;
+  div.avatar {
+    font-size: 12px;
+    width: 100px;
+    height: auto;
+    display: inline-block;
+    vertical-align: top;
+    float: left;
+    background-color: #f9f8f4;
+  }
+  div.content {
+    background-color: #ece6cd;
+    padding: 5px 7px;
+    display: inline-block;
+    width: 200px;
+    height: auto;
+    min-height: 60px;
+    vertical-align: top;
+    float: left;
+  }
+}

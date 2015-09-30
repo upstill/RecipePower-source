@@ -1,0 +1,9 @@
+<% if user_signed_in? %>
+    <div class="container menuback"></div>
+<% end %>
+<div class="<%= pagelet_class %>" id="<%= pagelet_body_id %>">
+  <%= render 'layouts/filter_header' %>
+  <%= pagelet_signin_links %>
+  <%= flash_notifications_div %>
+  <%= yield %>
+</div>

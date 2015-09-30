@@ -1,7 +1,6 @@
 {
-    pushState: [ response_service.originator, response_service.page_title ],
     done: true, # If we got here in closing a dialog
     replacements: [
-        [ 'div.stream-results', stream_results_placeholder ]
+        [ 'div.stream-results', with_format("html") { render "shared/stream_results_placeholder" } ]
     ]
-}.to_json
+}.merge(push_state).merge(flash_notify).to_json

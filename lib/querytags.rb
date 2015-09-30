@@ -3,7 +3,7 @@ module Querytags
   # Return the set of tags in the current query, as supplied by params[:querytags]
   # We also stash the last set of strings
   def querytags
-    return @querytags if @querytags # Use cache, if any
+    return @querytags if @querytags # Memoize
     newspecial = {}
     # Accumulate resulting tags here:
     @querytags = []

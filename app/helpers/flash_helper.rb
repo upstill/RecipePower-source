@@ -73,6 +73,13 @@ module FlashHelper
     }.join.html_safe
   end
 
+  def flash_usurp separator='<br\>'
+    flash.collect { |type, message|
+      flash.delete type
+      message
+    }.join(separator).html_safe
+  end
+
   # Collect the flash messages in a hash
   def flash_hash
     fh = {}

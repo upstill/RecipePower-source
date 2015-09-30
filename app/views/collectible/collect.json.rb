@@ -2,12 +2,12 @@ flash[:popup] ||= "Done! #{@decorator.human_name} '#{@decorator.title.truncate(2
 what = {
     done: true,
     replacements: [
-        collectible_buttons_panel_replacement(@decorator)
+        collectible_collect_icon_replacement(@decorator)
     ]
 }
 if params[:oust]
-  what[:replacements] << collectible_masonry_item_deleter(@decorator)
+  what[:replacements] += item_deleters(@decorator, @list) # collectible_masonry_item_deleter(@decorator)
 else
-  what[:insertions] = [ collectible_masonry_item_insertion(@decorator) ]
+  what[:insertions] = item_insertions(@decorator, @list) # [ collectible_masonry_item_insertion(@decorator) ]
 end
 what.merge(flash_notify).to_json

@@ -105,7 +105,6 @@
 			height: 150px;
 			display: -webkit-box;
 			display: -moz-box;
-			display: box;
 			float: left;
 			margin: 10px 30px 10px 10px;
 
@@ -154,9 +153,8 @@
 			line-height: 20px;
 			text-decoration: none;
 			font-size: 20px;
-			font-weight: 150;
+			font-weight: 200;
 			color: #999999;
-			# text-shadow: 0 1px 0 #888888;
 		}
 
 		div.footer {
@@ -182,7 +180,7 @@
                 :invitation_token => @recipient.raw_invitation_token,
                 :notification_token => @notification_token) %>
 		<div class="message_box">
-			<%= render "rp_devise_mailer/recipe_share", accept_invitation_link: accept_invitation_link %>
+			<%= render "rp_devise_mailer/collectible_share", accept_invitation_link: accept_invitation_link %>
 		</div>
 		<br>
 
@@ -198,7 +196,7 @@
         </div>
         <div class="footer">
 	  	<p><%= link_to "Recipe Power", home_url, class: "brand" %></p>
-			<p>Copyright 2013 by RecipePower. All Rights Reserved</p>
+			<p>Copyright 2015 by RecipePower. All Rights Reserved</p>
 		</div>
   </body>
 </html>

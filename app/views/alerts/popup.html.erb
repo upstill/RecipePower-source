@@ -1,9 +1,1 @@
-<% if response_service.injector? %>
-	<%= injector_dialog :alert, "has heard your command, and obeys.", dismiss_button: "Ack" do %>
-		<%= render "alerts/injector_popup" %>
-	<% end %>
-<% else %>
-	<%= modal_dialog :popup, "Your Work Here Is Done" do %>
-		<%# The flash message will do... render partial: "alerts/popup" %>
-	<% end %>
-<% end %>
+<%= render "alerts/popup_#{response_service.injector? ? :injector : :modal}" %>

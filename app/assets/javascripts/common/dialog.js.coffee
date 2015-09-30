@@ -3,22 +3,20 @@ RP.dialog = RP.dialog || {}
 
 # Handle 'dialog-run' remote links
 jQuery ->
-	# $(document).on("ajax:beforeSend", '.dialog-run', RP.dialog.beforeSend)
-	# $(document).on("ajax:success", '.dialog-run', RP.dialog.success)
-	# $(document).on("ajax:error", '.dialog-run', RP.dialog.error)
 	$(document).on 'shown.bs.modal', (event) ->
 		# When a dialog is invoked, focus on the first autofocus item, or a string item or a text item
 		RP.dialog.focus event.target
 	# On hiding a modal, we wait until it's actually hidden to muck with its classes
 	$(document).on 'hidden.bs.modal', (event) ->
-		$(event.target).addClass('hide').removeClass("modal").addClass 'modal-pending'
+		dlog = event.target
+		$(dlog).addClass 'hide'
+		# Hiding is the first step to removing, but that has to wait until the dialog has finished processing the hide
+		if !$(dlog).hasClass 'keeparound'
+			$(dlog).remove()
 
 RP.dialog.focus = (dlog) ->
-	$('[autofocus]:first',dlog).focus()[0] #  ||
-	# $('input.string', dlog).focus()[0] ||
-	# $('input.text', dlog).focus()[0] ||
-	# $('textarea', dlog).focus()[0]
-
+	$('input.autofocus', dlog)[0] ||
+	$("input[type='text']", dlog).focus()
 
 RP.dialog.close = (event) ->
 	if event
@@ -73,19 +71,6 @@ RP.dialog.close_modal = (dlog, epilog) ->
 	# If there's another dialog or recipe to edit waiting in the wings, trigger it
 	RP.fire_triggers()
 
-# Public convenience methods for handling events
-RP.dialog.onopen = (dlog, entity) ->
-	notify 'open', dlog, entity
-
-RP.dialog.onclose = (dlog, entity) ->
-	notify 'close', dlog, entity
-
-RP.dialog.onload = (dlog, entity) ->
-	notify 'load', dlog, entity
-
-RP.dialog.onsave = (dlog, entity) ->
-	notify 'save', dlog, entity
-
 # ------------ Thus ends the public interface. Private methods: ------------------
 
 # From a block of code (which may be a whole HTML page), extract a
@@ -93,31 +78,17 @@ RP.dialog.onsave = (dlog, entity) ->
 insert_modal = (newdlog, odlog) ->
 	if typeof newdlog == 'string'
 		# Assuming the code is a fragment for the dialog...
-		wrapper = document.createElement('div');
-		wrapper.innerHTML = newdlog;
-		newdlog = wrapper.firstElementChild
-		if $(newdlog).hasClass('dialog')
-			wrapper.removeChild newdlog
-		else
-			# ...It may also be a 'modal-yield' dialog embedded in a page
-			# dom = $(newdlog)
-			# if newdlog = $('div.dialog', dom)[0]
-			# return $(newdlog, dom).detach()[0]
-			# else if $(dom).hasClass "dialog"
-			# $(dom).removeClass('modal-pending').addClass('modal')
-			# return dom[0]
-			doc = document.implementation.createHTMLDocument("Temp Page")
-			doc.open()
-			doc.write newdlog
-			doc.close()
-			# We extract dialogs that are meant to be opened instead of the whole page
-			newdlog = $('div.dialog.modal-yield', doc.body).removeClass("modal-yield").addClass("modal-pending").detach()[0]
+		dlogs = jQuery.grep $(newdlog), (elmt) ->
+			$(elmt).is 'div.dialog'
+		newdlog = dlogs[0]
+	else
+		newdlog = ($(newdlog).detach())[0]
 	# Now the dialog is a detached DOM elmt: attach it relative to the parent
 	if odlog && (odlog != newdlog) && odlog.parentNode # We might be just reopening a retained dialog
 		odlog.parentNode.insertBefore newdlog, odlog
 		newdlog = odlog.previousSibling
 	# Add the new dialog at the end of the page body if necessary
-	if !newdlog.parentNode
+	else
 		newdlog = document.getElementsByTagName("body")[0].appendChild newdlog
 	newdlog
 
@@ -141,8 +112,8 @@ open_modal = (dlog, omit_button) ->
 	if (onget = $(dlog).data "onget" ) && (fcn = RP.named_function "RP." + onget.shift() )
 		fcn.apply null, onget
 	RP.hide_all_empty()
-	show_modal dlog # $(dlog).removeClass('modal-pending').removeClass('hide').addClass('modal')
-	notify "load", dlog
+	show_modal dlog
+	RP.dialog.notify "load", dlog
 	RP.state.onDialogOpen dlog
 	if !(omit_button || $('button.close', dlog)[0])
 		buttoncode = '<button type=\"button\" class=\"close dialog-x-box dialog-cancel-button\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>'
@@ -151,7 +122,7 @@ open_modal = (dlog, omit_button) ->
 		$(dlog).modal()
 	if $('input:file.directUpload')[0]
 		uploader_unpack()
-	notify "open", dlog
+	RP.dialog.notify "open", dlog
 	notify_injector "open", dlog
 	$('.token-input-field-pending', dlog).each ->
 		RP.tagger.setup this
@@ -160,11 +131,9 @@ open_modal = (dlog, omit_button) ->
 		RP.submit.bind dlog # Arm submission links and preload sub-dialogs
 	$('.dialog-cancel-button', dlog).click (event) ->
 		# When canceling, check for pending dialog/page, following instructions in the response
-		dlog = event.target
-		if !$(dlog).hasClass "cancelled"
-			$(dlog).addClass "cancelled"
-			RP.submit.submit_and_process "/popup"
+		close_modal RP.dialog.enclosing_modal(event.target), 'close'
 		event.preventDefault()
+		event.isDefaultPrevented()
 	$('a.question_section', dlog).click RP.showhide
 	if requires = $(dlog).data 'dialog-requires'
 		for requirement in requires
@@ -176,6 +145,8 @@ open_modal = (dlog, omit_button) ->
 hide_modal = (dlog) ->
 	if $(dlog).modal
 		$(dlog).modal 'hide'
+	else
+		$(dlog).hide()
 
 show_modal = (dlog) ->
 	$(dlog).removeClass('hide').addClass('modal').removeClass 'modal-pending'
@@ -193,60 +164,18 @@ push_modal = (dlog, parent) ->
 # The parent was stored in the child's data
 pop_modal = (dlog, action) ->
 	hide_modal dlog
-	if parent = $(dlog).data "parent"
+	if action && action != 'cancel' && parent = $(dlog).data "parent"
 		insert_modal parent, dlog
-		notify action, dlog
+		RP.dialog.notify action, dlog
 		show_modal parent
 	else
-		notify action, dlog
-		$('div.modal-backdrop').remove()
+		RP.dialog.notify action, dlog
 
 close_modal = (dlog, action) ->
 	if dlog
 		pop_modal dlog, (action || "close") # Modal can either be closed or cancelled
 		RP.state.onCloseDialog dlog
-		if !$(dlog).hasClass 'keeparound'
-			$(dlog).remove()
 		notify_injector "close", dlog
-
-# Filter for submit events, ala javascript. Must return a flag for processing the event normally
-filter_submit = (eventdata) ->
-	context = this
-	dlog = eventdata.data
-	clicked = $("input[type=submit][clicked=true]")
-	# return true;
-	if ($(clicked).attr("value") == "Save") && (shortcircuit = notify "beforesave", dlog, eventdata.currentTarget)
-		close_modal dlog, "cancel"
-		eventdata.preventDefault()
-		RP.process_response shortcircuit
-	else
-		# Okay to submit
-		if (confirm_msg = $(clicked).data 'confirmMsg') && !confirm(confirm_msg)
-			return false
-		if wait_msg = $(clicked).data('waitMsg')
-			RP.notifications.wait wait_msg
-		# To sort out errors from subsequent dialogs, we submit the form synchronously
-		#  and use the result to determine whether to do normal forms processing.
-		method = $(clicked).data("method") || $('input[name=_method]', this).attr "value"
-		$(context).ajaxSubmit
-			url: $(clicked).data("action") || context.action,
-			type: method, # $('input[name=_method]', this).attr("value"),
-			async: false,
-			dataType: 'json',
-			error: (jqXHR, textStatus, errorThrown) ->
-				RP.notifications.done()
-				jsonout = RP.post_error jqXHR, dlog # Show the error message in the dialog
-				eventdata.preventDefault()
-				return !RP.process_response jsonout, dlog
-			success: (responseData, statusText, xhr, form) ->
-				RP.notifications.done()
-				RP.post_success responseData, dlog, form
-				eventdata.preventDefault()
-				sorted = RP.process_response responseData, dlog
-				if responseData.success == false
-					# Equivalent to an error, so just return
-					return sorted
-	return false
 
 manager_of = (dlog) ->
 	# Look for a manager using the dialog's class name
@@ -276,22 +205,12 @@ manager_of = (dlog) ->
 # If it doesn't exist, or returns false when called, and there's a message for the event in the hooks, post it
 # If it doesn't exist, or returns false when called, and there's a handler for the manager of the dialog, call it
 # If it doesn't exist, or returns false when called, apply the default event handler 
-notify = (what, dlog, entity) ->
-	hooks = $(entity || dlog).data("hooks");
-	fcn_name = what + "Fcn";
-	msg_name = what + "Msg";
-	# If the entity or the dialog have hooks declared, use them
-	if hooks
-		if hooks.hasOwnProperty msg_name
-			RP.notifications.post hooks[msg_name], "popup"
-		if hooks.hasOwnProperty fcn_name
-			fcn = RP.named_function hooks[fcn_name]
-			return fcn dlog # We want an error if the function doesn't exist
-
+RP.dialog.notify = (what, dlog) ->
 	# If there's a manager module with a responder, call it
+	return if !dlog
+	RP.apply_hooks what, dlog # Run any messaging or functions associated with the dialog
 	if (mgr = manager_of dlog) && (fcn = mgr[what] || mgr["on" + what])
 		fcn dlog
-
 	# Otherwise, run the default
 	switch what
 		when 'load', 'onload'
@@ -303,34 +222,7 @@ notify = (what, dlog, entity) ->
 			show_modal dlog
 			$(dlog).on 'shown', ->
 				$('textarea', dlog).focus()
-			# Forms submissions that expect JSON structured data will be handled here:
-			$('form', dlog).submit dlog, filter_submit
-			# Turn a Bootstrap button group into radio buttons
-			$("form input[type=submit]").click ->
-				# Here is where we enable multiple submissions buttons with different routes
-				# The form gets 'data-action', 'data-method' and 'data-operation' fields to divert
-				# forms submission to a different URL and method. (data-operation declares the purpose
-				# of the submit for, e.g., pre-save checks)
-				$("input[type=submit]", dlog).removeAttr "clicked"
-				$(this).attr "clicked", "true"
-			$('div.btn-group').each ->
-				group = $(this);
-				if name = group.attr 'data-toggle-name'
-					form = group.parents('form').eq(0);
-					hidden = $('input[name="' + name + '"]', form);
-					$('button', group).each ->
-						button = $(this);
-						if button.val() == hidden.val()
-							button.addClass 'active'
-						button.live 'click', ->
-							if $(this).hasClass "active"
-								hidden.val $(hidden).data("toggle-default")
-								$(this).removeClass "active"
-							else
-								hidden.val $(this).val()
-								$('button', group).each ->
-									$(this).removeClass "active"
-								$(this).addClass "active"
+			RP.submit.form_prep dlog
 	return
 ###
 	#	when "load", "onload"

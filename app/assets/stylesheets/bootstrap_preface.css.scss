@@ -1,0 +1,34 @@
+// This file is meant to be imported before bootstrap is imported--via CDN or directly
+// Set the correct sprite paths
+$iconSpritePath: image-path('glyphicons-halflings.png');
+$iconWhiteSpritePath: image-path('glyphicons-halflings-white.png');
+
+// Set variables here, i.e. BEFORE loading bootstrap
+$navbarBackground: #555;
+$navbarBackgroundHighlight: #888;
+$navbarLinkColor: #eee;
+$navbar-default-color: #fff;
+
+$guideText: #AB812E !default;
+$guideBackground: #FAD8A7 !default;
+$guideBorder: darken(adjust-hue($guideBackground, -10), 7%) !default;
+
+.masonry-container {
+  div.popover {
+    max-width: 330px;
+    width: 330px;
+  }
+}
+
+div#container {
+  height: auto;
+}
+
+label.control-label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+div.control-group {
+  margin-bottom: 10px;
+}

@@ -1,5 +1,19 @@
 module ListsHelper
 
+  def list_homelink list, options={}
+    name = list.name
+    name = name.truncate(options[:truncate]) if options[:truncate]
+    (data = (options[:data] || {}))[:report] = polymorphic_path [:touch, list]
+    klass = "#{options[:class]} entity list"
+    path = case action = (options.extract!(:action)[:action] || :show)
+             when :show
+               list_path list
+             else
+               polymorphic_path([action, list])
+           end
+    link_to_submit name, path, {:mode => :partial}.merge(options).merge(data).merge(class: klass).except(:action)
+  end
+
   # Provide a button for adding (pinning) an entity to the list
   def pin_button list, entity
     button_to_submit list.name,
@@ -10,16 +24,8 @@ module ListsHelper
 
   def pin_navmenu entity
     navtab :pin, "+", users_path do
-      @user.owned_lists[0..10].collect { |l|
+      response_service.user.owned_lists[0..10].collect { |l|
         navlink "Add to '#{l.name.truncate(20)}'", pin_list_path(l), id: dom_id(l)
-=begin
-        link_to_submit "Add to '#{l.name.truncate(20)}'",
-                       pin_list_path(l),
-                       method: "POST",
-                       id: dom_id(l),
-                       query: { entity_type: (entity.klass.to_s rescue entity.class.to_s), entity_id: entity.id },
-                       :mode => :partial
-=end
       }
     end
 
@@ -63,7 +69,6 @@ module ListsHelper
                         oust: already_collected,
                         styling: styling),
                    method: "POST",
-                   mode: :partial,
                    class: "checkbox-menu-item #{dom_id(l)}"
   end
 

@@ -3,7 +3,7 @@
 	<p class="airy">
 		All we need is a username and email address, and you're good to go.
 		(You can provide/edit details later on your Profile page.)</p>
-	<%= simple_form_for @user, html: { class: "edit_user json", 'data-type' => :json } do |f| %>
+	<%= simple_form_for response_service.user, html: { class: "edit_user json", 'data-type' => :json } do |f| %>
 	  <%= form_errors_helper f %>
 	  <%= f.input :username, label: "Username/Handle" %>
 	  <%= f.input :email %>

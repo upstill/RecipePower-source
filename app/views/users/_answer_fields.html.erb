@@ -1,0 +1,7 @@
+<fieldset class="answer-field">
+  <%= f.label :answer, (f.object.question ? f.object.question.name : "" ), class: "question-text" %>
+  <%= f.text_field :answer, class: "answer-text" %>
+  &nbsp;<%= link_to "", '#', class: "remove_fields glyphicon glyphicon-remove" %>
+  <%= f.hidden_field :_destroy %>
+  <%= f.hidden_field :question_id, class: "question-id" %>
+</fieldset>

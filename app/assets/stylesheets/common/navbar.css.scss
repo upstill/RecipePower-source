@@ -1,0 +1,100 @@
+.navbar-inverse .navbar-nav>.active>a,
+.navbar-inverse .navbar-nav>.active>a:focus,
+.navbar-inverse .navbar-nav>.active>a:hover {
+  //color: #fff;
+  //background-color: transparent;
+}
+
+.navbar-inverse .navbar-nav>li#friends-navtab>a {
+  background-color: transparent;
+  color: #de8822;
+}
+
+.navbar{
+  background-color: transparent;
+  background-image: none;
+  background-repeat: none;
+  margin-bottom: 0;
+}
+
+//ay navigation changes
+.navbar-fixed-top, .navbar-header{
+  //height: 120px;
+}
+nav.navbar-inverse{
+  background-color: transparent;
+  background-image: none;
+  background-repaet: none;
+  border: 0;
+}
+
+a.navbar-brand{
+  padding-top: 0;
+}
+
+ul.nav.navbar-nav {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  li.master-navtab {
+    &#collections-navtab{
+      background-color: $recipes-navtab-background-color;
+      margin: 0 7px;
+      padding-top:80px;
+      text-shadow: none;
+      a.dropdown-toggle {
+        color: $recipes-navtab-text-color;
+      }
+    }
+    &#friends-navtab{
+      background-color: $friends-navtab-background-color;
+      margin: 0 7px;
+      padding:80px 8px 0;
+      text-shadow: none;
+      a.dropdown-toggle {
+        color: $friends-navtab-text-color;
+      }
+    }
+
+    &#my_lists-navtab{
+      background-color: $lists-navtab-background-color;
+      margin: 0 7px;
+      padding: 80px 18px 0;
+      text-shadow: none;
+      a.dropdown-toggle {
+        color: $lists-navtab-text-color;
+      }
+    }
+
+    &#feeds-navtab{
+      background-color: $feeds-navtab-background-color;
+      margin: 0 7px;
+      padding: 80px 34px 0;
+      text-shadow: none;
+      a.dropdown-toggle {
+        color: $feeds-navtab-text-color;
+      }
+    }
+
+    &#home-navtab{
+      background-color: #ff9583;
+      margin: 0 7px;
+      span.user-name {
+        font-size: 0.7em;
+        color: #fadfdb;
+        text-shadow: none;
+        text-transform: lowercase;
+      }
+    }
+  }
+}
+
+
+.navbar-nav>li>a.dropdown-toggle{
+  padding-bottom: 10px;
+  font-family: Oswald, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-size: 21px;
+}
+

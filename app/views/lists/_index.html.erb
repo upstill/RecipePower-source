@@ -1,0 +1,4 @@
+<% if !@access || @access == "all" %>
+    <p>You can search for lists using the search box above or browse below.</p>
+<% end %>
+<p>You can create a new list by clicking <%= button_to_submit "Here", new_list_path, :dialog, :mode => :modal %>.</p>

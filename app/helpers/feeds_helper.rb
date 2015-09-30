@@ -46,28 +46,6 @@ module FeedsHelper
     [ "span.feed-status-report", feed_status_report(feed) ]
   end
 
-  def feedlist
-    @feed.entries.collect { |entry| render partial: "feed_entries/show_feed_entry", item: entry }.join.html_safe
-  end
-  
-  # Helper for showing @feed_entry to @user_id
-  def show_feed_entry
-    %Q{<p>
-      <a href='#{@feed_entry.url}'>#{@feed_entry.name}</a><br />
-     #{@feed_entry.published_at}
-     #{@feed_entry.summary}
-    </p><hr>}.html_safe
-  end
-  
-  def list_feeds preface, feeds
-    count = feeds.count
-    msg = [preface, (count > 1 ? count.to_s : 'a'), 'feed'.pluralize(count)].join(' ')+
-          ":<br><ul><li>"+
-          feeds.map(&:title).join('</li><li>')+
-          "</li></ul>"
-    msg.html_safe
-  end
-
   def feed_subscribe_button item, options={}
     if item.collected? current_user_or_guest_id
       label, path = "Unsubscribe", collect_feed_path(item, oust: true)
@@ -108,6 +86,18 @@ module FeedsHelper
   def feeds_table
     headers = [ "Title/Description/URL", "Tag(s)", "Type", "Host Site", "# Entries/<br>Last Updated".html_safe, ("Approved" if response_service.admin_view?), "Actions" ].compact
     render "shared/stream_results_table", headers: headers
+  end
+
+  def feed_homelink feed, options={}
+    title = feed.title
+    title = title.truncate(options[:truncate]) if options[:truncate]
+    (data = (options[:data] || {}))[:report] = polymorphic_path [:touch, feed]
+    klass = "#{options[:class]} entity feed"
+    # Default submission is for #owned action
+    action = options[:action] || :owned
+    link_to_submit feed.title,
+                   polymorphic_path([action, feed]),
+                   {mode: :partial}.merge(options).merge(data: data, class: klass).except(:action, :truncate)
   end
 
 end

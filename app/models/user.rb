@@ -1,9 +1,14 @@
 require "type_map.rb"
 
 class User < ActiveRecord::Base
+  # Class variable @@Guest_user saves the guest User
+  @@Guest_user = nil
+  @@Guest_user_id = 4
+  @@Super_user_id = 5
+
   include Collectible
   # Keep an avatar URL denoted by the :image attribute and kept as :thumbnail
-  picable :image, :thumbnail
+  picable :image, :thumbnail, "default-avatar-128.png"
 
   # Include default devise modules. Others available are:
   # :token_authenticatable, :encryptable, :confirmable, :timeoutable
@@ -15,12 +20,14 @@ class User < ActiveRecord::Base
 
   # Setup accessible (or protected) attributes for your model
   attr_accessible :id, :username, :first_name, :last_name, :fullname, :about, :login, :private, :skip_invitation, :thumbnail_id,
-                :email, :password, :password_confirmation, :shared_recipe, :invitee_tokens, :channel_tokens, :avatar_url, # :image,
-                :invitation_token, :invitation_message, :invitation_issuer,
-                :remember_me, :role_id, :sign_in_count, :followee_tokens, :subscription_tokens
+                :email, :password, :password_confirmation, :invitee_tokens, :channel_tokens, :avatar_url, # :image,
+                :invitation_token, :invitation_message, :invitation_issuer, :shared_type, :shared_id,
+                :remember_me, :role_id, :sign_in_count, :followee_tokens, :subscription_tokens,
+                :answers_attributes, :tag_selections_attributes, :mail_subject, :mail_body
   # attr_writer :browser
   attr_readonly :count_of_collection_pointers
-  attr_accessor :shared_recipe, :invitee_tokens, :channel_tokens, :raw_invitation_token, :avatar_url
+  attr_accessor :invitee_tokens, :channel_tokens, :raw_invitation_token, :avatar_url, :mail_subject, :mail_body,
+                :shared_type, :shared_id # Kept temporarily during sharing operations
   
   has_many :notifications_sent, :foreign_key => :source_id, :class_name => "Notification", :dependent => :destroy
   has_many :notifications_received, :foreign_key => :target_id, :class_name => "Notification", :dependent => :destroy
@@ -30,6 +37,13 @@ class User < ActiveRecord::Base
 
   has_many :followee_relations, :foreign_key => "follower_id", :dependent=>:destroy, :class_name => "UserRelation"
   has_many :followees, -> { uniq }, :through => :followee_relations, :source => :followee
+
+  has_many :answers
+  accepts_nested_attributes_for :answers, allow_destroy: true
+  has_many :questions, :through => :answers
+
+  has_many :tag_selections
+  accepts_nested_attributes_for :tag_selections, allow_destroy: true
 
   # Channels are just another kind of user. This field (channel_referent_id, externally) denotes such.
   # TODO: delete channel_referent_id and tables feeds_users, lists_users and private_subscriptions
@@ -398,16 +412,13 @@ public
     @@Roles.list
   end
 
-  # Class variable @@Super_user saves the super User
-  @@Super_user = nil
   def self.super_id
-      (@@Super_user || (@@Super_user = (self.by_name(:super) || self.by_name("RecipePower")))).id
+    @@Super_user_id
+    # (@@Super_user || (@@Super_user = self.find(@@Super_user_id)) # (self.by_name(:super) || self.by_name("RecipePower")))).id
   end
 
-  # Class variable @@Guest_user saves the guest User
-  @@Guest_user = nil
   def self.guest
-      @@Guest_user || (@@Guest_user = self.by_name(:guest))
+      @@Guest_user || (@@Guest_user = self.find(@@Guest_user_id)) # by_name(:guest))
   end
 
   # Simply return the id of the guest
@@ -518,8 +529,8 @@ public
     if true # XXX User's profile approves
       # Mapping from notification types to email types
       case notification_type
-      when :share_recipe
-        self.shared_recipe = options[:what]
+      when :share
+        self.shared = options[:what]
         msg = RpMailer.sharing_notice(notification)
         msg.deliver
       when :make_friend
@@ -551,6 +562,17 @@ public
     other.followers.each { |follower| follower.add_followee self }
     other.votings.each { |voting| vote(voting.entity, voting.up) } # Transfer all the other's votes
     super
+  end
+
+  # Provide the resource being shared, stored (but not saved) as a polymorphic object description
+  def shared
+    if !@shared_type.blank? && @shared_id
+      @shared_type.constantize.find( @shared_id.to_i) rescue nil
+    end
+  end
+
+  def shared= entity
+    @shared_type, @shared_id = entity ? [ entity.class.to_s, entity.id ] : []
   end
 
   private

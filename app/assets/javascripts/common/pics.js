@@ -11,11 +11,15 @@ function onImageErrorEvent(event) {
 
 function onImageError(image) {
     if (!$(image).hasClass('empty')) { // Failure on original load
-        $(image).addClass('bogus').addClass('empty');
         if (image.alt && (image.alt.match(/\.(jpg|tif|tiff|gif|png)$/) != null)) {
             image.src = image.alt
+            image.alt = ""
         } else {
             image.src = $(image).data("bogusurlfallback") || "";
+        }
+        if( $(image).attr('src').length == 0) {
+            $(image).addClass('bogus').addClass('empty');
+            $(image).trigger('image:empty')
         }
     }
     return true;
@@ -38,29 +42,29 @@ function fitImage(img) {
 
     var frameAR = frameWidth / frameHeight;
     var imgAR = picWidth / picHeight;
-    var fillmode;
-    if (fillmode = $(img).data("fillmode")) {
-        if (fillmode == "width") {
-            // Size image to fit parent's width
-            $(img).css("width", frameWidth);
-            $(img).css("height", frameWidth / imgAR);
-        }
+    var fillmode = $(img).data("fillmode") || "none";
+    if (fillmode == "width") {
+        // Size image to fit parent's width
+        $(img).css("width", frameWidth);
+        $(img).css("height", frameWidth / imgAR);
+    } else if (fillmode == "height") {
+        // Size image to fit parent's height
+        $(img).css("height", frameHeight);
+        $(img).css("width", frameHeight * imgAR);
+    } else if (imgAR > frameAR) {
+        var newHeight = frameWidth / imgAR;
+        $(img).css("width", frameWidth);
+        $(img).css("height", newHeight);
+        // $(img).css("padding-left", 0);
+        // $(img).css("padding-top", (frameHeight-newHeight)/2);
+        // $(img).css("left", 0);
     } else {
-        if (imgAR > frameAR) {
-            var newHeight = frameWidth / imgAR;
-            $(img).css("width", frameWidth);
-            $(img).css("height", newHeight);
-            // $(img).css("padding-left", 0);
-            // $(img).css("padding-top", (frameHeight-newHeight)/2);
-            // $(img).css("left", 0);
-        } else {
-            var newWidth = frameHeight * imgAR;
-            $(img).css("width", newWidth);
-            $(img).css("height", frameHeight);
-            // $(img).css("top", 0);
-            // $(img).css("padding-top", 0);
-            // $(img).css("padding-left", (frameWidth-newWidth)/2);
-        }
+        var newWidth = frameHeight * imgAR;
+        $(img).css("width", newWidth);
+        $(img).css("height", frameHeight);
+        // $(img).css("top", 0);
+        // $(img).css("padding-top", 0);
+        // $(img).css("padding-left", (frameWidth-newWidth)/2);
     }
     $(img).addClass("loaded")
     return true;

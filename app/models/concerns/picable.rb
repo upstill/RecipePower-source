@@ -5,7 +5,7 @@ module Picable
 
   module ClassMethods
 
-    def picable attribute, reference_name=:picture
+    def picable attribute, reference_name=:picture, fallback_img_file="NoPictureOnFile.png"
       linkable attribute, reference_name, :as => "ImageReference"
       self.class_eval do
         define_singleton_method :image_reference_name do
@@ -14,23 +14,22 @@ module Picable
         define_singleton_method :picable_attribute do
           attribute
         end
+        define_method :fallback_imgdata do
+          fallback_img_file
+        end
+        alias_method :imglink, attribute
       end
     end
   end
 
   public
 
+  def picable_attribute
+    self.class.picable_attribute
+  end
+
   def picref
     @picref ||= self.method(self.class.image_reference_name).call
-  end
-
-  def picrefid
-    picref.id if picref
-  end
-
-  # Return the thumbnail data for the entity
-  def picdata
-    picref.thumbdata if picref
   end
 
   # Return the image for the entity as a url
@@ -48,13 +47,10 @@ module Picable
   # Return the image for the entity, either as a URL or a data specifier
   # The image may have an associated thumbnail, but it doesn't count unless
   # the thumbnail reflects the image's current private_picurl
-  def imgdata fallback_to_card=false
-    if picref
-      (href = picref.imgdata) && (return href)
-      "/assets/BadPicURL.png" if fallback_to_card
-    else
-      "/assets/NoPictureOnFile.png" if fallback_to_card
-    end # Default
+  def imgdata
+    if picref && (href = picref.imgdata || picref.url).present?
+      href
+    end
   end
 
   # One picable is being merged into another => transfer image

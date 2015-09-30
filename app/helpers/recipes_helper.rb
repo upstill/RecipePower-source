@@ -1,6 +1,5 @@
 require 'open-uri'
 require 'json'
-require './lib/Domain.rb'
 require 'string_utils'
 
 module RecipesHelper
@@ -9,25 +8,49 @@ module RecipesHelper
     "<div><h3>#{recipe.title}</h3></div>".html_safe
   end
 
-
-  def recipe_grid_datablock decorator
+  def collectible_title_link decorator, pclass="title"
     entity = decorator.object
-    klass = entity.class.to_s
-    label = ((klass == "Recipe") || (klass == "List")) ? "" : "#{klass}: "
-    itemlink = case klass
-                 when "Recipe", "Site"
-                   link_to decorator.title, decorator.url, class: "tablink", data: { report: polymorphic_path([:touch, entity]) } # ...to open up a new tab
-                 else # Other internal entities get opened up in a new partial
-                   link_to_submit decorator.title, decorator.url, mode: :partial
-               end
-    grid_element = content_tag :p, (label+itemlink).html_safe, class: "rcp_grid_element_title"
-    case klass
-      when "List"
-        source_element = content_tag :div, ("a list by "+link_to_submit(decorator.owner.handle, user_path(decorator.owner, :mode => :modal))).html_safe, class: "rcp_grid_element_source"
-      else
-        source_element = content_tag :div, ("from "+link_to(decorator.sourcename, decorator.sourcehome, class: "tablink")).html_safe, class: "rcp_grid_element_source"
+    case entity
+      when Recipe, Site
+        label = ""
+        itemlink = link_to decorator.title, decorator.url, class: "tablink", data: {report: polymorphic_path([:touch, entity])} # ...to open up a new tab
+      else # Other internal entities get opened up in a new partial
+        label = "#{entity.class.to_s}: "
+        itemlink = link_to_submit decorator.title, decorator.url, class: "tablink"
     end
-    content_tag :div, grid_element+source_element, class: "rcp_grid_datablock"
+    content_tag :p, "#{label}#{itemlink}".html_safe, class: pclass
+  end
+
+  def collectible_tablink decorator
+    case decorator.object
+      when Recipe, Site
+        link_to decorator.title, decorator.url, class: "tablink", data: {report: polymorphic_path([:touch, decorator.object])} # ...to open up a new tab
+      else # Internal entities get opened up in a new partial
+        link_to_submit decorator.title, decorator.object # , class: "tablink"
+    end
+  end
+
+  def collectible_source_link decorator
+    if decorator.object.class == List
+      label = "a list by "
+      link = link_to_submit decorator.owner.handle, user_path(decorator.owner, :mode => :modal)
+    else
+      label = "from "
+      link = link_to decorator.sourcename, decorator.sourcehome, class: "tablink"
+    end
+    content_tag :div, (label+link).html_safe, class: "rcp_grid_element_source"
+  end
+
+  def collectible_show_thumbnail decorator
+    image_div = image_enclosure decorator, class: 'pic-box', fill_mode: 'fixed-width', fallback_img: true
+    title = collectible_title_link decorator
+    content_tag :div, "#{image_div}#{title}".html_safe, class: "cardlet-item #{decorator.dom_id}"
+  end
+
+  def collectible_masonry_datablock decorator
+    title_link = collectible_title_link decorator, "rcp_grid_element_title"
+    source_element = collectible_source_link decorator
+    content_tag :div, (title_link+source_element).html_safe, class: "rcp_grid_datablock"
   end
 
   def collectible_info_icon decorator
@@ -93,7 +116,7 @@ end
             method: "POST",
             remote: true,
             title: "Remove from this collection",
-            class: "top_right_corner btn btn-default btn-xs"
+            class: "top-right-corner btn btn-default btn-xs"
   end
 
 def tagjoin tags, enquote = false, before = "", after = "", joiner = ','

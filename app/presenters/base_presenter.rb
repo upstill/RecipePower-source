@@ -1,8 +1,22 @@
 class BasePresenter
   require 'redcarpet'
-  def initialize(object, template)
-    @object = object
+
+  attr_reader :viewer, :decorator
+
+  def initialize decorator_or_object, template, viewer
+    if decorator_or_object.is_a?(Draper::Decorator)
+      @decorator, @object = decorator_or_object, decorator_or_object.object
+    else
+      @object = decorator_or_object
+      @decorator = (decorator_or_object.decorate if decorator_or_object.respond_to? :decorate)
+    end
     @template = template
+    @viewer = viewer
+  end
+
+  # Does this presenter have an avatar to present on cards, etc?
+  def card_avatar?
+    true
   end
 
 private
@@ -27,3 +41,4 @@ private
     @template.send(*args, &block)
   end
 end
+

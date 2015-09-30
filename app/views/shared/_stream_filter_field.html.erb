@@ -1,8 +1,1 @@
-  <%= stream_filter_field @sp,
-                          rows: 1,
-                          autofocus: true,
-                          data: {:"on-add" => "RP.submit.ontokenchange",
-                                 :"on-delete" => "RP.submit.ontokenchange",
-                                 :hint => "", # "Search the collection by typing terms here",
-                                 placeholder: "Seek and ye shall find...",
-                                 :"no-results-text" => "No matching tag found; hit Enter to search with text"} %>
+  <%= @filtered_presenter.filter_field %>

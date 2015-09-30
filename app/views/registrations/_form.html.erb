@@ -8,28 +8,23 @@
             <%# f.text_field :username, class: "signin_element", placeholder: "CoolBeans" %>
             <%# f.label :fullname, "Full Name".html_safe, class: "signin_element" %>
             <%# f.text_field :fullname, class: "signin_element", placeholder: "Joe Cool" %>
-            <%= f.label :email, "Email".html_safe, class: "signin_element" %>
-            <%= f.text_field :email, class: "signin_element", placeholder: "peerless@nonpareil.net" %>
+            <%= f.label :email, 'Email'.html_safe, class: 'signin_element' %>
+            <%= f.text_field :email, class: 'signin_element', placeholder: 'peerless@nonpareil.net' %>
             <%# f.label :password, class: "signin_element" %>
             <%# f.password_field :password, class: "signin_element" %>
           </div>
-          <br><%= f.submit "Sign me up!", class: "btn btn-success " %>
+          <br><%= f.submit 'Sign me up!', class: 'btn btn-success ' %>
         </div>
     <% end %>
 <% else %>
     <%= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name)) do |f| %>
         <%# devise_error_messages! %>
-        <%= form_errors_helper f, resource %>
-        <div class="row">
-          <div class="col-md-8">
-            <%# f.input :username, label: "Username (Handle)", placeholder: "CoolBeans" %>
-            <%= f.input :email, label: false, placeholder: 'user@domain.com', autofocus: true %>
-          </div>
-          <div class="col-md-3">
-            <%# f.input :fullname, label: "Full Name", placeholder: "Joe Cool" %>
-            <%# f.input :password %>
-            <%= f.submit "Sign me up!", class: "btn btn-success btn-lg" %>
-          </div>
-        </div>
+        <%# form_errors_helper f, resource %>
+        <%# f.input :username, label: "Username (Handle)", placeholder: "CoolBeans" %>
+        <%= f.input :email, label: false, placeholder: 'email', autofocus: true %>
+        <%# f.input :fullname, label: "Full Name", placeholder: "Joe Cool" %>
+        <%= f.input :password, label: false, placeholder: 'password' %>
+        <%= f.input :password_confirmation, label: false, placeholder: 'confirm password' %>
+        <%= f.submit 'SIGN ME UP!', class: 'dialog-submit-button btn btn-xl center-button free' %>
     <% end %>
 <% end %>

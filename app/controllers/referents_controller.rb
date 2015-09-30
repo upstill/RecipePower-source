@@ -10,7 +10,7 @@ class ReferentsController < ApplicationController
   # GET /referents
   # GET /referents.json
   def index
-    smartrender unless do_stream ReferentsCache
+    smartrender 
   end
 
   # GET /referents/1
@@ -169,8 +169,7 @@ class ReferentsController < ApplicationController
           end
           render json: {
             done: true,
-            popup: "Referent now updated to serve you better",
-            replacements: [ [ selector, with_format("html") { view_context.render_seeker_item element } ] ]
+            popup: "Referent now updated to serve you better"
           }
         }
       else

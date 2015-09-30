@@ -1,23 +1,8 @@
-class CollectiblePresenter
+class CollectiblePresenter < BasePresenter
+  include CardPresentation
 
-  attr_accessor :modal, :tagfields
+  attr_accessor :modal
   attr_writer :buttons
-
-  def initialize decorator, template
-    @template = template
-    @decorator = decorator
-    @tagfields = [
-        "Ingredient_tags",
-        ["Role_tags", "Produces"],
-        "Genre_tags",
-        "Occasion_tags",
-        "Process_tags",
-        "Tool_tags",
-        "Other Tag_tags",
-        ['Lists', "Listed in"],
-        ['Collections', "Collected by"]
-    ]
-  end
 
   def h
     @template
@@ -28,18 +13,10 @@ class CollectiblePresenter
   end
 
   def divclass
-    if @decorator.imgdata(false).blank?
+    if @decorator.imgdata.blank?
       modal ? "col-md-8 col-sm-6" : "col-lg-5 col-md-6 col-sm-7"
     else
       modal ? "col-md-12 col-sm-12" : "col-lg-5 col-md-7 col-sm-12"
-    end
-  end
-
-  def picdiv
-    unless @decorator.imgdata(false).blank?
-      h.content_tag :div,
-                    h.safe_image_div(@decorator, :card, class: "resource-element pic"),
-                    class: pic_class
     end
   end
 
@@ -57,19 +34,41 @@ class CollectiblePresenter
     @buttons || h.collectible_buttons_panel(@decorator)
   end
 
-  def fields_list
-    h.list_fields @tagfields
+  def present_field_wrapped what=nil
+    h.content_tag :span,
+                  present_field(what),
+                  class: "hide-if-empty"
   end
 
-  def label_field name, new_label
-    @tagfields.map! { |v|
-      if v.is_a? Array
-        v[1] = new_label if v[0] == name
-      else
-        v = [v, new_label] if v == name
-      end
-      v
-    }
+  def field_value what=nil
+    return form_authenticity_token if what && (what == "authToken")
+    if val = @decorator && @decorator.extract(what)
+      "#{val}".html_safe
+    end
   end
+
+  def present_field what=nil
+    field_value(what) || %Q{%%#{(what || "").to_s}%%}.html_safe
+  end
+
+  def field_count what
+    @decorator && @decorator.respond_to?(:arity) && @decorator.arity(what)
+  end
+
+  def present_field_label what
+    label = what.sub "_tags", ''
+    case field_count(what)
+      when nil, false
+        "%%#{what}_label_plural%%"+"%%#{what}_label_singular%%"
+      when 1
+        label.singularize
+      else
+        label.pluralize
+    end
+  end
+
+end
+
+class ListPresenter < CollectiblePresenter
 
 end

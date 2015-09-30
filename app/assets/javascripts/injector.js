@@ -18,11 +18,11 @@
 //= require common/submit
 //= require views/edit_recipe
 //= require concerns/tagger
-//= require jquery/jquery.form
-//= require jquery/jquery.ba-postmessage
-//= require jquery/jNotify.jquery
-//= require jquery/jquery.tokeninput
-//= require jquery/jquery.ba-resize
+//= require jquery_addons/jquery.form
+//= require jquery_addons/jquery.ba-postmessage
+//= require jquery_addons/jNotify.jquery
+//= require jquery_addons/jquery.tokeninput
+//= require jquery_addons/jquery.ba-resize
 //= require jquery_ujs
 //= require ../../../vendor/assets/javascripts/bootbox
 //= require ../../../vendor/assets/javascripts/imagesloaded.pkgd.min

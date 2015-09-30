@@ -21,10 +21,14 @@ class SessionsController < Devise::SessionsController
   end
 
   def create
-    # TODO: failed login causing uncaught exception here
-    resource = warden.authenticate!(:scope => resource_name, :recall => "#{controller_path}#new" ) # :failure)
-    result = sign_in_and_redirect(resource_name, resource)
-    return result
+    begin
+      resource = warden.authenticate!(:scope => resource_name, :recall => "#{controller_path}#new" ) # :failure)
+      result = sign_in_and_redirect(resource_name, resource)
+      return result
+    rescue Exception => e
+      flash[:error] = "Sorry, either the username/email or password don't match our records."
+      render :errors
+    end
   end
   
   def destroy

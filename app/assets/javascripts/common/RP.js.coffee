@@ -19,7 +19,7 @@ jQuery ->
 	$('div.navbar').on "resize", (event) ->
 		$('body')[0].style.paddingTop = ($('div.navbar')[0].offsetHeight+7).toString()+"px"
 
-	RP.fire_triggers()
+	RP.loadElmt $('body') # RP.fire_triggers()
 
 # Respond to the preview-recipe button by opening a popup loaded with its URL.
 #   If the popup gets blocked, return true so that the recipe is opened in a new
@@ -60,37 +60,6 @@ RP.makeExpandingArea = (containers) ->
 		i = i+1
 	# Enable extra CSS
 	containers.addClass 'active'
-
-###
-# Add a bookmark for the current page
-RP.bm = (title, addr) ->
-	if window.sidebar # Mozilla Firefox Bookmark
-		window.sidebar.addPanel location.href, document.title, ""
-	else if false # IE Favorite
-		window.external.AddFavorite location.href, document.title 
-	else if window.opera && window.print # Opera Hotlist
-		this.title = document.title;
-		return true;
-	else # webkit - safari/chrome
-		alert 'Press ' + ((navigator.userAgent.toLowerCase().indexOf('mac') != - 1) ? 'Command/Cmd' : 'CTRL') + ' + D to bookmark this page.'
-
-# Go to a page and push a special state
-RP.getgo = (request, addr) ->
-	$.ajax
-		type: "GET",
-		dataType: "html",
-		url: request,
-		error: (jqXHR, textStatus, errorThrown) ->
-			debugger
-		success: (response, statusText, xhr) ->
-			# Pass any assumptions into the response data
-			document.getElementsByTagName("html")[0].innerHTML = response;
-			document.title = "Cookmark";
-			window.history.pushState
-				html: response,
-				pageTitle: "Cookmark"
-			,"Cookmark", addr
-###
 
 RP.event_target = (event) ->
 	if event && (typeof event.target == "object")
@@ -203,7 +172,7 @@ RP.post_success = (jsonResponse, dlog, entity) ->
 
 	# Call the dialog's response function
 	if(dlog != undefined) || (entity != undefined)
-		RP.dialog.onsave dlog, entity
+		RP.notify 'save', (entity || dlog)
 
 	# Stash the result for later processing
 	# if dlog != undefined
@@ -273,22 +242,48 @@ RP.change = (event) ->
 	else
 		query.value = elmt.value
 	# Fire off an Ajax call notifying the server of the (re)classification
-	RP.submit.submit_and_process RP.build_request(data.request, query), elmt, "GET"
+	RP.submit.submit_and_process RP.build_request(data.request, query), elmt
 
-# Build a request string from a structure with attributes 'request' and 'querydata'
-RP.build_request = (request, query) ->
-	# Encode the querydata into the request string
-	str = []
-	for attrname,attrvalue of query
-		str.push(encodeURIComponent(attrname) + "=" + encodeURIComponent(attrvalue));
-	# Fire off an Ajax call notifying the server of the (re)classification
-	data.request+"?"+str.join("&")
+# Crack the query string (if any) to produce an object
+parse_query = (query) ->
+	rtnval = {}
+	if query
+		pl     = /\+/g  # Regex for replacing addition symbol with a space
+		search = /([^&=]+)=?([^&]*)/g
+		decode = (s) ->
+			decodeURIComponent s.replace(pl, " ")
+		while (match = search.exec(query))
+			rtnval[decode match[1]] = decode match[2]
+	rtnval
+
+# Rebuild a request string using values from the object 'assert'
+RP.build_request = (request, assert) ->
+	if assert
+		path = request.replace /\?.*/, ''
+		query = parse_query request.replace(path,'').replace("?", '')
+		# replace values in the existing query according to the imposed query
+		for attrname,attrvalue of assert
+			query[attrname] = attrvalue
+		str = []
+		for attrname,attrvalue of query
+			str.push(encodeURIComponent(attrname) + "=" + encodeURIComponent(attrvalue));
+		if str.length > 0
+			path += "?" + str.join("&")
+		path
+	else
+		request
 
 # Ensure that a newly-loaded element is properly attended to
 RP.loadElmt = (elmt) ->
 	$(elmt).trigger 'load'
 	$('[onload]', elmt).trigger 'load'
+	for toSetup in $('[data-setup]', elmt)
+		if fcn = RP.named_function $(toSetup).data "setup"
+			fcn toSetup
 	RP.fire_triggers elmt # For unobtrusive triggers
+
+RP.onload = (event) ->
+	x=2
 
 # Process response from a request. This will be an object supplied by a JSON request,
 # which may include code to be presented along with fields (how and area) telling how
@@ -309,10 +304,11 @@ RP.process_response = (responseData, odlog) ->
 				elmt = $(replacement[0])[0]
 				if replacement[1]
 					if newElmt = $(replacement[1])
-						$(elmt).replaceWith newElmt
-						RP.loadElmt newElmt
+						RP.replaceElmt elmt, newElmt
+						if $(newElmt).hasClass 'pagelet-body'
+							window.scrollTo 0, 0
 				else
-					RP.masonry.removeItem elmt
+					RP.removeElmt elmt
 				# The third value may be a function name to call on the replaced elemnnt
 				if (loader = replacement[2]) && (loadFcn = RP.named_function(loader))
 					loadFcn($(replacement[0])[0])
@@ -320,9 +316,9 @@ RP.process_response = (responseData, odlog) ->
 		if insertions = responseData.insertions # [ item_selector, item_data, composite_selector
 			for insertion in insertions
 				if elmt = $(insertion[0])[0]
-					RP.masonry.removeItem elmt
+					RP.removeElmt elmt
 				newElmt = $(insertion[1])[0]
-				RP.masonry.prependItem newElmt, insertion[2]
+				RP.prependElmt newElmt, insertion[2]
 
 		if redirect = responseData.redirect
 			window.location.assign redirect # "http://local.recipepower.com:3000/collection" #  href = href
@@ -342,12 +338,18 @@ RP.process_response = (responseData, odlog) ->
 				item = $(deletion)[0]
 				if $(item).hasClass('masonry-item') && $(item.parentNode).hasClass 'js-masonry'
 					$(item.parentNode).masonry 'remove', item
+					$(item.parentNode).masonry 'layout'
 				else
 					$(deletion).remove()
 
 		# 'odlog' gives a dialog DOM element to replace the extant one
 		if newdlog = responseData.dlog
 			RP.dialog.replace_modal newdlog, odlog
+			supplanted = true
+
+		# 'odlog' gives a dialog DOM element to replace the extant one
+		if newdlog = responseData.push
+			RP.dialog.push_modal newdlog, odlog
 			supplanted = true
 
 		# 'code' gives HTML code, presumably for a dialog, possibly wrapped in a page
@@ -376,3 +378,38 @@ RP.process_response = (responseData, odlog) ->
 				RP.dialog.run odlog
 
 	return supplanted
+
+RP.replaceElmt = (oldElmt, newElmt) ->
+	if !RP.masonry.replaceItem oldElmt, newElmt
+		$(oldElmt).replaceWith newElmt
+	RP.loadElmt newElmt
+
+RP.removeElmt = (elmt) ->
+	RP.masonry.removeItem(elmt) || $(elmt).remove()
+
+# Prepend the element at the top of the list given by 'selector' (which can be a parent node)
+RP.prependElmt = (elmt, parent) ->
+	if !RP.masonry.prependItem(elmt, parent)
+		$(parent).prepend elmt
+	RP.loadElmt elmt
+
+RP.appendElmt = (item, parent) ->
+	if !RP.masonry.appendItem item, parent
+		$(parent).append item
+
+RP.notify = (what, entity) ->
+	# If the entity or the dialog have hooks declared, use them
+	if dlog = $(entity).closest('div.dialog')[0]
+		RP.dialog.notify what, dlog
+	else
+		RP.apply_hooks what, entity
+
+RP.apply_hooks = (what, entity) ->
+	fcn_name = what + "Fcn";
+	msg_name = what + "Msg";
+	if hooks = $(entity).data "hooks"
+		if hooks.hasOwnProperty msg_name
+			RP.notifications.post hooks[msg_name], "popup"
+		if hooks.hasOwnProperty fcn_name
+			fcn = RP.named_function hooks[fcn_name]
+			return fcn entity # We want an error if the function doesn't exist

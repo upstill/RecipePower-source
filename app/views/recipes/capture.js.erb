@@ -198,7 +198,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		ns.postMessage(
 			{ url: this.src,
 				call: "replaceImg"
-			}, "<%= root_link %>", iframe.contentWindow);
+			}, "<%= rp_url %>", iframe.contentWindow);
 		event.preventDefault();
 		event.stopPropagation();
 	},
@@ -212,7 +212,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 			ns.postMessage(
 				{ url: childImgs[i].src,
 					call: "replaceImg"
-				}, "<%= root_link %>", iframe.contentWindow);
+				}, "<%= rp_url %>", iframe.contentWindow);
 		event.preventDefault();
 		event.stopPropagation();
 	},
@@ -337,7 +337,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	encodeExtractions: function(extrs) {
 		var result = "";
 		for(field in extrs)
-			result += "&amp;extractions["+field+"]="+encodeURIComponent(extrs[field]);
+			result += "&extractions["+field+"]="+encodeURIComponent(extrs[field]);
 		return result;
 	}
 	
@@ -385,7 +385,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	callback += ns.encodeExtractions(extractions);
 	
 	var goer = document.createElement('a');
-	goer.href = "<%= root_link %>/collection"
+	goer.href = "<%= rp_url '/collection' %>"
 	goer.id = 'recipePower-golink';
 	goer.style.display = 'none';
 	document.body.appendChild(goer);
@@ -583,4 +583,4 @@ window.recipePower_namespace.receiveMessage( function(evt) {
 			namespace[call](data);
 		}
 	}
-}, "<%= root_link %>" );
+}, "<%= rp_url %>" );

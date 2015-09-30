@@ -1,0 +1,55 @@
+.panels {
+  height: 100%;
+  display: block;
+  margin: 0;
+  padding:0;
+  font-size: 30px; /*1rem=30px*/
+  section {
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    font-family: Oswald, sans-serif;
+    .panel-one {
+      background: image-url("Ipad-Mock-Up-RP.jpg") center center cover no-repeat fixed;
+    }
+    .panel-two{
+      background-color: #7c966a;
+    }
+    .panel-three{
+      background-color: #dbc046;
+    }
+    .panel-four{
+      background-color: #4c7c99;
+    }
+    .panel-container{
+      display: inline-block;
+      .panel-title{
+        font-size: 9rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.32);
+        letter-spacing: .05rem;
+        margin-top: -5%;
+      }
+      .panel-subtitle{
+        font-size: 2rem;
+        color: rgba(255, 255, 255, 0.32);
+        letter-spacing: .05rem;
+        margin: -5% 0 0 10px;
+        line-height: 1;
+      }
+      .panel-description{
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 1);
+        font-weight: 400;
+        margin: -15% 0 0 30%;
+        letter-spacing: .08rem;
+        line-height: 1;
+        position: absolute;
+      }
+    }
+  }
+}
+
+

@@ -1,1 +1,0 @@
-render template: "shared/pagelet_body_replacement"

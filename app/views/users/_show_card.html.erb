@@ -1,0 +1,42 @@
+
+<%= present decorator, current_user_or_guest do |presenter| %>
+    <div class="container-fluid card-item list-card <%= decorator.dom_id %>">
+      <%= collectible_vote_buttons decorator.object unless decorator.object == response_service.user %>
+      <table style="width: 100%">
+        <tr>
+          <td rowspan="2" class="pic-box">
+            <div class="pic-inset">
+              <%= presenter.card_avatar %>
+            </div>
+          </td>
+          <td valign="top" class="upper-content">
+            <div class="title">
+              <%= presenter.card_homelink class: "title-link" %>
+              <% if decorator.object == response_service.user %>
+                  <%= collectible_edit_button decorator %>
+              <% else %>
+                  <%= collectible_collect_icon decorator %>
+              <% end %>
+            </div>
+            <div class="container-fluid">
+              <div class="row">
+                <% (0...(presenter.card_ncolumns)).each do |column| %>
+                    <%= presenter.column column %>
+                <% end %>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td valign="bottom" class="lower-content">
+            <%= collectible_upload_button decorator, 'lg' %>
+            <% if decorator.object != response_service.user %>
+                <%= collectible_edit_button decorator, 'lg' %>
+                <%= collectible_share_button decorator, 'lg' %>
+            <% end %>
+          </td>
+        </tr>
+      </table>
+    </div>
+<% end %>
+

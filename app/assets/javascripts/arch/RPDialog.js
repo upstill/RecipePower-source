@@ -126,8 +126,6 @@ function runResponse(responseData) {
 			  placed = recipePowerRunBootstrap(injectDialog(code, responseData.area, false));				
 
 			if (!placed) { // Force the page to be displayed. XXX Does nothing to the address bar
-				// $('#container').data("pending_page", code ); // Stash for doError function
-				// window.location.replace('javascript:doError()');	
 				document.open();
 				document.write(code);
 				document.close;

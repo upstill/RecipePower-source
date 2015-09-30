@@ -1,0 +1,8 @@
+<fieldset class="tag-selection-field">
+  <% tag_selection = f.object %>
+  <span class="prompt">My desert-island <%= tag_selection.tagset ? tag_selection.title.singularize : "%%tagset_title%%" %>:</span>
+  <%= token_input_field f, "tag", label: "" %>
+  &nbsp;<%= link_to "", '#', class: "remove_tag_selection glyphicon glyphicon-remove" %>
+  <%= f.hidden_field :_destroy, class: "destroy" %>
+  <%= f.hidden_field :tagset_id, class: "tagset-id" %>
+</fieldset>

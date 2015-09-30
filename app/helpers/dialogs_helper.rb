@@ -12,7 +12,7 @@ module DialogsHelper
     end
     pic =
         content_tag :div,
-                    image_tag("https://www.recipepower.com/assets/RPlogo.png", class: "small_logo", :alt => "RecipePower"),
+                    image_tag(rp_url(image_path 'RPlogo.png' ), class: "small_logo", :alt => "RecipePower"),
                     class: "small_logo"
     body_content = with_output_buffer(&block)
     alert = options[:noflash] ? "" : (content_tag(:div, "", class: "notifications-panel").html_safe+flash_all(false))
@@ -53,7 +53,7 @@ module DialogsHelper
     dialog_class = options[:dialog_class]
     header = modal_header ttl
     options[:body_contents] ||= with_output_buffer(&block)
-    body = modal_body options.slice(:prompt, :body_contents, :noFlash, :body_class)
+    body = modal_body options.slice(:prompt, :body_contents, :noflash, :body_class)
     options[:class] =
         ["dialog",
          which.to_s,
@@ -64,7 +64,7 @@ module DialogsHelper
         ].compact.join(' ')
     # The :requires option specifies JS modules that this dialog uses
     options[:data] = {:"dialog-requires" => options[:requires]} if options[:requires]
-    options = options.slice! :show, :noflash, :body_contents, :body_class, :requires
+    options = options.slice! :show, :noflash, :body_contents, :body_class, :requires, :dialog_class
     options[:title] ||= ttl if ttl
     content_tag(:div, # Outer block: dialog
                 content_tag(:div, # modal-dialog
@@ -85,7 +85,7 @@ module DialogsHelper
 
   def modal_body(options={}, &block)
     contents = ""
-    contents << flash_notifications_div("notifications-panel") unless options.delete(:noFlash)
+    contents << flash_notifications_div unless options.delete(:noflash)
     contents << content_tag(:div, prompt, class: "prompt").html_safe if prompt = options.delete(:prompt)
     contents << (options.delete(:body_contents) || capture(&block))
     options[:class] = "modal-body #{options.delete :body_class}"
@@ -137,37 +137,35 @@ module DialogsHelper
                 class: "recipePowerCancelDiv")
   end
 
-  def dialog_submit_button name = nil, options={}
-    if name.is_a? Hash
-      options, name = name, nil
+  def dialog_submit_button label = nil, options={}
+    if label.is_a? Hash
+      options, label = label, nil
     end
-    options = bootstrap_button_options({button_style: "success"}.merge(options))
-    str =
-        tag :input,
-            class: "#{options[:class]} dialog-submit-button dialog-form-button",
-            name: "commit",
-            type: "submit",
-            value: name||"Save",
-            data: { method: "post" }
-    # <input class="submit btn btn-primary" name="commit" type="submit" value="Save" data-method="post"/>
-    str
+    options = bootstrap_button_options options.merge(
+                                           button_style: (options[:button_style] || "success"),
+                                           class: "#{options[:class]} #{options[:style] || 'form-button'}"
+                                       )
+    tag :input,
+        class: "#{options[:class]} dialog-submit-button",
+        name: "commit",
+        type: "submit",
+        value: label||"Save",
+        data: { method: options[:method] || "post" }
   end
 
-  def dialog_cancel_button name = nil, options={}
-    if name.is_a? Hash
-      options, name = name, nil
+  def dialog_cancel_button label = nil, options={}
+    if label.is_a? Hash
+      options, label = label, nil
     end
-    options = bootstrap_button_options({button_style: "info"}.merge(options))
-    # options[:class] = "#{options[:class]} close dialog-cancel-button"
-    #link_to name, "#", options
-    str = tag :input,
-              class: "#{options[:class]} cancel dialog-cancel-button dialog-form-button",
-              data: {dismiss: "modal"},
-              name: "commit",
-              type: "submit",
-              value: name||"Cancel"
-    # <input class="cancel btn dialog-cancel-button" data-dismiss="modal" name="commit" type="submit" value="Cancel"/>
-    str
+    options = bootstrap_button_options options.merge(
+                                           button_style: (options[:button_style] || "info"),
+                                           class: "#{options[:class]} #{options[:style] || 'form-button'}"
+                                       )
+    tag :input,
+        class: "#{options[:class]} cancel dialog-cancel-button",
+        data: {dismiss: "modal"},
+        name: "commit",
+        type: "submit",
+        value: label||"Cancel"
   end
-
 end

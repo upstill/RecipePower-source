@@ -1,0 +1,11 @@
+<%= form_for @decorator, remote: true, method: :patch, html: {class: "user_image", onload: "RP.submit.form_onload(event);"}, data: {type: 'json'} do |f| %>
+    <div class="media-object fixed-width" >
+      <%= pic_field f, 
+                    :nopicker => true,
+                    :submit_on_change => true,
+                    :fallback_img => image_path("default-avatar-128.png")
+      %>
+      <%= uploader_field @decorator %>
+      <%= hidden_field_tag :form, "image" %>
+    </div>
+<% end %>

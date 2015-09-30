@@ -32,6 +32,10 @@ RP::Application.configure do
   # config.assets.digest = true
   # config.assets.initialize_on_precompile = false
 
+  # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
+  # TODO When we're sure that SSL works
+  config.force_ssl = true
+
   # Precompile additional assets (application.js, application.css, and all non-JS/CSS are already added)
   config.assets.precompile += %w( collection.css collection.js injector.css injector.js )
   config.middleware.use ExceptionNotification::Rack,
@@ -49,5 +53,8 @@ RP::Application.configure do
 
   config.action_mailer.delivery_method = :letter_opener # :smtp
 
-  config.eager_load = false # Added for Rails 4: 
+  config.eager_load = false # Added for Rails 4:
+
+  # Use local, e.g. bootstrap, files rather than a CDN
+  config.x.no_cdn = true
 end

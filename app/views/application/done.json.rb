@@ -1,1 +1,1 @@
-{ done: true }.to_json
+{ done: true }.merge(flash_notify).to_json

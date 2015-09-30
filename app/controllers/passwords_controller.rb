@@ -44,19 +44,20 @@ class PasswordsController < Devise::PasswordsController
     self.resource = resource_class.send_reset_password_instructions(resource_params)
     if successfully_sent?(resource)
       respond_to do |format|
-        format.html { # This is for capturing a new recipe. The injector (capture.js) calls for this
+        format.html {
+          # This is for capturing a new recipe. The injector (capture.js) calls for this
           redirect_to root_path
         }
-        format.json {
-          # @_area = params[:_area]
-          content = with_format("html") { render_to_string "alerts/popup", layout: false }
-          render json: { dlog: content }
-        }
+        format.json { render 'alerts/popup', locals: { alert_hdr: 'HELP IS ON ITS WAY' } }
       end
     else
-      error = "Hmm, we don't seem to have any user by that name (or email). Could you try again?"
-      redirect_to new_user_password_path(:mode => response_service.mode, user: { login: params[:user][:login] }),
-                  { :flash => { :error => error } }
+      flash[:error] = "Hmm, we don't seem to have any user by that name (or email). Could you try again?"
+      respond_to do |format|
+        format.html {
+          redirect_to new_user_password_path(user: { login: params[:user][:login] })
+        }
+        format.json { render 'alerts/popup', locals: { method: :push, alert_hdr: "HOW'S THAT AGAIN?" } }
+      end
     end
   end
 end

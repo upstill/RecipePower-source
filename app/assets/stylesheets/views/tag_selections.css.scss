@@ -1,0 +1,16 @@
+// Place all the styles related to the tagsets controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+fieldset.tag-selection-field {
+  div.form-group {
+    display: inline-block;
+    position: relative;
+    top: 10px;
+  }
+  span.prompt {
+    font-family: arial, sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+  }
+}

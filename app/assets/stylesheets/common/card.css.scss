@@ -1,0 +1,317 @@
+fieldset.answer-field {
+  margin-top: 10px;
+}
+
+label.question-text {
+  font-family: arial, sans-serif;
+  font-weight: 200;
+}
+
+a.tablink {
+  font-family: $archivo;
+  font-weight: bold;
+  color: #2c7191;
+}
+
+div.results-card {
+  margin-left: 1em;
+  margin-right: 1em;
+}
+
+div.associated-card {
+  margin-top: 1em;
+  padding: 1em;
+  .associated-title {
+    font-size: 2.5em;
+    padding-bottom: 0.3em;
+    &.lists-owned {
+      color: #dfc75c;
+    }
+    &.lists-collected {
+      color: #66996f;
+    }
+  }
+}
+
+div.card-item {
+  -webkit-box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
+  box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
+  background-color: $recipes-card-background-color;
+  font-family: $archivo;
+  position: relative;
+  &.row {
+    margin: 0.5em;
+  }
+  margin-bottom: 1em;
+  div.title-glyph {
+    color: #ea8a7a;
+    height: 2em;
+    &.top-right {
+      font-size: 2.5em;
+      position: absolute;
+      top: 0.1em;
+      right: 0.2em;
+    }
+  }
+  div.source {
+    font-family: $oswald-light;
+    font-size: 1em;
+    padding: 0.6em 1em 0.2em 1.2em;
+    color: #999;
+    margin: 0em -1em;
+    a.source-link {
+      color: #77a2be;
+      letter-spacing: 1px;
+    }
+  }
+  td.pic-box {
+    width: 25%;
+    &.empty {
+      display: none;
+    }
+  }
+  &.cardlet-item {
+    // min-width: 200px;
+    width: 350px;
+    padding: 1em 1em 0 1em;
+    background-color: $recipes-card-background-color;
+    font-family: $archivo;
+    margin-top: 0;
+    font-size: 50%;
+    div.bottom-strip {
+      position: absolute;
+      bottom: -0.4em;
+      left: -0.3em;
+      right: -0.4em;
+      height: 3em;
+      font-size: 1.8em;
+      background: $recipes-card-background-color;
+    }
+    div.source {
+      border-bottom: 0.3em solid #b95454;
+      margin-bottom: 0.5em;
+    }
+    div.title-box {
+      // min-height: 3.6em;
+      // margin-bottom: 1em;
+      // margin-top: 0.2em;
+      margin-right: 1em;
+      font-size: 2.1em;
+      font-family: $archivo;
+      font-weight: 700;
+      letter-spacing: 0.9px;
+      line-height: 1.2em;
+      a.title-link {
+        color: #4f4d4a;
+      }
+    }
+    td.pic-box {
+      width: 150px;
+    }
+    td.pic-box {
+      width: 165px;
+      padding-right: 8px;
+    }
+  }
+  &.card-large {
+    div.vote-buttons {
+      font-size: 1.2em;
+      float: right;
+      margin-right: -0.5em;
+      margin-bottom: 0.5em;
+      a.vote-button {
+        font-size: 1.4em;
+      }
+    }
+  }
+  &.recipe-card {
+    // width: 350px;
+    background-color: $recipes-card-background-color;
+    .description {
+      font-size: 1.2em;
+      color: #a2a2a2;
+    }
+    td.upper-content {
+      padding-left: 1em;
+    }
+    td.lower-content {
+      // padding-left: 0.5em;
+      padding-bottom: 0.3em;
+      vertical-align: bottom;
+      font-size: 2em;
+      div.share-button {
+        float: right;
+      }
+    }
+    .title-bar {
+      border-bottom: 0.3em solid #b95454;
+      .left-matter {
+        position: relative;
+      }
+    }
+    div.title {
+      // min-height: 3.6em;
+      // margin-bottom: 1em;
+      font-family: Oswald, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      margin-top: 0.4em;
+      font-size: 2.1em;
+      font-weight: 200;
+      letter-spacing: 2px;
+      line-height: 1.2em;
+      a.title-link {
+        color: white;
+      }
+    }
+    div.vote-buttons {
+      font-size: 1.2em;
+      float: right;
+      margin-right: -0.5em;
+      margin-bottom: 0.5em;
+      a.vote-button {
+        font-size: 1.4em;
+      }
+    }
+  }
+  &.comments-card {
+    padding-left: 35px;
+    padding-right: 10px;
+    padding-top: 5px;
+    div.title-bar {
+      font-family: $oswald-bold;
+      font-size: 24pt;
+    }
+  }
+  &.viewer-card {
+    background-color: $viewer-card-background-color;
+  }
+  &.friend-card {
+    background-color: $friends-card-background-color;
+  }
+  &.user-card {
+    background-color: $user-card-background-color;
+  }
+  &.list-card {
+    background-color: $lists-card-background-color;
+    color: #909090;
+    div.vote-buttons {
+      position: absolute;
+      top: 0;
+      right: 0.2em;
+    }
+    div.pic-inset {
+      margin: 2em;
+    }
+    span.owner-name {
+      font-size: 1.4em;
+    }
+    div.owner-pic {
+      width: 100%; // 8em;
+      // margin: 1em;
+    }
+    h3 {
+      color: white;
+      font-size: 1.5em;
+      margin-top: 0.5em;
+      margin-bottom: 0em;
+    }
+    td.lower-content {
+      padding-bottom: 0.3em;
+      // padding-left: 0.5em;
+      vertical-align: bottom;
+      font-size: 2em;
+      div.share-button {
+        float: right;
+        position: relative;
+        left: 10px;
+        bottom: 8px;
+      }
+    }
+    div.title {
+      // min-height: 3.6em;
+      // margin-bottom: 1em;
+      margin-top: 0.4em;
+      font-size: 3em;
+      font-family: $archivo;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      line-height: 1.2em;
+      a.title-link {
+        color: white;
+      }
+    }
+    div.vote-buttons {
+      font-size: 1.2em;
+      float: right;
+      margin-top: 0.3em;
+      a.vote-button {
+        font-size: 1.4em;
+      }
+    }
+  }
+  div.pic-200w {
+    width: 200px;
+  }
+  div.pic-200h {
+    height: 200px;
+  }
+  div.recipe-pic {
+    margin-top: 10px;
+  }
+  p.description {
+    font-size: 1.3em;
+  }
+  div.tags {
+    font-weight: 400;
+    color: #909090;
+    a.taglink {
+      color: inherit;
+    }
+    span.tagsep {
+      font-size: 1.3em;
+      color: #8ac5d2;
+      font-family: Helvetica, sans-serif;
+      font-weight: 200;
+      font-size: 1.2em;
+    }
+  }
+  .card-aspect-label {
+    margin-bottom: 0;
+    color: white;
+    letter-spacing: 2px;
+    font-size: 16px;
+    &.header {
+      font-size: 36px;
+      letter-spacing: 3px;
+      margin-bottom: 10px;
+      span.user-handle {
+        font-size: 0.5em;
+      }
+    }
+  }
+  p.card-aspect-contents {
+    margin-top: 0;
+    color: #8D8F90;
+  }
+}
+
+table.cardlet-table {
+  width: 100%;
+  height: 100%;
+}
+
+div.pic-inset {
+  width: auto;
+  margin: 15px 5px;
+}
+
+div.pic_preview {
+  div.bootstrap-filestyle {
+    margin: 20px;
+  }
+}
+
+.bootstrap-filestyle {
+  margin-top: 20px;
+  text-align: center;
+}

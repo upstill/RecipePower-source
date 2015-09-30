@@ -1,0 +1,17 @@
+<td>
+  <%= image_enclosure decorator, fill_mode: 'fixed-width' %>
+  <%= link_to_submit decorator.handle, user_path(decorator), mode: :modal %>
+</td>
+<td><%= decorator.about %></td>
+<td><%= taggable_list decorator %></td>
+<td>
+  <%= count_report decorator.object.collection_size, "cookmarks", "<b>Has collected</b>", "<br>" %>
+  <%= count_report decorator.object.followees.count, "other", "<b>Following</b>", "<br>" %>
+  <%= count_report decorator.object.followers.count, "other", "<b>Followed by</b>", "<br>" %>
+  <%= count_report decorator.object.collection_size(Feed), "feed", "<b>Taking</b>", "<br>" %>
+  <%= count_report decorator.object.visible_lists(current_user).count, "list", "<b>Owns</b>", "<br>" %>
+</td>
+<td>
+  <%= follow_button(decorator.object) if current_user && (current_user.id != decorator.id) %>
+  <%= button_to_submit((decorator.private? ? 'Show' : 'Hide'), user_path(decorator.object, user: {private: (decorator.private? ? 0 : 1)}), method: :put) if response_service.admin_view? %>
+</td>

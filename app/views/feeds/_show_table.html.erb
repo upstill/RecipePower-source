@@ -1,0 +1,15 @@
+<% feed = decorator.object %>
+  <td>
+    <%= feed_homelink feed, feed_wait_msg(feed).merge(truncate: 80) %><br>
+    <%= feed.description %><br>
+  </td>
+  <td><%= taggable_list feed %></td>
+  <td><%= feed.feedtypename unless feed.feedtypename == "Misc" %></td>
+  <td><%= link_to_submit feed.site.name, site_path(feed.site), mode: :modal %></td>
+  <td><%= feed_status_summary feed %></td>
+  <% if response_service.admin_view? %>
+      <td><%= feed_approval feed %></td>
+  <% end %>
+  <td>
+    <%= feed_collectible_buttons decorator, vote_button: true, edit_button: response_service.admin_view? %>
+  </td>

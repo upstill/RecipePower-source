@@ -1,10 +1,10 @@
-require "templateer.rb"
-class UserDecorator < Draper::Decorator
-  include Templateer
-  delegate_all
+# require "templateer.rb"
+class UserDecorator < CollectibleDecorator
+  # include Templateer
+  # delegate_all
 
   def title
-    object.handle
+    h.user_linktitle object
   end
 
   def sourcename

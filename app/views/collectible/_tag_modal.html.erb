@@ -1,7 +1,7 @@
 <%# Default modal dialog for editing a (collectible, taggable) item. May be overwritten for other controllers  %>
 <% decorator ||= @decorator || TemplateDecorator.new # If no decorator provided, assume this is for a template   %>
 <%= content_tag(:div,
-                class: "dialog tag-collectible modal at_left hide",
+                class: "dialog tag-collectible modal hide",
                 style: "overflow:visible") do %>
     <div class="modal-dialog">
       <div class="modal-content">
@@ -49,7 +49,7 @@
                 </div>
                 <div class="control-group">
                   <input id="<%= decorator.element_id :collectible_user_id %>" name="<%= decorator.field_name :collectible_user_id %>" type="hidden" value="<%= decorator.collectible_user_id %>">
-                  <label class="string optional">Notes & Comments</label>
+                  <label class="string optional">Comment</label>
                   <textarea id="<%= decorator.element_id :collectible_comment %>" name="<%= decorator.field_name :collectible_comment %>" placeholder="Anything you'd like to say about this <%= decorator.human_name false, false %>" rows="3" style="width:100%"><%= decorator.collectible_comment %></textarea>
                 </div>
                 <div class="control-group">
@@ -65,7 +65,7 @@
             <div class="row">
               <div class="col-md-12">
                 <div class="form-group recipe_picurl">
-                  <%= uploader_field decorator, :picurl %>
+                  <%= uploader_field decorator %>
                 </div>
               </div>
             </div>
@@ -73,7 +73,7 @@
           <div class="modal-footer">
             <input class="btn pull-left" type="submit" data-action="<%= decorator.object_path %>/collect.json?oust=true" value="Remove from collection" data-method="patch"/>
             <% if permitted_to?(:admin, :pages) && response_service.admin_view? %>
-                <%= link_to_submit "Destroy", decorator.object_path, :class => "pull-left", :button_style => :danger, :method => :delete, confirm: "This will remove the <%= decorator.human_name % > from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" %>
+                <%= link_to_submit "Destroy", decorator.object_path, :class => "pull-left", :button_style => :danger, :method => :delete, confirm: "This will permanently remove ths #{decorator.human_name} from RecipePower for good: it can't be undone. Are you absolutely sure you want to do this?" %>
             <% end %>
             <%= dialog_submit_button %>
             <%= dialog_cancel_button %>

@@ -1,15 +1,15 @@
 <%# inviter_name = (@resource.invited_by_id && User.find(@resource.invited_by_id).handle) %>
 <% inviter_name = @resource.invitation_issuer %>
-<% @recipe = Recipe.find @resource.shared_recipe %>
+<% @decorator = @resource.shared.decorate %>
 
-<%= (inviter_name || "Someone").split(/s/).first %> says: Look what I found on RecipePower (http://www.recipepower.com)
+<%= (inviter_name || "Someone").split(/s/).first %> says: Look what I found on RecipePower (<% rp_url %>)
 
 <% splitstr(@resource.invitation_message, 72).each do |line| %>
     <%= strip_tags line %>
 <% end %>
 
-Check out "<%= @recipe.title %>" 
-at <%= @recipe.url %>.
+Check out "<%= @decorator.title %>" 
+at <%= @decorator.url %>.
 
 BUT WAIT! Rather not deal with this now? Save it to RecipePower and have it waiting for you.
 Just click this link: <%= accept_user_invitation_url :invitation_token => @resource.raw_invitation_token %>
