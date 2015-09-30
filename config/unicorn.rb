@@ -6,4 +6,4 @@
 # listen "/tmp/unicorn.RP.sock"
 
 worker_processes 1
-timeout ((ENV['RAILS_ENV'] == 'development') ? 3000 : 20)
+timeout ((ENV['RAILS_ENV'] == 'development') ? 3000 : 200)
