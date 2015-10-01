@@ -214,27 +214,20 @@ class ApplicationController < ActionController::Base
         # Render the stream's entity in a modal dialog
         render :show
       when :items # Stream items into the stream's container
-        renderings = []
+        renderings = [ { deletions: [".stream-tail.#{fp.stream_id}"] } ]
         while item = fp.next_item do
-          renderings << with_format("html") { view_context.render_item item, fp.item_mode }
+          renderings << { elmt: with_format("html") { view_context.render_item item, fp.item_mode } }
         end
-        tail_item = with_format("html") { render_to_string partial: fp.tail_partial } if fp.next_path
-
+        renderings << { elmt: with_format("html") { render_to_string partial: fp.tail_partial } } if fp.next_path
+        render json: renderings
+=begin
         response.headers["Content-Type"] = "text/event-stream"
         response.headers["Cache-Control"] = "no-cache"
         # retrieve_seeker
         begin
           sse = Reloader::SSE.new response.stream
-          sse.write :stream_item, deletions: [".stream-tail.#{fp.stream_id}"]
           renderings.each do |rendering|
-              sse.write :stream_item, elmt: rendering
-          end
-          # while item = fp.next_item do
-          #   rendering = with_format("html") { view_context.render_item item, fp.item_mode }
-          #   sse.write :stream_item, elmt: rendering
-          # end
-          if tail_item
-            sse.write :stream_item, elmt: tail_item
+              sse.write :stream_item, rendering
           end
         rescue IOError
           logger.info "Stream closed"
@@ -243,6 +236,7 @@ class ApplicationController < ActionController::Base
           sse.close
         end
         fp.suspend
+=end
         true
     end
   end
