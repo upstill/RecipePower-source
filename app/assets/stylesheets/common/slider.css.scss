@@ -14,8 +14,8 @@ div.slider {
     position: absolute;
     bottom: 0;
     z-index: 999;
-    height: 220px;
-    overflow-x: auto;
+    height: 250px;
+    overflow-x: hidden;
     overflow-y: hidden;
     font-size: 16px;
     color: #EEEEEE;
@@ -28,7 +28,7 @@ div.slider {
     margin: 0;
     padding: 0;
     // border: 2px solid #0000ff;
-    overflow-x: auto;
+    overflow-x: hidden;
     overflow-y: hidden;
     white-space: nowrap;
     height: 16em;
@@ -50,11 +50,11 @@ div.slider {
     right: 0;
   }
   .slider-item {
-    height: 14em;
+    height: 15em;
     width: auto;
     min-width: 160px;
     // float: left;
-    margin-right: 15px;
+    margin-right: 25px;
     background-color: inherit;
     position: relative; // So components can get absolute coordinates
     vertical-align: top;
@@ -66,7 +66,7 @@ div.slider {
     }
     div.slider-left {
       div.slider-pic {
-        height: 12em;
+        height: 13em;
         display: inline-block;
         float: left;
         .pic-box {

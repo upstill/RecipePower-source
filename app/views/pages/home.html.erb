@@ -1,3 +1,12 @@
+<script type="text/javascript">
+    jQuery(function ($) {
+        $('body').panelSnap( {
+            panelSelector: 'section.snap-panel',
+        onActivate: function (a, b) {
+            RP.slider.startScroll($('div.track', a)[0])
+        }}) ;
+    });
+</script>
 <div class="panels">
   <section class="snap-panel panel-one">
     <div class="panel-elements">
@@ -21,7 +30,7 @@
       <p class="panel-subtitle">Join our community of dessert<br/>bakers & dinner party makers.</p>
       <p class="panel-description-long">Invite your real life sous chefs<br/>and hear about what they're cooking up.</p>
     </div>
-    <%= render 'lists/pano' %>
+    <%= render 'lists/pano', list: List.find(3) %>
   </section>
   <section class="snap-panel panel-two">
     <div class="panel-elements">
@@ -30,7 +39,7 @@
       <p class="panel-description">A tool to create, contribute to and discover<br/>communities focused on specific
         interests.</p>
     </div>
-    <%= render 'lists/pano' %>
+    <%= render 'lists/pano', list: List.find(3) %>
   </section>
   <section class="snap-panel panel-three">
     <div class="panel-elements">
@@ -38,7 +47,7 @@
       <p class="panel-subtitle">New ideas come to you.</p>
       <p class="panel-description">Subscribe to food blogs and columns <br/>from all over the world.</p>
     </div>
-    <%= render 'lists/pano' %>
+    <%= render 'lists/pano', list: List.find(3) %>
   </section>
 </div>
 

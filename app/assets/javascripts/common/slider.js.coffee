@@ -89,23 +89,26 @@ RP.slider.hoverout = (event) ->
 		clearTimeout RP.slider.current
 		RP.slider.current = null
 
-RP.slider.scroll = (event) ->
-	tracker = event.target
-	if $(':first', tracker)[0]
+RP.slider.startScroll = (tracker) ->
+	if RP.slider.intvl
+		clearInterval RP.slider.intvl
+		RP.slider.intvl = null
+	if tracker && $(':first', tracker)[0]
 		width = tracker.getBoundingClientRect().width
-		setInterval ->
-			incr = -3
-			leftmost = tracker.children[0]
-			rightmost = tracker.children[tracker.children.length - 1]
-			# Ensure we don't run past the end of the items by moving the first item to the end
-			if rightmost.getBoundingClientRect().right < tracker.parentNode.getBoundingClientRect().right
-				if tracker.children[1]
-					incr += tracker.children[1].getBoundingClientRect().left - leftmost.getBoundingClientRect().left
+		RP.slider.intvl = setInterval ->
+			if tracker.getBoundingClientRect().top < window.innerHeight && tracker.getBoundingClientRect().top > 0
+				incr = -3
+				leftmost = tracker.children[0]
+				rightmost = tracker.children[tracker.children.length - 1]
+				# Ensure we don't run past the end of the items by moving the first item to the end
+				if rightmost.getBoundingClientRect().right < tracker.parentNode.getBoundingClientRect().right
+					if tracker.children[1]
+						incr += tracker.children[1].getBoundingClientRect().left - leftmost.getBoundingClientRect().left
+					else
+						incr += leftmost.getBoundingClientRect().width
+					$(tracker).append $(leftmost).detach()
 				else
-					incr += leftmost.getBoundingClientRect().width
-				$(tracker).append $(leftmost).detach()
-			else
-				if tracker.getBoundingClientRect().left < -width
-					incr += width
-			slide_track tracker, incr
+					if tracker.getBoundingClientRect().left < -width
+						incr += width
+				slide_track tracker, incr
 		, 20
