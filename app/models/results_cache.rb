@@ -612,9 +612,9 @@ class UsersCache < ResultsCache
 
 end
 
-class UserFriendsCache < UserCollectionCache
+class UserFriendsCache < UsersCache
   def itemscope
-    user.followees if user
+    User.find(@userid).followees if @userid
   end
 end
 
