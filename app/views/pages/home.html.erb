@@ -1,3 +1,9 @@
+<%= javascript_include_tag 'jquery.panelSnap' %>
+<script type="text/javascript">
+    jQuery(function ($) {
+        $('body').panelSnap( { panelSelector: 'section.snap-panel' }) ;
+    });
+</script>
 <div class="panels">
   <section class="snap-panel panel-one">
     <div class="panel-elements">
