@@ -1,21 +1,29 @@
 module PageletsHelper
+
+  # Requisite beginning to all pagelets: filter header, signin links (maybe) and flash notifications
+  def pagelet_header
+    with_format('html') { render('layouts/filter_header') } +
+    (pagelet_signin_links || '') +
+    flash_notifications_div
+  end
+
   def pagelet_body_replacement entity_or_decorator=nil
-    body_id = "pagelet-body"
+    body_id = 'pagelet-body'
     content =
     case entity_or_decorator
       when String
         # A string specifies a partial
-        with_format("html") { render entity_or_decorator }
+        with_format('html') { render entity_or_decorator }
       when nil
         render_template response_service.controller, response_service.action
       else
         controller = (entity_or_decorator.is_a?(Draper::Decorator) ? entity_or_decorator.object : entity_or_decorator).class.to_s.underscore.pluralize
         body_id = pagelet_body_id entity_or_decorator
-        with_format("html") { render_template(controller, :show) }
+        with_format('html') { render_template(controller, :show) }
     end
     [ 'div.pagelet-body',
       content_tag(:div,
-                  "#{pagelet_signin_links}#{content}".html_safe,
+                  "#{pagelet_header}#{content}".html_safe,
                   class: pagelet_class,
                   id: body_id) ]
   end
