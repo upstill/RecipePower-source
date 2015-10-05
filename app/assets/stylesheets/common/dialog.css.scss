@@ -156,78 +156,19 @@ div.dialog.new-style {
 }
 
 div.dialog.new-style.purple div.modal-dialog div.modal-content {
-  background-color: #7D6D89;
-  color: #E8D6D6;
-  input[type='text'], input[type='password'], input[type='email'] {
-    background-color: #D2CCD6;
-    color: #8F9092;
-  }
-  .center-button {
-    background-color: #E1E0E4;
-    background-image: unset;
-    color: #541D78;
-    border-color: #541D78;
-  }
-  form div a {
-    color: #E8D6D6;
-  }
+  @include div-purple;
 }
 
 div.dialog.new-style.green div.modal-dialog div.modal-content {
-  background-color: #4B815B;
-  color: #9AB3A0;
-  input[type='text'], input[type='password'], input[type='email'] {
-    background-color: #C1D3C7;
-    color: #849688;
-  }
-  .center-button {
-    background-color: #D8E5DC;
-    background-image: unset;
-    color: #385E44;
-    border-color: #385E44;
-  }
-  a {
-    font-size: 0.7em;
-    color: #9AB3A0;
-  }
+  @include div-green;
 }
 
 div.dialog.new-style.salmon div.modal-dialog div.modal-content {
-  background-color: $salmon-background-color;
-  color: $salmon-text-color;
-  input[type='text'], input[type='password'], input[type='email'] {
-    background-color: $salmon-field-background-color;
-    color: $salmon-button-color;
-  }
-  .center-button {
-    background-color: $salmon-field-background-color;
-    background-image: unset;
-    color: $salmon-button-color;
-    border-color: $salmon-button-color;
-  }
-  a {
-    font-size: 0.7em;
-    color: $salmon-link-color;
-  }
+  @include div-salmon;
 }
 
 div.dialog.new-style.blue div.modal-dialog div.modal-content {
-  background-color: #5090A9;
-  color: #E6D7A3;
-  input[type='text'], input[type='password'], input[type='email'] {
-    background-color: #C2D9E1;
-    color: #7E9796;
-  }
-  .center-button {
-    background-color: #C2D9E1;
-    background-image: unset;
-    color: #205D72;
-    border-color: #205D72;
-  }
-  a {
-    font-size: 0.7em;
-    color: #A0B6C2;
-  }
+  @include div-blue;
 }
 
 div.form-group.user_remember_me {
