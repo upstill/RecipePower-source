@@ -3,7 +3,7 @@
     <a href='<%= decorator.object.url %>' class="tablink"><%= decorator.title %></a>
     <%# collectible_buttons_panel decorator, :button_size => "xs" %>
     <%= collectible_collect_icon decorator %>
-    <%= pin_menu decorator, current_user, { } %>
+    <%= collectible_list_menu decorator, current_user, { } %>
     <%= collectible_tag_button decorator, { } %>
     <%= collectible_share_button decorator, { } %>
   </div>

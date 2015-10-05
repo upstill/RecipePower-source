@@ -9,6 +9,7 @@
           <td valign="top">
             <div class="title-glyph top-right">
               <%= collectible_collect_icon decorator %>
+              <%= collectible_list_menu decorator, response_service.user, {} %>
             </div>
             <div class="title-box">
               <%= presenter.card_homelink class: "title-link" %>

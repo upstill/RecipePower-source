@@ -17,6 +17,7 @@ class ListDecorator < CollectibleDecorator
 
   def description fallback=false
     @object.description.or_fallback {
+      @object.name_tag.present? ?
       case @object.name_tag.name
         when "Keepers"
           "Recipes that are clearly worthwhile."
@@ -26,7 +27,7 @@ class ListDecorator < CollectibleDecorator
           "Recipes in active rotation."
         when "To Try"
           "Earmarked for later."
-      end
+      end : "Bogus list ##{@object.id}"
     }
   end
 

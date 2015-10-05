@@ -3,7 +3,7 @@
 
   <%= collectible_edit_button(decorator.object, styling) if styling[:edit_button] %>
 
-  <%= pin_menu decorator, current_user, styling %>
+  <%= collectible_list_menu decorator, current_user, styling %>
 
   <span class="<%= recipe_list_element_golink_class item %>">
       <%= collectible_tag_button decorator, styling %>
