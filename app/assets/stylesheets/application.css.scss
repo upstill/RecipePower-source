@@ -208,14 +208,19 @@ nav.navbar-fixed-top {
   // padding-bottom: 50px;
 }
 
+$menuback-height: 130px;
+$triggered-form-height: 30px;
+$triggered-form-margin: 10px;
 div.triggered-form {
   position: absolute;
   z-index: $container-depth;
+  height: $triggered-form-height;
+  top: 0;
   left: 230px;
+  margin: $triggered-form-margin;
   .filter-element {
     display: inline-block;
     vertical-align: bottom;
-    margin: 5px 10px
   }
 }
 
@@ -223,18 +228,41 @@ div.triggered-form {
 .container {
   background-color: $page-background-color;
   z-index: $container-depth;
-  &.med {
-    padding-top: 200px;
-    div.triggered-form {
-      top: 15px;
+  padding-bottom: 200px;
+  &.menuback {
+    padding-bottom: 0;
+    z-index: $menuback-depth;
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    margin-top: 0;
+    margin-right: auto;
+    margin-left: auto;
+    height: $menuback-height;
+    background-color: $page-background-color;
+  }
+  &.no-menu {
+    padding-top: 75px;
+    div.selector-element {
+      margin-top: 3em;
+      margin-bottom: 2em;
+      margin-left: 13em;
+    }
+    div.card-item {
+      margin-top: 30px;
     }
   }
-  &.top {
-    margin-top: 125px;
-    padding-top: 80px;
-    padding-bottom: 200px;
+  &.below-menu {
+    margin-top: $menuback-height;
+    padding-top: 75px;
     div.triggered-form {
-      top: 135px;
+      top: $menuback-height;
+    }
+    div.selector-element {
+      margin-top: 1em;
+      margin-bottom: 2em;
+      margin-left: 3em;
     }
     > div.row {
       margin-left: 15px;
@@ -243,18 +271,6 @@ div.triggered-form {
   }
 }
 
-div.menuback {
-  z-index: $menuback-depth;
-  position: fixed;
-  top: 0;
-  right: 0;
-  left: 0;
-  margin-top: 0;
-  margin-right: auto;
-  margin-left: auto;
-  height: 140px;
-  background-color: $page-background-color;
-}
 
 img.empty {
   display: none;
@@ -310,10 +326,6 @@ div.glyph-button {
 }
 
 div.selector-element {
-  display: inline-block;
-  margin-top: 2em;
-  margin-bottom: 1em;
-  margin-left: 3em;
   a.result-link {
     font-size: 1.5em;
           &.recipes {

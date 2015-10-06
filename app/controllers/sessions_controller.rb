@@ -32,10 +32,13 @@ class SessionsController < Devise::SessionsController
   end
   
   def destroy
+    handle = current_user.handle
     redirect_path = after_sign_out_path_for(resource_name)
     signed_out = (Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name))
-    set_flash_message :notice, :signed_out if signed_out && is_navigational_format?
-    flash[:notice] = flash[:notice].sub("uhandle", resource.handle) if flash[:notice] && resource
+    if signed_out && is_navigational_format?
+      set_flash_message :notice, :signed_out
+      flash[:notice] = flash[:notice].sub( 'uhandle', handle) if handle.present?
+    end
 
     # We actually need to hardcode this as Rails default responder doesn't
     # support returning empty response on GET request

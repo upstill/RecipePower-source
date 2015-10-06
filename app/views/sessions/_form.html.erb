@@ -25,14 +25,6 @@
         <%= form_errors_helper f %>
         <%= f.input :login, label: 'Username <b>or</b> Email'.html_safe, autofocus: resource.login.blank? %>
         <%= f.input :password, label: "Password", autofocus: !resource.login.blank? %></p>
-        <%# if false && devise_mapping.rememberable? -%>
-            <%# f.input :remember_me,
-                        :as => :boolean,
-                        :label => false,
-                        :inline_label => true,
-                        value: 1,
-                        input_html: {value: '1'} %>
-        <%# end -%>
         <%= f.submit 'SIGN IN', class: 'dialog-submit-button btn btn-xl center-button free' %>
         <p style="text-align: right; margin-bottom: 0px; margin-top: 10px;">
           <%= link_to_submit 'Forgot Password', new_user_password_path, mode: :modal %>

@@ -3,7 +3,7 @@ class FilteredPresenter
   attr_accessor :title, :h
 
   attr_reader :decorator, :entity,
-              :entity_type, :results_type, # :header_partial,
+              :entity_type, :results_type, 
               :results_class, # Class of the ResultsCache for fetching results
               :stream_presenter, # Manages the ResultsCache that produces items based on the query
               :content_mode, # What page element to render? :container, :entity, :results, :modal, :items
