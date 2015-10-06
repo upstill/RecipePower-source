@@ -3,14 +3,14 @@ authorization do
     has_permission_on [:pages], :to => [:home, :contact, :about, :welcome, :FAQ]
     has_permission_on [:visitors], :to => [:create]
     has_permission_on [:rcpqueries], :to => [:create, :read, :update, :tablist, :relist]
-    has_permission_on [:recipes], :to => [:read, :create, :collect, :capture, :uncollect]
+    has_permission_on [:recipes], :to => [:read, :create, :collect, :capture, :uncollect, :associated]
     has_permission_on [:tags], :to => [:show, :match, :query, :associated ]
   end
   
   role :user do
     includes :guest
     has_permission_on [:recipes, :lists, :feeds, :feed_entries, :sites, :users], :to => [ :tag, :editpic ]
-    has_permission_on [:recipes], :to => [ :subscribe, :update, :delete, :piclist, :touch, :associated ]
+    has_permission_on [:recipes], :to => [ :subscribe, :update, :delete, :piclist, :touch ]
     has_permission_on [:tags], :to => [:read]
     has_permission_on [:feeds], :to => [:index, :show, :subscribe]
     has_permission_on [:lists], :to => [:index, :show, :subscribe, :edit, :update]
