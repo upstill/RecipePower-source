@@ -59,11 +59,10 @@
 <% if user_signed_in? %>
     <%= render 'layouts/navbar' %>
 <% else %>
-    <div class="generic-top">
-      <div class="logo">
-        <%= image_tag 'rp-logo.png' %>
-      </div>
-    </div>
+  <div class="logo">
+    <%= image_tag 'rp-logo.png' %>
+  </div>
+  <%= render 'layouts/access_links' %>
 <% end %>
 <%= render 'layouts/pagelet' %>
 <% if false && Rails.env.development? %>

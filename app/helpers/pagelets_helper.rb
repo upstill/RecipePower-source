@@ -3,7 +3,6 @@ module PageletsHelper
   # Requisite beginning to all pagelets: filter header, signin links (maybe) and flash notifications
   def pagelet_header
     with_format('html') { render('layouts/filter_header') } +
-    (pagelet_signin_links || '') +
     flash_notifications_div
   end
 
@@ -45,16 +44,6 @@ module PageletsHelper
 
   def pagelet_body_selector entity=nil
     "div.pagelet-body##{pagelet_body_id(entity)}"
-  end
-
-  def pagelet_signin_links
-    unless user_signed_in?
-      content_tag :div,
-                  link_to_submit("Sign Up", new_user_registration_path, preload: true, mode: :modal)+
-                  tag(:br)+
-                  link_to_submit("Sign In", new_user_session_path, preload: true, mode: :modal),
-                  class: 'signin-link'
-    end
   end
 
   # Return the followup after updating or destroying an entity: replace its pagelet with either an update, or the list of such entities

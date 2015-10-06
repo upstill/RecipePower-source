@@ -127,30 +127,35 @@ div.dialog.new-style {
         // font:20px arial,sans-serif;
         // font-weight:bold
       }
-      input[type='text'], input[type='password'], input[type='email'] {
-        height: 2em;
-        padding: 15px;
-        border-radius: 20px;
-        margin-bottom: 10px;
-        font-style: oblique;
-      }
-      label.checkbox {
-        margin-bottom: 0;
-      }
-      .center-button {
-        letter-spacing: 4px;
-        border-radius: 8px;
-        padding: 5px 10px;
-        &.free {
-          margin-top: 20px;
-          display: block;
-          margin-left: auto;
-          margin-right: auto;
-        }
-        &.btn-xl {
-          font-size: 1.5em;
-        }
-      }
+    }
+  }
+}
+
+div.new-style {
+  input[type='text'], input[type='password'], input[type='email'] {
+    width: 86%;
+    margin-left: 7%;
+    height: 2em;
+    padding: 15px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+    font-style: oblique;
+  }
+  label.checkbox {
+    margin-bottom: 0;
+  }
+  .center-button {
+    letter-spacing: 4px;
+    border-radius: 8px;
+    padding: 5px 10px;
+    &.free {
+      margin-top: 20px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    &.btn-xl {
+      font-size: 1.5em;
     }
   }
 }

@@ -13,6 +13,14 @@ jQuery ->
 		# Hiding is the first step to removing, but that has to wait until the dialog has finished processing the hide
 		if !$(dlog).hasClass 'keeparound'
 			$(dlog).remove()
+	$('.select-content', document).click (event) ->
+		$('div.modal-body').hide()
+		if targetClass = $(event.target).data 'activate'
+			$('div.modal-body.'+targetClass).show()
+			$('a.select-content.none').show()
+		else
+			$('a.select-content.none').hide()
+		event.preventDefault()
 
 RP.dialog.focus = (dlog) ->
 	$('input.autofocus', dlog)[0] ||

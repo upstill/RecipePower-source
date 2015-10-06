@@ -5,7 +5,6 @@ div.auth_poss {
 }
 
 .sign_in.dialog {
-	// top: 100px;
 	.prompt {
 		margin:5px 0px 10px 0px;
 		font:20px arial,sans-serif;
@@ -15,13 +14,6 @@ div.auth_poss {
 		width:620px;
 		margin:5px 20px;
 		float:left;
-	}
-	.signup {
-		width:250px;
-		// border-left:solid 1px #999;
-		margin:0px;
-		padding-left:20px;
-		display: inline-block;
 	}
 	.or {
 		width: 50px;
@@ -75,7 +67,7 @@ div.sign_in .signin {
 		text-align:center;
 		margin:0;
 		padding:0;
-		padding-right:0.5em;
+		// padding-right:0.5em;
 		font-size:9px;
 		img {
 			width:40px;

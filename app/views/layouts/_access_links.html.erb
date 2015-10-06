@@ -1,0 +1,34 @@
+<div class="new-style access-links">
+  <div class="modal-content">
+    <div class="modal-header" style="text-align: center; border: none; color:#ECE6CD;">
+      <a class="select-content" , style="font-size: 2em; color:#ECE6CD;" , data-activate="signup">Sign Up</a>&nbsp;|&nbsp;
+      <a class="select-content" , data-activate="signin" style="font-size: 1.2em; color:#ECE6CD">Sign In</a>
+      <a class="select-content none" , style="display: none; float: right; font-size: 2em; color:#ECE6CD;"><%= sprite_glyph :'vote-up', 'xl' %></a>
+      <%# link_to_submit 'Sign Up',
+                             new_user_registration_path,
+                             preload: true,
+                             mode: :modal,
+                             class: 'select-content',
+                             style: 'font-size:2em',
+                             data: { activate: 'signup' } %>
+      <%# link_to_submit 'Sign In',
+                             new_user_session_path,
+                             preload: true,
+                             mode: :modal,
+                             class: 'select-content',
+                             data: { activate: 'signin' } %>
+      <%# link_to_submit sprite_glyph(:'vote-up', 'xl'),
+                             '#',
+                             style: 'float: right; font-size:2em',
+                             class: 'select-content none hide' %>
+    </div>
+    <div class="selectable signin modal-body" style="display: none">
+      <%= render 'sessions/form' %>
+      <hr style="margin-top: 5px;">
+      <%= render 'authentications/possible', prompt: 'OR SIGN IN VIA:' %>
+    </div>
+    <div class="selectable signup modal-body" style="display: none">
+      <%= render 'registrations/options' %>
+    </div>
+  </div>
+</div>

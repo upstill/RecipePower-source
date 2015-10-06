@@ -68,10 +68,12 @@ $utensils-navtab-text-color: #816887;
 $user-color: #EDDAD7;
 
 // Define depths of various elements
+$logo-depth: 1030;
 $menuback-depth: 1029;
 $container-depth: 990;
 $top-right-corner-depth: 1000;
 $dialog-depth: 1050;
+$panels-depth: 991;
 $footer_nav_links-depth: 11;
 $slider-scroller-depth: 1004; // from slider.css.scss
 $slider-title-depth: 1000; // from slider.css.scss
@@ -87,11 +89,12 @@ $salmon-link-color: #E0A09E;
 @mixin div-green {
   background-color: #4B815B;
   color: #9AB3A0;
-  input[type='text'], input[type='password'], input[type='email'] {
+  // input[type='text'], input[type='password'], input[type='email'] {
+  input.string {
     background-color: #C1D3C7;
     color: #849688;
   }
-  .center-button {
+  input.center-button {
     background-color: #D8E5DC;
     background-image: unset;
     color: #385E44;
