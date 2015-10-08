@@ -21,10 +21,14 @@
     <% end %>
 <% else %>
     <%# logger.debug "(in sessions form) CSRF tag: #{form_authenticity_token}" %>
-    <%= simple_form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f| %>
+    <%= simple_form_for resource,
+                        :as => resource_name,
+                        :url => session_path(resource_name),
+                        :html => { onload: 'RP.submit.form_prep(event)' } do |f| %>
         <%= form_errors_helper f %>
+        <%= flash_notifications_div %>
         <%= f.input :login, label: 'Username <b>or</b> Email'.html_safe, autofocus: resource.login.blank? %>
-        <%= f.input :password, label: "Password", autofocus: !resource.login.blank? %></p>
+        <%= f.input :password, label: 'Password', autofocus: !resource.login.blank? %></p>
         <%= f.submit 'SIGN IN', class: 'dialog-submit-button btn btn-xl center-button free' %>
         <p style="text-align: right; margin-bottom: 0px; margin-top: 10px;">
           <%= link_to_submit 'Forgot Password', new_user_password_path, mode: :modal %>

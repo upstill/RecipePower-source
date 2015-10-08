@@ -304,6 +304,26 @@ div.access-links {
   top: 1em;
   div.modal-header {
     padding: 5px;
+    text-align: center;
+    border: none;
+    color: #ECE6CD;
+    a.signup {
+      font-size: 2em;
+      color: #ECE6CD;
+    }
+    a.signin {
+      font-size: 1.2em;
+      color: #ECE6CD
+    }
+    a.rollup {
+      display: none;
+      float: right;
+      font-size: 1.2em;
+      color: #ECE6CD;
+    }
+  }
+  div.selectable {
+    display: none;
   }
   div.modal-content {
     @include div-green;
