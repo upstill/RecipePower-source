@@ -230,7 +230,7 @@ module ApplicationHelper
   end
 
   # Get jQuery from the Google CDN, falling back to the version in jquery-rails if unavailable
-  def jquery_include_tag no_cdn=false, use_jq2=false
+  def jquery_include_tag use_cdn=true, use_jq2=false
     if use_jq2
       localfile = 'jquery2'
       version = Jquery::Rails::JQUERY_2_VERSION
@@ -238,30 +238,34 @@ module ApplicationHelper
       localfile = 'jquery'
       version = Jquery::Rails::JQUERY_VERSION
     end
-    [ (javascript_include_tag("//ajax.googleapis.com/ajax/libs/jquery/#{version}/jquery.min.js") unless no_cdn),
+    [ (javascript_include_tag("//ajax.googleapis.com/ajax/libs/jquery/#{version}/jquery.min.js") if use_cdn),
       javascript_tag("window.jQuery || document.write(unescape('#{javascript_include_tag(localfile).gsub('<','%3C')}'))")
     ].join("\n").html_safe
   end
 
   # The Bootstrap version is that provided by bootstrap-sass
-  def bootstrap_include_tag
+  def bootstrap_include_tag use_cdn=true
     # The version may include a maintenance release number
     version = Bootstrap::VERSION.split('.')[0..2].join('.')
-    fallback = (
+    local_bs =
         javascript_include_tag("bootstrap.js") +
         stylesheet_link_tag("bootstrap_import.css")
-    ).gsub('<','%3C')
-    [
-      javascript_include_tag("//maxcdn.bootstrapcdn.com/bootstrap/#{version}/js/bootstrap.min.js"),
-      stylesheet_link_tag("bootstrap_preface"),
-      stylesheet_link_tag("//maxcdn.bootstrapcdn.com/bootstrap/#{version}/css/bootstrap.min.css"),
-      stylesheet_link_tag("//maxcdn.bootstrapcdn.com/bootstrap/#{version}/css/bootstrap-theme.min.css"),
-      javascript_tag(%Q{
-        if(typeof $().emulateTransitionEnd != 'function') {
-          document.write(unescape('#{fallback}'));
-        }
-      })
-    ].join("\n").html_safe
+    if use_cdn
+      local_bs.gsub! '<', '%3C'
+      [
+          javascript_include_tag("//maxcdn.bootstrapcdn.com/bootstrap/#{version}/js/bootstrap.min.js"),
+          stylesheet_link_tag("bootstrap_preface"),
+          stylesheet_link_tag("//maxcdn.bootstrapcdn.com/bootstrap/#{version}/css/bootstrap.min.css"),
+          stylesheet_link_tag("//maxcdn.bootstrapcdn.com/bootstrap/#{version}/css/bootstrap-theme.min.css"),
+          javascript_tag(%Q{
+            if(typeof $().emulateTransitionEnd != 'function') {
+              document.write(unescape('#{local_bs}'));
+            }
+          })
+      ].join("\n").html_safe
+    else
+      local_bs
+    end
   end
 
 end

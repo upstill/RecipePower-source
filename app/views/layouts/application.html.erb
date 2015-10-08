@@ -31,10 +31,9 @@
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap-3.3.2.js"></script>
   <%# end %>
 -->
-  <%= jquery_include_tag Rails.env.development?, Rails.application.config.use_jquery2 %>
+  <%= jquery_include_tag !Rails.env.development?, Rails.application.config.use_jquery2 %>
   <!-- From bootstrap-sass -->
-  <%= bootstrap_include_tag %>
-  <%# jquery_ui_include_tag Rails.application.config.jquery_ui_version %>
+  <%= bootstrap_include_tag !Rails.env.development? %>
   <%= stylesheet_link_tag 'application', :media => 'all' %>
   <%= javascript_include_tag 'application' %>
   <%= csrf_meta_tag %>
