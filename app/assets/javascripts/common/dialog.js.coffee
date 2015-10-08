@@ -17,7 +17,7 @@ jQuery ->
 		enclosure_selector = 'div.modal-body'
 		$(enclosure_selector).hide().find('div.flash-notifications').removeClass 'flash-target'
 		if targetClass = $(event.target).data 'activate'
-			$(targetSelector+'.'+targetClass).show().find('div.flash-notifications').addClass 'flash-target'
+			$(enclosure_selector+'.'+targetClass).show().find('div.flash-notifications').addClass 'flash-target'
 			$('a.select-content.none').show()
 		else
 			$('a.select-content.none').hide()
