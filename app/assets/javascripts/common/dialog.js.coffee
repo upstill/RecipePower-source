@@ -15,12 +15,9 @@ jQuery ->
 			$(dlog).remove()
 	$('.select-content', document).click (event) ->
 		enclosure_selector = 'div.modal-body'
-		$(enclosure_selector).hide()
-		$(enclosure_selector+' div.flash-notifications').removeClass 'flash-target'
+		$(enclosure_selector).hide().find('div.flash-notifications').removeClass 'flash-target'
 		if targetClass = $(event.target).data 'activate'
-			targetSelector = enclosure_selector + '.' + targetClass
-			$(targetSelector).show()
-			$(targetSelector+' div.flash-notifications').addClass 'flash-target'
+			$(targetSelector+'.'+targetClass).show().find('div.flash-notifications').addClass 'flash-target'
 			$('a.select-content.none').show()
 		else
 			$('a.select-content.none').hide()
