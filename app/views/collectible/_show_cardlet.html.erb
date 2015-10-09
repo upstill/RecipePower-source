@@ -15,11 +15,11 @@
         <% end %>
         <% if (decorator.object.respond_to?(:site) && decorator.site) %>
             <div class="source">
-              source: <%= site_homelink decorator.site, class: "source-link" %><%# link_to decorator.sourcename, decorator.sourcehome, class: "source-link" %>
+              source: <%= site_homelink decorator.site, class: 'source-link' %><%# link_to decorator.sourcename, decorator.sourcehome, class: "source-link" %>
             </div>
         <% end %>
         <div class="tags">
-          <%= presenter.present_field "tags" %>
+          <%= presenter.present_field 'tags' %>
           <% if defined?(comment) && comment.present? %>
               <p class="comment">
                 <%= comment %>
@@ -29,8 +29,8 @@
       </div>
       <% if params[:accept_invitation_link] %>
           <div style="width: 400px; margin: 0 auto;">
-            <%= link_to "Save on RecipePower", params[:accept_invitation_link], class: "btn btn-lg btn-success", style: "margin-right:40px; margin-top:30px" %>
-            <%= link_to "Go to Recipe", decorator.url, class: "btn btn-lg btn-info", style: "margin-top: 30px" %>
+            <%= link_to 'Save on RecipePower', params[:accept_invitation_link], class: 'btn btn-lg btn-success', style: 'margin-right:40px; margin-top:30px' %>
+            <%= link_to 'Go to Recipe', decorator.url, class: 'btn btn-lg btn-info', style: 'margin-top: 30px' %>
           </div>
       <% end %>
       <%= collectible_share_button decorator %>
