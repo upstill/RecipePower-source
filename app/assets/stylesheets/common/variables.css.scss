@@ -102,6 +102,9 @@ $salmon-link-color: #E0A09E;
   a {
     font-size: 0.7em;
     color: #9AB3A0;
+    &.btn-info {
+      color: lightyellow;
+    }
   }
 }
 
@@ -121,6 +124,9 @@ $salmon-link-color: #E0A09E;
   a {
     font-size: 0.7em;
     color: $salmon-link-color;
+    &.btn-info {
+      color: lightgray;
+    }
   }
 }
 
@@ -140,6 +146,9 @@ $salmon-link-color: #E0A09E;
   a {
     font-size: 0.7em;
     color: #A0B6C2;
+    &.btn-info {
+      color: lightgray;
+    }
   }
 }
 
@@ -158,5 +167,8 @@ $salmon-link-color: #E0A09E;
   }
   form div a {
     color: #E8D6D6;
+    &.btn-info {
+      color: lightgray;
+    }
   }
 }
