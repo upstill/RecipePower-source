@@ -76,7 +76,7 @@ module CollectibleHelper
     end
     url = polymorphic_path entity, :action => :edit, styling: styling
     button = button_to_submit '', url, 'glyph-edit-red', size, styling.merge(mode: :modal, title: 'Edit Me')
-    content_tag :div, button, class: "edit-button glyph-button"
+    content_tag :div, button, class: 'edit-button glyph-button'
   end
 
   # Provide the button for uploading an image

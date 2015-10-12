@@ -115,6 +115,11 @@ class CollectibleController < ApplicationController
     end
   end
 
+  def edit
+    update_and_decorate
+    smartrender
+  end
+
   def show
     update_and_decorate
     smartrender
