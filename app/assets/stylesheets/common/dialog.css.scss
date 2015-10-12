@@ -90,6 +90,10 @@ div.dialog.new-style {
     textarea {
       width: 86%;
       margin-left: 7%;
+      &.full-width {
+        width: 100%;
+        margin-left: 0;
+      }
     }
     div.modal-content {
       div.modal-header {
