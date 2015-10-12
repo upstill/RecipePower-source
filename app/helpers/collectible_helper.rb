@@ -82,13 +82,14 @@ module CollectibleHelper
   # Provide the button for uploading an image
   def collectible_upload_button entity, size=nil, styling={}
     entity = entity.object if entity.is_a? Draper::Decorator
-    return unless permitted_to? :update, entity
-    if size.is_a? Hash
-      size, options = nil, size
+    if permitted_to? :update, entity
+      if size.is_a? Hash
+        size, options = nil, size
+      end
+      url = polymorphic_path [:editpic, entity], styling: styling
+      button = button_to_submit '', url, 'glyph-upload', size, styling.merge(mode: :modal, title: 'Get Picture')
+      content_tag :div, button, class: "upload-button glyph-button"
     end
-    url = polymorphic_path [:editpic, entity], styling: styling
-    button = button_to_submit '', url, 'glyph-upload', size, styling.merge(mode: :modal, title: 'Get Picture')
-    content_tag :div, button, class: "upload-button glyph-button"
   end
 
   # Define and return a share button for the collectible

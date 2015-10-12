@@ -70,7 +70,7 @@ div.dialog.new-style {
   div.modal-dialog {
     font-family: $oswald; // $archivo;
     font-size: 20px;
-    letter-spacing: 3px;
+    letter-spacing: 2px;
     &.modal-xl {
       width: 100%; // responsive width
       margin-left: 0%; // width/2)
@@ -100,7 +100,7 @@ div.dialog.new-style {
       div.modal-header {
         text-align: center;
         padding-bottom: 5px;
-        min-height: 10px;
+        min-height: 40px; // Leave room for the close-box
         border-bottom: unset;
         button.dialog-x-box {
           position: absolute;
@@ -135,6 +135,7 @@ div.dialog.new-style {
 }
 
 div.new-style {
+  line-height: 1.5em;
   input[type='text'], input[type='password'], input[type='email'] {
     width: 86%;
     margin-left: 7%;
