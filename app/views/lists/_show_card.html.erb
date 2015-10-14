@@ -10,8 +10,8 @@
           </td>
           <td valign="top" class="upper-content">
             <div class="title">
-              <%= presenter.card_homelink class: "title-link" %>
-              <%= collectible_collect_icon decorator, "lg" %>
+              <%= presenter.card_homelink class: 'title-link' %>
+              <%= collectible_collect_icon decorator, 'lg' %>
               <%= collectible_list_menu decorator, response_service.user, {} %>
             </div>
             <div class="row">
@@ -29,7 +29,7 @@
                   <% if decorator.tags.present? %>
                       <h3>TAGS</h3>
                   <% end %>
-                  <%= presenter.present_field_wrapped "tags" %>
+                  <%= presenter.present_field_wrapped 'tags' %>
                 </div>
                 <p><%= decorator.description %></p>
                 <% if (notes = decorator.notes(false)).present? %>
@@ -42,9 +42,10 @@
         </tr>
         <tr>
           <td valign="bottom" class="lower-content">
-            <%= collectible_upload_button decorator, "xl" %>
-            <%= collectible_edit_button decorator, "xl" %>
-            <%= collectible_share_button decorator, "xl" %>
+            <%= collectible_upload_button decorator, 'xl' %>
+            <%= collectible_tools_menu decorator, 'xl' %>
+            <%# collectible_edit_button decorator, 'xl' %>
+            <%= collectible_share_button decorator, 'xl' %>
           </td>
         </tr>
       </table>
