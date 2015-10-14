@@ -83,7 +83,7 @@ module ItemHelper
 
   # Generate deleters for all versions of an item
   def item_deleters item_or_decorator_or_specs, context=nil
-    [:table, :modal, :masonry, :slider, :card].collect { |item_mode|
+    [:table, :modal, :masonry, :slider].collect { |item_mode|
       item_deleter item_or_decorator_or_specs, item_mode, context
     }.compact
   end

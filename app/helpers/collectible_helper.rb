@@ -22,20 +22,20 @@ module CollectibleHelper
     ["div.collectible-buttons##{dom_id decorator}", collectible_buttons_panel(decorator)]
   end
 
-  def collectible_collect_icon_replacement decorator
-    ["a.collectible-collect-icon.#{dom_id decorator}", collectible_collect_icon(decorator)]
+  def collectible_collect_icon_replacement decorator, size = nil, options={}
+    [ "div.collectible-collect-icon.#{dom_id decorator}", collectible_collect_icon(decorator, size, options) ]
   end
 
   def collectible_collect_icon decorator, size = nil, options={}
-    options[:class] = "#{options[:class]} collectible-collect-icon #{dom_id decorator}"
     if size.is_a? Hash
       size, options = nil, size
     end
-    if current_user_or_guest.collected?(decorator.object)
-      sprite_glyph :check, size
+    glyph = if current_user_or_guest.collected?(decorator.object)
+      sprite_glyph :check, size, title: 'In Collection'
     else
-      link_to_submit sprite_glyph(:plus, size), polymorphic_path([:collect, decorator.object]), options.merge(title: 'Add to My Collection')
+      collection_link decorator, sprite_glyph(:plus), {}, :in_collection => true
     end
+    content_tag :div, glyph, class: "collectible-collect-icon glyph-button #{dom_id decorator}"
   end
 
   def collectible_tools_menu_replacement decorator
@@ -58,8 +58,10 @@ module CollectibleHelper
                                  styling,
                                  :in_collection => !in_collection)
 
-        url = polymorphic_path entity, :action => :edit, styling: styling
-        items << link_to_submit('Edit Title', url, styling.merge(mode: :modal, title: 'Edit Title'))
+        if permitted_to? :update, entity.class.to_s.downcase.pluralize.to_sym
+          url = polymorphic_path entity, :action => :edit, styling: styling
+          items << link_to_submit('Edit Title', url, styling.merge(mode: :modal, title: nil))
+        end
 
         if permitted_to? :admin, entity.class.to_s.downcase.pluralize
           items << link_to_submit('Destroy',

@@ -6,9 +6,9 @@ what = {
         collectible_tools_menu_replacement(@decorator)
     ]
 }
-if params[:in_collection]
+if @newly_collected
   what[:insertions] = item_insertions(@decorator, @list) # [ collectible_masonry_item_insertion(@decorator) ]
-else
+elsif @newly_deleted
   what[:replacements] += item_deleters(@decorator, @list) # collectible_masonry_item_deleter(@decorator)
 end
 what.merge(flash_notify).to_json

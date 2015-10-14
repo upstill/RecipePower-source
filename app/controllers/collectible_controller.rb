@@ -9,8 +9,11 @@ class CollectibleController < ApplicationController
         @decorator.collectible_private = params[:private]
         msg << (@decorator.private ? ' now' : 'no longer')
         msg << ' hidden from others.'
-      else
+      end
+      if params.has_key? :in_collection
+        was_collected = @decorator.collected?
         @decorator.be_collected params[:in_collection]
+        @newly_deleted = !(@newly_collected = @decorator.collected?) if @decorator.collected? != was_collected
         msg << (@decorator.collected? ?
             ' now appearing in your collection.' :
             ' has been ousted from your collection (though you may see it elsewhere).')
