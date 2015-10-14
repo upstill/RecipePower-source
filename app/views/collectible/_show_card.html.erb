@@ -12,7 +12,7 @@
             <div class="title">
               <%= presenter.card_homelink class: "title-link" %>
               <%= collectible_collect_icon( decorator, "lg") unless decorator.object == response_service.user %>
-              <%= collectible_list_menu decorator, response_service.user, {} %>
+              <%# collectible_list_menu decorator, response_service.user, {} %>
             </div>
             <div class="row">
               <div class="col-md-12">
@@ -30,7 +30,8 @@
         <tr>
           <td valign="bottom" class="lower-content">
             <%# collectible_upload_button decorator, 'lg' %>
-            <%= collectible_edit_button decorator, 'lg' %>
+            <%= collectible_tools_menu decorator, 'lg' %>
+            <%# collectible_edit_button decorator, 'lg' %>
             <%= collectible_share_button decorator, 'lg' unless decorator.object == response_service.user %>
           </td>
         </tr>

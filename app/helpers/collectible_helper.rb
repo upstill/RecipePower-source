@@ -38,6 +38,49 @@ module CollectibleHelper
     end
   end
 
+  def collectible_tools_menu_replacement decorator
+    [ "div.tool-menu.#{dom_id(decorator)}", collectible_tools_menu(decorator) ]
+  end
+
+  def collectible_tools_menu decorator, size='lg', styling={}
+    if size.is_a?(Hash)
+      size, styling = 'lg', size
+    end
+    if user = current_user
+      entity = decorator.object
+      menu = hover_menu content_tag(:span, '', class: 'glyphicon glyphicon-cog'),
+                        styling do
+        in_collection = current_user.collected? decorator.object
+        items = []
+
+        items << collection_link(decorator,
+                                 (in_collection ? 'Remove from Collection' : 'Add to Collection'), # checkbox_menu_item_label('Collection', in_collection),
+                                 styling,
+                                 :in_collection => !in_collection)
+
+        url = polymorphic_path entity, :action => :edit, styling: styling
+        items << link_to_submit('Edit Title', url, styling.merge(mode: :modal, title: 'Edit Title'))
+
+        if permitted_to? :admin, entity.class.to_s.downcase.pluralize
+          items << link_to_submit('Destroy',
+                                  decorator.object_path,
+                                  :method => :delete,
+                                  confirm: "This will permanently remove ths #{decorator.human_name} from RecipePower for good: it can't be undone. Are you absolutely sure you want to do this?")
+
+        end
+
+        if entity.collected?
+          privacy_label = checkbox_menu_item_label 'Private', entity.private
+          items << collection_link(decorator, privacy_label, styling, private: !entity.private)
+        end
+
+        url = polymorphic_path [:editpic, entity], styling: styling
+        items << link_to_submit('Get Picture', url, styling.merge(mode: :modal, title: 'Get Picture'))
+      end
+      content_tag :div, menu, class: "tool-menu #{dom_id(decorator)}"
+    end
+  end
+
   def button_styling styling, options={}
     styling.slice( :button_size ).merge options
   end
@@ -47,14 +90,14 @@ module CollectibleHelper
                     id title url picuri imgdata
                     element_id field_name human_name object_path tag_path
                     tagging_tag_data tagging_user_id )
-    template_link decorator, "tag-collectible", "Tag it", styling, options.merge(:mode => :modal, :attribs => decorator.data(attribs))
+    template_link decorator, "tag-collectible", 'Tag it', styling, options.merge(:mode => :modal, :attribs => decorator.data(attribs))
   end
 
-  def collection_link decorator, label, already_collected, styling, options={}
-    query_options = { :styling => styling }
-    query_options.merge! oust: true if already_collected
+  def collection_link decorator, label, styling, query_options={}
+    options = query_options.slice! :in_collection, :comment, :private
+    query_options[:styling] = styling
     url = polymorphic_path [:collect, decorator.object], query_options
-    options[:method] = "PATCH"
+    options[:method] = 'PATCH'
     link_to_submit label, url, options.merge(title: 'Add to My Collection')
   end
 
@@ -65,18 +108,25 @@ module CollectibleHelper
                     id title url picuri imgdata
                     element_id field_name human_name object_path tag_path
                     tagging_tag_data tagging_user_id )
-    template_link decorator, "tag-collectible", sprite_glyph(:tag, 'xl'), styling, options.merge(:mode => :modal, :title => 'Tag Me', :attribs => decorator.data(attribs))
+    template_link decorator,
+                  'tag-collectible',
+                  sprite_glyph(:tag, 'xl'),
+                  styling,
+                  options.merge( :mode => :modal,
+                                 :title => 'Tag Me',
+                                 :attribs => decorator.data(attribs))
   end
 
   def collectible_edit_button entity, size=nil, styling={}
     entity = entity.object if entity.is_a? Draper::Decorator
-    return unless permitted_to? :update, entity
-    if size.is_a? Hash
-      size, options = nil, size
+    if permitted_to? :update, entity
+      if size.is_a? Hash
+        size, options = nil, size
+      end
+      url = polymorphic_path entity, :action => :edit, styling: styling
+      button = button_to_submit '', url, 'glyph-edit-red', size, styling.merge(mode: :modal, title: 'Edit Me')
+      content_tag :div, button, class: 'edit-button glyph-button'
     end
-    url = polymorphic_path entity, :action => :edit, styling: styling
-    button = button_to_submit '', url, 'glyph-edit-red', size, styling.merge(mode: :modal, title: 'Edit Me')
-    content_tag :div, button, class: 'edit-button glyph-button'
   end
 
   # Provide the button for uploading an image
@@ -88,7 +138,7 @@ module CollectibleHelper
       end
       url = polymorphic_path [:editpic, entity], styling: styling
       button = button_to_submit '', url, 'glyph-upload', size, styling.merge(mode: :modal, title: 'Get Picture')
-      content_tag :div, button, class: "upload-button glyph-button"
+      content_tag :div, button, class: 'upload-button glyph-button'
     end
   end
 
@@ -98,12 +148,12 @@ module CollectibleHelper
       size, options = nil, size
     end
     entity = entity.object if entity.is_a? Draper::Decorator
-    button = button_to_submit "",
+    button = button_to_submit '',
                               new_user_invitation_path(shared_type: entity.class.to_s, shared_id: entity.id),
-                              "glyph-share",
+                              'glyph-share',
                               size,
                               options.merge(mode: :modal, title: 'Share This')
-    content_tag :div, button, class: "share-button glyph-button"
+    content_tag :div, button, class: 'share-button glyph-button'
   end
 
   def collectible_list_button decorator, options={}
@@ -117,22 +167,22 @@ module CollectibleHelper
   def collectible_vote_buttons entity
     uplink = vote_link(entity, true)
     downlink = vote_link(entity, false)
-    button_options = { method: "post", remote: true, class: "vote-button" }
+    button_options = { method: 'post', remote: true, class: 'vote-button'}
     vote_state = Vote.current entity
-    up_button = button_to_submit "", uplink, "glyph-vote-up", "xl", button_options.merge(title: 'Vote Up')
-    down_button = button_to_submit "", downlink, "glyph-vote-down", "xl", button_options.merge(title: 'Vote Down')
-    vote_counter = (entity.upvotes > 0 && entity.upvotes.to_s) || ""
+    up_button = button_to_submit '', uplink, 'glyph-vote-up', "xl", button_options.merge(title: 'Vote Up')
+    down_button = button_to_submit '', downlink, 'glyph-vote-down', "xl", button_options.merge(title: 'Vote Down')
+    vote_counter = (entity.upvotes > 0 && entity.upvotes.to_s) || ''
     upcount =
         content_tag(:span,
                     "#{entity.upvotes.to_s}<br>".html_safe,
-                    class: "vote-count") # if entity.upvotes > 0
+                    class: 'vote-count') # if entity.upvotes > 0
     downcount =
         content_tag(:span,
                     "<br>#{entity.downvotes.to_s}".html_safe,
-                    class: "vote-count") # if entity.downvotes > 0
-    left = content_tag :div, "#{upcount}#{up_button}".html_safe, class: "vote-div"
-    right = content_tag :div, "#{down_button}#{downcount}".html_safe, class: "vote-div"
-    content_tag :div, (left+right).html_safe, class: "vote-buttons", id: dom_id(entity)
+                    class: 'vote-count') # if entity.downvotes > 0
+    left = content_tag :div, "#{upcount}#{up_button}".html_safe, class: 'vote-div'
+    right = content_tag :div, "#{down_button}#{downcount}".html_safe, class: 'vote-div'
+    content_tag :div, (left+right).html_safe, class: 'vote-buttons', id: dom_id(entity)
   end
 
   def vote_buttons_replacement entity
