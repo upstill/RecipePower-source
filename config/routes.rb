@@ -21,8 +21,10 @@ RP::Application.routes.draw do
   concern :taggable do
     member do
       # Routes for taggables
-      get 'tag' # Present the dialog for tagging, commenting and picture selection
+      get 'tag' # Present the dialog for tagging and commenting
       patch 'tag'
+      get 'lists'  # Present the dialog for managing the lists it's on
+      patch 'lists'
     end
   end
 
@@ -126,7 +128,6 @@ RP::Application.routes.draw do
   resources :sites, except: [:index, :create], :concerns => [:picable, :collectible, :taggable] do
     member do
       post 'scrape'
-      # Routes for collectibles
       post 'absorb'
     end
   end

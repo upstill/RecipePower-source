@@ -58,9 +58,14 @@ module CollectibleHelper
                                  styling,
                                  :in_collection => !in_collection)
 
+        items << link_to_submit('Lists',
+                                polymorphic_path([:lists, entity]),
+                                :mode => :modal,
+                                :title => 'Manage lists on which this appears')
+
         if permitted_to? :update, entity.class.to_s.downcase.pluralize.to_sym
           url = polymorphic_path entity, :action => :edit, styling: styling
-          items << link_to_submit('Edit Title', url, styling.merge(mode: :modal, title: nil))
+          items << link_to_submit('Edit', url, styling.merge(mode: :modal, title: nil))
         end
 
         if permitted_to? :admin, entity.class.to_s.downcase.pluralize

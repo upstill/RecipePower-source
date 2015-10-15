@@ -45,9 +45,20 @@ module Taggable
     filtered_tags(:tagtype_x => [11, :Collection, :List])
   end
 
+  # Return the list tags the current user has applied
+  # TODO: doesn't include all lists that the item appears on, since the list owner
+  #    may be someone else
+  def tagging_lists
+    filtered_tags :tagtype => :List
+  end
+
   # Provide the tags of appropriate types for the user identified by @tagging_user_id
   def tagging_tag_data
     tagging_tags.map(&:attributes).to_json
+  end
+
+  def tagging_lists_data
+    tagging_lists.map(&:attributes).to_json
   end
 
   # Associate a tag with this entity in the domain of the given user (or the tag's current owner if not given)
@@ -65,28 +76,6 @@ module Taggable
     other.taggings.map { |tagging| tag_with tagging.tag, tagging.user_id }
     super if defined? super
   end
-
-=begin Possibly called procedurally?
-  # Declare a data structure suitable for passing to RP.tagger.init
-  def tag_editing_data options={}
-    options[:tagtype_x] = [11, :Collection, :List]
-    data = { :hint => options.delete(:hint) || "Type your tag(s) here" }
-    data[:pre] = filtered_tags(options).collect { |tag| { id: tag.id, name: tag.typedname(options[:showtype]) } }
-    data[:query] = options.slice :verbose, :showtype
-    data[:query][:tagtype] = Tag.typenum(options[:tagtype]) if options[:tagtype]
-    data[:query][:tagtype_x] = Tag.typenum(options[:tagtype_x]) if options[:tagtype_x]
-    data.to_json
-  end
-
-  def tag_data uid, options={}
-    data = { :hint => options.delete(:hint) || "Type your tag(s) here" }
-    data[:pre] = filtered_tags(options).collect { |tag| { id: tag.id, name: tag.typedname(options[:showtype]) } }
-    data[:query] = options.slice :verbose, :showtype
-    data[:query][:tagtype] = Tag.typenum(options[:tagtype]) if options[:tagtype]
-    data[:query][:tagtype_x] = Tag.typenum(options[:tagtype_x]) if options[:tagtype_x]
-    data.to_json
-  end
-=end
 
   protected
 

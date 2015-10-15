@@ -1,0 +1,58 @@
+<%# Default modal dialog for editing a (collectible, taggable) item. May be overwritten for other controllers  %>
+<% decorator ||= @decorator || TemplateDecorator.new # If no decorator provided, assume this is for a template        %>
+<%= modal_dialog "lists-collectible", decorator.title.truncate(70), dialog_class: 'dialog-xs' do %>
+    <form accept-charset="UTF-8"
+          action="<%= decorator.lists_path %>"
+          class="form-inline lists-collectible"
+          data-remote="true"
+          data-type="json"
+          <%= "data-always_submit='true'" if decorator.picuri_problem %>
+          id="lists_collectible_<%= decorator.id %>">
+      <input name="utf8" type="hidden" value="&#x2713;"/>
+      <input name="_method" type="hidden" value="patch"/>
+      <input name="authenticity_token" type="hidden" value="<%= form_authenticity_token %>"/>
+
+      <div class="row">
+        <div class="col-md-12">
+          <div class="notifications-panel">
+            <%= flash_notifications_div %>
+          </div>
+          <div class="control-group now-appearing">
+            <label class="string optional">Now Appearing on the Lists:</label>
+            <input id="<%= decorator.element_id :tagging_user_id %>"
+                   name="<%= decorator.field_name :tagging_user_id %>"
+                   type="hidden"
+                   value="<%= decorator.tagging_user_id %>">
+            <input type="text"
+                   class="token-input-field-pending"
+                   id="tagging_lists_tokens"
+                   name="<%= decorator.field_name :tagging_lists_tokens %>"
+                   rows="2"
+                   size="30"
+                   placeholder="Lists"
+                   data-pre="<%= decorator.tagging_lists_data %>"
+                   data-free_tagging="false"
+                   data-on_list_add="RP.lists_collectible.add_title"
+                   data-theme="list"
+                   data-request="/tags/match.json?tagtype=16"
+                   data-hint_text="Search for a list by typing"/>
+          </div>
+          <div class="control-group">
+            <label class="string optional" style="margin-top: 50px;">Available Lists: (click one to add)</label>
+            <div class="selection-list">
+              <a href="#" class="selection-item" data-id="2" data-to_selector="#tagging_lists_tokens">The Second
+                List</a>
+              <a href="#" class="selection-item" data-id="1" data-to_selector="#tagging_lists_tokens">The First List</a>
+              <a href="#" class="selection-item" data-id="3" data-to_selector="#tagging_lists_tokens">The Final, sadly
+                verbose and excessively long List whose name just goes on and on...</a>
+              <a href="#" class="selection-item" data-id="1" data-to_selector="#tagging_lists_tokens">The Fourth List</a>
+              <a href="#" class="selection-item" data-id="1" data-to_selector="#tagging_lists_tokens">The Fifth List</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <%= dialog_submit_button %>
+      <%= dialog_cancel_button %>
+    </form>
+<% end %>
+

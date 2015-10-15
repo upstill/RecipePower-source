@@ -41,6 +41,10 @@ RP.tagger.querify = ->
 RP.tagger.select_type = (event) ->
 	RP.querify.propagate event.target, { tagtype: event.target.value }
 
+RP.tagger.add_title = ->
+	$('div.dialog span.token-input-delete-token').each (ix, item) ->
+		item.title = 'Click to Remove'
+
 # Use data attached to the element to initiate tokenInput
 RP.tagger.setup = (elmt) ->
 	# In case the token-input element is a child of elmt
@@ -61,13 +65,16 @@ RP.tagger.setup = (elmt) ->
 		options =
 			crossDomain: false,
 			noResultsText: data.noResultsText || "No existing tag found; hit Enter to make it a new tag",
-			hintText: "Type your own tag(s)",
+			hintText: data.hint_text || 'Type your own tag(s)',
 			zindex: 1052,
 			prePopulate: data.pre || "",
-			theme: "facebook",
 			preventDuplicates: true,
 			minChars: 2,
-			allowFreeTagging: (data.freeTagging != false)
+			onAdd: RP.named_function(data.on_list_add) || RP.tagger.add_title,
+			onReady: RP.named_function(data.on_list_add) || RP.tagger.add_title,
+			allowFreeTagging: (data.free_tagging != false)
+		if data.theme != 'list' # To get a list, the theme needs to be unspecified (!)
+			options.theme = data.theme || "facebook"
 		for attr in ['tokenLimit', 'placeholder']
 			if data[attr]
 				options[attr] = data[attr]

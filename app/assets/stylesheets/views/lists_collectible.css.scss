@@ -1,0 +1,57 @@
+div.lists-collectible {
+  div.control-group {
+    /*
+    ul.token-input-list {
+      border: 1px black;
+      padding: 2px;
+      margin: 2px;
+      li.token-input-input-token {
+        display: block;
+        width: 90%;
+        margin: 3px;
+        padding: 3px;
+        outline: 1px black;
+        input {
+          width: 100%;
+          outline: none;
+        }
+      }
+      li.token-input-token {
+        display: block;
+        width: 90%;
+        margin: 3px;
+        padding: 3px;
+        background-color: #94b79a;
+        text-color: #66dd66;
+        p {
+          display: inline;
+          padding: 0;
+          margin: 0;
+          span.token-input-delete-token {
+            float: right;
+          }
+        }
+      }
+      li.token-input-token-list {
+        width: 100%;
+        height: auto;
+        white-space: normal;
+      }
+    }
+    */
+  }
+  div.selection-list {
+    outline: 1px solid black;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    height: 6em;
+    margin: 5px 20px;
+    padding: 2px;
+    a.selection-item {
+      margin: 2px;
+      display: block;
+      height: 1.5em;
+      overflow: hidden;
+    }
+  }
+}
