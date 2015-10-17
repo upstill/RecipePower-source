@@ -18,22 +18,23 @@ matching_tag = (tagspec) ->
 			return ts2
 	null
 
+# When an item is added to the tokeninput
 RP.lists_collectible.onAdd = (tokeninput) ->
-	dom_item = input_tokens().last()[0]
-	if tokeninput.owner_name
-		if tokeninput.status == 'my own' || tokeninput.status == 'my collected'
-			$(dom_item).addClass 'owned'
-		else if tokeninput.status == 'owned' || tokeninput.status == 'collected'
-			$('p', dom_item)[0].innerHTML = tokeninput.name + ' (' + tokeninput.owner_name + ')'
-			$(dom_item).addClass 'friends'
+	added = input_tokens().last()
+	$('p', added).innerHTML = tokeninput.name
+	if tokeninput.cssclass
+		$(added).addClass tokeninput.cssclass
 
 RP.lists_collectible.onDelete = (tokeninput) ->
-	$('div.selection-list a').each (ix, listitem) ->
-		if $(listitem).data('tokeninput').id == tokeninput.id # If it's in the selected list, hide it
-			$(listitem).show()
+	$('div.selection-list a#'+tokeninput.cssid).show()
 
 RP.lists_collectible.onReady = (whatever) ->
 	$('li.token-input-input-token input').trigger 'click'
+	input_tokens().each (ix, item) ->
+		tokeninput = $(item).data 'tokeninput'
+		if tokeninput.cssclass
+			$(item).addClass tokeninput.cssclass
+
 
 # When dialog is loaded, activate its functionality
 RP.lists_collectible.onload = (dlog) ->

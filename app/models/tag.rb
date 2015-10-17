@@ -296,7 +296,7 @@ class Tag < ActiveRecord::Base
       type = opts[:tagtype] && Tag.typenum(opts[:tagtype])        # Restricted to types
       type_x = opts[:tagtype_x] && Tag.typenum(opts[:tagtype_x])  # Types excluded
       assert = opts[:assert]
-      name = name || "" # nil matches anything
+      name = name || '' # nil matches anything
       do_fold = opts[:fold]
       # Case-insensitive lookup
       fuzzyname = Tag.normalizeName name

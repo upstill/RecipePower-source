@@ -1,34 +1,39 @@
-div.lists-collectible {
-  div.control-group {
-    ul.token-input-list {
-      width: 100%;
-    }
-    li.token-input-token {
-      background-color: $lists-panel-background-color;
-      p {
-        width: 96%;
-      }
-      &.owned {
-        background-color: $viewer-card-background-color;
-      }
-      &.friends {
-        background-color: $friends-card-background-color;
-      }
-    }
-    li.token-input-input-token input {
-      margin-left: 0;
-    }
+@mixin list-item-backgrounds {
+  &.owned {
+    background-color: $viewer-card-background-color;
   }
-  div.selection-list {
-    outline: 1px solid black;
-    overflow-y: scroll;
-    height: 6em;
-    margin: 5px 20px;
-    padding: 2px;
-    a.selection-item {
-      margin: 3px 8px 3px 4px;
-      font-size: 0.8em;
-      display: block;
-    }
+  &.friends {
+    background-color: $friends-card-background-color;
   }
 }
+
+div.lists-collectible {
+    div.control-group {
+      ul.token-input-list {
+        width: 100%;
+      }
+      li.token-input-token {
+        background-color: $lists-panel-background-color;
+        p {
+          width: 96%;
+        }
+        @include list-item-backgrounds;
+      }
+      li.token-input-input-token input {
+        margin-left: 0;
+      }
+    }
+    div.selection-list {
+      outline: 1px solid black;
+      overflow-y: scroll;
+      height: 6em;
+      margin: 5px 20px;
+      padding: 2px;
+      a.selection-item {
+        margin: 3px 8px 3px 4px;
+        font-size: 0.8em;
+        display: block;
+        @include list-item-backgrounds;
+      }
+    }
+  }

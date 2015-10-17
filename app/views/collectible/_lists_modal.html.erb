@@ -13,7 +13,9 @@
       <input name="authenticity_token" type="hidden" value="<%= form_authenticity_token %>"/>
       <% user_decorator = current_user_or_guest.decorate %>
       <% all_tags = user_decorator.list_tags %>
+      <% classify_listtags all_tags %>
       <% used_tags = user_decorator.list_tags(decorator) %>
+      <% classify_listtags used_tags %>
       <div class="row">
         <div class="col-md-12">
           <div class="notifications-panel">
@@ -44,13 +46,16 @@
             <label class="string optional" style="margin-top: 40px;">Candidate Lists</label>
             <div class="selection-list" data->
               <% all_tags.each do |tagspec| %>
-                  <% unless used_tags.include? tagspec %>
+                  <!--Include only the lists of friends and self -->
+                  <% if tagspec[:status] %>
                       <a href="#"
-                         class="selection-item"
+                         class="selection-item <%= tagspec[:cssclass] %>"
+                         id="<%= tagspec[:cssid] %>"
                          data-to_selector="#tagging_lists_tokens"
                          data-tokeninput="<%= tagspec.to_json %>"
+                         <%= %q{style="display: none;"} if used_tags.include? tagspec %>
                          title="Click to Add">
-                        <%= tagspec[:name] %> <%= "(#{tagspec[:owner_name]})" if tagspec[:owner_name] && (tagspec[:sortval] > 2) %>
+                        <%= tagspec[:name] %>
                       </a>
                   <% end %>
               <% end %>

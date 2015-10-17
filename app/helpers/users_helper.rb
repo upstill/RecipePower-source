@@ -72,4 +72,21 @@ module UsersHelper
                    polymorphic_path([action, user]),
                    {mode: :partial}.merge(options).merge(data: data, class: klass).except(:action)
   end
+
+  # Operate on a set of tag specifications as defined in UserDecorator for directing a list search
+  # Enhance each tokeninput with css class, css id and (as appropriate) owner specifier)
+  def classify_listtags tokeninputs
+    tokeninputs.each { |tokeninput|
+      tokeninput[:cssid] = "choice_#{tokeninput[:id]}"
+
+      case tokeninput[:status]
+        when :'my own', :'my collected'
+          tokeninput[:cssclass] = 'owned'
+        when :'owned', :'collected'
+          tokeninput[:cssclass] = 'friends'
+          tokeninput[:name] = "#{tokeninput[:name]} (#{tokeninput[:owner_name]})"
+      end
+    }
+    tokeninputs
+  end
 end
