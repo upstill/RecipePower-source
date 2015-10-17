@@ -86,6 +86,64 @@ class List < ActiveRecord::Base
     l
   end
 
+  # Report all the tags in use, visible to the focus_user.
+  # The result is Struct with fields for tag_id, the name of the owner, and whether the owner is a friend
+  def self.tags_report focus_user
+    def assert_tag tag, user, status=nil, results={}
+      sortval = case status
+                  when :'my own'
+                    1
+                  when :'my collected'
+                    2
+                  when :'owned'
+                    3
+                  when :'collected'
+                    4
+                  else
+                    5
+                end
+      if user.is_a? Array
+        user[tag.id] ||= {
+            id: tag.id,
+            name: tag.name,
+            sortval: sortval
+        }
+      else
+        results[tag.id] ||= {
+            id: tag.id,
+            name: tag.name,
+            owner_id: user.id,
+            owner_name: user.handle,
+            status: status,
+            sortval: sortval
+        }
+      end
+    end
+    results = []
+    focus_user.owned_lists.each { |list|
+      assert_tag list.name_tag, focus_user, :'my own', results
+    }
+    focus_user.list_collections.each { |list|
+      assert_tag list.name_tag, focus_user, :'my collected', results
+    }
+    focus_user.followees.each { |friend|
+      friend.owned_lists.each { |list|
+        assert_tag list.name_tag, friend, :'owned', results
+      }
+    }
+    focus_user.followees.each { |friend|
+      friend.list_collections.each { |list|
+        assert_tag list.name_tag, friend, :'collected', results
+      }
+    }
+    # All other list tags
+    Tag.unscoped.where(tagtype: 16).not(id: results.map(&id)).each { |tag|
+      assert_tag tag, results if List.exists? availability: 0
+    }
+    # Now sort results by ownership
+    results.compact.sort { |h1, h2| h1[:sortval] <=> h2[:sortval] }
+  end
+
   def name
     (name_tag && name_tag.name) || ""
   end

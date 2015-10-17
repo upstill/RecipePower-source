@@ -40,25 +40,18 @@ module Taggable
     filtered_tags options.merge(user_id: taggers) # Allowing for an array of uids
   end
 
+  def tagging_tags_of_type type_or_types
+    filtered_tags tagtype: type_or_types
+  end
+
   # Return the editable tags, i.e. not channels, collections, or lists
   def tagging_tags
     filtered_tags(:tagtype_x => [11, :Collection, :List])
   end
 
-  # Return the list tags the current user has applied
-  # TODO: doesn't include all lists that the item appears on, since the list owner
-  #    may be someone else
-  def tagging_lists
-    filtered_tags :tagtype => :List
-  end
-
   # Provide the tags of appropriate types for the user identified by @tagging_user_id
   def tagging_tag_data
     tagging_tags.map(&:attributes).to_json
-  end
-
-  def tagging_lists_data
-    tagging_lists.map(&:attributes).to_json
   end
 
   # Associate a tag with this entity in the domain of the given user (or the tag's current owner if not given)

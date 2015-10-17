@@ -1,6 +1,6 @@
 <%# Default modal dialog for editing a (collectible, taggable) item. May be overwritten for other controllers  %>
 <% decorator ||= @decorator || TemplateDecorator.new # If no decorator provided, assume this is for a template        %>
-<%= modal_dialog "lists-collectible", decorator.title.truncate(70), dialog_class: 'dialog-xs' do %>
+<%= modal_dialog "lists-collectible new-style green", decorator.title.truncate(70), dialog_class: 'dialog-xs' do %>
     <form accept-charset="UTF-8"
           action="<%= decorator.lists_path %>"
           class="form-inline lists-collectible"
@@ -11,7 +11,9 @@
       <input name="utf8" type="hidden" value="&#x2713;"/>
       <input name="_method" type="hidden" value="patch"/>
       <input name="authenticity_token" type="hidden" value="<%= form_authenticity_token %>"/>
-
+      <% user_decorator = current_user_or_guest.decorate %>
+      <% all_tags = user_decorator.list_tags %>
+      <% used_tags = user_decorator.list_tags(decorator) %>
       <div class="row">
         <div class="col-md-12">
           <div class="notifications-panel">
@@ -30,23 +32,28 @@
                    rows="2"
                    size="30"
                    placeholder="Lists"
-                   data-pre="<%= decorator.tagging_lists_data %>"
+                   data-taglist="<%= all_tags.to_json %>"
+                   data-pre="<%= used_tags.to_json %>"
                    data-free_tagging="false"
-                   data-on_list_add="RP.lists_collectible.add_title"
+                   data-event_handler="RP.lists_collectible"
                    data-theme="list"
-                   data-request="/tags/match.json?tagtype=16"
+                   data-query="tagtype=16"
                    data-hint_text="Search for a list by typing"/>
           </div>
           <div class="control-group">
-            <label class="string optional" style="margin-top: 50px;">Available Lists: (click one to add)</label>
-            <div class="selection-list">
-              <a href="#" class="selection-item" data-id="2" data-to_selector="#tagging_lists_tokens">The Second
-                List</a>
-              <a href="#" class="selection-item" data-id="1" data-to_selector="#tagging_lists_tokens">The First List</a>
-              <a href="#" class="selection-item" data-id="3" data-to_selector="#tagging_lists_tokens">The Final, sadly
-                verbose and excessively long List whose name just goes on and on...</a>
-              <a href="#" class="selection-item" data-id="1" data-to_selector="#tagging_lists_tokens">The Fourth List</a>
-              <a href="#" class="selection-item" data-id="1" data-to_selector="#tagging_lists_tokens">The Fifth List</a>
+            <label class="string optional" style="margin-top: 40px;">Candidate Lists</label>
+            <div class="selection-list" data->
+              <% all_tags.each do |tagspec| %>
+                  <% unless used_tags.include? tagspec %>
+                      <a href="#"
+                         class="selection-item"
+                         data-to_selector="#tagging_lists_tokens"
+                         data-tokeninput="<%= tagspec.to_json %>"
+                         title="Click to Add">
+                        <%= tagspec[:name] %> <%= "(#{tagspec[:owner_name]})" if tagspec[:owner_name] && (tagspec[:sortval] > 2) %>
+                      </a>
+                  <% end %>
+              <% end %>
             </div>
           </div>
         </div>

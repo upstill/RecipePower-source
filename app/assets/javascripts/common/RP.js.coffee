@@ -207,7 +207,7 @@ RP.post_error = ( jqXHR, dlog ) ->
 			else
 				# Okay. Assume it's just a string error report
 				parsage = 
-					errortext: errtxt
+					errortext: errtxt.substring 0,250
 	if errors = parsage.errors
 		clicked = $("input[type=submit][clicked=true]")
 		form = $(clicked).parents('form:first')

@@ -41,9 +41,8 @@ RP.tagger.querify = ->
 RP.tagger.select_type = (event) ->
 	RP.querify.propagate event.target, { tagtype: event.target.value }
 
-RP.tagger.add_title = ->
-	$('div.dialog span.token-input-delete-token').each (ix, item) ->
-		item.title = 'Click to Remove'
+RP.tagger.onReady = ->
+	$('li.token-input-input-token input').trigger 'click'
 
 # Use data attached to the element to initiate tokenInput
 RP.tagger.setup = (elmt) ->
@@ -70,20 +69,20 @@ RP.tagger.setup = (elmt) ->
 			prePopulate: data.pre || "",
 			preventDuplicates: true,
 			minChars: 2,
-			onAdd: RP.named_function(data.on_list_add) || RP.tagger.add_title,
-			onReady: RP.named_function(data.on_list_add) || RP.tagger.add_title,
 			allowFreeTagging: (data.free_tagging != false)
+		if data.event_handler
+			options.onAdd = RP.named_function(data.event_handler + '.onAdd')
+			options.onDelete = RP.named_function(data.event_handler + '.onDelete')
+			options.onReady = RP.named_function(data.event_handler + '.onReady')
+
 		if data.theme != 'list' # To get a list, the theme needs to be unspecified (!)
 			options.theme = data.theme || "facebook"
 		for attr in ['tokenLimit', 'placeholder']
 			if data[attr]
 				options[attr] = data[attr]
-
-		# onAdd and onDelete specify functions to be called when the selection changes
-		if data.onAdd
-			options.onAdd = RP.named_function data.onAdd
-		if data.onDelete
-			options.onDelete = RP.named_function data.onDelete
+		for attr in ['onAdd', 'onDelete', 'onReady']
+			if data[attr] && func = RP.named_function data[attr]
+				options[attr] = func
 		if typeof data.hint == 'string'
 			options.hintText = data.hint
 
