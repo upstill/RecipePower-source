@@ -62,6 +62,7 @@ class List < ActiveRecord::Base
   include Typeable
   include Collectible
   picable :picurl, :picture, "List_Icon.png"
+  after_save :propagate_privacy
 
   typeable( :availability,
             public: ["Anyone (Public)", 0 ],
@@ -84,64 +85,6 @@ class List < ActiveRecord::Base
     l = List.where(owner_id: user.id, name_tag_id: tag.id).first || List.new(owner: user, name_tag: tag)
     l.save if options[:create] && !l.id
     l
-  end
-
-  # Report all the tags in use, visible to the focus_user.
-  # The result is Struct with fields for tag_id, the name of the owner, and whether the owner is a friend
-  def self.tags_report focus_user
-    def assert_tag tag, user, status=nil, results={}
-      sortval = case status
-                  when :'my own'
-                    1
-                  when :'my collected'
-                    2
-                  when :'owned'
-                    3
-                  when :'collected'
-                    4
-                  else
-                    5
-                end
-      if user.is_a? Array
-        user[tag.id] ||= {
-            id: tag.id,
-            name: tag.name,
-            sortval: sortval
-        }
-      else
-        results[tag.id] ||= {
-            id: tag.id,
-            name: tag.name,
-            owner_id: user.id,
-            owner_name: user.handle,
-            status: status,
-            sortval: sortval
-        }
-      end
-    end
-    results = []
-    focus_user.owned_lists.each { |list|
-      assert_tag list.name_tag, focus_user, :'my own', results
-    }
-    focus_user.list_collections.each { |list|
-      assert_tag list.name_tag, focus_user, :'my collected', results
-    }
-    focus_user.followees.each { |friend|
-      friend.owned_lists.each { |list|
-        assert_tag list.name_tag, friend, :'owned', results
-      }
-    }
-    focus_user.followees.each { |friend|
-      friend.list_collections.each { |list|
-        assert_tag list.name_tag, friend, :'collected', results
-      }
-    }
-    # All other list tags
-    Tag.unscoped.where(tagtype: 16).not(id: results.map(&id)).each { |tag|
-      assert_tag tag, results if List.exists? availability: 0
-    }
-    # Now sort results by ownership
-    results.compact.sort { |h1, h2| h1[:sortval] <=> h2[:sortval] }
   end
 
   def name
@@ -195,26 +138,10 @@ class List < ActiveRecord::Base
     save
   end
 
-=begin
-  # This functionality allowed lists to have included tags. Now that 'pullin' gets included tags from the list's tags,
-  # we don't need included tags. This may change, however
-  def included_tag_tokens
-    tag_ids
+  # Make sure the list's tag obeys the privacy constraint of the list itself,
+  # The tag is visible only if one of the lists that use it is not private
+  def propagate_privacy
+    name_tag.isGlobal = List.exists? name_tag_id: name_tag_id, availability: [0,1]
+    name_tag.save if name_tag.changed?
   end
-
-  # Write the virtual attribute tag_tokens (a list of ids) to
-  # update the real attribute tag_ids
-  def included_tag_tokens=(idstring)
-    self.included_tags =
-        TokenInput.parse_tokens(idstring) do |token| # parse_tokens analyzes each token in the list as either integer or string
-          case token
-            when Fixnum
-              Tag.find token
-            when String
-              Tag.strmatch(token, userid: tagging_user_id, assert: true)[0] # Match or assert the string
-          end
-        end
-  end
-=end
-
 end
