@@ -132,7 +132,7 @@ class TagPresenter < BasePresenter
       if val.present?
         (user.about + link_to_submit("Edit", edit_user_path(section: which), button_size: "xs")).html_safe
       else
-        aspect_editor which
+        card_aspect_editor which
       end
     else
       val if val.present?
