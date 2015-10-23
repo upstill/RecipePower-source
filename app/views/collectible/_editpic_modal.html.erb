@@ -4,9 +4,7 @@ Expecting the following local variables:
     * imgdata: data suitable for filling the href field of an image
     * pageurl: the URL of the page where the choices will be sourced
 -->
-<%= modal_dialog :pic_picker,
-                 "Pick an Applicable Picture Here",
-                 dialog_class: "modal-lg" do %>
+<%= modal_dialog 'pic_picker new-style green', dialog_class: 'modal-lg' do %>
     <div class="content">
       <div class="row">
         <div class="col-xs-12 col-sm-6 col-md-5">
@@ -33,24 +31,25 @@ Expecting the following local variables:
                      rel="jpg,png,gif"
                      class="icon_picker"
                      autofocus="autofocus"
-                     style="width: 100%"
+                     rows="2"
+                     style="width: 100%; margin-left: 0; margin-top: 10px"
                      data-golinkid="<%= @golinkid %>"/>
             </div>
-            <%= link_to "Preview", "#", class: "btn btn-info image_preview_button float-right-button" %>
+            <%= link_to 'Preview', "#", class: 'btn btn-info image_preview_button float-right-button' %>
           </div>
           <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-12">
               <span class="prompt">To pick an image from any web page, type or paste the page's web address (URL) here and click Extract Images.</span>
               <input type="text"
-                     rel="jpg,png,gif"
                      class="url_picker"
                      autofocus="autofocus"
-                     style="width: 100%"
+                     rows="2"
+                     style="width: 100%; margin-left: 0; margin-top: 10px"
                      data-golinkid="<%= @golinkid %>"/>
             </div>
-            <%= link_to_submit "Extract Images",
+            <%= link_to_submit 'Extract Images',
                                polymorphic_path([:editpic, @decorator]),
-                               class: "btn btn-info url-extract-button float-right-button",
+                               class: 'btn btn-info url-extract-button float-right-button',
                                mode: :modal
             %>
           </div>
@@ -60,14 +59,18 @@ Expecting the following local variables:
       <% if @decorator.pageurl && @pic_select_list.empty? %>
           <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-12">
-              ...or, you can visit the recipe's webpage, hit the Cookmark button, and pick a picture from there.
+              <div style="margin: 10px;">
+                <span class="prompt">
+                  ...or, you can <%= link_to 'visit the recipe\'s webpage', @decorator.url, :target => '_blank', style: 'text-decoration: underline;' %>, hit the Cookmark button, and pick a picture from there.
+                </span>
+              </div>
             </div>
           </div>
       <% end %>
 
       <%= modal_footer do %>
           <%= form_for @decorator.object, :method => :patch, data: {type: 'json'} do |f| %>
-              <%= f.hidden_field @decorator.picable_attribute, id: "pic-picker-url" %>
+              <%= f.hidden_field @decorator.picable_attribute, id: 'pic-picker-url' %>
               <%# f.submit "Save" %>
               <%= form_actions f %>
           <% end %>

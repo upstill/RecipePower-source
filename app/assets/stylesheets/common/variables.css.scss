@@ -68,18 +68,104 @@ $utensils-navtab-text-color: #816887;
 $user-color: #EDDAD7;
 
 // Define depths of various elements
-$menuback-depth: 1029;
-$container-depth: 990;
-$top-right-corner-depth: 1000;
 $dialog-depth: 1050;
+$logo-depth: 1030;
+$menuback-depth: 1029;
+$container-depth: 1000;
 $footer_nav_links-depth: 11;
 $slider-scroller-depth: 1004; // from slider.css.scss
-$slider-title-depth: 1000; // from slider.css.scss
+$slider-title-depth: 1001; // from slider.css.scss
 $slider-fader-depth: 1002; // from slider.css.scss
 $slider-right-depth: 1003; // from slider.css.scss
+$panels-depth: 991;
 
 $salmon-background-color: #CF6361;
 $salmon-text-color: #E8d6d6;
 $salmon-button-color: #CF2F27;
 $salmon-field-background-color: #F3DFDE;
 $salmon-link-color: #E0A09E;
+
+@mixin div-green {
+  background-color: #4B815B;
+  color: #9AB3A0;
+  // input[type='text'], input[type='password'], input[type='email'] {
+  input.string {
+    background-color: #C1D3C7;
+    color: #849688;
+  }
+  input.center-button {
+    background-color: #D8E5DC;
+    background-image: unset;
+    color: #385E44;
+    border-color: #385E44;
+  }
+  a {
+    color: #9AB3A0;
+    &.btn-info {
+      color: lightyellow;
+    }
+  }
+}
+
+@mixin div-salmon {
+  background-color: $salmon-background-color;
+  color: $salmon-text-color;
+  input[type='text'], input[type='password'], input[type='email'] {
+    background-color: $salmon-field-background-color;
+    color: $salmon-button-color;
+  }
+  .center-button {
+    background-color: $salmon-field-background-color;
+    background-image: unset;
+    color: $salmon-button-color;
+    border-color: $salmon-button-color;
+  }
+  a {
+    color: $salmon-link-color;
+    &.btn-info {
+      color: lightgray;
+    }
+  }
+}
+
+@mixin div-blue {
+  background-color: #5090A9;
+  color: #E6D7A3;
+  input[type='text'], input[type='password'], input[type='email'] {
+    background-color: #C2D9E1;
+    color: #7E9796;
+  }
+  .center-button {
+    background-color: #C2D9E1;
+    background-image: unset;
+    color: #205D72;
+    border-color: #205D72;
+  }
+  a {
+    color: #A0B6C2;
+    &.btn-info {
+      color: lightgray;
+    }
+  }
+}
+
+@mixin div-purple {
+  background-color: #7D6D89;
+  color: #E8D6D6;
+  input[type='text'], input[type='password'], input[type='email'] {
+    background-color: #D2CCD6;
+    color: #8F9092;
+  }
+  .center-button {
+    background-color: #E1E0E4;
+    background-image: unset;
+    color: #541D78;
+    border-color: #541D78;
+  }
+  form div a {
+    color: #E8D6D6;
+    &.btn-info {
+      color: lightgray;
+    }
+  }
+}

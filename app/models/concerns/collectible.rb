@@ -46,31 +46,21 @@ module Collectible
   # Gatekeeper for the privacy value to interpret strings from checkbox fields
   def collectible_private= newval
     # Boolean may be coming in as string or integer
-    cached_ref(true).private =
-        case newval
-          when Fixnum
-            newval == 1
-          when String
-            newval == "1"
-          when nil
-            false
-          else
-            newval
-        end
+    cached_ref(true).private = newval.respond_to?(:to_boolean) ? newval.to_boolean : (newval != nil)
   end
 
-  alias_method :"private=", :"collectible_private="
+  alias_method :'private=', :'collectible_private='
 
   def collectible_comment
-    cached_ref(false) ? @cached_ref.comment : ""
+    cached_ref(false) ? @cached_ref.comment : ''
   end
 
   def collectible_comment= str
     cached_ref.comment = str
   end
 
-  def be_collected going_in=true
-    cached_ref.in_collection = (going_in ? true : false)
+  def be_collected newval=true
+    cached_ref.in_collection = newval.respond_to?(:to_boolean) ? newval.to_boolean : (newval != nil)
   end
 
   # Present the time-since-touched in a text format

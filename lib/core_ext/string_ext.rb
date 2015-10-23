@@ -13,4 +13,8 @@ class String
       this = this ? "#{this}-#{substr}" : substr
     }.join '.'
   end
+
+  def to_boolean
+    %w{ true TRUE t T 1 }.include? self
+  end
 end

@@ -1,6 +1,6 @@
 <div class="slider pano">
-  <div class="track", onload="RP.slider.scroll(event);">
-    <% ((defined?(list) && ListServices.new(list).tagging_scope(3).to_a.map(&:entity).uniq.keep_if { |entity| entity.picture_id != nil }[0..20]) || []).each do |member| %>
+  <div class="track">
+    <% ListServices.new(list).tagging_scope(3).to_a.map(&:entity).each do |member| %>
         <%= render_item member, :slider %>
     <% end %>
   </div>

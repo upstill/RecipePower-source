@@ -1,4 +1,4 @@
-<div class="results-enclosure querify querify-supe querify-exec"
+<div class="results-enclosure querify querify-supe "
      data-href="<%= @filtered_presenter.results_path %>">
   <% @filtered_presenter.presentation_partials do |name, locals={}| %>
       <%= name.is_a?(Symbol) ? render_item(name, locals) : render(name, locals) %>

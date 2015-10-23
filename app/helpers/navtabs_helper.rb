@@ -1,5 +1,21 @@
 module NavtabsHelper
 
+  def dropdown_menu label, items, id, link_options={}
+    itemlist =
+        content_tag :ul,
+                    items.collect { |item| content_tag :li, item }.join("\n").html_safe,
+                    class: "dropdown-menu",
+                    id: id
+    label << content_tag(:span, "", class: "caret")
+
+    content = navlink label, '', true, link_options
+    content_tag :li,
+                content + itemlist,
+                id: id,
+                class: 'dropdown'
+
+  end
+
   # Define one element of the navbar. Could be a
   # -- simple label (no go_path and no block given)
   # -- link (valid go_path but no block)
@@ -24,15 +40,15 @@ module NavtabsHelper
 
     return itemlist if menu_only
 
-    content = navlink menu_label.html_safe, go_path, true, options
+    header = navlink menu_label.html_safe, go_path, true, options
     content_tag :li,
-                "#{content} #{itemlist}".html_safe,
+                "#{header} #{itemlist}".html_safe,
                 id: navtab_id(which),
                 class: class_str
   end
 
   # Declare one navlink with appropriate format and query parameters
-  def navlink label, path_or_options, is_menu_header=false, options={}
+  def navlink label, path, is_menu_header=false, options={}
     if is_menu_header.is_a? Hash
       is_menu_header, options = false, is_menu_header
     end
@@ -42,7 +58,7 @@ module NavtabsHelper
       options[:data] ||= {}
       options[:data][:toggle] = "dropdown"
     end
-    link_to_submit label, path_or_options, options  # defaults to partial
+    link_to_submit label, path, options  # defaults to partial
   end
 
   def collections_navtab menu_only = false
@@ -135,12 +151,12 @@ module NavtabsHelper
   def home_navtab menu_only = false
     navtab :home,
            content_tag(:span, "#{current_user.handle}&nbsp;".html_safe, class: "user-name")+
-            content_tag(:span, "", class: "glyphicon glyphicon-cog"),
+               content_tag(:span, '', class: 'measuring-spoons'),
            user_path(current_user, :mode => :partial),
            menu_only do
       item_list = [
           # navlink( "Profile", users_profile_path( section: "profile" ), :mode => :modal),
-          navlink("Sign-in Services", authentications_path, :mode => :modal, class: "transient"),
+          navlink('Sign-in Services', authentications_path, :mode => :modal, class: "transient"),
           navlink("Profile", users_profile_path, :mode => :modal),
           navlink("Invite", new_user_invitation_path, :mode => :modal, class: "transient"),
           navlink("Sign Out", destroy_user_session_path, :method => "delete")

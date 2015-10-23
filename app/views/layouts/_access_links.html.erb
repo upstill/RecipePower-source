@@ -1,0 +1,56 @@
+<% header_links =   content_tag(:a,
+                              "Sign Up",
+                              class: 'select-content signup',
+                              data: {activate: 'signup'}) +
+                    '&nbsp;|&nbsp'.html_safe +
+                    content_tag(:a,
+                                "Sign In",
+                                class: 'select-content signin',
+                                data: {activate: 'signin'}) +
+                    content_tag(:a,
+                                sprite_glyph(:'vote-up', 'xl'),
+                                class: 'select-content rollup none') %>
+<!--
+<%# modal_dialog 'access-links', header_links, show: true do %>
+    <div class="selectable signin">
+      <%# render 'sessions/form' %>
+      <hr style="margin-top: 5px;">
+      <%# render 'authentications/possible', prompt: 'OR SIGN IN VIA:' %>
+    </div>
+    <div class="selectable signup">
+      <%# render 'registrations/options' %>
+    </div>
+<%# end %>
+-->
+<div class="new-style access-links", onload="RP.access_links.onload(event);">
+  <div class="modal-content">
+    <div class="modal-header" style="text-align: center; border: none; color:#ECE6CD;">
+      <%= header_links %>
+      <%# link_to_submit 'Sign Up',
+                             new_user_registration_path,
+                             preload: true,
+                             mode: :modal,
+                             class: 'select-content',
+                             style: 'font-size:2em',
+                             data: { activate: 'signup' } %>
+        <%# link_to_submit 'Sign In',
+                             new_user_session_path,
+                             preload: true,
+                             mode: :modal,
+                             class: 'select-content',
+                             data: { activate: 'signin' } %>
+        <%# link_to_submit sprite_glyph(:'vote-up', 'xl'),
+                             '#',
+                             style: 'float: right; font-size:2em',
+                             class: 'select-content none hide' %>
+    </div>
+    <div class="selectable signin modal-body">
+      <%= render 'sessions/form' %>
+      <hr style="margin-top: 5px;">
+      <%= render 'authentications/possible', prompt: 'OR SIGN IN VIA:' %>
+    </div>
+    <div class="selectable signup modal-body">
+      <%= render 'registrations/options' %>
+    </div>
+  </div>
+</div>

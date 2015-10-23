@@ -71,6 +71,16 @@ div.card-item {
       display: none;
     }
   }
+  div.tool-menu {
+    font-size: 0.7em;
+    display: inline-block;
+    position: relative;
+    bottom: 0px;
+    left: 0px;
+    span.glyphicon-cog {
+      top: 7px;
+    }
+  }
   &.cardlet-item {
     // min-width: 200px;
     width: 350px;
@@ -264,6 +274,7 @@ div.card-item {
   div.tags {
     font-weight: 400;
     color: #909090;
+    font-size: 1.3em;
     a.taglink {
       color: inherit;
     }

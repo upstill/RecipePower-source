@@ -1,9 +1,9 @@
 <%= modal_dialog :sign_in,
                  '',
                  dialog_class: 'dialog-xs',
-                 class: "keeparound new-style green",
-                 data: { focus: "input#user_username" } do %>
+                 class: 'keeparound new-style green',
+                 data: { focus: 'input#user_username'} do %>
     <%= render partial: 'sessions/form' %>
     <hr style="margin-top: 5px;">
-    <%= render partial: 'authentications/possible', locals: { prompt: "OR SIGN IN VIA:" } %>
+    <%= render partial: 'authentications/possible', locals: { prompt: 'OR SIGN IN VIA:'} %>
 <% end %>

@@ -1,8 +1,44 @@
-<div class="masonry-item-contents grid-item <%= decorator.object.class.to_s.underscore %>-item <%= defined?(results_type) && results_type.extensions_to_classes %> <%= decorator.dom_id %>">
-  <%= image_enclosure decorator, class: "pic-box" %>
-  <div class="datablock">
-    <p class="title">
-      <%= collectible_tablink decorator %>
-    </p>
-  </div>
-</div>
+<%= present decorator, current_user_or_guest do |presenter| %>
+    <div class="card-item cardlet-item <%= "#{card_type}-card " if defined?(card_type) %>recipe-card">
+      <table class="cardlet-table">
+        <tr>
+          <% if it = image_with_error_recovery(decorator, class: 'pic-box', fill_mode: 'fixed-width') %>
+              <td rowspan="2" class="pic-box" valign="top"><%= it %></td>
+          <% end %>
+          <td valign="top">
+            <div class="title-glyph top-right">
+              <%= collectible_collect_icon decorator %>
+              <%= collectible_list_menu decorator, response_service.user, {} %>
+            </div>
+            <div class="title-box">
+              <%= presenter.card_homelink class: "title-link" %>
+            </div>
+            <div class="source">
+              source: <%= link_to decorator.sourcename, decorator.sourcehome, class: "source-link" %>
+            </div>
+            <div class="tags">
+              <%= presenter.present_field "tags" %>
+            </div>
+            <p class="description">
+              <%= presenter.present_field "description" %>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td class="bottom">
+            <% if params[:accept_invitation_link] %>
+                <div style="width: 400px; margin: 0 auto;">
+                  <%= link_to "Save on RecipePower", params[:accept_invitation_link], class: "btn btn-lg btn-success", style: "margin-right:40px; margin-top:30px" %>
+                  <%= link_to "Go to Recipe", decorator.url, class: "btn btn-lg btn-info", style: "margin-top: 30px" %>
+                </div>
+            <% end %>
+            <%= collectible_share_button decorator %>
+            <%= collectible_vote_buttons decorator.object %>
+          </td>
+        </tr>
+      </table>
+    </div>
+<% end %>
+
+
+

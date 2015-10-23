@@ -4,7 +4,9 @@
         <div class="col-md-8 col-sm-9 left-matter">
           <div class="title">
             <%# link_to decorator.title, decorator.url, class: "title-link", data: {report: polymorphic_path([:touch, decorator.object])} %>
-            <%= presenter.card_homelink class: "title-link" %>&nbsp;<%= collectible_collect_icon decorator, "lg" %>
+            <%= presenter.card_homelink class: "title-link" %>&nbsp;
+            <%= collectible_collect_icon decorator, "lg" %>
+            <%= collectible_list_menu decorator, response_service.user, {} %>
           </div>
           <div class="source">
             source: <%= link_to decorator.sourcename, decorator.sourcehome, class: "source-link" %>
@@ -26,8 +28,10 @@
                       </div>
                     </div>
                   </div>
-              <% elsif !(presenter.field_value "rcpPicURL").blank? %>
+              <% elsif presenter.field_value("rcpPicURL").present? %>
                   <img src="<%= presenter.present_field "rcpPicURL" %>" class="recipe-preview pull-right" width="100%">
+              <% elsif presenter.field_value("rcpPicSafeURL").present? %>
+                  <img src="<%= presenter.present_field "rcpPicSafeURL" %>" class="recipe-preview pull-right" width="100%">
               <% end %>
             </div>
           </td>

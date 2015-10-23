@@ -32,30 +32,15 @@ body {
   letter-spacing: 1px;
 }
 
-// The signin link behaves differently depending on whether we're on the landing page (no container)
-div.signin-link {
-  z-index: $menuback-depth;
-  position: absolute;
-  right: 0.5em;
-  top: 0.5em;
-  a {
-    color: white;
-  }
-}
-
-div.container.pagelet-body {
-  div.signin-link {
-    position: fixed;
-    right: 0.5em;
-    top: 0.5em;
-    a {
-      color: #aaa;
-    }
-  }
+div.modal.signup {
+  top:10%;
+  right:10%;
+  outline: none;
 }
 
 .panels {
   height: 100vh;
+  z-index: $panels-depth;
   section {
     overflow: hidden;
     width: 100%;
@@ -69,16 +54,10 @@ div.container.pagelet-body {
     //background-attachment: fixed;
     background-size: cover;
     height: 100vh;
-    div.pano {
-      border: 1px solid red;
-    }
   }
   .panel-two {
     background-color: $panel-two-background-color;
     height: 100vh;
-    div.pano {
-      border: 1px solid green;
-    }
     div.slider-fader {
       background: -moz-linear-gradient(left, $panel-two-background-transparent, $panel-two-background-color);
       // background: -webkit-linear-gradient(left, rgba(216,224,226,0), #d8dde0);
@@ -95,9 +74,6 @@ div.container.pagelet-body {
   .panel-three {
     background-color: $panel-three-background-color;
     height: 100vh;
-    div.pano {
-      border: 1px solid blue;
-    }
     div.slider-fader {
       background: -moz-linear-gradient(left, $panel-three-background-transparent, $panel-three-background-color);
       // background: -webkit-linear-gradient(left, rgba(216,224,226,0), #d8dde0);
@@ -114,9 +90,6 @@ div.container.pagelet-body {
   .panel-four {
     background-color: $panel-four-background-color;
     height: 100vh;
-    div.pano {
-      border: 1px solid yellow;
-    }
     div.slider-fader {
       background: -moz-linear-gradient(left, $panel-four-background-transparent, $panel-four-background-color);
       // background: -webkit-linear-gradient(left, rgba(216,224,226,0), #d8dde0);
@@ -134,7 +107,7 @@ div.container.pagelet-body {
     width: 100%;
     height: 100%;
     position: relative;
-    z-index: 990;
+    // z-index: $panels-depth;
     p.panel-title {
       top: 10%;
       font-size: 230px;
@@ -222,11 +195,7 @@ div.card {
   padding-top: 10px
 }
 
-span.caret {
-  display: none;
-}
-
-.glyphicon.glyphicon-cog {
+.measuring-spoons {
   content: image-url("rp-measuring-spoons.png");
 }
 
@@ -235,14 +204,19 @@ nav.navbar-fixed-top {
   // padding-bottom: 50px;
 }
 
+$menuback-height: 130px;
+$triggered-form-height: 30px;
+$triggered-form-margin: 10px;
 div.triggered-form {
   position: absolute;
   z-index: $container-depth;
+  height: $triggered-form-height;
+  top: 0;
   left: 230px;
+  margin: $triggered-form-margin;
   .filter-element {
     display: inline-block;
     vertical-align: bottom;
-    margin: 5px 10px
   }
 }
 
@@ -250,15 +224,41 @@ div.triggered-form {
 .container {
   background-color: $page-background-color;
   z-index: $container-depth;
-  &.med {
-    padding-top: 200px;
+  padding-bottom: 200px;
+  &.menuback {
+    padding-bottom: 0;
+    z-index: $menuback-depth;
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    margin-top: 0;
+    margin-right: auto;
+    margin-left: auto;
+    height: $menuback-height;
+    background-color: $page-background-color;
   }
-  &.top {
-    margin-top: 125px;
-    padding-top: 80px;
-    padding-bottom: 200px;
+  &.no-menu {
+    padding-top: 75px;
+    div.selector-element {
+      margin-top: 3em;
+      margin-bottom: 2em;
+      margin-left: 13em;
+    }
+    div.card-item {
+      margin-top: 30px;
+    }
+  }
+  &.below-menu {
+    margin-top: $menuback-height;
+    padding-top: 75px;
     div.triggered-form {
-      top: 135px;
+      top: $menuback-height;
+    }
+    div.selector-element {
+      margin-top: 1em;
+      margin-bottom: 2em;
+      margin-left: 3em;
     }
     > div.row {
       margin-left: 15px;
@@ -267,18 +267,6 @@ div.triggered-form {
   }
 }
 
-div.menuback {
-  z-index: $menuback-depth;
-  position: fixed;
-  top: 0;
-  right: 0;
-  left: 0;
-  margin-top: 0;
-  margin-right: auto;
-  margin-left: auto;
-  height: 140px;
-  background-color: $page-background-color;
-}
 
 img.empty {
   display: none;
@@ -297,6 +285,47 @@ div.generic-top {
   }
 }
 
+div.logo {
+  position: fixed;
+  left: 30px;
+  z-index: $logo-depth;
+}
+
+div.access-links {
+  width: 19em;
+  height: auto;
+  z-index: $logo-depth;
+  position: fixed;
+  right: 2em;
+  top: 1em;
+  div.modal-header {
+    padding: 5px;
+    text-align: center;
+    border: none;
+    color: #ECE6CD;
+    a.signup {
+      font-size: 2em;
+      color: #ECE6CD;
+    }
+    a.signin {
+      font-size: 1.2em;
+      color: #ECE6CD
+    }
+    a.rollup {
+      display: none;
+      float: right;
+      font-size: 1.2em;
+      color: #ECE6CD;
+    }
+  }
+  div.selectable {
+    display: none;
+  }
+  div.modal-content {
+    @include div-green;
+  }
+}
+
 div.filter-element {
   width: 500px;
   input#token-input-querytags {
@@ -309,14 +338,9 @@ div.filter-element {
 
 div.glyph-button {
   display: inline-block;
-  font-size: 1.2em;
 }
 
 div.selector-element {
-  display: inline-block;
-  margin-top: 2em;
-  margin-bottom: 1em;
-  margin-left: 3em;
   a.result-link {
     font-size: 1.5em;
           &.recipes {
@@ -399,13 +423,6 @@ form.edit_user {
 
 div.token-input-dropdown-facebook {
   font: 14px arial, sans-serif;
-}
-
-.top-right-corner {
-  position: absolute;
-  z-index: $top-right-corner-depth;
-  top: 0px;
-  right: 0px;
 }
 
 div.prompt {

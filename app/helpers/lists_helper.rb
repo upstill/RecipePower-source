@@ -32,15 +32,15 @@ module ListsHelper
   end
 
   # Offer to let the user save the item in their collection and any list they own, plus a new list
-  def pin_menu decorator, user, styling, options={}
+  def collectible_list_menu decorator, user, styling, options={}
     if user
       entity = decorator.object
-      hover_menu "", styling.merge(class: dom_id(decorator)) do
+      hover_menu sprite_glyph(:"list-add"), styling.merge(class: dom_id(decorator)) do
         already_collected = entity.collected? current_user_or_guest_id
         cl = collection_link decorator,
                              checkbox_menu_item_label("Collection", already_collected),
-                             already_collected,
                              styling,
+                             :in_collection => !already_collected,
                              :class => "checkbox-menu-item collection"
         [ content_tag(:li, cl),
           user.owned_lists.collect { |l| content_tag :li, (list_menu_item l, entity, styling.merge(class: dom_id(l))) },
@@ -77,16 +77,10 @@ module ListsHelper
   end
 
   def hover_menu label, options={}
-    button = # "<a class='dropdown-toggle' data-toggle='dropdown'>+</a>".html_safe
-      content_tag :button,
-       label.html_safe,
-       type: "button",
-       class: "btn btn-default btn-#{options[:button_size] || 'xs'} dropdown-toggle glyphicon glyphicon-pushpin",
-       data: { toggle: "dropdown" },
-       :"aria-expanded" => "false"
-    list_items = yield.join.html_safe
-    list_tag = content_tag :ul, list_items, class: "dropdown-menu #{options[:class]}", role: "menu"
-    content_tag :div, button+list_tag, class: "btn-group"
+    return with_format('html') { render 'shared/hover_menu',
+                                        label: label,
+                                        klass: options[:class] || '',
+                                        links: yield }
   end
 
 end

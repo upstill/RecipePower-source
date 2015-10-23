@@ -1,0 +1,38 @@
+<%= form_for @recipe do |f| %>
+    <%= form_errors_helper f, @recipe %>
+<!--
+    <div class="edit_recipe_field pic_picker_field">
+      <%# pic_field f %>
+    </div>
+-->
+    <div class="recipe_fields_div">
+      <div class="recipe_title_div">
+        <%= f.label :title, "Title", :class => "recipe_field_label" -%>
+        <% @recipe.title %>
+        <br><%= f.text_area :title, :rows => 3 %>
+      </div>
+      <% if permitted_to?(:admin, :recipes) %>
+          <div class="recipe_url_div">
+            <%= f.label :url, "URL", :class => "recipe_field_label" -%>
+            <br><%= f.text_area :url, :rows => 3 %>
+          </div>
+      <% end %>
+      <!--
+      <div class="recipe_status_div">
+        <%# f.label :status, "Status: ", :class => "recipe_field_label" -%>
+        <%# f.select :status, Recipe.status_select %>
+        <%# f.check_box :private %>
+        <%# f.label :private, "Private (for my eyes only)" %>
+        <%# f.label :privacy, "Privacy: ",:class=>"recipe_field_label" -%>
+        <%# f.select :privacy, Recipe.privacy_select %>
+      </div>
+-->
+    </div>
+    <div class="modal-footer">
+      <% if permitted_to?(:admin, :recipes) && response_service.admin_view? %>
+          <%= link_to_submit "Destroy", decorator.object_path, :class => "pull-left", :button_style => :danger, :method => :delete, confirm: "This will permanently remove ths #{decorator.human_name} from RecipePower for good: it can't be undone. Are you absolutely sure you want to do this?" %>
+      <% end %>
+      <%= dialog_submit_button %>
+      <%= dialog_cancel_button %>
+    </div>
+<% end %>

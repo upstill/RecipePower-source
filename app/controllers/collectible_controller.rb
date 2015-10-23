@@ -3,11 +3,21 @@ class CollectibleController < ApplicationController
   def collect
     if current_user
       update_and_decorate # Generate a FeedEntryDecorator as @feed_entry and prepares it for editing
-      @decorator.be_collected !params[:oust]
-      msg = "'#{@decorator.title.truncate(50)}' "
-      msg << (@decorator.collected? ?
-          "now appearing in your collection." :
-          "has been ousted from your collection (though you may see it elsewhere).")
+      msg = @decorator.title.truncate 50
+      if params.has_key? :private
+        @decorator.be_collected true
+        @decorator.collectible_private = params[:private]
+        msg << (@decorator.private ? ' now' : 'no longer')
+        msg << ' hidden from others.'
+      end
+      if params.has_key? :in_collection
+        was_collected = @decorator.collected?
+        @decorator.be_collected params[:in_collection]
+        @newly_deleted = !(@newly_collected = @decorator.collected?) if @decorator.collected? != was_collected
+        msg << (@decorator.collected? ?
+            ' now appearing in your collection.' :
+            ' has been ousted from your collection (though you may see it elsewhere).')
+      end
       @decorator.object.save
       if resource_errors_to_flash(@decorator.object)
         render :errors
@@ -113,6 +123,11 @@ class CollectibleController < ApplicationController
       ResultsCache.bust rp_uuid
       other.destroy
     end
+  end
+
+  def edit
+    update_and_decorate
+    smartrender
   end
 
   def show

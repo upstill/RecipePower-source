@@ -5,10 +5,16 @@ module CardPresentation
   end
 
   def card_avatar with_form=false
-    image_with_error_recovery decorator,
+    img = image_with_error_recovery decorator,
                               class: decorator.image_class,
                               fallback_img: decorator.object.is_a?(User),
                               fill_mode: 'fixed-width'
+    permitted_to?(:update, decorator.object) ?
+        link_to_submit( img,
+                        polymorphic_path( [:editpic, decorator.object] ),
+                        mode: 'modal',
+                        title: 'Get Picture') :
+        img
   end
 
   # By default, show the card if there's an avatar OR a backup avatar
