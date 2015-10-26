@@ -16,7 +16,7 @@
                   <%= collectible_edit_button decorator %>
               <% else %>
                   <%= collectible_collect_icon decorator %>
-                  <%= collectible_list_menu decorator, response_service.user, {} %>
+                  <%# collectible_list_menu decorator, response_service.user, {} %>
               <% end %>
             </div>
             <div class="container-fluid">
@@ -30,10 +30,11 @@
         </tr>
         <tr>
           <td valign="bottom" class="lower-content">
-            <%= collectible_upload_button decorator, 'lg' %>
-            <% if decorator.object != response_service.user %>
+            <% if decorator.object == response_service.user %>
                 <%# collectible_edit_button decorator, 'lg' %>
+                <%= collectible_upload_button decorator, 'lg' %>
                 <%= collectible_tools_menu decorator, 'lg' %>
+            <% else %>
                 <%= collectible_share_button decorator, 'lg' %>
             <% end %>
           </td>

@@ -71,7 +71,7 @@ class CollectibleController < ApplicationController
     if current_user
       params.delete :recipe if request.method == "GET" # We're not saving anything otherwise
       update_and_decorate
-      unless @decorator.errors.any? || @decorator.collected? # Ensure that it's collected before editing
+      unless @decorator.errors.any? || @decorator.collectible_collected? # Ensure that it's collected before editing
         @decorator.be_collected
         @decorator.save
         flash.now[:notice] = "'#{@decorator.title.truncate(50)}' has been added to your collection for tagging" # if @decorator.object.errors.empty?

@@ -80,7 +80,7 @@ module Collectible
   end
 
   # Does the entity appear in the user's collection?
-  def collected? uid=nil
+  def collectible_collected? uid=nil
     (ref = ref_if_any uid) && ref.in_collection
   end
 

@@ -41,15 +41,14 @@ class UsersController < CollectibleController
   def follow
     if current_user
       update_and_decorate # Generate a FeedEntryDecorator as @feed_entry and prepares it for editing
-      if current_user.follows? response_service.user
-        current_user_or_guest.followees.delete response_service.user
-        msg = "You've just been unplugged from'#{response_service.user.handle}'."
+      if current_user.follows? @user
+        current_user.followees.delete @user
+        msg = "You're no longer following '#{@user.handle}'."
       else
-        current_user_or_guest.followees << response_service.user
-        msg = "You're now connected with '#{response_service.user.handle}'."
+        current_user.followees << @user
+        msg = "You're now following '#{@user.handle}'."
       end
       current_user.save
-      response_service.user.save
       if resource_errors_to_flash(current_user)
         render :errors
       else

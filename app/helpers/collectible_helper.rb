@@ -30,10 +30,14 @@ module CollectibleHelper
     if size.is_a? Hash
       size, options = nil, size
     end
-    glyph = if current_user_or_guest.collected?(decorator.object)
-      sprite_glyph :check, size, title: 'In Collection'
+    if decorator.object.class == User
+      glyph = user_follow_button decorator.object
     else
-      collection_link decorator, sprite_glyph(:plus), {}, :in_collection => true
+      glyph = if current_user_or_guest.has_in_collection? decorator.object
+                sprite_glyph :check, size, title: 'In Collection'
+              else
+                collection_link decorator, sprite_glyph(:plus), {}, :in_collection => true
+              end
     end
     content_tag :div, glyph, class: "collectible-collect-icon glyph-button #{dom_id decorator}"
   end
@@ -50,7 +54,7 @@ module CollectibleHelper
       entity = decorator.object
       menu = hover_menu content_tag(:span, '', class: 'glyphicon glyphicon-cog'),
                         styling do
-        in_collection = current_user.collected? decorator.object
+        in_collection = current_user.has_in_collection? decorator.object
         items = []
 
         items << collection_link(decorator,
@@ -76,7 +80,7 @@ module CollectibleHelper
 
         end
 
-        if entity.collected?
+        if entity.collectible_collected?
           privacy_label = checkbox_menu_item_label 'Private', entity.private
           items << collection_link(decorator, privacy_label, styling, private: !entity.private)
         end

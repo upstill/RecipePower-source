@@ -36,7 +36,7 @@ module ListsHelper
     if user
       entity = decorator.object
       hover_menu sprite_glyph(:"list-add"), styling.merge(class: dom_id(decorator)) do
-        already_collected = entity.collected? current_user_or_guest_id
+        already_collected = entity.collectible_collected? current_user_or_guest_id
         cl = collection_link decorator,
                              checkbox_menu_item_label("Collection", already_collected),
                              styling,
