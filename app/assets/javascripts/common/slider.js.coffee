@@ -18,7 +18,7 @@ jQuery ->
 		$(enclosure).addClass 'nopic'
 
 RP.slider.setup = (button_elmt) ->
-	$(button_elmt).hover RP.slider.hoverin, RP.slider.hoverout
+	# $(button_elmt).hover RP.slider.hoverin, RP.slider.hoverout
 	$(button_elmt).click RP.slider.click
 	button_check button_elmt
 
@@ -27,18 +27,21 @@ RP.slider.click = (event) ->
 	parent = button_elmt.parentNode
 	right_button = $('.right', parent)[0]
 	left_button = $('.left', parent)[0]
+	winrect = parent.getBoundingClientRect()
+	scroll_by = winrect.right - winrect.left
 	if button_elmt == right_button
-		bound = right_button.getBoundingClientRect().right+2
-	else
-		bound = left_button.getBoundingClientRect().left-2
-	# Do a linear search for the item that overlaps the right side of the scrolling panel
+		scroll_by = -scroll_by
+	# Do a linear search for the item that overlaps the left side of the scrolling panel
 	$('.slider-item', parent).each (index) ->
 		itemrect = this.getBoundingClientRect()
-		if itemrect.right > bound
-			slide_by left_button, left_button.getBoundingClientRect().left-itemrect.left
-			if RP.slider.current
-				clearTimeout RP.slider.current
-				RP.slider.current = null
+		if (itemrect.right+scroll_by) >= winrect.left
+			# Scroll so that the leftmost item of the new scrolling window aligns with the left of the window
+			slide_by left_button, winrect.left-itemrect.left
+			clearScroll()
+			setTimeout ->
+				if $('div:hover', parent)[0] == button_elmt
+					setScroll button_elmt
+			, 1000
 			return false
 
 RP.slider.bump = (button_elmt) ->
@@ -77,17 +80,21 @@ RP.slider.trigger_check = (trigger_elmt) ->
 	$('.right', parent).each (index) ->
 		button_check this
 
-RP.slider.hoverin = (event) ->
-	button_elmt = event.currentTarget
+setScroll = (button_elmt) ->
 	RP.slider.current = setInterval ->
 		RP.slider.bump button_elmt
 	, 20
 
-RP.slider.hoverout = (event) ->
-	button_elmt = event.currentTarget
+clearScroll = ->
 	if RP.slider.current
 		clearTimeout RP.slider.current
 		RP.slider.current = null
+
+RP.slider.hoverin = (event) ->
+	setScroll event.currentTarget
+
+RP.slider.hoverout = (event) ->
+	clearScroll()
 
 RP.slider.startScroll = (tracker) ->
 	if RP.slider.intvl
