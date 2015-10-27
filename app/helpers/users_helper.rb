@@ -66,7 +66,7 @@ module UsersHelper
   end
 
   def user_linktitle user
-    user.fullname.present? ? user.fullname : user.username
+    user.fullname.if_present || user.username.if_present || user.handle
   end
 
   def user_homelink user, options={}
