@@ -4,7 +4,7 @@ class UserServices
   attr_accessor :user
   
   delegate :id, :username, :first_name, :last_name, :fullname, :about, :login, :private, :skip_invitation, :add_collection, :delete_collection, :add_followee,
-           :email, :password, :password_confirmation, :shared_type, :shared_id, :shared, :"shared=", :invitee_tokens, :channel_tokens, :image,
+           :email, :password, :password_confirmation, :shared_type, :shared_id, :shared, :'shared=', :invitee_tokens, :channel_tokens, :image,
            :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens, :subscription_tokens, :invitation_issuer, :to => :user
   
   def initialize(user)
@@ -19,7 +19,7 @@ class UserServices
       u.thumbnail && u.thumbnail.perform
       u.save
     end
-    "Users Converted"
+    'Users Converted'
   end
 
   def analyze_invitees(against_user)
@@ -66,9 +66,9 @@ class UserServices
   # Called on signup to initialize the user
   def sign_up
     # Give the user a starting set of collections and friends
-    List.assert "Now Cooking", response_service.user
-    List.assert "To Try", response_service.user
-    List.assert "Keepers", response_service.user
+    List.assert 'Now Cooking', user
+    List.assert 'To Try', user
+    List.assert 'Keepers', user
     add_followee User.find(1)
     add_followee User.find(3)
   end
