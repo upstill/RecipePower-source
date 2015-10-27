@@ -189,8 +189,12 @@ module NavtabsHelper
   end
 
   # Package the navtab up to be replaced via AJAX
-  def navtab_replacement which
+  def navmenu_replacement which
     [ "ul##{navmenu_id(which)}", method(:"#{which}_navtab").call(true) ]
+  end
+
+  def friends_navtab_replacement
+    [ 'ul#friends-navmenu', friends_navtab(true) ]
   end
 
   protected
