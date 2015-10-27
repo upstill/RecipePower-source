@@ -47,7 +47,7 @@ module FeedsHelper
   end
 
   def feed_subscribe_button item, options={}
-    if item.collected? current_user_or_guest_id
+    if item.collectible_collected? current_user_or_guest_id
       label, path = "Unsubscribe", collect_feed_path(item, in_collection: false)
     else
       label, path = "Subscribe", collect_feed_path(item)

@@ -26,16 +26,27 @@ module UsersHelper
        (user.email ? "your email '#{user.email}'" : "")).html_safe
    end
 
-  def follow_button user, options={}
-    button_to_submit((current_user.follows?(user) ? "Stop Following" : 'Follow'),
-                     follow_user_path(user), options.merge(
-                     class: "follow-button",
-                     id: dom_id(user),
-                     method: :post ))
+  def user_follow_button user, options={}
+    if current_user_or_guest.follows? user
+      sprite_glyph :check,
+                   options[:size],
+                   title: "Following #{user.handle}",
+                   class: "follow-button",
+                   id: dom_id(user)
+    else
+      button_to_submit '',
+                       follow_user_path(user),
+                       'glyph-plus',
+                       'lg',
+                       method: 'post',
+                       title: "Follow #{user.handle}",
+                       class: "follow-button",
+                       id: dom_id(user)
+    end
   end
 
-  def follow_button_replacement user, options={}
-    [ "a.follow-button##{dom_id user}", follow_button(user, options) ]
+  def user_follow_button_replacement user, options={}
+    [ ".follow-button##{dom_id user}", user_follow_button(user, options) ]
   end
 
   def di_select
@@ -71,5 +82,22 @@ module UsersHelper
     link_to_submit user_linktitle(user),
                    polymorphic_path([action, user]),
                    {mode: :partial}.merge(options).merge(data: data, class: klass).except(:action)
+  end
+
+  # Operate on a set of tag specifications as defined in UserDecorator for directing a list search
+  # Enhance each tokeninput with css class, css id and (as appropriate) owner specifier)
+  def classify_listtags tokeninputs
+    tokeninputs.each { |tokeninput|
+      tokeninput[:cssid] = "choice_#{tokeninput[:id]}"
+
+      case tokeninput[:status]
+        when :'my own', :'my collected'
+          tokeninput[:cssclass] = 'owned'
+        when :'owned', :'collected'
+          tokeninput[:cssclass] = 'friends'
+          tokeninput[:name] = "#{tokeninput[:name]} (#{tokeninput[:owner_name]})"
+      end
+    }
+    tokeninputs
   end
 end

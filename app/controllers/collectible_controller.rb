@@ -31,6 +31,28 @@ class CollectibleController < ApplicationController
     end
   end
 
+  # Replace the set of lists that the entity is on (as viewed by the current user)
+  def lists
+    if current_user
+      update_and_decorate # Generate a FeedEntryDecorator as @feed_entry and prepares it for editing
+      msg = @decorator.title.truncate 50
+      if request.method == "GET"
+        render :lists
+      else
+        @decorator.object.save
+        if resource_errors_to_flash(@decorator.object)
+          render :errors
+        else
+          flash[:popup] = msg
+          render :lists
+        end
+      end
+    else
+      flash[:alert] = "Sorry, you need to be logged in to manage lists."
+      render :errors
+    end
+  end
+
   def editpic
     update_and_decorate
     @golinkid = params[:golinkid]
@@ -49,7 +71,7 @@ class CollectibleController < ApplicationController
     if current_user
       params.delete :recipe if request.method == "GET" # We're not saving anything otherwise
       update_and_decorate
-      unless @decorator.errors.any? || @decorator.collected? # Ensure that it's collected before editing
+      unless @decorator.errors.any? || @decorator.collectible_collected? # Ensure that it's collected before editing
         @decorator.be_collected
         @decorator.save
         flash.now[:notice] = "'#{@decorator.title.truncate(50)}' has been added to your collection for tagging" # if @decorator.object.errors.empty?
@@ -57,7 +79,7 @@ class CollectibleController < ApplicationController
       if resource_errors_to_flash @decorator, preface: "Couldn't save."
         render :errors
       else
-        unless (request.method == "GET")
+        unless request.method == "GET"
           flash[:popup] = "#{@decorator.human_name} saved"
           render "collectible/update.json"
         else

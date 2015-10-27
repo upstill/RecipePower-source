@@ -102,7 +102,7 @@ class User < ActiveRecord::Base
     touch entity, true
   end
 
-  def collected? entity
+  def has_in_collection? entity
     collection_pointers.exists? user: self, entity: entity
   end
 

@@ -62,6 +62,7 @@ class List < ActiveRecord::Base
   include Typeable
   include Collectible
   picable :picurl, :picture, "List_Icon.png"
+  after_save :propagate_privacy
 
   typeable( :availability,
             public: ["Anyone (Public)", 0 ],
@@ -137,26 +138,10 @@ class List < ActiveRecord::Base
     save
   end
 
-=begin
-  # This functionality allowed lists to have included tags. Now that 'pullin' gets included tags from the list's tags,
-  # we don't need included tags. This may change, however
-  def included_tag_tokens
-    tag_ids
+  # Make sure the list's tag obeys the privacy constraint of the list itself,
+  # The tag is visible only if one of the lists that use it is not private
+  def propagate_privacy
+    name_tag.isGlobal = List.exists? name_tag_id: name_tag_id, availability: [0,1]
+    name_tag.save if name_tag.changed?
   end
-
-  # Write the virtual attribute tag_tokens (a list of ids) to
-  # update the real attribute tag_ids
-  def included_tag_tokens=(idstring)
-    self.included_tags =
-        TokenInput.parse_tokens(idstring) do |token| # parse_tokens analyzes each token in the list as either integer or string
-          case token
-            when Fixnum
-              Tag.find token
-            when String
-              Tag.strmatch(token, userid: tagging_user_id, assert: true)[0] # Match or assert the string
-          end
-        end
-  end
-=end
-
 end

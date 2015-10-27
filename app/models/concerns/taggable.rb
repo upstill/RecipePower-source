@@ -40,6 +40,10 @@ module Taggable
     filtered_tags options.merge(user_id: taggers) # Allowing for an array of uids
   end
 
+  def tagging_tags_of_type type_or_types
+    filtered_tags tagtype: type_or_types
+  end
+
   # Return the editable tags, i.e. not channels, collections, or lists
   def tagging_tags
     filtered_tags(:tagtype_x => [11, :Collection, :List])
@@ -65,28 +69,6 @@ module Taggable
     other.taggings.map { |tagging| tag_with tagging.tag, tagging.user_id }
     super if defined? super
   end
-
-=begin Possibly called procedurally?
-  # Declare a data structure suitable for passing to RP.tagger.init
-  def tag_editing_data options={}
-    options[:tagtype_x] = [11, :Collection, :List]
-    data = { :hint => options.delete(:hint) || "Type your tag(s) here" }
-    data[:pre] = filtered_tags(options).collect { |tag| { id: tag.id, name: tag.typedname(options[:showtype]) } }
-    data[:query] = options.slice :verbose, :showtype
-    data[:query][:tagtype] = Tag.typenum(options[:tagtype]) if options[:tagtype]
-    data[:query][:tagtype_x] = Tag.typenum(options[:tagtype_x]) if options[:tagtype_x]
-    data.to_json
-  end
-
-  def tag_data uid, options={}
-    data = { :hint => options.delete(:hint) || "Type your tag(s) here" }
-    data[:pre] = filtered_tags(options).collect { |tag| { id: tag.id, name: tag.typedname(options[:showtype]) } }
-    data[:query] = options.slice :verbose, :showtype
-    data[:query][:tagtype] = Tag.typenum(options[:tagtype]) if options[:tagtype]
-    data[:query][:tagtype_x] = Tag.typenum(options[:tagtype_x]) if options[:tagtype_x]
-    data.to_json
-  end
-=end
 
   protected
 
