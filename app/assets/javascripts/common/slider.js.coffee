@@ -18,7 +18,7 @@ jQuery ->
 		$(enclosure).addClass 'nopic'
 
 RP.slider.setup = (button_elmt) ->
-	# $(button_elmt).hover RP.slider.hoverin, RP.slider.hoverout
+	$(button_elmt).hover RP.slider.hoverin, RP.slider.hoverout
 	$(button_elmt).click RP.slider.click
 	button_check button_elmt
 
