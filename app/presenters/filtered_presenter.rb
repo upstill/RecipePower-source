@@ -192,7 +192,8 @@ class FilteredPresenter
   def presentation_partials &block
     if item_mode == :table
       block.call header_partial
-      block.call 'filtered_presenter/results_table'
+      # block.call 'filtered_presenter/results_table'
+      apply_partial 'filtered_presenter/partial_table', :table, block, :item_mode => :table
     else
       block.call :card if show_card?
       block.call :comments if @decorator && @decorator.object && @decorator.object.is_a?(Commentable)
