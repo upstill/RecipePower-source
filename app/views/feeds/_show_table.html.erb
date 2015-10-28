@@ -11,17 +11,26 @@
       <hr>
       <%= feed.description %>
     </td>
-    <td><%= taggable_list feed %></td>
+    <td><%= decorator.extract 'tags' %><%# taggable_list feed %></td>
     <!--<td><%# feed.feedtypename unless feed.feedtypename == "Misc" %></td>-->
     <td><%= link_to_submit feed.site.name, site_path(feed.site), mode: :modal %></td>
     <td><%= feed_status_summary feed %></td>
     <% if response_service.admin_view? %>
-        <td><%= feed_approval feed %></td>
-    <% end %>
-    <td class="actions-column">
-      <%= collectible_buttons_panel decorator do %>
-          <%# feed_subscribe_button feed, options %>
-      <% end %>
+        <td>
+          <%= feed_approval feed %>
+          <br>
+          <%= button_to('Destroy',
+                        decorator.object_path,
+                        :method => :delete,
+                        :class => 'btn btn-xs btn-danger',
+                        confirm: "This will permanently remove ths #{decorator.human_name} from RecipePower for good: it can't be undone. Are you absolutely sure you want to do this?"
+              ) if permitted_to? :delete, :feeds %>
+        </td>
+    <% end   %>
+        <td class="actions-column">
+          <%= collectible_buttons_panel decorator, :except => [:tag] do %>
+              <%# feed_subscribe_button feed, options %>
+          <% end %>
 <%# feed_collectible_buttons decorator, vote_button: true, edit_button: response_service.admin_view? %>
-    </td>
-<% end %>
+        </td>
+    <% end %>

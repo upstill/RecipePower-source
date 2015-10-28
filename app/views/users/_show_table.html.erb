@@ -9,7 +9,7 @@
       <%= collectible_collect_icon(decorator, "lg") unless decorator.object == current_user_or_guest %>
       <br><%= decorator.about %>
     </td>
-    <td><%= taggable_list decorator %></td>
+    <td><%= decorator.extract 'tags' %><%# taggable_list decorator %></td>
     <td>
       <%= count_report decorator.object.collection_size, "cookmarks", "<b>Has collected</b>", "<br>" %>
       <%= count_report decorator.object.followees.count, "other", "<b>Following</b>", "<br>" %>

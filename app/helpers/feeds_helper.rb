@@ -75,8 +75,19 @@ module FeedsHelper
             else
               ''
           end
-          str << link_to_submit('Approve', approve_feed_path(feed, approve: 'Y'), button_size: 'xs', method: 'POST') unless feed.approved == true
-          str << link_to_submit('Block', approve_feed_path(feed, approve: 'N'), button_size: 'xs', method: 'POST') unless feed.approved == false
+          # NB: feeds can have no approval status, in which case both buttons should show
+          str << link_to_submit('Approve',
+                                approve_feed_path(feed, approve: 'Y'),
+                                button_style: 'success',
+                                button_size: 'xs',
+                                method: 'POST'
+          ) unless feed.approved == true
+          str << link_to_submit('Block',
+                                approve_feed_path(feed, approve: 'N'),
+                                button_style: 'success',
+                                button_size: 'xs',
+                                method: 'POST'
+          ) unless feed.approved == false
     content_tag :span, str.html_safe, :id => dom_id(feed)
   end
 

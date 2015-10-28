@@ -2,7 +2,7 @@ RP.stream ||= {}
 
 jQuery ->
 	$(window).scroll () ->
-		$('div.stream-items-parent .stream-trigger').each (index) ->
+		$('.stream-items-parent .stream-trigger').each (index) ->
 			RP.stream.check this
 
 RP.stream.onload = (event) ->

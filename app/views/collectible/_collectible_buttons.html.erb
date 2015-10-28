@@ -1,3 +1,4 @@
+<% except = [] unless defined?(except) && except %>
 <div class="collectible-buttons" style="display: inline-block" id="<%= dom_id decorator %>">
   <%= extras if defined?(extras) %>
 
@@ -8,11 +9,11 @@
   <%= collectible_tools_menu decorator %>
 
   <span class="<%= recipe_list_element_golink_class item %>">
-      <%= collectible_tag_button decorator, styling %>
+      <%= collectible_tag_button decorator, styling unless except.include?(:tag) %>
   </span>
 
   <span class="<%= recipe_list_element_golink_class item %>">
-      <%= collectible_share_button decorator, styling %>
+      <%= collectible_share_button decorator, styling unless except.include?(:share) %>
   </span>
 
   <% if styling[:vote_button] && false %>

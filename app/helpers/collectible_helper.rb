@@ -2,10 +2,16 @@ module CollectibleHelper
 
   # Render the set of collectible buttons
   def collectible_buttons_panel decorator, styling={}, &block
+    except = styling.delete(:except) || []
     styling = params[:styling].merge styling if params[:styling]
     extras = block_given? ? yield : ""
     with_format("html") do
-      render("collectible/collectible_buttons", extras: extras, styling: styling, decorator: decorator, item: decorator.object)
+      render "collectible/collectible_buttons",
+             extras: extras,
+             except: except,
+             styling: styling,
+             decorator: decorator,
+             item: decorator.object
     end
   end
 
@@ -72,8 +78,8 @@ module CollectibleHelper
           items << link_to_submit('Edit', url, styling.merge(mode: :modal, title: nil))
         end
 
-        if permitted_to? :admin, entity.class.to_s.downcase.pluralize
-          items << link_to_submit('Destroy',
+        if permitted_to? :delete, entity.class.to_s.downcase.pluralize
+          items << button_to('Destroy',
                                   decorator.object_path,
                                   :method => :delete,
                                   confirm: "This will permanently remove ths #{decorator.human_name} from RecipePower for good: it can't be undone. Are you absolutely sure you want to do this?")

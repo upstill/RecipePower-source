@@ -64,7 +64,8 @@ module TaggableHelper
       { class: classname+" tags" },
       false
   end
-  
+
+  # OBSOLETE: replaced by decorator.extract('tags')
   def taggable_list taggable, with_type=false
     taggable.tags.collect { |tag| "<span>#{tag.typedname(with_type)}</span>" }.join('<br>').html_safe
   end

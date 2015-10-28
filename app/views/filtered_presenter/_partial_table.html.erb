@@ -1,5 +1,5 @@
 <%= querify_block url, class: "results-table #{type}", autoload: true do %>
-    <table class="results <%= @filtered_presenter.results_type.extensions_to_classes %> table table-striped ">
+    <table class="results <%# @filtered_presenter.results_type.extensions_to_classes %> table table-striped ">
       <thead>
       <tr>
         <%= @filtered_presenter.table_headers.collect { |ttl| "<th>#{ttl}</th>" if ttl }.compact.join("\n").html_safe %>

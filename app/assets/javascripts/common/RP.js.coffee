@@ -95,7 +95,7 @@ RP.findEnclosing = (tagname, elmt) ->
 		elmt = elmt.parentNode
 	elmt
 
-# Find an enclosing tag of a given name
+# Find an enclosing tag of a given name TODO: redundant wrt $(elmt).closest('.'+classname) ?
 RP.findEnclosingByClass = (classname, elmt) ->
 	elmt = elmt.parentNode
 	while elmt && !$(elmt).hasClass(classname)
