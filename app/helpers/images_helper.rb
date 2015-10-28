@@ -56,7 +56,7 @@ module ImagesHelper
 
     if image = image_with_error_recovery(decorator, image_options )
       if tag.to_sym == :div
-        enclosure_options[:style] = "#{enclosure_options[:style]}" +
+        enclosure_options[:style] = enclosure_options[:style].to_s +
             (image_options[:fill_mode] || '') == 'fixed-height' ? 'width: auto; height: 100%;' : 'width: 100%; height: auto;'
       end
       content_tag tag, link_to(image, decorator.url), enclosure_options

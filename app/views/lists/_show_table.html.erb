@@ -1,26 +1,32 @@
 <% list = decorator.object %>
-  <% if params[:access] != "owned" %>
-      <td>
-        <%= user_homelink list.owner, :mode => :partial, :action => :collection %>
-        <br>
-      </td>
-  <% end %>
-  <td>
-    <%= list_homelink list, truncate: 80 %>
-    <br>
-  </td>
-  <td>
-    <%= list.description.truncate(200) unless list.description.blank? %>
-  </td>
-  <td>
-    <% list.included_tags.each do |tag| %>
-        <span><%= tag_homelink tag, :mode => :modal %></span><br>
-    <% end %>
-  </td>
-  <td>
-    <%# labelled_quantity list.entity_count, "item" %>
-    <%= labelled_quantity ListServices.new(list).tagging_scope(current_user_or_guest_id).count, "item" %>
-  </td>
-  <td>
-    <%= collectible_buttons_panel decorator, edit_button: response_service.admin_view? %>
-   </td>
+<% if params[:access] != "owned" %>
+    <td>
+      <%= user_homelink list.owner, :mode => :partial, :action => :collection %>
+      <br>
+    </td>
+<% end %>
+<%= present decorator, current_user_or_guest do |presenter| %>
+    <td class="avatar-column">
+      <%# image_enclosure decorator, :fallback_img => image_path('Upload_Icon.jpg') %>
+      <%= presenter.card_avatar :fallback_img => image_path('Upload_Icon.jpg') %>
+    </td>
+    <td class="description-column">
+      <%# list_homelink list, truncate: 80 %>
+      <%= presenter.card_homelink class: "title-link" %>
+      <%= collectible_collect_icon(decorator, "lg") %>
+      <br><%= list.description %>
+      <hr><%= list.notes %>
+    </td>
+    <td>
+      <% list.included_tags.each do |tag| %>
+          <span><%= tag_homelink tag, :mode => :modal %></span><br>
+      <% end %>
+    </td>
+    <td>
+      <%# labelled_quantity list.entity_count, "item" %>
+      <%= labelled_quantity ListServices.new(list).tagging_scope(current_user_or_guest_id).count, "item" %>
+    </td>
+    <td class="actions-column">
+      <%= collectible_buttons_panel decorator %>
+    </td>
+<% end %>

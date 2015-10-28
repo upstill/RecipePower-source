@@ -138,7 +138,7 @@ class FilteredPresenter
       when 'list'
         'contents'
       else
-        display_class
+        display_class.pluralize
     end
   end
 
@@ -290,8 +290,13 @@ class UsersIndexPresenter < FilteredPresenter
   @results_class_name = 'UsersCache'
 
   def table_headers
-    [ '', 'About Me', 'Interest(s)', '', '' ]
+    [ '', 'About', 'Interest(s)', '', '' ]
   end
+
+  def panel_label
+    'USERS'
+  end
+
 end
 
 class UsersShowPresenter < FilteredPresenter
@@ -418,14 +423,14 @@ class FeedsIndexPresenter < FilteredPresenter
   @results_class_name = 'FeedsCache'
 
   def table_headers
-    [ 'Title/Description/URL',
+    [ '',
+      'Title<br>Description'.html_safe,
       'Tag(s)',
-      'Type',
+      # 'Type',
       'Host Site',
-      '# Entries/
-Last Updated',
-      'Approved',
-      'Actions' ]
+      '# Entries<br>Last Updated'.html_safe,
+      ('Approved' if @stream_presenter && @stream_presenter.as_admin),
+      'Actions' ].compact
   end
 
   def panel_label
@@ -508,7 +513,7 @@ class SitesIndexPresenter < FilteredPresenter
   @results_class_name = 'SitesCache'
 
   def table_headers
-    %W{ Site Description Further\ Info Actions }
+    [ '', 'Title<br>Description'.html_safe, 'Other Info', 'Actions' ]
   end
 
 end

@@ -12,7 +12,7 @@ class TagPresenter < BasePresenter
   end
 
   # Present the user's avatar, optionally with a form for uploading the image (if they're the viewer)
-  def card_avatar with_form=false
+  def card_avatar options={}
     nil
   end
 

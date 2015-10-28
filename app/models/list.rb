@@ -74,7 +74,10 @@ class List < ActiveRecord::Base
   belongs_to :name_tag, class_name: "Tag"
   has_and_belongs_to_many :included_tags, class_name: "Tag"
 #  has_and_belongs_to_many :subscribers, class_name: "User"
-  attr_accessible :owner, :ordering, :title, :name, :name_tag_id, :name_tag, :tags, :included_tag_tokens, :pullin, :notes, :description, :availability, :owner_id
+  attr_accessible :owner, :ordering, :title,
+                  :name, :name_tag_id, :name_tag,
+                  :tags, :included_tag_tokens, :pullin, :notes, :description,
+                  :availability, :owner_id
   serialize :ordering, ListSerializer
 
   # Using the name string, either find an existing list or create a new one FOR THE CURRENT USER

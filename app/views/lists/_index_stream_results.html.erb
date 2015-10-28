@@ -1,1 +1,9 @@
-<%= render "shared/stream_results_table", headers: (params[:access] == "owned" ? [] : [ "Owner"]) + [ "Name", "Description", "Included Tags", "Size" ] %>
+<%= render 'shared/stream_results_table',
+           headers: [
+                   'Picture',
+                   ('Owner' if params[:access] != 'owned'),
+                   'Name',
+                   'Description',
+                   'Included Tags',
+                   'Size'
+           ].compact %>

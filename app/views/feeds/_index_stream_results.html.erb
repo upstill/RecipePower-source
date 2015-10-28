@@ -1,1 +1,12 @@
-<%= feeds_table %>
+<%=
+    render 'shared/stream_results_table',
+           headers: ['Feed',
+                     'Title/Description/URL',
+                     'Tag(s)',
+                     'Type',
+                     'Host Site',
+                     '# Entries/<br>Last Updated'.html_safe,
+                     ('Approved' if response_service.admin_view?),
+                     'Actions'
+           ].compact
+%>

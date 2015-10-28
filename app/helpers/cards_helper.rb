@@ -6,7 +6,7 @@ module CardsHelper
       elsif current_user && (current_user.follows? object)
         "friend"
       else
-        "friend" # "user"
+        "user"
       end
     else
       object.class.to_s.underscore

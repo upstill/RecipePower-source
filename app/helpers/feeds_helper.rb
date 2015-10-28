@@ -5,25 +5,25 @@ module FeedsHelper
     params = tag_query.blank? ? {} : { querytags: tag_query }
     url = refresh_feed_path(feed, params)
 
-    if feed.status == "ready"
-      label = "Check for Updates"
+    if feed.status == 'ready'
+      label = 'Check for Updates'
     else
       status = "Update #{feed.status}. "
-      label = "Try Again"
+      label = 'Try Again'
     end
-    link = link_to_submit label, url, feed_wait_msg(feed, true).merge(button_size: "sm")
+    link = link_to_submit label, url, feed_wait_msg(feed, true).merge(button_size: 'sm')
     content_tag :span,
                 "Last updated #{time_ago_in_words feed.updated_at} ago. #{status}#{link}".html_safe,
-                class: "feed-status-report"
+                class: 'feed-status-report'
   end
 
   def feed_wait_msg feed, force=false
     wait_msg = "Hang on, we're contacting #{feed.site.name} for updates. This could take a minute." if force || feed.due_for_update
-    wait_msg ? { "wait-msg" => wait_msg } : {}
+    wait_msg ? { 'wait-msg' => wait_msg } : {}
   end
 
   def feed_update_button feed
-    link_to_submit "Update", refresh_feed_path(feed), feed_wait_msg(feed).merge(:button_size => "xs")
+    link_to_submit 'Update', refresh_feed_path(feed), feed_wait_msg(feed).merge(:button_size => 'xs')
   end
 
   # Summarize the number of entries/latest entry for a feed
@@ -31,26 +31,27 @@ module FeedsHelper
     entry_report =
     case nmatches = feed.feed_entries.size
       when 0
-        "No&nbsp;entries"
+        'No&nbsp;entries'
       when 1
-        "One&nbsp;entry"
+        'One&nbsp;entry'
       else
         "#{nmatches}&nbsp;entries"
     end
-    time_report = (feed.updated_at.today?) ? "Today" : "#{time_ago_in_words feed.updated_at} ago"
+    time_report = (feed.updated_at.today?) ? 'Today' : "#{time_ago_in_words feed.updated_at} ago"
     update_button = feed_update_button feed
     "#{entry_report}/<br>#{time_report} #{update_button}".html_safe
   end
 
   def feed_status_report_replacement feed
-    [ "span.feed-status-report", feed_status_report(feed) ]
+    [ 'span.feed-status-report', feed_status_report(feed) ]
   end
 
   def feed_subscribe_button item, options={}
     if item.collectible_collected? current_user_or_guest_id
-      label, path = "Unsubscribe", collect_feed_path(item, in_collection: false)
+      label, path = 'Unsubscribe', collect_feed_path(item, in_collection: false)
     else
-      label, path = "Subscribe", collect_feed_path(item)
+      return if options[:unsub_only]
+      label, path = 'Subscribe', collect_feed_path(item)
     end
     link_to_submit label, path, { method: :post }.merge(options)
   end
@@ -68,24 +69,19 @@ module FeedsHelper
   def feed_approval feed
     str = case feed.approved
             when true
-              "Approved "
+              'Approved '
             when false
-              "Blocked "
+              'Blocked '
             else
-              ""
+              ''
           end
-          str << link_to_submit('Approve', approve_feed_path(feed, approve: "Y"), button_size: "xs", method: "POST") unless feed.approved == true
-          str << link_to_submit('Block', approve_feed_path(feed, approve: "N"), button_size: "xs", method: "POST") unless feed.approved == false
+          str << link_to_submit('Approve', approve_feed_path(feed, approve: 'Y'), button_size: 'xs', method: 'POST') unless feed.approved == true
+          str << link_to_submit('Block', approve_feed_path(feed, approve: 'N'), button_size: 'xs', method: 'POST') unless feed.approved == false
     content_tag :span, str.html_safe, :id => dom_id(feed)
   end
 
   def feed_approval_replacement feed
     [ "span##{dom_id feed}", feed_approval(feed) ]
-  end
-
-  def feeds_table
-    headers = [ "Title/Description/URL", "Tag(s)", "Type", "Host Site", "# Entries/<br>Last Updated".html_safe, ("Approved" if response_service.admin_view?), "Actions" ].compact
-    render "shared/stream_results_table", headers: headers
   end
 
   def feed_homelink feed, options={}

@@ -2,7 +2,7 @@ class StreamPresenter
   attr_accessor :results, :tagtype
   attr_reader :this_path
 
-  delegate :items, :next_item, :next_range,
+  delegate :items, :next_item, :next_range, :as_admin,
            :"done?", :window, :param,
            :full_size, :"has_query?", :"ready?",
            :querytags, :nmatches, :org,

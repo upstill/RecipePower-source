@@ -175,7 +175,7 @@ class ResultsCache < ActiveRecord::Base
   serialize :params
   serialize :cache
   serialize :partition
-  attr_accessor :items, :querytags
+  attr_accessor :items, :querytags, :as_admin
   delegate :window, :next_index, :"done?", :max_window_size, :to => :safe_partition
 
   # Get the current results cache and return it if relevant. Otherwise,
@@ -509,7 +509,7 @@ class FeedsCache < ResultsCache
       when "newest"
         Feed.order 'updated_at DESC'
       else
-        Feed.where(approved: true)
+        as_admin ? Feed.unscoped : Feed.where(approved: true)
     end
   end
 

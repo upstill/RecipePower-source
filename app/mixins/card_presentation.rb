@@ -4,10 +4,10 @@ module CardPresentation
     "#{h.object_display_class decorator.object}-card"
   end
 
-  def card_avatar with_form=false
+  def card_avatar options={}
     img = image_with_error_recovery decorator,
                               class: decorator.image_class,
-                              fallback_img: decorator.object.is_a?(User),
+                              fallback_img: options[:fallback_img] || decorator.object.is_a?(User),
                               fill_mode: 'fixed-width'
     permitted_to?(:update, decorator.object) ?
         link_to_submit( img,

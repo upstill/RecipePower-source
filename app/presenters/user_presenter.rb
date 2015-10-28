@@ -10,8 +10,8 @@ class UserPresenter < BasePresenter
   delegate :username, :fullname, :handle, :lists, :feeds, to: :user
 
   # Present the user's avatar, optionally with a form for uploading the image (if they're the viewer)
-  def card_avatar with_form=false
-    if is_viewer? and with_form
+  def card_avatar options={}
+    if is_viewer?
       with_format('html') { render 'form_avatar', user: user }
     else
       super()
@@ -131,7 +131,7 @@ class UserPresenter < BasePresenter
         if latestrr = user.collection_pointers.where(:entity_type => 'Recipe', :in_collection => true).order(created_at: :desc).first
           latest = latestrr.entity
           contents = collectible_show_thumbnail latest.decorate
-        else
+        elsif current_user && user == current_user
           contents = "No recipes yet—so install the #{link_to_submit 'Cookmark Button', '/popup/starting_step2', :mode => :modal} and go get some!".html_safe
         end
       when :latest_list
