@@ -26,9 +26,7 @@ module FeedsHelper
     link_to_submit 'Update', refresh_feed_path(feed), feed_wait_msg(feed).merge(:button_size => 'xs')
   end
 
-  # Summarize the number of entries/latest entry for a feed
-  def feed_status_summary feed
-    entry_report =
+  def feed_entries_report feed
     case nmatches = feed.feed_entries.size
       when 0
         'No&nbsp;entries'
@@ -37,9 +35,13 @@ module FeedsHelper
       else
         "#{nmatches}&nbsp;entries"
     end
+  end
+
+  # Summarize the number of entries/latest entry for a feed
+  def feed_status_summary feed
     time_report = (feed.updated_at.today?) ? 'Today' : "#{time_ago_in_words feed.updated_at} ago"
     update_button = feed_update_button feed
-    "#{entry_report}/<br>#{time_report} #{update_button}".html_safe
+    "#{feed_entries_report feed}/<br>#{time_report} #{update_button}".html_safe
   end
 
   def feed_status_report_replacement feed

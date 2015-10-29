@@ -13,9 +13,9 @@ jQuery ->
 	RP.submit.bind()
 	# Set up processing for click events on links with a 'submit' class
 	$(document).on "click", '.submit', RP.submit.onClick
-	$(document).on "ajax:beforeSend", 'form.submit', RP.submit.beforeSend
-	$(document).on "ajax:success", 'form.submit', RP.submit.success
-	$(document).on "ajax:error", 'form.submit', RP.submit.error
+	$(document).on "ajax:beforeSend", 'form.ujs-submit', RP.submit.beforeSend
+	$(document).on "ajax:success", 'form.ujs-submit', RP.submit.success
+	$(document).on "ajax:error", 'form.ujs-submit', RP.submit.error
 	# We shunt form submission through RP.submit.submit_and_process so we can:
 	# -- handle JSON responses properly,
 	# -- short-circuit redundant forms requests
@@ -136,7 +136,7 @@ RP.submit.filter_submit = (eventdata) ->
 		RP.process_response shortcircuit
 	else
 		# Okay to submit
-		if (confirm_msg = $(clicked).data 'confirmMsg') && !confirm(confirm_msg)
+		if !proceedWithConfirmation clicked
 			return false
 		if wait_msg = $(clicked).data('waitMsg')
 			RP.notifications.wait wait_msg
@@ -239,7 +239,7 @@ fire = (elmt) ->
 	else if proceedWithConfirmation(elmt)
 		# If the submission is made from a top-level menu, make the menu active
 		handleEnclosingNavTab elmt
-		if href = $(elmt).data('href') || (elmt.attributes.href && elmt.attributes.href.value)
+		if href = $(elmt).data('href') || (elmt.attributes.href && elmt.attributes.href.value) || (elmt.tagName == 'FORM' && elmt.action)
 			RP.submit.enqueue href, elmt
 
 handleEnclosingNavTab = (menuElmt) ->
@@ -253,11 +253,18 @@ handleEnclosingNavTab = (menuElmt) ->
 			$('>a', menuElmt).css 'color','white'
 
 proceedWithConfirmation = (elmt) ->
-	!(confirm_msg = $(elmt).data 'confirmMsg') || confirm confirm_msg
+	if confirm_msg = $(elmt).data('confirmMsg') || $('input[type="submit"]', elmt).data('confirmMsg')
+		confirm confirm_msg
+	else
+		true
+
+postWaitMsg = (elmt) ->
+	if msg = $(elmt).data('waitMsg') || $('input[type="submit"]', elmt).data('waitMsg')
+		RP.notifications.wait msg
 
 shortCircuit = (elmt) ->
 	data = (elmt && $(elmt).data()) || {}
-	RP.notifications.wait data.waitMsg # If any
+	postWaitMsg elmt
 	# Four ways to short-circuit a request (and to satisfy the preloaded items):
 	# 1: a dialog has been preloaded into data.preloaded
 	# 2: the response has been preloaded into data.response
@@ -298,11 +305,14 @@ RP.submit.beforeSend = (event, xhr, settings) ->
 	elmt = event.currentTarget
 	# If the submission is made from a top-level menu, make the menu active
 	if proceedWithConfirmation elmt
-		RP.notifications.wait $(elmt).data 'waitMsg'
+		postWaitMsg elmt
 		true
 
 # Success handler for fetching dialog from server
 RP.submit.success = (event, responseData, statusText, xhr) ->
+	RP.notifications.done()
+	if typeof(responseData) == 'string'
+		responseData = JSON && JSON.parse(responseData) || $.parseJSON(responseData)
 	RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
 	RP.process_response responseData, RP.dialog.enclosing_modal(event.currentTarget)
 

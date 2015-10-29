@@ -19,18 +19,29 @@
         <td>
           <%= feed_approval feed %>
           <br>
+          <%# form_for decorator.object,
+                       :remote => true,
+                       :method => :delete,
+                       :html => {class: 'submit',
+                                 :'data-type' => 'json',
+                                 :id => "destroy_#{decorator.dom_id}"} do |f| %>
+              <%# f.submit 'Destroy', :class => 'btn btn-xs btn-danger' %>
+          <%# end %>
           <%= button_to('Destroy',
-                        decorator.object_path,
+                        feed_path(feed, format: :json),
                         :method => :delete,
+                        :remote => true,
                         :class => 'btn btn-xs btn-danger',
-                        confirm: "This will permanently remove ths #{decorator.human_name} from RecipePower for good: it can't be undone. Are you absolutely sure you want to do this?"
+                        :data => { wait_msg: "Deleting \"#{decorator.title}\" and its #{feed_entries_report feed}. #{'Patience...' if feed.feed_entries.size > 10}",
+                                   confirm_msg: "This will permanently remove ths #{decorator.human_name} from RecipePower for good: it can't be undone. Are you absolutely sure you want to do this?" },
+                        :form_class => 'ujs-submit'
               ) if permitted_to? :delete, :feeds %>
         </td>
-    <% end   %>
-        <td class="actions-column">
-          <%= collectible_buttons_panel decorator, :except => [:tag] do %>
-              <%# feed_subscribe_button feed, options %>
-          <% end %>
-<%# feed_collectible_buttons decorator, vote_button: true, edit_button: response_service.admin_view? %>
-        </td>
     <% end %>
+    <td class="actions-column">
+      <%= collectible_buttons_panel decorator, :except => [:tag] do %>
+          <%# feed_subscribe_button feed, options %>
+      <% end %>
+<%# feed_collectible_buttons decorator, vote_button: true, edit_button: response_service.admin_view? %>
+    </td>
+<% end %>
