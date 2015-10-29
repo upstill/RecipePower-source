@@ -253,7 +253,7 @@ handleEnclosingNavTab = (menuElmt) ->
 			$('>a', menuElmt).css 'color','white'
 
 proceedWithConfirmation = (elmt) ->
-	if confirm_msg = $(elmt).data('confirmMsg') || $('input[type="submit"]', elmt).data('confirmMsg')
+	if confirm_msg = $(elmt).data('confirmMsg') || $('input[type="submit"]', elmt).data 'confirmMsg'
 		confirm confirm_msg
 	else
 		true

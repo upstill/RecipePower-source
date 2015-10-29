@@ -25,16 +25,15 @@
                        :html => {class: 'submit',
                                  :'data-type' => 'json',
                                  :id => "destroy_#{decorator.dom_id}"} do |f| %>
-              <%# f.submit 'Destroy', :class => 'btn btn-xs btn-danger' %>
+          <%# f.submit 'Destroy', :class => 'btn btn-xs btn-danger' %>
           <%# end %>
-          <%= button_to('Destroy',
-                        feed_path(feed, format: :json),
-                        :method => :delete,
-                        :remote => true,
-                        :class => 'btn btn-xs btn-danger',
-                        :data => { wait_msg: "Deleting \"#{decorator.title}\" and its #{feed_entries_report feed}. #{'Patience...' if feed.feed_entries.size > 10}",
-                                   confirm_msg: "This will permanently remove ths #{decorator.human_name} from RecipePower for good: it can't be undone. Are you absolutely sure you want to do this?" },
-                        :form_class => 'ujs-submit'
+          <%= button_to_submit('Destroy',
+                               feed,
+                               :method => :delete,
+                               :button_size => :xs,
+                               :button_style => :danger,
+                               :wait_msg => "Deleting \"#{decorator.title}\" and its #{feed_entries_report feed}. #{'Patience...' if feed.feed_entries.size > 10}",
+                               :confirm_msg => "This will permanently remove ths #{decorator.human_name} from RecipePower for good: it can't be undone. Are you absolutely sure you want to do this?"
               ) if permitted_to? :delete, :feeds %>
         </td>
     <% end %>

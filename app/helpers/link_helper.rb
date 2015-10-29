@@ -8,17 +8,42 @@ module LinkHelper
       size, options = nil, size
     end
     options = options.clone
-    class_str = (options[:class] || "").gsub(/btn[-\w]*/i, '') # Purge the class of existing button classes
+    class_str = (options[:class] || '').gsub(/btn[-\w]*/i, '') # Purge the class of existing button classes
     if kind.match /^glyph-/ # 'kind' starting with 'glyph' denotes sprite
       label = sprite_glyph (kind.to_s.sub /^glyph-/, ''), size
     else # Otherwise, we use a Bootstrap button
       class_str << " btn btn-#{kind}"
       class_str << " btn-#{size}" if size
     end
-    link_to_submit label, path_or_options, options.merge(class: class_str)
+    options[:class] = class_str
+
+    link_options = linkto_options path_or_options, options
+    path = link_options.delete :path
+    if options[:method] && options[:method].to_s.downcase.to_sym == :get
+      link_to label, path, link_options
+    else # If the submission isn't a simple get request, we use a (secure) form
+      link_options[:class].sub! /\bsubmit\b/, '' # Remove the 'submit' class from the button
+      button_to(label, path_or_options, link_options.merge(:remote => true, :form_class => 'ujs-submit')) +
+      button_to('Destroy',
+                       path_or_options,
+                       :method => :delete,
+                       :remote => true,
+                       :class => 'btn btn-xs btn-danger',
+                       :data => {wait_msg: "Deleting \"blah blah\" and its however many feeds. Patience...",
+                                 confirm_msg: "This will permanently remove ths feed from RecipePower for good: it can't be undone. Are you absolutely sure you want to do this?"},
+                       :form_class => 'ujs-submit')
+    end
+
   end
 
-  # Hit a URL using the RP.submit javascript module, with options for confirmation (:confirm-msg) and waiting (:wait-msg)
+  def link_to_submit label, path_or_options, options={}
+    link_options = linkto_options path_or_options, options
+    path = link_options.delete :path
+    link_to label, path, link_options
+  end
+
+  # Provide a hash of options for link_to to hit a URL using the RP.submit javascript module,
+  # with options for confirmation (:confirm_msg) and waiting (:wait_msg)
   # NB: options are used as follows:
   # format may be stipulated as :html to get a normal link; otherwise, the link will submit for JSON
   # mode can be one of:
@@ -27,7 +52,7 @@ module LinkHelper
   # :template, :trigger, :submit, and :preload are classes on the link for triggering submit behavior
   # :id, :class, :style, :data, :onclick, :rel and :method are passed to link_to to create attributes
   # ...all other options get folded into the data attribute of the link
-  def link_to_submit label, path_or_options, options={}
+  def linkto_options path_or_options, options={}
     query_option_names = [ :mode ] # These get folded into the query UNLESS we're going to a page
     class_option_names = [ :trigger, :submit, :preload ]
     attribute_names = [ :id, :class, :style, :data, :onclick, :method, :rel, :title ]
@@ -75,12 +100,15 @@ module LinkHelper
     end
     if format == :html
       link_options[:data] = data unless data.empty?
-      link_to label, linkpath, link_options
+      link_options[:path] = linkpath
     else
       data[:href] = linkpath
       link_options[:data] = data
-      link_to label, 'javascript:void(0);', link_options
+      link_options[:path] = 'javascript:void(0);'
     end
+
+    link_options
   end
+
 
 end
