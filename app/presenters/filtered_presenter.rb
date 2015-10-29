@@ -425,12 +425,11 @@ class FeedsIndexPresenter < FilteredPresenter
 
   def table_headers
     [ '',
-      'Title<br>Description'.html_safe,
-      'Tag(s)',
-      # 'Type',
+      '',
+      '',
       'Host Site',
       '# Entries<br>Last Updated'.html_safe,
-      ('Approved' if @stream_presenter && @stream_presenter.as_admin),
+      ('Status' if @stream_presenter && @stream_presenter.as_admin),
       'Actions' ].compact
   end
 

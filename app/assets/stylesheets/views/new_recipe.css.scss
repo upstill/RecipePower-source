@@ -6,10 +6,12 @@ div.new_recipe.dialog {
 		font:18px arial,sans-serif;
 		font-weight:bold;
 	}
-	.modal-body h3 {
-		margin-top: 0px;
-		padding: 0px;
-	}
+    div.lesson, p.airy {
+      font-size: 14px;
+    }
+    li {
+      line-height: 1.3em;
+    }
 	form {
 		width: 90%;
 		margin: 10px;
@@ -17,6 +19,9 @@ div.new_recipe.dialog {
 		border: 3px solid #CCD3CC;
 		background: #DDE3DD;
 		overflow: auto;
+        label {
+          color: rgb(199, 94, 92);
+        }
 		div.recipe_url_div {
 			margin-top:15px;
 			margin-bottom:15px;

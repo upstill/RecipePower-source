@@ -8,6 +8,7 @@ module LinkHelper
       size, options = nil, size
     end
     options = options.clone
+    with_form = options.delete :with_form
     class_str = (options[:class] || '').gsub(/btn[-\w]*/i, '') # Purge the class of existing button classes
     if kind.match /^glyph-/ # 'kind' starting with 'glyph' denotes sprite
       label = sprite_glyph (kind.to_s.sub /^glyph-/, ''), size
@@ -19,19 +20,11 @@ module LinkHelper
 
     link_options = linkto_options path_or_options, options
     path = link_options.delete :path
-    if options[:method] && options[:method].to_s.downcase.to_sym == :get
-      link_to label, path, link_options
-    else # If the submission isn't a simple get request, we use a (secure) form
+    if with_form
       link_options[:class].sub! /\bsubmit\b/, '' # Remove the 'submit' class from the button
-      button_to(label, path_or_options, link_options.merge(:remote => true, :form_class => 'ujs-submit')) +
-      button_to('Destroy',
-                       path_or_options,
-                       :method => :delete,
-                       :remote => true,
-                       :class => 'btn btn-xs btn-danger',
-                       :data => {wait_msg: "Deleting \"blah blah\" and its however many feeds. Patience...",
-                                 confirm_msg: "This will permanently remove ths feed from RecipePower for good: it can't be undone. Are you absolutely sure you want to do this?"},
-                       :form_class => 'ujs-submit')
+      button_to label, path_or_options, link_options.merge(:remote => true, :form_class => 'ujs-submit')
+    else # If the submission isn't a simple get request, we use a (secure) form
+      link_to label, path, link_options
     end
 
   end
