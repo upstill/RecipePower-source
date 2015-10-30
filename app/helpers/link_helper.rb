@@ -10,8 +10,8 @@ module LinkHelper
     options = options.clone
     with_form = options.delete :with_form
     class_str = (options[:class] || '').gsub(/btn[-\w]*/i, '') # Purge the class of existing button classes
-    if kind.match /^glyph-/ # 'kind' starting with 'glyph' denotes sprite
-      label = sprite_glyph (kind.to_s.sub /^glyph-/, ''), size
+    if kind.sub! /^glyph-/, '' # 'kind' starting with 'glyph' denotes sprite
+      label = sprite_glyph(kind, size) + (label.present? ? ('&nbsp;'+label) : '').html_safe
     else # Otherwise, we use a Bootstrap button
       class_str << " btn btn-#{kind}"
       class_str << " btn-#{size}" if size

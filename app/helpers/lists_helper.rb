@@ -31,7 +31,9 @@ module ListsHelper
 
   end
 
+=begin
   # Offer to let the user save the item in their collection and any list they own, plus a new list
+  # NB Obsolete: now supplanted by list-manager dialog
   def collectible_list_menu decorator, user, styling, options={}
     if user
       entity = decorator.object
@@ -59,6 +61,7 @@ module ListsHelper
                      styling.merge( class: "glyphicon glyphicon-pushpin" )
     end
   end
+=end
 
   def list_menu_item l, entity, styling
     already_collected = ListServices.new(l).include? entity, current_user_or_guest_id

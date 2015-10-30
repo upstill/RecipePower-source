@@ -430,7 +430,7 @@ class FeedsIndexPresenter < FilteredPresenter
       'Host Site',
       '# Entries<br>Last Updated'.html_safe,
       ('Status' if @stream_presenter && @stream_presenter.as_admin),
-      'Actions' ].compact
+      '' ].compact
   end
 
   def panel_label
