@@ -9,10 +9,10 @@ module SpritesHelper
             "0 0 500 500"
           when :check
             "500 0 500 500"
+          when :minus
+            "0 600 400 400"
           when :chef
             "1000 0 500 500"
-          when :"list-viewer"
-            "0 600 375.0 500"
           when :"list-list"
             "500 600 375.0 500"
           when :"list-add"

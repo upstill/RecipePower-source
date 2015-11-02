@@ -1,39 +1,50 @@
 <%# Form for taking a list locator and using it to create a list %>
-<%= simple_form_for @list, url: (@list.id ? list_path(@list) : create_list_path), html: {class: "edit_list json", 'data-type' => :json} do |f| %>
+<%= simple_form_for @list, url: (@list.id ? list_path(@list) : create_list_path), html: {class: 'edit_list json', 'data-type' => :json} do |f| %>
     <%= form_errors_helper f %>
-    <%= f.input :name, label: 'Title', placeholder: "List\'s title here", input_html: {cols: 125, rows: 1, 'data-type' => 'json'} %>
-    <%= f.input :description, label: 'Subtitle', placeholder: 'The briefest of summaries (250 chars. max)', input_html: {cols: 125, rows: 1, 'data-type' => 'json'} %>
-    <%= f.input :notes, label: 'Full Description', placeholder: 'All there is to say about this list', input_html: {cols: 125, rows: 2, 'data-type' => 'json'} %>
+    <%= f.input :name,
+                label: 'Title',
+                autofocus: true,
+                input_html: {cols: 125, rows: 1, 'data-type' => 'json', class: 'autofocus'} %>
+    <%= f.input :description,
+                label: 'Subtitle',
+                placeholder: 'The briefest of summaries (250 chars. max)',
+                input_html: {cols: 125, rows: 1, 'data-type' => 'json'} %>
+    <%= f.input :notes,
+                label: 'Full Description',
+                placeholder: 'Everything there is to say',
+                input_html: {cols: 125, rows: 2, 'data-type' => 'json'} %>
     <% if @first_entity %>
-        <%= hidden_field_tag "entity_type", @first_entity.class.to_s %>
-        <%= hidden_field_tag "entity_id", @first_entity.id %>
+        <%= hidden_field_tag 'entity_type',
+                             @first_entity.class.to_s %>
+        <%= hidden_field_tag 'entity_id',
+                             @first_entity.id %>
     <% end %>
     <%# f.input :typenum, label: false,
                 collection: List.type_selections(true),
                 as: :radio_buttons %>
-    <label class="text options" style="margin: 0">Available to:</label><br>
-    <div class="form-group radio_buttons optional list_typenum" >
-      <span class="radio" style="display: inline-block; margin-left: 10px">
-        <label for="list_typenum_0" id="list_typenum_0" name="list[typenum]">
-          <input <%= "checked='checked'" if @list.typenum == 0 %> class="radio_buttons optional" style="margin-top: 0" id="list_typenum_0" name="list[typenum]" type="radio" value="0">
+    <label class='text options' style='margin: 0'>Available to:</label><br>
+    <div class='form-group radio_buttons optional list_typenum' >
+      <span class='radio' style='display: inline-block; margin-left: 10px'>
+        <label for='list_typenum_0' id='list_typenum_0' name='list[typenum]'>
+          <input <%= 'checked=\'checked\'' if @list.typenum == 0 %> class='radio_buttons optional' style='margin-top: 0' id='list_typenum_0' name='list[typenum]' type='radio' value='0'>
           Anyone (Public)
         </label>
       </span>
-      <span class="radio" style="display: inline-block; margin-left: 10px">
-        <label for="list_typenum_1" id="list_typenum_1" name="list[typenum]">
-          <input <%= "checked='checked'" if @list.typenum == 1 %> class="radio_buttons optional" style="margin-top: 0" id="list_typenum_1" name="list[typenum]" type="radio" value="1">
+      <span class='radio' style='display: inline-block; margin-left: 10px'>
+        <label for='list_typenum_1' id='list_typenum_1' name='list[typenum]'>
+          <input <%= 'checked=\'checked\'' if @list.typenum == 1 %> class='radio_buttons optional' style='margin-top: 0' id='list_typenum_1' name='list[typenum]' type='radio' value='1'>
           Friends only
         </label>
       </span>
-      <span class="radio" style="display: inline-block; margin-left: 10px">
-        <label for="list_typenum_2" id="list_typenum_2" name="list[typenum]">
-          <input <%= "checked='checked'" if @list.typenum == 2 %> class="radio_buttons optional" style="margin-top: 0" id="list_typenum_2" name="list[typenum]" type="radio" value="2">
+      <span class='radio' style='display: inline-block; margin-left: 10px'>
+        <label for='list_typenum_2' id='list_typenum_2' name='list[typenum]'>
+          <input <%= 'checked=\'checked\'' if @list.typenum == 2 %> class='radio_buttons optional' style='margin-top: 0' id='list_typenum_2' name='list[typenum]' type='radio' value='2'>
           Just me (Private)
         </label>
       </span>
     </div>
-    <div class="row">
-      <div class="col-md-12">
+    <div class='row'>
+      <div class='col-md-12'>
         <%= token_input_field f, label: 'Tags', wrapper_html: { style: 'margin-bottom: 0; width: 90%; margin-left: 35px' } %>
         <%= f.input :pullin, :as => :boolean, label: 'Use tags to find content' %>
       </div>

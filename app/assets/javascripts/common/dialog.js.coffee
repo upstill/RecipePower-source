@@ -24,8 +24,7 @@ jQuery ->
 		event.preventDefault()
 
 RP.dialog.focus = (dlog) ->
-	$('input.autofocus', dlog)[0] ||
-	$("input[type='text']", dlog).focus()
+	($('input.autofocus', dlog)[0] || $("input[type='text']", dlog)).focus()
 
 RP.dialog.close = (event) ->
 	if event

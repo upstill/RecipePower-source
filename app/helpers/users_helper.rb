@@ -26,18 +26,41 @@ module UsersHelper
        (user.email ? "your email '#{user.email}'" : "")).html_safe
    end
 
-  def user_follow_button user, options={}
+  # Present the 'follow' status of a user wrt the current user
+  # options[:label] should be a boolean for whether to accompany the button with a label
+  # options[:removable] denotes whether to offer an 'Unfollow' option or just report the status with a glyph
+  def user_follow_button user, size = nil, options={}
+    return ''.html_safe if user == current_user_or_guest
+    if size.is_a? Hash
+      size, options = nil, size
+    end
+    do_label = options.delete :label
+    label = ''
     if current_user_or_guest.follows? user
-      sprite_glyph :check,
-                   options[:size],
-                   title: "Following #{user.handle}",
-                   class: "follow-button",
-                   id: dom_id(user)
+      if options.delete :removable
+        label = "&nbsp;Unfollow" if do_label
+        button_to_submit label,
+                         follow_user_path(user),
+                         'glyph-minus',
+                         size,
+                         method: 'post',
+                         title: "Unfollow #{user.handle}",
+                         class: "follow-button",
+                         id: dom_id(user)
+      else
+        label = '&nbsp;Following' if do_label
+        sprite_glyph(:check,
+                     options[:size],
+                     title: "Following #{user.handle}",
+                     class: "follow-button",
+                     id: dom_id(user)) + label
+      end
     else
-      button_to_submit '',
+      label = "&nbsp;Follow" if do_label
+      button_to_submit label,
                        follow_user_path(user),
                        'glyph-plus',
-                       'lg',
+                       size,
                        method: 'post',
                        title: "Follow #{user.handle}",
                        class: "follow-button",

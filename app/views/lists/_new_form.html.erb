@@ -2,7 +2,10 @@
 <%= simple_form_for @list, url: create_list_path, html: {class: "new_list json", 'data-type' => :json} do |f| %>
     <%= form_errors_helper f %>
     <%= f.input :name, label: "Name", input_html: {cols: 125, rows: 1, "data-type" => "json"} %>
-    <%= f.input :description, label: "Tagline", placeholder: "A quick description of the list", input_html: {cols: 125, rows: 1, "data-type" => "json"} %>
+    <%= f.input :description,
+                label: "Tagline",
+                placeholder: "A quick description of the list",
+                input_html: {cols: 125, rows: 1, "data-type" => "json"} %>
     <div class="form-group">
       <label class="text options">Available To</label><br>
       <div class="btn-group" data-toggle="buttons-checkbox" data-toggle-name="list[typenum]">

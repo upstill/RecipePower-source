@@ -71,12 +71,12 @@ module CollectibleHelper
       if size.is_a? Hash
         size, styling = nil, size
       end
-      button = button_to_submit '',
+      button = button_to_submit options.delete(:label),
                                 polymorphic_path([:lists, entity], :mode => :modal),
                                 'glyph-list-add',
                                 size,
                                 :title => 'Manage lists on which this appears'
-      content_tag :div, button, class: 'lists-button glyph-button'
+      # content_tag :div, button, class: 'lists-button glyph-button'
     end
   end
 
@@ -88,23 +88,11 @@ module CollectibleHelper
       entity = decorator.object
       menu = hover_menu content_tag(:span, '', class: 'glyphicon glyphicon-cog'),
                         styling do
-        in_collection = current_user.has_in_collection? decorator.object
         items = []
 
-        items << collection_link(decorator,
-                                 (in_collection ? 'Remove from Collection' : 'Add to Collection'), # checkbox_menu_item_label('Collection', in_collection),
-                                 styling,
-                                 :in_collection => !in_collection)
+        items << collectible_collect_icon(decorator, size, styling.merge(label: true, removable: true))
 
-        items << link_to_submit('Lists',
-                                polymorphic_path([:lists, entity]),
-                                :mode => :modal,
-                                :title => 'Manage lists on which this appears')
-
-        if permitted_to? :update, entity.class.to_s.downcase.pluralize.to_sym
-          url = polymorphic_path entity, :action => :edit, styling: styling
-          items << link_to_submit('Edit', url, styling.merge(mode: :modal, title: nil))
-        end
+        items << collectible_lists_button(decorator, size, styling.merge(label: 'Manage Lists'))
 
         items << collectible_edit_button(decorator, size, styling.merge(label: 'Edit'))
 
@@ -121,8 +109,7 @@ module CollectibleHelper
           items << collection_link(decorator, privacy_label, styling, private: !entity.private)
         end
 
-        url = polymorphic_path [:editpic, entity], styling: styling
-        items << link_to_submit('Get Picture', url, styling.merge(mode: :modal, title: 'Get Picture'))
+        items << collectible_upload_button(decorator, size, styling.merge(label: 'Get Picture'))
       end
       content_tag :div, menu, class: "tool-menu #{dom_id(decorator)}"
     end
@@ -174,15 +161,46 @@ module CollectibleHelper
       if size.is_a? Hash
         size, options = nil, size
       end
-      button = button_to_submit '',
+      button = button_to_submit styling.delete(:label),
                                 polymorphic_path( [:editpic, entity], styling: styling),
                                 'glyph-upload',
                                 size,
                                 styling.merge(mode: :modal, title: 'Get Picture')
-      content_tag :div, button, class: 'upload-button glyph-button'
+      # content_tag :div, button, class: 'upload-button glyph-button'
     end
   end
 
+  def collectible_collect_icon decorator, size = nil, options={}
+    if current_user
+      if size.is_a? Hash
+        size, options = nil, size
+      end
+      entity = decorator.object
+      if entity.class == User
+        user_follow_button entity, size, options
+      else
+        do_label = options.delete :label
+        label = ''
+        if current_user_or_guest.has_in_collection? entity
+          if options[:removable]
+            label = '&nbsp;Remove from Collection' if do_label
+            collection_link decorator, sprite_glyph(:minus)+label.html_safe, {}, :in_collection => false
+          else
+            label = '&nbsp;In Collection' if do_label
+            content_tag :span,
+                        sprite_glyph(:check, size, title: 'In Collection') + label.html_safe,
+                        class: "collection-state #{dom_id decorator}"
+          end
+        else
+          label = '&nbsp;Add to Collection' if do_label
+          collection_link decorator, sprite_glyph(:plus)+label.html_safe, {}, :in_collection => true
+        end
+      end
+      # content_tag :div, glyph, class: "collectible-collect-icon glyph-button #{dom_id decorator}"
+    end
+  end
+
+=begin
   def collectible_collect_icon decorator, size = nil, options={}
     if current_user
       if size.is_a? Hash
@@ -198,12 +216,13 @@ module CollectibleHelper
                   collection_link decorator, sprite_glyph(:plus), {}, :in_collection => true
                 end
       end
-      content_tag :div, glyph, class: "collectible-collect-icon glyph-button #{dom_id decorator}"
+      # content_tag :div, glyph, class: "collectible-collect-icon glyph-button #{dom_id decorator}"
     end
   end
+=end
 
   def collectible_collect_icon_replacement decorator, size = nil, options={}
-    [ "div.collectible-collect-icon.#{dom_id decorator}", collectible_collect_icon(decorator, size, options) ]
+    [ ".collection-state.#{dom_id decorator}", collectible_collect_icon(decorator, size, options) ]
   end
   ################## End of standardized buttons ##########################
 
@@ -224,7 +243,8 @@ module CollectibleHelper
                    polymorphic_path([:collect, decorator.object],
                                     query_options.merge(styling: styling)),
                    options.merge(method: 'PATCH',
-                                 title: 'Add to My Collection')
+                                 title: 'Add to My Collection',
+                                 class: "collection-state #{dom_id decorator}")
   end
 
   # Declare the voting buttons for a collectible

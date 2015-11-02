@@ -89,7 +89,7 @@ $salmon-link-color: #E0A09E;
   background-color: #4B815B;
   color: #9AB3A0;
   // input[type='text'], input[type='password'], input[type='email'] {
-  input.string {
+  input.string, textarea, input[type='text'], input[type='password'], input[type='email'], div.form-group.string > ul.token-input-list-facebook {
     background-color: #C1D3C7;
     color: #849688;
   }
@@ -110,7 +110,7 @@ $salmon-link-color: #E0A09E;
 @mixin div-salmon {
   background-color: $salmon-background-color;
   color: $salmon-text-color;
-  input[type='text'], input[type='password'], input[type='email'] {
+  input.string, textarea, input[type='text'], input[type='password'], input[type='email'], div.form-group.string > ul.token-input-list-facebook {
     background-color: $salmon-field-background-color;
     color: $salmon-button-color;
   }
@@ -131,7 +131,7 @@ $salmon-link-color: #E0A09E;
 @mixin div-blue {
   background-color: #5090A9;
   color: #E6D7A3;
-  input[type='text'], input[type='password'], input[type='email'] {
+  input.string, textarea, input[type='text'], input[type='password'], input[type='email'], div.form-group.string > ul.token-input-list-facebook {
     background-color: #C2D9E1;
     color: #7E9796;
   }
@@ -152,7 +152,7 @@ $salmon-link-color: #E0A09E;
 @mixin div-purple {
   background-color: #7D6D89;
   color: #E8D6D6;
-  input[type='text'], input[type='password'], input[type='email'] {
+  input.string, textarea, input[type='text'], input[type='password'], input[type='email'], div.form-group.string > ul.token-input-list-facebook {
     background-color: #D2CCD6;
     color: #8F9092;
   }

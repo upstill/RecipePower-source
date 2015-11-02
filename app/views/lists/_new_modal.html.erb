@@ -1,4 +1,5 @@
 <%# Fields for a new-feed dialog %>
-<%= modal_dialog 'new_list new-style green', @first_entity ? ("Start a list with "+@first_entity.decorate.title.truncate(30)) : "New List" do %>
-    <%= render "form" %>
+<%= modal_dialog 'new_list new-style green',
+                 ("Start a list with "+@first_entity.decorate.title.truncate(30) if @first_entity) do %>
+    <%= render 'form' %>
 <% end %>

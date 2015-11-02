@@ -11,10 +11,10 @@ class CollectibleController < ApplicationController
         msg << ' hidden from others.'
       end
       if params.has_key? :in_collection
-        was_collected = @decorator.collected?
+        was_collected = @decorator.collectible_collected?
         @decorator.be_collected params[:in_collection]
-        @newly_deleted = !(@newly_collected = @decorator.collected?) if @decorator.collected? != was_collected
-        msg << (@decorator.collected? ?
+        @newly_deleted = !(@newly_collected = @decorator.collectible_collected?) if @decorator.collectible_collected? != was_collected
+        msg << (@decorator.collectible_collected? ?
             ' now appearing in your collection.' :
             ' has been ousted from your collection (though you may see it elsewhere).')
       end

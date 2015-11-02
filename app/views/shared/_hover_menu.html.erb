@@ -4,7 +4,7 @@
       <%= defined?(label) ? label : 'No label defined in shared/hover_menu' %><span class="caret"></span>
     </a>
     <ul class="dropdown-menu">
-      <% links.each do |link| %>
+      <% links.compact.each do |link| %>
         <li><%= link %></li>
       <% end %>
     </ul>
