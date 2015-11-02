@@ -49,8 +49,8 @@ class User < ActiveRecord::Base
   # TODO: delete channel_referent_id and tables feeds_users, lists_users and private_subscriptions
   belongs_to :channel, :class_name => "Referent", :foreign_key => "channel_referent_id"
 
-  has_and_belongs_to_many :feed_collections, :join_table => "feeds_users", class_name: "Feed"
-  has_and_belongs_to_many :list_collections, :join_table => "lists_users", class_name: "List"
+  has_and_belongs_to_many :collected_feeds, :join_table => "feeds_users", class_name: "Feed"
+  has_and_belongs_to_many :collected_lists, :join_table => "lists_users", class_name: "List"
 
   # NB: this stays; it represents a user's ownership of lists
   has_many :owned_lists, :class_name => "List", :foreign_key => :owner_id

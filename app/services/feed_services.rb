@@ -75,10 +75,10 @@ class FeedServices
   # TODO delete
   def self.collectify
     User.all.each { |user|
-      user.feed_collections.each { |feed|
+      user.collected_feeds.each { |feed|
         user.collect feed
       }
-      user.feed_collection_ids = []
+      user.collected_feed_ids = []
       user.save
     }
   end

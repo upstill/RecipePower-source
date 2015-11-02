@@ -75,41 +75,37 @@ class UserDecorator < CollectibleDecorator
                    self,
                    (list.owner == self ? :'my own' : :'my collected')
       }
-      # Get the set of lists where the owner has tagged the entity
-      #      List.joins(
-      #          'INNER JOIN taggings ON tagging.user_id = lists.owner_id'
-      #      ).where(entity: decorator.object).each { |list|
-      decorator.taggings.joins(
-                       'INNER JOIN lists ON taggings.user_id = lists.owner_id'
-      ).each { |tagging|
-        if followee_ids.include? tagging.user_id
+      decorator.list_tags.each { |list_tag|
+        if prime_list = list_tag.dependent_lists.where(availability: [0,1], owner_id: followee_ids).first
           # Tagging by a friend on a list they own
-          assert_tag tagging.tag, tagging.user, :'owned'
-        else
-          assert_tag tagging.tag
+          assert_tag list_tag, prime_list.owner, :owned
+        elsif list_tag.dependent_lists.where(availability: 0).exists? # There's at least one publicly available list
+          assert_tag list_tag
         end
       }
     else
       owned_lists.each { |list|
         assert_tag list.name_tag, self, :'my own'
       }
-      list_collections.each { |list|
+      collected_lists.each { |list|
         assert_tag list.name_tag, self, :'my collected'
       }
       followees.each { |friend|
-        friend.owned_lists.each { |list|
+        friend.owned_lists.where(availability: [0,1]).each { |list|
           assert_tag list.name_tag, friend, :'owned'
         }
       }
-      followees.each { |friend|  # TODO This is invoking a JOIN for each followee => BAD
-        friend.list_collections.each { |list|
+      followees.each { |friend|
+        friend.collected_lists.where(availability: 0).each { |list|
           assert_tag list.name_tag, friend, :'collected'
         }
       }
       if options[:exhaustive]
         # All other list tags
-        Tag.unscoped.where(tagtype: 16).not(id: @tag_ids_used).each { |tag|
-          assert_tag tag if List.exists? availability: 0, name_tag_id: tag.id
+        Tag.where(tagtype: 16).
+            where.not(id: @tag_ids_used).
+            joins('INNER JOIN lists ON lists.name_tag_id = tags.id and lists.availability = 0').each { |tag|
+          assert_tag tag if tag.public_lists.exists?
         }
       end
     end

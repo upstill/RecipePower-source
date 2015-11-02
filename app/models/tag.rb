@@ -27,9 +27,9 @@ class Tag < ActiveRecord::Base
     attr_accessible :name, :id, :tagtype, :isGlobal, :links, :referents, :users, :owners, :primary_meaning # , :recipes
     
     has_many :taggings, :dependent => :destroy
-
     has_many :dependent_lists, :class_name => "List", foreign_key: "name_tag_id"
-    
+    has_many :public_lists, -> { where(availability: 0) }, :class_name => "List", foreign_key: "name_tag_id"
+
     # expressions associate tags with the foods (roles, processes, etc.) they refer to
     # These are the "meanings" of a tag
     has_many :expressions, :dependent=>:destroy

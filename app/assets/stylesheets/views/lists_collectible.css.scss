@@ -31,7 +31,8 @@ div.lists-collectible {
       padding: 2px;
       a.selection-item {
         margin: 3px 8px 3px 4px;
-        font-size: 0.8em;
+        padding-left: 5px;
+        font-size: 0.6em;
         display: block;
         @include list-item-backgrounds;
       }
