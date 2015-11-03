@@ -2,7 +2,7 @@ module CollectibleHelper
 
   # List of buttons in the panel
   def collectible_buttons_available
-    %w{ edit_button lists_button tools_menu tag_button share_button upload_button collect_icon}
+    %w{ edit_button lists_button tools_menu tag_button share_button upload_button collect_button}
   end
 
   # Styling hash asserting all buttons
@@ -90,7 +90,7 @@ module CollectibleHelper
                         styling do
         items = []
 
-        items << collectible_collect_icon(decorator, size, styling.merge(label: true, removable: true))
+        items << collectible_collect_button(decorator, size, styling.merge(label: true, removable: true))
 
         items << collectible_lists_button(decorator, size, styling.merge(label: 'Manage Lists'))
 
@@ -170,7 +170,7 @@ module CollectibleHelper
     end
   end
 
-  def collectible_collect_icon decorator, size = nil, options={}
+  def collectible_collect_button decorator, size = nil, options={}
     if current_user
       if size.is_a? Hash
         size, options = nil, size
@@ -200,29 +200,8 @@ module CollectibleHelper
     end
   end
 
-=begin
-  def collectible_collect_icon decorator, size = nil, options={}
-    if current_user
-      if size.is_a? Hash
-        size, options = nil, size
-      end
-      entity = decorator.object
-      if entity.class == User
-        glyph = user_follow_button entity
-      else
-        glyph = if current_user_or_guest.has_in_collection? entity
-                  sprite_glyph :check, size, title: 'In Collection'
-                else
-                  collection_link decorator, sprite_glyph(:plus), {}, :in_collection => true
-                end
-      end
-      # content_tag :div, glyph, class: "collectible-collect-icon glyph-button #{dom_id decorator}"
-    end
-  end
-=end
-
-  def collectible_collect_icon_replacement decorator, size = nil, options={}
-    [ ".collection-state.#{dom_id decorator}", collectible_collect_icon(decorator, size, options) ]
+  def collectible_collect_button_replacement decorator, size = nil, options={}
+    [ ".collection-state.#{dom_id decorator}", collectible_collect_button(decorator, size, options) ]
   end
   ################## End of standardized buttons ##########################
 

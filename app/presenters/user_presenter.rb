@@ -48,8 +48,6 @@ class UserPresenter < BasePresenter
             :owned_lists,
             :desert_island,
             :question,
-            # :collected_lists,
-            # :collected_feeds
         ],
         [
             :latest_recipe,
@@ -81,10 +79,10 @@ class UserPresenter < BasePresenter
                           }).html_safe
       when :collected_lists, :owned_lists
         if which == :owned_lists
-          lists = user.visible_lists @viewer
+          lists = user.decorate.owned_lists @viewer
           label = 'Author of the lists'
         else
-          lists = user.collected_entities List, @viewer
+          lists = user.decorate.collected_lists
           label = 'Following the lists'
         end
         unless lists.empty?

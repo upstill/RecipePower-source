@@ -49,16 +49,26 @@ class User < ActiveRecord::Base
   # TODO: delete channel_referent_id and tables feeds_users, lists_users and private_subscriptions
   belongs_to :channel, :class_name => "Referent", :foreign_key => "channel_referent_id"
 
-  has_and_belongs_to_many :collected_feeds, :join_table => "feeds_users", class_name: "Feed"
-  has_and_belongs_to_many :collected_lists, :join_table => "lists_users", class_name: "List"
+  # TODO: These relations are obsolete (feeds and lists are now collected by, um, collecting them)
+  # has_and_belongs_to_many :collected_feeds, :join_table => "feeds_users", class_name: "Feed"
+  # has_and_belongs_to_many :collected_lists, :join_table => "lists_users", class_name: "List"
 
   # NB: this stays; it represents a user's ownership of lists
   has_many :owned_lists, :class_name => "List", :foreign_key => :owner_id
 
+  has_many :owned_taggings, :class_name => 'Tagging', :dependent => :destroy
+  has_many :owned_tags, :through => 'Tagging', :class_name => 'Tag'
+
   has_many :votings, :class_name => "Vote", dependent: :destroy
 
-  has_many :collection_pointers, -> { where(in_collection: true) }, :dependent => :destroy, :class_name => "Rcpref"
-  has_many :touched_pointers, :dependent => :destroy, :class_name => "Rcpref"
+  has_many :collection_pointers, -> { where(in_collection: true) }, :dependent => :destroy, :class_name => 'Rcpref'
+
+  # ALL Rcprefs, including those that have only been touched
+  has_many :touched_pointers, :dependent => :destroy, :class_name => 'Rcpref'
+
+  # The rcprefs that are visible by others (the public portion of the collection)
+  has_many :public_pointers, -> { where(in_collection: true, private: false) }, :class_name => 'Rcpref'
+
   # We allow users to collect users, but the collectible class method can't be used on self, so we define the association directly
   has_many :users, :through=>:collection_pointers, :source => :entity, :source_type => User, :autosave=>true
   # has_many :recipes, :through=>:collection_pointers, :source => :entity, :source_type => "Recipe", :autosave=>true
@@ -108,26 +118,6 @@ class User < ActiveRecord::Base
 
   def uncollect entity
     collection_pointers.where(entity: entity).map(&:uncollect)
-  end
-
-  # Return the set of entities of a given type that the user has collected, as visible to some other
-  def collected_entities entity_type, viewer=nil
-    entity_type = entity_type.to_s
-    if viewer == self
-      assoc = entity_type.to_s
-      scope = self.method(assoc).call
-      scope = scope.where.not(owner_id: id) if entity_type == "List"
-      scope
-    else
-      arr = collection_pointers.where(entity_type: entity_type, private: false).map(&:entity)
-      arr = arr.keep_if { |l| l.owner != self } if entity_type == "List"
-      arr
-    end
-  end
-
-  # Return the set of lists visible to the given other (or public lists otherwise)
-  def visible_lists other=nil
-    owned_lists.where availability: ((other && other.follows?(self)) ? [0,1] : 0)
   end
 
   # Remember that the user has (recently) touched the entity, optionally adding it to the collection

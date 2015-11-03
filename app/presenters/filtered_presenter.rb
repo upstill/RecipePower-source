@@ -428,8 +428,8 @@ class FeedsIndexPresenter < FilteredPresenter
       '',
       '',
       'Host Site',
-      '# Entries<br>Last Updated'.html_safe,
-      ('Status' if @stream_presenter && @stream_presenter.as_admin),
+      'Status'.html_safe,
+      ('' if @stream_presenter && @stream_presenter.as_admin),
       '' ].compact
   end
 

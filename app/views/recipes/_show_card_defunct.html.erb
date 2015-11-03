@@ -4,8 +4,8 @@
         <div class="col-md-8 col-sm-9 left-matter">
           <div class="title">
             <%# link_to decorator.title, decorator.url, class: "title-link", data: {report: polymorphic_path([:touch, decorator.object])} %>
-            <%= presenter.card_homelink class: "title-link" %>&nbsp;
-            <%= collectible_collect_icon decorator, "lg" %>
+            <%= presenter.card_homelink class: 'title-link' %>&nbsp;
+            <%= collectible_collect_button decorator, 'lg' %>
             <%# collectible_list_menu decorator, response_service.user, {} %>
           </div>
           <div class="source">

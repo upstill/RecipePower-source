@@ -19,6 +19,52 @@ class UserDecorator < CollectibleDecorator
     object.about
   end
 
+  # Filter the user's taggings by entity_type
+  def owned_taggings entity_type=nil
+    entity_type ? user.owned_taggings.where(entity_type: entity_type.to_s) : user.owned_taggings
+  end
+
+  def owned_tags entity_type=nil
+    Tag.where id: owned_taggings(entity_type).pluck(:tag_id)
+  end
+
+  # Get the entities of a given type tagged by the user
+  def tagged_entities entity_type=nil
+    owned_taggings(entity_type).map &:entity
+  end
+
+  # Get the user's Rcprefs that point to a given entity_type and/or are visible by a specific user
+  def collection_pointers entity_type=nil, viewer=nil
+    if entity_type.is_a? User
+      entity_type, viewer = nil, entity_type
+    end
+    scope = (viewer && viewer != user) ? user.public_pointers : user.collection_pointers
+    scope = (scope.where entity_type: entity_type.to_s) if entity_type
+    scope
+  end
+
+  # Return the set of entities of a given type that the user has collected, as visible to some other
+  def collection_entities entity_type=nil, viewer=nil
+    collection_pointers(entity_type, viewer).map &:entity
+  end
+  alias_method :collected_entities, :collection_entities
+
+  # Return the set of lists that the user has collected, as visible to some other viewer
+  # NB: excludes lists that the
+  def collection_lists viewer=nil
+    threshold = (viewer && user.follows?(viewer)) ? 2 : 1
+    collection_entities(List, viewer).keep_if { |l| (l.owner != user) && (l.availability <= threshold)}
+  end
+  alias_method :collected_lists, :collection_lists
+
+  # What lists that I own can be seen by the viewer?
+  def owned_lists viewer=nil
+    # Fall through to the full scope if no viewer is asserted
+    return user.owned_lists if viewer.nil? || user == viewer
+    # If the viewer is a friend, allow access at availability 0 and 1, else just 0
+    owned_lists.where availability: (user.follows?(viewer) ? [0,1] : 0)
+  end
+
   # Define presentation-specific methods here. Helpers are accessed through
   # `helpers` (aka `h`). You can override attributes, for example:
   #
@@ -66,20 +112,18 @@ class UserDecorator < CollectibleDecorator
     if decorator
       # The lists that the given object appear on FOR THIS USER are those that
       # are tagged either by the user or by the list owner (TODO or Super?)
-      decorator.taggings.joins(
-        'INNER JOIN tags ON tags.tagtype = 16'
-      ).where(user_id: id).each { |tagging|
+      decorator.taggings(:List, user).includes(:tag, :entity).each { |tagging|
         # For each tagging by the user
-        list = tagging.entity
         assert_tag tagging.tag,
                    self,
-                   (list.owner == self ? :'my own' : :'my collected')
+                   (tagging.entity.owner == self ? :'my own' : :'my collected')
       }
-      decorator.list_tags.each { |list_tag|
-        if prime_list = list_tag.dependent_lists.where(availability: [0,1], owner_id: followee_ids).first
+      decorator.tags(:List).each { |list_tag|
+        td = list_tag.decorate
+        if prime_list = td.friend_lists(user).first
           # Tagging by a friend on a list they own
           assert_tag list_tag, prime_list.owner, :owned
-        elsif list_tag.dependent_lists.where(availability: 0).exists? # There's at least one publicly available list
+        elsif td.public_lists.exists? # There's at least one publicly available list using this tag as title
           assert_tag list_tag
         end
       }
@@ -91,21 +135,19 @@ class UserDecorator < CollectibleDecorator
         assert_tag list.name_tag, self, :'my collected'
       }
       followees.each { |friend|
-        friend.owned_lists.where(availability: [0,1]).each { |list|
+        friend.decorate.owned_lists(user).includes(:name_tag).each { |list|
           assert_tag list.name_tag, friend, :'owned'
         }
       }
       followees.each { |friend|
-        friend.collected_lists.where(availability: 0).each { |list|
+        friend.decorate.collected_lists(user).includes(:name_tag).each { |list|
           assert_tag list.name_tag, friend, :'collected'
         }
       }
       if options[:exhaustive]
-        # All other list tags
-        Tag.where(tagtype: 16).
-            where.not(id: @tag_ids_used).
-            joins('INNER JOIN lists ON lists.name_tag_id = tags.id and lists.availability = 0').each { |tag|
-          assert_tag tag if tag.public_lists.exists?
+        # All other public list tags
+        List.where(availability: 0).where.not(name_tag_id: @tag_ids_used).includes(:name_tag).each { |list|
+          assert_tag list.name_tag
         }
       end
     end

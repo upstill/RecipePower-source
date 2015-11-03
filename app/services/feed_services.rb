@@ -71,16 +71,4 @@ class FeedServices
     keepers
   end
 
-  # Move all feeds from users' feeds list to their collection
-  # TODO delete
-  def self.collectify
-    User.all.each { |user|
-      user.collected_feeds.each { |feed|
-        user.collect feed
-      }
-      user.collected_feed_ids = []
-      user.save
-    }
-  end
-  
 end

@@ -2,7 +2,7 @@ flash[:popup] ||= "Done! #{@decorator.human_name} '#{@decorator.title.truncate(2
 what = {
     done: true,
     replacements: [
-        collectible_collect_icon_replacement(@decorator),
+        collectible_collect_button_replacement(@decorator),
         collectible_tools_menu_replacement(@decorator)
     ]
 }

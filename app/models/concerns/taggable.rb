@@ -16,7 +16,6 @@ module Taggable
 
     has_many :taggings, :as => :entity, :dependent => :destroy
     has_many :tags, -> { uniq }, :through => :taggings
-    has_many :list_tags, -> { where(tagtype: 16) }, :through => :taggings, :source => 'tag'
     has_many :taggers, -> { uniq }, :through => :taggings, :class_name => "User"
     attr_accessor :tagging_user_id, :tagging_tag_tokens # Only gets written externally; internally accessed with instance variable
     attr_accessible :tagging_user_id, :tagging_tag_tokens # For the benefit of update_attributes

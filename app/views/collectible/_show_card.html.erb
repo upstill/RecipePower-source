@@ -11,7 +11,7 @@
           <td valign="top" class="upper-content">
             <div class="title">
               <%= presenter.card_homelink class: "title-link" %>
-              <%= collectible_collect_icon( decorator, "lg") unless decorator.object == response_service.user %>
+              <%= collectible_collect_button( decorator, "lg") unless decorator.object == response_service.user %>
               <%# collectible_list_menu decorator, response_service.user, {} %>
             </div>
             <div class="row">
