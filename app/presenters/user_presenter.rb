@@ -9,6 +9,7 @@ class UserPresenter < BasePresenter
   presents :user
   delegate :username, :fullname, :handle, :lists, :feeds, to: :user
 
+=begin
   # Present the user's avatar, optionally with a form for uploading the image (if they're the viewer)
   def card_avatar options={}
     if is_viewer?
@@ -17,6 +18,7 @@ class UserPresenter < BasePresenter
       super()
     end
   end
+=end
 
   def card_homelink options={}
     user_homelink @decorator.object, options
