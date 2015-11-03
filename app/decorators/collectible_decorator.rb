@@ -2,6 +2,24 @@ class CollectibleDecorator < Draper::Decorator
   include Templateer
   delegate_all
 
+  # Glean the taggings to this entity by a given user, of a given type
+  def taggings user=nil, tagtype=nil
+    unless user.is_a? User
+      user, tagtype = nil, user
+    end
+    scope = object.taggings
+    scope = scope.where(user_id: user.id) if user
+    puts 'Hello from Taggings'
+    scope = scope.
+        joins('INNER JOIN tags ON tags.id = taggings.tag_id').
+        where("tags.tagtype = #{Tag.typenum(tagtype)}") if tagtype
+    scope
+  end
+
+  def tags user=nil, tagtype=nil
+    taggings(user, tagtype).includes(:tag).map &:tag
+  end
+
   # Define presentation-specific methods here. Helpers are accessed through
   # `helpers` (aka `h`). You can override attributes, for example:
   #
