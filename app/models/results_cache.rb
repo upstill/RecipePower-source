@@ -402,17 +402,30 @@ class ResultsCache < ActiveRecord::Base
 
 end
 
-# Provide the set of lists the user has collected
+# Provide the set of lists the user has collected, but only those visible to her
 class UserCollectedListsCache < UserCollectionCache
   def itemscope
-    super
+    scope = super
+    scope = scope.joins('INNER JOIN lists ON rcprefs.entity_id = lists.id')
+    # TODO: should only look at availability 1 if the other is a follower (doesn't work with itemscope from super)
+    more = "lists.availability = 0 OR (lists.availability = 1 AND lists.owner_id in (#{user.follower_ids.join(', ')}))"
+    more = "(lists.availability in (0,1)) AND (lists.owner_id <> #{user.id})"
+    scope = scope.where more
+    # logger.debug "#{scope.count} collected lists found: "
+    # scope.to_a.sort {|l1, l2| l1.entity_id <=> l2.entity_id }.each { |rr| e = rr.entity; puts "\t#{e.class} ##{e.id} (#{e.name}) owned by #{e.owner_id}"}
+    scope
   end
 end
 
 # Provide the set of lists the user has collected
 class UserOwnedListsCache < UserCollectionCache
   def itemscope
-    user.owned_lists if user
+    if user
+      scope = user.owned_lists
+      # logger.debug "#{scope.count} owned lists found: "
+      # scope.to_a.sort {|l1, l2| l1.id <=> l2.id }.each { |e| puts "\t#{e.class} ##{e.id} (#{e.name}) owned by #{e.owner_id}"}
+      scope
+    end
   end
 end
 
