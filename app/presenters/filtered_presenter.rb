@@ -383,6 +383,7 @@ class UsersCollectionPresenter < UserContentPresenter
     unless defined?(@@constants)
       'ResultsCache'.constantize
       @@constants = {
+          'lists' => UserListsCache,
           'lists.collected' => UserCollectedListsCache,
           'lists.owned' => UserOwnedListsCache,
           'friends' => UserFriendsCache

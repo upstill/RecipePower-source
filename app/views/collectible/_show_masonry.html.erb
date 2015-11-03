@@ -13,13 +13,9 @@
             <div class="title-box">
               <%= presenter.card_homelink class: "title-link" %>
             </div>
-                <div class="source">
-                  <% if (decorator.object.respond_to?(:site) && decorator.site) %>
-                      source: <%= site_homelink decorator.site, class: "source-link" %>
-                  <% elsif decorator.object.class == List %>
-                      compiled by <%= user_homelink decorator.object.owner, class: 'source-link' %>
-                  <% end %>
-                </div>
+            <div class="source">
+              <%= collectible_source decorator, class: 'source-link' %>
+            </div>
             <div class="tags">
               <%= presenter.present_field "tags" %>
             </div>

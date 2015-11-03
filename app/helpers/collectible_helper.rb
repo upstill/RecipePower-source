@@ -205,6 +205,14 @@ module CollectibleHelper
   end
   ################## End of standardized buttons ##########################
 
+  def collectible_source decorator, options={}
+    if (decorator.object.respond_to?(:site) && decorator.site)
+      "source: ".html_safe + site_homelink(decorator.site, options)
+    elsif decorator.object.class == List
+      "compiled by ".html_safe + user_homelink(decorator.object.owner, options)
+    end
+  end
+
   # Provide a list of the tags attached to the collectible, ending with the tagging button
   def collectible_taglist decorator
     taglist = decorator.object.tags.collect { |tag|

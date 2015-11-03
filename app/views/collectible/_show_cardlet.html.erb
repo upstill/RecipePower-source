@@ -14,11 +14,7 @@
             </p>
         <% end %>
             <div class="source">
-              <% if (decorator.object.respond_to?(:site) && decorator.site) %>
-                source: <%= site_homelink decorator.site, class: 'source-link' %><%# link_to decorator.sourcename, decorator.sourcehome, class: "source-link" %>
-              <% elsif decorator.object.class == List %>
-                compiled by <%= user_homelink decorator.object.owner, class: 'source-link' %>
-              <% end %>
+              <%= collectible_source decorator, class: 'source-link' %>
             </div>
         <div class="tags">
           <%= presenter.present_field 'tags' %>

@@ -89,7 +89,7 @@ $salmon-link-color: #E0A09E;
   background-color: #4B815B;
   color: #9AB3A0;
   // input[type='text'], input[type='password'], input[type='email'] {
-  input.string, textarea, input[type='text'], input[type='password'], input[type='email'], div.form-group.string > ul.token-input-list-facebook {
+  input.string, textarea, input[type='text'], input[type='password'], input[type='email'], ul.token-input-list-facebook {
     background-color: #C1D3C7;
     color: #849688;
   }

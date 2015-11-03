@@ -633,7 +633,7 @@ class SearchCache < UserBiglistCache
 end
 
 # user's lists visible to current_user (UserListsStreamer
-class UserListsCache < ResultsCache
+class UserListsCache < UserCollectionCache
 
   def itemscope
     user.owned_lists if user
