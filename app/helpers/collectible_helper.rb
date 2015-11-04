@@ -200,14 +200,18 @@ module CollectibleHelper
 
   def collectible_destroy_button decorator, size = nil, options={}
     if response_service.admin_view?
-      link_to_submit "Destroy this #{decorator.human_name}",
-                     decorator.object_path,
-                     {
-                         button_style: :danger,
-                         method: :delete,
-                         label: 'The nuclear option',
-                         confirm: 'Confirm please.'
-                     }.merge(options)
+      button_to_submit (options.delete(:label) || "Destroy this #{decorator.human_name}"),
+                       decorator.object_path,
+                       {
+                           button_style: :danger,
+                           button_size: (size || 'sm'),
+                           method: :delete,
+                           title: 'The nuclear option',
+                           # confirm_msg: 'Ultimate, permanent destruction, right? Confirm please.',
+                           with_form: true,
+                           wait_msg: "Deleting \"#{decorator.title}\"...",
+                           confirm_msg: "This will permanently remove ths #{decorator.human_name} from RecipePower for good: it can't be undone. Are you absolutely sure you want to do this?"
+                       }.merge(options)
     end
   end
 
