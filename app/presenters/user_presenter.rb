@@ -9,16 +9,12 @@ class UserPresenter < BasePresenter
   presents :user
   delegate :username, :fullname, :handle, :lists, :feeds, to: :user
 
-=begin
   # Present the user's avatar, optionally with a form for uploading the image (if they're the viewer)
   def card_avatar options={}
-    if is_viewer?
-      with_format('html') { render 'form_avatar', user: user }
-    else
-      super()
-    end
+    (is_viewer? && !@decorator.imgdata.present?) ?
+        super + collectible_upload_button(@decorator, 'lg', label: 'Get a Picture', class: 'upload-button') :
+        super
   end
-=end
 
   def card_homelink options={}
     user_homelink @decorator.object, options

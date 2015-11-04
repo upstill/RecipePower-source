@@ -211,6 +211,14 @@ div.card-item {
     }
     div.pic-inset {
       margin: 2em;
+      a.upload-button {
+        font-size: 1.2em;
+        display: block;
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 10px;
+      }
     }
     span.owner-name {
       font-size: 1.4em;

@@ -31,8 +31,6 @@
         <tr>
           <td valign="bottom" class="lower-content">
             <% if decorator.object == response_service.user %>
-                <%# collectible_edit_button decorator, 'lg' %>
-                <%= collectible_upload_button decorator, 'lg' %>
                 <%= collectible_tools_menu decorator, 'lg' %>
             <% else %>
                 <%= collectible_share_button decorator, 'lg' %>

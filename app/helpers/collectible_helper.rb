@@ -92,17 +92,9 @@ module CollectibleHelper
 
         items << collectible_collect_button(decorator, size, styling.merge(label: true, removable: true))
 
-        items << collectible_lists_button(decorator, size, styling.merge(label: 'Manage Lists'))
-
         items << collectible_edit_button(decorator, size, styling.merge(label: 'Edit'))
 
-        if permitted_to? :delete, entity.class.to_s.downcase.pluralize
-          items << button_to('Destroy',
-                             decorator.object_path,
-                             :method => :delete,
-                             confirm: "This will permanently remove this #{decorator.human_name} from RecipePower for good: it can't be undone. Are you absolutely sure you want to do this?")
-
-        end
+        items << collectible_lists_button(decorator, size, styling.merge(label: 'Manage Lists'))
 
         if entity.collectible_collected?
           privacy_label = checkbox_menu_item_label 'Private', entity.private
