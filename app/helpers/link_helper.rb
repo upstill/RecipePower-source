@@ -7,6 +7,7 @@ module LinkHelper
     elsif size.kind_of? Hash
       size, options = nil, size
     end
+    kind = kind.to_s
     options = options.clone
     with_form = options.delete :with_form
     class_str = (options[:class] || '').gsub(/btn[-\w]*/i, '') # Purge the class of existing button classes

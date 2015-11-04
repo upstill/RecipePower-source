@@ -18,13 +18,12 @@ table.results {
           // width: 300px;
         }
         &.actions-column {
-          width: 100px;
+          width: 50px;
+          .nav > li > a {
+            padding: 0px;
+          }
           div.tool-menu {
             display: inline-block;
-            ul > li > a {
-              padding: 0;
-              padding-right: 0.3em;
-            }
           }
         }
       }

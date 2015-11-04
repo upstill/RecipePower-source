@@ -458,7 +458,7 @@ class ListsIndexPresenter < FilteredPresenter
   end
 
   def table_headers
-    %w{ Owner	Name	Description Tags	Size }
+    [ '', '', 'Author', 'Tags', 'Size', '' ]
   end
 
   def panel_label

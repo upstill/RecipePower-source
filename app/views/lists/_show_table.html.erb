@@ -1,10 +1,4 @@
 <% list = decorator.object %>
-<% if params[:access] != "owned" %>
-    <td>
-      <%= user_homelink list.owner, :mode => :partial, :action => :collection %>
-      <br>
-    </td>
-<% end %>
 <%= present decorator, current_user_or_guest do |presenter| %>
     <td class="avatar-column">
       <%# image_enclosure decorator, :fallback_img => image_path('Upload_Icon.jpg') %>
@@ -18,15 +12,20 @@
       <hr><%= list.notes %>
     </td>
     <td>
-      <% list.included_tags.each do |tag| %>
-          <span><%= tag_homelink tag, :mode => :modal %></span><br>
-      <% end %>
+      <%= user_homelink list.owner, :mode => :partial, :action => :collection %>
+      <br>
+    </td>
+    <td>
+      <%= decorator.extract 'tags' %>
+      <%# list.included_tags.each do |tag| %>
+          <%# tag_homelink tag, :mode => :modal %><br>
+      <%# end %>
     </td>
     <td>
       <%# labelled_quantity list.entity_count, "item" %>
       <%= labelled_quantity ListServices.new(list).tagging_scope(current_user_or_guest_id).count, "item" %>
     </td>
     <td class="actions-column">
-      <%= collectible_buttons_panel decorator %>
+      <%= collectible_buttons_panel decorator, 'xl', :tools_menu => true %>
     </td>
 <% end %>
