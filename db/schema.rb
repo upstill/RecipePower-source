@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150402175847) do
+ActiveRecord::Schema.define(version: 20151104014855) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -119,11 +119,6 @@ ActiveRecord::Schema.define(version: 20150402175847) do
     t.integer  "picture_id"
   end
 
-  create_table "feeds_users", force: :cascade do |t|
-    t.integer "feed_id"
-    t.integer "user_id"
-  end
-
   create_table "finders", force: :cascade do |t|
     t.string   "finds",       limit: 255
     t.string   "selector",    limit: 255
@@ -151,11 +146,6 @@ ActiveRecord::Schema.define(version: 20150402175847) do
     t.integer  "list_id"
     t.datetime "created_at"
     t.datetime "updated_at"
-  end
-
-  create_table "lists_users", force: :cascade do |t|
-    t.integer "list_id"
-    t.integer "user_id"
   end
 
   create_table "notifications", force: :cascade do |t|

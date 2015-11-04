@@ -46,12 +46,8 @@ class User < ActiveRecord::Base
   accepts_nested_attributes_for :tag_selections, allow_destroy: true
 
   # Channels are just another kind of user. This field (channel_referent_id, externally) denotes such.
-  # TODO: delete channel_referent_id and tables feeds_users, lists_users and private_subscriptions
+  # TODO: delete channel_referent_id and table private_subscriptions
   belongs_to :channel, :class_name => "Referent", :foreign_key => "channel_referent_id"
-
-  # TODO: These relations are obsolete (feeds and lists are now collected by, um, collecting them)
-  # has_and_belongs_to_many :collected_feeds, :join_table => "feeds_users", class_name: "Feed"
-  # has_and_belongs_to_many :collected_lists, :join_table => "lists_users", class_name: "List"
 
   # NB: this stays; it represents a user's ownership of lists
   has_many :owned_lists, :class_name => "List", :foreign_key => :owner_id
