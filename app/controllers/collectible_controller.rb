@@ -7,7 +7,7 @@ class CollectibleController < ApplicationController
       if params.has_key? :private
         @decorator.be_collected true
         @decorator.collectible_private = params[:private]
-        msg << (@decorator.private ? ' now' : 'no longer')
+        msg << (@decorator.private ? ' now' : ' no longer')
         msg << ' hidden from others.'
       end
       if params.has_key? :in_collection

@@ -110,6 +110,8 @@ module CollectibleHelper
         end
 
         items << collectible_upload_button(decorator, size, styling.merge(label: 'Get Picture'))
+
+        items << collectible_destroy_button(decorator, size, styling)
       end
       content_tag :div, menu, class: "tool-menu #{dom_id(decorator)}"
     end
@@ -203,6 +205,20 @@ module CollectibleHelper
   def collectible_collect_button_replacement decorator, size = nil, options={}
     [ ".collection-state.#{dom_id decorator}", collectible_collect_button(decorator, size, options) ]
   end
+
+  def collectible_destroy_button decorator, size = nil, options={}
+    if response_service.admin_view?
+      link_to_submit "Destroy this #{decorator.human_name}",
+                     decorator.object_path,
+                     {
+                         button_style: :danger,
+                         method: :delete,
+                         label: 'The nuclear option',
+                         confirm: 'Confirm please.'
+                     }.merge(options)
+    end
+  end
+
   ################## End of standardized buttons ##########################
 
   def collectible_source decorator, options={}
