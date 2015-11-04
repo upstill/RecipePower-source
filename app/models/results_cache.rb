@@ -522,7 +522,7 @@ class FeedsCache < ResultsCache
       when "newest"
         Feed.order 'updated_at DESC'
       else
-        as_admin ? Feed.unscoped : Feed.where(approved: true)
+        as_admin ? Feed.order('approved DESC') : Feed.where(approved: true)
     end
   end
 
