@@ -6,8 +6,9 @@ module PageletsHelper
     flash_notifications_div
   end
 
-  def pagelet_body_replacement entity_or_decorator=nil
+  def pagelet_body_replacement entity_or_decorator=nil, to_delete=false
     body_id = 'pagelet-body'
+    selector = 'div.pagelet-body'
     content =
     case entity_or_decorator
       when String
@@ -16,11 +17,16 @@ module PageletsHelper
       when nil
         render_template response_service.controller, response_service.action
       else
-        controller = (entity_or_decorator.is_a?(Draper::Decorator) ? entity_or_decorator.object : entity_or_decorator).class.to_s.underscore.pluralize
-        body_id = pagelet_body_id entity_or_decorator
-        with_format('html') { render_template(controller, :show) }
+        if to_delete
+          selector << '.' + entity_or_decorator.dom_id
+          link_to_submit '', current_user, trigger: true
+        else
+          controller = (entity_or_decorator.is_a?(Draper::Decorator) ? entity_or_decorator.object : entity_or_decorator).class.to_s.underscore.pluralize
+          body_id = pagelet_body_id entity_or_decorator
+          with_format('html') { render_template(controller, :show) }
+        end
     end
-    [ 'div.pagelet-body',
+    [ selector,
       content_tag(:div,
                   "#{pagelet_header}#{content}".html_safe,
                   class: pagelet_class,
@@ -32,7 +38,7 @@ module PageletsHelper
     if response_service.controller == "pages" && response_service.action == "home"
       "pagelet-body"
     else
-      "pagelet-body container #{user_signed_in? ? 'below-menu' : 'no-menu'}"
+      "pagelet-body container #{user_signed_in? ? 'below-menu' : 'no-menu'} #{@decorator.dom_id if @decorator}"
     end
   end
 

@@ -223,7 +223,7 @@ module CollectibleHelper
 
   def collectible_source decorator, options={}
     if (decorator.object.respond_to?(:site) && decorator.site)
-      "source: ".html_safe + site_homelink(decorator.site, options)
+      "source: ".html_safe + site_homelink(decorator, options)
     elsif decorator.object.class == List
       "compiled by ".html_safe + user_homelink(decorator.object.owner, options)
     end

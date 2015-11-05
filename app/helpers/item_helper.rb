@@ -81,11 +81,11 @@ module ItemHelper
     [ item_partial_selector(item, item_mode, context) ]
   end
 
-  # Generate deleters for all versions of an item
+  # Generate deleters for all versions of an item, and, if we're on its page, a pagelet replacement returning to the user's home page
   def item_deleters item_or_decorator_or_specs, context=nil
     [:table, :modal, :masonry, :slider].collect { |item_mode|
       item_deleter item_or_decorator_or_specs, item_mode, context
-    }.compact
+    }.compact << pagelet_body_replacement(item_or_decorator_or_specs, true)
   end
 
   def item_insertion decorator, context=nil

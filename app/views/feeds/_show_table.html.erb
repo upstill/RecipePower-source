@@ -13,7 +13,7 @@
     </td>
     <td><%= decorator.extract 'tags' %><%# taggable_list feed %></td>
     <!--<td><%# feed.feedtypename unless feed.feedtypename == "Misc" %></td>-->
-    <td><%= link_to_submit feed.site.name, site_path(feed.site), mode: :modal %></td>
+    <td><%= site_homelink decorator.site %></td>
     <td><%= feed_status_summary feed %></td>
     <% if response_service.admin_view? %>
         <td>

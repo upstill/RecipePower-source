@@ -58,7 +58,7 @@ stream_fire = (elmt) ->
 			url: querypath,
 			error: (jqXHR, statusText, errorThrown) ->
 				responseData = RP.post_error(jqXHR) # Try to recover useable data from the error
-				handleResponse parent, responseData, statusText, errorThrown
+				RP.submit.handleResponse parent, responseData, statusText, errorThrown
 				RP.submit.block_off parent
 			success: (responseData, statusText, xhr) ->
 				# Expecting an array of items

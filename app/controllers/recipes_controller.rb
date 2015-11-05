@@ -190,6 +190,7 @@ class RecipesController < CollectibleController
     super
   end
 
+=begin
   # Remove the recipe from the system entirely
   def destroy
     # @recipe = Recipe.find params[:id]
@@ -198,6 +199,7 @@ class RecipesController < CollectibleController
     @recipe.destroy
     report_recipe collection_user_url(current_user), "\"#{title}\" is gone for good.", formats, true
   end
+=end
 
   def revise # modify current recipe to reflect a client-side change
     @recipe = Recipe.find(params[:id])

@@ -65,9 +65,9 @@ RP.submit.submit_and_process = ( request, elmt ) ->
 			error: (jqXHR, statusText, errorThrown) ->
 				# TODO Not actually posting an error for the user
 				responseData = RP.post_error(jqXHR) # Try to recover useable data from the error
-				handleResponse elmt, responseData, statusText, errorThrown
+				RP.submit.handleResponse elmt, responseData, statusText, errorThrown
 			success: (responseData, statusText, xhr) ->
-				handleResponse elmt, responseData, statusText, xhr
+				RP.submit.handleResponse elmt, responseData, statusText, xhr
 		if $(elmt).prop("tagName") == "FORM"
 			ajdata.url ||= $(elmt).attr('action')
 			method = $(elmt).attr('method')
@@ -80,7 +80,7 @@ RP.submit.submit_and_process = ( request, elmt ) ->
 	if preloaded
 		# The preloaded data is either a DOM element for a dialog, a source string for the dialog, or a responseData structure
 		if preloaded.done || preloaded.dlog || preloaded.code || preloaded.replacements
-			handleResponse elmt, preloaded
+			RP.submit.handleResponse elmt, preloaded
 		else if typeof(ndlog = preloaded) == "string" || (ndlog = $(preloaded)[0]) # Got a string or a DOM element => run dialog
 			$(elmt).removeClass 'trigger'
 			RP.dialog.push_modal ndlog, RP.dialog.enclosing_modal(elmt)
@@ -192,9 +192,9 @@ preload = (elmt) ->
 			url: href,
 			error: (jqXHR, statusText, errorThrown) ->
 				responseData = RP.post_error(jqXHR) # Try to recover useable data from the error
-				handleResponse elmt, responseData, statusText, errorThrown
+				RP.submit.handleResponse elmt, responseData, statusText, errorThrown
 			success: (responseData, statusText, xhr) ->
-				handleResponse elmt, responseData, statusText, xhr
+				RP.submit.handleResponse elmt, responseData, statusText, xhr
 
 # Handle submission links
 RP.submit.bind = (dlog) ->
@@ -283,7 +283,7 @@ shortCircuit = (elmt) ->
 	false
 
 # Apply a response to the element's request, whether preloaded or freshly arrived, or even whether the element exists or not
-handleResponse = (elmt, responseData, status, xhr) ->
+RP.submit.handleResponse = (elmt, responseData, status, xhr) ->
 	RP.notifications.done()
 	# A response has come in, so the element is no longer loading
 	RP.submit.block_off elmt
