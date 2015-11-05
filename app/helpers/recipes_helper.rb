@@ -18,7 +18,7 @@ module RecipesHelper
         label = "#{entity.class.to_s}: "
         itemlink = link_to_submit decorator.title, decorator.url, class: 'tablink'
     end
-    content_tag :p, "#{label}#{itemlink}".html_safe, class: pclass
+    content_tag :p, label.html_safe + itemlink, class: pclass
   end
 
   def collectible_tablink decorator
@@ -43,7 +43,7 @@ module RecipesHelper
 
   def collectible_show_thumbnail decorator
     image_div = image_enclosure decorator, class: 'pic-box', fill_mode: 'fixed-width', fallback_img: true
-    title = collectible_title_link decorator
+    title = link_to_submit decorator.title, decorator.object
     content_tag :div, "#{image_div}#{title}".html_safe, class: "cardlet-item #{decorator.dom_id}"
   end
 

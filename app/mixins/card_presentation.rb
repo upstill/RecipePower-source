@@ -30,6 +30,15 @@ module CardPresentation
     link_to_submit decorator.title, (homelink || decorator.object), options.merge(:mode => :partial, :data => data)
   end
 
+  def card_video
+    if (url = URI(decorator.url)) &&
+        url.host.match(/\.youtube.com/) &&
+        (vidlink = YouTubeAddy.extract_video_id(decorator.url))
+
+       video_embed "https://www.youtube.com/embed/#{vidlink}"
+    end
+  end
+
   def card_header
     content_tag :div, card_header_content, class: "card-aspect-label header"
   end

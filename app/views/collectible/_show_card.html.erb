@@ -3,15 +3,21 @@
       <%= collectible_vote_buttons decorator.object unless decorator.object == response_service.user %>
       <table style="width: 100%">
         <tr>
-          <td rowspan="2" class="pic-box">
-            <div class="pic-inset">
-              <%= presenter.card_avatar %>
-            </div>
-          </td>
-          <td valign="top" class="upper-content">
+          <% if vid = presenter.card_video %>
+              <td rowspan="2" class="video-box">
+                 <%= vid %>
+              </td>
+          <% else %>
+              <td rowspan="2" class="pic-box">
+                <div class="pic-inset">
+                  <%= presenter.card_avatar %>
+                </div>
+              </td>
+          <% end %>
+           <td valign="top" class="upper-content">
             <div class="title">
               <%= presenter.card_homelink class: "title-link" %>
-              <%= collectible_collect_button( decorator, "lg") unless decorator.object == response_service.user %>
+              <%= collectible_collect_button(decorator, "lg") unless decorator.object == response_service.user %>
               <%# collectible_list_menu decorator, response_service.user, {} %>
             </div>
             <div class="row">
@@ -23,7 +29,7 @@
                   <%= presenter.present_field_wrapped 'tags' %>
                 </div>
                 <p class="description"><%= decorator.description %></p>
-               </div>
+              </div>
             </div>
           </td>
         </tr>

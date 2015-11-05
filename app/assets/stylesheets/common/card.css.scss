@@ -65,6 +65,10 @@ div.card-item {
       letter-spacing: 1px;
     }
   }
+  td.video-box {
+    width: 40%;
+    padding: 10px;
+  }
   td.pic-box {
     width: 25%;
     &.empty {
@@ -115,9 +119,6 @@ div.card-item {
       a.title-link {
         color: #4f4d4a;
       }
-    }
-    td.pic-box {
-      width: 150px;
     }
     td.pic-box {
       width: 165px;
@@ -249,7 +250,7 @@ div.card-item {
       // min-height: 3.6em;
       // margin-bottom: 1em;
       margin-top: 0.4em;
-      font-size: 3em;
+      font-size: 2.4em;
       font-family: $archivo;
       font-weight: 700;
       letter-spacing: 1.5px;

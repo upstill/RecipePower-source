@@ -112,4 +112,25 @@ module ImagesHelper
     end
   end
 
+  def video_embed vidlink
+    iframe = content_tag :iframe,
+                         '',
+                         src: vidlink,
+                         frameborder: 0,
+                         height: '100%',
+                         width: '100%'
+    vbelement = content_tag :div, iframe, id: 'vbelement'
+    vbdummy = content_tag :div, vbelement, id: 'vbdummy'
+    content_tag :div, vbdummy, id: 'vidbox'
+=begin
+  <div id="vidbox">
+    <div id="vbdummy">
+      <div id="vbelement">
+        <iframe width="100%" height="100%" src="<%= vid %>" frameborder="0"></iframe>
+      </div>
+    </div>
+  </div>
+=end
+
+  end
 end

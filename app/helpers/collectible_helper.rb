@@ -98,12 +98,16 @@ module CollectibleHelper
 
         if entity.collectible_collected?
           privacy_label = checkbox_menu_item_label 'Private', entity.private
-          items << collection_link(decorator, privacy_label, styling, private: !entity.private)
+          items << collection_link(decorator,
+                                   privacy_label,
+                                   styling,
+                                   private: !entity.private,
+                                   title: entity.private ? 'Reveal to Others' : 'Hide from Others')
         end
 
         items << collectible_upload_button(decorator, size, styling.merge(label: 'Get Picture'))
 
-        items << collectible_destroy_button(decorator, size, styling)
+        items << collectible_destroy_button(decorator, 'xs', styling.merge(title: 'The Nuclear Option', style: 'margin-left: 3.8em;'))
       end
       content_tag :div, menu, class: "tool-menu #{dom_id(decorator)}"
     end
@@ -239,11 +243,11 @@ module CollectibleHelper
     options = query_options.slice! :in_collection, :comment, :private
     query_options[:styling] = styling
     link_to_submit label,
-                   polymorphic_path([:collect, decorator.object],
-                                    query_options.merge(styling: styling)),
-                   options.merge(method: 'PATCH',
-                                 title: 'Add to My Collection',
-                                 class: "collection-state #{dom_id decorator}")
+                   polymorphic_path([:collect, decorator.object], query_options),
+                   {title: 'Add to My Collection'}.
+                       merge(options).
+                       merge(method: 'PATCH',
+                             class: "collection-state #{dom_id decorator}")
   end
 
   # Declare the voting buttons for a collectible
