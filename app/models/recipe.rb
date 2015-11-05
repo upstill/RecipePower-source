@@ -63,15 +63,12 @@ class Recipe < ActiveRecord::Base
       # Extractions are parameters derived directly from the page
       logger.debug "Extracted from #{params[:url]}:"
       extractions.each { |key, value| logger.debug "\t#{key}: #{value}" }
-      params[:description] = extractions[:Description] if extractions[:Description]
-      if extractions[:URI]
-        params[:url] = extractions[:URI]
-      elsif extractions[:href]
-        params[:url] = extractions[:href]
-      end
-      params[:picurl] = extractions[:Image] if extractions[:Image]
-      params[:title] = extractions[:Title] if extractions[:Title]
-      # params[:href] = extractions[:href] if extractions[:href]
+      params = {
+          :description => extractions[:Description],
+          :url => (extractions[:URI] || extractions[:href]),
+          :picurl => extractions[:Image],
+          :title => extractions[:Title]
+      }.compact
       if params.blank?
         rcp = self.new
       elsif (id = params[:id].to_i) && (id > 0) # id of 0 means create a new recipe
