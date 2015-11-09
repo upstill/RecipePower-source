@@ -28,31 +28,20 @@ class RcprefCache < ResultsCache
       end
 
       # First, match on the comments using the rcpref
-      bump_counts scope.where('rcprefs.comment ILIKE ?', matchstr), type
+      counts.incr_by_scope scope.where('rcprefs.comment ILIKE ?', matchstr), type
 
-      # Now match on the entitie's relevant string field(s), for which we defer to the class
-      if modelclass.respond_to? :strscopes
-        [modelclass.strscopes(scope, tag.name)].flatten.each { |strscope|
-          bump_counts strscope, type
-        }
-      end
+      # Now match on the entity's relevant string field(s), for which we defer to the class
+      counts.incr_by_scope modelclass.strscopes(scope, tag.name), type if modelclass.respond_to? :strscopes
 
-      scope = scope.joins(:user_pointers).where('taggings.tag_id = ?', tag.id.to_s)
+      subscope = modelclass.joins(:taggings).where 'taggings.tag_id = ?', tag.id.to_s
+=begin
+      # TODO: We're not filtering by user taggings (the more the merrier)
       if @id
-        scope = scope.where 'taggings.user_id = ?', @userid.to_s
+        subscope = subscope.where 'taggings.user_id = ?', @id.to_s
       end
-      bump_counts scope, type
+=end
+      counts.incr_by_scope subscope, type
     end
-  end
-
-  protected
-
-  def bump_counts scope, type
-    counts.incr scope.
-                    pluck(&:id).
-                    uniq.
-                    collect { |id| type.to_s+id.to_s }
-
   end
 
 end

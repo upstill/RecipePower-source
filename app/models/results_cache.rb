@@ -2,13 +2,20 @@ require "rcpref.rb"
 # Object to put a uniform interface on a set of results, whether they
 # exist as a scope (if there is no search) or an array of Rcprefs (with search)
 class Counts < Hash
-  def incr key, amt=1
+  def incr key, incr=1
     key = key.to_a if key.is_a? ActiveRecord::Relation
     if key.is_a? Array
-      key.each { |k| self.incr k, amt }
+      key.each { |k| self.incr k, incr }
     else
-      self[key] = self[key]+amt
+      self[key] += incr
     end
+  end
+
+  # Bump the count of all hits across a scope using the id attribute
+  def incr_by_scope scope_or_scopes, type, incr=1
+    (scope_or_scopes.is_a?(Array) ? scope_or_scopes : [scope_or_scopes]).each { |scope|
+      incr scope, incr
+    }
   end
 
   def [](ix)
