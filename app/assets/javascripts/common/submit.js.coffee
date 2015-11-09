@@ -12,7 +12,7 @@ RP.submit = RP.submit || {}
 jQuery ->
 	RP.submit.bind()
 	# Set up processing for click events on links with a 'submit' class
-	$(document).on "click", '.submit', RP.submit.onClick
+	$(document).on "click", 'a.submit', RP.submit.onClick
 	$(document).on "ajax:beforeSend", 'form.ujs-submit', RP.submit.beforeSend
 	$(document).on "ajax:success", 'form.ujs-submit', RP.submit.success
 	$(document).on "ajax:error", 'form.ujs-submit', RP.submit.error

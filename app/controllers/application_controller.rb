@@ -138,10 +138,11 @@ class ApplicationController < ActionController::Base
     logger.info "COOKIES:"
     response.cookies.each { |k, v| logger.info "#{k}: #{v}" }
     begin
-      if session
-        sessid = session.is_a?(Hash) ? session[:id] : (session.id if session.respond_to?(:id))
+      sessid = if session
+        (session.is_a?(Hash) ? session[:id] : (session.id if session.respond_to?(:id))) || '<NO id for SESSION>'
+      else
+        '<NO SESSION>'
       end
-      sessid = "<NO SESSION>" if sessid.blank?
       logger.info "SESSION id: #{sessid}"
     rescue Exception => e
       x=1

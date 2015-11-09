@@ -24,7 +24,7 @@ class UserCollectionCache < RcprefCache
     if user
       constraints = { :sort_by => :viewed, :in_collection => true }
       if entity_type_root
-        constraints[:entity_type] = entity_type_root.singularize.camelize
+        constraints[:entity_type] = entity_type_to_model_name(entity_type_root)
       end
       user.collection_scope constraints
     end

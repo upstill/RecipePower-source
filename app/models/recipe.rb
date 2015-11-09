@@ -25,6 +25,14 @@ class Recipe < ActiveRecord::Base
 
   @@coder = HTMLEntities.new
 
+  # Return scopes for searching the title and description
+  def self.strscopes scope, str_to_match
+    [
+        scope.where('recipes.title ILIKE ?', "%#{str_to_match}%"),
+        scope.where('recipes.description ILIKE ?', "%#{str_to_match}%")
+    ]
+  end
+
   # Write the title attribute only after trimming and resolving HTML entities
   def title= ttl
     ttl = site_service.trim_title(ttl) if site

@@ -15,7 +15,9 @@ class SearchAllCache < RcprefCache
   end
 
   def itemscope
-    Rcpref.all
+    constraints = { }
+    constraints[:entity_type] = entity_type_to_model_name(@entity_type) if @entity_type.present?
+    Rcpref.where constraints
   end
 
 end

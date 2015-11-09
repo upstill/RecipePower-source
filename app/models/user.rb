@@ -170,6 +170,13 @@ class User < ActiveRecord::Base
     self.role_symbols.first.to_s
   end
 
+  def strscopes scope, str_to_match
+    [
+        subscope.where('users.email ILIKE ?', "%#{str_to_match}%"),
+        subscope.where('users.fullname ILIKE ?', "%#{str_to_match}%")
+    ]
+  end
+
   # Scope for items from the user's collection. Options:
   # :in_collection: whether they're collected or just viewed
   # :private: limited to the user
