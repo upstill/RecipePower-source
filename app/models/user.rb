@@ -170,10 +170,15 @@ class User < ActiveRecord::Base
     self.role_symbols.first.to_s
   end
 
-  def strscopes scope, str_to_match
+  def self.strscopes matcher
+    onscope = block_given? ? yield() : self.unscoped
     [
-        subscope.where('users.email ILIKE ?', "%#{str_to_match}%"),
-        subscope.where('users.fullname ILIKE ?', "%#{str_to_match}%")
+        onscope.where('"users"."username" ILIKE ?', matcher),
+        onscope.where('"users"."fullname" ILIKE ?', matcher),
+        onscope.where('"users"."email" ILIKE ?', matcher),
+        onscope.where('"users"."first_name" ILIKE ?', matcher),
+        onscope.where('"users"."last_name" ILIKE ?', matcher),
+        onscope.where('"users"."about" ILIKE ?', matcher)
     ]
   end
 

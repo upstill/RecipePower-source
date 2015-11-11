@@ -90,6 +90,20 @@ class List < ActiveRecord::Base
     l
   end
 
+  def self.strscopes matcher
+    onscope = block_given? ? yield() : self.unscoped
+    [
+    ] +
+    Tag.strscopes(matcher) { |inward=nil|
+      joinspec = inward ? {:name_tag => inward} : :name_tag
+      (block_given? ? yield(joinspec) : self.joins(joinspec)).where '"tags"."tagtype" = 16'
+    } +
+    Tag.strscopes(matcher) { |inward=nil|
+      joinspec = inward ? {:included_tags => inward} : :included_tags
+      block_given? ? yield(joinspec) : self.joins(joinspec)
+    }
+  end
+
   def name
     (name_tag && name_tag.name) || ""
   end

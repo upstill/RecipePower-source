@@ -77,6 +77,24 @@ public
     end
   end
 
+  def self.strscopes matcher
+    onscope = block_given? ? yield() : self.unscoped
+    [
+        onscope.where(%q{"sites"."description" ILIKE ?}, matcher)
+    ] + Reference.strscopes(matcher) { |inward=nil|
+      joinspec = inward ? {:reference => inward} : :reference
+      block_given? ? yield(joinspec) : self.joins(joinspec)
+    } + Referent.strscopes(matcher) { |inward=nil|
+      joinspec = inward ? {:referent => inward} : :referent
+      block_given? ? yield(joinspec) : self.joins(joinspec)
+    }
+  end
+
+  def self.joinings assoc_name, matcher, &block
+    # block.call(assoc_name).where 'sites.description ILIKE ?', matcher
+    block.call(assoc_name => {referent: :tags}).where 'tags.name ILIKE ?', matcher
+  end
+
   # Merge another site into this one, optionally destroying the other
   def absorb other
     # Merge corresponding referents

@@ -48,7 +48,19 @@ class Feed < ActiveRecord::Base
       end
     }
   end
-  
+
+  def self.strscopes matcher
+    onscope = block_given? ? yield() : self.unscoped
+    [
+        onscope.where('"feeds"."title" ILIKE ?', matcher),
+        onscope.where('"feeds"."description" ILIKE ?', matcher)
+
+    ] + Site.strscopes(matcher) { |inward=nil|
+      joinspec = inward ? {:site => inward} : :site
+      block_given? ? yield(joinspec) : self.joins(joinspec)
+    }
+  end
+
   # Return list of feed_entries by id for all feeds in the feedlist
   def self.entry_ids feedlist
     # Feed.find(feedlist).each { |feed| feed.update_entries }

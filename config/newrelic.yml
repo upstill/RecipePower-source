@@ -184,7 +184,7 @@ development:
   # 'enabled').
   # NOTE: for initial evaluation purposes, you may want to temporarily
   # turn the agent on in development mode.
-  monitor_mode: false
+  monitor_mode: true
 
   # Rails Only - when running in Developer Mode, the New Relic Agent will
   # present performance information on the last 100 transactions you have
@@ -195,6 +195,7 @@ development:
 
   # Enable textmate links
   # textmate: true
+  app_name: RecipePower (Development)
 
 test:
   <<: *default_settings
@@ -209,7 +210,7 @@ test:
 production:
   <<: *default_settings
   monitor_mode: true
-
+  app_name: RecipePower (Production)
 # Many applications have a staging environment which behaves
 # identically to production. Support for that environment is provided
 # here.  By default, the staging environment has the agent turned on.

@@ -17,14 +17,13 @@
 		</header>
 	    <section id="workpane">
 			<%= yield %>
-			<script type => 'text/javascript'>
+			<script type ='text/javascript'>
 			  var GOOG_FIXURL_LANG = '#{I18n.locale}';
 			  var GOOG_FIXURL_SITE = '#{request.protocol}#{request.host}';
 			</script>
 			<script type='text/javascript' src = 'http://linkhelp.clients.google.com/tbproxy/lh/wm/fixurl.js' >
 			</script>
 	    </section>
-	    <%# render 'layouts/footer' %>
 		<footer>
 			<div class="footer_nav_links">
 				<%= footer_navlinks %>

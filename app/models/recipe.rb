@@ -26,11 +26,15 @@ class Recipe < ActiveRecord::Base
   @@coder = HTMLEntities.new
 
   # Return scopes for searching the title and description
-  def self.strscopes scope, str_to_match
+  def self.strscopes matcher
+    scope = block_given? ? yield() : self.unscoped
     [
-        scope.where('recipes.title ILIKE ?', "%#{str_to_match}%"),
-        scope.where('recipes.description ILIKE ?', "%#{str_to_match}%")
-    ]
+        scope.where('"recipes"."title" ILIKE ?', matcher),
+        scope.where('"recipes"."description" ILIKE ?', matcher)
+    ] + Reference.strscopes(matcher) { |inward=nil|
+      joinspec = inward ? {:reference => inward} : :reference
+      block_given? ? yield(joinspec) : self.joins(joinspec)
+    }
   end
 
   # Write the title attribute only after trimming and resolving HTML entities

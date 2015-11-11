@@ -93,6 +93,13 @@ class Reference < ActiveRecord::Base
     end
   end
 
+  # Provide a relation for entities that match a string
+  def self.strscopes matcher
+    [
+        (block_given? ? yield() : self).where('"references"."host" ILIKE ?', matcher)
+    ]
+  end
+
   # Return a (perhaps unsaved) reference for the given url
   # params containts attribute name-value pairs for initializing the reference
   # AND ALSO an :affiliate, the object the reference is about (e.g., Site, Recipe...)
