@@ -13,21 +13,3 @@ def const_for object, qualifier=nil
   }
 end
 
-# Express a user-friendly name string as a class name for purposes of naming an entity_type
-def entity_type_to_model_name str
-  case result = str.to_s.singularize.camelize
-    when 'Friend'
-      'User'
-    else
-      result
-  end
-end
-
-def model_name_to_entity_type klass
-  case result = klass.to_s.underscore
-    when 'user'
-      'friend'
-    else
-      result
-  end
-end

@@ -14,7 +14,8 @@ class Site < ActiveRecord::Base
   #      may alter the path
   # Also, in most cases, site==home (when the domain is home, i.e. subsite is empty); in others, (site+subsite)==home,
   #     and only rarely will home be different from either of those
-  attr_accessible :finders_attributes, :sample, :oldname, :ttlcut, :finders, :reviewed, :description, :reference, :references, :name
+  attr_accessible :finders_attributes, :sample, :oldname, :ttlcut, :finders, :reviewed,
+                  :description, :reference, :references, :name
 
   belongs_to :referent # See before_destroy method, :dependent=>:destroy
 
@@ -88,6 +89,19 @@ public
       joinspec = inward ? {:referent => inward} : :referent
       block_given? ? yield(joinspec) : self.joins(joinspec)
     }
+  end
+
+  # Return a scope for finding references of a given type
+  def contents_scope model_name='Recipe'
+    case model_name
+      when 'Recipe'
+        urls = references.pluck(:url).collect { |url| url + '%' }
+        q = urls.map { |url| '"references"."url" ILIKE ?' }.join ' OR '
+        q = "\"references\".\"type\" = 'RecipeReference' AND (#{q})"
+        Recipe.joins(:references).where q, *urls
+      when 'Feed'
+        feeds
+    end
   end
 
   def self.joinings assoc_name, matcher, &block

@@ -64,11 +64,21 @@ class ListServices
     @list.pullin ? @list.taggings.where(user_id: @list.owner_id).map(&:tag_id) : []
   end
 
+  def self.lists_collected_by user
+    user.collection_scope(:entity_type => 'List').
+        where "lists.availability = 0 OR (lists.availability = 1 AND lists.owner_id in (#{user.follower_ids.join(', ')}))"
+  end
+
+  def self.lists_owned_by user
+    user.owned_lists.
+        where "lists.availability = 0 OR (lists.availability = 1 AND lists.owner_id in (#{user.follower_ids.join(', ')}))"
+  end
+
   # Return the set of lists containing the entity (either directly or indrectly) that are visible to the given user
   def self.find_by_listee taggable_entity
-    uid = taggable_entity.tagging_user_id || User.super_id
-    list_scope = self.find_visible_to uid, true
-    friend_ids = User.find(uid).followee_ids + [taggable_entity.tagging_user_id, User.super_id]
+    viewer = User.find(taggable_entity.tagging_user_id || User.super_id)
+    list_scope = self.lists_visible_to viewer, true
+    friend_ids = viewer.followee_ids + [taggable_entity.tagging_user_id, User.super_id]
     tag_ids = taggable_entity.taggings.where(user_id: friend_ids).pluck(:tag_id)
     list_tag_ids = Tag.where(id: tag_ids, tagtype: 16).pluck :id
     tag_id_str = tag_ids.map(&:to_s).join ','
@@ -98,12 +108,13 @@ class ListServices
     (direct+indirect).uniq(&:id)
   end
 
-  def self.find_visible_to uid, with_owned=false
-    friend_ids = (User.find(uid).followee_ids + [User.super_id]).map(&:to_s).join(',')
+  # Provide a scope for the lists visible to the given user
+  def self.lists_visible_to user, with_owned=false
+    friend_ids = (user.followee_ids + [User.super_id]).map(&:to_s).join(',')
     if with_owned
-      owner_clause = "(owner_id = #{uid}) or "
+      owner_clause = "(owner_id = #{user.id}) or "
     else
-      owner_clause = "(owner_id != #{uid}) and "
+      owner_clause = "(owner_id != #{user.id}) and "
     end
     List.where "#{owner_clause}(availability = 0 or (availability = 1 and owner_id in (#{friend_ids})))"
 =begin
@@ -121,11 +132,11 @@ class ListServices
   end
 
   # Return a scope on the Tagging table for the unfiltered contents of the list
-  def tagging_scope userid=nil
+  def tagging_scope viewerid=nil
     # We get everything tagged either directly by the list tag, or indirectly via
     # the included tags, EXCEPT for other users' tags using the list's tag
     tag_ids = [ @list.name_tag_id ]
-    tagger_id_or_ids = [@list.owner_id, userid].compact.uniq
+    tagger_id_or_ids = [@list.owner_id, viewerid].compact.uniq
     whereclause = tagger_id_or_ids.count > 1 ?
         "(user_id in (#{tagger_id_or_ids.join ','}))" :
         "(user_id = #{tagger_id_or_ids = tagger_id_or_ids.first})"

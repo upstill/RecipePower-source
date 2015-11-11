@@ -1,37 +1,54 @@
 # Recently-viewed recipes of the given user
-class UserCollectionCache < RcprefCache
-
-  def self.params_needed
-    # The access parameter filters for private and public lists
-    super + [:entity_type]
-  end
+class UserCollectionCache < ResultsCache
+  include EntityTyping
 
   def user
-    @user ||= User.find_by(id: @id) if @id
-  end
-
-  # The sources are a user, a list of users, or nil (for the master global list)
-  def sources
-    user.id
-  end
-
-  # Return the entity type sans extensions
-  def entity_type_root
-    @etr ||= (@entity_type.sub(/\..*/, '') if @entity_type.present?)
+    @user ||= User.find @id
   end
 
   def itemscope
-    if user
-      constraints = { :sort_by => :viewed, :in_collection => true }
-      if entity_type_root
-        constraints[:entity_type] = entity_type_to_model_name(entity_type_root)
+    @itemscope ||= user.collection_scope( { :sort_by => :viewed, :in_collection => true }.merge scope_constraints)
+  end
+
+  # Apply a tag to the current set of result counts
+  def count_tag tag, counts
+    matchstr = "%#{tag.name}%"
+    typeset.each do |type|
+      modelclass = type.constantize
+      scope = modelclass.joins :user_pointers
+      scope = scope.where('"rcprefs"."user_id" = ? and rcprefs.in_collection = true', @id.to_s)
+      scope = scope.where('"rcprefs"."private" = false') unless @id == @viewerid # Only non-private entities if the user is not the viewer
+
+      # First, match on the comments using the rcpref
+      counts.incr_by_scope scope.where('"rcprefs"."comment" ILIKE ?', matchstr)
+
+      # Now match on the entity's relevant string field(s), for which we defer to the class
+      if modelclass.respond_to? :strscopes
+        counts.incr_by_scope modelclass.strscopes("%{tag.name}%")
+        counts.incr_by_scope modelclass.strscopes(tag.name), 30
       end
-      user.collection_scope constraints
+
+      subscope = modelclass.joins(:taggings).where 'taggings.tag_id = ?', tag.id.to_s
+=begin
+      # TODO: We're not filtering by user taggings (the more the merrier)
+      if @id
+        subscope = subscope.where 'taggings.user_id = ?', @id.to_s
+      end
+=end
+      counts.incr_by_scope subscope, type
     end
   end
 
-  def stream_id
-    [ :user, @id, @entity_type.gsub(/\./,'-') ].join('-')
+  protected
+
+  # Memoize a query to get all the currently-defined entity types
+  def typeset
+    @typeset ||=
+        itemscope.
+        select(:entity_type).
+        distinct.
+        order("entity_type DESC").
+        pluck(:entity_type)
   end
 
 end

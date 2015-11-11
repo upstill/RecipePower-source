@@ -12,7 +12,7 @@ class Counts < Hash
   end
 
   # Bump the count of all hits across a scope using the id attribute
-  def incr_by_scope scope_or_scopes, type, incr=1
+  def incr_by_scope scope_or_scopes, incr=1
     (scope_or_scopes.is_a?(Array) ? scope_or_scopes : [scope_or_scopes]).each { |scope|
       incr scope, incr
     }
@@ -123,50 +123,6 @@ class Partition < Array
 
 end
 
-module Uniquify
-  # Allowing for the possibility of redundant items that are nonetheless significant for searching,
-  # the redundant itemscope may need to be retained (e.g., in the case of searching tagging-based scopes)
-  # while the final presentation (and initial count) are without redundancy.
-  # NB This happens to work for both collections (based on Rcpref) and taggings b/c both have
-  # polymorphic 'entity' associations
-  def uniqueitemscope
-    itemscope.select("DISTINCT ON (entity_type, entity_id) *")
-  end
-
-  def scope_count
-    # To avoid loading the relation, we construct a count query from the scope query
-    scope_query = uniqueitemscope.to_sql
-    sql = %Q{ SELECT COUNT(*) from (#{scope_query}) as internalQuery }
-    res = ActiveRecord::Base.connection.execute sql
-    res.first["count"].to_i
-  end
-
-  # When taking a slice out of the taggings/rcprefs, load the associated entities meanwhile
-  def slice_item_scope
-    uniqueitemscope.limit(safe_partition.windowsize).offset(safe_partition.window.min).includes(:entity).to_a
-  end
-
-end
-
-module TaggingMethods
-  include Uniquify
-
-  # Apply the tag to the current set of result counts
-  def count_tag tag, counts
-    # Intersect the scope with the set of entities tagged with tags similar to the given tag
-    tagscope = itemscope.where tag_id: TagServices.new(tag).similar_ids
-    tagset = tagscope.to_a
-    counts.incr tagset # One extra point for matching in one field
-
-    matchset = TaggingServices.match tag.name, itemscope # Returns an array of Tagging objects
-    counts.incr matchset
-
-    this_round = (tagset+matchset).uniq
-    counts.incr this_round, 30 # Thirty points for matching this tag
-  end
-
-end
-
 class ResultsCache < ActiveRecord::Base
   include ActiveRecord::Sanitization
 
@@ -175,7 +131,7 @@ class ResultsCache < ActiveRecord::Base
   end
   # The ResultsCache class responds to a query with a series of items.
   # As a model, it saves intermediate results to the database
-  self.primary_keys = ["session_id","type"]
+  self.primary_keys = ['session_id', 'type']
 
   # scope :integers_cache, -> { where type: 'IntegersCache' }
   attr_accessible :session_id, :type, :params, :cache, :partition
@@ -183,16 +139,16 @@ class ResultsCache < ActiveRecord::Base
   serialize :cache
   serialize :partition
   attr_accessor :items, :querytags, :as_admin
-  delegate :window, :next_index, :"done?", :max_window_size, :to => :safe_partition
+  delegate :window, :next_index, :'done?', :max_window_size, :to => :safe_partition
 
   # Get the current results cache and return it if relevant. Otherwise,
   # create a new one
-  def self.retrieve_or_build session_id, userid, as_admin, parsed_querytags=[], queryparams={}
+  def self.retrieve_or_build session_id, viewerid, as_admin, parsed_querytags=[], queryparams={}
     unless parsed_querytags.is_a? Array
       queryparams, parsed_querytags = parsed_querytags, []
     end
     # Convert from ActionController params to hash
-    relevant_params = { userid: userid, as_admin: as_admin } # Keep the id of the viewing user
+    relevant_params = { viewerid: viewerid, as_admin: as_admin } # Keep the id of the viewing user
     self.params_needed.uniq.each { |param| relevant_params[param] = queryparams[param] if queryparams[param] }
 
     rc = self.create_with(:params => relevant_params).find_or_initialize_by session_id: session_id, type: self.to_s
@@ -217,6 +173,10 @@ class ResultsCache < ActiveRecord::Base
   # Declare the parameters needed for this class
   def self.params_needed
     [:id, :querytags]
+  end
+
+  def viewer
+    @viewer ||= User.find @viewerid
   end
 
   # Return the following range, for triggering purposes, and optionally pre-advance the window
@@ -255,8 +215,8 @@ class ResultsCache < ActiveRecord::Base
 
   # Derive the class of the appropriate cache handler from the controller, action and other parameters
   def self.type params
-    controller = (params[:controller] || "").singularize.capitalize
-    controller = controller.pluralize if params[:action] && (params[:action] == "index")
+    controller = (params[:controller] || '').singularize.capitalize
+    controller = controller.pluralize if params[:action] && (params[:action] == 'index')
     name = "#{controller}Cache"
     Object.const_defined?(name) ? name.constantize : ResultsCache
   end
@@ -344,29 +304,17 @@ class ResultsCache < ActiveRecord::Base
   # This is a prototypical count_tag method, which digests the itemscope in light of a tag,
   # incrementing the counts appropriately
   def count_tag tag, counts
-    tagset = tagging_match tag
-    if self.respond_to? :name_match
-      # Get an array of entities that are a string match for the tag
-      matchset = name_match tag
-      counts.incr tagset # One extra point for matching in one field
-      counts.incr matchset
-      counts.incr (tagset+matchset).uniq, 30  # Thirty points for matching this tag
+    tagname = tag.normalized_name || Tag.normalizeName(tag.name)
+    model = itemscope.model
+    if model.reflect_on_association :tags
+      counts.incr_by_scope itemscope.joins(:tags).where('"tags"."normalized_name" ILIKE ?', "%#{tagname}%") # One extra point for matching in one field
+      counts.incr_by_scope itemscope.joins(:tags).where('"tags"."normalized_name" = ?', tagname), 10 # Extra points for complete matches
     end
-    counts.incr tagset, 30 # One extra point for matching in one field
-  end
+    if model.respond_to? :strscopes
+      counts.incr_by_scope model.strscopes("%#{tagname}%")
+      counts.incr_by_scope model.strscopes(tagname), 10
+    end
 
-  # Apply a tag to the members of the (Taggable) obj_class, returning an array of entities for count_tag
-  def tagging_match tag
-    model_class = itemscope.model.to_s
-    assoc_name = model_class.underscore.pluralize
-    matchstr = tag.normalized_name || Tag.normalizeName(tag.name)
-    sourcetags = Tag.where('normalized_name ILIKE ?', "%#{matchstr}%")
-    scope = itemscope.joins(:taggings).where("#{assoc_name}.id = taggings.entity_id AND taggings.entity_type = '#{model_class}'")
-    unless sourcetags.empty?
-      idlist = sourcetags.map(&:id).map(&:to_s).join(", ") #comma-separated list
-      scope = scope.where("taggings.tag_id IN (#{idlist})" )
-    end
-    scope.to_a
   end
 
   # This is the real interface, which returns items for display
@@ -375,13 +323,18 @@ class ResultsCache < ActiveRecord::Base
     raise 'Abstract Method'
   end
 
+  # Subclasses may define constraints on the itemscope in addition to the standard ones
+  def scope_constraints
+    { }
+  end
+
   # Report a previously-saved parameter (or, in fact, any instance variable)
   def param sym
     self.instance_variable_get "@#{sym}".to_sym
   end
 
   def stream_id
-    "#{self.class.to_s}_#{@id}"
+    "#{itemscope.model.to_s}-#{@id}"
   end
 
   protected
@@ -412,27 +365,14 @@ end
 # Provide the set of lists the user has collected, but only those visible to her
 class UserCollectedListsCache < UserCollectionCache
   def itemscope
-    scope = super
-    scope = scope.joins('INNER JOIN lists ON rcprefs.entity_id = lists.id')
-    # TODO: should only look at availability 1 if the other is a follower (doesn't work with itemscope from super)
-    more = "lists.availability = 0 OR (lists.availability = 1 AND lists.owner_id in (#{user.follower_ids.join(', ')}))"
-    more = "(lists.availability in (0,1)) AND (lists.owner_id <> #{user.id})"
-    scope = scope.where more
-    # logger.debug "#{scope.count} collected lists found: "
-    # scope.to_a.sort {|l1, l2| l1.entity_id <=> l2.entity_id }.each { |rr| e = rr.entity; puts "\t#{e.class} ##{e.id} (#{e.name}) owned by #{e.owner_id}"}
-    scope
+    @itemscope ||= ListServices.lists_collected_by viewer
   end
 end
 
 # Provide the set of lists the user has collected
 class UserOwnedListsCache < UserCollectionCache
   def itemscope
-    if user
-      scope = user.owned_lists
-      # logger.debug "#{scope.count} owned lists found: "
-      # scope.to_a.sort {|l1, l2| l1.id <=> l2.id }.each { |e| puts "\t#{e.class} ##{e.id} (#{e.name}) owned by #{e.owner_id}"}
-      scope
-    end
+    @itemscope ||= ListServices.lists_owned_by user
   end
 end
 
@@ -443,7 +383,7 @@ class IntegersCache < ResultsCache
   end
 end
 
-# list of lists visible to current user (ListsStreamer)
+# list of lists visible to the viewer
 class ListsCache < ResultsCache
 
   def self.params_needed
@@ -453,49 +393,71 @@ class ListsCache < ResultsCache
 
   # A listcache may define an itemscope to let the superclass#items method do pagination
   def itemscope
+    @itemscope ||=
     case @access
-      when "owned"
-        scope = List.where owner_id: @userid
-      when "collected"
-        scope = User.find(@userid).lists
-      when "all"
-        scope = List.unscoped
+      when 'owned'
+        ListServices.lists_owned_by viewer
+      when 'collected'
+        ListServices.lists_collected_by viewer
+      when 'all'
+        List.unscoped
       else # By default, we only see lists belonging to our friends and Super that are not private, and all those that are public
-        scope = ListServices.find_visible_to @userid
+        ListServices.lists_visible_to viewer
     end
-    scope
   end
 
-  # Apply a tag to the members of the (Taggable) obj_class, returning an array of entities for count_tag
-  def tagging_match tag
-    model_class = itemscope.model.to_s
-    assoc_name = model_class.underscore.pluralize
-    matchstr = tag.normalized_name || Tag.normalizeName(tag.name)
-    sourcetags = Tag.where('normalized_name ILIKE ?', "%#{matchstr}%")
-    scope = itemscope.joins(:taggings).where("#{assoc_name}.id = taggings.entity_id AND taggings.entity_type = '#{model_class}'")
-    unless sourcetags.empty?
-      idlist = sourcetags.map(&:id).map(&:to_s).join(", ") #comma-separated list
-      scope = scope.where("taggings.tag_id IN (#{idlist})" )
-    end
-    scope.to_a
-  end
-
-  def name_match tag
-    matchstr = tag.normalized_name || Tag.normalizeName(tag.name)
-    itemscope.joins(:name_tag).where('tags.normalized_name LIKE ?', "%#{matchstr}%").to_a +
-    itemscope.joins(:included_tags).where('tags.normalized_name LIKE ?', "%#{matchstr}%").to_a
-  end
 end
 
 # list's content visible to current user (ListStreamer)
 class ListCache < ResultsCache
-  include TaggingMethods
+
+  def list
+    @list ||= List.find @id
+  end
+
+  # module Uniquify
+    # Allowing for the possibility of redundant items that are nonetheless significant for searching,
+    # the redundant itemscope may need to be retained (e.g., in the case of searching tagging-based scopes)
+    # while the final presentation (and initial count) are without redundancy.
+    # NB This happens to work for both collections (based on Rcpref) and taggings b/c both have
+    # polymorphic 'entity' associations
+    def uniqueitemscope
+      itemscope.select("DISTINCT ON (entity_type, entity_id) *")
+    end
+
+    def scope_count
+      # To avoid loading the relation, we construct a count query from the scope query
+      scope_query = uniqueitemscope.to_sql
+      sql = %Q{ SELECT COUNT(*) from (#{scope_query}) as internalQuery }
+      res = ActiveRecord::Base.connection.execute sql
+      res.first["count"].to_i
+    end
+
+    # When taking a slice out of the taggings/rcprefs, load the associated entities meanwhile
+    def slice_item_scope
+      uniqueitemscope.limit(safe_partition.windowsize).offset(safe_partition.window.min).includes(:entity).to_a
+    end
+
+  # end  Uniquify
+  # include TaggingMethods
+
+  # module TaggingMethods
+    # include Uniquify
+
+    # Apply the tag to the current set of result counts
+    def count_tag tag, counts
+      # Intersect the scope with the set of entities tagged with tags similar to the given tag
+      counts.incr itemscope.where(tag_id: TagServices.new(tag).similar_ids) # One extra point for matching in one field
+
+      counts.incr TaggingServices.match tag.name, itemscope # Returns an array of Tagging objects
+
+    end
+
+  # end TaggingMethods
 
   # The itemscope is the initial query for all possible items, subject to subqueries via count_tag
   def itemscope
-    if list = List.find(@id)
-      ListServices.new(list).tagging_scope @userid
-    end
+    @itemscope ||= ListServices.new(list).tagging_scope @viewerid
   end
 
   def stream_id
@@ -513,43 +475,25 @@ class FeedsCache < ResultsCache
   end
 
   def itemscope
+    @itemscope ||=
     case @access
-      when "collected" # Feeds actually collected by user and friends
-        persons_of_interest = [@userid, 1, 3, 5].map(&:to_s).join(',')
+      when 'collected' # Feeds actually collected by user and friends
+        persons_of_interest = [@viewerid, 1, 3, 5].map(&:to_s).join(',')
         Feed.joins(:user_pointers).
             where("rcprefs.user_id in (#{persons_of_interest})").
             order("rcprefs.user_id DESC").   # User's own feeds first
             order("rcprefs.updated_at DESC") # Most recent first (within user)
-      when "all" # For admins only: every feed in the world
+      when 'all' # For admins only: every feed in the world
         Feed.order 'approved DESC'
-      when "approved" # Default: normal user view for shopping for feeds (only approved feeds)
+      when 'approved' # Default: normal user view for shopping for feeds (only approved feeds)
         Feed.where approved: true
-      when "oldest"
+      when 'oldest'
         Feed.order 'updated_at ASC'
-      when "newest"
+      when 'newest'
         Feed.order 'updated_at DESC'
       else
         as_admin ? Feed.order('approved DESC') : Feed.where(approved: true)
     end
-  end
-
-  def count_tag tag, counts
-    matchstr = tag.normalized_name || Tag.normalizeName(tag.name)
-
-    sourcetags = Tag.where(tagtype: 6).where('normalized_name ILIKE ?', "%#{matchstr}%")
-    referent_ids = sourcetags.map(&:referent_id)
-    site_ids = Site.where(referent_id: referent_ids).map(&:id)
-    tagset = Feed.where(site_id: site_ids)
-
-    tagset = tagset.map(&:id)
-    tagset = (tagset + tag.feeds.map(&:id)).uniq if tag.id > 0
-
-    matchstr = "%#{tag.name}%"
-    matchset = Feed.where("title ILIKE ? or description ILIKE ?", matchstr, matchstr).map(&:id)
-    counts.incr tagset.uniq # One extra point for matching in one field
-    counts.incr matchset
-    this_round = (tagset+matchset).uniq
-    counts.incr this_round, 30 # Thirty points for matching this tag
   end
 
   # The cache is just item keys
@@ -562,13 +506,12 @@ end
 # list of feed items
 class FeedCache < ResultsCache
 
-  def itemscope
-    FeedEntry.where(feed_id: @id).order('published_at DESC')
+  def feed
+    @feed ||= Feed.find @id
   end
 
-  def name_match tag
-    match = "%#{tag.name}%"
-    itemscope.where("title ILIKE ? or summary ILIKE ?", match, match).to_a
+  def itemscope
+    @itemscope ||= feed.feed_entries
   end
 
 end
@@ -582,38 +525,30 @@ class UsersCache < ResultsCache
   end
 
   def itemscope
-    return User.unscoped if @as_admin  # See everyone in admin view
-    scope = User.where(channel_referent_id: 0, private: false).where.not(id: [4, 5])
-    case @select
-      when "followees"
-        scope = User.find(@userid).followees
-      when "relevant"
-        # Exclude the viewer and all their friends
-        scope = scope.
-            where("count_of_collecteds > 0").
-            where.not(id: User.find(@userid).followee_ids+[@userid]).
-            order('count_of_collecteds DESC')
+    @itemscope ||=
+    if @as_admin # See everyone in admin view
+      User.unscoped
+    else
+      case @select
+        when 'followees'
+          viewer.followees
+        when 'relevant'
+          # Exclude the viewer and all their friends
+          User.where(private: false).
+              where('count_of_collecteds > 0').
+              where.not( id: viewer.followee_ids+[@viewerid, 4, 5] ).
+              order('count_of_collecteds DESC')
+        else
+          User.where(private: false).where.not(id: [4, 5])
+      end
     end
-    scope
-  end
-
-  def name_match tag
-    match = "%#{tag.name}%"
-    itemscope.where(
-                    'username ILIKE ? or
-                    fullname ILIKE ? or
-                    email ILIKE ? or
-                    first_name ILIKE ? or
-                    last_name ILIKE ? or
-                    about ILIKE ?',
-                    match, match, match, match, match, match).to_a
   end
 
 end
 
 class UserFriendsCache < UsersCache
   def itemscope
-    User.find(@userid).followees if @userid
+    @itemscope ||= user.followees
   end
 end
 
@@ -621,7 +556,7 @@ end
 class UserRecentCache < UserCollectionCache
 
   def itemscope
-    user.collection_scope(:sort_by => :viewed) if user
+    @itemscope ||= user.collection_scope :sort_by => :viewed
   end
 end
 
@@ -629,9 +564,9 @@ end
 class UserBiglistCache < UserCollectionCache
 
   def itemscope
-    scope = user ? Rcpref.where('private = false OR rcprefs.user_id = ?', user.id) : Rcpref.where(private: false)
-    scope.where.not(entity_type: ["Feed", "User", "List"])
-    # scope = Rcpref.select([:entity_type, :entity_id]).group(" entity_type, entity_id")
+    @itemscope ||=
+        Rcpref.where('private = false OR "rcprefs"."user_id" = ?', @viewerid).
+            where.not(entity_type: %w{ Feed User List})
   end
 end
 
@@ -643,7 +578,7 @@ end
 class UserListsCache < UserCollectionCache
 
   def itemscope
-    user.owned_lists if user
+    @itemscope ||= user.owned_lists
   end
 
 end
@@ -656,50 +591,46 @@ class TagsCache < ResultsCache
 
   # Tags don't go through Taggings, so we just use/count them directly
   def count_tag tag, counts
-    # tagset = tagging_match tag
-    matchstr = tag.normalized_name || Tag.normalizeName(tag.name)
-    scope = itemscope
-    counts.incr scope.where('normalized_name ILIKE ?', "%#{matchstr}%")
-    counts.incr scope.where(normalized_name: matchstr), 30
+    super # Do the usual strscopes thing
+    counts.incr_by_scope itemscope.where(normalized_name: tag.normalized_name || Tag.normalizeName(tag.name)), 30
   end
 
   def itemscope
-    @tagtype ? Tag.where(tagtype: @tagtype) : Tag.unscoped
+    @itemscope ||= @tagtype ? Tag.where(tagtype: @tagtype) : Tag.unscoped
   end
 
 end
 
 class TagCache < ResultsCache
-  def itemscope
-    if tag = Tag.find(@id)
-      tag.taggings
-    end
+
+  def tag
+    @tag ||= Tag.find @id
   end
+
+  def itemscope
+    @itemscope ||= tag.taggings
+  end
+
 end
 
 class SitesCache < ResultsCache
 
   def itemscope
-    Site.unscoped
-  end
-
-  def name_match tag
-    match = "%#{tag.name}%"
-    # Get a list of SourceReferents with matching name tags
-    reflist = Referent.joins("LEFT OUTER JOIN tags on tags.id = referents.tag_id and referents.type = 'SourceReferent'").
-        where("tags.name ILIKE ?", match).map(&:id)
-    if reflist.empty?
-      itemscope.where('description ILIKE ?', match)
-    else
-      idlist = reflist.map(&:to_s).join ','
-      itemscope.where("referent_id in (#{idlist}) or description ILIKE ?", match)
-    end
+    @itemscope ||= Site.unscoped
   end
 
 end
 
 class SiteCache < ResultsCache
+  include EntityTyping
 
+  def site
+    @site = Site.find @id
+  end
+
+  def itemscope
+    @itemscope ||= site.contents_scope entity_type_to_model_name
+  end
 end
 
 class ReferencesCache < ResultsCache
@@ -717,12 +648,16 @@ class ReferencesCache < ResultsCache
   end
 
   def itemscope
-    (typeclass == Reference) ? Reference.unscoped : Reference.where(type: typeclass)
+    @itemscope ||= (typeclass == Reference) ? Reference.unscoped : Reference.where(type: typeclass)
   end
 
 end
 
 class ReferenceCache < ResultsCache
+
+  def reference
+    @reference ||= Reference.find @id
+  end
 
 end
 
@@ -741,7 +676,7 @@ class ReferentsCache < ResultsCache
   end
 
   def itemscope
-    (typeclass == Referent) ? Referent.unscoped : Referent.where(type: typeclass)
+    @itemscope ||= (typeclass == Referent) ? Referent.unscoped : Referent.where(type: typeclass)
   end
 
 end
