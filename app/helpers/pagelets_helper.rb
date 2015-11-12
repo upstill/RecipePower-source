@@ -2,8 +2,11 @@ module PageletsHelper
 
   # Requisite beginning to all pagelets: filter header, signin links (maybe) and flash notifications
   def pagelet_header
-    with_format('html') { render('layouts/filter_header') } +
-    flash_notifications_div
+    if @no_pagelet_search
+      flash_notifications_div
+    else
+      with_format('html') { render('layouts/filter_header') } + flash_notifications_div
+    end
   end
 
   def pagelet_body_replacement entity_or_decorator=nil, to_delete=false

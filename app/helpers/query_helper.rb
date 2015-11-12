@@ -15,6 +15,7 @@ module QueryHelper
     # RP.submit.enclosing_form for results enclosures (which maintain and accumulate query data)
     data[:'on-add'] = options[:handler] || 'RP.submit.enclosing_form'
     data[:'on-delete'] = options[:handler] || 'RP.submit.enclosing_form'
+    # data[:'on-ready'] = 'RP.tagger.fix_width'
 
     # Set up the tokeninput data
     querytags = options[:querytags] || []
@@ -42,6 +43,6 @@ module QueryHelper
                     text_field_tag("querytags",
                                    querytags.map(&:id).join(','),
                                    options.except(:handler, :querytags, :tagtype, :type_selector).merge(data: data)),
-                    style: 'display: inline-block; width:300px;')
+                    style: 'display: inline-block; min-width:300px;')
   end
 end

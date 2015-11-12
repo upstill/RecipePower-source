@@ -44,6 +44,9 @@ RP.tagger.select_type = (event) ->
 RP.tagger.onReady = ->
 	$('li.token-input-input-token input').trigger 'click'
 
+RP.tagger.fix_width = ->
+	$('ul.token-input-list-facebook li.token-input-input-token-facebook input').css('width', '185px;')
+
 # Use data attached to the element to initiate tokenInput
 RP.tagger.setup = (elmt) ->
 	# In case the token-input element is a child of elmt

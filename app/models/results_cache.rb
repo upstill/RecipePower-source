@@ -546,7 +546,11 @@ class UsersCache < ResultsCache
 
 end
 
-class UserFriendsCache < UsersCache
+class UserFriendsCache < ResultsCache
+  def user
+    @user ||= User.find @id
+  end
+
   def itemscope
     @itemscope ||= user.followees
   end
@@ -560,7 +564,7 @@ class UserRecentCache < UserCollectionCache
   end
 end
 
-# user's collection visible to current_user (UserCollectionStreamer)
+# user's collection visible to viewer (UserCollectionStreamer)
 class UserBiglistCache < UserCollectionCache
 
   def itemscope

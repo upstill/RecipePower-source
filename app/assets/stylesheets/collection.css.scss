@@ -1,48 +1,67 @@
+div.collection_query_tokens {
+  ul.token-input-list-facebook {
+    max-height: 40px;
+    font-size: 2em;
+    display: block;
+    overflow-x: hidden;
+    li.token-input-input-token-facebook {
+      margin: 0;
+      line-height: 1;
+    }
+    li.token-input-token-facebook {
+      font-family: 'Archivo-Narrow', 'Archivo Narrow', "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 20px;
+      font-style: italic;
+      line-height: 24px;
+      margin-top: 6px;
+    }
+  }
+}
 
 div.centerblock {
-	position: relative;
-	width: 500px;
-	height: 50px;
-	margin: 10px auto;
-	text-align: center;
-	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-	line-height: 20px;
-	text-decoration: none;
-	font-size: 40px;
-	font-weight: 150;
-	color: #999999;
-	&.bold {
-		font-weight: bold;
-		color: #555555;
-	}
-	&.sub {
-		margin-top:50px;
-	}
-	.logo {
-		font-size:70px;
-		font-weight: 50;
-		color: #BBBBBB;
-	}
+  position: relative;
+  width: 500px;
+  height: 50px;
+  margin: 10px auto;
+  text-align: center;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  line-height: 20px;
+  text-decoration: none;
+  font-size: 40px;
+  font-weight: 150;
+  color: #999999;
+  &.bold {
+    font-weight: bold;
+    color: #555555;
+  }
+  &.sub {
+    margin-top: 50px;
+  }
+  .logo {
+    font-size: 70px;
+    font-weight: 50;
+    color: #BBBBBB;
+  }
 }
 
 #logo_img_small {
-	width: 250px;
+  width: 250px;
 }
 
 .back_button {
-	position: absolute;
-	left: 7px;
-	top: 30px;
+  position: absolute;
+  left: 7px;
+  top: 30px;
 }
 
 .query_form {
-	margin-bottom: 0px
+  margin-bottom: 0px
 }
 
 .nav-tabs > .active > a, .nav-tabs > .active > a:hover {
-	color: #ffffff;
-	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2);
-	background-color: #0088cc;
+  color: #ffffff;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2);
+  background-color: #0088cc;
 }
 
 div.slider-item {
@@ -110,77 +129,77 @@ div.slider-item {
 }
 
 .rcp_grid_pic_box {
-	width: 100%;
-	height: auto; // 220px;
-	display: -webkit-box;
-	display: -moz-box;
-	display: box;
+  width: 100%;
+  height: auto; // 220px;
+  display: -webkit-box;
+  display: -moz-box;
+  display: box;
 
-	-webkit-box-orient: vertical;
-	-moz-box-orient: vertical;
-	box-orient: vertical;
+  -webkit-box-orient: vertical;
+  -moz-box-orient: vertical;
+  box-orient: vertical;
 
-	-webkit-box-align: center;
-	-moz-box-align: center;
-	box-align: center;
+  -webkit-box-align: center;
+  -moz-box-align: center;
+  box-align: center;
 
-	-webkit-box-pack: center;
-	-moz-box-pack: center;
-	box-pack: center;
+  -webkit-box-pack: center;
+  -moz-box-pack: center;
+  box-pack: center;
 }
 
 .rcp_grid_datablock {
-	padding: 0px 8px;
-	height: auto; // 4.6em;
+  padding: 0px 8px;
+  height: auto; // 4.6em;
 }
 
 .rcp_grid_element_title {
-	margin-top: 7px;
-	font-weight: bold;
-	margin-bottom: 5px;
+  margin-top: 7px;
+  font-weight: bold;
+  margin-bottom: 5px;
 }
 
 .rcp_grid_element_title > a {
-	display: block;
-	overflow: hidden;
-	max-height: 2.8em;
+  display: block;
+  overflow: hidden;
+  max-height: 2.8em;
 }
 
 img.fixed-width {
-  width:100%;
-  height:auto;
+  width: 100%;
+  height: auto;
 }
 
 .rcp_grid_element_source {
-	font-size: 0.9em;
-	color: #999;
+  font-size: 0.9em;
+  color: #999;
 }
 
 .rcp_grid_element_footer {
-	height: 28px;
-	align: right;
-	position: relative;
-	
-	display: -webkit-box;
-	// display: -moz-box;
-	display: box;
+  height: 28px;
+  align: right;
+  position: relative;
 
-	-webkit-box-align: center;
-	-moz-box-align: center;
-	box-align: center;
+  display: -webkit-box;
+  // display: -moz-box;
+  display: box;
 
-	-webkit-box-pack: center;
-	-moz-box-pack: center;
-	box-pack: center;
-	
-	padding: 4px 4px 4px 12px;
-	margin: 2px -4px -4px;
-	border-top: 1px solid #ddd;
-	border-radius: 0 0 4px 4px;
-	background-color: #fafafa;
-	background-image: -webkit-linear-gradient(top, #ffffff, #f2f2f2);
-	background-image: -moz-linear-gradient(top, #ffffff, #f2f2f2);
-	background-image: linear-gradient(to bottom, #ffffff, #f2f2f2);
+  -webkit-box-align: center;
+  -moz-box-align: center;
+  box-align: center;
+
+  -webkit-box-pack: center;
+  -moz-box-pack: center;
+  box-pack: center;
+
+  padding: 4px 4px 4px 12px;
+  margin: 2px -4px -4px;
+  border-top: 1px solid #ddd;
+  border-radius: 0 0 4px 4px;
+  background-color: #fafafa;
+  background-image: -webkit-linear-gradient(top, #ffffff, #f2f2f2);
+  background-image: -moz-linear-gradient(top, #ffffff, #f2f2f2);
+  background-image: linear-gradient(to bottom, #ffffff, #f2f2f2);
 }
 
 .rcp_grid_element_icons {
@@ -194,96 +213,94 @@ img.fixed-width {
 }
 
 .rcp_grid_element_stats {
-	font-size: 0.8em;
-	color: #999;
-	height: auto;
+  font-size: 0.8em;
+  color: #999;
+  height: auto;
 }
 
 .rcp_grid_element_spacer {
-	-webkit-box-flex: 1;
-	-moz-box-flex: 1;
-	box-flex: 1;
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  box-flex: 1;
 }
 
-
 .modal-footer .form-inline {
-	margin-bottom: 0px;
+  margin-bottom: 0px;
 }
 
 .modal-footer .form-inline label.checkbox {
-	margin-right: 10px;
+  margin-right: 10px;
 }
 
 .feed_list_element_title {
-	margin-bottom: 0px;
-	font-size: 1.3em;
+  margin-bottom: 0px;
+  font-size: 1.3em;
 }
 
 .feed_list_element_title > a {
-	// display: block;
-	// overflow: hidden;
-	max-height: 2.8em;
+  // display: block;
+  // overflow: hidden;
+  max-height: 2.8em;
 }
 
 .feed_list_element_source {
-	font-size: 0.9em;
-	color: #999;
+  font-size: 0.9em;
+  color: #999;
 }
 
 .feed_list_element_stats {
-	font-size: 0.8em;
-	color: #999;
+  font-size: 0.8em;
+  color: #999;
 }
 
 div.content_browser_cover {
-	width: 300px;
-	position: absolute;
-	top: 0;
-	height: 95%;
-  z-index:    10;
-  background: rgba( 255, 255, 255, .45 ) 
-              50% 50% 
-              no-repeat;
+  width: 300px;
+  position: absolute;
+  top: 0;
+  height: 95%;
+  z-index: 10;
+  background: rgba(255, 255, 255, .45) 50% 50% no-repeat;
 }
 
 #footer_nav_links {
-	width: 100%;
-	margin: 0 auto;
-	// position: absolute;
-	// bottom: 10px; // 15px;
-	z-index: 11;
-	text-align: center;
+  width: 100%;
+  margin: 0 auto;
+  // position: absolute;
+  // bottom: 10px; // 15px;
+  z-index: 11;
+  text-align: center;
 }
 
 div.content_browser {
-	width: 100%;
-	height: 100%;
-	// position: fixed;
-	padding: 0px;
-	margin: 0px;
-	// width: 270px;
-	border: 2px solid blue;
+  width: 100%;
+  height: 100%;
+  // position: fixed;
+  padding: 0px;
+  margin: 0px;
+  // width: 270px;
+  border: 2px solid blue;
 }
 
 li.RcpBrowser {
-	position: relative;
-	left: 0px;
-	top: 0px;
-	span.badge {
-		display: none;
-	}
-	&.active {
-	  right: 30px;
-      color: white;
-      background-color: #428bca;
-      border-color: #428bca;
-      span.badge {
-          display: inline;
-      }
-	}
-	&.Level2 { // Indent subheads
-		margin-left: 30px;
-	}
+  position: relative;
+  left: 0px;
+  top: 0px;
+  span.badge {
+    display: none;
+  }
+  &.active {
+    right: 30px;
+    color: white;
+    background-color: #428bca;
+    border-color: #428bca;
+    span.badge {
+      display: inline;
+    }
+  }
+  &.Level2 {
+    // Indent subheads
+    margin-left: 30px;
+  }
 }
 
 /* Styling support for the loading-content beachball.
@@ -296,20 +313,20 @@ li.RcpBrowser {
    speak for themselves. Background we set to 80% white with
    our animation centered, and no-repeating */
 div.ajax-loader {
-    display:    none;
-    position:   absolute;
-    // z-index:    10000;
-    // top:        0;
-    // left:       0;
-    height: 	  inherited; // 100%;
-    width:      inherited; // 100%;
-    background: rgba( 255, 255, 255, .8 ) 
+  display: none;
+  position: absolute;
+  // z-index:    10000;
+  // top:        0;
+  // left:       0;
+  height: inherited; // 100%;
+  width: inherited; // 100%;
+    background: rgba( 255, 255, 255, .8 )
                 image-url('ajax-loader.gif')
-                50% 50% 
+                50% 50%
                 no-repeat;
-    &.loading {
-        display: block;
-    }
+  &.loading {
+    display: block;
+  }
 }
 
 /* When the body has the loading class, we turn
