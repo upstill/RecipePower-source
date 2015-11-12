@@ -3,8 +3,11 @@ require "rcpref.rb"
 # exist as a scope (if there is no search) or an array of Rcprefs (with search)
 class Counts < Hash
   def incr key, incr=1
-    key = key.to_a if key.is_a? ActiveRecord::Relation
-    if key.is_a? Array
+    if key.is_a? ActiveRecord::Relation
+      # Late-breaking conversion of scope into items
+      modelname = key.model.to_s
+      key.pluck(:id).each { |id| self[modelname+'/'+id.to_s] += incr }
+    elsif key.is_a? Array
       key.each { |k| self.incr k, incr }
     else
       self[key] += incr
@@ -22,21 +25,20 @@ class Counts < Hash
     super(ix) || 0
   end
 
-  def items sorted=true
-    @items ||= self.keys
-    @items_sorted ||= self.keys.sort { |rr1, rr2| self[rr2] <=> self[rr1] } if sorted
+  def itemstubs sorted=true
+    @itemstubs ||= sorted ? self.keys.sort { |k1, k2| self[k1] <=> self[k2] } : self.keys
   end
 
   def partition bounds
     partition = Partition.new [0]
-    # Counts has a complete, non-redundant set of Rcpref records for disparate entities, associated with the number of hits on @querytags
+    # Counts has a complete, non-redundant set of model/id records for disparate entities, associated with the number of hits on @querytags
     # We partition the results by the number of @querytags that it matched
     bounds.each do |b|
-      if (bound = items.find_index { |v| self[v] < b }) && (bound > partition.last)
+      if (bound = itemstubs.find_index { |v| self[v] < b }) && (bound > partition.last)
         partition.push bound
       end
     end
-    partition.push items.count
+    partition.push itemstubs.count
   end
 
 end
@@ -221,12 +223,16 @@ class ResultsCache < ActiveRecord::Base
     Object.const_defined?(name) ? name.constantize : ResultsCache
   end
 
-  # Take a window of items from the scope or the results cache
+  # Take a window of entities from the scope or the results cache
   def items
-    return @items if @items
-    return (@items = slice_cache) if cache_and_partition
-    # It's possible that the itemscope is an array...
-    @items = (itemscope.is_a? Array) ? slice_item_array : slice_item_scope
+    @items ||=
+    if cache_and_partition
+      slice_cache
+    elsif itemscope.is_a? Array
+      itemscope.slice safe_partition.window.min, safe_partition.windowsize
+    else
+      item_scope_for_loading(uniqueitemscope.limit(safe_partition.windowsize).offset(safe_partition.window.min)).to_a
+    end
   end
 
   # Return the next item in the current window, incrementing the cur_position
@@ -292,8 +298,8 @@ class ResultsCache < ActiveRecord::Base
       @querytags.each { |tag| count_tag tag, counts }
 
       # Sort the scope by number of hits, descending
-      self.cache = counts.items
-      bounds = (0...(@querytags.count)).to_a.map { |i| (@querytags.count-i)*30 }
+      self.cache = counts.itemstubs
+      bounds = (0...(@querytags.count)).to_a.map { |i| (@querytags.count-i)*30 } # Partition according to the # of matches
       wdw = partition.window if partition
       self.partition = counts.partition bounds
       self.window = [wdw.min, wdw.max] if wdw
@@ -339,16 +345,33 @@ class ResultsCache < ActiveRecord::Base
 
   protected
 
+  # Convert from item stubs (modelname + id) to entities, in the most efficient manner possible
   def slice_cache
-    cache.slice( safe_partition.window.min, safe_partition.windowsize )
+    cache_slice = cache.slice safe_partition.window.min, safe_partition.windowsize
+
+    # First, create a hash of arrays, indexed by modelname, to collect the ids for that model
+    records = { }
+    cache_slice.each { |itemspec|
+      modelname, id = *itemspec.split('/')
+      records[modelname] = (records[modelname] || []) << id.to_i
+    }
+
+    # Now bulk-load all the records for each model type, replacing the id array with the corresponding array of records
+    records.keys.each { |modelname|
+      # Convert the ids to objects in one go
+      records[modelname] = modelname.constantize.where(id: records[modelname]).to_a
+    }
+
+    # Finally convert the original, ordered array of item specs to the corresponding array of records (also ordered)
+    cache_slice.collect { |itemspec|
+      modelname= itemspec.split('/').first
+      records[modelname].shift
+    }
   end
 
-  def slice_item_scope
-    uniqueitemscope.limit(safe_partition.windowsize).offset(safe_partition.window.min).to_a
-  end
-
-  def slice_item_array
-    itemscope.slice( safe_partition.window.min, safe_partition.windowsize )
+  # May be overridden for the purpose of #includes to preload ancillary data
+  def item_scope_for_loading scope
+    scope
   end
 
   # Return the existing partition, if any; otherwise, create one otherwise
@@ -434,8 +457,8 @@ class ListCache < ResultsCache
     end
 
     # When taking a slice out of the taggings/rcprefs, load the associated entities meanwhile
-    def slice_item_scope
-      uniqueitemscope.limit(safe_partition.windowsize).offset(safe_partition.window.min).includes(:entity).to_a
+    def item_scope_for_loading scope
+      scope.includes :entity
     end
 
   # end  Uniquify
@@ -487,18 +510,9 @@ class FeedsCache < ResultsCache
         Feed.order 'approved DESC'
       when 'approved' # Default: normal user view for shopping for feeds (only approved feeds)
         Feed.where approved: true
-      when 'oldest'
-        Feed.order 'updated_at ASC'
-      when 'newest'
-        Feed.order 'updated_at DESC'
       else
         as_admin ? Feed.order('approved DESC') : Feed.where(approved: true)
     end
-  end
-
-  # The cache is just item keys
-  def slice_cache
-    Feed.find cache.slice(safe_partition.window.min, safe_partition.windowsize)
   end
 
 end

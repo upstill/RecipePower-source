@@ -1,4 +1,4 @@
-require "type_map.rb"
+require 'type_map.rb'
 
 class User < ActiveRecord::Base
   # Class variable @@Guest_user saves the guest User
@@ -8,7 +8,7 @@ class User < ActiveRecord::Base
 
   include Collectible
   # Keep an avatar URL denoted by the :image attribute and kept as :thumbnail
-  picable :image, :thumbnail, "default-avatar-128.png"
+  picable :image, :thumbnail, 'default-avatar-128.png'
 
   # Include default devise modules. Others available are:
   # :token_authenticatable, :encryptable, :confirmable, :timeoutable
@@ -29,13 +29,13 @@ class User < ActiveRecord::Base
   attr_accessor :invitee_tokens, :channel_tokens, :raw_invitation_token, :avatar_url, :mail_subject, :mail_body,
                 :shared_type, :shared_id # Kept temporarily during sharing operations
   
-  has_many :notifications_sent, :foreign_key => :source_id, :class_name => "Notification", :dependent => :destroy
-  has_many :notifications_received, :foreign_key => :target_id, :class_name => "Notification", :dependent => :destroy
+  has_many :notifications_sent, :foreign_key => :source_id, :class_name => 'Notification', :dependent => :destroy
+  has_many :notifications_received, :foreign_key => :target_id, :class_name => 'Notification', :dependent => :destroy
 
-  has_many :follower_relations, :foreign_key=>"followee_id", :dependent=>:destroy, :class_name=>"UserRelation"
+  has_many :follower_relations, :foreign_key=>'followee_id', :dependent=>:destroy, :class_name=>'UserRelation'
   has_many :followers, -> { uniq }, :through => :follower_relations, :source => :follower
 
-  has_many :followee_relations, :foreign_key => "follower_id", :dependent=>:destroy, :class_name => "UserRelation"
+  has_many :followee_relations, :foreign_key => 'follower_id', :dependent=>:destroy, :class_name => 'UserRelation'
   has_many :followees, -> { uniq }, :through => :followee_relations, :source => :followee
 
   has_many :answers
@@ -47,15 +47,15 @@ class User < ActiveRecord::Base
 
   # Channels are just another kind of user. This field (channel_referent_id, externally) denotes such.
   # TODO: delete channel_referent_id and table private_subscriptions
-  belongs_to :channel, :class_name => "Referent", :foreign_key => "channel_referent_id"
+  belongs_to :channel, :class_name => 'Referent', :foreign_key => 'channel_referent_id'
 
   # NB: this stays; it represents a user's ownership of lists
-  has_many :owned_lists, :class_name => "List", :foreign_key => :owner_id
+  has_many :owned_lists, :class_name => 'List', :foreign_key => :owner_id
 
   has_many :owned_taggings, :class_name => 'Tagging', :dependent => :destroy
   has_many :owned_tags, :through => 'Tagging', :class_name => 'Tag'
 
-  has_many :votings, :class_name => "Vote", dependent: :destroy
+  has_many :votings, :class_name => 'Vote', dependent: :destroy
 
   has_many :collection_pointers, -> { where(in_collection: true) }, :dependent => :destroy, :class_name => 'Rcpref'
 
@@ -67,14 +67,14 @@ class User < ActiveRecord::Base
 
   # We allow users to collect users, but the collectible class method can't be used on self, so we define the association directly
   has_many :users, :through=>:collection_pointers, :source => :entity, :source_type => User, :autosave=>true
-  # has_many :recipes, :through=>:collection_pointers, :source => :entity, :source_type => "Recipe", :autosave=>true
+  # has_many :recipes, :through=>:collection_pointers, :source => :entity, :source_type => 'Recipe', :autosave=>true
   # Class method to define instance methods for the collectible entities: those of collectible_class
   # This is invoked by the Collectible module when it is included in a collectible class
   def self.collectible collectible_class
 
     asoc_name = collectible_class.to_s.pluralize.underscore
     has_many asoc_name.to_sym, :through=>:collection_pointers, :source => :entity, :source_type => collectible_class, :autosave=>true
-    has_many ("touched_"+asoc_name).to_sym, :through=>:touched_pointers, :source => :entity, :source_type => collectible_class, :autosave=>true
+    has_many ('touched_'+asoc_name).to_sym, :through=>:touched_pointers, :source => :entity, :source_type => collectible_class, :autosave=>true
   end
 
   # The User class defines collectible-entity association methods here. The Collectible class is cocnsulted, and if it has
@@ -139,8 +139,8 @@ class User < ActiveRecord::Base
   end
 
   # TODO: remove collections after they've been migrated to lists
-#  has_many :private_subscriptions, -> { order "priority ASC" }, :dependent=>:destroy
-#  has_many :collection_tags, :through => :private_subscriptions, :source => :tag, :class_name => "Tag"
+#  has_many :private_subscriptions, -> { order 'priority ASC' }, :dependent=>:destroy
+#  has_many :collection_tags, :through => :private_subscriptions, :source => :tag, :class_name => 'Tag'
   
   # login is a virtual attribute placeholding for [username or email]
   attr_accessor :login
@@ -148,7 +148,7 @@ class User < ActiveRecord::Base
   def self.find_first_by_auth_conditions(warden_conditions)
     conditions = warden_conditions.dup
     if login = conditions.delete(:login)
-      where(conditions).where(["lower(username) = :value OR lower(email) = :value", { :value => login.downcase }]).first
+      where(conditions).where(['lower(username) = :value OR lower(email) = :value', { :value => login.downcase }]).first
     else
       where(conditions).first
     end
@@ -195,14 +195,14 @@ class User < ActiveRecord::Base
         options.slice(
             :in_collection, :private, :entity_type).merge( user_id: id )
     )
-    scope = scope.where.not(entity_type: ["List", "Feed"]) unless options[:entity_type] # Exclude Feeds and Lists b/c we have a
+    scope = scope.where.not(entity_type: %w{ List Feed }) unless options[:entity_type] # Exclude Feeds and Lists b/c we have a
     # The order field can be specified directly with :order, or implicitly with :collected
     unless ordering = options[:order]
       case options[:sort_by]
         when :collected
-          ordering = "created_at"
+          ordering = 'created_at'
         when :viewed
-          ordering = "updated_at"
+          ordering = 'updated_at'
       end
     end
     scope = scope.order("#{ordering} #{options[:direction] || 'DESC'}") if ordering
@@ -223,20 +223,20 @@ private
   @@leasts = {}
   def self.least_email(str)
       @@leasts[str] ||
-      (@@leasts[str] = User.where("email like ?", "%#{str}%").collect { |match| match.id }.min)
+      (@@leasts[str] = User.where('email like ?', "%#{str}%").collect { |match| match.id }.min)
   end
 
   # Start an invited user off with two friends: the person who invited them (if any) and 'guest'
   def initial_setup
       # Give him friends
-      f = [User.least_email("upstill"), User.least_email("arrone"), User.super_id ]
+      f = [User.least_email('upstill'), User.least_email('arrone'), User.super_id ]
       f << self.invited_by_id if self.invited_by_id
       self.followee_ids = f
 
-      # Give him some lists  "Keepers", "To Try", "Now Cooking"
-      List.assert "Keepers", self, create: true
-      List.assert "To Try", self, create: true
-      List.assert "Now Cooking", self, create: true
+      # Give him some lists  'Keepers', 'To Try', 'Now Cooking'
+      List.assert 'Keepers', self, create: true
+      List.assert 'To Try', self, create: true
+      List.assert 'Now Cooking', self, create: true
 
       self.save
 
@@ -263,7 +263,7 @@ public
   def followee_tokens=(flist)
     newlist = []
     flist.each_key do |key|
-        newlist.push key.to_i if (flist[key] == "1")
+        newlist.push key.to_i if (flist[key] == '1')
     end
     self.followee_ids = newlist
   end
@@ -283,12 +283,12 @@ public
 
   # Establish the relationship among role_id values, symbols and user-friendly names
   @@Roles = TypeMap.new( {
-      guest: ["Guest", 1],
-      user: ["User", 2],
-      moderator: ["Moderator", 3],
-      editor: ["Editor", 4],
-      admin: ["Admin", 5]
-  }, "unclassified")
+      guest: ['Guest', 1],
+      user: ['User', 2],
+      moderator: ['Moderator', 3],
+      editor: ['Editor', 4],
+      admin: ['Admin', 5]
+  }, 'unclassified')
 
   def role_symbols
       [@@Roles.sym(role_id)]
@@ -331,8 +331,8 @@ public
     if oi = omniauth['info']
       mapping = @@AuthenticationMappings[omniauth['provider']]
       # Get the user's image, replacing it if possible
-      uiname = mapping[:image] || "image"
-      unless imgdata || oi[uiname].blank? || ((image||"") == oi[uiname])
+      uiname = mapping[:image] || 'image'
+      unless imgdata || oi[uiname].blank? || ((image||'') == oi[uiname])
         self.image = oi[uiname]
         # While we're here, fetch the image data as a thumbnail
         thumbnail.perform if thumbnail # Fetch the user's thumbnail data while the authorization is fresh
@@ -373,7 +373,7 @@ public
 
   # ownership of tags restrict visible tags
   has_many :tag_owners
-  has_many :private_tags, :through=>:tag_owners, :source => :tag, :class_name => "Tag"
+  has_many :private_tags, :through=>:tag_owners, :source => :tag, :class_name => 'Tag'
 
   validates :email, :presence => true
 
@@ -384,12 +384,12 @@ public
     # The name must be unique within channels and within users, but not across the two, i.e. it's
     # okay to have a channel named 'upstill'
     unless value.blank?
-      query = user.channel ? "channel_referent_id > 0" : "channel_referent_id = 0"
-      query << " and username = ?"
+      query = user.channel ? 'channel_referent_id > 0' : 'channel_referent_id = 0'
+      query << ' and username = ?'
       query << " and id != #{user.id}" if user.id
       other = User.where query, value
-      user.errors[:username] << %Q{is already taken by another #{user.channel ? "channel" : "user"}} unless other.empty?
-      user.errors[:username] << "can't take funny characters. Letters, spaces, numbers, and/or .-!_@ only, please" unless value.match /\A[-\w\s\.!_@]+\z/i
+      user.errors[:username] << %Q{is already taken by another #{user.channel ? 'channel' : 'user'}} unless other.empty?
+      user.errors[:username] << 'can\'t take funny characters. Letters, spaces, numbers, and/or .-!_@ only, please' unless value.match /\A[-\w\s\.!_@]+\z/i
     end
 
   end
@@ -412,7 +412,7 @@ public
 
   def self.super_id
     @@Super_user_id
-    # (@@Super_user || (@@Super_user = self.find(@@Super_user_id)) # (self.by_name(:super) || self.by_name("RecipePower")))).id
+    # (@@Super_user || (@@Super_user = self.find(@@Super_user_id)) # (self.by_name(:super) || self.by_name('RecipePower')))).id
   end
 
   def self.guest
@@ -488,7 +488,7 @@ public
   # Return a list of my friends who match the input text
   def match_friends(txt, is_channel=nil)
     re = Regexp.new(txt, Regexp::IGNORECASE) # Match any embedded text, independent of case
-    channel_constraint = is_channel ? "channel_referent_id > 0" : "channel_referent_id = 0"
+    channel_constraint = is_channel ? 'channel_referent_id > 0' : 'channel_referent_id = 0'
     (is_channel ? User.all : followees).where(channel_constraint).select { |other|
       re.match(other.username) || re.match(other.fullname) || re.match(other.email)
     }
@@ -506,13 +506,13 @@ public
     case action
     when :invitation, :invitation_instructions
       {
-        :subject => invitation_issuer+" wants to get you cooking.",
+        :subject => invitation_issuer+' wants to get you cooking.',
         :from => invitation_issuer+" on RecipePower <#{inviter.email}>",
         :reply_to => inviter.email
       }
     when :sharing_notice, :sharing_invitation_instructions
       {
-        :subject => invitation_issuer+" has something tasty for you.",
+        :subject => invitation_issuer+' has something tasty for you.',
         :from => invitation_issuer+" on RecipePower <#{inviter.email}>",
         :reply_to => inviter.email
       }
