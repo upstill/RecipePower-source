@@ -5,10 +5,6 @@
   </div>
   <div class="col-md-7 panels-search">
     <%= @filtered_presenter.filter_field handler: 'RP.tagger.querify' %>
-    <div class="panels-buttons">
-      <% @filtered_presenter.header_buttons do |label, link=nil| %>
-          <%= link_to_submit label.upcase, link||'#', class: "#{'disabled' unless link} panels-button soft-button #{@filtered_presenter.panel_button_class}" %>
-      <% end %>
-    </div>
+      <%= filtered_presenter_header_buttons @filtered_presenter %>
   </div>
 </div>

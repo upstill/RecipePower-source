@@ -2,7 +2,7 @@ class FilteredPresenter
   require './app/models/results_cache.rb'
   attr_accessor :title, :h
 
-  attr_reader :decorator, :entity,
+  attr_reader :decorator, :entity, :admin_view,
               :entity_type, :results_type, 
               :results_class, # Class of the ResultsCache for fetching results
               :stream_presenter, # Manages the ResultsCache that produces items based on the query
@@ -62,6 +62,7 @@ class FilteredPresenter
 
     @title = response_service.title
     @request_path = request_path
+    @admin_view = response_service.admin_view?
     # FilteredPresenters don't always have results panels
     if rc_class = results_class
       @stream_presenter = StreamPresenter.new sessid, request_path, rc_class, user_id, response_service.admin_view?, querytags, params
@@ -440,10 +441,19 @@ class FeedsIndexPresenter < FilteredPresenter
   end
 
   def header_buttons &block
-    current_mode = stream_presenter.results.params[:access]
+    current_mode = stream_presenter.results.params['sort_direction']
     current_path = (@stream_presenter ? this_path : @request_path)
-    block.call 'newest first', (assert_query(current_path, access: 'newest') if current_mode != 'newest')
-    block.call 'oldest first', (assert_query(current_path, access: 'oldest') if current_mode != 'oldest')
+    block.call 'newest first',
+               assert_query(current_path, order_by: 'updated_at', sort_direction: 'DESC'),
+               title: 'Re-sort The List'
+    block.call 'oldest first',
+               assert_query(current_path, order_by: 'updated_at', sort_direction: 'ASC'),
+               title: 'Re-sort The List'
+    if admin_view
+      block.call 'unapproved first',
+               assert_query(current_path, order_by: 'approved', sort_direction: 'DESC'),
+               title: 'Re-sort The List'
+    end
   end
 
 end

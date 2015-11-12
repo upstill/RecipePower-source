@@ -1,4 +1,4 @@
-require "rcpref.rb"
+require 'rcpref.rb'
 # Object to put a uniform interface on a set of results, whether they
 # exist as a scope (if there is no search) or an array of Rcprefs (with search)
 class Counts < Hash
@@ -135,7 +135,6 @@ class ResultsCache < ActiveRecord::Base
   # As a model, it saves intermediate results to the database
   self.primary_keys = ['session_id', 'type']
 
-  # scope :integers_cache, -> { where type: 'IntegersCache' }
   attr_accessible :session_id, :type, :params, :cache, :partition
   serialize :params
   serialize :cache
@@ -149,9 +148,15 @@ class ResultsCache < ActiveRecord::Base
     unless parsed_querytags.is_a? Array
       queryparams, parsed_querytags = parsed_querytags, []
     end
+
+    # relevant_params are the parameters that will bust the cache when changed
     # Convert from ActionController params to hash
-    relevant_params = { viewerid: viewerid, as_admin: as_admin } # Keep the id of the viewing user
-    self.params_needed.uniq.each { |param| relevant_params[param] = queryparams[param] if queryparams[param] }
+    relevant_params = {
+        viewerid: viewerid,  # Keep the id of the viewing user
+        as_admin: as_admin
+    }
+    relevant_params = relevant_params.merge(queryparams.slice *self.params_needed.uniq).compact
+    # self.params_needed.uniq.each { |param| relevant_params[param] = queryparams[param] if queryparams[param] }
 
     rc = self.create_with(:params => relevant_params).find_or_initialize_by session_id: session_id, type: self.to_s
     # unpack the parameters into instance variables
@@ -160,7 +165,8 @@ class ResultsCache < ActiveRecord::Base
     # We STORE the unparsed string just because a synthesized tag (with negative ID) doesn't serialize properly
     rc.querytags = parsed_querytags
 
-    if rc.params != relevant_params # TODO: Take :nocache into consideration
+    # For purposes of busting the cache, we assume that sort direction is irrelevant
+    if rc.params.except(:sort_direction) != relevant_params.except(:sort_direction) # TODO: Take :nocache into consideration
       # Bust the cache if the params don't match
       rc.cache = rc.partition = rc.items = nil
       rc.params = relevant_params
@@ -174,7 +180,7 @@ class ResultsCache < ActiveRecord::Base
 
   # Declare the parameters needed for this class
   def self.params_needed
-    [:id, :querytags]
+    [:id, :querytags, :order_by, :sort_direction ]
   end
 
   def viewer
@@ -231,7 +237,17 @@ class ResultsCache < ActiveRecord::Base
     elsif itemscope.is_a? Array
       itemscope.slice safe_partition.window.min, safe_partition.windowsize
     else
-      item_scope_for_loading(uniqueitemscope.limit(safe_partition.windowsize).offset(safe_partition.window.min)).to_a
+      item_scope_for_loading(
+      ordereditemscope.limit(safe_partition.windowsize).offset(safe_partition.window.min)).to_a
+    end
+  end
+
+  # Use the order_by parameter and the ASC/DESC attribute to assert an ordering
+  def ordereditemscope
+    if @order_by
+      uniqueitemscope.order "#{@order_by} #{sort_direction}"
+    else
+      uniqueitemscope
     end
   end
 
@@ -344,6 +360,10 @@ class ResultsCache < ActiveRecord::Base
   end
 
   protected
+
+  def sort_direction
+    @sort_direction ||= 'DESC'
+  end
 
   # Convert from item stubs (modelname + id) to entities, in the most efficient manner possible
   def slice_cache
@@ -511,7 +531,7 @@ class FeedsCache < ResultsCache
       when 'approved' # Default: normal user view for shopping for feeds (only approved feeds)
         Feed.where approved: true
       else
-        as_admin ? Feed.order('approved DESC') : Feed.where(approved: true)
+        as_admin ? Feed.unscoped : Feed.where(approved: true)
     end
   end
 
