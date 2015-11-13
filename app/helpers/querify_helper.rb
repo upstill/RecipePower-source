@@ -22,7 +22,7 @@ module QuerifyHelper
   def querify_link label, url, options={}
     link_to_submit label,
                    url,
-                   options.merge( class: "#{options[:class]} querify-link" )
+                   options.merge( class: "#{options[:class]} querify querify-link" )
   end
 
   # Declare a button which propagates parameter changes to enclosing querify supes

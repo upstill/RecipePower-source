@@ -68,7 +68,8 @@ down = (supe, params) ->
 hit = (elmt, params) ->
 	# A link gets its href modified
 	if $(elmt).hasClass 'querify-link'
-		elmt.data 'href', RP.build_request(elmt.data('href'), params)
+		request = RP.build_request ($(elmt).data 'href'), params
+		$(elmt).data 'href', request
 	# If the supe is also an exec node, fire it off
 	if $(elmt).hasClass 'querify-exec'
 		request = RP.build_request ($(elmt).data 'href'), params
