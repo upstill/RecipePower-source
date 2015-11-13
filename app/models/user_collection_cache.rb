@@ -10,6 +10,19 @@ class UserCollectionCache < ResultsCache
     @itemscope ||= user.collection_scope( { :sort_by => :viewed, :in_collection => true }.merge scope_constraints)
   end
 
+  # Return
+  def strscopes matcher, modelclass
+    if modelclass.respond_to? :strscopes
+      modelclass.strscopes(matcher).collect { |innerscope|
+        innerscope = innerscope.joins(:user_pointers).where('"rcprefs"."user_id" = ? and "rcprefs"."in_collection" = true', @id.to_s)
+        innerscope = innerscope.where('"rcprefs"."private" = false') unless @id == @viewerid # Only non-private entities if the user is not the viewer
+        innerscope
+      }
+    else
+      []
+    end
+  end
+
   # Apply a tag to the current set of result counts
   def count_tag tag, counts
     matchstr = "%#{tag.name}%"
@@ -23,10 +36,8 @@ class UserCollectionCache < ResultsCache
       counts.incr_by_scope scope.where('"rcprefs"."comment" ILIKE ?', matchstr)
 
       # Now match on the entity's relevant string field(s), for which we defer to the class
-      if modelclass.respond_to? :strscopes
-        counts.incr_by_scope modelclass.strscopes("%#{tag.name}%")
-        counts.incr_by_scope modelclass.strscopes(tag.name), 30
-      end
+      strscopes("%#{tag.name}%", modelclass).each { |innerscope| counts.incr_by_scope innerscope }
+      strscopes(tag.name, modelclass).each { |innerscope| counts.incr_by_scope innerscope, 30 }
 
       subscope = modelclass.joins(:taggings).where 'taggings.tag_id = ?', tag.id.to_s
 =begin
@@ -35,7 +46,7 @@ class UserCollectionCache < ResultsCache
         subscope = subscope.where 'taggings.user_id = ?', @id.to_s
       end
 =end
-      counts.incr_by_scope subscope, type
+      counts.incr_by_scope subscope, 1
     end
   end
 
