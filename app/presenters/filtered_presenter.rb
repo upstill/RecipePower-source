@@ -452,7 +452,7 @@ class FeedsIndexPresenter < FilteredPresenter
     if admin_view
       block.call 'unapproved first',
                assert_query(current_path, order_by: 'approved', sort_direction: 'DESC'),
-               title: 'Re-sort The List'
+                 title: 'Re-sort The List'
     end
   end
 

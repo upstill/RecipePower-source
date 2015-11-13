@@ -5,9 +5,9 @@ module FilteredPresenterHelper
       link, link_options = nil, link if link.is_a? Hash
       link_options[:class] = (link_options[:class] || '') +
           "#{'disabled' unless link} panels-button soft-button #{fp.panel_button_class}"
-      buttons << link_to_submit( label.upcase, link||'#', link_options )
+      buttons << querify_link( label.upcase, link||'#', link_options )
     end
-    content_tag :div, buttons, class: "panels-buttons"
+    content_tag :div, buttons, class: 'panels-buttons'
   end
 
 end
