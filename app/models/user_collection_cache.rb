@@ -16,7 +16,7 @@ class UserCollectionCache < ResultsCache
     typeset.each do |type|
       modelclass = type.constantize
       scope = modelclass.joins :user_pointers
-      scope = scope.where('"rcprefs"."user_id" = ? and rcprefs.in_collection = true', @id.to_s)
+      scope = scope.where('"rcprefs"."user_id" = ? and "rcprefs"."in_collection" = true', @id.to_s)
       scope = scope.where('"rcprefs"."private" = false') unless @id == @viewerid # Only non-private entities if the user is not the viewer
 
       # First, match on the comments using the rcpref
@@ -24,7 +24,7 @@ class UserCollectionCache < ResultsCache
 
       # Now match on the entity's relevant string field(s), for which we defer to the class
       if modelclass.respond_to? :strscopes
-        counts.incr_by_scope modelclass.strscopes("%{tag.name}%")
+        counts.incr_by_scope modelclass.strscopes("%#{tag.name}%")
         counts.incr_by_scope modelclass.strscopes(tag.name), 30
       end
 
@@ -39,16 +39,19 @@ class UserCollectionCache < ResultsCache
     end
   end
 
-  protected
-
   # Memoize a query to get all the currently-defined entity types
   def typeset
     @typeset ||=
+    case modelname = itemscope.model.to_s
+      when 'Rcpref'
         itemscope.
-        select(:entity_type).
-        distinct.
-        order("entity_type DESC").
-        pluck(:entity_type)
+            select(:entity_type).
+            distinct.
+            pluck(:entity_type).
+            sort
+      else
+        [ modelname ]
+    end
   end
 
 end

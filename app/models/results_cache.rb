@@ -613,7 +613,11 @@ class SearchCache < UserBiglistCache
 end
 
 # user's lists visible to current_user (UserListsStreamer
-class UserListsCache < UserCollectionCache
+class UserListsCache < ResultsCache
+
+  def user
+    @user ||= User.find @id
+  end
 
   def itemscope
     @itemscope ||= user.owned_lists

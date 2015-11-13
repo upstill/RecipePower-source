@@ -187,9 +187,9 @@ class User < ActiveRecord::Base
   # :private: limited to the user
   # :limit, :offset slicing the selection
   # :entity_type for a particular type of entity
-  # :order can name any field to sort by
-  # :sort_by either :collected or :viewed if :order not provided
-  # :direction passes through to SQL; can be ASC or DESC
+  # OBSOLETE :order can name any field to sort by
+  # OBSOLETE :sort_by either :collected or :viewed if :order not provided
+  # OBSOLETE :direction passes through to SQL; can be ASC or DESC
   def collection_scope options={}
     scope = Rcpref.where(
         options.slice(
@@ -197,6 +197,8 @@ class User < ActiveRecord::Base
     )
     scope = scope.where.not(entity_type: %w{ List Feed }) unless options[:entity_type] # Exclude Feeds and Lists b/c we have a
     # The order field can be specified directly with :order, or implicitly with :collected
+=begin
+    # This is now handled at a different level
     unless ordering = options[:order]
       case options[:sort_by]
         when :collected
@@ -205,7 +207,8 @@ class User < ActiveRecord::Base
           ordering = 'updated_at'
       end
     end
-    scope = scope.order("#{ordering} #{options[:direction] || 'DESC'}") if ordering
+=end
+    scope = scope.order("#{options[:order]} #{options[:direction] || 'DESC'}") if options[:order]
     scope = scope.limit(options[:limit]) if options[:limit]
     scope = scope.offset(options[:offset]) if options[:offset]
     scope
