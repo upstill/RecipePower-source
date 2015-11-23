@@ -544,14 +544,19 @@ end
 # Provide the set of lists the user has collected, but only those visible to her
 class UserCollectedListsCache < UsersShowCache
   def itemscope
-    @itemscope ||= ListServices.lists_collected_by viewer
+    @itemscope ||= ListServices.lists_collected_by user, viewer
   end
 end
 
 # Provide the set of lists the user has collected
-class UserOwnedListsCache < UsersShowCache
+class UserOwnedListsCache < ResultsCache
+
+  def user
+    @user ||= User.find @id
+  end
+
   def itemscope
-    @itemscope ||= ListServices.lists_owned_by user
+    @itemscope ||= ListServices.lists_owned_by user, viewer
   end
 end
 
@@ -570,9 +575,9 @@ class ListsIndexCache < ResultsCache
     @itemscope ||=
     case result_type.subtype
       when 'owned'
-        ListServices.lists_owned_by viewer
+        ListServices.lists_owned_by user, viewer
       when 'collected'
-        ListServices.lists_collected_by viewer
+        ListServices.lists_collected_by user, viewer
       when 'all'
         List.unscoped
       else # By default, we only see lists belonging to our friends and Super that are not private, and all those that are public

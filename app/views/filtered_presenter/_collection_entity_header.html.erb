@@ -1,4 +1,3 @@
-<% possessive = (viewparams.display_style=="viewer") ? "my" : "#{response_service.user.polite_name}'s" %>
 <% decorator ||= viewparams.decorator %>
 <%= present decorator, current_user_or_guest do |presenter| %>
     <div class="row collection-header">
@@ -10,7 +9,7 @@
         </div>
         <div class="row">
           <div class="col-md-8 collection-label <%= viewparams.result_type %>">
-            <%= "#{possessive} #{viewparams.result_type}".downcase %>
+            <%= viewparams.result_expression(true).downcase %>
           </div>
           <div class="col-md-4 or-see">
             OR-SEE buttons go here
@@ -20,7 +19,7 @@
           <div class="col-md-8 search">
             <%= viewparams.filter_field(
                     handler: 'RP.tagger.querify',
-                    placeholder: "Search #{possessive} #{viewparams.result_type}") %>
+                    placeholder: "Search #{viewparams.result_expression true}") %>
           </div>
           <div class="col-md-4 filters">
             filters go here

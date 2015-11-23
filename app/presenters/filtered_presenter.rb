@@ -38,11 +38,12 @@ class ViewParams
   end
 
   # This is the human-facing expression for the result type
-  def result_expression
+  def result_expression with_possessive=false
+    "#{((display_style=='viewer') ? 'my ' : "#{entity.polite_name}'s ") if with_possessive}" +
     if result_type.match /^lists/
-        'treasuries'
+      result_type.sub(/^lists\.?/, '').sub(/owned$/, 'own') + ' treasuries'
     elsif result_type.blank?
-        'collection'
+      'collection'
     else
       result_type
     end
