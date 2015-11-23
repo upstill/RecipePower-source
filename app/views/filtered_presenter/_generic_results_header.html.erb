@@ -1,10 +1,9 @@
-<%# render @filtered_presenter.header_partial, title: title, comment: ((defined? comment) ? comment : "") %>
 <div class="row panels-query">
-  <div class="col-md-5 panels-label <%= @filtered_presenter.panel_label_class %>">
-    <%= @filtered_presenter.panel_label %>
+  <div class="col-md-5 panels-label <%= viewparams.display_style %>-label">
+    <%= viewparams.panels_label %>
   </div>
   <div class="col-md-7 panels-search">
-    <%= @filtered_presenter.filter_field handler: 'RP.tagger.querify' %>
-      <%= filtered_presenter_header_buttons @filtered_presenter %>
+    <%= viewparams.filter_field handler: 'RP.tagger.querify' %>
+      <%= filtered_presenter_header_buttons viewparams.filtered_presenter %>
   </div>
 </div>

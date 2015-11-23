@@ -167,7 +167,13 @@ class ApplicationController < ActionController::Base
     url = renderopts[:url] || request.original_url
     renderopts = response_service.render_params renderopts
     # Give the stream a crack at it
-    if fp = FilteredPresenter.build(view_context, rp_uuid, request.fullpath, current_user_or_guest_id, response_service, params, querytags, @decorator)
+    if fp = FilteredPresenter.build(view_context,
+                                    rp_uuid,
+                                    request.fullpath,
+                                    response_service,
+                                    params.merge(viewerid: current_user_or_guest_id, admin_view: response_service.admin_view?),
+                                    querytags,
+                                    @decorator)
       render_fp fp
     else
       respond_to do |format|
@@ -219,7 +225,7 @@ class ApplicationController < ActionController::Base
         while item = fp.next_item do
           renderings << { elmt: with_format("html") { view_context.render_item item, fp.item_mode } }
         end
-        renderings << { elmt: with_format("html") { render_to_string partial: fp.tail_partial } } if fp.next_path
+        renderings << { elmt: with_format("html") { render_to_string partial: fp.tail_partial, locals: { viewparams: fp.viewparams } } } if fp.next_path
         render json: renderings
 =begin
         response.headers["Content-Type"] = "text/event-stream"

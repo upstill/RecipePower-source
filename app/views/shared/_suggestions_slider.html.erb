@@ -1,8 +1,8 @@
 <!-- View for listing entities in a slider container -->
-<div class="suggestions <%= @filtered_presenter.results_type.extensions_to_classes %> slider">
+<div class="suggestions <%= viewparams.result_type.extensions_to_classes %> slider">
   <div class="left" data-setup="RP.slider.setup">&lt;</div>
   <div class="right" data-setup="RP.slider.setup">&gt;</div>
-  <div class="track stream-items-parent <%= @filtered_presenter.stream_id %>">
-    <%= render @filtered_presenter.tail_partial %>
+  <div class="track stream-items-parent <%= viewparams.stream_id %>">
+    <%= render viewparams.tail_partial %>
   </div>
 </div>

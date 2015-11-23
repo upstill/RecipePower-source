@@ -95,14 +95,13 @@ class UsersController < CollectibleController
   # Show the user's entire collection
   def collection
     update_and_decorate # response_service.user = User.find params[:id]
-    entity_type = params[:entity_type]
-    entity_type = entity_type ? entity_type.capitalize : "Collection"
+    label = (params[:result_type] || 'recipe').pluralize
     if (response_service.user.id == current_user_or_guest_id)
-      response_service.title = "My #{entity_type}"
+      response_service.title = "My #{label}"
       @empty_msg = "Nothing here yet. Click the Suggest button above to get some ideas.".html_safe
       @active_menu = :collections
     else
-      response_service.title = "#{response_service.user.handle}'s #{entity_type}"
+      response_service.title = "#{response_service.user.handle}'s #{label}"
       @empty_msg = "They haven't collected anything?!? Why not Share something with them?"
       @active_menu = :friends
     end

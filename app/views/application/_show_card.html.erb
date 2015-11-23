@@ -1,5 +1,5 @@
 <%= present decorator, current_user_or_guest do |presenter| %>
-    <div class="card-item row card-large <%= presenter.card_class %> <%= decorator.dom_id %>">
+    <div class="card-item row card-large <%= viewparams.display_style %>-card <%= decorator.dom_id %>">
       <%= collectible_vote_buttons decorator.object %><%# unless decorator.object == response_service.user %>
       <% if presenter.card_avatar? %>
           <div class="col-md-3">

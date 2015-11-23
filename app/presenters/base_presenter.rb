@@ -1,5 +1,6 @@
 class BasePresenter
   require 'redcarpet'
+  include CardPresentation
 
   attr_reader :viewer, :decorator
 
@@ -12,6 +13,7 @@ class BasePresenter
     end
     @template = template
     @viewer = viewer
+    # @display_services = DisplayServices.new viewer, @object
   end
 
   # Does this presenter have an avatar to present on cards, etc?

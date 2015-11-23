@@ -1,5 +1,4 @@
 class CollectiblePresenter < BasePresenter
-  include CardPresentation
 
   attr_accessor :modal
   attr_writer :buttons

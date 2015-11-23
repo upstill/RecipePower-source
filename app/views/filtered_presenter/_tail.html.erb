@@ -1,6 +1,6 @@
-<% if next_path = @filtered_presenter.next_path %>
+<% if next_path = viewparams.next_path %>
   <%= image_tag "ajax-loader.gif", class: "beachball hide" %>
-  <%= stream_loadlink next_path, @filtered_presenter.stream_id, (trigger_check if defined?(trigger_check))  %>
+  <%= stream_loadlink next_path, viewparams.stream_id, (trigger_check if defined?(trigger_check))  %>
 <% else %>
   <%= empty_msg  %>
 <% end %>

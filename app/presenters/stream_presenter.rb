@@ -1,14 +1,14 @@
 class StreamPresenter
-  attr_accessor :results, :tagtype
-  attr_reader :this_path
+  attr_accessor :tagtype
+  attr_reader :this_path, :results_cache
 
-  delegate :items, :next_item, :next_range, :as_admin,
-           :"done?", :window, :param,
+  delegate :items, :next_item, :next_range, :admin_view, :stream_id,
+           :"done?", :window, :param, :result_type,
            :full_size, :"has_query?", :"ready?",
            :querytags, :nmatches, :org,
-           :to => :results
+           :to => :results_cache
 
-  def initialize session_id, requestpath, rc_class, viewerid, as_admin, querytags=[], params={}
+  def initialize session_id, requestpath, querytags=[], params={}
     if querytags.class == Hash
       params, querytags = querytags, []
     end
@@ -23,14 +23,14 @@ class StreamPresenter
     end
 
     # Get a Streamer subclass for the controller and action
-    @results = rc_class.retrieve_or_build session_id, viewerid, as_admin, querytags, params
-    # limit ||= offset + @results.max_window_size
-    @results.window = offset, limit
+    @results_cache = ResultsCache.retrieve_or_build session_id, querytags, params
+    # limit ||= offset + results_cache.max_window_size
+    results_cache.window = offset, limit
   end
 
   # This is the path that will go into the "more items" link
   def next_path
-    if r = @results.next_range
+    if r = results_cache.next_range
       assert_query @this_path, stream: "#{r.min}-#{r.max}"
     end
   end
@@ -45,11 +45,7 @@ class StreamPresenter
 
   # Suspend the stream till later
   def suspend
-    @results.save if @results
-  end
-
-  def stream_id
-    results.stream_id
+    results_cache.save if results_cache
   end
 
 end

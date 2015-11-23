@@ -1,4 +1,6 @@
 require 'rcpref.rb'
+require 'result_type.rb'
+
 # Object to put a uniform interface on a set of results, whether they
 # exist as a scope (if there is no search) or an array of Rcprefs (with search)
 class Counts < Hash
@@ -128,6 +130,11 @@ end
 class ResultsCache < ActiveRecord::Base
   include ActiveRecord::Sanitization
 
+=begin
+  after_initialize { |rc|
+    @result_type = ResultType.new result_type
+  }
+=end
   before_save do
     session_id != nil
   end
@@ -139,40 +146,52 @@ class ResultsCache < ActiveRecord::Base
   serialize :params
   serialize :cache
   serialize :partition
-  attr_accessor :items, :querytags, :as_admin
+  attr_accessor :items, :querytags, :admin_view, :result_type
   delegate :window, :next_index, :'done?', :max_window_size, :to => :safe_partition
 
   # Get the current results cache and return it if relevant. Otherwise,
   # create a new one
-  def self.retrieve_or_build session_id, viewerid, as_admin, parsed_querytags=[], queryparams={}
+  def self.retrieve_or_build session_id, parsed_querytags=[], params={}
     unless parsed_querytags.is_a? Array
-      queryparams, parsed_querytags = parsed_querytags, []
+      params, parsed_querytags = parsed_querytags, []
     end
 
-    # relevant_params are the parameters that will bust the cache when changed
-    # Convert from ActionController params to hash
-    relevant_params = {
-        viewerid: viewerid,  # Keep the id of the viewing user
-        as_admin: as_admin
-    }
-    relevant_params = relevant_params.merge(queryparams.slice *self.params_needed.uniq).compact
-    # self.params_needed.uniq.each { |param| relevant_params[param] = queryparams[param] if queryparams[param] }
+    result_type = ResultType.new params['result_type']
+    # The choice of handling class, and thus the cache, is a function of the result type required as well as the controller/action pair
+    if cc = self.cache_class(params['controller'], params['action'], result_type)
+      # relevant_params are the parameters that will bust the cache when changed
+      relevant_params = params.slice *(cc.params_needed - ['result_type']).uniq
+      rc = cc.create_with(:params => relevant_params).find_or_initialize_by session_id: session_id, type: cc.to_s
+      # unpack the parameters into instance variables
+      relevant_params.each { |key, val|
+        rc.instance_variable_set "@#{key}".to_sym, ((val.is_a?(String) && (val.to_i.to_s == val)) ? val.to_i : val)
+      }
+      # A bit of subtlety: we USE the querytags passed in that parameter, NOT the unparsed string from the query params
+      # We STORE the unparsed string just because a synthesized tag (with negative ID) doesn't serialize properly
+      rc.querytags = parsed_querytags
+      rc.result_type = result_type # Because we want access to the result type's services, not just a string
 
-    rc = self.create_with(:params => relevant_params).find_or_initialize_by session_id: session_id, type: self.to_s
-    # unpack the parameters into instance variables
-    # TODO Convert integer params to integers with ((val.to_i.to_s == val) ? val.to_i : val)
-    relevant_params.each { |key, val| rc.instance_variable_set "@#{key}".to_sym, (key=='id' ? val.to_i : val) }
-    # A bit of subtlety: we USE the querytags passed in that parameter, NOT the unparsed string from the query params
-    # We STORE the unparsed string just because a synthesized tag (with negative ID) doesn't serialize properly
-    rc.querytags = parsed_querytags
-
-    # For purposes of busting the cache, we assume that sort direction is irrelevant
-    if rc.params.except(:sort_direction) != relevant_params.except(:sort_direction) # TODO: Take :nocache into consideration
-      # Bust the cache if the params don't match
-      rc.cache = rc.partition = rc.items = nil
-      rc.params = relevant_params
+      # For purposes of busting the cache, we assume that sort direction is irrelevant
+      if rc.params.except(:sort_direction) != relevant_params.except(:sort_direction) # TODO: Take :nocache into consideration
+        # Bust the cache if the params don't match
+        rc.cache = rc.partition = rc.items = nil
+        rc.params = relevant_params
+      end
+      rc
     end
-    rc
+  end
+
+  # Return the subclass of ResultsCache that will handle generating items
+  def self.cache_class controller, action, result_type
+    # Here's the chance to divert handling to different cache generators
+    classname = controller.camelize + action.capitalize + 'Cache'
+    if klass = (classname.constantize rescue nil)
+      # Give the class a chance to defer to a subclass based on the result type
+      klass = klass.subclass_for(result_type) if klass.respond_to? :subclass_for
+    else
+      logger.debug 'No ResultsCache handler ' + classname
+    end
+    klass
   end
 
   def self.bust session_id
@@ -181,7 +200,7 @@ class ResultsCache < ActiveRecord::Base
 
   # Declare the parameters needed for this class
   def self.params_needed
-    [:id, :querytags, :order_by, :sort_direction ]
+    [:id, :viewerid, :admin_view, :querytags, :order_by, :sort_direction ]
   end
 
   def viewer
@@ -406,15 +425,131 @@ class ResultsCache < ActiveRecord::Base
 
 end
 
+class SearchIndexCache < ResultsCache
+  include ResultTyping
+
+  def stream_id
+    'search'
+  end
+
+end
+
+# Recently-viewed content of the given user
+class UsersShowCache < ResultsCache
+  include ResultTyping
+
+  # Different subclasses are used to handle different result types
+  def self.subclass_for result_type
+    case result_type
+      when 'lists'
+        return UserListsCache
+      when 'lists.collected'
+        return UserCollectedListsCache
+      when 'lists.owned'
+        return UserOwnedListsCache
+      when 'friends'
+        return UserFriendsCache
+      else
+        self
+    end
+  end
+
+  def user
+    @user ||= User.find @id
+  end
+
+  def itemscope
+    @itemscope ||= user.collection_scope( { :sort_by => :viewed, :in_collection => true }.merge result_type.entity_params)
+  end
+
+  # Return
+  def strscopes matcher, modelclass
+    if modelclass.respond_to? :strscopes
+      modelclass.strscopes(matcher).collect { |innerscope|
+        innerscope = innerscope.joins(:user_pointers).where('"rcprefs"."user_id" = ? and "rcprefs"."in_collection" = true', @id.to_s)
+        innerscope = innerscope.where('"rcprefs"."private" = false') unless @id == @viewerid # Only non-private entities if the user is not the viewer
+        innerscope
+      }
+    else
+      []
+    end
+  end
+
+  # Apply a tag to the current set of result counts
+  def count_tag tag, counts
+    matchstr = "%#{tag.name}%"
+    typeset.each do |type|
+      modelclass = type.constantize
+      scope = modelclass.joins :user_pointers
+      scope = scope.where('"rcprefs"."user_id" = ? and "rcprefs"."in_collection" = true', @id.to_s)
+      scope = scope.where('"rcprefs"."private" = false') unless @id == @viewerid # Only non-private entities if the user is not the viewer
+
+      # First, match on the comments using the rcpref
+      counts.incr_by_scope scope.where('"rcprefs"."comment" ILIKE ?', matchstr)
+
+      # Now match on the entity's relevant string field(s), for which we defer to the class
+      strscopes("%#{tag.name}%", modelclass).each { |innerscope| counts.incr_by_scope innerscope }
+      strscopes(tag.name, modelclass).each { |innerscope| counts.incr_by_scope innerscope, 30 }
+
+      subscope = modelclass.joins(:taggings).where 'taggings.tag_id = ?', tag.id.to_s
+=begin
+      # TODO: We're not filtering by user taggings (the more the merrier)
+      if @id
+        subscope = subscope.where 'taggings.user_id = ?', @id.to_s
+      end
+=end
+      counts.incr_by_scope subscope, 1
+    end
+  end
+
+  # Memoize a query to get all the currently-defined entity types
+  def typeset
+    @typeset ||=
+        case modelname = itemscope.model.to_s
+          when 'Rcpref'
+            itemscope.
+                select(:entity_type).
+                distinct.
+                pluck(:entity_type).
+                sort
+          else
+            [ modelname ]
+        end
+  end
+
+end
+
+class UsersCollectionCache < UsersShowCache
+
+end
+
+# user's collection visible to current_user (UserCollectionStreamer)
+class UsersRecentCache < UsersShowCache
+
+  def itemscope
+    @itemscope ||= user.collection_scope :sort_by => :viewed
+  end
+end
+
+# user's collection visible to viewer (UserCollectionStreamer)
+class UsersBiglistCache < UsersShowCache
+
+  def itemscope
+    @itemscope ||=
+        Rcpref.where('private = false OR "rcprefs"."user_id" = ?', @viewerid).
+            where.not(entity_type: %w{ Feed User List})
+  end
+end
+
 # Provide the set of lists the user has collected, but only those visible to her
-class UserCollectedListsCache < UserCollectionCache
+class UserCollectedListsCache < UsersShowCache
   def itemscope
     @itemscope ||= ListServices.lists_collected_by viewer
   end
 end
 
 # Provide the set of lists the user has collected
-class UserOwnedListsCache < UserCollectionCache
+class UserOwnedListsCache < UsersShowCache
   def itemscope
     @itemscope ||= ListServices.lists_owned_by user
   end
@@ -428,17 +563,12 @@ class IntegersCache < ResultsCache
 end
 
 # list of lists visible to the viewer
-class ListsCache < ResultsCache
-
-  def self.params_needed
-    # The access parameter filters for private and public lists
-    super + [:access]
-  end
+class ListsIndexCache < ResultsCache
 
   # A listcache may define an itemscope to let the superclass#items method do pagination
   def itemscope
     @itemscope ||=
-    case @access
+    case result_type.subtype
       when 'owned'
         ListServices.lists_owned_by viewer
       when 'collected'
@@ -453,7 +583,7 @@ class ListsCache < ResultsCache
 end
 
 # list's content visible to current user (ListStreamer)
-class ListCache < ResultsCache
+class ListsShowCache < ResultsCache
 
   def list
     @list ||= List.find @id
@@ -510,17 +640,16 @@ class ListCache < ResultsCache
 
 end
 
-# list of feeds
-class FeedsCache < ResultsCache
+class ListsContentsCache < ListsShowCache
 
-  def self.params_needed
-    # The access parameter filters for private and public lists
-    super + [:access]
-  end
+end
+
+# list of feeds
+class FeedsIndexCache < ResultsCache
 
   def itemscope
     @itemscope ||=
-    case @access
+    case result_type.subtype
       when 'collected' # Feeds actually collected by user and friends
         persons_of_interest = [@viewerid, 1, 3, 5].map(&:to_s).join(',')
         Feed.joins(:user_pointers).
@@ -532,14 +661,14 @@ class FeedsCache < ResultsCache
       when 'approved' # Default: normal user view for shopping for feeds (only approved feeds)
         Feed.where approved: true
       else
-        as_admin ? Feed.unscoped : Feed.where(approved: true)
+        admin_view ? Feed.unscoped : Feed.where(approved: true)
     end
   end
 
 end
 
 # list of feed items
-class FeedCache < ResultsCache
+class FeedsOwnedCache < ResultsCache
 
   def feed
     @feed ||= Feed.find @id
@@ -552,19 +681,14 @@ class FeedCache < ResultsCache
 end
 
 # users: list of users visible to current_user (UsersStreamer)
-class UsersCache < ResultsCache
-
-  def self.params_needed
-    # The access parameter filters for private and public lists
-    super + [:select]
-  end
+class UsersIndexCache < ResultsCache
 
   def itemscope
     @itemscope ||=
-    if @as_admin # See everyone in admin view
+    if admin_view # See everyone in admin view
       User.unscoped
     else
-      case @select
+      case result_type.subtype
         when 'followees'
           viewer.followees
         when 'relevant'
@@ -591,25 +715,7 @@ class UserFriendsCache < ResultsCache
   end
 end
 
-# user's collection visible to current_user (UserCollectionStreamer)
-class UserRecentCache < UserCollectionCache
-
-  def itemscope
-    @itemscope ||= user.collection_scope :sort_by => :viewed
-  end
-end
-
-# user's collection visible to viewer (UserCollectionStreamer)
-class UserBiglistCache < UserCollectionCache
-
-  def itemscope
-    @itemscope ||=
-        Rcpref.where('private = false OR "rcprefs"."user_id" = ?', @viewerid).
-            where.not(entity_type: %w{ Feed User List})
-  end
-end
-
-class SearchCache < UserBiglistCache
+class SearchCache < UsersBiglistCache
 
 end
 
@@ -626,7 +732,7 @@ class UserListsCache < ResultsCache
 
 end
 
-class TagsCache < ResultsCache
+class TagsIndexCache < ResultsCache
 
   def self.params_needed
     super + [:tagtype]
@@ -644,7 +750,7 @@ class TagsCache < ResultsCache
 
 end
 
-class TagCache < ResultsCache
+class TagsAssociatedCache < ResultsCache
 
   def tag
     @tag ||= Tag.find @id
@@ -656,7 +762,7 @@ class TagCache < ResultsCache
 
 end
 
-class SitesCache < ResultsCache
+class SitesIndexCache < ResultsCache
 
   def itemscope
     @itemscope ||= Site.unscoped
@@ -665,29 +771,29 @@ class SitesCache < ResultsCache
 end
 
 class SiteCache < ResultsCache
-  include EntityTyping
+  include ResultTyping
 
   def site
     @site = Site.find @id
   end
 
   def itemscope
-    @itemscope ||= site.contents_scope entity_type_to_model_name
+    @itemscope ||= site.contents_scope result_type.model_name
   end
 end
 
-class ReferencesCache < ResultsCache
+class ReferencesIndexCache < ResultsCache
 
   def self.params_needed
     super + [:type]
   end
 
-  def typenum
-    @type ? @type.to_i : 0
+  def type
+    @type ||= 0
   end
 
   def typeclass
-    Reference.type_to_class(typenum).to_s
+    Reference.type_to_class(type).to_s
   end
 
   def itemscope
@@ -704,18 +810,18 @@ class ReferenceCache < ResultsCache
 
 end
 
-class ReferentsCache < ResultsCache
+class ReferentsIndexCache < ResultsCache
 
   def self.params_needed
     super + [:type]
   end
 
-  def typenum
-    @type ? @type.to_i : 0
+  def type
+    @type ||= 0
   end
 
   def typeclass
-    Referent.type_to_class(typenum).to_s
+    Referent.type_to_class(type).to_s
   end
 
   def itemscope

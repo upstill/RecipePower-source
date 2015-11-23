@@ -1,5 +1,5 @@
-<tr class="stream-tail <%= @filtered_presenter.stream_id %>">
+<tr class="stream-tail <%= viewparams.stream_id %>">
   <td>
-    <%= render partial: "filtered_presenter/tail" %>
+    <%= render 'filtered_presenter/tail', viewparams: viewparams %>
   </td>
 </tr>

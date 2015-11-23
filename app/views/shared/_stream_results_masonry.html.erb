@@ -4,9 +4,9 @@
        id="container"
        onload="RP.masonry.onload(event)"
        data-masonry-options='{ }'>
-    <% if @filtered_presenter.dump? %>
+    <% if false && @filtered_presenter.dump? %>
         <% while (item = @filtered_presenter.next_item) do %>
-            <%= render_item item %>
+            <%= render_item item  %>
         <% end %>
     <% end %>
   </div>

@@ -1,7 +1,7 @@
 <!-- Partial for listing entities in a masonry container -->
-  <div class="results <%= @filtered_presenter.results_type.extensions_to_classes %> js-masonry stream-items-parent <%= @filtered_presenter.stream_id %> "
+  <div class="results <%= viewparams.result_type.extensions_to_classes %> js-masonry stream-items-parent <%= viewparams.stream_id %> "
        id="container"
        onload="RP.masonry.onload(event)"
        data-masonry-options='{ }'>
-    <%= render @filtered_presenter.tail_partial %>
+    <%= render viewparams.tail_partial, viewparams: viewparams %>
   </div>

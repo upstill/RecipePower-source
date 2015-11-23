@@ -1,3 +1,3 @@
-<div class="masonry-item stream-tail <%= @filtered_presenter.stream_id %>" >
-  <%= render partial: "filtered_presenter/tail" %>
+<div class="masonry-item stream-tail <%= viewparams.stream_id %>" >
+  <%= render 'filtered_presenter/tail', viewparams: viewparams %>
 </div>

@@ -1,32 +1,89 @@
+# This class bundles up the parameters used in views off the presenter.
+class ViewParams
+  attr_reader :link_address, :result_type, :results_path, :filtered_presenter, :item_mode, :org
+
+  delegate :entity, :decorator, :viewer, :this_path, :next_path, :param, :query,
+           :filter_query, :filter_field, :filter_type_selector, :tagtype,
+           :table_headers, :stream_id, :tail_partial, :subviews, :otherviews,
+           :panels_label, :page_title, :presentation_partials, :results_partial, :org,
+           :to => :filtered_presenter
+
+  # Use a filtered presenter and a subtype to define the parameters
+  def initialize fp, qparams={}
+    @result_type = qparams[:result_type] || fp.result_type || ''
+    @link_address = fp.response_service.decorate_path qparams
+    @results_path = assert_query fp.results_path, qparams
+    @item_mode = qparams[:item_mode] || fp.item_mode
+    @org = qparams[:org] || fp.org
+    @filtered_presenter = fp
+  end
+
+  # Define a name used in linking to the subtype
+  def link_label
+    result_expression
+  end
+
+  def display_style
+    if entity && entity.class == User
+      if entity == viewer
+        'viewer'
+      elsif viewer.follows? entity
+        'friend'
+      else
+        'user'
+      end
+    else
+      @result_type
+    end
+  end
+
+  # This is the human-facing expression for the result type
+  def result_expression
+    if result_type.match /^lists/
+        'treasuries'
+    elsif result_type.blank?
+        'collection'
+    else
+      result_type
+    end
+  end
+end
+
 class FilteredPresenter
+  # include CardPresentation # Provides display services
   require './app/models/results_cache.rb'
   attr_accessor :title, :h
 
-  attr_reader :decorator, :entity, :admin_view,
-              :entity_type, :results_type, 
-              :results_class, # Class of the ResultsCache for fetching results
+  attr_reader :decorator, :entity, :viewer, :response_service, :result_type,
+              :results_type, :viewparams,
               :stream_presenter, # Manages the ResultsCache that produces items based on the query
               :content_mode, # What page element to render? :container, :entity, :results, :modal, :items
               :item_mode, # How composites are presented: :table, :strip, :masonry, :feed_item
               :org # How to organize the results: :ratings, :popularity, :newest, :random
 
-  delegate :tail_partial, :stream_id,
+  delegate :tail_partial, :stream_id, :results_cache,
            :suspend, :next_item, :this_path, :next_path,
-           :full_size, :query, :param, :querytags,
+           :full_size, :query, :param, :querytags, :admin_view,
            :to => :stream_presenter
+  
+  delegate :display_style,
+           :to => :viewparams
 
   # Build an instance of the appropriate subclass, given the entity, controller and action
-  def self.build view_context, sessid, request_path, user_id, response_service, params, querytags, decorator=nil
+  def self.build view_context, sessid, request_path, response_service, params, querytags, decorator=nil
     classname = "#{response_service.controller.capitalize}#{response_service.action.capitalize}Presenter"
 
     if Object.const_defined? classname # If we have a FilteredPresenter subclass available
-      classname.constantize.new view_context, sessid, request_path, user_id, response_service, params, querytags, decorator
+      classname.constantize.new view_context, sessid, request_path, response_service, params, querytags, decorator
     end
   end
 
-  def initialize view_context, sessid, request_path, user_id, response_service, params, querytags, decorator=nil
+  def initialize view_context, sessid, request_path, response_service, params, querytags, decorator=nil
     if @decorator = decorator
       @entity = decorator.object
+    else
+      name = params['controller'].sub(/Controller$/, '').singularize.capitalize
+      klass = name.constantize rescue nil
     end
     params_needed.each { |pspec|
       key, val = (pspec.is_a? Array) ? pspec : [pspec]
@@ -37,10 +94,11 @@ class FilteredPresenter
       else
         self.instance_variable_set "@#{key}".to_sym, val
       end
-
     }
     # @stream_param = params[:stream] || '' if params.has_key? :stream
     @h = view_context
+    @response_service = response_service
+    @viewer = @response_service.user
 
     # May have been set by subclass, may have been inherited from params
     # Set the instance variable, possibly in consultation with the class
@@ -62,24 +120,42 @@ class FilteredPresenter
 
     @title = response_service.title
     @request_path = request_path
-    @admin_view = response_service.admin_view?
     # FilteredPresenters don't always have results panels
-    if rc_class = results_class
-      @stream_presenter = StreamPresenter.new sessid, request_path, rc_class, user_id, response_service.admin_view?, querytags, params
+    @stream_presenter = StreamPresenter.new sessid,
+                                            request_path,
+                                            querytags,
+                                            params
+    @viewparams = ViewParams.new self
+    # @display_services = DisplayServices.new response_service.user, @entity || klass || result_type.model_class
+    # @display_services.result_type = result_type
+  end
+
+  # This is a stub for future use in eliding streaming
+  def dump?
+    false
+  end
+
+  # The label for the group of panels associated with a card
+  def panels_label
+    case display_style
+      when 'viewer'
+        'my collection'
+      when 'friend', 'user'
+        'collection'
+      when 'recipe'
+        'related'
+      when 'feed'
+        'entries'
+      when 'list'
+        'contents'
+      else
+        display_style.pluralize
     end
   end
 
   # Declare the parameters that we adopt as instance variables. subclasses would add to this list
   def params_needed
-    [ :tagtype, :entity_type, [:stream, ''], [ :content_mode, :container ], [ :org, :newest ] ]
-  end
-
-  def results_class
-    @results_class ||= (rcn = self.class.instance_variable_get :'@results_class_name') && rcn.constantize
-  end
-
-  def title_for subtype
-    subtype.downcase
+    [ :tagtype, :result_type, :id, [:stream, ''], [ :content_mode, :container ], [ :org, :newest ] ]
   end
 
   # Include a (tag) type selector in the query field?
@@ -100,11 +176,6 @@ class FilteredPresenter
     h.token_input_query opt_param.merge(tagtype: tagtype, querytags: querytags, type_selector: filter_type_selector)
   end
 
-  # Should the items be dumped now?
-  def dump?
-    false # !instance_variable_defined?(:@stream_param)
-  end
-
   # Provide the query for revising the results
   def filter_query format=nil, params={}
     if format.is_a? Hash
@@ -112,35 +183,6 @@ class FilteredPresenter
     end
     # NB: here is where we can assert our own parameters for the query
     @stream_presenter.query format, params
-  end
-
-  def display_class
-    decorator ? h.object_display_class(decorator.object) : self.class.to_s.underscore.sub(/_.*/,'').singularize
-  end
-
-  def panel_button_class
-    "#{display_class}-button"
-  end
-
-  def panel_label_class
-    "#{display_class}-label"
-  end
-
-  def panel_label
-    case display_class
-      when 'viewer'
-        'my collection'
-      when 'friend', 'user'
-        'collection'
-      when 'recipe'
-        'related'
-      when 'feed'
-        'entries'
-      when 'list'
-        'contents'
-      else
-        display_class.pluralize
-    end
   end
 
   def stream_count force=false
@@ -173,34 +215,33 @@ class FilteredPresenter
   ### The remaining public methods pertain to the page presentation
 
   def results_list
-    [entity_type || results_type]
-  end
-
-  def header_partial
-    'filtered_presenter/generic_results_header'
-  end
-
-  def contents_partial
-    (results_list.count == 1) ? 'filtered_presenter/partial_spew' : 'filtered_presenter/partial_associated'
+    [result_type || container_contents_type]
   end
 
   def show_card?
     @decorator && @decorator.object && @decorator.object.is_a?(Collectible)
   end
 
+  def show_comments?
+    @decorator && @decorator.object && @decorator.object.is_a?(Commentable)
+  end
+
+  def presentation_partial name, locals={}
+      name.is_a?(Symbol) ? h.render_item(name, locals) : h.render(name, locals)
+  end
+
   # The default presentation is different for tables and for objects, which in turn
   # may define multiple results panels
   def presentation_partials &block
+    apply_partial :card, block if show_card?
+    apply_partial :comments, block if show_comments?
+    apply_partial 'filtered_presenter/generic_results_header', block
     if item_mode == :table
-      block.call header_partial
-      # block.call 'filtered_presenter/results_table'
-      apply_partial 'filtered_presenter/partial_table', :table, block, :item_mode => :table
+      apply_partial 'filtered_presenter/partial_table', block, :item_mode => :table
+    elsif results_list.count == 1
+      apply_partial 'filtered_presenter/partial_spew', block, :item_mode => item_mode, :org => org
     else
-      block.call :card if show_card?
-      block.call :comments if @decorator && @decorator.object && @decorator.object.is_a?(Commentable)
-      block.call header_partial, title: panel_label
-      return unless results_list.present?
-      apply_partial contents_partial,
+      apply_partial 'filtered_presenter/partial_associated',
                     results_list,
                     block,
                     :item_mode => item_mode,
@@ -214,8 +255,8 @@ class FilteredPresenter
   end
 
   # This is the class of the results container
-  def results_type
-    entity_type || (@results_class || self.class).to_s
+  def container_contents_type
+    result_type || ((results_cache && results_cache.class) || self.class).to_s
   end
 
   # Specify a path for fetching the results partial
@@ -236,16 +277,52 @@ class FilteredPresenter
     @item_mode || :masonry
   end
 
+  # For presenting panels and other dependent information, provide viewparams for each
+  def subviews except=nil
+    results_list.collect { |subtype|
+      ViewParams.new(self, result_type: subtype) if subtype != except
+    }.compact
+  end
+
+  def otherviews
+    results_list('').collect { |subtype|
+      ViewParams.new(self, result_type: subtype) if subtype != result_type
+    }.compact
+  end
+
+  def page_title
+    if (@klass == User) && result_type
+      is_me = (@object == @viewer)
+      salutation = @object.salutation.downcase
+      case result_type
+        when 'recipes'
+          is_me ? "#{result_expression} I've collected" : "#{result_expression} collected by #{salutation}"
+        when 'lists.owned'
+            is_me ? "my own #{result_expression}" : "#{salutation}'s own #{result_expression}"
+        when 'lists.collected'
+            is_me ? "#{result_expression} I've collected" : "#{result_expression} collected by #{salutation}"
+        when 'friends'
+          is_me ? 'people I\'m following' : "people #{salutation} is following"
+        when 'feeds'
+          is_me ? 'feeds I\'m following' : "feeds followed by #{salutation}"
+        else
+          "#{result_expression.capitalize} by #{is_me ? 'me' : salutation}"
+      end
+    else
+      result_type.downcase.pluralize
+    end
+  end
+
 protected
 
-  # Invoke a partial for one or more types
-  def apply_partial partial_name, type_or_types, block, qparams={}
-      [type_or_types].flatten.compact.each { |type|
-        block.call partial_name,
-                   title: title_for(type),
-                   type: type,
-                   url: assert_query(results_path, qparams.merge(entity_type: type))
-      }
+  # Invoke a partial for one or more subtypes.
+  # If the list of subtypes is nil, just use the viewparams for the presenter itself
+  def apply_partial partial_name, subtype_or_subtypes, block=nil, qparams={}
+    subtype_or_subtypes, block = nil, subtype_or_subtypes if subtype_or_subtypes.is_a? Proc
+    [subtype_or_subtypes].flatten.each { |subtype|
+      block.call partial_name,
+                 subtype ? ViewParams.new(self, qparams.merge(result_type: subtype)) : @viewparams
+    }
   end
 
   private
@@ -261,18 +338,13 @@ protected
 end
 
 class SearchIndexPresenter < FilteredPresenter
-  @results_class_name = 'SearchAllCache'
   @item_mode = :masonry
 
-  def entity_type
-    @entity_type ||= 'recipes'
-  end
-
   def results_type
-    entity_type || self.class.to_s
+    result_type || self.class.to_s
   end
 
-  def display_class
+  def display_style
     'search'
   end
 
@@ -289,27 +361,25 @@ end
 
 class UsersIndexPresenter < FilteredPresenter
   @item_mode = :table
-  @results_class_name = 'UsersCache'
 
   def table_headers
     [ '', 'About', 'Interest(s)', '', '' ]
   end
 
-  def panel_label
+  def result_expression
     'USERS'
   end
 
 end
 
 class UsersShowPresenter < FilteredPresenter
-  @results_class_name = 'UserCollectionCache'
 
 end
 
 class RecipesAssociatedPresenter < FilteredPresenter
 
   # No results associated with recipes as yet
-  def results_list
+  def results_list rt=result_type
   end
 
 end
@@ -318,51 +388,34 @@ end
 class UserContentPresenter < FilteredPresenter
 
   def item_mode
-    @item_mode = :slider unless @entity_type
+    @item_mode = :slider unless result_type.present?
     @item_mode
   end
 
-  def title_for type
-    if item_mode == :slider
-      h.user_associated_label(type).downcase
-    else
-      is_me = @stream_presenter.results.user.id == h.current_user_or_guest_id
-      salutation = @stream_presenter.results.user.salutation.downcase
-      case type
-        when 'recipes'
-          is_me ? 'recipes I\'ve collected' : "recipes collected by #{salutation}"
-        when 'lists.owned'
-          is_me ? 'my own lists' : "#{salutation}'s own lists"
-        when 'lists.collected'
-          is_me ? 'lists I\'ve collected' : "lists collected by #{salutation}"
-        when 'friends'
-          is_me ? 'people I\'m following' : "friends of #{salutation}"
-        when 'feeds'
-          is_me ? 'feeds I\'m following' : "feeds followed by #{salutation}"
-        else
-          "#{type.gsub('.', '')} by #{is_me ? 'me' : salutation}"
-      end
-    end
-  end
-
-  def results_list
-    case @entity_type
+  # Here's where we translate from a result type (as provided by a pagelet) to
+  # a series of subtypes to be displayed on the page in panels
+  def results_list rt=result_type
+    case rt
       when 'lists'
         %w{ lists.owned lists.collected }
-      when nil
-        %w{ recipes feeds friends lists }
+      when nil, ''
+        %w{ lists recipes feeds friends }
       else
-        [ @entity_type ]
+        [ rt ]
     end
   end
 
   def presentation_partials &block
-    if @entity_type
-      block.call 'filtered_presenter/collection_entity_header'
-      apply_partial contents_partial, results_list, block, :item_mode => :masonry, :org => :newest
+    if result_type.present?
+      apply_partial 'filtered_presenter/collection_entity_header', block
+      # The contents partial will get defined once for every subtype in the results list
+      apply_partial "filtered_presenter/partial_#{results_list.count == 1 ? 'spew' : 'associated'}",
+                    results_list,
+                    block,
+                    :item_mode => :masonry, :org => :newest
     else
-      block.call :card
-      block.call 'filtered_presenter/generic_results_header'
+      apply_partial :card, block
+      apply_partial 'filtered_presenter/generic_results_header', block
       apply_partial :panel, results_list, block, :item_mode => :slider, :org => :newest
     end
   end
@@ -375,41 +428,20 @@ class UserContentPresenter < FilteredPresenter
 end
 
 class UsersCollectionPresenter < UserContentPresenter
-  # @results_class_name = 'UserCollectionCache'
-  # @item_mode = :slider
-  # @item_mode = :masonry
-
-  def results_class
-    # Memoized constants
-    unless defined?(@@constants)
-      'ResultsCache'.constantize
-      @@constants = {
-          'lists' => UserListsCache,
-          'lists.collected' => UserCollectedListsCache,
-          'lists.owned' => UserOwnedListsCache,
-          'friends' => UserFriendsCache
-      }
-      @@ucc = UserCollectionCache
-    end
-    @@constants[@entity_type] || @@ucc
-  end
 
 end
 
 class UsersRecentPresenter < UserContentPresenter
-  @results_class_name = 'UserRecentCache'
 
 end
 
 
 class UsersBiglistPresenter < UserContentPresenter
-  @results_class_name = 'UserBiglistCache'
 
 end
 
 # Present the entries associated with a feed
 class FeedsOwnedPresenter < FilteredPresenter
-  @results_class_name = 'FeedCache'
 
   def results_type
     'feed_entries'
@@ -424,7 +456,10 @@ end
 # Present a list of feeds for a user
 class FeedsIndexPresenter < FilteredPresenter
   @item_mode = :table
-  @results_class_name = 'FeedsCache'
+
+  def self.params_needed
+    super + [ :sort_direction ]
+  end
 
   def table_headers
     [ '',
@@ -432,16 +467,16 @@ class FeedsIndexPresenter < FilteredPresenter
       '',
       'Host Site',
       'Status'.html_safe,
-      ('' if @stream_presenter && @stream_presenter.as_admin),
+      ('' if admin_view),
       '' ].compact
   end
 
-  def panel_label
+  def result_expression
     'feeds'
   end
 
   def header_buttons &block
-    current_mode = stream_presenter.results.params['sort_direction']
+    current_mode = @sort_direction
     current_path = (@stream_presenter ? this_path : @request_path)
     block.call 'newest first',
                assert_query(current_path, order_by: 'updated_at', sort_direction: 'DESC'),
@@ -461,27 +496,17 @@ end
 # Present the entries associated with a list
 class ListsIndexPresenter < FilteredPresenter
   @item_mode = :table
-  @results_class_name = 'ListsCache'
-
-  def entity_type
-    @entity_type ||= 'lists'
-  end
 
   def table_headers
     [ '', '', 'Author', 'Tags', 'Size', '' ]
   end
 
-  def panel_label
+  def result_expression
     'all the lists'
   end
 end
 
 class ListsShowPresenter < FilteredPresenter
-  @results_class_name = 'ListCache'
-
-  def entity_type
-    @entity_type ||= 'recipes'
-  end
 
   def results_type
     'recipes'
@@ -492,7 +517,6 @@ end
 # Present the entries associated with a list
 class ListsContentsPresenter < FilteredPresenter
   @item_mode = :masonry
-  @results_class_name = 'ListCache'
 
 end
 
@@ -503,7 +527,6 @@ end
 # Present the entries associated with a list
 class ReferencesIndexPresenter < FilteredPresenter
   @item_mode = :table
-  @results_class_name = 'ReferencesCache'
 
   def table_headers
     [ 'Reference Type', 'URL/Referees', '', '', '' ]
@@ -513,7 +536,6 @@ end
 # Present the entries associated with a list
 class ReferentsIndexPresenter < FilteredPresenter
   @item_mode = :table
-  @results_class_name = 'ReferentsCache'
 
   def table_headers
     [ 'Referent', '', '', '' ]
@@ -522,7 +544,6 @@ end
 
 class SitesIndexPresenter < FilteredPresenter
   @item_mode = :table
-  @results_class_name = 'SitesCache'
 
   def table_headers
     [ '', 'Title<br>Description'.html_safe, 'Other Info', 'Actions' ]
@@ -532,7 +553,6 @@ end
 
 class TagsIndexPresenter < FilteredPresenter
   @item_mode = :table
-  @results_class_name = 'TagsCache'
 
   def table_headers
     [ 'ID', 'Name', 'Type', 'Usages', 'Public?', 'Similar', 'Synonym(s)', 'Meaning(s)', '', '' ]
@@ -542,7 +562,7 @@ class TagsIndexPresenter < FilteredPresenter
     true
   end
 
-  def panel_label
+  def result_expression
     "TAGS"
   end
 end
@@ -550,13 +570,12 @@ end
 # Present the entries associated with a list
 class TagsAssociatedPresenter < FilteredPresenter
   @item_mode = :masonry
-  @results_class_name = 'TagCache'
 
   def show_card?
     true
   end
 
-  def panel_label
+  def result_expression
     "TAGGEES"
   end
 

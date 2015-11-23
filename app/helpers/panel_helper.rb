@@ -18,7 +18,7 @@ module PanelHelper
   end
 
   def panel_expand_link url, type
-    link_to_submit "SEE ALL", assert_query(url, entity_type: type), :mode => :partial, class: "expand-link"
+    link_to_submit "SEE ALL", assert_query(url, ResultType.new(type).params), :mode => :partial, class: "expand-link"
   end
 
   def panel_org_menu url, type, cur_org
@@ -49,7 +49,7 @@ module PanelHelper
   end
 
   def panel_results partial
-    with_format('html') { render partial }
+    with_format('html') { render partial, viewparams: @filtered_presenter.viewparams }
   end
 
   def panel_results_replacement type, partial
@@ -61,7 +61,7 @@ module PanelHelper
   end
 
   def panel_suggestions partial
-    with_format('html') { render partial }
+    with_format('html') { render partial, viewparams: @filtered_presenter.viewparams }
   end
 
   def panel_suggestions_replacement type, partial=nil

@@ -1,6 +1,6 @@
-<div class="results feed_entries js-masonry stream-items-parent <%= @filtered_presenter.stream_id %> "
+<div class="results feed_entries js-masonry stream-items-parent <%= viewparams.stream_id %> "
      id="container">
-  <div class="masonry-item stream-tail <%= @filtered_presenter.stream_id %>" >
-    <%= render partial: "filtered_presenter/tail" %>
+  <div class="masonry-item stream-tail <%= viewparams.stream_id %>" >
+    <%= render 'filtered_presenter/tail', viewparams: viewparams %>
   </div>
 </div>

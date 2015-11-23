@@ -1,10 +1,10 @@
-<%= querify_block url, class: "results-card #{type.extensions_to_classes}", autoload: true do %>
-    <% if false && defined?(title) %>
-        <div class="results-title <%# type.extensions_to_classes %>"><%# title %></div>
+<%= querify_block viewparams.results_path, class: "results-card #{viewparams.result_type}", autoload: true do %>
+    <% if viewparams.page_title.present? %>
+        <div class="results-title <%= viewparams.result_type %>"><%= viewparams.page_title %></div>
     <% end %>
     <div class="results-content">
       <div class="results-box">
-        <%= panel_results_placeholder type %>
+        <%= panel_results_placeholder viewparams.result_type %>
       </div>
     </div>
 <% end %>

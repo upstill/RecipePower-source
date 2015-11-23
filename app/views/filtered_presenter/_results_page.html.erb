@@ -1,4 +1,4 @@
 <!-- View for splatting feed entries -->
-<div class="results <%= @filtered_presenter.results_type.extensions_to_classes %> stream-items-parent <%= @filtered_presenter.stream_id %> ">
-    <%= render @filtered_presenter.tail_partial %>
+<div class="results <%= viewparams.result_type.extensions_to_classes %> stream-items-parent <%= viewparams.stream_id %> ">
+    <%= render viewparams.tail_partial, viewparams: viewparams %>
 </div>

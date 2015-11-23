@@ -1,12 +1,12 @@
-<%= triggered_form(@filtered_presenter.filter_query) do %>
+<%= triggered_form(viewparams.filter_query) do %>
     <div class="filter-element">
-      <%= @filtered_presenter.filter_field placeholder: 'Let\'s cook up something' %>
+      <%= viewparams.filter_field placeholder: 'Let\'s cook up something' %>
     </div>
 <% end %>
 <div class="selector-element">
-  <% what = @filtered_presenter.entity_type %>
-  <%= link_to_submit what.pluralize.upcase, response_service.decorate_path(entity_type: what), class: "result-link #{what} lead" %>
-  <% (%w{ users recipes lists feeds } - [what]).each do |what| %>
-      <span class="divider">|</span>&nbsp;<%= link_to_submit what.upcase, response_service.decorate_path(entity_type: what), class: "result-link #{what}" %>
+  <%= link_to_submit viewparams.link_label, viewparams.link_address, class: "result-link #{viewparams.result_type} lead" %>
+  <% viewparams.subviews(viewparams.result_type).each do |viewparams| %>
+      <span class="divider">|</span>&nbsp;
+      <%= link_to_submit viewparams.link_label, viewparams.link_address, class: "result-link #{viewparams.result_type}" %>
   <% end %>
 </div>

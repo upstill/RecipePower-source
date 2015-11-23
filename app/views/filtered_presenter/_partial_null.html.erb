@@ -1,5 +1,5 @@
 <div>
   <p><%= title %></p>
-  <p>type: <%= type %></p>
-  <p>url: <%= url %></p>
+  <p>type: <%= viewparams.result_type.present? ? viewparams.result_type : '[No type defined]' %></p>
+  <p>link_address: <%= viewparams.link_address %></p>
 </div>

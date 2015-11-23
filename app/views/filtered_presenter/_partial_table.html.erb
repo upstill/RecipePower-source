@@ -1,12 +1,12 @@
-<%= querify_block url, class: "results-table #{type}", autoload: true do %>
-    <table class="results <%# @filtered_presenter.results_type.extensions_to_classes %> table table-striped ">
+<%= querify_block viewparams.results_path, class: "results-table #{viewparams.result_type}", autoload: true do %>
+    <table class="results <%# viewparams.result_type.extensions_to_classes %> table table-striped ">
       <thead>
       <tr>
-        <%= @filtered_presenter.table_headers.collect { |ttl| "<th>#{ttl}</th>" if ttl }.compact.join("\n").html_safe %>
+        <%= viewparams.table_headers.collect { |ttl| "<th>#{ttl}</th>" if ttl }.compact.join("\n").html_safe %>
       </tr>
       </thead>
-      <tbody class="stream-items-parent <%= @filtered_presenter.stream_id %>">
-      <%= render @filtered_presenter.tail_partial %>
+      <tbody class="stream-items-parent <%= viewparams.stream_id %>">
+      <%= render viewparams.tail_partial, viewparams: viewparams %>
       </tbody>
     </table>
 <% end %>

@@ -1,10 +1,10 @@
-<%= querify_block url, class: "associated-card card-item #{type.extensions_to_classes}", autoload: true do %>
-    <% if defined?(title) %>
-        <div class="associated-title <%= type.extensions_to_classes %>"><%= title %></div>
+<%= querify_block viewparams.results_path, class: "associated-card card-item #{viewparams.result_type.extensions_to_classes}", autoload: true do %>
+    <% if viewparams.page_title.present? %>
+        <div class="associated-title <%= viewparams.result_type.extensions_to_classes %>"><%= viewparams.page_title %></div>
     <% end %>
     <div class="results-content">
       <div class="results-box">
-        <%= panel_results_placeholder type %>
+        <%= panel_results_placeholder viewparams.result_type %>
       </div>
     </div>
 <% end %>
