@@ -1,4 +1,4 @@
-<%= querify_block viewparams.link_address, class: "results-panel #{viewparams.result_type}", autoload: true do %>
+<%= querify_block viewparams.results_path, class: "results-panel #{viewparams.result_type}", autoload: true do %>
     <div class="results-content">
       <div class="results-label <%= viewparams.result_type %> rotate"><%= viewparams.result_expression %></div>
       <div class="results-box">
@@ -7,9 +7,9 @@
       </div>
     </div>
     <div class="results-menu">
-      <%= panel_org_menu viewparams.link_address, viewparams.result_type, :newest %>
+      <%= panel_org_menu viewparams.results_path, viewparams.result_type, :newest %>
       <%# panel_collapse_button result_type, :slider %>
       <%= panel_expand_link collection_user_path(@decorator.object), viewparams.result_type %>
-      <%= panel_suggestion_button viewparams.link_address, viewparams.result_type %>
+      <%= panel_suggestion_button viewparams.results_path, viewparams.result_type %>
     </div>
 <% end %>

@@ -55,8 +55,7 @@ class FilteredPresenter
   require './app/models/results_cache.rb'
   attr_accessor :title, :h
 
-  attr_reader :decorator, :entity, :viewer, :response_service, :result_type,
-              :results_type, :viewparams,
+  attr_reader :decorator, :entity, :viewer, :response_service, :result_type, :viewparams,
               :stream_presenter, # Manages the ResultsCache that produces items based on the query
               :content_mode, # What page element to render? :container, :entity, :results, :modal, :items
               :item_mode, # How composites are presented: :table, :strip, :masonry, :feed_item
@@ -96,7 +95,7 @@ class FilteredPresenter
         self.instance_variable_set "@#{key}".to_sym, val
       end
     }
-    # @stream_param = params[:stream] || '' if params.has_key? :stream
+    params[:result_type] = result_type # Give subclasses a chance to weigh in on a default
     @h = view_context
     @response_service = response_service
     @viewer = @response_service.user
@@ -127,8 +126,6 @@ class FilteredPresenter
                                             querytags,
                                             params
     @viewparams = ViewParams.new self
-    # @display_services = DisplayServices.new response_service.user, @entity || klass || result_type.model_class
-    # @display_services.result_type = result_type
   end
 
   # This is a stub for future use in eliding streaming
@@ -215,8 +212,9 @@ class FilteredPresenter
 
   ### The remaining public methods pertain to the page presentation
 
-  def results_list
-    [result_type || container_contents_type]
+  # Default results list: only the result type. Subclasses may redefine appropriately
+  def results_list rt=result_type
+    [rt]
   end
 
   def show_card?
@@ -236,7 +234,7 @@ class FilteredPresenter
   def presentation_partials &block
     apply_partial :card, block if show_card?
     apply_partial :comments, block if show_comments?
-    apply_partial 'filtered_presenter/generic_results_header', block
+    apply_partial header_partial, block
     if item_mode == :table
       apply_partial 'filtered_presenter/partial_table', block, :item_mode => :table
     elsif results_list.count == 1
@@ -250,14 +248,13 @@ class FilteredPresenter
     end
   end
 
+  def header_partial
+    'filtered_presenter/generic_results_header'
+  end
+
   # Define buttons used in the search/redirect header above the presenter's results
   def header_buttons &block
     # block.call 'RECENTLY VIEWED', '#'
-  end
-
-  # This is the class of the results container
-  def container_contents_type
-    result_type || ((results_cache && results_cache.class) || self.class).to_s
   end
 
   # Specify a path for fetching the results partial
@@ -286,7 +283,7 @@ class FilteredPresenter
   end
 
   def otherviews
-    results_list('').collect { |subtype|
+    results_list(nil).collect { |subtype|
       ViewParams.new(self, result_type: subtype) if subtype != result_type
     }.compact
   end
@@ -341,8 +338,13 @@ end
 class SearchIndexPresenter < FilteredPresenter
   @item_mode = :masonry
 
-  def results_type
-    result_type || self.class.to_s
+  def result_type
+    super || 'recipes'
+  end
+
+  # Default results list: only the result type. Subclasses may redefine appropriately
+  def results_list rt=result_type
+    rt ? [rt] : %w{ recipes lists feeds users }
   end
 
   def display_style
@@ -400,7 +402,7 @@ class UserContentPresenter < FilteredPresenter
       when 'lists'
         %w{ lists.owned lists.collected }
       when nil, ''
-        %w{ lists recipes feeds friends }
+        %w{ recipes lists feeds friends }
       else
         [ rt ]
     end
@@ -444,7 +446,7 @@ end
 # Present the entries associated with a feed
 class FeedsOwnedPresenter < FilteredPresenter
 
-  def results_type
+  def result_type
     'feed_entries'
   end
 
@@ -509,7 +511,7 @@ end
 
 class ListsShowPresenter < FilteredPresenter
 
-  def results_type
+  def result_type
     'recipes'
   end
 

@@ -5,7 +5,7 @@
 <% end %>
 <div class="selector-element">
   <%= link_to_submit viewparams.link_label, viewparams.link_address, class: "result-link #{viewparams.result_type} lead" %>
-  <% viewparams.subviews(viewparams.result_type).each do |viewparams| %>
+  <% viewparams.otherviews.each do |viewparams| %>
       <span class="divider">|</span>&nbsp;
       <%= link_to_submit viewparams.link_label, viewparams.link_address, class: "result-link #{viewparams.result_type}" %>
   <% end %>
