@@ -4,7 +4,7 @@ class ViewParams
 
   delegate :entity, :decorator, :viewer, :this_path, :next_path, :param, :query,
            :filter_query, :filter_field, :filter_type_selector, :tagtype,
-           :table_headers, :stream_id, :tail_partial, :subviews, :otherviews,
+           :table_headers, :stream_id, :tail_partial, :subviews, :otherviews, :header_buttons,
            :panels_label, :page_title, :presentation_partials, :results_partial, :org,
            :to => :filtered_presenter
 
@@ -33,7 +33,7 @@ class ViewParams
         'user'
       end
     else
-      @result_type
+      result_type.singularize
     end
   end
 
@@ -143,7 +143,7 @@ class FilteredPresenter
       when 'recipe'
         'related'
       when 'feed'
-        'entries'
+        'feeds'
       when 'list'
         'contents'
       else
@@ -462,6 +462,10 @@ class FeedsIndexPresenter < FilteredPresenter
 
   def self.params_needed
     super + [ :sort_direction ]
+  end
+
+  def result_type
+    'feeds'
   end
 
   def table_headers

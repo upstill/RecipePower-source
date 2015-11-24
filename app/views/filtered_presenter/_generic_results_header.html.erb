@@ -4,6 +4,11 @@
   </div>
   <div class="col-md-7 panels-search">
     <%= viewparams.filter_field handler: 'RP.tagger.querify' %>
-      <%= filtered_presenter_header_buttons viewparams.filtered_presenter %>
+    <div class="panels-buttons">
+      <% viewparams.header_buttons do |label, link=nil| %>
+          <%= link_to_submit label.upcase, link||'#', class: "#{'disabled' unless link} panels-button soft-button #{viewparams.display_style}-button" %>
+      <% end %>
+    </div>
+      <%# filtered_presenter_header_buttons viewparams.filtered_presenter %>
   </div>
 </div>
