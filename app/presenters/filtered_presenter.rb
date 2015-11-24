@@ -1,9 +1,10 @@
 # This class bundles up the parameters used in views off the presenter.
 class ViewParams
-  attr_reader :link_address, :result_type, :results_path, :filtered_presenter, :item_mode, :org
+  attr_reader :link_address, :result_type, :results_path, :filtered_presenter, :item_mode
 
-  delegate :entity, :decorator, :viewer, :this_path, :next_path, :param, :query,
-           :filter_query, :filter_field, :filter_type_selector, :tagtype,
+  delegate :entity, :decorator, :viewer, :tagtype,
+           :request_path, :next_path,
+           :filter_field, :filter_type_selector,
            :table_headers, :stream_id, :tail_partial, :sibling_views, :header_buttons,
            :panels_label, :page_title, :presentation_partials, :results_partial, :org,
            :to => :filtered_presenter
@@ -14,7 +15,6 @@ class ViewParams
     @link_address = fp.response_service.decorate_path qparams
     @results_path = assert_query fp.results_path, qparams
     @item_mode = qparams[:item_mode] || fp.item_mode
-    @org = qparams[:org] || fp.org
     @filtered_presenter = fp
   end
 
@@ -51,23 +51,20 @@ class ViewParams
 end
 
 class FilteredPresenter
-  # include CardPresentation # Provides display services
+  include StreamPresentation # Provides a streaming interface to the results cache
   require './app/models/results_cache.rb'
   attr_accessor :title, :h
 
-  attr_reader :decorator, :entity, :viewer, :response_service, :result_type, :viewparams,
-              :stream_presenter, # Manages the ResultsCache that produces items based on the query
+  attr_reader :request_path, :decorator, :entity, :viewer, :response_service, :result_type, :viewparams, :tagtype,
               :content_mode, # What page element to render? :container, :entity, :results, :modal, :items
               :item_mode, # How composites are presented: :table, :strip, :masonry, :feed_item
               :org # How to organize the results: :ratings, :popularity, :newest, :random
 
-  delegate :tail_partial, :stream_id, :results_cache,
-           :suspend, :next_item, :this_path, :next_path,
-           :full_size, :query, :param, :querytags, :admin_view,
-           :to => :stream_presenter
-  
-  delegate :display_style,
-           :to => :viewparams
+  delegate :admin_view,
+           :querytags, :"has_query?",
+           :to => :results_cache
+
+  delegate :display_style, :to => :viewparams
 
   # Build an instance of the appropriate subclass, given the entity, controller and action
   def self.build view_context, sessid, request_path, response_service, params, querytags, decorator=nil
@@ -85,6 +82,7 @@ class FilteredPresenter
       name = params['controller'].sub(/Controller$/, '').singularize.capitalize
       klass = name.constantize rescue nil
     end
+
     params_needed.each { |pspec|
       key, val = (pspec.is_a? Array) ? pspec : [pspec]
       val = params[key] if params[key]
@@ -121,11 +119,21 @@ class FilteredPresenter
     @title = response_service.title
     @request_path = request_path
     # FilteredPresenters don't always have results panels
-    @stream_presenter = StreamPresenter.new sessid,
-                                            request_path,
-                                            querytags,
-                                            params
+    init_stream ResultsCache.retrieve_or_build( sessid, querytags, params)
     @viewparams = ViewParams.new self
+  end
+
+  # This is the path that will go into the "more items" link
+  def next_path
+    assert_query request_path, stream_params_next if stream_params_next
+  end
+
+  # The query for applying querytags is the same as this one, without :stream, :querytags or :nocache
+  def query format=nil, params={}
+    if format.is_a? Hash
+      params, format = format, nil
+    end
+    assert_query request_path, format, params.merge(stream_params_null).merge(querytags: nil)
   end
 
   # This is a stub for future use in eliding streaming
@@ -153,7 +161,7 @@ class FilteredPresenter
 
   # Declare the parameters that we adopt as instance variables. subclasses would add to this list
   def params_needed
-    [ :tagtype, :result_type, :id, [:stream, ''], [ :content_mode, :container ], [ :org, :newest ] ]
+    (defined?(super) ? super : []) + [ :tagtype, :result_type, :id, [ :content_mode, :container ], [ :org, :newest ] ]
   end
 
   # Include a (tag) type selector in the query field?
@@ -171,21 +179,12 @@ class FilteredPresenter
   # Provide a tokeninput field for specifying tags, with or without the ability to free-tag
   # The options are those of the tokeninput plugin, with defaults
   def filter_field opt_param={}
-    h.token_input_query opt_param.merge(tagtype: tagtype, querytags: querytags, type_selector: filter_type_selector)
-  end
-
-  # Provide the query for revising the results
-  def filter_query format=nil, params={}
-    if format.is_a? Hash
-      params, format = format, nil
-    end
-    # NB: here is where we can assert our own parameters for the query
-    @stream_presenter.query format, params
+    h.token_input_query opt_param.merge(tagtype: tagtype, querytags: querytags, type_selector: filter_type_selector).compact
   end
 
   def stream_count force=false
-    if stream_presenter.has_query? && (stream_presenter.ready? || force)
-      case nmatches = stream_presenter.nmatches
+    if results_cache.has_query? && (results_cache.ready? || force)
+      case nmatches = results_cache.nmatches
         when 0
           'No matches found'
         when 1
@@ -194,7 +193,7 @@ class FilteredPresenter
           "#{nmatches} found"
       end
     else
-      case nmatches = stream_presenter.full_size
+      case nmatches = results_cache.full_size
         when 0
           'Regrettably empty'
         when 1
@@ -203,11 +202,6 @@ class FilteredPresenter
           "#{nmatches} altogether"
       end
     end
-  end
-
-  # The types of tag to which the query is restricted
-  def tagtype
-    stream_presenter && stream_presenter.tagtype
   end
 
   ### The remaining public methods pertain to the page presentation
@@ -238,7 +232,7 @@ class FilteredPresenter
   def presentation_partials &block
     apply_partial :card, block if show_card?
     apply_partial :comments, block if show_comments?
-    apply_partial header_partial, block
+    apply_partial header_partial, block if subtypes.count > 0
     if item_mode == :table
       apply_partial 'filtered_presenter/partial_table', block, :item_mode => :table
     elsif subtypes.count == 1
@@ -263,7 +257,7 @@ class FilteredPresenter
 
   # Specify a path for fetching the results partial
   def results_path
-    assert_query (@stream_presenter ? this_path : @request_path), content_mode: 'results', item_mode: item_mode
+    assert_query request_path, content_mode: 'results', item_mode: item_mode
   end
 
   # This is the name of the partial used to render my results
@@ -323,7 +317,7 @@ protected
   private
 
   def querytags
-    stream_presenter ? stream_presenter.querytags : []
+    results_cache ? results_cache.querytags : []
   end
 
   def org= val
@@ -385,7 +379,7 @@ class RecipesAssociatedPresenter < FilteredPresenter
 
   # No results associated with recipes as yet
   def subtypes
-    []
+    [ ]
   end
 
 end
@@ -500,16 +494,15 @@ class FeedsIndexPresenter < FilteredPresenter
 
   def header_buttons &block
     current_mode = @sort_direction
-    current_path = (@stream_presenter ? this_path : @request_path)
     block.call 'newest first',
-               assert_query(current_path, order_by: 'updated_at', sort_direction: 'DESC'),
+               assert_query(request_path, order_by: 'updated_at', sort_direction: 'DESC'),
                title: 'Re-sort The List'
     block.call 'oldest first',
-               assert_query(current_path, order_by: 'updated_at', sort_direction: 'ASC'),
+               assert_query(request_path, order_by: 'updated_at', sort_direction: 'ASC'),
                title: 'Re-sort The List'
     if admin_view
       block.call 'unapproved first',
-               assert_query(current_path, order_by: 'approved', sort_direction: 'DESC'),
+               assert_query(request_path, order_by: 'approved', sort_direction: 'DESC'),
                  title: 'Re-sort The List'
     end
   end
@@ -524,6 +517,10 @@ class ListsIndexPresenter < FilteredPresenter
     [ '', '', 'Author', 'Tags', 'Size', '' ]
   end
 
+  def panels_label
+    'treasuries'
+  end
+
   def result_expression
     'all the lists'
   end
@@ -533,6 +530,10 @@ class ListsShowPresenter < FilteredPresenter
 
   def result_type
     'recipes'
+  end
+
+  def panels_label
+    'contents'
   end
 
 end
