@@ -4,7 +4,7 @@ class ViewParams
 
   delegate :entity, :decorator, :viewer, :this_path, :next_path, :param, :query,
            :filter_query, :filter_field, :filter_type_selector, :tagtype,
-           :table_headers, :stream_id, :tail_partial, :subviews, :otherviews, :header_buttons,
+           :table_headers, :stream_id, :tail_partial, :sibling_views, :header_buttons,
            :panels_label, :page_title, :presentation_partials, :results_partial, :org,
            :to => :filtered_presenter
 
@@ -212,9 +212,13 @@ class FilteredPresenter
 
   ### The remaining public methods pertain to the page presentation
 
-  # Default results list: only the result type. Subclasses may redefine appropriately
-  def results_list rt=result_type
-    [rt]
+  # Default results list: only the result type. Subclasses may redefine for multiple output types
+  def subtypes
+    [ result_type ]
+  end
+
+  def sibling_types
+    [ ]
   end
 
   def show_card?
@@ -237,11 +241,11 @@ class FilteredPresenter
     apply_partial header_partial, block
     if item_mode == :table
       apply_partial 'filtered_presenter/partial_table', block, :item_mode => :table
-    elsif results_list.count == 1
+    elsif subtypes.count == 1
       apply_partial 'filtered_presenter/partial_spew', block, :item_mode => item_mode, :org => org
     else
       apply_partial 'filtered_presenter/partial_associated',
-                    results_list,
+                    subtypes,
                     block,
                     :item_mode => item_mode,
                     :org => org
@@ -275,15 +279,8 @@ class FilteredPresenter
     @item_mode || :masonry
   end
 
-  # For presenting panels and other dependent information, provide viewparams for each
-  def subviews except=nil
-    results_list.collect { |subtype|
-      ViewParams.new(self, result_type: subtype) if subtype != except
-    }.compact
-  end
-
-  def otherviews
-    results_list(nil).collect { |subtype|
+  def sibling_views
+    sibling_types.collect { |subtype|
       ViewParams.new(self, result_type: subtype) if subtype != result_type
     }.compact
   end
@@ -338,13 +335,18 @@ end
 class SearchIndexPresenter < FilteredPresenter
   @item_mode = :masonry
 
+  # The global search only presents one type at a time, starting with recipes
   def result_type
     super || 'recipes'
   end
 
   # Default results list: only the result type. Subclasses may redefine appropriately
-  def results_list rt=result_type
-    rt ? [rt] : %w{ recipes lists feeds users }
+  def subtypes
+    result_type ? [ result_type ] : %w{ recipes lists feeds users }
+  end
+
+  def sibling_types
+    %w{ recipes lists feeds users } - [ result_type ]
   end
 
   def display_style
@@ -382,7 +384,8 @@ end
 class RecipesAssociatedPresenter < FilteredPresenter
 
   # No results associated with recipes as yet
-  def results_list rt=result_type
+  def subtypes
+    []
   end
 
 end
@@ -397,14 +400,27 @@ class UserContentPresenter < FilteredPresenter
 
   # Here's where we translate from a result type (as provided by a pagelet) to
   # a series of subtypes to be displayed on the page in panels
-  def results_list rt=result_type
-    case rt
+  def subtypes
+    case result_type
       when 'lists'
         %w{ lists.owned lists.collected }
       when nil, ''
         %w{ recipes lists feeds friends }
       else
-        [ rt ]
+        super
+    end
+  end
+
+  def sibling_types
+    case result_type
+      when 'lists.owned'
+        [ 'lists.collected' ]
+      when 'lists.collected'
+        [ 'lists.owned' ]
+      when 'recipes', 'lists', 'feeds', 'friends'
+        %w{ recipes lists feeds friends } - [result_type]
+      else
+        []
     end
   end
 
@@ -412,14 +428,14 @@ class UserContentPresenter < FilteredPresenter
     if result_type.present?
       apply_partial 'filtered_presenter/collection_entity_header', block
       # The contents partial will get defined once for every subtype in the results list
-      apply_partial "filtered_presenter/partial_#{results_list.count == 1 ? 'spew' : 'associated'}",
-                    results_list,
+      apply_partial "filtered_presenter/partial_#{subtypes.count == 1 ? 'spew' : 'associated'}",
+                    subtypes,
                     block,
                     :item_mode => :masonry, :org => :newest
     else
       apply_partial :card, block
       apply_partial 'filtered_presenter/generic_results_header', block
-      apply_partial :panel, results_list, block, :item_mode => :slider, :org => :newest
+      apply_partial :panel, subtypes, block, :item_mode => :slider, :org => :newest
     end
   end
 

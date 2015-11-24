@@ -42,7 +42,7 @@
                 <%= link_to_submit "COLLECTION", response_service.decorate_path(result_type: ''), class: "result-link collection" %>
               </div>
               <% divs = %w{ bl ur br } %>
-              <% viewparams.otherviews.each do |viewparams| %>
+              <% viewparams.sibling_views.each do |viewparams| %>
                 <div class="<%= divs.shift %>">
                   <%= link_to_submit viewparams.link_label.upcase, viewparams.link_address, class: "result-link #{viewparams.result_type}" %>
                 </div>
