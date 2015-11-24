@@ -14,7 +14,7 @@ class StreamPresenter
     end
     @this_path = assert_query requestpath # , nocache: nil, id: nil # stash the path from this request
     # Format of stream parameter is <start>[-<end>]
-    @stream_param = params.delete(:stream) || "" if params.has_key? :stream
+    @stream_param = params.delete(:stream) || '' if params.has_key? :stream
     @tagtype = params[:tagtype]
     if @stream_param.blank?
       offset = 0

@@ -85,18 +85,18 @@ module NavtabsHelper
   end
 
   def my_lists_navtab menu_only = false
-    navtab :my_lists, "My Lists", lists_path(access: "owned"), menu_only do
+    navtab :my_lists, 'Treasuries', lists_path(access: "owned"), menu_only do
       current_user_or_guest.owned_lists[0..16].collect { |l|
         navlink l.name, list_path(l), id: dom_id(l)
       } + [
           "<hr class='menu'>".html_safe,
-          navlink("Start a List...", new_list_path, mode: :modal, class: "transient")
+          navlink("Start a Treasury...", new_list_path, mode: :modal, class: "transient")
       ]
     end
   end
 
   def other_lists_navtab menu_only = false
-    navtab :other_lists, "More Lists", lists_path(access: "collected"), menu_only do
+    navtab :other_lists, "More Treasuries", lists_path(access: "collected"), menu_only do
       list_set = current_user_or_guest.collection_pointers.where(entity_type: "List").
           joins("INNER JOIN lists ON lists.id = rcprefs.entity_id").where("lists.owner_id != #{current_user_or_guest.id}").
           limit(16).
@@ -115,7 +115,7 @@ module NavtabsHelper
         navlink l.name, list_path(l), id: dom_id(l)
       } + [
           "<hr class='menu'>".html_safe,
-          navlink("Browse for Lists...", lists_path(item_mode: 'table')),
+          navlink("Hunt for Treasuries...", lists_path(item_mode: 'table')),
       ]
     end
   end

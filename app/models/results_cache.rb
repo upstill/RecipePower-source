@@ -130,11 +130,6 @@ end
 class ResultsCache < ActiveRecord::Base
   include ActiveRecord::Sanitization
 
-=begin
-  after_initialize { |rc|
-    @result_type = ResultType.new result_type
-  }
-=end
   before_save do
     session_id != nil
   end

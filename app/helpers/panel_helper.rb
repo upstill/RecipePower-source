@@ -14,7 +14,9 @@ module PanelHelper
   end
 
   def panel_collapse_button_replacement type, item_mode
-    ["a.collapse-button.#{type.extensions_to_selector}", panel_collapse_button(type, item_mode)]
+    selector = 'a.collapse-button'
+    selector << '.' + type.extensions_to_selector if type.present?
+    [selector, panel_collapse_button(type, item_mode)]
   end
 
   def panel_expand_link url, type
@@ -33,7 +35,9 @@ module PanelHelper
   end
 
   def panel_org_menu_replacement url, type, org
-    ["div.org-by.#{type.extensions_to_selector}", panel_org_menu(url, type, org) ]
+    selector = 'div.org-by'
+    selector << '.' + type.extensions_to_selector if type.present?
+    [selector, panel_org_menu(url, type, org) ]
   end
 
   def panel_suggestion_button url, type
@@ -41,7 +45,9 @@ module PanelHelper
   end
 
   def panel_suggestion_button_replacement url, type
-    [ "a.suggest.#{type.extensions_to_selector}", panel_suggestion_button(url, type) ]
+    selector = 'a.suggest'
+    selector << '.' + type.extensions_to_selector if type.present?
+    [selector, panel_suggestion_button(url, type) ]
   end
   
   def panel_results_placeholder type
@@ -53,7 +59,9 @@ module PanelHelper
   end
 
   def panel_results_replacement type, partial
-    [ ".results.#{type.extensions_to_selector}", panel_results(partial) ]
+    selector = '.results'
+    selector << '.' + type.extensions_to_selector if type.present?
+    [selector, panel_results(partial) ]
   end
 
   def panel_suggestions_placeholder type
@@ -65,6 +73,8 @@ module PanelHelper
   end
 
   def panel_suggestions_replacement type, partial=nil
-    [ ".suggestions.#{type.extensions_to_selector}", (partial ? panel_suggestions(partial) : panel_suggestions_placeholder(type)) ]
+    selector = '.suggestions'
+    selector << '.' + type.extensions_to_selector if type.present?
+    [selector, (partial ? panel_suggestions(partial) : panel_suggestions_placeholder(type)) ]
   end
 end

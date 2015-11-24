@@ -16,7 +16,7 @@ module ResultTyping
 
   # Default itemscope by result_type is to just search the model table
   def itemscope
-    @itemscope ||= model_class.unscoped
+    @itemscope ||= result_type.model_class.unscoped
   end
 
 end
