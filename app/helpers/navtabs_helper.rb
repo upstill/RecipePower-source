@@ -114,8 +114,10 @@ module NavtabsHelper
       list_set.collect { |l|
         navlink l.name, list_path(l), id: dom_id(l)
       } + [
+          navlink("Start a new Treasury...", new_list_path(mode: 'modal')),
           "<hr class='menu'>".html_safe,
-          navlink("Hunt for Treasuries...", lists_path(item_mode: 'table')),
+          navlink("Start a new Treasury...", new_list_path(mode: 'modal')),
+          navlink("Hunt for Treasuries...", lists_path(item_mode: 'table'))
       ]
     end
   end
@@ -135,6 +137,7 @@ module NavtabsHelper
       }
       result + [
           "<hr class='menu'>".html_safe,
+          navlink("Add a Feed...", new_feed_path(mode: 'modal')),
           navlink("Browse for More Feeds...", feeds_path(item_mode: 'table', access: (response_service.admin_view? ? "all" : "approved")))
       ]
     end

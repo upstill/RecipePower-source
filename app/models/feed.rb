@@ -24,8 +24,8 @@ class Feed < ActiveRecord::Base
   def follow_url 
     # First, check out the feed
     if fetch
-      self.title = (@fetched.title || "").truncate(255)
-      self.description = (@fetched.description || "").truncate(255)
+      self.title = (@fetched.title || '').truncate(255)
+      self.description = (@fetched.description || '').truncate(255)
       self.site ||= Site.find_or_create url
       unless @fetched.feed_url.blank? || (url == @fetched.feed_url)
         # When the URL changes, clear and update the feed entries
@@ -89,7 +89,7 @@ class Feed < ActiveRecord::Base
   end
 
   def to_s
-    title+" (#{url})"
+    "#{(title.present? && title) || ('Feed #'+id.to_s)} (#{url})"
   end
   
   # Get the external feed, setting the @fetched instance variable to point thereto
@@ -108,7 +108,7 @@ class Feed < ActiveRecord::Base
   end
   
   def self.evaluate
-    prevurl = ""
+    prevurl = ''
     feedcount = 0
     File.open("/Users/upstill/dev/rss_rejects3.txt", "w") do |outfile|
       File.open("/Users/upstill/dev/rss_rejects2.txt").each do |line|
