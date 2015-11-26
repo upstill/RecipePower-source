@@ -79,15 +79,11 @@ class FeedsController < CollectibleController
           render :errors
         else
           flash[:popup] = "'#{@feed.title.truncate(50)}' now appearing in your collection."
-          if params[:to_feeds]
-            redirect_to feeds_path(access: "collected")
-          else
-            render :errors
-          end
+          redirect_to feeds_path(access: 'collected') if params[:to_feeds]
         end
       end
     else
-      flash[:alert] = "Sorry, you need to be logged in to get a feed."
+      flash[:alert] = "Sorry, you need to be logged in to add a feed."
       render :errors
     end
   end

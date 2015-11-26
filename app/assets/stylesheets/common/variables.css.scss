@@ -169,3 +169,39 @@ $salmon-link-color: #E0A09E;
     }
   }
 }
+
+/*
+$feeds-navtab-background-color: #e7dfd6;
+$feeds-navtab-text-color: #de8822;
+$feeds-card-background-color: #f3e3cf;
+$feeds-panel-background-color: #e7dfd6;
+$feeds-panel-background-transparent: rgba(247, 223, 214, 0);
+$feeds-panel-label-color: #f5f2ee;
+*/
+
+$feeds-background-color: $feeds-card-background-color;
+$feeds-text-color: $feeds-navtab-text-color;
+$feeds-button-color: $feeds-panel-label-color;
+$feeds-field-background-color: $feeds-navtab-background-color;
+$feeds-link-color: $feeds-navtab-text-color;
+
+@mixin div-feeds {
+  background-color: $feeds-background-color;
+  color: $feeds-text-color;
+  input.string, textarea, input[type='text'], input[type='password'], input[type='email'], div.form-group.string > ul.token-input-list-facebook {
+    background-color: $feeds-field-background-color;
+    color: $feeds-text-color;
+  }
+  .center-button {
+    background-color: $feeds-field-background-color;
+    background-image: unset;
+    color: $feeds-button-color;
+    border-color: $feeds-button-color;
+  }
+  a {
+    color: $feeds-link-color;
+    &.btn-info {
+      color: lightgray;
+    }
+  }
+}

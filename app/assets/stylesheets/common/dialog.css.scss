@@ -180,6 +180,10 @@ div.dialog.new-style.blue div.modal-dialog div.modal-content {
   @include div-blue;
 }
 
+div.dialog.new-style.feed-scheme div.modal-dialog div.modal-content {
+  @include div-feeds;
+}
+
 div.form-group.user_remember_me {
   margin-bottom: 0;
 }
