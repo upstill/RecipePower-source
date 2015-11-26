@@ -5,7 +5,7 @@ module StreamPresentation
     attr_reader :results_cache
 
     delegate :items, :next_item, :next_range, :stream_id,
-             :"done?", :"ready?", :window, :'window=', :full_size, :nmatches,
+             :"done?", :"ready?", :window, :full_size, :nmatches,
              :to => :results_cache
   end
 
@@ -16,7 +16,7 @@ module StreamPresentation
       else
         offset, limit = @stream.split('-').map(&:to_i)
       end
-      window = offset, limit
+      rc.window = offset, limit
     end
   end
 
