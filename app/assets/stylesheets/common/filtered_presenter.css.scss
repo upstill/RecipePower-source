@@ -33,46 +33,54 @@ div.results-enclosure {
     }
     div.panels-search {
       margin-top: 10px;
-      div.panels-buttons {
-        margin: 20px;
-        a.panels-button {
-          margin: 10px;
-          &.recipe-button {
-            background-color: $recipes-panels-label-button-color;
-            &.disabled {
-              background-color: rgba($recipes-panels-label-button-color, 0.5);
-            }
-          }
-          &.viewer-button {
-            background-color: $viewer-panels-label-button-color;
-            &.disabled {
-              background-color: rgba($viewer-panels-label-button-color, 0.5);
-            }
-          }
-          &.user-button {
-            background-color: $user-panels-label-button-color;
-            &.disabled {
-              background-color: rgba($user-panels-label-button-color, 0.5);
-            }
-          }
-          &.feed-button {
-            background-color: $feeds-navtab-text-color;
-            &.disabled {
-              background-color: rgba($feeds-navtab-text-color, 0.5);
-            }
-          }
-          &.friend-button {
-            background-color: $friends-panels-label-button-color;
-            &.disabled {
-              background-color: rgba($friends-panels-label-button-color, 0.5);
-            }
-          }
-          &.disabled {
-            pointer-events: none;
-            cursor: default;
-          }
-        }
+    }
+  }
+}
+
+div.panels-buttons {
+  // margin: 20px;
+  a.panels-button {
+    margin: 10px;
+    &.small {
+      font-size: 0.8em;
+      &.soft-button {
+        padding: 4px 8px;
+        border-radius: 6px;
       }
+    }
+    &.recipe-button {
+      background-color: $recipes-panels-label-button-color;
+      &.disabled {
+        background-color: rgba($recipes-panels-label-button-color, 0.5);
+      }
+    }
+    &.viewer-button {
+      background-color: $viewer-panels-label-button-color;
+      &.disabled {
+        background-color: rgba($viewer-panels-label-button-color, 0.5);
+      }
+    }
+    &.user-button {
+      background-color: $user-panels-label-button-color;
+      &.disabled {
+        background-color: rgba($user-panels-label-button-color, 0.5);
+      }
+    }
+    &.feed-button {
+      background-color: $feeds-navtab-text-color;
+      &.disabled {
+        background-color: rgba($feeds-navtab-text-color, 0.5);
+      }
+    }
+    &.friend-button {
+      background-color: $friends-panels-label-button-color;
+      &.disabled {
+        background-color: rgba($friends-panels-label-button-color, 0.5);
+      }
+    }
+    &.disabled {
+      pointer-events: none;
+      cursor: default;
     }
   }
 }

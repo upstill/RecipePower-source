@@ -16,13 +16,15 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-md-8 search">
+          <div class="col-md-6 search">
             <%= viewparams.filter_field(
                     handler: 'RP.tagger.querify',
                     placeholder: "Search #{viewparams.result_expression true}") %>
           </div>
-          <div class="col-md-4 filters">
-            filters go here
+          <div class="col-md-6 filters">
+            <%= filtered_presenter_org_buttons ViewParams.new(viewparams.filtered_presenter, result_type: 'feeds'),
+                                               'order by',
+            class: 'small' %>
           </div>
         </div>
       </div>

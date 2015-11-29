@@ -5,7 +5,7 @@ class ViewParams
   delegate :entity, :decorator, :viewer, :tagtype,
            :request_path, :next_path,
            :filter_field, :filter_type_selector,
-           :table_headers, :stream_id, :tail_partial, :sibling_views, :header_buttons,
+           :table_headers, :stream_id, :tail_partial, :sibling_views, :org_buttons,
            :panels_label, :page_title, :presentation_partials, :results_partial, :org,
            :to => :filtered_presenter
 
@@ -24,7 +24,7 @@ class ViewParams
   end
 
   def display_style
-    if entity && entity.class == User
+    if (%w{ friends users }.include? result_type) && entity && (entity.class == User)
       if entity == viewer
         'viewer'
       elsif viewer.follows? entity
@@ -39,7 +39,7 @@ class ViewParams
 
   # This is the human-facing expression for the result type
   def result_expression with_possessive=false
-    "#{((display_style=='viewer') ? 'my ' : "#{entity.polite_name}'s ") if with_possessive}" +
+    "#{((entity==viewer) ? 'my ' : "#{entity.polite_name}'s ") if with_possessive}" +
     if result_type.match /^lists/
       result_type.sub(/^lists\.?/, '').sub(/owned$/, 'own') + ' treasuries'
     elsif result_type.blank?
@@ -58,7 +58,7 @@ class FilteredPresenter
   attr_reader :request_path, :decorator, :entity, :viewer, :response_service, :result_type, :viewparams, :tagtype,
               :content_mode, # What page element to render? :container, :entity, :results, :modal, :items
               :item_mode, # How composites are presented: :table, :strip, :masonry, :feed_item
-              :org # How to organize the results: :ratings, :popularity, :newest, :random
+              :org # How to organize the results: :ratings, :popularity, :newest, :viewed, :random
 
   delegate :admin_view,
            :querytags, :"has_query?",
@@ -251,13 +251,13 @@ class FilteredPresenter
   end
 
   # Define buttons used in the search/redirect header above the presenter's results
-  def header_buttons &block
+  def org_buttons &block
     # block.call 'RECENTLY VIEWED', '#'
   end
 
-  # Specify a path for fetching the results partial
-  def results_path
-    assert_query request_path, content_mode: 'results', item_mode: item_mode
+  # Specify a path for fetching the results partial, based on the current query
+  def results_path qparams={}
+    assert_query request_path, { content_mode: 'results', item_mode: item_mode }.merge(qparams)
   end
 
   # This is the name of the partial used to render my results
@@ -340,7 +340,7 @@ class SearchIndexPresenter < FilteredPresenter
   end
 
   def sibling_types
-    %w{ recipes lists feeds users } - [ result_type ]
+    %w{ lists recipes feeds users } - [ result_type ]
   end
 
   def display_style
@@ -388,8 +388,7 @@ end
 class UserContentPresenter < FilteredPresenter
 
   def item_mode
-    @item_mode = :slider unless result_type.present?
-    @item_mode
+    @item_mode ||= result_type.present? ? :masonry : :slider
   end
 
   # Here's where we translate from a result type (as provided by a pagelet) to
@@ -412,7 +411,7 @@ class UserContentPresenter < FilteredPresenter
       when 'lists.collected'
         [ 'lists.owned' ]
       when 'recipes', 'lists', 'feeds', 'friends'
-        %w{ recipes lists feeds friends } - [result_type]
+        %w{ lists recipes feeds friends } - [result_type]
       else
         []
     end
@@ -434,9 +433,9 @@ class UserContentPresenter < FilteredPresenter
   end
 
   # Define buttons used in the search/redirect header above the presenter's results
-  def header_buttons &block
-    block.call 'RECENTLY VIEWED', '#'
-    block.call 'EVERYTHING', '#'
+  def org_buttons &block
+    block.call 'RECENTLY VIEWED', results_path(:org => :viewed)
+    block.call 'NEWEST', results_path(:org => :newest)
   end
 end
 
@@ -492,7 +491,7 @@ class FeedsIndexPresenter < FilteredPresenter
     'feeds'
   end
 
-  def header_buttons &block
+  def org_buttons &block
     current_mode = @sort_direction
     block.call 'newest first',
                assert_query(request_path, order_by: 'updated_at', sort_direction: 'DESC'),
