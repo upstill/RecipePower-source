@@ -195,7 +195,7 @@ class ResultsCache < ActiveRecord::Base
 
   # Declare the parameters needed for this class
   def self.params_needed
-    [:id, :viewerid, :admin_view, :querytags, :order_by, :sort_direction ]
+    [:id, :viewerid, :admin_view, :querytags, :org, :sort_direction ]
   end
 
   def viewer
@@ -252,17 +252,12 @@ class ResultsCache < ActiveRecord::Base
     elsif itemscope.is_a? Array
       itemscope.slice safe_partition.window.min, safe_partition.windowsize
     else
+      ordereditemscope = sort_attribute ?
+          uniqueitemscope.joins(result_type.singularize.to_sym).order("#{sort_attribute} #{sort_direction}") :
+          uniqueitemscope
       item_scope_for_loading(
-      ordereditemscope.limit(safe_partition.windowsize).offset(safe_partition.window.min)).to_a
-    end
-  end
-
-  # Use the order_by parameter and the ASC/DESC attribute to assert an ordering
-  def ordereditemscope
-    if @order_by
-      uniqueitemscope.order "#{@order_by} #{sort_direction}"
-    else
-      uniqueitemscope
+        ordereditemscope.limit(safe_partition.windowsize).offset(safe_partition.window.min)
+      ).to_a
     end
   end
 
@@ -376,6 +371,20 @@ class ResultsCache < ActiveRecord::Base
 
   protected
 
+  # Use the org parameter and the ASC/DESC attribute to assert an ordering
+  def sort_attribute
+    case @org.to_sym
+      when :ratings
+      when :popularity
+      when :newest
+        'updated_at'
+      when :viewed
+        '"rcprefs"."updated_at"'
+      when :random
+      else
+    end if @org
+  end
+
   def sort_direction
     @sort_direction ||= 'DESC'
   end
@@ -444,6 +453,8 @@ class UsersShowCache < ResultsCache
         return UserOwnedListsCache
       when 'friends'
         return UserFriendsCache
+      when 'feeds'
+        return UserFeedsCache
       else
         self
     end
@@ -579,7 +590,6 @@ class ListsIndexCache < ResultsCache
         ListServices.lists_visible_to viewer
     end
   end
-
 end
 
 # list's content visible to current user (ListStreamer)
@@ -713,6 +723,20 @@ class UserFriendsCache < ResultsCache
   def itemscope
     @itemscope ||= user.followees
   end
+end
+
+class UserFeedsCache < UsersCollectionCache
+
+  protected
+
+  def sort_attribute
+    if @org && (@org.to_sym == :newest)
+      '"feeds"."last_post_date"'
+    else
+      super
+    end
+  end
+
 end
 
 class SearchCache < UsersBiglistCache

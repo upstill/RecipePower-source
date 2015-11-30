@@ -154,6 +154,8 @@ class FilteredPresenter
         'feeds'
       when 'list'
         'contents'
+      when 'feed_entry'
+        'entries'
       else
         display_style.pluralize
     end

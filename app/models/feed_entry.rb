@@ -26,9 +26,10 @@ class FeedEntry < ActiveRecord::Base
   private
   
   def self.add_entries(entries, feed)
-    entries.each do |entry|
-      entry.published = Time.current unless entry.published
+    last_posted =
+    entries.map { |entry|
       unless exists? :guid => entry.id
+        entry.published ||= Time.current
         create!(
           :title        => entry.title,
           :summary      => entry.summary,
@@ -37,7 +38,13 @@ class FeedEntry < ActiveRecord::Base
           :guid         => entry.id,
           :feed         => feed
         )
+        entry.published
       end
+    }.compact.sort.last
+    # Update the last_post_date of the feed if there's a new entry
+    if last_posted && (feed.last_post_date.nil? || (last_posted > feed.last_post_date))
+      feed.last_post_date = last_posted
+      feed.save
     end
   end
 end

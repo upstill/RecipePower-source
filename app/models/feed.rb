@@ -3,7 +3,7 @@ require 'feedjira'
 class Feed < ActiveRecord::Base
   include Collectible
   picable :picurl, :picture
-  attr_accessible :title, :description, :site_id, :feedtype, :approved, :url
+  attr_accessible :title, :description, :site_id, :feedtype, :approved, :url, :last_post_date
   
   # Setup a feed properly: do a reality check on the url, populate the information
   # fields (title, description...), and ensure it has an associated site

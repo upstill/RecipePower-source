@@ -222,10 +222,12 @@ module CollectibleHelper
   ################## End of standardized buttons ##########################
 
   def collectible_source decorator, options={}
-    if (decorator.object.respond_to?(:site) && decorator.site)
-      "source: ".html_safe + site_homelink(decorator, options)
+    if decorator.object.class == Feed
+      feed_entries_status decorator.object
     elsif decorator.object.class == List
-      "compiled by ".html_safe + user_homelink(decorator.object.owner, options)
+      'compiled by '.html_safe + user_homelink(decorator.object.owner, options)
+    elsif (decorator.object.respond_to?(:site) && decorator.site)
+      'source: '.html_safe + site_homelink(decorator, options)
     end
   end
 

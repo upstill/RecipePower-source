@@ -85,6 +85,9 @@ div.card-item {
     span.glyphicon-cog {
       top: 7px;
     }
+    a.dropdown-toggle {
+      padding: 5px 8px;
+    }
   }
   &.cardlet-item {
     // min-width: 200px;
@@ -241,10 +244,9 @@ div.card-item {
       vertical-align: bottom;
       font-size: 2em;
       div.share-button {
-        float: right;
-        position: relative;
-        left: 10px;
-        bottom: 8px;
+        position: absolute;
+        right: 8px;
+        bottom: 3px;
       }
     }
     div.title {
