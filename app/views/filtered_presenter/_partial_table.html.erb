@@ -1,5 +1,5 @@
 <%= querify_block viewparams.results_path, class: "results-table #{viewparams.result_type}", autoload: true do %>
-    <table class="results <%# viewparams.result_type.extensions_to_classes %> table table-striped ">
+    <table class="results <%= viewparams.result_type.extensions_to_classes %> table table-striped ">
       <thead>
       <tr>
         <%= viewparams.table_headers.collect { |ttl| "<th>#{ttl}</th>" if ttl }.compact.join("\n").html_safe %>

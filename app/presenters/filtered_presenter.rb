@@ -253,7 +253,7 @@ class FilteredPresenter
   end
 
   # Define buttons used in the search/redirect header above the presenter's results
-  def org_buttons &block
+  def org_buttons context, &block
     # block.call 'RECENTLY VIEWED', '#'
   end
 
@@ -435,9 +435,11 @@ class UserContentPresenter < FilteredPresenter
   end
 
   # Define buttons used in the search/redirect header above the presenter's results
-  def org_buttons &block
-    block.call 'RECENTLY VIEWED', results_path(:org => :viewed), class: (org.to_sym == :viewed ? 'disabled' : '')
-    block.call 'NEWEST', results_path(:org => :newest), class: (org.to_sym == :newest ? 'disabled' : '')
+  def org_buttons context, &block
+    size = context == 'panels' ? '' : ' small'
+    block.call 'RECENTLY VIEWED', results_path(:org => :viewed), class: (org.to_sym == :viewed ? 'disabled' : '')+size
+    block.call 'NEWEST', results_path(:org => :newest), class: (org.to_sym == :newest ? 'disabled' : '')+size
+    context == 'panels' ? '' : 'order by'
   end
 end
 
@@ -471,8 +473,8 @@ end
 class FeedsIndexPresenter < FilteredPresenter
   @item_mode = :table
 
-  def self.params_needed
-    super + [ :sort_direction ]
+  def params_needed
+    super + [ [ :sort_direction, 'DESC' ] ]
   end
 
   def result_type
@@ -493,19 +495,22 @@ class FeedsIndexPresenter < FilteredPresenter
     'feeds'
   end
 
-  def org_buttons &block
+  def org_buttons context, &block
     current_mode = @sort_direction
     block.call 'newest first',
-               assert_query(request_path, org: :newest, sort_direction: 'DESC'),
-               title: 'Re-sort The List'
+               results_path(:org => :newest, sort_direction: 'DESC'),
+               title: 'Re-sort The List',
+               class: (@sort_direction == 'DESC' ? 'disabled' : '')
     block.call 'oldest first',
-               assert_query(request_path, org: :newest, sort_direction: 'ASC'),
-               title: 'Re-sort The List'
+               results_path(:org => :newest, sort_direction: 'ASC'),
+               title: 'Re-sort The List',
+               class: (@sort_direction == 'ASC' ? 'disabled' : '')
     if admin_view
       block.call 'unapproved first',
-               assert_query(request_path, org: :approved, sort_direction: 'DESC'),
+                 results_path(:org => :approved, sort_direction: 'DESC'),
                  title: 'Re-sort The List'
     end
+    '' # No label
   end
 
 end
