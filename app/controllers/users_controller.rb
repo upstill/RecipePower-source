@@ -86,7 +86,7 @@ class UsersController < CollectibleController
   # Show the user's recently-viewed recipes
   def recent
     @active_menu = params[:id].to_s == current_user_or_guest_id ? :home : :collections
-    update_and_decorate # response_service.user = User.find params[:id]
+    update_and_decorate 
     @empty_msg = "As you check out things in RecipePower, they will be remembered here."
     response_service.title = "Recently Viewed"
     smartrender 
@@ -94,7 +94,7 @@ class UsersController < CollectibleController
 
   # Show the user's entire collection
   def collection
-    update_and_decorate # response_service.user = User.find params[:id]
+    update_and_decorate 
     label = (params[:result_type] || 'recipe').pluralize
     if (response_service.user.id == current_user_or_guest_id)
       response_service.title = "My #{label}"
@@ -110,7 +110,7 @@ class UsersController < CollectibleController
 
   # Show the user's recently-viewed recipes
   def biglist
-    update_and_decorate # response_service.user = User.find params[:id]
+    update_and_decorate 
     @active_menu = :collections
     response_service.title = "The Big List"
     smartrender 

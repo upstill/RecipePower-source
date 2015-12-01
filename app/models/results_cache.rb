@@ -253,7 +253,7 @@ class ResultsCache < ActiveRecord::Base
       itemscope.slice safe_partition.window.min, safe_partition.windowsize
     else
       ordereditemscope = sort_attribute ?
-          uniqueitemscope.joins(result_type.singularize.to_sym).order("#{sort_attribute} #{sort_direction}") :
+          uniqueitemscope.joins(result_type.to_sym).order("#{sort_attribute} #{sort_direction}") :
           uniqueitemscope
       item_scope_for_loading(
         ordereditemscope.limit(safe_partition.windowsize).offset(safe_partition.window.min)
@@ -377,7 +377,7 @@ class ResultsCache < ActiveRecord::Base
       when :ratings
       when :popularity
       when :newest
-        'updated_at'
+        %Q{"#{result_type}"."created_at"}
       when :viewed
         '"rcprefs"."updated_at"'
       when :random

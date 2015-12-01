@@ -16,16 +16,16 @@ class Rcpref < ActiveRecord::Base
   # before_save :ensure_unique
   attr_accessible :comment, :entity_type, :entity_id, :user_id, :in_collection, :updated_at, :created_at, :private
 
-  # Establish belongs_to relations for all the known Collectible classes
+  # Establish belongs_to relations for all the known Collectible classes, mainly for use in joins
   # TODO: Smell! We're enumerating a relation for every collectible type. This really should be
   # declared in the Collectible module by modifying each class. But how?
-  belongs_to :feed, -> { where '"rcprefs"."entity_type" = \'Feed\'' }, foreign_key: 'entity_id', class_name: 'Feed'
-  belongs_to :feed_entry, -> { where '"rcprefs"."entity_type" = \'FeedEntry\'' }, foreign_key: 'entity_id', class_name: 'FeedEntry'
-  belongs_to :recipe, -> { where '"rcprefs"."entity_type" = \'Recipe\'' }, foreign_key: 'entity_id', class_name: 'Recipe'
-  belongs_to :site, -> { where '"rcprefs"."entity_type" = \'Site\'' }, foreign_key: 'entity_id', class_name: 'Site'
-  belongs_to :list, -> { where '"rcprefs"."entity_type" = \'List\'' }, foreign_key: 'entity_id', class_name: 'List'
-  belongs_to :product, -> { where '"rcprefs"."entity_type" = \'Product\'' }, foreign_key: 'entity_id', class_name: 'Product'
-  belongs_to :user, -> { where '"rcprefs"."entity_type" = \'User\'' }, foreign_key: 'entity_id', class_name: 'User'
+  belongs_to :feeds, -> { where '"rcprefs"."entity_type" = \'Feed\'' }, foreign_key: 'entity_id', class_name: 'Feed'
+  belongs_to :feed_entries, -> { where '"rcprefs"."entity_type" = \'FeedEntry\'' }, foreign_key: 'entity_id', class_name: 'FeedEntry'
+  belongs_to :recipes, -> { where '"rcprefs"."entity_type" = \'Recipe\'' }, foreign_key: 'entity_id', class_name: 'Recipe'
+  belongs_to :sites, -> { where '"rcprefs"."entity_type" = \'Site\'' }, foreign_key: 'entity_id', class_name: 'Site'
+  belongs_to :lists, -> { where '"rcprefs"."entity_type" = \'List\'' }, foreign_key: 'entity_id', class_name: 'List'
+  belongs_to :products, -> { where '"rcprefs"."entity_type" = \'Product\'' }, foreign_key: 'entity_id', class_name: 'Product'
+  belongs_to :users, -> { where '"rcprefs"."entity_type" = \'User\'' }, foreign_key: 'entity_id', class_name: 'User'
 
   # When saving a "new" use, make sure it's unique
   def ensure_unique

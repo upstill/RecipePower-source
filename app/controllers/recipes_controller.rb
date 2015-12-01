@@ -72,7 +72,7 @@ class RecipesController < CollectibleController
       report_recipe( collection_path, truncate( @recipe.title, :length => 100)+" now appearing in your collection.", formats)
     else
         response_service.title = "Cookmark a Recipe"
-        update_and_decorate (@recipe || Recipe.new)
+        update_and_decorate (@recipe || Recipe.new), true
         smartrender
     end
   end
@@ -81,7 +81,7 @@ class RecipesController < CollectibleController
   def create # Take a URL, then either lookup or create the recipe
     # return if need_login true
     # Find the recipe by URI (possibly correcting same), and bind it to the current user
-    update_and_decorate Recipe.ensure(params[:recipe]) # session[:user_id], params[:recipe]
+    update_and_decorate Recipe.ensure(params[:recipe]), true
     if @recipe.errors.empty? # Success (valid recipe, either created or fetched)
       current_user.collect @recipe if current_user  # Add to collection
       respond_to do |format|
@@ -112,7 +112,7 @@ class RecipesController < CollectibleController
     respond_to do |format|
       format.html { # This is for capturing a new recipe and tagging it using a new page. 
         if current_user
-          update_and_decorate Recipe.ensure(params[:recipe]||{}, params[:extractions])
+          update_and_decorate Recipe.ensure(params[:recipe]||{}, params[:extractions]), true
           if @recipe.id
             current_user.collect @recipe
             if response_service.injector?
@@ -133,7 +133,7 @@ class RecipesController < CollectibleController
       }
       format.json {
         if current_user          
-          update_and_decorate Recipe.ensure(params[:recipe]||{}, params[:extractions])
+          update_and_decorate Recipe.ensure(params[:recipe]||{}, params[:extractions]), true
           if @recipe.id && @recipe.errors.empty?
             current_user.collect @recipe
             # Recipe all captured and everything. Let's go tag it.
@@ -189,17 +189,6 @@ class RecipesController < CollectibleController
     @entity = Recipe.ensure(params.slice(:id, :url))
     super
   end
-
-=begin
-  # Remove the recipe from the system entirely
-  def destroy
-    # @recipe = Recipe.find params[:id]
-    update_and_decorate
-    title = @recipe.title
-    @recipe.destroy
-    report_recipe collection_user_url(current_user), "\"#{title}\" is gone for good.", formats, true
-  end
-=end
 
   def revise # modify current recipe to reflect a client-side change
     @recipe = Recipe.find(params[:id])
