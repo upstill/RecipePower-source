@@ -11,7 +11,7 @@ module FilteredPresenterHelper
           "#{'disabled' unless link} org-button soft-button #{viewparams.display_style} #{options[:class]}"
       buttons << querify_link( label.upcase, link||'#', link_options )
     end || ''
-    content_tag :div, label.html_safe+buttons, class: "org-buttons #{context}-buttons"
+    content_tag :div, label.html_safe+buttons, class: "org-buttons #{context}-buttons" if buttons.present?
   end
 
   def filtered_presenter_org_buttons_replacement viewparams, context='panels'

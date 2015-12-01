@@ -24,7 +24,7 @@ class ViewParams
   end
 
   def display_style
-    if (%w{ friends users }.include? result_type) && entity && (entity.class == User)
+    if (['friends', 'users', '', nil].include? result_type) && entity && (entity.class == User)
       if entity == viewer
         'viewer'
       elsif viewer.follows? entity
@@ -146,8 +146,10 @@ class FilteredPresenter
     case display_style
       when 'viewer'
         'my collection'
-      when 'friend', 'user'
-        'collection'
+      when 'friend'
+        "#{entity.salutation.downcase}'s collection"
+      when 'user'
+        "#{entity.polite_name.downcase}'s collection"
       when 'recipe'
         'related'
       when 'feed'
@@ -345,10 +347,6 @@ class SearchIndexPresenter < FilteredPresenter
     %w{ lists recipes feeds users } - [ result_type ]
   end
 
-  def display_style
-    'search'
-  end
-
   def header_partial
     'filtered_presenter/associated_results_header'
   end
@@ -527,6 +525,10 @@ class ListsIndexPresenter < FilteredPresenter
     'treasuries'
   end
 
+  def result_type
+    'lists'
+  end
+
   def result_expression
     'all the lists'
   end
@@ -535,7 +537,7 @@ end
 class ListsShowPresenter < FilteredPresenter
 
   def result_type
-    'recipes'
+    'lists'
   end
 
   def panels_label

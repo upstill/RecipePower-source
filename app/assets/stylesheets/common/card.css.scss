@@ -199,15 +199,35 @@ div.card-item {
   }
   &.viewer-card {
     background-color: $viewer-card-background-color;
+    div.title > a.title-link {
+      color: white;
+    }
   }
   &.friend-card {
     background-color: $friends-card-background-color;
+    div.title > a.title-link {
+      color: white;
+    }
+  }
+  &.feed-card {
+    background-color: $feeds-card-background-color;
+    div.title > a.title-link {
+      color: $feeds-panel-label-color;
+    }
   }
   &.user-card {
     background-color: $user-card-background-color;
+    div.title > a.title-link {
+      color: white;
+    }
   }
   &.list-card {
     background-color: $lists-card-background-color;
+    div.title > a.title-link {
+      color: rgba($lists-navtab-text-color, 0.6);
+    }
+  }
+  &.entity-card {
     color: #909090;
     div.vote-buttons {
       position: absolute;
@@ -258,9 +278,6 @@ div.card-item {
       font-weight: 700;
       letter-spacing: 1.5px;
       line-height: 1.2em;
-      a.title-link {
-        color: white;
-      }
     }
     div.vote-buttons {
       font-size: 1.2em;

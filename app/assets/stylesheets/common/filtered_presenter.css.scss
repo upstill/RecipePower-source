@@ -3,6 +3,7 @@ div.results-enclosure {
   height: auto;
   div.panels-query {
     margin-top: 15px;
+    position: relative;
     div.panels-label {
       font-family: $oswald;
       font-size: 500%;
@@ -21,6 +22,9 @@ div.results-enclosure {
       &.feed-label {
         color: $feeds-navtab-text-color;
       }
+      &.feed_entry-label {
+        color: $feeds-navtab-text-color;
+      }
       &.friend-label {
         color: $friends-navtab-text-color;
       }
@@ -32,7 +36,8 @@ div.results-enclosure {
       }
     }
     div.panels-search {
-      margin-top: 10px;
+      position: absolute;
+      bottom: 20px;
     }
   }
 }

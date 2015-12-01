@@ -1,6 +1,6 @@
 
 <%= present decorator, current_user_or_guest do |presenter| %>
-    <div class="container-fluid card-item list-card <%= decorator.dom_id %>">
+    <div class="container-fluid card-item entity-card <%= viewparams.display_style %>-card <%= decorator.dom_id %>">
       <%= collectible_vote_buttons decorator.object unless decorator.object == response_service.user %>
       <table style="width: 100%">
         <tr>
