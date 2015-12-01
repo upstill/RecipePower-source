@@ -253,7 +253,7 @@ class ResultsCache < ActiveRecord::Base
       itemscope.slice safe_partition.window.min, safe_partition.windowsize
     else
       ordereditemscope = sort_attribute ?
-          uniqueitemscope.joins(result_type.to_sym).order("#{sort_attribute} #{sort_direction}") :
+          uniqueitemscope.joins(result_type.model_name.underscore.pluralize.to_sym).order("#{sort_attribute} #{sort_direction}") :
           uniqueitemscope
       item_scope_for_loading(
         ordereditemscope.limit(safe_partition.windowsize).offset(safe_partition.window.min)

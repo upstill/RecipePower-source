@@ -436,8 +436,8 @@ class UserContentPresenter < FilteredPresenter
 
   # Define buttons used in the search/redirect header above the presenter's results
   def org_buttons &block
-    block.call 'RECENTLY VIEWED', results_path(:org => :viewed)
-    block.call 'NEWEST', results_path(:org => :newest)
+    block.call 'RECENTLY VIEWED', results_path(:org => :viewed), class: (org.to_sym == :viewed ? 'disabled' : '')
+    block.call 'NEWEST', results_path(:org => :newest), class: (org.to_sym == :newest ? 'disabled' : '')
   end
 end
 

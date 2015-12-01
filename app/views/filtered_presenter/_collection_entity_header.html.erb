@@ -22,9 +22,7 @@
                     placeholder: "Search #{viewparams.result_expression true}") %>
           </div>
           <div class="col-md-6 filters">
-            <%= filtered_presenter_org_buttons ViewParams.new(viewparams.filtered_presenter, result_type: 'feeds'),
-                                               'order by',
-            class: 'small' %>
+            <%= filtered_presenter_org_buttons viewparams, 'order by', class: 'small' %>
           </div>
         </div>
       </div>

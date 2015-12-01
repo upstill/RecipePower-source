@@ -13,4 +13,8 @@ module FilteredPresenterHelper
     content_tag :div, buttons, class: 'panels-buttons'
   end
 
+  def filtered_presenter_org_buttons_replacement viewparams
+    [ 'div.panels-buttons', filtered_presenter_org_buttons(viewparams, 'order by', class: 'small') ]
+  end
+
 end
