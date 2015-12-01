@@ -29,19 +29,17 @@ module FeedsHelper
   def feed_entries_report feed
     case nmatches = feed.feed_entries.size
       when 0
-        'No&nbsp;entries.'
+        'No&nbsp;entries. '.html_safe
       when 1
-        'One&nbsp;entry,'
+        'One&nbsp;entry, '.html_safe
       else
-        "#{nmatches}&nbsp;entries,"
+        "#{nmatches}&nbsp;entries, ".html_safe
     end
   end
 
   # Summarize the number of entries/latest entry for a feed
   def feed_status_summary feed
-    time_report = (feed.updated_at.today?) ? 'today' : "#{time_ago_in_words feed.updated_at} ago"
-    update_button = feed_update_button feed
-    "#{feed_entries_report feed}/<br>#{time_report} #{update_button}".html_safe
+    feed_entries_status(feed) + feed_update_button(feed)
   end
 
   def feed_status_report_replacement feed
@@ -49,11 +47,11 @@ module FeedsHelper
   end
 
   def feed_entries_status feed
-    result = feed_entries_report(feed).html_safe
+    result = feed_entries_report feed
     if (feed.feed_entries.size > 0) && feed.last_post_date
       time_report = (feed.last_post_date.today?) ? 'Today' : "#{time_ago_in_words feed.last_post_date} ago"
-      result = result + ' latest'.html_safe if feed.feed_entries.size > 1
-      result + " posted: #{time_report}.".html_safe
+      result = result + 'latest '.html_safe if feed.feed_entries.size > 1
+      result + "posted #{time_report}.".html_safe
     else
       result
     end

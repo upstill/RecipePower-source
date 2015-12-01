@@ -496,14 +496,14 @@ class FeedsIndexPresenter < FilteredPresenter
   def org_buttons &block
     current_mode = @sort_direction
     block.call 'newest first',
-               assert_query(request_path, order_by: 'updated_at', sort_direction: 'DESC'),
+               assert_query(request_path, org: :newest, sort_direction: 'DESC'),
                title: 'Re-sort The List'
     block.call 'oldest first',
-               assert_query(request_path, order_by: 'updated_at', sort_direction: 'ASC'),
+               assert_query(request_path, org: :newest, sort_direction: 'ASC'),
                title: 'Re-sort The List'
     if admin_view
       block.call 'unapproved first',
-               assert_query(request_path, order_by: 'approved', sort_direction: 'DESC'),
+               assert_query(request_path, org: :approved, sort_direction: 'DESC'),
                  title: 'Re-sort The List'
     end
   end

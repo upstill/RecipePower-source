@@ -45,9 +45,11 @@ class ResultType < String
 
   # Express a user-friendly name string as a class name for purposes of naming a result_type
   def model_name
-    if root.present?
-      root.singularize.camelize
-    end
+    root.singularize.camelize if root.present?
+  end
+
+  def table_name
+    root if root.present?
   end
 
   def model_class
