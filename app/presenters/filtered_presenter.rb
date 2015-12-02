@@ -6,21 +6,74 @@ class ViewParams
            :request_path, :next_path,
            :filter_field, :filter_type_selector,
            :table_headers, :stream_id, :tail_partial, :sibling_views, :org_buttons,
-           :panels_label, :page_title, :presentation_partials, :results_partial, :org,
+           :presentation_partials, :results_partial, :org,
            :to => :filtered_presenter
 
   # Use a filtered presenter and a subtype to define the parameters
   def initialize fp, qparams={}
-    @result_type = qparams[:result_type] || fp.result_type || ''
+    @result_type = ResultType.new qparams[:result_type] || fp.result_type || ''
     @link_address = fp.response_service.decorate_path qparams
     @results_path = assert_query fp.results_path, qparams
     @item_mode = qparams[:item_mode] || fp.item_mode
     @filtered_presenter = fp
   end
 
-  # Define a name used in linking to the subtype
-  def link_label
-    result_expression
+    # For use in the address bar
+    def page_title
+      case display_style
+        when 'viewer'
+          'my collection'
+        when 'friend'
+          "#{entity.salutation.downcase}'s collection"
+        when 'user'
+          "#{entity.polite_name.downcase}'s collection"
+        when 'recipe'
+          'related'
+        when 'feed'
+          'feeds'
+        when 'list'
+          'contents'
+        when 'feed_entry'
+          'entries'
+        else
+          display_style.pluralize
+      end
+    end
+
+  def panel_title short=false
+    if (user = filtered_presenter.entity) && (user.class == User) && result_type
+      is_me = (user == filtered_presenter.viewer)
+      is_friend = filtered_presenter.viewer.follows? user
+      salutation = (is_friend ? user.salutation : user.polite_name).downcase
+      if short
+        %Q{#{is_me ? 'my' : salutation+'\'s'} #{panel_label}}
+      else
+        case result_type
+          when 'recipes'
+            is_me ? "#{panel_label} I've collected" : "#{panel_label} collected by #{salutation}"
+          when 'lists.owned'
+            is_me ? "my own #{panel_label}" : "#{salutation}'s own #{panel_label}"
+          when 'lists.collected'
+            is_me ? "#{panel_label} I've collected" : "#{panel_label} collected by #{salutation}"
+          when 'friends'
+            is_me ? 'people I\'m following' : "people #{salutation} is following"
+          when 'feeds'
+            is_me ? 'feeds I\'m following' : "feeds followed by #{salutation}"
+          else
+            "#{panel_label.capitalize} by #{is_me ? 'me' : salutation}"
+        end
+      end
+    else
+      result_type.downcase.pluralize
+    end
+  end
+
+  def panel_label
+    if result_type.present?
+      result_type == 'lists' ? 'treasuries' : result_type.root
+    else
+      'collection'
+    end
   end
 
   def display_style
@@ -33,19 +86,7 @@ class ViewParams
         'user'
       end
     else
-      result_type.singularize
-    end
-  end
-
-  # This is the human-facing expression for the result type
-  def result_expression with_possessive=false
-    "#{((entity==viewer) ? 'my ' : "#{entity.polite_name}'s ") if with_possessive}" +
-    if result_type.match /^lists/
-      result_type.sub(/^lists\.?/, '').sub(/owned$/, 'own') + ' treasuries'
-    elsif result_type.blank?
-      'collection'
-    else
-      result_type
+      result_type.root.singularize
     end
   end
 end
@@ -58,7 +99,8 @@ class FilteredPresenter
   attr_reader :request_path, :decorator, :entity, :viewer, :response_service, :result_type, :viewparams, :tagtype,
               :content_mode, # What page element to render? :container, :entity, :results, :modal, :items
               :item_mode, # How composites are presented: :table, :strip, :masonry, :feed_item
-              :org # How to organize the results: :ratings, :popularity, :newest, :viewed, :random
+              :org, # How to organize the results: :ratings, :popularity, :newest, :viewed, :random
+              :klass # class of the underlying object
 
   delegate :admin_view,
            :querytags, :"has_query?",
@@ -78,9 +120,10 @@ class FilteredPresenter
   def initialize view_context, sessid, request_path, response_service, params, querytags, decorator=nil
     if @decorator = decorator
       @entity = decorator.object
+      @klass = @entity.class
     else
       name = params['controller'].sub(/Controller$/, '').singularize.capitalize
-      klass = name.constantize rescue nil
+      @klass = name.constantize rescue nil
     end
 
     params_needed.each { |pspec|
@@ -139,28 +182,6 @@ class FilteredPresenter
   # This is a stub for future use in eliding streaming
   def dump?
     false
-  end
-
-  # The label for the group of panels associated with a card
-  def panels_label
-    case display_style
-      when 'viewer'
-        'my collection'
-      when 'friend'
-        "#{entity.salutation.downcase}'s collection"
-      when 'user'
-        "#{entity.polite_name.downcase}'s collection"
-      when 'recipe'
-        'related'
-      when 'feed'
-        'feeds'
-      when 'list'
-        'contents'
-      when 'feed_entry'
-        'entries'
-      else
-        display_style.pluralize
-    end
   end
 
   # Declare the parameters that we adopt as instance variables. subclasses would add to this list
@@ -283,29 +304,6 @@ class FilteredPresenter
     }.compact
   end
 
-  def page_title
-    if (@klass == User) && result_type
-      is_me = (@object == @viewer)
-      salutation = @object.salutation.downcase
-      case result_type
-        when 'recipes'
-          is_me ? "#{result_expression} I've collected" : "#{result_expression} collected by #{salutation}"
-        when 'lists.owned'
-            is_me ? "my own #{result_expression}" : "#{salutation}'s own #{result_expression}"
-        when 'lists.collected'
-            is_me ? "#{result_expression} I've collected" : "#{result_expression} collected by #{salutation}"
-        when 'friends'
-          is_me ? 'people I\'m following' : "people #{salutation} is following"
-        when 'feeds'
-          is_me ? 'feeds I\'m following' : "feeds followed by #{salutation}"
-        else
-          "#{result_expression.capitalize} by #{is_me ? 'me' : salutation}"
-      end
-    else
-      result_type.downcase.pluralize
-    end
-  end
-
 protected
 
   # Invoke a partial for one or more subtypes.
@@ -361,17 +359,13 @@ end
 class UsersIndexPresenter < FilteredPresenter
   @item_mode = :table
 
+  def result_type
+    'users'
+  end
+
   def table_headers
     [ '', 'About', 'Interest(s)', '', '' ]
   end
-
-  def result_expression
-    'USERS'
-  end
-
-end
-
-class UsersShowPresenter < FilteredPresenter
 
 end
 
@@ -441,6 +435,10 @@ class UserContentPresenter < FilteredPresenter
   end
 end
 
+class UsersShowPresenter < UserContentPresenter
+
+end
+
 class UsersCollectionPresenter < UserContentPresenter
 
 end
@@ -448,7 +446,6 @@ end
 class UsersRecentPresenter < UserContentPresenter
 
 end
-
 
 class UsersBiglistPresenter < UserContentPresenter
 
@@ -489,10 +486,6 @@ class FeedsIndexPresenter < FilteredPresenter
       '' ].compact
   end
 
-  def result_expression
-    'feeds'
-  end
-
   def org_buttons context, &block
     current_mode = @sort_direction
     block.call 'newest first',
@@ -521,27 +514,20 @@ class ListsIndexPresenter < FilteredPresenter
     [ '', '', 'Author', 'Tags', 'Size', '' ]
   end
 
-  def panels_label
-    'treasuries'
-  end
-
   def result_type
     'lists'
   end
 
-  def result_expression
-    'all the lists'
-  end
 end
 
 class ListsShowPresenter < FilteredPresenter
 
   def result_type
-    'lists'
+    'list'
   end
 
-  def panels_label
-    'contents'
+  def subtypes
+    [ 'list.contents' ]
   end
 
 end
@@ -550,15 +536,35 @@ end
 class ListsContentsPresenter < FilteredPresenter
   @item_mode = :masonry
 
+  def result_type
+    'list'
+  end
+
+  def subtypes
+    [ 'list.contents' ]
+  end
+
 end
 
 class ListsAssociatedPresenter < FilteredPresenter
+
+  def result_type
+    'list'
+  end
+
+  def subtypes
+    [ 'lists.associated' ]
+  end
 
 end
 
 # Present the entries associated with a list
 class ReferencesIndexPresenter < FilteredPresenter
   @item_mode = :table
+
+  def result_type
+    'references'
+  end
 
   def table_headers
     [ 'Reference Type', 'URL/Referees', '', '', '' ]
@@ -569,6 +575,10 @@ end
 class ReferentsIndexPresenter < FilteredPresenter
   @item_mode = :table
 
+  def result_type
+    'referents'
+  end
+
   def table_headers
     [ 'Referent', '', '', '' ]
   end
@@ -576,6 +586,10 @@ end
 
 class SitesIndexPresenter < FilteredPresenter
   @item_mode = :table
+
+  def result_type
+    'sites'
+  end
 
   def table_headers
     [ '', 'Title<br>Description'.html_safe, 'Other Info', 'Actions' ]
@@ -586,6 +600,10 @@ end
 class TagsIndexPresenter < FilteredPresenter
   @item_mode = :table
 
+  def result_type
+    'tags'
+  end
+
   def table_headers
     [ 'ID', 'Name', 'Type', 'Usages', 'Public?', 'Similar', 'Synonym(s)', 'Meaning(s)', '', '' ]
   end
@@ -593,22 +611,18 @@ class TagsIndexPresenter < FilteredPresenter
   def filter_type_selector
     true
   end
-
-  def result_expression
-    "TAGS"
-  end
 end
 
 # Present the entries associated with a list
 class TagsAssociatedPresenter < FilteredPresenter
   @item_mode = :masonry
 
-  def show_card?
-    true
+  def subtypes
+    [ 'tags.associated' ]
   end
 
-  def result_expression
-    "TAGGEES"
+  def show_card?
+    true
   end
 
 end

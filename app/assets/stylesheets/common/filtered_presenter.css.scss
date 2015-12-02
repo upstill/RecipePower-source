@@ -2,9 +2,9 @@ div.results-enclosure {
   width: 100%;
   height: auto;
   div.panels-query {
-    margin-top: 15px;
-    position: relative;
-    div.panels-label {
+    // margin-top: 15px;
+    // position: relative;
+    span.panels-label {
       font-family: $oswald;
       font-size: 500%;
       letter-spacing: 1.5px;
@@ -34,10 +34,6 @@ div.results-enclosure {
       &.tag-label {
         color: rgba($salmon-text-color, 0.8);
       }
-    }
-    div.panels-search {
-      position: absolute;
-      bottom: 20px;
     }
   }
 }

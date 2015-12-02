@@ -1,17 +1,6 @@
 module CardPresentation
   extend ActiveSupport::Concern
 
-=begin
-  included do
-    attr_accessor :display_services
-
-    delegate :viewer,
-             # :style_class, :link_label, :class_name, :page_title,
-             # :card_class, :panel_button_class, :panels_label, :panels_label_class,
-             :to => :display_services
-  end
-=end
-
   def card_avatar options={}
     img = image_with_error_recovery decorator,
                                     class: decorator.image_class,

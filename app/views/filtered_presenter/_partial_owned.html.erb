@@ -1,6 +1,6 @@
 <%= querify_block viewparams.results_path, class: "results-card #{viewparams.result_type}", autoload: true do %>
-    <% if viewparams.page_title.present? %>
-        <div class="results-title <%= viewparams.result_type %>"><%= viewparams.page_title %></div>
+    <% if viewparams.panel_title.present? %>
+        <div class="results-title <%= viewparams.result_type %>"><%= viewparams.panel_title %></div>
     <% end %>
     <div class="results-content">
       <div class="results-box">

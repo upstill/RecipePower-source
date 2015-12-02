@@ -1,6 +1,6 @@
 <%= querify_block viewparams.results_path, class: "results-panel #{viewparams.result_type}", autoload: true do %>
     <div class="results-content">
-      <div class="results-label <%= viewparams.result_type %> rotate"><%= viewparams.result_expression %></div>
+      <div class="results-label <%= viewparams.result_type %> rotate"><%= viewparams.panel_label %></div>
       <div class="results-box">
         <%= panel_results_placeholder viewparams.result_type %>
     	<%= panel_suggestions_placeholder viewparams.result_type %>

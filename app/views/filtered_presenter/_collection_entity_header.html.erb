@@ -9,7 +9,7 @@
         </div>
         <div class="row">
           <div class="col-md-8 collection-label <%= viewparams.result_type %>">
-            <%= viewparams.result_expression(true).downcase %>
+            <%= viewparams.panel_title(true).downcase %>
           </div>
           <div class="col-md-4 or-see">
             OR-SEE buttons go here
@@ -19,7 +19,7 @@
           <div class="col-md-6 search">
             <%= viewparams.filter_field(
                     handler: 'RP.tagger.querify',
-                    placeholder: "Search #{viewparams.result_expression true}") %>
+                    placeholder: "Search #{viewparams.panel_label}") %>
           </div>
           <div class="col-md-6 filters">
             <%= filtered_presenter_org_buttons viewparams, 'header' %>
@@ -44,7 +44,7 @@
               <% divs = %w{ bl ur br } %>
               <% viewparams.sibling_views.each do |viewparams| %>
                 <div class="<%= divs.shift %>">
-                  <%= link_to_submit viewparams.link_label.upcase, viewparams.link_address, class: "result-link #{viewparams.result_type}" %>
+                  <%= link_to_submit viewparams.panel_label.upcase, viewparams.link_address, class: "result-link #{viewparams.result_type}" %>
                 </div>
               <% end %>
             </div>

@@ -4,9 +4,9 @@
     </div>
 <% end %>
 <div class="selector-element">
-  <%= link_to_submit viewparams.link_label, viewparams.link_address, class: "result-link #{viewparams.result_type} lead" %>
+  <%= link_to_submit viewparams.panel_label, viewparams.link_address, class: "result-link #{viewparams.result_type} lead" %>
   <% viewparams.sibling_views.each do |viewparams| %>
       <span class="divider">|</span>&nbsp;
-      <%= link_to_submit viewparams.link_label, viewparams.link_address, class: "result-link #{viewparams.result_type}" %>
+      <%= link_to_submit viewparams.panel_label, viewparams.link_address, class: "result-link #{viewparams.result_type}" %>
   <% end %>
 </div>

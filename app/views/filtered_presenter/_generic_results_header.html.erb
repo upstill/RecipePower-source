@@ -1,11 +1,9 @@
-<div class="row panels-query" style="overflow: hidden; position: relative; width: 100%;">
-  <div class="col-md-5 panels-label <%= viewparams.display_style %>-label">
-    <%= viewparams.panels_label %>
-  </div>
-  <div class="col-md-7" style="height: 100%; position: absolute; right: 0; top: 0;">
-    <div class="panels-search">
-      <%= viewparams.filter_field handler: 'RP.tagger.querify' %>
-      <%= filtered_presenter_org_buttons viewparams, 'panels' %>
-    </div>
+<div class="panels-query">
+  <span class="panels-label <%= viewparams.display_style %>-label">
+    <%= viewparams.panel_title true %>
+  </span>
+  <div class="panels-search" style="display: inline-block; vertical-align: baseline;">
+    <%= viewparams.filter_field handler: 'RP.tagger.querify' %>
+    <%= filtered_presenter_org_buttons viewparams, 'panels' %>
   </div>
 </div>
