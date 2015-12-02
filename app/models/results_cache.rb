@@ -860,7 +860,7 @@ class SitesIndexCache < ResultsCache
 
 end
 
-class SiteCache < ResultsCache
+class SitesShowCache < ResultsCache
   include ResultTyping
   include EntitiesCache
 

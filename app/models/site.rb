@@ -14,7 +14,7 @@ class Site < ActiveRecord::Base
   #      may alter the path
   # Also, in most cases, site==home (when the domain is home, i.e. subsite is empty); in others, (site+subsite)==home,
   #     and only rarely will home be different from either of those
-  attr_accessible :finders_attributes, :sample, :oldname, :ttlcut, :finders, :reviewed,
+  attr_accessible :finders_attributes, :sample, :oldname, :ttlcut, :finders, :reviewed, :approved_feeds_count, :feeds_count,
                   :description, :reference, :references, :name
 
   belongs_to :referent # See before_destroy method, :dependent=>:destroy

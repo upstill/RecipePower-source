@@ -11,6 +11,15 @@ class Feed < ActiveRecord::Base
     feed.follow_url if ((feed.new_record? && feed.url.present?) || feed.url_changed?)
   }
 
+  after_save { |feed|
+    if feed.approved_changed?
+      site = feed.site
+      site.feeds_count = site.feeds.count
+      site.approved_feeds_count = site.feeds.where(approved: true).count
+      site.save
+    end
+  }
+
   belongs_to :site
   validates :site, :presence => true
   validates :url, :presence => true, :uniqueness => true

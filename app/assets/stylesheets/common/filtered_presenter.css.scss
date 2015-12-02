@@ -69,16 +69,16 @@ div.org-buttons {
         background-color: rgba($user-panels-label-button-color, 0.5);
       }
     }
+    &.friend {
+      background-color: $friends-navtab-text-color;
+      &.disabled {
+        background-color: rgba($friends-navtab-text-color, 0.5);
+      }
+    }
     &.feed {
       background-color: $feeds-navtab-text-color;
       &.disabled {
         background-color: rgba($feeds-navtab-text-color, 0.5);
-      }
-    }
-    &.friend {
-      background-color: $friends-panels-label-button-color;
-      &.disabled {
-        background-color: rgba($friends-panels-label-button-color, 0.5);
       }
     }
     &.list {

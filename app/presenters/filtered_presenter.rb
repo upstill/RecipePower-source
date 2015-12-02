@@ -69,13 +69,11 @@ class ViewParams
   end
 
   def panel_label
-    case result_type
+    case result_type.root
       when 'lists'
         'treasuries'
       when 'feed_entries'
         'entries'
-      when nil, ''
-        'collection'
       else
         result_type.root
     end
@@ -191,7 +189,8 @@ class FilteredPresenter
 
   # Declare the parameters that we adopt as instance variables. subclasses would add to this list
   def params_needed
-    (defined?(super) ? super : []) + [ :tagtype, :result_type, :id, [ :content_mode, :container ], [ :org, :newest ] ]
+    (defined?(super) ? super : []) +
+        [ :tagtype, :result_type, :id, [ :content_mode, :container ], [ :org, :newest ], [ :sort_direction, 'DESC' ] ]
   end
 
   # Include a (tag) type selector in the query field?
@@ -236,11 +235,13 @@ class FilteredPresenter
 
   ### The remaining public methods pertain to the page presentation
 
-  # Default results list: only the result type. Subclasses may redefine for multiple output types
+  # Default results list: only the result type. Subclasses may redefine for multiple subtypes
   def subtypes
-    [ result_type ]
+    subtype = viewparams.result_type.subtype
+    [ (subtype.present? ? subtype : result_type) ]
   end
 
+  # Other result types that may be provided alternative to the current one
   def sibling_types
     [ ]
   end
@@ -264,9 +265,9 @@ class FilteredPresenter
     apply_partial :comments, block if show_comments?
     apply_partial header_partial, block if subtypes.count > 0
     if item_mode == :table
-      apply_partial 'filtered_presenter/partial_table', block, :item_mode => :table
+      apply_partial 'filtered_presenter/partial_table', subtypes, block, :item_mode => :table
     elsif subtypes.count == 1
-      apply_partial 'filtered_presenter/partial_spew', block, :item_mode => item_mode, :org => org
+      apply_partial 'filtered_presenter/partial_spew', subtypes, block, :item_mode => item_mode, :org => org
     else
       apply_partial 'filtered_presenter/partial_associated',
                     subtypes,
@@ -341,11 +342,6 @@ class SearchIndexPresenter < FilteredPresenter
     super || 'recipes'
   end
 
-  # Default results list: only the result type. Subclasses may redefine appropriately
-  def subtypes
-    result_type ? [ result_type ] : %w{ recipes lists feeds users }
-  end
-
   def sibling_types
     %w{ lists recipes feeds users } - [ result_type ]
   end
@@ -376,6 +372,10 @@ end
 
 class RecipesAssociatedPresenter < FilteredPresenter
 
+  def result_type
+    'recipes.associated'
+  end
+
   # No results associated with recipes as yet
   def subtypes
     [ ]
@@ -385,6 +385,10 @@ end
 
 # Present a list of items for a user
 class UserContentPresenter < FilteredPresenter
+
+  def result_type
+    super || 'collection'
+  end
 
   def item_mode
     @item_mode ||= result_type.present? ? :masonry : :slider
@@ -396,7 +400,7 @@ class UserContentPresenter < FilteredPresenter
     case result_type
       when 'lists'
         %w{ lists.owned lists.collected }
-      when nil, ''
+      when 'collection'
         %w{ recipes lists feeds friends }
       else
         super
@@ -412,7 +416,7 @@ class UserContentPresenter < FilteredPresenter
       when 'recipes', 'lists', 'feeds', 'friends'
         %w{ lists recipes feeds friends } - [result_type]
       else
-        []
+        super
     end
   end
 
@@ -473,10 +477,6 @@ end
 class FeedsIndexPresenter < FilteredPresenter
   @item_mode = :table
 
-  def params_needed
-    super + [ [ :sort_direction, 'DESC' ] ]
-  end
-
   def result_type
     'feeds'
   end
@@ -511,16 +511,25 @@ class FeedsIndexPresenter < FilteredPresenter
 
 end
 
+class SitesShowPresenter < FilteredPresenter
+  @item_mode = :slider
+
+  def result_type
+    super || 'feeds'
+  end
+
+end
+
 # Present the entries associated with a list
 class ListsIndexPresenter < FilteredPresenter
   @item_mode = :table
 
-  def table_headers
-    [ '', '', 'Author', 'Tags', 'Size', '' ]
-  end
-
   def result_type
     'lists'
+  end
+
+  def table_headers
+    [ '', '', 'Author', 'Tags', 'Size', '' ]
   end
 
 end
@@ -528,11 +537,7 @@ end
 class ListsShowPresenter < FilteredPresenter
 
   def result_type
-    'list'
-  end
-
-  def subtypes
-    [ 'list.contents' ]
+    'lists.contents'
   end
 
 end
@@ -542,11 +547,7 @@ class ListsContentsPresenter < FilteredPresenter
   @item_mode = :masonry
 
   def result_type
-    'list'
-  end
-
-  def subtypes
-    [ 'list.contents' ]
+    'lists.contents'
   end
 
 end
@@ -554,11 +555,7 @@ end
 class ListsAssociatedPresenter < FilteredPresenter
 
   def result_type
-    'list'
-  end
-
-  def subtypes
-    [ 'lists.associated' ]
+    'lists.associated'
   end
 
 end
@@ -622,8 +619,8 @@ end
 class TagsAssociatedPresenter < FilteredPresenter
   @item_mode = :masonry
 
-  def subtypes
-    [ 'tags.associated' ]
+  def result_type
+    'tags.associated'
   end
 
   def show_card?
