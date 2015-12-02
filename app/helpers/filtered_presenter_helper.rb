@@ -8,7 +8,7 @@ module FilteredPresenterHelper
     viewparams.org_buttons(context) do |label, link=nil, link_options = {}|
       link, link_options = nil, link if link.is_a? Hash
       link_options[:class] = (link_options[:class] || '') +
-          "#{'disabled' unless link} org-button soft-button #{viewparams.display_style} #{options[:class]}"
+          "#{'disabled' unless link} org-button soft-button #{viewparams.display_style false} #{options[:class]}"
       buttons << querify_link( label.upcase, link||'#', link_options )
     end || ''
     content_tag :div, label.html_safe+buttons, class: "org-buttons #{context}-buttons" if buttons.present?

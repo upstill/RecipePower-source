@@ -52,9 +52,9 @@ div.org-buttons {
       }
     }
     &.recipe {
-      background-color: $recipes-panels-label-button-color;
+      background-color: $recipes-navtab-text-color;
       &.disabled {
-        background-color: rgba($recipes-panels-label-button-color, 0.5);
+        background-color: rgba($recipes-navtab-text-color, 0.5);
       }
     }
     &.viewer {
@@ -79,6 +79,12 @@ div.org-buttons {
       background-color: $friends-panels-label-button-color;
       &.disabled {
         background-color: rgba($friends-panels-label-button-color, 0.5);
+      }
+    }
+    &.list {
+      background-color: $lists-panels-label-button-color;
+      &.disabled {
+        background-color: rgba($lists-panels-label-button-color, 0.5);
       }
     }
     &.disabled {

@@ -607,7 +607,7 @@ class UsersShowCache < ResultsCache
 
 end
 
-class UsersCollectionCache < ResultsCache
+class UsersCollectionCache < UsersShowCache
   include CollectionCache
 
   # The CollectionCache module defines the default itemscope on a user's collection,

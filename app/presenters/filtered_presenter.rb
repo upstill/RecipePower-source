@@ -41,11 +41,11 @@ class ViewParams
     end
 
   def panel_title short=false
-    if (user = filtered_presenter.entity) && (user.class == User) && result_type
+    if (user = filtered_presenter.entity) && (user.class == User)
       is_me = (user == filtered_presenter.viewer)
       is_friend = filtered_presenter.viewer.follows? user
       salutation = (is_friend ? user.salutation : user.polite_name).downcase
-      if short
+      if short || !result_type
         %Q{#{is_me ? 'my' : salutation+'\'s'} #{panel_label}}
       else
         case result_type
@@ -64,20 +64,25 @@ class ViewParams
         end
       end
     else
-      result_type.downcase.pluralize
+      panel_label.downcase.pluralize
     end
   end
 
   def panel_label
-    if result_type.present?
-      result_type == 'lists' ? 'treasuries' : result_type.root
-    else
-      'collection'
+    case result_type
+      when 'lists'
+        'treasuries'
+      when 'feed_entries'
+        'entries'
+      when nil, ''
+        'collection'
+      else
+        result_type.root
     end
   end
 
-  def display_style
-    if (['friends', 'users', '', nil].include? result_type) && entity && (entity.class == User)
+  def display_style specific=true
+    if specific && (['friends', 'users', '', nil].include? result_type) && entity && (entity.class == User)
       if entity == viewer
         'viewer'
       elsif viewer.follows? entity
