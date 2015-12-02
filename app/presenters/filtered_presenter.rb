@@ -164,9 +164,9 @@ class FilteredPresenter
 
     @title = response_service.title
     @request_path = request_path
-    # FilteredPresenters don't always have results panels
-    init_stream ResultsCache.retrieve_or_build( sessid, querytags, params)
     @viewparams = ViewParams.new self
+    # Notify the ResultsCache(s) of any prospective results query
+    init_stream ResultsCache.retrieve_or_build( sessid, subtypes, querytags, params).first
   end
 
   # This is the path that will go into the "more items" link

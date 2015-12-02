@@ -343,45 +343,46 @@ class ResultsCache < ActiveRecord::Base
 
   # Get the current results cache and return it if relevant. Otherwise,
   # create a new one
-  def self.retrieve_or_build session_id, parsed_querytags=[], params={}
+  def self.retrieve_or_build session_id, result_types, parsed_querytags=[], params={}
     unless parsed_querytags.is_a? Array
       params, parsed_querytags = parsed_querytags, []
     end
 
-    result_type = ResultType.new params['result_type']
-    # The choice of handling class, and thus the cache, is a function of the result type required as well as the controller/action pair
-    if cc = self.cache_class(params['controller'], params['action'], result_type)
+    result_types.collect { |result_type|
+      # The choice of handling class, and thus the cache, is a function of the result type required as well as the controller/action pair
+      if cc = self.cache_class(params['controller'], params['action'], result_type)
 
-      # Since params_needed may have key/default pairs as well as a list of names
-      defaulted_params = HashWithIndifferentAccess.new
-      paramlist = cc.params_needed.collect { |pspec|
-        if pspec.is_a? Array
-          defaulted_params[pspec.first] = pspec.last
-          pspec.first
-        else
-          pspec
+        # Since params_needed may have key/default pairs as well as a list of names
+        defaulted_params = HashWithIndifferentAccess.new
+        paramlist = cc.params_needed.collect { |pspec|
+          if pspec.is_a? Array
+            defaulted_params[pspec.first] = pspec.last
+            pspec.first
+          else
+            pspec
+          end
+        }.uniq
+        # relevant_params are the parameters that will bust the cache when changed
+        relevant_params = defaulted_params.merge(params).slice *(paramlist - ['result_type']).uniq
+        rc = cc.create_with(:params => relevant_params).find_or_initialize_by session_id: session_id, type: cc.to_s
+        # unpack the parameters into instance variables
+        relevant_params.each { |key, val|
+          rc.instance_variable_set "@#{key}".to_sym, ((val.is_a?(String) && (val.to_i.to_s == val)) ? val.to_i : val)
+        }
+        # A bit of subtlety: we USE the querytags passed in that parameter, NOT the unparsed string from the query params
+        # We STORE the unparsed string just because a synthesized tag (with negative ID) doesn't serialize properly
+        rc.querytags = parsed_querytags
+        rc.result_type = result_type # Because we want access to the result type's services, not just a string
+
+        # For purposes of busting the cache, we assume that sort direction is irrelevant
+        if rc.params.except(:sort_direction) != relevant_params.except(:sort_direction) # TODO: Take :nocache into consideration
+          # Bust the cache if the params don't match
+          rc.cache = rc.partition = rc.items = nil
+          rc.params = relevant_params
         end
-      }.uniq
-      # relevant_params are the parameters that will bust the cache when changed
-      relevant_params = defaulted_params.merge(params).slice *(paramlist - ['result_type']).uniq
-      rc = cc.create_with(:params => relevant_params).find_or_initialize_by session_id: session_id, type: cc.to_s
-      # unpack the parameters into instance variables
-      relevant_params.each { |key, val|
-        rc.instance_variable_set "@#{key}".to_sym, ((val.is_a?(String) && (val.to_i.to_s == val)) ? val.to_i : val)
-      }
-      # A bit of subtlety: we USE the querytags passed in that parameter, NOT the unparsed string from the query params
-      # We STORE the unparsed string just because a synthesized tag (with negative ID) doesn't serialize properly
-      rc.querytags = parsed_querytags
-      rc.result_type = result_type # Because we want access to the result type's services, not just a string
-
-      # For purposes of busting the cache, we assume that sort direction is irrelevant
-      if rc.params.except(:sort_direction) != relevant_params.except(:sort_direction) # TODO: Take :nocache into consideration
-        # Bust the cache if the params don't match
-        rc.cache = rc.partition = rc.items = nil
-        rc.params = relevant_params
+        rc
       end
-      rc
-    end
+    }.compact
   end
 
   # Return the subclass of ResultsCache that will handle generating items
