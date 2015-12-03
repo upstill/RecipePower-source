@@ -46,7 +46,7 @@ module SitesHelper
     napproved = site.feeds.where(approved: true).count
     nothers = site.feeds.count - napproved
     q = labelled_quantity( napproved, 'feed').capitalize
-    summ = content_tag :b, link_to_submit( q, site_path(site, result_type: 'sites.feeds', item_mode: 'table'))
+    summ = content_tag :b, link_to_submit( q, feeds_site_path(site, response_service.admin_view? ? { :item_mode => :table } : {} ))
     # response_service.admin_view? ? (summ + " approved; #{site.feeds.count - napproved} others".html_safe) : summ
     summ += " approved (#{labelled_quantity( nothers, 'other').downcase})".html_safe
   end

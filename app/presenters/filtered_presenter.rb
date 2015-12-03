@@ -1,3 +1,58 @@
+module FeedsTable
+  @item_mode = :table
+  def table_headers
+    [ '',
+      '',
+      '',
+      'Host Site',
+      'Status'.html_safe,
+      ('' if admin_view),
+      '' ].compact
+  end
+end
+
+module SitesTable
+  @item_mode = :table
+  def table_headers
+    [ '', 'Title<br>Description'.html_safe, 'Other Info', 'Actions' ]
+  end
+end
+
+module ListsTable
+  @item_mode = :table
+  def table_headers
+    [ '', '', 'Author', 'Tags', 'Size', '' ]
+  end
+end
+
+module TagsTable
+  @item_mode = :table
+  def table_headers
+    [ 'ID', 'Name', 'Type', 'Usages', 'Public?', 'Similar', 'Synonym(s)', 'Meaning(s)', '', '' ]
+  end
+end
+
+module ReferencesTable
+  @item_mode = :table
+  def table_headers
+    ['Reference Type', 'URL/Referees', '', '', '']
+  end
+end
+
+module ReferentsTable
+  @item_mode = :table
+  def table_headers
+    [ 'Referent', '', '', '' ]
+  end
+end
+
+module UsersTable
+  @item_mode = :table
+  def table_headers
+    [ '', 'About', 'Interest(s)', '', '' ]
+  end
+end
+
 # This class bundles up the parameters used in views off the presenter.
 class ViewParams
   attr_reader :link_address, :result_type, :results_path, :filtered_presenter, :item_mode
@@ -352,14 +407,10 @@ class SearchIndexPresenter < FilteredPresenter
 end
 
 class UsersIndexPresenter < FilteredPresenter
-  @item_mode = :table
+  include UsersTable
 
   def result_type
     'users'
-  end
-
-  def table_headers
-    [ '', 'About', 'Interest(s)', '', '' ]
   end
 
 end
@@ -463,20 +514,10 @@ end
 
 # Present a list of feeds for a user
 class FeedsIndexPresenter < FilteredPresenter
-  @item_mode = :table
+  include FeedsTable
 
   def result_type
     'feeds'
-  end
-
-  def table_headers
-    [ '',
-      '',
-      '',
-      'Host Site',
-      'Status'.html_safe,
-      ('' if admin_view),
-      '' ].compact
   end
 
   def org_buttons context, &block
@@ -508,16 +549,20 @@ class SitesShowPresenter < FilteredPresenter
 
 end
 
+class SitesFeedsPresenter < FilteredPresenter
+  include FeedsTable
+
+  def result_type
+    'feeds'
+  end
+end
+
 # Present the entries associated with a list
 class ListsIndexPresenter < FilteredPresenter
-  @item_mode = :table
+  include ListsTable
 
   def result_type
     'lists'
-  end
-
-  def table_headers
-    [ '', '', 'Author', 'Tags', 'Size', '' ]
   end
 
 end
@@ -550,52 +595,36 @@ end
 
 # Present the entries associated with a list
 class ReferencesIndexPresenter < FilteredPresenter
-  @item_mode = :table
+  include ReferencesTable
 
   def result_type
     'references'
-  end
-
-  def table_headers
-    [ 'Reference Type', 'URL/Referees', '', '', '' ]
   end
 end
 
 # Present the entries associated with a list
 class ReferentsIndexPresenter < FilteredPresenter
-  @item_mode = :table
+  include ReferentsTable
 
   def result_type
     'referents'
   end
-
-  def table_headers
-    [ 'Referent', '', '', '' ]
-  end
 end
 
 class SitesIndexPresenter < FilteredPresenter
-  @item_mode = :table
+  include SitesTable
 
   def result_type
     'sites'
   end
 
-  def table_headers
-    [ '', 'Title<br>Description'.html_safe, 'Other Info', 'Actions' ]
-  end
-
 end
 
 class TagsIndexPresenter < FilteredPresenter
-  @item_mode = :table
+  include TagsTable
 
   def result_type
     'tags'
-  end
-
-  def table_headers
-    [ 'ID', 'Name', 'Type', 'Usages', 'Public?', 'Similar', 'Synonym(s)', 'Meaning(s)', '', '' ]
   end
 
   def filter_type_selector

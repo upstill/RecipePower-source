@@ -129,6 +129,7 @@ RP::Application.routes.draw do
     member do
       post 'scrape'
       post 'absorb'
+      get 'feeds'
     end
   end
   match 'sites', :controller => 'sites', :action => 'index', :via => [:get, :post]

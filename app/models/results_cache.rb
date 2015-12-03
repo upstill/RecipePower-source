@@ -642,6 +642,17 @@ class UserFeedsCache < UsersCollectionCache
 
 end
 
+class SitesFeedsCache < ResultsCache
+  include EntitiesCache
+
+  def site
+    @site ||= Site.find @id
+  end
+
+  def itemscope
+    site.feeds
+  end
+end
 
 # Provide the set of lists the user has collected, but only those visible to her
 class UserCollectedListsCache < ResultsCache

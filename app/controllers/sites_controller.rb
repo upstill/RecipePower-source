@@ -31,6 +31,11 @@ class SitesController < CollectibleController
     render :edit
   end
 
+  def feeds
+    update_and_decorate
+    smartrender
+  end
+
   # POST /sites
   # POST /sites.json
   def create
