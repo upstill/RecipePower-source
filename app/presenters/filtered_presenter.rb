@@ -254,31 +254,25 @@ class FilteredPresenter
     @decorator && @decorator.object && @decorator.object.is_a?(Commentable)
   end
 
-  def presentation_partial name, locals={}
-      name.is_a?(Symbol) ? h.render_item(name, locals) : h.render(name, locals)
-  end
-
   # The default presentation is different for tables and for objects, which in turn
   # may define multiple results panels
   def presentation_partials &block
-    apply_partial :card, block if show_card?
-    apply_partial :comments, block if show_comments?
-    apply_partial header_partial, block if subtypes.count > 0
-    if item_mode == :table
-      apply_partial 'filtered_presenter/partial_table', subtypes, block, :item_mode => :table
-    elsif subtypes.count == 1
-      apply_partial 'filtered_presenter/partial_spew', subtypes, block, :item_mode => item_mode, :org => org
-    else
-      apply_partial 'filtered_presenter/partial_associated',
-                    subtypes,
-                    block,
-                    :item_mode => item_mode,
-                    :org => org
-    end
+    presentation_partial :card, block if show_card?
+    presentation_partial :comments, block if show_comments?
+    presentation_partial header_partial, block if subtypes.count > 0
+    presentation_partial body_partial, subtypes, block, :item_mode => item_mode, :org => org
   end
 
   def header_partial
-    'filtered_presenter/generic_results_header'
+    'header_generic'
+  end
+
+  def body_partial
+    if item_mode == :table
+      'partial_table'
+    else
+      subtypes.count == 1 ? 'partial_spew' : 'partial_associated'
+    end
   end
 
   # Define buttons used in the search/redirect header above the presenter's results
@@ -293,11 +287,11 @@ class FilteredPresenter
 
   # This is the name of the partial used to render my results
   def results_partial
-    "filtered_presenter/results_#{item_mode}"
+    "results_#{item_mode}"
   end
 
   def tail_partial
-    "filtered_presenter/tail_#{item_mode}"
+    "tail_#{item_mode}"
   end
 
   def item_mode
@@ -314,7 +308,7 @@ protected
 
   # Invoke a partial for one or more subtypes.
   # If the list of subtypes is nil, just use the viewparams for the presenter itself
-  def apply_partial partial_name, subtype_or_subtypes, block=nil, qparams={}
+  def presentation_partial partial_name, subtype_or_subtypes, block=nil, qparams={}
     subtype_or_subtypes, block = nil, subtype_or_subtypes if subtype_or_subtypes.is_a? Proc
     [subtype_or_subtypes].flatten.each { |subtype|
       block.call partial_name,
@@ -347,7 +341,7 @@ class SearchIndexPresenter < FilteredPresenter
   end
 
   def header_partial
-    'filtered_presenter/associated_results_header'
+    'header_associated_results'
   end
 
   # The global query will be maintained
@@ -391,7 +385,7 @@ class UserContentPresenter < FilteredPresenter
   end
 
   def item_mode
-    @item_mode ||= result_type.present? ? :masonry : :slider
+    @item_mode ||= result_type=='collection' ? :slider : :masonry
   end
 
   # Here's where we translate from a result type (as provided by a pagelet) to
@@ -420,19 +414,13 @@ class UserContentPresenter < FilteredPresenter
     end
   end
 
-  def presentation_partials &block
-    if result_type.present?
-      apply_partial 'filtered_presenter/collection_entity_header', block
-      # The contents partial will get defined once for every subtype in the results list
-      apply_partial "filtered_presenter/partial_#{subtypes.count == 1 ? 'spew' : 'associated'}",
-                    subtypes,
-                    block,
-                    :item_mode => :masonry, :org => :newest
-    else
-      apply_partial :card, block
-      apply_partial 'filtered_presenter/generic_results_header', block
-      apply_partial :panel, subtypes, block, :item_mode => :slider, :org => :newest
-    end
+  def header_partial
+    viewparams.result_type.root == 'collection' ? 'header_generic' : 'header_collection_entity'
+  end
+
+  def body_partial
+    return :panel if viewparams.result_type.root == 'collection'
+    super
   end
 
   # Define buttons used in the search/redirect header above the presenter's results

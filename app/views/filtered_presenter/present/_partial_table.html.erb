@@ -1,4 +1,4 @@
-<%= querify_block viewparams.results_path, class: "results-table #{viewparams.result_type}", autoload: true do %>
+<%= querify_block viewparams.results_path, class: "results-table #{viewparams.result_type.extensions_to_classes}", autoload: true do %>
     <table class="results <%= viewparams.result_type.extensions_to_classes %> table table-striped ">
       <thead>
       <tr>
@@ -6,7 +6,7 @@
       </tr>
       </thead>
       <tbody class="stream-items-parent <%= viewparams.stream_id %>">
-      <%= render viewparams.tail_partial, viewparams: viewparams %>
+      <%= filtered_presenter_tail viewparams %>
       </tbody>
     </table>
 <% end %>

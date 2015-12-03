@@ -230,7 +230,7 @@ class ApplicationController < ActionController::Base
         while item = fp.next_item do
           renderings << { elmt: with_format("html") { view_context.render_item item, fp.item_mode } }
         end
-        renderings << { elmt: with_format("html") { render_to_string partial: fp.tail_partial, locals: { viewparams: fp.viewparams } } } if fp.next_path
+        renderings << { elmt: with_format("html") { render_to_string partial: "filtered_presenter/present/#{fp.tail_partial}", locals: { viewparams: fp.viewparams } } } if fp.next_path
         render json: renderings
 =begin
         response.headers["Content-Type"] = "text/event-stream"

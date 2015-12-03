@@ -50,20 +50,6 @@ module PanelHelper
     [selector, panel_suggestion_button(url, type) ]
   end
   
-  def panel_results_placeholder type
-    content_tag :div, '', class: "results #{type.to_s.extensions_to_classes} placeholder"
-  end
-
-  def panel_results partial
-    with_format('html') { render partial, viewparams: @filtered_presenter.viewparams }
-  end
-
-  def panel_results_replacement type, partial
-    selector = '.results'
-    selector << '.' + type.extensions_to_selector if type.present?
-    [selector, panel_results(partial) ]
-  end
-
   def panel_suggestions_placeholder type
     content_tag :div, '', class: "suggestions #{type.to_s.extensions_to_classes} placeholder" # Placeholder for the suggestions panel
   end

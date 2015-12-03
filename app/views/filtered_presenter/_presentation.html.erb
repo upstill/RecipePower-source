@@ -1,7 +1,7 @@
 <% viewparams = @filtered_presenter.viewparams unless defined?(viewparams) && viewparams %>
 <div class="results-enclosure querify querify-supe " data-href="<%= viewparams.results_path %>">
   <% viewparams.presentation_partials do |name, viewparams| %>
-      <%= name.is_a?(Symbol) ? render_item(name, viewparams: viewparams) : render(name, viewparams: viewparams) %>
+      <%= name.is_a?(Symbol) ? render_item(name, viewparams: viewparams) : render("filtered_presenter/present/#{name}", viewparams: viewparams) %>
   <% end %>
 </div>
 

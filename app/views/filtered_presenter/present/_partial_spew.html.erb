@@ -1,3 +1,3 @@
 <%= querify_block viewparams.results_path, class: "#{viewparams.result_type.extensions_to_classes}", autoload: true do %>
-    <%= panel_results_placeholder viewparams.result_type %>
+    <%= filtered_presenter_panel_results_placeholder viewparams.result_type %>
 <% end %>

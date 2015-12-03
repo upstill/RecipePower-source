@@ -18,4 +18,21 @@ module FilteredPresenterHelper
     [ "div.org-buttons.#{context}-buttons", filtered_presenter_org_buttons(viewparams, context) ]
   end
 
+  def filtered_presenter_panel_results_placeholder type
+    content_tag :div, '', class: "results #{type.to_s.extensions_to_classes} placeholder"
+  end
+
+  def filtered_presenter_panel_results viewparams
+    with_format('html') { render "filtered_presenter/present/#{viewparams.results_partial}", viewparams: viewparams }
+  end
+
+  def filtered_presenter_panel_results_replacement viewparams
+    selector = '.results'
+    selector << '.' + viewparams.result_type.extensions_to_selector
+    [selector, filtered_presenter_panel_results(viewparams) ]
+  end
+
+  def filtered_presenter_tail viewparams
+    render "filtered_presenter/present/#{viewparams.tail_partial}", viewparams: viewparams
+  end
 end
