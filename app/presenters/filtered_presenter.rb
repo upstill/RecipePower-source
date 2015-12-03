@@ -560,6 +560,10 @@ end
 class SitesFeedsPresenter < FilteredPresenter
   include FeedsTable
 
+  def item_mode
+    super || 'masonry'
+  end
+
   def result_type
     'feeds'
   end
