@@ -5,14 +5,16 @@ module ItemHelper
     if item_or_decorator_or_specs.is_a? Symbol
       item_or_decorator_or_specs, item_mode = nil, item_or_decorator_or_specs
     end
+    item_mode ||= response_service.item_mode
     if item = (item_or_decorator_or_specs.is_a?(Draper::Decorator) ? item_or_decorator_or_specs.object : item_or_decorator_or_specs) || (@decorator.object if @decorator)
       unless @decorator && @decorator.object == item
         controller.update_and_decorate item
         @decorator = controller.instance_variable_get :"@decorator"
         instance_variable_set :"@#{item.class.to_s.underscore}", item
       end
+      # Set up viewparams
+      @viewparams = FilteredPresenter.new(self, response_service, { item_mode: item_mode}, [], @decorator).viewparams
     end
-    item_mode ||= response_service.item_mode # (response_service.dialog? ? :modal : response_service.item_mode)
     [ item, item_mode ]
   end
 
@@ -105,7 +107,7 @@ module ItemHelper
     end
     item, item_mode = item_preflight item_or_decorator_or_specs, (item_mode || :card)
     if partial = item_partial_name(item, item_mode)
-      with_format("html") { render partial, locals.merge( decorator: @decorator ) }
+      with_format("html") { render partial, locals.merge( decorator: @decorator, viewparams: @viewparams ) }
     end
   end
 

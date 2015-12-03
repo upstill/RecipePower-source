@@ -19,7 +19,7 @@ class ResultType < String
   end
 
   def root
-    split('.').first
+    split('.').first || ''
   end
 
   def subtype

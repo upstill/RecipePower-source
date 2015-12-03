@@ -142,7 +142,7 @@ class CollectibleController < ApplicationController
     if update_and_decorate && params[:other_id] && (other = @decorator.object.class.find(params[:other_id].to_i))
       @absorbee = other.decorate
       @decorator.absorb other
-      ResultsCache.bust rp_uuid
+      ResultsCache.bust response_service.uuid
       other.destroy
     end
   end

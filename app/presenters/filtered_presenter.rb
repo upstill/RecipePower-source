@@ -67,40 +67,40 @@ class ViewParams
   # Use a filtered presenter and a subtype to define the parameters
   def initialize fp, qparams={}
     @result_type = ResultType.new qparams[:result_type] || fp.result_type || ''
+    @filtered_presenter = fp
     @link_address = fp.response_service.decorate_path qparams
     @results_path = assert_query fp.results_path, qparams
-    @item_mode = qparams[:item_mode] || fp.item_mode
-    @filtered_presenter = fp
+    @item_mode = qparams[:item_mode] || (fp && fp.item_mode)
   end
 
     # For use in the address bar
-    def page_title
-      case display_style
-        when 'viewer'
-          'my collection'
-        when 'friend'
-          "#{entity.salutation.downcase}'s collection"
-        when 'user'
-          "#{entity.polite_name.downcase}'s collection"
-        when 'recipe'
-          'related'
-        when 'feed'
-          'feeds'
-        when 'list'
-          'contents'
-        when 'feed_entry'
-          'entries'
-        else
-          display_style.pluralize
-      end
+  def page_title
+    case display_style
+      when 'viewer'
+        'my collection'
+      when 'friend'
+        "#{entity.salutation.downcase}'s collection"
+      when 'user'
+        "#{entity.polite_name.downcase}'s collection"
+      when 'recipe'
+        'related'
+      when 'feed'
+        'feeds'
+      when 'list'
+        'contents'
+      when 'feed_entry'
+        'entries'
+      else
+        display_style.pluralize
     end
+  end
 
   def panel_title short=false
     if (user = filtered_presenter.entity) && (user.class == User)
       is_me = (user == filtered_presenter.viewer)
       is_friend = filtered_presenter.viewer.follows? user
       salutation = (is_friend ? user.salutation : user.polite_name).downcase
-      if short || !result_type
+      if short || result_type.blank?
         %Q{#{is_me ? 'my' : salutation+'\'s'} #{panel_label}}
       else
         case result_type
@@ -167,15 +167,23 @@ class FilteredPresenter
   delegate :display_style, :to => :viewparams
 
   # Build an instance of the appropriate subclass, given the entity, controller and action
-  def self.build view_context, sessid, request_path, response_service, params, querytags, decorator=nil
+  def self.build view_context, response_service, params, querytags, decorator=nil
     classname = "#{response_service.controller.capitalize}#{response_service.action.capitalize}Presenter"
 
     if Object.const_defined? classname # If we have a FilteredPresenter subclass available
-      classname.constantize.new view_context, sessid, request_path, response_service, params, querytags, decorator
+      classname.constantize.new view_context, response_service, params, querytags, decorator
     end
   end
 
-  def initialize view_context, sessid, request_path, response_service, params, querytags, decorator=nil
+  # Build a filtered_presenter for the purpose of showing an object
+  def self.build_from_decorator decorator, view_context, response_service, params
+    classname = "#{decorator.object.class.to_s.pluralize}ShowPresenter"
+    if Object.const_defined? classname
+      classname.constantize.new view_context, response_service, {}, [], decorator
+    end
+  end
+
+  def initialize view_context, response_service, params, querytags, decorator=nil
     if @decorator = decorator
       @entity = decorator.object
       @klass = @entity.class
@@ -218,10 +226,10 @@ class FilteredPresenter
         end
 
     @title = response_service.title
-    @request_path = request_path
+    @request_path = response_service.requestpath
     @viewparams = ViewParams.new self
     # Notify the ResultsCache(s) of any prospective results query
-    init_stream ResultsCache.retrieve_or_build( sessid, subtypes, querytags, params).first
+    init_stream ResultsCache.retrieve_or_build( response_service.uuid, subtypes, querytags, params).first
   end
 
   # This is the path that will go into the "more items" link
@@ -293,7 +301,7 @@ class FilteredPresenter
   # Default results list: only the result type. Subclasses may redefine for multiple subtypes
   def subtypes
     subtype = viewparams.result_type.subtype
-    [ (subtype.present? ? subtype : result_type) ]
+    [ (subtype.present? ? subtype : result_type) ].compact
   end
 
   # Other result types that may be provided alternative to the current one

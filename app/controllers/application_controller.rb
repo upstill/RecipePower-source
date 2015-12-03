@@ -152,7 +152,7 @@ class ApplicationController < ActionController::Base
     rescue Exception => e
       x=1
     end
-    logger.info "UUID: #{rp_uuid}"
+    logger.info "UUID: #{response_service.uuid}"
   end
 
   # Monkey-patch to adjudicate between streaming and render_to_stream per
@@ -173,8 +173,6 @@ class ApplicationController < ActionController::Base
     renderopts = response_service.render_params renderopts
     # Give the stream a crack at it
     if fp = FilteredPresenter.build(view_context,
-                                    rp_uuid,
-                                    request.fullpath,
                                     response_service,
                                     params.merge(viewerid: current_user_or_guest_id, admin_view: response_service.admin_view?),
                                     querytags,
@@ -294,6 +292,8 @@ class ApplicationController < ActionController::Base
     # @user = current_user_or_guest
     @response_service ||= ResponseServices.new params, session, request
     @response_service.controller_instance = self
+    # This is a unique identifier for a computer, stored as a cookie to persist across sessions
+    @response_service.uuid = cookies[:rp_uuid] || (cookies[:rp_uuid] = session.id)
     @response_service
   end
 
@@ -388,11 +388,6 @@ class ApplicationController < ActionController::Base
     defer_request path: "/popup/need_to_know?context=signup", :mode => :modal, :format => :json
     defer_request path: "/popup/starting_step3?context=signup", :mode => :modal, :format => :json
     defer_request path: "/popup/starting_step2?context=signup", :mode => :modal, :format => :json
-  end
-
-  # This is a unique identifier for a computer, implemented as a cookie to persist across sessions
-  def rp_uuid
-    @uuid ||= cookies[:rp_uuid] || (cookies[:rp_uuid] = session.id)
   end
 
   protected

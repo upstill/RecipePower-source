@@ -34,15 +34,6 @@ module CollectibleHelper
                 class: 'collectible-buttons',
                 style: 'display: inline-block',
                 id: dom_id(decorator)
-=begin
-    with_format 'html' do
-      render 'collectible/collectible_buttons',
-             extras: extras,
-             styling: styling,
-             decorator: decorator,
-             item: decorator.object
-    end
-=end
   end
 
   def collectible_buttons_panel_replacement decorator

@@ -5,7 +5,7 @@ module ControllerDeference
   # can reproduce it after login. Any of the current request parameters may be
   # overridden--or other data stored--by passing them in the elements hash
   def defer_request spec={}
-    DeferredRequest.push rp_uuid, unpack_path(spec) # pack_request(spec)
+    DeferredRequest.push response_service.uuid, unpack_path(spec) # pack_request(spec)
   end
 
   # Recall an earlier, deferred, request that can be redirected to in the current context .
@@ -55,7 +55,7 @@ module ControllerDeference
 
   # Get a spec from deferred requests that matches the format and mode, if any
   def specs_matching specs
-    (req = DeferredRequest.pull( rp_uuid, specs)) && unpack_request(req)
+    (req = DeferredRequest.pull( response_service.uuid, specs)) && unpack_request(req)
   end
 
   # If there is a deferred request, fetch it as a spec and return it as a request path

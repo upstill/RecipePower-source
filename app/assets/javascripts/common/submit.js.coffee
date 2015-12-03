@@ -259,7 +259,7 @@ proceedWithConfirmation = (elmt) ->
 		true
 
 postWaitMsg = (elmt) ->
-	if msg = $(elmt).data('waitMsg').data 'waitMsg'
+	if msg = $(elmt).data 'waitMsg'
 		RP.notifications.wait msg
 
 shortCircuit = (elmt) ->

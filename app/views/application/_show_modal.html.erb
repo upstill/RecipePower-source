@@ -3,5 +3,5 @@ This is the default for showing an item in a modal window: use the standard page
 It can be over-ridden with an identically-named view in the item's class's view folder
 -->
 <%= modal_dialog "show_object", decorator.title do %>
-    <%= render "show_card", decorator: decorator %>
+    <%= render "show_card", decorator: decorator, viewparams: viewparams %>
 <% end %>

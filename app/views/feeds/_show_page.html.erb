@@ -1,4 +1,4 @@
-<%= render "show_page", decorator: decorator %>
+<%= render "show_page", decorator: decorator, viewparams: viewparams %>
 <% permitted_to?(:approve, :feeds) do %>
     <p>
       Feed <%= feed_approval decorator.object %>
