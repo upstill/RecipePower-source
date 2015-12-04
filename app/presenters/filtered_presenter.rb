@@ -135,7 +135,7 @@ class ViewParams
   end
 
   def display_style specific=true
-    if specific && (['friends', 'users', '', nil].include? result_type) && entity && (entity.class == User)
+    if specific && (['friends', 'users', 'collection', '', nil].include? result_type) && entity && (entity.class == User)
       if entity == viewer
         'viewer'
       elsif viewer.follows? entity

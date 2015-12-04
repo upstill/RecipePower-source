@@ -8,14 +8,14 @@ module FilteredPresenterHelper
     viewparams.org_buttons(context) do |label, link=nil, link_options = {}|
       link, link_options = nil, link if link.is_a? Hash
       link_options[:class] = (link_options[:class] || '') +
-          "#{'disabled' unless link} org-button soft-button #{viewparams.display_style false} #{options[:class]}"
+          "#{'disabled' unless link} org-button soft-button #{viewparams.display_style} #{options[:class]}"
       buttons << querify_link( label.upcase, link||'#', link_options )
     end || ''
-    content_tag :div, label.html_safe+buttons, class: "org-buttons #{context}-buttons" if buttons.present?
+    content_tag :div, label.html_safe+buttons, class: "org-buttons #{viewparams.display_style} #{context}-buttons" if buttons.present?
   end
 
   def filtered_presenter_org_buttons_replacement viewparams, context='panels'
-    [ "div.org-buttons.#{context}-buttons", filtered_presenter_org_buttons(viewparams, context) ]
+    [ "div.org-buttons.#{context}-buttons.#{viewparams.display_style}", filtered_presenter_org_buttons(viewparams, context) ]
   end
 
   def filtered_presenter_panel_results_placeholder type
