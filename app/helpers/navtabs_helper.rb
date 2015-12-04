@@ -90,7 +90,8 @@ module NavtabsHelper
         navlink l.name, list_path(l), id: dom_id(l)
       } + [
           "<hr class='menu'>".html_safe,
-          navlink("Start a Treasury...", new_list_path, mode: :modal, class: "transient")
+          navlink("Start a Treasury...", new_list_path, mode: :modal, class: "transient"),
+          navlink("Hunt for Treasuries...", lists_path(item_mode: 'table'))
       ]
     end
   end
@@ -114,7 +115,6 @@ module NavtabsHelper
       list_set.collect { |l|
         navlink l.name, list_path(l), id: dom_id(l)
       } + [
-          navlink("Start a new Treasury...", new_list_path(mode: 'modal')),
           "<hr class='menu'>".html_safe,
           navlink("Start a new Treasury...", new_list_path(mode: 'modal')),
           navlink("Hunt for Treasuries...", lists_path(item_mode: 'table'))
