@@ -12,8 +12,6 @@ module ItemHelper
         @decorator = controller.instance_variable_get :"@decorator"
         instance_variable_set :"@#{item.class.to_s.underscore}", item
       end
-      # Set up viewparams
-      @viewparams = FilteredPresenter.new(self, response_service, { item_mode: item_mode}, [], @decorator).viewparams
     end
     [ item, item_mode ]
   end
@@ -65,9 +63,11 @@ module ItemHelper
   end
 
   # Define a :replacements item to replace a particular item under an item mode (defaulting to the item_mode parameter)
-  def item_replacement item_or_decorator_or_specs=nil, item_mode=nil
+  def item_replacement item_or_decorator_or_specs=nil, item_mode=nil, locals={}
     item, item_mode = item_preflight item_or_decorator_or_specs, item_mode
-    [ item_partial_selector(item, item_mode), render_item(item, item_mode) ]
+    # Ensure viewparams
+    viewparams = FilteredPresenter.new(self, response_service, { item_mode: item_mode }, [], @decorator).viewparams
+    [ item_partial_selector(item, item_mode), render_item(item, item_mode, viewparams: viewparams) ]
   end
 
   # Generate replacements for all versions of the item
@@ -107,7 +107,7 @@ module ItemHelper
     end
     item, item_mode = item_preflight item_or_decorator_or_specs, (item_mode || :card)
     if partial = item_partial_name(item, item_mode)
-      with_format("html") { render partial, locals.merge( decorator: @decorator, viewparams: @viewparams ) }
+      with_format("html") { render partial, locals.merge(decorator: @decorator) }
     end
   end
 

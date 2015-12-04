@@ -58,7 +58,7 @@ class ViewParams
   attr_reader :link_address, :result_type, :results_path, :filtered_presenter, :item_mode
 
   delegate :entity, :decorator, :viewer, :tagtype,
-           :request_path, :next_path,
+           :request_path, :next_path, :query,
            :filter_field, :filter_type_selector,
            :table_headers, :stream_id, :tail_partial, :sibling_views, :org_buttons,
            :presentation_partials, :results_partial, :org,
