@@ -15,4 +15,4 @@
 <% if response_service.admin_view? && permitted_to?(:edit, @tag) %>
     <%= link_to_submit 'Edit', edit_tag_path(@tag), :mode => :modal %>
 <% end %>
-<%= link_to_submit 'All Tags', tags_path, mode: "partial", item_mode: "table" %>
+<%= link_to_submit 'All Tags', tags_path, mode: 'partial', item_mode: 'table' %>

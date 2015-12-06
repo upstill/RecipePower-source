@@ -222,7 +222,7 @@ class ApplicationController < ActionController::Base
         render template: 'filtered_presenter/results'
       when :modal
         # Render the stream's entity in a modal dialog
-        render :show
+        render :show, locals: { viewparams: fp.viewparams }
       when :items # Stream items into the stream's container
         renderings = [ { deletions: [".stream-tail.#{fp.stream_id}"] } ]
         while item = fp.next_item do

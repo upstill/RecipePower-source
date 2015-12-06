@@ -657,3 +657,17 @@ class TagsAssociatedPresenter < FilteredPresenter
   end
 
 end
+
+# Present the entries associated with a list
+class TagsShowPresenter < FilteredPresenter
+  @item_mode = :masonry
+
+  def result_type
+    nil
+  end
+
+  def show_card?
+    true
+  end
+
+end
