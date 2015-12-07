@@ -6,7 +6,7 @@
        data-masonry-options='{ }'>
     <% if false && @filtered_presenter.dump? %>
         <% while (item = @filtered_presenter.next_item) do %>
-            <%= render_item item  %>
+            <%= render_item item.decorate, :masonry, viewparams: @filtered_presenter.viewparams  %>
         <% end %>
     <% end %>
   </div>

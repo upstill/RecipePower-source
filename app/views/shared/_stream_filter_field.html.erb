@@ -1,1 +1,2 @@
-  <%= viewparams.filter_field %>
+<% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
+<%= viewparams.filter_field %>

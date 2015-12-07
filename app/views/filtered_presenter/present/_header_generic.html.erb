@@ -1,3 +1,4 @@
+<% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
 <div class="panels-query">
   <span class="panels-label <%= viewparams.display_style %>-label">
     <%= viewparams.panel_title true %>

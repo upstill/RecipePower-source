@@ -1,3 +1,4 @@
+<% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
 <div class="<%= stream_element_class :results %>" id="<%= viewparams.stream_id %>">
   <div class="stream-tail">
     <% if next_path = viewparams.next_path %>

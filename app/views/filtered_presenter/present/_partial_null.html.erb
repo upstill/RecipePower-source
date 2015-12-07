@@ -1,3 +1,4 @@
+<% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
 <div>
   <p><%= title %></p>
   <p>type: <%= viewparams.result_type.present? ? viewparams.result_type : '[No type defined]' %></p>

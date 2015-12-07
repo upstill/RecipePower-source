@@ -1,3 +1,4 @@
+<% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
 <!-- View for listing entities in a slider container -->
 <div class="suggestions <%= viewparams.result_type.extensions_to_classes %> slider">
   <div class="left" data-setup="RP.slider.setup">&lt;</div>

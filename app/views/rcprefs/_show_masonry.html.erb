@@ -1,2 +1,3 @@
 <%# Render a Rcpref by rendering its entity %>
-<%= render_item_unwrapped decorator.object.entity, :masonry, comment: decorator.object.comment %>
+<% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
+<%= render_item_unwrapped decorator.object.entity.decorate, :masonry, viewparams: viewparams, comment: decorator.object.comment %>

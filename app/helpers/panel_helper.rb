@@ -55,7 +55,7 @@ module PanelHelper
   end
 
   def panel_suggestions partial
-    with_format('html') { render partial, viewparams: @filtered_presenter.viewparams }
+    with_format('html') { render partial, decorator: @decorator, viewparams: @filtered_presenter.viewparams }
   end
 
   def panel_suggestions_replacement type, partial=nil

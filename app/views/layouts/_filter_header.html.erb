@@ -1,3 +1,4 @@
+<% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
 <%= triggered_form search_path do %>
     <% if @filtered_header && viewparams.filter_type_selector %>
         <%= select_tag :tagtype, options_from_collection_for_select(Tag.type_selections(true, true), :last, :first, viewparams.tagtype),

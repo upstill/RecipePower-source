@@ -1,4 +1,5 @@
 <!-- View for listing entities in a table -->
+<% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
 <table class="results <%= viewparams.result_type.extensions_to_classes %> table table-striped ">
   <thead>
   <tr>

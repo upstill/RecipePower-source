@@ -1,4 +1,5 @@
 <!-- View for splatting feed entries -->
+<% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
 <div class="results <%= viewparams.result_type.extensions_to_classes %> stream-items-parent <%= viewparams.stream_id %> ">
     <%= filtered_presenter_tail viewparams %>
 </div>

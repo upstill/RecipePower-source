@@ -372,7 +372,7 @@ class ResultsCache < ActiveRecord::Base
         # A bit of subtlety: we USE the querytags passed in that parameter, NOT the unparsed string from the query params
         # We STORE the unparsed string just because a synthesized tag (with negative ID) doesn't serialize properly
         rc.querytags = parsed_querytags
-        rc.result_type = result_type # Because we want access to the result type's services, not just a string
+        rc.result_type = ResultType.new result_type # Because we want access to the result type's services, not just a string
 
         # For purposes of busting the cache, we assume that sort direction is irrelevant
         if rc.params.except(:sort_direction) != relevant_params.except(:sort_direction) # TODO: Take :nocache into consideration

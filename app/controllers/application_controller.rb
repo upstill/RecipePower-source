@@ -222,13 +222,13 @@ class ApplicationController < ActionController::Base
         render template: 'filtered_presenter/results'
       when :modal
         # Render the stream's entity in a modal dialog
-        render :show, locals: { viewparams: fp.viewparams }
+        render :show, locals: { decorator: @decorator, viewparams: fp.viewparams }
       when :items # Stream items into the stream's container
         renderings = [ { deletions: [".stream-tail.#{fp.stream_id}"] } ]
         while item = fp.next_item do
           renderings << { elmt: with_format("html") { view_context.render_item item, fp.item_mode } }
         end
-        renderings << { elmt: with_format("html") { render_to_string partial: "filtered_presenter/present/#{fp.tail_partial}", locals: { viewparams: fp.viewparams } } } if fp.next_path
+        renderings << { elmt: with_format("html") { render_to_string partial: "filtered_presenter/present/#{fp.tail_partial}", locals: { decorator: @decorator, viewparams: fp.viewparams } } } if fp.next_path
         render json: renderings
 =begin
         response.headers["Content-Type"] = "text/event-stream"

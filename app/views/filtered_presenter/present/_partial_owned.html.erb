@@ -1,3 +1,4 @@
+<% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
 <%= querify_block viewparams.results_path, class: "results-card #{viewparams.result_type.extensions_to_classes}", autoload: true do %>
     <% if viewparams.panel_title.present? %>
         <div class="results-title <%= viewparams.result_type.extensions_to_classes %>"><%= viewparams.panel_title %></div>

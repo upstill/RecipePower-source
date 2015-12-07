@@ -57,7 +57,7 @@ end
 class ViewParams
   attr_reader :link_address, :result_type, :results_path, :filtered_presenter, :item_mode
 
-  delegate :entity, :decorator, :viewer, :tagtype,
+  delegate :entity, :decorator, :viewer, :tagtype, :response_service,
            :request_path, :next_path, :query,
            :filter_field, :filter_type_selector,
            :table_headers, :stream_id, :tail_partial, :sibling_views, :org_buttons,
@@ -210,9 +210,10 @@ class FilteredPresenter
     # May have been set by subclass, may have been inherited from params
     # Set the instance variable, possibly in consultation with the class
     @item_mode =
-        response_service.item_mode || # Provisionally accept item mode imposed by param
+        params[:item_mode] || # Provisionally accept item mode imposed by param
             (self.class.instance_variable_get(:'@item_mode') rescue nil) ||
             (:table if response_service.action == 'index')
+    @item_mode = @item_mode.to_sym if @item_mode
     # Allow the class to define the item mode on its own
     response_service.item_mode = item_mode
 

@@ -1,4 +1,4 @@
-viewparams ||= @filtered_presenter.viewparams
+viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams 
 result_type = viewparams.result_type
 {
     replacements: [

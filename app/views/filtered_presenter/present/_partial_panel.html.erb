@@ -1,3 +1,4 @@
+<% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
 <%= querify_block viewparams.results_path, class: "results-panel #{viewparams.result_type}", autoload: true do %>
     <div class="results-content">
       <div class="results-label <%= viewparams.result_type %> rotate"><%= viewparams.panel_label %></div>

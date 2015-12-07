@@ -1,3 +1,4 @@
+<% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
 <%= triggered_form(viewparams.query) do %>
     <h2 class="filter-element"><%= viewparams.title %></h2>
     <% if viewparams.filter_type_selector %>

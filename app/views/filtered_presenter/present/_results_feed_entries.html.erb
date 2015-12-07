@@ -1,3 +1,4 @@
+<% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
 <div class="results feed_entries js-masonry stream-items-parent <%= viewparams.stream_id %> "
      id="container">
   <div class="masonry-item stream-tail <%= viewparams.stream_id %>" >
