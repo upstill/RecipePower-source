@@ -8,7 +8,11 @@ class Feed < ActiveRecord::Base
   # Setup a feed properly: do a reality check on the url, populate the information
   # fields (title, description...), and ensure it has an associated site
   before_validation { |feed|
-    feed.follow_url if ((feed.new_record? && feed.url.present?) || feed.url_changed?)
+    if ((feed.new_record? && feed.url.present?) || feed.url_changed?)
+      feed.follow_url
+    else
+      true
+    end
   }
 
   after_save { |feed|
@@ -42,6 +46,8 @@ class Feed < ActiveRecord::Base
         feed_entries.clear
         FeedEntry.update_from_feed self
       end
+    else
+      false
     end
   end
     

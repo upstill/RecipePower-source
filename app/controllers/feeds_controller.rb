@@ -70,7 +70,7 @@ class FeedsController < CollectibleController
         update_and_decorate( (Feed.where url: @feed.url)[0] || @feed )
       end
       if resource_errors_to_flash @feed
-        render :new, status: :unprocessable_entity, mode: :modal
+        render :new, mode: :modal
       else
         # No problems. Collect the feed now.
         @feed.be_collected
