@@ -28,10 +28,6 @@ class Site < ActiveRecord::Base
   # before_create :ensure_referent
   
   after_initialize :post_init
-  
-  def perform
-    feeds.each { |feed| feed.destroy if (feed.user_ids-[4]).empty? }
-  end
 
 protected
 

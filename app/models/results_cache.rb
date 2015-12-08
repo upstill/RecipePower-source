@@ -28,7 +28,8 @@ class Counts < Hash
   end
 
   def itemstubs sorted=true
-    @itemstubs ||= sorted ? self.keys.sort { |k1, k2| self[k1] <=> self[k2] } : self.keys
+    # Sort the count keys in descending order of hits
+    @itemstubs ||= sorted ? self.keys.sort { |k1, k2| self[k2] <=> self[k1] } : self.keys
   end
 
   def partition bounds
@@ -197,8 +198,10 @@ module EntitiesCache
       counts.incr_by_scope itemscope.joins(:tags).where('"tags"."normalized_name" = ?', tagname), 10 # Extra points for complete matches
     end
     if model.respond_to? :strscopes
-      counts.incr_by_scope model.strscopes("%#{tagname}%")
-      counts.incr_by_scope model.strscopes(tagname), 10
+      strscope = model.strscopes "%#{tagname}%" do ordereditemscope end
+      counts.incr_by_scope strscope
+      strscope = model.strscopes tagname do ordereditemscope end
+      counts.incr_by_scope strscope, 10
     end
   end
 
@@ -553,7 +556,11 @@ class ResultsCache < ActiveRecord::Base
     # Now bulk-load all the records for each model type, replacing the id array with the corresponding array of records
     records.keys.each { |modelname|
       # Convert the ids to objects in one go
-      records[modelname] = modelname.constantize.where(id: records[modelname]).to_a
+      entries = modelname.constantize.where(id: records[modelname]).to_a
+
+      # Restore the ordering after randomizing by
+      entry_map = entries.map &:id
+      records[modelname] = records[modelname].collect { |id| entries[entry_map.index id] }
     }
 
     # Finally convert the original, ordered array of item specs to the corresponding array of records (also ordered)

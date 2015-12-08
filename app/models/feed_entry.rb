@@ -8,6 +8,15 @@ class FeedEntry < ActiveRecord::Base
   belongs_to :feed
   delegate :site, :to => :feed
 
+  # Return scopes for searching the title and description
+  def self.strscopes matcher
+    scope = block_given? ? yield() : self.unscoped
+    [
+        scope.where('"feed_entries"."title" ILIKE ?', matcher),
+        scope.where('"feed_entries"."summary" ILIKE ?', matcher)
+    ]
+  end
+
   def self.update_from_feed(feed)
     feedz = Feedjira::Feed.fetch_and_parse(feed.url)
     add_entries(feedz.entries, feed) if feedz.respond_to? :entries
