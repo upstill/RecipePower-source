@@ -40,6 +40,7 @@ module PanelHelper
     [selector, panel_org_menu(url, type, org) ]
   end
 
+=begin
   def panel_suggestion_button url, type
     querify_link '', url, class: "suggest #{type.to_s.extensions_to_classes} icon-large icon-lightbulb"
   end
@@ -49,7 +50,8 @@ module PanelHelper
     selector << '.' + type.extensions_to_selector if type.present?
     [selector, panel_suggestion_button(url, type) ]
   end
-  
+
+=end
   def panel_suggestions_placeholder type
     content_tag :div, '', class: "suggestions #{type.to_s.extensions_to_classes} placeholder" # Placeholder for the suggestions panel
   end

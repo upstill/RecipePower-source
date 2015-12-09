@@ -1,5 +1,9 @@
 RP.querify = RP.querify || {}
 
+jQuery ->
+	$('a.querify-link', document).on 'click', (event) ->
+		RP.querify.onclick event
+
 ###
 jQuery ->
 	s = RP.build_request "http:/blah"
@@ -50,10 +54,16 @@ RP.querify.onchange = (event) ->
 # When an element gets hit that's enclosed by a querify target, hit it with the params
 RP.querify.onclick = (event) ->
 	elmt = event.target
-	param = { altClicked: event.altKey }
-	param[elmt.name] = elmt.value
+	# The element may have multiple parameters in the 'qparams' data object, or
+	# the param may be fetched using the element's name and value
+	if !(param = $(elmt).data 'qparams')
+		param = { }
+		param[elmt.name] = elmt.value
+	param.altClicked = event.altKey
 	RP.querify.propagate elmt, param
 	event.preventDefault()
+	event.stopImmediatePropagation()
+	false
 
 # Propagate the param(s) to the supe and all its descendants
 down = (supe, params) ->

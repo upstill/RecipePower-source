@@ -22,13 +22,19 @@ module QuerifyHelper
   def querify_link label, url, options={}
     link_to_submit label,
                    url,
-                   options.merge( class: "#{options[:class]} querify querify-link" )
+                   options.merge(
+                       class: "#{options[:class]} querify querify-link"
+                   )
+  end
+
+  def querify_item label, qparams, options={ }
+    querify_link label, '#', options.merge( qparams: qparams )
   end
 
   # Declare a button which propagates parameter changes to enclosing querify supes
   def querify_button name, value, options={}
     button_tag(type: "querify",
-               class: "#{options[:class]} querify",
+               class: "#{options[:class]} querify querify-button",
                onclick: "RP.querify.onclick(event);", # Send when clicked
                name: name,
                value: value) do

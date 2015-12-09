@@ -341,7 +341,7 @@ class FilteredPresenter
 
   # Define buttons used in the search/redirect header above the presenter's results
   def org_buttons context, &block
-    # block.call 'RECENTLY VIEWED', '#'
+    block.call 'RECENTLY VIEWED', { :org => :viewed }
   end
 
   # Specify a path for fetching the results partial, based on the current query
@@ -486,8 +486,8 @@ class UserContentPresenter < FilteredPresenter
   # Define buttons used in the search/redirect header above the presenter's results
   def org_buttons context, &block
     size = context == 'panels' ? '' : ' small'
-    block.call 'RECENTLY VIEWED', results_path(:org => :viewed), class: (org.to_sym == :viewed ? 'disabled' : '')+size
-    block.call 'NEWEST', results_path(:org => :newest), class: (org.to_sym == :newest ? 'disabled' : '')+size
+    block.call 'RECENTLY VIEWED', { :org => :viewed }, class: (org.to_sym == :viewed ? 'disabled' : '')+size
+    block.call 'NEWEST', { :org => :newest }, class: (org.to_sym == :newest ? 'disabled' : '')+size
     context == 'panels' ? '' : 'order by'
   end
 end
@@ -531,17 +531,14 @@ class FeedsIndexPresenter < FilteredPresenter
 
   def org_buttons context, &block
     current_mode = @sort_direction
-    block.call 'newest first',
-               results_path(:org => :newest, sort_direction: 'DESC'),
+    block.call 'newest first', { :org => :newest, :sort_direction => 'DESC' },
                title: 'Re-sort The List',
                class: (@sort_direction == 'DESC' ? 'disabled' : '')
-    block.call 'oldest first',
-               results_path(:org => :newest, sort_direction: 'ASC'),
+    block.call 'oldest first', { :org => :newest, sort_direction: 'ASC' },
                title: 'Re-sort The List',
                class: (@sort_direction == 'ASC' ? 'disabled' : '')
     if admin_view
-      block.call 'unapproved first',
-                 results_path(:org => :approved, sort_direction: 'DESC'),
+      block.call 'unapproved first', { :org => :approved, sort_direction: 'ASC' },
                  title: 'Re-sort The List'
     end
     '' # No label
