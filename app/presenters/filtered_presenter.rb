@@ -486,8 +486,8 @@ class UserContentPresenter < FilteredPresenter
   # Define buttons used in the search/redirect header above the presenter's results
   def org_buttons context, &block
     size = context == 'panels' ? '' : ' small'
-    block.call 'RECENTLY VIEWED', { :org => :viewed }, class: (org.to_sym == :viewed ? 'disabled' : '')+size
-    block.call 'NEWEST', { :org => :newest }, class: (org.to_sym == :newest ? 'disabled' : '')+size
+    block.call 'RECENTLY VIEWED', { :org => :viewed, active: org.to_sym == :viewed }, class: size
+    block.call 'NEWEST', { :org => :newest, active: org.to_sym == :newest }, class: size
     context == 'panels' ? '' : 'order by'
   end
 end
@@ -531,7 +531,7 @@ class FeedsIndexPresenter < FilteredPresenter
 
   def org_buttons context, &block
     current_mode = @sort_direction
-    block.call 'newest first', { :org => :newest, :sort_direction => 'DESC' },
+    block.call 'newest first', { :org => :newest, :sort_direction => 'DESC', active: true },
                title: 'Re-sort The List',
                class: (@sort_direction == 'DESC' ? 'disabled' : '')
     block.call 'oldest first', { :org => :newest, sort_direction: 'ASC' },

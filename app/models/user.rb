@@ -33,10 +33,10 @@ class User < ActiveRecord::Base
   has_many :notifications_received, :foreign_key => :target_id, :class_name => 'Notification', :dependent => :destroy
 
   has_many :follower_relations, :foreign_key=>'followee_id', :dependent=>:destroy, :class_name=>'UserRelation'
-  has_many :followers, -> { uniq }, :through => :follower_relations, :source => :follower
+  has_many :followers, :through => :follower_relations, :source => :follower
 
   has_many :followee_relations, :foreign_key => 'follower_id', :dependent=>:destroy, :class_name => 'UserRelation'
-  has_many :followees, -> { uniq }, :through => :followee_relations, :source => :followee
+  has_many :followees, :through => :followee_relations, :source => :followee
 
   has_many :answers
   accepts_nested_attributes_for :answers, allow_destroy: true

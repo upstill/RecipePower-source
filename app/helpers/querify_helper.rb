@@ -31,6 +31,17 @@ module QuerifyHelper
     querify_link label, '#', options.merge( qparams: qparams )
   end
 
+  def querify_radiobutton label, qparams, options={ }
+    active = qparams.delete :active
+    content_tag :label,
+                radio_button_tag(qparams.keys.first,
+                                 qparams.values.first,
+                                 active,
+                                 class: 'querify-select',
+                                 data: { qparams: qparams })+label.html_safe,
+                class: "#{options[:class]} btn btn-primary #{'active' if active}"
+  end
+
   # Declare a button which propagates parameter changes to enclosing querify supes
   def querify_button name, value, options={}
     button_tag(type: "querify",

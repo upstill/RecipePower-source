@@ -42,13 +42,23 @@ div.org-buttons {
   &.panels-buttons {
     margin-top: 15px;
   }
-  a.org-button {
-    margin: 10px;
+  span.org-buttons-label {
+    display: inline-block;
+    margin-right: 10px;
+    float: left;
+  }
+  .org-button {
+    // margin: 10px;
+    border: none;
+    color: #cccccc;
+    &.active {
+      color: white;
+    }
     &.small {
       font-size: 0.8em;
       &.soft-button {
         padding: 4px 8px;
-        border-radius: 6px;
+        // border-radius: 6px;
       }
     }
     &.recipe {

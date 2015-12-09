@@ -6,11 +6,14 @@ module FilteredPresenterHelper
     buttons = ''.html_safe
     label =
     viewparams.org_buttons(context) do |label, qparams, link_options = {}|
-      link_options[:class] = (link_options[:class] || '') +
-          "#{'disabled' unless true} org-button soft-button #{viewparams.display_style} #{options[:class]}"
-      buttons << querify_item( label.upcase.html_safe, qparams, link_options )
+      link_options[:class] =
+          "#{link_options[:class]} org-button #{viewparams.display_style} #{options[:class]}"
+      buttons << querify_radiobutton( label.upcase.html_safe, qparams, link_options )
     end || ''
-    content_tag :div, label.html_safe+buttons, class: "org-buttons #{viewparams.display_style} #{context}-buttons" if buttons.present?
+    buttons = content_tag :div, buttons, class: 'btn-group', data: { toggle: 'buttons' }
+    content_tag :div,
+                content_tag(:span, label, class: 'org-buttons-label')+buttons,
+                class: "org-buttons #{viewparams.display_style} #{context}-buttons" if buttons.present?
   end
 
   def filtered_presenter_org_buttons_replacement viewparams, context='panels'

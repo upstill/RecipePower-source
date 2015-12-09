@@ -205,6 +205,19 @@ module EntitiesCache
     end
   end
 
+  # Provide the uniqueitemscope with a query for ordering the items. Defaults to no response
+  def ordereditemscope
+    # Use the org parameter and the ASC/DESC attribute to assert an ordering
+    case org
+      when :ratings
+      when :popularity
+      when :newest
+      when :viewed
+        uniqueitemscope.joins(:user_pointers).order('"rcprefs"."updated_at" ' + (@sort_direction || 'DESC'))
+      when :random
+    end || super
+  end
+
 end
 
 # Methods and defaults for a ResultsCache based on a user's collection
@@ -355,6 +368,7 @@ class ResultsCache < ActiveRecord::Base
       # The choice of handling class, and thus the cache, is a function of the result type required as well as the controller/action pair
       if cc = self.cache_class(params['controller'], params['action'], result_type)
 
+        logger.debug "Building ResultsCache #{cc.to_s}"
         # Since params_needed may have key/default pairs as well as a list of names
         defaulted_params = HashWithIndifferentAccess.new
         paramlist = cc.params_needed.collect { |pspec|
@@ -680,16 +694,6 @@ class UserOwnedListsCache < ResultsCache
     @itemscope ||= ListServices.lists_owned_by user, viewer
   end
 
-  def ordereditemscope
-    case org
-      when :ratings
-      when :popularity
-      when :newest
-      when :viewed
-        uniqueitemscope.order('"rcprefs"."updated_at"' + (@sort_direction || 'DESC'))
-      when :random
-    end || super
-  end
 end
 
 # An IntegersCache presents the default ResultsCache behavior: no scope, no cache, degenerate partition producing successive integers
