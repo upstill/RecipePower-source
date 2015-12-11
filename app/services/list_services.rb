@@ -66,10 +66,8 @@ class ListServices
 
   # Define a scope for the lists collected by one user, as visible to another
   def self.lists_collected_by user, viewer
-    scope = List.joins(:user_pointers).where(%Q{"rcprefs"."user_id" = #{user.id}})
-    user == viewer ?
-        scope.where.not(owner_id: user.id) :
-        scope.where(%Q{
+    scope = List.where.not(owner_id: user.id).joins(:user_pointers).where(%Q{"rcprefs"."user_id" = #{user.id}})
+    scope = scope.where(%Q{
           "rcprefs"."private" = false AND
           (
             "lists"."availability" = 0 OR
@@ -78,7 +76,8 @@ class ListServices
               "lists"."owner_id" in (#{viewer.follower_ids.join(', ')})
             )
           )
-        })
+        }) if user != viewer
+    scope
   end
 
   def self.lists_owned_by user, viewer
