@@ -124,7 +124,7 @@ module NavtabsHelper
 
   def feeds_navtab menu_only = false
     navtab :feeds, "Feeds", feeds_path(access: "collected"), menu_only do
-      feed_set = current_user_or_guest.collection_scope(entity_type: "Feed", limit: 16, sort_by: :viewed).map(&:entity)
+      feed_set = current_user_or_guest.collection_scope(entity_type: "Feed", limit: 16, sort_by: :viewed).map(&:entity).compact
       if feed_set.count < 16
         # Try adding the lists owned by friends
         current_user_or_guest.followees.each { |friend|
