@@ -1,1 +1,1 @@
-# ResultsCache.delete_all
+ResultsCache.delete_all

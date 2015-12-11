@@ -301,8 +301,7 @@ class FilteredPresenter
 
   # Default results list: only the result type. Subclasses may redefine for multiple subtypes
   def subtypes
-    subtype = viewparams.result_type.subtype
-    [ (subtype.present? ? subtype : result_type) ].compact
+    [ result_type ].compact
   end
 
   # Other result types that may be provided alternative to the current one
