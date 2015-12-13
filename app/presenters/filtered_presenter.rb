@@ -473,6 +473,10 @@ class UserContentPresenter < FilteredPresenter
     end
   end
 
+  def show_card?
+    result_type == 'collection'
+  end
+
   def header_partial
     viewparams.result_type.root == 'collection' ? 'header_generic' : 'header_collection_entity'
   end
