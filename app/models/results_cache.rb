@@ -782,7 +782,7 @@ class FeedsIndexCache < ResultsCache
 end
 
 # list of feed items
-class FeedsOwnedCache < ResultsCache
+class FeedsShowCache < ResultsCache
   include EntitiesCache
 
   def feed

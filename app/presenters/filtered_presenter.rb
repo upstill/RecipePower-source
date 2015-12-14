@@ -144,7 +144,7 @@ class ViewParams
         'user'
       end
     else
-      result_type.root.singularize
+      entity ? entity.class.to_s.underscore.singularize : result_type.root.singularize
     end
   end
 end
@@ -512,7 +512,7 @@ class UsersBiglistPresenter < UserContentPresenter
 end
 
 # Present the entries associated with a feed
-class FeedsOwnedPresenter < FilteredPresenter
+class FeedsShowPresenter < FilteredPresenter
 
   def result_type
     'feed_entries'

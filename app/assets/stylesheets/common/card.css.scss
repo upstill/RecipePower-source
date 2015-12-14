@@ -212,7 +212,7 @@ div.card-item {
   &.feed-card {
     background-color: $feeds-card-background-color;
     div.title > a.title-link {
-      color: $feeds-panel-label-color;
+      color: $feeds-navtab-text-color;
     }
   }
   &.user-card {
