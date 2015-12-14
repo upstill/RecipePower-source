@@ -72,6 +72,12 @@ module UsersHelper
     [ ".follow-button##{dom_id user}", user_follow_button(user, options) ]
   end
 
+  def user_follower_count decorator
+    content_tag(:span,
+                "#{decorator.followers.size}&nbsp;".html_safe,
+                class: 'follower-count') + sprite_glyph(:chef)
+  end
+
   def di_select
     menu_options = { class: "di-selector" }
     menu_options[:style] = "display: none;" if (alltags-curtags).empty?

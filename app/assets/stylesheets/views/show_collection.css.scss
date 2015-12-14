@@ -70,7 +70,11 @@ div.collection-header {
       margin-bottom: 0.5em;
       margin-left: 0.3em;
       font-size: 2em;
+      color: $friends-navtab-text-color; // #dfca6a;
       // border: 1px solid red;
+      span.follower-count {
+        font-size: 0.9em;
+      }
     }
     div.nav-bottom {
       //  style="position: absolute; bottom: 0px;"

@@ -37,7 +37,8 @@
             </td>
             <td valign="top">
               <div class="nav-top">
-                <%= collectible_collect_button(decorator, 'xl') unless decorator.object == response_service.user %>
+                <%= collectible_collect_button(decorator, 'xl', class: 'friend-color') unless decorator.object == response_service.user %>
+                <%= user_follower_count decorator %>
               </div>
             </td>
           </tr>
