@@ -216,6 +216,11 @@ module EntitiesCache
       when :ratings
       when :popularity
       when :newest
+        sort_attribute = %Q{"#{result_type.table_name}"."created_at"}
+        uniqueitemscope.order("#{sort_attribute} #{@sort_direction || 'DESC'}")
+      when :updated
+        sort_attribute = %Q{"#{result_type.table_name}"."updated_at"}
+        uniqueitemscope.order("#{sort_attribute} #{@sort_direction || 'DESC'}")
       when :viewed
         uniqueitemscope.joins(:user_pointers).order('"rcprefs"."updated_at" ' + (@sort_direction || 'DESC'))
       when :random
@@ -240,6 +245,9 @@ module CollectionCache
     case org
       when :ratings
       when :popularity
+      when :updated
+        sort_attribute = %Q{"#{result_type.table_name}"."updated_at"}
+        uniqueitemscope.joins(result_type.table_name.to_sym).order("#{sort_attribute} #{@sort_direction || 'DESC'}")
       when :newest
         sort_attribute = %Q{"#{result_type.table_name}"."created_at"}
         uniqueitemscope.joins(result_type.table_name.to_sym).order("#{sort_attribute} #{@sort_direction || 'DESC'}")
@@ -658,7 +666,7 @@ end
 class UserFeedsCache < UsersCollectionCache
 
   def ordereditemscope
-    if @org && (@org.to_sym == :newest)
+    if @org && (@org.to_sym == :updated)
       uniqueitemscope.joins(:feeds).order('"feeds"."last_post_date"' + (@sort_direction || 'DESC'))
     else
       super
@@ -774,7 +782,7 @@ class FeedsIndexCache < ResultsCache
 
   def ordereditemscope
     case @org.to_sym
-      when :newest
+      when :updated
         uniqueitemscope.order('"feeds"."last_post_date" ' + (@sort_direction || 'DESC'))
       when :approved
         uniqueitemscope.order('"feeds"."approved" ' + (@sort_direction || 'ASC'))

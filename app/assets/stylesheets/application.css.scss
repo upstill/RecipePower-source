@@ -242,11 +242,6 @@ div.triggered-form {
   }
   &.no-menu {
     padding-top: 75px;
-    div.selector-element {
-      margin-top: 3em;
-      margin-bottom: 2em;
-      margin-left: 13em;
-    }
     div.card-item {
       margin-top: 30px;
     }
@@ -256,11 +251,6 @@ div.triggered-form {
     padding-top: 75px;
     div.triggered-form {
       top: $menuback-height;
-    }
-    div.selector-element {
-      margin-top: 1em;
-      margin-bottom: 2em;
-      margin-left: 3em;
     }
     > div.row {
       margin-left: 15px;
@@ -343,6 +333,10 @@ div.glyph-button {
 }
 
 div.selector-element {
+  display: inline-block;
+  float: left;
+  // margin-top: 10px;
+  margin-bottom: 10px;
   a.result-link {
     font-size: 1.5em;
           &.recipes {
@@ -367,13 +361,20 @@ div.selector-element {
   }
 }
 
+div.org-element {
+  display: inline-block;
+  float: right;
+  margin-top: 20px;
+  // margin-bottom: 10px;
+}
+
 .tag-filter-title {
   font-family: Oswald, sans-serif;
   text-transform: lowercase;
 }
 
 // .simple_form label {
-// float: left;
+// float: left
 // margin: 8px 0 5px;
 // }
 

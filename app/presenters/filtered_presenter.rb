@@ -96,6 +96,7 @@ class ViewParams
   end
 
   def panel_title short=false
+    return filtered_presenter.panel_title if filtered_presenter.respond_to? :panel_title
     if (user = filtered_presenter.entity) && (user.class == User)
       is_me = (user == filtered_presenter.viewer)
       is_friend = filtered_presenter.viewer.follows? user
@@ -124,6 +125,7 @@ class ViewParams
   end
 
   def panel_label
+    return filtered_presenter.panel_label if filtered_presenter.respond_to? :panel_label
     case rt = result_type.subtype || result_type.root
       when 'lists'
         'treasuries'
@@ -396,6 +398,18 @@ end
 
 class SearchIndexPresenter < FilteredPresenter
   @item_mode = :masonry
+
+  def panel_title
+    'Everything in RecipePower'
+  end
+
+  # Define buttons used in the search/redirect header above the presenter's results
+  def org_buttons context, &block
+    block.call 'RECENTLY VIEWED', { :org => :viewed, active: org.to_sym == :viewed }
+    block.call 'NEWEST', { :org => :newest, active: org.to_sym == :newest }
+    block.call 'UPDATED', { :org => :updated, active: org.to_sym == :updated } if result_type == 'feeds'
+    'organize by:'
+  end
 
   # The global search only presents one type at a time, starting with recipes
   def result_type

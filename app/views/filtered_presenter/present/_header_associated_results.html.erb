@@ -1,13 +1,31 @@
 <% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
+<% if viewparams.panel_title.present? %>
+    <div class="row">
+      <div class="col-md-12">
+        <span class="panels-label <%= viewparams.display_style.extensions_to_classes %>-label ">
+          <%= viewparams.panel_title %>
+        </span>
+      </div>
+    </div>
+<% end %>
 <%= triggered_form(viewparams.query) do %>
     <div class="filter-element">
       <%= viewparams.filter_field placeholder: 'Let\'s cook up something' %>
     </div>
 <% end %>
-<div class="selector-element">
-  <%= link_to_submit viewparams.panel_label, viewparams.link_address, class: "result-link #{viewparams.result_type} lead" %>
-  <% viewparams.sibling_views.each do |viewparams| %>
-      <span class="divider">|</span>&nbsp;
-      <%= link_to_submit viewparams.panel_label, viewparams.link_address, class: "result-link #{viewparams.result_type}" %>
-  <% end %>
+<div class="row">
+  <div class="col-md-5">
+    <div class="selector-element">
+      <%= link_to_submit viewparams.panel_label, viewparams.link_address, class: "result-link #{viewparams.result_type} lead" %>
+      <% viewparams.sibling_views.each do |viewparams| %>
+          <span class="divider">|</span>&nbsp;
+          <%= link_to_submit viewparams.panel_label, viewparams.link_address, class: "result-link #{viewparams.result_type}" %>
+      <% end %>
+    </div>
+  </div>
+  <div class="col-md-7">
+    <div class="org-element">
+      <%= filtered_presenter_org_buttons viewparams, 'organize by:' %>
+    </div>
+  </div>
 </div>
