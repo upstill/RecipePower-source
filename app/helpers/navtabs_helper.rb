@@ -65,8 +65,8 @@ module NavtabsHelper
     navtab :collections, "Collections", collection_user_path(current_user_or_guest), menu_only do
       [
           navlink("My Collection", collection_user_path(current_user_or_guest)),
-          navlink("Recently Viewed", user_recent_path(current_user_or_guest_id)),
-          navlink("Everything in RecipePower", user_biglist_path(current_user_or_guest)),
+          # navlink("Recently Viewed", user_recent_path(current_user_or_guest_id)),
+          navlink("Everything in RecipePower", search_path()),
           "<hr class='menu'>".html_safe,
           navlink("Add to Collection", new_recipe_path, :mode => :modal)
       ]

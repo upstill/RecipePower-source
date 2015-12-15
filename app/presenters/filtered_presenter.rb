@@ -124,13 +124,13 @@ class ViewParams
   end
 
   def panel_label
-    case result_type.root
+    case rt = result_type.subtype || result_type.root
       when 'lists'
         'treasuries'
       when 'feed_entries'
         'entries'
       else
-        result_type.root
+        rt
     end
   end
 
@@ -340,7 +340,10 @@ class FilteredPresenter
 
   # Define buttons used in the search/redirect header above the presenter's results
   def org_buttons context, &block
-    block.call 'RECENTLY VIEWED', { :org => :viewed }
+    size = context == 'panels' ? '' : ' small'
+    block.call 'RECENTLY VIEWED', { :org => :viewed, active: org.to_sym == :viewed }, class: size
+    block.call 'NEWEST', { :org => :newest, active: org.to_sym == :newest }, class: size
+    context == 'panels' ? '' : 'order by'
   end
 
   # Specify a path for fetching the results partial, based on the current query
@@ -486,13 +489,6 @@ class UserContentPresenter < FilteredPresenter
     super
   end
 
-  # Define buttons used in the search/redirect header above the presenter's results
-  def org_buttons context, &block
-    size = context == 'panels' ? '' : ' small'
-    block.call 'RECENTLY VIEWED', { :org => :viewed, active: org.to_sym == :viewed }, class: size
-    block.call 'NEWEST', { :org => :newest, active: org.to_sym == :newest }, class: size
-    context == 'panels' ? '' : 'order by'
-  end
 end
 
 class UsersShowPresenter < UserContentPresenter

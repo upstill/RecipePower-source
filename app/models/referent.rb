@@ -60,7 +60,7 @@ class Referent < ActiveRecord::Base
 
   def self.strscopes matcher
     [
-        (block_given? ? yield() : self.unscoped).joins(:tags).where('"tags"."name" ILIKE ?', matcher)
+        (block_given? ? yield() : self).joins(:tags).where('"tags"."name" ILIKE ?', matcher)
     ]
   end
 
