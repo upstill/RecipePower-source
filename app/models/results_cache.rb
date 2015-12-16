@@ -615,6 +615,16 @@ class SearchIndexCache < ResultsCache
     'search'
   end
 
+  def ordereditemscope
+    # Use the org parameter and the ASC/DESC attribute to assert an ordering
+    if org == :viewed
+      scope = uniqueitemscope.select("#{result_type.table_name}.*, max(rcprefs.updated_at)").joins(:toucher_pointers).group("#{result_type.table_name}.id").order('max("rcprefs"."updated_at") DESC')
+      # scope = uniqueitemscope.joins(:toucher_pointers).group("rcprefs.updated_at, #{result_type.table_name}.id, rcprefs.id").order('"rcprefs"."updated_at" ' + (@sort_direction || 'DESC'))
+      # scope = uniqueitemscope.joins(:toucher_pointers).order('"rcprefs"."updated_at" ' + (@sort_direction || 'DESC'))
+      scope
+    end || super
+  end
+
 end
 
 # Cache for facets of a user's collection, in fact just a stub for selecting other classes
