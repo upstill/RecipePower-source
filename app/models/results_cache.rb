@@ -217,10 +217,10 @@ module EntitiesCache
       when :ratings
       when :popularity
       when :newest
-        sort_attribute = %Q{"#{result_type.table_name}"."created_at"}
+        sort_attribute = %Q{"#{sort_table_name}"."created_at"}
         uniqueitemscope.order("#{sort_attribute} #{@sort_direction || 'DESC'}")
       when :updated
-        sort_attribute = %Q{"#{result_type.table_name}"."updated_at"}
+        sort_attribute = %Q{"#{sort_table_name}"."updated_at"}
         uniqueitemscope.order("#{sort_attribute} #{@sort_direction || 'DESC'}")
       when :viewed
         uniqueitemscope.joins(:user_pointers).order('"rcprefs"."updated_at" ' + (@sort_direction || 'DESC'))
@@ -247,11 +247,11 @@ module CollectionCache
       when :ratings
       when :popularity
       when :updated
-        sort_attribute = %Q{"#{result_type.table_name}"."updated_at"}
-        uniqueitemscope.joins(result_type.table_name.to_sym).order("#{sort_attribute} #{@sort_direction || 'DESC'}")
+        sort_attribute = %Q{"#{sort_table_name}"."updated_at"}
+        uniqueitemscope.joins(sort_table_name.to_sym).order("#{sort_attribute} #{@sort_direction || 'DESC'}")
       when :newest
-        sort_attribute = %Q{"#{result_type.table_name}"."created_at"}
-        uniqueitemscope.joins(result_type.table_name.to_sym).order("#{sort_attribute} #{@sort_direction || 'DESC'}")
+        sort_attribute = %Q{"#{sort_table_name}"."created_at"}
+        uniqueitemscope.joins(sort_table_name.to_sym).order("#{sort_attribute} #{@sort_direction || 'DESC'}")
       when :viewed
         uniqueitemscope.order('"rcprefs"."updated_at"' + (@sort_direction || 'DESC'))
       when :random
@@ -356,17 +356,6 @@ class ResultsCache < ActiveRecord::Base
   include ActiveRecord::Sanitization
   include NullCache
 
-  # Initialize the cache by copying values from the params into instance variables
-  after_initialize do
-    params.each { |key, val|
-      if self.respond_to? key.to_sym
-        self.send "#{key}=", val
-      else
-        self.instance_variable_set "@#{key}".to_sym, val
-      end
-    }
-  end
-
   before_save do
     session_id != nil
   end
@@ -382,7 +371,7 @@ class ResultsCache < ActiveRecord::Base
 
   # Declare the parameters needed for this class
   def self.params_needed
-    [:entity_id, :viewerid, :admin_view, :querytags, [:org, :viewed], :sort_direction ]
+    [:entity_id, :viewerid, :admin_view, :querytags, [:org, :viewed], :sort_direction, [ :result_type, '' ] ]
   end
 
   attr_accessible :session_id, :type, :params, :cache, :partition
@@ -420,7 +409,7 @@ class ResultsCache < ActiveRecord::Base
 
         # For purposes of busting the cache, we assume that sort direction is irrelevant
         # NB: At the point, the params in rc are in exactly the same form as the query params, i.e. strings
-        if rc.params.except(:sort_direction) != relevant_params.except(:sort_direction) # TODO: Take :nocache into consideration
+        if true || rc.params.except(:sort_direction) != relevant_params.except(:sort_direction) # TODO: Take :nocache into consideration
           # Bust the cache if the params don't match
           rc.cache = rc.partition = rc.items = nil
           rc.params = relevant_params
@@ -430,8 +419,21 @@ class ResultsCache < ActiveRecord::Base
     }.compact
   end
 
+  # Whenever the params get assigned--whether directly by assignment, by mass-assignment, or by fetching records--we
+  # copy the param values into the cache object
+  def params= params_hash
+    super # To handle, e.g., serialization
+    params_hash.each { |key, val|
+      if self.respond_to? key.to_sym
+        self.send "#{key}=", val
+      else
+        self.instance_variable_set "@#{key}".to_sym, val
+      end
+    }
+  end
+
   # Return the subclass of ResultsCache that will handle generating items
-  def self.cache_class controller, action, result_type
+  def self.cache_class controller, action, result_type=nil
     # Here's the chance to divert handling to different cache generators
     classname = controller.camelize + action.capitalize + 'Cache'
     if klass = (classname.constantize rescue nil)
@@ -621,7 +623,7 @@ class ResultsCache < ActiveRecord::Base
 
       # Sort the scope by number of hits, descending
       self.cache = counts.itemstubs
-      bounds = (0...(@querytags.count)).to_a.map { |i| (@querytags.count-i)*30 } # Partition according to the # of matches
+      bounds = (0...(@querytags.count)).to_a.map { |i| (@querytags.count-i)*100 } # Partition according to the # of matches
       wdw = partition.window if partition
       self.partition = counts.partition bounds
       self.window = [wdw.min, wdw.max] if wdw
@@ -632,6 +634,10 @@ class ResultsCache < ActiveRecord::Base
   # Report a previously-saved parameter (or, in fact, any instance variable)
   def param sym
     self.instance_variable_get "@#{sym}".to_sym
+  end
+
+  def sort_table_name
+    result_type.table_name
   end
 
   protected
@@ -686,10 +692,7 @@ class SearchIndexCache < ResultsCache
   def ordereditemscope
     # Use the org parameter and the ASC/DESC attribute to assert an ordering
     if org == :viewed
-      scope = uniqueitemscope.select("#{result_type.table_name}.*, max(rcprefs.updated_at)").joins(:toucher_pointers).group("#{result_type.table_name}.id").order('max("rcprefs"."updated_at") DESC')
-      # scope = uniqueitemscope.joins(:toucher_pointers).group("rcprefs.updated_at, #{result_type.table_name}.id, rcprefs.id").order('"rcprefs"."updated_at" ' + (@sort_direction || 'DESC'))
-      # scope = uniqueitemscope.joins(:toucher_pointers).order('"rcprefs"."updated_at" ' + (@sort_direction || 'DESC'))
-      scope
+      uniqueitemscope.select("#{result_type.table_name}.*, max(rcprefs.updated_at)").joins(:toucher_pointers).group("#{result_type.table_name}.id").order('max("rcprefs"."updated_at") DESC')
     end || super
   end
 
@@ -700,7 +703,7 @@ class UsersShowCache < ResultsCache
   include ResultTyping
 
   # Different subclasses are used to handle different result types
-  def self.subclass_for result_type
+  def self.subclass_for result_type=nil
     case result_type
       when 'lists'
         UserListsCache
@@ -920,6 +923,10 @@ class UserFriendsCache < ResultsCache
     @itemscope ||= user.followees
   end
 
+  def sort_table_name
+    'user_relations'
+  end
+
 end
 
 # user's lists visible to current_user (UserListsStreamer
@@ -943,7 +950,7 @@ class TagsIndexCache < ResultsCache
   # Tags don't go through Taggings, so we just use/count them directly
   def count_tag tag, counts
     super # Do the usual strscopes thing
-    counts.incr_by_scope itemscope.where(normalized_name: tag.normalized_name || Tag.normalizeName(tag.name)), 30
+    counts.incr_by_scope itemscope.where(normalized_name: tag.normalized_name || Tag.normalizeName(tag.name)), 10
   end
 
   def itemscope

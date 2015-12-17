@@ -384,10 +384,6 @@ protected
 
   private
 
-  def querytags
-    results_cache ? results_cache.querytags : []
-  end
-
   def org= val
     @org = val.to_sym
   end

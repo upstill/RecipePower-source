@@ -139,7 +139,7 @@ RP::Application.routes.draw do
   match 'references', :controller => 'references', :action => 'index', :via => [:get, :post]
 
   post '/feed' => 'feeds#create', :as => 'create_feed'
-  get 'feeds/:id/owned' => 'feeds#owned', :as => "owned_feed"
+  # get 'feeds/:id/owned' => 'feeds#owned', :as => "owned_feed"
   resources :feeds, :except => [:index, :create], :concerns => [:picable, :collectible, :taggable] do
     member do
       get 'refresh' # Refresh the feed's entries
