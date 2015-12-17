@@ -57,7 +57,7 @@ end
 class ViewParams
   attr_reader :link_address, :result_type, :results_path, :filtered_presenter, :item_mode
 
-  delegate :entity, :decorator, :viewer, :tagtype, :response_service,
+  delegate :entity, :decorator, :viewer, :tagtype, :response_service, :querytags,
            :request_path, :next_path, :query,
            :filter_field, :filter_type_selector,
            :table_headers, :stream_id, :tail_partial, :sibling_views, :org_buttons,
@@ -162,18 +162,16 @@ class FilteredPresenter
               :org, # How to organize the results: :ratings, :popularity, :newest, :viewed, :random
               :klass # class of the underlying object
 
-  delegate :admin_view,
-           :querytags, :"has_query?",
-           :to => :results_cache
+  delegate :admin_view, :querytags, :"has_query?", :to => :results_cache
 
   delegate :display_style, :to => :viewparams
 
   # Build an instance of the appropriate subclass, given the entity, controller and action
-  def self.build view_context, response_service, params, querytags, decorator=nil
+  def self.build view_context, response_service, params, decorator=nil
     classname = "#{response_service.controller.capitalize}#{response_service.action.capitalize}Presenter"
 
     if Object.const_defined? classname # If we have a FilteredPresenter subclass available
-      classname.constantize.new view_context, response_service, params, querytags, decorator
+      classname.constantize.new view_context, response_service, params, decorator
     end
   end
 
@@ -185,7 +183,7 @@ class FilteredPresenter
     end
   end
 
-  def initialize view_context, response_service, params, querytags, decorator=nil
+  def initialize view_context, response_service, params, decorator=nil
     if @decorator = decorator
       @entity = decorator.object
       @klass = @entity.class
@@ -232,7 +230,7 @@ class FilteredPresenter
     @request_path = response_service.requestpath
     @viewparams = ViewParams.new self
     # Notify the ResultsCache(s) of any prospective results query
-    init_stream ResultsCache.retrieve_or_build( response_service.uuid, subtypes, querytags, params).first
+    init_stream ResultsCache.retrieve_or_build( response_service.uuid, subtypes, params).first
   end
 
   # This is the path that will go into the "more items" link

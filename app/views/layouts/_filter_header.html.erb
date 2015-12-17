@@ -7,7 +7,7 @@
     <% end %>
     <div class="filter-element">
       <%= token_input_query(
-                  :querytags => (defined?(querytags) ? querytags : []),
+                  :querytags => viewparams.querytags,
                   :hint => "Type food terms and hit Enter or Return",
                   placeholder: "Let's cook up something...") %>
     </div>

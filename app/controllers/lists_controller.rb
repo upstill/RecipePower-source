@@ -1,5 +1,3 @@
-require './lib/querytags.rb'
-
 class ListsController < CollectibleController
 
   def index

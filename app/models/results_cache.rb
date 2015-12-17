@@ -1,3 +1,4 @@
+require './lib/querytags.rb'
 require 'rcpref.rb'
 require 'result_type.rb'
 
@@ -132,7 +133,7 @@ end
 module UserFunc
 
   def user
-    @user ||= User.find @id
+    @user ||= User.find @entity_id
   end
 
 end
@@ -163,7 +164,7 @@ module NullCache
   end
 
   def stream_id
-    "#{itemscope.model.to_s}-#{@id}"
+    "#{itemscope.model.to_s}-#{@entity_id}"
   end
 
   # This is a prototypical count_tag method, which digests the itemscope in light of a tag,
@@ -230,7 +231,7 @@ module EntitiesCache
 end
 
 # Methods and defaults for a ResultsCache based on a user's collection
-# @id parameter denotes the user
+# @entity_id parameter denotes the user
 module CollectionCache
   include UserFunc
   include ResultTyping
@@ -261,8 +262,8 @@ module CollectionCache
   def strscopes matcher, modelclass
     if modelclass.respond_to? :strscopes
       modelclass.strscopes(matcher).collect { |innerscope|
-        innerscope = innerscope.joins(:user_pointers).where('"rcprefs"."user_id" = ? and "rcprefs"."in_collection" = true', @id.to_s)
-        innerscope = innerscope.where('"rcprefs"."private" = false') unless @id == @viewerid # Only non-private entities if the user is not the viewer
+        innerscope = innerscope.joins(:user_pointers).where('"rcprefs"."user_id" = ? and "rcprefs"."in_collection" = true', @entity_id.to_s)
+        innerscope = innerscope.where('"rcprefs"."private" = false') unless @entity_id == @viewerid # Only non-private entities if the user is not the viewer
         innerscope
       }
     else
@@ -276,8 +277,8 @@ module CollectionCache
     typeset.each do |type|
       modelclass = type.constantize
       scope = modelclass.joins :user_pointers
-      scope = scope.where('"rcprefs"."user_id" = ? and "rcprefs"."in_collection" = true', @id.to_s)
-      scope = scope.where('"rcprefs"."private" = false') unless @id == @viewerid # Only non-private entities if the user is not the viewer
+      scope = scope.where('"rcprefs"."user_id" = ? and "rcprefs"."in_collection" = true', @entity_id.to_s)
+      scope = scope.where('"rcprefs"."private" = false') unless @entity_id == @viewerid # Only non-private entities if the user is not the viewer
 
       # First, match on the comments using the rcpref
       counts.incr_by_scope scope.where('"rcprefs"."comment" ILIKE ?', matchstr)
@@ -289,8 +290,8 @@ module CollectionCache
       subscope = modelclass.joins(:taggings).where 'taggings.tag_id = ?', tag.id.to_s
 =begin
       # TODO: We're not filtering by user taggings (the more the merrier)
-      if @id
-        subscope = subscope.where 'taggings.user_id = ?', @id.to_s
+      if @entity_id
+        subscope = subscope.where 'taggings.user_id = ?', @entity_id.to_s
       end
 =end
       counts.incr_by_scope subscope, 1
@@ -355,55 +356,70 @@ class ResultsCache < ActiveRecord::Base
   include ActiveRecord::Sanitization
   include NullCache
 
+  # Initialize the cache by copying values from the params into instance variables
+  after_initialize do
+    params.each { |key, val|
+      if self.respond_to? key.to_sym
+        self.send "#{key}=", val
+      else
+        self.instance_variable_set "@#{key}".to_sym, val
+      end
+    }
+  end
+
   before_save do
     session_id != nil
   end
+
+  belongs_to :tags_cache, :foreign_key => :session_id
+
   # The ResultsCache class responds to a query with a series of items.
   # As a model, it saves intermediate results to the database
   self.primary_keys = ['session_id', 'type']
+
+  # Standard parameters
+  attr_accessor :entity_id, :viewerid, :admin_view, :querytags, :org, :sort_direction, :result_type
+
+  # Declare the parameters needed for this class
+  def self.params_needed
+    [:entity_id, :viewerid, :admin_view, :querytags, [:org, :viewed], :sort_direction ]
+  end
 
   attr_accessible :session_id, :type, :params, :cache, :partition
   serialize :params
   serialize :cache
   serialize :partition
-  attr_accessor :items, :querytags, :admin_view, :result_type
+  attr_accessor :items
   delegate :window, :next_index, :'done?', :max_window_size, :to => :safe_partition
 
   # Get the current results cache and return it if relevant. Otherwise,
   # create a new one
-  def self.retrieve_or_build session_id, result_types, parsed_querytags=[], params={}
-    unless parsed_querytags.is_a? Array
-      params, parsed_querytags = parsed_querytags, []
-    end
-
+  def self.retrieve_or_build session_id, result_types, params={}
     result_types.collect { |result_type|
       # The choice of handling class, and thus the cache, is a function of the result type required as well as the controller/action pair
       if cc = self.cache_class(params['controller'], params['action'], result_type)
 
-        logger.debug "Building ResultsCache #{cc.to_s}"
-        # Since params_needed may have key/default pairs as well as a list of names
+        # Since params_needed may be key/default pairs as well as a list of names
         defaulted_params = HashWithIndifferentAccess.new
         paramlist = cc.params_needed.collect { |pspec|
           if pspec.is_a? Array
-            defaulted_params[pspec.first] = pspec.last
+            defaulted_params[pspec.first] = pspec.last.to_s # They're recorded as strings, since that's what params use
             pspec.first
           else
             pspec
           end
         }.uniq
-        # relevant_params are the parameters that will bust the cache when changed
-        relevant_params = defaulted_params.merge(params).slice *(paramlist - ['result_type']).uniq
+
+        # The entity_id comes in the :id param, but this can cause confusion with the AR id for the record.
+        # Consequently, we use :entity_id internally
+        defaulted_params[:entity_id] = params[:id] if params[:id]
+
+        # relevant_params are the parameters that will bust the cache when changed from one request to another
+        relevant_params = defaulted_params.merge(params).slice *paramlist
         rc = cc.create_with(:params => relevant_params).find_or_initialize_by session_id: session_id, type: cc.to_s
-        # unpack the parameters into instance variables
-        relevant_params.each { |key, val|
-          rc.instance_variable_set "@#{key}".to_sym, ((val.is_a?(String) && (val.to_i.to_s == val)) ? val.to_i : val)
-        }
-        # A bit of subtlety: we USE the querytags passed in that parameter, NOT the unparsed string from the query params
-        # We STORE the unparsed string just because a synthesized tag (with negative ID) doesn't serialize properly
-        rc.querytags = parsed_querytags
-        rc.result_type = ResultType.new result_type # Because we want access to the result type's services, not just a string
 
         # For purposes of busting the cache, we assume that sort direction is irrelevant
+        # NB: At the point, the params in rc are in exactly the same form as the query params, i.e. strings
         if rc.params.except(:sort_direction) != relevant_params.except(:sort_direction) # TODO: Take :nocache into consideration
           # Bust the cache if the params don't match
           rc.cache = rc.partition = rc.items = nil
@@ -431,17 +447,69 @@ class ResultsCache < ActiveRecord::Base
     self.where(session_id: session_id).each { |rc| rc.destroy }
   end
 
-  # Declare the parameters needed for this class
-  def self.params_needed
-    [:id, :viewerid, :admin_view, :querytags, [:org, :viewed], :sort_direction ]
+  # Convert the querytags string parameter into an array of tags for internal use.
+  # When querytags are given as strings (as opposed to tag ids), they are stored
+  # temporarily in the session with negative ids, for use in later callbacks.
+  def querytags= querytext
+    @querytags ||=
+    if querytext
+      tags_cache ||= TagsCache.find_or_initialize_by session_id: session_id
+      special = tags_cache.tags || {}
+      qt =
+      querytext.split(",").collect do |e|
+        e.strip!
+        if (e=~/^\d*$/) # numbers (sans quotes) represent existing tags that the user selected
+          Tag.find e.to_i
+        elsif e=~/^-\d*$/ # negative numbers (sans quotes) represent special tags from before
+          # Re-save this one
+          tag = Tag.new name: special[e]
+          tag.id = e.to_i
+          tag
+        else
+          # This is a new special tag. Unless it matches an existing tag, convert it to an internal tag and add it to the cache
+          name = e.gsub(/\'/, '').strip
+          unless tag = Tag.strmatch(name, { matchall: true, uid: @userid }).first
+            tag = Tag.new name: name
+            unless special.find { |k, v| (special[k] = v and tag.id = k.to_i) if v == name }
+              tag.id = -1
+              # Search for an unused id
+              while special[tag.id.to_s] do
+                tag.id = tag.id - 1
+              end
+              special[tag.id.to_s] = tag.name
+            end
+          end
+          tag
+        end
+      end
+      tags_cache.tags = special
+      tags_cache.save
+      qt
+    else
+      []
+    end
   end
 
+  # Do type conversions when accepting instance variables
+  def entity_id= i
+    @entity_id = i.to_i
+  end
+
+  def viewerid= id
+    @viewerid = id.to_i
+  end
+
+  def org= o
+    @org = o.to_sym
+  end
+
+  def result_type= rt
+    @result_type = ResultType.new rt # Because we want access to the result type's services, not just a string
+  end
+
+  # Memoize the viewing user
   def viewer
     @viewer ||= User.find @viewerid
-  end
-
-  def org
-    @org.to_sym
   end
 
   # Return the following range, for triggering purposes, and optionally pre-advance the window
@@ -689,7 +757,7 @@ class SitesFeedsCache < ResultsCache
   include EntitiesCache
 
   def site
-    @site ||= Site.find @id
+    @site ||= Site.find @entity_id
   end
 
   def itemscope
@@ -750,7 +818,7 @@ class ListsShowCache < ResultsCache
   include TaggingCache
 
   def list
-    @list ||= List.find @id
+    @list ||= List.find @entity_id
   end
 
   # The itemscope is the initial query for all possible items, subject to subqueries via count_tag
@@ -759,7 +827,7 @@ class ListsShowCache < ResultsCache
   end
 
   def stream_id
-    "list_#{@id}_contents"
+    "list_#{@entity_id}_contents"
   end
 
 end
@@ -768,6 +836,7 @@ end
 class FeedsIndexCache < ResultsCache
   include EntitiesCache
 
+  # Declare a different default org
   def self.params_needed
     super + [ [:org, :newest] ]
   end
@@ -808,7 +877,7 @@ class FeedsShowCache < ResultsCache
   include EntitiesCache
 
   def feed
-    @feed ||= Feed.find @id
+    @feed ||= Feed.find @entity_id
   end
 
   def itemscope
@@ -887,7 +956,7 @@ class TagsAssociatedCache < ResultsCache
   include TaggingCache
 
   def tag
-    @tag ||= Tag.find @id
+    @tag ||= Tag.find @entity_id
   end
 
   def itemscope
@@ -910,7 +979,7 @@ class SitesShowCache < ResultsCache
   include EntitiesCache
 
   def site
-    @site = Site.find @id
+    @site = Site.find @entity_id
   end
 
   def itemscope
@@ -942,7 +1011,7 @@ end
 class ReferenceCache < ResultsCache
 
   def reference
-    @reference ||= Reference.find @id
+    @reference ||= Reference.find @entity_id
   end
 
 end

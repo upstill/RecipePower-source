@@ -1,7 +1,7 @@
 module FeedsHelper
 
-  def feed_status_report feed
-    tag_query = @querytags.collect { |tag| tag.id > 0 ? tag.id.to_s : tag.name }.join(',')
+  def feed_status_report feed, querytags
+    tag_query = querytags.collect { |tag| tag.id > 0 ? tag.id.to_s : tag.name }.join(',')
     params = tag_query.blank? ? {} : { querytags: tag_query }
     url = refresh_feed_path(feed, params)
 
@@ -42,8 +42,8 @@ module FeedsHelper
     feed_entries_status(feed) + feed_update_button(feed)
   end
 
-  def feed_status_report_replacement feed
-    [ 'span.feed-status-report', feed_status_report(feed) ]
+  def feed_status_report_replacement feed, querytags
+    [ 'span.feed-status-report', feed_status_report(feed, querytags) ]
   end
 
   def feed_entries_status feed

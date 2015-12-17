@@ -1,5 +1,4 @@
 # require './lib/seeker.rb'
-require './lib/querytags.rb'
 require './lib/templateer.rb'
 require 'rp_event'
 require 'reloader/sse'
@@ -175,7 +174,6 @@ class ApplicationController < ActionController::Base
     if fp = FilteredPresenter.build(view_context,
                                     response_service,
                                     params.merge(viewerid: current_user_or_guest_id, admin_view: response_service.admin_view?),
-                                    querytags,
                                     @decorator)
       render_fp fp
     else
