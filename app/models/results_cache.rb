@@ -364,17 +364,17 @@ class ResultsCache < ActiveRecord::Base
 
   # The ResultsCache class responds to a query with a series of items.
   # As a model, it saves intermediate results to the database
-  self.primary_keys = ['session_id', 'type']
+  self.primary_keys = ['session_id', 'type', 'result_typestr']
 
   # Standard parameters
-  attr_accessor :entity_id, :viewerid, :admin_view, :querytags, :org, :sort_direction, :result_type
+  attr_reader :entity_id, :viewerid, :admin_view, :querytags, :org, :sort_direction, :result_type
 
   # Declare the parameters needed for this class
   def self.params_needed
-    [:entity_id, :viewerid, :admin_view, :querytags, [:org, :viewed], :sort_direction, [ :result_type, '' ] ]
+    [:entity_id, :viewerid, :admin_view, :querytags, [:org, :newest], :sort_direction, [ :result_type, '' ] ]
   end
 
-  attr_accessible :session_id, :type, :params, :cache, :partition
+  attr_accessible :session_id, :type, :params, :cache, :partition, :result_typestr
   serialize :params
   serialize :cache
   serialize :partition
@@ -404,32 +404,30 @@ class ResultsCache < ActiveRecord::Base
         defaulted_params[:entity_id] = params[:id] if params[:id]
 
         # relevant_params are the parameters that will bust the cache when changed from one request to another
-        relevant_params = defaulted_params.merge(params).slice *paramlist
-        rc = cc.create_with(:params => relevant_params).find_or_initialize_by session_id: session_id, type: cc.to_s
-
+        relevant_params = defaulted_params.merge(params).merge(:result_type => result_type).slice *paramlist
+        rc = cc.find_or_initialize_by(session_id: session_id,
+                                      type: cc.to_s,
+                                      result_typestr: (relevant_params[:result_type] || ''))
         # For purposes of busting the cache, we assume that sort direction is irrelevant
         # NB: At the point, the params in rc are in exactly the same form as the query params, i.e. strings
-        if true || rc.params.except(:sort_direction) != relevant_params.except(:sort_direction) # TODO: Take :nocache into consideration
-          # Bust the cache if the params don't match
+
+        if rc.params != relevant_params # TODO: Take :nocache into consideration
+          # Bust the cache if the prior params don't match the new ones
+          diffs = (rc.params.keys + relevant_params.keys).uniq.collect { |key|
+            "#{key}: #{rc.params[key] || nil}=>#{relevant_params[key] || nil}" if rc.params[key] != relevant_params[key]
+          }.compact.join('; ') if rc.params.present?
+          diffs = diffs ? "; busted cache on #{diffs}" : '. (new)'
+
           rc.cache = rc.partition = rc.items = nil
-          rc.params = relevant_params
         end
+
+        # Assign the params anyway for side-effects in setting instance variables correctly
+        rc.send :'params=', relevant_params
+
+        logger.debug "Started #{cc} for #{rc.result_type.class} #{rc.result_type}#{diffs || '.'}"
         rc
       end
     }.compact
-  end
-
-  # Whenever the params get assigned--whether directly by assignment, by mass-assignment, or by fetching records--we
-  # copy the param values into the cache object
-  def params= params_hash
-    super # To handle, e.g., serialization
-    params_hash.each { |key, val|
-      if self.respond_to? key.to_sym
-        self.send "#{key}=", val
-      else
-        self.instance_variable_set "@#{key}".to_sym, val
-      end
-    }
   end
 
   # Return the subclass of ResultsCache that will handle generating items
@@ -447,66 +445,6 @@ class ResultsCache < ActiveRecord::Base
 
   def self.bust session_id
     self.where(session_id: session_id).each { |rc| rc.destroy }
-  end
-
-  # Convert the querytags string parameter into an array of tags for internal use.
-  # When querytags are given as strings (as opposed to tag ids), they are stored
-  # temporarily in the session with negative ids, for use in later callbacks.
-  def querytags= querytext
-    @querytags ||=
-    if querytext
-      tags_cache ||= TagsCache.find_or_initialize_by session_id: session_id
-      special = tags_cache.tags || {}
-      qt =
-      querytext.split(",").collect do |e|
-        e.strip!
-        if (e=~/^\d*$/) # numbers (sans quotes) represent existing tags that the user selected
-          Tag.find e.to_i
-        elsif e=~/^-\d*$/ # negative numbers (sans quotes) represent special tags from before
-          # Re-save this one
-          tag = Tag.new name: special[e]
-          tag.id = e.to_i
-          tag
-        else
-          # This is a new special tag. Unless it matches an existing tag, convert it to an internal tag and add it to the cache
-          name = e.gsub(/\'/, '').strip
-          unless tag = Tag.strmatch(name, { matchall: true, uid: @userid }).first
-            tag = Tag.new name: name
-            unless special.find { |k, v| (special[k] = v and tag.id = k.to_i) if v == name }
-              tag.id = -1
-              # Search for an unused id
-              while special[tag.id.to_s] do
-                tag.id = tag.id - 1
-              end
-              special[tag.id.to_s] = tag.name
-            end
-          end
-          tag
-        end
-      end
-      tags_cache.tags = special
-      tags_cache.save
-      qt
-    else
-      []
-    end
-  end
-
-  # Do type conversions when accepting instance variables
-  def entity_id= i
-    @entity_id = i.to_i
-  end
-
-  def viewerid= id
-    @viewerid = id.to_i
-  end
-
-  def org= o
-    @org = o.to_sym
-  end
-
-  def result_type= rt
-    @result_type = ResultType.new rt # Because we want access to the result type's services, not just a string
   end
 
   # Memoize the viewing user
@@ -677,6 +615,85 @@ class ResultsCache < ActiveRecord::Base
     else
       self.partition = Partition.new [0, full_size]
     end
+  end
+
+  private
+
+  ######## The setters for instance variables are private to prevent them being set after initialization
+
+  # Whenever the params get assigned--whether directly by assignment, by mass-assignment, or by fetching records--we
+  # copy the param values into the cache object
+
+  # Do type conversions when accepting instance variables
+  def params= params_hash
+    super # To handle, e.g., serialization
+    params_hash.each { |key, val|
+      setter = :"#{key}="
+      if self.private_methods.include? setter
+        self.send setter, val
+      else
+        self.instance_variable_set "@#{key}".to_sym, val
+      end
+    }
+  end
+
+  # Convert the querytags string parameter into an array of tags for internal use.
+  # When querytags are given as strings (as opposed to tag ids), they are stored
+  # temporarily in the session with negative ids, for use in later callbacks.
+  def querytags= querytext
+    @querytags ||=
+        if querytext
+          tags_cache ||= TagsCache.find_or_initialize_by session_id: session_id
+          special = tags_cache.tags || {}
+          qt =
+              querytext.split(",").collect do |e|
+                e.strip!
+                if (e=~/^\d*$/) # numbers (sans quotes) represent existing tags that the user selected
+                  Tag.find e.to_i
+                elsif e=~/^-\d*$/ # negative numbers (sans quotes) represent special tags from before
+                  # Re-save this one
+                  tag = Tag.new name: special[e]
+                  tag.id = e.to_i
+                  tag
+                else
+                  # This is a new special tag. Unless it matches an existing tag, convert it to an internal tag and add it to the cache
+                  name = e.gsub(/\'/, '').strip
+                  unless tag = Tag.strmatch(name, { matchall: true, uid: @userid }).first
+                    tag = Tag.new name: name
+                    unless special.find { |k, v| (special[k] = v and tag.id = k.to_i) if v == name }
+                      tag.id = -1
+                      # Search for an unused id
+                      while special[tag.id.to_s] do
+                        tag.id = tag.id - 1
+                      end
+                      special[tag.id.to_s] = tag.name
+                    end
+                  end
+                  tag
+                end
+              end
+          tags_cache.tags = special
+          tags_cache.save
+          qt
+        else
+          []
+        end
+  end
+
+  def entity_id= i
+    @entity_id = i.to_i
+  end
+
+  def viewerid= id
+    @viewerid = id.to_i
+  end
+
+  def org= o
+    @org = o.to_sym
+  end
+
+  def result_type= rt
+    @result_type = ResultType.new rt # Because we want access to the result type's services, not just a string
   end
 
 end

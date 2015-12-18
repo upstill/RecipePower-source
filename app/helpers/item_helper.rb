@@ -66,7 +66,7 @@ module ItemHelper
   def item_replacement item_or_decorator_or_specs=nil, item_mode=nil, locals={}
     item, item_mode = item_preflight item_or_decorator_or_specs, item_mode
     # Ensure viewparams
-    viewparams = FilteredPresenter.new(self, response_service, { item_mode: item_mode }, [], @decorator).viewparams
+    viewparams = FilteredPresenter.new(self, response_service, { item_mode: item_mode }, @decorator).viewparams
     [ item_partial_selector(item, item_mode), render_item(item, item_mode, viewparams: viewparams) ]
   end
 

@@ -126,7 +126,7 @@ class ViewParams
 
   def panel_label
     return filtered_presenter.panel_label if filtered_presenter.respond_to? :panel_label
-    case rt = result_type.subtype || result_type.root
+    case rt = result_type.root # result_type.subtype || result_type.root
       when 'lists'
         'treasuries'
       when 'feed_entries'
@@ -538,15 +538,13 @@ class FeedsIndexPresenter < FilteredPresenter
 
   def org_buttons context, &block
     current_mode = @sort_direction
-    block.call 'newest first', { :org => :newest, :sort_direction => 'DESC', active: true },
-               title: 'Re-sort The List',
-               class: (@sort_direction == 'DESC' ? 'disabled' : '')
-    block.call 'oldest first', { :org => :newest, sort_direction: 'ASC' },
-               title: 'Re-sort The List',
-               class: (@sort_direction == 'ASC' ? 'disabled' : '')
+    block.call 'newest', { :org => :newest, :sort_direction => 'DESC', active: (@org == :newest) },
+               title: 'Newest feeds in RecipePower'
+    block.call 'latest post', { :org => :updated, sort_direction: 'DESC', active: (@org == :updated) },
+               title: 'Feeds with most recent posts'
     if admin_view
-      block.call 'unapproved first', { :org => :approved, sort_direction: 'ASC' },
-                 title: 'Re-sort The List'
+      block.call 'unapproved', { :org => :approved, sort_direction: 'ASC' },
+                 title: 'Show feeds needing (dis)approval'
     end
     '' # No label
   end
