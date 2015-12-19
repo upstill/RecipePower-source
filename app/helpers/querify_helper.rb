@@ -39,7 +39,7 @@ module QuerifyHelper
                                  active,
                                  class: 'querify-select',
                                  data: { qparams: qparams })+label.html_safe,
-                class: "#{options[:class]} btn btn-primary #{'active' if active}"
+                class: "#{options[:class]} btn #{'active' if active}"
   end
 
   # Declare a button which propagates parameter changes to enclosing querify supes
