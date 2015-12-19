@@ -373,6 +373,12 @@ div.org-element {
   text-transform: lowercase;
 }
 
+.scrollable-menu {
+  height: auto;
+  max-height: 400px;
+  overflow-x: hidden;
+}
+
 // .simple_form label {
 // float: left
 // margin: 8px 0 5px;

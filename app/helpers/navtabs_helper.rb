@@ -4,7 +4,7 @@ module NavtabsHelper
     itemlist =
         content_tag :ul,
                     items.collect { |item| content_tag :li, item }.join("\n").html_safe,
-                    class: "dropdown-menu",
+                    class: "dropdown-menu scrollable-menu",
                     id: id
     label << content_tag(:span, "", class: "caret")
 
@@ -32,7 +32,7 @@ module NavtabsHelper
       itemlist =
           content_tag :ul,
                       menu_items.collect { |item| content_tag :li, item }.join("\n").html_safe,
-                      class: "dropdown-menu",
+                      class: "dropdown-menu scrollable-menu",
                       id: navmenu_id(which)
       menu_label << content_tag(:span, "", class: "caret")
       class_str << " dropdown"
