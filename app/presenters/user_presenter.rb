@@ -77,10 +77,10 @@ class UserPresenter < BasePresenter
       when :collected_lists, :owned_lists
         if which == :owned_lists
           lists = user.decorate.owned_lists @viewer
-          label = 'Author of the lists'
+          label = 'Author of the treasuries'
         else
           lists = user.decorate.collected_lists
-          label = 'Following the lists'
+          label = 'Following the treasuries'
         end
         unless lists.empty?
           listlinks = lists[0..5].collect { |list|

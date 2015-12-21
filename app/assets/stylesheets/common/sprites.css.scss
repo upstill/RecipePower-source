@@ -76,16 +76,16 @@ svg {
     fill: #A0A0A0;
   }
   &#vote-up {
-    color: #ECE6CD;
-    fill: #ECE6CD;
+    color: $vote-glyph-color;
+    fill: $vote-glyph-color;
   }
   &#upload {
     color: #A0A0A0;
     fill: #A0A0A0;
   }
   &#vote-down {
-    color: #ECE6CD;
-    fill: #ECE6CD;
+    color: $vote-glyph-color;
+    fill: $vote-glyph-color;
   }
   &#share {
     color: #DFCA6A;

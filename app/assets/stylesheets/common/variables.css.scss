@@ -32,9 +32,13 @@ $panel-three-background-transparent: rgba(76, 124, 153, 0);
 $panel-four-background-color: #dbc046;
 $panel-four-background-transparent: rgba( 219, 192, 70, 0);
   // For displaying other users
-$user-card-background-color: #ffffff;
+$user-card-background-color: #ecedef;
+$user-card-text-color: #aaaaaa;
+$user-card-title-color: darkgrey;
+$user-card-label-color: darkgrey;
 $user-panels-label-text-color: #bbbbbb;
 $user-panels-label-button-color: #ffffff;
+$user-panels-button-color: #999999;
 
 $recipes-navtab-background-color: #d8dde0;
 $recipes-navtab-text-color: #4c7c99;
@@ -66,6 +70,9 @@ $utensils-navtab-text-color: #816887;
 
 // Color for the user card and panels
 $user-color: #EDDAD7;
+
+// Default colors for glyphs
+$vote-glyph-color: #ECE6CD;
 
 // Define depths of various elements
 $dialog-depth: 1050;

@@ -208,6 +208,15 @@ div.card-item {
     div.title > a.title-link {
       color: white;
     }
+    div.sprite-glyph
+    svg#vote-up {
+      color: mix($vote-glyph-color, black, 93%);
+      fill: mix($vote-glyph-color, black, 93%);
+    }
+    svg#vote-down {
+      color: mix($vote-glyph-color, black, 93%);
+      fill: mix($vote-glyph-color, black, 93%);
+    }
   }
   &.feed-card {
     background-color: $feeds-card-background-color;
@@ -216,9 +225,13 @@ div.card-item {
     }
   }
   &.user-card {
+    color: $user-card-text-color;
     background-color: $user-card-background-color;
     div.title > a.title-link {
-      color: darkgrey;
+      color: $user-card-title-color;
+    }
+    .card-aspect-label {
+      color: $user-card-label-color;
     }
   }
   &.list-card {
