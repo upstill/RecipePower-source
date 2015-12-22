@@ -155,7 +155,6 @@ RP::Application.routes.draw do
   resources :tags, except: [:index, :create] do
     member do
       post 'absorb'
-      get 'associated'
       get 'owned'
     end
     collection do

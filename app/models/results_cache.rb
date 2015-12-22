@@ -352,9 +352,91 @@ module TaggingCache
   end
 end
 
+module ExtractParams
+  def self.included(base)
+    base.extend(ClassMethods)
+  end
+  module ClassMethods
+    def extract_params result_type=nil, params={}
+      if result_type.is_a? Hash
+        result_type, params = nil, result_type
+      end
+
+      # Since params_needed may be key/default pairs as well as a list of names
+      defaulted_params = HashWithIndifferentAccess.new
+      paramlist = self.params_needed.collect { |pspec|
+        if pspec.is_a? Array
+          defaulted_params[pspec.first] = pspec.last.to_s # They're recorded as strings, since that's what params use
+          pspec.first
+        else
+          pspec
+        end
+      }.uniq
+
+      # The entity_id comes in the :id param, but this can cause confusion with the AR id for the record.
+      # Consequently, we use :entity_id internally
+      defaulted_params[:entity_id] = params[:id] if params[:id]
+
+      # relevant_params are the parameters that will bust the cache when changed from one request to another
+      defaulted_params.merge(params).merge(:result_type => result_type || '').slice *paramlist
+    end
+  end
+
+  private
+
+  # Whenever the params get assigned--whether directly by assignment, by mass-assignment, or by fetching records--we
+  # copy the param values into the cache object
+
+  # Do type conversions when accepting instance variables
+  def params= params_hash
+    defined?(super) ? super : (@params = params_hash.clone)# To handle, e.g., serialization
+    params_hash.each { |key, val|
+      setter = :"#{key}="
+      if self.private_methods.include? setter
+        self.send setter, val
+      else
+        self.instance_variable_set "@#{key}".to_sym, val
+      end
+    }
+  end
+
+  def result_type= rt
+    @result_type = ResultType.new rt # Because we want access to the result type's services, not just a string
+  end
+
+end
+
+# A NullCache is a shell for handling the case where there ARE no results to manage (eg., in a #show action)
+class NullResults
+  include NullCache
+  include ExtractParams
+
+  attr_reader :params, :admin_view, :querytags
+
+  # Declare the parameters needed for this class
+  def self.params_needed
+    # [:entity_id, :viewerid, :admin_view, :querytags, [:org, :newest], :sort_direction, [ :result_type, '' ] ]
+    [ :admin_view ]
+  end
+
+  def initialize params={}
+    puts 'self.private_methods.include?(:\'params=\')' + ": #{self.private_methods.include?(:'params=')}"
+    self.send :'params=', self.class.extract_params(params)
+    # We blow off any querytags, but respond with an empty array
+    @querytags = []
+    @result_type = ResultType.new ''
+  end
+
+  def has_query?
+    false
+  end
+
+end
+
 class ResultsCache < ActiveRecord::Base
   include ActiveRecord::Sanitization
   include NullCache
+  include ExtractParams
 
   before_save do
     session_id != nil
@@ -386,25 +468,16 @@ class ResultsCache < ActiveRecord::Base
   def self.retrieve_or_build session_id, result_types, params={}
     result_types.collect { |result_type|
       # The choice of handling class, and thus the cache, is a function of the result type required as well as the controller/action pair
-      if cc = self.cache_class(params['controller'], params['action'], result_type)
 
-        # Since params_needed may be key/default pairs as well as a list of names
-        defaulted_params = HashWithIndifferentAccess.new
-        paramlist = cc.params_needed.collect { |pspec|
-          if pspec.is_a? Array
-            defaulted_params[pspec.first] = pspec.last.to_s # They're recorded as strings, since that's what params use
-            pspec.first
-          else
-            pspec
-          end
-        }.uniq
-
-        # The entity_id comes in the :id param, but this can cause confusion with the AR id for the record.
-        # Consequently, we use :entity_id internally
-        defaulted_params[:entity_id] = params[:id] if params[:id]
-
-        # relevant_params are the parameters that will bust the cache when changed from one request to another
-        relevant_params = defaulted_params.merge(params).merge(:result_type => result_type).slice *paramlist
+      # Derive the subclass of ResultsCache that will handle generating items
+      # NullResults is a degenerate class which only exists to provide parameters
+      classname = params['controller'].camelize + params['action'].capitalize + 'Cache'
+      if cc = (classname.constantize rescue nil)
+        # Give the class a chance to defer to a subclass based on the result type
+        cc = cc.subclass_for(result_type) if cc.respond_to? :subclass_for
+        
+        relevant_params = cc.extract_params result_type, params
+        
         rc = cc.find_or_initialize_by(session_id: session_id,
                                       type: cc.to_s,
                                       result_typestr: (relevant_params[:result_type] || ''))
@@ -426,21 +499,10 @@ class ResultsCache < ActiveRecord::Base
 
         logger.debug "Started #{cc} for #{rc.result_type.class} #{rc.result_type}#{diffs || '.'}"
         rc
+      else # No cacheclass
+        logger.debug 'No ResultsCache handler ' + classname
       end
     }.compact
-  end
-
-  # Return the subclass of ResultsCache that will handle generating items
-  def self.cache_class controller, action, result_type=nil
-    # Here's the chance to divert handling to different cache generators
-    classname = controller.camelize + action.capitalize + 'Cache'
-    if klass = (classname.constantize rescue nil)
-      # Give the class a chance to defer to a subclass based on the result type
-      klass = klass.subclass_for(result_type) if klass.respond_to? :subclass_for
-    else
-      logger.debug 'No ResultsCache handler ' + classname
-    end
-    klass
   end
 
   def self.bust session_id
@@ -621,22 +683,6 @@ class ResultsCache < ActiveRecord::Base
 
   ######## The setters for instance variables are private to prevent them being set after initialization
 
-  # Whenever the params get assigned--whether directly by assignment, by mass-assignment, or by fetching records--we
-  # copy the param values into the cache object
-
-  # Do type conversions when accepting instance variables
-  def params= params_hash
-    super # To handle, e.g., serialization
-    params_hash.each { |key, val|
-      setter = :"#{key}="
-      if self.private_methods.include? setter
-        self.send setter, val
-      else
-        self.instance_variable_set "@#{key}".to_sym, val
-      end
-    }
-  end
-
   # Convert the querytags string parameter into an array of tags for internal use.
   # When querytags are given as strings (as opposed to tag ids), they are stored
   # temporarily in the session with negative ids, for use in later callbacks.
@@ -690,10 +736,6 @@ class ResultsCache < ActiveRecord::Base
 
   def org= o
     @org = o.to_sym
-  end
-
-  def result_type= rt
-    @result_type = ResultType.new rt # Because we want access to the result type's services, not just a string
   end
 
 end
@@ -830,6 +872,12 @@ class ListsIndexCache < ResultsCache
       else # By default, we only see lists belonging to our friends and Super that are not private, and all those that are public
         ListServices.lists_visible_to viewer
     end
+  end
+end
+
+class RecipesAssociatedCache < ResultsCache
+  def recipe
+    @recipe ||= Recipe.find @entity_id
   end
 end
 
