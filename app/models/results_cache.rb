@@ -420,7 +420,6 @@ class NullResults
   end
 
   def initialize params={}
-    puts 'self.private_methods.include?(:\'params=\')' + ": #{self.private_methods.include?(:'params=')}"
     self.send :'params=', self.class.extract_params(params)
     # We blow off any querytags, but respond with an empty array
     @querytags = []
@@ -470,7 +469,6 @@ class ResultsCache < ActiveRecord::Base
       # The choice of handling class, and thus the cache, is a function of the result type required as well as the controller/action pair
 
       # Derive the subclass of ResultsCache that will handle generating items
-      # NullResults is a degenerate class which only exists to provide parameters
       classname = params['controller'].camelize + params['action'].capitalize + 'Cache'
       if cc = (classname.constantize rescue nil)
         # Give the class a chance to defer to a subclass based on the result type

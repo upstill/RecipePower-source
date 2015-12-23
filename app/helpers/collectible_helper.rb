@@ -245,24 +245,26 @@ module CollectibleHelper
 
   # Declare the voting buttons for a collectible
   def collectible_vote_buttons entity
-    uplink = vote_link(entity, true)
-    downlink = vote_link(entity, false)
-    button_options = { method: 'post', remote: true, class: 'vote-button'}
-    vote_state = Vote.current entity
-    up_button = button_to_submit '', uplink, 'glyph-vote-up', "xl", button_options.merge(title: 'Vote Up')
-    down_button = button_to_submit '', downlink, 'glyph-vote-down', "xl", button_options.merge(title: 'Vote Down')
-    vote_counter = (entity.upvotes > 0 && entity.upvotes.to_s) || ''
-    upcount =
-        content_tag(:span,
-                    "#{entity.upvotes.to_s}<br>".html_safe,
-                    class: 'vote-count') # if entity.upvotes > 0
-    downcount =
-        content_tag(:span,
-                    "<br>#{entity.downvotes.to_s}".html_safe,
-                    class: 'vote-count') # if entity.downvotes > 0
-    left = content_tag :div, "#{upcount}#{up_button}".html_safe, class: 'vote-div'
-    right = content_tag :div, "#{down_button}#{downcount}".html_safe, class: 'vote-div'
-    content_tag :div, (left+right).html_safe, class: 'vote-buttons', id: dom_id(entity)
+    if entity.is_a? Collectible
+      uplink = vote_link(entity, true)
+      downlink = vote_link(entity, false)
+      button_options = { method: 'post', remote: true, class: 'vote-button'}
+      vote_state = Vote.current entity
+      up_button = button_to_submit '', uplink, 'glyph-vote-up', "xl", button_options.merge(title: 'Vote Up')
+      down_button = button_to_submit '', downlink, 'glyph-vote-down', "xl", button_options.merge(title: 'Vote Down')
+      vote_counter = (entity.upvotes > 0 && entity.upvotes.to_s) || ''
+      upcount =
+          content_tag(:span,
+                      "#{entity.upvotes.to_s}<br>".html_safe,
+                      class: 'vote-count') # if entity.upvotes > 0
+      downcount =
+          content_tag(:span,
+                      "<br>#{entity.downvotes.to_s}".html_safe,
+                      class: 'vote-count') # if entity.downvotes > 0
+      left = content_tag :div, "#{upcount}#{up_button}".html_safe, class: 'vote-div'
+      right = content_tag :div, "#{down_button}#{downcount}".html_safe, class: 'vote-div'
+      content_tag :div, (left+right).html_safe, class: 'vote-buttons', id: dom_id(entity)
+    end
   end
 
   def vote_buttons_replacement entity

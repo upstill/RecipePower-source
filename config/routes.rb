@@ -14,6 +14,7 @@ RP::Application.routes.draw do
   concern :collectible do
     member do
       get 'touch'
+      get 'associated'
       patch 'collect'
     end
   end
@@ -151,11 +152,11 @@ RP::Application.routes.draw do
   resources :tag_selections
 
   post '/tag' => 'tags#create', :as => 'create_tag'
-  get 'tags/:id/associated' => 'tags#associated', :as => "tag_associated"
   resources :tags, except: [:index, :create] do
     member do
       post 'absorb'
       get 'owned'
+      get 'associated'
     end
     collection do
       get 'editor'
@@ -196,7 +197,6 @@ RP::Application.routes.draw do
   resources :recipes, :concerns => [:picable, :collectible, :taggable] do
     member do
       get 'piclist'
-      get 'associated'
     end
     collection do
       get 'capture'

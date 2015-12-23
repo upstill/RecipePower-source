@@ -168,18 +168,11 @@ class FilteredPresenter
 
   # Build an instance of the appropriate subclass, given the entity, controller and action
   def self.build view_context, response_service, params, decorator=nil
+    # If we have a FilteredPresenter subclass available
     classname = "#{response_service.controller.capitalize}#{response_service.action.capitalize}Presenter"
-
-    if Object.const_defined? classname # If we have a FilteredPresenter subclass available
+    if (Object.const_defined? classname) ||
+        (classname = 'EntityShowPresenter' if response_service.action == 'show')
       classname.constantize.new view_context, response_service, params, decorator
-    end
-  end
-
-  # Build a filtered_presenter for the purpose of showing an object
-  def self.build_from_decorator decorator, view_context, response_service, params
-    classname = "#{decorator.object.class.to_s.pluralize}ShowPresenter"
-    if Object.const_defined? classname
-      classname.constantize.new view_context, response_service, {}, [], decorator
     end
   end
 
@@ -229,8 +222,12 @@ class FilteredPresenter
     @title = response_service.title
     @request_path = response_service.requestpath
     @viewparams = ViewParams.new self
-    # Notify the ResultsCache(s) of any prospective results query
-    init_stream ResultsCache.retrieve_or_build( response_service.uuid, subtypes, params).first
+    # Initialize a stream using ResultsCache(s), if any
+    if subtypes.present?
+      init_stream (@results_cache = ResultsCache.retrieve_or_build( response_service.uuid, subtypes, params).first)
+    elsif response_service.action == 'show'
+      @results_cache = NullResults.new params
+    end
   end
 
   # This is the path that will go into the "more items" link
@@ -310,7 +307,7 @@ class FilteredPresenter
   end
 
   def show_card?
-    @decorator && @decorator.object && @decorator.object.is_a?(Collectible)
+    @decorator && @decorator.object
   end
 
   def show_comments?
@@ -386,6 +383,15 @@ protected
 
   def org= val
     @org = val.to_sym
+  end
+
+end
+
+# Generic class for showing an entity on a card, without further associated panels, etc.
+class EntityShowPresenter < FilteredPresenter
+
+  def subtypes
+    []
   end
 
 end
@@ -499,10 +505,6 @@ class UserContentPresenter < FilteredPresenter
 
 end
 
-class UsersShowPresenter < UserContentPresenter
-
-end
-
 class UsersCollectionPresenter < UserContentPresenter
 
 end
@@ -516,7 +518,7 @@ class UsersBiglistPresenter < UserContentPresenter
 end
 
 # Present the entries associated with a feed
-class FeedsShowPresenter < FilteredPresenter
+class FeedsAssociatedPresenter < FilteredPresenter
 
   def result_type
     'feed_entries'
@@ -551,7 +553,7 @@ class FeedsIndexPresenter < FilteredPresenter
 
 end
 
-class SitesShowPresenter < FilteredPresenter
+class SitesAssociatedPresenter < FilteredPresenter
   @item_mode = :slider
 
   def result_type
@@ -582,7 +584,7 @@ class ListsIndexPresenter < FilteredPresenter
 
 end
 
-class ListsShowPresenter < FilteredPresenter
+class ListsAssociatedPresenter < FilteredPresenter
 
   def result_type
     'lists.contents'
@@ -596,14 +598,6 @@ class ListsContentsPresenter < FilteredPresenter
 
   def result_type
     'lists.contents'
-  end
-
-end
-
-class ListsAssociatedPresenter < FilteredPresenter
-
-  def result_type
-    'lists.associated'
   end
 
 end
@@ -653,24 +647,6 @@ class TagsAssociatedPresenter < FilteredPresenter
 
   def result_type
     'tags.associated'
-  end
-
-  def show_card?
-    true
-  end
-
-end
-
-# Present the entries associated with a list
-class TagsShowPresenter < FilteredPresenter
-  @item_mode = :masonry
-
-  def result_type
-    nil
-  end
-
-  def show_card?
-    true
   end
 
 end

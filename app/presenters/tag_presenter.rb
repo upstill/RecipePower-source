@@ -50,26 +50,27 @@ class TagPresenter < BasePresenter
 
   def card_aspect which
     label = content = nil
-    itemstrs = []
-    case which
+    itemstrs =
+    (case which
       when :tag_synonyms
         label = 'synonyms'
-        itemstrs = tagserv.synonyms.collect { |tag| h.tag_homelink tag }
+        tagserv.synonyms.collect { |tag| h.tag_homelink tag }
       when :meaning
         label = 'described as'
         # content = h.summarize_meaning
         if (meaning = tagserv.primary_meaning) && meaning.description.present?
           content = meaning.description
         end
+        nil
       when :tag_owners
         label = 'private to'
         # content = h.summarize_tag_owners
-        itemstrs = tagserv.owners.collect { |owner| h.user_homelink owner } unless tagserv.isGlobal
+        tagserv.owners.collect { |owner| h.user_homelink owner } unless tagserv.isGlobal
       when :tag_similars
         label = 'similar tags'
         # content = h.summarize_tag_similars
         # TODO: The elimination should be done in the query
-        itemstrs = Tag.where(normalized_name: tagserv.normalized_name).
+        Tag.where(normalized_name: tagserv.normalized_name).
             to_a.
             delete_if { |other|
               other.id == tagserv.id
@@ -89,30 +90,29 @@ class TagPresenter < BasePresenter
       when :tag_referents
         label = 'meanings'
         # content = h.summarize_tag_referents
-        itemstrs =
-            tagserv.
-            referents.
-            to_a.
-            collect { |ref|
-              # summarize_referent ref, "Other Meaning(s)"
-              h.referent_homelink ref if ref != tagserv.primary_meaning
-            }.compact
+        tagserv.
+        referents.
+        to_a.
+        collect { |ref|
+          # summarize_referent ref, "Other Meaning(s)"
+          h.referent_homelink ref if ref != tagserv.primary_meaning
+        }
       when :tag_parents
         label = 'under categories'
         # content = h.summarize_tag_parents
-        itemstrs = tagserv.parents.collect { |parent| h.tag_homelink parent }
+        tagserv.parents.collect { |parent| h.tag_homelink parent }
       when :tag_children
         label = 'includes'
         # content = h.summarize_tag_children
-        itemstrs = tagserv.children.collect { |child| h.tag_homelink child }
+        tagserv.children.collect { |child| h.tag_homelink child }
       when :tag_references
         label = 'references'
         # content = h.summarize_tag_references
-        itemstrs = tagserv.references.collect{ |reference| h.present_reference(reference) }
+        tagserv.references.collect { |reference| h.present_reference(reference) }
       when :tag_relations
         label = 'See Also'
         # content = h.summarize_tag_relations
-        itemstrs = Referent.related(tagserv, false, true).collect { |rel|
+        Referent.related(tagserv, false, true).collect { |rel|
           if(rel.id != tagserv.id)
             ts = TagServices.new(rel)
             refs = ts.references
@@ -121,9 +121,9 @@ class TagPresenter < BasePresenter
                         tag_info_section(refstrs, label: ("'#{rel.synonyms.map(&:name).join('/&#8201')}'" + " on ")).html_safe,
                         class: "container").html_safe unless refstrs.empty?
           end
-        }.compact
-    end
-    content = itemstrs.join(', ') unless itemstrs.empty?
+        }
+    end || []).compact
+    content = safe_join(itemstrs, ', ') unless itemstrs.empty?
     [label, content]
   end
 

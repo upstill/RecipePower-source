@@ -93,8 +93,8 @@ module CardPresentation
 
   # Render the n-th column (limited by card_ncolumns)
   def column which_column
-    return unless (content = card_aspects(which_column).collect { |aspect| card_aspect_rendered aspect }.join("\n")).present?
-    content_tag :div, content.html_safe, class: "col-md-#{12/card_ncolumns}"
+    return if (content = card_aspects(which_column).collect { |aspect| card_aspect_rendered aspect }.compact).empty?
+    content_tag :div, safe_join(content), class: "col-md-#{12/card_ncolumns}"
   end
 
   # Enumerate the aspects for a given column
