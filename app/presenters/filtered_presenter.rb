@@ -649,4 +649,8 @@ class TagsAssociatedPresenter < FilteredPresenter
     'tags.associated'
   end
 
+  def panel_label
+    'tagging'
+  end
+
 end

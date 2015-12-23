@@ -12,7 +12,7 @@ span.panels-label {
   font-size: 400%;
   letter-spacing: 1.5px;
   padding-left: 20px;
-  color: #999999;
+  color: $generic-panels-label-text-color;
   &.recipe-label {
     color: rgba($recipes-navtab-text-color, 0.6);
     // color: $recipes-panels-label-text-color;
@@ -35,9 +35,6 @@ span.panels-label {
   &.list-label {
     color: rgba($lists-navtab-text-color, 0.6);
   }
-  &.tag-label {
-    color: rgba($salmon-text-color, 0.8);
-  }
 }
 
 div.org-buttons {
@@ -52,7 +49,15 @@ div.org-buttons {
   .org-button {
     // margin: 10px;
     border: none;
-    color: rgba(#f2f2f2, 0.6);
+    // Default, generic colors for org buttons (overridden by specific types)
+    background-color: $generic-panels-label-button-color;
+    color: rgba($generic-panels-button-color, 0.6);
+    &.active {
+      color: $generic-panels-button-color;
+    }
+    &.disabled {
+      background-color: rgba($generic-panels-label-button-color, 0.6);
+    }
     &.active {
       color: #f2f2f2;
     }

@@ -38,9 +38,27 @@ div.card-item {
   -webkit-box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
   -moz-box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
   box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
-  background-color: $recipes-card-background-color;
   font-family: $archivo;
   position: relative;
+  color: $generic-card-text-color;
+  background-color: $generic-card-background-color;
+  div.title > a.title-link {
+    color: $generic-card-title-color;
+  }
+  .card-aspect-label {
+    color: $generic-card-label-color;
+    margin-bottom: 0;
+    letter-spacing: 2px;
+    font-size: 16px;
+    &.header {
+      font-size: 36px;
+      letter-spacing: 3px;
+      margin-bottom: 10px;
+      span.user-handle {
+        font-size: 0.5em;
+      }
+    }
+  }
   &.row {
     margin: 0.5em;
   }
@@ -326,20 +344,6 @@ div.card-item {
       font-family: Helvetica, sans-serif;
       font-weight: 200;
       font-size: 1.2em;
-    }
-  }
-  .card-aspect-label {
-    margin-bottom: 0;
-    color: white;
-    letter-spacing: 2px;
-    font-size: 16px;
-    &.header {
-      font-size: 36px;
-      letter-spacing: 3px;
-      margin-bottom: 10px;
-      span.user-handle {
-        font-size: 0.5em;
-      }
     }
   }
   p.card-aspect-contents {
