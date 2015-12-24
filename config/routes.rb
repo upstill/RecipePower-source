@@ -191,6 +191,11 @@ RP::Application.routes.draw do
   resources :feedback, :only => [:new, :create]
   resources :expressions
   resources :referents
+  resources :referents do
+    member do
+      get 'associated'
+    end
+  end
   resources :ratings
   resources :scales
 

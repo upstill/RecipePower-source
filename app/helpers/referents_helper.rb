@@ -1,9 +1,9 @@
 module ReferentsHelper
 
   def referent_homelink ref, options={}
-    action = options.extract!(:action)[:action] || :show # :associated
-    option_defaults = { :mode => :partial }
-    link_to_submit ref.name, polymorphic_path([action, ref]), option_defaults.merge(options)
+    action = options.extract!(:action)[:action] # || :associated
+    pathspec = action ? polymorphic_path([action, ref.becomes(Referent)]) : ref.becomes(Referent)
+    link_to_submit ref.name, pathspec, { :mode => :partial }.merge(options)
   end
 
   def list_expressions referent, do_tag=true

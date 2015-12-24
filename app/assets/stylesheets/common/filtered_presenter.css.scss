@@ -2,8 +2,12 @@ div.results-enclosure {
   width: 100%;
   height: auto;
   div.panels-query {
-    // margin-top: 15px;
-    // position: relative;
+    margin-top: 1em;
+  }
+  div.results {
+    &.js-masonry {
+      margin-top: 1em;
+    }
   }
 }
 
