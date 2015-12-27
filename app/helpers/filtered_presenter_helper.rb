@@ -34,6 +34,20 @@ module FilteredPresenterHelper
     [selector, filtered_presenter_panel_results(viewparams) ]
   end
 
+  def filtered_presenter_table_results_placeholder viewparams
+    content_tag :tbody, '', class: "results #{viewparams.result_type} placeholder"
+  end
+
+  def filtered_presenter_table_results viewparams
+    with_format('html') { render "filtered_presenter/present/#{viewparams.results_partial}", viewparams: viewparams }
+  end
+
+  def filtered_presenter_table_results_replacement viewparams
+    selector = '.results'
+    selector << '.' + viewparams.result_type
+    [selector, filtered_presenter_table_results(viewparams) ]
+  end
+
   def filtered_presenter_tail viewparams
     render "filtered_presenter/present/#{viewparams.tail_partial}", viewparams: viewparams
   end

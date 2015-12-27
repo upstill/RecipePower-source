@@ -1,13 +1,13 @@
 <% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
 <%= querify_block viewparams.results_path, class: "results-table #{viewparams.result_type.extensions_to_classes}", autoload: true do %>
-    <table class="results <%= viewparams.result_type.extensions_to_classes %> table table-striped ">
+  <div class="results-content">
+    <table class=" table table-striped ">
       <thead>
       <tr>
         <%= viewparams.table_headers.collect { |ttl| "<th>#{ttl}</th>" if ttl }.compact.join("\n").html_safe %>
       </tr>
       </thead>
-      <tbody class="stream-items-parent <%= viewparams.stream_id %>">
-      <%= filtered_presenter_tail viewparams %>
-      </tbody>
+      <%= filtered_presenter_table_results_placeholder viewparams %>
     </table>
+  </div>
 <% end %>

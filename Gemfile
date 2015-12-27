@@ -71,6 +71,7 @@ group :development do
   # gem "better_errors" '~> 1.1'
   gem "binding_of_caller"
   # gem "json"
+  gem 'rack-mini-profiler'
 end
 
 gem "masonry-rails"
