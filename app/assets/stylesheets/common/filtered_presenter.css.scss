@@ -108,6 +108,10 @@ div.org-buttons {
     }
     &.feed {
       background-color: $feeds-navtab-text-color;
+      color: rgba(#fafafa, 0.6);
+      &.active {
+        color: #fafafa;
+      }
       &.disabled {
         background-color: rgba($feeds-navtab-text-color, 0.6);
       }

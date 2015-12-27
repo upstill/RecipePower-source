@@ -30,6 +30,10 @@ class Feed < ActiveRecord::Base
 
   has_many :feed_entries, -> { order 'published_at DESC' }, :dependent => :destroy
 
+  def self.fix_counters
+    Feed.find_each { |feed| Feed.reset_counters(feed.id, :feed_entries) }
+  end
+
   # When a feed is built, the url may be valid for getting to a feed, but it may also
   # alias to the url of an already-extant feed (no good). We also need to extract the title and description 
   # from the feed, but only once. Thus, we "follow" the url once, when a new feed is created

@@ -5,7 +5,7 @@ class FeedEntry < ActiveRecord::Base
   attr_accessible :guid, :title, :published_at, :summary, :url, :feed, :recipe
 
   belongs_to :recipe
-  belongs_to :feed
+  belongs_to :feed, :counter_cache => true
   delegate :site, :to => :feed
 
   # Return scopes for searching the title and description
