@@ -42,7 +42,7 @@ stream_fire = (elmt) ->
 	querypath = $(elmt).data('path')
 	parent = RP.findEnclosingByClass 'stream-items-parent', elmt
 	RP.submit.block_on parent
-	$('.beachball', parent).removeClass "hide"
+	$('.beachball', parent).show()
 	$(elmt).remove() # Remove the link element to forestall subsequent loads
 	# The following code represents two alternative ways of providing a set of items.
 	# The 'if' clause is the sane way: issue a request for the set, then get them all
@@ -64,6 +64,8 @@ stream_fire = (elmt) ->
 				# Expecting an array of items
 				do_item item, parent for item in responseData
 				RP.submit.block_off parent
+				$('.beachball', parent).hide()
+				$('.stream-trigger', parent).show()
 			}
 		$.ajax ajoptions
 	else
