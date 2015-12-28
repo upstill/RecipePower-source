@@ -23,7 +23,7 @@
                         placeholder: "Search #{viewparams.panel_label}") %>
           </div>
           <div class="col-md-6 filters">
-            <%= filtered_presenter_org_buttons viewparams, 'header' %>
+            <%= filtered_presenter_org_buttons viewparams, 'header', display_style: viewparams.result_type.singularize %>
           </div>
         </div>
       </div>

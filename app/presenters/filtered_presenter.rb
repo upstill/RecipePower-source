@@ -337,10 +337,16 @@ class FilteredPresenter
 
   # Define buttons used in the search/redirect header above the presenter's results
   def org_buttons context, &block
-    size = context == 'panels' ? '' : ' small'
-    block.call 'RECENTLY VIEWED', { :org => :viewed, active: org.to_sym == :viewed }, class: size
-    block.call 'NEWEST', { :org => :newest, active: org.to_sym == :newest }, class: size
-    context == 'panels' ? '' : 'order by'
+    if context == 'panels'
+      link_options = {}
+      label = ''
+    else
+      link_options = { class: 'small' }
+      label = 'order by'
+    end
+    block.call 'RECENTLY VIEWED', {:org => :viewed, active: org.to_sym == :viewed}, link_options
+    block.call 'NEWEST', {:org => :newest, active: org.to_sym == :newest}, link_options
+    label
   end
 
   # Specify a path for fetching the results partial, based on the current query

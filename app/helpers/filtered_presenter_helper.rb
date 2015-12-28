@@ -4,16 +4,17 @@ module FilteredPresenterHelper
       context, options = 'panels', context
     end
     buttons = ''.html_safe
+    display_style = options[:display_style] || viewparams.display_style
     label =
     viewparams.org_buttons(context) do |label, qparams, link_options = {}|
       link_options[:class] =
-          "#{link_options[:class]} org-button #{viewparams.display_style} #{options[:class]}"
+          "#{link_options[:class]} org-button #{display_style} #{options[:class]}"
       buttons << querify_radiobutton( label.upcase.html_safe, qparams, link_options )
     end || ''
     buttons = content_tag :div, buttons, class: 'btn-group', data: { toggle: 'buttons' }
     content_tag :div,
                 content_tag(:span, label, class: 'org-buttons-label')+buttons,
-                class: "org-buttons #{viewparams.display_style} #{context}-buttons" if buttons.present?
+                class: "org-buttons #{display_style} #{context}-buttons" if buttons.present?
   end
 
   def filtered_presenter_org_buttons_replacement viewparams, context='panels'
