@@ -144,6 +144,7 @@ RP::Application.routes.draw do
   resources :feeds, :except => [:index, :create], :concerns => [:picable, :collectible, :taggable] do
     member do
       get 'refresh' # Refresh the feed's entries
+      get 'contents'
       post 'approve' # (Admin only) approve the feed for presentation
     end
   end

@@ -39,19 +39,6 @@ class RecipesController < CollectibleController
     # Get the collected recipes for the user named in query
   end
 
-  def show
-    # return if need_login true
-    update_and_decorate
-    current_user.touch @recipe if current_user
-    response_service.title = @recipe && @recipe.title.truncate(20)
-    @nav_current = nil
-    smartrender
-  end
-
-  def associated
-    show
-  end
-
   def new # Collect URL, then re-direct to edit
     # return if need_login true
     # Here is where we take a hit on the "Add to RecipePower" widget,

@@ -192,9 +192,6 @@ div.card-item {
       font-weight: 200;
       letter-spacing: 2px;
       line-height: 1.2em;
-      a.title-link {
-        color: white;
-      }
     }
     div.vote-buttons {
       font-size: 1.2em;
@@ -240,6 +237,14 @@ div.card-item {
     background-color: $feeds-card-background-color;
     div.title > a.title-link {
       color: $feeds-navtab-text-color;
+    }
+    svg#vote-up {
+      color: mix($vote-glyph-color, black, 93%);
+      fill: mix($vote-glyph-color, black, 93%);
+    }
+    svg#vote-down {
+      color: mix($vote-glyph-color, black, 93%);
+      fill: mix($vote-glyph-color, black, 93%);
     }
   }
   &.user-card {

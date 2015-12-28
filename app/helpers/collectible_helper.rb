@@ -217,8 +217,8 @@ module CollectibleHelper
       feed_entries_status decorator.object
     elsif decorator.object.class == List
       'compiled by '.html_safe + user_homelink(decorator.object.owner, options)
-    elsif (decorator.object.respond_to?(:site) && decorator.site)
-      'source: '.html_safe + site_homelink(decorator, options)
+    elsif (decorator.object.respond_to?(:site) && decorator.object.site)
+      'source: '.html_safe + site_homelink(decorator.object.site, options)
     end
   end
 

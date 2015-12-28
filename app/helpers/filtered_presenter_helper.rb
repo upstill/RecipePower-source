@@ -44,7 +44,7 @@ module FilteredPresenterHelper
 
   def filtered_presenter_table_results_replacement viewparams
     selector = '.results'
-    selector << '.' + viewparams.result_type
+    selector << '.' + viewparams.result_type.extensions_to_selector
     [selector, filtered_presenter_table_results(viewparams) ]
   end
 

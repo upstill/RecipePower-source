@@ -112,7 +112,7 @@ module FeedsHelper
     (data = (options[:data] || {}))[:report] = polymorphic_path [:touch, feed]
     klass = "#{options[:class]} entity feed"
     # Default submission is for #owned action
-    action = options[:action] || :owned
+    action = options[:action] || :contents
     link_to_submit feed.title,
                    polymorphic_path([action, feed]),
                    {mode: :partial}.merge(options).merge(data: data, class: klass).except(:action, :truncate)

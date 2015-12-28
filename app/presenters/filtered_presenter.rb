@@ -225,7 +225,7 @@ class FilteredPresenter
     # Initialize a stream using ResultsCache(s), if any
     if subtypes.present?
       init_stream (@results_cache = ResultsCache.retrieve_or_build( response_service.uuid, subtypes, params).first)
-    elsif response_service.action == 'show'
+    else
       @results_cache = NullResults.new params
     end
   end
@@ -518,7 +518,7 @@ class UsersBiglistPresenter < UserContentPresenter
 end
 
 # Present the entries associated with a feed
-class FeedsAssociatedPresenter < FilteredPresenter
+class FeedsShowPresenter < FilteredPresenter
 
   def result_type
     'feed_entries'
@@ -527,6 +527,14 @@ class FeedsAssociatedPresenter < FilteredPresenter
   def item_mode
     :page
   end
+
+end
+
+class FeedsContentsPresenter < FeedsShowPresenter
+
+end
+
+class FeedsAssociatedPresenter < FeedsShowPresenter
 
 end
 
@@ -584,21 +592,23 @@ class ListsIndexPresenter < FilteredPresenter
 
 end
 
-class ListsAssociatedPresenter < FilteredPresenter
+class ListsShowPresenter < FilteredPresenter
 
   def result_type
     'lists.contents'
+  end
+
+  def panel_title
+    'contents'
   end
 
 end
 
-# Present the entries associated with a list
-class ListsContentsPresenter < FilteredPresenter
-  @item_mode = :masonry
+class ListsContentsPresenter < ListsShowPresenter
 
-  def result_type
-    'lists.contents'
-  end
+end
+
+class ListsAssociatedPresenter < ListsShowPresenter
 
 end
 

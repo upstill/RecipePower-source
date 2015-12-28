@@ -384,10 +384,9 @@ class ImageReference < Reference
           else
             thumb = img
           end
-          thumb.format = "JPEG"
+          thumb.format = 'PNG'
           quality = 80
-          # thumb.write("thumb#{id.to_s}-M#{quality.to_s}.jpg") { self.quality = quality } unless Rails.env.production?
-          self.thumbdata = "data:image/jpeg;base64," + Base64.encode64(thumb.to_blob{self.quality = quality })
+          self.thumbdata = "data:image/png;base64," + Base64.encode64(thumb.to_blob{self.quality = quality })
         rescue Exception => e
           logger.debug "Failed to parse image data for ImageReference#{id}: #{url} (#{e})"
           self.status = -2 # Bad data

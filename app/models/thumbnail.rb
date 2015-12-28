@@ -41,7 +41,7 @@ class Thumbnail < ActiveRecord::Base
           else
             thumb = img
           end
-          thumb.format = "JPEG"
+          thumb.format = 'PNG'
           quality = 20
           thumb.write("thumb#{id.to_s}-M#{quality.to_s}.jpg") { self.quality = quality } unless true # Rails.env.production?
           self.thumbdata = "data:image/jpeg;base64," + Base64.encode64(thumb.to_blob{self.quality = quality })

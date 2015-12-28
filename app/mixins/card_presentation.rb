@@ -23,7 +23,7 @@ module CardPresentation
   def card_homelink options={}
     (data = (options[:data] || {}))[:report] = h.polymorphic_path [:touch, decorator.object]
     homelink = h.polymorphic_path([:associated, decorator.object]) rescue nil
-    homelink ||= h.polymorphic_path([:owned, decorator.object]) rescue nil
+    homelink ||= h.polymorphic_path([:contents, decorator.object]) rescue nil
     link_to_submit decorator.title, (homelink || decorator.object), options.merge(:mode => :partial, :data => data)
   end
 

@@ -154,7 +154,13 @@ class CollectibleController < ApplicationController
 
   def show
     update_and_decorate
+    response_service.title = @decorator && @decorator.title.truncate(20)
+    @nav_current = nil
     smartrender
+  end
+
+  def associated
+    show
   end
 
 end

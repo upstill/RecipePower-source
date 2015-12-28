@@ -5,7 +5,7 @@ module ListsHelper
     name = name.truncate(options[:truncate]) if options[:truncate]
     (data = (options[:data] || {}))[:report] = polymorphic_path [:touch, list]
     klass = "#{options[:class]} entity list"
-    path = case action = (options.extract!(:action)[:action] || :show)
+    path = case action = (options.extract!(:action)[:action] || :contents)
              when :show
                list_path list
              else

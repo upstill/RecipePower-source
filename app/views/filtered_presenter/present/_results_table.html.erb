@@ -1,5 +1,5 @@
 <!-- View for listing entities in a table -->
 <% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
-<tbody class="results stream-items-parent <%= viewparams.stream_id %>">
+<tbody class="results stream-items-parent <%= viewparams.result_type.extensions_to_classes %>">
     <%= filtered_presenter_tail viewparams %>
 </tbody>

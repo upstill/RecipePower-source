@@ -52,12 +52,17 @@ end
 class Partition < Array
   attr_accessor :cur_position, :window, :max_window_size
 
+  def initialize range, mws=5
+    super range
+    self.max_window_size = mws
+  end
+
   def windowsize
     window.max-window.min
   end
 
   def max_window_size
-    @max_window_size ||= 10
+    @max_window_size ||= 5
   end
 
   # Provide the stream parameter for the "next page" link. Will be null if we've passed the window
@@ -499,6 +504,7 @@ class ResultsCache < ActiveRecord::Base
         rc
       else # No cacheclass
         logger.debug 'No ResultsCache handler ' + classname
+        nil
       end
     }.compact
   end
@@ -610,7 +616,7 @@ class ResultsCache < ActiveRecord::Base
     return (cache != nil) unless self.respond_to? :count_tag
     if (@querytags ||= []).count == 0
       # Straight passthrough of the itemscope => no cache required
-      self.partition ||= Partition.new([0, scope_count ])
+      self.partition ||= Partition.new([0, scope_count ], max_window_size)
       false
     elsif cache
       true
@@ -668,12 +674,16 @@ class ResultsCache < ActiveRecord::Base
     }
   end
 
+  def max_window_size
+    5
+  end
+
   # Return the existing partition, if any; otherwise, create one otherwise
   def safe_partition
     if pt = partition
       pt
     else
-      self.partition = Partition.new [0, full_size]
+      self.partition = Partition.new [0, full_size], max_window_size
     end
   end
 
@@ -776,6 +786,9 @@ class UsersShowCache < ResultsCache
         UsersCollectionCache
     end
   end
+end
+
+class UsersAssociatedCache < UsersShowCache
 
 end
 
@@ -868,7 +881,7 @@ class ListsIndexCache < ResultsCache
       when 'all'
         List.unscoped
       else # By default, we only see lists belonging to our friends and Super that are not private, and all those that are public
-        ListServices.lists_visible_to viewer
+        ListServices.lists_visible_to viewer, true
     end
   end
 end
@@ -898,6 +911,14 @@ class ListsShowCache < ResultsCache
 
 end
 
+class ListsContentsCache < ListsShowCache
+
+end
+
+class ListsAssociatedCache < ListsShowCache
+
+end
+
 # list of feeds
 class FeedsIndexCache < ResultsCache
   include EntitiesCache
@@ -905,6 +926,10 @@ class FeedsIndexCache < ResultsCache
   # Declare a different default org
   def self.params_needed
     super + [ [:org, :newest] ]
+  end
+
+  def max_window_size
+    10
   end
 
   def itemscope
@@ -952,9 +977,21 @@ class FeedsShowCache < ResultsCache
 
 end
 
+class FeedsAssociatedCache < FeedsShowCache
+
+end
+
+class FeedsContentsCache < FeedsShowCache
+
+end
+
 # users: list of users visible to current_user (UsersStreamer)
 class UsersIndexCache < ResultsCache
   include EntitiesCache
+
+  def max_window_size
+    10
+  end
 
   def itemscope
     @itemscope ||=
@@ -1006,6 +1043,10 @@ end
 class TagsIndexCache < ResultsCache
   include EntitiesCache
 
+  def max_window_size
+    10
+  end
+
   def self.params_needed
     super + [:tagtype]
   end
@@ -1038,6 +1079,10 @@ end
 class SitesIndexCache < ResultsCache
   include EntitiesCache
 
+  def max_window_size
+    10
+  end
+
   def itemscope
     @itemscope ||= Site.unscoped
   end
@@ -1057,8 +1102,16 @@ class SitesShowCache < ResultsCache
   end
 end
 
+class SitesAssociatedCache < SitesShowCache
+
+end
+
 class ReferencesIndexCache < ResultsCache
   include EntitiesCache
+
+  def max_window_size
+    10
+  end
 
   def self.params_needed
     super + [:type]
@@ -1088,6 +1141,10 @@ end
 
 class ReferentsIndexCache < ResultsCache
   include EntitiesCache
+
+  def max_window_size
+    10
+  end
 
   def self.params_needed
     super + [:type]
