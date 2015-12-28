@@ -48,7 +48,7 @@
                 <div class="half-height"></div>
                 <div class="half-width"></div>
                 <div class="ul">
-                  <%= link_to_submit "COLLECTION", response_service.decorate_path(result_type: ''), class: "result-link collection" %>
+                  <%= link_to_submit "COLLECTION", response_service.decorate_path(result_type: nil), class: "result-link collection" %>
                 </div>
                 <% divs = %w{ bl ur br } %>
                 <% viewparams.sibling_views.each do |viewparams| %>

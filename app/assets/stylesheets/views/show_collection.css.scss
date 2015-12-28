@@ -4,15 +4,27 @@ div.collection-header {
     margin: 0.8em;
     &.recipes {
       background: $recipes-panel-background-color;
+      div.navlink a {
+        color: $recipes-navtab-text-color;
+      }
     }
     &.friends {
       background: #e9e3c9; // $friends-panel-background-color;
+      div.navlink a {
+        color: #dfc96a; // $friends-navtab-text-color; // #dfca6a;
+      }
     }
     &.lists {
       background: #D0DbD2; // $lists-panel-background-color;
+      div.navlink a {
+        color: #1d6a2b; // $lists-navtab-text-color;
+      }
     }
     &.feeds {
       background: $feeds-panel-background-color;
+      div.navlink a {
+        color: $feeds-navtab-text-color;
+      }
     }
     div.navlink {
       color: #979693;

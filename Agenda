@@ -5,6 +5,7 @@
 2/1: Eliminate Channel referents
 1/1: Associations for recipes and more
 2/3: Link colors on cards
-3/4: Org buttons color in FilteredPresenter header_collection_entity
+√ 3/4: Org buttons color in FilteredPresenter header_collection_entity
 2/2: Site editor
 2/3: Error message in pic picker when page doesn't work
+√ 2/5: 'Collection' link on header_collection_entity doesn't return to whole collection
