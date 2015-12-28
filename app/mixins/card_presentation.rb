@@ -21,10 +21,7 @@ module CardPresentation
   # Provide the card's title with a link to the entity involved
   # NB This is meant to be overridden by entities (recipes, sites...) that link externally
   def card_homelink options={}
-    (data = (options[:data] || {}))[:report] = h.polymorphic_path [:touch, decorator.object]
-    homelink = h.polymorphic_path([:associated, decorator.object]) rescue nil
-    homelink ||= h.polymorphic_path([:contents, decorator.object]) rescue nil
-    link_to_submit decorator.title, (homelink || decorator.object), options.merge(:mode => :partial, :data => data)
+    homelink decorator, options
   end
 
   def card_video

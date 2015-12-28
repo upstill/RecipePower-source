@@ -1,19 +1,5 @@
 module ListsHelper
 
-  def list_homelink list, options={}
-    name = list.name
-    name = name.truncate(options[:truncate]) if options[:truncate]
-    (data = (options[:data] || {}))[:report] = polymorphic_path [:touch, list]
-    klass = "#{options[:class]} entity list"
-    path = case action = (options.extract!(:action)[:action] || :contents)
-             when :show
-               list_path list
-             else
-               polymorphic_path([action, list])
-           end
-    link_to_submit name, path, {:mode => :partial}.merge(options).merge(data).merge(class: klass).except(:action)
-  end
-
   # Provide a button for adding (pinning) an entity to the list
   def pin_button list, entity
     button_to_submit list.name,

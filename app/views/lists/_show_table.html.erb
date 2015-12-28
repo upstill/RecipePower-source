@@ -5,14 +5,13 @@
       <%= presenter.card_avatar :fallback_img => image_path('Upload_Icon.jpg') %>
     </td>
     <td class="description-column">
-      <%# list_homelink list, truncate: 80 %>
       <%= presenter.card_homelink class: 'title-link' %>
       <%= collectible_collect_button decorator, 'lg' %>
       <br><%= list.description %>
       <hr><%= list.notes %>
     </td>
     <td>
-      <%= user_homelink list.owner, :mode => :partial, :action => :collection %>
+      <%= user_homelink list.owner %>
       <br>
     </td>
     <td>

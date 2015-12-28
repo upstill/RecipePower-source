@@ -1,9 +1,7 @@
 module TagsHelper
 
   def tag_homelink tag, options={}
-    action = options.extract!(:action)[:action] || :associated
-    option_defaults = { :mode => :partial }
-    link_to_submit tag.name, polymorphic_path([action, tag]), option_defaults.merge(options)
+    homelink tag, options
   end
 
   # TODO: These should be part of the tag presenter

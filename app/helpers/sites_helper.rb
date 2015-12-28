@@ -27,20 +27,6 @@ module SitesHelper
     }.compact.join.html_safe
   end
 
-  def site_homelink decorator, options={}
-    decorator = decorator.decorate unless decorator.is_a?(Draper::Decorator)
-    (data = (options[:data] || {}))[:report] = polymorphic_path [:touch, decorator.object]
-    link_to_submit( decorator.title,
-                    decorator.object,
-                    options.merge(data: data)) + '&nbsp;'.html_safe +
-        link_to( "",
-                 decorator.url,
-                 class: 'glyphicon glyphicon-play-circle',
-                 style: 'color: #aaa',
-                 :target => '_blank')
-
-  end
-
   def site_feeds_summary site
     ft = nil
     napproved = site.feeds.where(approved: true).count

@@ -93,19 +93,12 @@ module UsersHelper
     user.fullname.if_present || user.username.if_present || user.handle
   end
 
+  def user_subclass user
+    user.id == current_user_or_guest_id ? 'viewer' : 'friend'
+  end
+
   def user_homelink user, options={}
-    (data = (options[:data] || {}))[:report] = polymorphic_path [:touch, user]
-    if user.id == current_user_or_guest_id
-      subclass = 'viewer'
-    else
-      subclass = 'friend'
-    end
-    klass = "#{options[:class]} entity user #{subclass}"
-    # Default submission is partial
-    action = options[:action] || :collection
-    link_to_submit user_linktitle(user),
-                   polymorphic_path([action, user]),
-                   {mode: :partial}.merge(options).merge(data: data, class: klass).except(:action)
+    homelink user, options.merge(:action => :collection, :class => "#{options[:class]} #{user_subclass user}")
   end
 
   # Operate on a set of tag specifications as defined in UserDecorator for directing a list search

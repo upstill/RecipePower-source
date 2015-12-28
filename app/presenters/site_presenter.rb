@@ -38,10 +38,6 @@ class SitePresenter < CollectiblePresenter
     [ :author, :description, :tags, :title ]
   end
 
-  def card_homelink options={}
-    site_homelink @decorator, options
-  end
-
 =begin
   def aspects
     card_aspects.collect { |this| aspect(this) }.compact.join.html_safe

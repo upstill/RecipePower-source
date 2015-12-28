@@ -23,7 +23,7 @@ class FeedsController < CollectibleController
     smartrender
   end
 
-  def owned
+  def contents
     @active_menu = :feeds
     @feed.refresh if update_and_decorate && !params[:stream] && @feed.due_for_update
     if resource_errors_to_flash @feed

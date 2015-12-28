@@ -104,5 +104,39 @@ module LinkHelper
     link_options
   end
 
+  # Provide an internal link to an object's #associated, #contents or #show methods, as available
+  def homelink decorator, options={}
+    decorator = decorator.decorate unless decorator.is_a?(Draper::Decorator)
+    data = options[:data] || {}
+    data[:report] = (polymorphic_path([:touch, decorator.object]) rescue nil)
 
+    cssclass = "#{options[:class]} entity #{decorator.object.class.to_s.underscore}"
+
+    linkpath =
+        (options[:action] && polymorphic_path([options[:action], decorator.object]) rescue nil) ||
+        (polymorphic_path([:contents, decorator.object]) rescue nil) ||
+        (polymorphic_path([:associated, decorator.object]) rescue nil) ||
+        decorator.object
+
+    amended_options = {mode: :partial}.
+        merge(options).
+        merge(data: (data unless data.compact.empty?), class: cssclass).
+        except(:action, :truncate).
+        compact
+
+    title = decorator.title
+    if options[:truncate]
+      title = title.truncate(options[:truncate])
+    end
+
+    link = link_to_submit title, linkpath, amended_options
+    if decorator.respond_to?(:external_link)
+      link << '&nbsp;'.html_safe + link_to('',
+                                          decorator.external_link,
+                                          class: 'glyphicon glyphicon-play-circle',
+                                          style: 'color: #aaa',
+                                          :target => '_blank')
+    end
+    link
+  end
 end

@@ -16,7 +16,7 @@ class UserPresenter < BasePresenter
   end
 
   def card_homelink options={}
-    user_homelink @decorator.object, options
+    user_homelink @decorator, options
   end
 
   def member_since

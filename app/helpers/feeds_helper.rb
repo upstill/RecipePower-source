@@ -106,16 +106,4 @@ module FeedsHelper
     [ "span##{dom_id feed}", feed_approval(feed) ]
   end
 
-  def feed_homelink feed, options={}
-    title = feed.title
-    title = title.truncate(options[:truncate]) if options[:truncate]
-    (data = (options[:data] || {}))[:report] = polymorphic_path [:touch, feed]
-    klass = "#{options[:class]} entity feed"
-    # Default submission is for #owned action
-    action = options[:action] || :contents
-    link_to_submit feed.title,
-                   polymorphic_path([action, feed]),
-                   {mode: :partial}.merge(options).merge(data: data, class: klass).except(:action, :truncate)
-  end
-
 end

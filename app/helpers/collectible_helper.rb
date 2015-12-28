@@ -218,7 +218,7 @@ module CollectibleHelper
     elsif decorator.object.class == List
       'compiled by '.html_safe + user_homelink(decorator.object.owner, options)
     elsif (decorator.object.respond_to?(:site) && decorator.object.site)
-      'source: '.html_safe + site_homelink(decorator.object.site, options)
+      'source: '.html_safe + homelink(decorator.object.site, options)
     end
   end
 
