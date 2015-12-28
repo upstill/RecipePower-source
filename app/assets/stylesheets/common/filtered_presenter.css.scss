@@ -8,6 +8,12 @@ div.results-enclosure {
     &.js-masonry {
       margin-top: 1em;
     }
+    &.slider {
+      div.beachball {
+        margin-left: 100px;
+        margin-top: 50px;
+      }
+    }
   }
 }
 
@@ -74,9 +80,6 @@ div.org-buttons {
     &.disabled {
       background-color: rgba($generic-panels-label-button-color, 0.6);
     }
-    &.active {
-      color: #f2f2f2;
-    }
     &.small {
       font-size: 0.8em;
       &.soft-button {
@@ -86,17 +89,9 @@ div.org-buttons {
     }
     &.recipe {
       background-color: $recipes-navtab-text-color;
-      &.disabled {
-        background-color: rgba($recipes-navtab-text-color, 0.6);
-      }
     }
     &.viewer {
       background-color: $viewer-panels-label-button-color;
-      color: rgba(#fafafa, 0.6);
-      &.disabled {
-        background-color: rgba($viewer-panels-label-button-color, 0.6);
-        color: #fafafa;
-      }
     }
     &.user {
       background-color: $user-panels-label-button-color;
@@ -104,39 +99,15 @@ div.org-buttons {
       &.active {
         color: $user-panels-button-color;
       }
-      &.disabled {
-        background-color: rgba($user-panels-label-button-color, 0.6);
-      }
     }
     &.friend {
       background-color: $friends-navtab-text-color;
-      color: rgba(#fafafa, 0.6);
-      &.active {
-        color: #fafafa;
-      }
-      &.disabled {
-        background-color: rgba($friends-navtab-text-color, 0.6);
-      }
     }
     &.feed {
       background-color: $feeds-navtab-text-color;
-      color: rgba(#fafafa, 0.6);
-      &.active {
-        color: #fafafa;
-      }
-      &.disabled {
-        background-color: rgba($feeds-navtab-text-color, 0.6);
-      }
     }
     &.list {
       background-color: $lists-panels-label-button-color;
-      &.disabled {
-        background-color: rgba($lists-panels-label-button-color, 0.6);
-      }
-    }
-    &.disabled {
-      pointer-events: none;
-      cursor: default;
     }
   }
 }
