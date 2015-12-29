@@ -177,6 +177,9 @@ div.card-item {
         float: right;
       }
     }
+    a {
+      color: $recipes-panels-label-button-color;
+    }
     .title-bar {
       border-bottom: 0.3em solid #b95454;
       .left-matter {
@@ -217,11 +220,17 @@ div.card-item {
     div.title > a.title-link {
       color: white;
     }
+    a {
+      color: $viewer-card-link-color;
+    }
   }
   &.friend-card {
     background-color: $friends-card-background-color;
     div.title > a.title-link {
       color: white;
+    }
+    a {
+      color: $friends-card-link-color;
     }
     div.sprite-glyph
     svg#vote-up {
@@ -237,6 +246,9 @@ div.card-item {
     background-color: $feeds-card-background-color;
     div.title > a.title-link {
       color: $feeds-navtab-text-color;
+    }
+    a {
+      color: $feeds-link-color;
     }
     svg#vote-up {
       color: mix($vote-glyph-color, black, 93%);
@@ -256,11 +268,17 @@ div.card-item {
     .card-aspect-label {
       color: $user-card-label-color;
     }
+    a {
+      color: $user-panels-label-button-color;
+    }
   }
   &.list-card {
     background-color: $lists-card-background-color;
     div.title > a.title-link {
       color: rgba($lists-navtab-text-color, 0.6);
+    }
+    a {
+      color: $lists-panels-label-button-color;
     }
   }
   &.entity-card {
@@ -319,6 +337,7 @@ div.card-item {
       font-size: 1.2em;
       float: right;
       margin-top: 0.3em;
+      margin-right: 0.15em;
       a.vote-button {
         font-size: 1.4em;
       }
@@ -340,9 +359,6 @@ div.card-item {
     font-weight: 400;
     color: #909090;
     font-size: 1.3em;
-    a.taglink {
-      color: inherit;
-    }
     span.tagsep {
       font-size: 1.3em;
       color: #8ac5d2;

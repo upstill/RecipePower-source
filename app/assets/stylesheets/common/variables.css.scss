@@ -11,13 +11,14 @@ $generic-card-text-color: #aaaaaa;
 $generic-card-title-color: darkgrey;
 $generic-card-label-color: darkgrey;
 $generic-panels-label-text-color: #bbbbbb;
-$generic-panels-label-button-color: #ffffff;
+$generic-panels-label-button-color: lightgray;
 $generic-panels-button-color: #fafafa;
 
 // For material relating to the current user
 $viewer-card-background-color: #ecdad7;
 $viewer-panels-label-text-color: #e6ccc8;
 $viewer-panels-label-button-color: #efc5bd;
+$viewer-card-link-color: mix($viewer-panels-label-button-color, black, 70%);
 
 // For material relating to lists of the current user
 
@@ -30,6 +31,7 @@ $friends-panels-label-button-color: #dbd3ab;
 $friends-panel-background-color: #e9e4ca;
 $friends-panel-background-transparent: rgba(233, 228, 202, 0);
 $friends-panel-label-color: #f3f2ea;
+$friends-card-link-color: mix($friends-panels-label-button-color, black, 80%);
 
 $panel-two-background-color: #7c966a;
 $panel-two-background-transparent: rgba(124, 150, 106, 0);
