@@ -1,9 +1,8 @@
 3/4: Heroku: Remove tags of type Channel
 1/1: Hashtag nav
 1/2: Sharing
-2/2: Admin uploads pics for others
+√ 2/2: Admin uploads pics for others
 2/1: Eliminate Channel referents
-1/1: Associations for recipes and more
 √ 2/3: Link colors on cards
 √ 3/4: Org buttons color in FilteredPresenter header_collection_entity
 √ 2/2: Site editor

@@ -12,7 +12,7 @@
           <td valign="top" class="upper-content">
             <div class="title">
               <%= presenter.card_homelink class: 'title-link' %>
-              <% if decorator.object == response_service.user %>
+              <% if (decorator.object == response_service.user) || response_service.admin_view? %>
                   <%= collectible_edit_button decorator %>
               <% else %>
                   <%= collectible_collect_button decorator %>
