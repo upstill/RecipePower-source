@@ -1,24 +1,12 @@
 <%= simple_form_for(@site) do |f| %>
     <%= modal_body do %>
         <div class="row">
-          <div class="col-md-4">
-            <div class="pic_picker_field">
-              <%= pic_field f, decorator: @decorator %>
-            </div>
-          </div>
-          <div class="col-md-8">
+         <div class="col-md-12">
             <%= f.input :name %>
             <%= f.input :description %>
           </div>
         </div>
-        <div class="row">
-          <div class="col-md-12">
-            <div class="form-group site_logo">
-              <%= uploader_field @decorator %>
-            </div>
-          </div>
-        </div>
-        <% if permitted_to? :admin, :pages %>
+        <% if response_service.admin_view? && permitted_to?(:admin, :pages) %>
             <div class="row">
               <div class="col-md-12">
                 <%# f.input :site %>

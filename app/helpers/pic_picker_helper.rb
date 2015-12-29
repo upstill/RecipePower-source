@@ -18,6 +18,7 @@ module PicPickerHelper
 
     pic_area = image_with_error_recovery decorator,
                                          id: pic_preview_img_id(decorator),
+                                         class: 'fixed-width',
                                          fallback_img: options[:fallback_img] || true
     field_options = {
         rel: "jpg,png,gif",
