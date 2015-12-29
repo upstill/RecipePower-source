@@ -528,7 +528,7 @@ public
   # Notify self of an event, possibly (if profile allows) sending email
   def notify( notification_type, source_user, options={})
     notification = post_notification(notification_type, source_user, options)
-    if true # XXX User's profile approves
+    if true # TODO: User's profile approves
       # Mapping from notification types to email types
       case notification_type
       when :share

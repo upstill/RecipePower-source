@@ -12,7 +12,7 @@ class InvitationsController < Devise::InvitationsController
 
   # GET /resource/invitation/new
   def new
-    self.resource = resource_class.new(invitation_message: "Here's a little something I found on RecipePower. Have a look and tell me what you think.")
+    self.resource = resource_class.new(invitation_message: 'Here\'s a little something I found on RecipePower. Have a look and tell me what you think.')
     resource.shared_type = params[:shared_type]
     resource.shared_id = params[:shared_id]
     @shared = resource.shared
@@ -46,7 +46,7 @@ class InvitationsController < Devise::InvitationsController
   # POST /resource/invitation
   def create
     unless current_user
-      logger.debug "NULL CURRENT_USER in invitation/create without raising authenticity error"
+      logger.debug 'NULL CURRENT_USER in invitation/create without raising authenticity error'
       raise ActionController::InvalidAuthenticityToken
     end
 
@@ -54,11 +54,11 @@ class InvitationsController < Devise::InvitationsController
     popups = []
 
     # If dialog has no invitee_tokens, get them from email field
-    params[resource_name][:invitee_tokens] = params[resource_name][:invitee_tokens] ||
+    params[resource_name][:invitee_tokens] ||=
         params[resource_name][:email].split(',').collect { |email| %Q{'#{email.downcase.strip}'} }.join(',')
     # Check email addresses in the tokenlist for validity
     @staged = User.new params[resource_name] # invite_resource
-    for_sharing = @staged.shared
+    @shared = @staged.shared
 
     # It is an error to provide a bogus email address
     err_address =
@@ -66,13 +66,12 @@ class InvitationsController < Devise::InvitationsController
           token.kind_of?(String) && !(token =~ /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i)
         }
     if err_address || @staged.invitee_tokens.empty? # if there's an invalid email, go back to the user
-      @staged.errors.add (for_sharing ? :invitee_tokens : :email),
+      @staged.errors.add (@shared ? :invitee_tokens : :email),
                          err_address.blank? ?
-                             "Can't send an invitation without an email to send it to!" :
+                             'Can\'t send an invitation without an email to send it to!' :
                              "'#{err_address}' doesn't look like an email address."
       self.resource = @staged
-      # dialog_boilerplate(for_sharing ? :share : :new)
-      smartrender :action => (for_sharing ? :share : :new)
+      smartrender :action => (@shared ? :share : :new)
       return
     end
 
@@ -92,12 +91,12 @@ class InvitationsController < Devise::InvitationsController
         pr[:skip_invitation] = true # Hold off on invitation so we can re-direct to share, as nec.
         @resource = self.resource = resource_class.invite!(pr, current_inviter)
         @resource.invitation_sent_at = Time.now.utc
-        if for_sharing
-          @notification = @resource.post_notification(:share, current_inviter, what: resource.shared)
+        if @shared
+          @notification = @resource.post_notification(:share, current_inviter, what: @shared)
           @resource.save(validate: false) # ...because the invitee doesn't have a handle yet
           @resource.issue_instructions(:sharing_invitation_instructions,
                                        notification_token: @notification.notification_token,
-                                       subject: @resource.invitation_issuer+" has something tasty for you")
+                                       subject: @resource.invitation_issuer+' has something tasty for you')
         else
           @resource.save(validate: false) # ...because the invitee doesn't have a handle yet
           @resource.issue_instructions(:invitation_instructions)
@@ -108,46 +107,45 @@ class InvitationsController < Devise::InvitationsController
         #          self.resource = nil
       end
     end
-    what_to_send = for_sharing ? "a sharing notice" : "an invitation"
+    what_to_send = @shared ? 'a sharing notice' : 'an invitation'
     popups <<
         breakdown.report(:invited, :email) { |names, count|
           subj_verb = (count > 1) ?
-              (what_to_send.sub(/^[^\s]*\s*/, '').capitalize+"s are winging their way") :
-              (what_to_send.capitalize+" is winging its way")
+              (what_to_send.sub(/^[^\s]*\s*/, '').capitalize+'s are winging their way') :
+              (what_to_send.capitalize+' is winging its way')
           %Q{Yay! #{subj_verb} to #{names}}
         }
     alerts <<
         breakdown.report(:failures) { |items, count|
-          what_to_send = what_to_send.sub(/^[^\s]*\s*/, '')+"s" if count > 1
+          what_to_send = what_to_send.sub(/^[^\s]*\s*/, '')+'s' if count > 1
           "Couldn't send #{what_to_send} to:"+
-              "<ul>" + items.collect { |item| "<li>#{item[:email]}: #{item[:error]}</li>" }.join + "</ul>"
+              '<ul>' + items.collect { |item| "<li>#{item[:email]}: #{item[:error]}</li>" }.join + '</ul>'
         }
 
-    if for_sharing
+    if @shared
       # All categories of user get notified of the share
       (breakdown[:new_friends]+breakdown[:redundancies]).each do |sharee|
         # Mail generic share notice with action button to collect recipe
         # Cook Me Later: add to collection
         sharee.invitation_message = params[:user][:invitation_message]
         sharee.save
-        sharee.notify(:share_recipe, current_user, what: sharee.share)
+        sharee.notify(:share_recipe, current_user, what: @shared)
         breakdown[:invited] << sharee
       end
-      popups << breakdown.report(:redundancies, :salutation) { |names, count| %Q{#{names} #{count > 1 ? "have" : "has" } been notified on your behalf.} }
+      popups << breakdown.report(:redundancies, :salutation) { |names, count| %Q{#{names} #{count > 1 ? 'have' : 'has' } been notified on your behalf.} }
     else
       alerts << [
           breakdown.report(:redundancies, :handle) { |names, count|
             "You're already friends with #{names}." },
           breakdown.report(:pending, :email) { |names, count|
-            verb = count > 1 ? "have" : "has"
+            verb = count > 1 ? 'have' : 'has'
             %Q{#{names} #{verb} already been invited but #{verb}n't accepted.}
           },
           breakdown.report(:new_friends, :handle) { |names, count|
-            %Q{#{names} #{count > 1 ? "are" : "is"} already on RecipePower, so we've added them to your friends.}
+            %Q{#{names} #{count > 1 ? 'are' : 'is'} already on RecipePower, so we've added them to your friends.}
           }
       ]
     end
-    @shared = for_sharing && @staged.shared
     respond_to { |format|
       format.json {
         response = {done: true}
@@ -176,7 +174,7 @@ class InvitationsController < Devise::InvitationsController
     ##################
     email = params[resource_name][:email].downcase
     if resource = User.where(email: email).first
-      resource.errors[:email] << "We already have a user with that email address"
+      resource.errors[:email] << 'We already have a user with that email address'
     else
       params[resource_name][:invitation_message] =
           splitstr(params[resource_name][:invitation_message], 100)
@@ -202,10 +200,10 @@ class InvitationsController < Devise::InvitationsController
         other = User.find_by_email email
         flash[:notice] = "What do you know? '#{other.handle}' has already been invited/signed up."
       else
-        error = "Sorry, can't create invitation for some reason."
+        error = 'Sorry, can\'t create invitation for some reason.'
         if e
-          e.to_s.split("\n").each { |line|
-            error << "\n"+line if (line =~ /DETAIL:/)
+          e.to_s.split('\n').each { |line|
+            error << '\n'+line if (line =~ /DETAIL:/)
           }
         end
         flash[:error] = error
@@ -239,7 +237,7 @@ class InvitationsController < Devise::InvitationsController
     resource.password = resource.email if resource.password.blank?
     if resource.errors.empty?
       if resource.password == resource.email
-        flash[:alert] = "You didn't provide a password, so we've set it to be the same as your email address. You might want to consider changing that in your Profile"
+        flash[:alert] = 'You didn\'t provide a password, so we\'ve set it to be the same as your email address. You might want to consider changing that in your Profile'
       end
       invitation_event = RpEvent.where(subject_id: resource.invited_by_id, indirect_object_id: resource.id, indirect_object_type: resource.class.to_s).first
       RpEvent.post resource, :invitation_accepted, invitation_event, User.find(resource.invited_by_id)

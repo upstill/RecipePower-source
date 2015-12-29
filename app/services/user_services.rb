@@ -22,14 +22,14 @@ class UserServices
     'Users Converted'
   end
 
-  def analyze_invitees(against_user)
+  def analyze_invitees(sender)
     result = {
       redundancies:  [], # Current friends (member's share notice sent)
       pending:  [], # Invited but not yet confirmed
       new_friends:  [], # Newly-added friends (member's share notice sent)
       to_invite:  []
     }
-    response_service.user.invitee_tokens.each do |invitee|
+    @user.invitee_tokens.each do |invitee|
       u = 
       case invitee
       when Fixnum # ID of existing friend
@@ -39,7 +39,7 @@ class UserServices
       end
       if u
         # Existing user, whether signed up or not, friend or not
-        if against_user.followee_ids.include? u.id # Existing friend: redundant
+        if sender.followee_ids.include? u.id # Existing friend: redundant
           result[:redundancies] << u
         elsif u.last_sign_in_at # The user has ever signed in (not a pending invitation)
           result[:new_friends] << u
