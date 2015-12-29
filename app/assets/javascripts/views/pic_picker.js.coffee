@@ -72,7 +72,7 @@ RP.pic_picker.open = (dlog) ->
 			if linkdata = $(targetGolinkSelector).data()
 				imagePreviewWidgetSet linkdata.imageid, linkdata.inputid, url
 
-	$(dlog).on 'click','img.pic_pickee', (event) ->
+	$(dlog).on 'click','img.pic-pickee', (event) ->
 		clickee = RP.event_target event
 		set_picker_input (clickee.getAttribute 'src')
 
@@ -80,15 +80,15 @@ RP.pic_picker.open = (dlog) ->
 		clickee = RP.event_target event
 		set_picker_input clickee.getAttribute('value')
 
-	$('img.pic_pickee').load (evt) ->
+	$('img.pic-pickee').load (evt) ->
 		check_image this
 
-	$('img.pic_pickee').each (index, img) ->
+	$('img.pic-pickee').each (index, img) ->
 		check_image img
 		true
 
 	# imagesLoaded fires when all the images are either loaded or fail
-	imagesLoaded 'img.pic_pickee', (instance) ->
+	imagesLoaded 'img.pic-pickee', (instance) ->
 		# Just in case: when all images are loaded, check for qualifying images that are still hidden
 		$(':hidden', dlog).each (index, img) ->
 			check_image img

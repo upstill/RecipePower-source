@@ -16,6 +16,19 @@ div.pic_picker_field {
   }
 }
 
+img.pic-pickee {
+  width: 120px;
+  height: auto;
+  margin: 10px;
+  display: none;
+}
+
+div.pic-pickees {
+  width: 100%;
+  height: 300px;
+  overflow-y: auto;
+}
+
 // Portion of a pic_picker which shows an image, accompanied by its url in a hidden field
 div.pic_preview {
   width:100%;

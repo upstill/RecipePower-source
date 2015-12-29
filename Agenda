@@ -9,6 +9,6 @@
 √ 2/2: Site editor
 √ 2/3: Error message in pic picker when page doesn't work
 √ 2/5: 'Collection' link on header_collection_entity doesn't return to whole collection
-2/2: Make selection of images in pic-picker scrollable
+√ 2/2: Make selection of images in pic-picker scrollable
 1/1: Recipes#associated
 1/1: Sites#associated

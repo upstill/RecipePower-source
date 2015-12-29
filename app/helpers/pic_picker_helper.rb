@@ -76,17 +76,15 @@ module PicPickerHelper
 
   def pic_picker_select_list pageurl
     piclist = page_piclist pageurl # Crack the page for its image links
-    return "" if piclist.empty?
+    return '' if piclist.empty?
     thumbNum = 0
     pics = piclist.collect { |url|
       image_with_error_recovery(url,
-                                style: "width:120px; height: auto; margin:10px; display: none;",
-                                class: "pic_pickee",
+                                class: 'pic-pickee',
                                 id: "thumbnail#{thumbNum += 1}",
-                                alt: "No Image Available")
+                                alt: 'No Image Available')
     }.join(' ').html_safe
-    %q{<div class="row"><div class="col-md-12">}.html_safe + pics + "</div></div>".html_safe
-    # content_tag(:div, pics, id: "masonry-pic-pickees")
+    content_tag :div, pics, class: 'pic-pickees'
   end
 
 end

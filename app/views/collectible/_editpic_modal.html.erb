@@ -15,14 +15,12 @@ Expecting the following local variables:
                                           fill_mode: 'fixed-width' %>
           </div>
           <%= uploader_field @decorator, input_id: 'pic-picker-url', img_id: 'rcpPic' %>
+          <% if @pic_select_list.present? %>
+            <br><span class="prompt">Click on an image to grab it.</span>
+            <%= @pic_select_list %>
+          <% end %>
         </div>
         <div class="col-xs-12 col-sm-6 col-md-7">
-          <span class="prompt">
-            <% if @pic_select_list.present? %>
-                Click on an image to grab it. If none suit, see below for other options.
-                <%= @pic_select_list.html_safe %>
-            <% end %>
-          </span>
 
           <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-12">
@@ -50,6 +48,7 @@ Expecting the following local variables:
             <%= link_to_submit 'Extract Images',
                                polymorphic_path([:editpic, @decorator]),
                                class: 'btn btn-info url-extract-button float-right-button',
+                               data: { :'wait-msg' => 'Give us a sec to crack that page...' },
                                mode: :modal
             %>
           </div>
