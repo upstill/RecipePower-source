@@ -30,7 +30,7 @@
         </tr>
         <tr>
           <td valign="bottom" class="lower-content">
-            <% if decorator.object == response_service.user %>
+            <% if (decorator.object == response_service.user) || response_service.admin_view? %>
                 <%= collectible_tools_menu decorator, 'lg' %>
             <% else %>
                 <%= collectible_share_button decorator, 'lg' %>
