@@ -4,9 +4,9 @@ module NavtabsHelper
     itemlist =
         content_tag :ul,
                     items.collect { |item| content_tag :li, item }.join("\n").html_safe,
-                    class: "dropdown-menu scrollable-menu",
+                    class: 'dropdown-menu scrollable-menu',
                     id: id
-    label << content_tag(:span, "", class: "caret")
+    label << content_tag(:span, '', class: 'caret')
 
     content = navlink label, '', true, link_options
     content_tag :li,
@@ -22,9 +22,9 @@ module NavtabsHelper
   # -- Full-bore dropdown menu (block given), with or without a link at the top (go_path given or not)
   def navtab which, menu_label, go_path=nil, menu_only = false
     options={}
-    class_str = "master-navtab"
+    class_str = 'master-navtab'
     if which == (@active_menu || response_service.active_menu)
-      class_str << " active"
+      class_str << ' active'
     end
 
     # The block should produce an array of menu items (links, etc.)
@@ -32,10 +32,10 @@ module NavtabsHelper
       itemlist =
           content_tag :ul,
                       menu_items.collect { |item| content_tag :li, item }.join("\n").html_safe,
-                      class: "dropdown-menu scrollable-menu",
+                      class: 'dropdown-menu scrollable-menu',
                       id: navmenu_id(which)
-      menu_label << content_tag(:span, "", class: "caret")
-      class_str << " dropdown"
+      menu_label << content_tag(:span, '', class: 'caret')
+      class_str << ' dropdown'
     end
 
     return itemlist if menu_only
@@ -56,50 +56,51 @@ module NavtabsHelper
     if is_menu_header
       options[:class] = "dropdown-toggle #{options[:class]}"
       options[:data] ||= {}
-      options[:data][:toggle] = "dropdown"
+      options[:data][:toggle] = 'dropdown'
     end
     link_to_submit label, path, options  # defaults to partial
   end
 
   def collections_navtab menu_only = false
-    navtab :collections, "Collections", collection_user_path(current_user_or_guest), menu_only do
+    navtab :collections, 'Collections', collection_user_path(current_user_or_guest), menu_only do
       [
-          navlink("My Collection", collection_user_path(current_user_or_guest)),
-          # navlink("Recently Viewed", user_recent_path(current_user_or_guest_id)),
-          navlink("Everything in RecipePower", search_path()),
-          "<hr class='menu'>".html_safe,
-          navlink("Add to Collection", new_recipe_path, :mode => :modal)
+          navlink('My Collection', collection_user_path(current_user_or_guest)),
+          # navlink('Recently Viewed', user_recent_path(current_user_or_guest_id)),
+          navlink('Everything in RecipePower', search_path()),
+          '<hr class="menu">'.html_safe,
+          navlink('Add to Collection', new_recipe_path, :mode => :modal)
       ]
     end
   end
 
   def friends_navtab menu_only = false
-    navtab :friends, "Cookmates", users_path(:select => :followees), menu_only do
+    navtab :friends, 'Cookmates', users_path(:select => :followees), menu_only do
       current_user_or_guest.followees[0..10].collect { |u|
         navlink u.handle, user_path(u), id: dom_id(u)
       } + [
-          "<hr class='menu'>".html_safe,
-          navlink("Get another friend...", users_path(:select => :relevant))
+          '<hr class="menu">'.html_safe,
+          navlink('Invite Someone to RecipePower!', new_user_invitation_path(:mode => :modal) ),
+          navlink('Browse for friends...', users_path(:select => :relevant))
       ]
     end
   end
 
   def my_lists_navtab menu_only = false
-    navtab :my_lists, 'Treasuries', lists_path(access: "owned"), menu_only do
+    navtab :my_lists, 'Treasuries', lists_path(access: 'owned'), menu_only do
       current_user_or_guest.owned_lists[0..16].collect { |l|
         navlink l.name, list_path(l), id: dom_id(l)
       } + [
-          "<hr class='menu'>".html_safe,
-          navlink("Start a Treasury...", new_list_path, mode: :modal, class: "transient"),
-          navlink("Hunt for Treasuries...", lists_path(item_mode: 'table'))
+          '<hr class=\'menu\'>'.html_safe,
+          navlink('Start a Treasury...', new_list_path, mode: :modal, class: 'transient'),
+          navlink('Hunt for Treasuries...', lists_path(item_mode: 'table'))
       ]
     end
   end
 
   def other_lists_navtab menu_only = false
-    navtab :other_lists, "More Treasuries", lists_path(access: "collected"), menu_only do
-      list_set = current_user_or_guest.collection_pointers.where(entity_type: "List").
-          joins("INNER JOIN lists ON lists.id = rcprefs.entity_id").where("lists.owner_id != #{current_user_or_guest.id}").
+    navtab :other_lists, 'More Treasuries', lists_path(access: 'collected'), menu_only do
+      list_set = current_user_or_guest.collection_pointers.where(entity_type: 'List').
+          joins('INNER JOIN lists ON lists.id = rcprefs.entity_id').where("lists.owner_id != #{current_user_or_guest.id}").
           limit(16).
           map(&:entity)
       if list_set.count < 16
@@ -107,7 +108,7 @@ module NavtabsHelper
         current_user_or_guest.followees.each { |friend|
           list_set = (list_set +
               friend.owned_lists.where.not(availability: 2).to_a.
-                  keep_if { |l| l.name != "Keepers" && l.name != "To Try" && l.name != "Now Cooking" }
+                  keep_if { |l| l.name != 'Keepers' && l.name != 'To Try' && l.name != 'Now Cooking' }
           ).uniq
           break if list_set.count >= 16
         }
@@ -115,16 +116,16 @@ module NavtabsHelper
       list_set.collect { |l|
         navlink l.name, list_path(l), id: dom_id(l)
       } + [
-          "<hr class='menu'>".html_safe,
-          navlink("Start a new Treasury...", new_list_path(mode: 'modal')),
-          navlink("Hunt for Treasuries...", lists_path(item_mode: 'table'))
+          '<hr class="menu">'.html_safe,
+          navlink('Start a new Treasury...', new_list_path(mode: 'modal')),
+          navlink('Hunt for Treasuries...', lists_path(item_mode: 'table'))
       ]
     end
   end
 
   def feeds_navtab menu_only = false
-    navtab :feeds, "Feeds", feeds_path(access: "collected"), menu_only do
-      feed_set = current_user_or_guest.collection_scope(entity_type: "Feed", limit: 16, sort_by: :viewed).map(&:entity).compact
+    navtab :feeds, 'Feeds', feeds_path(access: 'collected'), menu_only do
+      feed_set = current_user_or_guest.collection_scope(entity_type: 'Feed', limit: 16, sort_by: :viewed).map(&:entity).compact
       if feed_set.count < 16
         # Try adding the lists owned by friends
         current_user_or_guest.followees.each { |friend|
@@ -136,54 +137,54 @@ module NavtabsHelper
         navlink truncate(f.title, length: 30), feed_path(f), id: dom_id(f)
       }
       result + [
-          "<hr class='menu'>".html_safe,
-          navlink("Add a Feed...", new_feed_path(mode: 'modal')),
-          navlink("Browse for More Feeds...", feeds_path(item_mode: 'table', access: (response_service.admin_view? ? "all" : "approved")))
+          '<hr class="menu">'.html_safe,
+          navlink('Add a Feed...', new_feed_path(mode: 'modal')),
+          navlink('Browse for More Feeds...', feeds_path(item_mode: 'table', access: (response_service.admin_view? ? 'all' : 'approved')))
       ]
     end
   end
 
   def news_navtab menu_only = false
-    navtab :news, "News", "/users/#{current_user_or_guest_id}/news", menu_only
+    navtab :news, 'News', "/users/#{current_user_or_guest_id}/news", menu_only
   end
   
   def more_navtab menu_only = false
-    navtab :more, "More", "/users/#{current_user_or_guest_id}/biglist", menu_only
+    navtab :more, 'More', "/users/#{current_user_or_guest_id}/biglist", menu_only
   end
 
   def home_navtab menu_only = false
     navtab :home,
-           content_tag(:span, "#{current_user.handle}&nbsp;".html_safe, class: "user-name")+
+           content_tag(:span, "#{current_user.handle}&nbsp;".html_safe, class: 'user-name')+
                content_tag(:span, '', class: 'measuring-spoons'),
            user_path(current_user, :mode => :partial),
            menu_only do
       item_list = [
-          # navlink( "Profile", users_profile_path( section: "profile" ), :mode => :modal),
-          navlink('Sign-in Services', authentications_path, :mode => :modal, class: "transient"),
-          navlink("Profile", users_profile_path, :mode => :modal),
-          navlink("Invite", new_user_invitation_path, :mode => :modal, class: "transient"),
-          navlink("Sign Out", destroy_user_session_path, :method => "delete")
+          # navlink( 'Profile', users_profile_path( section: 'profile' ), :mode => :modal),
+          navlink('Sign-in Services', authentications_path, :mode => :modal, class: 'transient'),
+          navlink('Profile', users_profile_path, :mode => :modal),
+          navlink('Invite', new_user_invitation_path, :mode => :modal, class: 'transient'),
+          navlink('Sign Out', destroy_user_session_path, :method => 'delete')
       ].compact
       if permitted_to? :admin, :pages
         if response_service.admin_view?
           item_list += [
-            "<hr class='menu'>".html_safe,
-            link_to_submit( "Admin View Off", admin_toggle_path(on: false), class: "transient"),
-            link_to_submit("Add Cookmark", new_recipe_path, :mode => :modal, class: "transient"),
-            link_to("Admin", admin_path),
-            link_to_submit("Upload Picture", getpic_user_path(current_user), :mode => :modal),
-            link_to("Address Bar Magic", "#", onclick: "RP.getgo('#{home_path}', 'http://local.recipepower.com:3000/bar.html##{bookmarklet_script}')"),
-            link_to("Bookmark Magic", "#", onclick: "RP.bm('Cookmark', '#{bookmarklet_script}')"),
-            link_to("Stream Test", "#", onclick: "RP.stream.buffer_test();"),
-            (link_to_submit("Page", current_user, :format => :json) if current_user),
-            (link_to_submit("Modal", current_user, :format => :json, :mode => :modal) if current_user),
-            link_to_submit("Sites", sites_path, :format => :json),
-            link_to_submit("Tags", tags_path, :format => :json)
+            '<hr class="menu">'.html_safe,
+            link_to_submit( 'Admin View Off', admin_toggle_path(on: false), class: 'transient'),
+            link_to_submit('Add Cookmark', new_recipe_path, :mode => :modal, class: 'transient'),
+            link_to('Admin', admin_path),
+            link_to_submit('Upload Picture', getpic_user_path(current_user), :mode => :modal),
+            link_to('Address Bar Magic', '#', onclick: "RP.getgo('#{home_path}', 'http://local.recipepower.com:3000/bar.html##{bookmarklet_script}')"),
+            link_to('Bookmark Magic', '#', onclick: "RP.bm('Cookmark', '#{bookmarklet_script}')"),
+            link_to('Stream Test', '#', onclick: 'RP.stream.buffer_test();'),
+            (link_to_submit('Page', current_user, :format => :json) if current_user),
+            (link_to_submit('Modal', current_user, :format => :json, :mode => :modal) if current_user),
+            link_to_submit('Sites', sites_path, :format => :json),
+            link_to_submit('Tags', tags_path, :format => :json)
           ].compact
         else
           item_list += [
-              "<hr class='menu'>".html_safe,
-              link_to_submit("Admin View On", admin_toggle_path(on: true), class: "transient")
+              '<hr class="menu">'.html_safe,
+              link_to_submit('Admin View On', admin_toggle_path(on: true), class: 'transient')
           ]
         end
       end
