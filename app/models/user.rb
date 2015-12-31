@@ -32,10 +32,10 @@ class User < ActiveRecord::Base
   has_many :notifications_sent, :foreign_key => :source_id, :class_name => 'Notification', :dependent => :destroy
   has_many :notifications_received, :foreign_key => :target_id, :class_name => 'Notification', :dependent => :destroy
 
-  has_many :follower_relations, :foreign_key=>'followee_id', :dependent=>:destroy, :class_name=>'UserRelation'
+  has_many :follower_relations, :foreign_key=>'followee_id', :dependent => :destroy, :class_name => 'UserRelation'
   has_many :followers, :through => :follower_relations, :source => :follower
 
-  has_many :followee_relations, :foreign_key => 'follower_id', :dependent=>:destroy, :class_name => 'UserRelation'
+  has_many :followee_relations, :foreign_key => 'follower_id', :dependent => :destroy, :class_name => 'UserRelation'
   has_many :followees, :through => :followee_relations, :source => :followee
 
   has_many :answers
@@ -532,7 +532,7 @@ public
       # Mapping from notification types to email types
       case notification_type
       when :share
-        self.shared = options[:what]
+        self.shared = notification.shared
         msg = RpMailer.sharing_notice(notification)
         msg.deliver
       when :make_friend
@@ -544,14 +544,14 @@ public
   # Post a notification event without sending email
   def post_notification( notification_type, from = nil, options={})
     attributes = {
-      :info => options,
-      :source_id => from.id,
+      :info => options.except(:what),
+      :shared => options[:what],
+      :source_id => (from.id if from),
       :target_id => id,
       :typenum => notification_type,
       :accepted => false
-    }
-    attributes[:source_id] = from.id if from
-    notification = Notification.create( attributes )
+    }.compact
+    notification = Notification.create attributes
     self.notifications_received << notification
     notification
   end

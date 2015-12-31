@@ -1,16 +1,17 @@
 class Notification < ActiveRecord::Base
-  attr_accessible :info, :source_id, :target_id, :notification_type, :typenum, :typesym, :notification_token, :accepted
+  attr_accessible :info, :source_id, :target_id, :notification_type, :typenum, :typesym, :notification_token, :accepted, :shared
   serialize :info
   
-  belongs_to :target, :class_name => "User"
-  belongs_to :source, :class_name => "User"
+  belongs_to :target, :class_name => 'User'
+  belongs_to :source, :class_name => 'User'
+  belongs_to :shared, :polymorphic => true
   before_create :generate_token
   
   include Typeable
   typeable( :notification_type, 
-      Untyped: ["Untyped", 0 ],
-      :share => ["Share", 1], # Shared a collectible with
-      :make_friend => ["Friended", 2] # Source added target as friend
+      Untyped: ['Untyped', 0 ],
+      :share => ['Share', 1], # Shared a collectible with
+      :make_friend => ['Friended', 2] # Source added target as friend
   )
   
   # Do whatever is entailed by the notification
@@ -18,7 +19,6 @@ class Notification < ActiveRecord::Base
     msg = ""
     case typesym
     when :share
-      shared = info[:what]
       shared.collectible_user_id = target_id
       shared.be_collected
       msg = "'#{shared.decorate.title}' now appearing in your collection"

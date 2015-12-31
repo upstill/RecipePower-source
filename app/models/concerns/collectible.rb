@@ -3,6 +3,7 @@ module Collectible
   include Taggable
   include Voteable
   include Picable
+  include Sharable
 
   included do
     before_save do
@@ -10,7 +11,7 @@ module Collectible
     end
 
     # User_pointers refers to users who have the entity in their collection
-    has_many :user_pointers, -> { where(in_collection: true) }, :dependent => :destroy, :as => :entity, :class_name => "Rcpref"
+    has_many :user_pointers, -> { where(in_collection: true) }, :dependent => :destroy, :as => :entity, :class_name => 'Rcpref'
     has_many :users, :through => :user_pointers, :autosave => true
 
     # Viewer_points refers to all users who have viewed it, whether it's collected or not

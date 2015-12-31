@@ -17,7 +17,7 @@ class NotificationsController < ApplicationController
         # Add the recipe to the user's collection and go to the collection
         if current_user # Current user matches the notification: just collect the recipe
           note.accept
-          redirect_to collect_recipe_path(Recipe.find(note.info[:what]), :uid => note.target_id)
+          redirect_to collect_recipe_path(note.shared, :uid => note.target_id)
         else # Need to login before anything else
           redirect_to home_path(:notification_token => params[:notification_token]) # This will generate a trigger for the accept after login
         end

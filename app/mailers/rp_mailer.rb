@@ -15,21 +15,21 @@ class RpMailer < ActionMailer::Base
   def welcome_email(user)
     @inviter = User.where(id: user.invited_by).first
     response_service.user = user
-    @login_url  = rp_url "/login"
-    mail :to => response_service.user.email, :from => "support@recipepower.com", :subject => "Welcome to RecipePower"
+    @login_url  = rp_url '/login'
+    mail :to => response_service.user.email, :from => 'support@recipepower.com', :subject => 'Welcome to RecipePower'
   end
     
   def invitation_accepted_email(invitee)
     return unless response_service.user = User.where(id: invitee.invited_by).first
     @invitee = invitee
-    @profile_url = rp_url "/users/profile"
-    mail to: response_service.user.email, :from => "support@recipepower.com", :subject => "Your invitation was accepted"
+    @profile_url = rp_url '/users/profile'
+    mail to: response_service.user.email, :from => 'support@recipepower.com', :subject => 'Your invitation was accepted'
   end
   
   # Notify the user via email of a recipe share
   def sharing_notice(notification, opts={})
     @notification = notification
-    @recipe = Recipe.find(notification.info[:what])
+    @recipe = notification.shared
     @sender = notification.source
     @recipient = notification.target
     mail to: @recipient.email, 
