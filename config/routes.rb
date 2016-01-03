@@ -183,10 +183,10 @@ RP::Application.routes.draw do
   get "stream/buffer_test"
 =end
 
-  get "iframe/create"
-  get "admin/data"
-  get "admin/control"
-  get "notifications/accept"
+  get 'iframe/create'
+  get 'admin/data'
+  get 'admin/control'
+  get 'notifications/accept'
 
   resources :thumbnails
   resources :feedback, :only => [:new, :create]

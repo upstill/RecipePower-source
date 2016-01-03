@@ -32,6 +32,9 @@ class User < ActiveRecord::Base
   has_many :notifications_sent, :foreign_key => :source_id, :class_name => 'Notification', :dependent => :destroy
   has_many :notifications_received, :foreign_key => :target_id, :class_name => 'Notification', :dependent => :destroy
 
+  # has_one :inviter, :class_name => 'User'  Defined by Devise
+  has_many :invitees, :foreign_key => :invited_by_id, :class_name => 'User'
+
   has_many :follower_relations, :foreign_key=>'followee_id', :dependent => :destroy, :class_name => 'UserRelation'
   has_many :followers, :through => :follower_relations, :source => :follower
 
@@ -245,12 +248,9 @@ private
       self.save
 
       # Make the inviter follow the newbie.
-      if self.invited_by_id
-          begin
-              invited_by = User.find(self.invited_by_id)
-              invited_by.followees << self
-          rescue
-          end
+      if invited_by
+        invited_by.followees << self
+        invited_by.save
       end
   end
 public
@@ -506,19 +506,18 @@ public
   end
 
   def headers_for(action)
-    inviter = User.find invited_by_id
     case action
     when :invitation, :invitation_instructions
       {
         :subject => invitation_issuer+' wants to get you cooking.',
-        :from => invitation_issuer+" on RecipePower <#{inviter.email}>",
-        :reply_to => inviter.email
+        :from => invitation_issuer+" on RecipePower <#{invited_by.email}>",
+        :reply_to => invited_by.email
       }
     when :sharing_notice, :sharing_invitation_instructions
       {
         :subject => invitation_issuer+' has something tasty for you.',
-        :from => invitation_issuer+" on RecipePower <#{inviter.email}>",
-        :reply_to => inviter.email
+        :from => invitation_issuer+" on RecipePower <#{invited_by.email}>",
+        :reply_to => invited_by.email
       }
     else
       {}

@@ -8,7 +8,7 @@
 class ResponseServices
 
   attr_accessor :controller, :action, :title, :page_url, :active_menu, :mode, :specs, :item_mode, :controller_instance, :uuid
-  attr_reader :format, :trigger, :requestpath
+  attr_reader :format, :trigger, :requestpath, :invitation_token, :notification_token
   attr_writer :user
 
   def initialize params, session, request
@@ -23,8 +23,8 @@ class ResponseServices
     # A trigger is a request for a popup, embedded in the query string
     @trigger = params[:trigger].sub(/^"?([^"]*)"?/, '\\1') if params[:trigger]
     @title = @controller.capitalize+"#"+@action
-    @invitation_token = params[:invitation_token]
-    @notification_token = params[:notification_token]
+    # @invitation_token = params[:invitation_token] || session[:invitation_token]
+    self.notification_token = params[:notification_token] || session[:notification_token]
 
     # How composites are presented: :table, :strip, :masonry, :feed_entry, :card
     # ...thus governing how individuals are presented
@@ -162,29 +162,60 @@ class ResponseServices
         end
   end
 
+  def pending_invitee
+    @pending_invitee ||= invitation_token && User.find_by_invitation_token(invitation_token, false)
+  end
+
+  def invitation_token
+    @invitation_token ||= @session[:invitation_token]
+  end
+
+  # Set the invitation_token and store it in the @session
+  def invitation_token= it
+    @invitation_token = @session[:invitation_token] = it
+  end
+
+  # Set the notification_token and store it in the @session
+  def notification_token= it
+    @notification_token = @session[:notification_token] = it
+  end
+
+  def notification_path
+    if notification_token &&
+        (notif = Notification.find_by_notification_token @notification_token) &&
+        notif.shared
+      Rails.application.routes.url_helpers.homelink notif.shared
+    end
+  end
+
+  def invitation_acceptance_path fallback=true
+    h = Rails.application.routes.url_helpers
+    if invitation_token
+      h.accept_user_invitation_path :mode => :modal, invitation_token: invitation_token
+    elsif notification_token
+      user = Notification.find_by_notification_token(notification_token).target
+      h.new_user_session_path :mode => :modal, user: { id: user.id, username: user.username }
+    elsif fallback
+      h.new_user_registration_path :mode => :modal
+    end
+  end
+
+  def invitation_acceptance_form fallback=true
+    if invitation_token
+      'devise/invitations/form'
+    elsif @notification_token
+    elsif fallback
+    end
+  end
+
   # The signup button on the home page responds differently (and may or may not be a trigger)
   #  depending on the presence of an invitation token or a notification token in the params
-  def signup_button_options
-    options = { class: "btn btn-lg btn-success" }
-    if @invitation_token
-      # We've invited a new user, with or without a recipe share
-      user = User.find_by_invitation_token(@invitation_token, false)
-      notifications = user.notifications_received.where(accepted: false)
-      options[:label] = notifications.empty? ? "Accept Invitation" : "Take Share"
-      options[:class] << " preload trigger"
-      options[:path] = Rails.application.routes.url_helpers.accept_user_invitation_path(invitation_token: @invitation_token)
-    elsif @notification_token
-      user = Notification.find_by_notification_token(@notification_token).target
-      options[:label] = "Take Share"
-      options[:path] = Rails.application.routes.url_helpers.new_user_session_path(user: {id: user.id, username: user.username})
-      options[:class] << " preload trigger"
-    else
-      options[:label] = "Sign Me Up"
-      options[:class] << " preload"
-      options[:selector] = "div.dialog.signup"
-      options[:path] = Rails.application.routes.url_helpers.new_user_registration_path()
-    end
-    options
+  def invitation_link_options
+    {
+        class: 'btn btn-lg btn-success preload trigger',
+        label: invitation_acceptance_label,
+        path: invitation_acceptance_path
+    }
   end
 
 end
