@@ -1,6 +1,6 @@
 <%= flash_all %>
 <% if @seeker.list_type == :recipe %>
-  <%= arm_seeker_stream :div, collection_path, class: "thumbnails masonry-container" %>
+  <%= arm_seeker_stream :div, default_next_path, class: "thumbnails masonry-container" %>
 <% else %>
-  <%= arm_seeker_stream :ul, collection_path, class: "feed_entries" %>
+  <%= arm_seeker_stream :ul, default_next_path, class: "feed_entries" %>
 <% end %>

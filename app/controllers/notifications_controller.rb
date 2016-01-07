@@ -2,7 +2,7 @@ class NotificationsController < ApplicationController
   
   # Respond to a link accepting a notification
   # The request must come with an acceptance token which 
-  # provides security, and is used to find the 
+  # provides security, and is used to find the notification in question
   def accept
     if token = params[:notification_token] # defer_notification 
       note = Notification.find_by_notification_token(token)

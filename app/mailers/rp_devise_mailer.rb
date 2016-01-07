@@ -7,7 +7,7 @@ class RPDeviseMailer < Devise::Mailer
   def sharing_invitation_instructions(record, raw_token, opts={})
     @notification_token = opts[:notification_token] if opts[:notification_token]
     @recipient = record
-    @sender = User.find record.invited_by_id
+    @sender = record.invited_by
     # opts[:from] = "Ignatz from RecipePower <ignatz@recipepower.com>"
     # optional arguments introduced in Devise 2.2.0, remove check once support for < 2.2.0 is dropped.
     @invitation_event = RpEvent.post @sender,

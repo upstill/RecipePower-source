@@ -1,4 +1,3 @@
-<%# inviter_name = (@resource.invited_by_id && User.find(@resource.invited_by_id).handle) %>
 <% inviter_name = @resource.invitation_issuer %>
 <% accept_str = link_to("accept the invitation", 
 		accept_user_invitation_url(

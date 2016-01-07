@@ -3,6 +3,8 @@ RP.dialog = RP.dialog || {}
 
 # Handle 'dialog-run' remote links
 jQuery ->
+	$('div.dialog.modal-pending').each (ix, dlog) ->
+		RP.dialog.run dlog # Show any dialogs or alerts that came in with the page
 	$(document).on 'shown.bs.modal', (event) ->
 		# When a dialog is invoked, focus on the first autofocus item, or a string item or a text item
 		RP.dialog.focus event.target

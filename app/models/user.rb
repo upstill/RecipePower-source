@@ -35,6 +35,11 @@ class User < ActiveRecord::Base
   # has_one :inviter, :class_name => 'User'  Defined by Devise
   has_many :invitees, :foreign_key => :invited_by_id, :class_name => 'User'
 
+  has_many :aliases, :foreign_key => :alias_id, :class_name => 'User'
+  belongs_to :aliased_to, :foreign_key => :alias_id, :class_name => 'User'
+
+  scope :legit, -> { where 'sign_in_count > 0' }
+
   has_many :follower_relations, :foreign_key=>'followee_id', :dependent => :destroy, :class_name => 'UserRelation'
   has_many :followers, :through => :follower_relations, :source => :follower
 

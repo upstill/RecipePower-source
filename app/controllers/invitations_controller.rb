@@ -7,7 +7,7 @@ class InvitationsController < Devise::InvitationsController
   prepend_before_filter :login_required, :except => [ :edit, :update ] # No invitations unless logged in!
 
   def after_invite_path_for(resource)
-    collection_path
+    default_next_path
   end
 
   # GET /resource/invitation/new
@@ -27,19 +27,17 @@ class InvitationsController < Devise::InvitationsController
 
   # GET /resource/invitation/accept?invitation_token=abcdef
   def edit
-    if params[:invitation_token] &&
-        (self.resource = resource_class.find_by_invitation_token(params[:invitation_token], false))
-      resource.extend_fields # Default values for name, etc.
-      # RpEvent.post resource, :invitation_responded, nil, resource_class.find(resource.invited_by_id)
-      if response_service.dialog? # Referred by on-site link => do dialog
-        smartrender
-      else
-        # Invitation link was followed => issue the 'responded' event
-        redirect_to home_path(:invitation_token => params[:invitation_token])
-      end
-    else
-      set_flash_message(:alert, :invitation_token_invalid)
-      redirect_to after_sign_out_path_for(resource_name)
+    response_service.notification_token = params[:notification_token] # If any
+    respond_to do |format|
+      format.json {
+        unless response_service.dialog?
+          redirect_to default_next_path
+        end
+      }
+      format.html {
+        # Can't do anything till we render a page, so find a page to render, and depend on it to sort out the invitation
+        redirect_to default_next_path
+      }
     end
   end
 
@@ -208,7 +206,7 @@ class InvitationsController < Devise::InvitationsController
         end
         flash[:error] = error
       end
-      redirect_to collection_path
+      redirect_to default_next_path
     elsif resource.errors[:email]
       if (other = User.where(email: resource.email).first)
         # HA! request failed because email exists. Forget the invitation, just make us friends.
@@ -240,15 +238,16 @@ class InvitationsController < Devise::InvitationsController
         flash[:alert] = 'You didn\'t provide a password, so we\'ve set it to be the same as your email address. You might want to consider changing that in your Profile'
       end
       invitation_event = RpEvent.where(subject_id: resource.invited_by_id, indirect_object_id: resource.id, indirect_object_type: resource.class.to_s).first
-      RpEvent.post resource, :invitation_accepted, invitation_event, User.find(resource.invited_by_id)
+      RpEvent.post resource, :invitation_accepted, invitation_event, resource.invited_by
+      response_service.user = resource
       RpMailer.welcome_email(resource).deliver
-      RpMailer.invitation_accepted_email(resource).deliver
+      RpMailer.invitation_accepted_email(resource).deliver if resource.invited_by
       set_flash_message :notice, :updated
       sign_in(resource_name, resource)
       redirect_to after_accept_path_for(resource), status: 303
     else
       # respond_with_navigational(resource){ dialog_boilerplate :edit }
-      respond_with_navigational(resource) { smartrender :action => :edit }
+      respond_with_navigational(resource) { smartrender :action => :edit, :mode => :modal }
     end
   end
 
@@ -268,4 +267,14 @@ class InvitationsController < Devise::InvitationsController
     defer_welcome_dialogs
     after_sign_in_path_for resource
   end
+
+  def resource_from_invitation_token
+    session[:invitation_token] = params[:invitation_token] if params[:invitation_token]
+  end
+
+  # Override to allow inspection of invitation while logged in
+  def require_no_authentication
+    super unless params[:action] == 'edit'
+  end
+
 end

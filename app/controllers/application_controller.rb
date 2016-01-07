@@ -27,7 +27,7 @@ class ApplicationController < ActionController::Base
 
   helper_method :response_service
   helper_method :orphantagid
-  helper_method :collection_path
+  helper_method :default_next_path
   # Supplied by ControllerDeference
   helper_method :pending_modal_trigger
 
@@ -87,8 +87,9 @@ class ApplicationController < ActionController::Base
   end
 
   # This replaces the old collections path, providing a path to either the current user's collection or home
-  def collection_path
-    current_user ? collection_user_path(current_user) : home_path
+  def default_next_path
+    response_service.notification_path ||
+      (current_user ? collection_user_path(current_user) : home_path)
   end
 
   # Track the session, saving session events when the session goes stale
@@ -190,7 +191,7 @@ class ApplicationController < ActionController::Base
           case response_service.mode
             when :modal, :injector
               dialog = render_to_string renderopts.merge(action: response_service.action, layout: (@layout || false), formats: ["html"])
-              render json: {code: dialog, how: "bootstrap"}.to_json, layout: false, :content_type => 'application/json'
+              render json: { code: dialog, how: 'bootstrap' }.to_json, layout: false, :content_type => 'application/json'
             else
               # Render a replacement for the pagelet partial, as if it were rendered on the page
               render partial: "layouts/pagelet" # Respond with JSON instructions to replace the pagelet appropriately
@@ -198,7 +199,7 @@ class ApplicationController < ActionController::Base
         }
         format.js {
           # XXX??? Must have set @partial in preparation
-          render renderopts.merge(action: "capture")
+          render renderopts.merge(action: 'capture')
         }
       end
     end

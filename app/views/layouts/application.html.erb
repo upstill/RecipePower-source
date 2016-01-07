@@ -61,9 +61,8 @@
   <div class="logo">
     <%= image_tag 'rp-logo.png' %>
   </div>
-  <%# signup_button %>
 <% end %>
-<%= do_notifs !user_signed_in? %>
+<%= do_notifs %>
 <%= render 'layouts/pagelet' %>
 <% if false && Rails.env.development? %>
     <p>

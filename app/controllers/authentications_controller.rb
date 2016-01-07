@@ -71,6 +71,7 @@ class AuthenticationsController < ApplicationController
         if user.save
           @authentication = user.authentications.create!(authparams) # Link authorization to user
           sign_in user, :event => :authentication
+          response_service.user = user
           RpMailer.welcome_email(user).deliver
           flash[:notice] =
               %Q{Welcome to RecipePower, #{user.polite_name}! Introductory email is on its way. }

@@ -1,0 +1,4 @@
+<div class="selectable modal-body accept" <%= 'style=display:initial;' if invitee_error %> >
+  <%= flash_notifications_div %>
+  <%= render invitation_acceptance_form, resource: resource, resource_name: 'user' %>
+</div>

@@ -9,8 +9,7 @@ class AdminController < ApplicationController
         stats = []
         session[:sort_field] = (params[:sort_by] || session[:sort_field] || :id)
         User.all.each do |user|
-          accepts = ((invitees = User.where(:invited_by_id => user.id)).count > 0) ?
-              invitees.where('invitation_accepted_at IS NOT NULL').count : 0
+          accepts = user.invitees.where('invitation_accepted_at IS NOT NULL').count
           num_recipes = user.recipes.size
           num_tags = Tagging.where(user_id: user.id).count
           stats[user.id] = RpEvent.user_stats(user, 1.month.ago).merge(
@@ -22,7 +21,7 @@ class AdminController < ApplicationController
               num_tags_per_recipe: (num_recipes > 0) ? num_tags.to_f/num_recipes : 0.0,
               edit_count: 0,
               accepts: accepts,
-              invites: invitees.count
+              invites: user.invitees.size
           )
         end
         Rcpref.all.each { |rr|

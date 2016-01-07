@@ -34,7 +34,7 @@ class RecipesController < CollectibleController
   end
 
   def index
-    redirect_to collection_path
+    redirect_to default_next_path
     # return if need_login true
     # Get the collected recipes for the user named in query
   end
@@ -56,7 +56,7 @@ class RecipesController < CollectibleController
     	  @feed_entry.recipe = @recipe
     	  @feed_entry.save
   	  end
-      report_recipe( collection_path, truncate( @recipe.title, :length => 100)+" now appearing in your collection.", formats)
+      report_recipe( default_next_path, truncate( @recipe.title, :length => 100)+" now appearing in your collection.", formats)
     else
         response_service.title = "Cookmark a Recipe"
         update_and_decorate (@recipe || Recipe.new), true
@@ -74,7 +74,7 @@ class RecipesController < CollectibleController
       respond_to do |format|
         format.html { # This is for capturing a new recipe and tagging it using a new page. 
           session[:recipe_pending] = @recipe.id
-          redirect_to collection_path
+          redirect_to default_next_path
         }
         format.json {
           @data = { onget: [ "submit.submit_and_process", collection_user_url(current_user, layout: false) ] }

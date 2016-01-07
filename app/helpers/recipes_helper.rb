@@ -106,7 +106,7 @@ module RecipesHelper
 #   provide a link to add it
 def ownership_status(rcp)
 	# Summarize ownership as a list of owners, each linked to their collection
-	(rcp.users.map { |u| link_to u.handle, collection_path( :owner=>u.id.to_s) }.join(', ') || '').html_safe
+	(rcp.users.map { |u| link_to u.handle, default_next_path( :owner=>u.id.to_s) }.join(', ') || '').html_safe
 end
 
   def recipe_uncollect_button recipe, browser_item

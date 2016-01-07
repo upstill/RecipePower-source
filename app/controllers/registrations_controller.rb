@@ -29,6 +29,7 @@ class RegistrationsController < Devise::RegistrationsController
             if resource.active_for_authentication?
               # set_flash_message :notice, :signed_up if is_navigational_format?
               sign_up(resource_name, resource)
+              response_service.user = resource
               RpMailer.welcome_email(resource).deliver unless Rails.env.staging?
               redirect_to after_sign_up_path_for(resource)
             else
@@ -117,6 +118,6 @@ class RegistrationsController < Devise::RegistrationsController
     end
     
     def user_root_path
-      collection_path
+      default_next_path
     end
 end

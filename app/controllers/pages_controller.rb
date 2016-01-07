@@ -3,7 +3,7 @@ class PagesController < ApplicationController
   respond_to :html, :json
   
   def root
-    redirect_to collection_path # ...but only if current user
+    redirect_to default_next_path # ...but only if current user
   end
 
   def admin

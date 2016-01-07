@@ -1,7 +1,9 @@
+<% resource = nil unless defined? resource %>
+<% invitee_error = nil unless defined? invitee_error %>
 <div class="new-style notifs" , onload="RP.access_links.onload(event);">
   <div class="modal-content">
     <div class="modal-header" style="text-align: center; border: none; color:#ECE6CD;">
-      <% if invitee %>
+      <% if resource %>
           <a class="select-content signup" data-activate="accept"><%= invitation_acceptance_label %></a>
           <a class="select-content rollup none"><%= sprite_glyph(:'vote-up', 'xl') %></a>
           <br><a class="select-content signin" data-activate="signin">Sign In Otherwise</a>
@@ -13,19 +15,11 @@
           </a>
       <% end %>
     </div>
-    <div class="selectable modal-body <%= invitee ? 'accept' : 'signup' %>" <%= 'style=display:initial;' if invitee_error %> >
-      <%= flash_notifications_div %>
-      <% if invitee %>
-          <%= render invitation_acceptance_form, resource: invitee, resource_name: 'user' %>
-      <% else %>
-          <%= render 'registrations/options' %>
-      <% end %>
-    </div>
-    <div class="selectable modal-body signin">
-      <%= flash_notifications_div %>
-      <%= render 'sessions/form' %>
-      <hr style="margin-top: 5px;">
-      <%= render 'authentications/possible', prompt: 'OR SIGN IN VIA:' %>
-    </div>
+    <% if resource %>
+        <%= render 'notifs/accept_invitation', resource: resource, invitee_error: invitee_error %>
+    <% else %>
+        <%= render 'notifs/signup', invitee_error: invitee_error %>
+    <% end %>
+    <%= render 'notifs/signin' %>
   </div>
 </div>

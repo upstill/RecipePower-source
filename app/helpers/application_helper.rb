@@ -4,7 +4,7 @@ require 'class_utils.rb'
 # require 'suggestion_presenter'
 # require 'user_presenter.rb'
 # Ensure all presenters are available
-Dir[Rails.root.join('app', 'presenters', "*.rb")].each {|l| require l }
+Dir[Rails.root.join('app', 'presenters', '*.rb')].each {|l| require l }
 
 module ApplicationHelper
   include ActionView::Helpers::DateHelper
@@ -168,12 +168,10 @@ module ApplicationHelper
                 :"data-template" => { string: template }.to_json
   end
 
-  # Sign Me Up button for the home page, with contents varying according to, whether, e.g., a person is responding to an invitation
-  def signup_button
-    options = response_service.signup_button_options
-    label = options.delete :label
-    path = options.delete :path
-    link_to_submit label, path, options.merge(:button_size => :lg, :button_style => :success)
+  def invitation_acceptance_label
+    if response_service.pending_invitee
+      response_service.pending_invitee.notifications_received.where(accepted: false).empty? ? 'Accept Invitation' : 'Take Share'
+    end
   end
 
   # Pump pending notifications into flash notices
@@ -219,7 +217,7 @@ module ApplicationHelper
 
   # Generic termination buttons for dialogs--or any other forms
   def form_actions f, options = {}
-    cancel_path = options[:cancel_path] || collection_path
+    cancel_path = options[:cancel_path] || default_next_path
     submit_label = options[:submit_label] || "Save"
     content_tag :div,
                 ((block_given? ? yield : "") +
