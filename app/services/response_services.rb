@@ -8,7 +8,7 @@
 class ResponseServices
 
   attr_accessor :controller, :action, :title, :page_url, :active_menu, :mode, :specs, :item_mode, :controller_instance, :uuid
-  attr_reader :format, :trigger, :requestpath, :notification_token
+  attr_reader :format, :trigger, :requestpath
   attr_writer :user
 
   def initialize params, session, request
@@ -23,7 +23,6 @@ class ResponseServices
     # A trigger is a request for a popup, embedded in the query string
     @trigger = params[:trigger].sub(/^"?([^"]*)"?/, '\\1') if params[:trigger]
     @title = @controller.capitalize+"#"+@action
-    self.notification_token = params[:notification_token] || session[:notification_token]
 
     # How composites are presented: :table, :strip, :masonry, :feed_entry, :card
     # ...thus governing how individuals are presented
@@ -183,17 +182,17 @@ class ResponseServices
     end
   end
 
+  def notification_token
+    @notification_token ||= @session[:notification_token]
+  end
+
   # Set the notification_token and store it in the @session
   def notification_token= it
     @notification_token = @session[:notification_token] = it
   end
 
-  def notification_path
-    if notification_token &&
-        (notif = Notification.find_by_notification_token @notification_token) &&
-        notif.shared
-      Rails.application.routes.url_helpers.homelink notif.shared
-    end
+  def pending_notification
+    @notification ||= Notification.find_by_notification_token(@notification_token) if notification_token
   end
 
 end

@@ -88,7 +88,9 @@ class ApplicationController < ActionController::Base
 
   # This replaces the old collections path, providing a path to either the current user's collection or home
   def default_next_path
-    response_service.notification_path ||
+    if (notif = response_service.pending_notification) && notif.shared
+      return view_context.linkpath notif.shared
+    end
       (current_user ? collection_user_path(current_user) : home_path)
   end
 

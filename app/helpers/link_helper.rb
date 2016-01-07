@@ -104,6 +104,13 @@ module LinkHelper
     link_options
   end
 
+  def linkpath object, action=nil
+    (action && polymorphic_path([action, object]) rescue nil) ||
+        (polymorphic_path([:contents, object]) rescue nil) ||
+        (polymorphic_path([:associated, object]) rescue nil) ||
+        polymorphic_path(object)
+  end
+
   # Provide an internal link to an object's #associated, #contents or #show methods, as available
   def homelink decorator, options={}
     decorator = decorator.decorate unless decorator.is_a?(Draper::Decorator)
@@ -111,12 +118,6 @@ module LinkHelper
     data[:report] = (polymorphic_path([:touch, decorator.object]) rescue nil)
 
     cssclass = "#{options[:class]} entity #{decorator.object.class.to_s.underscore}"
-
-    linkpath =
-        (options[:action] && polymorphic_path([options[:action], decorator.object]) rescue nil) ||
-        (polymorphic_path([:contents, decorator.object]) rescue nil) ||
-        (polymorphic_path([:associated, decorator.object]) rescue nil) ||
-        decorator.object
 
     amended_options = {mode: :partial}.
         merge(options).
@@ -129,7 +130,7 @@ module LinkHelper
       title = title.truncate(options[:truncate])
     end
 
-    link = link_to_submit title, linkpath, amended_options
+    link = link_to_submit title, linkpath(decorator.object, options[:action]), amended_options
     if decorator.respond_to?(:external_link)
       link << '&nbsp;'.html_safe + link_to('',
                                           decorator.external_link,
