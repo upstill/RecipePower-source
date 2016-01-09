@@ -1,7 +1,9 @@
 module LinkHelper
 
   # A wrapper for flavored_link which asserts either 1) button options for Bootstrap, or 2) glyphs via sprites
-  def button_to_submit label, path_or_options, kind="default", size=nil, options={}
+  # kind: primary, info, success, warning, danger, inverse, link http://getbootstrap.com/2.3.2/base-css.html#buttons
+  # size: large, small, mini
+  def button_to_submit label, path_or_options, kind='default', size=nil, options={}
     if kind.kind_of? Hash
       kind, size, options = :default, nil, kind
     elsif size.kind_of? Hash

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160106022215) do
+ActiveRecord::Schema.define(version: 20160108021256) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -156,11 +156,12 @@ ActiveRecord::Schema.define(version: 20160106022215) do
     t.integer  "notification_type"
     t.string   "notification_token", limit: 255
     t.text     "info"
-    t.datetime "created_at",                                    null: false
-    t.datetime "updated_at",                                    null: false
+    t.datetime "created_at",                                     null: false
+    t.datetime "updated_at",                                     null: false
     t.boolean  "accepted",                       default: true
     t.string   "shared_type"
     t.integer  "shared_id"
+    t.boolean  "autosave",                       default: false
   end
 
   create_table "private_subscriptions", force: :cascade do |t|

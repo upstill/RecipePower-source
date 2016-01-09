@@ -5,6 +5,20 @@ div.notifs {
   position: fixed;
   right: 2em;
   top: 1em;
+  div.notification {
+    width: 100%;
+    position: relative;
+    div.notification-cancel {
+      position: absolute;
+      right: -8px;
+      top: -12px;
+    }
+    div.notification-act-button {
+      position: absolute;
+      right: 0px;
+      bottom: 0px;
+    }
+  }
   div.modal-header {
     padding: 12px;
     text-align: center;

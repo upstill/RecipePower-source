@@ -183,14 +183,14 @@
 			<div style="width:90%;margin: 20px 0px 0px;float: left;font-size:20px; font-weight:bold;">Rather not deal with this now?</div>
 			<div style="width:90%; margin: 0px;float: left;">
 				<%= link_to "Save It To RecipePower", 
-					notifications_accept_url(notification_token: @notification.notification_token),
+					notifications_accept_url(notification_token: @notification.notification_token, autosave: true),
 					class: "get_button btn-lg btn-success" %>
 			</div>
 			<div style="width:90%; margin: 20px 0px;float: left; font-size:16px;">...and have it waiting for you.</div>
 		</div>
 		<div class="footer">
 	  	<p><a class="brand" href="<%= rp_url %>">RecipePower</a></p>
-			<p>Copyright 2015 by RecipePower. All Rights Reserved</p>
+			<p>Copyright 2012-2016 by RecipePower. All Rights Reserved</p>
 		</div>
   </body>
 </html>
