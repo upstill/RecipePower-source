@@ -7,16 +7,18 @@ module NotifsHelper
 
   # Any pending invitation gets handled here, and also getting login credentials w/o an invitation
   def handle_invitation_and_login
-    if !(response_service.invitation_token || current_user)
-      # The simplest case: no invitation token, no current user
-      # Simply present login options
-      render 'notifs/panel'
+    if current_user
+      # User logged in: check for notifications
+      if response_service.notification_token && (notif = response_service.pending_notification)
+        render 'notifications/present', presenter: present(notif, current_user)
+      end
     elsif response_service.invitation_token
       # Sort out a pending invitation, whether anyone is logged in or not
       handle_invitation 'notifs/panel', !response_service.notification_token
-    end ||
-    if response_service.notification_token && (notif = response_service.pending_notification)
-      render 'notifications/present', presenter: present(notif, current_user)
+    else
+      # The simplest case: no invitation token, no current user
+      # Simply present login options
+      render 'notifs/panel'
     end
   end
 

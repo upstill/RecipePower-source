@@ -72,6 +72,7 @@ class SessionsController < Devise::SessionsController
       notice = "Welcome back, #{resource.handle}! You are logged in to RecipePower."
     end
     logger.debug "sign_in_and_redirect: Signed in #{resource.handle}; redirecting with..."
+    response_service.invitation_token = nil # Clear the pending invitation
     redirect_to after_sign_in_path_for(resource_or_scope), notice: notice
   end
  

@@ -8,6 +8,7 @@ RP.notifications ||= {}
 # "popup" -- jNotify popup
 RP.notifications.post = (msg, how) ->
 	if msg && msg.length > 0
+		clear_flash()
 		msg = RP.notifications.html msg
 		# Handle 'how' that's like "flash-<level>"
 		if how && how.match /^flash/
@@ -54,7 +55,6 @@ RP.notifications.html = (msg) ->
 # data.error gives error message
 # data.notice gives non-alarming informational message
 RP.notifications.from_response = (data) ->
-	clear_flash()
 	RP.notifications.post data["flash-success"], "flash-success"
 	RP.notifications.post data["flash-error"], "flash-error"
 	RP.notifications.post data["flash-alert"], "flash-alert"

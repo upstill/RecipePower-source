@@ -187,6 +187,7 @@ RP::Application.routes.draw do
   get 'admin/data'
   get 'admin/control'
   get 'notifications/accept'
+  patch 'notifications/act'
 
   resources :thumbnails
   resources :feedback, :only => [:new, :create]

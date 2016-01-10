@@ -111,6 +111,10 @@ class User < ActiveRecord::Base
     Vote.vote entity, up, self
   end
 
+  def aliases_to? user_or_id
+    self.alias_id == (user_or_id.is_a?(Fixnum) ? user_or_id : user_or_id.id)
+  end
+
   # Include the entity in the user's collection
   def collect entity
     touch entity, true
