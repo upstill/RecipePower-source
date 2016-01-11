@@ -7,16 +7,25 @@ class SessionsController < Devise::SessionsController
       # flash[:notice] = "All signed in. Welcome back, #{current_user.handle}!"
       redirect_to after_sign_in_path_for(current_user), notice: "All signed in. Welcome back, #{current_user.handle}!"
     else
+=begin
+      respond_to do |format|
+        format.html {
+          redirect_to home_path
+        }
+        format.json {
+=end
       self.resource = resource_class.new # build_resource(nil, :unsafe => true)
-      if u = params[:user] && params[:user][:id] && User.find_by_id(params[:user][:id])
-        self.resource.username = u.username
-        self.resource.fullname = u.fullname
-        self.resource.login = u.username || u.email
-      end
-      r = resource
-      clean_up_passwords r
-      resource.remember_me = 1
-      smartrender :action => :new
+          if u = params[:user] && params[:user][:id] && User.find_by_id(params[:user][:id])
+            self.resource.username = u.username
+            self.resource.fullname = u.fullname
+            self.resource.login = u.username || u.email
+          end
+          r = resource
+          clean_up_passwords r
+          resource.remember_me = 1
+          smartrender :action => :new
+#        }
+#        end
     end
   end
 
