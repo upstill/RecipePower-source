@@ -9,7 +9,7 @@ module NotifsHelper
   def handle_invitation_and_login
     if current_user
       # User logged in: check for notifications
-      if response_service.notification_token && (notif = response_service.pending_notification)
+      if notif = notifiable_notification
         render 'notifications/present', presenter: present(notif, current_user)
       end
     elsif response_service.invitation_token

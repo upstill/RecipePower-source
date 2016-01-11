@@ -16,7 +16,6 @@ class ApplicationController < ActionController::Base
   before_filter { logger.info "Before controller:"; report_session }
   # after_filter :log_serve
   after_filter { logger.info "After controller:"; report_session }
-  # before_filter :detect_notification_token
   before_filter :setup_response_service
 
   helper :all
@@ -30,6 +29,7 @@ class ApplicationController < ActionController::Base
   helper_method :default_next_path
   # Supplied by ControllerDeference
   helper_method :pending_modal_trigger
+  helper_method :notifiable_notification
 
   # From ControllerUtils
   helper_method :express_error_context
@@ -93,6 +93,23 @@ class ApplicationController < ActionController::Base
     end
       (current_user ? collection_user_path(current_user) : home_path)
   end
+
+  def notifiable_notification
+    # Check for a pending notification. If it's to be autosaved, do that and simply set a flash notice. Otherwise, return it
+    if response_service.notification_token && (notif = response_service.pending_notification)
+      if notif.autosave
+        if msg = notif.decorate.act
+          # All is well; clear the pending notification
+          response_service.notification_token = nil
+          flash.now[:notice] = msg
+        end
+        nil
+      else
+        notif
+      end
+    end
+  end
+
 
   # Track the session, saving session events when the session goes stale
   def log_serve

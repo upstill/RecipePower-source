@@ -7,9 +7,15 @@
         </div>
         <%= presenter.verbalization :mode => :partial %>
         <br>
-          <div class="notification-act-button">
-            <%= button_to_submit presenter.response_label, presenter.act_path, 'success', 'small' %>
-          </div>
+        <div class="notification-act-button">
+          <%= button_to_submit presenter.response_label,
+                               presenter.act_path,
+                               'success',
+                               'small',
+                               :class => 'notification-ack',
+                               :mode => :partial,
+                               :method => :patch %>
+        </div>
       </div>
     </div>
   </div>

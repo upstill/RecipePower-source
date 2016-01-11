@@ -33,6 +33,16 @@ class UserDecorator < CollectibleDecorator
     owned_taggings(entity_type).map &:entity
   end
 
+  # Is the object an alias for another user
+  def aliases_to? user_or_id
+    object.alias_id == (user_or_id.is_a?(Fixnum) ? user_or_id : user_or_id.id)
+  end
+
+  # If a user is aliased to another, return the latter
+  def or_alias
+    object.alias || object
+  end
+
   # Get the user's Rcprefs that point to a given entity_type and/or are visible by a specific user
   def collection_pointers entity_type=nil, viewer=nil
     if entity_type.is_a? User

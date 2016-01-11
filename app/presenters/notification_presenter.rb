@@ -2,7 +2,7 @@ class NotificationPresenter < BasePresenter
   presents :notification
   delegate :source, :target, :shared, :typesym, :notification_token, :accepted, :shared, :autosave, to: :notification
 
-  # Path to accept the notificaiton without acting on it
+  # Path to accept the notification without acting on it
   def accept_path
     h.notifications_accept_path notification_token: notification_token
   end
