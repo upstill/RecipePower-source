@@ -1,19 +1,20 @@
-3/4: Heroku: Remove tags of type Channel
 1/1: Hashtag nav
-1/2: Sharing
-√ 2/2: Admin uploads pics for others
-2/1: Eliminate Channel referents
-√ 2/3: Link colors on cards
-√ 3/4: Org buttons color in FilteredPresenter header_collection_entity
-√ 2/2: Site editor
-√ 2/3: Error message in pic picker when page doesn't work
-√ 2/5: 'Collection' link on header_collection_entity doesn't return to whole collection
-√ 2/2: Make selection of images in pic-picker scrollable
 1/1: Recipes#associated
 1/1: Sites#associated
-2/2: Make organization buttons on panels work
+2/1: Eliminate Channel referents
 2/1: Popularity contests
-3/2: Presenting errors to user
-1/1: Events (& notifications thereof)
-3/2: Collectible reports user who first collected it
+2/2: Events (& notifications thereof)
+2/2: Make organization buttons on panels work
 2/3: Scrolling problem with panels
+3/2: Collectible reports user who first collected it
+3/2: Presenting errors to user
+3/2: Eliminate followers/followees in User model
+3/4: Heroku: Remove tags of type Channel
+√ 1/2: Sharing
+√ 2/2: Admin uploads pics for others
+√ 2/2: Make selection of images in pic-picker scrollable
+√ 2/2: Site editor
+√ 2/3: Error message in pic picker when page doesn't work
+√ 2/3: Link colors on cards
+√ 2/5: 'Collection' link on header_collection_entity doesn't return to whole collection
+√ 3/4: Org buttons color in FilteredPresenter header_collection_entity

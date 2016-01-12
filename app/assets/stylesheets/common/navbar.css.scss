@@ -32,25 +32,33 @@ a.navbar-brand{
   padding-top: 0;
 }
 
+#RP-navbar-collapse[aria-expanded=false] {
+  li.master-navtab {
+    padding-top:80px;
+  }
+  span.measuring-spoons {
+    content: image-url("rp-measuring-spoons.png");
+  }
+}
+
 ul.nav.navbar-nav {
   display: block;
   max-width: 100%;
   height: auto;
   li.master-navtab {
+    margin: 0 7px;
+    text-shadow: none;
     &#collections-navtab{
       background-color: $recipes-navtab-background-color;
-      margin: 0 7px;
-      padding-top:80px;
-      text-shadow: none;
       a.dropdown-toggle {
         color: $recipes-navtab-text-color;
       }
     }
     &#friends-navtab{
       background-color: $friends-navtab-background-color;
-      margin: 0 7px;
-      padding:80px 8px 0;
-      text-shadow: none;
+      //margin: 0 7px;
+      //padding:80px 8px 0;
+      //text-shadow: none;
       a.dropdown-toggle {
         color: $friends-navtab-text-color;
       }
@@ -58,9 +66,9 @@ ul.nav.navbar-nav {
 
     &#my_lists-navtab{
       background-color: $lists-navtab-background-color;
-      margin: 0 7px;
-      padding: 80px 18px 0;
-      text-shadow: none;
+      //margin: 0 7px;
+      //padding: 80px 18px 0;
+      //text-shadow: none;
       a.dropdown-toggle {
         color: $lists-navtab-text-color;
       }
@@ -68,9 +76,9 @@ ul.nav.navbar-nav {
 
     &#feeds-navtab{
       background-color: $feeds-navtab-background-color;
-      margin: 0 7px;
-      padding: 80px 34px 0;
-      text-shadow: none;
+      //margin: 0 7px;
+      //padding: 80px 34px 0;
+      //text-shadow: none;
       a.dropdown-toggle {
         color: $feeds-navtab-text-color;
       }
@@ -78,7 +86,8 @@ ul.nav.navbar-nav {
 
     &#home-navtab{
       background-color: #ff9583;
-      margin: 0 7px;
+      //margin: 0 7px;
+      padding: 0;
       span.user-name {
         font-size: 0.7em;
         color: #fadfdb;

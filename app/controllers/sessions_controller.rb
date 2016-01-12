@@ -7,7 +7,7 @@ class SessionsController < Devise::SessionsController
       # flash[:notice] = "All signed in. Welcome back, #{current_user.handle}!"
       redirect_to after_sign_in_path_for(current_user), notice: "All signed in. Welcome back, #{current_user.handle}!"
     elsif response_service.format == :html && !response_service.injector?
-      redirect_to home_path
+      redirect_to home_path # Page display not an option
     else
       self.resource = resource_class.new # build_resource(nil, :unsafe => true)
       if u = params[:user] && params[:user][:id] && User.find_by_id(params[:user][:id])
