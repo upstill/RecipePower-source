@@ -13,7 +13,7 @@
 .navbar{
   background-color: transparent;
   background-image: none;
-  background-repeat: none;
+  // background-repeat: none;
   margin-bottom: 0;
 }
 
@@ -63,11 +63,14 @@ ul.nav.navbar-nav {
   max-width: 100%;
   height: auto;
 }
+
 li.master-navtab {
     margin: 0 7px;
+    width: 170px;
     padding-top: 80px;
     text-shadow: none;
     margin-bottom: 10px;
+    text-align: center;
     &#collections-navtab{
       background-color: $recipes-navtab-background-color;
       a.dropdown-toggle {
@@ -108,6 +111,9 @@ li.master-navtab {
       background-color: #ff9583;
       //margin: 0 7px;
       padding: 0;
+      position: fixed;
+      right: 30px;
+      width: 150px;
       span.user-name {
         font-size: 0.7em;
         color: #fadfdb;
@@ -142,14 +148,13 @@ li.master-navtab {
         display: inline-block;
         float: left;
         list-style: none;
-        // padding: 0 0 0 5px;
-        // margin: 0;
         margin: 0 7px;
         margin-bottom: 10px;
         padding-top: 90px;
         padding-left: 8px;
         padding-right: 8px;
         text-shadow: none;
+        text-align: center;
         &#collections-navtab{
           background-color: $recipes-navtab-background-color;
           a.dropdown-toggle {
@@ -189,6 +194,9 @@ li.master-navtab {
           background-color: #ff9583;
           //margin: 0 7px;
           padding: 0;
+          position: absolute;
+          top: 0;
+          right: 150px;
           span.user-name {
             font-size: 0.7em;
             color: #fadfdb;
@@ -197,11 +205,14 @@ li.master-navtab {
           }
         }
         a.dropdown-toggle{
-          padding: 10px 15px;
           font-family: Oswald, sans-serif;
           text-transform: uppercase;
           letter-spacing: 1.5px;
           font-size: 21px;
+          span.caret {
+            display: inline-block;
+            margin-left: 3px;
+          }
         }
         span.measuring-spoons {
           content: image-url("rp-measuring-spoons.png");
@@ -228,27 +239,32 @@ li.master-navtab {
   }
 }
 
-@media only screen and (max-width: 1120px) {
+@media only screen and (max-width: 1180px) {
   .header {
     .menu {
       ul {
+        width: 400px;
         li {
-          padding-top: 20px;
+          padding-top: 30px;
         }
       }
     }
   }
 }
 
-@media only screen and (max-width: 767px) {
+@media only screen and (max-width: 800px) {
   .header {
-    left: 185px;
+    left: 0;
+    width: 100%;
+    padding-left: 200px;
+    padding-right: 100px;
     .menu {
       max-height: 0;
       overflow: hidden;
       float: none;
       text-align: center;
       width: 100%;
+      padding: 0;
       @include transition(max-height 0.5s);
       div.logo {
         height: 40px;
@@ -259,6 +275,7 @@ li.master-navtab {
         @include transition(max-height 0.5s);
       }
       ul {
+        width: 100%;
         li {
           display: block;
           width: 100%;
@@ -279,6 +296,11 @@ li.master-navtab {
           }
           span.measuring-spoons {
             content: none;
+          }
+          &#home-navtab{
+            //margin: 0 7px;
+            position: static;
+            width: 100%;
           }
         }
       }

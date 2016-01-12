@@ -26,8 +26,7 @@ module NavtabsHelper
     if which == (@active_menu || response_service.active_menu)
       class_str << ' active'
     end
-
-    return content_tag( :li, link_to(menu_label, '#', class: 'dropdown-toggle'), class: class_str, id: navtab_id(which))
+    # return content_tag( :li, link_to(menu_label, '#', class: 'dropdown-toggle'), class: class_str, id: navtab_id(which))
 
     # The block should produce an array of menu items (links, etc.)
     if block_given? && (menu_items = yield) && !menu_items.empty?
