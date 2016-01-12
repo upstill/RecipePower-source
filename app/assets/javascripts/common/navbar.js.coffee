@@ -1,5 +1,5 @@
 jQuery ->
 	$('body').on 'click', 'a[href=#menuExpand]', (event) ->
-		$('.menu').toggleClass 'menuOpen'
-		e.preventDefault();
+		$('ul.main-menu').toggleClass 'menuOpen'
+		event.preventDefault();
 

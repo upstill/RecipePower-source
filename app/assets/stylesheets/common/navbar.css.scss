@@ -133,14 +133,38 @@ li.master-navtab {
 
 .header {
   position: fixed;
+  width: 100%;
   top: 0;
-  left: 240px;
-  z-index: 1030;
-  div.logo {
-    height: 200px;
-    content: image-url('rp-logo.png');
-  }
+  z-index: $menu-depth;
+  height: 230px;
+  padding-left: 240px;
+  padding-right: 200px;
   .menu {
+    position: relative;
+    width: 740px;
+    height: 130px;
+    div.logo {
+      position: absolute;
+      left: -210px;
+      height: 200px;
+      content: image-url('rp-logo.png');
+    }
+    .menuIcon {
+      display: none;
+      position: absolute;
+      right: -100px;
+      &:hover {
+        background: #999;
+      }
+      a {
+        width: 100px;
+        display: inline-block;
+        color: #000;
+        img.hamburger {
+          vertical-align: middle;
+        }
+      }
+    }
     ul {
       padding:0;
       margin:0;
@@ -196,7 +220,7 @@ li.master-navtab {
           padding: 0;
           position: absolute;
           top: 0;
-          right: 150px;
+          right: -158px;
           span.user-name {
             font-size: 0.7em;
             color: #fadfdb;
@@ -220,30 +244,13 @@ li.master-navtab {
       }
     }
   }
-  .menuIcon {
-    display: none;
-    // background: #000;
-    width: 100%;
-    text-align: center;
-    &:hover {
-      background: #999;
-    }
-    a {
-      width: 100%;
-      display: inline-block;
-      color: #000;
-      img {
-        vertical-align: middle;
-      }
-    }
-  }
 }
 
 @media only screen and (max-width: 1180px) {
   .header {
     .menu {
+      width: 375px;
       ul {
-        width: 400px;
         li {
           padding-top: 30px;
         }
@@ -254,28 +261,31 @@ li.master-navtab {
 
 @media only screen and (max-width: 800px) {
   .header {
-    left: 0;
-    width: 100%;
-    padding-left: 200px;
+    height: 40px;
+    padding-left: 150px;
     padding-right: 100px;
     .menu {
-      max-height: 0;
-      overflow: hidden;
-      float: none;
-      text-align: center;
       width: 100%;
-      padding: 0;
-      @include transition(max-height 0.5s);
+      min-width: 200px;
       div.logo {
         height: 40px;
+        left: -150px;
         content: image-url('rp-logo-small-tomato.png');
       }
-      &.menuOpen {
-        max-height: 1000px;
-        @include transition(max-height 0.5s);
+      .menuIcon {
+        display: block;
       }
+      float: none;
+      @include transition(max-height 0.5s);
       ul {
+        text-align: center;
+        &.menuOpen {
+          max-height: 1000px;
+          @include transition(max-height 0.5s);
+        }
         width: 100%;
+        max-height: 0;
+        overflow: hidden;
         li {
           display: block;
           width: 100%;
@@ -290,9 +300,6 @@ li.master-navtab {
           a {
             color: #fff;
             text-shadow: #848484 0px 1px 2px;
-            padding: 10px 0;
-            width: 100%;
-            padding-left: 140px;
           }
           span.measuring-spoons {
             content: none;
@@ -304,12 +311,6 @@ li.master-navtab {
           }
         }
       }
-    }
-    .menuIcon {
-      width: 100%;
-      display: inline-block;
-      float: left;
-      list-style: none;
     }
   }
 }

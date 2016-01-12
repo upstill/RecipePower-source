@@ -1,10 +1,12 @@
 <div class="header">
-  <div class="menuIcon">
-    <a href="#menuExpand">Menu</a>
-  </div>
   <div class="menu">
     <div class="logo"></div>
-    <ul>
+    <div class="menuIcon">
+      <a href="#menuExpand">
+        <%= image_tag image_path('hamburger.svg'), class: 'hamburger' %>&nbsp;Go
+      </a>
+    </div>
+    <ul class="main-menu">
       <%= collections_navtab %>
       <%= friends_navtab %>
       <%= my_lists_navtab %>
