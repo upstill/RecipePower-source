@@ -1,3 +1,4 @@
+@import 'bourbon';
 @import url(https://fonts.googleapis.com/css?family=Archivo+Narrow:700,400);
 @import 'common/variables';
 @import 'bootstrap_amendments';
@@ -205,7 +206,7 @@ div.triggered-form {
   z-index: $container-depth;
   height: $triggered-form-height;
   top: 0;
-  left: 230px;
+  left: 240px;
   margin: $triggered-form-margin;
   .filter-element {
     display: inline-block;
@@ -271,6 +272,7 @@ div.generic-top {
 div.logo {
   position: fixed;
   left: 30px;
+  top: 0;
   z-index: $logo-depth;
 }
 

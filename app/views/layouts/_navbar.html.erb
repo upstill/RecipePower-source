@@ -1,30 +1,31 @@
 <nav class="navbar navbar-fixed-top navbar-inverse" role="navigation">
-  <div class="navbar-header">
-    <button type="button" class="navbar-toggle" data-toggle="collapse"
-            data-target="#RP-navbar-collapse">
-      <span class="sr-only">Toggle navigation</span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-    </button>
-    <div class="navbar-brand visible-md-block visible-lg-block" style="padding: 0; height: 200px;">
-      <a href="/"><%= image_tag 'rp-logo.png' %></a>
-    </div>
-    <div class="navbar-brand visible-xs-block visible-sm-block"  style="padding: 0; height: 40px;">
-      <a href="/"><%= image_tag 'rp-logo-small-tomato.png', style: 'height: 40px;' %></a>
-    </div>
-
-    <div class="collapse navbar-collapse navbar-left" id="RP-navbar-collapse" aria-expanded="false">
-      <ul class="nav navbar-nav">
-        <%= collections_navtab %>
-        <%= friends_navtab %>
-        <%= my_lists_navtab %>
-        <%# other_lists_navtab %>
-        <%= feeds_navtab %>
-        <%# news_navtab %>
-        <%# more_navtab %>
-        <%= home_navtab %>
-      </ul>
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse"
+              data-target="#RP-navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <div class="navbar-brand visible-md-block visible-lg-block" style="padding: 0; height: 200px;">
+        <a href="/"><%= image_tag 'rp-logo.png' %></a>
+      </div>
+      <div class="navbar-brand visible-xs-block visible-sm-block" style="padding: 0; height: 40px;">
+        <a href="/"><%= image_tag 'rp-logo-small-tomato.png', style: 'height: 40px;' %></a>
+      </div>
+      <div class="collapse navbar-collapse navbar-left" id="RP-navbar-collapse" aria-expanded="false">
+        <ul class="nav navbar-nav">
+          <%= collections_navtab %>
+          <%= friends_navtab %>
+          <%= my_lists_navtab %>
+          <%# other_lists_navtab %>
+          <%= feeds_navtab %>
+          <%# news_navtab %>
+          <%# more_navtab %>
+          <%= home_navtab %>
+        </ul>
+      </div>
     </div>
   </div>
 </nav>

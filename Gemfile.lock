@@ -83,6 +83,9 @@ GEM
     bootstrap-sass (3.3.4.1)
       autoprefixer-rails (>= 5.0.0.1)
       sass (>= 3.2.19)
+    bourbon (3.2.4)
+      sass (~> 3.2)
+      thor
     builder (3.1.4)
     capistrano (3.3.5)
       capistrano-stats (~> 1.1.0)
@@ -382,6 +385,7 @@ DEPENDENCIES
   aws-sdk (~> 1)
   binding_of_caller
   bootstrap-sass (~> 3.3.4)
+  bourbon
   builder (~> 3.1.0)
   capistrano (~> 3.3.5)
   capistrano-bundler (~> 1.1.4)

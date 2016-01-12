@@ -32,10 +32,27 @@ a.navbar-brand{
   padding-top: 0;
 }
 
-#RP-navbar-collapse[aria-expanded=false] {
+@media only screen and (max-width: 767px) {
   li.master-navtab {
-    padding-top:80px;
+    padding-top: 10px;
   }
+  nav.navbar {
+    div.navbar-header {
+      div.navbar-left {
+        ul.nav.navbar-nav {
+          li.master-navtab {
+            padding-top: 10px;
+          }
+        }
+      }
+    }
+  }
+}
+
+#RP-navbar-collapse[aria-expanded=false] {
+  //li.master-navtab {
+  //  padding-top:80px;
+  //}
   span.measuring-spoons {
     content: image-url("rp-measuring-spoons.png");
   }
@@ -45,9 +62,12 @@ ul.nav.navbar-nav {
   display: block;
   max-width: 100%;
   height: auto;
-  li.master-navtab {
+}
+li.master-navtab {
     margin: 0 7px;
+    padding-top: 80px;
     text-shadow: none;
+    margin-bottom: 10px;
     &#collections-navtab{
       background-color: $recipes-navtab-background-color;
       a.dropdown-toggle {
@@ -96,8 +116,6 @@ ul.nav.navbar-nav {
       }
     }
   }
-}
-
 
 .navbar-nav>li>a.dropdown-toggle{
   padding-bottom: 10px;
@@ -107,3 +125,169 @@ ul.nav.navbar-nav {
   font-size: 21px;
 }
 
+.header {
+  position: fixed;
+  top: 0;
+  left: 240px;
+  z-index: 1030;
+  div.logo {
+    height: 200px;
+    content: image-url('rp-logo.png');
+  }
+  .menu {
+    ul {
+      padding:0;
+      margin:0;
+      li {
+        display: inline-block;
+        float: left;
+        list-style: none;
+        // padding: 0 0 0 5px;
+        // margin: 0;
+        margin: 0 7px;
+        margin-bottom: 10px;
+        padding-top: 90px;
+        padding-left: 8px;
+        padding-right: 8px;
+        text-shadow: none;
+        &#collections-navtab{
+          background-color: $recipes-navtab-background-color;
+          a.dropdown-toggle {
+            color: $recipes-navtab-text-color;
+          }
+        }
+        &#friends-navtab{
+          background-color: $friends-navtab-background-color;
+          //margin: 0 7px;
+          //padding:80px 8px 0;
+          //text-shadow: none;
+          a.dropdown-toggle {
+            color: $friends-navtab-text-color;
+          }
+        }
+        &#my_lists-navtab{
+          background-color: $lists-navtab-background-color;
+          //margin: 0 7px;
+          //padding: 80px 18px 0;
+          //text-shadow: none;
+          a.dropdown-toggle {
+            color: $lists-navtab-text-color;
+          }
+        }
+        &#feeds-navtab{
+          background-color: $feeds-navtab-background-color;
+          //margin: 0 7px;
+          //padding: 80px 34px 0;
+          //text-shadow: none;
+          padding-left: 34px;
+          padding-right: 34px;
+          a.dropdown-toggle {
+            color: $feeds-navtab-text-color;
+          }
+        }
+        &#home-navtab{
+          background-color: #ff9583;
+          //margin: 0 7px;
+          padding: 0;
+          span.user-name {
+            font-size: 0.7em;
+            color: #fadfdb;
+            text-shadow: none;
+            text-transform: lowercase;
+          }
+        }
+        a.dropdown-toggle{
+          padding: 10px 15px;
+          font-family: Oswald, sans-serif;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          font-size: 21px;
+        }
+        span.measuring-spoons {
+          content: image-url("rp-measuring-spoons.png");
+        }
+      }
+    }
+  }
+  .menuIcon {
+    display: none;
+    // background: #000;
+    width: 100%;
+    text-align: center;
+    &:hover {
+      background: #999;
+    }
+    a {
+      width: 100%;
+      display: inline-block;
+      color: #000;
+      img {
+        vertical-align: middle;
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 1120px) {
+  .header {
+    .menu {
+      ul {
+        li {
+          padding-top: 20px;
+        }
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  .header {
+    left: 185px;
+    .menu {
+      max-height: 0;
+      overflow: hidden;
+      float: none;
+      text-align: center;
+      width: 100%;
+      @include transition(max-height 0.5s);
+      div.logo {
+        height: 40px;
+        content: image-url('rp-logo-small-tomato.png');
+      }
+      &.menuOpen {
+        max-height: 1000px;
+        @include transition(max-height 0.5s);
+      }
+      ul {
+        li {
+          display: block;
+          width: 100%;
+          background: #000;
+          border-top:1px solid #4d4d4d;
+          padding-top: 5px;
+          padding-bottom: 5px;
+          margin-bottom: 0;
+          &:hover {
+            background: #999;
+          }
+          a {
+            color: #fff;
+            text-shadow: #848484 0px 1px 2px;
+            padding: 10px 0;
+            width: 100%;
+            padding-left: 140px;
+          }
+          span.measuring-spoons {
+            content: none;
+          }
+        }
+      }
+    }
+    .menuIcon {
+      width: 100%;
+      display: inline-block;
+      float: left;
+      list-style: none;
+    }
+  }
+}
