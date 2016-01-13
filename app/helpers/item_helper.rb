@@ -72,7 +72,7 @@ module ItemHelper
 
   # Generate replacements for all versions of the item
   def item_replacements item_or_decorator_or_specs
-    [:table, :modal, :masonry, :slider, :card].collect { |item_mode|
+    [:table, :masonry, :slider, :card].collect { |item_mode|
       item_replacement item_or_decorator_or_specs, item_mode
     }.compact
   end

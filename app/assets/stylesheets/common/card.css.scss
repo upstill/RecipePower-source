@@ -89,7 +89,7 @@ div.card-item {
     padding: 10px;
   }
   td.pic-box {
-    width: 25%;
+    width: 300px;
     &.empty {
       display: none;
     }
@@ -106,6 +106,12 @@ div.card-item {
     a.dropdown-toggle {
       padding: 5px 8px;
     }
+  }
+  h3 {
+    color: white;
+    font-size: 1.5em;
+    margin-top: 0.5em;
+    margin-bottom: 0em;
   }
   &.cardlet-item {
     // min-width: 200px;
@@ -165,8 +171,14 @@ div.card-item {
       font-size: 1.2em;
       color: #a2a2a2;
     }
+    h3 {
+      color: #cdcdcd;
+    }
     td.upper-content {
       padding-left: 1em;
+      a {
+        color: $recipes-panels-label-button-color;
+      }
     }
     td.lower-content {
       // padding-left: 0.5em;
@@ -176,9 +188,6 @@ div.card-item {
       div.share-button {
         float: right;
       }
-    }
-    a {
-      color: $recipes-panels-label-button-color;
     }
     .title-bar {
       border-bottom: 0.3em solid #b95454;
@@ -305,12 +314,6 @@ div.card-item {
     div.owner-pic {
       width: 100%; // 8em;
       // margin: 1em;
-    }
-    h3 {
-      color: white;
-      font-size: 1.5em;
-      margin-top: 0.5em;
-      margin-bottom: 0em;
     }
     td.lower-content {
       padding-bottom: 0.3em;
