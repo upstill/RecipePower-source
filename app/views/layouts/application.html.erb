@@ -58,7 +58,7 @@
 <% if user_signed_in? %>
     <%= render 'layouts/navbar_experimental' %>
 <% else %>
-  <div class="logo">
+  <div class="logo" style="position: absolute; left: 20px; z-index: 1000;">
     <%= image_tag 'rp-logo.png' %>
   </div>
 <% end %>
