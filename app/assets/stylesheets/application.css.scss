@@ -198,9 +198,6 @@ div.card {
   padding-top: 10px
 }
 
-$menuback-height: 130px;
-$triggered-form-height: 30px;
-$triggered-form-margin: 10px;
 div.triggered-form {
   position: absolute;
   z-index: $container-depth;
@@ -219,36 +216,6 @@ div.triggered-form {
   background-color: $page-background-color;
   z-index: $container-depth;
   padding-bottom: 200px;
-  &.menuback {
-    padding-bottom: 0;
-    z-index: $menuback-depth;
-    position: fixed;
-    top: 0;
-    right: 0;
-    left: 0;
-    margin-top: 0;
-    margin-right: auto;
-    margin-left: auto;
-    height: $menuback-height;
-    background-color: $page-background-color;
-  }
-  &.no-menu {
-    padding-top: 75px;
-    div.card-item {
-      margin-top: 30px;
-    }
-  }
-  &.below-menu {
-    margin-top: $menuback-height;
-    padding-top: 75px;
-    div.triggered-form {
-      top: $menuback-height;
-    }
-    > div.row {
-      margin-left: 15px;
-      margin-right: 15px;
-    }
-  }
 }
 
 
@@ -270,7 +237,7 @@ div.generic-top {
 }
 
 div.filter-element {
-  width: 500px;
+  width: 100%;
   input#token-input-querytags {
     font-family: Oswald-Light, sans-serif;
     font-style: italic;

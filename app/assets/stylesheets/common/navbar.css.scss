@@ -1,61 +1,29 @@
-.navbar-inverse .navbar-nav>.active>a,
-.navbar-inverse .navbar-nav>.active>a:focus,
-.navbar-inverse .navbar-nav>.active>a:hover {
-  //color: #fff;
-  //background-color: transparent;
+
+.navbar-inverse .navbar-nav {
+  li#friends-navtab {
+    a {
+      background-color: transparent;
+      color: #de8822;
+    }
+  }
 }
 
-.navbar-inverse .navbar-nav>li#friends-navtab>a {
-  background-color: transparent;
-  color: #de8822;
-}
-
-.navbar{
+.navbar {
   background-color: transparent;
   background-image: none;
   // background-repeat: none;
   margin-bottom: 0;
 }
 
-//ay navigation changes
-.navbar-fixed-top, .navbar-header{
-  //height: 120px;
-}
-nav.navbar-inverse{
+nav.navbar-inverse {
   background-color: transparent;
   background-image: none;
   background-repaet: none;
   border: 0;
 }
 
-a.navbar-brand{
+a.navbar-brand {
   padding-top: 0;
-}
-
-@media only screen and (max-width: 767px) {
-  li.master-navtab {
-    padding-top: 10px;
-  }
-  nav.navbar {
-    div.navbar-header {
-      div.navbar-left {
-        ul.nav.navbar-nav {
-          li.master-navtab {
-            padding-top: 10px;
-          }
-        }
-      }
-    }
-  }
-}
-
-#RP-navbar-collapse[aria-expanded=false] {
-  //li.master-navtab {
-  //  padding-top:80px;
-  //}
-  span.measuring-spoons {
-    content: image-url("rp-measuring-spoons.png");
-  }
 }
 
 ul.nav.navbar-nav {
@@ -65,70 +33,108 @@ ul.nav.navbar-nav {
 }
 
 li.master-navtab {
-    margin: 0 7px;
-    width: 170px;
-    padding-top: 80px;
-    text-shadow: none;
-    margin-bottom: 10px;
-    text-align: center;
-    &#collections-navtab{
-      background-color: $recipes-navtab-background-color;
-      a.dropdown-toggle {
-        color: $recipes-navtab-text-color;
-      }
+  margin: 0 7px;
+  width: 170px;
+  padding-top: 80px;
+  text-shadow: none;
+  margin-bottom: 10px;
+  text-align: center;
+  &#collections-navtab {
+    background-color: $recipes-navtab-background-color;
+    a.dropdown-toggle {
+      color: $recipes-navtab-text-color;
     }
-    &#friends-navtab{
-      background-color: $friends-navtab-background-color;
-      //margin: 0 7px;
-      //padding:80px 8px 0;
-      //text-shadow: none;
-      a.dropdown-toggle {
-        color: $friends-navtab-text-color;
-      }
-    }
-
-    &#my_lists-navtab{
-      background-color: $lists-navtab-background-color;
-      //margin: 0 7px;
-      //padding: 80px 18px 0;
-      //text-shadow: none;
-      a.dropdown-toggle {
-        color: $lists-navtab-text-color;
-      }
-    }
-
-    &#feeds-navtab{
-      background-color: $feeds-navtab-background-color;
-      //margin: 0 7px;
-      //padding: 80px 34px 0;
-      //text-shadow: none;
-      a.dropdown-toggle {
-        color: $feeds-navtab-text-color;
-      }
-    }
-
-    &#home-navtab{
-      background-color: #ff9583;
-      //margin: 0 7px;
-      padding: 0;
-      position: fixed;
-      right: 30px;
-      width: 150px;
-      span.user-name {
-        font-size: 0.7em;
-        color: #fadfdb;
-        text-shadow: none;
-        text-transform: lowercase;
-      }
+  }
+  &#friends-navtab {
+    background-color: $friends-navtab-background-color;
+    //margin: 0 7px;
+    //padding:80px 8px 0;
+    //text-shadow: none;
+    a.dropdown-toggle {
+      color: $friends-navtab-text-color;
     }
   }
 
-.navbar-nav>li>a.dropdown-toggle{
-  padding-bottom: 10px;
-  font-family: Oswald, sans-serif;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  font-size: 21px;
+  &#my_lists-navtab {
+    background-color: $lists-navtab-background-color;
+    //margin: 0 7px;
+    //padding: 80px 18px 0;
+    //text-shadow: none;
+    a.dropdown-toggle {
+      color: $lists-navtab-text-color;
+    }
+  }
+
+  &#feeds-navtab {
+    background-color: $feeds-navtab-background-color;
+    //margin: 0 7px;
+    //padding: 80px 34px 0;
+    //text-shadow: none;
+    a.dropdown-toggle {
+      color: $feeds-navtab-text-color;
+    }
+  }
+
+  &#home-navtab {
+    background-color: #ff9583;
+    //margin: 0 7px;
+    padding: 0;
+    position: fixed;
+    right: 30px;
+    width: 150px;
+    span.user-name {
+      font-size: 0.7em;
+      color: #fadfdb;
+      text-shadow: none;
+      text-transform: lowercase;
+    }
+  }
+}
+
+.navbar-nav {
+  li {
+    a.dropdown-toggle {
+      padding-bottom: 10px;
+      font-family: Oswald, sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-size: 21px;
+    }
+  }
+}
+
+div.container.menuback { // Backing for the menu which matches the general container in cross-section
+  height: $menuback-height-down;
+  z-index: $menuback-depth;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  border: 2px #333333;
+  margin-top: 0;
+  margin-right: auto;
+  margin-left: auto;
+  padding-bottom: 2px;
+  margin-bottom: 2px;
+}
+
+div.container.no-menu { // Master container with no menu
+  padding-top: 75px;
+  div.card-item {
+    margin-top: 30px;
+  }
+}
+
+div.container.below-menu { // Master container that scrolls below the menu
+  margin-top: $menuback-height-down;
+  padding-top: 75px;
+  div.triggered-form {
+    top: $menuback-height-down;
+  }
+  > div.row {
+    margin-left: 15px;
+    margin-right: 15px;
+  }
 }
 
 .header {
@@ -137,8 +143,8 @@ li.master-navtab {
   top: 0;
   z-index: $menu-depth;
   height: 230px;
-  padding-left: 240px;
-  padding-right: 200px;
+  padding-left: $logo-clearance-lg;
+  padding-right: $menu-right-margin;
   .menu {
     position: relative;
     width: 740px;
@@ -152,7 +158,9 @@ li.master-navtab {
     .menuIcon {
       display: none;
       position: absolute;
-      right: -100px;
+      padding: 7px;
+      right: -110px;
+      z-index: $menu-depth;
       &:hover {
         background: #999;
       }
@@ -166,8 +174,8 @@ li.master-navtab {
       }
     }
     ul {
-      padding:0;
-      margin:0;
+      padding: 0;
+      margin: 0;
       li {
         display: inline-block;
         float: left;
@@ -179,13 +187,13 @@ li.master-navtab {
         padding-right: 8px;
         text-shadow: none;
         text-align: center;
-        &#collections-navtab{
+        &#collections-navtab {
           background-color: $recipes-navtab-background-color;
           a.dropdown-toggle {
             color: $recipes-navtab-text-color;
           }
         }
-        &#friends-navtab{
+        &#friends-navtab {
           background-color: $friends-navtab-background-color;
           //margin: 0 7px;
           //padding:80px 8px 0;
@@ -194,7 +202,7 @@ li.master-navtab {
             color: $friends-navtab-text-color;
           }
         }
-        &#my_lists-navtab{
+        &#my_lists-navtab {
           background-color: $lists-navtab-background-color;
           //margin: 0 7px;
           //padding: 80px 18px 0;
@@ -203,7 +211,7 @@ li.master-navtab {
             color: $lists-navtab-text-color;
           }
         }
-        &#feeds-navtab{
+        &#feeds-navtab {
           background-color: $feeds-navtab-background-color;
           //margin: 0 7px;
           //padding: 80px 34px 0;
@@ -214,7 +222,7 @@ li.master-navtab {
             color: $feeds-navtab-text-color;
           }
         }
-        &#home-navtab{
+        &#home-navtab {
           background-color: #ff9583;
           //margin: 0 7px;
           padding: 0;
@@ -228,7 +236,7 @@ li.master-navtab {
             text-transform: lowercase;
           }
         }
-        a.dropdown-toggle{
+        a.dropdown-toggle {
           font-family: Oswald, sans-serif;
           text-transform: uppercase;
           letter-spacing: 1.5px;
@@ -259,18 +267,40 @@ li.master-navtab {
   }
 }
 
-@media only screen and (max-width: 800px) {
+@media only screen and (max-width: 780px) {
+  div.container.menuback {
+    // Backing for the menu which matches the general container in cross-section
+    height: $menuback-height-up;
+  }
+  div.container.below-menu {
+    margin-top: $menuback-height-up;
+    padding-top: 0px; // In allowance for the menuback
+    div.triggered-form {
+      position: fixed;
+      top: 0;
+      left: $logo-clearance-sm;
+      right: $menu-right-margin;
+      z-index: $menu-depth + 1;
+      padding-left: 5px;
+      width: 350px;
+      margin-top: 0;
+      &.menuOpen {
+        display: none;
+      }
+    }
+  }
   .header {
     height: 40px;
-    padding-left: 150px;
-    padding-right: 100px;
+    padding-left: $logo-clearance-sm;
+    padding-right: $menu-right-margin;
     .menu {
       width: 100%;
       min-width: 200px;
       div.logo {
-        height: 40px;
-        left: -150px;
-        content: image-url('rp-logo-small-tomato.png');
+        padding: 4px 6px;
+        height: 47px;
+        left: -$logo-clearance-sm;
+        content: image-url('RP-logo-small.png');
       }
       .menuIcon {
         display: block;
@@ -290,7 +320,7 @@ li.master-navtab {
           display: block;
           width: 100%;
           background: #000;
-          border-top:1px solid #4d4d4d;
+          border-top: 1px solid #4d4d4d;
           padding-top: 5px;
           padding-bottom: 5px;
           margin-bottom: 0;
@@ -304,7 +334,7 @@ li.master-navtab {
           span.measuring-spoons {
             content: none;
           }
-          &#home-navtab{
+          &#home-navtab {
             //margin: 0 7px;
             position: static;
             width: 100%;
