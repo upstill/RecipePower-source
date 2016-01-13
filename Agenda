@@ -6,6 +6,7 @@
 2/2: Events (& notifications thereof)
 2/2: Make organization buttons on panels work
 2/3: Scrolling problem with panels
+2/3: In masonry view, 'load more' link can stay at top (infinite reload)
 3/2: Collectible reports user who first collected it
 3/2: Presenting errors to user
 3/2: Eliminate followers/followees in User model
