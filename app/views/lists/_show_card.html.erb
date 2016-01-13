@@ -3,7 +3,7 @@
       <%= collectible_vote_buttons decorator.object %>
       <table style="width: 100%">
         <tr>
-          <td rowspan="2" style="width: 25%;">
+          <td rowspan="2" style="width: 300px;">
             <div class="pic-inset">
               <%= presenter.card_avatar %>
             </div>
@@ -15,7 +15,7 @@
               <%# collectible_list_menu decorator, response_service.user, {} %>
             </div>
             <div class="row">
-              <div class="col-md-3">
+              <div class="col-sm-6 col-xs-6 col-md-5 col-lg-4">
                 <h3>AS COMPILED BY</h3>
                 <span class="owner-name"><%= decorator.owner.polite_name %><br></span>
                 <div class="owner-pic">
@@ -24,7 +24,7 @@
                   <% end %>
                 </div>
               </div>
-              <div class="col-md-9">
+              <div class="col-sm-6 col-xs-6 col-md-7 col-lg-8">
                 <div class="tags">
                   <% if decorator.tags.present? %>
                       <h3>TAGS</h3>

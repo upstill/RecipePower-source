@@ -149,7 +149,7 @@ div.container.below-menu { // Master container that scrolls below the menu
   width: 100%;
   top: 0;
   z-index: $menu-depth;
-  height: 230px;
+  height: $menuback-height-down;
   padding-left: $logo-clearance-lg;
   padding-right: $menu-right-margin;
   div.menu {
@@ -311,7 +311,7 @@ div.container.below-menu { // Master container that scrolls below the menu
     }
   }
   .header {
-    height: 40px;
+    height: $menuback-height-up;
     padding-left: $logo-clearance-sm;
     padding-right: $menu-right-margin;
     div.menu {
