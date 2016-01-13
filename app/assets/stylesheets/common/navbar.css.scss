@@ -26,11 +26,11 @@ a.navbar-brand {
   padding-top: 0;
 }
 
-ul.nav.navbar-nav {
-  display: block;
-  max-width: 100%;
-  height: auto;
-}
+//ul.nav.navbar-nav {
+//  display: block;
+//  max-width: 100%;
+//  height: auto;
+//}
 
 li.master-navtab {
   margin: 0 7px;
@@ -39,9 +39,15 @@ li.master-navtab {
   text-shadow: none;
   margin-bottom: 10px;
   text-align: center;
+  ul {
+    background-color: inherit;
+    li {
+      background-color: inherit;
+    }
+  }
   &#collections-navtab {
     background-color: $recipes-navtab-background-color;
-    a.dropdown-toggle {
+    a {
       color: $recipes-navtab-text-color;
     }
   }
@@ -50,7 +56,7 @@ li.master-navtab {
     //margin: 0 7px;
     //padding:80px 8px 0;
     //text-shadow: none;
-    a.dropdown-toggle {
+    a {
       color: $friends-navtab-text-color;
     }
   }
@@ -60,7 +66,7 @@ li.master-navtab {
     //margin: 0 7px;
     //padding: 80px 18px 0;
     //text-shadow: none;
-    a.dropdown-toggle {
+    a {
       color: $lists-navtab-text-color;
     }
   }
@@ -70,7 +76,7 @@ li.master-navtab {
     //margin: 0 7px;
     //padding: 80px 34px 0;
     //text-shadow: none;
-    a.dropdown-toggle {
+    a {
       color: $feeds-navtab-text-color;
     }
   }
@@ -94,6 +100,7 @@ li.master-navtab {
 .navbar-nav {
   li {
     a.dropdown-toggle {
+      padding: 0;
       padding-bottom: 10px;
       font-family: Oswald, sans-serif;
       text-transform: uppercase;
@@ -145,7 +152,7 @@ div.container.below-menu { // Master container that scrolls below the menu
   height: 230px;
   padding-left: $logo-clearance-lg;
   padding-right: $menu-right-margin;
-  .menu {
+  div.menu {
     position: relative;
     width: 740px;
     height: 130px;
@@ -176,7 +183,7 @@ div.container.below-menu { // Master container that scrolls below the menu
     ul {
       padding: 0;
       margin: 0;
-      li {
+      li.master-navtab {
         display: inline-block;
         float: left;
         list-style: none;
@@ -218,7 +225,7 @@ div.container.below-menu { // Master container that scrolls below the menu
           //text-shadow: none;
           padding-left: 34px;
           padding-right: 34px;
-          a.dropdown-toggle {
+          a {
             color: $feeds-navtab-text-color;
           }
         }
@@ -235,6 +242,9 @@ div.container.below-menu { // Master container that scrolls below the menu
             text-shadow: none;
             text-transform: lowercase;
           }
+        }
+        a.submenu {
+          padding-left: 40px;
         }
         a.dropdown-toggle {
           font-family: Oswald, sans-serif;
@@ -259,7 +269,7 @@ div.container.below-menu { // Master container that scrolls below the menu
     .menu {
       width: 375px;
       ul {
-        li {
+        li.master-navtab {
           padding-top: 30px;
         }
       }
