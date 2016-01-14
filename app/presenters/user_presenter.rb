@@ -130,7 +130,7 @@ class UserPresenter < BasePresenter
           contents = "No recipes yet—so install the #{link_to_submit 'Cookmark Button', '/popup/starting_step2', :mode => :modal} and go get some!".html_safe
         end
       when :latest_list
-        label = 'Latest List'
+        label = 'Latest Treasury'
         if latest = user.owned_lists.order(updated_at: :desc).first
           contents = link_to_submit latest.name, list_path(latest)
         else

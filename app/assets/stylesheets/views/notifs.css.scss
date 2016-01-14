@@ -1,9 +1,9 @@
 div.notifs {
-  width: 19em;
+  width: auto;
   height: auto;
   z-index: $menu-depth;
   position: fixed;
-  right: 2em;
+  right: 1em;
   top: 1em;
   div.notification {
     width: 100%;
@@ -51,6 +51,12 @@ div.notifs {
   }
   div.selectable {
     display: none;
+    &.signup {
+      width: 300px;
+    }
+    &.signin {
+      width: 300px;
+    }
   }
   div.modal-content {
     @include div-green;
