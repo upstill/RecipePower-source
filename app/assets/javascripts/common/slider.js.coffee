@@ -81,6 +81,7 @@ RP.slider.trigger_check = (trigger_elmt) ->
 		button_check this
 
 setScroll = (button_elmt) ->
+	clearScroll()
 	RP.slider.current = setInterval ->
 		RP.slider.bump button_elmt
 	, 20

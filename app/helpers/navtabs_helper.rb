@@ -68,7 +68,7 @@ module NavtabsHelper
         navlink('My Collection', collection_user_path(current_user_or_guest)),
         navlink('Recipes', collection_user_path(current_user_or_guest, result_type: 'recipes'), class: 'submenu'),
         navlink('Treasuries', collection_user_path(current_user_or_guest, result_type: 'lists'), class: 'submenu'),
-        navlink('Lists', collection_user_path(current_user_or_guest, result_type: 'feeds'), class: 'submenu'),
+        navlink('Feeds', collection_user_path(current_user_or_guest, result_type: 'feeds'), class: 'submenu'),
         navlink('Friends', collection_user_path(current_user_or_guest, result_type: 'friends'), class: 'submenu'),
           # navlink('Recently Viewed', user_recent_path(current_user_or_guest_id)),
           navlink('Everything in RecipePower', search_path()),
