@@ -100,8 +100,7 @@ li.master-navtab {
 .navbar-nav {
   li {
     a.dropdown-toggle {
-      padding: 0;
-      padding-bottom: 10px;
+      padding: 5px 0px;
       font-family: Oswald, sans-serif;
       text-transform: uppercase;
       letter-spacing: 1.5px;
@@ -200,9 +199,7 @@ div.container.below-menu { // Master container that scrolls below the menu
         list-style: none;
         margin: 0 7px;
         margin-bottom: 10px;
-        padding-top: 90px;
-        padding-left: 8px;
-        padding-right: 8px;
+        padding: 90px 8px 3px;
         text-shadow: none;
         text-align: center;
         &#collections-navtab {
