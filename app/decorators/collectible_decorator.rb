@@ -131,4 +131,10 @@ class CollectibleDecorator < Draper::Decorator
     end
   end
 
+  # Get the user who first collected the recipe (or at least the one with the oldest Rcpref)
+  def first_collector
+    # find_by_id handles the NULL case (no User has in collection)
+    User.find_by_id object.toucher_pointers.order('created_at ASC').limit(1).pluck(:user_id).first
+  end
+
 end

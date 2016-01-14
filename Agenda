@@ -5,17 +5,18 @@
 2/1: Popularity contests
 2/2: Events (& notifications thereof)
 2/2: Make organization buttons on panels work
-2/3: Scrolling problem with panels
 2/3: In masonry view, 'load more' link can stay at top (infinite reload)
-3/2: Collectible reports user who first collected it
 3/2: Presenting errors to user
 3/2: Eliminate followers/followees in User model
 3/4: Heroku: Remove tags of type Channel
 √ 1/2: Sharing
+√ 1/2: Responsive menu!
 √ 2/2: Admin uploads pics for others
 √ 2/2: Make selection of images in pic-picker scrollable
 √ 2/2: Site editor
+√ 2/3: Scrolling problem with panels
 √ 2/3: Error message in pic picker when page doesn't work
 √ 2/3: Link colors on cards
 √ 2/5: 'Collection' link on header_collection_entity doesn't return to whole collection
+√ 3/2: Collectible reports user who first collected it
 √ 3/4: Org buttons color in FilteredPresenter header_collection_entity
