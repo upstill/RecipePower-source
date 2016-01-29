@@ -76,17 +76,17 @@ class UserPresenter < BasePresenter
                           }).html_safe
       when :collected_lists, :owned_lists
         if which == :owned_lists
-          lists = user.decorate.owned_lists @viewer
+          lists = @decorator.owned_lists @viewer
           label = 'Author of the treasuries'
         else
-          lists = user.decorate.collected_lists
+          lists = @decorator.collected_lists @viewer
           label = 'Following the treasuries'
         end
         unless lists.empty?
-          listlinks = lists[0..5].collect { |list|
+          listlinks = lists.includes(:name_tag).take(5).collect { |list|
                                link_to_submit list.name, list_path(list)
                              }
-          contents = if lists.length > 5
+          contents = if lists.count > 5
             path = collection_user_path user, :entity_type => :lists
             "#{listlinks.join ', '}...(and #{link_to_submit 'more', path })"
           else
@@ -123,7 +123,7 @@ class UserPresenter < BasePresenter
         label = answer.question.name if answer
       when :latest_recipe
         label = 'Latest Recipe'
-        if latestrr = user.collection_pointers.where(:entity_type => 'Recipe', :in_collection => true).order(created_at: :desc).first
+        if latestrr = @decorator.collection_pointers(Recipe,current_user).order(created_at: :desc).first
           latest = latestrr.entity
           contents = collectible_show_thumbnail latest.decorate
         elsif current_user && user == current_user

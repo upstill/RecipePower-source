@@ -44,35 +44,47 @@ class UserDecorator < CollectibleDecorator
   end
 
   # Get the user's Rcprefs that point to a given entity_type and/or are visible by a specific user
-  def collection_pointers entity_type=nil, viewer=nil
+  def collection_pointers entity_type=nil, viewer=user
     if entity_type.is_a? User
       entity_type, viewer = nil, entity_type
     end
-    scope = (viewer && viewer != user) ? user.public_pointers : user.collection_pointers
+    scope = (viewer == user) ? user.collection_pointers : user.public_pointers
     scope = (scope.where entity_type: entity_type.to_s) if entity_type
     scope
   end
 
   # Return the set of entities of a given type that the user has collected, as visible to some other
-  def collection_entities entity_type=nil, viewer=nil
-    collection_pointers(entity_type, viewer).map &:entity
+  def collection_entities entity_type, viewer=user
+    # collection_pointers(entity_type, viewer).map &:entity
+    rrq = { user_id: user.id }
+    rrq[:private] = false if viewer != user
+    entity_type = entity_type.to_s.constantize unless entity_type.is_a? Class
+    entity_type.joins(:user_pointers).where(rcprefs: rrq)
   end
-  alias_method :collected_entities, :collection_entities
+
+  def list_availability viewer
+    if user == viewer
+      [0, 1, 2]
+    else
+      user.follows?(viewer) ? [0,1] : 0
+    end
+  end
 
   # Return the set of lists that the user has collected, as visible to some other viewer
-  # NB: excludes lists that the
-  def collection_lists viewer=nil
-    threshold = (viewer && user.follows?(viewer)) ? 2 : 1
-    collection_entities(List, viewer).keep_if { |l| (l.owner != user) && (l.availability <= threshold)}
+  # NB: excludes lists that the user owns
+  def collection_lists viewer=user
+    scope = collection_entities(List, viewer).where.not(owner_id: user.id)
+    scope = scope.where(availability: list_availability(viewer)) if user != viewer
+    scope
   end
   alias_method :collected_lists, :collection_lists
 
   # What lists that I own can be seen by the viewer?
-  def owned_lists viewer=nil
+  def owned_lists viewer=user
     # Fall through to the full scope if no viewer is asserted
-    return user.owned_lists if viewer.nil? || user == viewer
-    # If the viewer is a friend, allow access at availability 0 and 1, else just 0
-    owned_lists.where availability: (user.follows?(viewer) ? [0,1] : 0)
+    scope = user.owned_lists
+    scope = scope.where(availability: list_availability(viewer)) if user != viewer
+    scope
   end
 
   # Define presentation-specific methods here. Helpers are accessed through
@@ -138,26 +150,26 @@ class UserDecorator < CollectibleDecorator
         end
       }
     else
-      owned_lists.each { |list|
-        assert_tag list.name_tag, self, :'my own'
+      owned_lists.includes(:name_tag).map(&:name_tag).each { |tag|
+        assert_tag tag, self, :'my own'
       }
-      collected_lists.each { |list|
-        assert_tag list.name_tag, self, :'my collected'
+      collected_lists.includes(:name_tag).map(&:name_tag).each { |tag|
+        assert_tag tag, self, :'my collected'
       }
       followees.each { |friend|
-        friend.decorate.owned_lists(user).includes(:name_tag).each { |list|
-          assert_tag list.name_tag, friend, :'owned'
+        friend.decorate.owned_lists(user).includes(:name_tag).map(&:name_tag).each { |tag|
+          assert_tag tag, friend, :'owned'
         }
       }
       followees.each { |friend|
-        friend.decorate.collected_lists(user).includes(:name_tag).each { |list|
-          assert_tag list.name_tag, friend, :'collected'
+        friend.decorate.collected_lists(user).includes(:name_tag).map(&:name_tag).each { |tag|
+          assert_tag tag, friend, :'collected'
         }
       }
       if options[:exhaustive]
         # All other public list tags
-        List.where(availability: 0).where.not(name_tag_id: @tag_ids_used).includes(:name_tag).each { |list|
-          assert_tag list.name_tag
+        List.where(availability: 0).where.not(name_tag_id: @tag_ids_used).includes(:name_tag).map(&:name_tag).each { |tag|
+          assert_tag tag
         }
       end
     end

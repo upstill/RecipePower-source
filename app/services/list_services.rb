@@ -65,6 +65,8 @@ class ListServices
   end
 
   # Define a scope for the lists collected by one user, as visible to another
+=begin
+  # SUPPLANTED BY UserDecorator#collection_lists
   def self.lists_collected_by user, viewer
     scope = List.where.not(owner_id: user.id).joins(:user_pointers).where(%Q{"rcprefs"."user_id" = #{user.id}})
     scope = scope.where(%Q{
@@ -80,11 +82,14 @@ class ListServices
     scope
   end
 
+  # SUPPLANTED BY UserDecorator#owned_lists
   def self.lists_owned_by user, viewer
+    user.decorate
     user == viewer ?
         user.owned_lists :
         user.owned_lists.where(%Q{"lists"."availability" < #{user.follows?(viewer) ? 2 : 1}})
   end
+=end
 
   # Return the set of lists containing the entity (either directly or indrectly) that are visible to the given user
     def self.find_by_listee taggable_entity
@@ -167,6 +172,7 @@ class ListServices
       scope
     end
 
+=begin
     # Move each of the user's collections into a list
     # TODO: remove all these after collections migrate to lists
     def self.adopt_collections
@@ -216,6 +222,7 @@ class ListServices
       gar.save
       list
     end
+=end
 
     def self.study_users
       User.all.collect { |user|

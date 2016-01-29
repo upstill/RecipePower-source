@@ -844,7 +844,7 @@ class UserCollectedListsCache < ResultsCache
   include EntitiesCache
 
   def itemscope
-    @itemscope ||= ListServices.lists_collected_by user, viewer
+    @itemscope ||= user.decorate.collected_lists(viewer) # ListServices.lists_collected_by user, viewer
   end
 end
 
@@ -854,7 +854,7 @@ class UserOwnedListsCache < ResultsCache
   include EntitiesCache
 
   def itemscope
-    @itemscope ||= ListServices.lists_owned_by user, viewer
+    @itemscope ||= user.decorate.owned_lists(viewer) # ListServices.lists_owned_by user, viewer
   end
 
 end
@@ -875,9 +875,9 @@ class ListsIndexCache < ResultsCache
     @itemscope ||=
     case result_type.subtype
       when 'owned'
-        ListServices.lists_owned_by user, viewer
+        user.decorate.owned_lists viewer # ListServices.lists_owned_by user, viewer
       when 'collected'
-        ListServices.lists_collected_by user, viewer
+        user.decorate.collection_lists viewer # ListServices.lists_collected_by user, viewer
       when 'all'
         List.unscoped
       else # By default, we only see lists belonging to our friends and Super that are not private, and all those that are public

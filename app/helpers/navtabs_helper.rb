@@ -104,15 +104,12 @@ module NavtabsHelper
 
   def other_lists_navtab menu_only = false
     navtab :other_lists, 'More Treasuries', lists_path(access: 'collected'), menu_only do
-      list_set = current_user_or_guest.collection_pointers.where(entity_type: 'List').
-          joins('INNER JOIN lists ON lists.id = rcprefs.entity_id').where("lists.owner_id != #{current_user_or_guest.id}").
-          limit(16).
-          map(&:entity)
+      list_set = current_user_or_guest.decorate.collection_lists.take(16)
       if list_set.count < 16
         # Try adding the lists owned by friends
         current_user_or_guest.followees.each { |friend|
           list_set = (list_set +
-              friend.owned_lists.where.not(availability: 2).to_a.
+              friend.owned_lists(current_user_or_guest).includes(:name_tag).to_a.
                   keep_if { |l| l.name != 'Keepers' && l.name != 'To Try' && l.name != 'Now Cooking' }
           ).uniq
           break if list_set.count >= 16
