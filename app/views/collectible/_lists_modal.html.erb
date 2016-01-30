@@ -22,7 +22,7 @@
             <%= flash_notifications_div %>
           </div>
           <div class="control-group now-appearing">
-            <label class="string optional">Now Appearing on the Lists:</label>
+            <label class="string optional">Now Appearing in the Treasuries:</label>
             <input id="<%= decorator.element_id :tagging_user_id %>"
                    name="<%= decorator.field_name :tagging_user_id %>"
                    type="hidden"
@@ -36,11 +36,12 @@
                    placeholder="Lists"
                    data-taglist="<%= all_tags.to_json %>"
                    data-pre="<%= used_tags.to_json %>"
-                   data-free_tagging="false"
-                   data-event_handler="RP.lists_collectible"
+                   data-allowFreeTagging="false"
+                   data-eventHandler="RP.lists_collectible"
                    data-theme="list"
                    data-query="tagtype=16"
-                   data-hint_text="Search for a list by typing"/>
+                   data-noResultsText="No such treasury now; hit Enter to start a new one"
+                   data-hintText="Search for a treasury by typing"/>
           </div>
           <div class="control-group">
             <label class="string optional" style="margin-top: 40px;">Suggested Lists</label>

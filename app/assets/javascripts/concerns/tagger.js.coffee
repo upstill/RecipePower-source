@@ -66,17 +66,17 @@ RP.tagger.setup = (elmt) ->
 			request += qstr # encodeURIComponent(data.query)
 		options =
 			crossDomain: false,
-			noResultsText: data.noResultsText || "No existing tag found; hit Enter to make it a new tag",
-			hintText: data.hint_text || 'Type your own tag(s)',
+			noResultsText: data.noResultsText || data.noresultstext || "No existing tag found; hit Enter to make it a new tag",
+			hintText: data.hintText || data.hinttext || 'Type your own tag(s)',
 			zindex: 1052,
 			prePopulate: data.pre || "",
 			preventDuplicates: true,
 			minChars: 2,
-			allowFreeTagging: (data.free_tagging != false)
-		if data.event_handler
-			options.onAdd = RP.named_function(data.event_handler + '.onAdd')
-			options.onDelete = RP.named_function(data.event_handler + '.onDelete')
-			options.onReady = RP.named_function(data.event_handler + '.onReady')
+			allowFreeTagging: (data.allowFreeTagging != false) && (data.allowfreetagging != false)
+		if hdlr = data.eventHandler || data.eventhandler
+			options.onAdd = RP.named_function(hdlr + '.onAdd')
+			options.onDelete = RP.named_function(hdlr + '.onDelete')
+			options.onReady = RP.named_function(hdlr + '.onReady')
 
 		if data.theme != 'list' # To get a list, the theme needs to be unspecified (!)
 			options.theme = data.theme || "facebook"

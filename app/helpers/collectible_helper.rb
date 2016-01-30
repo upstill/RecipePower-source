@@ -66,7 +66,7 @@ module CollectibleHelper
                                 polymorphic_path([:lists, entity], :mode => :modal),
                                 'glyph-list-add',
                                 size,
-                                :title => 'Manage lists on which this appears'
+                                :title => 'Manage treasuries on which this appears'
       # content_tag :div, button, class: 'lists-button glyph-button'
     end
   end
@@ -85,7 +85,7 @@ module CollectibleHelper
 
         items << collectible_edit_button(decorator, size, styling.merge(label: 'Edit'))
 
-        items << collectible_lists_button(decorator, size, styling.merge(label: 'Manage Lists'))
+        items << collectible_lists_button(decorator, size, styling.merge(label: 'Treasuries'))
 
         if entity.collectible_collected?
           privacy_label = checkbox_menu_item_label 'Private', entity.private
