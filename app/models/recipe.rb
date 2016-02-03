@@ -13,7 +13,7 @@ class Recipe < ActiveRecord::Base
   # The picurl attribute is handled by the :picture reference of type ImageReference
   picable :picurl, :picture
 
-  attr_accessible :title, :ratings_attributes, :description, :url #, :comment, :private, :tagpane, :status, :alias, :picurl :href, :collection_tokens, :channel_tokens
+  attr_accessible :title, :ratings_attributes, :description, :url #, :comment, :private, :tagpane, :status, :alias, :picurl :href, :collection_tokens
 
   validates :title, length: { minimum: 2 }
   # private

@@ -20,13 +20,13 @@ class User < ActiveRecord::Base
 
   # Setup accessible (or protected) attributes for your model
   attr_accessible :id, :username, :first_name, :last_name, :fullname, :about, :login, :private, :skip_invitation, :thumbnail_id,
-                :email, :password, :password_confirmation, :invitee_tokens, :channel_tokens, :avatar_url, # :image,
+                :email, :password, :password_confirmation, :invitee_tokens, :avatar_url, # :image,
                 :invitation_token, :invitation_message, :invitation_issuer, :shared_type, :shared_id,
                 :remember_me, :role_id, :sign_in_count, :followee_tokens, :subscription_tokens,
                 :answers_attributes, :tag_selections_attributes, :mail_subject, :mail_body
   # attr_writer :browser
   attr_readonly :count_of_collection_pointers
-  attr_accessor :invitee_tokens, :channel_tokens, :raw_invitation_token, :avatar_url, :mail_subject, :mail_body,
+  attr_accessor :invitee_tokens, :raw_invitation_token, :avatar_url, :mail_subject, :mail_body,
                 :shared_type, :shared_id # Kept temporarily during sharing operations
   
   has_many :notifications_sent, :foreign_key => :source_id, :class_name => 'Notification', :dependent => :destroy
@@ -52,10 +52,6 @@ class User < ActiveRecord::Base
 
   has_many :tag_selections
   accepts_nested_attributes_for :tag_selections, allow_destroy: true
-
-  # Channels are just another kind of user. This field (channel_referent_id, externally) denotes such.
-  # TODO: delete channel_referent_id and table private_subscriptions
-  belongs_to :channel, :class_name => 'Referent', :foreign_key => 'channel_referent_id'
 
   # NB: this stays; it represents a user's ownership of lists
   has_many :owned_lists, :class_name => 'List', :foreign_key => :owner_id
@@ -277,19 +273,6 @@ public
     self.followee_ids = newlist
   end
 
-  # TODO: eliminate channel? method
-  # Is a user a channel, as opposed to a human user?
-  def channel?
-    self.channel_referent_id > 0
-  end
-
-  # TODO: replace follows method with straight followees
-  # Who does this user follow?
-  # Return either friends or channels, depending on 'channel' parameter
-  def follows channel=false
-    followees.find_all { |user| (user.channel? == channel) }
-  end
-
   # Establish the relationship among role_id values, symbols and user-friendly names
   @@Roles = TypeMap.new( {
       guest: ['Guest', 1],
@@ -372,12 +355,7 @@ public
   end
 
   def password_required?
-    (self.channel_referent_id==0) && (authentications.empty? || !password.blank?)
-  end
-
-  # We don't require an email for users representing channels
-  def email_changed?
-      (self.channel_referent_id==0) && super
+    authentications.empty? || !password.blank?
   end
 
   # ownership of tags restrict visible tags
@@ -387,21 +365,8 @@ public
   validates :email, :presence => true
 
   # validates_presence_of :username
-  # validates_uniqueness_of :username, allow_blank: true
-  # validates_format_of :username, :allow_blank => true, :with => /\A[-\w\s\.!_@]+\z/i, :message => "can't take funny characters (letters, spaces, numbers, or .-!_@ only)"
-  validates_each :username do |user, attribute, value|
-    # The name must be unique within channels and within users, but not across the two, i.e. it's
-    # okay to have a channel named 'upstill'
-    unless value.blank?
-      query = user.channel ? 'channel_referent_id > 0' : 'channel_referent_id = 0'
-      query << ' and username = ?'
-      query << " and id != #{user.id}" if user.id
-      other = User.where query, value
-      user.errors[:username] << %Q{is already taken by another #{user.channel ? 'channel' : 'user'}} unless other.empty?
-      user.errors[:username] << 'can\'t take funny characters. Letters, spaces, numbers, and/or .-!_@ only, please' unless value.match /\A[-\w\s\.!_@]+\z/i
-    end
-
-  end
+  validates_uniqueness_of :username, allow_blank: true
+  validates_format_of :username, :allow_blank => true, :with => /\A[-\w\s\.!_@]+\z/i, :message => "can't take funny characters (letters, spaces, numbers, or .-!_@ only)"
 
   validates_uniqueness_of :email, :if => :email_changed?
   validates_format_of :email, :allow_blank => true, :with => /\A[-a-z0-9_+\.]+\@([-a-z0-9]+\.)+[a-z0-9]{2,4}\z/i
@@ -476,16 +441,14 @@ public
   end
 
   # 'name' is just an alias for handle, for use by Channel referents
-  def name
-    handle
-  end
+  alias_method :name, :handle
 
-  # Who is eligible to be
-  def friend_candidates(for_channels)
+  # Who is eligible to be a followee
+  # NB Currently out of use except in followees_list, which is also out of use
+  def friend_candidates
     User.all.keep_if { |other|
-        (for_channels == other.channel?) && # Select for channels or regular users
          User.public?(other.id) && # Exclude invisible users
-         (other.channel? || (other.sign_in_count && (other.sign_in_count > 0))) && # Excluded unconfirmed invites
+         (other.sign_in_count && (other.sign_in_count > 0)) && # Excluded unconfirmed invites
          (other.id != id) # Don't include this user
     }
   end
@@ -495,11 +458,10 @@ public
   end
 
   # Return a list of my friends who match the input text
-  def match_friends(txt, is_channel=nil)
+  def match_friends txt
     re = Regexp.new(txt, Regexp::IGNORECASE) # Match any embedded text, independent of case
-    channel_constraint = is_channel ? 'channel_referent_id > 0' : 'channel_referent_id = 0'
-    (is_channel ? User.all : followees).where(channel_constraint).select { |other|
-      re.match(other.username) || re.match(other.fullname) || re.match(other.email)
+    followees.select { |followee|
+      re.match(followee.username) || re.match(followee.fullname) || re.match(followee.email)
     }
   end
 

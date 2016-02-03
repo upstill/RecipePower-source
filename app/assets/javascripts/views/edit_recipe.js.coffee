@@ -14,7 +14,6 @@ RP.edit_recipe.bind = (dlog) ->
 me = () ->
 	$('div.edit_recipe')[0]
 
-channel_tagger_selector = "div.edit_recipe #recipe_channel_tokens"
 collection_tagger_selector = "div.edit_recipe #recipe_collection_tokens"
 tagger_selector = "div.edit_recipe #recipe_tagging_tokens"
 

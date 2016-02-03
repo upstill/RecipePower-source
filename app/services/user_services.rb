@@ -4,7 +4,7 @@ class UserServices
   attr_accessor :user
   
   delegate :id, :username, :first_name, :last_name, :fullname, :about, :login, :private, :skip_invitation, :add_collection, :delete_collection, :add_followee,
-           :email, :password, :password_confirmation, :shared_type, :shared_id, :shared, :'shared=', :invitee_tokens, :channel_tokens, :image,
+           :email, :password, :password_confirmation, :shared_type, :shared_id, :shared, :'shared=', :invitee_tokens, :image,
            :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens, :subscription_tokens, :invitation_issuer, :to => :user
   
   def initialize(user)

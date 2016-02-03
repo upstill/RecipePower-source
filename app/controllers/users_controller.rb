@@ -7,14 +7,14 @@ class UsersController < CollectibleController
   before_filter :login_required, :except => [:create, :new, :show, :index, :identify, :profile, :sign_up, :collection ]
   before_filter :authenticate_user!, :except => [:new, :show, :index, :identify, :profile, :collection]
 
-  # Take a tokenInput query string and match the input against the given user's set of friends/channels
+  # Take a tokenInput query string and match the input against the given user's set of friends
   def match_friends
     me = User.find params[:id]
     respond_to do |format|
       format.json { 
-        friends = me.match_friends(params[:q], params[:channel]).collect { |friend|
+        friends = me.match_friends(params[:q]).collect { |friend|
           name = friend.handle
-          name << " (#{friend.email})" unless params[:channel]
+          name << " (#{friend.email})"
           { id: friend.id.to_s, name: name }
         }
         if friends.empty? 
@@ -37,7 +37,7 @@ class UsersController < CollectibleController
     smartrender 
   end
 
-  # Add a user or channel to the friends of the current user
+  # Add a user to the friends of the current user
   def follow
     if current_user
       update_and_decorate # Generate a FeedEntryDecorator as @feed_entry and prepares it for editing

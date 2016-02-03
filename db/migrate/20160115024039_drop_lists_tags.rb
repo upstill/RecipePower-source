@@ -1,0 +1,7 @@
+class DropListsTags < ActiveRecord::Migration
+  def up
+	drop_table :lists_tags
+	drop_table :private_subscriptions
+	drop_table :channels_referents
+  end
+end

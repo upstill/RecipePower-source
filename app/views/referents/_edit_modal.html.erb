@@ -1,9 +1,3 @@
-<% if @referent.class==ChannelReferent %>
-    <%= modal_dialog :edit_channel, "Edit Channel" do %>
-        <%= render 'form_channel' %>
-    <% end %>
-<% else %>
-    <%= modal_dialog :edit_referent, "Edit #{summarize_ref_name(@referent, true)}" do %>
-        <%= render 'form' %>
-    <% end %>
+<%= modal_dialog :edit_referent, "Edit #{summarize_ref_name(@referent, true)}" do %>
+  <%= render 'form' %>
 <% end %>

@@ -4,7 +4,7 @@ class ReferentsController < ApplicationController
     @@HandlersByIndex = [ Referent, GenreReferent, RoleReferent, 
             ProcessReferent, IngredientReferent, UnitReferent, 
             SourceReferent, AuthorReferent, OccasionReferent, 
-            PantrySectionReferent, StoreSectionReferent, ChannelReferent, ToolReferent ]
+            PantrySectionReferent, StoreSectionReferent, nil, ToolReferent ]
     @@HandlerClass = Referent
 
   # GET /referents
@@ -33,7 +33,6 @@ class ReferentsController < ApplicationController
     @typeselections.shift
 
     respond_to do |format|
-      # format.html { render (@tabindex==11 ? "new_channel.html.erb" : "new") }
       format.json { 
         if params[:tagid]
           render json: [ { :title=>@referent.longname, :isLazy=>true, :key=>@referent.id, :isFolder=>false } ]
@@ -113,9 +112,6 @@ class ReferentsController < ApplicationController
     end
 
     if @referent && @referent.save
-      if @referent.class==ChannelReferent # Need to assign user's tags, but only after it has an id
-        @referent.user.update_attributes params[param_key][:user_attributes]
-      end
       respond_to do |format|
         format.html { redirect_to @referent.becomes(Referent), notice: 'Referent was successfully created/aliased.' }
         format.json {
@@ -159,14 +155,8 @@ class ReferentsController < ApplicationController
       if @referent.update_attributes(params[param_key])
         format.html { redirect_to @referent.becomes(Referent), notice: 'Referent was successfully updated.' }
         format.json {
-          # The Channels table shows users (which are the outward face of channels)
-          if @referent.class == ChannelReferent
-            selector = dom_id(@referent.user) # "#listrow_#{@referent.user.id}"
-            element = @referent.user
-          else
-            selector = "#Referent#{@referent.id}"
-            element = @referent.becomes(Referent)
-          end
+          selector = "#Referent#{@referent.id}"
+          element = @referent.becomes(Referent)
           render json: {
             done: true,
             popup: "Referent now updated to serve you better"

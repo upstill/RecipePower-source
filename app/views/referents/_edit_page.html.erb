@@ -1,10 +1,5 @@
-<% if @referent.class==ChannelReferent %>
-    <h3>Edit Channel <%= @referent.name %></h3>
-    <%= render 'form_channel' %>
-<% else %>
-    <h3>Edit <%= summarize_ref_name(@referent, true) %></h3>
-    <%= render 'form' %>
-<% end %>
+<h3>Edit <%= summarize_ref_name(@referent, true) %></h3>
+<%= render 'form' %>
 <%# if assoc = @referent.associate %>
     | <%# link_to assoc.class.to_s+" "+assoc.name, "/#{assoc.class.to_s.downcase.pluralize}/#{assoc.id}/edit" %>
     <%# end %>

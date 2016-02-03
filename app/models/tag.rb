@@ -2,7 +2,6 @@
 class Tag < ActiveRecord::Base
   # require 'iconv'
   include Typeable
-  # TODO: eliminate Channel and Collection types
   typeable(:tagtype,
            Untyped: ["Untyped", 0],
            Genre: ["Genre", 1],
@@ -15,7 +14,7 @@ class Tag < ActiveRecord::Base
            Occasion: ["Occasion", 8],
            PantrySection: ["Pantry Section", 9],
            StoreSection: ["Store Section", 10],
-           Channel: ["Channel", 11],
+           # Channel: ["Channel", 11],
            Tool: ["Tool", 12],
            Nutrient: ["Nutrient", 13],
            CulinaryTerm: ["Culinary Term", 14],
@@ -27,7 +26,8 @@ class Tag < ActiveRecord::Base
   attr_accessible :name, :id, :tagtype, :isGlobal, :links, :referents, :users, :owners, :primary_meaning # , :recipes
 
   has_many :taggings, :dependent => :destroy
-  has_many :dependent_lists, :class_name => "List", foreign_key: "name_tag_id"
+  has_many :dependent_lists, :class_name => 'List', foreign_key: 'name_tag_id'
+  has_many :dependent_referents, :class_name => 'Referent', foreign_key: 'tag_id', :dependent => :nullify
   has_many :public_lists, -> { where(availability: 0) }, :class_name => "List", foreign_key: "name_tag_id"
 
   # expressions associate tags with the foods (roles, processes, etc.) they refer to
@@ -36,7 +36,7 @@ class Tag < ActiveRecord::Base
   has_many :referents, :through => :expressions
 
   # When a tag is used as the basis for a personal collection, destroying the tag destroys the collection
-  has_many :private_subscriptions, :dependent => :destroy
+  # has_many :private_subscriptions, :dependent => :destroy
 
   # The primary meaning is the default meaning of a tag
   belongs_to :primary_meaning, :class_name => "Referent", :foreign_key => "referent_id"

@@ -1,8 +1,7 @@
 <%= page_or_modal title: "Admin" do %>
     <p>RecipePower now has
-      <%= Recipe.count.to_s %> recipes,
-      <%= User.where("channel_referent_id = 0").count.to_s %> users, and
-      <%= User.where("channel_referent_id > 0").count.to_s %> channels.
+      <%= Recipe.count.to_s %> recipes, and
+      <%= User.count.to_s %> users.
       <br>
     <ul>
       <li><%= link_to "Edit Tags", tags_path %></li>

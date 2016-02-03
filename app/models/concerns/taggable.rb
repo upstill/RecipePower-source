@@ -44,9 +44,9 @@ module Taggable
     filtered_tags tagtype: type_or_types
   end
 
-  # Return the editable tags, i.e. not channels, collections, or lists
+  # Return the editable tags, i.e. not collections or lists
   def tagging_tags
-    filtered_tags(:tagtype_x => [11, :Collection, :List])
+    filtered_tags(:tagtype_x => [ :Collection, :List])
   end
 
   # Provide the tags of appropriate types for the user identified by @tagging_user_id

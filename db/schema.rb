@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160108021256) do
+ActiveRecord::Schema.define(version: 20160130084939) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -32,11 +32,6 @@ ActiveRecord::Schema.define(version: 20160108021256) do
     t.string   "uid",        limit: 255
     t.datetime "created_at"
     t.datetime "updated_at"
-  end
-
-  create_table "channels_referents", id: false, force: :cascade do |t|
-    t.integer "channel_id"
-    t.integer "referent_id"
   end
 
   create_table "deferred_requests", id: false, force: :cascade do |t|
@@ -143,13 +138,6 @@ ActiveRecord::Schema.define(version: 20160108021256) do
     t.integer  "picture_id"
   end
 
-  create_table "lists_tags", force: :cascade do |t|
-    t.integer  "tag_id"
-    t.integer  "list_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
   create_table "notifications", force: :cascade do |t|
     t.integer  "source_id"
     t.integer  "target_id"
@@ -162,14 +150,6 @@ ActiveRecord::Schema.define(version: 20160108021256) do
     t.string   "shared_type"
     t.integer  "shared_id"
     t.boolean  "autosave",                       default: false
-  end
-
-  create_table "private_subscriptions", force: :cascade do |t|
-    t.integer  "user_id"
-    t.integer  "tag_id"
-    t.integer  "priority",   default: 10
-    t.datetime "created_at"
-    t.datetime "updated_at"
   end
 
   create_table "products", force: :cascade do |t|
@@ -432,8 +412,6 @@ ActiveRecord::Schema.define(version: 20160108021256) do
     t.integer  "invited_by_id"
     t.string   "invited_by_type",        limit: 255
     t.text     "invitation_message"
-    t.integer  "channel_referent_id",                default: 0
-    t.text     "browser_serialized"
     t.boolean  "private",                            default: false
     t.string   "invitation_issuer",      limit: 255
     t.datetime "invitation_created_at"

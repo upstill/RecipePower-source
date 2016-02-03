@@ -22,13 +22,11 @@ class Referent < ActiveRecord::Base
   has_many :parent_relations, :foreign_key => "child_id", :dependent => :destroy, :class_name => "ReferentRelation"
   has_many :parents, -> { uniq }, :through => :parent_relations, :source => :parent
 
-  has_many :expressions
+  has_many :expressions, :dependent => :destroy
   has_many :tags, :through => :expressions
   accepts_nested_attributes_for :expressions, allow_destroy: true
 
-  belongs_to :canonical_expression, :class_name => "Tag", :foreign_key => "tag_id"
-
-  has_and_belongs_to_many :channels, -> { uniq }, :class_name => "Referent", :foreign_key => "channel_id", :join_table => "channels_referents"
+  belongs_to :canonical_expression, :class_name => 'Tag', :foreign_key => 'tag_id'
 
   has_many :referments, :dependent => :destroy, :inverse_of => :referent
   # What can we get to through the referments? Each class that includes the Referrable module should be in this list
@@ -76,11 +74,6 @@ class Referent < ActiveRecord::Base
       collection = self.method(collection_method).call
       other.method(collection_method).call.each { |entity| collection << entity }
     }
-    other.channels.each { |channel| self.channels << channel }
-    if (self.is_a? ChannelReferent) && (other_user = other.associate)
-      # When merging channels, the mergee's user's data, including recipes, need to be associated with this channel's user
-      user.absorb other_user
-    end
     self.description = other.description if description.blank?
     self.save
     other.destroy if nuke_it
@@ -106,7 +99,7 @@ class Referent < ActiveRecord::Base
   end
 
   # The associate is the model associated with any particular class of referent, if any
-  # By default, referents have no associate; currently, only Channels and Sources have one
+  # By default, referents have no associate; currently, Sources have one
   def associate
     nil
   end
@@ -459,6 +452,19 @@ class ChannelReferent < Referent;
     self.user = User.find(User.super_id).dup
     user.email = "channels@recipepower.com"
     user.channel = self
+  end
+
+  def ref_check
+    result = []
+    channels.each { |cr2|
+      if cr2 != self
+        result << "#{name}(#{id}) has #{cr2.name}(#{cr2.id}) as channel."
+      end
+    }
+    if user
+      result << "#{name}(#{id}) has #{user.handle}(#{user.id}) as user."
+    end
+    result.join "\n"
   end
 
   def associate

@@ -1,15 +1,17 @@
 module UsersHelper
 
-  def followees_list f, me, channels
+  # NB Currently out of use
+  def followees_list f, me
     # followee_tokens is a virtual attribute, an array of booleans for checking and unchecking followees
     f.fields_for :followee_tokens do |builder|
-  	   me.friend_candidates(channels).map { |other|
+  	   me.friend_candidates.map { |other|
   		 builder.check_box(other.id.to_s, :checked => me.follows?(other.id)) + builder.label(other.id.to_s, other.username)
   	   }.compact.join('<br>').html_safe
     end
   end
-  
-  def subscriptions_list f, me, channels
+
+  # NB Currently out of use
+  def subscriptions_list f, me
     # subscription_tokens is a virtual attribute, an array of booleans for checking and unchecking followees
     f.fields_for :subscription_tokens do |builder|
   	   Feed.where(approved: true).map { |feed|
