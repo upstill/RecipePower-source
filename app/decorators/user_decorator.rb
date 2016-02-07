@@ -101,23 +101,24 @@ class UserDecorator < CollectibleDecorator
     decorator, options = nil, decorator if decorator.is_a? Hash
     # define method to add to the results array
     def assert_tag tag, user=nil, status=nil
+      user, status = nil, user if !user.is_a?(User)
       return if @results[tag.id]
-      sortval = case status
-                  when :'my own'
-                    1
-                  when :'my collected'
-                    2
-                  when :'owned'
-                    3
-                  when :'collected'
-                    4
-                  else
-                    5
-                end
       result = {
+          tag: tag,
           id: tag.id,
           name: tag.name,
-          sortval: sortval
+          sortval: case status
+                     when :owned
+                       1
+                     when :collected
+                       2
+                     when :friends
+                       3
+                     when :public
+                       4
+                     else
+                       5
+                   end
       }
       result[:status] = status if status
       result.merge!(
@@ -132,44 +133,30 @@ class UserDecorator < CollectibleDecorator
     @tag_ids_used = []
 
     if decorator
-      # The lists that the given object appear on FOR THIS USER are those that
-      # are tagged either by the user or by the list owner (TODO or Super?)
-      decorator.taggings(:List, user).includes(:tag, :entity).each { |tagging|
-        # For each tagging by the user
-        assert_tag tagging.tag,
-                   self,
-                   (tagging.entity.owner == self ? :'my own' : :'my collected')
-      }
-      decorator.tags(:List).each { |list_tag|
-        td = list_tag.decorate
-        if prime_list = td.friend_lists(user).first
-          # Tagging by a friend on a list they own
-          assert_tag list_tag, prime_list.owner, :owned
-        elsif td.public_lists.exists? # There's at least one publicly available list using this tag as title
-          assert_tag list_tag
-        end
-      }
+      ListServices.associated_lists(decorator, user) do |list, status|
+        assert_tag list.name_tag, list.owner, status
+      end
     else
       owned_lists.includes(:name_tag).map(&:name_tag).each { |tag|
-        assert_tag tag, self, :'my own'
+        assert_tag tag, self, :owned
       }
       collected_lists.includes(:name_tag).map(&:name_tag).each { |tag|
-        assert_tag tag, self, :'my collected'
+        assert_tag tag, self, :collected
       }
       followees.each { |friend|
         friend.decorate.owned_lists(user).includes(:name_tag).map(&:name_tag).each { |tag|
-          assert_tag tag, friend, :'owned'
+          assert_tag tag, friend, :friends
         }
       }
       followees.each { |friend|
         friend.decorate.collected_lists(user).includes(:name_tag).map(&:name_tag).each { |tag|
-          assert_tag tag, friend, :'collected'
+          assert_tag tag, friend, :friends
         }
       }
       if options[:exhaustive]
         # All other public list tags
         List.where(availability: 0).where.not(name_tag_id: @tag_ids_used).includes(:name_tag).map(&:name_tag).each { |tag|
-          assert_tag tag
+          assert_tag tag, :public
         }
       end
     end

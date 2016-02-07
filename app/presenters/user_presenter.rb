@@ -131,7 +131,7 @@ class UserPresenter < BasePresenter
         end
       when :latest_list
         label = 'Latest Treasury'
-        if latest = user.owned_lists.order(updated_at: :desc).first
+        if latest = user.decorate.owned_lists(current_user).order(updated_at: :desc).first
           contents = link_to_submit latest.name, list_path(latest)
         else
           contents = "To create your first list, click #{link_to_submit "here", new_list_path, :mode => :modal}.".html_safe

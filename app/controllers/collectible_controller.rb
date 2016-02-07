@@ -36,19 +36,19 @@ class CollectibleController < ApplicationController
     if current_user
       update_and_decorate # Generate a FeedEntryDecorator as @feed_entry and prepares it for editing
       msg = @decorator.title.truncate 50
-      if request.method == "GET"
+      if request.method == 'GET'
         render :lists
       else
         @decorator.object.save
         if resource_errors_to_flash(@decorator.object)
           render :errors
         else
-          flash[:popup] = msg
-          render :lists
+          flash[:popup] = "'#{msg}' treasured."
+          render 'collectible/update.json'
         end
       end
     else
-      flash[:alert] = "Sorry, you need to be logged in to manage lists."
+      flash[:alert] = 'Sorry, you need to be logged in to manage treasuries.'
       render :errors
     end
   end
@@ -76,12 +76,12 @@ class CollectibleController < ApplicationController
         @decorator.save
         flash.now[:notice] = "'#{@decorator.title.truncate(50)}' has been added to your collection for tagging" # if @decorator.object.errors.empty?
       end
-      if resource_errors_to_flash @decorator, preface: "Couldn't save."
+      if resource_errors_to_flash @decorator, preface: 'Couldn\'t save.'
         render :errors
       else
-        unless request.method == "GET"
+        unless request.method == 'GET'
           flash[:popup] = "#{@decorator.human_name} saved"
-          render "collectible/update.json"
+          render 'collectible/update.json'
         else
           response_service.title = @decorator.title.truncate(20) # Get title (or name, etc.) from the entity
           smartrender

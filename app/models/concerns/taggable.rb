@@ -18,11 +18,14 @@ module Taggable
         end
         if @tagging_list_tokens
           # Map the elements of the token string to tags, whether existing or new
-          set_list_tags TokenInput.parse_tokens(@tagging_tag_tokens) { |token| # parse_tokens analyzes each token in the list as either integer or string
-                        token.is_a?(Fixnum) ?
-                            Tag.find(token) :
-                            Tag.strmatch(token, userid: @tagging_user_id, tagtype: :List, assert: true)[0] # Match or assert the tag
-                      }
+          ListServices.associate(
+              self,
+              TokenInput.parse_tokens(@tagging_list_tokens) { |token| # parse_tokens analyzes each token in the list as either integer or string
+                token.is_a?(Fixnum) ?
+                    Tag.find(token) :
+                    Tag.strmatch(token, userid: @tagging_user_id, tagtype: :List, assert: true)[0] # Match or assert the tag
+              },
+              @tagging_user_id)
         end
       end
     end
@@ -30,10 +33,21 @@ module Taggable
     has_many :taggings, :as => :entity, :dependent => :destroy
     has_many :tags, -> { uniq }, :through => :taggings
     has_many :taggers, -> { uniq }, :through => :taggings, :class_name => "User"
-    attr_accessor :tagging_user_id, :tagging_tag_tokens, :tagging_list_tokens # Only gets written externally; internally accessed with instance variable
-    attr_accessible :tagging_user_id, :tagging_tag_tokens # For the benefit of update_attributes
+    attr_reader :tagging_user_id
+    attr_accessor :tagging_tag_tokens, :tagging_list_tokens # Only gets written externally; internally accessed with instance variable
+    attr_accessible :tagging_user_id, :tagging_tag_tokens, :tagging_list_tokens # For the benefit of update_attributes
 
     Tag.taggable self
+  end
+
+  def tagging_user_id= id
+    @tagging_user_id =
+        case id
+          when String
+            id.to_i
+          when Fixnum
+            id
+        end
   end
 
   # Define an editable field of taggings by the current user on the entity
@@ -109,26 +123,6 @@ module Taggable
 
     # Remove tags as nec.
     (oids - nids).each { |tagid| refute_tagging tagid, @tagging_user_id }
-  end
-
-  # List tags are handled specially, due to ownership of lists
-  def set_list_tags ntags
-    otags = User.find(@tagging_user_id).decorate.list_tags self.decorate
-    (ntags - otags).each { |list_tag| assert_tagging list_tag, @tagging_user_id }
-    (otags - ntags).each do |list_tag|
-      if owned_list = list_tag.dependent_lists.where(owner_id: @tagging_user_id).first
-        ListServices.new(owned_list).exclude self, @tagging_user_id do
-          refute_tagging list_tag
-        end
-      else
-        refute_tagging list_tag, @tagging_user_id
-      end
-    end
-    ntags.each { |list_tag|
-      list_tag.dependent_lists.where(owner_id: @tagging_user_id).each { |list|
-        list.store self
-      }
-    }
   end
 
   def assert_tagging tag_or_id, uid

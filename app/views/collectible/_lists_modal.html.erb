@@ -29,8 +29,8 @@
                    value="<%= decorator.tagging_user_id %>">
             <input type="text"
                    class="token-input-field-pending"
-                   id="tagging_lists_tokens"
-                   name="<%= decorator.field_name :tagging_lists_tokens %>"
+                   id="tagging_list_tokens"
+                   name="<%= decorator.field_name :tagging_list_tokens %>"
                    rows="2"
                    size="30"
                    placeholder="Lists"
@@ -48,11 +48,11 @@
             <div class="selection-list" data->
               <% all_tags.each do |tagspec| %>
                   <!--Include only the lists of friends and self -->
-                  <% if tagspec[:status] %>
+                  <% if tagspec[:sortval] < 4 %>
                       <a href="#"
                          class="selection-item <%= tagspec[:cssclass] %>"
                          id="<%= tagspec[:cssid] %>"
-                         data-to_selector="#tagging_lists_tokens"
+                         data-to_selector="#tagging_list_tokens"
                          data-tokeninput="<%= tagspec.to_json %>"
                          <%= %q{style="display: none;"} if used_tags.include? tagspec %>
                          title="Click to Add">

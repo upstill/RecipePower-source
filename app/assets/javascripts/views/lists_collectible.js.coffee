@@ -6,7 +6,7 @@ me = () ->
 	$('div.lists-collectible.dialog')
 
 token_input = () ->
-	$('input#tagging_lists_tokens')
+	$('input#tagging_list_tokens')
 
 input_tokens = () ->
 	$('ul.token-input-list li.token-input-token')

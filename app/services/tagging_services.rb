@@ -4,6 +4,24 @@ class TaggingServices
     @taggable_entity = taggable_entity
   end
 
+  # Glean the taggings to this entity by a given user, of a given type
+  def taggings user=nil, tagtype=nil
+    unless user.is_a? User
+      user, tagtype = nil, user
+    end
+    scope = @taggable_entity.taggings
+    scope = scope.where(user_id: user.id) if user
+    puts 'Hello from Taggings'
+    scope = scope.
+        joins('INNER JOIN tags ON tags.id = taggings.tag_id').
+        where("tags.tagtype = #{Tag.typenum(tagtype)}") if tagtype
+    scope
+  end
+
+  def tags user=nil, tagtype=nil
+    taggings(user, tagtype).includes(:tag).map &:tag
+  end
+
   # Does a tagging exist for the given entity, tag and owner?
   # Sets of each are allowed, whether id numbers or objects
   # The latter may also be nil, to find taggings by anyone

@@ -352,7 +352,7 @@ module TaggingCache
     # Intersect the scope with the set of entities tagged with tags similar to the given tag
     counts.incr itemscope.where(tag_id: TagServices.new(tag).similar_ids) # One extra point for matching in one field
 
-    counts.incr TaggingServices.match tag.name, itemscope # Returns an array of Tagging objects
+    counts.incr TaggingServices.match(tag.name, itemscope) # Returns an array of Tagging objects
 
   end
 end
@@ -848,13 +848,13 @@ class UserCollectedListsCache < ResultsCache
   end
 end
 
-# Provide the set of lists the user has collected
+# Provide the set of lists the user owns
 class UserOwnedListsCache < ResultsCache
   include UserFunc
   include EntitiesCache
 
   def itemscope
-    @itemscope ||= user.decorate.owned_lists(viewer) # ListServices.lists_owned_by user, viewer
+    @itemscope ||= user.decorate.owned_lists viewer # ListServices.lists_owned_by user, viewer
   end
 
 end
@@ -1035,7 +1035,7 @@ class UserListsCache < ResultsCache
   include UserFunc
 
   def itemscope
-    @itemscope ||= user.owned_lists
+    @itemscope ||= user.decorate.owned_lists viewer
   end
 
 end

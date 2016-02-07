@@ -8,6 +8,65 @@ class ListServices
     self.list = list
   end
 
+  # Get the lists on which the entity appears, as visible to the user
+  def self.associated_lists entity_or_decorator, user
+    def self.accept_if list, status
+      [ list, status ] if list
+    end
+    decorator = entity_or_decorator.is_a?(Draper::Decorator) ? entity_or_decorator : entity_or_decorator.decorate
+    ts = TaggingServices.new decorator.object
+    # The lists that the given object appear on FOR THIS USER are those that
+    # are tagged either by the user or by the list owner
+    lists_with_status = (ts.tags(user, :List).collect { |list_tag|  # ts.tags provides all the list taggings BY THIS USER
+      accept_if(list_tag.dependent_lists.where(owner: user).first, :owned) ||
+      accept_if(list_tag.dependent_lists.first, :contributed) ||
+      # List tag but no list! Assert the list as owned by the user
+      accept_if(List.create(name_tag: list_tag, owner: user), :owned)
+    } +
+    ts.tags(:List).collect { |list_tag|
+      accept_if(self.friend_lists_on_tag(list_tag, user).first, :friends) ||
+      accept_if(list_tag.public_lists.first, :public) # There's at least one publicly available list using this tag as title
+    }).compact
+    # Execute the optional block on each, returning the lists only
+    if block_given?
+      lists_with_status.collect { |arr| yield(*arr); arr.first }.uniq
+    else
+      lists_with_status.map(&:first).uniq
+    end
+  end
+
+  # Tagging by a friend on a list they own
+  def self.friend_lists_on_tag tag, user
+    # 1) All public lists owned by friends
+    # 2) All friends-only lists owned by friends who also follow the user (thus allowing access to friends-only lists)
+    query = "(lists.availability = 0 AND lists.owner_id in (#{user.followee_ids.join(', ')}))"
+    if (extras = user.followee_ids & user.follower_ids).present?
+      query << " OR (lists.availability = 1 AND lists.owner_id in (#{extras.join(', ')}))"
+      puts 'extras: ', extras.sort.join(', ')
+    end
+    tag.dependent_lists.where query
+  end
+
+    # List tags are handled specially, due to ownership of lists
+  def self.associate entity_or_decorator, ntags, uid
+    decorator = entity_or_decorator.is_a?(Draper::Decorator) ? entity_or_decorator : entity_or_decorator.decorate
+    otags = ListServices.associated_lists(decorator, User.find(uid)).map &:name_tag
+    # otags = User.find(uid).decorate.list_tags(decorator).collect { |h| h[:tag] }
+    (ntags - otags).each { |list_tag| decorator.assert_tagging list_tag, uid }
+    (otags - ntags).each do |list_tag|
+      if owned_list = list_tag.dependent_lists.where(owner_id: uid).first
+        ListServices.new(owned_list).exclude decorator, uid
+      else
+        refute_tagging list_tag, uid
+      end
+    end
+    ntags.each { |list_tag|
+      list_tag.dependent_lists.where(owner_id: uid).each { |list|
+        list.store decorator.object
+      }
+    }
+  end
+
   # A list "includes" an item if
   # 1) it is stored directly in the list, or
   # 2) it is tagged by the list's tag
@@ -44,11 +103,8 @@ class ListServices
 
   def exclude entity, user_or_id
     uid = (user_or_id.is_a?(Fixnum) ? user_or_id : user_or_id.id)
-    if uid == owner_id
-      @list.remove entity
-      yield if block_given?
-    end
-    TaggingServices.new(entity).refute @list.name_tag, uid # Tag with the list's name tag anyway
+    @list.remove entity if uid == owner_id
+    TaggingServices.new(entity).refute @list.name_tag, uid # Remove tagging (from this user's perspective)
   end
 
   # Remove an entity from the list based on parameters

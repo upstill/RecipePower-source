@@ -109,7 +109,7 @@ module NavtabsHelper
         # Try adding the lists owned by friends
         current_user_or_guest.followees.each { |friend|
           list_set = (list_set +
-              friend.owned_lists(current_user_or_guest).includes(:name_tag).to_a.
+              friend.decorate.owned_lists(current_user_or_guest).includes(:name_tag).to_a.
                   keep_if { |l| l.name != 'Keepers' && l.name != 'To Try' && l.name != 'Now Cooking' }
           ).uniq
           break if list_set.count >= 16
