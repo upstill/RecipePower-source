@@ -35,10 +35,16 @@
               <% end %>
               <div class="<%= collector ? 'col-sm-8 col-xs-8 col-md-9 col-lg-10' : 'col-md-12' %>">
                 <div class="tags">
-                  <% if decorator.tags.present? %>
+                  <% if (tags = decorator.tags).present? %>
                       <h3>TAGS</h3>
                   <% end %>
                   <%= presenter.present_field_wrapped 'tags' %>
+                </div>
+                <div class="lists">
+                  <% if (lists = presenter.present_field_wrapped('lists')).present? %>
+                      <h3>AS SEEN IN TREASURIES</h3>
+                  <% end %>
+                  <%= lists %>
                 </div>
                 <p class="description"><%= decorator.description %></p>
               </div>

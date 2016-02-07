@@ -14,10 +14,10 @@ class CollectibleDecorator < Draper::Decorator
     case fieldname.downcase
       when /_tags$/
         tagtype = fieldname.sub /_tags$/, ''
-        tagtype = ["Culinary Term", "Untyped"] if tagtype=="Other"
+        tagtype = ['Culinary Term', 'Untyped'] if tagtype=='Other'
         visible_tags(:tagtype => tagtype).count
-      when "list", "lists"
-        ListServices.find_by_listee(object).count
+      when 'list', 'lists'
+        ListServices.associated_lists(object).count # ListServices.find_by_listee(object).count
     end
   end
 
@@ -31,11 +31,19 @@ class CollectibleDecorator < Draper::Decorator
                 }
       when /^tags$/
         taglist = visible_tags( :tagtype_x => [ :Question, :List, ]).collect { |tag|
-          h.link_to_submit(tag.name.downcase, tag, :mode => :modal, :class => "taglink" )
+          h.link_to_submit(tag.name.downcase, tag, :mode => :partial, :class => 'taglink' )
         }.join('&nbsp;<span class="tagsep">|</span> ')
         # <span class="<%= recipe_list_element_golink_class item %>">
         button = h.collectible_tag_button self
         (taglist+"&nbsp; "+button).html_safe
+      when /^lists$/
+        ListServices.associated_lists(self) { |list, status|
+          list if [:owned, :contributed, :friends].include?(status)
+        }.compact.collect { |list|
+          name = h.link_to_submit(list.name_tag.name.truncate(50).downcase, list, :mode => :partial, :class => 'taglink' )
+          name << " (#{h.user_homelink list.owner})".html_safe if list.owner_id != tagging_user_id
+          name
+        }.join('&nbsp;<span class="tagsep">|</span> ').html_safe
       when /^rcp/
         attrname = fieldname.sub(/^rcp/, '').downcase
         case attrname
@@ -59,6 +67,7 @@ class CollectibleDecorator < Draper::Decorator
         end
       when "site"
         h.link_to object.sourcename, object.sourcehome, class: "tablink"
+=begin
       when "list", "lists"
         strjoin ListServices.find_by_listee(object).collect { |list|
                   llink = h.link_to_submit list.name, list, class: "rcp_list_element_tag"
@@ -69,6 +78,7 @@ class CollectibleDecorator < Draper::Decorator
                     "#{llink} (#{ulink})".html_safe
                   end
                 }
+=end
       when "collections"
         strjoin CollectibleServices.new(object).collectors.collect { |user|
           h.link_to_submit( user.handle, h.user_path(user), :mode => :modal) unless user.id == object.tagging_user_id

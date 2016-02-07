@@ -9,30 +9,72 @@ class ListServices
   end
 
   # Get the lists on which the entity appears, as visible to the user
-  def self.associated_lists entity_or_decorator, user
+  def self.associated_lists entity_or_decorator, user_or_user_id=nil
     def self.accept_if list, status
-      [ list, status ] if list
+      [list, status] if list
     end
+
+    user, user_id =
+        case user_or_user_id
+          when User
+            [ user_or_user_id, user_or_user_id.id ]
+          when Fixnum
+            [ User.find(user_or_user_id), user_or_user_id ]
+          when nil
+            [ User.find(entity_or_decorator.tagging_user_id), entity_or_decorator.tagging_user_id ]
+        end
     decorator = entity_or_decorator.is_a?(Draper::Decorator) ? entity_or_decorator : entity_or_decorator.decorate
     ts = TaggingServices.new decorator.object
     # The lists that the given object appear on FOR THIS USER are those that
     # are tagged either by the user or by the list owner
-    lists_with_status = (ts.tags(user, :List).collect { |list_tag|  # ts.tags provides all the list taggings BY THIS USER
+    lists_with_status = (ts.filtered_tags(:user => user, :tagtype => :List).collect { |list_tag| # ts.tags provides all the list taggings BY THIS USER
       accept_if(list_tag.dependent_lists.where(owner: user).first, :owned) ||
-      accept_if(list_tag.dependent_lists.first, :contributed) ||
-      # List tag but no list! Assert the list as owned by the user
-      accept_if(List.create(name_tag: list_tag, owner: user), :owned)
+          accept_if(list_tag.dependent_lists.first, :contributed) ||
+          # List tag but no list! Assert the list as owned by the user
+          accept_if(List.create(name_tag: list_tag, owner: user), :owned)
     } +
-    ts.tags(:List).collect { |list_tag|
-      accept_if(self.friend_lists_on_tag(list_tag, user).first, :friends) ||
-      accept_if(list_tag.public_lists.first, :public) # There's at least one publicly available list using this tag as title
-    }).compact
+        ts.tags(:List).collect { |list_tag|
+          accept_if(self.friend_lists_on_tag(list_tag, user).first, :friends) ||
+              accept_if(list_tag.public_lists.first, :public) # There's at least one publicly available list using this tag as title
+        }).compact
     # Execute the optional block on each, returning the lists only
     if block_given?
       lists_with_status.collect { |arr| yield(*arr); arr.first }.uniq
     else
       lists_with_status.map(&:first).uniq
     end
+  end
+
+=begin
+  # Return the set of lists containing the entity (either directly or indrectly) that are visible to the given user
+  # NB: Supplanted by associated_lists
+  def self.find_by_listee taggable_entity
+    viewer = User.find(taggable_entity.tagging_user_id || User.super_id)
+    list_scope = self.lists_visible_to viewer, true
+    friend_ids = viewer.followee_ids + [taggable_entity.tagging_user_id, User.super_id]
+    tag_ids = taggable_entity.taggings.where(user_id: friend_ids).pluck(:tag_id)
+    list_tag_ids = Tag.where(id: tag_ids, tagtype: 16).pluck :id
+    tag_id_str = tag_ids.map(&:to_s).join ','
+
+
+    indirect = tag_ids.blank? ? [] : list_scope.where(pullin: true).joins(:taggings).where("taggings.tag_id in (#{tag_id_str})").to_a
+    # Collect all the lists whose owners included the entity in the list directly
+    direct = Tagging.where(user_id: friend_ids, entity: taggable_entity, tag_id: list_tag_ids).collect { |tagging|
+      list_scope.find_by owner_id: tagging.user_id, name_tag_id: tagging.tag_id
+    }.compact
+    (direct+indirect).uniq(&:id)
+  end
+=end
+
+  # Provide a scope for the lists visible to the given user
+  def self.lists_visible_to user, with_owned=false
+    friend_ids = (user.followee_ids + [User.super_id]).map(&:to_s).join(',')
+    if with_owned
+      owner_clause = "(owner_id = #{user.id}) or "
+    else
+      owner_clause = "(owner_id != #{user.id}) and "
+    end
+    List.where "#{owner_clause}(availability = 0 or (availability = 1 and owner_id in (#{friend_ids})))"
   end
 
   # Tagging by a friend on a list they own
@@ -50,8 +92,7 @@ class ListServices
     # List tags are handled specially, due to ownership of lists
   def self.associate entity_or_decorator, ntags, uid
     decorator = entity_or_decorator.is_a?(Draper::Decorator) ? entity_or_decorator : entity_or_decorator.decorate
-    otags = ListServices.associated_lists(decorator, User.find(uid)).map &:name_tag
-    # otags = User.find(uid).decorate.list_tags(decorator).collect { |h| h[:tag] }
+    otags = ListServices.associated_lists(decorator, uid).map &:name_tag
     (ntags - otags).each { |list_tag| decorator.assert_tagging list_tag, uid }
     (otags - ntags).each do |list_tag|
       if owned_list = list_tag.dependent_lists.where(owner_id: uid).first
@@ -122,42 +163,6 @@ class ListServices
   def pulled_tag_ids
     @list.pullin ? @list.taggings.where(user_id: @list.owner_id).map(&:tag_id) : []
   end
-
-  # Return the set of lists containing the entity (either directly or indrectly) that are visible to the given user
-    def self.find_by_listee taggable_entity
-      viewer = User.find(taggable_entity.tagging_user_id || User.super_id)
-      list_scope = self.lists_visible_to viewer, true
-      friend_ids = viewer.followee_ids + [taggable_entity.tagging_user_id, User.super_id]
-      tag_ids = taggable_entity.taggings.where(user_id: friend_ids).pluck(:tag_id)
-      list_tag_ids = Tag.where(id: tag_ids, tagtype: 16).pluck :id
-      tag_id_str = tag_ids.map(&:to_s).join ','
-
-
-      indirect = tag_ids.blank? ? [] : list_scope.where(pullin: true).joins(:taggings).where("taggings.tag_id in (#{tag_id_str})").to_a
-      # Collect all the lists whose owners included the entity in the list directly
-      direct = Tagging.where(user_id: friend_ids, entity: taggable_entity, tag_id: list_tag_ids).collect { |tagging|
-        list_scope.find_by owner_id: tagging.user_id, name_tag_id: tagging.tag_id
-      }.compact
-      (direct+indirect).uniq(&:id)
-    end
-
-    # Provide a scope for the lists visible to the given user
-    def self.lists_visible_to user, with_owned=false
-      friend_ids = (user.followee_ids + [User.super_id]).map(&:to_s).join(',')
-      if with_owned
-        owner_clause = "(owner_id = #{user.id}) or "
-      else
-        owner_clause = "(owner_id != #{user.id}) and "
-      end
-      List.where "#{owner_clause}(availability = 0 or (availability = 1 and owner_id in (#{friend_ids})))"
-    end
-
-    def available_to? user
-      (user.id == @list.owner.id) || # always available to owner
-          (user.name == "super") || # always available to super
-          (@list.typesym == :public) || # always available if public
-          ((@list.typesym == :friends) && (@list.owner.follows? user)) # available to friends
-    end
 
     # Return a scope on the Tagging table for the unfiltered contents of the list
     def tagging_scope viewerid=nil

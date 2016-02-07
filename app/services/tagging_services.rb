@@ -4,6 +4,17 @@ class TaggingServices
     @taggable_entity = taggable_entity
   end
 
+  # Shop for taggings according to various criteria
+  def filtered_taggings options={}
+    scope = @taggable_entity.taggings
+    uid = options[:user_id] || (options[:user].id if options[:user])
+    scope = scope.where(user_id: uid) if uid
+    scope = scope.
+        joins('INNER JOIN tags ON tags.id = taggings.tag_id').
+        where("tags.tagtype = #{Tag.typenum(options[:tagtype])}") if options[:tagtype]
+    scope
+  end
+
   # Glean the taggings to this entity by a given user, of a given type
   def taggings user=nil, tagtype=nil
     unless user.is_a? User
@@ -11,7 +22,6 @@ class TaggingServices
     end
     scope = @taggable_entity.taggings
     scope = scope.where(user_id: user.id) if user
-    puts 'Hello from Taggings'
     scope = scope.
         joins('INNER JOIN tags ON tags.id = taggings.tag_id').
         where("tags.tagtype = #{Tag.typenum(tagtype)}") if tagtype
@@ -20,6 +30,10 @@ class TaggingServices
 
   def tags user=nil, tagtype=nil
     taggings(user, tagtype).includes(:tag).map &:tag
+  end
+
+  def filtered_tags options={}
+    filtered_taggings(options).includes(:tag).map &:tag
   end
 
   # Does a tagging exist for the given entity, tag and owner?
