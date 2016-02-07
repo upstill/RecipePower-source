@@ -30,7 +30,7 @@ class CollectibleDecorator < Draper::Decorator
                   h.link_to_submit tag.name, tag, :mode => :modal, class: "rcp_list_element_tag"
                 }
       when /^tags$/
-        taglist = visible_tags.collect { |tag|
+        taglist = visible_tags( :tagtype_x => [ :Question, :List, ]).collect { |tag|
           h.link_to_submit(tag.name.downcase, tag, :mode => :modal, :class => "taglink" )
         }.join('&nbsp;<span class="tagsep">|</span> ')
         # <span class="<%= recipe_list_element_golink_class item %>">

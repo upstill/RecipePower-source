@@ -2,7 +2,7 @@
 <% decorator ||= @decorator || TemplateDecorator.new # If no decorator provided, assume this is for a template        %>
 <%= modal_dialog "lists-collectible new-style green", decorator.title.truncate(70), dialog_class: 'dialog-sm' do %>
     <form accept-charset="UTF-8"
-          action="<%= decorator.lists_path %>"
+          action="<%= polymorphic_path [:lists, decorator.object ] %>"
           class="form-inline lists-collectible"
           data-remote="true"
           data-type="json"

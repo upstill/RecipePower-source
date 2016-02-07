@@ -57,7 +57,7 @@ class ListServices
       if owned_list = list_tag.dependent_lists.where(owner_id: uid).first
         ListServices.new(owned_list).exclude decorator, uid
       else
-        refute_tagging list_tag, uid
+        decorator.refute_tagging list_tag, uid
       end
     end
     ntags.each { |list_tag|

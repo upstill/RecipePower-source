@@ -110,9 +110,9 @@ module UsersHelper
       tokeninput[:cssid] = "choice_#{tokeninput[:id]}"
 
       case tokeninput[:status]
-        when :'my own', :'my collected'
+        when :owned, :contributed
           tokeninput[:cssclass] = 'owned'
-        when :'owned', :'collected'
+        when :friends, :public
           tokeninput[:cssclass] = 'friends'
           tokeninput[:name] = "#{tokeninput[:name]} (#{tokeninput[:owner_name]})"
       end
