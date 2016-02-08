@@ -34,7 +34,7 @@ class ListServices
           accept_if(List.create(name_tag: list_tag, owner: user), :owned)
     } +
         ts.tags(:List).collect { |list_tag|
-          accept_if(self.friend_lists_on_tag(list_tag, user).first, :friends) ||
+          accept_if(self.friend_lists_on_tag(decorator, list_tag, user).first, :friends) ||
               accept_if(list_tag.public_lists.first, :public) # There's at least one publicly available list using this tag as title
         }).compact
     # Execute the optional block on each, returning the lists only
@@ -78,7 +78,8 @@ class ListServices
   end
 
   # Tagging by a friend on a list they own
-  def self.friend_lists_on_tag tag, user
+  def self.friend_lists_on_tag decorator, tag, user
+    # What lists are visible:
     # 1) All public lists owned by friends
     # 2) All friends-only lists owned by friends who also follow the user (thus allowing access to friends-only lists)
     query = "(lists.availability = 0 AND lists.owner_id in (#{user.followee_ids.join(', ')}))"
@@ -86,7 +87,13 @@ class ListServices
       query << " OR (lists.availability = 1 AND lists.owner_id in (#{extras.join(', ')}))"
       puts 'extras: ', extras.sort.join(', ')
     end
-    tag.dependent_lists.where query
+    # HOWEVER: since many people may use the list's tag, we only present
+    # lists for an entity when the owner of the list has tagged the entity with the list's name tag
+    tag.
+        dependent_lists.
+        where(query).
+        joins("INNER JOIN taggings ON taggings.user_id = lists.owner_id and taggings.entity_id = #{decorator.id} and taggings.entity_type = '#{decorator.object.class}'").
+        uniq
   end
 
     # List tags are handled specially, due to ownership of lists
