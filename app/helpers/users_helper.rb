@@ -108,14 +108,8 @@ module UsersHelper
   def classify_listtags tokeninputs
     tokeninputs.each { |tokeninput|
       tokeninput[:cssid] = "choice_#{tokeninput[:id]}"
-
-      case tokeninput[:status]
-        when :owned, :contributed
-          tokeninput[:cssclass] = 'owned'
-        when :friends, :public
-          tokeninput[:cssclass] = 'friends'
-          tokeninput[:name] = "#{tokeninput[:name]} (#{tokeninput[:owner_name]})"
-      end
+      tokeninput[:cssclass] = tokeninput[:status].to_s
+      tokeninput[:name] << " (#{tokeninput[:owner_name]})" if tokeninput[:status] != :owned
     }
     tokeninputs
   end

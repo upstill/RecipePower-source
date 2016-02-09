@@ -37,13 +37,13 @@ class CollectibleDecorator < Draper::Decorator
         button = h.collectible_tag_button self
         (taglist+"&nbsp; "+button).html_safe
       when /^lists$/
-        ListServices.associated_lists(self) { |list, status|
-          list if [:owned, :contributed, :friends].include?(status)
-        }.compact.collect { |list|
+        ListServices.associated_lists_with_status(self).collect { |pair|
+          list, status = pair.first, pair.last
           name = h.link_to_submit(list.name_tag.name.truncate(50).downcase, list, :mode => :partial, :class => 'taglink' )
           name << " (#{h.user_homelink list.owner})".html_safe if list.owner_id != tagging_user_id
+          name << "--#{status}" if Rails.env.development?
           name
-        }.join('&nbsp;<span class="tagsep">|</span> ').html_safe
+        }.compact.join('&nbsp;<span class="tagsep">|</span> ').html_safe
       when /^rcp/
         attrname = fieldname.sub(/^rcp/, '').downcase
         case attrname

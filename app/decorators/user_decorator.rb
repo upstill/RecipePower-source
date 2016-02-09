@@ -140,8 +140,8 @@ class UserDecorator < CollectibleDecorator
       owned_lists.includes(:name_tag).map(&:name_tag).each { |tag|
         assert_tag tag, self, :owned
       }
-      collected_lists.includes(:name_tag).map(&:name_tag).each { |tag|
-        assert_tag tag, self, :collected
+      collected_lists.includes(:name_tag, :owner).each { |list|
+        assert_tag list.name_tag, list.owner, :collected
       }
       followees.each { |friend|
         friend.decorate.owned_lists(user).includes(:name_tag).map(&:name_tag).each { |tag|
@@ -155,8 +155,8 @@ class UserDecorator < CollectibleDecorator
       }
       if options[:exhaustive]
         # All other public list tags
-        List.where(availability: 0).where.not(name_tag_id: @tag_ids_used).includes(:name_tag).map(&:name_tag).each { |tag|
-          assert_tag tag, :public
+        List.where(availability: 0).where.not(name_tag_id: @tag_ids_used).includes(:name_tag, :owner).each { |list|
+          assert_tag list.name_tag, list.owner, :public
         }
       end
     end

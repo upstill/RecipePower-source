@@ -9,7 +9,7 @@ class ListServices
   end
 
   # Get the lists on which the entity appears, as visible to the user
-  def self.associated_lists entity_or_decorator, user_or_user_id=nil
+  def self.associated_lists_with_status entity_or_decorator, user_or_user_id=nil
     def self.accept_if list, status
       [list, status] if list
     end
@@ -17,31 +17,44 @@ class ListServices
     user, user_id =
         case user_or_user_id
           when User
-            [ user_or_user_id, user_or_user_id.id ]
+            [user_or_user_id, user_or_user_id.id]
           when Fixnum
-            [ User.find(user_or_user_id), user_or_user_id ]
+            [User.find(user_or_user_id), user_or_user_id]
           when nil
-            [ User.find(entity_or_decorator.tagging_user_id), entity_or_decorator.tagging_user_id ]
+            [User.find(entity_or_decorator.tagging_user_id), entity_or_decorator.tagging_user_id]
         end
     decorator = entity_or_decorator.is_a?(Draper::Decorator) ? entity_or_decorator : entity_or_decorator.decorate
     ts = TaggingServices.new decorator.object
     # The lists that the given object appear on FOR THIS USER are those that
     # are tagged either by the user or by the list owner
-    lists_with_status = (ts.filtered_tags(:user => user, :tagtype => :List).collect { |list_tag| # ts.tags provides all the list taggings BY THIS USER
-      accept_if(list_tag.dependent_lists.where(owner: user).first, :owned) ||
-          accept_if(list_tag.dependent_lists.first, :contributed) ||
+
+    # The tags the user has applied map back to a list.
+    # If the user owns the list (possibly by creating it from the tag), it gets the status :owned
+    # If it already exists, it gets the status :contributed
+    user_tags = ts.filtered_tags(:user => user, :tagtype => :List) # ts.tags provides all the list taggings BY THIS USER
+    (user_tags.collect { |user_tag|
+      accept_if(user_tag.dependent_lists.where(owner: user).first, :owned) ||
+          accept_if(user_tag.dependent_lists.first, :contributed) ||
           # List tag but no list! Assert the list as owned by the user
-          accept_if(List.create(name_tag: list_tag, owner: user), :owned)
+          accept_if(List.create(name_tag: user_tag, owner: user), :owned)
     } +
-        ts.tags(:List).collect { |list_tag|
-          accept_if(self.friend_lists_on_tag(decorator, list_tag, user).first, :friends) ||
-              accept_if(list_tag.public_lists.first, :public) # There's at least one publicly available list using this tag as title
-        }).compact
+    # The item may also be included in the list by
+    # -- its owner (if they allow it to be seen) => :friends
+    # -- or publicly => :public
+    (ts.tags(:List) - user_tags).collect { |other_tag|
+      accept_if(self.friend_lists_on_tag(decorator, other_tag, user).first, :friends) ||
+          accept_if(other_tag.public_lists.first, :public) # There's at least one publicly available list using this tag as title
+    }).compact
+  end
+
+  # Compile the set of lists, leaving the status intact but optionally uniquifying the lists
+  def self.associated_lists entity_or_decorator, user_or_user_id=nil
+    lws = self.associated_lists_with_status(entity_or_decorator, user_or_user_id)
     # Execute the optional block on each, returning the lists only
     if block_given?
-      lists_with_status.collect { |arr| yield(*arr); arr.first }.uniq
+      lws.collect { |arr| yield(*arr); arr.first }.uniq
     else
-      lists_with_status.map(&:first).uniq
+      lws.map(&:first).uniq
     end
   end
 
