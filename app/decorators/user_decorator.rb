@@ -73,9 +73,7 @@ class UserDecorator < CollectibleDecorator
   # Return the set of lists that the user has collected, as visible to some other viewer
   # NB: excludes lists that the user owns
   def collection_lists viewer=user
-    scope = collection_entities(List, viewer).where.not(owner_id: user.id)
-    scope = scope.where(availability: list_availability(viewer)) if user != viewer
-    scope
+    collection_entities(List, viewer).where ListServices.availability_query(viewer) # Only expose lists that are visible to the viewer
   end
   alias_method :collected_lists, :collection_lists
 
@@ -83,7 +81,7 @@ class UserDecorator < CollectibleDecorator
   def owned_lists viewer=user
     # Fall through to the full scope if no viewer is asserted
     scope = user.owned_lists
-    scope = scope.where(availability: list_availability(viewer)) if user != viewer
+    scope = scope.where(ListServices.availability_query(viewer)) if user != viewer
     scope
   end
 

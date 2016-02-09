@@ -1,9 +1,21 @@
 @mixin list-item-backgrounds {
+  background-color: $green-field-background-color;
+  color: $lists-navtab-text-color;
   &.owned {
-    background-color: $viewer-card-background-color;
+    background-color: $lists-navtab-background-color;
+    color: $lists-navtab-text-color;
+  }
+  &.contributed {
+    background-color: $recipes-navtab-background-color;
+    color: $recipes-navtab-text-color;
   }
   &.friends {
-    background-color: $friends-card-background-color;
+    background-color: $friends-navtab-background-color;
+    color: $friends-navtab-text-color;
+  }
+  &.public {
+    background-color: $green-field-background-color;
+    color: $green-text-color;
   }
 }
 
@@ -13,7 +25,6 @@ div.lists-collectible {
         width: 100%;
       }
       li.token-input-token {
-        background-color: $lists-panel-background-color;
         p {
           width: 96%;
         }

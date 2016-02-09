@@ -881,7 +881,7 @@ class ListsIndexCache < ResultsCache
       when 'all'
         List.unscoped
       else # By default, we only see lists belonging to our friends and Super that are not private, and all those that are public
-        ListServices.lists_visible_to viewer, true
+        ListServices.visible_lists viewer, true
     end
   end
 end

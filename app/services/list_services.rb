@@ -80,14 +80,18 @@ class ListServices
 =end
 
   # Provide a scope for the lists visible to the given user
-  def self.lists_visible_to user, with_owned=false
+  def self.availability_query user, with_owned=false
     friend_ids = (user.followee_ids + [User.super_id]).map(&:to_s).join(',')
     if with_owned
       owner_clause = "(owner_id = #{user.id}) or "
     else
       owner_clause = "(owner_id != #{user.id}) and "
     end
-    List.where "#{owner_clause}(availability = 0 or (availability = 1 and owner_id in (#{friend_ids})))"
+    "#{owner_clause}(availability = 0 or (availability = 1 and owner_id in (#{friend_ids})))"
+  end
+
+  def self.visible_lists viewer, with_owned=false
+    List.where ListServices.availability_query(viewer, with_owned)
   end
 
   # Tagging by a friend on a list they own
