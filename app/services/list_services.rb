@@ -33,10 +33,11 @@ class ListServices
     # If it already exists, it gets the status :contributed
     user_tags = ts.filtered_tags(:user => user, :tagtype => :List) # ts.tags provides all the list taggings BY THIS USER
     (user_tags.collect { |user_tag|
-      accept_if(user_tag.dependent_lists.where(owner: user).first, :owned) ||
-          accept_if(user_tag.dependent_lists.where(ListServices.availability_query(user)).first, :contributed) ||
-          # List tag but no list! Assert the list as owned by the user
-          accept_if(List.create(name_tag: user_tag, owner: user), :owned)
+      list_scope = user_tag.dependent_lists
+      accept_if(list_scope.where(owner: user).first, :owned) ||
+          accept_if(list_scope.where(ListServices.availability_query(user)).first, :contributed) ||
+          # List tag but no list! Assert the list as owned by the user UNLESS there's already an invisible list by that name
+          (accept_if(List.create(name_tag: user_tag, owner: user), :owned) unless list_scope.exists?)
     } +
     # The item may also be included in the list by
     # -- its owner (if they allow it to be seen) => :friends
