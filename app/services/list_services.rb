@@ -34,7 +34,7 @@ class ListServices
     user_tags = ts.filtered_tags(:user => user, :tagtype => :List) # ts.tags provides all the list taggings BY THIS USER
     (user_tags.collect { |user_tag|
       accept_if(user_tag.dependent_lists.where(owner: user).first, :owned) ||
-          accept_if(user_tag.dependent_lists.first, :contributed) ||
+          accept_if(user_tag.dependent_lists.where(ListServices.availability_query(user)).first, :contributed) ||
           # List tag but no list! Assert the list as owned by the user
           accept_if(List.create(name_tag: user_tag, owner: user), :owned)
     } +
