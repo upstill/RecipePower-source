@@ -32,7 +32,11 @@ class RpMailer < ActionMailer::Base
     @sender = notification.source
     @recipient = notification.target
     @recipient.shared = notification.shared
-    mail to: @recipient.email, 
+    # Add an attachment for the shared entity's image, if available
+    if (imgdata = @recipe.imgdata).present?
+      attachments['collectible_image'] = Base64.decode64(imgdata.sub(/^data:image\/png;base64,/,''))
+    end
+    mail to: @recipient.email,
       from: @sender.polite_name+" on RecipePower <#{@sender.email}>",
       subject: @sender.polite_name+" has something tasty for you"
   end

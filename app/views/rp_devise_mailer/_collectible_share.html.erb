@@ -1,8 +1,8 @@
 <!--TODO: @recipe -> @collectible -->
 <% @decorator = @recipient.shared.decorate %>
-<% if href = @decorator.imgdata %>
+<% if attachments['collectible_image'] %>
     <div class="share_recipe_pic_box">
-      <%= image_tag href %>
+      <%= image_tag attachments['collectible_image'].url -%>
     </div>
 <% end %>
 <br>
