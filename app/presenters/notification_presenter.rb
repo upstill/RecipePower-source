@@ -31,6 +31,16 @@ class NotificationPresenter < BasePresenter
     end
   end
 
+  def report_accepted
+    case typesym
+      when :share
+        collection_str = (viewer == source) ? 'your collection' : "the collection of #{homelink source}."
+        "#{homelink shared} now appearing in #{collection_str}".html_safe
+      when :make_friend
+        "#{homelink source, link_options} followed you".html_safe
+    end
+  end
+
   def response_label
     case typesym
       when :share

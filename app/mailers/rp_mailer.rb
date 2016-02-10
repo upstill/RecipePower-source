@@ -31,6 +31,7 @@ class RpMailer < ActionMailer::Base
     @recipe = notification.shared
     @sender = notification.source
     @recipient = notification.target
+    @recipient.shared = notification.shared
     mail to: @recipient.email, 
       from: @sender.polite_name+" on RecipePower <#{@sender.email}>",
       subject: @sender.polite_name+" has something tasty for you"

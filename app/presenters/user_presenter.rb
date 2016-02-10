@@ -123,7 +123,7 @@ class UserPresenter < BasePresenter
         label = answer.question.name if answer
       when :latest_recipe
         label = 'Latest Recipe'
-        if latestrr = @decorator.collection_pointers(Recipe,current_user).order(created_at: :desc).first
+        if latestrr = @decorator.collection_pointers(Recipe,current_user_or_guest).order(created_at: :desc).first
           latest = latestrr.entity
           contents = collectible_show_thumbnail latest.decorate
         elsif current_user && user == current_user
@@ -131,7 +131,7 @@ class UserPresenter < BasePresenter
         end
       when :latest_list
         label = 'Latest Treasury'
-        if latest = user.decorate.owned_lists(current_user).order(updated_at: :desc).first
+        if latest = user.decorate.owned_lists(current_user_or_guest).order(updated_at: :desc).first
           contents = link_to_submit latest.name, list_path(latest)
         else
           contents = "To create your first list, click #{link_to_submit "here", new_list_path, :mode => :modal}.".html_safe

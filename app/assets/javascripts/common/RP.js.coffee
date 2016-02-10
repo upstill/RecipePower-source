@@ -327,6 +327,9 @@ RP.process_response = (responseData, odlog) ->
 			window.location.assign redirect # "http://local.recipepower.com:3000/collection" #  href = href
 
 		if followup = responseData.followup # Submit a follow-up request
+			# The idea here is the followup is to replace a certain element, IF IT ALREADY EXISTS. Thus, to
+			# delete an item from its home page, we need to go elsewhere, but if we're NOT on the item's page,
+			# life continues as normal.
 			if !followup.target || $(followup.target)[0] # Either there is no target, or the target exists
 				RP.submit.submit_and_process followup.request
 

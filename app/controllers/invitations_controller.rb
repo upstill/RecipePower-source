@@ -128,11 +128,11 @@ class InvitationsController < Devise::InvitationsController
     if @shared
       # All categories of user get notified of the share
       (breakdown[:new_friends]+breakdown[:redundancies]).each do |sharee|
-        # Mail generic share notice with action button to collect recipe
+        # Mail generic share notice ()sans invitation) with action button to collect recipe
         # Cook Me Later: add to collection
         sharee.invitation_message = params[:user][:invitation_message]
         sharee.save
-        sharee.notify(:share_recipe, current_user, what: @shared)
+        sharee.notify(:share, current_user, what: @shared)
         breakdown[:invited] << sharee
       end
       popups << breakdown.report(:redundancies, :salutation) { |names, count| %Q{#{names} #{count > 1 ? 'have' : 'has' } been notified on your behalf.} }
