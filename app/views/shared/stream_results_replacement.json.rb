@@ -3,4 +3,4 @@
     replacements: [
         [ 'div.stream-results', with_format("html") { render "shared/stream_results_placeholder" } ]
     ]
-}.merge(push_state).merge(flash_notify).to_json
+}.merge(flash_notify).to_json

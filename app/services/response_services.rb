@@ -54,6 +54,13 @@ class ResponseServices
     @originator
   end
 
+  # Provide an array of parameters for pushState on the client such that:
+  # 1) the page can be reloaded without modification
+  # 2) when popping the state, reload only those portions that need to be reloaded (via JSON request)
+  def push_state action=nil
+    [ { format: 'json' }, page_title, originator ]
+  end
+
   def omniauth_pending clear = false
     @session.delete(:omniauth) if clear
     @session[:omniauth] && @session[:omniauth][:provider]

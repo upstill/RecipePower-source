@@ -7,4 +7,4 @@
                      id: pagelet_body_id)
         ]
     ]
-}.merge(flash_notify).to_json
+}.merge(push_state).merge(flash_notify).to_json

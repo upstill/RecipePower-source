@@ -6,12 +6,22 @@ jQuery ->
 		window.open this.href,'_blank'
 		RP.reporting.report this
 		event.preventDefault()
-	$('body').on "click", 'a.checkbox-menu-item', (event) ->
+	$('body').on 'click', 'a.checkbox-menu-item', (event) ->
 		# The input element is either the target, or it is enclosed in the target
 		# if !$(event.target).prop('tagName') == 'INPUT'
 		# 	$('input', event.target).prop 'checked', !$('input', event.target).prop('checked')
 		RP.submit.onClick event
 		false
+
+	# Handle popstate events by adding special parameters to the URL and submitting
+	$(window).on 'popstate', (e) ->
+		url = location.href
+		state = e.originalEvent.state
+		if (state != null) && state.format == 'json'
+			# state.queryparams provides parametrization for making a JSON request, if possible
+			RP.submit.submit_and_process RP.build_request(url, state.queryparams)
+		else
+			window.location.assign url # Replace the page from scratch
 
 	# Adjust the pading on the window contents to accomodate the navbar, on load and wheneer the navbar resizes
 	if navbar = $('div.navbar')[0]
@@ -153,13 +163,6 @@ do_request = (url, ajax_options, processing_options) ->
 		xmlhttp.setRequestHeader "Accept", "text/html" 
 		xmlhttp.setRequestHeader 'If-Modified-Since', ajax_options.requestHeaders['If-Modified-Since']
 		xmlhttp.send()
-
-
-# Replace the page with the results of the link, properly updating the address bar
-RP.get_page = (url) ->
-	$('body').load url, {}, (responseText, textStatus, XMLHttpRequest) ->
-		$('body').trigger('load')
-		window.history.replaceState { an: "object" }, 'Collection', url
 
 # Handle successful return of a JSON request by running whatever success function
 #   obtains, and stashing any resulting code away for invocation after closing the
@@ -330,8 +333,10 @@ RP.process_response = (responseData, odlog) ->
 		if responseData.reload
 			location.reload()
 
+		# Remember this URL for getting back to here
 		if state = responseData.pushState
-			window.history.pushState null, state[1], state[0]
+			window.history.pushState state[0], state[1], state[2]
+			document.title = state[1]
 
 		if deletions = responseData.deletions
 			for deletion in deletions
