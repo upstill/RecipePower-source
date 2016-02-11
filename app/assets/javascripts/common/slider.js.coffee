@@ -18,34 +18,39 @@ jQuery ->
 		$(enclosure).addClass 'nopic'
 
 RP.slider.setup = (button_elmt) ->
-	$(button_elmt).hover RP.slider.hoverin, RP.slider.hoverout
+	# $(button_elmt).hover RP.slider.hoverin, RP.slider.hoverout
 	$(button_elmt).click RP.slider.click
 	button_check button_elmt
 
 RP.slider.click = (event) ->
 	button_elmt = event.currentTarget
 	parent = button_elmt.parentNode
+	trackitem = $('.track', parent)[0]
 	right_button = $('.right', parent)[0]
 	left_button = $('.left', parent)[0]
 	winrect = parent.getBoundingClientRect()
-	scroll_by = winrect.right - winrect.left
 	if button_elmt == right_button
-		scroll_by = -scroll_by
+		cutoff = winrect.right
+	else
+		cutoff = winrect.left - (winrect.right - winrect.left)
 	# Do a linear search for the item that overlaps the left side of the scrolling panel
 	$('.slider-item', parent).each (index) ->
 		itemrect = this.getBoundingClientRect()
-		if (itemrect.right+scroll_by) >= winrect.left
-			# Scroll so that the leftmost item of the new scrolling window aligns with the left of the window
-			slide_by left_button, winrect.left-itemrect.left
-			clearScroll()
-			setTimeout ->
-				if $('div:hover', parent)[0] == button_elmt
-					setScroll button_elmt
-			, 1000
-			return false
+		if itemrect.right > cutoff
+			# slide_by left_button, winrect.left-itemrect.left
+			$(trackitem).animate
+				left: ("+=" + (winrect.left-itemrect.left)),
+				->
+					if button_elmt == right_button # Check for more content if scrolling left
+						button_check button_elmt
+			return false # Break the loop
 
 RP.slider.bump = (button_elmt) ->
 	slide_by button_elmt, 5
+
+scroll_to = (parent, elmt) ->
+	$('.track', parent).scrollTo elmt, 100,
+		axis: 'x'
 
 slide_by = (button_elmt, incr) ->
 	parent = button_elmt.parentNode
