@@ -22,6 +22,7 @@ jQuery ->
 				# state.queryparams provides parametrization for making a JSON request, if possible
 				RP.submit.submit_and_process RP.build_request(url, state.queryparams)
 			else
+				window.history.replaceState null, state.title
 				window.location.assign url # Replace the page from scratch
 
 	# Adjust the pading on the window contents to accomodate the navbar, on load and wheneer the navbar resizes
@@ -339,6 +340,8 @@ RP.process_response = (responseData, odlog) ->
 
 		# Remember this URL for getting back to here
 		if state = responseData.pushState
+			if window.history.state == null # If we're leaving an original page, define a state vbl. so we can reload
+				window.history.replaceState { title: document.title }, document.title
 			window.history.pushState state[0], state[1], state[2]
 			document.title = state[1]
 
