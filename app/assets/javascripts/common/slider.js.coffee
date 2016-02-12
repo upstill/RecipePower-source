@@ -18,6 +18,49 @@ jQuery ->
 		$(enclosure).addClass 'nopic'
 
 RP.slider.setup = (button_elmt) ->
+	# Enable swiping...
+	$('div.slider').swipe
+		# Generic swipe handler for all directions
+		swipeLeft: (event, direction, distance, duration, fingerCount, fingerData) ->
+			console.log "You swiped left"
+		,
+		swipeRight: (event, direction, distance, duration, fingerCount, fingerData) ->
+			console.log "You swiped right"
+		,
+		swipeStatus: (event, phase, direction, distance, duration, fingerCount, fingerData) ->
+			console.log "Swiping " + phase + " " + direction + " " + distance
+			parent = $(this)[0]
+			winrect = parent.getBoundingClientRect()
+			trackitem = $('.track', parent)[0]
+			trackrect = trackitem.getBoundingClientRect()
+			if phase == 'start'
+				# Initialize locations and bounds
+				$(trackitem).data 'startpos', trackrect.left
+			else if phase == 'move'
+				startpos = $(trackitem).data 'startpos'
+				prevmove = trackrect.left - startpos # How much we've moved prior
+				if direction == 'left'
+					distance = -distance
+					relmove = distance - prevmove
+					relmove = Math.max (winrect.right-trackrect.right), relmove
+					console.log "relmove is " + relmove
+					slide_track trackitem, relmove
+				else if direction == 'right'
+					relmove = distance - prevmove
+					relmove = Math.min (winrect.left-trackrect.left), relmove
+					console.log "relmove is " + relmove
+					slide_track trackitem, relmove
+			else if phase == 'end'
+				# We check for loading more items
+				if (stream_trigger = $('.stream-trigger', parent)[0]) && (trackrect.right - winrect.right) < 500
+					# Fire if the trigger is closer than 500 pixels to visibility
+					RP.stream.fire stream_trigger
+		,
+		tap: (event, target) ->
+			console.log "Tapped " + target
+		,
+		# Default is 75px, set to 0 for demo so any distance triggers swipe
+		threshold: 0
 	# $(button_elmt).hover RP.slider.hoverin, RP.slider.hoverout
 	$(button_elmt).click RP.slider.click
 	button_check button_elmt
