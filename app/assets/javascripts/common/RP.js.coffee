@@ -20,8 +20,8 @@ jQuery ->
 		if (state != null) && state.format == 'json'
 			# state.queryparams provides parametrization for making a JSON request, if possible
 			RP.submit.submit_and_process RP.build_request(url, state.queryparams)
-		else
-			window.location.assign url # Replace the page from scratch
+		# else
+		# 	window.location.assign url # Replace the page from scratch
 
 	# Adjust the pading on the window contents to accomodate the navbar, on load and wheneer the navbar resizes
 	if navbar = $('div.navbar')[0]
