@@ -41,7 +41,7 @@
                   <%= presenter.present_field_wrapped 'tags' %>
                 </div>
                 <div class="lists">
-                  <% if (lists = presenter.present_field_wrapped('lists')).present? %>
+                  <% if (lists = presenter.present_field('lists')).present? %>
                       <h3>AS SEEN IN TREASURIES</h3>
                   <% end %>
                   <%= lists %>
