@@ -1,16 +1,20 @@
 RP.slider ||= {}
 
 jQuery ->
-	$(document).on 'mouseenter', 'div.slider-item', (event) ->
-		console.log "entering item of class " + event.target.attributes.class
+	$(document).on 'click', 'div.slider-item', (event) ->
+		# console.log "entering item of class " + event.target.attributes.class
 		elmt = $(event.target).closest 'div.slider-item'
 		if $('div.slider-right', elmt).hasClass 'pop-cardlet'
 			$('div.slider-right', elmt).fadeIn()
-	$(document).on 'mouseleave', 'div.slider-item', (event) ->
-		console.log "leaving item of class " + event.target.attributes.class
+		event.preventBubble()
+		# event.preventDefault()
+	$(document).on 'click', 'div.slider-item', (event) ->
+		# console.log "leaving item of class " + event.target.attributes.class
 		elmt = $(event.target).closest 'div.slider-item'
 		if $('div.slider-right', elmt).hasClass 'pop-cardlet'
 			$('div.slider-right', elmt).fadeOut()
+		event.preventBubble()
+		# event.preventDefault()
 	$(document).on 'image:empty', 'div.slider-pic img.empty', (event) ->
 		enclosure = $(event.currentTarget).closest 'div.slider-item'
 		$('div.slider-left', enclosure).hide()
@@ -41,15 +45,19 @@ RP.slider.setup = (button_elmt) ->
 				prevmove = trackrect.left - startpos # How much we've moved prior
 				if direction == 'left'
 					distance = -distance
-					relmove = distance - prevmove
-					relmove = Math.max (winrect.right-trackrect.right), relmove
-					console.log "relmove is " + relmove
-					slide_track trackitem, relmove
+					maxmove = winrect.right-trackrect.right
 				else if direction == 'right'
+					maxmove = winrect.left-trackrect.left
+				else
+					maxmove = 0
+				if maxmove != 0
 					relmove = distance - prevmove
-					relmove = Math.min (winrect.left-trackrect.left), relmove
-					console.log "relmove is " + relmove
-					slide_track trackitem, relmove
+					console.log "prevmove " + prevmove + ", relmove " + relmove + ", maxmove " + maxmove
+					if Math.abs(relmove) > 10
+						if Math.abs(relmove) > Math.abs(maxmove)
+							relmove = maxmove
+						# console.log "Moving " + relmove
+						slide_track trackitem, relmove
 			else if phase == 'end'
 				# We check for loading more items
 				if (stream_trigger = $('.stream-trigger', parent)[0]) && (trackrect.right - winrect.right) < 500
@@ -111,9 +119,11 @@ slide_by = (button_elmt, incr) ->
 		button_check button_elmt
 
 slide_track = (track_item, incr) ->
-	if incr != 0
+	if incr != 0 && !$(track_item).hasClass 'move-pending'
 		place = parseInt $(track_item).css('left')
-		$(track_item).css 'left', place+incr
+		$(track_item).addClass 'move-pending'
+		$(track_item).css('left', place+incr).promise().done ->
+			$(track_item).removeClass 'move-pending'
 
 button_check = (button_elmt) ->
 	parent = button_elmt.parentNode

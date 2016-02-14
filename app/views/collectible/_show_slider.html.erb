@@ -4,7 +4,9 @@
         <%= image_enclosure decorator,
                             class: 'pic-box',
                             fill_mode: 'fixed-height',
-                            fallback_img: decorator.object.is_a?(User) %>
+                            fallback_img: decorator.object.is_a?(User),
+                            nolink: true
+        %>
       </div>
       <p class="slider-title">
         <%= decorator.title %>
