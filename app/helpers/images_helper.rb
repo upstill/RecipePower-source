@@ -60,7 +60,7 @@ module ImagesHelper
         enclosure_options[:style] = enclosure_options[:style].to_s +
             (image_options[:fill_mode] || '') == 'fixed-height' ? 'width: auto; height: 100%;' : 'width: 100%; height: auto;'
       end
-      content = link_to(content, decorator.url) unless nolink
+      content = link_to_submit(content, decorator.object) unless nolink
       content_tag tag, content, enclosure_options
     end
   end
