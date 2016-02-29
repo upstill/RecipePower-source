@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %></title>
+  <%= stylesheet_link_tag 'application', :media => 'all' %>
   <!--[if lt IE 9]>
   <script src="http://html5shim.googlecode.com/svn/trunk/html5.js" type="text/javascript"></script>
   <![endif]-->
@@ -31,10 +32,10 @@
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap-3.3.2.js"></script>
   <%# end %>
 -->
+  <%= bootstrap_css_include_tag !Rails.env.development? %>
   <%= jquery_include_tag !Rails.env.development?, Rails.application.config.use_jquery2 %>
   <!-- From bootstrap-sass -->
-  <%= bootstrap_include_tag !Rails.env.development? %>
-  <%= stylesheet_link_tag 'application', :media => 'all' %>
+  <%= bootstrap_js_include_tag !Rails.env.development? %>
   <%= javascript_include_tag 'application' %>
   <%= csrf_meta_tag %>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
