@@ -18,7 +18,7 @@ class BasePresenter
 
   # Does this presenter have an avatar to present on cards, etc?
   def card_avatar?
-    true
+    decorator.imgdata.present?
   end
 
 private

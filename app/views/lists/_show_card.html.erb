@@ -3,7 +3,7 @@
       <%= collectible_vote_buttons decorator.object %>
       <table style="width: 100%">
         <tr>
-          <td rowspan="2" class="pic-box">
+          <td rowspan="2" class="pic-box" <%= 'style=display:none' if !presenter.card_avatar? %>>
             <div class="pic-inset">
               <%= presenter.card_avatar %>
             </div>
@@ -17,7 +17,7 @@
             <div class="row">
               <div class="col-sm-6 col-xs-6 col-md-5 col-lg-4">
                 <h3>AS COMPILED BY</h3>
-                <span class="owner-name"><%= decorator.owner.polite_name %><br></span>
+                <span class="owner-name"><%= user_homelink decorator.owner %><br></span>
                 <div class="owner-pic">
                   <%= present decorator.owner, nil do |up| %>
                       <%= up.card_avatar %>

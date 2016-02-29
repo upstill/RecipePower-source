@@ -6,11 +6,14 @@ module CardPresentation
                                     class: decorator.image_class,
                                     fallback_img: options[:fallback_img] || decorator.object.is_a?(User),
                                     fill_mode: 'fixed-width'
-    img = link_to_submit(img,
-                         polymorphic_path([:editpic, decorator.object]),
-                         mode: 'modal',
-                         title: 'Get Picture') if permitted_to?(:update, decorator.object)
-    img
+    if img && permitted_to?(:update, decorator.object)
+      link_to_submit img,
+                     polymorphic_path([:editpic, decorator.object]),
+                     mode: 'modal',
+                     title: 'Get Picture'
+    else
+      img
+    end
   end
 
   # By default, show the card if there's an avatar OR a backup avatar

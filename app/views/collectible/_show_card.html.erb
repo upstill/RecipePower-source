@@ -6,16 +6,16 @@
         <tr>
           <% if vid = presenter.card_video %>
               <td rowspan="2" class="video-box">
-                 <%= vid %>
+                <%= vid %>
               </td>
           <% else %>
-              <td rowspan="2" class="pic-box">
+              <td rowspan="2" class="pic-box" <%= 'style=display:none' if !presenter.card_avatar? %> >
                 <div class="pic-inset">
                   <%= presenter.card_avatar %>
                 </div>
               </td>
           <% end %>
-           <td valign="top" class="upper-content">
+          <td valign="top" class="upper-content">
             <div class="title">
               <%= presenter.card_homelink class: "title-link" %>
               <%= collectible_collect_button(decorator, "lg") unless decorator.object == response_service.user %>
@@ -25,12 +25,12 @@
               <% if collector = decorator.first_collector %>
                   <div class="col-sm-4 col-xs-4 col-md-3 col-lg-2">
                     <h3>FOUND BY</h3>
-                    <span class="owner-name"><%= collector.polite_name %><br></span>
-                    <div class="owner-pic">
-                      <%= present collector, nil do |cp| %>
+                    <%= present collector, nil do |cp| %>
+                        <span class="owner-name"><%= user_homelink collector%><br></span>
+                        <div class="owner-pic">
                           <%= cp.card_avatar %>
-                      <% end %>
-                    </div>
+                        </div>
+                    <% end %>
                   </div>
               <% end %>
               <div class="<%= collector ? 'col-sm-8 col-xs-8 col-md-9 col-lg-10' : 'col-md-12' %>">

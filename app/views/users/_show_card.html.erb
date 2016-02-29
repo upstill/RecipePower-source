@@ -4,7 +4,7 @@
       <%= collectible_vote_buttons decorator.object unless decorator.object == response_service.user %>
       <table style="width: 100%">
         <tr>
-          <td rowspan="2" class="pic-box">
+          <td rowspan="2" class="pic-box" <%= 'style=display:none' if !presenter.card_avatar? %> >
             <div class="pic-inset">
               <%= presenter.card_avatar %>
             </div>
