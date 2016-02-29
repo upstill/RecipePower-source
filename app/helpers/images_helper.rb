@@ -52,14 +52,16 @@ module ImagesHelper
       tag, opts_in = :div, tag
     end
     image_options = opts_in.clone
+    nolink = image_options.delete :nolink
     enclosure_options = image_options.slice! :fill_mode, :explain, :fallback_img, :handle_empty
 
-    if image = image_with_error_recovery(decorator, image_options )
+    if content = image_with_error_recovery(decorator, image_options )
       if tag.to_sym == :div
         enclosure_options[:style] = enclosure_options[:style].to_s +
             (image_options[:fill_mode] || '') == 'fixed-height' ? 'width: auto; height: 100%;' : 'width: 100%; height: auto;'
       end
-      content_tag tag, link_to(image, decorator.url), enclosure_options
+      content = link_to_submit(content, decorator.object) unless nolink
+      content_tag tag, content, enclosure_options
     end
   end
 

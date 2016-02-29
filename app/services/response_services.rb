@@ -20,6 +20,7 @@ class ResponseServices
     @controller = params[:controller]
     @active_menu = params[:am]
     @action = params[:action]
+    @nopush = params[:nopush]
     # A trigger is a request for a popup, embedded in the query string
     @trigger = params[:trigger].sub(/^"?([^"]*)"?/, '\\1') if params[:trigger]
     @title = @controller.capitalize+"#"+@action
@@ -58,7 +59,8 @@ class ResponseServices
   # 1) the page can be reloaded without modification
   # 2) when popping the state, reload only those portions that need to be reloaded (via JSON request)
   def push_state action=nil
-    [ { format: 'json' }, page_title, originator ]
+    # TODO: modify originator according to action
+    [ { format: 'json', queryparams: { nopush: true } }, page_title, originator ] unless @nopush
   end
 
   def omniauth_pending clear = false
