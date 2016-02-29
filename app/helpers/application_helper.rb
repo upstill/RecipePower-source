@@ -242,25 +242,32 @@ module ApplicationHelper
   end
 
   # The Bootstrap version is that provided by bootstrap-sass
-  def bootstrap_include_tag use_cdn=true
-    # The version may include a maintenance release number
-    version = Bootstrap::VERSION.split('.')[0..2].join('.')
-    local_bs =
-        javascript_include_tag("bootstrap.js") +
-        stylesheet_link_tag("bootstrap_import.css")
+  def bootstrap_css_include_tag use_cdn=true
     if use_cdn
-      local_bs.gsub! '<', '%3C'
-      [
-          javascript_include_tag("//maxcdn.bootstrapcdn.com/bootstrap/#{version}/js/bootstrap.min.js"),
-          stylesheet_link_tag("bootstrap_preface"),
-          stylesheet_link_tag("//maxcdn.bootstrapcdn.com/bootstrap/#{version}/css/bootstrap.min.css"),
-          stylesheet_link_tag("//maxcdn.bootstrapcdn.com/bootstrap/#{version}/css/bootstrap-theme.min.css"),
-          javascript_tag(%Q{
-            if(typeof $().emulateTransitionEnd != 'function') {
-              document.write(unescape('#{local_bs}'));
-            }
-          })
-      ].join("\n").html_safe
+      # The version may include a maintenance release number
+      version = Bootstrap::VERSION.split('.')[0..2].join('.')
+      stylesheet_link_tag('bootstrap_preface') +
+      stylesheet_link_tag("//maxcdn.bootstrapcdn.com/bootstrap/#{version}/css/bootstrap.min.css") +
+      stylesheet_link_tag("//maxcdn.bootstrapcdn.com/bootstrap/#{version}/css/bootstrap-theme.min.css")
+    else
+      stylesheet_link_tag 'bootstrap_import.css'
+    end
+  end
+
+  # The Bootstrap version is that provided by bootstrap-sass
+  def bootstrap_js_include_tag use_cdn=true
+    local_bs = javascript_include_tag 'bootstrap.js'
+    if use_cdn
+      # The version may include a maintenance release number
+      version = Bootstrap::VERSION.split('.')[0..2].join('.')
+      bs = (stylesheet_link_tag('bootstrap_import.css') + local_bs).gsub '<', '%3C'
+      # Follow the bootstrap CDN pull with a test and fallback to the local version
+      javascript_include_tag("//maxcdn.bootstrapcdn.com/bootstrap/#{version}/js/bootstrap.min.js") +
+      javascript_tag(%Q{
+        if(typeof $().emulateTransitionEnd != 'function') {
+          document.write(unescape('#{bs}'));
+        }
+      })
     else
       local_bs
     end
