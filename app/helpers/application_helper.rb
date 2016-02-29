@@ -241,6 +241,7 @@ module ApplicationHelper
     ].join("\n").html_safe
   end
 
+
   # The Bootstrap version is that provided by bootstrap-sass
   def bootstrap_css_include_tag use_cdn=true
     if use_cdn
