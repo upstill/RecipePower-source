@@ -1,3 +1,5 @@
+@import 'common/media';
+
 $font-stack: Oswald, "Helvetica Neue", Helvetica, Arial, sans-serif;
 $oswald: Oswald, "Helvetica Neue", Helvetica, Arial, sans-serif;
 $oswald-light: Oswald-Light, Oswald, "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -33,14 +35,6 @@ $friends-panel-background-transparent: rgba(233, 228, 202, 0);
 $friends-panel-label-color: #f3f2ea;
 $friends-card-link-color: mix($friends-panels-label-button-color, black, 80%);
 
-$panel-two-background-color: #7c966a;
-$panel-two-background-transparent: rgba(124, 150, 106, 0);
-
-$panel-three-background-color: #4c7c99;
-$panel-three-background-transparent: rgba(76, 124, 153, 0);
-
-$panel-four-background-color: #dbc046;
-$panel-four-background-transparent: rgba( 219, 192, 70, 0);
   // For displaying other users
 $user-card-background-color: #ecedef;
 $user-card-text-color: #aaaaaa;
@@ -104,7 +98,6 @@ $slider-scroller-depth: 1004; // from slider.css.scss
 $slider-title-depth: 1001; // from slider.css.scss
 $slider-fader-depth: 1002; // from slider.css.scss
 $slider-right-depth: 1003; // from slider.css.scss
-$panels-depth: 991;
 
 $salmon-background-color: #CF6361;
 $salmon-text-color: #E8d6d6;

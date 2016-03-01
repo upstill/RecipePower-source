@@ -143,6 +143,21 @@ div.container.below-menu { // Master container that scrolls below the menu
   }
 }
 
+/*
+div.generic-top {
+  width: 100%;
+  position: absolute;
+  z-index: $menuback-depth;
+  div {
+    display: inline-block;
+    float: left;
+    &.logo {
+      margin-left: 30px;
+    }
+  }
+}
+*/
+
 .header {
   position: fixed;
   width: 100%;
@@ -155,12 +170,6 @@ div.container.below-menu { // Master container that scrolls below the menu
     position: relative;
     width: 740px;
     height: 130px;
-    div.logo {
-      position: absolute;
-      left: -210px;
-      height: 200px;
-      content: image-url('rp-logo.png');
-    }
     .menuIcon {
       display: none;
       position: absolute;
@@ -285,7 +294,20 @@ div.container.below-menu { // Master container that scrolls below the menu
   }
 }
 
+div.logo {
+  position: absolute;
+  left: 1px;
+  height: 200px;
+  content: image-url('rp-logo.png');
+}
+
 @media only screen and (max-width: 780px) {
+  div.logo {
+    padding: 4px 6px;
+    height: 47px;
+    left: -$logo-clearance-sm;
+    content: image-url('RP-logo-small.png');
+  }
   div.container.menuback {
     // Backing for the menu which matches the general container in cross-section
     height: $menuback-height-up;
@@ -314,12 +336,6 @@ div.container.below-menu { // Master container that scrolls below the menu
     div.menu {
       width: 100%;
       min-width: 300px;
-      div.logo {
-        padding: 4px 6px;
-        height: 47px;
-        left: -$logo-clearance-sm;
-        content: image-url('RP-logo-small.png');
-      }
       .menuIcon {
         display: block;
       }

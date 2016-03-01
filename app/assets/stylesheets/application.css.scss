@@ -41,170 +41,6 @@ div.modal.signup {
   outline: none;
 }
 
-.panels {
-  height: 100vh;
-  z-index: $panels-depth;
-  section {
-    overflow: hidden;
-    width: 100%;
-    position: relative;
-    font-family: Oswald, sans-serif;
-  }
-  .panel-one {
-    background-image: image-url("rp-homepage-2.jpg");
-    background-position: center center;
-    background-repeat: no-repeat;
-    //background-attachment: fixed;
-    background-size: cover;
-    height: 100vh;
-  }
-  .panel-two {
-    background-color: $panel-two-background-color;
-    height: 100vh;
-    div.slider-fader {
-      background: -moz-linear-gradient(left, $panel-two-background-transparent, $panel-two-background-color);
-      // background: -webkit-linear-gradient(left, rgba(216,224,226,0), #d8dde0);
-      background: rgb(124, 150, 106); /* Old browsers */
-      background: -moz-linear-gradient(left, $panel-two-background-transparent, $panel-two-background-color); /* FF3.6+ */
-      background: -webkit-gradient(linear, left top, right top, color-stop(0%, $panel-two-background-color), color-stop(100%, $panel-two-background-color)); /* Chrome,Safari4+ */
-      background: -webkit-linear-gradient(left, $panel-two-background-transparent, $panel-two-background-color); /* Chrome10+,Safari5.1+ */
-      background: -o-linear-gradient(left, $panel-two-background-transparent, $panel-two-background-color); /* Opera 11.10+ */
-      background: -ms-linear-gradient(left, $panel-two-background-transparent, $panel-two-background-color); /* IE10+ */
-      background: linear-gradient(to right, $panel-two-background-transparent, $panel-two-background-color); /* W3C */
-      filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#d8dde0', endColorstr='#d8dde0', GradientType=1); /* IE6-9 */
-    }
-  }
-  .panel-three {
-    background-color: $panel-three-background-color;
-    height: 100vh;
-    div.slider-fader {
-      background: -moz-linear-gradient(left, $panel-three-background-transparent, $panel-three-background-color);
-      // background: -webkit-linear-gradient(left, rgba(216,224,226,0), #d8dde0);
-      background: rgb(76, 124, 153); /* Old browsers */
-      background: -moz-linear-gradient(left, $panel-three-background-transparent, $panel-three-background-color); /* FF3.6+ */
-      background: -webkit-gradient(linear, left top, right top, color-stop(0%, $panel-three-background-color), color-stop(100%, $panel-three-background-color)); /* Chrome,Safari4+ */
-      background: -webkit-linear-gradient(left, $panel-three-background-transparent, $panel-three-background-color); /* Chrome10+,Safari5.1+ */
-      background: -o-linear-gradient(left, $panel-three-background-transparent, $panel-three-background-color); /* Opera 11.10+ */
-      background: -ms-linear-gradient(left, $panel-three-background-transparent, $panel-three-background-color); /* IE10+ */
-      background: linear-gradient(to right, $panel-three-background-transparent, $panel-three-background-color); /* W3C */
-      filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#d8dde0', endColorstr='#d8dde0', GradientType=1); /* IE6-9 */
-    }
-  }
-  .panel-four {
-    background-color: $panel-four-background-color;
-    height: 100vh;
-    div.slider-fader {
-      background: -moz-linear-gradient(left, $panel-four-background-transparent, $panel-four-background-color);
-      // background: -webkit-linear-gradient(left, rgba(216,224,226,0), #d8dde0);
-      background: rgb(219, 192, 70); /* Old browsers */
-      background: -moz-linear-gradient(left, $panel-four-background-transparent, $panel-four-background-color); /* FF3.6+ */
-      background: -webkit-gradient(linear, left top, right top, color-stop(0%, $panel-four-background-color), color-stop(100%, $panel-four-background-color)); /* Chrome,Safari4+ */
-      background: -webkit-linear-gradient(left, $panel-four-background-transparent, $panel-four-background-color); /* Chrome10+,Safari5.1+ */
-      background: -o-linear-gradient(left, $panel-four-background-transparent, $panel-four-background-color); /* Opera 11.10+ */
-      background: -ms-linear-gradient(left, $panel-four-background-transparent, $panel-four-background-color); /* IE10+ */
-      background: linear-gradient(to right, $panel-four-background-transparent, $panel-four-background-color); /* W3C */
-      filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#d8dde0', endColorstr='#d8dde0', GradientType=1); /* IE6-9 */
-    }
-  }
-  div.panel-elements {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    // z-index: $panels-depth;
-    p.panel-title {
-      top: 10%;
-      font-size: 230px;
-      text-transform: uppercase;
-      font-weight: 700;
-      color: rgba(255, 255, 255, 0.32);
-      margin: 0 30px;
-      line-height: 1;
-    }
-    p.panel-subtitle {
-      font-size: 50px;
-      color: rgba(255, 255, 255, 0.32);
-      letter-spacing: 2px;
-      margin: 0 40px;
-      line-height: 1;
-    }
-    p.panel-description {
-      font-size: 27px;
-      color: rgba(255, 255, 255, 1);
-      font-weight: 400;
-      letter-spacing: 2px;
-      margin: -105px 0 0 350px;
-      position: absolute;
-      line-height: 1;
-    }
-    p.panel-description-long {
-      font-size: 27px;
-      color: rgba(255, 255, 255, 1);
-      font-weight: 400;
-      letter-spacing: 2px;
-      margin: -160px 0 0 600px;
-      position: absolute;
-      line-height: 1;
-    }
-  }
-}
-
-@media only screen and (max-width: 1100px) {
-  div.panels {
-    div.panel-elements {
-      p.panel-title {
-        font-size: 172px;
-      }
-      p.panel-subtitle {
-        font-size: 38px;
-      }
-      p.panel-description {
-        font-size: 20px;
-      }
-      p.panel-description-long {
-        font-size: 20px;
-      }
-    }
-  }
-}
-
-@media only screen and (max-width: 900px) {
-  div.panels {
-    div.panel-elements {
-      p.panel-title {
-        font-size: 150px;
-      }
-      p.panel-subtitle {
-        font-size: 33px;
-      }
-      p.panel-description {
-        font-size: 18px;
-      }
-      p.panel-description-long {
-        font-size: 18px;
-      }
-    }
-  }
-}
-
-@media only screen and (max-width: 700px) {
-  div.panels {
-    div.panel-elements {
-      p.panel-title {
-        font-size: 115px;
-      }
-      p.panel-subtitle {
-        font-size: 25px;
-      }
-      p.panel-description {
-        font-size: 14px;
-      }
-      p.panel-description-long {
-        font-size: 14px;
-      }
-    }
-  }
-}
-
 div.card {
   background-color: white;
   border: 2px darkgray;
@@ -277,19 +113,6 @@ div.triggered-form {
 
 img.empty {
   display: none;
-}
-
-div.generic-top {
-  width: 100%;
-  position: absolute;
-  z-index: $menuback-depth;
-  div {
-    display: inline-block;
-    float: left;
-    &.logo {
-      margin-left: 30px;
-    }
-  }
 }
 
 div.filter-element {
@@ -428,12 +251,6 @@ div.stream-filter-field {
   display: inline-block;
   vertical-align: bottom;
   margin-bottom: 0px
-}
-
-div.masonry-item {
-  img.beachball {
-    margin: 50px 96px;
-  }
 }
 
 hr.menu {

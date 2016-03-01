@@ -1,3 +1,4 @@
+<%= stylesheet_link_tag 'panels', :media => 'all' %>
 <%= javascript_include_tag 'jquery.panelSnap' %>
 <script type="text/javascript">
     jQuery(function ($) {
@@ -11,27 +12,10 @@
 <div class="panels">
   <section class="snap-panel panel-one">
     <div class="panel-elements">
-      <p class="panel-title">RecipePower is Here</p>
+      <p class="panel-title">RecipePower<br>is Here</p>
       <p class="panel-subtitle">Cooks Together, Owning the Web.</p>
       <p class="panel-description">Keep your finds from anywhere and<br/>pool them with our community.</p>
     </div>
-  </section>
-  <section class="snap-panel panel-three">
-    <div class="panel-elements">
-      <p class="panel-title">Recipes</p>
-      <p class="panel-subtitle">If it works, why throw it back?</p>
-      <p class="panel-description">Clip and save the best recipes you've found <br/>on the web, and share them around
-        here.</p>
-    </div>
-    <%= render 'lists/pano', list: List.find(658)  %>
-  </section>
-  <section class="snap-panel panel-four">
-    <div class="panel-elements">
-      <p class="panel-title">Cookmates</p>
-      <p class="panel-subtitle">Join our community of dessert<br/>bakers & dinner party makers.</p>
-      <p class="panel-description-long">Invite your real life sous chefs<br/>and hear about what they're cooking up.</p>
-    </div>
-    <%= render 'lists/pano', list: List.find(659) %>
   </section>
   <section class="snap-panel panel-two">
     <div class="panel-elements">
@@ -49,5 +33,22 @@
       <p class="panel-description">Subscribe to food blogs and columns <br/>from all over the world.</p>
     </div>
     <%= render 'lists/pano', list: List.find(661) %>
+  </section>
+  <section class="snap-panel panel-three">
+    <div class="panel-elements">
+      <p class="panel-title">Recipes</p>
+      <p class="panel-subtitle">If it works, why throw it back?</p>
+      <p class="panel-description">Clip and save the best recipes you've found <br/>on the web, and share them around
+        here.</p>
+    </div>
+    <%= render 'lists/pano', list: List.find(658)  %>
+  </section>
+  <section class="snap-panel panel-four">
+    <div class="panel-elements">
+      <p class="panel-title">Cookmates</p>
+      <p class="panel-subtitle">Join our community of dessert<br/>bakers & dinner party makers.</p>
+      <p class="panel-description">Invite your real life sous chefs<br/>and hear about what they're cooking up.</p>
+    </div>
+    <%= render 'lists/pano', list: List.find(659) %>
   </section>
 </div>

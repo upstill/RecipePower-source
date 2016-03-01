@@ -18,28 +18,13 @@ div.results-card {
   margin-right: 1em;
 }
 
-div.associated-card {
-  margin-top: 1em;
-  padding: 1em;
-  min-height: 200px;
-  .associated-title {
-    font-size: 2.5em;
-    padding-bottom: 0.3em;
-    &.lists-owned {
-      color: #dfc75c;
-    }
-    &.lists-collected {
-      color: #66996f;
-    }
-  }
-}
-
 div.card-item {
   -webkit-box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
   -moz-box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
   box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
   font-family: $archivo;
   position: relative;
+  margin-bottom: 1em;
   color: $generic-card-text-color;
   background-color: $generic-card-background-color;
   div.title > a.title-link {
@@ -59,10 +44,6 @@ div.card-item {
       }
     }
   }
-  &.row {
-    margin: 0.5em;
-  }
-  margin-bottom: 1em;
   div.title-glyph {
     color: #ea8a7a;
     height: 2em;
@@ -109,6 +90,54 @@ div.card-item {
     font-size: 1.5em;
     margin-top: 0.5em;
     margin-bottom: 0em;
+  }
+  /*
+  div.pic-200w {
+    width: 200px;
+  }
+  div.pic-200h {
+    height: 200px;
+  }
+  */
+  div.recipe-pic {
+    margin-top: 10px;
+  }
+  p.description {
+    font-size: 1.3em;
+  }
+  div.tags {
+    font-weight: 400;
+    color: #909090;
+    font-size: 1.3em;
+    span.tagsep {
+      font-size: 1.3em;
+      color: #8ac5d2;
+      font-family: Helvetica, sans-serif;
+      font-weight: 200;
+      font-size: 1.2em;
+    }
+  }
+  p.card-aspect-contents {
+    margin-top: 0;
+    color: #8D8F90;
+  }
+  &.associated-card {
+    margin-top: 1em;
+    padding: 1em;
+    min-height: 200px;
+    .associated-title {
+      font-size: 2.5em;
+      padding-bottom: 0.3em;
+      &.lists-owned {
+        color: #dfc75c;
+      }
+      &.lists-collected {
+        color: #66996f;
+      }
+    }
+  }
+  &.row {
+    margin: 0.5em;
   }
   &.cardlet-item {
     // min-width: 200px;
@@ -343,34 +372,6 @@ div.card-item {
         font-size: 1.4em;
       }
     }
-  }
-  div.pic-200w {
-    width: 200px;
-  }
-  div.pic-200h {
-    height: 200px;
-  }
-  div.recipe-pic {
-    margin-top: 10px;
-  }
-  p.description {
-    font-size: 1.3em;
-  }
-  div.tags {
-    font-weight: 400;
-    color: #909090;
-    font-size: 1.3em;
-    span.tagsep {
-      font-size: 1.3em;
-      color: #8ac5d2;
-      font-family: Helvetica, sans-serif;
-      font-weight: 200;
-      font-size: 1.2em;
-    }
-  }
-  p.card-aspect-contents {
-    margin-top: 0;
-    color: #8D8F90;
   }
 }
 
