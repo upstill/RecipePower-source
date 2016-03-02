@@ -1,20 +1,24 @@
 <div class="header">
+  <div class="logo"></div>
   <div class="menu">
-    <div class="logo"></div>
-    <div class="menuIcon">
-      <a href="#menuExpand">
-        <%= image_tag image_path('hamburger.svg'), class: 'hamburger' %>&nbsp;Go
-      </a>
-    </div>
-    <ul class="nav navbar-nav main-menu">
-      <%= collections_navtab %>
-      <%= friends_navtab %>
-      <%= my_lists_navtab %>
-      <%# other_lists_navtab %>
-      <%= feeds_navtab %>
-      <%# news_navtab %>
-      <%# more_navtab %>
-      <%= home_navtab %>
-    </ul>
+    <% if current_user %>
+        <div class="menuIcon">
+          <a href="#menuExpand">
+            <%= image_tag image_path('hamburger.svg'), class: 'hamburger' %>&nbsp;Go
+          </a>
+        </div>
+        <ul class="nav navbar-nav main-menu">
+          <%= collections_navtab %>
+          <%= friends_navtab %>
+          <%= my_lists_navtab %>
+          <%# other_lists_navtab %>
+          <%= feeds_navtab %>
+          <%# news_navtab %>
+          <%# more_navtab %>
+          <%= home_navtab %>
+        </ul>
+    <% else %>
+    <% end %>
   </div>
+  <%= render 'layouts/filter_header' %>
 </div>

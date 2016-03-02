@@ -15,6 +15,18 @@
   margin-bottom: 0;
 }
 
+.navbar-nav {
+  li {
+    a.dropdown-toggle {
+      padding: 5px 0px;
+      font-family: Oswald, sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-size: 21px;
+    }
+  }
+}
+
 nav.navbar-inverse {
   background-color: transparent;
   background-image: none;
@@ -32,6 +44,7 @@ a.navbar-brand {
 //  height: auto;
 //}
 
+/*
 li.master-navtab {
   margin: 0 7px;
   width: 170px;
@@ -96,52 +109,7 @@ li.master-navtab {
     }
   }
 }
-
-.navbar-nav {
-  li {
-    a.dropdown-toggle {
-      padding: 5px 0px;
-      font-family: Oswald, sans-serif;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      font-size: 21px;
-    }
-  }
-}
-
-div.container.menuback { // Backing for the menu which matches the general container in cross-section
-  height: $menuback-height-down;
-  z-index: $menuback-depth;
-  position: fixed;
-  top: 0;
-  right: 0;
-  left: 0;
-  border: 2px #333333;
-  margin-top: 0;
-  margin-right: auto;
-  margin-left: auto;
-  padding-bottom: 2px;
-  margin-bottom: 2px;
-}
-
-div.container.no-menu { // Master container with no menu
-  padding-top: 75px;
-  div.card-item {
-    margin-top: 30px;
-  }
-}
-
-div.container.below-menu { // Master container that scrolls below the menu
-  margin-top: $menuback-height-down;
-  padding-top: 75px;
-  div.triggered-form {
-    top: $menuback-height-down;
-  }
-  > div.row {
-    margin-left: 15px;
-    margin-right: 15px;
-  }
-}
+*/
 
 /*
 div.generic-top {
@@ -163,18 +131,199 @@ div.generic-top {
   width: 100%;
   top: 0;
   z-index: $menu-depth;
-  height: $menuback-height-down;
-  padding-left: $logo-clearance-lg;
-  padding-right: $menu-right-margin;
+  @include respond-to(medium-down) {
+    padding-left: $logo-clearance-sm;
+    padding-right: $hamburger-clearance-sm;
+    height: $menuback-height-up;
+  }
+  @include respond-to(large-up) {
+    padding-left: $logo-clearance-lg;
+    padding-right: $hamburger-clearance-lg;
+    height: $menuback-height-down;
+  }
   div.menu {
-    position: relative;
-    width: 740px;
-    height: 130px;
-    .menuIcon {
-      display: none;
+    @include transition(max-height 0.5s);
+    @include respond-to(medium-down) {
+      width: 100%;
+      min-width: 300px;
+      float: none;
+      ul {
+        text-align: center;
+        width: 100%;
+        display: none;
+        //max-height: 0;
+        //overflow: hidden;
+        li.master-navtab {
+          display: block;
+          width: 100%;
+          background: #000;
+          border-top: 1px solid #4d4d4d;
+          padding-top: 12px;
+          padding-bottom: 5px;
+          margin-bottom: 0;
+          @include respond-to(wide) { padding-top: 30px; }
+          &:hover {
+            background: #999;
+          }
+          a {
+            color: #fff;
+            text-shadow: #848484 0px 1px 2px;
+          }
+          span.measuring-spoons {
+            content: none;
+          }
+          &#home-navtab {
+            //margin: 0 7px;
+            position: static;
+            width: 100%;
+          }
+        }
+      }
+    }
+    @include respond-to(large-up) {
+      position: relative;
+      width: 740px;
+      height: 130px;
+      ul {
+        position: relative;
+        padding: 0 10px 0 0;
+        margin: 0;
+        li.master-navtab {
+          display: inline-block;
+          float: left;
+          list-style: none;
+          margin: 0 7px;
+          width: 155px;
+          margin-bottom: 10px;
+          text-shadow: none;
+          text-align: center;
+          &#collections-navtab {
+            background-color: $recipes-navtab-background-color;
+            a.dropdown-toggle {
+              color: $recipes-navtab-text-color;
+            }
+          }
+          &#friends-navtab {
+            background-color: $friends-navtab-background-color;
+            //margin: 0 7px;
+            //padding:80px 8px 0;
+            //text-shadow: none;
+            a.dropdown-toggle {
+              color: $friends-navtab-text-color;
+            }
+          }
+          &#my_lists-navtab {
+            background-color: $lists-navtab-background-color;
+            //margin: 0 7px;
+            //padding: 80px 18px 0;
+            //text-shadow: none;
+            a.dropdown-toggle {
+              color: $lists-navtab-text-color;
+            }
+          }
+          &#feeds-navtab {
+            background-color: $feeds-navtab-background-color;
+            //margin: 0 7px;
+            //padding: 80px 34px 0;
+            //text-shadow: none;
+            padding-left: 34px;
+            padding-right: 34px;
+            a {
+              color: $feeds-navtab-text-color;
+            }
+          }
+          &#home-navtab {
+            background-color: #ff9583;
+            //margin: 0 7px;
+            padding: 0;
+            position: absolute;
+            top: 0;
+            right: -158px;
+            span.user-name {
+              font-size: 0.7em;
+              color: #fadfdb;
+              text-shadow: none;
+              text-transform: lowercase;
+            }
+          }
+          a.submenu {
+            padding-left: 40px;
+          }
+          a.dropdown-toggle {
+            font-family: Oswald, sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-size: 21px;
+            span.caret {
+              display: inline-block;
+              margin-left: 3px;
+            }
+          }
+          span.measuring-spoons {
+            content: image-url("rp-measuring-spoons.png");
+          }
+        }
+      }
+    }
+    @include respond-to(large) {
+      width: 348px;
+      li.master-navtab {
+        padding: 28px 8px 3px;
+      }
+    }
+    @include respond-to(wide) {
+      width: 736px;
+      li.master-navtab {
+        padding: 90px 8px 3px;
+      }
+    }
+  }
+  div.logo {
+    position: absolute;
+    @include respond-to(medium-down) {
+      height: 47px;
+      padding: 4px 6px;
+      left: 0px;
+      // left: -$logo-clearance-sm;
+      content: image-url('RP-logo-small.png');
+    }
+    @include respond-to(large-up) {
+      // left: -20px;
+      height: 200px;
+      left: 15px;
+      content: image-url('rp-logo.png');
+    }
+  }
+  div.triggered-form {
+    width: 100%;
+    z-index: $menu-depth + 1;
+    padding-left: 5px;
+    margin-top: 0;
+    float: left;
+    div.filter-element {
+      width: 100%;
+      input#token-input-querytags {
+        @include respond-to(phone) {
+          font-size: 12px;
+        }
+        @include respond-to(small) {
+          font-size: 14px;
+        }
+        @include respond-to(medium) {
+          font-size: 18px;
+        }
+        @include respond-to(large-up) {
+          font-size: 20px;
+        }
+      }
+    }
+  }
+  .menuIcon {
+    @include respond-to(medium-down) {
+      display: block;
       position: absolute;
-      padding: 3px 8px;
-      right: -80px;
+      padding: 2px 2px;
+      right: 4px;
       top: 5px;
       z-index: $menu-depth;
       width: 70px;
@@ -199,184 +348,49 @@ div.generic-top {
         }
       }
     }
-    ul {
-      padding: 0;
-      margin: 0;
-      li.master-navtab {
-        display: inline-block;
-        float: left;
-        list-style: none;
-        margin: 0 7px;
-        margin-bottom: 10px;
-        padding: 90px 8px 3px;
-        text-shadow: none;
-        text-align: center;
-        &#collections-navtab {
-          background-color: $recipes-navtab-background-color;
-          a.dropdown-toggle {
-            color: $recipes-navtab-text-color;
-          }
-        }
-        &#friends-navtab {
-          background-color: $friends-navtab-background-color;
-          //margin: 0 7px;
-          //padding:80px 8px 0;
-          //text-shadow: none;
-          a.dropdown-toggle {
-            color: $friends-navtab-text-color;
-          }
-        }
-        &#my_lists-navtab {
-          background-color: $lists-navtab-background-color;
-          //margin: 0 7px;
-          //padding: 80px 18px 0;
-          //text-shadow: none;
-          a.dropdown-toggle {
-            color: $lists-navtab-text-color;
-          }
-        }
-        &#feeds-navtab {
-          background-color: $feeds-navtab-background-color;
-          //margin: 0 7px;
-          //padding: 80px 34px 0;
-          //text-shadow: none;
-          padding-left: 34px;
-          padding-right: 34px;
-          a {
-            color: $feeds-navtab-text-color;
-          }
-        }
-        &#home-navtab {
-          background-color: #ff9583;
-          //margin: 0 7px;
-          padding: 0;
-          position: absolute;
-          top: 0;
-          right: -158px;
-          span.user-name {
-            font-size: 0.7em;
-            color: #fadfdb;
-            text-shadow: none;
-            text-transform: lowercase;
-          }
-        }
-        a.submenu {
-          padding-left: 40px;
-        }
-        a.dropdown-toggle {
-          font-family: Oswald, sans-serif;
-          text-transform: uppercase;
-          letter-spacing: 1.5px;
-          font-size: 21px;
-          span.caret {
-            display: inline-block;
-            margin-left: 3px;
-          }
-        }
-        span.measuring-spoons {
-          content: image-url("rp-measuring-spoons.png");
-        }
-      }
+    @include respond-to(large-up) {
+      display: none;
     }
   }
 }
 
-@media only screen and (max-width: 1180px) {
-  .header {
-    div.menu {
-      width: 375px;
-      ul {
-        li.master-navtab {
-          padding-top: 30px;
-        }
-      }
-    }
-  }
-}
-
-div.logo {
-  position: absolute;
-  left: 1px;
-  height: 200px;
-  content: image-url('rp-logo.png');
-}
-
-@media only screen and (max-width: 780px) {
-  div.logo {
-    padding: 4px 6px;
-    height: 47px;
-    left: -$logo-clearance-sm;
-    content: image-url('RP-logo-small.png');
-  }
-  div.container.menuback {
+div.container {
+  &.menuback { // Backing for the menu which matches the general container in cross-section
+    z-index: $menuback-depth;
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    border: 2px #333333;
+    margin-top: 0;
+    margin-right: auto;
+    margin-left: auto;
+    padding-bottom: 2px;
+    margin-bottom: 2px;
     // Backing for the menu which matches the general container in cross-section
-    height: $menuback-height-up;
-  }
-  div.container.below-menu {
-    margin-top: $menuback-height-up;
-    padding-top: 0px; // In allowance for the menuback
-    div.triggered-form {
-      position: fixed;
-      top: 0;
-      left: $logo-clearance-sm;
-      right: $menu-right-margin;
-      z-index: $menu-depth + 1;
-      padding-left: 5px;
-      width: 350px;
-      margin-top: 0;
-      &.menuOpen {
-        display: none;
-      }
+    @include respond-to(medium-down) {
+      height: $menuback-height-up;
+    }
+    @include respond-to(large-up) {
+      height: $menuback-height-down;
     }
   }
-  .header {
-    height: $menuback-height-up;
-    padding-left: $logo-clearance-sm;
-    padding-right: $menu-right-margin;
-    div.menu {
-      width: 100%;
-      min-width: 300px;
-      .menuIcon {
-        display: block;
-      }
-      float: none;
-      @include transition(max-height 0.5s);
-      ul {
-        text-align: center;
-        width: 100%;
-        display: none;
-        //max-height: 0;
-        //overflow: hidden;
-        &.menuOpen {
-          display: block;
-          //max-height: 1000px;
-          // @include transition(max-height 0.5s);
-        }
-        li.master-navtab {
-          display: block;
-          width: 100%;
-          background: #000;
-          border-top: 1px solid #4d4d4d;
-          padding-top: 12px;
-          padding-bottom: 5px;
-          margin-bottom: 0;
-          &:hover {
-            background: #999;
-          }
-          a {
-            color: #fff;
-            text-shadow: #848484 0px 1px 2px;
-          }
-          span.measuring-spoons {
-            content: none;
-          }
-          &#home-navtab {
-            //margin: 0 7px;
-            position: static;
-            width: 100%;
-          }
-        }
-      }
+  &.below-menu {
+    > div.row {
+      margin-left: 15px;
+      margin-right: 15px;
+    }
+    @include respond-to(medium-down) {
+      margin-top: $menuback-height-up;
+    }
+    @include respond-to(large-up) {
+      margin-top: $menuback-height-down;
+    }
+  }
+  &.no-menu { // Master container with no menu
+    padding-top: 75px;
+    div.card-item {
+      margin-top: 30px;
     }
   }
 }

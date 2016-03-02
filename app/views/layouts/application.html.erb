@@ -55,14 +55,8 @@
       })();
   </script>
 </head>
-<body>
-<% if user_signed_in? %>
-    <%= render 'layouts/navbar_experimental' %>
-<% else %>
-  <div class="logo" style="position: absolute; left: 20px; z-index: 1000;">
-    <%= image_tag 'rp-logo.png' %>
-  </div>
-<% end %>
+<body <%= 'class=logged-in' if current_user %> >
+<%= render 'layouts/navbar_experimental' %>
 <%= do_notifs %>
 <%= render 'layouts/pagelet' %>
 <% if false && Rails.env.development? %>

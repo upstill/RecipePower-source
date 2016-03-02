@@ -1,7 +1,5 @@
-<% if user_signed_in? %>
-    <div class="container menuback"></div>
-<% end %>
+<div class="container menuback"></div>
 <div class="<%= pagelet_class %>" id="<%= pagelet_body_id %>">
-  <%= pagelet_header %>
+  <%= flash_notifications_div %>
   <%= yield %>
 </div>

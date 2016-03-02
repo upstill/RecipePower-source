@@ -91,19 +91,6 @@ div.card {
   padding-top: 10px
 }
 
-div.triggered-form {
-  position: absolute;
-  z-index: $container-depth;
-  height: $triggered-form-height;
-  top: 0;
-  left: 240px;
-  margin: $triggered-form-margin;
-  .filter-element {
-    display: inline-block;
-    vertical-align: bottom;
-  }
-}
-
 //contents of pages
 .container {
   background-color: $page-background-color;
