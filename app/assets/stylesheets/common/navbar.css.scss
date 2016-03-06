@@ -126,51 +126,30 @@ div.generic-top {
 }
 */
 
+div.container {
+  padding-top: $header-height;
+}
+
 body.logged-in {
   .header {
     // How to lay out the header when the user is logged in
     @include respond-to(medium-down) {
       padding-left: $logo-clearance-xs;
       padding-right: $hamburger-clearance-sm;
-      height: $menuback-height-up;
+      // height: $header-height;
     }
     /*
     @include respond-to(medium-down) {
       padding-left: $logo-clearance-sm;
       padding-right: $hamburger-clearance-sm;
-      height: $menuback-height-up;
+      height: $header-height;
     }
     */
     @include respond-to(large-up) {
       padding-left: $logo-clearance-lg;
       padding-right: $hamburger-clearance-lg;
-      height: $menuback-height-down;
+      height: $header-height + $menus-height;
     }
-  }
-}
-
-.header {
-  position: fixed;
-  width: 100%;
-  top: 0;
-  z-index: $menu-depth;
-  // Default layout for the header (not logged-in)
-  @include respond-to(medium-down) {
-    padding-left: $logo-clearance-xs;
-    padding-right: $hamburger-clearance-sm;
-    height: $menuback-height-up;
-  }
-  /*
-  @include respond-to(medium-down) {
-    padding-left: $logo-clearance-sm;
-    padding-right: $hamburger-clearance-sm;
-    height: $menuback-height-up;
-  }
-  */
-  @include respond-to(large-up) {
-    padding-left: $logo-clearance-lg;
-    padding-right: $hamburger-clearance-lg;
-    height: $menuback-height-down;
   }
   div.menu {
     @include transition(max-height 0.5s);
@@ -309,6 +288,37 @@ body.logged-in {
       }
     }
   }
+  div.container {
+    @include respond-to(large-up) {
+      padding-top: $header-height + $menus-height;
+    }
+  }
+}
+
+.header {
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: $menu-depth;
+  backbround-color: #f1f1f0;
+  padding-top: 0;
+  height: $header-height;
+  // Default layout for the header (not logged-in)
+  @include respond-to(medium-down) {
+    padding-left: $logo-clearance-xs;
+    padding-right: $hamburger-clearance-sm;
+  }
+  /*
+  @include respond-to(medium-down) {
+    padding-left: $logo-clearance-sm;
+    padding-right: $hamburger-clearance-sm;
+    height: $header-height;
+  }
+  */
+  @include respond-to(large-up) {
+    padding-left: $logo-clearance-lg;
+    padding-right: $hamburger-clearance-lg;
+  }
   div.logo {
     position: absolute;
     @include respond-to(medium-down) {
@@ -334,11 +344,14 @@ body.logged-in {
       content: image-url('rp-logo.png');
     }
   }
+  div.form-group {
+    margin-bottom: 0;
+  }
   div.triggered-form {
     width: 100%;
     z-index: $menu-depth + 1;
-    padding-left: 5px;
-    margin-top: 0;
+    // padding-left: 5px;
+    // margin-top: 0;
     float: left;
     div.filter-element {
       width: 100%;
@@ -394,43 +407,3 @@ body.logged-in {
   }
 }
 
-div.container {
-  &.menuback { // Backing for the menu which matches the general container in cross-section
-    z-index: $menuback-depth;
-    position: fixed;
-    top: 0;
-    right: 0;
-    left: 0;
-    border: 2px #333333;
-    margin-top: 0;
-    margin-right: auto;
-    margin-left: auto;
-    padding-bottom: 2px;
-    margin-bottom: 2px;
-    // Backing for the menu which matches the general container in cross-section
-    @include respond-to(medium-down) {
-      height: $menuback-height-up;
-    }
-    @include respond-to(large-up) {
-      height: $menuback-height-down;
-    }
-  }
-  &.below-menu {
-    > div.row {
-      margin-left: 15px;
-      margin-right: 15px;
-    }
-    @include respond-to(medium-down) {
-      margin-top: $menuback-height-up;
-    }
-    @include respond-to(large-up) {
-      margin-top: $menuback-height-down;
-    }
-  }
-  &.no-menu { // Master container with no menu
-    padding-top: 75px;
-    div.card-item {
-      margin-top: 30px;
-    }
-  }
-}

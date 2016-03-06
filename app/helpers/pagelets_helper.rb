@@ -32,7 +32,7 @@ module PageletsHelper
     if response_service.controller == "pages" && response_service.action == "home"
       "pagelet-body"
     else
-      "pagelet-body container #{user_signed_in? ? 'below-menu' : 'no-menu'} #{@decorator.dom_id if @decorator}"
+      "pagelet-body container #{@decorator.dom_id if @decorator}"
     end
   end
 
