@@ -126,16 +126,47 @@ div.generic-top {
 }
 */
 
+body.logged-in {
+  .header {
+    // How to lay out the header when the user is logged in
+    @include respond-to(medium-down) {
+      padding-left: $logo-clearance-xs;
+      padding-right: $hamburger-clearance-sm;
+      height: $menuback-height-up;
+    }
+    /*
+    @include respond-to(medium-down) {
+      padding-left: $logo-clearance-sm;
+      padding-right: $hamburger-clearance-sm;
+      height: $menuback-height-up;
+    }
+    */
+    @include respond-to(large-up) {
+      padding-left: $logo-clearance-lg;
+      padding-right: $hamburger-clearance-lg;
+      height: $menuback-height-down;
+    }
+  }
+}
+
 .header {
   position: fixed;
   width: 100%;
   top: 0;
   z-index: $menu-depth;
+  // Default layout for the header (not logged-in)
+  @include respond-to(medium-down) {
+    padding-left: $logo-clearance-xs;
+    padding-right: $hamburger-clearance-sm;
+    height: $menuback-height-up;
+  }
+  /*
   @include respond-to(medium-down) {
     padding-left: $logo-clearance-sm;
     padding-right: $hamburger-clearance-sm;
     height: $menuback-height-up;
   }
+  */
   @include respond-to(large-up) {
     padding-left: $logo-clearance-lg;
     padding-right: $hamburger-clearance-lg;
@@ -281,12 +312,21 @@ div.generic-top {
   div.logo {
     position: absolute;
     @include respond-to(medium-down) {
+      height: 36px;
+      margin: 4px;
+      left: 0px;
+      // left: -$logo-clearance-sm;
+      content: image-url('rp-logo-xs-web.png');
+    }
+    /*
+    @include respond-to(medium) {
       height: 47px;
       padding: 4px 6px;
       left: 0px;
       // left: -$logo-clearance-sm;
       content: image-url('RP-logo-small.png');
     }
+    */
     @include respond-to(large-up) {
       // left: -20px;
       height: 200px;

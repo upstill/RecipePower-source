@@ -3,8 +3,53 @@ div.notifs {
   height: auto;
   z-index: $menu-depth;
   position: fixed;
-  right: 1em;
-  top: 1em;
+  right: 4px;
+  top: 4px;
+  span.break {
+    display: none;
+  }
+  &.collapsed {
+    span.separator {
+      @include respond-to(medium-down) {
+        display: none;
+      }
+      @include respond-to(large-up) {
+        display: inline;
+      }
+    }
+    span.break {
+      @include respond-to(medium-down) {
+        display: inline;
+      }
+      @include respond-to(large-up) {
+        display: none;
+      }
+    }
+    div.modal-header {
+      @include respond-to(phone) {
+        padding: 3px;
+        font-size: 0.4em;
+        line-height: 2em;
+        max-width: 60px;
+      }
+      @include respond-to(small) {
+        padding: 4px;
+        font-size: 0.6em;
+        line-height: 2em;
+        max-width: 90px;
+      }
+      @include respond-to(medium) {
+        padding: 6px;
+        font-size: 0.6em;
+        line-height: 2em;
+      }
+      @include respond-to(large-up) {
+        padding: 12px;
+        line-height: 2em;
+        font-size: 1em;
+      }
+    }
+  }
   div.notification {
     width: 100%;
     position: relative;
@@ -30,7 +75,6 @@ div.notifs {
     }
   }
   div.modal-header {
-    padding: 12px;
     text-align: center;
     border: none;
     color: #ECE6CD;

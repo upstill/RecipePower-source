@@ -1,15 +1,17 @@
 <% resource = nil unless defined? resource %>
 <% invitee_error = nil unless defined? invitee_error %>
-<div class="new-style notifs" , onload="RP.access_links.onload(event);">
+<div class="new-style notifs collapsed" , onload="RP.access_links.onload(event);">
   <div class="modal-content">
-    <div class="modal-header" style="text-align: center; border: none; color:#ECE6CD;">
+    <div class="modal-header">
       <% if resource %>
           <a class="select-content signup" data-activate="accept"><%= invitation_acceptance_label %></a>
           <a class="select-content rollup none"><%= sprite_glyph(:'vote-up', 'xl') %></a>
           <br><a class="select-content signin" data-activate="signin">Sign In Otherwise</a>
       <% else %>
-          <a class="select-content signup" data-activate="signup">Sign Up</a>&nbsp;|&nbsp;
-          <a class="select-content signin" data-activate="signin">Sign In</a>
+          <a class="select-content signup" data-activate="signup">Sign&nbsp;Up</a>
+          <span class="separator">&nbsp;|&nbsp;</span>
+          <span class="break"><br></span>
+          <a class="select-content signin" data-activate="signin">Sign&nbsp;In</a>
           <a class="select-content rollup none" <%= 'style=display:initial;' if invitee_error %> >
             <%= sprite_glyph(:'vote-up', 'xl') %>
           </a>

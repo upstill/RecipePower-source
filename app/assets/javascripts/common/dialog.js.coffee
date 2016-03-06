@@ -21,8 +21,10 @@ jQuery ->
 		if targetClass = $(event.target).data 'activate'
 			$(enclosure_selector+'.'+targetClass).show().find('div.flash-notifications').addClass 'flash-target'
 			$('a.select-content.none').show()
+			$(enclosure_selector).closest('div.notifs').removeClass 'collapsed'
 		else
 			$('a.select-content.none').hide()
+			$(enclosure_selector).closest('div.notifs').addClass 'collapsed'
 		event.preventDefault()
 
 RP.dialog.focus = (dlog) ->
