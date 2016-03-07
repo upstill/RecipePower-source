@@ -9,6 +9,7 @@
       <%= token_input_query(
                   :querytags => (viewparams ? viewparams.querytags : []),
                   :hint => 'Type food terms and hit Enter or Return',
-                  placeholder: 'Let\'s cook up something...') %>
+                  :glyphicon => (defined?(glyphicon) && glyphicon),
+                  :placeholder => 'Let\'s cook up something...') %>
     </div>
 <% end %>

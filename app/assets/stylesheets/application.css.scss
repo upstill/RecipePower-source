@@ -104,10 +104,13 @@ img.empty {
 
 div.filter-element {
   width: 100%;
+  font-family: Oswald-Light, sans-serif;
+  font-style: italic;
+  font-size: 20px;
   input#token-input-querytags {
-    font-family: Oswald-Light, sans-serif;
-    font-style: italic;
-    font-size: 20px;
+    font-family: inherit;
+    font-style: inherit;
+    font-size: inherit;
     // width: 500px;
   }
 }

@@ -142,10 +142,15 @@ body.logged-in {
       padding-left: $logo-clearance-sm;
       padding-right: $hamburger-clearance-sm;
     }
-    @include respond-to(large-up) {
+    @include respond-to(large) {
       padding-left: $logo-clearance-lg;
       padding-right: $hamburger-clearance-lg;
-      height: $header-height + $menus-height;
+      height: $header-height + $menus-height-lg;
+    }
+    @include respond-to(wide) {
+      padding-left: $logo-clearance-lg;
+      padding-right: $hamburger-clearance-lg;
+      height: $header-height + $menus-height-wide;
     }
     div.right-matter {
       @include respond-to(medium-down) {
@@ -297,8 +302,11 @@ body.logged-in {
     }
   }
   div.container {
-    @include respond-to(large-up) {
-      padding-top: $header-height + $menus-height;
+    @include respond-to(large) {
+      padding-top: $header-height + $menus-height-lg;
+    }
+    @include respond-to(wide) {
+      padding-top: $header-height + $menus-height-wide;
     }
   }
 }
@@ -362,19 +370,17 @@ body.logged-in {
     bottom: 0;
     div.filter-element {
       width: 100%;
-      input#token-input-querytags {
-        @include respond-to(phone) {
-          font-size: 12px;
-        }
-        @include respond-to(small) {
-          font-size: 14px;
-        }
-        @include respond-to(medium) {
-          font-size: 18px;
-        }
-        @include respond-to(large-up) {
-          font-size: 20px;
-        }
+      @include respond-to(phone) {
+        font-size: 12px;
+      }
+      @include respond-to(small) {
+        font-size: 14px;
+      }
+      @include respond-to(medium) {
+        font-size: 18px;
+      }
+      @include respond-to(large-up) {
+        font-size: 20px;
       }
     }
   }
@@ -395,7 +401,7 @@ body.logged-in {
       width: $notif-clearance-lg;
     }
     .menuIcon {
-      @include respond-to(medium-down) {
+      @include respond-to(largish-down) {
         display: initial;
         position: absolute;
         padding: 2px 2px;

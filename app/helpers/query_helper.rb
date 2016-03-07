@@ -7,9 +7,9 @@ module QueryHelper
 
     # Assert defaults for data fields
     data[:hint] ||= 'Narrow down the list'
-    data[:placeholder] ||= "Seek and ye shall find..."
-    data[:"min-chars"] ||= 2
-    data[:"no-results-text"] ||= "No matching tag found; hit Enter to search with text"
+    data[:placeholder] ||= 'Seek and ye shall find...'
+    data[:'min-chars'] ||= 2
+    data[:'no-results-text'] ||= 'No matching tag found; hit Enter to search with text'
     # JS for how to invoke the search on tag completion:
     # RP.tagger.querify for standard tag handling;
     # RP.submit.enclosing_form for results enclosures (which maintain and accumulate query data)
@@ -23,11 +23,17 @@ module QueryHelper
 
     data[:query] = "tagtype=#{tagtype}" if tagtype
     data[:pre] = querytags.collect { |tag| {id: tag.id, name: tag.name} }.to_json
-    options[:onload] = "RP.tagger.onload(event);"
+    options[:onload] = 'RP.tagger.onload(event);'
     options[:class] = "token-input-field-pending #{options[:class]}" # The token-input-field-pending class triggers tokenInput
 
     options[:rows] ||= 1
     options[:autofocus] = true unless options[:autofocus] == false
+    qt = text_field_tag 'querytags',
+                        querytags.map(&:id).join(','),
+                        options.except(:handler, :querytags, :tagtype, :type_selector).merge(data: data)
+    qt += content_tag(:div,
+                      content_tag(:span, '', class: "glyphicon glyphicon-#{options[:glyphicon]}"),
+                      style: 'position: absolute; right: 7px; font-size: inherit; top: 0.4em;') if options[:glyphicon]
 
     if options[:type_selector]
       content_tag :div,
@@ -39,10 +45,6 @@ module QueryHelper
     else
       ''.html_safe
     end +
-        content_tag(:div,
-                    text_field_tag("querytags",
-                                   querytags.map(&:id).join(','),
-                                   options.except(:handler, :querytags, :tagtype, :type_selector).merge(data: data)),
-                    style: 'display: inline-block; min-width:300px;')
+      content_tag(:div, qt, style: 'display: inline-block; min-width:300px; position: relative;')
   end
 end
