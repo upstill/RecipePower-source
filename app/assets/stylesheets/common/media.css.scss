@@ -1,5 +1,6 @@
 $break-small: 320px;
 $break-medium: 480px;
+$break-largish: 680px;
 $break-large: 768px;
 $break-wide: 1024px;
 
@@ -17,13 +18,22 @@ $break-wide: 1024px;
     @media only screen and (min-width: $break-small + 1) { @content; }
   }
   @else if $media == medium-down {
-    @media only screen and (max-width: $break-large) { @content; }
+    @media only screen and (max-width: $break-largish) { @content; }
   }
   @else if $media == medium {
-    @media only screen and (min-width: $break-medium + 1) and (max-width: $break-large) { @content; }
+    @media only screen and (min-width: $break-medium + 1) and (max-width: $break-largish) { @content; }
   }
   @else if $media == medium-up {
     @media only screen and (min-width: $break-medium + 1) { @content; }
+  }
+  @else if $media == largish-down {
+    @media only screen and (max-width: $break-large) { @content; }
+  }
+  @else if $media == largish {
+    @media only screen and (min-width: $break-largish + 1) and (max-width: $break-large) { @content; }
+  }
+  @else if $media == largish-up {
+    @media only screen and (min-width: $break-largish + 1) { @content; }
   }
   @else if $media == large-down {
     @media only screen and (max-width: $break-wide) { @content; }

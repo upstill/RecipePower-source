@@ -13,7 +13,7 @@ div.notifs {
       @include respond-to(medium-down) {
         display: none;
       }
-      @include respond-to(large-up) {
+      @include respond-to(largish-up) {
         display: inline;
       }
     }
@@ -21,7 +21,7 @@ div.notifs {
       @include respond-to(medium-down) {
         display: inline;
       }
-      @include respond-to(large-up) {
+      @include respond-to(largish-up) {
         display: none;
       }
     }
@@ -43,10 +43,15 @@ div.notifs {
         font-size: 0.6em;
         line-height: 2em;
       }
+      @include respond-to(largish) {
+        padding: 8px;
+        font-size: 0.8em;
+        line-height: 2em;
+      }
       @include respond-to(large-up) {
         padding: 12px;
-        line-height: 2em;
         font-size: 1em;
+        line-height: 2em;
       }
     }
   }

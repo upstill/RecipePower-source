@@ -138,22 +138,30 @@ body.logged-in {
       padding-right: $hamburger-clearance-sm;
       // height: $header-height;
     }
-    /*
-    @include respond-to(medium-down) {
+    @include respond-to(largish) {
       padding-left: $logo-clearance-sm;
       padding-right: $hamburger-clearance-sm;
-      height: $header-height;
     }
-    */
     @include respond-to(large-up) {
       padding-left: $logo-clearance-lg;
       padding-right: $hamburger-clearance-lg;
       height: $header-height + $menus-height;
     }
+    div.right-matter {
+      @include respond-to(medium-down) {
+        width: $hamburger-clearance-sm;
+      }
+      @include respond-to(largish) {
+        width: $hamburger-clearance-sm;
+      }
+      @include respond-to(large-up) {
+        width: $hamburger-clearance-lg;
+      }
+    }
   }
   div.menu {
     @include transition(max-height 0.5s);
-    @include respond-to(medium-down) {
+    @include respond-to(largish-down) {
       width: 100%;
       min-width: 300px;
       float: none;
@@ -300,43 +308,40 @@ body.logged-in {
   width: 100%;
   top: 0;
   z-index: $menu-depth;
-  backbround-color: #f1f1f0;
+  background-color: #f1f1f0;
   padding-top: 0;
   height: $header-height;
+  border-bottom: 1px solid royalblue;
   // Default layout for the header (not logged-in)
   @include respond-to(medium-down) {
+    height: $header-height-xs;
     padding-left: $logo-clearance-xs;
-    padding-right: $hamburger-clearance-sm;
+    padding-right: $notif-clearance-sm;
   }
-  /*
-  @include respond-to(medium-down) {
+  @include respond-to(largish) {
     padding-left: $logo-clearance-sm;
-    padding-right: $hamburger-clearance-sm;
-    height: $header-height;
+    padding-right: $notif-clearance-med;
   }
-  */
   @include respond-to(large-up) {
     padding-left: $logo-clearance-lg;
-    padding-right: $hamburger-clearance-lg;
+    padding-right: $notif-clearance-lg;
   }
   div.logo {
-    position: absolute;
+    position: fixed;
+    top: 0;
+    left: 0;
     @include respond-to(medium-down) {
-      height: 36px;
-      margin: 4px;
-      left: 0px;
+      height: $header-height-xs;
+      padding: 3px;
       // left: -$logo-clearance-sm;
       content: image-url('rp-logo-xs-web.png');
     }
-    /*
-    @include respond-to(medium) {
-      height: 47px;
-      padding: 4px 6px;
-      left: 0px;
+    @include respond-to(largish) {
+      height: $header-height;
+      padding: 4px;
       // left: -$logo-clearance-sm;
       content: image-url('RP-logo-small.png');
     }
-    */
     @include respond-to(large-up) {
       // left: -20px;
       height: 200px;
@@ -352,7 +357,9 @@ body.logged-in {
     z-index: $menu-depth + 1;
     // padding-left: 5px;
     // margin-top: 0;
+    position: absolute;
     float: left;
+    bottom: 0;
     div.filter-element {
       width: 100%;
       input#token-input-querytags {
@@ -371,38 +378,55 @@ body.logged-in {
       }
     }
   }
-  .menuIcon {
+  div.right-matter {
+    position: fixed;
+    height: 100%;
+    top: 0;
+    right: 0;
+    padding: 3px;
+    height: $header-height;
     @include respond-to(medium-down) {
-      display: block;
-      position: absolute;
-      padding: 2px 2px;
-      right: 4px;
-      top: 5px;
-      z-index: $menu-depth;
-      width: 70px;
-      border-radius: 8px;
-      outline: 2px darkgrey;
-      outline-color: black;
-      background-color: #dedede;
-      &:hover {
-        background: #999;
+      width: $notif-clearance-sm;
+    }
+    @include respond-to(largish) {
+      width: $notif-clearance-med;
+    }
+    @include respond-to(large-up) {
+      width: $notif-clearance-lg;
+    }
+    .menuIcon {
+      @include respond-to(medium-down) {
+        display: initial;
+        position: absolute;
+        padding: 2px 2px;
+        right: 4px;
+        top: 5px;
+        z-index: $menu-depth;
+        width: 70px;
+        border-radius: 8px;
+        outline: 2px darkgrey;
+        outline-color: black;
+        background-color: #dedede;
+        &:hover {
+          background: #999;
+          a {
+            a:hover, a:focus {
+              text-decoration: none;
+            }
+          }
+        }
         a {
-          a:hover, a:focus {
-            text-decoration: none;
+          width: 100px;
+          display: inline-block;
+          color: #000;
+          img.hamburger {
+            vertical-align: middle;
           }
         }
       }
-      a {
-        width: 100px;
-        display: inline-block;
-        color: #000;
-        img.hamburger {
-          vertical-align: middle;
-        }
+      @include respond-to(large-up) {
+        display: none;
       }
-    }
-    @include respond-to(large-up) {
-      display: none;
     }
   }
 }

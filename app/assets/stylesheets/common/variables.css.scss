@@ -84,8 +84,9 @@ $menu-depth: 1030;
 $menuback-depth: 1029;
 $container-depth: 1000;
 
-$header-height: 50px;
-$menus-height: 160px;
+$header-height-xs: 46px;
+$header-height: 52px;
+$menus-height: 136px;
 
 /*
 $menuback-height-down: 205px;
@@ -93,11 +94,16 @@ $menuback-height-up: 45px;
 */
 
 $logo-clearance-lg: 220px;
-$logo-clearance-sm: 180px;
-$logo-clearance-xs: 54px;
+$logo-clearance-sm: 198px;
+$logo-clearance-xs: 60px;
+
 $hamburger-clearance-lg: 0;
 $hamburger-clearance-sm: 80px;
-$signin-clearance-lg: 210px;
+
+$notif-clearance-xs: 90px;
+$notif-clearance-sm: 90px;
+$notif-clearance-med: 185px;
+$notif-clearance-lg: 225px;
 
 $triggered-form-height: 30px;
 $triggered-form-margin: 10px;

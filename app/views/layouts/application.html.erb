@@ -57,7 +57,6 @@
 </head>
 <body <%= 'class=logged-in' if current_user %> >
 <%= render 'layouts/navbar_experimental' %>
-<%= do_notifs %>
 <%= render 'layouts/pagelet' %>
 <% if false && Rails.env.development? %>
     <p>
