@@ -41,11 +41,47 @@ RP.tagger.querify = ->
 RP.tagger.select_type = (event) ->
 	RP.querify.propagate event.target, { tagtype: event.target.value }
 
-RP.tagger.onReady = ->
-	$('li.token-input-input-token input').trigger 'click'
-
+###
 RP.tagger.fix_width = ->
 	$('ul.token-input-list-facebook li.token-input-input-token-facebook input').css('width', '185px;')
+###
+
+check_enabler = ->
+	# An enabler specifies an element that will be en/disabled when there are tokens extant
+	# e.g., a Submit button that can be enabled when a token has been input
+	if selector = $(this).data 'enabler'
+		if $(this).tokenInput('get').length == 0
+			$(selector).attr 'disabled', 'disabled'
+		else
+			$(selector).removeAttr 'disabled'
+
+handlerFor = (what, op) ->
+	data = $(what).data()
+	if hdlr = data.eventHandler || data.eventhandler
+		RP.named_function hdlr + '.' + op
+	else
+		data[op] && RP.named_function data[op]
+
+onReady = (evt) ->
+	# if handler = handlerFor this, 'onReady'
+	# 	handler()
+	inputs = $('div.header li.token-input-input-token-facebook input').width '30px'
+	# $('div.header ul.token-input-list-facebook li:first-child input').width '100%'
+	setTimeout ->
+		$(inputs).first().focus()
+	, 50
+
+onAdd = (token) ->
+	check_enabler this
+	$(this).width '30px'
+	if handler = handlerFor this, 'onAdd'
+		handler this, token
+
+onDelete = (token) ->
+	check_enabler this
+	$(this).width '30px'
+	if handler = handlerFor this, 'onDelete'
+		handler this, token
 
 # Use data attached to the element to initiate tokenInput
 RP.tagger.setup = (elmt) ->
@@ -72,32 +108,19 @@ RP.tagger.setup = (elmt) ->
 			prePopulate: data.pre || "",
 			preventDuplicates: true,
 			minChars: 2,
-			allowFreeTagging: (data.allowFreeTagging != false) && (data.allowfreetagging != false)
-		if hdlr = data.eventHandler || data.eventhandler
-			options.onAdd = RP.named_function(hdlr + '.onAdd')
-			options.onDelete = RP.named_function(hdlr + '.onDelete')
-			options.onReady = RP.named_function(hdlr + '.onReady')
+			allowFreeTagging: (data.allowFreeTagging != false) && (data.allowfreetagging != false),
+			onReady: onReady,
+			onAdd: onAdd,
+			onDelete: onDelete
 
 		if data.theme != 'list' # To get a list, the theme needs to be unspecified (!)
 			options.theme = data.theme || "facebook"
 		for attr in ['tokenLimit', 'placeholder']
 			if data[attr]
 				options[attr] = data[attr]
-		for attr in ['onAdd', 'onDelete', 'onReady']
-			if data[attr] && func = RP.named_function data[attr]
-				options[attr] = func
 		if typeof data.hint == 'string'
 			options.hintText = data.hint
 
-		# An enabler specifies an element that will be en/disabled when there are tokens extant
-		# e.g., a Submit button that can be enabled when a token has been input
-		if data.enabler?
-			options.onAdd = options.onDelete = (item) ->
-				selector = $(this).data "enabler"
-				if $(this).tokenInput("get").length == 0
-					$(selector).attr "disabled","disabled"
-				else
-					$(selector).removeAttr "disabled"
 		$(elmt).tokenInput request, options
 		$(elmt).removeClass "token-input-field-pending"
 		$(elmt).addClass "token-input-field"

@@ -216,9 +216,8 @@ RP.submit.ontokenchange = ->
 	formelmt = RP.findEnclosing 'FORM', this[0]
 	$(formelmt).submit()
 
-RP.submit.enclosing_form = ->
-	# elmt = event.target
-	$(this).closest('form').submit()
+RP.submit.enclosing_form = (elmt) ->
+	$(elmt || this).closest('form').submit()
 
 RP.submit.why = (event) ->
 	false

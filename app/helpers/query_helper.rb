@@ -45,6 +45,6 @@ module QueryHelper
     else
       ''.html_safe
     end +
-      content_tag(:div, qt, style: 'display: inline-block; min-width:300px; position: relative;')
+      content_tag(:div, qt, style: 'display: inline-block; min-width:12em; position: relative;')
   end
 end
