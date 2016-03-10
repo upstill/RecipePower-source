@@ -1,19 +1,19 @@
+<% if current_user %>
+    <div class="menu">
+      <ul class="nav navbar-nav main-menu">
+        <%= collections_navtab %>
+        <%= friends_navtab %>
+        <%= my_lists_navtab %>
+        <%# other_lists_navtab %>
+        <%= feeds_navtab %>
+        <%# news_navtab %>
+        <%# more_navtab %>
+        <%= home_navtab %>
+      </ul>
+    </div>
+<% end %>
 <div class="header">
   <div class="logo"></div>
-  <% if current_user %>
-    <div class="menu">
-        <ul class="nav navbar-nav main-menu">
-          <%= collections_navtab %>
-          <%= friends_navtab %>
-          <%= my_lists_navtab %>
-          <%# other_lists_navtab %>
-          <%= feeds_navtab %>
-          <%# news_navtab %>
-          <%# more_navtab %>
-          <%= home_navtab %>
-        </ul>
-    </div>
-  <% end %>
   <div class="right-matter">
     <% if current_user %>
         <div class="menuIcon">

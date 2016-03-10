@@ -1,0 +1,40 @@
+
+div.filter-element {
+  width: 100%;
+  font-family: Oswald-Light, sans-serif;
+  font-style: italic;
+  font-size: 20px;
+  ul.token-input-list-facebook {
+    font-family: inherit;
+    font-size: inherit;
+    font-style: inherit;
+    display: block;
+    overflow-x: hidden;
+    padding-right: 1.5em; // Room for the search icon
+    li:first-child {
+      &.token-input-input-token-facebook {
+        // The width of an empty tokeninput field is too narrow for the placeholder, so...
+        // background-color: red;
+        min-width: 12em;
+      }
+    }
+    li.token-input-token-facebook { // Styling for chosen tokens
+      font-family: 'Archivo-Narrow', 'Archivo Narrow', "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: inherit;
+      font-style: italic;
+      line-height: 1.3em;
+      margin-top: .3em;
+    }
+    li.token-input-input-token-facebook {
+      margin: 0;
+      line-height: 1;
+      // float: initial;
+      input {
+        font-family: inherit;
+        font-style: inherit;
+        font-size: inherit;
+        margin-top: 6px;
+      }
+    }
+  }
+}

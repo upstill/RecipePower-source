@@ -14,6 +14,7 @@
 @import 'common/panel';
 @import 'common/slider';
 @import 'common/sprites';
+@import 'common/tagger';
 @import 'common/tool_menu';
 @import 'paginate';
 @import "jquery/jNotify.jquery";
@@ -91,28 +92,8 @@ div.card {
   padding-top: 10px
 }
 
-//contents of pages
-.container {
-  background-color: $page-background-color;
-  z-index: $container-depth;
-  padding-bottom: 200px;
-}
-
 img.empty {
   display: none;
-}
-
-div.filter-element {
-  width: 100%;
-  font-family: Oswald-Light, sans-serif;
-  font-style: italic;
-  font-size: 20px;
-  input#token-input-querytags {
-    font-family: inherit;
-    font-style: inherit;
-    font-size: inherit;
-    // width: 500px;
-  }
 }
 
 div.glyph-button {
@@ -350,4 +331,11 @@ div.vote-div {
   &.bold {
     font-weight: 700;
   }
+}
+
+//contents of pages
+div.container {
+  background-color: $page-background-color;
+  z-index: $container-depth;
+  padding-bottom: 200px;
 }

@@ -19,6 +19,7 @@ jQuery ->
 	$('div.stream-body').on "load", '.token-input-field-pending', (event) ->
 		c=3
 		false
+	$('div.header').resize adjustHeader
 
 # Set up an input element for tagging by populating the data of the element as specified
 RP.tagger.init = (selector, data) ->
@@ -62,24 +63,43 @@ handlerFor = (what, op) ->
 	else
 		data[op] && RP.named_function data[op]
 
+adjustHeader = ->
+	hdr = $('div.header')
+	formbottom = $('div.form-group.triggered-form', hdr)[0].getBoundingClientRect().bottom
+	# ## Find the padding-top style for the pagelet body, to shift it down--for now and for subsequent loads
+	$('div.pagelet-body').css 'padding-top', (formbottom + 'px')
+	for ss, ssix in document.styleSheets
+		do (ss) ->
+			if ss.title == 'pagelet-padding' # Which we have defined in the style declaration in application.html
+				for rule, ruleix in ss.rules
+					do (rule) ->
+						if rule.selectorText == 'div.pagelet-body'
+							if rule.style['padding-top'] != formbottom + 'px'
+								document.styleSheets[ssix].rules[ruleix].style['padding-top'] = formbottom + 'px'
+
 onReady = (evt) ->
 	# if handler = handlerFor this, 'onReady'
 	# 	handler()
-	inputs = $('div.header li.token-input-input-token-facebook input').width '30px'
-	# $('div.header ul.token-input-list-facebook li:first-child input').width '100%'
 	setTimeout ->
+		inputs = $('div.header li.token-input-input-token-facebook input').width '30px'
+		# $('div.header ul.token-input-list-facebook li:first-child input').width '100%'
+		adjustHeader()
 		$(inputs).first().focus()
 	, 50
 
 onAdd = (token) ->
 	check_enabler this
-	$(this).width '30px'
+	if (container = $(this).closest('div.header'))[0]
+		$('li.token-input-input-token-facebook input', container).width '30px'
+	adjustHeader()
 	if handler = handlerFor this, 'onAdd'
 		handler this, token
 
 onDelete = (token) ->
 	check_enabler this
-	$(this).width '30px'
+	if (container = $(this).closest('div.header'))[0]
+		$('li.token-input-input-token-facebook input', container).width '30px'
+	adjustHeader()
 	if handler = handlerFor this, 'onDelete'
 		handler this, token
 

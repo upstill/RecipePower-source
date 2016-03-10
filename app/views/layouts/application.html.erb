@@ -54,6 +54,11 @@
           s.parentNode.insertBefore(ga, s);
       })();
   </script>
+  <style title="pagelet-padding">
+      div.pagelet-body {
+          padding-top: 102px;
+      }
+  </style>
 </head>
 <body <%= 'class=logged-in' if current_user %> >
 <%= render 'layouts/navbar_experimental' %>

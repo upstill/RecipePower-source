@@ -58,7 +58,7 @@ class ViewParams
   attr_reader :link_address, :result_type, :results_path, :filtered_presenter, :item_mode
 
   delegate :entity, :decorator, :viewer, :tagtype, :response_service, :querytags,
-           :request_path, :next_path, :query,
+           :request_path, :next_path, :query, :querytags?,
            :filter_field, :filter_type_selector,
            :table_headers, :stream_id, :tail_partial, :sibling_views, :org_buttons,
            :presentation_partials, :results_partial, :org,
@@ -241,6 +241,10 @@ class FilteredPresenter
       params, format = format, nil
     end
     assert_query request_path, format, params.merge(stream_params_null).merge(querytags: nil)
+  end
+
+  def querytags?
+    true
   end
 
   # This is a stub for future use in eliding streaming
@@ -433,6 +437,10 @@ class SearchIndexPresenter < FilteredPresenter
   # The global query will be maintained
   def global_querytags
     querytags
+  end
+
+  def querytags?
+    false
   end
 
 end
