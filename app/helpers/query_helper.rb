@@ -11,11 +11,10 @@ module QueryHelper
     data[:'min-chars'] ||= 2
     data[:'no-results-text'] ||= 'No matching tag found; hit Enter to search with text'
     # JS for how to invoke the search on tag completion:
-    # RP.tagger.querify for standard tag handling;
-    # RP.submit.enclosing_form for results enclosures (which maintain and accumulate query data)
-    data[:'on-add'] = options[:handler] || 'RP.submit.enclosing_form'
-    data[:'on-delete'] = options[:handler] || 'RP.submit.enclosing_form'
-    # data[:'on-ready'] = 'RP.tagger.fix_width'
+    # querify (tagger.js) for standard tag handling;
+    # submit (tagger.js) for results enclosures (which maintain and accumulate query data)
+    data[:'on-add'] = options[:handler] || 'submit'
+    data[:'on-delete'] = options[:handler] || 'submit'
 
     # Set up the tokeninput data
     querytags = options[:querytags] || []

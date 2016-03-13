@@ -1,7 +1,7 @@
 <% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
 <% if viewparams.panel_title.present? %>
     <div class="row">
-      <div class="col-md-12">
+      <div class="col-md-12 panels-label">
         <span class="panels-label <%= viewparams.display_style.extensions_to_classes %>-label ">
           <%= viewparams.panel_title %>
         </span>

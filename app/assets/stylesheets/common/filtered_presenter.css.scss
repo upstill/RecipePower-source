@@ -29,33 +29,36 @@ div.beachball {
   }
 }
 
-span.panels-label {
-  font-family: $oswald;
-  font-size: 400%;
-  letter-spacing: 1.5px;
-  padding-left: 20px;
-  color: $generic-panels-label-text-color;
-  &.recipe-label {
-    color: rgba($recipes-navtab-text-color, 0.6);
-    // color: $recipes-panels-label-text-color;
-  }
-  &.viewer-label {
-    color: $viewer-panels-label-text-color;
-  }
-  &.user-label {
-    color: $user-panels-label-text-color;
-  }
-  &.feed-label {
-    color: rgba($feeds-navtab-text-color, 0.6);
-  }
-  &.feed_entry-label {
-    color: $feeds-navtab-text-color;
-  }
-  &.friend-label {
-    color: $friends-navtab-text-color;
-  }
-  &.list-label {
-    color: rgba($lists-navtab-text-color, 0.6);
+div.panels-label {
+  margin-top: 10px;
+  span.panels-label {
+    font-family: $oswald;
+    font-size: 400%;
+    letter-spacing: 1.5px;
+    padding-left: 20px;
+    color: $generic-panels-label-text-color;
+    &.recipe-label {
+      color: rgba($recipes-navtab-text-color, 0.6);
+      // color: $recipes-panels-label-text-color;
+    }
+    &.viewer-label {
+      color: $viewer-panels-label-text-color;
+    }
+    &.user-label {
+      color: $user-panels-label-text-color;
+    }
+    &.feed-label {
+      color: rgba($feeds-navtab-text-color, 0.6);
+    }
+    &.feed_entry-label {
+      color: $feeds-navtab-text-color;
+    }
+    &.friend-label {
+      color: $friends-navtab-text-color;
+    }
+    &.list-label {
+      color: rgba($lists-navtab-text-color, 0.6);
+    }
   }
 }
 

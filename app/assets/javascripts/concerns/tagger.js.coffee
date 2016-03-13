@@ -36,9 +36,6 @@ RP.tagger.onopen = (selector = '.token-input-field-pending') ->
 RP.tagger.onload = (event) ->
 	RP.tagger.setup event.target
 
-RP.tagger.querify = ->
-	RP.querify.propagate this, { querytags: $(this)[0].value }
-
 RP.tagger.select_type = (event) ->
 	RP.querify.propagate event.target, { tagtype: event.target.value }
 
@@ -47,21 +44,30 @@ RP.tagger.fix_width = ->
 	$('ul.token-input-list-facebook li.token-input-input-token-facebook input').css('width', '185px;')
 ###
 
-check_enabler = ->
+check_enabler = (elmt) ->
 	# An enabler specifies an element that will be en/disabled when there are tokens extant
 	# e.g., a Submit button that can be enabled when a token has been input
-	if selector = $(this).data 'enabler'
-		if $(this).tokenInput('get').length == 0
+	if selector = $(elmt).data 'enabler'
+		if $(elmt).tokenInput('get').length == 0
 			$(selector).attr 'disabled', 'disabled'
 		else
 			$(selector).removeAttr 'disabled'
 
+# The semantics of a tagger event (onReady, onAdd, onDelete) are directed by the corresponding data attribute.
+# 'querify': consult the enclosing querify supervisor via an anonymous function
+# 'submit': submit the enclosing form via an anonymous function
+# ...(any other string): return the named function
 handlerFor = (what, op) ->
 	data = $(what).data()
 	if hdlr = data.eventHandler || data.eventhandler
 		RP.named_function hdlr + '.' + op
-	else
-		data[op] && RP.named_function data[op]
+	else if data[op]
+		switch data[op]
+			when 'querify' then (elmt) ->
+				RP.querify.propagate elmt, { querytags: $(elmt)[0].value }
+			when 'submit' then (elmt) ->
+				RP.submit.enclosing_form elmt
+			else RP.named_function data[op]
 
 adjustHeader = ->
 	hdr = $('div.header')
@@ -82,7 +88,7 @@ onReady = (evt) ->
 	# 	handler()
 	setTimeout ->
 		inputs = $('div.header li.token-input-input-token-facebook input').width '30px'
-		# $('div.header ul.token-input-list-facebook li:first-child input').width '100%'
+		$('div.header ul.token-input-list-facebook li:first-child input').width '100%'
 		adjustHeader()
 		$(inputs).first().focus()
 	, 50

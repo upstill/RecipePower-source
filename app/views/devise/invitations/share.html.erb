@@ -17,7 +17,7 @@
 											}.to_json,
 											:no_results_text => "No matches among friends, but outside emails work too",
 											:hint => "Type email addresses or match friends",
-											:allowFreeTagging => false,
+											:allowFreeTagging => true,
 											:enabler => "input.dialog-submit-button",
 											:request => match_friends_user_path(current_user.id) # "/users/#{current_user.id}/match_friends.json"
 										}
