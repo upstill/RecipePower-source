@@ -72,8 +72,7 @@ div.panels-label {
 
 div.org-element {
   display: inline-block;
-  // float: right;
-  // margin-top: 50px;
+  vertical-align: baseline;
   @include respond-to(medium-down) {
     font-size: 80%;
   }
@@ -85,13 +84,13 @@ div.org-element {
   }
   // margin-bottom: 10px;
   div.org-buttons {
+    display: inline-block;
     &.panels-buttons {
-      margin-top: 15px;
+      // margin-top: 15px;
     }
     span.org-buttons-label {
-      display: inline-block;
       margin-right: 10px;
-      float: left;
+      // float: left;
     }
     .org-button {
       // margin: 10px;

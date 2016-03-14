@@ -14,18 +14,16 @@
     </div>
 <% end if viewparams.querytags? %>
 <div class="row">
-  <div class="col-md-5">
+  <div class="col-md-12">
     <div class="selector-element">
       <%= link_to_submit viewparams.panel_label, viewparams.link_address, class: "result-link #{viewparams.result_type} lead" %>
       <% viewparams.sibling_views.each do |viewparams| %>
           <span class="divider">|</span>&nbsp;
           <%= link_to_submit viewparams.panel_label, viewparams.link_address, class: "result-link #{viewparams.result_type}" %>
       <% end %>
-    </div>
-  </div>
-  <div class="col-md-7">
-    <div class="org-element">
-      <%= filtered_presenter_org_buttons viewparams, 'organize by:' %>
+      <div class="org-element">
+        <%= filtered_presenter_org_buttons viewparams, 'header' %>
+      </div>
     </div>
   </div>
 </div>

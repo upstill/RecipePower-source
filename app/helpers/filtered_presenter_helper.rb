@@ -11,10 +11,11 @@ module FilteredPresenterHelper
           "#{link_options[:class]} org-button #{display_style} #{options[:class]}"
       buttons << querify_radiobutton( label.upcase.html_safe, qparams, link_options )
     end || ''
-    buttons = content_tag :div, buttons, class: 'btn-group', data: { toggle: 'buttons' }
-    content_tag :div,
-                content_tag(:span, label, class: 'org-buttons-label')+buttons,
-                class: "org-buttons #{display_style} #{context}-buttons" if buttons.present?
+    if (buttons = content_tag :div, buttons, class: 'btn-group', data: { toggle: 'buttons' }).present?
+      content_tag(:div,
+                  content_tag(:span, label, class: 'org-buttons-label') + buttons,
+                  class: "org-buttons #{display_style} #{context}-buttons")
+    end
   end
 
   def filtered_presenter_org_buttons_replacement viewparams, context='panels'
