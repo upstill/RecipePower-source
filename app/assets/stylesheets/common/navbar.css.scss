@@ -166,7 +166,6 @@ body.logged-in {
     z-index: $header-depth + 1;
     @include transition(max-height 0.5s);
     @include respond-to(largish-down) {
-      width: 100%;
       min-width: 300px;
       float: none;
       ul {
@@ -202,10 +201,15 @@ body.logged-in {
         }
       }
     }
+    @include respond-to(large) {
+      max-width: 35em;
+    }
     @include respond-to(large-up) {
-      width: 740px;
       left: $logo-clearance-lg;
       ul {
+        font-family: Oswald, sans-serif;
+        letter-spacing: 1.5px;
+        font-size: 2em;
         position: relative;
         padding: 0 10px 0 0;
         margin: 0;
@@ -214,7 +218,7 @@ body.logged-in {
           float: left;
           list-style: none;
           margin: 0 7px;
-          width: 155px;
+          width: 5.75em;
           margin-bottom: 10px;
           text-shadow: none;
           text-align: center;
@@ -259,7 +263,6 @@ body.logged-in {
             padding: 0;
             position: absolute;
             top: 0;
-            right: -158px;
             span.user-name {
               font-size: 0.7em;
               color: #fadfdb;
@@ -271,13 +274,15 @@ body.logged-in {
             padding-left: 40px;
           }
           a.dropdown-toggle {
-            font-family: Oswald, sans-serif;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-size: 21px;
             span.caret {
               display: inline-block;
               margin-left: 3px;
+            }
+          }
+          ul.dropdown-menu {
+            a.submit {
+              font-size: 0.25em;
             }
           }
           span.measuring-spoons {
@@ -287,14 +292,14 @@ body.logged-in {
       }
     }
     @include respond-to(large) {
-      width: 348px;
+      // width: 348px;
       height: $menus-height-lg;
       li.master-navtab {
         padding: 28px 8px 3px;
       }
     }
     @include respond-to(wide) {
-      width: 736px;
+      // width: 736px;
       height: $menus-height-wide;
       li.master-navtab {
         padding: 90px 8px 3px;
