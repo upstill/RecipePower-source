@@ -70,72 +70,117 @@ div.panels-label {
   }
 }
 
-div.org-element {
-  display: inline-block;
-  vertical-align: baseline;
+div.selector-element {
+  // display: inline-block;
+  // float: left;
+  text-align: justify;
+  line-height: 2px;
   @include respond-to(medium-down) {
-    font-size: 80%;
+    font-size: 0.8em;
   }
   @include respond-to(largish) {
-    font-size: 80%;
+    font-size: 0.9em;
   }
   @include respond-to(large-up) {
-    font-size: 100%;
+    font-size: 1.2em;
   }
-  // margin-bottom: 10px;
-  div.org-buttons {
+  div.org-element {
     display: inline-block;
-    &.panels-buttons {
-      // margin-top: 15px;
+    vertical-align: baseline;
+    margin-top: 10px;
+    @include respond-to(medium-down) {
+      font-size: 80%;
     }
-    span.org-buttons-label {
-      margin-right: 10px;
-      // float: left;
+    @include respond-to(largish) {
+      font-size: 80%;
     }
-    .org-button {
-      // margin: 10px;
-      font-size: inherit;
-      border: none;
-      // Default, generic colors for org buttons (overridden by specific types)
-      background-color: $generic-panels-label-button-color;
-      color: rgba($generic-panels-button-color, 0.6);
-      &.active {
-        color: $generic-panels-button-color;
+    @include respond-to(large-up) {
+      font-size: 90%;
+    }
+    // margin-bottom: 10px;
+    div.org-buttons {
+      display: inline-block;
+      &.panels-buttons {
+        // margin-top: 15px;
       }
-      &.disabled {
-        background-color: rgba($generic-panels-label-button-color, 0.6);
+      span.org-buttons-label {
+        margin-right: 10px;
+        // float: left;
       }
-      &.small {
-        font-size: 0.8em;
-        &.soft-button {
-          padding: 4px 8px;
-          // border-radius: 6px;
-        }
-      }
-      &.recipe {
-        background-color: $recipes-navtab-text-color;
-      }
-      &.viewer {
-        background-color: $viewer-panels-label-button-color;
-      }
-      &.user {
-        background-color: $user-panels-label-button-color;
-        color: rgba($user-panels-button-color, 0.6);
+      .org-button {
+        // margin: 10px;
+        font-size: inherit;
+        border: none;
+        // Default, generic colors for org buttons (overridden by specific types)
+        background-color: $generic-panels-label-button-color;
+        color: rgba($generic-panels-button-color, 0.6);
         &.active {
-          color: $user-panels-button-color;
+          color: $generic-panels-button-color;
+        }
+        &.disabled {
+          background-color: rgba($generic-panels-label-button-color, 0.6);
+        }
+        &.small {
+          font-size: 0.8em;
+          &.soft-button {
+            padding: 4px 8px;
+            // border-radius: 6px;
+          }
+        }
+        &.recipe {
+          background-color: $recipes-navtab-text-color;
+        }
+        &.viewer {
+          background-color: $viewer-panels-label-button-color;
+        }
+        &.user {
+          background-color: $user-panels-label-button-color;
+          color: rgba($user-panels-button-color, 0.6);
+          &.active {
+            color: $user-panels-button-color;
+          }
+        }
+        &.friend {
+          background-color: $friends-navtab-text-color;
+        }
+        &.feed {
+          background-color: $feeds-navtab-text-color;
+        }
+        &.list {
+          background-color: $lists-panels-label-button-color;
         }
       }
-      &.friend {
-        background-color: $friends-navtab-text-color;
-      }
-      &.feed {
-        background-color: $feeds-navtab-text-color;
-      }
-      &.list {
-        background-color: $lists-panels-label-button-color;
-      }
     }
+  }
+  a.result-link {
+    font-size: 1.5em;
+    &.recipes {
+      color: $recipes-navtab-text-color;
+    }
+    &.lists {
+      color: $lists-navtab-text-color;
+    }
+    &.friends {
+      color: $friends-navtab-text-color; // #dfca6a;
+    }
+    &.feeds {
+      color: $feeds-navtab-text-color;
+    }
+    &.lead {
+      font-size: 3em;
+    }
+  }
+  span.divider {
+    font-size: 2em;
+    color: white;
+  }
+  span.boom {
+    display: inline-block;
+    visibility: hidden;
+    font-size:  0.1em;
+    width: 100%;
   }
 }
+
 
 

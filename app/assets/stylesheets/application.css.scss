@@ -100,44 +100,6 @@ div.glyph-button {
   display: inline-block;
 }
 
-div.selector-element {
-  display: inline-block;
-  float: left;
-  // margin-top: 10px;
-  margin-bottom: 10px;
-  @include respond-to(medium-down) {
-    font-size: 0.8em;
-  }
-  @include respond-to(largish) {
-    font-size: 1em;
-  }
-  @include respond-to(large-up) {
-    font-size: 1.2em;
-  }
-  a.result-link {
-    font-size: 1.5em;
-    &.recipes {
-      color: $recipes-navtab-text-color;
-    }
-    &.lists {
-      color: $lists-navtab-text-color;
-    }
-    &.friends {
-      color: $friends-navtab-text-color; // #dfca6a;
-    }
-    &.feeds {
-      color: $feeds-navtab-text-color;
-    }
-    &.lead {
-      font-size: 3em;
-    }
-  }
-  span.divider {
-    font-size: 2em;
-    color: white;
-  }
-}
-
 .tag-filter-title {
   font-family: Oswald, sans-serif;
   text-transform: lowercase;
