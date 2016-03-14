@@ -410,7 +410,7 @@ class SearchIndexPresenter < FilteredPresenter
   @item_mode = :masonry
 
   def panel_title
-    'Everything in RecipePower'
+    'The RecipePower Collection'
   end
 
   # Define buttons used in the search/redirect header above the presenter's results

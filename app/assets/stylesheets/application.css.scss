@@ -105,6 +105,15 @@ div.selector-element {
   float: left;
   // margin-top: 10px;
   margin-bottom: 10px;
+  @include respond-to(medium-down) {
+    font-size: 0.8em;
+  }
+  @include respond-to(largish) {
+    font-size: 1em;
+  }
+  @include respond-to(large-up) {
+    font-size: 1.2em;
+  }
   a.result-link {
     font-size: 1.5em;
     &.recipes {
@@ -129,13 +138,6 @@ div.selector-element {
   }
 }
 
-div.org-element {
-  display: inline-block;
-  float: right;
-  margin-top: 20px;
-  // margin-bottom: 10px;
-}
-
 .tag-filter-title {
   font-family: Oswald, sans-serif;
   text-transform: lowercase;
@@ -152,6 +154,49 @@ div.org-element {
 // margin: 8px 0 5px;
 // }
 
+div.booger {
+  position: fixed;
+  top: 20px;
+  right: 0;
+  z-index: $dialog-depth + 1;
+  background-color: #dedede;
+  border: 1px solid #222222;
+  padding: 0 3px;
+  font-size: 0.7em;
+  span {
+    display: none;
+    &.phone {
+      @include respond-to(phone) {
+        display: inline-block;
+      }
+    }
+    &.small {
+      @include respond-to(small) {
+        display: inline-block;
+      }
+    }
+    &.medium {
+      @include respond-to(medium) {
+        display: inline-block;
+      }
+    }
+    &.largish {
+      @include respond-to(largish) {
+        display: inline-block;
+      }
+    }
+    &.large {
+      @include respond-to(large) {
+        display: inline-block;
+      }
+    }
+    &.wide {
+      @include respond-to(wide) {
+        display: inline-block;
+      }
+    }
+  }
+}
 .resource-element {
   margin-top: 10px;
   &.pic {

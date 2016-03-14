@@ -61,6 +61,16 @@
   </style>
 </head>
 <body <%= 'class=logged-in' if current_user %> >
+<% if Rails.env.development? %>
+<div class="booger">
+  <span class="phone" >phone</span>
+  <span class="small" >small</span>
+  <span class="medium" >medium</span>
+  <span class="largish" >largish</span>
+  <span class="large" >large</span>
+  <span class="wide" >wide</span>
+</div>
+<% end %>
 <%= render 'layouts/navbar_experimental' %>
 <%= render 'layouts/pagelet' %>
 <% if false && Rails.env.development? %>

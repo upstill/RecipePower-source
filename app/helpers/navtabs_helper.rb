@@ -71,7 +71,7 @@ module NavtabsHelper
         navlink('Feeds', collection_user_path(current_user_or_guest, result_type: 'feeds'), class: 'submenu'),
         navlink('Friends', collection_user_path(current_user_or_guest, result_type: 'friends'), class: 'submenu'),
           # navlink('Recently Viewed', user_recent_path(current_user_or_guest_id)),
-          navlink('Everything in RecipePower', search_path()),
+          navlink('The RecipePower Collection', search_path()),
           '<hr class="menu">'.html_safe,
           navlink('Add to Collection', new_recipe_path, :mode => :modal)
       ]
