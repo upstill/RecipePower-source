@@ -16,7 +16,7 @@ class RPDeviseMailer < Devise::Mailer
                                      @recipient
     # Add an attachment for the shared entity's image, if available
     if (imgdata = @recipient.shared && @recipient.shared.imgdata).present?
-      attachments['collectible_image'] = Base64.decode64(imgdata.sub(/^data:image\/png;base64,/,''))
+      attachments['collectible_image'] = Base64.decode64(imgdata.sub(/^data:image\/[^;]*;base64,/,''))
     end
     if Gem::Version.new(Devise::VERSION.dup) < Gem::Version.new('2.2.0')
       devise_mail(record, :sharing_invitation_instructions)
