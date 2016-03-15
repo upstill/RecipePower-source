@@ -82,12 +82,14 @@ RP.slider.click = (event) ->
 	winrect = parent.getBoundingClientRect()
 	if button_elmt == right_button
 		cutoff = winrect.right
+		minleft = winrect.left
 	else
 		cutoff = winrect.left - (winrect.right - winrect.left)
+		minleft = -10000
 	# Do a linear search for the item that overlaps the left side of the scrolling panel
 	$('.slider-item', parent).each (index) ->
 		itemrect = this.getBoundingClientRect()
-		if itemrect.right > cutoff
+		if (itemrect.right > cutoff) && (itemrect.left > minleft) # Not the first visible
 			# slide_by left_button, winrect.left-itemrect.left
 			$(trackitem).animate
 				left: ("+=" + (winrect.left-itemrect.left)),
