@@ -4,6 +4,9 @@ div.masonry-item {
   img.beachball {
     margin: 50px 96px;
   }
+  &.stream-tail { // To ensure that the tail link appears at the bottom of the masonry panel
+    width: 100%;
+  }
   div.masonry-item-contents {
     width: 350px;
     &.user-item {
@@ -61,9 +64,6 @@ div.masonry-item {
 
     }
   }
-}
-
-div.masonry-item {
   table.cardlet-table {
     div.title-glyph {
       &.top-right {
