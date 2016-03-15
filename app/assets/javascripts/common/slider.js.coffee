@@ -5,16 +5,11 @@ jQuery ->
 		# console.log "entering item of class " + event.target.attributes.class
 		elmt = $(event.target).closest 'div.slider-item'
 		if $('div.slider-right', elmt).hasClass 'pop-cardlet'
-			$('div.slider-right', elmt).fadeIn()
-		event.preventBubble()
-		# event.preventDefault()
-	$(document).on 'click', 'div.slider-item', (event) ->
-		# console.log "leaving item of class " + event.target.attributes.class
-		elmt = $(event.target).closest 'div.slider-item'
-		if $('div.slider-right', elmt).hasClass 'pop-cardlet'
-			$('div.slider-right', elmt).fadeOut()
-		event.preventBubble()
-		# event.preventDefault()
+			if $('div.slider-right', elmt).is ":visible"
+				$('div.slider-right', elmt).fadeOut()
+			else
+				$('div.slider-right', elmt).fadeIn()
+				event.preventDefault()
 	$(document).on 'image:empty', 'div.slider-pic img.empty', (event) ->
 		enclosure = $(event.currentTarget).closest 'div.slider-item'
 		$('div.slider-left', enclosure).hide()
