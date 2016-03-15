@@ -224,7 +224,7 @@ body.logged-in {
           text-align: center;
           &#collections-navtab {
             background-color: $recipes-navtab-background-color;
-            a.dropdown-toggle {
+            a {
               color: $recipes-navtab-text-color;
             }
           }
@@ -233,7 +233,7 @@ body.logged-in {
             //margin: 0 7px;
             //padding:80px 8px 0;
             //text-shadow: none;
-            a.dropdown-toggle {
+            a {
               color: $friends-navtab-text-color;
             }
           }
@@ -242,7 +242,7 @@ body.logged-in {
             //margin: 0 7px;
             //padding: 80px 18px 0;
             //text-shadow: none;
-            a.dropdown-toggle {
+            a {
               color: $lists-navtab-text-color;
             }
           }
