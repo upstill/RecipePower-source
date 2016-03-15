@@ -26,7 +26,7 @@ module StreamHelper
     end
     # Define a default partial as needed
     unless partial || block_given?
-      fname = etype.to_s.sub /-/, '_'
+      fname = etype.to_s.gsub /-/, '_'
       partial = "shared/stream_#{fname}"
     end
     if partial

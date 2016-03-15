@@ -1,5 +1,5 @@
 
-div.filter-element {
+div.token-input-holder {
   width: 100%;
   font-family: Oswald-Light, sans-serif;
   font-style: italic;
@@ -18,7 +18,8 @@ div.filter-element {
         min-width: 12em;
       }
     }
-    li.token-input-token-facebook { // Styling for chosen tokens
+    li.token-input-token-facebook {
+      // Styling for chosen tokens
       font-family: 'Archivo-Narrow', 'Archivo Narrow', "Helvetica Neue", Helvetica, Arial, sans-serif;
       font-size: inherit;
       font-style: italic;
@@ -38,3 +39,4 @@ div.filter-element {
     }
   }
 }
+

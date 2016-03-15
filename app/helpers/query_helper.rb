@@ -44,6 +44,6 @@ module QueryHelper
     else
       ''.html_safe
     end +
-      content_tag(:div, qt, style: 'display: inline-block; min-width:12em; max-width: 100%; position: relative;')
+      content_tag(:div, qt, class: 'token-input-elmt')
   end
 end

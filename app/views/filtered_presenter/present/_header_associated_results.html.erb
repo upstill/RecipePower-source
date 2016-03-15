@@ -9,24 +9,22 @@
     </div>
 <% end %>
 <%= triggered_form(viewparams.query) do %>
-    <div class="filter-element">
+    <div class="token-input-holder">
       <%= viewparams.filter_field placeholder: 'Let\'s cook up something' %>
     </div>
 <% end if viewparams.querytags? %>
 <div class="row">
-  <div class="col-md-12">
-    <div class="selector-element">
-      <div style="display: inline-block">
-        <%= link_to_submit viewparams.panel_label, viewparams.link_address, class: "result-link #{viewparams.result_type} lead" %>
-        <% viewparams.sibling_views.each do |viewparams| %>
-            <span class="divider">|</span>&nbsp;
-            <%= link_to_submit viewparams.panel_label, viewparams.link_address, class: "result-link #{viewparams.result_type}" %>
-        <% end %>
-      </div>
-        <div class="org-element">
-          <%= filtered_presenter_org_buttons viewparams, 'header' %>
-        </div>
-        <span class="boom">anextrema</span>
+  <div class="col-md-12 header-element">
+    <div style="display: inline-block; vertical-align: sub;">
+      <%= link_to_submit viewparams.panel_label, viewparams.link_address, class: "result-link #{viewparams.result_type} lead" %>
+      <% viewparams.sibling_views.each do |viewparams| %>
+          <span class="divider">|</span>&nbsp;
+          <%= link_to_submit viewparams.panel_label, viewparams.link_address, class: "result-link #{viewparams.result_type}" %>
+      <% end %>
     </div>
+    <div class="org-element">
+      <%= filtered_presenter_org_buttons viewparams, 'header' %>
+    </div>
+    <span class="boom"></span>
   </div>
 </div>

@@ -343,7 +343,7 @@ class FilteredPresenter
   def org_buttons context, &block
     if context == 'panels'
       link_options = {}
-      label = ''
+      label = 'order:'
     else
       link_options = { class: 'small' }
       label = 'order by'

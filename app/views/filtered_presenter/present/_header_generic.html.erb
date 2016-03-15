@@ -1,10 +1,15 @@
 <% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
-<div class="panels-query">
-  <span class="panels-label <%= viewparams.display_style %>-label">
-    <%= viewparams.panel_title true %>
-  </span>
-  <div class="panels-search" style="display: inline-block; vertical-align: baseline;">
-    <%= viewparams.filter_field handler: 'querify' %>
-    <%= filtered_presenter_org_buttons viewparams, 'panels' %>
+<div class="row">
+  <div class="col-md-12 header-element <%= viewparams.display_style %>">
+    <div style="display: inline-block">
+        <span class="panels-label <%= viewparams.display_style %>-label">
+          <%= viewparams.panel_title true %>
+        </span>
+    </div>
+    <div class="org-element">
+        <%= viewparams.filter_field handler: 'querify', placeholder: 'Search within results' %>
+        <br><%= filtered_presenter_org_buttons viewparams, 'panels' %>
+    </div>
+    <span class="boom"></span>
   </div>
 </div>

@@ -1,8 +1,8 @@
 <% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
 <%= triggered_form(viewparams.query) do %>
-    <h2 class="filter-element"><%= viewparams.title %></h2>
+    <h2 class="token-input-holder"><%= viewparams.title %></h2>
     <% if viewparams.filter_type_selector %>
-        <div class="filter-element" style="margin-bottom: 10px;">
+        <div class="token-input-holder">
           <%= select_tag :tagtype, 
 			             options_from_collection_for_select(Tag.type_selections(true, true),
                                                             :last,
@@ -12,7 +12,7 @@
                          :onchange => %Q{RP.submit.onselect( event ); } %>
         </div>
     <% end %>
-    <div class="filter-element">
+    <div class="token-input-holder">
       <%= viewparams.filter_field %>
     </div>
 <% end %>

@@ -5,7 +5,7 @@
                        :include_blank => false,
                        :onchange => 'RP.submit.onselect( event );' %>
     <% end %>
-    <div class="filter-element">
+    <div class="token-input-holder">
       <%= token_input_query(
                   :querytags => (viewparams ? viewparams.querytags : []),
                   :hint => 'Type food terms and hit Enter or Return',

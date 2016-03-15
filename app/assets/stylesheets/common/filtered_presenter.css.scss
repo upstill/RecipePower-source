@@ -29,52 +29,20 @@ div.beachball {
   }
 }
 
-div.panels-label {
-  margin-top: 10px;
-  span.panels-label {
-    font-family: $oswald;
-    @include respond-to(medium-down) {
-      font-size: 200%;
-    }
-    @include respond-to(largish) {
-      font-size: 300%;
-    }
-    @include respond-to(large-up) {
-      font-size: 400%;
-    }
-    letter-spacing: 1.5px;
-    padding-left: 0.2em;
-    color: $generic-panels-label-text-color;
-    &.recipe-label {
-      color: rgba($recipes-navtab-text-color, 0.6);
-      // color: $recipes-panels-label-text-color;
-    }
-    &.viewer-label {
-      color: $viewer-panels-label-text-color;
-    }
-    &.user-label {
-      color: $user-panels-label-text-color;
-    }
-    &.feed-label {
-      color: rgba($feeds-navtab-text-color, 0.6);
-    }
-    &.feed_entry-label {
-      color: $feeds-navtab-text-color;
-    }
-    &.friend-label {
-      color: $friends-navtab-text-color;
-    }
-    &.list-label {
-      color: rgba($lists-navtab-text-color, 0.6);
-    }
+span.panels-label {
+  font-family: $oswald;
+  vertical-align: sub;
+  font-size: 400%;
+  @include respond-to(small-down) {
+    font-size: 300%;
   }
+  letter-spacing: 1.5px;
+  padding-left: 0.2em;
 }
 
-div.selector-element {
-  // display: inline-block;
-  // float: left;
+div.header-element {
   text-align: justify;
-  line-height: 2px;
+  // line-height: 2px;
   @include respond-to(medium-down) {
     font-size: 0.8em;
   }
@@ -84,10 +52,34 @@ div.selector-element {
   @include respond-to(large-up) {
     font-size: 1.2em;
   }
+  color: $generic-panels-label-text-color;
+  &.recipe {
+    color: rgba($recipes-navtab-text-color, 0.6);
+    // color: $recipes-panels-text-color;
+  }
+  &.viewer {
+    color: $viewer-panels-label-text-color;
+  }
+  &.user {
+    color: $user-panels-label-text-color;
+  }
+  &.feed {
+    color: rgba($feeds-navtab-text-color, 0.6);
+  }
+  &.feed_entry {
+    color: $feeds-navtab-text-color;
+  }
+  &.friend {
+    color: $friends-navtab-text-color;
+  }
+  &.list {
+    color: rgba($lists-navtab-text-color, 0.6);
+  }
   div.org-element {
     display: inline-block;
     vertical-align: baseline;
-    margin-top: 10px;
+    text-align: right;
+    // margin-top: 10px;
     @include respond-to(medium-down) {
       font-size: 80%;
     }
@@ -96,6 +88,26 @@ div.selector-element {
     }
     @include respond-to(large-up) {
       font-size: 90%;
+    }
+    div.token-input-elmt {
+      margin-bottom: 1em;
+      min-width: 200px;
+      max-width: 300px;
+      display: inline-block;
+      color: #555555;
+      // We want to propagate the font size down to the selections and the dropdown
+      ul {
+        font-size: inherit;
+        li {
+          font-size: inherit;
+        }
+      }
+      div {
+        font-size: inherit;
+        p {
+          font-size: inherit;
+        }
+      }
     }
     // margin-bottom: 10px;
     div.org-buttons {
