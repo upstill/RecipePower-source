@@ -2,7 +2,7 @@
 <% decorator ||= viewparams.decorator %>
 <%= present decorator, current_user_or_guest do |presenter| %>
     <div class="row collection-header">
-      <div class="col-md-7 collection-nav <%= viewparams.result_type %>">
+      <div class="col-md-7 header-element collection-nav <%= viewparams.result_type %>">
         <div class="row">
           <div class="col-md-12 navlink">
             <%= link_to_submit "#{sprite_glyph :'send-left', 'lg'}&nbsp;[last page]".html_safe, collection_user_path(decorator.object), title: 'Back to Collection' %>
@@ -17,12 +17,14 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-md-6 search">
-            <%= viewparams.filter_field(
-                        handler: 'querify',
-                        placeholder: "Search #{viewparams.panel_label}") %>
+          <div class="col-sm-6 search">
+            <div class="token-input-holder">
+              <%= viewparams.filter_field(
+                          handler: 'querify',
+                          placeholder: "Search #{viewparams.panel_label}") %>
+            </div>
           </div>
-          <div class="col-md-6 filters">
+          <div class="col-sm-6 org-element">
             <%= filtered_presenter_org_buttons viewparams, 'header', display_style: viewparams.result_type.singularize %>
           </div>
         </div>

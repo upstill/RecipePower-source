@@ -3,7 +3,29 @@ div.token-input-holder {
   width: 100%;
   font-family: Oswald-Light, sans-serif;
   font-style: italic;
-  font-size: 20px;
+  div.token-input-elmt {
+    display: inline-block;
+    min-width: 12em;
+    max-width: 100%;
+    position: relative;
+    color: #555555;
+    // We want to propagate the font size down to the selections and the dropdown
+    ul {
+      font-size: inherit;
+      li {
+        font-size: inherit;
+      }
+    }
+    div {
+      font-size: inherit;
+      &.token-input-dropdown-facebook {
+        font-size: 80%;
+      }
+      p {
+        font-size: inherit;
+      }
+    }
+  }
   ul.token-input-list-facebook {
     font-family: inherit;
     font-size: inherit;

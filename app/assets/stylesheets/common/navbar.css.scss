@@ -366,14 +366,8 @@ body.logged-in {
     margin-bottom: 0;
   }
   div.triggered-form {
-    /// width: 100%;
     margin: 0 3px 0 3px;
     z-index: $header-depth + 1;
-    /// padding-left: 5px;
-    /// margin-top: 0;
-    // position: absolute;
-    // float: left;
-    // bottom: 0;
     div.token-input-holder {
       width: 100%;
       @include respond-to(phone) {
@@ -387,12 +381,6 @@ body.logged-in {
       }
       @include respond-to(large-up) {
         font-size: 20px;
-      }
-      div.token-input-elmt {
-        display: inline-block;
-        min-width:12em;
-        max-width: 100%;
-        position: relative;
       }
     }
   }

@@ -40,6 +40,27 @@ span.panels-label {
   padding-left: 0.2em;
 }
 
+div.collection-label {
+  font-family: $oswald;
+  letter-spacing: 2px;
+  font-size: 150%;
+  font-weight: 200;
+  margin-top: 0.4em;
+  margin-bottom: 0.4em;
+  &.recipes {
+    color: $recipes-navtab-text-color;
+  }
+  &.lists {
+    color: #1d6a2b; // $lists-navtab-text-color;
+  }
+  &.friends {
+    color: #dfc96a; // $friends-navtab-text-color; // #dfca6a;
+  }
+  &.feeds {
+    color: $feeds-navtab-text-color;
+  }
+}
+
 div.header-element {
   text-align: justify;
   // line-height: 2px;
@@ -75,6 +96,51 @@ div.header-element {
   &.list {
     color: rgba($lists-navtab-text-color, 0.6);
   }
+  &.collection-nav {
+    padding: 0.5em;
+    margin: 0.8em;
+    &.recipes {
+      color: rgba($recipes-navtab-text-color, 0.6);
+      background: $recipes-panel-background-color;
+      div.navlink a {
+        color: $recipes-navtab-text-color;
+      }
+    }
+    &.feeds {
+      color: rgba($feeds-navtab-text-color, 0.6);
+      background: $feeds-panel-background-color;
+      div.navlink a {
+        color: $feeds-navtab-text-color;
+      }
+    }
+    &.lists {
+      color: rgba($lists-navtab-text-color, 0.6);
+      background: #D0DbD2; // $lists-panel-background-color;
+      div.navlink a {
+        color: #1d6a2b; // $lists-navtab-text-color;
+      }
+    }
+    &.friends {
+      color: $friends-navtab-text-color;
+      background: #e9e3c9; // $friends-panel-background-color;
+      div.navlink a {
+        color: #dfc96a; // $friends-navtab-text-color; // #dfca6a;
+      }
+    }
+    div.navlink {
+      color: #979693;
+      fill: #979693;
+      font-family: $oswald-light;
+      font-size: 120%;
+      font-weight: 700;
+    }
+  }
+  div.token-input-holder {
+    div.token-input-elmt {
+      margin-bottom: 1em;
+      min-width: 12em;
+    }
+  }
   div.org-element {
     display: inline-block;
     vertical-align: baseline;
@@ -88,26 +154,6 @@ div.header-element {
     }
     @include respond-to(large-up) {
       font-size: 90%;
-    }
-    div.token-input-elmt {
-      margin-bottom: 1em;
-      min-width: 200px;
-      max-width: 300px;
-      display: inline-block;
-      color: #555555;
-      // We want to propagate the font size down to the selections and the dropdown
-      ul {
-        font-size: inherit;
-        li {
-          font-size: inherit;
-        }
-      }
-      div {
-        font-size: inherit;
-        p {
-          font-size: inherit;
-        }
-      }
     }
     // margin-bottom: 10px;
     div.org-buttons {

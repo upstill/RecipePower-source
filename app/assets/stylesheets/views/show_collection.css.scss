@@ -1,5 +1,5 @@
 div.collection-header {
-  div.collection-nav {
+  div.collection_nav {
     padding: 0.5em;
     margin: 0.8em;
     &.recipes {
@@ -32,26 +32,6 @@ div.collection-header {
       font-family: $oswald-light;
       font-size: 1.5em;
       font-weight: 700;
-    }
-    div.collection-label {
-      font-family: $oswald;
-      letter-spacing: 2px;
-      font-size: 2em;
-      font-weight: 200;
-      margin-top: 0.4em;
-      margin-bottom: 0.4em;
-      &.recipes {
-        color: $recipes-navtab-text-color;
-      }
-      &.lists {
-        color: #1d6a2b; // $lists-navtab-text-color;
-      }
-      &.friends {
-        color: #dfc96a; // $friends-navtab-text-color; // #dfca6a;
-      }
-      &.feeds {
-        color: $feeds-navtab-text-color;
-      }
     }
     div.or-see {
 
