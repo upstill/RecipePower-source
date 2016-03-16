@@ -247,9 +247,9 @@ handleEnclosingNavTab = (menuElmt) ->
 			menuElmt = RP.findEnclosing "LI", menuElmt
 		if menuElmt # Select this menu element exclusively
 			$('.master-navtab').removeClass "active"
-			$('.master-navtab a').css 'color','#999'
+			# $('.master-navtab a').css 'color','#999'
 			$(menuElmt).addClass "active"
-			$('>a', menuElmt).css 'color','white'
+			# $('>a', menuElmt).css 'color','white'
 
 proceedWithConfirmation = (elmt) ->
 	if confirm_msg = $(elmt).data('confirmMsg') || $('input[type="submit"]', elmt).data 'confirmMsg'

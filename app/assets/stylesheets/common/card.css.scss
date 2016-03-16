@@ -69,9 +69,6 @@ div.card-item {
     width: 40%;
     padding: 10px;
   }
-  td.pic-box {
-    width: 300px;
-  }
   div.tool-menu {
     font-size: 0.7em;
     display: inline-block;
@@ -324,7 +321,6 @@ div.card-item {
       right: 0.2em;
     }
     div.pic-inset {
-      margin: 2em;
       a.upload-button {
         font-size: 1.2em;
         display: block;
@@ -380,9 +376,14 @@ table.cardlet-table {
   height: 100%;
 }
 
+td.pic-box {
+  width: 300px;
+  vertical-align: top;
+}
+
 div.pic-inset {
   width: auto;
-  margin: 15px 5px;
+  margin: 18px 5%;
 }
 
 div.pic_preview {
