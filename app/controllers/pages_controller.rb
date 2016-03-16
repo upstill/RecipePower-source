@@ -3,7 +3,7 @@ class PagesController < ApplicationController
   respond_to :html, :json
   
   def root
-    redirect_to default_next_path # ...but only if current user
+    redirect_to default_next_path # Either current user's home page (if any) or /home (if not)
   end
 
   def admin
@@ -14,8 +14,11 @@ class PagesController < ApplicationController
   def home
     response_service.title = 'Home'
     @auth_context = :manage
-    # setup_collection
-    render
+    if current_user
+      redirect_to collection_user_path(current_user)
+    else
+      render
+    end
   end
 
   def contact

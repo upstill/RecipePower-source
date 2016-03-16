@@ -4,6 +4,11 @@ $break-largish: 680px;
 $break-large: 768px;
 $break-wide: 1024px;
 
+// Bootstrap's version of breakpoints
+$bs-break-small: 768;
+$bs-break-med: 992;
+$bs-break-large: 1200;
+
 @mixin respond-to($media) {
   @if $media == phone {
     @media only screen and (max-width: $break-small) { @content; }
