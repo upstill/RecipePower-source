@@ -73,7 +73,8 @@ module NavtabsHelper
           # navlink('Recently Viewed', user_recent_path(current_user_or_guest_id)),
           navlink('The RecipePower Collection', search_path()),
           '<hr class="menu">'.html_safe,
-          navlink('Add to Collection', new_recipe_path, :mode => :modal)
+        navlink('Add to Collection...', new_recipe_path, :mode => :modal),
+        navlink('Install Cookmark Button...', cookmark_path, :mode => :modal)
       ]
     end
   end

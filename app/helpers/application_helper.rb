@@ -147,8 +147,8 @@ module ApplicationHelper
   end
 
   def bookmarklet
-    imgtag = image_tag("cookmark_button.png", class: "bookmarklet", style: "display: inline-block", alt: "Cookmark")
-    content_tag :a, imgtag, href: bookmarklet_script, title: "Cookmark", class: "bookmarklet"
+    imgtag = image_tag('InstallCookmarkButton.png', class: 'bookmarklet', style: 'display: inline-block', alt: 'Cookmark')
+    content_tag :a, imgtag, href: bookmarklet_script, title: 'Cookmark', class: 'bookmarklet'
   end
 
   def question_section q, &block

@@ -8,18 +8,23 @@ class PagesController < ApplicationController
 
   def admin
     # session.delete :on_tour # Tour's over!
-    response_service.title = "Admin"
+    response_service.title = 'Admin'
   end
 
   def home
-    response_service.title = "Home"
+    response_service.title = 'Home'
     @auth_context = :manage
     # setup_collection
     render
   end
 
   def contact
-  	response_service.title = "Contact"
+  	response_service.title = 'Contact'
+    smartrender
+  end
+
+  def cookmark
+    response_service.title = 'Cookmark'
     smartrender
   end
 
@@ -28,12 +33,12 @@ class PagesController < ApplicationController
   end
 
   def about
-  	response_service.title = "About"
+  	response_service.title = 'About'
     smartrender
   end
 
   def faq
-    response_service.title = "FAQ"
+    response_service.title = 'FAQ'
     smartrender
   end
   

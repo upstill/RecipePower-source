@@ -31,8 +31,8 @@ span.large {
 	font-size:150%
 }
 .bookmarklet {
-	height:59px;
-	width:70px;
+	height:90px;
+	width:105px;
 	margin:0;
 	line-height:59px;
 	highlight-color:#FFFFFF;
@@ -82,6 +82,14 @@ div.dialog.step2_page {
 		width: 330px; 
 		margin: 10px 0px 20px 10px;
 	}
+}
+
+div.bm-pic {
+  width: 105px;
+  margin: 0 auto;
+  -webkit-box-shadow: 10px 10px 12px -5px rgba(0,0,0,0.75);
+  -moz-box-shadow: 10px 10px 12px -5px rgba(0,0,0,0.75);
+  box-shadow: 10px 10px 12px -5px rgba(0,0,0,0.75);
 }
 
 

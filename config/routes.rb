@@ -225,6 +225,7 @@ RP::Application.routes.draw do
   get '/faq', :to => "pages#faq"
   get '/admin', :to => "pages#admin"
   get '/sprites', :to => "pages#sprites"
+  get '/cookmark', :to => "pages#cookmark"
   root :to => 'pages#root'
 
   # The priority is based upon order of creation:
