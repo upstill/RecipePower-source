@@ -327,7 +327,15 @@ body.logged-in {
   padding-top: 0;
   border-bottom: 1px solid royalblue;
   // Default layout for the header (not logged-in)
-  @include respond-to(medium-down) {
+  @include respond-to(phone) {
+    padding-left: $logo-clearance-xs;
+    padding-right: $notif-clearance-xs;
+  }
+  @include respond-to(small) {
+    padding-left: $logo-clearance-xs;
+    padding-right: $notif-clearance-sm;
+  }
+  @include respond-to(medium) {
     padding-left: $logo-clearance-xs;
     padding-right: $notif-clearance-sm;
   }
@@ -367,20 +375,32 @@ body.logged-in {
   }
   div.triggered-form {
     margin: 0 3px 0 3px;
-    z-index: $header-depth + 1;
+    // z-index: $header-depth;
     div.token-input-holder {
       width: 100%;
       @include respond-to(phone) {
         font-size: 12px;
+        ul.token-input-list-facebook {
+          min-width: 100px;
+        }
       }
       @include respond-to(small) {
         font-size: 14px;
+        ul.token-input-list-facebook {
+          min-width: 150px;
+        }
       }
       @include respond-to(medium) {
         font-size: 18px;
       }
       @include respond-to(large-up) {
         font-size: 20px;
+      }
+      ul.token-input-list-facebook {
+        max-width: 400px;
+      }
+      div.search-glyph {
+        top: 0.8em;
       }
     }
   }

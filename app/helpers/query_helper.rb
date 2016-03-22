@@ -32,7 +32,8 @@ module QueryHelper
                         options.except(:handler, :querytags, :tagtype, :type_selector).merge(data: data)
     qt += content_tag(:div,
                       content_tag(:span, '', class: "glyphicon glyphicon-#{options[:glyphicon]}"),
-                      style: 'position: absolute; right: 7px; font-size: inherit; top: 0.4em;') if options[:glyphicon]
+                      class: 'search-glyph'
+                     ) if options[:glyphicon]
 
     if options[:type_selector]
       content_tag :div,
