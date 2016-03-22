@@ -375,9 +375,10 @@ body.logged-in {
   }
   div.triggered-form {
     margin: 0 3px 0 3px;
-    // z-index: $header-depth;
+    z-index: $header-depth;
     div.token-input-holder {
       width: 100%;
+      z-index: $header-depth;
       @include respond-to(phone) {
         font-size: 12px;
         ul.token-input-list-facebook {
