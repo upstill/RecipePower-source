@@ -95,7 +95,7 @@ li.master-navtab {
   }
 
   &#home-navtab {
-    background-color: #ff9583;
+    background-color: $header-outline-color;
     //margin: 0 7px;
     padding: 0;
     position: fixed;
@@ -164,31 +164,157 @@ body.logged-in {
     position: fixed;
     top: 0;
     z-index: $header-depth + 1;
+    ul {
+      font-family: Oswald, sans-serif;
+      letter-spacing: 1.5px;
+      font-size: 2em;
+      position: relative;
+      padding: 0 10px 0 0;
+      margin: 0;
+      li.master-navtab {
+        display: inline-block;
+        float: left;
+        list-style: none;
+        margin: 0 7px;
+        width: 5.75em;
+        margin-bottom: 10px;
+        text-shadow: none;
+        text-align: center;
+        &#collections-navtab {
+          background-color: $recipes-navtab-background-color;
+            a {
+            color: $recipes-navtab-text-color;
+          }
+        }
+        &#friends-navtab {
+          background-color: $friends-navtab-background-color;
+          //margin: 0 7px;
+          //padding:80px 8px 0;
+          //text-shadow: none;
+            a {
+            color: $friends-navtab-text-color;
+          }
+        }
+        &#my_lists-navtab {
+          background-color: $lists-navtab-background-color;
+          //margin: 0 7px;
+          //padding: 80px 18px 0;
+          //text-shadow: none;
+            a {
+            color: $lists-navtab-text-color;
+          }
+        }
+        &#feeds-navtab {
+          background-color: $feeds-navtab-background-color;
+          //margin: 0 7px;
+          //padding: 80px 34px 0;
+          //text-shadow: none;
+          padding-left: 34px;
+          padding-right: 34px;
+            a {
+            color: $feeds-navtab-text-color;
+          }
+        }
+        &#home-navtab {
+          background-color: $header-outline-color; // #ecdad7
+          //margin: 0 7px;
+          padding: 0;
+          position: absolute;
+          top: 0;
+          span.user-name {
+            font-size: 0.7em;
+            color: #fadfdb;
+            text-shadow: none;
+            text-transform: lowercase;
+          }
+        }
+        a.submenu {
+          padding-left: 40px;
+        }
+        a.dropdown-toggle {
+          text-transform: uppercase;
+          span.caret {
+            display: inline-block;
+            margin-left: 3px;
+          }
+        }
+        ul.dropdown-menu {
+          a.submit {
+            font-size: 0.25em;
+          }
+        }
+        span.measuring-spoons {
+          content: image-url("rp-measuring-spoons.png");
+        }
+      }
+    }
     @include transition(max-height 0.5s);
     @include respond-to(largish-down) {
-      min-width: 300px;
+      width: 100%;
+      z-index: $header-depth;
+      /*
+      .menu {
+        max-height: 0;
+        overflow: hidden;
+        float: none;
+        text-align: center;
+        width: 100%;
+        @include transition(max-height 0.5s);
+        ul {
+          li {
+            display: block;
+            width: 100%;
+            background: #000;
+            border-top:1px solid #4d4d4d;
+            &:hover {
+              background: #999;
+            }
+            a {
+              color: #fff;
+              text-shadow: #848484 0px 1px 2px;
+              padding: 10px 0;
+              width: 100%;
+            }
+          }
+        }
+      }
+      */
+      max-height: 0;
       float: none;
+      overflow-y: hidden;
+      &.menuOpen {
+        max-height: 1000px;
+        @include transition(max-height 0.5s);
+      }
       ul {
         text-align: center;
         width: 100%;
-        display: none;
+        border: 2px solid $header-outline-color;
+        padding: 0;
+        @include respond-to(phone) {
+          margin-top: $menu-top-xs;
+        }
+        @include respond-to(small) {
+          margin-top: $menu-top-sm;
+        }
+        @include respond-to(medium) {
+          margin-top: $menu-top-med;
+        }
+        @include respond-to(largish) {
+          margin-top: $menu-top-largish;
+        }
+        // display: none;
         //max-height: 0;
         //overflow: hidden;
         li.master-navtab {
           display: block;
           width: 100%;
-          background: #000;
-          border-top: 1px solid #4d4d4d;
-          padding-top: 12px;
-          padding-bottom: 5px;
-          margin-bottom: 0;
-          @include respond-to(wide) { padding-top: 30px; }
+          // border-top: 1px solid #4d4d4d;
+          padding-top: 10px;
+          padding-bottom: 7px;
+          margin: 0;
           &:hover {
             background: #999;
-          }
-          a {
-            color: #fff;
-            text-shadow: #848484 0px 1px 2px;
           }
           span.measuring-spoons {
             content: none;
@@ -197,6 +323,10 @@ body.logged-in {
             //margin: 0 7px;
             position: static;
             width: 100%;
+            background-color: #ecdad7;
+            span.user-name {
+              color: white;
+            }
           }
         }
       }
@@ -206,90 +336,6 @@ body.logged-in {
     }
     @include respond-to(large-up) {
       left: $logo-clearance-lg;
-      ul {
-        font-family: Oswald, sans-serif;
-        letter-spacing: 1.5px;
-        font-size: 2em;
-        position: relative;
-        padding: 0 10px 0 0;
-        margin: 0;
-        li.master-navtab {
-          display: inline-block;
-          float: left;
-          list-style: none;
-          margin: 0 7px;
-          width: 5.75em;
-          margin-bottom: 10px;
-          text-shadow: none;
-          text-align: center;
-          &#collections-navtab {
-            background-color: $recipes-navtab-background-color;
-            a {
-              color: $recipes-navtab-text-color;
-            }
-          }
-          &#friends-navtab {
-            background-color: $friends-navtab-background-color;
-            //margin: 0 7px;
-            //padding:80px 8px 0;
-            //text-shadow: none;
-            a {
-              color: $friends-navtab-text-color;
-            }
-          }
-          &#my_lists-navtab {
-            background-color: $lists-navtab-background-color;
-            //margin: 0 7px;
-            //padding: 80px 18px 0;
-            //text-shadow: none;
-            a {
-              color: $lists-navtab-text-color;
-            }
-          }
-          &#feeds-navtab {
-            background-color: $feeds-navtab-background-color;
-            //margin: 0 7px;
-            //padding: 80px 34px 0;
-            //text-shadow: none;
-            padding-left: 34px;
-            padding-right: 34px;
-            a {
-              color: $feeds-navtab-text-color;
-            }
-          }
-          &#home-navtab {
-            background-color: #ff9583;
-            //margin: 0 7px;
-            padding: 0;
-            position: absolute;
-            top: 0;
-            span.user-name {
-              font-size: 0.7em;
-              color: #fadfdb;
-              text-shadow: none;
-              text-transform: lowercase;
-            }
-          }
-          a.submenu {
-            padding-left: 40px;
-          }
-          a.dropdown-toggle {
-            text-transform: uppercase;
-            span.caret {
-              display: inline-block;
-              margin-left: 3px;
-            }
-          }
-          ul.dropdown-menu {
-            a.submit {
-              font-size: 0.25em;
-            }
-          }
-          span.measuring-spoons {
-            content: image-url("rp-measuring-spoons.png");
-          }
-        }
-      }
     }
     @include respond-to(large) {
       // width: 348px;
@@ -325,7 +371,7 @@ body.logged-in {
   z-index: $header-depth;
   background-color: #f1f1f0;
   padding-top: 0;
-  border-bottom: 1px solid royalblue;
+  border-bottom: 1px solid $header-outline-color;
   // Default layout for the header (not logged-in)
   @include respond-to(phone) {
     padding-left: $logo-clearance-xs;
@@ -392,6 +438,9 @@ body.logged-in {
         }
       }
       @include respond-to(medium) {
+        font-size: 16px;
+      }
+      @include respond-to(largish) {
         font-size: 18px;
       }
       @include respond-to(large-up) {

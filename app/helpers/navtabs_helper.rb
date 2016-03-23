@@ -42,6 +42,8 @@ module NavtabsHelper
     return itemlist if menu_only
 
     header = navlink menu_label.html_safe, go_path, true, options
+    header = content_tag :span, menu_label.html_safe
+    header = navlink menu_label.html_safe, nil, true, options
     content_tag :li,
                 "#{header} #{itemlist}".html_safe,
                 id: navtab_id(which),
