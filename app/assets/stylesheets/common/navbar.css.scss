@@ -453,11 +453,15 @@ body.logged-in {
       @include respond-to(large-up) {
         font-size: 20px;
       }
-      ul.token-input-list-facebook {
-        max-width: 400px;
-      }
-      div.search-glyph {
-        top: 0.6em;
+      div.token-input-elmt {
+        margin-top: 5px; // Adopted from token-input-list-facebook so we can center the glyph
+        ul.token-input-list-facebook {
+          max-width: 400px;
+          margin: 0;
+        }
+        div.search-glyph {
+          height: 100%; // top: 0.6em;
+        }
       }
     }
   }
