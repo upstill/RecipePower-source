@@ -90,7 +90,7 @@ onReady = (evt) ->
 		inputs = $('div.header li.token-input-input-token-facebook input').width '30px'
 		$('div.header ul.token-input-list-facebook li:first-child input').width '100%'
 		adjustHeader()
-		$(inputs).first().focus()
+		# $(inputs).first().focus()
 	, 50
 
 onAdd = (token) ->

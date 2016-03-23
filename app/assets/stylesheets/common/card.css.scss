@@ -380,7 +380,8 @@ table.cardlet-table {
 }
 
 td.pic-box {
-  width: 300px;
+  // width: 300px;
+  min-width: 80px;
   vertical-align: top;
 }
 
