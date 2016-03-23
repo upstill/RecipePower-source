@@ -209,21 +209,26 @@ body.logged-in {
           //margin: 0 7px;
           //padding: 80px 34px 0;
           //text-shadow: none;
-          padding-left: 34px;
-          padding-right: 34px;
-            a {
+          @include respond-to(large-up) {
+            // Mobile menu: stacks up and fills the screen
+            padding-left: 34px;
+            padding-right: 34px;
+          }
+          a {
             color: $feeds-navtab-text-color;
           }
         }
         &#home-navtab {
           background-color: $header-outline-color; // #ecdad7
           //margin: 0 7px;
-          padding: 0;
+          @include respond-to(large-up) {
+            padding: 0;
+          }
           position: absolute;
           top: 0;
           span.user-name {
             font-size: 0.7em;
-            color: #fadfdb;
+            color: darkgrey;
             text-shadow: none;
             text-transform: lowercase;
           }
@@ -249,7 +254,7 @@ body.logged-in {
       }
     }
     @include transition(max-height 0.5s);
-    @include respond-to(largish-down) {
+    @include respond-to(largish-down) { // Mobile menu: stacks up and fills the screen
       width: 100%;
       z-index: $header-depth;
       /*
@@ -312,7 +317,9 @@ body.logged-in {
           // border-top: 1px solid #4d4d4d;
           padding-top: 10px;
           padding-bottom: 7px;
+          padding: 10px 10px 7px 17px;
           margin: 0;
+          text-align: left;
           &:hover {
             background: #999;
           }

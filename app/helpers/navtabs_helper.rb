@@ -1,21 +1,5 @@
 module NavtabsHelper
 
-  def dropdown_menu label, items, id, link_options={}
-    itemlist =
-        content_tag :ul,
-                    items.collect { |item| content_tag :li, item }.join("\n").html_safe,
-                    class: 'dropdown-menu scrollable-menu',
-                    id: id
-    label << content_tag(:span, '', class: 'caret')
-
-    content = navlink label, '', true, link_options
-    content_tag :li,
-                content + itemlist,
-                id: id,
-                class: 'dropdown'
-
-  end
-
   # Define one element of the navbar. Could be a
   # -- simple label (no go_path and no block given)
   # -- link (valid go_path but no block)
@@ -41,42 +25,30 @@ module NavtabsHelper
 
     return itemlist if menu_only
 
-    header = navlink menu_label.html_safe, go_path, true, options
-    header = content_tag :span, menu_label.html_safe
-    header = navlink menu_label.html_safe, nil, true, options
+    header = link_to menu_label.html_safe,
+                     'javascript:void(0);',
+                     class: "dropdown-toggle #{options[:class]}",
+                     data: { toggle: 'dropdown' },
+                     title: 'Your Tooltip Here'
     content_tag :li,
                 "#{header} #{itemlist}".html_safe,
                 id: navtab_id(which),
                 class: class_str
   end
 
-  # Declare one navlink with appropriate format and query parameters
-  def navlink label, path, is_menu_header=false, options={}
-    if is_menu_header.is_a? Hash
-      is_menu_header, options = false, is_menu_header
-    end
-    # The menu headers may or may not have links, but they do have dropdown menus
-    if is_menu_header
-      options[:class] = "dropdown-toggle #{options[:class]}"
-      options[:data] ||= {}
-      options[:data][:toggle] = 'dropdown'
-    end
-    link_to_submit label, path, options  # defaults to partial
-  end
-
   def collections_navtab menu_only = false
     navtab :collections, 'Collections', collection_user_path(current_user_or_guest), menu_only do
       [
-        navlink('My Collection', collection_user_path(current_user_or_guest)),
-        navlink('Recipes', collection_user_path(current_user_or_guest, result_type: 'recipes'), class: 'submenu'),
-        navlink('Treasuries', collection_user_path(current_user_or_guest, result_type: 'lists'), class: 'submenu'),
-        navlink('Feeds', collection_user_path(current_user_or_guest, result_type: 'feeds'), class: 'submenu'),
-        navlink('Friends', collection_user_path(current_user_or_guest, result_type: 'friends'), class: 'submenu'),
-          # navlink('Recently Viewed', user_recent_path(current_user_or_guest_id)),
-          navlink('The RecipePower Collection', search_path()),
+        link_to_submit('My Collection', collection_user_path(current_user_or_guest)),
+        link_to_submit('Recipes', collection_user_path(current_user_or_guest, result_type: 'recipes'), class: 'submenu'),
+        link_to_submit('Treasuries', collection_user_path(current_user_or_guest, result_type: 'lists'), class: 'submenu'),
+        link_to_submit('Feeds', collection_user_path(current_user_or_guest, result_type: 'feeds'), class: 'submenu'),
+        link_to_submit('Friends', collection_user_path(current_user_or_guest, result_type: 'friends'), class: 'submenu'),
+          # link_to_submit('Recently Viewed', user_recent_path(current_user_or_guest_id)),
+          link_to_submit('The RecipePower Collection', search_path()),
           '<hr class="menu">'.html_safe,
-        navlink('Add to Collection...', new_recipe_path, :mode => :modal),
-        navlink('Install Cookmark Button...', cookmark_path, :mode => :modal)
+        link_to_submit('Add to Collection...', new_recipe_path, :mode => :modal),
+        link_to_submit('Install Cookmark Button...', cookmark_path, :mode => :modal)
       ]
     end
   end
@@ -84,11 +56,11 @@ module NavtabsHelper
   def friends_navtab menu_only = false
     navtab :friends, 'Cookmates', users_path(:select => :followees), menu_only do
       current_user_or_guest.followees[0..10].collect { |u|
-        navlink u.handle, user_path(u), id: dom_id(u)
+        link_to_submit u.handle, user_path(u), id: dom_id(u)
       } + [
           '<hr class="menu">'.html_safe,
-          navlink('Invite Someone to RecipePower!', new_user_invitation_path(:mode => :modal) ),
-          navlink('Browse for friends...', users_path(:select => :relevant))
+          link_to_submit('Invite Someone to RecipePower!', new_user_invitation_path(:mode => :modal) ),
+          link_to_submit('Browse for friends...', users_path(:select => :relevant))
       ]
     end
   end
@@ -96,11 +68,11 @@ module NavtabsHelper
   def my_lists_navtab menu_only = false
     navtab :my_lists, 'Treasuries', lists_path(access: 'owned'), menu_only do
       current_user_or_guest.owned_lists[0..16].collect { |l|
-        navlink l.name, list_path(l), id: dom_id(l)
+        link_to_submit l.name, list_path(l), id: dom_id(l)
       } + [
           '<hr class=\'menu\'>'.html_safe,
-          navlink('Start a Treasury...', new_list_path, mode: :modal, class: 'transient'),
-          navlink('Hunt for Treasuries...', lists_path(item_mode: 'table'))
+          link_to_submit('Start a Treasury...', new_list_path, mode: :modal, class: 'transient'),
+          link_to_submit('Hunt for Treasuries...', lists_path(item_mode: 'table'))
       ]
     end
   end
@@ -119,11 +91,11 @@ module NavtabsHelper
         }
       end
       list_set.collect { |l|
-        navlink l.name, list_path(l), id: dom_id(l)
+        link_to_submit l.name, list_path(l), id: dom_id(l)
       } + [
           '<hr class="menu">'.html_safe,
-          navlink('Start a new Treasury...', new_list_path(mode: 'modal')),
-          navlink('Hunt for Treasuries...', lists_path(item_mode: 'table'))
+          link_to_submit('Start a new Treasury...', new_list_path(mode: 'modal')),
+          link_to_submit('Hunt for Treasuries...', lists_path(item_mode: 'table'))
       ]
     end
   end
@@ -139,12 +111,12 @@ module NavtabsHelper
         }
       end
       result = feed_set.collect { |f|
-        navlink truncate(f.title, length: 30), feed_path(f), id: dom_id(f)
+        link_to_submit truncate(f.title, length: 30), feed_path(f), id: dom_id(f)
       }
       result + [
           '<hr class="menu">'.html_safe,
-          navlink('Add a Feed...', new_feed_path(mode: 'modal')),
-          navlink('Browse for More Feeds...', feeds_path(item_mode: 'table', access: (response_service.admin_view? ? 'all' : 'approved')))
+          link_to_submit('Add a Feed...', new_feed_path(mode: 'modal')),
+          link_to_submit('Browse for More Feeds...', feeds_path(item_mode: 'table', access: (response_service.admin_view? ? 'all' : 'approved')))
       ]
     end
   end
@@ -164,11 +136,11 @@ module NavtabsHelper
            user_path(current_user, :mode => :partial),
            menu_only do
       item_list = [
-          # navlink( 'Profile', users_profile_path( section: 'profile' ), :mode => :modal),
-          navlink('Sign-in Services', authentications_path, :mode => :modal, class: 'transient'),
-          navlink('Profile', users_profile_path, :mode => :modal),
-          navlink('Invite', new_user_invitation_path, :mode => :modal, class: 'transient'),
-          navlink('Sign Out', destroy_user_session_path, :method => 'delete')
+          # link_to_submit( 'Profile', users_profile_path( section: 'profile' ), :mode => :modal),
+          link_to_submit('Sign-in Services', authentications_path, :mode => :modal, class: 'transient'),
+          link_to_submit('Profile', users_profile_path, :mode => :modal),
+          link_to_submit('Invite', new_user_invitation_path, :mode => :modal, class: 'transient'),
+          link_to_submit('Sign Out', destroy_user_session_path, :method => 'delete')
       ].compact
       if permitted_to? :admin, :pages
         if response_service.admin_view?
