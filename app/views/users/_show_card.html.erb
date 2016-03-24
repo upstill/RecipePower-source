@@ -2,68 +2,36 @@
 <%= present decorator, current_user_or_guest do |presenter| %>
     <div class="container-fluid card-item card-grid js-masonry entity-card <%= viewparams.display_style %>-card <%= decorator.dom_id %>"
          data-masonry-options='{
-            "columnWidth": 200,
             "gutter": 10,
             "itemSelector": ".grid-item",
             "stamp": ".stamp" }'>
+      <!--"columnWidth": 200,-->
       <!--onload="RP.masonry.onload(event)"-->
-      <div class="stamp stamp-avatar" <%= 'style=display:none' if !presenter.card_avatar? %>>
+      <div class="stamp stamp-avatar card-column" <%= 'style=display:none' if !presenter.card_avatar? %>>
         <%= presenter.card_avatar %>
       </div>
       <div class="stamp stamp-title">
-        <%= collectible_vote_buttons decorator.object, class: 'stamp stamp-votes' unless decorator.object == response_service.user %>
-        <%= presenter.card_homelink class: 'title-link' %>
-        <% if (decorator.object == response_service.user) || response_service.admin_view? %>
-            <%= collectible_edit_button decorator %>
-        <% else %>
-            <%= collectible_collect_button decorator %>
-            <%# collectible_list_menu decorator, response_service.user, {} %>
-        <% end %>
+          <%= collectible_vote_buttons decorator.object, class: 'stamp stamp-votes' unless decorator.object == response_service.user %>
+          <%= presenter.card_homelink class: 'title-link' %>
+          <% if (decorator.object == response_service.user) || response_service.admin_view? %>
+              <%= collectible_edit_button decorator %>
+          <% else %>
+              <%= collectible_collect_button decorator %>
+              <%# collectible_list_menu decorator, response_service.user, {} %>
+          <% end %>
       </div>
       <% presenter.card_aspects.collect { |aspect| presenter.card_aspect_rendered aspect }.compact.each do |item_content| %>
-        <div class="grid-item">
+        <div class="grid-item card-column">
           <%= item_content %>
         </div>
       <% end %>
-    </div>
-    <div class="container-fluid card-item entity-card <%= viewparams.display_style %>-card <%= decorator.dom_id %>">
-      <%= collectible_vote_buttons decorator.object unless decorator.object == response_service.user %>
-      <table style="width: 100%">
-        <tr>
-          <td rowspan="2" class="pic-box" <%= 'style=display:none' if !presenter.card_avatar? %> >
-            <div class="pic-inset">
-              <%= presenter.card_avatar %>
-            </div>
-          </td>
-          <td valign="top" class="upper-content">
-            <div class="title">
-              <%= presenter.card_homelink class: 'title-link' %>
-              <% if (decorator.object == response_service.user) || response_service.admin_view? %>
-                  <%= collectible_edit_button decorator %>
-              <% else %>
-                  <%= collectible_collect_button decorator %>
-                  <%# collectible_list_menu decorator, response_service.user, {} %>
-              <% end %>
-            </div>
-            <div class="container-fluid">
-              <div class="row">
-                <% (0...(presenter.card_ncolumns)).each do |column| %>
-                    <%= presenter.column column %>
-                <% end %>
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td valign="bottom" class="lower-content">
-            <% if (decorator.object == response_service.user) || response_service.admin_view? %>
-                <%= collectible_tools_menu decorator, 'lg' %>
-            <% else %>
-                <%= collectible_share_button decorator, 'lg' %>
-            <% end %>
-          </td>
-        </tr>
-      </table>
+      <div class="lower-content">
+        <% if (decorator.object == response_service.user) || response_service.admin_view? %>
+            <%= collectible_tools_menu decorator, 'lg' %>
+        <% else %>
+            <%= collectible_share_button decorator, 'lg' %>
+        <% end %>
+      </div>
     </div>
 <% end %>
 

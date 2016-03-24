@@ -404,8 +404,29 @@ div.pic_preview {
 div.card-grid {
   position: relative;
   padding-top: 1em;
+  padding-bottom: 3em;
+  div.grid-item {
+    ul.token-input-list-facebook {
+      min-width: 100px;
+      width: 100%;
+    }
+    form {
+      width: 100%;
+      div.inline-text-field {
+        width: 100%;
+        div.form-group {
+          margin-bottom: 0;
+        }
+        input {
+          width: 100%;
+        }
+      }
+      input.form-button {
+        margin-top: 1em;
+      }
+    }
+  }
   div.stamp-avatar {
-    width: 325px; // 195px;
     margin-right: 15px;
     height: auto;
     float: left;
@@ -432,8 +453,45 @@ div.card-grid {
       // top: 1em;
     }
   }
-  div.grid-item {
-    width: 200px;
+  div.card-column {
+    @include respond-to(phone) {
+      width: $col-width-phone;
+    }
+    @include respond-to(small) {
+      width: $col-width-small;
+    }
+    @include respond-to(medium) {
+      width: $col-width-medium;
+    }
+    @include respond-to(largish) {
+      width: $col-width-largish;
+    }
+    @include respond-to(large) {
+      width: $col-width-large;
+    }
+    @include respond-to(wide) {
+      width: $col-width-wide;
+    }
     // border: 1px solid blue;
+  }
+  div.lower-content {
+    width: 100%;
+    height: 1.5em;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    padding-bottom: 0.3em;
+    padding-left: inherit;
+    // padding-left: 0.5em;
+    vertical-align: bottom;
+    font-size: 2em;
+    div.tool-menu {
+      bottom: 7px;
+    }
+    div.share-button {
+      position: absolute;
+      right: 6px;
+      bottom: 0;
+    }
   }
 }

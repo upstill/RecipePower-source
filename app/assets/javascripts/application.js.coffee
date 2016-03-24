@@ -28,7 +28,7 @@
 #= require eventsource.js
 #= require bootbox
 #= require history
-#= require masonry.pkgd
+#= require masonry4.pkgd
 
 #= require authentication
 # require messaging
