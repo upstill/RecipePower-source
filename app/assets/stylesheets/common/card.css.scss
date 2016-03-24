@@ -400,3 +400,40 @@ div.pic_preview {
   margin-top: 20px;
   text-align: center;
 }
+
+div.card-grid {
+  position: relative;
+  padding-top: 1em;
+  div.stamp-avatar {
+    width: 325px; // 195px;
+    margin-right: 15px;
+    height: auto;
+    float: left;
+    margin-bottom: 15px;
+  }
+  div.stamp-title {
+    // padding-right: 35px;
+    font-size: 2.4em;
+    font-family: $archivo;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    // line-height: 1.2em;
+    width: 100%;
+    margin-bottom: 15px;
+    padding-right: 30px; // To allow room for the votes
+    div.stamp-votes {
+      width: auto;
+      height: auto;
+      display: inline-block;
+      float: right;
+      font-size: 0.5em;
+      position: absolute;
+      // position: relative;
+      // top: 1em;
+    }
+  }
+  div.grid-item {
+    width: 200px;
+    // border: 1px solid blue;
+  }
+}

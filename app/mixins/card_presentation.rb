@@ -98,7 +98,7 @@ module CardPresentation
   end
 
   # Enumerate the aspects for a given column
-  def card_aspects for_column
+  def card_aspects for_column=nil
     []
   end
 

@@ -244,7 +244,7 @@ module CollectibleHelper
   end
 
   # Declare the voting buttons for a collectible
-  def collectible_vote_buttons entity
+  def collectible_vote_buttons entity, options={}
     if entity.is_a? Collectible
       uplink = vote_link(entity, true)
       downlink = vote_link(entity, false)
@@ -263,7 +263,7 @@ module CollectibleHelper
                       class: 'vote-count') # if entity.downvotes > 0
       left = content_tag :div, "#{upcount}#{up_button}".html_safe, class: 'vote-div'
       right = content_tag :div, "#{down_button}#{downcount}".html_safe, class: 'vote-div'
-      content_tag :div, (left+right).html_safe, class: 'vote-buttons', id: dom_id(entity)
+      content_tag :div, (left+right).html_safe, class: "#{options[:class]} vote-buttons", id: dom_id(entity)
     end
   end
 

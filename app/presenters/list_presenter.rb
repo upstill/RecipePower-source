@@ -18,7 +18,7 @@ class ListPresenter < CollectiblePresenter
   end
 
   # Provide a list of aspects for display in the entity's panel, suitable for passing to card_aspect
-  def card_aspects
+  def card_aspects which_column=nil
     [ :created_by, :description, :notes ]
   end
 end

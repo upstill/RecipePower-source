@@ -37,8 +37,8 @@ class UserPresenter < BasePresenter
     3
   end
 
-  def card_aspects which_column
-    [
+  def card_aspects which_column=nil
+    @aspects ||= [
         [
             # :member_since,
             :name_form,
@@ -54,7 +54,8 @@ class UserPresenter < BasePresenter
             :about
         ]
 
-    ][which_column]
+    ]
+	  which_column ? @aspects[which_column] : @aspects.flatten
   end
 
   def card_aspect which

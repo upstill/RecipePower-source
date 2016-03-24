@@ -34,7 +34,7 @@ class SitePresenter < CollectiblePresenter
     [ label, contents ]
   end
 
-  def card_aspects
+  def card_aspects which_column=nil
     [ :author, :description, :tags, :title ]
   end
 
