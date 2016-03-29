@@ -28,7 +28,8 @@ module CardPresentation
   end
 
   def card_video
-    if (url = URI(decorator.url)) &&
+    if decorator.url.present? &&
+        (url = URI(decorator.url)) &&
         url.host.match(/\.youtube.com/) &&
         (vidlink = YouTubeAddy.extract_video_id(decorator.url))
 

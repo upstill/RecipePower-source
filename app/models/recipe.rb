@@ -90,7 +90,7 @@ class Recipe < ActiveRecord::Base
           rcp = self.new
           rcp.errors.add :id, "There is no recipe number #{id.to_s}"
         end
-      else
+      elsif !(rcp = RecipeReference.lookup_recipe params[:url]) # Try again to find based on the extracted url
         # No id: create based on url
         params.delete(:rcpref)
         # Assigning title and picurl must wait until the url (and hence the reference) is set
