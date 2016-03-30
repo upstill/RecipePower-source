@@ -141,6 +141,13 @@ div.header-element {
       min-width: 12em;
     }
   }
+  div.links {
+    display: inline-block;
+    vertical-align: sub;
+    text-align: initial;
+    font-size: 0.8em;
+    margin-bottom: 1em;
+  }
   div.org-element {
     display: inline-block;
     vertical-align: baseline;

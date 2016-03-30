@@ -1,7 +1,7 @@
 <% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
 <div class="row">
   <div class="col-md-12 header-element <%= viewparams.display_style %>">
-    <div style="display: inline-block">
+    <div class="links">
         <span class="panels-label <%= viewparams.display_style %>-label">
           <%= viewparams.panel_title true %>
         </span>

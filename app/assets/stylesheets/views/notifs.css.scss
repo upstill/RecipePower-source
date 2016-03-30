@@ -2,13 +2,14 @@ div.notifs {
   width: auto;
   height: auto;
   z-index: $dialog-depth;
-  position: fixed;
-  right: 4px;
-  top: 4px;
+  position: relative;
   span.break {
     display: none;
   }
   &.collapsed {
+    position: fixed;
+    right: 4px;
+    top: 4px;
     span.separator {
       @include respond-to(medium-down) {
         display: none;

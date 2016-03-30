@@ -15,10 +15,10 @@
 <% end if viewparams.querytags? %>
 <div class="row">
   <div class="col-md-12 header-element">
-    <div style="display: inline-block; vertical-align: sub;">
+    <div class="links" >
       <%= link_to_submit viewparams.panel_label, viewparams.link_address, class: "result-link #{viewparams.result_type} lead" %>
       <% viewparams.sibling_views.each do |viewparams| %>
-          <span class="divider">|</span>&nbsp;
+          <span class="divider">|</span>
           <%= link_to_submit viewparams.panel_label, viewparams.link_address, class: "result-link #{viewparams.result_type}" %>
       <% end %>
     </div>
