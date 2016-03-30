@@ -315,7 +315,10 @@ class FilteredPresenter
   end
 
   def show_comments?
-    @decorator && @decorator.object && @decorator.object.is_a?(Commentable)
+    @decorator &&
+        @decorator.object &&
+        @decorator.object.is_a?(Collectible) &&
+        @decorator.object.user_pointers.where.not(comment: '').exists?
   end
 
   # The default presentation is different for tables and for objects, which in turn
