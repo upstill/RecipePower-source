@@ -28,10 +28,10 @@ module PanelHelper
       org, label = org.is_a?(Array) ? org : [ org, org.to_s ]
       # Provide a button to change the org state
       link = querify_link label, assert_query(url, org: org), class: "link #{'selected' if org==cur_org}"
-      content_tag :div, link, class: "link-button"
+      content_tag :div, link, class: 'link-button'
     }.join.html_safe
-    label = content_tag :span, "organize by:", class: "label"
-    content_tag :div, (label+links).html_safe, class: "org-by #{type.to_s.extensions_to_classes}"
+    label = content_tag :span, "organize by:", class: 'label'
+    content_tag :div, label+links+(block_given? ? yield : ''.html_safe), class: "org-by #{type.to_s.extensions_to_classes}"
   end
 
   def panel_org_menu_replacement url, type, org

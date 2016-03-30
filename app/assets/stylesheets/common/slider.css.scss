@@ -3,17 +3,16 @@ div.slider {
   position: relative;
   // background-color: #ccc;
   background-color: inherit;
-  height: 230px;
+  height: 220px;
   overflow: hidden;
   &.labelled {
-    margin-left: 80px;
+    margin-left: 75px;
     color: #777777;
   }
   .track {
     position: absolute;
     top: 10px;
     left: 10px;
-
     margin: 0;
     padding: 0;
     // border: 2px solid #0000ff;

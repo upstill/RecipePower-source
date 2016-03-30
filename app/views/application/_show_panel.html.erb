@@ -8,9 +8,10 @@
       </div>
     </div>
     <div class="results-menu">
-      <%= panel_org_menu viewparams.results_path, viewparams.result_type, :newest %>
-      <%# panel_collapse_button result_type, :slider %>
-      <%= panel_expand_link collection_user_path(@decorator.object), viewparams.result_type %>
-      <%# panel_suggestion_button viewparams.results_path, viewparams.result_type %>
+      <%= panel_org_menu viewparams.results_path, viewparams.result_type, :newest do %>
+          <%# panel_collapse_button result_type, :slider %>
+          <%= panel_expand_link collection_user_path(@decorator.object), viewparams.result_type %>
+          <%# panel_suggestion_button viewparams.results_path, viewparams.result_type %>
+      <% end %>
     </div>
 <% end %>

@@ -32,17 +32,23 @@ div.results-panel {
   }
   .results-menu {
     width: 100%;
-    height: 45px;
+    position: relative;
+    height: auto;
+    padding-left: 12px;
+    padding-bottom: 6px;
     .glyphicon {
       font-size: 2.0em;
     }
     .org-by {
-      // display: inline-block;
-      // width: auto;
-      float: left;
+      padding-top: 1.2em;
+      padding-right: 100px;
       margin-bottom: 5px;
       font-family: $oswald-light;
       .label {
+        display: block;
+        position: absolute;
+        left: 0;
+        top: -0.2em;
         font-size: 0.9em;
         letter-spacing: 1.5px;
         color: inherit;
@@ -66,7 +72,9 @@ div.results-panel {
       float: right;
     }
     .expand-link {
-      float: right;
+      position: absolute;
+      bottom: 6px;
+      right: 0px;
       margin: 0.3em;
       font-size: 1.3em;
     }
@@ -84,7 +92,7 @@ div.results-panel {
     .results-label {
       position: absolute;
       left: -85px;
-      top: 110px;
+      top: 100px;
       width: 200px;
       height: 70px;
       font-size: 64px;
@@ -101,6 +109,8 @@ div.results-panel {
         color: $friends-panel-label-color;
       }
       &.lists {
+        top: 88px;
+        font-size: 59px;
         color: $lists-panel-label-color;
       }
       .results-img {
