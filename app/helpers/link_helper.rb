@@ -108,6 +108,7 @@ module LinkHelper
 
   def linkpath object, action=nil
     (action && polymorphic_path([action, object]) rescue nil) ||
+        (polymorphic_path([:collection, object]) rescue nil) ||
         (polymorphic_path([:contents, object]) rescue nil) ||
         (polymorphic_path([:associated, object]) rescue nil) ||
         polymorphic_path(object)

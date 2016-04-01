@@ -2,10 +2,7 @@ module CardPresentation
   extend ActiveSupport::Concern
 
   def card_avatar options={}
-    img = image_with_error_recovery decorator,
-                                    class: decorator.image_class,
-                                    fallback_img: options[:fallback_img] || decorator.object.is_a?(User),
-                                    fill_mode: 'fixed-width'
+    img = image_from_decorator decorator
     if img && permitted_to?(:update, decorator.object)
       link_to_submit img,
                      polymorphic_path([:editpic, decorator.object]),
@@ -55,11 +52,11 @@ module CardPresentation
   end
 
   def card_aspect_enclosure which, contents, label=nil
-    label ||= which.to_s.capitalize.tr('_', ' ') # split('_').map(&:capitalize).join
-    (
-    content_tag(:p, label.upcase, class: "card-aspect-label #{which}") +
-        content_tag(:p, contents, class: "card-aspect-contents #{which}")
-    ).html_safe if contents.present?
+    if contents.present?
+      label ||= which.to_s.capitalize.tr('_', ' ')
+      (label.present? ? h.content_tag(:p, label.upcase, class: "card-aspect-label #{which}") : ''.html_safe) +
+      h.content_tag(:p, contents, class: "card-aspect-contents #{which}")
+    end
   end
 
   def card_aspect_editor which
@@ -98,9 +95,28 @@ module CardPresentation
     content_tag :div, safe_join(content), class: "col-md-#{12/card_ncolumns}"
   end
 
-  # Enumerate the aspects for a given column
+  # Enumerate the possible aspects of the card
   def card_aspects for_column=nil
     []
+  end
+
+  # Call the provided block for each aspect of the card
+  def rendered_aspects
+    card_aspects.each do |aspect|
+      contents = card_aspect_rendered aspect
+      yield aspect.to_s, contents if contents.present?
+    end
+  end
+
+  def card_aspect which
+    contents =
+    case which.to_sym
+      when :authToken
+        form_authenticity_token
+      else
+        decorator.extract which
+    end
+    [ which.to_s.capitalize.tr('_', ' '), contents]
   end
 
   def present_field_wrapped what=nil
@@ -112,7 +128,7 @@ module CardPresentation
   def field_value what=nil
     return form_authenticity_token if what && (what == "authToken")
     if val = @decorator && @decorator.extract(what)
-      "#{val}".html_safe
+      val.html_safe
     end
   end
 

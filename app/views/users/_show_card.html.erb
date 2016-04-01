@@ -1,6 +1,7 @@
 <% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
 <%= present decorator, current_user_or_guest do |presenter| %>
     <div class="container-fluid card-item card-grid js-masonry entity-card <%= viewparams.display_style %>-card <%= decorator.dom_id %>"
+         onload="RP.masonry.onload(event)"
          data-masonry-options='{
             "gutter": 10,
             "itemSelector": ".grid-item",
@@ -20,9 +21,10 @@
               <%# collectible_list_menu decorator, response_service.user, {} %>
           <% end %>
       </div>
-      <% presenter.card_aspects.collect { |aspect| presenter.card_aspect_rendered aspect }.compact.each do |item_content| %>
-        <div class="grid-item card-column">
-          <%= item_content %>
+      <%# presenter.card_aspects.collect { |aspect| presenter.card_aspect_rendered aspect }.compact.each do |item_content| %>
+      <% presenter.rendered_aspects do |aspect, content | %>
+          <div class="grid-item card-column <%= aspect %>">
+          <%= content %>
         </div>
       <% end %>
       <div class="lower-content">

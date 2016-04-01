@@ -40,14 +40,14 @@ class CollectiblePresenter < BasePresenter
   end
 
   def field_value what=nil
-    return form_authenticity_token if what && (what == "authToken")
+    return form_authenticity_token if what && (what == 'authToken')
     if val = @decorator && @decorator.extract(what)
-      "#{val}".html_safe
+      val.html_safe
     end
   end
 
   def present_field what=nil
-    field_value(what) || %Q{%%#{(what || "").to_s}%%}.html_safe
+    field_value(what) || %Q{%%#{(what || '').to_s}%%}.html_safe
   end
 
   def field_count what
@@ -55,7 +55,7 @@ class CollectiblePresenter < BasePresenter
   end
 
   def present_field_label what
-    label = what.sub "_tags", ''
+    label = what.sub '_tags', ''
     case field_count(what)
       when nil, false
         "%%#{what}_label_plural%%"+"%%#{what}_label_singular%%"
@@ -64,6 +64,10 @@ class CollectiblePresenter < BasePresenter
       else
         label.pluralize
     end
+  end
+
+  def card_aspects which_column=nil
+      (super + [ :tags, (:found_by if @decorator.first_collector) ]).compact.uniq
   end
 
 end

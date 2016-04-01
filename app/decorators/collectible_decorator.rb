@@ -33,7 +33,6 @@ class CollectibleDecorator < Draper::Decorator
         taglist = visible_tags( :tagtype_x => [ :Question, :List, ]).collect { |tag|
           h.link_to_submit(tag.name.downcase, tag, :mode => :partial, :class => 'taglink' )
         }.join('&nbsp;<span class="tagsep">|</span> ')
-        # <span class="<%= recipe_list_element_golink_class item %>">
         button = h.collectible_tag_button self
         (taglist+"&nbsp; "+button).html_safe
       when /^lists$/

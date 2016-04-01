@@ -193,6 +193,9 @@ div.card-item {
   &.recipe-card {
     // width: 350px;
     background-color: $recipes-card-background-color;
+    a {
+      color: $recipes-panels-label-button-color;
+    }
     .description {
       font-size: 1.2em;
       color: #a2a2a2;
@@ -202,9 +205,6 @@ div.card-item {
     }
     td.upper-content {
       padding-left: 1em;
-      a {
-        color: $recipes-panels-label-button-color;
-      }
     }
     td.lower-content {
       // padding-left: 0.5em;

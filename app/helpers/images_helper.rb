@@ -65,6 +65,20 @@ module ImagesHelper
     end
   end
 
+  def image_from_decorator decorator, options={}
+    image_with_error_recovery decorator,
+                              class: decorator.image_class,
+                              fallback_img: options[:fallback_img] || decorator.object.is_a?(User),
+                              fill_mode: 'fixed-width'
+  end
+
+  def labelled_avatar decorator, options={}
+    content_tag(:div,
+                image_from_decorator(decorator, options),
+                class: 'owner-pic') +
+    content_tag(:span, homelink(decorator), class: 'owner-name')
+  end
+
   # Provide an image tag that resizes according to options[:fill_mode].
   # We give the tag an id according to the decorator, and an alt;
   # Both of those may be explicitly provided with the options

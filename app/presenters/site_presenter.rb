@@ -11,7 +11,7 @@ class SitePresenter < CollectiblePresenter
   end
   alias_method :header, :card_header_content  # Backwards compatibility thing
 
-  def card_aspect which, options = {}
+  def card_aspect which
     label = contents = nil
     case which
       when :description
@@ -30,6 +30,8 @@ class SitePresenter < CollectiblePresenter
         contents = strjoin(site.visible_tags(tagtype: :List).collect { |list_tag|
           link_to_submit list.name, list_path(list)
         }).html_safe
+      else
+        return super
     end
     [ label, contents ]
   end

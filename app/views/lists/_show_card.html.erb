@@ -1,4 +1,35 @@
 <%= present decorator, current_user_or_guest do |presenter| %>
+    <div class="container-fluid card-item card-grid js-masonry entity-card list-card <%= decorator.dom_id %>"
+         onload="RP.masonry.onload(event)"
+         data-masonry-options='{
+            "gutter": 10,
+            "itemSelector": ".grid-item",
+            "stamp": ".stamp" }'>
+      <!--"columnWidth": 200,-->
+      <!--onload="RP.masonry.onload(event)"-->
+      <div class="stamp stamp-avatar card-column" <%= 'style=display:none' if !presenter.card_avatar? %>>
+        <%= presenter.card_avatar %>
+      </div>
+      <div class="stamp stamp-title">
+        <%= collectible_vote_buttons decorator.object, class: 'stamp stamp-votes' unless decorator.object == response_service.user %>
+        <%= presenter.card_homelink class: 'title-link' %>
+        <%= collectible_collect_button decorator %>
+        <%# collectible_list_menu decorator, response_service.user, {} %>
+      </div>
+      <%# presenter.card_aspects.collect { |aspect| presenter.card_aspect_rendered aspect }.compact.each do |item_content| %>
+      <% presenter.rendered_aspects do |aspect, content | %>
+          <div class="grid-item card-column <%= aspect %>">
+            <%= item_content %>
+          </div>
+      <% end %>
+      <div class="lower-content">
+        <% if (decorator.object == response_service.user) || response_service.admin_view? %>
+            <%= collectible_tools_menu decorator, 'lg' %>
+        <% else %>
+            <%= collectible_share_button decorator, 'lg' %>
+        <% end %>
+      </div>
+    </div>
     <div class="container-fluid card-item entity-card list-card">
       <%= collectible_vote_buttons decorator.object %>
       <table style="width: 100%">
@@ -51,4 +82,3 @@
       </table>
     </div>
 <% end %>
-
