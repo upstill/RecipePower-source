@@ -5,23 +5,4 @@ class RecipePresenter < CollectiblePresenter
     decorator.imgdata.present?
   end
 
-  def card_aspect which
-    label = nil
-    content =
-    case which
-      when :found_by
-        if collector = decorator.first_collector
-          h.labelled_avatar collector.decorate
-        end
-      when :description
-        label = '' # Unlabelled
-        @object.description
-      when :notes
-        @object.notes
-      else
-        return super
-    end
-    [ label, content ]
-  end
-
 end

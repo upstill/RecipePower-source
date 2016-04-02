@@ -100,9 +100,19 @@ module CardPresentation
     []
   end
 
+  # Select available aspects according to the given arguments
+  # The arguments are strings selecting particular aspects
+  # A terminating options hash can provide exceptions
+  def card_aspects_filtered *args
+    aspects = card_aspects
+    options = args.last.is_a?(Hash) ? args.pop : {}
+    aspects -= options[:except] if options[:except]
+    aspects
+  end
+
   # Call the provided block for each aspect of the card
-  def rendered_aspects
-    card_aspects.each do |aspect|
+  def rendered_aspects *args
+    card_aspects_filtered(*args).each do |aspect|
       contents = card_aspect_rendered aspect
       yield aspect.to_s, contents if contents.present?
     end
@@ -113,10 +123,13 @@ module CardPresentation
     case which.to_sym
       when :authToken
         form_authenticity_token
-      else
-        decorator.extract which
+      when :description
+        label = ''
+        decorator.description if decorator.respond_to?(:description)
+      else # Fall back on the decorator's version
+        self.respond_to?(:present_field) ? present_field(which) : decorator.extract(which)
     end
-    [ which.to_s.capitalize.tr('_', ' '), contents]
+    [ which.to_s.capitalize.tr('_', ' ').to_sym, contents]
   end
 
   def present_field_wrapped what=nil
@@ -150,6 +163,26 @@ module CardPresentation
       else
         label.pluralize
     end
+  end
+
+  def field_label_counted what, count
+    case count
+      when 0
+        ''
+      when 1
+        what.to_s.singularize
+      else
+        what.to_s.pluralize
+    end
+  end
+
+  # Provide a list of links to a partial for the home of each entity
+  def entity_links entities, options={}
+    safe_join entities.collect { |entity|
+      decorator = entity.decorate
+      homelink = decorator.respond_to?(:homelink) ? decorator.homelink : linkpath(entity)
+      link_to_submit decorator.title, homelink, :mode => (options[:mode] || :partial)
+    }, (options[:joinstr] || ', ').html_safe
   end
 
 end

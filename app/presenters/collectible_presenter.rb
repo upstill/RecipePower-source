@@ -66,8 +66,38 @@ class CollectiblePresenter < BasePresenter
     end
   end
 
+  def card_aspect which
+    label = nil
+    contents =
+        case which.to_sym
+          when :author
+            tags = decorator.visible_tags :tagtype => :Author
+            label = field_label_counted 'author', tags.count
+            entity_links tags, joinstr: ' | '
+          when :tags
+            taglist = decorator.visible_tags :tagtype_x => [ :Question, :List, :Author ]
+            label = field_label_counted 'tags', taglist.count
+            list_tags_for_collectible taglist, decorator
+          when :lists # Lists it appears under
+            lists_with_status = ListServices.associated_lists_with_status decorator
+            label = field_label_counted 'AS SEEN IN TREASURY', lists_with_status.count
+            list_lists_with_status lists_with_status
+          when :site
+            h.link_to decorator.sourcename, decorator.sourcehome, class: "tablink" if decorator.respond_to? :sourcehome
+          when :found_by
+            if collector = decorator.first_collector
+              h.labelled_avatar collector.decorate
+            end
+          when :notes
+            decorator.notes if decorator.respond_to? :notes
+          else
+            return super
+        end
+    [ label, contents ]
+  end
+
   def card_aspects which_column=nil
-      (super + [ :tags, (:found_by if @decorator.first_collector) ]).compact.uniq
+      (super + [ :author, :description, :tags, :title, :lists, (:found_by if @decorator.first_collector) ]).compact.uniq
   end
 
 end

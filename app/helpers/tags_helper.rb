@@ -252,4 +252,13 @@ BLOCK_END
       link_to_submit tag.name, tag_path(tag), :mode => :modal
     }).html_safe
   end
+
+  def list_tags_for_collectible taglist, collectible_decorator=nil
+    tags_str = safe_join taglist.collect { |tag|
+      link_to_submit tag.name, linkpath(tag), :mode => :partial, :class => 'taglink'
+    }, '&nbsp;<span class="tagsep">|</span> '.html_safe
+    collectible_decorator ?
+        safe_join( [ tags_str, collectible_tag_button(collectible_decorator)], '&nbsp; '.html_safe ) :
+        tags_str
+  end
 end

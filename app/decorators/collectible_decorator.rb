@@ -30,19 +30,9 @@ class CollectibleDecorator < Draper::Decorator
                   h.link_to_submit tag.name, tag, :mode => :modal, class: "rcp_list_element_tag"
                 }
       when /^tags$/
-        taglist = visible_tags( :tagtype_x => [ :Question, :List, ]).collect { |tag|
-          h.link_to_submit(tag.name.downcase, tag, :mode => :partial, :class => 'taglink' )
-        }.join('&nbsp;<span class="tagsep">|</span> ')
-        button = h.collectible_tag_button self
-        (taglist+"&nbsp; "+button).html_safe
+        h.list_tags_for_collectible visible_tags( :tagtype_x => [ :Question, :List, ]), self
       when /^lists$/
-        ListServices.associated_lists_with_status(self).collect { |pair|
-          list, status = pair.first, pair.last
-          name = h.link_to_submit(list.name_tag.name.truncate(50).downcase, list, :mode => :partial, :class => 'taglink' )
-          name << " (#{h.user_homelink list.owner})".html_safe if list.owner_id != tagging_user_id
-          name << "--#{status}" if Rails.env.development?
-          name
-        }.compact.join('&nbsp;<span class="tagsep">|</span> ').html_safe
+        h.list_lists_with_status ListServices.associated_lists_with_status(self)
       when /^rcp/
         attrname = fieldname.sub(/^rcp/, '').downcase
         case attrname

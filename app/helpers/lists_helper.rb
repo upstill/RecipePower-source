@@ -72,4 +72,19 @@ module ListsHelper
                                         links: yield }
   end
 
+  # Describe all the lists and their statuses
+  def list_lists_with_status lists_with_status
+    safe_join lists_with_status.collect { |list_or_list_with_status|
+      if list_or_list_with_status.is_a? Array
+        list, status = list_or_list_with_status.first, list_or_list_with_status.last
+      else
+        list, status = list_or_list_with_status, nil
+      end
+      name = link_to_submit(list.name_tag.name.truncate(50).downcase, linkpath(list), :mode => :partial, :class => 'taglink' )
+      name << " (#{user_homelink list.owner})".html_safe if list.owner_id != list.tagging_user_id
+      name << "--#{status}" if Rails.env.development? && status
+      name
+    }.compact, '&nbsp;<span class="tagsep">|</span> '.html_safe
+  end
+
 end

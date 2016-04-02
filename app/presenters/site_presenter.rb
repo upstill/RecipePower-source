@@ -11,35 +11,6 @@ class SitePresenter < CollectiblePresenter
   end
   alias_method :header, :card_header_content  # Backwards compatibility thing
 
-  def card_aspect which
-    label = contents = nil
-    case which
-      when :description
-        contents = site.description
-      when :author
-        tags = site.visible_tags :tagtype => :Author
-        label = label.pluralize unless tags.empty?
-        contents = tag_list tags
-      when :tags
-        tags = site.visible_tags :tagtype => [:Genre, :Role, :Ingredient, :Source, :Occasion, :Tool]
-        label = label.pluralize unless tags.empty?
-        contents = tag_list tags
-      when :lists # Lists it appears under
-        # TODO Shoud be including option of indirect linkage i.e. being tagged with a list's tag
-        label = "Seen on list(s)"
-        contents = strjoin(site.visible_tags(tagtype: :List).collect { |list_tag|
-          link_to_submit list.name, list_path(list)
-        }).html_safe
-      else
-        return super
-    end
-    [ label, contents ]
-  end
-
-  def card_aspects which_column=nil
-    [ :author, :description, :tags, :title ]
-  end
-
 =begin
   def aspects
     card_aspects.collect { |this| aspect(this) }.compact.join.html_safe

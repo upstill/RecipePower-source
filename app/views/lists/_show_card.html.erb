@@ -19,7 +19,7 @@
       <%# presenter.card_aspects.collect { |aspect| presenter.card_aspect_rendered aspect }.compact.each do |item_content| %>
       <% presenter.rendered_aspects do |aspect, content | %>
           <div class="grid-item card-column <%= aspect %>">
-            <%= item_content %>
+            <%= content %>
           </div>
       <% end %>
       <div class="lower-content">
