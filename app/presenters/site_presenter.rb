@@ -11,22 +11,6 @@ class SitePresenter < CollectiblePresenter
   end
   alias_method :header, :card_header_content  # Backwards compatibility thing
 
-=begin
-  def aspects
-    card_aspects.collect { |this| aspect(this) }.compact.join.html_safe
-  end
-
-  def about
-    handle_none user.about do
-      markdown(user.about)
-    end
-  end
-
-  def tags
-    user.tags.collect { |tag| tag.name }.join(', ')
-  end
-=end
-
   private
 
   def handle_none(value)

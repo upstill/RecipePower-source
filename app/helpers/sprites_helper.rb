@@ -50,10 +50,10 @@ module SpritesHelper
       options[:width] ||= dim_scale(options[:height], ar)
       options[:height] ||= dim_scale(options[:width], 1/ar)
     else
-      options[:height] = "100%" # Fit into enclosing div
+      options[:height] = '100%' # Fit into enclosing div
     end
     content_tag :svg,
-                tag(:use, :"xlink:href" => ip),
+                tag(:use, :'xlink:href' => ip),
                 options.slice(:width, :height).merge(id: what, viewBox: vb).compact
   end
 

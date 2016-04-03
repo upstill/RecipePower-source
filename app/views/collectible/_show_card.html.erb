@@ -21,7 +21,7 @@
             <%# collectible_list_menu decorator, response_service.user, {} %>
         <% end %>
       </div>
-      <% presenter.rendered_aspects(:tags, except: [:title] ) do |aspect, content | %>
+      <% presenter.rendered_aspects( except: [:title] ) do |aspect, content | %>
           <div class="grid-item card-column <%= aspect %>">
             <%= content %>
           </div>

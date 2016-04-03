@@ -52,10 +52,11 @@ module CardPresentation
   end
 
   def card_aspect_enclosure which, contents, label=nil
+    which = which.to_s
     if contents.present?
-      label ||= which.to_s.capitalize.tr('_', ' ')
-      (label.present? ? h.content_tag(:p, label.upcase, class: "card-aspect-label #{which}") : ''.html_safe) +
-      h.content_tag(:p, contents, class: "card-aspect-contents #{which}")
+      label ||= which.capitalize.tr('_', ' ')
+      (label.present? ? h.content_tag(:h3, label.upcase, class: 'card-aspect-label ' + which) : ''.html_safe) +
+      h.content_tag(:div, contents, class: 'card-aspect-contents ' + which)
     end
   end
 

@@ -30,20 +30,6 @@ div.card-item {
   div.title > a.title-link {
     color: $generic-card-title-color;
   }
-  .card-aspect-label {
-    color: $generic-card-label-color;
-    margin-bottom: 0;
-    letter-spacing: 2px;
-    font-size: 16px;
-    &.header {
-      font-size: 36px;
-      letter-spacing: 3px;
-      margin-bottom: 10px;
-      span.user-handle {
-        font-size: 0.5em;
-      }
-    }
-  }
   div.title-glyph {
     color: #ea8a7a;
     height: 2em;
@@ -86,8 +72,8 @@ div.card-item {
     }
   }
   h3 {
-    color: white;
-    font-size: 1.5em;
+    color: #cccccc;
+    // font-size: 1.5em;
     margin-top: 0.5em;
     margin-bottom: 0em;
   }
@@ -105,10 +91,12 @@ div.card-item {
   p.description {
     font-size: 1.3em;
   }
-  div.tags {
+  div.card-aspect-contents {
     font-weight: 400;
     color: #909090;
     font-size: 1.3em;
+    margin-top: 0;
+    // color: #8D8F90;
     span.tagsep {
       font-size: 1.3em;
       color: #8ac5d2;
@@ -116,10 +104,6 @@ div.card-item {
       font-weight: 200;
       font-size: 1.2em;
     }
-  }
-  p.card-aspect-contents {
-    margin-top: 0;
-    color: #8D8F90;
   }
   &.associated-card {
     margin-top: 1em;
@@ -333,9 +317,6 @@ div.card-item {
         margin-top: 10px;
       }
     }
-    span.owner-name {
-      font-size: 1.4em;
-    }
     div.owner-pic {
       width: 100%; // 8em;
       // margin: 1em;
@@ -442,6 +423,8 @@ div.card-grid {
     width: 100%;
     margin-bottom: 15px;
     padding-right: 30px; // To allow room for the votes
+    background-color: inherit;
+    overflow-x: hidden;
     div.stamp-votes {
       width: auto;
       height: auto;
@@ -449,8 +432,7 @@ div.card-grid {
       float: right;
       font-size: 0.5em;
       position: absolute;
-      // position: relative;
-      // top: 1em;
+      background-color: inherit;
     }
   }
   div.card-column {

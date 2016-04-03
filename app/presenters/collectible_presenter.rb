@@ -36,7 +36,7 @@ class CollectiblePresenter < BasePresenter
   def present_field_wrapped what=nil
     h.content_tag :span,
                   present_field(what),
-                  class: "hide-if-empty"
+                  class: 'hide-if-empty'
   end
 
   def field_value what=nil

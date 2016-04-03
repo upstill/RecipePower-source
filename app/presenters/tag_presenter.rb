@@ -33,17 +33,17 @@ class TagPresenter < BasePresenter
   end
 
   def card_aspects which_column=nil
-        [
-            :tag_synonyms,
-            :meaning,
-            :tag_owners,
-            :tag_similars,
-            :tag_referents,
-            :tag_parents,
-            :tag_children,
-            :tag_references,
-            :tag_relations,
-        ]
+    [
+        :tag_synonyms,
+        :meaning,
+        :tag_owners,
+        :tag_similars,
+        :tag_referents,
+        :tag_parents,
+        :tag_children,
+        :tag_references,
+        :tag_relations,
+    ]
   end
 
   def card_aspect which
