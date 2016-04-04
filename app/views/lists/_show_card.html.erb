@@ -7,11 +7,11 @@
             "stamp": ".stamp" }'>
       <!--"columnWidth": 200,-->
       <!--onload="RP.masonry.onload(event)"-->
-      <div class="stamp stamp-avatar card-column" <%= 'style=display:none' if !presenter.card_avatar? %>>
+      <div class="stamp avatar card-column" <%= 'style=display:none' if !presenter.card_avatar? %>>
         <%= presenter.card_avatar %>
       </div>
-      <div class="stamp stamp-title">
-        <%= collectible_vote_buttons decorator.object, class: 'stamp stamp-votes' unless decorator.object == response_service.user %>
+      <div class="stamp title">
+        <%= collectible_vote_buttons decorator.object, class: 'stamp votes' unless decorator.object == response_service.user %>
         <%= presenter.card_homelink class: 'title-link' %>
         <%= collectible_collect_button decorator %>
         <%# collectible_list_menu decorator, response_service.user, {} %>
