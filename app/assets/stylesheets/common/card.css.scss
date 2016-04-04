@@ -73,7 +73,7 @@ div.card-item {
   }
   h3 {
     color: #cccccc;
-    // font-size: 1.5em;
+    font-size: 1.4em;
     margin-top: 0.5em;
     margin-bottom: 0em;
   }
@@ -97,6 +97,10 @@ div.card-item {
     font-size: 1.3em;
     margin-top: 0;
     // color: #8D8F90;
+    &.description {
+      font-size: 0.6em;
+      color: #aaaaaa;
+    }
     span.tagsep {
       font-size: 1.3em;
       color: #8ac5d2;
@@ -424,7 +428,6 @@ div.card-grid {
     margin-bottom: 15px;
     padding-right: 30px; // To allow room for the votes
     background-color: inherit;
-    overflow-x: hidden;
     div.votes {
       width: auto;
       height: auto;

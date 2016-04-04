@@ -153,6 +153,26 @@ class UserPresenter < BasePresenter
     end
   end
 
+  def is_viewer?
+    decorator.object == response_service.user
+  end
+
+  def editable_from_card?
+    is_viewer?
+  end
+
+  def collectible_from_card?
+    !is_viewer?
+  end
+
+  def sharable_from_card?
+    false
+  end
+
+  def votable_from_card?
+    !is_viewer?
+  end
+
   def about
     handle_none user.about do
       markdown(user.about)

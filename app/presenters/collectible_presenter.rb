@@ -100,6 +100,23 @@ class CollectiblePresenter < BasePresenter
       (super + [ :author, :description, :tags, :title, :lists, (:found_by if @decorator.first_collector) ]).compact.uniq
   end
 
+  # Entities are editable, sharable, votable and collectible from the card by default
+  def editable_from_card?
+    true
+  end
+
+  def sharable_from_card?
+    true
+  end
+
+  def votable_from_card?
+    true
+  end
+
+  def collectible_from_card?
+    true
+  end
+
 end
 
 class ListPresenter < CollectiblePresenter

@@ -21,6 +21,14 @@ class BasePresenter
     decorator.imgdata.present?
   end
 
+  def card_video
+    nil
+  end
+
+  def card_video?
+    card_video.present?
+  end
+
 private
 
   def self.presents(name)

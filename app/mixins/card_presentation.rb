@@ -24,16 +24,6 @@ module CardPresentation
     homelink decorator, options
   end
 
-  def card_video
-    if decorator.url.present? &&
-        (url = URI(decorator.url)) &&
-        url.host.match(/\.youtube.com/) &&
-        (vidlink = YouTubeAddy.extract_video_id(decorator.url))
-
-       video_embed "https://www.youtube.com/embed/#{vidlink}"
-    end
-  end
-
   def card_header
     content_tag :div, card_header_content, class: "card-aspect-label header"
   end
@@ -120,6 +110,7 @@ module CardPresentation
   end
 
   def card_aspect which
+    label = nil
     contents =
     case which.to_sym
       when :authToken
@@ -130,7 +121,7 @@ module CardPresentation
       else # Fall back on the decorator's version
         self.respond_to?(:present_field) ? present_field(which) : decorator.extract(which)
     end
-    [ which.to_s.capitalize.tr('_', ' ').to_sym, contents]
+    [ label || which.to_s.capitalize.tr('_', ' ').to_sym, contents]
   end
 
   def present_field_wrapped what=nil

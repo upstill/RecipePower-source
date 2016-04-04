@@ -8,37 +8,24 @@
             "stamp": ".stamp" }'>
       <!--"columnWidth": 200,-->
       <!--onload="RP.masonry.onload(event)"-->
-      <div class="stamp avatar card-column" <%= 'style=display:none' if !presenter.card_avatar? %>>
-        <%= presenter.card_avatar %>
+      <div class="stamp avatar card-column" <%= 'style=display:none' if !(presenter.card_video? || presenter.card_avatar?) %>>
+        <%= presenter.card_video? ? presenter.card_video : presenter.card_avatar %>
       </div>
       <div class="stamp title">
-        <%= collectible_vote_buttons decorator.object, class: 'stamp votes' unless decorator.object == response_service.user %>
+        <%= collectible_vote_buttons decorator.object, class: 'stamp votes' if presenter.votable_from_card? %>
         <%= presenter.card_homelink class: 'title-link' %>
-        <% if (decorator.object == response_service.user) || response_service.admin_view? %>
-            <%= collectible_edit_button decorator %>
-        <% else %>
-            <%= collectible_collect_button decorator %>
-            <%# collectible_list_menu decorator, response_service.user, {} %>
-        <% end %>
+        <%= collectible_edit_button decorator if presenter.editable_from_card? %>
+        <%= collectible_collect_button decorator if presenter.collectible_from_card? %>
+        <%= presenter.card_aspect_rendered :description %>
       </div>
-      <% presenter.rendered_aspects( except: [:title] ) do |aspect, content | %>
+      <% presenter.rendered_aspects( except: [:title, :description] ) do |aspect, content | %>
           <div class="grid-item card-column <%= aspect %>">
             <%= content %>
           </div>
       <% end %>
-<!--
-      <%# presenter.card_aspects.collect { |aspect| presenter.field_value aspect }.compact.each do |item_content| %>
-          <div class="grid-item card-column">
-            <%# item_content %>
-          </div>
-      <%# end %>
--->
       <div class="lower-content">
-        <% if (decorator.object == response_service.user) || response_service.admin_view? %>
-            <%= collectible_tools_menu decorator, 'lg' %>
-        <% else %>
-            <%= collectible_share_button decorator, 'lg' %>
-        <% end %>
+        <%= collectible_tools_menu decorator, 'lg' if presenter.editable_from_card? || response_service.admin_view? %>
+        <%= collectible_share_button decorator, 'lg' if presenter.sharable_from_card? %>
       </div>
     </div>
     <div class="container-fluid card-item entity-card <%= viewparams.display_style %>-card <%= decorator.dom_id %>">
