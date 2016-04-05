@@ -130,8 +130,25 @@ div.card-item {
     margin: 0.5em;
   }
   &.cardlet-item {
-    // min-width: 200px;
     width: 350px;
+    @include respond-to(phone) {
+      width: 300px;
+    }
+    @include respond-to(small) {
+      width: 100%; // ($break-small - 30);
+    }
+    @include respond-to(medium) {
+      width: 100%; // ($break-medium - 30);
+    }
+    @include respond-to(largish) {
+      width: ($break-largish - (30+10))/2;
+    }
+    @include respond-to(large) {
+      width: 355px; // ($break-large - (30+10))/2;
+    }
+    @include respond-to(wide) {
+      width: 306px; // ($break-wide - (30+20))/3;
+    }
     padding: 1em 1em 0 1em;
     background-color: $recipes-card-background-color;
     font-family: $archivo;
