@@ -58,7 +58,7 @@ module CardPresentation
     card_aspect_enclosure which, contents, label
   end
 
-  def card_aspect_size
+  def card_aspect_size which
   end
 
   # How many columns does the card have (next to the avatar)
@@ -103,7 +103,7 @@ module CardPresentation
         form_authenticity_token
       when :description
         label = ''
-        decorator.description if decorator.respond_to?(:description)
+        decorator.description.html_safe if decorator.respond_to?(:description)
       else # Fall back on the decorator's version
         self.respond_to?(:present_field) ? present_field(which) : decorator.extract(which)
     end

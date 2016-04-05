@@ -28,21 +28,4 @@
         <%= presenter.share_button %>
       </div>
     </div>
-    <div class="card-item row card-large <%= viewparams.display_style %>-card <%= decorator.dom_id %>">
-      <%= collectible_vote_buttons decorator.object %>
-      <div class="col-md-3" <%= 'style=display:none' if !presenter.card_avatar? %>>
-        <div class="pic-inset">
-          <%= presenter.card_avatar %>
-        </div>
-      </div>
-      <div class="col-md-<%= presenter.card_avatar? ? '9' : '12' %> ">
-        <%= presenter.card_header %>
-        <%# presenter.card_subhead %>
-        <div class="row">
-          <% (0...(presenter.card_ncolumns)).each do |column| %>
-              <%= presenter.column column %>
-          <% end %>
-        </div>
-      </div>
-    </div>
 <% end %>

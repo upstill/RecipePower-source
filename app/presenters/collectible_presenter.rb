@@ -22,12 +22,12 @@ class CollectiblePresenter < BasePresenter
 
   def title
     unless modal
-      h.content_tag :p, @decorator.title, class: "resource-element title"
+      h.content_tag :p, @decorator.title, class: 'resource-element title'
     end
   end
 
   def description
-    h.content_tag :p, @decorator.description, class: "resource-element subtitle"
+    h.content_tag :p, @decorator.description.html_safe, class: 'resource-element subtitle'
   end
 
   def buttons

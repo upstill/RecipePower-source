@@ -4,8 +4,7 @@ class String
   end
 end
 
-class UserPresenter < BasePresenter
-  include CardPresentation
+class UserPresenter < CollectiblePresenter
   presents :user
   delegate :username, :fullname, :handle, :lists, :feeds, to: :user
 

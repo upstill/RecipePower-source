@@ -41,7 +41,11 @@ class TagPresenter < BasePresenter
     label = content = nil
     itemstrs =
     (case which
-      when :tag_synonyms
+       when :description
+         tn = decorator.typename.capitalize
+         article = %w{ A E I O U }.include?(tn[0]) ? 'An' : 'A'
+         return ['', "#{article} #{decorator.typename} tag"]
+       when :tag_synonyms
         label = 'synonyms'
         tagserv.synonyms.collect { |tag| h.tag_homelink tag }
       when :meaning
