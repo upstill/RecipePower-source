@@ -42,7 +42,7 @@ module RecipesHelper
   end
 
   def collectible_show_thumbnail decorator
-    image_div = image_enclosure decorator, class: 'pic-box', fill_mode: 'fixed-width', fallback_img: true
+    image_div = image_enclosure decorator, class: 'pic-box', fill_mode: 'fixed-width', fallback_img: false
     title = link_to_submit decorator.title, decorator.object
     content_tag :div, "#{image_div}#{title}".html_safe, class: "cardlet-item #{decorator.dom_id}"
   end

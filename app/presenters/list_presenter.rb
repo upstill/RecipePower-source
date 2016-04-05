@@ -16,6 +16,7 @@ class ListPresenter < CollectiblePresenter
       when :tags
         present_field_wrapped 'tags'
       when :notes
+        label = 'description'
         @object.notes
       else
         return super

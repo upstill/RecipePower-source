@@ -103,7 +103,7 @@ module CardPresentation
         form_authenticity_token
       when :description
         label = ''
-        decorator.description.html_safe if decorator.respond_to?(:description)
+        decorator.description.html_safe if decorator.respond_to?(:description) && decorator.description
       else # Fall back on the decorator's version
         self.respond_to?(:present_field) ? present_field(which) : decorator.extract(which)
     end
@@ -113,18 +113,18 @@ module CardPresentation
   def present_field_wrapped what=nil
     h.content_tag :span,
                   present_field(what),
-                  class: "hide-if-empty"
+                  class: 'hide-if-empty'
   end
 
   def field_value what=nil
-    return form_authenticity_token if what && (what == "authToken")
+    return form_authenticity_token if what && (what == 'authToken')
     if val = @decorator && @decorator.extract(what)
       val.html_safe
     end
   end
 
   def present_field what=nil
-    field_value(what) || %Q{%%#{(what || "").to_s}%%}.html_safe
+    field_value(what) || %Q{%%#{(what || '').to_s}%%}.html_safe
   end
 
   def field_count what
@@ -132,7 +132,7 @@ module CardPresentation
   end
 
   def present_field_label what
-    label = what.sub "_tags", ''
+    label = what.sub '_tags', ''
     case field_count(what)
       when nil, false
         "%%#{what}_label_plural%%"+"%%#{what}_label_singular%%"

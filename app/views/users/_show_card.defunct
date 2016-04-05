@@ -12,6 +12,34 @@
         <%= presenter.card_avatar %>
       </div>
       <div class="stamp title">
+        <%= presenter.vote_buttons %>
+        <%= presenter.card_homelink class: 'title-link' %>
+        <%= presenter.edit_button %>
+        <%= presenter.collect_button %>
+        <%= presenter.card_aspect_rendered :description %>
+      </div>
+      <% presenter.rendered_aspects( except: [:title, :description] ) do |aspect, content | %>
+          <div class="grid-item card-column <%= aspect %>">
+            <%= content %>
+          </div>
+      <% end %>
+      <div class="lower-content">
+        <%= presenter.tools_menu %>
+        <%= presenter.share_button %>
+      </div>
+    </div>
+    <div class="container-fluid card-item card-grid js-masonry entity-card <%= viewparams.display_style %>-card <%= decorator.dom_id %>"
+         onload="RP.masonry.onload(event)"
+         data-masonry-options='{
+            "gutter": 10,
+            "itemSelector": ".grid-item",
+            "stamp": ".stamp" }'>
+      <!--"columnWidth": 200,-->
+      <!--onload="RP.masonry.onload(event)"-->
+      <div class="stamp avatar card-column" <%= 'style=display:none' if !presenter.card_avatar? %>>
+        <%= presenter.card_avatar %>
+      </div>
+      <div class="stamp title">
           <%= collectible_vote_buttons decorator.object, class: 'stamp votes' unless decorator.object == response_service.user %>
           <%= presenter.card_homelink class: 'title-link' %>
           <% if (decorator.object == response_service.user) || response_service.admin_view? %>
