@@ -5,6 +5,7 @@ class String
 end
 
 class UserPresenter < BasePresenter
+  include CardPresentation
   presents :user
   delegate :username, :fullname, :handle, :lists, :feeds, to: :user
 

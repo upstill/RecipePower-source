@@ -7,15 +7,6 @@ class TagPresenter < BasePresenter
     @tagserv ||= TagServices.new tag
   end
 
-  def card_avatar?
-    false
-  end
-
-  # Present the user's avatar, optionally with a form for uploading the image (if they're the viewer)
-  def card_avatar options={}
-    nil
-  end
-
   def card_homelink options={}
     tag_homelink tag, options
   end
@@ -145,6 +136,10 @@ class TagPresenter < BasePresenter
 
   def tags
     user.tags.collect { |tag| tag.name }.join(', ')
+  end
+
+  def tools_menu
+
   end
 
   private

@@ -1,23 +1,6 @@
 module CardPresentation
   extend ActiveSupport::Concern
 
-  def card_avatar options={}
-    img = image_from_decorator decorator
-    if img && permitted_to?(:update, decorator.object)
-      link_to_submit img,
-                     polymorphic_path([:editpic, decorator.object]),
-                     mode: 'modal',
-                     title: 'Get Picture'
-    else
-      img
-    end
-  end
-
-  # By default, show the card if there's an avatar OR a backup avatar
-  def card_show_avatar
-    (href = decorator.imgdata).present? ? href : h.image_path(decorator.fallback_imgdata)
-  end
-
   # Provide the card's title with a link to the entity involved
   # NB This is meant to be overridden by entities (recipes, sites...) that link externally
   def card_homelink options={}
@@ -75,6 +58,9 @@ module CardPresentation
     card_aspect_enclosure which, contents, label
   end
 
+  def card_aspect_size
+  end
+
   # How many columns does the card have (next to the avatar)
   def card_ncolumns
     0
@@ -105,7 +91,7 @@ module CardPresentation
   def rendered_aspects *args
     card_aspects_filtered(*args).each do |aspect|
       contents = card_aspect_rendered aspect
-      yield aspect.to_s, contents if contents.present?
+      yield "#{aspect} #{card_aspect_size aspect}", contents if contents.present?
     end
   end
 
@@ -175,6 +161,60 @@ module CardPresentation
       homelink = decorator.respond_to?(:homelink) ? decorator.homelink : linkpath(entity)
       link_to_submit decorator.title, homelink, :mode => (options[:mode] || :partial)
     }, (options[:joinstr] || ', ').html_safe
+  end
+
+  def card_video?
+    false
+  end
+
+  def card_video
+    nil
+  end
+
+  # Does this presenter have an avatar to present on cards, etc?
+  def card_avatar?
+    false
+  end
+
+  def card_avatar options={}
+    nil
+  end
+
+  # Entities are editable, sharable, votable and collectible from the card by default
+  def editable_from_card?
+    true
+  end
+
+  def edit_button
+    collectible_edit_button decorator if editable_from_card?
+  end
+
+  def tools_menu
+    collectible_tools_menu decorator, 'lg' if editable_from_card? || response_service.admin_view?
+  end
+
+  def sharable_from_card?
+    decorator.object.is_a? Collectible
+  end
+
+  def share_button
+    collectible_share_button decorator, 'lg' if sharable_from_card?
+  end
+
+  def votable_from_card?
+    decorator.object.is_a? Voteable
+  end
+
+  def vote_buttons
+    collectible_vote_buttons decorator.object, class: 'stamp votes' if votable_from_card?
+  end
+
+  def collectible_from_card?
+    decorator.object.is_a? Collectible
+  end
+
+  def collect_button
+    collectible_collect_button decorator if collectible_from_card?
   end
 
 end

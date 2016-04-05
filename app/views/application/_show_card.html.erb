@@ -1,5 +1,33 @@
 <% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
 <%= present decorator, current_user_or_guest do |presenter| %>
+    <div class="container-fluid card-item card-grid js-masonry entity-card <%= viewparams.display_style %>-card <%= decorator.dom_id %>"
+         onload="RP.masonry.onload(event)"
+         data-masonry-options='{
+            "gutter": 10,
+            "itemSelector": ".grid-item",
+            "stamp": ".stamp" }'>
+      <!--"columnWidth": 200,-->
+      <!--onload="RP.masonry.onload(event)"-->
+      <div class="stamp avatar card-column" <%= 'style=display:none' if !presenter.card_avatar? %>>
+        <%= presenter.card_avatar %>
+      </div>
+      <div class="stamp title">
+        <%= presenter.vote_buttons %>
+        <%= presenter.card_homelink class: 'title-link' %>
+        <%= presenter.edit_button %>
+        <%= presenter.collect_button %>
+        <%= presenter.card_aspect_rendered :description %>
+      </div>
+      <% presenter.rendered_aspects( except: [:title, :description] ) do |aspect, content | %>
+          <div class="grid-item card-column <%= aspect %>">
+            <%= content %>
+          </div>
+      <% end %>
+      <div class="lower-content">
+        <%= presenter.tools_menu %>
+        <%= presenter.share_button %>
+      </div>
+    </div>
     <div class="card-item row card-large <%= viewparams.display_style %>-card <%= decorator.dom_id %>">
       <%= collectible_vote_buttons decorator.object %>
       <div class="col-md-3" <%= 'style=display:none' if !presenter.card_avatar? %>>

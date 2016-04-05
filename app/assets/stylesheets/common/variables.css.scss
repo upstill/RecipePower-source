@@ -98,10 +98,33 @@ $header-outline-color: #ff9583;
 
 $col-width-phone: 85%;
 $col-width-small: 43%;
-$col-width-medium: 30%;
-$col-width-largish: 30%;
-$col-width-large: 22%;
-$col-width-wide: 18%;
+$col-width-medium: 23%;
+$col-width-largish: 23%;
+$col-width-large: 23%;
+$col-width-wide: 23%;
+
+$col-width-lg-phone: $col-width-phone;
+$col-width-lg-small: $col-width-small*2+3;
+$col-width-lg-medium: $col-width-medium*2+2;
+$col-width-lg-largish: $col-width-largish*2+2;
+$col-width-lg-large: $col-width-large*2+1;
+$col-width-lg-wide: $col-width-wide*2+1;
+
+$col-width-xl-phone: 85%;
+$col-width-xl-small: 85%;
+$col-width-xl-medium: 85%;
+$col-width-xl-largish: 90%;
+$col-width-xl-large: 95%;
+$col-width-xl-wide: 95%;
+
+/*
+$avatar-width-phone: 85%;
+$avatar-width-small: 85%;
+$avatar-width-medium: 90%;
+$avatar-width-largish: 50%;
+$avatar-width-large: 40%;
+$avatar-width-wide: 45%;
+*/
 
 /*
 $menuback-height-down: 205px;

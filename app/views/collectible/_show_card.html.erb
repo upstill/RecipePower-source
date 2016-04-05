@@ -6,16 +6,15 @@
             "gutter": 10,
             "itemSelector": ".grid-item",
             "stamp": ".stamp" }'>
-      <!--"columnWidth": 200,-->
-      <!--onload="RP.masonry.onload(event)"-->
-      <div class="stamp avatar card-column" <%= 'style=display:none' if !(presenter.card_video? || presenter.card_avatar?) %>>
-        <%= presenter.card_video? ? presenter.card_video : presenter.card_avatar %>
+      <div class="stamp card-column"></div>
+      <div class="stamp avatar card-column card-column-lg" <%= 'style=display:none' if !presenter.card_avatar? %>>
+        <%= presenter.card_avatar %>
       </div>
       <div class="stamp title">
-        <%= collectible_vote_buttons decorator.object, class: 'stamp votes' if presenter.votable_from_card? %>
+        <%= presenter.vote_buttons %>
         <%= presenter.card_homelink class: 'title-link' %>
-        <%= collectible_edit_button decorator if presenter.editable_from_card? %>
-        <%= collectible_collect_button decorator if presenter.collectible_from_card? %>
+        <%= presenter.edit_button %>
+        <%= presenter.collect_button %>
         <%= presenter.card_aspect_rendered :description %>
       </div>
       <% presenter.rendered_aspects( except: [:title, :description] ) do |aspect, content | %>
@@ -24,8 +23,8 @@
           </div>
       <% end %>
       <div class="lower-content">
-        <%= collectible_tools_menu decorator, 'lg' if presenter.editable_from_card? || response_service.admin_view? %>
-        <%= collectible_share_button decorator, 'lg' if presenter.sharable_from_card? %>
+        <%= presenter.tools_menu %>
+        <%= presenter.share_button %>
       </div>
     </div>
     <div class="container-fluid card-item entity-card <%= viewparams.display_style %>-card <%= decorator.dom_id %>">

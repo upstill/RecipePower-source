@@ -94,8 +94,9 @@ div.card-item {
   div.card-aspect-contents {
     font-weight: 400;
     color: #909090;
-    font-size: 1.3em;
-    margin-top: 0;
+    font-size: 1.2em;
+    line-height: 1.4em;
+    margin-top: 0.2em;
     // color: #8D8F90;
     &.description {
       font-size: 0.6em;
@@ -459,6 +460,48 @@ div.card-grid {
       width: $col-width-wide;
     }
     // border: 1px solid blue;
+    &.card-column-lg {
+      @include respond-to(phone) {
+        width: $col-width-lg-phone;
+      }
+      @include respond-to(small) {
+        width: $col-width-lg-small;
+      }
+      @include respond-to(medium) {
+        width: $col-width-lg-medium;
+      }
+      @include respond-to(largish) {
+        width: $col-width-lg-largish;
+      }
+      @include respond-to(large) {
+        width: $col-width-lg-large;
+      }
+      @include respond-to(wide) {
+        width: $col-width-lg-wide;
+      }
+      // border: 1px solid blue;
+    }
+    &.card-column-xl {
+      @include respond-to(phone) {
+        width: $col-width-xl-phone;
+      }
+      @include respond-to(small) {
+        width: $col-width-xl-small;
+      }
+      @include respond-to(medium) {
+        width: $col-width-xl-medium;
+      }
+      @include respond-to(largish) {
+        width: $col-width-xl-largish;
+      }
+      @include respond-to(large) {
+        width: $col-width-xl-large;
+      }
+      @include respond-to(wide) {
+        width: $col-width-xl-wide;
+      }
+      // border: 1px solid blue;
+    }
   }
   div.lower-content {
     width: 100%;

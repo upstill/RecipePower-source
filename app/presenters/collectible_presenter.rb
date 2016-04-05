@@ -1,4 +1,5 @@
 class CollectiblePresenter < BasePresenter
+  include CardPresentation
 
   attr_accessor :modal
   attr_writer :buttons
@@ -66,6 +67,10 @@ class CollectiblePresenter < BasePresenter
     end
   end
 
+  def card_aspects which_column=nil
+    (super + [ :author, :description, :tags, :title, :lists, (:found_by if @decorator.first_collector) ]).compact.uniq
+  end
+
   def card_aspect which
     label = nil
     contents =
@@ -96,8 +101,30 @@ class CollectiblePresenter < BasePresenter
     [ label, contents ]
   end
 
-  def card_aspects which_column=nil
-      (super + [ :author, :description, :tags, :title, :lists, (:found_by if @decorator.first_collector) ]).compact.uniq
+  def card_aspect_size which
+    'card-column-xl' if (which.to_sym == :tags)
+  end
+
+  # Does this presenter have an avatar to present on cards, etc?
+  def card_avatar?
+    decorator.imgdata.present?
+  end
+
+  def card_avatar options={}
+    img = image_from_decorator decorator
+    if img && permitted_to?(:update, decorator.object)
+      link_to_submit img,
+                     polymorphic_path([:editpic, decorator.object]),
+                     mode: 'modal',
+                     title: 'Get Picture'
+    else
+      img
+    end
+  end
+
+  # By default, show the card if there's an avatar OR a backup avatar
+  def card_show_avatar
+    (href = decorator.imgdata).present? ? href : h.image_path(decorator.fallback_imgdata)
   end
 
   # Entities are editable, sharable, votable and collectible from the card by default
@@ -105,16 +132,36 @@ class CollectiblePresenter < BasePresenter
     true
   end
 
+  def edit_button
+    collectible_edit_button decorator if editable_from_card?
+  end
+
+  def tools_menu
+    collectible_tools_menu decorator, 'lg' if editable_from_card? || response_service.admin_view?
+  end
+
   def sharable_from_card?
     true
+  end
+
+  def share_button
+    collectible_share_button decorator, 'lg' if sharable_from_card?
   end
 
   def votable_from_card?
     true
   end
 
+  def vote_buttons
+    collectible_vote_buttons decorator.object, class: 'stamp votes' if votable_from_card?
+  end
+
   def collectible_from_card?
     true
+  end
+
+  def collect_button
+    collectible_collect_button decorator if collectible_from_card?
   end
 
 end
