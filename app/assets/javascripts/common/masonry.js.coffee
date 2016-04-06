@@ -17,6 +17,8 @@ RP.masonry.onload = (event) ->
 	$(elmt).masonry 'on', 'layoutComplete', ( msnryInstance, laidOutItems ) ->
 		$(elmt).removeClass 'layout-pending'
 		dequeue elmt
+		if (!$(elmt).hasClass 'layout-pending') && (trigger = $('.stream-trigger', elmt)[0]) && (trigger.getBoundingClientRect().top > 0)
+			$(trigger).trigger 'load'
 
 dequeue = (elmt) ->
 	if !($(elmt).hasClass 'layout-pending') && (q = $(elmt).data('itemQ')) && (item = q.shift())
