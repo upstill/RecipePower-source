@@ -290,8 +290,8 @@ class SiteServices
   end
 
   @@DefaultFinders = [
-      {:label => "URI", :path => "link[rel='canonical']", :attribute => "href"},
       {:label => "URI", :path => "meta[property='og:url']", :attribute => "content"},
+      {:label => "URI", :path => "link[rel='canonical']", :attribute => "href"},
       {:label => "URI", :path => "div.post a[rel='bookmark']", :attribute => "href"},
       {:label => "URI", :path => ".title a", :attribute => "href"},
       {:label => "URI", :path => "a.permalink", :attribute => "href"},
