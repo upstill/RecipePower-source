@@ -4,6 +4,10 @@ function doFitImage(evt) {
     fitImage(evt.target)
 }
 
+function layoutMasonryOnLoad(event) {
+    $(event.target).closest('div.js-masonry').masonry('layout');
+}
+
 function onImageErrorEvent(event) {
     var image = event.currentTarget;
     return onImageError(image);

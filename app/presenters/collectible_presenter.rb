@@ -88,10 +88,10 @@ class CollectiblePresenter < BasePresenter
             label = field_label_counted 'AS SEEN IN TREASURY', lists_with_status.count
             list_lists_with_status lists_with_status
           when :site
-            h.link_to decorator.sourcename, decorator.sourcehome, class: "tablink" if decorator.respond_to? :sourcehome
+            h.link_to decorator.sourcename, decorator.sourcehome, class: 'tablink' if decorator.respond_to? :sourcehome
           when :found_by
             if collector = decorator.first_collector
-              h.labelled_avatar collector.decorate
+              h.labelled_avatar collector.decorate, onload: 'layoutMasonryOnLoad(event);'
             end
           when :notes
             decorator.notes if decorator.respond_to? :notes

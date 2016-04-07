@@ -67,9 +67,11 @@ module ImagesHelper
 
   def image_from_decorator decorator, options={}
     image_with_error_recovery decorator,
-                              class: decorator.image_class,
-                              fallback_img: options[:fallback_img] || decorator.object.is_a?(User),
-                              fill_mode: 'fixed-width'
+                              {
+                                  class: decorator.image_class,
+                                  fallback_img: decorator.object.is_a?(User),
+                                  fill_mode: 'fixed-width'
+                              }.merge(options)
   end
 
   def labelled_avatar decorator, options={}
