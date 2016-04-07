@@ -108,44 +108,13 @@ class Recipe < ActiveRecord::Base
 
   # Absorb another recipe
   def absorb other, destroy=true
-    # This recipe may be presenting a URL that redirects to the target => include that URL in the table
-    # RecipeReference.find_or_initialize other.url, affiliate: self
-    # Apply thumbnail and comment, if any
-    other.references.each { |other_ref|
-      other_ref.recipe = self
-      other_ref.save
-    }
-    unless other.picurl.blank? || !picurl.blank?
-      self.picurl = other.picurl
-    end
     self.description = other.description if description.blank?
-    unless other.rcprefs.empty?
-      xfers = []
-      other.rcprefs.each { |my_ref|
-        # Redirect each rcpref to the other, merging them when there's already one for a user
-        # comment, private, status, in_collection, edit_count
-        if other_ref = self.rcprefs.where(user_id: my_ref.user_id).first
-          # Transfer reference information
-          other_ref.private ||= my_ref.private
-          other_ref.comment = my_ref.comment if other_ref.comment.blank?
-          other_ref.in_collection ||= my_ref.in_collection
-          other_ref.edit_count += my_ref.edit_count
-          other_ref.save
-        else
-          # Simply redirect the ref, thus moving the owner from the old recipe to the new
-          # (Need to do this after iterating over the recipe's refs)
-          xfers << my_ref.clone
-        end
-      }
-      unless xfers.empty?
-        self.rcprefs = self.rcprefs + xfers
-      end
-    end
     # Move feed_entries from the old recipe to the new
     FeedEntry.where(:recipe_id => other.id).each { |fe|
       fe.recipe = self
       fe.save
     }
+    super other if defined? super
     other.reload
     other.destroy if destroy
     save

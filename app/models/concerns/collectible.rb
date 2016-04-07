@@ -92,7 +92,15 @@ module Collectible
 
   # One collectible is being merged into another, so add the new one to the collectors of the old one
   def absorb other
-    other.toucher_pointers.each { |ref| ref.user.touch self, ref.in_collection }
+    other.toucher_pointers.each { |other_ref|
+      other_ref.user.touch self, other_ref.in_collection # Ensure there's a ref
+      if other_ref.comment.present? &&
+          (myref = toucher_pointers.where(user: other_ref.user).first) &&
+          myref.comment.blank?
+        myref.comment = other_ref.comment
+        myref.save
+      end
+    }
     super if defined? super
   end
 

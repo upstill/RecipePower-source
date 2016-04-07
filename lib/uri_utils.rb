@@ -59,6 +59,7 @@ def safe_parse(url)
       end
     end
   end
+  uri.scheme = 'http' unless uri.scheme.present?
   uri
 end
 

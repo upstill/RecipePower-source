@@ -51,7 +51,7 @@ class Reference < ActiveRecord::Base
   # The 'partial' flag indicates that it's sufficient for the URL to match a substring of the target record
   def self.lookup_by_url type, normalized_url, partial=false
     typescope = Reference.where type: type
-    sans_protocol = normalized_url.sub /^http[^\/]*\/\//, '' # Remove the protocol from consideration
+    sans_protocol = normalized_url.sub /^(http[^\/]*)?\/\//, '' # Remove the protocol from consideration
     if partial
       typescope.where 'url ILIKE ?', '%://' + sans_protocol + '%'
       # Reference.where "type = '#{type}' and url ILIKE ?", normalized_url+"%"
@@ -114,7 +114,7 @@ class Reference < ActiveRecord::Base
     end
     # IMPORTANT! the type of reference is determined from the invoked class if not given specifically
     if url.match(/^data:/)
-      return [ self.create_with(url: url, canonical: true).find_or_create_by( type: "ImageReference", thumbdata: url) ]
+      return [ self.create_with(url: url, canonical: true).find_or_create_by( type: 'ImageReference', thumbdata: url) ]
     end
     params[:type] ||= self.to_s
 
@@ -125,8 +125,7 @@ class Reference < ActiveRecord::Base
       ref.errors.add :url, "can't be blank"
       refs = [ref]
     else
-      refs = self.lookup_by_url(params[:type], normalized).order "canonical DESC"
-      # refs = Reference.where( type: params[:type], :url => normalized).order "canonical DESC"
+      refs = self.lookup_by_url(params[:type], normalized).order 'canonical DESC'
       if refs.empty?
         # Need to create, if possible
         if !(redirected = test_url normalized) # Purports to be a url, but doesn't work
