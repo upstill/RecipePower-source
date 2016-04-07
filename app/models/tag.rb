@@ -112,9 +112,10 @@ class Tag < ActiveRecord::Base
 
   # When a tag is asserted into the database, we do have minimal sanitary standards:
   #  no leading or trailing whitespace
+  #  no commas
   #  all internal whitespace is replaced by a single space character
   def self.tidyName(str)
-    str.strip.gsub(/\s+/, ' ')
+    str.gsub(',', ' ').strip.gsub(/\s+/, ' ')
   end
 
   @@wordmap = {
@@ -335,7 +336,7 @@ class Tag < ActiveRecord::Base
         tags.each { |tag| tag.admit_user uid } if uid && (uid != User.super_id)
       else
         # We are to create a tag on the given string (after cleanup), and make it visible to the given user
-        name = Tag.tidyName name # Strip/collapse whitespace
+        name = Tag.tidyName name # Strip/collapse whitespace and commas
         return [] if name.blank?
         tag = nil
         if type.nil? # No type specified
