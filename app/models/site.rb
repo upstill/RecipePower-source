@@ -106,7 +106,7 @@ public
   end
 
   # Merge another site into this one, optionally destroying the other
-  def absorb other
+  def absorb other, destroy=true
     # Merge corresponding referents
     self.description = other.description if description.blank?
     if other.referent
@@ -122,8 +122,10 @@ public
       other_feed.site = self
       other_feed.save
     }
-    super # Let the taggable, collectible, etc. modules do their work
+    super other if defined? super # Let the taggable, collectible, etc. modules do their work
     other.reload # Refreshes, e.g., feeds list prior to deletion
+    other.destroy if destroy
+    save
   end
 
 
