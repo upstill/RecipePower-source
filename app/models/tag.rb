@@ -115,7 +115,7 @@ class Tag < ActiveRecord::Base
   #  no commas
   #  all internal whitespace is replaced by a single space character
   def self.tidyName(str)
-    str.gsub(',', ' ').strip.gsub(/\s+/, ' ')
+    str.sub(/^[\s,]*/,'').sub(/[,\s]*$/, '').gsub(/\s+/, ' ')
   end
 
   @@wordmap = {
