@@ -89,7 +89,7 @@ class FinderResults
     end
     labelset.each do |label|
       pagetags.results_for(label = label.to_s).each do |result|
-        foundset = "["+result.out.join("\n\t\t ")+"] (from "+url+")"
+        foundset = '['+result.out.join("\n\t\t ")+'] (from '+url+')'
         finder = result.finder
         finder[:count] = finder[:count] + 1
         finder[:foundlings] << foundset
@@ -104,39 +104,39 @@ class FinderResults
       puts "#{finder[:label]}: #{finder[:path]}"
       finder.each { |key, value| puts "\t(#{key}: #{value})" unless [:label, :path, :count, :foundlings].include?(key) }
       # Trim any found title using the 'ttlcut' attribute of the site
-      if finder[:label] == "Title" && @site.ttlcut
+      if finder[:label] == 'Title' && @site.ttlcut
         finder[:foundlings].each_index do |ix|
           ttl, url = finder[:foundlings][ix].match(/^\[([^\]]*)\] \(from (.*)\)$/)[1, 2]
           finder[:foundlings][ix] = "[#{trim_title ttl}] (from #{url})"
         end
       end
       puts "\t["+finder[:foundlings].join("\n\t ")+"\t]"
-      puts "Action? ([dD]=Delete [qQ]=quit [C cutstring])"
+      puts 'Action? ([dD]=Delete [qQ]=quit [C cutstring])'
       answer = gets.strip
       if m = answer.match(/^([Cc])\s*(\S.*$)/)
         answer, cutstring = m[1, 2]
       end
       case answer
-        when "d", "D"
+        when 'd', 'D'
           @finders.delete_if { |f| f == finder }
           done = false
-        when "q", "Q"
+        when 'q', 'Q'
           exit
-        when "c", "C"
-          if finder[:label] == "Title"
+        when 'c', 'C'
+          if finder[:label] == 'Title'
             puts "Really cut titles from this site using '#{cutstring}'?"
             if gets.strip == 'y'
-              puts "...okay..."
+              puts '...okay...'
               @site.ttlcut = cutstring
               done = false
             end
           end
-        when ""
+        when ''
         else
           # Replace the path with input text
           puts "Really replace path '#{finder[:path]}' with '#{answer}'?"
           next unless gets.strip == 'y'
-          puts "...okay..."
+          puts '...okay...'
           finder[:path] = answer
           @finders.each do |tag|
             if tag == finder
@@ -164,15 +164,15 @@ class FinderResults
       foundlist[label][path] << finder
     end
     foundlist.each do |label, labelset|
-      puts label.to_s+":"
+      puts label.to_s+':'
       labelset.each do |path, pathset|
-        puts "\t"+path+":"
+        puts "\t"+path+':'
         pathset.each do |tags|
           tags.each do |name, value|
             next if name == :label || name == :path || name == :foundlings
-            nq = name.class == Symbol ? "\'"+name.to_s+"\'" : "\""+name+"\""
-            vq = value.class == Symbol ? "\'"+value.to_s+"\'" : "\""+value.to_s+"\""
-            puts "\t\t"+nq+": "+vq
+            nq =  name.class == Symbol ? '\'' + name.to_s + '\'' : '"' + name + '"'
+            vq = value.class == Symbol ? '\'' + value.to_s+ '\'' : '"' + value.to_s+'"'
+            puts "\t\t"+nq+': '+vq
           end
           puts "\t\t"+tags[:foundlings].join("\n\t\t") if tags[:foundlings]
           puts "\t\t--------------------------------------"
@@ -203,7 +203,7 @@ class PageTags
       attribute_name = finder[:attribute]
       @result = Result.new finder # For accumulating results
       matches.each do |ou|
-        children = (ou.name == "ul") ? ou.css('li') : [ou]
+        children = (ou.name == 'ul') ? ou.css('li') : [ou]
         children.each do |child|
           # If the content is enclosed in a link, emit the link too
           if attribute_value = attribute_name && child.attributes[attribute_name.to_s].to_s
@@ -214,7 +214,7 @@ class PageTags
             outstr = child.attributes['src'].to_s
             @result.push outstr unless finder[:pattern] && !(outstr =~ /#{finder[:pattern]}/)
             # If there's an enclosed link coextensive with the content, emit the link
-          elsif (atag = child.css("a").first) && (cleanupstr(atag.content) == cleanupstr(child.content))
+          elsif (atag = child.css('a').first) && (cleanupstr(atag.content) == cleanupstr(child.content))
             glean_atag finder, atag
           else # Otherwise, it's just vanilla content
             @result.push child.content
@@ -231,7 +231,7 @@ class PageTags
 
   def glean_atag (finder, atag)
     matchstr = finder[:linkpath]
-    if href = atag.attribute("href")
+    if href = atag.attribute('href')
       uri = href.value
       uri = @site+uri if uri =~ /^\// # Prepend domain/site to path as nec.
       outstr = atag.content
@@ -290,48 +290,49 @@ class SiteServices
   end
 
   @@DefaultFinders = [
-      {:label => "URI", :path => "meta[property='og:url']", :attribute => "content"},
-      {:label => "URI", :path => "link[rel='canonical']", :attribute => "href"},
-      {:label => "URI", :path => "div.post a[rel='bookmark']", :attribute => "href"},
-      {:label => "URI", :path => ".title a", :attribute => "href"},
-      {:label => "URI", :path => "a.permalink", :attribute => "href"},
-      {:label => "Image", :path => "meta[itemprop='image']", :attribute => "content"},
-      {:label => "Image", :path => "meta[property='og:image']", :attribute => "content"},
-      {:label => "Image", :path => "img.recipe_image", :attribute => "src"},
-      {:label => "Image", :path => "img.mainIMG", :attribute => "src"},
-      {:label => "Image", :path => "div.entry-content img", :attribute => "src"},
-      {:label => "Image", :path => "div.post-body img", :attribute => "src"},
-      {:label => "Image", :path => "img[itemprop='image']", :attribute => "src"},
-      {:label => "Image", :path => "link[itemprop='image']", :attribute => "href"},
-      {:label => "Image", :path => "link[rel='image_src']", :attribute => "href"},
-      {:label => "Image", :path => "img[itemprop='photo']", :attribute => "src"},
-      {:label => "Image", :path => ".entry img", :attribute => "src"},
-      {:label => "Title", :path => "meta[name='title']", :attribute => "content"},
-      {:label => "Title", path: "title"},
-      {:label => "Title", :path => "meta[name='fb_title']", :attribute => "content"},
-      {:label => "Title", :path => "meta[property='og:title']", :attribute => "content"},
-      {:label => "Title", :path => "meta[property='dc:title']", :attribute => "content"},
+      {:label => 'URI', :path => 'meta[property=\'og:url\']', :attribute => 'content'},
+      {:label => 'URI', :path => 'link[rel=\'canonical\']', :attribute => 'href'},
+      {:label => 'URI', :path => 'div.post a[rel=\'bookmark\']', :attribute => 'href'},
+      {:label => 'URI', :path => '.title a', :attribute => 'href'},
+      {:label => 'URI', :path => 'a.permalink', :attribute => 'href'},
+      {:label => 'Image', :path => 'meta[itemprop=\'image\']', :attribute => 'content'},
+      {:label => 'Image', :path => 'meta[property=\'og:image\']', :attribute => 'content'},
+      {:label => 'Image', :path => 'img.recipe_image', :attribute => 'src'},
+      {:label => 'Image', :path => 'img.mainIMG', :attribute => 'src'},
+      {:label => 'Image', :path => 'div.entry-content img', :attribute => 'src'},
+      {:label => 'Image', :path => 'div.post-body img', :attribute => 'src'},
+      {:label => 'Image', :path => 'img[itemprop=\'image\']', :attribute => 'src'},
+      {:label => 'Image', :path => 'link[itemprop=\'image\']', :attribute => 'href'},
+      {:label => 'Image', :path => 'link[rel=\'image_src\']', :attribute => 'href'},
+      {:label => 'Image', :path => 'img[itemprop=\'photo\']', :attribute => 'src'},
+      {:label => 'Image', :path => '.entry img', :attribute => 'src'},
+      {:label => 'Title', :path => 'meta[name=\'title\']', :attribute => 'content'},
+      {:label => 'Title', path: 'title'},
+      {:label => 'Title', :path => 'meta[name=\'fb_title\']', :attribute => 'content'},
+      {:label => 'Title', :path => 'meta[property=\'og:title\']', :attribute => 'content'},
+      {:label => 'Title', :path => 'meta[property=\'dc:title\']', :attribute => 'content'},
   ]
 
   @@CandidateFinders = [
-      {:label => "Author Name", path: "meta[name='author']", :attribute => "content"},
-      {:label => "Author Name", path: "meta[itemprop='author']", :attribute => "content"},
-      {:label => "Author Name", path: "meta[name='author.name']", :attribute => "content"},
-      {:label => "Author Name", path: "meta[name='article.author']", :attribute => "content"},
-      {:label => "Author Link", path: "link[rel='author']", :attribute => "href"},
-      {:label => "Description", path: "meta[name='description']", :attribute => "content"},
-      {:label => "Description", path: "meta[property='og:description']", :attribute => "content"},
-      {:label => "Description", path: "meta[property='description']", :attribute => "content"},
-      {:label => "Description", path: "meta[itemprop='description']", :attribute => "content"},
-      {:label => "Tags", path: "meta[name='keywords']", :attribute => "content"},
-      {:label => "Site Name", path: "meta[property='og:site_name']", :attribute => "content"},
-      {:label => "Site Name", path: "meta[name='application_name']", :attribute => "content"},
+      {:label => 'Author Name', path: 'meta[name=\'author\']', :attribute => 'content'},
+      {:label => 'Author Name', path: 'meta[itemprop=\'author\']', :attribute => 'content'},
+      {:label => 'Author Name', path: 'meta[name=\'author.name\']', :attribute => 'content'},
+      {:label => 'Author Name', path: 'meta[name=\'article.author\']', :attribute => 'content'},
+      {:label => 'Author Link', path: 'link[rel=\'author\']', :attribute => 'href'},
+      {:label => 'Description', path: 'meta[name=\'description\']', :attribute => 'content'},
+      {:label => 'Description', path: 'meta[property=\'og:description\']', :attribute => 'content'},
+      {:label => 'Description', path: 'meta[property=\'description\']', :attribute => 'content'},
+      {:label => 'Description', path: 'meta[itemprop=\'description\']', :attribute => 'content'},
+      {:label => 'Tags', path: 'meta[name=\'keywords\']', :attribute => 'content'},
+      {:label => 'Site Name', path: 'meta[property=\'og:site_name\']', :attribute => 'content'},
+      {:label => 'Site Name', path: 'meta[name=\'application_name\']', :attribute => 'content'},
+      {:label => 'RSS Feed', path: 'link[type=\'application/rss+xml\']', :attribute => 'href'}
   ]
 
-#   @@DataChoices = [ "URI", "Image", "Title", "Description", "Author Name", "Author Link", "Site Name", "Keywords", "Tags" ]
+#   @@DataChoices = [ 'URI', 'Image', 'Title', 'Description', 'Author Name', 'Author Link', 'Site Name', 'Keywords', 'Tags' ]
 
   def self.data_choices
-    @@DataChoices ||= ((@@DefaultFinders+@@CandidateFinders).collect { |f| f[:label] } << "Site Logo").uniq
+    @@DataChoices ||= ((@@DefaultFinders+@@CandidateFinders).collect { |f| f[:label] } << 'Site Logo').uniq
   end
 
   def self.attribute_choices
@@ -349,7 +350,7 @@ class SiteServices
   def site_finders
     @site_finders ||=
         @site.finders.collect { |f| {:label => f.finds, :path => f.selector, :attribute => f.read_attrib, :id => f.id} }
-    # result << {:label=>"Image", :path=>"p.bodytext img", :attribute=>"src"},
+    # result << {:label=>'Image', :path=>'p.bodytext img', :attribute=>'src'},
   end
 
   # Make sure the given uri isn't relative, and make it absolute if it is
@@ -375,7 +376,7 @@ class SiteServices
     end
   end
 
-  def get_input(prompt="? ")
+  def get_input(prompt='? ')
     print prompt
     gets.strip
   end
@@ -384,16 +385,16 @@ class SiteServices
     fr = FinderResults.new @site, site_finders
     fr.collect_results url || @site.sample
     self.site_finders = fr.revise_interactively
-    case get_input("Any finder to add ([yY]: yes, [qQ]: quit without saving)? ")
-      when "y", "Y"
+    case get_input('Any finder to add ([yY]: yes, [qQ]: quit without saving)? ')
+      when 'y', 'Y'
         finder = {}
-        finder[:label] = get_input("Label: ")
-        finder[:path] = get_input("Path: ")
-        unless (attrib = get_input("Attribute: ")).blank?
+        finder[:label] = get_input('Label: ')
+        finder[:path] = get_input('Path: ')
+        unless (attrib = get_input('Attribute: ')).blank?
           finder[:attribute] = attrib
         end
         ss.add_finder finder
-      when "q", "Q"
+      when 'q', 'Q'
         return
       else
         @site.save
@@ -403,7 +404,7 @@ class SiteServices
   def add_finder (finder={})
     finder.each do |k, v|
       unless [:label, :path, :attribute].include?(k)
-        puts k.to_s+" is not a valid field"
+        puts k.to_s+' is not a valid field'
         return
       end
       finder[k] = v.to_s
@@ -468,16 +469,16 @@ class SiteServices
     moved_out = []
     unmapped = []
     Site.all.each do |site|
-      puts "---------------"
+      puts '---------------'
       sought = sought+1
 
       # Probe the site's sample URL for validity or relocation
       test_url = site.sample
-      puts "Cracking "+test_url
+      puts 'Cracking '+test_url
       if !(testback = test_link(test_url))
         bogus_in << test_url
       elsif testback.class == String
-        moved_in << test_url+" => "+testback
+        moved_in << test_url+' => '+testback
         test_url = testback
       end
 
@@ -494,17 +495,17 @@ class SiteServices
         if !(testback = test_link(recipe_url))
           bogus_out << recipe_url
         elsif testback.class == String
-          moved_out << recipe_url+" => "+testback
+          moved_out << recipe_url+' => '+testback
           recipe_url = testback
         end
       end
 
       # Check that the (possibly redirected) derived URL has a recipe on file
       if Recipe.where(:url => recipe_url)[0]
-        puts "URI matches recipe: "+recipe_url
+        puts 'URI matches recipe: '+recipe_url
         matched = matched + 1
       elsif (test_url != recipe_url) && Recipe.where(:url => test_url)[0]
-        puts "Unredirected URI matches recipe: "+test_url
+        puts 'Unredirected URI matches recipe: '+test_url
         matched = matched + 1
       end
 
@@ -534,31 +535,31 @@ class SiteServices
     fr = FinderResults.new Site.first, @@DefaultFinders.clone, only
     Site.all[100..110].each do |site|
       ss = self.new site
-      puts "------------------------------------------------------------------------"
-      puts "home: "+site.home
-      puts "sample: "+site.sample
+      puts '------------------------------------------------------------------------'
+      puts 'home: '+site.home
+      puts 'sample: '+site.sample
       if pagetags = fr.collect_results(site.sample, [:URI, :Title, :Image], true, site)
-        puts ">>>>>>>>>>>>>>> Results >>>>>>>>>>>>>>>>>>"
+        puts '>>>>>>>>>>>>>>> Results >>>>>>>>>>>>>>>>>>'
         [:URI, :Title, :Image].each do |label|
           label = label.to_s
-          result = (pagetags.result_for(label) || "** Nothing Found **")
-          found_or_not = ""
-          if label=="URI" && result!=site.sample
-            found_or_not = "(NO MATCH!)"
+          result = (pagetags.result_for(label) || '** Nothing Found **')
+          found_or_not = ''
+          if label=='URI' && result!=site.sample
+            found_or_not = '(NO MATCH!)'
           end
-          puts label+found_or_not+": "+result
+          puts label+found_or_not+': '+result
         end
       else
-        puts "...No Results because couldn't open pagetags to crack the page"
+        puts '...No Results because couldn\t open pagetags to crack the page'
       end
     end
     # allfinders.sort { |t1,t2| t2[:count] <=> t1[:count] }.each { |tag| puts tag.to_s }
-    puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Report !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! "
+    puts '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Report !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! '
     fr.report
     nil
   end
 
-  def self.extract_from_page(url, spec={})
+  def self.extract_from_page url, spec={}
     extractions = {}
     if !url.blank? && (site = Site.find_or_create url) && (ss = SiteServices.new(site))
       extractions = ss.extract_from_page url, spec
@@ -574,8 +575,8 @@ class SiteServices
       charset=UTF-8
       rel=stylesheet
     }
-    f = File.open("stab.txt", "w")
-    summ = {"link" => {}, "meta" => {}}
+    f = File.open('stab.txt', 'w')
+    summ = {'link' => {}, 'meta' => {}}
     nsites = 0
     Site.all.each { |site|
       next if site.recipes.count < 1
@@ -584,13 +585,13 @@ class SiteServices
       limit = limit - 1
       break if limit == 0
     }
-    f = File.open("stabsumm.txt", "w")
+    f = File.open('stabsumm.txt', 'w')
     summ.each { |k, v|
-      f.puts k+":"
+      f.puts k+':'
       v.each { |ik, iv|
         f.puts "\t#{ik}(#{iv.count}/#{nsites}):"
         iv.each { |iiv|
-          f.puts "\t\t"+iiv
+          f.puts '\t\t'+iiv
         }
       }
     }
@@ -618,10 +619,10 @@ class SiteServices
       tag = candidate.name
       map = summ[tag]
       attribs.each { |attrib|
-        next if attrib == "href" || attrib == "content"
+        next if attrib == 'href' || attrib == 'content'
         key_name_value = "#{attrib}=#{candidate.attributes[attrib].value}"
         remainder = (attribs - [attrib]).collect { |attrib| attrib+'='+candidate.attributes[attrib].value }
-        (map[key_name_value] ||= []) << remainder.join("\t")
+        (map[key_name_value] ||= []) << remainder.join('\t')
       }
     end
   end
@@ -647,12 +648,12 @@ class SiteServices
       if foundstr = pagetags.result_for(label)
         # Assuming the tag was fulfilled, there may be post-processing to do
         case label
-          when "Title"
+          when 'Title'
             # A title may produce both a title and a URL, conventionally separated by a tab
             titledata = foundstr.split('\t')
             results[:URI] = titledata[1] if titledata[1]
             foundstr = trim_title titledata.first
-          when "Image", "URI"
+          when 'Image', 'URI'
             # Make picture path absolute if it's not already
             foundstr = resolve foundstr
         end
@@ -704,7 +705,7 @@ class SiteServices
         pagetags.results_for(finder[:id]).each do |result|
           # pagetags.results_for(label).each do |result|
           # finder = result.finder
-          puts "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+          puts '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'
           puts "URL: #{url}"
           label = finder[:label]
           finder.each { |key, value| puts "\t(#{key}: #{value})" unless [:label, :count, :foundlings].include?(key) }
@@ -712,7 +713,7 @@ class SiteServices
           if (foundstr = result.out.shift)
             unless column = correct_result && (foundstr == correct_result) && :yes_votes
               puts "#{label}: #{foundstr}"
-              site_option = ["Description", "Site Name", "Title", "Image", "Author Name", "Author Link", "Tags"].include?(label) ? " S(ave value to Site) " : ""
+              site_option = ['Description', 'Site Name', 'Title', 'Image', 'Author Name', 'Author Link', 'Tags'].include?(label) ? '" S(ave value to Site) ' : ''
               puts "Good? [y](es) n(o) #{site_option} Q(uit)"
               answer = gets.strip
               case answer[0]
@@ -741,13 +742,13 @@ class SiteServices
                     end
                   end
                   # Saved the title finder: take a crack at the editing RegExp
-                  if label == "Title"
+                  if label == 'Title'
                     done = false
                     until done
                       trimmed = trim_title foundstr
                       puts "Title In: #{foundstr}"
                       puts "Title Out: #{trimmed}"
-                      puts "Good? (sS to save, qQ to quit, otherwise type new regexp for title) "
+                      puts 'Good? (sS to save, qQ to quit, otherwise type new regexp for title) '
                       answer = gets.strip
                       case answer
                         when 's', 'S'
@@ -765,24 +766,24 @@ class SiteServices
                   rest_of_line = answer[1..-1].strip
                   field_val = rest_of_line.blank? ? foundstr : rest_of_line
                   case label
-                    when "Image"
+                    when 'Image'
                       @site.logo = field_val
                       @site.save
-                    when "Description"
+                    when 'Description'
                       @site.description = field_val
                       @site.save
-                    when "Site Name", "Title"
+                    when 'Site Name', 'Title'
                       @site.name = field_val
                       @site.save
-                    when "Author Name"
-                      TaggingServices.new(@site).tag_with field_val, User.super_id, type: "Author"
+                    when 'Author Name'
+                      TaggingServices.new(@site).tag_with field_val, User.super_id, type: 'Author'
                       @site.save
-                    when "Author Link"
+                    when 'Author Link'
                       # Add a reference to the author, if any
-                      @site.tags(User.super_id, tagtype: "Author").each { |author|
-                        Reference.assert field_val, author, "Home Page"
+                      @site.tags(User.super_id, tagtype: 'Author').each { |author|
+                        Reference.assert field_val, author, 'Home Page'
                       }
-                    when "Tags"
+                    when 'Tags'
                       ts = TaggingServices.new @site
                       field_val.split(',').collect { |tagname|
                         tagname = tagname.split(':').last.strip
@@ -828,9 +829,9 @@ class SiteServices
           okay_to_quit = true
           if site.ttlcut && site.ttlcut.match(site.name)
             puts "\tttlcut: #{site.ttlcut}"
-            puts "...assuming name is okay"
+            puts '...assuming name is okay'
           else
-            puts "Name? (blank to keep as is)"
+            puts 'Name? (blank to keep as is)'
             newname = gets.strip
             case newname
               when 'Q'
@@ -866,7 +867,7 @@ class SiteServices
     uri = URI(site.home)
     if match = uri.host.match( /\b\w*\.\w*$/)
       Site.joins(:reference).
-          where("type = 'SiteReference' and url ILIKE ?", "%#{match[0]}%").
+          where('type = \'SiteReference\' and url ILIKE ?', "%#{match[0]}%").
           uniq.
           keep_if { |other| other.id != site.id }
     else
