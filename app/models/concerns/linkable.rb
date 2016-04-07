@@ -184,7 +184,8 @@ module Linkable
     # Steal references
     if other.respond_to? :references
       other.references.each { |other_ref|
-        other_ref.site = self
+        logger.debug "Pointing #{other_ref.class.to_s}##{other_ref.id} to me (#{self.class.to_s}##{self.id})"
+        other_ref.affiliate_id = id
         other_ref.canonical = false
         other_ref.save
       }

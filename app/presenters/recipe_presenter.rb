@@ -9,6 +9,7 @@ class RecipePresenter < CollectiblePresenter
     @vidlink ||=
     if decorator.url.present? &&
         (url = URI(decorator.url)) &&
+        url.host &&
         url.host.match(/\.youtube.com/) &&
         (vidlink = YouTubeAddy.extract_video_id(decorator.url))
 
