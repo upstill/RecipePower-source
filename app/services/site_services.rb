@@ -1,21 +1,6 @@
 require 'yaml'
 require 'reference.rb'
 
-=begin
-class String
-  def remove_non_ascii
-    require 'iconv'
-    # XXX Should be mapping single quotes into ASCII equivalent
-    Iconv.conv('ASCII//IGNORE', 'UTF8', self)
-  end
-
-  def cleanup
-    # self.strip.force_encoding('ASCII-8BIT').gsub(/[\xa0\s]+/, ' ').remove_non_ascii.encode('UTF-8').gsub(/ ,/, ',') unless self.nil?
-    self.strip.force_encoding('ASCII-8BIT').remove_non_ascii.encode('UTF-8').gsub(/ ,/, ',') unless self.nil?
-  end
-end
-=end
-
 class Result
 
   attr_accessor :finder, :out

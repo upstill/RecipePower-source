@@ -5,7 +5,7 @@ class SitesController < CollectibleController
   # GET /sites.json
   def index
     # seeker_result Site, "div.site_list" # , clear_tags: true
-    response_service.title = "Sites"
+    response_service.title = 'Sites'
     smartrender 
   end
 
@@ -18,7 +18,7 @@ class SitesController < CollectibleController
 
   def edit
     update_and_decorate
-    response_service.title = "Edit Site"
+    response_service.title = 'Edit Site'
     smartrender
   end
 
@@ -27,7 +27,7 @@ class SitesController < CollectibleController
   def new
     # return if need_login true, true
     update_and_decorate
-    response_service.title = "New Site"
+    response_service.title = 'New Site'
     render :edit
   end
 
@@ -45,7 +45,7 @@ class SitesController < CollectibleController
         format.html { redirect_to @site, notice: 'Site was successfully created.' }
         format.json { render json: @site, status: :created, location: @site }
       else
-        format.html { render action: "new" }
+        format.html { render action: 'new' }
         format.json { render json: @site.errors, status: :unprocessable_entity }
       end
     end
@@ -66,7 +66,7 @@ class SitesController < CollectibleController
       if @site
         resource_errors_to_flash @site
       else
-        flash[:alert] = "Couldn't fetch site"
+        flash[:alert] = 'Couldn\'t fetch site'
       end
       render :edit, status: :unprocessable_entity
     end

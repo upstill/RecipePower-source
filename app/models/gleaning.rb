@@ -21,4 +21,19 @@ class Gleaning < ActiveRecord::Base
       return {}
     end
   end
+
+  def options_for label
+    results[label] ? results[label].map(&:out).flatten.uniq : []
+  end
+
+  def value_found_in label, val
+    results.collect { |result| self if result.out.include? val }
+  end
+
+  def method_missing namesym, *args
+    case namesym
+      when :Description, :description
+        entity.description
+    end
+  end
 end

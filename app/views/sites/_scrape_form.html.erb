@@ -2,8 +2,25 @@
     <%= modal_body do %>
         <div class="row">
           <div class="col-md-12">
-            <%= f.input :name %>
-            <%= f.input :description %>
+            <%= f.label 'Name' %>
+            <!--Construct a list of possible answers-->
+            <%= f.fields_for :gleaning do |g| %>
+                <%= g.input 'Title',
+                               collection: @site.gleaning.options_for('Title'),
+                               prompt: 'Suggested Names',
+                               html_options: { class: 'select-string' },
+                               data: { target: 'input#site_name' }
+                %>
+            <% end %>
+          <%= f.input :name, :label => false %>
+            <%= f.label 'Description' %>
+            <%= select_tag 'site[gleaning_attributes][Description]',
+                           options_for_select(@site.gleaning.options_for('Description')),
+                           prompt: 'Gleaned Descriptions',
+                           class: 'select-string',
+                           data: { target: 'textarea#site_description' }
+            %>
+            <%= f.input :description, :label => false %>
           </div>
         </div>
         <% if response_service.admin_view? && permitted_to?(:admin, :pages) %>
@@ -25,19 +42,7 @@
                 Sample Title (raw): <strong><%= crack_sample @site %></strong><br>
               </div>
             </div>
-            <div class="row">
-              <div class="col-md-12">
-                <%= f.input :ttlcut, label: "RegExp to cut out of title" %>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-12">
-                Sample Title (editted): <strong><%= trimmed_sample %></strong><br>
-              </div>
-            </div>
         <% end %>
-        <%= render("finders", f: f) if permitted_to? :edit, :finders %>
-
     <% end %>
     <%= modal_footer do %>
         <%# if ref = @site.referent %>
