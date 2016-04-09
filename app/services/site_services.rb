@@ -185,6 +185,8 @@ end
 # PageTags accumulates the tags for a page
 class PageTags
 
+  attr_accessor :results
+
   private
 
   def initialize (url, site, do_all=nil, verbose = true)
@@ -420,7 +422,7 @@ class SiteServices
   def all_finders
     # Give the DefaultFinders and CandidateFinders a unique id from the database
     (@@DefaultFinders + @@CandidateFinders).each { |df|
-      df[:id] ||= Finder.where(finds: df[:label], selector: df[:path], read_attrib: df[:attribute]).first_or_create.id
+      df[:id] ||= Finder.where(site_id: nil, finds: df[:label], selector: df[:path], read_attrib: df[:attribute]).first_or_create.id
     } unless @@DefaultFinders.first[:id]
     site_finders + @@DefaultFinders + @@CandidateFinders
   end
@@ -626,6 +628,11 @@ class SiteServices
         (map[key_name_value] ||= []) << remainder.join('\t')
       }
     end
+  end
+
+  # Return the raw mapping from finders to arrays of hits
+  def gleaning_results url
+    PageTags.new(url, site, true, true).results
   end
 
   # Examine a page and return a hash mapping labels into found fields

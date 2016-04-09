@@ -3,7 +3,7 @@ class CreateGleanings < ActiveRecord::Migration
     create_table :gleanings do |t|
       t.string :entity_type
       t.integer :entity_id
-      t.text :page_tags
+      t.text :results
 
       t.timestamps null: false
     end

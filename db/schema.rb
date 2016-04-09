@@ -129,7 +129,7 @@ ActiveRecord::Schema.define(version: 20160408020735) do
   create_table "gleanings", force: :cascade do |t|
     t.string   "entity_type"
     t.integer  "entity_id"
-    t.text     "page_tags"
+    t.text     "results"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
   end
