@@ -79,10 +79,10 @@ class FinderResults
 
   def collect_results(url, labelset=nil, verbose=true, site=nil)
     @site = site if site
-    labelset ||= @finders.collect { |finder| finder[:label].to_s }.uniq
+    labelset ||= @site.finders.collect { |finder| finder[:label].to_s }.uniq
     begin
       # Collect all results from the page
-      pagetags = PageTags.new(url, @site, @finders, true, verbose)
+      pagetags = PageTags.new url, @site, true, verbose
     rescue
       puts "Error: couldn't open page '#{url}' for analysis."
       return nil
@@ -187,9 +187,9 @@ class PageTags
 
   private
 
-  def initialize (url, site, finders, do_all=nil, verbose = true)
+  def initialize (url, site, do_all=nil, verbose = true)
     @nkdoc = Nokogiri::HTML(open normalize_url(url))
-    @finderset = finders
+    @finderset = SiteServices.new(site).all_finders
     @results = {}
     SiteServices.data_choices().each { |label| @results[label] = [] }
     @site = site
@@ -197,7 +197,8 @@ class PageTags
     # Initialize the results
     @finderset.each do |finder|
       label = finder[:label]
-      next unless (do_all || @results[label].empty?) && (selector = finder[:path]) &&
+      next unless (do_all || @results[label].empty?) &&
+          (selector = finder[:path]) &&
           (matches = @nkdoc.css(selector)) &&
           (matches.count > 0)
       attribute_name = finder[:attribute]
@@ -222,7 +223,7 @@ class PageTags
         end
       end
       if @result.found
-        @result.report if @verboase
+        @result.report if @verbose
         @results[label] << @result
         @results[finder[:id]] = [@result]
       end
@@ -417,19 +418,19 @@ class SiteServices
 
   # Return the set of finders that apply to the site (those assigned to the site, then global ones)
   def all_finders
-    # Give the DefaultFinders a unique id
-    @@DefaultFinders.each { |df|
-      df[:id] = Finder.where(finds: df[:label], selector: df[:path], read_attrib: df[:attribute]).first_or_create.id
+    # Give the DefaultFinders and CandidateFinders a unique id from the database
+    (@@DefaultFinders + @@CandidateFinders).each { |df|
+      df[:id] ||= Finder.where(finds: df[:label], selector: df[:path], read_attrib: df[:attribute]).first_or_create.id
     } unless @@DefaultFinders.first[:id]
-    site_finders + @@DefaultFinders
+    site_finders + @@DefaultFinders + @@CandidateFinders
   end
 
   def scrape
-    extractions = extract_from_page(@site.sample)
-    puts "Site # #{@site.id.to_s}"
+    extractions = extract_from_page(@site.home)
+    puts "Site # #{@site.id}"
     puts "\tname: #{@site.name}"
     puts "\thome: (#{@site.home})"
-    puts "\tsubsite: (#{@site.subsite})"
+    puts "\tdescription: (#{@site.description})"
     puts "\tlogo: (#{@site.logo})"
     extractions.each { |k, v| puts "\t\t#{k.to_s}: #{v}" }
   end
@@ -483,7 +484,7 @@ class SiteServices
       end
 
       ss = SiteServices.new site
-      if ((results = ss.extract_from_page(test_url, :label => :URI, :finders => @@DefaultFinders)) && (recipe_url = results[:URI]))
+      if ((results = ss.extract_from_page test_url, :label => :URI ) && (recipe_url = results[:URI]))
         found = found + 1
       else
         suspect << test_url
@@ -559,10 +560,10 @@ class SiteServices
     nil
   end
 
-  def self.extract_from_page url, spec={}
+  def self.extract_from_page url
     extractions = {}
     if !url.blank? && (site = Site.find_or_create url) && (ss = SiteServices.new(site))
-      extractions = ss.extract_from_page url, spec
+      extractions = ss.extract_from_page url
     end
     extractions
   end
@@ -629,22 +630,15 @@ class SiteServices
 
   # Examine a page and return a hash mapping labels into found fields
   def extract_from_page(url, spec={})
-    finders = spec[:finders] || all_finders
-    if label = spec[:label] # Can specify either a single label or a set
-      labels = ((label.class == Array) ? label : [label]).collect { |l| l.to_s }
-      finders = finders.keep_if { |t| labels.include? t[:label] }
-    else
-      labels = SiteServices.data_choices
-    end
     begin
-      pagetags = PageTags.new(url, @site, finders, spec[:all], false)
+      pagetags = PageTags.new(url, @site, spec[:all], false)
     rescue Exception => e
       puts "Error: couldn't open page '#{url}' for analysis."
       return {}
     end
     results = {}
     # We've cracked the page for all tags. Now report them into the result
-    labels.each do |label|
+    SiteServices.data_choices.each do |label|
       if foundstr = pagetags.result_for(label)
         # Assuming the tag was fulfilled, there may be post-processing to do
         case label
@@ -697,11 +691,10 @@ class SiteServices
   # results (either extractors or hard values) to the site
   def poll_extractions url=nil
     url ||= site.sample
-    finders = all_finders
     begin
-      pagetags = PageTags.new(url, @site, finders, true, false)
+      pagetags = PageTags.new(url, @site, true, false)
       correct_result = nil
-      finders.each do |finder|
+      @site.finders.each do |finder|
         pagetags.results_for(finder[:id]).each do |result|
           # pagetags.results_for(label).each do |result|
           # finder = result.finder

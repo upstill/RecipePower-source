@@ -5,6 +5,10 @@
 
 RP::Application.routes.draw do
 
+  get 'gleanings/new'
+
+  get 'gleanings/create'
+
   concern :picable do
     member do
       get 'editpic' # Open dialog to acquire an image from various sources
@@ -128,7 +132,7 @@ RP::Application.routes.draw do
   post '/site' => 'sites#create', :as => 'create_site'
   resources :sites, except: [:index, :create], :concerns => [:picable, :collectible, :taggable] do
     member do
-      post 'scrape'
+      get 'scrape'
       post 'absorb'
       get 'feeds'
     end

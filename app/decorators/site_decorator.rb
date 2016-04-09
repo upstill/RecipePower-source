@@ -11,12 +11,16 @@ class SiteDecorator < CollectibleDecorator
     object.home
   end
 
+  def site
+    object
+  end
+
   def external_link
     object.home
   end
 
   def sourcename
-    ""
+    ''
   end
 
   def sourcehome

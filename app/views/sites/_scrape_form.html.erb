@@ -1,7 +1,48 @@
-<%= form_tag({controller: "sites", action: "scrape"}) do %>
-    <%= label_tag "URL of page to scrape" %><br/>
-    <%= text_field_tag :url, @url, style: "width: 100%" %>
-    <div class="actions">
-      <br><%= submit_tag 'Scrape' %>
-    </div>
+<%= simple_form_for(@site) do |f| %>
+    <%= modal_body do %>
+        <div class="row">
+          <div class="col-md-12">
+            <%= f.input :name %>
+            <%= f.input :description %>
+          </div>
+        </div>
+        <% if response_service.admin_view? && permitted_to?(:admin, :pages) %>
+            <div class="row">
+              <div class="col-md-12">
+                <%# f.input :site %>
+                <%= f.input :home %>
+                <%# if params[:action] != "edit" %>
+                <%# end %>
+                <%# f.input :subsite %>
+                <%= f.input :sample %>
+                <%# f.input :logo %>
+                <%= f.hidden_field :tagging_user_id %>
+                <%= token_input_field f, :taggings %>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                Sample Title (raw): <strong><%= crack_sample @site %></strong><br>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <%= f.input :ttlcut, label: "RegExp to cut out of title" %>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                Sample Title (editted): <strong><%= trimmed_sample %></strong><br>
+              </div>
+            </div>
+        <% end %>
+        <%= render("finders", f: f) if permitted_to? :edit, :finders %>
+
+    <% end %>
+    <%= modal_footer do %>
+        <%# if ref = @site.referent %>
+        <%# link_to_submit ref.class.to_s+" "+ref.name, edit_referent_path(ref), mode: :modal %>
+        <%# end %>
+        <%= form_actions f %>
+    <% end %>
 <% end %>

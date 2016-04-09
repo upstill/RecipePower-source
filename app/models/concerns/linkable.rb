@@ -64,6 +64,12 @@ module Linkable
         attr_accessible reference_association_pl
       end
 
+      # A gleaning is the result of cracking a page. The gleaning for a linkable is used mainly to
+      # peg successful hits on finders. (Sites have an associated set of finders, on which they
+      # remember successful hits)
+      has_one :gleaning, :as => :entity
+      accepts_nested_attributes_for :gleaning
+
       self.class_eval do
         unless options[:as]
           # For the one attribute used to index the entity, provide access to its name for use in class and instance methods
@@ -74,6 +80,10 @@ module Linkable
       end
 
       self.instance_eval do
+
+        define_method 'glean' do
+          gleaning || create_gleaning
+        end
 
         # Whenever a reference is added, we ensure that it gets to the same site
         define_method "#{reference_association_pl}_ensure_site" do |reference|

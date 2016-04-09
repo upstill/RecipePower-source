@@ -3,7 +3,7 @@ require './lib/uri_utils.rb'
 
 class Site < ActiveRecord::Base
   include Collectible
-  picable :logo, :thumbnail, "MissingLogo.png"
+  picable :logo, :thumbnail, 'MissingLogo.png'
   linkable :home, :reference
 
   # site: root of the domain (i.e., protocol + domain); suitable for pattern-matching on a reference URL to glean a set of matching Sites
@@ -15,7 +15,7 @@ class Site < ActiveRecord::Base
   # Also, in most cases, site==home (when the domain is home, i.e. subsite is empty); in others, (site+subsite)==home,
   #     and only rarely will home be different from either of those
   attr_accessible :finders_attributes, :sample, :oldname, :ttlcut, :finders, :reviewed, :approved_feeds_count, :feeds_count,
-                  :description, :reference, :references, :name
+                  :description, :reference, :references, :name, :gleaning
 
   belongs_to :referent # See before_destroy method, :dependent=>:destroy
 
@@ -158,4 +158,5 @@ public
     # The recipes for a site are all those that match the site's references
     RecipeReference.lookup_recipes references.map(&:url), true
   end
+
 end
