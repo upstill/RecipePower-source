@@ -4,21 +4,19 @@
           <div class="col-md-12">
             <%= f.label 'Name' %>
             <!--Construct a list of possible answers-->
-            <%= f.fields_for :gleaning do |g| %>
-                <%= g.input 'Title',
-                               collection: @site.gleaning.options_for('Title'),
-                               prompt: 'Suggested Names',
-                               html_options: { class: 'select-string' },
-                               data: { target: 'input#site_name' }
-                %>
-            <% end %>
-          <%= f.input :name, :label => false %>
+            <%= select_tag 'site[gleaning_attributes][Title]',
+                           options_for_select(@site.gleaning.options_for('Title')),
+                           prompt: 'Gleaned Titles',
+                           class: 'select-string',
+                           data: {target: 'input#site_title'}
+            %>
+            <%= f.input :name, :label => false %>
             <%= f.label 'Description' %>
             <%= select_tag 'site[gleaning_attributes][Description]',
                            options_for_select(@site.gleaning.options_for('Description')),
                            prompt: 'Gleaned Descriptions',
                            class: 'select-string',
-                           data: { target: 'textarea#site_description' }
+                           data: {target: 'textarea#site_description'}
             %>
             <%= f.input :description, :label => false %>
           </div>
@@ -49,5 +47,34 @@
         <%# link_to_submit ref.class.to_s+" "+ref.name, edit_referent_path(ref), mode: :modal %>
         <%# end %>
         <%= form_actions f %>
+        <hr>
     <% end %>
 <% end %>
+<% finder = Finder.new(site: @site, read_attrib: 'href', finds: 'Title') %>
+<%= simple_form_for finder,
+                    url: finders_create_path(finder,
+                                             entity_type: @site.class.to_s,
+                                             entity_id: @site.id,
+                                             :format => :JSON,
+                                             :mode => :partial),
+                    :method => :post do |g| %>
+    <%= g.hidden_field :site_id, value: finder.site_id %>
+    <h3>Creating a new finder</h3>
+    <div class="row">
+      <div class="col-md-12">
+        <%= g.input :label,
+                    collection: SiteServices.new(@site).all_finders.collect { |h| h[:label] }.uniq << 'locale',
+                    label: 'To find ',
+                    prompt: nil,
+                    inline_label: true %>
+        <%= g.input :selector, required: true, label: '...use CSS selector: ' %>
+        <%= g.input :attribute_name,
+                    collection: %w{href content src},
+                    inline_label: true,
+                    prompt: nil,
+                    label: '...then read attribute: ' %>
+        <%= g.submit %>
+      </div>
+    </div>
+<% end %>
+

@@ -43,6 +43,13 @@ div.dialog {
     background: -webkit-gradient(linear, left top, left bottom, from(#880000), to(#6c0000));
     background: -moz-linear-gradient(top, #880000, #6c0000);
   }
+  form.simple_form {
+    select.select {
+      margin-left: 7px;
+      margin-top: 4px;
+      vertical-align: top;
+    }
+  }
 }
 
 .hdrdiv {

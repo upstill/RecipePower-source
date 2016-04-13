@@ -3,10 +3,10 @@ require 'reference.rb'
 
 class Result
 
-  attr_accessor :finder, :out
+  attr_accessor :finderdata, :out
 
   def initialize(f)
-    @finder = f
+    @finderdata = f.attributes_hash
     @out = []
   end
 
@@ -34,17 +34,18 @@ class Result
   end
 
   def report
-    puts "...results due to #{@finder}:"
+    puts "...results due to #{@finderdata}:"
     puts "\t"+out.join("\n\t")
   end
 
   def is_for(label)
-    @finder[:label] == label
+    @finderdata[:label] == label
   end
 
 end
 
 # Accumulates the results of a finder set
+=begin
 class FinderResults
 
   def initialize(site, finders, only=nil)
@@ -67,7 +68,7 @@ class FinderResults
     labelset ||= @site.finders.collect { |finder| finder[:label].to_s }.uniq
     begin
       # Collect all results from the page
-      pagetags = PageTags.new url, @site, true, verbose
+      pagetags = PageTags.new url, SiteServices.new(@site).all_finders, true, verbose
     rescue
       puts "Error: couldn't open page '#{url}' for analysis."
       return nil
@@ -86,8 +87,8 @@ class FinderResults
   # Interact via the terminal on the fate of the finders
   def revise_interactively
     @finders.each do |finder|
-      puts "#{finder[:label]}: #{finder[:path]}"
-      finder.each { |key, value| puts "\t(#{key}: #{value})" unless [:label, :path, :count, :foundlings].include?(key) }
+      puts "#{finder[:label]}: #{finder[:selector]}"
+      finder.each { |key, value| puts "\t(#{key}: #{value})" unless [:label, :selector, :count, :foundlings].include?(key) }
       # Trim any found title using the 'ttlcut' attribute of the site
       if finder[:label] == 'Title' && @site.ttlcut
         finder[:foundlings].each_index do |ix|
@@ -119,13 +120,13 @@ class FinderResults
         when ''
         else
           # Replace the path with input text
-          puts "Really replace path '#{finder[:path]}' with '#{answer}'?"
+          puts "Really replace path '#{finder[:selector]}' with '#{answer}'?"
           next unless gets.strip == 'y'
           puts '...okay...'
-          finder[:path] = answer
+          finder[:selector] = answer
           @finders.each do |tag|
             if tag == finder
-              tag[:path] = answer
+              tag[:selector] = answer
             end
           end
           done = false
@@ -142,7 +143,7 @@ class FinderResults
     # finderset = self.collect_tags(which)+@@TitleTags
     foundlist = {}
     @finders.each do |finder|
-      path = finder[:path]
+      path = finder[:selector]
       label = finder[:label]
       foundlist[label] ||= {}
       foundlist[label][path] ||= []
@@ -154,7 +155,7 @@ class FinderResults
         puts "\t"+path+':'
         pathset.each do |tags|
           tags.each do |name, value|
-            next if name == :label || name == :path || name == :foundlings
+            next if name == :label || name == :selector || name == :foundlings
             nq =  name.class == Symbol ? '\'' + name.to_s + '\'' : '"' + name + '"'
             vq = value.class == Symbol ? '\'' + value.to_s+ '\'' : '"' + value.to_s+'"'
             puts "\t\t"+nq+': '+vq
@@ -166,6 +167,7 @@ class FinderResults
     end
   end
 end
+=end
 
 # PageTags accumulates the tags for a page
 class PageTags
@@ -174,21 +176,19 @@ class PageTags
 
   private
 
-  def initialize (url, site, do_all=nil, verbose = true)
+  def initialize (url, finders, do_all=nil, verbose = true)
     @nkdoc = Nokogiri::HTML(open normalize_url(url))
-    @finderset = SiteServices.new(site).all_finders
     @results = {}
-    SiteServices.data_choices().each { |label| @results[label] = [] }
-    @site = site
+    (@finderset = finders).map(&:label).each { |label| @results[label] = [] }
     @verbose = verbose
     # Initialize the results
     @finderset.each do |finder|
-      label = finder[:label]
+      label = finder.label
       next unless (do_all || @results[label].empty?) &&
-          (selector = finder[:path]) &&
+          (selector = finder.selector) &&
           (matches = @nkdoc.css(selector)) &&
           (matches.count > 0)
-      attribute_name = finder[:attribute]
+      attribute_name = finder.attribute_name
       @result = Result.new finder # For accumulating results
       matches.each do |ou|
         children = (ou.name == 'ul') ? ou.css('li') : [ou]
@@ -212,7 +212,7 @@ class PageTags
       if @result.found
         @result.report if @verbose
         @results[label] << @result
-        @results[finder[:id]] = [@result]
+        # @results[finder[:id]] = [@result]
       end
     end
   end
@@ -274,47 +274,46 @@ class SiteServices
 
   def initialize site
     @site = site
-    site_finders # Preload the finders
   end
 
   @@DefaultFinders = [
-      {:label => 'URI', :path => 'meta[property=\'og:url\']', :attribute => 'content'},
-      {:label => 'URI', :path => 'link[rel=\'canonical\']', :attribute => 'href'},
-      {:label => 'URI', :path => 'div.post a[rel=\'bookmark\']', :attribute => 'href'},
-      {:label => 'URI', :path => '.title a', :attribute => 'href'},
-      {:label => 'URI', :path => 'a.permalink', :attribute => 'href'},
-      {:label => 'Image', :path => 'meta[itemprop=\'image\']', :attribute => 'content'},
-      {:label => 'Image', :path => 'meta[property=\'og:image\']', :attribute => 'content'},
-      {:label => 'Image', :path => 'img.recipe_image', :attribute => 'src'},
-      {:label => 'Image', :path => 'img.mainIMG', :attribute => 'src'},
-      {:label => 'Image', :path => 'div.entry-content img', :attribute => 'src'},
-      {:label => 'Image', :path => 'div.post-body img', :attribute => 'src'},
-      {:label => 'Image', :path => 'img[itemprop=\'image\']', :attribute => 'src'},
-      {:label => 'Image', :path => 'link[itemprop=\'image\']', :attribute => 'href'},
-      {:label => 'Image', :path => 'link[rel=\'image_src\']', :attribute => 'href'},
-      {:label => 'Image', :path => 'img[itemprop=\'photo\']', :attribute => 'src'},
-      {:label => 'Image', :path => '.entry img', :attribute => 'src'},
-      {:label => 'Title', :path => 'meta[name=\'title\']', :attribute => 'content'},
-      {:label => 'Title', path: 'title'},
-      {:label => 'Title', :path => 'meta[name=\'fb_title\']', :attribute => 'content'},
-      {:label => 'Title', :path => 'meta[property=\'og:title\']', :attribute => 'content'},
-      {:label => 'Title', :path => 'meta[property=\'dc:title\']', :attribute => 'content'},
+      {:label => 'URI', :selector => 'meta[property=\'og:url\']', :attribute_name => 'content'},
+      {:label => 'URI', :selector => 'link[rel=\'canonical\']', :attribute_name => 'href'},
+      {:label => 'URI', :selector => 'div.post a[rel=\'bookmark\']', :attribute_name => 'href'},
+      {:label => 'URI', :selector => '.title a', :attribute_name => 'href'},
+      {:label => 'URI', :selector => 'a.permalink', :attribute_name => 'href'},
+      {:label => 'Image', :selector => 'meta[itemprop=\'image\']', :attribute_name => 'content'},
+      {:label => 'Image', :selector => 'meta[property=\'og:image\']', :attribute_name => 'content'},
+      {:label => 'Image', :selector => 'img.recipe_image', :attribute_name => 'src'},
+      {:label => 'Image', :selector => 'img.mainIMG', :attribute_name => 'src'},
+      {:label => 'Image', :selector => 'div.entry-content img', :attribute_name => 'src'},
+      {:label => 'Image', :selector => 'div.post-body img', :attribute_name => 'src'},
+      {:label => 'Image', :selector => 'img[itemprop=\'image\']', :attribute_name => 'src'},
+      {:label => 'Image', :selector => 'link[itemprop=\'image\']', :attribute_name => 'href'},
+      {:label => 'Image', :selector => 'link[rel=\'image_src\']', :attribute_name => 'href'},
+      {:label => 'Image', :selector => 'img[itemprop=\'photo\']', :attribute_name => 'src'},
+      {:label => 'Image', :selector => '.entry img', :attribute_name => 'src'},
+      {:label => 'Title', :selector => 'meta[name=\'title\']', :attribute_name => 'content'},
+      {:label => 'Title', :selector => 'title'},
+      {:label => 'Title', :selector => 'meta[name=\'fb_title\']', :attribute_name => 'content'},
+      {:label => 'Title', :selector => 'meta[property=\'og:title\']', :attribute_name => 'content'},
+      {:label => 'Title', :selector => 'meta[property=\'dc:title\']', :attribute_name => 'content'},
   ]
 
   @@CandidateFinders = [
-      {:label => 'Author Name', path: 'meta[name=\'author\']', :attribute => 'content'},
-      {:label => 'Author Name', path: 'meta[itemprop=\'author\']', :attribute => 'content'},
-      {:label => 'Author Name', path: 'meta[name=\'author.name\']', :attribute => 'content'},
-      {:label => 'Author Name', path: 'meta[name=\'article.author\']', :attribute => 'content'},
-      {:label => 'Author Link', path: 'link[rel=\'author\']', :attribute => 'href'},
-      {:label => 'Description', path: 'meta[name=\'description\']', :attribute => 'content'},
-      {:label => 'Description', path: 'meta[property=\'og:description\']', :attribute => 'content'},
-      {:label => 'Description', path: 'meta[property=\'description\']', :attribute => 'content'},
-      {:label => 'Description', path: 'meta[itemprop=\'description\']', :attribute => 'content'},
-      {:label => 'Tags', path: 'meta[name=\'keywords\']', :attribute => 'content'},
-      {:label => 'Site Name', path: 'meta[property=\'og:site_name\']', :attribute => 'content'},
-      {:label => 'Site Name', path: 'meta[name=\'application_name\']', :attribute => 'content'},
-      {:label => 'RSS Feed', path: 'link[type=\'application/rss+xml\']', :attribute => 'href'}
+      {:label => 'Author Name', :selector => 'meta[name=\'author\']', :attribute_name => 'content'},
+      {:label => 'Author Name', :selector => 'meta[itemprop=\'author\']', :attribute_name => 'content'},
+      {:label => 'Author Name', :selector => 'meta[name=\'author.name\']', :attribute_name => 'content'},
+      {:label => 'Author Name', :selector => 'meta[name=\'article.author\']', :attribute_name => 'content'},
+      {:label => 'Author Link', :selector => 'link[rel=\'author\']', :attribute_name => 'href'},
+      {:label => 'Description', :selector => 'meta[name=\'description\']', :attribute_name => 'content'},
+      {:label => 'Description', :selector => 'meta[property=\'og:description\']', :attribute_name => 'content'},
+      {:label => 'Description', :selector => 'meta[property=\'description\']', :attribute_name => 'content'},
+      {:label => 'Description', :selector => 'meta[itemprop=\'description\']', :attribute_name => 'content'},
+      {:label => 'Tags', :selector => 'meta[name=\'keywords\']', :attribute_name => 'content'},
+      {:label => 'Site Name', :selector => 'meta[property=\'og:site_name\']', :attribute_name => 'content'},
+      {:label => 'Site Name', :selector => 'meta[name=\'application_name\']', :attribute_name => 'content'},
+      {:label => 'RSS Feed', :selector => 'link[type=\'application/rss+xml\']', :attribute_name => 'href'}
   ]
 
 #   @@DataChoices = [ 'URI', 'Image', 'Title', 'Description', 'Author Name', 'Author Link', 'Site Name', 'Keywords', 'Tags' ]
@@ -324,7 +323,7 @@ class SiteServices
   end
 
   def self.attribute_choices
-    @@AttributeChoices ||= (@@DefaultFinders+@@CandidateFinders).collect { |f| f[:attribute] }.uniq
+    @@AttributeChoices ||= (@@DefaultFinders+@@CandidateFinders).collect { |f| f[:attribute_name] }.uniq
   end
 
   protected
@@ -334,12 +333,6 @@ class SiteServices
   end
 
   public
-
-  def site_finders
-    @site_finders ||=
-        @site.finders.collect { |f| {:label => f.finds, :path => f.selector, :attribute => f.read_attrib, :id => f.id} }
-    # result << {:label=>'Image', :path=>'p.bodytext img', :attribute=>'src'},
-  end
 
   # Make sure the given uri isn't relative, and make it absolute if it is
   def resolve(candidate)
@@ -369,6 +362,7 @@ class SiteServices
     gets.strip
   end
 
+=begin
   def test_finders(url = nil)
     fr = FinderResults.new @site, site_finders
     fr.collect_results url || @site.sample
@@ -376,10 +370,10 @@ class SiteServices
     case get_input('Any finder to add ([yY]: yes, [qQ]: quit without saving)? ')
       when 'y', 'Y'
         finder = {}
-        finder[:label] = get_input('Label: ')
-        finder[:path] = get_input('Path: ')
+        finder.label = get_input('Label: ')
+        finder[:selector] = get_input('Path: ')
         unless (attrib = get_input('Attribute: ')).blank?
-          finder[:attribute] = attrib
+          finder[:attribute_name] = attrib
         end
         ss.add_finder finder
       when 'q', 'Q'
@@ -388,10 +382,12 @@ class SiteServices
         @site.save
     end
   end
+=end
 
+=begin
   def add_finder (finder={})
     finder.each do |k, v|
-      unless [:label, :path, :attribute].include?(k)
+      unless [:label, :selector, :attribute_name].include?(k)
         puts k.to_s+' is not a valid field'
         return
       end
@@ -402,14 +398,15 @@ class SiteServices
     self.site_finders = (self.site_finders + fr.revise_interactively)
     @site.save
   end
+=end
 
   # Return the set of finders that apply to the site (those assigned to the site, then global ones)
   def all_finders
-    # Give the DefaultFinders and CandidateFinders a unique id from the database
-    (@@DefaultFinders + @@CandidateFinders).each { |df|
-      df[:id] ||= Finder.where(site_id: nil, finds: df[:label], selector: df[:path], read_attrib: df[:attribute]).first_or_create.id
-    } unless @@DefaultFinders.first[:id]
-    site_finders + @@DefaultFinders + @@CandidateFinders
+    # Give the DefaultFinders and CandidateFinders a unique, site-less finder from the database
+    @site.finders +
+        (@@DefaultFinders + @@CandidateFinders).collect { |finderspec|
+      finderspec[:finder] ||= Finder.where(finderspec.slice(:label, :selector, :attribute_name).merge site_id: nil).first_or_create
+    }
   end
 
   def scrape
@@ -518,6 +515,7 @@ class SiteServices
   end
 
   # Examine every page on the site and count the number of hits on the global tag set
+=begin
   def self.study(only = nil)
     # Get the set of tags to glean with
     fr = FinderResults.new Site.first, @@DefaultFinders.clone, only
@@ -546,6 +544,7 @@ class SiteServices
     fr.report
     nil
   end
+=end
 
   def self.extract_from_page url
     extractions = {}
@@ -616,14 +615,14 @@ class SiteServices
   end
 
   # Return the raw mapping from finders to arrays of hits
-  def gleaning_results url
-    PageTags.new(url, site, true, true).results
+  def gleaning_results url, finders=nil
+    PageTags.new(url, finders || all_finders, true, true).results
   end
 
   # Examine a page and return a hash mapping labels into found fields
   def extract_from_page(url, spec={})
     begin
-      pagetags = PageTags.new(url, @site, spec[:all], false)
+      pagetags = PageTags.new(url, spec[:finders] || all_finders, spec[:all], false)
     rescue Exception => e
       puts "Error: couldn't open page '#{url}' for analysis."
       return {}
@@ -653,6 +652,7 @@ class SiteServices
   # of all the associated finders.
   # If a site_id is provided, go through all sites starting with the one thus indicated.
   # If no site_id is provided, go through all unreviewed sites
+=begin
   def self.screen site_id = nil
     @@DefaultFinders = @@DefaultFinders + @@CandidateFinders unless (@@DefaultFinders.last == @@CandidateFinders.last)
     if site_id
@@ -678,13 +678,15 @@ class SiteServices
       end
     end
   end
+=end
 
   # Use the extant finders on a site, interactively querying their appropriateness and potentially assigning
   # results (either extractors or hard values) to the site
+=begin
   def poll_extractions url=nil
     url ||= site.sample
     begin
-      pagetags = PageTags.new(url, @site, true, false)
+      pagetags = PageTags.new(url, all_finders, true, false)
       correct_result = nil
       @site.finders.each do |finder|
         pagetags.results_for(finder[:id]).each do |result|
@@ -692,7 +694,7 @@ class SiteServices
           # finder = result.finder
           puts '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'
           puts "URL: #{url}"
-          label = finder[:label]
+          label = finder.label
           finder.each { |key, value| puts "\t(#{key}: #{value})" unless [:label, :count, :foundlings].include?(key) }
           # accepted = false
           if (foundstr = result.out.shift)
@@ -716,13 +718,13 @@ class SiteServices
                   # accepted = (answer[0] == 'Y')
                   correct_result = foundstr
                   # Include the finder on the site
-                  unless @site.finders.exists?(finds: finder[:label], selector: finder[:path], read_attrib: finder[:attribute])
-                    if existing = @site.finders.where(finds: finder[:label]).first
-                      existing.selector = finder[:path]
-                      existing.read_attrib = finder[:attribute]
+                  unless @site.finders.exists?(finder.slice :label, :selector, :attribute_name)
+                    if existing = @site.finders.where(finder.slice :label).first
+                      existing.selector = finder[:selector]
+                      existing.read_attrib = finder[:attribute_name]
                       existing.save
                     else
-                      @site.finders.create(finds: finder[:label], selector: finder[:path], read_attrib: finder[:attribute])
+                      @site.finders.create(finder.slice :label, :selector, :attribute_name)
                       @site.save
                     end
                   end
@@ -795,6 +797,7 @@ class SiteServices
       return false
     end
   end
+=end
 
   # Examine site names, possibly starting at a given id
   def self.names id=nil

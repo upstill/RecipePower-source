@@ -322,8 +322,8 @@ window.recipePower_namespace = window.recipePower_namespace || {
 				}
 				if (candidates.length > 0) {
 					var found = null;
-					if(finder.attribute) {
-						found = candidates[0].getAttribute(finder.attribute);
+					if(finder.attributeName) {
+						found = candidates[0].getAttribute(finder.attributeName);
 					} else {
 						found = candidates[0].innerHTML;
 					}

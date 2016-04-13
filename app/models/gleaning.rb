@@ -23,17 +23,23 @@ class Gleaning < ActiveRecord::Base
   end
 
   def options_for label
-    results[label] ? results[label].map(&:out).flatten.uniq : []
+    (results && results[label]) ? results[label].map(&:out).flatten.uniq : []
   end
 
-  def value_found_in label, val
-    results.collect { |result| self if result.out.include? val }
+  def attributes= labels
+    x=2
   end
 
   def method_missing namesym, *args
-    case namesym
-      when :Description, :description
-        entity.description
+    namestr = namesym.to_s
+    if namestr.match /\=$/
+      # Assign virtual attribute, which means voting for the named string
+      x=2
+    else
+      case namesym
+        when :Description, :description
+          nil
+      end
     end
   end
 end

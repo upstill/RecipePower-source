@@ -170,7 +170,7 @@ class UsersController < CollectibleController
     @authentications = response_service.user.authentications if @decorator.id
     @section = params[:section] || "profile"
     response_service.title = "My "+@section.capitalize
-    smartrender action: "edit"
+    smartrender action: 'edit'
   end
 
   def getpic
@@ -180,7 +180,7 @@ class UsersController < CollectibleController
   def update
     if update_and_decorate
       if @updated = params[:form]
-        flash[:popup] = "Thanks for the update!"
+        flash[:popup] = 'Thanks for the update!'
       else
         response_service.title = 'Cookmarks from Update'
         flash[:message] = (response_service.user == current_user ? 'Your profile' : response_service.user.handle+"'s profile")+' has been updated.'
@@ -188,9 +188,9 @@ class UsersController < CollectibleController
         render 'collectible/update'
       end
     else
-      @section = params[:user][:email] ? "profile" : "account"
+      @section = params[:user][:email] ? 'profile' : 'account'
       response_service.title = "Edit #{@section}"
-      smartrender action: "edit", mode: "modal"
+      smartrender action: 'edit', mode: 'modal'
     end
   end
 

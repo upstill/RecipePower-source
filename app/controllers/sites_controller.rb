@@ -55,6 +55,7 @@ class SitesController < CollectibleController
   # PUT /sites/1.json
   def update
     if update_and_decorate
+      @site.gleaning.attributes = params[:site][:gleaning_attributes]
       respond_to do |format|
         format.html { redirect_to @site, notice: 'Site #{@site.name} was successfully updated.' }
         format.json {
