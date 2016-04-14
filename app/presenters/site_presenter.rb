@@ -11,15 +11,6 @@ class SitePresenter < CollectiblePresenter
   end
   alias_method :header, :card_header_content  # Backwards compatibility thing
 
-  def gleaning_field label
-    case label
-      when 'Title'
-        h.gleaning_field site, label, 'input'
-      when 'Description'
-        h.gleaning_field site, label
-    end
-  end
-
   private
 
   def handle_none(value)

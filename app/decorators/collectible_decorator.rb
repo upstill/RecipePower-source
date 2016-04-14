@@ -32,6 +32,17 @@ class CollectibleDecorator < Draper::Decorator
     }
   end
 
+
+  def input_field_type label
+    case label
+      when 'Title'
+        'input'
+      when 'Description'
+        'textarea'
+    end
+  end
+
+
   # Define presentation-specific methods here. Helpers are accessed through
   # `helpers` (aka `h`). You can override attributes, for example:
   #

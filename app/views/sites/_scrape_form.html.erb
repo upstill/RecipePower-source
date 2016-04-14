@@ -5,16 +5,10 @@
               <div class="col-md-12">
                 <%= f.label 'Name' %>
                 <!--Construct a list of possible answers-->
-                <%= presenter.gleaning_field 'Title' %>
+                <%= gleaning_field @decorator, 'Title' %>
                 <%= f.input :name, :label => false %>
                 <%= f.label 'Description' %>
-                <%= presenter.gleaning_field 'Description' %>
-                <%# select_tag 'site[gleaning_attributes][Description]',
-                           options_for_select(@site.gleaning.options_for('Description')),
-                           prompt: 'Gleaned Descriptions',
-                           class: 'select-string',
-                           data: {target: 'textarea#site_description'}
-                %>
+                <%= gleaning_field @decorator, 'Description' %>
                 <%= f.input :description, :label => false %>
               </div>
             </div>

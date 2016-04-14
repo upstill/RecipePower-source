@@ -1,25 +1,19 @@
 module GleaningsHelper
 
-  def gleaning_field entity, label, target_input_type=nil
-    entity_name = entity.class.to_s.underscore
-    options = entity.gleaning.options_for label
-    entity_field = entity.decorate.findermap[label].to_s
-    target_input_type ||=
-        case entity.class.columns_hash[entity_field].type
-          when :string
-            'input'
-          when :text
-            'textarea'
-        end
+  def gleaning_field decorator, label
+    entity_name = decorator.object.class.to_s.underscore
+    options = decorator.gleaning.options_for label
+    entity_field = decorator.findermap[label].to_s
+    entity_field_type = decorator.input_field_type(label)
     select_tag "#{entity_name}[gleaning_attributes][#{label}]",
                options_for_select(options),
                prompt: "Gleaned #{(options.count > 1) ? label.pluralize : label}",
                class: 'select-string',
                id: label,
-               data: {target: "#{target_input_type}##{entity_name}_#{entity_field}"}
+               data: {target: "#{entity_field_type}##{entity_name}_#{entity_field}"}
   end
 
-  def gleaning_field_replacement entity, label, target_input_type=nil
-    ["select##{label}", gleaning_field(entity, label, target_input_type) ]
+  def gleaning_field_replacement decorator, label
+    ["select##{label}", gleaning_field(decorator, label) ]
   end
 end
