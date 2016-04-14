@@ -1,4 +1,4 @@
-<% finder = Finder.new(site: for_entity.site, label: 'Title', attribute_name: 'href') %>
+<% finder = Finder.new(site_id: for_entity.site.id, label: 'Title', attribute_name: 'href') %>
 <%= simple_form_for finder,
                     url: finders_create_path(finder,
                                              entity_type: for_entity.class.to_s,

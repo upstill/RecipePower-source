@@ -50,6 +50,14 @@ protected
 
 public
 
+  # When a result from one of the site's finders gets hit, vote it up
+  def hit_on_finder label, selector, attribute_name
+    attribs = { label: label, selector: selector, attribute_name: attribute_name }
+    finder = finders.exists?(attribs) ? finders.where(attribs).first : finders.create(attribs)
+    finder.hits += 1
+    finder.save
+  end
+
   # Make sure that a url(s) map(s) to this site, returning true if any references were added
   def include_url url_or_urls
     (url_or_urls.is_a?(String) ? [url_or_urls] : url_or_urls).any? do |url|

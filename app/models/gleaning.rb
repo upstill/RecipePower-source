@@ -26,8 +26,11 @@ class Gleaning < ActiveRecord::Base
     (results && results[label]) ? results[label].map(&:out).flatten.uniq : []
   end
 
-  def attributes= labels
-    x=2
+  def attributes= attrhash
+    site = entity.site
+    attrhash.each do |label, value|
+      hit_on site, label, value
+    end
   end
 
   def method_missing namesym, *args
@@ -60,5 +63,19 @@ class Gleaning < ActiveRecord::Base
     end
     save if do_save
     do_save # Return a boolean indicating whether the finder made a difference
+  end
+
+  private
+
+  # Declare success on a label/value pair by voting up the corresponding finder
+  def hit_on site, label, value
+    if value.present?
+      # Vote up each finder that produces this value
+      results[label].each do |result|
+        if result.out.include? value
+          site.hit_on_finder *result.finderdata.slice(:label, :selector, :attribute_name).values
+        end
+      end
+    end
   end
 end
