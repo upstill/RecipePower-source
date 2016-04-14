@@ -1,11 +1,10 @@
-<% finder = Finder.new(site_id: for_entity.site.id, label: 'Title', attribute_name: 'href') %>
+<% finder = Finder.new(site_id: for_entity.site.id, label: 'Title', attribute_name: 'content') %>
 <%= simple_form_for finder,
                     url: finders_create_path(finder,
                                              entity_type: for_entity.class.to_s,
                                              entity_id: for_entity.id,
-                                             :format => :JSON,
                                              :mode => :partial),
-                    :method => :post do |g| %>
+                    html: {'data-type' => :json} do |g| %>
     <%= g.hidden_field :site_id, value: finder.site_id %>
     <h3>Creating a new finder</h3>
     <div class="row">

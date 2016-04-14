@@ -12,9 +12,14 @@ module GleaningsHelper
             'textarea'
         end
     select_tag "#{entity_name}[gleaning_attributes][#{label}]",
-                           options_for_select(options),
-                           prompt: "Gleaned #{(options.count > 1) ? label.pluralize : label}",
-                           class: 'select-string',
-                           data: {target: "#{target_input_type}##{entity_name}_#{entity_field}"}
+               options_for_select(options),
+               prompt: "Gleaned #{(options.count > 1) ? label.pluralize : label}",
+               class: 'select-string',
+               id: label,
+               data: {target: "#{target_input_type}##{entity_name}_#{entity_field}"}
+  end
+
+  def gleaning_field_replacement entity, label, target_input_type=nil
+    ["select##{label}", gleaning_field(entity, label, target_input_type) ]
   end
 end
