@@ -5,4 +5,8 @@ class Finder < ActiveRecord::Base
   def attributes_hash
     { id: id, label: label, selector: selector, attribute_name: attribute_name, site: site, site_id: site_id}
   end
+
+  def labelsym
+    @labelsym ||= label.downcase.gsub /\s/, '_'
+  end
 end

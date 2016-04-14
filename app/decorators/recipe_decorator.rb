@@ -7,4 +7,8 @@ class RecipeDecorator < CollectibleDecorator
     url
   end
 
+  def findermap
+    super.merge 'URI' => :url
+  end
+
 end

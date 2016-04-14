@@ -42,4 +42,23 @@ class Gleaning < ActiveRecord::Base
       end
     end
   end
+
+  # Add results (presumably from a new finder) to the results in a gleaning
+  def assimilate_finder_results results_hash
+    do_save = false
+    results_hash.each do |key, results_arr|
+      results_arr.each do |proposed|
+        # Either modify an existing result in the gleaning, or append this one
+        unless (results[key] ||= []).detect { |my_result|
+          my_result.finderdata.slice('selector', 'attribute_name').values ==
+          proposed.finderdata.slice('selector', 'attribute_name').values
+        }
+          results[key] << proposed
+          do_save = true
+        end
+      end
+    end
+    save if do_save
+    do_save # Return a boolean indicating whether the finder made a difference
+  end
 end

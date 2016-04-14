@@ -2,6 +2,36 @@ class CollectibleDecorator < Draper::Decorator
   include Templateer
   delegate_all
 
+  # sample_page is a full URL somewhere on the associated site so we can absolutize links
+  def sample_page
+
+  end
+
+  def picurl
+    picurl = object.imglink
+    (picurl.present? && sample_page) ? valid_url(picurl, sample_page) : picurl
+  end
+
+  def pageurl
+    if object.respond_to?(:url_attribute)
+      pageurl = object.url_attribute
+      (pageurl.present? && sample_page) ? valid_url(pageurl, sample_page) : pageurl
+    end
+  end
+
+  def finderlabels
+    findermap.keys
+  end
+
+  # Provide a map specifying how finders relate to accessor methods
+  def findermap
+    {
+      'Image' => :picurl,
+      'Title' => :title,
+      'Description' => :description
+    }
+  end
+
   # Define presentation-specific methods here. Helpers are accessed through
   # `helpers` (aka `h`). You can override attributes, for example:
   #
@@ -91,25 +121,8 @@ class CollectibleDecorator < Draper::Decorator
     entity_type.constantize.find(entity_id).decorate rescue nil
   end
 
-  # sample_page is a full URL somewhere on the associated site so we can absolutize links
-  def sample_page
-
-  end
-
-  def picurl
-    picurl = object.imglink
-    (picurl.present? && sample_page) ? valid_url(picurl, sample_page) : picurl
-  end
-
   def image_class
     dom_id + '_pic'
-  end
-
-  def pageurl
-    if object.respond_to?(:url_attribute)
-      pageurl = object.url_attribute
-      (pageurl.present? && sample_page) ? valid_url(pageurl, sample_page) : pageurl
-    end
   end
 
   # Get the user who first collected the recipe (or at least the one with the oldest Rcpref)

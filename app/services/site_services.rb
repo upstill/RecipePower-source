@@ -44,131 +44,6 @@ class Result
 
 end
 
-# Accumulates the results of a finder set
-=begin
-class FinderResults
-
-  def initialize(site, finders, only=nil)
-    @finders = finders
-    @site = site
-    finders.each do |finder|
-      finder[:label] = finder[:label].to_s # Basic QA
-      finder[:count] = 0 unless finder[:count]
-      finder[:foundlings] = [] unless finder[:foundlings]
-    end
-    # Restrict the tags to the requested set, if any
-    if only
-      only.each_index { |ix| only[ix] = only[ix].to_s }
-      @finders = @finders.select { |finder| only.include? finder[:label] }
-    end
-  end
-
-  def collect_results(url, labelset=nil, verbose=true, site=nil)
-    @site = site if site
-    labelset ||= @site.finders.collect { |finder| finder[:label].to_s }.uniq
-    begin
-      # Collect all results from the page
-      pagetags = PageTags.new url, SiteServices.new(@site).all_finders, true, verbose
-    rescue
-      puts "Error: couldn't open page '#{url}' for analysis."
-      return nil
-    end
-    labelset.each do |label|
-      pagetags.results_for(label = label.to_s).each do |result|
-        foundset = '['+result.out.join("\n\t\t ")+'] (from '+url+')'
-        finder = result.finder
-        finder[:count] = finder[:count] + 1
-        finder[:foundlings] << foundset
-      end
-    end
-    return pagetags
-  end
-
-  # Interact via the terminal on the fate of the finders
-  def revise_interactively
-    @finders.each do |finder|
-      puts "#{finder[:label]}: #{finder[:selector]}"
-      finder.each { |key, value| puts "\t(#{key}: #{value})" unless [:label, :selector, :count, :foundlings].include?(key) }
-      # Trim any found title using the 'ttlcut' attribute of the site
-      if finder[:label] == 'Title' && @site.ttlcut
-        finder[:foundlings].each_index do |ix|
-          ttl, url = finder[:foundlings][ix].match(/^\[([^\]]*)\] \(from (.*)\)$/)[1, 2]
-          finder[:foundlings][ix] = "[#{trim_title ttl}] (from #{url})"
-        end
-      end
-      puts "\t["+finder[:foundlings].join("\n\t ")+"\t]"
-      puts 'Action? ([dD]=Delete [qQ]=quit [C cutstring])'
-      answer = gets.strip
-      if m = answer.match(/^([Cc])\s*(\S.*$)/)
-        answer, cutstring = m[1, 2]
-      end
-      case answer
-        when 'd', 'D'
-          @finders.delete_if { |f| f == finder }
-          done = false
-        when 'q', 'Q'
-          exit
-        when 'c', 'C'
-          if finder[:label] == 'Title'
-            puts "Really cut titles from this site using '#{cutstring}'?"
-            if gets.strip == 'y'
-              puts '...okay...'
-              @site.ttlcut = cutstring
-              done = false
-            end
-          end
-        when ''
-        else
-          # Replace the path with input text
-          puts "Really replace path '#{finder[:selector]}' with '#{answer}'?"
-          next unless gets.strip == 'y'
-          puts '...okay...'
-          finder[:selector] = answer
-          @finders.each do |tag|
-            if tag == finder
-              tag[:selector] = answer
-            end
-          end
-          done = false
-      end
-    end
-    @finders.each do |finder|
-      finder.delete(:count)
-      finder.delete(:foundlings)
-    end
-    @finders
-  end
-
-  def report
-    # finderset = self.collect_tags(which)+@@TitleTags
-    foundlist = {}
-    @finders.each do |finder|
-      path = finder[:selector]
-      label = finder[:label]
-      foundlist[label] ||= {}
-      foundlist[label][path] ||= []
-      foundlist[label][path] << finder
-    end
-    foundlist.each do |label, labelset|
-      puts label.to_s+':'
-      labelset.each do |path, pathset|
-        puts "\t"+path+':'
-        pathset.each do |tags|
-          tags.each do |name, value|
-            next if name == :label || name == :selector || name == :foundlings
-            nq =  name.class == Symbol ? '\'' + name.to_s + '\'' : '"' + name + '"'
-            vq = value.class == Symbol ? '\'' + value.to_s+ '\'' : '"' + value.to_s+'"'
-            puts "\t\t"+nq+': '+vq
-          end
-          puts "\t\t"+tags[:foundlings].join("\n\t\t") if tags[:foundlings]
-          puts "\t\t--------------------------------------"
-        end
-      end
-    end
-  end
-end
-=end
-
 # PageTags accumulates the tags for a page
 class PageTags
 
@@ -362,44 +237,6 @@ class SiteServices
     gets.strip
   end
 
-=begin
-  def test_finders(url = nil)
-    fr = FinderResults.new @site, site_finders
-    fr.collect_results url || @site.sample
-    self.site_finders = fr.revise_interactively
-    case get_input('Any finder to add ([yY]: yes, [qQ]: quit without saving)? ')
-      when 'y', 'Y'
-        finder = {}
-        finder.label = get_input('Label: ')
-        finder[:selector] = get_input('Path: ')
-        unless (attrib = get_input('Attribute: ')).blank?
-          finder[:attribute_name] = attrib
-        end
-        ss.add_finder finder
-      when 'q', 'Q'
-        return
-      else
-        @site.save
-    end
-  end
-=end
-
-=begin
-  def add_finder (finder={})
-    finder.each do |k, v|
-      unless [:label, :selector, :attribute_name].include?(k)
-        puts k.to_s+' is not a valid field'
-        return
-      end
-      finder[k] = v.to_s
-    end
-    fr = FinderResults.new @site, [finder]
-    fr.collect_results @site.sample
-    self.site_finders = (self.site_finders + fr.revise_interactively)
-    @site.save
-  end
-=end
-
   # Return the set of finders that apply to the site (those assigned to the site, then global ones)
   def all_finders
     # Give the DefaultFinders and CandidateFinders a unique, site-less finder from the database
@@ -514,38 +351,6 @@ class SiteServices
     puts unmapped.join("\n")
   end
 
-  # Examine every page on the site and count the number of hits on the global tag set
-=begin
-  def self.study(only = nil)
-    # Get the set of tags to glean with
-    fr = FinderResults.new Site.first, @@DefaultFinders.clone, only
-    Site.all[100..110].each do |site|
-      ss = self.new site
-      puts '------------------------------------------------------------------------'
-      puts 'home: '+site.home
-      puts 'sample: '+site.sample
-      if pagetags = fr.collect_results(site.sample, [:URI, :Title, :Image], true, site)
-        puts '>>>>>>>>>>>>>>> Results >>>>>>>>>>>>>>>>>>'
-        [:URI, :Title, :Image].each do |label|
-          label = label.to_s
-          result = (pagetags.result_for(label) || '** Nothing Found **')
-          found_or_not = ''
-          if label=='URI' && result!=site.sample
-            found_or_not = '(NO MATCH!)'
-          end
-          puts label+found_or_not+': '+result
-        end
-      else
-        puts '...No Results because couldn\t open pagetags to crack the page'
-      end
-    end
-    # allfinders.sort { |t1,t2| t2[:count] <=> t1[:count] }.each { |tag| puts tag.to_s }
-    puts '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Report !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! '
-    fr.report
-    nil
-  end
-=end
-
   def self.extract_from_page url
     extractions = {}
     if !url.blank? && (site = Site.find_or_create url) && (ss = SiteServices.new(site))
@@ -648,11 +453,139 @@ class SiteServices
     results
   end
 
+  # Examine site names, possibly starting at a given id
+  def self.names id=nil
+    first_found = id.nil?
+    nsites = Site.all.count
+    site_n = 1
+    Site.all.each do |site|
+      name = site.name
+      if (first_found ||= (site.id == id))
+        puts "#{site_n}/#{nsites} >>>>>>>>>>>>>>>>>>>>>>"
+        puts site.sample
+        puts "\tid: #{site.id}"
+        puts "\tname: #{name}"
+        puts "\tdescription: #{site.description}"
+        puts "\tlogo: #{site.logo}"
+        begin
+          okay_to_quit = true
+          if site.ttlcut && site.ttlcut.match(site.name)
+            puts "\tttlcut: #{site.ttlcut}"
+            puts '...assuming name is okay'
+          else
+            puts 'Name? (blank to keep as is)'
+            newname = gets.strip
+            case newname
+              when 'Q'
+                return
+              when /^D\s/
+                site.description = newname.sub(/^D\s*/, '')
+                puts "Saving Description \'#{site.description}\'"
+                site.save
+                okay_to_quit = false
+              when /^L\s/
+                site.logo = newname.sub(/^L\s*/, '')
+                puts "Saving Logo \'#{site.logo}\'"
+                site.save
+                okay_to_quit = false
+              else
+                unless newname.blank?
+                  site.name = newname
+                  site.save
+                end
+            end
+            return if newname == 'Q'
+          end
+        end until okay_to_quit
+      else
+        puts "...skipping #{name}..."
+      end
+      site_n += 1
+    end
+  end
+
+  # Find sites that are candidates for merging, i.e. those with the same domain
+  def similars
+    uri = URI(site.home)
+    if match = uri.host.match( /\b\w*\.\w*$/)
+      Site.joins(:reference).
+          where('type = \'SiteReference\' and url ILIKE ?', "%#{match[0]}%").
+          uniq.
+          keep_if { |other| other.id != site.id }
+    else
+      []
+    end
+  end
+
+=begin
+  def test_finders(url = nil)
+    fr = FinderResults.new @site, site_finders
+    fr.collect_results url || @site.sample
+    self.site_finders = fr.revise_interactively
+    case get_input('Any finder to add ([yY]: yes, [qQ]: quit without saving)? ')
+      when 'y', 'Y'
+        finder = {}
+        finder.label = get_input('Label: ')
+        finder[:selector] = get_input('Path: ')
+        unless (attrib = get_input('Attribute: ')).blank?
+          finder[:attribute_name] = attrib
+        end
+        ss.add_finder finder
+      when 'q', 'Q'
+        return
+      else
+        @site.save
+    end
+  end
+
+  def add_finder (finder={})
+    finder.each do |k, v|
+      unless [:label, :selector, :attribute_name].include?(k)
+        puts k.to_s+' is not a valid field'
+        return
+      end
+      finder[k] = v.to_s
+    end
+    fr = FinderResults.new @site, [finder]
+    fr.collect_results @site.sample
+    self.site_finders = (self.site_finders + fr.revise_interactively)
+    @site.save
+  end
+
+  # Examine every page on the site and count the number of hits on the global tag set
+  def self.study(only = nil)
+    # Get the set of tags to glean with
+    fr = FinderResults.new Site.first, @@DefaultFinders.clone, only
+    Site.all[100..110].each do |site|
+      ss = self.new site
+      puts '------------------------------------------------------------------------'
+      puts 'home: '+site.home
+      puts 'sample: '+site.sample
+      if pagetags = fr.collect_results(site.sample, [:URI, :Title, :Image], true, site)
+        puts '>>>>>>>>>>>>>>> Results >>>>>>>>>>>>>>>>>>'
+        [:URI, :Title, :Image].each do |label|
+          label = label.to_s
+          result = (pagetags.result_for(label) || '** Nothing Found **')
+          found_or_not = ''
+          if label=='URI' && result!=site.sample
+            found_or_not = '(NO MATCH!)'
+          end
+          puts label+found_or_not+': '+result
+        end
+      else
+        puts '...No Results because couldn\t open pagetags to crack the page'
+      end
+    end
+    # allfinders.sort { |t1,t2| t2[:count] <=> t1[:count] }.each { |tag| puts tag.to_s }
+    puts '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Report !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! '
+    fr.report
+    nil
+  end
+
   # Go through all sites, presenting a sample recipe and querying the appropriateness
   # of all the associated finders.
   # If a site_id is provided, go through all sites starting with the one thus indicated.
   # If no site_id is provided, go through all unreviewed sites
-=begin
   def self.screen site_id = nil
     @@DefaultFinders = @@DefaultFinders + @@CandidateFinders unless (@@DefaultFinders.last == @@CandidateFinders.last)
     if site_id
@@ -678,11 +611,9 @@ class SiteServices
       end
     end
   end
-=end
 
   # Use the extant finders on a site, interactively querying their appropriateness and potentially assigning
   # results (either extractors or hard values) to the site
-=begin
   def poll_extractions url=nil
     url ||= site.sample
     begin
@@ -798,69 +729,129 @@ class SiteServices
     end
   end
 =end
-
-  # Examine site names, possibly starting at a given id
-  def self.names id=nil
-    first_found = id.nil?
-    nsites = Site.all.count
-    site_n = 1
-    Site.all.each do |site|
-      name = site.name
-      if (first_found ||= (site.id == id))
-        puts "#{site_n}/#{nsites} >>>>>>>>>>>>>>>>>>>>>>"
-        puts site.sample
-        puts "\tid: #{site.id}"
-        puts "\tname: #{name}"
-        puts "\tdescription: #{site.description}"
-        puts "\tlogo: #{site.logo}"
-        begin
-          okay_to_quit = true
-          if site.ttlcut && site.ttlcut.match(site.name)
-            puts "\tttlcut: #{site.ttlcut}"
-            puts '...assuming name is okay'
-          else
-            puts 'Name? (blank to keep as is)'
-            newname = gets.strip
-            case newname
-              when 'Q'
-                return
-              when /^D\s/
-                site.description = newname.sub(/^D\s*/, '')
-                puts "Saving Description \'#{site.description}\'"
-                site.save
-                okay_to_quit = false
-              when /^L\s/
-                site.logo = newname.sub(/^L\s*/, '')
-                puts "Saving Logo \'#{site.logo}\'"
-                site.save
-                okay_to_quit = false
-              else
-                unless newname.blank?
-                  site.name = newname
-                  site.save
-                end
-            end
-            return if newname == 'Q'
-          end
-        end until okay_to_quit
-      else
-        puts "...skipping #{name}..."
-      end
-      site_n += 1
-    end
-  end
-
-  # Find sites that are candidates for merging, i.e. those with the same domain
-  def similars
-    uri = URI(site.home)
-    if match = uri.host.match( /\b\w*\.\w*$/)
-      Site.joins(:reference).
-          where('type = \'SiteReference\' and url ILIKE ?', "%#{match[0]}%").
-          uniq.
-          keep_if { |other| other.id != site.id }
-    else
-      []
-    end
-  end
-
 end
+
+# Accumulates the results of a finder set
+=begin
+class FinderResults
+
+  def initialize(site, finders, only=nil)
+    @finders = finders
+    @site = site
+    finders.each do |finder|
+      finder[:label] = finder[:label].to_s # Basic QA
+      finder[:count] = 0 unless finder[:count]
+      finder[:foundlings] = [] unless finder[:foundlings]
+    end
+    # Restrict the tags to the requested set, if any
+    if only
+      only.each_index { |ix| only[ix] = only[ix].to_s }
+      @finders = @finders.select { |finder| only.include? finder[:label] }
+    end
+  end
+
+  def collect_results(url, labelset=nil, verbose=true, site=nil)
+    @site = site if site
+    labelset ||= @site.finders.collect { |finder| finder[:label].to_s }.uniq
+    begin
+      # Collect all results from the page
+      pagetags = PageTags.new url, SiteServices.new(@site).all_finders, true, verbose
+    rescue
+      puts "Error: couldn't open page '#{url}' for analysis."
+      return nil
+    end
+    labelset.each do |label|
+      pagetags.results_for(label = label.to_s).each do |result|
+        foundset = '['+result.out.join("\n\t\t ")+'] (from '+url+')'
+        finder = result.finder
+        finder[:count] = finder[:count] + 1
+        finder[:foundlings] << foundset
+      end
+    end
+    return pagetags
+  end
+
+  # Interact via the terminal on the fate of the finders
+  def revise_interactively
+    @finders.each do |finder|
+      puts "#{finder[:label]}: #{finder[:selector]}"
+      finder.each { |key, value| puts "\t(#{key}: #{value})" unless [:label, :selector, :count, :foundlings].include?(key) }
+      # Trim any found title using the 'ttlcut' attribute of the site
+      if finder[:label] == 'Title' && @site.ttlcut
+        finder[:foundlings].each_index do |ix|
+          ttl, url = finder[:foundlings][ix].match(/^\[([^\]]*)\] \(from (.*)\)$/)[1, 2]
+          finder[:foundlings][ix] = "[#{trim_title ttl}] (from #{url})"
+        end
+      end
+      puts "\t["+finder[:foundlings].join("\n\t ")+"\t]"
+      puts 'Action? ([dD]=Delete [qQ]=quit [C cutstring])'
+      answer = gets.strip
+      if m = answer.match(/^([Cc])\s*(\S.*$)/)
+        answer, cutstring = m[1, 2]
+      end
+      case answer
+        when 'd', 'D'
+          @finders.delete_if { |f| f == finder }
+          done = false
+        when 'q', 'Q'
+          exit
+        when 'c', 'C'
+          if finder[:label] == 'Title'
+            puts "Really cut titles from this site using '#{cutstring}'?"
+            if gets.strip == 'y'
+              puts '...okay...'
+              @site.ttlcut = cutstring
+              done = false
+            end
+          end
+        when ''
+        else
+          # Replace the path with input text
+          puts "Really replace path '#{finder[:selector]}' with '#{answer}'?"
+          next unless gets.strip == 'y'
+          puts '...okay...'
+          finder[:selector] = answer
+          @finders.each do |tag|
+            if tag == finder
+              tag[:selector] = answer
+            end
+          end
+          done = false
+      end
+    end
+    @finders.each do |finder|
+      finder.delete(:count)
+      finder.delete(:foundlings)
+    end
+    @finders
+  end
+
+  def report
+    # finderset = self.collect_tags(which)+@@TitleTags
+    foundlist = {}
+    @finders.each do |finder|
+      path = finder[:selector]
+      label = finder[:label]
+      foundlist[label] ||= {}
+      foundlist[label][path] ||= []
+      foundlist[label][path] << finder
+    end
+    foundlist.each do |label, labelset|
+      puts label.to_s+':'
+      labelset.each do |path, pathset|
+        puts "\t"+path+':'
+        pathset.each do |tags|
+          tags.each do |name, value|
+            next if name == :label || name == :selector || name == :foundlings
+            nq =  name.class == Symbol ? '\'' + name.to_s + '\'' : '"' + name + '"'
+            vq = value.class == Symbol ? '\'' + value.to_s+ '\'' : '"' + value.to_s+'"'
+            puts "\t\t"+nq+': '+vq
+          end
+          puts "\t\t"+tags[:foundlings].join("\n\t\t") if tags[:foundlings]
+          puts "\t\t--------------------------------------"
+        end
+      end
+    end
+  end
+end
+=end
