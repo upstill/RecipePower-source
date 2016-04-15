@@ -151,7 +151,7 @@ public
   end
 
   def name
-    referent.name
+    referent && referent.name
   end
 
   def name=(str)

@@ -19,8 +19,13 @@ class UserDecorator < CollectibleDecorator
     object.about
   end
 
-  def findermap
-    super.merge 'Image' => :image
+  def finderlabels
+    super << 'Image'
+  end
+
+  def assert_gleaning gleaning
+    super
+    gleaning.extract1 'Image' do |value| object.image = value end
   end
 
   # Filter the user's taggings by entity_type

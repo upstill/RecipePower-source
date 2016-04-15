@@ -12,7 +12,7 @@
                 <%= f.input :description, :label => false %>
               </div>
             </div>
-            <% if response_service.admin_view? && permitted_to?(:admin, :pages) %>
+            <% if response_service.admin_view? && permitted_to?(:admin, :pages) && false %>
                 <div class="row">
                   <div class="col-md-12">
                     <%# f.input :site %>

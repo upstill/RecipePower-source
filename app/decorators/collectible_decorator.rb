@@ -19,29 +19,26 @@ class CollectibleDecorator < Draper::Decorator
     end
   end
 
+  # Declare the set of gleanings labels that we can handle
   def finderlabels
-    findermap.keys
+    %w{ Image Title Description }
   end
 
-  # Provide a map specifying how finders relate to accessor methods
-  def findermap
-    {
-      'Image' => :picurl,
-      'Title' => :title,
-      'Description' => :description
-    }
-  end
-
-
-  def input_field_type label
+  def attribute_name_for label
     case label
       when 'Title'
-        'input'
+        'title'
       when 'Description'
-        'textarea'
+        'description'
     end
   end
 
+  # Process the results of a gleaning
+  def assert_gleaning gleaning
+    gleaning.extract1 'Title' do |value| self.title = value end
+    gleaning.extract1 'Image' do |value| self.picurl = value end
+    gleaning.extract1 'Description' do |value| self.description = value end
+  end
 
   # Define presentation-specific methods here. Helpers are accessed through
   # `helpers` (aka `h`). You can override attributes, for example:

@@ -52,10 +52,31 @@ class PageTags
   private
 
   def initialize (url, finders, do_all=nil, verbose = true)
-    @nkdoc = Nokogiri::HTML(open normalize_url(url))
     @results = {}
     (@finderset = finders).map(&:label).each { |label| @results[label] = [] }
     @verbose = verbose
+    normu = normalize_url url
+    begin
+      pagefile = open normu
+    rescue Exception => e
+      errstr = e.to_s
+      if redirection = errstr.sub( /[^:]*:/, '').strip
+        from, to = *redirection.split('->')
+        if from.strip == normu
+          normu = normalize_url to.strip
+          begin
+            pagefile = open normu
+          rescue Exception => e
+            errstr = e.to_s
+          end
+        end
+      end
+    end
+    unless pagefile
+      self.errors.add 'url', 'page can\'t be open for analysis: ' + errstr
+      return
+    end
+    @nkdoc = Nokogiri::HTML(pagefile)
     # Initialize the results
     @finderset.each do |finder|
       label = finder.label

@@ -37,9 +37,16 @@ class SiteDecorator < CollectibleDecorator
     object.home
   end
 
-  # Give the mapping from finder labels to (possibly virtual) attributes
-  def findermap
-    super.merge 'Image' => :logo, 'URI' => :home, 'RSS Feed' => :ensure_feed, 'Title' => :name
+  def finderlabels
+    super + %w{ Image URI RSS\ Feed }
+  end
+
+  def assert_gleaning gleaning
+    super
+    gleaning.extract1 'Image' do |value| object.logo = value end
+    gleaning.extract1 'URI' do |value| object.home = value end
+    gleaning.extract_all 'RSS Feed' do |value| object.assert_feed value unless value.match /comments/ end
+    gleaning.extract1 'Title' do |value| object.name = value end
   end
 
 end
