@@ -110,18 +110,22 @@ class Feed < ActiveRecord::Base
   def to_s
     "#{(title.present? && title) || ('Feed #'+id.to_s)} (#{url})"
   end
+
+  def self.preload url
+    begin
+      f = Feedjira::Feed.fetch_and_parse url, :on_failure => Proc.new { raise 'Feedjira error: Can\'t open feed' }
+      f = nil if [Fixnum, Hash].include?(f.class) # || !@fetched.is_a?(Feedjira::Feed)
+    rescue Exception => e
+      f = nil
+    end
+    f
+  end
   
   # Get the external feed, setting the @fetched instance variable to point thereto
   def fetch
     return @fetched if @fetched
-    begin
-      @fetched = Feedjira::Feed.fetch_and_parse url, :on_failure => Proc.new { raise "Feedjira error: Can't open feed" }
-      @fetched = nil if [Fixnum, Hash].include?(@fetched.class) # || !@fetched.is_a?(Feedjira::Feed)
-    rescue Exception => e
-      @fetched = nil
-    end
-    unless @fetched
-      self.errors.add :url, "doesn't point to a feed"
+    unless @fetched = self.preload(url)
+      self.errors.add :url, 'doesn\'t point to a feed'
     end
     @fetched
   end

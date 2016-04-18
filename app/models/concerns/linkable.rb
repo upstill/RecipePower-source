@@ -81,8 +81,16 @@ module Linkable
 
       self.instance_eval do
 
-        define_method 'glean' do
-          gleaning || create_gleaning
+        # Glean info from the page in background as a DelayedJob job
+        define_method 'glean' do |now=false|
+          create_gleaning unless gleaning
+          gleaning.fire now
+        end
+
+        # Glean info synchronously, i.e. don't return until it's done
+        define_method 'glean!' do |now=false|
+          create_gleaning unless gleaning
+          gleaning.ensure now
         end
 
         # Whenever a reference is added, we ensure that it gets to the same site

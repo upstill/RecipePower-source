@@ -129,9 +129,10 @@ ActiveRecord::Schema.define(version: 20160413030537) do
   create_table "gleanings", force: :cascade do |t|
     t.string   "entity_type"
     t.integer  "entity_id"
+    t.integer  "status",      default: 0
     t.text     "results"
-    t.datetime "created_at",  null: false
-    t.datetime "updated_at",  null: false
+    t.datetime "created_at",              null: false
+    t.datetime "updated_at",              null: false
   end
 
   create_table "lists", force: :cascade do |t|

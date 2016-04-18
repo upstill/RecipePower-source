@@ -45,7 +45,7 @@ class SiteDecorator < CollectibleDecorator
     super
     gleaning.extract1 'Image' do |value| object.logo = value end
     gleaning.extract1 'URI' do |value| object.home = value end
-    gleaning.extract_all 'RSS Feed' do |value| object.assert_feed value unless value.match /comments/ end
+    gleaning.extract_all 'RSS Feed' do |value| object.assert_feed value end
     gleaning.extract1 'Title' do |value| object.name = value end
   end
 

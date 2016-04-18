@@ -6,11 +6,9 @@
 RP::Application.routes.draw do
 
   get 'finders/create'
-
-  get 'gleanings/new'
-  get 'gleanings/create'
-
   post 'finders/create'
+
+  resources :gleanings, :only => [:new, :create, :show]
 
   concern :picable do
     member do

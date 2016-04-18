@@ -9,7 +9,8 @@ RP.gleanings = RP.gleanings || {}
 jQuery ->
 	$(document).on 'change', 'select.gleaning-select', (event) ->
 		me = event.currentTarget
-		$('input', $(me).next('div.form-group.string')).val $(me).val()
-		$('textarea', $(me).next('div.form-group.text')).val $(me).val()
+		enclosure = $(me).closest '.gleaning-field-enclosure'
+		$('input', $(enclosure).next('div.form-group.string')).val $(me).val()
+		$('textarea', $(enclosure).next('div.form-group.text')).val $(me).val()
 		# target_selector = $(me).data 'target'
 		# $(target_selector).val $(me).val()
