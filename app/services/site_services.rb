@@ -209,7 +209,7 @@ class SiteServices
       {:label => 'Tags', :selector => 'meta[name=\'keywords\']', :attribute_name => 'content'},
       {:label => 'Site Name', :selector => 'meta[property=\'og:site_name\']', :attribute_name => 'content'},
       {:label => 'Site Name', :selector => 'meta[name=\'application_name\']', :attribute_name => 'content'},
-      {:label => 'RSS Feed', :selector => 'link[type=\'application/rss+xml\']', :attribute_name => 'href'}
+      {:label => 'RSS Feed', :selector => 'link[type="application/rss+xml"]', :attribute_name => 'href'}
   ]
 
 #   @@DataChoices = [ 'URI', 'Image', 'Title', 'Description', 'Author Name', 'Author Link', 'Site Name', 'Keywords', 'Tags' ]

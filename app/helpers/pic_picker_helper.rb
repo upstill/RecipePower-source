@@ -59,26 +59,25 @@ module PicPickerHelper
   def pic_picker_go_button decorator, picker_fallback_img=nil
     golink = polymorphic_path [:editpic, decorator.object],
                               golinkid: pic_picker_golinkid(decorator),
-                              fallback_img: (picker_fallback_img || "NoPictureOnFile.png")
-    button_to_submit decorator.pageurl ? "Pick Picture..." : "Get Picture from Web...",
+                              fallback_img: (picker_fallback_img || 'NoPictureOnFile.png')
+    button_to_submit decorator.pageurl ? 'Pick Picture...' : 'Get Picture from Web...',
                      golink,
-                     "default",
-                     "small",
+                     'default',
+                     'small',
                      id: pic_picker_golinkid(decorator),
                      preload: true,
                      :mode => :modal,
-                     class: "pic_picker_golink",
+                     class: 'pic_picker_golink',
                      data: {
                          inputid: pic_preview_input_id(decorator),
                          imageid: pic_preview_img_id(decorator)
                      }
   end
 
-  def pic_picker_select_list pageurl
-    piclist = page_piclist pageurl # Crack the page for its image links
-    return '' if piclist.empty?
+  def pic_picker_select_list urls
+    return '' if urls.empty?
     thumbNum = 0
-    pics = piclist.collect { |url|
+    pics = urls.collect { |url|
       image_with_error_recovery(url,
                                 class: 'pic-pickee',
                                 id: "thumbnail#{thumbNum += 1}",

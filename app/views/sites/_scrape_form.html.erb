@@ -12,11 +12,6 @@
                 <%= gleaning_field @decorator, 'Description' %>
                 <%= f.input :description, :label => false %>
                 <%= gleaning_field @decorator, 'RSS Feed' if response_service.admin_view?  %>
-                <%= presenter.card_avatar %>
-                <%= link_to_submit 'Select Image',
-                        polymorphic_path([:editpic, @site]),
-                        mode: 'modal',
-                        title: 'Get Picture' if permitted_to?(:update, @site) %>
               </div>
             </div>
             <% if response_service.admin_view? && permitted_to?(:admin, :pages) && false %>

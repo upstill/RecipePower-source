@@ -62,16 +62,27 @@ class Gleaning < ActiveRecord::Base
 
   def attributes= attrhash
     site = entity.site
-    attrhash.each do |label, value|
-      hit_on site, label, value
+    decorator = entity.decorate
+    (attrhash || {}).each do |label, value_or_set|
+      if value_or_set.is_a? Hash
+        (value_or_set = value_or_set.values).map { |value| hit_on site, label, value }
+      else
+        hit_on site, label, value_or_set
+      end
+      decorator.assert_gleaning_attribute label, value_or_set
     end
   end
 
-  # Access the results by name
-  def method_missing namesym_or_str, *args
-    namestr = namesym_or_str.is_a?( Symbol) ? namesym_or_str.to_s.gsub('_',' ').titleize : namesym_or_str
+  # Access the results by label; singular => return first result, plural => return all
+  def method_missing namesym, *args
+    namestr = namesym.to_s.gsub('_',' ').titleize
+    namestr = namestr.singularize if is_plural = (namestr == namestr.pluralize)
+    namestr.sub! /Rss/, 'RSS'
     puts namestr + ' results.'
-    (results && results[namestr] && results[namestr].collect(&:out).flatten.uniq) || []
+    if results && results[namestr]
+      list = results[namestr].collect(&:out).flatten.uniq || []
+      is_plural ? list : list.first
+    end
   end
 
   # Add results (presumably from a new finder) to the results in a gleaning
@@ -93,7 +104,7 @@ class Gleaning < ActiveRecord::Base
     do_save || true # Return a boolean indicating whether the finder made a difference
   end
 
-  def extract_unique *labels
+  def extract_all *labels
     result = ''
     labels.each do |label|
       index = 0
@@ -103,6 +114,12 @@ class Gleaning < ActiveRecord::Base
       end
     end
     result
+  end
+
+  def extract1 label
+    (results[label] || []).map(&:out).flatten.first do |str|
+      yield(str)
+    end
   end
 
   private

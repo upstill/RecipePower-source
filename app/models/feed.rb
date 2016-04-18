@@ -124,7 +124,7 @@ class Feed < ActiveRecord::Base
   # Get the external feed, setting the @fetched instance variable to point thereto
   def fetch
     return @fetched if @fetched
-    unless @fetched = self.preload(url)
+    unless @fetched = Feed.preload(url)
       self.errors.add :url, 'doesn\'t point to a feed'
     end
     @fetched

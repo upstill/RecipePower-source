@@ -31,8 +31,8 @@ module GleaningsHelper
                    id: label
       when 'RSS Feed'
         # Declare a checkbox and an external link to each feed link
-        gleaning = decorator.gleaning.extract_unique 'RSS Feed' do |link, index|
-          if fz = Feed.preload(link)
+        gleaning = decorator.gleaning.extract_all 'RSS Feed' do |link, index|
+          if fz = Feed.preload(normalize_url link)
             '<br>' +
             content_tag(:div,
                         check_box_tag( attribute_name+"[#{index}]", link),

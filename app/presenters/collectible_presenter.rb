@@ -111,7 +111,7 @@ class CollectiblePresenter < BasePresenter
   end
 
   def card_avatar options={}
-    img = image_from_decorator decorator
+    img = image_from_decorator decorator, options
     if img && permitted_to?(:update, decorator.object)
       link_to_submit img,
                      polymorphic_path([:editpic, decorator.object]),

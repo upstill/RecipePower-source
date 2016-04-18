@@ -40,6 +40,10 @@ class CollectibleDecorator < Draper::Decorator
     gleaning.extract1 'Description' do |value| self.description = value end
   end
 
+  # When attributes are selected directly and returned as gleaning attributes, assert them into the model
+  def assert_gleaning_attribute label, value
+  end
+
   # Define presentation-specific methods here. Helpers are accessed through
   # `helpers` (aka `h`). You can override attributes, for example:
   #

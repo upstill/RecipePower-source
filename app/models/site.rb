@@ -50,6 +50,15 @@ protected
 
 public
 
+  def assert_feed url, approved=false
+    url = normalize_url url
+    feed = feeds.exists?(url: url) ? feeds.where(url: url).first : feeds.create(url: url, approved: approved)
+    if feed.approved != approved
+      feed.approved = approved
+      feed.save
+    end
+  end
+
   # When a result from one of the site's finders gets hit, vote it up
   def hit_on_finder label, selector, attribute_name
     attribs = { label: label, selector: selector, attribute_name: attribute_name }
