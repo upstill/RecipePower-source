@@ -32,17 +32,26 @@ module GleaningsHelper
       when 'RSS Feed'
         # Declare a checkbox and an external link to each feed link
         gleaning = decorator.gleaning.extract_all 'RSS Feed' do |link, index|
-          if fz = Feed.preload(normalize_url link)
+          link = normalize_url link
+          if fz = Feed.preload(link)
+            entry_date = ", latest #{fz.entries.first.published.to_s.split.first}" if fz.entries.first
             '<br>' +
-            content_tag(:div,
-                        check_box_tag( attribute_name+"[#{index}]", link),
-                        style: 'display: inline-block; margin-right: 6px;'
-            ) +
-            label_tag((fz.title.present? ? fz.title : fz.description) + " (#{pluralize fz.entries.count, 'entry'})")
+                content_tag(:div,
+                            check_box_tag(attribute_name+"[#{index}]",
+                                          link,
+                                          decorator.feeds.where(url: link).exists?
+                            ),
+                            style: 'display: inline-block; margin-right: 6px; margin-left: 5%'
+                ) +
+                label_tag(fz.title.present? ? fz.title : fz.description) +
+                '<br>'.html_safe +
+                content_tag(:div,
+                            "-- #{pluralize(fz.entries.count, 'entry')}#{entry_date}",
+                            style: 'display: inline-block; padding-left: 50px; font-size: 14px; margin-bottom: 9px;')
           end
         end
         if gleaning.present?
-          label_tag('Possible Feeds') + gleaning.html_safe
+          label_tag('Gleaned Feeds') + gleaning.html_safe
         end
       when 'Image'
       when 'Tags'
@@ -64,7 +73,7 @@ module GleaningsHelper
   def gleaning_field_enclosure label, content
     content_tag :div,
                 content,
-                style: 'display: inline-block',
-                class: 'gleaning-field-enclosure '+gleaning_field_class(label)
+                style: 'display: inline-block; width: 100%',
+                class: 'gleaning-field-enclosure ' + gleaning_field_class(label)
   end
 end
