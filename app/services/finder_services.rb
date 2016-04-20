@@ -191,6 +191,7 @@ class FinderServices
       {:label => 'Image', :selector => 'link[rel=\'image_src\']', :attribute_name => 'href'},
       {:label => 'Image', :selector => 'img[itemprop=\'photo\']', :attribute_name => 'src'},
       {:label => 'Image', :selector => '.entry img', :attribute_name => 'src'},
+      {:label => 'Image', :selector => 'img', :attribute_name => 'src'},
       {:label => 'Title', :selector => "meta[name='title']", :attribute_name => 'content'},
       {:label => 'Title', :selector => 'title'},
       {:label => 'Title', :selector => "meta[name='fb_title']", :attribute_name => 'content'},
