@@ -14,13 +14,12 @@ class Gleaning < ActiveRecord::Base
 
   # Crack a url (or the home page for a decorator) for the information denoted by the set of labels
   def self.glean url_or_decorator, *labels
-    if url_or_decorator.object.is_a? Linkable
+    if url_or_decorator.is_a? String
+      (gleaning = self.new).go url_or_decorator
+    elsif url_or_decorator.object.is_a? Linkable
       url = url_or_decorator.pageurl
       url_or_decorator.glean!
       (gleaning = url_or_decorator.gleaning).go url, url_or_decorator.site
-    else
-      url = url_or_decorator
-      (gleaning = self.new).go url_or_decorator
     end
     gleaning
   end

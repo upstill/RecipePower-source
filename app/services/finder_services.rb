@@ -161,7 +161,7 @@ class FinderServices
       @finder.errors.add 'url', 'page can\'t be open for analysis: ' + errstr
       return
     end
-    if results[@finder.label].present? # Found a result on the page!
+    if results.result_for @finder.label # Found a result on the page!
       if !entity.gleaning || entity.gleaning.assimilate_finder_results(results)
         # This was a meaningful addition to the finders
         @finder.save
