@@ -64,6 +64,10 @@ RP.pic_picker.open = (dlog) ->
 	$(dlog).on 'click','a.url-extract-button', (event) ->
 		extract_from_page(event)
 
+	$('input.icon_picker').pasteImageReader (results) ->
+		{filename, dataURL} = results
+		set_image_safely 'div.preview img', dataURL, 'input#pic-picker-url'
+
 	$(dlog).on 'click','.dialog-submit-button', (event) ->
 		url = url_result()
 		if targetGolinkSelector = originating_golink_selector()
