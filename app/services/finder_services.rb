@@ -1,5 +1,6 @@
 # require 'yaml'
 # require 'reference.rb'
+require 'site.rb'
 
 class Results < Hash
 
@@ -109,13 +110,14 @@ class FinderServices
     return unless pagefile
 
     # We've got a set of finders to apply and an open page to apply them to. Nokogiri time!
-    results = Results.new *finders.map(&:label)
     nkdoc = Nokogiri::HTML pagefile
+
     # Initialize the results
+    results = Results.new *finders.map(&:label)
+
     finders.each do |finder|
       label = finder.label
-      next unless results[label].empty? &&
-          (selector = finder.selector) &&
+      next unless (selector = finder.selector) &&
           (matches = nkdoc.css(selector)) &&
           (matches.count > 0)
       attribute_name = finder.attribute_name

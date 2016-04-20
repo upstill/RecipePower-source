@@ -10,7 +10,7 @@ class Gleaning < ActiveRecord::Base
 
   serialize :results
 
-  # delegate :result_for, :results_for, :labels, :to => :results
+  delegate :result_for, :results_for, :labels, :to => :results
 
   # Crack a url (or the home page for a decorator) for the information denoted by the set of labels
   def self.glean url_or_decorator, *labels
