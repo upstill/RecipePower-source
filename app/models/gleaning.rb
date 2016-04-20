@@ -1,5 +1,5 @@
 class Gleaning < ActiveRecord::Base
-  require 'site_services.rb'
+  require 'finder_services.rb'
   belongs_to :entity, :polymorphic => true
 
   attr_accessible :entity, :results, :status
@@ -10,22 +10,46 @@ class Gleaning < ActiveRecord::Base
 
   serialize :results
 
+  # delegate :result_for, :results_for, :labels, :to => :results
+
+  # Crack a url (or the home page for a decorator) for the information denoted by the set of labels
+  def self.glean url_or_decorator, *labels
+    if url_or_decorator.object.is_a? Linkable
+      url = url_or_decorator.pageurl
+      url_or_decorator.glean!
+      (gleaning = url_or_decorator.gleaning).go url, url_or_decorator.site
+    else
+      url = url_or_decorator
+      (gleaning = self.new).go url_or_decorator
+    end
+    gleaning
+  end
+
+  # Execute a gleaning on the given url
+  def go url, site=nil, *labels
+    if site.is_a? String
+      labels.unshift site
+      site = nil
+    end
+    begin
+      if self.results = FinderServices.findings(url, site, *labels)
+        good!
+      else
+        bad!
+      end
+    rescue Exception => e
+      errors.add 'url', "analyzing page '#{url}': #{e}."
+      bad!
+    end
+    good?
+  end
+
   def perform
     if virgin? || pending?
       # Lock during processing
       processing!
       save
-      url = entity.decorate.url
-      begin
-        if self.results = SiteServices.new(entity.site).gleaning_results(url)
-          good!
-        else
-          bad!
-        end
-      rescue Exception => e
-        errors.add 'url', "analyzing page '#{url}': #{e}."
-        bad!
-      end
+      go entity.decorate.url, entity.site
       save
     end
   end

@@ -32,15 +32,18 @@ class RecipeServices
   end
 
   def scrape
-    extractions = SiteServices.extract_from_page(@recipe.url )
     puts "Recipe # #{@recipe.id}: #{@recipe.title}"
     puts "\tsite: #{@recipe.site.name} (#{@recipe.site.home})"
     puts "\turl: #{@recipe.url}"
-    puts "\thref: #{@recipe.href}"
     puts "\tdescription: #{@recipe.description}"
     puts "\tpicurl: #{@recipe.picurl}"
     puts "\tExtractions:"
-    extractions.each { |k, v| puts "\t\t#{k.to_s}: #{v}"}
+    if results = FinderServices.findings(@recipe.url, @recipe.site)
+      results.labels.each { |label| puts "\t\t#{label}: #{results.result_for(label)}" }
+    else
+      puts "!!! Couldn't open the page for analysis!"
+    end
+    results
   end
 
   def robotags= extractions={}

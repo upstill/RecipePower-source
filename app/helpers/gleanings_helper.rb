@@ -67,7 +67,7 @@ module GleaningsHelper
   end
 
   def gleaning_field_class label
-    "gleaning-field-#{Finder.css_class label}"
+    "gleaning-field-#{FinderServices.css_class label}"
   end
 
   def gleaning_field_enclosure label, content

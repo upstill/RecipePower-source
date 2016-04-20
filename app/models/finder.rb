@@ -3,10 +3,6 @@ class Finder < ActiveRecord::Base
   belongs_to :site
 
 
-  def self.css_class label
-    label.downcase.gsub /\s/, '-'
-  end
-
   def attributes_hash
     { id: id, label: label, selector: selector, attribute_name: attribute_name, site: site, site_id: site_id}
   end

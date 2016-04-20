@@ -160,16 +160,6 @@ class RecipesController < CollectibleController
     end
   end
 
-  # Respond to a request from the recipe editor for a list of pictures
-  def piclist
-      @recipe = Recipe.find(params[:id])
-      @piclist = page_piclist @recipe.url
-      respond_to do |format|
-        format.html # index.html.erb
-        format.json { render json: @piclist }
-      end
-  end
-  
   # Register that the recipe was touched by the current user--if they own it.
   def touch
     # This is a generic #touch action except for the manner in which the recipe is fetched

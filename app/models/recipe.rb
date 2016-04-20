@@ -65,7 +65,8 @@ class Recipe < ActiveRecord::Base
       rcp = Recipe.find params[:id]
     elsif !(rcp = RecipeReference.lookup_recipe params[:url])
       if !extractions
-        extractions = SiteServices.extract_from_page(params[:url])
+        # extractions = SiteServices.extract_from_page(params[:url])
+        extractions = FinderServices.findings params[:url]
         if extractions.empty?
           rcp = self.new params
           rcp.errors[:url] = 'Doesn\'t appear to be a working URL: we can\'t open it for analysis'

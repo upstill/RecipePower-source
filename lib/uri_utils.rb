@@ -134,30 +134,6 @@ def test_link(link, resource=nil)
   end
 end
 
- # Return a list of image URLs for a given page
-def page_piclist url
-  begin 
-    (ou = open url) && (doc = Nokogiri::HTML(ou))
-    return [] unless doc
-  rescue Exception => e
-    return []
-  end
-  # Get all the img tags, uniqify them, purge non-compliant ones and insert the domain as required
-  doc.css("img").map { |img| 
-    img.attributes["src"] # Collect all the "src" attributes from <img tags
-  }.compact.map { |src| # Ignore if nil
-    src.value # Extract value (URL string)
-  }.uniq. # Purge duplicates
-  # keep_if { |url| url =~ /\.(gif|tif|tiff|png|jpg|jpeg|img)$/i }. # Accept only image tags (NB: apparently irrelevant)
-  map{ |path| 
-    begin
-      (uri = URI.join( url, path)) && uri.to_s 
-    rescue Exception => e
-      nil
-    end 
-  }.compact
-end
-
 # Inverse of CGI.parse: take a hash of key/array-of-value pairs and produce a query string
 # NB: THIS ESCAPES EVERYTHING, SO THIS IS NOT A STRICT INVERSE, I.E., IT IS LIKELY TO PRODUCE A DIFFERENT QUERY STRING
 def build_query(params)
