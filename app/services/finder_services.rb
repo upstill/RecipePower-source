@@ -233,6 +233,13 @@ class FinderServices
     end
   end
 
+  # Provide the finders in a form suitable for passing to a Javascript processor (see capture.js.erb)
+  def self.js_finders site=nil
+    self.applicable_finders(site).collect { |finder|
+      finder.attributes.slice 'label', 'selector', 'attribute_name'
+    }
+  end
+
   def self.label_choices
     @@DataChoices ||= ((@@DefaultFinders+@@CandidateFinders).collect { |f| f[:label] } << 'Site Logo').uniq
   end

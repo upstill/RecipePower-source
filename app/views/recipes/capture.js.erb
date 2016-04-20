@@ -316,14 +316,14 @@ window.recipePower_namespace = window.recipePower_namespace || {
 			finder = finders[ix];
 			if (!result[finder.label]) {
 				var candidates = [window.document];
-				var pathlist = finder.path.split(/\s+/);
+				var pathlist = finder.selector.split(/\s+/);
 				for(var jx=0; jx<pathlist.length; jx++) {
 					candidates = ns.pathFilter(candidates, pathlist[jx]);
 				}
 				if (candidates.length > 0) {
 					var found = null;
-					if(finder.attributeName) {
-						found = candidates[0].getAttribute(finder.attributeName);
+					if(finder.attribute_name) {
+						found = candidates[0].getAttribute(finder.attribute_name);
 					} else {
 						found = candidates[0].innerHTML;
 					}
@@ -376,7 +376,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
   // The extraction_js helper should declare finders for needed elements
 	var callback = "<%= @url %>".replace( /&amp;/g, '&');
 	// The finders are specifications for extracting data of different types
-	var finders = JSON.parse ("<%= j FinderServices.applicable_finders(@site).to_json.html_safe %>");
+	var finders = JSON.parse ("<%= j FinderServices.js_finders(@site).to_json.html_safe %>");
 	var extractions = ns.applyFinders(finders); // Scrape the page for definitive URL, Title and image (etc.)
 	if(extractions.URI)
 		extractions.URI = extractions.URI;
