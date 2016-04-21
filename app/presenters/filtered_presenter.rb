@@ -120,12 +120,12 @@ class ViewParams
         end
       end
     else
-      panel_label.downcase.pluralize
+      panel_label
     end
   end
 
   def panel_label
-    return filtered_presenter.panel_label if filtered_presenter.respond_to? :panel_label
+    return filtered_presenter.panel_label.downcase.pluralize if filtered_presenter.respond_to? :panel_label
     case rt = result_type.root # result_type.subtype || result_type.root
       when 'lists'
         'treasuries'

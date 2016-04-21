@@ -22,8 +22,8 @@ module FeedsHelper
     wait_msg ? { 'wait-msg' => wait_msg } : {}
   end
 
-  def feed_update_button feed
-    link_to_submit 'Update', refresh_feed_path(feed), feed_wait_msg(feed).merge(:button_size => 'xs')
+  def feed_update_button feed, force=false
+    link_to_submit 'Update', refresh_feed_path(feed), feed_wait_msg(feed, force).merge(:button_size => 'xs')
   end
 
   def feed_entries_report feed
@@ -39,7 +39,7 @@ module FeedsHelper
 
   # Summarize the number of entries/latest entry for a feed
   def feed_status_summary feed
-    feed_entries_status(feed) + feed_update_button(feed)
+    feed_entries_status(feed) + feed_update_button(feed, true)
   end
 
   def feed_status_report_replacement feed, querytags

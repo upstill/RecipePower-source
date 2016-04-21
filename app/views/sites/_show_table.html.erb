@@ -15,8 +15,7 @@
       <%= site_feeds_summary site %>
     </td>
     <td class="actions-column">
-      <%= link_to_submit 'Scrape Home Page', scrape_site_path(@decorator.object) if response_service.admin_view? %>
-      <%= collectible_buttons_panel @decorator do %>
+      <%= collectible_buttons_panel @decorator, 'xl', :tools_menu => true do %>
           <%# link_to_submit "Scrape for feeds", scrape_site_path(@site), options.merge(:method => :post) if response_service.admin_view? %>
       <% end %>
       <br>

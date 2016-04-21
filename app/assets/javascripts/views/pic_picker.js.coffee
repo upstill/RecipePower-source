@@ -64,7 +64,7 @@ RP.pic_picker.open = (dlog) ->
 	$(dlog).on 'click','a.url-extract-button', (event) ->
 		extract_from_page(event)
 
-	$('input.icon_picker').pasteImageReader (results) ->
+	$('input[type="text"]', dlog).pasteImageReader (results) ->
 		{filename, dataURL} = results
 		set_image_safely 'div.preview img', dataURL, 'input#pic-picker-url'
 

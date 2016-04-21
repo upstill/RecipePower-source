@@ -9,6 +9,7 @@ div.token-input-holder {
     max-width: 100%;
     position: relative;
     color: #555555;
+    text-align: left;
     // We want to propagate the font size down to the selections and the dropdown
     ul {
       font-size: inherit;

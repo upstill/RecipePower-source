@@ -90,7 +90,7 @@ class FeedsController < CollectibleController
 
   def refresh
     update_and_decorate
-    if @feed.status == "ready"
+    if @feed.status == 'ready'
       # if Rails.env.development? # Immediate refresh
         n_entries = @feed.feed_entries.size
         @feed.refresh
@@ -98,11 +98,11 @@ class FeedsController < CollectibleController
         if resource_errors_to_flash(@feed)
           render :errors
         else
-          flash[:popup] = labelled_quantity(n_new, "New entry")+" found"
-          render :update
+          flash[:popup] = labelled_quantity(n_new, 'New entry')+' found'
+          render :refresh, locals: { followup: (n_new > 0) }
         end
     else
-      flash[:popup] = "Feed update is still in process"
+      flash[:popup] = 'Feed update is still in process'
       render :errors
     end
   end

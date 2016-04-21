@@ -463,7 +463,7 @@ class SiteReference < Reference
     if host.blank?
       begin
         uri = URI(url)
-        logger.debug (self.host = uri.host.match(/\w*\.\w*$/)[0])
+        logger.debug (self.host = uri.host)
       rescue
         return false
       end

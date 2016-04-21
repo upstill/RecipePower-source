@@ -193,10 +193,10 @@ class FinderServices
       {:label => 'Image', :selector => '.entry img', :attribute_name => 'src'},
       {:label => 'Image', :selector => 'img', :attribute_name => 'src'},
       {:label => 'Title', :selector => "meta[name='title']", :attribute_name => 'content'},
-      {:label => 'Title', :selector => 'title'},
       {:label => 'Title', :selector => "meta[name='fb_title']", :attribute_name => 'content'},
       {:label => 'Title', :selector => "meta[property='og:title']", :attribute_name => 'content'},
       {:label => 'Title', :selector => "meta[property='dc:title']", :attribute_name => 'content'},
+      {:label => 'Title', :selector => 'title'},
   ]
 
   @@CandidateFinders = [

@@ -29,8 +29,8 @@ module PageletsHelper
 
   # The class of the pagelet body, which depends on
   def pagelet_class
-    if response_service.controller == "pages" && response_service.action == "home"
-      "pagelet-body"
+    if response_service.controller == 'pages' && response_service.action == 'home'
+      'pagelet-body'
     else
       "pagelet-body container #{@decorator.dom_id if @decorator}"
     end
@@ -39,11 +39,11 @@ module PageletsHelper
   # Hang an id on the pagelet body for future conditional replacement
   def pagelet_body_id entity=nil
     entity ||= @decorator
-    entity ? dom_id(entity) : "pagelet-body"
+    entity ? dom_id(entity) : 'pagelet-body'
   end
 
   def pagelet_body_selector entity=nil
-    "div.pagelet-body##{pagelet_body_id(entity)}"
+    "div.pagelet-body.#{pagelet_body_id(entity)}"
   end
 
   # Return the followup after updating or destroying an entity: replace its pagelet with either an update, or the list of such entities

@@ -18,6 +18,7 @@ class SitesController < CollectibleController
 
   def edit
     update_and_decorate
+    @site.glean unless @site.gleaning
     response_service.title = 'Edit Site'
     smartrender
   end

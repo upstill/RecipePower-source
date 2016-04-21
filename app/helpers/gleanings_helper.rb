@@ -14,7 +14,8 @@ module GleaningsHelper
   def gleaning_trigger decorator
     link_to_submit 'Scrape',
                    gleaning_path(decorator.gleaning),
-                   class: 'trigger hide' unless !decorator.gleaning || decorator.gleaning.good?
+                   class: 'trigger hide',
+                   data: { :'wait-msg' => 'Checking the page for help' } unless !decorator.gleaning || decorator.gleaning.good?
   end
 
   def gleaning_field_declaration decorator, label

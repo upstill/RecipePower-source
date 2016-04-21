@@ -139,6 +139,7 @@ div.header-element {
     div.token-input-elmt {
       margin-bottom: 1em;
       min-width: 12em;
+      text-align: left;
     }
   }
   div.links {
@@ -163,6 +164,9 @@ div.header-element {
       font-size: 90%;
     }
     // margin-bottom: 10px;
+    div.token-input-elmt {
+	text-align: left;
+    }
     div.org-buttons {
       display: inline-block;
       &.panels-buttons {

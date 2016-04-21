@@ -52,7 +52,8 @@ public
 
   def assert_feed url, approved=false
     url = normalize_url url
-    feed = feeds.exists?(url: url) ? feeds.where(url: url).first : feeds.create(url: url, approved: approved)
+    feed = (existed = feeds.exists?(url: url)) ? feeds.where(url: url).first : feeds.create(url: url, approved: approved)
+    Delayed::Job.enqueue feed if feed && !existed # New feeds get updated by default
     if feed.approved != approved
       feed.approved = approved
       feed.save
