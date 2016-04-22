@@ -1,7 +1,15 @@
 require 'string_utils.rb'
-require "templateer.rb"
+require 'templateer.rb'
 class RecipeDecorator < CollectibleDecorator
   include Templateer
+
+  def image
+    object.picurl
+  end
+
+  def image=img
+    object.picurl = img
+  end
 
   def external_link
     url

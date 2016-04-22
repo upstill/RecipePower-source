@@ -46,25 +46,6 @@ class RecipeServices
     results
   end
 
-  def robotags= extractions={}
-    ts = nil
-    if author = extractions["Author Name"]
-      ts ||= TaggingServices.new @recipe
-      ts.tag_with author, User.super_id, type: "Author"
-    end
-    if tagstring = extractions["Tags"]
-      ts ||= TaggingServices.new @recipe
-      tagstring.split(',').collect { |tagname| tagname.strip!; tagname if (tagname.length>0) }.compact.each { |tagname|
-        ts.tag_with tagname, User.super_id
-      }
-    end
-  end
-
-  # The robotags are those owned by super
-  def robotags
-    @recipe.tags User.super_id
-  end
-  
   def show_tags(file=STDOUT)
     file.puts tags.sort { |t1, t2| t1.id <=> t2.id }.collect { |tag| "#{tag.id.to_s}: #{tag.name}" }.join "\n"
   end

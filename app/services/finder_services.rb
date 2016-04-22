@@ -18,14 +18,22 @@ class Results < Hash
 
   alias_method :labels, :keys
 
+  def assert_result label, val_or_vals
+    # We keep these asserted results in Results with no finderdata
+    unless prior = (self[label] ||= []).find { |result| result.finderdata.nil? }
+      self[label].unshift (prior = Result.new)
+    end
+    prior.out = val_or_vals.is_a?(Array) ? val_or_vals : [val_or_vals]
+  end
+
 end
 
 class Result
 
   attr_accessor :finderdata, :out
 
-  def initialize(f)
-    @finderdata = f.attributes_hash
+  def initialize(f=nil)
+    @finderdata = f && f.attributes_hash
     @out = []
   end
 

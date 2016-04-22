@@ -32,6 +32,7 @@ module GleaningsHelper
                    id: label
       when 'RSS Feed'
         # Declare a checkbox and an external link to each feed link
+        return unless decorator.object.is_a? Site
         gleaning = decorator.gleaning.extract_all 'RSS Feed' do |link, index|
           link = normalize_url link
           if fz = Feed.preload(link)

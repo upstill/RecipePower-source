@@ -11,16 +11,15 @@ def path_from_url(url)
 end
 
 # Provide a url based on the current environment
-def rp_url path=""
-  domain = case
-             when Rails.env.production?
-               "https://www.recipepower.com"
-             when Rails.env.development?, Rails.env.test?
-               "https://local.recipepower.com:3000"
-             when Rails.env.staging?
-               "http://staging.herokuapp.com"
-           end
-  "#{domain}#{path}"
+def rp_url path=''
+  case
+    when Rails.env.production?
+      'https://www.recipepower.com'
+    when Rails.env.development?, Rails.env.test?
+      'https://local.recipepower.com:3000'
+    when Rails.env.staging?
+      'http://staging.herokuapp.com'
+  end + path.to_s
 end
 
 # We don't record urls from any of our hosts

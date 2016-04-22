@@ -156,6 +156,7 @@ class CollectibleController < ApplicationController
 
   def edit
     update_and_decorate
+    @decorator.glean if @decorator.object.is_a?(Linkable) && !@decorator.gleaning
     smartrender
   end
 

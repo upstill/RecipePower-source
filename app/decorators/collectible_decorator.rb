@@ -36,8 +36,33 @@ class CollectibleDecorator < Draper::Decorator
   # Process the results of a gleaning
   def assert_gleaning gleaning
     gleaning.extract1 'Title' do |value| self.title = value end
-    gleaning.extract1 'Image' do |value| self.picurl = value end
+    gleaning.extract1 'Image' do |value| self.image = value end
     gleaning.extract1 'Description' do |value| self.description = value end
+  end
+
+  def extractions= extractions
+    self.title = extractions[:Title] if extractions[:Title].present?
+    if extractions[:Image].present? && self.image.blank?
+      self.image = extractions[:Image]
+      image_changed = image.present?
+    end
+    self.description = extractions[:Description] if extractions[:Description].present? && description.blank?
+    save if id.nil? || image_changed || title_changed? || description_changed? # No other extractions need apply until saved
+    ts = nil
+    if author = extractions['Author Name']
+      ts ||= TaggingServices.new object
+      ts.tag_with author, User.super_id, type: 'Author'
+    end
+    if tagstring = extractions['Tags']
+      ts ||= TaggingServices.new object
+      tagstrings = tagstring.sub(/\[(.*)\]$/, '\1').sub(/"(.*)"$/, '\1').split( '","').map &:strip
+      tagstrings.each { |tagname| ts.tag_with tagname, User.super_id }
+    end
+  end
+
+  # The robotags are those owned by super
+  def robotags
+    object.tags User.super_id
   end
 
   # When attributes are selected directly and returned as gleaning attributes, assert them into the model

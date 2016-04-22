@@ -84,7 +84,7 @@ class RecipesController < CollectibleController
         }
       end
     else # failure (not a valid recipe) => return to new
-       response_service.title = "Cookmark a Recipe"
+       response_service.title = 'Cookmark a Recipe'
        @nav_current = :addcookmark
        @recipe.url = params[:recipe][:url]
        smartrender :action => 'new', mode: :modal
@@ -111,7 +111,7 @@ class RecipesController < CollectibleController
             end
           else
             @resource = @recipe
-            render "pages/resource_errors", response_service.render_params
+            render 'pages/resource_errors', response_service.render_params
           end
         else
           # Defer request, redirecting it for JSON

@@ -9,8 +9,16 @@ class SiteDecorator < CollectibleDecorator
     object.name
   end
 
-  def description
-    object.description
+  def title= t
+    object.name = t
+  end
+
+  def image
+    object.logo
+  end
+
+  def image=img
+    object.logo = img
   end
 
   def url
@@ -46,6 +54,7 @@ class SiteDecorator < CollectibleDecorator
     gleaning.extract1 'URI' do |value| object.home = value end
     gleaning.extract_all 'RSS Feed' do |value| object.assert_feed value end
     gleaning.extract1 'Title' do |value| object.name = value end
+    gleaning.extract1 'Description' do |value| object.description = value end
   end
 
   # When attributes are selected directly and returned as gleaning attributes, assert them into the model

@@ -71,17 +71,18 @@ handlerFor = (what, op) ->
 
 adjustHeader = ->
 	hdr = $('div.header')
-	formbottom = $('div.form-group.triggered-form', hdr)[0].getBoundingClientRect().bottom
-	# ## Find the padding-top style for the pagelet body, to shift it down--for now and for subsequent loads
-	$('div.pagelet-body').css 'padding-top', (formbottom + 'px')
-	for ss, ssix in document.styleSheets
-		do (ss) ->
-			if ss.title == 'pagelet-padding' # Which we have defined in the style declaration in application.html
-				for rule, ruleix in ss.rules
-					do (rule) ->
-						if rule.selectorText == 'div.pagelet-body'
-							if rule.style['padding-top'] != formbottom + 'px'
-								document.styleSheets[ssix].rules[ruleix].style['padding-top'] = formbottom + 'px'
+	if formitem = $('div.form-group.triggered-form', hdr)[0]
+		formbottom = formitem.getBoundingClientRect().bottom
+		# ## Find the padding-top style for the pagelet body, to shift it down--for now and for subsequent loads
+		$('div.pagelet-body').css 'padding-top', (formbottom + 'px')
+		for ss, ssix in document.styleSheets
+			do (ss) ->
+				if ss.title == 'pagelet-padding' # Which we have defined in the style declaration in application.html
+					for rule, ruleix in ss.rules
+						do (rule) ->
+							if rule.selectorText == 'div.pagelet-body'
+								if rule.style['padding-top'] != formbottom + 'px'
+									document.styleSheets[ssix].rules[ruleix].style['padding-top'] = formbottom + 'px'
 
 onReady = (evt) ->
 	# if handler = handlerFor this, 'onReady'

@@ -76,31 +76,29 @@ class Recipe < ActiveRecord::Base
       # Extractions are parameters derived directly from the page
       logger.debug "Extracted from #{params[:url]}:"
       extractions.each { |key, value| logger.debug "\t#{key}: #{value}" }
-      params = {
-          :description => extractions[:Description],
-          :url => (extractions[:URI] || extractions[:href]),
-          :picurl => extractions[:Image],
-          :title => extractions[:Title]
-      }.compact
-      if params.blank?
+      url = extractions[:URI] || extractions[:href] || params[:url]
+      uri = URI url
+      if uri.blank?
         rcp = self.new
       elsif (id = params[:id].to_i) && (id > 0) # id of 0 means create a new recipe
         begin
           rcp = Recipe.find id
         rescue => e
           rcp = self.new
-          rcp.errors.add :id, "There is no recipe number #{id.to_s}"
+          rcp.errors.add :id, 'There is no recipe number ' + params[:id]
         end
-      elsif !(rcp = RecipeReference.lookup_recipe params[:url]) # Try again to find based on the extracted url
+      elsif !(rcp = RecipeReference.lookup_recipe url) # Try again to find based on the extracted url
         # No id: create based on url
-        params.delete(:rcpref)
+        params.delete :rcpref
         # Assigning title and picurl must wait until the url (and hence the reference) is set
-        rcp = Recipe.new params.slice! :title, :picurl
-        rcp.update_attributes params # Now set the title
-        if rcp.url.match %r{^#{rp_url}} # Check we're not trying to link to a RecipePower page
-          rcp.errors.add :base, "Sorry, can't cookmark pages from RecipePower. (Does that even make sense?)"
+        rcp = Recipe.new
+        if uri.to_s.match %r{^#{rp_url}} # Check we're not trying to link to a RecipePower page
+          rcp.errors.add :base, 'Sorry, can\'t cookmark pages from RecipePower. (Does that even make sense?)'
         else
-          RecipeServices.new(rcp).robotags = extractions  # Set tags, etc., derived from page
+          rcp.url = url
+          rcp.decorate.extractions = extractions # Now set the title, description, etc.
+          # This recipe is initializing a site
+          rcp.site.decorate.extractions = extractions if uri.path == URI(rcp.site.home).path
         end
       end
     end
