@@ -5,16 +5,16 @@ class ListsController < CollectibleController
     @active_menu = :other_lists
     response_service.title =
     case @access = params[:access]
-      when "owned"
+      when 'owned'
         @active_menu = :my_lists
-        "My Lists"
-      when "collected"
-        @empty_msg = "As you add other people's lists to your collection, they will appear here."
-        "Collected Lists"
-      when "all"
-        "Every List There Is"
+        'My Lists'
+      when 'collected'
+        @empty_msg = 'As you add other people\'s lists to your collection, they will appear here.'
+        'Collected Lists'
+      when 'all'
+        'Every List There Is'
       else
-        "Available Lists"
+        'Available Lists'
     end
     smartrender 
   end

@@ -41,7 +41,7 @@ class RecipeServices
     if results = FinderServices.findings(@recipe.url, @recipe.site)
       results.labels.each { |label| puts "\t\t#{label}: #{results.result_for(label)}" }
     else
-      puts "!!! Couldn't open the page for analysis!"
+      puts '!!! Couldn\'t open the page for analysis!'
     end
     results
   end

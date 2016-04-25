@@ -58,7 +58,7 @@ class SitesController < CollectibleController
     if update_and_decorate
       @site.gleaning.attributes = params[:site][:gleaning_attributes]
       respond_to do |format|
-        format.html { redirect_to @site, notice: 'Site #{@site.name} was successfully updated.' }
+        format.html { redirect_to @site, notice: "Site #{@site.name} was successfully updated." }
         format.json {
           flash[:popup] = "#{@site.name} updated"
           render :update
@@ -83,22 +83,6 @@ class SitesController < CollectibleController
     respond_to do |format|
       format.html { redirect_to sites_url }
       format.json { head :ok }
-    end
-  end
-  
-  def scrape
-    if update_and_decorate
-      if url = params[:url]
-        if (@candidate_feeds = FeedServices.scrape_page @site, url).empty?
-          flash[:popup] = 'Couldn\'t find any feeds.'
-          render :errors
-        end
-      else
-        @site.glean
-      end
-    else
-      flash[:popup] = 'Couldn\'t make sense of URL'
-      render :errors
     end
   end
 end

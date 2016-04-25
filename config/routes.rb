@@ -124,7 +124,6 @@ RP::Application.routes.draw do
   resources :lists, except: [:index, :create], :concerns => [:picable, :taggable, :collectible] do
     member do
       post 'pin' # Add an entity to a list
-      get 'scrape'
       get 'contents'
     end
   end
@@ -133,7 +132,6 @@ RP::Application.routes.draw do
   post '/site' => 'sites#create', :as => 'create_site'
   resources :sites, except: [:index, :create], :concerns => [:picable, :collectible, :taggable] do
     member do
-      get 'scrape'
       post 'absorb'
       get 'feeds'
     end

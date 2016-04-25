@@ -1,42 +1,31 @@
 <%= form_for @recipe do |f| %>
     <%= form_errors_helper f, @recipe %>
-<!--
-    <div class="edit_recipe_field pic_picker_field">
-      <%# pic_field f %>
-    </div>
--->
-    <div class="recipe_fields_div">
-      <div class="recipe_title_div">
+    <div class="row">
+      <div class="col-md-12">
+        <%= gleaning_trigger @decorator %>
+
         <%= f.label :title, "Title", :class => "recipe_field_label" -%>
-        <% @recipe.title %>
-        <br><%= f.text_area :title, :rows => 3 %>
-      </div>
-      <% if permitted_to?(:admin, :recipes) %>
-          <div class="recipe_url_div">
+        <%= gleaning_field @decorator, 'Title' %>
+        <br><%= f.text_field :title, :label => false %>
+
+        <%= f.label :title, "Description", :class => "recipe_field_label" -%>
+        <%= gleaning_field @decorator, 'Description' %>
+        <br><%= f.text_area :description, :label => false %>
+        <% if permitted_to?(:admin, :recipes) %>
             <%= f.label :url, "URL", :class => "recipe_field_label" -%>
-            <br><%= f.text_area :url, :rows => 3 %>
-          </div>
-      <% end %>
-      <!--
-      <div class="recipe_status_div">
-        <%# f.label :status, "Status: ", :class => "recipe_field_label" -%>
-        <%# f.select :status, Recipe.status_select %>
-        <%# f.check_box :private %>
-        <%# f.label :private, "Private (for my eyes only)" %>
-        <%# f.label :privacy, "Privacy: ",:class=>"recipe_field_label" -%>
-        <%# f.select :privacy, Recipe.privacy_select %>
+            <br><%= f.url_field :url %>
+        <% end %>
       </div>
--->
     </div>
     <div class="modal-footer">
       <% if permitted_to?(:admin, :recipes) && response_service.admin_view? %>
           <% link_to_submit "Destroy This Recipe",
-                                 @decorator.object_path,
-                                 :class => "pull-left",
-                                 :style => 'color: #dddddd;',
-                                 :button_style => :danger,
-                                 :method => :delete,
-                                 confirm: "This will permanently remove the #{@decorator.human_name} from RecipePower for good: it can't be undone. Are you absolutely sure you want to do this?" %>
+                            @decorator.object_path,
+                            :class => "pull-left",
+                            :style => 'color: #dddddd;',
+                            :button_style => :danger,
+                            :method => :delete,
+                            confirm: "This will permanently remove the #{@decorator.human_name} from RecipePower for good: it can't be undone. Are you absolutely sure you want to do this?" %>
       <% end %>
       <%= dialog_submit_button %>
       <%= dialog_cancel_button %>
