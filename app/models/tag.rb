@@ -244,7 +244,6 @@ class Tag < ActiveRecord::Base
       return nil if tag.nil?
     end
     # Now we've found/created a tag, we need to ensure it's the right type (if we care)
-    puts "Found tag #{tag.name} (type #{tag.tagtype.to_s}) on key #{tag.id.to_s} using key #{t.to_s} and type #{opts[:tagtype].to_s}"
     unless tag.typematch opts[:tagtype]
       # Clone the tag for another type, but if it's a free tag, just change types
       tag = tag.dup if tag.tagtype != 0 # If free tag, just change type

@@ -40,7 +40,7 @@ class UsersController < CollectibleController
   # Add a user to the friends of the current user
   def follow
     if current_user
-      update_and_decorate # Generate a FeedEntryDecorator as @feed_entry and prepares it for editing
+      update_and_decorate 
       if current_user.follows? @user
         current_user.followees.delete @user
         msg = "You're no longer following '#{@user.handle}'."

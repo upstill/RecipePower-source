@@ -44,6 +44,15 @@ class ResponseServices
     @user ||= @controller_instance.current_user_or_guest
   end
 
+  # What model is the controller addressing?
+  def controller_model_class
+    controller_model_name.camelize.constantize
+  end
+
+  def controller_model_name
+    @controller.singularize
+  end
+
   # Provide a URL that reproduces the current request
   def originator
     unless @originator

@@ -13,9 +13,9 @@ class ApplicationController < ActionController::Base
 
   before_filter :check_flash
   before_filter :report_cookie_string
-  before_filter { logger.info "Before controller:"; report_session }
+  before_filter { logger.info 'Before controller:'; report_session }
   # after_filter :log_serve
-  after_filter { logger.info "After controller:"; report_session }
+  after_filter { logger.info 'After controller:'; report_session }
   before_filter :setup_response_service
 
   helper :all
@@ -36,7 +36,7 @@ class ApplicationController < ActionController::Base
   helper_method :resource_errors_to_flash
   helper_method :resource_errors_to_flash_now
   helper_method :with_format
-  helper_method :"permitted_to?"
+  helper_method :'permitted_to?'
 
   include ApplicationHelper
 
@@ -61,8 +61,8 @@ class ApplicationController < ActionController::Base
       # If the entity is provided, ignore parameters
       modelname = entity.class.to_s.underscore
     else # If entity not provided, find/build it and update attributes
-      modelname = params[:controller].sub(/_controller$/, '').singularize
-      objclass = modelname.camelize.constantize
+      modelname = response_service.controller_model_name # params[:controller].sub(/_controller$/, '').singularize
+      objclass = response_service.controller_model_class
       entity = params[:id] ? objclass.find(params[:id]) : objclass.new
       attribute_params = params[modelname.to_sym]
     end

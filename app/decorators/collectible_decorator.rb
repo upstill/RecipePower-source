@@ -40,23 +40,26 @@ class CollectibleDecorator < Draper::Decorator
     gleaning.extract1 'Description' do |value| self.description = value end
   end
 
-  def extractions= extractions
-    self.title = extractions[:Title] if extractions[:Title].present?
-    if extractions[:Image].present? && self.image.blank?
-      self.image = extractions[:Image]
+  # Here's where we incorporate findings from a page into the corresponding entity
+  def findings= findings
+    if findings.result_for('Title').present?
+      self.title = findings.result_for('Title')
+      title_changed = true
+    end
+    if findings.result_for('Image').present? && self.image.blank?
+      self.image = findings.result_for('Image')
       image_changed = image.present?
     end
-    self.description = extractions[:Description] if extractions[:Description].present? && description.blank?
-    save if id.nil? || image_changed || title_changed? || description_changed? # No other extractions need apply until saved
+    self.description = findings.result_for('Description') if findings.result_for('Description').present? && description.blank?
+    save if id.nil? || image_changed || title_changed || description_changed? # No other extractions need apply until saved
     ts = nil
-    if author = extractions['Author Name']
+    if author = findings.result_for('Author Name')
       ts ||= TaggingServices.new object
       ts.tag_with author, User.super_id, type: 'Author'
     end
-    if tagstring = extractions['Tags']
+    if tagstring = findings.result_for('Tags')
       ts ||= TaggingServices.new object
-      tagstrings = tagstring.sub(/\[(.*)\]$/, '\1').sub(/"(.*)"$/, '\1').split( '","').map &:strip
-      tagstrings.each { |tagname| ts.tag_with tagname, User.super_id }
+      tagstring.split(',').map(&:strip).each { |tagname| ts.tag_with tagname, User.super_id }
     end
   end
 

@@ -59,6 +59,8 @@ class Recipe < ActiveRecord::Base
   # If a new recipe record needs to be created, we also do QA on the provided URL
   # and dig around for a title, description, etc.
   # Either way, we also make sure that the recipe is associated with the given user
+  # NB This functionality moved to CollectibleServices
+=begin
   def self.ensure params, extractions = nil
     if params[:id]
       # Recipe exists and we're just touching it for the user
@@ -79,7 +81,7 @@ class Recipe < ActiveRecord::Base
       url = extractions[:URI] || extractions[:href] || params[:url]
       uri = URI url
       if uri.blank?
-        rcp = self.new
+        rcp = Recipe.new
       elsif (id = params[:id].to_i) && (id > 0) # id of 0 means create a new recipe
         begin
           rcp = Recipe.find id
@@ -96,14 +98,18 @@ class Recipe < ActiveRecord::Base
           rcp.errors.add :base, 'Sorry, can\'t cookmark pages from RecipePower. (Does that even make sense?)'
         else
           rcp.url = url
-          rcp.decorate.extractions = extractions # Now set the title, description, etc.
-          # This recipe is initializing a site
-          rcp.site.decorate.extractions = extractions if uri.path == URI(rcp.site.home).path
+          if uri.path == URI(rcp.site.home).path
+            rcp.site.decorate.extractions = extractions
+            return rcp.site
+          else
+            rcp.decorate.extractions = extractions # Now set the title, description, etc.
+          end
         end
       end
     end
     rcp
   end
+=end
 
   # Absorb another recipe
   def absorb other, destroy=true
