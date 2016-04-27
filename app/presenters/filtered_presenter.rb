@@ -500,7 +500,7 @@ class UserContentPresenter < FilteredPresenter
         [ 'lists.collected' ]
       when 'lists.collected'
         [ 'lists.owned' ]
-      when 'recipes', 'lists', 'feeds', 'friends'
+      when 'lists', 'feeds', 'friends', 'cookmarks' #, 'recipes'
         %w{ lists cookmarks feeds friends } - [result_type]
       else
         super

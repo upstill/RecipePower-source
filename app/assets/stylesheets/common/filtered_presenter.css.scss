@@ -47,7 +47,7 @@ div.collection-label {
   font-weight: 200;
   margin-top: 0.4em;
   margin-bottom: 0.4em;
-  &.recipes {
+  &.cookmarks {
     color: $recipes-navtab-text-color;
   }
   &.lists {
@@ -99,7 +99,7 @@ div.header-element {
   &.collection-nav {
     padding: 0.5em;
     margin: 0.8em;
-    &.recipes {
+    &.cookmarks {
       color: rgba($recipes-navtab-text-color, 0.6);
       background: $recipes-panel-background-color;
       div.navlink a {
@@ -223,7 +223,7 @@ div.header-element {
   }
   a.result-link {
     font-size: 1.5em;
-    &.recipes {
+    &.cookmarks {
       color: $recipes-navtab-text-color;
     }
     &.lists {

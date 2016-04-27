@@ -14,7 +14,7 @@ div.results-panel {
   width: 100%;
   margin-left: 1em;
   margin-bottom: 15px;
-  &.recipes {
+  &.cookmarks {
     background-color: $recipes-panel-background-color;
     color: $recipes-panel-label-color;
   }
@@ -99,8 +99,9 @@ div.results-panel {
       font-family: $oswald-light;
       font-weight: 400;
       text-align: right;
-      &.recipes {
+      &.cookmarks {
         color: $recipes-panel-label-color;
+        font-size: 57px;
       }
       &.feeds {
         color: $feeds-panel-label-color;

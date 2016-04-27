@@ -115,7 +115,7 @@ div.slider {
         height: 2em;
         bottom: 0;
         right: 0;
-        z-index: $slider-fader-depth; // $recipes-panel-background-color: #d8dde0;
+        z-index: $slider-fader-depth; 
       }
     }
     div.slider-right {
@@ -235,7 +235,7 @@ div.slider {
   }
 }
 
-div.results-panel.recipes div.slider-fader {
+div.results-panel.cookmarks div.slider-fader {
   background: -moz-linear-gradient(left, $recipes-panel-background-transparent, $recipes-panel-background-color);
   // background: -webkit-linear-gradient(left, rgba(216,224,226,0), #d8dde0);
   background: rgb(216, 221, 224); /* Old browsers */

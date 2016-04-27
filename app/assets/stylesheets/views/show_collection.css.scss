@@ -2,7 +2,7 @@ div.collection-header {
   div.collection_nav {
     padding: 0.5em;
     margin: 0.8em;
-    &.recipes {
+    &.cookmarks {
       background: $recipes-panel-background-color;
       div.navlink a {
         color: $recipes-navtab-text-color;
@@ -82,7 +82,7 @@ div.collection-header {
           font-size: 1.1em;
           color: #d0d0d0;
         }
-        &.recipes {
+        &.cookmarks {
           color: $recipes-navtab-text-color;
         }
         &.lists {
