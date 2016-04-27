@@ -2,6 +2,10 @@ class CollectibleDecorator < Draper::Decorator
   include Templateer
   delegate_all
 
+  def attribute_for what
+    what.to_sym
+  end
+
   # sample_page is a full URL somewhere on the associated site so we can absolutize links
   def sample_page
 

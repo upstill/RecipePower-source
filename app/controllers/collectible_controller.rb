@@ -76,7 +76,7 @@ class CollectibleController < ApplicationController
   # PATCH tag
   def tag
     if current_user
-      params.delete :recipe if request.method == "GET" # We're not saving anything otherwise
+      params.delete :recipe if request.method == 'GET' # We're not saving anything otherwise
       update_and_decorate
       unless @decorator.errors.any? || @decorator.collectible_collected? # Ensure that it's collected before editing
         @decorator.be_collected
@@ -132,8 +132,8 @@ class CollectibleController < ApplicationController
   # Since that entity will now be at the head return a new first item in the list.
   def touch
     # If all is well, make sure it's on the user's list
-    @entity = CollectibleServices.find_or_create(params.slice(:id, :url), response_service.controller_model_class)
-    if update_and_decorate(@entity) # May be defined by a subclass before calling up the chain
+    @resource = CollectibleServices.find_or_create(params.slice(:id, :url), response_service.controller_model_class)
+    if update_and_decorate(@resource) # May be defined by a subclass before calling up the chain
       if current_user
         current_user.touch @decorator.object
         flash[:popup] = "Snap! Touched #{@decorator.human_name} #{@decorator.title}." unless params[:silent]
@@ -179,13 +179,13 @@ class CollectibleController < ApplicationController
     # and also invoke the 'new cookmark' dialog. The difference is whether
     # parameters are supplied for url, title and note (though only URI is required).
     if params[:url] &&
-        (@entity = CollectibleServices.find_or_create params.slice(:url), response_service.controller_model_class) &&
-        @entity.id # A fetched/successfully saved item has an id
-      current_user.collect @entity if current_user # Add to the current user's collection
-      report_entity( default_next_path, truncate( @entity.decorate.title, :length => 100)+' now appearing in your collection.', formats)
+        (@resource = CollectibleServices.find_or_create params.slice(:url), response_service.controller_model_class) &&
+        @resource.id # A fetched/successfully saved item has an id
+      current_user.collect @resource if current_user # Add to the current user's collection
+      report_entity( default_next_path, truncate( @resource.decorate.title, :length => 100)+' now appearing in your collection.', formats)
     else
       response_service.title = 'Cookmark a Recipe'
-      update_and_decorate (@entity || response_service.controller_model_class.new), true
+      update_and_decorate (@resource || response_service.controller_model_class.new), true
       smartrender
     end
   end
@@ -194,14 +194,14 @@ class CollectibleController < ApplicationController
   def create # Take a URL, then either lookup or create the entity
     # return if need_login true
     # Find the recipe by URI (possibly correcting same), and bind it to the current user
-    @entity = CollectibleServices.find_or_create params[response_service.controller_model_name],
+    @resource = CollectibleServices.find_or_create params[response_service.controller_model_name],
                                                  response_service.controller_model_class
-    update_and_decorate @entity, true
-    if @decorator.errors.empty? # Success (valid recipe, either created or fetched)
-      current_user.collect @decorator.object if current_user  # Add to collection
+    update_and_decorate @resource, true
+    if @resource.errors.empty? # Success (valid recipe, either created or fetched)
+      current_user.collect @resource if current_user  # Add to collection
       respond_to do |format|
         format.html { # This is for capturing a new recipe and tagging it using a new page.
-          session[:recipe_pending] = @decorator.id
+          session[:recipe_pending] = @resource.id
           redirect_to default_next_path
         }
         format.json {
@@ -212,7 +212,7 @@ class CollectibleController < ApplicationController
         }
       end
     else # failure (not a valid collectible) => return to new
-      response_service.title = 'Cookmark a ' + @decorator.object.class.to_s
+      response_service.title = 'Cookmark a ' + @resource.class.to_s
       @nav_current = :addcookmark
       @decorator.url = params[response_service.controller_model_name][:url]
       smartrender :action => 'new', mode: :modal
@@ -227,18 +227,22 @@ class CollectibleController < ApplicationController
     respond_to do |format|
       format.html { # This is for capturing a new recipe and tagging it using a new page.
         if current_user
-          update_and_decorate CollectibleServices.find_or_create(params[:recipe]||{}, params[:extractions]), true
-          if @recipe.id
-            current_user.collect @recipe
+          @resource = CollectibleServices.find_or_create params[response_service.controller_model_name]||{},
+                                                         params[:extractions],
+                                                         response_service.controller_model_class
+          update_and_decorate @resource, true
+          if @resource.id
+            current_user.collect @resource
             if response_service.injector?
               smartrender :action => :tag
             else
               # If we're collecting a recipe outside the context of the iframe, redirect to
               # the collection page with an embedded modal dialog invocation
-              redirect_to_modal tag_recipe_path(@recipe)
+              tag_path = send "tag_#{response_service.controller_model_name}_path", @resource
+              tag_path = polymorphic_path [:tag, @resource]
+              redirect_to_modal tag_path
             end
           else
-            @resource = @recipe
             render 'pages/resource_errors', response_service.render_params
           end
         else
@@ -248,13 +252,16 @@ class CollectibleController < ApplicationController
       }
       format.json {
         if current_user
-          update_and_decorate CollectibleServices.find_or_create(params[:recipe]||{}, params[:extractions]), true
-          if @recipe.id && @recipe.errors.empty?
-            current_user.collect @recipe
+          @resource = CollectibleServices.find_or_create params[response_service.controller_model_name]||{},
+                                                         params[:extractions],
+                                                         response_service.controller_model_class
+          update_and_decorate @resource, true
+          if @resource.id && @resource.errors.empty?
+            current_user.collect @resource
             # Recipe all captured and everything. Let's go tag it.
             smartrender :action => :tag
           else
-            render :errors, locals: { entity: @recipe }
+            render :errors, locals: { entity: @resource }
           end
         else
           login_required
@@ -289,27 +296,27 @@ class CollectibleController < ApplicationController
   end
 
     # Render to html, json or js the results of a recipe manipulation
-    def report_entity( url, notice, formats, destroyed = false)
-      respond_to do |fmt|
-        fmt.html {
-          if response_service.injector?
-            render text: notice
-          else
-            redirect_to url, :notice  => notice
-          end
-        }
-        fmt.json {
-          if response_service.injector?
-            flash[:notice] = notice
-            render :errors, locals: { entity: @recipe }
-          else
-            render :update, locals: { destroyed: destroyed, notice: notice, entity: @recipe }
-          end
-        }
-        fmt.js {
-          render text: @recipe.title
-        }
-      end
+  def report_entity(url, notice, formats, destroyed = false)
+    respond_to do |fmt|
+      fmt.html {
+        if response_service.injector?
+          render text: notice
+        else
+          redirect_to url, :notice => notice
+        end
+      }
+      fmt.json {
+        if response_service.injector?
+          flash[:notice] = notice
+          render :errors, locals: {entity: @recipe}
+        else
+          render :update, locals: {destroyed: destroyed, notice: notice, entity: @recipe}
+        end
+      }
+      fmt.js {
+        render text: @recipe.title
+      }
     end
+  end
 
 end

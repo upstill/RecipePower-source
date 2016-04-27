@@ -30,10 +30,8 @@ class CollectibleServices
       if extractions
         # Translate the extractions into Finder results
         findings = FinderServices::Results.new *extractions.keys
-        tagstrings = tagstring.sub(/\[(.*)\]$/, '\1').sub(/"(.*)"$/, '\1').split( '","').map(&:strip).join ','
-        extractions.each { |key, value|
-          findings.assert_result key, value
-        }
+        # tagstrings = tagstring.sub(/\[(.*)\]$/, '\1').sub(/"(.*)"$/, '\1').split( '","').map(&:strip).join ','
+        extractions.each { |key, value| findings.assert_result key, value }
       else
         findings = FinderServices.findings params[:url]
         if findings.empty?

@@ -79,9 +79,9 @@ class ApplicationController < ActionController::Base
       @decorator = (entity.decorate if entity.respond_to? :decorate)
     end
     if entity.respond_to? :title
-      response_service.title = (entity.title || "").truncate(20)
+      response_service.title = (entity.title || '').truncate(20)
     elsif @decorator && @decorator.respond_to?(:title)
-      response_service.title = (@decorator.title || "").truncate(20)
+      response_service.title = (@decorator.title || '').truncate(20)
     end
     entity.errors.empty? # ...and report back status
   end

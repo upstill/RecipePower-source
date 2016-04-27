@@ -6,10 +6,10 @@
       <div class="edit_recipe_field pic_picker_field">
         <%= pic_field f,
                       :decorator => @decorator,
-                      :fallback_img => image_path("PickPicture.png"),
+                      :fallback_img => image_path('PickPicture.png'),
                       :nopicker => true %>
       </div>
-      <% if @entity.picurl.blank? %>
+      <% if @decorator.image.blank? %>
           <p>Click a picture to file it with the recipe.</p>
       <% else %>
           <p>Prefer another picture?<br/>Click one!</p>
@@ -18,27 +18,27 @@
 
     <div class="middle">
       <div class="notifications-panel">
-        <%= flash_notifications_div "flash_notifications", false %>
+        <%= flash_notifications_div 'flash_notifications', false %>
       </div>
       <div class="edit_recipe_field" >
-        <%= f.label :title, "Title" -%>
-        <% @entity.title %>
+        <%= f.label @decorator.attribute_for(:title), 'Title' -%>
+        <% @decorator.title %>
         <div class="edit_recipe_field_textarea">
           <div class="expandingArea">
             <pre><span></span><br></pre>
-            <%= f.text_area :title, rows: "1" -%>
+            <%= f.text_area @decorator.attribute_for(:title), rows: '1' -%>
           </div>
         </div>
       </div>
 
-      <%= taggable_div f, :attribute_name => :tagging_tags, :label => "Tag(s)" %>
+      <%= taggable_div f, :attribute_name => :tagging_tags, :label => 'Tag(s)' %>
 
       <div class="edit_recipe_field" >
-        <%= f.label :comment, "Notes" -%>
+        <%= f.label :comment, 'Notes' -%>
         <div class="edit_recipe_field_textarea">
           <div class="expandingArea">
             <pre><span></span><br></pre>
-            <%= f.text_area :collectible_comment, rows: "1", placeholder: "What are your thoughts about this recipe?" -%>
+            <%= f.text_area :collectible_comment, rows: '1', placeholder: 'What are your thoughts about this recipe?' -%>
           </div>
         </div>
       </div>
@@ -47,9 +47,9 @@
     <div class="right">
       <div class="edit_recipe_field ">
         <%= f.check_box :collectible_private %>
-        <%= f.label :collectible_private, "Private" %>
+        <%= f.label :collectible_private, 'Private' %>
       </div>
-      <%= f.submit "Save", class: "btn btn-success" %>
+      <%= f.submit 'Save', class: 'btn btn-success' %>
       <%# button_to "Forget It", remove_recipe_path(@entity), class: "btn btn-sm btn-success" %>
       <%= hidden_field_tag 'layout', 'injector' %>
     </div>

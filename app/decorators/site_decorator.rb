@@ -5,6 +5,19 @@ class SiteDecorator < CollectibleDecorator
 
   # Standard accessors for model attributes
 
+  def attribute_for what
+    case what
+      when :title, 'title'
+        :name
+      when :image, 'image'
+        :logo
+      when :url, 'url'
+        :home
+      else
+        super
+    end
+  end
+
   def title
     object.name
   end
