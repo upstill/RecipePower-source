@@ -242,6 +242,7 @@ module CollectionCache
   include ResultTyping
 
   def itemscope
+    # :entity_type => %w{ Recipe Site FeedEntry },
     @itemscope ||= user.collection_scope( { :in_collection => true }.merge result_type.entity_params)
   end
 
@@ -252,11 +253,11 @@ module CollectionCache
       when :ratings
       when :popularity
       when :updated
-        sort_attribute = %Q{"#{sort_table_name}"."updated_at"}
-        uniqueitemscope.joins(sort_table_name.to_sym).order("#{sort_attribute} #{@sort_direction || 'DESC'}")
+        ## sort_attribute = %Q{"#{sort_table_name}"."updated_at"}
+        ## uniqueitemscope.joins(sort_table_name.to_sym).order("#{sort_attribute} #{@sort_direction || 'DESC'}")
       when :newest
-        sort_attribute = %Q{"#{sort_table_name}"."created_at"}
-        uniqueitemscope.joins(sort_table_name.to_sym).order("#{sort_attribute} #{@sort_direction || 'DESC'}")
+        ## sort_attribute = %Q{"#{sort_table_name}"."created_at"}
+        ## uniqueitemscope.joins(sort_table_name.to_sym).order("#{sort_attribute} #{@sort_direction || 'DESC'}")
       when :viewed
         uniqueitemscope.order('"rcprefs"."updated_at"' + (@sort_direction || 'DESC'))
       when :random

@@ -105,7 +105,7 @@ class ViewParams
         %Q{#{is_me ? 'my' : salutation+'\'s'} #{panel_label}}
       else
         case result_type
-          when 'recipes'
+          when 'recipes', 'cookmarks'
             is_me ? "#{panel_label} I've collected" : "#{panel_label} collected by #{salutation}"
           when 'lists.owned'
             is_me ? "my own #{panel_label}" : "#{salutation}'s own #{panel_label}"
@@ -430,7 +430,7 @@ class SearchIndexPresenter < FilteredPresenter
   end
 
   def sibling_types
-    %w{ lists recipes feeds users } - [ result_type ]
+    %w{ lists recipes feeds users sites } - [ result_type ]
   end
 
   def header_partial
@@ -488,7 +488,7 @@ class UserContentPresenter < FilteredPresenter
       when 'lists'
         %w{ lists.owned lists.collected }
       when 'collection'
-        %w{ recipes lists feeds friends }
+        %w{ cookmarks lists feeds friends }
       else
         super
     end
@@ -501,7 +501,7 @@ class UserContentPresenter < FilteredPresenter
       when 'lists.collected'
         [ 'lists.owned' ]
       when 'recipes', 'lists', 'feeds', 'friends'
-        %w{ lists recipes feeds friends } - [result_type]
+        %w{ lists cookmarks feeds friends } - [result_type]
       else
         super
     end

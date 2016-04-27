@@ -40,7 +40,15 @@ class ResultType < String
   end
 
   def entity_params
-    @entity_params ||= self.present? ? { entity_type: self.model_name } : { }
+    @entity_params ||=
+        case root
+          when '', nil
+            { }
+          when 'cookmarks'
+            { entity_type: %w{ Recipe Site FeedEntry } }
+          else
+            { entity_type: self.model_name }
+        end
   end
 
   # Express a user-friendly name string as a class name for purposes of naming a result_type
