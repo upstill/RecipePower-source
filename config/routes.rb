@@ -192,7 +192,6 @@ RP::Application.routes.draw do
   get 'notifications/accept'
   patch 'notifications/act'
 
-  resources :thumbnails
   resources :feedback, :only => [:new, :create]
   resources :expressions
   resources :referents

@@ -11,18 +11,18 @@ class Reference < ActiveRecord::Base
   validates_uniqueness_of :url, :scope => :type
 
   typeable( :reference_type,
-    Article: ["Article", 1],
-    Newsitem: ["News Item", 2],
-    Tip: ["Tip", 4],
-    Video: ["Video", 8],
-    Definition: ["Glossary Entry", 16],
-    Homepage: ["Home Page", 32],
-    Product: ["Product", 64],
-    Offering: ["Offering", 128],
-    Recipe: ["Recipe", 256],
-    Image: ["Image", 512],
-    Site: ["Site", 1024],
-    Event: ["Event", 2048]
+    Article: ['Article', 1],
+    Newsitem: ['News Item', 2],
+    Tip: ['Tip', 4],
+    Video: ['Video', 8],
+    Definition: ['Glossary Entry', 16],
+    Homepage: ['Home Page', 32],
+    Product: ['Product', 64],
+    Offering: ['Offering', 128],
+    Recipe: ['Recipe', 256],
+    Image: ['Image', 512],
+    Site: ['Site', 1024],
+    Event: ['Event', 2048]
   )
 
   public
