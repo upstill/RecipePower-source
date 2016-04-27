@@ -123,15 +123,15 @@ class UserPresenter < CollectiblePresenter
         end
         label = answer.question.name if answer
       when :latest_recipe
-        label = 'Latest Recipe'
-        if latestrr = @decorator.collection_pointers(Recipe,current_user_or_guest).order(created_at: :desc).first
+        label = 'Latest Cookmark'
+         if latestrr = @decorator.collection_pointers([Recipe, Site, FeedEntry],current_user_or_guest).order(created_at: :desc).first
           latest = latestrr.entity
           contents = collectible_show_thumbnail latest.decorate
         elsif current_user && user == current_user
           contents = "No recipes yet—so install the #{link_to_submit 'Cookmark Button', '/popup/starting_step2', :mode => :modal} and go get some!".html_safe
         end
       when :latest_list
-        label = 'Latest Treasury'
+        label = 'Newest Treasury'
         if latest = user.decorate.owned_lists(current_user_or_guest).order(updated_at: :desc).first
           contents = link_to_submit latest.name, list_path(latest)
         else

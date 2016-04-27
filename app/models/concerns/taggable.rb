@@ -73,7 +73,7 @@ module Taggable
 
   # Return the editable tags, i.e. not collections or lists
   def tagging_tags
-    filtered_tags(:tagtype_x => [ :Collection, :List])
+    filtered_tags(:tagtype_x => :List)
   end
 
   # Provide the tags of appropriate types for the user identified by @tagging_user_id
@@ -99,7 +99,7 @@ module Taggable
 
   protected
 
-  # Fetch the tags associated with the entity, with various optional constraints (including userid via @taggable_user_id)
+  # Fetch the tags associated with the entity, with various optional constraints (including userid via @tagging_user_id)
   # Options:
   # :tagtype: one or more types to be applied
   # :tagtype_x: one or more types to be ignored
@@ -109,7 +109,7 @@ module Taggable
     tagscope = tagscope.where(tagtype: Tag.typenum(opts[:tagtype])) if opts[:tagtype]
     tagscope = tagscope.where.not(tagtype: Tag.typenum(opts[:tagtype_x])) if opts[:tagtype_x]
     tagging_constraints = opts.slice(:user_id).merge entity: self
-    tagging_constraints[:user_id] ||= @taggable_user_id if @taggable_user_id
+    tagging_constraints[:user_id] ||= @tagging_user_id if @tagging_user_id
     tagscope.joins(:taggings).where(taggings: tagging_constraints).uniq
   end
 

@@ -52,14 +52,19 @@ class UserDecorator < CollectibleDecorator
     object.alias || object
   end
 
-  # Get the user's Rcprefs that point to a given entity_type and/or are visible by a specific user
-  def collection_pointers entity_type=nil, viewer=user
-    if entity_type.is_a? User
-      entity_type, viewer = nil, entity_type
+  # Get the user's Rcprefs that point to a given entity_type (or types, in an Array) and/or are visible by a specific user
+  def collection_pointers entity_type_or_types=nil, viewer=user
+    if entity_type_or_types.is_a? User
+      entity_type_or_types, viewer = nil, entity_type_or_types
     end
     scope = (viewer == user) ? user.collection_pointers : user.public_pointers
-    scope = (scope.where entity_type: entity_type.to_s) if entity_type
-    scope
+    if entity_type_or_types.is_a? Array
+      scope.where entity_type: entity_type_or_types.map(&:to_s)
+    elsif entity_type_or_types
+      scope.where entity_type: entity_type_or_types.to_s
+    else
+      scope
+    end
   end
 
   # Return the set of entities of a given type that the user has collected, as visible to some other
