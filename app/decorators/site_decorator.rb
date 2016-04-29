@@ -30,10 +30,6 @@ class SiteDecorator < CollectibleDecorator
     object.logo
   end
 
-  def update_picture_as_necessary
-    super thumbnail
-  end
-
   def image=img
     object.logo = img
   end

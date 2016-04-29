@@ -37,21 +37,6 @@ class CollectibleDecorator < Draper::Decorator
     end
   end
 
-  def update_picture_as_necessary picref=(object.respond_to?(:picture) && object.picture)
-    if picref
-      if picref.updated_at < (Time.now - 1.minute)
-        old = picref.thumbdata
-        picref.thumbdata = nil
-        picref.perform
-        if picref.thumbdata
-          picref.save
-        else
-          picref.thumbdata = old
-        end
-      end
-    end
-  end
-
   # Process the results of a gleaning
   def assert_gleaning gleaning
     gleaning.extract1 'Title' do |value| self.title = value end

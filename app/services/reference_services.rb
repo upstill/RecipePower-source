@@ -2,7 +2,7 @@ class ReferenceServices
 
   attr_accessor :reference
 
-  delegate :url, :thumbdata, :to => :reference # , :reference_type
+  delegate :url, :to => :reference # , :reference_type
 
   def initialize(reference)
     self.reference = reference

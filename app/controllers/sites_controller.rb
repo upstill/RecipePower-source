@@ -58,7 +58,6 @@ class SitesController < CollectibleController
     if update_and_decorate
       @site.gleaning.attributes = params[:site][:gleaning_attributes]
       # @decorator.gleaning.attributes = params[@decorator.object.class.to_s.underscore][:gleaning_attributes] if @decorator.object.is_a?(Linkable)
-      @decorator.update_picture_as_necessary if @decorator.object.is_a?(Picable)
       respond_to do |format|
         format.html { redirect_to @site, notice: "Site #{@site.name} was successfully updated." }
         format.json {
