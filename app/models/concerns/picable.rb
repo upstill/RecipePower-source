@@ -5,8 +5,8 @@ module Picable
 
   module ClassMethods
 
-    def picable attribute, reference_name=:picture, fallback_img_file="NoPictureOnFile.png"
-      linkable attribute, reference_name, :as => "ImageReference"
+    def picable attribute, reference_name=:picture, fallback_img_file='NoPictureOnFile.png'
+      linkable attribute, reference_name, :as => 'ImageReference'
       self.class_eval do
         define_singleton_method :image_reference_name do
           reference_name

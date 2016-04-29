@@ -82,15 +82,17 @@ module Linkable
       self.instance_eval do
 
         # Glean info from the page in background as a DelayedJob job
-        define_method 'glean' do |now=false|
+        # force => do the job even if it was priorly complete
+        define_method 'glean' do |force=false|
           create_gleaning unless gleaning
-          gleaning.fire now
+          gleaning.bkg_enqueue force
         end
 
         # Glean info synchronously, i.e. don't return until it's done
-        define_method 'glean!' do |now=false|
+        # force => do the job even if it was priorly complete
+        define_method 'glean!' do |force=false|
           create_gleaning unless gleaning
-          gleaning.ensure now
+          gleaning.bkg_perform force
         end
 
         # Whenever a reference is added, we ensure that it gets to the same site

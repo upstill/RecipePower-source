@@ -9,6 +9,6 @@ class GleaningsController < ApplicationController
 
   def show
     update_and_decorate
-    @gleaning.ensure
+    @gleaning.bkg_perform
   end
 end

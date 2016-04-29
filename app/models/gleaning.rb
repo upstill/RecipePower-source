@@ -1,10 +1,12 @@
 class Gleaning < ActiveRecord::Base
+  include Backgroundable
+
+  backgroundable :status
+
   require 'finder_services.rb'
   belongs_to :entity, :polymorphic => true
 
-  attr_accessible :entity, :results, :status
-
-  enum status: [ :virgin, :pending, :processing, :good, :bad ]
+  attr_accessible :entity, :results
 
   attr_accessor :decorator # Decorator corresponding to entity
 
@@ -24,58 +26,17 @@ class Gleaning < ActiveRecord::Base
     gleaning
   end
 
-  # Execute a gleaning on the given url
+  def perform
+    go entity.decorate.url, entity.site
+  end
+
+  # Execute a gleaning on the given url, RIGHT NOW (maybe in an asynchronous execution, maybe not)
   def go url, site=nil, *labels
     if site.is_a? String
       labels.unshift site
       site = nil
     end
-    begin
-      if self.results = FinderServices.findings(url, site, *labels)
-        good!
-      else
-        bad!
-      end
-    rescue Exception => e
-      errors.add 'url', "analyzing page '#{url}': #{e}."
-      bad!
-    end
-    good?
-  end
-
-  def perform
-    if virgin? || pending?
-      # Lock during processing
-      processing!
-      save
-      go entity.decorate.url, entity.site
-      save
-    end
-  end
-
-  # Fire off worker process to glean results, if needed
-  def fire force=false
-    if virgin? || (force && !(pending? || processing?))
-      pending!
-      save
-      Delayed::Job.enqueue self
-    end
-    pending?
-  end
-
-  # Glean results asynchronously, returning only when status is definitive (good or bad)
-  def ensure force=false
-    if virgin? || pending? # Run the scrape process right now
-      perform
-    elsif processing? # Wait for scraping to return
-      until !processing?
-        sleep 1
-        reload
-      end
-    elsif force
-      pending!
-      perform
-    end
+    bkg_execute do self.results = FinderServices.findings(url, site, *labels) end || errors.add('url', "analyzing page '#{url}': #{e}.")
     good?
   end
 

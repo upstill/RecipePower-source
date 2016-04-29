@@ -39,16 +39,6 @@ class FeedsController < CollectibleController
     smartrender
   end
 
-  def update
-    update_and_decorate
-    if resource_errors_to_flash @decorator.object
-      render :edit
-    else
-      flash[:popup] = "#{@decorator.human_name} is saved"
-      render :update
-    end
-  end
-
   # GET /feeds/new
   # GET /feeds/new.json
   def new

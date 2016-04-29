@@ -341,19 +341,13 @@ class ImageReference < Reference
           when /^data:/
             self.find_by(thumbdata: url) || self.new(url: self.fake_url, thumbdata: url)
           when nil
-          when ""
+          when ''
           else
             candidates = super # Find by the url
             candidates.map { |candidate|
               # Queue the ref up to get data for the url as necessary and appropriate
-              if !candidate.thumbdata && candidate.usable_url(true)
-                candidate.save unless candidate.id
-                if Rails.env.production?
-                  Delayed::Job.enqueue(candidate, priority: 5)
-                else
-                  candidate.perform  # Go get it right now.
-                end
-              end
+              candidate.save unless candidate.id
+              candidate.dothumb unless candidate.thumbdata
             }
             # Check all the candidates for a data: URL, and return the canonical one or the first one, if none is canonical
             candidates.find &:canonical || candidates.first
@@ -367,32 +361,38 @@ class ImageReference < Reference
   end
   # alias_method :digested_reference, :imgdata
 
-  # Try to fetch the thumbnail data for the record. Status code assigned in ImageReference#fetchable and Reference#fetch
-  def perform
-    # include Magick
-    unless thumbdata && (thumbdata =~ /^data:/)
-      logger.info ">>>>>>>>>>>>>>>>>>>>>>>>>>>>> Acquiring Thumbnail data on url '#{url}' >>>>>>>>>>>>>>>>>>>>>>>>>"
-      self.thumbdata = nil
-      self.status = 0 if self.status == -2
-      if response_body = fetch # Attempt to get data at the other end of the URL
-        begin
-          img = Magick::Image::from_blob(response_body).first
-          if img.columns > 200
-            scalefactor = 200.0/img.columns
-            thumb = img.scale(scalefactor)
-          else
-            thumb = img
-          end
-          thumb.format = 'PNG'
-          quality = 80
-          self.thumbdata = "data:image/png;base64," + Base64.encode64(thumb.to_blob{self.quality = quality })
-        rescue Exception => e
-          logger.debug "Failed to parse image data for ImageReference#{id}: #{url} (#{e})"
-          self.status = -2 # Bad data
-        end
+  def dothumb
+    if usable_url(true)
+      if Rails.env.production?
+        Delayed::Job.enqueue(self, priority: 5)
+      else
+        perform  # Go get it right now.
       end
-      save  # Save the status code, if nothing else
     end
+  end
+
+  # Try to fetch thumbnail data for the record. Status code assigned in ImageReference#fetchable and Reference#fetch
+  def perform
+    logger.info ">>>>>>>>>>>>>>>>>>>>>>>>>>>>> Acquiring Thumbnail data on url '#{url}' >>>>>>>>>>>>>>>>>>>>>>>>>"
+    self.status = 0 if self.status == -2
+    if response_body = fetch # Attempt to get data at the other end of the URL
+      begin
+        img = Magick::Image::from_blob(response_body).first
+        if img.columns > 200
+          scalefactor = 200.0/img.columns
+          thumb = img.scale(scalefactor)
+        else
+          thumb = img
+        end
+        thumb.format = 'PNG'
+        quality = 80
+        self.thumbdata = 'data:image/png;base64,' + Base64.encode64(thumb.to_blob { self.quality = quality })
+      rescue Exception => e
+        logger.debug "Failed to parse image data for ImageReference#{id}: #{url} (#{e})"
+        self.status = -2 # Bad data
+      end
+    end
+    save # Save the status code, if nothing else
     self
   end
 
