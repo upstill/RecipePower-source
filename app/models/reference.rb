@@ -192,7 +192,7 @@ class Reference < ActiveRecord::Base
   # Get data from the reference via HTTP
   def fetch
     def get_response url
-      self.status = response = nil
+      self.errcode = response = nil
       begin
         uri = URI.parse url
         if uri.host &&
@@ -201,29 +201,29 @@ class Reference < ActiveRecord::Base
             (uri.scheme != 'https' || (http.use_ssl = true && http.verify_mode = OpenSSL::SSL::VERIFY_NONE)) # read into this
             (request = Net::HTTP::Get.new(uri.request_uri, 'upgrade-insecure-requests' => '1'))
           response = http.request request
-          self.status = response.code.to_i
+          self.errcode = response.code.to_i
         else # Invalid URL
-          self.status = 400
+          self.errcode = 400
         end
       rescue Exception => e
         # If the server doesn't want to talk, we assume that the URL is okay, at least
         case e
           when Errno::ECONNRESET
-            self.status = 401
+            self.errcode = 401
           else
-            self.status = -1  # Undifferentiated error during fetch, possibly a parsing problem
+            self.errcode = -1  # Undifferentiated error during fetch, possibly a parsing problem
         end
       end
       response
     end
 
-    # get_response records the status of the last HTTP access in self.status
+    # get_response records the errcode of the last HTTP access in self.errcode
     tried = {}
     next_try = url
     until tried[next_try]
       tried[next_try] = true
       response = get_response next_try
-      case status
+      case errcode
         when 200
           return response.body
         when 301, 302 # Redirection
@@ -240,7 +240,7 @@ class Reference < ActiveRecord::Base
       if affiliate.class != affiliate_class # self.class.to_s != "#{affiliate.class.to_s}Reference"
         raise "Attempt to affiliate #{self.class.to_s} reference with #{affiliate.class} object."
       elsif affiliate_id && (affiliate_id != affiliate.id)
-        raise "Attempt to create ambiguous reference by asserting new affiliate"
+        raise 'Attempt to create ambiguous reference by asserting new affiliate'
       else
         self.affiliate_id = affiliate.id
       end
@@ -317,8 +317,11 @@ class RecipeReference < Reference
 end
 
 class ImageReference < Reference
+  include Backgroundable
+
+  backgroundable :status
+
   # An Image Reference maintains a local thumbnail of the image
-  attr_accessible :thumbdata, :status
 
   def self.lookup_image url
     self.lookup_affiliate url
@@ -344,11 +347,8 @@ class ImageReference < Reference
           when ''
           else
             candidates = super # Find by the url
-            candidates.map { |candidate|
-              # Queue the ref up to get data for the url as necessary and appropriate
-              candidate.save unless candidate.id
-              candidate.dothumb unless candidate.thumbdata
-            }
+            # Queue the refs up to get data for the url as necessary and appropriate
+            candidates.map &:launch
             # Check all the candidates for a data: URL, and return the canonical one or the first one, if none is canonical
             candidates.find &:canonical || candidates.first
         end
@@ -356,44 +356,40 @@ class ImageReference < Reference
   end
 
   # Provide suitable content for an <img> element: preferably data, but possibly a url or even (if the data fetch fails) nil
-  def imgdata
-    thumbdata || usable_url
-  end
-  # alias_method :digested_reference, :imgdata
-
-  def dothumb
-    if usable_url(true)
-      if Rails.env.production?
-        Delayed::Job.enqueue(self, priority: 5)
-      else
-        perform  # Go get it right now.
-      end
-    end
+  def imgdata force=false
+    # Provide good thumbdata if possible
+    bkg_perform(force) ? thumbdata : url
   end
 
   # Try to fetch thumbnail data for the record. Status code assigned in ImageReference#fetchable and Reference#fetch
   def perform
     logger.info ">>>>>>>>>>>>>>>>>>>>>>>>>>>>> Acquiring Thumbnail data on url '#{url}' >>>>>>>>>>>>>>>>>>>>>>>>>"
-    self.status = 0 if self.status == -2
-    if response_body = fetch # Attempt to get data at the other end of the URL
+    bkg_execute do
+      # A url which is a date string denotes an ImageReference which came in as data, and is therefore good
+      (url =~ /^\d\d\d\d-/) ||
       begin
-        img = Magick::Image::from_blob(response_body).first
-        if img.columns > 200
-          scalefactor = 200.0/img.columns
-          thumb = img.scale(scalefactor)
-        else
-          thumb = img
+        self.errcode = 0 if self.errcode == -2
+        if response_body = fetch # Attempt to get data at the other end of the URL
+          begin
+            img = Magick::Image::from_blob(response_body).first
+            if img.columns > 200
+              scalefactor = 200.0/img.columns
+              thumb = img.scale(scalefactor)
+            else
+              thumb = img
+            end
+            thumb.format = 'PNG'
+            quality = 80
+            self.thumbdata = 'data:image/png;base64,' + Base64.encode64(thumb.to_blob { self.quality = quality })
+          rescue Exception => e
+            logger.debug "Failed to parse image data for ImageReference#{id}: #{url} (#{e})"
+            self.errcode = -2 # Bad data
+          end
         end
-        thumb.format = 'PNG'
-        quality = 80
-        self.thumbdata = 'data:image/png;base64,' + Base64.encode64(thumb.to_blob { self.quality = quality })
-      rescue Exception => e
-        logger.debug "Failed to parse image data for ImageReference#{id}: #{url} (#{e})"
-        self.status = -2 # Bad data
+        save # Save the errcode code, if nothing else
+        errcode == 200 # Let bkg_execute know how we did
       end
     end
-    save # Save the status code, if nothing else
-    self
   end
 
   # Provide the phony (but unique) URL that's used for a data-only image
@@ -402,13 +398,40 @@ class ImageReference < Reference
     Time.new.to_s + randstr
   end
 
-  # Return the URL if it passes a sanity check
-  def usable_url ignore_status=false
-    unless url.blank? || (url =~ /^\d\d\d\d-/)
-      perform unless ignore_status || status # Not previously tested
-      url if ignore_status || !status || (status==200)
+  # Ensure the thumbdata is up to date, optionally forcing an update even if previously processed
+  def launch force=false
+    if url =~ /^\d\d\d\d-/
+      (good! && save) unless good?
+    elsif url.blank?
+      (bad! && save) unless bad?
+    else
+      bkg_enqueue force
     end
   end
+
+  private
+
+  def thumbdata
+    self[:thumbdata]
+  end
+
+  def thumbdata=(val)
+    write_attribute :thumbdata, val
+  end
+
+=begin
+  # Return the URL if it passes a sanity check. NB: a url with a date denotes a record that's all imagedata
+  def usable_url ignore_status=false
+    unless url.blank? || (url =~ /^\d\d\d\d-/)
+      if ignore_status
+        url
+      else
+        fetch if !errcode # Not previously tested
+        url if errcode==200
+      end
+    end
+  end
+=end
 
 end
 

@@ -40,9 +40,11 @@ module Picable
     picref.url if picref
   end
 
+=begin
   def picuri_problem
     picref && !picref.usable_url
   end
+=end
 
   # Return the image for the entity, either as a URL or a data specifier
   # The image may have an associated thumbnail, but it doesn't count unless
