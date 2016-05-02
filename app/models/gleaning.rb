@@ -72,6 +72,7 @@ class Gleaning < ActiveRecord::Base
   # Add results (presumably from a new finder) to the results in a gleaning
   def assimilate_finder_results results_hash
     do_save = false
+    self.results ||= Results.new *results_hash.keys
     results_hash.each do |key, results_arr|
       results_arr.each do |proposed|
         # Either modify an existing result in the gleaning, or append this one
@@ -96,21 +97,21 @@ class Gleaning < ActiveRecord::Base
         result += yield(str, index) || ''
         index += 1
       end
-    end
+    end if results
     result
   end
 
   def extract1 label
     (results[label] || []).map(&:out).flatten.first do |str|
       yield(str)
-    end
+    end if results
   end
 
   private
 
   # Declare success on a label/value pair by voting up the corresponding finder
   def hit_on site, label, value
-    if value.present?
+    if results && value.present?
       # Vote up each finder that produces this value
       results[label].each do |result|
         if result.out.include? value

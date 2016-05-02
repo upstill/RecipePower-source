@@ -227,7 +227,7 @@ class Reference < ActiveRecord::Base
         when 200
           return response.body
         when 301, 302 # Redirection
-          next_try = response.header["location"]
+          next_try = response.header['location']
         when 401 # Unauthorized
           next_try.sub! /^https/, 'http'
       end
