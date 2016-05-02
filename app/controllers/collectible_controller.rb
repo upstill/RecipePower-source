@@ -65,7 +65,7 @@ class CollectibleController < ApplicationController
     else
       Gleaning.glean @decorator, 'Image'
     end
-    @pic_select_list = view_context.pic_picker_select_list gleaning.images
+    @pic_select_list = view_context.pic_picker_select_list(gleaning.images) if gleaning.images
     if @pageurl && @pic_select_list.blank?
       flash.now[:error] = 'Sorry, we couldn\'t get any images from there.'
       render :errors

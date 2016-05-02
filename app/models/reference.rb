@@ -321,7 +321,65 @@ class ImageReference < Reference
 
   backgroundable :status
 
+=begin
+  # This SHOULD be a better way to ensure that an ImageReference knows about all entities that could be pointing to it.
+  # However, until we can ensure that all such entities are loaded before querying the relations, we'll have to live
+  # with explicitly declaring the relations below
+  def self.register_client klass, attribute_name
+    unless (@@Clients ||= {})[klass]
+      attribute_name = attribute_name.to_s + '_id'
+      @@Clients[klass] = attribute_name
+      assoc_sym = klass.to_s.underscore.pluralize.to_sym
+      has_many assoc_sym, :foreign_key => attribute_name.to_sym
+    end
+  end
+=end
+
   # An Image Reference maintains a local thumbnail of the image
+  has_many :feeds, :foreign_key => :picture_id
+  has_many :feed_entries, :foreign_key => :picture_id
+  has_many :lists, :foreign_key => :picture_id
+  has_many :products, :foreign_key => :picture_id
+  has_many :recipes, :foreign_key => :picture_id
+  has_many :sites, :foreign_key => :thumbnail_id
+  has_many :users, :foreign_key => :thumbnail_id
+
+  # Return the set of objects referring to this image
+  def clients
+    feeds.to_a +
+        feed_entries.to_a +
+        lists.to_a +
+        products.to_a +
+        recipes.to_a +
+        sites.to_a +
+        users.to_a
+=begin
+    @@Clients.collect { |klass, attribute|
+      klass.where(attribute => id).to_a
+    }.flatten
+=end
+  end
+
+  def clients?
+    !(feeds.empty? &&
+        feed_entries.empty? &&
+        lists.empty? &&
+        products.empty? &&
+        recipes.empty? &&
+        sites.empty? &&
+        users.empty?)
+=begin
+    @@Clients.each { |klass, attribute|
+      puts "Testing for existence of #{klass} #{attribute}:"
+      ct = klass.where(attribute => id).count
+      puts  "#{ct} #{klass.to_s.pluralize}."
+      x = ct > 0
+      return true if x
+    }
+    false
+  end
+=end
+  end
 
   def self.lookup_image url
     self.lookup_affiliate url

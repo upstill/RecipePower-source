@@ -21,16 +21,16 @@ module PicPickerHelper
                                          class: 'fixed-width',
                                          fallback_img: options[:fallback_img] || true
     field_options = {
-        rel: "jpg,png,gif",
-        class: "hidden_text",
-        onchange: ("RP.submit.enclosing_form" if options[:submit_on_change])
+        rel: 'jpg,png,gif',
+        class: 'hidden_text',
+        onchange: ('RP.submit.enclosing_form' if options[:submit_on_change])
     }
     preview = content_tag :div,
                           pic_area+form.hidden_field(decorator.picable_attribute, field_options.compact),
-                          class: "pic_preview"
+                          class: 'pic_preview'
     preview << content_tag(:div,
                            pic_picker_go_button(decorator, options[:fallback_img]),
-                           class: "pic_picker_link") unless options[:nopicker]
+                           class: 'pic_picker_link') unless options[:nopicker]
     preview
   end
 
@@ -43,8 +43,8 @@ module PicPickerHelper
       hidden_field_tag( decorator.field_name(:picurl),
                         decorator.picuri,
                         id: pic_preview_input_id(decorator),
-                        rel: "jpg,png,gif",
-                        type: "text"
+                        rel: 'jpg,png,gif',
+                        type: 'text'
       )
 
     content_tag(:div, pic_preview, :class => :pic_preview)+

@@ -18,6 +18,7 @@ module Picable
           fallback_img_file
         end
         alias_method :imglink, attribute
+        # ImageReference.register_client self, reference_name
       end
     end
   end
