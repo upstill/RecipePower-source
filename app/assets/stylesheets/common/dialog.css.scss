@@ -88,10 +88,12 @@ div.dialog.new-style {
       width: 60%; // responsive width
     }
     &.dialog-xs {
-      width: 370px;
+      width: 100%;
+      max-width: 370px;
     }
     &.dialog-sm {
-      width: 470px;
+      width: 100%;
+      max-width: 470px;
     }
     input.string,
     input.password,
