@@ -4,14 +4,14 @@ class FeedsController < CollectibleController
     update_and_decorate
     @feed.approved = params[:approve] == 'Y'
     @feed.save
-    flash[:popup] = 'Feedthrough '+(@feed.approved ? "Approved" : "Blocked")
+    flash[:popup] = 'Feedthrough '+(@feed.approved ? 'Approved' : 'Blocked')
   end
   
   # GET /feeds
   # GET /feeds.json
   def index
     @active_menu = :feeds
-    response_service.title = (params[:access] == "collected") ? "My Feeds" : "Available Feeds"
+    response_service.title = (params[:access] == 'collected') ? 'My Feeds' : 'Available Feeds'
     smartrender 
   end
 
@@ -25,11 +25,25 @@ class FeedsController < CollectibleController
 
   def contents
     @active_menu = :feeds
-    @feed.refresh if update_and_decorate && !params[:stream] && @feed.due_for_update
-    if resource_errors_to_flash @feed
-      render :errors
-    else
-      smartrender
+    if update_and_decorate
+      if params[:last_entry_id] # Only return entries that have been gathered since this one
+        @feed.bkg_perform
+        since = (fe = FeedEntry.find_by(id: params[:last_entry_id])) ?
+            (fe.published_at+1.second) :
+            Time.new(2000)
+        list_entries = @feed.feed_entries.exists?(published_at: since..Time.now)
+      else
+        @feed.bkg_enqueue @feed.updated_at < Time.now - 1.minute # Ensure there's an update pending
+        list_entries = true
+      end
+      if resource_errors_to_flash @feed
+        render :errors
+      elsif list_entries
+        smartrender
+      else
+        # Notify of no new entries
+        render 'contents_finished'
+      end
     end
   end
 
@@ -44,7 +58,7 @@ class FeedsController < CollectibleController
   def new
     @feed = Feed.new
     # update_and_decorate
-    response_service.title = "Open a feed"
+    response_service.title = 'Open a feed'
     smartrender mode: :modal
   end
 
@@ -73,24 +87,21 @@ class FeedsController < CollectibleController
         end
       end
     else
-      flash[:alert] = "Sorry, you need to be logged in to add a feed."
+      flash[:alert] = 'Sorry, you need to be logged in to add a feed.'
       render :errors
     end
   end
 
   def refresh
     update_and_decorate
-    if @feed.status == 'ready'
-      # if Rails.env.development? # Immediate refresh
-        n_entries = @feed.feed_entries.size
-        @feed.refresh
-        n_new = @feed.feed_entries.size - n_entries
-        if resource_errors_to_flash(@feed)
-          render :errors
-        else
-          flash[:popup] = labelled_quantity(n_new, 'New entry')+' found'
-          render :refresh, locals: { followup: (n_new > 0) }
-        end
+    @feed.bkg_perform
+    if @feed.good?
+      if resource_errors_to_flash(@feed)
+        render :errors
+      else
+        flash[:popup] = labelled_quantity(n_new, 'New entry')+' found'
+        render :refresh, locals: {followup: (n_new > 0)}
+      end
     else
       flash[:popup] = 'Feed update is still in process'
       render :errors

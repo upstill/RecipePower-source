@@ -1,7 +1,7 @@
 RP.querify = RP.querify || {}
 
 jQuery ->
-	$('a.querify-link', document).on 'click', (event) ->
+	$('body').on 'click', 'a.querify-link', (event) ->
 		RP.querify.onclick event
 	$(document).on 'change', 'input.querify-select', (event) ->
 		fire event.target

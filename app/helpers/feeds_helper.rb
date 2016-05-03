@@ -5,7 +5,7 @@ module FeedsHelper
     params = tag_query.blank? ? {} : { querytags: tag_query }
     url = refresh_feed_path(feed, params)
 
-    if feed.status == 'ready'
+    if feed.good?
       label = 'Check for Updates'
     else
       status = "Update #{feed.status}. "
@@ -24,6 +24,16 @@ module FeedsHelper
 
   def feed_update_button feed, force=false
     link_to_submit 'Update', refresh_feed_path(feed), feed_wait_msg(feed, force).merge(:button_size => 'xs')
+  end
+
+  def feed_update_trigger feed, force=false
+    if feed.pending!
+      last_entry = feed.feed_entries.order('published_at DESC').first
+      last_entry_id = last_entry ? last_entry.id : 0
+      querify_item 'Check for Updates',
+                   { last_entry_id: last_entry_id },
+                   feed_wait_msg(feed, force).merge(:button_size => 'xs')
+    end
   end
 
   def feed_entries_report feed

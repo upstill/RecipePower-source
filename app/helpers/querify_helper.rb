@@ -23,7 +23,8 @@ module QuerifyHelper
     link_to_submit label,
                    url,
                    options.merge(
-                       class: "#{options[:class]} querify querify-link"
+                       handler_class: 'querify-link',
+                       class: "#{options[:class]} querify"
                    )
   end
 

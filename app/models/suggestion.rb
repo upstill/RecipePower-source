@@ -3,7 +3,7 @@ class Suggestion < ActiveRecord::Base
   attr_accessible :base, :viewer, :session, :filter, :results_cache, :results, :pending, :ready
 
   belongs_to :base, :polymorphic => true
-  belongs_to :viewer, :class_name => "User"
+  belongs_to :viewer, :class_name => 'User'
   belongs_to :results_cache
   serialize :results, JSON  # A structured collection of, say, headings and content.
   # Typically, one or more entries will be placeholders for later streaming with a results_cache

@@ -579,10 +579,10 @@ class FeedsIndexPresenter < FilteredPresenter
 end
 
 class SitesAssociatedPresenter < FilteredPresenter
-  @item_mode = :slider
+  @item_mode = :masonry
 
   def result_type
-    super || 'feeds'
+    'recipes'
   end
 
 end
@@ -590,6 +590,7 @@ end
 class SitesFeedsPresenter < FilteredPresenter
   include FeedsTable
 
+=begin
   def item_mode
     super || 'masonry'
   end
@@ -597,6 +598,7 @@ class SitesFeedsPresenter < FilteredPresenter
   def result_type
     'feeds'
   end
+=end
 end
 
 # Present the entries associated with a list

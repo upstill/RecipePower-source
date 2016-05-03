@@ -54,6 +54,7 @@ module LinkHelper
     attribute_names = [ :id, :class, :style, :data, :onclick, :method, :rel, :title ]
     # We do NOT want a remote response: it asks for Javascript
     options = options.clone
+    handler_class = options.delete(:handler_class) || 'submit'
     options.delete :remote
 
     # Pull out button options and set classes appropriately to express the link as a button
@@ -67,11 +68,11 @@ module LinkHelper
     else
       # These options get included in the link's class
       # Pull out all class options and assert class "submit" to attract Javascript handling
-      class_list = [:submit]
+      class_list = [ handler_class ]
       if class_options = options.slice(*class_option_names)
         class_list += class_options.keep_if { |k, v| v }.keys
       end
-      class_str = (options[:class] || "").assert_words class_list
+      class_str = (options[:class] || '').assert_words class_list
       options[:class] = class_str unless class_str.blank?
 
       # Include the query options in the path's query

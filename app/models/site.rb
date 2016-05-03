@@ -23,6 +23,7 @@ class Site < ActiveRecord::Base
   accepts_nested_attributes_for :finders, :allow_destroy => true
   
   has_many :feeds, :dependent=>:restrict_with_exception
+  has_many :approved_feeds, -> { where(approved: true) }, :class_name => 'Feed'
 
   # When creating a site, also create a corresponding site referent
   # before_create :ensure_referent

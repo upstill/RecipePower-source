@@ -2,6 +2,10 @@ require 'feedjira'
 
 class Feed < ActiveRecord::Base
   include Collectible
+  include Backgroundable
+
+  backgroundable :status
+
   picable :picurl, :picture
   attr_accessible :title, :description, :site_id, :feedtype, :approved, :url, :last_post_date
   
@@ -133,8 +137,8 @@ class Feed < ActiveRecord::Base
   def self.evaluate
     prevurl = ''
     feedcount = 0
-    File.open("/Users/upstill/dev/rss_rejects3.txt", "w") do |outfile|
-      File.open("/Users/upstill/dev/rss_rejects2.txt").each do |line|
+    File.open('/Users/upstill/dev/rss_rejects3.txt', 'w') do |outfile|
+      File.open('/Users/upstill/dev/rss_rejects2.txt').each do |line|
         fields = line.split(' ')
         feedurl = fields[0]
         pageurl = fields[2].sub(/\)$/, '')
@@ -187,19 +191,30 @@ class Feed < ActiveRecord::Base
 
   # Callbacks for DelayedJob
   def enqueue(job)
-    self.status = :pending
+    pending!
     discreet_save
   end
 
   def before(job)
-    self.status = :running
+    processing!
     discreet_save
   end
 
   def perform
     logger.debug "[#{Time.now}] Updating feed #{id}; approved=#{approved ? 'Y' : 'N'}"
-    if feed = Feed.where(id: id).first
-      feed.refresh
+    bkg_execute do
+      begin
+        FeedEntry.update_from_feed self
+      rescue Exception => e
+        errors.add 'url', 'update failed: '+e.to_s
+      end
+      if errors.any?
+        false
+      else
+        reload # To ensure associations are updated
+        touch
+        true
+      end
     end
   end
 
@@ -214,18 +229,18 @@ class Feed < ActiveRecord::Base
     if feed = Feed.where(id: feed.id).first
       feed.enqueue_update true
       logger.debug "Queued up feed ##{feed.id}"
-      feed.status = :ready
+      feed.good!
       feed.discreet_save
     end
   end
 
   def error(job, exception)
-    self.status = :failed
+    bad!
     discreet_save
   end
 
   def failure(job)
-    self.status = :failed
+    bad!
     discreet_save
   end
 end

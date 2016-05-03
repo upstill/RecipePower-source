@@ -840,6 +840,19 @@ class SitesFeedsCache < ResultsCache
   end
 end
 
+class SitesRecipesCache < ResultsCache
+  include EntitiesCache
+
+  def site
+    @site ||= Site.find @entity_id
+  end
+
+  def itemscope
+    sitepath = site.home.sub /^https?:\/\//, ''
+    Recipe.joins(:references).where('"references"."url" LIKE ?', "%#{sitepath}%")
+  end
+end
+
 # Provide the set of lists the user has collected, but only those visible to her
 class UserCollectedListsCache < ResultsCache
   include UserFunc

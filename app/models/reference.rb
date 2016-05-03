@@ -305,7 +305,7 @@ class OfferingReference < Reference
 end
 
 class RecipeReference < Reference
-  belongs_to :recipe, foreign_key: "affiliate_id"
+  belongs_to :recipe, foreign_key: 'affiliate_id'
 
   def self.lookup_recipe url_or_urls, by_site=false
     self.lookup_affiliate url_or_urls, by_site
