@@ -62,5 +62,6 @@ module RP
     # config.assets.precompile += ["jquery.min.js"]
     config.use_jquery2 = true
 
+    config.active_job.queue_adapter = :delayed_job
   end
 end

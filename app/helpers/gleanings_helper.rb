@@ -23,46 +23,50 @@ module GleaningsHelper
     attribute_name = "#{entity_name}[gleaning_attributes][#{label}]"
     target = nil
     field =
-    case label
-      when 'Title', 'Description'
-        options = decorator.gleaning.options_for label
-        target = "#{decorator.object.class.to_s.underscore}[#{decorator.attribute_for label}]"
-        select_tag attribute_name,
-                   options_for_select(options),
-                   prompt: "Gleaned #{(options.count > 1) ? label.pluralize : label}",
-                   class: 'gleaning-select',
-                   id: label
-      when 'RSS Feed'
-        # Declare a checkbox and an external link to each feed link
-        return unless decorator.object.is_a? Site
-        gleaning = decorator.gleaning.extract_all 'RSS Feed' do |link, index|
-          link = normalize_url link
-          if fz = Feed.preload(link)
-            entry_date = ", latest #{fz.entries.first.published.to_s.split.first}" if fz.entries.first
-            '<br>' +
-                content_tag(:div,
-                            check_box_tag(attribute_name+"[#{index}]",
-                                          link,
-                                          decorator.feeds.where(url: link).exists?
-                            ),
-                            style: 'display: inline-block; margin-right: 6px; margin-left: 5%'
-                ) +
-                label_tag(fz.title.present? ? fz.title : fz.description) +
-                '<br>'.html_safe +
-                content_tag(:div,
-                            "-- #{pluralize(fz.entries.count, 'entry')}#{entry_date}",
-                            style: 'display: inline-block; padding-left: 50px; font-size: 14px; margin-bottom: 9px;')
-          end
+        case label
+          when 'Title', 'Description'
+            options = decorator.gleaning.options_for label
+            target = "#{decorator.object.class.to_s.underscore}[#{decorator.attribute_for label}]"
+            if options.empty?
+              content_tag :span, "No #{label.pluralize} Gleaned"
+            else
+              select_tag attribute_name,
+                         options_for_select(options),
+                         prompt: "Gleaned #{(options.count > 1) ? label.pluralize : label}",
+                         class: 'gleaning-select',
+                         id: label
+            end
+          when 'RSS Feed'
+            # Declare a checkbox and an external link to each feed link
+            return unless decorator.object.is_a? Site
+            gleaning = decorator.gleaning.extract_all 'RSS Feed' do |link, index|
+              link = normalize_url link
+              if fz = Feed.preload(link)
+                entry_date = ", latest #{fz.entries.first.published.to_s.split.first}" if fz.entries.first
+                '<br>' +
+                    content_tag(:div,
+                                check_box_tag(attribute_name+"[#{index}]",
+                                              link,
+                                              decorator.feeds.where(url: link).exists?
+                                ),
+                                style: 'display: inline-block; margin-right: 6px; margin-left: 5%'
+                    ) +
+                    label_tag(fz.title.present? ? fz.title : fz.description) +
+                    '<br>'.html_safe +
+                    content_tag(:div,
+                                "-- #{pluralize(fz.entries.count, 'entry')}#{entry_date}",
+                                style: 'display: inline-block; padding-left: 50px; font-size: 14px; margin-bottom: 9px;')
+              end
+            end
+            if gleaning.present?
+              label_tag('Gleaned Feeds') + gleaning.html_safe
+            end
+          when 'Image'
+          when 'Tags'
+          when 'Site Name'
+          when 'Author Name'
+          when 'Author Link'
         end
-        if gleaning.present?
-          label_tag('Gleaned Feeds') + gleaning.html_safe
-        end
-      when 'Image'
-      when 'Tags'
-      when 'Site Name'
-      when 'Author Name'
-      when 'Author Link'
-    end
     gleaning_field_enclosure label, field, target
   end
 

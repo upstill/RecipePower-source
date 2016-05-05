@@ -57,7 +57,7 @@ class SitesController < CollectibleController
   def update
     if update_and_decorate
       @site.gleaning.attributes = params[:site][:gleaning_attributes]
-      # @decorator.gleaning.attributes = params[@decorator.object.class.to_s.underscore][:gleaning_attributes] if @decorator.object.is_a?(Linkable)
+      # @decorator.gleaning.attributes = params[@decorator.object.class.to_s.underscore][:gleaning_attributes] if @decorator.object.respond_to?(:gleaning)
       respond_to do |format|
         format.html { redirect_to @site, notice: "Site #{@site.name} was successfully updated." }
         format.json {

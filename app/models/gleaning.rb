@@ -18,16 +18,16 @@ class Gleaning < ActiveRecord::Base
   def self.glean url_or_decorator, *labels
     if url_or_decorator.is_a? String
       (gleaning = self.new).go url_or_decorator
-    elsif url_or_decorator.object.is_a? Linkable
+    elsif url_or_decorator.object.respond_to? :gleaning
       url = url_or_decorator.pageurl
       url_or_decorator.glean!
-      (gleaning = url_or_decorator.gleaning).go url, url_or_decorator.site
+      (gleaning = url_or_decorator.gleaning).go url, (url_or_decorator.site if url_or_decorator.respond_to?(:site))
     end
     gleaning
   end
 
   def perform
-    go entity.decorate.url, entity.site
+    go entity.decorate.url, (entity.site if entity.respond_to?(:site))
   end
 
   # Execute a gleaning on the given url, RIGHT NOW (maybe in an asynchronous execution, maybe not)
@@ -51,6 +51,7 @@ class Gleaning < ActiveRecord::Base
   end
 
   def attributes= attrhash
+    return unless entity.respond_to? :site
     site = entity.site
     decorator = entity.decorate
     (attrhash || {}).each do |label, value_or_set|

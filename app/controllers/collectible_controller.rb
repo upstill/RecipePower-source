@@ -60,12 +60,12 @@ class CollectibleController < ApplicationController
     gleaning =
     if @pageurl = params[:url]
       Gleaning.glean @pageurl, 'Image'
-    elsif @decorator.object.is_a?(Linkable) && @decorator.glean!
+    elsif @decorator.object.respond_to?(:gleaning) && @decorator.glean!
       @decorator.gleaning
     else
       Gleaning.glean @decorator, 'Image'
     end
-    @pic_select_list = view_context.pic_picker_select_list(gleaning.images) if gleaning.images
+    @pic_select_list = view_context.pic_picker_select_list(gleaning.images) if gleaning && gleaning.images
     if @pageurl && @pic_select_list.blank?
       flash.now[:error] = 'Sorry, we couldn\'t get any images from there.'
       render :errors
@@ -105,7 +105,7 @@ class CollectibleController < ApplicationController
     if resource_errors_to_flash @decorator.object
       render :edit
     else
-      @decorator.gleaning.attributes = params[@decorator.object.class.to_s.underscore][:gleaning_attributes] if @decorator.object.is_a?(Linkable)
+      @decorator.gleaning.attributes = params[@decorator.object.class.to_s.underscore][:gleaning_attributes] if @decorator.object.respond_to?(:gleaning)
       flash[:popup] = "#{@decorator.human_name} is saved"
       render :update
     end
@@ -158,7 +158,7 @@ class CollectibleController < ApplicationController
 
   def edit
     update_and_decorate
-    @decorator.glean if @decorator.object.is_a?(Linkable) && !@decorator.gleaning
+    @decorator.glean if @decorator.object.respond_to?(:gleaning) && !@decorator.gleaning
     smartrender
   end
 

@@ -14,7 +14,7 @@ class User < ActiveRecord::Base
   # :token_authenticatable, :encryptable, :confirmable, :timeoutable
   devise :invitable, :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable #, :validatable,
-         :lockable # , :omniauthable
+         :lockable
   after_invitation_accepted :initial_setup
   # before_save :serialize_browser
 

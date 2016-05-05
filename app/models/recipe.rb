@@ -9,7 +9,7 @@ class Recipe < ActiveRecord::Base
   include Collectible
   include Referrable
   # The url attribute is handled by a reference of type RecipeReference
-  linkable :url, :reference
+  linkable :url, :reference, gleanable: true
   # The picurl attribute is handled by the :picture reference of type ImageReference
   picable :picurl, :picture
 
