@@ -416,7 +416,7 @@ class ImageReference < Reference
   # Provide suitable content for an <img> element: preferably data, but possibly a url or even (if the data fetch fails) nil
   def imgdata force=false
     # Provide good thumbdata if possible
-    bkg_perform(force) ? thumbdata : url
+    bkg_sync(force) ? thumbdata : url
   end
 
   # Try to fetch thumbnail data for the record. Status code assigned in ImageReference#fetchable and Reference#fetch

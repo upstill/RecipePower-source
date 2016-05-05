@@ -10,7 +10,8 @@ jQuery ->
 	$(document).on 'change', 'select.gleaning-select', (event) ->
 		me = event.currentTarget
 		enclosure = $(me).closest '.gleaning-field-enclosure'
-		$('input', $(enclosure).next('div.form-group.string')).val $(me).val()
-		$('textarea', $(enclosure).next('div.form-group.text')).val $(me).val()
-		# target_selector = $(me).data 'target'
-		# $(target_selector).val $(me).val()
+		# $('input', $(enclosure).next('div.form-group.string')).val $(me).val()
+		# $('textarea', $(enclosure).next('div.form-group.text')).val $(me).val()
+		target_selector = $(enclosure).data 'target'
+		$("input[name='" + target_selector + "']").val $(me).val()
+		$("textarea[name='" + target_selector + "']").val $(me).val()

@@ -2,8 +2,9 @@ class CollectibleDecorator < Draper::Decorator
   include Templateer
   delegate_all
 
+  # Translation from label names to attribute names
   def attribute_for what
-    what.to_sym
+    what.to_s.downcase.to_sym
   end
 
   # sample_page is a full URL somewhere on the associated site so we can absolutize links

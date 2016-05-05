@@ -191,8 +191,10 @@ class Feed < ActiveRecord::Base
 
   # Callbacks for DelayedJob
   def enqueue(job)
-    pending!
-    discreet_save
+    unless job.run_at && (job.run_at > Time.now)
+      pending!
+      discreet_save
+    end
   end
 
   def before(job)
@@ -202,26 +204,14 @@ class Feed < ActiveRecord::Base
 
   def perform
     logger.debug "[#{Time.now}] Updating feed #{id}; approved=#{approved ? 'Y' : 'N'}"
-    bkg_execute do
-      begin
-        FeedEntry.update_from_feed self
-      rescue Exception => e
-        errors.add 'url', 'update failed: '+e.to_s
-      end
-      if errors.any?
-        false
-      else
-        reload # To ensure associations are updated
-        touch
-        true
-      end
-    end
+    bkg_execute do FeedEntry.update_from_feed(self) || true end
   end
 
   def enqueue_update later = false
     Delayed::Job.enqueue self, priority: 10, run_at: (later ? (Time.new.beginning_of_week(:sunday)+1.week) : Time.now)
   end
 
+=begin
   def success(job)
     # When the feed is updated successfully, re-queue it for one week hence
     feed = YAML::load(job.handler)
@@ -229,12 +219,12 @@ class Feed < ActiveRecord::Base
     if feed = Feed.where(id: feed.id).first
       feed.enqueue_update true
       logger.debug "Queued up feed ##{feed.id}"
-      feed.good!
-      feed.discreet_save
     end
   end
+=end
 
   def error(job, exception)
+    errors.add 'url', 'update failed: ' + exception.to_s
     bad!
     discreet_save
   end

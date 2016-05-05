@@ -4,22 +4,22 @@
       <div class="col-md-12">
         <%= gleaning_trigger @decorator %>
 
-        <%= f.label :title, "Title", :class => "recipe_field_label" -%>
+        <%= f.label :title, 'Title', :class => 'recipe_field_label' -%>
         <%= gleaning_field @decorator, 'Title' %>
         <br><%= f.text_field :title, :label => false %>
 
-        <%= f.label :title, "Description", :class => "recipe_field_label" -%>
+        <%= f.label :title, 'Description', :class => 'recipe_field_label' -%>
         <%= gleaning_field @decorator, 'Description' %>
         <br><%= f.text_area :description, :label => false %>
         <% if permitted_to?(:admin, :recipes) %>
-            <%= f.label :url, "URL", :class => "recipe_field_label" -%>
-            <br><%= f.url_field :url %>
+            <br><%= f.label :url, 'URL', :class => 'recipe_field_label' -%>
+            <%= f.url_field :url %>
         <% end %>
       </div>
     </div>
     <div class="modal-footer">
       <% if permitted_to?(:admin, :recipes) && response_service.admin_view? %>
-          <% link_to_submit "Destroy This Recipe",
+          <% link_to_submit 'Destroy This Recipe',
                             @decorator.object_path,
                             :class => "pull-left",
                             :style => 'color: #dddddd;',

@@ -21,10 +21,12 @@ module GleaningsHelper
   def gleaning_field_declaration decorator, label
     entity_name = decorator.object.class.to_s.underscore
     attribute_name = "#{entity_name}[gleaning_attributes][#{label}]"
+    target = nil
     field =
     case label
       when 'Title', 'Description'
         options = decorator.gleaning.options_for label
+        target = "#{decorator.object.class.to_s.underscore}[#{decorator.attribute_for label}]"
         select_tag attribute_name,
                    options_for_select(options),
                    prompt: "Gleaned #{(options.count > 1) ? label.pluralize : label}",
@@ -61,7 +63,7 @@ module GleaningsHelper
       when 'Author Name'
       when 'Author Link'
     end
-    gleaning_field_enclosure label, field
+    gleaning_field_enclosure label, field, target
   end
 
   def gleaning_field_replacement decorator, label
@@ -72,10 +74,11 @@ module GleaningsHelper
     "gleaning-field-#{FinderServices.css_class label}"
   end
 
-  def gleaning_field_enclosure label, content
+  def gleaning_field_enclosure label, content, target=nil
     content_tag :div,
                 content,
                 style: 'display: inline-block; width: 100%',
-                class: 'gleaning-field-enclosure ' + gleaning_field_class(label)
+                class: 'gleaning-field-enclosure ' + gleaning_field_class(label),
+                data: { target: target }.compact
   end
 end

@@ -55,9 +55,9 @@ module Linkable
         belongs_to reference_association, class_name: ref_type
       else
         # References that define the location of their affiliates have a many-to-one relationship (i.e. many URLs can refer to the same entity)
-        has_one reference_association, -> { where(type: ref_type).order('canonical DESC') }, foreign_key: "affiliate_id", class_name: ref_type, :dependent=>:destroy
+        has_one reference_association, -> { where(type: ref_type).order('canonical DESC') }, foreign_key: 'affiliate_id', class_name: ref_type, :dependent=>:destroy
         has_many reference_association_pl, -> { where type: ref_type },
-                 foreign_key: "affiliate_id",
+                 foreign_key: 'affiliate_id',
                  class_name: ref_type,
                  after_add: :"#{reference_association_pl}_ensure_site",
                  dependent: :destroy
@@ -92,7 +92,7 @@ module Linkable
         # force => do the job even if it was priorly complete
         define_method 'glean!' do |force=false|
           create_gleaning unless gleaning
-          gleaning.bkg_perform force
+          gleaning.bkg_sync force
         end
 
         # Whenever a reference is added, we ensure that it gets to the same site
@@ -132,6 +132,8 @@ module Linkable
         #  to the object by creating a new Reference bound to the object.
         # IT IS AN ERROR TO ASSIGN A URL WHICH IS IN USE BY ANOTHER ENTITY OF THE SAME CLASS.
         define_method "#{url_attribute}=" do |pu|
+          # If we're changing the url, any gleanings need to be refreshed
+          glean(true) if gleaning && (pu != self.method(:"#{url_attribute}").call) # Update the gleaning data, if any
           # Since we can't modify references once created, we can only assert a new
           # URL by resort to a new reference
           # Get the existing reference
@@ -140,7 +142,7 @@ module Linkable
             ref = pu.blank? ? nil : ref_type.constantize.find_or_initialize(pu).first
             self.method(:"#{reference_association}=").call ref
           elsif pu.blank?
-            self.errors.add(url_attribute, "can't be blank")
+            self.errors.add(url_attribute, 'can\'t be blank')
           else
             # Create a new reference (or references, if there's a redirect involved) as necessary
             refs = ref_type.constantize.find_or_initialize(pu)

@@ -105,7 +105,7 @@ class FinderServices
       errstr = e.to_s
       if redirection = errstr.sub( /[^:]*:/, '').strip
         from, to = *redirection.split('->')
-        if from.strip == normu
+        if (from.strip == normu) && to.present?
           normu = normalize_url to.strip
           begin
             pagefile = open normu

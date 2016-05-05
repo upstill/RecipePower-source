@@ -18,8 +18,6 @@ module Backgroundable
   def bkg_enqueue force=false
     # force => do the job even if it was priorly complete
     if virgin? || (force && !(pending? || processing?)) # Don't add it to the queue redundantly
-      pending!
-      save
       Delayed::Job.enqueue self
     end
     pending?
@@ -27,16 +25,15 @@ module Backgroundable
 
   # Glean results synchronously, returning only when status is definitive (good or bad)
   # force => do the job even if it was priorly complete
-  def bkg_perform force=false
-    if virgin? || pending? # Run the scrape process right now
-      perform
-    elsif processing? # Wait for scraping to return
+  def bkg_sync force=false
+    if processing? # Wait for worker to return
       until !processing?
         sleep 1
         reload
       end
-    elsif force
-      pending!
+    elsif virgin? || pending? || force # Run the scrape process right now
+      # Lock during processing
+      before nil
       perform
     end
     good?
@@ -44,22 +41,35 @@ module Backgroundable
 
   # Finally execute the block that will update the model (or whatever)
   def bkg_execute &block
-    if virgin? || pending?
-      # Lock during processing
-      processing!
-      save
-      begin
-        if block.call
-          good!
-        else
-          bad!
-        end
-      rescue Exception => e
+    begin
+      if block.call
+        good!
+      else
         bad!
       end
       save
+    rescue Exception => e
+      error nil, e
     end
     good?
+  end
+
+  # Callbacks for DelayedJob: jobs are pending when they are to run ASAP
+  def enqueue(job)
+    unless job.run_at && (job.run_at > Time.now)
+      pending!
+      save
+    end
+  end
+
+  def error(job, exception)
+    bad!
+    save
+  end
+
+  def before(job)
+    processing!
+    save
   end
 
 end

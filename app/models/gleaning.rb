@@ -36,8 +36,14 @@ class Gleaning < ActiveRecord::Base
       labels.unshift site
       site = nil
     end
-    bkg_execute do self.results = FinderServices.findings(url, site, *labels) end || errors.add('url', "analyzing page '#{url}': #{e}.")
+    bkg_execute do self.results = FinderServices.findings(url, site, *labels) end
     good?
+  end
+
+  def error(job, exception)
+    errors.add 'url', "analyzing page: #{exception}."
+    bad!
+    save
   end
 
   def options_for label

@@ -1,4 +1,4 @@
-require "templateer.rb"
+require 'templateer.rb'
 class SiteDecorator < CollectibleDecorator
   include Templateer
   delegate_all
@@ -6,15 +6,15 @@ class SiteDecorator < CollectibleDecorator
   # Standard accessors for model attributes
 
   def attribute_for what
-    case what
-      when :title, 'title'
+    case default = super
+      when :title
         :name
-      when :image, 'image'
+      when :image
         :logo
-      when :url, 'url'
+      when :url
         :home
       else
-        super
+        default
     end
   end
 

@@ -8,11 +8,11 @@ class UserDecorator < CollectibleDecorator
   end
 
   def sourcename
-    ""
+    ''
   end
 
   def sourcehome
-    ""
+    ''
   end
 
   def description

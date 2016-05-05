@@ -27,7 +27,7 @@ class FeedsController < CollectibleController
     @active_menu = :feeds
     if update_and_decorate
       if params[:last_entry_id] # Only return entries that have been gathered since this one
-        @feed.bkg_perform
+        @feed.bkg_sync
         since = (fe = FeedEntry.find_by(id: params[:last_entry_id])) ?
             (fe.published_at+1.second) :
             Time.new(2000)
@@ -94,7 +94,7 @@ class FeedsController < CollectibleController
 
   def refresh
     update_and_decorate
-    @feed.bkg_perform
+    @feed.bkg_sync
     if @feed.good?
       if resource_errors_to_flash(@feed)
         render :errors
