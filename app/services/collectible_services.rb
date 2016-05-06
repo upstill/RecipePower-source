@@ -62,7 +62,8 @@ class CollectibleServices
         elsif entity.is_a? Linkable
           entity.url = url
           # If this url is to the home of a site, return a Site object instead
-          if uri.path == URI(entity.site.home).path
+          # Ignore leading and trailing slashes in comparing paths
+          if uri.path.sub(/^\//, '').sub(/\/$/,'') == URI(entity.site.home).path.sub(/^\//, '').sub(/\/$/,'')
             entity.site.decorate.findings = findings
             return entity.site
           else
