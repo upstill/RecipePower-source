@@ -48,9 +48,10 @@ Couldn't figure out how to use sudo with another user
       # sudo "curl --silent -o /tmp/latest.dump '#{fetch :postgresql_dburl}'"
       # execute "pg_restore --no-password --verbose --clean --no-acl --no-owner -h #{fetch :postgresql_host} -U #{fetch :postgresql_user} -d #{fetch :postgresql_database} /tmp/latest.dump ; true"
       run_and_show 'whoami'
-      run_and_show '/usr/bin/heroku --version'
+      run_and_show 'heroku --version'
       run_and_show 'echo $AWS_ACCESS_KEY_ID'
-      dburl = "https://xfrtu.s3.amazonaws.com/88e3a632-8522-453e-92e0-d691b7ead5b6/2016-02-10T00%3A36%3A12Z/66d70d4f-fa46-47d1-a338-9dbc25537b62?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAJQE5E3XOYH2LQHPQ%2F20160506%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20160506T030328Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=5b6f7bdb9059c2663ad2794a408a8f9ab87ef3f538d2a43d8763e58cdda91833" # run_and_show "heroku pg:backups public-url --app strong-galaxy-5765"
+      # "https://xfrtu.s3.amazonaws.com/88e3a632-8522-453e-92e0-d691b7ead5b6/2016-02-10T00%3A36%3A12Z/66d70d4f-fa46-47d1-a338-9dbc25537b62?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAJQE5E3XOYH2LQHPQ%2F20160506%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20160506T030328Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=5b6f7bdb9059c2663ad2794a408a8f9ab87ef3f538d2a43d8763e58cdda91833" #
+      dburl = run_and_show "heroku pg:backups public-url --app strong-galaxy-5765"
       # NB: since the Heroku toolbelt doesn't work in this context, it's necessary to provide the backup url
       # in dburl, eg., run the command elsewhere and set the result here
       # As it stands, the database will NOT be replaced unless dburl is set explicitly
