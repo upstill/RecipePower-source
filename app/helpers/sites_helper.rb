@@ -11,17 +11,20 @@ module SitesHelper
   end
 
   def site_feeds_summary site
-    ft = nil
-    approved = site.feeds.where approved: true
-    napproved = approved.count
+    napproved = site.approved_feeds.count
     nothers = site.feeds.count - napproved
     q = labelled_quantity( napproved, 'feed').capitalize
     link = (napproved == 1) ?
-        feed_path(approved.first) :
+        feed_path(site.approved_feeds.first) :
         feeds_site_path(site, response_service.admin_view? ? { :item_mode => :table } : {} )
     summ = content_tag :b, link_to_submit( q, link)
-    # response_service.admin_view? ? (summ + " approved; #{site.feeds.count - napproved} others".html_safe) : summ
     summ += " approved (#{labelled_quantity( nothers, 'other').downcase})".html_safe
+  end
+
+  def site_recipes_summary site
+    p = labelled_quantity(site.recipes.count, 'cookmark')
+    p += ': ' + homelink(site.recipes.first) if site.recipes.count == 1
+    content_tag :p, p.html_safe
   end
 
 end

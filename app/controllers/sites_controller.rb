@@ -77,6 +77,7 @@ class SitesController < CollectibleController
 
   # DELETE /sites/1
   # DELETE /sites/1.json
+=begin
   def destroy
     # return if need_login true, true
     @site = Site.find params[:id]
@@ -86,4 +87,5 @@ class SitesController < CollectibleController
       format.json { head :ok }
     end
   end
+=end
 end
