@@ -1,5 +1,6 @@
 class CreateGleanings < ActiveRecord::Migration
   def change
+    drop_table :gleanings if ActiveRecord::Base.connection.table_exists?("gleanings")
     create_table :gleanings do |t|
       t.string :entity_type
       t.integer :entity_id
