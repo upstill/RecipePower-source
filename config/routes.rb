@@ -134,6 +134,7 @@ RP::Application.routes.draw do
     member do
       post 'absorb'
       get 'feeds'
+      post 'approve' # (Admin only) approve the site for presentation
     end
   end
   match 'sites', :controller => 'sites', :action => 'index', :via => [:get, :post]

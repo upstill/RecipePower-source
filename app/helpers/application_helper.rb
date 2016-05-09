@@ -274,4 +274,42 @@ module ApplicationHelper
     end
   end
 
+  def entity_approval entity
+    labels =
+    case entity
+      when Site
+        %w{ Expose Visible Hide Hidden }
+      when Feed
+        %w{ Approve Approved Block Blocked }
+      else
+        []
+    end
+    str = case entity.approved
+            when true
+              labels[1]
+            when false
+              labels[3]
+            else
+              ''
+          end
+    # NB: entities can have nil approval status, in which case both buttons should show
+    str << link_to_submit(labels[0],
+                          polymorphic_path( [:approve, entity], approve: 'Y'),
+                          button_style: 'success',
+                          button_size: 'xs',
+                          method: 'POST'
+    ) unless entity.approved == true
+    str << link_to_submit(labels[2],
+                          polymorphic_path( [:approve, entity], approve: 'N'),
+                          button_style: 'danger',
+                          button_size: 'xs',
+                          method: 'POST'
+    ) unless entity.approved == false
+    content_tag :span, str.html_safe, :id => dom_id(entity)
+  end
+
+  def entity_approval_replacement entity
+    [ "span##{dom_id entity}", entity_approval(entity) ]
+  end
+
 end

@@ -1,12 +1,5 @@
 class FeedsController < CollectibleController
-  
-  def approve
-    update_and_decorate
-    @feed.approved = params[:approve] == 'Y'
-    @feed.save
-    flash[:popup] = 'Feedthrough '+(@feed.approved ? 'Approved' : 'Blocked')
-  end
-  
+
   # GET /feeds
   # GET /feeds.json
   def index

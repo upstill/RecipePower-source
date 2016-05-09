@@ -87,33 +87,5 @@ module FeedsHelper
     [ "div.collectible-buttons##{dom_id decorator}", feed_collectible_buttons(decorator, options) ]
   end
 
-  def feed_approval feed
-    str = case feed.approved
-            when true
-              'Approved '
-            when false
-              'Blocked '
-            else
-              ''
-          end
-          # NB: feeds can have no approval status, in which case both buttons should show
-          str << link_to_submit('Approve',
-                                approve_feed_path(feed, approve: 'Y'),
-                                button_style: 'success',
-                                button_size: 'xs',
-                                method: 'POST'
-          ) unless feed.approved == true
-          str << link_to_submit('Block',
-                                approve_feed_path(feed, approve: 'N'),
-                                button_style: 'success',
-                                button_size: 'xs',
-                                method: 'POST'
-          ) unless feed.approved == false
-    content_tag :span, str.html_safe, :id => dom_id(feed)
-  end
-
-  def feed_approval_replacement feed
-    [ "span##{dom_id feed}", feed_approval(feed) ]
-  end
 
 end

@@ -158,6 +158,7 @@ class Tag < ActiveRecord::Base
   end
 
   def absorb other
+    return true if other.id == id
     # Normal procedure:
     TaggingServices.change_tag(other.id, self.id)
     ReferentServices.change_tag(other.id, self.id) # Change the canonical expression of any referent which uses us

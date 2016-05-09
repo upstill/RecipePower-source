@@ -40,6 +40,14 @@ class ApplicationController < ActionController::Base
 
   include ApplicationHelper
 
+  # Generic action for approving an entity
+  def approve
+    update_and_decorate
+    @decorator.approved = params[:approve] == 'Y'
+    @decorator.save
+    flash[:popup] = 'Thumbs '+(@decorator.approved ? 'Up' : 'Down')
+  end
+
   # Set up a model for editing or rendering. The parameters are orthogonal:
   # If entity is nil, it is either fetched using params[:id] or created anew
   # If attribute_params are non-nil, they are used to initialize(update) the created(fetched) entity

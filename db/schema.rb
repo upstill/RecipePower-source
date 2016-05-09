@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160503024027) do
+ActiveRecord::Schema.define(version: 20160509031238) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -309,11 +309,11 @@ ActiveRecord::Schema.define(version: 20160503024027) do
     t.datetime "updated_at"
     t.string   "ttlcut",               limit: 255
     t.integer  "referent_id"
-    t.boolean  "reviewed",                         default: false
     t.text     "description"
     t.integer  "thumbnail_id"
     t.integer  "feeds_count",                      default: 0
     t.integer  "approved_feeds_count",             default: 0
+    t.boolean  "approved"
   end
 
   add_index "sites", ["id"], name: "sites_index_by_id", unique: true, using: :btree

@@ -207,6 +207,7 @@ module Linkable
 
   # One linkable is being merged into another => transfer references
   def absorb other
+    return true if other.id == id
     # Steal references
     if other.respond_to? :references
       other.references.each { |other_ref|

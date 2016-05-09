@@ -64,6 +64,7 @@ class Referent < ActiveRecord::Base
 
   def absorb other, nuke_it=true
     return false if type != other.type
+    return true if other.id == id
     puts "Merging '"+name+"' (#{children.count} children) with '"+other.name+"' (#{other.children.count} children):"
     other.children.each { |child| children << child }
     other.parents.each { |parent| parents << parent }

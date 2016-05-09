@@ -20,6 +20,7 @@
       <%= collectible_buttons_panel @decorator, 'xl', :tools_menu => true do %>
           <%# link_to_submit "Scrape for feeds", scrape_site_path(@site), options.merge(:method => :post) if response_service.admin_view? %>
       <% end %>
+      <%= entity_approval site if response_service.admin_view? %>
       <br>
       <%= site_similars site if response_service.admin_view? %><br>
     </td>
