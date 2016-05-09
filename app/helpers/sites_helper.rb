@@ -5,7 +5,7 @@ module SitesHelper
   end
 
   def site_similars site
-    SiteReference.where(host: site.reference.host).map(&:site).uniq.collect { |other|
+    SiteServices.new(site).similars.collect { |other|
       button_to_submit "Absorb #{other.home}", absorb_site_path(site, other_id: other.id), :method => :post, :button_size => "sm" unless other.id == site.id
     }.compact.join.html_safe
   end

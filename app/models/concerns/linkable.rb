@@ -101,8 +101,14 @@ module Linkable
 
         # Whenever a reference is added, we ensure that it gets to the same site
         define_method "#{reference_association_pl}_ensure_site" do |reference|
-          # debugger
-          site.include_url reference.url if (self.class != Site) && site && reference
+          if (self.class != Site) && site && reference
+            if URI(reference.url).host == URI(site.home).host
+              site.include_url reference.url
+            else # The entity is getting redirected to another site
+              Site.find_or_create url
+              @site = nil # Bust the memo to trigger a re-find of the site
+            end
+          end
         end
 
         # Ensure that all the linkable's references refer to the same site
