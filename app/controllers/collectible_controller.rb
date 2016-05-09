@@ -1,4 +1,7 @@
 class CollectibleController < ApplicationController
+  before_filter :login_required, :except => [:index, :show, :associated, :capture, :collect ]
+  before_filter :allow_iframe, only: :capture
+  protect_from_forgery except: :capture
 
   def collect
     if current_user
@@ -238,7 +241,6 @@ class CollectibleController < ApplicationController
             else
               # If we're collecting a recipe outside the context of the iframe, redirect to
               # the collection page with an embedded modal dialog invocation
-              tag_path = send "tag_#{response_service.controller_model_name}_path", @resource
               tag_path = polymorphic_path [:tag, @resource]
               redirect_to_modal tag_path
             end

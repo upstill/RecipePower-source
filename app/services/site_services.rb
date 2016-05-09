@@ -481,7 +481,7 @@ class SiteServices
                   unless @site.finders.exists?(finder.slice :label, :selector, :attribute_name)
                     if existing = @site.finders.where(finder.slice :label).first
                       existing.selector = finder[:selector]
-                      existing.read_attrib = finder[:attribute_name]
+                      existing.attribute_name = finder[:attribute_name]
                       existing.save
                     else
                       @site.finders.create(finder.slice :label, :selector, :attribute_name)

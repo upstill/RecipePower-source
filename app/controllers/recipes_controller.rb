@@ -1,25 +1,19 @@
 class RecipesController < CollectibleController
-  before_filter :allow_iframe, only: :capture
-  protect_from_forgery except: :capture
 
   before_filter :login_required, :except => [:index, :show, :associated, :capture, :collect ]
-  before_filter { @focus_selector = "#recipe_url" }
+  before_filter { @focus_selector = '#recipe_url' }
     
   filter_access_to :all
   # include ApplicationHelper
   # include ActionView::Helpers::TextHelper
 
-  def index
-    redirect_to default_next_path
-    # return if need_login true
-    # Get the collected recipes for the user named in query
-  end
-
+=begin
   def capture # Collect URL from foreign site, asking whether to re-direct to edit
     # return if need_login true
     # Here is where we take a hit on the "Add to RecipePower" widget,
     # and also invoke the 'new cookmark' dialog. The difference is whether
     # parameters are supplied for url, title and note (though only URI is required).
+    x=2
     respond_to do |format|
       format.html { # This is for capturing a new recipe and tagging it using a new page.
         if current_user
@@ -34,8 +28,7 @@ class RecipesController < CollectibleController
             else
               # If we're collecting a recipe outside the context of the iframe, redirect to
               # the collection page with an embedded modal dialog invocation
-              tag_path = send "tag_#{response_service.controller_model_name}_path", @resource
-              tag_path = polymorphic_path [@resource, :tag]
+              tag_path = polymorphic_path [:tag, @resource]
               redirect_to_modal tag_path
             end
           else
@@ -89,6 +82,17 @@ class RecipesController < CollectibleController
         end
       }
     end
+  end
+=end
+
+  def capture
+    super
+  end
+
+  def index
+    redirect_to default_next_path
+    # return if need_login true
+    # Get the collected recipes for the user named in query
   end
 
   def revise # modify current recipe to reflect a client-side change

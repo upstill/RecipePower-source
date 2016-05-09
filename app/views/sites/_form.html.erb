@@ -29,11 +29,11 @@
             </div>
             <div class="row">
               <div class="col-md-12">
-                <%= f.input :ttlcut, label: "RegExp to cut out of title" %>
+                <%= f.input :ttlcut, label: 'RegExp to cut out of title' %>
               </div>
             </div>
         <% end %>
-        <%= render("finders", f: f) if permitted_to? :edit, :finders %>
+        <%= render('finders', f: f) if permitted_to? :admin, :finders %>
 
     <% end %>
     <%= modal_footer do %>

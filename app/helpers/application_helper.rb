@@ -1,4 +1,4 @@
-require "Domain"
+require 'Domain'
 require './lib/string_utils.rb'
 require 'class_utils.rb'
 # require 'suggestion_presenter'
@@ -16,15 +16,15 @@ module ApplicationHelper
   end
 
   # Nicely format a report of some quantity
-  def count_report number, name, preface="", postscript="", threshold=1
+  def count_report number, name, preface='', postscript='', threshold=1
     if !preface.is_a? String
-      threshold, preface = preface, ""
+      threshold, preface = preface, ''
     elsif !postscript.is_a? String
-      threshold, postscript = postscript, ""
+      threshold, postscript = postscript, ''
     end
-    return "" if number<threshold
+    return '' if number<threshold
     if number == 0
-      numstr = preface.blank? ? "No" : "no"
+      numstr = preface.blank? ? 'No' : 'no'
       name = name.strip.pluralize
     else
       numstr = number.to_s
@@ -35,7 +35,7 @@ module ApplicationHelper
 
   def present to_present, viewer, &block
     object = to_present.is_a?(Draper::Decorator) ? to_present.object : to_present
-    if const = const_for(object, "Presenter")
+    if const = const_for(object, 'Presenter')
       presenter = const.new to_present, self, viewer
       if block_given?
         with_output_buffer { yield presenter }
@@ -71,9 +71,8 @@ module ApplicationHelper
   def link_to_add_fields(name, f, association, *initializers)
     data = data_to_add_fields f, association, *initializers
     link_to name,
-            '#',
-            style: "display:none",
-            class: "add_fields",
+            '#', # style: 'display:none',
+            class: 'add_fields',
             data: data
   end
 
@@ -81,21 +80,21 @@ module ApplicationHelper
     new_object = f.object.send(association).klass.new *initializers
     id = new_object.object_id
     fields = f.simple_fields_for(association, new_object, child_index: id) do |builder|
-      render association.to_s.singularize + "_fields", f: builder
+      render association.to_s.singularize + '_fields', f: builder
     end
-    { id: id, fields: fields.gsub("\n", "") }
+    { id: id, fields: fields.gsub("\n", '') }
   end
 
   def recipe_popup(rcp)
-    link_to image_tag("preview.png", title: "Show the recipe in a popup window", class: "preview_button"), rcp.url, target: "_blank", class: "popup", id: "popup#{rcp.id.to_s}"
+    link_to image_tag('preview.png', title: 'Show the recipe in a popup window', class: 'preview_button'), rcp.url, target: '_blank', class: 'popup', id: "popup#{rcp.id.to_s}"
   end
 
   def recipe_list_element_golink_class recipe
-    "rcpListGotag"+recipe.id.to_s
+    'rcpListGotag'+recipe.id.to_s
   end
 
   def recipe_list_element_class recipe
-    "rcpListElmt"+recipe.id.to_s
+    'rcpListElmt'+recipe.id.to_s
   end
 
   def recipe_grid_element_class recipe
@@ -103,12 +102,12 @@ module ApplicationHelper
   end
 
   def feed_list_element_class entry
-    "feedListElmt"+entry.id.to_s
+    'feedListElmt'+entry.id.to_s
   end
 
   # Return the id of the DOM element giving the time-since-touched for a recipe
   def touch_date_class recipe
-    "touchtime#{recipe.id.to_s}"
+    'touchtime' + recipe.id.to_s
   end
 
   # Present the date and time the recipe was last touched by its current user
@@ -116,7 +115,7 @@ module ApplicationHelper
     if td = entity.touch_date
       stmt = "Last touched/viewed #{time_ago_in_words td} ago."
     else
-      stmt = "Never touched or viewed"
+      stmt = 'Never touched or viewed'
     end
     content_tag :span, stmt, class: touch_date_class(entity)
   end
@@ -127,18 +126,18 @@ module ApplicationHelper
   end
 
   def logo(small=false)
-    link_to image_tag("RPlogo.png", :alt => "RecipePower", :id => "logo_img"+(small ? "_small" : "")), root_path
+    link_to image_tag('RPlogo.png', :alt => 'RecipePower', :id => 'logo_img'+(small ? '_small' : '')), root_path
   end
 
   def enumerate_strs strs
     case strs.count
       when 0
-        ""
+        ''
       when 1
         strs[0]
       else
         last = strs.pop
-        strs.join(', ')+" and " + last
+        strs.join(', ')+' and ' + last
     end
   end
 
@@ -153,8 +152,8 @@ module ApplicationHelper
 
   def question_section q, &block
     (
-    content_tag(:h4, link_to(q, "#", class: "question_section"))+
-        content_tag(:div, with_output_buffer(&block), class: "answer hide")
+    content_tag(:h4, link_to(q, '#', class: 'question_section'))+
+        content_tag(:div, with_output_buffer(&block), class: 'answer hide')
     ).html_safe
   end
 
@@ -162,10 +161,10 @@ module ApplicationHelper
   def template_element id, partial
     template = render(partial, entity: TemplateDecorator.new )
     content_tag :div,
-                "",
-                class: "template",
+                '',
+                class: 'template',
                 id: id,
-                :"data-template" => { string: template }.to_json
+                :'data-template' => { string: template }.to_json
   end
 
   def invitation_acceptance_label
@@ -188,7 +187,7 @@ module ApplicationHelper
 
   def globstring(hsh)
     hsh.keys.each.collect { |key|
-      key.to_s+": ["+(hsh[key] ? hsh[key].to_s : "nil")+"]"
+      key.to_s+': ['+(hsh[key] ? hsh[key].to_s : 'nil')+']'
     }.join(' ')
   end
 
@@ -218,13 +217,13 @@ module ApplicationHelper
   # Generic termination buttons for dialogs--or any other forms
   def form_actions f, options = {}
     cancel_path = options[:cancel_path] || default_next_path
-    submit_label = options[:submit_label] || "Save"
+    submit_label = options[:submit_label] || 'Save'
     content_tag :div,
-                ((block_given? ? yield : "") +
+                ((block_given? ? yield : '') +
                     dialog_submit_button(submit_label) +
                     dialog_cancel_button
                 ).html_safe,
-                class: "form-group actions"
+                class: 'form-group actions'
   end
 
   # Get jQuery from the Google CDN, falling back to the version in jquery-rails if unavailable
