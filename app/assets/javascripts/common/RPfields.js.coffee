@@ -17,10 +17,10 @@ jQuery ->
 		event.preventDefault()
 
 	$('body').on 'click', 'a.add_fields', (event) ->
-		time = new Date().getTime()
-		regexp = new RegExp($(this).data('id'), 'g')
-		newfields = $(this).data('fields').replace(regexp, time)
-		$(this).before(newfields)
+		#		time = new Date().getTime()
+		#		regexp = new RegExp($(this).data('id'), 'g')
+		#		newfields = $(this).data('fields').replace(regexp, time)
+		#		$(this).before(newfields)
 		event.preventDefault()
 
 	$('body').on 'change', 'select.question-selector', (event) ->

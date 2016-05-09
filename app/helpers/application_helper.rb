@@ -73,6 +73,7 @@ module ApplicationHelper
     link_to name,
             '#', # style: 'display:none',
             class: 'add_fields',
+            style: 'display: block; height: 15px; font-size: 50px; position: relative; top: -10px',
             data: data
   end
 

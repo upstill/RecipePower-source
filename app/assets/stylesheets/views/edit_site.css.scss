@@ -1,8 +1,28 @@
-.edit_site.dialog {
+div.edit_site.dialog {
 	// width:95%;
 	// margin:5px;
 	// padding:5px;
 	// padding-bottom:0;
 	// background-color:#EEE;
 	// z-index: 9000001;
+  div.finder-fields-header {
+    margin-top: 1em;
+    // background-color: mix($green-background-color, white, 20%);
+    // color: mix($green-text-color, black, 5%);
+    font-size: .75em;
+    border-bottom: 2px solid $green-text-color;
+    div.finder-fields {
+      div.form-group.string {
+        font-size: 1em;
+      }
+      div.site_finders_selector {
+        margin-bottom: 0;
+      }
+      a.add_fields {
+        display: block;
+        height: 15px;
+        font-size: 50px;
+      }
+    }
+  }
 }

@@ -1,19 +1,18 @@
 <h4>Data Finders </h4>
-<div class="row">
-  <div class="col-md-3">
-    To Extract
+<div class="row finder-fields-header">
+  <div class="col-md-4">
+    <span class="field-prompt">To Extract:</span>
   </div>
   <div class="col-md-5">
-    Use Selector
+    <span class="field-prompt">Use Selector:</span>
   </div>
-  <div class="col-md-4">
-    Read Attribute
+  <div class="col-md-3">
+    <span class="field-prompt">Read Attribute:</span>
   </div>
 </div>
 <div class="finder-fields">
   <%= f.simple_fields_for :finders do |p| %>
       <%= render 'finder_fields', f: p %>
   <% end %>
-  <%= link_to_add_fields 'Add New', f, :finders %>
+  <%= link_to_add_fields '+', f, :finders %>
 </div>
-<hr>

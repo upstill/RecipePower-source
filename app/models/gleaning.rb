@@ -1,3 +1,5 @@
+require './lib/results.rb'
+
 class Gleaning < ActiveRecord::Base
   include Backgroundable
 

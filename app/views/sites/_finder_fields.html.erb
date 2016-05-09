@@ -1,14 +1,14 @@
 <div class="row finder-field">
-  <div class="col-md-2">
+  <div class="col-md-3">
     <%= f.input :label, collection: FinderServices.label_choices, label: false, required: true %>
   </div>
-  <div class="col-md-5">
-    <%= f.input :selector, label: false, required: true %>
-  </div>
-  <div class="col-md-3">
-    <%= f.input :attribute_name, collection: FinderServices.attribute_choices, label: false %>
+  <div class="col-md-6">
+    <%= f.input :selector, label: false, required: true, input_html: { style: 'font-size: .8em;' } %>
   </div>
   <div class="col-md-2">
+    <%= f.input :attribute_name, collection: FinderServices.attribute_choices, label: false %>
+  </div>
+  <div class="col-md-1">
     <%= f.input :_destroy, :as => :hidden, label: false %>
     <%= link_to '', '#', class: 'btn btn-default btn-xs glyphicon glyphicon-arrow-up move-finder-up' %>
     <%= link_to '', '#', class: 'btn btn-default btn-xs glyphicon glyphicon-arrow-down move-finder-down' %>
