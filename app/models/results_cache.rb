@@ -1094,12 +1094,34 @@ end
 class SitesIndexCache < ResultsCache
   include EntitiesCache
 
+  def self.params_needed
+    super + [:approved]
+  end
+
+=begin
   def max_window_size
     10
   end
+=end
+  def approved
+    if defined?(@approved)
+      case @approved
+        when 'invisible'
+          [ nil, false ]
+        when 'true'
+          true
+        when 'false'
+          false
+        when '', 'nil'
+          nil
+      end
+    else
+      true
+    end
+  end
 
   def itemscope
-    @itemscope ||= Site.unscoped
+    @itemscope ||= Site.where(approved: approved)
   end
 
 end

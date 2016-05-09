@@ -147,15 +147,16 @@ module NavtabsHelper
           item_list += [
             '<hr class="menu">'.html_safe,
             link_to_submit( 'Admin View Off', admin_toggle_path(on: false), class: 'transient'),
-            link_to_submit('Add Cookmark', new_recipe_path, :mode => :modal, class: 'transient'),
+            # link_to_submit('Add Cookmark', new_recipe_path, :mode => :modal, class: 'transient'),
             link_to('Admin', admin_path),
-            link_to_submit('Upload Picture', getpic_user_path(current_user), :mode => :modal),
-            link_to('Address Bar Magic', '#', onclick: "RP.getgo('#{home_path}', 'http://local.recipepower.com:3000/bar.html##{bookmarklet_script}')"),
-            link_to('Bookmark Magic', '#', onclick: "RP.bm('Cookmark', '#{bookmarklet_script}')"),
-            link_to('Stream Test', '#', onclick: 'RP.stream.buffer_test();'),
-            (link_to_submit('Page', current_user, :format => :json) if current_user),
-            (link_to_submit('Modal', current_user, :format => :json, :mode => :modal) if current_user),
-            link_to_submit('Sites', sites_path, :format => :json),
+            # link_to_submit('Upload Picture', getpic_user_path(current_user), :mode => :modal),
+            # link_to('Address Bar Magic', '#', onclick: "RP.getgo('#{home_path}', 'http://local.recipepower.com:3000/bar.html##{bookmarklet_script}')"),
+            # link_to('Bookmark Magic', '#', onclick: "RP.bm('Cookmark', '#{bookmarklet_script}')"),
+            # link_to('Stream Test', '#', onclick: 'RP.stream.buffer_test();'),
+            # (link_to_submit('Page', current_user, :format => :json) if current_user),
+            # (link_to_submit('Modal', current_user, :format => :json, :mode => :modal) if current_user),
+            link_to_submit('Review Pending Sites', sites_path(approved: 'nil'), :format => :json),
+            link_to_submit('Review Invisible Sites', sites_path(approved: 'invisible'), :format => :json),
             link_to_submit('Tags', tags_path, :format => :json)
           ].compact
         else
