@@ -2,7 +2,7 @@ source 'http://rubygems.org'
 
 ruby '2.2.0'
 # gem 'bundler', '~> 1.4'
-gem 'rails', '~> 4.2' # '3.2.11' #
+gem 'rails', '~> 4.2.5' # '3.2.11' #
 gem 'composite_primary_keys', '~> 8.0'
 gem 'arel', '~> 6.0'
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
@@ -61,6 +61,7 @@ gem 'rspec-rails', '2.99', :group => [ :development, :test ] # ~> 3.1'
 gem 'jquery-migrate-rails' # TODO: remove after jQuery 1.9 is confirmed
 gem 'bourbon'
 gem 'premailer-rails'
+gem 'letsencrypt_plugin'
 
 gem 'exception_notification', git: 'git://github.com/smartinez87/exception_notification.git'
 # gem 'exception_notification', '~> 4.0.1', :require => 'exception_notifier' # , git: 'git://github.com/alanjds/exception_notification.git' 

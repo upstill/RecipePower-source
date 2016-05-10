@@ -28,7 +28,7 @@ class SessionsController < Devise::SessionsController
       result = sign_in_and_redirect(resource_name, resource)
       return result
     rescue Exception => e
-      flash[:error] = "Sorry, either the username/email or password don't match our records."
+      flash[:error] = 'Sorry, either the username/email or password don\'t match our records.'
       render :errors
     end
   end

@@ -356,7 +356,7 @@ class ApplicationController < ActionController::Base
                       new_user_session_url(response_service.redirect_params params.slice(:sourcehome))
                     else
                       # Redirect to the home page with a login popup trigger
-                      view_context.page_with_trigger home_path, new_user_registration_url(header: "Sorry, members only", flash: {alert: alert})
+                      view_context.page_with_trigger home_path, new_user_registration_url(header: 'Sorry, members only', flash: {alert: alert})
                     end
         )
       else
