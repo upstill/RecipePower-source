@@ -130,7 +130,7 @@ RP::Application.routes.draw do
   match 'lists', :controller => 'lists', :action => 'index', :via => [:get, :post]
 
   post '/site' => 'sites#create', :as => 'create_site'
-  resources :sites, except: [:index, :create], :concerns => [:picable, :collectible, :taggable] do
+  resources :sites, except: [:index, :create, :destroy], :concerns => [:picable, :collectible, :taggable] do
     member do
       post 'absorb'
       get 'feeds'
