@@ -15,10 +15,9 @@ server {
 
 server {
   listen 443 ssl;
-  ssl_certificate      /srv/ssl/nginx.pem;
-  ssl_certificate_key  /srv/ssl/nginx.key;
-  ssl_session_cache shared:SSL:10m;
-  ssl_session_timeout 10m;
+  include /etc/nginx/ssl.conf;
+  ssl_certificate /etc/letsencrypt/live/staging.recipepower.com/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/staging.recipepower.com/privkey.pem;
   root <%= current_path %>/public;
 
   location ^~ /assets/ {
