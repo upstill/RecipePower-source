@@ -15,7 +15,7 @@ default: &default
 
 production:
   <<: *default
-  domain: 'strong-galaxy-5765.herokuapp.com'
+  domain: 'www.recipepower.com'
 
 staging:
   <<: *default
