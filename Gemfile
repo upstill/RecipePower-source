@@ -61,7 +61,7 @@ gem 'rspec-rails', '2.99', :group => [ :development, :test ] # ~> 3.1'
 gem 'jquery-migrate-rails' # TODO: remove after jQuery 1.9 is confirmed
 gem 'bourbon'
 gem 'premailer-rails'
-gem 'letsencrypt_plugin'
+# gem 'letsencrypt_plugin'
 
 gem 'exception_notification', git: 'git://github.com/smartinez87/exception_notification.git'
 # gem 'exception_notification', '~> 4.0.1', :require => 'exception_notifier' # , git: 'git://github.com/alanjds/exception_notification.git' 

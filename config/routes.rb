@@ -4,7 +4,6 @@
 # a second, POST, method (#query), which wasn't being POSTed to upon page reload.
 
 RP::Application.routes.draw do
-  mount LetsencryptPlugin::Engine, at: '/'  # It must be at root level
 
   get 'finders/create'
   post 'finders/create'
