@@ -19,7 +19,7 @@ server {
 #  ssl_certificate /etc/letsencrypt/live/staging.recipepower.com/fullchain.pem;
 #  ssl_certificate_key /etc/letsencrypt/live/staging.recipepower.com/privkey.pem;
   listen 173.255.245.80:80;  # This line replaced the above commented code
-  server_name staging.recipepower.com;
+  server_name recipepower.com staging.recipepower.com;
   root <%= current_path %>/public;
 
   location ^~ /assets/ {
