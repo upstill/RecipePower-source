@@ -15,11 +15,11 @@ server {
 
 #server {
 #  listen 443 ssl;
-#  server_name staging.recipepower.com;
 #  include /etc/nginx/ssl.conf;
 #  ssl_certificate /etc/letsencrypt/live/staging.recipepower.com/fullchain.pem;
 #  ssl_certificate_key /etc/letsencrypt/live/staging.recipepower.com/privkey.pem;
-  listen 80 default deferred;  # This line replaced the above commented code
+  listen 173.255.245.80:80;  # This line replaced the above commented code
+  server_name staging.recipepower.com;
   root <%= current_path %>/public;
 
   location ^~ /assets/ {

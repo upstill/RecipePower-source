@@ -39,6 +39,7 @@ run () {
 case "$1" in
 start)
   sig 0 && echo >&2 "Already running" && exit 0
+  echo >&2 "$CMD"
   run "$CMD"
   ;;
 stop)
@@ -78,7 +79,7 @@ reopen-logs)
   sig USR1
   ;;
 *)
-  echo >&2 "Usage: $0 <start|stop|restart|upgrade|force-stop|reopen-logs>"
+  echo >&2 "Usage: $0 < start|stop|restart|upgrade|force-stop|reopen-logs >"
   exit 1
   ;;
 esac
