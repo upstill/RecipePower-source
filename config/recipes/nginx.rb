@@ -14,6 +14,8 @@ namespace :nginx do
     on roles(:web) do
       template "nginx_unicorn.erb", "/tmp/nginx_conf"
       sudo "mv /tmp/nginx_conf /etc/nginx/sites-enabled/#{fetch :application}"
+      template "ssl.conf.erb", "/tmp/ssl_conf"
+      sudo "mv /tmp/ssl_conf /etc/nginx/ssl.conf"
       sudo "rm -f /etc/nginx/sites-enabled/default"
       sudo "service nginx stop"
       sudo "service nginx start"
