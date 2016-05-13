@@ -1,8 +1,8 @@
 upstream unicorn {
-    server unix:/tmp/unicorn.RP.sock fail_timeout=0;
+    server unix:/tmp/unicorn.<%= fetch :application %>.sock fail_timeout=0;
 }
 
-error_log /var/www/RP/shared/log/nginx.log debug;
+error_log /var/www/<%= fetch :application %>/shared/log/nginx.log debug;
 
 server {
     listen 80 default deferred;
@@ -11,7 +11,7 @@ server {
     # server_name recipepower.com www.recipepower.com;
     # return 301 https://$server_name$request_uri;
 
-    root /var/www/RP/current/public;
+    root <%= current_path %>/public;
 
     location ^~ /assets/ {
         gzip_static on;
@@ -19,15 +19,15 @@ server {
         add_header Cache-Control public;
     }
 
-    try_files $uri/index.html $uri @unicorn;
-    try_files $uri @unicorn;
-    location @unicorn {
-        # proxy_set_header   X-Forwarded-Proto https;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header Host $http_host;
-        proxy_redirect off;
-        proxy_pass http://unicorn;
-    }
+    try_files $uri/index.html $uri;
+    # try_files $uri/index.html $uri @unicorn;
+    # location @unicorn {
+        # # proxy_set_header   X-Forwarded-Proto https;
+# proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+# proxy_set_header Host $http_host;
+# proxy_redirect off;
+# proxy_pass http://unicorn;
+# }
 
     error_page 500 502 503 504 /500.html;
     client_max_body_size 4G;
