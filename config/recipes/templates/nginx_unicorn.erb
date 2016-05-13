@@ -5,8 +5,8 @@ upstream unicorn {
 error_log /var/www/<%= fetch :application %>/shared/log/nginx.log debug;
 
 server {
-    listen 80 default deferred;
-    # listen 173.255.245.80:80;
+    # listen 173.255.245.80:80 default deferred;
+    listen 173.255.245.80:80;
     # listen [::]:80 ipv6only=off;
     # server_name recipepower.com www.recipepower.com;
     # return 301 https://$server_name$request_uri;
