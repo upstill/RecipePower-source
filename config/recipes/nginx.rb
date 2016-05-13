@@ -17,6 +17,8 @@ namespace :nginx do
       template "ssl.conf.erb", "/tmp/ssl_conf"
       sudo "mv /tmp/ssl_conf /etc/nginx/ssl.conf"
       sudo "rm -f /etc/nginx/sites-enabled/default"
+      sudo "mkdir /var/www/#{fetch :application}/current/tmp/pids"
+      sudo "chmod 777 /var/www/#{fetch :application}/current/tmp/pids"
       sudo "service nginx stop"
       sudo "service nginx start"
     end
