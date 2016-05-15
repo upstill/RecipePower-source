@@ -10,6 +10,7 @@
 #= require jquery-migrate
 #= require jquery_ujs
 #= require jquery.ui.widget
+#= require jquery.panelSnap
 #= require_self
 #= require arch/collection.js.coffee
 #= require_directory ../../../vendor/assets/javascripts/jquery_addons
