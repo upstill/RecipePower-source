@@ -1,4 +1,4 @@
 <%# Fields for an edit-user dialog %>
-<%= modal_dialog :edit_user, (response_service.user.id == current_user.id ? "Profile" : "#{response_service.user.handle}'s Profile" ) do %>
-    <%= render "form" %>
+<%= modal_dialog 'edit_user new-style green', (response_service.user.id == current_user.id ? 'Profile' : "#{response_service.user.handle}'s Profile" ) do %>
+    <%= render 'form' %>
 <% end %>

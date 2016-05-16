@@ -43,6 +43,10 @@ div.control-group {
 .modal-body h3 {
   margin-top: 5px;
   margin-bottom: 10px;
+  &.section {
+    margin-top: 15px;
+    margin-bottom: 8px;
+  }
 }
 
 .badge > a {
