@@ -14,13 +14,13 @@ class PagesController < ApplicationController
   def letsencrypt
     respond_with do |format|
       format.html {
-        render :text => "ijDCLkP70VwYpWsDzTtpJWydjHkyBKteiPpsgPXTJSw.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo"
+        render :text => "KRZT-0JDMDQEQPdvyLjB7v2zTLP0-NEjPvIaid96Gk0.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo"
       }
       format.json {
-        render :text => "ijDCLkP70VwYpWsDzTtpJWydjHkyBKteiPpsgPXTJSw.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo"
+        render :text => "KRZT-0JDMDQEQPdvyLjB7v2zTLP0-NEjPvIaid96Gk0.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo"
       }
       format.text {
-        render :text => "ijDCLkP70VwYpWsDzTtpJWydjHkyBKteiPpsgPXTJSw.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo"
+        render :text => "KRZT-0JDMDQEQPdvyLjB7v2zTLP0-NEjPvIaid96Gk0.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo"
       }
     end
   end
