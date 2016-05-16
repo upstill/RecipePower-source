@@ -12,6 +12,8 @@ class PagesController < ApplicationController
   end
 
   def letsencrypt
+    render :text => "FBWtVRVpcUwhQbO6DVsqq9-xeqDr9epgpV90tE-HMUE.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo"
+=begin
     respond_with do |format|
       format.html {
         render :text => "FBWtVRVpcUwhQbO6DVsqq9-xeqDr9epgpV90tE-HMUE.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo"
@@ -23,6 +25,7 @@ class PagesController < ApplicationController
         render :text => "FBWtVRVpcUwhQbO6DVsqq9-xeqDr9epgpV90tE-HMUE.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo"
       }
     end
+=end
   end
 
   def home
