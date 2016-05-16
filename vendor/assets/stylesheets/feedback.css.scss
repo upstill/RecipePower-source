@@ -14,9 +14,9 @@ a#feedback_link {
   width: 26px;
   height: 96px;
   overflow: hidden;
-  background: #C00 url(feedback/feedback_tab.png);
+  background: #C00 asset-data-url("feedback/feedback_tab.png");
   _position: absolute;
-  /*_background-image: url(feedback/feedback_tab.png);*/
+  //_background-image: asset-data-url(feedback/feedback_tab.png);*/
 }
 
 a#feedback_link:hover {
@@ -28,8 +28,8 @@ a#feedback_link.left {
   top: 25%;
   width: 26px;
   height: 96px;
-  background-image: url(feedback/feedback_tab.png);
-  _background-image: url(feedback/feedback_tab.png);
+  background-image: asset-data-url("feedback/feedback_tab.png");
+  _background-image: asset-data-url("feedback/feedback_tab.png");
 }
 
 a#feedback_link.right {
@@ -37,8 +37,8 @@ a#feedback_link.right {
   top: 25%;
   width: 26px;
   height: 96px;
-  background-image: url(feedback/feedback_tab.png);
-  _background-image: url(feedback/feedback_tab.png);
+  background-image: asset-data-url("feedback/feedback_tab.png");
+  _background-image: asset-data-url("feedback/feedback_tab.png");
 }
 
 a#feedback_link.top {
@@ -46,8 +46,8 @@ a#feedback_link.top {
   top: 0;
   width: 96px;
   height: 26px;
-  background-image: url(feedback/feedback_tab_h.png);
-  _background-image: url(feedback/feedback_tab_h.png);
+  background-image: asset-data-url("feedback/feedback_tab_h.png");
+  _background-image: asset-data-url("feedback/feedback_tab_h.png");
 }
 
 a#feedback_link.bottom {
@@ -55,8 +55,8 @@ a#feedback_link.bottom {
   bottom: 0;
   width: 96px;
   height: 26px;
-  background-image: url(feedback/feedback_tab_h.png);
-  _background-image: url(feedback/feedback_tab_h.png);
+  background-image: asset-data-url("feedback/feedback_tab_h.png");
+  _background-image: asset-data-url("feedback/feedback_tab_h.png");
 }
 
 a#feedback_close_link {
@@ -65,8 +65,8 @@ a#feedback_close_link {
   position: absolute;
   height: 22px;
   width: 66px;
-  background-image: url(feedback/closelabel.gif);
-  _background-image: url(feedback/closelabel.gif);
+  background-image: asset-data-url("feedback/closelabel.gif");
+  _background-image: asset-data-url("feedback/closelabel.gif");
 }
 
 div#feedback_modal_window {
