@@ -5,6 +5,7 @@
 
 RP::Application.routes.draw do
 
+
   get 'finders/create'
   post 'finders/create'
 
@@ -229,6 +230,8 @@ RP::Application.routes.draw do
   get '/admin', :to => "pages#admin"
   get '/sprites', :to => "pages#sprites"
   get '/cookmark', :to => "pages#cookmark"
+  # Challenge response for Lets Encrypt
+  get '/.well-known/acme-challenge/:id' => 'pages#letsencrypt'
   root :to => 'pages#root'
 
   # The priority is based upon order of creation:

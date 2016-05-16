@@ -11,6 +11,10 @@ class PagesController < ApplicationController
     response_service.title = 'Admin'
   end
 
+  def letsencrypt
+    render text: '3-KZRLytc-uQKPEH9nkbtamKj4Cz4KWnIvoZCfQneRI.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
+  end
+
   def home
     response_service.title = 'Home'
     @auth_context = :manage
