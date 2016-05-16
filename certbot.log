@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/usr/local/Cellar/certbot/0.6.0/libexec/bin/certbot", line 9, in <module>
+    load_entry_point('certbot==0.6.0', 'console_scripts', 'certbot')()
+  File "/usr/local/Cellar/certbot/0.6.0/libexec/lib/python2.7/site-packages/certbot/main.py", line 658, in main
+    "--strict-permissions" in cli_args)
+  File "/usr/local/Cellar/certbot/0.6.0/libexec/lib/python2.7/site-packages/certbot/le_util.py", line 105, in make_or_verify_dir
+    os.makedirs(directory, mode)
+  File "/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/os.py", line 157, in makedirs
+    mkdir(name, mode)
+OSError: [Errno 13] Permission denied: '/etc/letsencrypt'
