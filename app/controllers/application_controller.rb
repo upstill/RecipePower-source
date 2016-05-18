@@ -78,7 +78,10 @@ class ApplicationController < ActionController::Base
     if entity.errors.empty? && # No probs. so far
         current_user # Only the current user gets to touch/modify a model
       current_user.touch(entity) if do_touch
-      entity.update_attributes attribute_params if attribute_params # There are parameters to update
+      if attribute_params
+        entity.incoming_attributes attribute_params.keys if entity.is_a? Taggable
+        entity.update_attributes attribute_params # There are parameters to update
+      end
     end
     # Having prep'ed the entity, set instance variables for the entity and decorator
     instance_variable_set :"@#{modelname}", entity

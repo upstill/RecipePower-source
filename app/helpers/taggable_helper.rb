@@ -7,7 +7,7 @@ module TaggableHelper
     if tags_attribute_name.is_a? Hash
       tags_attribute_name, options = nil, tags_attribute_name
     end
-    tags_attribute_name ||= 'tagging_tags' # Assert the default
+    tags_attribute_name ||= 'editable_tags' # Assert the default
     attribute_name = tags_attribute_name.to_s.singularize
     is_plural = attribute_name != tags_attribute_name.to_s
     attribute_name << '_tag' unless attribute_name.match /tag$/

@@ -100,22 +100,22 @@ class CollectibleDecorator < Draper::Decorator
     case fieldname.downcase
       when /_tags$/
         tagtype = fieldname.sub /_tags$/, ''
-        tagtype = ["Culinary Term", "Untyped"] if tagtype=="Other"
+        tagtype = ['Culinary Term', 'Untyped'] if tagtype=='Other'
         strjoin visible_tags(:tagtype => tagtype).collect { |tag|
-                  h.link_to_submit tag.name, tag, :mode => :modal, class: "rcp_list_element_tag"
+                  h.link_to_submit tag.name, tag, :mode => :modal, class: 'rcp_list_element_tag'
                 }
       when /^tags$/
-        h.list_tags_for_collectible visible_tags( :tagtype_x => [ :Question, :List, ]), self
+        h.list_tags_for_collectible visible_tags( :tagtype_x => [ :Question, :List ]), self
       when /^lists$/
         h.list_lists_with_status ListServices.associated_lists_with_status(self)
       when /^rcp/
         attrname = fieldname.sub(/^rcp/, '').downcase
         case attrname
-          when "picsafeurl"
+          when 'picsafeurl'
             object.imgdata
-          when "titlelink"
+          when 'titlelink'
             h.link_to object.title, object.url
-          when "video"
+          when 'video'
             (uri = URI(object.url)) &&
             uri.host.match(/\.youtube.com/) &&
             (vid = YouTubeAddy.extract_video_id(object.url)) &&
@@ -125,34 +125,34 @@ class CollectibleDecorator < Draper::Decorator
         end
       when /^comments/
         case fieldname.sub(/^comments_/, '')
-          when "mine"
-          when "friends"
-          when "others"
+          when 'mine'
+          when 'friends'
+          when 'others'
         end
-      when "site"
-        h.link_to object.sourcename, object.sourcehome, class: "tablink"
+      when 'site'
+        h.link_to object.sourcename, object.sourcehome, class: 'tablink'
 =begin
-      when "list", "lists"
+      when 'list', 'lists'
         strjoin ListServices.find_by_listee(object).collect { |list|
-                  llink = h.link_to_submit list.name, list, class: "rcp_list_element_tag"
+                  llink = h.link_to_submit list.name, list, class: 'rcp_list_element_tag'
                   if list.owner_id == object.tagging_user_id
                     llink
                   else
-                    ulink = h.link_to list.owner.handle, list.owner, class: "rcp_list_element_tag"
+                    ulink = h.link_to list.owner.handle, list.owner, class: 'rcp_list_element_tag'
                     "#{llink} (#{ulink})".html_safe
                   end
                 }
 =end
-      when "collections"
+      when 'collections'
         strjoin CollectibleServices.new(object).collectors.collect { |user|
           h.link_to_submit( user.handle, h.user_path(user), :mode => :modal) unless user.id == object.tagging_user_id
         }.compact
-      when "feeds"
-        strjoin(object.feeds.where(approved: true).collect { |feed| h.link_to_submit feed.title, h.feed_path(feed) },"","",',', '<br>').html_safe
-      when "classname_lower"
+      when 'feeds'
+        strjoin(object.feeds.where(approved: true).collect { |feed| h.link_to_submit feed.title, h.feed_path(feed) },'','',',', '<br>').html_safe
+      when 'classname_lower'
         object.class.to_s.downcase
       else
-        (method(fieldname.to_sym).call rescue nil) || ""
+        (method(fieldname.to_sym).call rescue nil) || ''
     end
   end
 

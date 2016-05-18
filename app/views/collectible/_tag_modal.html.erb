@@ -25,16 +25,28 @@
                 </div>
             <% end %>
             <div class="control-group">
-              <label class="string optional">Tag(s)</label>
+              <label class="string optional">Tag(s)<br><span class="locked-tags"><%= decorator.locked_author_tags.map(&:name).join ' | ' %></span></label>
               <input id="<%= decorator.element_id :tagging_user_id %>" name="<%= decorator.field_name :tagging_user_id %>" type="hidden" value="<%= decorator.tagging_user_id %>">
               <input type="text"
                      class="token-input-field-pending"
-                     id="tagging_tag_tokens"
-                     name="<%= decorator.field_name :tagging_tag_tokens %>"
+                     id="editable_author_tag_tokens"
+                     name="<%= decorator.field_name :editable_author_tag_tokens %>"
                      rows="2"
                      size="30"
                      placeholder="Tags"
-                     data-pre="<%= decorator.tagging_tag_data %>"/>
+                     data-pre="<%= decorator.editable_author_tags.map(&:attributes).to_json %>"/>
+            </div>
+            <div class="control-group">
+              <label class="string optional">Tag(s)<br><span class="locked-tags"><%= decorator.locked_no_author_tags.map(&:name).join ' | ' %></span></label>
+              <input id="<%= decorator.element_id :tagging_user_id %>" name="<%= decorator.field_name :tagging_user_id %>" type="hidden" value="<%= decorator.tagging_user_id %>">
+              <input type="text"
+                     class="token-input-field-pending"
+                     id="editable_no_author_tag_tokens"
+                     name="<%= decorator.field_name :editable_no_author_tag_tokens %>"
+                     rows="2"
+                     size="30"
+                     placeholder="Tags"
+                     data-pre="<%= decorator.editable_no_author_tags.map(&:attributes).to_json %>"/>
             </div>
             <div class="control-group">
               <input id="<%= decorator.element_id :collectible_user_id %>" name="<%= decorator.field_name :collectible_user_id %>" type="hidden" value="<%= decorator.collectible_user_id %>">

@@ -95,6 +95,11 @@ div.dialog.new-style {
       width: 100%;
       max-width: 470px;
     }
+    label .locked-tags {
+      font-size: 0.8em;
+      font-weight: bold;
+      color: mix(#9ab3a0, black, 90%)
+    }
     input.string,
     input.password,
     textarea {

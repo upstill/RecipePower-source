@@ -76,11 +76,11 @@ class CollectiblePresenter < BasePresenter
     contents =
         case which.to_sym
           when :author
-            tags = decorator.visible_tags :tagtype => :Author
+            tags = decorator.visible_author_tags # visible_tags :tagtype => :Author
             label = field_label_counted 'author', tags.count
             entity_links tags, joinstr: ' | '
           when :tags
-            taglist = decorator.visible_tags :tagtype_x => [ :Question, :List, :Author ]
+            taglist = decorator.visible_no_author_tags # visible_tags :tagtype_x => [ :Question, :List, :Author ]
             label = field_label_counted 'tags', taglist.count
             list_tags_for_collectible taglist, decorator
           when :lists # Lists it appears under
