@@ -153,14 +153,13 @@ module Taggable
           if tokens
             # Map the elements of the token string to tags, whether existing or new
             TokenInput.parse_tokens(args.first) { |token| # parse_tokens analyzes each token in the list as either integer or string
-              token.is_a?(Fixnum) ? token : Tag.strmatch(token,
-                                                         userid: @tagging_user_id,
-                                                         tagtype_x: [ :List, :Question ],
-                                                         assert: true)[0].id # Match or assert the string
+              token.is_a?(Fixnum) ? token : Tag.strmatch(token, filter_options.merge(assert: true))[0].id # Match or assert the string
             }
           else
             args.first.map &:id
           end
+
+      # By a remarkable coincidence, the taglist as currently defined is fetched by the corresponding 'get' method
       oids = self.method_missing((namestr.sub /tag_tokens$/, 'tags').to_sym).pluck :id
 
       # Add new tags as necessary
@@ -201,6 +200,7 @@ module Taggable
     (oids - nids).each { |tagid| refute_tagging tagid, @tagging_user_id }
   end
 
+  # Manage taggings of a given user
   def assert_tagging tag_or_id, uid
     Tagging.find_or_create_by user_id: uid,
                               tag_id: (tag_or_id.is_a?(Fixnum) ? tag_or_id : tag_or_id.id),

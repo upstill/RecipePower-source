@@ -3,24 +3,24 @@ class Tag < ActiveRecord::Base
   # require 'iconv'
   include Typeable
   typeable(:tagtype,
-           Untyped: ["Untyped", 0],
-           Genre: ["Genre", 1],
-           Role: ["Role", 2],
-           Process: ["Process", 3],
-           Ingredient: ["Ingredient", 4],
-           Unit: ["Unit", 5],
-           Source: ["Source", 6],
-           Author: ["Author", 7],
-           Occasion: ["Occasion", 8],
-           PantrySection: ["Pantry Section", 9],
-           StoreSection: ["Store Section", 10],
-           # Channel: ["Channel", 11],
-           Tool: ["Tool", 12],
-           Nutrient: ["Nutrient", 13],
-           CulinaryTerm: ["Culinary Term", 14],
-           Question: ["Question", 15],
-           List: ["List", 16],
-           Epitaph: ["Epitaph", 17]
+           Untyped: ['Untyped', 0],
+           Genre: ['Genre', 1],
+           Role: ['Role', 2],
+           Process: ['Process', 3],
+           Ingredient: ['Ingredient', 4],
+           Unit: ['Unit', 5],
+           Source: ['Source', 6],
+           Author: ['Author', 7],
+           Occasion: ['Occasion', 8],
+           PantrySection: ['Pantry Section', 9],
+           StoreSection: ['Store Section', 10],
+           # Channel: ['Channel', 11],
+           Tool: ['Tool', 12],
+           Nutrient: ['Nutrient', 13],
+           CulinaryTerm: ['Culinary Term', 14],
+           Question: ['Question', 15],
+           List: ['List', 16],
+           Epitaph: ['Epitaph', 17]
   )
 
   attr_accessible :name, :id, :tagtype, :isGlobal, :links, :referents, :users, :owners, :primary_meaning # , :recipes
@@ -28,10 +28,10 @@ class Tag < ActiveRecord::Base
   has_many :taggings, :dependent => :destroy
   has_many :dependent_lists, :class_name => 'List', foreign_key: 'name_tag_id'
   has_many :dependent_referents, :class_name => 'Referent', foreign_key: 'tag_id', :dependent => :nullify
-  has_many :public_lists, -> { where(availability: 0) }, :class_name => "List", foreign_key: "name_tag_id"
+  has_many :public_lists, -> { where(availability: 0) }, :class_name => 'List', foreign_key: 'name_tag_id'
 
   # expressions associate tags with the foods (roles, processes, etc.) they refer to
-  # These are the "meanings" of a tag
+  # These are the 'meanings' of a tag
   has_many :expressions, :dependent => :destroy
   has_many :referents, :through => :expressions
 
@@ -39,11 +39,11 @@ class Tag < ActiveRecord::Base
   # has_many :private_subscriptions, :dependent => :destroy
 
   # The primary meaning is the default meaning of a tag
-  belongs_to :primary_meaning, :class_name => "Referent", :foreign_key => "referent_id"
+  belongs_to :primary_meaning, :class_name => 'Referent', :foreign_key => 'referent_id'
 
   # ownership of tags restrict visible tags
   has_many :tag_owners, :dependent => :destroy
-  has_many :owners, :through => :tag_owners, :class_name => "User", :foreign_key => "user_id"
+  has_many :owners, :through => :tag_owners, :class_name => 'User', :foreign_key => 'user_id'
 
   validates_presence_of :name
   before_validation :tagqa
