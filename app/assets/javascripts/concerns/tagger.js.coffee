@@ -118,6 +118,10 @@ RP.tagger.setup = (elmt) ->
 			elmt = $('.token-input-field-pending', elmt)
 		data = $(elmt).data() || {}
 		request = data.request || "/tags/match.json"
+		if data.tagtype
+			request += "?tagtype="+data.tagtype
+		if data.tagtype_x
+			request += "?tagtype_x="+data.tagtype_x
 		if data.query
 			qstr = "?"
 			if typeof data.query == 'string'
