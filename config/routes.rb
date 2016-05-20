@@ -6,6 +6,10 @@
 RP::Application.routes.draw do
 
 
+  get 'scraper/new'
+
+  get 'scraper/create'
+
   get 'finders/create'
   post 'finders/create'
 
@@ -215,6 +219,7 @@ RP::Application.routes.draw do
     end
   end
   get '/revise', :to => 'recipes#revise'
+  get '/scrape', :to => 'references#scrape'
 
   # get "pages/home"
   # get "pages/contact"

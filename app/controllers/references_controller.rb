@@ -70,4 +70,13 @@ class ReferencesController < ApplicationController
       format.json { head :no_content }
     end
   end
+
+  def scrape
+    begin
+      render json: { popup: 'Scraped through ' + RecipeReference.scrape(params[:first]) + '. Hit reload for next batch.' }
+    rescue Exception => e
+      render json: { alert: 'Scrape died: ' + e.to_s }
+    end
+  end
+
 end

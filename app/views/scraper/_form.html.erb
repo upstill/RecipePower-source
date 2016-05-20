@@ -1,0 +1,13 @@
+<%# Form for taking a list locator and using it to create a list %>
+<%= simple_form_for @scraper, html: { class: 'edit_scraper json', 'data-type' => :json} do |f| %>
+    <%= form_errors_helper f %>
+    <%= f.input :page,
+                label: 'URL of page',
+                autofocus: true,
+                input_html: {cols: 125, rows: 1, 'data-type' => 'json', class: 'autofocus'} %>
+    <%= f.input :what,
+                label: 'How to process page',
+                placeholder: 'e.g, \'chefs\', \'atoz_page\', \'stash_page\', \'chef_page\'',
+                input_html: {cols: 30, rows: 1, 'data-type' => 'json'} %>
+    <%= form_actions f, submit_label: 'Scrape It!' %>
+<% end %>

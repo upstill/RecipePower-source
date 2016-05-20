@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160509031238) do
+ActiveRecord::Schema.define(version: 20160522074054) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -235,6 +235,7 @@ ActiveRecord::Schema.define(version: 20160509031238) do
     t.boolean  "canonical",               default: false
     t.string   "host"
     t.integer  "status",                  default: 0
+    t.string   "filename"
   end
 
   add_index "references", ["affiliate_id", "type"], name: "references_index_by_affil_and_type", using: :btree
@@ -300,6 +301,18 @@ ActiveRecord::Schema.define(version: 20160509031238) do
     t.datetime "updated_at"
     t.string   "name",       limit: 255
     t.integer  "user_id"
+  end
+
+  create_table "scrapers", force: :cascade do |t|
+    t.string   "page"
+    t.string   "what"
+    t.string   "subclass",   default: "Scraper"
+    t.text     "data"
+    t.datetime "run_at"
+    t.integer  "waittime",   default: 1
+    t.integer  "errcode",    default: 0
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
   end
 
   create_table "sites", force: :cascade do |t|
