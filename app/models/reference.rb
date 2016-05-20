@@ -1,12 +1,14 @@
 require 'RMagick' unless Rails.env.development?
 require 'open-uri'
+require 'mechanize'
+require 'fileutils'
 
 class Reference < ActiveRecord::Base
 
   include Referrable
   include Typeable
 
-  attr_accessible :reference_type, :type, :url, :affiliate_id
+  attr_accessible :reference_type, :type, :url, :affiliate_id, :filename
 
   validates_uniqueness_of :url, :scope => :type
 
@@ -313,6 +315,64 @@ class RecipeReference < Reference
 
   def self.lookup_recipes url, by_site=false
     self.lookup_affiliates url, by_site
+  end
+
+  def self.scrape first=''
+    mechanize = Mechanize.new
+
+    mechanize.user_agent_alias = 'Mac Safari'
+
+    chefs_url = 'http://www.bbc.co.uk/food/chefs'
+
+    STDERR.puts "** Getting #{chefs_url}"
+    chefs_page = mechanize.get(chefs_url)
+
+    chefs_page.links_with(href: /\/by\/letters\//).each do |link|
+      link_ref = link.to_s
+      if link_ref.last.downcase >= first.first
+        chefs = []
+        STDERR.puts "-> Clicking #{link}"
+        atoz_page = mechanize.click(link)
+        atoz_page.links_with(href: /\A\/food\/chefs\/\w+\z/).each do |link|
+          chef_id = link.href.split('/').last
+          chefs << chef_id unless chef_id <= first
+        end
+
+        search_url = 'http://www.bbc.co.uk/food/recipes/search?chefs[]='
+
+        chefs.each do |chef_id|
+          results_pages = []
+
+          STDERR.puts "** Getting #{search_url + chef_id}"
+          results_pages << mechanize.get(search_url + chef_id)
+
+          dirname = File.join('/var/www/RP/files/chefs', chef_id)
+
+          FileUtils.mkdir_p(dirname)
+
+          while results_page = results_pages.shift
+            links = results_page.links_with(href: /\A\/food\/recipes\/\w+\z/)
+
+            links.each do |link|
+              path = File.join(dirname, File.basename(link.href) + '.html')
+
+              STDERR.puts "+ #{link.href} => #{path}"
+
+              url = normalize_url "http://www.bbc.co.uk#{link.href}"
+              next if File.exist?(path) || Reference.lookup_by_url('RecipeReference', url).exists?
+
+              # mechanize.download(link.href, path)
+              RecipeReference.create url: url, filename: path
+            end
+
+            if next_link = results_page.links.detect { |link| link.rel?('next') }
+              results_pages << mechanize.click(next_link)
+            end
+          end
+        end
+        chefs.last
+      end
+    end
   end
 end
 
