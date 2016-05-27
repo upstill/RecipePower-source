@@ -1,5 +1,5 @@
 <%# Form for taking a list locator and using it to create a list %>
-<%= simple_form_for @scraper, html: { class: 'edit_scraper json', 'data-type' => :json} do |f| %>
+<%= simple_form_for @scraper, url: scraper_create_path, html: { class: 'edit_scraper json', 'data-type' => :json} do |f| %>
     <%= form_errors_helper f %>
     <%= f.input :page,
                 label: 'URL of page',

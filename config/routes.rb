@@ -5,10 +5,9 @@
 
 RP::Application.routes.draw do
 
-
   get 'scraper/new'
 
-  get 'scraper/create'
+  post 'scraper/create'
 
   get 'finders/create'
   post 'finders/create'
