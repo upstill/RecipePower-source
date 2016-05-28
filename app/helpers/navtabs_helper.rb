@@ -159,10 +159,6 @@ module NavtabsHelper
             link_to_submit('Review Invisible Sites', sites_path(approved: 'invisible'), :format => :json),
             link_to_submit('Tags', tags_path, :format => :json),
             link_to_submit('New Scraper...', scraper_new_path, :format => :json, :mode => :modal),
-            link_to_submit('Scrape',
-                           scrape_path(
-                               first: RecipeReference.all.pluck(:filename).compact.collect { |fname| fname.split('/')[6] }.uniq.sort.last || ''
-                           ), :format => :json),
             link_to_submit('Scrape BBC Chefs', scraper_create_path(
                                                    page: 'http://www.bbc.co.uk/food/chefs',
                                                    what: :chefs

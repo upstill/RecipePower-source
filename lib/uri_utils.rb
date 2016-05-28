@@ -84,14 +84,23 @@ def sanitize_url url
 end
 
 # Return nil if anything is amiss, including nil or empty url
+def normalized_uri url
+  if url.present? && (uri = safe_parse(sanitize_url url))
+    uri.normalize!
+    uri
+  end
+end
+
 def normalize_url url
-  ((uri = safe_parse(sanitize_url url)) && uri.normalize.to_s) unless url.blank?
+  if uri = normalized_uri(url)
+    uri.to_s
+  end
 end
 
 # Parse the url and return the protocol, host and port portion
 def host_url url
   if (uri = safe_parse(sanitize_url url)) && !uri.host.blank?
-    uri.path = ""
+    uri.path = ''
     uri.query = uri.fragment = nil
     uri.normalize.to_s.sub(/\/$/,'') # Remove trailing slash from normalized form
   end

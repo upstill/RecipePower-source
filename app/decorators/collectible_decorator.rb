@@ -66,6 +66,10 @@ class CollectibleDecorator < Draper::Decorator
       ts ||= TaggingServices.new object
       tagstring.split(',').map(&:strip).each { |tagname| ts.tag_with tagname, User.super_id }
     end
+    if tagstring = findings.result_for('Ingredients')
+      ts ||= TaggingServices.new object
+      tagstring.split(',').map(&:strip).each { |tagname| ts.tag_with tagname, User.super_id, type: 'Ingredient' }
+    end
   end
 
   # The robotags are those owned by super
