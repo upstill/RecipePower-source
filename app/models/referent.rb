@@ -1,25 +1,28 @@
 class ReferentValidator < ActiveModel::Validator
   def validate(record)
     # Test that record has non-generic type
-    unless record.type && record.type != "Referent"
-      record.errors[:base] << "Referent can't have generic type"
+    unless record.type && record.type != 'Referent'
+      record.errors[:base] << 'Referent can\'t have generic type'
       return false;
     end
     if record.tags.empty? && !record.canonical_expression
-      record.errors[:base] << "A Referent must have at least one tag to express it."
-      return false;
+      record.errors[:base] << 'A Referent must have at least one tag to express it.'
+      return false
     end
     true
   end
 end
 
 class Referent < ActiveRecord::Base
+  include Linkable
+
+  picable :picurl, :picture
   # Referents don't have a strict tree structure, just categories defined by an isa relationship.
   # This relationship is implemented by the ReferentRelation table, with parent_id and child_id keys
-  has_many :child_relations, :foreign_key => "parent_id", :dependent => :destroy, :class_name => "ReferentRelation"
+  has_many :child_relations, :foreign_key => 'parent_id', :dependent => :destroy, :class_name => 'ReferentRelation'
   has_many :children, -> { uniq }, :through => :child_relations, :source => :child
 
-  has_many :parent_relations, :foreign_key => "child_id", :dependent => :destroy, :class_name => "ReferentRelation"
+  has_many :parent_relations, :foreign_key => 'child_id', :dependent => :destroy, :class_name => 'ReferentRelation'
   has_many :parents, -> { uniq }, :through => :parent_relations, :source => :parent
 
   has_many :expressions, :dependent => :destroy
@@ -166,7 +169,7 @@ class Referent < ActiveRecord::Base
   def parent_tokens=(tokenlist)
     # After collecting tags, scan list to eliminate references to self
     tokenlist = tokenlist.split(',')
-    self.parents = tag_tokens_to_referents(tokenlist).delete_if { |rel| (rel.id == self.id) && errors.add(:parents, "Can't be its own parent.") }.uniq
+    self.parents = tag_tokens_to_referents(tokenlist).delete_if { |rel| (rel.id == self.id) && errors.add(:parents, 'Can\'t be its own parent.') }.uniq
   end
 
   def child_tokens
@@ -196,12 +199,12 @@ class Referent < ActiveRecord::Base
       token = token.to_i unless token.sub!(/^\'(.*)\'$/, '\1')
       Referent.express token, self.typenum
     }.compact # Blow off failed referents
-    puts "Tokens converted to referents: "+refs.inspect
+    puts 'Tokens converted to referents: '+refs.inspect
     refs
   end
 
   def self.referent_class_for_tagtype(typenum)
-    (((typenum > 0) ? Tag.typesym(typenum).to_s : "")+"Referent")
+    (((typenum > 0) ? Tag.typesym(typenum).to_s : '')+'Referent')
   end
 
   # Class method to create a referent of a given type under the given tag,
