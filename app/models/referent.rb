@@ -14,7 +14,7 @@ class ReferentValidator < ActiveModel::Validator
 end
 
 class Referent < ActiveRecord::Base
-  include Linkable
+  include Picable
 
   picable :picurl, :picture
   # Referents don't have a strict tree structure, just categories defined by an isa relationship.
