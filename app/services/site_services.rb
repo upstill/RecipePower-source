@@ -74,7 +74,7 @@ class SiteServices
     puts "\thome: (#{@site.home})"
     puts "\tdescription: (#{@site.description})"
     puts "\tlogo: (#{@site.logo})"
-    if results = FinderServices.findings(@site.home, @site)
+    if results = FinderServices.glean(@site.home, @site)
       results.labels.each { |label| puts "\t\t#{label}: #{results.result_for(label)}" }
     else
       puts "!!! Couldn't open the page for analysis !!!"
@@ -130,7 +130,7 @@ class SiteServices
         test_url = testback
       end
 
-      if recipe_url = (results = FinderServices.findings(test_url, site, 'URI')) && results.result_for('URI')
+      if recipe_url = (results = FinderServices.glean(test_url, site, 'URI')) && results.result_for('URI')
         found = found + 1
       else
         suspect << test_url

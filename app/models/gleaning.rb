@@ -38,7 +38,7 @@ class Gleaning < ActiveRecord::Base
       labels.unshift site
       site = nil
     end
-    bkg_execute do self.results = FinderServices.findings(url, site, *labels) end
+    bkg_execute do self.results = FinderServices.glean(url, site, *labels) end
     good?
   end
 

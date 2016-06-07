@@ -290,7 +290,7 @@ class VideoReference < Reference
 
 end
 
-class DefinitionReference < Reference
+class  DefinitionReference < Reference
 
 end
 
@@ -396,14 +396,16 @@ class ImageReference < Reference
 =end
 
   # An Image Reference maintains a local thumbnail of the image
-  has_many :feeds, :foreign_key => :picture_id
-  has_many :feed_entries, :foreign_key => :picture_id
-  has_many :lists, :foreign_key => :picture_id
-  has_many :products, :foreign_key => :picture_id
-  has_many :recipes, :foreign_key => :picture_id
-  has_many :sites, :foreign_key => :thumbnail_id
-  has_many :users, :foreign_key => :thumbnail_id
+  has_many :feeds, :foreign_key => :picture_id, :dependent => :nullify
+  has_many :feed_entries, :foreign_key => :picture_id, :dependent => :nullify
+  has_many :lists, :foreign_key => :picture_id, :dependent => :nullify
+  has_many :products, :foreign_key => :picture_id, :dependent => :nullify
+  has_many :recipes, :foreign_key => :picture_id, :dependent => :nullify
+  has_many :sites, :foreign_key => :thumbnail_id, :dependent => :nullify
+  has_many :users, :foreign_key => :thumbnail_id, :dependent => :nullify
+  has_many :referents, :foreign_key => :picture_id, :dependent => :nullify
 
+=begin
   # Return the set of objects referring to this image
   def clients
     feeds.to_a +
@@ -412,12 +414,11 @@ class ImageReference < Reference
         products.to_a +
         recipes.to_a +
         sites.to_a +
-        users.to_a
-=begin
+        users.to_a +
+        referents.to_a
     @@Clients.collect { |klass, attribute|
       klass.where(attribute => id).to_a
     }.flatten
-=end
   end
 
   def clients?
@@ -427,8 +428,8 @@ class ImageReference < Reference
         products.empty? &&
         recipes.empty? &&
         sites.empty? &&
-        users.empty?)
-=begin
+        users.empty? &&
+        referents.empty?)
     @@Clients.each { |klass, attribute|
       puts "Testing for existence of #{klass} #{attribute}:"
       ct = klass.where(attribute => id).count
@@ -439,7 +440,6 @@ class ImageReference < Reference
     false
   end
 =end
-  end
 
   def self.lookup_image url
     self.lookup_affiliate url

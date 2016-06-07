@@ -33,9 +33,9 @@ class Referent < ActiveRecord::Base
 
   has_many :referments, :dependent => :destroy, :inverse_of => :referent
   # What can we get to through the referments? Each class that includes the Referrable module should be in this list
-  @@referment_associations = [:references, :recipes]
+  @@referment_associations = %w{ references recipes referents }
   @@referment_associations.each { |assoc|
-    has_many assoc, :through => :referments, :source => :referee, :source_type => assoc.to_s.singularize.capitalize
+    has_many assoc.to_sym, :through => :referments, :source => :referee, :source_type => assoc.singularize.camelize
   }
 
 =begin
@@ -442,6 +442,7 @@ class SourceReferent < Referent;
   end
 end
 
+=begin
 class ChannelReferent < Referent;
   has_one :user, :dependent => :destroy
   attr_accessible :user, :user_attributes
@@ -534,6 +535,7 @@ end
 
 class InterestReferent < ChannelReferent;
 end
+=end
 
 class GenreReferent < Referent;
 end
@@ -550,10 +552,13 @@ end
 class UnitReferent < Referent;
 end
 
-class AuthorReferent < Referent;
+class AuthorReferent < Referent
 end
 
-class OccasionReferent < Referent;
+class OccasionReferent < Referent
+  # Ingredients associated with the occasion
+  has_many :ingredient_referents, :through => :referments, :source => :referee, :source_type => IngredientReferent
+
 end
 
 class PantrySectionReferent < Referent;

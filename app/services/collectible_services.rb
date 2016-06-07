@@ -27,18 +27,11 @@ class CollectibleServices
       # Recipe (or whatever) exists and we're just touching it for the user
       entity = klass.find params[:id]
     elsif !(entity = RecipeReference.lookup_recipe params[:url])
-      if extractions
-        # Translate the extractions into Finder results
-        findings = FinderServices::Results.new *extractions.keys
-        # tagstrings = tagstring.sub(/\[(.*)\]$/, '\1').sub(/"(.*)"$/, '\1').split( '","').map(&:strip).join ','
-        extractions.each { |key, value| findings.assert_result key, value }
-      else
-        findings = FinderServices.findings params[:url]
-        if findings.empty?
-          entity = klass.new params
-          entity.errors[:url] = 'Doesn\'t appear to be a working URL: we can\'t open it for analysis'
-          return entity
-        end
+      # Get findings, either from the extractions, or by looking at the page
+      unless findings = FinderServices.findings(extractions, params[:url])
+        entity = klass.new params
+        entity.errors[:url] = 'Doesn\'t appear to be a working URL: we can\'t open it for analysis'
+        return entity
       end
       # Extractions are parameters derived directly from the page
       url = findings.result_for('URI') || findings.result_for('href') || params[:url]

@@ -58,6 +58,8 @@ class Scraper < ActiveRecord::Base
     save
   end
 
+  protected
+
   # Pitch the scraper into the DelayedJob queue
   def queue_up
     # Defer till later
@@ -88,26 +90,33 @@ class Scraper < ActiveRecord::Base
     save if id
   end
 
+  # Define a scraper to follow a link or links and return it, for whatever purpose
   def launch link_or_links, what, data=self.data
-    [link_or_links].flatten.compact.each { |link|
+    [link_or_links].flatten.compact.collect { |link|
       link = absolutize link # A Mechanize object for a link
-      if recur
-
-        STDERR.puts "** Launching #{what} on #{link}"
-        scraper = Scraper.assert link, what, data
-        data.immediate ? scraper.perform : scraper.queue_up
-      else
-        STDERR.puts "** WOULD BE Launching #{what} (handler says #{self.class.handler link}) on #{link}"
-      end
+      scraper = Scraper.assert link, what, recur, data
+      (data[:immediate] ? scraper.perform : scraper.queue_up) if recur
+      STDERR.puts "** #{'WOULD BE ' unless recur}Launching #{what} (handler says #{self.class.handler link}) on #{link}"
+      scraper
     }
   end
 
-  def absolutize link_or_path
-    if path = link_or_path.is_a?(String) ? link_or_path : (link_or_path.href if link_or_path.respond_to? :href)
-      URI.join(url, path).to_s
-    else
-      url
-    end
+  # Ensure that a given link (or Nokogiri spec or Mechanize node)
+  def absolutize link_or_path, attr=:href
+    path =
+        case link_or_path
+          when String
+            link_or_path
+          when Mechanize::Page::Link
+            link_or_path.href
+          when Nokogiri::XML::Element
+            link_or_path.attribute attr.to_s
+          when Nokogiri::XML::Attr
+            link_or_path.to_s
+          when respond_to?(attr.to_sym)
+            link_or_path.send attr.to_sym
+        end
+    path.present? ? URI.join(url, path).to_s : url
   end
 
   def mechanize
@@ -137,7 +146,7 @@ class Scraper < ActiveRecord::Base
     @uri
   end
 
-  def find selector, attribute_name=nil
+  def find_by_selector selector, attribute_name=nil
     if s = page.search(selector).first
       found = attribute_name ? s.attributes[attribute_name.to_s] : s.text
       STDERR.puts "!! ...found in #{selector}: '#{found}'"
@@ -145,13 +154,35 @@ class Scraper < ActiveRecord::Base
     end
   end
 
-  # Declare a tag of the given type, with a matching DefinitionReference (perhaps to the current page).
-  # NB: This is all we need to produce a Referent
-  def define tagtype, tagname, href=nil
-    tag = Tag.assert tagname, tagtype: tagtype
-    STDERR.puts "!! ...found #{tagtype.to_s.downcase} link to #{tagname} (Tag ##{tag.id}) at #{href || url}"
-    Reference.assert absolutize(href), tag, :Definition
-    tagname
+  # Given a name (or the tag thereof), ensure the existence of:
+  # -- a tag of the tagtype
+  # -- a referent "defining" that kind of entity
+  # -- a reference to the page for such a definition
+  # -- optionally, a picture link for that entity
+  def define tag_or_tagname, tagtype, page_link, image_link=nil
+    tag = tag_or_tagname.is_a?(Tag) ?
+        tag_or_tagname :
+        Tag.assert(tag_or_tagname.to_s, tagtype: tagtype)
+    STDERR.puts "!! ...found #{tag.typename} link to #{tag.name} (Tag ##{tag.id}) at #{absolutize page_link}"
+    # Asserting the reference ensures a referent for the tag # Referent.express(tag) if tag.referents.empty?
+    Reference.assert absolutize(page_link), tag, :Definition
+    if image_link
+      irf = Reference.assert absolutize(image_link), tag, :Image
+      tag.referents.each { |rft|
+        unless rft.picture
+          rft.picture = irf
+          rft.save
+        end
+      }
+    end
+    tag
+  end
+
+  # Ensure that a recipe has been filed, and launch it for scraping if new
+  def propose_recipe recipe_link, extractions, scraper=nil
+    launch recipe_link, scraper unless RecipeReference.where(url: absolutize(recipe_link)).exists?
+    recipe = CollectibleServices.find_or_create( { url: absolutize(recipe_link) }, extractions, Recipe)
+    recipe.decorate.findings = FinderServices.findings(extractions) if extractions
   end
 end
 
@@ -164,28 +195,32 @@ class Www_bbc_co_uk_Scraper < Scraper
       when /\A\/food\/chefs\z/
         :chefs
       when /\A\/food\/chefs\/by\/letters\//
-        :atoz_page
+        :recipes_atoz_page
       when /\A\/food\/chefs\/\w+\z/
         :chef_page
       when /\A\/food\/recipes\/search\?.*chefs(\[[^\]]*\]=|\/)([^&]*)/
         :chef_recipes_page
       when /\A\/food\/recipes\/\w+\z/
-        :recipe_page
+        :bbc_recipe_page
       when /\A\/food\/ingredients\/by\/letter\z/
         :ingredient_letters
       when /\A\/food\/ingredients\/by\/letter\/[a-z]\z/
         :ingredients_by_letter
+      when /\A\/food\/seasons\z/
+        :bbc_seasons_page
       when /\A\/food\/\w+\z/
         uri.fragment == 'related-foods' ? :related_ingredients : :ingredient_page
+      when /\A\/food\/seasons\/\w+\z/
+        :bbc_season_page
     end
   end
 
   ########## Recipes, by chef #####################
   def chefs # Top level of chef scraping
-    launch page.links_with(href: /\/by\/letters\//), :atoz_page
+    launch page.links_with(href: /\/by\/letters\//), :recipes_atoz_page
   end
 
-  def atoz_page
+  def recipes_atoz_page
     chef_ids = page.links_with(href: /\A\/food\/chefs\/\w+\z/).collect { |link|
       link.href.split('/').last
     }.compact
@@ -203,8 +238,17 @@ class Www_bbc_co_uk_Scraper < Scraper
       return
     end
 
-    if (s = page.search 'h1.fn') && s.first
-      define 'Author', s.first.content, url
+    if s = page.search('h1.fn').first
+      tag = define s.content, 'Author', url
+      if item = page.search('div#overview p').first
+        description = item.text.strip
+        tag.referents.each { |ref|
+          unless ref.description.present?
+            ref.description = description
+            ref.save
+          end
+        }
+      end
     end
 
   end
@@ -218,21 +262,28 @@ class Www_bbc_co_uk_Scraper < Scraper
 
     chef_id = m[2].to_s
 
+    atag =
+        if authlink = page.search('div#queryBox a').first
+          define authlink.content, :Author, authlink
+        end
+    extractions = {'Author Name' => (atag.name if atag) }.compact
 
-    launch page.links_with(href: /\A\/food\/recipes\/\w+\z/),
-           :recipe_page,
-           data.merge(chef_id: chef_id)
+    links = page.links_with(href: /\A\/food\/recipes\/[-\w]+\z/)
+    links.each { |link|
+      STDERR.puts "!!! Identified recipe '#{link.to_s}'"
+      propose_recipe link, extractions.merge( 'Title' => link.to_s ), :bbc_recipe_page
+    }
     launch page.links.detect { |link| link.rel?('next') }, :chef_recipes_page
   end
 
-  def recipe_page
-
+  def bbc_recipe_page
+    # e.g., http://www.bbc.co.uk/food/recipes/lemon_and_ricotta_tart_44080
     if uri
       # Glean title, description and image
       extractions = HashWithIndifferentAccess.new(
-          :Title => find("meta[property='og:title']", :content),
-          :Description => find("meta[property='og:description']", :content),
-          :Image => find("meta[property='og:image']", :content)
+          :Title => find_by_selector("meta[property='og:title']", :content),
+          :Description => find_by_selector("meta[property='og:description']", :content),
+          :Image => find_by_selector("meta[property='og:image']", :content)
       )
 
       chef_id = data[:chef_id]
@@ -241,16 +292,17 @@ class Www_bbc_co_uk_Scraper < Scraper
             if m = link.href.match(/chefs(\[[^\]]*\]=|\/)([^&]*)/)
               m[2].to_s
             end
-        extractions['Author Name'] = define 'Author', link.to_s, link.href
+        extractions['Author Name'] = define(link.to_s, 'Author', link.href).name
       end
 
       # Glean ingredient links from the page, meanwhile ensuring the tag is defined
       extractions[:Ingredients] = page.links_with(dom_class: 'recipe-ingredients__link').collect { |link|
-        define 'Ingredient', link.to_s, link.href
+        define(link.to_s, 'Ingredient', link.href).name
       }.join ', '
 
-      params = {url: url}
-      recipe = CollectibleServices.find_or_create params, extractions.compact, Recipe
+      r = propose_recipe url, extractions.compact
+      # Apply the findings, in case the recipe already existed
+      r.decorate.findings = FinderServices.findings extractions
 
       # Ensure the output directory exists
       dirname = File.join '/var/www/RP/files/chefs', chef_id
@@ -281,7 +333,8 @@ class Www_bbc_co_uk_Scraper < Scraper
   end
 
   def ingredients_by_letter
-    ingredient_links = find('li.resource.food a', :href)
+    # e.g., http://www.bbc.co.uk/food/ingredients/by/letter/c
+    ingredient_links = find_by_selector('li.resource.food a', :href)
     ingredient_links.each { |link|
       launch link, (link.match(/\A\/food\/\w+#related-foods\z/) ? :related_ingredients : :ingredient_page )
     }
@@ -298,12 +351,66 @@ class Www_bbc_co_uk_Scraper < Scraper
   end
 
   def ingredient_page
-    if img = find 'img#food-image', :src
-      x=2
+    # e.g., http://www.bbc.co.uk/food/candied_peel
+    unless tagname = data[:ingredient]
+      if link = page.links_with(href: /\/food\/recipes\/search\b.*\bkeywords=/).first
+        tagname = link.href.sub /\/food\/recipes\/search\b.*\bkeywords=([\w\s]*)/, '\1'
+      end
+    end
+    STDERR.puts "...identified tag '#{tagname}'..."
+    tag = Tag.assert tagname, tagtype: 'Ingredient'
+    if img = find_by_selector('img#food-image', :src)
+      Referent.express(tag) if tag.referents.empty?
+      tag.referents.each { |tr|
+        unless tr.picture
+          tr.picurl = img
+          tr.save
+          tr.picture.bkg_enqueue
+        end
+      }
+    else
+      STDERR.puts "??!? No image found for tag ##{tag.id} (#{tagname})."
     end
   end
 
   def related_ingredients
 
+  end
+
+  def bbc_seasons_page
+    page.search('a.season-image').each { |season_link|
+      tag_name = season_link.css('span.season-name').text
+      page_link = absolutize season_link.attribute('href').to_s
+      img_link = season_link.css('img').attribute('src').to_s
+      STDERR.puts "Found '#{tag_name}' -> #{page_link} and image link #{img_link}"
+      tag = Tag.assert tag_name, tagtype: 'Occasion'
+      Referent.express(tag) if tag.referents.empty?
+      dr = Reference.assert page_link, tag, :Definition
+
+      tag.referents.each { |tr|
+        unless tr.picture
+          tr.picurl = img_link
+          tr.save
+          tr.picture.bkg_enqueue
+        end
+      }
+    }
+  end
+
+  def bbc_season_page
+    month_name = page.search('div#column-1 h1').text.sub /.*\s(\w*\z)/, '\1'
+    month_tag = define month_name, :Occasion, url
+    page.search('ul.resources h4 a').collect { |recipe_link|
+      extractions = { 'Title' => recipe_link.text.strip }
+      recipe = propose_recipe recipe_link, extractions, :bbc_recipe_page
+      STDERR.puts "Found #{month_tag.name} recipe '#{recipe.title}' at #{recipe.url}"
+      TaggingServices.new(recipe).assert month_tag, User.super_id
+    }
+    page.search('div#related-ingredients li a').each { |page_link|
+      ingred_tag = define page_link.text.downcase, :Ingredient, page_link
+      month_tag.referents.each { |tr|
+        tr.ingredient_referents = (tr.ingredient_referents + ingred_tag.referents).uniq
+      }
+    }
   end
 end

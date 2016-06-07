@@ -10,8 +10,22 @@ class FinderServices
     @finder = finder
   end
 
+  # Return a Results structure, either using the given extractions, or by examining the page
+  def self.findings extractions, url=nil
+    if extractions
+      # Translate the extractions into Finder results
+      findings = Results.new *extractions.keys
+      # tagstrings = tagstring.sub(/\[(.*)\]$/, '\1').sub(/"(.*)"$/, '\1').split( '","').map(&:strip).join ','
+      extractions.each { |key, value| findings.assert_result key, value }
+      findings
+    elsif url
+      findings = FinderServices.glean url
+      findings if findings.present
+    end
+  end
+
   # Return the raw mapping from finders to arrays of hits
-  def self.findings url, site=nil, *finders_or_labels
+  def self.glean url, site=nil, *finders_or_labels
     unless site.nil? || site.is_a?(Site)
       finders_or_labels.unshift site
       site = nil
@@ -88,7 +102,7 @@ class FinderServices
 
   # Check that the proposed finder actually does its job by running it on a linkable entity
   def testflight entity
-    if !(results = FinderServices.findings entity.decorate.url, @finder)
+    if !(results = FinderServices.glean entity.decorate.url, @finder)
       @finder.errors.add 'url', 'page can\'t be open for analysis: ' + errstr
       return
     end
