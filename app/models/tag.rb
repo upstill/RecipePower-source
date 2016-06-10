@@ -5,7 +5,7 @@ class Tag < ActiveRecord::Base
   typeable(:tagtype,
            Untyped: ['Untyped', 0],
            Genre: ['Genre', 1],
-           Role: ['Role', 2],
+           Dish: ['Dish', 2],
            Process: ['Process', 3],
            Ingredient: ['Ingredient', 4],
            Unit: ['Unit', 5],
@@ -14,13 +14,14 @@ class Tag < ActiveRecord::Base
            Occasion: ['Occasion', 8],
            PantrySection: ['Pantry Section', 9],
            StoreSection: ['Store Section', 10],
-           # Channel: ['Channel', 11],
+           Diet: ['Special Diet', 11],
            Tool: ['Tool', 12],
            Nutrient: ['Nutrient', 13],
            CulinaryTerm: ['Culinary Term', 14],
            Question: ['Question', 15],
            List: ['List', 16],
-           Epitaph: ['Epitaph', 17]
+           Epitaph: ['Epitaph', 17],
+           Course: ['Course', 18]
   )
 
   attr_accessible :name, :id, :tagtype, :isGlobal, :links, :referents, :users, :owners, :primary_meaning # , :recipes

@@ -74,6 +74,63 @@ class TagServices
     # Tag.where id: parent_ids
   end
 
+  def make_parent_of child_tag
+    Referent.express(tag).make_parent_of Referent.express(child_tag)
+  end
+
+  def suggests target_tag
+    Referent.express(tag).suggests Referent.express(target_tag)
+  end
+
+  def child_referents
+    tag.referents.collect { |referent| referent.children.to_a }.flatten.uniq
+  end
+
+# Given a name (or the tag thereof), ensure the existence of:
+# -- a tag of the tagtype
+# -- a referent "defining" that kind of entity
+# -- a reference to the page for such a definition
+# -- optionally, a picture link for that entity
+  def self.define tag_or_tagname, options={}
+    return nil unless tag_or_tagname
+    page_link = options[:page_link]
+    image_link = options[:image_link]
+    tagtype = Tag.typenum options[:tagtype] if options[:tagtype]
+    tag = tag_or_tagname.is_a?(Tag) ?
+        tag_or_tagname :
+        Tag.assert(tag_or_tagname.to_s, tagtype: tagtype)
+    location =
+        if page_link
+          # Asserting the reference ensures a referent for the tag # Referent.express(tag) if tag.referents.empty?
+          Reference.assert page_link, tag, :Definition
+          page_link
+        else
+          Referent.express tag
+          '(no reference)'
+        end
+    STDERR.puts "Defined #{tag.typename} link to #{tag.name} (Tag ##{tag.id}) at #{location}" unless tag_or_tagname.is_a?(Tag)
+    if parent_tag = options[:kind_of]
+      parent_tag = self.define parent_tag, options.slice(:tagtype)
+      STDERR.puts "!! ...made '#{tag.name}' a kind of '#{parent_tag.name}'"
+      TagServices.new(parent_tag).make_parent_of tag
+    end
+    if source_tag = options[:suggested_by]
+      source_tag = self.define source_tag, options.slice(:tagtype)
+      STDERR.puts "!! ...noted that '#{tag.name}' is suggested by '#{source_tag.name}'"
+      TagServices.new(source_tag).suggests tag
+    end
+    if image_link
+      irf = Reference.assert image_link, tag, :Image
+      tag.referents.each { |rft|
+        unless rft.picture
+          rft.picture = irf
+          rft.save
+        end
+      }
+    end
+    tag
+  end
+
 # -----------------------------------------------
   # Return tags that match any of the given tags lexically, regardless of type
   def self.lexical_similars(tags)

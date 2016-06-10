@@ -422,17 +422,22 @@ class Referent < ActiveRecord::Base
     result << "(#{aliases})" unless aliases.blank?
     result
   end
+
+  def make_parent_of child_ref
+    children << child_ref unless children.include?(child_ref)
+  end
 end
 
 # Subclases for different types of referents
 
-class FoodReferent < Referent;
+# An Ingredient may suggest a type of dish
+class FoodReferent < Referent
   def self.fix
     FoodReferent.all.each { |ref| ref.type = "IngredientReferent"; ref.save }
   end
 end
 
-class SourceReferent < Referent;
+class SourceReferent < Referent
   has_one :site, foreign_key: "referent_id"
 
   attr_accessible :site
@@ -443,7 +448,7 @@ class SourceReferent < Referent;
 end
 
 =begin
-class ChannelReferent < Referent;
+class ChannelReferent < Referent
   has_one :user, :dependent => :destroy
   attr_accessible :user, :user_attributes
   accepts_nested_attributes_for :user
@@ -537,19 +542,31 @@ class InterestReferent < ChannelReferent;
 end
 =end
 
-class GenreReferent < Referent;
+class GenreReferent < Referent
 end
 
-class RoleReferent < Referent;
+class RoleReferent < Referent
 end
 
-class ProcessReferent < Referent;
+class DishReferent < Referent
 end
 
-class IngredientReferent < Referent;
+class CourseReferent < Referent
 end
 
-class UnitReferent < Referent;
+class ProcessReferent < Referent
+end
+
+class IngredientReferent < Referent
+  has_many :dish_referents, :through => :referments, :source => :referee, :source_type => 'DishReferent'
+  def suggests target_ref
+    unless dish_referents.include? target_ref
+      dish_referents << target_ref
+    end
+  end
+end
+
+class UnitReferent < Referent
 end
 
 class AuthorReferent < Referent
@@ -561,17 +578,20 @@ class OccasionReferent < Referent
 
 end
 
-class PantrySectionReferent < Referent;
+class PantrySectionReferent < Referent
 end
 
-class StoreSectionReferent < Referent;
+class StoreSectionReferent < Referent
 end
 
-class ToolReferent < Referent;
+class DietReferent < Referent
 end
 
-class NutrientReferent < Referent;
+class ToolReferent < Referent
 end
 
-class CulinaryTermReferent < Referent;
+class NutrientReferent < Referent
+end
+
+class CulinaryTermReferent < Referent
 end

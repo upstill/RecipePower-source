@@ -1,10 +1,11 @@
 class ReferentsController < ApplicationController
     filter_access_to :all
     # Here's where we defer to different handlers for different types of referent
-    @@HandlersByIndex = [ Referent, GenreReferent, RoleReferent, 
+    @@HandlersByIndex = [ Referent, GenreReferent, DishReferent, 
             ProcessReferent, IngredientReferent, UnitReferent, 
             SourceReferent, AuthorReferent, OccasionReferent, 
-            PantrySectionReferent, StoreSectionReferent, nil, ToolReferent ]
+            PantrySectionReferent, StoreSectionReferent, nil, ToolReferent,
+	nil, nil, nil, nil, nil, CourseReferent ]
     @@HandlerClass = Referent
 
   # GET /referents
