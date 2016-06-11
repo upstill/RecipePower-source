@@ -241,7 +241,7 @@ class Www_bbc_co_uk_Scraper < Scraper
         else
           # Assume a recipe, and the header is a role
           unless header_name == 'other'
-            header_name = header_name.singularize
+            header_name = header_name.downcase.singularize
             TagServices.define header_name, :tagtype => :Course
             extractions['Course'] = header_name
           end

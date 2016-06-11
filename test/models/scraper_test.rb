@@ -215,6 +215,11 @@ class ResultsCacheTest < ActiveSupport::TestCase
     assert_equal course_tag.name, 'main course'
     assert r.tags.include?(course_tag), "Recipe doesn't have course tag"
 
+    # Caught all the accordion tabs?
+    assert_equal 8, Tag.where(tagtype: Tag.typenum(:Course)).count
+    mains = Tag.first
+    assert_equal 5, mains.recipes.count
+
     # Second time around...
     scraper.perform_naked
     assert_equal 1, Tag.where(tagtype: 8).count
@@ -244,22 +249,29 @@ class ResultsCacheTest < ActiveSupport::TestCase
     scraper.perform_naked
     assert_equal 8, ImageReference.count
     assert_equal 1, DefinitionReference.count
-    assert_equal 'desserts', Tag.where(tagtype: Tag.typenum('Role')).first.name
-    assert_equal 'cakes and baking', Tag.where(tagtype: Tag.typenum('Role')).last.name
-    STDERR.puts 'Tags gleaned: ' + Tag.all.map(&:name).join(', ')
-    assert_equal 1, Tag.where(tagtype: Tag.typenum(:Ingredient)).count
-    assert_equal 1, Tag.where(tagtype: Tag.typenum(:Source)).count
-    assert_equal 8, Tag.where(tagtype: Tag.typenum(:Author)).count
-    assert_equal 2, Tag.where(tagtype: Tag.typenum(:Role)).count
+    assert_equal 1, show_tags(:Ingredient).count
+    assert_equal 1, show_tags(:Source).count
+    assert_equal 8, show_tags(:Author).count
+    courses = show_tags(:Course)
+    assert_equal 2, courses.count
+    assert_equal 'dessert', courses.first.name
+    assert_equal 'cakes and baking', courses.last.name
 
     assert_equal 1, IngredientReferent.count
-    assert_equal 2, RoleReferent.count
+    assert_equal 2, CourseReferent.count
 
     r = Recipe.first
     assert_equal 'Lemon and ricotta tart', r.title
     assert_equal 'http://www.bbc.co.uk/food/recipes/lemon_and_ricotta_tart_44080', r.url
     assert_equal 'http://ichef.bbci.co.uk/food/ic/food_16x9_88/recipes/lemon_and_ricotta_tart_44080_16x9.jpg', r.picurl
     assert r.tags.exists?(name: 'Antonio Carluccio')
+    assert r.tags.exists?(name: 'dessert')
+
+    # Caught all the accordion tabs?
+    courses = Tag.where(tagtype: Tag.typenum(:Course))
+    assert_equal 2, courses.count
+    assert_equal 'dessert', courses.first.name
+    assert_equal 5, courses.first.recipes.count
 
   end
 
@@ -268,6 +280,7 @@ class ResultsCacheTest < ActiveSupport::TestCase
     scraper.perform_naked
     cheese_tag = Tag.where(normalized_name: 'cheese', tagtype: Tag.typenum(:Ingredient)).first
     assert_equal 35, TagServices.new(cheese_tag).child_referents.count
-    assert_equal 13, Tag.where(tagtype: Tag.typenum(:Role)).count
+    assert_equal 6, show_tags(:Dish).count
+    assert_equal 7, show_tags(:Course).count
   end
 end
