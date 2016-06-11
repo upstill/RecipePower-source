@@ -69,6 +69,7 @@ class ResultsCacheTest < ActiveSupport::TestCase
   test 'bbc_chefs_atoz_page' do
     url = 'http://www.bbc.co.uk/food/chefs/by/letters/d,e,f'
     scraper = Scraper.assert url, false
+    assert_equal scraper.handler, :bbc_chefs_atoz_page
     scraper.recur = true
     scraper.perform_naked
     assert_equal 56, Scraper.where(what: 'bbc_chef_home_page').count
@@ -78,6 +79,7 @@ class ResultsCacheTest < ActiveSupport::TestCase
   test 'bbc_chef_home_page' do
     url = 'http://www.bbc.co.uk/food/chefs/antonio_carluccio'
     scraper = Scraper.assert url, false
+    assert_equal scraper.handler, :bbc_chef_home_page
     scraper.perform_naked
     dr = DefinitionReference.first
     assert_equal url, dr.url
@@ -99,6 +101,7 @@ class ResultsCacheTest < ActiveSupport::TestCase
   test 'bbc_chef_recipes_page' do
     url = 'http://www.bbc.co.uk/food/recipes/search?chefs[]=antonio_carluccio'
     scraper = Scraper.assert url, true
+    assert_equal scraper.handler, :bbc_chef_recipes_page
     scraper.save
     scraper.perform_naked
 
@@ -282,5 +285,34 @@ class ResultsCacheTest < ActiveSupport::TestCase
     assert_equal 35, TagServices.new(cheese_tag).child_referents.count
     assert_equal 6, show_tags(:Dish).count
     assert_equal 7, show_tags(:Course).count
+    assert_equal 33, Recipe.count
+  end
+
+  test 'bbc_occasions_page' do
+    scraper = Scraper.assert 'http://www.bbc.co.uk/food/occasions', true
+    assert_equal :bbc_occasions_page, scraper.handler
+    scraper.save
+    scraper.perform_naked
+    assert_equal 31, show_tags(:Occasion).count
+    assert_equal 32, Scraper.count
+  end
+
+  test 'bbc_occasion_page' do
+    scraper = Scraper.assert 'http://www.bbc.co.uk/food/occasions/passover', true
+    scraper.data = { Occasion: 'Passover' }
+    assert_equal :bbc_occasion_page, scraper.handler
+    scraper.save
+    scraper.perform_naked
+
+    assert (occ_tag = Tag.find_by( name: 'Passover', tagtype: Tag.typenum(:Occasion)))
+    assert_equal 17, occ_tag.recipes.count
+    assert_equal 17, Recipe.count
+    assert_equal 5, show_tags(:Ingredient).count
+
+    assert (occ_ref = occ_tag.referents.first)
+    assert_equal 5, occ_ref.ingredient_referents.count
+    assert_equal 23, Scraper.count # Including the initial scraper
+    assert_equal 17, Scraper.where(what: 'bbc_recipe_page').count
+    assert_equal 5, Scraper.where(what: 'bbc_ingredient_page').count
   end
 end

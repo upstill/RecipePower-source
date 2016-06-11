@@ -58,6 +58,10 @@ class Scraper < ActiveRecord::Base
     save
   end
 
+  def handler
+    subclass.constantize.handler url
+  end
+
   protected
 
   # Pitch the scraper into the DelayedJob queue
@@ -91,12 +95,12 @@ class Scraper < ActiveRecord::Base
   end
 
   # Define a scraper to follow a link or links and return it, for whatever purpose
-  def launch link_or_links, what, data=self.data
+  def launch link_or_links, data=self.data
     [link_or_links].flatten.compact.collect { |link|
       link = absolutize link # A Mechanize object for a link
-      scraper = Scraper.assert link, what, recur, data
+      scraper = Scraper.assert link, recur, data
       (data[:immediate] ? scraper.perform : scraper.queue_up) if recur
-      STDERR.puts "** #{'WOULD BE ' unless recur}Launching #{what} (handler says #{self.class.handler link}) on #{link}"
+      STDERR.puts "** #{'WOULD BE ' unless recur}Launching #{scraper.what} on #{link}"
       scraper
     }
   end
@@ -150,8 +154,8 @@ class Scraper < ActiveRecord::Base
   end
 
   # Ensure that a recipe has been filed, and launch it for scraping if new
-  def propose_recipe recipe_link, extractions, scraper=nil
-    launch recipe_link, scraper
+  def propose_recipe recipe_link, extractions
+    launch recipe_link
     recipe = CollectibleServices.find_or_create({url: absolutize(recipe_link)}, extractions, Recipe)
     STDERR.puts "Defined Recipe at #{absolutize recipe_link}:"
     extractions.each { |key, value| STDERR.puts "        #{key}: '#{value}'" }
@@ -183,8 +187,12 @@ class Www_bbc_co_uk_Scraper < Scraper
         :ingredients_by_letter
       when /\A\/food\/seasons\z/
         :bbc_seasons_page
+      when /\A\/food\/occasions\z/
+        :bbc_occasions_page
       when /\A\/food\/[-\w]+\z/
-        uri.fragment == 'related-foods' ? :related_ingredients : :ingredient_page
+        uri.fragment == 'related-foods' ? :bbc_related_ingredients : :bbc_ingredient_page
+      when /\A\/food\/occasions\/[-\w]+\z/
+        :bbc_occasion_page
       when /\A\/food\/seasons\/[-\w]+\z/
         :bbc_season_page
     end
@@ -254,7 +262,7 @@ class Www_bbc_co_uk_Scraper < Scraper
 
   ########## Recipes, by chef #####################
   def chefs # Top level of chef scraping
-    launch page.links_with(href: /\/by\/letters\//), :bbc_chefs_atoz_page
+    launch page.links_with(href: /\/by\/letters\//)
   end
 
   def bbc_chefs_atoz_page
@@ -263,10 +271,10 @@ class Www_bbc_co_uk_Scraper < Scraper
     }.compact
     launch chef_ids.collect { |chef_id|
              'http://www.bbc.co.uk/food/chefs/' + chef_id
-           }, :bbc_chef_home_page
+           }
     launch chef_ids.collect { |chef_id|
              'http://www.bbc.co.uk/food/recipes/search?chefs[]=' + chef_id
-           }, :bbc_chef_recipes_page
+           }
   end
 
   def bbc_chef_home_page
@@ -313,7 +321,7 @@ class Www_bbc_co_uk_Scraper < Scraper
     page.search('div#article-list li').each { |li|
       recipe_item li, extractions
     }
-    launch page.links.detect { |link| link.rel?('next') }, :chef_recipes_page
+    launch page.links.detect { |link| link.rel?('next') }
 
     accordions extractions do |header_name, li, extractions|
       if link = li.search('a').first
@@ -404,7 +412,7 @@ class Www_bbc_co_uk_Scraper < Scraper
   def ingredient_letters
     launch ('a'..'z').to_a.collect { |letter|
              'http://www.bbc.co.uk/food/ingredients/by/letter/' + letter
-           }, :ingredients_by_letter
+           }
   end
 
   def ingredients_by_letter
@@ -414,7 +422,7 @@ class Www_bbc_co_uk_Scraper < Scraper
     ingredient_links.each { |link|
       path = link.attribute('href').to_s
       if path.match(/\A\/food\/[-\w]+#related-foods\z/)
-        launch link, :related_ingredients
+        launch link
       else
         img_link = link.search('img').first
         tagname = img_link ? img_link.attribute('alt').to_s : link.text.downcase
@@ -422,12 +430,12 @@ class Www_bbc_co_uk_Scraper < Scraper
                            :tagtype => :Ingredient,
                            :page_link => absolutize(link),
                            :image_link => (absolutize(img_link.attribute('src')) if img_link)
-        launch link, :ingredient_page
+        launch link
       end
     }
   end
 
-  def ingredient_page
+  def bbc_ingredient_page
     # e.g., http://www.bbc.co.uk/food/candied_peel
     unless tagname = data[:ingredient]
       if link = page.links_with(href: /\/food\/recipes\/search\b.*\bkeywords=/).first
@@ -469,7 +477,7 @@ class Www_bbc_co_uk_Scraper < Scraper
     accordions 'Ingredients' => tagname
   end
 
-  def related_ingredients
+  def bbc_related_ingredients
 
   end
 
@@ -482,7 +490,7 @@ class Www_bbc_co_uk_Scraper < Scraper
       tag = Tag.assert tag_name, tagtype: 'Occasion'
       Referent.express(tag) if tag.referents.empty?
       dr = Reference.assert page_link, tag, :Definition
-      launch page_link, :bbc_season_page
+      launch page_link
 
       tag.referents.each { |tr|
         unless tr.picture
@@ -501,14 +509,6 @@ class Www_bbc_co_uk_Scraper < Scraper
                                    :page_link => url)
     accordions 'Occasion' => month_name
 
-=begin
-    page.search('ul.resources h4 a').collect { |recipe_link|
-      extractions = {'Title' => recipe_link.text.strip}
-      recipe = propose_recipe recipe_link, extractions, :bbc_recipe_page
-      STDERR.puts "Found #{month_tag.name} recipe '#{recipe.title}' at #{recipe.url}"
-      TaggingServices.new(recipe).assert month_tag, User.super_id
-    }
-=end
     page.search('div#related-ingredients li a').each { |page_link|
       ingred_tag = TagServices.define( page_link.text.downcase,
                                       :tagtype => :Ingredient,
@@ -517,5 +517,63 @@ class Www_bbc_co_uk_Scraper < Scraper
         tr.ingredient_referents = (tr.ingredient_referents + ingred_tag.referents).uniq
       }
     }
+  end
+
+=begin
+<ul class="occasions">
+  <li>
+    <h4>
+      <a href="/food/occasions/bonfire_night">
+        <img src="http://ichef.bbci.co.uk/food/ic/food_16x9_111/occasions/bonfire_night_16x9.jpg" width="111" height="63" alt="Bonfire Night"/>
+        Bonfire Night
+      </a>
+    </h4>
+    <h5>November 6th</h5>
+  </li>
+</ul>
+=end
+  def bbc_occasions_page
+      (page.search('ul.occasions li') + page.search('ul#other-occasions li')).each { |li_elmt|
+      if occ_link = li_elmt.search('h4 a').first
+        occ_name = occ_link.text.strip
+        occ_link = absolutize occ_link.attribute('href')
+      end
+      (img_link = li_elmt.search('h4 a img').first) && (img_link = img_link.attribute('src'))
+      definitions = {
+          tagtype: :Occasion,
+          page_link: occ_link,
+          image_link: absolutize(img_link)
+      }.compact
+      TagServices.define occ_name.to_s, definitions
+      launch occ_link, 'Occasion' => occ_name
+    }
+  end
+
+  def bbc_occasion_page
+    occ_name = data[:Occasion] || find_by_selector( 'h1.bordered').strip
+    occ_name.sub! ' recipes', ''
+    occ_tag = TagServices.define occ_name, tagtype: Tag.typenum(:Occasion), page_link: url
+    accordions 'Occasion' => occ_name
+    if related = page.search('div.related-resources-module').first
+      resource_type = related.search('h3').first.text # Ingredients
+      related.search('ul li a').each { |ingtag|
+        food_link = ingtag.attribute 'href'
+        food_name = ingtag.text.strip
+        if img_link = ingtag.search('img').first
+          img_link = absolutize img_link, :src
+        end
+        case resource_type
+          when /^Ingredients/
+            ing_tag = TagServices.define(food_name,
+                               :tagtype => :Ingredient,
+                               :page_link => absolutize(food_link),
+                               :image_link => img_link)
+        end
+        occ_tag.referents.each { |tr|
+          tr.ingredient_referents = tr.ingredient_referents | ing_tag.referents
+        }
+        launch food_link, Ingredient: food_name
+      }
+    end
   end
 end
