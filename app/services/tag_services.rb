@@ -108,7 +108,11 @@ class TagServices
           Referent.express tag
           '(no reference)'
         end
-    STDERR.puts "Defined #{tag.typename} link to #{tag.name} (Tag ##{tag.id}) at #{location}" unless tag_or_tagname.is_a?(Tag)
+    unless tag_or_tagname.is_a?(Tag)
+      msg = "Defined #{tag.typename} link to #{tag.name} (Tag ##{tag.id}) at #{location}"
+      msg << " with image #{image_link}" if image_link.present?
+      STDERR.puts msg
+    end
     if parent_tag = options[:kind_of]
       parent_tag = self.define parent_tag, options.slice(:tagtype)
       STDERR.puts "!! ...made '#{tag.name}' a kind of '#{parent_tag.name}'"
@@ -118,6 +122,14 @@ class TagServices
       source_tag = self.define source_tag, options.slice(:tagtype)
       STDERR.puts "!! ...noted that '#{tag.name}' is suggested by '#{source_tag.name}'"
       TagServices.new(source_tag).suggests tag
+    end
+    if options[:description].present?
+      tag.referents.each { |ref|
+        unless ref.description.present?
+          ref.description = options[:description]
+          ref.save
+        end
+      }
     end
     if image_link
       irf = Reference.assert image_link, tag, :Image

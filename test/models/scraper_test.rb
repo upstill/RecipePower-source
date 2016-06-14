@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class ResultsCacheTest < ActiveSupport::TestCase
+class ScraperTest < ActiveSupport::TestCase
 
   def setup
     Tag.delete_all
@@ -16,43 +16,46 @@ class ResultsCacheTest < ActiveSupport::TestCase
     rel
   end
 
-  test 'ingredient_test_extracts_correct_data' do
+  test 'bbc_ingredient_page' do
     scraper = Scraper.assert 'http://www.bbc.co.uk/food/candied_peel', false
     scraper.perform_naked
     # After scraping the page, there should be a SINGLE 'candied peel' tag, with corresponding expression, referent and ImageReference
-    assert_equal 1, Tag.count
-    assert_equal 'candied peel', Tag.first.name
-    assert_equal 1, Referent.count
-    assert_equal 1, ImageReference.count
+    ing_tags = show_tags(:Ingredient)
+    ing_tag = ing_tags.first
+    assert_equal 1, ing_tags.count
+    assert_equal 'candied peel', ing_tag.name
+    ing_refs = Referent.where(type: 'IngredientReferent')
+    ing_ref = ing_refs.first
+    assert_equal ing_tag.referents, ing_refs
+    assert_equal 1, ing_refs.count
+    assert_equal 8, ImageReference.count
     assert_equal 'http://ichef.bbci.co.uk/food/ic/food_16x9_608/foods/c/candied_peel_16x9.jpg', ImageReference.first.url
-    assert_equal 1, Expression.count
 
     # Check that the referent got the image
-    referent = Tag.first.referents.first
-    assert_equal ImageReference.first, referent.picture
+    assert_equal ImageReference.first, ing_ref.picture
 
     # Rerun the scraper to ensure that no tags, etc. get created redundantly
     scraper2 = Scraper.assert 'http://www.bbc.co.uk/food/candied_peel', false
     assert_equal scraper, scraper2
     scraper2.perform_naked
-    assert_equal 1, Tag.count
-    assert_equal 'candied peel', Tag.first.name
-    assert_equal 1, Referent.count
-    assert_equal 1, ImageReference.count
+    # After scraping the page, there should be a SINGLE 'candied peel' tag, with corresponding expression, referent and ImageReference
+    ing_tags = show_tags(:Ingredient)
+    ing_tag = ing_tags.first
+    assert_equal 1, ing_tags.count
+    assert_equal 'candied peel', ing_tag.name
+    ing_refs = Referent.where(type: 'IngredientReferent')
+    ing_ref = ing_refs.first
+    assert_equal ing_tag.referents, ing_refs
+    assert_equal 1, ing_refs.count
+    assert_equal 8, ImageReference.count
     assert_equal 'http://ichef.bbci.co.uk/food/ic/food_16x9_608/foods/c/candied_peel_16x9.jpg', ImageReference.first.url
-    assert_equal 1, Expression.count
-    referent = Tag.first.referents.first
-    assert_equal ImageReference.first, referent.picture
-    assert_equal referent.picture, ImageReference.first
 
     # Confirm that destroying the image removes the picture from the referent
     ImageReference.first.destroy
-    referent.reload
-    assert_nil referent.picture
+    ing_ref.reload
+    assert_nil ing_ref.picture
 
-    referent.destroy
-    assert_equal 0, Referent.count
-    assert_equal 0, Expression.count
+    ing_ref.destroy
     assert_equal 0, Tag.first.expressions.count
     assert_equal 0, Tag.first.referents.count
 
@@ -96,6 +99,61 @@ class ResultsCacheTest < ActiveSupport::TestCase
     assert_equal ar, at.referents.first
     assert_equal at, ar.tags.first
     assert ar.description.match('Antonio Carluccio is a leading authority on Italian cooking')
+  end
+
+  test 'bbc_programme_home_page' do
+    url = 'http://www.bbc.co.uk/food/programmes/b04gtx26'
+    scraper = Scraper.assert url, true
+    assert_equal scraper.handler, :bbc_programme_home_page
+    scraper.save
+    scraper.perform_naked
+    # Check for "find all recipes" link
+    assert Scraper.find_by(what: 'bbc_programme_recipes_page', url: 'http://www.bbc.co.uk/food/recipes/search?programmes[]=b04gtx26')
+    source_tags = show_tags(:Source)
+    source_tag = source_tags.first
+    assert_equal 'A Taste of Britain', source_tag.name
+
+    # Ensure the existence of both this page and the Programme's home page on the bbc
+    assert Reference.find_by(type: 'DefinitionReference', url: 'http://www.bbc.co.uk/food/programmes/b04gtx26')
+    assert Reference.find_by(type: 'DefinitionReference', url: 'http://www.bbc.co.uk/programmes/b04gtx26')
+
+    source_ref = source_tag.referents.first
+    assert_equal 2, source_ref.references.count
+    assert source_ref.references.where(type: 'DefinitionReference', url: 'http://www.bbc.co.uk/food/programmes/b04gtx26').exists?
+    assert source_ref.references.where(type: 'DefinitionReference', url: 'http://www.bbc.co.uk/programmes/b04gtx26').exists?
+
+    assert source_ref.description.match('Food programme exploring specialities from around Britain.')
+    assert_equal 'http://ichef.bbci.co.uk/images/ic/608x342/p025h6sj.jpg', source_ref.picurl
+
+    # Check that the author's name got defined, and linked into our referent as an association
+    auth_refs = source_ref.author_referents
+    auth_ref = auth_refs.first
+    assert_equal 1, auth_refs.count
+    assert_equal 'http://ichef.bbci.co.uk/food/ic/food_1x1_95/chefs/brian_turner_1x1.jpg', auth_ref.picurl
+    assert_equal 'Brian Turner', auth_ref.name
+    assert_equal 'http://www.bbc.co.uk/food/chefs/brian_turner', auth_ref.references.where(type: 'DefinitionReference').first.url
+  end
+
+  test 'bbc_programme_recipes_page' do
+    url = 'http://www.bbc.co.uk/food/recipes/search?programmes[]=b04gtx26'
+    scraper = Scraper.assert url, true
+    assert_equal scraper.handler, :bbc_programme_recipes_page
+    scraper.save
+    scraper.perform_naked
+
+  end
+
+  test 'bbc_nigella_home_page' do
+    url = 'http://www.bbc.co.uk/food/chefs/nigella_lawson'
+    scraper = Scraper.assert url, true
+    assert_equal scraper.handler, :bbc_chef_home_page
+    scraper.save
+    scraper.perform_naked
+
+    chef_tags = Tag.where(tagtype: Tag.typenum(:Author))
+    chef_tag = chef_tags.first
+    assert_equal 'Nigella Lawson', chef_tag.name
+    assert_equal 1, chef_tag.referents.first.references.count
   end
 
   test 'bbc_chef_recipes_page' do
@@ -195,6 +253,87 @@ class ResultsCacheTest < ActiveSupport::TestCase
     assert_equal 'http://ichef.bbci.co.uk/food/ic/food_16x9_235/seasons/january_16x9.jpg', occr.picurl
   end
 
+  test 'bbc_dish_page' do
+    # Scrape the 'January' page and confirm results
+    scraper = Scraper.assert 'http://www.bbc.co.uk/food/sauce', :bbc_dish_page, false
+    assert_equal 'bbc_dish_page', scraper.what
+    scraper.recur = true
+    scraper.save
+    scraper.perform_naked
+
+    dish_tags = Tag.where(tagtype: Tag.typenum(:Dish))
+    assert_equal 35, dish_tags.count
+    dish_tag = dish_tags.first
+    assert_equal 'Sauces', dish_tag.name
+
+    # 34 child dishes
+    assert_equal 34, dish_tag.referents.first.children.count
+
+    # ---- 1 definition page: this one
+    assert_equal 1, dish_tag.referents.first.references.count
+
+    # ---- 14 recipes in 5 accordions
+    assert_equal 15, Recipe.count
+    assert_equal 15, dish_tag.taggings.count
+    courses = show_tags :Course
+    assert_equal 5, courses.count
+    sides = courses.first
+    assert_equal 1, sides.recipes.count
+
+    # Confirm that the first recipe under the "side dish" tab is tagged with both 'sauces' and 'side dish'
+    r = Recipe.first
+    assert r.tags.include?(dish_tag), "Recipe doesn't have Sauces tag"
+    course_tag = show_tags(:Course).first
+    assert_equal course_tag.name, 'side dishes'
+    assert r.tags.include?(course_tag), "Recipe doesn't have side dish tag"
+
+    assert 1, Scraper.where(what: 'bbc_dish_recipes_page').count
+  end
+
+  test 'bbc_genre_page' do
+    # Scrape the 'January' page and confirm results
+    scraper = Scraper.assert 'http://www.bbc.co.uk/food/cuisines/italian', false
+    assert_equal :bbc_genre_page, scraper.handler
+    scraper.recur = true
+    scraper.save
+    scraper.perform_naked
+
+    genre_tags = Tag.where(tagtype: Tag.typenum(:Genre))
+    assert_equal 1, genre_tags.count
+    genre_tag = genre_tags.first
+    assert_equal 'Italian', genre_tag.name
+
+    # ----- 14 associated dishes
+    assert_equal 14, show_tags(:Dish).count
+    assert_equal 14, genre_tag.referents.first.dish_referents.count
+
+    # ---- 22 associated ingredients
+    assert_equal 33, show_tags(:Ingredient).count
+    assert_equal 33, genre_tag.referents.first.ingredient_referents.count
+
+    # ---- 6 associated authors
+    assert Tag.where(name: 'Angela Hartnett', tagtype: Tag.typenum(:Author)).exists?
+
+    # ---- 3 definition pages, including this one
+    assert_equal 3, genre_tag.referents.first.references.count
+
+    # ---- 40 recipes in 8 accordions
+    assert_equal 40, Recipe.count
+    assert_equal 40, genre_tag.taggings.count
+    courses = show_tags :Course
+    assert_equal 8, courses.count
+    mains = courses.first
+    assert_equal 5, mains.recipes.count
+
+    # Confirm that the first recipe under the "Main courses" tab is tagged with both 'Italian' and 'Main course'
+    r = Recipe.first
+    assert r.tags.include?(genre_tag), "Recipe doesn't have Italian tag"
+    course_tag = Tag.where(tagtype: Tag.typenum(:Course)).first
+    assert_equal course_tag.name, 'main course'
+    assert r.tags.include?(course_tag), "Recipe doesn't have course tag"
+
+  end
+
   test 'bbc_season_page' do
     # Scrape the 'January' page and confirm results
     scraper = Scraper.assert 'http://www.bbc.co.uk/food/seasons/january', false
@@ -218,11 +357,6 @@ class ResultsCacheTest < ActiveSupport::TestCase
     assert_equal course_tag.name, 'main course'
     assert r.tags.include?(course_tag), "Recipe doesn't have course tag"
 
-    # Caught all the accordion tabs?
-    assert_equal 8, Tag.where(tagtype: Tag.typenum(:Course)).count
-    mains = Tag.first
-    assert_equal 5, mains.recipes.count
-
     # Second time around...
     scraper.perform_naked
     assert_equal 1, Tag.where(tagtype: 8).count
@@ -236,6 +370,34 @@ class ResultsCacheTest < ActiveSupport::TestCase
     assert_equal 1, OccasionReferent.count
     assert_equal 22, Tag.where(tagtype: 4).count
     assert_equal 22, month_tag.referents.first.ingredient_referents.count
+
+    # Caught all the accordion tabs?
+    course_tags = show_tags :Course
+    assert_equal 8, course_tags.count
+    mains = course_tags.first
+    assert_equal 5, mains.recipes.count
+  end
+
+  test 'bbc_genres_page' do
+    scraper = Scraper.assert 'http://www.bbc.co.uk/food/cuisines', true
+    assert_equal :bbc_genres_page, scraper.what.to_sym
+    scraper.perform_naked
+
+    tagtype = Tag.typenum :Genre
+    assert_equal 20, Tag.where(tagtype: tagtype).count
+    assert_equal 'African', Tag.where(tagtype: tagtype).first.name
+
+    assert_equal 'http://www.bbc.co.uk/food/cuisines/african', DefinitionReference.first.url
+    assert_equal 20, DefinitionReference.count
+    assert_equal 20, ImageReference.count
+    assert_equal 20, GenreReferent.count
+
+    occr = GenreReferent.first
+    assert_equal ImageReference.first, occr.picture
+    assert_equal 'http://ichef.bbci.co.uk/food/ic/food_16x9_235/cuisines/african_16x9.jpg', occr.picurl
+
+    assert_equal 21, Scraper.count
+    assert_equal 20, Scraper.where(what: 'bbc_genre_page').count
   end
 
   test 'bbc_ingredients_by_letter' do
@@ -311,7 +473,8 @@ class ResultsCacheTest < ActiveSupport::TestCase
 
     assert (occ_ref = occ_tag.referents.first)
     assert_equal 5, occ_ref.ingredient_referents.count
-    assert_equal 23, Scraper.count # Including the initial scraper
+    assert_equal 24, Scraper.count # Including the initial scraper
+    assert_equal 1, Scraper.where(what: 'bbc_occasion_recipes_page').count
     assert_equal 17, Scraper.where(what: 'bbc_recipe_page').count
     assert_equal 5, Scraper.where(what: 'bbc_ingredient_page').count
   end

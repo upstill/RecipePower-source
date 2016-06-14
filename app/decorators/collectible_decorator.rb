@@ -67,6 +67,7 @@ class CollectibleDecorator < Draper::Decorator
         'Dish' => 'Dish',
         'Tag' => nil,
         'Diet' => 'Diet',
+        'Genre' => 'Genre',
         'Ingredient' => 'Ingredient'
     }.each { |label, type|
       plurlabel = label.pluralize

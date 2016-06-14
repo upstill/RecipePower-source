@@ -95,10 +95,13 @@ class Scraper < ActiveRecord::Base
   end
 
   # Define a scraper to follow a link or links and return it, for whatever purpose
-  def launch link_or_links, data=self.data
+  def launch link_or_links, what = nil, data=self.data
+    if what.is_a? Hash
+      what, data = nil, what
+    end
     [link_or_links].flatten.compact.collect { |link|
       link = absolutize link # A Mechanize object for a link
-      scraper = Scraper.assert link, recur, data
+      scraper = Scraper.assert link, what, recur, data
       (data[:immediate] ? scraper.perform : scraper.queue_up) if recur
       STDERR.puts "** #{'WOULD BE ' unless recur}Launching #{scraper.what} on #{link}"
       scraper
@@ -179,6 +182,10 @@ class Www_bbc_co_uk_Scraper < Scraper
         :bbc_chef_home_page
       when /\A\/food\/recipes\/search\?.*chefs(\[[^\]]*\]=|\/)([^&]*)/
         :bbc_chef_recipes_page
+      when /\A\/food\/recipes\/search\?.*occasions(\[[^\]]*\]=|\/)([^&]*)/
+        :bbc_occasion_recipes_page
+      when /\A\/food\/recipes\/search\?.*programmes(\[[^\]]*\]=|\/)([^&]*)/
+        :bbc_programme_recipes_page
       when /\A\/food\/recipes\/[-\w]+\z/
         :bbc_recipe_page
       when /\A\/food\/ingredients\/by\/letter\z/
@@ -189,17 +196,25 @@ class Www_bbc_co_uk_Scraper < Scraper
         :bbc_seasons_page
       when /\A\/food\/occasions\z/
         :bbc_occasions_page
+      when /\A\/food\/cuisines\z/
+        :bbc_genres_page
       when /\A\/food\/[-\w]+\z/
         uri.fragment == 'related-foods' ? :bbc_related_ingredients : :bbc_ingredient_page
       when /\A\/food\/occasions\/[-\w]+\z/
         :bbc_occasion_page
       when /\A\/food\/seasons\/[-\w]+\z/
         :bbc_season_page
+      when /\A\/food\/cuisines\/[-\w]+\z/
+        :bbc_genre_page
+      when /\A\/food\/programmes\/[-\w]+\z/
+        :bbc_programme_home_page
     end
   end
 
   def recipe_item li, extractions_from_context={}
-    extractions = extractions_from_context.clone
+    # Clone the extractions, ensuring that keys are strings
+    extractions = {}
+    extractions_from_context.each { |key, value| extractions[key.to_s] = value }
     recipe_link = li.search('a').first
     extractions['Title'] = recipe_link.text.strip
     if img_link = li.search('img').first
@@ -230,33 +245,64 @@ class Www_bbc_co_uk_Scraper < Scraper
         extractions[$1.capitalize] = $2
       end
     }
-    rcp = propose_recipe recipe_link, extractions.compact, :bbc_recipe_page
+    rcp = propose_recipe recipe_link, extractions.compact
   end
 
-  def accordions extractions_from_context={}
-    page.search('h3.accordion-header').each { |header|
-      extractions = extractions_from_context.clone
-      header_name = header.text.sub(/^[A-Z]/, &:downcase)
+  def tag_item li, tagtype=nil
+    entity_page = absolutize(entity_link = li.search('a').first)
+    if img_link = li.search('img').first
+      img_link = absolutize img_link, :src
+    end
+    # How to handle the link depends on what the target page denotes
+    # For that, we depend on the #handler method parsing the URL to tell us what kind of link it is
+    tagtype ||=
+    case self.class.handler(entity_page)
+      when :bbc_chefs_atoz_page
+      when :bbc_chef_recipes_page
+      when :bbc_related_ingredients
+      when :bbc_genres_page
+      when :bbc_seasons_page
+      when :bbc_occasions_page
+      when :bbc_recipe_page
+      when :bbc_chef_home_page
+        :Author
+      when :bbc_occasion_page
+        :Occasion
+      when :bbc_genre_page
+        :Genre
+      when :bbc_season_page
+        :Occasion
+      when :bbc_dish_page
+        :Dish
+      when :bbc_ingredient_page
+        :Ingredient
+    end
+    if tagtype
+      launch entity_page, (tagtype == :Dish ? :bbc_dish_page : nil) if recur
+      TagServices.define entity_link.text.strip,
+                         tagtype: Tag.typenum(tagtype),
+                         page_link: entity_page,
+                         image_link: img_link
+    end
+  end
 
-      if div = header.search('~ div.resource-list').first
-        div_class = 'resource-list'
-      elsif div = header.search('~ div.filters').first
-        div_kind = 'filters'
-      end
-      div.search('li').each { |li|
+  def accordions extractions={}
+    %w{ accordion resource_list filters }.each do |div_class|
+      headered_list_items 'h3.accordion-header', 'div.'+div_class do |title, li|
+        header_name = title.sub(/^[A-Z]/, &:downcase)
         if block_given?
           yield header_name, li, extractions
         else
           # Assume a recipe, and the header is a role
-          unless header_name == 'other'
-            header_name = header_name.downcase.singularize
-            TagServices.define header_name, :tagtype => :Course
-            extractions['Course'] = header_name
+          if header_name != 'other'
+            course_name = header_name.downcase
+            TagServices.define course_name, :tagtype => :Course
+            course_name
           end
-          recipe_item li, extractions
+          recipe_item li, extractions.merge('Course' => course_name).compact
         end
-      } if div
-    }
+      end
+    end
 
   end
 
@@ -285,14 +331,14 @@ class Www_bbc_co_uk_Scraper < Scraper
 
     if s = page.search('h1.fn').first
       author_name = s.content
-      tag = TagServices.define( author_name,
+      author_tag = TagServices.define( author_name,
                                tagtype: 'Author',
                                page_link: url)
       if item = page.search('div#overview p').first
         description = item.text.strip
-        tag.referents.each { |ref|
+        author_tag.referents.each { |ref|
           unless ref.description.present?
-            ref.description = description
+            ref.description = description.truncate 250
             ref.save
           end
         }
@@ -300,6 +346,19 @@ class Www_bbc_co_uk_Scraper < Scraper
       # Scrape recipes filed under Dishes accordions
       accordions 'Author Name' => author_name
     end
+    headered_list_items 'div.links-module h2', 'ul' do |hdr_title, li|
+      if hdr_title == 'Elsewhere on the web'
+        TagServices.define author_tag, page_link: 'http://www.bbc.co.uk/nigella' # absolutize(li)
+      end
+    end
+  end
+
+  def bbc_occasion_recipes_page
+
+  end
+
+  def bbc_programme_recipes_page
+
   end
 
   def bbc_chef_recipes_page
@@ -481,6 +540,23 @@ class Www_bbc_co_uk_Scraper < Scraper
 
   end
 
+  def bbc_genres_page
+    page.search('ol#cuisines li.cuisine a').each { |season_link|
+      tag_name = season_link.css('span.cuisine-title').text
+      page_link = absolutize season_link.attribute('href').to_s
+      if img_link = season_link.css('img').attribute('src')
+        img_link = absolutize img_link.to_s
+      end
+      STDERR.puts "Found '#{tag_name}' -> #{page_link} and image link #{img_link}"
+      TagServices.define tag_name,
+                               tagtype: 'Genre',
+                               page_link: page_link,
+                               image_link: img_link
+      launch page_link
+      launch page_link
+    }
+  end
+
   def bbc_seasons_page
     page.search('a.season-image').each { |season_link|
       tag_name = season_link.css('span.season-name').text
@@ -502,36 +578,128 @@ class Www_bbc_co_uk_Scraper < Scraper
     }
   end
 
+  # Process the items of a list that is preceded by a header
+  def headered_list_items header_selector, sibling_tag='ul', title=nil, &block
+    (page.search(header_selector)).each { |hdr|
+      hdr_text = hdr.text.to_s.strip
+      hdr.search("~ #{sibling_tag}:first li").each { |li| block.call hdr_text, li } unless title && (title != hdr_text)
+    }
+  end
+
+  def bbc_dish_page
+    dish_name = page.search('div#column-1 h1').text.strip.sub /([-\w]*) recipes/, '\1'
+    dish_tag = TagServices.define(dish_name,
+                                   :tagtype => :Dish,
+                                   :page_link => url)
+    accordions 'Dish' => dish_name
+    ts = nil
+    headered_list_items 'div#related-foods h3', 'ul' do |title, li|
+      if title.match /^Varieties of/
+        ts ||= TagServices.new(dish_tag)
+        ts.make_parent_of tag_item(li, :Dish)
+      end
+    end
+
+    # A see-also section within a 'links-module' div
+    page.search('div.links-module a').each { |see_also_link|
+      TagServices.define dish_tag, page_link: absolutize(see_also_link.attribute('href'))
+    }
+
+    page.search('a.see-all-search').each { |a| launch a.attribute('href'), :bbc_dish_recipes_page }
+  end
+
+  def bbc_genre_page
+    genre_name = page.search('div#column-1 h1').text.sub /.*\s([-\w]*\z)/, '\1'
+    genre_tag = TagServices.define(genre_name,
+                                   :tagtype => :Genre,
+                                   :page_link => url)
+    accordions 'Genre' => genre_name
+    headered_list_items 'div.related-resources-module h2', 'ul', 'Related chefs' do |title, li|
+      # The 'Related Chefs' section
+      tag = tag_item li
+      genre_tag.referents.each { |genre_ref| genre_ref.author_referents |= tag.referents }
+    end
+
+    headered_list_items 'div.related-resources-module h3' do |title, li|
+      tag = tag_item li, title.singularize.to_sym
+      genre_tag.referents.each { |genre_ref|
+        case tag.typesym
+          when :Author
+            genre_ref.author_referents |= tag.referents
+          when :Ingredient
+            genre_ref.ingredient_referents |= tag.referents
+          when :Dish
+            genre_ref.dish_referents |= tag.referents
+        end
+      }
+    end
+
+    # A see-also section within a 'links-module' div
+    page.search('div.links-module a').each { |see_also_link|
+      TagServices.define genre_tag, page_link: absolutize(see_also_link.attribute('href'))
+    }
+  end
+
+  def bbc_programme_home_page
+    # The programme_link is the home page of the program on the BBC
+    programme_link = page.search('div#episode-detail a').first
+    programme_name = programme_link.text.strip # page.search('title').text.sub(/BBC - Food - Recipes from Programmes :/, '').strip
+    programme_description = page.search('div#episode-detail p').first.text.strip
+    programme_image = find_by_selector('div#programme-brand img', :src)
+    programme_tag = TagServices.define(programme_name,
+                                       {
+                                           :tagtype => :Source,
+                                           :description => programme_description,
+                                           :page_link => url,
+                                           :image_link => (programme_image if programme_image.present?)
+                                       }.compact
+    )
+    TagServices.define programme_tag, page_link: absolutize(programme_link.attribute('href'))
+
+    headered_list_items 'div.related-resources-module h2', 'ul' do |header_name, li|
+      if header_name == 'Related chefs'
+        link = li.search('a').first
+        img = link.search('img').first
+        chef_name = img.attribute('alt').to_s
+        chef_img = img.attribute('src').to_s
+        chef_link = absolutize link.attribute('href').to_s
+        chef_tag = TagServices.define chef_name, {
+          tagtype: :Author,
+          page_link: chef_link,
+          image_link: chef_img
+        }.compact
+        TagServices.new(programme_tag).suggests chef_tag
+      end
+    end
+
+    # The seemore link finds all recipes under that programme
+    if seemore = page.search('p.see-all a.see-all-search').first
+      launch seemore.attribute('href')
+    end
+
+  end
+
   def bbc_season_page
     month_name = page.search('div#column-1 h1').text.sub /.*\s([-\w]*\z)/, '\1'
     month_tag = TagServices.define(month_name,
                                    :tagtype => :Occasion,
                                    :page_link => url)
     accordions 'Occasion' => month_name
-
+=begin
+    if seemore = find_by_selector('p.see-more a.see-all-search', :href)
+      launch seemore
+    end
+=end
     page.search('div#related-ingredients li a').each { |page_link|
       ingred_tag = TagServices.define( page_link.text.downcase,
-                                      :tagtype => :Ingredient,
-                                      :page_link => absolutize(page_link))
+                                       :tagtype => :Ingredient,
+                                       :page_link => absolutize(page_link))
       month_tag.referents.each { |tr|
         tr.ingredient_referents = (tr.ingredient_referents + ingred_tag.referents).uniq
       }
     }
   end
 
-=begin
-<ul class="occasions">
-  <li>
-    <h4>
-      <a href="/food/occasions/bonfire_night">
-        <img src="http://ichef.bbci.co.uk/food/ic/food_16x9_111/occasions/bonfire_night_16x9.jpg" width="111" height="63" alt="Bonfire Night"/>
-        Bonfire Night
-      </a>
-    </h4>
-    <h5>November 6th</h5>
-  </li>
-</ul>
-=end
   def bbc_occasions_page
       (page.search('ul.occasions li') + page.search('ul#other-occasions li')).each { |li_elmt|
       if occ_link = li_elmt.search('h4 a').first
@@ -553,6 +721,9 @@ class Www_bbc_co_uk_Scraper < Scraper
     occ_name = data[:Occasion] || find_by_selector( 'h1.bordered').strip
     occ_name.sub! ' recipes', ''
     occ_tag = TagServices.define occ_name, tagtype: Tag.typenum(:Occasion), page_link: url
+    if seemore = find_by_selector('p.see-more a.see-all-search', :href)
+      launch seemore
+    end
     accordions 'Occasion' => occ_name
     if related = page.search('div.related-resources-module').first
       resource_type = related.search('h3').first.text # Ingredients
