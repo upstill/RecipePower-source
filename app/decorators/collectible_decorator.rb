@@ -61,13 +61,14 @@ class CollectibleDecorator < Draper::Decorator
     save if id.nil? || changed? || image_changed # No other extractions need apply until saved
     ts = nil
     {
-        'Author Name' => 'Author',
+        'Author' => 'Author',
         'Course' => 'Course',
         'Occasion' => 'Occasion',
         'Dish' => 'Dish',
         'Tag' => nil,
         'Diet' => 'Diet',
         'Genre' => 'Genre',
+        'List' => 'List',
         'Ingredient' => 'Ingredient'
     }.each { |label, type|
       plurlabel = label.pluralize
@@ -81,7 +82,7 @@ class CollectibleDecorator < Draper::Decorator
       end
     }
 =begin
-    if author = findings.result_for('Author Name')
+    if author = findings.result_for('Author')
       ts ||= TaggingServices.new object
       ts.tag_with author, User.super_id, type: 'Author'
     end

@@ -243,6 +243,7 @@ ActiveRecord::Schema.define(version: 20160610173507) do
     t.string   "host"
     t.integer  "status",                  default: 0
     t.string   "filename"
+    t.string   "link_text"
   end
 
   add_index "references", ["affiliate_id", "type"], name: "references_index_by_affil_and_type", using: :btree

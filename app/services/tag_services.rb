@@ -82,6 +82,10 @@ class TagServices
     Referent.express(tag).suggests Referent.express(target_tag)
   end
 
+  def suggests? target_tag
+    Referent.express(tag).suggests? Referent.express(target_tag)
+  end
+
   def child_referents
     tag.referents.collect { |referent| referent.children.to_a }.flatten.uniq
   end
@@ -102,7 +106,11 @@ class TagServices
     location =
         if page_link
           # Asserting the reference ensures a referent for the tag # Referent.express(tag) if tag.referents.empty?
-          Reference.assert page_link, tag, :Definition
+          reference = Reference.assert page_link, tag, :Definition
+          if options[:link_text].present?
+            reference.link_text = options[:link_text]
+            reference.save
+          end
           page_link
         else
           Referent.express tag
@@ -122,6 +130,11 @@ class TagServices
       source_tag = self.define source_tag, options.slice(:tagtype)
       STDERR.puts "!! ...noted that '#{tag.name}' is suggested by '#{source_tag.name}'"
       TagServices.new(source_tag).suggests tag
+    end
+    if target_tag = options[:suggests]
+      target_tag = self.define target_tag, options.slice(:tagtype)
+      STDERR.puts "!! ...noted that '#{tag.name}' suggests '#{target_tag.name}'"
+      TagServices.new(tag).suggests target_tag
     end
     if options[:description].present?
       tag.referents.each { |ref|

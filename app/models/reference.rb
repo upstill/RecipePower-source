@@ -8,7 +8,7 @@ class Reference < ActiveRecord::Base
   include Referrable
   include Typeable
 
-  attr_accessible :reference_type, :type, :url, :affiliate_id, :filename
+  attr_accessible :reference_type, :type, :url, :affiliate_id, :filename, :link_text
 
   validates_uniqueness_of :url, :scope => :type
 

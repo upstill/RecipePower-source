@@ -456,7 +456,7 @@ class SiteServices
           if (foundstr = result.out.shift)
             unless column = correct_result && (foundstr == correct_result) && :yes_votes
               puts "#{label}: #{foundstr}"
-              site_option = ['Description', 'Site Name', 'Title', 'Image', 'Author Name', 'Author Link', 'Tags'].include?(label) ? '" S(ave value to Site) ' : ''
+              site_option = ['Description', 'Site Name', 'Title', 'Image', 'Author', 'Author Link', 'Tags'].include?(label) ? '" S(ave value to Site) ' : ''
               puts "Good? [y](es) n(o) #{site_option} Q(uit)"
               answer = gets.strip
               case answer[0]
@@ -518,7 +518,7 @@ class SiteServices
                     when 'Site Name', 'Title'
                       @site.name = field_val
                       @site.save
-                    when 'Author Name'
+                    when 'Author'
                       TaggingServices.new(@site).tag_with field_val, User.super_id, type: 'Author'
                       @site.save
                     when 'Author Link'

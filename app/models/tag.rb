@@ -65,6 +65,24 @@ class Tag < ActiveRecord::Base
     ]
   end
 
+  # Check if a tag is already defined.
+  # type_or_types may specify a single type or an array of types.
+  # Options:
+  # :strict matches the name, not the normalized_name
+  # :visible_to specifies a user and returns false if it's not visible to that user
+  def self.available? name, type_or_types=nil, options={}
+    if type_or_types.is_a? Hash
+      type_or_types, options = 0, type_or_types
+    end
+    constraints = { tagtype: (Tag.typenum(type_or_types) if type_or_types) }
+    if options[:strict]
+      constraints[:name] = name
+    else
+      constraints[:normalized_name] = normalizeName name
+    end
+    Tag.exists? constraints.compact
+  end
+
   # Class method to define instance methods for the taggable entities: those of taggable_class
   # This is invoked by the Taggable module when it is included in a taggable
   def self.taggable taggable_class

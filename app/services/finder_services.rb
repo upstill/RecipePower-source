@@ -145,10 +145,10 @@ class FinderServices
   ]
 
   @@CandidateFinders = [
-      {:label => 'Author Name', :selector => 'meta[name=\'author\']', :attribute_name => 'content'},
-      {:label => 'Author Name', :selector => 'meta[itemprop=\'author\']', :attribute_name => 'content'},
-      {:label => 'Author Name', :selector => 'meta[name=\'author.name\']', :attribute_name => 'content'},
-      {:label => 'Author Name', :selector => 'meta[name=\'article.author\']', :attribute_name => 'content'},
+      {:label => 'Author', :selector => 'meta[name=\'author\']', :attribute_name => 'content'},
+      {:label => 'Author', :selector => 'meta[itemprop=\'author\']', :attribute_name => 'content'},
+      {:label => 'Author', :selector => 'meta[name=\'author.name\']', :attribute_name => 'content'},
+      {:label => 'Author', :selector => 'meta[name=\'article.author\']', :attribute_name => 'content'},
       {:label => 'Author Link', :selector => 'link[rel=\'author\']', :attribute_name => 'href'},
       {:label => 'Description', :selector => 'meta[name=\'description\']', :attribute_name => 'content'},
       {:label => 'Description', :selector => 'meta[property=\'og:description\']', :attribute_name => 'content'},

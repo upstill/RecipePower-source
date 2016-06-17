@@ -389,8 +389,16 @@ public
     # (@@Super_user || (@@Super_user = self.find(@@Super_user_id)) # (self.by_name(:super) || self.by_name('RecipePower')))).id
   end
 
+  def self.superuser
+    @@Super_user ||= self.find(@@Super_user_id) # by_name(:guest))
+  end
+
+  def self.super_id= id
+    @@Super_user_id = id
+  end
+
   def self.guest
-      @@Guest_user || (@@Guest_user = self.find(@@Guest_user_id)) # by_name(:guest))
+    @@Guest_user ||= self.find(@@Guest_user_id) # by_name(:guest))
   end
 
   # Simply return the id of the guest
