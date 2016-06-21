@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160520005645) do
+ActiveRecord::Schema.define(version: 20160610173507) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -214,11 +214,18 @@ ActiveRecord::Schema.define(version: 20160520005645) do
   end
 
   create_table "recipes", force: :cascade do |t|
-    t.string   "title",       limit: 255
+    t.string   "title",          limit: 255
     t.datetime "created_at"
     t.datetime "updated_at"
     t.text     "description"
     t.integer  "picture_id"
+    t.string   "prep_time"
+    t.string   "cook_time"
+    t.integer  "prep_time_low",              default: 0
+    t.integer  "prep_time_high",             default: 0
+    t.integer  "cook_time_low",              default: 0
+    t.integer  "cook_time_high",             default: 0
+    t.string   "yield"
   end
 
   add_index "recipes", ["id"], name: "recipes_index_by_id", unique: true, using: :btree
@@ -236,6 +243,7 @@ ActiveRecord::Schema.define(version: 20160520005645) do
     t.string   "host"
     t.integer  "status",                  default: 0
     t.string   "filename"
+    t.string   "link_text"
   end
 
   add_index "references", ["affiliate_id", "type"], name: "references_index_by_affil_and_type", using: :btree
@@ -256,6 +264,7 @@ ActiveRecord::Schema.define(version: 20160520005645) do
     t.boolean  "isCountable"
     t.string   "description", limit: 255
     t.integer  "tag_id"
+    t.integer  "picture_id"
   end
 
   create_table "referments", force: :cascade do |t|
@@ -301,6 +310,19 @@ ActiveRecord::Schema.define(version: 20160520005645) do
     t.datetime "updated_at"
     t.string   "name",       limit: 255
     t.integer  "user_id"
+  end
+
+  create_table "scrapers", force: :cascade do |t|
+    t.string   "url"
+    t.string   "what"
+    t.string   "subclass",   default: "Scraper"
+    t.text     "data"
+    t.boolean  "recur",      default: true
+    t.datetime "run_at"
+    t.integer  "waittime",   default: 1
+    t.integer  "errcode",    default: 0
+    t.datetime "created_at",                     null: false
+    t.datetime "updated_at",                     null: false
   end
 
   create_table "sites", force: :cascade do |t|

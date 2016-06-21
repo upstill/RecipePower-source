@@ -70,9 +70,9 @@ class List < ActiveRecord::Base
             private: ["Me only (Private)", 2]
   )
 
-  belongs_to :owner, class_name: "User"   # The creator and default editor
-  belongs_to :name_tag, class_name: "Tag"
-  has_and_belongs_to_many :included_tags, class_name: "Tag"
+  belongs_to :owner, class_name: 'User'   # The creator and default editor
+  belongs_to :name_tag, class_name: 'Tag'
+  has_and_belongs_to_many :included_tags, class_name: 'Tag'
 #  has_and_belongs_to_many :subscribers, class_name: "User"
   attr_accessible :owner, :ordering, :title,
                   :name, :name_tag_id, :name_tag,
@@ -82,8 +82,8 @@ class List < ActiveRecord::Base
 
   # Using the name string, either find an existing list or create a new one FOR THE CURRENT USER
   def self.assert name, user, options={}
-    puts "Asserting tag '#{name}' for user ##{user.id} (#{user.name})"
-    tag = Tag.assert(name, tagtype: "List", userid: user.id)
+    STDERR.puts "Asserting tag '#{name}' for user ##{user.id} (#{user.name})"
+    tag = Tag.assert(name, tagtype: 'List', userid: user.id)
     puts "...asserted with id #{tag.id}"
     l = List.where(owner_id: user.id, name_tag_id: tag.id).first || List.new(owner: user, name_tag: tag)
     l.save if options[:create] && !l.id

@@ -1,25 +1,28 @@
 class ReferentValidator < ActiveModel::Validator
   def validate(record)
     # Test that record has non-generic type
-    unless record.type && record.type != "Referent"
-      record.errors[:base] << "Referent can't have generic type"
+    unless record.type && record.type != 'Referent'
+      record.errors[:base] << 'Referent can\'t have generic type'
       return false;
     end
     if record.tags.empty? && !record.canonical_expression
-      record.errors[:base] << "A Referent must have at least one tag to express it."
-      return false;
+      record.errors[:base] << 'A Referent must have at least one tag to express it.'
+      return false
     end
     true
   end
 end
 
 class Referent < ActiveRecord::Base
+  include Picable
+
+  picable :picurl, :picture
   # Referents don't have a strict tree structure, just categories defined by an isa relationship.
   # This relationship is implemented by the ReferentRelation table, with parent_id and child_id keys
-  has_many :child_relations, :foreign_key => "parent_id", :dependent => :destroy, :class_name => "ReferentRelation"
+  has_many :child_relations, :foreign_key => 'parent_id', :dependent => :destroy, :class_name => 'ReferentRelation'
   has_many :children, -> { uniq }, :through => :child_relations, :source => :child
 
-  has_many :parent_relations, :foreign_key => "child_id", :dependent => :destroy, :class_name => "ReferentRelation"
+  has_many :parent_relations, :foreign_key => 'child_id', :dependent => :destroy, :class_name => 'ReferentRelation'
   has_many :parents, -> { uniq }, :through => :parent_relations, :source => :parent
 
   has_many :expressions, :dependent => :destroy
@@ -30,9 +33,29 @@ class Referent < ActiveRecord::Base
 
   has_many :referments, :dependent => :destroy, :inverse_of => :referent
   # What can we get to through the referments? Each class that includes the Referrable module should be in this list
-  @@referment_associations = [:references, :recipes]
+  @@referment_associations = %w{
+      Reference
+      Recipe
+      Referent
+      SourceReferent
+      InterestReferent
+      GenreReferent
+      RoleReferent
+      DishReferent
+      CourseReferent
+      ProcessReferent
+      IngredientReferent
+      AuthorReferent
+      OccasionReferent
+      PantrySectionReferent
+      StoreSectionReferent
+      DietReferent
+      ToolReferent
+      NutrientReferent
+      CulinaryTermReferent
+  }
   @@referment_associations.each { |assoc|
-    has_many assoc, :through => :referments, :source => :referee, :source_type => assoc.to_s.singularize.capitalize
+    has_many assoc.underscore.pluralize.to_sym, :through => :referments, :source => :referee, :source_type => assoc
   }
 
 =begin
@@ -166,7 +189,7 @@ class Referent < ActiveRecord::Base
   def parent_tokens=(tokenlist)
     # After collecting tags, scan list to eliminate references to self
     tokenlist = tokenlist.split(',')
-    self.parents = tag_tokens_to_referents(tokenlist).delete_if { |rel| (rel.id == self.id) && errors.add(:parents, "Can't be its own parent.") }.uniq
+    self.parents = tag_tokens_to_referents(tokenlist).delete_if { |rel| (rel.id == self.id) && errors.add(:parents, 'Can\'t be its own parent.') }.uniq
   end
 
   def child_tokens
@@ -196,12 +219,12 @@ class Referent < ActiveRecord::Base
       token = token.to_i unless token.sub!(/^\'(.*)\'$/, '\1')
       Referent.express token, self.typenum
     }.compact # Blow off failed referents
-    puts "Tokens converted to referents: "+refs.inspect
+    puts 'Tokens converted to referents: '+refs.inspect
     refs
   end
 
   def self.referent_class_for_tagtype(typenum)
-    (((typenum > 0) ? Tag.typesym(typenum).to_s : "")+"Referent")
+    (((typenum > 0) ? Tag.typesym(typenum).to_s : '')+'Referent')
   end
 
   # Class method to create a referent of a given type under the given tag,
@@ -419,18 +442,31 @@ class Referent < ActiveRecord::Base
     result << "(#{aliases})" unless aliases.blank?
     result
   end
+
+  def make_parent_of child_ref
+    children << child_ref unless children.include?(child_ref)
+  end
+
+  def suggests target_ref
+    referments.create(referee: target_ref) unless referments.where(referee_type: 'Referent', referee_id: target_ref.id).exists?
+  end
+
+  def suggests? target_ref
+    referments.exists? referee_type: 'Referent', referee_id: target_ref.id
+  end
 end
 
 # Subclases for different types of referents
 
-class FoodReferent < Referent;
+# An Ingredient may suggest a type of dish
+class FoodReferent < Referent
   def self.fix
-    FoodReferent.all.each { |ref| ref.type = "IngredientReferent"; ref.save }
+    FoodReferent.all.each { |ref| ref.type = 'IngredientReferent'; ref.save }
   end
 end
 
-class SourceReferent < Referent;
-  has_one :site, foreign_key: "referent_id"
+class SourceReferent < Referent
+  has_one :site, foreign_key: 'referent_id'
 
   attr_accessible :site
 
@@ -439,131 +475,47 @@ class SourceReferent < Referent;
   end
 end
 
-class ChannelReferent < Referent;
-  has_one :user, :dependent => :destroy
-  attr_accessible :user, :user_attributes
-  accepts_nested_attributes_for :user
-
-  before_validation :check_tag
-  after_save :fix_user
-
-  def initialize *args
-    super *args
-    # Each channel gets a corresponding user with the super-user password
-    self.user = User.find(User.super_id).dup
-    user.email = "channels@recipepower.com"
-    user.channel = self
-  end
-
-  def ref_check
-    result = []
-    channels.each { |cr2|
-      if cr2 != self
-        result << "#{name}(#{id}) has #{cr2.name}(#{cr2.id}) as channel."
-      end
-    }
-    if user
-      result << "#{name}(#{id}) has #{user.handle}(#{user.id}) as user."
-    end
-    result.join "\n"
-  end
-
-  def associate
-    self.user
-  end
-
-  def tag
-    [canonical_expression].compact
-  end
-
-  # The tag_tokens VA is special to channels, since 1) the name of the channel could
-  # refer to a referent of another type (for dependent channels) and 2) a tag may or
-  # may not be appropriate.
-  def tag_token
-    [canonical_expression].compact
-  end
-
-  def tag_token=(tokenlist)
-    if token = tokenlist.split(',').first
-      token.strip!
-      if token.sub!(/^\'(.*)\'$/, '\1') || (token.to_i == 0) # A quote-delimited string a la tokeninput
-        self.canonical_expression = Tag.assert token, tagtype: self.typenum # Creating it if need be, and/or making it global
-      else
-        self.canonical_expression = Tag.find token.to_i # Existing tag
-      end
-    end
-  end
-
-  # This is a pre-validation check on the tag selected for a channel. The user can either select an existing tag
-  # of any type (except Channel), or type a new tag, in which case a new tag of type Channel is created.
-  # For a channel based on another class of referent, the tag must have an associated referent, or
-  # at least have a type so that a referent can be created.
-  # For a freestanding channel, the tag CANNOT have an existing type (other than 'unclassified')
-  def check_tag
-    # At this point in the history of a channel, it presumably has a canonical expression.
-    # We need to check that type
-
-    return if !(tag = canonical_expression) # All referents must have a tag; this error will get picked up elsewhere
-    # ensure_user
-    # self.canonical_expression = self.expressions.first.tag unless self.canonical_expression || self.expressions.empty?
-    # user.username = canonical_expression.name
-    user.username = tag.name
-    if [0, 11].include? tag.typenum
-      express tag
-      channels << self
-    end
-  end
-
-  # after_save method to direct the primary key's referent hither and correct the channel's user's email address
-  def fix_user
-    # Need to make sure the tag is linked to self
-    if (tag = self.canonical_expression) && (tag.typenum != 11)
-      ref = Referent.express tag, tag.typenum
-      ref.channels << self
-      ref.save
-    end
-    if self.user.email == "channels@recipepower.com"
-      self.user.email = "channel#{self.id.to_s}@recipepower.com"
-      self.user.save
-    end
-  end
+class GenreReferent < Referent
 end
 
-class InterestReferent < ChannelReferent;
+class RoleReferent < Referent
 end
 
-class GenreReferent < Referent;
+class DishReferent < Referent
 end
 
-class RoleReferent < Referent;
+class CourseReferent < Referent
 end
 
-class ProcessReferent < Referent;
+class ProcessReferent < Referent
 end
 
-class IngredientReferent < Referent;
+class IngredientReferent < Referent
 end
 
-class UnitReferent < Referent;
+class UnitReferent < Referent
 end
 
-class AuthorReferent < Referent;
+class AuthorReferent < Referent
 end
 
-class OccasionReferent < Referent;
+class OccasionReferent < Referent
 end
 
-class PantrySectionReferent < Referent;
+class PantrySectionReferent < Referent
 end
 
-class StoreSectionReferent < Referent;
+class StoreSectionReferent < Referent
 end
 
-class ToolReferent < Referent;
+class DietReferent < Referent
 end
 
-class NutrientReferent < Referent;
+class ToolReferent < Referent
 end
 
-class CulinaryTermReferent < Referent;
+class NutrientReferent < Referent
+end
+
+class CulinaryTermReferent < Referent
 end

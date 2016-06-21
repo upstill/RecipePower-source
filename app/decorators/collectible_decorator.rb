@@ -47,26 +47,67 @@ class CollectibleDecorator < Draper::Decorator
 
   # Here's where we incorporate findings from a page into the corresponding entity
   def findings= findings
-    if findings.result_for('Title').present?
-      self.title = findings.result_for('Title')
-      title_changed = true
+    self.title = findings.result_for('Title') if findings.result_for('Title').present?
+    self.description = findings.result_for('Description') if findings.result_for('Description').present? && description.blank?
+    if self.is_a? Recipe
+      self.prep_time = findings.result_for('Prep Time') if findings.result_for('Prep Time').present?
+      self.cook_time = findings.result_for('Cooking Time') if findings.result_for('Cooking Time').present?
+      self.yield = findings.result_for('Yield') if findings.result_for('Yield').present?
     end
     if findings.result_for('Image').present? && self.image.blank?
       self.image = findings.result_for('Image')
       image_changed = image.present?
     end
-    self.description = findings.result_for('Description') if findings.result_for('Description').present? && description.blank?
-    save if id.nil? || image_changed || title_changed || description_changed? # No other extractions need apply until saved
+    save if id.nil? || changed? || image_changed # No other extractions need apply until saved
     ts = nil
-    if author = findings.result_for('Author Name')
+    {
+        'Author' => 'Author',
+        'Course' => 'Course',
+        'Occasion' => 'Occasion',
+        'Dish' => 'Dish',
+        'Tag' => nil,
+        'Diet' => 'Diet',
+        'Genre' => 'Genre',
+        'List' => 'List',
+        'Ingredient' => 'Ingredient'
+    }.each { |label, type|
+      plurlabel = label.pluralize
+      if tagstring = (findings.result_for(label) || findings.result_for(plurlabel))
+        ts ||= TaggingServices.new object
+        if label == plurlabel
+          tagstring.split(',').map(&:strip).each { |tagname| ts.tag_with tagname, User.super_id, { type: type }.compact }
+        else
+          ts.tag_with tagstring, User.super_id, { type: type }.compact
+        end
+      end
+    }
+=begin
+    if author = findings.result_for('Author')
       ts ||= TaggingServices.new object
       ts.tag_with author, User.super_id, type: 'Author'
+    end
+    if course = findings.result_for('Course')
+      ts ||= TaggingServices.new object
+      ts.tag_with course, User.super_id, type: 'Course'
+    end
+    if occasion = findings.result_for('Occasion')
+      ts ||= TaggingServices.new object
+      ts.tag_with occasion, User.super_id, type: 'Occasion'
     end
     if tagstring = findings.result_for('Tags')
       ts ||= TaggingServices.new object
       tagstring.split(',').map(&:strip).each { |tagname| ts.tag_with tagname, User.super_id }
     end
-  end
+    if tagstring = findings.result_for('Diet')
+      ts ||= TaggingServices.new object
+      tagstring.split(',').map(&:strip).each { |tagname| ts.tag_with tagname, User.super_id, type: Tag.typenum(:Diet) }
+    end
+    if tagstring = findings.result_for('Ingredients')
+      ts ||= TaggingServices.new object
+      tagstring.split(',').map(&:strip).each { |tagname| ts.tag_with tagname, User.super_id, type: 'Ingredient' }
+    end
+=end
+    end
 
   # The robotags are those owned by super
   def robotags

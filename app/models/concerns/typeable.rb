@@ -1,4 +1,4 @@
-require "type_map.rb"
+require 'type_map.rb'
 # Management of type fields made easy
 module Typeable
   extend ActiveSupport::Concern
@@ -7,7 +7,7 @@ module Typeable
     
     def typeable(attribute, list)
       attr_accessible attribute, :typenum, :typename, :typesym
-      @tag_types = TypeMap.new(list, "unclassified")
+      @tag_types = TypeMap.new(list, 'unclassified')
       @attrib_name = attribute
 =begin
       self.class_eval do

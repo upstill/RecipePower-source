@@ -38,7 +38,7 @@ class RecipeServices
     puts "\tdescription: #{@recipe.description}"
     puts "\tpicurl: #{@recipe.picurl}"
     puts "\tExtractions:"
-    if results = FinderServices.findings(@recipe.url, @recipe.site)
+    if results = FinderServices.glean(@recipe.url, @recipe.site)
       results.labels.each { |label| puts "\t\t#{label}: #{results.result_for(label)}" }
     else
       puts '!!! Couldn\'t open the page for analysis!'

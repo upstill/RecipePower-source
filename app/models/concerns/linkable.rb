@@ -1,6 +1,5 @@
 require './lib/uri_utils.rb'
 require 'reference.rb'
-require 'referent.rb'
 
 # Manage a URL associated with a model such that the URL is unique across the model's class
 
@@ -197,18 +196,15 @@ module Linkable
   # Return the human-readable name for the recipe's source
   def sourcename
     if respond_to?(:site) && site
-      ref = site.referent
-      name = ref.name
       site.name
     else
       "Entity #{self.class.to_s} ##{id} has no site"
     end
-
   end
 
   # Return the URL for the recipe's source's home page
   def sourcehome
-    (respond_to?(:site) && site) ? site.home : "#"
+    (respond_to?(:site) && site) ? site.home : '#'
   end
 
   # One linkable is being merged into another => transfer references

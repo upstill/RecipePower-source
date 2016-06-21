@@ -23,6 +23,10 @@ module Picable
     end
   end
 
+  def self.included(base)
+    base.extend ClassMethods
+  end
+
   public
 
   def picable_attribute

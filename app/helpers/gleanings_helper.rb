@@ -64,7 +64,7 @@ module GleaningsHelper
           when 'Image'
           when 'Tags'
           when 'Site Name'
-          when 'Author Name'
+          when 'Author'
           when 'Author Link'
         end
     gleaning_field_enclosure label, field, target

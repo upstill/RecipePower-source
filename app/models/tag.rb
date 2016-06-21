@@ -5,7 +5,7 @@ class Tag < ActiveRecord::Base
   typeable(:tagtype,
            Untyped: ['Untyped', 0],
            Genre: ['Genre', 1],
-           Role: ['Role', 2],
+           Dish: ['Dish', 2],
            Process: ['Process', 3],
            Ingredient: ['Ingredient', 4],
            Unit: ['Unit', 5],
@@ -14,13 +14,14 @@ class Tag < ActiveRecord::Base
            Occasion: ['Occasion', 8],
            PantrySection: ['Pantry Section', 9],
            StoreSection: ['Store Section', 10],
-           # Channel: ['Channel', 11],
+           Diet: ['Special Diet', 11],
            Tool: ['Tool', 12],
            Nutrient: ['Nutrient', 13],
            CulinaryTerm: ['Culinary Term', 14],
            Question: ['Question', 15],
            List: ['List', 16],
-           Epitaph: ['Epitaph', 17]
+           Epitaph: ['Epitaph', 17],
+           Course: ['Course', 18]
   )
 
   attr_accessible :name, :id, :tagtype, :isGlobal, :links, :referents, :users, :owners, :primary_meaning # , :recipes
@@ -62,6 +63,24 @@ class Tag < ActiveRecord::Base
     [
       (block_given? ? yield() : self).where('"tags"."normalized_name" LIKE ?', matcher.downcase)
     ]
+  end
+
+  # Check if a tag is already defined.
+  # type_or_types may specify a single type or an array of types.
+  # Options:
+  # :strict matches the name, not the normalized_name
+  # :visible_to specifies a user and returns false if it's not visible to that user
+  def self.available? name, type_or_types=nil, options={}
+    if type_or_types.is_a? Hash
+      type_or_types, options = 0, type_or_types
+    end
+    constraints = { tagtype: (Tag.typenum(type_or_types) if type_or_types) }
+    if options[:strict]
+      constraints[:name] = name
+    else
+      constraints[:normalized_name] = normalizeName name
+    end
+    Tag.exists? constraints.compact
   end
 
   # Class method to define instance methods for the taggable entities: those of taggable_class
@@ -204,7 +223,7 @@ class Tag < ActiveRecord::Base
   # Return the tag's name with a marker of its type, to clear up ambiguities
   def typedname include_type=false, include_ref=false
     return name unless include_type && (typenum > 0)
-    referent_str = (include_ref && referent_id && (" "+referent_id.to_s)) || ""
+    referent_str = (include_ref && referent_id && (' '+referent_id.to_s)) || ''
     %Q{#{name} [#{typename}#{referent_str}]}
   end
 
