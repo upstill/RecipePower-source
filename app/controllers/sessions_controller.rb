@@ -41,6 +41,7 @@ class SessionsController < Devise::SessionsController
       set_flash_message :notice, :signed_out
       flash[:notice] = flash[:notice].sub( 'uhandle', handle) if handle.present?
     end
+    reset_session if signed_out
 
     # We actually need to hardcode this as Rails default responder doesn't
     # support returning empty response on GET request

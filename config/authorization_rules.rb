@@ -33,6 +33,7 @@ authorization do
   role :admin do
     includes :editor
     # :sessions, :users
+    has_permission_on :scrapers, :to => [ :new, :create, :init ]
     has_permission_on [:pages, :lists, :recipes, :feeds, :sites, :users, :finders ], :to => [:admin]
     has_permission_on [:tags, :lists, :recipes, :feeds, :sites, :finders ], :to => [:destroy]
     has_permission_on [:feeds, :sites, :finders], :to => [:approve]

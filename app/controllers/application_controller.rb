@@ -346,11 +346,12 @@ class ApplicationController < ActionController::Base
   end
 
   # before_filter on controller that needs login to do anything
-  def login_required format=nil
+  def  login_required format=nil
     unless logged_in?
       summary = action_summary params[:controller], params[:action]
       alert = "You need to be logged in to an account on RecipePower to #{summary}."
-      if session.id
+      reset_session unless session.id
+      if session.id || true
         defer_request path: request.fullpath, format: format||request.format.symbol
         redirect_to(if (response_service.format == :json)
                       flash[:alert] = alert

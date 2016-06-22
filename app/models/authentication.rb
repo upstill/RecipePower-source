@@ -4,10 +4,10 @@ class Authentication < ActiveRecord::Base
   
   def provider_name
     case provider
-    when "open_id"
-      "OpenID"
-    when "google_oauth2"
-      "Google"
+    when 'open_id'
+      'OpenID'
+    when 'google_oauth2'
+      'Google'
     else
       provider.titleize
     end

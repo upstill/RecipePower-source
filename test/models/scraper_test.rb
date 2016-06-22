@@ -3,11 +3,28 @@ require 'test_helper'
 class ScraperTest < ActiveSupport::TestCase
 
   def setup
-    Tag.delete_all
+    Answer.delete_all
+    Authentication.delete_all
     Expression.delete_all
+    Finder.delete_all
+    List.delete_all
+    Rcpref.delete_all
+    Recipe.delete_all
     Reference.delete_all
     Referent.delete_all
-    Recipe.delete_all
+    Referment.delete_all
+    ReferentRelation.delete_all
+    ResultsCache.delete_all
+    Scraper.delete_all
+    Site.delete_all
+    Tag.delete_all
+    TagOwner.delete_all
+    Tagging.delete_all
+    TagsCache.delete_all
+    Tagset.delete_all
+    User.delete_all
+    UserRelation.delete_all
+    Vote.delete_all
     User.super_id = (User.find(User.super_id) rescue User.create(email: 'mesuper@bogus.com')).id
   end
 
