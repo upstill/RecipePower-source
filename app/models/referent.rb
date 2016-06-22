@@ -448,11 +448,14 @@ class Referent < ActiveRecord::Base
   end
 
   def suggests target_ref
-    referments.create(referee: target_ref) unless referments.where(referee_type: 'Referent', referee_id: target_ref.id).exists?
+    target_ref.save unless target_ref.id
+    # author_referents << target_ref unless author_referents.include?(target_ref)
+    referments.create(referee_type: target_ref.class.to_s, referee_id: target_ref.id) unless referments.where(referee_type: target_ref.class.to_s, referee_id: target_ref.id).exists?
+    x=2
   end
 
   def suggests? target_ref
-    referments.exists? referee_type: 'Referent', referee_id: target_ref.id
+    referments.exists? referee_type: target_ref.type, referee_id: target_ref.id
   end
 end
 

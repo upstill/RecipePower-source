@@ -6,37 +6,33 @@
 # url: the url of the page to be examined
 # site: the site being examined, expressed as the name of a method of the scraper model
 # what: the contents that are being sought (a section of the method that scrapes this kind of page)
-# data: a JSON dataset that may be passed down the scrape tree
 class Scraper < ActiveRecord::Base
 
-  attr_accessible :url, :what, :subclass, :data, :run_at, :waittime, :errcode, :recur
-
-  serialize :data
+  attr_accessible :url, :what, :subclass, :run_at, :waittime, :errcode, :recur
 
   attr_accessor :mechanize
-
-  def self.assert url, *args # what, recur=true, data={}
+  @@LaunchedScrapers = {}
+  def self.assert url, *args # what, recur=true
     uri = normalized_uri CGI.unescape(url)
     subclass = (uri.host.capitalize.split('.') << 'Scraper').join('_')
 
     what = subclass.constantize.handler uri
     recur = true
-    data = {}
     args.each do |arg|
       case arg
         when String, Symbol
           what = arg
-        when Hash
-          data = arg
         when TrueClass, FalseClass, nil
           recur = arg
       end
     end
-
-    scraper = self.find_or_initialize_by url: uri.to_s, what: what, subclass: subclass
-    scraper.recur = recur
-    scraper.data = data
-    scraper
+    cache_key = "#{what}:#{uri.to_s}"
+    unless @@LaunchedScrapers[cache_key]
+      @@LaunchedScrapers[cache_key] = true
+      scraper = self.find_or_initialize_by url: uri.to_s, what: what, subclass: subclass
+      scraper.recur = recur
+      scraper
+    end
   end
 
   def ping
@@ -53,7 +49,7 @@ class Scraper < ActiveRecord::Base
   end
 
   def perform_naked
-    STDERR.puts ">> Performing #{what} on #{url}"
+    Rails.logger.info ">> Performing #{what} on #{url}"
 
     self.becomes(subclass.constantize).send what.to_sym
     self.errcode = errors.any? ? -1 : 0 # Successful
@@ -67,14 +63,17 @@ class Scraper < ActiveRecord::Base
   protected
 
   # Pitch the scraper into the DelayedJob queue
-  def queue_up
+  def queue_up bump_time=false
     # Defer till later
-    maxwait = self.class.maximum('waittime') || 1
-    # The strategy here: double the wait time as jobs fail
-    self.waittime = (waittime < maxwait) ? maxwait : (maxwait*2)
-    self.run_at = (self.class.maximum('run_at') || Time.now) + waittime.seconds
-    STDERR.puts "<< Queueing #{what} on #{url} after #{waittime} to run at #{run_at}"
+    if bump_time
+      maxwait = self.class.maximum('waittime') || 1
+      # The strategy here: double the wait time as jobs fail
+      self.waittime = (waittime < maxwait) ? maxwait : (maxwait*2)
+    end
+    self.run_at = ((self.class.maximum('run_at') || Time.now) + waittime.seconds) if bump_time || !run_at
     save
+    Rails.logger.info "<< Queued Scraper ##{id} for #{what} on #{url}"
+    Rails.logger.info "\t\t...after #{waittime} to run at #{run_at}"
     Delayed::Job.enqueue self, priority: 20, run_at: run_at
   end
 
@@ -83,7 +82,7 @@ class Scraper < ActiveRecord::Base
     case rcode
       when 503
         if id
-          queue_up
+          queue_up true
           return
         else
           error = 'Host isn\'t talking at the moment'
@@ -97,16 +96,19 @@ class Scraper < ActiveRecord::Base
   end
 
   # Define a scraper to follow a link or links and return it, for whatever purpose
-  def launch link_or_links, what = nil, data=self.data
-    if what.is_a? Hash
-      what, data = nil, what
+  def launch link_or_links, what = nil, imm=false
+    unless what.is_a?(String) || what.is_a?(Symbol)
+      what, imm = nil, what
     end
     [link_or_links].flatten.compact.collect { |link|
       link = absolutize link # A Mechanize object for a link
-      scraper = Scraper.assert link, what, recur, data
-      (data[:immediate] ? scraper.perform : scraper.queue_up) if recur
-      STDERR.puts "** #{'WOULD BE ' unless recur}Launching #{scraper.what} on #{link}"
-      scraper
+      if scraper = Scraper.assert(link, what, recur)
+        (imm ? scraper.perform : scraper.queue_up) if recur
+        Rails.logger.info "** #{'WOULD BE ' unless recur}Launching #{scraper.what} on #{link}"
+        scraper
+      else
+        Rails.logger.info "XXX ALREADY Launched #{link}"
+      end
     }
   end
 
@@ -132,7 +134,7 @@ class Scraper < ActiveRecord::Base
   def page
     return @page if @page
 
-    STDERR.puts "** Getting page #{url}"
+    Rails.logger.info "** Getting page #{url}"
     mechanize = Mechanize.new
     mechanize.user_agent_alias = 'Mac Safari'
     mechanize
@@ -153,7 +155,7 @@ class Scraper < ActiveRecord::Base
   def find_by_selector selector, attribute_name=nil
     if s = page.search(selector).first
       found = attribute_name ? s.attributes[attribute_name.to_s] : s.text
-      STDERR.puts "!! ...found in #{selector}: '#{found}'"
+      Rails.logger.info "!! ...found in #{selector}: '#{found}'"
       found.to_s
     end
   end
@@ -162,9 +164,9 @@ class Scraper < ActiveRecord::Base
   def propose_recipe recipe_link, extractions
     launch recipe_link
     recipe = CollectibleServices.find_or_create({url: absolutize(recipe_link)}, extractions, Recipe)
-    STDERR.puts "Defined Recipe at #{absolutize recipe_link}:"
-    extractions.each { |key, value| STDERR.puts "        #{key}: '#{value}'" }
-    STDERR.puts ''
+    Rails.logger.info "Defined Recipe at #{absolutize recipe_link}:"
+    extractions.each { |key, value| Rails.logger.info "        #{key}: '#{value}'" }
+    Rails.logger.info ''
     recipe.decorate.findings = FinderServices.findings(extractions) if extractions
     recipe
   end
@@ -189,7 +191,7 @@ class Www_bbc_co_uk_Scraper < Scraper
       when /\A\/food\/ingredients\/by\/letter\/[a-z]\z/
         :bbc_ingredients_by_letter
       when /\A\/food\/[-\w]+\z/
-        uri.fragment == 'related-foods' ? :bbc_related_ingredients : :bbc_ingredient_home_page
+        :bbc_ingredient_home_page
       else
         x=2
     end
@@ -222,14 +224,30 @@ class Www_bbc_co_uk_Scraper < Scraper
           when 'Serves'
             extractions['Yield'] = value.to_s + ' Servings'
         end
-      elsif (cl = hdr.attribute('class')) &&
-          (cl.text.strip == 'icon') &&
-          (link = find_by_selector('a', :href)) &&
-          link.match(/\A\/food\/(\w*)\/([-\w]*)\z/)
-        extractions[$1.capitalize] = $2
+      elsif (cl = hdr.attribute('class')) && (cl.text.strip == 'icon')
+        if (link = hdr.search('a').first) && link['href'].to_s.match(/\A\/food\/(\w*)\/([-\w]*)\z/)
+          bbc_type, name = $1, $2
+          rp_type = case bbc_type
+                      when 'seasons'
+                        name.capitalize!
+                        'Occasion'
+                      else
+                        bbc_type.capitalize.singularize
+                    end
+          if extractions[rp_type].present?
+            extractions[rp_type.pluralize] = "#{extractions.delete rp_type}, #{name}"
+          else
+            extractions[rp_type] = name
+          end
+        else
+          if hdr.search('span.quick-and-easy').first
+            # Icon denoting 'quick and easy recipes'
+            extractions['Total Time'] = 'Under a half hour'
+          end
+        end
       end
     }
-    rcp = propose_recipe recipe_link, extractions.compact
+    propose_recipe recipe_link, extractions.compact
   end
 
   def tag_item li, tagtype=nil
@@ -348,8 +366,8 @@ class Www_bbc_co_uk_Scraper < Scraper
       accordions 'Author' => author_name
     end
     headered_list_items 'div.links-module h2', 'ul' do |hdr_title, li|
-      if hdr_title == 'Elsewhere on the web'
-        TagServices.define author_tag, page_link: 'http://www.bbc.co.uk/nigella' # absolutize(li)
+      if hdr_title.match( 'Elsewhere') && (link = li.search('a').first)
+        TagServices.define author_tag, page_link: absolutize(link)
       end
     end
   end
@@ -357,14 +375,19 @@ class Www_bbc_co_uk_Scraper < Scraper
   # How to process a recipe page due to a search on a tag (after determining the type of tag)
   def bbc_tag_recipes_page tagtype
     tag =
-        if taglink = page.search('div.current-filters li a').first
+        if taglink = page.search('div.current-filters li a').first ||
+            page.search('div#column-1 h2').first
           tagname = taglink.content
-          tagname.downcase! if [ :Dish, :Course, :Diet ].include?(Tag.typesym(tagtype))
-          TagServices.define(tagname,
+          tagname.downcase! if [:Dish, :Course, :Diet].include?(Tag.typesym(tagtype))
+          case Tag.typesym(tagtype)
+            when :Occasion
+              tagname.sub! /\brecipes\b.*/, ''
+          end
+          TagServices.define(tagname.strip,
                              :tagtype => tagtype,
                              :page_link => absolutize(taglink))
         end
-    extractions = { tagtype.to_s => (tag.name if tag) }
+    extractions = {tagtype.to_s => (tag.name if tag)}
     page.search('div#article-list li').each { |li|
       recipe_item li, extractions
     }
@@ -373,7 +396,7 @@ class Www_bbc_co_uk_Scraper < Scraper
   end
 
   def bbc_occasion_recipes_page
-    bbc_tag_recipes_page :Occasion
+     bbc_tag_recipes_page :Occasion
   end
 
   def bbc_technique_recipes_page
@@ -421,6 +444,8 @@ class Www_bbc_co_uk_Scraper < Scraper
               :Dish
             when 'occasions'
               :Occasion
+            when 'ingredients'
+              :Ingredient
             when 'chefs'
               :Author
             when 'programmes'
@@ -437,19 +462,21 @@ class Www_bbc_co_uk_Scraper < Scraper
           end
       if link = li.search('a').first
         link_text = CGI.unescape link['href']
-        if match = link_text.match(/#{key_name_type}(\[[^\]]*\]=|\/)([^&]*)/) ||
-          link_text.match(/\/food\/([-\w]*$)/)
-          tag_id = match[-1]
-          launch absolutize("/food/recipes/search?#{key_name_type}[0]=#{tag_id}")
-          launch absolutize("/food/#{tag_id}"), "bbc_#{key_name_type.singularize}_home_page"
+        tag_id = nil
+        if link_text.match(/\/food\/([-\w]*$)/)
+          tag_id = $1
+        else
+          # Get the last reference to this key_name_type in the link
+          while link_text.sub!(/#{key_name_type}(\[[^\]]*\]=|\/)([^&]*)/, '')
+            tag_id = $2
+          end
         end
+        launch link, :bbc_dish_home_page if tagtype == :Dish  # Dishes' home pages can't be reached via indexing)
+        launch absolutize("/food/recipes/search?#{key_name_type}[0]=#{tag_id}") if tag_id
       else
         x=2
       end
       TagServices.define tagname, :tagtype => Tag.typenum(tagtype) if tagtype
-      unless tagtype
-        x=2
-      end
     end
   end
 
@@ -525,9 +552,8 @@ class Www_bbc_co_uk_Scraper < Scraper
         extractions['Diet'] = diet.strip
       end
 
-      chef_id = data[:chef_id]
       if link = page.link_with(dom_class: 'chef__link')
-        chef_id ||=
+        chef_id =
             if m = link.href.match(/chefs(\[[^\]]*\]=|\/)([^&]*)/)
               m[2].to_s
             end
@@ -554,7 +580,7 @@ class Www_bbc_co_uk_Scraper < Scraper
       hpath = uri.path
       fpath = File.join(dirname, File.basename(hpath) + '.html')
 
-      STDERR.puts "+ #{hpath} => #{fpath}"
+      Rails.logger.info "+ #{hpath} => #{fpath}"
 
       unless File.exist?(fpath)
         # @mechanize.download(hpath, fpath)
@@ -577,13 +603,11 @@ class Www_bbc_co_uk_Scraper < Scraper
 
   def bbc_ingredients_by_letter
     # e.g., http://www.bbc.co.uk/food/ingredients/by/letter/o
-    Tag.all.pluck(:name).each { |name| STDERR.puts name }
+    Tag.all.pluck(:name).each { |name| Rails.logger.info name }
     ingredient_links = page.search('li.resource.food a')
     ingredient_links.each { |link|
       path = link.attribute('href').to_s
-      if path.match(/\A\/food\/[-\w]+#related-foods\z/)
-        launch link
-      else
+      unless path.match(/\A\/food\/[-\w]+#related-foods\z/)
         img_link = link.search('img').first
         tagname = img_link ? img_link.attribute('alt').to_s : link.text.downcase
         TagServices.define tagname,
@@ -597,12 +621,11 @@ class Www_bbc_co_uk_Scraper < Scraper
 
   def bbc_ingredient_home_page
     # e.g., http://www.bbc.co.uk/food/candied_peel
-    unless tagname = data[:ingredient]
+    tagname =
       if link = page.links_with(href: /\/food\/recipes\/search\b.*\bkeywords=/).first
-        tagname = link.href.sub /\/food\/recipes\/search\b.*\bkeywords=([-\w\s]*)/, '\1'
+        link.href.sub /\/food\/recipes\/search\b.*\bkeywords=([-\w\s]*)/, '\1'
       end
-    end
-    STDERR.puts "...identified tag '#{tagname}' for #{url}"
+    Rails.logger.info "...identified tag '#{tagname}' for #{url}"
     ingredient_tag = TagServices.define(tagname,
                                         :tagtype => :Ingredient,
                                         :page_link => url,
@@ -637,10 +660,6 @@ class Www_bbc_co_uk_Scraper < Scraper
     accordions 'Ingredients' => tagname
   end
 
-  def bbc_related_ingredients
-
-  end
-
   def bbc_techniques_page
     header_tag_services = nil
     headered_list_items 'dl dt', 'dd' do |header_name, li|
@@ -654,7 +673,7 @@ class Www_bbc_co_uk_Scraper < Scraper
       tech_link = li.search('a').first
       tag_name = tech_link.text.strip
       page_link = absolutize tech_link.attribute('href').to_s
-      STDERR.puts "Found '#{tag_name}' -> #{page_link}"
+      Rails.logger.info "Found '#{tag_name}' -> #{page_link}"
       tag = TagServices.define  tag_name,
                                 tagtype: 'Process',
                                 page_link: page_link
@@ -670,12 +689,11 @@ class Www_bbc_co_uk_Scraper < Scraper
       if img_link = season_link.css('img').attribute('src')
         img_link = absolutize img_link.to_s
       end
-      STDERR.puts "Found '#{tag_name}' -> #{page_link} and image link #{img_link}"
+      Rails.logger.info "Found '#{tag_name}' -> #{page_link} and image link #{img_link}"
       TagServices.define tag_name,
                          tagtype: 'Genre',
                          page_link: page_link,
                          image_link: img_link
-      launch page_link
       launch page_link
     }
   end
@@ -685,7 +703,7 @@ class Www_bbc_co_uk_Scraper < Scraper
       tag_name = season_link.css('span.season-name').text
       page_link = absolutize season_link.attribute('href').to_s
       img_link = season_link.css('img').attribute('src').to_s
-      STDERR.puts "Found '#{tag_name}' -> #{page_link} and image link #{img_link}"
+      Rails.logger.info "Found '#{tag_name}' -> #{page_link} and image link #{img_link}"
       tag = Tag.assert tag_name, tagtype: 'Occasion'
       Referent.express(tag) if tag.referents.empty?
       dr = Reference.assert page_link, tag, :Definition
@@ -754,15 +772,19 @@ class Www_bbc_co_uk_Scraper < Scraper
     accordions 'List' => list_name
   end
 
+  def bbc_define_collection cname, home_link, image_link=nil
+    list = List.assert cname.strip + ' (BBC Food)', User.superuser
+    list.picurl = absolutize image_link if image_link
+    list.save
+    launch home_link, :bbc_collection_home_page
+  end
+
   def bbc_recipes_page
     page.search('div.recipe-collections__list a').each { |collection_link|
-      cname = collection_link.search('div.recipe-collections__title').first.text.strip + ' (BBC Food)'
-      list = List.assert cname, User.superuser
-      if cpic = collection_link.search('img').first
-        list.picurl = absolutize cpic.attribute('src')
-      end
-      list.save
-      launch collection_link.attribute('href')
+      cpic = collection_link.search('img').first
+      bbc_define_collection collection_link.search('div.recipe-collections__title').first.text,
+                            collection_link.attribute('href'),
+                            (cpic.attribute('src') if cpic)
     }
   end
 
@@ -921,7 +943,7 @@ class Www_bbc_co_uk_Scraper < Scraper
           image_link: absolutize(img_link)
       }.compact
       TagServices.define occ_name.to_s, definitions
-      launch occ_link, 'Occasion' => occ_name
+      launch occ_link
     }
   end
 
@@ -933,8 +955,16 @@ class Www_bbc_co_uk_Scraper < Scraper
       launch seemore
     end
     accordions 'Occasion' => occ_name
+    occ_svcs = nil
+    page.search('div#related-collections li a').each { |alink|
+      imglink = alink.search('img')
+      bbc_define_collection alink.text.strip, alink['href'], ((imglink.attribute 'src') if imglink)
+    }
     headered_list_items 'div.related-resources-module h3' do |resource_type, li|
-      define_linked_tag resource_type, li
+      if related_tag = define_linked_tag(resource_type, li)
+        occ_svcs ||= TagServices.new(occ_tag)
+        occ_svcs.suggests related_tag
+      end
     end
   end
 

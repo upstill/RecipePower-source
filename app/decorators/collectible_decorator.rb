@@ -52,6 +52,9 @@ class CollectibleDecorator < Draper::Decorator
     if self.is_a? Recipe
       self.prep_time = findings.result_for('Prep Time') if findings.result_for('Prep Time').present?
       self.cook_time = findings.result_for('Cooking Time') if findings.result_for('Cooking Time').present?
+      if findings.result_for('Total Time').present?
+        Tag.assert (self.total_time = findings.result_for('Total Time')), :tagtype => :Time
+      end
       self.yield = findings.result_for('Yield') if findings.result_for('Yield').present?
     end
     if findings.result_for('Image').present? && self.image.blank?
@@ -71,14 +74,16 @@ class CollectibleDecorator < Draper::Decorator
         'List' => 'List',
         'Ingredient' => 'Ingredient'
     }.each { |label, type|
-      plurlabel = label.pluralize
-      if tagstring = (findings.result_for(label) || findings.result_for(plurlabel))
+      if tagstrings =
+          if tagstring = findings.result_for(label)
+            [ tagstring ]
+          elsif tagstring = findings.result_for(label.pluralize)
+            tagstring.split(',').map(&:strip)
+          end
         ts ||= TaggingServices.new object
-        if label == plurlabel
-          tagstring.split(',').map(&:strip).each { |tagname| ts.tag_with tagname, User.super_id, { type: type }.compact }
-        else
-          ts.tag_with tagstring, User.super_id, { type: type }.compact
-        end
+        tagstrings.each { |tagname|
+          ts.tag_with tagname, User.super_id, {type: type}.compact
+        }
       end
     }
 =begin
@@ -107,7 +112,7 @@ class CollectibleDecorator < Draper::Decorator
       tagstring.split(',').map(&:strip).each { |tagname| ts.tag_with tagname, User.super_id, type: 'Ingredient' }
     end
 =end
-    end
+  end
 
   # The robotags are those owned by super
   def robotags

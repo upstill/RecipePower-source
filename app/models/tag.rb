@@ -21,7 +21,8 @@ class Tag < ActiveRecord::Base
            Question: ['Question', 15],
            List: ['List', 16],
            Epitaph: ['Epitaph', 17],
-           Course: ['Course', 18]
+           Course: ['Course', 18],
+           Time: ['Time', 19]
   )
 
   attr_accessible :name, :id, :tagtype, :isGlobal, :links, :referents, :users, :owners, :primary_meaning # , :recipes
