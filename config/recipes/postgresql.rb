@@ -48,7 +48,7 @@ Couldn't figure out how to use sudo with another user
       # sudo "curl --silent -o /tmp/latest.dump '#{fetch :postgresql_dburl}'"
       # execute "pg_restore --no-password --verbose --clean --no-acl --no-owner -h #{fetch :postgresql_host} -U #{fetch :postgresql_user} -d #{fetch :postgresql_database} /tmp/latest.dump ; true"
       run_and_show 'whoami'
-      run_and_show '/usr/bin/heroku --version'
+      run_and_show '/usr/local/bin/heroku --version'
       run_and_show 'echo $AWS_ACCESS_KEY_ID'
       dburl = run_and_show "heroku pg:backups public-url --app strong-galaxy-5765"
       # NB: since the Heroku toolbelt doesn't work in this context, it's necessary to provide the backup url
