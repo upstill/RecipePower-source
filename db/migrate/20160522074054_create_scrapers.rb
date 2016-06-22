@@ -1,6 +1,6 @@
 class CreateScrapers < ActiveRecord::Migration
   def change
-    create_table :scrapers do |t|
+    create_table :scrapers, :force => true do |t|
       t.string :url
       t.string :what
       t.string :subclass, default: 'Scraper'
