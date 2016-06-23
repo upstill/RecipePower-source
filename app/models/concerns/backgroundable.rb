@@ -18,6 +18,7 @@ module Backgroundable
   def bkg_enqueue force=false
     # force => do the job even if it was priorly complete
     if virgin? || (force && !(pending? || processing?)) # Don't add it to the queue redundantly
+      save unless id
       Delayed::Job.enqueue self
     end
     pending?

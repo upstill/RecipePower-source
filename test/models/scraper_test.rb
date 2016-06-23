@@ -344,6 +344,7 @@ class ScraperTest < ActiveSupport::TestCase
     scraper.recur = true
     scraper.perform_naked
     assert_equal 9, Scraper.count
+    assert_equal 0, ImageReference.count
   end
 
   test 'bbc_chefs_atoz_page' do

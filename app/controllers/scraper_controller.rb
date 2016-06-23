@@ -45,6 +45,8 @@ class ScraperController < ApplicationController
       # User.delete_all
       # UserRelation.delete_all
       Vote.delete_all
+      sql = 'DELETE FROM delayed_jobs;'
+      ActiveRecord::Base.connection.execute(sql)
       render json: { popup: 'Database is initialized and ready for scraping.' }
     end
   end

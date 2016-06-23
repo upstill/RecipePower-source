@@ -214,17 +214,17 @@ ActiveRecord::Schema.define(version: 20160620172832) do
   end
 
   create_table "recipes", force: :cascade do |t|
-    t.string   "title",          limit: 255
+    t.string   "title",           limit: 255
     t.datetime "created_at"
     t.datetime "updated_at"
     t.text     "description"
     t.integer  "picture_id"
     t.string   "prep_time"
     t.string   "cook_time"
-    t.integer  "prep_time_low",              default: 0
-    t.integer  "prep_time_high",             default: 0
-    t.integer  "cook_time_low",              default: 0
-    t.integer  "cook_time_high",             default: 0
+    t.integer  "prep_time_low",               default: 0
+    t.integer  "prep_time_high",              default: 0
+    t.integer  "cook_time_low",               default: 0
+    t.integer  "cook_time_high",              default: 0
     t.string   "yield"
   end
 
