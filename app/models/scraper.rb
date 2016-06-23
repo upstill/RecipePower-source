@@ -12,6 +12,12 @@ class Scraper < ActiveRecord::Base
 
   attr_accessor :mechanize
   @@LaunchedScrapers = {}
+
+  def self.clear_all
+    Scraper.delete_all
+    @@LaunchedScrapers = {}
+  end
+
   def self.assert url, *args # what, recur=true
     uri = normalized_uri CGI.unescape(url)
     subclass = (uri.host.capitalize.split('.') << 'Scraper').join('_')
@@ -60,8 +66,6 @@ class Scraper < ActiveRecord::Base
     subclass.constantize.handler url
   end
 
-  protected
-
   # Pitch the scraper into the DelayedJob queue
   def queue_up bump_time=false
     # Defer till later
@@ -76,6 +80,8 @@ class Scraper < ActiveRecord::Base
     Rails.logger.info "\t\t...after #{waittime} to run at #{run_at}"
     Delayed::Job.enqueue self, priority: 20, run_at: run_at
   end
+
+  protected
 
   def fail error
     rcode = error.respond_to?(:response_code) ? error.response_code.to_i : -1

@@ -7,7 +7,7 @@ class ScraperController < ApplicationController
 
   def create
     @scraper = Scraper.assert params[:scraper][:url], (params[:scraper][:recur] == '1')
-    @scraper.perform_naked
+    @scraper.queue_up # perform_naked
     if resource_errors_to_flash @scraper
       smartrender :action => :new
     else
@@ -34,7 +34,7 @@ class ScraperController < ApplicationController
       Referment.delete_all
       ReferentRelation.delete_all
       ResultsCache.delete_all
-      Scraper.delete_all
+      Scraper.clear_all
       Site.delete_all
       TagSelection.delete_all
       Tag.delete_all

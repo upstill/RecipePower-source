@@ -540,6 +540,7 @@ class ScraperTest < ActiveSupport::TestCase
     ingredient_tags.each { |it|
       assert tag_names.include?(it.name)
       assert (it.recipes.to_a == [r])
+      assert Tag.find(it.id)
     }
   end
 
