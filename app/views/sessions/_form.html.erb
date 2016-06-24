@@ -3,7 +3,11 @@
         <div class="signin">
           <strong>Sign in with a password:</strong><br>
           <%# form_errors_helper f, resource %>
-          <%= flash_all(false) %>
+          <% if (flashes = flash_all(false)).present? %>
+              <%= flashes %>
+          <% else %>
+              <%= flash_notifications_div 'flash_notifications', false %>
+          <% end %>
           <div class="signin_credentials">
             <%= f.label :login, "Username or Email".html_safe, class: "signin_element" %>
             <%= f.text_field :login, class: "signin_element" %>

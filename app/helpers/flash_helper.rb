@@ -4,7 +4,7 @@
 module FlashHelper
 
   # Emit the flash_notifications for the page in a div.
-  def flash_notifications_div cssclass = "flash_notifications", for_bootstrap = true
+  def flash_notifications_div cssclass = 'flash_notifications', for_bootstrap = true
     content_tag :div, flash_all(for_bootstrap), class: cssclass
   end
   

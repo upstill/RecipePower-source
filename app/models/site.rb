@@ -1,5 +1,6 @@
 # encoding: UTF-8
 require './lib/uri_utils.rb'
+require 'referent.rb'
 
 class Site < ActiveRecord::Base
   include Collectible

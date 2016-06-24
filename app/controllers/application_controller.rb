@@ -350,7 +350,10 @@ class ApplicationController < ActionController::Base
     unless logged_in?
       summary = action_summary params[:controller], params[:action]
       alert = "You need to be logged in to an account on RecipePower to #{summary}."
-      reset_session unless session.id
+      unless session.id
+        reset_session
+        response_service.uuid = session.id
+      end
       if session.id || true
         defer_request path: request.fullpath, format: format||request.format.symbol
         redirect_to(if (response_service.format == :json)

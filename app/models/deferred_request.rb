@@ -35,7 +35,7 @@ class DeferredRequest < ActiveRecord::Base
         (defreqs = self.find_by(session_id: sessid)) &&
         (ix = defreqs.requests.rindex { |req|
           req = YAML::load(req)
-          [:format, :mode].all? { |key| !specs[key] || (req[key] == specs[key]) }
+          specs.slice(:format, :mode).all? { |key, spec_val| req[key] == spec_val }
         })
       req = YAML::load(defreqs.requests.delete_at ix)
       defreqs.requests.empty? ? defreqs.destroy : defreqs.save

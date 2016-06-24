@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160620172832) do
+ActiveRecord::Schema.define(version: 20160610173507) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -221,10 +221,13 @@ ActiveRecord::Schema.define(version: 20160620172832) do
     t.integer  "picture_id"
     t.string   "prep_time"
     t.string   "cook_time"
+    t.string   "total_time"
     t.integer  "prep_time_low",               default: 0
     t.integer  "prep_time_high",              default: 0
     t.integer  "cook_time_low",               default: 0
     t.integer  "cook_time_high",              default: 0
+    t.integer  "total_time_low",              default: 0
+    t.integer  "total_time_high",             default: 0
     t.string   "yield"
   end
 
@@ -312,7 +315,7 @@ ActiveRecord::Schema.define(version: 20160620172832) do
     t.integer  "user_id"
   end
 
-  create_table "scrapers", id: :bigserial, force: :cascade do |t|
+  create_table "scrapers", force: :cascade do |t|
     t.string   "url"
     t.string   "what"
     t.string   "subclass",   default: "Scraper"
