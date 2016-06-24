@@ -10,6 +10,27 @@
                 label: 'How to process page',
                 placeholder: 'e.g, \'chefs\', \'atoz_page\', \'stash_page\', \'chef_page\'',
                 input_html: {cols: 30, rows: 1, 'data-type' => 'json'} %>
-    <%= f.input :recur, inline_label: 'Follow links' %>
+    <%# f.input :recur, inline_label: 'Follow links' %>
+    <div class="row">
+      <div class="col-md-6">
+        <%= f.input :recur,
+                    :collection => [[true, 'Follow links'], [false, 'This page only']],
+                    :label => 'How to run',
+                    :label_method => :last,
+                    :value_method => :first,
+                    :as => :radio_buttons,
+                    :item_wrapper_class => 'inline' %>
+      </div>
+      <div class="col-md-6">
+        <%= f.input :immediate,
+                    :collection => [[true, 'Do it now'], [false, 'Queue it up']],
+                    :label => 'When to execute',
+                    :label_method => :last,
+                    :value_method => :first,
+                    :as => :radio_buttons,
+                    :item_wrapper_class => 'inline',
+                    :checked => false %>
+      </div>
+    </div>
     <%= form_actions f, submit_label: 'Scrape It!' %>
 <% end %>

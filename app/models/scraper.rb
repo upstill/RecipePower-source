@@ -9,6 +9,7 @@
 class Scraper < ActiveRecord::Base
 
   attr_accessible :url, :what, :subclass, :run_at, :waittime, :errcode, :recur
+  attr_accessor :immediate
 
   attr_accessor :mechanize
   @@LaunchedScrapers = {}

@@ -2,13 +2,16 @@ class ScraperController < ApplicationController
   before_filter :login_required
 
   def new
-    @scraper = Scraper.new recur: false
+    @scraper = Scraper.new recur: true
   end
 
   def create
-    @scraper = Scraper.assert params[:scraper][:url], (params[:scraper][:recur] == '1')
-    # @scraper.queue_up
-    @scraper.perform_naked
+    @scraper = Scraper.assert params[:scraper][:url], (params[:scraper][:recur] == 'true')
+    if params[:scraper][:immediate] == 'true'
+      @scraper.perform_naked
+    else
+      @scraper.queue_up
+    end
     if resource_errors_to_flash @scraper
       smartrender :action => :new
     else
