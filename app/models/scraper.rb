@@ -56,7 +56,7 @@ class Scraper < ActiveRecord::Base
   end
 
   def perform_naked
-    Rails.logger.info ">> Performing #{what} on #{url}"
+    Rails.logger.info "!!!Scraper Performing #{what} on #{url}"
 
     self.becomes(subclass.constantize).send what.to_sym
     self.errcode = errors.any? ? -1 : 0 # Successful
@@ -77,8 +77,7 @@ class Scraper < ActiveRecord::Base
     end
     self.run_at = ((self.class.maximum('run_at') || Time.now) + waittime.seconds) if bump_time || !run_at
     save
-    Rails.logger.info "<< Queued Scraper ##{id} for #{what} on #{url}"
-    Rails.logger.info "\t\t...after #{waittime} to run at #{run_at}"
+    Rails.logger.info "!!!Scraper Queued Scraper ##{id} for #{what} on #{url} after #{waittime} to run at #{run_at}"
     Delayed::Job.enqueue self, priority: 20, run_at: run_at
   end
 
@@ -111,10 +110,10 @@ class Scraper < ActiveRecord::Base
       link = absolutize link # A Mechanize object for a link
       if scraper = Scraper.assert(link, what, recur)
         (imm ? scraper.perform : scraper.queue_up) if recur
-        Rails.logger.info "** #{'WOULD BE ' unless recur}Launching #{scraper.what} on #{link}"
+        Rails.logger.info "!!!Scraper #{'WOULD BE ' unless recur}Launching #{scraper.what} on #{link}"
         scraper
       else
-        Rails.logger.info "XXX ALREADY Launched #{link}"
+        Rails.logger.info "!!!Scraper ALREADY Launched #{link}"
       end
     }
   end
@@ -141,7 +140,7 @@ class Scraper < ActiveRecord::Base
   def page
     return @page if @page
 
-    Rails.logger.info "** Getting page #{url}"
+    Rails.logger.info "!!!Scraper Getting page #{url}"
     mechanize = Mechanize.new
     mechanize.user_agent_alias = 'Mac Safari'
     mechanize
@@ -162,7 +161,6 @@ class Scraper < ActiveRecord::Base
   def find_by_selector selector, attribute_name=nil
     if s = page.search(selector).first
       found = attribute_name ? s.attributes[attribute_name.to_s] : s.text
-      Rails.logger.info "!! ...found in #{selector}: '#{found}'"
       found.to_s
     end
   end
@@ -171,8 +169,8 @@ class Scraper < ActiveRecord::Base
   def propose_recipe recipe_link, extractions
     launch recipe_link
     recipe = CollectibleServices.find_or_create({url: absolutize(recipe_link)}, extractions, Recipe)
-    Rails.logger.info "Defined Recipe at #{absolutize recipe_link}:"
-    extractions.each { |key, value| Rails.logger.info "        #{key}: '#{value}'" }
+    Rails.logger.info "!!!Scraper Defined Recipe at #{absolutize recipe_link}:"
+    extractions.each { |key, value| Rails.logger.info "!!!Scraper Defined Recipe        #{key}: '#{value}'" }
     Rails.logger.info ''
     recipe.decorate.findings = FinderServices.findings(extractions) if extractions
     recipe
@@ -589,8 +587,6 @@ class Www_bbc_co_uk_Scraper < Scraper
       hpath = uri.path
       fpath = File.join(dirname, File.basename(hpath) + '.html')
 
-      Rails.logger.info "+ #{hpath} => #{fpath}"
-
       unless File.exist?(fpath)
         # @mechanize.download(hpath, fpath)
         if ref = Reference.lookup_by_url('RecipeReference', url).first
@@ -612,7 +608,6 @@ class Www_bbc_co_uk_Scraper < Scraper
 
   def bbc_ingredients_by_letter
     # e.g., http://www.bbc.co.uk/food/ingredients/by/letter/o
-    Tag.all.pluck(:name).each { |name| Rails.logger.info name }
     ingredient_links = page.search('li.resource.food a')
     ingredient_links.each { |link|
       path = link.attribute('href').to_s
@@ -634,7 +629,7 @@ class Www_bbc_co_uk_Scraper < Scraper
       if link = page.links_with(href: /\/food\/recipes\/search\b.*\bkeywords=/).first
         link.href.sub /\/food\/recipes\/search\b.*\bkeywords=([-\w\s]*)/, '\1'
       end
-    Rails.logger.info "...identified tag '#{tagname}' for #{url}"
+    Rails.logger.info "!!!Scraper Defined Tag '#{tagname}' for #{url}"
     ingredient_tag = TagServices.define(tagname,
                                         :tagtype => :Ingredient,
                                         :page_link => url,
@@ -682,7 +677,7 @@ class Www_bbc_co_uk_Scraper < Scraper
       tech_link = li.search('a').first
       tag_name = tech_link.text.strip
       page_link = absolutize tech_link.attribute('href').to_s
-      Rails.logger.info "Found '#{tag_name}' -> #{page_link}"
+      Rails.logger.info "!!!Scraper Defined Tag Link for '#{tag_name}' -> #{page_link}"
       tag = TagServices.define  tag_name,
                                 tagtype: 'Process',
                                 page_link: page_link
@@ -698,7 +693,7 @@ class Www_bbc_co_uk_Scraper < Scraper
       if img_link = season_link.css('img').attribute('src')
         img_link = absolutize img_link.to_s
       end
-      Rails.logger.info "Found '#{tag_name}' -> #{page_link} and image link #{img_link}"
+      Rails.logger.info "!!!Scraper Defined Tag '#{tag_name}' -> #{page_link} and image link #{img_link}"
       TagServices.define tag_name,
                          tagtype: 'Genre',
                          page_link: page_link,
@@ -712,7 +707,7 @@ class Www_bbc_co_uk_Scraper < Scraper
       tag_name = season_link.css('span.season-name').text
       page_link = absolutize season_link.attribute('href').to_s
       img_link = season_link.css('img').attribute('src').to_s
-      Rails.logger.info "Found '#{tag_name}' -> #{page_link} and image link #{img_link}"
+      Rails.logger.info "!!!Scraper Defined Tag '#{tag_name}' -> #{page_link} and image link #{img_link}"
       tag = Tag.assert tag_name, tagtype: 'Occasion'
       Referent.express(tag) if tag.referents.empty?
       dr = Reference.assert page_link, tag, :Definition
