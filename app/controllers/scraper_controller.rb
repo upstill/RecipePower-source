@@ -7,7 +7,8 @@ class ScraperController < ApplicationController
 
   def create
     @scraper = Scraper.assert params[:scraper][:url], (params[:scraper][:recur] == '1')
-    @scraper.queue_up # perform_naked
+    # @scraper.queue_up
+    @scraper.perform_naked
     if resource_errors_to_flash @scraper
       smartrender :action => :new
     else

@@ -477,8 +477,10 @@ class Www_bbc_co_uk_Scraper < Scraper
             tag_id = $2
           end
         end
-        launch link, :bbc_dish_home_page if tagtype == :Dish  # Dishes' home pages can't be reached via indexing)
-        launch absolutize("/food/recipes/search?#{key_name_type}[0]=#{tag_id}") if tag_id
+        if tag_id
+          launch absolutize("/food/#{tag_id}"), :bbc_dish_home_page if tagtype == :Dish  # Most home pages can be reached via indexing, but not Dishes'
+          launch absolutize("/food/recipes/search?#{key_name_type}[0]=#{tag_id}")
+        end
       else
         x=2
       end
