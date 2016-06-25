@@ -7,23 +7,25 @@
 # site: the site being examined, expressed as the name of a method of the scraper model
 # what: the contents that are being sought (a section of the method that scrapes this kind of page)
 class Scraper < ActiveRecord::Base
+  include Backgroundable
+
+  backgroundable :status
 
   attr_accessible :url, :what, :subclass, :run_at, :waittime, :errcode, :recur
   attr_accessor :immediate
 
   attr_accessor :mechanize
-  @@LaunchedScrapers = {}
+  # @@LaunchedScrapers = {}
 
   def self.clear_all
     Scraper.delete_all
-    @@LaunchedScrapers = {}
+    # @@LaunchedScrapers = {}
   end
 
   def self.assert url, *args # what, recur=true
     uri = normalized_uri CGI.unescape(url)
     subclass = (uri.host.capitalize.split('.') << 'Scraper').join('_')
 
-    what = subclass.constantize.handler uri
     recur = true
     args.each do |arg|
       case arg
@@ -33,13 +35,25 @@ class Scraper < ActiveRecord::Base
           recur = arg
       end
     end
-    cache_key = "#{what}:#{uri.to_s}"
-    unless @@LaunchedScrapers[cache_key]
-      @@LaunchedScrapers[cache_key] = true
+    what ||= subclass.constantize.handler uri
+
+=begin
+    # cache_key = "#{what}:#{uri.to_s}"
+    # unless @@LaunchedScrapers[cache_key]
+      # @@LaunchedScrapers[cache_key] = true
       scraper = self.find_or_initialize_by url: uri.to_s, what: what, subclass: subclass
       scraper.recur = recur
       scraper
+    # end
+=end
+    if scraper = self.find_by(url: uri.to_s, what: what, subclass: subclass)
+      Rails.logger.info "!!!Scraper ALREADY Defined for #{uri}"
+    else
+      scraper = self.new url: uri.to_s, what: what, subclass: subclass
+      Rails.logger.info "!!!Scraper #{'WOULD BE ' unless recur}Defined for '#{scraper.what}' on #{uri}"
     end
+    scraper.recur = recur
+    scraper
   end
 
   def ping
@@ -48,13 +62,23 @@ class Scraper < ActiveRecord::Base
 
   # perform with error catching
   def perform
-    begin
-      perform_naked
-    rescue Exception => e
-      fail e
+    bkg_execute do
+      Rails.logger.info "!!!Scraper Performing #{what} on #{url}"
+
+      self.becomes(subclass.constantize).send what.to_sym
+      self.errcode = errors.any? ? -1 : 0 # Successful
+      save
+      !errors.any?
     end
   end
 
+  # Handle performance errors
+  def error(job, exception)
+    fail exception
+    super
+  end
+
+=begin
   def perform_naked
     Rails.logger.info "!!!Scraper Performing #{what} on #{url}"
 
@@ -62,6 +86,7 @@ class Scraper < ActiveRecord::Base
     self.errcode = errors.any? ? -1 : 0 # Successful
     save
   end
+=end
 
   def handler
     subclass.constantize.handler url
@@ -78,7 +103,8 @@ class Scraper < ActiveRecord::Base
     self.run_at = ((self.class.maximum('run_at') || Time.now) + waittime.seconds) if bump_time || !run_at
     save
     Rails.logger.info "!!!Scraper Queued Scraper ##{id} for #{what} on #{url} after #{waittime} to run at #{run_at}"
-    Delayed::Job.enqueue self, priority: 20, run_at: run_at
+    # Delayed::Job.enqueue self
+    bkg_enqueue true, priority: 20, run_at: run_at
   end
 
   protected
@@ -108,13 +134,9 @@ class Scraper < ActiveRecord::Base
     end
     [link_or_links].flatten.compact.collect { |link|
       link = absolutize link # A Mechanize object for a link
-      if scraper = Scraper.assert(link, what, recur)
-        (imm ? scraper.perform : scraper.queue_up) if recur
-        Rails.logger.info "!!!Scraper #{'WOULD BE ' unless recur}Launching #{scraper.what} on #{link}"
-        scraper
-      else
-        Rails.logger.info "!!!Scraper ALREADY Launched #{link}"
-      end
+      scraper = Scraper.assert link, what, recur
+      (imm ? scraper.bkg_sync : scraper.queue_up) if recur
+      scraper
     }
   end
 
@@ -450,6 +472,7 @@ class Www_bbc_co_uk_Scraper < Scraper
             when 'occasions'
               :Occasion
             when 'ingredients'
+              tagname.downcase!
               :Ingredient
             when 'chefs'
               :Author
@@ -629,6 +652,7 @@ class Www_bbc_co_uk_Scraper < Scraper
       if link = page.links_with(href: /\/food\/recipes\/search\b.*\bkeywords=/).first
         link.href.sub /\/food\/recipes\/search\b.*\bkeywords=([-\w\s]*)/, '\1'
       end
+    tagname.downcase!
     Rails.logger.info "!!!Scraper Defined Tag '#{tagname}' for #{url}"
     ingredient_tag = TagServices.define(tagname,
                                         :tagtype => :Ingredient,
@@ -646,13 +670,13 @@ class Www_bbc_co_uk_Scraper < Scraper
         end
         case related_section.text.strip
           when /^Varieties/
-            TagServices.define(definition_name,
+            TagServices.define(definition_name.downcase,
                                :tagtype => :Ingredient,
                                :page_link => absolutize(definition_link),
                                :image_link => img_link,
                                :kind_of => ingredient_tag)
           when /^Typically made with/
-            TagServices.define(definition_name,
+            TagServices.define(definition_name.downcase,
                                :tagtype => :Dish,
                                :page_link => absolutize(definition_link),
                                :image_link => img_link,
@@ -802,7 +826,7 @@ class Www_bbc_co_uk_Scraper < Scraper
                                     :page_link => author_page,
                                     :image_link => author_pic_link
 
-    technique_name = page.search('div#column-1 h1').text.strip.downcase
+    technique_name = page.search('div#column-1 h1').text.strip
     technique_tag = TagServices.define technique_name,
                                        :tagtype => :Process,
                                        :page_link => url,
@@ -919,11 +943,6 @@ class Www_bbc_co_uk_Scraper < Scraper
                                    :tagtype => :Occasion,
                                    :page_link => url)
     accordions 'Occasion' => month_name
-=begin
-    if seemore = find_by_selector('p.see-more a.see-all-search', :href)
-      launch seemore
-    end
-=end
     page.search('div#related-ingredients li a').each { |page_link|
       ingred_tag = TagServices.define( page_link.text.downcase,
                                        :tagtype => :Ingredient,

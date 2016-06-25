@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160610173507) do
+ActiveRecord::Schema.define(version: 20160624225215) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -319,13 +319,13 @@ ActiveRecord::Schema.define(version: 20160610173507) do
     t.string   "url"
     t.string   "what"
     t.string   "subclass",   default: "Scraper"
-    t.text     "data"
     t.boolean  "recur",      default: true
     t.datetime "run_at"
     t.integer  "waittime",   default: 1
     t.integer  "errcode",    default: 0
     t.datetime "created_at",                     null: false
     t.datetime "updated_at",                     null: false
+    t.integer  "status",     default: 0
   end
 
   create_table "sites", force: :cascade do |t|

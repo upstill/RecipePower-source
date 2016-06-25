@@ -8,7 +8,7 @@ class ScraperController < ApplicationController
   def create
     @scraper = Scraper.assert params[:scraper][:url], (params[:scraper][:recur] == 'true')
     if params[:scraper][:immediate] == 'true'
-      @scraper.perform_naked
+      @scraper.bkg_sync(true) # perform_naked
     else
       @scraper.queue_up
     end

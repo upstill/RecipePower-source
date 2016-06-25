@@ -15,11 +15,14 @@ module Backgroundable
   end
 
   # Fire off worker process to glean results, if needed
-  def bkg_enqueue force=false
+  def bkg_enqueue force=false, djopts = {}
+    if force.is_a?(Hash)
+      force, djopts = false, force
+    end
     # force => do the job even if it was priorly complete
     if virgin? || (force && !(pending? || processing?)) # Don't add it to the queue redundantly
       save unless id
-      Delayed::Job.enqueue self
+      Delayed::Job.enqueue self, djopts
     end
     pending?
   end
