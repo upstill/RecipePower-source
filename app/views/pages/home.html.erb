@@ -24,7 +24,7 @@
       <p class="panel-description">A tool to create, contribute to and discover<br/>communities focused on specific
         interests.</p>
     </div>
-    <%= render 'lists/pano', list: List.find(660) %>
+    <%= render 'lists/pano', list: List.find_by(id: 660) %>
   </section>
   <section class="snap-panel panel-three">
     <div class="panel-elements">
@@ -32,7 +32,7 @@
       <p class="panel-subtitle">New ideas come to you.</p>
       <p class="panel-description">Subscribe to food blogs and columns <br/>from all over the world.</p>
     </div>
-    <%= render 'lists/pano', list: List.find(661) %>
+    <%= render 'lists/pano', list: List.find_by(id: 661) %>
   </section>
   <section class="snap-panel panel-three">
     <div class="panel-elements">
@@ -41,7 +41,7 @@
       <p class="panel-description">Clip and save the best recipes you've found <br/>on the web, and share them around
         here.</p>
     </div>
-    <%= render 'lists/pano', list: List.find(658)  %>
+    <%= render 'lists/pano', list: List.find_by(id: 658)  %>
   </section>
   <section class="snap-panel panel-four">
     <div class="panel-elements">
@@ -49,6 +49,6 @@
       <p class="panel-subtitle">Join our community of dessert<br/>bakers & dinner party makers.</p>
       <p class="panel-description">Invite your real life sous chefs<br/>and hear about what they're cooking up.</p>
     </div>
-    <%= render 'lists/pano', list: List.find(659) %>
+    <%= render 'lists/pano', list: List.find_by(id: 659) %>
   </section>
 </div>
