@@ -74,9 +74,24 @@ class Scraper < ActiveRecord::Base
   end
 
   # Handle performance errors
-  def error(job, exception)
-    fail exception
-    super
+  def error job, exception
+    rcode = exception.respond_to?(:response_code) ? exception.response_code.to_i : -1
+    case rcode
+      when 503
+        if id
+          virgin!
+          queue_up true
+          return
+        else
+          exception = 'Host isn\'t talking at the moment'
+        end
+      when 404
+        exception = 'doesn\'t point to anything!'
+    end
+    self.errcode = rcode
+    errors.add :url, exception.to_s
+    bad!
+    save if id
   end
 
 =begin
@@ -95,6 +110,7 @@ class Scraper < ActiveRecord::Base
 
   # Pitch the scraper into the DelayedJob queue
   def queue_up bump_time=false
+    return if good?
     # Defer till later
     if bump_time
       maxwait = self.class.maximum('waittime') || 1
@@ -111,21 +127,6 @@ class Scraper < ActiveRecord::Base
   protected
 
   def fail error
-    rcode = error.respond_to?(:response_code) ? error.response_code.to_i : -1
-    case rcode
-      when 503
-        if id
-          queue_up true
-          return
-        else
-          error = 'Host isn\'t talking at the moment'
-        end
-      when 404
-        error = 'doesn\'t point to anything!'
-    end
-    self.errcode = rcode
-    errors.add :url, error.to_s
-    save if id
   end
 
   # Define a scraper to follow a link or links and return it, for whatever purpose
@@ -136,7 +137,7 @@ class Scraper < ActiveRecord::Base
     [link_or_links].flatten.compact.collect { |link|
       link = absolutize link # A Mechanize object for a link
       scraper = Scraper.assert link, what, recur
-      (imm ? scraper.bkg_sync : scraper.queue_up) if recur && !scraper.good? # Don't rerun redundantly
+      (imm ? scraper.bkg_sync : scraper.queue_up) if recur # Don't rerun redundantly
       scraper
     }
   end
