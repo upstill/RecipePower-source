@@ -55,6 +55,7 @@ class Scraper < ActiveRecord::Base
       scraper.bump_time
     end
     scraper.recur = recur
+    scraper.save
     scraper
   end
 
