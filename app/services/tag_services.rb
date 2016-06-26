@@ -117,23 +117,23 @@ class TagServices
           '(no reference)'
         end
     unless tag_or_tagname.is_a?(Tag)
-      msg = "Defined #{tag.typename} link to #{tag.name} (Tag ##{tag.id}) at #{location}"
+      msg = "!!!Scraper Defined #{tag.typename} link to #{tag.name} (Tag ##{tag.id}) at #{location}"
       msg << " with image #{image_link}" if image_link.present?
       Rails.logger.info msg
     end
     if parent_tag = options[:kind_of]
       parent_tag = self.define parent_tag, options.slice(:tagtype)
-      Rails.logger.info "!! ...made '#{tag.name}' a kind of '#{parent_tag.name}'"
+      Rails.logger.info "!!!Scraper  ...made '#{tag.name}' a kind of '#{parent_tag.name}'"
       TagServices.new(parent_tag).make_parent_of tag
     end
     if source_tag = options[:suggested_by]
       source_tag = self.define source_tag, options.slice(:tagtype)
-      Rails.logger.info "!! ...noted that '#{tag.name}' is suggested by '#{source_tag.name}'"
+      Rails.logger.info "!!!Scraper  ...noted that '#{tag.name}' is suggested by '#{source_tag.name}'"
       TagServices.new(source_tag).suggests tag
     end
     if target_tag = options[:suggests]
       target_tag = self.define target_tag, options.slice(:tagtype)
-      Rails.logger.info "!! ...noted that '#{tag.name}' suggests '#{target_tag.name}'"
+      Rails.logger.info "!!!Scraper  ...noted that '#{tag.name}' suggests '#{target_tag.name}'"
       TagServices.new(tag).suggests target_tag
     end
     if options[:description].present?

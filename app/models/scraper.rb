@@ -136,7 +136,7 @@ class Scraper < ActiveRecord::Base
     [link_or_links].flatten.compact.collect { |link|
       link = absolutize link # A Mechanize object for a link
       scraper = Scraper.assert link, what, recur
-      (imm ? scraper.bkg_sync : scraper.queue_up) if recur
+      (imm ? scraper.bkg_sync : scraper.queue_up) if recur && !scraper.good? # Don't rerun redundantly
       scraper
     }
   end
