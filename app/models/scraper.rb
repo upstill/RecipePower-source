@@ -52,6 +52,7 @@ class Scraper < ActiveRecord::Base
     else
       scraper = self.new url: uri.to_s, what: what, subclass: subclass
       Rails.logger.info "!!!Scraper #{'WOULD BE ' unless recur}Defined for '#{scraper.what}' on #{uri}"
+      scraper.bump_time
     end
     scraper.recur = recur
     scraper
@@ -80,7 +81,8 @@ class Scraper < ActiveRecord::Base
       when 503
         if id
           virgin!
-          queue_up true
+          bump_time # Increment the execution target time
+          queue_up
           return
         else
           exception = 'Host isn\'t talking at the moment'
@@ -108,26 +110,27 @@ class Scraper < ActiveRecord::Base
     subclass.constantize.handler url
   end
 
-  # Pitch the scraper into the DelayedJob queue
-  def queue_up bump_time=false
-    return if good?
-    # Defer till later
-    if bump_time
-      maxwait = self.class.maximum('waittime') || 1
-      # The strategy here: double the wait time as jobs fail
-      self.waittime = (waittime < maxwait) ? maxwait : (maxwait*2)
-    end
-    self.run_at = ((self.class.maximum('run_at') || Time.now) + waittime.seconds) if bump_time || !run_at
+  def bump_time
+    self.waittime =
+      if run_at
+        maxwait = self.class.maximum('waittime') || 1
+        # The strategy here: double the wait time as jobs fail
+        (waittime < maxwait) ? maxwait : (maxwait*2)
+      else
+        1
+      end
+    self.run_at = ((self.class.maximum('run_at') || Time.now) + waittime.seconds)
     save
+  end
+
+  # Pitch the scraper into the DelayedJob queue
+  def queue_up
+    return unless virgin?
     Rails.logger.info "!!!Scraper Queued Scraper ##{id} for #{what} on #{url} after #{waittime} to run at #{run_at}"
-    # Delayed::Job.enqueue self
     bkg_enqueue true, priority: 20, run_at: run_at
   end
 
   protected
-
-  def fail error
-  end
 
   # Define a scraper to follow a link or links and return it, for whatever purpose
   def launch link_or_links, what = nil, imm=false
