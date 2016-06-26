@@ -27,6 +27,7 @@ class Scraper < ActiveRecord::Base
     subclass = (uri.host.capitalize.split('.') << 'Scraper').join('_')
 
     recur = true
+    what = nil
     args.each do |arg|
       case arg
         when String, Symbol
