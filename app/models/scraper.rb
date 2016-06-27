@@ -51,7 +51,7 @@ class Scraper < ActiveRecord::Base
       Rails.logger.info "!!!Scraper Already Defined for '#{scraper.what}' on #{uri} (status #{scraper.status})"
     else
       scraper = self.new url: uri.to_s, what: what, subclass: subclass
-      Rails.logger.info "!!!Scraper Recalled for '#{scraper.what}' on #{uri} (status #{scraper.status})"
+      Rails.logger.info "!!!Scraper Defined for '#{scraper.what}' on #{uri} (status #{scraper.status})"
       scraper.bump_time
     end
     scraper.recur = recur
@@ -127,10 +127,10 @@ class Scraper < ActiveRecord::Base
   # Pitch the scraper into the DelayedJob queue
   def queue_up
     return unless virgin?
-    Rails.logger.info "!!!Scraper Queued: ##{id} for #{what} on #{url} (status #{status})"
-    Rails.logger.info "!!!Scraper Queued:        ....will run after #{waittime} at #{run_at}"
     bkg_enqueue true, priority: 20, run_at: run_at
     save
+    Rails.logger.info "!!!Scraper Queued: ##{id} for #{what} on #{url} (status #{status})"
+    Rails.logger.info "!!!Scraper Queued:        ....will run after #{waittime} at #{run_at}"
   end
 
   protected
