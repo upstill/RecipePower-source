@@ -21,7 +21,9 @@ module Backgroundable
     end
     # force => do the job even if it was priorly complete
     if virgin? || (force && !(pending? || processing?)) # Don't add it to the queue redundantly
-      save unless id
+      pending!
+      save
+      # save unless id
       Delayed::Job.enqueue self, djopts
     end
     pending?
@@ -59,12 +61,14 @@ module Backgroundable
   end
 
   # Callbacks for DelayedJob: jobs are pending when they are to run ASAP
+=begin
   def enqueue(job)
     unless job.run_at && (job.run_at > Time.now)
       pending!
       save
     end
   end
+=end
 
   def error(job, exception)
     bad!
