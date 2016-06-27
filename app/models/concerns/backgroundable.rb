@@ -1,3 +1,10 @@
+# The Backgroundable module supplies an object with the ability to manage execution using DelayedJob
+# It keeps a status variable as below.
+# Execution may be either synchronous or asynchronous, and a queued job may be recalled from the
+# queue and executed synchronously.
+# Backgroundable jobs are also tidy: a job will only be queued once, and once executed, it will not
+# be queued again until reset to virgin state.
+
 module Backgroundable
   extend ActiveSupport::Concern
 
@@ -5,7 +12,13 @@ module Backgroundable
 
     def backgroundable status_attribute=:status
       attr_accessible status_attribute
-      enum status_attribute => [ :virgin, :pending, :processing, :good, :bad ]
+      enum status_attribute => [
+               :virgin,  # Hasn't been executed or queued
+               :pending, # Queued but not executed
+               :processing, # Set during execution
+               :good, # Executed successfully
+               :bad   # Executed unsuccessfully
+           ]
     end
 
   end
@@ -29,6 +42,15 @@ module Backgroundable
     pending?
   end
 
+  # Place the object's job back in the queue, as appropriate. 'force' will do so regardless whether the job
+  # is already queued (good for recovering from crashes)
+  def bkg_requeue force=false
+    if force || !(pending? || processing?)
+      virgin!
+      bkg_enqueue
+    end
+  end
+
   # Glean results synchronously, returning only when status is definitive (good or bad)
   # force => do the job even if it was priorly complete
   def bkg_sync force=false
@@ -37,25 +59,36 @@ module Backgroundable
         sleep 1
         reload
       end
-    elsif virgin? || pending? || force # Run the scrape process right now
-      # Lock during processing
-      before nil
-      perform
+    elsif virgin? || pending? || force # Run the process right now
+      bkg_perform
     end
     good?
   end
 
-  # Finally execute the block that will update the model (or whatever)
+  # Wrapper for the #perform method, managing job correctly
+  def bkg_perform
+    processing!
+    save
+    perform
+  end
+
+  # Finally execute the block that will update the model (or whatever). This is intended to
+  # be called within the #perform method, with a block that does the real work and returns
+  # either true (for successful execution) or false (for failure). The instance will get status
+  # of 'good' or 'bad' thereby
+  # We check for the processing flag b/c the job may have been run before (ie., by bkg_sync)
   def bkg_execute &block
-    begin
-      if block.call
-        good!
-      else
-        bad!
+    if processing?
+      begin
+        if block.call
+          good!
+        else
+          bad!
+        end
+        save
+      rescue Exception => e
+        error nil, e
       end
-      save
-    rescue Exception => e
-      error nil, e
     end
     good?
   end
@@ -75,9 +108,14 @@ module Backgroundable
     save
   end
 
+  # Before the job is performed, revise its status from pending to processing
+  # NB: if it's not pending, then the job has been executed by other
+  # means (perhaps by bkg_sync) and should be ignored
   def before(job)
-    processing!
-    save
+    if pending?
+      processing!
+      save
+    end
   end
 
 end
