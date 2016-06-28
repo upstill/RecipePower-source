@@ -4,7 +4,7 @@ class ReferentsController < ApplicationController
     @@HandlersByIndex = [ Referent, GenreReferent, DishReferent, 
             ProcessReferent, IngredientReferent, UnitReferent, 
             SourceReferent, AuthorReferent, OccasionReferent, 
-            PantrySectionReferent, StoreSectionReferent, nil, ToolReferent,
+            PantrysectionReferent, StoresectionReferent, nil, ToolReferent,
 	nil, nil, nil, nil, nil, CourseReferent ]
     @@HandlerClass = Referent
 

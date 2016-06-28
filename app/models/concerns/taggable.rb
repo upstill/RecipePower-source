@@ -38,7 +38,12 @@ module Taggable
     attr_reader :tagging_user_id
     attr_accessor :tagging_tag_tokens, :tagging_list_tokens # Only gets written externally; internally accessed with instance variable
     attr_accessible :tagging_user_id, :tagging_tag_tokens, :tagging_list_tokens, # For the benefit of update_attributes
-                    :editable_no_author_tag_tokens, :editable_author_tag_tokens
+                    :editable_untyped_culinaryterm_tag_tokens,
+                    :editable_author_tag_tokens, :editable_dish_tag_tokens,
+                    :editable_genre_tag_tokens, :editable_ingredient_tag_tokens,
+                    :editable_tool_tag_tokens, :editable_process_tag_tokens,
+                    :editable_occasion_tag_tokens, :editable_source_tag_tokens,
+                    :editable_course_tag_tokens, :editable_diet_tag_tokens
 
                     Tag.taggable self
   end

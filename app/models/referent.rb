@@ -47,8 +47,8 @@ class Referent < ActiveRecord::Base
       IngredientReferent
       AuthorReferent
       OccasionReferent
-      PantrySectionReferent
-      StoreSectionReferent
+      PantrysectionReferent
+      StoresectionReferent
       DietReferent
       ToolReferent
       NutrientReferent
@@ -505,7 +505,13 @@ end
 class OccasionReferent < Referent
 end
 
+class PantrysectionReferent < Referent
+end
+
 class PantrySectionReferent < Referent
+end
+
+class StoresectionReferent < Referent
 end
 
 class StoreSectionReferent < Referent
@@ -521,4 +527,7 @@ class NutrientReferent < Referent
 end
 
 class CulinaryTermReferent < Referent
+end
+
+class CulinarytermReferent < Referent
 end

@@ -12,12 +12,12 @@ class Tag < ActiveRecord::Base
            Source: ['Source', 6],
            Author: ['Author', 7],
            Occasion: ['Occasion', 8],
-           PantrySection: ['Pantry Section', 9],
-           StoreSection: ['Store Section', 10],
+           Pantrysection: ['Pantry Section', 9],
+           Storesection: ['Store Section', 10],
            Diet: ['Special Diet', 11],
            Tool: ['Tool', 12],
            Nutrient: ['Nutrient', 13],
-           CulinaryTerm: ['Culinary Term', 14],
+           Culinaryterm: ['Culinary Term', 14],
            Question: ['Question', 15],
            List: ['List', 16],
            Epitaph: ['Epitaph', 17],
@@ -363,8 +363,7 @@ class Tag < ActiveRecord::Base
           tag = Tag.find_or_create_by :name => name # It'll be a free tag, but if you don't care enough to specify...
         else
           if type.kind_of?(Array) # Look for the tag among the given types
-            type.find { |t| tag ||= Tag.find_by_name_and_tagtype(name, t) }
-            puts "Found tag #{tag.id} from array of types"
+            type.find { |t| break if tag = Tag.find_by_name_and_tagtype(name, t) }
           else
             tag = Tag.find_by_name_and_tagtype(name, type)
           end
