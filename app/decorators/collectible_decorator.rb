@@ -222,11 +222,12 @@ class CollectibleDecorator < Draper::Decorator
     User.find_by_id object.toucher_pointers.order('created_at ASC').limit(1).pluck(:user_id).first
   end
 
-  # This method may be over-ridden to specify tag types that are relevant to the class
-  def presentable_tagtypes
+  # Specify the types of tag that get their own individual display
+  def individual_tagtypes
     [ :Misc ]
   end
 
+  # Specify the types of tag that appear under the 'Misc. Tags' heading
   def misc_tagtypes
     [ :Untyped, :Occasion, :Course ]
   end

@@ -1,6 +1,6 @@
 <%# Default modal dialog for editing a (collectible, taggable) item. May be overwritten for other controllers  %>
 <% decorator ||= @decorator || TemplateDecorator.new # If no decorator provided, assume this is for a template    %>
-<%= modal_dialog "tag-collectible new-style green", decorator.title.truncate(70), dialog_class: 'dialog-xs' do %>
+<%= modal_dialog "tag-collectible new-style green", decorator.title.truncate(70), dialog_class: 'modal-lg' do %>
     <form accept-charset="UTF-8"
           action="<%= decorator.tag_path %>"
           class="form-inline tag-collectible"
@@ -24,7 +24,7 @@
                   <textarea id="<%= decorator.element_id :title %>" name="<%= decorator.field_name :title %>" placeholder="Title"><%= decorator.title %></textarea>
                 </div>
             <% end %>
-            <%= tag_controls_for_presentable_tagtypes decorator %>
+            <%= tagging_fields decorator %>
             <div class="control-group">
               <input id="<%= decorator.element_id :collectible_user_id %>" name="<%= decorator.field_name :collectible_user_id %>" type="hidden" value="<%= decorator.collectible_user_id %>">
               <label class="string optional">Comment</label>
