@@ -224,6 +224,27 @@ class CollectibleDecorator < Draper::Decorator
 
   # This method may be over-ridden to specify tag types that are relevant to the class
   def presentable_tagtypes
-    []
+    [ :Misc ]
   end
-end
+
+  def misc_tagtypes
+    [ :Untyped, :Occasion, :Course ]
+  end
+
+  # Here's where we define misc_tag_types, misc_tags_label, locked_misc_tags and editable_misc_tags
+  def method_missing namesym, *args
+    case (callname = namesym.to_s)
+      when /^(\w*)_tag_types$/
+        typesym = $1.capitalize.to_sym
+        return typesym == :Misc ? Tag.typenum(misc_tagtypes) : Tag.typenum(typesym)
+      when /^(\w*)_tags_label$/
+        typesym = $1.capitalize.to_sym
+        return typesym == :Misc ? 'Misc. Tag' : Tag.typename(typesym)
+      when /^(locked|editable)_misc_tags$/
+        # Translate from 'misc' to a sequence of type symbols for the Taggable class
+        callname.sub! '_misc_', '_' + misc_tagtypes.map { |type| Tag.typesym(type).to_s.downcase }.join('_') + '_'
+    end
+    super callname, *args
+  end
+
+  end

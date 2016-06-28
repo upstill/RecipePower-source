@@ -3,7 +3,7 @@ class Tag < ActiveRecord::Base
   # require 'iconv'
   include Typeable
   typeable(:tagtype,
-           Untyped: ['Untyped', 0],
+           Untyped: ['Tag', 0],
            Genre: ['Genre', 1],
            Dish: ['Dish', 2],
            Process: ['Process', 3],

@@ -66,7 +66,7 @@ class TagsController < ApplicationController
           fold: !params[:verbose]
       }
       if params[:tagtype]
-        params[:tagtype] << ",0" if params[:untypedOK]
+        params[:tagtype] << ',0' if params[:untypedOK]
         matchopts[:tagtype] = params[:tagtype].split(',').map(&:to_i)
       elsif params[:tagtype_x]
         matchopts[:tagtype_x] = params[:tagtype_x].split(',').map(&:to_i)
@@ -74,16 +74,16 @@ class TagsController < ApplicationController
       @taglist = Tag.strmatch(matchstr, matchopts)
       # When searching over more than one type, we can disambiguate by showing the type of the resulting tag
       showtype = params[:showtype] # tagtype.nil? || (tagtype.is_a?(Array) && (tagtype.size>1))
-      @taglist.delete_if { |t| !t.referents.empty? } if params[:unbound_only] == "true"
+      @taglist.delete_if { |t| !t.referents.empty? } if params[:unbound_only] == 'true'
       respond_to do |format|
         format.json { render :json => 
             case params[:response_format]
-            when "dynatree"
+            when 'dynatree'
                 # for a dynatree list: an array of hashes with title, isLazy, key and isFolder fields
                 @taglist.map { |tag| { :title=>tag.name, :isLazy=>false, :key=>tag.id, :isFolder=>false } }
-            when "strings"
+            when 'strings'
                 # Just a list of strings...
-                @taglist.map(&:attributes).map { |match| match["name"] }
+                @taglist.map(&:attributes).map { |match| match['name'] }
             else # assuming "tokenInput" because that js won't send a parameter
                 # for tokenInput: an array of hashes, each with "id" and "name" values
                 @taglist.collect { |match| {
@@ -92,7 +92,7 @@ class TagsController < ApplicationController
                 } }
             end
         }
-        format.html { render partial: "tags/taglist" }
+        format.html { render partial: 'tags/taglist' }
         format.xml  { render :xml => @taglist }
       end
   end
@@ -137,9 +137,9 @@ class TagsController < ApplicationController
     # return if need_login true, true
     @tabindex = params[:tabindex] ? params[:tabindex].to_i : (session[:tabindex] || 0)
     # The list of orphan tags gets all tags of this type which aren't linked to a table
-    @taglist = Tag.strmatch("", userid: current_user_id, tagtype: Tag.index_to_type(@tabindex) )
+    @taglist = Tag.strmatch('', userid: current_user_id, tagtype: Tag.index_to_type(@tabindex) )
     session[:tabindex] = @tabindex
-    render partial: "editor"
+    render partial: 'editor'
   end
   
   # GET /id/absorb
@@ -156,7 +156,7 @@ class TagsController < ApplicationController
               "#tagrow_#{victimidstr}", "#tagrow_#{victimidstr}HR"
           ],
           replacements: [
-             [ "#tagrow_#{@tag.id.to_s}", with_format("html") { render_to_string partial: "tags/show_table_item", locals: { item: @tag } } ]
+             [ "#tagrow_#{@tag.id.to_s}", with_format("html") { render_to_string partial: 'tags/show_table_item', locals: { item: @tag } } ]
           ]
       }
     else
@@ -167,7 +167,7 @@ class TagsController < ApplicationController
       format.json  {
         render :json => @jsondata
       }
-      format.js { render "shared/get_content" }
+      format.js { render 'shared/get_content' }
     end
   end
   
@@ -176,21 +176,21 @@ class TagsController < ApplicationController
   def typify
       # Return array of ids of tags successfully converted
       # We can take an array of tagids or a single tagid together with a new type spec
-      if params["tagids"] 
-          puts "Typify"+params["tagids"].inspect
-          idsChanged = Tag.convertTypesByIndex(params["tagids"].map{|p| p.delete("orphantag_").to_i}, params["fromtabindex"].to_i, params["totabindex"].to_i, true)
+      if params['tagids']
+          puts "Typify"+params['tagids'].inspect
+          idsChanged = Tag.convertTypesByIndex(params['tagids'].map{|p| p.delete('orphantag_').to_i}, params['fromtabindex'].to_i, params['totabindex'].to_i, true)
           # Go back to the client with a list of ids that were changed
-          puts "Success on "+idsChanged.inspect
-      elsif params["tagid"] && params["typenum"]
+          puts 'Success on '+idsChanged.inspect
+      elsif params['tagid'] && params['typenum']
           # Change the type of a single tag
           # We ask and allow for the possibility that the tag will be absorbed into another 
           # tag of the target type
-          tag = (Tag.find params["tagid"].to_i).project params["typenum"]
+          tag = (Tag.find params['tagid'].to_i).project params['typenum']
           idsChanged = tag.errors.empty? && [tag.id]
       end
       if idsChanged
         render :json=>{ deletions: idsChanged.map{ |id| ["#tagrow_#{id.to_s}", "#tagrow_#{id.to_s}HR", ".absorb_#{id.to_s}"] }.flatten ,
-                        popup: (tag ? "'#{tag.name}' now typed as '#{tag.typename}'" : "Tags changed successfully")
+                        popup: (tag ? "'#{tag.name}' now typed as '#{tag.typename}'" : 'Tags changed successfully')
         }
       else
         render :json => { }

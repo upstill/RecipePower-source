@@ -34,7 +34,7 @@ class RecipeDecorator < CollectibleDecorator
   end
 
   def presentable_tagtypes
-    [ :Process, :Tool, :Occasion, :Source, :Genre, :Ingredient, :Dish, :Diet, :Author, :Course ]
+    super # [ :Process, :Tool, :Occasion, :Source, :Genre, :Ingredient, :Dish, :Diet, :Author, :Course ]
   end
 
 end

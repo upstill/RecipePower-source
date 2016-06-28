@@ -13,6 +13,10 @@ div.dialog {
   font-weight: normal;
   ul.token-input-list-facebook {
     font: 14px arial, sans-serif;
+    li.token-input-input-token-facebook input[type='text'] {
+      padding: 0;
+      margin: 0;
+    }
   }
   &.modal {
     div.modal-dialog {

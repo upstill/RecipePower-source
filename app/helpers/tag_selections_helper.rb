@@ -45,8 +45,9 @@ module TagSelectionsHelper
       result = result +
       render('tags/tag_controls',
              decorator: decorator,
-             label: type.to_s.capitalize,
+             label: decorator.send("#{dc}_tags_label"),
              tokens_id: "editable_#{dc}_tag_tokens",
+             tagtypes: decorator.send("#{dc}_tag_types"),
              locked_tags: locked_tags.map(&:name).join(' | '),
              data_pre: editable_tags.map(&:attributes).to_json)
     end
