@@ -26,4 +26,25 @@ class RecipePresenter < CollectiblePresenter
     card_video.present? ? card_video : super
   end
 
+  def card_aspects which_column=nil
+    ([ :ingredient, :yield, :tool, :process, :genre, :occasion, :course, :dish, :diet, :times ] + super).compact.uniq
+  end
+  def card_aspect which
+    label = nil
+    contents =
+        case which.to_sym
+          when :times
+            label = 'Time'
+            [ ("Prep: #{decorator.prep_time}" if decorator.prep_time.present?),
+              ("Cooking: #{decorator.cook_time}" if decorator.cook_time.present?),
+              ("Total: #{decorator.total_time}" if decorator.total_time.present?) ].compact.join('</br>').html_safe
+          when :yield
+            label = 'Yield'
+            decorator.yield if decorator.yield.present?
+          else
+            return super
+        end
+    [ label, contents ]
+  end
+
 end

@@ -16,6 +16,7 @@ class Recipe < ActiveRecord::Base
   attr_accessible :title, :ratings_attributes, :description, :url,
                   :prep_time, :prep_time_low, :prep_time_high,
                   :cook_time, :cook_time_low, :cook_time_high,
+                  :total_time, :total_time_low, :total_time_high,
                   :yield
   #, :comment, :private, :tagpane, :status, :alias, :picurl :href, :collection_tokens
 

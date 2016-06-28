@@ -68,7 +68,7 @@ class CollectiblePresenter < BasePresenter
   end
 
   def card_aspects which_column=nil
-    (super + [ :tool, :process, :genre, :ingredient, :occasion, :source, :course, :dish, :diet, :author, :description, :tags, :title, :lists, (:found_by if @decorator.first_collector) ]).compact.uniq
+    (super + [ :source, :author, :description, :tags, :title, :lists, (:found_by if @decorator.first_collector) ]).compact.uniq
   end
 
   def card_aspect which
@@ -81,7 +81,7 @@ class CollectiblePresenter < BasePresenter
             entity_links tags, joinstr: ' | '
           when :tags
             taglist = decorator.visible_untyped_culinaryterm_tags # visible_tags :tagtype_x => [ :Question, :List, :Author ]
-            label = field_label_counted 'tags', taglist.count
+            label = 'MISC. TAGS' # field_label_counted 'Misc. tags', taglist.count
             list_tags_for_collectible taglist, decorator
           when :lists # Lists it appears under
             lists_with_status = ListServices.associated_lists_with_status decorator
