@@ -26,7 +26,7 @@ class FeedsController < CollectibleController
             Time.new(2000)
         list_entries = @feed.feed_entries.exists?(published_at: since..Time.now)
       else
-        @feed.bkg_enqueue @feed.updated_at < Time.now - 1.minute # Ensure there's an update pending
+        @feed.bkg_requeue if @feed.updated_at < Time.now - 1.minute # Ensure there's an update pending
         list_entries = true
       end
       if resource_errors_to_flash @feed

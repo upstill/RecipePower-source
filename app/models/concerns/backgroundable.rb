@@ -42,8 +42,8 @@ module Backgroundable
     pending?
   end
 
-  # Place the object's job back in the queue, as appropriate. 'force' will do so regardless whether the job
-  # is already queued (good for recovering from crashes)
+  # Place the object's job back in the queue, even if it was previously complete.
+  # 'force' will do so even if the job was already queued (good for recovering from crashes)
   def bkg_requeue force=false
     if force || !(pending? || processing?)
       virgin!
