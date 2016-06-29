@@ -34,7 +34,7 @@ class RecipeDecorator < CollectibleDecorator
   end
 
   def individual_tagtypes
-    ([ :Process, :Tool, :Occasion, :Source, :Genre, :Ingredient, :Dish, :Diet, :Author, :Course ] + super).uniq
+    ([ :Dish, :Process, :Tool, :Occasion, :Source, :Genre, :Course, :Ingredient, :Diet, :Author ] + super).uniq
   end
 
 end

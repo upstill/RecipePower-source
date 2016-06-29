@@ -32,6 +32,10 @@ RP.tagger.init = (selector, data) ->
 RP.tagger.onopen = (selector = '.token-input-field-pending') ->
 	$(selector).each ->
 		RP.tagger.setup this
+	$('a.token-adder').on "click", (event) ->
+		data = $(event.currentTarget).data()
+		$(data.selector).tokenInput "add", {id: data.id, name: data.name}
+		event.preventDefault() # Prevent link from following its href
 
 RP.tagger.onload = (event) ->
 	RP.tagger.setup event.target
@@ -160,4 +164,3 @@ RP.tagger.setup = (elmt) ->
 			setTimeout (selector) ->
 				$(selector).focus()
 			, 50, "input#token-input-"+elmt.id
-

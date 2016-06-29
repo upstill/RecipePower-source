@@ -21,8 +21,9 @@ RP.tag_collectible.onopen = (dlog) ->
 	# Only proceed if the dialog has children
 	if $('.tag-collectible > *').length > 0
 		# Set up any tokenInput fields so the before-data is current
-		$('.token-input-field-pending', dlog).each ->
-			RP.tagger.setup this
+		RP.tagger.onopen()
+		#$('.token-input-field-pending', dlog).each ->
+		#	RP.tagger.setup this
 		$('form.tag-collectible', dlog).data "hooks",
 				dataBefore: $('form.tag-collectible', dlog).serialize(), # recipedata($('form.tag-collectible', dlog).serializeArray()),
 				beforesaveFcn: "RP.tag_collectible.submission_redundant"

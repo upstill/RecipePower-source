@@ -229,7 +229,7 @@ class CollectibleDecorator < Draper::Decorator
 
   # Specify the types of tag that appear under the 'Misc. Tags' heading
   def misc_tagtypes
-    [ :Untyped, :Occasion, :Course ]
+    [ :Untyped, :Occasion ]
   end
 
   # Here's where we define misc_tag_types, misc_tags_label, locked_misc_tags and editable_misc_tags
