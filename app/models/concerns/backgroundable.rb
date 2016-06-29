@@ -36,7 +36,6 @@ module Backgroundable
     if virgin? || (force && !(pending? || processing?)) # Don't add it to the queue redundantly
       pending!
       save
-      # save unless id
       Delayed::Job.enqueue self, djopts
     end
     pending?
@@ -60,16 +59,16 @@ module Backgroundable
         reload
       end
     elsif virgin? || pending? || force # Run the process right now
-      bkg_perform
+      bkg_perform false
     end
     good?
   end
 
   # Wrapper for the #perform method, managing job correctly
-  def bkg_perform
+  def bkg_perform with_save=true
     processing!
-    save
-    perform
+    save # Necessary, to notify queue handler that the job is in process
+    perform with_save
   end
 
   # Finally execute the block that will update the model (or whatever). This is intended to
@@ -77,7 +76,7 @@ module Backgroundable
   # either true (for successful execution) or false (for failure). The instance will get status
   # of 'good' or 'bad' thereby
   # We check for the processing flag b/c the job may have been run before (ie., by bkg_sync)
-  def bkg_execute &block
+  def bkg_execute with_save=true, &block
     if processing?
       begin
         if block.call
@@ -85,11 +84,11 @@ module Backgroundable
         else
           bad!
         end
-        save
       rescue Exception => e
         error nil, e
       end
     end
+    save if with_save
     good?
   end
 
@@ -105,7 +104,7 @@ module Backgroundable
 
   def error(job, exception)
     bad!
-    save
+    errors.add :url, exception.to_s
   end
 
   # Before the job is performed, revise its status from pending to processing

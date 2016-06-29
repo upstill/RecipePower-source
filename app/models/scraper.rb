@@ -64,13 +64,14 @@ class Scraper < ActiveRecord::Base
   end
 
   # perform with error catching
-  def perform
-    bkg_execute do
+  def perform with_save=true
+    self.errcode = 0
+    bkg_execute with_save do
       Rails.logger.info "!!!Scraper Performing #{what} on #{url} with status #{status}"
 
       self.becomes(subclass.constantize).send what.to_sym
-      self.errcode = errors.any? ? -1 : 0 # Successful
-      save
+      # Remember the fact that there was an error, allowing for the possibility that the errcode was set in the course of executtion
+      self.errcode = -1 if errors.any? && (errcode == 0)
       !errors.any?
     end
   end
@@ -92,9 +93,8 @@ class Scraper < ActiveRecord::Base
         exception = 'doesn\'t point to anything!'
     end
     self.errcode = rcode
-    errors.add :url, exception.to_s
     bad!
-    save if id
+    errors.add :url, exception.to_s
   end
 
 =begin
@@ -127,8 +127,7 @@ class Scraper < ActiveRecord::Base
   # Pitch the scraper into the DelayedJob queue
   def queue_up
     return unless virgin?
-    bkg_enqueue true, priority: 20, run_at: run_at
-    save
+    bkg_enqueue priority: 20, run_at: run_at
     Rails.logger.info "!!!Scraper Queued: ##{id} for #{what} on #{url} (status #{status})"
     Rails.logger.info "!!!Scraper Queued:        ....will run after #{waittime} at #{run_at}"
   end
@@ -612,6 +611,25 @@ class Www_bbc_co_uk_Scraper < Scraper
                                                         page_link: absolutize(link.href)).name
       end
 
+      if false # We're not saving recipes to disk anymore
+        # Ensure the output directory exists
+        dirname = File.join '/var/www/RP/files/chefs', chef_id
+        FileUtils.mkdir_p dirname
+
+        hpath = uri.path
+        fpath = File.join(dirname, File.basename(hpath) + '.html')
+
+        unless File.exist?(fpath)
+          # @mechanize.download(hpath, fpath)
+          if ref = Reference.lookup_by_url('RecipeReference', url).first
+            ref.filename = fpath
+            ref.save
+          else
+            RecipeReference.create url: url, filename: fpath
+          end
+        end
+      end
+
       # Glean ingredient links from the page, meanwhile ensuring the tag is defined
       extractions[:Ingredients] = page.links_with(dom_class: 'recipe-ingredients__link').collect { |link|
         TagServices.define(link.to_s,
@@ -622,23 +640,6 @@ class Www_bbc_co_uk_Scraper < Scraper
       r = propose_recipe url, extractions.compact
       # Apply the findings, in case the recipe already existed
       r.decorate.findings = FinderServices.findings extractions
-
-      # Ensure the output directory exists
-      dirname = File.join '/var/www/RP/files/chefs', chef_id
-      FileUtils.mkdir_p dirname
-
-      hpath = uri.path
-      fpath = File.join(dirname, File.basename(hpath) + '.html')
-
-      unless File.exist?(fpath)
-        # @mechanize.download(hpath, fpath)
-        if ref = Reference.lookup_by_url('RecipeReference', url).first
-          ref.filename = fpath
-          ref.save
-        else
-          RecipeReference.create url: url, filename: fpath
-        end
-      end
     end
   end
 

@@ -9,13 +9,21 @@ class ScraperController < ApplicationController
     @scraper = Scraper.assert params[:scraper][:url], (params[:scraper][:recur] == 'true')
     if params[:scraper][:immediate] == 'true'
       @scraper.bkg_sync(true) # perform_naked
+      if resource_errors_to_flash @scraper
+        smartrender :action => :new
+      else
+        @scraper.save
+        render json: { done: true, alert: 'Scraping successful' }
+      end
     else
-      @scraper.queue_up
-    end
-    if resource_errors_to_flash @scraper
-      smartrender :action => :new
-    else
-      render json: { done: true, alert: 'Scraping successful' }
+      if @scraper.pending? || @scraper.processing?
+        msg = 'Scraper already launched and waiting'
+      else
+        msg = @scraper.virgin? ? 'Scraper launched' : 'Scraper relaunched'
+        @scraper.virgin!
+        @scraper.queue_up
+      end
+      render json: { done: true, alert: msg }
     end
   end
 
