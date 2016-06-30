@@ -41,6 +41,7 @@ Couldn't figure out how to use sudo with another user
   task :fetch_database do # , roles: :db, only: {primary: true} do
     on roles(:db) do
       def run_and_show str
+        return ''
         output =  `#{str}`.chomp
         info "'#{str}'\n\t=> (#{$?.to_s})\n\t'#{output}'"
         output

@@ -454,13 +454,18 @@ class Www_bbc_co_uk_Scraper < Scraper
   end
 
   def bbc_dish_recipes_page
-    tag =
-    if dishlink = page.search('div#article-list ul li h4 a').first
-      launch dishlink['href'], :bbc_dish_home_page
-      TagServices.define dishlink.content.strip.downcase,
-                         :tagtype => :Dish,
-                         :page_link => absolutize(dishlink)
+    dishname = dish_url = nil
+    if url.match /(dishes|keywords)(\[[^\]]*\])?=([^&]*)/
+      if dishlink = (($1 == 'dishes') ?
+          page.search('div#queryBox h2 a') :
+          page.search('div#article-list ul li h4 a')).first
+        dish_url = absolutize(dishlink['href']) if dishlink['href'].match /food\/[^\/]+$/
+        dishname = dishlink.content.sub(/recipes\./, '').strip.downcase
+      end
     end
+
+    launch dish_url, :bbc_dish_home_page if dish_url
+    tag = TagServices.define dishname, { :tagtype => :Dish, :page_link => dish_url }.compact if dishname.present?
 
     bbc_tag_recipes_page tag || :Dish
   end
