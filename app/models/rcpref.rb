@@ -29,7 +29,6 @@ class Rcpref < ActiveRecord::Base
 
   # When saving a "new" use, make sure it's unique
   def ensure_unique
-    puts "Ensuring uniqueness of user #{self.user_id.to_s} to recipe #{self.entity_id.to_s}"
   end
 
   def uncollect

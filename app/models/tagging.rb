@@ -11,7 +11,6 @@ class Tagging < ActiveRecord::Base
 
   # From tagref: When saving a "new" Tag, make sure the tagging is unique
   def ensure_unique
-    puts "Ensuring uniqueness of tag #{self.tag_id.to_s} to taggable #{self.entity_id.to_s} for user #{self.user_id.to_s}"
   end
   
 end

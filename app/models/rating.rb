@@ -15,7 +15,6 @@ class Rating < ActiveRecord::Base
 
     # When saving a "new" rating, make sure it's unique
     def ensure_unique
-puts "Ensuring uniqueness of rating #{self.scale_id.to_s} to recipe #{self.recipe_id.to_s}"
     end
 
     def rating_minlabel()
