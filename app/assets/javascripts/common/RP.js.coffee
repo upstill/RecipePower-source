@@ -359,7 +359,7 @@ RP.process_response = (responseData, odlog) ->
 			RP.dialog.replace_modal newdlog, odlog
 			supplanted = true
 
-		# 'odlog' gives a dialog DOM element to replace the extant one
+		# 'odlog' gives a dialog DOM element to replace the extant one, with the option of restoring the latter later
 		if newdlog = responseData.push
 			RP.dialog.push_modal newdlog, odlog
 			supplanted = true

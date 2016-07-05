@@ -1,5 +1,5 @@
 <% (resource = response_service.pending_invitee) && resource.extend_fields %>
-<%= simple_form_for resource, :as => 'user', :url => invitation_path('user', :mode => :modal), :html => {:method => :put} do |f| %>
+<%= simple_form_for resource, :as => 'user', :url => invitation_path('user', :mode => response_service.mode), :html => {:method => :put} do |f| %>
     <div class="row">
       <div class="col-md-12">
         <p>Welcome to RecipePower!</p>

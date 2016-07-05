@@ -75,21 +75,23 @@ public
     (url_or_urls.is_a?(String) ? [url_or_urls] : url_or_urls).any? do |url|
       url = normalize_url url
       # Reject urls that already reference a site
-      unless SiteReference.lookup_site(url)
-        # Ensure that 1) this url gets back to this site, and 2) it has the longest possible subpath in common with the other references
-        target_uri = URI(url)
-        target_uri.query = target_uri.fragment = nil # Queries and fragments are ignored in site mappings
-        target_path = target_uri.path
-        existing_urls = references.map(&:url)
-        target_uri.path = existing_urls.inject("") { |memo, ref_url|
-          ref_path = URI(ref_url).path
-          memo = ((ref_path.length > memo.length) && target_path.match(/^#{ref_path}/)) ? ref_path : memo
-        }
-        # Add the new references to those of the site, eliminating redundant ones
-        new_refs = SiteReference.find_or_initialize(target_uri.to_s, true).keep_if { |candidate| existing_urls.all? { |url| url != candidate.url } }
-        unless new_refs.empty?
-          self.references = self.references + new_refs
-        end
+      if ((other = SiteReference.lookup_site(url)) && (other != self)) || true # Don't change references
+        errors.add :home, "That url is already associated with the site '#{other.name}'."
+        return
+      end
+      # Ensure that 1) this url gets back to this site, and 2) it has the longest possible subpath in common with the other references
+      target_uri = URI(url)
+      target_uri.query = target_uri.fragment = nil # Queries and fragments are ignored in site mappings
+      target_path = target_uri.path
+      existing_urls = references.map(&:url)
+      target_uri.path = existing_urls.inject("") { |memo, ref_url|
+        ref_path = URI(ref_url).path
+        memo = ((ref_path.length > memo.length) && target_path.match(/^#{ref_path}/)) ? ref_path : memo
+      }
+      # Add the new references to those of the site, eliminating redundant ones
+      new_refs = SiteReference.find_or_initialize(target_uri.to_s, true).keep_if { |candidate| existing_urls.all? { |url| url != candidate.url } }
+      unless new_refs.empty?
+        self.references = self.references + new_refs
       end
     end
   end

@@ -1,7 +1,7 @@
 <%# simple_page "Feedback", true %>
 <%= page_or_modal :action => :feedback, :title => "Talking Back to The Power" do %>
     <% resource = @feedback %>
-    <%= simple_form_for resource, :url => feedback_index_path do |f| %>
+    <%= simple_form_for resource, :url => feedback_index_path(:mode => response_service.mode) do |f| %>
         <p>Getting your reactions is the only way we can make RecipePower as good as it can be. Thanks so much for sharing with us.</p>
         <%= form_errors_helper f %>
         <hr>
