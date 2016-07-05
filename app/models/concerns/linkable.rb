@@ -115,7 +115,6 @@ module Linkable
           self.method(:"#{reference_association_pl}").call.each { |other_ref|
             case other_site = SiteReference.lookup_site(other_ref.url)
               when nil
-                # debugger
                 site.include_url other_ref.url
               when site # If the other_ref maps to the same site, all is well
               else

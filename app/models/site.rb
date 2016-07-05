@@ -71,11 +71,11 @@ public
   end
 
   # Make sure that a url(s) map(s) to this site, returning true if any references were added
-  def include_url url_or_urls
+  def include_url url_or_urls, in_full=false
     (url_or_urls.is_a?(String) ? [url_or_urls] : url_or_urls).any? do |url|
       url = normalize_url url
       # Reject urls that already reference a site
-      if ((other = SiteReference.lookup_site(url)) && (other != self)) || true # Don't change references
+      if ((other = SiteReference.lookup_site(url)) && (other != self)) # Don't change references
         errors.add :home, "That url is already associated with the site '#{other.name}'."
         return
       end
@@ -84,12 +84,15 @@ public
       target_uri.query = target_uri.fragment = nil # Queries and fragments are ignored in site mappings
       target_path = target_uri.path
       existing_urls = references.map(&:url)
-      target_uri.path = existing_urls.inject("") { |memo, ref_url|
+      # Of all the urls in the extant references, determine the longest subpath of the target
+      target_uri.path = existing_urls.inject('') { |memo, ref_url|
         ref_path = URI(ref_url).path
-        memo = ((ref_path.length > memo.length) && target_path.match(/^#{ref_path}/)) ? ref_path : memo
-      }
+        memo = ref_path if ((ref_path.length > memo.length) && target_path.match(/^#{ref_path}/))
+      } unless in_full
       # Add the new references to those of the site, eliminating redundant ones
-      new_refs = SiteReference.find_or_initialize(target_uri.to_s, true).keep_if { |candidate| existing_urls.all? { |url| url != candidate.url } }
+      new_refs = SiteReference.find_or_initialize(target_uri.to_s, true).to_a.keep_if { |candidate|
+        !existing_urls.include?(candidate.url)
+      }
       unless new_refs.empty?
         self.references = self.references + new_refs
       end

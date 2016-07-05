@@ -179,16 +179,18 @@ pop_modal = (dlog, action) ->
 		insert_modal parent, dlog
 	RP.dialog.notify action, dlog
 	if $(dlog).modal
-		$(dlog).modal 'hide'
-	$(dlog).remove()
+		$(dlog).modal('hide').on 'hidden.bs.modal', ->
+			$(dlog).remove()
+	else
+		$(dlog).remove()
 	if parent
 		show_modal parent
 
 close_modal = (dlog, action) ->
 	if dlog
-		pop_modal dlog, (action || "close") # Modal can either be closed or cancelled
 		RP.state.onCloseDialog dlog
 		notify_injector "close", dlog
+		pop_modal dlog, (action || "close") # Modal can either be closed or cancelled
 
 manager_of = (dlog) ->
 	# Look for a manager using the dialog's class name
