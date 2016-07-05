@@ -220,11 +220,11 @@ class ApplicationController < ActionController::Base
         format.json {
           case response_service.mode
             when :modal, :injector
-              dialog = render_to_string renderopts.merge(action: response_service.action, layout: (@layout || false), formats: ["html"])
-              render json: { code: dialog, how: 'bootstrap' }.to_json, layout: false, :content_type => 'application/json'
+              dialog = render_to_string renderopts.merge(action: response_service.action, layout: (@layout || false), formats: ['html'])
+              render json: { dlog: dialog, how: 'bootstrap' }.to_json, layout: false, :content_type => 'application/json'
             else
               # Render a replacement for the pagelet partial, as if it were rendered on the page
-              render partial: "layouts/pagelet" # Respond with JSON instructions to replace the pagelet appropriately
+              render partial: 'layouts/pagelet' # Respond with JSON instructions to replace the pagelet appropriately
           end
         }
         format.js {

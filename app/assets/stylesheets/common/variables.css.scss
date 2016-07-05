@@ -181,6 +181,9 @@ $green-field-background-color: #C1D3C7;
       color: lightyellow;
     }
   }
+  span.help-block.has-error {
+    color: #6ba942;
+  }
 }
 
 @mixin div-salmon {

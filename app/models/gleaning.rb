@@ -28,18 +28,14 @@ class Gleaning < ActiveRecord::Base
     gleaning
   end
 
-  def perform
-    go entity.decorate.url, (entity.site if entity.respond_to?(:site))
+  def perform with_save=true
+    # go entity.decorate.url, (entity.site if entity.respond_to?(:site))
+    bkg_execute with_save do self.results = FinderServices.glean(entity.decorate.url, (entity.site if entity.respond_to?(:site))) end
   end
 
   # Execute a gleaning on the given url, RIGHT NOW (maybe in an asynchronous execution, maybe not)
-  def go url, site=nil, *labels
-    if site.is_a? String
-      labels.unshift site
-      site = nil
-    end
-    bkg_execute do self.results = FinderServices.glean(url, site, *labels) end
-    good?
+  def go url, site=nil
+    bkg_execute do self.results = FinderServices.glean(url, site) end
   end
 
   def error(job, exception)

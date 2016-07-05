@@ -110,17 +110,17 @@ module DialogsHelper
     classes = options[:class] || ''
     logger.debug "dialogHeader for #{globstring({dialog: which, format: response_service.format_class, ttl: ttl})}"
     # Assert a page title if given
-    ttlspec = ttl ? %Q{ title="#{ttl}"} : ""
+    ttlspec = ttl ? %Q{ title="#{ttl}"} : ''
     bs_classes = !response_service.injector? ? '' : 'modal-pending hide fade'
     hdr =
         %Q{<div class="#{bs_classes} dialog #{which.to_s} #{response_service.format_class} #{classes}" #{ttlspec}>}+
             (response_service.injector? ?
                 injector_cancel_button('X') :
                 content_tag(:div,
-                            (dialog_cancel_button("&times;")+content_tag(:h3, ttl)),
+                            (dialog_cancel_button('&times;')+content_tag(:h3, ttl)),
                             class: 'modal-header')
             )
-    hdr <<= (content_tag(:div, "", class: 'notifications-panel')+flash_all) unless options[:noflash]
+    hdr <<= (content_tag(:div, '', class: 'notifications-panel')+flash_all) unless options[:noflash]
     hdr.html_safe
   end
 
@@ -141,15 +141,15 @@ module DialogsHelper
       options, label = label, nil
     end
     options = bootstrap_button_options options.merge(
-                                           button_style: (options[:button_style] || "success"),
+                                           button_style: (options[:button_style] || 'success'),
                                            class: "#{options[:class]} #{options[:style] || 'form-button'}"
                                        )
     tag :input,
         class: "#{options[:class]} dialog-submit-button",
-        name: "commit",
-        type: "submit",
-        value: label||"Save",
-        data: { method: options[:method] || "post" }
+        name: 'commit',
+        type: 'submit',
+        value: label||'Save',
+        data: { method: options[:method] || 'post' }
   end
 
   def dialog_cancel_button label = nil, options={}
@@ -157,14 +157,14 @@ module DialogsHelper
       options, label = label, nil
     end
     options = bootstrap_button_options options.merge(
-                                           button_style: (options[:button_style] || "info"),
+                                           button_style: (options[:button_style] || 'info'),
                                            class: "#{options[:class]} #{options[:style] || 'form-button'}"
                                        )
     tag :input,
         class: "#{options[:class]} cancel dialog-cancel-button",
-        data: {dismiss: "modal"},
-        name: "commit",
-        type: "submit",
-        value: label||"Cancel"
+        data: {dismiss: 'modal'},
+        name: 'commit',
+        type: 'submit',
+        value: label||'Cancel'
   end
 end

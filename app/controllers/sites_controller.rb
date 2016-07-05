@@ -56,23 +56,26 @@ class SitesController < CollectibleController
   # PUT /sites/1.json
   def update
     if update_and_decorate
-      @site.gleaning.attributes = params[:site][:gleaning_attributes]
-      # @decorator.gleaning.attributes = params[@decorator.object.class.to_s.underscore][:gleaning_attributes] if @decorator.object.respond_to?(:gleaning)
-      respond_to do |format|
-        format.html { redirect_to @site, notice: "Site #{@site.name} was successfully updated." }
-        format.json {
-          flash[:popup] = "#{@site.name} updated"
-          render :update
-        }
+      @site.include_url params[:site][:home] if params[:site][:home].present?
+      unless @site.errors.any?
+        @site.gleaning.attributes = params[:site][:gleaning_attributes]
+        # @decorator.gleaning.attributes = params[@decorator.object.class.to_s.underscore][:gleaning_attributes] if @decorator.object.respond_to?(:gleaning)
+        respond_to do |format|
+          format.html { redirect_to @site, notice: "Site #{@site.name} was successfully updated." }
+          format.json {
+            flash[:popup] = "#{@site.name} updated"
+            render :update
+          }
+        end
+        return
       end
-    else
-      if @site
-        resource_errors_to_flash @site
-      else
-        flash[:alert] = 'Couldn\'t fetch site'
-      end
-      render :edit, status: :unprocessable_entity
     end
+    if @site
+      resource_errors_to_flash @site
+    else
+      flash[:alert] = 'Couldn\'t fetch site'
+    end
+    smartrender :action => :edit
   end
 
   # DELETE /sites/1

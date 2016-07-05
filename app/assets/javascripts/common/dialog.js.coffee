@@ -103,6 +103,7 @@ insert_modal = (newdlog, odlog) ->
 	# Add the new dialog at the end of the page body if necessary
 	else
 		newdlog = document.getElementsByTagName("body")[0].appendChild newdlog
+	$(newdlog).modal() # Brand the dialog for bootstrap
 	newdlog
 
 # Return the dialog element for the current event target, correctly handling the event whether
@@ -131,8 +132,6 @@ open_modal = (dlog, omit_button) ->
 	if !(omit_button || $('button.close', dlog)[0])
 		buttoncode = '<button type=\"button\" class=\"close dialog-x-box dialog-cancel-button\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>'
 		$('div.modal-header', dlog).prepend buttoncode
-	if $(dlog).modal
-		$(dlog).modal()
 	if $('input:file.directUpload')[0]
 		uploader_unpack()
 	RP.dialog.notify "open", dlog
@@ -171,18 +170,19 @@ show_modal = (dlog) ->
 push_modal = (dlog, parent) ->
 	hide_modal parent
 	$(parent).detach()
-	$(dlog).data("parent", parent)
+	$(dlog).data('parent', parent)
 
 # Remove the child dialog, notifying it of the action, and reopen the parent
 # The parent was stored in the child's data
 pop_modal = (dlog, action) ->
-	hide_modal dlog
-	if action && action != 'cancel' && parent = $(dlog).data "parent"
+	if action && action != 'cancel' && parent = $(dlog).data 'parent'
 		insert_modal parent, dlog
-		RP.dialog.notify action, dlog
+	RP.dialog.notify action, dlog
+	if $(dlog).modal
+		$(dlog).modal 'hide'
+	$(dlog).remove()
+	if parent
 		show_modal parent
-	else
-		RP.dialog.notify action, dlog
 
 close_modal = (dlog, action) ->
 	if dlog
@@ -232,7 +232,6 @@ RP.dialog.notify = (what, dlog) ->
 		# onopen handler that sets a Boostrap dialog up to run modally: Trap the
 		# form submission event to give us a chance to get JSON data and inject it into the page
 		# rather than do a full page reload.
-			show_modal dlog
 			$(dlog).on 'shown', ->
 				$('textarea', dlog).focus()
 			RP.submit.form_prep dlog

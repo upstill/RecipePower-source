@@ -1,4 +1,4 @@
-<%= simple_form_for(@site) do |f| %>
+<%= simple_form_for @site, :url => site_path(:mode => response_service.mode) do |f| %>
     <%= modal_body do %>
         <div class="row">
           <div class="col-md-12">

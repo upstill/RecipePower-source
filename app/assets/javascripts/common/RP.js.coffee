@@ -386,8 +386,8 @@ RP.process_response = (responseData, odlog) ->
 		if !supplanted
 			if responseData.done
 				RP.dialog.close_modal odlog, responseData.notice
-			else if responseData.replacements && odlog
-				RP.dialog.run odlog
+			# else if responseData.replacements && odlog
+			# 	RP.dialog.run odlog
 
 	return supplanted
 
