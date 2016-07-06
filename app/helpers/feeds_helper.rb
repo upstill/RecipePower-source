@@ -27,13 +27,16 @@ module FeedsHelper
   end
 
   def feed_update_trigger feed, force=false
-    if feed.pending!
-      last_entry = feed.feed_entries.order('published_at DESC').first
-      last_entry_id = last_entry ? last_entry.id : 0
-      querify_item 'Check for Updates',
-                   { last_entry_id: last_entry_id },
-                   feed_wait_msg(feed, force).merge(:button_size => 'xs')
-    end
+    feed.virgin!
+    feed.bkg_enqueue # Set a job running to update the feed, whether there's already one or not
+    last_entry = feed.feed_entries.order('published_at DESC').first
+    last_entry_id = last_entry ? last_entry.id : 0
+    link_to_submit 'Check for Updates', contents_feed_path(feed, last_entry_id: last_entry_id )
+=begin
+    querify_item 'Check for Updates',
+                 { last_entry_id: last_entry_id },
+                 feed_wait_msg(feed, force).merge(:button_size => 'xs')
+=end
   end
 
   def feed_entries_report feed
