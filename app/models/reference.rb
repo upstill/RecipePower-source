@@ -460,7 +460,12 @@ class ImageReference < Reference
           when /^\d\d\d\d-/
             self.find_by url: url # Fake url previously defined
           when /^data:/
-            self.find_by(thumbdata: url) || self.new(url: self.fake_url, thumbdata: url)
+            self.find_by(thumbdata: url) ||
+                begin
+                  ref = self.new(url: self.fake_url)
+                  ref.write_attribute :thumbdata, url
+                  ref
+                end
           when nil
           when ''
           else
@@ -480,9 +485,9 @@ class ImageReference < Reference
   end
 
   # Try to fetch thumbnail data for the record. Status code assigned in ImageReference#fetchable and Reference#fetch
-  def perform
+  def perform with_save=false
     logger.info ">>>>>>>>>>>>>>>>>>>>>>>>>>>>> Acquiring Thumbnail data on url '#{url}' >>>>>>>>>>>>>>>>>>>>>>>>>"
-    bkg_execute do
+    bkg_execute with_save do
       # A url which is a date string denotes an ImageReference which came in as data, and is therefore good
       (url =~ /^\d\d\d\d-/) ||
       begin
@@ -556,7 +561,7 @@ end
 # Site references are indexed by the initial substring of a url
 # (specifically, the protocol, domain and host, plus any path used to distinguish different sites with the same host).
 class SiteReference < Reference
-  belongs_to :site, foreign_key: "affiliate_id"
+  belongs_to :site, foreign_key: 'affiliate_id'
   before_save :fix_host
 
   # Return the definitive url for a given url. NB: This will only be the site portion of the URL

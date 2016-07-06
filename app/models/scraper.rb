@@ -38,15 +38,6 @@ class Scraper < ActiveRecord::Base
     end
     what ||= subclass.constantize.handler uri
 
-=begin
-    # cache_key = "#{what}:#{uri.to_s}"
-    # unless @@LaunchedScrapers[cache_key]
-      # @@LaunchedScrapers[cache_key] = true
-      scraper = self.find_or_initialize_by url: uri.to_s, what: what, subclass: subclass
-      scraper.recur = recur
-      scraper
-    # end
-=end
     if scraper = self.find_by(url: uri.to_s, what: what, subclass: subclass)
       Rails.logger.info "!!!Scraper Already Defined for '#{scraper.what}' on #{uri} (status #{scraper.status})"
     else

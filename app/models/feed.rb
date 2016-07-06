@@ -202,9 +202,9 @@ class Feed < ActiveRecord::Base
     discreet_save
   end
 
-  def perform
+  def perform with_save=false
     logger.debug "[#{Time.now}] Updating feed #{id}; approved=#{approved ? 'Y' : 'N'}"
-    bkg_execute do FeedEntry.update_from_feed(self) || true end
+    bkg_execute with_save do FeedEntry.update_from_feed(self) || true end
   end
 
   def enqueue_update later = false
