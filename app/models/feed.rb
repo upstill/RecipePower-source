@@ -189,7 +189,37 @@ class Feed < ActiveRecord::Base
     updated_at < 7.days.ago
   end
 
-  # Callbacks for DelayedJob
+  # Integration with Backgroundable is made more complicated by the fact that
+  # a feed generally saves without updating its timestamps, so we use discreet_save
+
+  # Fire off worker process to glean results, if needed
+  def bkg_enqueue force=false, djopts = {}
+    if force.is_a?(Hash)
+      force, djopts = false, force
+    end
+    # force => do the job even if it was priorly complete
+    if virgin? || (force && !(pending? || processing?)) # Don't add it to the queue redundantly
+      pending!
+      discreet_save
+      Delayed::Job.enqueue self, djopts
+    end
+    pending?
+  end
+
+  # Wrapper for the #perform method, managing job correctly
+  def bkg_perform with_save=true
+    processing!
+    discreet_save # Necessary, to notify queue handler that the job is in process
+    perform with_save
+  end
+
+  def bkg_execute with_save=true, &block
+    super false, &block
+    discreet_save if with_save
+    good?
+  end
+
+    # Callbacks for DelayedJob
   def enqueue(job)
     unless job.run_at && (job.run_at > Time.now)
       pending!
@@ -198,8 +228,10 @@ class Feed < ActiveRecord::Base
   end
 
   def before(job)
-    processing!
-    discreet_save
+    if pending?
+      processing!
+      discreet_save
+    end
   end
 
   def perform with_save=false
@@ -208,10 +240,9 @@ class Feed < ActiveRecord::Base
   end
 
   def enqueue_update later = false
-    Delayed::Job.enqueue self, priority: 10, run_at: (later ? (Time.new.beginning_of_week(:sunday)+1.week) : Time.now)
+    bkg_enqueue priority: 10, run_at: (later ? (Time.new.beginning_of_week(:sunday)+1.week) : Time.now)
   end
 
-=begin
   def success(job)
     # When the feed is updated successfully, re-queue it for one week hence
     feed = YAML::load(job.handler)
@@ -221,17 +252,6 @@ class Feed < ActiveRecord::Base
       logger.debug "Queued up feed ##{feed.id}"
     end
   end
-=end
 
-  def error(job, exception)
-    errors.add 'url', 'update failed: ' + exception.to_s
-    bad!
-    discreet_save
-  end
-
-  def failure(job)
-    bad!
-    discreet_save
-  end
 end
 

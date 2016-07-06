@@ -59,13 +59,9 @@ class FeedsController < CollectibleController
   # POST /feeds.json
   def create
     if current_user
-      update_and_decorate
+      update_and_decorate Feed.where(url: params[:feed][:url]).first # Builds new one if doesn't already exist
       # URLs uniquely identify feeds, so we may have clashed with an existing one.
       # If so, simply adopt that one.
-      # NB If so, we merrily ignore the other attributes being provided as parameters--if any
-      if @feed.errors.any?
-        update_and_decorate( (Feed.where url: @feed.url)[0] || @feed )
-      end
       if resource_errors_to_flash @feed
         render :new, mode: :modal
       else

@@ -103,7 +103,7 @@ class Reference < ActiveRecord::Base
   end
 
   # Return a (perhaps unsaved) reference for the given url
-  # params containts attribute name-value pairs for initializing the reference
+  # params contains name-value pairs for initializing the reference
   # AND ALSO an :affiliate, the object the reference is about (e.g., Site, Recipe...)
   def self.find_or_initialize url, params = {}
 

@@ -108,8 +108,9 @@ end
 
 # Test that a (previously normalized) url works, possibly relative to a secondary href.
 def test_url normalized, href=nil
-  if !(valid_url = test_link(normalized) ||
-      ((normalized =~ /^https/) && test_link(normalized.sub! /^https/, 'http')))
+  insecure = normalized.sub /^https:/, 'http:'
+  secure = insecure.sub /^http:/, 'https:'
+  if !(valid_url = test_link(insecure) || test_link(secure))
     # Try to construct a valid normalized by merging the href and the url
     if (uri = safe_parse(href)) && (normalized = uri.normalize.merge(normalized).to_s)
       valid_url = test_link(normalized) ||

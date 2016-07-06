@@ -159,8 +159,12 @@ public
   def self.find_or_create link_or_links
     links = link_or_links.is_a?(String) ? [link_or_links] : link_or_links
     refs = SiteReference.find_or_initialize links
-    if refs && refs.first
-      refs.first.site || self.create(sample: links.first, references: refs, reference: refs.first )
+    if refs && (ref = refs.first)
+      unless ref.site
+        ref.site = self.create(sample: links.first, references: refs, reference: refs.first )
+        ref.save
+      end
+      ref.site
     end
   end
 
