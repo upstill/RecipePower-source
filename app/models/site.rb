@@ -75,7 +75,7 @@ public
     (url_or_urls.is_a?(String) ? [url_or_urls] : url_or_urls).any? do |url|
       url = normalize_url url
       # Reject urls that already reference a site
-      if ((other = SiteReference.lookup_site(url)) && (other != self)) # Don't change references
+      if (other = SiteReference.lookup_site(url)) && (other != self) # Don't change references
         errors.add :home, "That url is already associated with the site '#{other.name}'."
         return
       end

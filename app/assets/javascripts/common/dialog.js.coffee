@@ -63,18 +63,36 @@ RP.dialog.run = (dlog) ->
 # Insert a new modal dialog while saving its predecessor
 RP.dialog.push_modal = (newdlog, odlog) ->
 	odlog ||= RP.dialog.enclosing_modal()
-	newdlog = insert_modal newdlog, odlog # Insert the new dialog into the DOM
-	push_modal newdlog, odlog # Hide, detach and store the parent with the child
-	open_modal newdlog
+	newdlog = assert_modal newdlog, odlog # Grab the new dialog as a detached DOM element
+	# push_modal newdlog, odlog # Hide, detach and store the parent with the child
+	# hide_modal odlog
+	if $(odlog).modal
+		$(odlog).modal('hide').on 'hidden.bs.modal', ->
+			$(odlog).detach()
+			newdlog = attach_modal newdlog
+			$(newdlog).data 'parent', odlog
+			open_modal newdlog
+	else
+		$(odlog).hide()
+		$(odlog).detach()
+		newdlog = attach_modal newdlog
+		$(newdlog).data('parent', odlog)
+		open_modal newdlog
+
+attach_modal = (newdlog, parentnode) ->
+	parentnode ||= document.getElementsByTagName("body")[0]
+	newdlog = parentnode.appendChild newdlog
+	$(newdlog).modal() # Brand the dialog for bootstrap
+	newdlog
 
 # Insert a new modal dialog, closing and replacing any predecessor
 RP.dialog.replace_modal = (newdlog, odlog) ->
 	odlog ||= RP.dialog.enclosing_modal()
-	newdlog = insert_modal newdlog, odlog
-	if odlog && newdlog && (odlog != newdlog) # We might be just reopening a retained dialog
-		close_modal odlog, "cancel"
-	if newdlog
-		open_modal newdlog
+	if newdlog = assert_modal newdlog, odlog
+		if odlog && (odlog != newdlog) # We might be just reopening a retained dialog
+			close_modal odlog, "cancel", newdlog
+		else
+			open_modal newdlog
 	newdlog
 
 # Remove the dialog and notify its handler prior to removing the element
@@ -88,7 +106,7 @@ RP.dialog.close_modal = (dlog, epilog) ->
 
 # From a block of code (which may be a whole HTML page), extract a
 # modal dialog, attach it relative to a parent dialog, and return the element
-insert_modal = (newdlog, odlog) ->
+assert_modal = (newdlog, odlog) ->
 	if typeof newdlog == 'string'
 		# Assuming the code is a fragment for the dialog...
 		dlogs = jQuery.grep $(newdlog), (elmt) ->
@@ -96,14 +114,7 @@ insert_modal = (newdlog, odlog) ->
 		newdlog = dlogs[0]
 	else
 		newdlog = ($(newdlog).detach())[0]
-	# Now the dialog is a detached DOM elmt: attach it relative to the parent
-	if odlog && (odlog != newdlog) && odlog.parentNode # We might be just reopening a retained dialog
-		odlog.parentNode.insertBefore newdlog, odlog
-		newdlog = odlog.previousSibling
-	# Add the new dialog at the end of the page body if necessary
-	else
-		newdlog = document.getElementsByTagName("body")[0].appendChild newdlog
-	$(newdlog).modal() # Brand the dialog for bootstrap
+	# Now the dialog is a detached DOM elmt, ready for attachment
 	newdlog
 
 # Return the dialog element for the current event target, correctly handling the event whether
@@ -126,7 +137,9 @@ open_modal = (dlog, omit_button) ->
 	if (onget = $(dlog).data "onget" ) && (fcn = RP.named_function "RP." + onget.shift() )
 		fcn.apply null, onget
 	RP.hide_all_empty()
-	show_modal dlog
+	$(dlog).removeClass('hide').addClass('modal').removeClass 'modal-pending'
+	if $(dlog).modal
+		$(dlog).modal 'show'
 	RP.dialog.notify "load", dlog
 	RP.state.onDialogOpen dlog
 	if !(omit_button || $('button.close', dlog)[0])
@@ -154,43 +167,25 @@ open_modal = (dlog, omit_button) ->
 	RP.fire_triggers()
 	dlog
 
-hide_modal = (dlog) ->
-	if $(dlog).modal
-		$(dlog).modal 'hide'
-	else
-		$(dlog).hide()
-
-show_modal = (dlog) ->
-	$(dlog).removeClass('hide').addClass('modal').removeClass 'modal-pending'
-	if $(dlog).modal
-		$(dlog).modal 'show'
-
-# The following pair push and pop the dialog state
-# 'push' detaches the parent dialog and stores it in the child's data
-push_modal = (dlog, parent) ->
-	hide_modal parent
-	$(parent).detach()
-	$(dlog).data('parent', parent)
-
-# Remove the child dialog, notifying it of the action, and reopen the parent
-# The parent was stored in the child's data
-pop_modal = (dlog, action) ->
-	if action && action != 'cancel' && parent = $(dlog).data 'parent'
-		insert_modal parent, dlog
-	RP.dialog.notify action, dlog
-	if $(dlog).modal
-		$(dlog).modal('hide').on 'hidden.bs.modal', ->
-			$(dlog).remove()
-	else
-		$(dlog).remove()
-	if parent
-		show_modal parent
-
-close_modal = (dlog, action) ->
+# Close a dialog nicely, possibly replacing it with another, possibly saving the closed dialog for later restoral
+# when the 'next' dialog is done
+close_modal = (dlog, action, next) ->
 	if dlog
 		RP.state.onCloseDialog dlog
-		notify_injector "close", dlog
-		pop_modal dlog, (action || "close") # Modal can either be closed or cancelled
+		notify_injector 'close', dlog
+		action ||= 'close'
+		if action != 'cancel' && parent = $(dlog).data 'parent'
+			next = assert_modal parent, dlog
+		RP.dialog.notify action, dlog
+		if $(dlog).modal
+			$(dlog).modal('hide').on 'hidden.bs.modal', ->
+				$(dlog).remove()
+				if next
+					open_modal attach_modal(next)
+		else
+			$(dlog).remove()
+			if next
+				open_modal attach_modal(next)
 
 manager_of = (dlog) ->
 	# Look for a manager using the dialog's class name
